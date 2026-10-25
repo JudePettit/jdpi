@@ -1,0 +1,114 @@
+{
+  "platform": {
+    "name": "JDP-I",
+    "tagline": "Integrated intelligence platform",
+    "version": "1.0"
+  },
+  "suites": [
+    {
+      "id": "q",
+      "code": "Q",
+      "name": "JDP-I Q",
+      "title": "Geopolitical Intelligence",
+      "description": "Monitor events, headlines, volatility and country conditions around the world.",
+      "icon": "design/brand-eye-q.svg",
+      "modules": [
+        {
+          "id": "briefing",
+          "name": "Briefing",
+          "icon": "↗",
+          "status": "live",
+          "host": "Lovable",
+          "url": "https://gtts-briefing-preview.lovable.app",
+          "description": "Follow selected topics through publisher headlines and political-perspective filters."
+        },
+        {
+          "id": "calendar",
+          "name": "Political Calendar",
+          "icon": "▦",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "q/calendar.html?period=contemporary",
+          "description": "The current 18-month outlook of elections and political milestones, plus decade archives.",
+          "submodules": [
+            { "id": "contemporary", "name": "Contemporary", "url": "q/calendar.html?period=contemporary" },
+            { "id": "2020s", "name": "2020s", "url": "q/calendar.html?period=2020s" },
+            { "id": "2010s", "name": "2010s", "url": "q/calendar.html?period=2010s" },
+            { "id": "2000s", "name": "2000s", "url": "q/calendar.html?period=2000s" },
+            { "id": "1990s", "name": "1990s", "url": "q/calendar.html?period=1990s" },
+            { "id": "1980s", "name": "1980s", "url": "q/calendar.html?period=1980s" }
+          ]
+        },
+        {
+          "id": "headlines",
+          "name": "Country Headlines",
+          "icon": "◎",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "q/headlines.html?view=current",
+          "description": "Pick a country for its 24-hour news feed, or browse daily, weekly and monthly archives.",
+          "submodules": [
+            { "id": "current", "name": "Country map · 24 hours", "url": "q/headlines.html?view=current" },
+            { "id": "day", "name": "Daily archive", "url": "q/headlines.html?view=archive&period=day" },
+            { "id": "week", "name": "Weekly archive", "url": "q/headlines.html?view=archive&period=week" },
+            { "id": "month", "name": "Monthly archive", "url": "q/headlines.html?view=archive&period=month" }
+          ]
+        },
+        {
+          "id": "volatility",
+          "name": "Geopolitical Volatility",
+          "icon": "⌁",
+          "status": "live",
+          "host": "Lovable",
+          "url": "https://world-tension-atlas.lovable.app",
+          "description": "Compare source-derived country volatility across day, week, month and longer windows."
+        },
+        {
+          "id": "pestle",
+          "name": "Country PESTLE",
+          "icon": "◉",
+          "status": "live",
+          "host": "Lovable",
+          "url": "https://country-signal-atlas.lovable.app",
+          "description": "Daily country analysis across political, economic, social, technological, legal and environmental factors."
+        }
+      ]
+    },
+    {
+      "id": "hp",
+      "code": "H&P",
+      "name": "JDP-I H&P",
+      "title": "History & Politics",
+      "description": "Political systems, leadership and their history.",
+      "modules": [
+        {
+          "id": "atlas",
+          "name": "Political Atlas",
+          "icon": "◍",
+          "status": "live",
+          "host": "Cloudflare Pages",
+          "url": "https://political-atlas.pages.dev",
+          "description": "Who holds power across 78 countries: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
+        }
+      ]
+    },
+    {
+      "id": "fe",
+      "code": "F&E",
+      "name": "JDP-I F&E",
+      "title": "Finance & Economics",
+      "description": "Market signals and economic intelligence.",
+      "modules": [
+        {
+          "id": "double-signal",
+          "name": "Double Signal",
+          "icon": "⇈",
+          "status": "in-build",
+          "host": "ChatGPT Sites",
+          "url": null,
+          "description": "Email alerts when a US-listed stock more than doubles in under six hours. Scans the whole market hourly."
+        }
+      ]
+    }
+  ]
+}

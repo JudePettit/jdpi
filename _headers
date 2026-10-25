@@ -1,0 +1,6 @@
+/design/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300
+
+/registry.json
+  Cache-Control: no-cache

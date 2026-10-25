@@ -1,0 +1,117 @@
+/* ==========================================================================
+   JDP-I design system — shared by the shell and every module.
+   Load from any app:  <link rel="stylesheet" href="https://jdpi.pages.dev/design/jdpi.css">
+   Pick a suite accent: <html data-suite="q|hp|fe">
+   Fonts: Manrope (display), DM Sans (UI), DM Mono (labels/data).
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
+:root {
+  /* Surfaces (dark-first; JDP-I is a single-theme workspace) */
+  --jdpi-bg: #101820;
+  --jdpi-side: #111d26;
+  --jdpi-topbar: #111b24;
+  --jdpi-panel: #17242e;
+  --jdpi-panel-2: #1c2b36;
+  --jdpi-inset: #0d1721;
+  --jdpi-line: #293a46;
+  --jdpi-line-strong: #3a4f5d;
+
+  /* Text */
+  --jdpi-text: #edf3f1;
+  --jdpi-text-2: #c8d2d2;
+  --jdpi-muted: #91a0aa;
+  --jdpi-faint: #70818b;
+
+  /* Suite accents */
+  --jdpi-lime: #b7f36b;   /* Q   — Geopolitical intelligence */
+  --jdpi-cyan: #6ddac8;   /* H&P — History & politics */
+  --jdpi-amber: #f0b95a;  /* F&E — Finance & economics */
+
+  /* Status */
+  --jdpi-ok: #7fd6a4;
+  --jdpi-warn: #f0b95a;
+  --jdpi-alert: #f07a6a;
+  --jdpi-info: #7aa9f0;
+
+  /* Active accent (overridden per suite) */
+  --jdpi-accent: var(--jdpi-lime);
+  --jdpi-accent-soft: rgba(183, 243, 107, .08);
+  --jdpi-accent-line: #5f7d45;
+
+  /* Type */
+  --jdpi-font-display: "Manrope", "DM Sans", system-ui, sans-serif;
+  --jdpi-font-ui: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jdpi-font-mono: "DM Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  /* Shape & depth */
+  --jdpi-radius-sm: 4px;
+  --jdpi-radius: 7px;
+  --jdpi-radius-lg: 10px;
+  --jdpi-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+
+  /* Layout */
+  --jdpi-sidebar-w: 264px;
+  --jdpi-topbar-h: 56px;
+
+  color-scheme: dark;
+}
+
+[data-suite="q"]  { --jdpi-accent: var(--jdpi-lime);  --jdpi-accent-soft: rgba(183, 243, 107, .08); --jdpi-accent-line: #5f7d45; }
+[data-suite="hp"] { --jdpi-accent: var(--jdpi-cyan);  --jdpi-accent-soft: rgba(109, 218, 200, .09); --jdpi-accent-line: #3f7a70; }
+[data-suite="fe"] { --jdpi-accent: var(--jdpi-amber); --jdpi-accent-soft: rgba(240, 185, 90, .09);  --jdpi-accent-line: #86683a; }
+
+/* --- Base ---------------------------------------------------------------- */
+.jdpi, .jdpi body { background: var(--jdpi-bg); color: var(--jdpi-text); font: 14px/1.5 var(--jdpi-font-ui); }
+
+/* --- Typography helpers -------------------------------------------------- */
+.jdpi-eyebrow { color: var(--jdpi-accent); font: 500 10px var(--jdpi-font-mono); letter-spacing: .15em; text-transform: uppercase; }
+.jdpi-h1 { font: 600 30px/1.15 var(--jdpi-font-display); letter-spacing: -.035em; margin: 8px 0; }
+.jdpi-h2 { font: 600 15px var(--jdpi-font-display); margin: 0; }
+.jdpi-label { color: var(--jdpi-faint); font: 10px var(--jdpi-font-mono); letter-spacing: .12em; text-transform: uppercase; }
+.jdpi-muted { color: var(--jdpi-muted); }
+
+/* --- Components ---------------------------------------------------------- */
+.jdpi-panel { background: var(--jdpi-panel); border: 1px solid var(--jdpi-line); border-radius: var(--jdpi-radius); }
+
+.jdpi-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--jdpi-line); border-radius: 3px; padding: 3px 7px;
+  color: var(--jdpi-muted); font: 9px var(--jdpi-font-mono); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap;
+}
+.jdpi-tag[data-status="live"] { color: var(--jdpi-ok); border-color: #3c6a52; }
+.jdpi-tag[data-status="in-build"] { color: var(--jdpi-warn); border-color: #6d5a33; }
+.jdpi-tag[data-status="planned"] { color: var(--jdpi-faint); }
+.jdpi-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.jdpi-btn {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none;
+  border: 1px solid var(--jdpi-line); border-radius: var(--jdpi-radius-sm); background: transparent;
+  padding: 7px 10px; color: var(--jdpi-text-2); font: 500 11px var(--jdpi-font-ui);
+}
+.jdpi-btn:hover { border-color: var(--jdpi-accent); color: var(--jdpi-accent); }
+.jdpi-btn.primary { border-color: var(--jdpi-accent-line); background: var(--jdpi-accent-soft); color: var(--jdpi-accent); }
+
+.jdpi-note {
+  border: 1px solid var(--jdpi-line); border-left: 2px solid var(--jdpi-amber); border-radius: var(--jdpi-radius-sm);
+  padding: 11px 13px; color: var(--jdpi-muted); font-size: 12px; line-height: 1.6;
+}
+
+/* --- Module embedding -----------------------------------------------------
+   jdpi-bar.js adds .jdpi-embedded to <html> when a module runs inside the
+   JDP-I shell. Mark a module's own brand header with data-jdpi-standalone so it
+   hides there (the shell already shows the brand and breadcrumb).            */
+.jdpi-embedded [data-jdpi-standalone] { display: none !important; }
+
+/* Standalone return bar injected by jdpi-bar.js when a module is opened directly */
+.jdpi-returnbar {
+  display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 14px;
+  background: var(--jdpi-side); border-bottom: 1px solid var(--jdpi-line);
+  font: 11px var(--jdpi-font-mono); color: var(--jdpi-muted); position: relative; z-index: 1000;
+}
+.jdpi-returnbar a { color: var(--jdpi-text-2); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.jdpi-returnbar a:hover { color: var(--jdpi-accent); }
+.jdpi-returnbar b { font: 800 12px var(--jdpi-font-display); letter-spacing: .08em; color: var(--jdpi-text); }
+.jdpi-returnbar .sep { color: var(--jdpi-faint); }
+.jdpi-returnbar .suite { color: var(--jdpi-accent); }

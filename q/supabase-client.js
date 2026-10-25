@@ -55,6 +55,26 @@
       }));
     },
 
+    // Top 3 stories from each of the country's 5 most-read outlets (front-page order), English titles.
+    async topStories(countryCode, startDate, endDate) {
+      return request(tablePath("country_top_stories", {
+        select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at",
+        country_code: `eq.${countryCode}`,
+        and: `(snapshot_date.gte.${startDate},snapshot_date.lte.${endDate})`,
+        order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
+        limit: "2000"
+      }));
+    },
+
+    async latestTopStories(countryCode) {
+      const latest = await request(tablePath("country_top_stories", {
+        select: "snapshot_date", country_code: `eq.${countryCode}`, order: "snapshot_date.desc", limit: "1"
+      }));
+      if (!latest?.length) return [];
+      const d = latest[0].snapshot_date;
+      return this.topStories(countryCode, d, d);
+    },
+
     async latestHeadlineStatus(countryCode) {
       const rows = await request(tablePath("source_status_history", {
         select: "state,message,checked_at,last_success_at,item_count,metadata",

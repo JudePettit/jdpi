@@ -18,6 +18,7 @@
   try { embedded = window.self !== window.top; } catch { embedded = true; }
 
   if (embedded) {
+    // A class on <html> (not a new element) is safe to add before hydration.
     root.classList.add('jdpi-embedded');
     const announce = () => {
       try { window.parent.postMessage({ type: 'jdpi:module-ready', suite, module: moduleId, title: document.title }, '*'); } catch { /* ignore */ }
@@ -36,5 +37,8 @@
       `<span class="sep">›</span><span>${document.title.replace(/</g, '&lt;')}</span>`;
     document.body.prepend(bar);
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject); else inject();
+  // Wait until the page has fully loaded (and React/Next.js apps have hydrated) before
+  // adding DOM nodes; adding them earlier causes hydration mismatches.
+  const later = () => setTimeout(inject, 300);
+  if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
 })();

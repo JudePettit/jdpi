@@ -4,8 +4,8 @@ JDP-I is a single workspace for three suites of intelligence apps. You pick a mo
 
 | Suite | Focus | Accent | Modules |
 |---|---|---|---|
-| **Q** | Geopolitical intelligence | Lime `#b7f36b` | Briefing · Political Calendar · Country Headlines · Geopolitical Volatility · Country PESTLE |
-| **H&P** | History & politics | Cyan `#6ddac8` | Political Atlas |
+| **Q** | Geopolitical intelligence | Lime `#b7f36b` | Briefing Â· Political Calendar Â· Country Headlines Â· Geopolitical Volatility Â· Country PESTLE |
+| **H&P** | History & politics | Cyan `#6ddac8` | Political Atlas · H&P Retrospective |
 | **F&E** | Finance & economics | Amber `#f0b95a` | Double Signal (in build) |
 
 Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo).
@@ -13,18 +13,18 @@ Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo).
 ## Architecture
 
 ```
-            ┌──────────────────────── JDP-I shell (this repo) ────────────────────────┐
-            │  Sidebar: suites → modules → submodules     Top bar: breadcrumb, actions │
-            │  Router (#/suite/module/sub)   registry.json   design/ (design system)   │
-            └────────┬───────────────────────┬───────────────────────┬────────────────┘
-                     │ persistent iframes (one per module, state kept when you switch)
-       ┌─────────────┴──────────┐   ┌────────┴─────────┐   ┌─────────┴─────────┐
-       │ Q suite                │   │ H&P suite        │   │ F&E suite         │
-       │ q/calendar.html  (here)│   │ Political Atlas  │   │ Double Signal     │
-       │ q/headlines.html (here)│   │ (own repo,       │   │ (Next.js, own     │
-       │ Briefing, Volatility,  │   │  Cloudflare)     │   │  project)         │
-       │ PESTLE (Lovable)       │   │                  │   │                   │
-       └────────────────────────┘   └──────────────────┘   └───────────────────┘
+            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ JDP-I shell (this repo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+            â”‚  Sidebar: suites â†’ modules â†’ submodules     Top bar: breadcrumb, actions â”‚
+            â”‚  Router (#/suite/module/sub)   registry.json   design/ (design system)   â”‚
+            â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                     â”‚ persistent iframes (one per module, state kept when you switch)
+       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+       â”‚ Q suite                â”‚   â”‚ H&P suite        â”‚   â”‚ F&E suite         â”‚
+       â”‚ q/calendar.html  (here)â”‚   â”‚ Political Atlas  â”‚   â”‚ Double Signal     â”‚
+       â”‚ q/headlines.html (here)â”‚   â”‚ (own repo,       â”‚   â”‚ (Next.js, own     â”‚
+       â”‚ Briefing, Volatility,  â”‚   â”‚  Cloudflare)     â”‚   â”‚  project)         â”‚
+       â”‚ PESTLE (Lovable)       â”‚   â”‚                  â”‚   â”‚                   â”‚
+       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 **Each module stays an independent app.** It has its own codebase, host and deploy pipeline, so modules can be built with different tools (plain HTML, Lovable, Next.js) and released separately. The shell only has to know each module's URL.
@@ -34,14 +34,14 @@ Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo).
 | Module registry | `registry.json` | The single list of suites, modules, submodules, URLs and status. Adding a module is a JSON edit. |
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing, breadcrumb, persistent module frames, sidebar search (press `/`). |
 | Design system | `design/jdpi.css` | Colour, type and spacing tokens, suite accents, and shared components. |
-| Module connector | `design/jdpi-bar.js` | Runs in each module. Inside the shell, it hides the module's own brand header. Opened on its own, it adds a "← JDP-I › Suite › Module" bar. |
+| Module connector | `design/jdpi-bar.js` | Runs in each module. Inside the shell, it hides the module's own brand header. Opened on its own, it adds a "â† JDP-I â€º Suite â€º Module" bar. |
 | Brand | `design/brand-jdpi.svg`, `design/brand-eye-q.svg` | The platform mark and the Q suite mark. |
 
 ### Adding a module
 
 1. Add an entry under the right suite in `registry.json`:
    ```json
-   { "id": "my-module", "name": "My Module", "icon": "◇", "status": "live",
+   { "id": "my-module", "name": "My Module", "icon": "â—‡", "status": "live",
      "host": "Cloudflare Pages", "url": "https://my-module.pages.dev",
      "description": "One sentence on what it does." }
    ```
@@ -61,11 +61,11 @@ Add these two lines to the module's `<head>`, setting `data-suite` to `q`, `hp` 
 ```
 
 Then:
-- Use the tokens (`var(--jdpi-bg)`, `var(--jdpi-panel)`, `var(--jdpi-accent)`, `var(--jdpi-font-display)`…) instead of hard-coded colours and fonts.
+- Use the tokens (`var(--jdpi-bg)`, `var(--jdpi-panel)`, `var(--jdpi-accent)`, `var(--jdpi-font-display)`â€¦) instead of hard-coded colours and fonts.
 - Add `data-jdpi-standalone` to the module's own brand header so it hides inside the shell. Keep functional toolbars (search, filters) visible.
 - For resilience, give token fallbacks, e.g. `background: var(--jdpi-bg, #101820)`, so the module still looks right if the shared stylesheet can't load.
 
-**Next.js / Tailwind (Double Signal).** Put the two tags in `app/layout.tsx` (`<link>` in `<head>`, `<Script src=… strategy="afterInteractive" data-suite="fe" data-module="double-signal" />`). Then map Tailwind/shadcn theme variables to the tokens in `globals.css`: `--background: var(--jdpi-bg)`, `--card: var(--jdpi-panel)`, `--primary: var(--jdpi-amber)`, `--border: var(--jdpi-line)`, `--font-sans: var(--jdpi-font-ui)`.
+**Next.js / Tailwind (Double Signal).** Put the two tags in `app/layout.tsx` (`<link>` in `<head>`, `<Script src=â€¦ strategy="afterInteractive" data-suite="fe" data-module="double-signal" />`). Then map Tailwind/shadcn theme variables to the tokens in `globals.css`: `--background: var(--jdpi-bg)`, `--card: var(--jdpi-panel)`, `--primary: var(--jdpi-amber)`, `--border: var(--jdpi-line)`, `--font-sans: var(--jdpi-font-ui)`.
 
 **Lovable apps (Briefing, Volatility, PESTLE).** Paste this into each project's Lovable chat:
 

@@ -1,0 +1,1 @@
+{"name":"jdpi","private":true,"type":"module","scripts":{"test":"node --test --test-concurrency=1 tests/platform.test.mjs"},"devDependencies":{"playwright-core":"^1.56.1"}}

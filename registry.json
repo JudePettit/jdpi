@@ -89,6 +89,15 @@
           "host": "Cloudflare Pages",
           "url": "https://political-atlas.pages.dev",
           "description": "Who holds power across 78 countries: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
+        },
+        {
+          "id": "retrospective",
+          "name": "H&P Retrospective",
+          "icon": "◷",
+          "status": "live",
+          "host": "Cloudflare Pages",
+          "url": "https://hp-retrospective.pages.dev",
+          "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
         }
       ]
     },

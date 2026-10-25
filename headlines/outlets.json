@@ -1,0 +1,1922 @@
+{
+ "US": [
+  {
+   "name": "CNN",
+   "home": "https://www.cnn.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Acnn.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Fox News",
+   "home": "https://www.foxnews.com",
+   "rss": "https://moxie.foxnews.com/google-publisher/latest.xml",
+   "via": "site"
+  },
+  {
+   "name": "The New York Times",
+   "home": "https://www.nytimes.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Anytimes.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "NBC News",
+   "home": "https://www.nbcnews.com",
+   "rss": "https://feeds.nbcnews.com/nbcnews/public/news",
+   "via": "site"
+  },
+  {
+   "name": "The Washington Post",
+   "home": "https://www.washingtonpost.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Awashingtonpost.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "CA": [
+  {
+   "name": "CBC News",
+   "home": "https://www.cbc.ca/news",
+   "rss": "https://news.google.com/rss/search?q=site%3Acbc.ca%2Fnews%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "CTV News",
+   "home": "https://www.ctvnews.ca",
+   "rss": "https://www.ctvnews.ca/arc/outboundfeeds/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Global News",
+   "home": "https://globalnews.ca",
+   "rss": "https://globalnews.ca/feed/",
+   "via": "site"
+  },
+  {
+   "name": "The Globe and Mail",
+   "home": "https://www.theglobeandmail.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Atheglobeandmail.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Toronto Star",
+   "home": "https://www.thestar.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Athestar.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "MX": [
+  {
+   "name": "El Universal",
+   "home": "https://www.eluniversal.com.mx",
+   "rss": "https://www.eluniversal.com.mx/arc/outboundfeeds/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Infobae México",
+   "home": "https://www.infobae.com/mexico",
+   "rss": "https://www.infobae.com/arc/outboundfeeds/rss/category/mexico/",
+   "via": "site"
+  },
+  {
+   "name": "El Financiero",
+   "home": "https://www.elfinanciero.com.mx",
+   "rss": "https://www.elfinanciero.com.mx/arc/outboundfeeds/rss/?outputType=xml",
+   "via": "site"
+  }
+ ],
+ "GT": [
+  {
+   "name": "Prensa Libre",
+   "home": "https://www.prensalibre.com",
+   "rss": "https://www.prensalibre.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Publinews",
+   "home": "https://www.publinews.gt",
+   "rss": "https://www.publinews.gt/arc/outboundfeeds/rss/",
+   "via": "site"
+  },
+  {
+   "name": "La Hora",
+   "home": "https://lahora.gt",
+   "rss": "https://lahora.gt/feed/",
+   "via": "site"
+  },
+  {
+   "name": "República",
+   "home": "https://republica.gt",
+   "rss": "https://republica.com/feed",
+   "via": "site"
+  }
+ ],
+ "BZ": [
+  {
+   "name": "Amandala",
+   "home": "https://amandala.com.bz",
+   "rss": "https://news.google.com/rss/search?q=site%3Aamandala.com.bz%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Breaking Belize News",
+   "home": "https://www.breakingbelizenews.com",
+   "rss": "https://www.breakingbelizenews.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "7 News Belize",
+   "home": "https://www.7newsbelize.com",
+   "rss": "https://news.google.com/rss/search?q=site%3A7newsbelize.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "The Reporter",
+   "home": "https://reporter.bz",
+   "rss": "https://bachthulo.vip/feed",
+   "via": "site"
+  }
+ ],
+ "HN": [
+  {
+   "name": "Proceso Digital",
+   "home": "https://proceso.hn",
+   "rss": "https://proceso.hn/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Criterio",
+   "home": "https://criterio.hn",
+   "rss": "https://criterio.hn/feed/",
+   "via": "site"
+  }
+ ],
+ "SV": [
+  {
+   "name": "El Diario de Hoy",
+   "home": "https://www.elsalvador.com",
+   "rss": "https://www.elsalvador.com/sitemap.rss",
+   "via": "site"
+  },
+  {
+   "name": "Diario Co Latino",
+   "home": "https://www.diariocolatino.com",
+   "rss": "https://www.diariocolatino.com/feed/",
+   "via": "site"
+  }
+ ],
+ "NI": [
+  {
+   "name": "Confidencial",
+   "home": "https://confidencial.digital",
+   "rss": "https://confidencial.digital/feed/",
+   "via": "site"
+  },
+  {
+   "name": "El 19 Digital",
+   "home": "https://www.el19digital.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Ael19digital.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Despacho 505",
+   "home": "https://www.despacho505.com",
+   "rss": "https://despacho505.com/feed/",
+   "via": "site"
+  }
+ ],
+ "CR": [
+  {
+   "name": "La Nación",
+   "home": "https://www.nacion.com",
+   "rss": "https://www.nacion.com/arc/outboundfeeds/rss/?outputType=xml",
+   "via": "site"
+  },
+  {
+   "name": "Diario Extra",
+   "home": "https://www.diarioextra.com",
+   "rss": "https://www.diarioextra.com/feed/",
+   "via": "site"
+  }
+ ],
+ "PA": [
+  {
+   "name": "TVN Noticias",
+   "home": "https://www.tvn-2.com",
+   "rss": "https://www.tvn-2.com/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Telemetro",
+   "home": "https://www.telemetro.com",
+   "rss": "https://www.telemetro.com/rss/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "Panamá América",
+   "home": "https://www.panamaamerica.com.pa",
+   "rss": "https://www.panamaamerica.com.pa/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "La Estrella de Panamá",
+   "home": "https://www.laestrella.com.pa",
+   "rss": "https://www.laestrella.com.pa/rss/home.xml",
+   "via": "site"
+  }
+ ],
+ "CU": [
+  {
+   "name": "Granma",
+   "home": "https://www.granma.cu",
+   "rss": "https://www.granma.cu/feed",
+   "via": "site"
+  },
+  {
+   "name": "CiberCuba",
+   "home": "https://www.cibercuba.com",
+   "rss": "https://www.cibercuba.com/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "14ymedio",
+   "home": "https://www.14ymedio.com",
+   "rss": "https://www.14ymedio.com/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Cubadebate",
+   "home": "http://www.cubadebate.cu",
+   "rss": "http://www.cubadebate.cu/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Diario de Cuba",
+   "home": "https://diariodecuba.com",
+   "rss": "https://diariodecuba.com/rss.xml",
+   "via": "site"
+  }
+ ],
+ "HT": [
+  {
+   "name": "Le Nouvelliste",
+   "home": "https://lenouvelliste.com",
+   "rss": "https://lenouvelliste.com/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Haiti Libre",
+   "home": "https://www.haitilibre.com",
+   "rss": "https://www.haitilibre.com/rss-flash.php",
+   "via": "site"
+  },
+  {
+   "name": "Radio Métropole",
+   "home": "https://www.metropolehaiti.com",
+   "rss": "https://metropole.ht/feed/",
+   "via": "site"
+  }
+ ],
+ "DO": [
+  {
+   "name": "Listín Diario",
+   "home": "https://listindiario.com",
+   "rss": "https://listindiario.com/rss/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "Diario Libre",
+   "home": "https://www.diariolibre.com",
+   "rss": "https://www.diariolibre.com/rss/portada.xml",
+   "via": "site"
+  },
+  {
+   "name": "El Día",
+   "home": "https://eldia.com.do",
+   "rss": "https://eldia.com.do/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Hoy",
+   "home": "https://hoy.com.do",
+   "rss": "https://hoy.com.do/rss/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "N Digital",
+   "home": "https://n.com.do",
+   "rss": "https://n.com.do/feed/",
+   "via": "site"
+  }
+ ],
+ "JM": [
+  {
+   "name": "Jamaica Gleaner",
+   "home": "https://jamaica-gleaner.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Ajamaica-gleaner.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Jamaica Observer",
+   "home": "https://www.jamaicaobserver.com",
+   "rss": "https://www.jamaicaobserver.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Radio Jamaica News",
+   "home": "https://radiojamaicanewsonline.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Aradiojamaicanewsonline.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Nationwide 90FM",
+   "home": "https://nationwideradiojm.com",
+   "rss": "https://nationwideradiojm.com/feed/",
+   "via": "site"
+  }
+ ],
+ "BS": [
+  {
+   "name": "The Tribune",
+   "home": "https://www.tribune242.com",
+   "rss": "https://www.tribune242.com/rss/headlines/",
+   "via": "site"
+  },
+  {
+   "name": "The Nassau Guardian",
+   "home": "https://thenassauguardian.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Athenassauguardian.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Eyewitness News",
+   "home": "https://ewnews.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Aewnews.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Our News",
+   "home": "https://ournews.bs",
+   "rss": "https://ournews.bs/feed/",
+   "via": "site"
+  },
+  {
+   "name": "ZNS",
+   "home": "https://znsbahamas.com",
+   "rss": "https://znsbahamas.com/feed/",
+   "via": "site"
+  }
+ ],
+ "BB": [
+  {
+   "name": "Barbados Today",
+   "home": "https://barbadostoday.bb",
+   "rss": "https://barbadostoday.bb/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Nation News",
+   "home": "https://www.nationnews.com",
+   "rss": "https://nationnews.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "CBC Barbados",
+   "home": "https://www.cbc.bb",
+   "rss": "https://www.cbc.bb/feed/",
+   "via": "site"
+  }
+ ],
+ "TT": [
+  {
+   "name": "Trinidad Guardian",
+   "home": "https://www.guardian.co.tt",
+   "rss": "https://news.google.com/rss/search?q=site%3Aguardian.co.tt%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Trinidad Express",
+   "home": "https://trinidadexpress.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Atrinidadexpress.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Newsday",
+   "home": "https://newsday.co.tt",
+   "rss": "https://news.google.com/rss/search?q=site%3Anewsday.co.tt%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "CNC3",
+   "home": "https://www.cnc3.co.tt",
+   "rss": "https://www.cnc3.co.tt/feed/",
+   "via": "site"
+  }
+ ],
+ "AG": [
+  {
+   "name": "Antigua Observer",
+   "home": "https://antiguaobserver.com",
+   "rss": "https://antiguaobserver.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Antigua News Room",
+   "home": "https://antiguanewsroom.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Aantiguanewsroom.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "ABS TV",
+   "home": "https://abstvradio.com",
+   "rss": "https://abstvradio.com/feed/",
+   "via": "site"
+  }
+ ],
+ "DM": [
+  {
+   "name": "Emo News",
+   "home": "https://emonewsdm.com",
+   "rss": "https://emonewsdm.com/feed.xml",
+   "via": "site"
+  },
+  {
+   "name": "Nature Isle News",
+   "home": "https://natureisle.news",
+   "rss": "https://natureisle.news/feed/",
+   "via": "site"
+  }
+ ],
+ "GD": [
+  {
+   "name": "NOW Grenada",
+   "home": "https://nowgrenada.com",
+   "rss": "https://nowgrenada.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Grenada Informer",
+   "home": "https://www.thegrenadainformer.com",
+   "rss": "https://thegrenadainformer.com/feed/",
+   "via": "site"
+  }
+ ],
+ "KN": [
+  {
+   "name": "SKNVibes",
+   "home": "https://www.sknvibes.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Asknvibes.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "WINN FM",
+   "home": "https://www.winnmediaskn.com",
+   "rss": "https://www.winnmediaskn.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "The St Kitts Nevis Observer",
+   "home": "https://www.thestkittsnevisobserver.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Athestkittsnevisobserver.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "ZIZ",
+   "home": "https://zizonline.com",
+   "rss": "https://zizonline.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Times Caribbean",
+   "home": "https://timescaribbeanonline.com",
+   "rss": "https://timescaribbeanonline.com/feed/",
+   "via": "site"
+  }
+ ],
+ "LC": [
+  {
+   "name": "St Lucia Times",
+   "home": "https://stluciatimes.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Astluciatimes.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "The Voice",
+   "home": "https://thevoiceslu.com",
+   "rss": "https://thevoiceslu.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "HTS News",
+   "home": "https://htsstlucia.org",
+   "rss": "https://news.google.com/rss/search?q=site%3Ahtsstlucia.org%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "St Lucia News Online",
+   "home": "https://www.stlucianewsonline.com",
+   "rss": "https://www.stlucianewsonline.com/feed/",
+   "via": "site"
+  }
+ ],
+ "VC": [
+  {
+   "name": "iWitness News",
+   "home": "https://www.iwnsvg.com",
+   "rss": "https://www.iwnsvg.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Searchlight",
+   "home": "https://www.searchlight.vc",
+   "rss": "https://www.searchlight.vc/rss/",
+   "via": "site"
+  },
+  {
+   "name": "NBC Radio SVG",
+   "home": "https://nbcsvg.com",
+   "rss": "https://www.nbcsvg.com/feed/",
+   "via": "site"
+  }
+ ],
+ "GL": [
+  {
+   "name": "KNR",
+   "home": "https://knr.gl",
+   "rss": "https://knr.gl/kl/rss",
+   "via": "site"
+  },
+  {
+   "name": "Arctic Today",
+   "home": "https://www.arctictoday.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Aarctictoday.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "GB": [
+  {
+   "name": "BBC News",
+   "home": "https://www.bbc.co.uk/news",
+   "rss": "https://feeds.bbci.co.uk/news/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "The Guardian",
+   "home": "https://www.theguardian.com/uk",
+   "rss": "https://www.theguardian.com/uk/rss",
+   "via": "site"
+  },
+  {
+   "name": "Daily Mail",
+   "home": "https://www.dailymail.co.uk",
+   "rss": "https://www.dailymail.com/home/index.rss",
+   "via": "site"
+  },
+  {
+   "name": "Sky News",
+   "home": "https://news.sky.com",
+   "rss": "https://feeds.skynews.com/feeds/rss/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "The Independent",
+   "home": "https://www.independent.co.uk",
+   "rss": "https://www.independent.co.uk/rss",
+   "via": "site"
+  }
+ ],
+ "IE": [
+  {
+   "name": "RTÉ News",
+   "home": "https://www.rte.ie/news",
+   "rss": "https://www.rte.ie/feeds/rss/?index=/news/",
+   "via": "site"
+  },
+  {
+   "name": "The Irish Times",
+   "home": "https://www.irishtimes.com",
+   "rss": "https://www.irishtimes.com/arc/outboundfeeds/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Irish Independent",
+   "home": "https://www.independent.ie",
+   "rss": "https://www.independent.ie/rss/",
+   "via": "site"
+  },
+  {
+   "name": "TheJournal.ie",
+   "home": "https://www.thejournal.ie",
+   "rss": "https://www.thejournal.ie/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Irish Examiner",
+   "home": "https://www.irishexaminer.com",
+   "rss": "https://www.irishexaminer.com/feed/35-top_news.xml",
+   "via": "site"
+  }
+ ],
+ "FR": [
+  {
+   "name": "Le Monde",
+   "home": "https://www.lemonde.fr",
+   "rss": "https://www.lemonde.fr/en/rss/une.xml",
+   "via": "site"
+  },
+  {
+   "name": "Le Figaro",
+   "home": "https://www.lefigaro.fr",
+   "rss": "https://www.lefigaro.fr/rss/figaro_actualites.xml",
+   "via": "site"
+  },
+  {
+   "name": "franceinfo",
+   "home": "https://www.francetvinfo.fr",
+   "rss": "https://www.franceinfo.fr/titres.rss",
+   "via": "site"
+  },
+  {
+   "name": "BFMTV",
+   "home": "https://www.bfmtv.com",
+   "rss": "https://www.bfmtv.com/rss/news-24-7/",
+   "via": "site"
+  },
+  {
+   "name": "Le Parisien",
+   "home": "https://www.leparisien.fr",
+   "rss": "https://feeds.leparisien.fr/leparisien/rss",
+   "via": "site"
+  }
+ ],
+ "DE": [
+  {
+   "name": "Tagesschau",
+   "home": "https://www.tagesschau.de",
+   "rss": "https://www.tagesschau.de/index~atom.xml",
+   "via": "site"
+  },
+  {
+   "name": "Der Spiegel",
+   "home": "https://www.spiegel.de",
+   "rss": "https://www.spiegel.de/schlagzeilen/index.rss",
+   "via": "site"
+  },
+  {
+   "name": "Bild",
+   "home": "https://www.bild.de",
+   "rss": "https://www.bild.de/feed/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "Die Zeit",
+   "home": "https://www.zeit.de",
+   "rss": "https://newsfeed.zeit.de/index",
+   "via": "site"
+  },
+  {
+   "name": "FAZ",
+   "home": "https://www.faz.net",
+   "rss": "https://www.faz.net/rss/aktuell/",
+   "via": "site"
+  }
+ ],
+ "NL": [
+  {
+   "name": "NOS",
+   "home": "https://nos.nl",
+   "rss": "https://feeds.nos.nl/nosnieuwsalgemeen",
+   "via": "site"
+  },
+  {
+   "name": "De Telegraaf",
+   "home": "https://www.telegraaf.nl",
+   "rss": "https://www.telegraaf.nl/rss/",
+   "via": "site"
+  },
+  {
+   "name": "NU.nl",
+   "home": "https://www.nu.nl",
+   "rss": "https://www.nu.nl/rss",
+   "via": "site"
+  },
+  {
+   "name": "AD",
+   "home": "https://www.ad.nl",
+   "rss": "https://www.ad.nl/home/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "de Volkskrant",
+   "home": "https://www.volkskrant.nl",
+   "rss": "https://www.volkskrant.nl/rss.xml",
+   "via": "site"
+  }
+ ],
+ "BE": [
+  {
+   "name": "HLN",
+   "home": "https://www.hln.be",
+   "rss": "https://www.hln.be/home/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Het Laatste Nieuws",
+   "home": "https://www.nieuwsblad.be",
+   "rss": "https://www.nieuwsblad.be/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Le Soir",
+   "home": "https://www.lesoir.be",
+   "rss": "https://www.lesoir.be/rss.xml",
+   "via": "site"
+  }
+ ],
+ "LU": [
+  {
+   "name": "Luxemburger Wort",
+   "home": "https://www.wort.lu",
+   "rss": "https://www.wort.lu/rss/",
+   "via": "site"
+  },
+  {
+   "name": "RTL Today",
+   "home": "https://today.rtl.lu",
+   "rss": "https://news.google.com/rss/search?q=site%3Atoday.rtl.lu%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "L'essentiel",
+   "home": "https://www.lessentiel.lu",
+   "rss": "https://news.google.com/rss/search?q=site%3Alessentiel.lu%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Tageblatt",
+   "home": "https://www.tageblatt.lu",
+   "rss": "https://www.tageblatt.lu/news.rss",
+   "via": "site"
+  },
+  {
+   "name": "Virgule",
+   "home": "https://www.virgule.lu",
+   "rss": "https://www.virgule.lu/rss/",
+   "via": "site"
+  }
+ ],
+ "AT": [
+  {
+   "name": "ORF",
+   "home": "https://orf.at",
+   "rss": "https://rss.orf.at/news.xml",
+   "via": "site"
+  },
+  {
+   "name": "Der Standard",
+   "home": "https://www.derstandard.at",
+   "rss": "https://www.derstandard.at/rss",
+   "via": "site"
+  },
+  {
+   "name": "Kronen Zeitung",
+   "home": "https://www.krone.at",
+   "rss": "https://api.krone.at/v1/rss/rssfeed-google.xml?id=2311992",
+   "via": "site"
+  },
+  {
+   "name": "Die Presse",
+   "home": "https://www.diepresse.com",
+   "rss": "https://www.diepresse.com/rss//",
+   "via": "site"
+  },
+  {
+   "name": "Kurier",
+   "home": "https://kurier.at",
+   "rss": "https://kurier.at/xml/rss",
+   "via": "site"
+  }
+ ],
+ "CH": [
+  {
+   "name": "Blick",
+   "home": "https://www.blick.ch",
+   "rss": "https://www.blick.ch/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "NZZ",
+   "home": "https://www.nzz.ch",
+   "rss": "https://www.nzz.ch/startseite.rss",
+   "via": "site"
+  }
+ ],
+ "LI": [
+  {
+   "name": "1FLTV",
+   "home": "https://www.1fl.li",
+   "rss": "https://1fl.li/wp/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Lie:Zeit",
+   "home": "https://www.lie-zeit.li",
+   "rss": "https://www.lie-zeit.li/feed/",
+   "via": "site"
+  }
+ ],
+ "MC": [
+  {
+   "name": "Monaco Matin",
+   "home": "https://www.monacomatin.mc",
+   "rss": "https://www.nicematin.com/monaco/rss",
+   "via": "site"
+  },
+  {
+   "name": "Monaco Tribune",
+   "home": "https://www.monaco-tribune.com",
+   "rss": "https://www.monaco-tribune.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Monaco Info",
+   "home": "https://www.monacoinfo.com",
+   "rss": "https://monacoinfo.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Monaco Life",
+   "home": "https://monacolife.net",
+   "rss": "https://monacolife.net/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Nice-Matin",
+   "home": "https://www.nicematin.com",
+   "rss": "https://www.nicematin.com/rss",
+   "via": "site"
+  }
+ ],
+ "AD": [
+  {
+   "name": "Diari d'Andorra",
+   "home": "https://www.diariandorra.ad",
+   "rss": "https://www.diariandorra.ad/rss/home.xml",
+   "via": "site"
+  },
+  {
+   "name": "Bondia",
+   "home": "https://www.bondia.ad",
+   "rss": "https://www.bondia.ad/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Ara Andorra",
+   "home": "https://www.ara.ad",
+   "rss": "https://andorraara.com/ca/feed/",
+   "via": "site"
+  }
+ ],
+ "IT": [
+  {
+   "name": "Corriere della Sera",
+   "home": "https://www.corriere.it",
+   "rss": "https://news.google.com/rss/search?q=site%3Acorriere.it%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "la Repubblica",
+   "home": "https://www.repubblica.it",
+   "rss": "https://news.google.com/rss/search?q=site%3Arepubblica.it%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "ANSA",
+   "home": "https://www.ansa.it",
+   "rss": "https://www.ansa.it/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Il Sole 24 Ore",
+   "home": "https://www.ilsole24ore.com",
+   "rss": "https://www.ilsole24ore.com/rss/homepage.xml",
+   "via": "site"
+  },
+  {
+   "name": "La Stampa",
+   "home": "https://www.lastampa.it",
+   "rss": "https://www.lastampa.it/rss/copertina.xml",
+   "via": "site"
+  }
+ ],
+ "SM": [
+  {
+   "name": "San Marino RTV",
+   "home": "https://www.sanmarinortv.sm",
+   "rss": "https://www.sanmarinortv.sm/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Libertas",
+   "home": "https://www.libertas.sm",
+   "rss": "https://www.libertas.sm/feed/",
+   "via": "site"
+  }
+ ],
+ "VA": [
+  {
+   "name": "Vatican News",
+   "home": "https://www.vaticannews.va/en.html",
+   "rss": "https://www.vaticannews.va/en.rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Catholic News Agency",
+   "home": "https://www.catholicnewsagency.com",
+   "rss": "https://www.ewtnnews.com/rss?redirectedfrom=cna",
+   "via": "site"
+  },
+  {
+   "name": "Crux",
+   "home": "https://cruxnow.com",
+   "rss": "https://cruxnow.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "National Catholic Reporter",
+   "home": "https://www.ncronline.org",
+   "rss": "https://www.ncronline.org/rss.xml",
+   "via": "site"
+  }
+ ],
+ "ES": [
+  {
+   "name": "El País",
+   "home": "https://elpais.com",
+   "rss": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+   "via": "site"
+  },
+  {
+   "name": "El Mundo",
+   "home": "https://www.elmundo.es",
+   "rss": "https://www.elmundo.es/rss/googlenews/portada.xml",
+   "via": "site"
+  },
+  {
+   "name": "ABC",
+   "home": "https://www.abc.es",
+   "rss": "https://www.abc.es/rss/2.0/portada/",
+   "via": "site"
+  },
+  {
+   "name": "20minutos",
+   "home": "https://www.20minutos.es",
+   "rss": "https://www.20minutos.es/rss",
+   "via": "site"
+  },
+  {
+   "name": "La Vanguardia",
+   "home": "https://www.lavanguardia.com",
+   "rss": "https://www.lavanguardia.com/rss/home.xml",
+   "via": "site"
+  }
+ ],
+ "PT": [
+  {
+   "name": "Público",
+   "home": "https://www.publico.pt",
+   "rss": "https://feeds.feedburner.com/PublicoRSS",
+   "via": "site"
+  },
+  {
+   "name": "RTP Notícias",
+   "home": "https://www.rtp.pt/noticias",
+   "rss": "https://www.rtp.pt/noticias/rss",
+   "via": "site"
+  },
+  {
+   "name": "Observador",
+   "home": "https://observador.pt",
+   "rss": "https://observador.pt/feed/",
+   "via": "site"
+  }
+ ],
+ "MT": [
+  {
+   "name": "Times of Malta",
+   "home": "https://timesofmalta.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Atimesofmalta.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Malta Independent",
+   "home": "https://www.independent.com.mt",
+   "rss": "https://news.google.com/rss/search?q=site%3Aindependent.com.mt%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Lovin Malta",
+   "home": "https://lovinmalta.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Alovinmalta.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Newsbook",
+   "home": "https://newsbook.com.mt",
+   "rss": "https://newsbook.com.mt/feed/",
+   "via": "site"
+  },
+  {
+   "name": "MaltaToday",
+   "home": "https://www.maltatoday.com.mt",
+   "rss": "https://news.google.com/rss/search?q=site%3Amaltatoday.com.mt%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "GR": [
+  {
+   "name": "Proto Thema",
+   "home": "https://www.protothema.gr",
+   "rss": "https://www.protothema.gr/rss",
+   "via": "site"
+  },
+  {
+   "name": "in.gr",
+   "home": "https://www.in.gr",
+   "rss": "https://www.in.gr/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Naftemporiki",
+   "home": "https://www.naftemporiki.gr",
+   "rss": "https://www.naftemporiki.gr/feed/",
+   "via": "site"
+  },
+  {
+   "name": "ERT News",
+   "home": "https://www.ertnews.gr",
+   "rss": "https://www.ertnews.gr/feed/",
+   "via": "site"
+  }
+ ],
+ "CY": [
+  {
+   "name": "Cyprus Mail",
+   "home": "https://cyprus-mail.com",
+   "rss": "https://cyprus-mail.com/feed",
+   "via": "site"
+  },
+  {
+   "name": "Phileleftheros",
+   "home": "https://www.philenews.com",
+   "rss": "https://www.philenews.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Sigmalive",
+   "home": "https://www.sigmalive.com",
+   "rss": "https://www.sigmalive.com/rss",
+   "via": "site"
+  },
+  {
+   "name": "Politis",
+   "home": "https://politis.com.cy",
+   "rss": "https://www.politis.com.cy/feed",
+   "via": "site"
+  }
+ ],
+ "DK": [
+  {
+   "name": "DR Nyheder",
+   "home": "https://www.dr.dk/nyheder",
+   "rss": "https://www.dr.dk/nyheder/service/feeds/senestenyt",
+   "via": "site"
+  },
+  {
+   "name": "TV 2",
+   "home": "https://nyheder.tv2.dk",
+   "rss": "https://feeds.services.tv2.dk/api/feeds/nyheder/rss",
+   "via": "site"
+  },
+  {
+   "name": "Politiken",
+   "home": "https://politiken.dk",
+   "rss": "https://politiken.dk/rss/senestenyt.rss",
+   "via": "site"
+  },
+  {
+   "name": "Berlingske",
+   "home": "https://www.berlingske.dk",
+   "rss": "https://www.berlingske.dk/next-api/feeds/alle",
+   "via": "site"
+  },
+  {
+   "name": "Ekstra Bladet",
+   "home": "https://ekstrabladet.dk",
+   "rss": "https://ekstrabladet.dk/rssfeed/all/",
+   "via": "site"
+  }
+ ],
+ "SE": [
+  {
+   "name": "SVT Nyheter",
+   "home": "https://www.svt.se/nyheter",
+   "rss": "https://www.svt.se/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Aftonbladet",
+   "home": "https://www.aftonbladet.se",
+   "rss": "https://rss.aftonbladet.se/rss2/small/pages/sections/senastenytt",
+   "via": "site"
+  },
+  {
+   "name": "Expressen",
+   "home": "https://www.expressen.se",
+   "rss": "https://news.google.com/rss/search?q=site%3Aexpressen.se%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Dagens Nyheter",
+   "home": "https://www.dn.se",
+   "rss": "https://www.dn.se/rss/",
+   "via": "site"
+  }
+ ],
+ "NO": [
+  {
+   "name": "NRK",
+   "home": "https://www.nrk.no",
+   "rss": "https://www.nrk.no/toppsaker.rss",
+   "via": "site"
+  },
+  {
+   "name": "VG",
+   "home": "https://www.vg.no",
+   "rss": "https://www.vg.no/rss/feed/?format=rss",
+   "via": "site"
+  },
+  {
+   "name": "Aftenposten",
+   "home": "https://www.aftenposten.no",
+   "rss": "https://www.aftenposten.no/rss",
+   "via": "site"
+  },
+  {
+   "name": "E24",
+   "home": "https://e24.no",
+   "rss": "https://e24.no/rss",
+   "via": "site"
+  }
+ ],
+ "FI": [
+  {
+   "name": "Helsingin Sanomat",
+   "home": "https://www.hs.fi",
+   "rss": "https://news.google.com/rss/search?q=site%3Ahs.fi%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Iltalehti",
+   "home": "https://www.iltalehti.fi",
+   "rss": "https://www.iltalehti.fi/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "MTV Uutiset",
+   "home": "https://www.mtvuutiset.fi",
+   "rss": "https://www.mtvuutiset.fi/api/feed/rss/mtv_uusimmat_100",
+   "via": "site"
+  }
+ ],
+ "IS": [
+  {
+   "name": "Morgunblaðið",
+   "home": "https://www.mbl.is",
+   "rss": "https://news.google.com/rss/search?q=site%3Ambl.is%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Vísir",
+   "home": "https://www.visir.is",
+   "rss": "https://news.google.com/rss/search?q=site%3Avisir.is%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "DV",
+   "home": "https://www.dv.is",
+   "rss": "https://www.dv.is/feed",
+   "via": "site"
+  }
+ ],
+ "EE": [
+  {
+   "name": "ERR News",
+   "home": "https://news.err.ee",
+   "rss": "https://news.err.ee/rss",
+   "via": "site"
+  },
+  {
+   "name": "Postimees",
+   "home": "https://www.postimees.ee",
+   "rss": "https://www.postimees.ee/rss",
+   "via": "site"
+  },
+  {
+   "name": "Õhtuleht",
+   "home": "https://www.ohtuleht.ee",
+   "rss": "https://www.ohtuleht.ee/rss",
+   "via": "site"
+  }
+ ],
+ "LV": [
+  {
+   "name": "LSM",
+   "home": "https://www.lsm.lv",
+   "rss": "https://www.lsm.lv/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Delfi",
+   "home": "https://www.delfi.lv",
+   "rss": "https://www.delfi.lv/rss/index.xml",
+   "via": "site"
+  },
+  {
+   "name": "TVNET",
+   "home": "https://www.tvnet.lv",
+   "rss": "https://www.tvnet.lv/rss",
+   "via": "site"
+  },
+  {
+   "name": "Diena",
+   "home": "https://www.diena.lv",
+   "rss": "https://diena.lv/rss",
+   "via": "site"
+  },
+  {
+   "name": "Apollo",
+   "home": "https://www.apollo.lv",
+   "rss": "https://www.apollo.lv/rss",
+   "via": "site"
+  }
+ ],
+ "LT": [
+  {
+   "name": "LRT",
+   "home": "https://www.lrt.lt",
+   "rss": "https://www.lrt.lt/?rss",
+   "via": "site"
+  },
+  {
+   "name": "Delfi",
+   "home": "https://www.delfi.lt",
+   "rss": "https://feed.delfi.lt/v2?format=rss",
+   "via": "site"
+  },
+  {
+   "name": "15min",
+   "home": "https://www.15min.lt",
+   "rss": "https://www.15min.lt/rss",
+   "via": "site"
+  },
+  {
+   "name": "LRytas",
+   "home": "https://www.lrytas.lt",
+   "rss": "https://www.lrytas.lt/rss.xml",
+   "via": "site"
+  }
+ ],
+ "PL": [
+  {
+   "name": "Onet",
+   "home": "https://wiadomosci.onet.pl",
+   "rss": "https://wiadomosci.onet.pl/.feed",
+   "via": "site"
+  },
+  {
+   "name": "Wirtualna Polska",
+   "home": "https://wiadomosci.wp.pl",
+   "rss": "https://wiadomosci.wp.pl/rss/aktualnosci",
+   "via": "site"
+  },
+  {
+   "name": "Gazeta Wyborcza",
+   "home": "https://wyborcza.pl",
+   "rss": "https://wyborcza.pl/pub/rss/najnowsze_wyborcza.xml",
+   "via": "site"
+  },
+  {
+   "name": "Rzeczpospolita",
+   "home": "https://www.rp.pl",
+   "rss": "https://www.rp.pl/rss_main",
+   "via": "site"
+  }
+ ],
+ "CZ": [
+  {
+   "name": "iDNES",
+   "home": "https://www.idnes.cz",
+   "rss": "https://servis.idnes.cz/rss.aspx",
+   "via": "site"
+  },
+  {
+   "name": "Novinky",
+   "home": "https://www.novinky.cz",
+   "rss": "https://www.novinky.cz/rss",
+   "via": "site"
+  },
+  {
+   "name": "Seznam Zprávy",
+   "home": "https://www.seznamzpravy.cz",
+   "rss": "https://www.seznamzpravy.cz/rss",
+   "via": "site"
+  },
+  {
+   "name": "iROZHLAS",
+   "home": "https://www.irozhlas.cz",
+   "rss": "https://www.irozhlas.cz/rss/irozhlas",
+   "via": "site"
+  },
+  {
+   "name": "Aktuálně",
+   "home": "https://www.aktualne.cz",
+   "rss": "https://www.aktualne.cz/rss?lp=1",
+   "via": "site"
+  }
+ ],
+ "SK": [
+  {
+   "name": "SME",
+   "home": "https://www.sme.sk",
+   "rss": "https://www.sme.sk/rss",
+   "via": "site"
+  },
+  {
+   "name": "Aktuality",
+   "home": "https://www.aktuality.sk",
+   "rss": "https://www.aktuality.sk/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Denník N",
+   "home": "https://dennikn.sk",
+   "rss": "https://dennikn.sk/rss",
+   "via": "site"
+  },
+  {
+   "name": "TA3",
+   "home": "https://www.ta3.com",
+   "rss": "https://www.ta3.com/rss/top-spravy",
+   "via": "site"
+  }
+ ],
+ "HU": [
+  {
+   "name": "Index",
+   "home": "https://index.hu",
+   "rss": "https://index.hu/24ora/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Telex",
+   "home": "https://telex.hu",
+   "rss": "https://telex.hu/rss",
+   "via": "site"
+  },
+  {
+   "name": "24.hu",
+   "home": "https://24.hu",
+   "rss": "https://24.hu/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Magyar Nemzet",
+   "home": "https://magyarnemzet.hu",
+   "rss": "https://magyarnemzet.hu/publicapi/hu/rss/magyar_nemzet/articles",
+   "via": "site"
+  },
+  {
+   "name": "HVG",
+   "home": "https://hvg.hu",
+   "rss": "https://hvg.hu/rss",
+   "via": "site"
+  }
+ ],
+ "SI": [
+  {
+   "name": "24ur",
+   "home": "https://www.24ur.com",
+   "rss": "https://www.24ur.com/rss",
+   "via": "site"
+  },
+  {
+   "name": "Delo",
+   "home": "https://www.delo.si",
+   "rss": "https://www.delo.si/rss",
+   "via": "site"
+  },
+  {
+   "name": "Siol",
+   "home": "https://siol.net",
+   "rss": "https://siol.net/feeds/latest",
+   "via": "site"
+  },
+  {
+   "name": "Večer",
+   "home": "https://vecer.com",
+   "rss": "https://vecer.com/feed/allarticles",
+   "via": "site"
+  }
+ ],
+ "HR": [
+  {
+   "name": "Index.hr",
+   "home": "https://www.index.hr",
+   "rss": "https://www.index.hr/rss",
+   "via": "site"
+  },
+  {
+   "name": "Jutarnji list",
+   "home": "https://www.jutarnji.hr",
+   "rss": "https://www.jutarnji.hr/feed",
+   "via": "site"
+  },
+  {
+   "name": "Večernji list",
+   "home": "https://www.vecernji.hr",
+   "rss": "https://www.vecernji.hr/feeds/latest",
+   "via": "site"
+  },
+  {
+   "name": "24sata",
+   "home": "https://www.24sata.hr",
+   "rss": "https://www.24sata.hr/feeds/najnovije.xml",
+   "via": "site"
+  }
+ ],
+ "BA": [
+  {
+   "name": "Avaz",
+   "home": "https://avaz.ba",
+   "rss": "https://avaz.ba/rss",
+   "via": "site"
+  },
+  {
+   "name": "N1 BiH",
+   "home": "https://n1info.ba",
+   "rss": "https://n1info.ba/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Oslobođenje",
+   "home": "https://www.oslobodjenje.ba",
+   "rss": "https://www.oslobodjenje.ba/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "RTRS",
+   "home": "https://www.rtrs.tv",
+   "rss": "https://www.rtrs.tv/vijesti/rss.php",
+   "via": "site"
+  }
+ ],
+ "RS": [
+  {
+   "name": "Blic",
+   "home": "https://www.blic.rs",
+   "rss": "https://www.blic.rs/rss/index.xml",
+   "via": "site"
+  },
+  {
+   "name": "N1 Srbija",
+   "home": "https://n1info.rs",
+   "rss": "https://n1info.rs/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Danas",
+   "home": "https://www.danas.rs",
+   "rss": "https://www.danas.rs/feed/",
+   "via": "site"
+  }
+ ],
+ "ME": [
+  {
+   "name": "Vijesti",
+   "home": "https://www.vijesti.me",
+   "rss": "https://www.vijesti.me/rss",
+   "via": "site"
+  },
+  {
+   "name": "CdM",
+   "home": "https://www.cdm.me",
+   "rss": "https://news.google.com/rss/search?q=site%3Acdm.me%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Dan",
+   "home": "https://www.dan.co.me",
+   "rss": "https://www.dan.co.me/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Pobjeda",
+   "home": "https://www.pobjeda.me",
+   "rss": "https://rss.pobjeda.me/",
+   "via": "site"
+  }
+ ],
+ "XK": [
+  {
+   "name": "Koha",
+   "home": "https://www.koha.net",
+   "rss": "https://www.koha.net/rss",
+   "via": "site"
+  },
+  {
+   "name": "Gazeta Express",
+   "home": "https://www.gazetaexpress.com",
+   "rss": "https://www.gazetaexpress.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Telegrafi",
+   "home": "https://telegrafi.com",
+   "rss": "https://telegrafi.com/feeds/feed.rss",
+   "via": "site"
+  },
+  {
+   "name": "Kosovo Online",
+   "home": "https://www.kosovo-online.com",
+   "rss": "https://www.kosovo-online.com/rss.xml",
+   "via": "site"
+  }
+ ],
+ "AL": [
+  {
+   "name": "Balkanweb",
+   "home": "https://www.balkanweb.com",
+   "rss": "https://www.balkanweb.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Lapsi.al",
+   "home": "https://lapsi.al",
+   "rss": "https://news.google.com/rss/search?q=site%3Alapsi.al%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "MK": [
+  {
+   "name": "MKD.mk",
+   "home": "https://www.mkd.mk",
+   "rss": "https://mkd.mk/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Sloboden Pecat",
+   "home": "https://www.slobodenpecat.mk",
+   "rss": "https://news.google.com/rss/search?q=site%3Aslobodenpecat.mk%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Telma",
+   "home": "https://telma.com.mk",
+   "rss": "https://telma.com.mk/feed/",
+   "via": "site"
+  }
+ ],
+ "BG": [
+  {
+   "name": "Mediapool",
+   "home": "https://www.mediapool.bg",
+   "rss": "https://www.mediapool.bg/feed/",
+   "via": "site"
+  }
+ ],
+ "RO": [
+  {
+   "name": "Digi24",
+   "home": "https://www.digi24.ro",
+   "rss": "https://www.digi24.ro/rss",
+   "via": "site"
+  },
+  {
+   "name": "HotNews",
+   "home": "https://www.hotnews.ro",
+   "rss": "https://hotnews.ro/feed",
+   "via": "site"
+  },
+  {
+   "name": "Libertatea",
+   "home": "https://www.libertatea.ro",
+   "rss": "https://www.libertatea.ro/feed",
+   "via": "site"
+  },
+  {
+   "name": "Adevărul",
+   "home": "https://adevarul.ro",
+   "rss": "https://adevarul.ro/rss/index",
+   "via": "site"
+  },
+  {
+   "name": "G4Media",
+   "home": "https://www.g4media.ro",
+   "rss": "https://www.g4media.ro/feed",
+   "via": "site"
+  }
+ ],
+ "MD": [
+  {
+   "name": "Moldpres",
+   "home": "https://www.moldpres.md",
+   "rss": "https://news.google.com/rss/search?q=site%3Amoldpres.md%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Ziarul de Gardă",
+   "home": "https://www.zdg.md",
+   "rss": "https://www.zdg.md/feed/",
+   "via": "site"
+  },
+  {
+   "name": "NewsMaker",
+   "home": "https://newsmaker.md",
+   "rss": "https://newsmaker.md/ru/feed",
+   "via": "site"
+  }
+ ],
+ "UA": [
+  {
+   "name": "Ukrainska Pravda",
+   "home": "https://www.pravda.com.ua",
+   "rss": "https://www.pravda.com.ua/rss",
+   "via": "site"
+  },
+  {
+   "name": "Kyiv Independent",
+   "home": "https://kyivindependent.com",
+   "rss": "https://kyivindependent.com/news-archive/rss/",
+   "via": "site"
+  },
+  {
+   "name": "UNIAN",
+   "home": "https://www.unian.ua",
+   "rss": "https://rss.unian.net/site/news_ukr.rss",
+   "via": "site"
+  },
+  {
+   "name": "RBC-Ukraine",
+   "home": "https://www.rbc.ua",
+   "rss": "https://www.rbc.ua/static/rss/all.rus.rss.xml",
+   "via": "site"
+  }
+ ],
+ "BY": [
+  {
+   "name": "Nasha Niva",
+   "home": "https://nashaniva.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Anashaniva.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Belta",
+   "home": "https://www.belta.by",
+   "rss": "https://belta.by/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Onliner",
+   "home": "https://www.onliner.by",
+   "rss": "https://www.onliner.by/feed",
+   "via": "site"
+  }
+ ],
+ "RU": [
+  {
+   "name": "RIA Novosti",
+   "home": "https://ria.ru",
+   "rss": "https://ria.ru/export/rss2/index.xml",
+   "via": "site"
+  },
+  {
+   "name": "TASS",
+   "home": "https://tass.ru",
+   "rss": "https://tass.ru/rss/v2.xml",
+   "via": "site"
+  },
+  {
+   "name": "Kommersant",
+   "home": "https://www.kommersant.ru",
+   "rss": "https://www.kommersant.ru/rss/news.xml",
+   "via": "site"
+  },
+  {
+   "name": "Meduza",
+   "home": "https://meduza.io",
+   "rss": "https://meduza.io/rss/all",
+   "via": "site"
+  }
+ ],
+ "TR": [
+  {
+   "name": "Hürriyet",
+   "home": "https://www.hurriyet.com.tr",
+   "rss": "https://www.hurriyet.com.tr/rss/anasayfa",
+   "via": "site"
+  },
+  {
+   "name": "Sözcü",
+   "home": "https://www.sozcu.com.tr",
+   "rss": "https://www.sozcu.com.tr/feeds/rsssubpub",
+   "via": "site"
+  },
+  {
+   "name": "Sabah",
+   "home": "https://www.sabah.com.tr",
+   "rss": "https://www.sabah.com.tr/rss/anasayfa.xml",
+   "via": "site"
+  }
+ ],
+ "GE": [
+  {
+   "name": "Interpressnews",
+   "home": "https://www.interpressnews.ge",
+   "rss": "https://news.google.com/rss/search?q=site%3Ainterpressnews.ge%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Civil.ge",
+   "home": "https://civil.ge",
+   "rss": "https://civil.ge/feed",
+   "via": "site"
+  },
+  {
+   "name": "Netgazeti",
+   "home": "https://netgazeti.ge",
+   "rss": "https://netgazeti.ge/feed/",
+   "via": "site"
+  },
+  {
+   "name": "1TV",
+   "home": "https://1tv.ge",
+   "rss": "https://news.google.com/rss/search?q=site%3A1tv.ge%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "AM": [
+  {
+   "name": "Armenpress",
+   "home": "https://armenpress.am",
+   "rss": "https://news.google.com/rss/search?q=site%3Aarmenpress.am%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "News.am",
+   "home": "https://news.am",
+   "rss": "https://news.google.com/rss/search?q=site%3Anews.am%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Azatutyun",
+   "home": "https://www.azatutyun.am",
+   "rss": "https://www.azatutyun.am/api/",
+   "via": "site"
+  },
+  {
+   "name": "Hetq",
+   "home": "https://hetq.am",
+   "rss": "https://hetq.am/hy/rss",
+   "via": "site"
+  }
+ ],
+ "AZ": [
+  {
+   "name": "APA",
+   "home": "https://apa.az",
+   "rss": "https://apa.az/rss",
+   "via": "site"
+  },
+  {
+   "name": "Report.az",
+   "home": "https://report.az",
+   "rss": "https://report.az/rss",
+   "via": "site"
+  },
+  {
+   "name": "Trend",
+   "home": "https://www.trend.az",
+   "rss": "https://www.trend.az/rss/",
+   "via": "site"
+  },
+  {
+   "name": "Azertac",
+   "home": "https://azertag.az",
+   "rss": "https://news.google.com/rss/search?q=site%3Aazertag.az%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Oxu.az",
+   "home": "https://oxu.az",
+   "rss": "https://oxu.az/feed",
+   "via": "site"
+  }
+ ],
+ "IL": [
+  {
+   "name": "The Times of Israel",
+   "home": "https://www.timesofisrael.com",
+   "rss": "https://www.timesofisrael.com/feed/",
+   "via": "site"
+  },
+  {
+   "name": "Israel Hayom",
+   "home": "https://www.israelhayom.co.il",
+   "rss": "https://www.israelhayom.co.il/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Maariv",
+   "home": "https://www.maariv.co.il",
+   "rss": "https://www.maariv.co.il/rss/index.xml",
+   "via": "site"
+  }
+ ],
+ "SA": [
+  {
+   "name": "Arab News",
+   "home": "https://www.arabnews.com",
+   "rss": "https://www.arabnews.com/rss.xml",
+   "via": "site"
+  },
+  {
+   "name": "Saudi Gazette",
+   "home": "https://saudigazette.com.sa",
+   "rss": "https://news.google.com/rss/search?q=site%3Asaudigazette.com.sa%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Al Arabiya",
+   "home": "https://www.alarabiya.net",
+   "rss": "https://news.google.com/rss/search?q=site%3Aalarabiya.net%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ],
+ "CN": [
+  {
+   "name": "Xinhua",
+   "home": "http://www.news.cn",
+   "rss": "https://news.google.com/rss/search?q=site%3Anews.cn%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "People's Daily",
+   "home": "http://www.people.com.cn",
+   "rss": "http://www.people.com.cn/rss/politics.xml",
+   "via": "site"
+  },
+  {
+   "name": "China Daily",
+   "home": "https://www.chinadaily.com.cn",
+   "rss": "https://news.google.com/rss/search?q=site%3Achinadaily.com.cn%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Global Times",
+   "home": "https://www.globaltimes.cn",
+   "rss": "https://www.globaltimes.cn/rss/outbrain.xml",
+   "via": "site"
+  }
+ ],
+ "JP": [
+  {
+   "name": "NHK",
+   "home": "https://www3.nhk.or.jp/news",
+   "rss": "https://www3.nhk.or.jp/rss/news/cat0.xml",
+   "via": "site"
+  },
+  {
+   "name": "Yomiuri Shimbun",
+   "home": "https://www.yomiuri.co.jp",
+   "rss": "https://news.google.com/rss/search?q=site%3Ayomiuri.co.jp%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Asahi Shimbun",
+   "home": "https://www.asahi.com",
+   "rss": "https://www.asahi.com/rss/asahi/newsheadlines.rdf",
+   "via": "site"
+  },
+  {
+   "name": "Mainichi",
+   "home": "https://mainichi.jp",
+   "rss": "https://news.google.com/rss/search?q=site%3Amainichi.jp%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  },
+  {
+   "name": "Nikkei",
+   "home": "https://www.nikkei.com",
+   "rss": "https://news.google.com/rss/search?q=site%3Anikkei.com%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
+   "via": "google-news"
+  }
+ ]
+}

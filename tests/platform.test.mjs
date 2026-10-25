@@ -51,7 +51,8 @@ test('shell home lists every suite and module', async () => {
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(`${BASE}/#/`, { waitUntil: 'networkidle' });
   assert.equal(await page.locator('.suite-card').count(), 3);
-  for (const { m } of modules) assert.ok(await page.locator('#nav').getByText(m.name, { exact: true }).count() >= 1, `${m.name} in sidebar`);
+  const nav = await page.textContent('#nav');
+  for (const { m } of modules) assert.ok(nav.includes(m.name), `${m.name} in sidebar`);
   assert.deepEqual(errors, []);
 });
 

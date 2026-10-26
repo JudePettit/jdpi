@@ -1,0 +1,37 @@
+{
+ "generated": "2026-10-26T14:21:12.192Z",
+ "entities": 7056,
+ "withMentions": 5868,
+ "mentions": 11432,
+ "types": {
+  "place": 405,
+  "person": 1819,
+  "party": 699,
+  "election": 2546,
+  "event": 641,
+  "topic": 206,
+  "idea": 270,
+  "conflict": 467,
+  "organisation": 3
+ },
+ "shards": {
+  "entities": 512,
+  "titles": 256
+ },
+ "modules": {
+  "retrospective": 7906,
+  "historical-calendar": 3039,
+  "calendar": 49,
+  "battlefield-history": 34,
+  "battlefield": 18,
+  "kardashev": 82,
+  "traders": 139,
+  "learning": 96,
+  "learning-politics": 97
+ },
+ "sources": [
+  "Wikidata (CC0)",
+  "Wikipedia summaries (CC BY-SA 4.0)",
+  "JDP-I modules"
+ ]
+}

@@ -138,7 +138,7 @@ const notes = [];
 function renderTrades() {
   const list = filtered(), m = members.get(selMember);
   $('#clear-member').hidden = !selMember;
-  $('#trades-title').textContent = m ? `Trades by ${m.name}` : 'Latest trades';
+  $('#trades-title').innerHTML = m ? `Trades by <span${m.bioguide ? ` data-entity-key="congress:${esc(m.bioguide)}"` : ''}>${esc(m.name)}</span>` : 'Latest trades';
   $('#trades-count').textContent = `${list.length.toLocaleString('en-GB')} trades`;
   // Most-traded tickers in the current view.
   const by = new Map();
@@ -180,7 +180,7 @@ function renderInvestors() {
   const moves = inv.positions.filter(p => p.change === 'new' || p.change === 'added' || p.change === 'trimmed').sort((a, b) => b.value - a.value);
   const row = p => `<tr><td>${esc(p.name)} <span class="note">${esc(p.cls)}${p.putCall ? ' · ' + esc(p.putCall) : ''}</span></td><td><span class="bar"><i style="width:${Math.min(100, p.weight * 100 / Math.max(...inv.positions.map(x => x.weight)) )}%"></i></span>${(p.weight * 100).toFixed(1)}%</td><td>${money(p.value)}</td><td>${p.shares.toLocaleString('en-GB')}</td><td><span class="badge ${p.change}">${p.change}</span></td></tr>`;
   const head = '<thead><tr><th>Holding</th><th>Weight</th><th>Value</th><th>Shares</th><th>vs previous quarter</th></tr></thead>';
-  box.innerHTML = `<div class="panelhead"><span class="ptitle">${esc(inv.person)} · ${esc(inv.registeredName)}</span><span class="sub">13F for quarter to ${fmtDate(inv.period)} · filed ${fmtDate(inv.filed)} · <a href="${inv.filingUrl}" target="_blank" rel="noreferrer">SEC filings ↗</a></span></div>
+  box.innerHTML = `<div class="panelhead"><span class="ptitle"><span data-entity-key="investor:${inv.cik}">${esc(inv.person)}</span> · ${esc(inv.registeredName)}</span><span class="sub">13F for quarter to ${fmtDate(inv.period)} · filed ${fmtDate(inv.filed)} · <a href="${inv.filingUrl}" target="_blank" rel="noreferrer">SEC filings ↗</a></span></div>
     ${moves.length ? `<div class="chips"><span class="sub" style="align-self:center">Moves:</span>${moves.slice(0, 12).map(p => `<span class="chip">${esc(p.name)} <span class="badge ${p.change}">${p.change}</span></span>`).join('')}${inv.sold.slice(0, 8).map(p => `<span class="chip">${esc(p.name)} <span class="badge sold">sold out</span></span>`).join('')}</div>` : ''}
     <div class="tablewrap"><table>${head}<tbody>${inv.positions.slice(0, 25).map(row).join('')}</tbody></table>
     ${inv.positions.length > 25 ? `<p style="padding:0 16px"><button class="more" id="all-holdings">See all ${inv.positions.length} holdings</button></p>` : ''}

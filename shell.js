@@ -12,11 +12,25 @@ function allModules() {
 }
 
 function parseRoute() {
-  const [suiteId, moduleId, subId] = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+  // #/suite/module/sub?at=<address>: "at" deep-links to an exact place inside the module (see deepLink()).
+  const [path, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
+  const [suiteId, moduleId, subId] = path.split('/').filter(Boolean).map(decodeURIComponent);
+  const at = new URLSearchParams(query).get('at');
   const suite = state.registry.suites.find(s => s.id === suiteId) || null;
   const module = suite?.modules.find(m => m.id === moduleId) || null;
   const sub = module?.submodules?.find(x => x.id === subId) || null;
-  return { suite, module, sub };
+  return { suite, module, sub, at };
+}
+
+// A deep link may only point at the module's own page (same origin and path), so the shell never frames
+// arbitrary sites.
+function deepLink(r) {
+  if (!r.at || !r.module?.url) return null;
+  try {
+    const want = new URL(r.at, location.href), base = new URL(r.sub?.url || r.module.url, location.href);
+    const strip = p => p.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+    return want.origin === base.origin && strip(want.pathname) === strip(base.pathname) ? want.href : null;
+  } catch { return null; }
 }
 
 function href(suite, module, sub) {
@@ -190,7 +204,7 @@ function route() {
   const suiteId = r.suite?.id || '';
   if (suiteId) document.documentElement.dataset.suite = suiteId; else delete document.documentElement.dataset.suite;
 
-  const moduleUrl = r.module?.url ? (r.sub?.url || r.module.url) : null;
+  const moduleUrl = r.module?.url ? (deepLink(r) || r.sub?.url || r.module.url) : null;
   const frameUrl = moduleUrl && !r.module.opensInNewTab ? moduleUrl : null;
   $('#view').hidden = !!frameUrl;
   $('#frames').hidden = !frameUrl;

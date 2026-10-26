@@ -116,6 +116,15 @@
       "description": "Political systems, leadership and their history.",
       "modules": [
         {
+          "id": "encyclopedia",
+          "name": "Encyclopaedia",
+          "icon": "◈",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "encyclopedia/index.html",
+          "description": "Every person, place, war, party and idea in JDP-I. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\"), and jump to everywhere each one appears across the suite."
+        },
+        {
           "id": "atlas",
           "name": "Political Atlas",
           "icon": "◍",

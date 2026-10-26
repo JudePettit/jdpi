@@ -1,0 +1,28 @@
+﻿name: Refresh Encyclopaedia entity layer
+# Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries.
+on:
+  schedule:
+    - cron: '23 4 3 * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: JudePettit/hp-retrospective
+          path: hp-retrospective
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node lake/scripts/build.mjs --retro hp-retrospective
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lake/data lake/scripts/summary-cache.json
+          git diff --cached --quiet || git commit -m "Encyclopaedia: monthly refresh of the entity layer" && git push

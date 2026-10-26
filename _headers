@@ -4,3 +4,7 @@
 
 /registry.json
   Cache-Control: no-cache
+
+/lake/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600

@@ -14,6 +14,16 @@
   const root = document.documentElement;
   if (suite && !root.dataset.suite) root.dataset.suite = suite;
 
+  // Encyclopaedia links on every module page (skipped on the Encyclopaedia itself, which links natively).
+  if (moduleId !== 'encyclopedia' && !document.querySelector('script[src*="jdpi-entities.js"]')) {
+    const ency = document.createElement('script');
+    const shellUrl = new URL(SHELL, location.href);
+    ency.src = new URL('design/jdpi-entities.js', shellUrl).href;
+    ency.dataset.shell = shellUrl.href;
+    ency.defer = true;
+    document.head.appendChild(ency);
+  }
+
   let embedded = false;
   try { embedded = window.self !== window.top; } catch { embedded = true; }
 

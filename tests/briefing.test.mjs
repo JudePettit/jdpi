@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
 import { POSITIONS, PER_POSITION, SOURCES } from '../briefing/scripts/sources.mjs';
 import { parseFeed, canonicalUrl } from '../briefing/scripts/rss.mjs';
+import { categorize } from '../briefing/scripts/categorize.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
@@ -18,6 +19,21 @@ test('parses RSS and Atom and strips tracking', () => {
   const atom = parseFeed('<feed><entry><title>T</title><link rel="self" href="https://x.com/self"/><link rel="alternate" href="https://x.com/post"/><updated>2026-10-26T10:00:00Z</updated></entry></feed>');
   assert.equal(atom[0].url, 'https://x.com/post');
   assert.equal(canonicalUrl('https://x.com/?fbclid=1'), 'https://x.com/');
+});
+
+test('soft-news filter classifies sport, entertainment and lifestyle but keeps hard news', () => {
+  const cases = [
+    ['Arsenal striker scores hat-trick in derby', 'https://x.com/news/a', 'sports'],
+    ['Antonelli takes F1 pole', 'https://x.com/formula-1/2026/a', 'sports'],
+    ['Red carpet looks from the Met Gala', 'https://x.com/news/a', 'entertainment'],
+    ['Slate Mini Crossword for Oct. 26', 'https://slate.com/life/2026/10/x', 'lifestyle'],
+    ['Government bans betting ads in football', 'https://x.com/sport/a', 'news'],
+    ['FIFA corruption trial opens', 'https://x.com/football/a', 'news'],
+    ['Actress joins rally for Texas Democrat', 'https://x.com/entertainment/a', 'news'],
+    ['Senate race tightens in Ohio', 'https://x.com/politics/a', 'news'],
+    ['Election games: who blinks first?', 'https://x.com/world/a', 'news'],
+  ];
+  for (const [t, u, want] of cases) assert.equal(categorize(t, u), want, t);
 });
 
 test('live data: ten active publishers per position, recent stories', async () => {
@@ -38,6 +54,8 @@ test('page shows five columns and filters by topic', async () => {
   await page.waitForSelector('.cols5 .col', { timeout: 20000 });
   const cols = await page.locator('.cols5 .col').count();
   const all = await page.locator('#out .story').count();
+  const hardOnly = await page.locator('#hardnews').isChecked();
+  const visibleSoft = await page.evaluate(() => [...document.querySelectorAll('#out .story a.t')].filter(a => D.items.find(i => i.u === a.getAttribute('href'))?.c).length);
   await page.locator('.topic[data-id="t0"]').click();
   const title = await page.locator('#viewtitle').innerText();
   await page.locator('[data-pos="far_right"]').click();
@@ -45,6 +63,8 @@ test('page shows five columns and filters by topic', async () => {
   await browser.close();
   assert.equal(cols, 5);
   assert.ok(all > 20, `stories: ${all}`);
+  assert.ok(hardOnly, 'hard-news filter on by default');
+  assert.equal(visibleSoft, 0, 'no soft-news stories shown while filtered');
   assert.equal(title, 'US politics');
   assert.equal(cols2, 4);
   assert.deepEqual(errors, []);

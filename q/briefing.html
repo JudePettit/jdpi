@@ -90,6 +90,7 @@ td{padding:6px 10px;border-bottom:1px solid #24343f}td.num{text-align:right;font
             <select id="window" aria-label="Time window"><option value="24">Last 24 hours</option><option value="72" selected>Last 3 days</option><option value="168">Last 7 days</option></select>
             <select id="publisher" aria-label="Publisher"><option value="">All publishers</option></select>
             <input type="search" id="q" placeholder="Search headlines…" aria-label="Search headlines">
+            <label class="meta" style="margin:0" title="Hides sports results, celebrity and entertainment coverage, and lifestyle sections (advice, puzzles, food, fashion, travel, property, shopping). Stories about politics, laws, courts, business or money in those fields are kept."><input type="checkbox" id="hardnews" checked> Hard news only <span id="hiddencount"></span></label>
           </div></div>
         <div class="controls" style="padding:10px 14px 0" id="posbtns"></div>
         <div class="meter" id="meter"></div><div class="meterkey" id="meterkey"></div>
@@ -141,7 +142,15 @@ function matcher(keywords) {
 const matches = (topic, it) => matcher(topic.keywords)(it.t + ' ' + it.d);
 
 /* ---------- topics panel ---------- */
-function windowed() { const since = Date.now() - +$('#window').value * 36e5; return D.items.filter(i => Date.parse(i.p) >= since); }
+const SOFT_KEY = 'jdpi.briefing.hideSoft';
+// Stories in the time window, minus sport, entertainment and lifestyle unless the filter is off (tagged by categorize.mjs).
+function windowed() {
+  const since = Date.now() - +$('#window').value * 36e5, inWin = D.items.filter(i => Date.parse(i.p) >= since);
+  if (!$('#hardnews').checked) { $('#hiddencount').textContent = ''; return inWin; }
+  const kept = inWin.filter(i => !i.c);
+  $('#hiddencount').textContent = inWin.length > kept.length ? `(${inWin.length - kept.length})` : '';
+  return kept;
+}
 function renderTopics() {
   const items = windowed();
   $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><div class="n"><b>All stories</b><small>Every story from all fifty publishers</small></div><span class="c">${items.length}</span></div>` +
@@ -218,6 +227,8 @@ fetch('../briefing/data/latest.json').then(r => r.json()).then(d => {
   $('#meta').textContent = `${d.items.length.toLocaleString('en-GB')} stories from the last ${d.keepDays} days · ${active} active publishers (${d.perPosition} per position) · refreshed ${d.generated.slice(0, 16).replace('T', ' ')} UTC`;
   for (const id of ['#view', '#publisher']) $(id).onchange = render;
   $('#window').onchange = () => { renderTopics(); render(); };
+  try { $('#hardnews').checked = localStorage.getItem(SOFT_KEY) !== '0'; } catch {}
+  $('#hardnews').onchange = () => { try { localStorage.setItem(SOFT_KEY, $('#hardnews').checked ? '1' : '0'); } catch {} renderTopics(); render(); };
   $('#q').oninput = render;
   renderTopics(); render(); renderSources();
 }).catch(e => { $('#meta').textContent = 'Stories could not load: ' + e.message; });

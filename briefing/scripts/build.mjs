@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { POSITIONS, PER_POSITION, SOURCES } from './sources.mjs';
 import { parseFeed, titleKey } from './rss.mjs';
+import { categorize } from './categorize.mjs';
 
 const OUT = fileURLToPath(new URL('../data/latest.json', import.meta.url));
 mkdirSync(fileURLToPath(new URL('../data/', import.meta.url)), { recursive: true });
@@ -53,7 +54,10 @@ const byKey = new Set();
 const items = [...seen.values()]
   .filter(i => Date.parse(i.p) >= since && SOURCES.some(s => s.id === i.s))
   .sort((a, b) => (a.p < b.p ? 1 : -1))
-  .filter(i => { const k = i.s + '|' + titleKey(i.t); if (byKey.has(k)) return false; byKey.add(k); return true; });
+  .filter(i => { const k = i.s + '|' + titleKey(i.t); if (byKey.has(k)) return false; byKey.add(k); return true; })
+  // Tag soft news (s = sport, e = entertainment, l = lifestyle) so the page can hide it; re-tagged every run so rule
+  // changes apply to the whole store.
+  .map(({ c: _c, ...i }) => { const c = categorize(i.t, i.u); return c === 'news' ? i : { ...i, c: c[0] }; });
 
 writeFileSync(OUT, JSON.stringify({ generated: stamp, keepDays: KEEP_DAYS, perPosition: PER_POSITION, positions: POSITIONS, sources, items }));
-console.log(`${items.length} stories from ${new Set(items.map(i => i.s)).size} sources (${activeIds.size} active this run)`);
+console.log(`${items.length} stories from ${new Set(items.map(i => i.s)).size} sources (${activeIds.size} active this run); ${items.filter(i => i.c === 's').length} sport, ${items.filter(i => i.c === 'e').length} entertainment, ${items.filter(i => i.c === 'l').length} lifestyle`);

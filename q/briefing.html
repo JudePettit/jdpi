@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en" data-suite="q">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml">
+<title>JDP-I Q — Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../design/jdpi.css">
+<script src="../design/jdpi-bar.js" data-suite="q" data-module="briefing" data-shell="../" defer></script>
+<style>
+:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--faint:#6d7d86;--text:#eff4f2;--accent:var(--jdpi-accent,#b7f36b);--soft:var(--jdpi-accent-soft,rgba(183,243,107,.08));--accline:var(--jdpi-accent-line,#5f7d45);
+  --far_left:#e0525e;--left:#f08a8a;--centre:#c8d0d4;--right:#7fb2ff;--far_right:#4a74e0}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
+a{color:var(--accent)}button,input,select,textarea{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
+.wrap{max-width:1560px;margin:auto;padding:20px 26px 40px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
+h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:780px}
+.meta{font:10px 'DM Mono';color:var(--muted);margin-top:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:5px;padding:7px 12px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs button.active,.tabs button:hover{border-color:var(--accline);color:var(--accent);background:var(--soft)}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;margin-top:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panel+.panel{margin-top:14px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.phead b{font:700 13px Manrope}
+select,input[type=search],input[type=text],textarea{background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:6px 9px;font-size:12.5px}
+textarea{width:100%;resize:vertical;min-height:56px}
+.topic{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #24343f;cursor:pointer}
+.topic:hover{background:#ffffff05}.topic.on{background:var(--soft);box-shadow:inset 3px 0 var(--accent)}
+.topic .n{flex:1;min-width:0}.topic .n b{font-weight:600;font-size:13px}.topic .n small{display:block;color:var(--faint);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topic.paused .n{opacity:.45}
+.topic .c{font:10px 'DM Mono';color:var(--muted)}
+.ib{background:none;border:0;color:var(--faint);padding:2px 4px;font-size:12px}.ib:hover{color:var(--accent)}
+.btn{border:1px solid var(--accline);background:var(--soft);color:var(--accent);border-radius:5px;padding:6px 11px;font-size:12px}
+.btn.ghost{border-color:var(--line);background:none;color:var(--muted)}
+.form{padding:12px;display:grid;gap:8px}
+.form label{font:10px 'DM Mono';color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pos{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:11.5px;background:none;color:var(--muted)}
+.pos i{width:8px;height:8px;border-radius:50%;display:inline-block}.pos.on{color:var(--text);border-color:#ffffff30;background:#ffffff08}
+.meter{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:10px 14px 4px}.meter span{display:block;height:100%}
+.meterkey{display:flex;gap:12px;flex-wrap:wrap;padding:0 14px 10px;font:10px 'DM Mono';color:var(--muted)}
+.cols5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+.col{border-right:1px solid var(--line);min-width:0}.col:last-child{border-right:0}
+.col h3{margin:0;padding:9px 12px;font:600 12px Manrope;display:flex;justify-content:space-between;border-bottom:2px solid;position:sticky;top:0;background:var(--panel)}
+.story{padding:9px 12px;border-bottom:1px solid #24343f;font-size:12.8px;line-height:1.4}
+.story a.t{color:var(--text);text-decoration:none;font-weight:500}.story a.t:hover{color:var(--accent)}
+.story small{display:block;color:var(--faint);font:10px 'DM Mono';margin-top:3px}
+.story p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.story .tag{font:9.5px 'DM Mono';padding:1px 5px;border-radius:3px;margin-right:5px;color:#0d1721}
+.caution{color:#f0b95a;font:9.5px 'DM Mono';margin-left:4px}
+.stream .story{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{text-align:left;font:600 11px Manrope;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--line)}
+td{padding:6px 10px;border-bottom:1px solid #24343f}td.num{text-align:right;font-variant-numeric:tabular-nums}
+.st{font:10px 'DM Mono'}.st.active{color:var(--accent)}.st.reserve{color:var(--muted)}.st.down{color:#ff826f}
+.note{color:var(--faint);font-size:11.5px;padding:10px 14px;line-height:1.6}
+.more{display:block;width:100%;border:0;background:none;color:var(--muted);padding:8px;font:11px 'DM Mono'}.more:hover{color:var(--accent)}
+@media(max-width:1200px){.cols5{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.col{border-bottom:1px solid var(--line)}}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.wrap{padding:14px}.stream .story{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div><div class="eyebrow">JDP-I Q · Briefing</div><h1>Briefing</h1>
+      <p>Follow your topics across fifty publishers, ten from each political position: far left, left, centre, right and far right. The balanced view lines the positions up side by side so you can see how each covers the same story.</p>
+      <div class="meta" id="meta">Loading…</div></div>
+    <div class="tabs" role="tablist"><button data-tab="brief" class="active">Briefing</button><button data-tab="sources">Sources</button></div>
+  </section>
+
+  <section id="tab-brief" class="layout">
+    <aside>
+      <div class="panel"><div class="phead"><b>Topics</b><button class="btn" id="addtopic">+ Topic</button></div>
+        <div id="topics"></div>
+        <div class="form" id="topicform" hidden>
+          <label for="tname">Name</label><input type="text" id="tname" maxlength="60">
+          <label for="tkeys">Keywords (comma-separated)</label><textarea id="tkeys" placeholder="Ukraine, Zelensky, Kyiv"></textarea>
+          <div class="controls"><button class="btn" id="tsave">Save</button><button class="btn ghost" id="tcancel">Cancel</button><button class="btn ghost" id="tdelete" style="margin-left:auto">Delete</button></div>
+        </div>
+        <p class="note">Topics are stored in this browser only. Keywords match whole words; short capitalised ones such as “UN” or “AI” match case-sensitively.</p>
+      </div>
+    </aside>
+    <main>
+      <div class="panel">
+        <div class="phead"><b id="viewtitle">All stories</b>
+          <div class="controls">
+            <select id="view" aria-label="View"><option value="balanced">Balanced columns</option><option value="stream">Stream</option></select>
+            <select id="window" aria-label="Time window"><option value="24">Last 24 hours</option><option value="72" selected>Last 3 days</option><option value="168">Last 7 days</option></select>
+            <select id="publisher" aria-label="Publisher"><option value="">All publishers</option></select>
+            <input type="search" id="q" placeholder="Search headlines…" aria-label="Search headlines">
+          </div></div>
+        <div class="controls" style="padding:10px 14px 0" id="posbtns"></div>
+        <div class="meter" id="meter"></div><div class="meterkey" id="meterkey"></div>
+        <div id="out"></div>
+      </div>
+    </main>
+  </section>
+
+  <section id="tab-sources" hidden>
+    <div class="panel" style="margin-top:16px"><div class="phead"><b>Publisher catalogue</b><span class="meta" style="margin:0" id="srcmeta"></span></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
+      <p class="note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. ⚠ marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage.</p>
+    </div>
+  </section>
+</div>
+<script>
+// Briefing (rebuilt from the Lovable app). Stories: ../briefing/data/latest.json, refreshed twice a day by
+// briefing/scripts/build.mjs from a catalogue balanced across five political positions. Topics live in localStorage.
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const KEY = 'jdpi.briefing.topics.v1';
+const DEFAULT_TOPICS = [
+  ['US politics', 'Trump, Congress, Senate, White House, Republicans, Democrats, midterms, Supreme Court'],
+  ['Ukraine & Russia', 'Ukraine, Ukrainian, Russia, Russian, Kremlin, Putin, Zelensky, Kyiv, Moscow'],
+  ['Middle East', 'Israel, Israeli, Gaza, Hamas, Hezbollah, Iran, Iranian, West Bank, Netanyahu, Lebanon, Syria, Yemen, Houthi'],
+  ['China', 'China, Chinese, Beijing, Xi Jinping, Taiwan, Hong Kong'],
+  ['UK politics', 'Starmer, Labour, Tory, Tories, Conservatives, Reform UK, Farage, Westminster, Downing Street, Badenoch, Burnham'],
+  ['Europe', 'EU, European Union, Brussels, Macron, Merz, Meloni, Le Pen, NATO, European Commission'],
+  ['Economy', 'inflation, recession, interest rates, Federal Reserve, Fed, tariffs, tariff, GDP, jobs report, stocks, markets'],
+  ['Immigration', 'immigration, immigrants, migrants, migrant, asylum, border, deportation, deportations, ICE'],
+  ['AI & tech', 'AI, artificial intelligence, OpenAI, Anthropic, Google, Meta, Nvidia, chatbot, Silicon Valley'],
+  ['Climate & energy', 'climate, emissions, net zero, renewable, oil, gas, OPEC, heatwave, wildfire, hurricane'],
+].map(([name, keys], i) => ({ id: 't' + i, name, keywords: keys.split(',').map(s => s.trim()), paused: false }));
+let D, SRC = new Map(), topics = load(), current = null, editing = null, posOn = new Set(), expanded = new Set();
+
+function load() { try { const t = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(t)) return t; } catch {} return DEFAULT_TOPICS; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(topics)); } catch {} }
+
+/* ---------- matching (whole words; short all-caps keywords are case-sensitive) ---------- */
+const reCache = new Map();
+function matcher(keywords) {
+  const k = keywords.join('\u0001');
+  if (!reCache.has(k)) {
+    const parts = keywords.filter(Boolean).map(w => { const e = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'); return { re: new RegExp(`(?<![\\p{L}\\p{N}])${e}(?![\\p{L}\\p{N}])`, /^[A-Z0-9]{1,4}$/.test(w) ? 'u' : 'iu') }; });
+    reCache.set(k, text => parts.some(p => p.re.test(text)));
+  }
+  return reCache.get(k);
+}
+const matches = (topic, it) => matcher(topic.keywords)(it.t + ' ' + it.d);
+
+/* ---------- topics panel ---------- */
+function windowed() { const since = Date.now() - +$('#window').value * 36e5; return D.items.filter(i => Date.parse(i.p) >= since); }
+function renderTopics() {
+  const items = windowed();
+  $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><div class="n"><b>All stories</b><small>Every story from all fifty publishers</small></div><span class="c">${items.length}</span></div>` +
+    topics.map(t => `<div class="topic ${current === t.id ? 'on' : ''} ${t.paused ? 'paused' : ''}" data-id="${esc(t.id)}"><div class="n"><b>${esc(t.name)}</b><small>${esc(t.keywords.join(', '))}</small></div>
+      <span class="c">${t.paused ? 'paused' : items.filter(i => matches(t, i)).length}</span>
+      <button class="ib" data-pause="${esc(t.id)}" title="${t.paused ? 'Resume' : 'Pause'}" aria-label="${t.paused ? 'Resume' : 'Pause'} ${esc(t.name)}">${t.paused ? '▶' : '❚❚'}</button><button class="ib" data-edit="${esc(t.id)}" title="Edit" aria-label="Edit ${esc(t.name)}">✎</button></div>`).join('');
+}
+$('#topics').addEventListener('click', e => {
+  const p = e.target.closest('[data-pause]'), ed = e.target.closest('[data-edit]'), row = e.target.closest('.topic');
+  if (p) { const t = topics.find(x => x.id === p.dataset.pause); t.paused = !t.paused; save(); renderTopics(); render(); return; }
+  if (ed) { openForm(topics.find(x => x.id === ed.dataset.edit)); return; }
+  if (row) { current = row.dataset.id || null; renderTopics(); render(); }
+});
+function openForm(t) { editing = t || null; $('#topicform').hidden = false; $('#tname').value = t?.name || ''; $('#tkeys').value = t?.keywords.join(', ') || ''; $('#tdelete').hidden = !t; $('#tname').focus(); }
+$('#addtopic').onclick = () => openForm(null);
+$('#tcancel').onclick = () => { $('#topicform').hidden = true; };
+$('#tsave').onclick = () => {
+  const name = $('#tname').value.trim(), keywords = $('#tkeys').value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!name || !keywords.length) { $('#tkeys').focus(); return; }
+  if (editing) Object.assign(editing, { name, keywords }); else { const t = { id: 'u' + Date.now().toString(36), name, keywords, paused: false }; topics.push(t); current = t.id; }
+  save(); $('#topicform').hidden = true; renderTopics(); render();
+};
+$('#tdelete').onclick = () => { if (!editing) return; topics = topics.filter(t => t !== editing); if (current === editing.id) current = null; save(); $('#topicform').hidden = true; renderTopics(); render(); };
+
+/* ---------- stories ---------- */
+const ago = iso => { const m = (Date.now() - Date.parse(iso)) / 6e4; return m < 60 ? Math.max(1, Math.round(m)) + 'm ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
+const posLabel = k => D.positions.find(p => p.key === k)?.label || k;
+function storyHtml(i, showTag) {
+  const s = SRC.get(i.s);
+  return `<div class="story">${showTag ? `<div><span class="tag" style="background:var(--${s.position})">${esc(posLabel(s.position))}</span></div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t)}</a>
+    <small>${esc(s.name)}${s.caution ? '<span class="caution" title="Mixed or low factual reliability rating">⚠</span>' : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(i.d.slice(0, 180))}${i.d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
+}
+function filtered() {
+  const q = $('#q').value.trim().toLowerCase(), pub = $('#publisher').value, t = topics.find(x => x.id === current);
+  return windowed().filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && (!pub || i.s === pub) && (!q || i.t.toLowerCase().includes(q)) && (!t || (!t.paused && matches(t, i))); });
+}
+function render() {
+  const list = filtered(), t = topics.find(x => x.id === current);
+  $('#viewtitle').textContent = t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
+  const by = Object.fromEntries(D.positions.map(p => [p.key, list.filter(i => SRC.get(i.s).position === p.key)]));
+  const total = list.length || 1;
+  $('#meter').innerHTML = D.positions.map(p => `<span style="width:${by[p.key].length / total * 100}%;background:var(--${p.key})" title="${esc(p.label)}: ${by[p.key].length}"></span>`).join('');
+  $('#meterkey').innerHTML = D.positions.map(p => `<span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--${p.key});margin-right:4px"></i>${esc(p.label)} ${by[p.key].length} (${Math.round(by[p.key].length / total * 100)}%)</span>`).join('') + '<span>· coverage of this topic by position</span>';
+  if (!list.length) { $('#out').innerHTML = `<div class="empty">${t?.paused ? 'This topic is paused.' : 'No stories match in this window.'}</div>`; return; }
+  if ($('#view').value === 'stream') {
+    const lim = expanded.has('stream') ? 400 : 80;
+    $('#out').innerHTML = `<div class="stream">${list.slice(0, lim).map(i => storyHtml(i, true)).join('')}</div>${list.length > lim ? `<button class="more" data-more="stream">Show more (${list.length - lim})</button>` : ''}`;
+  } else {
+    $('#out').innerHTML = `<div class="cols5">${D.positions.filter(p => posOn.has(p.key)).map(p => { const l = by[p.key], lim = expanded.has(p.key) ? 200 : 12;
+      return `<div class="col"><h3 style="border-color:var(--${p.key})"><span>${esc(p.label)}</span><span class="meta" style="margin:0">${l.length}</span></h3>${l.slice(0, lim).map(i => storyHtml(i, false)).join('') || '<div class="empty">No stories.</div>'}${l.length > lim ? `<button class="more" data-more="${p.key}">Show ${l.length - lim} more</button>` : ''}</div>`; }).join('')}</div>`;
+  }
+}
+$('#out').addEventListener('click', e => { const m = e.target.closest('[data-more]'); if (m) { expanded.add(m.dataset.more); render(); } });
+
+/* ---------- sources tab ---------- */
+function renderSources() {
+  const counts = new Map(); for (const i of D.items) counts.set(i.s, (counts.get(i.s) || 0) + 1);
+  const order = Object.fromEntries(D.positions.map((p, k) => [p.key, k]));
+  $('#srcrows').innerHTML = [...D.sources].sort((a, b) => order[a.position] - order[b.position] || (b.active - a.active)).map(s => `<tr><td>${esc(s.name)}${s.caution ? ' <span class="caution" title="Mixed or low factual reliability rating">⚠</span>' : ''}</td>
+    <td><span class="tag" style="font:9.5px 'DM Mono';padding:1px 6px;border-radius:3px;color:#0d1721;background:var(--${s.position})">${esc(posLabel(s.position))}</span></td><td>${esc(s.country)}</td>
+    <td class="st ${s.active ? 'active' : s.reserve ? 'reserve' : 'down'}">${s.active ? 'Active' : s.reserve ? 'Reserve' : 'Unavailable (' + esc(s.status) + ')'}</td><td class="num">${counts.get(s.id) || 0}</td></tr>`).join('');
+  $('#srcmeta').textContent = D.positions.map(p => `${p.label}: ${D.sources.filter(s => s.position === p.key && s.active).length}`).join(' · ');
+}
+
+/* ---------- boot ---------- */
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b)); $('#tab-brief').hidden = b.dataset.tab !== 'brief'; $('#tab-sources').hidden = b.dataset.tab !== 'sources'; });
+fetch('../briefing/data/latest.json').then(r => r.json()).then(d => {
+  D = d; SRC = new Map(d.sources.map(s => [s.id, s])); posOn = new Set(d.positions.map(p => p.key));
+  $('#posbtns').innerHTML = d.positions.map(p => `<button class="pos on" data-pos="${p.key}" aria-pressed="true"><i style="background:var(--${p.key})"></i>${esc(p.label)}</button>`).join('');
+  $('#posbtns').onclick = e => { const b = e.target.closest('[data-pos]'); if (!b) return; const k = b.dataset.pos; posOn.has(k) ? posOn.delete(k) : posOn.add(k); b.classList.toggle('on', posOn.has(k)); b.setAttribute('aria-pressed', posOn.has(k)); render(); };
+  const groups = d.positions.map(p => `<optgroup label="${esc(p.label)}">${d.sources.filter(s => s.position === p.key && d.items.some(i => i.s === s.id)).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
+  $('#publisher').innerHTML += groups;
+  const active = d.sources.filter(s => s.active).length;
+  $('#meta').textContent = `${d.items.length.toLocaleString('en-GB')} stories from the last ${d.keepDays} days · ${active} active publishers (${d.perPosition} per position) · refreshed ${d.generated.slice(0, 16).replace('T', ' ')} UTC`;
+  for (const id of ['#view', '#publisher']) $(id).onchange = render;
+  $('#window').onchange = () => { renderTopics(); render(); };
+  $('#q').oninput = render;
+  renderTopics(); render(); renderSources();
+}).catch(e => { $('#meta').textContent = 'Stories could not load: ' + e.message; });
+</script>
+</body>
+</html>

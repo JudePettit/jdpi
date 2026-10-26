@@ -18,9 +18,9 @@
           "name": "Briefing",
           "icon": "↗",
           "status": "live",
-          "host": "Lovable",
-          "url": "https://gtts-briefing-preview.lovable.app",
-          "description": "Follow selected topics through publisher headlines and political-perspective filters."
+          "host": "JDP-I",
+          "url": "q/briefing.html",
+          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side."
         },
         {
           "id": "calendar",
@@ -72,9 +72,9 @@
           "name": "Geopolitical Volatility",
           "icon": "⌁",
           "status": "live",
-          "host": "Lovable",
-          "url": "https://world-tension-atlas.lovable.app",
-          "description": "Compare source-derived country volatility across day, week, month and longer windows."
+          "host": "JDP-I",
+          "url": "q/volatility.html",
+          "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT. Compare up to four countries."
         },
         {
           "id": "pestle",

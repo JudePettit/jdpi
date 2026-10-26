@@ -18,7 +18,8 @@ const claude = apiKey ? new Anthropic({ apiKey }) : null;
 
 const decode = (s: string) => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, "")
   .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
-  .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n)).replace(/\s+/g, " ").trim();
+  .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n))
+  .replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 
 function parseFeed(xml: string, googleNews: boolean) {
   const items = [...xml.matchAll(/<(item|entry)[\s>][\s\S]*?<\/\1>/gi)].map(m => m[0]);
@@ -107,5 +108,18 @@ Deno.serve(async (req) => {
     try { results[cc] = await refreshCountry(cc, all[cc], today); }
     catch (e) { results[cc] = `error: ${(e as Error).message}`; }
   }
-  return new Response(JSON.stringify({ date: today, translation: claude ? "claude" : "not configured", results }), { headers: { "Content-Type": "application/json" } });
+  // Catch up on stories saved before translation was configured (or whose translation failed), newest first.
+  let backfilled = 0, backfillError: string | null = null;
+  if (claude && !body.country_code) {
+    const { data: pending } = await db.from("country_top_stories").select("*").is("title_en", null)
+      .order("snapshot_date", { ascending: false }).limit(Math.min(Number(body.backfill) || 60, 200));
+    if (pending?.length) {
+      const rows = pending.map(({ id: _id, ...r }: any) => ({ ...r, title_original: decode(r.title_original) }));
+      const out = await translate(rows.map((r: any) => r.title_original));
+      rows.forEach((r: any, k: number) => { r.title_en = out[k]; });
+      const { error } = await db.from("country_top_stories").upsert(rows, { onConflict: "snapshot_date,country_code,outlet_domain,story_rank" });
+      if (error) backfillError = error.message; else backfilled = out.filter(Boolean).length;
+    }
+  }
+  return new Response(JSON.stringify({ date: today, translation: claude ? "claude" : "not configured", results, backfilled, backfillError }), { headers: { "Content-Type": "application/json" } });
 });

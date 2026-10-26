@@ -1,0 +1,53 @@
+/* War Focus — extends Retrospective Battlefield's styles. Side A is blue, side B red, a contested state amber. */
+:root { --side-a: #4f8fe8; --side-b: #e5534b; --contested: #b8893a; --ally-a: #2f5d99; --ally-b: #8f3a35; }
+#war { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; max-width: 320px; }
+.counters { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
+.counter { display: flex; flex-direction: column; }
+.counter .label { font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.counter b { font: 800 22px var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
+.counter.date b { color: var(--accent); min-width: 150px; }
+#c-total { color: #ff8f86; }
+
+.state { stroke: var(--land-stroke); stroke-width: .5; vector-effect: non-scaling-stroke; fill: var(--land-inactive); }
+.state.side-a { fill: var(--side-a); }
+.state.side-b { fill: var(--side-b); }
+.state.occ-a { fill: url(#hatch-a); }
+.state.occ-b { fill: url(#hatch-b); }
+.state.theatre { fill: var(--contested); }
+.state.joined { animation: flash 1.2s ease-out; }
+@keyframes flash { from { stroke: #fff; stroke-width: 3; } to { stroke: var(--land-stroke); stroke-width: .5; } }
+.cell { fill: #ff5a4f; fill-opacity: .45; stroke: #ffb3ad; stroke-opacity: .6; stroke-width: .6; vector-effect: non-scaling-stroke; }
+.cell.old { fill-opacity: .14; stroke-opacity: 0; }
+.battle { fill: #ffe08a; stroke: #3b2a00; stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; }
+.battle.past { fill: #c9b16b; fill-opacity: .35; stroke-opacity: .2; }
+.battle.now { fill: #fff2c2; stroke: #ff8f1f; stroke-width: 1.6; }
+.battle:hover { stroke: #fff; stroke-width: 2; }
+.ring { fill: none; stroke: #ffb347; stroke-width: 1.5; vector-effect: non-scaling-stroke; animation: ring 1.6s ease-out infinite; pointer-events: none; }
+@keyframes ring { from { stroke-opacity: .9; r: 4; } to { stroke-opacity: 0; r: 18; } }
+.state-label { fill: #e8eef0; font: 600 10px var(--font-ui); text-anchor: middle; paint-order: stroke; stroke: rgba(13, 23, 33, .85); stroke-width: 3px; pointer-events: none; }
+
+.focus-timeline { align-items: flex-end; }
+.focus-timeline .slider-wrap { padding-bottom: 16px; }
+#spark { width: 100%; height: 44px; display: block; }
+#spark .area { fill: rgba(229, 83, 75, .35); }
+#spark .area.est { fill: rgba(229, 83, 75, .18); }
+#spark .now { stroke: var(--accent); stroke-width: 1.5; }
+#speed { padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: 12px var(--font-ui); margin-bottom: 18px; }
+#month { width: 100%; accent-color: var(--accent); }
+
+.side-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0; }
+.side-chip i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.stat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.stat span { display: block; font: 9px var(--font-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.stat b { font: 700 18px var(--font-display); font-variant-numeric: tabular-nums; }
+.stat small { display: block; color: var(--faint); font-size: 11px; }
+.blist { list-style: none; margin: 0; padding: 0; }
+.blist li { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.blist li button.bname { all: unset; cursor: pointer; font-weight: 600; color: var(--text); }
+.blist li button.bname:hover { color: var(--accent); }
+.blist li small { display: block; color: var(--muted); font: 11px var(--font-mono); }
+.blist li .wl { font-size: 12px; margin-left: 6px; }
+.est-note { color: var(--faint); font-size: 11px; }
+.legend .hatch { background: repeating-linear-gradient(45deg, var(--side-b) 0 3px, var(--side-a) 3px 6px); }
+@media (max-width: 900px) { .counter b { font-size: 17px; } .counter.date b { min-width: 0; } #war { max-width: 100%; width: 100%; } }

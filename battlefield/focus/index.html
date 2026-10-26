@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-suite="hp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <title>War Focus · JDP-I H&amp;P</title>
+  <meta name="description" content="The major wars since 1926, month by month: who held what, where the battles were, and the running death toll.">
+  <link rel="icon" href="../../design/brand-jdpi.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../design/jdpi.css">
+  <link rel="stylesheet" href="../history/styles.css">
+  <link rel="stylesheet" href="focus.css">
+  <script src="../../design/jdpi-bar.js" data-suite="hp" data-module="battlefield-history" data-shell="../../" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <p class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · Retrospective Battlefield</p>
+      <h1>War Focus</h1>
+      <p class="subtitle" id="status">Loading wars…</p>
+    </div>
+    <div class="controls">
+      <select id="war" aria-label="Choose a war"></select>
+      <div class="counters" aria-live="polite">
+        <div class="counter date"><span class="label">Month</span><b id="date">–</b></div>
+        <div class="counter"><span class="label">Deaths so far</span><b id="c-total">–</b></div>
+        <div class="counter"><span class="label">This month</span><b id="c-month">–</b></div>
+        <div class="counter"><span class="label">Battles so far</span><b id="c-battles">–</b></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="map-wrap" aria-label="War map">
+      <svg id="map" role="img" aria-label="Map of the selected war for the selected month">
+        <defs>
+          <pattern id="hatch-a" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-b)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-a)" stroke-width="3"/></pattern>
+          <pattern id="hatch-b" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-a)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-b)" stroke-width="3"/></pattern>
+        </defs>
+      </svg>
+      <div class="map-tools">
+        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+        <button type="button" id="zoom-reset" aria-label="Fit the theatre">⟲</button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div id="tooltip" class="tooltip" hidden></div>
+    </section>
+    <aside id="panel" class="panel" aria-live="polite"></aside>
+  </main>
+
+  <footer class="timeline focus-timeline" aria-label="Month selector">
+    <button type="button" id="prev" class="tl-btn" aria-label="Previous month">‹</button>
+    <button type="button" id="play" class="tl-btn play" aria-label="Play month by month">▶</button>
+    <div class="slider-wrap">
+      <svg id="spark" aria-hidden="true"></svg>
+      <input type="range" id="month" min="0" max="0" step="1" value="0" aria-label="Month">
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+    <button type="button" id="next" class="tl-btn" aria-label="Next month">›</button>
+    <select id="speed" aria-label="Playback speed"><option value="900">Slow</option><option value="450" selected>Normal</option><option value="180">Fast</option></select>
+  </footer>
+
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box"><button type="button" class="close" id="modal-close" aria-label="Close">×</button><h2 id="modal-title"></h2><div id="modal-body"></div></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

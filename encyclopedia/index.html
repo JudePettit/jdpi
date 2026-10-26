@@ -112,7 +112,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const LAKE = '../lake/data/', SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
-const MODULE_SUITE = { retrospective: 'hp', 'historical-calendar': 'hp', calendar: 'q', 'battlefield-history': 'hp', battlefield: 'q', kardashev: 'hp', traders: 'fe', learning: 'fe', 'learning-politics': 'hp', encyclopedia: 'hp' };
+const MODULE_SUITE = { retrospective: 'hp', 'historical-calendar': 'hp', calendar: 'q', 'battlefield-history': 'hp', 'war-focus': 'hp', battlefield: 'q', kardashev: 'hp', traders: 'fe', learning: 'fe', 'learning-politics': 'hp', encyclopedia: 'hp' };
 const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School or tag', 'Political spectrum', 'Occupation', 'Field', 'Movement', 'Ideology', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Century', 'Appears in'];
 const PAGE = 100;
 let idx, rows, tagFacet = [], tagValue = [], byQid = new Map(), shown = PAGE;
@@ -120,7 +120,9 @@ const sel = new Map(); // facet → Set(tagId)
 const openFacets = new Set(['Type', 'Nationality', 'Role', 'School or tag']);
 
 // Links into modules: inside the JDP-I shell they open as a deep link; on its own, directly.
-const goto = (module, url) => (embedded && MODULE_SUITE[module] ? { href: `${SHELL}#/${MODULE_SUITE[module]}/${module}?at=${encodeURIComponent(url)}`, target: '_top' } : { href: url, target: '_blank' });
+// Submodules open inside their parent module in the shell.
+const SHELL_MODULE = { 'war-focus': 'battlefield-history' };
+const goto = (module, url) => (embedded && MODULE_SUITE[module] ? { href: `${SHELL}#/${MODULE_SUITE[module]}/${SHELL_MODULE[module] || module}?at=${encodeURIComponent(url)}`, target: '_top' } : { href: url, target: '_blank' });
 const linkHtml = (module, url, text, cls = '') => { const g = goto(module, url); return `<a class="${cls}" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 
 /* ---------- Boolean query: + / AND, | / OR, - / NOT, ( ), "phrases", Facet:Value ---------- */

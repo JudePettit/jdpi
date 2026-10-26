@@ -64,7 +64,7 @@ export function calendar({ jdpiDir }) {
   return out;
 }
 
-/** Retrospective Battlefield (1926–2025) and Realtime Battlefield (this year). */
+/** Retrospective Battlefield (1926–2025), its War Focus submodule, and Realtime Battlefield (this year). */
 export function battlefield({ jdpiDir }) {
   const out = [];
   const hist = json(join(jdpiDir, 'battlefield/history/data/wars.json'));
@@ -72,6 +72,15 @@ export function battlefield({ jdpiDir }) {
     if (!w.wiki) continue;
     out.push({ key: { title: w.wiki }, label: w.name, module: 'battlefield-history', url: `${JDPI}battlefield/history/index.html#y=${w.years[0][0]}&w=${w.id}`,
       date: String(w.years[0][0]), context: `${w.type}, ${w.span || `${w.years[0][0]}–${w.years.at(-1)[0]}`}` });
+  }
+  // War Focus: each major war and every battle or operation recorded as part of it, keyed by Wikidata ID.
+  const focus = json(join(jdpiDir, 'battlefield/focus/data/index.json'));
+  for (const f of focus.wars) {
+    if (f.qid) out.push({ key: { qid: f.qid }, label: f.name, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}`,
+      date: f.start, context: `Month by month, ${f.start.slice(0, 4)}–${f.end ? f.end.slice(0, 4) : 'now'}: ${f.battles} battles and operations, ${f.totalDeaths.toLocaleString('en-GB')} battle deaths` });
+    const d = json(join(jdpiDir, `battlefield/focus/data/wars/${f.id}.json`));
+    for (const b of d.battles) if (b.w) out.push({ key: { qid: b.q }, label: b.n, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}&m=${b.s.slice(0, 7)}`,
+      date: b.s, context: `Part of ${f.name}${b.deaths ? `; ${b.deaths.toLocaleString('en-GB')} deaths` : ''}` });
   }
   const live = json(join(jdpiDir, 'battlefield/data/realtime.json'));
   for (const w of live.wars) {

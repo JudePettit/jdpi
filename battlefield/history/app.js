@@ -3,7 +3,7 @@
 import { displayName } from './names.mjs';
 
 const W = 1000, H = 600;
-const state = { year: 2025, selected: null, war: null, data: null, features: [], playing: null };
+const state = { year: 2025, selected: null, war: null, data: null, features: [], playing: null, focus: {} };
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = n => Number(n).toLocaleString('en-GB');
@@ -109,6 +109,16 @@ function warCard(w, y) {
   return `<div class="war${state.war === w ? ' sel' : ''}" data-level="${l}" data-id="${w.id}"><div class="who">${esc(w.name)}</div><div class="meta">${esc(w.type)} · ${span(w)}${w.deaths ? ` · ${num(w.deaths)} battle deaths in total` : ''}</div></div>`;
 }
 
+// War Focus covers the major wars month by month; a UCDP conflict can span several of them (Afghanistan, Chechnya),
+// so pick the one running in the selected year, else the nearest.
+function focusLink(w, y) {
+  const fs = state.focus[w.id]; if (!fs) return '';
+  const f = fs.find(f => +f.start.slice(0, 4) <= y && (!f.end || +f.end.slice(0, 4) >= y)) || fs.reduce((a, b) => (Math.abs(+a.start.slice(0, 4) - y) <= Math.abs(+b.start.slice(0, 4) - y) ? a : b));
+  const m = `${Math.min(Math.max(y, +f.start.slice(0, 4)), +(f.end || '9999').slice(0, 4))}-01`;
+  const month = m < f.start.slice(0, 7) ? f.start.slice(0, 7) : f.end && m > f.end.slice(0, 7) ? f.end.slice(0, 7) : m;
+  return `<a class="btn" href="../focus/index.html#war=${f.id}&m=${month}">War Focus: ${esc(f.name)}, month by month →</a>`;
+}
+
 function warDetail(w, y) {
   const l = levelIn(w, y);
   const activeYears = w.years.length;
@@ -123,6 +133,7 @@ function warDetail(w, y) {
     ${l ? `<p><span class="tag ${l === 2 ? 'irregular' : 'office'}">${y}</span> ${levelLabel(l)}</p>` : `<p class="empty">Not active in ${y}.</p>`}
     <div class="sides"><b>Side A</b>${seeMoreText(w.sideA, 8, `${w.name} · side A`)}<b>Side B</b>${seeMoreText(w.sideB, 8, `${w.name} · side B`)}</div>
     <a class="btn" href="${wikiUrl(w)}" target="_blank" rel="noreferrer">${w.wiki ? 'Wikipedia article ↗' : 'Search Wikipedia ↗'}</a>
+    ${focusLink(w, y)}
     ${w.src === 'ucdp' ? `<h3>Year by year <span class="count">red = war level</span></h3><p class="meta">${seeMore(w.years.map(([yy, x]) => `<span style="color:${x === 2 ? 'var(--c-war)' : 'var(--c-minor)'}">${yy}</span> `), 24, `${w.name} · active years`)}</p>` : ''}`;
 }
 
@@ -231,11 +242,13 @@ function setupSearch() {
 
 (async function init() {
   try {
-    const [topo, data] = await Promise.all([
+    const [topo, data, focus] = await Promise.all([
       fetch('data/borders.topo.json').then(r => r.json()),
       fetch('data/wars.json').then(r => r.json()),
+      fetch('../focus/data/index.json').then(r => r.json()).catch(() => ({ wars: [] })),
     ]);
     state.data = data;
+    for (const f of focus.wars) if (f.bf) (state.focus[f.bf] ||= []).push(f);
     state.features = topojson.feature(topo, topo.objects.borders).features;
     $('#status').textContent = `${data.wars.length} wars and armed conflicts · ${data.firstYear}–${data.lastYear} · historical borders`;
     drawMap(); setupTimeline(); setupSearch();

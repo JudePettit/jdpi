@@ -2,11 +2,13 @@
 const BY_DATE = {
   260: [['1990-10-03', 'Germany'], ['0000', 'West Germany']],
   365: [['1991-12-26', 'Russia'], ['0000', 'Soviet Union']],
+  816: [['1976-07-02', 'Vietnam'], ['0000', 'North Vietnam']], // the unified state keeps North Vietnam's code
   345: [['2006-06-05', 'Serbia'], ['2003-02-04', 'Serbia and Montenegro'], ['1992-04-27', 'Federal Republic of Yugoslavia'], ['0000', 'Yugoslavia']]
 };
 const FIXED = {
   2: 'United States', 255: 'Germany', 265: 'East Germany', 325: 'Italy', 343: 'North Macedonia',
-  346: 'Bosnia and Herzegovina', 360: 'Romania', 370: 'Belarus', 640: 'Turkey', 316: 'Czechia'
+  346: 'Bosnia and Herzegovina', 360: 'Romania', 370: 'Belarus', 640: 'Turkey', 316: 'Czechia',
+  731: 'North Korea', 732: 'South Korea', 817: 'South Vietnam'
 };
 
 export function displayName(gw, cshapesName, date) {

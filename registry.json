@@ -179,6 +179,15 @@
           "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links."
         },
         {
+          "id": "kardashev",
+          "name": "Kardashev Tracker",
+          "icon": "☼",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "kardashev/index.html",
+          "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
+        },
+        {
           "id": "learning-politics",
           "name": "Learning",
           "icon": "◫",

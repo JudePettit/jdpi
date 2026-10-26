@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" data-suite="hp">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101820"><link rel="icon" href="../design/brand-jdpi.svg" type="image/svg+xml">
+<title>Kardashev Tracker · JDP-I H&amp;P</title>
+<meta name="description" content="Which empires and countries controlled what share of humanity's energy capture, from 2000 BC to today.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../design/jdpi.css">
+<link rel="stylesheet" href="../battlefield/history/styles.css">
+<script src="../design/jdpi-bar.js" data-suite="hp" data-module="kardashev" data-shell="../" defer></script>
+<style>
+.layout{grid-template-rows:minmax(0,1fr) 170px}
+.map-wrap{grid-row:1}.chart-wrap{grid-column:1 / -1;grid-row:2;background:var(--surface);border-top:1px solid var(--border);position:relative}
+#chart{width:100%;height:100%;display:block}
+.land{fill:#22323d;stroke:#0d1721;stroke-width:.4}
+.bubble{stroke:#0d1721;stroke-width:.8;fill-opacity:.82;cursor:pointer}.bubble:hover,.bubble.sel{stroke:#fff;stroke-width:1.6}
+.blabel{font:600 10px var(--font-ui);fill:#edf3f1;pointer-events:none;paint-order:stroke;stroke:#0d1721;stroke-width:3px}
+.kbox{position:absolute;right:12px;top:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;box-shadow:var(--shadow);text-align:right}
+.kbox b{display:block;font:800 26px var(--font-display);color:var(--accent)}.kbox span{font:10px var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.rank{display:grid;grid-template-columns:10px 1fr auto;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.rank i{width:10px;height:10px;border-radius:50%}.rank small{display:block;color:var(--muted);font-size:11px}.rank b{font:600 13px var(--font-mono)}
+.sharebar{height:4px;background:var(--surface-2);border-radius:2px;margin-top:4px}.sharebar i{display:block;height:100%;border-radius:2px}
+.yearline{stroke:#fff;stroke-width:1.2;stroke-dasharray:3 3}
+.axis text{fill:var(--faint);font:10px var(--font-mono)}.axis path,.axis line{stroke:var(--border)}
+#step{width:100%;accent-color:var(--accent)}
+.charthint{position:absolute;left:12px;top:6px;font:10px var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;pointer-events:none}
+@media (max-width:900px){.layout{grid-template-rows:48vh auto 150px}.chart-wrap{grid-row:3}}
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div>
+      <p class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · History &amp; Politics</p>
+      <h1>Kardashev Tracker</h1>
+      <p class="subtitle" id="status">Loading…</p>
+    </div></div>
+    <div class="controls"><div class="year-badge" aria-live="polite"><span class="label">Year</span><b id="year-big">2025</b></div></div>
+  </header>
+  <main class="layout">
+    <section class="map-wrap" aria-label="Map of energy capture">
+      <svg id="map" role="img" aria-label="Circles on each power's capital, sized by its share of world energy capture"></svg>
+      <div class="map-tools"><button type="button" id="zoom-in" aria-label="Zoom in">+</button><button type="button" id="zoom-out" aria-label="Zoom out">−</button><button type="button" id="zoom-reset" aria-label="Reset view">⟲</button></div>
+      <div class="kbox"><span>Humanity's Kardashev rating</span><b id="kval">–</b><span id="watts"></span></div>
+      <div id="tooltip" class="tooltip" hidden></div>
+    </section>
+    <aside id="panel" class="panel" aria-live="polite"></aside>
+    <section class="chart-wrap" aria-label="Share of world energy over time"><svg id="chart"></svg><div class="charthint">Share of world energy capture · click to jump</div></section>
+  </main>
+  <footer class="timeline" aria-label="Century selector">
+    <button type="button" id="prev" class="tl-btn" aria-label="Previous step">‹</button>
+    <button type="button" id="play" class="tl-btn play" aria-label="Play through the centuries">▶</button>
+    <div class="slider-wrap"><input type="range" id="step" min="0" max="43" step="1" value="43" aria-label="Century"><div class="ticks" id="ticks" aria-hidden="true"></div></div>
+    <button type="button" id="next" class="tl-btn" aria-label="Next step">›</button>
+  </footer>
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true"><div class="modal-box"><button type="button" class="close" id="modal-close" aria-label="Close">×</button><h2 id="modal-title"></h2><div id="modal-body"></div></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script>
+  // Kardashev Tracker: estimated share of humanity's energy capture held by each empire or country, in
+  // century steps (2000 BC – 1800, then 1850, 1900, 1950, 2000, 2025). Built by kardashev/scripts/build.mjs.
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const yearLabel = y => y < 0 ? `${-y} BC` : y === 1 ? 'AD 1' : String(y);
+  const pct = x => x >= 0.1 ? (x * 100).toFixed(0) + '%' : (x * 100).toFixed(1) + '%';
+  const watts = w => w >= 1e12 ? (w / 1e12).toFixed(1) + ' TW' : (w / 1e9).toFixed(0) + ' GW';
+  const people = n => n >= 1e9 ? (n / 1e9).toFixed(2) + ' bn' : (n / 1e6).toFixed(n < 1e7 ? 1 : 0) + ' m';
+  const REGION = { 'Near East': '#f0b95a', 'Europe': '#7aa7ff', 'East Asia': '#ff826f', 'South Asia': '#b7f36b', 'Central Asia': '#c58cff', 'Southeast Asia': '#ff9ad5', 'Americas': '#6ddac8', 'Africa': '#e8e07a' };
+  const W = 1000, H = 520;
+  let data, byId, idx = 0, selected = null, playing = null, svg, g, projection, zoom;
+
+  function drawMap(world) {
+    svg = d3.select('#map').attr('viewBox', `0 0 ${W} ${H}`);
+    projection = d3.geoNaturalEarth1().fitExtent([[10, 10], [W - 10, H - 10]], { type: 'Sphere' });
+    g = svg.append('g');
+    g.append('path').datum(topojson.feature(world, world.objects.land)).attr('class', 'land').attr('d', d3.geoPath(projection));
+    g.append('g').attr('class', 'bubbles');
+    zoom = d3.zoom().scaleExtent([1, 12]).on('zoom', ev => g.attr('transform', ev.transform));
+    svg.call(zoom);
+    $('#zoom-in').onclick = () => svg.transition().call(zoom.scaleBy, 1.6);
+    $('#zoom-out').onclick = () => svg.transition().call(zoom.scaleBy, 1 / 1.6);
+    $('#zoom-reset').onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity);
+  }
+
+  function renderMap() {
+    const s = data.steps[idx], tip = $('#tooltip');
+    const r = d3.scaleSqrt().domain([0, 0.6]).range([0, 70]);
+    const nodes = s.polities.map(p => ({ ...p, meta: byId[p.id], xy: projection([byId[p.id].lon, byId[p.id].lat]) }));
+    const sel = g.select('.bubbles').selectAll('g.b').data(nodes, d => d.id);
+    sel.exit().remove();
+    const enter = sel.enter().append('g').attr('class', 'b');
+    enter.append('circle').attr('class', 'bubble');
+    enter.append('text').attr('class', 'blabel').attr('text-anchor', 'middle');
+    const all = enter.merge(sel).sort((a, b) => b.share - a.share);
+    all.select('circle').attr('cx', d => d.xy[0]).attr('cy', d => d.xy[1]).attr('r', d => Math.max(2.5, r(d.share)))
+      .attr('fill', d => REGION[d.meta.region] || '#91a0aa').classed('sel', d => d.id === selected)
+      .on('mousemove', (ev, d) => {
+        const box = $('.map-wrap').getBoundingClientRect();
+        tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>${pct(d.share)} of world energy · ${people(d.pop)} people`;
+        tip.hidden = false; tip.style.left = `${Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8)}px`; tip.style.top = `${ev.clientY - box.top + 14}px`;
+      }).on('mouseleave', () => { tip.hidden = true; }).on('click', (ev, d) => select(d.id));
+    all.select('text').attr('x', d => d.xy[0]).attr('y', d => d.xy[1] - Math.max(2.5, r(d.share)) - 4).text(d => d.share >= 0.04 ? d.meta.name.replace(/ \(.*\)$/, '').replace(/ dynasty| Empire$/, '') : '');
+    $('#kval').textContent = `K ${s.K.toFixed(2)}`;
+    $('#watts').textContent = `${watts(s.worldWatts)} · ${people(s.worldPop)} people`;
+  }
+
+  function renderPanel() {
+    const s = data.steps[idx], panel = $('#panel');
+    if (selected) {
+      const p = byId[selected], here = s.polities.find(x => x.id === selected);
+      const series = data.steps.filter(x => x.polities.some(y => y.id === selected)).map(x => ({ year: x.year, share: x.polities.find(y => y.id === selected).share }));
+      const peak = series.reduce((a, b) => (b.share > a.share ? b : a), series[0]);
+      panel.innerHTML = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(p.name)}</h2><p class="sub">${esc(p.region)} · ${yearLabel(p.from)} – ${p.to >= 2025 ? 'today' : yearLabel(p.to)}</p>
+        ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${pct(here.share)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">Did not exist in ${yearLabel(s.year)}.</p>`}
+        <h3>Over time</h3><p>Its largest estimated share was <b>${pct(peak.share)}</b> in ${yearLabel(peak.year)}.</p>
+        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${pct(x.share)}`).join(' · ')}</p>
+        <a class="btn" href="https://en.wikipedia.org/wiki/${encodeURIComponent(p.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>`;
+      $('#close').onclick = () => select(null);
+      panel.querySelectorAll('[data-year]').forEach(a => a.onclick = e => { e.preventDefault(); setStep(data.steps.findIndex(x => x.year === +a.dataset.year)); });
+      return;
+    }
+    const top = s.polities.slice(0, 10);
+    const row = p => `<div class="rank" data-id="${p.id}"><i style="background:${REGION[byId[p.id].region]}"></i><div>${esc(byId[p.id].name)}<small>${people(p.pop)} people · ${Math.round(p.kcal / 1000)}k kcal/person/day</small><div class="sharebar"><i style="width:${Math.min(100, p.share * 100 / Math.max(top[0]?.share || 1, 0.01))}%;background:${REGION[byId[p.id].region]}"></i></div></div><b>${pct(p.share)}</b></div>`;
+    panel.innerHTML = `<h2>${yearLabel(s.year)}</h2><p class="sub">Humanity: ${people(s.worldPop)} people · ${watts(s.worldWatts)} · Kardashev ${s.K.toFixed(3)}</p>
+      <h3>Largest shares of world energy</h3>${top.map(row).join('')}
+      ${s.polities.length > 10 ? `<button class="more" id="see-more">See more (${s.polities.length - 10} more)</button>` : ''}
+      <div class="rank" style="cursor:default"><i style="background:#3a4a55"></i><div>Everyone else<small>${people(s.rest.pop)} people in smaller states, villages and foraging bands${s.year >= 1950 ? ', or other countries' : ''}</small></div><b>${pct(s.rest.share)}</b></div>
+      <button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
+    panel.querySelectorAll('.rank[data-id]').forEach(el => el.onclick = () => select(el.dataset.id));
+    $('#see-more')?.addEventListener('click', () => openModal(`All powers in ${yearLabel(s.year)}`, s.polities.map(row).join('')));
+    $('#method').onclick = () => openModal('How these estimates are made', `
+      <p><b>Energy capture</b> is all the energy a society uses per person per day: food, fuel, animal fodder and raw materials, following the historian Ian Morris (<i>Why the West Rules — For Now</i>, 2010; <i>The Measure of Civilization</i>, 2013). It rises from about 10,000 kcal a day in early farming states to about 31,000 under Rome and the Han, and over 200,000 in today's richest economies.</p>
+      <p><b>Each power's share</b> = its population × energy per person, divided by the world total. Populations follow McEvedy and Jones, Maddison and standard estimates; energy per person follows the shape of Morris's Western and Eastern core series, set lower for the less developed parts of large empires. From 1900, primary-energy statistics (Energy Institute / Our World in Data) are used, with food and traditional biomass added.</p>
+      <p><b>Kardashev rating</b> uses Carl Sagan's formula K = (log₁₀ P − 6) ÷ 10, where P is power in watts. A Type I civilisation (K = 1) would use about 10¹⁶ W, roughly all the sunlight reaching Earth's surface. Humanity today is about K 0.73.</p>
+      <p><b>Uncertainty</b>: before 1800, treat shares as accurate to within ±30–50%. Some entries combine several states ("North Indian kingdoms"). Because food and biomass count, very populous agrarian empires such as Qing China score highly even when others had more coal or oil.</p>
+      <p>Steps are a century apart until 1800, then 1850, 1900, 1950, 2000 and 2025, which keeps the data small enough to load instantly.</p>`);
+    $('#see-more') && 0;
+  }
+
+  // Stacked area: the ten powers with the largest peak shares, plus everyone else.
+  function drawChart() {
+    const el = $('#chart'), w = el.clientWidth || 1000, h = el.clientHeight || 170, m = { l: 36, r: 12, t: 22, b: 20 };
+    const svgC = d3.select(el).attr('viewBox', `0 0 ${w} ${h}`); svgC.selectAll('*').remove();
+    const peak = new Map();
+    for (const s of data.steps) for (const p of s.polities) peak.set(p.id, Math.max(peak.get(p.id) || 0, p.share));
+    const keys = [...peak].sort((a, b) => b[1] - a[1]).slice(0, 16).map(([id]) => id);
+    const rows = data.steps.map((s, i) => { const r = { i }; for (const k of keys) r[k] = s.polities.find(p => p.id === k)?.share || 0; r.other = 1 - keys.reduce((t, k) => t + r[k], 0); return r; });
+    const stack = d3.stack().keys([...keys, 'other'])(rows);
+    const x = d3.scaleLinear().domain([0, data.steps.length - 1]).range([m.l, w - m.r]), y = d3.scaleLinear().domain([0, 1]).range([h - m.b, m.t]);
+    svgC.append('g').selectAll('path').data(stack).join('path')
+      .attr('d', d3.area().x((d, i) => x(i)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveMonotoneX))
+      .attr('fill', d => d.key === 'other' ? '#2a3a46' : REGION[byId[d.key].region]).attr('fill-opacity', d => d.key === 'other' ? 1 : 0.75)
+      .attr('stroke', '#0d1721').attr('stroke-width', .5).style('cursor', 'pointer')
+      .on('click', (ev, d) => { if (d.key !== 'other') select(d.key); })
+      .append('title').text(d => d.key === 'other' ? 'Everyone else' : byId[d.key].name);
+    const ticks = data.steps.map((s, i) => i).filter(i => [-2000, -1000, 1, 1000, 1500, 1800, 1900, 2025].includes(data.steps[i].year));
+    svgC.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickValues(ticks).tickFormat(i => yearLabel(data.steps[i].year)).tickSizeOuter(0));
+    svgC.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(2).tickFormat(d3.format('.0%')));
+    svgC.append('line').attr('class', 'yearline').attr('id', 'yearline').attr('y1', m.t).attr('y2', h - m.b);
+    svgC.on('click', ev => { if (ev.target.tagName !== 'path') setStep(Math.round(x.invert(d3.pointer(ev)[0]))); });
+    drawChart.x = x;
+  }
+
+  function setStep(i) {
+    idx = Math.max(0, Math.min(data.steps.length - 1, i));
+    $('#step').value = idx; $('#year-big').textContent = yearLabel(data.steps[idx].year);
+    d3.select('#yearline').attr('x1', drawChart.x(idx)).attr('x2', drawChart.x(idx));
+    renderMap(); renderPanel();
+    history.replaceState(null, '', `#y=${data.steps[idx].year}${selected ? `&p=${selected}` : ''}`);
+  }
+  function select(id) { selected = id; renderMap(); renderPanel(); history.replaceState(null, '', `#y=${data.steps[idx].year}${id ? `&p=${id}` : ''}`); }
+  function openModal(title, html) { $('#modal-title').textContent = title; $('#modal-body').innerHTML = html; $('#modal').hidden = false; $('#modal-body').querySelectorAll('.rank[data-id]').forEach(el => el.onclick = () => { $('#modal').hidden = true; select(el.dataset.id); }); }
+  $('#modal-close').onclick = () => { $('#modal').hidden = true; };
+  $('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').hidden = true; };
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').hidden = true; });
+  function stopPlay() { clearInterval(playing); playing = null; $('#play').textContent = '▶'; }
+
+  Promise.all([
+    fetch('data/energy.json').then(r => r.json()),
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json').then(r => r.json()),
+  ]).then(([d, world]) => {
+    data = d; byId = Object.fromEntries(d.polities.map(p => [p.id, p]));
+    $('#status').textContent = `${d.polities.length} empires and countries · ${yearLabel(d.steps[0].year)} – ${d.steps.at(-1).year} · estimated share of humanity's energy capture`;
+    const slider = $('#step'); slider.max = d.steps.length - 1;
+    $('#ticks').innerHTML = d.steps.map((s, i) => [-2000, -1000, 1, 1000, 1500, 1800, 2025].includes(s.year) ? `<span style="left:${i / (d.steps.length - 1) * 100}%">${yearLabel(s.year)}</span>` : '').join('');
+    slider.oninput = () => { stopPlay(); setStep(+slider.value); };
+    $('#prev').onclick = () => { stopPlay(); setStep(idx - 1); };
+    $('#next').onclick = () => { stopPlay(); setStep(idx + 1); };
+    $('#play').onclick = () => { if (playing) return stopPlay(); if (idx >= d.steps.length - 1) setStep(0); $('#play').textContent = '❚❚'; playing = setInterval(() => idx >= d.steps.length - 1 ? stopPlay() : setStep(idx + 1), 900); };
+    drawMap(world); drawChart();
+    const h = new URLSearchParams(location.hash.slice(1));
+    const want = d.steps.findIndex(s => s.year === +h.get('y'));
+    selected = byId[h.get('p')] ? h.get('p') : null;
+    setStep(want >= 0 ? want : d.steps.length - 1);
+    window.addEventListener('resize', () => { drawChart(); setStep(idx); });
+  }).catch(err => { console.error(err); $('#status').textContent = 'Could not load the energy data.'; });
+  </script>
+</body>
+</html>

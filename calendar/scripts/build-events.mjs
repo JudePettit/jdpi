@@ -23,7 +23,10 @@ for (const c of Object.values(retro.countries)) {
     if (!type) continue;
     // Wikidata often records only an election's year (YYYY-01-01); those can't sit on a calendar day.
     if (type === 'election' && e.date.endsWith('-01-01')) continue;
-    add({ date: e.date, country: c.name, title: e.text, type, status: 'declared', source: e.url || (c.yearPage ? wiki(`${e.date.slice(0, 4)} in ${c.yearPage}`) : null) });
+    // A new leader links to their own article and is named in full, not "Koller takes power".
+    const leader = type === 'leader' || type === 'coup' ? c.leaders.find(l => l.start === e.date && l.url) : null;
+    const title = leader?.name && leader.full && e.text.startsWith(leader.name + ' ') ? leader.full + e.text.slice(leader.name.length) : e.text;
+    add({ date: e.date, country: c.name, title, type, status: 'declared', source: leader?.url || e.url || (c.yearPage ? wiki(`${e.date.slice(0, 4)} in ${c.yearPage}`) : null) });
   }
 }
 

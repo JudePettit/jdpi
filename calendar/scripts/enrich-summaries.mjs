@@ -49,7 +49,9 @@ for (const [f, d] of decades) {
   for (const e of d.events) {
     total++;
     const t = titleOf(e.source);
-    const s = (t && cache[t]) || e.summary || '';
+    // "Events in the year 1990 in X" style intros of year pages say nothing about the event itself.
+    const fromWiki = t && cache[t] && !/^(Events|The following lists events|This is a list)/i.test(cache[t]) ? cache[t] : '';
+    const s = fromWiki || e.summary || '';
     if (s) { e.summary = s; withSummary++; } else delete e.summary;
   }
   writeFileSync(new URL(f, DATA), JSON.stringify(d));

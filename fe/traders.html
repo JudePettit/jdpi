@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" data-suite="fe">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101820"><link rel="icon" href="../design/brand-jdpi.svg" type="image/svg+xml">
+<title>JDP-I F&amp;E — Trader Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../design/jdpi.css">
+<script src="../design/jdpi-bar.js" data-suite="fe" data-module="traders" data-shell="../" defer></script>
+<style>
+:root{--bg:var(--jdpi-bg,#101820);--panel:var(--jdpi-panel,#17242e);--panel2:var(--jdpi-panel-2,#1c2b36);--line:var(--jdpi-line,#293a46);--text:var(--jdpi-text,#edf3f1);--muted:var(--jdpi-muted,#91a0aa);--accent:var(--jdpi-accent,#f0b95a);--buy:#b7f36b;--sell:#ff826f;--dem:#7aa7ff;--rep:#ff8a7a}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
+a{color:var(--accent)}button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
+.wrap{max-width:1400px;margin:auto;padding:22px 28px 40px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
+.hero h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:760px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:5px;padding:7px 12px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs button.active,.tabs button:hover{border-color:var(--jdpi-accent-line,#86683a);color:var(--accent);background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}
+.meta{font:10px 'DM Mono';color:var(--muted);margin-top:8px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;margin-top:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panelhead{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ptitle{font:700 13px Manrope}.sub{color:var(--muted);font:10px 'DM Mono';text-transform:uppercase;letter-spacing:.08em}
+input[type=search],select{background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:7px 9px;font-size:12px}
+.list{max-height:70vh;overflow:auto}.member{display:grid;grid-template-columns:8px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid #24343f;color:var(--text);padding:9px 14px}
+.member:hover{background:var(--panel2)}.member.sel{background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}.member small{display:block;color:var(--muted);font-size:11px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}.dot.Democrat{background:var(--dem)}.dot.Republican{background:var(--rep)}
+.count{font:11px 'DM Mono';color:var(--muted)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.chip{border:1px solid var(--line);background:#0f1b25;color:var(--text);border-radius:99px;padding:4px 10px;font:11px 'DM Mono'}.chip b{color:var(--buy);font-weight:500}.chip i{color:var(--sell);font-style:normal}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{padding:8px 10px;border-top:1px solid #24343f;text-align:left;vertical-align:top}th{font:600 11px Manrope;color:var(--muted);position:sticky;top:0;background:var(--panel)}
+.tablewrap{max-height:70vh;overflow:auto}
+.t-buy{color:var(--buy)}.t-sell,.t-partial{color:var(--sell)}.t-exchange{color:var(--accent)}
+.tk{font:600 12px 'DM Mono';color:var(--accent)}.note{color:var(--muted);font-size:11.5px;margin-top:2px}
+.flag{color:var(--accent);font:10px 'DM Mono'}
+.more{background:none;border:0;color:var(--accent);font:10px 'DM Mono';padding:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;text-align:left;color:var(--text)}.card:hover,.card.sel{border-color:var(--accent)}
+.card h3{margin:0;font:600 16px Manrope}.card p{margin:4px 0 0;color:var(--muted);font-size:12px}.card .stale{color:var(--sell);font:10px 'DM Mono'}
+.badge{font:10px 'DM Mono';padding:2px 6px;border-radius:3px;border:1px solid var(--line)}.badge.new{color:var(--buy);border-color:#5f7d45}.badge.added{color:var(--buy)}.badge.trimmed{color:var(--sell)}.badge.sold{color:var(--sell);border-color:#7a3b33}
+.bar{height:5px;background:var(--panel2);border-radius:3px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-right:6px}.bar i{display:block;height:100%;background:var(--accent)}
+.about{max-width:860px;margin-top:18px}.about h3{font:600 16px Manrope;margin:22px 0 6px}.about p,.about li{color:#c9d3d6}
+.modal{position:fixed;inset:0;z-index:50;background:#050a0eb8;display:grid;place-items:center;padding:16px}.modal-box{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;width:min(640px,100%);max-height:85vh;overflow:auto;padding:20px 22px}.modal-box h2{font:600 18px Manrope;margin:0 30px 8px 0}.modal-close{position:absolute;right:12px;top:10px;background:var(--panel2);border:1px solid var(--line);color:var(--text);width:30px;height:30px;border-radius:6px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.list{max-height:280px}.wrap{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div><div class="eyebrow">JDP-I F&amp;E · Trader Tracker</div><h1>Trader Tracker</h1>
+      <p>What members of Congress and famous investors have been buying and selling, from their legally required public disclosures.</p>
+      <div class="meta" id="meta">Loading…</div></div>
+    <div class="tabs" role="tablist"><button data-tab="congress" class="active">Congress</button><button data-tab="investors">Famous investors</button><button data-tab="about">About the data</button></div>
+  </section>
+
+  <section id="tab-congress">
+    <div class="layout">
+      <aside class="panel"><div class="panelhead"><span class="ptitle">Members of the House</span><input type="search" id="member-search" placeholder="Find a member…" aria-label="Find a member"></div><div class="list" id="members"></div></aside>
+      <div class="panel">
+        <div class="panelhead"><span class="ptitle" id="trades-title">Latest trades</span><span class="sub" id="trades-count"></span></div>
+        <div class="filters">
+          <select id="f-type" aria-label="Transaction type"><option value="">Buys and sells</option><option value="buy">Buys</option><option value="sell">Sells</option></select>
+          <select id="f-party" aria-label="Party"><option value="">All parties</option><option>Democrat</option><option>Republican</option></select>
+          <select id="f-days" aria-label="Period"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last 12 months</option><option value="9999">All</option></select>
+          <input type="search" id="f-ticker" placeholder="Ticker or company…" aria-label="Ticker or company">
+          <button class="chip" id="clear-member" hidden>✕ All members</button>
+        </div>
+        <div class="chips" id="hot" aria-label="Most traded"></div>
+        <div class="tablewrap"><table><thead><tr><th>Traded</th><th>Member</th><th>Asset</th><th>Type</th><th>Amount</th><th>Filed</th></tr></thead><tbody id="trades"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-investors" hidden>
+    <div class="cards" id="investor-cards"></div>
+    <div class="panel" id="investor-detail" style="margin-top:18px" hidden></div>
+  </section>
+
+  <section id="tab-about" class="about" hidden>
+    <h3>Congress</h3>
+    <p>Under the STOCK Act (2012), members of the House must report stock, bond and option trades by themselves, their spouses (SP), joint accounts (JT) and dependent children (DC) within 45 days. This page reads every electronic Periodic Transaction Report filed with the Clerk of the House for this year and last, and refreshes weekly.</p>
+    <ul>
+      <li><b>Amounts are ranges</b> ($1,001–$15,000 up to over $50 million), not exact values.</li>
+      <li><b>Reports lag</b> by up to 45 days, and some members file late, so these are not real-time trades.</li>
+      <li><b>Paper filings</b> are scanned images and are linked but not parsed.</li>
+      <li><b>The Senate</b> publishes reports only behind a terms-of-use page on efdsearch.senate.gov, so Senators are not included yet.</li>
+    </ul>
+    <h3>Famous investors</h3>
+    <p>Fund managers with more than $100 million in US equities file Form 13F with the SEC within 45 days of each quarter end. It lists their long positions in US-listed shares and options at quarter end, but not short positions, cash, most non-US holdings or trades within the quarter. Changes are worked out by comparing the latest two filings. A filing flagged "old" means the manager hasn't filed recently, for example because the fund has closed or now files under a different name.</p>
+    <h3>Jim Cramer and other commentators</h3>
+    <p>Television and social-media commentators have no disclosure duty, so there is no official record of their picks. Tracking them means collecting what they say on air or online, which needs a licensed data feed or manual curation. This page sticks to legally filed disclosures.</p>
+    <p class="meta">Not investment advice. Disclosures can be late, amended or incomplete; always check the linked filing.</p>
+  </section>
+</div>
+<div id="modal" class="modal" hidden role="dialog" aria-modal="true"><div class="modal-box"><button class="modal-close" id="modal-close" aria-label="Close">×</button><h2 id="modal-title"></h2><div id="modal-body"></div></div></div>
+
+<script>
+// Data: traders/data/congress.json (House PTRs) and traders/data/investors.json (13F), rebuilt weekly by
+// traders/scripts/build-congress.mjs and build-13f.mjs.
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => n >= 1e9 ? '$' + (n / 1e9).toFixed(1) + 'bn' : n >= 1e6 ? '$' + (n / 1e6).toFixed(1) + 'm' : '$' + Math.round(n / 1e3) + 'k';
+const fmtDate = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const OWNER = { self: 'Member', SP: 'Spouse', JT: 'Joint', DC: 'Child' };
+const params = new URLSearchParams(location.search);
+let congress, investors, members = new Map(), selMember = params.get('member'), selInvestor = params.get('investor');
+
+function setTab(tab) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  for (const t of ['congress', 'investors', 'about']) $('#tab-' + t).hidden = t !== tab;
+  const p = new URLSearchParams(location.search); p.set('tab', tab); history.replaceState(null, '', '?' + p);
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ---------- Congress ---------- */
+function renderMembers() {
+  const q = $('#member-search').value.toLowerCase();
+  $('#members').innerHTML = congress.members.filter(m => m.trades && (!q || m.name.toLowerCase().includes(q)))
+    .map(m => `<button class="member${m.id === selMember ? ' sel' : ''}" data-id="${m.id}"><i class="dot ${esc(m.party || '')}"></i><span>${esc(m.name)}<small>${esc(m.party || '—')} · ${esc(m.district)}</small></span><span class="count">${m.trades}</span></button>`).join('');
+  $('#members').querySelectorAll('.member').forEach(b => b.onclick = () => { selMember = selMember === b.dataset.id ? null : b.dataset.id; renderMembers(); renderTrades(); });
+}
+function filtered() {
+  const type = $('#f-type').value, party = $('#f-party').value, days = +$('#f-days').value, q = $('#f-ticker').value.trim().toLowerCase();
+  const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+  return congress.trades.filter(t => {
+    const m = members.get(t.member);
+    if (selMember && t.member !== selMember) return false;
+    if (type === 'buy' && t.type !== 'buy') return false;
+    if (type === 'sell' && !/sell|sale/.test(t.type)) return false;
+    if (party && m?.party !== party) return false;
+    if ((t.dateAsFiled ? t.filed : t.date) < since) return false;
+    return !q || (t.ticker || '').toLowerCase() === q || t.asset.toLowerCase().includes(q);
+  });
+}
+const notes = [];
+function renderTrades() {
+  const list = filtered(), m = members.get(selMember);
+  $('#clear-member').hidden = !selMember;
+  $('#trades-title').textContent = m ? `Trades by ${m.name}` : 'Latest trades';
+  $('#trades-count').textContent = `${list.length.toLocaleString('en-GB')} trades`;
+  // Most-traded tickers in the current view.
+  const by = new Map();
+  for (const t of list) if (t.ticker) { const x = by.get(t.ticker) || by.set(t.ticker, { b: 0, s: 0, who: new Set() }).get(t.ticker); t.type === 'buy' ? x.b++ : x.s++; x.who.add(t.member); }
+  const hot = [...by].sort((a, b) => b[1].who.size - a[1].who.size || (b[1].b + b[1].s) - (a[1].b + a[1].s)).slice(0, 14);
+  $('#hot').innerHTML = hot.length ? '<span class="sub" style="align-self:center">Most traded:</span>' + hot.map(([tk, x]) => `<button class="chip" data-tk="${tk}" title="${x.who.size} members">${tk} <b>${x.b}↑</b> <i>${x.s}↓</i></button>`).join('') : '';
+  $('#hot').querySelectorAll('[data-tk]').forEach(b => b.onclick = () => { $('#f-ticker').value = b.dataset.tk; renderTrades(); });
+  notes.length = 0;
+  $('#trades').innerHTML = list.slice(0, 400).map(t => {
+    const mem = members.get(t.member), cls = t.type === 'buy' ? 't-buy' : t.type === 'exchange' ? 't-exchange' : 't-sell';
+    let extra = '';
+    if (t.note || t.account) {
+      const text = [t.account && `Account: ${t.account}`, t.note].filter(Boolean).join(' · ');
+      if (text.length > 110) { notes.push({ title: `${t.ticker || t.asset} · ${mem?.name}`, text }); extra = `<div class="note">${esc(text.slice(0, 100))}… <button class="more" data-n="${notes.length - 1}">See more</button></div>`; }
+      else extra = `<div class="note">${esc(text)}</div>`;
+    }
+    return `<tr><td>${fmtDate(t.date)}${t.dateAsFiled ? '<div class="flag">date as filed</div>' : ''}</td>
+      <td><button class="more" style="font:inherit;color:var(--text)" data-m="${t.member}"><i class="dot ${esc(mem?.party || '')}" style="display:inline-block;margin-right:5px"></i>${esc(mem?.name || t.member)}</button><div class="note">${OWNER[t.owner] || t.owner}</div></td>
+      <td>${t.ticker ? `<span class="tk">${esc(t.ticker)}</span> ` : ''}${esc(t.asset)}${extra}</td>
+      <td class="${cls}">${esc(t.type)}</td><td>${esc(t.amount)}</td>
+      <td><a href="${esc(t.url)}" target="_blank" rel="noreferrer">${fmtDate(t.filed)} ↗</a></td></tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty">No trades match these filters.</td></tr>';
+  if (list.length > 400) $('#trades').insertAdjacentHTML('beforeend', `<tr><td colspan="6" class="empty">Showing the latest 400 of ${list.length.toLocaleString('en-GB')}. Narrow the filters to see more.</td></tr>`);
+  $('#trades').querySelectorAll('[data-n]').forEach(b => b.onclick = () => openModal(notes[+b.dataset.n].title, `<p>${esc(notes[+b.dataset.n].text)}</p>`));
+  $('#trades').querySelectorAll('[data-m]').forEach(b => b.onclick = () => { selMember = b.dataset.m; renderMembers(); renderTrades(); });
+  const p = new URLSearchParams(location.search); selMember ? p.set('member', selMember) : p.delete('member'); history.replaceState(null, '', '?' + p);
+}
+
+/* ---------- Famous investors ---------- */
+function renderInvestors() {
+  const staleBefore = new Date(Date.now() - 270 * 864e5).toISOString().slice(0, 10);
+  $('#investor-cards').innerHTML = investors.investors.map(i => `<button class="card${i.cik == selInvestor ? ' sel' : ''}" data-cik="${i.cik}"><h3>${esc(i.person)}</h3><p>${esc(i.fund)}</p><p>${esc(i.style)}</p>
+    <p>${i.positions.length} positions · ${money(i.total)} · quarter to ${fmtDate(i.period)}${i.period < staleBefore ? ' <span class="stale">old filing</span>' : ''}</p></button>`).join('');
+  $('#investor-cards').querySelectorAll('.card').forEach(c => c.onclick = () => { selInvestor = c.dataset.cik; renderInvestors(); });
+  const inv = investors.investors.find(i => i.cik == selInvestor);
+  const box = $('#investor-detail');
+  box.hidden = !inv;
+  if (!inv) return;
+  const moves = inv.positions.filter(p => p.change === 'new' || p.change === 'added' || p.change === 'trimmed').sort((a, b) => b.value - a.value);
+  const row = p => `<tr><td>${esc(p.name)} <span class="note">${esc(p.cls)}${p.putCall ? ' · ' + esc(p.putCall) : ''}</span></td><td><span class="bar"><i style="width:${Math.min(100, p.weight * 100 / Math.max(...inv.positions.map(x => x.weight)) )}%"></i></span>${(p.weight * 100).toFixed(1)}%</td><td>${money(p.value)}</td><td>${p.shares.toLocaleString('en-GB')}</td><td><span class="badge ${p.change}">${p.change}</span></td></tr>`;
+  const head = '<thead><tr><th>Holding</th><th>Weight</th><th>Value</th><th>Shares</th><th>vs previous quarter</th></tr></thead>';
+  box.innerHTML = `<div class="panelhead"><span class="ptitle">${esc(inv.person)} · ${esc(inv.registeredName)}</span><span class="sub">13F for quarter to ${fmtDate(inv.period)} · filed ${fmtDate(inv.filed)} · <a href="${inv.filingUrl}" target="_blank" rel="noreferrer">SEC filings ↗</a></span></div>
+    ${moves.length ? `<div class="chips"><span class="sub" style="align-self:center">Moves:</span>${moves.slice(0, 12).map(p => `<span class="chip">${esc(p.name)} <span class="badge ${p.change}">${p.change}</span></span>`).join('')}${inv.sold.slice(0, 8).map(p => `<span class="chip">${esc(p.name)} <span class="badge sold">sold out</span></span>`).join('')}</div>` : ''}
+    <div class="tablewrap"><table>${head}<tbody>${inv.positions.slice(0, 25).map(row).join('')}</tbody></table>
+    ${inv.positions.length > 25 ? `<p style="padding:0 16px"><button class="more" id="all-holdings">See all ${inv.positions.length} holdings</button></p>` : ''}
+    ${inv.sold.length ? `<p style="padding:0 16px"><button class="more" id="all-sold">See ${inv.sold.length} positions sold out this quarter</button></p>` : ''}</div>`;
+  $('#all-holdings')?.addEventListener('click', () => openModal(`${inv.person} · all holdings`, `<table>${head}<tbody>${inv.positions.map(row).join('')}</tbody></table>`));
+  $('#all-sold')?.addEventListener('click', () => openModal(`${inv.person} · sold out`, `<table><thead><tr><th>Holding</th><th>Value at previous quarter</th></tr></thead><tbody>${inv.sold.map(p => `<tr><td>${esc(p.name)} <span class="note">${esc(p.cls)}</span></td><td>${money(p.value)}</td></tr>`).join('')}</tbody></table>`));
+  const p = new URLSearchParams(location.search); p.set('investor', inv.cik); history.replaceState(null, '', '?' + p);
+}
+
+/* ---------- pop-out ---------- */
+function openModal(title, html) { $('#modal-title').textContent = title; $('#modal-body').innerHTML = html; $('#modal').hidden = false; }
+$('#modal-close').onclick = () => { $('#modal').hidden = true; };
+$('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').hidden = true; };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').hidden = true; });
+
+Promise.all([fetch('../traders/data/congress.json').then(r => r.json()), fetch('../traders/data/investors.json').then(r => r.json())]).then(([c, i]) => {
+  congress = c; investors = i;
+  members = new Map(c.members.map(m => [m.id, m]));
+  $('#meta').textContent = `${c.trades.length.toLocaleString('en-GB')} House trades by ${c.members.filter(m => m.trades).length} members · ${i.investors.length} investors · updated ${fmtDate(c.generated.slice(0, 10))}`;
+  if (!members.has(selMember)) selMember = null;
+  for (const id of ['#member-search']) $(id).oninput = renderMembers;
+  for (const id of ['#f-type', '#f-party', '#f-days']) $(id).onchange = renderTrades;
+  $('#f-ticker').oninput = renderTrades;
+  $('#clear-member').onclick = () => { selMember = null; renderMembers(); renderTrades(); };
+  selInvestor ||= i.investors[0]?.cik;
+  renderMembers(); renderTrades(); renderInvestors();
+  setTab(['congress', 'investors', 'about'].includes(params.get('tab')) ? params.get('tab') : 'congress');
+}).catch(e => { $('#meta').textContent = 'Data could not load: ' + e.message; });
+</script>
+</body>
+</html>

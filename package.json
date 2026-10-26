@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs"
+    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs tests/traders.test.mjs"
   },
   "devDependencies": {
+    "pdfjs-dist": "^4.10.38",
     "playwright-core": "^1.56.1"
   }
 }

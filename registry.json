@@ -206,6 +206,27 @@
           "description": "Email alerts when a US-listed stock more than doubles in under six hours. Scans the whole market hourly."
         },
         {
+          "id": "traders",
+          "name": "Trader Tracker",
+          "icon": "◈",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "fe/traders.html",
+          "description": "What members of Congress (including Nancy Pelosi) and famous investors such as Buffett, Burry and Ackman are buying and selling, from STOCK Act and SEC 13F filings. Refreshed weekly.",
+          "submodules": [
+            {
+              "id": "congress",
+              "name": "Congress",
+              "url": "fe/traders.html?tab=congress"
+            },
+            {
+              "id": "investors",
+              "name": "Famous investors",
+              "url": "fe/traders.html?tab=investors"
+            }
+          ]
+        },
+        {
           "id": "learning",
           "name": "Learning",
           "icon": "◫",

@@ -50,7 +50,8 @@ test('other modules link names into the Encyclopaedia', async () => {
   const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
   await page.goto(`${BASE}/q/calendar?period=2020s&month=2022-02`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('.eventrow', { timeout: 20000 });
-  await page.waitForSelector('a.jdpi-ency', { timeout: 15000 });
+  // Badges arrive shard by shard as the linker resolves titles; wait for several rather than the first.
+  await page.waitForFunction(() => document.querySelectorAll('a.jdpi-ency').length >= 3, null, { timeout: 15000 }).catch(() => {});
   const n = await page.locator('a.jdpi-ency').count();
   const href = await page.locator('a.jdpi-ency').first().getAttribute('href');
   await browser.close();

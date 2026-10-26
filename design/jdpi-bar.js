@@ -27,6 +27,16 @@
   let embedded = false;
   try { embedded = window.self !== window.top; } catch { embedded = true; }
 
+  // Documentary mode: inside the shell, the narrator answers the shell's reader with what to say next.
+  if (embedded && !document.querySelector('script[src*="jdpi-narrator.js"]')) {
+    const nar = document.createElement('script');
+    const shellUrl = new URL(SHELL, location.href);
+    nar.src = new URL('design/jdpi-narrator.js', shellUrl).href;
+    nar.dataset.shell = shellUrl.href;
+    nar.defer = true;
+    document.head.appendChild(nar);
+  }
+
   if (embedded) {
     // A class on <html> (not a new element) is safe to add before hydration.
     root.classList.add('jdpi-embedded');

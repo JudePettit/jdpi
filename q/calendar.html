@@ -171,6 +171,31 @@ function renderMonth(ev) {
   document.querySelectorAll('#eventrows [data-more]').forEach(b => b.onclick = () => openEvent(monthEvents[+b.dataset.more]));
 }
 
+// ---- Documentary mode (design/jdpi-narrator.js): read each month's events in order, then turn to the next month.
+const firstSentences = (s, n) => (String(s || '').match(/[^.!?]+[.!?]+/g) || [s || '']).slice(0, n).join(' ').trim();
+window.jdpiDocumentary = {
+  get title() { return `${document.getElementById('listtitle')?.textContent || 'Calendar'}`; },
+  async *story() {
+    if (calView !== 'month') setCalView('month');
+    for (let empty = 0; empty < 24;) {
+      render();
+      const month = monthKey(view), list = visibleEvents().filter(e => e.date.startsWith(month)).sort((a, b) => a.date.localeCompare(b.date));
+      if (!list.length) { empty++; step(1); continue; }
+      empty = 0;
+      yield { text: `${fmt.format(view)}. ${list.length} event${list.length > 1 ? 's' : ''}.`, el: document.getElementById('listtitle') };
+      const rows = [...document.querySelectorAll('#eventrows .eventrow')];
+      for (const [i, e] of list.entries()) {
+        const d = new Date(e.date + 'T00:00:00');
+        yield { text: `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}. ${e.country}: ${e.title}.${e.summary ? ' ' + firstSentences(e.summary, 2) : ''}`, el: rows[i] };
+      }
+      const next = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+      yield { chapterEnd: true, label: `Continue to ${fmt.format(next)}` };
+      step(1);
+      await new Promise(r => setTimeout(r, 300));
+    }
+  },
+};
+
 // ---- plain-text detail: a short summary in the row, the full account in a pop-out
 let rowIndex = 0;
 function summaryHtml(e) {

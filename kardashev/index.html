@@ -175,6 +175,34 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').hidden = true; });
   function stopPlay() { clearInterval(playing); playing = null; $('#play').textContent = '▶'; }
 
+  // Documentary mode (design/jdpi-narrator.js): step through the centuries, pausing at the great divides.
+  const sayPeople = n => n >= 1e9 ? `${(n / 1e9).toFixed(1).replace(/\.0$/, '')} billion` : `${Math.round(n / 1e6)} million`;
+  const sayWatts = w => w >= 1e12 ? `${(w / 1e12).toFixed(1).replace(/\.0$/, '')} terawatts` : `${Math.round(w / 1e9)} gigawatts`;
+  const sayYear = y => (y < 0 ? `${-y} BC` : y === 1 ? 'AD 1' : String(y));
+  const plainPolity = id => { const n = byId[id].name.replace(/\s*\(.*\)$/, ''); return /(civilisation|states|kingdoms|Empire|Caliphate|Sultanate|Khanate|dynasty|Union|States|Republic|Raj)$/i.test(n) && !/^the /i.test(n) ? 'the ' + n : n; };
+  window.jdpiDocumentary = {
+    get title() { return `Kardashev Tracker · ${sayYear(data?.steps[idx]?.year ?? '')}`; },
+    async *story() {
+      for (let t = 0; !data && t < 50; t++) await new Promise(r => setTimeout(r, 200));
+      if (!data) { yield { text: 'The energy data has not loaded yet.' }; return; }
+      stopPlay(); select(null);
+      if (idx >= data.steps.length - 1) setStep(0);
+      yield { text: `Who has commanded humanity's energy? From ${sayYear(data.steps[0].year)} to today, century by century, the share of the world's energy capture held by each great power, and humanity's place on the Kardashev scale.`, el: $('#year-big') };
+      for (let i = idx; i < data.steps.length; i++) {
+        setStep(i); await new Promise(r => setTimeout(r, 400));
+        const s = data.steps[i], top = s.polities.slice(0, 3), prev = i ? new Set(data.steps[i - 1].polities.slice(0, 5).map(p => p.id)) : null;
+        const fresh = prev ? s.polities.slice(0, 5).filter(p => !prev.has(p.id)).map(p => plainPolity(p.id)) : [];
+        const parts = [`${sayYear(s.year)}.`, `Humanity numbers about ${sayPeople(s.worldPop)}, using some ${sayWatts(s.worldWatts)}: a Kardashev rating of ${s.K.toFixed(2)}.`];
+        if (top.length) parts.push(`The largest share belongs to ${plainPolity(top[0].id)}, with ${pct(top[0].share)}${top[1] ? `; then ${plainPolity(top[1].id)}, ${pct(top[1].share)}` : ''}${top[2] ? `, and ${plainPolity(top[2].id)}, ${pct(top[2].share)}` : ''}.`);
+        if (fresh.length) parts.push(`New among the five greatest: ${fresh.join(' and ')}.`);
+        yield { text: parts.join(' '), el: $('#panel h2') };
+        const next = data.steps[i + 1];
+        if (next && [1, 1000, 1500, 1800, 1900].includes(next.year)) yield { chapterEnd: true, label: `Continue to ${sayYear(next.year)}` };
+      }
+      yield { text: 'And so to today. Humanity has yet to reach a Kardashev rating of one: that would mean harnessing all the sunlight that falls on the Earth.', el: $('#kval') };
+    },
+  };
+
   Promise.all([
     fetch('data/energy.json').then(r => r.json()),
     fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json').then(r => r.json()),

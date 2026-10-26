@@ -159,6 +159,29 @@ fetch(COURSES[course]).then(r => r.text()).then(text => {
   const want = params.get('lesson');
   go(Math.max(0, lessons.findIndex(l => l.id === want)));
 }).catch(err => { $('#lesson').innerHTML = `<p class="note">The course could not load: ${esc(err.message)}</p>`; });
+
+// Documentary mode (design/jdpi-narrator.js): read the lesson in order, mention the quiz, then turn the page.
+const speakable = el => el.innerText.replace(/\s+/g, ' ').trim();
+window.jdpiDocumentary = {
+  get title() { return `${doc?.meta?.title || 'Learning'} · ${lessons[current]?.title || ''}`; },
+  async *story() {
+    while (lessons.length) {
+      const l = lessons[current];
+      yield { text: `${l.unit.split(' · ').slice(-1)[0]}. ${l.title}.`, el: $('#lesson h2') };
+      for (const el of $('#lesson').querySelectorAll(':scope > h3, :scope > p, :scope > ul > li, :scope > ol > li, :scope > .callout, :scope > .quote, :scope > table')) {
+        if (el.matches('table')) { yield { text: [...el.rows].slice(1).map(r => [...r.cells].map(c => c.innerText.trim()).join(': ')).join('. '), el }; continue; }
+        const text = speakable(el);
+        const k = el.matches('.callout') && el.querySelector('.k');
+        if (text) yield { text: k ? `${k.innerText.trim()}. ${text.slice(k.innerText.trim().length).trim()}` : text, el };
+      }
+      if ($('#lesson .quiz')) yield { text: 'Now, a short quiz to check your understanding. Pause here if you would like to try it.', el: $('#lesson .quiz') };
+      if (current >= lessons.length - 1) { yield { text: 'That concludes the course.', el: $('#lesson h2') }; return; }
+      yield { chapterEnd: true, label: `Continue to “${lessons[current + 1].title}”` };
+      go(current + 1);
+      await new Promise(r => setTimeout(r, 400));
+    }
+  },
+};
 </script>
 </body>
 </html>

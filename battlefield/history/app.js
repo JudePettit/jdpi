@@ -240,6 +240,36 @@ function setupSearch() {
   input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; }, 150));
 }
 
+/* ---------------------------------------------------------------- documentary narration */
+// For JDP-I Documentary mode (design/jdpi-narrator.js): the century of conflict, year by year, pausing each decade.
+const warNew = (w, y) => w.years[0][0] === y;
+function yearStory(y) {
+  const all = warsIn(y), wars = all.filter(w => levelIn(w, y) === 2), fresh = all.filter(w => warNew(w, y) && levelIn(w, y) === 2);
+  const ended = state.data.wars.filter(w => w.years.at(-1)[0] === y - 1 && levelIn(w, y - 1) === 2 && y - 1 < state.data.lastYear);
+  const parts = [`${y}.`];
+  parts.push(all.length ? `${all.length} armed conflict${all.length > 1 ? 's are' : ' is'} under way, ${wars.length ? `${wars.length} of ${all.length > 1 ? 'them' : 'it'} at the level of war, with a thousand or more battle deaths` : 'none of them at the level of war'}.` : 'The world records no armed conflict this year.');
+  const big = (fresh.length ? fresh : wars).slice().sort((a, b) => (b.deaths || 0) - (a.deaths || 0)).slice(0, 3);
+  if (fresh.length) parts.push(`New this year: ${big.map(w => w.name.replace(/:/, ',')).join('; ')}.`);
+  else if (big.length) parts.push(`The largest: ${big.map(w => w.name.replace(/:/, ',')).join('; ')}.`);
+  if (ended.length) parts.push(`Coming to an end: ${ended.slice(0, 2).map(w => w.name.replace(/:/, ',')).join('; ')}.`);
+  const focus = big.find(w => state.focus[w.id]);
+  if (focus) parts.push(`War Focus follows ${state.focus[focus.id][0].name} month by month.`);
+  return parts.join(' ');
+}
+window.jdpiDocumentary = {
+  get title() { return `Retrospective Battlefield · ${state.year}`; },
+  async *story() {
+    if (state.playing) $('#play')?.click();
+    yield { text: `A century of war, from ${state.data.firstYear} to ${state.data.lastYear}, drawn on the map as the world stood each year. We begin in ${state.year}.`, el: $('#year-big') };
+    for (let y = state.year; y <= state.data.lastYear; y++) {
+      setYear(y, { push: false });
+      await new Promise(r => setTimeout(r, 400));
+      yield { text: yearStory(y), el: $('#panel') };
+      if (y % 10 === 9 && y < state.data.lastYear) yield { chapterEnd: true, label: `Continue to the ${y + 1}s` };
+    }
+  },
+};
+
 (async function init() {
   try {
     const [topo, data, focus] = await Promise.all([

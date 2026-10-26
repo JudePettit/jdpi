@@ -240,6 +240,98 @@ $('#prev').onclick = () => setMonth(state.m - 1);
 $('#next').onclick = () => setMonth(state.m + 1);
 $('#month').oninput = e => setMonth(+e.target.value);
 
+/* ---------------------------------------------------------------- documentary narration */
+// Told month by month for JDP-I Documentary mode (design/jdpi-narrator.js asks for one step at a time).
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+function spokenNumber(n) {
+  if (n >= 1e6) return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '')} million`;
+  if (n >= 1e4) return Math.round(n / 1000).toLocaleString('en-GB') + ' thousand';
+  if (n >= 1000) return (Math.round(n / 100) * 100).toLocaleString('en-GB');
+  return String(Math.round(n / 10) * 10 || n);
+}
+// Countries said with "the" (the Soviet Union, the United States…); cap() for the start of a sentence.
+const the = n => (/^(Soviet Union|United (States|Kingdom|Arab Emirates)|Netherlands|Philippines|Czech Republic|Dominican Republic|Central African Republic|Gambia|Bahamas|Democratic Republic|Republic of)/.test(n) ? 'the ' + n : n);
+const cap = s => s.replace(/^./, c => c.toUpperCase());
+const plainName = n => n.replace(/\s*\([^)]*\)/g, '').trim(); // "Iran (Persia)" → "Iran"
+const listNames = l => { l = l.map(n => the(plainName(n))); return l.length <= 2 ? l.join(' and ') : `${l.slice(0, -1).join(', ')} and ${l.at(-1)}`; };
+// Side labels said as groups: "the Allies", "the Axis"; others ("Finland", "South Korea & UN forces") as they are.
+const sideName = label => (/^(Allies|Axis)$/.test(label) ? 'the ' + label : label);
+// Battle names as spoken: "The Battle of Kiev begins", "The Iași pogrom begins", "Operation Barbarossa begins".
+function battleLine(b) {
+  const n = b.n.replace(/^the /i, '');
+  const common = /^(battle|siege|offensive|invasion|campaign|capture|liberation|occupation|bombing|landing|evacuation)\b/i.test(n) || /\b(pogrom|massacre|attack|raid|uprising|campaign|offensive|convoys?|front|participation|bombing|landing)\b/.test(n);
+  const subject = /^Operation\b/.test(n) ? n : common ? `The ${n}` : cap(n);
+  return `${subject} ${b.s === b.e ? 'takes place' : /\bconvoys\b|s of\b/.test(n) ? 'begin' : 'begins'}.`;
+}
+function changes(i) {
+  const w = state.war, d = dateOf(i), p = i ? dateOf(i - 1) : null;
+  if (!p) return [];
+  const gws = new Set([...w.sides.a.states, ...w.sides.b.states].map(s => s.gw).concat(w.control.map(c => c.gw)));
+  const featAt = (gw, date) => features.find(f => f.properties.gw === gw && f.properties.s <= date && f.properties.e >= date);
+  const label = s => sideName(s === 'a' ? w.sides.a.label : w.sides.b.label);
+  const events = [];
+  for (const gw of gws) {
+    const now = sideOf(gw, d), before = sideOf(gw, p), f = featAt(gw, d) || featAt(gw, p);
+    if (!f || now === before) continue;
+    const raw = plainName(displayName(gw, f.properties.name, d)), name = cap(the(raw));
+    let kind, text;
+    if (now.startsWith('occ-')) { kind = 'occ'; text = `${name} is occupied by ${label(now.slice(4))}.`; }
+    else if (before.startsWith('occ-')) { kind = 'free'; text = now ? `${name} is liberated.` : `The occupation of ${the(raw)} ends.`; }
+    else if (now.startsWith('side-') && before.startsWith('side-')) { kind = 'switch'; text = `${name} changes sides, joining ${label(now.slice(5))}.`; }
+    else if (now.startsWith('side-')) { kind = 'join' + now.slice(5); text = `${name} enters the war on the side of ${label(now.slice(5))}`; }
+    else if (before.startsWith('side-')) { kind = 'leave'; text = `${name} leaves the war.`; }
+    if (kind) events.push({ kind, text, area: d3.geoArea(f) });
+  }
+  // Largest countries first; when several join one side at once, name the two largest and count the rest.
+  events.sort((a, b) => b.area - a.area);
+  const out = [];
+  for (const k of ['joina', 'joinb']) {
+    const js = events.filter(e => e.kind === k);
+    if (js.length) out.push(js[0].text + (js.length > 1 ? `, ${js.length > 2 ? `with ${js.length - 1} other states and territories` : `as does ${js[1].text.split(' enters')[0].replace(/^The /, 'the ')}`}.` : '.'));
+  }
+  out.push(...events.filter(e => !e.kind.startsWith('join')).slice(0, 4).map(e => e.text));
+  return out;
+}
+function monthStory(i) {
+  const w = state.war, m = w.months[i], parts = [monthLabel(m) + '.'];
+  if (i === 0) {
+    const a = statesOn('a', dateOf(0)), b = statesOn('b', dateOf(0));
+    if (a.length || b.length) parts.push(`On one side, ${a.length ? listNames(a.slice(0, 5)) : w.sides.a.label}; on the other, ${b.length ? listNames(b.slice(0, 5)) : w.sides.b.label}.`);
+  }
+  parts.push(...changes(i).slice(0, 4));
+  const begun = w.battles.filter(b => b.p !== 'y' && b.s.slice(0, 7) === m).sort((x, y) => (y.deaths || 0) - (x.deaths || 0) || !!y.w - !!x.w).slice(0, 3);
+  for (const b of begun) parts.push(battleLine(b));
+  const ended = w.battles.filter(b => b.p !== 'y' && b.e && b.e !== b.s && b.e.slice(0, 7) === m && (b.deaths || 0) >= 10000).slice(0, 2);
+  for (const b of ended) parts.push(`The ${b.n.replace(/^the /i, '')} ends, at a cost of some ${spokenNumber(b.deaths)} lives.`);
+  if (w.deaths[i] > 0) parts.push(`${w.estimated[i] ? 'An estimated' : 'Some'} ${spokenNumber(w.deaths[i])} die in battle this month, bringing the toll to about ${spokenNumber(cumulative[i])}.`);
+  const top = w.top[i]?.[0];
+  if (top && top[1] >= 20) parts.push(`The deadliest recorded clash is at ${String(top[2]).replace(/\s*\(.*\)$/, '')}, where ${spokenNumber(top[1])} are killed.`);
+  if (parts.length === 1) parts.push('The fighting continues.');
+  return parts.join(' ');
+}
+window.jdpiDocumentary = {
+  get title() { return state.war ? `War Focus · ${state.war.name}` : 'War Focus'; },
+  async *story() {
+    stop();
+    const w = state.war;
+    let intro = `${w.name}. ${fmtDate(w.start)} to ${w.end ? fmtDate(w.end) : 'the present day'}: ${w.sides.a.label} against ${w.sides.b.label}.`;
+    try {
+      const s = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(w.wiki.replace(/ /g, '_'))}`).then(r => r.json());
+      if (s.extract) intro += ' ' + (s.extract.match(/[^.!?]+[.!?]+/g) || [s.extract]).slice(0, 3).join(' ').trim();
+    } catch {}
+    intro += ` In all, about ${spokenNumber(w.totalDeaths)} died in battle${w.ongoing ? ' so far' : ''}.`;
+    yield { text: intro, el: document.querySelector('#panel h2') };
+    for (let i = state.m; i < w.months.length; i++) {
+      if (state.war !== w) return;
+      setMonth(i); await sleepMs(500);
+      yield { text: monthStory(i), el: document.querySelector('.counters') };
+      const next = w.months[i + 1];
+      if (next && next.slice(0, 4) !== w.months[i].slice(0, 4)) yield { chapterEnd: true, label: `Continue to ${next.slice(0, 4)}` };
+    }
+    yield { text: w.end ? `The war ended on ${fmtDate(w.end)}. About ${spokenNumber(w.totalDeaths)} had died in battle.` : `The war goes on. The record here runs to ${fmtDate(w.dataThrough)}, with about ${spokenNumber(w.totalDeaths)} battle deaths so far.`, el: document.querySelector('#panel h2') };
+  },
+};
+
 function writeHash() { if (state.war) history.replaceState(null, '', `#war=${state.war.id}&m=${state.war.months[state.m]}`); }
 async function loadWar(id, month) {
   stop();

@@ -210,9 +210,10 @@
           "name": "Double Signal",
           "icon": "⇈",
           "status": "in-build",
-          "host": "ChatGPT Sites",
+          "host": "Cloudflare Workers",
           "url": null,
-          "description": "Email alerts when a US-listed stock more than doubles in under six hours. Scans the whole market hourly."
+          "description": "Emails you when a US-listed stock more than doubles in under six hours. Scans the whole market hourly on Cloudflare Workers; private, behind Cloudflare Access.",
+          "opensInNewTab": true
         },
         {
           "id": "traders",

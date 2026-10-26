@@ -147,6 +147,20 @@ function renderPlaceholder(suite, m) {
   </div></div>`;
 }
 
+// Modules behind their own sign-in (e.g. Cloudflare Access) can't sign in inside a cross-site iframe,
+// because browsers block third-party cookies there. Registry flag: "opensInNewTab": true.
+function renderLaunch(suite, m, url) {
+  const abs = new URL(url, location.href).href;
+  $('#view').innerHTML = `<div class="page"><div class="jdpi-panel placeholder">
+    <div class="mod-icon">${esc(m.icon)}</div>
+    <div class="jdpi-eyebrow">${esc(suite.name)} · ${STATUS_LABEL[m.status]}</div>
+    <h1 class="jdpi-h1">${esc(m.name)}</h1>
+    <p class="jdpi-muted">${esc(m.description)}</p>
+    <div class="jdpi-note" style="margin-top:18px"><b>Opens in its own tab.</b> ${esc(m.name)} is private and asks you to sign in, which browsers don't allow inside another site's frame.</div>
+    <p style="margin-top:18px"><a class="jdpi-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(m.name)} ↗</a></p>
+  </div></div>`;
+}
+
 /* --- Module frames: one persistent iframe per module URL ---------------- */
 function showLoading() {
   if (!$('#frames .loading-bar')) $('#frames').insertAdjacentHTML('afterbegin', '<div class="loading-bar"></div>');
@@ -176,11 +190,13 @@ function route() {
   const suiteId = r.suite?.id || '';
   if (suiteId) document.documentElement.dataset.suite = suiteId; else delete document.documentElement.dataset.suite;
 
-  const frameUrl = r.module?.url ? (r.sub?.url || r.module.url) : null;
+  const moduleUrl = r.module?.url ? (r.sub?.url || r.module.url) : null;
+  const frameUrl = moduleUrl && !r.module.opensInNewTab ? moduleUrl : null;
   $('#view').hidden = !!frameUrl;
   $('#frames').hidden = !frameUrl;
 
   if (frameUrl) showFrame(frameUrl, `${r.module.name}${r.sub ? ' · ' + r.sub.name : ''}`);
+  else if (moduleUrl) renderLaunch(r.suite, r.module, moduleUrl);
   else if (r.module) renderPlaceholder(r.suite, r.module);
   else if (r.suite) renderSuite(r.suite);
   else renderHome();

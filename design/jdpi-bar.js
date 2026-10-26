@@ -39,6 +39,7 @@
   };
   // Wait until the page has fully loaded (and React/Next.js apps have hydrated) before
   // adding DOM nodes; adding them earlier causes hydration mismatches.
-  const later = () => setTimeout(inject, 300);
+  // Hydration can finish after "load" (e.g. Vite dev servers), so also wait for the browser to go idle.
+  const later = () => setTimeout(() => (window.requestIdleCallback || (f => setTimeout(f, 1500)))(inject, { timeout: 3000 }), 800);
   if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
 })();

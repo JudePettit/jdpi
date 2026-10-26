@@ -72,6 +72,12 @@ test('each live module opens inside the shell workspace', async () => {
       if (!(await page.locator('.placeholder').count())) problems.push(`${m.id}: no in-build placeholder`);
       continue;
     }
+    if (m.opensInNewTab) {
+      // Modules behind their own sign-in show a launch panel with a new-tab link instead of a frame.
+      const href = await page.locator('#view a.jdpi-btn.primary[target=_blank]').getAttribute('href').catch(() => null);
+      if (absolute(href || '') !== absolute(m.url)) problems.push(`${m.id}: launch link ${href}`);
+      continue;
+    }
     const frame = page.locator('#frames iframe.active');
     await frame.waitFor({ state: 'attached', timeout: 15000 });
     const src = await frame.getAttribute('src');

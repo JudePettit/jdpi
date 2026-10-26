@@ -209,9 +209,9 @@
           "id": "double-signal",
           "name": "Double Signal",
           "icon": "⇈",
-          "status": "in-build",
+          "status": "live",
           "host": "Cloudflare Workers",
-          "url": null,
+          "url": "https://double-signal.judep92.workers.dev",
           "description": "Emails you when a US-listed stock more than doubles in under six hours. Scans the whole market hourly on Cloudflare Workers; private, behind Cloudflare Access.",
           "opensInNewTab": true
         },

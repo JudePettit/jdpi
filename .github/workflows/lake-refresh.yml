@@ -1,4 +1,4 @@
-﻿name: Refresh Encyclopaedia entity layer
+name: Refresh Encyclopaedia entity layer
 # Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries.
 on:
   schedule:
@@ -25,4 +25,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lake/data lake/scripts/summary-cache.json
-          git diff --cached --quiet || git commit -m "Encyclopaedia: monthly refresh of the entity layer" && git push
+          git diff --cached --quiet || git commit -m "Encyclopaedia: monthly refresh of the entity layer" && git pull --rebase && git push

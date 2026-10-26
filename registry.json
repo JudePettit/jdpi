@@ -78,12 +78,24 @@
         },
         {
           "id": "pestle",
-          "name": "Country PESTLE",
+          "name": "National Analysis",
           "icon": "◉",
           "status": "live",
-          "host": "Lovable",
-          "url": "https://country-signal-atlas.lovable.app",
-          "description": "Daily country analysis across political, economic, social, technological, legal and environmental factors."
+          "host": "JDP-I",
+          "url": "q/national.html",
+          "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
+          "submodules": [
+            {
+              "id": "map",
+              "name": "Map & ranking",
+              "url": "q/national.html#map"
+            },
+            {
+              "id": "compare",
+              "name": "Compare countries",
+              "url": "q/national.html#compare=USA,CHN,RUS,IND"
+            }
+          ]
         },
         {
           "id": "battlefield",

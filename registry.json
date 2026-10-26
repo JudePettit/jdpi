@@ -214,6 +214,20 @@
           "opensInNewTab": true
         },
         {
+          "id": "trade-desk",
+          "name": "Trade Desk",
+          "icon": "⇄",
+          "status": "live",
+          "host": "Cloudflare Workers",
+          "url": "https://trade-desk.judep92.workers.dev/markets/",
+          "description": "Markets, news and a Hype Tracker for tickers suddenly talked about or traded far more than usual (TD Markets), plus Tally Stick: Alpaca, Trading 212, Interactive Brokers, Coinbase and Kraken in one place, with rules, risk limits and an MCP server for AI agents.",
+          "submodules": [
+            { "id": "markets", "name": "TD Markets", "url": "https://trade-desk.judep92.workers.dev/markets/" },
+            { "id": "tally-stick", "name": "Tally Stick", "url": "https://trade-desk.judep92.workers.dev/tally/", "opensInNewTab": true,
+              "description": "Your brokerage accounts, automation rules, risk limits and the MCP connection for AI agents. Private, behind Cloudflare Access." }
+          ]
+        },
+        {
           "id": "traders",
           "name": "Trader Tracker",
           "icon": "◈",

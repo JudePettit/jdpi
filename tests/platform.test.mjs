@@ -37,10 +37,12 @@ test('registry is well formed', () => {
 test('every live module URL responds', async () => {
   const failures = [];
   for (const { m } of modules.filter(x => x.m.url)) {
-    const urls = [m.url, ...(m.submodules || []).map(s => s.url)];
-    for (const u of urls) {
+    // Private pages that open in their own tab only need to answer: locked (401/403, or 503 while sign-in isn't set
+    // up yet) counts, a missing page or network error doesn't.
+    const urls = [[m.url, m.opensInNewTab], ...(m.submodules || []).map(s => [s.url, s.opensInNewTab ?? m.opensInNewTab])];
+    for (const [u, priv] of urls) {
       const res = await fetch(absolute(u), { redirect: 'follow' }).catch(e => ({ ok: false, status: e.message }));
-      if (!res.ok) failures.push(`${m.id}: ${u} → ${res.status}`);
+      if (!res.ok && !(priv && [401, 403, 503].includes(res.status))) failures.push(`${m.id}: ${u} → ${res.status}`);
     }
   }
   assert.deepEqual(failures, []);

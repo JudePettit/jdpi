@@ -205,12 +205,14 @@ function route() {
   if (suiteId) document.documentElement.dataset.suite = suiteId; else delete document.documentElement.dataset.suite;
 
   const moduleUrl = r.module?.url ? (deepLink(r) || r.sub?.url || r.module.url) : null;
-  const frameUrl = moduleUrl && !r.module.opensInNewTab ? moduleUrl : null;
+  // A submodule can open in its own tab while its siblings embed (Trade Desk: TD Markets embeds, Tally Stick signs in).
+  const newTab = r.sub?.opensInNewTab ?? r.module?.opensInNewTab;
+  const frameUrl = moduleUrl && !newTab ? moduleUrl : null;
   $('#view').hidden = !!frameUrl;
   $('#frames').hidden = !frameUrl;
 
   if (frameUrl) showFrame(frameUrl, `${r.module.name}${r.sub ? ' · ' + r.sub.name : ''}`);
-  else if (moduleUrl) renderLaunch(r.suite, r.module, moduleUrl);
+  else if (moduleUrl) renderLaunch(r.suite, r.sub?.opensInNewTab ? { ...r.module, ...r.sub, icon: r.module.icon } : r.module, moduleUrl);
   else if (r.module) renderPlaceholder(r.suite, r.module);
   else if (r.suite) renderSuite(r.suite);
   else renderHome();

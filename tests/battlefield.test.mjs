@@ -49,9 +49,20 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', a
   const y1939 = await page.locator('#panel').innerText();
   await page.evaluate(() => { location.hash = '#y=2025'; });
   await page.waitForFunction(() => document.querySelector('#year-big').textContent === '2025');
-  const n2025 = await page.locator('#panel .war').count();
+  const n2025 = +(await page.locator('#panel .sub').innerText()).match(/^(\d+) armed/)[1];
   const red = await page.locator('path.shape[fill="var(--c-war)"]').count();
+  // A long list shows its first items and opens the rest in a pop-out.
+  await page.evaluate(() => { location.hash = '#y=2025&c=2'; });
+  await page.waitForSelector('#panel [data-more]');
+  const shown = await page.locator('#panel .war').count();
+  await page.locator('#panel [data-more]').last().click();
+  await page.waitForSelector('#modal:not([hidden]) .war');
+  const all = await page.locator('#modal .war').count();
+  const heading = await page.locator('#modal-title').innerText();
   await browser.close();
+  assert.ok(all > 6, `pop-out lists every US conflict: ${all}`);
+  assert.ok(shown < all + 12, 'panel shows a shortened list');
+  assert.match(heading, /all conflicts 1926–2025/);
   assert.match(y1939, /World War II/);
   assert.ok(n2025 >= 40, `2025 conflicts: ${n2025}`);
   assert.ok(red >= 5, `countries at war: ${red}`);

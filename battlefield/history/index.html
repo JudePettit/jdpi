@@ -1,23 +1,23 @@
 <!doctype html>
-<html lang="en" data-suite="q">
+<html lang="en" data-suite="hp">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101820">
-  <title>Retrospective Battlefield · JDP-I Q</title>
+  <title>Retrospective Battlefield · JDP-I H&amp;P</title>
   <meta name="description" content="Every war and armed conflict from 1926 to 2025 on a historical map, year by year.">
-  <link rel="icon" href="../../q/brand-eye-q.svg" type="image/svg+xml">
+  <link rel="icon" href="../../design/brand-jdpi.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../design/jdpi.css">
   <link rel="stylesheet" href="styles.css">
-  <script src="../../design/jdpi-bar.js" data-suite="q" data-module="battlefield-history" data-shell="../../" defer></script>
+  <script src="../../design/jdpi-bar.js" data-suite="hp" data-module="battlefield-history" data-shell="../../" defer></script>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
       <div>
-        <p class="eyebrow" data-jdpi-standalone>JDP-I Q · Geopolitical Intelligence</p>
+        <p class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · History &amp; Politics</p>
         <h1>Retrospective Battlefield</h1>
         <p class="subtitle" id="status">Loading conflict history…</p>
       </div>
@@ -62,6 +62,10 @@
     </div>
     <button type="button" id="next" class="tl-btn" aria-label="Next year">›</button>
   </footer>
+
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box"><button type="button" class="close" id="modal-close" aria-label="Close">×</button><h2 id="modal-title"></h2><div id="modal-body"></div></div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>

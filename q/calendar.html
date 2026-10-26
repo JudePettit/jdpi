@@ -25,11 +25,21 @@
 .calendar-history input{background:#0f1b25;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:5px 7px;font:10px "DM Mono"}
 .calendar-history-note{margin-left:auto;line-height:1.5}
 @media(max-width:600px){.calendar-history-note{margin-left:0;width:100%}}
+[hidden]{display:none!important}
+.filters{flex-wrap:wrap}.filterset{display:flex;flex-wrap:wrap;gap:6px}.filter{display:inline-flex;align-items:center;gap:5px}
+.viewtoggle{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}.viewbtn{background:transparent;border:0;color:var(--muted);padding:5px 10px;font:10px 'DM Mono';text-transform:uppercase}.viewbtn.active{background:#b7f36b17;color:var(--green)}
+#monthpick{background:#0f1b25;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:4px 6px;font:10px 'DM Mono';color-scheme:dark}
+.countrybar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-bottom:1px solid var(--line);font:10px 'DM Mono';color:var(--muted)}.countrybar label{text-transform:uppercase;letter-spacing:.08em}.countrybar input{background:#0f1b25;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:6px 8px;font-size:11px;width:170px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:#b7f36b17;border:1px solid #799c59;color:var(--green);border-radius:99px;padding:4px 9px;font:10px 'DM Mono'}.chip.clear{background:transparent;border-color:var(--line);color:var(--muted)}.chiphint{color:#6d7d86}
+.eventname a{color:var(--text);text-decoration:none}.eventname a:hover{color:var(--green)}.detail p a{font:inherit}
+.yeargrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ymonth{text-align:left;background:#101c26;border:1px solid var(--line);border-radius:6px;padding:10px;color:var(--text);min-height:150px}.ymonth:hover{border-color:#799c59}.ymhead{display:flex;justify-content:space-between;font:600 13px Manrope}.ymhead span{font:10px 'DM Mono';color:var(--muted)}.ymbar{display:flex;height:4px;border-radius:2px;overflow:hidden;margin:7px 0 6px;background:#23333e}.ymevent{font-size:11px;color:#c9d3d6;line-height:1.4;margin:3px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ymevent .eventdot{display:inline-block;vertical-align:1px}
+.calctrl{flex-wrap:wrap}.panelhead{height:auto;min-height:57px;flex-wrap:wrap;gap:8px;padding-top:8px;padding-bottom:8px}
+@media(max-width:700px){.yeargrid{grid-template-columns:1fr 1fr}}@media(max-width:450px){.yeargrid{grid-template-columns:1fr}}
 </style><link rel="stylesheet" href="../design/jdpi.css"><script src="../design/jdpi-bar.js" data-suite="q" data-module="calendar" data-shell="../" defer></script></head>
 <body><div class="shell">
 <header class="topbar" data-jdpi-standalone><div class="brand"><div class="mark"><img src="brand-eye-q.svg" alt=""></div><div class="brandname" role="img" aria-label="JDP-I Q">JDP-I <span class="brand-eye-q" aria-hidden="true"><img src="brand-eye-q.svg" alt=""></span></div></div><div class="topmeta"><span class="live"><i class="dot"></i> Global watch</span><span id="clock"></span><span>Edition 01</span></div></header>
-<section class="hero"><div><div class="eyebrow">World affairs · Political event register</div><h1>Geopolitical Calendar</h1><p>A daily briefing of consequential elections and political milestones, alongside the stories shaping each country today.</p></div><div class="updated">EVENT DATA SNAPSHOT<br><strong id="updated">23 Oct 2026 · editorial</strong></div></section>
-<aside class="source-health" aria-label="Political Calendar data source status" role="status" aria-live="polite"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Supabase archive · checking</span></span><span class="source-health-note" id="calendar-source-note">Checking saved calendar history.</span></aside><div class="calendar-history"><label for="snapshot-date">View calendar as of</label><button class="navbtn" id="snapshot-prev" aria-label="Previous snapshot day">‹</button><input id="snapshot-date" type="date"><button class="navbtn" id="snapshot-next" aria-label="Next snapshot day">›</button><span class="calendar-history-note" id="snapshot-note" role="status"></span></div><nav class="subnav" aria-label="Political Calendar submodules"><a class="calendar-submodule" href="calendar.html?period=contemporary">Contemporary Calendar</a><a class="calendar-submodule" href="calendar.html?period=2020s">2020s</a><a class="calendar-submodule" href="calendar.html?period=2010s">2010s</a><a class="calendar-submodule" href="calendar.html?period=2000s">2000s</a><a class="calendar-submodule" href="calendar.html?period=1990s">1990s</a><a class="calendar-submodule" href="calendar.html?period=1980s">1980s</a></nav><div class="periodnote" id="period-note" role="status"></div><main class="layout single"><section class="panel"><div class="panelhead"><div class="ptitle"><span class="icon">▦</span> Political calendar <span class="subtle" id="calendar-range">· 18-month outlook</span></div><div class="calctrl"><button class="navbtn" id="prev" aria-label="Previous month">‹</button><div class="month" id="monthlabel"></div><button class="navbtn" id="next" aria-label="Next month">›</button></div></div><div class="filters"><button class="filter active" data-filter="all">All events</button><button class="filter" data-filter="election">Elections</button><button class="filter" data-filter="summit">Summits</button><div class="search"><input id="search" placeholder="Search country or event…" aria-label="Search events"></div></div><div class="calendar"><div class="weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="grid" id="days"></div><div class="legend"><span><i class="legdot"></i>Declared date</span><span><i class="legdot amber"></i>Tentative / expected</span></div></div><div class="detail" id="detail"></div><div class="eventlist"><div class="listhead"><span>Events this month</span><span id="eventcount"></span></div><div id="eventrows"></div></div><div class="notice">Calendar snapshot: 23 Oct 2026. Dates can change. “Tentative” and “expected” events are not official confirmations. Coverage focuses on selected national elections. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div></section></main><footer class="foot"><a href="index.html">JDP-I Q · SUITE HOME</a><span>POLITICAL CALENDAR</span><span>Calendar snapshot: 23 Oct 2026 · <a href="https://www.electionguide.org/" target="_blank" rel="noreferrer">IFES ElectionGuide</a> · <a href="https://odihr.osce.org/odihr/elections" target="_blank" rel="noreferrer">OSCE ODIHR</a></span></footer></div><script>
+<section class="hero"><div><div class="eyebrow">World affairs · Political event register</div><h1>Political Calendar</h1><p>Elections, new leaders, coups, outbreaks of war, assassinations, crises and treaties, by day, month or year, for every country or just the ones you choose.</p></div><div class="updated">EVENT DATA SNAPSHOT<br><strong id="updated">23 Oct 2026 · editorial</strong></div></section>
+<aside class="source-health" aria-label="Political Calendar data source status" role="status" aria-live="polite"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Supabase archive · checking</span></span><span class="source-health-note" id="calendar-source-note">Checking saved calendar history.</span></aside><div class="calendar-history"><label for="snapshot-date">View calendar as of</label><button class="navbtn" id="snapshot-prev" aria-label="Previous snapshot day">‹</button><input id="snapshot-date" type="date"><button class="navbtn" id="snapshot-next" aria-label="Next snapshot day">›</button><span class="calendar-history-note" id="snapshot-note" role="status"></span></div><nav class="subnav" aria-label="Political Calendar submodules"><a class="calendar-submodule" href="calendar.html?period=contemporary">Contemporary Calendar</a><a class="calendar-submodule" href="calendar.html?period=2020s">2020s</a><a class="calendar-submodule" href="calendar.html?period=2010s">2010s</a><a class="calendar-submodule" href="calendar.html?period=2000s">2000s</a><a class="calendar-submodule" href="calendar.html?period=1990s">1990s</a><a class="calendar-submodule" href="calendar.html?period=1980s">1980s</a></nav><div class="periodnote" id="period-note" role="status"></div><main class="layout single"><section class="panel"><div class="panelhead"><div class="ptitle"><span class="icon">▦</span> Political calendar <span class="subtle" id="calendar-range">· 18-month outlook</span></div><div class="calctrl"><div class="viewtoggle"><button class="viewbtn" data-view="month">Month</button><button class="viewbtn" data-view="year">Year</button></div><button class="navbtn" id="prev" aria-label="Previous">‹</button><div class="month" id="monthlabel"></div><button class="navbtn" id="next" aria-label="Next">›</button><input type="month" id="monthpick" aria-label="Jump to month"></div></div><div class="filters"><div id="filters" class="filterset"></div><div class="search"><input id="search" placeholder="Search country or event…" aria-label="Search events"></div></div><div class="countrybar"><label for="countrypick">Highlight countries</label><input id="countrypick" list="countrylist" placeholder="Type a country…" autocomplete="off"><datalist id="countrylist"></datalist><button class="smallbtn" id="countryadd">Add</button><div id="chips" class="chips"></div></div><div class="calendar"><div id="yeargrid" class="yeargrid" hidden></div><div id="monthgrid"><div class="weekdays"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="grid" id="days"></div></div><div class="legend"><span>Dot colour = event type</span><span>Click a day for details</span></div></div><div class="detail" id="detail"></div><div class="eventlist"><div class="listhead"><span id="listtitle">Events this month</span><span id="eventcount"></span></div><div id="eventrows"></div></div><div class="notice">Calendar snapshot: 23 Oct 2026. Dates can change. “Tentative” and “expected” events are not official confirmations. Upcoming coverage focuses on national elections; past events also include leaders, coups, wars, assassinations, crises and treaties. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div></section></main><footer class="foot"><a href="index.html">JDP-I Q · SUITE HOME</a><span>POLITICAL CALENDAR</span><span>Upcoming: <a href="https://www.electionguide.org/" target="_blank" rel="noreferrer">IFES ElectionGuide</a> · <a href="https://odihr.osce.org/odihr/elections" target="_blank" rel="noreferrer">OSCE ODIHR</a> · Past: H&amp;P Retrospective, <a href="https://ucdp.uu.se/" target="_blank" rel="noreferrer">UCDP</a>, <a href="https://www.wikidata.org/" target="_blank" rel="noreferrer">Wikidata</a></span></footer></div><script>
 // Election calendar curated from IFES ElectionGuide and OSCE ODIHR public listings. Dates refresh by manual editorial updates.
 let events=[
 {date:'2026-10-25',country:'Brazil',title:'General election · second round if needed',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/id/4736/'},
@@ -59,11 +69,189 @@ let events=[
 {date:'2026-10-04',country:'Brazil',title:'Presidential, Senate & Chamber elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-04',country:'Bosnia and Herzegovina',title:'General elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-03',country:'Latvia',title:'Parliamentary election',type:'election',status:'declared',source:'https://www.electionguide.org/'},];
-const activePeriod=new URLSearchParams(location.search).get('period')||'contemporary';const start=new Date();start.setDate(1);start.setHours(0,0,0,0);let view=new Date(start);if(activePeriod!=='contemporary'){const decade=Number(activePeriod.slice(0,4)),matching=events.filter(e=>Number(e.date.slice(0,4))>=decade&&Number(e.date.slice(0,4))<decade+10).sort((a,b)=>a.date.localeCompare(b.date));view=matching.length?new Date(matching[0].date+'T00:00:00'):new Date(decade,0,1);view.setDate(1);view.setHours(0,0,0,0)}let activeFilter='all';let selected=null;let articlesCache={};
-const fmt=new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric'});const dateFmt=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric'});function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}function periodIncludes(e){const year=Number(e.date.slice(0,4));if(activePeriod==='contemporary'){const end=new Date();end.setMonth(end.getMonth()+18);return e.date>=dateKey(new Date())&&e.date<=dateKey(end)}const first=Number(activePeriod.slice(0,4));return Number.isFinite(first)&&year>=first&&year<first+10}
-function showUpdated(){const t=new Date();document.getElementById('clock').textContent=t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'}
-function visibleEvents(){const q=document.getElementById('search').value.toLowerCase();return events.filter(e=>periodIncludes(e)&&(activeFilter==='all'||e.type===activeFilter)&&(!q||(e.country+' '+e.title).toLowerCase().includes(q)))}
-function render(){document.getElementById('monthlabel').textContent=fmt.format(view);const first=new Date(view.getFullYear(),view.getMonth(),1),offset=first.getDay(),daysIn=new Date(view.getFullYear(),view.getMonth()+1,0).getDate(),prevDays=new Date(view.getFullYear(),view.getMonth(),0).getDate();const ds=document.getElementById('days');ds.innerHTML='';const ev=visibleEvents();for(let i=0;i<42;i++){let n,dt,off=false;if(i<offset){n=prevDays-offset+i+1;dt=new Date(view.getFullYear(),view.getMonth()-1,n);off=true}else if(i>=offset+daysIn){n=i-offset-daysIn+1;dt=new Date(view.getFullYear(),view.getMonth()+1,n);off=true}else{n=i-offset+1;dt=new Date(view.getFullYear(),view.getMonth(),n)}const key=dateKey(dt),matches=ev.filter(e=>e.date===key);const cell=document.createElement('div');cell.className='day'+(off?' off':'')+(key===dateKey(new Date())?' today':'');cell.innerHTML='<span class="num">'+n+'</span>'+(matches.length?'<div class="eventdots">'+matches.slice(0,4).map(e=>'<i class="eventdot '+(e.status==='tentative'?'tentative':'')+'"></i>').join('')+'</div><span class="daycount">'+matches.length+'</span>':'');cell.onclick=()=>{const ee=matches.length?matches:ev.filter(e=>e.date===key);if(ee.length){const d=document.getElementById('detail');d.classList.add('show');d.innerHTML='<strong>'+dateFmt.format(dt)+' · '+ee.length+' event'+(ee.length>1?'s':'')+'</strong><p>'+ee.map(e=>e.country+' — '+e.title).join('<br>')+'</p><a href="'+ee[0].source+'" target="_blank" rel="noreferrer">Open source ↗</a>'}};ds.appendChild(cell)}const monthEvents=ev.filter(e=>{const d=new Date(e.date+'T00:00:00');return d.getFullYear()===view.getFullYear()&&d.getMonth()===view.getMonth()}).sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('eventcount').textContent=monthEvents.length+' events';const emptyMessage=activePeriod==='contemporary'?'No events in this month’s current 18-month outlook. Browse another month with the arrows above.':activePeriod==='2020s'?'No matching events are included for this month in the 2020s snapshot.':'No records for this decade are present in the current curated dataset.';document.getElementById('eventrows').innerHTML=monthEvents.length?monthEvents.map(e=>{const d=new Date(e.date+'T00:00:00');return '<div class="eventrow"><div class="datebox"><b>'+String(d.getDate()).padStart(2,'0')+'</b><span>'+d.toLocaleDateString('en-GB',{month:'short'})+'</span></div><div><div class="eventname">'+e.title+'</div><div class="eventcountry">'+e.country+' · '+d.getFullYear()+'</div></div><span class="tag '+(e.status==='tentative'?'tent':'')+'">'+(e.status==='tentative'?'Expected':'Confirmed')+'</span></div>'}).join(''): '<div class="empty">'+emptyMessage+'</div>'}document.getElementById('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};document.getElementById('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{document.querySelector('.filter.active').classList.remove('active');b.classList.add('active');activeFilter=b.dataset.filter;render()});document.querySelectorAll('.calendar-submodule').forEach(a=>{if(new URL(a.href).searchParams.get('period')===activePeriod)a.classList.add('active')});const note=document.getElementById('period-note');if(activePeriod==='contemporary'){note.innerHTML='<strong>Contemporary outlook:</strong> rolling 18 months. Dates come from the 23 Oct 2026 editorial snapshot; source catalog is manually maintained; check the event source for changes.'}else if(activePeriod==='2020s'){note.innerHTML='<strong>2020s archive:</strong> this snapshot contains selected 2026–2028 events. Records for 2020–2025 are not included.'}else{note.innerHTML='<strong>'+activePeriod.replace('s','s')+' archive:</strong> no verified events for this decade are present in the current dataset.'}const calendarRange=document.getElementById('calendar-range');if(activePeriod==='contemporary')calendarRange.textContent='· 18-month outlook';else{const firstYear=Number(activePeriod.slice(0,4));calendarRange.textContent='· '+firstYear+'–'+(firstYear+9)}document.getElementById('search').oninput=render;showUpdated();setInterval(showUpdated,60000);render();
+// Historical events (elections, new leaders, coups, conflicts, assassinations, crises, treaties) come from
+// ../calendar/data/<decade>.json, built by calendar/scripts/build-events.mjs. Upcoming elections come from the
+// editorial list above or the Supabase snapshot. Contemporary = the last 6 months plus an 18-month outlook.
+const TYPES = {
+  election: { label: 'Elections', tag: 'Election', colour: 'var(--cyan)' },
+  leader: { label: 'New leaders', tag: 'New leader', colour: 'var(--green)' },
+  coup: { label: 'Coups', tag: 'Coup', colour: '#ff9ad5' },
+  conflict: { label: 'Wars & clashes', tag: 'Conflict', colour: 'var(--red)' },
+  assassination: { label: 'Assassinations', tag: 'Assassination', colour: '#c58cff' },
+  crisis: { label: 'Crises & landmarks', tag: 'Crisis', colour: 'var(--amber)' },
+  treaty: { label: 'Treaties', tag: 'Treaty', colour: '#7aa7ff' },
+};
+const params = new URLSearchParams(location.search);
+const activePeriod = params.get('period') || 'contemporary';
+const decadeOf = d => d.slice(0, 3) + '0s';
+const decadeCache = new Map();
+let editorial = events.slice(), pastEvents = [];
+let activeFilter = 'all', calView = params.get('view') === 'year' ? 'year' : 'month';
+let highlighted = (params.get('countries') || '').split(',').map(s => s.trim()).filter(Boolean);
+let view = new Date(); view.setDate(1); view.setHours(0, 0, 0, 0);
+const fmt = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
+const dateFmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const dateKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const monthKey = d => dateKey(d).slice(0, 7);
+
+function contemporaryRange() {
+  const a = new Date(); a.setMonth(a.getMonth() - 6);
+  const b = new Date(); b.setMonth(b.getMonth() + 18);
+  return [dateKey(a), dateKey(b)];
+}
+function periodIncludes(e) {
+  if (activePeriod === 'contemporary') { const [a, b] = contemporaryRange(); return e.date >= a && e.date <= b; }
+  const first = Number(activePeriod.slice(0, 4)), year = Number(e.date.slice(0, 4));
+  return year >= first && year < first + 10;
+}
+async function loadDecade(d) {
+  if (!decadeCache.has(d)) decadeCache.set(d, fetch(`../calendar/data/${d}.json`).then(r => r.ok ? r.json() : { events: [] }).then(x => x.events).catch(() => []));
+  return decadeCache.get(d);
+}
+async function loadHistory() {
+  const decades = activePeriod === 'contemporary' ? [...new Set(contemporaryRange().map(decadeOf))] : [activePeriod];
+  pastEvents = (await Promise.all(decades.map(loadDecade))).flat();
+}
+// Editorial/Supabase entries win over the historical file when both list the same country's election that day.
+function allEvents() {
+  const seen = new Set(editorial.map(e => e.date + '|' + e.country));
+  return [...editorial.map(e => ({ ...e, type: e.type === 'summit' ? 'treaty' : e.type })), ...pastEvents.filter(e => !(e.type === 'election' && seen.has(e.date + '|' + e.country)))];
+}
+function visibleEvents() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const hl = new Set(highlighted.map(c => c.toLowerCase()));
+  return allEvents().filter(e => periodIncludes(e) && (activeFilter === 'all' || e.type === activeFilter)
+    && (!hl.size || hl.has(String(e.country).toLowerCase()))
+    && (!q || (e.country + ' ' + e.title).toLowerCase().includes(q)));
+}
+const dot = e => `<i class="eventdot${e.status === 'tentative' ? ' tentative' : ''}" style="background:${TYPES[e.type]?.colour || 'var(--cyan)'}"></i>`;
+const tag = e => e.status === 'tentative' ? '<span class="tag tent">Expected</span>' : `<span class="tag" style="color:${TYPES[e.type]?.colour};background:transparent;border:1px solid #34444e">${esc(TYPES[e.type]?.tag || 'Event')}</span>`;
+
+function showDay(dt, list) {
+  const d = document.getElementById('detail');
+  d.classList.add('show');
+  d.innerHTML = '<strong>' + dateFmt.format(dt) + ' · ' + list.length + ' event' + (list.length > 1 ? 's' : '') + '</strong>'
+    + list.map(e => `<p>${dot(e)} <b>${esc(e.country)}</b> — ${e.source ? `<a href="${esc(e.source)}" target="_blank" rel="noreferrer">${esc(e.title)} ↗</a>` : esc(e.title)}</p>`).join('');
+}
+
+function renderMonth(ev) {
+  const first = new Date(view.getFullYear(), view.getMonth(), 1), offset = first.getDay(),
+    daysIn = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate(), prevDays = new Date(view.getFullYear(), view.getMonth(), 0).getDate();
+  const ds = document.getElementById('days'); ds.innerHTML = '';
+  for (let i = 0; i < 42; i++) {
+    let n, dt, off = false;
+    if (i < offset) { n = prevDays - offset + i + 1; dt = new Date(view.getFullYear(), view.getMonth() - 1, n); off = true; }
+    else if (i >= offset + daysIn) { n = i - offset - daysIn + 1; dt = new Date(view.getFullYear(), view.getMonth() + 1, n); off = true; }
+    else { n = i - offset + 1; dt = new Date(view.getFullYear(), view.getMonth(), n); }
+    const key = dateKey(dt), matches = ev.filter(e => e.date === key);
+    const cell = document.createElement('div');
+    cell.className = 'day' + (off ? ' off' : '') + (key === dateKey(new Date()) ? ' today' : '');
+    cell.innerHTML = '<span class="num">' + n + '</span>' + (matches.length ? '<div class="eventdots">' + matches.slice(0, 6).map(dot).join('') + '</div><span class="daycount">' + matches.length + '</span>' : '');
+    if (matches.length) cell.title = matches.slice(0, 5).map(e => e.country + ': ' + e.title).join('\n');
+    cell.onclick = () => { if (matches.length) showDay(dt, matches); };
+    ds.appendChild(cell);
+  }
+  const monthEvents = ev.filter(e => e.date.startsWith(monthKey(view))).sort((a, b) => a.date.localeCompare(b.date));
+  document.getElementById('eventcount').textContent = monthEvents.length + ' events';
+  document.getElementById('listtitle').textContent = 'Events in ' + fmt.format(view);
+  document.getElementById('eventrows').innerHTML = monthEvents.length ? monthEvents.map(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return '<div class="eventrow"><div class="datebox"><b>' + String(d.getDate()).padStart(2, '0') + '</b><span>' + d.toLocaleDateString('en-GB', { month: 'short' }) + '</span></div><div><div class="eventname">' + (e.source ? `<a href="${esc(e.source)}" target="_blank" rel="noreferrer">${esc(e.title)}</a>` : esc(e.title)) + '</div><div class="eventcountry">' + esc(e.country) + ' · ' + d.getFullYear() + '</div></div>' + tag(e) + '</div>';
+  }).join('') : '<div class="empty">No matching events this month. Try another month, event type or country.</div>';
+}
+
+function renderYear(ev) {
+  const y = view.getFullYear();
+  document.getElementById('yeargrid').innerHTML = Array.from({ length: 12 }, (_, m) => {
+    const key = `${y}-${String(m + 1).padStart(2, '0')}`, list = ev.filter(e => e.date.startsWith(key)).sort((a, b) => a.date.localeCompare(b.date));
+    const counts = Object.keys(TYPES).map(t => [t, list.filter(e => e.type === t).length]).filter(([, n]) => n);
+    // Lead with the rarer, weightier event types rather than the many routine elections.
+    const order = ['conflict', 'coup', 'assassination', 'crisis', 'treaty', 'leader', 'election'];
+    const top = [...list].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type)).slice(0, 4);
+    return `<button class="ymonth" data-month="${key}"><div class="ymhead"><b>${new Date(y, m, 1).toLocaleDateString('en-GB', { month: 'long' })}</b><span>${list.length}</span></div>
+      <div class="ymbar">${counts.map(([t, n]) => `<i style="flex:${n};background:${TYPES[t].colour}" title="${TYPES[t].label}: ${n}"></i>`).join('')}</div>
+      ${top.map(e => `<div class="ymevent">${dot(e)} ${esc(e.country)}: ${esc(e.title)}</div>`).join('')}</button>`;
+  }).join('');
+  document.querySelectorAll('.ymonth').forEach(b => b.onclick = () => { view = new Date(b.dataset.month + '-01T00:00:00'); setCalView('month'); });
+  const yearEvents = ev.filter(e => e.date.startsWith(String(y)));
+  document.getElementById('eventcount').textContent = yearEvents.length + ' events';
+}
+
+function render() {
+  const ev = visibleEvents();
+  document.getElementById('monthlabel').textContent = calView === 'year' ? String(view.getFullYear()) : fmt.format(view);
+  document.getElementById('monthpick').value = monthKey(view);
+  document.getElementById('monthgrid').hidden = calView !== 'month';
+  document.getElementById('yeargrid').hidden = calView !== 'year';
+  document.querySelector('.eventlist').hidden = calView !== 'month';
+  document.querySelectorAll('.viewbtn').forEach(b => b.classList.toggle('active', b.dataset.view === calView));
+  renderChips();
+  if (calView === 'year') renderYear(ev); else renderMonth(ev);
+  writeUrl();
+}
+function writeUrl() {
+  const p = new URLSearchParams(location.search);
+  p.set('period', activePeriod);
+  if (calView === 'year') p.set('view', 'year'); else p.delete('view');
+  if (highlighted.length) p.set('countries', highlighted.join(',')); else p.delete('countries');
+  window.history.replaceState(null, '', '?' + p);
+}
+function setCalView(v) { calView = v; document.getElementById('detail').classList.remove('show'); render(); }
+function step(dir) {
+  if (calView === 'year') view.setFullYear(view.getFullYear() + dir); else view.setMonth(view.getMonth() + dir);
+  document.getElementById('detail').classList.remove('show');
+  render();
+}
+
+// Country highlighting: pick one or several countries to see only their events.
+function renderChips() {
+  document.getElementById('chips').innerHTML = highlighted.map(c => `<button class="chip" data-country="${esc(c)}" aria-label="Remove ${esc(c)}">${esc(c)} ✕</button>`).join('')
+    + (highlighted.length ? '<button class="chip clear" id="clearchips">Show all countries</button>' : '<span class="chiphint">Showing every country. Add countries to highlight only them.</span>');
+  document.querySelectorAll('.chip[data-country]').forEach(b => b.onclick = () => { highlighted = highlighted.filter(c => c !== b.dataset.country); render(); });
+  document.getElementById('clearchips')?.addEventListener('click', () => { highlighted = []; render(); });
+  const names = [...new Set(allEvents().filter(periodIncludes).map(e => e.country))].sort();
+  document.getElementById('countrylist').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+}
+function addCountry() {
+  const input = document.getElementById('countrypick'), v = input.value.trim();
+  const match = [...new Set(allEvents().map(e => e.country))].find(n => n.toLowerCase() === v.toLowerCase());
+  if (match && !highlighted.includes(match)) highlighted.push(match);
+  input.value = '';
+  render();
+}
+
+async function init() {
+  // Open on the period's first month with events (archives) or the current month (contemporary).
+  await loadHistory();
+  const requested = params.get('month');
+  if (requested && /^\d{4}-\d{2}$/.test(requested)) view = new Date(requested + '-01T00:00:00');
+  else if (activePeriod !== 'contemporary') {
+    const first = allEvents().filter(periodIncludes).sort((a, b) => a.date.localeCompare(b.date))[0];
+    view = first ? new Date(first.date.slice(0, 7) + '-01T00:00:00') : new Date(Number(activePeriod.slice(0, 4)), 0, 1);
+  }
+  render();
+}
+function showUpdated() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; }
+
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('next').onclick = () => step(1);
+document.getElementById('monthpick').onchange = e => { if (e.target.value) { view = new Date(e.target.value + '-01T00:00:00'); render(); } };
+document.querySelectorAll('.viewbtn').forEach(b => b.onclick = () => setCalView(b.dataset.view));
+document.getElementById('filters').innerHTML = '<button class="filter active" data-filter="all">All events</button>' + Object.entries(TYPES).map(([k, t]) => `<button class="filter" data-filter="${k}"><i class="legdot" style="background:${t.colour}"></i> ${t.label}</button>`).join('');
+document.querySelectorAll('.filter').forEach(b => b.onclick = () => { document.querySelector('.filter.active').classList.remove('active'); b.classList.add('active'); activeFilter = b.dataset.filter; render(); });
+document.getElementById('countryadd').onclick = addCountry;
+document.getElementById('countrypick').addEventListener('keydown', e => { if (e.key === 'Enter') addCountry(); });
+document.getElementById('countrypick').addEventListener('change', addCountry);
+document.querySelectorAll('.calendar-submodule').forEach(a => { if (new URL(a.href).searchParams.get('period') === activePeriod) a.classList.add('active'); });
+const note = document.getElementById('period-note');
+note.innerHTML = activePeriod === 'contemporary'
+  ? '<strong>Contemporary:</strong> the last six months and an 18-month outlook. Upcoming elections come from the editorial calendar; past events cover elections, new leaders, coups, wars, assassinations, crises and treaties.'
+  : `<strong>${activePeriod} archive:</strong> elections, new leaders and coups (H&amp;P Retrospective), outbreaks of armed conflict (UCDP), and assassinations, battles, attacks, epidemics, disasters and treaties (Wikidata, events covered in many Wikipedia languages).`;
+document.getElementById('calendar-range').textContent = activePeriod === 'contemporary' ? '· last 6 months + 18-month outlook' : '· ' + activePeriod.slice(0, 4) + '–' + (Number(activePeriod.slice(0, 4)) + 9);
+document.getElementById('search').oninput = render;
+showUpdated(); setInterval(showUpdated, 60000);
+init();
 
 const localEvents=events.slice();
 const snapshotDateInput=document.getElementById('snapshot-date');
@@ -78,14 +266,14 @@ async function loadCalendarSnapshot(requestedDate){
   try{
     if(!globalThis.GTTSDB)throw new Error('Supabase client is not configured');
     const snapshot=await globalThis.GTTSDB.calendarSnapshotOnOrBefore(date);
-    if(!snapshot){events=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · no snapshot','No saved snapshot exists for this date yet; showing the local editorial catalog.');snapshotNote.textContent='No archive captured on or before '+date+'.';render();return}
-    events=(Array.isArray(snapshot.events)?snapshot.events:[]).map(e=>({date:String(e.date).slice(0,10),country:e.country,title:e.title,type:e.type,status:e.status,source:e.source}));
+    if(!snapshot){editorial=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · no snapshot','No saved snapshot exists for this date yet; showing the local editorial catalog.');snapshotNote.textContent='No archive captured on or before '+date+'.';render();return}
+    editorial=(Array.isArray(snapshot.events)?snapshot.events:[]).map(e=>({date:String(e.date).slice(0,10),country:e.country,title:e.title,type:e.type,status:e.status,source:e.source}));
     const state=snapshot.state||'stale';
     const captured=String(snapshot.snapshot_date||'').slice(0,10);
     const sourceDate=String(snapshot.source_data_date||'').slice(0,10);
     setCalendarArchiveStatus(state,'Supabase archive · '+state+' · '+captured,snapshot.message||'Saved calendar snapshot loaded.');
-    snapshotNote.textContent=(captured===date?'Snapshot '+captured:'Showing nearest saved snapshot '+captured)+' · '+events.length+' events · source data '+sourceDate+'.';
-  }catch(error){events=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · unavailable','Could not reach the Supabase archive; showing the local editorial catalog.');snapshotNote.textContent=String(error.message||'Database unavailable');}
+    snapshotNote.textContent=(captured===date?'Snapshot '+captured:'Showing nearest saved snapshot '+captured)+' · '+editorial.length+' upcoming entries · source data '+sourceDate+'.';
+  }catch(error){editorial=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · unavailable','Could not reach the Supabase archive; showing the local editorial catalog.');snapshotNote.textContent=String(error.message||'Database unavailable');}
   render();
 }
 snapshotDateInput.onchange=()=>loadCalendarSnapshot(snapshotDateInput.value);

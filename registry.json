@@ -29,14 +29,38 @@
           "status": "live",
           "host": "JDP-I",
           "url": "q/calendar.html?period=contemporary",
-          "description": "The current 18-month outlook of elections and political milestones, plus decade archives.",
+          "description": "Elections, new leaders, coups, outbreaks of war, assassinations, crises and treaties, by month or year, for every country or only those you highlight. Contemporary outlook plus archives back to 1980.",
           "submodules": [
-            { "id": "contemporary", "name": "Contemporary", "url": "q/calendar.html?period=contemporary" },
-            { "id": "2020s", "name": "2020s", "url": "q/calendar.html?period=2020s" },
-            { "id": "2010s", "name": "2010s", "url": "q/calendar.html?period=2010s" },
-            { "id": "2000s", "name": "2000s", "url": "q/calendar.html?period=2000s" },
-            { "id": "1990s", "name": "1990s", "url": "q/calendar.html?period=1990s" },
-            { "id": "1980s", "name": "1980s", "url": "q/calendar.html?period=1980s" }
+            {
+              "id": "contemporary",
+              "name": "Contemporary",
+              "url": "q/calendar.html?period=contemporary"
+            },
+            {
+              "id": "2020s",
+              "name": "2020s",
+              "url": "q/calendar.html?period=2020s"
+            },
+            {
+              "id": "2010s",
+              "name": "2010s",
+              "url": "q/calendar.html?period=2010s"
+            },
+            {
+              "id": "2000s",
+              "name": "2000s",
+              "url": "q/calendar.html?period=2000s"
+            },
+            {
+              "id": "1990s",
+              "name": "1990s",
+              "url": "q/calendar.html?period=1990s"
+            },
+            {
+              "id": "1980s",
+              "name": "1980s",
+              "url": "q/calendar.html?period=1980s"
+            }
           ]
         },
         {
@@ -48,11 +72,31 @@
           "url": "q/headlines.html?view=current",
           "description": "Pick a country for its 24-hour news feed, or browse daily, weekly and monthly archives.",
           "submodules": [
-            { "id": "current", "name": "Country map · 24 hours", "url": "q/headlines.html?view=current" },
-            { "id": "day", "name": "Daily archive", "url": "q/headlines.html?view=archive&period=day" },
-            { "id": "week", "name": "Weekly archive", "url": "q/headlines.html?view=archive&period=week" },
-            { "id": "month", "name": "Monthly archive", "url": "q/headlines.html?view=archive&period=month" },
-            { "id": "year", "name": "Yearly top stories", "url": "q/headlines.html?view=archive&period=year" }
+            {
+              "id": "current",
+              "name": "Country map · 24 hours",
+              "url": "q/headlines.html?view=current"
+            },
+            {
+              "id": "day",
+              "name": "Daily archive",
+              "url": "q/headlines.html?view=archive&period=day"
+            },
+            {
+              "id": "week",
+              "name": "Weekly archive",
+              "url": "q/headlines.html?view=archive&period=week"
+            },
+            {
+              "id": "month",
+              "name": "Monthly archive",
+              "url": "q/headlines.html?view=archive&period=month"
+            },
+            {
+              "id": "year",
+              "name": "Yearly top stories",
+              "url": "q/headlines.html?view=archive&period=year"
+            }
           ]
         },
         {
@@ -82,18 +126,17 @@
           "url": "q/battlefield.html?view=live",
           "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive and related coverage. UCDP data, refreshed monthly.",
           "submodules": [
-            { "id": "live", "name": "Live map · last 3 months", "url": "q/battlefield.html?view=live" },
-            { "id": "archive", "name": "Year-to-date archive", "url": "q/battlefield.html?view=archive" }
+            {
+              "id": "live",
+              "name": "Live map · last 3 months",
+              "url": "q/battlefield.html?view=live"
+            },
+            {
+              "id": "archive",
+              "name": "Year-to-date archive",
+              "url": "q/battlefield.html?view=archive"
+            }
           ]
-        },
-        {
-          "id": "battlefield-history",
-          "name": "Retrospective Battlefield",
-          "icon": "⚔",
-          "status": "live",
-          "host": "JDP-I",
-          "url": "battlefield/history/index.html",
-          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links."
         }
       ]
     },
@@ -121,6 +164,15 @@
           "host": "Cloudflare Pages",
           "url": "https://hp-retrospective.pages.dev",
           "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
+        },
+        {
+          "id": "battlefield-history",
+          "name": "Retrospective Battlefield",
+          "icon": "⚔",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "battlefield/history/index.html",
+          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links."
         }
       ]
     },

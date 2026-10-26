@@ -1,4 +1,4 @@
-/* Retrospective Battlefield — JDP-I design system, Q suite (green). Tokens fall back if jdpi.css can't load. */
+/* Retrospective Battlefield — JDP-I design system, H&P suite (cyan). Tokens fall back if jdpi.css can't load. */
 :root {
   --bg: var(--jdpi-bg, #101820);
   --surface: var(--jdpi-panel, #17242e);
@@ -7,7 +7,7 @@
   --muted: var(--jdpi-muted, #91a0aa);
   --faint: var(--jdpi-faint, #70818b);
   --border: var(--jdpi-line, #293a46);
-  --accent: var(--jdpi-green, #b7f36b);
+  --accent: var(--jdpi-cyan, #6ddac8);
   --ocean: var(--jdpi-inset, #0d1721);
   --land-inactive: #22323d;
   --land-stroke: #0d1721;
@@ -99,10 +99,10 @@ h1 { font: 700 18px var(--font-display); margin: 0; letter-spacing: -.02em; }
 .events li[data-type="coup"] .kind { color: var(--c-irregular); }
 .events li[data-type="border"] .kind, .events li[data-type="statehood"] .kind { color: var(--c-border); }
 .btn {
-  display: inline-flex; align-items: center; gap: 6px; border: 1px solid #5d7a45; background: rgba(183, 243, 107, .08); color: var(--accent);
+  display: inline-flex; align-items: center; gap: 6px; border: 1px solid #3f7a70; background: rgba(109, 218, 200, .09); color: var(--accent);
   border-radius: 5px; padding: 7px 10px; font: 500 12px var(--font-ui); cursor: pointer; text-decoration: none; margin: 4px 6px 0 0;
 }
-.btn:hover { background: rgba(183, 243, 107, .16); }
+.btn:hover { background: rgba(109, 218, 200, .18); }
 .btn[disabled] { opacity: .5; cursor: wait; }
 .note { color: var(--muted); font-size: 12px; margin-top: 18px; }
 .empty { color: var(--muted); font-size: 13px; }
@@ -110,7 +110,7 @@ h1 { font: 700 18px var(--font-display); margin: 0; letter-spacing: -.02em; }
 .timeline {
   display: flex; align-items: center; gap: 10px; padding: 10px 20px 14px; background: var(--surface); border-top: 1px solid var(--border);
 }
-.tl-btn.play { width: 40px; height: 40px; border-radius: 50%; border-color: #5d7a45; color: var(--accent); }
+.tl-btn.play { width: 40px; height: 40px; border-radius: 50%; border-color: #3f7a70; color: var(--accent); }
 .slider-wrap { flex: 1; position: relative; padding-bottom: 16px; }
 #year { width: 100%; accent-color: var(--accent); }
 .ticks { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; font: 10px var(--font-mono); color: var(--faint); }
@@ -134,3 +134,12 @@ h1 { font: 700 18px var(--font-display); margin: 0; letter-spacing: -.02em; }
 .sides b { color: var(--muted); font: 9px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; display: block; margin-top: 6px; }
 .shape.involved { stroke: var(--accent); stroke-width: 1.6; }
 .src-note { color: var(--faint); font-size: 11px; margin-top: 16px; line-height: 1.5; }
+
+.more { display: inline-block; margin: 4px 0 0; border: 1px solid var(--border); background: transparent; color: var(--accent); border-radius: 5px; padding: 5px 10px; font: 500 12px var(--font-ui); cursor: pointer; }
+.more:hover { border-color: var(--accent); }
+.modal { position: fixed; inset: 0; z-index: 50; background: rgba(5, 10, 14, .72); display: grid; place-items: center; padding: 16px; }
+.modal[hidden] { display: none; }
+.modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); width: min(720px, 100%); max-height: 85vh; overflow: auto; padding: 20px 22px; }
+.modal-box h2 { margin: 0 0 10px; font: 600 20px var(--font-display); }
+.modal-box h3 { font: 10px var(--font-mono); text-transform: uppercase; letter-spacing: .14em; color: var(--accent); margin: 18px 0 8px; }
+.count { color: var(--muted); font: 10px var(--font-mono); margin-left: 6px; }

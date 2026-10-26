@@ -74,6 +74,35 @@ function renderMap() {
     .on('click', (ev, d) => select(d.properties.gw));
 }
 
+/* ---------------------------------------------------------------- see more */
+// Long lists and long text show their first items in the panel; "See more" opens the rest in a pop-out.
+const popouts = new Map();
+function seeMore(items, limit, title, full) {
+  if (items.length <= limit) return items.join('');
+  const key = 'm' + popouts.size;
+  popouts.set(key, { title, html: full ?? items.join('') });
+  return items.slice(0, limit).join('') + `<button type="button" class="more" data-more="${key}">See more (${items.length - limit} more)</button>`;
+}
+function seeMoreText(list, limit, title) {
+  if (list.length <= limit) return esc(list.join(', ') || '—');
+  const key = 'm' + popouts.size;
+  popouts.set(key, { title, html: `<p>${esc(list.join(', '))}</p>` });
+  return `${esc(list.slice(0, limit).join(', '))} <button type="button" class="more" data-more="${key}">See more (${list.length - limit} more)</button>`;
+}
+function openPopout(key) {
+  const p = popouts.get(key);
+  if (!p) return;
+  $('#modal-title').textContent = p.title;
+  $('#modal-body').innerHTML = p.html;
+  $('#modal').hidden = false;
+  $('#modal-body').querySelectorAll('.war[data-id]').forEach(el => el.onclick = () => { closePopout(); selectWar(el.dataset.id); });
+  $('#modal-close').focus();
+}
+function closePopout() { $('#modal').hidden = true; }
+$('#modal-close').onclick = closePopout;
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closePopout(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopout(); });
+
 /* ---------------------------------------------------------------- panel */
 function warCard(w, y) {
   const l = levelIn(w, y);
@@ -92,33 +121,43 @@ function warDetail(w, y) {
     <h2>${esc(w.name)}</h2><p class="sub">${esc(w.type)} · ${span(w)}</p>
     <p>${intro}</p>
     ${l ? `<p><span class="tag ${l === 2 ? 'irregular' : 'office'}">${y}</span> ${levelLabel(l)}</p>` : `<p class="empty">Not active in ${y}.</p>`}
-    <div class="sides"><b>Side A</b>${esc(w.sideA.join(', ') || '—')}<b>Side B</b>${esc(w.sideB.join(', ') || '—')}</div>
+    <div class="sides"><b>Side A</b>${seeMoreText(w.sideA, 8, `${w.name} · side A`)}<b>Side B</b>${seeMoreText(w.sideB, 8, `${w.name} · side B`)}</div>
     <a class="btn" href="${wikiUrl(w)}" target="_blank" rel="noreferrer">${w.wiki ? 'Wikipedia article ↗' : 'Search Wikipedia ↗'}</a>
-    ${w.src === 'ucdp' ? `<h3>Year by year</h3><p class="meta">${w.years.map(([yy, x]) => `<span style="color:${x === 2 ? 'var(--c-war)' : 'var(--c-minor)'}">${yy}</span>`).join(' ')}</p>` : ''}`;
+    ${w.src === 'ucdp' ? `<h3>Year by year <span class="count">red = war level</span></h3><p class="meta">${seeMore(w.years.map(([yy, x]) => `<span style="color:${x === 2 ? 'var(--c-war)' : 'var(--c-minor)'}">${yy}</span> `), 24, `${w.name} · active years`)}</p>` : ''}`;
 }
 
 function renderPanel() {
   const y = state.year, panel = $('#panel');
+  popouts.clear();
   let html;
   if (state.war) html = warDetail(state.war, y);
   else if (state.selected) {
     const gw = state.selected;
     const here = warsIn(y).filter(w => w.loc.includes(gw)), abroad = warsIn(y).filter(w => !w.loc.includes(gw) && w.states.includes(gw));
-    const ever = state.data.wars.filter(w => w.loc.includes(gw) || w.states.includes(gw));
-    html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(nameOf(gw, y))}</h2>
+    // Every conflict this state took part in or hosted, across the whole period, oldest first.
+    const ever = state.data.wars.filter(w => w.loc.includes(gw) || w.states.includes(gw)).sort((a, b) => a.years[0][0] - b.years[0][0]);
+    const onSoil = ever.filter(w => w.loc.includes(gw)), away = ever.filter(w => !w.loc.includes(gw));
+    const cards = list => list.map(w => warCard(w, y));
+    const byDecade = list => [...new Set(list.map(w => Math.floor(w.years[0][0] / 10) * 10))]
+      .map(d => `<h3>${d}s</h3>${list.filter(w => Math.floor(w.years[0][0] / 10) * 10 === d).map(w => warCard(w, y)).join('')}`).join('');
+    const cname = nameOf(gw, y);
+    html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(cname)}</h2>
       <p class="sub">${here.length ? `${here.length} conflict${here.length > 1 ? 's' : ''} on its territory in ${y}` : `No conflict on its territory in ${y}`}${abroad.length ? ` · fighting in ${abroad.length} abroad` : ''}</p>
-      ${here.length ? `<h3>On its territory</h3>${here.map(w => warCard(w, y)).join('')}` : ''}
-      ${abroad.length ? `<h3>Fighting abroad</h3>${abroad.map(w => warCard(w, y)).join('')}` : ''}
-      <h3>All conflicts 1926–${state.data.lastYear}</h3>${ever.length ? ever.sort((a, b) => a.years[0][0] - b.years[0][0]).map(w => warCard(w, y)).join('') : '<p class="empty">None recorded.</p>'}`;
+      ${here.length ? `<h3>On its territory in ${y}</h3>${seeMore(cards(here), 6, `${cname} · conflicts on its territory in ${y}`)}` : ''}
+      ${abroad.length ? `<h3>Fighting abroad in ${y}</h3>${seeMore(cards(abroad), 6, `${cname} · fighting abroad in ${y}`)}` : ''}
+      <h3>All conflicts ${state.data.firstYear}–${state.data.lastYear} <span class="count">${ever.length} · ${onSoil.length} on its territory · ${away.length} abroad</span></h3>
+      ${ever.length ? seeMore(cards(ever), 6, `${cname} · all conflicts ${state.data.firstYear}–${state.data.lastYear}`,
+        `<p class="sub">${ever.length} conflicts: ${onSoil.length} fought on its territory, ${away.length} fought abroad. Before ${state.data.ucdpFrom} only wars with 1,000+ battle deaths are recorded.</p>${byDecade(ever)}`) : '<p class="empty">None recorded.</p>'}`;
   } else {
     const list = warsIn(y), wars = list.filter(w => levelIn(w, y) === 2).length;
     html = `<h2>${y}</h2><p class="sub">${list.length} armed conflict${list.length === 1 ? '' : 's'}, ${wars} at war level</p>
-      ${list.map(w => warCard(w, y)).join('') || '<p class="empty">No conflicts recorded.</p>'}
+      ${list.length ? seeMore(list.map(w => warCard(w, y)), 15, `All armed conflicts in ${y}`) : '<p class="empty">No conflicts recorded.</p>'}
       <p class="note">Click a country or a war for details. Drag the slider or press ▶ to move through the years.</p>`;
   }
   const src = y < state.data.ucdpFrom ? state.data.sources.cow + '. Before 1946 only wars with 1,000+ battle deaths are recorded.' : state.data.sources.ucdp + '.';
   panel.innerHTML = html + `<p class="src-note">Source: ${esc(src)} Borders: CShapes 2.0.</p>`;
   panel.querySelectorAll('.war[data-id]').forEach(el => el.onclick = () => selectWar(el.dataset.id));
+  panel.querySelectorAll('[data-more]').forEach(b => b.onclick = () => openPopout(b.dataset.more));
   $('#close')?.addEventListener('click', () => select(null));
   $('#close-war')?.addEventListener('click', () => selectWar(null));
 }

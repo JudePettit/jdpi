@@ -72,6 +72,28 @@
           "host": "Lovable",
           "url": "https://country-signal-atlas.lovable.app",
           "description": "Daily country analysis across political, economic, social, technological, legal and environmental factors."
+        },
+        {
+          "id": "battlefield",
+          "name": "Realtime Battlefield",
+          "icon": "✕",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "q/battlefield.html?view=live",
+          "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive and related coverage. UCDP data, refreshed monthly.",
+          "submodules": [
+            { "id": "live", "name": "Live map · last 3 months", "url": "q/battlefield.html?view=live" },
+            { "id": "archive", "name": "Year-to-date archive", "url": "q/battlefield.html?view=archive" }
+          ]
+        },
+        {
+          "id": "battlefield-history",
+          "name": "Retrospective Battlefield",
+          "icon": "⚔",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "battlefield/history/index.html",
+          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links."
         }
       ]
     },

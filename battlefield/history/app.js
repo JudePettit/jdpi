@@ -1,0 +1,217 @@
+/* Retrospective Battlefield — every war and armed conflict, year by year, 1926–2025.
+   Borders: CShapes 2.0. Conflicts: UCDP/PRIO ACD (1946–2025) and Correlates of War (1926–1945). */
+import { displayName } from './names.mjs';
+
+const W = 1000, H = 600;
+const state = { year: 2025, selected: null, war: null, data: null, features: [], playing: null };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = n => Number(n).toLocaleString('en-GB');
+const FILL = { war: 'var(--c-war)', minor: 'var(--c-minor)', abroad: 'var(--c-abroad)', peace: 'var(--c-peace)' };
+
+let svg, g, projection, path, zoom;
+
+/* ---------------------------------------------------------------- data helpers */
+const dateFor = y => `${y}-07-01`;
+const activeOn = date => state.features.filter(f => f.properties.s <= date && date <= f.properties.e);
+const levelIn = (w, y) => w.years.find(([yy]) => yy === y)?.[1] || 0;
+const warsIn = y => state.data.wars.filter(w => levelIn(w, y)).sort((a, b) => levelIn(b, y) - levelIn(a, y) || a.name.localeCompare(b.name));
+const nameOf = (gw, y) => {
+  const f = activeOn(dateFor(y)).find(x => x.properties.gw === gw) || state.features.find(x => x.properties.gw === gw);
+  return f ? displayName(gw, f.properties.name, dateFor(y)) : `State ${gw}`;
+};
+// Per-country status this year: war or minor conflict on its territory, or fighting only abroad.
+function statusMap(y) {
+  const m = new Map();
+  for (const w of warsIn(y)) {
+    const lvl = levelIn(w, y);
+    for (const gw of w.loc) { const cur = m.get(gw); if (cur !== 'war') m.set(gw, lvl === 2 ? 'war' : 'minor'); }
+    for (const gw of w.states) if (!m.has(gw)) m.set(gw, 'abroad');
+  }
+  return m;
+}
+const wikiUrl = w => w.wiki ? `https://en.wikipedia.org/wiki/${encodeURIComponent(w.wiki.replace(/ /g, '_'))}`
+  : `https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(warQuery(w))}`;
+function warQuery(w) {
+  if (w.src === 'cow') return `${w.name} war ${w.span.slice(0, 4)}`;
+  const b = w.sideB.filter(s => !/^Government of/.test(s)).slice(0, 2).join(' ');
+  return `${w.name.split(':')[0]} ${b || 'war'} ${w.years[0][0]}`;
+}
+const span = w => w.src === 'cow' ? w.span : `${w.years[0][0]}–${w.years.at(-1)[0] >= state.data.lastYear ? 'ongoing' : w.years.at(-1)[0]}`;
+const levelLabel = l => l === 2 ? 'War · 1,000+ deaths this year' : 'Minor conflict · 25–999 deaths this year';
+
+/* ---------------------------------------------------------------- map */
+function drawMap() {
+  svg = d3.select('#map').attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'xMidYMid meet');
+  projection = d3.geoNaturalEarth1().fitExtent([[10, 10], [W - 10, H - 10]], { type: 'FeatureCollection', features: activeOn('2020-01-01') });
+  path = d3.geoPath(projection);
+  g = svg.append('g');
+  zoom = d3.zoom().scaleExtent([1, 40]).on('zoom', ev => g.attr('transform', ev.transform));
+  svg.call(zoom);
+  $('#zoom-in').onclick = () => svg.transition().call(zoom.scaleBy, 1.6);
+  $('#zoom-out').onclick = () => svg.transition().call(zoom.scaleBy, 1 / 1.6);
+  $('#zoom-reset').onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity);
+}
+
+function renderMap() {
+  const y = state.year, date = dateFor(y), status = statusMap(y), tip = $('#tooltip');
+  const involved = new Set(state.war ? [...state.war.loc, ...state.war.states] : []);
+  g.selectAll('path.shape')
+    .data(activeOn(date), d => `${d.properties.gw}|${d.properties.s}`)
+    .join('path')
+    .attr('d', path)
+    .attr('class', d => `shape active${d.properties.gw === state.selected ? ' selected' : ''}${involved.has(d.properties.gw) ? ' involved' : ''}`)
+    .attr('fill', d => FILL[status.get(d.properties.gw) || 'peace'])
+    .on('mousemove', (ev, d) => {
+      const box = $('.map-wrap').getBoundingClientRect();
+      const ws = warsIn(y).filter(w => w.loc.includes(d.properties.gw) || w.states.includes(d.properties.gw));
+      tip.innerHTML = `<strong>${esc(displayName(d.properties.gw, d.properties.name, date))}</strong>${ws.length ? ws.slice(0, 3).map(w => esc(w.name)).join('<br>') + (ws.length > 3 ? `<br>+${ws.length - 3} more` : '') : 'No recorded armed conflict'}`;
+      tip.hidden = false;
+      tip.style.left = `${Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8)}px`;
+      tip.style.top = `${ev.clientY - box.top + 14}px`;
+    })
+    .on('mouseleave', () => { tip.hidden = true; })
+    .on('click', (ev, d) => select(d.properties.gw));
+}
+
+/* ---------------------------------------------------------------- panel */
+function warCard(w, y) {
+  const l = levelIn(w, y);
+  return `<div class="war${state.war === w ? ' sel' : ''}" data-level="${l}" data-id="${w.id}"><div class="who">${esc(w.name)}</div><div class="meta">${esc(w.type)} · ${span(w)}${w.deaths ? ` · ${num(w.deaths)} battle deaths in total` : ''}</div></div>`;
+}
+
+function warDetail(w, y) {
+  const l = levelIn(w, y);
+  const activeYears = w.years.length;
+  const warYears = w.years.filter(([, x]) => x === 2).length;
+  const places = w.loc.map(gw => nameOf(gw, y)).filter((v, i, a) => a.indexOf(v) === i);
+  const intro = w.src === 'cow'
+    ? `${esc(w.name)} was ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())} fought ${w.span.replace('–', ' to ')}${w.deaths ? `, with about ${num(w.deaths)} battle deaths according to the Correlates of War project` : ''}.`
+    : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)} in ${esc(places.join(', '))}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
+  return `<button class="close" id="close-war" aria-label="Back">×</button>
+    <h2>${esc(w.name)}</h2><p class="sub">${esc(w.type)} · ${span(w)}</p>
+    <p>${intro}</p>
+    ${l ? `<p><span class="tag ${l === 2 ? 'irregular' : 'office'}">${y}</span> ${levelLabel(l)}</p>` : `<p class="empty">Not active in ${y}.</p>`}
+    <div class="sides"><b>Side A</b>${esc(w.sideA.join(', ') || '—')}<b>Side B</b>${esc(w.sideB.join(', ') || '—')}</div>
+    <a class="btn" href="${wikiUrl(w)}" target="_blank" rel="noreferrer">${w.wiki ? 'Wikipedia article ↗' : 'Search Wikipedia ↗'}</a>
+    ${w.src === 'ucdp' ? `<h3>Year by year</h3><p class="meta">${w.years.map(([yy, x]) => `<span style="color:${x === 2 ? 'var(--c-war)' : 'var(--c-minor)'}">${yy}</span>`).join(' ')}</p>` : ''}`;
+}
+
+function renderPanel() {
+  const y = state.year, panel = $('#panel');
+  let html;
+  if (state.war) html = warDetail(state.war, y);
+  else if (state.selected) {
+    const gw = state.selected;
+    const here = warsIn(y).filter(w => w.loc.includes(gw)), abroad = warsIn(y).filter(w => !w.loc.includes(gw) && w.states.includes(gw));
+    const ever = state.data.wars.filter(w => w.loc.includes(gw) || w.states.includes(gw));
+    html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(nameOf(gw, y))}</h2>
+      <p class="sub">${here.length ? `${here.length} conflict${here.length > 1 ? 's' : ''} on its territory in ${y}` : `No conflict on its territory in ${y}`}${abroad.length ? ` · fighting in ${abroad.length} abroad` : ''}</p>
+      ${here.length ? `<h3>On its territory</h3>${here.map(w => warCard(w, y)).join('')}` : ''}
+      ${abroad.length ? `<h3>Fighting abroad</h3>${abroad.map(w => warCard(w, y)).join('')}` : ''}
+      <h3>All conflicts 1926–${state.data.lastYear}</h3>${ever.length ? ever.sort((a, b) => a.years[0][0] - b.years[0][0]).map(w => warCard(w, y)).join('') : '<p class="empty">None recorded.</p>'}`;
+  } else {
+    const list = warsIn(y), wars = list.filter(w => levelIn(w, y) === 2).length;
+    html = `<h2>${y}</h2><p class="sub">${list.length} armed conflict${list.length === 1 ? '' : 's'}, ${wars} at war level</p>
+      ${list.map(w => warCard(w, y)).join('') || '<p class="empty">No conflicts recorded.</p>'}
+      <p class="note">Click a country or a war for details. Drag the slider or press ▶ to move through the years.</p>`;
+  }
+  const src = y < state.data.ucdpFrom ? state.data.sources.cow + '. Before 1946 only wars with 1,000+ battle deaths are recorded.' : state.data.sources.ucdp + '.';
+  panel.innerHTML = html + `<p class="src-note">Source: ${esc(src)} Borders: CShapes 2.0.</p>`;
+  panel.querySelectorAll('.war[data-id]').forEach(el => el.onclick = () => selectWar(el.dataset.id));
+  $('#close')?.addEventListener('click', () => select(null));
+  $('#close-war')?.addEventListener('click', () => selectWar(null));
+}
+
+/* ---------------------------------------------------------------- year control, selection, URL */
+function setYear(y, { push = true } = {}) {
+  state.year = Math.max(state.data.firstYear, Math.min(state.data.lastYear, y));
+  $('#year').value = state.year;
+  $('#year-big').textContent = state.year;
+  renderMap(); renderPanel();
+  if (push) writeHash();
+}
+function stopPlay() {
+  clearInterval(state.playing); state.playing = null;
+  $('#play').textContent = '▶'; $('#play').setAttribute('aria-label', 'Play through the years');
+}
+function setupTimeline() {
+  const { firstYear: a, lastYear: b } = state.data, slider = $('#year');
+  slider.min = a; slider.max = b;
+  $('#ticks').innerHTML = Array.from({ length: Math.floor((b - a) / 10) + 1 }, (_, i) => a + 4 + i * 10)
+    .filter(y => y <= b).map(y => `<span style="left:${((y - a) / (b - a)) * 100}%">${y}</span>`).join('');
+  slider.addEventListener('input', () => setYear(+slider.value));
+  $('#prev').onclick = () => { stopPlay(); setYear(state.year - 1); };
+  $('#next').onclick = () => { stopPlay(); setYear(state.year + 1); };
+  $('#play').onclick = () => {
+    if (state.playing) return stopPlay();
+    if (state.year >= b) setYear(a);
+    $('#play').textContent = '❚❚'; $('#play').setAttribute('aria-label', 'Pause');
+    state.playing = setInterval(() => { if (state.year >= b) stopPlay(); else setYear(state.year + 1); }, 900);
+  };
+}
+function select(gw) { state.selected = gw; state.war = null; renderMap(); renderPanel(); writeHash(); }
+function selectWar(id) {
+  state.war = state.data.wars.find(w => w.id === id) || null;
+  if (state.war && !levelIn(state.war, state.year)) setYear(state.war.years[0][0], { push: false });
+  renderMap(); renderPanel(); writeHash();
+}
+function writeHash() {
+  const h = `#y=${state.year}${state.selected ? `&c=${state.selected}` : ''}${state.war ? `&w=${state.war.id}` : ''}`;
+  if (location.hash !== h) history.replaceState(null, '', h);
+}
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  return { y: +p.get('y') || state.data.lastYear, c: +p.get('c') || null, w: p.get('w') };
+}
+
+function setupSearch() {
+  const input = $('#search'), list = $('#search-results');
+  const index = state.data.wars.map(w => ({ label: w.name, sub: `${w.type} · ${span(w)}`, key: `${w.name} ${w.sideA.join(' ')} ${w.sideB.join(' ')}`.toLowerCase(), war: w.id }));
+  const seenGw = new Set();
+  for (const f of state.features) {
+    const k = `${f.properties.gw}|${f.properties.name}`;
+    if (seenGw.has(k)) continue; seenGw.add(k);
+    index.push({ label: f.properties.name, sub: `Country · ${f.properties.s.slice(0, 4)}–${f.properties.e.slice(0, 4)}`, key: f.properties.name.toLowerCase(), gw: f.properties.gw, year: Math.max(+f.properties.s.slice(0, 4), state.data.firstYear) });
+  }
+  let results = [];
+  const choose = r => {
+    input.value = ''; list.hidden = true;
+    if (r.war) selectWar(r.war); else { if (r.year > state.year || +r.year < state.data.firstYear) setYear(r.year, { push: false }); select(r.gw); }
+  };
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    results = q.length < 2 ? [] : index.filter(r => r.key.includes(q)).slice(0, 12);
+    list.hidden = !results.length;
+    list.innerHTML = results.map((r, i) => `<li role="option" aria-selected="${i === 0}">${esc(r.label)}<small>${esc(r.sub)}</small></li>`).join('');
+    list.querySelectorAll('li').forEach((li, i) => li.onmousedown = () => choose(results[i]));
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && results[0]) choose(results[0]); else if (e.key === 'Escape') list.hidden = true; });
+  input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; }, 150));
+}
+
+(async function init() {
+  try {
+    const [topo, data] = await Promise.all([
+      fetch('data/borders.topo.json').then(r => r.json()),
+      fetch('data/wars.json').then(r => r.json()),
+    ]);
+    state.data = data;
+    state.features = topojson.feature(topo, topo.objects.borders).features;
+    $('#status').textContent = `${data.wars.length} wars and armed conflicts · ${data.firstYear}–${data.lastYear} · historical borders`;
+    drawMap(); setupTimeline(); setupSearch();
+    const { y, c, w } = readHash();
+    state.selected = c;
+    setYear(y, { push: false });
+    if (w) selectWar(w);
+    window.addEventListener('hashchange', () => {
+      const h = readHash();
+      if (h.y !== state.year) setYear(h.y, { push: false });
+      if (h.c !== state.selected) select(h.c);
+      if ((h.w || null) !== (state.war?.id || null)) selectWar(h.w);
+    });
+  } catch (err) {
+    console.error(err);
+    $('#status').textContent = 'Could not load conflict history.';
+  }
+})();

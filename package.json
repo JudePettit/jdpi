@@ -1,9 +1,9 @@
-﻿{
+{
     "name":  "jdpi",
     "private":  true,
     "type":  "module",
     "scripts":  {
-                    "test":  "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs"
+                    "test":  "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs"
                 },
     "devDependencies":  {
                             "playwright-core":  "^1.56.1"

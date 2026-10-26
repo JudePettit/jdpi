@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml"><title>JDP-I Q — Realtime Battlefield</title>
+<script src="supabase-config.js"></script><script src="supabase-client.js"></script><script src="observability-config.js"></script><script src="observability.js" data-module="Realtime Battlefield"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--text:#eff4f2;--green:#b7f36b;--cyan:#6ddac8;--amber:#f0b95a;--red:#ff826f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px}button,select{font:inherit}button{cursor:pointer}
+.shell{max-width:1500px;margin:auto;padding:0 34px}
+.topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:12px;align-items:center}.mark img{display:block;width:28px;height:28px}.brandname{font:700 17px Manrope;letter-spacing:.06em}.topmeta{display:flex;gap:22px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.08em}
+.hero{padding:31px 0 22px;display:flex;align-items:end;justify-content:space-between;gap:20px}.eyebrow{color:var(--green);font:11px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}.hero h1{font:600 32px Manrope;margin:8px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);max-width:660px;line-height:1.6}
+.updated{text-align:right;color:var(--muted);font:11px 'DM Mono';line-height:1.8}.updated strong{color:var(--text);font-weight:400}
+.subnav{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 12px}.subnav a{border:1px solid var(--line);border-radius:4px;padding:7px 10px;color:var(--muted);text-decoration:none;font:10px "DM Mono"}.subnav a:hover,.subnav a.active{border-color:#799c59;color:var(--green);background:#b7f36b12}
+.layout{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(400px,.87fr);gap:16px;padding-bottom:24px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.panelhead{min-height:57px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 19px}.ptitle{display:flex;align-items:center;gap:10px;font:700 13px Manrope}.icon{color:var(--green);font-size:16px}.subtle{color:var(--muted);font:10px 'DM Mono';letter-spacing:.1em;text-transform:uppercase}
+.mapwrap{height:430px;position:relative;background:#101d27}#map{height:100%;width:100%;background:#101d27}.leaflet-container{background:#101d27}.leaflet-control-zoom a{background:#182733!important;color:var(--text)!important;border-color:#34444e!important}.leaflet-control-attribution{background:#101d27bb!important;color:#83949c!important;font-size:9px!important}.leaflet-control-attribution a{color:#91aaa5!important}
+.maphint{position:absolute;z-index:500;left:15px;bottom:12px;color:#adbbc0;background:#0d1721c9;border:1px solid #34444e;padding:7px 10px;border-radius:4px;font:10px 'DM Mono'}
+[hidden]{display:none!important}.monthctl{display:flex;align-items:center;gap:8px;color:var(--muted);font:10px 'DM Mono'}.monthctl select{background:#0f1b25;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:5px 6px;font:10px 'DM Mono'}.navbtn{background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:4px 9px}.navbtn:hover{border-color:var(--green);color:var(--green)}
+.warlist{max-height:330px;overflow:auto}.warrow{display:grid;grid-template-columns:12px 1fr auto;gap:11px;align-items:center;padding:10px 18px;border-top:1px solid #24343f;cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;color:inherit}.warrow:hover{background:#1a2b37}.warrow.sel{background:#b7f36b0f}.swatch{width:10px;height:10px;border-radius:50%}.warname{font-weight:600;font-size:12px}.warmeta{font-size:11px;color:var(--muted);margin-top:2px}.deaths{font:11px 'DM Mono';color:var(--text);text-align:right}.deaths small{display:block;color:var(--muted);font-size:9px}
+.detail{padding:4px 19px 18px;max-height:760px;overflow:auto}.detail h2{font:600 20px Manrope;letter-spacing:-.03em;margin:14px 0 4px}.detail h3{font:10px 'DM Mono';letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin:18px 0 6px}.detail p{color:#c9d3d6;line-height:1.6;margin:6px 0;font-size:13px}.detail a{color:var(--cyan)}.small{font-size:11px;color:var(--muted)}
+.conf{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #24343f;font-size:12px}.conf span:last-child{font:11px 'DM Mono';color:var(--muted);white-space:nowrap}
+.bars{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;align-items:end;height:70px;margin:6px 0 2px}.bars div{background:#6ddac855;border-radius:2px 2px 0 0;min-height:2px;position:relative}.bars div.cur{background:var(--green)}.barlabels{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;font:9px 'DM Mono';color:var(--muted);text-align:center}
+.src{border-left:2px solid #34444e;padding:3px 0 3px 10px;margin:7px 0;font-size:12px;color:#c9d3d6}.src small{display:block;color:var(--muted);font:10px 'DM Mono';margin-top:2px}
+.story{padding:7px 0;border-bottom:1px solid #24343f;font-size:12px}.story a{color:var(--text);text-decoration:none}.story a:hover{color:var(--green)}.story small{display:block;color:var(--muted);font:10px 'DM Mono';margin-top:3px}
+.archive{padding:6px 19px 18px}.arow{padding:14px 0;border-bottom:1px solid #24343f}.arow h4{margin:0 0 4px;font:600 14px Manrope;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.arow h4 span{font:11px 'DM Mono';color:var(--muted);white-space:nowrap}.arow p{margin:4px 0;color:#c9d3d6;line-height:1.55;font-size:12.5px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);line-height:1.7}
+.foot{display:flex;justify-content:space-between;gap:12px;color:#76858d;font:10px 'DM Mono';padding:6px 2px 25px}.foot a{color:#90aaa0}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.mapwrap{height:360px}}
+@media(max-width:600px){.shell{padding:0 14px}.hero{flex-direction:column;align-items:start}.hero h1{font-size:26px}.updated{text-align:left}.mapwrap{height:300px}.panelhead{padding:8px 12px;flex-wrap:wrap}.foot{flex-direction:column}}
+</style><link rel="stylesheet" href="../design/jdpi.css"><script src="../design/jdpi-bar.js" data-suite="q" data-module="battlefield" data-shell="../" defer></script></head>
+<body><div class="shell">
+<header class="topbar" data-jdpi-standalone><div class="brand"><div class="mark"><img src="brand-eye-q.svg" alt=""></div><div class="brandname">JDP-I Q</div></div><div class="topmeta"><span id="clock"></span></div></header>
+<section class="hero"><div><div class="eyebrow">Armed conflict · year to date</div><h1>Realtime Battlefield</h1><p>Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by Country Headlines.</p></div><div class="updated">DATA THROUGH<br><strong id="through">Loading…</strong><br><span id="totals"></span></div></section>
+<nav class="subnav" aria-label="Realtime Battlefield views"><a data-view="live" href="battlefield.html?view=live">Live map · last 3 months</a><a data-view="archive" href="battlefield.html?view=archive">Year-to-date archive by month</a></nav>
+<main class="layout">
+  <section class="panel">
+    <div class="panelhead"><div class="ptitle"><span class="icon">✕</span> <span id="maptitle">Conflict map</span></div><div class="monthctl" id="monthctl" hidden><button class="navbtn" id="prev" aria-label="Previous month">‹</button><select id="month" aria-label="Month"></select><button class="navbtn" id="next" aria-label="Next month">›</button></div></div>
+    <div class="mapwrap"><div id="map"></div><div class="maphint" id="maphint">Circles are sized by deaths · click one to open its war</div></div>
+    <div id="lefttail"></div>
+  </section>
+  <section class="panel">
+    <div class="panelhead"><div class="ptitle"><span class="icon">◈</span> <span id="sidetitle">Wars and warzones</span></div><span class="subtle" id="sidecaption"></span></div>
+    <div id="side"><div class="empty">Loading conflict data…</div></div>
+  </section>
+</main>
+<footer class="foot"><a href="index.html">JDP-I Q · SUITE HOME</a><span>REALTIME BATTLEFIELD</span><span>Events: <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events</a> (CC BY 4.0) · Map tiles © Esri</span></footer>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
+// battlefield/scripts/build-realtime.mjs, plus matching stories from Country Headlines' Supabase archive.
+const DATA_URL = '../battlefield/data/realtime.json';
+const RELOAD_MS = 6 * 3600 * 1000; // data changes monthly; re-check every six hours
+const PALETTE = ['#ff826f','#f0b95a','#b7f36b','#6ddac8','#7aa7ff','#c58cff','#ff9ad5','#e8e07a','#5fd38d','#ffb38a','#9ad0ff','#d4a373'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n).toLocaleString('en-GB');
+const monthName = (m, opts = { month: 'long', year: 'numeric' }) => new Date(m + '-01T00:00:00Z').toLocaleString('en-GB', { ...opts, timeZone: 'UTC' });
+const params = new URLSearchParams(location.search);
+const view = params.get('view') === 'archive' ? 'archive' : 'live';
+let data, selectedWar = params.get('war'), month = params.get('month');
+document.querySelectorAll('.subnav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+
+const tick = () => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; };
+tick(); setInterval(tick, 60000);
+
+const map = L.map('map', { scrollWheelZoom: false, minZoom: 1, maxZoom: 7, worldCopyJump: true }).setView([22, 20], 2);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16 }).addTo(map);
+const layer = L.layerGroup().addTo(map);
+
+const colour = w => w.colour;
+function setUrl() {
+  const p = new URLSearchParams({ view });
+  if (view === 'archive' && month) p.set('month', month);
+  if (selectedWar) p.set('war', selectedWar);
+  history.replaceState(null, '', '?' + p);
+}
+
+function drawMap() {
+  layer.clearLayers();
+  const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+  for (const w of data.wars) {
+    for (const [lat, lon, mi, deaths, events] of w.points) {
+      if (!idx.has(mi)) continue;
+      const sel = selectedWar === w.id;
+      L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: colour(w), weight: sel ? 1.5 : .6, fillColor: colour(w), fillOpacity: selectedWar && !sel ? .12 : .5, opacity: selectedWar && !sel ? .25 : .9 })
+        .bindTooltip(`<b>${esc(w.name)}</b><br>${monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
+        .on('click', () => selectWar(w.id))
+        .addTo(layer);
+    }
+  }
+}
+
+function warRow(w, m) {
+  const mm = m ? w.monthly.find(x => x.month === m) : null;
+  const deaths = m ? mm.deaths : w.monthly.slice(-3).reduce((s, x) => s + x.deaths, 0);
+  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${colour(w)}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${m ? 'deaths' : '3-mo deaths'}</small></div></button>`;
+}
+
+function bars(w) {
+  const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = view === 'archive' ? month : data.latest;
+  return `<div class="bars" style="--n:${w.monthly.length}">${w.monthly.map(x => `<div class="${x.month === cur ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div>`;
+}
+
+function warDetail(w) {
+  const m = view === 'archive' ? month : data.latest;
+  const mm = w.monthly.find(x => x.month === m);
+  const prev = w.monthly.filter(x => x.month < m && x.events).slice(-2).reverse();
+  return `<div class="detail">
+    <button class="navbtn" id="back" style="margin-top:12px">‹ All wars</button>
+    <h2>${esc(w.name)}</h2><div class="small">${esc(w.zone)} · ${esc(w.countries.join(', '))}</div>
+    <p>${esc(w.summary)}</p>
+    ${bars(w)}
+    <h3>${monthName(m)}</h3><p>${esc(mm.text)}</p>
+    ${mm.sources.filter(s => s.headline).map(s => `<div class="src">${esc(s.headline)}<small>${esc(s.office)} · ${s.date}${s.place ? ' · ' + esc(s.place) : ''} · ${fmt(s.deaths)} deaths</small></div>`).join('')}
+    ${prev.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>`).join('')}
+    ${w.background ? `<h3>Background</h3><p>${esc(w.background)}</p>` : ''}
+    ${w.wiki ? `<p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(w.wiki)}" target="_blank" rel="noreferrer">Read more on Wikipedia ↗</a></p>` : ''}
+    <h3>Conflicts in this war (UCDP)</h3>
+    ${w.conflicts.slice(0, 12).map(c => `<div class="conf"><span>${esc(c.name)} <span class="small">· ${esc(c.type)}</span></span><span>${fmt(c.deaths)} deaths</span></div>`).join('')}
+    ${w.conflicts.length > 12 ? `<div class="small" style="margin-top:6px">+ ${w.conflicts.length - 12} smaller conflicts</div>` : ''}
+    <h3>In the news this month</h3><div id="stories"><div class="small">${w.keywords.length ? 'Searching tracked outlets…' : 'No news search for this group.'}</div></div>
+  </div>`;
+}
+
+async function loadStories(w) {
+  const box = document.getElementById('stories');
+  if (!box || !w.keywords.length) return;
+  if (!globalThis.GTTSDB?.storiesMatching) { box.innerHTML = '<div class="small">News archive unavailable.</div>'; return; }
+  try {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const rows = await globalThis.GTTSDB.storiesMatching(w.keywords, since, 60);
+    const seen = new Set(), list = rows.filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 12);
+    if (selectedWar !== w.id) return;
+    box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · ${esc(r.snapshot_date)}</small></div>`).join('')
+      : '<div class="small">No front-page stories about this war in the tracked outlets in the last 30 days.</div>';
+  } catch (e) { box.innerHTML = `<div class="small">News archive unavailable: ${esc(e.message)}</div>`; }
+}
+
+function renderSide() {
+  const side = document.getElementById('side');
+  const w = data.wars.find(x => x.id === selectedWar);
+  if (w) {
+    document.getElementById('sidetitle').textContent = 'War briefing';
+    document.getElementById('sidecaption').textContent = w.status === 'active' ? 'Active' : 'Quiet';
+    side.innerHTML = warDetail(w);
+    document.getElementById('back').onclick = () => selectWar(null);
+    loadStories(w);
+    return;
+  }
+  const m = view === 'archive' ? month : null;
+  const list = data.wars.filter(x => m ? x.monthly.find(y => y.month === m).events : x.status === 'active')
+    .sort((a, b) => m ? b.monthly.find(y => y.month === m).deaths - a.monthly.find(y => y.month === m).deaths : 0);
+  document.getElementById('sidetitle').textContent = m ? `Wars in ${monthName(m)}` : 'Extant wars and warzones';
+  document.getElementById('sidecaption').textContent = list.length + ' groups';
+  side.innerHTML = `<div class="warlist" style="max-height:${m ? 'none' : '760px'}">${list.map(x => warRow(x, m)).join('')}</div>`;
+  side.querySelectorAll('.warrow').forEach(b => b.onclick = () => selectWar(b.dataset.war));
+}
+
+function renderArchive() {
+  const tail = document.getElementById('lefttail');
+  // Archive: the selected month's insight for every war. Live: the latest month's eight deadliest.
+  const m = view === 'archive' ? month : data.latest;
+  const list = data.wars.map(w => ({ w, mm: w.monthly.find(x => x.month === m) })).filter(x => x.mm.events).sort((a, b) => b.mm.deaths - a.mm.deaths);
+  const total = list.reduce((s, x) => s + x.mm.deaths, 0);
+  tail.innerHTML = `<div class="archive"><h3 class="eyebrow" style="margin:14px 0 4px">${view === 'archive' ? '' : 'Latest month · '}${monthName(m)} · ${fmt(total)} deaths across ${list.length} wars and warzones</h3>
+    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, mm }) => `<div class="arow"><h4 data-war="${w.id}"><span style="color:${colour(w)};font:inherit">● ${esc(w.name)}</span><span>${fmt(mm.deaths)} deaths</span></h4><p>${esc(mm.text)}</p></div>`).join('')}</div>`;
+  tail.querySelectorAll('h4[data-war]').forEach(h => h.onclick = () => selectWar(h.dataset.war));
+}
+
+function selectWar(id) {
+  selectedWar = id; setUrl(); renderSide(); drawMap();
+  const w = data.wars.find(x => x.id === id);
+  if (w) {
+    const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+    const pts = w.points.filter(p => idx.has(p[2])).map(p => [p[0], p[1]]);
+    if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 5 });
+  }
+}
+
+function setMonth(m) { month = m; document.getElementById('month').value = m; setUrl(); renderSide(); renderArchive(); drawMap(); }
+
+function render() {
+  data.wars.forEach((w, i) => w.colour = i < PALETTE.length ? PALETTE[i] : '#8c9aa3');
+  document.getElementById('through').textContent = monthName(data.latest);
+  document.getElementById('totals').textContent = `${fmt(data.totals.deaths)} deaths · ${fmt(data.totals.events)} events in ${data.year}`;
+  if (!data.months.includes(month)) month = data.latest;
+  if (view === 'archive') {
+    document.getElementById('monthctl').hidden = false;
+    document.getElementById('maptitle').textContent = 'Conflict map by month';
+    const sel = document.getElementById('month');
+    sel.innerHTML = data.months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
+    sel.value = month; sel.onchange = () => setMonth(sel.value);
+    document.getElementById('prev').onclick = () => { const i = data.months.indexOf(month); if (i > 0) setMonth(data.months[i - 1]); };
+    document.getElementById('next').onclick = () => { const i = data.months.indexOf(month); if (i < data.months.length - 1) setMonth(data.months[i + 1]); };
+  } else {
+    document.getElementById('maptitle').textContent = `Conflict map · ${monthName(data.months.at(-3) || data.latest, { month: 'short' })}–${monthName(data.latest)}`;
+  }
+  if (selectedWar && !data.wars.some(w => w.id === selectedWar)) selectedWar = null;
+  renderSide(); renderArchive(); drawMap();
+}
+
+async function load() {
+  try {
+    const res = await fetch(DATA_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const next = await res.json();
+    if (data && next.generated === data.generated) return;
+    data = next; render();
+  } catch (e) {
+    if (!data) document.getElementById('side').innerHTML = `<div class="empty">Conflict data could not load.<br><span class="small">${esc(e.message)}</span></div>`;
+  }
+}
+load(); setInterval(load, RELOAD_MS);
+</script></body></html>

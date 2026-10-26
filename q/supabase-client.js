@@ -75,6 +75,19 @@
       return this.topStories(countryCode, d, d);
     },
 
+    // Recent top stories (any country) whose headline mentions one of the keywords; used by Realtime Battlefield.
+    async storiesMatching(keywords, sinceDate, limit = 30) {
+      const terms = keywords.map(k => k.replace(/[^\p{L}\p{N} -]/gu, "")).filter(Boolean);
+      if (!terms.length) return [];
+      return request(tablePath("country_top_stories", {
+        select: "snapshot_date,country_code,outlet,title_original,title_en,url,published_at",
+        snapshot_date: `gte.${sinceDate}`,
+        or: `(${terms.flatMap(t => [`title_en.ilike.*${t}*`, `title_original.ilike.*${t}*`]).join(",")})`,
+        order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
+        limit: String(limit)
+      }));
+    },
+
     async latestHeadlineStatus(countryCode) {
       const rows = await request(tablePath("source_status_history", {
         select: "state,message,checked_at,last_success_at,item_count,metadata",

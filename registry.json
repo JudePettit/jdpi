@@ -51,7 +51,8 @@
             { "id": "current", "name": "Country map · 24 hours", "url": "q/headlines.html?view=current" },
             { "id": "day", "name": "Daily archive", "url": "q/headlines.html?view=archive&period=day" },
             { "id": "week", "name": "Weekly archive", "url": "q/headlines.html?view=archive&period=week" },
-            { "id": "month", "name": "Monthly archive", "url": "q/headlines.html?view=archive&period=month" }
+            { "id": "month", "name": "Monthly archive", "url": "q/headlines.html?view=archive&period=month" },
+            { "id": "year", "name": "Yearly top stories", "url": "q/headlines.html?view=archive&period=year" }
           ]
         },
         {

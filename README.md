@@ -4,7 +4,7 @@ JDP-I is a single workspace for three suites of intelligence apps. You pick a mo
 
 | Suite | Focus | Accent | Modules |
 |---|---|---|---|
-| **Q** | Geopolitical intelligence | Lime `#b7f36b` | Briefing Â· Political Calendar Â· Country Headlines Â· Geopolitical Volatility Â· Country PESTLE |
+| **Q** | Geopolitical intelligence | Lime `#b7f36b` | Briefing Â· Political Calendar Â· Global Headline Tracker Â· Geopolitical Volatility Â· Country PESTLE |
 | **H&P** | History & politics | Cyan `#6ddac8` | Political Atlas · H&P Retrospective |
 | **F&E** | Finance & economics | Amber `#f0b95a` | Double Signal (in build) |
 

@@ -33,7 +33,7 @@
 </style><link rel="stylesheet" href="../design/jdpi.css"><script src="../design/jdpi-bar.js" data-suite="q" data-module="battlefield" data-shell="../" defer></script></head>
 <body><div class="shell">
 <header class="topbar" data-jdpi-standalone><div class="brand"><div class="mark"><img src="brand-eye-q.svg" alt=""></div><div class="brandname">JDP-I Q</div></div><div class="topmeta"><span id="clock"></span></div></header>
-<section class="hero"><div><div class="eyebrow">Armed conflict · year to date</div><h1>Realtime Battlefield</h1><p>Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by Country Headlines.</p></div><div class="updated">DATA THROUGH<br><strong id="through">Loading…</strong><br><span id="totals"></span></div></section>
+<section class="hero"><div><div class="eyebrow">Armed conflict · year to date</div><h1>Realtime Battlefield</h1><p>Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by Global Headline Tracker.</p></div><div class="updated">DATA THROUGH<br><strong id="through">Loading…</strong><br><span id="totals"></span></div></section>
 <nav class="subnav" aria-label="Realtime Battlefield views"><a data-view="live" href="battlefield.html?view=live">Live map · last 3 months</a><a data-view="archive" href="battlefield.html?view=archive">Year-to-date archive by month</a></nav>
 <main class="layout">
   <section class="panel">
@@ -51,7 +51,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
-// battlefield/scripts/build-realtime.mjs, plus matching stories from Country Headlines' Supabase archive.
+// battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
 const DATA_URL = '../battlefield/data/realtime.json';
 const RELOAD_MS = 6 * 3600 * 1000; // data changes monthly; re-check every six hours
 const PALETTE = ['#ff826f','#f0b95a','#b7f36b','#6ddac8','#7aa7ff','#c58cff','#ff9ad5','#e8e07a','#5fd38d','#ffb38a','#9ad0ff','#d4a373'];

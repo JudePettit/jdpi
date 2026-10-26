@@ -33,7 +33,7 @@
         },
         {
           "id": "headlines",
-          "name": "Country Headlines",
+          "name": "Global Headline Tracker",
           "icon": "◎",
           "status": "live",
           "host": "JDP-I",

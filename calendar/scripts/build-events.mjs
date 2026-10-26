@@ -35,7 +35,15 @@ for (const r of rows) {
   if (!seen.has(key)) {
     seen.add(key);
     const name = r.type_of_conflict === '2' ? `${r.side_a.replace(/^Government of /, '')} – ${r.side_b.replace(/^Government of /, '')}` : `${r.side_a.replace(/^Government of /, '')} vs ${r.side_b}`;
-    add({ date: r.start_date2, country: r.location.split(',')[0].replace(/ \(.*\)$/, ''), title: `Armed conflict breaks out: ${name}${r.territory_name ? ` (${r.territory_name})` : ''}`, type: 'conflict', status: 'declared', source: `https://ucdp.uu.se/conflict/${r.conflict_id}` });
+    // Plain-text account from the UCDP record, since these events have no Wikipedia article of their own.
+    const episode = rows.filter(x => x.conflict_id === r.conflict_id && x.start_date2 === r.start_date2);
+    const last = episode.at(-1), warYears = episode.filter(x => x.intensity_level === '2').length;
+    const KIND = { 1: 'a colonial conflict', 2: 'an interstate conflict', 3: 'a civil conflict', 4: 'an internationalised civil conflict' };
+    const over = r.incompatibility === '1' ? `control of ${r.territory_name || 'territory'}` : r.incompatibility === '2' ? 'control of the government' : 'territory and government';
+    const summary = `UCDP records ${KIND[r.type_of_conflict]} between ${r.side_a}${r.side_a_2nd ? ` (backed by ${r.side_a_2nd})` : ''} and ${r.side_b}${r.side_b_2nd ? ` (backed by ${r.side_b_2nd})` : ''} over ${over}, starting ${r.start_date2}. `
+      + `This episode was active in ${episode.length} year${episode.length > 1 ? 's' : ''} (${episode[0].year}–${last.year})${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths a year)` : ', below war level (25–999 battle deaths a year)'}`
+      + `${last.ep_end === '1' ? `, and ended ${last.ep_end_date || last.year}.` : ' and was still active in the latest data.'}`;
+    add({ date: r.start_date2, country: r.location.split(',')[0].replace(/ \(.*\)$/, ''), title: `Armed conflict breaks out: ${name}${r.territory_name ? ` (${r.territory_name})` : ''}`, type: 'conflict', status: 'declared', source: `https://ucdp.uu.se/conflict/${r.conflict_id}`, summary });
   }
 }
 

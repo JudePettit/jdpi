@@ -24,44 +24,12 @@
         },
         {
           "id": "calendar",
-          "name": "Political Calendar",
+          "name": "Realtime Calendar",
           "icon": "▦",
           "status": "live",
           "host": "JDP-I",
           "url": "q/calendar.html?period=contemporary",
-          "description": "Elections, new leaders, coups, outbreaks of war, assassinations, crises and treaties, by month or year, for every country or only those you highlight. Contemporary outlook plus archives back to 1980.",
-          "submodules": [
-            {
-              "id": "contemporary",
-              "name": "Contemporary",
-              "url": "q/calendar.html?period=contemporary"
-            },
-            {
-              "id": "2020s",
-              "name": "2020s",
-              "url": "q/calendar.html?period=2020s"
-            },
-            {
-              "id": "2010s",
-              "name": "2010s",
-              "url": "q/calendar.html?period=2010s"
-            },
-            {
-              "id": "2000s",
-              "name": "2000s",
-              "url": "q/calendar.html?period=2000s"
-            },
-            {
-              "id": "1990s",
-              "name": "1990s",
-              "url": "q/calendar.html?period=1990s"
-            },
-            {
-              "id": "1980s",
-              "name": "1980s",
-              "url": "q/calendar.html?period=1980s"
-            }
-          ]
+          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
         },
         {
           "id": "headlines",
@@ -164,6 +132,42 @@
           "host": "Cloudflare Pages",
           "url": "https://hp-retrospective.pages.dev",
           "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
+        },
+        {
+          "id": "historical-calendar",
+          "name": "Historical Calendar",
+          "icon": "▤",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "q/calendar.html?period=2020s",
+          "description": "Political history since 1980 by decade: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account.",
+          "submodules": [
+            {
+              "id": "2020s",
+              "name": "2020s",
+              "url": "q/calendar.html?period=2020s"
+            },
+            {
+              "id": "2010s",
+              "name": "2010s",
+              "url": "q/calendar.html?period=2010s"
+            },
+            {
+              "id": "2000s",
+              "name": "2000s",
+              "url": "q/calendar.html?period=2000s"
+            },
+            {
+              "id": "1990s",
+              "name": "1990s",
+              "url": "q/calendar.html?period=1990s"
+            },
+            {
+              "id": "1980s",
+              "name": "1980s",
+              "url": "q/calendar.html?period=1980s"
+            }
+          ]
         },
         {
           "id": "battlefield-history",

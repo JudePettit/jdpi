@@ -199,6 +199,12 @@
  ],
  "PA": [
   {
+   "name": "La Prensa",
+   "home": "https://www.prensa.com",
+   "rss": "https://www.prensa.com/arc/outboundfeeds/rss/",
+   "via": "site"
+  },
+  {
    "name": "TVN Noticias",
    "home": "https://www.tvn-2.com",
    "rss": "https://www.tvn-2.com/rss/",
@@ -561,13 +567,13 @@
   {
    "name": "The Guardian",
    "home": "https://www.theguardian.com/uk",
-   "rss": "https://www.theguardian.com/uk/rss",
+   "rss": "https://www.theguardian.com/uk-news/rss",
    "via": "site"
   },
   {
    "name": "Daily Mail",
    "home": "https://www.dailymail.co.uk",
-   "rss": "https://www.dailymail.com/home/index.rss",
+   "rss": "https://www.dailymail.com/news/index.rss",
    "via": "site"
   },
   {
@@ -579,7 +585,7 @@
   {
    "name": "The Independent",
    "home": "https://www.independent.co.uk",
-   "rss": "https://www.independent.co.uk/rss",
+   "rss": "https://www.independent.co.uk/news/uk/rss",
    "via": "site"
   }
  ],
@@ -797,6 +803,12 @@
  ],
  "CH": [
   {
+   "name": "SRF News",
+   "home": "https://www.srf.ch/news",
+   "rss": "https://www.srf.ch/news/bnf/rss/1646",
+   "via": "site"
+  },
+  {
    "name": "Blick",
    "home": "https://www.blick.ch",
    "rss": "https://www.blick.ch/rss.xml",
@@ -805,7 +817,7 @@
   {
    "name": "NZZ",
    "home": "https://www.nzz.ch",
-   "rss": "https://www.nzz.ch/startseite.rss",
+   "rss": "https://www.nzz.ch/recent.rss",
    "via": "site"
   }
  ],
@@ -1587,6 +1599,12 @@
  ],
  "BG": [
   {
+   "name": "Dnevnik",
+   "home": "https://www.dnevnik.bg",
+   "rss": "https://www.dnevnik.bg/rss/",
+   "via": "site"
+  },
+  {
    "name": "Mediapool",
    "home": "https://www.mediapool.bg",
    "rss": "https://www.mediapool.bg/feed/",
@@ -1873,12 +1891,6 @@
    "home": "http://www.people.com.cn",
    "rss": "http://www.people.com.cn/rss/politics.xml",
    "via": "site"
-  },
-  {
-   "name": "China Daily",
-   "home": "https://www.chinadaily.com.cn",
-   "rss": "https://news.google.com/rss/search?q=site%3Achinadaily.com.cn%20when%3A2d&hl=en-US&gl=US&ceid=US:en",
-   "via": "google-news"
   },
   {
    "name": "Global Times",

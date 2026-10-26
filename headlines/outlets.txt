@@ -1,5 +1,5 @@
 # Five most-read news outlets per country (ISO2: Name|homepage; …). Feeds are discovered and verified by discover-feeds.mjs.
-US: CNN|https://www.cnn.com; Fox News|https://www.foxnews.com; The New York Times|https://www.nytimes.com; NBC News|https://www.nbcnews.com; The Washington Post|https://www.washingtonpost.com
+US: CNN|https://www.cnn.com; Fox News|https://www.foxnews.com|https://moxie.foxnews.com/google-publisher/latest.xml; The New York Times|https://www.nytimes.com; NBC News|https://www.nbcnews.com; The Washington Post|https://www.washingtonpost.com
 CA: CBC News|https://www.cbc.ca/news; CTV News|https://www.ctvnews.ca; Global News|https://globalnews.ca; The Globe and Mail|https://www.theglobeandmail.com; Toronto Star|https://www.thestar.com
 MX: El Universal|https://www.eluniversal.com.mx; Milenio|https://www.milenio.com; Infobae México|https://www.infobae.com/mexico; El Financiero|https://www.elfinanciero.com.mx; La Jornada|https://www.jornada.com.mx
 GT: Prensa Libre|https://www.prensalibre.com; Soy502|https://www.soy502.com; Publinews|https://www.publinews.gt; La Hora|https://lahora.gt; República|https://republica.gt
@@ -23,7 +23,7 @@ KN: SKNVibes|https://www.sknvibes.com; WINN FM|https://www.winnmediaskn.com; The
 LC: St Lucia Times|https://stluciatimes.com; The Voice|https://thevoiceslu.com; Loop St Lucia|https://stlucia.loopnews.com; HTS News|https://htsstlucia.org; St Lucia News Online|https://www.stlucianewsonline.com
 VC: iWitness News|https://www.iwnsvg.com; Searchlight|https://www.searchlight.vc; SVG Broadcasting|https://svgbcnews.com; NBC Radio SVG|https://nbcsvg.com; Asberth News Network|https://asberthnews.com
 GL: KNR|https://knr.gl; Sermitsiaq.AG|https://sermitsiaq.ag; AG|https://sermitsiaq.ag/ag; Arctic Today|https://www.arctictoday.com; High North News|https://www.highnorthnews.com
-GB: BBC News|https://www.bbc.co.uk/news; The Guardian|https://www.theguardian.com/uk; Daily Mail|https://www.dailymail.co.uk; Sky News|https://news.sky.com|https://feeds.skynews.com/feeds/rss/home.xml; The Independent|https://www.independent.co.uk
+GB: BBC News|https://www.bbc.co.uk/news; The Guardian|https://www.theguardian.com/uk|https://www.theguardian.com/uk-news/rss; Daily Mail|https://www.dailymail.co.uk|https://www.dailymail.co.uk/news/index.rss; Sky News|https://news.sky.com|https://feeds.skynews.com/feeds/rss/home.xml; The Independent|https://www.independent.co.uk|https://www.independent.co.uk/news/uk/rss
 IE: RTÉ News|https://www.rte.ie/news; The Irish Times|https://www.irishtimes.com; Irish Independent|https://www.independent.ie; TheJournal.ie|https://www.thejournal.ie; Irish Examiner|https://www.irishexaminer.com
 FR: Le Monde|https://www.lemonde.fr; Le Figaro|https://www.lefigaro.fr|https://www.lefigaro.fr/rss/figaro_actualites.xml; franceinfo|https://www.francetvinfo.fr|https://www.francetvinfo.fr/titres.rss; BFMTV|https://www.bfmtv.com|https://www.bfmtv.com/rss/news-24-7/; Le Parisien|https://www.leparisien.fr|https://feeds.leparisien.fr/leparisien/rss
 DE: Tagesschau|https://www.tagesschau.de; Der Spiegel|https://www.spiegel.de; Bild|https://www.bild.de; Die Zeit|https://www.zeit.de|https://newsfeed.zeit.de/index; FAZ|https://www.faz.net|https://www.faz.net/rss/aktuell/
@@ -31,7 +31,7 @@ NL: NOS|https://nos.nl; De Telegraaf|https://www.telegraaf.nl; NU.nl|https://www
 BE: HLN|https://www.hln.be; VRT NWS|https://www.vrt.be/vrtnws; Het Laatste Nieuws|https://www.nieuwsblad.be; Le Soir|https://www.lesoir.be; RTBF|https://www.rtbf.be/info
 LU: Luxemburger Wort|https://www.wort.lu; RTL Today|https://today.rtl.lu; L'essentiel|https://www.lessentiel.lu; Tageblatt|https://www.tageblatt.lu; Virgule|https://www.virgule.lu
 AT: ORF|https://orf.at; Der Standard|https://www.derstandard.at; Kronen Zeitung|https://www.krone.at; Die Presse|https://www.diepresse.com; Kurier|https://kurier.at
-CH: SRF News|https://www.srf.ch/news; 20 Minuten|https://www.20min.ch; Blick|https://www.blick.ch; NZZ|https://www.nzz.ch; Tages-Anzeiger|https://www.tagesanzeiger.ch
+CH: SRF News|https://www.srf.ch/news|https://www.srf.ch/news/bnf/rss/1646; 20 Minuten|https://www.20min.ch; Blick|https://www.blick.ch; NZZ|https://www.nzz.ch|https://www.nzz.ch/recent.rss; Tages-Anzeiger|https://www.tagesanzeiger.ch
 LI: Liechtensteiner Vaterland|https://www.vaterland.li; Liechtensteiner Volksblatt|https://www.volksblatt.li; Radio Liechtenstein|https://www.radio.li; 1FLTV|https://www.1fl.li; Lie:Zeit|https://www.lie-zeit.li
 MC: Monaco Matin|https://www.monacomatin.mc; Monaco Tribune|https://www.monaco-tribune.com; Monaco Info|https://www.monacoinfo.com; Monaco Life|https://monacolife.net; Nice-Matin|https://www.nicematin.com
 AD: Diari d'Andorra|https://www.diariandorra.ad; Bondia|https://www.bondia.ad; Altaveu|https://www.altaveu.com; Ara Andorra|https://www.ara.ad; Andorra Difusió|https://www.andorradifusio.ad
@@ -63,7 +63,7 @@ ME: Vijesti|https://www.vijesti.me; CdM|https://www.cdm.me; RTCG|https://www.rtc
 XK: Koha|https://www.koha.net; Gazeta Express|https://www.gazetaexpress.com; Telegrafi|https://telegrafi.com; Kosovo Online|https://www.kosovo-online.com; RTK|https://www.rtklive.com
 AL: Top Channel|https://top-channel.tv; Balkanweb|https://www.balkanweb.com; Lapsi.al|https://lapsi.al; Panorama|https://www.panorama.com.al; Shqiptarja|https://shqiptarja.com
 MK: MKD.mk|https://www.mkd.mk; Sloboden Pecat|https://www.slobodenpecat.mk; Telma|https://telma.com.mk; Kanal 5|https://kanal5.com.mk; MIA|https://mia.mk
-BG: Dnevnik|https://www.dnevnik.bg; Mediapool|https://www.mediapool.bg; bTV News|https://btvnovinite.bg; Novini.bg|https://novini.bg; BNR|https://bnr.bg
+BG: Dnevnik|https://www.dnevnik.bg|https://www.dnevnik.bg/rss/; Mediapool|https://www.mediapool.bg; bTV News|https://btvnovinite.bg; Novini.bg|https://novini.bg; BNR|https://bnr.bg
 RO: Digi24|https://www.digi24.ro; HotNews|https://www.hotnews.ro; Libertatea|https://www.libertatea.ro; Adevărul|https://adevarul.ro; G4Media|https://www.g4media.ro
 MD: Moldpres|https://www.moldpres.md; Ziarul de Gardă|https://www.zdg.md; NewsMaker|https://newsmaker.md; Point.md|https://point.md; Agora|https://agora.md
 UA: Ukrainska Pravda|https://www.pravda.com.ua; Kyiv Independent|https://kyivindependent.com; UNIAN|https://www.unian.ua; Ukrinform|https://www.ukrinform.ua; RBC-Ukraine|https://www.rbc.ua

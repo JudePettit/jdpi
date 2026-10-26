@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en" data-suite="fe">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101820"><link rel="icon" href="../design/brand-jdpi.svg" type="image/svg+xml">
+<title>JDP-I F&amp;E — Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../design/jdpi.css">
+<script src="../design/jdpi-bar.js" data-suite="fe" data-module="learning" data-shell="../" defer></script>
+<script>(function(){if(new URLSearchParams(location.search).get('course')==='politics'){var s=document.querySelector('script[src*="jdpi-bar.js"]');s.dataset.suite='hp';s.dataset.module='learning-politics';document.documentElement.dataset.suite='hp'}})();</script>
+<style>
+:root{--accent-src:0;--bg:var(--jdpi-bg,#101820);--panel:var(--jdpi-panel,#17242e);--panel2:var(--jdpi-panel-2,#1c2b36);--line:var(--jdpi-line,#293a46);--text:var(--jdpi-text,#edf3f1);--muted:var(--jdpi-muted,#91a0aa);--accent:var(--jdpi-accent,#f0b95a);--good:#b7f36b;--bad:#ff826f}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:15px/1.65 'DM Sans',system-ui,sans-serif}
+a{color:var(--accent)}button{font:inherit;cursor:pointer}[hidden]{display:none!important}
+.wrap{max-width:1320px;margin:auto;padding:22px 28px 40px}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
+.hero h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:720px}
+.tabs{display:flex;gap:6px}.tabs a{border:1px solid var(--line);border-radius:5px;padding:7px 12px;color:var(--muted);text-decoration:none;font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs a.active,.tabs a:hover{border-color:var(--jdpi-accent-line,#86683a);color:var(--accent);background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}
+.progress{margin-top:10px;font:10px 'DM Mono';color:var(--muted)}.bar{height:4px;background:var(--panel2);border-radius:2px;overflow:hidden;margin-top:5px;width:260px}.bar i{display:block;height:100%;background:var(--accent)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;margin-top:20px}
+nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 0;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.unit{padding:10px 16px 4px;font:600 12px Manrope;color:var(--text)}.unit small{display:block;color:var(--muted);font:9px 'DM Mono';letter-spacing:.12em;text-transform:uppercase}
+.toc button{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;color:var(--muted);padding:6px 16px 6px 22px;font-size:13px;line-height:1.4}
+.toc button:hover{color:var(--text);background:var(--panel2)}.toc button.cur{color:var(--accent);background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}
+.tick{flex:none;width:14px;color:var(--good)}
+article{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px 36px;min-width:0}
+article h2{font:600 26px Manrope;letter-spacing:-.03em;margin:4px 0 14px}article h3{font:600 17px Manrope;margin:26px 0 8px}
+article p{margin:10px 0}article ul,article ol{padding-left:22px}article li{margin:4px 0}
+.formula{font:14px 'DM Mono';background:#0d1721;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin:14px 0;overflow-x:auto;white-space:pre-wrap}
+.callout{background:var(--jdpi-accent-soft,rgba(240,185,90,.08));border:1px solid var(--jdpi-accent-line,#86683a);border-radius:8px;padding:12px 16px;margin:16px 0}.callout b.k{display:block;color:var(--accent);font:10px 'DM Mono';letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.quote{border-left:3px solid var(--line);padding:4px 14px;color:#c9d3d6;font-style:italic;margin:14px 0}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--panel2);font:600 12px Manrope}
+.quiz{margin-top:30px;border-top:1px solid var(--line);padding-top:16px}.quiz h3{margin-top:0}
+.q{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}.q p{margin:0 0 8px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;background:#0f1b25;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:8px 12px;margin:6px 0}
+.opt:hover{border-color:var(--accent)}.opt.right{border-color:var(--good);color:var(--good)}.opt.wrong{border-color:var(--bad);color:var(--bad)}
+.why{font-size:13.5px;color:#c9d3d6;margin-top:8px}
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:28px}.pager button{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:9px 14px;max-width:48%}.pager button:hover{border-color:var(--accent);color:var(--accent)}
+.done{background:var(--jdpi-accent-soft,rgba(240,185,90,.08))!important;border-color:var(--jdpi-accent-line,#86683a)!important;color:var(--accent)!important}
+.note{color:var(--muted);font-size:12px;margin-top:24px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{position:static;max-height:none}article{padding:20px 18px}.wrap{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div><div class="eyebrow" id="suite-label">JDP-I F&amp;E · Learning</div><h1 id="title">Learning</h1><p id="intro"></p>
+      <div class="progress"><span id="progress-label"></span><div class="bar"><i id="progress-bar" style="width:0"></i></div></div></div>
+    <div class="tabs"><a href="learning.html?course=finance" data-course="finance" data-suite="fe">Finance</a><a href="learning.html?course=economics" data-course="economics" data-suite="fe">Economics</a><a href="learning.html?course=politics" data-course="politics" data-suite="hp">Politics</a></div>
+  </section>
+  <div class="layout">
+    <nav class="toc" id="toc" aria-label="Course contents"></nav>
+    <article id="lesson" aria-live="polite"><p class="note">Loading course…</p></article>
+  </div>
+</div>
+<script>
+// Courses are plain-text files (learning/<course>.md) in a small markup:
+//   # Unit · ## Lesson · ### Heading · "- " bullets · "1. " steps · "$ " formula · "! Title: text" callout
+//   "> " quotation · "| a | b |" table rows · "? " question, "* " wrong option, "+ " right option, "= " explanation
+const COURSES = { finance: 'learning/finance.md', economics: 'learning/economics.md', politics: 'learning/politics.md' };
+const params = new URLSearchParams(location.search);
+const course = COURSES[params.get('course')] ? params.get('course') : 'finance';
+const STORE = `jdpi-learning-${course}`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>').replace(/\[(.+?)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+let doc, lessons = [], current = 0, done = new Set();
+try { done = new Set(JSON.parse(localStorage.getItem(STORE) || '[]')); } catch {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify([...done])); } catch {} };
+
+function parse(text) {
+  const out = { meta: {}, units: [] };
+  let unit = null, lesson = null;
+  for (const raw of text.replace(/\r/g, '').split('\n')) {
+    const line = raw.trimEnd();
+    if (!unit && /^(title|intro):/.test(line)) { const [k, ...v] = line.split(':'); out.meta[k] = v.join(':').trim(); continue; }
+    if (line.startsWith('# ')) { unit = { title: line.slice(2), lessons: [] }; out.units.push(unit); lesson = null; continue; }
+    if (line.startsWith('## ')) { lesson = { title: line.slice(3), lines: [], quiz: [], unit: unit.title }; unit.lessons.push(lesson); continue; }
+    if (!lesson) continue;
+    if (line.startsWith('? ')) lesson.quiz.push({ q: line.slice(2), options: [], why: '' });
+    else if (/^[*+] /.test(line) && lesson.quiz.length) lesson.quiz.at(-1).options.push({ text: line.slice(2), right: line[0] === '+' });
+    else if (line.startsWith('= ') && lesson.quiz.length) lesson.quiz.at(-1).why = line.slice(2);
+    else lesson.lines.push(line);
+  }
+  return out;
+}
+
+function render(lines) {
+  let html = '', list = null, table = null, para = [];
+  const flush = () => {
+    if (para.length) { html += `<p>${inline(para.join(' '))}</p>`; para = []; }
+    if (list) { html += `<${list.tag}>${list.items.map(i => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`; list = null; }
+    if (table) { const [h, ...rows] = table; html += `<table><tr>${h.map(c => `<th>${inline(c)}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</table>`; table = null; }
+  };
+  for (const line of lines) {
+    if (!line.trim()) { flush(); continue; }
+    if (line.startsWith('### ')) { flush(); html += `<h3>${inline(line.slice(4))}</h3>`; }
+    else if (line.startsWith('$ ')) { flush(); html += `<div class="formula">${esc(line.slice(2))}</div>`; }
+    else if (line.startsWith('! ')) { flush(); const m = line.slice(2).match(/^([^:]{1,40}):\s*(.*)$/); html += `<div class="callout"><b class="k">${esc(m ? m[1] : 'Note')}</b>${inline(m ? m[2] : line.slice(2))}</div>`; }
+    else if (line.startsWith('> ')) { flush(); html += `<div class="quote">${inline(line.slice(2))}</div>`; }
+    else if (line.startsWith('|')) { if (para.length || list) flush(); table ||= []; const cells = line.split('|').slice(1, -1).map(c => c.trim()); if (!cells.every(c => /^-+$/.test(c))) table.push(cells); }
+    else if (/^- /.test(line)) { if (para.length || table) flush(); if (list?.tag !== 'ul') { flush(); list = { tag: 'ul', items: [] }; } list.items.push(line.slice(2)); }
+    else if (/^\d+\. /.test(line)) { if (para.length || table) flush(); if (list?.tag !== 'ol') { flush(); list = { tag: 'ol', items: [] }; } list.items.push(line.replace(/^\d+\. /, '')); }
+    else { if (list || table) flush(); para.push(line.trim()); }
+  }
+  flush();
+  return html;
+}
+
+function toc() {
+  let i = 0;
+  $('#toc').innerHTML = doc.units.map(u => `<div class="unit"><small>${esc(u.title.split(' · ')[0])}</small>${esc(u.title.split(' · ').slice(1).join(' · ') || u.title)}</div>`
+    + u.lessons.map(l => { const n = i++; return `<button data-i="${n}" class="${n === current ? 'cur' : ''}"><span class="tick">${done.has(l.id) ? '✓' : ''}</span>${esc(l.title)}</button>`; }).join('')).join('');
+  $('#toc').querySelectorAll('button').forEach(b => b.onclick = () => go(+b.dataset.i));
+  const pct = Math.round(done.size / lessons.length * 100);
+  $('#progress-label').textContent = `${done.size} of ${lessons.length} lessons completed (${pct}%) · saved in this browser`;
+  $('#progress-bar').style.width = pct + '%';
+}
+
+function show() {
+  const l = lessons[current];
+  const quiz = l.quiz.length ? `<section class="quiz"><h3>Check your understanding</h3>${l.quiz.map((q, qi) => `<div class="q" data-q="${qi}"><p>${inline(q.q)}</p>${q.options.map((o, oi) => `<button class="opt" data-o="${oi}">${inline(o.text)}</button>`).join('')}<div class="why" hidden>${inline(q.why)}</div></div>`).join('')}</section>` : '';
+  $('#lesson').innerHTML = `<div class="eyebrow">${esc(l.unit)}</div><h2>${esc(l.title)}</h2>${render(l.lines)}${quiz}
+    <div class="pager"><button id="prev" ${current ? '' : 'hidden'}>‹ ${esc(lessons[current - 1]?.title || '')}</button>
+    <button id="mark" class="${done.has(l.id) ? 'done' : ''}">${done.has(l.id) ? '✓ Completed' : 'Mark as completed'}</button>
+    <button id="next" ${current < lessons.length - 1 ? '' : 'hidden'}>${esc(lessons[current + 1]?.title || '')} ›</button></div>`;
+  $('#lesson').querySelectorAll('.q').forEach(qel => {
+    const q = l.quiz[+qel.dataset.q];
+    qel.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      qel.querySelectorAll('.opt').forEach((x, i) => { x.disabled = true; if (q.options[i].right) x.classList.add('right'); });
+      if (!q.options[+b.dataset.o].right) b.classList.add('wrong');
+      qel.querySelector('.why').hidden = false;
+    });
+  });
+  $('#prev').onclick = () => go(current - 1);
+  $('#next').onclick = () => go(current + 1);
+  $('#mark').onclick = () => { done.has(l.id) ? done.delete(l.id) : done.add(l.id); save(); toc(); show(); };
+}
+
+function go(i) {
+  current = Math.max(0, Math.min(lessons.length - 1, i));
+  const p = new URLSearchParams({ course, lesson: lessons[current].id });
+  history.replaceState(null, '', '?' + p);
+  toc(); show(); window.scrollTo({ top: 0 });
+}
+
+// Finance and Economics belong to F&E; Politics belongs to H&P, so each suite only shows its own courses.
+const suite = course === 'politics' ? 'hp' : 'fe';
+$('#suite-label').textContent = suite === 'hp' ? 'JDP-I H&P · Learning' : 'JDP-I F&E · Learning';
+document.querySelectorAll('.tabs a').forEach(a => { a.classList.toggle('active', a.dataset.course === course); a.hidden = a.dataset.suite !== suite; });
+fetch(COURSES[course]).then(r => r.text()).then(text => {
+  doc = parse(text);
+  lessons = doc.units.flatMap(u => u.lessons);
+  lessons.forEach((l, i) => { l.id = l.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'l' + i; });
+  $('#title').textContent = doc.meta.title || 'Learning';
+  $('#intro').textContent = doc.meta.intro || '';
+  document.title = `JDP-I ${suite === 'hp' ? 'H&P' : 'F&E'} — ${doc.meta.title || 'Learning'}`;
+  const want = params.get('lesson');
+  go(Math.max(0, lessons.findIndex(l => l.id === want)));
+}).catch(err => { $('#lesson').innerHTML = `<p class="note">The course could not load: ${esc(err.message)}</p>`; });
+</script>
+</body>
+</html>

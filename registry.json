@@ -177,6 +177,15 @@
           "host": "JDP-I",
           "url": "battlefield/history/index.html",
           "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links."
+        },
+        {
+          "id": "learning-politics",
+          "name": "Learning",
+          "icon": "◫",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "fe/learning.html?course=politics",
+          "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (Mearsheimer and the Realists) and far right, with quizzes."
         }
       ]
     },
@@ -195,6 +204,27 @@
           "host": "ChatGPT Sites",
           "url": null,
           "description": "Email alerts when a US-listed stock more than doubles in under six hours. Scans the whole market hourly."
+        },
+        {
+          "id": "learning",
+          "name": "Learning",
+          "icon": "◫",
+          "status": "live",
+          "host": "JDP-I",
+          "url": "fe/learning.html?course=finance",
+          "description": "Two courses: Finance, a university-style introduction with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
+          "submodules": [
+            {
+              "id": "finance",
+              "name": "Finance",
+              "url": "fe/learning.html?course=finance"
+            },
+            {
+              "id": "economics",
+              "name": "Economics",
+              "url": "fe/learning.html?course=economics"
+            }
+          ]
         }
       ]
     }

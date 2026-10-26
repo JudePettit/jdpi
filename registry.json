@@ -148,35 +148,8 @@
           "icon": "▤",
           "status": "live",
           "host": "JDP-I",
-          "url": "q/calendar.html?period=2020s",
-          "description": "Political history since 1980 by decade: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account.",
-          "submodules": [
-            {
-              "id": "2020s",
-              "name": "2020s",
-              "url": "q/calendar.html?period=2020s"
-            },
-            {
-              "id": "2010s",
-              "name": "2010s",
-              "url": "q/calendar.html?period=2010s"
-            },
-            {
-              "id": "2000s",
-              "name": "2000s",
-              "url": "q/calendar.html?period=2000s"
-            },
-            {
-              "id": "1990s",
-              "name": "1990s",
-              "url": "q/calendar.html?period=1990s"
-            },
-            {
-              "id": "1980s",
-              "name": "1980s",
-              "url": "q/calendar.html?period=1980s"
-            }
-          ]
+          "url": "q/calendar.html?period=history",
+          "description": "Political history from 1980 to today in one calendar: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account."
         },
         {
           "id": "battlefield-history",

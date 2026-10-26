@@ -58,7 +58,7 @@ export function calendar({ jdpiDir }) {
       if (!title) continue;
       const recent = e.date >= new Date(Date.now() - 180 * 864e5).toISOString().slice(0, 10);
       out.push({ key: { title }, label: e.title, module: recent ? 'calendar' : 'historical-calendar', date: e.date,
-        url: `${JDPI}q/calendar.html?period=${recent ? 'contemporary' : d}&month=${e.date.slice(0, 7)}`, context: `${e.country}: ${e.title}`, tags: [['Event type', EVENT_TYPE[e.type] || e.type]] });
+        url: `${JDPI}q/calendar.html?period=${recent ? 'contemporary' : 'history'}&month=${e.date.slice(0, 7)}`, context: `${e.country}: ${e.title}`, tags: [['Event type', EVENT_TYPE[e.type] || e.type]] });
     }
   }
   return out;

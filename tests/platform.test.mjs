@@ -89,9 +89,9 @@ test('each live module opens inside the shell workspace', async () => {
 });
 
 test('submodule deep links open the right page', async () => {
-  const cal = modules.find(x => x.m.id === 'historical-calendar');
+  const cal = modules.find(x => x.m.id === 'headlines');
   for (const sub of cal.m.submodules) {
-    await page.goto(`${BASE}/#/hp/historical-calendar/${sub.id}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE}/#/q/headlines/${sub.id}`, { waitUntil: 'domcontentloaded' });
     const src = await page.locator('#frames iframe.active').getAttribute('src');
     assert.equal(src, sub.url);
   }

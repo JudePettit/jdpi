@@ -85,7 +85,11 @@ const TYPES = {
   treaty: { label: 'Treaties', tag: 'Treaty', colour: '#7aa7ff' },
 };
 const params = new URLSearchParams(location.search);
-const activePeriod = params.get('period') || 'contemporary';
+// "contemporary" = Realtime Calendar (Q). Anything else = the Historical Calendar (H&P): one archive from 1980 to
+// today. Old decade links (?period=1990s) still work and open that decade's first month.
+const requestedPeriod = params.get('period') || 'contemporary';
+const activePeriod = requestedPeriod === 'contemporary' ? 'contemporary' : 'history';
+const HISTORY_FROM = '1980-01-01', DECADES = ['1980s', '1990s', '2000s', '2010s', '2020s'];
 const decadeOf = d => d.slice(0, 3) + '0s';
 const decadeCache = new Map();
 let editorial = events.slice(), pastEvents = [];
@@ -105,15 +109,14 @@ function contemporaryRange() {
 }
 function periodIncludes(e) {
   if (activePeriod === 'contemporary') { const [a, b] = contemporaryRange(); return e.date >= a && e.date <= b; }
-  const first = Number(activePeriod.slice(0, 4)), year = Number(e.date.slice(0, 4));
-  return year >= first && year < first + 10;
+  return e.date >= HISTORY_FROM && e.date <= dateKey(new Date());
 }
 async function loadDecade(d) {
   if (!decadeCache.has(d)) decadeCache.set(d, fetch(`../calendar/data/${d}.json`).then(r => r.ok ? r.json() : { events: [] }).then(x => x.events).catch(() => []));
   return decadeCache.get(d);
 }
 async function loadHistory() {
-  const decades = activePeriod === 'contemporary' ? [...new Set(contemporaryRange().map(decadeOf))] : [activePeriod];
+  const decades = activePeriod === 'contemporary' ? [...new Set(contemporaryRange().map(decadeOf))] : DECADES;
   pastEvents = (await Promise.all(decades.map(loadDecade))).flat();
 }
 // Editorial/Supabase entries win over the historical file when both list the same country's election that day.
@@ -270,10 +273,7 @@ async function init() {
   await loadHistory();
   const requested = params.get('month');
   if (requested && /^\d{4}-\d{2}$/.test(requested)) view = new Date(requested + '-01T00:00:00');
-  else if (activePeriod !== 'contemporary') {
-    const first = allEvents().filter(periodIncludes).sort((a, b) => a.date.localeCompare(b.date))[0];
-    view = first ? new Date(first.date.slice(0, 7) + '-01T00:00:00') : new Date(Number(activePeriod.slice(0, 4)), 0, 1);
-  }
+  else if (/^\d{4}s$/.test(requestedPeriod)) view = new Date(Number(requestedPeriod.slice(0, 4)), 0, 1);
   render();
 }
 function showUpdated() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; }
@@ -290,7 +290,7 @@ document.getElementById('countrypick').addEventListener('change', addCountry);
 document.querySelectorAll('.calendar-submodule').forEach(a => {
   const p = new URL(a.href).searchParams.get('period');
   if (p === activePeriod) a.classList.add('active');
-  a.hidden = activePeriod === 'contemporary' || p === 'contemporary'; // Realtime has no decade tabs; Historical has no contemporary tab
+  a.hidden = true; // one Realtime and one Historical calendar; no decade tabs
 });
 if (activePeriod === 'contemporary') {
   document.getElementById('hero-eyebrow').textContent = 'JDP-I Q · Realtime';
@@ -299,15 +299,15 @@ if (activePeriod === 'contemporary') {
 } else {
   document.getElementById('hero-eyebrow').textContent = 'JDP-I H&P · History & Politics';
   document.getElementById('hero-title').textContent = 'Historical Calendar';
-  document.getElementById('hero-text').textContent = 'Political history since 1980, decade by decade: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account.';
+  document.getElementById('hero-text').textContent = 'Political history from 1980 to today: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account. Jump to any month or year.';
   document.querySelector('.source-health').hidden = true;
   document.querySelector('.calendar-history').hidden = true;
 }
 const note = document.getElementById('period-note');
 note.innerHTML = activePeriod === 'contemporary'
   ? '<strong>Contemporary:</strong> the last six months and an 18-month outlook. Upcoming elections come from the editorial calendar; past events cover elections, new leaders, coups, wars, assassinations, crises and treaties.'
-  : `<strong>${activePeriod} archive:</strong> elections, new leaders and coups (H&amp;P Retrospective), outbreaks of armed conflict (UCDP), and assassinations, battles, attacks, epidemics, disasters and treaties (Wikidata, events covered in many Wikipedia languages).`;
-document.getElementById('calendar-range').textContent = activePeriod === 'contemporary' ? '· last 6 months + 18-month outlook' : '· ' + activePeriod.slice(0, 4) + '–' + (Number(activePeriod.slice(0, 4)) + 9);
+  : `<strong>1980 to today:</strong> elections, new leaders and coups (H&amp;P Retrospective), outbreaks of armed conflict (UCDP), and assassinations, battles, attacks, epidemics, disasters and treaties (Wikidata, events covered in many Wikipedia languages).`;
+document.getElementById('calendar-range').textContent = activePeriod === 'contemporary' ? '· last 6 months + 18-month outlook' : '· 1980–today';
 document.getElementById('search').oninput = render;
 showUpdated(); setInterval(showUpdated, 60000);
 init();

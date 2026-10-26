@@ -1,8 +1,8 @@
 {
- "generated": "2026-10-26T16:57:16.129Z",
- "entities": 10322,
- "withMentions": 9130,
- "mentions": 15023,
+ "generated": "2026-10-26T17:12:47.877Z",
+ "entities": 10317,
+ "withMentions": 9125,
+ "mentions": 15017,
  "types": {
   "place": 454,
   "person": 1819,
@@ -11,7 +11,7 @@
   "event": 1037,
   "topic": 209,
   "idea": 270,
-  "conflict": 3285,
+  "conflict": 3280,
   "organisation": 3
  },
  "shards": {
@@ -23,7 +23,7 @@
   "historical-calendar": 3039,
   "calendar": 49,
   "battlefield-history": 34,
-  "war-focus": 3591,
+  "war-focus": 3585,
   "battlefield": 18,
   "kardashev": 82,
   "traders": 139,

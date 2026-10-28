@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-suite="mm" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Economics Briefing · PRP</title>
+<meta name="description" content="Economics news and scholarly articles by field: working papers, journal articles, central-bank research and releases, think tanks and quality economic journalism.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../design/prp.css">
+<link rel="stylesheet" href="briefing.css">
+<script src="../../design/prp-bar.js" data-suite="mm" data-module="econ-briefing" data-shell="../../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="eb">
+  <header class="front">
+    <div class="prp-eyebrow">Money Management <span class="sep">·</span> Economics Briefing</div>
+    <h1 class="prp-title">Economics Briefing</h1>
+    <p class="prp-dek">New working papers, journal articles, central-bank research and releases, and the best economic journalism, refreshed every six hours. Pick a field, choose papers (research) or news, and open any item at its publisher.</p>
+    <div class="prp-meta" id="meta"><span>Loading the latest papers and stories…</span></div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-stories" aria-controls="panel-stories" aria-selected="true">Stories</button>
+    <button type="button" role="tab" id="tab-sources" aria-controls="panel-sources" aria-selected="false" tabindex="-1">Sources</button>
+  </div>
+
+  <section id="panel-stories" role="tabpanel" aria-labelledby="tab-stories">
+    <div class="toolbar prp-panel">
+      <div class="chips" id="chips" role="group" aria-label="Field"></div>
+      <div class="controls">
+        <div class="field"><span class="prp-label" id="lbl-type">Show</span>
+          <div class="seg" id="type" role="group" aria-labelledby="lbl-type">
+            <button type="button" data-v="paper" aria-pressed="false" title="Research: journal articles, working papers and research columns">Papers</button><button type="button" data-v="news" aria-pressed="false" title="Journalism, commentary and central-bank releases">News</button><button type="button" data-v="both" aria-pressed="true">Both</button>
+          </div></div>
+        <div class="field"><span class="prp-label" id="lbl-w">Window</span>
+          <div class="seg" id="window" role="group" aria-labelledby="lbl-w">
+            <button type="button" data-v="24h" aria-pressed="false">24 h</button><button type="button" data-v="3d" aria-pressed="true">3 days</button><button type="button" data-v="7d" aria-pressed="false">7 days</button>
+          </div></div>
+        <label class="field"><span class="prp-label">Source</span><select class="prp-select" id="source"><option value="">All sources</option></select></label>
+        <label class="field grow"><span class="prp-label">Search</span><input class="prp-input" type="search" id="q" placeholder="Title, author, summary, DOI…" autocomplete="off"></label>
+        <label class="field"><span class="prp-label">Order</span><select class="prp-select" id="order"><option value="tier">Major sources first</option><option value="newest">Newest first</option></select></label>
+      </div>
+    </div>
+
+    <div class="layout">
+      <main class="prp-panel toc" aria-labelledby="toc-title">
+        <div class="prp-panel-head toc-head"><h2 class="prp-h2" id="toc-title">All fields</h2><span class="status" id="status" aria-live="polite"></span></div>
+        <div id="list"><p class="prp-empty">Loading…</p></div>
+      </main>
+      <aside class="side" aria-label="Overview">
+        <section class="prp-panel">
+          <div class="prp-panel-head"><b>The week by field</b><span class="prp-label">7 days</span></div>
+          <div class="prp-panel-body">
+            <figure class="prp-figure">
+              <div id="chart" class="chart" role="img" aria-label="Items per day by field over the last seven days"></div>
+              <figcaption><b>Figure 1.</b> Papers and stories per day over the last seven days, by field, for the current type, source and search. An item can count under more than one field. Source: the research and news feeds listed under Sources.</figcaption>
+            </figure>
+            <details class="as-table"><summary>Show as a table</summary><div class="scroll" id="chart-table"></div></details>
+          </div>
+        </section>
+        <section class="prp-panel">
+          <div class="prp-panel-head"><b>Most active sources</b><span class="prp-label" id="top-scope">in this view</span></div>
+          <ol class="top" id="top"></ol>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <section id="panel-sources" role="tabpanel" aria-labelledby="tab-sources" hidden>
+    <div class="prp-kpis" id="kpis"></div>
+    <div class="prp-panel src-panel">
+      <div class="prp-panel-head"><b>Feeds</b><span class="prp-label" id="src-checked"></span></div>
+      <div class="scroll"><table class="prp-table" id="src-table">
+        <thead><tr><th scope="col">Source</th><th scope="col">Kind</th><th scope="col">Tier</th><th scope="col">Default fields</th><th scope="col">Status</th><th scope="col" class="num">Items, 7 days</th><th scope="col" class="num">In feed</th><th scope="col">Latest item</th></tr></thead>
+        <tbody id="src-rows"></tbody>
+      </table></div>
+    </div>
+    <p class="prp-note src-note">Tier 1 is the leading general-interest journals and the Journal of Finance (the American Economic Review, the Quarterly Journal of Economics, the Journal of Political Economy, Econometrica and the Review of Economic Studies) and the flagship working-paper series (NBER, CEPR); tier 2 other major journals, central banks and international institutions; tier 3 think tanks and research columns; tier 4 journalism and commentary. “Major sources first” orders each day by tier. A feed with no default field is general: its items are sorted into fields by keywords, and those marked “economics only” keep only the items that match a field. “In feed” is what the feed returned at the last check, after front matter, corrections, events and off-topic posts were dropped.</p>
+  </section>
+
+  <footer class="prp-sources" id="sources-note">
+    <p><b>Sources.</b> RSS and Atom feeds from the journals (the American Economic Association, Oxford, Chicago and Wiley journals), the NBER and CEPR working papers, the BIS, the ECB, the Federal Reserve Board and the New York and St. Louis Feds, the Bank of England, the Bank of Japan, the Central Bank of Ireland, the OECD, the Congressional Budget Office and the WTO; VoxEU, Brookings, VoxDev, Equitable Growth, the Resolution Foundation, Econofact and Econbrowser; and the economics desks of the Financial Times, The Economist, Bloomberg, The Wall Street Journal, The New York Times, The Guardian, BBC News, Project Syndicate and Carbon Brief. Headlines, links, authors and short summaries only; every item links to its publisher, and the text remains theirs. DOIs resolve through doi.org.</p>
+    <p><b>Not covered.</b> The IMF, the World Bank, PIIE and Bruegel offer no working news or research feed at present, the OECD’s newsroom blocks feed readers (its Ecoscope blog is included), and Reuters and AP publish no public feeds. Elsevier’s journals are left out because their feeds give no dates.</p>
+    <p><b>Method.</b> Items are classed by their feed's default field, refined by a keyword classifier (an item can belong to several fields; general feeds are classed by keywords alone, and items matching none appear under All). Papers are research: journal articles, working papers, and research columns, notes and think-tank analysis. News is journalism, commentary, and central banks’ and institutions’ releases, statements and speeches. Journal front matter, corrections, announcements, events and translations are left out. Duplicates (same URL or DOI, or near-identical titles across outlets) are merged and the copy from the highest tier is kept. Items stay for seven days, at most 2,500 in all and 150 per feed. Times are shown in your time zone; feeds that give only a date are grouped by that date, and NBER’s undated list takes the time it last changed.</p>
+    <p><b>Refresh.</b> Every six hours by a GitHub Actions workflow (<code>econ/scripts/build-briefing.mjs</code>). <span id="refreshed"></span></p>
+  </footer>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+</body>
+</html>

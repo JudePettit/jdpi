@@ -26,13 +26,15 @@ button,input,select{font:inherit}button{cursor:pointer}
 .prp-sources p{margin:0 0 6px;max-width:120ch}
 .panel-note{margin:0;padding:10px 14px 14px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.6}
 .muted{color:var(--prp-muted)}
-/* map */
+/* map (zoomed only by Documentary mode, so lines keep their width at any scale) */
+.mapbox{position:relative}
 #map{display:block;width:100%;height:auto;background:var(--prp-surface)}
-#map .sphere{fill:var(--prp-map-water);stroke:var(--prp-map-border);stroke-width:.6}
-#map .graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5}
-#map .land{stroke:var(--prp-surface);stroke-width:.5;cursor:pointer}
+#map .sphere{fill:var(--prp-map-water);stroke:var(--prp-map-border);stroke-width:.6;vector-effect:non-scaling-stroke}
+#map .graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5;vector-effect:non-scaling-stroke}
+#map .land{stroke:var(--prp-surface);stroke-width:.5;cursor:pointer;vector-effect:non-scaling-stroke}
 #map .land:hover{stroke:var(--prp-text);stroke-width:1.1}
 #map .land.sel{stroke:var(--prp-text);stroke-width:1.8}
+#map .land.prp-focus-hit{stroke:var(--prp-text)!important} /* Documentary focus: ink, as the accent is lost on the blue ramp */
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-muted);font:var(--prp-fs-xs)/1.4 var(--prp-font-mono)}
 .legend .ramp{display:inline-block;width:150px;height:10px;border-radius:2px}
 .legend .note{color:var(--prp-text-2)}
@@ -122,7 +124,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
     <figure class="prp-figure">
       <div class="prp-panel">
         <div class="prp-panel-head"><b id="maptitle">Overall PESTLE pressure</b><span class="hint">Hover for values · click a country for its profile</span></div>
-        <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
+        <div class="mapbox" id="mapbox"><svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg></div>
         <div class="legend" id="legend"></div>
       </div>
       <figcaption><b>Figure 1.</b> <span id="mapcap">Overall PESTLE pressure by country.</span></figcaption>
@@ -146,6 +148,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 <div class="tip" id="tip" role="tooltip" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="../design/prp-focus.js"></script>
 <script>
 // National Analysis (formerly Country PESTLE). Data: ../national/data/index.json and series/<ISO3>.json, built monthly
 // by national/scripts/build.mjs from World Bank indicators, Wikidata and PRP's own submodules.
@@ -211,7 +214,8 @@ const SOURCE = { PESTLE: 'World Bank (WDI and WGI), scored as in Country PESTLE'
 const sourceOf = m => SOURCE[m.group] || 'World Bank (WDI and WGI)';
 
 /* ---------- map ---------- */
-let mapG, mapPath, numToIso = new Map();
+let mapG, mapPath, mapProj, numToIso = new Map(), focusView = null, focusReset = null, places = null;
+const focusIsos = new Set(); // countries Documentary mode is discussing
 function showTip(ev, html) {
   const t = $('#tip'); t.innerHTML = html; t.hidden = false;
   const w = t.offsetWidth, h = t.offsetHeight;
@@ -220,17 +224,51 @@ function showTip(ev, html) {
 }
 const hideTip = () => { $('#tip').hidden = true; };
 function drawMap(world) {
-  const svg = d3.select('#map'), proj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' });
+  const svg = d3.select('#map'), proj = mapProj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' });
   mapPath = d3.geoPath(proj);
-  svg.append('path').attr('class', 'sphere').attr('d', mapPath({ type: 'Sphere' }));
-  svg.append('path').attr('class', 'graticule').attr('d', mapPath(d3.geoGraticule10()));
+  // One layer for the whole map, zoomed only by Documentary mode (no wheel or drag, so the page scrolls as before).
+  const layer = svg.append('g');
+  const zoom = d3.zoom().scaleExtent([1, 10]).filter(() => false).on('zoom', e => layer.attr('transform', e.transform));
+  svg.call(zoom);
+  if (window.PRPFocus) { focusView = PRPFocus.d3View({ svg, zoom, project: () => mapProj, clamp: true }); focusReset = PRPFocus.resetButton($('#mapbox'), () => { clearFocus(); focusView.reset(); }); }
+  layer.append('path').attr('class', 'sphere').attr('d', mapPath({ type: 'Sphere' }));
+  layer.append('path').attr('class', 'graticule').attr('d', mapPath(d3.geoGraticule10()));
   const feats = topojson.feature(world, world.objects.countries).features;
-  mapG = svg.append('g');
+  mapG = layer.append('g');
   mapG.selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', mapPath)
     .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); showTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}` : esc(f.properties.name)); })
     .on('mouseleave', hideTip)
     .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso) openProfile(iso); });
 }
+// Documentary focus (design/prp-focus.js): the countries being discussed are outlined in the module accent and the map
+// eases to fit them all; "Reset view" or the end of the reading brings back the whole world.
+function paintFocus() { if (!mapG) return; mapG.selectAll('path.land').classed('prp-focus-hit', f => focusIsos.has(numToIso.get(f.id))); mapG.selectAll('.land.prp-focus-hit').raise(); }
+function clearFocus() { focusIsos.clear(); paintFocus(); focusReset?.hide(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    if (!mapG || !focusView) return;
+    const isos = new Set(), feats = mapG.selectAll('path.land').data();
+    const r = PRPFocus.resolve(t, { country: id => {
+      const iso = /^gw:\d+$/.test(id) ? (D?.countries.find(c => c.gw === +id.slice(3))?.iso3 || PRPFocus.iso3OfGw(id.slice(3))) : id, fs = feats.filter(f => numToIso.get(f.id) === iso);
+      if (fs.length) isos.add(iso);
+      return fs.length ? fs : null;
+    } });
+    if (!r.box) return;
+    focusIsos.clear(); isos.forEach(i => focusIsos.add(i)); paintFocus();
+    focusView.fit(r.box, r.padding); focusReset?.show();
+  },
+  reset() { clearFocus(); focusView?.reset(); },
+  // A passage is placed by the countries it names (common names, and this page's own); one in a country's profile or
+  // the comparison, by the countries there.
+  request(text, el) {
+    if (!D) return null;
+    const named = PRPFocus.matchPlaces(text, places ||= PRPFocus.countryPlaces(D.countries.map(c => [c.iso3, c.name])));
+    if (named) return named;
+    if (el?.closest?.('#tab-profile') && selected) return { countries: [selected] };
+    if (el?.closest?.('#tab-compare') && compare.length) return { countries: compare };
+    return null;
+  },
+});
 function colourMap() {
   const m = METRICS.find(x => x.id === $('#metric').value);
   const vals = D.countries.map(c => m.get(c)).filter(v => v != null);
@@ -238,6 +276,7 @@ function colourMap() {
   const [lo, hi] = d3.extent(vals);
   const scale = isPress ? pressColour : v => (v == null ? NODATA : ramp(hi > lo ? (v - lo) / (hi - lo) : 0.5));
   mapG.selectAll('path.land').attr('fill', f => { const c = byIso.get(numToIso.get(f.id)); return c ? scale(m.get(c)) : NODATA; }).classed('sel', f => compare.includes(numToIso.get(f.id)));
+  mapG.selectAll('.land.prp-focus-hit').raise();
   $('#maptitle').textContent = m.label;
   const grad = `linear-gradient(90deg,${SEQ.join(',')})`, better = m.better ? `<span class="note">${m.better === 'down' ? 'lower is better' : 'higher is better'}</span>` : '';
   $('#legend').innerHTML = (isPress ? `<span>0%</span><i class="ramp" style="background:${grad}"></i><span>${PRESS_MAX * 100}%+</span><span class="note">of the indicators worsening</span>`
@@ -283,6 +322,10 @@ function spark(pts, better) {
 
 /* ---------- profile ---------- */
 async function openProfile(iso) { selected = iso; setTab('profile'); await renderProfile(); writeHash(); }
+// Calendar event types, as the Realtime and Historical Calendars name them.
+const CAL_TYPES = { election: 'elections', referendum: 'referendums', party: 'party contests', leader: 'new leaders', inauguration: 'inaugurations',
+  resignation: 'resignations', coup: 'coups', conflict: 'conflicts', ceasefire: 'ceasefires', assassination: 'assassinations', crisis: 'crises',
+  protest: 'protests', treaty: 'treaties', summit: 'summits', sanctions: 'sanctions', vote: 'parliamentary votes', court: 'court rulings' };
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
@@ -330,7 +373,7 @@ async function renderProfile() {
       ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`) : ''}
       ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${K.cowWars1926_45} wars 1926–45 (COW)`) : ''}
       ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '2025 · Kardashev Tracker') : ''}
-      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${t}`).join(' · ')) : ''}
+      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${CAL_TYPES[t] || t}`).join(' · ')) : ''}
       ${stat('PESTLE pressure', pct(P.overall), `${period === 'latest' ? 'latest' : period + 's'} · coverage ${pct(P.coverage)}`)}
       ${stat('Population', fmtVal(c.latest['SP.POP.TOTL']?.[1], 'people'), c.latest['NY.GDP.MKTP.CD'] ? 'GDP ' + fmtVal(c.latest['NY.GDP.MKTP.CD'][1], 'US$') : '')}
     </div>

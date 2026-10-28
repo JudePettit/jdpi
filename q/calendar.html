@@ -39,11 +39,18 @@ button,input{font:inherit}button{cursor:pointer}
 .calctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .month{min-width:136px;color:var(--prp-text);font:600 16px var(--prp-font-serif);text-align:center}
 #monthpick{width:150px}
-.filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 14px;border-bottom:1px solid var(--prp-line-soft)}
-.filterset{display:flex;flex-wrap:wrap;gap:6px}
-.filter{height:26px;padding:0 10px;cursor:pointer}
+.filters{display:flex;flex-direction:column;gap:8px;padding:10px 14px 12px;border-bottom:1px solid var(--prp-line-soft)}
+.filterhead{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.filterhint{color:var(--prp-muted);font-size:var(--prp-fs-xs)}
+/* Event-type chips, one group per family (same colour), with the number of events each type has in view */
+.filterset{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.fam{display:flex;flex-wrap:wrap;gap:6px}
+.filter{height:26px;padding:0 9px;cursor:pointer}
 .filter:hover{border-color:var(--prp-line-strong);color:var(--prp-text)}
 .filter.active{border-color:var(--prp-primary);background:var(--prp-primary-soft);color:var(--prp-text)}
+.filter .n{color:var(--prp-muted);font:500 10.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.filter.active .n{color:var(--prp-text-2)}
+.filter.zero:not(.active){color:var(--prp-muted);border-style:dashed}
 .search{margin-left:auto}.search .prp-input{width:230px}
 .countrybar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--prp-line-soft)}
 .countrybar label{margin-right:4px}
@@ -66,11 +73,18 @@ button,input{font:inherit}button{cursor:pointer}
 .day.today{box-shadow:inset 0 0 0 2px var(--prp-accent)}.day.today .num{color:var(--prp-accent);font-weight:600}
 .num{font:12px var(--prp-font-mono)}
 .eventdots{position:absolute;left:7px;bottom:7px;display:flex;flex-wrap:wrap;gap:3px;max-width:calc(100% - 28px)}
+/* An event's mark: colour = its family, shape = its type within the family (● ■ ◆), ring = expected, not confirmed */
 .eventdot{display:inline-block;flex:none;width:7px;height:7px;border-radius:50%;background:var(--c,var(--prp-cat-1))}
+.eventdot.sq{border-radius:1px}
+.eventdot.dia{width:6px;height:6px;margin:0 .5px;border-radius:1px;transform:rotate(45deg)}
 .eventdot.tentative{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c,var(--prp-cat-1))}
 .daycount{position:absolute;right:6px;bottom:5px;color:var(--prp-muted);font:10px var(--prp-font-mono)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.legend-types{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--prp-line-soft);color:var(--prp-text-2);font:var(--prp-fs-xs) var(--prp-font-ui)}
+.legend-types:empty{display:none}
+.legend-types b{color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.legend-types span{display:inline-flex;align-items:center;gap:5px}
 .detail{display:none;margin-top:12px;padding:12px 14px;border:1px solid var(--prp-line);border-left:3px solid var(--prp-accent);border-radius:var(--prp-radius-sm);background:var(--prp-surface)}
 .detail.show{display:block}
 .detail strong{color:var(--prp-text);font:600 13.5px var(--prp-font-ui)}
@@ -97,7 +111,7 @@ button,input{font:inherit}button{cursor:pointer}
 .ymonth:hover{border-color:var(--prp-primary);background:var(--prp-surface-2)}
 .ymhead{display:flex;justify-content:space-between;gap:8px;font:600 14.5px var(--prp-font-serif)}
 .ymhead span{color:var(--prp-muted);font:11px var(--prp-font-mono)}
-.ymbar{display:flex;height:5px;margin:8px 0 7px;overflow:hidden;border-radius:3px;background:var(--prp-surface-3)}
+.ymbar{display:flex;gap:1px;height:5px;margin:8px 0 7px;overflow:hidden;border-radius:3px;background:var(--prp-surface-3)}
 .ymbar i{display:block;height:100%}
 .ymevent{display:-webkit-box;margin:3px 0;overflow:hidden;color:var(--prp-text-2);font-size:11.5px;line-height:1.4;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .ymevent .eventdot{margin-right:3px;vertical-align:1px}
@@ -108,6 +122,7 @@ button,input{font:inherit}button{cursor:pointer}
 .modal-box p{margin:8px 0;color:var(--prp-text);font:15px/1.65 var(--prp-font-serif)}
 .modal-meta{color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
 .modal-box .credit{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.modal-box h3{margin:16px 0 4px;padding-top:12px;border-top:1px solid var(--prp-line-soft);color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
 .modal-close{position:absolute;right:14px;top:12px;width:30px;padding:0;font-size:18px}
 /* Saved-research tools: research-workspace.js injects these with its own dark styles, so they are restyled here
    (selectors start with :root to win over the injected sheet). */
@@ -141,6 +156,7 @@ button,input{font:inherit}button{cursor:pointer}
 @media(min-width:1101px){.calbody:not(.year) .calendar{position:sticky;top:0;align-self:start}:root .jdp-timeline .calendar{position:static}}
 @media(max-width:1100px){.calbody{grid-template-columns:minmax(0,1fr)}.eventlist{border-left:0;border-top:1px solid var(--prp-line-soft)}.yeargrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.yeargrid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.filters{padding:10px 12px}.filterset{gap:5px}.fam{display:contents}.filter{height:24px;padding:0 7px;gap:5px}.filterhint{flex-basis:100%}.eventdot.dia{width:4.5px;height:4.5px}}
 @media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.search{width:100%;margin-left:0}.search .prp-input{width:100%}.calendar-history label,.countrybar label{flex-basis:100%}.calendar-history .prp-input,.countrybar .prp-input{flex:1 1 140px;width:auto;min-width:0}.calendar-history-note{flex-basis:100%;margin-left:0}:root .calendar-history:not([hidden])~.research-toolbar{justify-content:flex-start}.calendar{padding:10px}.day{height:46px;padding:4px 5px}.eventdots{left:4px;bottom:5px;gap:2px}.eventdot{width:5px;height:5px}.daycount{right:3px;bottom:3px;font-size:9px}.eventlist{padding:0 12px 6px}.eventrow{grid-template-columns:42px minmax(0,1fr)}.eventrow>.tag{grid-column:2;justify-self:start}.month{min-width:0}}
 @media(max-width:450px){.yeargrid{grid-template-columns:1fr}}
 </style>
@@ -150,10 +166,10 @@ button,input{font:inherit}button{cursor:pointer}
   <header>
     <div class="prp-eyebrow" id="hero-eyebrow">Realtime Intelligence <span class="sep">·</span> Realtime Calendar</div>
     <h1 class="prp-title" id="hero-title">Realtime Calendar</h1>
-    <p class="prp-dek" id="hero-text">Upcoming elections and the last six months of political events: new leaders, coups, outbreaks of war, assassinations, crises and treaties. See a month or a whole year, for every country or just the ones you highlight.</p>
+    <p class="prp-dek" id="hero-text">Upcoming elections, referendums and summits, and the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests, parliamentary votes, court rulings, sanctions and more. See a month or a whole year, for every country or just the ones you highlight.</p>
     <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span class="rt-only">Elections snapshot <b id="updated">23 Oct 2026 · editorial</b></span><span>Events updated <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Calendar data source status"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Supabase archive · checking</span></span><span class="source-health-note" id="calendar-source-note">Checking saved calendar history.</span></span><span class="rt-only">Now <b id="clock"></b></span></div>
   </header>
-  <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Intelligence <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
+  <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Intelligence <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
   <div class="prp-tabs" role="tablist" aria-label="Calendar views">
     <button type="button" role="tab" class="viewbtn active" id="tab-month" data-view="month" aria-controls="calpanel" aria-selected="true">Month</button>
     <button type="button" role="tab" class="viewbtn" id="tab-year" data-view="year" aria-controls="calpanel" aria-selected="false" tabindex="-1">Year</button>
@@ -164,17 +180,17 @@ button,input{font:inherit}button{cursor:pointer}
   </div>
   <section class="prp-panel calpanel" id="calpanel" role="tabpanel" aria-labelledby="tab-month">
     <div class="prp-panel-head"><div class="ptitle"><b>Political calendar</b><span class="hint" id="calendar-range">· 18-month outlook</span></div><div class="calctrl"><button class="prp-btn sm navbtn" id="prev" aria-label="Previous">‹</button><div class="month" id="monthlabel" aria-live="polite"></div><button class="prp-btn sm navbtn" id="next" aria-label="Next">›</button><input class="prp-input" type="month" id="monthpick" aria-label="Jump to month"></div></div>
-    <div class="filters"><div id="filters" class="filterset" role="group" aria-label="Event types"></div><div class="search"><input class="prp-input" type="search" id="search" placeholder="Search country or event…" aria-label="Search events"></div></div>
+    <div class="filters"><div class="filterhead"><span class="prp-label" id="types-label">Event types</span><span class="filterhint">Pick one or more. Colour groups related types; the shape tells them apart.</span><div class="search"><input class="prp-input" type="search" id="search" placeholder="Search country or event…" aria-label="Search events"></div></div><div id="filters" class="filterset" role="group" aria-labelledby="types-label"></div></div>
     <div class="countrybar"><label for="countrypick" class="prp-label">Highlight countries</label><input class="prp-input" id="countrypick" list="countrylist" placeholder="Type a country…" autocomplete="off"><datalist id="countrylist"></datalist><button class="prp-btn sm" id="countryadd">Add</button><div id="chips" class="chips"></div></div>
     <div class="calbody">
-      <div class="calendar"><div id="yeargrid" class="yeargrid" hidden></div><div id="monthgrid"><div class="weekdays" aria-hidden="true"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="grid" id="days"></div></div><div class="legend"><span><i class="eventdot" style="--c:var(--prp-muted)"></i>Confirmed</span><span><i class="eventdot tentative" style="--c:var(--prp-muted)"></i>Expected</span><span>Dot colour = event type</span><span>Click a day for details</span></div><div class="detail" id="detail" aria-live="polite"></div></div>
+      <div class="calendar"><div id="yeargrid" class="yeargrid" hidden></div><div id="monthgrid"><div class="weekdays" aria-hidden="true"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="grid" id="days"></div></div><div class="legend"><span><i class="eventdot" style="--c:var(--prp-muted)"></i>Confirmed</span><span><i class="eventdot tentative" style="--c:var(--prp-muted)"></i>Expected</span><span>Colour and shape = event type</span><span>Click a day for details</span></div><div class="legend-types" id="legend-types" aria-label="Event types this month"></div><div class="detail" id="detail" aria-live="polite"></div></div>
       <div class="eventlist"><div class="listhead"><span id="listtitle">Events this month</span><span id="eventcount" aria-live="polite"></span></div><div id="eventrows"></div></div>
     </div>
-    <div class="notice">Calendar snapshot: 23 Oct 2026. Dates can change. “Tentative” and “expected” events are not official confirmations. Upcoming coverage focuses on national elections; past events also include leaders, coups, wars, assassinations, crises and treaties. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div>
+    <div class="notice">Calendar snapshot: 23 Oct 2026. Dates can change. “Tentative” and “expected” events are not official confirmations. Upcoming coverage: national elections, scheduled referendums and summits (the European Council, G20, COP, APEC, Commonwealth, European Political Community and more). Past events add leaders, coups, wars, assassinations, crises and treaties and, from the news, inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions and party contests. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div>
   </section>
   <footer class="prp-sources">
     <p id="period-note" role="status"></p>
-    <p><b>Sources.</b> <span class="rt-only">Upcoming elections: <a href="https://www.electionguide.org/" target="_blank" rel="noreferrer">IFES ElectionGuide</a> and <a href="https://odihr.osce.org/odihr/elections" target="_blank" rel="noreferrer">OSCE ODIHR</a> listings, curated by hand, with saved snapshots in the PRP archive (Supabase). </span>Past events: Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums; the <a href="https://ucdp.uu.se/" target="_blank" rel="noreferrer">UCDP</a>/PRIO Armed Conflict Dataset (CC BY 4.0) for outbreaks of armed conflict; <a href="https://www.wikidata.org/" target="_blank" rel="noreferrer">Wikidata</a> (CC0) for assassinations, battles, attacks, epidemics, disasters and treaties. Full accounts in the pop-out: Wikipedia (CC BY-SA).</p>
+    <p><b>Sources.</b> <span class="rt-only">Upcoming elections: <a href="https://www.electionguide.org/" target="_blank" rel="noreferrer">IFES ElectionGuide</a> and <a href="https://odihr.osce.org/odihr/elections" target="_blank" rel="noreferrer">OSCE ODIHR</a> listings, curated by hand, with saved snapshots in the PRP archive (Supabase). </span>Past events: Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums; the <a href="https://ucdp.uu.se/" target="_blank" rel="noreferrer">UCDP</a>/PRIO Armed Conflict Dataset (CC BY 4.0) for outbreaks of armed conflict; <a href="https://www.wikidata.org/" target="_blank" rel="noreferrer">Wikidata</a> (CC0) for assassinations, battles, attacks, epidemics, disasters and treaties, and by class and date for referendums, summits and state visits, impeachments, confidence votes and budgets, supreme- and constitutional-court, ICJ and ICC rulings, protests and strikes, ceasefires and peace talks, sanctions, party leadership contests and congresses, inaugurations, and resignations (positions held that ended in resignation). Summits, past and scheduled: Wikipedia's lists of European Council meetings and of G7, G20, NATO, BRICS, SCO, APEC, ASEAN, Commonwealth and European Political Community summits, its COP and UN General Assembly articles, and its national electoral calendars for scheduled referendums. The news since January 2026: Wikipedia's <a href="https://en.wikipedia.org/wiki/Portal:Current_events" target="_blank" rel="noreferrer">Current events portal</a> (CC BY-SA) for inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions, party contests, summits and visits, each with the news report it cites; one protest wave or round of talks is shown at its main moments rather than every day. Full accounts in the pop-out: Wikipedia (CC BY-SA).</p>
   </footer>
 </main>
 <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-box"><button type="button" class="modal-close prp-btn" id="modal-close" aria-label="Close">×</button><div class="modal-meta" id="modal-meta"></div><h2 id="modal-title"></h2><div id="modal-body"></div></div></div><script>
@@ -201,25 +217,53 @@ let events=[
 {date:'2027-08-10',country:'Kenya',title:'General election · President & Parliament',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
 {date:'2027-09-11',country:'Palestine',title:'Legislative election (postponed)',type:'election',status:'tentative',source:'https://apnews.com/article/3c0ab74a39492328a15318d7949b972c'},
 {date:'2027-10-24',country:'Switzerland',title:'Federal Assembly election',type:'election',status:'declared',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2026-10-16',country:'Czech Republic',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
+{date:'2026-10-16',country:'Czechia',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-11',country:'Slovenia',title:'National referendum',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-09',country:'Czech Republic',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
+{date:'2026-10-09',country:'Czechia',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-04',country:'Brazil',title:'Presidential, Senate & Chamber elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-04',country:'Bosnia and Herzegovina',title:'General elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
 {date:'2026-10-03',country:'Latvia',title:'Parliamentary election',type:'election',status:'declared',source:'https://www.electionguide.org/'},];
-// Historical events (elections, new leaders, coups, conflicts, assassinations, crises, treaties) come from
-// ../calendar/data/<decade>.json, built by calendar/scripts/build-events.mjs. Upcoming elections come from the
-// editorial list above or the Supabase snapshot. Contemporary = the last 6 months plus an 18-month outlook.
-// Event types take the PRP categorical colours in their fixed order.
+// Past and scheduled events (elections and referendums, leaders, coups, conflicts, assassinations, crises, treaties,
+// summits, and from the news inaugurations, resignations, votes, rulings, protests, ceasefires, sanctions, party
+// contests) come from ../calendar/data/<decade>.json, built by calendar/scripts/build-events.mjs. Upcoming elections
+// also come from the editorial list above or the Supabase snapshot. Contemporary = the last 6 months plus an 18-month outlook.
+// Seventeen types, eight colours: each family of related types takes one PRP categorical colour, in their fixed order
+// (never cycled), and each type in a family its own shape (● ■ ◆). Every mark is named in the chips (which count and
+// filter), the month's legend, the day's tooltip and the event list.
+const FAMILIES = [
+  { id: 'ballots', label: 'Ballots', colour: 'var(--prp-cat-1)', types: ['election', 'referendum', 'party'] },
+  { id: 'office', label: 'Who holds office', colour: 'var(--prp-cat-2)', types: ['leader', 'inauguration', 'resignation'] },
+  { id: 'coups', label: 'Coups', colour: 'var(--prp-cat-3)', types: ['coup'] },
+  { id: 'war', label: 'War and peace', colour: 'var(--prp-cat-4)', types: ['conflict', 'ceasefire'] },
+  { id: 'assassinations', label: 'Assassinations', colour: 'var(--prp-cat-5)', types: ['assassination'] },
+  { id: 'unrest', label: 'Crises and unrest', colour: 'var(--prp-cat-6)', types: ['crisis', 'protest'] },
+  { id: 'diplomacy', label: 'Diplomacy', colour: 'var(--prp-cat-7)', types: ['treaty', 'summit', 'sanctions'] },
+  { id: 'institutions', label: 'Parliaments and courts', colour: 'var(--prp-cat-8)', types: ['vote', 'court'] },
+];
 const TYPES = {
-  election: { label: 'Elections', tag: 'Election', colour: 'var(--prp-cat-1)' },
-  leader: { label: 'New leaders', tag: 'New leader', colour: 'var(--prp-cat-2)' },
-  coup: { label: 'Coups', tag: 'Coup', colour: 'var(--prp-cat-3)' },
-  conflict: { label: 'Wars & clashes', tag: 'Conflict', colour: 'var(--prp-cat-4)' },
-  assassination: { label: 'Assassinations', tag: 'Assassination', colour: 'var(--prp-cat-5)' },
-  crisis: { label: 'Crises & landmarks', tag: 'Crisis', colour: 'var(--prp-cat-6)' },
-  treaty: { label: 'Treaties', tag: 'Treaty', colour: 'var(--prp-cat-7)' },
+  election: { label: 'Elections', tag: 'Election' },
+  referendum: { label: 'Referendums', tag: 'Referendum' },
+  party: { label: 'Party contests & congresses', tag: 'Party contest' },
+  leader: { label: 'New leaders', tag: 'New leader' },
+  inauguration: { label: 'Inaugurations & swearing-in', tag: 'Inauguration' },
+  resignation: { label: 'Resignations', tag: 'Resignation' },
+  coup: { label: 'Coups', tag: 'Coup' },
+  conflict: { label: 'Wars & clashes', tag: 'Conflict' },
+  ceasefire: { label: 'Ceasefires & peace talks', tag: 'Ceasefire' },
+  assassination: { label: 'Assassinations', tag: 'Assassination' },
+  crisis: { label: 'Crises & landmarks', tag: 'Crisis' },
+  protest: { label: 'Protests & strikes', tag: 'Protest' },
+  treaty: { label: 'Treaties', tag: 'Treaty' },
+  summit: { label: 'Summits & state visits', tag: 'Summit' },
+  sanctions: { label: 'Sanctions', tag: 'Sanctions' },
+  vote: { label: 'Parliamentary votes', tag: 'Parliament vote' },
+  court: { label: 'Court rulings', tag: 'Court ruling' },
 };
+const SHAPES = ['', 'sq', 'dia'];
+for (const f of FAMILIES) f.types.forEach((t, i) => Object.assign(TYPES[t], { family: f.id, colour: f.colour, shape: SHAPES[i] }));
+const TYPE_ORDER = FAMILIES.flatMap(f => f.types);
+// Spellings the editorial list or a saved snapshot may use for the data's country names.
+const COUNTRY_ALIASES = { 'Czech Republic': 'Czechia', 'United States of America': 'United States', "People's Republic of China": 'China' };
 const params = new URLSearchParams(location.search);
 // "contemporary" = Realtime Calendar (Realtime Intelligence). Anything else = the Historical Calendar (Retrospective
 // Intelligence): one archive from 1980 to today. Old decade links (?period=1990s) still work and open that decade's first month.
@@ -229,7 +273,8 @@ const HISTORY_FROM = '1980-01-01', DECADES = ['1980s', '1990s', '2000s', '2010s'
 const decadeOf = d => d.slice(0, 3) + '0s';
 const decadeCache = new Map();
 let editorial = events.slice(), pastEvents = [], dataGenerated = '';
-let activeFilter = 'all', calView = params.get('view') === 'year' ? 'year' : 'month';
+// The event types picked in the chips (none = every type); ?types=referendum,summit opens with them picked.
+let activeTypes = new Set((params.get('types') || '').split(',').filter(t => TYPES[t])), calView = params.get('view') === 'year' ? 'year' : 'month';
 let highlighted = (params.get('countries') || '').split(',').map(s => s.trim()).filter(Boolean);
 let view = new Date(); view.setDate(1); view.setHours(0, 0, 0, 0);
 const fmt = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
@@ -256,27 +301,36 @@ async function loadHistory() {
   pastEvents = (await Promise.all(decades.map(loadDecade))).flat();
   document.getElementById('data-updated').textContent = dataGenerated ? new Date(dataGenerated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'unavailable';
 }
-// Editorial/Supabase entries win over the historical file when both list the same country's election that day.
+// Editorial/Supabase entries: a referendum on the list is a referendum; a country takes the data's spelling.
+const editorialEvents = () => editorial.map(e => ({ ...e, country: COUNTRY_ALIASES[e.country] || e.country, type: e.type === 'election' && /referend|plebiscite/i.test(e.title) ? 'referendum' : e.type }));
+const ballotKey = e => e.date + '|' + e.country + '|' + e.type;
+// Editorial/Supabase entries win over the data files when both list the same country's election or referendum that day.
 function allEvents() {
-  const seen = new Set(editorial.map(e => e.date + '|' + e.country));
-  return [...editorial.map(e => ({ ...e, type: e.type === 'summit' ? 'treaty' : e.type })), ...pastEvents.filter(e => !(e.type === 'election' && seen.has(e.date + '|' + e.country)))];
+  const ed = editorialEvents(), seen = new Set(ed.map(ballotKey));
+  return [...ed, ...pastEvents.filter(e => !((e.type === 'election' || e.type === 'referendum') && seen.has(ballotKey(e))))];
 }
+// "Soviet Union / Russia" is Russia too: a highlighted country matches either half of a historical name.
+const countryParts = c => String(c).split(' / ').map(s => s.trim().toLowerCase());
+// Everything but the type filter: the period, the highlighted countries and the search.
+function inView(e, hl, q) {
+  return periodIncludes(e) && (!hl.size || countryParts(e.country).some(c => hl.has(c))) && (!q || (e.country + ' ' + e.title).toLowerCase().includes(q));
+}
+const viewFilters = () => [new Set(highlighted.map(c => c.toLowerCase())), document.getElementById('search').value.toLowerCase()];
 function visibleEvents() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const hl = new Set(highlighted.map(c => c.toLowerCase()));
-  return allEvents().filter(e => periodIncludes(e) && (activeFilter === 'all' || e.type === activeFilter)
-    && (!hl.size || hl.has(String(e.country).toLowerCase()))
-    && (!q || (e.country + ' ' + e.title).toLowerCase().includes(q)));
+  const [hl, q] = viewFilters();
+  return allEvents().filter(e => inView(e, hl, q) && (!activeTypes.size || activeTypes.has(e.type)));
 }
-// A filled dot is a confirmed event, a ring an expected (tentative) one; the colour is the event type.
-const dot = e => `<i class="eventdot${e.status === 'tentative' ? ' tentative' : ''}" style="--c:${TYPES[e.type]?.colour || 'var(--prp-cat-1)'}"></i>`;
-const tag = e => e.status === 'tentative' ? `<span class="tag tent">${dot(e)}Expected</span>` : `<span class="tag">${dot(e)}${esc(TYPES[e.type]?.tag || 'Event')}</span>`;
+// A filled mark is a confirmed event, a ring an expected (tentative) one; colour = the type's family, shape = the type.
+const mark = (type, tentative) => `<i class="eventdot${TYPES[type]?.shape ? ' ' + TYPES[type].shape : ''}${tentative ? ' tentative' : ''}" style="--c:${TYPES[type]?.colour || 'var(--prp-cat-1)'}" aria-hidden="true"></i>`;
+const dot = e => mark(e.type, e.status === 'tentative');
+const typeName = e => TYPES[e.type]?.tag || 'Event';
+const tag = e => e.status === 'tentative' ? `<span class="tag tent">${dot(e)}${esc(typeName(e))} · expected</span>` : `<span class="tag">${dot(e)}${esc(typeName(e))}</span>`;
 
 function showDay(dt, list) {
   const d = document.getElementById('detail');
   d.classList.add('show');
   d.innerHTML = '<strong>' + dateFmt.format(dt) + ' · ' + list.length + ' event' + (list.length > 1 ? 's' : '') + '</strong>'
-    + list.map((e, i) => `<p>${dot(e)} <b>${esc(e.country)}</b> — ${esc(e.title)} <button class="more" data-day="${i}">${e.summary ? 'See more ›' : 'Details ›'}</button></p>`).join('');
+    + list.map((e, i) => `<p>${dot(e)} <b>${esc(e.country)}</b> — ${esc(e.title)} <span class="prp-muted">(${esc(typeName(e))}${e.status === 'tentative' ? ', expected' : ''})</span> <button class="more" data-day="${i}">${e.summary ? 'See more ›' : 'Details ›'}</button></p>`).join('');
   d.querySelectorAll('[data-day]').forEach(b => b.onclick = () => openEvent(list[+b.dataset.day]));
   d.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
 }
@@ -295,7 +349,7 @@ function renderMonth(ev) {
     cell.className = 'day' + (off ? ' off' : '') + (key === dateKey(new Date()) ? ' today' : '');
     cell.innerHTML = '<span class="num">' + n + '</span>' + (matches.length ? '<div class="eventdots">' + matches.slice(0, 6).map(dot).join('') + '</div><span class="daycount">' + matches.length + '</span>' : '');
     if (matches.length) {
-      cell.title = matches.slice(0, 5).map(e => e.country + ': ' + e.title).join('\n');
+      cell.title = matches.slice(0, 5).map(e => `${e.country}: ${e.title} (${typeName(e)})`).join('\n') + (matches.length > 5 ? `\n+ ${matches.length - 5} more` : '');
       cell.tabIndex = 0; cell.setAttribute('role', 'button');
       cell.setAttribute('aria-label', dateFmt.format(dt) + ': ' + matches.length + ' event' + (matches.length > 1 ? 's' : ''));
       cell.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showDay(dt, matches); } };
@@ -304,6 +358,9 @@ function renderMonth(ev) {
     ds.appendChild(cell);
   }
   const monthEvents = ev.filter(e => e.date.startsWith(monthKey(view))).sort((a, b) => a.date.localeCompare(b.date));
+  // The month's legend: each type on the grid this month, by its mark and name, with how many.
+  const here = TYPE_ORDER.map(t => [t, monthEvents.filter(e => e.type === t).length]).filter(([, n]) => n);
+  document.getElementById('legend-types').innerHTML = here.length ? '<b>This month</b>' + here.map(([t, n]) => `<span>${mark(t)}${esc(TYPES[t].label)} <span class="prp-muted">${n}</span></span>`).join('') : '';
   rowIndex = 0;
   document.getElementById('eventcount').textContent = monthEvents.length + ' events';
   document.getElementById('listtitle').textContent = 'Events in ' + fmt.format(view);
@@ -329,7 +386,7 @@ window.jdpiDocumentary = {
       const rows = [...document.querySelectorAll('#eventrows .eventrow')];
       for (const [i, e] of list.entries()) {
         const d = new Date(e.date + 'T00:00:00');
-        yield { text: `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}. ${e.country}: ${e.title}.${e.summary ? ' ' + firstSentences(e.summary, 2) : ''}`, el: rows[i] };
+        yield { text: `${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}. ${typeName(e)}, ${e.country}: ${e.title}.${e.summary ? ' ' + firstSentences(e.summary, 2) : ''}`, el: rows[i] };
       }
       const next = new Date(view.getFullYear(), view.getMonth() + 1, 1);
       yield { chapterEnd: true, label: `Continue to ${fmt.format(next)}` };
@@ -343,7 +400,8 @@ window.jdpiDocumentary = {
 let rowIndex = 0;
 function summaryHtml(e) {
   const i = rowIndex++;
-  if (!e.summary) return e.source ? '<div class="esummary"><button class="more" data-more="' + i + '">Details ›</button></div>' : '';
+  // A one-sentence news item whose headline is the whole sentence: the row needn't say it twice.
+  if (!e.summary || e.summary.replace(/\.$/, '') === e.title) return e.source || e.summary ? '<div class="esummary"><button class="more" data-more="' + i + '">Details ›</button></div>' : '';
   const short = e.summary.length > 170 ? e.summary.slice(0, 170).replace(/\s+\S*$/, '') + '…' : e.summary;
   return '<div class="esummary">' + esc(short) + ' <button class="more" data-more="' + i + '">See more ›</button></div>';
 }
@@ -351,11 +409,15 @@ const introCache = new Map();
 async function openEvent(e) {
   if (!e) return;
   const d = new Date(e.date + 'T00:00:00');
-  document.getElementById('modal-meta').textContent = (TYPES[e.type]?.tag || 'Event') + ' · ' + e.country + ' · ' + dateFmt.format(d);
+  document.getElementById('modal-meta').textContent = typeName(e) + (e.status === 'tentative' ? ' (expected)' : '') + ' · ' + e.country + ' · ' + dateFmt.format(d);
   document.getElementById('modal-title').textContent = e.title;
   const body = document.getElementById('modal-body');
   const src = e.source ? '<p><a href="' + esc(e.source) + '" target="_blank" rel="noreferrer">' + (/wikipedia\.org/.test(e.source) ? 'Read the full Wikipedia article ↗' : 'Open source ↗') + '</a></p>' : '';
-  body.innerHTML = (e.summary ? '<p>' + esc(e.summary) + '</p>' : '') + src;
+  // A news item (from Wikipedia's Current events portal) keeps the report it cites.
+  const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return 'source'; } };
+  const report = e.ref ? `<p class="credit">Reported by <a href="${esc(e.ref)}" target="_blank" rel="noreferrer">${esc(e.refName || host(e.ref))} ↗</a> · Wikipedia's Current events portal, CC BY-SA.</p>` : '';
+  const own = (e.summary ? '<p>' + esc(e.summary) + '</p>' : '') + report;
+  body.innerHTML = own + src;
   document.getElementById('modal').hidden = false;
   document.getElementById('modal-close').focus();
   const m = /en\.wikipedia\.org\/wiki\/([^#?]+)/.exec(e.source || '');
@@ -368,8 +430,13 @@ async function openEvent(e) {
       introCache.set(title, (pages[0]?.extract || '').split(/\n+/).filter(Boolean));
     }
     const paras = introCache.get(title);
-    if (paras.length && document.getElementById('modal-title').textContent === e.title)
-      body.innerHTML = paras.slice(0, 6).map(p => '<p>' + esc(p) + '</p>').join('') + '<p class="credit">Text: Wikipedia, CC BY-SA.</p>' + src;
+    if (!paras.length || document.getElementById('modal-title').textContent !== e.title) return;
+    // The event's own account (a news report, a resignation) first, the article's introduction as background;
+    // when the summary is just the article's lead, the full introduction replaces it.
+    const ownAccount = e.ref || (e.summary && paras[0].slice(0, 60) !== e.summary.slice(0, 60));
+    body.innerHTML = ownAccount
+      ? own + '<h3>Background · ' + esc(title.replace(/_/g, ' ')) + '</h3>' + paras.slice(0, 3).map(p => '<p>' + esc(p) + '</p>').join('') + '<p class="credit">Background text: Wikipedia, CC BY-SA.</p>' + src
+      : paras.slice(0, 6).map(p => '<p>' + esc(p) + '</p>').join('') + '<p class="credit">Text: Wikipedia, CC BY-SA.</p>' + src;
   } catch {}
 }
 function closeModal() { document.getElementById('modal').hidden = true; }
@@ -381,11 +448,12 @@ function renderYear(ev) {
   const y = view.getFullYear();
   document.getElementById('yeargrid').innerHTML = Array.from({ length: 12 }, (_, m) => {
     const key = `${y}-${String(m + 1).padStart(2, '0')}`, list = ev.filter(e => e.date.startsWith(key)).sort((a, b) => a.date.localeCompare(b.date));
-    const counts = Object.keys(TYPES).map(t => [t, list.filter(e => e.type === t).length]).filter(([, n]) => n);
-    // Lead with the rarer, weightier event types rather than the many routine elections.
-    const order = ['conflict', 'coup', 'assassination', 'crisis', 'treaty', 'leader', 'election'];
+    // The bar: one segment per type, in family order (a family's types sit together in its colour).
+    const counts = TYPE_ORDER.map(t => [t, list.filter(e => e.type === t).length]).filter(([, n]) => n);
+    // Lead with the rarer, weightier event types rather than the many routine elections and summits.
+    const order = ['conflict', 'coup', 'assassination', 'ceasefire', 'resignation', 'crisis', 'vote', 'court', 'protest', 'sanctions', 'treaty', 'referendum', 'leader', 'summit', 'inauguration', 'party', 'election'];
     const top = [...list].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type)).slice(0, 4);
-    return `<button class="ymonth" data-month="${key}"><div class="ymhead"><b>${new Date(y, m, 1).toLocaleDateString('en-GB', { month: 'long' })}</b><span>${list.length}</span></div>
+    return `<button class="ymonth" data-month="${key}" aria-label="${new Date(y, m, 1).toLocaleDateString('en-GB', { month: 'long' })}: ${list.length} events${counts.length ? ' (' + counts.map(([t, n]) => `${TYPES[t].label} ${n}`).join(', ') + ')' : ''}"><div class="ymhead"><b>${new Date(y, m, 1).toLocaleDateString('en-GB', { month: 'long' })}</b><span>${list.length}</span></div>
       <div class="ymbar">${counts.map(([t, n]) => `<i style="flex:${n};background:${TYPES[t].colour}" title="${TYPES[t].label}: ${n}"></i>`).join('')}</div>
       ${top.map(e => `<div class="ymevent">${dot(e)} ${esc(e.country)}: ${esc(e.title)}</div>`).join('')}</button>`;
   }).join('');
@@ -403,9 +471,11 @@ function render() {
   document.querySelector('.eventlist').hidden = calView !== 'month';
   document.querySelector('.calbody').classList.toggle('year', calView === 'year');
   document.querySelector('.calendar .legend').hidden = calView !== 'month';
+  document.getElementById('legend-types').hidden = calView !== 'month';
   document.querySelectorAll('.viewbtn').forEach(b => { const on = b.dataset.view === calView; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   document.getElementById('calpanel').setAttribute('aria-labelledby', 'tab-' + calView);
   renderChips();
+  renderFilters();
   if (calView === 'year') renderYear(ev); else renderMonth(ev);
   writeUrl();
 }
@@ -414,7 +484,26 @@ function writeUrl() {
   p.set('period', activePeriod);
   if (calView === 'year') p.set('view', 'year'); else p.delete('view');
   if (highlighted.length) p.set('countries', highlighted.join(',')); else p.delete('countries');
+  if (activeTypes.size) p.set('types', TYPE_ORDER.filter(t => activeTypes.has(t)).join(',')); else p.delete('types');
   window.history.replaceState(null, '', '?' + p);
+}
+
+// Event-type chips: the legend that filters. Each chip pairs the type's mark with its name and the number of its
+// events in the period (for the highlighted countries and the search); pick one or several, "All events" clears them.
+function renderFilters() {
+  const [hl, q] = viewFilters(), counts = {};
+  let total = 0;
+  for (const e of allEvents()) if (inView(e, hl, q)) { counts[e.type] = (counts[e.type] || 0) + 1; total++; }
+  const chip = (t, label, n, on, extra = '') => `<button type="button" class="filter prp-chip${on ? ' active' : ''}${n ? '' : ' zero'}" data-filter="${t}" aria-pressed="${on}" aria-label="${esc(label)}: ${n} event${n === 1 ? '' : 's'}"${extra}>${t === 'all' ? '' : mark(t)}${esc(label)} <span class="n">${n.toLocaleString('en-GB')}</span></button>`;
+  document.getElementById('filters').innerHTML = chip('all', 'All events', total, !activeTypes.size)
+    + FAMILIES.map(f => `<span class="fam" role="group" aria-label="${esc(f.label)}">${f.types.map(t => chip(t, TYPES[t].label, counts[t] || 0, activeTypes.has(t))).join('')}</span>`).join('');
+  document.querySelectorAll('#filters .filter').forEach(b => b.onclick = () => {
+    const t = b.dataset.filter;
+    if (t === 'all') activeTypes.clear(); else if (activeTypes.has(t)) activeTypes.delete(t); else activeTypes.add(t);
+    document.getElementById('detail').classList.remove('show');
+    render();
+    document.querySelector(`#filters .filter[data-filter="${t}"]`)?.focus();
+  });
 }
 function setCalView(v) { calView = v; document.getElementById('detail').classList.remove('show'); render(); }
 function step(dir) {
@@ -429,12 +518,13 @@ function renderChips() {
     + (highlighted.length ? '<button class="chip clear" id="clearchips">Show all countries</button>' : '<span class="chiphint">Showing every country. Add countries to highlight only them.</span>');
   document.querySelectorAll('.chip[data-country]').forEach(b => b.onclick = () => { highlighted = highlighted.filter(c => c !== b.dataset.country); render(); });
   document.getElementById('clearchips')?.addEventListener('click', () => { highlighted = []; render(); });
-  const names = [...new Set(allEvents().filter(periodIncludes).map(e => e.country))].sort();
-  document.getElementById('countrylist').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+  document.getElementById('countrylist').innerHTML = countryNames(allEvents().filter(periodIncludes)).map(n => `<option value="${esc(n)}">`).join('');
 }
+// The names to pick from: each half of a historical name ("Soviet Union / Russia" offers Soviet Union and Russia).
+const countryNames = list => [...new Set(list.flatMap(e => String(e.country).split(' / ').map(s => s.trim())))].sort();
 function addCountry() {
   const input = document.getElementById('countrypick'), v = input.value.trim();
-  const match = [...new Set(allEvents().map(e => e.country))].find(n => n.toLowerCase() === v.toLowerCase());
+  const match = countryNames(allEvents()).find(n => n.toLowerCase() === v.toLowerCase());
   if (match && !highlighted.includes(match)) highlighted.push(match);
   input.value = '';
   render();
@@ -460,8 +550,6 @@ document.querySelector('.prp-tabs').addEventListener('keydown', e => {
   if (i < 0 || !k) return;
   e.preventDefault(); const b = VIEWTABS[(i + k + VIEWTABS.length) % VIEWTABS.length]; b.focus(); setCalView(b.dataset.view);
 });
-document.getElementById('filters').innerHTML = '<button class="filter prp-chip active" data-filter="all" aria-pressed="true">All events</button>' + Object.entries(TYPES).map(([k, t]) => `<button class="filter prp-chip" data-filter="${k}" aria-pressed="false"><i class="eventdot" style="--c:${t.colour}"></i>${t.label}</button>`).join('');
-document.querySelectorAll('.filter').forEach(b => b.onclick = () => { const was = document.querySelector('.filter.active'); was.classList.remove('active'); was.setAttribute('aria-pressed', 'false'); b.classList.add('active'); b.setAttribute('aria-pressed', 'true'); activeFilter = b.dataset.filter; render(); });
 document.getElementById('countryadd').onclick = addCountry;
 document.getElementById('countrypick').addEventListener('keydown', e => { if (e.key === 'Enter') addCountry(); });
 document.getElementById('countrypick').addEventListener('change', addCountry);
@@ -471,8 +559,8 @@ if (activePeriod !== 'contemporary') {
 }
 const note = document.getElementById('period-note');
 note.innerHTML = activePeriod === 'contemporary'
-  ? '<b>Coverage.</b> The last six months and an 18-month outlook. Upcoming elections come from the editorial calendar; past events cover elections, new leaders, coups, wars, assassinations, crises and treaties.'
-  : '<b>Coverage.</b> 1980 to today: elections, new leaders and coups (Political Retrospective), outbreaks of armed conflict (UCDP), and assassinations, battles, attacks, epidemics, disasters and treaties (Wikidata, events covered in many Wikipedia languages).';
+  ? '<b>Coverage.</b> The last six months and an 18-month outlook. Upcoming elections come from the editorial calendar, scheduled referendums and summits from Wikipedia; past events cover seventeen types, from elections and new leaders to court rulings, protests and sanctions.'
+  : '<b>Coverage.</b> 1980 to today: elections, referendums, new leaders and coups (Political Retrospective), outbreaks of armed conflict (UCDP), assassinations, battles, attacks, epidemics, disasters and treaties, and referendums, summits and state visits, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions, party contests, inaugurations and resignations (Wikidata, events covered in several Wikipedia languages); European Council meetings and G7, G20, NATO and other summits (Wikipedia\'s lists); and, since January 2026, the news of each day (Wikipedia\'s Current events portal).';
 document.getElementById('calendar-range').textContent = activePeriod === 'contemporary' ? '· last 6 months + 18-month outlook' : '· 1980–today';
 document.getElementById('search').oninput = render;
 showUpdated(); setInterval(showUpdated, 60000);

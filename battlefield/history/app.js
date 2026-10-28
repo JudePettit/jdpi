@@ -18,7 +18,8 @@ const SHELL = new URL('../../', location.href).href;
 const sibling = rel => (embedded ? `${SHELL}#/rs/war-focus?at=${encodeURIComponent(new URL(rel, location.href).href)}` : rel);
 const siblingTarget = embedded ? '_top' : '_self';
 
-let svg, g, projection, path, zoom;
+let svg, g, projection, path, zoom, focusView = null;
+const focusHits = new Set(); // states (GW codes) Documentary mode is discussing
 
 /* ---------------------------------------------------------------- data helpers */
 const dateFor = y => `${y}-07-01`;
@@ -60,8 +61,37 @@ function drawMap() {
   svg.call(zoom);
   $('#zoom-in').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1.6);
   $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
-  $('#zoom-reset').onclick = () => svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity);
+  $('#zoom-reset').onclick = () => { clearFocus(); svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity); };
+  focusView = window.PRPFocus?.d3View({ svg, zoom, project: () => projection, maxScale: 8, clamp: true });
 }
+
+/* ---------------------------------------------------------------- documentary focus (design/prp-focus.js) */
+// When the reader talks about wars, the states they were fought in are outlined in the module accent and the map
+// eases to fit them all; ⟲ or the end of the reading brings back the whole world.
+function paintFocus() {
+  if (!g) return;
+  g.selectAll('path.shape').classed('prp-focus-hit', d => focusHits.has(d.properties.gw));
+  g.selectAll('path.shape.prp-focus-hit').raise();
+}
+function clearFocus() { focusHits.clear(); paintFocus(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    if (!state.data || !focusView) return;
+    const live = activeOn(dateFor(state.year)), gws = new Set();
+    const r = PRPFocus.resolve(t, {
+      country: id => {
+        const gw = /^gw:\d+$/.test(id) ? +id.slice(3) : PRPFocus.gwOf(id), fs = live.filter(f => f.properties.gw === gw);
+        if (fs.length) gws.add(gw);
+        return fs.length ? fs : null;
+      },
+      minSpan: 4,
+    });
+    if (!r.box) return;
+    focusHits.clear(); gws.forEach(gw => focusHits.add(gw)); paintFocus();
+    focusView.fit(r.box, r.padding);
+  },
+  reset() { clearFocus(); focusView?.reset(); },
+});
 
 function renderMap() {
   const y = state.year, date = dateFor(y), status = statusMap(y), tip = $('#tooltip');
@@ -70,7 +100,7 @@ function renderMap() {
     .data(activeOn(date), d => `${d.properties.gw}|${d.properties.s}`)
     .join('path')
     .attr('d', path)
-    .attr('class', d => `shape active${d.properties.gw === state.selected ? ' selected' : ''}${involved.has(d.properties.gw) ? ' involved' : ''}`)
+    .attr('class', d => `shape active${d.properties.gw === state.selected ? ' selected' : ''}${involved.has(d.properties.gw) ? ' involved' : ''}${focusHits.has(d.properties.gw) ? ' prp-focus-hit' : ''}`)
     .attr('fill', d => FILL[status.get(d.properties.gw) || 'peace'])
     .on('mousemove', (ev, d) => {
       const box = $('.map-wrap').getBoundingClientRect();
@@ -84,6 +114,7 @@ function renderMap() {
     .on('click', (ev, d) => select(d.properties.gw));
   // The selected or involved countries draw last, so their outlines are not hidden under their neighbours'.
   g.selectAll('path.shape.involved, path.shape.selected').raise();
+  g.selectAll('path.shape.prp-focus-hit').raise();
   $('#caption').textContent = state.war
     ? `Countries on the borders of ${y}, shaded by the most intense armed conflict on their territory; countries in ${state.war.name} are outlined.`
     : `Countries on the borders of ${y}, shaded by the most intense armed conflict fought on their territory.`;
@@ -311,6 +342,7 @@ function setupSearch() {
 /* ---------------------------------------------------------------- documentary narration */
 // For PRP Documentary mode (design/jdpi-narrator.js): the century of conflict, year by year, pausing each decade.
 const warNew = (w, y) => w.years[0][0] === y;
+// A year as told, and where: the states the named wars were fought in (or, when none is named, every conflict's).
 function yearStory(y) {
   const all = warsIn(y), wars = all.filter(w => levelIn(w, y) === 2), fresh = all.filter(w => warNew(w, y) && levelIn(w, y) === 2);
   const ended = state.data.wars.filter(w => w.years.at(-1)[0] === y - 1 && levelIn(w, y - 1) === 2 && y - 1 < state.data.lastYear);
@@ -320,20 +352,22 @@ function yearStory(y) {
   if (fresh.length) parts.push(`New this year: ${big.map(w => w.name.replace(/:/, ',')).join('; ')}.`);
   else if (big.length) parts.push(`The largest: ${big.map(w => w.name.replace(/:/, ',')).join('; ')}.`);
   if (ended.length) parts.push(`Coming to an end: ${ended.slice(0, 2).map(w => w.name.replace(/:/, ',')).join('; ')}.`);
-  const focus = big.find(w => state.focus[w.id]);
-  if (focus) parts.push(`War Focus follows ${state.focus[focus.id][0].name} month by month.`);
-  return parts.join(' ');
+  const focusWar = big.find(w => state.focus[w.id]);
+  if (focusWar) parts.push(`War Focus follows ${state.focus[focusWar.id][0].name} month by month.`);
+  const named = [...big, ...ended.slice(0, 2)], gws = [...new Set((named.length ? named : all).flatMap(w => w.loc))];
+  return { text: parts.join(' '), focus: gws.length ? { countries: gws.map(gw => `gw:${gw}`), padding: 36 } : { reset: true } };
 }
 window.jdpiDocumentary = {
   get title() { return `Retrospective Battlefield · ${state.year}`; },
   async *story() {
     if (state.playing) $('#play')?.click();
     if (state.view !== 'map') setView('map');
-    yield { text: `A century of war, from ${state.data.firstYear} to ${state.data.lastYear}, drawn on the map as the world stood each year. We begin in ${state.year}.`, el: $('#year-big') };
+    yield { text: `A century of war, from ${state.data.firstYear} to ${state.data.lastYear}, drawn on the map as the world stood each year. We begin in ${state.year}.`, el: $('#year-big'), focus: { reset: true } };
     for (let y = state.year; y <= state.data.lastYear; y++) {
       setYear(y, { push: false });
       await new Promise(r => setTimeout(r, 400));
-      yield { text: yearStory(y), el: $('#panel') };
+      const { text, focus } = yearStory(y);
+      yield { text, el: $('#panel'), focus };
       if (y % 10 === 9 && y < state.data.lastYear) yield { chapterEnd: true, label: `Continue to the ${y + 1}s` };
     }
   },

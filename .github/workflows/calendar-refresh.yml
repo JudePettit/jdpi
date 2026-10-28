@@ -1,0 +1,30 @@
+name: Refresh the Realtime and Historical Calendars
+# Resignations, votes, court rulings, protests, sanctions and the like come from Wikipedia's "Current events" portal,
+# so they go stale within days; summits and referendums are scheduled from Wikipedia's lists and Wikidata.
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: JudePettit/hp-retrospective
+          path: hp-retrospective
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json
+      - run: node calendar/scripts/enrich-summaries.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add calendar/data calendar/scripts/summary-cache.json
+          git diff --cached --quiet || git commit -m "Calendars: daily event refresh" && git pull --rebase && git push

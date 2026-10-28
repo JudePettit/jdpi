@@ -18,7 +18,7 @@ test('map, profile and comparison work', async () => {
   await page.waitForSelector('.dims .ind', { timeout: 20000 });
   const profile = await page.locator('#profile').innerText();
   await page.goto(`${BASE}/q/national#compare=FRA,DEU,GBR`, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('#cmpsvg path', { timeout: 20000 });
+  await page.waitForSelector('#cmpsvg path[stroke-width="2"]', { timeout: 20000 });
   const cmpCols = await page.locator('#compare thead th').count();
   await browser.close();
   assert.ok(rows > 200, `rows: ${rows}`);

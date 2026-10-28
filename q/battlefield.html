@@ -108,6 +108,7 @@ button,select{font:inherit}button{cursor:pointer}
   </footer>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="../design/prp-focus.js"></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
 // battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
@@ -144,6 +145,37 @@ const token = n => getComputedStyle(document.documentElement).getPropertyValue(n
 const theme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 const map = L.map('map', { scrollWheelZoom: false, minZoom: 1, maxZoom: 7, worldCopyJump: true }).setView([22, 20], 2);
 const layer = L.layerGroup().addTo(map);
+
+// Documentary focus (design/prp-focus.js): the map flies to fit what is being discussed and the events inside it stand
+// out; "Reset view" or the end of the reading brings back the page's own view (the selected war, or the world).
+let focusBox = null;
+const shownMonths = () => new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+const warPoints = w => { const idx = shownMonths(); return w.points.filter(p => idx.has(p[2])).map(p => [p[1], p[0]]); };
+const focusReset = window.PRPFocus?.resetButton(document.querySelector('.mapwrap'), () => clearFocus(true));
+function home() {
+  const w = data?.wars.find(x => x.id === selectedWar), pts = w ? warPoints(w).map(([lon, lat]) => [lat, lon]) : [];
+  if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 5, animate: !PRPFocus.reduced() });
+  else if (PRPFocus.reduced()) map.setView([22, 20], 2); else map.flyTo([22, 20], 2, { duration: 0.9 });
+}
+function clearFocus(goHome) { focusBox = null; focusReset?.hide(); if (data) drawMap(); if (goHome) home(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    const r = PRPFocus.resolve(t, { minSpan: 3 });
+    if (!r.box || !data) return;
+    focusBox = r.box; drawMap();
+    PRPFocus.leafletFit(map, r.box, { padding: r.padding, maxZoom: 6 }); focusReset?.show();
+  },
+  reset() { if (focusBox) clearFocus(true); },
+  // A passage is placed by the wars it names (their events in the months shown) and the countries it names; one in a
+  // war's briefing, by that war. A war and a country of the same name ("Yemen") mean the war's events.
+  request(text, el) {
+    if (!data) return null;
+    const named = PRPFocus.matchPlaces(text, [...data.wars.map(w => ({ names: [w.name], targets: { points: warPoints(w) } })), ...PRPFocus.countryPlaces()]);
+    if (named) return named;
+    const w = el?.closest?.('#side .detail') && data.wars.find(x => x.id === selectedWar);
+    return w ? { points: warPoints(w) } : null;
+  },
+});
 // Light and dark grey canvas basemaps (base + labels), swapped with the theme. CARTO's light_all/dark_all, the PRP
 // default, now answer every request without an API key with an "API key required" placeholder tile.
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
@@ -179,12 +211,14 @@ function drawMap() {
   layer.clearLayers();
   const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
   const ink = token('--prp-text');
-  // "Other" wars first, the three named wars over them, the selected war on top.
+  // "Other" wars first, the three named wars over them, the selected war on top. While Documentary mode is discussing
+  // a place, the events inside it are drawn as if selected and the rest fade, as they do for a selected war.
   const order = [...data.wars].sort((a, b) => (a.id === selectedWar) - (b.id === selectedWar) || (a.rank >= 0) - (b.rank >= 0) || b.rank - a.rank);
   for (const w of order) {
-    const sel = selectedWar === w.id, faded = selectedWar && !sel, quiet = w.rank < 0 && !sel, col = sel && w.rank < 0 ? ink : colour(w);
     for (const [lat, lon, mi, deaths, events] of w.points) {
       if (!idx.has(mi)) continue;
+      const inFocus = focusBox && PRPFocus.contains(focusBox, [lon, lat]);
+      const sel = selectedWar === w.id || inFocus, faded = (selectedWar || focusBox) && !sel, quiet = w.rank < 0 && !sel, col = selectedWar === w.id && w.rank < 0 ? ink : colour(w);
       L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: col, weight: sel ? 1.5 : .6, fillColor: col, fillOpacity: faded ? .08 : quiet ? .3 : .55, opacity: faded ? .2 : quiet ? .6 : .95 })
         .bindTooltip(`<b>${esc(w.name)}</b><br>${monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
         .on('click', () => selectWar(w.id))

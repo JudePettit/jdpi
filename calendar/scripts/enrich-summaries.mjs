@@ -31,7 +31,7 @@ async function summary(title) {
 
 const files = readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f));
 const decades = files.map(f => [f, JSON.parse(readFileSync(new URL(f, DATA), 'utf8'))]);
-const titles = [...new Set(decades.flatMap(([, d]) => d.events.map(e => titleOf(e.source)).filter(Boolean)))].filter(t => !(t in cache));
+const titles = [...new Set(decades.flatMap(([, d]) => d.events.filter(e => !e.summary).map(e => titleOf(e.source)).filter(Boolean)))].filter(t => !(t in cache));
 console.log(`${titles.length} articles to fetch (${Object.keys(cache).length} cached)`);
 let done = 0;
 const queue = [...titles];
@@ -51,7 +51,9 @@ for (const [f, d] of decades) {
     const t = titleOf(e.source);
     // "Events in the year 1990 in X" style intros of year pages say nothing about the event itself.
     const fromWiki = t && cache[t] && !/^(Events|The following lists events|This is a list)/i.test(cache[t]) ? cache[t] : '';
-    const s = fromWiki || e.summary || '';
+    // An account the build wrote for this event (a news report, a resignation, a UCDP record) says more about the
+    // day itself than the article's lead does, so it stays; build-events.mjs never writes Wikipedia's text itself.
+    const s = e.summary || fromWiki || '';
     if (s) { e.summary = s; withSummary++; } else delete e.summary;
   }
   writeFileSync(new URL(f, DATA), JSON.stringify(d));

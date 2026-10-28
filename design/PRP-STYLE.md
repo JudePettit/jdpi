@@ -12,8 +12,9 @@ is what every page in the suite follows. The stylesheet is `design/prp.css`; the
 | H&P · History & Politics | **Retrospective Intelligence** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
 | (new) | **Natural Science** | `ns` | NS |
+| (new) | **Kino** (documentaries) | `kino` | KN |
 
-In the registry the four are "suites" and their pages "modules"; in the interface we say **module** for the four and
+In the registry the five are "suites" and their pages "modules"; in the interface we say **module** for the five and
 **submodule** for the pages.
 
 | Submodule | Module | Notes |
@@ -22,6 +23,7 @@ In the registry the four are "suites" and their pages "modules"; in the interfac
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
+| OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | RT (new) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
 | OSINT Training | RT (new) | `fe/learning.html?course=osint` |
 | Encyclopaedia | RS | |
 | Political Retrospective (was H&P Retrospective) | RS | external site hp-retrospective.pages.dev |
@@ -29,13 +31,17 @@ In the registry the four are "suites" and their pages "modules"; in the interfac
 | Retrospective Battlefield | RS | world map 1926–2025 (`battlefield/history/`) |
 | War Focus | RS | now its own submodule (`battlefield/focus/`) |
 | Learning · Politics | RS | `fe/learning.html?course=politics` |
-| TD Markets | MM | trade-desk `/markets/` |
+| Market Briefing (was TD Markets) | MM | trade-desk `/markets/` |
+| Economics Briefing | MM (new) | `econ/briefing/` |
 | Tally Stick | MM | trade-desk `/tally/` (private) |
 | Algo Trader (was Double Signal) | MM | trade-desk `/tally/algo/` (private); Double Signal's logic is the **Double Agent** ruleset |
 | Auto Trader (was Trader Tracker) | MM | `fe/traders.html` |
 | Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
 | Scientific Briefing | NS (new) | `science/briefing/` |
 | Timeline of Progress | NS (new) | `science/progress/` |
+| Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
+
+**Sidebar order.** Within each module the strongest submodules come first, the calendar second-last and the course last.
 
 Never write "JDP-I", "Q", "H&P" or "F&E" in visible text any more (code identifiers and URLs may keep them).
 Page titles: `<Submodule> · PRP` (e.g. `Intelligence Briefing · PRP`).
@@ -47,7 +53,7 @@ the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tab
 ## 2. Hooking a page up
 
 ```html
-<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns -->
+<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns | kino -->
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
@@ -66,7 +72,7 @@ Read a token in JS with `getComputedStyle(document.documentElement).getPropertyV
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns` and `-soft`.
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns|kn` and `-soft`.
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,
@@ -112,6 +118,21 @@ Colour follows the entity, never its rank; categorical colours in the fixed orde
 diverging = two hues with a grey midpoint; status colours only for status and always with a word or icon. Thin marks,
 recessive gridlines (`--prp-grid`), a legend for ≥2 series, direct labels where few, text in text tokens (never in the
 series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes. Exception: a map may use more than three categorical colours (e.g. Timeline of Progress, one per discipline) only when every mark is also named in a legend with counts that filters, in its tooltip and in a list.
+More than eight categories (e.g. the calendars' seventeen event types): group related types into families, give each
+family one categorical colour in the fixed order and each type in it its own shape (● ■ ◆), and name every mark in
+chips that count and filter, a legend, the tooltip and the list. Never cycle the eight colours.
+
+### Documentary mode: zooming to what is read
+
+The narrator (`design/jdpi-narrator.js`) sends each step's places to the page as a window event `prp:focus`
+(`{ countries: [ISO3 | 'gw:<code>'], points: [[lon, lat]], bbox: [w, s, e, n], qids: ['Q…'], padding, label }`, or
+`{ reset: true }` when reading stops or ends). A step without places is first offered to the page as
+`prp:focus-request`, then read from `data-iso3`, `data-lonlat`, `data-bbox` or `data-qid` on the passage. A map page loads
+`design/prp-focus.js` and calls `PRPFocus.listen({ focus, reset, request })`, turns the targets into one box with
+`PRPFocus.resolve`, fits it (`PRPFocus.d3View(…).fit(box)` or `PRPFocus.leafletFit(map, box)`), outlines what it found
+with `.prp-focus-hit` and offers a way back. All targets of a step are fitted at once; motion follows
+`prefers-reduced-motion`. Read-aloud text treats a full stop as the end of a sentence only before a space or the end
+of the text: "3.5" is read "3 point 5", "jdpi.pages.dev" "jdpi dot pages dot dev".
 
 ## 7. Accessibility
 

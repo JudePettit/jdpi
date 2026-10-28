@@ -330,7 +330,7 @@
           "status": "live",
           "host": "PRP",
           "url": "q/calendar.html?period=contemporary",
-          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
+          "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
         },
         {
           "id": "osint-training",
@@ -415,7 +415,7 @@
           "status": "live",
           "host": "PRP",
           "url": "q/calendar.html?period=history",
-          "description": "Political history from 1980 to today in one calendar: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account."
+          "description": "Political history from 1980 to today in one calendar: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account."
         },
         {
           "id": "learning-politics",
@@ -457,11 +457,10 @@
           "name": "Economics Briefing",
           "kind": "realtime",
           "icon": "⊿",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "econ/briefing/index.html",
-          "description": "Economics news and scholarly articles: NBER, CEPR/VoxEU, the IMF, BIS and central banks, think tanks and the leading journals, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
+          "url": "econ/briefing/index.html",
+          "description": "Economics news and scholarly articles from 50 feeds: NBER and CEPR working papers, the top journals, the BIS, ECB, Fed and Bank of England, VoxEU, Brookings and other think tanks, and the FT, Economist and Bloomberg, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
         },
         {
           "id": "traders",

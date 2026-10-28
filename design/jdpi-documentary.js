@@ -7,8 +7,81 @@
    - Story: asked of the submodule in view, one step at a time, through design/jdpi-narrator.js (postMessage). A page
      says whether it tells its own story when its narrator announces itself ({ jdpiDoc: 'ready', story }).
      Autoplay pauses briefly at chapter ends and carries on, like a documentary; without it, "Continue Reading" waits.
+   - Speech text: a full stop ends a sentence only when whitespace or the end follows it; elsewhere it is read ("point"
+     in numbers, "dot" in names such as jdpi.pages.dev). See PRPSpeech below (tested in tests/documentary.test.mjs).
    Styled with the PRP tokens (design/prp.css), so it follows the shell's light or dark theme. */
 (function () {
+  /* ---------- speech text (pure) ---------- */
+  const PRPSpeech = (() => {
+    const CUR = { '€': 'euros', $: 'dollars', '£': 'pounds', '¥': 'yen', '₹': 'rupees' };
+    const DOLLARS = { US: 'US dollars', A: 'Australian dollars', C: 'Canadian dollars', NZ: 'New Zealand dollars', HK: 'Hong Kong dollars', S: 'Singapore dollars' };
+    const MAG = { trillion: 'trillion', billion: 'billion', million: 'million', thousand: 'thousand', tn: 'trillion', bn: 'billion', m: 'million', k: 'thousand' };
+    const TITLE = { Mr: 'Mister', Mrs: 'Missus', Ms: 'Ms', Dr: 'Doctor', Prof: 'Professor', St: 'Saint', Gen: 'General', Col: 'Colonel', Lt: 'Lieutenant', Sgt: 'Sergeant',
+      Capt: 'Captain', Adm: 'Admiral', Gov: 'Governor', Sen: 'Senator', Rep: 'Representative', Pres: 'President', Rev: 'Reverend', Mt: 'Mount', Ft: 'Fort', Hon: 'Honourable' };
+    const BEFORE_NUMBER = { No: 'number', no: 'number', Nos: 'numbers', nos: 'numbers', Op: 'opus', op: 'opus', Vol: 'volume', vol: 'volume', pp: 'pages', p: 'page',
+      Fig: 'figure', fig: 'figure', Ch: 'chapter', ch: 'chapter', c: 'circa', ca: 'circa', Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April', Jun: 'June',
+      Jul: 'July', Aug: 'August', Sep: 'September', Sept: 'September', Oct: 'October', Nov: 'November', Dec: 'December' };
+    const DEGREE = { 'Ph.D': 'PhD', 'M.Sc': 'MSc', 'B.Sc': 'BSc', 'D.Phil': 'DPhil', 'M.Phil': 'MPhil' };
+    const spaced = d => d.split('').join(' '); // digits after the point are said one by one: 0.73 → "0 point 7 3"
+    const KEPT = '\uE000'; // a full stop inside initials (U.S.), kept while the other dots are read
+    // The text as it should be said. Only a full stop followed by whitespace (or the end) is a sentence end; any other
+    // full stop is read: "point" between digits, "dot" between letters. Common abbreviations are said in full, or kept
+    // as initials (U.S., U.K.) for the voice to spell out.
+    function spoken(text) {
+      let t = String(text ?? '').replace(/\s+/g, ' ').trim();
+      // Money: "€2.11" → "2 point 1 1 euros", "$4.5bn" → "4 point 5 billion dollars", "US$1.2 trillion" → "… US dollars".
+      t = t.replace(/(?:(?<![A-Za-z])(US|NZ|HK|A|C|S))?([€$£¥₹])\s?(\d{1,3}(?:,\d{3})+|\d+)\.(\d+)(?:\s?(trillion|billion|million|thousand|tn|bn|m|k)\b)?/g,
+        (_, pre, sym, int, frac, mag) => `${int} point ${spaced(frac)}${mag ? ' ' + MAG[mag] : ''} ${sym === '$' && DOLLARS[pre] ? DOLLARS[pre] : (pre ? pre + ' ' : '') + CUR[sym]}`);
+      // Versions: "v1.2.3" → "version 1 point 2 point 3"; "version 2.11" → "version 2 point 11" (each part a number).
+      t = t.replace(/\bv(?=\d+(?:\.\d+)+\b)/g, 'version ');
+      t = t.replace(/(?<![\d.])\d+(?:\.\d+){2,}(?!\.?\d)/g, m => m.split('.').join(' point '));
+      t = t.replace(/\b([Vv]ersion )(\d+)\.(\d+)\b/g, '$1$2 point $3');
+      // Decimals: "3.5" → "3 point 5", "12.5%" → "12 point 5%", ".5" → "point 5".
+      t = t.replace(/(\d)\.(\d+)/g, (_, a, b) => `${a} point ${spaced(b)}`);
+      t = t.replace(/(^|[^\w.])\.(\d+)/g, (_, a, b) => `${a}point ${spaced(b)}`);
+      // Abbreviations said in full; a capital after "etc." or "a.m." still starts a new sentence.
+      t = t.replace(/\b([ap])\.m\.(\s+(?=[A-Z]))?/g, (_, x, sp) => `${x.toUpperCase()}M${sp ? '.' + sp : ''}`);
+      t = t.replace(/\b(Ph\.D|M\.Sc|B\.Sc|D\.Phil|M\.Phil)\.?(?![\p{L}\p{N}])/gu, m => DEGREE[m.replace(/\.$/, '')]);
+      t = t.replace(/\b([Ee])\.g\.(?=[\s,;:)]|$)/g, (_, e) => (e === 'E' ? 'For example' : 'for example'));
+      t = t.replace(/\b([Ii])\.e\.(?=[\s,;:)]|$)/g, (_, i) => (i === 'I' ? 'That is' : 'that is'));
+      t = t.replace(/\betc\.(\s+(?=[A-Z]))?/g, (_, sp) => (sp ? 'et cetera.' + sp : 'et cetera'));
+      t = t.replace(/\b(?:vs|v)\.\s+/g, 'versus ').replace(/\bcf\.\s+/g, 'compare ').replace(/\bapprox\.(?=\s)/g, 'approximately')
+        .replace(/\bet al\.(?=\s+[a-z0-9(]|[,;:)]|$)/g, 'et al');
+      t = t.replace(/\b(Mr|Mrs|Ms|Dr|Prof|St|Gen|Col|Lt|Sgt|Capt|Adm|Gov|Sen|Rep|Pres|Rev|Mt|Ft|Hon)\.\s*(?=[A-Z])/g, (_, a) => TITLE[a] + ' ');
+      t = t.replace(/\b(No|no|Nos|nos|Op|op|Vol|vol|pp|p|Fig|fig|Ch|ch|c|ca|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.\s?(?=\d)/g, (_, a) => BEFORE_NUMBER[a] + ' ');
+      t = t.replace(/\b(c|ca)\.\s(?=(?:AD|BC|BCE|CE)\b)/g, 'circa ');
+      t = t.replace(/\b(Jr|Sr)\.(?=[\s,;:)]|$)/g, (_, a) => (a === 'Jr' ? 'Junior' : 'Senior'));
+      t = t.replace(/\b(Inc|Ltd|Co|Corp|Bros|Plc|plc)\.(?=\s+[a-z0-9]|[,;:)])/g, '$1');
+      // Initials keep their dots ("U.S.", "J.R.R."); any other full stop between letters or digits is a "dot".
+      t = t.replace(/(?<![\p{L}\p{N}.])(?:\p{L}\.)+\p{L}\.?(?![\p{L}\p{N}])/gu, m => m.replace(/\./g, KEPT));
+      t = t.replace(/([\p{L}\p{N}])\.(?=[\p{L}\p{N}])/gu, '$1 dot ');
+      return t.replace(/\uE000/g, '.');
+    }
+    // Words after which a full stop and a space do not end the sentence (initials are checked separately).
+    const KEEP = /^(?:Mr|Mrs|Ms|Dr|Prof|St|Mt|Ft|Gen|Col|Lt|Sgt|Capt|Adm|Gov|Sen|Rep|Pres|Rev|Hon|Jr|Sr|No|Nos|Op|Vol|Fig|vs|v|cf|approx|ca|c|e\.g|i\.e)$/;
+    // Sentences: each ends at . ! ? or … (with any closing quote or bracket) followed by whitespace, or at the end.
+    function sentences(text) {
+      const t = String(text ?? '').replace(/\s+/g, ' ').trim(), out = [];
+      let from = 0;
+      for (const m of t.matchAll(/[.!?…]+["'’”)\]]*(?=\s|$)/g)) {
+        const end = m.index + m[0].length;
+        if (/^\.(?!\.)/.test(m[0]) && end < t.length) {
+          const word = (/(\S+)$/.exec(t.slice(from, m.index))?.[1] || '').replace(/^[("'‘“[]+/, '');
+          if (/^(?:\p{L}\.)+\p{L}$/u.test(word) || /^\p{Lu}$/u.test(word) || KEEP.test(word)) continue; // U.S. forces, John F. Kennedy, Dr. Who
+        }
+        out.push(t.slice(from, end).trim()); from = end;
+      }
+      if (from < t.length) out.push(t.slice(from).trim());
+      return out.filter(Boolean);
+    }
+    // What the voice is given, one utterance at a time: long utterances get cut off in some browsers, so a long
+    // sentence is split again at its commas, semicolons and colons.
+    const utterances = text => sentences(spoken(text)).flatMap(s => (s.length > 220 ? s.split(/(?<=[,;:])\s+/) : [s]));
+    return { spoken, sentences, utterances };
+  })();
+  globalThis.PRPSpeech = PRPSpeech;
+  if (typeof document === 'undefined') return; // loaded by the tests, outside a browser
+
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -103,13 +176,11 @@
   }
   if ('speechSynthesis' in window) { fillVoices(); speechSynthesis.addEventListener?.('voiceschanged', fillVoices); }
 
-  // Long utterances get cut off in some browsers, so speak sentence by sentence.
-  const sentences = t => (t.match(/[^.!?…]+[.!?…]+["'’”)]*\s*|[^.!?…]+$/g) || [t]).map(s => s.trim()).filter(Boolean)
-    .flatMap(s => (s.length > 220 ? s.split(/(?<=[,;:])\s+/) : [s]));
+  // Sentence by sentence, as the voice should say it (PRPSpeech above).
   async function speak(text) {
     if (!('speechSynthesis' in window)) { await sleep(Math.min(9000, 60 * text.length)); return; }
     S.speaking = true; S.skip = false; duck(true);
-    for (const part of sentences(text)) {
+    for (const part of PRPSpeech.utterances(text)) {
       if (S.stopFlag || S.skip) break;
       await new Promise(resolve => {
         const u = new SpeechSynthesisUtterance(part);
@@ -154,8 +225,8 @@
     if (e.data.title) $('#doc-title').textContent = e.data.title;
     if (e.data.jdpiDoc === 'step') { const p = S.pending.get(e.data.seq); if (p) { S.pending.delete(e.data.seq); p(e.data.step); } }
   });
-  function ask(cmd) {
-    const f = activeFrame(); if (!f) return Promise.resolve({ done: true, error: 'no-page' });
+  function ask(cmd, f = activeFrame()) {
+    if (!f) return Promise.resolve({ done: true, error: 'no-page' });
     const seq = ++S.seq;
     const reply = new Promise(resolve => { S.pending.set(seq, resolve); setTimeout(() => { if (S.pending.delete(seq)) resolve({ done: true, error: 'timeout' }); }, 20000); });
     f.contentWindow.postMessage({ jdpiDoc: cmd, seq }, originOf(f));
@@ -174,6 +245,7 @@
     if (S.music) setMusic(true);
     const f = activeFrame();
     if (!f) { $('#doc-sub').textContent = 'Open a Retrospective Intelligence submodule or a course to have it read to you.'; S.playing = false; setPlayButton(); return; }
+    S.frame = f; // the page being read: told to stop (and to clear its highlight and map focus) even after the route moves on
     if (fresh) { ask('start'); S.resume = null; }
     // Resuming after a pause repeats the passage that was interrupted.
     if (S.resume) { const text = S.resume; S.resume = null; $('#doc-sub').textContent = text; await speak(text); }
@@ -199,10 +271,10 @@
     }
   }
   function pause() { S.playing = false; S.stopFlag = true; speechSynthesis?.cancel(); setPlayButton(); }
-  function stopReading() { pause(); S.resume = null; ask('stop'); }
+  function stopReading() { pause(); S.resume = null; const f = S.frame?.isConnected ? S.frame : activeFrame(); S.frame = null; ask('stop', f); }
   function routeChanged() {
     if (!S.open) return;
-    if (S.playing || S.waiting) { stopReading(); S.waiting = null; }
+    if (S.playing || S.waiting || S.frame) { stopReading(); S.waiting = null; }
     const here = available();
     $('#doc-cont').hidden = !here; $('#doc-cont').textContent = 'Continue Reading';
     $('#doc-sub').textContent = here ? 'A new page. Press Continue Reading and I shall carry on here; the music plays on.' : 'There is nothing to read aloud on this page. The music plays on until you close it.';

@@ -40,7 +40,7 @@ test('a Boolean tag query finds John Mearsheimer, and his page links to where he
   assert.equal(err, false);
   assert.ok(!withoutOffensive.some(n => /Mearsheimer/.test(n)) && withoutOffensive.some(n => /Morgenthau/.test(n)), 'NOT excludes offensive realists');
   assert.ok(either.some(n => /Hayek|Mises/.test(n)) && either.some(n => /Friedman/.test(n)), 'OR combines schools');
-  assert.match(entity, /appears in jdp-i/i);
+  assert.match(entity, /appears in prp/i);
   assert.ok(links.some(h => /learning\.html\?course=politics/.test(decodeURIComponent(h))), 'links to the Politics lesson');
   assert.deepEqual(errors, []);
 });

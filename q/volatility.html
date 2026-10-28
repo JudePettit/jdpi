@@ -32,12 +32,13 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
 .check input{margin:0;accent-color:var(--prp-primary)}
 .note{margin:0;padding:10px 14px 14px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.55}
 
-/* Map */
+/* Map (zoomed only by Documentary mode, so lines keep their width at any scale) */
 .mapfig{padding:4px 14px 14px}
-#map{display:block;width:100%;max-width:1180px;height:auto;margin:0 auto}
-.sphere{fill:var(--prp-map-water);stroke:var(--prp-line)}
-.graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5}
-.land{stroke:var(--prp-map-border);stroke-width:.4;cursor:pointer}
+.mapbox{position:relative;max-width:1180px;margin:0 auto}
+#map{display:block;width:100%;height:auto}
+.sphere{fill:var(--prp-map-water);stroke:var(--prp-line);vector-effect:non-scaling-stroke}
+.graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5;vector-effect:non-scaling-stroke}
+.land{stroke:var(--prp-map-border);stroke-width:.4;cursor:pointer;vector-effect:non-scaling-stroke}
 .land:hover{stroke:var(--prp-text);stroke-width:1.1}
 .land.sel{stroke:var(--prp-accent);stroke-width:1.6}
 .legend{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 20px;margin-top:10px;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.4 var(--prp-font-ui)}
@@ -128,7 +129,7 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
     <div class="prp-panel">
       <div class="prp-panel-head"><b id="maptitle">GVI score</b></div>
       <figure class="prp-figure mapfig">
-        <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
+        <div class="mapbox" id="mapbox"><svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg></div>
         <div class="legend" id="legend"></div>
         <figcaption id="mapcap"><b>Figure 1.</b> The selected measure by country.</figcaption>
       </figure>
@@ -162,6 +163,7 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
 <div class="tip" id="tip" role="tooltip" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="../design/prp-focus.js"></script>
 <script>
 // Geopolitical Volatility (rebuilt from the Lovable app). Data: ../volatility/data/index.json, built daily by
 // volatility/scripts/ingest.mjs from GDELT 2.0. Country metadata, political stability and active wars come from
@@ -270,27 +272,63 @@ function scaleFor(m, vals) {
 }
 
 /* ---------- map ---------- */
-let mapG;
+let mapG, mapProj, focusView = null, focusReset = null, places = null;
+const focusIsos = new Set(); // countries Documentary mode is discussing
 function drawMap(world) {
-  const svg = d3.select('#map'), proj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' }), path = d3.geoPath(proj);
+  const svg = d3.select('#map'), proj = mapProj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' }), path = d3.geoPath(proj);
   const pat = svg.append('defs').append('pattern').attr('id', 'nodata').attr('patternUnits', 'userSpaceOnUse').attr('width', 5).attr('height', 5).attr('patternTransform', 'rotate(45)');
   pat.append('rect').attr('width', 5).attr('height', 5).style('fill', 'var(--prp-map-nodata)');
   pat.append('line').attr('y2', 5).attr('stroke-width', 1.4).style('stroke', 'var(--prp-map-border)');
-  svg.append('path').datum({ type: 'Sphere' }).attr('class', 'sphere').attr('d', path);
-  svg.append('path').datum(d3.geoGraticule10()).attr('class', 'graticule').attr('d', path);
-  mapG = svg.append('g');
+  // One layer for the whole map, zoomed only by Documentary mode (no wheel or drag, so the page scrolls as before).
+  const layer = svg.append('g');
+  const zoom = d3.zoom().scaleExtent([1, 10]).filter(() => false).on('zoom', e => layer.attr('transform', e.transform));
+  svg.call(zoom);
+  if (window.PRPFocus) { focusView = PRPFocus.d3View({ svg, zoom, project: () => mapProj, clamp: true }); focusReset = PRPFocus.resetButton($('#mapbox'), () => { clearFocus(); focusView.reset(); }); }
+  layer.append('path').datum({ type: 'Sphere' }).attr('class', 'sphere').attr('d', path);
+  layer.append('path').datum(d3.geoGraticule10()).attr('class', 'graticule').attr('d', path);
+  mapG = layer.append('g');
   mapG.selectAll('path').data(topojson.feature(world, world.objects.countries).features).join('path').attr('class', 'land').attr('d', path)
     .on('mouseenter', function () { d3.select(this).raise(); })
     .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)), m = cur(); placeTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${m.id !== 'score' ? `<br><span class="sub">GVI: ${c.cur.score == null ? '–' : c.cur.score.toFixed(1)}</span>` : ''}` : `<b>${esc(f.properties.name)}</b><br><span class="sub">No data</span>`); })
-    .on('mouseleave', () => { hideTip(); mapG.selectAll('.land.sel').raise(); })
+    .on('mouseleave', () => { hideTip(); mapG.selectAll('.land.sel').raise(); mapG.selectAll('.land.prp-focus-hit').raise(); })
     .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso && byIso.has(iso)) { hideTip(); openProfile(iso); } });
 }
+// Documentary focus (design/prp-focus.js): the countries being discussed are outlined in the module accent and the map
+// eases to fit them all; "Reset view" or the end of the reading brings back the whole world.
+function paintFocus() { if (!mapG) return; mapG.selectAll('path.land').classed('prp-focus-hit', f => focusIsos.has(numToIso.get(f.id))); mapG.selectAll('.land.prp-focus-hit').raise(); }
+function clearFocus() { focusIsos.clear(); paintFocus(); focusReset?.hide(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    if (!mapG || !focusView) return;
+    const isos = new Set(), feats = mapG.selectAll('path.land').data();
+    const r = PRPFocus.resolve(t, { country: id => {
+      const iso = /^gw:\d+$/.test(id) ? PRPFocus.iso3OfGw(id.slice(3)) : id, fs = feats.filter(f => numToIso.get(f.id) === iso);
+      if (fs.length) isos.add(iso);
+      return fs.length ? fs : null;
+    } });
+    if (!r.box) return;
+    focusIsos.clear(); isos.forEach(i => focusIsos.add(i)); paintFocus();
+    focusView.fit(r.box, r.padding); focusReset?.show();
+  },
+  reset() { clearFocus(); focusView?.reset(); },
+  // A passage is placed by the countries it names (common names, and this page's own); one in a country's profile or
+  // the comparison, by the countries there.
+  request(text, el) {
+    if (!C.length) return null;
+    const named = PRPFocus.matchPlaces(text, places ||= PRPFocus.countryPlaces(C.map(c => [c.iso3, c.name])));
+    if (named) return named;
+    if (el?.closest?.('#tab-profile') && selected) return { countries: [selected] };
+    if (el?.closest?.('#tab-compare') && compare.length) return { countries: compare };
+    return null;
+  },
+});
 const cur = () => METRICS.find(x => x.id === $('#metric').value);
 function colourMap() {
   const m = cur(), vals = C.map(m.get).filter(v => v != null), { s, lo, hi, mid, log } = scaleFor(m, vals);
   mapG.selectAll('path.land').style('fill', f => { const c = byIso.get(numToIso.get(f.id)); if (!c) return 'var(--prp-map-nodata)'; const v = m.get(c); return v == null ? 'url(#nodata)' : s(v); })
     .classed('sel', f => compare.includes(numToIso.get(f.id)));
   mapG.selectAll('.land.sel').raise();
+  mapG.selectAll('.land.prp-focus-hit').raise();
   $('#maptitle').textContent = `${m.label} · ${DAYS[dayIdx]}`;
   // Legend: a colour bar over the scale's domain, plus the two kinds of missing data.
   const at = p => (lo == null ? null : log ? lo * (hi / lo) ** p : lo + (hi - lo) * p);

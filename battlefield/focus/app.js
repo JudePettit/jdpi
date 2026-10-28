@@ -20,7 +20,8 @@ const go = (module, url) => embedded ? `${SHELL}#/rs/${module}?at=${encodeURICom
 const motion = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
 
 const state = { index: null, borders: null, war: null, m: 0, playing: null, zoomK: 1, view: 'map' };
-let svg, g, gStates, gLabels, gCells, gBattles, path, projection, zoom, features = [];
+let svg, g, gStates, gLabels, gCells, gBattles, path, projection, zoom, features = [], focusView = null, focusFit = null;
+const hits = { gws: new Set(), qids: new Set() }; // what Documentary mode is discussing: states (GW codes) and battles (QIDs)
 
 /* ---------------------------------------------------------------- side logic */
 const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
@@ -42,7 +43,8 @@ function initMap() {
   svg.call(zoom);
   $('#zoom-in').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1.6);
   $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
-  $('#zoom-reset').onclick = () => svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity);
+  $('#zoom-reset').onclick = () => { clearFocus(); svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity); };
+  focusView = window.PRPFocus?.d3View({ svg, zoom, project: () => projection, maxScale: 8 });
   features = topojson.feature(state.borders, state.borders.objects.borders).features;
   new ResizeObserver(() => state.war && fitProjection()).observe($('.map-wrap'));
 }
@@ -64,6 +66,7 @@ function fitProjection() {
   path = d3.geoPath(projection);
   svg.call(zoom.transform, d3.zoomIdentity);
   draw(true);
+  if (focusFit) focusView?.fit(...focusFit); // a refit (the frame resized) keeps what Documentary mode is showing
 }
 const R = b => Math.min(16, 3.2 + Math.sqrt(b.deaths || b.cas || 0) / 22);
 function sizeMarks() {
@@ -80,7 +83,7 @@ function draw(full) {
   const prevDate = i ? dateOf(i - 1) : null;
   gStates.selectAll('path').data(live, f => f.properties.gw + f.properties.s).join('path')
     .attr('d', path)
-    .attr('class', f => { const s = sideOf(f.properties.gw, date); const was = prevDate ? sideOf(f.properties.gw, prevDate) : s; return `state ${s}${!full && s !== was ? ' joined' : ''}`; })
+    .attr('class', f => { const s = sideOf(f.properties.gw, date); const was = prevDate ? sideOf(f.properties.gw, prevDate) : s; return `state ${s}${!full && s !== was ? ' joined' : ''}${hits.gws.has(f.properties.gw) ? ' prp-focus-hit' : ''}`; })
     .on('mousemove', (e, f) => tip(e, `<strong>${esc(displayName(f.properties.gw, f.properties.name, date))}</strong>${sideText(sideOf(f.properties.gw, date))}`))
     .on('mouseleave', hideTip);
   // Labels for the states taking part.
@@ -99,11 +102,12 @@ function draw(full) {
   gBattles.selectAll('circle.ring').data(shown.filter(isNow), b => b.q).join('circle').attr('class', 'ring')
     .attr('cx', b => projection([b.lon, b.lat])[0]).attr('cy', b => projection([b.lon, b.lat])[1]);
   gBattles.selectAll('circle.battle').data(shown, b => b.q).join('circle')
-    .attr('class', b => `battle ${isNow(b) ? 'now' : 'past'}`)
+    .attr('class', b => `battle ${isNow(b) ? 'now' : 'past'}${hits.qids.has(b.q) ? ' prp-focus-hit' : ''}`)
     .attr('cx', b => projection([b.lon, b.lat])[0]).attr('cy', b => projection([b.lon, b.lat])[1])
     .on('mousemove', (e, b) => tip(e, `<strong>${esc(b.n)}</strong>${esc(bDates(b))}${b.deaths ? `<br>${num(b.deaths)} deaths` : b.cas ? `<br>${num(b.cas)} casualties` : ''}`))
     .on('mouseleave', hideTip).on('click', (e, b) => openBattle(b));
   gBattles.selectAll('circle.battle').filter(isNow).raise();
+  raiseHits();
   sizeMarks();
   renderCounters(); renderSpark(); renderPanel(); renderLegend(); renderCaption(); renderTables();
 }
@@ -118,6 +122,35 @@ function sideText(s) {
 }
 function tip(e, html) { const t = $('#tooltip'), r = $('.map-wrap').getBoundingClientRect(); t.hidden = false; t.innerHTML = html; t.style.left = e.clientX - r.left + 14 + 'px'; t.style.top = e.clientY - r.top + 14 + 'px'; }
 function hideTip() { $('#tooltip').hidden = true; }
+
+/* ---------------------------------------------------------------- documentary focus (design/prp-focus.js) */
+// When the reader talks about states or battles, they are outlined in the module accent (drawn over their neighbours)
+// and the map eases to fit them all; ⟲ or the end of the reading brings back the whole theatre.
+const featureAt = (gw, date) => features.find(f => f.properties.gw === gw && f.properties.s <= date && f.properties.e >= date);
+function raiseHits() { gStates.selectAll('path.prp-focus-hit').raise(); gBattles.selectAll('circle.prp-focus-hit').raise(); }
+function paintHits() {
+  if (!gStates) return;
+  gStates.selectAll('path.state').classed('prp-focus-hit', f => hits.gws.has(f.properties.gw));
+  gBattles.selectAll('circle.battle').classed('prp-focus-hit', b => hits.qids.has(b.q));
+  raiseHits();
+}
+function clearFocus() { hits.gws.clear(); hits.qids.clear(); focusFit = null; paintHits(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    const w = state.war; if (!w || !projection || !focusView) return;
+    const date = dateOf(state.m), gws = new Set(), qids = new Set();
+    const r = PRPFocus.resolve(t, {
+      country: id => { const gw = /^gw:\d+$/.test(id) ? +id.slice(3) : PRPFocus.gwOf(id), f = gw == null ? null : featureAt(gw, date); if (f) gws.add(gw); return f; },
+      qid: q => { const b = w.battles.find(x => x.q === q && x.lat != null); if (b) { qids.add(q); return [b.lon, b.lat]; } return q === w.qid ? w.bbox : null; },
+      minSpan: 5,
+    });
+    if (!r.box) return;
+    hits.gws = gws; hits.qids = qids; paintHits();
+    focusFit = [r.box, r.padding];
+    focusView.fit(...focusFit);
+  },
+  reset() { clearFocus(); focusView?.reset(); },
+});
 
 /* ---------------------------------------------------------------- counters, sparkline, legend */
 let cumulative = [];
@@ -338,34 +371,43 @@ function changes(i) {
     else if (now.startsWith('side-') && before.startsWith('side-')) { kind = 'switch'; text = `${name} changes sides, joining ${label(now.slice(5))}.`; }
     else if (now.startsWith('side-')) { kind = 'join' + now.slice(5); text = `${name} enters the war on the side of ${label(now.slice(5))}`; }
     else if (before.startsWith('side-')) { kind = 'leave'; text = `${name} leaves the war.`; }
-    if (kind) events.push({ kind, text, area: d3.geoArea(f) });
+    if (kind) events.push({ kind, text, gw, area: d3.geoArea(f) });
   }
-  // Largest countries first; when several join one side at once, name the two largest and count the rest.
+  // Largest countries first; when several join one side at once, name the two largest and count the rest. Each line
+  // keeps the states it is about (all the joiners, counted or named), for the map.
   events.sort((a, b) => b.area - a.area);
   const out = [];
   for (const k of ['joina', 'joinb']) {
     const js = events.filter(e => e.kind === k);
-    if (js.length) out.push(js[0].text + (js.length > 1 ? `, ${js.length > 2 ? `with ${js.length - 1} other states and territories` : `as does ${js[1].text.split(' enters')[0].replace(/^The /, 'the ')}`}.` : '.'));
+    if (js.length) out.push({ text: js[0].text + (js.length > 1 ? `, ${js.length > 2 ? `with ${js.length - 1} other states and territories` : `as does ${js[1].text.split(' enters')[0].replace(/^The /, 'the ')}`}.` : '.'), gws: js.map(e => e.gw) });
   }
-  out.push(...events.filter(e => !e.kind.startsWith('join')).slice(0, 4).map(e => e.text));
+  out.push(...events.filter(e => !e.kind.startsWith('join')).slice(0, 4).map(e => ({ text: e.text, gws: [e.gw] })));
   return out;
 }
+// A month as told, and where it happens: the states that join, leave or change hands, the battles that begin or end,
+// and the deadliest clash (the month's deadliest UCDP cell). A month with none of these shows the whole theatre.
 function monthStory(i) {
-  const w = state.war, m = w.months[i], parts = [monthLabel(m) + '.'];
+  const w = state.war, m = w.months[i], parts = [monthLabel(m) + '.'], gws = [], qids = [], points = [];
   if (i === 0) {
     const a = statesOn('a', dateOf(0)), b = statesOn('b', dateOf(0));
     if (a.length || b.length) parts.push(`On one side, ${a.length ? listNames(a.slice(0, 5)) : w.sides.a.label}; on the other, ${b.length ? listNames(b.slice(0, 5)) : w.sides.b.label}.`);
   }
-  parts.push(...changes(i).slice(0, 4));
+  for (const c of changes(i).slice(0, 4)) { parts.push(c.text); gws.push(...c.gws); }
   const begun = w.battles.filter(b => b.p !== 'y' && b.s.slice(0, 7) === m).sort((x, y) => (y.deaths || 0) - (x.deaths || 0) || !!y.w - !!x.w).slice(0, 3);
   for (const b of begun) parts.push(battleLine(b));
   const ended = w.battles.filter(b => b.p !== 'y' && b.e && b.e !== b.s && b.e.slice(0, 7) === m && (b.deaths || 0) >= 10000).slice(0, 2);
   for (const b of ended) parts.push(`The ${b.n.replace(/^the /i, '')} ends, at a cost of some ${spokenNumber(b.deaths)} lives.`);
+  qids.push(...[...begun, ...ended].filter(b => b.lat != null).map(b => b.q));
   if (w.deaths[i] > 0) parts.push(`${w.estimated[i] ? 'An estimated' : 'Some'} ${spokenNumber(w.deaths[i])} die in battle this month, bringing the toll to about ${spokenNumber(cumulative[i])}.`);
   const top = w.top[i]?.[0];
-  if (top && top[1] >= 20) parts.push(`The deadliest recorded clash is at ${String(top[2]).replace(/\s*\(.*\)$/, '')}, where ${spokenNumber(top[1])} are killed.`);
+  if (top && top[1] >= 20) {
+    parts.push(`The deadliest recorded clash is at ${String(top[2]).replace(/\s*\(.*\)$/, '')}, where ${spokenNumber(top[1])} are killed.`);
+    const cell = (w.cells[i] || []).reduce((a, c) => (!a || c[2] > a[2] ? c : a), null);
+    if (cell) points.push([cell[1], cell[0]]);
+  }
   if (parts.length === 1) parts.push('The fighting continues.');
-  return parts.join(' ');
+  const focus = gws.length || qids.length || points.length ? { countries: [...new Set(gws)].map(gw => `gw:${gw}`), qids, points, padding: 48 } : { reset: true };
+  return { text: parts.join(' '), focus };
 }
 window.jdpiDocumentary = {
   get title() { return state.war ? `War Focus · ${state.war.name}` : 'War Focus'; },
@@ -375,18 +417,21 @@ window.jdpiDocumentary = {
     let intro = `${w.name}. ${fmtDate(w.start)} to ${w.end ? fmtDate(w.end) : 'the present day'}: ${w.sides.a.label} against ${w.sides.b.label}.`;
     try {
       const s = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(w.wiki.replace(/ /g, '_'))}`).then(r => r.json());
-      if (s.extract) intro += ' ' + (s.extract.match(/[^.!?]+[.!?]+/g) || [s.extract]).slice(0, 3).join(' ').trim();
+      // The first sentences: a full stop inside a number ("3.5 million") or after "U.S." does not end one.
+      const said = window.jdpiNarrator?.sentences?.(s.extract || '') || (s.extract || '').match(/(?:[^.!?]|[.!?](?=\S))+[.!?]*/g) || [];
+      if (said.length) intro += ' ' + said.slice(0, 3).join(' ').trim();
     } catch {}
     intro += ` In all, about ${spokenNumber(w.totalDeaths)} died in battle${w.ongoing ? ' so far' : ''}.`;
-    yield { text: intro, el: document.querySelector('#panel h2') };
+    yield { text: intro, el: document.querySelector('#panel h2'), focus: { reset: true } };
     for (let i = state.m; i < w.months.length; i++) {
       if (state.war !== w) return;
       setMonth(i); await sleepMs(500);
-      yield { text: monthStory(i), el: document.querySelector('.counters') };
+      const { text, focus } = monthStory(i);
+      yield { text, el: document.querySelector('.counters'), focus };
       const next = w.months[i + 1];
       if (next && next.slice(0, 4) !== w.months[i].slice(0, 4)) yield { chapterEnd: true, label: `Continue to ${next.slice(0, 4)}` };
     }
-    yield { text: w.end ? `The war ended on ${fmtDate(w.end)}. About ${spokenNumber(w.totalDeaths)} had died in battle.` : `The war goes on. The record here runs to ${fmtDate(w.dataThrough)}, with about ${spokenNumber(w.totalDeaths)} battle deaths so far.`, el: document.querySelector('#panel h2') };
+    yield { text: w.end ? `The war ended on ${fmtDate(w.end)}. About ${spokenNumber(w.totalDeaths)} had died in battle.` : `The war goes on. The record here runs to ${fmtDate(w.dataThrough)}, with about ${spokenNumber(w.totalDeaths)} battle deaths so far.`, el: document.querySelector('#panel h2'), focus: { reset: true } };
   },
 };
 
@@ -403,6 +448,7 @@ async function loadWar(id, month) {
   const pos = k => (k / Math.max(1, w.months.length - 1)) * 100, edge = p => (p < 2 ? ' class="start"' : p > 98 ? ' class="end"' : '');
   $('#ticks').innerHTML = w.months.map((m, k) => (k % step === 0 ? `<span${edge(pos(k))} style="left:${pos(k)}%">${step >= 12 ? m.slice(0, 4) : m.slice(2).replace('-', '/')}</span>` : '')).join('');
   $('#status').innerHTML = `<span><b>${esc(w.sides.a.label)}</b> v <b>${esc(w.sides.b.label)}</b></span><span>${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'}</span>${w.ongoing && w.dataThrough ? `<span>Data through <b>${esc(fmtDate(w.dataThrough))}</b></span>` : ''}<span><b>${state.index.wars.length}</b> major wars since 1926</span>`;
+  hits.gws.clear(); hits.qids.clear(); focusFit = null;
   fitProjection(); writeHash();
 }
 function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m'), v: VIEWS.includes(p.get('v')) ? p.get('v') : 'map' }; }

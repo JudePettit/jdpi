@@ -54,7 +54,8 @@ const isNew = e => e.y > prevStopYear() && e.y <= state.year;
 const visible = () => upTo().filter(e => isShown(e) && (state.trail === 'all' || isRecent(e)));
 
 /* ---------------------------------------------------------------- map */
-let svg, gBase, gDots, gLabels, projection, path, zoom, transform = d3.zoomIdentity, W = 0, H = 0, land = null;
+let svg, gBase, gDots, gLabels, projection, path, zoom, transform = d3.zoomIdentity, W = 0, H = 0, land = null, focusView = null, focusFit = null;
+const focusIds = new Set(); // breakthroughs Documentary mode is discussing
 function setupMap(world) {
   land = topojson.feature(world, world.objects.land);
   svg = d3.select('#map');
@@ -65,7 +66,8 @@ function setupMap(world) {
   svg.call(zoom);
   const step = k => () => svg.transition().duration(reduced() ? 0 : 250).call(zoom.scaleBy, k);
   $('#zoom-in').onclick = step(1.6); $('#zoom-out').onclick = step(1 / 1.6);
-  $('#zoom-reset').onclick = () => svg.transition().duration(reduced() ? 0 : 250).call(zoom.transform, d3.zoomIdentity);
+  $('#zoom-reset').onclick = () => { clearFocus(); svg.transition().duration(reduced() ? 0 : 250).call(zoom.transform, d3.zoomIdentity); };
+  focusView = window.PRPFocus?.d3View({ svg, zoom, project: () => projection, maxScale: 10, clamp: true });
   let raf = 0;
   new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(resize); }).observe($('#map-canvas'));
   resize();
@@ -85,6 +87,7 @@ function resize() {
   for (const e of EVENTS) e._xy = projection([e.place.lon, e.place.lat]);
   svg.call(zoom.transform, d3.zoomIdentity);
   renderMap();
+  if (focusFit) focusView?.fit(...focusFit); // a refit (the frame resized) keeps what Documentary mode is showing
 }
 // Breakthroughs at the same place fan out on a small spiral (in screen pixels, so it holds at every zoom).
 const offset = e => { const k = e._slot || 0, r = 4.4 * Math.sqrt(k), a = k * 2.39996; return [r * Math.cos(a), r * Math.sin(a)]; };
@@ -101,8 +104,8 @@ function renderMap() {
   const list = visible().filter(e => e._xy).sort((a, b) => a.y - b.y || a.id.localeCompare(b.id));
   const slots = new Map();
   for (const e of list) { const k = `${e.place.lat},${e.place.lon}`; e._slot = slots.get(k) || 0; slots.set(k, e._slot + 1); }
-  // Earlier breakthroughs first, then recent ones, then the selection on top.
-  const rank = e => (e.id === state.sel ? 2 : isRecent(e) ? 1 : 0);
+  // Earlier breakthroughs first, then recent ones, then those being read about, then the selection on top.
+  const rank = e => (e.id === state.sel ? 3 : focusIds.has(e.id) ? 2 : isRecent(e) ? 1 : 0);
   list.sort((a, b) => rank(a) - rank(b) || a.y - b.y);
   const tip = $('#tooltip');
   gDots.selectAll('circle.dot').data(list, e => e.id).join(enter => enter.append('circle').attr('class', 'dot')
@@ -111,11 +114,11 @@ function renderMap() {
     .on('click', (ev, e) => { ev.stopPropagation(); select(e.id); }))
     .attr('r', radius)
     .style('fill', colourOf)
-    .attr('class', e => `dot${isRecent(e) ? ' recent' : ' old'}${isNew(e) ? ' new' : ''}${e.id === state.sel ? ' sel' : ''}`)
+    .attr('class', e => `dot${isRecent(e) ? ' recent' : ' old'}${isNew(e) ? ' new' : ''}${e.id === state.sel ? ' sel' : ''}${focusIds.has(e.id) ? ' prp-focus-hit' : ''}`)
     .order();
-  // Direct labels: the selection, and the recent breakthroughs when there are only a few of them.
+  // Direct labels: the selection, those being read about, and the recent breakthroughs when there are only a few.
   const recent = list.filter(isRecent);
-  const labelled = list.filter(e => e.id === state.sel || (recent.length <= 4 && isRecent(e)));
+  const labelled = list.filter(e => e.id === state.sel || focusIds.has(e.id) || (recent.length <= 4 && isRecent(e)));
   gLabels.selectAll('text').data(labelled, e => e.id).join('text').attr('class', e => (e.id === state.sel ? 'sel' : '')).text(e => e.t.length > 46 ? `${e.t.slice(0, 44)}…` : e.t);
   placeDots();
   $('#caption').textContent = `${state.trail === 'all' ? 'Breakthroughs up to' : 'Breakthroughs in the steps leading to'} ${yearText(state.year)}, coloured by main discipline; ${state.trail === 'all' ? 'the most recent are drawn larger, earlier ones faded.' : 'earlier ones are hidden.'}`;
@@ -130,6 +133,26 @@ function showTip(ev, e) {
   tip.style.left = `${Math.max(4, Math.min(x + 14, box.width - tip.offsetWidth - 6))}px`;
   tip.style.top = `${y + 16 + tip.offsetHeight > box.height ? Math.max(4, y - tip.offsetHeight - 12) : y + 16}px`;
 }
+
+/* ---------------------------------------------------------------- documentary focus (design/prp-focus.js) */
+// When the reader names breakthroughs (by Wikidata ID) or places, the breakthroughs are ringed in the module accent and
+// labelled, and the map eases to fit everything named; ⟲ or the end of the reading brings back the whole world.
+function clearFocus() { focusFit = null; if (!focusIds.size) return; focusIds.clear(); renderMap(); }
+window.PRPFocus?.listen({
+  focus(t) {
+    if (!D || !focusView || !projection) return;
+    const ids = new Set();
+    const r = PRPFocus.resolve(t, {
+      qid: q => { const es = EVENTS.filter(e => e.q === q && e.y <= state.year); es.forEach(e => ids.add(e.id)); return es.length ? es.map(e => [e.place.lon, e.place.lat]) : null; },
+      minSpan: 10,
+    });
+    if (!r.box) return;
+    focusIds.clear(); ids.forEach(id => focusIds.add(id)); renderMap();
+    focusFit = [r.box, r.padding];
+    focusView.fit(...focusFit);
+  },
+  reset() { clearFocus(); focusView?.reset(); },
+});
 
 /* ---------------------------------------------------------------- legend = discipline filter */
 function setupLegend() {
@@ -410,7 +433,7 @@ window.jdpiDocumentary = {
     if (state.playing) stopPlay();
     if (state.view !== 'map') setView('map');
     state.off.clear(); state.sel = null;
-    yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened.`, el: $('#year-big') };
+    yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened.`, el: $('#year-big'), focus: { reset: true } };
     for (const [a, b, name] of ERAS) {
       if (a > D.lastYear) break;
       const list = EVENTS.filter(e => e.y >= a && e.y <= Math.min(b, D.lastYear));
@@ -418,7 +441,10 @@ window.jdpiDocumentary = {
       await new Promise(r => setTimeout(r, 400));
       const top = list.filter(e => e.people.length).slice(0, 3).concat(list.filter(e => !e.people.length)).slice(0, 3);
       const places = [...new Set(list.map(e => e.place.n))].slice(0, 3);
-      yield { text: `${name}, ${yearText(Math.max(a, D.firstYear))} to ${yearText(Math.min(b, D.lastYear))}: ${list.length} breakthroughs${places.length ? `, from ${places.join(', ')} and beyond` : ''}. Among them: ${top.map(e => `${e.t.replace(/[:;]/g, ',')} (${evYear(e)})`).join('; ')}.`, el: $('#panel') };
+      // The map frames the places named and the breakthroughs named (ringed and labelled when Wikidata knows them).
+      const named = [...top, ...places.map(n => list.find(e => e.place.n === n))].filter(Boolean);
+      const focus = named.length ? { qids: [...new Set(top.map(e => e.q).filter(Boolean))], points: named.map(e => [e.place.lon, e.place.lat]), padding: 48 } : { reset: true };
+      yield { text: `${name}, ${yearText(Math.max(a, D.firstYear))} to ${yearText(Math.min(b, D.lastYear))}: ${list.length} breakthroughs${places.length ? `, from ${places.join(', ')} and beyond` : ''}. Among them: ${top.map(e => `${e.t.replace(/[:;]/g, ',')} (${evYear(e)})`).join('; ')}.`, el: $('#panel'), focus };
       if (b < D.lastYear) yield { chapterEnd: true, label: 'Continue' };
     }
   },

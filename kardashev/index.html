@@ -104,6 +104,7 @@
   <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-box"><button type="button" class="close" id="modal-close" aria-label="Close">×</button><h2 id="modal-title"></h2><div id="modal-body"></div></div></div>
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="../design/prp-focus.js"></script>
   <script>
   // Kardashev Tracker (PRP · Retrospective Intelligence): estimated share of humanity's energy capture held by each empire
   // or country, in century steps (2000 BC – 1800, then 1850, 1900, 1950, 2000, 2025). Built by kardashev/scripts/build.mjs.
@@ -120,20 +121,45 @@
   const motion = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
   // The map is fitted to its frame in pixels and to the inhabited world (Antarctica and the far north are left out).
   const WORLD = (() => { const xs = d3.range(9).map(k => -128 + 283 * k / 8); return { type: 'MultiPoint', coordinates: [...xs.map(x => [x, -42]), ...xs.map(x => [x, 71])] }; })();
-  let data, byId, idx = 0, selected = null, playing = null, svg, g, projection, zoom, land, rMax = 70, view = 'map';
+  let data, byId, idx = 0, selected = null, playing = null, svg, g, marks, projection, zoom, zt = d3.zoomIdentity, land, rMax = 70, view = 'map', focusView = null, focusFit = null;
+  const focusIds = new Set(); // powers Documentary mode is discussing
+
+  // Documentary focus (design/prp-focus.js): the powers being discussed are ringed in the module accent and the map
+  // eases to fit their capitals; ⟲ or the end of the reading brings back the whole map. A country (ISO3) is found by
+  // its modern power(s) on the map, and framed by its own borders.
+  const MODERN = { USA: ['usa'], RUS: ['russia', 'ussr', 'russia-emp'], CHN: ['prc', 'roc', 'qing'], IND: ['india'], JPN: ['japan', 'japan-emp'], GBR: ['uk', 'britain'],
+    FRA: ['france-mod'], DEU: ['west-germany', 'germany-weimar', 'germany-emp'], ITA: ['italy'], TUR: ['ottoman'] };
+  function clearFocus() { focusIds.clear(); focusFit = null; marks?.selectAll('circle.bubble').classed('prp-focus-hit', false); }
+  window.PRPFocus?.listen({
+    focus(t) {
+      if (!data || !focusView) return;
+      const here = new Set(data.steps[idx].polities.map(p => p.id)), ids = new Set();
+      const r = PRPFocus.resolve(t, { country: iso => { (MODERN[iso] || []).filter(id => here.has(id)).forEach(id => ids.add(id)); return null; }, minSpan: 20 });
+      for (const [lon, lat] of r.points) for (const id of here) if (byId[id].lon === lon && byId[id].lat === lat) ids.add(id);
+      if (!r.box) return;
+      focusIds.clear(); ids.forEach(id => focusIds.add(id));
+      marks.selectAll('circle.bubble').classed('prp-focus-hit', d => focusIds.has(d.id));
+      focusFit = [r.box, r.padding];
+      focusView.fit(...focusFit);
+    },
+    reset() { clearFocus(); focusView?.reset(); },
+  });
 
   function drawMap(world) {
     svg = d3.select('#map');
     land = topojson.feature(world, world.objects.land);
+    // The land zooms; circles and names stay the same size on screen and move with it (so a zoomed map stays legible).
     g = svg.append('g');
     g.append('path').attr('class', 'land');
-    g.append('g').attr('class', 'bubbles');
-    g.append('g').attr('class', 'labels');
-    zoom = d3.zoom().scaleExtent([1, 12]).on('zoom', ev => g.attr('transform', ev.transform));
+    marks = svg.append('g');
+    marks.append('g').attr('class', 'bubbles');
+    marks.append('g').attr('class', 'labels');
+    zoom = d3.zoom().scaleExtent([1, 12]).on('zoom', ev => { zt = ev.transform; g.attr('transform', zt); placeMarks(); }).on('end', () => { if (data) renderMap(); });
     svg.call(zoom);
     $('#zoom-in').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1.6);
     $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
-    $('#zoom-reset').onclick = () => svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity);
+    $('#zoom-reset').onclick = () => { clearFocus(); svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity); };
+    focusView = window.PRPFocus?.d3View({ svg, zoom, project: () => projection, maxScale: 4 });
     fitMap();
     let size = '';
     new ResizeObserver(() => { const b = $('#map').getBoundingClientRect(), k = `${Math.round(b.width)}x${Math.round(b.height)}`; if (b.width && k !== size) { size = k; fitMap(); if (data) renderMap(); } }).observe($('#map'));
@@ -146,17 +172,18 @@
     rMax = Math.max(24, (x1 - x0) * 0.09); // the largest power's circle, in proportion to the map
     g.select('.land').attr('d', d3.geoPath(projection)(land));
     svg.call(zoom.transform, d3.zoomIdentity);
+    if (focusFit) focusView?.fit(...focusFit); // a refit (the frame resized) keeps what Documentary mode is showing
   }
 
   function renderMap() {
     const s = data.steps[idx], tip = $('#tooltip');
     const r = d3.scaleSqrt().domain([0, 0.6]).range([0, rMax]);
-    const nodes = s.polities.map(p => ({ ...p, meta: byId[p.id], xy: projection([byId[p.id].lon, byId[p.id].lat]) }));
-    const rad = d => Math.max(2.5, r(d.share));
+    const nodes = s.polities.map(p => ({ ...p, meta: byId[p.id], xy: projection([byId[p.id].lon, byId[p.id].lat]), r: Math.max(2.5, r(p.share)) }));
+    const rad = d => d.r, sx = d => zt.applyX(d.xy[0]), sy = d => zt.applyY(d.xy[1]);
     // Larger powers first, so smaller circles sit on top of them.
-    g.select('.bubbles').selectAll('circle.bubble').data(nodes, d => d.id).join('circle').attr('class', 'bubble').sort((a, b) => b.share - a.share)
-      .attr('cx', d => d.xy[0]).attr('cy', d => d.xy[1]).attr('r', rad)
-      .attr('fill', d => regionColor(d.meta.region)).classed('sel', d => d.id === selected)
+    marks.select('.bubbles').selectAll('circle.bubble').data(nodes, d => d.id).join('circle').attr('class', 'bubble').sort((a, b) => b.share - a.share)
+      .attr('cx', sx).attr('cy', sy).attr('r', rad)
+      .attr('fill', d => regionColor(d.meta.region)).classed('sel', d => d.id === selected).classed('prp-focus-hit', d => focusIds.has(d.id))
       .on('mousemove', (ev, d) => {
         const box = $('.map-wrap').getBoundingClientRect();
         tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>${pct(d.share)} of world energy · ${people(d.pop)} people`;
@@ -167,15 +194,23 @@
     const short = n => { n = n.replace(/ \(.*\)$/, '').replace(/ dynasty| Empire$/, ''); return n.includes(' / ') ? n.split(' / ').pop() : n; };
     const named = nodes.filter(d => d.share >= 0.04);
     const placed = [], hit = b => placed.some(p => b.x < p.x + p.width && p.x < b.x + b.width && b.y < p.y + p.height && p.y < b.y + b.height);
-    g.select('.labels').selectAll('text.blabel').data(named, d => d.id).join('text').attr('class', 'blabel').attr('text-anchor', 'middle').sort((a, b) => b.share - a.share)
-      .text(d => short(d.meta.name)).attr('x', d => d.xy[0]).attr('y', d => d.xy[1] - rad(d) - 4).attr('visibility', null)
+    marks.select('.labels').selectAll('text.blabel').data(named, d => d.id).join('text').attr('class', 'blabel').attr('text-anchor', 'middle').sort((a, b) => b.share - a.share)
+      .text(d => short(d.meta.name)).attr('x', sx).attr('y', d => sy(d) - rad(d) - 4).attr('visibility', null)
       .each(function (d) {
+        d.below = false;
         let b = this.getBBox(); if (!b.width) return;
-        if (hit(b)) { this.setAttribute('y', d.xy[1] + rad(d) + 11); b = this.getBBox(); }
+        if (hit(b)) { d.below = true; this.setAttribute('y', sy(d) + rad(d) + 11); b = this.getBBox(); }
         if (hit(b)) this.setAttribute('visibility', 'hidden'); else placed.push(b);
       });
     $('#kval').textContent = `K ${s.K.toFixed(2)}`;
     $('#watts').textContent = `${watts(s.worldWatts)} · ${people(s.worldPop)} people`;
+  }
+
+  // Circles and names follow the zoom without growing; names are placed again (collisions change) when it ends.
+  function placeMarks() {
+    if (!marks) return;
+    marks.select('.bubbles').selectAll('circle.bubble').attr('cx', d => zt.applyX(d.xy[0])).attr('cy', d => zt.applyY(d.xy[1]));
+    marks.select('.labels').selectAll('text.blabel').attr('x', d => zt.applyX(d.xy[0])).attr('y', d => zt.applyY(d.xy[1]) + (d.below ? d.r + 11 : -d.r - 4));
   }
 
   const rankRow = (p, top) => `<div class="rank" data-id="${p.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[p.id].region)}"></i><div>${esc(byId[p.id].name)}<small>${people(p.pop)} people · ${Math.round(p.kcal / 1000)}k kcal/person/day</small><div class="sharebar"><i style="width:${Math.min(100, p.share * 100 / Math.max(top || 1, 0.01))}%;background:${regionColor(byId[p.id].region)}"></i></div></div><b>${pct(p.share)}</b></div>`;
@@ -304,19 +339,21 @@
       if (!data) { yield { text: 'The energy data has not loaded yet.' }; return; }
       stopPlay(); select(null); if (view !== 'map') setView('map');
       if (idx >= data.steps.length - 1) setStep(0);
-      yield { text: `Who has commanded humanity's energy? From ${sayYear(data.steps[0].year)} to today, century by century, the share of the world's energy capture held by each great power, and humanity's place on the Kardashev scale.`, el: $('#year-big') };
+      yield { text: `Who has commanded humanity's energy? From ${sayYear(data.steps[0].year)} to today, century by century, the share of the world's energy capture held by each great power, and humanity's place on the Kardashev scale.`, el: $('#year-big'), focus: { reset: true } };
       for (let i = idx; i < data.steps.length; i++) {
         setStep(i); await new Promise(r => setTimeout(r, 400));
         const s = data.steps[i], top = s.polities.slice(0, 3), prev = i ? new Set(data.steps[i - 1].polities.slice(0, 5).map(p => p.id)) : null;
-        const fresh = prev ? s.polities.slice(0, 5).filter(p => !prev.has(p.id)).map(p => plainPolity(p.id)) : [];
+        const freshIds = prev ? s.polities.slice(0, 5).filter(p => !prev.has(p.id)).map(p => p.id) : [], fresh = freshIds.map(plainPolity);
         const parts = [`${sayYear(s.year)}.`, `Humanity numbers about ${sayPeople(s.worldPop)}, using some ${sayWatts(s.worldWatts)}: a Kardashev rating of ${s.K.toFixed(2)}.`];
         if (top.length) parts.push(`The largest share belongs to ${plainPolity(top[0].id)}, with ${pct(top[0].share)}${top[1] ? `; then ${plainPolity(top[1].id)}, ${pct(top[1].share)}` : ''}${top[2] ? `, and ${plainPolity(top[2].id)}, ${pct(top[2].share)}` : ''}.`);
         if (fresh.length) parts.push(`New among the five greatest: ${fresh.join(' and ')}.`);
-        yield { text: parts.join(' '), el: $('#panel h2') };
+        // The map frames the capitals of the powers named.
+        const named = [...new Set([...top.map(p => p.id), ...freshIds])];
+        yield { text: parts.join(' '), el: $('#panel h2'), focus: named.length ? { points: named.map(id => [byId[id].lon, byId[id].lat]), padding: 56 } : { reset: true } };
         const next = data.steps[i + 1];
         if (next && [1, 1000, 1500, 1800, 1900].includes(next.year)) yield { chapterEnd: true, label: `Continue to ${sayYear(next.year)}` };
       }
-      yield { text: 'And so to today. Humanity has yet to reach a Kardashev rating of one: that would mean harnessing all the sunlight that falls on the Earth.', el: $('#kval') };
+      yield { text: 'And so to today. Humanity has yet to reach a Kardashev rating of one: that would mean harnessing all the sunlight that falls on the Earth.', el: $('#kval'), focus: { reset: true } };
     },
   };
 

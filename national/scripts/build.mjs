@@ -178,7 +178,7 @@ for (const c of wbCountries) {
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
     leadership: gw != null && retro.countries[gw] ? leadership(gw) : null,
     conflict: gw != null ? conflict(gw) : null,
-    calendar: calEvents.length ? Object.fromEntries(['election', 'leader', 'coup', 'conflict', 'assassination', 'crisis', 'treaty'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
+    calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,
   });
   writeFileSync(join(OUT, `series/${c.id}.json`), JSON.stringify(s));

@@ -45,7 +45,9 @@ export async function retrospective({ retroDir }) {
   return out;
 }
 
-const EVENT_TYPE = { election: 'Election', leader: 'New leader', coup: 'Coup', conflict: 'War or battle', assassination: 'Assassination', crisis: 'Crisis', treaty: 'Treaty' };
+const EVENT_TYPE = { election: 'Election', referendum: 'Referendum', party: 'Party contest', leader: 'New leader', inauguration: 'Inauguration',
+  resignation: 'Resignation', coup: 'Coup', conflict: 'War or battle', ceasefire: 'Ceasefire or peace talks', assassination: 'Assassination', crisis: 'Crisis',
+  protest: 'Protest or strike', treaty: 'Treaty', summit: 'Summit or state visit', sanctions: 'Sanctions', vote: 'Parliamentary vote', court: 'Court ruling' };
 
 /** Historical and Realtime Calendars: every event with a Wikipedia source. */
 export function calendar({ jdpiDir }) {

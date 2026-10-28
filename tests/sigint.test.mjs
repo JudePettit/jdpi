@@ -508,7 +508,8 @@ test('page: tabs, hash, documents and the GNSS sample in Edge', { skip: !process
     await page.click('#tab-gnss');
     assert.match(page.url(), /#tab=gnss$/);
     await page.click('#gn-sample');
-    await page.waitForTimeout(2600);
+    // The sample plays in real time; wait for it rather than a fixed time, which a busy full run can outlast.
+    await page.waitForFunction(() => document.querySelectorAll('#gn-snr .snr-row').length >= 15, null, { timeout: 10000 }).catch(() => {});
     assert.ok(await page.locator('#gn-snr .snr-row').count() >= 15, 'sample satellites listed');
     assert.ok(await page.locator('#gn-sky svg circle').count() > 15, 'sky plot drawn');
     await page.click('#tab-law');

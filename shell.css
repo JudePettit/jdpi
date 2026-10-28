@@ -68,19 +68,19 @@ button { font: inherit; }
 
 /* --- Kino now playing: the film's caption and controls while Kino follows along with its frame hidden ----------- */
 .main { position: relative; }
-.np { position: absolute; z-index: 30; left: 12px; bottom: 12px; width: min(640px, calc(100% - 24px));
+.kino-np { position: absolute; z-index: 30; left: 12px; bottom: 12px; width: min(640px, calc(100% - 24px));
   display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "head ctrl back" "cap ctrl back";
   align-items: center; column-gap: 10px; row-gap: 1px; padding: 6px 7px 6px 13px;
   background: var(--prp-surface); color: var(--prp-text); border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius);
   box-shadow: inset 3px 0 var(--prp-kn), var(--prp-shadow-2); animation: np-in .18s ease-out; }
 @keyframes np-in { from { opacity: 0; transform: translateY(6px); } }
-.np p { margin: 0; min-width: 0; }
+.kino-np p { margin: 0; min-width: 0; }
 .np-head { grid-area: head; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; color: var(--prp-muted); font: 500 11.5px/1.4 var(--prp-font-ui); }
 .np-k { flex: none; color: var(--prp-kn); font-weight: 700; letter-spacing: .03em; }
 .np-sep { flex: none; }
 .np-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--prp-text-2); }
 .np-n { flex: none; font-family: var(--prp-font-mono); font-variant-numeric: tabular-nums; }
-.np-cap { grid-area: cap; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 14px/1.45 var(--prp-font-serif); }
+.np-cap { grid-area: cap; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; font: 14px/1.45 var(--prp-font-serif); }
 .np-ctrl { grid-area: ctrl; display: flex; gap: 4px; }
 .np-btn, .np-back { height: 32px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm);
   background: var(--prp-surface); color: var(--prp-text); cursor: pointer; white-space: nowrap; }
@@ -89,10 +89,12 @@ button { font: inherit; }
 .np-back { grid-area: back; padding: 0 11px; text-decoration: none; font: 600 12.5px var(--prp-font-ui); }
 .np-btn:hover, .np-back:hover { background: var(--prp-surface-3); }
 .np-btn.np-play:hover { background: var(--prp-kn); filter: brightness(1.12); }
-/* Room beside the bar for the Documentary reader (bottom right): its button, or its open panel; where there is too
-   little room the reader moves above the bar instead. */
-html:has(.doc-fab:not([hidden])) .np { width: min(640px, calc(100% - 196px)); }
-@media (min-width: 1101px) { html:has(.doc:not([hidden])) .np { width: min(640px, calc(100% - 464px)); } }
+/* While Kino follows along, its narrator is the one speaking: the Documentary button is hidden, and the frame stops
+   above the bar so the page underneath is not covered. A reader opened before the film keeps room beside the bar or
+   moves above it. */
+html.np-on .doc-fab { display: none; }
+html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
+@media (min-width: 1101px) { html:has(.doc:not([hidden])) .kino-np { width: min(640px, calc(100% - 464px)); } }
 @media (max-width: 1100px) { html.np-on .doc { bottom: calc(var(--np-h, 54px) + 22px); } }
 
 /* --- Pages (launchpad, module overview, launch) ---------------------------- */
@@ -134,11 +136,11 @@ html:has(.doc-fab:not([hidden])) .np { width: min(640px, calc(100% - 196px)); }
   .page { padding: 18px 16px 32px; }
 }
 @media (max-width: 560px) {
-  .np, html:has(.doc-fab:not([hidden])) .np { left: 8px; bottom: 8px; width: calc(100% - 16px);
+  .kino-np { left: 8px; bottom: 8px; width: calc(100% - 16px);
     grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "head back" "cap ctrl"; column-gap: 8px; row-gap: 3px; padding: 6px 6px 6px 11px; }
   .np-back { height: 28px; padding: 0 9px; }
   .np-btn { width: 36px; }
-  html.np-on .doc-fab { bottom: calc(var(--np-h, 72px) + 16px); }
+  .np-cap { -webkit-line-clamp: 3; line-clamp: 3; }
   html.np-on .doc { bottom: calc(var(--np-h, 72px) + 14px); }
 }
-@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side { transition: none; } .np { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side { transition: none; } .kino-np { animation: none; } }

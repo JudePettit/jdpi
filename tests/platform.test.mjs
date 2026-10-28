@@ -142,7 +142,8 @@ test('deep links move their submodule\'s one frame: hash changes in place, other
     assert.equal(await p.locator(WF).count(), 1);
     assert.equal(await frame.evaluate(() => document.querySelector('#date').textContent), 'November 1952');
     await p.locator('#newtab').focus();
-    assert.equal(await p.locator('#newtab').getAttribute('href'), `${BASE}/battlefield/focus/index.html#war=korean-war&m=1952-11`);
+    // (Pages serves /battlefield/focus/index.html at its clean address, so that is where the page is now.)
+    assert.equal(await p.locator('#newtab').getAttribute('href'), `${BASE}/battlefield/focus/#war=korean-war&m=1952-11`);
     // A deep link to the page's own address ("open War Focus", from another page) is a plain visit too.
     await p.evaluate(h => { location.hash = h; }, `#/rs/war-focus?at=${encodeURIComponent(`${BASE}/battlefield/focus/index.html`)}`);
     await p.waitForTimeout(1500);
@@ -180,6 +181,18 @@ test('the shell\'s theme reaches module pages', async () => {
   await page.waitForTimeout(1500);
   assert.equal(await frame.locator('html').getAttribute('data-theme'), 'dark');
   await page.click('[data-theme-choice=system]');
+});
+
+test('the Documentary reader keeps its own styles beside the Kino now-playing bar', async () => {
+  // The reader's music credit is .np inside .doc; the shell's bar is .kino-np, so the bar's rules must not reach it.
+  const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await p.goto(`${BASE}/#/rs/war-focus`, { waitUntil: 'domcontentloaded' });
+  await p.locator('.doc-fab').click({ timeout: 20000 });
+  await p.locator('#doc-np').waitFor({ state: 'attached', timeout: 10000 });
+  const style = await p.locator('#doc-np').evaluate(el => ({ position: getComputedStyle(el).position, display: getComputedStyle(el).display }));
+  await p.close();
+  assert.equal(style.position, 'static');
+  assert.notEqual(style.display, 'grid');
 });
 
 test('shell works at phone width', async () => {

@@ -161,7 +161,11 @@ function finish() {
   const card = stage.end(S.doc, next);
   card.querySelector('[data-act="again"]').onclick = () => { S.ended = false; go(0); play(); };
   card.querySelector('[data-act="sources"]').onclick = () => $('#doc-sources').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
-  if (S.doc.quiz?.length) { $('#quiz').hidden = false; $('#quiz').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); }
+  if (S.doc.quiz?.length) {
+    $('#quiz').hidden = false; $('#quiz').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+    // Following along, the course ended on another page: bring Kino back into view for its quiz.
+    if (embedded && S.follow) shellGo(`#/kino/kino-${CAT}`);
+  }
 }
 function setPlayUi() {
   const b = $('#play'); if (!b) return;
@@ -178,7 +182,7 @@ const np = { timer: 0, last: 0, live: false };
 const toShell = msg => { try { window.parent.postMessage(msg, location.origin); } catch { /* no shell */ } };
 function nowPlaying() {
   if (!embedded) return;
-  if (!S.follow || !S.doc || S.ended) { nowPlayingStop(); return; }
+  if (!S.follow || !S.doc) { nowPlayingStop(); return; }
   const wait = np.last + NP_EVERY - Date.now();
   if (wait > 0) { np.timer ||= setTimeout(() => { np.timer = 0; nowPlaying(); }, wait); return; }
   clearTimeout(np.timer); np.timer = 0; np.last = Date.now(); np.live = true;
@@ -187,8 +191,9 @@ function nowPlaying() {
     type: 'prp:nowplaying',
     doc: { id: S.doc.id, title: S.doc.title, category: S.doc.category },
     scene: { index: S.i, count: S.scenes.length, title: sc.title },
-    caption: sentences(sc.narration)[S.sentence] || '',
-    playing: S.playing,
+    // A film that ends while following along keeps the bar, so "Back to film" leads to its end card.
+    caption: S.ended ? (S.doc.quiz?.length ? 'The course has ended. Its quiz is in Kino.' : 'The film has ended.') : sentences(sc.narration)[S.sentence] || '',
+    playing: S.playing && !S.ended, ended: S.ended,
     route: filmRoute(CAT, S.doc.id, sc.id, SHELL),
   });
 }

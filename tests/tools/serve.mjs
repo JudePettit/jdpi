@@ -1,4 +1,5 @@
-// A plain static server for checking pages locally (unlike `npx serve`, it keeps .html paths and query strings).
+// A plain static server for checking pages locally, with Cloudflare Pages' clean addresses: /x.html and /x/index.html
+// redirect (308) to /x and /x/, which are served from x.html and x/index.html; query strings are kept.
 //   node tests/tools/serve.mjs [port=8787] [root=.]
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -11,7 +12,13 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 createServer(async (req, res) => {
   try {
-    let path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^([\\/])+/, '');
+    const url = new URL(req.url, 'http://x');
+    if (url.pathname.endsWith('.html')) {
+      const clean = url.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+      res.writeHead(308, { Location: clean + url.search, 'Cache-Control': 'no-store' }).end();
+      return;
+    }
+    let path = normalize(decodeURIComponent(url.pathname)).replace(/^([\\/])+/, '');
     let file = join(root, path);
     if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
     // Like Cloudflare Pages, /q/calendar is served from q/calendar.html (even when a q/calendar/ folder exists, as

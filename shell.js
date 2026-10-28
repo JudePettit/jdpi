@@ -40,13 +40,16 @@ function parseRoute() {
 // The only addresses a page may move the shell to (Kino's 'prp:navigate', the now-playing bar's "Back to film").
 const SHELL_ROUTE = /^#\/[a-z-]+(\/[\w-]+){0,2}(\?at=[^#\s]*)?$/;
 
+// Cloudflare Pages serves /x/index.html at /x/ and /x.html at /x (with a 308), so page addresses compare without them.
+const stripPage = p => p.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+const samePage = (a, b) => a.origin === b.origin && stripPage(a.pathname) === stripPage(b.pathname) && a.search === b.search;
+
 // A deep link may only point at the submodule's own page (same origin and path), so the shell never frames other sites.
 function deepLink(r) {
   if (!r.at || !r.module?.url) return null;
   try {
     const want = new URL(r.at, location.href), base = new URL(r.view?.url || r.module.url, location.href);
-    const strip = p => p.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
-    return want.origin === base.origin && strip(want.pathname) === strip(base.pathname) ? want.href : null;
+    return want.origin === base.origin && stripPage(want.pathname) === stripPage(base.pathname) ? want.href : null;
   } catch { return null; }
 }
 
@@ -233,9 +236,15 @@ function moveFrame(frame, url) {
   const to = new URL(url, location.href), from = new URL(frame.hasAttribute('data-loading') ? frame.dataset.url : frameAddress(frame));
   frame.dataset.url = to.href;
   if (from.href === to.href) return;
-  const sameDocument = !!to.hash && from.origin === to.origin && from.pathname === to.pathname && from.search === to.search;
+  // The same page with another hash: change only the hash, on the page's own address, so it stays in place (no reload).
+  if (samePage(from, to)) {
+    if (from.hash === to.hash) return;
+    const here = new URL(from.href); here.hash = to.hash;
+    try { frame.contentWindow.location.replace(here.href); } catch { frame.src = to.href; }
+    return;
+  }
   try { frame.contentWindow.location.replace(to.href); } catch { frame.src = to.href; }
-  if (!sameDocument) setLoading(frame, true);
+  setLoading(frame, true);
 }
 function reloadFrame(frame) {
   try { frame.contentWindow.location.reload(); setLoading(frame, true); return; } catch { /* another origin: load it afresh */ }
@@ -273,7 +282,7 @@ function nowPlayingMessage(e) {
   const own = findModule(frame.dataset.module);
   setNowPlaying({
     frame, title: String(d.doc?.title || 'Kino'), index: num(d.scene?.index), count: num(d.scene?.count), scene: String(d.scene?.title || ''),
-    caption: String(d.caption || '').replace(/\s+/g, ' ').trim(), playing: d.playing === true,
+    caption: String(d.caption || '').replace(/\s+/g, ' ').trim(), playing: d.playing === true, ended: d.ended === true,
     route: SHELL_ROUTE.test(String(d.route || '')) ? d.route : href(own?.suite, own?.module),
   });
 }
@@ -294,6 +303,7 @@ function syncNowPlaying() {
   const play = $('#np-play'), label = np.playing ? 'Pause' : 'Play';
   if (play.getAttribute('aria-label') !== label) { play.textContent = np.playing ? '❚❚' : '▶\uFE0E'; play.setAttribute('aria-label', label); play.title = `${label} the film`; }
   $('#np-back').setAttribute('href', np.route);
+  bar.querySelector('.np-ctrl').hidden = np.ended; // a finished film offers only "Back to film"
   bar.hidden = false;
   document.documentElement.style.setProperty('--np-h', `${bar.offsetHeight}px`);
 }

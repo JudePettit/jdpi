@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en" data-suite="rt" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIGINT Dashboard · PRP</title>
+<meta name="description" content="Receive-only monitoring of public, unencrypted signals: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather, from public feeds or your own receivers, with a Software Cookbook, a Hardware Guide and the law.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="styles.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="sigint" data-shell="../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="sg">
+  <header class="front">
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> SIGINT Dashboard</div>
+    <h1 class="prp-title">SIGINT Dashboard</h1>
+    <p class="prp-dek">Receive-only monitoring of public, unencrypted signals: aircraft, ships, satellites, LoRa mesh nodes, satellite navigation and space weather. Every view works without hardware from public feeds and connects to your own receiver when you have one. Nothing here transmits, decrypts or listens to private communications.</p>
+    <div class="prp-meta" id="meta">
+      <span><b>Location</b> <span id="meta-loc">Dublin (default)</span> <button type="button" class="linkish" data-goto="overview" data-focus="loc-lat">Change</button></span>
+      <span><b>Mode</b> Receive only</span>
+      <span id="meta-feeds"><b>Feeds</b> not checked yet</span>
+      <span><b>Coverage</b> Public feeds worldwide; your receivers as far as they hear</span>
+    </div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="SIGINT Dashboard views" id="tabs">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" id="tab-aircraft" aria-controls="panel-aircraft" aria-selected="false" tabindex="-1">Aircraft (ADS-B)</button>
+    <button type="button" role="tab" id="tab-ships" aria-controls="panel-ships" aria-selected="false" tabindex="-1">Ships (AIS)</button>
+    <button type="button" role="tab" id="tab-satellites" aria-controls="panel-satellites" aria-selected="false" tabindex="-1">Satellites</button>
+    <button type="button" role="tab" id="tab-spaceweather" aria-controls="panel-spaceweather" aria-selected="false" tabindex="-1">Space weather</button>
+    <button type="button" role="tab" id="tab-gnss" aria-controls="panel-gnss" aria-selected="false" tabindex="-1">GNSS interference</button>
+    <button type="button" role="tab" id="tab-mesh" aria-controls="panel-mesh" aria-selected="false" tabindex="-1">Mesh &amp; APRS</button>
+    <button type="button" role="tab" id="tab-listen" aria-controls="panel-listen" aria-selected="false" tabindex="-1">Listen</button>
+    <button type="button" role="tab" id="tab-cookbook" aria-controls="panel-cookbook" aria-selected="false" tabindex="-1">Software Cookbook</button>
+    <button type="button" role="tab" id="tab-hardware" aria-controls="panel-hardware" aria-selected="false" tabindex="-1">Hardware Guide</button>
+    <button type="button" role="tab" id="tab-law" aria-controls="panel-law" aria-selected="false" tabindex="-1">Law &amp; ethics</button>
+  </div>
+  <noscript><p class="prp-note warn">The live views need JavaScript. The guides are also plain text: <a href="content/cookbook.md">Software Cookbook</a>, <a href="content/hardware.md">Hardware Guide</a> and <a href="content/law.md">Law &amp; ethics</a>.</p></noscript>
+
+  <!-- ============================================================ Overview -->
+  <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="tabpanel">
+    <div class="ov-grid">
+      <section class="prp-panel" aria-labelledby="h-feeds">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-feeds">Feeds and connectors</h2>
+          <div class="head-actions"><span class="prp-label" id="feeds-checked" aria-live="polite"></span><button type="button" class="prp-btn sm" id="check-all">Check public feeds</button></div></div>
+        <div class="prp-panel-body"><div class="tiles" id="tiles" role="list"></div>
+          <p class="hint">Public feeds are checked when you open this page. Your own receivers, the bridge and USB devices are only contacted when you set them up or press Check: a public website reaching into your network makes Chrome and Edge ask for permission first.</p></div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-loc">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-loc">Your location</h2><span class="prp-label">Stored in this browser only</span></div>
+        <form class="prp-panel-body loc-form" id="loc-form" novalidate>
+          <div class="loc-row">
+            <label class="field"><span class="prp-label">Latitude</span><input class="prp-input" id="loc-lat" inputmode="decimal" autocomplete="off" placeholder="53.35 or 53°21'N"></label>
+            <label class="field"><span class="prp-label">Longitude</span><input class="prp-input" id="loc-lon" inputmode="decimal" autocomplete="off" placeholder="-6.26 or 6°16'W"></label>
+          </div>
+          <label class="field"><span class="prp-label">Or a Maidenhead locator</span><input class="prp-input" id="loc-grid" autocomplete="off" placeholder="IO63ui" maxlength="8"></label>
+          <label class="field"><span class="prp-label">Name (optional)</span><input class="prp-input" id="loc-name" autocomplete="off" placeholder="Home" maxlength="40"></label>
+          <div class="loc-actions">
+            <button type="submit" class="prp-btn primary">Save location</button>
+            <button type="button" class="prp-btn" id="loc-gps">Use this device’s location</button>
+            <button type="button" class="prp-btn ghost" id="loc-reset">Reset to Dublin</button>
+          </div>
+          <p class="loc-now" id="loc-now" aria-live="polite"></p>
+          <p class="hint">Used to centre the maps, predict satellite passes and measure distances. It never leaves this browser except as a rounded map position in the public-feed requests (aircraft near you, WSPR spots near you). The browser asks before sharing the device’s location.</p>
+        </form>
+      </section>
+    </div>
+
+    <section class="prp-panel matrix-panel" aria-labelledby="h-matrix">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-matrix">What you can monitor, and with what</h2><span class="prp-label">Zero hardware → €30 RTL-SDR → more</span></div>
+      <div class="scroll"><table class="prp-table matrix">
+        <thead><tr><th scope="col">Signal</th><th scope="col">Where</th><th scope="col">With no hardware (this page)</th><th scope="col">With a €30 RTL-SDR</th><th scope="col">With more</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="aircraft">Aircraft (ADS-B)</button></th><td class="mono">1090 MHz</td><td>Live map and table of aircraft near you from adsb.lol (through the PRP proxy or bridge)</td><td>Your own receiver (readsb + tar1090); hear 150–250 km with an outdoor antenna; feed the aggregators</td><td>Filtered LNA, collinear on a mast, a Raspberry Pi feeding 24/7, MLAT</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="ships">Ships (AIS)</button></th><td class="mono">161.975 / 162.025 MHz</td><td>Links to public ship maps; aisstream.io through the PRP bridge (free key)</td><td>AIS-catcher with a marine VHF antenna, if you can see the sea or a big river</td><td>Dedicated AIS antenna high up; share with aggregators</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="satellites">Weather satellites</button></th><td class="mono">137 MHz · 1.7 GHz</td><td>Pass predictions for your location</td><td>Meteor-M LRPT images with a V-dipole and SatDump (NOAA APT ended in 2025)</td><td>QFH antenna and LNA; an L-band dish for METOP and FengYun HRPT; GOES HRIT in the Americas</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="satellites">ISS and amateur satellites</button></th><td class="mono">145 / 435 MHz</td><td>Passes, sky plots, downlink frequencies</td><td>Hear the ISS (145.800 MHz FM, SSTV events, APRS) and FM repeaters</td><td>Hand-held yagi; a QO-100 dish; an amateur licence to transmit</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="spaceweather">Space weather and HF</button></th><td class="mono">Data · 1–30 MHz</td><td>NOAA SWPC indices and WSPR spots near you</td><td>Decode WSPR and FT8 yourself (RTL-SDR V4 or V4L covers HF)</td><td>HF SDR (Airspy HF+, SDRplay) with an active loop; a KiwiSDR</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="gnss">GNSS interference</button></th><td class="mono">1575.42 MHz</td><td>GPSJam and Flightradar24 interference maps</td><td>A €15–30 USB u-blox receiver read here over Web Serial</td><td>Multi-band GNSS (u-blox F9) and a spectrum view of L1</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="mesh">LoRa mesh (Meshtastic)</button></th><td class="mono">868 MHz EU · 915 MHz US</td><td>The Meshtastic documentation (no public mesh feed is shown here)</td><td>A €25 LoRa board on USB: your mesh’s node list and map here</td><td>A solar router node on a roof</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="mesh">APRS</button></th><td class="mono">144.800 EU · 144.390 US</td><td>aprs.fi map</td><td>Decode packets locally with Direwolf</td><td>A licensed receive-only iGate or digipeater</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="listen">Broadcast, shortwave, amateur voice</button></th><td class="mono">LW to UHF</td><td>Public WebSDR, KiwiSDR and OpenWebRX receivers</td><td>SDR++ or SDR# on your PC</td><td>Your own OpenWebRX server; an HF antenna away from house noise</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="prp-panel" aria-labelledby="h-connect" id="connect">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-connect">Connect your own receivers</h2><a class="prp-btn sm" href="bridge/prp-bridge.mjs" download>Download prp-bridge.mjs</a></div>
+      <div class="prp-panel-body connect-body">
+        <div class="prp-prose small-prose">
+          <p>Decoders such as readsb, AIS-catcher, a Meshtastic radio or OpenWebRX publish JSON on your network, but a web page may only read it if the receiver allows it (CORS), and an HTTPS page may not load plain-HTTP addresses on your network at all. The <b>PRP bridge</b> is one small Node.js file with no dependencies that you run on your own computer: it listens on <code>localhost</code> only, fetches the endpoints you name (read-only), and passes them to this page with the right headers. It also relays the public aircraft feed and connects to aisstream.io for you, so your key never goes to a website.</p>
+        </div>
+        <ol class="steps">
+          <li>Install <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js</a> 22 or newer and download the bridge.</li>
+          <li>Run it with your receivers’ addresses (built from the settings in each tab):
+            <pre class="md-code" id="bridge-cmd"><code>node prp-bridge.mjs</code></pre>
+            <button type="button" class="prp-btn sm" id="copy-bridge">Copy command</button></li>
+          <li>Turn on <label class="inline-check"><input type="checkbox" id="bridge-on"> Use the PRP bridge at</label> <input class="prp-input mono sm-input" id="bridge-url" value="http://localhost:8790" aria-label="Bridge address"> <button type="button" class="prp-btn sm" id="bridge-check">Check</button> <span class="prp-status" id="bridge-state">Off</span></li>
+          <li>The first time, Chrome and Edge ask to let this site “look for and connect to devices on your local network” (or “apps on this device”). Allow it for the bridge to work; you can withdraw it in the site settings.</li>
+        </ol>
+        <p class="hint">Without the bridge, a receiver on <code>localhost</code> works directly if it sends CORS headers (AIS-catcher and Meshtastic do; readsb’s web server can be told to; see the <button type="button" class="linkish" data-goto="cookbook" data-section="tar1090">cookbook</button>). Firefox and Safari block plain-HTTP addresses on your network from HTTPS pages: use the bridge there.</p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================================================ Aircraft -->
+  <section id="panel-aircraft" role="tabpanel" aria-labelledby="tab-aircraft" class="tabpanel" hidden>
+    <div class="prp-panel sg-toolbar">
+      <label class="field"><span class="prp-label">Source</span>
+        <select class="prp-select" id="ac-source">
+          <option value="auto">Public: adsb.lol (best available route)</option>
+          <option value="opensky">Public: OpenSky Network (through the bridge)</option>
+          <option value="receiver">My receiver (readsb, dump1090, tar1090)</option>
+        </select></label>
+      <label class="field" id="ac-radius-f"><span class="prp-label">Radius</span>
+        <select class="prp-select" id="ac-radius"><option value="10">10 nm</option><option value="25">25 nm</option><option value="50">50 nm</option><option value="100">100 nm</option><option value="150">150 nm</option><option value="250">250 nm</option></select></label>
+      <label class="field grow" id="ac-url-f" hidden><span class="prp-label">aircraft.json address</span><input class="prp-input mono" id="ac-url" placeholder="http://localhost:8080/data/aircraft.json" spellcheck="false"></label>
+      <label class="check" id="ac-bridge-f" hidden><input type="checkbox" id="ac-via-bridge"> Through the bridge</label>
+      <label class="check"><input type="checkbox" id="ac-privacy" checked> Withhold identities of aircraft in privacy programmes (LADD, PIA)</label>
+      <div class="tool-end"><button type="button" class="prp-btn sm" id="ac-pause" aria-pressed="false">Pause</button><span class="status" id="ac-status" aria-live="polite"></span></div>
+    </div>
+    <div class="prp-kpis" id="ac-kpis"></div>
+    <div class="live-grid">
+      <figure class="prp-figure prp-panel map-fig">
+        <div class="map" id="ac-map" role="region" aria-label="Map of aircraft near your location"></div>
+        <div class="legend" id="ac-legend"></div>
+        <figcaption id="ac-caption"><b>Figure 1.</b> Aircraft within the chosen radius of your location, coloured by altitude, pointing along their track. Rings every quarter of the radius.</figcaption>
+      </figure>
+      <section class="prp-panel table-panel" aria-labelledby="h-ac-table">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-ac-table">Aircraft, nearest first</h2><span class="prp-label" id="ac-count"></span></div>
+        <div class="scroll tall"><table class="prp-table" id="ac-table"><thead><tr><th scope="col">Flight</th><th scope="col">Reg · type</th><th scope="col" class="num">Alt ft</th><th scope="col" class="num">Speed kt</th><th scope="col" class="num">Dist nm</th><th scope="col">Bearing</th><th scope="col" class="num">Squawk</th></tr></thead><tbody><tr><td colspan="7" class="prp-empty">Loading…</td></tr></tbody></table></div>
+      </section>
+    </div>
+    <div class="note-row">
+      <p class="prp-note" id="ac-note"></p>
+      <p class="links" id="ac-links"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ Ships -->
+  <section id="panel-ships" role="tabpanel" aria-labelledby="tab-ships" class="tabpanel" hidden>
+    <div class="prp-panel sg-toolbar">
+      <label class="field"><span class="prp-label">Source</span>
+        <select class="prp-select" id="sh-source"><option value="receiver">My receiver (AIS-catcher)</option><option value="aisstream">aisstream.io (through the bridge, free key)</option></select></label>
+      <label class="field grow" id="sh-url-f"><span class="prp-label">AIS-catcher ships.json address</span><input class="prp-input mono" id="sh-url" placeholder="http://localhost:8100/api/ships.json" spellcheck="false"></label>
+      <label class="check" id="sh-bridge-f"><input type="checkbox" id="sh-via-bridge"> Through the bridge</label>
+      <label class="field" id="sh-key-f" hidden><span class="prp-label">aisstream.io API key</span><span class="key-row"><input class="prp-input mono" id="sh-key" type="password" autocomplete="off" spellcheck="false" placeholder="paste your key"><button type="button" class="prp-btn sm ghost" id="sh-key-forget">Forget</button></span></label>
+      <label class="field" id="sh-radius-f"><span class="prp-label">Radius</span><select class="prp-select" id="sh-radius"><option value="20">20 km</option><option value="50">50 km</option><option value="100">100 km</option><option value="200">200 km</option></select></label>
+      <div class="tool-end"><button type="button" class="prp-btn sm primary" id="sh-connect">Connect</button><span class="status" id="sh-status" aria-live="polite"></span></div>
+    </div>
+    <div class="prp-kpis" id="sh-kpis"></div>
+    <div class="live-grid">
+      <figure class="prp-figure prp-panel map-fig">
+        <div class="map" id="sh-map" role="region" aria-label="Map of ships near your location"></div>
+        <div class="legend" id="sh-legend"></div>
+        <figcaption><b>Figure 2.</b> Vessels reporting by AIS within the radius, coloured by type (cargo and tankers, passenger, fishing; everything else grey), pointing along their course.</figcaption>
+      </figure>
+      <section class="prp-panel table-panel" aria-labelledby="h-sh-table">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-sh-table">Vessels, nearest first</h2><span class="prp-label" id="sh-count"></span></div>
+        <div class="scroll tall"><table class="prp-table" id="sh-table"><thead><tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col" class="num">Speed kn</th><th scope="col" class="num">Course</th><th scope="col" class="num">Dist km</th><th scope="col">Status · destination</th><th scope="col">MMSI</th></tr></thead><tbody></tbody></table></div>
+      </section>
+    </div>
+    <div class="note-row">
+      <div class="prp-note" id="sh-note"></div>
+      <p class="links" id="sh-links"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ Satellites -->
+  <section id="panel-satellites" role="tabpanel" aria-labelledby="tab-satellites" class="tabpanel" hidden>
+    <div class="prp-panel sg-toolbar">
+      <div class="field"><span class="prp-label" id="lbl-groups">Satellites</span><div class="chips" id="sat-groups" role="group" aria-labelledby="lbl-groups"></div></div>
+      <label class="field"><span class="prp-label">Highest point at least</span><select class="prp-select" id="sat-minel"><option value="0">0°</option><option value="10">10°</option><option value="20">20°</option><option value="30">30°</option><option value="45">45°</option></select></label>
+      <label class="field"><span class="prp-label">Window</span><select class="prp-select" id="sat-hours"><option value="12">Next 12 hours</option><option value="24">Next 24 hours</option><option value="48">Next 48 hours</option></select></label>
+      <label class="check"><input type="checkbox" id="sat-simple" checked> Only satellites I can hear with a simple antenna</label>
+      <div class="tool-end"><span class="status" id="sat-status" aria-live="polite"></span></div>
+    </div>
+    <div class="prp-note warn sat-noaa">NOAA’s analogue APT pictures are gone: NOAA-18 was switched off on 6 June 2025, NOAA-19 on 13 August and NOAA-15 on 19 August 2025. At 137 MHz the Russian <b>Meteor-M N2-3</b> and <b>N2-4</b> remain, with digital LRPT images that SatDump decodes. Their modes change from time to time, so check a current status page before a session.</div>
+    <div class="sat-grid">
+      <section class="prp-panel" aria-labelledby="h-passes">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-passes">Next passes over your location</h2><span class="prp-label" id="sat-count"></span></div>
+        <div class="scroll tall"><table class="prp-table" id="sat-table"><thead><tr><th scope="col">Satellite</th><th scope="col">Rises</th><th scope="col" class="num">Highest</th><th scope="col">Sets</th><th scope="col">Path</th><th scope="col">Downlink · antenna</th></tr></thead><tbody><tr><td colspan="6" class="prp-empty">Loading orbits…</td></tr></tbody></table></div>
+      </section>
+      <figure class="prp-figure prp-panel sky-fig">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="sky-title">Sky plot</h2><span class="prp-label" id="sky-sub"></span></div>
+        <div class="sky" id="sky"></div>
+        <div class="legend" id="sky-legend"></div>
+        <figcaption><b>Figure 3.</b> The selected pass as seen from your location: the centre is straight overhead, the outer ring the horizon, north up. Hollow dot where it rises, filled where it sets; satellites above the horizon now are dots. Choose a row to plot its pass.</figcaption>
+      </figure>
+    </div>
+    <section class="prp-panel" aria-labelledby="h-geo" id="geo-panel">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-geo">Geostationary satellites above your horizon</h2><span class="prp-label">No passes: they stay put</span></div>
+      <div class="scroll"><table class="prp-table" id="geo-table"><thead><tr><th scope="col">Satellite</th><th scope="col" class="num">Azimuth</th><th scope="col" class="num">Elevation</th><th scope="col">Downlink · antenna</th></tr></thead><tbody></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ============================================================ Space weather -->
+  <section id="panel-spaceweather" role="tabpanel" aria-labelledby="tab-spaceweather" class="tabpanel" hidden>
+    <div class="prp-kpis" id="sw-kpis"></div>
+    <section class="prp-panel sw-now" aria-labelledby="h-sw-now">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-sw-now">What it means now</h2><span class="status" id="sw-status" aria-live="polite"></span></div>
+      <div class="prp-panel-body sw-means" id="sw-means"></div>
+    </section>
+    <div class="chart-grid">
+      <figure class="prp-figure prp-panel chart-fig">
+        <div class="prp-panel-head"><h2 class="prp-h3">Planetary K index</h2><span class="prp-label">3-hourly · past week and forecast</span></div>
+        <div class="chart" id="ch-kp"></div><div class="legend" id="kp-legend"></div>
+        <figcaption><b>Figure 4.</b> Geomagnetic activity (Kp, 0–9) for each three-hour period; the paler bars are NOAA’s forecast. Kp 5 or more is a geomagnetic storm (G1–G5). Source: NOAA SWPC.</figcaption>
+        <details class="as-table"><summary>Show as a table</summary><div class="scroll" id="tb-kp"></div></details>
+      </figure>
+      <figure class="prp-figure prp-panel chart-fig">
+        <div class="prp-panel-head"><h2 class="prp-h3">Solar X-ray flux</h2><span class="prp-label">GOES 0.1–0.8 nm · 24 hours</span></div>
+        <div class="chart" id="ch-xray"></div>
+        <figcaption><b>Figure 5.</b> Soft X-rays from the Sun on a logarithmic scale; the levels A, B, C, M and X are flare classes. M and X flares black out HF radio on the sunlit side of the Earth for minutes to hours. Source: NOAA SWPC (GOES).</figcaption>
+        <details class="as-table"><summary>Show as a table (hourly maxima)</summary><div class="scroll" id="tb-xray"></div></details>
+      </figure>
+      <figure class="prp-figure prp-panel chart-fig">
+        <div class="prp-panel-head"><h2 class="prp-h3">Solar wind speed</h2><span class="prp-label">km/s · 24 hours</span></div>
+        <div class="chart" id="ch-wind"></div>
+        <figcaption><b>Figure 6.</b> Speed of the solar wind measured at the L1 point, about an hour upstream of the Earth. Fast wind (over about 500 km/s) often drives geomagnetic activity. Source: NOAA SWPC real-time solar wind.</figcaption>
+        <details class="as-table"><summary>Show as a table (hourly means)</summary><div class="scroll" id="tb-wind"></div></details>
+      </figure>
+      <figure class="prp-figure prp-panel chart-fig">
+        <div class="prp-panel-head"><h2 class="prp-h3">Interplanetary magnetic field, Bz</h2><span class="prp-label">nT · 24 hours</span></div>
+        <div class="chart" id="ch-bz"></div>
+        <figcaption><b>Figure 7.</b> North–south component of the magnetic field carried by the solar wind (GSM coordinates). A strongly negative (southward) Bz lets energy into the magnetosphere: storms and aurora follow. Source: NOAA SWPC real-time solar wind.</figcaption>
+        <details class="as-table"><summary>Show as a table (hourly means)</summary><div class="scroll" id="tb-bz"></div></details>
+      </figure>
+    </div>
+    <div class="sw-bottom">
+      <section class="prp-panel" aria-labelledby="h-wspr">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-wspr">Bands open near you</h2><span class="prp-label" id="wspr-sub">WSPR spots · last hour</span></div>
+        <div class="scroll"><table class="prp-table" id="wspr-table"><thead><tr><th scope="col">Band</th><th scope="col" class="num">Spots</th><th scope="col" class="num">Stations heard</th><th scope="col" class="num">Furthest km</th><th scope="col" class="num">Median SNR dB</th><th scope="col">Activity</th></tr></thead><tbody></tbody></table></div>
+        <p class="hint pad">WSPR beacons send a few watts; each spot is a beacon decoded by a receiver within about 450 km of you. Many spots and long distances mean the band is open from here. Source: <a href="https://wspr.live/" target="_blank" rel="noopener">wspr.live</a>, the WSPRnet spot database.</p>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-alerts">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-alerts">Latest SWPC alerts and warnings</h2><a class="prp-label" href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">swpc.noaa.gov ↗</a></div>
+        <div id="sw-alerts" class="alerts"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================ GNSS -->
+  <section id="panel-gnss" role="tabpanel" aria-labelledby="tab-gnss" class="tabpanel" hidden>
+    <div class="gnss-top">
+      <section class="prp-panel" aria-labelledby="h-jam">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-jam">Interference maps</h2><span class="prp-label">Derived from aircraft</span></div>
+        <div class="prp-panel-body">
+          <div class="cards">
+            <a class="card" id="gpsjam-link" href="https://gpsjam.org/" target="_blank" rel="noopener"><b>GPSJam</b><span>Daily map of where aircraft report degraded navigation accuracy, in hexagons: green under 2% of aircraft affected, yellow 2–10%, red over 10%. Updated after midnight UTC.</span><i>Open at your location ↗</i></a>
+            <a class="card" href="https://www.flightradar24.com/data/gps-jamming" target="_blank" rel="noopener"><b>Flightradar24 GPS jamming map</b><span>The same method from Flightradar24’s receivers, refreshed through the day, with a timeline.</span><i>Open ↗</i></a>
+          </div>
+          <div class="prp-prose small-prose">
+            <p>Airliners broadcast how accurate their satellite position is (the <abbr title="Navigation Accuracy Category for Position">NACp</abbr> field in ADS-B). When many aircraft over one area suddenly report poor accuracy, someone is jamming GNSS there. Spoofing, where false signals move the computed position, shows up differently: aircraft tracks jump or circle impossibly.</p>
+            <p>These maps cannot see where there are no aircraft, mix jamming with equipment faults at low percentages, and lag by hours to a day. Persistent interference has been widely reported around the Baltic Sea, the eastern Mediterranean, the Black Sea and parts of the Middle East: a useful indicator for conflict monitoring, never proof on its own of who is responsible.</p>
+            <p class="hint">Why only links: GPSJam’s data files don’t allow other websites to read them and carry no licence for re-use, so PRP sends you to the source instead of copying it.</p>
+          </div>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-gnss-rx">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-gnss-rx">My GNSS receiver</h2><span class="prp-status" id="gn-state">Not connected</span></div>
+        <div class="prp-panel-body">
+          <div class="gn-controls">
+            <label class="field"><span class="prp-label">Speed</span><select class="prp-select" id="gn-baud"><option>4800</option><option selected>9600</option><option>38400</option><option>57600</option><option>115200</option><option>230400</option></select></label>
+            <button type="button" class="prp-btn primary" id="gn-connect">Connect USB receiver</button>
+            <button type="button" class="prp-btn" id="gn-sample">Play a sample recording</button>
+            <button type="button" class="prp-btn ghost" id="gn-stop" disabled>Stop</button>
+            <label class="check"><input type="checkbox" id="gn-hide" checked> Round my position on screen</label>
+          </div>
+          <p class="hint" id="gn-support"></p>
+          <div class="prp-kpis gn-kpis" id="gn-kpis"></div>
+          <p class="prp-note" id="gn-hint">Connect a USB GPS (most u-blox, SiRF and MediaTek dongles speak NMEA at 9600 or 4800 baud), or play the sample to see how it works.</p>
+        </div>
+      </section>
+    </div>
+    <div class="gnss-grid">
+      <figure class="prp-figure prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h3">Signal strength by satellite</h2><span class="prp-label">C/N0, dB-Hz</span></div>
+        <div class="prp-panel-body"><div id="gn-snr"></div><div class="legend" id="gn-legend"></div></div>
+        <figcaption><b>Figure 8.</b> Carrier-to-noise density of each satellite the receiver reports, by constellation; filled bars are used in the fix, hollow ones only tracked. Clear sky gives 35–50 dB-Hz; jamming pushes every bar down at once.</figcaption>
+      </figure>
+      <figure class="prp-figure prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h3">Satellites in view</h2><span class="prp-label">Sky plot</span></div>
+        <div class="sky" id="gn-sky"></div>
+        <figcaption><b>Figure 9.</b> Where each satellite is in your sky, from the receiver’s own report, coloured by constellation as in Figure 8.</figcaption>
+      </figure>
+      <figure class="prp-figure prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h3">Average of the four strongest</h2><span class="prp-label">dB-Hz · this session</span></div>
+        <div class="chart" id="gn-trend"></div>
+        <figcaption><b>Figure 10.</b> Mean C/N0 of the four strongest satellites, once a second. A sudden drop across all satellites at once, with the antenna unchanged, is the signature of interference.</figcaption>
+      </figure>
+    </div>
+    <details class="prp-panel raw"><summary>Raw NMEA (last 30 sentences)</summary><pre class="md-code" id="gn-raw"><code></code></pre></details>
+  </section>
+
+  <!-- ============================================================ Mesh & APRS -->
+  <section id="panel-mesh" role="tabpanel" aria-labelledby="tab-mesh" class="tabpanel" hidden>
+    <div class="prp-panel sg-toolbar">
+      <div class="field"><span class="prp-label">Meshtastic radio</span>
+        <div class="btn-row"><button type="button" class="prp-btn primary" id="ms-serial">Connect over USB</button><button type="button" class="prp-btn ghost" id="ms-stop" disabled>Disconnect</button></div></div>
+      <label class="field grow"><span class="prp-label">Or the radio’s address on Wi-Fi</span><input class="prp-input mono" id="ms-url" placeholder="http://meshtastic.local" spellcheck="false"></label>
+      <label class="check"><input type="checkbox" id="ms-via-bridge"> Through the bridge</label>
+      <button type="button" class="prp-btn" id="ms-http">Read node list</button>
+      <div class="tool-end"><span class="status" id="ms-status" aria-live="polite"></span></div>
+    </div>
+    <div class="prp-kpis" id="ms-kpis"></div>
+    <div class="live-grid">
+      <figure class="prp-figure prp-panel map-fig">
+        <div class="map" id="ms-map" role="region" aria-label="Map of mesh nodes"></div>
+        <figcaption><b>Figure 11.</b> Nodes in your radio’s database that share a position (often deliberately blurred by their owners), and your location.</figcaption>
+      </figure>
+      <section class="prp-panel table-panel" aria-labelledby="h-ms-table">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-ms-table">Nodes, most recently heard first</h2><span class="prp-label" id="ms-count"></span></div>
+        <div class="scroll tall"><table class="prp-table" id="ms-table"><thead><tr><th scope="col">Node</th><th scope="col">Hardware</th><th scope="col">Last heard</th><th scope="col" class="num">SNR dB</th><th scope="col" class="num">Hops</th><th scope="col" class="num">Battery</th><th scope="col" class="num">Dist km</th></tr></thead><tbody><tr><td colspan="7" class="prp-empty">Connect a radio to list its nodes.</td></tr></tbody></table></div>
+      </section>
+    </div>
+    <p class="prp-note">Only the node database is read: names, hardware, signal and the positions their owners chose to share. Messages are not decoded or shown. Treat node positions as personal data: don’t publish them or use them to follow anyone.</p>
+    <div class="link-grid">
+      <section class="prp-panel" aria-labelledby="h-aprs">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-aprs">APRS</h2><span class="prp-label">144.800 MHz in Europe · 144.390 MHz in North America</span></div>
+        <div class="prp-panel-body prp-prose small-prose">
+          <p>The Automatic Packet Reporting System carries positions, weather and short messages from licensed radio amateurs, relayed by digipeaters and gated to the internet (APRS-IS). The public map shows it all.</p>
+          <p><a class="prp-btn sm" id="aprs-link" href="https://aprs.fi/" target="_blank" rel="noopener">Open aprs.fi at your location ↗</a></p>
+          <p class="hint">To decode packets yourself: an RTL-SDR, <code>rtl_fm</code> and Direwolf (see the <button type="button" class="linkish" data-goto="cookbook" data-section="direwolf">cookbook</button>). Receiving needs no licence; gating to APRS-IS needs a callsign.</p>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-prop">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-prop">Propagation from amateur reports</h2><span class="prp-label">Who hears whom, right now</span></div>
+        <div class="prp-panel-body">
+          <ul class="linklist">
+            <li><a href="https://pskreporter.info/pskmap.html" target="_blank" rel="noopener">PSKReporter</a> <span>Live map of FT8, FT4, PSK and other digital-mode reports by band.</span></li>
+            <li><a href="https://www.reversebeacon.net/" target="_blank" rel="noopener">Reverse Beacon Network</a> <span>Skimmer receivers that decode CW and RTTY calls and report signal strength.</span></li>
+            <li><a href="https://www.wsprnet.org/drupal/wsprnet/map" target="_blank" rel="noopener">WSPRnet</a> <span>Map of low-power WSPR beacon reports; the database behind wspr.live.</span></li>
+            <li><a href="https://prop.kc2g.com/" target="_blank" rel="noopener">KC2G MUF map</a> <span>Maximum usable frequency from ionosondes, updated every 15 minutes.</span></li>
+          </ul>
+          <p class="hint">PRP’s own read of WSPR spots near you is in <button type="button" class="linkish" data-goto="spaceweather">Space weather</button>.</p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================ Listen -->
+  <section id="panel-listen" role="tabpanel" aria-labelledby="tab-listen" class="tabpanel" hidden>
+    <div class="listen-grid">
+      <section class="prp-panel" aria-labelledby="h-rx">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-rx">Public receivers you can tune from this browser</h2><span class="prp-label">Nearest first</span></div>
+        <div class="scroll"><table class="prp-table" id="rx-table"><thead><tr><th scope="col">Receiver</th><th scope="col">Type</th><th scope="col">Where</th><th scope="col">Covers</th><th scope="col" class="num">Distance</th></tr></thead><tbody></tbody></table></div>
+        <div class="prp-panel-body"><h3 class="prp-h3 sub">Directories</h3><div class="cards" id="rx-dirs"></div>
+        <p class="hint">These are run by volunteers: share the bandwidth, close the tab when you’re done, and follow each site’s rules. Listen to broadcast, amateur and other transmissions meant for everyone (see <button type="button" class="linkish" data-goto="law">Law &amp; ethics</button>).</p></div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-owrx">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-owrx">My SDR (OpenWebRX)</h2><span class="prp-status" id="ow-state">Not checked</span></div>
+        <div class="prp-panel-body">
+          <div class="ow-form">
+            <label class="field grow"><span class="prp-label">OpenWebRX address</span><input class="prp-input mono" id="ow-url" placeholder="http://localhost:8073" spellcheck="false"></label>
+            <label class="check"><input type="checkbox" id="ow-via-bridge"> Status through the bridge</label>
+            <div class="btn-row"><button type="button" class="prp-btn primary" id="ow-check">Check</button><a class="prp-btn" id="ow-open" href="http://localhost:8073" target="_blank" rel="noopener">Open receiver ↗</a></div>
+          </div>
+          <div id="ow-info" class="ow-info"></div>
+          <p class="hint">OpenWebRX (or the OpenWebRX+ fork) turns an RTL-SDR on a Raspberry Pi into a receiver you can use from any browser. The page opens in its own tab: an HTTPS page can’t embed a plain-HTTP receiver.</p>
+          <h3 class="prp-h3 sub">In this browser, with no server <span class="prp-status warn">Planned</span></h3>
+          <p class="hint">A future version will drive an RTL-SDR plugged into this computer directly over WebUSB (Chrome and Edge), as the open-source <a href="https://radio.ea1iti.es/" target="_blank" rel="noopener">Radio Receiver</a> by Jacobo Tarrío already does for broadcast FM and AM. Until then, use OpenWebRX or SDR++.</p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================ Documents -->
+  <section id="panel-cookbook" role="tabpanel" aria-labelledby="tab-cookbook" class="tabpanel doc-panel" hidden data-doc="content/cookbook.md">
+    <div class="prp-panel sg-toolbar">
+      <label class="field grow"><span class="prp-label">Search the cookbook</span><input class="prp-input" type="search" id="cb-q" placeholder="SatDump, Zadig, Raspberry Pi…" autocomplete="off"></label>
+      <div class="field"><span class="prp-label" id="lbl-cb">Kind</span><div class="chips" id="cb-chips" role="group" aria-labelledby="lbl-cb"></div></div>
+      <div class="tool-end"><span class="status" id="cb-status" aria-live="polite"></span></div>
+    </div>
+    <div class="doc-layout"><nav class="doc-toc prp-panel" aria-label="Cookbook contents" id="cb-toc"></nav><article class="doc prp-panel" id="cb-doc"><p class="prp-empty">Loading the cookbook…</p></article></div>
+  </section>
+  <section id="panel-hardware" role="tabpanel" aria-labelledby="tab-hardware" class="tabpanel doc-panel" hidden data-doc="content/hardware.md">
+    <div class="doc-layout"><nav class="doc-toc prp-panel" aria-label="Hardware Guide contents" id="hw-toc"></nav><article class="doc prp-panel" id="hw-doc"><p class="prp-empty">Loading the guide…</p></article></div>
+  </section>
+  <section id="panel-law" role="tabpanel" aria-labelledby="tab-law" class="tabpanel doc-panel" hidden data-doc="content/law.md">
+    <div class="doc-layout"><nav class="doc-toc prp-panel" aria-label="Law and ethics contents" id="law-toc"></nav><article class="doc prp-panel" id="law-doc"><p class="prp-empty">Loading…</p></article></div>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> Aircraft: <a href="https://www.adsb.lol/" target="_blank" rel="noopener">adsb.lol</a> (ODbL, community receivers) and the <a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>. Satellites: orbital elements from <a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a>, propagated in your browser with <a href="https://github.com/shashwatak/satellite-js" target="_blank" rel="noopener">satellite.js</a> (SGP4). Space weather: <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA Space Weather Prediction Center</a> (public domain). HF propagation: <a href="https://wspr.live/" target="_blank" rel="noopener">wspr.live</a>. Ships: your AIS-catcher, or <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> through the bridge. Interference maps: <a href="https://gpsjam.org/" target="_blank" rel="noopener">GPSJam</a> and Flightradar24, linked. Maps: Leaflet; tiles © Esri.</p>
+    <p><b>Refresh.</b> Aircraft every 15 seconds (5 seconds from your own receiver, 30 seconds from OpenSky) while the tab is open and visible; ships every 10 seconds; space weather every 5 minutes; WSPR every 10 minutes; orbital elements at most every 6 hours (cached in this browser). Nothing is polled while the tab is hidden.</p>
+    <p><b>Method and limits.</b> Public feeds show what volunteers’ receivers hear: coverage has holes, military and some private aircraft are filtered by the aggregators, and positions can be wrong. Pass times assume a flat horizon. Everything here is for awareness and the hobby, not navigation or safety of life.</p>
+  </footer>
+</div>
+</body>
+</html>

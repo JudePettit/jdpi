@@ -83,28 +83,6 @@
           "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT. Compare up to four countries."
         },
         {
-          "id": "pestle",
-          "name": "National Analysis",
-          "kind": "realtime",
-          "icon": "◉",
-          "status": "live",
-          "host": "PRP",
-          "url": "q/national.html",
-          "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
-          "views": [
-            {
-              "id": "map",
-              "name": "Map & ranking",
-              "url": "q/national.html#map"
-            },
-            {
-              "id": "compare",
-              "name": "Compare countries",
-              "url": "q/national.html#compare=USA,CHN,RUS,IND"
-            }
-          ]
-        },
-        {
           "id": "battlefield",
           "name": "Realtime Battlefield",
           "kind": "realtime",
@@ -127,6 +105,28 @@
           ]
         },
         {
+          "id": "pestle",
+          "name": "National Analysis",
+          "kind": "realtime",
+          "icon": "◉",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/national.html",
+          "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
+          "views": [
+            {
+              "id": "map",
+              "name": "Map & ranking",
+              "url": "q/national.html#map"
+            },
+            {
+              "id": "compare",
+              "name": "Compare countries",
+              "url": "q/national.html#compare=USA,CHN,RUS,IND"
+            }
+          ]
+        },
+        {
           "id": "atlas",
           "name": "Political Atlas",
           "kind": "realtime",
@@ -135,16 +135,6 @@
           "host": "Cloudflare Pages",
           "url": "https://political-atlas.pages.dev",
           "description": "Who holds power across 78 countries now: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
-        },
-        {
-          "id": "calendar",
-          "name": "Realtime Calendar",
-          "kind": "realtime",
-          "icon": "▦",
-          "status": "live",
-          "host": "PRP",
-          "url": "q/calendar.html?period=contemporary",
-          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
         },
         {
           "id": "osint",
@@ -162,11 +152,67 @@
           "name": "SIGINT Dashboard",
           "kind": "realtime",
           "icon": "⌇",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
+          "url": "sigint/index.html",
           "description": "Receive-only signals monitoring: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather from public feeds or your own receivers, plus a Software Cookbook and a Hardware Guide for hobbyists.",
-          "pendingUrl": "sigint/index.html"
+          "views": [
+            {
+              "id": "overview",
+              "name": "Overview",
+              "url": "sigint/index.html#tab=overview"
+            },
+            {
+              "id": "aircraft",
+              "name": "Aircraft (ADS-B)",
+              "url": "sigint/index.html#tab=aircraft"
+            },
+            {
+              "id": "ships",
+              "name": "Ships (AIS)",
+              "url": "sigint/index.html#tab=ships"
+            },
+            {
+              "id": "satellites",
+              "name": "Satellites",
+              "url": "sigint/index.html#tab=satellites"
+            },
+            {
+              "id": "spaceweather",
+              "name": "Space weather",
+              "url": "sigint/index.html#tab=spaceweather"
+            },
+            {
+              "id": "gnss",
+              "name": "GNSS",
+              "url": "sigint/index.html#tab=gnss"
+            },
+            {
+              "id": "mesh",
+              "name": "Mesh & APRS",
+              "url": "sigint/index.html#tab=mesh"
+            },
+            {
+              "id": "listen",
+              "name": "Listen",
+              "url": "sigint/index.html#tab=listen"
+            },
+            {
+              "id": "cookbook",
+              "name": "Software Cookbook",
+              "url": "sigint/index.html#tab=cookbook"
+            },
+            {
+              "id": "hardware",
+              "name": "Hardware Guide",
+              "url": "sigint/index.html#tab=hardware"
+            },
+            {
+              "id": "law",
+              "name": "Law & ethics",
+              "url": "sigint/index.html#tab=law"
+            }
+          ]
         },
         {
           "id": "geoint",
@@ -178,6 +224,16 @@
           "url": null,
           "description": "Geospatial and imagery intelligence: daily satellite imagery and night lights with before/after comparison, active fires, terrain, OpenStreetMap features, measuring and sun/shadow tools for geolocation and chronolocation. Plus a Software Cookbook and a Hardware Guide.",
           "pendingUrl": "geoint/index.html"
+        },
+        {
+          "id": "calendar",
+          "name": "Realtime Calendar",
+          "kind": "realtime",
+          "icon": "▦",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/calendar.html?period=contemporary",
+          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
         },
         {
           "id": "osint-training",
@@ -222,16 +278,6 @@
           "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
         },
         {
-          "id": "historical-calendar",
-          "name": "Historical Calendar",
-          "kind": "retrospective",
-          "icon": "▤",
-          "status": "live",
-          "host": "PRP",
-          "url": "q/calendar.html?period=history",
-          "description": "Political history from 1980 to today in one calendar: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account."
-        },
-        {
           "id": "battlefield-history",
           "name": "Retrospective Battlefield",
           "kind": "retrospective",
@@ -265,6 +311,16 @@
           "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
         },
         {
+          "id": "historical-calendar",
+          "name": "Historical Calendar",
+          "kind": "retrospective",
+          "icon": "▤",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/calendar.html?period=history",
+          "description": "Political history from 1980 to today in one calendar: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account."
+        },
+        {
           "id": "learning-politics",
           "name": "Learning · Politics",
           "kind": "learning",
@@ -291,38 +347,24 @@
           "aliases": [
             "trade-desk"
           ],
-          "name": "TD Markets",
+          "name": "Market Briefing",
           "kind": "realtime",
           "icon": "↯",
           "status": "live",
           "host": "Cloudflare Workers",
           "url": "https://trade-desk.judep92.workers.dev/markets/",
-          "description": "Indices, rates, FX, commodities and crypto, movers, news, ticker pages and the Hype Tracker: tickers suddenly talked about or traded far more than usual."
+          "description": "Markets now: indices, rates, FX, commodities and crypto, movers, news, ticker pages and the Hype Tracker of tickers suddenly talked about or traded far more than usual."
         },
         {
-          "id": "tally-stick",
-          "name": "Tally Stick",
-          "kind": "operations",
-          "icon": "▥",
-          "status": "live",
-          "host": "Cloudflare Workers",
-          "url": "https://trade-desk.judep92.workers.dev/tally/",
-          "opensInNewTab": true,
-          "description": "Trading 212, Alpaca, Interactive Brokers, Coinbase and Kraken in one ledger: balances, positions, orders, rules, risk limits, the kill switch and an MCP connection for AI agents. Private."
-        },
-        {
-          "id": "algo-trader",
-          "aliases": [
-            "double-signal"
-          ],
-          "name": "Algo Trader",
-          "kind": "automation",
-          "icon": "⚙",
-          "status": "live",
-          "host": "Cloudflare Workers",
-          "url": "https://trade-desk.judep92.workers.dev/tally/algo/",
-          "opensInNewTab": true,
-          "description": "Create trading agents that follow a ruleset: Double Agent (stocks that double within hours), Hype Rider (the Hype Tracker), and more. Each simulates first, has its own pot and passes the shared risk limits. Private."
+          "id": "econ-briefing",
+          "name": "Economics Briefing",
+          "kind": "realtime",
+          "icon": "⊿",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "econ/briefing/index.html",
+          "description": "Economics news and scholarly articles: NBER, CEPR/VoxEU, the IMF, BIS and central banks, think tanks and the leading journals, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
         },
         {
           "id": "traders",
@@ -348,6 +390,31 @@
               "url": "fe/traders.html?tab=investors"
             }
           ]
+        },
+        {
+          "id": "algo-trader",
+          "aliases": [
+            "double-signal"
+          ],
+          "name": "Algo Trader",
+          "kind": "automation",
+          "icon": "⚙",
+          "status": "live",
+          "host": "Cloudflare Workers",
+          "url": "https://trade-desk.judep92.workers.dev/tally/algo/",
+          "opensInNewTab": true,
+          "description": "Create trading agents that follow a ruleset: Double Agent (stocks that double within hours), Hype Rider (the Hype Tracker), and more. Each simulates first, has its own pot and passes the shared risk limits. Private."
+        },
+        {
+          "id": "tally-stick",
+          "name": "Tally Stick",
+          "kind": "operations",
+          "icon": "▥",
+          "status": "live",
+          "host": "Cloudflare Workers",
+          "url": "https://trade-desk.judep92.workers.dev/tally/",
+          "opensInNewTab": true,
+          "description": "Trading 212, Alpaca, Interactive Brokers, Coinbase and Kraken in one ledger: balances, positions, orders, rules, risk limits, the kill switch and an MCP connection for AI agents. Private."
         },
         {
           "id": "learning",

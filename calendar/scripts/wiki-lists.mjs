@@ -4,6 +4,7 @@
 //   import { listEvents } from './wiki-lists.mjs'; await listEvents({ from: '1980-01-01', today: '2026-10-28' })
 // Each list row gives a summit's article, its year and its dates; an upcoming summit with only a month is kept as
 // "expected" on the 1st of that month and says so in its title. Rows with no date yet ("TBA") are skipped.
+// Also each year's national electoral calendar: elections and referendums, past and scheduled.
 import { COUNTRIES, countryInText, countryOfLink, normaliseCountry } from './countries.mjs';
 
 const UA = { 'User-Agent': 'JDP-Iq Political Calendar (https://jdpi.pages.dev)' };
@@ -13,6 +14,8 @@ const pad = n => String(n).padStart(2, '0');
 const iso = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
 const monthNo = name => MONTHS.indexOf(name) + 1;
 const wiki = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
+// The title of something dated only to the month: "General election (second round; date to be confirmed)".
+export const toBeConfirmed = t => /\)$/.test(t) ? t.replace(/\)$/, '; date to be confirmed)') : `${t} (date to be confirmed)`;
 
 // Flag templates name the host: {{flag|Turkey}}, {{flagu|Cyprus}}, {{Country|France|1974}}, {{IRL}}.
 const IOC = { IRL: 'Ireland', SWI: 'Switzerland', SUI: 'Switzerland', KGZ: 'Kyrgyzstan', PAK: 'Pakistan', CHN: 'China', RUS: 'Russia', IND: 'India', USA: 'United States', GBR: 'United Kingdom', FRA: 'France',
@@ -113,7 +116,7 @@ export function eventsFromList(wikitext, { article, link, title, country, type =
     const official = (/\[(https?:\/\/(?:www\.)?consilium\.europa\.eu[^\s\]]*)/.exec(raw) || [])[1];
     out.push({
       date: d.date, country: where,
-      title: name + (d.precision === 'month' ? ' (date to be confirmed)' : ''),
+      title: name + (d.precision === 'month' ? ' (date to be confirmed)' : ''), precision: d.precision,
       type, status: d.precision === 'month' || (future && !official && !own) ? 'tentative' : 'declared',
       source: own ? wiki(own.target) : (official || wiki(article)),
       ...(own ? {} : { summary: `EU heads of state or government meet as the European Council${kind ? ` (${kind.replace(/\s*\(.*$/, '').toLowerCase()} meeting)` : ''}.${host ? ` Council presidency: ${host}.` : ''}` }),
@@ -132,34 +135,49 @@ export function eventFromInfobox(wikitext, { article, type = 'summit', title, fi
   const place = strip(fields.location || fields.city || fields.cities || fields.venue || '');
   const where = hostOf(fields.country || '') || placeCountry(place) || countryInText(article) || 'International';
   return { date: d.date, country: where, title: (title || article) + (d.precision === 'month' ? ' (date to be confirmed)' : ''), type,
-    status: d.precision === 'month' ? 'tentative' : 'declared', source: wiki(article) };
+    status: d.precision === 'month' ? 'tentative' : 'declared', precision: d.precision, source: wiki(article) };
 }
 
 /**
- * Referendums from a "<year> national electoral calendar" article: "* 9 December: [[Elections in Fiji|Fiji]],
- * [[2026 Fijian constitutional referendum|Constitutional referendum]]" (a date line may hold several countries).
+ * Elections and referendums from a "<year> national electoral calendar" article: "* 9 December: [[Elections in
+ * Fiji|Fiji]], [[2026 Fijian constitutional referendum|Constitutional referendum]]" (a date line may hold several
+ * countries, one per sub-bullet). A vote known only to the month ("* March: …") is expected on the 1st and says so in
+ * its title; an election's round says which. Elections in dependencies and unrecognised states, which the article
+ * sets in italics, are left out. `unknown` holds the articles of the votes it lists under "Unknown date".
  */
-export function referendumsFromCalendar(wikitext, year) {
-  const out = [];
-  let month = null, date = null;
-  for (const line of String(wikitext).split('\n')) {
+export function ballotsFromCalendar(wikitext, year) {
+  const events = [], unknown = new Set();
+  let month = null, date = null, undated = false;
+  for (const raw of String(wikitext).split('\n')) {
+    const line = raw.replace(/<ref[^>]*\/>/g, '').replace(/<ref[\s\S]*?(?:<\/ref>|$)/g, '');
     const h = new RegExp(`^==\\s*${M}\\s*==`).exec(line);
-    if (h) { month = monthNo(h[1]); date = null; continue; }
-    if (/^==/.test(line)) { month = null; continue; }
+    if (h) { month = monthNo(h[1]); date = null; undated = false; continue; }
+    if (/^==/.test(line)) { month = null; undated = /^==\s*Unknown date\s*==/i.test(line); continue; }
     const b = /^(\*+)\s*(.*)$/.exec(line);
-    if (!b || !month) continue;
+    if (!b || !(month || undated)) continue;
+    const links = [...b[2].matchAll(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g)].map(m => ({ target: m[1].trim(), label: (m[2] || m[1]).trim(), at: m.index }));
+    const ballots = links.filter(l => /referend|plebiscite|election/i.test(l.target) && !/^(?:Elections in|Politics of) /.test(l.target));
+    if (undated) { for (const l of ballots) unknown.add(l.target); continue; }
     const lead = /^(\d{1,2})(?:\s*[–-]\s*\d{1,2})?\s+[A-Z][a-z]+\s*:/.exec(b[2]);
     if (b[1].length === 1) date = lead ? iso(year, month, lead[1]) : (/^[A-Z][a-z]+\s*:/.test(b[2]) ? iso(year, month, 1) + '~' : null);
-    if (!date) continue;
-    for (const m of b[2].matchAll(/\[\[([^\]|]*(?:referend|plebiscite)[^\]|]*)(?:\|[^\]]*)?\]\]/gi)) {
-      const first = /\[\[(?:Elections in |Politics of )?([^\]|]+?)(?:\|([^\]]+))?\]\]/.exec(b[2]);
-      const name = first && !/referend|plebiscite|election/i.test(first[1]) ? normaliseCountry((first[2] || first[1]).replace(/^the /, '').trim()) : countryInText(m[1]) || 'International';
-      const monthOnly = date.endsWith('~');
-      out.push({ date: date.replace('~', ''), country: name, title: m[1].trim() + (monthOnly ? ' (date to be confirmed)' : ''), type: 'referendum', status: monthOnly ? 'tentative' : 'declared', source: wiki(m[1].trim()) });
+    if (!date || !ballots.length) continue;
+    const first = links[0], monthOnly = date.endsWith('~');
+    const name = first && !ballots.includes(first)
+      ? normaliseCountry(first.label.replace(/''/g, '').replace(/^the /, '').replace(/[\s,;:.]+$/, '').trim()) : countryInText(ballots[0].target) || 'International';
+    // A country in italics: its link's label is, or the whole entry is wrapped in ''…''.
+    const italic = /''/.test(first?.label || '') || /''\s*$/.test(b[2].slice(0, first?.at ?? 0));
+    for (const l of ballots.filter((x, i, a) => a.findIndex(y => y.target === x.target) === i)) {
+      const type = /referend|plebiscite/i.test(l.target) ? 'referendum' : 'election';
+      if (type === 'election' && italic) continue;
+      const round = type === 'election' ? (/\b(?:1st|first) round/i.test(l.label) ? ' (first round)' : /\b(?:2nd|second) round/i.test(l.label) ? ' (second round)' : '') : '';
+      events.push({ date: date.replace('~', ''), country: name, title: monthOnly ? toBeConfirmed(l.target + round) : l.target + round, type,
+        status: monthOnly ? 'tentative' : 'declared', precision: monthOnly ? 'month' : 'day', source: wiki(l.target) });
     }
   }
-  return out;
+  return { events, unknown };
 }
+/** The referendums alone. */
+export const referendumsFromCalendar = (wikitext, year) => ballotsFromCalendar(wikitext, year).events.filter(e => e.type === 'referendum');
 
 // The lists, and single articles for meetings the lists don't date (yet).
 export const LISTS = [
@@ -208,16 +226,22 @@ async function wikitexts(titles) {
   return out;
 }
 
-/** Summits (and a few scheduled sessions) from the lists and articles above. */
+/**
+ * Summits (and a few scheduled sessions) from the lists and articles above, and elections and referendums from the
+ * national electoral calendars of every year from 2026 (or last year, if earlier) to the year after next.
+ * `unknown`: the articles of the calendars' votes that have no date yet; `calendarsFrom`: the first calendar's year.
+ */
 export async function listEvents({ from = '1980-01-01', today = new Date().toISOString().slice(0, 10) } = {}) {
-  // This year's, next year's and the year after's national electoral calendars, for scheduled referendums.
-  const y = +today.slice(0, 4), calendars = [y, y + 1, y + 2].map(n => [n, `${n} national electoral calendar`]);
+  const y = +today.slice(0, 4), calendars = [], calendarsFrom = Math.min(2026, y - 1);
+  for (let n = calendarsFrom; n <= y + 2; n++) calendars.push([n, `${n} national electoral calendar`]);
   const texts = await wikitexts([...LISTS.map(l => l.article), ...ARTICLES.map(a => a.article), ...calendars.map(c => c[1])]);
-  const events = [], log = [];
+  const events = [], log = [], unknown = new Set();
   for (const [year, article] of calendars) {
-    const list = texts.get(article) ? referendumsFromCalendar(texts.get(article), year).filter(e => e.date >= from) : [];
-    log.push(`${article}: ${texts.get(article) ? list.length + ' referendums' : 'no article'}`);
+    const ballots = texts.get(article) ? ballotsFromCalendar(texts.get(article), year) : null;
+    const list = ballots ? ballots.events.filter(e => e.date >= from) : [];
+    log.push(`${article}: ${ballots ? `${list.filter(e => e.type === 'election').length} elections, ${list.filter(e => e.type === 'referendum').length} referendums, ${ballots.unknown.size} undated` : 'no article'}`);
     events.push(...list);
+    ballots?.unknown.forEach(t => unknown.add(t));
   }
   for (const l of LISTS) {
     const list = eventsFromList(texts.get(l.article) || '', { ...l, from, today });
@@ -230,5 +254,5 @@ export async function listEvents({ from = '1980-01-01', today = new Date().toISO
     log.push(`${a.article}: ${e ? e.date : text ? 'no date yet' : 'no article'}`);
     if (e && e.date >= from) events.push(e);
   }
-  return { events, log };
+  return { events, log, unknown, calendarsFrom };
 }

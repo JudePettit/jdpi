@@ -2,20 +2,32 @@
 //   node battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> <cow-dir>
 // 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (CC BY 4.0), conflict-years with ≥25 battle deaths.
 // 1926–1945: Correlates of War inter-, intra- and extra-state war lists v4 (wars with ≥1,000 battle deaths).
+// Where each war was fought: the sources' location, unless history-fought.mjs records otherwise (check-fought.mjs
+// tests UCDP's interstate conflicts against GED after each release).
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseCsv } from './csv.mjs';
 import { COW_WIKI, UCDP_WIKI } from './history-wiki.mjs';
+import { FOUGHT_IN, CHECKED_THROUGH } from './history-fought.mjs';
+import { actors, interstateName } from './ucdp.mjs';
 
 const [acdPath, cowDir] = process.argv.slice(2);
 const FIRST = 1926, UCDP_FROM = 1946, LAST = 2025;
 const gws = s => String(s || '').split(',').map(x => parseInt(x, 10)).filter(n => n > 0);
-const split = s => String(s || '').split(',').map(x => x.trim()).filter(Boolean);
 const wars = [];
+// A war's places: the sources' `loc` (codes), unless history-fought.mjs has its own: `loc`, `where` (names for places
+// the map has no shape for) or places by year (`locYears`; a year it doesn't list keeps the sources', own(year)).
+function place(id, loc, years, own) {
+  const f = FOUGHT_IN[id];
+  if (!f) return { loc };
+  if (!f.years) return { loc: f.loc, ...(f.where ? { where: f.where } : {}) };
+  const locYears = Object.fromEntries(years.map(y => [y, f.years[y] || own(y)]));
+  return { loc: [...new Set(Object.values(locYears).flat())], locYears };
+}
 
 // ---- UCDP/PRIO: one entry per conflict_id, with an intensity per active year (1 = minor, 2 = war).
 const UCDP_TYPE = { 1: 'Colonial war', 2: 'Interstate war', 3: 'Civil conflict', 4: 'Internationalised civil conflict' };
-const byId = new Map();
+const byId = new Map(), unchecked = [];
 for (const r of parseCsv(readFileSync(acdPath, 'utf8'))) {
   const c = byId.get(r.conflict_id) || byId.set(r.conflict_id, { rows: [] }).get(r.conflict_id);
   c.rows.push(r);
@@ -23,17 +35,16 @@ for (const r of parseCsv(readFileSync(acdPath, 'utf8'))) {
 for (const [id, { rows }] of byId) {
   rows.sort((a, b) => a.year - b.year);
   const last = rows.at(-1), first = rows[0];
-  const sidesB = [...new Set(rows.flatMap(r => split(r.side_b)))];
   const territory = [...new Set(rows.map(r => r.territory_name).filter(Boolean))].join(', ');
-  const name = last.type_of_conflict === '2' ? `${first.side_a.replace(/^Government of /, '')} – ${sidesB.map(s => s.replace(/^Government of /, '')).join(', ')}`
-    : `${last.location}: ${territory || 'government'}`;
+  const name = last.type_of_conflict === '2' ? interstateName(rows) : `${last.location}: ${territory || 'government'}`;
+  const sides = k => [...new Set(rows.flatMap(r => [...actors(r[k], r[`${k}_id`]), ...actors(r[`${k}_2nd`])]))];
+  if (rows.some(r => r.type_of_conflict === '2') && +first.year > CHECKED_THROUGH && !FOUGHT_IN['u' + id]) unchecked.push('u' + id);
   wars.push({
     id: 'u' + id, src: 'ucdp', name, type: UCDP_TYPE[last.type_of_conflict],
     aim: last.incompatibility === '1' ? 'territory' : last.incompatibility === '2' ? 'government' : 'territory and government',
     years: rows.map(r => [+r.year, +r.intensity_level]),
-    loc: [...new Set(rows.flatMap(r => gws(r.gwno_loc)))],
-    sideA: [...new Set(rows.flatMap(r => [...split(r.side_a), ...split(r.side_a_2nd)]))],
-    sideB: [...new Set(rows.flatMap(r => [...split(r.side_b), ...split(r.side_b_2nd)]))],
+    ...place('u' + id, [...new Set(rows.flatMap(r => gws(r.gwno_loc)))], rows.map(r => +r.year), y => gws(rows.find(r => +r.year === y).gwno_loc)),
+    sideA: sides('side_a'), sideB: sides('side_b'),
     states: [...new Set(rows.flatMap(r => [...gws(r.gwno_a), ...gws(r.gwno_a_2nd), ...gws(r.gwno_b), ...gws(r.gwno_b_2nd)]))],
     start: first.start_date, wiki: UCDP_WIKI[id] || null,
   });
@@ -80,7 +91,7 @@ for (const w of cowWars.values()) {
   const all = [...w.years].sort((a, b) => a - b);
   wars.push({
     id: w.id, src: 'cow', name: w.name, type: w.type, years: years.map(y => [y, 2]),
-    span: `${all[0]}–${all.at(-1)}`, loc: [...w.loc], states: [...w.states], sideA: [...w.sideA].filter(s => s !== '-8'), sideB: [...w.sideB].filter(s => s !== '-8'),
+    span: `${all[0]}–${all.at(-1)}`, ...place(w.id, [...w.loc], years, () => [...w.loc]), states: [...w.states], sideA: [...w.sideA].filter(s => s !== '-8'), sideB: [...w.sideB].filter(s => s !== '-8'),
     deaths: w.deaths || null, wiki: COW_WIKI[w.id.slice(1)] || null,
   });
 }
@@ -97,4 +108,5 @@ writeFileSync(new URL('wars.json', out), JSON.stringify({
 }));
 const n = y => wars.filter(w => w.years.some(([yy]) => yy === y)).length;
 console.log(`${wars.length} wars/conflicts; 1926: ${n(1926)}, 1939: ${n(1939)}, 1946: ${n(1946)}, 2025: ${n(2025)}`);
+if (unchecked.length) console.warn(`Interstate conflicts newer than ${CHECKED_THROUGH} not yet in history-fought.mjs: ${unchecked.join(', ')}. Run check-fought.mjs with the GED CSV.`);
 if (process.argv.includes('--list-cow')) for (const w of wars.filter(w => w.src === 'cow')) console.log(w.id.slice(1), '|', w.name, '|', w.span);

@@ -204,3 +204,64 @@ test('shell works at phone width', async () => {
   assert.ok(await p.locator('#side.open').count());
   await p.close();
 });
+
+test('"Skip to content" moves focus into the workspace and keeps the route', async () => {
+  for (const [route, target] of [['#/ns/progress', 'frame'], ['#/rt', 'Realtime Intelligence'], ['#/', 'Workspace']]) {
+    const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+    try {
+      await p.goto(`${BASE}/${route}`, { waitUntil: 'domcontentloaded' });
+      await p.waitForSelector(target === 'frame' ? '#frames iframe.active' : '#view h1');
+      await p.keyboard.press('Tab');
+      assert.equal(await p.evaluate(() => document.activeElement.className), 'skip', `${route}: the first Tab stop`);
+      await p.keyboard.press('Enter');
+      await p.waitForTimeout(300);
+      const now = await p.evaluate(() => ({ hash: location.hash, frame: document.activeElement === document.querySelector('#frames:not([hidden]) iframe.active'),
+        heading: document.activeElement.matches('#view h1') ? document.activeElement.textContent : null }));
+      assert.equal(now.hash, route, `${route}: the route is unchanged`);
+      if (target === 'frame') assert.ok(now.frame, `${route}: focus is in the submodule's frame`);
+      else assert.equal(now.heading, target, `${route}: focus is on the page heading`);
+    } finally { await p.close(); }
+  }
+});
+
+test('phone drawer: out of the tab order when closed, modal when open, closed by Escape, the scrim and its links', async () => {
+  const p = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const open = () => p.evaluate(() => document.getElementById('side').classList.contains('open'));
+  try {
+    await p.goto(`${BASE}/#/ns/progress`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#frames iframe.active');
+    await p.locator('.doc-fab').waitFor({ state: 'visible', timeout: 15000 });
+    // Closed: the off-screen drawer is inert, so Tab goes from the skip link straight to ☰.
+    await p.keyboard.press('Tab');
+    await p.keyboard.press('Tab');
+    assert.equal(await p.evaluate(() => document.activeElement.id), 'menu');
+    assert.equal(await p.evaluate(() => document.getElementById('side').inert), true);
+    // Opened from the keyboard: focus in the search box, the rest of the page inert and under the scrim (the
+    // Documentary button included), and Tab stays in the drawer.
+    await p.keyboard.press('Enter');
+    assert.equal(await open(), true);
+    assert.deepEqual(await p.evaluate(() => ({ focus: document.activeElement.id, mainInert: document.getElementById('main').inert, expanded: document.getElementById('menu').getAttribute('aria-expanded') })),
+      { focus: 'find', mainInert: true, expanded: 'true' });
+    const overFab = await p.evaluate(() => { const r = document.querySelector('.doc-fab').getBoundingClientRect(); return document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)?.id; });
+    assert.equal(overFab, 'scrim', 'the Documentary button is under the scrim');
+    for (let i = 0; i < 5; i++) {
+      await p.keyboard.press('Tab');
+      assert.ok(await p.evaluate(() => !!document.activeElement.closest('#side')), 'Tab stays in the drawer');
+    }
+    // Escape closes it and puts focus back on ☰.
+    await p.keyboard.press('Escape');
+    assert.deepEqual(await p.evaluate(() => ({ open: document.getElementById('side').classList.contains('open'), focus: document.activeElement.id, mainInert: document.getElementById('main').inert })),
+      { open: false, focus: 'menu', mainInert: false });
+    // A tap on the scrim closes it, and so do its close button and a link to the page already shown (no hashchange).
+    await p.tap('#menu');
+    await p.tap('#scrim', { position: { x: 360, y: 420 } });
+    assert.equal(await open(), false, 'scrim');
+    await p.tap('#menu');
+    await p.tap('#side-close');
+    assert.equal(await open(), false, 'close button');
+    await p.tap('#menu');
+    await p.tap('#nav a[data-route="ns/progress"]');
+    await p.waitForFunction(() => !document.getElementById('side').classList.contains('open'), null, { timeout: 2000 });
+    assert.equal(await p.evaluate(() => location.hash), '#/ns/progress');
+  } finally { await p.close(); }
+});

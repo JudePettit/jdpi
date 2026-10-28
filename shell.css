@@ -127,10 +127,18 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 34px; padding-top: 12px; border-top: 1px solid var(--prp-line); color: var(--prp-muted); font: 11px var(--prp-font-ui); }
 
 /* --- Small screens --------------------------------------------------------- */
+.scrim, .side-close { display: none; }
 @media (max-width: 900px) {
   .app { grid-template-columns: 1fr; }
-  .side { position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(86vw, 300px); transform: translateX(-102%); transition: transform .18s; box-shadow: var(--prp-shadow-2); }
-  .side.open { transform: none; }
+  /* The sidebar becomes a drawer above everything, the Documentary button and reader (z-index 60–61) included. Once it
+     has slid away it is hidden, so it leaves the tab order even before shell.js marks it inert. */
+  .side { position: fixed; z-index: 70; inset: 0 auto 0 0; width: min(86vw, 300px); transform: translateX(-102%); visibility: hidden;
+    transition: transform .18s, visibility 0s .18s; box-shadow: var(--prp-shadow-2); }
+  .side.open { transform: none; visibility: visible; transition: transform .18s; }
+  .scrim { display: block; position: fixed; z-index: 69; inset: 0; background: var(--prp-scrim); }
+  .side-close { position: absolute; top: 14px; right: 12px; display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0;
+    border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); background: var(--prp-surface); color: var(--prp-text); cursor: pointer; font-size: 14px; }
+  .side-close:hover { background: var(--prp-surface-3); }
   .menu { display: inline-grid; place-items: center; }
   .top-actions .meta, .top-actions .prp-kind, .top-actions .btn-label { display: none; }
   .page { padding: 18px 16px 32px; }
@@ -143,4 +151,4 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   .np-cap { -webkit-line-clamp: 3; line-clamp: 3; }
   html.np-on .doc { bottom: calc(var(--np-h, 72px) + 14px); }
 }
-@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side { transition: none; } .kino-np { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side, .side.open { transition: none; } .kino-np { animation: none; } }

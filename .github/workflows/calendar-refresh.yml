@@ -1,6 +1,8 @@
 name: Refresh the Realtime and Historical Calendars
 # Resignations, votes, court rulings, protests, sanctions and the like come from Wikipedia's "Current events" portal,
-# so they go stale within days; summits and referendums are scheduled from Wikipedia's lists and Wikidata.
+# so they go stale within days; summits, referendums and elections are scheduled from Wikipedia's lists, its national
+# electoral calendars, Wikidata and the Political Atlas. If a source fails and a type of event would lose more than
+# half its records, the build stops without writing, so this run fails instead of committing.
 on:
   schedule:
     - cron: '23 5 * * *'
@@ -17,10 +19,14 @@ jobs:
         with:
           repository: JudePettit/hp-retrospective
           path: hp-retrospective
+      - uses: actions/checkout@v4
+        with:
+          repository: JudePettit/political-atlas
+          path: political-atlas
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json
+      - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json --atlas=political-atlas
       - run: node calendar/scripts/enrich-summaries.mjs
       - name: Commit if changed
         run: |

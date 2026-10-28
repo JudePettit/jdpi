@@ -1,8 +1,13 @@
 // Builds calendar/data/<decade>.json: dated political and geopolitical events, 1980 onwards, and what is scheduled.
-//   node calendar/scripts/build-events.mjs <hp-retrospective/data/countries.json> [<UcdpPrioConflict_v26_1.csv>] [--news-from=YYYY-MM-DD]
+//   node calendar/scripts/build-events.mjs <hp-retrospective/data/countries.json> [<UcdpPrioConflict_v26_1.csv>]
+//        [--atlas=<political-atlas folder>] [--news-from=YYYY-MM-DD] [--allow-drop]
 //   node calendar/scripts/enrich-summaries.mjs        (then: a plain-text summary for every event with an article)
+// The build stops without writing if a type of event with more than 20 records would lose more than half of them
+// (a failed source); --allow-drop writes anyway, for a deliberate change.
 // Sources:
 //   - H&P Retrospective (Archigos + Wikidata): new leaders, irregular seizures of power, elections, referendums
+//   - Political Atlas (political-atlas/data/countries/*.json, with --atlas): each country's national elections, held
+//     and upcoming, as the Atlas keeps them (Europe, North America and the major powers; refreshed monthly)
 //   - UCDP/PRIO Armed Conflict Dataset: outbreaks of armed conflict (episode starts). Without the CSV, the conflict
 //     events of the last build are kept as they are.
 //   - Wikidata, by class and date. Only items with articles in several Wikipedia languages are kept, as a proxy for
@@ -13,27 +18,36 @@
 //     inaugurations; and resignations of office-holders (a position held with end cause "resignation").
 //   - Wikipedia's lists and infoboxes (wiki-lists.mjs): European Council meetings; G7, G20, NATO, BRICS, SCO, APEC,
 //     ASEAN, Commonwealth and European Political Community summits; COP climate conferences; UN General Assembly
-//     general debates. Past and scheduled.
+//     general debates; and every country's elections and referendums from the national electoral calendars, from
+//     2026 on. Past and scheduled.
 //   - Wikipedia's "Portal:Current events" (current-events.mjs), from --news-from (default: six months ago or the start
 //     of 2026, whichever is earlier) to today: resignations, parliamentary votes, court rulings, protests and strikes,
 //     ceasefires and peace talks, sanctions, party contests, inaugurations, summits and visits, referendums.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
+import { FOUGHT_IN } from '../../battlefield/scripts/history-fought.mjs';
+import { interstateName, parties, stateName } from '../../battlefield/scripts/ucdp.mjs';
 import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from './countries.mjs';
 import { currentEvents } from './current-events.mjs';
 import { listEvents } from './wiki-lists.mjs';
+import { atlasElections, mergeBallots, resolveExpected } from './outlook.mjs';
+import { lostTypes } from './guard.mjs';
 
 const args = process.argv.slice(2);
 const option = name => args.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 const [countriesPath, acdPath] = args.filter(a => !a.startsWith('--'));
+const atlasDir = option('atlas');
 const FROM = '1980-01-01';
 const TODAY = new Date().toISOString().slice(0, 10);
 const shiftMonths = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); };
 const NEWS_FROM = option('news-from') || [shiftMonths(TODAY, -6), '2026-01-01'].sort()[0];
 const RECENT = shiftMonths(TODAY, -24);
 const DATA = new URL('../data/', import.meta.url);
+// The last build, for the UCDP events when no CSV is given and for the guard before writing.
+const previous = (existsSync(DATA) ? readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f)) : []).flatMap(f => JSON.parse(readFileSync(new URL(f, DATA), 'utf8')).events);
 const events = [];
-// `via` (dropped on write) says where an event came from, so that duplicates keep the structured record.
+// `via` (dropped on write) says where an event came from, so that duplicates keep the structured record; so does
+// `precision` ("month" for a date known only to the month, on the 1st).
 const add = (e, via) => { if (e.date >= FROM && e.date < '2030' && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) events.push({ ...e, country: normaliseCountry(e.country), via }); };
 const wiki = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
 const articleTitle = url => decodeURIComponent(String(url).split('/wiki/')[1] || '').replace(/_/g, ' ');
@@ -67,24 +81,26 @@ if (acdPath) {
     const key = `${r.conflict_id}|${r.start_date2}`;
     if (!seen.has(key)) {
       seen.add(key);
-      const name = r.type_of_conflict === '2' ? `${r.side_a.replace(/^Government of /, '')} – ${r.side_b.replace(/^Government of /, '')}` : `${r.side_a.replace(/^Government of /, '')} vs ${r.side_b}`;
-      // Plain-text account from the UCDP record, since these events have no Wikipedia article of their own.
       const episode = rows.filter(x => x.conflict_id === r.conflict_id && x.start_date2 === r.start_date2);
+      const name = r.type_of_conflict === '2' ? interstateName(episode) : `${stateName(r.side_a, r.start_date2)} vs ${r.side_b}`;
+      // Where: UCDP's location, except that an interstate conflict's lists every party's government ("Australia,
+      // Iraq, United Kingdom, …"), so the first state it was fought in comes first (history-fought.mjs).
+      const fought = FOUGHT_IN['u' + r.conflict_id]?.loc, partyName = parties(r, r.start_date2);
+      const country = fought?.map(gw => partyName.get(gw)).find(Boolean) || r.location.split(',')[0].replace(/ \(.*\)$/, '');
+      // Plain-text account from the UCDP record, since these events have no Wikipedia article of their own.
       const last = episode.at(-1), warYears = episode.filter(x => x.intensity_level === '2').length;
       const KIND = { 1: 'a colonial conflict', 2: 'an interstate conflict', 3: 'a civil conflict', 4: 'an internationalised civil conflict' };
       const over = r.incompatibility === '1' ? `control of ${r.territory_name || 'territory'}` : r.incompatibility === '2' ? 'control of the government' : 'territory and government';
       const summary = `UCDP records ${KIND[r.type_of_conflict]} between ${r.side_a}${r.side_a_2nd ? ` (backed by ${r.side_a_2nd})` : ''} and ${r.side_b}${r.side_b_2nd ? ` (backed by ${r.side_b_2nd})` : ''} over ${over}, starting ${r.start_date2}. `
         + `This episode was active in ${episode.length} year${episode.length > 1 ? 's' : ''} (${episode[0].year}–${last.year})${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths a year)` : ', below war level (25–999 battle deaths a year)'}`
         + `${last.ep_end === '1' ? `, and ended ${last.ep_end_date || last.year}.` : ' and was still active in the latest data.'}`;
-      add({ date: r.start_date2, country: r.location.split(',')[0].replace(/ \(.*\)$/, ''), title: `Armed conflict breaks out: ${name}${r.territory_name ? ` (${r.territory_name})` : ''}`, type: 'conflict', status: 'declared', source: `https://ucdp.uu.se/conflict/${r.conflict_id}`, summary }, 'ucdp');
+      add({ date: r.start_date2, country, title: `Armed conflict breaks out: ${name}${r.territory_name ? ` (${r.territory_name})` : ''}`, type: 'conflict', status: 'declared', source: `https://ucdp.uu.se/conflict/${r.conflict_id}`, summary }, 'ucdp');
     }
   }
 } else {
   // No CSV given: keep the conflict episodes of the last build (UCDP publishes the dataset once a year).
   let kept = 0;
-  for (const f of existsSync(DATA) ? readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f)) : [])
-    for (const e of JSON.parse(readFileSync(new URL(f, DATA), 'utf8')).events)
-      if (/^https:\/\/ucdp\.uu\.se\/conflict\//.test(e.source || '')) { add(e, 'ucdp'); kept++; }
+  for (const e of previous) if (/^https:\/\/ucdp\.uu\.se\/conflict\//.test(e.source || '')) { add(e, 'ucdp'); kept++; }
   console.log(`UCDP: no CSV given; kept ${kept} conflict events from the last build`);
 }
 
@@ -252,12 +268,22 @@ const LANDMARKS = [
 ];
 for (const [date, country, title, type, article] of LANDMARKS) add({ date, country, title, type, status: 'declared', source: wiki(article) }, 'landmark');
 
-// ---- Summits and scheduled meetings from Wikipedia's lists and infoboxes
+// ---- Summits and scheduled meetings from Wikipedia's lists and infoboxes, and the national electoral calendars
+let undated = new Set(), calendarsFrom = Infinity; // votes the electoral calendars don't date yet; their first year
 try {
-  const { events: listed, log } = await listEvents({ from: FROM, today: TODAY });
+  const { events: listed, log, unknown, calendarsFrom: first } = await listEvents({ from: FROM, today: TODAY });
   for (const e of listed) add(e, 'list');
+  undated = new Set([...unknown].map(wiki));
+  calendarsFrom = first;
   console.log('Wikipedia lists:', log.join(' · '));
 } catch (err) { console.warn('Wikipedia lists skipped:', err.message); }
+
+// ---- Political Atlas: each country's national elections, as the Atlas keeps them (outlook.mjs)
+if (atlasDir) {
+  const list = atlasElections(atlasDir);
+  for (const e of list) add(e, 'atlas');
+  console.log(`Political Atlas: ${list.length} elections with a day or a month`);
+} else console.warn('Political Atlas: no --atlas=<folder>; the outlook has only the elections from Wikipedia and Wikidata');
 
 // ---- The news: Wikipedia's Current events portal
 try {
@@ -265,6 +291,12 @@ try {
   for (const e of news.events) add(e, 'news');
   console.log(`Current events ${NEWS_FROM}…${TODAY}: ${news.days} days, ${news.items} items, ${news.events.length} events`);
 } catch (err) { console.warn('Current events skipped:', err.message); }
+
+// ---- Ballots: one record per vote and round, with the best date known; then the expected events whose day has passed
+// are held or dropped (outlook.mjs).
+const resolved = resolveExpected(mergeBallots(events, { today: TODAY, undated, calendarsFrom }), TODAY);
+events.length = 0;
+events.push(...resolved);
 
 // ---- One record per event: the structured record wins over a news item about the same event, and the first
 // structured source (Retrospective, Wikidata, lists) over later ones. A Wikipedia article names the event; year pages
@@ -290,10 +322,18 @@ for (const e of structured) {
 const sameDay = new Set(kept.map(e => `${e.type}|${e.country}|${e.date}`));
 for (const e of news) if (!dupOf(e, 10) && !(!/^(?:court|sanctions|protest)$/.test(e.type) && sameDay.has(`${e.type}|${e.country}|${e.date}`))) kept.push(e);
 const unique = new Map();
-for (const { via, ...e } of kept) if (!unique.has(`${e.date}|${e.title}`)) unique.set(`${e.date}|${e.title}`, e);
+for (const { via, precision, ...e } of kept) if (!unique.has(`${e.date}|${e.title}`)) unique.set(`${e.date}|${e.title}`, e);
+
+const all = [...unique.values()].sort((a, b) => a.date.localeCompare(b.date) || a.country.localeCompare(b.country));
+
+// ---- Guard (guard.mjs): stop before writing if a type of event would lose more than half of its records.
+const lost = lostTypes(previous, all);
+if (lost.length && !args.includes('--allow-drop')) {
+  console.error(`Not written: ${lost.join(', ')}. A source probably failed; --allow-drop writes anyway.`);
+  process.exit(1);
+}
 
 // ---- write one file per decade
-const all = [...unique.values()].sort((a, b) => a.date.localeCompare(b.date) || a.country.localeCompare(b.country));
 mkdirSync(DATA, { recursive: true });
 const decades = new Map();
 for (const e of all) { const d = e.date.slice(0, 3) + '0s'; (decades.get(d) || decades.set(d, []).get(d)).push(e); }

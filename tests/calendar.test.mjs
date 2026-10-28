@@ -1,14 +1,19 @@
-// Political Calendar (Realtime and Historical): the pipeline's news classifier and Wikipedia parsers, the built data,
-// and the page (event types, month jump, year view, country highlighting) running against JDPI_URL.
+// Political Calendar (Realtime and Historical): the pipeline's news classifier and Wikipedia parsers, the elections
+// outlook and the build's guard, the built data, and the page (event types, month jump, year view, country
+// highlighting) running against JDPI_URL.
 //   node --test tests/calendar.test.mjs                                   (page tests against https://jdpi.pages.dev)
 //   JDPI_URL=http://localhost:8787 node --test tests/calendar.test.mjs    (page tests against a local server)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { chromium } from 'playwright-core';
 import { classify, headline, parseDay, eventsFromItems } from '../calendar/scripts/current-events.mjs';
 import { countryOf, countryInText, normaliseCountry } from '../calendar/scripts/countries.mjs';
-import { parseDate, eventsFromList, referendumsFromCalendar } from '../calendar/scripts/wiki-lists.mjs';
+import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar } from '../calendar/scripts/wiki-lists.mjs';
+import { atlasElections, mergeBallots, resolveExpected } from '../calendar/scripts/outlook.mjs';
+import { lostTypes } from '../calendar/scripts/guard.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const TYPES = ['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'];
@@ -126,6 +131,117 @@ test('Wikipedia lists: dates, summit tables and electoral calendars', () => {
   assert.deepEqual(referendumsFromCalendar(calendar, 2026).map(e => [e.date, e.country, e.title]), [['2026-12-09', 'Fiji', '2026 Fijian constitutional referendum']]);
 });
 
+test('electoral calendars: elections by day and round, month-only votes expected, dependencies left out, undated votes listed', () => {
+  const page = `==October==
+* 25 October:
+** [[Elections in Bulgaria|Bulgaria]], [[2026 Bulgarian presidential election|President (1st round)]]<ref>[https://example.com BNT]</ref>
+** [[Elections in Brazil|Brazil]], [[2026 Brazilian general election|President (2nd round)]]
+==November==
+* 1 November: [[Elections in Bulgaria|Bulgaria,]] [[2026 Bulgarian presidential election|President (2nd round)]]
+* 3 November:
+** [[Elections in Guam|''Guam'']], [[2026 Guam gubernatorial election|''Governor'']]
+** [[Elections in the United States|United States]], [[2026 United States Senate elections|Senate]] and [[2026 United States House of Representatives elections|House of Representatives]]
+* 6 December ''[[Elections in Northern Cyprus|Northern Cyprus]], [[2026 Northern Cypriot parliamentary election|Assembly]]''
+==December==
+* December: [[Elections in the Gambia|Gambia]], [[2026 Gambian presidential election|President]]
+==Unknown date==
+* [[Elections in Italy|Italy]], [[Next Italian general election|Chamber of Deputies and Senate]]
+==Indirect elections==
+* 9 December: [[Elections in Switzerland|Switzerland]], [[2026 Swiss Federal Council election|Federal Council]]`;
+  const { events, unknown } = ballotsFromCalendar(page, 2026);
+  assert.deepEqual(events.map(e => [e.date, e.country, e.title, e.status]), [
+    ['2026-10-25', 'Bulgaria', '2026 Bulgarian presidential election (first round)', 'declared'],
+    ['2026-10-25', 'Brazil', '2026 Brazilian general election (second round)', 'declared'],
+    ['2026-11-01', 'Bulgaria', '2026 Bulgarian presidential election (second round)', 'declared'],
+    ['2026-11-03', 'United States', '2026 United States Senate elections', 'declared'],
+    ['2026-11-03', 'United States', '2026 United States House of Representatives elections', 'declared'],
+    ['2026-12-01', 'The Gambia', '2026 Gambian presidential election (date to be confirmed)', 'tentative'],
+  ]);
+  assert.equal(events.at(-1).precision, 'month');
+  assert.deepEqual([...unknown], ['Next Italian general election']);
+});
+
+test('elections outlook: one record per vote with the best date; expected events held or dropped once past', () => {
+  const ev = (via, date, country, title, more = {}) => ({ via, date, country, title, type: 'election', status: 'declared', precision: 'day', source: `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`, ...more });
+  const atlas = (date, country, title, iso, more = {}) => ev('atlas', date, country, title, { source: `https://political-atlas.pages.dev/#${iso}`, ...more });
+  const month = { status: 'tentative', precision: 'month' };
+  const merged = mergeBallots([
+    ev('retro', '2027-06-30', 'Grenada', '2026 Grenadian general election'),          // a deadline; the calendar has the day
+    ev('list', '2026-11-05', 'Grenada', '2026 Grenadian general election'),
+    ev('retro', '2027-09-30', 'Italy', 'Next Italian general election'),              // the calendar has no date yet
+    ev('retro', '2027-11-01', 'Nicaragua', '2026 Nicaraguan general election'),       // the 1st of a month, unconfirmed
+    ev('retro', '2027-12-31', 'Malta', 'Next Maltese general election'),              // a deadline, unconfirmed
+    ev('retro', '2024-12-01', 'Croatia', '2024–25 Croatian presidential election'),   // before the calendars start
+    ev('list', '2025-01-12', 'Croatia', '2024–25 Croatian presidential election (second round)', { source: ev('', '', '', '2024–25 Croatian presidential election').source }),
+    ev('list', '2027-03-01', 'Estonia', 'Next Estonian parliamentary election (date to be confirmed)', { ...month, source: ev('', '', '', 'Next Estonian parliamentary election').source }),
+    ev('retro', '2027-03-07', 'Estonia', 'Next Estonian parliamentary election'),
+    ev('list', '2027-06-27', 'Guatemala', '2027 Guatemalan general election'),
+    atlas('2027-06-01', 'Guatemala', 'General election (date to be confirmed)', 'GTM', month),
+    atlas('2027-03-01', 'Netherlands', 'Provincial / Senate elections (date to be confirmed)', 'NLD', month),
+    ev('retro', '2026-11-29', 'Spain', '2026 Spanish general election'),
+    atlas('2026-11-29', 'Spain', 'Snap general election', 'ESP'),
+    atlas('2026-09-20', 'Russia', 'State Duma election', 'RUS'),
+    ev('retro', '2026-09-20', 'Soviet Union / Russia', '2026 Russian legislative election'),
+  ], { today: '2026-10-28', undated: new Set([ev('', '', '', 'Next Italian general election').source]), calendarsFrom: 2025 });
+  assert.deepEqual(merged.map(e => [e.date, e.country, e.title, e.status]), [
+    ['2026-11-05', 'Grenada', '2026 Grenadian general election', 'declared'],
+    ['2027-11-01', 'Nicaragua', '2026 Nicaraguan general election (date to be confirmed)', 'tentative'],
+    ['2027-12-01', 'Malta', 'Next Maltese general election (date to be confirmed)', 'tentative'],
+    ['2024-12-01', 'Croatia', '2024–25 Croatian presidential election', 'declared'],
+    ['2025-01-12', 'Croatia', '2024–25 Croatian presidential election (second round)', 'declared'],
+    ['2027-03-07', 'Estonia', 'Next Estonian parliamentary election', 'declared'],
+    ['2027-06-27', 'Guatemala', '2027 Guatemalan general election', 'declared'],
+    ['2027-03-01', 'Netherlands', 'Provincial / Senate elections (date to be confirmed)', 'tentative'],
+    ['2026-11-29', 'Spain', '2026 Spanish general election', 'declared'],
+    ['2026-09-20', 'Soviet Union / Russia', '2026 Russian legislative election', 'declared'],
+  ]);
+  const expected = (date, title, precision = 'day') => ({ date, title, status: 'tentative', precision });
+  const resolved = resolveExpected([
+    expected('2026-10-25', 'General election (second round if needed)'), // may not have happened: dropped
+    expected('2026-10-27', 'Knesset election'),                          // its day has passed: held
+    expected('2026-09-01', 'Senate election (date to be confirmed)', 'month'),
+    expected('2026-10-01', 'Local elections (date to be confirmed)', 'month'), // this month: still expected
+    expected('2026-12-01', 'General election (date to be confirmed)', 'month'),
+  ], '2026-10-28');
+  assert.deepEqual(resolved.map(e => [e.date, e.status]), [['2026-10-27', 'declared'], ['2026-10-01', 'tentative'], ['2026-12-01', 'tentative']]);
+});
+
+test('Political Atlas: national elections by day or month, hedged ones expected, the year-only and local ones left out', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'atlas-'));
+  try {
+    mkdirSync(join(dir, 'data/countries'), { recursive: true });
+    writeFileSync(join(dir, 'data/manifest.json'), JSON.stringify({ files: ['countries/test.json'] }));
+    writeFileSync(join(dir, 'data/countries/test.json'), JSON.stringify([
+      { iso3: 'BGR', name: 'Bulgaria', lastVerified: '2026-10-26', elections: [
+        { name: 'Presidential election (1st round)', date: '2026-10-25', status: 'held', note: 'Official results pending.' },
+        { name: 'Presidential runoff (if needed)', date: '2026-11-01', status: 'upcoming' }] },
+      { iso3: 'HTI', name: 'Haiti', lastVerified: '2026-10-20', elections: [
+        { name: 'General election (second round, planned)', date: '2026-12', status: 'upcoming' },
+        { name: 'Inauguration of elected president (target)', date: '2027-02-07', status: 'upcoming' }] },
+      { iso3: 'ITA', name: 'Italy', elections: [{ name: 'General election (latest)', date: '2027', status: 'upcoming' }] },
+      { iso3: 'GBR', name: 'United Kingdom', elections: [{ name: 'Scottish, Welsh & English local elections', date: '2026-05-07', status: 'held' }] },
+      { iso3: 'JPN', name: 'Japan', elections: [{ name: 'LDP leadership election', date: '2027-09', status: 'upcoming' }] },
+    ]));
+    const list = atlasElections(dir);
+    assert.deepEqual(list.map(e => [e.date, e.country, e.title, e.type, e.status]), [
+      ['2026-10-25', 'Bulgaria', 'Presidential election (1st round)', 'election', 'declared'],
+      ['2026-11-01', 'Bulgaria', 'Presidential runoff (if needed)', 'election', 'tentative'],
+      ['2026-12-01', 'Haiti', 'General election (second round, planned; date to be confirmed)', 'election', 'tentative'],
+      ['2027-02-07', 'Haiti', 'Inauguration of elected president (target)', 'inauguration', 'tentative'],
+      ['2027-09-01', 'Japan', 'LDP leadership election (date to be confirmed)', 'party', 'tentative'],
+    ]);
+    assert.equal(list[0].source, 'https://political-atlas.pages.dev/#BGR');
+    assert.equal(list[0].summary, 'Official results pending. Political Atlas, checked 26 October 2026.');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('build guard: a type of event that would lose more than half of its records stops the build', () => {
+  const of = (type, n) => Array.from({ length: n }, () => ({ type }));
+  assert.deepEqual(lostTypes([...of('summit', 649), ...of('vote', 30), ...of('treaty', 10)], [...of('summit', 12), ...of('vote', 15), ...of('treaty', 0)]), ['summit 649 → 12']);
+  assert.deepEqual(lostTypes(of('court', 77), of('court', 39)), []);
+  assert.deepEqual(lostTypes(of('court', 77), []), ['court 77 → 0']);
+});
+
 test('calendar data: seventeen types, clean records, the new types in the last six months, the outlook and the archive', () => {
   for (const e of ALL) {
     assert.match(e.date, /^\d{4}-\d{2}-\d{2}$/, JSON.stringify(e));
@@ -145,6 +261,18 @@ test('calendar data: seventeen types, clean records, the new types in the last s
   for (const t of NEW_TYPES) assert.ok(count(archive, t) >= 1, `${t} before 2026: ${count(archive, t)}`);
   // Existing types keep their history.
   for (const t of ['election', 'leader', 'coup', 'conflict', 'assassination', 'crisis', 'treaty']) assert.ok(count(archive, t) >= 50, `${t} before 2026: ${count(archive, t)}`);
+  // The elections outlook is built, not kept by hand: dozens of elections, from Wikipedia's electoral calendars and the
+  // Political Atlas, each linking to its source; one known only to the month is expected on the 1st and says so.
+  const elections = ahead.filter(e => e.type === 'election');
+  assert.ok(elections.length >= 25, `elections in the 18-month outlook: ${elections.length}`);
+  assert.ok(elections.some(e => /en\.wikipedia\.org/.test(e.source)) && elections.some(e => /^https:\/\/political-atlas\.pages\.dev\/#[A-Z]{3}$/.test(e.source)), 'elections from both sources');
+  for (const e of ALL.filter(e => /date to be confirmed/.test(e.title))) assert.ok(e.status === 'tentative' && e.date.endsWith('-01'), `${e.date} ${e.title}`);
+  // Nothing stays "expected" once its day has passed (a month-only entry, once its month has).
+  assert.deepEqual(ALL.filter(e => e.status === 'tentative' && e.date.slice(0, 7) < GENERATED.slice(0, 7)).map(e => `${e.date} ${e.title}`), []);
+  assert.deepEqual(ALL.filter(e => e.status === 'tentative' && e.date < GENERATED && !/date to be confirmed/.test(e.title)).map(e => `${e.date} ${e.title}`), []);
+  // UCDP's interstate conflicts are named without "Government of", and placed where they were fought.
+  assert.deepEqual(ALL.filter(e => /Government of/.test(e.title) && e.type === 'conflict').map(e => e.title), []);
+  assert.equal(ALL.find(e => e.date === '2003-03-23' && e.type === 'conflict' && /– Iraq/.test(e.title))?.country, 'Iraq');
 });
 
 // ---- the page --------------------------------------------------------------------------------------------------
@@ -254,4 +382,23 @@ test('Realtime Calendar fits a phone: no horizontal scroll at 360px', async () =
     await page.waitForSelector('#filters .filter', { timeout: 20000 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), 0);
   }, { width: 360 });
+});
+
+test('Realtime Calendar: upcoming elections come from the daily build, with no hand-kept list or snapshot archive', async () => {
+  // The first expected election from the Political Atlas, known only to the month.
+  const atlas = ALL.find(e => e.date > GENERATED && e.type === 'election' && /political-atlas\.pages\.dev/.test(e.source || '') && /date to be confirmed/.test(e.title));
+  assert.ok(atlas, 'an expected Political Atlas election in the outlook');
+  await withPage(async page => {
+    await page.goto(`${BASE}/q/calendar.html?period=contemporary&month=${atlas.date.slice(0, 7)}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('.eventrow', { timeout: 20000 });
+    await page.waitForFunction(() => !/checking/.test(document.querySelector('#status-calendar').textContent));
+    const row = page.locator('#eventrows .eventrow', { hasText: atlas.title });
+    const meta = await page.locator('#hero-meta').innerText();
+    assert.equal(await row.count(), 1);
+    assert.match(await row.locator('.tag').innerText(), /expected/i);
+    assert.equal(await row.locator('.eventname a').getAttribute('href'), atlas.source);
+    assert.doesNotMatch(meta, /snapshot|Supabase|editorial/i);
+    assert.match(meta, /Daily build · (up to date|overdue)/);
+    assert.equal(await page.locator('#snapshot-date').count(), 0);
+  });
 });

@@ -384,22 +384,66 @@ function setupFind() {
       if (first) { location.hash = first.getAttribute('href'); input.value = ''; input.dispatchEvent(new Event('input')); input.blur(); }
     } else if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input')); input.blur(); }
   });
-  document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement?.tagName)) { e.preventDefault(); input.focus(); } });
+  // On a phone the search box is in the drawer, so "/" opens the drawer at it when it is closed.
+  document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement?.tagName)) { e.preventDefault(); if (phone.matches && !$('#side').classList.contains('open')) setDrawer(true, true); else input.focus(); } });
 }
 
-function closeMenu() { $('#side').classList.remove('open'); $('#menu').setAttribute('aria-expanded', 'false'); }
+/* --- Skip link: focus the workspace (the page in its frame, or the heading of a shell page) without touching the
+   address, since the routes live in the hash. ----------------------------------------------------------------------- */
+function setupSkip() {
+  $('.skip').addEventListener('click', e => {
+    e.preventDefault();
+    const target = visibleFrame() || $('#view h1') || $('#view');
+    if (target.tagName !== 'IFRAME') target.tabIndex = -1;
+    target.focus();
+  });
+}
+
+/* --- Phone drawer ---------------------------------------------------------------------------------------------------
+   At 900 px and below the sidebar is a drawer. Closed, it is inert (off screen and out of the tab order). Open, it is
+   modal: the rest of the page (the workspace, the Documentary button and reader) is inert under a scrim, and the scrim,
+   Escape, its close button or any link in it (even to the page already shown) closes it. Opening moves focus into it
+   (to the search box from the keyboard); closing while focus is in it puts focus back on ☰. */
+const phone = window.matchMedia('(max-width: 900px)');
+let behindDrawer = []; // what the open drawer made inert, given back when it closes
+function setDrawer(open, toSearch = false) {
+  const side = $('#side'), wasOpen = side.classList.contains('open'), active = document.activeElement;
+  open = open && phone.matches;
+  side.classList.toggle('open', open);
+  side.inert = phone.matches && !open;
+  $('#menu').setAttribute('aria-expanded', String(open));
+  $('#scrim').hidden = !open;
+  if (open && !wasOpen) {
+    behindDrawer = [$('#main'), ...[...document.body.children].filter(el => !el.contains(side) && !el.inert && el.tagName !== 'SCRIPT')];
+    behindDrawer.forEach(el => { el.inert = true; });
+    if (toSearch) $('#find').focus(); else { side.tabIndex = -1; side.focus(); }
+  } else if (!open && wasOpen) {
+    behindDrawer.forEach(el => { el.inert = false; });
+    behindDrawer = [];
+    if (side.contains(active) || active === document.body || !active) $('#menu').focus();
+  }
+}
+function closeMenu() { setDrawer(false); }
 function setupMenu() {
-  $('#menu').onclick = () => { const open = $('#side').classList.toggle('open'); $('#menu').setAttribute('aria-expanded', String(open)); };
-  $('#view').addEventListener('click', closeMenu);
+  // A click from the keyboard (Enter or Space) has detail 0: the drawer then opens at its search box.
+  $('#menu').addEventListener('click', e => setDrawer(!$('#side').classList.contains('open'), e.detail === 0));
+  $('#side-close').addEventListener('click', closeMenu);
+  $('#scrim').addEventListener('click', closeMenu);
+  // After the link has done its work: a link to the page already shown changes nothing, so route() would not close it.
+  $('#side').addEventListener('click', e => { if (e.target.closest('a[href]')) setTimeout(closeMenu); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#side').classList.contains('open')) closeMenu(); });
+  phone.addEventListener?.('change', closeMenu);
+  closeMenu();
 }
 
 (async function init() {
   setupTheme();
+  setupSkip();
+  setupMenu();
   try { state.registry = await fetch('registry.json', { cache: 'no-cache' }).then(r => r.json()); }
   catch (err) { $('#view').innerHTML = '<div class="page"><div class="prp-note">Could not load the module registry. Serve this folder over HTTP.</div></div>'; console.error(err); return; }
   renderNav();
   setupFind();
-  setupMenu();
   setupNowPlaying();
   window.addEventListener('hashchange', route);
   route();

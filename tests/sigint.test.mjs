@@ -507,8 +507,12 @@ test('page: tabs, hash, documents and the GNSS sample in Edge', { skip: !process
     assert.ok(visible >= 3 && visible < 15, `search narrows the recipes (${visible})`);
     await page.click('#tab-gnss');
     assert.match(page.url(), /#tab=gnss$/);
-    await page.click('#gn-sample');
-    // The sample plays in real time; wait for it rather than a fixed time, which a busy full run can outlast.
+    // The GNSS view loads when its tab opens, so in a busy run a first click can land before the button is wired: click
+    // until the sample starts (it disables the button), then wait for its satellites rather than a fixed time.
+    for (let i = 0; i < 10 && !(await page.locator('#gn-snr .snr-row').count()); i++) {
+      if (await page.locator('#gn-sample').isEnabled()) await page.click('#gn-sample');
+      await page.waitForTimeout(1000);
+    }
     await page.waitForFunction(() => document.querySelectorAll('#gn-snr .snr-row').length >= 15, null, { timeout: 10000 }).catch(() => {});
     assert.ok(await page.locator('#gn-snr .snr-row').count() >= 15, 'sample satellites listed');
     assert.ok(await page.locator('#gn-sky svg circle').count() > 15, 'sky plot drawn');

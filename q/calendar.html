@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml"><title>Realtime Calendar · PRP</title>
-<script src="supabase-config.js"></script><script src="supabase-client.js"></script><script src="observability-config.js"></script><script src="observability.js" data-module="Political Calendar"></script>
+<script src="observability-config.js"></script><script src="observability.js" data-module="Political Calendar"></script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="rt" data-module="calendar" data-shell="../" defer></script>
 <script>(function(){var h=(new URLSearchParams(location.search).get('period')||'contemporary')!=='contemporary',r=document.documentElement,s=document.querySelector('script[src*="prp-bar.js"]');r.dataset.period=h?'history':'contemporary';if(h){s.dataset.suite='rs';s.dataset.module='historical-calendar';r.dataset.suite='rs';document.title='Historical Calendar · PRP'}else document.title='Realtime Calendar · PRP'})();</script>
@@ -17,7 +17,7 @@ button,input{font:inherit}button{cursor:pointer}
 .prp-tabs{margin-top:22px}
 .prp-sources p{margin:0 0 6px;max-width:120ch}
 .prp-btn.navbtn{width:32px;height:32px;padding:0;font-size:15px}
-/* data-source status, in the meta line */
+/* the daily build's status, in the meta line */
 .source-health{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 8px}
 .source-chip{display:inline-flex;align-items:center;gap:6px;color:var(--prp-text-2)}
 .source-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--prp-faint)}
@@ -26,12 +26,8 @@ button,input{font:inherit}button{cursor:pointer}
 .source-chip[data-state=stale] .source-dot,.source-chip[data-state=degraded] .source-dot{background:var(--prp-status-warning)}
 .source-chip[data-state=unavailable] .source-dot{background:var(--prp-status-critical)}
 .source-health-note{color:var(--prp-muted)}
-/* toolbar: the snapshot date and the saved-research tools */
+/* toolbar: the saved-research tools */
 .toolrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:14px 0}
-.calendar-history{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.calendar-history label{margin-right:4px}
-.calendar-history .prp-input{width:150px}
-.calendar-history-note{margin-left:4px;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.5}
 /* calendar panel */
 .calpanel{overflow:clip}
 .ptitle{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
@@ -127,7 +123,6 @@ button,input{font:inherit}button{cursor:pointer}
 /* Saved-research tools: research-workspace.js injects these with its own dark styles, so they are restyled here
    (selectors start with :root to win over the injected sheet). */
 :root .research-toolbar{flex:1 1 auto;justify-content:flex-start;gap:8px 14px;margin:0;padding:0;border:0;background:none}
-:root .calendar-history:not([hidden])~.research-toolbar{justify-content:flex-end}
 :root .research-toolbar-actions{gap:6px}
 :root .research-action{height:28px;padding:0 10px;border:1px solid var(--prp-line-strong);border-radius:var(--prp-radius-sm);background:var(--prp-surface);color:var(--prp-text);font:500 12px var(--prp-font-ui)}
 :root .research-action:hover{border-color:var(--prp-line-strong);background:var(--prp-surface-3);color:var(--prp-text)}
@@ -157,7 +152,7 @@ button,input{font:inherit}button{cursor:pointer}
 @media(max-width:1100px){.calbody{grid-template-columns:minmax(0,1fr)}.eventlist{border-left:0;border-top:1px solid var(--prp-line-soft)}.yeargrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.yeargrid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.filters{padding:10px 12px}.filterset{gap:5px}.fam{display:contents}.filter{height:24px;padding:0 7px;gap:5px}.filterhint{flex-basis:100%}.eventdot.dia{width:4.5px;height:4.5px}}
-@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.search{width:100%;margin-left:0}.search .prp-input{width:100%}.calendar-history label,.countrybar label{flex-basis:100%}.calendar-history .prp-input,.countrybar .prp-input{flex:1 1 140px;width:auto;min-width:0}.calendar-history-note{flex-basis:100%;margin-left:0}:root .calendar-history:not([hidden])~.research-toolbar{justify-content:flex-start}.calendar{padding:10px}.day{height:46px;padding:4px 5px}.eventdots{left:4px;bottom:5px;gap:2px}.eventdot{width:5px;height:5px}.daycount{right:3px;bottom:3px;font-size:9px}.eventlist{padding:0 12px 6px}.eventrow{grid-template-columns:42px minmax(0,1fr)}.eventrow>.tag{grid-column:2;justify-self:start}.month{min-width:0}}
+@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.search{width:100%;margin-left:0}.search .prp-input{width:100%}.countrybar label{flex-basis:100%}.countrybar .prp-input{flex:1 1 140px;width:auto;min-width:0}.calendar{padding:10px}.day{height:46px;padding:4px 5px}.eventdots{left:4px;bottom:5px;gap:2px}.eventdot{width:5px;height:5px}.daycount{right:3px;bottom:3px;font-size:9px}.eventlist{padding:0 12px 6px}.eventrow{grid-template-columns:42px minmax(0,1fr)}.eventrow>.tag{grid-column:2;justify-self:start}.month{min-width:0}}
 @media(max-width:450px){.yeargrid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -167,7 +162,7 @@ button,input{font:inherit}button{cursor:pointer}
     <div class="prp-eyebrow" id="hero-eyebrow">Realtime Intelligence <span class="sep">·</span> Realtime Calendar</div>
     <h1 class="prp-title" id="hero-title">Realtime Calendar</h1>
     <p class="prp-dek" id="hero-text">Upcoming elections, referendums and summits, and the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests, parliamentary votes, court rulings, sanctions and more. See a month or a whole year, for every country or just the ones you highlight.</p>
-    <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span class="rt-only">Elections snapshot <b id="updated">23 Oct 2026 · editorial</b></span><span>Events updated <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Calendar data source status"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Supabase archive · checking</span></span><span class="source-health-note" id="calendar-source-note">Checking saved calendar history.</span></span><span class="rt-only">Now <b id="clock"></b></span></div>
+    <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span>Events updated <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Status of the daily data build"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Daily build · checking</span></span><span class="source-health-note" id="calendar-source-note"></span></span><span class="rt-only">Now <b id="clock"></b></span></div>
   </header>
   <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Intelligence <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
   <div class="prp-tabs" role="tablist" aria-label="Calendar views">
@@ -175,7 +170,6 @@ button,input{font:inherit}button{cursor:pointer}
     <button type="button" role="tab" class="viewbtn" id="tab-year" data-view="year" aria-controls="calpanel" aria-selected="false" tabindex="-1">Year</button>
   </div>
   <div class="toolrow">
-    <div class="calendar-history rt-only"><label for="snapshot-date" class="prp-label">View calendar as of</label><button class="prp-btn sm navbtn" id="snapshot-prev" aria-label="Previous snapshot day">‹</button><input class="prp-input" id="snapshot-date" type="date"><button class="prp-btn sm navbtn" id="snapshot-next" aria-label="Next snapshot day">›</button><span class="calendar-history-note" id="snapshot-note" role="status"></span></div>
     <span class="subnav" hidden></span><!-- research-workspace.js adds the saved-research tools after this -->
   </div>
   <section class="prp-panel calpanel" id="calpanel" role="tabpanel" aria-labelledby="tab-month">
@@ -186,47 +180,19 @@ button,input{font:inherit}button{cursor:pointer}
       <div class="calendar"><div id="yeargrid" class="yeargrid" hidden></div><div id="monthgrid"><div class="weekdays" aria-hidden="true"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="grid" id="days"></div></div><div class="legend"><span><i class="eventdot" style="--c:var(--prp-muted)"></i>Confirmed</span><span><i class="eventdot tentative" style="--c:var(--prp-muted)"></i>Expected</span><span>Colour and shape = event type</span><span>Click a day for details</span></div><div class="legend-types" id="legend-types" aria-label="Event types this month"></div><div class="detail" id="detail" aria-live="polite"></div></div>
       <div class="eventlist"><div class="listhead"><span id="listtitle">Events this month</span><span id="eventcount" aria-live="polite"></span></div><div id="eventrows"></div></div>
     </div>
-    <div class="notice">Calendar snapshot: 23 Oct 2026. Dates can change. “Tentative” and “expected” events are not official confirmations. Upcoming coverage: national elections, scheduled referendums and summits (the European Council, G20, COP, APEC, Commonwealth, European Political Community and more). Past events add leaders, coups, wars, assassinations, crises and treaties and, from the news, inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions and party contests. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div>
+    <div class="notice">Rebuilt every morning. Dates can change, and an “expected” event (a ring rather than a dot) is not confirmed: its date may be a target, a legal deadline or, with “date to be confirmed”, only the month. Upcoming coverage: national elections, scheduled referendums and summits (the European Council, G20, COP, APEC, Commonwealth, European Political Community and more). Past events add leaders, coups, wars, assassinations, crises and treaties and, from the news, inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions and party contests. <a href="https://www.electionguide.org/elections/type/upcoming/" target="_blank" rel="noreferrer">ElectionGuide ↗</a></div>
   </section>
   <footer class="prp-sources">
     <p id="period-note" role="status"></p>
-    <p><b>Sources.</b> <span class="rt-only">Upcoming elections: <a href="https://www.electionguide.org/" target="_blank" rel="noreferrer">IFES ElectionGuide</a> and <a href="https://odihr.osce.org/odihr/elections" target="_blank" rel="noreferrer">OSCE ODIHR</a> listings, curated by hand, with saved snapshots in the PRP archive (Supabase). </span>Past events: Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums; the <a href="https://ucdp.uu.se/" target="_blank" rel="noreferrer">UCDP</a>/PRIO Armed Conflict Dataset (CC BY 4.0) for outbreaks of armed conflict; <a href="https://www.wikidata.org/" target="_blank" rel="noreferrer">Wikidata</a> (CC0) for assassinations, battles, attacks, epidemics, disasters and treaties, and by class and date for referendums, summits and state visits, impeachments, confidence votes and budgets, supreme- and constitutional-court, ICJ and ICC rulings, protests and strikes, ceasefires and peace talks, sanctions, party leadership contests and congresses, inaugurations, and resignations (positions held that ended in resignation). Summits, past and scheduled: Wikipedia's lists of European Council meetings and of G7, G20, NATO, BRICS, SCO, APEC, ASEAN, Commonwealth and European Political Community summits, its COP and UN General Assembly articles, and its national electoral calendars for scheduled referendums. The news since January 2026: Wikipedia's <a href="https://en.wikipedia.org/wiki/Portal:Current_events" target="_blank" rel="noreferrer">Current events portal</a> (CC BY-SA) for inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions, party contests, summits and visits, each with the news report it cites; one protest wave or round of talks is shown at its main moments rather than every day. Full accounts in the pop-out: Wikipedia (CC BY-SA).</p>
+    <p><b>Sources.</b> <span class="rt-only">Upcoming elections: Wikipedia's national electoral calendars, every country's elections and referendums, and the <a href="https://political-atlas.pages.dev/" target="_blank" rel="noreferrer">Political Atlas</a> for Europe, North America and the major powers, merged into one record per vote and rebuilt every day. </span>Past events: Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums; the <a href="https://ucdp.uu.se/" target="_blank" rel="noreferrer">UCDP</a>/PRIO Armed Conflict Dataset (CC BY 4.0) for outbreaks of armed conflict; <a href="https://www.wikidata.org/" target="_blank" rel="noreferrer">Wikidata</a> (CC0) for assassinations, battles, attacks, epidemics, disasters and treaties, and by class and date for referendums, summits and state visits, impeachments, confidence votes and budgets, supreme- and constitutional-court, ICJ and ICC rulings, protests and strikes, ceasefires and peace talks, sanctions, party leadership contests and congresses, inaugurations, and resignations (positions held that ended in resignation). Summits, past and scheduled: Wikipedia's lists of European Council meetings and of G7, G20, NATO, BRICS, SCO, APEC, ASEAN, Commonwealth and European Political Community summits, its COP and UN General Assembly articles, and, from 2026, its national electoral calendars for elections and referendums. The news since January 2026: Wikipedia's <a href="https://en.wikipedia.org/wiki/Portal:Current_events" target="_blank" rel="noreferrer">Current events portal</a> (CC BY-SA) for inaugurations, resignations, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions, party contests, summits and visits, each with the news report it cites; one protest wave or round of talks is shown at its main moments rather than every day. Full accounts in the pop-out: Wikipedia (CC BY-SA).</p>
   </footer>
 </main>
 <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-box"><button type="button" class="modal-close prp-btn" id="modal-close" aria-label="Close">×</button><div class="modal-meta" id="modal-meta"></div><h2 id="modal-title"></h2><div id="modal-body"></div></div></div><script>
-// Election calendar curated from IFES ElectionGuide and OSCE ODIHR public listings. Dates refresh by manual editorial updates.
-let events=[
-{date:'2026-10-25',country:'Brazil',title:'General election · second round if needed',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/id/4736/'},
-{date:'2026-10-27',country:'Israel',title:'Knesset election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-11-03',country:'United States',title:'Midterm elections · Congress & governors',type:'election',status:'declared',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2026-12-22',country:'South Sudan',title:'National legislative elections',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2026-12-24',country:'Fiji',title:'Parliamentary election',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2026-12-31',country:'Somalia',title:'Presidential & parliamentary elections',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-01-16',country:'Nigeria',title:'General election · presidency & National Assembly',type:'election',status:'declared',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-01-27',country:'Kyrgyzstan',title:'Presidential election',type:'election',status:'tentative',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2027-02-28',country:'El Salvador',title:'Presidential & legislative elections',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-02-28',country:'Switzerland',title:'Federal referendum (expected)',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-03-02',country:'Micronesia',title:'Congressional election',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-03-07',country:'Estonia',title:'Parliamentary election',type:'election',status:'declared',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2027-04-10',country:'The Gambia',title:'National Assembly election',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-04-18',country:'Finland',title:'Parliamentary election',type:'election',status:'tentative',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2027-04-18',country:'France',title:'Presidential election · first round',type:'election',status:'declared',source:'https://www.info.gouv.fr/actualite/election-presidentielle-2027'},
-{date:'2027-05-02',country:'France',title:'Presidential election · second round if needed',type:'election',status:'declared',source:'https://www.info.gouv.fr/actualite/election-presidentielle-2027'},
-{date:'2027-06-13',country:'Montenegro',title:'Local elections',type:'election',status:'tentative',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2027-06-06',country:'Mexico',title:'Federal legislative election (expected)',type:'election',status:'tentative',source:'https://www.electionguide.org/'},
-{date:'2027-08-10',country:'Kenya',title:'General election · President & Parliament',type:'election',status:'tentative',source:'https://www.electionguide.org/elections/type/upcoming/'},
-{date:'2027-09-11',country:'Palestine',title:'Legislative election (postponed)',type:'election',status:'tentative',source:'https://apnews.com/article/3c0ab74a39492328a15318d7949b972c'},
-{date:'2027-10-24',country:'Switzerland',title:'Federal Assembly election',type:'election',status:'declared',source:'https://odihr.osce.org/odihr/elections?country=200'},
-{date:'2026-10-16',country:'Czechia',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-11',country:'Slovenia',title:'National referendum',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-09',country:'Czechia',title:'Senate election',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-04',country:'Brazil',title:'Presidential, Senate & Chamber elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-04',country:'Bosnia and Herzegovina',title:'General elections',type:'election',status:'declared',source:'https://www.electionguide.org/'},
-{date:'2026-10-03',country:'Latvia',title:'Parliamentary election',type:'election',status:'declared',source:'https://www.electionguide.org/'},];
-// Past and scheduled events (elections and referendums, leaders, coups, conflicts, assassinations, crises, treaties,
-// summits, and from the news inaugurations, resignations, votes, rulings, protests, ceasefires, sanctions, party
-// contests) come from ../calendar/data/<decade>.json, built by calendar/scripts/build-events.mjs. Upcoming elections
-// also come from the editorial list above or the Supabase snapshot. Contemporary = the last 6 months plus an 18-month outlook.
+// Every event, past and scheduled (elections and referendums, leaders, coups, conflicts, assassinations, crises,
+// treaties, summits, and from the news inaugurations, resignations, votes, rulings, protests, ceasefires, sanctions,
+// party contests), comes from ../calendar/data/<decade>.json, which calendar/scripts/build-events.mjs rebuilds every
+// morning; upcoming elections there merge Wikipedia's national electoral calendars and the Political Atlas.
+// Contemporary = the last 6 months plus an 18-month outlook.
 // Seventeen types, eight colours: each family of related types takes one PRP categorical colour, in their fixed order
 // (never cycled), and each type in a family its own shape (● ■ ◆). Every mark is named in the chips (which count and
 // filter), the month's legend, the day's tooltip and the event list.
@@ -262,8 +228,6 @@ const TYPES = {
 const SHAPES = ['', 'sq', 'dia'];
 for (const f of FAMILIES) f.types.forEach((t, i) => Object.assign(TYPES[t], { family: f.id, colour: f.colour, shape: SHAPES[i] }));
 const TYPE_ORDER = FAMILIES.flatMap(f => f.types);
-// Spellings the editorial list or a saved snapshot may use for the data's country names.
-const COUNTRY_ALIASES = { 'Czech Republic': 'Czechia', 'United States of America': 'United States', "People's Republic of China": 'China' };
 const params = new URLSearchParams(location.search);
 // "contemporary" = Realtime Calendar (Realtime Intelligence). Anything else = the Historical Calendar (Retrospective
 // Intelligence): one archive from 1980 to today. Old decade links (?period=1990s) still work and open that decade's first month.
@@ -272,7 +236,7 @@ const activePeriod = requestedPeriod === 'contemporary' ? 'contemporary' : 'hist
 const HISTORY_FROM = '1980-01-01', DECADES = ['1980s', '1990s', '2000s', '2010s', '2020s'];
 const decadeOf = d => d.slice(0, 3) + '0s';
 const decadeCache = new Map();
-let editorial = events.slice(), pastEvents = [], dataGenerated = '';
+let events = [], dataGenerated = '';
 // The event types picked in the chips (none = every type); ?types=referendum,summit opens with them picked.
 let activeTypes = new Set((params.get('types') || '').split(',').filter(t => TYPES[t])), calView = params.get('view') === 'year' ? 'year' : 'month';
 let highlighted = (params.get('countries') || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -298,17 +262,23 @@ async function loadDecade(d) {
 }
 async function loadHistory() {
   const decades = activePeriod === 'contemporary' ? [...new Set(contemporaryRange().map(decadeOf))] : DECADES;
-  pastEvents = (await Promise.all(decades.map(loadDecade))).flat();
-  document.getElementById('data-updated').textContent = dataGenerated ? new Date(dataGenerated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'unavailable';
+  events = (await Promise.all(decades.map(loadDecade))).flat();
+  document.getElementById('data-updated').textContent = dataGenerated ? builtOn() : 'unavailable';
+  showBuildStatus();
 }
-// Editorial/Supabase entries: a referendum on the list is a referendum; a country takes the data's spelling.
-const editorialEvents = () => editorial.map(e => ({ ...e, country: COUNTRY_ALIASES[e.country] || e.country, type: e.type === 'election' && /referend|plebiscite/i.test(e.title) ? 'referendum' : e.type }));
-const ballotKey = e => e.date + '|' + e.country + '|' + e.type;
-// Editorial/Supabase entries win over the data files when both list the same country's election or referendum that day.
-function allEvents() {
-  const ed = editorialEvents(), seen = new Set(ed.map(ballotKey));
-  return [...ed, ...pastEvents.filter(e => !((e.type === 'election' || e.type === 'referendum') && seen.has(ballotKey(e))))];
+const builtOn = () => new Date(dataGenerated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+// The daily build's status, from the data itself: it runs every morning (05:23 UTC), so data more than a day and a
+// half old means a run failed, for instance because a source failed and the build refused to write.
+function showBuildStatus() {
+  const chip = document.getElementById('status-calendar'), hours = dataGenerated ? (Date.now() - Date.parse(dataGenerated)) / 36e5 : null;
+  const [state, label, note] = hours == null ? ['unavailable', 'Daily build · unavailable', 'The calendar data could not be loaded.']
+    : hours <= 36 ? ['ready', 'Daily build · up to date', '']
+    : ['stale', 'Daily build · overdue', `Not rebuilt since ${builtOn()}; the outlook may be out of date.`];
+  chip.dataset.state = state;
+  chip.querySelector('.source-label').textContent = label;
+  document.getElementById('calendar-source-note').textContent = note;
 }
+const allEvents = () => events;
 // "Soviet Union / Russia" is Russia too: a highlighted country matches either half of a historical name.
 const countryParts = c => String(c).split(' / ').map(s => s.trim().toLowerCase());
 // Everything but the type filter: the period, the highlighted countries and the search.
@@ -553,45 +523,14 @@ document.querySelector('.prp-tabs').addEventListener('keydown', e => {
 document.getElementById('countryadd').onclick = addCountry;
 document.getElementById('countrypick').addEventListener('keydown', e => { if (e.key === 'Enter') addCountry(); });
 document.getElementById('countrypick').addEventListener('change', addCountry);
-if (activePeriod !== 'contemporary') {
-  document.querySelector('.source-health').hidden = true;
-  document.querySelector('.calendar-history').hidden = true;
-}
+if (activePeriod !== 'contemporary') document.querySelector('.source-health').hidden = true;
 const note = document.getElementById('period-note');
 note.innerHTML = activePeriod === 'contemporary'
-  ? '<b>Coverage.</b> The last six months and an 18-month outlook. Upcoming elections come from the editorial calendar, scheduled referendums and summits from Wikipedia; past events cover seventeen types, from elections and new leaders to court rulings, protests and sanctions.'
+  ? '<b>Coverage.</b> The last six months and an 18-month outlook. Upcoming elections and referendums come from Wikipedia\'s national electoral calendars and the Political Atlas, summits from Wikipedia\'s lists; past events cover seventeen types, from elections and new leaders to court rulings, protests and sanctions.'
   : '<b>Coverage.</b> 1980 to today: elections, referendums, new leaders and coups (Political Retrospective), outbreaks of armed conflict (UCDP), assassinations, battles, attacks, epidemics, disasters and treaties, and referendums, summits and state visits, parliamentary votes, court rulings, protests and strikes, ceasefires and peace talks, sanctions, party contests, inaugurations and resignations (Wikidata, events covered in several Wikipedia languages); European Council meetings and G7, G20, NATO and other summits (Wikipedia\'s lists); and, since January 2026, the news of each day (Wikipedia\'s Current events portal).';
 document.getElementById('calendar-range').textContent = activePeriod === 'contemporary' ? '· last 6 months + 18-month outlook' : '· 1980–today';
 document.getElementById('search').oninput = render;
 showUpdated(); setInterval(showUpdated, 60000);
 init();
 
-const localEvents=events.slice();
-const snapshotDateInput=document.getElementById('snapshot-date');
-const snapshotNote=document.getElementById('snapshot-note');
-const utcToday=new Date().toISOString().slice(0,10);
-snapshotDateInput.max=utcToday;
-snapshotDateInput.value=utcToday;
-function setCalendarArchiveStatus(state,label,note){const chip=document.getElementById('status-calendar');chip.dataset.state=state;const text=chip.querySelector('.source-label');if(text)text.textContent=label;document.getElementById('calendar-source-note').textContent=note}
-async function loadCalendarSnapshot(requestedDate){
-  const date=requestedDate||snapshotDateInput.value||utcToday;
-  setCalendarArchiveStatus('loading','Supabase archive · loading','Looking for the latest saved calendar snapshot on or before the selected day.');
-  try{
-    if(!globalThis.GTTSDB)throw new Error('Supabase client is not configured');
-    const snapshot=await globalThis.GTTSDB.calendarSnapshotOnOrBefore(date);
-    if(!snapshot){editorial=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · no snapshot','No saved snapshot exists for this date yet; showing the local editorial catalog.');snapshotNote.textContent='No archive captured on or before '+date+'.';render();return}
-    editorial=(Array.isArray(snapshot.events)?snapshot.events:[]).map(e=>({date:String(e.date).slice(0,10),country:e.country,title:e.title,type:e.type,status:e.status,source:e.source}));
-    const state=snapshot.state||'stale';
-    const captured=String(snapshot.snapshot_date||'').slice(0,10);
-    const sourceDate=String(snapshot.source_data_date||'').slice(0,10);
-    setCalendarArchiveStatus(state,'Supabase archive · '+state+' · '+captured,snapshot.message||'Saved calendar snapshot loaded.');
-    snapshotNote.textContent=(captured===date?'Snapshot '+captured:'Showing nearest saved snapshot '+captured)+' · '+editorial.length+' upcoming entries · source data '+sourceDate+'.';
-  }catch(error){editorial=localEvents.slice();setCalendarArchiveStatus('unavailable','Supabase archive · unavailable','Could not reach the Supabase archive; showing the local editorial catalog.');snapshotNote.textContent=String(error.message||'Database unavailable');}
-  render();
-}
-snapshotDateInput.onchange=()=>loadCalendarSnapshot(snapshotDateInput.value);
-function shiftSnapshotDate(direction){const d=new Date((snapshotDateInput.value||utcToday)+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+direction);if(d.toISOString().slice(0,10)>utcToday)d.setTime(Date.parse(utcToday+'T00:00:00Z'));snapshotDateInput.value=d.toISOString().slice(0,10);loadCalendarSnapshot(snapshotDateInput.value)}
-document.getElementById('snapshot-prev').onclick=()=>shiftSnapshotDate(-1);
-document.getElementById('snapshot-next').onclick=()=>shiftSnapshotDate(1);
-loadCalendarSnapshot(utcToday);
 </script><script src="research-workspace.js"></script></body></html>

@@ -25,17 +25,22 @@ const focusHits = new Set(); // states (GW codes) Documentary mode is discussing
 const dateFor = y => `${y}-07-01`;
 const activeOn = date => state.features.filter(f => f.properties.s <= date && date <= f.properties.e);
 const levelIn = (w, y) => w.years.find(([yy]) => yy === y)?.[1] || 0;
+// Where a war was fought: the same places every year, or the year's own for a war that moved (World War II, a
+// government fighting rebels abroad).
+const locIn = (w, y) => w.locYears?.[y] || w.loc;
 const warsIn = y => state.data.wars.filter(w => levelIn(w, y)).sort((a, b) => levelIn(b, y) - levelIn(a, y) || a.name.localeCompare(b.name));
 const nameOf = (gw, y) => {
   const f = activeOn(dateFor(y)).find(x => x.properties.gw === gw) || state.features.find(x => x.properties.gw === gw);
   return f ? displayName(gw, f.properties.name, dateFor(y)) : `State ${gw}`;
 };
+// The places a war was fought in that year, by name (`where` names places the map has no shape for).
+const placesIn = (w, y) => w.where || [...new Set(locIn(w, y).map(gw => nameOf(gw, y)))];
 // Per-country status this year: war or minor conflict on its territory, or fighting only abroad.
 function statusMap(y) {
   const m = new Map();
   for (const w of warsIn(y)) {
     const lvl = levelIn(w, y);
-    for (const gw of w.loc) { const cur = m.get(gw); if (cur !== 'war') m.set(gw, lvl === 2 ? 'war' : 'minor'); }
+    for (const gw of locIn(w, y)) { const cur = m.get(gw); if (cur !== 'war') m.set(gw, lvl === 2 ? 'war' : 'minor'); }
     for (const gw of w.states) if (!m.has(gw)) m.set(gw, 'abroad');
   }
   return m;
@@ -95,7 +100,7 @@ window.PRPFocus?.listen({
 
 function renderMap() {
   const y = state.year, date = dateFor(y), status = statusMap(y), tip = $('#tooltip');
-  const involved = new Set(state.war ? [...state.war.loc, ...state.war.states] : []);
+  const involved = new Set(state.war ? [...locIn(state.war, y), ...state.war.states] : []);
   g.selectAll('path.shape')
     .data(activeOn(date), d => `${d.properties.gw}|${d.properties.s}`)
     .join('path')
@@ -104,7 +109,7 @@ function renderMap() {
     .attr('fill', d => FILL[status.get(d.properties.gw) || 'peace'])
     .on('mousemove', (ev, d) => {
       const box = $('.map-wrap').getBoundingClientRect();
-      const ws = warsIn(y).filter(w => w.loc.includes(d.properties.gw) || w.states.includes(d.properties.gw));
+      const ws = warsIn(y).filter(w => locIn(w, y).includes(d.properties.gw) || w.states.includes(d.properties.gw));
       tip.innerHTML = `<strong>${esc(displayName(d.properties.gw, d.properties.name, date))}</strong>${ws.length ? ws.slice(0, 3).map(w => esc(w.name)).join('<br>') + (ws.length > 3 ? `<br>+${ws.length - 3} more` : '') : 'No recorded armed conflict'}`;
       tip.hidden = false;
       tip.style.left = `${Math.max(4, Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8))}px`;
@@ -178,10 +183,10 @@ function warDetail(w, y) {
   const l = levelIn(w, y);
   const activeYears = w.years.length;
   const warYears = w.years.filter(([, x]) => x === 2).length;
-  const places = w.loc.map(gw => nameOf(gw, y)).filter((v, i, a) => a.indexOf(v) === i);
+  const places = w.where || [...new Set(w.loc.map(gw => nameOf(gw, y)))];
   const intro = w.src === 'cow'
     ? `${esc(w.name)} was ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())} fought ${w.span.replace('–', ' to ')}${w.deaths ? `, with about ${num(w.deaths)} battle deaths according to the Correlates of War project` : ''}.`
-    : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)} in ${esc(places.join(', '))}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
+    : `UCDP records this ${esc(w.type.toLowerCase())} over ${esc(w.aim)}${places.length ? ` in ${esc(places.join(', '))}` : ''}, active in ${activeYears} year${activeYears > 1 ? 's' : ''} between ${w.years[0][0]} and ${w.years.at(-1)[0]}${warYears ? `, ${warYears} of them at war level (1,000+ battle deaths)` : ''}.`;
   return `<button class="close" id="close-war" aria-label="Back to the year">×</button>
     <h2>${esc(w.name)}</h2><p class="sub">${esc(w.type)} · ${span(w)}</p>
     <p>${intro}</p>
@@ -199,7 +204,7 @@ function renderPanel() {
   if (state.war) html = warDetail(state.war, y);
   else if (state.selected) {
     const gw = state.selected;
-    const here = warsIn(y).filter(w => w.loc.includes(gw)), abroad = warsIn(y).filter(w => !w.loc.includes(gw) && w.states.includes(gw));
+    const here = warsIn(y).filter(w => locIn(w, y).includes(gw)), abroad = warsIn(y).filter(w => !locIn(w, y).includes(gw) && w.states.includes(gw));
     // Every conflict this state took part in or hosted, across the whole period, oldest first.
     const ever = state.data.wars.filter(w => w.loc.includes(gw) || w.states.includes(gw)).sort((a, b) => a.years[0][0] - b.years[0][0]);
     const onSoil = ever.filter(w => w.loc.includes(gw)), away = ever.filter(w => !w.loc.includes(gw));
@@ -243,7 +248,7 @@ function renderTable() {
   $('#table-title').textContent = `Armed conflicts in ${y} · ${list.length}`;
   $('#th-year').textContent = `In ${y}`;
   $('#table-rows').innerHTML = list.map(w => {
-    const l = levelIn(w, y), places = [...new Set(w.loc.map(gw => nameOf(gw, y)))];
+    const l = levelIn(w, y), places = placesIn(w, y);
     return `<tr data-id="${w.id}"${state.war === w ? ' class="sel"' : ''}><td><button type="button" class="rowbtn">${esc(w.name)}</button></td><td class="mono">${esc(w.type)}</td>
       <td><span class="lvl l${l}">${l === 2 ? 'War' : 'Minor'}</span></td><td class="mono">${span(w)}</td><td class="num">${w.deaths ? num(w.deaths) : '–'}</td>
       <td class="wrap">${esc(places.slice(0, 4).join(', '))}${places.length > 4 ? ` +${places.length - 4}` : ''}</td></tr>`;
@@ -354,7 +359,9 @@ function yearStory(y) {
   if (ended.length) parts.push(`Coming to an end: ${ended.slice(0, 2).map(w => w.name.replace(/:/, ',')).join('; ')}.`);
   const focusWar = big.find(w => state.focus[w.id]);
   if (focusWar) parts.push(`War Focus follows ${state.focus[focusWar.id][0].name} month by month.`);
-  const named = [...big, ...ended.slice(0, 2)], gws = [...new Set((named.length ? named : all).flatMap(w => w.loc))];
+  // The places of the wars named (those ending, as of their last year), or of every conflict when none is named.
+  const named = [...big.map(w => locIn(w, y)), ...ended.slice(0, 2).map(w => locIn(w, y - 1))];
+  const gws = [...new Set((named.length ? named : all.map(w => locIn(w, y))).flat())];
   return { text: parts.join(' '), focus: gws.length ? { countries: gws.map(gw => `gw:${gw}`), padding: 36 } : { reset: true } };
 }
 window.jdpiDocumentary = {

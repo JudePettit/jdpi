@@ -361,37 +361,32 @@
     }
   }
 
-  function selectLinkedCountry(attempt = 0) {
+  // ?country= (links from the calendar, the watchlist and the evidence board) selects that country once the Headline
+  // Tracker's country list is ready: countriesReady and findCountry in headlines.html, which match ISO codes, names and
+  // older names. It waits for the list, however long that takes, and a country the tracker does not cover says so.
+  function selectLinkedCountry() {
     const wanted = new URLSearchParams(location.search).get("country");
     if (!wanted || !document.getElementById("countryname")) return;
-    try {
-      if (typeof geoLayer !== "undefined" && geoLayer && typeof countryIdentity === "function") {
-        const layers = geoLayer.countryLayers || [];
-        let found = null;
-        if (layers.length) found = layers.find((layer) => countryIdentity(layer.feature?.properties || {}).name.toLowerCase() === wanted.toLowerCase());
-        else if (geoLayer.eachLayer) geoLayer.eachLayer((layer) => { if (!found && countryIdentity(layer.feature?.properties || {}).name.toLowerCase() === wanted.toLowerCase()) found = layer; });
-        if (found) {
-          const id = countryIdentity(found.feature?.properties || {});
-          if (typeof loadNews === "function" && id.code) loadNews(id.code, id.name);
-          return;
-        }
+    let ready = null;
+    try { ready = countriesReady; } catch { /* the page's script stopped before its country list */ }
+    Promise.resolve(ready).then((list) => {
+      const found = Array.isArray(list) && typeof findCountry === "function" ? findCountry(wanted) : null;
+      if (found) { if (!selected && typeof loadNews === "function") loadNews(found.code, found.name); return; }
+      const listed = Array.isArray(list) && list.length > 0;
+      const countryName = document.getElementById("countryname");
+      const countryCode = document.getElementById("countrycode");
+      const newsState = document.getElementById("newsstate");
+      const articles = document.getElementById("articles");
+      if (countryName && newsState && articles && countryName.textContent === "Select a country") {
+        countryName.textContent = wanted;
+        countryCode.textContent = listed ? "Not covered" : "Country list unavailable";
+        newsState.textContent = listed ? "Country not covered" : "Country could not be matched";
+        articles.replaceChildren();
+        const empty = document.createElement("div"); empty.className = "empty";
+        empty.textContent = listed ? wanted + " is not one of the countries the Global Headline Tracker covers. Choose one from the list." : "The country could not be matched because the country list is unavailable.";
+        articles.append(empty);
       }
-    } catch { /* Boundary data may still be loading. */ }
-    if (attempt < 100) { setTimeout(() => selectLinkedCountry(attempt + 1), 100); return; }
-    const boundaryStatus = document.getElementById("status-boundaries")?.dataset.state;
-    const countryName = document.getElementById("countryname");
-    const countryCode = document.getElementById("countrycode");
-    const newsState = document.getElementById("newsstate");
-    const articles = document.getElementById("articles");
-    if (countryName && newsState && articles && countryName.textContent === "Select a country") {
-      countryName.textContent = wanted;
-      countryCode.textContent = boundaryStatus === "ready" ? "Outside current map coverage" : "Map boundary status unavailable";
-      newsState.textContent = boundaryStatus === "ready" ? "Country outside current coverage" : "Country could not be matched";
-      articles.replaceChildren();
-      const empty = document.createElement("div"); empty.className = "empty";
-      empty.textContent = boundaryStatus === "ready" ? wanted + " is outside the Headlines module’s current country coverage." : "The country could not be matched because map boundaries are unavailable.";
-      articles.append(empty);
-    }
+    });
   }
 
   function addStyles() {

@@ -36,12 +36,24 @@
 .maplegend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px 0;color:var(--prp-text-2);font-size:12px}
 .maplegend i{display:inline-block;width:12px;height:10px;margin-right:6px;border:1px solid var(--hl-covered-line);border-radius:2px;vertical-align:-1px;background:var(--hl-covered)}
 .maplegend i.sel{border-color:var(--hl-selected);background:var(--hl-selected)}
+.maplegend i.dot{width:10px;border-radius:50%}
 .mapfig figcaption{margin:8px 14px 14px}
+/* Country picker and A–Z list: the keyboard and phone way to choose a country (the countries in outlets.json) */
+.countrybar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--prp-line-soft)}
+.countrybar .prp-select{flex:1;min-width:0;max-width:320px}
+.country-az{border-top:1px solid var(--prp-line-soft)}
+.country-az summary{padding:10px 14px;cursor:pointer;color:var(--prp-text-2);font:500 13px var(--prp-font-ui)}
+.country-az summary:hover{color:var(--prp-text)}
+.az-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 8px;margin:0;padding:0 10px 12px;list-style:none}
+.az-item{width:100%;min-height:32px;padding:4px 6px;border:0;border-radius:var(--prp-radius-sm);background:none;color:var(--prp-link);text-align:left;font:13px/1.3 var(--prp-font-ui)}
+.az-item:hover{background:var(--prp-surface-3)}
+.az-item[aria-current=true]{background:var(--prp-accent-soft);color:var(--prp-text);font-weight:600}
 /* Leaflet, restyled from tokens (country fills are CSS, so they beat inline fills and follow the theme) */
 .mapwrap .leaflet-container{background:var(--prp-map-water);font:12px/1.4 var(--prp-font-ui)}
 .country{fill:var(--hl-covered);stroke:var(--hl-covered-line);transition:fill .14s}
 .country:hover{fill:var(--hl-hover)}
 .country.selected,.country.selected:hover{fill:var(--hl-selected);stroke:var(--prp-surface)}
+.country-dot{stroke-width:1.5px}
 .mapwrap .leaflet-bar{border:1px solid var(--prp-line-strong);border-radius:var(--prp-radius-sm);box-shadow:var(--prp-shadow-1);background-clip:border-box}
 .mapwrap .leaflet-bar a{width:30px;height:30px;border-bottom:1px solid var(--prp-line);background:var(--prp-surface);color:var(--prp-text);font:500 17px/29px var(--prp-font-ui)}
 .mapwrap .leaflet-bar a:first-child{border-radius:var(--prp-radius-sm) var(--prp-radius-sm) 0 0}.mapwrap .leaflet-bar a:last-child{border-bottom:0;border-radius:0 0 var(--prp-radius-sm) var(--prp-radius-sm)}
@@ -107,7 +119,8 @@
 
 @media(max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}.mapwrap{height:420px}.articles{flex:none;height:auto;overflow:visible}}
 @media(max-width:600px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}.mapwrap{height:320px}
-  .newsbar,.viewbar{padding-left:14px;padding-right:14px}.articles{padding:0 14px}:root .map-layer{padding:0 8px;font-size:11.5px}}
+  .newsbar,.viewbar{padding-left:14px;padding-right:14px}.articles{padding:0 14px}:root .map-layer{padding:0 8px;font-size:11.5px}
+  .countrybar .prp-select{max-width:none;height:36px}.az-list{grid-template-columns:repeat(2,minmax(0,1fr))}.az-item{min-height:38px}}
 @media(prefers-reduced-motion:reduce){.country{transition:none}.source-chip[data-state=loading]::before{animation:none}}
 </style>
 <script src="../design/prp-bar.js" data-suite="rt" data-module="headlines" data-shell="../" defer></script>
@@ -116,40 +129,112 @@
 <header class="front">
   <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> Global Headline Tracker</div>
   <h1 class="prp-title">Global Headline Tracker</h1>
-  <p class="prp-dek">Pick a country on the map to read the stories leading its most-read news outlets over the last 24 hours, or step back through daily, weekly, monthly and yearly archives of its top stories.</p>
+  <p class="prp-dek">Pick a country on the map or from the list to read the stories leading its most-read news outlets over the last 24 hours, or step back through daily, weekly, monthly and yearly archives of its top stories.</p>
   <div class="prp-meta"><span>Coverage: Europe, North America, China, Israel, Russia, Japan and Saudi Arabia</span><span>Now <b id="updated">—</b></span><span>Source: national outlets’ front pages, translated to English</span></div>
   <div class="source-health" aria-label="Global Headline Tracker data source status" role="status" aria-live="polite"><span class="prp-label">Data status</span><span class="source-chip prp-status" id="status-boundaries" data-state="loading"><span class="source-label">Country boundaries · checking</span></span><span class="source-chip prp-status" id="status-tiles" data-state="loading"><span class="source-label">Map tiles · checking</span></span><span class="source-chip prp-status" id="status-news" data-state="idle"><span class="source-label">Headlines · waiting for a country</span></span><span class="source-chip prp-status" id="status-archive" data-state="idle"><span class="source-label">Local history · not checked</span></span><span class="source-chip prp-status" id="status-database" data-state="idle"><span class="source-label">Headline archive · waiting for a country</span></span></div>
 </header>
 <nav class="prp-tabs subnav" role="tablist" aria-label="Global Headline Tracker views"><a role="tab" class="headlines-submodule" data-view="current" href="headlines.html?view=current">Last 24 hours</a><a role="tab" class="headlines-submodule" data-view="archive" data-period="day" href="headlines.html?view=archive&amp;period=day">Daily archive</a><a role="tab" class="headlines-submodule" data-view="archive" data-period="week" href="headlines.html?view=archive&amp;period=week">Weekly archive</a><a role="tab" class="headlines-submodule" data-view="archive" data-period="month" href="headlines.html?view=archive&amp;period=month">Monthly archive</a><a role="tab" class="headlines-submodule" data-view="archive" data-period="year" href="headlines.html?view=archive&amp;period=year">Yearly top stories</a></nav>
 <main class="layout" role="tabpanel" aria-label="Global Headline Tracker">
-  <section class="prp-panel mappanel" aria-label="Map of covered countries">
-    <div class="prp-panel-head"><b>Countries</b><span class="maphint">Click a highlighted country to load its headlines.</span></div>
+  <section class="prp-panel mappanel" aria-label="Covered countries">
+    <div class="prp-panel-head"><b>Countries</b><span class="maphint">Click a highlighted country, or choose one from the list.</span></div>
+    <div class="countrybar"><label class="prp-label" for="countryPick">Country</label><select class="prp-select" id="countryPick" disabled><option value="">Loading countries…</option></select></div>
     <figure class="prp-figure mapfig">
       <div class="mapwrap"><div id="map"></div></div>
-      <div class="maplegend"><span><i aria-hidden="true"></i>Covered country</span><span><i class="sel" aria-hidden="true"></i>Selected</span></div>
-      <figcaption><b>Figure 1.</b> The countries the tracker covers: Europe, North America, China, Israel, Russia, Japan and Saudi Arabia. Boundaries: Natural Earth via datasets/geo-countries; basemap © OpenStreetMap contributors © CARTO.</figcaption>
+      <div class="maplegend"><span><i aria-hidden="true"></i>Covered country</span><span><i class="dot" aria-hidden="true"></i>Small country</span><span><i class="sel" aria-hidden="true"></i>Selected</span></div>
+      <figcaption><b>Figure 1.</b> The countries the tracker covers: Europe, North America, China, Israel, Russia, Japan and Saudi Arabia. Countries too small to click at this scale also have a round marker. Boundaries: Natural Earth via datasets/geo-countries, simplified; basemap © Esri.</figcaption>
     </figure>
+    <details class="country-az"><summary>All <span id="countryCount">covered</span> countries, A–Z</summary><ul class="az-list" id="countryList"></ul></details>
   </section>
   <section class="prp-panel newspanel" aria-labelledby="countryname">
     <div class="newsbar"><div><h2 class="countryname" id="countryname">Select a country</h2><div class="countrycode" id="countrycode">World news by country</div></div><div class="newsstatus"><span id="newsstate">Ready</span><button type="button" class="prp-btn sm" id="refresh">↻ Refresh</button></div></div>
     <div class="viewbar"><span class="caption" id="module-caption">Top 3 stories from each of the country’s 5 most-read outlets · translated to English</span>
       <div class="history-controls"><input type="hidden" id="historyPeriod" value="day"><label class="prp-label" id="historyLabel" for="historyDate">Day</label><button type="button" class="prp-btn navbtn history-nav" id="historyPrev" aria-label="Previous period">‹</button><input class="prp-input" id="historyDate" type="date"><button type="button" class="prp-btn navbtn history-nav" id="historyNext" aria-label="Next period">›</button></div></div>
-    <div class="articles" id="articles" aria-live="polite"><div class="empty">Choose a highlighted country on the map<br>to read its top stories.</div></div>
+    <div class="articles" id="articles" aria-live="polite"><div class="empty">Choose a country on the map or from the list<br>to read its top stories.</div></div>
   </section>
 </main>
 <footer class="prp-sources">
   <p><b>Top stories.</b> For each covered country, the top three front-page stories of its five most-read news outlets, collected once a day into the PRP headline archive and translated into English; links go to the original-language articles. A day lists each outlet’s stories in front-page order; a week, month or year ranks the stories that stayed on front pages longest.</p>
   <p><b>Fallback.</b> When the archive cannot be reached, the tracker queries <a href="https://www.gdeltproject.org/" target="_blank" rel="noreferrer">GDELT DOC 2.0 ↗</a>: the 100 highest relevance-ranked results, from which up to 20 stories are spread across publishers. Relevance is a proxy for prominence, not a popularity score, and English-language coverage varies by country. Windows you load are also saved in this browser.</p>
-  <p><b>Map.</b> Boundaries: Natural Earth via datasets/geo-countries. Basemap © OpenStreetMap contributors © CARTO. <b>Research tools.</b> The evidence board and watchlist are stored in this browser only.</p>
+  <p><b>Map.</b> Boundaries: Natural Earth 1:10m via datasets/geo-countries, simplified for this map (headlines/boundaries.json). Basemap tiles © Esri: Esri, HERE, Garmin, © OpenStreetMap contributors. <b>Research tools.</b> The evidence board and watchlist are stored in this browser only.</p>
 </footer>
-</div><script>window.addEventListener('error',event=>{if(/L is not defined/.test(String(event.message||''))){for(const id of ['status-boundaries','status-tiles','status-news']){const item=document.getElementById(id);if(item){item.dataset.state='unavailable';const label=item.querySelector('.source-label');if(label)label.textContent=id==='status-news'?'Headlines · map library unavailable':id==='status-tiles'?'Map library · unavailable':'Country boundaries · unavailable'}}}});</script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script>function setSourceStatus(id,state,label){const el=document.getElementById(id);if(!el)return;el.dataset.state=state;const text=el.querySelector('.source-label');if(text)text.textContent=label}const dateFmt=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});let selected=null;let articlesCache={};function showUpdated(){let t=new Date();document.getElementById('updated').textContent=dateFmt.format(t)+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'}showUpdated();setInterval(showUpdated,60000);function selectDiverseArticles(rows,limit=20){const publishers=new Map(),seenUrls=new Set();for(const article of rows||[]){if(!article||typeof article!=="object")continue;const url=String(article.url||article.article_url||"").trim(),title=String(article.title||article.socialimage||"").trim();if(!/^https?:\/\//i.test(url)||!title||seenUrls.has(url.toLowerCase()))continue;seenUrls.add(url.toLowerCase());let domain=String(article.domain||"").trim();if(!domain){try{domain=new URL(url).hostname}catch{domain="Unknown source"}}const key=domain.toLowerCase().replace(/^www\./,"");if(!publishers.has(key))publishers.set(key,[]);publishers.get(key).push({...article,domain})}const selected=[];for(let offset=0;selected.length<limit;offset++){let added=false;for(const articles of publishers.values()){if(!articles[offset])continue;selected.push(articles[offset]);added=true;if(selected.length===limit)break}if(!added)break}return selected}// Clickable country boundaries from datasets/geo-countries (Natural Earth). Article lookup uses GDELT's rolling 24-hour DOC index.
-// Basemap: CARTO light or dark to match the PRP theme, swapped on 'prp:themechange'. Country fills are page tokens in CSS.
+</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script>function setSourceStatus(id,state,label){const el=document.getElementById(id);if(!el)return;el.dataset.state=state;const text=el.querySelector('.source-label');if(text)text.textContent=label}const dateFmt=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});let selected=null;let articlesCache={};function showUpdated(){let t=new Date();document.getElementById('updated').textContent=dateFmt.format(t)+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'}showUpdated();setInterval(showUpdated,60000);function selectDiverseArticles(rows,limit=20){const publishers=new Map(),seenUrls=new Set();for(const article of rows||[]){if(!article||typeof article!=="object")continue;const url=String(article.url||article.article_url||"").trim(),title=String(article.title||article.socialimage||"").trim();if(!/^https?:\/\//i.test(url)||!title||seenUrls.has(url.toLowerCase()))continue;seenUrls.add(url.toLowerCase());let domain=String(article.domain||"").trim();if(!domain){try{domain=new URL(url).hostname}catch{domain="Unknown source"}}const key=domain.toLowerCase().replace(/^www\./,"");if(!publishers.has(key))publishers.set(key,[]);publishers.get(key).push({...article,domain})}const selected=[];for(let offset=0;selected.length<limit;offset++){let added=false;for(const articles of publishers.values()){if(!articles[offset])continue;selected.push(articles[offset]);added=true;if(selected.length===limit)break}if(!added)break}return selected}// Clickable countries from headlines/boundaries.json (Natural Earth, simplified by headlines/scripts/build-boundaries.mjs). Article lookup uses GDELT's rolling 24-hour DOC index.
+// Basemap: Esri light or dark grey to match the PRP theme, swapped on 'prp:themechange'. Country fills are page tokens in CSS.
+// Without Leaflet (its CDN unreachable) there is no map, but the country list still works.
 const prpThemeNow=()=>document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');const tileUrl=()=>'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/'+(prpThemeNow()==='dark'?'World_Dark_Gray_Base':'World_Light_Gray_Base')+'/MapServer/tile/{z}/{y}/{x}';
-const map=L.map('map',{zoomControl:true,scrollWheelZoom:false,minZoom:1,maxZoom:5,worldCopyJump:true,zoomSnap:.25}).fitBounds([[8,-128],[72,146]]);const baseTiles=L.tileLayer(tileUrl(),{attribution:'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',maxZoom:16});let tileLoaded=0,tileFailed=0;baseTiles.on('tileload',()=>{tileLoaded++;setSourceStatus('status-tiles',tileFailed?'degraded':'ready',tileFailed?'Map tiles · partial coverage':'Map tiles · available')});baseTiles.on('tileerror',()=>{tileFailed++;setSourceStatus('status-tiles',tileLoaded?'degraded':'unavailable',tileLoaded?'Map tiles · partial coverage':'Map tiles · unavailable')});baseTiles.addTo(map);window.addEventListener('prp:themechange',()=>baseTiles.setUrl(tileUrl()));let geoLayer;const isoFix={USA:'US',GBR:'GB',FRA:'FR',DEU:'DE',RUS:'RU',CHN:'CN',IND:'IN',BRA:'BR',ZAF:'ZA',KOR:'KR',PRK:'KP',IRN:'IR',SYR:'SY',TUR:'TR',AUS:'AU',CAN:'CA',MEX:'MX',JPN:'JP',IDN:'ID',SAU:'SA',EGY:'EG',UKR:'UA',ISR:'IL',NZL:'NZ',NGA:'NG',KEN:'KE',ETH:'ET',ESP:'ES',ITA:'IT',POL:'PL',SWE:'SE',NOR:'NO',FIN:'FI',CHE:'CH',ARG:'AR',COL:'CO',PAK:'PK',BGD:'BD',VNM:'VN',THA:'TH',MYS:'MY',PHL:'PH',IRQ:'IQ',AFG:'AF',GRC:'GR',PRT:'PT',NLD:'NL',BEL:'BE',CZE:'CZ',AUT:'AT',HUN:'HU',ROU:'RO',BGR:'BG',SRB:'RS',HRV:'HR',ISL:'IS'};function normalizeCountryCode(value){const code=String(value||'').trim().toUpperCase();if(/^[A-Z]{2}$/.test(code))return code;if(/^[A-Z]{3}$/.test(code))return isoFix[code]||code;return null}function countryIdentity(properties={}){const code=normalizeCountryCode(properties['ISO3166-1-Alpha-2']||properties.ISO_A2||properties.ISO_A2_EH)||normalizeCountryCode(properties['ISO3166-1-Alpha-3']||properties.ISO_A3||properties.ISO_A3_EH);return {code,name:properties.name||properties.ADMIN||properties.NAME||code||'Unknown country'}}function isSelectedCountry(properties,code){return countryIdentity(properties).code===code}
-const token=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();const countryStyle=()=>({className:'country',color:token('--hl-covered-line'),weight:.6,fillColor:token('--hl-covered'),fillOpacity:.9});
+const map=window.L?L.map('map',{zoomControl:true,scrollWheelZoom:false,minZoom:1,maxZoom:5,worldCopyJump:true,zoomSnap:.25}).fitBounds([[8,-128],[72,146]]):null;if(map){const baseTiles=L.tileLayer(tileUrl(),{attribution:'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',maxZoom:16});let tileLoaded=0,tileFailed=0;baseTiles.on('tileload',()=>{tileLoaded++;setSourceStatus('status-tiles',tileFailed?'degraded':'ready',tileFailed?'Map tiles · partial coverage':'Map tiles · available')});baseTiles.on('tileerror',()=>{tileFailed++;setSourceStatus('status-tiles',tileLoaded?'degraded':'unavailable',tileLoaded?'Map tiles · partial coverage':'Map tiles · unavailable')});baseTiles.addTo(map);window.addEventListener('prp:themechange',()=>baseTiles.setUrl(tileUrl()))}else setSourceStatus('status-tiles','unavailable','Map library · unavailable');let geoLayer;
+// Each shape carries its ISO 3166-1 alpha-2 code and name (research-workspace.js reads them too).
+function countryIdentity(properties={}){const code=/^[A-Z]{2}$/.test(properties.code||'')?properties.code:null;return {code,name:properties.name||code||'Unknown country'}}
+const token=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();const countryStyle=f=>{const dot=f?.geometry?.type==='Point';return {className:dot?'country country-dot':'country',color:token('--hl-covered-line'),weight:dot?1.5:.6,fillColor:token('--hl-covered'),fillOpacity:.9}};
 // The selected country is a class on its path (CSS paints it in the accent), so other code restyling the layer can't hide it.
-function markSelected(code){if(!geoLayer)return;geoLayer.eachLayer(l=>{const on=!!code&&countryIdentity(l.feature?.properties||{}).code===code;l.getElement?.()?.classList.toggle('selected',on);if(on)l.bringToFront()})}
-const includedCountryCodes=new Set('AD AL AM AT AX AZ BA BE BG BY CH CY CZ DE DK EE ES FI FO FR GB GE GG GI GR HR HU IE IM IS IT JE LI LT LU LV MC MD ME MK MT NL NO PL PT RO RS RU SE SI SJ SK SM TR UA VA AI AG AW BB BL BM BQ BS BZ CA CR CU CW DM DO GD GL GP GT HN HT JM KN KY LC MF MQ MS MX NI PA PM PR SX TC TT US VC VG VI CN IL JP SA'.split(/\s+/));function countryFeaturesInScope(features){return features.filter(f=>includedCountryCodes.has(countryIdentity(f.properties||{}).code))}
+// Markers stay above every shape (Italy must not cover San Marino's), and the picker and the A–Z list follow the selection.
+function markSelected(code){
+  syncCountryPicker(code);
+  if(!geoLayer)return;
+  const dots=[];
+  geoLayer.eachLayer(l=>{const on=!!code&&countryIdentity(l.feature?.properties).code===code;l.getElement?.()?.classList.toggle('selected',on);if(l.feature?.geometry?.type==='Point')dots.push([l,on]);else if(on)l.bringToFront()});
+  for(const [l] of dots)l.bringToFront();
+  for(const [l,on] of dots)if(on)l.bringToFront();
+}
+/* ---------- covered countries: the keys of outlets.json (what is collected each day), named and drawn from boundaries.json ----------
+   The picker and the A–Z list work even without the map. ?country= (research-workspace.js) waits for countriesReady, then findCountry. */
+let countries=[];
+const regionName=(()=>{try{const names=new Intl.DisplayNames(['en-GB'],{type:'region'});return code=>names.of(code)||code}catch{return code=>code}})();
+const getJson=url=>fetch(url).then(r=>{if(!r.ok)throw new Error(url+' returned '+r.status);return r.json()});
+// TopoJSON (quantised, delta-encoded arcs) to GeoJSON features; a shape smaller than the grid (Vatican City) has no geometry, only its dot.
+function topoFeatures(topo,name){
+  const [sx,sy]=topo.transform.scale,[tx,ty]=topo.transform.translate;
+  const arcs=topo.arcs.map(a=>{let x=0,y=0;return a.map(([dx,dy])=>[(x+=dx)*sx+tx,(y+=dy)*sy+ty])});
+  const ring=ids=>ids.flatMap((i,k)=>{const a=i<0?arcs[~i].slice().reverse():arcs[i];return k?a.slice(1):a});
+  const geometry=g=>g.type==='Polygon'?{type:'Polygon',coordinates:g.arcs.map(ring)}:g.type==='MultiPolygon'?{type:'MultiPolygon',coordinates:g.arcs.map(p=>p.map(ring))}:null;
+  return topo.objects[name].geometries.map(g=>({type:'Feature',properties:g.properties||{},geometry:geometry(g)}));
+}
+// Markers grow as the map zooms in: small at the world view, where neighbours' markers would overlap, larger once they separate.
+const dotRadius=()=>{const z=map.getZoom();return z<3?3.5:z<4?5:6.5};
+function drawCountries(features){
+  const dots=features.filter(f=>f.properties.dot).map(f=>({type:'Feature',properties:f.properties,geometry:{type:'Point',coordinates:f.properties.dot}}));
+  geoLayer=L.geoJSON({type:'FeatureCollection',features:[...features.filter(f=>f.geometry),...dots]},{style:countryStyle,pointToLayer:(f,latlng)=>L.circleMarker(latlng,{radius:dotRadius()}),onEachFeature:(f,l)=>{const {code,name}=countryIdentity(f.properties);l.bindTooltip(name,{sticky:true});l.on('click',()=>loadNews(code,name))}}).addTo(map);
+  map.on('zoomend',()=>geoLayer.eachLayer(l=>l.setRadius?.(dotRadius())));
+  markSelected(selected?.code);
+}
+// Names match whatever a link carries: ISO codes, the name shown, older names ("Republic of Serbia"), and "Soviet Union / Russia" by its last part.
+const countryKey=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' and ').replace(/^\s*the\s+/,'').replace(/[^a-z0-9]/g,'');
+function findCountry(query){
+  for(const part of String(query||'').split('/').map(s=>s.trim()).filter(Boolean).reverse()){
+    const key=countryKey(part),upper=part.toUpperCase();
+    const hit=countries.find(c=>c.code===upper||c.iso3===upper||[c.name,...c.aliases].some(n=>countryKey(n)===key));
+    if(hit)return hit;
+  }
+  return null;
+}
+function syncCountryPicker(code){
+  const pick=document.getElementById('countryPick');
+  if(!pick.disabled)pick.value=countries.some(c=>c.code===code)?code:'';
+  document.querySelectorAll('#countryList .az-item').forEach(b=>{if(b.dataset.code===code)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current')});
+}
+function renderCountryPicker(){
+  const pick=document.getElementById('countryPick');
+  if(!countries.length){pick.innerHTML='<option value="">Country list unavailable</option>';return}
+  pick.innerHTML='<option value="" disabled selected>Choose a country…</option>'+countries.map(c=>'<option value="'+escHtml(c.code)+'">'+escHtml(c.name)+'</option>').join('');
+  pick.disabled=false;
+  document.getElementById('countryList').innerHTML=countries.map(c=>'<li><button type="button" class="az-item" data-code="'+escHtml(c.code)+'">'+escHtml(c.name)+'</button></li>').join('');
+  document.getElementById('countryCount').textContent=countries.length;
+  syncCountryPicker(selected?.code);
+}
+// Arrow keys change a select at once, so a choice loads after a short pause rather than for every country passed.
+let pickTimer;document.getElementById('countryPick').addEventListener('change',e=>{const c=countries.find(x=>x.code===e.target.value);clearTimeout(pickTimer);if(c)pickTimer=setTimeout(()=>{if(selected?.code!==c.code)loadNews(c.code,c.name)},250)});
+// On one column the headlines sit below the list, so a choice there brings them into view.
+document.getElementById('countryList').addEventListener('click',e=>{const b=e.target.closest('.az-item'),c=b&&countries.find(x=>x.code===b.dataset.code);if(!c)return;loadNews(c.code,c.name);if(matchMedia('(max-width:1100px)').matches)document.querySelector('.newspanel').scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})});
+const countriesReady=Promise.allSettled([getJson('../headlines/outlets.json'),getJson('../headlines/boundaries.json')]).then(([outlets,topo])=>{
+  let features=[];try{if(topo.status==='fulfilled')features=topoFeatures(topo.value,'countries')}catch{/* not TopoJSON: the list still works */}
+  const shapes=new Map(features.map(f=>[f.properties.code,f.properties]));
+  const codes=(outlets.status==='fulfilled'?Object.keys(outlets.value):[...shapes.keys()]).filter(c=>/^[A-Z]{2}$/.test(c));
+  countries=codes.map(code=>{const p=shapes.get(code)||{};return {code,name:p.name||regionName(code),iso3:p.iso3||'',aliases:p.aliases||[]}}).sort((a,b)=>a.name.localeCompare(b.name,'en-GB'));
+  renderCountryPicker();
+  const drawn=features.filter(f=>codes.includes(f.properties.code));
+  if(map&&drawn.length){drawCountries(drawn);setSourceStatus('status-boundaries','ready','Boundaries · '+drawn.length+' covered countries')}
+  else{setSourceStatus('status-boundaries','unavailable','Country boundaries · unavailable');document.querySelector('.maphint').textContent=countries.length?'The map is unavailable. Choose a country from the list.':'Country boundaries are unavailable. Try again later.';if(!countries.length)document.getElementById('newsstate').textContent='Map data unavailable'}
+  return countries;
+});
 function sourceCountryTerm(name){return String(name||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}const HISTORY_DB='gtts-headlines-history';function openHistoryDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(HISTORY_DB,1);req.onupgradeneeded=()=>req.result.createObjectStore('snapshots',{keyPath:'key'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function readArchive(key){try{const db=await openHistoryDB();return await new Promise(resolve=>{const tx=db.transaction('snapshots','readonly'),req=tx.objectStore('snapshots').get(key);req.onsuccess=()=>{setSourceStatus('status-archive','ready',req.result?'Local history · available':'Local history · available · no saved snapshot');db.close?.();resolve(req.result||null)};req.onerror=()=>{setSourceStatus('status-archive','unavailable','Local history · unavailable');db.close?.();resolve(null)}})}catch(e){setSourceStatus('status-archive','unavailable','Local history · unavailable');return null}}async function saveArchive(key,rows,range){try{const db=await openHistoryDB();return await new Promise(resolve=>{const tx=db.transaction('snapshots','readwrite');tx.objectStore('snapshots').put({key,rows,range,savedAt:new Date().toISOString()});tx.oncomplete=()=>{setSourceStatus('status-archive','ready','Local history · saved on this device');db.close();resolve(true)};tx.onerror=()=>{setSourceStatus('status-archive','unavailable','Local history · save failed');db.close();resolve(false)}})}catch(e){setSourceStatus('status-archive','unavailable','Local history · unavailable');return false}}
 // The period's UTC window around the chosen day (week from Monday; month; year), never past now.
 function periodRange(period,day,current){const now=new Date(),anchor=new Date(day+'T00:00:00Z');let start=new Date(anchor),end=new Date(anchor);end.setUTCHours(23,59,59,999);if(current)start.setTime(now.getTime()-86400000);if(period==='week'){start.setUTCDate(start.getUTCDate()-((start.getUTCDay()+6)%7));end=new Date(start);end.setUTCDate(end.getUTCDate()+7);end.setTime(end.getTime()-1)}if(period==='month'){start.setUTCDate(1);end=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+1,1)-1)}if(period==='year'){start=new Date(Date.UTC(anchor.getUTCFullYear(),0,1));end=new Date(Date.UTC(anchor.getUTCFullYear()+1,0,1)-1)}if(end>now)end=now;const rangeLabel=period==='month'?new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric',timeZone:'UTC'}).format(start):period==='year'?String(start.getUTCFullYear()):start.toISOString().slice(0,10)+' — '+end.toISOString().slice(0,10);return {start,end,rangeLabel}}
@@ -234,12 +319,14 @@ document.querySelector('.subnav').addEventListener('click',e=>{const a=e.target.
 document.querySelector('.subnav').addEventListener('keydown',e=>{const i=viewTabs.indexOf(document.activeElement),j={ArrowRight:i+1,ArrowLeft:i-1,Home:0,End:viewTabs.length-1}[e.key];if(i<0||j==null)return;e.preventDefault();const a=viewTabs[(j+viewTabs.length)%viewTabs.length];a.focus();setView(a.dataset.view,a.dataset.period,true)});
 setView(moduleParams.get('view')||'current',moduleParams.get('period')||'day',false);
 function shiftHistory(direction){const d=new Date(historyDate.value+'T00:00:00Z'),period=document.getElementById('historyPeriod').value;if(period==='year'){d.setUTCFullYear(d.getUTCFullYear()+direction)}else if(period==='month'){d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+direction)}else if(period==='week'){d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+direction*7)}else d.setUTCDate(d.getUTCDate()+direction);const today=new Date();today.setUTCHours(0,0,0,0);if(d>today)d.setTime(today.getTime());historyDate.value=d.toISOString().slice(0,10);if(selected)loadNews(selected.code,selected.name)}document.getElementById('historyPrev').onclick=()=>shiftHistory(-1);document.getElementById('historyNext').onclick=()=>shiftHistory(1);
-fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson').then(r=>{if(!r.ok)throw new Error('Boundary source returned '+r.status);return r.json()}).then(g=>{const includedFeatures=countryFeaturesInScope(g.features||[]);setSourceStatus('status-boundaries','ready','Boundaries · '+includedFeatures.length+' covered countries');geoLayer=L.geoJSON({...g,features:includedFeatures},{style:countryStyle,onEachFeature:(f,l)=>{const {code,name}=countryIdentity(f.properties||{});l.bindTooltip(name,{sticky:true});l.on('click',()=>loadNews(code,name))}}).addTo(map);if(selected)markSelected(selected.code)}).catch(()=>{setSourceStatus('status-boundaries','unavailable','Country boundaries · unavailable');document.getElementById('newsstate').textContent='Map data unavailable';document.querySelector('.maphint').textContent='Country boundaries are unavailable. Try again later.'});
 if(!globalThis.GTTSDB)setSourceStatus('status-database','unavailable','Headline archive · not configured; using GDELT');
 // Country top stories: each of the country's 5 most-read outlets' top 3 stories (front-page order),
 // translated to English server-side; links go to the original-language articles.
 const escHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Each load has a number; an answer that arrives after a newer choice (country, period or day) is dropped.
+let loadSeq=0;
 async function loadTopStories(code,name){
+  const seq=++loadSeq;
   selected={code,name};
   document.getElementById('countryname').textContent=name;
   document.getElementById('newsstate').textContent='Loading…';
@@ -258,12 +345,13 @@ async function loadTopStories(code,name){
   try{
     let rows=await globalThis.GTTSDB.topStories(code,s,e),note='';
     if(!rows.length&&period==='day'&&day===today){rows=await globalThis.GTTSDB.latestTopStories(code);if(rows.length)note=' · today\'s refresh pending, showing '+rows[0].snapshot_date}
+    if(seq!==loadSeq)return;
     setSourceStatus('status-database','ready','Headline archive · available');
     if(!rows.length){setSourceStatus('status-news','stale','Top stories · not collected yet');document.getElementById('newsstate').textContent='No stories yet';document.getElementById('articles').innerHTML='<div class="empty">Stories for this country haven\'t been collected for this period yet.<br>Every country refreshes automatically once a day.</div>';return}
     setSourceStatus('status-news','ready','Top stories · '+rows.length+' saved');
     if(period==='day')renderByOutlet(rows);else renderMostPersistent(rows);
     document.getElementById('newsstate').textContent=(period==='day'?rows.length+' stories from '+new Set(rows.map(r=>r.outlet)).size+' outlets':'Most persistent stories')+note;
-  }catch(err){setSourceStatus('status-news','unavailable','Top stories · unavailable');setSourceStatus('status-database','unavailable','Headline archive · unavailable');document.getElementById('newsstate').textContent='Unavailable';document.getElementById('articles').innerHTML='<div class="empty">Top stories are unavailable right now.<br><span style="font-size:11px">'+escHtml(err.message)+'</span></div>'}
+  }catch(err){if(seq!==loadSeq)return;setSourceStatus('status-news','unavailable','Top stories · unavailable');setSourceStatus('status-database','unavailable','Headline archive · unavailable');document.getElementById('newsstate').textContent='Unavailable';document.getElementById('articles').innerHTML='<div class="empty">Top stories are unavailable right now.<br><span style="font-size:11px">'+escHtml(err.message)+'</span></div>'}
 }
 function storyHtml(r,rank,extra){
   const en=r.title_en||r.title_original,orig=r.title_en&&r.title_en!==r.title_original?r.title_original:'';

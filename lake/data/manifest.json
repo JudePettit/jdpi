@@ -1,18 +1,18 @@
 {
- "generated": "2026-10-26T17:12:47.877Z",
- "entities": 10317,
- "withMentions": 9125,
- "mentions": 15017,
+ "generated": "2026-10-28T01:06:29.552Z",
+ "entities": 12051,
+ "withMentions": 10624,
+ "mentions": 16807,
  "types": {
-  "place": 454,
-  "person": 1819,
-  "party": 699,
+  "place": 510,
+  "person": 2672,
+  "party": 702,
   "election": 2546,
-  "event": 1037,
-  "topic": 209,
-  "idea": 270,
-  "conflict": 3280,
-  "organisation": 3
+  "event": 1072,
+  "topic": 916,
+  "idea": 289,
+  "conflict": 3301,
+  "organisation": 43
  },
  "shards": {
   "entities": 512,
@@ -20,15 +20,16 @@
  },
  "modules": {
   "retrospective": 7906,
-  "historical-calendar": 3039,
-  "calendar": 49,
+  "historical-calendar": 3040,
+  "calendar": 48,
   "battlefield-history": 34,
   "war-focus": 3585,
   "battlefield": 18,
   "kardashev": 82,
   "traders": 139,
   "learning": 96,
-  "learning-politics": 97
+  "learning-politics": 97,
+  "progress": 1790
  },
  "sources": [
   "Wikidata (CC0)",

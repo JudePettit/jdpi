@@ -141,11 +141,67 @@
           "name": "OSINT Dashboard",
           "kind": "realtime",
           "icon": "⌕",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
+          "url": "osint/index.html",
           "description": "An investigator's workbench for open sources: search across engines and archives, domains, company and sanctions records, event monitoring and image checks, with a case notebook that grades every source. Plus a Software Cookbook and a Kit Guide.",
-          "pendingUrl": "osint/index.html"
+          "views": [
+            {
+              "id": "overview",
+              "name": "Overview",
+              "url": "osint/index.html#tab=overview"
+            },
+            {
+              "id": "search",
+              "name": "Search",
+              "url": "osint/index.html#tab=search"
+            },
+            {
+              "id": "archives",
+              "name": "Archives",
+              "url": "osint/index.html#tab=archives"
+            },
+            {
+              "id": "domains",
+              "name": "Domains",
+              "url": "osint/index.html#tab=domains"
+            },
+            {
+              "id": "orgs",
+              "name": "Organisations & sanctions",
+              "url": "osint/index.html#tab=orgs"
+            },
+            {
+              "id": "events",
+              "name": "Events",
+              "url": "osint/index.html#tab=events"
+            },
+            {
+              "id": "media",
+              "name": "Media check",
+              "url": "osint/index.html#tab=media"
+            },
+            {
+              "id": "notebook",
+              "name": "Case notebook",
+              "url": "osint/index.html#tab=notebook"
+            },
+            {
+              "id": "cookbook",
+              "name": "Software Cookbook",
+              "url": "osint/index.html#tab=cookbook"
+            },
+            {
+              "id": "kit",
+              "name": "Kit Guide",
+              "url": "osint/index.html#tab=kit"
+            },
+            {
+              "id": "law",
+              "name": "Law & ethics",
+              "url": "osint/index.html#tab=law"
+            }
+          ]
         },
         {
           "id": "sigint",
@@ -219,11 +275,52 @@
           "name": "GEOINT & IMINT Dashboard",
           "kind": "realtime",
           "icon": "◫",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
+          "url": "geoint/index.html",
           "description": "Geospatial and imagery intelligence: daily satellite imagery and night lights with before/after comparison, active fires, terrain, OpenStreetMap features, measuring and sun/shadow tools for geolocation and chronolocation. Plus a Software Cookbook and a Hardware Guide.",
-          "pendingUrl": "geoint/index.html"
+          "views": [
+            {
+              "id": "overview",
+              "name": "Overview",
+              "url": "geoint/index.html#tab=overview"
+            },
+            {
+              "id": "imagery",
+              "name": "Imagery",
+              "url": "geoint/index.html#tab=imagery"
+            },
+            {
+              "id": "hazards",
+              "name": "Fires & hazards",
+              "url": "geoint/index.html#tab=hazards"
+            },
+            {
+              "id": "features",
+              "name": "Features",
+              "url": "geoint/index.html#tab=features"
+            },
+            {
+              "id": "measure",
+              "name": "Measure & geolocate",
+              "url": "geoint/index.html#tab=measure"
+            },
+            {
+              "id": "cookbook",
+              "name": "Software Cookbook",
+              "url": "geoint/index.html#tab=cookbook"
+            },
+            {
+              "id": "hardware",
+              "name": "Hardware Guide",
+              "url": "geoint/index.html#tab=hardware"
+            },
+            {
+              "id": "law",
+              "name": "Law & ethics",
+              "url": "geoint/index.html#tab=law"
+            }
+          ]
         },
         {
           "id": "calendar",
@@ -466,6 +563,81 @@
           "host": "PRP",
           "url": "science/progress/index.html",
           "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
+        }
+      ]
+    },
+    {
+      "id": "kino",
+      "code": "KN",
+      "name": "Kino",
+      "title": "Kino",
+      "description": "Documentaries that play across PRP: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
+      "modules": [
+        {
+          "id": "kino-political-events",
+          "name": "Political Events",
+          "kind": "retrospective",
+          "icon": "◉",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=political-events",
+          "description": "Kino documentaries: political events."
+        },
+        {
+          "id": "kino-political-figures",
+          "name": "Political Figures",
+          "kind": "retrospective",
+          "icon": "☺",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=political-figures",
+          "description": "Kino documentaries: political figures."
+        },
+        {
+          "id": "kino-political-parties",
+          "name": "Political Parties",
+          "kind": "retrospective",
+          "icon": "◧",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=political-parties",
+          "description": "Kino documentaries: political parties."
+        },
+        {
+          "id": "kino-wars",
+          "name": "Wars",
+          "kind": "retrospective",
+          "icon": "⚔",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=wars",
+          "description": "Kino documentaries: wars."
+        },
+        {
+          "id": "kino-geopolitical-events",
+          "name": "Geopolitical Events",
+          "kind": "retrospective",
+          "icon": "⊕",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=geopolitical-events",
+          "description": "Kino documentaries: geopolitical events."
+        },
+        {
+          "id": "kino-great-thinkers",
+          "name": "Great Thinkers",
+          "kind": "learning",
+          "icon": "✎",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "kino/index.html?cat=great-thinkers",
+          "description": "Kino documentaries: great thinkers."
         }
       ]
     }

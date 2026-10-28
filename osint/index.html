@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en" data-suite="rt" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OSINT Dashboard · PRP</title>
+<meta name="description" content="An investigator's workbench for open sources: searches across engines and archives, domains, company and sanctions records, event monitoring and image checks, with a case notebook that grades every source. Plus a Software Cookbook, a Kit Guide and a Law & ethics guide.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="osint.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="osint" data-shell="../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="os">
+  <header class="front">
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> OSINT Dashboard</div>
+    <h1 class="prp-title">OSINT Dashboard</h1>
+    <p class="prp-dek">An investigator’s workbench for open sources: build searches across engines and archives, check domains, companies and sanctions lists, follow events in the news and read image metadata, then log every claim in a case notebook that grades its source. For lawful research on events, organisations, places, infrastructure and claims, never on private individuals.</p>
+    <div class="prp-meta" id="meta"><span>Tools and links checked <b>28 Oct 2026</b></span><span>Live lookups go from your browser straight to each public service</span><span>Notebook stored in this browser only</span></div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Dashboard views" id="tabs">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" id="tab-search" aria-controls="panel-search" data-tab="search" aria-selected="false" tabindex="-1">Search</button>
+    <button type="button" role="tab" id="tab-archives" aria-controls="panel-archives" data-tab="archives" aria-selected="false" tabindex="-1">Archives</button>
+    <button type="button" role="tab" id="tab-domains" aria-controls="panel-domains" data-tab="domains" aria-selected="false" tabindex="-1">Domains</button>
+    <button type="button" role="tab" id="tab-orgs" aria-controls="panel-orgs" data-tab="orgs" aria-selected="false" tabindex="-1">Organisations &amp; sanctions</button>
+    <button type="button" role="tab" id="tab-events" aria-controls="panel-events" data-tab="events" aria-selected="false" tabindex="-1">Events</button>
+    <button type="button" role="tab" id="tab-media" aria-controls="panel-media" data-tab="media" aria-selected="false" tabindex="-1">Media check</button>
+    <button type="button" role="tab" id="tab-notebook" aria-controls="panel-notebook" data-tab="notebook" aria-selected="false" tabindex="-1">Case notebook <span class="tab-count" id="nb-count"></span></button>
+    <button type="button" role="tab" id="tab-cookbook" aria-controls="panel-cookbook" data-tab="cookbook" aria-selected="false" tabindex="-1">Software Cookbook</button>
+    <button type="button" role="tab" id="tab-kit" aria-controls="panel-kit" data-tab="kit" aria-selected="false" tabindex="-1">Kit Guide</button>
+    <button type="button" role="tab" id="tab-law" aria-controls="panel-law" data-tab="law" aria-selected="false" tabindex="-1">Law &amp; ethics</button>
+  </div>
+
+  <!-- ======================================================= Overview -->
+  <section id="panel-overview" class="tabpanel" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="ov-top">
+      <div class="prp-panel ov-start">
+        <div class="prp-panel-head"><h2 class="prp-h2">Start with a question</h2><span class="prp-label">The intelligence cycle, in this dashboard</span></div>
+        <div class="prp-panel-body">
+          <p class="lede">Open sources answer specific questions: who runs this website, when did this video first appear, which company owns that ship operator. Write the question down, collect against it, preserve and grade what you find, and only then analyse. Each tab below does one part of that loop, and the case notebook ties them together.</p>
+          <div id="ov-figure"></div>
+        </div>
+      </div>
+      <aside class="prp-panel ov-case" aria-labelledby="ov-case-h">
+        <div class="prp-panel-head"><b id="ov-case-h">Your case notebook</b><span class="prp-label" id="ov-case-title"></span></div>
+        <div class="prp-panel-body">
+          <div class="prp-kpis ov-kpis" id="ov-kpis"></div>
+          <div class="btn-row"><a class="prp-btn primary" href="#tab=notebook">Open the notebook</a><a class="prp-btn" href="#tab=search">Start a search</a></div>
+          <p class="small muted">The notebook lives in this browser only. Export it regularly from the notebook tab.</p>
+        </div>
+      </aside>
+    </div>
+
+    <h2 class="sec-h">What each tool answers</h2>
+    <div class="tool-grid" id="ov-tools"></div>
+
+    <div class="prp-panel ov-services">
+      <div class="prp-panel-head"><h2 class="prp-h2">Services and access</h2><div class="btn-row"><span class="status-line" id="ov-check-status" aria-live="polite"></span><button type="button" class="prp-btn sm" id="ov-check">Check the keyless services now</button></div></div>
+      <div class="scroll"><table class="prp-table" id="ov-services">
+        <thead><tr><th scope="col">Service</th><th scope="col">Used in</th><th scope="col">Access</th><th scope="col">From your browser</th><th scope="col">Limits and terms</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="prp-note warn ov-scope"><b>Scope.</b> This dashboard is for legal, ethical open-source work on events, organisations, places, infrastructure and claims. It only reads what is public, never gets round logins, paywalls, CAPTCHAs or rate limits, and leaves out tools whose main purpose is finding or profiling people. Read <a href="#tab=law">Law &amp; ethics</a> before you start, and the <a data-course="" href="../fe/learning.html?course=osint">OSINT Training</a> course for method.</div>
+  </section>
+
+  <!-- ======================================================= Search -->
+  <section id="panel-search" class="tabpanel" role="tabpanel" aria-labelledby="tab-search" hidden>
+    <div class="split search-split">
+      <form class="prp-panel builder" id="search-form" autocomplete="off">
+        <div class="prp-panel-head"><h2 class="prp-h2">Build a query</h2><button type="reset" class="prp-btn sm ghost">Clear</button></div>
+        <div class="prp-panel-body form-grid">
+          <label class="field span2"><span class="prp-label">All of these words</span><input class="prp-input" name="all" type="search" placeholder="fuel depot fire"></label>
+          <label class="field"><span class="prp-label">This exact phrase</span><input class="prp-input" name="phrase" type="text" placeholder="drone attack"></label>
+          <label class="field"><span class="prp-label">Any of these words</span><input class="prp-input" name="any" type="text" placeholder="Odesa Odessa Одеса"></label>
+          <label class="field"><span class="prp-label">None of these words</span><input class="prp-input" name="none" type="text" placeholder="game film"></label>
+          <label class="field"><span class="prp-label">Words in the page title</span><input class="prp-input" name="intitle" type="text" placeholder="statement"></label>
+          <div class="field span2">
+            <label class="prp-label" for="s-site">Site or domain</label>
+            <input class="prp-input" id="s-site" name="site" type="text" placeholder="gov.ie or reuters.com (several: separate with spaces)">
+            <div class="chips" role="group" aria-label="Common sites"><button type="button" class="prp-chip" data-site="gov.ie">gov.ie</button><button type="button" class="prp-chip" data-site="gov.uk">gov.uk</button><button type="button" class="prp-chip" data-site="europa.eu">europa.eu</button><button type="button" class="prp-chip" data-site=".gov">.gov (US)</button><button type="button" class="prp-chip" data-site="un.org">un.org</button><button type="button" class="prp-chip" data-site="">none</button></div>
+          </div>
+          <label class="field span2 ft-field"><span class="prp-label">File type</span><select class="prp-select" name="filetype" id="s-filetype"></select></label>
+          <div class="field span2"><span class="prp-label" id="s-dates">Dates</span><div class="dates" role="group" aria-labelledby="s-dates"><input class="prp-input" name="from" type="date" aria-label="From"><span aria-hidden="true">to</span><input class="prp-input" name="to" type="date" aria-label="To"></div></div>
+          <div class="field span2 examples"><span class="prp-label">Examples</span><div class="chips" id="search-examples"></div></div>
+        </div>
+      </form>
+      <div class="search-results">
+        <div class="prp-panel q-preview">
+          <div class="prp-panel-head"><b>The query, in Google’s syntax</b><button type="button" class="prp-btn sm" id="q-copy">Copy</button></div>
+          <div class="prp-panel-body">
+            <code class="qline" id="q-google">Type some words to build a query.</code>
+            <label class="check"><input type="checkbox" id="log-searches"> Log each search I open in the case notebook’s activity log</label>
+            <p class="small muted">Each link opens the engine’s own results in a new tab. This page does not fetch or scrape results; engines that cannot use part of the query say so under their name.</p>
+          </div>
+        </div>
+        <div id="launch-groups" class="launch-groups"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= Archives -->
+  <section id="panel-archives" class="tabpanel" role="tabpanel" aria-labelledby="tab-archives" hidden>
+    <form class="prp-panel toolbar" id="arch-form" autocomplete="off">
+      <label class="field grow"><span class="prp-label">Page address</span><input class="prp-input" name="url" type="text" inputmode="url" placeholder="https://www.example.com/page" required></label>
+      <label class="field"><span class="prp-label">Closest to a date (optional)</span><input class="prp-input" name="date" type="date"></label>
+      <button class="prp-btn primary" type="submit">Check the archives</button>
+      <div class="chips field-row" id="arch-examples"><span class="prp-label">Try</span></div>
+    </form>
+    <div id="arch-out" class="stack" aria-live="polite"></div>
+    <div class="split arch-bottom">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Hash a file you captured</h2><span class="prp-label">SHA-256 · in your browser</span></div>
+        <div class="prp-panel-body">
+          <p class="small">Drop a screenshot, a saved page or a downloaded video to fingerprint it. The file is read on this device and never uploaded. Record the hash in the notebook so you can show later that the file has not changed.</p>
+          <label class="dropzone" id="arch-drop"><input type="file" id="arch-file" class="sr-only"><span class="dz-title">Drop a file here, or choose one</span><span class="dz-sub">Any type and size your browser can open</span></label>
+          <div id="arch-hash-out" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Archive well</h2></div>
+        <div class="prp-panel-body small prose-ui">
+          <ul>
+            <li><b>Preserve first, analyse second.</b> Save an independent copy (the Wayback Machine) and your own copy (SingleFile or ArchiveWeb.page, plus a full-page screenshot), then hash your files.</li>
+            <li><b>Check the capture</b>, not just the “saved” message: pages built by scripts or behind logins often capture badly.</li>
+            <li><b>An archive proves what a page said at a moment</b>, not that it was true, and it is not a way round a paywall or login.</li>
+          </ul>
+          <p>More in the <a href="#tab=kit&amp;s=archiving-and-storage">Kit Guide</a> and the course lesson <a data-course="archives-and-preservation" href="../fe/learning.html?course=osint&amp;lesson=archives-and-preservation">Archives and preservation</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= Domains -->
+  <section id="panel-domains" class="tabpanel" role="tabpanel" aria-labelledby="tab-domains" hidden>
+    <form class="prp-panel toolbar" id="dom-form" autocomplete="off">
+      <label class="field grow"><span class="prp-label">Domain or web address</span><input class="prp-input" name="domain" type="text" inputmode="url" placeholder="example.org" required></label>
+      <label class="field"><span class="prp-label">DNS resolver</span><select class="prp-select" name="resolver" id="dom-resolver"><option value="google">Google Public DNS</option><option value="cloudflare">Cloudflare 1.1.1.1</option></select></label>
+      <button class="prp-btn primary" type="submit">Look up</button>
+      <div class="chips field-row" id="dom-examples"><span class="prp-label">Try</span></div>
+    </form>
+    <div id="dom-out" class="stack" aria-live="polite"><div class="prp-panel"><div class="prp-empty">Enter a domain to see who registered it and when (RDAP), its DNS records, where it is hosted and the hostnames in its certificates. Registrant details of individuals are redacted under data-protection law: don’t try to unmask them.</div></div></div>
+  </section>
+
+  <!-- ======================================================= Organisations & sanctions -->
+  <section id="panel-orgs" class="tabpanel" role="tabpanel" aria-labelledby="tab-orgs" hidden>
+    <form class="prp-panel toolbar" id="org-form" autocomplete="off">
+      <label class="field grow"><span class="prp-label">Organisation name or LEI</span><input class="prp-input" name="q" type="search" placeholder="Ryanair, or a 20-character LEI" required></label>
+      <button class="prp-btn primary" type="submit">Search</button>
+      <div class="chips field-row" id="org-examples"><span class="prp-label">Try</span></div>
+    </form>
+    <div class="split org-split">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Legal entities (GLEIF)</h2><span class="prp-label" id="org-count">Keyless</span></div>
+        <div id="org-results"><p class="prp-empty">Search a name to find legal entity identifiers (LEIs): the global register of companies, funds and public bodies that trade in financial markets, with their registry numbers and corporate parents.</p></div>
+      </div>
+      <div class="prp-panel" id="org-detail-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2" id="org-detail-title">Entity</h2><span class="prp-label">Level 1 and 2 data</span></div>
+        <div id="org-detail"><p class="prp-empty">Choose an entity to see its registration, its parents and children, and links to its registry.</p></div>
+      </div>
+    </div>
+    <div class="prp-panel" id="os-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Sanctions and watchlists (OpenSanctions)</h2><span class="prp-label" id="os-key-state">Needs your key</span></div>
+      <div class="prp-panel-body os-body">
+        <div class="os-key">
+          <p class="small">OpenSanctions combines sanctions lists, watchlists and politically exposed persons from hundreds of sources. Anyone can search <a id="os-web" href="https://www.opensanctions.org/search/" target="_blank" rel="noopener noreferrer">its website<span class="sr-only"> (opens in a new tab)</span></a> without a key. The API needs one: free for public-interest work (journalists, non-profits working against corruption and financial crime, academic researchers; OpenSanctions checks before granting it), while anyone else gets 2,000 trial credits on sign-up and then pays per query. Hobby projects and business screening don’t qualify for a free key. <a href="https://www.opensanctions.org/docs/commercial/exemption/" target="_blank" rel="noopener noreferrer">Who qualifies<span class="sr-only"> (opens in a new tab)</span></a>.</p>
+          <div class="key-row">
+            <label class="field grow"><span class="prp-label">Your API key</span><input class="prp-input" id="os-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your OpenSanctions key"></label>
+            <label class="field"><span class="prp-label">Entity types</span><select class="prp-select" id="os-schema"></select></label>
+            <label class="check"><input type="checkbox" id="os-remember"> Remember on this device</label>
+            <button type="button" class="prp-btn primary" id="os-search">Screen the name</button>
+            <button type="button" class="prp-btn ghost" id="os-forget">Forget key</button>
+          </div>
+          <p class="small muted">Your key stays in this browser (only if you tick “Remember”) and is sent only to api.opensanctions.org, in the request address: the API’s browser check refuses the usual Authorization header. Screening here covers organisations, vessels and aircraft, not people.</p>
+        </div>
+        <div id="os-out" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Registries and official lists</h2><span class="prp-label">Opens each site in a new tab</span></div>
+      <div class="prp-panel-body"><div id="org-links" class="link-grid"></div>
+        <p class="small muted">A name match is not a match until identifiers agree: registration number, jurisdiction, address, or an IMO number for a ship. Under OFAC’s 50 percent rule, a company owned half or more by sanctioned parties is blocked even if it is not listed. See <a data-course="sanctions-procurement-and-court-records" href="../fe/learning.html?course=osint&amp;lesson=sanctions-procurement-and-court-records">Sanctions, procurement and court records</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= Events -->
+  <section id="panel-events" class="tabpanel" role="tabpanel" aria-labelledby="tab-events" hidden>
+    <form class="prp-panel" id="ev-form" autocomplete="off">
+      <div class="prp-panel-head"><h2 class="prp-h2">News monitor (GDELT)</h2><span class="prp-label">Keyless · last three months · one query every five seconds</span></div>
+      <div class="prp-panel-body">
+        <div class="chips presets" id="ev-presets" role="group" aria-label="Preconfigured monitors"><span class="prp-label">Monitors</span></div>
+        <div class="form-grid ev-grid">
+          <label class="field"><span class="prp-label">All of these words</span><input class="prp-input" name="all" type="text" placeholder="cable"></label>
+          <label class="field"><span class="prp-label">Exact phrase</span><input class="prp-input" name="phrase" type="text" placeholder="Red Sea"></label>
+          <label class="field"><span class="prp-label">Any of these words</span><input class="prp-input" name="any" type="text" placeholder="attack strike"></label>
+          <label class="field"><span class="prp-label">None of these words</span><input class="prp-input" name="none" type="text"></label>
+          <label class="field"><span class="prp-label">One outlet only</span><input class="prp-input" name="domain" type="text" placeholder="reuters.com"></label>
+          <label class="field"><span class="prp-label">Outlets in</span><select class="prp-select" name="country" id="ev-country"></select></label>
+          <label class="field"><span class="prp-label">Language</span><select class="prp-select" name="lang" id="ev-lang"></select></label>
+          <label class="field"><span class="prp-label">Window</span><select class="prp-select" name="span" id="ev-span"></select></label>
+          <label class="field"><span class="prp-label">Articles</span><select class="prp-select" name="sort" id="ev-sort"></select></label>
+        </div>
+        <div class="ev-query">
+          <label class="field grow"><span class="prp-label">GDELT query (built from the fields; you can edit it)</span><input class="prp-input mono" name="query" id="ev-query" type="text" spellcheck="false"></label>
+          <button class="prp-btn primary" type="submit" id="ev-run">Run</button>
+          <a class="prp-btn" id="ev-open" href="https://api.gdeltproject.org/api/v2/doc/doc" target="_blank" rel="noopener noreferrer">Open in GDELT</a>
+        </div>
+        <p class="small error-text" id="ev-errors" role="alert"></p>
+      </div>
+    </form>
+    <div class="prp-panel ev-chart-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2" id="ev-title">Coverage over time</h2><div class="seg" role="group" aria-label="Measure"><button type="button" data-measure="value" aria-pressed="true">Articles</button><button type="button" data-measure="share" aria-pressed="false">Share of all coverage</button></div></div>
+      <div class="prp-panel-body">
+        <p class="status-line" id="ev-status" aria-live="polite"></p>
+        <figure class="prp-figure">
+          <div class="chart" id="ev-chart" role="img" aria-label="Articles per period matching the query"></div>
+          <figcaption id="ev-caption"><b>Figure 1.</b> Online news articles matching the query, per period, as monitored by GDELT. Counts follow GDELT’s coverage, which grows over time and is richest in English; use the share of all coverage to compare periods. Source: GDELT DOC 2.0 API.</figcaption>
+        </figure>
+        <details class="as-table"><summary>Show as a table</summary><div class="scroll" id="ev-table"></div></details>
+      </div>
+    </div>
+    <div class="split ev-split">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Articles</h2><span class="prp-label" id="ev-art-count"></span></div>
+        <div id="ev-articles" aria-live="polite"><p class="prp-empty">Run a query to list matching articles.</p></div>
+      </div>
+      <aside class="ev-side">
+        <div class="prp-panel"><div class="prp-panel-head"><b>Who is reporting</b><span class="prp-label">in these articles</span></div><div class="prp-panel-body" id="ev-summary"><p class="small muted">Top outlets, countries and languages appear here.</p></div></div>
+        <div class="prp-panel"><div class="prp-panel-head"><b>Elsewhere in PRP</b></div><div class="prp-panel-body"><ul class="plain-links" id="ev-prp"></ul></div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================================================= Media check -->
+  <section id="panel-media" class="tabpanel" role="tabpanel" aria-labelledby="tab-media" hidden>
+    <div class="split media-top">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Check an image</h2><span class="prp-label">Read on this device · nothing is uploaded</span></div>
+        <div class="prp-panel-body">
+          <label class="dropzone big" id="media-drop"><input type="file" id="media-file" class="sr-only" accept="image/*,.heic,.heif,.avif,.dng,.tif,.tiff"><span class="dz-title">Drop an image here, or choose one</span><span class="dz-sub">JPEG, PNG, WebP, HEIC, AVIF or TIFF. The original file, not a screenshot of it.</span></label>
+          <div class="btn-row"><button type="button" class="prp-btn sm" id="media-sample">Try a sample image</button><span class="small muted">The sample is made in your browser, with metadata for a public place in Dublin.</span></div>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">What metadata can and can’t prove</h2></div>
+        <div class="prp-panel-body small prose-ui">
+          <p>Metadata is what the camera, phone or software wrote into the file: the device, the time, sometimes a GPS position and an editing history.</p>
+          <ul>
+            <li><b>Absence proves nothing.</b> Social networks and messaging apps strip metadata on upload, so most images found online have none.</li>
+            <li><b>Presence proves little.</b> Anyone can edit these fields with free tools. Camera clocks are often wrong or on another time zone, and GPS fixes can be tens of metres out.</li>
+            <li><b>It is a lead, not a verdict.</b> Confirm a time with shadows and weather, a place with satellite and street-level imagery, and the image’s history with reverse image search.</li>
+            <li><b>Content Credentials</b> (C2PA), where present, record a signed history; they show who signed it, not that the scene is real.</li>
+          </ul>
+          <p>Course: <a data-course="reverse-image-search-metadata-and-synthetic-media" href="../fe/learning.html?course=osint&amp;lesson=reverse-image-search-metadata-and-synthetic-media">Reverse image search, metadata and synthetic media</a>.</p>
+        </div>
+      </div>
+    </div>
+    <div id="media-out" class="stack" aria-live="polite"></div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Reverse image search</h2><span class="prp-label">You open each engine yourself</span></div>
+      <div class="prp-panel-body">
+        <p class="small">Search engines can’t receive a file from this page. For a file on your computer, open an engine and drop the file into it. For an image already online, paste its address and the links search it directly. Crop to distinctive details and try a mirrored copy too.</p>
+        <label class="field grow"><span class="prp-label">Public image address (optional)</span><input class="prp-input" id="ris-url" type="text" inputmode="url" placeholder="https://…/photo.jpg"></label>
+        <div class="link-grid" id="ris-links"></div>
+        <p class="small muted">Use reverse image search to trace images of places and events, never to identify private people from their faces.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= Case notebook -->
+  <section id="panel-notebook" class="tabpanel" role="tabpanel" aria-labelledby="tab-notebook" hidden>
+    <div class="prp-panel toolbar nb-bar">
+      <label class="field"><span class="prp-label">Case</span><select class="prp-select" id="nb-case"></select></label>
+      <div class="btn-row">
+        <button type="button" class="prp-btn sm" id="nb-new">New case</button>
+        <button type="button" class="prp-btn sm" id="nb-rename">Rename</button>
+        <button type="button" class="prp-btn sm danger" id="nb-delete">Delete case</button>
+      </div>
+      <div class="btn-row nb-io">
+        <button type="button" class="prp-btn sm" id="nb-export-json">Export JSON</button>
+        <button type="button" class="prp-btn sm" id="nb-export-md">Export Markdown</button>
+        <label class="prp-btn sm" for="nb-import">Import</label><input type="file" id="nb-import" class="sr-only" accept=".json,.md,.markdown,.txt,application/json,text/markdown,text/plain">
+      </div>
+    </div>
+    <div class="prp-kpis nb-kpis" id="nb-kpis"></div>
+    <div class="split nb-split">
+      <form class="prp-panel nb-form" id="nb-form" autocomplete="off">
+        <div class="prp-panel-head"><h2 class="prp-h2" id="nb-form-title">Add a claim</h2><button type="button" class="prp-btn sm ghost" id="nb-cancel" hidden>Cancel edit</button></div>
+        <div class="prp-panel-body form-grid one">
+          <label class="field"><span class="prp-label">Claim or finding</span><textarea class="prp-input area" name="claim" rows="3" required placeholder="What the source says, in one sentence"></textarea></label>
+          <label class="field"><span class="prp-label">Source address</span><input class="prp-input" name="url" type="text" inputmode="url" placeholder="https://…"></label>
+          <div class="field"><label class="prp-label" for="nb-archive">Archived copy</label><div class="inline-row"><input class="prp-input grow" id="nb-archive" name="archive" type="text" inputmode="url" placeholder="https://web.archive.org/web/…"><button type="button" class="prp-btn sm" id="nb-find-archive">Find</button></div><span class="hint" id="nb-archive-hint"></span></div>
+          <div class="two">
+            <label class="field"><span class="prp-label">Date accessed</span><input class="prp-input" name="accessed" type="date" required></label>
+            <label class="field"><span class="prp-label">Date of the event (optional)</span><input class="prp-input" name="eventDate" type="date"></label>
+          </div>
+          <div class="two">
+            <label class="field"><span class="prp-label">Source reliability</span><select class="prp-select" name="reliability" id="nb-rel"></select></label>
+            <label class="field"><span class="prp-label">Information credibility</span><select class="prp-select" name="credibility" id="nb-cred"></select></label>
+          </div>
+          <label class="field"><span class="prp-label">Notes</span><textarea class="prp-input area" name="notes" rows="4" placeholder="How you found it, what corroborates or contradicts it"></textarea></label>
+          <div class="two">
+            <label class="field"><span class="prp-label">Tags</span><input class="prp-input" name="tags" type="text" placeholder="port, fire, day 1"></label>
+            <label class="field"><span class="prp-label">SHA-256 of a captured file</span><input class="prp-input mono" name="hash" type="text" spellcheck="false" placeholder="64 hex characters"></label>
+          </div>
+          <div class="btn-row"><button class="prp-btn primary" type="submit" id="nb-save">Add to the case</button><span class="hint">Grades follow the Admiralty (NATO) system: a letter for the source, a number for the information, judged separately.</span></div>
+        </div>
+      </form>
+      <div class="prp-panel nb-view-panel">
+        <div class="prp-panel-head">
+          <div class="seg" role="group" aria-label="Notebook view" id="nb-views"><button type="button" data-view="items" aria-pressed="true">Items</button><button type="button" data-view="timeline" aria-pressed="false">Timeline</button><button type="button" data-view="sources" aria-pressed="false">Sources table</button><button type="button" data-view="log" aria-pressed="false">Activity log</button></div>
+          <label class="field nb-filter"><span class="sr-only">Filter items</span><input class="prp-input" id="nb-filter" type="search" placeholder="Filter"></label>
+        </div>
+        <div id="nb-view" aria-live="polite"></div>
+      </div>
+    </div>
+    <details class="prp-panel grades">
+      <summary><b>The Admiralty grading system</b><span class="prp-label">Reliability A–F · credibility 1–6</span></summary>
+      <div class="prp-panel-body" id="nb-grades"></div>
+    </details>
+  </section>
+
+  <!-- ======================================================= Guides -->
+  <section id="panel-cookbook" class="tabpanel guide" role="tabpanel" aria-labelledby="tab-cookbook" hidden data-guide="cookbook"></section>
+  <section id="panel-kit" class="tabpanel guide" role="tabpanel" aria-labelledby="tab-kit" hidden data-guide="kit"></section>
+  <section id="panel-law" class="tabpanel guide" role="tabpanel" aria-labelledby="tab-law" hidden data-guide="law"></section>
+
+  <footer class="prp-sources">
+    <p><b>Sources and services.</b> Live lookups go directly from your browser to the services named on each tab: the Internet Archive’s Wayback Machine (availability API; Save Page Now opens on archive.org), the RDAP servers of the domain registries and regional internet registries, found through <a href="https://data.iana.org/rdap/" target="_blank" rel="noopener noreferrer">IANA’s RDAP bootstrap files</a> (with <a href="https://about.rdap.org/" target="_blank" rel="noopener noreferrer">rdap.org</a> as a fallback), Google Public DNS and Cloudflare’s DNS-over-HTTPS JSON APIs, <a href="https://crt.sh" target="_blank" rel="noopener noreferrer">crt.sh</a> and SSLMate’s Cert Spotter (certificate transparency), the <a href="https://www.gleif.org/en/lei-data/gleif-api" target="_blank" rel="noopener noreferrer">GLEIF API</a> (LEI data under CC0), OpenSanctions (with your key; data under CC BY-NC 4.0) and the <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener noreferrer">GDELT Project</a>’s DOC 2.0 API. Map tiles: Esri. Everything else opens as a link on the service’s own site.</p>
+    <p><b>Privacy.</b> PRP receives nothing you type here. The case notebook, your settings, any API key you choose to remember and copies of your last few GDELT results are kept in this browser’s local storage; clearing site data deletes them, so export your notebook. Images you check are read on your device and never uploaded.</p>
+    <p><b>Method.</b> Search links are built from your fields in each engine’s own syntax; where an engine lacks an operator, its card says what it ignores. Archive checks use the Wayback availability API, which returns the capture closest to a date; the full capture list (CDX) cannot be read by browser pages, so the page opens it for you to paste back. GDELT requests are spaced at least six seconds apart, and when GDELT is busy the Events tab shows the last copy of the same query saved in this browser, marked with the time it was saved. Tool versions, prices and links in the guides were checked on 28 October 2026.</p>
+  </footer>
+</div>
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+<div class="chart-tip" id="tip" role="tooltip" hidden></div>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-suite="rt" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GEOINT &amp; IMINT Dashboard · PRP</title>
+<meta name="description" content="Geospatial and imagery intelligence from open sources: daily satellite imagery and night lights with before/after comparison, fires and hazards, OpenStreetMap features, terrain, measuring and sun-and-shadow tools for geolocation and chronolocation, plus a Software Cookbook, a Hardware Guide and law and ethics.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="geoint.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="geoint" data-shell="../" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<script type="importmap">
+{
+  "imports": { "suncalc": "https://cdn.jsdelivr.net/npm/suncalc@2.1.1/index.js" },
+  "integrity": { "https://cdn.jsdelivr.net/npm/suncalc@2.1.1/index.js": "sha384-8SR6Bo1GclD3dStBaBnGMOT2hurXi59RF5AoIfyDAMZRA8hWDQfaFfR7yYeAidgK" }
+}
+</script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div class="gi">
+  <header class="front">
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> GEOINT &amp; IMINT Dashboard</div>
+    <h1 class="prp-title">GEOINT &amp; IMINT Dashboard</h1>
+    <p class="prp-dek">Geospatial and imagery intelligence from public sources: compare daily satellite imagery and night lights between two dates, follow fires, earthquakes and disasters, query OpenStreetMap for infrastructure, and measure distances, terrain, sun and shadows to find where and when a picture was taken. It covers places, events and infrastructure, never private individuals.</p>
+    <div class="prp-meta" id="meta">
+      <span>Live, no key: <b>NASA GIBS</b>, <b>USGS</b>, <b>GDACS</b>, <b>OpenStreetMap</b>, <b>Terrain Tiles</b></span>
+      <span>Free key: <b>NASA FIRMS</b></span>
+      <span>Coverage: <b>global</b></span>
+      <span id="meta-latest">Latest imagery: checking…</span>
+    </div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Dashboard views" id="tabs">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" id="tab-imagery" aria-controls="panel-imagery" aria-selected="false" tabindex="-1">Imagery</button>
+    <button type="button" role="tab" id="tab-hazards" aria-controls="panel-hazards" aria-selected="false" tabindex="-1">Fires &amp; hazards</button>
+    <button type="button" role="tab" id="tab-features" aria-controls="panel-features" aria-selected="false" tabindex="-1">Features</button>
+    <button type="button" role="tab" id="tab-measure" aria-controls="panel-measure" aria-selected="false" tabindex="-1">Measure &amp; geolocate</button>
+    <button type="button" role="tab" id="tab-cookbook" aria-controls="panel-cookbook" aria-selected="false" tabindex="-1">Software Cookbook</button>
+    <button type="button" role="tab" id="tab-hardware" aria-controls="panel-hardware" aria-selected="false" tabindex="-1">Hardware Guide</button>
+    <button type="button" role="tab" id="tab-law" aria-controls="panel-law" aria-selected="false" tabindex="-1">Law &amp; ethics</button>
+  </div>
+  <noscript><p class="prp-note warn">The maps and tools need JavaScript. The guides are also plain files: <a href="content/cookbook.md">Software Cookbook</a>, <a href="content/hardware.md">Hardware Guide</a>, <a href="content/law.md">Law &amp; ethics</a>.</p></noscript>
+
+  <!-- 1. Overview -->
+  <section id="panel-overview" class="tabpanel" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="ov-grid">
+      <div class="ov-main">
+        <section class="prp-panel">
+          <div class="prp-panel-body ov-intro">
+            <h2 class="prp-h2">What GEOINT and IMINT are</h2>
+            <p><b>Geospatial intelligence (GEOINT)</b> is what you learn by putting information on the surface of the Earth: where something is, how far and how big, what lies near it and how a place changes over time. <b>Imagery intelligence (IMINT)</b> is the part that comes from pictures of the Earth: satellite and aerial images, drone surveys and photographs taken on the ground.</p>
+            <p>For an open-source analyst they answer three questions. <i>Where</i> was this, <i>when</i> was it, and <i>what changed</i>? This dashboard brings together the free public data and the measuring tools to answer them, with guides to the software and the kit for going further.</p>
+          </div>
+        </section>
+
+        <section class="prp-panel" aria-labelledby="ov-now-h">
+          <div class="prp-panel-head"><h2 class="prp-h3" id="ov-now-h">Right now</h2><span class="status" id="ov-status" aria-live="polite">Checking the live sources…</span></div>
+          <div class="prp-panel-body"><div class="prp-kpis" id="ov-kpis"></div></div>
+        </section>
+
+        <section class="prp-panel" aria-labelledby="ov-tools-h">
+          <div class="prp-panel-head"><h2 class="prp-h3" id="ov-tools-h">What each tool answers</h2></div>
+          <div class="table-wrap" tabindex="0">
+            <table class="prp-table ov-table">
+              <thead><tr><th scope="col">Question</th><th scope="col">Where</th><th scope="col">Data</th><th scope="col">Limits to remember</th></tr></thead>
+              <tbody>
+                <tr><td>What did this place look like on a given day, and what changed between two days?</td><td><a href="#tab=imagery" data-tab-link>Imagery</a></td><td>NASA GIBS daily MODIS and VIIRS images, before/after swipe; Sentinel-2 and Landsat via the Copernicus Browser</td><td>250–750 m pixels show towns, fields, smoke, floods and burn scars, not buildings or vehicles</td></tr>
+                <tr><td>Did the lights go out, or come on?</td><td><a href="#tab=imagery&amp;l=bm" data-tab-link>Imagery · night lights</a></td><td>VIIRS Black Marble and Day/Night Band</td><td>Moonlight, cloud, snow and season change brightness: compare like with like</td></tr>
+                <tr><td>Where is it burning, shaking or flooding now?</td><td><a href="#tab=hazards" data-tab-link>Fires &amp; hazards</a></td><td>VIIRS and MODIS thermal anomalies, NASA FIRMS (free key), USGS earthquakes, GDACS alerts</td><td>A hotspot is heat, not a cause; cloud and satellite timing hide short fires</td></tr>
+                <tr><td>What infrastructure is here: airfields, ports, power, bridges, hospitals?</td><td><a href="#tab=features" data-tab-link>Features</a></td><td>OpenStreetMap through the Overpass API; place search with Nominatim</td><td>Only what volunteers have mapped, as they tagged it</td></tr>
+                <tr><td>How far, how big, in which direction, how high, and can A see B?</td><td><a href="#tab=measure" data-tab-link>Measure &amp; geolocate</a></td><td>Ellipsoidal distances and bearings, areas, bearing lines, Terrain Tiles elevation and line of sight</td><td>Terrain data are 30–90 m in most places: hills yes, buildings no</td></tr>
+                <tr><td>When was this picture taken?</td><td><a href="#tab=measure" data-tab-link>Measure &amp; geolocate · sun</a></td><td>Sun position (SunCalc) from a shadow's direction and length</td><td>Gives a time window, not a minute; sloping ground and guessed heights add error</td></tr>
+                <tr><td>Where was this picture taken?</td><td><a href="#tab=measure" data-tab-link>Measure &amp; geolocate</a></td><td>Coordinates, MGRS, bearings from landmarks, street-level and 3D link-outs</td><td>Street-level coverage is patchy; prove it with at least three matching features</td></tr>
+                <tr><td>Which software and which kit?</td><td><a href="#tab=cookbook" data-tab-link>Software Cookbook</a>, <a href="#tab=hardware" data-tab-link>Hardware Guide</a></td><td>Official downloads, installs per system, first tests, pitfalls, legal notes</td><td>Tools change: check the official page before installing</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="prp-panel" aria-labelledby="ov-flow-h">
+          <div class="prp-panel-head"><h2 class="prp-h3" id="ov-flow-h">How an investigation flows</h2></div>
+          <div class="prp-panel-body" id="ov-figure"></div>
+        </section>
+      </div>
+
+      <aside class="ov-side" aria-label="Learning and ground rules">
+        <section class="prp-panel">
+          <div class="prp-panel-head"><h2 class="prp-h3">Learn the method</h2><span class="prp-label">OSINT Training</span></div>
+          <ul class="lesson-list" id="ov-lessons"></ul>
+        </section>
+        <section class="prp-panel">
+          <div class="prp-panel-head"><h2 class="prp-h3">Ground rules</h2></div>
+          <div class="prp-panel-body rules">
+            <ul>
+              <li>Use only what is public, without getting round logins, paywalls, CAPTCHAs or rate limits.</li>
+              <li>Investigate events, organisations, places, infrastructure and claims. Never locate, profile or track private people.</li>
+              <li>Check a finding three ways before you publish, and say how sure you are.</li>
+              <li>Think about who could be harmed by a map: people in danger, sources, and you.</li>
+            </ul>
+            <p><a href="#tab=law" data-tab-link>Law &amp; ethics →</a></p>
+          </div>
+        </section>
+        <section class="prp-panel">
+          <div class="prp-panel-head"><h2 class="prp-h3">Related dashboards</h2></div>
+          <ul class="lesson-list" id="ov-related"></ul>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 2. Imagery -->
+  <section id="panel-imagery" class="tabpanel" role="tabpanel" aria-labelledby="tab-imagery" hidden>
+    <div class="toolbar prp-panel">
+      <label class="field"><span class="prp-label">Preset</span><select class="prp-select" id="im-preset"><option value="">Choose a preset view…</option></select></label>
+      <label class="field wide"><span class="prp-label">Product</span><select class="prp-select" id="im-layer"></select></label>
+      <div class="field"><span class="prp-label" id="im-d1-l">Date (UTC)</span>
+        <div class="datebox" role="group" aria-labelledby="im-d1-l"><button type="button" class="prp-btn sm" data-step="-1" data-for="im-d1" aria-label="Previous day">‹</button><input type="date" class="prp-input" id="im-d1" aria-labelledby="im-d1-l"><button type="button" class="prp-btn sm" data-step="1" data-for="im-d1" aria-label="Next day">›</button></div></div>
+      <label class="field check"><input type="checkbox" id="im-compare"> <span>Before/after swipe</span></label>
+      <div class="field" id="im-d2-f" hidden><span class="prp-label" id="im-d2-l">After (UTC)</span>
+        <div class="datebox" role="group" aria-labelledby="im-d2-l"><button type="button" class="prp-btn sm" data-step="-1" data-for="im-d2" aria-label="Previous day">‹</button><input type="date" class="prp-input" id="im-d2" aria-labelledby="im-d2-l"><button type="button" class="prp-btn sm" data-step="1" data-for="im-d2" aria-label="Next day">›</button></div></div>
+      <div class="field"><span class="prp-label">Overlays</span>
+        <div class="chips"><button type="button" class="prp-chip" id="im-fires" aria-pressed="false">Fires</button><button type="button" class="prp-chip" id="im-labels" aria-pressed="true">Labels</button><button type="button" class="prp-btn sm ghost" id="im-latest">Latest day</button></div></div>
+    </div>
+    <div class="map-layout">
+      <figure class="prp-figure map-fig sticky">
+        <div class="map" id="im-map" role="region" aria-label="Satellite imagery map. Use the arrow keys to pan and plus or minus to zoom."></div>
+        <figcaption id="im-caption"></figcaption>
+      </figure>
+      <aside class="side" aria-label="About this view">
+        <section class="prp-panel"><div class="prp-panel-head"><b>This view</b><span class="status" id="im-status" aria-live="polite"></span></div><div class="prp-panel-body" id="im-info"></div></section>
+        <section class="prp-panel"><div class="prp-panel-head"><b>Open the same place in</b></div><ul class="links" id="im-links"></ul></section>
+        <section class="prp-panel"><div class="prp-panel-head"><b>Sharper, commercial imagery</b></div>
+          <div class="prp-panel-body small">
+            <p>Daily global images are coarse. For buildings and vehicles you need very-high-resolution (VHR) imagery, 30 cm to 3 m, mostly commercial and under licence:</p>
+            <ul>
+              <li><a href="https://vantor.com/company/open-data-program/" target="_blank" rel="noopener">Vantor Open Data</a> (formerly Maxar): free sub-metre images of disasters, <b>CC BY-NC 4.0</b> (non-commercial, with credit), also on <a href="https://registry.opendata.aws/vantor-open-data/" target="_blank" rel="noopener">AWS</a>.</li>
+              <li><a href="https://www.planet.com/" target="_blank" rel="noopener">Planet</a>: PlanetScope about 3 m daily, SkySat about 50 cm. Paid; the Education and Research programme gives limited free access to university researchers. Licences restrict sharing the images.</li>
+              <li>Open radar: <a href="https://umbra.space/open-data/" target="_blank" rel="noopener">Umbra</a> and <a href="https://www.capellaspace.com/" target="_blank" rel="noopener">Capella</a> publish sample SAR scenes, <b>CC BY 4.0</b>.</li>
+              <li><a href="https://livingatlas.arcgis.com/wayback/" target="_blank" rel="noopener">Esri Wayback</a> and Google Earth's historical imagery show dated VHR captures to look at, not to republish without permission.</li>
+            </ul>
+            <p class="muted">Always check the licence before you publish an image, credit the provider, and say what date it shows.</p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 3. Fires & hazards -->
+  <section id="panel-hazards" class="tabpanel" role="tabpanel" aria-labelledby="tab-hazards" hidden>
+    <div class="toolbar prp-panel">
+      <div class="field"><span class="prp-label">Fires, NASA GIBS</span>
+        <div class="chips"><button type="button" class="prp-chip" id="hz-viirs" aria-pressed="true">VIIRS 375 m</button><button type="button" class="prp-chip" id="hz-modis" aria-pressed="false">MODIS 1 km</button></div></div>
+      <div class="field"><span class="prp-label" id="hz-d-l">Fire day (UTC)</span>
+        <div class="datebox" role="group" aria-labelledby="hz-d-l"><button type="button" class="prp-btn sm" data-step="-1" data-for="hz-d" aria-label="Previous day">‹</button><input type="date" class="prp-input" id="hz-d" aria-labelledby="hz-d-l"><button type="button" class="prp-btn sm" data-step="1" data-for="hz-d" aria-label="Next day">›</button></div></div>
+      <label class="field"><span class="prp-label">Earthquakes, USGS</span><select class="prp-select" id="hz-quakes"></select></label>
+      <label class="field"><span class="prp-label">Disaster alerts, GDACS</span><select class="prp-select" id="hz-gdacs"><option value="current">Current events</option><option value="recent">Orange and red, recent months</option><option value="off">Off</option></select></label>
+      <div class="field"><span class="prp-label">&nbsp;</span><button type="button" class="prp-btn" id="hz-refresh">Refresh</button></div>
+      <span class="status grow-status" id="hz-status" aria-live="polite"></span>
+    </div>
+    <div class="map-layout">
+      <figure class="prp-figure map-fig">
+        <div class="map" id="hz-map" role="region" aria-label="Fires and hazards map"></div>
+        <div class="legend" id="hz-legend" aria-label="Legend"></div>
+        <figcaption><b>Figure 1.</b> Fire and thermal-anomaly detections for the chosen day (red points; NASA GIBS, VIIRS and MODIS), earthquakes (blue circles sized by magnitude; USGS) and disaster alerts (diamonds coloured by alert level; GDACS). Detections and events are listed under the map.</figcaption>
+      </figure>
+      <aside class="side" aria-label="NASA FIRMS and notes">
+        <section class="prp-panel" id="firms-panel">
+          <div class="prp-panel-head"><b>NASA FIRMS, last 24 hours to 7 days</b><span class="prp-status" id="firms-state">No key</span></div>
+          <div class="prp-panel-body small" id="firms-body"></div>
+        </section>
+        <section class="prp-panel"><div class="prp-panel-head"><b>Reading a hotspot</b></div>
+          <div class="prp-panel-body small">
+            <p>A detection means a satellite saw <b>heat</b> in a pixel (375 m for VIIRS, 1 km for MODIS), not what caused it. Crop burning, wildfires, gas flares, steelworks and strikes all show. Cloud, smoke and the time between passes hide short fires.</p>
+            <p>Compare the same place in earlier years, check the true-colour image for smoke, and look for the same heat on consecutive passes before you call it a fire. <a href="#" data-lesson="tracking-aircraft-ships-fires-and-lights">Lesson: tracking fires and lights →</a></p>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <section class="prp-panel hz-lists">
+      <div class="prp-panel-head">
+        <div class="seg" role="tablist" aria-label="Lists" id="hz-seg">
+          <button type="button" role="tab" data-v="quakes" aria-selected="true">Earthquakes <span class="n" id="hz-n-quakes">0</span></button><button type="button" role="tab" data-v="gdacs" aria-selected="false" tabindex="-1">GDACS alerts <span class="n" id="hz-n-gdacs">0</span></button><button type="button" role="tab" data-v="firms" aria-selected="false" tabindex="-1">FIRMS detections <span class="n" id="hz-n-firms">–</span></button>
+        </div>
+        <span class="prp-label" id="hz-list-note"></span>
+      </div>
+      <div class="scroll capped" id="hz-list" role="tabpanel" tabindex="0" aria-label="List"></div>
+    </section>
+  </section>
+
+  <!-- 4. Features -->
+  <section id="panel-features" class="tabpanel" role="tabpanel" aria-labelledby="tab-features" hidden>
+    <div class="toolbar prp-panel">
+      <form class="field grow" id="ft-geo" role="search"><label class="prp-label" for="ft-q">Find a place</label>
+        <div class="inline"><input type="search" class="prp-input" id="ft-q" placeholder="Town, landmark or address" autocomplete="off" maxlength="200"><button type="submit" class="prp-btn">Search</button></div></form>
+      <label class="field wide"><span class="prp-label">Features</span><select class="prp-select" id="ft-preset"></select></label>
+      <div class="field"><span class="prp-label" id="ft-area-l">Area</span>
+        <div class="seg" id="ft-area" role="group" aria-labelledby="ft-area-l"><button type="button" data-v="view" aria-pressed="true">Current view</button><button type="button" data-v="point" aria-pressed="false">Around a point</button></div></div>
+      <label class="field" id="ft-radius-f" hidden><span class="prp-label">Radius</span><select class="prp-select" id="ft-radius"><option value="1000">1 km</option><option value="2000">2 km</option><option value="5000" selected>5 km</option><option value="10000">10 km</option><option value="25000">25 km</option></select></label>
+      <div class="field"><label class="prp-label check-l"><input type="checkbox" id="ft-near-on"> Only within</label>
+        <div class="inline near-row"><select class="prp-select" id="ft-near-r" aria-label="Distance"><option value="100">100 m</option><option value="200" selected>200 m</option><option value="500">500 m</option><option value="1000">1 km</option></select><span class="of">of</span><select class="prp-select" id="ft-near" aria-label="Other features"></select></div></div>
+      <div class="field"><span class="prp-label">&nbsp;</span><div class="inline"><button type="button" class="prp-btn primary" id="ft-run">Run query</button><a class="prp-btn" id="ft-turbo" target="_blank" rel="noopener">Overpass Turbo ↗</a></div></div>
+    </div>
+    <div class="map-layout">
+      <figure class="prp-figure map-fig">
+        <div class="map" id="ft-map" role="region" aria-label="OpenStreetMap features map"></div>
+        <figcaption id="ft-caption"><b>Figure 1.</b> OpenStreetMap features matching the chosen preset (blue points, at the centre of areas and lines). Click a point for its tags. Data © OpenStreetMap contributors, ODbL.</figcaption>
+      </figure>
+      <aside class="side" aria-label="Search results and query">
+        <section class="prp-panel" id="ft-geo-panel" hidden><div class="prp-panel-head"><b>Places found</b><span class="status" id="ft-geo-status" aria-live="polite"></span></div><ol class="geo-results" id="ft-geo-results"></ol></section>
+        <section class="prp-panel"><div class="prp-panel-head"><b>Query</b><span class="status" id="ft-status" aria-live="polite"></span></div>
+          <div class="prp-panel-body small">
+            <p class="prp-note warn" id="ft-error" role="status" hidden></p>
+            <div class="code"><div class="code-head"><span id="ft-ql-label">Overpass QL</span><button type="button" class="copy" data-copy>Copy</button></div><pre tabindex="0"><code id="ft-ql"></code></pre></div>
+            <label class="field server-f"><span class="prp-label">Overpass server</span><select class="prp-select" id="ft-server"></select></label>
+            <p class="muted" id="ft-note"></p>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <section class="prp-panel">
+      <div class="prp-panel-head"><b id="ft-count">Results</b><div class="inline"><span class="prp-label" id="ft-osmdate"></span><button type="button" class="prp-btn sm" id="ft-download" disabled>Download GeoJSON</button></div></div>
+      <div class="scroll capped" id="ft-table"><p class="prp-empty">Choose features and an area, then run the query.</p></div>
+    </section>
+  </section>
+
+  <!-- 5. Measure & geolocate -->
+  <section id="panel-measure" class="tabpanel" role="tabpanel" aria-labelledby="tab-measure" hidden>
+    <div class="toolbar prp-panel">
+      <div class="field"><span class="prp-label" id="ms-base-l">Base</span>
+        <div class="seg" id="ms-base" role="group" aria-labelledby="ms-base-l"><button type="button" data-v="map" aria-pressed="false">Map</button><button type="button" data-v="imagery" aria-pressed="true">Imagery</button><button type="button" data-v="s2" aria-pressed="false">Sentinel-2</button></div></div>
+      <label class="field check"><input type="checkbox" id="ms-hill"> <span>Hillshade</span></label>
+      <div class="field"><span class="prp-label" id="ms-tool-l">Tool</span>
+        <div class="seg seg-wrap" id="ms-tool" role="group" aria-labelledby="ms-tool-l"><button type="button" data-v="inspect" aria-pressed="true">Inspect</button><button type="button" data-v="distance" aria-pressed="false">Distance</button><button type="button" data-v="area" aria-pressed="false">Area</button><button type="button" data-v="bearing" aria-pressed="false">Bearing</button><button type="button" data-v="line" aria-pressed="false">Bearing line</button><button type="button" data-v="shadow" aria-pressed="false">Shadow</button></div></div>
+      <div class="field"><span class="prp-label">&nbsp;</span><div class="inline"><button type="button" class="prp-btn" id="ms-finish" disabled>Finish</button><button type="button" class="prp-btn ghost" id="ms-clear">Clear</button></div></div>
+      <form class="field grow" id="ms-go"><label class="prp-label" for="ms-coords">Go to coordinates</label>
+        <div class="inline"><input class="prp-input" id="ms-coords" placeholder="48.8584, 2.2945 · 48°51′30″N 2°17′40″E · 31U DQ 48251 11932" autocomplete="off"><button type="submit" class="prp-btn">Go</button></div></form>
+    </div>
+    <div class="map-layout measure">
+      <figure class="prp-figure map-fig sticky">
+        <div class="map" id="ms-map" role="region" aria-label="Measuring map"></div>
+        <p class="hint" id="ms-hint" aria-live="polite"></p>
+        <figcaption id="ms-caption"><b>Figure 1.</b> Measurements on the WGS84 ellipsoid. Elevation and hillshade from Terrain Tiles; sun and shadow directions from SunCalc for the point, day and time set in the calculator.</figcaption>
+      </figure>
+      <aside class="side" aria-label="Results and calculators">
+        <section class="prp-panel"><div class="prp-panel-head"><b>Point and measurements</b></div><div class="prp-panel-body" id="ms-readout"></div></section>
+        <section class="prp-panel" id="ms-sun"><div class="prp-panel-head"><b>Sun and shadows</b><span class="status" id="ms-sun-status" aria-live="polite"></span></div><div class="prp-panel-body"></div></section>
+        <section class="prp-panel" id="ms-chrono"><div class="prp-panel-head"><b>When was it taken? Chronolocation</b></div><div class="prp-panel-body"></div></section>
+        <section class="prp-panel"><div class="prp-panel-head"><b>Street level and 3D at this point</b></div><ul class="links" id="ms-links"></ul></section>
+      </aside>
+    </div>
+    <section class="prp-panel" id="ms-profile" hidden>
+      <div class="prp-panel-head"><b>Elevation profile and line of sight</b><div class="inline small-controls">
+        <label>Observer <input class="prp-input num" type="number" id="ms-obs" value="1.7" min="0" max="500" step="0.1"> m</label>
+        <label>Target <input class="prp-input num" type="number" id="ms-tgt" value="0" min="0" max="2000" step="1"> m</label></div></div>
+      <div class="prp-panel-body"><figure class="prp-figure"><div id="ms-profile-chart" class="chart"></div><figcaption id="ms-profile-cap"></figcaption></figure>
+        <details class="as-table"><summary>Show as a table</summary><div class="scroll" id="ms-profile-table"></div></details></div>
+    </section>
+  </section>
+
+  <!-- 6–8. Guides -->
+  <section id="panel-cookbook" class="tabpanel" role="tabpanel" aria-labelledby="tab-cookbook" hidden><div class="doc" data-doc="cookbook"><p class="prp-empty">Loading the Software Cookbook…</p></div></section>
+  <section id="panel-hardware" class="tabpanel" role="tabpanel" aria-labelledby="tab-hardware" hidden><div class="doc" data-doc="hardware"><p class="prp-empty">Loading the Hardware Guide…</p></div></section>
+  <section id="panel-law" class="tabpanel" role="tabpanel" aria-labelledby="tab-law" hidden><div class="doc" data-doc="law"><p class="prp-empty">Loading Law &amp; ethics…</p></div></section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> Imagery: NASA EOSDIS Global Imagery Browse Services (GIBS), MODIS Terra and Aqua corrected reflectance (true colour and bands 7-2-1), VIIRS Suomi NPP, NOAA-20 and NOAA-21 corrected reflectance, VIIRS Black Marble (VNP46A2, moonlight-corrected and gap-filled) and the Day/Night Band, no restrictions on use, credit NASA. Fires: GIBS VIIRS and MODIS thermal anomalies (drawn by the GIBS WMS) and NASA FIRMS with your own free MAP_KEY. Earthquakes: USGS Earthquake Hazards Program GeoJSON feeds (public domain). Disaster alerts: GDACS, a cooperation of the United Nations and the European Commission. Features: © OpenStreetMap contributors (ODbL) through the public Overpass API servers of Private.coffee or VK Maps; place search by Nominatim under the <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener">OSM Foundation's usage policy</a>. Elevation: Terrain Tiles on AWS Open Data (Mapzen/Tilezen; SRTM, GMTED, ETOPO1, 3DEP, EU-DEM and other sources, see <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noopener">attribution</a>). Base maps: Esri Canvas and World Imagery (Esri's terms of use apply), EOxCloudless Sentinel-2 2025 (CC BY-NC-SA 4.0). Sun positions: SunCalc 2.1.1 (BSD-2-Clause); time zones: tz-lookup (CC0).</p>
+    <p><b>Refresh.</b> Everything is fetched live by your browser when you open a view: GIBS daily imagery appears about three hours after each satellite pass and the newest complete day is shown by default; FIRMS updates every 15 minutes; USGS feeds every minute; GDACS as events change. Nothing is stored on a PRP server.</p>
+    <p><b>Method and privacy.</b> Distances and bearings are computed on the WGS84 ellipsoid (Vincenty), areas on the equal-area sphere. Your FIRMS key is kept only in this browser's storage and sent only to firms.modaps.eosdis.nasa.gov. Place searches go to nominatim.openstreetmap.org (one per second at most, never as you type), feature queries to the Overpass server you choose (Private.coffee unless you pick VK Maps), and identify this site by its address only. Use the tools for places, events and infrastructure, never to find or follow private people.</p>
+  </footer>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+</body>
+</html>

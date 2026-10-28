@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs tests/traders.test.mjs tests/kardashev.test.mjs tests/encyclopedia.test.mjs tests/national.test.mjs tests/volatility.test.mjs tests/briefing.test.mjs tests/warfocus.test.mjs tests/science-briefing.test.mjs tests/science-progress.test.mjs tests/sigint.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs tests/traders.test.mjs tests/kardashev.test.mjs tests/encyclopedia.test.mjs tests/national.test.mjs tests/volatility.test.mjs tests/briefing.test.mjs tests/warfocus.test.mjs tests/science-briefing.test.mjs tests/science-progress.test.mjs tests/sigint.test.mjs tests/osint.test.mjs tests/geoint.test.mjs",
     "build:lake": "node lake/scripts/build.mjs",
     "build:national": "node national/scripts/build.mjs"
   },

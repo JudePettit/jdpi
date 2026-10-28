@@ -21,8 +21,8 @@ after(async () => { await browser?.close(); });
 test('registry is well formed', () => {
   assert.equal(registry.platform.name, 'PRP');
   assert.equal(registry.platform.company, 'JDP-Iq');
-  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'mm', 'ns']);
-  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'Money Management', 'Natural Science']);
+  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'mm', 'ns', 'kino']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'Money Management', 'Natural Science', 'Kino']);
   const ids = modules.map(x => x.m.id);
   assert.equal(new Set(ids).size, ids.length, 'submodule ids are unique across modules');
   for (const { m } of modules) {
@@ -36,6 +36,8 @@ test('registry is well formed', () => {
   assert.equal(where('markets'), 'mm'); assert.equal(where('tally-stick'), 'mm'); assert.equal(where('algo-trader'), 'mm');
   assert.equal(where('science-briefing'), 'ns'); assert.equal(where('progress'), 'ns');
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'rt');
+  assert.equal(where('econ-briefing'), 'mm');
+  for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
   assert.equal(modules.find(x => x.m.id === 'briefing').m.name, 'Intelligence Briefing');
 });
 

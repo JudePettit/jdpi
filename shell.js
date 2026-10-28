@@ -64,6 +64,8 @@ function setupTheme() {
   // A module announces itself when it loads; answer with the theme so it matches the shell.
   window.addEventListener('message', e => {
     if (e.data?.type === 'jdpi:module-ready' || e.data?.type === 'prp:hello') state.frames.forEach(f => { if (f.contentWindow === e.source) postTheme(f); });
+    // Kino's 'Follow along' (and any same-origin page) may move the shell to another submodule; only shell routes are accepted.
+    if (e.data?.type === 'prp:navigate' && e.origin === location.origin && /^#\/[a-z-]+(\/[\w-]+){0,2}(\?at=[^#\s]*)?$/.test(String(e.data.hash || ''))) location.hash = e.data.hash;
   });
   applyTheme(saved);
 }

@@ -566,6 +566,48 @@
       ]
     },
     {
+      "id": "ds",
+      "code": "DS",
+      "name": "Digital Science",
+      "title": "Digital Science",
+      "description": "Computing, AI and the digital world: the week’s papers and technology news by field, a Data Analytics workbench for exploring and charting PRP’s own data, and an Integration Hub that opens PRP to AI assistants and plugins.",
+      "modules": [
+        {
+          "id": "digital-briefing",
+          "name": "Digital Briefing",
+          "kind": "realtime",
+          "icon": "⌬",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "digital/briefing/index.html",
+          "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
+        },
+        {
+          "id": "data-analytics",
+          "name": "Data Analytics",
+          "kind": "operations",
+          "icon": "▤",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "analytics/index.html",
+          "description": "Explore and chart PRP’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in PRP’s style, export them, and hand the analysis to an AI assistant."
+        },
+        {
+          "id": "integration-hub",
+          "name": "Integration Hub",
+          "kind": "reference",
+          "icon": "⇄",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "pendingUrl": "integration/index.html",
+          "description": "Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools."
+        }
+      ]
+    },
+    {
       "id": "kino",
       "code": "KN",
       "name": "Kino",

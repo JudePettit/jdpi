@@ -12,9 +12,10 @@ is what every page in the suite follows. The stylesheet is `design/prp.css`; the
 | H&P · History & Politics | **Retrospective Intelligence** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
 | (new) | **Natural Science** | `ns` | NS |
+| (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
 
-In the registry the five are "suites" and their pages "modules"; in the interface we say **module** for the five and
+In the registry the six are "suites" and their pages "modules"; in the interface we say **module** for the six and
 **submodule** for the pages.
 
 | Submodule | Module | Notes |
@@ -39,6 +40,7 @@ In the registry the five are "suites" and their pages "modules"; in the interfac
 | Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
 | Scientific Briefing | NS (new) | `science/briefing/` |
 | Timeline of Progress | NS (new) | `science/progress/` |
+| Digital Briefing, Data Analytics, Integration Hub | DS (new) | `digital/briefing/`, `analytics/`, `integration/` |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
 
 **Sidebar order.** Within each module the strongest submodules come first, the calendar second-last and the course last.
@@ -53,7 +55,7 @@ the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tab
 ## 2. Hooking a page up
 
 ```html
-<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns | kino -->
+<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns | ds | kino -->
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
@@ -82,7 +84,7 @@ so a page should not pin anything it needs there.
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns|kn` and `-soft`.
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns|ds|kn` and `-soft`.
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,

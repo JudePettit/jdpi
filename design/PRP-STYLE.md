@@ -1,0 +1,128 @@
+# PRP style and naming guide
+
+PRP (Personal Resource Planner) is a product of **JDP-Iq** (lower-case q, always). It used to be called JDP-I. This guide
+is what every page in the suite follows. The stylesheet is `design/prp.css`; the connector script is `design/prp-bar.js`.
+
+## 1. Names
+
+| Old | New | id (registry) | Code |
+|---|---|---|---|
+| JDP-I (platform) | **PRP** (Personal Resource Planner), by **JDP-Iq** | | |
+| Q · Geopolitical Intelligence | **Realtime Intelligence** | `rt` (alias `q`) | RT |
+| H&P · History & Politics | **Retrospective Intelligence** | `rs` (alias `hp`) | RS |
+| F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
+| (new) | **Natural Science** | `ns` | NS |
+
+In the registry the four are "suites" and their pages "modules"; in the interface we say **module** for the four and
+**submodule** for the pages.
+
+| Submodule | Module | Notes |
+|---|---|---|
+| Intelligence Briefing (was Briefing) | RT | `q/briefing.html` |
+| Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page |
+| Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
+| Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
+| OSINT Training | RT (new) | `fe/learning.html?course=osint` |
+| Encyclopaedia | RS | |
+| Political Retrospective (was H&P Retrospective) | RS | external site hp-retrospective.pages.dev |
+| Historical Calendar, Kardashev Tracker | RS | |
+| Retrospective Battlefield | RS | world map 1926–2025 (`battlefield/history/`) |
+| War Focus | RS | now its own submodule (`battlefield/focus/`) |
+| Learning · Politics | RS | `fe/learning.html?course=politics` |
+| TD Markets | MM | trade-desk `/markets/` |
+| Tally Stick | MM | trade-desk `/tally/` (private) |
+| Algo Trader (was Double Signal) | MM | trade-desk `/tally/algo/` (private); Double Signal's logic is the **Double Agent** ruleset |
+| Auto Trader (was Trader Tracker) | MM | `fe/traders.html` |
+| Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
+| Scientific Briefing | NS (new) | `science/briefing/` |
+| Timeline of Progress | NS (new) | `science/progress/` |
+
+Never write "JDP-I", "Q", "H&P" or "F&E" in visible text any more (code identifiers and URLs may keep them).
+Page titles: `<Submodule> · PRP` (e.g. `Intelligence Briefing · PRP`).
+
+**One page, one submodule.** A page's own views (archives, map/compare, live/archive, course parts) are **tabs inside
+the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tablist"`, update the URL
+(`history.replaceState`) so a view can be linked, and switch without a full reload where practical.
+
+## 2. Hooking a page up
+
+```html
+<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns -->
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">   <!-- loads the fonts; drop the old DM/Manrope font links -->
+<script src="../design/prp-bar.js" data-suite="rt" data-module="briefing" data-shell="../" defer></script>
+```
+External sites use the absolute URLs `https://jdpi.pages.dev/design/prp.css` and `…/prp-bar.js`.
+`prp-bar.js` applies the theme (light by default, dark by system or choice), sets the accent, hides
+`[data-jdpi-standalone]` elements inside the shell, and fires `window` event `prp:themechange` when the theme changes:
+**anything drawn in canvas/SVG/Leaflet with theme colours must re-read the tokens and redraw on that event.**
+Read a token in JS with `getComputedStyle(document.documentElement).getPropertyValue('--prp-map-land').trim()`.
+
+## 3. Tokens (write CSS against these; no raw hex in page CSS)
+
+- Surfaces: `--prp-canvas` (page background), `--prp-surface` (panels, inputs), `--prp-surface-2` (table heads,
+  toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
+- Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
+- Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns` and `-soft`.
+- Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
+- Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
+  "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,
+  `--prp-div-pos-1…3`, status marks `--prp-status-good|warning|serious|critical`, `--prp-grid`, `--prp-axis`.
+- Maps: `--prp-map-water`, `--prp-map-land`, `--prp-map-nodata`, `--prp-map-border`, `--prp-map-graticule`,
+  `--prp-map-label`, `--prp-map-halo`. Raster basemaps: Esri Canvas `World_Light_Gray_Base` in light, `World_Dark_Gray_Base` in dark
+  (`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/<layer>/MapServer/tile/{z}/{y}/{x}`, attribution "Tiles © Esri —
+  Esri, HERE, Garmin, © OpenStreetMap contributors"), swapped on `prp:themechange`. (CARTO basemaps now need an API key.)
+- Type: `--prp-font-serif` (Source Serif 4: page titles, section headings, reading text, captions),
+  `--prp-font-ui` (IBM Plex Sans: everything interactive and body), `--prp-font-mono` (IBM Plex Mono: labels, codes,
+  timestamps, numbers in tables). Sizes `--prp-fs-xs|sm|(base)|md|lg|xl|2xl`. Numbers: `font-variant-numeric: tabular-nums`.
+- Shape: `--prp-radius-sm|radius|radius-lg`, `--prp-shadow-1|2`, `--prp-measure` (72ch reading width).
+
+Political-position colours in the Intelligence Briefing (far left … far right) stay as the page's own named tokens,
+defined for both themes.
+
+## 4. Page anatomy (publication front matter + ERP object page)
+
+1. **Header**: `.prp-eyebrow` "Realtime Intelligence · Intelligence Briefing" (mark the eyebrow and any standalone brand
+   with `data-jdpi-standalone` only if it duplicates the shell), `.prp-title` (serif h1), `.prp-dek` (one or two
+   plain sentences: what this is and what you can do), `.prp-meta` line (Updated … · Source … · Coverage …).
+2. **Tabs** for the page's views (`.prp-tabs`).
+3. **Toolbar/filters** in one row above the content (`.prp-input`, `.prp-select`, `.prp-chip`, `.prp-btn`).
+4. **Content** in `.prp-panel`s: tables (`.prp-table`), KPI tiles (`.prp-kpis`/`.prp-kpi`), maps and charts as
+   **figures** with a caption: `<figure class="prp-figure">…<figcaption><b>Figure 1.</b> What it shows. Source.</figcaption></figure>`.
+5. **Sources** block at the bottom (`.prp-sources`): data sources, licences, refresh cadence, method notes.
+
+Layout: max content width ~1440px, 24px page padding (16px on phones), 12–16px gaps. Light surfaces, 1px lines, small
+radii, almost no shadows. Never a horizontal page scroll at 360px wide.
+
+## 5. Components (classes in prp.css)
+
+`.prp-panel`, `.prp-panel-head`, `.prp-panel-body`, `.prp-btn` (`.primary`, `.ghost`, `.danger`, `.sm`), `.prp-input`,
+`.prp-select`, `.prp-tabs`, `.prp-chip` (`.on`), `.prp-code` (module code chip), `.prp-kind` (Realtime/Retrospective
+badge), `.prp-status` (`data-status="live|in-build"` or `.good|.warn|.bad`), `.prp-table` (`.num` cells),
+`.prp-kpis`/`.prp-kpi`, `.prp-figure`/`.prp-caption`, `.prp-note` (`.warn`, `.bad`), `.prp-sources`, `.prp-empty`,
+`.prp-label`, `.prp-meta`, `.prp-prose` (serif reading text), `.prp-num`, `.prp-up`/`.prp-down`.
+Legacy `.jdpi-*` classes still work and look new.
+
+## 6. Data visualisation rules
+
+Colour follows the entity, never its rank; categorical colours in the fixed order; sequential = one hue light→dark;
+diverging = two hues with a grey midpoint; status colours only for status and always with a word or icon. Thin marks,
+recessive gridlines (`--prp-grid`), a legend for ≥2 series, direct labels where few, text in text tokens (never in the
+series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes.
+
+## 7. Accessibility
+
+Contrast ≥4.5:1 for text (use `--prp-muted` or darker for anything readable), visible focus (`:focus-visible`), keyboard
+operable tabs and sliders, `prefers-reduced-motion` respected, form labels, `aria-live` for updating feeds.
+
+## 8. Checklist before you finish a page
+
+- [ ] Old brand text gone (JDP-I, Q, H&P, F&E) from visible text, titles and footers; new names used.
+- [ ] Only tokens in CSS (search the file for `#` colours outside token definitions; maps/charts read tokens).
+- [ ] Works in light and dark (`<html data-theme="dark">`), including maps, charts and canvases (redraw on `prp:themechange`).
+- [ ] Views are in-page tabs; old URL parameters still open the right view.
+- [ ] Inline scripts still parse (`node --check` on extracted scripts) and existing tests still pass.
+- [ ] Phone width (360px): no horizontal scroll; tables scroll inside their panel.

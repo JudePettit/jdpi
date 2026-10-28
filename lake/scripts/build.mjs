@@ -167,8 +167,8 @@ await Promise.all(Array.from({ length: 8 }, async () => {
 writeFileSync(cachePath, JSON.stringify(cache));
 
 // ---- 5. Entity records and shards
-const MODULE_ORDER = ['retrospective', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics'];
-const MODULE_NAMES = { retrospective: 'H&P Retrospective', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Trader Tracker', learning: 'Learning (F&E)', 'learning-politics': 'Learning (Politics)' };
+const MODULE_ORDER = ['retrospective', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress'];
+const MODULE_NAMES = { retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Timeline of Progress', 'science-briefing': 'Scientific Briefing', 'osint-training': 'OSINT Training' };
 const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
 function tagsFor(e, type, ms) {
   const tags = new Set([`Type:${TYPE_NAMES[type]}`]);

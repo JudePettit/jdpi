@@ -1,9 +1,10 @@
-/* JDP-I entity linker. Loaded by jdpi-bar.js on every module page.
-   Adds a small ◈ link to the JDP-I Encyclopaedia next to anything the entity layer (lake/) knows about:
-     - links to English Wikipedia articles (most modules already link people, wars and events there);
+/* PRP entity linker. Loaded by prp-bar.js on every submodule page.
+   Adds a small ◈ link to the PRP Encyclopaedia next to anything the entity layer (lake/) knows about:
+     - links to English Wikipedia articles (most submodules already link people, wars and events there);
      - elements with data-qid="Q…" (a Wikidata ID);
-     - elements with data-entity-key="congress:P000197" (module keys listed in lake/data/keys.json).
-   Lookups use small static shards, fetched only for titles present on the page, and re-run as pages render. */
+     - elements with data-entity-key="congress:P000197" (submodule keys listed in lake/data/keys.json).
+   Lookups use small static shards, fetched only for titles present on the page, and re-run as pages render.
+   The mark takes the PRP link colour, so it reads in light and dark. */
 (function () {
   const script = document.currentScript;
   const SHELL = (script && script.dataset.shell) || 'https://jdpi.pages.dev/';
@@ -18,12 +19,13 @@
   const getShard = n => { if (!shards.has(n)) shards.set(n, fetch(`${LAKE}t/${n}.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({}))); return shards.get(n); };
   const getKeys = () => (keys ||= fetch(`${LAKE}keys.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({})));
 
-  // Inside the shell the Encyclopaedia opens as a JDP-I module; on its own it opens directly.
+  // Inside the shell the Encyclopaedia opens as a PRP submodule (Retrospective Intelligence); on its own it opens directly.
   const pageUrl = q => new URL(`encyclopedia/index.html#${q}`, SHELL).href;
-  const linkUrl = q => (embedded ? `${SHELL}#/hp/encyclopedia?at=${encodeURIComponent(pageUrl(q))}` : pageUrl(q));
+  const linkUrl = q => (embedded ? `${SHELL}#/rs/encyclopedia?at=${encodeURIComponent(pageUrl(q))}` : pageUrl(q));
 
   const style = document.createElement('style');
-  style.textContent = '.jdpi-ency{display:inline-block;margin-left:3px;font-size:.78em;line-height:1;text-decoration:none!important;opacity:.7;vertical-align:.1em;color:var(--jdpi-accent,#6ddac8)!important}.jdpi-ency:hover{opacity:1}';
+  style.textContent = '.jdpi-ency{display:inline-block;margin-left:3px;font-size:.78em;line-height:1;text-decoration:none!important;opacity:.75;vertical-align:.1em;color:var(--prp-link,currentColor)!important}'
+    + '.jdpi-ency:hover,.jdpi-ency:focus-visible{opacity:1}';
   document.head.appendChild(style);
 
   function badge(el, q, label) {
@@ -31,7 +33,7 @@
     el.dataset.jdpiEncy = q;
     const a = document.createElement('a');
     a.className = 'jdpi-ency'; a.href = linkUrl(q); a.target = embedded ? '_top' : '_self';
-    a.title = `${label || 'Open'} in the JDP-I Encyclopaedia`; a.setAttribute('aria-label', a.title);
+    a.title = `${label ? `Open ${label}` : 'Open'} in the PRP Encyclopaedia`; a.setAttribute('aria-label', a.title);
     a.textContent = '◈';
     a.addEventListener('click', e => e.stopPropagation());
     el.insertAdjacentElement('afterend', a);

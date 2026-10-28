@@ -1,72 +1,131 @@
 <!doctype html>
-<html lang="en" data-suite="fe">
+<html lang="en" data-suite="mm" class="prp">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101820"><link rel="icon" href="../design/brand-jdpi.svg" type="image/svg+xml">
-<title>JDP-I F&amp;E — Learning</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../design/jdpi.css">
-<script src="../design/jdpi-bar.js" data-suite="fe" data-module="learning" data-shell="../" defer></script>
-<script>(function(){if(new URLSearchParams(location.search).get('course')==='politics'){var s=document.querySelector('script[src*="jdpi-bar.js"]');s.dataset.suite='hp';s.dataset.module='learning-politics';document.documentElement.dataset.suite='hp'}})();</script>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<title>Learning · Finance &amp; Economics · PRP</title>
+<meta name="description" content="PRP courses with quizzes: Finance and Economics (Money Management), Politics (Retrospective Intelligence) and OSINT Training (Realtime Intelligence).">
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="mm" data-module="learning" data-shell="../" defer></script>
+<script>/* Each course belongs to a module: tell the connector before it runs, and apply the saved theme before first paint. */
+(function(){var c=new URLSearchParams(location.search).get('course'),g={politics:['rs','learning-politics','Learning · Politics'],osint:['rt','osint-training','OSINT Training']}[c]||['mm','learning','Learning · Finance & Economics'],s=document.querySelector('script[src*="prp-bar.js"]');if(s){s.dataset.suite=g[0];s.dataset.module=g[1]}document.documentElement.dataset.suite=g[0];document.title=g[2]+' · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <style>
-:root{--accent-src:0;--bg:var(--jdpi-bg,#101820);--panel:var(--jdpi-panel,#17242e);--panel2:var(--jdpi-panel-2,#1c2b36);--line:var(--jdpi-line,#293a46);--text:var(--jdpi-text,#edf3f1);--muted:var(--jdpi-muted,#91a0aa);--accent:var(--jdpi-accent,#f0b95a);--good:#b7f36b;--bad:#ff826f}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:15px/1.65 'DM Sans',system-ui,sans-serif}
-a{color:var(--accent)}button{font:inherit;cursor:pointer}[hidden]{display:none!important}
-.wrap{max-width:1320px;margin:auto;padding:22px 28px 40px}
-.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
-.hero h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:720px}
-.tabs{display:flex;gap:6px}.tabs a{border:1px solid var(--line);border-radius:5px;padding:7px 12px;color:var(--muted);text-decoration:none;font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs a.active,.tabs a:hover{border-color:var(--jdpi-accent-line,#86683a);color:var(--accent);background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}
-.progress{margin-top:10px;font:10px 'DM Mono';color:var(--muted)}.bar{height:4px;background:var(--panel2);border-radius:2px;overflow:hidden;margin-top:5px;width:260px}.bar i{display:block;height:100%;background:var(--accent)}
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;margin-top:20px}
-nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 0;align-self:start;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
-.unit{padding:10px 16px 4px;font:600 12px Manrope;color:var(--text)}.unit small{display:block;color:var(--muted);font:9px 'DM Mono';letter-spacing:.12em;text-transform:uppercase}
-.toc button{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;color:var(--muted);padding:6px 16px 6px 22px;font-size:13px;line-height:1.4}
-.toc button:hover{color:var(--text);background:var(--panel2)}.toc button.cur{color:var(--accent);background:var(--jdpi-accent-soft,rgba(240,185,90,.08))}
-.tick{flex:none;width:14px;color:var(--good)}
-article{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px 36px;min-width:0}
-article h2{font:600 26px Manrope;letter-spacing:-.03em;margin:4px 0 14px}article h3{font:600 17px Manrope;margin:26px 0 8px}
-article p{margin:10px 0}article ul,article ol{padding-left:22px}article li{margin:4px 0}
-.formula{font:14px 'DM Mono';background:#0d1721;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin:14px 0;overflow-x:auto;white-space:pre-wrap}
-.callout{background:var(--jdpi-accent-soft,rgba(240,185,90,.08));border:1px solid var(--jdpi-accent-line,#86683a);border-radius:8px;padding:12px 16px;margin:16px 0}.callout b.k{display:block;color:var(--accent);font:10px 'DM Mono';letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
-.quote{border-left:3px solid var(--line);padding:4px 14px;color:#c9d3d6;font-style:italic;margin:14px 0}
-table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{background:var(--panel2);font:600 12px Manrope}
-.quiz{margin-top:30px;border-top:1px solid var(--line);padding-top:16px}.quiz h3{margin-top:0}
-.q{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}.q p{margin:0 0 8px;font-weight:600}
-.opt{display:block;width:100%;text-align:left;background:#0f1b25;border:1px solid var(--line);border-radius:6px;color:var(--text);padding:8px 12px;margin:6px 0}
-.opt:hover{border-color:var(--accent)}.opt.right{border-color:var(--good);color:var(--good)}.opt.wrong{border-color:var(--bad);color:var(--bad)}
-.why{font-size:13.5px;color:#c9d3d6;margin-top:8px}
-.pager{display:flex;justify-content:space-between;gap:10px;margin-top:28px}.pager button{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:9px 14px;max-width:48%}.pager button:hover{border-color:var(--accent);color:var(--accent)}
-.done{background:var(--jdpi-accent-soft,rgba(240,185,90,.08))!important;border-color:var(--jdpi-accent-line,#86683a)!important;color:var(--accent)!important}
-.note{color:var(--muted);font-size:12px;margin-top:24px}
-@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{position:static;max-height:none}article{padding:20px 18px}.wrap{padding:16px}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+button{font:inherit;cursor:pointer}
+.page{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
+.head{padding-bottom:18px}.head .prp-title{margin-top:10px}
+.prp-tabs{margin-bottom:16px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.toc{position:sticky;top:12px;display:flex;flex-direction:column;max-height:calc(100vh - 24px)}
+#toc{position:relative;min-height:0;overflow:auto;padding-bottom:10px}
+.progress{padding:12px 14px;border-bottom:1px solid var(--prp-line-soft);background:var(--prp-surface-2)}
+.progress .prp-label{display:block;margin-bottom:4px}
+#progress-label{color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
+.progress small{display:block;margin-top:6px;color:var(--prp-muted);font-size:var(--prp-fs-xs)}
+.bar{height:6px;margin-top:8px;background:var(--prp-surface-3);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--prp-accent);transition:width .3s}
+.unit{padding:14px 14px 4px;color:var(--prp-text);font:600 13px/1.35 var(--prp-font-ui)}
+.unit small{display:block;margin-bottom:2px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.toc button{display:flex;gap:8px;align-items:flex-start;width:100%;padding:6px 14px;border:0;background:none;color:var(--prp-text-2);text-align:left;font-size:13px;line-height:1.4}
+.toc button:hover{background:var(--prp-surface-2);color:var(--prp-text)}
+.toc button.cur{background:var(--prp-accent-soft);color:var(--prp-text);font-weight:500;box-shadow:inset 3px 0 var(--prp-accent)}
+.tick{flex:none;width:14px;color:var(--prp-good);font-weight:600}
+.lesson{min-width:0;padding:32px 40px 28px}
+.lesson .inner{max-width:var(--prp-measure);margin:0 auto;font:var(--prp-fs-md)/1.65 var(--prp-font-serif)}
+.lesson .prp-eyebrow{flex-wrap:wrap}
+.lesson h2{margin:10px 0 16px;color:var(--prp-text);font:600 28px/1.2 var(--prp-font-serif);letter-spacing:-.01em}
+.body{max-width:none}
+.body h3{margin:28px 0 6px;font:600 19px/1.3 var(--prp-font-serif)}
+.body p{margin:12px 0}.body ul,.body ol{margin:12px 0;padding-left:24px}.body li{margin:6px 0}.body li::marker{color:var(--prp-muted)}
+.body b{font-weight:600}
+.formula{margin:16px 0;padding:10px 14px;overflow-x:auto;white-space:pre-wrap;background:var(--prp-surface-2);border:1px solid var(--prp-line);border-left:3px solid var(--prp-accent);border-radius:var(--prp-radius-sm);color:var(--prp-text);font:14px/1.6 var(--prp-font-mono)}
+.callout{margin:18px 0;padding:12px 16px;background:var(--prp-accent-soft);border:1px solid var(--prp-line);border-left:3px solid var(--prp-accent);border-radius:var(--prp-radius-sm);color:var(--prp-text);font:14.5px/1.6 var(--prp-font-ui)}
+.callout b.k{display:block;margin-bottom:3px;color:var(--prp-text-2);font:600 var(--prp-fs-xs)/1.4 var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
+.quote{margin:18px 0;padding:2px 0 2px 18px;border-left:3px solid var(--prp-line-strong);color:var(--prp-text-2);font-style:italic}
+.lesson{container-type:inline-size}
+.tablewrap{margin:16px 0;overflow-x:auto;border:1px solid var(--prp-line);border-radius:var(--prp-radius-sm)}
+.body>.tablewrap{--w:min(100cqw,1000px);width:var(--w);max-width:none;margin-left:calc((100% - var(--w)) / 2)} /* wide tables may span the panel */
+.tablewrap .prp-table th{position:static;text-transform:none;letter-spacing:0;font-size:var(--prp-fs-sm);color:var(--prp-text-2)}
+.tablewrap .prp-table td{font-size:13px}.tablewrap .prp-table tr:last-child td{border-bottom:0}
+.quiz{margin-top:32px;padding-top:18px;border-top:1px solid var(--prp-line);font-family:var(--prp-font-ui)}
+.quiz h3{margin:0 0 2px;font:600 19px/1.3 var(--prp-font-serif)}.quiz>p{margin:0 0 8px;color:var(--prp-muted);font-size:var(--prp-fs-sm)}
+.q{margin:12px 0;padding:14px 16px;background:var(--prp-surface-2);border:1px solid var(--prp-line);border-radius:var(--prp-radius)}
+.q>p{margin:0 0 10px;color:var(--prp-text);font-weight:600}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;margin:6px 0;padding:8px 12px;text-align:left;background:var(--prp-surface);border:1px solid var(--prp-line-strong);border-radius:var(--prp-radius-sm);color:var(--prp-text);font-size:14px;line-height:1.45}
+.opt .key{flex:none;width:16px;color:var(--prp-muted);font:500 12px/1.65 var(--prp-font-mono)}
+.opt:not(:disabled):hover{border-color:var(--prp-primary);background:var(--prp-primary-soft)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--prp-good);background:var(--prp-good-soft)}.opt.right .key{color:var(--prp-good)}
+.opt.wrong{border-color:var(--prp-bad);background:var(--prp-bad-soft)}.opt.wrong .key{color:var(--prp-bad)}
+.why{margin-top:10px;color:var(--prp-text-2);font-size:14px;line-height:1.55}
+.why .res{margin-right:4px;font-weight:600}.why .res.ok{color:var(--prp-good)}.why .res.no{color:var(--prp-bad)}
+.pager{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:32px;padding-top:18px;border-top:1px solid var(--prp-line)}
+.pager .prp-btn{height:auto;min-height:34px;max-width:100%;padding:6px 12px;white-space:normal;line-height:1.35}
+.pager .prev{justify-self:start;text-align:left}.pager .next{justify-self:end;text-align:right}
+.pager .prev small,.pager .next small{display:block;color:var(--prp-muted);font:500 10px var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.pager .primary small{color:inherit;opacity:.85}
+#mark.done{border-color:var(--prp-good);background:var(--prp-good-soft);color:var(--prp-good)}
+.status{padding:28px;color:var(--prp-muted);text-align:center}
+.prp-sources{margin-top:28px}.prp-sources p{margin:0 0 6px;max-width:120ch}
+.layout.empty{grid-template-columns:minmax(0,1fr)}.layout.empty .toc{display:none}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static;max-height:360px}.lesson{padding:22px 18px}}
+@media(max-width:640px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.lesson h2{font-size:24px}.pager{grid-template-columns:1fr}.pager .prev,.pager .next,.pager #mark{justify-self:stretch}}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <section class="hero">
-    <div><div class="eyebrow" id="suite-label">JDP-I F&amp;E · Learning</div><h1 id="title">Learning</h1><p id="intro"></p>
-      <div class="progress"><span id="progress-label"></span><div class="bar"><i id="progress-bar" style="width:0"></i></div></div></div>
-    <div class="tabs"><a href="learning.html?course=finance" data-course="finance" data-suite="fe">Finance</a><a href="learning.html?course=economics" data-course="economics" data-suite="fe">Economics</a><a href="learning.html?course=politics" data-course="politics" data-suite="hp">Politics</a></div>
-  </section>
-  <div class="layout">
-    <nav class="toc" id="toc" aria-label="Course contents"></nav>
-    <article id="lesson" aria-live="polite"><p class="note">Loading course…</p></article>
+<main class="page">
+  <header class="head">
+    <div class="prp-eyebrow" id="eyebrow" data-jdpi-standalone>Money Management <span class="sep">·</span> Learning · Finance &amp; Economics</div>
+    <h1 class="prp-title" id="title">Learning</h1>
+    <p class="prp-dek" id="intro"></p>
+    <div class="prp-meta" id="meta"></div>
+  </header>
+  <div class="prp-tabs tabs" role="tablist" aria-label="Courses">
+    <a href="learning.html?course=finance" role="tab" data-course="finance" data-group="mm">Finance</a><a href="learning.html?course=economics" role="tab" data-course="economics" data-group="mm">Economics</a><a href="learning.html?course=politics" role="tab" data-course="politics" data-group="rs">Politics</a><a href="learning.html?course=osint" role="tab" data-course="osint" data-group="rt">OSINT</a>
   </div>
-</div>
+  <div class="layout">
+    <nav class="toc prp-panel" aria-label="Course contents">
+      <div class="progress"><span class="prp-label">Your progress</span><span id="progress-label"></span><div class="bar"><i id="progress-bar" style="width:0"></i></div><small>Saved in this browser only</small></div>
+      <div id="toc"></div>
+    </nav>
+    <article id="lesson" class="lesson prp-panel" aria-live="polite"><p class="status">Loading course…</p></article>
+  </div>
+  <footer class="prp-sources" id="sources"></footer>
+</main>
 <script>
 // Courses are plain-text files (learning/<course>.md) in a small markup:
+//   "title: …", "intro: …" (and optional "sources: …") before the first unit
 //   # Unit · ## Lesson · ### Heading · "- " bullets · "1. " steps · "$ " formula · "! Title: text" callout
 //   "> " quotation · "| a | b |" table rows · "? " question, "* " wrong option, "+ " right option, "= " explanation
-const COURSES = { finance: 'learning/finance.md', economics: 'learning/economics.md', politics: 'learning/politics.md' };
+//   inline: **bold**, _italic_, [link](https://…) and PRP links [text](#/rt/headlines)
+// Each course belongs to one module, and the tabs show only that module's courses.
+const COURSES = {
+  finance: { file: 'learning/finance.md', group: 'mm' },
+  economics: { file: 'learning/economics.md', group: 'mm' },
+  politics: { file: 'learning/politics.md', group: 'rs' },
+  osint: { file: 'learning/osint.md', group: 'rt' },
+};
+const GROUPS = {
+  mm: { module: 'Money Management', submodule: 'Learning · Finance & Economics', note: 'Not financial advice: worked examples are for learning only.',
+    intro: 'Two courses: Finance, a university-style introduction with worked examples, and Economics, taught through its great thinkers and rival schools.' },
+  rs: { module: 'Retrospective Intelligence', submodule: 'Learning · Politics', note: 'Each movement is presented as its own thinkers explained it, then what happened when it held power and what its critics say.',
+    intro: 'The political spectrum through the leaders and thinkers who shaped it, with quizzes.' },
+  rt: { module: 'Realtime Intelligence', submodule: 'OSINT Training', note: 'Use open-source methods lawfully and ethically: respect each tool’s terms, people’s privacy and the law where you work.',
+    intro: 'Open-source intelligence tools and methods, from the intelligence cycle and source grading to verification, geolocation and structured analysis, and how to use PRP itself as an intelligence tool.' },
+};
 const params = new URLSearchParams(location.search);
-const course = COURSES[params.get('course')] ? params.get('course') : 'finance';
-const STORE = `jdpi-learning-${course}`;
+let course = COURSES[params.get('course')] ? params.get('course') : 'finance';
+const group = COURSES[course].group;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>').replace(/\[(.+?)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
-let doc, lessons = [], current = 0, done = new Set();
-try { done = new Set(JSON.parse(localStorage.getItem(STORE) || '[]')); } catch {}
+const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
+const SHELL = new URL('../', location.href).href;
+const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/_(.+?)_/g, '<i>$1</i>')
+  .replace(/\[(.+?)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
+  .replace(/\[(.+?)\]\((#\/[^)]*)\)/g, (m, text, route) => `<a href="${SHELL}${route}" target="${embedded ? '_top' : '_self'}">${text}</a>`);
+let doc, lessons = [], current = 0, done = new Set(), STORE = '';
 const save = () => { try { localStorage.setItem(STORE, JSON.stringify([...done])); } catch {} };
 
 function parse(text) {
@@ -74,9 +133,9 @@ function parse(text) {
   let unit = null, lesson = null;
   for (const raw of text.replace(/\r/g, '').split('\n')) {
     const line = raw.trimEnd();
-    if (!unit && /^(title|intro):/.test(line)) { const [k, ...v] = line.split(':'); out.meta[k] = v.join(':').trim(); continue; }
+    if (!unit && /^(title|intro|sources):/.test(line)) { const [k, ...v] = line.split(':'); out.meta[k] = v.join(':').trim(); continue; }
     if (line.startsWith('# ')) { unit = { title: line.slice(2), lessons: [] }; out.units.push(unit); lesson = null; continue; }
-    if (line.startsWith('## ')) { lesson = { title: line.slice(3), lines: [], quiz: [], unit: unit.title }; unit.lessons.push(lesson); continue; }
+    if (line.startsWith('## ')) { if (!unit) { unit = { title: '', lessons: [] }; out.units.push(unit); } lesson = { title: line.slice(3), lines: [], quiz: [], unit: unit.title }; unit.lessons.push(lesson); continue; }
     if (!lesson) continue;
     if (line.startsWith('? ')) lesson.quiz.push({ q: line.slice(2), options: [], why: '' });
     else if (/^[*+] /.test(line) && lesson.quiz.length) lesson.quiz.at(-1).options.push({ text: line.slice(2), right: line[0] === '+' });
@@ -91,15 +150,15 @@ function render(lines) {
   const flush = () => {
     if (para.length) { html += `<p>${inline(para.join(' '))}</p>`; para = []; }
     if (list) { html += `<${list.tag}>${list.items.map(i => `<li>${inline(i)}</li>`).join('')}</${list.tag}>`; list = null; }
-    if (table) { const [h, ...rows] = table; html += `<table><tr>${h.map(c => `<th>${inline(c)}</th>`).join('')}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</table>`; table = null; }
+    if (table) { const [h, ...rows] = table; html += `<div class="tablewrap"><table class="prp-table"><thead><tr>${h.map(c => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; table = null; }
   };
   for (const line of lines) {
     if (!line.trim()) { flush(); continue; }
     if (line.startsWith('### ')) { flush(); html += `<h3>${inline(line.slice(4))}</h3>`; }
     else if (line.startsWith('$ ')) { flush(); html += `<div class="formula">${esc(line.slice(2))}</div>`; }
     else if (line.startsWith('! ')) { flush(); const m = line.slice(2).match(/^([^:]{1,40}):\s*(.*)$/); html += `<div class="callout"><b class="k">${esc(m ? m[1] : 'Note')}</b>${inline(m ? m[2] : line.slice(2))}</div>`; }
-    else if (line.startsWith('> ')) { flush(); html += `<div class="quote">${inline(line.slice(2))}</div>`; }
-    else if (line.startsWith('|')) { if (para.length || list) flush(); table ||= []; const cells = line.split('|').slice(1, -1).map(c => c.trim()); if (!cells.every(c => /^-+$/.test(c))) table.push(cells); }
+    else if (line.startsWith('> ')) { flush(); html += `<blockquote class="quote">${inline(line.slice(2))}</blockquote>`; }
+    else if (line.startsWith('|')) { if (para.length || list) flush(); table ||= []; const cells = line.split('|').slice(1, -1).map(c => c.trim()); if (!cells.every(c => /^:?-+:?$/.test(c))) table.push(cells); }
     else if (/^- /.test(line)) { if (para.length || table) flush(); if (list?.tag !== 'ul') { flush(); list = { tag: 'ul', items: [] }; } list.items.push(line.slice(2)); }
     else if (/^\d+\. /.test(line)) { if (para.length || table) flush(); if (list?.tag !== 'ol') { flush(); list = { tag: 'ol', items: [] }; } list.items.push(line.replace(/^\d+\. /, '')); }
     else { if (list || table) flush(); para.push(line.trim()); }
@@ -108,67 +167,123 @@ function render(lines) {
   return html;
 }
 
-function toc() {
-  let i = 0;
-  $('#toc').innerHTML = doc.units.map(u => `<div class="unit"><small>${esc(u.title.split(' · ')[0])}</small>${esc(u.title.split(' · ').slice(1).join(' · ') || u.title)}</div>`
-    + u.lessons.map(l => { const n = i++; return `<button data-i="${n}" class="${n === current ? 'cur' : ''}"><span class="tick">${done.has(l.id) ? '✓' : ''}</span>${esc(l.title)}</button>`; }).join('')).join('');
-  $('#toc').querySelectorAll('button').forEach(b => b.onclick = () => go(+b.dataset.i));
-  const pct = Math.round(done.size / lessons.length * 100);
-  $('#progress-label').textContent = `${done.size} of ${lessons.length} lessons completed (${pct}%) · saved in this browser`;
+const unitParts = t => { const [a, ...b] = String(t).split(' · '); return b.length ? [a, b.join(' · ')] : ['', a]; };
+function progress() {
+  const pct = lessons.length ? Math.round(done.size / lessons.length * 100) : 0;
+  $('#progress-label').textContent = `${done.size} of ${lessons.length} lessons completed (${pct}%)`;
   $('#progress-bar').style.width = pct + '%';
 }
+function toc() {
+  let i = 0;
+  $('#toc').innerHTML = doc.units.map(u => { const [label, name] = unitParts(u.title); return (name ? `<div class="unit">${label ? `<small>${esc(label)}</small>` : ''}${esc(name)}</div>` : '')
+    + u.lessons.map(l => { const n = i++; return `<button type="button" data-i="${n}" class="${n === current ? 'cur' : ''}"${n === current ? ' aria-current="true"' : ''}><span class="tick" aria-label="${done.has(l.id) ? 'Completed' : ''}">${done.has(l.id) ? '✓' : ''}</span>${esc(l.title)}</button>`; }).join(''); }).join('');
+  $('#toc').querySelectorAll('button').forEach(b => b.onclick = () => go(+b.dataset.i));
+  progress();
+}
 
+function markButton(l) { const b = $('#mark'); b.classList.toggle('done', done.has(l.id)); b.textContent = done.has(l.id) ? '✓ Completed' : 'Mark as completed'; b.setAttribute('aria-pressed', String(done.has(l.id))); }
 function show() {
-  const l = lessons[current];
-  const quiz = l.quiz.length ? `<section class="quiz"><h3>Check your understanding</h3>${l.quiz.map((q, qi) => `<div class="q" data-q="${qi}"><p>${inline(q.q)}</p>${q.options.map((o, oi) => `<button class="opt" data-o="${oi}">${inline(o.text)}</button>`).join('')}<div class="why" hidden>${inline(q.why)}</div></div>`).join('')}</section>` : '';
-  $('#lesson').innerHTML = `<div class="eyebrow">${esc(l.unit)}</div><h2>${esc(l.title)}</h2>${render(l.lines)}${quiz}
-    <div class="pager"><button id="prev" ${current ? '' : 'hidden'}>‹ ${esc(lessons[current - 1]?.title || '')}</button>
-    <button id="mark" class="${done.has(l.id) ? 'done' : ''}">${done.has(l.id) ? '✓ Completed' : 'Mark as completed'}</button>
-    <button id="next" ${current < lessons.length - 1 ? '' : 'hidden'}>${esc(lessons[current + 1]?.title || '')} ›</button></div>`;
+  const l = lessons[current], prev = lessons[current - 1], next = lessons[current + 1];
+  const quiz = l.quiz.length ? `<section class="quiz" aria-label="Quiz"><h3>Check your understanding</h3><p>Choose an answer to see the explanation.</p>${l.quiz.map((q, qi) => `<div class="q" data-q="${qi}"><p>${inline(q.q)}</p>${q.options.map((o, oi) => `<button type="button" class="opt" data-o="${oi}"><span class="key" aria-hidden="true">${'ABCDEFGH'[oi] || '•'}</span><span>${inline(o.text)}</span></button>`).join('')}<div class="why" hidden aria-live="polite">${inline(q.why)}</div></div>`).join('')}</section>` : '';
+  const [label] = unitParts(l.unit);
+  $('#lesson').innerHTML = `<div class="inner"><div class="prp-eyebrow">${esc(label || l.unit || doc.meta.title || 'Lesson')}<span class="sep">·</span>Lesson ${current + 1} of ${lessons.length}</div><h2>${esc(l.title)}</h2>
+    <div class="body prp-prose">${render(l.lines)}</div>${quiz}
+    <div class="pager"><span>${prev ? `<button type="button" class="prp-btn prev" id="prev"><span><small>‹ Previous</small>${esc(prev.title)}</span></button>` : ''}</span>
+      <button type="button" class="prp-btn" id="mark"></button>
+      <span class="next">${next ? `<button type="button" class="prp-btn primary next" id="next"><span><small>Next ›</small>${esc(next.title)}</span></button>` : ''}</span></div></div>`;
   $('#lesson').querySelectorAll('.q').forEach(qel => {
     const q = l.quiz[+qel.dataset.q];
     qel.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      const right = q.options[+b.dataset.o].right;
       qel.querySelectorAll('.opt').forEach((x, i) => { x.disabled = true; if (q.options[i].right) x.classList.add('right'); });
-      if (!q.options[+b.dataset.o].right) b.classList.add('wrong');
-      qel.querySelector('.why').hidden = false;
+      if (!right) b.classList.add('wrong');
+      const why = qel.querySelector('.why');
+      why.insertAdjacentHTML('afterbegin', right ? '<span class="res ok">✓ Correct.</span>' : '<span class="res no">✗ Not quite.</span>');
+      why.hidden = false;
     });
   });
-  $('#prev').onclick = () => go(current - 1);
-  $('#next').onclick = () => go(current + 1);
-  $('#mark').onclick = () => { done.has(l.id) ? done.delete(l.id) : done.add(l.id); save(); toc(); show(); };
+  $('#prev')?.addEventListener('click', () => go(current - 1));
+  $('#next')?.addEventListener('click', () => go(current + 1));
+  markButton(l);
+  $('#mark').onclick = () => { done.has(l.id) ? done.delete(l.id) : done.add(l.id); save(); toc(); markButton(l); };
 }
 
-function go(i) {
+function go(i, keepScroll) {
   current = Math.max(0, Math.min(lessons.length - 1, i));
-  const p = new URLSearchParams({ course, lesson: lessons[current].id });
-  history.replaceState(null, '', '?' + p);
-  toc(); show(); window.scrollTo({ top: 0 });
+  history.replaceState(null, '', '?' + new URLSearchParams({ course, lesson: lessons[current].id }));
+  toc(); show();
+  if (!keepScroll) window.scrollTo({ top: 0 });
+  // Keep the current lesson visible in the contents list (without scrolling the page).
+  const list = $('#toc'), cur = list.querySelector('button.cur');
+  if (cur && (cur.offsetTop < list.scrollTop || cur.offsetTop + cur.offsetHeight > list.scrollTop + list.clientHeight)) list.scrollTop = cur.offsetTop - list.clientHeight / 3;
 }
 
-// Finance and Economics belong to F&E; Politics belongs to H&P, so each suite only shows its own courses.
-const suite = course === 'politics' ? 'hp' : 'fe';
-$('#suite-label').textContent = suite === 'hp' ? 'JDP-I H&P · Learning' : 'JDP-I F&E · Learning';
-document.querySelectorAll('.tabs a').forEach(a => { a.classList.toggle('active', a.dataset.course === course); a.hidden = a.dataset.suite !== suite; });
-fetch(COURSES[course]).then(r => r.text()).then(text => {
-  doc = parse(text);
-  lessons = doc.units.flatMap(u => u.lessons);
+/* ---------- header, tabs, sources for the course's module ---------- */
+const G = GROUPS[group];
+$('#eyebrow').innerHTML = `${esc(G.module)} <span class="sep">·</span> ${esc(G.submodule)}`;
+const tabs = [...document.querySelectorAll('.tabs a')];
+function markTabs() { tabs.forEach(a => { const on = a.dataset.course === course; a.hidden = a.dataset.group !== group; a.classList.toggle('active', on); a.setAttribute('aria-selected', String(on)); a.tabIndex = on ? 0 : -1; }); }
+// Courses in the same module switch in place; the link still works on its own.
+tabs.forEach(a => a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey || a.dataset.group !== group) return; e.preventDefault(); if (a.dataset.course !== course) load(a.dataset.course); }));
+document.querySelector('.tabs').addEventListener('keydown', e => {
+  const shown = tabs.filter(a => !a.hidden), i = shown.findIndex(a => a.dataset.course === course), d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (!d || shown.length < 2) return;
+  e.preventDefault(); const to = shown[(i + d + shown.length) % shown.length]; load(to.dataset.course).then(() => to.focus());
+});
+
+function sources() {
+  const file = COURSES[course].file;
+  $('#sources').innerHTML = `<p><b>About this course.</b> ${doc?.meta?.sources ? inline(doc.meta.sources) + ' ' : ''}The text is written for PRP and kept as plain text (<a href="${esc(file)}" target="_blank" rel="noreferrer">fe/${esc(file)}</a>); quotations name their source in the text. ${esc(G.note)}</p>
+    <p><b>Progress.</b> Completed lessons are saved only in this browser; quiz answers are not stored or sent anywhere.</p>`;
+}
+
+function meta() {
+  const words = lessons.reduce((s, l) => s + l.lines.join(' ').split(/\s+/).filter(Boolean).length, 0), mins = Math.max(5, Math.round(words / 220 / 5) * 5);
+  const qs = lessons.reduce((s, l) => s + l.quiz.length, 0), units = doc.units.filter(u => u.title).length;
+  const time = mins >= 60 ? `${Math.floor(mins / 60)} h${mins % 60 ? ' ' + (mins % 60) + ' min' : ''}` : `${mins} min`;
+  $('#meta').innerHTML = [units && `<span><b>${units}</b> units</span>`, `<span><b>${lessons.length}</b> lessons</span>`, qs && `<span><b>${qs}</b> quiz questions</span>`, `<span>About <b>${time}</b> of reading</span>`].filter(Boolean).join('');
+}
+
+async function load(next) {
+  course = next;
+  STORE = `jdpi-learning-${course}`;
+  try { done = new Set(JSON.parse(localStorage.getItem(STORE) || '[]')); } catch { done = new Set(); }
+  markTabs();
+  try {
+    const r = await fetch(COURSES[course].file);
+    if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status });
+    doc = parse(await r.text());
+    lessons = doc.units.flatMap(u => u.lessons);
+    if (!lessons.length) throw Object.assign(new Error('no lessons yet'), { status: 404 });
+  } catch (err) {
+    doc = null; lessons = [];
+    $('.layout').classList.add('empty');
+    $('#title').textContent = G.submodule; $('#intro').textContent = G.intro; $('#meta').innerHTML = ''; $('#toc').innerHTML = ''; $('#progress-label').textContent = ''; $('#progress-bar').style.width = '0';
+    $('#lesson').innerHTML = err.status === 404 ? '<p class="status">This course is being written. Check back soon.</p>' : `<p class="status">The course could not load: ${esc(err.message)}</p>`;
+    sources();
+    delete window.jdpiDocumentary; window.jdpiNarrator?.announce(); // nothing to read aloud
+    return;
+  }
+  window.jdpiDocumentary = DOC; window.jdpiNarrator?.announce();
+  $('.layout').classList.remove('empty');
   lessons.forEach((l, i) => { l.id = l.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'l' + i; });
-  $('#title').textContent = doc.meta.title || 'Learning';
-  $('#intro').textContent = doc.meta.intro || '';
-  document.title = `JDP-I ${suite === 'hp' ? 'H&P' : 'F&E'} — ${doc.meta.title || 'Learning'}`;
-  const want = params.get('lesson');
-  go(Math.max(0, lessons.findIndex(l => l.id === want)));
-}).catch(err => { $('#lesson').innerHTML = `<p class="note">The course could not load: ${esc(err.message)}</p>`; });
+  $('#title').textContent = doc.meta.title || G.submodule;
+  $('#intro').textContent = doc.meta.intro || G.intro;
+  meta(); sources();
+  const want = new URLSearchParams(location.search).get('course') === course ? new URLSearchParams(location.search).get('lesson') : null;
+  go(Math.max(0, lessons.findIndex(l => l.id === want)), true);
+}
 
 // Documentary mode (design/jdpi-narrator.js): read the lesson in order, mention the quiz, then turn the page.
+// Offered once a course has loaded (the shell is told through window.jdpiNarrator.announce()).
 const speakable = el => el.innerText.replace(/\s+/g, ' ').trim();
-window.jdpiDocumentary = {
-  get title() { return `${doc?.meta?.title || 'Learning'} · ${lessons[current]?.title || ''}`; },
+const DOC = {
+  get title() { return `${doc?.meta?.title || G.submodule} · ${lessons[current]?.title || ''}`; },
   async *story() {
     while (lessons.length) {
       const l = lessons[current];
-      yield { text: `${l.unit.split(' · ').slice(-1)[0]}. ${l.title}.`, el: $('#lesson h2') };
-      for (const el of $('#lesson').querySelectorAll(':scope > h3, :scope > p, :scope > ul > li, :scope > ol > li, :scope > .callout, :scope > .quote, :scope > table')) {
+      yield { text: `${unitParts(l.unit)[1] || l.unit}. ${l.title}.`, el: $('#lesson h2') };
+      for (const el of $('#lesson .body').querySelectorAll(':scope > h3, :scope > p, :scope > ul > li, :scope > ol > li, :scope > .callout, :scope > .quote, :scope > .tablewrap > table')) {
         if (el.matches('table')) { yield { text: [...el.rows].slice(1).map(r => [...r.cells].map(c => c.innerText.trim()).join(': ')).join('. '), el }; continue; }
         const text = speakable(el);
         const k = el.matches('.callout') && el.querySelector('.k');
@@ -182,6 +297,7 @@ window.jdpiDocumentary = {
     }
   },
 };
+load(course);
 </script>
 </body>
 </html>

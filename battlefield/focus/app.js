@@ -1,6 +1,7 @@
-// War Focus: one war, month by month. Data: data/index.json and data/wars/<id>.json (scripts/build.mjs);
-// borders from Retrospective Battlefield's CShapes file. Wars and battles carry their Wikidata IDs (data-qid), so the
-// JDP-I entity linker adds Encyclopaedia links, and lake/scripts/adapters.mjs links the Encyclopaedia back here.
+// War Focus (PRP · Retrospective Intelligence): one war, month by month. Data: data/index.json and data/wars/<id>.json
+// (scripts/build.mjs); borders from Retrospective Battlefield's CShapes file. Wars and battles carry their Wikidata IDs
+// (data-qid), so the PRP entity linker adds Encyclopaedia links, and lake/scripts/adapters.mjs links the Encyclopaedia back here.
+// Views (tabs): the map, a table of the war's battles and a table of deaths by month. URL: #war=<id>&m=<yyyy-mm>&v=battles|months
 import { displayName } from '../history/names.mjs';
 
 const $ = s => document.querySelector(s);
@@ -14,9 +15,11 @@ const bDates = b => { const f = d => (b.p === 'y' ? d.slice(0, 4) : b.p === 'm' 
 const wikiUrl = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const SHELL = new URL('../../', location.href).href;
-const go = (module, url) => embedded ? `${SHELL}#/hp/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}` : new URL(url, SHELL).href;
+// Retrospective Battlefield is a sibling submodule: inside the PRP shell its links open it there; on its own, directly.
+const go = (module, url) => embedded ? `${SHELL}#/rs/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}` : new URL(url, SHELL).href;
+const motion = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
 
-const state = { index: null, borders: null, war: null, m: 0, playing: null, zoomK: 1 };
+const state = { index: null, borders: null, war: null, m: 0, playing: null, zoomK: 1, view: 'map' };
 let svg, g, gStates, gLabels, gCells, gBattles, path, projection, zoom, features = [];
 
 /* ---------------------------------------------------------------- side logic */
@@ -37,14 +40,15 @@ function initMap() {
   gStates = g.append('g'); gCells = g.append('g'); gBattles = g.append('g'); gLabels = g.append('g');
   zoom = d3.zoom().scaleExtent([1, 40]).on('zoom', e => { g.attr('transform', e.transform); state.zoomK = e.transform.k; sizeMarks(); });
   svg.call(zoom);
-  $('#zoom-in').onclick = () => svg.transition().call(zoom.scaleBy, 1.6);
-  $('#zoom-out').onclick = () => svg.transition().call(zoom.scaleBy, 1 / 1.6);
-  $('#zoom-reset').onclick = () => svg.transition().call(zoom.transform, d3.zoomIdentity);
+  $('#zoom-in').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1.6);
+  $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
+  $('#zoom-reset').onclick = () => svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity);
   features = topojson.feature(state.borders, state.borders.objects.borders).features;
   new ResizeObserver(() => state.war && fitProjection()).observe($('.map-wrap'));
 }
 function fitProjection() {
-  const w = state.war, box = $('.map-wrap').getBoundingClientRect(), W = Math.max(320, box.width), H = Math.max(280, box.height);
+  // The map's own box (on phones the key sits under it, inside the same frame).
+  const w = state.war, box = $('#map').getBoundingClientRect(), W = Math.max(320, box.width), H = Math.max(280, box.height);
   svg.attr('viewBox', `0 0 ${W} ${H}`);
   let target;
   if (w.bbox) {
@@ -101,7 +105,7 @@ function draw(full) {
     .on('mouseleave', hideTip).on('click', (e, b) => openBattle(b));
   gBattles.selectAll('circle.battle').filter(isNow).raise();
   sizeMarks();
-  renderCounters(); renderSpark(); renderPanel(); renderLegend();
+  renderCounters(); renderSpark(); renderPanel(); renderLegend(); renderCaption(); renderTables();
 }
 function sideText(s) {
   const w = state.war;
@@ -134,16 +138,18 @@ function renderSpark() {
   el.selectAll('line.now').data([state.m]).join('line').attr('class', 'now').attr('x1', x).attr('x2', x).attr('y1', 0).attr('y2', H);
 }
 function renderLegend() {
-  const w = state.war, any = c => features.some(() => false) || c;
-  const items = [];
+  const w = state.war, items = [];
   if (w.sides.a.states.length) items.push(`<li><span class="swatch" style="background:var(--side-a)"></span>${esc(w.sides.a.label)}</li>`);
   if (w.sides.b.states.length) items.push(`<li><span class="swatch" style="background:var(--side-b)"></span>${esc(w.sides.b.label)}</li>`);
   if (w.control.length) items.push('<li><span class="swatch hatch"></span>Occupied (whole country)</li>');
   if (w.theatre.length) items.push('<li><span class="swatch" style="background:var(--contested)"></span>Contested (civil war)</li>');
-  if (w.battles.some(b => b.lat != null)) items.push('<li><span class="swatch" style="background:#fff2c2;border-radius:50%;box-shadow:0 0 0 2px #ff8f1f"></span>Battle this month</li><li><span class="swatch" style="background:#c9b16b;opacity:.5;border-radius:50%"></span>Earlier battle</li>');
-  if (w.events) items.push('<li><span class="swatch" style="background:#ff5a4f;opacity:.6;border-radius:50%"></span>Recorded clashes (UCDP)</li>');
+  if (w.battles.some(b => b.lat != null)) items.push('<li><span class="swatch dot b-now"></span>Battle this month</li><li><span class="swatch dot b-past"></span>Earlier battle</li>');
+  if (w.events) items.push('<li><span class="swatch dot clash"></span>Recorded clashes (UCDP)</li>');
   $('#legend').innerHTML = `<h4>${esc(monthLabel(w.months[state.m]))}</h4><ul>${items.join('')}</ul>`;
-  void any;
+}
+function renderCaption() {
+  const w = state.war, m = monthLabel(w.months[state.m]);
+  $('#caption').textContent = `${w.name}, ${m}: the states at war coloured by side (${w.sides.a.label} blue, ${w.sides.b.label} red) on the borders of the day${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}; battles under way are ringed${w.events ? ', UCDP clashes in red' : ''}.`;
 }
 
 /* ---------------------------------------------------------------- panel */
@@ -154,7 +160,8 @@ function seeMoreList(items, limit, title) {
   return `<ul class="blist">${items.slice(0, limit).join('')}</ul><button class="more" data-pop="${addPop(title, `<ul class="blist">${items.join('')}</ul>`)}">See all ${items.length} ›</button>`;
 }
 function battleItem(b) {
-  return `<li data-qid="${esc(b.q)}"><button class="bname" data-b="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
+  // The Wikidata ID sits on the name, so the Encyclopaedia linker puts its ◈ beside it (and not again by the Wikipedia link).
+  return `<li><button class="bname" data-b="${esc(b.q)}" data-qid="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl jdpi-no-ency" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <small>${esc(bDates(b))}${b.deaths ? ` · ${num(b.deaths)} deaths` : b.cas ? ` · ${num(b.cas)} casualties` : ''}${b.lat == null ? ' · not mapped' : ''}</small></li>`;
 }
 // The states on a side that month, largest first, so the major powers lead the list.
@@ -175,12 +182,12 @@ function renderPanel() {
   const months = w.months.length, years = Math.floor(months / 12);
   const sides = ['a', 'b'].map(s => {
     const on = statesOn(s, date), list = on.length > 14 ? `${on.slice(0, 14).join(', ')} <button class="more" data-pop="${addPop(`${w.sides[s].label}, ${monthLabel(m)}`, `<p>${esc(on.join(', '))}</p>`)}">+${on.length - 14} more</button>` : esc(on.join(', '));
-    return `<div class="side-chip"><i style="background:var(--side-${s})"></i><b>${esc(w.sides[s].label)}</b></div>${on.length ? `<div class="meta" style="color:var(--muted);font-size:12px">${list}</div>` : ''}`;
+    return `<div class="side-chip"><i style="background:var(--side-${s})"></i><b>${esc(w.sides[s].label)}</b></div>${on.length ? `<div class="side-list">${list}</div>` : ''}`;
   }).join('');
   const top = (w.top[i] || []).map(([d, deaths, where, dyad]) => `<li><b>${num(deaths)} deaths</b> · ${esc(where)}<small>${esc(fmtDate(d))} · ${esc(dyad)}</small></li>`);
   const bfYear = Math.min(2025, +m.slice(0, 4));
   $('#panel').innerHTML = `
-    <h2 data-qid="${esc(w.qid || '')}">${esc(w.name)}</h2>
+    <h2><span data-qid="${esc(w.qid || '')}">${esc(w.name)}</span></h2>
     <p class="sub">${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'} · ${years ? `${years} yr${years > 1 ? 's' : ''} ` : ''}${months % 12 ? `${months % 12} mo` : ''}</p>
     <div class="sides" style="margin-top:10px">${sides}</div>
     <div class="stat-row">
@@ -190,7 +197,7 @@ function renderPanel() {
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
     </div>
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
-    ${w.bf ? `<a class="btn" href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${bfYear}&w=${w.bf}`))}" target="${embedded ? '_top' : '_self'}">World map, ${bfYear} ↗</a>` : ''}
+    ${w.bf ? `<a class="btn go" href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${bfYear}&w=${w.bf}`))}" target="${embedded ? '_top' : '_self'}">Open in Retrospective Battlefield: ${bfYear} →</a>` : ''}
     <h3>${esc(monthLabel(m))} <span class="count">${now.length} battle${now.length === 1 ? '' : 's'} or operation${now.length === 1 ? '' : 's'} under way</span></h3>
     ${now.length ? seeMoreList(now.map(battleItem), 8, `${w.name} · ${monthLabel(m)}`) : '<p class="empty">No battles or operations recorded as under way this month.</p>'}
     ${top.length ? `<h3>Deadliest clashes this month <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
@@ -223,7 +230,58 @@ function openBattle(b) {
 function closeModal() { $('#modal').hidden = true; }
 $('#modal-close').onclick = closeModal;
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); else if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') { if (e.key === 'ArrowRight') setMonth(state.m + 1); if (e.key === 'ArrowLeft') setMonth(state.m - 1); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); else if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && !e.target.closest('[role="tablist"]') && $('#modal').hidden) { if (e.key === 'ArrowRight') setMonth(state.m + 1); if (e.key === 'ArrowLeft') setMonth(state.m - 1); } });
+
+/* ---------------------------------------------------------------- table views */
+// The war's battles (the list view of the map's marks) and its deaths month by month (the table of the sparkline).
+function renderTables() {
+  const w = state.war; if (!w) return;
+  const i = state.m, m = w.months[i];
+  if (state.view === 'battles') {
+    const status = b => (b.s.slice(0, 7) > m ? ['later', 'Not yet'] : b.p !== 'y' && (b.e || b.s).slice(0, 7) >= m ? ['now', 'Under way'] : ['', 'Earlier']);
+    const list = [...w.battles].sort((a, b) => a.s.localeCompare(b.s) || a.n.localeCompare(b.n));
+    $('#battles-title').textContent = `${w.name} · ${num(list.length)} battles and operations`;
+    $('#th-status').textContent = monthLabel(m);
+    $('#battles-rows').innerHTML = list.map(b => {
+      const [cls, word] = status(b);
+      return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button></td><td class="mono">${esc(bDates(b))}</td>
+        <td><span class="st ${cls}">${word}</span></td><td class="num">${b.deaths ? num(b.deaths) : '–'}</td><td class="num">${b.cas ? num(b.cas) : '–'}</td><td class="mono">${b.lat == null ? 'Not mapped' : 'Mapped'}</td></tr>`;
+    }).join('') || '<tr><td colspan="6" class="empty">No battles or operations recorded in Wikidata.</td></tr>';
+    $('#battles-rows').querySelectorAll('[data-b]').forEach(el => el.onclick = () => openBattle(w.battles.find(x => x.q === el.dataset.b)));
+  } else if (state.view === 'months') {
+    const begun = new Map();
+    for (const b of w.battles) if (b.p !== 'y') begun.set(b.s.slice(0, 7), (begun.get(b.s.slice(0, 7)) || 0) + 1);
+    $('#months-title').textContent = `${w.name} · battle deaths by month`;
+    $('#months-rows').innerHTML = w.months.map((mm, k) => {
+      const clashes = (w.cells[k] || []).reduce((s, c) => s + (c[3] || 0), 0);
+      return `<tr data-k="${k}"${k === i ? ' class="sel"' : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${w.estimated[k] ? '~' : ''}${num(w.deaths[k])}</td>
+        <td class="num">${num(cumulative[k])}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
+    }).join('');
+    $('#months-rows').querySelectorAll('tr[data-k]').forEach(tr => tr.onclick = () => setMonth(+tr.dataset.k));
+    $('#months-rows tr.sel')?.scrollIntoView({ block: 'nearest' });
+  }
+}
+const VIEWS = ['map', 'battles', 'months'];
+const TABS = [...document.querySelectorAll('[role="tab"]')];
+function setView(v, { push = true } = {}) {
+  state.view = VIEWS.includes(v) ? v : 'map';
+  for (const t of TABS) {
+    const on = t.dataset.view === state.view;
+    t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+    $('#' + t.getAttribute('aria-controls')).hidden = !on;
+  }
+  hideTip();
+  if (state.view === 'map' && state.war && projection) fitProjection();
+  renderTables();
+  if (push) writeHash();
+}
+TABS.forEach((t, k) => {
+  t.onclick = () => setView(t.dataset.view);
+  t.onkeydown = e => {
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return;
+    const n = TABS[(k + d + TABS.length) % TABS.length]; n.focus(); setView(n.dataset.view);
+  };
+});
 
 /* ---------------------------------------------------------------- timeline, playback, routing */
 function setMonth(i) { if (!state.war) return; state.m = Math.max(0, Math.min(state.war.months.length - 1, i)); draw(false); writeHash(); }
@@ -241,7 +299,7 @@ $('#next').onclick = () => setMonth(state.m + 1);
 $('#month').oninput = e => setMonth(+e.target.value);
 
 /* ---------------------------------------------------------------- documentary narration */
-// Told month by month for JDP-I Documentary mode (design/jdpi-narrator.js asks for one step at a time).
+// Told month by month for PRP Documentary mode (design/jdpi-narrator.js asks for one step at a time).
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 function spokenNumber(n) {
   if (n >= 1e6) return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '')} million`;
@@ -332,7 +390,7 @@ window.jdpiDocumentary = {
   },
 };
 
-function writeHash() { if (state.war) history.replaceState(null, '', `#war=${state.war.id}&m=${state.war.months[state.m]}`); }
+function writeHash() { if (state.war) history.replaceState(null, '', `#war=${state.war.id}&m=${state.war.months[state.m]}${state.view !== 'map' ? `&v=${state.view}` : ''}`); }
 async function loadWar(id, month) {
   stop();
   const w = await fetch(`data/wars/${id}.json`).then(r => r.json());
@@ -342,13 +400,15 @@ async function loadWar(id, month) {
   $('#war').value = id;
   const sl = $('#month'); sl.max = w.months.length - 1; sl.value = state.m;
   const step = w.months.length > 150 ? 60 : w.months.length > 60 ? 24 : w.months.length > 24 ? 12 : w.months.length > 8 ? 3 : 1;
-  $('#ticks').innerHTML = w.months.map((m, k) => (k % step === 0 ? `<span style="left:${(k / Math.max(1, w.months.length - 1)) * 100}%">${step >= 12 ? m.slice(0, 4) : m.slice(2).replace('-', '/')}</span>` : '')).join('');
-  $('#status').textContent = `${w.sides.a.label} v ${w.sides.b.label}`;
+  const pos = k => (k / Math.max(1, w.months.length - 1)) * 100, edge = p => (p < 2 ? ' class="start"' : p > 98 ? ' class="end"' : '');
+  $('#ticks').innerHTML = w.months.map((m, k) => (k % step === 0 ? `<span${edge(pos(k))} style="left:${pos(k)}%">${step >= 12 ? m.slice(0, 4) : m.slice(2).replace('-', '/')}</span>` : '')).join('');
+  $('#status').innerHTML = `<span><b>${esc(w.sides.a.label)}</b> v <b>${esc(w.sides.b.label)}</b></span><span>${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'}</span>${w.ongoing && w.dataThrough ? `<span>Data through <b>${esc(fmtDate(w.dataThrough))}</b></span>` : ''}<span><b>${state.index.wars.length}</b> major wars since 1926</span>`;
   fitProjection(); writeHash();
 }
-function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m') }; }
-window.addEventListener('hashchange', () => { const h = readHash(); if (h.war && h.war !== state.war?.id) loadWar(h.war, h.m); else if (h.m && state.war) { const k = state.war.months.indexOf(h.m); if (k >= 0 && k !== state.m) setMonth(k); } });
+function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m'), v: VIEWS.includes(p.get('v')) ? p.get('v') : 'map' }; }
+window.addEventListener('hashchange', () => { const h = readHash(); if (h.v !== state.view) setView(h.v, { push: false }); if (h.war && h.war !== state.war?.id) loadWar(h.war, h.m); else if (h.m && state.war) { const k = state.war.months.indexOf(h.m); if (k >= 0 && k !== state.m) setMonth(k); } });
 
+{ const a = $('#sibling'); a.href = go('battlefield-history', 'battlefield/history/index.html'); a.target = embedded ? '_top' : '_self'; }
 Promise.all([fetch('data/index.json').then(r => r.json()), fetch('../history/data/borders.topo.json').then(r => r.json())]).then(([idx, borders]) => {
   state.index = idx; state.borders = borders;
   const eras = [['1926–1945', w => w.start < '1946'], ['1946–1988', w => w.start >= '1946' && w.start < '1989'], ['1989 to today', w => w.start >= '1989']];
@@ -356,5 +416,6 @@ Promise.all([fetch('data/index.json').then(r => r.json()), fetch('../history/dat
   $('#war').onchange = e => loadWar(e.target.value);
   initMap();
   const h = readHash();
+  setView(h.v, { push: false });
   loadWar(idx.wars.some(w => w.id === h.war) ? h.war : 'ww2', h.m);
 }).catch(e => { $('#status').textContent = 'War data could not load: ' + e.message; });

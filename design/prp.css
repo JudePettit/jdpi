@@ -1,0 +1,290 @@
+/* ==========================================================================
+   PRP design system — Personal Resource Planner, by JDP-Iq.
+   One stylesheet for the shell and every module (Realtime Intelligence, Retrospective Intelligence, Money Management,
+   Natural Science), on any host:   <link rel="stylesheet" href="https://jdpi.pages.dev/design/prp.css">
+   Module accent:  <html data-suite="rt|rs|mm|ns">  (the old ids q, hp, fe still work).
+   Theme: light by default; dark follows the system, or <html data-theme="light|dark"> (set by the shell / prp-bar).
+
+   The look: a modern ERP (clear navigation, dense legible tables, one primary action colour, quiet surfaces) set like a
+   scientific publication (serif titles and reading text, numbered figures with captions, sources under every view).
+     Type: Source Serif 4 (titles, reading), IBM Plex Sans (interface), IBM Plex Mono (labels, codes, data).
+     Data colours: the validated categorical, sequential, diverging and status palettes (CVD-checked in both themes).
+   Pages write their CSS against these tokens, never raw hex, so light and dark both work.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap");
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --prp-canvas: #f3f4f6;        /* app background behind panels */
+  --prp-surface: #ffffff;       /* panels, cards, tables, inputs */
+  --prp-surface-2: #f8f9fa;     /* table heads, toolbars, zebra rows */
+  --prp-surface-3: #eef0f3;     /* hover, selected */
+  --prp-line: #dadde2;          /* panel and table borders */
+  --prp-line-soft: #e9ebef;     /* row dividers */
+  --prp-line-strong: #b8bec7;   /* inputs, emphasised rules */
+  --prp-scrim: rgba(20, 24, 31, .38);
+
+  /* Text */
+  --prp-text: #14181f;          /* ink */
+  --prp-text-2: #3b4350;        /* secondary */
+  --prp-muted: #5c6470;         /* metadata (4.9:1 on white) */
+  --prp-faint: #757d89;         /* hints only (4.2:1) */
+  --prp-on-primary: #ffffff;
+
+  /* Interaction */
+  --prp-primary: #1c5cab;       /* the one action colour */
+  --prp-primary-hover: #184f95;
+  --prp-primary-soft: #e9f1fb;
+  --prp-link: #1c5cab;
+  --prp-focus: #2a78d6;
+
+  /* Modules (identity marks: code chips, rules, active nav) */
+  --prp-rt: #1c5cab; --prp-rt-soft: #e9f1fb;   /* Realtime Intelligence */
+  --prp-rs: #8a5a1f; --prp-rs-soft: #f7f0e6;   /* Retrospective Intelligence */
+  --prp-mm: #1f7a4d; --prp-mm-soft: #e8f4ee;   /* Money Management */
+  --prp-ns: #5b47c7; --prp-ns-soft: #f0edfb;   /* Natural Science */
+  --prp-accent: var(--prp-rt);
+  --prp-accent-soft: var(--prp-rt-soft);
+
+  /* Status (text-safe; pair with an icon or word, never colour alone) */
+  --prp-good: #127a3e;  --prp-good-soft: #e7f5ec;
+  --prp-warn: #8f5a00;  --prp-warn-soft: #fdf3dc;
+  --prp-bad: #b42318;   --prp-bad-soft: #fdecea;
+  --prp-info: #1c5cab;  --prp-info-soft: #e9f1fb;
+  --prp-up: #127a3e;    --prp-down: #b42318;      /* gains and losses */
+
+  /* Data: categorical (fixed order; first 3 for scatter/maps), sequential (blue), diverging (red-grey-blue), status marks */
+  --prp-cat-1: #2a78d6; --prp-cat-2: #eb6834; --prp-cat-3: #1baf7a; --prp-cat-4: #eda100;
+  --prp-cat-5: #e87ba4; --prp-cat-6: #008300; --prp-cat-7: #6250d6; --prp-cat-8: #e34948;
+  --prp-seq-100: #cde2fb; --prp-seq-200: #9ec5f4; --prp-seq-300: #6da7ec; --prp-seq-400: #3987e5;
+  --prp-seq-500: #256abf; --prp-seq-600: #184f95; --prp-seq-700: #0d366b;
+  --prp-div-neg-3: #b42318; --prp-div-neg-2: #e06258; --prp-div-neg-1: #f3b3ad; --prp-div-mid: #f0efec;
+  --prp-div-pos-1: #b7d3f6; --prp-div-pos-2: #5598e7; --prp-div-pos-3: #1c5cab;
+  --prp-status-good: #0ca30c; --prp-status-warning: #fab219; --prp-status-serious: #ec835a; --prp-status-critical: #d03b3b;
+  --prp-grid: #e9ebef;          /* chart gridlines */
+  --prp-axis: #b8bec7;
+
+  /* Maps */
+  --prp-map-water: #e8eef5;
+  --prp-map-land: #ffffff;
+  --prp-map-nodata: #eef0f3;
+  --prp-map-border: #b9c1cc;
+  --prp-map-graticule: #dce3ec;
+  --prp-map-label: #3b4350;
+  --prp-map-halo: #ffffff;
+
+  /* Type */
+  --prp-font-serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --prp-font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --prp-font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --prp-fs-xs: 11px; --prp-fs-sm: 12.5px; --prp-fs: 14px; --prp-fs-md: 16px; --prp-fs-lg: 20px; --prp-fs-xl: 26px; --prp-fs-2xl: 32px;
+
+  /* Shape, depth, layout */
+  --prp-radius-sm: 4px; --prp-radius: 6px; --prp-radius-lg: 10px;
+  --prp-shadow-1: 0 1px 2px rgba(16, 24, 40, .06);
+  --prp-shadow-2: 0 6px 20px rgba(16, 24, 40, .12);
+  --prp-sidebar-w: 272px;
+  --prp-topbar-h: 52px;
+  --prp-measure: 72ch;          /* reading line length */
+
+  /* Legacy JDP-I tokens, so pages and external sites written for the old system follow the new one */
+  --jdpi-bg: var(--prp-canvas); --jdpi-side: var(--prp-surface); --jdpi-topbar: var(--prp-surface);
+  --jdpi-panel: var(--prp-surface); --jdpi-panel-2: var(--prp-surface-2); --jdpi-inset: var(--prp-surface-2);
+  --jdpi-line: var(--prp-line); --jdpi-line-strong: var(--prp-line-strong);
+  --jdpi-text: var(--prp-text); --jdpi-text-2: var(--prp-text-2); --jdpi-muted: var(--prp-muted); --jdpi-faint: var(--prp-faint);
+  --jdpi-lime: var(--prp-rt); --jdpi-cyan: var(--prp-rs); --jdpi-amber: var(--prp-mm);
+  --jdpi-ok: var(--prp-good); --jdpi-warn: var(--prp-warn); --jdpi-alert: var(--prp-bad); --jdpi-info: var(--prp-info);
+  --jdpi-accent: var(--prp-accent); --jdpi-accent-soft: var(--prp-accent-soft); --jdpi-accent-line: var(--prp-accent);
+  --jdpi-font-display: var(--prp-font-serif); --jdpi-font-ui: var(--prp-font-ui); --jdpi-font-mono: var(--prp-font-mono);
+  --jdpi-radius-sm: var(--prp-radius-sm); --jdpi-radius: var(--prp-radius); --jdpi-radius-lg: var(--prp-radius-lg);
+  --jdpi-shadow: var(--prp-shadow-2); --jdpi-sidebar-w: var(--prp-sidebar-w); --jdpi-topbar-h: var(--prp-topbar-h);
+}
+
+/* Dark theme: its own selected steps (not an inversion). Declared for the OS setting and for an explicit choice. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --prp-canvas: #0f1318; --prp-surface: #161b22; --prp-surface-2: #1b212a; --prp-surface-3: #222a34;
+    --prp-line: #2b343f; --prp-line-soft: #232b35; --prp-line-strong: #3b4654; --prp-scrim: rgba(0, 0, 0, .55);
+    --prp-text: #e9edf2; --prp-text-2: #c6ced8; --prp-muted: #9aa5b2; --prp-faint: #808b98; --prp-on-primary: #0f1318;
+    --prp-primary: #6da7ec; --prp-primary-hover: #86b6ef; --prp-primary-soft: #18263a; --prp-link: #86b6ef; --prp-focus: #86b6ef;
+    --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217;
+    --prp-mm: #4fbf85; --prp-mm-soft: #15291f; --prp-ns: #a193f0; --prp-ns-soft: #221e3a;
+    --prp-good: #4fbf85; --prp-good-soft: #15291f; --prp-warn: #e2ad4a; --prp-warn-soft: #2d2412;
+    --prp-bad: #f07a6e; --prp-bad-soft: #321a19; --prp-info: #6da7ec; --prp-info-soft: #18263a; --prp-up: #4fbf85; --prp-down: #f07a6e;
+    --prp-cat-1: #3987e5; --prp-cat-2: #d95926; --prp-cat-3: #199e70; --prp-cat-4: #c98500;
+    --prp-cat-5: #d55181; --prp-cat-6: #008300; --prp-cat-7: #9085e9; --prp-cat-8: #e66767;
+    --prp-seq-100: #104281; --prp-seq-200: #184f95; --prp-seq-300: #256abf; --prp-seq-400: #2a78d6;
+    --prp-seq-500: #5598e7; --prp-seq-600: #86b6ef; --prp-seq-700: #cde2fb;
+    --prp-div-neg-3: #f07a6e; --prp-div-neg-2: #b9473f; --prp-div-neg-1: #5a2b29; --prp-div-mid: #383835;
+    --prp-div-pos-1: #1d3a5f; --prp-div-pos-2: #2a78d6; --prp-div-pos-3: #86b6ef;
+    --prp-grid: #232b35; --prp-axis: #3b4654;
+    --prp-map-water: #0d1621; --prp-map-land: #1b222b; --prp-map-nodata: #161b22; --prp-map-border: #3b4654;
+    --prp-map-graticule: #1a2531; --prp-map-label: #c6ced8; --prp-map-halo: #0f1318;
+    --prp-shadow-1: 0 1px 2px rgba(0, 0, 0, .4); --prp-shadow-2: 0 8px 26px rgba(0, 0, 0, .5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --prp-canvas: #0f1318; --prp-surface: #161b22; --prp-surface-2: #1b212a; --prp-surface-3: #222a34;
+  --prp-line: #2b343f; --prp-line-soft: #232b35; --prp-line-strong: #3b4654; --prp-scrim: rgba(0, 0, 0, .55);
+  --prp-text: #e9edf2; --prp-text-2: #c6ced8; --prp-muted: #9aa5b2; --prp-faint: #808b98; --prp-on-primary: #0f1318;
+  --prp-primary: #6da7ec; --prp-primary-hover: #86b6ef; --prp-primary-soft: #18263a; --prp-link: #86b6ef; --prp-focus: #86b6ef;
+  --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217;
+  --prp-mm: #4fbf85; --prp-mm-soft: #15291f; --prp-ns: #a193f0; --prp-ns-soft: #221e3a;
+  --prp-good: #4fbf85; --prp-good-soft: #15291f; --prp-warn: #e2ad4a; --prp-warn-soft: #2d2412;
+  --prp-bad: #f07a6e; --prp-bad-soft: #321a19; --prp-info: #6da7ec; --prp-info-soft: #18263a; --prp-up: #4fbf85; --prp-down: #f07a6e;
+  --prp-cat-1: #3987e5; --prp-cat-2: #d95926; --prp-cat-3: #199e70; --prp-cat-4: #c98500;
+  --prp-cat-5: #d55181; --prp-cat-6: #008300; --prp-cat-7: #9085e9; --prp-cat-8: #e66767;
+  --prp-seq-100: #104281; --prp-seq-200: #184f95; --prp-seq-300: #256abf; --prp-seq-400: #2a78d6;
+  --prp-seq-500: #5598e7; --prp-seq-600: #86b6ef; --prp-seq-700: #cde2fb;
+  --prp-div-neg-3: #f07a6e; --prp-div-neg-2: #b9473f; --prp-div-neg-1: #5a2b29; --prp-div-mid: #383835;
+  --prp-div-pos-1: #1d3a5f; --prp-div-pos-2: #2a78d6; --prp-div-pos-3: #86b6ef;
+  --prp-grid: #232b35; --prp-axis: #3b4654;
+  --prp-map-water: #0d1621; --prp-map-land: #1b222b; --prp-map-nodata: #161b22; --prp-map-border: #3b4654;
+  --prp-map-graticule: #1a2531; --prp-map-label: #c6ced8; --prp-map-halo: #0f1318;
+  --prp-shadow-1: 0 1px 2px rgba(0, 0, 0, .4); --prp-shadow-2: 0 8px 26px rgba(0, 0, 0, .5);
+}
+
+/* Module accent: new ids and the old ones */
+[data-suite="rt"], [data-suite="q"]  { --prp-accent: var(--prp-rt); --prp-accent-soft: var(--prp-rt-soft); }
+[data-suite="rs"], [data-suite="hp"] { --prp-accent: var(--prp-rs); --prp-accent-soft: var(--prp-rs-soft); }
+[data-suite="mm"], [data-suite="fe"] { --prp-accent: var(--prp-mm); --prp-accent-soft: var(--prp-mm-soft); }
+[data-suite="ns"]                    { --prp-accent: var(--prp-ns); --prp-accent-soft: var(--prp-ns-soft); }
+
+/* --- Base (opt in with class="prp" on <html>) ------------------------------ */
+html.prp, .prp body { background: var(--prp-canvas); color: var(--prp-text); font: var(--prp-fs)/1.55 var(--prp-font-ui); }
+.prp body { margin: 0; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+:where(.prp) a { color: var(--prp-link); }
+:where(.prp) :focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+:where(.prp) ::selection { background: var(--prp-primary-soft); }
+
+/* --- Page header: the publication front matter ----------------------------- */
+.prp-eyebrow { display: flex; align-items: center; gap: 8px; color: var(--prp-muted); font: 500 var(--prp-fs-xs)/1.3 var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.prp-eyebrow::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--prp-accent); flex: none; }
+.prp-eyebrow .sep { color: var(--prp-faint); }
+.prp-title { font: 600 30px/1.15 var(--prp-font-serif); letter-spacing: -.012em; margin: 8px 0 6px; color: var(--prp-text); }
+.prp-dek { margin: 0; max-width: var(--prp-measure); color: var(--prp-text-2); font: 15px/1.6 var(--prp-font-ui); }
+.prp-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); }
+.prp-meta b { color: var(--prp-text-2); font-weight: 500; }
+.prp-h2 { font: 600 19px/1.3 var(--prp-font-serif); margin: 0; color: var(--prp-text); }
+.prp-h3 { font: 600 var(--prp-fs)/1.35 var(--prp-font-ui); margin: 0; color: var(--prp-text); }
+.prp-section-no { color: var(--prp-faint); font: 500 var(--prp-fs-sm) var(--prp-font-mono); margin-right: 8px; }
+.prp-prose { max-width: var(--prp-measure); font: var(--prp-fs-md)/1.65 var(--prp-font-serif); color: var(--prp-text); }
+.prp-label { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.prp-muted { color: var(--prp-muted); }
+.prp-num { font-variant-numeric: tabular-nums; }
+.prp-up { color: var(--prp-up); } .prp-down { color: var(--prp-down); }
+
+/* --- Panels ---------------------------------------------------------------- */
+.prp-panel { background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
+.prp-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--prp-line-soft); }
+.prp-panel-head b, .prp-panel-title { font: 600 13.5px var(--prp-font-ui); color: var(--prp-text); }
+.prp-panel-body { padding: 14px; }
+
+/* --- Buttons and inputs ---------------------------------------------------- */
+.prp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; cursor: pointer; text-decoration: none; white-space: nowrap;
+  border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); background: var(--prp-surface); color: var(--prp-text); font: 500 13px var(--prp-font-ui); }
+.prp-btn:hover { background: var(--prp-surface-3); }
+.prp-btn.primary { background: var(--prp-primary); border-color: var(--prp-primary); color: var(--prp-on-primary); }
+.prp-btn.primary:hover { background: var(--prp-primary-hover); border-color: var(--prp-primary-hover); }
+.prp-btn.ghost { border-color: transparent; background: transparent; color: var(--prp-text-2); }
+.prp-btn.ghost:hover { background: var(--prp-surface-3); }
+.prp-btn.danger { border-color: var(--prp-bad); color: var(--prp-bad); }
+.prp-btn.danger:hover { background: var(--prp-bad-soft); }
+.prp-btn.sm { height: 26px; padding: 0 9px; font-size: 12px; }
+.prp-btn[disabled], .prp-btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.prp-input, .prp-select { height: 32px; padding: 0 10px; border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); background: var(--prp-surface); color: var(--prp-text); font: 13px var(--prp-font-ui); }
+.prp-input:focus, .prp-select:focus { outline: 2px solid var(--prp-focus); outline-offset: -1px; border-color: var(--prp-focus); }
+
+/* --- Tabs (underline, as in ERP object pages) ------------------------------ */
+.prp-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--prp-line); overflow-x: auto; }
+.prp-tabs > button, .prp-tabs > a { border: 0; border-bottom: 2px solid transparent; background: none; padding: 9px 12px 8px; margin-bottom: -1px; cursor: pointer; text-decoration: none; white-space: nowrap;
+  color: var(--prp-muted); font: 500 13px var(--prp-font-ui); }
+.prp-tabs > button:hover, .prp-tabs > a:hover { color: var(--prp-text); }
+.prp-tabs > .active, .prp-tabs > [aria-selected="true"] { color: var(--prp-text); border-bottom-color: var(--prp-accent); }
+
+/* --- Chips, tags, badges --------------------------------------------------- */
+.prp-chip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border: 1px solid var(--prp-line); border-radius: 99px; background: var(--prp-surface);
+  color: var(--prp-text-2); font: 500 var(--prp-fs-xs) var(--prp-font-ui); white-space: nowrap; }
+.prp-chip.on { border-color: var(--prp-primary); background: var(--prp-primary-soft); color: var(--prp-text); }
+.prp-code { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 18px; padding: 0 5px; border-radius: 3px; background: var(--prp-accent); color: var(--prp-on-primary);
+  font: 600 10px/1 var(--prp-font-mono); letter-spacing: .04em; }
+.prp-kind { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid var(--prp-line); border-radius: 3px; color: var(--prp-muted); font: 500 10px var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.prp-status { display: inline-flex; align-items: center; gap: 6px; font: 500 var(--prp-fs-xs) var(--prp-font-ui); color: var(--prp-text-2); }
+.prp-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--prp-faint); }
+.prp-status[data-status="live"]::before, .prp-status.good::before { background: var(--prp-status-good); }
+.prp-status[data-status="in-build"]::before, .prp-status.warn::before { background: var(--prp-status-warning); }
+.prp-status.bad::before { background: var(--prp-status-critical); }
+
+/* --- Tables (dense, legible, numbers aligned) ------------------------------ */
+.prp-table { width: 100%; border-collapse: collapse; font: var(--prp-fs-sm)/1.4 var(--prp-font-ui); }
+.prp-table th { position: sticky; top: 0; z-index: 1; text-align: left; padding: 8px 10px; background: var(--prp-surface-2); border-bottom: 1px solid var(--prp-line);
+  color: var(--prp-muted); font: 600 var(--prp-fs-xs) var(--prp-font-ui); letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; }
+.prp-table td { padding: 7px 10px; border-bottom: 1px solid var(--prp-line-soft); vertical-align: top; color: var(--prp-text); }
+.prp-table tbody tr:hover td { background: var(--prp-surface-2); }
+.prp-table .num, .prp-table td.num, .prp-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --- KPI tiles -------------------------------------------------------------- */
+.prp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.prp-kpi { padding: 12px 14px; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); }
+.prp-kpi span { display: block; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.prp-kpi b { display: block; margin-top: 4px; font: 600 24px/1.1 var(--prp-font-ui); font-variant-numeric: tabular-nums; color: var(--prp-text); }
+.prp-kpi small { color: var(--prp-muted); font-size: var(--prp-fs-xs); }
+
+/* --- Figures, captions, notes, sources (publication conventions) ----------- */
+.prp-figure { margin: 0; }
+.prp-caption, .prp-figure figcaption { margin-top: 8px; color: var(--prp-text-2); font: italic 13px/1.5 var(--prp-font-serif); max-width: var(--prp-measure); }
+.prp-caption b, .prp-figure figcaption b { font-style: normal; font-weight: 600; color: var(--prp-text); }
+.prp-note { border: 1px solid var(--prp-line); border-left: 3px solid var(--prp-accent); border-radius: var(--prp-radius-sm); background: var(--prp-surface);
+  padding: 11px 14px; color: var(--prp-text-2); font-size: var(--prp-fs-sm); line-height: 1.6; }
+.prp-note.warn { border-left-color: var(--prp-warn); } .prp-note.bad { border-left-color: var(--prp-bad); }
+.prp-sources { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--prp-line); color: var(--prp-muted); font: var(--prp-fs-xs)/1.6 var(--prp-font-ui); }
+.prp-sources b { color: var(--prp-text-2); font-weight: 600; }
+.prp-empty { padding: 28px; text-align: center; color: var(--prp-muted); }
+
+/* --- Legacy JDP-I classes, restyled ---------------------------------------- */
+.jdpi, .jdpi body { background: var(--prp-canvas); color: var(--prp-text); font: var(--prp-fs)/1.55 var(--prp-font-ui); }
+.jdpi-eyebrow { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.jdpi-h1 { font: 600 30px/1.15 var(--prp-font-serif); letter-spacing: -.012em; margin: 8px 0; }
+.jdpi-h2 { font: 600 19px/1.3 var(--prp-font-serif); margin: 0; }
+.jdpi-label { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.jdpi-muted { color: var(--prp-muted); }
+.jdpi-panel { background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
+.jdpi-tag { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--prp-line); border-radius: 3px; padding: 2px 7px; color: var(--prp-muted);
+  font: 500 10px var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
+.jdpi-tag[data-status="live"] { color: var(--prp-good); }
+.jdpi-tag[data-status="in-build"] { color: var(--prp-warn); }
+.jdpi-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.jdpi-btn { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; cursor: pointer; text-decoration: none; border: 1px solid var(--prp-line-strong);
+  border-radius: var(--prp-radius-sm); background: var(--prp-surface); color: var(--prp-text); font: 500 12.5px var(--prp-font-ui); }
+.jdpi-btn:hover { background: var(--prp-surface-3); }
+.jdpi-btn.primary { background: var(--prp-primary); border-color: var(--prp-primary); color: var(--prp-on-primary); }
+.jdpi-btn.primary:hover { background: var(--prp-primary-hover); }
+.jdpi-note { border: 1px solid var(--prp-line); border-left: 3px solid var(--prp-accent); border-radius: var(--prp-radius-sm); padding: 11px 13px; color: var(--prp-text-2); font-size: 12.5px; line-height: 1.6; background: var(--prp-surface); }
+
+/* --- Module embedding --------------------------------------------------------
+   prp-bar.js adds .jdpi-embedded (and .prp-embedded) to <html> inside the shell; elements marked
+   data-jdpi-standalone (a module's own brand header) hide there, as the shell already shows the brand and breadcrumb. */
+.jdpi-embedded [data-jdpi-standalone], .prp-embedded [data-jdpi-standalone] { display: none !important; }
+
+/* Standalone return bar, injected by prp-bar.js when a module is opened on its own */
+.jdpi-returnbar { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 16px; position: relative; z-index: 1000;
+  background: var(--prp-surface); border-bottom: 1px solid var(--prp-line); color: var(--prp-muted); font: 12px var(--prp-font-ui); }
+.jdpi-returnbar a { color: var(--prp-text-2); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.jdpi-returnbar a:hover { color: var(--prp-primary); }
+.jdpi-returnbar b { font: 700 13px var(--prp-font-serif); letter-spacing: .02em; color: var(--prp-text); }
+.jdpi-returnbar .sep { color: var(--prp-faint); }
+.jdpi-returnbar .suite { display: inline-flex; align-items: center; gap: 6px; color: var(--prp-text-2); }
+.jdpi-returnbar .suite::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--prp-accent); }
+.jdpi-returnbar > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) { .jdpi-returnbar .suite, .jdpi-returnbar .suite + .sep { display: none; } }
+.jdpi-returnbar .theme { flex: none; margin-left: auto; border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); background: none; color: var(--prp-text-2); height: 24px; padding: 0 8px; cursor: pointer; font: 11px var(--prp-font-ui); }
+
+@media print {
+  .jdpi-returnbar, .doc-fab, .doc { display: none !important; }
+  :root { --prp-canvas: #fff; }
+}

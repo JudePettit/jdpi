@@ -1,128 +1,179 @@
 <!doctype html>
-<html lang="en" data-suite="hp">
+<html lang="en" class="prp" data-suite="rs">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101820"><link rel="icon" href="../design/brand-jdpi.svg" type="image/svg+xml">
-<title>Encyclopaedia · JDP-I H&amp;P</title>
-<meta name="description" content="Every person, place, war, party and idea in JDP-I, with Boolean tag filters and links to everywhere each one appears.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../design/jdpi.css">
-<script src="../design/jdpi-bar.js" data-suite="hp" data-module="encyclopedia" data-shell="../" defer></script>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<title>Encyclopaedia · PRP</title>
+<meta name="description" content="Every person, place, war, party and idea in PRP, with Boolean tag filters and links to everywhere each one appears.">
+<script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rs" data-module="encyclopedia" data-shell="../" defer></script>
 <style>
-:root{--bg:var(--jdpi-bg,#101820);--panel:var(--jdpi-panel,#17242e);--panel2:var(--jdpi-panel-2,#1c2b36);--line:var(--jdpi-line,#293a46);--text:var(--jdpi-text,#edf3f1);--muted:var(--jdpi-muted,#91a0aa);--faint:#70818b;--accent:var(--jdpi-accent,#6ddac8);--soft:var(--jdpi-accent-soft,rgba(109,218,200,.09));--accline:var(--jdpi-accent-line,#3f7a70);--warn:#f0b95a;--neg:#ff826f}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
-a{color:var(--accent)}button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
-.wrap{max-width:1500px;margin:auto;padding:20px 24px 40px}
-.top{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
-h1{font:600 28px Manrope;letter-spacing:-.04em;margin:6px 0 2px}.sub{color:var(--muted);font-size:13px;margin:0}
-.meta{font:10px 'DM Mono';color:var(--muted);margin-top:6px}
-.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;margin-top:16px}
-aside{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;align-self:start;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
-label.lbl{display:block;font:10px 'DM Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px}
-input[type=search],input[type=text],select{width:100%;background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:8px 10px;font-size:13px}
-input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.qhelp{font-size:11px;color:var(--faint);margin:5px 0 12px;line-height:1.5}.qhelp code{font:11px 'DM Mono';color:var(--text)}
-.qerr{color:var(--neg);font-size:11.5px;margin-top:4px}
-.sugg{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px}
-.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#0f1b25;color:var(--text);border-radius:99px;padding:3px 9px;font:11px 'DM Sans';text-decoration:none;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-.chip:hover{border-color:var(--accent)}.chip small{color:var(--faint);font:9.5px 'DM Mono'}.chip.on{border-color:var(--accline);background:var(--soft);color:var(--accent)}
-.facet{border-top:1px solid var(--line);padding:8px 0}
-.facet>button{width:100%;display:flex;justify-content:space-between;background:none;border:0;color:var(--text);font:600 12.5px Manrope;padding:4px 0;text-align:left}
-.facet>button span{font:10px 'DM Mono';color:var(--muted)}
-.fbody{padding:6px 0 2px}.fbody input{padding:5px 8px;font-size:12px;margin-bottom:6px}
-.opt{display:flex;align-items:center;gap:7px;font-size:12.5px;padding:2px 0;cursor:pointer}.opt input{accent-color:var(--accent)}.opt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.opt small{color:var(--faint);font:10px 'DM Mono'}
-.more{background:none;border:0;color:var(--accent);font:10.5px 'DM Mono';padding:2px 0}
-.clear{width:100%;margin-top:10px;background:none;border:1px solid var(--line);border-radius:5px;color:var(--muted);padding:6px}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
+.wrap{max-width:1440px;margin:0 auto;padding:22px 24px 28px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px 32px;flex-wrap:wrap;margin-bottom:16px}
+.front{flex:1 1 520px;min-width:0}.front .prp-title{margin:6px 0 5px}.front .prp-meta{margin-top:8px}
+.jump{flex:0 1 380px;min-width:240px;display:grid;gap:5px}.jump .prp-input{width:100%;height:36px}
+.prp-tabs{margin-bottom:16px}.prp-tabs>a{max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.prp-tabs>a .k{color:var(--prp-faint);font:500 10.5px var(--prp-font-mono);letter-spacing:.05em;text-transform:uppercase;margin-right:6px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+/* Filters */
+.filters{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding:14px 14px 12px}
+.filters .prp-label{display:block;margin:0 0 6px}
+.filters .prp-input{width:100%}
+.qhelp{margin:6px 0 14px;color:var(--prp-muted);font-size:11.5px;line-height:1.55}.qhelp code{font:11px var(--prp-font-mono);color:var(--prp-text);background:var(--prp-surface-3);border-radius:3px;padding:0 3px}
+.qerr{margin-top:6px;color:var(--prp-bad);font-size:12px}
+.sugg{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 2px}.sugg:empty{display:none}
+.facets{margin-top:14px}
+.facet{border-top:1px solid var(--prp-line-soft);padding:6px 0}
+.facet>button{width:100%;display:flex;align-items:center;gap:8px;padding:5px 2px;border:0;background:none;color:var(--prp-text);text-align:left;font:600 13px var(--prp-font-ui);border-radius:var(--prp-radius-sm)}
+.facet>button:hover{background:var(--prp-surface-2)}
+.facet>button .chev{flex:none;width:10px;color:var(--prp-faint);font-size:10px;transition:transform .15s}.facet>button[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.facet>button .f{flex:1;min-width:0}.facet>button .n{color:var(--prp-muted);font:500 10.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.fbody{padding:4px 0 4px 18px}.fbody .prp-input{height:28px;font-size:12px;margin:2px 0 6px}
+.opt{display:flex;align-items:center;gap:8px;padding:2px 4px;margin:0 -4px;border-radius:var(--prp-radius-sm);color:var(--prp-text-2);font-size:12.5px;cursor:pointer}
+.opt:hover{background:var(--prp-surface-2);color:var(--prp-text)}
+.opt input{flex:none;margin:0;accent-color:var(--prp-primary)}.opt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt small{color:var(--prp-muted);font:10.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.opt:has(input:checked){color:var(--prp-text);font-weight:500}
+.none{color:var(--prp-muted);font-size:12px;padding:2px 0}
+.more{display:inline-flex;align-items:center;margin-top:4px;padding:2px 0;border:0;background:none;color:var(--prp-link);font:500 12px var(--prp-font-ui)}
+.more:hover{text-decoration:underline}
+.clear{width:100%;margin-top:12px}
+/* Results */
 main{min-width:0}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
-.phead b{font:700 13px Manrope}.phead select{width:auto;padding:5px 8px;font-size:12px}
-.active{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.results{overflow:hidden}
+.results .prp-panel-head .prp-select{height:28px;font-size:12px}
+.sortby{display:flex;align-items:center;gap:8px;color:var(--prp-muted);font-size:12px}
+.active{display:flex;flex-wrap:wrap;gap:6px;padding:9px 14px;border-bottom:1px solid var(--prp-line-soft);background:var(--prp-surface-2)}
 .tbl{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;font:600 11px Manrope;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:9px 12px;border-bottom:1px solid #24343f;vertical-align:top}
-tr:last-child td{border-bottom:0}
-.name a{color:var(--text);font-weight:600;text-decoration:none}.name a:hover{color:var(--accent)}.name div{color:var(--muted);font-size:12px;margin-top:2px}
-.type{font:10.5px 'DM Mono';color:var(--muted);white-space:nowrap}
+.prp-table td{padding:9px 12px}.prp-table th{padding:8px 12px}.prp-table tbody tr:last-child td{border-bottom:0}
+.name{min-width:200px}.name a{color:var(--prp-text);font-weight:600;font-size:13.5px;text-decoration:none}.name a:hover{color:var(--prp-link);text-decoration:underline}
+.name div{color:var(--prp-muted);font-size:12.5px;margin-top:2px}
+.type{color:var(--prp-text-2);font:11.5px var(--prp-font-mono);white-space:nowrap}
 .tags,.where{display:flex;flex-wrap:wrap;gap:4px;max-width:520px}
-.where a{font:11px 'DM Sans'}
-.empty{padding:40px;text-align:center;color:var(--muted)}
-.pager{padding:12px;text-align:center}
-.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--accline);background:var(--soft);color:var(--accent);border-radius:5px;padding:7px 12px;font:500 12.5px 'DM Sans';text-decoration:none}
-/* entity page */
-.entity{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;margin-top:16px}
-.ehead{display:flex;gap:18px;align-items:flex-start}.ehead img{width:120px;height:150px;object-fit:cover;border-radius:6px;border:1px solid var(--line);flex:none;background:var(--panel2)}
-.ehead h2{font:600 30px Manrope;letter-spacing:-.04em;margin:4px 0}.ehead .d{color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:14px}
-.card h3{margin:0 0 10px;font:10px 'DM Mono';letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
-.summary{font-size:14.5px;line-height:1.7;color:#d6dfe1;margin:0}
-.facts{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}.facts dt{color:var(--muted)}.facts dd{margin:0}
-.group{margin-bottom:14px}.group h4{margin:0 0 6px;font:600 13px Manrope;display:flex;justify-content:space-between}.group h4 span{font:10px 'DM Mono';color:var(--muted)}
-.ment{padding:7px 0;border-top:1px solid #24343f;font-size:13px}.ment a{color:var(--text);text-decoration:none}.ment a:hover{color:var(--accent)}.ment small{display:block;color:var(--faint);font:10.5px 'DM Mono'}
-.back{background:none;border:1px solid var(--line);color:var(--muted);border-radius:5px;padding:5px 10px;margin-top:14px}
-.modal{position:fixed;inset:0;z-index:50;background:#050a0eb8;display:grid;place-items:center;padding:16px}.mbox{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;width:min(720px,100%);max-height:85vh;overflow:auto;padding:20px 22px}.mbox h2{font:600 19px Manrope;margin:0 30px 10px 0}.mbox p{line-height:1.65;color:#d6dfe1}.mclose{position:absolute;right:12px;top:10px;background:var(--panel2);border:1px solid var(--line);color:var(--text);width:30px;height:30px;border-radius:6px}
-.foot{color:var(--faint);font-size:11.5px;margin-top:20px}
-@media(max-width:980px){.layout,.entity{grid-template-columns:1fr}aside{position:static;max-height:none}.wrap{padding:14px}}
+.chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;height:22px;padding:0 8px;border:1px solid var(--prp-line);border-radius:99px;background:var(--prp-surface);color:var(--prp-text-2);font:500 11.5px var(--prp-font-ui);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip:hover{border-color:var(--prp-line-strong);background:var(--prp-surface-2);color:var(--prp-text)}
+.chip small{color:var(--prp-muted);font:10.5px var(--prp-font-mono)}
+.chip.on{border-color:var(--prp-primary);background:var(--prp-primary-soft);color:var(--prp-text)}
+.where a.chip{color:var(--prp-link)}.where a.chip:hover{border-color:var(--prp-primary)}
+.empty{padding:40px;text-align:center;color:var(--prp-muted)}
+.pager{padding:12px;text-align:center;border-top:1px solid var(--prp-line-soft)}.pager:empty{display:none}
+/* Entry */
+.entity{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.ehead{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px}
+.ehead img{width:120px;height:150px;object-fit:cover;flex:none;border-radius:var(--prp-radius);border:1px solid var(--prp-line);background:var(--prp-surface-2)}
+.ehead h2{font:600 32px/1.15 var(--prp-font-serif);letter-spacing:-.012em;margin:6px 0 4px;color:var(--prp-text)}
+.ehead .prp-label{margin:4px 0 0}.ehead .d{color:var(--prp-text-2);font-size:15px}.ehead .also{margin-top:6px;color:var(--prp-muted);font-size:12.5px}
+.card{background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius);box-shadow:var(--prp-shadow-1);padding:14px 18px 16px;margin-bottom:14px}
+.card h3{margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--prp-line-soft);color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.summary{margin:0;max-width:var(--prp-measure);color:var(--prp-text);font:16px/1.7 var(--prp-font-serif)}
+.links{margin:12px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;font-size:13px}.links .more{margin:0;padding:0;font-size:13px}
+.facts{display:grid;grid-template-columns:110px minmax(0,1fr);gap:7px 12px;margin:0;font-size:13px}.facts dt{color:var(--prp-muted)}.facts dd{margin:0;color:var(--prp-text)}
+.group{margin-bottom:16px}.group:last-child{margin-bottom:0}
+.group h4{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 2px;color:var(--prp-text);font:600 13.5px var(--prp-font-ui)}.group h4 span{color:var(--prp-muted);font:500 11px var(--prp-font-mono)}
+.ment{padding:7px 0;border-top:1px solid var(--prp-line-soft);font-size:13px}.ment a{color:var(--prp-text);text-decoration:none}.ment a:hover{color:var(--prp-link);text-decoration:underline}
+.ment small{display:block;color:var(--prp-muted);font:11px var(--prp-font-mono)}
+.note{color:var(--prp-muted);font-size:12.5px}
+/* Pop-out */
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:var(--prp-scrim)}
+.mbox{position:relative;width:min(720px,100%);max-height:85vh;overflow:auto;padding:20px 22px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-lg);box-shadow:var(--prp-shadow-2);color:var(--prp-text-2)}
+.mbox h2{margin:0 36px 10px 0;color:var(--prp-text);font:600 20px/1.3 var(--prp-font-serif)}.mbox p{line-height:1.65}
+.mclose{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:var(--prp-radius-sm);background:transparent;color:var(--prp-muted);font-size:20px;line-height:1}
+.mclose:hover{background:var(--prp-surface-3);color:var(--prp-text)}
+.prp-sources p{max-width:130ch;margin:0 0 6px}
+@media(max-width:980px){.layout,.entity{grid-template-columns:minmax(0,1fr)}.filters{position:static;max-height:none}.wrap{padding:16px 16px 24px}.jump{flex:1 1 100%}}
+@media(max-width:560px){.ehead{flex-direction:column}.ehead h2{font-size:27px}.prp-table th:nth-child(3),.prp-table td:nth-child(3){display:none}}
+@media(prefers-reduced-motion:reduce){.facet>button .chev{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div><div class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · History &amp; Politics</div><h1>Encyclopaedia</h1>
-      <p class="sub">Every person, place, war, party and idea that appears in JDP-I, with everywhere it appears.</p><div class="meta" id="meta">Loading…</div></div>
-    <div style="min-width:min(380px,100%)"><input type="search" id="jump" placeholder="Go to a person, place, war or idea…" aria-label="Go to an entry" list="jumplist" autocomplete="off"><datalist id="jumplist"></datalist></div>
+  <header class="head">
+    <div class="front">
+      <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Intelligence <span class="sep">·</span> Encyclopaedia</span></p>
+      <h1 class="prp-title">Encyclopaedia</h1>
+      <p class="prp-dek">Every person, place, war, party and idea that appears in PRP, and everywhere it appears. Filter with a Boolean tag query or the facets, or go straight to an entry.</p>
+      <p class="prp-meta" id="meta">Loading…</p>
+    </div>
+    <div class="jump"><label class="prp-label" for="jump">Go to an entry</label><input class="prp-input" type="search" id="jump" placeholder="A person, place, war or idea…" list="jumplist" autocomplete="off"><datalist id="jumplist"></datalist></div>
   </header>
 
-  <section id="explore">
+  <nav class="prp-tabs" role="tablist" aria-label="Views">
+    <a role="tab" id="tab-explore" href="#explore" aria-controls="explorer" aria-selected="true">Explorer</a>
+    <a role="tab" id="tab-entry" href="#explore" aria-controls="entity" aria-selected="false" hidden><span class="k">Entry</span><span id="tab-entry-name"></span></a>
+  </nav>
+
+  <section id="explorer" role="tabpanel" aria-labelledby="tab-explore">
     <div class="layout">
-      <aside aria-label="Filters">
-        <label class="lbl" for="query">Boolean tag query</label>
-        <input type="text" id="query" placeholder='Realist + "Structural realism" + American' autocomplete="off" spellcheck="false">
-        <div class="qerr" id="qerr" hidden></div>
+      <aside class="prp-panel filters" aria-label="Filters">
+        <label class="prp-label" for="query">Boolean tag query</label>
+        <input class="prp-input" type="text" id="query" placeholder='Realist + "Structural realism" + American' autocomplete="off" spellcheck="false">
+        <div class="qerr" id="qerr" role="alert" hidden></div>
         <div class="sugg" id="sugg"></div>
         <p class="qhelp"><code>+</code> or <code>AND</code> all of · <code>|</code> or <code>OR</code> any of · <code>-</code> or <code>NOT</code> exclude · <code>( )</code> groups · quotes for phrases · <code>Facet:Value</code> to be exact, e.g. <code>Party:Labour Party</code>. Terms match tags.</p>
-        <label class="lbl" for="name">Name contains</label>
-        <input type="search" id="name" placeholder="e.g. Keynes" autocomplete="off">
-        <div id="facets" style="margin-top:12px"></div>
-        <button class="clear" id="clear">Clear all filters</button>
+        <label class="prp-label" for="name">Name contains</label>
+        <input class="prp-input" type="search" id="name" placeholder="e.g. Keynes" autocomplete="off">
+        <div class="facets" id="facets"></div>
+        <button class="prp-btn clear" id="clear" type="button">Clear all filters</button>
       </aside>
       <main>
-        <div class="panel">
-          <div class="phead"><b id="count">–</b><label class="type">Sort <select id="sort" aria-label="Sort by"><option value="mentions">Most appearances in JDP-I</option><option value="name">Name</option><option value="type">Type</option></select></label></div>
+        <div class="prp-panel results">
+          <div class="prp-panel-head"><b id="count">–</b><label class="sortby">Sort <select class="prp-select" id="sort" aria-label="Sort by"><option value="mentions">Most appearances in PRP</option><option value="name">Name</option><option value="type">Type</option></select></label></div>
           <div class="active" id="active" hidden></div>
-          <div class="tbl"><table><thead><tr><th>Name</th><th>Type</th><th>Tags</th><th>Appears in JDP-I</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <div class="tbl"><table class="prp-table"><thead><tr><th>Name</th><th>Type</th><th>Tags</th><th>Appears in PRP</th></tr></thead><tbody id="rows"></tbody></table></div>
           <div class="pager" id="pager"></div>
         </div>
       </main>
     </div>
   </section>
 
-  <section id="entity" hidden></section>
-  <p class="foot">Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0). Tags combine Wikidata facts with JDP-I's own tags. Refreshed monthly.</p>
+  <section id="entity" role="tabpanel" aria-labelledby="tab-entry" hidden></section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0; the text stays under that licence). Tags combine Wikidata facts with PRP's own tags, such as schools of thought.</p>
+    <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. Refreshed monthly.</p>
+  </footer>
 </div>
-<div class="modal" id="modal" hidden role="dialog" aria-modal="true"><div class="mbox"><button class="mclose" id="mclose" aria-label="Close">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox"><button class="mclose" id="mclose" type="button" aria-label="Close">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
 
 <script>
-// JDP-I Encyclopaedia: reads the entity layer in ../lake/data (built by lake/scripts/build.mjs).
+// PRP Encyclopaedia: reads the entity layer in ../lake/data (built by lake/scripts/build.mjs).
 //   #explore[?q=…]  the Explorer (Boolean tag query + Excel-style facet filters)
-//   #Q9061          an entity page
+//   #Q9061          an entry (entity page)
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const LAKE = '../lake/data/', SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
-const MODULE_SUITE = { retrospective: 'hp', 'historical-calendar': 'hp', calendar: 'q', 'battlefield-history': 'hp', 'war-focus': 'hp', battlefield: 'q', kardashev: 'hp', traders: 'fe', learning: 'fe', 'learning-politics': 'hp', encyclopedia: 'hp' };
+// Every submodule's module in PRP (registry.json): rt Realtime Intelligence, rs Retrospective Intelligence,
+// mm Money Management, ns Natural Science. Old ids (q, hp, fe) are not used here any more.
+const MODULE_SUITE = {
+  briefing: 'rt', headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'rt',
+  encyclopedia: 'rs', retrospective: 'rs', 'historical-calendar': 'rs', 'battlefield-history': 'rs', 'war-focus': 'rs', kardashev: 'rs', 'learning-politics': 'rs',
+  markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', traders: 'mm', learning: 'mm',
+  'science-briefing': 'ns', progress: 'ns',
+};
+// Submodule names as PRP shows them; the data may still carry older names (H&P Retrospective, Trader Tracker, …).
+const MODULE_NAME = {
+  briefing: 'Intelligence Briefing', headlines: 'Global Headline Tracker', volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', atlas: 'Political Atlas', calendar: 'Realtime Calendar', 'osint-training': 'OSINT Training',
+  encyclopedia: 'Encyclopaedia', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
+  markets: 'TD Markets', 'tally-stick': 'Tally Stick', 'algo-trader': 'Algo Trader', traders: 'Auto Trader', learning: 'Learning · Finance & Economics',
+  'science-briefing': 'Scientific Briefing', progress: 'Timeline of Progress',
+};
+const modName = m => MODULE_NAME[m] || idx?.modules?.[m] || m;
 const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School or tag', 'Political spectrum', 'Occupation', 'Field', 'Movement', 'Ideology', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Century', 'Appears in'];
 const PAGE = 100;
-let idx, rows, tagFacet = [], tagValue = [], byQid = new Map(), shown = PAGE;
+let idx, rows, tagFacet = [], tagValue = [], tagShown = [], byQid = new Map(), shown = PAGE, lastEntry = null;
 const sel = new Map(); // facet → Set(tagId)
 const openFacets = new Set(['Type', 'Nationality', 'Role', 'School or tag']);
 
-// Links into modules: inside the JDP-I shell they open as a deep link; on its own, directly.
-// Submodules open inside their parent module in the shell.
-const SHELL_MODULE = { 'war-focus': 'battlefield-history' };
-const goto = (module, url) => (embedded && MODULE_SUITE[module] ? { href: `${SHELL}#/${MODULE_SUITE[module]}/${SHELL_MODULE[module] || module}?at=${encodeURIComponent(url)}`, target: '_top' } : { href: url, target: '_blank' });
+// Links into submodules: inside the PRP shell they open as a deep link (#/<module>/<submodule>?at=<url>); on its own,
+// directly. Links recorded for the live site point at this copy of PRP when it is served elsewhere (a preview or local copy).
+const LIVE = 'https://jdpi.pages.dev/';
+const here = url => (SHELL !== LIVE && String(url).startsWith(LIVE) ? SHELL + url.slice(LIVE.length) : url);
+const goto = (module, url) => (embedded && MODULE_SUITE[module] ? { href: `${SHELL}#/${MODULE_SUITE[module]}/${module}?at=${encodeURIComponent(here(url))}`, target: '_top' } : { href: here(url), target: '_blank' });
 const linkHtml = (module, url, text, cls = '') => { const g = goto(module, url); return `<a class="${cls}" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 
 /* ---------- Boolean query: + / AND, | / OR, - / NOT, ( ), "phrases", Facet:Value ---------- */
@@ -161,12 +212,12 @@ function parse(tokens) {
   if (!tokens.length) return null;
   const n = expr(); if (p < tokens.length) throw new Error('Unexpected "' + (tokens[p].v || tokens[p].t) + '".'); return n;
 }
-// A term matches a tag's value ("American") or the whole "Facet:Value"; resolved once to tag ids.
+// A term matches a tag's value ("American") or the whole "Facet:Value" (old or current submodule names); resolved once to tag ids.
 function compile(node) {
   if (!node) return null;
   if (node.op === 'term') {
     const v = node.v.toLowerCase(), ids = new Set();
-    tagValue.forEach((val, i) => { if (val.toLowerCase() === v || idx.tags[i].toLowerCase() === v) ids.add(i); });
+    tagValue.forEach((val, i) => { if (val.toLowerCase() === v || idx.tags[i].toLowerCase() === v || tagShown[i].toLowerCase() === v) ids.add(i); });
     node.ids = ids; node.unknown = !ids.size; return node;
   }
   compile(node.a); if (node.b) compile(node.b); return node;
@@ -199,7 +250,7 @@ function suggest(raw) {
   const counts = new Map();
   for (const r of rows) for (const t of r[6]) if (tagValue[t].toLowerCase().includes(last)) counts.set(t, (counts.get(t) || 0) + 1);
   const top = [...counts].sort((a, b) => b[1] - a[1]).slice(0, 8);
-  $('#sugg').innerHTML = top.map(([t, n]) => `<button class="chip" data-t="${t}" title="${esc(idx.tags[t])}">${esc(tagValue[t])} <small>${esc(tagFacet[t])} · ${n}</small></button>`).join('');
+  $('#sugg').innerHTML = top.map(([t, n]) => `<button type="button" class="chip" data-t="${t}" title="${esc(tagShown[t])}">${esc(tagValue[t])} <small>${esc(tagFacet[t])} · ${n}</small></button>`).join('');
   $('#sugg').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
     const v = tagValue[+b.dataset.t], q = $('#query'), cut = q.value.toLowerCase().lastIndexOf(last);
     const phrase = /[\s+&|!()-]/.test(v) ? `"${v}"` : v;
@@ -226,12 +277,12 @@ function renderFacets() {
     let opts = [...counts].filter(([t]) => !search || tagValue[t].toLowerCase().includes(search)).sort((a, b) => chosen.has(b[0]) - chosen.has(a[0]) || b[1] - a[1]);
     const limit = openFacets.has(f + ':all') ? 400 : 12;
     const more = opts.length > limit; opts = opts.slice(0, limit);
-    return `<div class="facet"><button data-toggle="${esc(f)}" aria-expanded="${!!open}">${esc(f)}<span>${chosen.size ? chosen.size + ' selected · ' : ''}${counts.size}</span></button>
-      ${open ? `<div class="fbody">${counts.size > 12 ? `<input type="search" data-fsearch="${esc(f)}" placeholder="Search ${esc(f.toLowerCase())}…" value="${esc(search)}">` : ''}
-        ${opts.map(([t, n]) => `<label class="opt"><input type="checkbox" data-f="${esc(f)}" data-t="${t}" ${chosen.has(t) ? 'checked' : ''}><span title="${esc(tagValue[t])}">${esc(tagValue[t])}</span><small>${n}</small></label>`).join('') || '<div class="type">No values with the current filters</div>'}
-        ${more ? `<button class="more" data-all="${esc(f)}">Show all values</button>` : ''}</div>` : ''}</div>`;
+    return `<div class="facet"><button type="button" data-toggle="${esc(f)}" aria-expanded="${!!open}"><span class="chev" aria-hidden="true">▶</span><span class="f">${esc(f)}</span><span class="n">${chosen.size ? chosen.size + ' selected · ' : ''}${counts.size.toLocaleString('en-GB')}</span></button>
+      ${open ? `<div class="fbody">${counts.size > 12 ? `<input class="prp-input" type="search" data-fsearch="${esc(f)}" placeholder="Search ${esc(f.toLowerCase())}…" aria-label="Search ${esc(f.toLowerCase())}" value="${esc(search)}">` : ''}
+        ${opts.map(([t, n]) => `<label class="opt"><input type="checkbox" data-f="${esc(f)}" data-t="${t}" ${chosen.has(t) ? 'checked' : ''}><span title="${esc(tagValue[t])}">${esc(tagValue[t])}</span><small>${n.toLocaleString('en-GB')}</small></label>`).join('') || '<div class="none">No values with the current filters</div>'}
+        ${more ? `<button type="button" class="more" data-all="${esc(f)}">Show all values</button>` : ''}</div>` : ''}</div>`;
   }).join('');
-  $('#facets').querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => { const f = b.dataset.toggle; openFacets.has(f) ? openFacets.delete(f) : openFacets.add(f); renderFacets(); });
+  $('#facets').querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => { const f = b.dataset.toggle; openFacets.has(f) ? openFacets.delete(f) : openFacets.add(f); renderFacets(); document.querySelector(`[data-toggle="${CSS.escape(f)}"]`)?.focus(); });
   $('#facets').querySelectorAll('[data-all]').forEach(b => b.onclick = () => { openFacets.add(b.dataset.all + ':all'); renderFacets(); });
   $('#facets').querySelectorAll('[data-fsearch]').forEach(i => i.oninput = () => { const pos = i.selectionStart; renderFacets(); const n = document.querySelector(`[data-fsearch="${CSS.escape(i.dataset.fsearch)}"]`); if (n) { n.focus(); n.setSelectionRange(pos, pos); } });
   $('#facets').querySelectorAll('input[type=checkbox]').forEach(c => c.onchange = () => {
@@ -250,95 +301,113 @@ function renderResults() {
     const tags = [...r[6]].sort((a, b) => (chosen.has(b) - chosen.has(a)) || ((FACET_ORDER.indexOf(tagFacet[a]) + 1 || 99) - (FACET_ORDER.indexOf(tagFacet[b]) + 1 || 99))).filter(t => tagFacet[t] !== 'Appears in' && tagFacet[t] !== 'Type').slice(0, 6);
     return `<tr><td class="name"><a href="#${r[0]}">${esc(r[1])}</a><div>${esc(r[3])}</div></td>
       <td class="type">${esc(tagValue[r[6].find(t => tagFacet[t] === 'Type')] || r[2])}</td>
-      <td><div class="tags">${tags.map(t => `<button class="chip${chosen.has(t) ? ' on' : ''}" data-add="${t}" title="${esc(idx.tags[t])}">${esc(tagValue[t])}</button>`).join('')}</div></td>
-      <td><div class="where">${r[7].map(([m, u, n]) => linkHtml(m, u, `${esc(idx.modules[m] || m)}${n > 1 ? ` <small>${n}</small>` : ''}`, 'chip')).join('') || '<span class="type">Related entry</span>'}</div></td></tr>`;
+      <td><div class="tags">${tags.map(t => `<button type="button" class="chip${chosen.has(t) ? ' on' : ''}" data-add="${t}" title="${esc(tagShown[t])}">${esc(tagValue[t])}</button>`).join('')}</div></td>
+      <td><div class="where">${r[7].map(([m, u, n]) => linkHtml(m, u, `${esc(modName(m))}${n > 1 ? ` <small>${n}</small>` : ''}`, 'chip')).join('') || '<span class="type">Related entry</span>'}</div></td></tr>`;
   }).join('') || '<tr><td colspan="4" class="empty">No entries match. Remove a filter or change the query.</td></tr>';
   $('#rows').querySelectorAll('[data-add]').forEach(b => b.onclick = () => addTag(+b.dataset.add));
-  $('#pager').innerHTML = list.length > shown ? `<button class="btn" id="showmore">Show ${Math.min(PAGE, list.length - shown)} more of ${(list.length - shown).toLocaleString('en-GB')}</button>` : '';
+  $('#pager').innerHTML = list.length > shown ? `<button type="button" class="prp-btn" id="showmore">Show ${Math.min(PAGE, list.length - shown)} more of ${(list.length - shown).toLocaleString('en-GB')}</button>` : '';
   $('#showmore')?.addEventListener('click', () => { shown += PAGE; renderResults(); });
-  const act = [...sel].flatMap(([f, s]) => [...s].map(t => `<button class="chip on" data-rm="${t}" data-f="${esc(f)}">${esc(f)}: ${esc(tagValue[t])} ✕</button>`));
+  const act = [...sel].flatMap(([f, s]) => [...s].map(t => `<button type="button" class="chip on" data-rm="${t}" data-f="${esc(f)}" aria-label="Remove ${esc(f)}: ${esc(tagValue[t])}">${esc(f)}: ${esc(tagValue[t])} ✕</button>`));
   $('#active').hidden = !act.length; $('#active').innerHTML = act.join('');
   $('#active').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { sel.get(b.dataset.f)?.delete(+b.dataset.rm); update(); });
 }
 function addTag(t) { const f = tagFacet[t]; if (!sel.has(f)) sel.set(f, new Set()); sel.get(f).add(t); openFacets.add(f); shown = PAGE; show('explore'); update(); }
 function update() { readQuery(); renderFacets(); renderResults(); writeUrl(); }
 function writeUrl() {
-  if (!$('#entity').hidden) return;
   const q = $('#query').value.trim();
   const h = '#explore' + (q ? '?q=' + encodeURIComponent(q) : '');
+  $('#tab-explore').href = h;
+  if (!$('#entity').hidden) return;
   if (location.hash !== h && !(location.hash === '' && h === '#explore')) history.replaceState(null, '', h);
 }
 
-/* ---------- Entity page ---------- */
+/* ---------- Entry (entity page) ---------- */
 const shardCache = new Map();
 const entity = q => { const n = +q.slice(1) % 512; if (!shardCache.has(n)) shardCache.set(n, fetch(`${LAKE}e/${n}.json`).then(r => r.json())); return shardCache.get(n).then(s => s[q]); };
-function openModal(title, html) { $('#mtitle').textContent = title; $('#mbody').innerHTML = html; $('#modal').hidden = false; }
-$('#mclose').onclick = () => { $('#modal').hidden = true; };
-$('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').hidden = true; };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').hidden = true; });
+let lastFocus = null;
+function openModal(title, html) { lastFocus = document.activeElement; $('#mtitle').textContent = title; $('#mbody').innerHTML = html; $('#modal').hidden = false; $('#mclose').focus(); }
+function closeModal() { if ($('#modal').hidden) return; $('#modal').hidden = true; lastFocus?.focus?.(); }
+$('#mclose').onclick = closeModal;
+$('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 const fmtDate = d => { if (!d) return ''; if (/^-?\d+$/.test(d)) return +d < 0 ? `${-d} BC` : d; const [y, m, dd] = d.split('-'); return new Date(Date.UTC(+y, +m - 1, +(dd || 1))).toLocaleDateString('en-GB', { day: dd ? 'numeric' : undefined, month: 'long', year: 'numeric', timeZone: 'UTC' }); };
 
 async function renderEntity(q) {
   const box = $('#entity');
   box.innerHTML = '<div class="empty">Loading…</div>';
   const e = await entity(q).catch(() => null);
-  if (!e) { box.innerHTML = `<div class="empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; return; }
-  document.title = `${e.label} · Encyclopaedia · JDP-I`;
+  if (!e) { box.innerHTML = `<div class="prp-panel empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; setEntryTab(q, q); return; }
+  document.title = `${e.label} · Encyclopaedia · PRP`;
+  setEntryTab(q, e.label);
   const tagIdOf = new Map(idx.tags.map((t, i) => [t, i]));
   const factRows = [['Born', e.facts.born], ['Died', e.facts.died], ['Founded', e.facts.founded], ['Dissolved', e.facts.dissolved], ['Began', e.facts.start], ['Ended', e.facts.end], ['Date', e.facts.date]].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(fmtDate(v))}</dd>`);
   const relRows = Object.entries(e.rel).map(([k, list]) => `<dt>${esc(k)}</dt><dd>${list.map(([rq, l]) => byQid.has(rq) ? `<a href="#${rq}">${esc(l)}</a>` : esc(l)).join(', ')}</dd>`);
-  // Group appearances by module; long lists open in a pop-out.
+  // Group appearances by submodule; long lists open in a pop-out.
   const groups = new Map();
   for (const m of e.mentions) (groups.get(m.m) || groups.set(m.m, []).get(m.m)).push(m);
   const ment = m => `<div class="ment">${linkHtml(m.m, m.u, esc(m.c))}<small>${m.d ? esc(fmtDate(m.d)) : ''}</small></div>`;
   const popouts = [];
   const groupHtml = [...groups].map(([mod, list]) => {
     let more = '';
-    if (list.length > 6) { popouts.push({ title: `${e.label} in ${idx.modules[mod] || mod}`, html: list.map(ment).join('') }); more = `<button class="more" data-pop="${popouts.length - 1}">See more (${list.length - 6} more)</button>`; }
-    return `<div class="group"><h4>${esc(idx.modules[mod] || mod)}<span>${list.length}</span></h4>${list.slice(0, 6).map(ment).join('')}${more}</div>`;
+    if (list.length > 6) { popouts.push({ title: `${e.label} in ${modName(mod)}`, html: list.map(ment).join('') }); more = `<button type="button" class="more" data-pop="${popouts.length - 1}">See more (${list.length - 6} more)</button>`; }
+    return `<div class="group"><h4>${esc(modName(mod))}<span>${list.length}</span></h4>${list.slice(0, 6).map(ment).join('')}${more}</div>`;
   }).join('');
   const img = e.img ? `<img src="https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(e.img)}?width=240" alt="" loading="lazy">` : '';
-  box.innerHTML = `<button class="back" id="back">‹ Explorer</button>
-    <div class="entity"><div>
-      <div class="ehead">${img}<div><div class="eyebrow">${esc(tagValueOf(e.tags, 'Type') || e.type)}</div><h2>${esc(e.label)}</h2><div class="d">${esc(e.desc)}</div>
-        ${e.aliases.length ? `<div class="type" style="margin-top:6px">Also: ${esc(e.aliases.join(' · '))}</div>` : ''}</div></div>
-      <div class="card" style="margin-top:16px"><h3>Summary</h3><p class="summary">${esc(e.summary || 'No summary available.')}</p>
-        ${e.wiki ? `<p style="margin:10px 0 0"><button class="more" id="fullintro">See more</button> · <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a> · <a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
-      <div class="card"><h3>Appears in JDP-I · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="type">Not mentioned directly; linked from related entries.</p>'}</div>
+  box.innerHTML = `<div class="entity"><div>
+      <div class="ehead">${img}<div><p class="prp-label">${esc(tagValueOf(e.tags, 'Type') || e.type)}</p><h2>${esc(e.label)}</h2><div class="d">${esc(e.desc)}</div>
+        ${e.aliases.length ? `<div class="also">Also: ${esc(e.aliases.join(' · '))}</div>` : ''}</div></div>
+      <div class="card"><h3>Summary</h3><p class="summary">${esc(e.summary || 'No summary available.')}</p>
+        ${e.wiki ? `<p class="links"><button type="button" class="more" id="fullintro">See more</button><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a><a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
+      <div class="card"><h3>Appears in PRP · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
     </div><div>
       ${factRows.length || relRows.length ? `<div class="card"><h3>Facts</h3><dl class="facts">${factRows.join('')}${relRows.join('')}</dl></div>` : ''}
-      <div class="card"><h3>Tags · click to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button class="chip" data-add="${tagIdOf.get(t)}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>
+      <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${tagIdOf.get(t)}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>
     </div></div>`;
-  $('#back').onclick = () => { location.hash = '#explore'; };
   box.querySelectorAll('[data-add]').forEach(b => b.onclick = () => addTag(+b.dataset.add));
   box.querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openModal(popouts[+b.dataset.pop].title, popouts[+b.dataset.pop].html));
   $('#fullintro')?.addEventListener('click', async () => {
-    openModal(e.label, '<p class="type">Loading from Wikipedia…</p>');
+    openModal(e.label, '<p class="note">Loading from Wikipedia…</p>');
     try {
       const url = 'https://en.wikipedia.org/w/api.php?' + new URLSearchParams({ action: 'query', prop: 'extracts', exintro: '1', explaintext: '1', redirects: '1', titles: e.wiki, format: 'json', origin: '*' });
       const page = Object.values((await (await fetch(url)).json()).query.pages)[0];
-      $('#mbody').innerHTML = (page.extract || '').split(/\n+/).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('') + '<p class="type">Text: Wikipedia, CC BY-SA 4.0.</p>';
+      $('#mbody').innerHTML = (page.extract || '').split(/\n+/).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('') + '<p class="note">Text: Wikipedia, CC BY-SA 4.0.</p>';
     } catch { $('#mbody').innerHTML = '<p>Wikipedia could not be reached.</p>'; }
   });
 }
 const tagValueOf = (tags, facet) => tags.find(t => t.startsWith(facet + ':'))?.slice(facet.length + 1);
 
-/* ---------- Routing ---------- */
-function show(view) { $('#explore').hidden = view !== 'explore'; $('#entity').hidden = view === 'explore'; }
+/* ---------- Tabs and routing ---------- */
+// Two views: the Explorer, and the entry last opened (a tab that returns to it).
+function setEntryTab(q, label) { lastEntry = q; const t = $('#tab-entry'); t.hidden = false; t.href = '#' + q; $('#tab-entry-name').textContent = label; t.title = label; }
+function show(view) {
+  const ex = view === 'explore';
+  // The Explorer's id is not "explore", so a #explore link does not scroll the page past its front matter.
+  $('#explorer').hidden = !ex; $('#entity').hidden = ex;
+  $('#tab-explore').setAttribute('aria-selected', String(ex)); $('#tab-entry').setAttribute('aria-selected', String(!ex));
+}
+document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
+  const tabs = [...document.querySelectorAll('[role="tab"]:not([hidden])')], i = tabs.indexOf(document.activeElement), k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (i < 0 || !k) return; e.preventDefault(); tabs[(i + k + tabs.length) % tabs.length].focus();
+});
 function route() {
   const h = location.hash.slice(1);
   if (/^Q\d+$/.test(h)) { show('entity'); renderEntity(h); window.scrollTo(0, 0); return; }
-  show('explore'); document.title = 'Encyclopaedia · JDP-I H&P';
+  show('explore'); document.title = 'Encyclopaedia · PRP';
   const q = new URLSearchParams(h.split('?')[1] || '').get('q');
   if (q !== null && q !== $('#query').value) $('#query').value = q;
   update();
 }
 
+const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 fetch(`${LAKE}index.json`).then(r => r.json()).then(d => {
   idx = d; rows = d.rows;
-  idx.tags.forEach((t, i) => { const k = t.indexOf(':'); tagFacet[i] = t.slice(0, k); tagValue[i] = t.slice(k + 1); });
+  // Tags keep their stored form for matching; "Appears in" values show the submodule's current name.
+  const RENAMED = Object.fromEntries(Object.entries(idx.modules).filter(([m, n]) => MODULE_NAME[m] && MODULE_NAME[m] !== n).map(([m, n]) => [n, MODULE_NAME[m]]));
+  idx.tags.forEach((t, i) => { const k = t.indexOf(':'); tagFacet[i] = t.slice(0, k); tagValue[i] = t.slice(k + 1); if (tagFacet[i] === 'Appears in') tagValue[i] = RENAMED[tagValue[i]] || tagValue[i]; tagShown[i] = `${tagFacet[i]}:${tagValue[i]}`; });
   rows.forEach(r => byQid.set(r[0], r));
-  $('#meta').textContent = `${rows.length.toLocaleString('en-GB')} entries · ${idx.tags.length.toLocaleString('en-GB')} tags · links into ${Object.keys(idx.modules).length} modules`;
+  const meta = [`<span><b>${rows.length.toLocaleString('en-GB')}</b> entries</span>`, `<span><b>${idx.tags.length.toLocaleString('en-GB')}</b> tags</span>`, `<span>Links into <b>${Object.keys(idx.modules).length}</b> submodules</span>`, '<span>Sources <b>Wikidata · Wikipedia</b></span>'];
+  $('#meta').innerHTML = meta.join('');
+  fetch(`${LAKE}manifest.json`).then(r => r.json()).then(m => { if (m.generated) $('#meta').insertAdjacentHTML('beforeend', `<span>Updated <b>${esc(fmtDay(m.generated))}</b></span>`); }).catch(() => {});
   $('#jumplist').innerHTML = rows.slice(0, 3000).map(r => `<option value="${esc(r[1])}">`).join('');
   $('#jump').addEventListener('change', () => { const v = $('#jump').value.toLowerCase(); const r = rows.find(x => x[1].toLowerCase() === v) || rows.find(x => x[1].toLowerCase().includes(v)); if (r) { location.hash = '#' + r[0]; $('#jump').value = ''; } });
   let t; const debounced = () => { clearTimeout(t); t = setTimeout(() => { shown = PAGE; update(); }, 180); };

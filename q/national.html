@@ -1,105 +1,177 @@
 <!doctype html>
-<html lang="en" data-suite="q">
+<html lang="en" class="prp" data-suite="rt">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml">
-<title>JDP-I Q — National Analysis</title>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<title>National Analysis · PRP</title>
 <script src="supabase-config.js"></script><script src="supabase-client.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../design/jdpi.css">
-<script src="../design/jdpi-bar.js" data-suite="q" data-module="pestle" data-shell="../" defer></script>
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="pestle" data-shell="../" defer></script>
 <style>
-:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--faint:#6d7d86;--text:#eff4f2;--accent:var(--jdpi-accent,#b7f36b);--soft:var(--jdpi-accent-soft,rgba(183,243,107,.08));--accline:var(--jdpi-accent-line,#5f7d45);--good:#6ddac8;--bad:#ff826f;--warn:#f0b95a}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
-a{color:var(--accent)}button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
-.wrap{max-width:1480px;margin:auto;padding:20px 26px 40px}
-.hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
-h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:760px}
-.meta{font:10px 'DM Mono';color:var(--muted);margin-top:6px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:5px;padding:7px 12px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs button.active,.tabs button:hover{border-color:var(--accline);color:var(--accent);background:var(--soft)}
-.tabs .count{background:var(--accent);color:#10200a;border-radius:99px;padding:0 6px;margin-left:5px;font-weight:600}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:16px}
-.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
-.phead b{font:700 13px Manrope}
-select,input[type=search]{background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:6px 9px;font-size:12.5px}
-#map{width:100%;height:auto;display:block;background:#101d27}
-.land{stroke:#0d1721;stroke-width:.5;cursor:pointer}.land:hover{stroke:#fff;stroke-width:1.2}.land.sel{stroke:var(--accent);stroke-width:1.6}
-.legend{display:flex;align-items:center;gap:8px;font:10px 'DM Mono';color:var(--muted);padding:8px 14px;flex-wrap:wrap}.legend i{display:inline-block;width:26px;height:9px;border-radius:2px}
-.tip{position:fixed;pointer-events:none;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px;z-index:20}
-.tbl{overflow-x:auto;max-height:560px;overflow-y:auto}
-table{border-collapse:collapse;width:100%;font-size:12.5px}
-th{text-align:left;font:600 11px Manrope;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);cursor:pointer;white-space:nowrap}
-td{padding:7px 10px;border-bottom:1px solid #24343f}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.cname{color:var(--text);text-decoration:none;font-weight:600}.cname:hover{color:var(--accent)}
-.bar{display:inline-block;height:6px;border-radius:3px;background:var(--bad);vertical-align:middle}
-.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#0f1b25;color:var(--text);border-radius:99px;padding:3px 9px;font-size:11.5px;text-decoration:none}.chip:hover{border-color:var(--accent)}.chip.on{border-color:var(--accline);background:var(--soft);color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:14px}
-.stat{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:10px 12px}.stat span{display:block;font:10px 'DM Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.stat b{display:block;font:600 20px Manrope;margin-top:3px;font-variant-numeric:tabular-nums}.stat small{color:var(--faint);font-size:11px}
-.ptitle{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding:16px}
-.ptitle h2{font:600 26px Manrope;letter-spacing:-.03em;margin:0}.ptitle .sub{color:var(--muted);font-size:13px}
-.links{display:flex;flex-wrap:wrap;gap:6px}
-.dims{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:12px;padding:14px}
-.dim{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:12px}
-.dim h3{margin:0 0 6px;font:600 14px Manrope;display:flex;justify-content:space-between;align-items:center}
-.press{font:11px 'DM Mono';padding:2px 7px;border-radius:4px}
-.ind{display:grid;grid-template-columns:minmax(0,1fr) 70px 92px 74px;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #2a3a4655;font-size:12px}
-.ind .l{min-width:0}.ind .l small{display:block;color:var(--faint);font-size:10.5px}
-.mv{font:10px 'DM Mono';text-align:right}.mv.improving{color:var(--good)}.mv.worsening{color:var(--bad)}.mv.stable{color:var(--muted)}
-.spark{width:70px;height:22px}
-.added{font:9px 'DM Mono';color:var(--faint);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:4px}
-.best{color:var(--good);font-weight:600}.worst{color:var(--bad)}
-.cmpchart{padding:12px 14px}
-.story{font-size:12.5px;padding:6px 0;border-top:1px solid #24343f}.story a{color:var(--text);text-decoration:none}.story a:hover{color:var(--accent)}.story small{display:block;color:var(--faint);font:10px 'DM Mono'}
-.note{color:var(--faint);font-size:11.5px;padding:0 14px 14px;line-height:1.6}
-.empty{padding:30px;text-align:center;color:var(--muted)}
-@media(max-width:700px){.wrap{padding:14px}.dims{grid-template-columns:1fr}.ind{grid-template-columns:minmax(0,1fr) 60px 74px}.ind .spark{display:none}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+button,input,select{font:inherit}button{cursor:pointer}
+.page{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
+.prp-tabs{margin-top:22px}
+.prp-tabs .sub{color:var(--prp-muted);font-weight:400}
+.prp-tabs .count{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:7px;padding:0 5px;border-radius:99px;background:var(--prp-accent-soft);color:var(--prp-accent);font:600 var(--prp-fs-xs)/1 var(--prp-font-mono);vertical-align:1px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:14px 0}
+.fld{display:inline-flex;align-items:center;gap:9px;min-width:0}
+.fld .prp-select{min-width:0;max-width:min(380px,calc(100vw - 150px))}
+.stack{display:grid;gap:16px}
+.prp-panel{overflow:hidden}
+.prp-panel-head .hint{color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+.prp-panel-head .filters{display:flex;flex-wrap:wrap;gap:8px}
+.prp-panel-head .filters .prp-input{width:220px;max-width:100%}
+.prp-sources p{margin:0 0 6px;max-width:120ch}
+.panel-note{margin:0;padding:10px 14px 14px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.6}
+.muted{color:var(--prp-muted)}
+/* map */
+#map{display:block;width:100%;height:auto;background:var(--prp-surface)}
+#map .sphere{fill:var(--prp-map-water);stroke:var(--prp-map-border);stroke-width:.6}
+#map .graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5}
+#map .land{stroke:var(--prp-surface);stroke-width:.5;cursor:pointer}
+#map .land:hover{stroke:var(--prp-text);stroke-width:1.1}
+#map .land.sel{stroke:var(--prp-text);stroke-width:1.8}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-muted);font:var(--prp-fs-xs)/1.4 var(--prp-font-mono)}
+.legend .ramp{display:inline-block;width:150px;height:10px;border-radius:2px}
+.legend .note{color:var(--prp-text-2)}
+.legend .nd{display:inline-flex;align-items:center;gap:6px;margin-left:10px}
+.nd i,i.nd{display:inline-block;width:12px;height:10px;border-radius:2px;background:var(--prp-map-nodata);border:1px solid var(--prp-line-strong)}
+.tip{position:fixed;z-index:20;pointer-events:none;max-width:280px;padding:7px 10px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-sm);box-shadow:var(--prp-shadow-2);color:var(--prp-text);font:12px/1.5 var(--prp-font-ui)}
+.tip .row{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}.tip .row b{margin-left:auto;padding-left:10px;font-weight:600}
+.tip .sw,.prp-chip .sw{display:inline-block;width:12px;height:3px;border-radius:2px;flex:none}
+/* ranking table */
+.tbl{overflow:auto;max-height:560px}
+.prp-table th .sort{display:inline-flex;align-items:center;gap:4px;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
+.prp-table th .sort:hover{color:var(--prp-text)}
+.prp-table th.wrap{white-space:normal;min-width:120px;max-width:240px}
+.prp-table input[type=checkbox]{accent-color:var(--prp-primary);margin:0;vertical-align:-2px}
+.cname{color:var(--prp-text);text-decoration:none;font-weight:600}.cname:hover{color:var(--prp-link);text-decoration:underline}
+.bar{display:inline-block;height:6px;margin-right:6px;border-radius:3px;vertical-align:middle}
+/* country profile */
+.ptitle{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:18px 16px 16px;border-bottom:1px solid var(--prp-line-soft)}
+.ptitle h2{margin:6px 0 4px;font:600 26px/1.2 var(--prp-font-serif);letter-spacing:-.01em;color:var(--prp-text)}
+.ptitle .sub{color:var(--prp-text-2);font-size:13.5px}
+.pact{display:grid;gap:8px;justify-items:end}
+.links{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+a.prp-chip{text-decoration:none}a.prp-chip:hover{border-color:var(--prp-primary);color:var(--prp-text)}
+.prp-chip small{color:var(--prp-muted);font-size:10.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px;padding:14px}
+.stat{min-width:0;padding:10px 12px;background:var(--prp-surface-2);border:1px solid var(--prp-line-soft);border-radius:var(--prp-radius-sm)}
+.stat span{display:block;color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.3 var(--prp-font-mono);letter-spacing:.05em;text-transform:uppercase}
+.stat b{display:block;margin-top:4px;color:var(--prp-text);font:600 17px/1.25 var(--prp-font-ui);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stat small{display:block;margin-top:3px;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.4}
+.wars{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
+.dims{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:12px;padding:14px}
+.dim{min-width:0;padding:12px 14px 6px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius)}
+.dim h3{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 6px;color:var(--prp-text);font:600 16px/1.3 var(--prp-font-serif)}
+.press{display:inline-flex;align-items:center;gap:6px;color:var(--prp-text-2);font:500 var(--prp-fs-xs) var(--prp-font-mono);white-space:nowrap}
+.press i{display:inline-block;width:12px;height:10px;border-radius:2px}
+.ind{display:grid;grid-template-columns:minmax(0,1fr) 70px 92px 80px;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--prp-line-soft);font-size:12.5px}
+.ind .l{min-width:0}.ind .l small{display:block;color:var(--prp-muted);font-size:11px}.ind .l small a{white-space:nowrap}
+.ind .v{text-align:right;font-variant-numeric:tabular-nums}
+.mv{text-align:right;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}.mv.improving{color:var(--prp-good)}.mv.worsening{color:var(--prp-bad)}
+.spark{display:block;width:70px;height:22px}
+.added{margin-left:5px;padding:0 4px;border:1px solid var(--prp-line);border-radius:3px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px}
+.stories{padding:2px 14px 12px}
+.story{padding:8px 0;border-top:1px solid var(--prp-line-soft);font-size:13px}.story:first-child{border-top:0}
+.story a{color:var(--prp-text);text-decoration:none}.story a:hover{color:var(--prp-link);text-decoration:underline}
+.story small{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+/* comparison */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+button.prp-chip{cursor:pointer}button.prp-chip:hover{border-color:var(--prp-bad)}
+.cmpfig{padding:12px 14px 14px;border-bottom:1px solid var(--prp-line-soft)}
+#cmpsvg{display:block;width:100%;height:auto;margin-top:8px}
+#cmpsvg .gridlines line{stroke:var(--prp-grid)}
+#cmpsvg .axis .domain,#cmpsvg .axis line{stroke:var(--prp-axis)}
+#cmpsvg .axis text{fill:var(--prp-muted);font:11px var(--prp-font-mono)}
+#cmpsvg .lbl{fill:var(--prp-text-2);font:12px var(--prp-font-ui)}
+#cmpsvg .empty{fill:var(--prp-muted);font:13px var(--prp-font-ui)}
+#cmpsvg .rule{stroke:var(--prp-line-strong);stroke-dasharray:3 3}
+#cmpsvg .hov circle,#cmpsvg .end{stroke:var(--prp-surface);stroke-width:1.5}
+details.dt{margin-top:10px}details.dt summary{cursor:pointer;color:var(--prp-link);font-size:var(--prp-fs-sm)}
+details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-soft);border-radius:var(--prp-radius-sm)}
+.cmp .grp td{padding-top:16px;border-bottom-color:var(--prp-line);color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.cmp tbody tr.grp:hover td{background:none}
+.cmp td.best{color:var(--prp-good);font-weight:600}.cmp td.worst{color:var(--prp-bad)}
+.cmp .rk{margin-left:5px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase}
+@media(max-width:700px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px}.stat b{font-size:15px}.ind{grid-template-columns:minmax(0,1fr) 64px 76px}.ind .spark{display:none}.links{justify-content:flex-start}.pact{justify-items:start}.prp-panel-head .filters,.prp-panel-head .filters .prp-input{width:100%}.prp-panel-head .filters .prp-input{flex:1 1 140px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <section class="hero">
-    <div><div class="eyebrow">JDP-I Q · National Analysis</div><h1>National Analysis</h1>
-      <p>Every country's political, economic, social, technological, legal and environmental pressures (PESTLE), with a profile of how it is governed, how often its leaders change and how much conflict it has seen. Compare up to four countries side by side.</p>
-      <div class="meta" id="meta">Loading…</div></div>
-    <div class="tabs" role="tablist"><button data-tab="map" class="active">Map &amp; ranking</button><button data-tab="profile">Country profile</button><button data-tab="compare">Compare<span class="count" id="ccount" hidden>0</span></button></div>
+<main class="page">
+  <header>
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> National Analysis</div>
+    <h1 class="prp-title">National Analysis</h1>
+    <p class="prp-dek">Every country's political, economic, social, technological, legal and environmental pressures (PESTLE), with how it is governed, how often its leaders change and how much conflict it has seen. Open a country's profile, or compare up to four side by side.</p>
+    <div class="prp-meta" id="meta">Loading…</div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="National Analysis views">
+    <button type="button" role="tab" id="tab-btn-map" data-tab="map" aria-controls="tab-map" aria-selected="true" class="active">Map &amp; ranking</button>
+    <button type="button" role="tab" id="tab-btn-profile" data-tab="profile" aria-controls="tab-profile" aria-selected="false" tabindex="-1">Country profile<span class="sub" id="pname"></span></button>
+    <button type="button" role="tab" id="tab-btn-compare" data-tab="compare" aria-controls="tab-compare" aria-selected="false" tabindex="-1">Compare countries<span class="count" id="ccount" hidden>0</span></button>
+  </div>
+  <div class="toolbar" role="group" aria-label="Data settings">
+    <label class="fld" id="metricfld"><span class="prp-label">Colour by</span><select class="prp-select" id="metric" aria-label="Metric to colour the map by"></select></label>
+    <label class="fld"><span class="prp-label">PESTLE period</span><select class="prp-select" id="period" aria-label="PESTLE period"><option value="latest">Latest</option><option value="1980">1980s</option><option value="1990">1990s</option><option value="2000">2000s</option><option value="2010">2010s</option><option value="2020">2020s (to date)</option></select></label>
+  </div>
+
+  <section id="tab-map" class="stack" role="tabpanel" aria-labelledby="tab-btn-map">
+    <figure class="prp-figure">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><b id="maptitle">Overall PESTLE pressure</b><span class="hint">Hover for values · click a country for its profile</span></div>
+        <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
+        <div class="legend" id="legend"></div>
+      </div>
+      <figcaption><b>Figure 1.</b> <span id="mapcap">Overall PESTLE pressure by country.</span></figcaption>
+    </figure>
+    <section class="prp-panel" aria-labelledby="ctitle">
+      <div class="prp-panel-head"><b id="ctitle">Countries</b><span class="filters"><input type="search" class="prp-input" id="search" placeholder="Search countries…" aria-label="Search countries"><select class="prp-select" id="region" aria-label="Region"><option value="">All regions</option></select></span></div>
+      <div class="tbl"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
+      <p class="panel-note">Tick up to four countries to compare them. Pressure is the share of a dimension's indicators that are worsening (Country PESTLE's method). Coverage is the share of the 22 core indicators with data.</p>
+    </section>
   </section>
 
-  <section id="tab-map">
-    <div class="panel">
-      <div class="phead"><b id="maptitle">Overall PESTLE pressure</b>
-        <span><label class="meta" style="margin:0">Colour by <select id="metric" aria-label="Metric to colour the map by"></select></label>
-        <label class="meta" style="margin:0 0 0 8px">PESTLE period <select id="period" aria-label="PESTLE period"><option value="latest">Latest</option><option value="1980">1980s</option><option value="1990">1990s</option><option value="2000">2000s</option><option value="2010">2010s</option><option value="2020">2020s (to date)</option></select></label></span></div>
-      <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
-      <div class="legend" id="legend"></div>
-    </div>
-    <div class="panel">
-      <div class="phead"><b>Countries</b><span><input type="search" id="search" placeholder="Search countries…" aria-label="Search countries"> <select id="region" aria-label="Region"><option value="">All regions</option></select></span></div>
-      <div class="tbl"><table><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
-      <p class="note">Tick up to four countries to compare them. Pressure is the share of a dimension's indicators that are worsening (Country PESTLE's method). Coverage is the share of the 22 core indicators with data.</p>
-    </div>
-  </section>
+  <section id="tab-profile" role="tabpanel" aria-labelledby="tab-btn-profile" hidden><div id="profile"><div class="prp-panel"><div class="prp-empty">Choose a country on the map or in the list.</div></div></div></section>
+  <section id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare" hidden><div id="compare"></div></section>
 
-  <section id="tab-profile" hidden><div id="profile"><div class="panel"><div class="empty">Choose a country on the map or in the list.</div></div></div></section>
-  <section id="tab-compare" hidden><div id="compare"></div></section>
-</div>
-<div class="tip" id="tip" hidden></div>
+  <footer class="prp-sources">
+    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and capitals; Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
+    <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored.</p>
+    <p><b>Refresh.</b> Rebuilt monthly from the sources above.</p>
+  </footer>
+</main>
+<div class="tip" id="tip" role="tooltip" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
 // National Analysis (formerly Country PESTLE). Data: ../national/data/index.json and series/<ISO3>.json, built monthly
-// by national/scripts/build.mjs from World Bank indicators, Wikidata and JDP-I's own modules.
+// by national/scripts/build.mjs from World Bank indicators, Wikidata and PRP's own submodules.
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DIMS = [['political', 'Political'], ['economic', 'Economic'], ['social', 'Social'], ['technological', 'Technological'], ['legal', 'Legal'], ['environmental', 'Environmental']];
 const SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const go = (suite, module, url) => embedded ? { href: `${SHELL}#/${suite}/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}`, target: '_top' } : { href: new URL(url, SHELL).href, target: '_blank' };
-const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="chip" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
+const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="prp-chip" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 let D, byIso = new Map(), indBy = new Map(), selected = null, compare = [], sortKey = 'metric', sortDir = -1;
 const seriesCache = new Map();
 const series = iso => { if (!seriesCache.has(iso)) seriesCache.set(iso, fetch(`../national/data/series/${iso}.json`).then(r => r.json()).catch(() => ({}))); return seriesCache.get(iso); };
+
+/* ---------- colours: read from the PRP tokens at draw time, again on prp:themechange ---------- */
+const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const isDark = () => (document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+const PRESS_MAX = 0.6; // pressure from 60% up gets the darkest step
+let SEQ = [], ramp = () => '', NODATA = '';
+function readTokens() {
+  SEQ = [100, 200, 300, 400, 500, 600, 700].map(n => token('--prp-seq-' + n));
+  ramp = d3.piecewise(d3.interpolateLab, SEQ);
+  NODATA = token('--prp-map-nodata');
+}
+const pressColour = v => (v == null || v === '' ? NODATA : ramp(Math.min(1, +v / PRESS_MAX)));
+const seriesColour = i => `var(--prp-cat-${i + 1})`; // compared countries, in the order they were added
 
 /* ---------- formatting ---------- */
 function fmtVal(v, unit) {
@@ -111,7 +183,6 @@ function fmtVal(v, unit) {
   return a >= 1000 ? Math.round(v).toLocaleString('en-GB') : a >= 10 ? v.toFixed(1) : v.toFixed(2);
 }
 const pct = v => (v == null ? '–' : Math.round(v * 100) + '%');
-const pressColour = v => (v == null ? '#2a3a46' : d3.interpolateRgb('#2f6f63', '#ff826f')(Math.min(1, v * 1.6)));
 
 /* ---------- metrics (map colouring, ranking, comparison) ---------- */
 function metrics() {
@@ -136,17 +207,28 @@ function metrics() {
 }
 let METRICS = [];
 const pdata = c => { const p = $('#period').value; return p === 'latest' ? c : c.decades[p] || {}; };
+const SOURCE = { PESTLE: 'World Bank (WDI and WGI), scored as in Country PESTLE', Leadership: 'Political Retrospective (Archigos and Wikidata)', Conflict: 'UCDP/PRIO Armed Conflict Dataset and UCDP Candidate Events', Energy: 'Kardashev Tracker' };
+const sourceOf = m => SOURCE[m.group] || 'World Bank (WDI and WGI)';
 
 /* ---------- map ---------- */
 let mapG, mapPath, numToIso = new Map();
+function showTip(ev, html) {
+  const t = $('#tip'); t.innerHTML = html; t.hidden = false;
+  const w = t.offsetWidth, h = t.offsetHeight;
+  t.style.left = (ev.clientX + 14 + w > innerWidth ? Math.max(4, ev.clientX - w - 14) : ev.clientX + 14) + 'px';
+  t.style.top = (ev.clientY + 14 + h > innerHeight ? Math.max(4, ev.clientY - h - 14) : ev.clientY + 14) + 'px';
+}
+const hideTip = () => { $('#tip').hidden = true; };
 function drawMap(world) {
   const svg = d3.select('#map'), proj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' });
   mapPath = d3.geoPath(proj);
+  svg.append('path').attr('class', 'sphere').attr('d', mapPath({ type: 'Sphere' }));
+  svg.append('path').attr('class', 'graticule').attr('d', mapPath(d3.geoGraticule10()));
   const feats = topojson.feature(world, world.objects.countries).features;
   mapG = svg.append('g');
   mapG.selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', mapPath)
-    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); const t = $('#tip'); t.hidden = false; t.style.left = ev.clientX + 12 + 'px'; t.style.top = ev.clientY + 12 + 'px'; t.innerHTML = c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}` : esc(f.properties.name); })
-    .on('mouseleave', () => { $('#tip').hidden = true; })
+    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); showTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}` : esc(f.properties.name)); })
+    .on('mouseleave', hideTip)
     .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso) openProfile(iso); });
 }
 function colourMap() {
@@ -154,25 +236,32 @@ function colourMap() {
   const vals = D.countries.map(c => m.get(c)).filter(v => v != null);
   const isPress = m.fmt === pct && m.better === 'down';
   const [lo, hi] = d3.extent(vals);
-  const scale = isPress ? pressColour : v => (v == null ? '#2a3a46' : d3.interpolateRgb(m.better === 'down' ? '#2f6f63' : '#5b2f2f', m.better === 'down' ? '#ff826f' : m.better === 'up' ? '#6ddac8' : '#b7f36b')(hi > lo ? (v - lo) / (hi - lo) : 0.5));
-  mapG.selectAll('path').attr('fill', f => { const c = byIso.get(numToIso.get(f.id)); return c ? scale(m.get(c)) : '#1b2833'; }).classed('sel', f => compare.includes(numToIso.get(f.id)));
+  const scale = isPress ? pressColour : v => (v == null ? NODATA : ramp(hi > lo ? (v - lo) / (hi - lo) : 0.5));
+  mapG.selectAll('path.land').attr('fill', f => { const c = byIso.get(numToIso.get(f.id)); return c ? scale(m.get(c)) : NODATA; }).classed('sel', f => compare.includes(numToIso.get(f.id)));
   $('#maptitle').textContent = m.label;
-  $('#legend').innerHTML = isPress ? ['0–20%', '20–40%', '40–60%', '60–80%', '80–100%'].map((l, i) => `<span><i style="background:${pressColour(i * .2 + .1)}"></i> ${l}</span>`).join('') + '<span><i style="background:#2a3a46"></i> no data</span>'
-    : `<span>${m.fmt(lo)}</span><i style="width:120px;background:linear-gradient(90deg,${scale(lo)},${scale(hi)})"></i><span>${m.fmt(hi)}</span>${m.better ? `<span>· ${m.better === 'down' ? 'lower is better' : 'higher is better'}</span>` : ''}`;
+  const grad = `linear-gradient(90deg,${SEQ.join(',')})`, better = m.better ? `<span class="note">${m.better === 'down' ? 'lower is better' : 'higher is better'}</span>` : '';
+  $('#legend').innerHTML = (isPress ? `<span>0%</span><i class="ramp" style="background:${grad}"></i><span>${PRESS_MAX * 100}%+</span><span class="note">of the indicators worsening</span>`
+    : `<span>${m.fmt(lo)}</span><i class="ramp" style="background:${grad}"></i><span>${m.fmt(hi)}</span>${better}`) + '<span class="nd"><i></i>No data</span>';
+  // The ramp runs light to dark on the light theme and dark to bright on the dark theme.
+  const period = $('#period'), when = m.group === 'PESTLE' ? (period.value === 'latest' ? ', latest change' : ', ' + period.selectedOptions[0].text) : '';
+  const strong = isDark() ? 'Brighter' : 'Darker', strongest = isDark() ? 'brightest' : 'darkest';
+  $('#mapcap').textContent = `${m.label}${when}, by country. ${strong} blue means ${isPress ? `more of a dimension's indicators are worsening (${PRESS_MAX * 100}% or more is ${strongest})` : `a higher value${m.better ? ` (${m.better === 'down' ? 'lower' : 'higher'} is better)` : ''}`}; countries without data have the “No data” colour. Source: ${sourceOf(m)}.`;
 }
+function recolour() { document.querySelectorAll('[data-p]').forEach(el => { el.style.background = pressColour(el.dataset.p); }); }
 
 /* ---------- ranking table ---------- */
 function renderTable() {
   const m = METRICS.find(x => x.id === $('#metric').value), q = $('#search').value.toLowerCase(), reg = $('#region').value;
   const cols = [['name', 'Country'], ['region', 'Region'], ['metric', m.label], ['overall', 'Pressure'], ['coverage', 'Coverage']];
-  $('#thead').innerHTML = '<th>Compare</th>' + cols.map(([k, l]) => `<th class="${k === 'metric' || k === 'overall' || k === 'coverage' ? 'num' : ''}" data-sort="${k}">${esc(l)}${sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : ''}</th>`).join('');
+  $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'metric' || k === 'overall' || k === 'coverage' ? 'num' : ''}${k === 'metric' ? ' wrap' : ''}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${sortKey === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
   const val = (c, k) => k === 'name' ? c.name : k === 'region' ? c.region : k === 'metric' ? m.get(c) : k === 'overall' ? pdata(c).overall : pdata(c).coverage;
   const list = D.countries.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || c.region === reg))
     .sort((a, b) => { const x = val(a, sortKey), y = val(b, sortKey); if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * sortDir; });
+  $('#ctitle').textContent = `Countries · ${list.length}`;
   $('#rows').innerHTML = list.map(c => `<tr><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
-    <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="meta" style="margin:0">${esc(c.region)}</td>
-    <td class="num">${m.fmt(m.get(c))}</td><td class="num"><span class="bar" style="width:${(pdata(c).overall || 0) * 60}px;background:${pressColour(pdata(c).overall)}"></span> ${pct(pdata(c).overall)}</td><td class="num">${pct(pdata(c).coverage)}</td></tr>`).join('');
-  $('#thead').querySelectorAll('[data-sort]').forEach(th => th.onclick = () => { const k = th.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'name' || k === 'region' ? 1 : -1); sortKey = k; renderTable(); });
+    <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>
+    <td class="num">${m.fmt(m.get(c))}</td><td class="num"><span class="bar" data-p="${pdata(c).overall ?? ''}" style="width:${(pdata(c).overall || 0) * 60}px;background:${pressColour(pdata(c).overall)}"></span>${pct(pdata(c).overall)}</td><td class="num">${pct(pdata(c).coverage)}</td></tr>`).join('');
+  $('#thead').querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'name' || k === 'region' ? 1 : -1); sortKey = k; renderTable(); $(`#thead [data-sort="${k}"]`).focus(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
 function toggleCompare(iso, on) {
@@ -184,12 +273,12 @@ function toggleCompare(iso, on) {
 
 /* ---------- sparkline ---------- */
 function spark(pts, better) {
-  if (!pts || pts.length < 2) return '';
+  if (!pts || pts.length < 2) return '<span class="spark" aria-hidden="true"></span>';
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const x = d3.scaleLinear().domain(d3.extent(xs)).range([1, 69]), y = d3.scaleLinear().domain(d3.extent(ys)).range([20, 2]);
   const last = pts.at(-1), prev = pts.at(-2), up = last[1] >= prev[1];
-  const col = better == null ? '#91a0aa' : (up === (better === 'up')) ? '#6ddac8' : '#ff826f';
-  return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true"><path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(pts)}" fill="none" stroke="${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" fill="${col}"/></svg>`;
+  const col = better == null ? 'var(--prp-muted)' : (up === (better === 'up')) ? 'var(--prp-good)' : 'var(--prp-bad)';
+  return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true"><path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(pts)}" fill="none" style="stroke:${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" style="fill:${col}"/></svg>`;
 }
 
 /* ---------- profile ---------- */
@@ -197,19 +286,20 @@ async function openProfile(iso) { selected = iso; setTab('profile'); await rende
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
+  $('#pname').textContent = ' · ' + c.name;
   const s = await series(c.iso3), L = c.leadership, K = c.conflict, period = $('#period').value, P = pdata(c);
   const stat = (label, value, small = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}</div>`;
   const links = [
-    c.encyclopedia && link('hp', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Encyclopaedia'),
-    c.gw != null && link('hp', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.gw}`, 'H&amp;P Retrospective'),
-    c.gw != null && link('hp', 'battlefield-history', `battlefield/history/index.html#y=2025&c=${c.gw}`, 'Retrospective Battlefield'),
-    link('hp', 'historical-calendar', `q/calendar.html?period=history&countries=${encodeURIComponent(c.name)}&view=year`, 'Historical Calendar'),
-    `<a class="chip" href="https://political-atlas.pages.dev/#${c.iso3}" target="_blank" rel="noopener">Political Atlas ↗</a>`,
+    c.encyclopedia && link('rs', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Encyclopaedia'),
+    c.gw != null && link('rs', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.gw}`, 'Political Retrospective'),
+    c.gw != null && link('rs', 'battlefield-history', `battlefield/history/index.html#y=2025&c=${c.gw}`, 'Retrospective Battlefield'),
+    link('rs', 'historical-calendar', `q/calendar.html?period=history&countries=${encodeURIComponent(c.name)}&view=year`, 'Historical Calendar'),
+    `<a class="prp-chip" href="https://political-atlas.pages.dev/#${c.iso3}" target="_blank" rel="noopener">Political Atlas ↗</a>`,
   ].filter(Boolean).join('');
   const dimHtml = DIMS.map(([k, l]) => {
     const inds = D.indicators.filter(i => i.dimension === k);
     const pr = P.pressure?.[k];
-    return `<div class="dim"><h3>${l}<span class="press" style="background:${pressColour(pr)}22;color:${pr == null ? 'var(--muted)' : pressColour(pr)}">${pr == null ? 'no data' : pct(pr) + ' worsening'}</span></h3>
+    return `<div class="dim"><h3>${l}<span class="press">${pr == null ? '<i class="nd"></i>no data' : `<i data-p="${pr}" style="background:${pressColour(pr)}"></i>${pct(pr)} worsening`}</span></h3>
       ${inds.map(i => {
         const pts = (s[i.code] || []).filter(p => period === 'latest' || (p[0] >= +period && p[0] < +period + 10));
         const lv = period === 'latest' ? c.latest[i.code] : null;
@@ -217,14 +307,15 @@ async function renderProfile() {
         const ch = last && first && last !== first ? last[1] - first[1] : null;
         const mv = i.better == null || ch == null ? null : Math.abs(ch) <= i.threshold ? 'stable' : (ch > 0) === (i.better === 'up') ? 'improving' : 'worsening';
         return `<div class="ind"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${last ? ' · ' + last[0] : ''} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a></small></div>
-          ${spark((s[i.code] || []).slice(-25), i.better)}<div class="num" style="text-align:right">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
+          ${spark((s[i.code] || []).slice(-25), i.better)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
       }).join('')}</div>`;
   }).join('');
-  $('#profile').innerHTML = `<div class="panel">
-    <div class="ptitle"><div><div class="eyebrow">${esc(c.region)} · ${esc(c.income)}</div><h2>${esc(c.name)}</h2>
+  const inCmp = compare.includes(c.iso3);
+  $('#profile').innerHTML = `<div class="prp-panel">
+    <div class="ptitle"><div><div class="prp-label">${esc(c.region)} · ${esc(c.income)}</div><h2>${esc(c.name)}</h2>
       <div class="sub">${esc(c.government.join(', ') || 'System of government not recorded')}${c.capital ? ' · capital ' + esc(c.capital) : ''}</div></div>
-      <div><div class="links">${links}</div><p style="margin:8px 0 0"><button class="chip ${compare.includes(c.iso3) ? 'on' : ''}" id="addcmp">${compare.includes(c.iso3) ? '✓ In comparison' : '+ Add to comparison'}</button></p></div></div>
-    <div class="phead"><b>Overview</b><span class="meta" style="margin:0">Leadership: H&amp;P Retrospective (Archigos + Wikidata) · Conflict: UCDP/PRIO 1946–2025 · Government: Wikidata</span></div>
+      <div class="pact"><div class="links">${links}</div><button type="button" class="prp-btn sm${inCmp ? '' : ' primary'}" id="addcmp" aria-pressed="${inCmp}">${inCmp ? '✓ In comparison' : '+ Add to comparison'}</button></div></div>
+    <div class="prp-panel-head"><b>Overview</b><span class="hint">Leadership: Political Retrospective (Archigos + Wikidata) · Conflict: UCDP/PRIO 1946–2025 · Government: Wikidata</span></div>
     <div class="grid">
       ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')))}
       ${stat('Head of state', esc(c.headOfState || '–'), c.headOfGovernment && c.headOfGovernment !== c.headOfState ? 'Head of government: ' + esc(c.headOfGovernment) : '')}
@@ -243,21 +334,21 @@ async function renderProfile() {
       ${stat('PESTLE pressure', pct(P.overall), `${period === 'latest' ? 'latest' : period + 's'} · coverage ${pct(P.coverage)}`)}
       ${stat('Population', fmtVal(c.latest['SP.POP.TOTL']?.[1], 'people'), c.latest['NY.GDP.MKTP.CD'] ? 'GDP ' + fmtVal(c.latest['NY.GDP.MKTP.CD'][1], 'US$') : '')}
     </div>
-    ${K?.active2026?.length ? `<div class="phead"><b>Wars and warzones active this year</b></div><div class="links" style="padding:10px 14px">${K.active2026.map(w => link('q', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
-    <div class="phead"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="meta" style="margin:0">Green improving · red worsening · grey stable or context only</span></div>
+    ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">Realtime Battlefield</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
+    <div class="prp-panel-head"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="hint">Improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
-    <div class="phead"><b>Latest headlines</b><span class="meta" style="margin:0">Global Headline Tracker</span></div><div id="stories" style="padding:4px 14px 12px"><div class="meta">Loading…</div></div>
+    <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
   $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
   try {
     const rows = globalThis.GTTSDB ? await globalThis.GTTSDB.latestTopStories(c.iso2) : [];
-    $('#stories').innerHTML = rows.length ? rows.slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}</a><small>${esc(r.outlet)} · ${esc(r.snapshot_date)}</small></div>`).join('') : '<div class="meta">No outlets tracked for this country yet.</div>';
-  } catch { $('#stories').innerHTML = '<div class="meta">Headlines unavailable.</div>'; }
+    $('#stories').innerHTML = rows.length ? rows.slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}</a><small>${esc(r.outlet)} · ${esc(r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
+  } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
 }
 
 /* ---------- compare ---------- */
 async function renderCompare() {
-  if (!compare.length) { $('#compare').innerHTML = '<div class="panel"><div class="empty">Tick up to four countries in the list, or use "Add to comparison" on a profile.</div></div>'; return; }
+  if (!compare.length) { $('#compare').innerHTML = '<div class="prp-panel"><div class="prp-empty">Tick up to four countries in the list, or use “Add to comparison” on a profile.</div></div>'; return; }
   const cs = compare.map(i => byIso.get(i)).filter(Boolean);
   const groups = [...new Set(METRICS.map(m => m.group))];
   const row = m => {
@@ -265,47 +356,88 @@ async function renderCompare() {
     const nums = vals.filter(v => v != null);
     const best = m.better && nums.length > 1 ? (m.better === 'up' ? Math.max(...nums) : Math.min(...nums)) : null;
     const worst = m.better && nums.length > 1 ? (m.better === 'up' ? Math.min(...nums) : Math.max(...nums)) : null;
-    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map(v => `<td class="num ${v != null && v === best ? 'best' : v != null && v === worst && best !== worst ? 'worst' : ''}">${m.fmt(v)}</td>`).join('')}</tr>`;
+    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map(v => { const k = v != null && v === best ? 'best' : v != null && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${m.fmt(v)}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
   };
   const chartable = D.indicators;
-  $('#compare').innerHTML = `<div class="panel">
-    <div class="phead"><b>Comparing ${cs.length} ${cs.length === 1 ? 'country' : 'countries'}</b><span>${cs.map(c => `<button class="chip on" data-rm="${c.iso3}">${esc(c.name)} ✕</button>`).join(' ')}</span></div>
-    <div class="cmpchart"><label class="meta" style="margin:0">Chart over time <select id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}">${esc(i.label)}</option>`).join('')}</select></label><svg id="cmpsvg" viewBox="0 0 900 260" style="width:100%;height:auto;margin-top:8px" role="img" aria-label="Indicator over time for the compared countries"></svg></div>
-    <div class="tbl" style="max-height:none"><table><thead><tr><th>Metric</th>${cs.map(c => `<th class="num"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
-    <tbody>${groups.map(g => `<tr><td colspan="${cs.length + 1}" class="eyebrow" style="padding-top:14px">${esc(g)}</td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
-    <tr><td colspan="${cs.length + 1}" class="eyebrow" style="padding-top:14px">Profile</td></tr>
+  $('#compare').innerHTML = `<div class="prp-panel">
+    <div class="prp-panel-head"><b>Comparing ${cs.length} ${cs.length === 1 ? 'country' : 'countries'}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
+    <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}">${esc(i.label)}</option>`).join('')}</select></label>
+      <svg id="cmpsvg" viewBox="0 0 900 280" role="img" aria-label="Indicator over time for the compared countries"></svg>
+      <figcaption><b>Figure 2.</b> <span id="cmpcap"></span></figcaption>
+      <details class="dt" id="cmpdt"><summary>Show the chart's data as a table</summary><div id="cmpdata"></div></details></figure>
+    <div class="tbl" style="max-height:none"><table class="prp-table cmp"><thead><tr><th scope="col">Metric</th>${cs.map(c => `<th scope="col" class="num"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
+    <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}</td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
+    <tr class="grp"><td colspan="${cs.length + 1}">Profile</td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
     <tr><td>Current leader</td>${cs.map(c => `<td class="num">${esc(c.leadership?.current?.name || c.headOfGovernment || c.headOfState || '–')}</td>`).join('')}</tr>
-    </tbody></table></div><p class="note">Green marks the best value in a row and red the worst, where "better" has a clear direction. Indicators marked "added" were not part of Country PESTLE's score.</p></div>`;
+    </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction. Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
   $('#cmpind').onchange = drawCmpChart;
+  $('#cmpdt').ontoggle = drawCmpTable;
   drawCmpChart();
 }
+let cmpData = null;
 async function drawCmpChart() {
   const code = $('#cmpind').value, ind = indBy.get(code), svg = d3.select('#cmpsvg'); svg.selectAll('*').remove();
-  const data = await Promise.all(compare.map(async iso => ({ c: byIso.get(iso), pts: (await series(iso))[code] || [] })));
+  const data = await Promise.all(compare.map(async (iso, i) => ({ c: byIso.get(iso), i, pts: (await series(iso))[code] || [] })));
+  if ($('#cmpind')?.value !== code) return;
   const all = data.flatMap(d => d.pts);
-  if (!all.length) { svg.append('text').attr('x', 450).attr('y', 130).attr('text-anchor', 'middle').attr('fill', '#91a0aa').text('No data for these countries'); return; }
-  const x = d3.scaleLinear().domain(d3.extent(all, p => p[0])).range([50, 780]), y = d3.scaleLinear().domain(d3.extent(all, p => p[1])).nice().range([235, 12]);
-  const colours = ['#b7f36b', '#6ddac8', '#f0b95a', '#c58cff'];
-  svg.append('g').attr('transform', 'translate(0,235)').call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(8)).attr('color', '#6d7d86');
-  svg.append('g').attr('transform', 'translate(50,0)').call(d3.axisLeft(y).ticks(5).tickFormat(v => fmtVal(v, ind.unit))).attr('color', '#6d7d86');
-  data.forEach((d, i) => {
+  cmpData = { ind, data, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
+  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}Source: World Bank.`;
+  drawCmpTable();
+  // Drawn at the figure's real width, so text stays at its set size; redrawn when the window resizes.
+  const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = W < 560 ? 240 : 300;
+  const M = { l: 58, r: Math.min(150, Math.round(W * 0.27)), t: 12, b: 28 };
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  if (!all.length) { svg.append('text').attr('class', 'empty').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text('No data for these countries'); return; }
+  const x = d3.scaleLinear().domain(d3.extent(all, p => p[0])).range([M.l, W - M.r]), y = d3.scaleLinear().domain(d3.extent(all, p => p[1])).nice().range([H - M.b, M.t]);
+  svg.append('g').attr('class', 'gridlines').selectAll('line').data(y.ticks(5)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', v => y(v)).attr('y2', v => y(v));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - M.b})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(Math.max(3, Math.min(8, Math.floor((W - M.l - M.r) / 70)))).tickSizeOuter(0));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8).tickFormat(v => fmtVal(v, ind.unit))).call(g => g.select('.domain').remove());
+  const labels = [];
+  data.forEach(d => {
     if (d.pts.length < 1) return;
-    svg.append('path').attr('d', d3.line().x(p => x(p[0])).y(p => y(p[1]))(d.pts)).attr('fill', 'none').attr('stroke', colours[i]).attr('stroke-width', 2);
+    svg.append('path').attr('d', d3.line().x(p => x(p[0])).y(p => y(p[1]))(d.pts)).attr('fill', 'none').style('stroke', seriesColour(d.i)).attr('stroke-width', 2);
     const last = d.pts.at(-1);
-    svg.append('text').attr('x', 790).attr('y', y(last[1])).attr('dy', 4).attr('fill', colours[i]).attr('font-size', 12).text(d.c.name.slice(0, 16));
+    svg.append('circle').attr('class', 'end').attr('cx', x(last[0])).attr('cy', y(last[1])).attr('r', 3.5).style('fill', seriesColour(d.i));
+    labels.push({ d, x: x(last[0]) + 9, y: y(last[1]) });
   });
+  labels.sort((a, b) => a.y - b.y).forEach((l, k) => { if (k && l.y - labels[k - 1].y < 15) l.y = labels[k - 1].y + 15; });
+  const room = Math.max(6, Math.floor((M.r - 14) / 7)); // characters that fit beside the lines
+  labels.forEach(l => svg.append('text').attr('class', 'lbl').attr('x', l.x).attr('y', l.y).attr('dy', 4).text(l.d.c.name.length > room ? l.d.c.name.slice(0, room - 1) + '…' : l.d.c.name));
+  // Hover: a rule at the nearest year and each country's value there.
+  const rule = svg.append('line').attr('class', 'rule').attr('y1', M.t).attr('y2', H - M.b).style('display', 'none');
+  const dots = svg.append('g').attr('class', 'hov');
+  svg.append('rect').attr('x', M.l).attr('y', M.t).attr('width', W - M.l - M.r).attr('height', H - M.t - M.b).attr('fill', 'none').attr('pointer-events', 'all')
+    .on('mousemove', ev => {
+      const xv = x.invert(d3.pointer(ev)[0]), yr = cmpData.years.reduce((a, b) => (Math.abs(b - xv) < Math.abs(a - xv) ? b : a));
+      rule.attr('x1', x(yr)).attr('x2', x(yr)).style('display', null);
+      const at = data.map(d => ({ d, p: d.pts.find(p => p[0] === yr) }));
+      dots.selectAll('circle').data(at.filter(a => a.p)).join('circle').attr('r', 3.5).attr('cx', a => x(a.p[0])).attr('cy', a => y(a.p[1])).style('fill', a => seriesColour(a.d.i));
+      showTip(ev, `<b>${yr}</b>` + at.map(a => `<div class="row"><i class="sw" style="background:${seriesColour(a.d.i)}"></i>${esc(a.d.c.name)}<b>${a.p ? fmtVal(a.p[1], ind.unit) : '–'}</b></div>`).join(''));
+    })
+    .on('mouseleave', () => { rule.style('display', 'none'); dots.selectAll('*').remove(); hideTip(); });
+}
+// The chart as a table (built only while it is open).
+function drawCmpTable() {
+  const box = $('#cmpdata');
+  if (!box) return;
+  if (!$('#cmpdt').open || !cmpData) { box.innerHTML = ''; return; }
+  const { ind, data, years } = cmpData;
+  box.innerHTML = years.length ? `<div class="tbl"><table class="prp-table"><thead><tr><th scope="col">Year</th>${data.map(d => `<th scope="col" class="num">${esc(d.c.name)}</th>`).join('')}</tr></thead><tbody>${[...years].reverse().map(yr => `<tr><td class="prp-num">${yr}</td>${data.map(d => { const p = d.pts.find(q => q[0] === yr); return `<td class="num">${p ? fmtVal(p[1], ind.unit) : '–'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="muted">No data for these countries.</p>';
 }
 
 /* ---------- tabs and URL ---------- */
+const TABS = [...document.querySelectorAll('.prp-tabs [role=tab]')];
 function setTab(t) {
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  TABS.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   for (const x of ['map', 'profile', 'compare']) $('#tab-' + x).hidden = x !== t;
+  $('#metricfld').hidden = t !== 'map';
+  hideTip();
   if (t === 'compare') renderCompare();
 }
 function writeHash() {
-  const t = document.querySelector('.tabs button.active').dataset.tab;
+  const t = TABS.find(b => b.getAttribute('aria-selected') === 'true').dataset.tab;
   const h = t === 'profile' && selected ? `#country=${selected}` : t === 'compare' ? `#compare=${compare.join(',')}` : '#map';
   if (location.hash !== h) history.replaceState(null, '', h + (compare.length && t !== 'compare' ? `&compare=${compare.join(',')}` : ''));
 }
@@ -313,21 +445,39 @@ function readHash() {
   const p = new URLSearchParams(location.hash.slice(1).replace(/^map&?/, ''));
   if (p.get('compare')) compare = p.get('compare').split(',').filter(i => byIso.has(i)).slice(0, 4);
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
+  colourMap(); renderTable();
   if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); renderProfile(); }
   else if (location.hash.startsWith('#compare')) setTab('compare');
+  else setTab('map');
 }
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
-window.addEventListener('hashchange', readHash);
+TABS.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
+$('.prp-tabs').addEventListener('keydown', e => {
+  const i = TABS.indexOf(document.activeElement), k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (i < 0 || (!k && e.key !== 'Home' && e.key !== 'End')) return;
+  e.preventDefault();
+  const b = TABS[e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : (i + k + TABS.length) % TABS.length];
+  b.focus(); b.click();
+});
+window.addEventListener('hashchange', () => { if (D) readHash(); });
 $('#rows').addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
 $('#compare').addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
+// A #map link would otherwise scroll the page down to the map (the <svg id="map">), past the header and tabs.
+window.addEventListener('load', () => { if (/^#map/.test(location.hash)) scrollTo(0, 0); }, { once: true });
+window.addEventListener('prp:themechange', () => { if (!D) return; readTokens(); colourMap(); recolour(); });
+let resizing;
+window.addEventListener('resize', () => { clearTimeout(resizing); resizing = setTimeout(() => { if (D && !$('#tab-compare').hidden && $('#cmpind')) drawCmpChart(); }, 200); });
 
-Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json())]).then(([d, world]) => {
+// Draw once the page (and the PRP connector, which applies the saved theme) has finished loading.
+const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
+Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json()), domReady]).then(([d, world]) => {
   D = d; byIso = new Map(d.countries.map(c => [c.iso3, c])); indBy = new Map(d.indicators.map(i => [i.code, i]));
   for (const c of d.countries) if (c.num) numToIso.set(String(c.num).padStart(3, '0'), c.iso3);
+  readTokens();
   METRICS = metrics();
   $('#metric').innerHTML = [...new Set(METRICS.map(m => m.group))].map(g => `<optgroup label="${esc(g)}">${METRICS.filter(m => m.group === g).map(m => `<option value="${m.id}">${esc(m.label)}</option>`).join('')}</optgroup>`).join('');
   $('#region').innerHTML += [...new Set(d.countries.map(c => c.region))].sort().map(r => `<option>${esc(r)}</option>`).join('');
-  $('#meta').textContent = `${d.countries.length} countries · ${d.indicators.length} indicators (${d.indicators.filter(i => i.core).length} PESTLE core) · World Bank data ${d.years[0]}–${d.years[1]} · updated ${d.generated.slice(0, 10)}`;
+  const updated = new Date(d.generated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  $('#meta').innerHTML = `<span>Updated <b>${updated}</b></span><span>Coverage <b>${d.countries.length} countries · ${d.years[0]}–${d.years[1]}</b></span><span>Indicators <b>${d.indicators.length}</b> (${d.indicators.filter(i => i.core).length} PESTLE core)</span><span>Sources <b>World Bank · Wikidata · UCDP</b></span><span>Refreshed <b>monthly</b></span>`;
   drawMap(world); colourMap(); renderTable();
   const rerender = () => { colourMap(); renderTable(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
   $('#metric').onchange = rerender; $('#period').onchange = rerender; $('#search').oninput = renderTable; $('#region').onchange = renderTable;

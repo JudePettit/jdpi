@@ -1,38 +1,45 @@
-/* JDP-I narrator — the module side of Documentary mode. Loaded by jdpi-bar.js when a module runs inside the shell.
+/* PRP narrator — the submodule side of Documentary mode. Loaded by prp-bar.js when a submodule runs inside the shell.
    The shell's reader (design/jdpi-documentary.js) owns the voice, music and controls; this script decides what to say
-   next on this page, highlights it and scrolls to it. They talk by postMessage, so it works for modules on other
+   next on this page, highlights it and scrolls to it. They talk by postMessage, so it works for submodules on other
    domains too.
-     shell → module  { jdpiDoc: 'start' }            begin from what is on screen now
-                     { jdpiDoc: 'next', seq }         the next step, please
-                     { jdpiDoc: 'stop' }              clear the highlight
-     module → shell  { jdpiDoc: 'step', seq, step }   step: { text, label? } | { chapterEnd, label } | { done }
-   A module can tell its own story by defining window.jdpiDocumentary = { title, story() } where story() is an async
+     shell → page    { jdpiDoc: 'start' }                   begin from what is on screen now
+                     { jdpiDoc: 'next', seq }                the next step, please
+                     { jdpiDoc: 'stop' }                     clear the highlight
+     page → shell    { jdpiDoc: 'ready', title, story }      on load, or window.jdpiNarrator.announce(); story: it tells its own
+                     { jdpiDoc: 'step', seq, step }          step: { text, label? } | { chapterEnd, label } | { done }
+   A page can tell its own story by defining window.jdpiDocumentary = { title, story() } where story() is an async
    generator yielding { text, el? } steps and { chapterEnd: true, label } pauses ("Continue Reading" or, with
-   autoplay, an automatic pause). Without one, the page's headings and paragraphs are read in order. */
+   autoplay, an automatic pause). Such pages get the reader in any module; without one, the page's headings and
+   paragraphs are read in order (offered in Retrospective Intelligence). */
 (function () {
   const script = document.currentScript;
   const SHELL = new URL((script && script.dataset.shell) || 'https://jdpi.pages.dev/', location.href);
   const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   let iter = null, lit = null;
 
+  // The passage being read: the module accent as an outline, on its soft tint (PRP tokens, so both themes work).
   const style = document.createElement('style');
-  style.textContent = '.jdpi-reading{outline:2px solid var(--jdpi-accent,#6ddac8)!important;outline-offset:4px;border-radius:4px;background:rgba(109,218,200,.07)!important;transition:outline-color .3s}';
+  style.textContent = '.jdpi-reading{outline:2px solid var(--prp-accent,currentColor)!important;outline-offset:4px;border-radius:4px;background:var(--prp-accent-soft,transparent)!important;transition:outline-color .3s}'
+    + '@media(prefers-reduced-motion:reduce){.jdpi-reading{transition:none}}';
   document.head.appendChild(style);
 
+  const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function highlight(el) {
     lit?.classList.remove('jdpi-reading');
     lit = el || null;
     if (!lit) return;
     lit.classList.add('jdpi-reading');
-    lit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    lit.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
   }
 
   // Generic story: headings, paragraphs and list items in reading order, starting from what is on screen.
-  const SKIP = 'nav, header, footer, button, select, script, style, .jdpi-bar, .tabs, .toc, [aria-hidden="true"], [hidden], .modal';
+  // Site headers are skipped, but a PRP page's own front matter (its title and dek) is read first.
+  const SKIP = 'nav, header, footer, button, select, script, style, .jdpi-bar, .tabs, .prp-tabs, .toc, [aria-hidden="true"], [hidden], .modal';
+  const FRONT = '.prp-title, .prp-dek';
   function readable(root) {
-    const els = [...root.querySelectorAll('h1, h2, h3, h4, p, li, blockquote, figcaption, dd, .lead, .summary')];
+    const els = [...root.querySelectorAll('h1, h2, h3, h4, p, li, blockquote, figcaption, dd, .lead, .summary, .prp-dek')];
     return els.filter(el => {
-      if (el.closest(SKIP)) return false;
+      if (el.closest(SKIP) && !(el.matches(FRONT) && !el.closest('nav, footer, [hidden], [aria-hidden="true"]'))) return false;
       if (el.querySelector('p, li')) return false; // read the innermost blocks
       const t = el.innerText?.trim() || '';
       const min = /^H\d$/.test(el.tagName) ? 3 : 25;
@@ -83,5 +90,10 @@
       window.parent.postMessage({ jdpiDoc: 'step', seq, step, title: window.jdpiDocumentary?.title || document.title }, e.origin);
     }
   });
-  window.parent.postMessage({ jdpiDoc: 'ready', title: window.jdpiDocumentary?.title || document.title }, local ? '*' : SHELL.origin);
+  // Announce the page (again once it has fully loaded). A page whose story comes or goes later (a course that loads
+  // after the narrator, say) calls window.jdpiNarrator.announce() itself.
+  const announce = () => window.parent.postMessage({ jdpiDoc: 'ready', title: window.jdpiDocumentary?.title || document.title, story: !!window.jdpiDocumentary?.story }, local ? '*' : SHELL.origin);
+  window.jdpiNarrator = { announce };
+  announce();
+  if (document.readyState !== 'complete') window.addEventListener('load', announce, { once: true });
 })();

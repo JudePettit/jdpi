@@ -1,36 +1,43 @@
 <!doctype html>
-<html lang="en" class="jdpi">
+<html lang="en" class="prp">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101820">
-  <title>JDP-I</title>
-  <meta name="description" content="JDP-I: an integrated platform of intelligence suites covering geopolitics (Q), history and politics (H&P), and finance and economics (F&E).">
-  <link rel="icon" href="design/brand-jdpi.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>PRP · Personal Resource Planner</title>
+  <meta name="description" content="PRP, the Personal Resource Planner by JDP-Iq: Realtime Intelligence, Retrospective Intelligence, Money Management and Natural Science in one workspace.">
+  <link rel="icon" href="design/brand-prp.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="design/jdpi.css">
+  <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="design/prp.css">
   <link rel="stylesheet" href="shell.css">
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
   <div class="app">
-    <aside class="side" id="side">
+    <aside class="side" id="side" aria-label="PRP navigation">
       <a class="brand" href="#/">
-        <img src="design/brand-jdpi.svg" alt="" width="34" height="34">
-        <span>
-          <span class="brand-name">JDP-I</span>
-          <small>Intelligence platform</small>
-        </span>
+        <img src="design/brand-prp.svg" alt="" width="32" height="32">
+        <span><b>PRP</b><small>Personal Resource Planner</small></span>
       </a>
       <div class="find">
-        <input id="find" type="search" placeholder="Find a module…" autocomplete="off" aria-label="Find a module">
-        <kbd>/</kbd>
+        <input id="find" type="search" placeholder="Search PRP" autocomplete="off" aria-label="Search modules or the Encyclopaedia">
+        <kbd aria-hidden="true">/</kbd>
       </div>
-      <nav id="nav" aria-label="Suites and modules"></nav>
-      <div class="side-foot" id="side-foot"></div>
+      <nav id="nav" aria-label="Modules and submodules"></nav>
+      <div class="side-foot">
+        <div class="theme" role="group" aria-label="Theme">
+          <button type="button" data-theme-choice="system" title="Follow your system setting">System</button>
+          <button type="button" data-theme-choice="light">Light</button>
+          <button type="button" data-theme-choice="dark">Dark</button>
+        </div>
+        <div class="legal" id="legal"></div>
+      </div>
     </aside>
 
-    <div class="main">
+    <div class="main" id="main">
       <header class="top">
         <button class="menu" id="menu" type="button" aria-label="Open navigation" aria-controls="side" aria-expanded="false">☰</button>
         <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>

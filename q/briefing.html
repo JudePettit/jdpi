@@ -1,113 +1,162 @@
 <!doctype html>
-<html lang="en" data-suite="q">
+<html lang="en" class="prp" data-suite="rt">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml">
-<title>JDP-I Q — Briefing</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../design/jdpi.css">
-<script src="../design/jdpi-bar.js" data-suite="q" data-module="briefing" data-shell="../" defer></script>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<title>Intelligence Briefing · PRP</title>
+<meta name="description" content="Follow your topics across fifty publishers, ten from each political position, side by side.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="briefing" data-shell="../" defer></script>
 <style>
-:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--faint:#6d7d86;--text:#eff4f2;--accent:var(--jdpi-accent,#b7f36b);--soft:var(--jdpi-accent-soft,rgba(183,243,107,.08));--accline:var(--jdpi-accent-line,#5f7d45);
-  --far_left:#e0525e;--left:#f08a8a;--centre:#c8d0d4;--right:#7fb2ff;--far_right:#4a74e0}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
-a{color:var(--accent)}button,input,select,textarea{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
-.wrap{max-width:1560px;margin:auto;padding:20px 26px 40px}
-.hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
-h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:780px}
-.meta{font:10px 'DM Mono';color:var(--muted);margin-top:6px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:5px;padding:7px 12px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs button.active,.tabs button:hover{border-color:var(--accline);color:var(--accent);background:var(--soft)}
-.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;margin-top:16px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.panel+.panel{margin-top:14px}
-.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
-.phead b{font:700 13px Manrope}
-select,input[type=search],input[type=text],textarea{background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:6px 9px;font-size:12.5px}
-textarea{width:100%;resize:vertical;min-height:56px}
-.topic{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #24343f;cursor:pointer}
-.topic:hover{background:#ffffff05}.topic.on{background:var(--soft);box-shadow:inset 3px 0 var(--accent)}
-.topic .n{flex:1;min-width:0}.topic .n b{font-weight:600;font-size:13px}.topic .n small{display:block;color:var(--faint);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.topic.paused .n{opacity:.45}
-.topic .c{font:10px 'DM Mono';color:var(--muted)}
-.ib{background:none;border:0;color:var(--faint);padding:2px 4px;font-size:12px}.ib:hover{color:var(--accent)}
-.btn{border:1px solid var(--accline);background:var(--soft);color:var(--accent);border-radius:5px;padding:6px 11px;font-size:12px}
-.btn.ghost{border-color:var(--line);background:none;color:var(--muted)}
-.form{padding:12px;display:grid;gap:8px}
-.form label{font:10px 'DM Mono';color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.pos{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:11.5px;background:none;color:var(--muted)}
-.pos i{width:8px;height:8px;border-radius:50%;display:inline-block}.pos.on{color:var(--text);border-color:#ffffff30;background:#ffffff08}
-.meter{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:10px 14px 4px}.meter span{display:block;height:100%}
-.meterkey{display:flex;gap:12px;flex-wrap:wrap;padding:0 14px 10px;font:10px 'DM Mono';color:var(--muted)}
-.cols5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
-.col{border-right:1px solid var(--line);min-width:0}.col:last-child{border-right:0}
-.col h3{margin:0;padding:9px 12px;font:600 12px Manrope;display:flex;justify-content:space-between;border-bottom:2px solid;position:sticky;top:0;background:var(--panel)}
-.story{padding:9px 12px;border-bottom:1px solid #24343f;font-size:12.8px;line-height:1.4}
-.story a.t{color:var(--text);text-decoration:none;font-weight:500}.story a.t:hover{color:var(--accent)}
-.story small{display:block;color:var(--faint);font:10px 'DM Mono';margin-top:3px}
-.story p{margin:4px 0 0;color:var(--muted);font-size:12px}
-.story .tag{font:9.5px 'DM Mono';padding:1px 5px;border-radius:3px;margin-right:5px;color:#0d1721}
-.caution{color:#f0b95a;font:9.5px 'DM Mono';margin-left:4px}
-.stream .story{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
-.empty{padding:28px;text-align:center;color:var(--muted)}
-table{border-collapse:collapse;width:100%;font-size:12.5px}
-th{text-align:left;font:600 11px Manrope;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--line)}
-td{padding:6px 10px;border-bottom:1px solid #24343f}td.num{text-align:right;font-variant-numeric:tabular-nums}
-.st{font:10px 'DM Mono'}.st.active{color:var(--accent)}.st.reserve{color:var(--muted)}.st.down{color:#ff826f}
-.note{color:var(--faint);font-size:11.5px;padding:10px 14px;line-height:1.6}
-.more{display:block;width:100%;border:0;background:none;color:var(--muted);padding:8px;font:11px 'DM Mono'}.more:hover{color:var(--accent)}
-@media(max-width:1200px){.cols5{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.col{border-bottom:1px solid var(--line)}}
-@media(max-width:860px){.layout{grid-template-columns:1fr}.wrap{padding:14px}.stream .story{grid-template-columns:1fr}}
+/* Political positions: the page's own diverging scale (red · grey · blue). The far positions carry the most contrast
+   against the page in both themes; every mark sits next to its label, so colour is never the only cue. */
+:root{--pos-far_left:#b42318;--pos-left:#e06258;--pos-centre:#868c96;--pos-right:#3d87df;--pos-far_right:#184f95}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--pos-far_left:#f07a6e;--pos-left:#b9473f;--pos-centre:#6f7782;--pos-right:#2a78d6;--pos-far_right:#86b6ef}}
+:root[data-theme="dark"]{--pos-far_left:#f07a6e;--pos-left:#b9473f;--pos-centre:#6f7782;--pos-right:#2a78d6;--pos-far_right:#86b6ef}
+
+*{box-sizing:border-box}[hidden]{display:none!important}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.wrap{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
+.front{margin-bottom:18px}.front .prp-eyebrow{flex-wrap:wrap;row-gap:2px}
+.front .prp-meta{gap:4px 10px}.front .prp-meta span+span::before{content:"·";margin-right:10px;color:var(--prp-faint)}
+.prp-tabs{margin-bottom:16px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.toolbar .prp-input[type=search]{width:220px}
+.check{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 4px;color:var(--prp-text-2);font-size:13px;cursor:pointer}
+.check input{width:15px;height:15px;margin:0;accent-color:var(--prp-primary)}
+.check small{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.layout{display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;align-items:start}
+
+/* Topics */
+.topics-panel .prp-panel-head b{font-size:13.5px}
+.topic{display:flex;align-items:center;gap:6px;padding:7px 8px 7px 14px;border-bottom:1px solid var(--prp-line-soft);cursor:pointer}
+.topic:hover{background:var(--prp-surface-2)}
+.topic.on{background:var(--prp-accent-soft);box-shadow:inset 3px 0 var(--prp-accent)}
+.topic .n{flex:1;min-width:0;padding:0;border:0;background:none;color:inherit;text-align:left}
+.topic .n b{display:block;color:var(--prp-text);font-weight:600;font-size:13px;line-height:1.35}
+.topic .n small{display:block;color:var(--prp-muted);font-size:11.5px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topic.paused .n b,.topic.paused .n small{color:var(--prp-faint)}
+.topic .c{min-width:28px;text-align:right;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.ib{display:inline-grid;place-items:center;width:24px;height:24px;flex:none;border:0;border-radius:var(--prp-radius-sm);background:none;color:var(--prp-muted);font-size:11px;line-height:1}
+.ib:hover{background:var(--prp-surface-3);color:var(--prp-text)}
+.form{display:grid;gap:7px;padding:12px 14px 14px;border-bottom:1px solid var(--prp-line-soft);background:var(--prp-surface-2)}
+.form .prp-input{width:100%}
+textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;line-height:1.45}
+.form .actions{display:flex;gap:6px;margin-top:4px}.form .actions .danger{margin-left:auto}
+.hint{margin:0;padding:11px 14px 13px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.55}
+
+/* Stories */
+.stories-panel .prp-panel-head{padding:11px 14px}
+.stories-panel .prp-panel-head .count{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.posbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:12px 14px 0}
+.posbtns .prp-label{margin-right:4px}
+.pos{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 11px;border:1px solid var(--prp-line);border-radius:99px;background:var(--prp-surface);color:var(--prp-muted);font:500 12.5px var(--prp-font-ui)}
+.pos i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.pos.on{border-color:var(--prp-line-strong);background:var(--prp-surface-2);color:var(--prp-text)}
+.pos:not(.on) i{background:none;box-shadow:inset 0 0 0 1.5px var(--c)}
+.pos:hover{border-color:var(--prp-text-2)}
+.coverage{margin:12px 14px 14px}
+.meter{display:flex;gap:2px;height:10px;overflow:hidden;border-radius:3px;background:var(--prp-surface-3)}
+.meter span{height:100%;background:var(--c)}
+.meterkey{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.meterkey i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:2px;background:var(--c)}
+.meterkey b{color:var(--prp-text);font-weight:500}
+.coverage figcaption{margin-top:6px;font-size:12.5px}
+.cols5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--prp-line)}
+.col{min-width:0;border-right:1px solid var(--prp-line-soft)}.col:last-child{border-right:0}
+.col h3{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0;padding:9px 12px 7px;background:var(--prp-surface-2);border-bottom:2px solid var(--c);color:var(--prp-text);font:600 12.5px var(--prp-font-ui)}
+.col h3 span+span{color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono)}
+.story{padding:10px 12px 11px;border-bottom:1px solid var(--prp-line-soft)}
+.story a.t{color:var(--prp-text);text-decoration:none;font:600 14.5px/1.35 var(--prp-font-serif)}
+.story a.t:hover{color:var(--prp-link);text-decoration:underline;text-underline-offset:2px}
+.story small{display:block;margin-top:4px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.45 var(--prp-font-mono)}
+.story p{margin:5px 0 0;color:var(--prp-text-2);font-size:12.5px;line-height:1.5}
+.caution{margin-left:4px;color:var(--prp-warn)}
+.ptag{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border:1px solid var(--prp-line);border-radius:99px;background:var(--prp-surface);color:var(--prp-text-2);font:500 11px var(--prp-font-ui);white-space:nowrap}
+.ptag i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.stream .story{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px}
+.more{display:block;width:100%;padding:9px;border:0;border-bottom:1px solid var(--prp-line-soft);background:none;color:var(--prp-link);font:500 12.5px var(--prp-font-ui)}
+.more:hover{background:var(--prp-surface-2)}
+
+/* Publishers */
+.tablewrap{overflow-x:auto}
+.tablewrap .prp-table th{position:static}
+.srcmeta{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.pub-note{margin:14px}
+.prp-sources p{margin:0 0 5px;max-width:110ch}
+
+@media(max-width:1200px){.cols5{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}.col{border-bottom:1px solid var(--prp-line)}}
+@media(max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}#topics{max-height:300px;overflow-y:auto}.stream .story{grid-template-columns:minmax(0,1fr);gap:6px}}
+@media(max-width:600px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}.toolbar .prp-select,.toolbar .prp-input[type=search]{flex:1 1 140px;width:auto;min-width:0}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <section class="hero">
-    <div><div class="eyebrow">JDP-I Q · Briefing</div><h1>Briefing</h1>
-      <p>Follow your topics across fifty publishers, ten from each political position: far left, left, centre, right and far right. The balanced view lines the positions up side by side so you can see how each covers the same story.</p>
-      <div class="meta" id="meta">Loading…</div></div>
-    <div class="tabs" role="tablist"><button data-tab="brief" class="active">Briefing</button><button data-tab="sources">Sources</button></div>
-  </section>
+  <header class="front">
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> Intelligence Briefing</div>
+    <h1 class="prp-title">Intelligence Briefing</h1>
+    <p class="prp-dek">Follow your topics across fifty publishers, ten from each political position: far left, left, centre, right and far right. The balanced view lines the positions up side by side, so you can see how each covers the same story.</p>
+    <div class="prp-meta" id="meta" aria-live="polite">Loading stories…</div>
+  </header>
 
-  <section id="tab-brief" class="layout">
-    <aside>
-      <div class="panel"><div class="phead"><b>Topics</b><button class="btn" id="addtopic">+ Topic</button></div>
-        <div id="topics"></div>
+  <nav class="prp-tabs" role="tablist" aria-label="Intelligence Briefing views">
+    <button type="button" role="tab" id="tabbtn-stories" data-tab="stories" aria-controls="tab-stories" aria-selected="true" class="active">Stories</button>
+    <button type="button" role="tab" id="tabbtn-publishers" data-tab="publishers" aria-controls="tab-publishers" aria-selected="false" tabindex="-1">Publishers</button>
+  </nav>
+
+  <section id="tab-stories" role="tabpanel" aria-labelledby="tabbtn-stories">
+    <div class="toolbar" role="group" aria-label="Story filters">
+      <select class="prp-select" id="view" aria-label="Layout"><option value="balanced">Balanced columns</option><option value="stream">Stream</option></select>
+      <select class="prp-select" id="window" aria-label="Time window"><option value="24">Last 24 hours</option><option value="72" selected>Last 3 days</option><option value="168">Last 7 days</option></select>
+      <select class="prp-select" id="publisher" aria-label="Publisher"><option value="">All publishers</option></select>
+      <input class="prp-input" type="search" id="q" placeholder="Search headlines…" aria-label="Search headlines">
+      <label class="check" title="Hides sports results, celebrity and entertainment coverage, and lifestyle sections (advice, puzzles, food, fashion, travel, property, shopping). Stories about politics, laws, courts, business or money in those fields are kept."><input type="checkbox" id="hardnews" checked> Hard news only <small id="hiddencount"></small></label>
+    </div>
+    <div class="layout">
+      <aside class="prp-panel topics-panel" aria-label="Topics">
+        <div class="prp-panel-head"><b>Topics</b><button type="button" class="prp-btn sm" id="addtopic">+ Topic</button></div>
         <div class="form" id="topicform" hidden>
-          <label for="tname">Name</label><input type="text" id="tname" maxlength="60">
-          <label for="tkeys">Keywords (comma-separated)</label><textarea id="tkeys" placeholder="Ukraine, Zelensky, Kyiv"></textarea>
-          <div class="controls"><button class="btn" id="tsave">Save</button><button class="btn ghost" id="tcancel">Cancel</button><button class="btn ghost" id="tdelete" style="margin-left:auto">Delete</button></div>
+          <label class="prp-label" for="tname">Name</label><input class="prp-input" type="text" id="tname" maxlength="60">
+          <label class="prp-label" for="tkeys">Keywords, comma-separated</label><textarea class="prp-input" id="tkeys" placeholder="Ukraine, Zelensky, Kyiv"></textarea>
+          <div class="actions"><button type="button" class="prp-btn sm primary" id="tsave">Save</button><button type="button" class="prp-btn sm ghost" id="tcancel">Cancel</button><button type="button" class="prp-btn sm danger" id="tdelete">Delete</button></div>
         </div>
-        <p class="note">Topics are stored in this browser only. Keywords match whole words; short capitalised ones such as “UN” or “AI” match case-sensitively.</p>
-      </div>
-    </aside>
-    <main>
-      <div class="panel">
-        <div class="phead"><b id="viewtitle">All stories</b>
-          <div class="controls">
-            <select id="view" aria-label="View"><option value="balanced">Balanced columns</option><option value="stream">Stream</option></select>
-            <select id="window" aria-label="Time window"><option value="24">Last 24 hours</option><option value="72" selected>Last 3 days</option><option value="168">Last 7 days</option></select>
-            <select id="publisher" aria-label="Publisher"><option value="">All publishers</option></select>
-            <input type="search" id="q" placeholder="Search headlines…" aria-label="Search headlines">
-            <label class="meta" style="margin:0" title="Hides sports results, celebrity and entertainment coverage, and lifestyle sections (advice, puzzles, food, fashion, travel, property, shopping). Stories about politics, laws, courts, business or money in those fields are kept."><input type="checkbox" id="hardnews" checked> Hard news only <span id="hiddencount"></span></label>
-          </div></div>
-        <div class="controls" style="padding:10px 14px 0" id="posbtns"></div>
-        <div class="meter" id="meter"></div><div class="meterkey" id="meterkey"></div>
+        <div id="topics"></div>
+        <p class="hint">Topics are stored in this browser only. Keywords match whole words; short capitalised ones such as “UN” or “AI” match case-sensitively.</p>
+      </aside>
+      <main class="prp-panel stories-panel">
+        <div class="prp-panel-head"><b id="viewtitle">All stories</b><span class="count" id="viewcount" aria-live="polite"></span></div>
+        <div class="posbtns" id="posbtns" role="group" aria-label="Political positions shown"></div>
+        <figure class="prp-figure coverage">
+          <div class="meter" id="meter" role="img" aria-label="Share of stories by political position"></div>
+          <div class="meterkey" id="meterkey"></div>
+          <figcaption><b>Figure 1.</b> Coverage of the selected topic by political position: each position’s share of the stories shown.</figcaption>
+        </figure>
         <div id="out"></div>
-      </div>
-    </main>
-  </section>
-
-  <section id="tab-sources" hidden>
-    <div class="panel" style="margin-top:16px"><div class="phead"><b>Publisher catalogue</b><span class="meta" style="margin:0" id="srcmeta"></span></div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
-      <p class="note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. ⚠ marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage.</p>
+      </main>
     </div>
   </section>
+
+  <section id="tab-publishers" role="tabpanel" aria-labelledby="tabbtn-publishers" hidden>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><b>Publisher catalogue</b><span class="srcmeta" id="srcmeta"></span></div>
+      <div class="tablewrap"><table class="prp-table"><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
+      <p class="prp-note pub-note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. <span class="caution" aria-hidden="true">⚠</span> marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage.</p>
+    </div>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> RSS and Atom feeds from a catalogue of publishers balanced across five political positions, ten active per position with reserves; headlines link to the original articles.</p>
+    <p><b>Positions.</b> AllSides Media Bias Ratings where available, otherwise Media Bias/Fact Check, adjusted to five steps. They describe editorial slant, not accuracy; ⚠ marks outlets rated mixed or low for factual reliability.</p>
+    <p><b>Refresh.</b> Twice a day; stories are kept for seven days. <b>Hard news only</b> hides sport results, celebrity and entertainment coverage and lifestyle sections, but keeps stories about politics, law, courts, business or money in those fields.</p>
+    <p><b>Privacy.</b> Your topics and filter choice are stored in this browser only.</p>
+  </footer>
 </div>
 <script>
-// Briefing (rebuilt from the Lovable app). Stories: ../briefing/data/latest.json, refreshed twice a day by
+// Intelligence Briefing (rebuilt from the Lovable app). Stories: ../briefing/data/latest.json, refreshed twice a day by
 // briefing/scripts/build.mjs from a catalogue balanced across five political positions. Topics live in localStorage.
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -128,6 +177,8 @@ let D, SRC = new Map(), topics = load(), current = null, editing = null, posOn =
 
 function load() { try { const t = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(t)) return t; } catch {} return DEFAULT_TOPICS; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(topics)); } catch {} }
+const num = n => n.toLocaleString('en-GB');
+const posVar = k => `--c:var(--pos-${String(k).replace(/[^\w-]/g, '')})`; // the position's page token, for the mark only
 
 /* ---------- matching (whole words; short all-caps keywords are case-sensitive) ---------- */
 const reCache = new Map();
@@ -148,15 +199,15 @@ function windowed() {
   const since = Date.now() - +$('#window').value * 36e5, inWin = D.items.filter(i => Date.parse(i.p) >= since);
   if (!$('#hardnews').checked) { $('#hiddencount').textContent = ''; return inWin; }
   const kept = inWin.filter(i => !i.c);
-  $('#hiddencount').textContent = inWin.length > kept.length ? `(${inWin.length - kept.length})` : '';
+  $('#hiddencount').textContent = inWin.length > kept.length ? `· ${num(inWin.length - kept.length)} hidden` : '';
   return kept;
 }
 function renderTopics() {
   const items = windowed();
-  $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><div class="n"><b>All stories</b><small>Every story from all fifty publishers</small></div><span class="c">${items.length}</span></div>` +
-    topics.map(t => `<div class="topic ${current === t.id ? 'on' : ''} ${t.paused ? 'paused' : ''}" data-id="${esc(t.id)}"><div class="n"><b>${esc(t.name)}</b><small>${esc(t.keywords.join(', '))}</small></div>
-      <span class="c">${t.paused ? 'paused' : items.filter(i => matches(t, i)).length}</span>
-      <button class="ib" data-pause="${esc(t.id)}" title="${t.paused ? 'Resume' : 'Pause'}" aria-label="${t.paused ? 'Resume' : 'Pause'} ${esc(t.name)}">${t.paused ? '▶' : '❚❚'}</button><button class="ib" data-edit="${esc(t.id)}" title="Edit" aria-label="Edit ${esc(t.name)}">✎</button></div>`).join('');
+  $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><button type="button" class="n" aria-pressed="${current === null}"><b>All stories</b><small>Every story from all fifty publishers</small></button><span class="c">${num(items.length)}</span></div>` +
+    topics.map(t => `<div class="topic ${current === t.id ? 'on' : ''} ${t.paused ? 'paused' : ''}" data-id="${esc(t.id)}"><button type="button" class="n" aria-pressed="${current === t.id}"><b>${esc(t.name)}</b><small>${esc(t.keywords.join(', '))}</small></button>
+      <span class="c">${t.paused ? 'paused' : num(items.filter(i => matches(t, i)).length)}</span>
+      <button type="button" class="ib" data-pause="${esc(t.id)}" title="${t.paused ? 'Resume' : 'Pause'}" aria-label="${t.paused ? 'Resume' : 'Pause'} ${esc(t.name)}">${t.paused ? '▶' : '❚❚'}</button><button type="button" class="ib" data-edit="${esc(t.id)}" title="Edit" aria-label="Edit ${esc(t.name)}">✎</button></div>`).join('');
 }
 $('#topics').addEventListener('click', e => {
   const p = e.target.closest('[data-pause]'), ed = e.target.closest('[data-edit]'), row = e.target.closest('.topic');
@@ -178,10 +229,12 @@ $('#tdelete').onclick = () => { if (!editing) return; topics = topics.filter(t =
 /* ---------- stories ---------- */
 const ago = iso => { const m = (Date.now() - Date.parse(iso)) / 6e4; return m < 60 ? Math.max(1, Math.round(m)) + 'm ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
 const posLabel = k => D.positions.find(p => p.key === k)?.label || k;
+const posTag = k => `<span class="ptag" style="${posVar(k)}"><i aria-hidden="true"></i>${esc(posLabel(k))}</span>`;
+const caution = '<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>';
 function storyHtml(i, showTag) {
   const s = SRC.get(i.s);
-  return `<div class="story">${showTag ? `<div><span class="tag" style="background:var(--${s.position})">${esc(posLabel(s.position))}</span></div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t)}</a>
-    <small>${esc(s.name)}${s.caution ? '<span class="caution" title="Mixed or low factual reliability rating">⚠</span>' : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(i.d.slice(0, 180))}${i.d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
+  return `<div class="story">${showTag ? `<div>${posTag(s.position)}</div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t)}</a>
+    <small>${esc(s.name)}${s.caution ? caution : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(i.d.slice(0, 180))}${i.d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
 }
 function filtered() {
   const q = $('#q').value.trim().toLowerCase(), pub = $('#publisher').value, t = topics.find(x => x.id === current);
@@ -190,41 +243,59 @@ function filtered() {
 function render() {
   const list = filtered(), t = topics.find(x => x.id === current);
   $('#viewtitle').textContent = t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
+  $('#viewcount').textContent = `${num(list.length)} ${list.length === 1 ? 'story' : 'stories'}`;
   const by = Object.fromEntries(D.positions.map(p => [p.key, list.filter(i => SRC.get(i.s).position === p.key)]));
-  const total = list.length || 1;
-  $('#meter').innerHTML = D.positions.map(p => `<span style="width:${by[p.key].length / total * 100}%;background:var(--${p.key})" title="${esc(p.label)}: ${by[p.key].length}"></span>`).join('');
-  $('#meterkey').innerHTML = D.positions.map(p => `<span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--${p.key});margin-right:4px"></i>${esc(p.label)} ${by[p.key].length} (${Math.round(by[p.key].length / total * 100)}%)</span>`).join('') + '<span>· coverage of this topic by position</span>';
-  if (!list.length) { $('#out').innerHTML = `<div class="empty">${t?.paused ? 'This topic is paused.' : 'No stories match in this window.'}</div>`; return; }
+  const total = list.length || 1, pct = k => Math.round(by[k].length / total * 100);
+  $('#meter').innerHTML = D.positions.filter(p => by[p.key].length).map(p => `<span style="width:${by[p.key].length / total * 100}%;${posVar(p.key)}" title="${esc(p.label)}: ${by[p.key].length}"></span>`).join('');
+  $('#meter').setAttribute('aria-label', 'Share of stories by political position: ' + D.positions.map(p => `${p.label} ${pct(p.key)}%`).join(', '));
+  $('#meterkey').innerHTML = D.positions.map(p => `<span><i style="${posVar(p.key)}" aria-hidden="true"></i>${esc(p.label)} <b>${num(by[p.key].length)}</b> (${pct(p.key)}%)</span>`).join('');
+  if (!list.length) { $('#out').innerHTML = `<div class="prp-empty">${t?.paused ? 'This topic is paused.' : 'No stories match in this window.'}</div>`; return; }
   if ($('#view').value === 'stream') {
     const lim = expanded.has('stream') ? 400 : 80;
-    $('#out').innerHTML = `<div class="stream">${list.slice(0, lim).map(i => storyHtml(i, true)).join('')}</div>${list.length > lim ? `<button class="more" data-more="stream">Show more (${list.length - lim})</button>` : ''}`;
+    $('#out').innerHTML = `<div class="stream">${list.slice(0, lim).map(i => storyHtml(i, true)).join('')}</div>${list.length > lim ? `<button type="button" class="more" data-more="stream">Show more (${num(list.length - lim)})</button>` : ''}`;
   } else {
     $('#out').innerHTML = `<div class="cols5">${D.positions.filter(p => posOn.has(p.key)).map(p => { const l = by[p.key], lim = expanded.has(p.key) ? 200 : 12;
-      return `<div class="col"><h3 style="border-color:var(--${p.key})"><span>${esc(p.label)}</span><span class="meta" style="margin:0">${l.length}</span></h3>${l.slice(0, lim).map(i => storyHtml(i, false)).join('') || '<div class="empty">No stories.</div>'}${l.length > lim ? `<button class="more" data-more="${p.key}">Show ${l.length - lim} more</button>` : ''}</div>`; }).join('')}</div>`;
+      return `<div class="col"><h3 style="${posVar(p.key)}"><span>${esc(p.label)}</span><span>${num(l.length)}</span></h3>${l.slice(0, lim).map(i => storyHtml(i, false)).join('') || '<div class="prp-empty">No stories.</div>'}${l.length > lim ? `<button type="button" class="more" data-more="${p.key}">Show ${num(l.length - lim)} more</button>` : ''}</div>`; }).join('')}</div>`;
   }
 }
 $('#out').addEventListener('click', e => { const m = e.target.closest('[data-more]'); if (m) { expanded.add(m.dataset.more); render(); } });
 
-/* ---------- sources tab ---------- */
+/* ---------- publishers tab ---------- */
 function renderSources() {
   const counts = new Map(); for (const i of D.items) counts.set(i.s, (counts.get(i.s) || 0) + 1);
   const order = Object.fromEntries(D.positions.map((p, k) => [p.key, k]));
-  $('#srcrows').innerHTML = [...D.sources].sort((a, b) => order[a.position] - order[b.position] || (b.active - a.active)).map(s => `<tr><td>${esc(s.name)}${s.caution ? ' <span class="caution" title="Mixed or low factual reliability rating">⚠</span>' : ''}</td>
-    <td><span class="tag" style="font:9.5px 'DM Mono';padding:1px 6px;border-radius:3px;color:#0d1721;background:var(--${s.position})">${esc(posLabel(s.position))}</span></td><td>${esc(s.country)}</td>
-    <td class="st ${s.active ? 'active' : s.reserve ? 'reserve' : 'down'}">${s.active ? 'Active' : s.reserve ? 'Reserve' : 'Unavailable (' + esc(s.status) + ')'}</td><td class="num">${counts.get(s.id) || 0}</td></tr>`).join('');
-  $('#srcmeta').textContent = D.positions.map(p => `${p.label}: ${D.sources.filter(s => s.position === p.key && s.active).length}`).join(' · ');
+  $('#srcrows').innerHTML = [...D.sources].sort((a, b) => order[a.position] - order[b.position] || (b.active - a.active)).map(s => `<tr><td>${esc(s.name)}${s.caution ? ' ' + caution : ''}</td>
+    <td>${posTag(s.position)}</td><td>${esc(s.country)}</td>
+    <td>${s.active ? '<span class="prp-status good">Active</span>' : s.reserve ? '<span class="prp-status">Reserve</span>' : `<span class="prp-status bad">Unavailable (${esc(s.status)})</span>`}</td><td class="num">${num(counts.get(s.id) || 0)}</td></tr>`).join('');
+  $('#srcmeta').textContent = 'Active · ' + D.positions.map(p => `${p.label} ${D.sources.filter(s => s.position === p.key && s.active).length}`).join(' · ');
 }
 
+/* ---------- tabs (?tab=publishers links to the catalogue) ---------- */
+const tabs = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+function setTab(t, write) {
+  if (t === 'sources') t = 'publishers';
+  if (!tabs.some(b => b.dataset.tab === t)) t = 'stories';
+  tabs.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+  $('#tab-stories').hidden = t !== 'stories'; $('#tab-publishers').hidden = t !== 'publishers';
+  if (write) { const u = new URL(location.href); if (t === 'stories') u.searchParams.delete('tab'); else u.searchParams.set('tab', t); history.replaceState(history.state, '', u); }
+}
+tabs.forEach(b => b.onclick = () => setTab(b.dataset.tab, true));
+$('.prp-tabs').addEventListener('keydown', e => {
+  const i = tabs.indexOf(document.activeElement), j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+  if (i < 0 || j == null) return;
+  e.preventDefault(); const b = tabs[(j + tabs.length) % tabs.length]; b.focus(); setTab(b.dataset.tab, true);
+});
+setTab(new URLSearchParams(location.search).get('tab'), false);
+
 /* ---------- boot ---------- */
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('active', x === b)); $('#tab-brief').hidden = b.dataset.tab !== 'brief'; $('#tab-sources').hidden = b.dataset.tab !== 'sources'; });
 fetch('../briefing/data/latest.json').then(r => r.json()).then(d => {
   D = d; SRC = new Map(d.sources.map(s => [s.id, s])); posOn = new Set(d.positions.map(p => p.key));
-  $('#posbtns').innerHTML = d.positions.map(p => `<button class="pos on" data-pos="${p.key}" aria-pressed="true"><i style="background:var(--${p.key})"></i>${esc(p.label)}</button>`).join('');
+  $('#posbtns').innerHTML = '<span class="prp-label">Positions</span>' + d.positions.map(p => `<button type="button" class="pos on" data-pos="${esc(p.key)}" aria-pressed="true" style="${posVar(p.key)}"><i aria-hidden="true"></i>${esc(p.label)}</button>`).join('');
   $('#posbtns').onclick = e => { const b = e.target.closest('[data-pos]'); if (!b) return; const k = b.dataset.pos; posOn.has(k) ? posOn.delete(k) : posOn.add(k); b.classList.toggle('on', posOn.has(k)); b.setAttribute('aria-pressed', posOn.has(k)); render(); };
-  const groups = d.positions.map(p => `<optgroup label="${esc(p.label)}">${d.sources.filter(s => s.position === p.key && d.items.some(i => i.s === s.id)).map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
+  const groups = d.positions.map(p => `<optgroup label="${esc(p.label)}">${d.sources.filter(s => s.position === p.key && d.items.some(i => i.s === s.id)).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
   $('#publisher').innerHTML += groups;
   const active = d.sources.filter(s => s.active).length;
-  $('#meta').textContent = `${d.items.length.toLocaleString('en-GB')} stories from the last ${d.keepDays} days · ${active} active publishers (${d.perPosition} per position) · refreshed ${d.generated.slice(0, 16).replace('T', ' ')} UTC`;
+  $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> stories from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>`;
   for (const id of ['#view', '#publisher']) $(id).onchange = render;
   $('#window').onchange = () => { renderTopics(); render(); };
   try { $('#hardnews').checked = localStorage.getItem(SOFT_KEY) !== '0'; } catch {}

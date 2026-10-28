@@ -1,53 +1,81 @@
-/* War Focus — extends Retrospective Battlefield's styles. Side A is blue, side B red, a contested state amber. */
-:root { --side-a: #4f8fe8; --side-b: #e5534b; --contested: #b8893a; --ally-a: #2f5d99; --ally-b: #8f3a35; }
-#war { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: inherit; max-width: 320px; }
-.counters { display: flex; gap: 18px; align-items: baseline; flex-wrap: wrap; }
-.counter { display: flex; flex-direction: column; }
-.counter .label { font: 9px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.counter b { font: 800 22px var(--font-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
-.counter.date b { color: var(--accent); min-width: 150px; }
-#c-total { color: #ff8f86; }
+/* War Focus (PRP · Retrospective Intelligence): extends the shared map workspace in ../history/styles.css.
+   The two sides are a diverging pair (side A blue, side B red), a contested state is amber, battles are amber marks
+   ringed while under way, and UCDP clashes are red. All tokens, so light and dark both work. */
+:root {
+  --side-a: color-mix(in srgb, var(--prp-div-pos-2) 84%, var(--prp-map-land));
+  --side-b: color-mix(in srgb, var(--prp-div-neg-2) 84%, var(--prp-map-land));
+  --contested: color-mix(in srgb, var(--prp-cat-4) 62%, var(--prp-map-land));
+  --battle: var(--prp-status-warning);
+  --battle-ring: var(--prp-status-serious);
+  --clash: var(--prp-status-critical);
+  --map-ratio: 6 / 5;
+}
 
-.state { stroke: var(--land-stroke); stroke-width: .5; vector-effect: non-scaling-stroke; fill: var(--land-inactive); }
+/* Header figures and toolbar */
+.counters .date dd { min-width: 8.6em; }
+#c-total { color: var(--prp-bad); }
+#war { min-width: 0; max-width: 340px; }
+.focus-timeline { align-items: flex-end; }
+.focus-timeline .tl-btn, #speed { margin-bottom: 12px; }
+#speed { flex: none; height: 30px; font-size: 12px; }
+#spark { display: block; width: 100%; height: 38px; }
+#spark .area { fill: var(--clash); fill-opacity: .28; }
+#spark .area.est { fill-opacity: .15; }
+#spark .now { stroke: var(--prp-text); stroke-width: 1.5; }
+
+/* Map */
+.state { fill: var(--prp-map-land); stroke: var(--prp-map-border); stroke-width: .5; vector-effect: non-scaling-stroke; }
 .state.side-a { fill: var(--side-a); }
 .state.side-b { fill: var(--side-b); }
 .state.occ-a { fill: url(#hatch-a); }
 .state.occ-b { fill: url(#hatch-b); }
 .state.theatre { fill: var(--contested); }
 .state.joined { animation: flash 1.2s ease-out; }
-@keyframes flash { from { stroke: #fff; stroke-width: 3; } to { stroke: var(--land-stroke); stroke-width: .5; } }
-.cell { fill: #ff5a4f; fill-opacity: .45; stroke: #ffb3ad; stroke-opacity: .6; stroke-width: .6; vector-effect: non-scaling-stroke; }
+@keyframes flash { from { stroke: var(--prp-text); stroke-width: 3; } to { stroke: var(--prp-map-border); stroke-width: .5; } }
+.cell { fill: var(--clash); fill-opacity: .42; stroke: var(--clash); stroke-opacity: .75; stroke-width: .6; vector-effect: non-scaling-stroke; }
 .cell.old { fill-opacity: .14; stroke-opacity: 0; }
-.battle { fill: #ffe08a; stroke: #3b2a00; stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; }
-.battle.past { fill: #c9b16b; fill-opacity: .35; stroke-opacity: .2; }
-.battle.now { fill: #fff2c2; stroke: #ff8f1f; stroke-width: 1.6; }
-.battle:hover { stroke: #fff; stroke-width: 2; }
-.ring { fill: none; stroke: #ffb347; stroke-width: 1.5; vector-effect: non-scaling-stroke; animation: ring 1.6s ease-out infinite; pointer-events: none; }
+.battle { fill: var(--battle); stroke: var(--prp-text); stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; }
+.battle.past { fill-opacity: .32; stroke-opacity: .25; }
+.battle.now { stroke: var(--battle-ring); stroke-width: 1.6; }
+.battle:hover { stroke: var(--prp-text); stroke-width: 2; stroke-opacity: 1; fill-opacity: 1; }
+.ring { fill: none; stroke: var(--battle-ring); stroke-width: 1.5; vector-effect: non-scaling-stroke; animation: ring 1.6s ease-out infinite; pointer-events: none; }
 @keyframes ring { from { stroke-opacity: .9; r: 4; } to { stroke-opacity: 0; r: 18; } }
-.state-label { fill: #e8eef0; font: 600 10px var(--font-ui); text-anchor: middle; paint-order: stroke; stroke: rgba(13, 23, 33, .85); stroke-width: 3px; pointer-events: none; }
-
-.focus-timeline { align-items: flex-end; }
-.focus-timeline .slider-wrap { padding-bottom: 16px; }
-#spark { width: 100%; height: 44px; display: block; }
-#spark .area { fill: rgba(229, 83, 75, .35); }
-#spark .area.est { fill: rgba(229, 83, 75, .18); }
-#spark .now { stroke: var(--accent); stroke-width: 1.5; }
-#speed { padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font: 12px var(--font-ui); margin-bottom: 18px; }
-#month { width: 100%; accent-color: var(--accent); }
-
-.side-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin: 2px 0; }
-.side-chip i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.stat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
-.stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
-.stat span { display: block; font: 9px var(--font-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-.stat b { font: 700 18px var(--font-display); font-variant-numeric: tabular-nums; }
-.stat small { display: block; color: var(--faint); font-size: 11px; }
-.blist { list-style: none; margin: 0; padding: 0; }
-.blist li { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-.blist li button.bname { all: unset; cursor: pointer; font-weight: 600; color: var(--text); }
-.blist li button.bname:hover { color: var(--accent); }
-.blist li small { display: block; color: var(--muted); font: 11px var(--font-mono); }
-.blist li .wl { font-size: 12px; margin-left: 6px; }
-.est-note { color: var(--faint); font-size: 11px; }
+.state-label { fill: var(--prp-map-label); font: 600 10px var(--prp-font-ui); text-anchor: middle; pointer-events: none;
+  paint-order: stroke; stroke: var(--prp-map-halo); stroke-width: 3px; stroke-linejoin: round; }
 .legend .hatch { background: repeating-linear-gradient(45deg, var(--side-b) 0 3px, var(--side-a) 3px 6px); }
-@media (max-width: 900px) { .counter b { font-size: 17px; } .counter.date b { min-width: 0; } #war { max-width: 100%; width: 100%; } }
+.legend .dot { border-radius: 50%; }
+.legend .b-now { background: var(--battle); box-shadow: 0 0 0 2px var(--battle-ring); }
+.legend .b-past { background: color-mix(in srgb, var(--battle) 40%, var(--prp-surface)); }
+.legend .clash { background: color-mix(in srgb, var(--clash) 55%, var(--prp-surface)); box-shadow: inset 0 0 0 1px var(--clash); }
+
+/* Panel */
+.side-chip { display: inline-flex; align-items: center; gap: 7px; margin: 6px 0 1px; color: var(--prp-text); font-size: 13px; }
+.side-chip i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--prp-map-border); }
+.side-list { color: var(--prp-text-2); font-size: 12.5px; line-height: 1.55; }
+.stat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+.stat { padding: 8px 10px 9px; background: var(--prp-surface-2); border: 1px solid var(--prp-line-soft); border-radius: var(--prp-radius-sm); }
+.stat span { display: block; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; }
+.stat b { display: block; margin-top: 2px; color: var(--prp-text); font: 600 18px/1.3 var(--prp-font-ui); font-variant-numeric: tabular-nums; }
+.stat small { display: block; color: var(--prp-muted); font-size: 11.5px; }
+.blist { margin: 0; padding: 0; list-style: none; }
+.blist li { padding: 7px 0; border-bottom: 1px solid var(--prp-line-soft); color: var(--prp-text-2); font-size: 13px; }
+.blist li b { color: var(--prp-text); font-weight: 600; }
+.blist li button.bname { all: unset; cursor: pointer; color: var(--prp-text); font-weight: 600; }
+.blist li button.bname:hover { color: var(--prp-link); text-decoration: underline; }
+.blist li button.bname:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.blist li small { display: block; color: var(--prp-muted); font: 11.5px/1.5 var(--prp-font-mono); }
+.blist li .wl { margin-left: 6px; font-size: 12px; }
+.est-note { color: var(--prp-muted); font-size: 11.5px; }
+
+/* Table views */
+.st { font: 500 10.5px var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--prp-muted); white-space: nowrap; }
+.st.now { color: var(--prp-good); }
+.prp-table tr.later td { color: var(--prp-muted); }
+.prp-table tr.later .rowbtn { color: var(--prp-text-2); font-weight: 500; }
+
+@media (max-width: 900px) {
+  .counters { display: grid; grid-template-columns: 1fr 1fr; }
+  .counters .date dd { min-width: 0; }
+  .war-field { flex: 1 1 100%; }
+  .war-field select { flex: 1; max-width: none; }
+}

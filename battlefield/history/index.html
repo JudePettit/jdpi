@@ -1,66 +1,98 @@
 <!doctype html>
-<html lang="en" data-suite="hp">
+<html lang="en" class="prp" data-suite="rs">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101820">
-  <title>Retrospective Battlefield · JDP-I H&amp;P</title>
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>Retrospective Battlefield · PRP</title>
   <meta name="description" content="Every war and armed conflict from 1926 to 2025 on a historical map, year by year.">
-  <link rel="icon" href="../../design/brand-jdpi.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../design/jdpi.css">
+  <link rel="icon" href="../../design/brand-prp.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="../../design/prp.css">
   <link rel="stylesheet" href="styles.css">
-  <script src="../../design/jdpi-bar.js" data-suite="hp" data-module="battlefield-history" data-shell="../../" defer></script>
+  <script src="../../design/prp-bar.js" data-suite="rs" data-module="battlefield-history" data-shell="../../" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div>
-        <p class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · History &amp; Politics</p>
-        <h1>Retrospective Battlefield</h1>
-        <p class="subtitle" id="status">Loading conflict history…</p>
+  <div class="screen">
+    <header class="head">
+      <div class="front">
+        <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Intelligence <span class="sep">·</span> Retrospective Battlefield</span></p>
+        <h1 class="prp-title">Retrospective Battlefield</h1>
+        <p class="prp-dek">Every war and armed conflict from 1926 to 2025, drawn on the borders of its day. Move through the years, then choose a country or a war to read its record.</p>
+        <p class="prp-meta" id="status">Loading conflict history…</p>
       </div>
+      <dl class="kpis" aria-live="polite">
+        <div class="kpi when"><dt>Year</dt><dd id="year-big">2025</dd></div>
+        <div class="kpi"><dt>Conflicts</dt><dd id="k-conflicts">–</dd></div>
+        <div class="kpi"><dt>At war level</dt><dd id="k-wars">–</dd></div>
+      </dl>
+    </header>
+
+    <div class="prp-tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="true">Map</button>
+      <button type="button" role="tab" id="tab-table" data-view="table" aria-controls="view-table" aria-selected="false" tabindex="-1">Table</button>
     </div>
-    <div class="controls">
+
+    <div class="toolbar">
       <div class="search-wrap">
-        <input id="search" type="search" placeholder="Search a war or country…" autocomplete="off" aria-label="Search wars and countries">
+        <input id="search" class="prp-input" type="search" placeholder="Search a war or country…" autocomplete="off" aria-label="Search wars and countries">
         <ul id="search-results" class="search-results" role="listbox" hidden></ul>
       </div>
-      <div class="year-badge" aria-live="polite"><span class="label">Year</span><b id="year-big">2025</b></div>
-    </div>
-  </header>
-
-  <main class="layout">
-    <section class="map-wrap" aria-label="Historical conflict map">
-      <svg id="map" role="img" aria-label="Map of armed conflicts for the selected year"></svg>
-      <div class="map-tools">
-        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
-        <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
-        <button type="button" id="zoom-reset" aria-label="Reset view">⟲</button>
+      <div class="timeline" aria-label="Year selector">
+        <button type="button" id="prev" class="tl-btn" aria-label="Previous year">‹</button>
+        <button type="button" id="play" class="tl-btn play" aria-label="Play through the years">▶</button>
+        <div class="slider-wrap">
+          <input type="range" id="year" min="1926" max="2025" step="1" value="2025" aria-label="Year">
+          <div class="ticks" id="ticks" aria-hidden="true"></div>
+        </div>
+        <button type="button" id="next" class="tl-btn" aria-label="Next year">›</button>
       </div>
-      <div class="legend">
-        <h4>This year</h4>
-        <ul>
-          <li><span class="swatch" style="background:var(--c-war)"></span>War on its territory (1,000+ deaths)</li>
-          <li><span class="swatch" style="background:var(--c-minor)"></span>Armed conflict (25–999 deaths)</li>
-          <li><span class="swatch" style="background:var(--c-abroad)"></span>Fighting abroad only</li>
-          <li><span class="swatch" style="background:var(--c-peace)"></span>No recorded conflict</li>
-        </ul>
-      </div>
-      <div id="tooltip" class="tooltip" hidden></div>
-    </section>
-    <aside id="panel" class="panel" aria-live="polite"></aside>
-  </main>
-
-  <footer class="timeline" aria-label="Year selector">
-    <button type="button" id="prev" class="tl-btn" aria-label="Previous year">‹</button>
-    <button type="button" id="play" class="tl-btn play" aria-label="Play through the years">▶</button>
-    <div class="slider-wrap">
-      <input type="range" id="year" min="1926" max="2025" step="1" value="2025" aria-label="Year">
-      <div class="ticks" id="ticks" aria-hidden="true"></div>
     </div>
-    <button type="button" id="next" class="tl-btn" aria-label="Next year">›</button>
+
+    <main class="work">
+      <figure class="prp-figure view mapfig" id="view-map" role="tabpanel" aria-labelledby="tab-map">
+        <div class="map-wrap">
+          <svg id="map" role="img" aria-label="Map of armed conflicts for the selected year"></svg>
+          <div class="map-tools">
+            <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+            <button type="button" id="zoom-reset" aria-label="Reset view">⟲</button>
+          </div>
+          <div class="legend">
+            <h4>Key</h4>
+            <ul>
+              <li><span class="swatch" style="background:var(--c-war)"></span>War on its territory (1,000+ battle deaths)</li>
+              <li><span class="swatch" style="background:var(--c-minor)"></span>Armed conflict (25–999 deaths)</li>
+              <li><span class="swatch" style="background:var(--c-abroad)"></span>Fighting abroad only</li>
+              <li><span class="swatch" style="background:var(--c-peace)"></span>No recorded conflict</li>
+            </ul>
+          </div>
+          <div id="tooltip" class="tooltip" hidden></div>
+        </div>
+        <figcaption><b>Figure 1.</b> <span id="caption">Countries on the borders of the selected year, shaded by the most intense armed conflict fought on their territory.</span> Drag to pan, scroll or use + and − to zoom; click a country for its record. UCDP/PRIO and Correlates of War; borders CShapes 2.0.</figcaption>
+      </figure>
+      <section class="view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden>
+        <div class="prp-panel tablepanel">
+          <div class="prp-panel-head"><b id="table-title">Armed conflicts</b><span>Select a row for the conflict's record</span></div>
+          <div class="tablescroll">
+            <table class="prp-table">
+              <thead><tr><th>Conflict</th><th>Type</th><th id="th-year">This year</th><th>Active</th><th class="num">Battle deaths</th><th>Fought in</th></tr></thead>
+              <tbody id="table-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <aside id="panel" class="panel" aria-live="polite"></aside>
+    </main>
+  </div>
+
+  <footer class="sources">
+    <div class="prp-sources">
+      <p><b>Sources.</b> 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (Uppsala Conflict Data Program and PRIO; Davies, Pettersson &amp; Öberg 2026; Gleditsch et al. 2002), CC BY 4.0. 1926–1945: Correlates of War Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees &amp; Wayman 2010). Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA, as they stood on 1 July of each year. Articles: Wikipedia.</p>
+      <p><b>Method.</b> A country is shaded red when a conflict with 1,000 or more battle deaths that year was fought on its territory, amber for 25–999 deaths, and violet when its forces fought only abroad. Before 1946 the Correlates of War lists only wars with 1,000+ battle deaths, so smaller conflicts are missing. Battle-death totals are as published by each dataset.</p>
+      <p><b>See also.</b> <a href="../focus/index.html" id="sibling">War Focus</a>, the major wars of the last hundred years month by month, a sibling submodule in Retrospective Intelligence.</p>
+    </div>
   </footer>
 
   <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">

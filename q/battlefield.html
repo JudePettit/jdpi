@@ -1,75 +1,172 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="prp" data-suite="rt">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml"><title>JDP-I Q — Realtime Battlefield</title>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml"><title>Realtime Battlefield · PRP</title>
 <script src="supabase-config.js"></script><script src="supabase-client.js"></script><script src="observability-config.js"></script><script src="observability.js" data-module="Realtime Battlefield"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="battlefield" data-shell="../" defer></script>
 <style>
-:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--text:#eff4f2;--green:#b7f36b;--cyan:#6ddac8;--amber:#f0b95a;--red:#ff826f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px}button,select{font:inherit}button{cursor:pointer}
-.shell{max-width:1500px;margin:auto;padding:0 34px}
-.topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:12px;align-items:center}.mark img{display:block;width:28px;height:28px}.brandname{font:700 17px Manrope;letter-spacing:.06em}.topmeta{display:flex;gap:22px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.08em}
-.hero{padding:31px 0 22px;display:flex;align-items:end;justify-content:space-between;gap:20px}.eyebrow{color:var(--green);font:11px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}.hero h1{font:600 32px Manrope;margin:8px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);max-width:660px;line-height:1.6}
-.updated{text-align:right;color:var(--muted);font:11px 'DM Mono';line-height:1.8}.updated strong{color:var(--text);font-weight:400}
-.subnav{display:flex;flex-wrap:wrap;gap:7px;padding:0 0 12px}.subnav a{border:1px solid var(--line);border-radius:4px;padding:7px 10px;color:var(--muted);text-decoration:none;font:10px "DM Mono"}.subnav a:hover,.subnav a.active{border-color:#799c59;color:var(--green);background:#b7f36b12}
-.layout{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(400px,.87fr);gap:16px;padding-bottom:24px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}.panelhead{min-height:57px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 19px}.ptitle{display:flex;align-items:center;gap:10px;font:700 13px Manrope}.icon{color:var(--green);font-size:16px}.subtle{color:var(--muted);font:10px 'DM Mono';letter-spacing:.1em;text-transform:uppercase}
-.mapwrap{height:430px;position:relative;background:#101d27}#map{height:100%;width:100%;background:#101d27}.leaflet-container{background:#101d27}.leaflet-control-zoom a{background:#182733!important;color:var(--text)!important;border-color:#34444e!important}.leaflet-control-attribution{background:#101d27bb!important;color:#83949c!important;font-size:9px!important}.leaflet-control-attribution a{color:#91aaa5!important}
-.maphint{position:absolute;z-index:500;left:15px;bottom:12px;color:#adbbc0;background:#0d1721c9;border:1px solid #34444e;padding:7px 10px;border-radius:4px;font:10px 'DM Mono'}
-[hidden]{display:none!important}.monthctl{display:flex;align-items:center;gap:8px;color:var(--muted);font:10px 'DM Mono'}.monthctl select{background:#0f1b25;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:5px 6px;font:10px 'DM Mono'}.navbtn{background:transparent;border:1px solid var(--line);border-radius:4px;color:var(--text);padding:4px 9px}.navbtn:hover{border-color:var(--green);color:var(--green)}
-.warlist{max-height:330px;overflow:auto}.warrow{display:grid;grid-template-columns:12px 1fr auto;gap:11px;align-items:center;padding:10px 18px;border-top:1px solid #24343f;cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;width:100%;text-align:left;color:inherit}.warrow:hover{background:#1a2b37}.warrow.sel{background:#b7f36b0f}.swatch{width:10px;height:10px;border-radius:50%}.warname{font-weight:600;font-size:12px}.warmeta{font-size:11px;color:var(--muted);margin-top:2px}.deaths{font:11px 'DM Mono';color:var(--text);text-align:right}.deaths small{display:block;color:var(--muted);font-size:9px}
-.detail{padding:4px 19px 18px;max-height:760px;overflow:auto}.detail h2{font:600 20px Manrope;letter-spacing:-.03em;margin:14px 0 4px}.detail h3{font:10px 'DM Mono';letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin:18px 0 6px}.detail p{color:#c9d3d6;line-height:1.6;margin:6px 0;font-size:13px}.detail a{color:var(--cyan)}.small{font-size:11px;color:var(--muted)}
-.conf{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #24343f;font-size:12px}.conf span:last-child{font:11px 'DM Mono';color:var(--muted);white-space:nowrap}
-.bars{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;align-items:end;height:70px;margin:6px 0 2px}.bars div{background:#6ddac855;border-radius:2px 2px 0 0;min-height:2px;position:relative}.bars div.cur{background:var(--green)}.barlabels{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;font:9px 'DM Mono';color:var(--muted);text-align:center}
-.src{border-left:2px solid #34444e;padding:3px 0 3px 10px;margin:7px 0;font-size:12px;color:#c9d3d6}.src small{display:block;color:var(--muted);font:10px 'DM Mono';margin-top:2px}
-.story{padding:7px 0;border-bottom:1px solid #24343f;font-size:12px}.story a{color:var(--text);text-decoration:none}.story a:hover{color:var(--green)}.story small{display:block;color:var(--muted);font:10px 'DM Mono';margin-top:3px}
-.archive{padding:6px 19px 18px}.arow{padding:14px 0;border-bottom:1px solid #24343f}.arow h4{margin:0 0 4px;font:600 14px Manrope;display:flex;justify-content:space-between;gap:10px;cursor:pointer}.arow h4 span{font:11px 'DM Mono';color:var(--muted);white-space:nowrap}.arow p{margin:4px 0;color:#c9d3d6;line-height:1.55;font-size:12.5px}
-.empty{padding:40px 20px;text-align:center;color:var(--muted);line-height:1.7}
-.foot{display:flex;justify-content:space-between;gap:12px;color:#76858d;font:10px 'DM Mono';padding:6px 2px 25px}.foot a{color:#90aaa0}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}.mapwrap{height:360px}}
-@media(max-width:600px){.shell{padding:0 14px}.hero{flex-direction:column;align-items:start}.hero h1{font-size:26px}.updated{text-align:left}.mapwrap{height:300px}.panelhead{padding:8px 12px;flex-wrap:wrap}.foot{flex-direction:column}}
-</style><link rel="stylesheet" href="../design/jdpi.css"><script src="../design/jdpi-bar.js" data-suite="q" data-module="battlefield" data-shell="../" defer></script></head>
-<body><div class="shell">
-<header class="topbar" data-jdpi-standalone><div class="brand"><div class="mark"><img src="brand-eye-q.svg" alt=""></div><div class="brandname">JDP-I Q</div></div><div class="topmeta"><span id="clock"></span></div></header>
-<section class="hero"><div><div class="eyebrow">Armed conflict · year to date</div><h1>Realtime Battlefield</h1><p>Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by Global Headline Tracker.</p></div><div class="updated">DATA THROUGH<br><strong id="through">Loading…</strong><br><span id="totals"></span></div></section>
-<nav class="subnav" aria-label="Realtime Battlefield views"><a data-view="live" href="battlefield.html?view=live">Live map · last 3 months</a><a data-view="archive" href="battlefield.html?view=archive">Year-to-date archive by month</a></nav>
-<main class="layout">
-  <section class="panel">
-    <div class="panelhead"><div class="ptitle"><span class="icon">✕</span> <span id="maptitle">Conflict map</span></div><div class="monthctl" id="monthctl" hidden><button class="navbtn" id="prev" aria-label="Previous month">‹</button><select id="month" aria-label="Month"></select><button class="navbtn" id="next" aria-label="Next month">›</button></div></div>
-    <div class="mapwrap"><div id="map"></div><div class="maphint" id="maphint">Circles are sized by deaths · click one to open its war</div></div>
+*{box-sizing:border-box}[hidden]{display:none!important}
+button,select{font:inherit}button{cursor:pointer}
+.page{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
+.prp-tabs{margin:22px 0 16px}
+/* Map, then monthly insights, beside the war list; on one column the war list comes straight after the map. */
+.layout{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(380px,.87fr);grid-template-rows:auto 1fr;grid-template-areas:"map side" "tail side";gap:16px;align-items:start}
+.layout>figure{grid-area:map;min-width:0}.layout>.side{grid-area:side;min-width:0}#lefttail{grid-area:tail;min-width:0}
+.prp-panel{overflow:hidden}
+.prp-panel-head{min-height:50px}
+.prp-panel-head .hint{color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+.prp-sources p{margin:0 0 6px;max-width:120ch}
+.small{color:var(--prp-muted);font-size:12px}
+/* map */
+.mapwrap{position:relative;height:440px;background:var(--prp-map-water)}
+#map{width:100%;height:100%}
+.monthctl{display:flex;align-items:center;gap:6px}
+.monthctl .prp-btn{width:32px;height:32px;padding:0;font-size:15px}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
+.legend .lg{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left}
+.legend button.lg:hover{color:var(--prp-link);text-decoration:underline}
+.legend .size{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.swatch{display:inline-block;flex:none;width:10px;height:10px;border-radius:50%}
+.leaflet-container{background:var(--prp-map-water);font:12px/1.45 var(--prp-font-ui)}
+.leaflet-bar{border:1px solid var(--prp-line)!important;border-radius:var(--prp-radius-sm)!important;box-shadow:var(--prp-shadow-1)!important}
+.leaflet-container .leaflet-bar a{background:var(--prp-surface);border-bottom-color:var(--prp-line);color:var(--prp-text)}
+.leaflet-container .leaflet-bar a:hover,.leaflet-container .leaflet-bar a:focus{background:var(--prp-surface-3);color:var(--prp-text)}
+.leaflet-container .leaflet-bar a.leaflet-disabled{background:var(--prp-surface-2);color:var(--prp-faint)}
+.leaflet-container .leaflet-control-attribution{background:color-mix(in srgb,var(--prp-surface) 85%,transparent);color:var(--prp-muted);font-size:10px}
+.leaflet-container .leaflet-control-attribution a{color:var(--prp-link)}
+.leaflet-tooltip{padding:6px 9px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-sm);box-shadow:var(--prp-shadow-2);color:var(--prp-text);font:12px/1.45 var(--prp-font-ui)}
+.leaflet-tooltip-top:before{border-top-color:var(--prp-line)}.leaflet-tooltip-bottom:before{border-bottom-color:var(--prp-line)}.leaflet-tooltip-left:before{border-left-color:var(--prp-line)}.leaflet-tooltip-right:before{border-right-color:var(--prp-line)}
+/* wars and briefing */
+.warlist{max-height:760px;overflow:auto}
+.warrow{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:11px;align-items:center;width:100%;padding:10px 16px;border:0;border-top:1px solid var(--prp-line-soft);background:none;color:inherit;text-align:left}
+.warrow:first-child{border-top:0}.warrow:hover{background:var(--prp-surface-2)}.warrow.sel{background:var(--prp-primary-soft)}
+.warname{color:var(--prp-text);font-size:13px;font-weight:600}
+.warmeta{margin-top:2px;color:var(--prp-muted);font-size:11.5px}
+.deaths{text-align:right;color:var(--prp-text);font:500 12px var(--prp-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.deaths small{display:block;color:var(--prp-muted);font:10.5px var(--prp-font-ui)}
+.detail{max-height:860px;overflow:auto;padding:12px 18px 18px}
+.detail h2{margin:14px 0 4px;color:var(--prp-text);font:600 22px/1.25 var(--prp-font-serif);letter-spacing:-.005em}
+.detail h3{margin:20px 0 6px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
+.detail p{margin:6px 0;color:var(--prp-text);font:14.5px/1.6 var(--prp-font-serif)}
+.detail .small{font-family:var(--prp-font-ui)}
+.bars{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;align-items:end;height:72px;margin:14px 0 3px;border-bottom:1px solid var(--prp-axis)}
+.bars div{min-height:2px;border-radius:2px 2px 0 0;background:var(--prp-seq-200)}.bars div.cur{background:var(--prp-primary)}
+.barlabels{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px;color:var(--prp-muted);font:10px var(--prp-font-mono);text-align:center}
+.barcap{margin-top:4px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.conf{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--prp-line-soft);font-size:12.5px}
+.conf span:last-child{color:var(--prp-muted);font:11px var(--prp-font-mono);white-space:nowrap}
+.src{margin:8px 0;padding:3px 0 3px 10px;border-left:2px solid var(--prp-line-strong);color:var(--prp-text-2);font-size:12.5px}
+.src small{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.story{padding:8px 0;border-bottom:1px solid var(--prp-line-soft);font-size:13px}
+.story a{color:var(--prp-text);text-decoration:none}.story a:hover{color:var(--prp-link);text-decoration:underline}
+.story small{display:block;margin-top:3px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+/* monthly insights */
+.arow{padding:12px 16px;border-top:1px solid var(--prp-line-soft)}.arow:first-child{border-top:0}
+.arow h4{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 4px;font-size:14px}
+.arow h4 button{display:inline-flex;align-items:center;gap:8px;min-width:0;padding:0;border:0;background:none;color:var(--prp-text);font:600 14px/1.35 var(--prp-font-ui);text-align:left}
+.arow h4 button:hover{color:var(--prp-link);text-decoration:underline}
+.arow h4 span{color:var(--prp-muted);font:11px var(--prp-font-mono);white-space:nowrap}
+.arow p{margin:4px 0 0;color:var(--prp-text-2);font:14px/1.6 var(--prp-font-serif)}
+@media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"map" "side" "tail"}.mapwrap{height:380px}.warlist{max-height:480px!important}}
+@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.mapwrap{height:300px}.detail{padding:10px 14px 16px}.warrow{padding:10px 12px}.arow{padding:12px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> Realtime Battlefield</div>
+    <h1 class="prp-title">Realtime Battlefield</h1>
+    <p class="prp-dek">Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by the Global Headline Tracker. Click a war on the map or in the list to open its briefing.</p>
+    <div class="prp-meta"><span>Data through <b id="through">Loading…</b></span><span id="totals"></span><span>Source <b>UCDP Candidate Events</b></span><span>Refreshed <b>monthly</b></span><span>Now <b id="clock"></b></span></div>
+  </header>
+  <div class="prp-tabs" role="tablist" aria-label="Realtime Battlefield views">
+    <a role="tab" id="tab-live" data-view="live" href="battlefield.html?view=live" aria-controls="views">Live map · last 3 months</a>
+    <a role="tab" id="tab-archive" data-view="archive" href="battlefield.html?view=archive" aria-controls="views">Year-to-date archive</a>
+  </div>
+  <div class="layout" id="views" role="tabpanel">
+    <figure class="prp-figure">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><b id="maptitle">Conflict map</b><div class="monthctl" id="monthctl" hidden><button class="prp-btn sm" id="prev" aria-label="Previous month">‹</button><select class="prp-select" id="month" aria-label="Month"></select><button class="prp-btn sm" id="next" aria-label="Next month">›</button></div></div>
+        <div class="mapwrap"><div id="map" role="region" aria-label="Map of armed-conflict events"></div></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <figcaption><b>Figure 1.</b> <span id="mapcap">Armed-conflict events this year, sized by deaths.</span></figcaption>
+    </figure>
     <div id="lefttail"></div>
-  </section>
-  <section class="panel">
-    <div class="panelhead"><div class="ptitle"><span class="icon">◈</span> <span id="sidetitle">Wars and warzones</span></div><span class="subtle" id="sidecaption"></span></div>
-    <div id="side"><div class="empty">Loading conflict data…</div></div>
-  </section>
+    <section class="prp-panel side" aria-labelledby="sidetitle">
+      <div class="prp-panel-head"><b id="sidetitle">Wars and warzones</b><span class="hint" id="sidecaption"></span></div>
+      <div id="side" aria-live="polite"><div class="prp-empty">Loading conflict data…</div></div>
+    </section>
+  </div>
+  <footer class="prp-sources">
+    <p><b>Sources.</b> Events: <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a><span id="ver"></span> (Hegre et al. 2020), CC BY 4.0, released monthly by the Uppsala Conflict Data Program. News: front pages of the outlets tracked by the Global Headline Tracker over the last 30 days. Basemap: Esri Light Gray and Dark Gray Canvas (Esri, HERE, Garmin, © OpenStreetMap contributors).</p>
+    <p><b>Method.</b> Events are grouped into wars and warzones, and each month is summarised in plain English; deaths are UCDP's best estimates. Candidate events are preliminary and can change when UCDP publishes its final annual data. The page checks for new data every six hours.</p>
+  </footer>
 </main>
-<footer class="foot"><a href="index.html">JDP-I Q · SUITE HOME</a><span>REALTIME BATTLEFIELD</span><span>Events: <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events</a> (CC BY 4.0) · Map tiles © Esri</span></footer>
-</div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
 // battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
 const DATA_URL = '../battlefield/data/realtime.json';
 const RELOAD_MS = 6 * 3600 * 1000; // data changes monthly; re-check every six hours
-const PALETTE = ['#ff826f','#f0b95a','#b7f36b','#6ddac8','#7aa7ff','#c58cff','#ff9ad5','#e8e07a','#5fd38d','#ffb38a','#9ad0ff','#d4a373'];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => Number(n).toLocaleString('en-GB');
 const monthName = (m, opts = { month: 'long', year: 'numeric' }) => new Date(m + '-01T00:00:00Z').toLocaleString('en-GB', { ...opts, timeZone: 'UTC' });
 const params = new URLSearchParams(location.search);
-const view = params.get('view') === 'archive' ? 'archive' : 'live';
+let view = params.get('view') === 'archive' ? 'archive' : 'live';
 let data, selectedWar = params.get('war'), month = params.get('month');
-document.querySelectorAll('.subnav a').forEach(a => a.classList.toggle('active', a.dataset.view === view));
+const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
+
+/* ---------- views: in-page tabs, linked by ?view= ---------- */
+const TABS = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+function showTabs() {
+  TABS.forEach(a => { const on = a.dataset.view === view; a.classList.toggle('active', on); a.setAttribute('aria-selected', String(on)); a.tabIndex = on ? 0 : -1; });
+  document.getElementById('views').setAttribute('aria-labelledby', 'tab-' + view);
+}
+function setView(v) { if (v === view) return; view = v; showTabs(); setUrl(); if (data) render(); }
+TABS.forEach(a => a.addEventListener('click', e => { if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); setView(a.dataset.view); }));
+document.querySelector('.prp-tabs').addEventListener('keydown', e => {
+  const i = TABS.indexOf(document.activeElement), k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (i < 0 || !k) return;
+  e.preventDefault(); const a = TABS[(i + k + TABS.length) % TABS.length]; a.focus(); setView(a.dataset.view);
+});
+showTabs();
 
 const tick = () => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; };
 tick(); setInterval(tick, 60000);
 
+/* ---------- map: the basemap and circle colours follow the PRP theme ---------- */
+const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const theme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 const map = L.map('map', { scrollWheelZoom: false, minZoom: 1, maxZoom: 7, worldCopyJump: true }).setView([22, 20], 2);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16 }).addTo(map);
 const layer = L.layerGroup().addTo(map);
+// Light and dark grey canvas basemaps (base + labels), swapped with the theme. CARTO's light_all/dark_all, the PRP
+// default, now answer every request without an API key with an "API key required" placeholder tile.
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+const BASEMAP = { light: ['World_Light_Gray_Base', 'World_Light_Gray_Reference'], dark: ['World_Dark_Gray_Base', 'World_Dark_Gray_Reference'] };
+let basemap = [], basemapTheme;
+function setBasemap() {
+  const t = theme();
+  if (t === basemapTheme) return;
+  basemapTheme = t;
+  BASEMAP[t].forEach((name, i) => {
+    const url = `${ESRI}${name}/MapServer/tile/{z}/{y}/{x}`;
+    if (basemap[i]) basemap[i].setUrl(url);
+    else basemap[i] = L.tileLayer(url, { attribution: i ? '' : 'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16 }).addTo(map);
+  });
+}
+domReady.then(setBasemap);
 
+// The three deadliest wars of the year keep their own categorical colours; every other war folds into a quiet "Other".
+const OTHER = '--prp-faint';
+function paint() {
+  const top = [...data.wars].sort((a, b) => (b.deaths ?? 0) - (a.deaths ?? 0)).slice(0, 3).map(w => w.id);
+  data.wars.forEach(w => { w.rank = top.indexOf(w.id); w.cvar = w.rank >= 0 ? `var(--prp-cat-${w.rank + 1})` : `var(${OTHER})`; w.colour = token(w.rank >= 0 ? `--prp-cat-${w.rank + 1}` : OTHER); });
+}
 const colour = w => w.colour;
 function setUrl() {
   const p = new URLSearchParams({ view });
@@ -81,27 +178,41 @@ function setUrl() {
 function drawMap() {
   layer.clearLayers();
   const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
-  for (const w of data.wars) {
+  const ink = token('--prp-text');
+  // "Other" wars first, the three named wars over them, the selected war on top.
+  const order = [...data.wars].sort((a, b) => (a.id === selectedWar) - (b.id === selectedWar) || (a.rank >= 0) - (b.rank >= 0) || b.rank - a.rank);
+  for (const w of order) {
+    const sel = selectedWar === w.id, faded = selectedWar && !sel, quiet = w.rank < 0 && !sel, col = sel && w.rank < 0 ? ink : colour(w);
     for (const [lat, lon, mi, deaths, events] of w.points) {
       if (!idx.has(mi)) continue;
-      const sel = selectedWar === w.id;
-      L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: colour(w), weight: sel ? 1.5 : .6, fillColor: colour(w), fillOpacity: selectedWar && !sel ? .12 : .5, opacity: selectedWar && !sel ? .25 : .9 })
+      L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: col, weight: sel ? 1.5 : .6, fillColor: col, fillOpacity: faded ? .08 : quiet ? .3 : .55, opacity: faded ? .2 : quiet ? .6 : .95 })
         .bindTooltip(`<b>${esc(w.name)}</b><br>${monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
         .on('click', () => selectWar(w.id))
         .addTo(layer);
     }
   }
 }
+function renderLegend() {
+  const named = data.wars.filter(w => w.rank >= 0).sort((a, b) => a.rank - b.rank);
+  const box = document.getElementById('legend');
+  box.innerHTML = named.map(w => `<button type="button" class="lg" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button>`).join('')
+    + `<span class="lg"><i class="swatch" style="background:var(${OTHER})"></i>Other wars and warzones</span><span class="lg size">Circle size grows with deaths</span>`;
+  box.querySelectorAll('[data-war]').forEach(b => b.onclick = () => selectWar(b.dataset.war));
+}
+function renderCaption() {
+  const when = view === 'archive' ? monthName(month) : `${monthName(data.months.at(-3) || data.latest, { month: 'long' })} to ${monthName(data.latest)}`;
+  document.getElementById('mapcap').textContent = `Armed-conflict events, ${when}: one circle per place and month, sized by deaths. The three deadliest wars of ${data.year} have their own colours; click a circle to open its war's briefing. Source: UCDP Candidate Events Dataset${data.version ? ', version ' + data.version : ''}.`;
+}
 
 function warRow(w, m) {
   const mm = m ? w.monthly.find(x => x.month === m) : null;
   const deaths = m ? mm.deaths : w.monthly.slice(-3).reduce((s, x) => s + x.deaths, 0);
-  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${colour(w)}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${m ? 'deaths' : '3-mo deaths'}</small></div></button>`;
+  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${m ? 'deaths' : '3-month deaths'}</small></div></button>`;
 }
 
 function bars(w) {
   const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = view === 'archive' ? month : data.latest;
-  return `<div class="bars" style="--n:${w.monthly.length}">${w.monthly.map(x => `<div class="${x.month === cur ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div>`;
+  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${x.month === cur ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${monthName(cur)}</div>`;
 }
 
 function warDetail(w) {
@@ -109,7 +220,7 @@ function warDetail(w) {
   const mm = w.monthly.find(x => x.month === m);
   const prev = w.monthly.filter(x => x.month < m && x.events).slice(-2).reverse();
   return `<div class="detail">
-    <button class="navbtn" id="back" style="margin-top:12px">‹ All wars</button>
+    <button class="prp-btn sm" id="back">‹ All wars</button>
     <h2>${esc(w.name)}</h2><div class="small">${esc(w.zone)} · ${esc(w.countries.join(', '))}</div>
     <p>${esc(w.summary)}</p>
     ${bars(w)}
@@ -165,9 +276,9 @@ function renderArchive() {
   const m = view === 'archive' ? month : data.latest;
   const list = data.wars.map(w => ({ w, mm: w.monthly.find(x => x.month === m) })).filter(x => x.mm.events).sort((a, b) => b.mm.deaths - a.mm.deaths);
   const total = list.reduce((s, x) => s + x.mm.deaths, 0);
-  tail.innerHTML = `<div class="archive"><h3 class="eyebrow" style="margin:14px 0 4px">${view === 'archive' ? '' : 'Latest month · '}${monthName(m)} · ${fmt(total)} deaths across ${list.length} wars and warzones</h3>
-    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, mm }) => `<div class="arow"><h4 data-war="${w.id}"><span style="color:${colour(w)};font:inherit">● ${esc(w.name)}</span><span>${fmt(mm.deaths)} deaths</span></h4><p>${esc(mm.text)}</p></div>`).join('')}</div>`;
-  tail.querySelectorAll('h4[data-war]').forEach(h => h.onclick = () => selectWar(h.dataset.war));
+  tail.innerHTML = `<section class="prp-panel" aria-labelledby="archtitle"><div class="prp-panel-head"><b id="archtitle">${view === 'archive' ? '' : 'Latest month · '}${monthName(m)}</b><span class="hint">${fmt(total)} deaths across ${list.length} wars and warzones</span></div>
+    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, mm }) => `<div class="arow"><h4><button type="button" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button><span>${fmt(mm.deaths)} deaths</span></h4><p>${esc(mm.text)}</p></div>`).join('')}</section>`;
+  tail.querySelectorAll('button[data-war]').forEach(h => h.onclick = () => selectWar(h.dataset.war));
 }
 
 function selectWar(id) {
@@ -177,18 +288,21 @@ function selectWar(id) {
     const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
     const pts = w.points.filter(p => idx.has(p[2])).map(p => [p[0], p[1]]);
     if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 5 });
+    // One column (phones, narrow windows): bring the briefing into view.
+    if (matchMedia('(max-width: 1000px)').matches) document.querySelector('.side').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }
 }
 
-function setMonth(m) { month = m; document.getElementById('month').value = m; setUrl(); renderSide(); renderArchive(); drawMap(); }
+function setMonth(m) { month = m; document.getElementById('month').value = m; setUrl(); renderSide(); renderArchive(); drawMap(); renderCaption(); }
 
 function render() {
-  data.wars.forEach((w, i) => w.colour = i < PALETTE.length ? PALETTE[i] : '#8c9aa3');
+  paint();
   document.getElementById('through').textContent = monthName(data.latest);
-  document.getElementById('totals').textContent = `${fmt(data.totals.deaths)} deaths · ${fmt(data.totals.events)} events in ${data.year}`;
+  document.getElementById('totals').innerHTML = `<b>${fmt(data.totals.deaths)}</b>&nbsp;deaths · <b>${fmt(data.totals.events)}</b>&nbsp;events in ${data.year}`;
+  document.getElementById('ver').textContent = data.version ? `, version ${data.version}` : '';
   if (!data.months.includes(month)) month = data.latest;
+  document.getElementById('monthctl').hidden = view !== 'archive';
   if (view === 'archive') {
-    document.getElementById('monthctl').hidden = false;
     document.getElementById('maptitle').textContent = 'Conflict map by month';
     const sel = document.getElementById('month');
     sel.innerHTML = data.months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
@@ -199,8 +313,11 @@ function render() {
     document.getElementById('maptitle').textContent = `Conflict map · ${monthName(data.months.at(-3) || data.latest, { month: 'short' })}–${monthName(data.latest)}`;
   }
   if (selectedWar && !data.wars.some(w => w.id === selectedWar)) selectedWar = null;
-  renderSide(); renderArchive(); drawMap();
+  renderLegend(); renderSide(); renderArchive(); drawMap(); renderCaption();
 }
+
+// Theme switch: new basemap, and the circles redrawn in the new palette (swatches use CSS variables).
+window.addEventListener('prp:themechange', () => { setBasemap(); if (data) { paint(); drawMap(); } });
 
 async function load() {
   try {
@@ -208,9 +325,10 @@ async function load() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const next = await res.json();
     if (data && next.generated === data.generated) return;
+    await domReady; // the connector has applied the saved theme by now
     data = next; render();
   } catch (e) {
-    if (!data) document.getElementById('side').innerHTML = `<div class="empty">Conflict data could not load.<br><span class="small">${esc(e.message)}</span></div>`;
+    if (!data) document.getElementById('side').innerHTML = `<div class="prp-empty">Conflict data could not load.<br><span class="small">${esc(e.message)}</span></div>`;
   }
 }
 load(); setInterval(load, RELOAD_MS);

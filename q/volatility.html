@@ -1,113 +1,209 @@
 <!doctype html>
-<html lang="en" data-suite="q">
+<html lang="en" class="prp" data-suite="rt">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0d1721"><link rel="icon" href="brand-eye-q.svg" type="image/svg+xml">
-<title>JDP-I Q — Geopolitical Volatility</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../design/jdpi.css">
-<script src="../design/jdpi-bar.js" data-suite="q" data-module="volatility" data-shell="../" defer></script>
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<title>Geopolitical Volatility · PRP</title>
+<meta name="description" content="A daily 0–100 index of how unusually turbulent each country's news is, from GDELT. Compare up to four countries.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="volatility" data-shell="../" defer></script>
 <style>
-:root{--bg:#0d1721;--panel:#14212d;--panel2:#192937;--line:#2a3a46;--muted:#91a0aa;--faint:#6d7d86;--text:#eff4f2;--accent:var(--jdpi-accent,#b7f36b);--soft:var(--jdpi-accent-soft,rgba(183,243,107,.08));--accline:var(--jdpi-accent-line,#5f7d45);--good:#6ddac8;--bad:#ff826f;--warn:#f0b95a}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 'DM Sans',system-ui,sans-serif}
-a{color:var(--accent)}button,input,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
-.wrap{max-width:1480px;margin:auto;padding:20px 26px 40px}
-.hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.eyebrow{color:var(--accent);font:500 10px 'DM Mono';letter-spacing:.15em;text-transform:uppercase}
-h1{font:600 30px Manrope;letter-spacing:-.04em;margin:6px 0 4px}.hero p{margin:0;color:var(--muted);max-width:780px}
-.meta{font:10px 'DM Mono';color:var(--muted);margin-top:6px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:none;border-radius:5px;padding:7px 12px;color:var(--muted);font:11px 'DM Mono';text-transform:uppercase;letter-spacing:.06em}.tabs button.active,.tabs button:hover{border-color:var(--accline);color:var(--accent);background:var(--soft)}
-.tabs .count{background:var(--accent);color:#10200a;border-radius:99px;padding:0 6px;margin-left:5px;font-weight:600}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:16px}
-.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
-.phead b{font:700 13px Manrope}
-select,input[type=search]{background:#0f1b25;border:1px solid var(--line);border-radius:5px;color:var(--text);padding:6px 9px;font-size:12.5px}
-input[type=range]{accent-color:var(--accent);width:220px;vertical-align:middle}
-#map{width:100%;height:auto;display:block;background:#101d27}
-.land{stroke:#0d1721;stroke-width:.5;cursor:pointer}.land:hover{stroke:#fff;stroke-width:1.2}.land.sel{stroke:var(--accent);stroke-width:1.6}
-.legend{display:flex;align-items:center;gap:8px;font:10px 'DM Mono';color:var(--muted);padding:8px 14px;flex-wrap:wrap}.legend i{display:inline-block;width:26px;height:9px;border-radius:2px}
-.tip{position:fixed;pointer-events:none;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12px;z-index:20;max-width:280px}
-.cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
-.tbl{overflow-x:auto;max-height:620px;overflow-y:auto}
-table{border-collapse:collapse;width:100%;font-size:12.5px}
-th{text-align:left;font:600 11px Manrope;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);cursor:pointer;white-space:nowrap}
-td{padding:6px 10px;border-bottom:1px solid #24343f}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.cname{color:var(--text);text-decoration:none;font-weight:600}.cname:hover{color:var(--accent)}
-.band{font:10px 'DM Mono';padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
-.band.high{background:#ff826f22;color:var(--bad)}.band.elevated{background:#f0b95a22;color:var(--warn)}.band.normal{background:#6ddac81a;color:var(--good)}.band.none{color:var(--faint)}
-.up{color:var(--bad)}.down{color:var(--good)}
-.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#0f1b25;color:var(--text);border-radius:99px;padding:3px 9px;font-size:11.5px;text-decoration:none}.chip:hover{border-color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;padding:14px}
-.stat{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:10px 12px}.stat span{display:block;font:10px 'DM Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.stat b{display:block;font:600 20px Manrope;margin-top:3px;font-variant-numeric:tabular-nums}.stat small{color:var(--faint);font-size:11px}
-.ptitle{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding:16px}
-.ptitle h2{font:600 26px Manrope;letter-spacing:-.03em;margin:0}.ptitle .sub{color:var(--muted);font-size:13px}
+*{box-sizing:border-box}[hidden]{display:none!important}
+button,input,select{font:inherit}button{cursor:pointer}
+.wrap{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
+.front{margin-bottom:18px}.front .prp-eyebrow{flex-wrap:wrap;row-gap:2px}
+.front .prp-meta{gap:4px 10px}.front .prp-meta span+span::before{content:"·";margin-right:10px;color:var(--prp-faint)}
+.prp-tabs{margin-bottom:16px}
+.prp-tabs .count{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:99px;background:var(--prp-accent);color:var(--prp-on-primary);font:600 10.5px/1 var(--prp-font-mono)}
+.stack{display:grid;gap:16px;min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px}
+.field{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.field .prp-select{max-width:100%}
+input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
+.daylabel{min-width:84px;color:var(--prp-text);font:500 12.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.prp-panel-head .tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.prp-panel-head .tools .prp-input{width:180px}.prp-panel-head .tools .prp-select{max-width:200px}
+.check{display:inline-flex;align-items:center;gap:6px;color:var(--prp-text-2);font-size:12.5px;cursor:pointer}
+.check input{margin:0;accent-color:var(--prp-primary)}
+.note{margin:0;padding:10px 14px 14px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.55}
+
+/* Map */
+.mapfig{padding:4px 14px 14px}
+#map{display:block;width:100%;max-width:1180px;height:auto;margin:0 auto}
+.sphere{fill:var(--prp-map-water);stroke:var(--prp-line)}
+.graticule{fill:none;stroke:var(--prp-map-graticule);stroke-width:.5}
+.land{stroke:var(--prp-map-border);stroke-width:.4;cursor:pointer}
+.land:hover{stroke:var(--prp-text);stroke-width:1.1}
+.land.sel{stroke:var(--prp-accent);stroke-width:1.6}
+.legend{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 20px;margin-top:10px;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.4 var(--prp-font-ui)}
+.ramp{position:relative;display:inline-block;width:260px;padding-bottom:16px}
+.ramp i{display:block;height:10px;border-radius:2px}
+.ramp b{position:absolute;top:13px;transform:translateX(-50%);color:var(--prp-muted);font:500 10.5px var(--prp-font-mono);white-space:nowrap}
+.ramp b.first{transform:none}.ramp b.last{transform:translateX(-100%)}
+.sw{display:inline-block;width:12px;height:10px;margin-right:6px;border-radius:2px;vertical-align:-1px}
+.hatch{background:repeating-linear-gradient(135deg,var(--prp-map-border) 0 1px,var(--prp-map-nodata) 1px 4px);box-shadow:inset 0 0 0 1px var(--prp-line)}
+.nodata{background:var(--prp-map-nodata);box-shadow:inset 0 0 0 1px var(--prp-line)}
+.tip{position:fixed;z-index:20;max-width:300px;padding:7px 10px;pointer-events:none;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius);box-shadow:var(--prp-shadow-2);color:var(--prp-text);font-size:12.5px;line-height:1.5}
+.tip b{font-weight:600}.tip .sub{color:var(--prp-muted)}
+
+/* Tables */
+.tbl{overflow:auto;max-height:620px}.tbl.full{max-height:none}
+.prp-table .sort{padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
+.prp-table .sort:hover{color:var(--prp-text)}
+.prp-table td input[type=checkbox]{margin:0;accent-color:var(--prp-primary)}
+.prp-table td.grp{padding-top:14px;background:var(--prp-surface-2);color:var(--prp-muted);font:600 var(--prp-fs-xs) var(--prp-font-ui);letter-spacing:.03em;text-transform:uppercase}
+.prp-table th .sw{margin-right:5px}
+.cname{color:var(--prp-text);font-weight:600;text-decoration:none}.cname:hover{color:var(--prp-link);text-decoration:underline}
+.band{display:inline-block;padding:0 6px;border-radius:3px;font:500 10.5px/1.6 var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase}
+.band.high{background:var(--prp-bad-soft);color:var(--prp-bad)}.band.elevated{background:var(--prp-warn-soft);color:var(--prp-warn)}
+.band.normal{background:var(--prp-good-soft);color:var(--prp-good)}.band.none{color:var(--prp-muted)}
+.up,.prp-table .up{color:var(--prp-bad)}.down,.prp-table .down{color:var(--prp-good)}
+.best,.prp-table .best{color:var(--prp-good);font-weight:600}.worst,.prp-table .worst{color:var(--prp-bad)}
+.mk{margin-left:4px;font-size:10px}
+.movers .prp-table+.prp-table{border-top:1px solid var(--prp-line)}
+
+/* Country and comparison */
+.ptitle{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 16px;flex-wrap:wrap;padding:16px 16px 2px}
+.ptitle h2{margin:4px 0 2px;font:600 26px/1.2 var(--prp-font-serif);letter-spacing:-.01em}
+.ptitle .sub{color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
 .links{display:flex;flex-wrap:wrap;gap:6px}
-.comp{display:grid;grid-template-columns:200px minmax(0,1fr) 54px 70px;gap:10px;align-items:center;padding:6px 14px;font-size:12.5px}
-.comp .track{height:8px;background:#0f1b25;border-radius:4px;overflow:hidden}.comp .fill{height:100%;border-radius:4px}
-.comp small{color:var(--faint);font:10px 'DM Mono'}
-.chart{padding:10px 14px 4px}.chart svg{width:100%;height:auto;display:block}
-.axis text{fill:var(--faint);font:10px 'DM Mono'}.axis line,.axis path{stroke:#2a3a46}
-.ev{padding:8px 14px;border-top:1px solid #24343f;font-size:12.5px}.ev a{color:var(--text);text-decoration:none;word-break:break-all}.ev a:hover{color:var(--accent)}.ev small{display:block;color:var(--faint);font:10px 'DM Mono'}
-.key{display:flex;gap:14px;flex-wrap:wrap;padding:6px 14px 10px;font-size:12px}.key i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
-.best{color:var(--good);font-weight:600}.worst{color:var(--bad)}
-.note{color:var(--faint);font-size:11.5px;padding:0 14px 14px;line-height:1.6}
-.empty{padding:30px;text-align:center;color:var(--muted)}
-.method{padding:14px;font-size:13px;color:var(--muted);line-height:1.65}.method b{color:var(--text)}
-@media(max-width:980px){.cols{grid-template-columns:1fr}}
-@media(max-width:700px){.wrap{padding:14px}.comp{grid-template-columns:120px minmax(0,1fr) 44px}.comp small{display:none}input[type=range]{width:140px}}
+.kpis{grid-template-columns:repeat(auto-fill,minmax(196px,1fr));padding:14px 16px 16px}
+.kpis .prp-kpi{background:var(--prp-surface-2)}.prp-kpi .band{display:inline-block;margin-right:2px}
+.comp{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 34px 74px;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--prp-line-soft);font-size:12.5px}
+.comp .track{height:8px;overflow:hidden;border-radius:4px;background:var(--prp-surface-3)}
+.comp .fill{height:100%;border-radius:4px}
+.comp small{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.comp b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.compfig{padding:0 0 14px}.compfig figcaption{padding:0 14px}
+.chartfig{padding:12px 14px 14px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--prp-muted);font:10.5px var(--prp-font-mono)}
+.chart .lbl{fill:var(--prp-text-2);font:12px var(--prp-font-ui)}
+.axis line,.axis path{stroke:var(--prp-axis)}
+.gridl line{stroke:var(--prp-grid)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;color:var(--prp-text-2);font-size:12px}
+.ev{padding:9px 14px;border-bottom:1px solid var(--prp-line-soft);font-size:12.5px}
+.ev a{color:var(--prp-link);text-decoration:none;word-break:break-all}.ev a:hover{text-decoration:underline}
+.ev small{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+.datatable{margin-top:12px}
+.datatable summary{width:max-content;cursor:pointer;color:var(--prp-link);font:500 12.5px var(--prp-font-ui)}
+.datatable .tbl{max-height:300px;margin-top:8px;border:1px solid var(--prp-line-soft);border-radius:var(--prp-radius-sm)}
+.method{padding:4px 20px 18px}.method p{margin:12px 0}
+.method code{font:13px var(--prp-font-mono);color:var(--prp-text-2)}
+.prp-sources p{margin:0 0 5px;max-width:110ch}
+
+@media(max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}
+  .toolbar .field{flex-wrap:wrap}.toolbar .field .prp-select{width:100%}input[type=range]{width:150px}
+  .prp-panel-head .tools .prp-input{width:100%}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpis .prp-kpi{padding:10px 12px}.comp{grid-template-columns:minmax(0,118px) minmax(0,1fr) 30px}.comp small{display:none}.ramp{width:210px}}
+@media(prefers-reduced-motion:reduce){.land{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <section class="hero">
-    <div><div class="eyebrow">JDP-I Q · Geopolitical Volatility</div><h1>Geopolitical Volatility Index</h1>
-      <p>A daily 0–100 score for how unusually turbulent each country's news is: conflict, political escalation, civil unrest, economic disruption and cross-border spread, each measured against the past 90 days of every country. Built from the GDELT event stream. Compare up to four countries.</p>
-      <div class="meta" id="meta">Loading…</div></div>
-    <div class="tabs" role="tablist"><button data-tab="map" class="active">Map &amp; ranking</button><button data-tab="profile">Country</button><button data-tab="compare">Compare<span class="count" id="ccount" hidden>0</span></button><button data-tab="method">Method</button></div>
-  </section>
+  <header class="front">
+    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> Geopolitical Volatility</div>
+    <h1 class="prp-title">Geopolitical Volatility</h1>
+    <p class="prp-dek">A daily 0–100 index of how unusually turbulent each country’s news is (conflict, political escalation, civil unrest, economic disruption and cross-border spread), measured against the past 90 days of every country. Map it, rank it, and compare up to four countries.</p>
+    <div class="prp-meta" id="meta" aria-live="polite">Loading…</div>
+  </header>
 
-  <section id="tab-map">
-    <div class="panel">
-      <div class="phead"><b id="maptitle">GVI score</b>
-        <span><label class="meta" style="margin:0">Colour by <select id="metric" aria-label="Metric"></select></label>
-        <label class="meta" style="margin:0 0 0 10px">Day <input type="range" id="day" aria-label="Day"> <span id="daylabel"></span></label></span></div>
-      <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
-      <div class="legend" id="legend"></div>
+  <nav class="prp-tabs" role="tablist" aria-label="Geopolitical Volatility views">
+    <button type="button" role="tab" id="tabbtn-map" data-tab="map" aria-controls="tab-map" aria-selected="true" class="active">Map &amp; ranking</button>
+    <button type="button" role="tab" id="tabbtn-profile" data-tab="profile" aria-controls="tab-profile" aria-selected="false" tabindex="-1">Country</button>
+    <button type="button" role="tab" id="tabbtn-compare" data-tab="compare" aria-controls="tab-compare" aria-selected="false" tabindex="-1">Compare<span class="count" id="ccount" hidden>0</span></button>
+    <button type="button" role="tab" id="tabbtn-method" data-tab="method" aria-controls="tab-method" aria-selected="false" tabindex="-1">Method</button>
+  </nav>
+
+  <section id="tab-map" class="stack" role="tabpanel" aria-labelledby="tabbtn-map">
+    <div class="toolbar" role="group" aria-label="Map settings">
+      <label class="field"><span class="prp-label">Colour by</span><select class="prp-select" id="metric"></select></label>
+      <label class="field"><span class="prp-label">Day</span><input type="range" id="day"><output class="daylabel" id="daylabel" for="day"></output></label>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><b id="maptitle">GVI score</b></div>
+      <figure class="prp-figure mapfig">
+        <svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg>
+        <div class="legend" id="legend"></div>
+        <figcaption id="mapcap"><b>Figure 1.</b> The selected measure by country.</figcaption>
+      </figure>
     </div>
     <div class="cols">
-      <div class="panel">
-        <div class="phead"><b>Ranking</b><span><input type="search" id="search" placeholder="Search countries…" aria-label="Search countries"> <select id="region" aria-label="Region"><option value="">All regions</option></select> <label class="meta" style="margin:0"><input type="checkbox" id="scoredOnly" checked> scored only</label></span></div>
-        <div class="tbl"><table><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><b>Ranking</b><span class="tools"><input class="prp-input" type="search" id="search" placeholder="Search countries…" aria-label="Search countries"><select class="prp-select" id="region" aria-label="Region"><option value="">All regions</option></select><label class="check"><input type="checkbox" id="scoredOnly" checked> Scored only</label></span></div>
+        <div class="tbl"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
         <p class="note">Tick up to four countries to compare them. Countries without a score had too few events or sources that day; their event counts and tone are still shown.</p>
       </div>
-      <div>
-        <div class="panel"><div class="phead"><b>Biggest movers · 7 days</b></div><div id="movers"></div></div>
-        <div class="panel"><div class="phead"><b>Global activity</b></div><div class="chart" id="globalchart"></div><p class="note" id="globalnote"></p></div>
+      <div class="stack">
+        <div class="prp-panel movers"><div class="prp-panel-head"><b>Biggest movers · 7 days</b></div><div id="movers"></div></div>
+        <div class="prp-panel"><div class="prp-panel-head"><b>Global activity</b></div>
+          <figure class="prp-figure chartfig"><div class="chart" id="globalchart"></div>
+            <figcaption><b>Figure 2.</b> Worldwide, the evidence-weighted mean GVI (top) and the number of located events per day (bottom). Source: GDELT 2.0.</figcaption>
+            <details class="datatable" id="globaldata"><summary>Data table</summary></details></figure></div>
       </div>
     </div>
   </section>
 
-  <section id="tab-profile" hidden><div id="profile"><div class="panel"><div class="empty">Choose a country on the map or in the ranking.</div></div></div></section>
-  <section id="tab-compare" hidden><div id="compare"></div></section>
-  <section id="tab-method" hidden><div class="panel"><div class="phead"><b>How the index works</b></div><div class="method" id="methodtext"></div></div></section>
+  <section id="tab-profile" class="stack" role="tabpanel" aria-labelledby="tabbtn-profile" hidden><div id="profile" class="stack"><div class="prp-panel"><div class="prp-empty">Choose a country on the map or in the ranking.</div></div></div></section>
+  <section id="tab-compare" role="tabpanel" aria-labelledby="tabbtn-compare" hidden><div id="compare" class="stack"></div></section>
+  <section id="tab-method" role="tabpanel" aria-labelledby="tabbtn-method" hidden><div class="prp-panel"><div class="prp-panel-head"><b>How the index works</b></div><div class="method prp-prose" id="methodtext"></div></div></section>
+
+  <footer class="prp-sources">
+    <p><b>Data.</b> GDELT 2.0 event exports, all 96 quarter-hour files a day, which code news reports worldwide into who-did-what-to-whom events (CAMEO) with a location and a Goldstein score; the index is rebuilt every morning. <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">The GDELT Project ↗</a></p>
+    <p><b>Context.</b> Regions, government, political stability (World Bank Worldwide Governance Indicators) and battle deaths in active wars (UCDP, via Realtime Battlefield) come from National Analysis.</p>
+    <p><b>Map.</b> Natural Earth 1:110m boundaries via world-atlas. <b>Caveat.</b> The GVI measures news coverage, not events on the ground; see the Method tab.</p>
+  </footer>
 </div>
-<div class="tip" id="tip" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script>
 // Geopolitical Volatility (rebuilt from the Lovable app). Data: ../volatility/data/index.json, built daily by
 // volatility/scripts/ingest.mjs from GDELT 2.0. Country metadata, political stability and active wars come from
 // National Analysis (../national/data/index.json), which draws on Realtime Battlefield.
+// Every colour comes from the PRP tokens: read at draw time, and again on the 'prp:themechange' event.
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const go = (suite, module, url) => embedded ? { href: `${SHELL}#/${suite}/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}`, target: '_top' } : { href: new URL(url, SHELL).href, target: '_blank' };
-const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="chip" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
-const COLOURS = ['#b7f36b', '#6ddac8', '#f0b95a', '#c59bff'];
+const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="prp-btn sm" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 const CAT_LABEL = { conflict: 'Conflict', political: 'Political', unrest: 'Unrest', economic: 'Economic', spread: 'Cross-border' };
 let V, N = new Map(), DAYS = [], C = [], byIso = new Map(), numToIso = new Map(), METRICS, dayIdx, compare = [], selected = null, sortKey = 'metric', sortDir = -1;
+
+/* ---------- colours (PRP tokens) ---------- */
+let PAL = {};
+function readPalette() {
+  const cs = getComputedStyle(document.documentElement), t = n => cs.getPropertyValue(n).trim(), lab = d3.interpolateLab;
+  const mid = t('--prp-div-mid'), neg = [1, 2, 3].map(i => t('--prp-div-neg-' + i)), pos = [1, 2, 3].map(i => t('--prp-div-pos-' + i));
+  PAL = {
+    // GVI: one red hue from near-neutral (calm) to dark, stepping at the elevated (40) and high (70) thresholds.
+    gvi: d3.scaleLinear().domain([0, 40, 70, 100]).range([lab(mid, neg[0])(0.3), neg[0], neg[1], neg[2]]).interpolate(lab).clamp(true),
+    // Signed scales, −1…1: positive (more volatile) red, negative (calmer) blue, grey at zero.
+    div: d3.scaleLinear().domain([-1, -2 / 3, -1 / 3, 0, 1 / 3, 2 / 3, 1]).range([pos[2], pos[1], pos[0], mid, neg[0], neg[1], neg[2]]).interpolate(lab).clamp(true),
+    // Counts and other magnitudes, 0…1: one blue hue.
+    seq: d3.scaleLinear().domain(d3.range(7).map(i => i / 6)).range([100, 200, 300, 400, 500, 600, 700].map(i => t('--prp-seq-' + i))).interpolate(lab).clamp(true),
+  };
+}
+readPalette();
+// Compared countries keep their colour (categorical, fixed order) for as long as they stay in the comparison.
+const slots = new Map();
+const slotOf = iso => { if (!slots.has(iso)) { const used = new Set(slots.values()); slots.set(iso, [0, 1, 2, 3].find(i => !used.has(i)) ?? 0); } return slots.get(iso); };
+const cc = iso => `var(--prp-cat-${slotOf(iso) + 1})`;
+const COMP_COLOUR = j => `var(--prp-cat-${j + 1})`;
+const sw = colour => `<i class="sw" style="background:${colour}" aria-hidden="true"></i>`;
+function placeTip(ev, html) {
+  const t = $('#tip'); t.innerHTML = html; t.hidden = false;
+  const r = t.getBoundingClientRect();
+  t.style.left = Math.max(8, Math.min(ev.clientX + 14, innerWidth - r.width - 8)) + 'px';
+  t.style.top = (ev.clientY + 14 + r.height > innerHeight ? ev.clientY - r.height - 10 : ev.clientY + 14) + 'px';
+}
+const hideTip = () => { $('#tip').hidden = true; };
 
 /* ---------- per-country derived metrics ---------- */
 const mean = a => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
@@ -160,36 +256,50 @@ function metricList() {
     { id: 'articles', label: 'Articles (latest day)', get: c => lat(c)?.articles ?? null, fmt: int, group: 'Activity', log: true },
     { id: 'sources', label: 'Distinct news sources (latest day)', get: c => lat(c)?.sources ?? null, fmt: int, group: 'Activity', log: true },
     { id: 'share', label: 'Share of world events (latest day)', get: c => lat(c)?.share ?? null, fmt: v => (v == null ? '–' : (v * 100).toFixed(2) + '%'), group: 'Activity', log: true },
-    { id: 'pv', label: 'Political stability (World Bank, −2.5…2.5)', get: pv, fmt: v => (v == null ? '–' : v.toFixed(2)), group: 'Context', scale: 'tone' },
-    { id: 'war', label: 'Battle deaths in active wars, 2026', get: c => warDeaths(c) || null, fmt: int, group: 'Context', log: true },
+    { id: 'pv', label: 'Political stability (World Bank, −2.5…2.5)', get: pv, fmt: v => (v == null ? '–' : v.toFixed(2)), group: 'Context', scale: 'tone', src: 'World Bank Worldwide Governance Indicators, via National Analysis' },
+    { id: 'war', label: 'Battle deaths in active wars, 2026', get: c => warDeaths(c) || null, fmt: int, group: 'Context', log: true, src: 'UCDP, via Realtime Battlefield' },
   ];
 }
-const gviColour = v => (v == null ? '#2a3a46' : d3.interpolateRgbBasis(['#2f6f63', '#6b8f4a', '#f0b95a', '#ff826f', '#d9304a'])(Math.max(0, Math.min(1, v / 100))));
+const gviColour = v => (v == null ? 'transparent' : PAL.gvi(v));
+// A colour function for the metric's values; also the domain its legend shows.
 function scaleFor(m, vals) {
-  if (m.scale === 'gvi') return gviColour;
-  if (m.scale === 'div') { const r = d3.max(vals, Math.abs) || 1; return v => (v == null ? '#2a3a46' : d3.interpolateRdYlGn(0.5 - (m.id === 'rankChange' ? -v : v) / r / 2)); }
-  if (m.scale === 'tone') { const [lo, hi] = d3.extent(vals); return v => (v == null ? '#2a3a46' : d3.interpolateRgb('#ff826f', '#6ddac8')(hi > lo ? (v - lo) / (hi - lo) : 0.5)); }
+  if (m.scale === 'gvi') return { s: PAL.gvi, lo: 0, hi: 100 };
+  if (m.scale === 'div' || m.scale === 'tone') { const r = d3.max(vals, Math.abs) || 1, k = m.scale === 'tone' ? -1 : 1; return { s: v => PAL.div(k * v / r), lo: -r, hi: r, mid: true }; }
   const [lo, hi] = d3.extent(vals), t = m.log ? d3.scaleLog().domain([Math.max(lo, 1e-6), hi]).clamp(true) : d3.scaleLinear().domain([lo, hi]);
-  return v => (v == null ? '#2a3a46' : d3.interpolateRgb('#1f3a4a', '#b7f36b')(hi > lo ? t(Math.max(v, 1e-6)) : 0.5));
+  return { s: v => PAL.seq(hi > lo ? t(Math.max(v, 1e-6)) : 0.5), lo, hi, log: m.log };
 }
 
 /* ---------- map ---------- */
 let mapG;
 function drawMap(world) {
   const svg = d3.select('#map'), proj = d3.geoNaturalEarth1().fitExtent([[6, 6], [954, 464]], { type: 'Sphere' }), path = d3.geoPath(proj);
+  const pat = svg.append('defs').append('pattern').attr('id', 'nodata').attr('patternUnits', 'userSpaceOnUse').attr('width', 5).attr('height', 5).attr('patternTransform', 'rotate(45)');
+  pat.append('rect').attr('width', 5).attr('height', 5).style('fill', 'var(--prp-map-nodata)');
+  pat.append('line').attr('y2', 5).attr('stroke-width', 1.4).style('stroke', 'var(--prp-map-border)');
+  svg.append('path').datum({ type: 'Sphere' }).attr('class', 'sphere').attr('d', path);
+  svg.append('path').datum(d3.geoGraticule10()).attr('class', 'graticule').attr('d', path);
   mapG = svg.append('g');
   mapG.selectAll('path').data(topojson.feature(world, world.objects.countries).features).join('path').attr('class', 'land').attr('d', path)
-    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)), m = cur(); const t = $('#tip'); t.hidden = false; t.style.left = ev.clientX + 12 + 'px'; t.style.top = ev.clientY + 12 + 'px'; t.innerHTML = c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${m.id !== 'score' ? `<br>GVI: ${c.cur.score == null ? '–' : c.cur.score.toFixed(1)}` : ''}` : esc(f.properties.name); })
-    .on('mouseleave', () => { $('#tip').hidden = true; })
-    .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso && byIso.has(iso)) openProfile(iso); });
+    .on('mouseenter', function () { d3.select(this).raise(); })
+    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)), m = cur(); placeTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${m.id !== 'score' ? `<br><span class="sub">GVI: ${c.cur.score == null ? '–' : c.cur.score.toFixed(1)}</span>` : ''}` : `<b>${esc(f.properties.name)}</b><br><span class="sub">No data</span>`); })
+    .on('mouseleave', () => { hideTip(); mapG.selectAll('.land.sel').raise(); })
+    .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso && byIso.has(iso)) { hideTip(); openProfile(iso); } });
 }
 const cur = () => METRICS.find(x => x.id === $('#metric').value);
 function colourMap() {
-  const m = cur(), vals = C.map(m.get).filter(v => v != null), s = scaleFor(m, vals);
-  mapG.selectAll('path').attr('fill', f => { const c = byIso.get(numToIso.get(f.id)); return c ? s(m.get(c)) : '#1b2833'; }).classed('sel', f => compare.includes(numToIso.get(f.id)));
-  $('#maptitle').textContent = m.label;
-  if (m.scale === 'gvi') $('#legend').innerHTML = [[0, 'calm'], [25, ''], [40, 'elevated ≥40'], [55, ''], [70, 'high ≥70'], [90, '']].map(([v, l]) => `<span><i style="background:${gviColour(v + 5)}"></i>${l}</span>`).join('') + '<span><i style="background:#2a3a46"></i>not scored</span>';
-  else { const [lo, hi] = d3.extent(vals); $('#legend').innerHTML = `<span>${m.fmt(lo)}</span><i style="width:140px;background:linear-gradient(90deg,${s(lo)},${m.scale === 'div' ? s(0) + ',' : ''}${s(hi)})"></i><span>${m.fmt(hi)}</span><span><i style="background:#2a3a46"></i>no data</span>`; }
+  const m = cur(), vals = C.map(m.get).filter(v => v != null), { s, lo, hi, mid, log } = scaleFor(m, vals);
+  mapG.selectAll('path.land').style('fill', f => { const c = byIso.get(numToIso.get(f.id)); if (!c) return 'var(--prp-map-nodata)'; const v = m.get(c); return v == null ? 'url(#nodata)' : s(v); })
+    .classed('sel', f => compare.includes(numToIso.get(f.id)));
+  mapG.selectAll('.land.sel').raise();
+  $('#maptitle').textContent = `${m.label} · ${DAYS[dayIdx]}`;
+  // Legend: a colour bar over the scale's domain, plus the two kinds of missing data.
+  const at = p => (lo == null ? null : log ? lo * (hi / lo) ** p : lo + (hi - lo) * p);
+  const stops = d3.range(0, 1.0001, 0.05).map(p => { const v = at(p); return `${v == null ? 'transparent' : s(v)} ${Math.round(p * 100)}%`; }).join(',');
+  const ticks = m.scale === 'gvi' ? [[0, '0'], [40, '40 elevated'], [70, '70 high'], [100, '100']] : lo == null ? [] : mid ? [[0, m.fmt(lo)], [50, '0'], [100, m.fmt(hi)]] : [[0, m.fmt(lo)], [100, m.fmt(hi)]];
+  $('#legend').innerHTML = `<span class="ramp"><i style="background:linear-gradient(90deg,${stops})"></i>${ticks.map(([p, l], k) => `<b class="${k === 0 ? 'first' : k === ticks.length - 1 ? 'last' : ''}" style="left:${p}%">${esc(l)}</b>`).join('')}</span>` +
+    '<span><i class="sw hatch" aria-hidden="true"></i>not scored that day</span><span><i class="sw nodata" aria-hidden="true"></i>no data</span>';
+  const what = m.scale === 'gvi' ? '; 40 and above is elevated, 70 and above high' : m.scale === 'div' ? '; red is more volatile than a week before, blue calmer' : m.scale === 'tone' ? '; red is more hostile or less stable, blue more cooperative or stable' : m.log ? ' (log scale)' : '';
+  $('#mapcap').innerHTML = `<b>Figure 1.</b> ${esc(m.label)} by country on ${esc(DAYS[dayIdx])}${what}. Hatched countries had too few events or sources to be scored. Source: ${esc(m.src || 'GDELT 2.0, scored by PRP')}.`;
 }
 
 /* ---------- ranking ---------- */
@@ -197,7 +307,7 @@ function renderTable() {
   const m = cur(), q = $('#search').value.toLowerCase(), reg = $('#region').value, only = $('#scoredOnly').checked;
   const cols = [['rank', '#', 'num'], ['name', 'Country', ''], ['metric', m.label, 'num'], ['band', 'Band', ''], ['change7', '7d Δ', 'num'], ['rankChange', 'Rank Δ', 'num'], ['events', 'Events', 'num']];
   if (m.id === 'score') cols.splice(2, 1, ['metric', 'GVI', 'num']);
-  $('#thead').innerHTML = '<th>Cmp</th>' + cols.map(([k, l, cl]) => `<th class="${cl}" data-sort="${k}">${esc(l)}${sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : ''}</th>`).join('');
+  $('#thead').innerHTML = '<th title="Tick up to four countries to compare them">Cmp</th>' + cols.map(([k, l, cl]) => `<th class="${cl}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}${sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : ''}</button></th>`).join('');
   const val = (c, k) => ({ rank: c.cur.rank ? -c.cur.rank : null, name: c.name, metric: m.get(c), band: c.cur.score, change7: c.cur.change7, rankChange: c.cur.rankChange, events: c.cur.events })[k];
   const list = C.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || nat(c).region === reg) && (!only || c.cur.score != null))
     .sort((a, b) => { const x = val(a, sortKey), y = val(b, sortKey); if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * sortDir; });
@@ -206,49 +316,70 @@ function renderTable() {
     <td class="num">${c.cur.rank || ''}</td><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${m.fmt(m.get(c))}</td>
     <td><span class="band ${bandOf(c.cur.score)}">${bandOf(c.cur.score) === 'none' ? 'n/a' : bandOf(c.cur.score)}</span></td>
     <td class="num ${c.cur.change7 > 0 ? 'up' : c.cur.change7 < 0 ? 'down' : ''}">${c.cur.change7 == null ? '–' : (c.cur.change7 > 0 ? '+' : '') + c.cur.change7.toFixed(1)}</td>
-    <td class="num">${arrow(c.cur.rankChange)}</td><td class="num">${c.cur.events.toLocaleString('en-GB')}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">No countries match.</td></tr>';
+    <td class="num">${arrow(c.cur.rankChange)}</td><td class="num">${c.cur.events.toLocaleString('en-GB')}</td></tr>`).join('') || '<tr><td colspan="8" class="prp-empty">No countries match.</td></tr>';
   $('#thead').querySelectorAll('[data-sort]').forEach(th => th.onclick = () => { const k = th.dataset.sort; sortDir = sortKey === k ? -sortDir : k === 'name' ? 1 : -1; sortKey = k; renderTable(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
 function renderMovers() {
   const l = C.filter(c => c.cur.change7 != null).sort((a, b) => b.cur.change7 - a.cur.change7);
-  const row = c => `<tr><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${c.cur.avg7.toFixed(1)}</td><td class="num ${c.cur.change7 > 0 ? 'up' : 'down'}">${(c.cur.change7 > 0 ? '+' : '') + c.cur.change7.toFixed(1)}</td></tr>`;
-  $('#movers').innerHTML = l.length ? `<table><thead><tr><th>Rising</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(0, 6).map(row).join('')}</tbody></table>
-    <table><thead><tr><th>Easing</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : '<div class="empty">Needs two weeks of scores.</div>';
+  const row = c => `<tr><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${c.cur.avg7.toFixed(1)}</td><td class="num ${c.cur.change7 > 0 ? 'up' : 'down'}">${c.cur.change7 > 0 ? '▲ +' : '▼ '}${c.cur.change7.toFixed(1)}</td></tr>`;
+  $('#movers').innerHTML = l.length ? `<table class="prp-table"><thead><tr><th>Rising</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(0, 6).map(row).join('')}</tbody></table>
+    <table class="prp-table"><thead><tr><th>Easing</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : '<div class="prp-empty">Needs two weeks of scores.</div>';
 }
+// Two small panels on one time axis (no dual axis): mean GVI above, located events below.
 function renderGlobal() {
-  const g = V.global, w = 440, h = 140, x = d3.scaleTime().domain(d3.extent(g, r => new Date(r[0]))).range([34, w - 34]);
-  const y = d3.scaleLinear().domain([0, d3.max(g, r => r[1])]).nice().range([h - 20, 8]), y2 = d3.scaleLinear().domain([0, 100]).range([h - 20, 8]);
-  const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`);
-  svg.append('g').selectAll('rect').data(g).join('rect').attr('x', r => x(new Date(r[0])) - 3).attr('width', 6).attr('y', r => y(r[1])).attr('height', r => y(0) - y(r[1])).attr('fill', '#2a4a5a');
-  svg.append('path').datum(g.filter(r => r[3] != null)).attr('fill', 'none').attr('stroke', '#b7f36b').attr('stroke-width', 1.6).attr('d', d3.line().x(r => x(new Date(r[0]))).y(r => y2(r[3])));
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - 20})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.timeFormat('%d %b')));
-  svg.append('g').attr('class', 'axis').attr('transform', 'translate(34,0)').call(d3.axisLeft(y).ticks(4).tickFormat(d3.format('~s')));
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(${w - 34},0)`).call(d3.axisRight(y2).ticks(4));
-  $('#globalchart').replaceChildren(svg.node());
-  $('#globalnote').textContent = 'Bars: located events per day (left axis). Line: the evidence-weighted mean GVI (right axis).';
+  const el = $('#globalchart'), g = V.global, w = Math.max(300, Math.round(el.clientWidth || 440)), ph = 80, gap = 34, m = { l: 40, r: 8, t: 18 };
+  const top2 = m.t + ph + gap, h = top2 + ph + 24, bw = Math.max(2, (w - m.l - m.r) / g.length * 0.66);
+  const x = d3.scaleTime().domain(d3.extent(g, r => new Date(r[0]))).range([m.l + bw / 2 + 2, w - m.r - bw / 2 - 2]);
+  const yG = d3.scaleLinear().domain([0, 100]).range([m.t + ph, m.t]), yE = d3.scaleLinear().domain([0, d3.max(g, r => r[1]) || 1]).nice(3).range([top2 + ph, top2]);
+  const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`).attr('role', 'img').attr('aria-label', 'Global mean GVI and located events per day');
+  for (const [y, ticks] of [[yG, [0, 50, 100]], [yE, yE.ticks(3)]]) svg.append('g').attr('class', 'gridl').selectAll('line').data(ticks).join('line').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y).attr('y2', y);
+  svg.append('text').attr('class', 'lbl').attr('x', m.l).attr('y', m.t - 7).text('Mean GVI (0–100)');
+  svg.append('text').attr('class', 'lbl').attr('x', m.l).attr('y', top2 - 7).text('Located events per day');
+  const gl = g.filter(r => r[3] != null);
+  svg.append('path').datum(gl).attr('fill', 'none').attr('stroke-width', 1.75).attr('stroke-linejoin', 'round').style('stroke', 'var(--prp-text)').attr('d', d3.line().x(r => x(new Date(r[0]))).y(r => yG(r[3])));
+  svg.append('g').selectAll('circle').data(gl).join('circle').attr('cx', r => x(new Date(r[0]))).attr('cy', r => yG(r[3])).attr('r', 2).style('fill', 'var(--prp-text)').append('title').text(r => `${r[0]}: mean GVI ${r[3].toFixed(1)}`);
+  svg.append('g').selectAll('rect').data(g).join('rect').attr('x', r => x(new Date(r[0])) - bw / 2).attr('width', bw).attr('y', r => yE(r[1])).attr('height', r => yE(0) - yE(r[1])).style('fill', 'var(--prp-seq-300)').append('title').text(r => `${r[0]}: ${r[1].toLocaleString('en-GB')} events`);
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${top2 + ph})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(w / 95))).tickFormat(d3.timeFormat('%d %b')).tickSizeOuter(0));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(yG).tickValues([0, 50, 100]).tickSizeOuter(0));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(yE).ticks(3).tickFormat(d3.format('~s')).tickSizeOuter(0));
+  el.replaceChildren(svg.node());
+  $('#globaldata').innerHTML = `<summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">Located events</th><th class="num">Mean GVI</th></tr></thead><tbody>${[...g].reverse().map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1].toLocaleString('en-GB')}</td><td class="num">${r[3] == null ? '–' : r[3].toFixed(1)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 /* ---------- charts ---------- */
-function lineChart(lines, { w = 900, h = 220, yMax = 100, bands = true } = {}) {
-  const all = lines.flatMap(l => l.points);
-  if (!all.length) return '<div class="empty">No scored days yet.</div>';
-  const x = d3.scaleTime().domain(d3.extent(DAYS, d => new Date(d))).range([36, w - 10]), y = d3.scaleLinear().domain([0, yMax]).range([h - 22, 8]);
+// A line chart sized to its container (1 unit = 1 CSS pixel, so its text stays legible), with a hover read-out.
+function lineChart(lines, { w = 640, h = 220, yMax = 100, bands = true } = {}) {
+  if (!lines.some(l => l.points.some(p => p[1] != null))) return Object.assign(document.createElement('div'), { className: 'prp-empty', textContent: 'No scored days yet.' });
+  w = Math.max(300, Math.round(w));
+  const m = { l: 32, r: 10, t: 8, b: 22 }, x = d3.scaleTime().domain(d3.extent(DAYS, d => new Date(d))).range([m.l, w - m.r]), y = d3.scaleLinear().domain([0, yMax]).range([h - m.b, m.t]);
   const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`);
-  if (bands) { svg.append('rect').attr('x', 36).attr('width', w - 46).attr('y', y(100)).attr('height', y(70) - y(100)).attr('fill', '#ff826f10'); svg.append('rect').attr('x', 36).attr('width', w - 46).attr('y', y(70)).attr('height', y(40) - y(70)).attr('fill', '#f0b95a0c'); }
-  svg.append('line').attr('x1', x(new Date(DAYS[dayIdx]))).attr('x2', x(new Date(DAYS[dayIdx]))).attr('y1', 8).attr('y2', h - 22).attr('stroke', '#91a0aa55').attr('stroke-dasharray', '3 3');
+  if (bands) { svg.append('rect').attr('x', m.l).attr('width', w - m.l - m.r).attr('y', y(100)).attr('height', y(70) - y(100)).style('fill', 'var(--prp-bad-soft)'); svg.append('rect').attr('x', m.l).attr('width', w - m.l - m.r).attr('y', y(70)).attr('height', y(40) - y(70)).style('fill', 'var(--prp-warn-soft)'); }
+  svg.append('g').attr('class', 'gridl').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y).attr('y2', y);
+  svg.append('line').attr('x1', x(new Date(DAYS[dayIdx]))).attr('x2', x(new Date(DAYS[dayIdx]))).attr('y1', m.t).attr('y2', h - m.b).attr('stroke-dasharray', '3 3').style('stroke', 'var(--prp-faint)');
   for (const l of lines) {
-    svg.append('path').datum(l.points).attr('fill', 'none').attr('stroke', l.colour).attr('stroke-width', l.width || 2).attr('opacity', l.opacity || 1).attr('d', d3.line().defined(p => p[1] != null).x(p => x(new Date(p[0]))).y(p => y(p[1])));
-    svg.append('g').selectAll('circle').data(l.points.filter(p => p[1] != null)).join('circle').attr('cx', p => x(new Date(p[0]))).attr('cy', p => y(p[1])).attr('r', l.dots === false ? 0 : 2.2).attr('fill', l.colour).append('title').text(p => `${l.name} · ${p[0]}: ${p[1].toFixed(1)}`);
+    svg.append('path').datum(l.points).attr('fill', 'none').attr('stroke-width', l.width || 1.75).attr('stroke-linejoin', 'round').style('stroke', l.colour).attr('d', d3.line().defined(p => p[1] != null).x(p => x(new Date(p[0]))).y(p => y(p[1])));
+    if (l.dots !== false) svg.append('g').selectAll('circle').data(l.points.filter(p => p[1] != null)).join('circle').attr('cx', p => x(new Date(p[0]))).attr('cy', p => y(p[1])).attr('r', 2.2).style('fill', l.colour);
   }
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - 22})`).call(d3.axisBottom(x).ticks(8).tickFormat(d3.timeFormat('%d %b')));
-  svg.append('g').attr('class', 'axis').attr('transform', 'translate(36,0)').call(d3.axisLeft(y).ticks(5));
-  return svg.node().outerHTML;
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(Math.max(3, Math.floor(w / 100))).tickFormat(d3.timeFormat('%d %b')).tickSizeOuter(0));
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickSizeOuter(0));
+  // Hover: a rule on the nearest day and every series' value there.
+  const rule = svg.append('line').attr('y1', m.t).attr('y2', h - m.b).attr('visibility', 'hidden').style('stroke', 'var(--prp-text-2)');
+  const vals = lines.map(l => new Map(l.points.map(p => [p[0], p[1]])));
+  svg.append('rect').attr('x', m.l).attr('y', m.t).attr('width', w - m.l - m.r).attr('height', h - m.t - m.b).attr('fill', 'transparent')
+    .on('mousemove', ev => {
+      const [px] = d3.pointer(ev), d = DAYS[d3.leastIndex(DAYS, s => Math.abs(x(new Date(s)) - px))], xd = x(new Date(d));
+      rule.attr('x1', xd).attr('x2', xd).attr('visibility', 'visible');
+      placeTip(ev, `<b>${esc(d)}</b>` + lines.map((l, i) => { const v = vals[i].get(d); return `<div>${sw(l.colour)}${esc(l.name)}: ${v == null ? '–' : v.toFixed(1)}</div>`; }).join(''));
+    })
+    .on('mouseleave', () => { rule.attr('visibility', 'hidden'); hideTip(); });
+  return svg.node();
 }
 const pts = (c, j) => c.days.map(r => [r[0], j == null ? r[1] : r[2]?.[j] ?? null]);
+const width = id => $(id)?.clientWidth || 640;
 
 /* ---------- country profile ---------- */
-function openProfile(iso) { selected = iso; renderProfile(); setTab('profile'); writeHash(); }
+function openProfile(iso) { selected = iso; setTab('profile'); writeHash(); }
 function renderProfile() {
   const c = byIso.get(selected); if (!c) return;
   const n = nat(c), L = lat(c), k = c.cur, comps = V.components;
@@ -263,82 +394,112 @@ function renderProfile() {
     ['Coverage', ({ h: 'High', m: 'Medium', l: 'Low', i: 'Insufficient' })[k.cov] || '–', L?.reason || `${k.daysScored30} scored days of last 30`],
     ['Share of world events', L ? (L.share * 100).toFixed(2) + '%' : '–', 'latest day'],
     ['Political stability', pv(c) == null ? '–' : pv(c).toFixed(2), 'World Bank WGI, −2.5…2.5'],
-    ['Active-war battle deaths', warDeaths(c) ? fmtN(warDeaths(c)) : '0', (n.conflict?.active2026 || []).map(w => w.name).join(', ') || 'none recorded in 2026'],
+    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.conflict?.active2026 || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
   ];
-  const compRows = comps.map((m, j) => { const v = k.comps?.[j]; const cnt = L?.counts?.[m.key]; return `<div class="comp"><span>${esc(m.label)} <small>${Math.round(m.weight * 100)}%</small></span><div class="track"><div class="fill" style="width:${v || 0}%;background:${gviColour(v)}"></div></div><b class="num">${v == null ? '–' : v.toFixed(0)}</b><small>${cnt == null ? '' : cnt + ' events'}</small></div>`; }).join('');
+  const compRows = comps.map((m, j) => { const v = k.comps?.[j]; const cnt = L?.counts?.[m.key]; return `<div class="comp"><span>${esc(m.label)} <small>${Math.round(m.weight * 100)}%</small></span><div class="track"><div class="fill" style="width:${v || 0}%;background:${gviColour(v)}"></div></div><b>${v == null ? '–' : v.toFixed(0)}</b><small>${cnt == null ? '' : cnt + ' events'}</small></div>`; }).join('');
   const ev = (L?.evidence || []).map(e => `<div class="ev"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 120))}</a><small>${esc(CAT_LABEL[e.cat] || 'Other')} · CAMEO ${esc(e.code)} · Goldstein ${e.g} · ${e.a} articles${e.a1 || e.a2 ? ` · ${esc([e.a1, e.a2].filter(Boolean).join(' → '))}` : ''}${e.loc ? ` · ${esc(e.loc)}` : ''}</small></div>`).join('');
-  const links = [link('q', 'pestle', `q/national.html#country=${c.iso3}`, 'National Analysis ↗'), link('q', 'headlines', `q/headlines.html`, 'Global Headline Tracker ↗')];
-  if (n.conflict?.active2026?.length) links.push(link('q', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
-  if (n.qid) links.push(link('hp', 'encyclopedia', `encyclopedia/index.html#/e/${n.qid}`, 'Encyclopaedia ↗'));
-  $('#profile').innerHTML = `<div class="panel"><div class="ptitle"><div><div class="eyebrow">${esc(n.region || '')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(DAYS[dayIdx])} · ${n.government ? esc(n.government) : ''}</div></div>
-      <div class="links">${links.join('')}<button class="chip" id="addcmp">${compare.includes(c.iso3) ? '✓ In comparison' : '+ Compare'}</button></div></div>
-      <div class="grid">${stats.map(([a, b, s]) => `<div class="stat"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('')}</div></div>
-    <div class="cols"><div class="panel"><div class="phead"><b>GVI over time</b></div><div class="chart">${lineChart([{ name: c.name, colour: '#b7f36b', points: pts(c) }])}</div>
-      <div class="chart">${lineChart(comps.map((m, j) => ({ name: m.label, colour: ['#ff826f', '#c59bff', '#f0b95a', '#6ddac8', '#7fb2ff'][j], width: 1.4, dots: false, points: pts(c, j) })), { h: 180, bands: false })}</div>
-      <div class="key">${comps.map((m, j) => `<span><i style="background:${['#ff826f', '#c59bff', '#f0b95a', '#6ddac8', '#7fb2ff'][j]}"></i>${esc(m.label)}</span>`).join('')}</div></div>
-    <div><div class="panel"><div class="phead"><b>Components · percentile vs 90 days</b></div>${compRows}<p class="note">Each component is ranked against every adequately covered country-day in the trailing 90 days (100 = the most intense seen).</p></div>
-      <div class="panel"><div class="phead"><b>Evidence · strongest events</b></div>${ev || `<div class="empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
+  const links = [link('rt', 'pestle', `q/national.html#country=${c.iso3}`, 'National Analysis ↗'), link('rt', 'headlines', `q/headlines.html`, 'Global Headline Tracker ↗')];
+  if (n.conflict?.active2026?.length) links.push(link('rt', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
+  if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#/e/${n.qid}`, 'Encyclopaedia ↗'));
+  const inCmp = compare.includes(c.iso3);
+  const days = [...c.days].reverse();
+  $('#profile').innerHTML = `<div class="prp-panel"><div class="ptitle"><div><div class="prp-label">${esc(n.region || 'Country')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(DAYS[dayIdx])}${n.government ? ' · ' + esc(n.government) : ''}</div></div>
+      <div class="links">${links.join('')}<button type="button" class="prp-btn sm ${inCmp ? '' : 'primary'}" id="addcmp">${inCmp ? '✓ In comparison' : '+ Compare'}</button></div></div>
+      <div class="prp-kpis kpis">${stats.map(([a, b, s]) => `<div class="stat prp-kpi"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('')}</div></div>
+    <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>GVI over time</b></div>
+      <figure class="prp-figure chartfig"><div class="chart" id="pf-gvi"></div><figcaption><b>Figure 3.</b> Daily GVI for ${esc(c.name)}; the elevated (40–70) and high (70+) bands are shaded and the dashed line marks the selected day. Source: GDELT 2.0.</figcaption></figure>
+      <figure class="prp-figure chartfig"><div class="chart" id="pf-comp"></div><div class="key">${comps.map((m, j) => `<span>${sw(COMP_COLOUR(j))}${esc(m.label)}</span>`).join('')}</div><figcaption><b>Figure 4.</b> The five components of ${esc(c.name)}’s GVI, each a percentile against the trailing 90 days.</figcaption>
+        <details class="datatable"><summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">GVI</th>${comps.map(m => `<th class="num">${esc(CAT_LABEL[m.key] || m.label)}</th>`).join('')}<th class="num">Events</th></tr></thead>
+          <tbody>${days.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1] == null ? '–' : r[1].toFixed(1)}</td>${comps.map((m, j) => `<td class="num">${r[2]?.[j] == null ? '–' : r[2][j].toFixed(0)}</td>`).join('')}<td class="num">${(r[3] || 0).toLocaleString('en-GB')}</td></tr>`).join('')}</tbody></table></div></details></figure></div>
+    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs 90 days</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in the trailing 90 days (100 = the most intense seen), on ${esc(DAYS[dayIdx])}.</figcaption></figure></div>
+      <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
+  $('#pf-gvi').replaceChildren(lineChart([{ name: 'GVI', colour: 'var(--prp-text)', points: pts(c) }], { w: width('#pf-gvi') }));
+  $('#pf-comp').replaceChildren(lineChart(comps.map((m, j) => ({ name: m.label, colour: COMP_COLOUR(j), width: 1.5, dots: false, points: pts(c, j) })), { w: width('#pf-comp'), h: 180, bands: false }));
   $('#addcmp').onclick = () => toggleCompare(c.iso3, !compare.includes(c.iso3));
 }
 
 /* ---------- compare ---------- */
 function toggleCompare(iso, on) {
-  compare = compare.filter(x => x !== iso);
-  if (on) { if (compare.length >= 4) compare.shift(); compare.push(iso); }
+  compare = compare.filter(x => x !== iso); slots.delete(iso);
+  if (on) { if (compare.length >= 4) slots.delete(compare.shift()); compare.push(iso); slotOf(iso); }
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
   colourMap(); renderTable(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); writeHash();
 }
 function renderCompare() {
   const cs = compare.map(i => byIso.get(i)).filter(Boolean);
-  if (!cs.length) { $('#compare').innerHTML = '<div class="panel"><div class="empty">Tick up to four countries in the ranking, or press “+ Compare” on a country page.</div></div>'; return; }
+  if (!cs.length) { $('#compare').innerHTML = '<div class="prp-panel"><div class="prp-empty">Tick up to four countries in the ranking, or press “+ Compare” on a country page.</div></div>'; return; }
   const rows = METRICS.filter(m => m.id !== 'rankChange').map(m => ({ m, v: cs.map(c => m.get(c)) }));
   const lowerBetter = new Set(['score', 'avg7', 'change7', 'vol30', 'peak30', 'high30', 'war', ...V.components.map(k => 'c_' + k.key)]), higherBetter = new Set(['tone', 'pv']);
-  const cell = (r, j) => { const v = r.v[j], ok = r.v.filter(x => x != null); let cls = ''; if (v != null && ok.length > 1 && (lowerBetter.has(r.m.id) || higherBetter.has(r.m.id))) { const best = lowerBetter.has(r.m.id) ? Math.min(...ok) : Math.max(...ok), worst = lowerBetter.has(r.m.id) ? Math.max(...ok) : Math.min(...ok); cls = v === best ? 'best' : v === worst ? 'worst' : ''; } return `<td class="num ${cls}">${r.m.fmt(v)}</td>`; };
+  const cell = (r, j) => { const v = r.v[j], ok = r.v.filter(x => x != null); let cls = ''; if (v != null && ok.length > 1 && (lowerBetter.has(r.m.id) || higherBetter.has(r.m.id))) { const best = lowerBetter.has(r.m.id) ? Math.min(...ok) : Math.max(...ok), worst = lowerBetter.has(r.m.id) ? Math.max(...ok) : Math.min(...ok); cls = v === best ? 'best' : v === worst ? 'worst' : ''; }
+    return `<td class="num ${cls}">${r.m.fmt(v)}${cls === 'best' ? '<span class="mk" title="Calmer or more stable">✓</span>' : cls === 'worst' ? '<span class="mk" title="More volatile">▲</span>' : ''}</td>`; };
   const groups = [...new Set(rows.map(r => r.m.group))];
-  $('#compare').innerHTML = `<div class="panel"><div class="phead"><b>GVI over time</b><span class="links">${cs.map((c, j) => `<button class="chip" data-rm="${c.iso3}" style="border-color:${COLOURS[j]}">${esc(c.name)} ✕</button>`).join('')}</span></div>
-      <div class="chart">${lineChart(cs.map((c, j) => ({ name: c.name, colour: COLOURS[j], points: pts(c) })))}</div>
-      <div class="key">${cs.map((c, j) => `<span><i style="background:${COLOURS[j]}"></i>${esc(c.name)}</span>`).join('')}</div></div>
-    <div class="cols"><div class="panel"><div class="phead"><b>Side by side · ${esc(DAYS[dayIdx])}</b></div><div class="tbl"><table><thead><tr><th>Metric</th>${cs.map((c, j) => `<th class="num" style="color:${COLOURS[j]}"><a class="cname" href="#country=${c.iso3}" style="color:inherit">${esc(c.name)}</a></th>`).join('')}</tr></thead>
-      <tbody>${groups.map(g => `<tr><td colspan="${cs.length + 1}" class="meta" style="padding-top:12px">${esc(g)}</td></tr>` + rows.filter(r => r.m.group === g).map(r => `<tr><td>${esc(r.m.label)}</td>${cs.map((_, j) => cell(r, j)).join('')}</tr>`).join('')).join('')}</tbody></table></div>
-      <p class="note">Green marks the calmer or more stable value, red the more volatile.</p></div>
-    <div class="panel"><div class="phead"><b>Components</b></div><div class="chart">${componentBars(cs)}</div></div></div>`;
+  $('#compare').innerHTML = `<div class="prp-panel"><div class="prp-panel-head"><b>GVI over time</b><span class="links">${cs.map(c => `<button type="button" class="prp-btn sm" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison">${sw(cc(c.iso3))}${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
+      <figure class="prp-figure chartfig"><div class="chart" id="cmp-gvi"></div><div class="key">${cs.map(c => `<span>${sw(cc(c.iso3))}${esc(c.name)}</span>`).join('')}</div><figcaption><b>Figure 6.</b> Daily GVI for the countries compared; the elevated (40–70) and high (70+) bands are shaded. Source: GDELT 2.0.</figcaption></figure></div>
+    <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>Side by side · ${esc(DAYS[dayIdx])}</b></div><div class="tbl full"><table class="prp-table"><thead><tr><th>Metric</th>${cs.map(c => `<th class="num">${sw(cc(c.iso3))}<a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
+      <tbody>${groups.map(g => `<tr><td colspan="${cs.length + 1}" class="grp">${esc(g)}</td></tr>` + rows.filter(r => r.m.group === g).map(r => `<tr><td>${esc(r.m.label)}</td>${cs.map((_, j) => cell(r, j)).join('')}</tr>`).join('')).join('')}</tbody></table></div>
+      <p class="note"><span class="best">✓</span> marks the calmer or more stable value, <span class="worst">▲</span> the more volatile.</p></div>
+    <div class="prp-panel"><div class="prp-panel-head"><b>Components</b></div><figure class="prp-figure chartfig"><div class="chart" id="cmp-comp"></div><figcaption><b>Figure 7.</b> Component percentiles on ${esc(DAYS[dayIdx])} (100 = the most intense country-day in the trailing 90 days).</figcaption></figure></div></div>`;
+  $('#cmp-gvi').replaceChildren(lineChart(cs.map(c => ({ name: c.name, colour: cc(c.iso3), points: pts(c) })), { w: width('#cmp-gvi') }));
+  $('#cmp-comp').replaceChildren(componentBars(cs, width('#cmp-comp')));
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => toggleCompare(b.dataset.rm, false));
 }
-function componentBars(cs) {
-  const comps = V.components, w = 460, h = 40 + comps.length * (cs.length * 12 + 18), x = d3.scaleLinear().domain([0, 100]).range([120, w - 34]);
+function componentBars(cs, w) {
+  w = Math.max(300, Math.round(w));
+  const comps = V.components, row = 14, block = cs.length * row, gap = 16, lab = Math.min(170, Math.round(w * 0.34));
+  const axisY = 4 + comps.length * (block + gap) - gap + 6, h = axisY + 22, x = d3.scaleLinear().domain([0, 100]).range([lab, w - 30]);
   const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`);
+  svg.append('g').attr('class', 'gridl').selectAll('line').data([0, 25, 50, 75, 100]).join('line').attr('x1', x).attr('x2', x).attr('y1', 0).attr('y2', axisY);
   comps.forEach((m, j) => {
-    const y0 = 14 + j * (cs.length * 12 + 18);
-    svg.append('text').attr('x', 0).attr('y', y0 + cs.length * 6 + 4).attr('fill', '#91a0aa').attr('font-size', 11).text(m.label.split(' / ')[0]);
-    cs.forEach((c, i) => { const v = c.cur.comps?.[j]; svg.append('rect').attr('x', x(0)).attr('y', y0 + i * 12).attr('height', 9).attr('rx', 2).attr('width', v == null ? 0 : x(v) - x(0)).attr('fill', COLOURS[i]); svg.append('text').attr('x', (v == null ? x(0) : x(v)) + 4).attr('y', y0 + i * 12 + 8).attr('fill', '#91a0aa').attr('font-size', 9).text(v == null ? 'n/a' : v.toFixed(0)); });
+    const y0 = 4 + j * (block + gap);
+    svg.append('text').attr('class', 'lbl').attr('x', 0).attr('y', y0 + block / 2 + 4).text(m.label.split(' / ')[0]);
+    cs.forEach((c, i) => { const v = c.cur.comps?.[j];
+      svg.append('rect').attr('x', x(0)).attr('y', y0 + i * row).attr('height', row - 4).attr('rx', 1.5).attr('width', v == null ? 0 : x(v) - x(0)).style('fill', cc(c.iso3)).append('title').text(`${c.name} · ${m.label}: ${v == null ? 'n/a' : v.toFixed(0)}`);
+      svg.append('text').attr('x', (v == null ? x(0) : x(v)) + 4).attr('y', y0 + i * row + row - 5).text(v == null ? 'n/a' : v.toFixed(0)); });
   });
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - 22})`).call(d3.axisBottom(x).ticks(5));
-  return svg.node().outerHTML;
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${axisY})`).call(d3.axisBottom(x).tickValues([0, 25, 50, 75, 100]).tickSizeOuter(0));
+  return svg.node();
 }
 
 /* ---------- method ---------- */
 function renderMethod() {
   $('#methodtext').innerHTML = `<p><b>Source.</b> Every quarter-hour event export from GDELT 2.0 (96 a day), which codes news reports worldwide into who-did-what-to-whom events (CAMEO codes) with a location and a Goldstein score from −10 (most hostile) to +10 (most cooperative). Events are assigned to the country where they happened; each news URL is counted once per country per day.</p>
     <p><b>Components.</b> ${V.components.map(c => `${esc(c.label)} (${Math.round(c.weight * 100)}%)`).join(' · ')}. Conflict is CAMEO 17–20 (coerce, assault, fight, mass violence); political is 10–13, 15 and 16 (demands, disapproval, rejection, threats, force posture, reduced relations); unrest is 14 (protest); economic is 162–163 (sanctions, embargoes); cross-border spread counts conflict and political events between actors from different countries.</p>
-    <p><b>Intensity.</b> Each event weighs 0.1 + max(0, −Goldstein)/10, so hostile events count up to eleven times a neutral one. A component's intensity is its weighted events divided by all of the country's events that day, so large and small countries are comparable.</p>
-    <p><b>Score.</b> Each component's intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. It is then shrunk toward the day's global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
-    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in JDP-I from the original Lovable app's gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
+    <p><b>Intensity.</b> Each event weighs 0.1 + max(0, −Goldstein)/10, so hostile events count up to eleven times a neutral one. A component’s intensity is its weighted events divided by all of the country’s events that day, so large and small countries are comparable.</p>
+    <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. It is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
+    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in PRP from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
     <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. Use the evidence links to check.</p>`;
 }
 
-/* ---------- tabs & routing ---------- */
-function setTab(t) { document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === t)); ['map', 'profile', 'compare', 'method'].forEach(x => { $('#tab-' + x).hidden = x !== t; }); if (t === 'compare') renderCompare(); if (t === 'profile') renderProfile(); }
-function writeHash() { const t = document.querySelector('.tabs button.active').dataset.tab, p = new URLSearchParams(); if (t === 'profile' && selected) p.set('country', selected); else if (t !== 'map') p.set('tab', t); if (compare.length) p.set('compare', compare.join(',')); history.replaceState(null, '', '#' + p.toString()); }
+/* ---------- tabs & routing (#country=ISO3, #tab=compare|method, &compare=A,B) ---------- */
+const TABS = ['map', 'profile', 'compare', 'method'], tabs = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+function setTab(t) {
+  if (!TABS.includes(t)) t = 'map';
+  tabs.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+  TABS.forEach(x => { $('#tab-' + x).hidden = x !== t; });
+  hideTip();
+  if (t === 'compare') renderCompare(); if (t === 'profile') renderProfile(); if (t === 'map' && V) renderGlobal();
+}
+function writeHash() { const t = document.querySelector('.prp-tabs [role=tab].active').dataset.tab, p = new URLSearchParams(); if (t === 'profile' && selected) p.set('country', selected); else if (t !== 'map') p.set('tab', t); if (compare.length) p.set('compare', compare.join(',')); history.replaceState(null, '', '#' + p.toString()); }
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
-  compare = (p.get('compare') || '').split(',').filter(i => byIso.has(i)).slice(0, 4); $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
+  compare = (p.get('compare') || '').split(',').filter(i => byIso.has(i)).slice(0, 4); slots.clear(); compare.forEach(slotOf);
+  $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
   if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); }
   else setTab(p.get('tab') || 'map');
   colourMap(); renderTable();
 }
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
+tabs.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
+$('.prp-tabs').addEventListener('keydown', e => {
+  const i = tabs.indexOf(document.activeElement), j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+  if (i < 0 || j == null) return;
+  e.preventDefault(); const b = tabs[(j + tabs.length) % tabs.length]; b.focus(); setTab(b.dataset.tab); writeHash();
+});
 window.addEventListener('hashchange', readHash);
 for (const sel of ['#rows', '#compare', '#movers']) $(sel).addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
+// Theme change: read the tokens again and redraw what holds computed colours (inline var() colours follow by themselves).
+window.addEventListener('prp:themechange', () => { readPalette(); if (!V) return; colourMap(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); });
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (!V) return; if (!$('#tab-map').hidden) renderGlobal(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); }, 200); });
 
 Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('../national/data/index.json').then(r => r.json()).catch(() => ({ countries: [] })), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json())]).then(([v, n, world]) => {
   V = v; N = new Map(n.countries.map(c => [c.iso3, c]));
@@ -350,13 +511,15 @@ Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('
   $('#metric').innerHTML = [...new Set(METRICS.map(m => m.group))].map(g => `<optgroup label="${esc(g)}">${METRICS.filter(m => m.group === g).map(m => `<option value="${m.id}">${esc(m.label)}</option>`).join('')}</optgroup>`).join('');
   $('#region').innerHTML += [...new Set(n.countries.map(c => c.region).filter(Boolean))].sort().map(r => `<option>${esc(r)}</option>`).join('');
   const slider = $('#day'); slider.min = 0; slider.max = DAYS.length - 1; slider.value = dayIdx = DAYS.length - 1;
-  const setDay = () => { dayIdx = +slider.value; $('#daylabel').textContent = DAYS[dayIdx]; derive(dayIdx); colourMap(); renderTable(); renderMovers(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
-  derive(dayIdx); $('#daylabel').textContent = DAYS[dayIdx];
+  const showDay = () => { $('#daylabel').textContent = DAYS[dayIdx]; slider.setAttribute('aria-valuetext', DAYS[dayIdx]); };
+  const setDay = () => { dayIdx = +slider.value; showDay(); derive(dayIdx); colourMap(); renderTable(); renderMovers(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
+  derive(dayIdx); showDay();
   const scored = C.filter(c => c.cur.score != null).length;
-  $('#meta').textContent = `${scored} countries scored on ${v.latest} · ${C.length} with events · ${DAYS.length} days of history · GDELT 2.0 · updated ${v.generated.slice(0, 16).replace('T', ' ')} UTC`;
-  drawMap(world); renderMovers(); renderGlobal(); renderMethod();
+  $('#meta').innerHTML = `<span><b>${scored}</b> countries scored on ${esc(v.latest)}</span><span><b>${C.length}</b> with events</span><span><b>${DAYS.length}</b> days of history</span><span>Source: GDELT 2.0</span><span>Updated <b>${esc(v.generated.slice(0, 16).replace('T', ' '))} UTC</b></span>`;
+  drawMap(world); renderMovers(); renderMethod();
   $('#metric').onchange = () => { colourMap(); renderTable(); }; slider.oninput = setDay; $('#search').oninput = renderTable; $('#region').onchange = renderTable; $('#scoredOnly').onchange = renderTable;
   readHash();
+  if ($('#tab-map').hidden) renderGlobal(); // drawn at its fallback width until the map tab is shown
 }).catch(e => { $('#meta').textContent = 'Data could not load: ' + e.message; });
 </script>
 </body>

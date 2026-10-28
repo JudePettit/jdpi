@@ -1,45 +1,50 @@
 {
   "platform": {
-    "name": "JDP-I",
-    "tagline": "Integrated intelligence platform",
-    "version": "1.0"
+    "name": "PRP",
+    "fullName": "Personal Resource Planner",
+    "company": "JDP-Iq",
+    "tagline": "What an ERP does for an enterprise, for one person: intelligence, history, money and science in one workspace.",
+    "version": "2.0"
+  },
+  "kinds": {
+    "realtime": "Realtime",
+    "retrospective": "Retrospective",
+    "reference": "Reference",
+    "learning": "Learning",
+    "operations": "Operations",
+    "automation": "Automation"
   },
   "suites": [
     {
-      "id": "q",
-      "code": "Q",
-      "name": "JDP-I Q",
-      "title": "Geopolitical Intelligence",
-      "description": "Monitor events, headlines, volatility and country conditions around the world.",
-      "icon": "design/brand-eye-q.svg",
+      "id": "rt",
+      "aliases": [
+        "q"
+      ],
+      "code": "RT",
+      "name": "Realtime Intelligence",
+      "title": "Realtime Intelligence",
+      "description": "What is happening now: the news across the political spectrum, country conditions and volatility, armed conflict, who holds power, and the political calendar.",
       "modules": [
         {
           "id": "briefing",
-          "name": "Briefing",
+          "name": "Intelligence Briefing",
+          "kind": "realtime",
           "icon": "↗",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/briefing.html",
-          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side."
-        },
-        {
-          "id": "calendar",
-          "name": "Realtime Calendar",
-          "icon": "▦",
-          "status": "live",
-          "host": "JDP-I",
-          "url": "q/calendar.html?period=contemporary",
-          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
+          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
         },
         {
           "id": "headlines",
           "name": "Global Headline Tracker",
+          "kind": "realtime",
           "icon": "◎",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/headlines.html?view=current",
-          "description": "Pick a country for its 24-hour news feed, or browse daily, weekly and monthly archives.",
-          "submodules": [
+          "description": "Any country's last 24 hours of news on a map, with daily, weekly, monthly and yearly archives of its top stories in the same view.",
+          "views": [
             {
               "id": "current",
               "name": "Country map · 24 hours",
@@ -70,21 +75,23 @@
         {
           "id": "volatility",
           "name": "Geopolitical Volatility",
+          "kind": "realtime",
           "icon": "⌁",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/volatility.html",
           "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT. Compare up to four countries."
         },
         {
           "id": "pestle",
           "name": "National Analysis",
+          "kind": "realtime",
           "icon": "◉",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/national.html",
           "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
-          "submodules": [
+          "views": [
             {
               "id": "map",
               "name": "Map & ranking",
@@ -100,12 +107,13 @@
         {
           "id": "battlefield",
           "name": "Realtime Battlefield",
+          "kind": "realtime",
           "icon": "✕",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/battlefield.html?view=live",
           "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive and related coverage. UCDP data, refreshed monthly.",
-          "submodules": [
+          "views": [
             {
               "id": "live",
               "name": "Live map · last 3 months",
@@ -117,37 +125,96 @@
               "url": "q/battlefield.html?view=archive"
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "hp",
-      "code": "H&P",
-      "name": "JDP-I H&P",
-      "title": "History & Politics",
-      "description": "Political systems, leadership and their history.",
-      "modules": [
-        {
-          "id": "encyclopedia",
-          "name": "Encyclopaedia",
-          "icon": "◈",
-          "status": "live",
-          "host": "JDP-I",
-          "url": "encyclopedia/index.html",
-          "description": "Every person, place, war, party and idea in JDP-I. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\"), and jump to everywhere each one appears across the suite."
         },
         {
           "id": "atlas",
           "name": "Political Atlas",
+          "kind": "realtime",
           "icon": "◍",
           "status": "live",
           "host": "Cloudflare Pages",
           "url": "https://political-atlas.pages.dev",
-          "description": "Who holds power across 78 countries: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
+          "description": "Who holds power across 78 countries now: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
+        },
+        {
+          "id": "calendar",
+          "name": "Realtime Calendar",
+          "kind": "realtime",
+          "icon": "▦",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/calendar.html?period=contemporary",
+          "description": "Upcoming elections plus the last six months of new leaders, coups, outbreaks of war, assassinations, crises and treaties. Month or year view, any country or just the ones you highlight."
+        },
+        {
+          "id": "osint",
+          "name": "OSINT Dashboard",
+          "kind": "realtime",
+          "icon": "⌕",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "description": "An investigator's workbench for open sources: search across engines and archives, domains, company and sanctions records, event monitoring and image checks, with a case notebook that grades every source. Plus a Software Cookbook and a Kit Guide.",
+          "pendingUrl": "osint/index.html"
+        },
+        {
+          "id": "sigint",
+          "name": "SIGINT Dashboard",
+          "kind": "realtime",
+          "icon": "⌇",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "description": "Receive-only signals monitoring: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather from public feeds or your own receivers, plus a Software Cookbook and a Hardware Guide for hobbyists.",
+          "pendingUrl": "sigint/index.html"
+        },
+        {
+          "id": "geoint",
+          "name": "GEOINT & IMINT Dashboard",
+          "kind": "realtime",
+          "icon": "◫",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "description": "Geospatial and imagery intelligence: daily satellite imagery and night lights with before/after comparison, active fires, terrain, OpenStreetMap features, measuring and sun/shadow tools for geolocation and chronolocation. Plus a Software Cookbook and a Hardware Guide.",
+          "pendingUrl": "geoint/index.html"
+        },
+        {
+          "id": "osint-training",
+          "name": "OSINT Training",
+          "kind": "learning",
+          "icon": "✎",
+          "status": "live",
+          "host": "PRP",
+          "url": "fe/learning.html?course=osint",
+          "description": "Open-source intelligence tools and methods (the intelligence cycle, source grading, verification, geolocation, imagery, records and structured analysis) and how to use PRP itself as an intelligence tool, with exercises and quizzes."
+        }
+      ]
+    },
+    {
+      "id": "rs",
+      "aliases": [
+        "hp"
+      ],
+      "code": "RS",
+      "name": "Retrospective Intelligence",
+      "title": "Retrospective Intelligence",
+      "description": "What happened and why: an Encyclopaedia of everyone and everything in PRP, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
+      "modules": [
+        {
+          "id": "encyclopedia",
+          "name": "Encyclopaedia",
+          "kind": "reference",
+          "icon": "◈",
+          "status": "live",
+          "host": "PRP",
+          "url": "encyclopedia/index.html",
+          "description": "Every person, place, war, party, idea, scientist and discovery in PRP. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
         },
         {
           "id": "retrospective",
-          "name": "H&P Retrospective",
+          "name": "Political Retrospective",
+          "kind": "retrospective",
           "icon": "◷",
           "status": "live",
           "host": "Cloudflare Pages",
@@ -157,88 +224,122 @@
         {
           "id": "historical-calendar",
           "name": "Historical Calendar",
+          "kind": "retrospective",
           "icon": "▤",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "q/calendar.html?period=history",
           "description": "Political history from 1980 to today in one calendar: elections, new leaders, coups, wars, assassinations, crises and treaties, each with a plain-English account."
         },
         {
           "id": "battlefield-history",
           "name": "Retrospective Battlefield",
+          "kind": "retrospective",
           "icon": "⚔",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "battlefield/history/index.html",
-          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links. War Focus follows each major war month by month.",
-          "submodules": [
-            { "id": "world-map", "name": "World map · 1926–2025", "url": "battlefield/history/index.html" },
-            { "id": "war-focus", "name": "War Focus", "url": "battlefield/focus/index.html" }
+          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
+          "aliases": [
+            "world-map"
           ]
+        },
+        {
+          "id": "war-focus",
+          "name": "War Focus",
+          "kind": "retrospective",
+          "icon": "⌖",
+          "status": "live",
+          "host": "PRP",
+          "url": "battlefield/focus/index.html",
+          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a slider, battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
         },
         {
           "id": "kardashev",
           "name": "Kardashev Tracker",
+          "kind": "retrospective",
           "icon": "☼",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "kardashev/index.html",
           "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
         },
         {
           "id": "learning-politics",
-          "name": "Learning",
-          "icon": "◫",
+          "name": "Learning · Politics",
+          "kind": "learning",
+          "icon": "✎",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "fe/learning.html?course=politics",
           "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (Mearsheimer and the Realists) and far right, with quizzes."
         }
       ]
     },
     {
-      "id": "fe",
-      "code": "F&E",
-      "name": "JDP-I F&E",
-      "title": "Finance & Economics",
-      "description": "Market signals and economic intelligence.",
+      "id": "mm",
+      "aliases": [
+        "fe"
+      ],
+      "code": "MM",
+      "name": "Money Management",
+      "title": "Money Management",
+      "description": "Your money end to end: markets and the Hype Tracker, every brokerage account in one ledger, trading agents that follow rules you choose or mirror famous investors, all drawing on one shared pool under one set of risk limits.",
       "modules": [
         {
-          "id": "double-signal",
-          "name": "Double Signal",
-          "icon": "⇈",
-          "status": "live",
-          "host": "Cloudflare Workers",
-          "url": "https://double-signal.judep92.workers.dev",
-          "description": "Emails you when a US-listed stock more than doubles in under six hours. Scans the whole market hourly on Cloudflare Workers; private, behind Cloudflare Access.",
-          "opensInNewTab": true
-        },
-        {
-          "id": "trade-desk",
-          "name": "Trade Desk",
-          "icon": "⇄",
+          "id": "markets",
+          "aliases": [
+            "trade-desk"
+          ],
+          "name": "TD Markets",
+          "kind": "realtime",
+          "icon": "↯",
           "status": "live",
           "host": "Cloudflare Workers",
           "url": "https://trade-desk.judep92.workers.dev/markets/",
-          "description": "Markets, news and a Hype Tracker for tickers suddenly talked about or traded far more than usual (TD Markets), plus Tally Stick: Alpaca, Trading 212, Interactive Brokers, Coinbase and Kraken in one place, with rules, risk limits and an MCP server for AI agents.",
-          "submodules": [
-            { "id": "markets", "name": "TD Markets", "url": "https://trade-desk.judep92.workers.dev/markets/" },
-            { "id": "tally-stick", "name": "Tally Stick", "url": "https://trade-desk.judep92.workers.dev/tally/", "opensInNewTab": true,
-              "description": "Your brokerage accounts, automation rules, risk limits and the MCP connection for AI agents. Private, behind Cloudflare Access." }
-          ]
+          "description": "Indices, rates, FX, commodities and crypto, movers, news, ticker pages and the Hype Tracker: tickers suddenly talked about or traded far more than usual."
+        },
+        {
+          "id": "tally-stick",
+          "name": "Tally Stick",
+          "kind": "operations",
+          "icon": "▥",
+          "status": "live",
+          "host": "Cloudflare Workers",
+          "url": "https://trade-desk.judep92.workers.dev/tally/",
+          "opensInNewTab": true,
+          "description": "Trading 212, Alpaca, Interactive Brokers, Coinbase and Kraken in one ledger: balances, positions, orders, rules, risk limits, the kill switch and an MCP connection for AI agents. Private."
+        },
+        {
+          "id": "algo-trader",
+          "aliases": [
+            "double-signal"
+          ],
+          "name": "Algo Trader",
+          "kind": "automation",
+          "icon": "⚙",
+          "status": "live",
+          "host": "Cloudflare Workers",
+          "url": "https://trade-desk.judep92.workers.dev/tally/algo/",
+          "opensInNewTab": true,
+          "description": "Create trading agents that follow a ruleset: Double Agent (stocks that double within hours), Hype Rider (the Hype Tracker), and more. Each simulates first, has its own pot and passes the shared risk limits. Private."
         },
         {
           "id": "traders",
-          "name": "Trader Tracker",
-          "icon": "◈",
+          "aliases": [
+            "auto-trader"
+          ],
+          "name": "Auto Trader",
+          "kind": "realtime",
+          "icon": "⇄",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "fe/traders.html",
-          "description": "What members of Congress (including Nancy Pelosi) and famous investors such as Buffett, Burry and Ackman are buying and selling, from STOCK Act and SEC 13F filings. Refreshed weekly.",
-          "submodules": [
+          "description": "What members of Congress (including Nancy Pelosi) and famous investors such as Buffett, Burry and Ackman are buying and selling, from STOCK Act and SEC 13F filings, and an agent that mirrors any of them or trades in their style.",
+          "views": [
             {
               "id": "congress",
-              "name": "Congress",
+              "name": "Members of Congress",
               "url": "fe/traders.html?tab=congress"
             },
             {
@@ -250,13 +351,14 @@
         },
         {
           "id": "learning",
-          "name": "Learning",
-          "icon": "◫",
+          "name": "Learning · Finance & Economics",
+          "kind": "learning",
+          "icon": "✎",
           "status": "live",
-          "host": "JDP-I",
+          "host": "PRP",
           "url": "fe/learning.html?course=finance",
           "description": "Two courses: Finance, a university-style introduction with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
-          "submodules": [
+          "views": [
             {
               "id": "finance",
               "name": "Finance",
@@ -270,6 +372,37 @@
           ]
         }
       ]
+    },
+    {
+      "id": "ns",
+      "code": "NS",
+      "name": "Natural Science",
+      "title": "Natural Science",
+      "description": "The natural sciences now and through history: the week's major papers and science news by discipline, and a map-and-slider timeline of humanity's key breakthroughs and the people and institutions behind them.",
+      "modules": [
+        {
+          "id": "science-briefing",
+          "name": "Scientific Briefing",
+          "kind": "realtime",
+          "icon": "◬",
+          "status": "live",
+          "host": "PRP",
+          "url": "science/briefing/index.html",
+          "description": "New papers and news from the major journals and science desks (Nature, Science, Cell, PNAS, PRL and more), with a toggle for physics, chemistry, biology, earth & environment, and astronomy & space."
+        },
+        {
+          "id": "progress",
+          "name": "Timeline of Progress",
+          "kind": "retrospective",
+          "icon": "⟡",
+          "status": "in-build",
+          "host": "PRP",
+          "url": null,
+          "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia.",
+          "pendingUrl": "science/progress/index.html"
+        }
+      ]
     }
-  ]
+  ],
+  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them."
 }

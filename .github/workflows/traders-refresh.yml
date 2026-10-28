@@ -1,5 +1,6 @@
-name: Refresh Trader Tracker data
-# House trade reports and 13F filings arrive continuously; a weekly refresh keeps the tracker within days.
+name: Refresh Auto Trader data
+# House trade reports and 13F filings arrive continuously; a weekly refresh keeps Auto Trader within days.
+# 13F holdings get US tickers from OpenFIGI (cached in figi-cache.json); an optional OPENFIGI_API_KEY secret speeds that up.
 on:
   schedule:
     - cron: '41 5 * * 2'
@@ -17,9 +18,11 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: node traders/scripts/build-congress.mjs
       - run: node traders/scripts/build-13f.mjs
+        env:
+          OPENFIGI_API_KEY: ${{ secrets.OPENFIGI_API_KEY }}
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add traders/data traders/scripts/ptr-cache.json
-          git diff --cached --quiet || git commit -m "Trader Tracker: weekly refresh" && git pull --rebase && git push
+          git add traders/data traders/scripts/ptr-cache.json traders/scripts/figi-cache.json
+          git diff --cached --quiet || git commit -m "Auto Trader: weekly refresh" && git pull --rebase && git push

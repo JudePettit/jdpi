@@ -1,66 +1,108 @@
 <!doctype html>
-<html lang="en" data-suite="hp">
+<html lang="en" class="prp" data-suite="rs">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101820">
-  <title>War Focus · JDP-I H&amp;P</title>
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>War Focus · PRP</title>
   <meta name="description" content="The major wars since 1926, month by month: who held what, where the battles were, and the running death toll.">
-  <link rel="icon" href="../../design/brand-jdpi.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../design/jdpi.css">
+  <link rel="icon" href="../../design/brand-prp.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="../../design/prp.css">
   <link rel="stylesheet" href="../history/styles.css">
   <link rel="stylesheet" href="focus.css">
-  <script src="../../design/jdpi-bar.js" data-suite="hp" data-module="battlefield-history" data-shell="../../" defer></script>
+  <script src="../../design/prp-bar.js" data-suite="rs" data-module="war-focus" data-shell="../../" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <p class="eyebrow" data-jdpi-standalone>JDP-I H&amp;P · Retrospective Battlefield</p>
-      <h1>War Focus</h1>
-      <p class="subtitle" id="status">Loading wars…</p>
+  <div class="screen">
+    <header class="head">
+      <div class="front">
+        <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Intelligence <span class="sep">·</span> War Focus</span></p>
+        <h1 class="prp-title">War Focus</h1>
+        <p class="prp-dek">The major wars of the last hundred years, month by month: who held what, where the battles were, and the running death toll. Choose a war, then play it or step through the months.</p>
+        <p class="prp-meta" id="status">Loading wars…</p>
+      </div>
+      <dl class="kpis counters" aria-live="polite">
+        <div class="kpi when date"><dt>Month</dt><dd id="date">–</dd></div>
+        <div class="kpi"><dt>Deaths so far</dt><dd id="c-total">–</dd></div>
+        <div class="kpi"><dt>This month</dt><dd id="c-month">–</dd></div>
+        <div class="kpi"><dt>Battles so far</dt><dd id="c-battles">–</dd></div>
+      </dl>
+    </header>
+
+    <div class="prp-tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="true">Map</button>
+      <button type="button" role="tab" id="tab-battles" data-view="battles" aria-controls="view-battles" aria-selected="false" tabindex="-1">Battles</button>
+      <button type="button" role="tab" id="tab-months" data-view="months" aria-controls="view-months" aria-selected="false" tabindex="-1">Deaths by month</button>
     </div>
-    <div class="controls">
-      <select id="war" aria-label="Choose a war"></select>
-      <div class="counters" aria-live="polite">
-        <div class="counter date"><span class="label">Month</span><b id="date">–</b></div>
-        <div class="counter"><span class="label">Deaths so far</span><b id="c-total">–</b></div>
-        <div class="counter"><span class="label">This month</span><b id="c-month">–</b></div>
-        <div class="counter"><span class="label">Battles so far</span><b id="c-battles">–</b></div>
+
+    <div class="toolbar">
+      <label class="field war-field"><span class="prp-label">War</span><select id="war" class="prp-select" aria-label="Choose a war"></select></label>
+      <div class="timeline focus-timeline" aria-label="Month selector">
+        <button type="button" id="prev" class="tl-btn" aria-label="Previous month">‹</button>
+        <button type="button" id="play" class="tl-btn play" aria-label="Play month by month">▶</button>
+        <div class="slider-wrap">
+          <svg id="spark" aria-hidden="true"></svg>
+          <input type="range" id="month" min="0" max="0" step="1" value="0" aria-label="Month">
+          <div class="ticks" id="ticks" aria-hidden="true"></div>
+        </div>
+        <button type="button" id="next" class="tl-btn" aria-label="Next month">›</button>
+        <select id="speed" class="prp-select" aria-label="Playback speed"><option value="900">Slow</option><option value="450" selected>Normal</option><option value="180">Fast</option></select>
       </div>
     </div>
-  </header>
 
-  <main class="layout">
-    <section class="map-wrap" aria-label="War map">
-      <svg id="map" role="img" aria-label="Map of the selected war for the selected month">
-        <defs>
-          <pattern id="hatch-a" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-b)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-a)" stroke-width="3"/></pattern>
-          <pattern id="hatch-b" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-a)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-b)" stroke-width="3"/></pattern>
-        </defs>
-      </svg>
-      <div class="map-tools">
-        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
-        <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
-        <button type="button" id="zoom-reset" aria-label="Fit the theatre">⟲</button>
-      </div>
-      <div class="legend" id="legend"></div>
-      <div id="tooltip" class="tooltip" hidden></div>
-    </section>
-    <aside id="panel" class="panel" aria-live="polite"></aside>
-  </main>
+    <main class="work">
+      <figure class="prp-figure view mapfig" id="view-map" role="tabpanel" aria-labelledby="tab-map">
+        <div class="map-wrap">
+          <svg id="map" role="img" aria-label="Map of the selected war for the selected month">
+            <defs>
+              <pattern id="hatch-a" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-b)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-a)" stroke-width="3"/></pattern>
+              <pattern id="hatch-b" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--side-a)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--side-b)" stroke-width="3"/></pattern>
+            </defs>
+          </svg>
+          <div class="map-tools">
+            <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+            <button type="button" id="zoom-reset" aria-label="Fit the theatre">⟲</button>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div id="tooltip" class="tooltip" hidden></div>
+        </div>
+        <figcaption><b>Figure 1.</b> <span id="caption">The states at war in the selected month, coloured by side, on the borders of the day.</span> Drag to pan, scroll or use + and − to zoom; click a battle for its record.</figcaption>
+      </figure>
+      <section class="view" id="view-battles" role="tabpanel" aria-labelledby="tab-battles" hidden>
+        <div class="prp-panel tablepanel">
+          <div class="prp-panel-head"><b id="battles-title">Battles and operations</b><span>Wikidata · select a name for its record</span></div>
+          <div class="tablescroll">
+            <table class="prp-table">
+              <thead><tr><th>Battle or operation</th><th>Dates</th><th id="th-status">This month</th><th class="num">Deaths</th><th class="num">Casualties</th><th>On the map</th></tr></thead>
+              <tbody id="battles-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="view" id="view-months" role="tabpanel" aria-labelledby="tab-months" hidden>
+        <div class="prp-panel tablepanel">
+          <div class="prp-panel-head"><b id="months-title">Battle deaths by month</b><span>Select a month to go to it · ~ estimated</span></div>
+          <div class="tablescroll">
+            <table class="prp-table">
+              <thead><tr><th>Month</th><th class="num">Battle deaths</th><th class="num">Running total</th><th class="num">Battles begun</th><th class="num">Clashes recorded</th></tr></thead>
+              <tbody id="months-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <aside id="panel" class="panel" aria-live="polite"></aside>
+    </main>
+  </div>
 
-  <footer class="timeline focus-timeline" aria-label="Month selector">
-    <button type="button" id="prev" class="tl-btn" aria-label="Previous month">‹</button>
-    <button type="button" id="play" class="tl-btn play" aria-label="Play month by month">▶</button>
-    <div class="slider-wrap">
-      <svg id="spark" aria-hidden="true"></svg>
-      <input type="range" id="month" min="0" max="0" step="1" value="0" aria-label="Month">
-      <div class="ticks" id="ticks" aria-hidden="true"></div>
+  <footer class="sources">
+    <div class="prp-sources" id="sources">
+      <p><b>Sources.</b> Battle deaths: UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg &amp; Melander 2013; Davies et al. 2026), CC BY 4.0, recorded event by event; where no monthly record exists, PRIO Battle Deaths Dataset v3.1 annual totals (Lacina &amp; Gleditsch 2005) or Correlates of War war totals (Sarkees &amp; Wayman 2010), spread across months by UCDP events or recorded battles. Each war's panel names the source it uses. Battles, sieges and operations: Wikidata (CC0). Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA. Articles: Wikipedia.</p>
+      <p><b>Method.</b> States are coloured by the side they fought on that month and hatched while wholly occupied; in a civil war the contested state is shaded as a whole. Front lines are not drawn: no open data records them month by month. Months marked ~ are estimates; yearly and war totals are as published.</p>
+      <p><b>See also.</b> <a href="../history/index.html" id="sibling">Retrospective Battlefield</a>, every war and armed conflict from 1926 to 2025 on a world map, a sibling submodule in Retrospective Intelligence.</p>
     </div>
-    <button type="button" id="next" class="tl-btn" aria-label="Next month">›</button>
-    <select id="speed" aria-label="Playback speed"><option value="900">Slow</option><option value="450" selected>Normal</option><option value="180">Fast</option></select>
   </footer>
 
   <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">

@@ -1,10 +1,13 @@
-/* JDP-I Documentary mode — the reader, in the shell. Offered in History & Politics.
+/* PRP Documentary mode — the reader, in the shell. Offered on Retrospective Intelligence submodules and on any page
+   that tells its own story (the courses, the calendars), wherever it sits.
    - Voice: the browser's speech synthesis, preferring a British English male voice (Edge's natural "Ryan" or
      "Thomas", Chrome's "Google UK English Male", Apple's "Daniel"); pace slowed slightly for a lecture feel.
    - Music: public-domain and CC0 classical recordings from Wikimedia Commons, played quietly and dipped further while
-     the voice speaks. It lives in the shell, so it carries on across modules and "Continue Reading".
-   - Story: asked of the module in view, one step at a time, through design/jdpi-narrator.js (postMessage).
-     Autoplay pauses briefly at chapter ends and carries on, like a documentary; without it, "Continue Reading" waits. */
+     the voice speaks. It lives in the shell, so it carries on across submodules and "Continue Reading".
+   - Story: asked of the submodule in view, one step at a time, through design/jdpi-narrator.js (postMessage). A page
+     says whether it tells its own story when its narrator announces itself ({ jdpiDoc: 'ready', story }).
+     Autoplay pauses briefly at chapter ends and carries on, like a documentary; without it, "Continue Reading" waits.
+   Styled with the PRP tokens (design/prp.css), so it follows the shell's light or dark theme. */
 (function () {
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -31,42 +34,57 @@
   const S = { open: false, playing: false, autoplay: store.get('autoplay', true), music: store.get('music', true), vol: store.get('vol', 0.16), rate: store.get('rate', 0.92),
     voiceName: store.get('voice', null), seq: 0, waiting: null, pending: new Map(), frame: null, order: [], track: -1, speaking: false, stopFlag: false };
 
-  /* ---------- UI ---------- */
+  /* ---------- UI (PRP tokens: light and dark follow the shell) ---------- */
   const css = document.createElement('style');
   css.textContent = `
-  .doc-fab{position:fixed;right:18px;bottom:18px;z-index:60;border:1px solid var(--jdpi-accent-line,#3f7a70);background:var(--jdpi-panel,#17242e);color:var(--jdpi-accent,#6ddac8);border-radius:99px;padding:10px 16px;font:600 13px var(--jdpi-font-ui,'DM Sans',sans-serif);box-shadow:0 10px 28px rgba(0,0,0,.45);cursor:pointer;display:flex;gap:8px;align-items:center}
-  .doc-fab:hover{background:var(--jdpi-panel-2,#1c2b36)}
-  .doc{position:fixed;right:18px;bottom:18px;z-index:61;width:min(420px,calc(100vw - 32px));background:var(--jdpi-panel,#17242e);border:1px solid var(--jdpi-line,#293a46);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.55);font:13px/1.5 var(--jdpi-font-ui,'DM Sans',sans-serif);color:var(--jdpi-text,#edf3f1)}
-  .doc header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--jdpi-line,#293a46)}
-  .doc header b{font:700 13px var(--jdpi-font-display,Manrope,sans-serif)}.doc header small{display:block;color:var(--jdpi-muted,#91a0aa);font:10px var(--jdpi-font-mono,'DM Mono',monospace)}
-  .doc .x{border:0;background:none;color:var(--jdpi-muted,#91a0aa);font-size:18px;cursor:pointer}
-  .doc .sub{padding:12px 14px;min-height:64px;font:15px/1.55 Georgia,'Times New Roman',serif;color:#f3efe6;max-height:150px;overflow:auto}
-  .doc .ctrl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 14px 10px}
-  .doc button.b{border:1px solid var(--jdpi-line,#293a46);background:var(--jdpi-panel-2,#1c2b36);color:var(--jdpi-text,#edf3f1);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit}
-  .doc button.b:hover{border-color:var(--jdpi-accent,#6ddac8)}.doc button.primary{border-color:var(--jdpi-accent-line,#3f7a70);color:var(--jdpi-accent,#6ddac8);background:rgba(109,218,200,.09)}
-  .doc button.cont{animation:docPulse 1.6s ease-in-out infinite}@keyframes docPulse{50%{box-shadow:0 0 0 4px rgba(109,218,200,.18)}}
-  .doc .row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--jdpi-line,#293a46);color:var(--jdpi-muted,#91a0aa);font-size:12px}
-  .doc select,.doc input[type=range]{background:#0f1b25;border:1px solid var(--jdpi-line,#293a46);color:var(--jdpi-text,#edf3f1);border-radius:5px;font-size:12px;max-width:190px}
-  .doc .np{padding:6px 14px 10px;color:var(--jdpi-faint,#70818b);font:10.5px var(--jdpi-font-mono,'DM Mono',monospace)}.doc .np a{color:inherit}
-  @media(max-width:600px){.doc{right:8px;left:8px;width:auto;bottom:8px}.doc-fab{right:10px;bottom:10px}}`;
+  .doc-fab{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;gap:8px;align-items:center;height:38px;padding:0 16px 0 14px;cursor:pointer;
+    border:1px solid var(--prp-line-strong);border-radius:99px;background:var(--prp-surface);color:var(--prp-text);box-shadow:var(--prp-shadow-2);font:600 13px var(--prp-font-ui)}
+  .doc-fab svg{color:var(--prp-accent)}
+  .doc-fab:hover{background:var(--prp-surface-3)}
+  .doc{position:fixed;right:18px;bottom:18px;z-index:61;width:min(420px,calc(100vw - 32px));background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-lg);
+    box-shadow:var(--prp-shadow-2);color:var(--prp-text);font:13px/1.5 var(--prp-font-ui)}
+  .doc header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 12px 10px 14px;border-bottom:1px solid var(--prp-line-soft)}
+  .doc header .k{display:flex;align-items:center;gap:7px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
+  .doc header .k::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--prp-accent)}
+  .doc header b{display:block;margin-top:2px;color:var(--prp-text);font:600 15px/1.3 var(--prp-font-serif)}
+  .doc .x{flex:none;width:28px;height:28px;border:0;border-radius:var(--prp-radius-sm);background:none;color:var(--prp-muted);font-size:18px;line-height:1;cursor:pointer}
+  .doc .x:hover{background:var(--prp-surface-3);color:var(--prp-text)}
+  .doc .sub{max-height:150px;min-height:64px;overflow:auto;padding:12px 14px;color:var(--prp-text);font:15px/1.6 var(--prp-font-serif)}
+  .doc .ctrl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 14px 12px}
+  .doc .ctrl .auto{margin-left:auto}
+  .doc button.cont{animation:docPulse 1.6s ease-in-out infinite}@keyframes docPulse{50%{box-shadow:0 0 0 4px var(--prp-primary-soft)}}
+  .doc .row2{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:8px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-text-2);font-size:12px}
+  .doc label{display:inline-flex;align-items:center;gap:6px}
+  .doc select{max-width:190px;height:28px;font-size:12px}
+  .doc input[type=range],.doc input[type=checkbox]{accent-color:var(--prp-primary)}
+  .doc input[type=range]{width:110px}
+  .doc .np{padding:7px 14px 10px;border-top:1px solid var(--prp-line-soft);color:var(--prp-muted);font:10.5px/1.5 var(--prp-font-mono)}.doc .np a{color:inherit}.doc .np:empty{display:none}
+  @media(max-width:600px){.doc{right:8px;left:8px;width:auto;bottom:8px}.doc-fab{right:10px;bottom:10px}}
+  @media(prefers-reduced-motion:reduce){.doc button.cont{animation:none}}`;
   document.head.appendChild(css);
-  const fab = Object.assign(document.createElement('button'), { className: 'doc-fab', type: 'button', innerHTML: '<span aria-hidden="true">🎙</span> Documentary' });
+  const fab = Object.assign(document.createElement('button'), { className: 'doc-fab', type: 'button',
+    innerHTML: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8.5" rx="2.5"/><path d="M3 7.8a5 5 0 0 0 10 0M8 12.8V15"/></svg>Documentary' });
   fab.title = 'Have this page read to you as a documentary, with quiet classical music';
   const panel = document.createElement('section');
   panel.className = 'doc'; panel.hidden = true; panel.setAttribute('aria-label', 'Documentary reader');
-  panel.innerHTML = `<header><div><b>Documentary</b><small id="doc-title">History &amp; Politics</small></div><button class="x" id="doc-close" aria-label="Close documentary">×</button></header>
+  panel.innerHTML = `<header><div><span class="k">Documentary</span><b id="doc-title">Read aloud, with quiet music</b></div><button type="button" class="x" id="doc-close" aria-label="Close documentary">×</button></header>
     <div class="sub" id="doc-sub" aria-live="polite">Press play to begin.</div>
-    <div class="ctrl"><button class="b primary" id="doc-play">▶ Play</button><button class="b" id="doc-skip" title="Skip this passage">⏭</button><button class="b primary cont" id="doc-cont" hidden>Continue Reading</button>
-      <label style="margin-left:auto;font-size:12px;color:var(--jdpi-muted,#91a0aa)"><input type="checkbox" id="doc-auto"> Autoplay</label></div>
-    <div class="row2"><label>Voice <select id="doc-voice"></select></label><label>Pace <input type="range" id="doc-rate" min="0.7" max="1.2" step="0.02"></label></div>
-    <div class="row2"><label><input type="checkbox" id="doc-music"> Music</label><input type="range" id="doc-vol" min="0" max="0.5" step="0.01" aria-label="Music volume"><button class="b" id="doc-nexttrack" title="Next piece">♫ ›</button></div>
+    <div class="ctrl"><button type="button" class="prp-btn primary sm" id="doc-play">▶ Play</button><button type="button" class="prp-btn sm" id="doc-skip" title="Skip this passage" aria-label="Skip this passage">⏭</button><button type="button" class="prp-btn primary sm cont" id="doc-cont" hidden>Continue Reading</button>
+      <label class="auto"><input type="checkbox" id="doc-auto"> Autoplay</label></div>
+    <div class="row2"><label>Voice <select class="prp-select" id="doc-voice"></select></label><label>Pace <input type="range" id="doc-rate" min="0.7" max="1.2" step="0.02"></label></div>
+    <div class="row2"><label><input type="checkbox" id="doc-music"> Music</label><input type="range" id="doc-vol" min="0" max="0.5" step="0.01" aria-label="Music volume"><button type="button" class="prp-btn ghost sm" id="doc-nexttrack" title="Next piece">♫ Next piece</button></div>
     <div class="np" id="doc-np"></div>`;
   document.body.append(fab, panel);
   const audio = new Audio(); audio.preload = 'none'; audio.crossOrigin = null;
 
-  const onHp = () => /^#\/hp(\/|$)/.test(location.hash);
-  const syncFab = () => { fab.hidden = !onHp() || S.open; };
-  window.addEventListener('hashchange', () => { syncFab(); routeChanged(); });
+  /* ---------- where it is offered ---------- */
+  const tellsStory = new WeakSet(); // frames whose page has its own story (window.jdpiDocumentary)
+  const activeFrame = () => { const f = $('#frames'); return f && !f.hidden ? f.querySelector('iframe.active') : null; };
+  const onRetrospective = () => /^#\/(rs|hp)(\/|$)/.test(location.hash);
+  const available = () => onRetrospective() || tellsStory.has(activeFrame());
+  const syncFab = () => { fab.hidden = !available() || S.open; };
+  // The shell switches frames on the same hashchange, so look once it has.
+  window.addEventListener('hashchange', () => setTimeout(() => { syncFab(); routeChanged(); }, 0));
   syncFab();
 
   /* ---------- voice ---------- */
@@ -122,12 +140,17 @@
   }
   function setMusic(on) { S.music = on; store.set('music', on); if (on && S.open) { if (!audio.src) nextTrack(); else audio.play().catch(() => {}); } else audio.pause(); }
 
-  /* ---------- talking to the module ---------- */
-  const activeFrame = () => { const f = $('#frames'); return f && !f.hidden ? f.querySelector('iframe.active') : null; };
+  /* ---------- talking to the submodule ---------- */
   const originOf = f => new URL(f.src, location.href).origin;
   window.addEventListener('message', e => {
-    const f = activeFrame();
-    if (!f || e.source !== f.contentWindow || !e.data || typeof e.data !== 'object' || !('jdpiDoc' in e.data)) return;
+    if (!e.data || typeof e.data !== 'object' || !('jdpiDoc' in e.data)) return;
+    const from = [...document.querySelectorAll('#frames iframe')].find(f => f.contentWindow === e.source);
+    if (!from) return;
+    if (e.data.jdpiDoc === 'ready') {
+      if (e.data.story) tellsStory.add(from); else tellsStory.delete(from);
+      if (from === activeFrame()) { syncFab(); if (S.open && !S.playing && !S.waiting) routeChanged(); }
+    }
+    if (from !== activeFrame()) return;
     if (e.data.title) $('#doc-title').textContent = e.data.title;
     if (e.data.jdpiDoc === 'step') { const p = S.pending.get(e.data.seq); if (p) { S.pending.delete(e.data.seq); p(e.data.step); } }
   });
@@ -150,7 +173,7 @@
     S.playing = true; S.stopFlag = false; setPlayButton();
     if (S.music) setMusic(true);
     const f = activeFrame();
-    if (!f) { $('#doc-sub').textContent = 'Open a History & Politics module to have it read to you.'; S.playing = false; setPlayButton(); return; }
+    if (!f) { $('#doc-sub').textContent = 'Open a Retrospective Intelligence submodule or a course to have it read to you.'; S.playing = false; setPlayButton(); return; }
     if (fresh) { ask('start'); S.resume = null; }
     // Resuming after a pause repeats the passage that was interrupted.
     if (S.resume) { const text = S.resume; S.resume = null; $('#doc-sub').textContent = text; await speak(text); }
@@ -180,8 +203,9 @@
   function routeChanged() {
     if (!S.open) return;
     if (S.playing || S.waiting) { stopReading(); S.waiting = null; }
-    $('#doc-cont').hidden = !onHp(); $('#doc-cont').textContent = 'Continue Reading';
-    $('#doc-sub').textContent = onHp() ? 'A new page. Press Continue Reading and I shall carry on here; the music plays on.' : 'Documentary mode is for History & Politics. The music plays on until you close it.';
+    const here = available();
+    $('#doc-cont').hidden = !here; $('#doc-cont').textContent = 'Continue Reading';
+    $('#doc-sub').textContent = here ? 'A new page. Press Continue Reading and I shall carry on here; the music plays on.' : 'There is nothing to read aloud on this page. The music plays on until you close it.';
   }
 
   /* ---------- controls ---------- */

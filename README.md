@@ -1,89 +1,73 @@
-# JDP-I
+# PRP — Personal Resource Planner
 
-JDP-I is a single workspace for three suites of intelligence apps. You pick a module from one sidebar, it opens in the main area, and every module shares the same look.
+**PRP** is a product of **JDP-Iq**. It does for one person what an ERP does for an enterprise: one workspace for
+intelligence, history, money and science. You pick a submodule in the sidebar, it opens in the main area, and every
+submodule shares one design system, one Encyclopaedia and one light/dark theme.
 
-| Suite | Focus | Accent | Modules |
-|---|---|---|---|
-| **Q** | Geopolitical intelligence | Lime `#b7f36b` | Briefing Â· Political Calendar Â· Global Headline Tracker Â· Geopolitical Volatility Â· Country PESTLE |
-| **H&P** | History & politics | Cyan `#6ddac8` | Political Atlas · H&P Retrospective |
-| **F&E** | Finance & economics | Amber `#f0b95a` | Double Signal (in build) |
+Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo). Formerly "JDP-I".
 
-Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo).
+| Module | Code | Submodules |
+|---|---|---|
+| **Realtime Intelligence**: what is happening now | RT | Intelligence Briefing · Global Headline Tracker · Geopolitical Volatility · National Analysis · Realtime Battlefield · Political Atlas · Realtime Calendar · OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · OSINT Training |
+| **Retrospective Intelligence**: what happened and why | RS | Encyclopaedia · Political Retrospective · Historical Calendar · Retrospective Battlefield · War Focus · Kardashev Tracker · Learning · Politics |
+| **Money Management**: your money end to end | MM | TD Markets · Tally Stick · Algo Trader · Auto Trader · Learning · Finance & Economics |
+| **Natural Science**: science now and through history | NS | Scientific Briefing · Timeline of Progress |
+
+(In `registry.json` the four modules are "suites" and their submodules "modules". The old ids `q`, `hp` and `fe` still
+work as aliases.)
 
 ## Architecture
 
 ```
-            â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ JDP-I shell (this repo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-            â”‚  Sidebar: suites â†’ modules â†’ submodules     Top bar: breadcrumb, actions â”‚
-            â”‚  Router (#/suite/module/sub)   registry.json   design/ (design system)   â”‚
-            â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                     â”‚ persistent iframes (one per module, state kept when you switch)
-       â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-       â”‚ Q suite                â”‚   â”‚ H&P suite        â”‚   â”‚ F&E suite         â”‚
-       â”‚ q/calendar.html  (here)â”‚   â”‚ Political Atlas  â”‚   â”‚ Double Signal     â”‚
-       â”‚ q/headlines.html (here)â”‚   â”‚ (own repo,       â”‚   â”‚ (Next.js, own     â”‚
-       â”‚ Briefing, Volatility,  â”‚   â”‚  Cloudflare)     â”‚   â”‚  project)         â”‚
-       â”‚ PESTLE (Lovable)       â”‚   â”‚                  â”‚   â”‚                   â”‚
-       â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+  PRP shell (this repo): sidebar → modules → submodules · breadcrumb · search · theme · registry.json
+        │ one persistent iframe per submodule page (state is kept when you switch)
+        ├── pages in this repo: q/, battlefield/, kardashev/, encyclopedia/, fe/, science/, osint/, sigint/, geoint/
+        ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
+        └── trade-desk Worker (TD Markets, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
+  design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
+  lake/ (the Encyclopaedia's entity layer, keyed by Wikidata IDs) links every page to every other
 ```
-
-**Each module stays an independent app.** It has its own codebase, host and deploy pipeline, so modules can be built with different tools (plain HTML, Lovable, Next.js) and released separately. The shell only has to know each module's URL.
 
 | Piece | File | Role |
 |---|---|---|
-| Module registry | `registry.json` | The single list of suites, modules, submodules, URLs and status. Adding a module is a JSON edit. |
-| Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing, breadcrumb, persistent module frames, sidebar search (press `/`). |
-| Design system | `design/jdpi.css` | Colour, type and spacing tokens, suite accents, and shared components. |
-| Module connector | `design/jdpi-bar.js` | Runs in each module. Inside the shell, it hides the module's own brand header. Opened on its own, it adds a "â† JDP-I â€º Suite â€º Module" bar. |
-| Brand | `design/brand-jdpi.svg`, `design/brand-eye-q.svg` | The platform mark and the Q suite mark. |
+| Registry | `registry.json` | Modules, submodules, URLs, kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
+| Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
+| Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
+| Connector | `design/prp-bar.js` (`design/jdpi-bar.js` is an identical copy) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "PRP / Module / Submodule" bar when a page is opened on its own. |
+| Entity layer | `lake/` | See `lake/README.md`. |
+| Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
 
-### Adding a module
+### One page, one submodule
 
-1. Add an entry under the right suite in `registry.json`:
-   ```json
-   { "id": "my-module", "name": "My Module", "icon": "â—‡", "status": "live",
-     "host": "Cloudflare Pages", "url": "https://my-module.pages.dev",
-     "description": "One sentence on what it does." }
-   ```
-   `status` is `live`, `in-build` or `planned`. Set `url: null` until the module is deployed; the shell then shows an "in build" page. Add `submodules` (each with `id`, `name` and `url`) to list deep links in the sidebar.
-2. Connect the module to the design system (see below).
-3. Commit. Cloudflare redeploys the shell automatically.
+A submodule is one page. A page's own views (archives, map/compare, live/archive, course parts) are **tabs inside the
+page**, listed under `views` in the registry, never extra sidebar entries.
 
-To add a whole new suite, add an object to `suites` with `id`, `code`, `name`, `title` and `description`. Give it an accent in `design/jdpi.css` (`[data-suite="xx"]`) and in `shell.css`.
+### Adding a submodule
 
-## Connecting a module to the design system
+1. Add an entry under the right module in `registry.json` with `id`, `name`, `kind`, `icon`, `status` (`live`,
+   `in-build` or `planned`), `host`, `url` and `description`. Add `opensInNewTab: true` for private pages behind their own
+   sign-in.
+2. Hook the page up to the design system (see `design/PRP-STYLE.md` §2) and follow its anatomy and checklist.
+3. If the page mentions people, places, wars, parties or ideas, add an adapter in `lake/scripts/adapters.mjs` so the
+   Encyclopaedia links to it.
+4. Commit. Cloudflare redeploys automatically.
 
-Add these two lines to the module's `<head>`, setting `data-suite` to `q`, `hp` or `fe`:
+## Data refreshes
 
-```html
-<link rel="stylesheet" href="https://jdpi.pages.dev/design/jdpi.css">
-<script src="https://jdpi.pages.dev/design/jdpi-bar.js" data-suite="fe" data-module="double-signal" defer></script>
-```
+GitHub Actions (`.github/workflows/`) rebuild data and commit it: Briefing (twice daily), Scientific Briefing (every six
+hours), Volatility, National Analysis, Battlefield and War Focus, Auto Trader (weekly), Timeline of Progress and the
+Encyclopaedia (monthly).
 
-Then:
-- Use the tokens (`var(--jdpi-bg)`, `var(--jdpi-panel)`, `var(--jdpi-accent)`, `var(--jdpi-font-display)`â€¦) instead of hard-coded colours and fonts.
-- Add `data-jdpi-standalone` to the module's own brand header so it hides inside the shell. Keep functional toolbars (search, filters) visible.
-- For resilience, give token fallbacks, e.g. `background: var(--jdpi-bg, #101820)`, so the module still looks right if the shared stylesheet can't load.
-
-**Next.js / Tailwind (Double Signal).** Put the two tags in `app/layout.tsx` (`<link>` in `<head>`, `<Script src=â€¦ strategy="afterInteractive" data-suite="fe" data-module="double-signal" />`). Then map Tailwind/shadcn theme variables to the tokens in `globals.css`: `--background: var(--jdpi-bg)`, `--card: var(--jdpi-panel)`, `--primary: var(--jdpi-amber)`, `--border: var(--jdpi-line)`, `--font-sans: var(--jdpi-font-ui)`.
-
-**Lovable apps (Briefing, Volatility, PESTLE).** Paste this into each project's Lovable chat:
-
-> Restyle this app to the JDP-I design system. In index.html add `<link rel="stylesheet" href="https://jdpi.pages.dev/design/jdpi.css">` and `<script src="https://jdpi.pages.dev/design/jdpi-bar.js" data-suite="q" data-module="MODULE_ID" defer></script>`. Use the CSS variables from that stylesheet for all colours and fonts: background `--jdpi-bg`, panels `--jdpi-panel`/`--jdpi-panel-2`, borders `--jdpi-line`, text `--jdpi-text`/`--jdpi-muted`, accent `--jdpi-lime`, headings in `--jdpi-font-display` (Manrope), body in `--jdpi-font-ui` (DM Sans), labels and numbers in `--jdpi-font-mono` (DM Mono). Add the attribute `data-jdpi-standalone` to the app's top brand header. Keep the dark theme only.
-
-Replace `MODULE_ID` with `briefing`, `volatility` or `pestle`.
-
-## Design principles
-
-- **Dark, calm and data-dense.** It's a workspace people keep open, not a marketing site.
-- **One accent per suite.** Lime for Q, cyan for H&P, amber for F&E. The accent marks the active item, primary actions and key numbers only.
-- **Three typefaces with fixed jobs:** Manrope for headings, DM Sans for interface text, DM Mono for labels, codes, dates and figures.
-- **Status is always explicit:** Live, In build, or Planned, shown with a coloured dot and tag.
-
-## Local development
+## Tests
 
 ```bash
-npx serve@14.2.4 -l 8090 .
+node --test tests/*.test.mjs                      # data and page tests
+PRP_URL=http://localhost:8787 node --test tests/platform.test.mjs   # shell and pages, with Edge via playwright-core
+node tests/tools/serve.mjs 8787                   # local static server (keeps .html and query strings)
+node tests/tools/shoot.mjs <url> <out.png> [--dark] [--width 390]   # screenshot a page in light or dark
 ```
 
-Then open http://localhost:8090. The Q pages (`q/`) came from the original JDP-I Q hub built in Codex. Edit them here from now on.
+## Licences
+
+Code © JDP-Iq. Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0 and are credited where shown. Each data source
+is credited on the page that uses it.

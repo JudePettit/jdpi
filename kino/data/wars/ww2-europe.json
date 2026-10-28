@@ -1,0 +1,271 @@
+{
+  "id": "ww2-europe",
+  "title": "The Second World War in Europe, 1939–1945",
+  "category": "wars",
+  "subjects": [
+    { "qid": "Q362", "label": "World War II" },
+    { "qid": "Q7318", "label": "Nazi Germany" },
+    { "qid": "Q15180", "label": "Soviet Union" }
+  ],
+  "era": [1939, 1945],
+  "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga, what it cost, and how it divided the continent. Fourteen scenes, with maps that follow War Focus month by month.",
+  "minutes": 7,
+  "preview": { "scene": "barbarossa" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "World War II (Q362), Nazi Germany (Q7318), Soviet Union (Q15180)", "url": "https://www.wikidata.org/wiki/Q362" },
+    { "id": "kershaw-2015", "kind": "book", "author": "Ian Kershaw", "title": "To Hell and Back: Europe 1914–1949", "year": 2015, "publisher": "Allen Lane" },
+    { "id": "kershaw-2007", "kind": "book", "author": "Ian Kershaw", "title": "Fateful Choices: Ten Decisions That Changed the World, 1940–1941", "year": 2007, "publisher": "Allen Lane" },
+    { "id": "weinberg-1994", "kind": "book", "author": "Gerhard L. Weinberg", "title": "A World at Arms: A Global History of World War II", "year": 1994, "publisher": "Cambridge University Press" },
+    { "id": "overy-1995", "kind": "book", "author": "Richard Overy", "title": "Why the Allies Won", "year": 1995, "publisher": "Jonathan Cape" },
+    { "id": "beevor-2012", "kind": "book", "author": "Antony Beevor", "title": "The Second World War", "year": 2012, "publisher": "Weidenfeld & Nicolson" },
+    { "id": "hastings-2011", "kind": "book", "author": "Max Hastings", "title": "All Hell Let Loose: The World at War 1939–1945", "year": 2011, "publisher": "HarperPress" },
+    { "id": "glantz-house-1995", "kind": "book", "author": "David M. Glantz and Jonathan M. House", "title": "When Titans Clashed: How the Red Army Stopped Hitler", "year": 1995, "publisher": "University Press of Kansas" },
+    { "id": "friedlander-2007", "kind": "book", "author": "Saul Friedländer", "title": "The Years of Extermination: Nazi Germany and the Jews, 1939–1945", "year": 2007, "publisher": "HarperCollins" },
+    { "id": "hilberg-2003", "kind": "book", "author": "Raul Hilberg", "title": "The Destruction of the European Jews (third edition)", "year": 2003, "publisher": "Yale University Press" },
+    { "id": "harrison-2019", "kind": "article", "author": "Mark Harrison", "title": "Counting the Soviet Union's War Dead: Still 26–27 Million", "year": 2019, "journal": "Europe-Asia Studies 71 (6): 1036–1047", "url": "https://doi.org/10.1080/09668136.2018.1547366" },
+    { "id": "materski-szarota-2009", "kind": "book", "author": "Wojciech Materski and Tomasz Szarota (eds)", "title": "Polska 1939–1945: Straty osobowe i ofiary represji pod dwiema okupacjami", "year": 2009, "publisher": "Instytut Pamięci Narodowej" },
+    { "id": "overmans-1999", "kind": "book", "author": "Rüdiger Overmans", "title": "Deutsche militärische Verluste im Zweiten Weltkrieg", "year": 1999, "publisher": "Oldenbourg" },
+    { "id": "judt-2005", "kind": "book", "author": "Tony Judt", "title": "Postwar: A History of Europe Since 1945", "year": 2005, "publisher": "Heinemann" },
+    { "id": "yad-vashem", "kind": "web", "title": "Hall of Names: Historical Questions (estimates of the number of Jewish victims)", "publisher": "Yad Vashem", "url": "https://www.yadvashem.org/archive/hall-of-names/database/faq.html" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Second World War in Europe",
+      "narration": "Between September 1939 and May 1945, war spread from the borders of Poland to the Atlantic, the Arctic, the Mediterranean and deep into Russia. It became the deadliest conflict in Europe's history, and most of those who died were civilians. This film follows the war in Europe from its causes to its aftermath, with the maps and figures that historians rely on.",
+      "visual": { "kind": "title", "kicker": "Kino · Wars", "heading": "The Second World War in Europe", "sub": "1939–1945" },
+      "focus": { "bbox": [-12, 34, 48, 66] },
+      "link": { "label": "Retrospective Battlefield · 1939", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1939&w=c139" },
+      "cites": ["weinberg-1994", "kershaw-2015"]
+    },
+    {
+      "id": "road-to-war",
+      "title": "The road to war, 1933–1939",
+      "narration": "Adolf Hitler came to power in Germany in January 1933 and set out to overturn the settlement imposed after the First World War. Germany rearmed, sent troops into the demilitarised Rhineland in 1936, absorbed Austria in March 1938 and, under the Munich Agreement that September, took the Sudetenland from Czechoslovakia with the consent of Britain and France. When German troops occupied Prague in March 1939, Britain and France promised to defend Poland.",
+      "visual": {
+        "kind": "timeline", "from": "1933", "to": "1939-09",
+        "events": [
+          { "at": "1933-01-30", "label": "Hitler becomes Chancellor" },
+          { "at": "1936-03-07", "label": "Rhineland reoccupied" },
+          { "at": "1938-03-12", "label": "Austria annexed" },
+          { "at": "1938-09-30", "label": "Munich Agreement" },
+          { "at": "1939-03-15", "label": "Prague occupied" },
+          { "at": "1939-08-23", "label": "Nazi–Soviet Pact" },
+          { "at": "1939-09-01", "label": "Poland invaded" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Nazi Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7318" },
+      "cites": ["kershaw-2015", "weinberg-1994"]
+    },
+    {
+      "id": "poland",
+      "title": "The invasion of Poland, September 1939",
+      "narration": "On 23 August 1939 Germany and the Soviet Union signed a non-aggression pact whose secret protocol divided eastern Europe between them. Germany invaded Poland on 1 September, and Britain and France declared war two days later. The Red Army crossed Poland's eastern border on 17 September, and Warsaw surrendered on 28 September after weeks of bombardment.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Poland", "tone": 1, "countries": ["POL"] },
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] },
+          { "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }
+        ],
+        "arrows": [
+          { "from": [13.9, 52.4], "via": [17.0, 52.6], "to": [20.4, 52.3], "tone": 2 },
+          { "from": [20.6, 54.4], "via": [20.9, 53.5], "to": [21.0, 52.6], "tone": 2 },
+          { "from": [18.9, 49.4], "via": [19.6, 50.5], "to": [20.6, 51.6], "tone": 2 },
+          { "from": [28.2, 53.9], "via": [25.8, 53.5], "to": [23.9, 53.0], "tone": 3 },
+          { "from": [28.2, 49.8], "via": [26.0, 49.9], "to": [24.2, 49.85], "tone": 3 }
+        ]
+      },
+      "focus": { "countries": ["POL", "DEU"], "points": [[21.01, 52.23, "Warsaw, surrendered 28 September"]], "bbox": [10, 46.5, 32, 57] },
+      "link": { "label": "War Focus · September 1939", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1939-09" },
+      "cites": ["weinberg-1994", "beevor-2012"]
+    },
+    {
+      "id": "west-1940",
+      "title": "The fall of France, 1940",
+      "narration": "After a winter of little fighting in the west, Germany occupied Denmark and invaded Norway in April 1940. On 10 May it attacked the Netherlands, Belgium and Luxembourg, and its armoured divisions broke through the Ardennes to reach the Channel coast within ten days. More than 330,000 British and French troops were evacuated from Dunkirk, and France signed an armistice on 22 June.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Invaded, April to June 1940", "tone": 1, "countries": ["DNK", "NOR", "NLD", "BEL", "LUX", "FRA"] },
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] }
+        ],
+        "arrows": [
+          { "from": [6.8, 50.4], "via": [4.9, 49.75], "to": [1.9, 50.15], "tone": 2, "label": "Through the Ardennes" },
+          { "from": [6.7, 51.8], "via": [5.3, 51.6], "to": [4.5, 51.9], "tone": 2 },
+          { "from": [6.8, 51.1], "via": [5.6, 50.8], "to": [4.4, 50.85], "tone": 2 }
+        ]
+      },
+      "focus": { "countries": ["FRA", "BEL", "NLD"], "points": [[4.94, 49.7, "Sedan, 13 May"], [2.38, 51.03, "Dunkirk, 26 May – 4 June"], [2.35, 48.86, "Paris, 14 June"]], "bbox": [-5, 42.5, 17, 61] },
+      "link": { "label": "War Focus · May 1940", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1940-05" },
+      "cites": ["beevor-2012", "hastings-2011"]
+    },
+    {
+      "id": "britain-alone",
+      "title": "Britain fights on, 1940–1941",
+      "narration": "Winston Churchill had become Prime Minister on 10 May, and in late May his War Cabinet decided against seeking terms from Germany. Through the summer of 1940 the Royal Air Force held off the Luftwaffe in the Battle of Britain, and Germany put off its plan to invade. The bombing of British cities, the Blitz, went on until May 1941 and killed more than 40,000 civilians.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "United Kingdom", "tone": 1, "countries": ["GBR"] },
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] }
+        ],
+        "arrows": [
+          { "from": [2.2, 50.3], "via": [1.0, 51.1], "to": [-0.05, 51.45], "tone": 2, "label": "Luftwaffe raids" },
+          { "from": [4.7, 52.0], "via": [2.0, 52.4], "to": [-1.35, 52.45], "tone": 2 }
+        ]
+      },
+      "focus": { "countries": ["GBR"], "points": [[-0.13, 51.51, "London, bombed from September 1940"], [-1.51, 52.41, "Coventry, 14 November 1940"]], "bbox": [-9, 48.5, 12, 59] },
+      "link": { "label": "Kino · Winston Churchill, May 1940", "suite": "kino", "module": "kino-political-figures", "at": "kino/index.html?cat=political-figures#doc=winston-churchill&s=may-1940" },
+      "cites": ["kershaw-2007", "hastings-2011"]
+    },
+    {
+      "id": "barbarossa",
+      "title": "Operation Barbarossa, 1941",
+      "narration": "On 22 June 1941 Germany and its allies invaded the Soviet Union along a front from the Baltic to the Black Sea, in the largest land invasion in history. The Red Army lost millions of men killed or captured in the first months, Leningrad was besieged from September and Kyiv fell on 19 September. In December, with German troops close to Moscow, a Soviet counter-offensive drove them back, and the war in the east became a long struggle of attrition.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Germany and its allies", "tone": 2, "countries": ["DEU", "ROU", "HUN", "FIN", "SVK"] },
+          { "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }
+        ],
+        "arrows": [
+          { "from": [21.5, 54.9], "via": [25.6, 57.1], "to": [29.8, 59.4], "tone": 2, "label": "Army Group North" },
+          { "from": [23.8, 52.1], "via": [30.0, 54.5], "to": [36.6, 55.6], "tone": 2, "label": "Army Group Centre" },
+          { "from": [23.6, 50.6], "via": [27.0, 50.1], "to": [30.1, 50.4], "tone": 2, "label": "Army Group South" }
+        ],
+        "fronts": [
+          { "label": "Front line, early December 1941 (approximate)", "line": [[31.0, 59.95], [33.6, 59.6], [32.3, 59.0], [31.3, 58.5], [32.5, 57.6], [33.1, 57.15], [35.9, 56.86], [36.73, 56.33], [37.15, 56.0], [36.75, 55.6], [36.7, 55.39], [37.2, 54.6], [38.1, 54.6], [38.5, 53.6], [38.5, 52.6], [37.0, 51.6], [37.0, 50.0], [38.0, 48.2], [38.9, 47.2]] }
+        ]
+      },
+      "focus": { "countries": ["SUN"], "points": [[37.62, 55.76, "Moscow"], [30.32, 59.94, "Leningrad"], [30.52, 50.45, "Kyiv"]], "bbox": [14, 43, 46, 62] },
+      "link": { "label": "War Focus · June 1941", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1941-06" },
+      "cites": ["glantz-house-1995", "overy-1995"]
+    },
+    {
+      "id": "holocaust",
+      "title": "The Holocaust",
+      "narration": "Behind the front lines, Nazi Germany carried out the systematic murder of Europe's Jews. From the summer of 1941 German units carried out mass shootings of Jews across the occupied Soviet territories, and from 1942 Jews from all over Europe were deported to death camps in occupied Poland, among them Treblinka, Sobibór, Bełżec and Auschwitz-Birkenau. Historians' estimates of the Jewish dead range from about 5.1 million to 6 million. Roma and Sinti, disabled people, Soviet prisoners of war and many others were also murdered.",
+      "visual": { "kind": "map", "still": true },
+      "focus": {
+        "points": [[19.18, 50.03, "Auschwitz-Birkenau"], [22.05, 52.63, "Treblinka"], [23.59, 51.45, "Sobibór"], [23.46, 50.38, "Bełżec"], [18.73, 52.15, "Chełmno"], [22.6, 51.22, "Majdanek"], [30.45, 50.47, "Babyn Yar, Kyiv"]],
+        "bbox": [13, 46.5, 33, 55.5]
+      },
+      "cites": ["friedlander-2007", "hilberg-2003", "yad-vashem"]
+    },
+    {
+      "id": "stalingrad",
+      "title": "Stalingrad and Kursk, 1942–1943",
+      "narration": "In the summer of 1942 Germany struck south-east towards the oilfields of the Caucasus and the city of Stalingrad on the Volga. The battle for the city was fought street by street from August, until on 19 November the Red Army encircled the German Sixth Army in Operation Uranus. Its last troops surrendered on 2 February 1943, and after a German offensive at Kursk in July 1943 was called off within about a week, the Red Army held the initiative.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }],
+        "arrows": [
+          { "from": [36.6, 50.5], "via": [40.2, 49.4], "to": [44.1, 48.8], "tone": 2, "label": "German advance, summer 1942" },
+          { "from": [39.7, 47.2], "via": [41.6, 45.4], "to": [43.4, 43.7], "tone": 2 },
+          { "from": [42.8, 49.7], "to": [43.55, 48.75], "tone": 3, "label": "Operation Uranus" },
+          { "from": [44.7, 48.0], "to": [43.65, 48.6], "tone": 3 }
+        ]
+      },
+      "focus": { "points": [[44.52, 48.71, "Stalingrad"], [36.19, 51.73, "Kursk, July 1943"]], "bbox": [34, 42.5, 48, 53] },
+      "link": { "label": "War Focus · November 1942", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1942-11" },
+      "cites": ["glantz-house-1995", "beevor-2012"]
+    },
+    {
+      "id": "mediterranean",
+      "title": "North Africa and Italy, 1940–1945",
+      "narration": "Italy entered the war in June 1940, and the Mediterranean became a second front, fought across North Africa, the Balkans and the sea between them. British and Commonwealth forces defeated the German and Italian army at El Alamein in late 1942, while American and British troops landed in Morocco and Algeria. After the Axis surrender in Tunisia in May 1943 the Allies invaded Sicily and then mainland Italy, where Mussolini fell from power but German forces fought on until the last days of the war.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Italy (in the Axis until September 1943)", "tone": 2, "countries": ["ITA"] }],
+        "arrows": [
+          { "from": [29.0, 30.9], "via": [20.0, 31.6], "to": [10.6, 34.4], "tone": 1, "label": "Eighth Army" },
+          { "from": [3.0, 36.8], "via": [6.6, 36.5], "to": [9.6, 36.8], "tone": 1, "label": "Operation Torch" },
+          { "from": [14.3, 37.2], "via": [15.8, 39.2], "to": [12.6, 41.8], "tone": 1 }
+        ]
+      },
+      "focus": { "points": [[28.95, 30.83, "El Alamein"], [3.06, 36.75, "Algiers"], [10.18, 36.81, "Tunis"], [14.25, 37.07, "Sicily, July 1943"], [12.5, 41.9, "Rome, June 1944"]], "bbox": [-6, 29, 33, 46.5] },
+      "link": { "label": "Retrospective Battlefield · 1942", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1942&w=c139" },
+      "cites": ["hastings-2011", "beevor-2012"]
+    },
+    {
+      "id": "science",
+      "title": "A war of factories and laboratories",
+      "narration": "The war was decided in factories and laboratories as well as on battlefields. Richard Overy has argued that the Allies won partly because they outproduced the Axis in aircraft, tanks and ships, and used that output well. British radar, the Colossus code-breaking computers at Bletchley Park and the Anglo-American atomic bomb project were all shaped by the war.",
+      "visual": { "kind": "module", "blurb": "See where radar, Colossus and the first nuclear reactor were built, on the map of humanity's breakthroughs." },
+      "link": { "label": "Timeline of Progress · Colossus, 1943", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1943&e=colossus" },
+      "cites": ["overy-1995"]
+    },
+    {
+      "id": "two-fronts",
+      "title": "Two fronts close in, 1944",
+      "narration": "On 6 June 1944 American, British, Canadian and other Allied forces landed in Normandy, the largest seaborne invasion ever attempted. Sixteen days later the Red Army opened Operation Bagration in Belarus, destroying most of the German Army Group Centre and advancing to the Vistula. Paris was liberated in August, but the Warsaw Uprising was crushed by German forces that autumn, and the Allied attempt to cross the Rhine at Arnhem failed in September.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] },
+          { "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }
+        ],
+        "arrows": [
+          { "from": [-1.3, 50.7], "to": [-0.6, 49.45], "tone": 1, "label": "D-Day, 6 June" },
+          { "from": [-0.4, 49.0], "via": [0.6, 48.5], "to": [2.1, 48.8], "tone": 1 },
+          { "from": [30.4, 55.2], "via": [27.6, 53.9], "to": [23.6, 52.6], "tone": 3, "label": "Operation Bagration" },
+          { "from": [30.0, 52.4], "via": [26.4, 52.3], "to": [21.8, 51.9], "tone": 3 }
+        ]
+      },
+      "focus": { "points": [[-0.6, 49.35, "Normandy"], [27.56, 53.9, "Minsk, 3 July"], [2.35, 48.86, "Paris, 25 August"], [21.01, 52.23, "Warsaw Uprising"]], "bbox": [-6, 44, 35, 58] },
+      "link": { "label": "War Focus · June 1944", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1944-06" },
+      "cites": ["beevor-2012", "glantz-house-1995", "hastings-2011"]
+    },
+    {
+      "id": "berlin",
+      "title": "The fall of Berlin, 1945",
+      "narration": "Through the winter of 1944–45 the Allies fought their way into Germany from east and west, and the bombing of German cities reached its height. The Soviet assault on Berlin began on 16 April, American and Soviet troops met on the Elbe at Torgau on 25 April, and Hitler killed himself on 30 April. Germany's commanders signed an unconditional surrender at Reims on 7 May and again in Berlin the next day, and 8 May 1945 became Victory in Europe Day.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Germany", "tone": 2, "countries": ["DEU"] }],
+        "arrows": [
+          { "from": [18.4, 52.4], "via": [15.6, 52.6], "to": [13.65, 52.52], "tone": 3, "label": "Red Army" },
+          { "from": [16.9, 51.1], "via": [14.9, 51.7], "to": [13.5, 52.3], "tone": 3 },
+          { "from": [6.4, 51.5], "via": [9.0, 51.9], "to": [11.6, 52.1], "tone": 1, "label": "Western Allies" },
+          { "from": [8.2, 50.1], "via": [10.6, 50.8], "to": [12.85, 51.5], "tone": 1 }
+        ]
+      },
+      "focus": { "countries": ["DEU"], "points": [[13.4, 52.52, "Berlin"], [13.0, 51.56, "Torgau, 25 April"], [4.03, 49.26, "Reims, 7 May"]], "bbox": [2, 47.5, 21, 56] },
+      "link": { "label": "War Focus · April 1945", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1945-04" },
+      "cites": ["beevor-2012", "kershaw-2015"]
+    },
+    {
+      "id": "the-cost",
+      "title": "The human cost",
+      "narration": "No one knows exactly how many people died in Europe's war, and estimates still differ, so this chart shows ranges. The best estimate of Soviet deaths is 26 to 27 million, and Poland lost between 5.6 and 5.8 million citizens, about a sixth of its pre-war population. Rüdiger Overmans counted about 5.3 million German military dead, and the rows overlap, because most of the Jews murdered in the Holocaust were Polish or Soviet citizens.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Deaths in Europe's war: ranges of scholarly estimates", "unit": "million people",
+        "data": [
+          { "label": "Soviet Union, all deaths", "low": 26, "high": 27 },
+          { "label": "Poland, all deaths", "low": 5.6, "high": 5.8 },
+          { "label": "Jews murdered in the Holocaust", "low": 5.1, "high": 6 }
+        ],
+        "note": "Rows overlap: most Jewish victims were Polish or Soviet citizens. German military dead: about 5.3 million (Overmans).",
+        "cite": ["harrison-2019", "materski-szarota-2009", "hilberg-2003", "yad-vashem", "overmans-1999"]
+      },
+      "link": { "label": "Encyclopaedia · World War II", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q362" },
+      "cites": ["harrison-2019", "materski-szarota-2009", "overmans-1999", "hilberg-2003"]
+    },
+    {
+      "id": "aftermath",
+      "title": "A divided continent",
+      "narration": "Victory left much of Europe in ruins, with millions of people displaced and borders redrawn. At Yalta and Potsdam the Allied leaders agreed to divide Germany into zones of occupation and to move Poland westwards, and millions of Germans were expelled from central and eastern Europe. Within a few years the continent was split between a Soviet-dominated east and a west aligned with the United States, a division that lasted until 1989.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "The Soviet Union and the states it dominated by 1949", "tone": 3, "countries": ["SUN", "POL", "CZE", "SVK", "HUN", "ROU", "BGR"] }],
+        "fronts": [
+          { "label": "The Iron Curtain (approximate)", "line": [[10.9, 54.0], [10.75, 53.0], [10.6, 52.0], [10.1, 51.0], [10.6, 50.3], [12.1, 50.3], [12.5, 49.9], [13.8, 48.75], [15.0, 48.9], [16.9, 48.6], [17.1, 48.0], [16.5, 47.5], [16.1, 46.7], [13.8, 45.65]] }
+        ]
+      },
+      "focus": { "points": [[13.06, 52.39, "Potsdam, July 1945"]], "bbox": [-11, 36, 42, 66] },
+      "link": { "label": "Historical Calendar · November 1989", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1989-11" },
+      "cites": ["judt-2005"]
+    }
+  ]
+}

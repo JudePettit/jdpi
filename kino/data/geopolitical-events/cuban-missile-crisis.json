@@ -1,0 +1,159 @@
+{
+  "id": "cuban-missile-crisis",
+  "title": "The Cuban Missile Crisis, 1962",
+  "category": "geopolitical-events",
+  "subjects": [
+    { "qid": "Q128160", "label": "Cuban Missile Crisis" },
+    { "qid": "Q9696", "label": "John F. Kennedy" },
+    { "qid": "Q35314", "label": "Nikita Khrushchev" },
+    { "qid": "Q11256", "label": "Fidel Castro" }
+  ],
+  "era": [1962, 1962],
+  "summary": "Why Khrushchev sent nuclear missiles to Cuba, how Kennedy found and answered them, the secret bargain that ended the thirteen days, and what both sides kept quiet for decades. Eleven scenes, with the words of Kennedy and Khrushchev themselves.",
+  "minutes": 6,
+  "preview": { "scene": "anadyr" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Cuban Missile Crisis (Q128160), John F. Kennedy (Q9696), Nikita Khrushchev (Q35314), Fidel Castro (Q11256)", "url": "https://www.wikidata.org/wiki/Q128160" },
+    { "id": "fursenko-naftali-1997", "kind": "book", "author": "Aleksandr Fursenko and Timothy Naftali", "title": "\"One Hell of a Gamble\": Khrushchev, Castro, and Kennedy, 1958–1964", "year": 1997, "publisher": "W. W. Norton" },
+    { "id": "dobbs-2008", "kind": "book", "author": "Michael Dobbs", "title": "One Minute to Midnight: Kennedy, Khrushchev, and Castro on the Brink of Nuclear War", "year": 2008, "publisher": "Alfred A. Knopf" },
+    { "id": "stern-2005", "kind": "book", "author": "Sheldon M. Stern", "title": "The Week the World Stood Still: Inside the Secret Cuban Missile Crisis", "year": 2005, "publisher": "Stanford University Press" },
+    { "id": "plokhy-2021", "kind": "book", "author": "Serhii Plokhy", "title": "Nuclear Folly: A History of the Cuban Missile Crisis", "year": 2021, "publisher": "W. W. Norton" },
+    { "id": "norris-kristensen-2010", "kind": "article", "author": "Robert S. Norris and Hans M. Kristensen", "title": "Global nuclear weapons inventories, 1945–2010", "year": 2010, "journal": "Bulletin of the Atomic Scientists 66 (4): 77–83", "url": "https://doi.org/10.2968/066004008" },
+    { "id": "nnsa-stockpile", "kind": "web", "title": "Transparency in the U.S. Nuclear Weapons Stockpile (stockpile size at the end of each fiscal year since 1962)", "publisher": "National Nuclear Security Administration, US Department of Energy", "url": "https://www.energy.gov/nnsa/transparency-us-nuclear-weapons-stockpile" },
+    { "id": "jfk-1962", "kind": "web", "title": "Address during the Cuban Missile Crisis, 22 October 1962", "publisher": "John F. Kennedy Presidential Library and Museum", "url": "https://www.jfklibrary.org/learn/about-jfk/historic-speeches/address-during-the-cuban-missile-crisis" },
+    { "id": "frus-1962", "kind": "web", "title": "Letter from Chairman Khrushchev to President Kennedy, 26 October 1962 (Foreign Relations of the United States, 1961–1963, volume 6, document 65)", "publisher": "Office of the Historian, US Department of State", "url": "https://history.state.gov/historicaldocuments/frus1961-63v06/d65" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Cuban Missile Crisis",
+      "narration": "In October 1962 the United States discovered that the Soviet Union was secretly installing nuclear missiles in Cuba, about ninety miles from Florida. For thirteen days the two superpowers stood closer to nuclear war than at any other time. This film follows how the missiles got there, how the crisis was resolved, and what each side kept secret for decades afterwards.",
+      "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The Cuban Missile Crisis", "sub": "October 1962" },
+      "focus": { "bbox": [-100, 10, -60, 38] },
+      "link": { "label": "Encyclopaedia · Cuban Missile Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128160" },
+      "cites": ["stern-2005", "plokhy-2021"]
+    },
+    {
+      "id": "revolution",
+      "title": "Revolution and invasion, 1959–1962",
+      "narration": "Fidel Castro's guerrillas took power in Cuba on 1 January 1959, and within two years his government had nationalised American-owned businesses and turned to the Soviet Union for trade and arms. In April 1961 about 1,400 Cuban exiles trained by the CIA landed at the Bay of Pigs and were defeated within three days, and the Kennedy administration went on planning sabotage and covert action against Castro. Both Castro and the Soviet leader, Nikita Khrushchev, had reason to expect an American invasion.",
+      "visual": { "kind": "portrait", "file": "File:Fidel Castro 1950s.jpg", "heading": "Fidel Castro", "sub": "1959", "position": "50% 25%" },
+      "link": { "label": "Retrospective Battlefield · 1961", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1961&w=u242" },
+      "cites": ["fursenko-naftali-1997", "dobbs-2008"]
+    },
+    {
+      "id": "balance",
+      "title": "An unequal balance",
+      "narration": "In 1962 the United States had far more nuclear weapons than the Soviet Union, and far more missiles and bombers able to reach the other side, whatever Khrushchev claimed in public. American Jupiter missiles had recently been deployed in Italy and Turkey, close to Soviet borders. In May 1962 Khrushchev decided to send medium-range missiles to Cuba, both to protect Castro and to narrow the gap at a stroke; historians still weigh which motive mattered more.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Nuclear warheads held in 1962", "unit": "warheads",
+        "data": [
+          { "label": "United States, official count, June 1962", "value": 25540 },
+          { "label": "Soviet Union, estimate for 1962", "value": 3322 }
+        ],
+        "note": "The United States also had many more long-range missiles and bombers to deliver its weapons.",
+        "cite": ["nnsa-stockpile", "norris-kristensen-2010"]
+      },
+      "link": { "label": "Timeline of Progress · Sputnik 1, 1957", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1957&e=sputnik" },
+      "cites": ["nnsa-stockpile", "norris-kristensen-2010", "fursenko-naftali-1997", "plokhy-2021"]
+    },
+    {
+      "id": "anadyr",
+      "title": "Operation Anadyr, summer 1962",
+      "narration": "Under the code name Anadyr, Soviet ships carried more than 40,000 troops to Cuba, with medium-range missiles that could reach Washington, bombers, and short-range nuclear weapons to use against an invasion. The missiles were shipped in secret, and many of the soldiers were not told where they were going until they were at sea. American intelligence saw the build-up but did not believe that Khrushchev would risk placing nuclear missiles on the island.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "United States", "tone": 1, "countries": ["USA"] },
+          { "label": "Soviet Union", "tone": 2, "countries": ["SUN"] },
+          { "label": "Cuba", "tone": 3, "countries": ["CUB"] }
+        ],
+        "arrows": [
+          { "from": [33.5, 44.6], "via": [-20, 33], "to": [-80.6, 23.3], "tone": 2, "label": "Soviet shipping, July – October" },
+          { "from": [33.4, 69.0], "via": [-25, 47], "to": [-79.8, 23.9], "tone": 2 }
+        ]
+      },
+      "focus": { "points": [[-77.04, 38.9, "Washington"], [27.14, 38.42, "Jupiter missiles, Izmir"], [16.92, 40.8, "Jupiter missiles, Apulia"]], "bbox": [-105, 5, 50, 72] },
+      "link": { "label": "Encyclopaedia · Nikita Khrushchev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35314" },
+      "cites": ["fursenko-naftali-1997", "plokhy-2021", "dobbs-2008"]
+    },
+    {
+      "id": "discovery",
+      "title": "Discovery, 14–16 October",
+      "narration": "On 14 October an American U-2 spy plane photographed missile sites under construction near San Cristóbal in western Cuba. Kennedy was shown the pictures on the morning of 16 October and called together a group of advisers, later known as the ExComm, whose meetings he secretly recorded. Most of them at first favoured air strikes, perhaps followed by an invasion, but over the following days a naval blockade won out, as the step that left Khrushchev room to retreat.",
+      "visual": { "kind": "portrait", "file": "File:Photograph of MRBM Field Launch Site No. 1 in San Cristobal, Cuba, 14 October 1962 - DPLA - 6f2b0f566d82e64633864b99154ce957.gif", "heading": "A missile site at San Cristóbal", "sub": "U-2 photograph, 14 October 1962", "position": "50% 50%" },
+      "link": { "label": "Encyclopaedia · John F. Kennedy", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9696" },
+      "cites": ["stern-2005", "dobbs-2008"]
+    },
+    {
+      "id": "quarantine",
+      "title": "The quarantine, 22–24 October",
+      "narration": "On the evening of 22 October Kennedy told the world about the missiles in a television address and announced a naval quarantine of Cuba, avoiding the word blockade, which in law would have been an act of war. He warned that any missile launched from Cuba would bring a full retaliatory response against the Soviet Union. American nuclear forces moved to their highest state of readiness short of war, and on 24 October Soviet ships carrying weapons stopped short of the quarantine line and turned back.",
+      "visual": { "kind": "quote", "text": "It shall be the policy of this Nation to regard any nuclear missile launched from Cuba against any nation in the Western Hemisphere as an attack by the Soviet Union on the United States, requiring a full retaliatory response upon the Soviet Union.", "who": "President John F. Kennedy, address to the nation", "when": "22 October 1962", "cite": "jfk-1962" },
+      "link": { "label": "Political Retrospective · 1962, United States", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1962&c=2" },
+      "cites": ["jfk-1962", "stern-2005"]
+    },
+    {
+      "id": "letters",
+      "title": "Two letters, 26–27 October",
+      "narration": "On 26 October a long and emotional letter from Khrushchev offered to remove the missiles if the United States promised not to invade Cuba. The next day a second message, broadcast on Moscow radio, demanded that the American missiles in Turkey be withdrawn as well. Kennedy and his advisers chose to answer the first letter in public and to deal with the second in private.",
+      "visual": { "kind": "quote", "text": "… we and you ought not now to pull on the ends of the rope in which you have tied the knot of war, because the more the two of us pull, the tighter that knot will be tied.", "who": "Nikita Khrushchev, letter to President Kennedy (State Department translation)", "when": "26 October 1962", "cite": "frus-1962" },
+      "link": { "label": "Learning · Politics: The realist tradition", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-realist-tradition" },
+      "cites": ["frus-1962", "fursenko-naftali-1997"]
+    },
+    {
+      "id": "black-saturday",
+      "title": "Black Saturday, 27 October",
+      "narration": "Saturday 27 October was the most dangerous day. A Soviet missile shot down a U-2 over eastern Cuba, killing its pilot, Major Rudolf Anderson; another U-2 strayed into Soviet airspace; and American warships dropped practice depth charges to force a Soviet submarine to surface, unaware that it carried a nuclear torpedo. That evening Robert Kennedy told the Soviet ambassador, Anatoly Dobrynin, that the United States would pledge not to invade Cuba and would quietly remove its missiles from Turkey within months, provided that part of the bargain stayed secret.",
+      "visual": {
+        "kind": "timeline", "from": "1962-10-10", "to": "1962-11-20",
+        "events": [
+          { "at": "1962-10-14", "label": "U-2 finds the missiles" },
+          { "at": "1962-10-22", "label": "Kennedy's address" },
+          { "at": "1962-10-24", "label": "Quarantine begins" },
+          { "at": "1962-10-27", "label": "Black Saturday" },
+          { "at": "1962-10-28", "label": "Khrushchev agrees to withdraw" },
+          { "at": "1962-11-20", "label": "Quarantine lifted" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Cold War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8683" },
+      "cites": ["dobbs-2008", "plokhy-2021", "stern-2005"]
+    },
+    {
+      "id": "the-deal",
+      "title": "The deal, 28 October",
+      "narration": "On the morning of 28 October Moscow radio broadcast Khrushchev's reply: the missiles would be dismantled and shipped home. Castro, who had not been consulted, was furious and refused to allow inspections on Cuban soil, so American aircraft and ships watched the missiles leave. The quarantine was lifted on 20 November, once the Soviet bombers were also going home, and the Jupiters were removed from Turkey in April 1963.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "United States", "tone": 1, "countries": ["USA"] },
+          { "label": "Soviet Union", "tone": 2, "countries": ["SUN"] },
+          { "label": "Cuba", "tone": 3, "countries": ["CUB"] }
+        ],
+        "arrows": [
+          { "from": [-80.4, 23.4], "via": [-30, 37], "to": [30.5, 44.8], "tone": 2, "label": "Missiles shipped home, November 1962" },
+          { "from": [27.3, 38.6], "via": [5, 48], "to": [-60, 42], "tone": 1, "label": "Jupiters withdrawn, April 1963" }
+        ]
+      },
+      "focus": { "points": [[27.14, 38.42, "Izmir, Jupiter base"]], "bbox": [-100, 8, 48, 66] },
+      "link": { "label": "Encyclopaedia · Fidel Castro", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11256" },
+      "cites": ["fursenko-naftali-1997", "dobbs-2008"]
+    },
+    {
+      "id": "lessons",
+      "title": "Lessons and myths",
+      "narration": "For more than twenty-five years the Turkish part of the bargain was kept secret, and the crisis was remembered in the West as Kennedy staring Khrushchev down. Kennedy's tapes and Soviet and Cuban records have since shown two leaders who were both looking for a way out, and how close accidents and misjudgements brought the world to war. Only in 1992 did American officials learn that Soviet forces in Cuba had held short-range nuclear weapons ready for use against an invasion.",
+      "visual": { "kind": "portrait", "file": "File:John Kennedy, Nikita Khrushchev 1961.jpg", "heading": "Kennedy and Khrushchev", "sub": "Vienna, June 1961", "position": "50% 35%" },
+      "link": { "label": "Learning · Politics: A crisis seen five ways", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=a-crisis-seen-five-ways" },
+      "cites": ["stern-2005", "plokhy-2021", "dobbs-2008"]
+    },
+    {
+      "id": "aftermath",
+      "title": "After the crisis",
+      "narration": "Both governments drew back from the edge. In 1963 they set up a direct teleprinter link between Washington and Moscow, the hotline, and signed a treaty banning nuclear tests in the atmosphere, in space and under water. Khrushchev was removed by his colleagues in October 1964, the Cuban adventure among the charges against him, and the Soviet Union built up its nuclear forces until they matched America's; Cuba remained Communist, and under an American embargo.",
+      "visual": { "kind": "module", "blurb": "Who holds power in Cuba now, and how its government and economy work, in PRP's Political Atlas." },
+      "link": { "label": "Political Atlas · Cuba today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#CUB" },
+      "cites": ["fursenko-naftali-1997", "plokhy-2021"]
+    }
+  ]
+}

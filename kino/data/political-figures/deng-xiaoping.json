@@ -1,0 +1,228 @@
+{
+  "id": "deng-xiaoping",
+  "title": "Deng Xiaoping",
+  "category": "political-figures",
+  "subjects": [{ "qid": "Q16977", "label": "Deng Xiaoping" }],
+  "era": [1904, 1997],
+  "summary": "Revolutionary, party leader who fell from power three times, and architect of China's market reforms: Deng's life from Sichuan to the southern tour, including the war with Vietnam and the killings of June 1989. Thirteen scenes.",
+  "minutes": 7,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Deng Xiaoping (Q16977), Chinese economic reform (Q1205521), Sino-Vietnamese War (Q623171), one-child policy (Q221719), 1989 Tiananmen Square protests and massacre (Q99717)", "url": "https://www.wikidata.org/wiki/Q16977" },
+    { "id": "vogel-2011", "kind": "book", "author": "Ezra F. Vogel", "title": "Deng Xiaoping and the Transformation of China", "year": 2011, "publisher": "Belknap Press of Harvard University Press" },
+    { "id": "pantsov-levine-2015", "kind": "book", "author": "Alexander V. Pantsov and Steven I. Levine", "title": "Deng Xiaoping: A Revolutionary Life", "year": 2015, "publisher": "Oxford University Press" },
+    { "id": "naughton-2007", "kind": "book", "author": "Barry Naughton", "title": "The Chinese Economy: Transitions and Growth", "year": 2007, "publisher": "MIT Press" },
+    { "id": "zhang-2015", "kind": "book", "author": "Xiaoming Zhang", "title": "Deng Xiaoping's Long War: The Military Conflict between China and Vietnam, 1979–1991", "year": 2015, "publisher": "University of North Carolina Press" },
+    { "id": "greenhalgh-2008", "kind": "book", "author": "Susan Greenhalgh", "title": "Just One Child: Science and Policy in Deng's China", "year": 2008, "publisher": "University of California Press" },
+    { "id": "brown-2021", "kind": "book", "author": "Jeremy Brown", "title": "June Fourth: The Tiananmen Protests and Beijing Massacre of 1989", "year": 2021, "publisher": "Cambridge University Press" },
+    { "id": "deng-1962", "kind": "web", "author": "Deng Xiaoping", "short": "Deng 1962", "year": 1962, "title": "Restore Agricultural Production, talk to the Seventh Plenary Session of the Third Central Committee of the Communist Youth League, 7 July 1962 (Selected Works of Deng Xiaoping, volume 1, Foreign Languages Press; translator not named)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/reference/archive/deng-xiaoping/1962/190.htm" },
+    { "id": "deng-1988", "kind": "web", "author": "Deng Xiaoping", "short": "Deng 1988", "year": 1988, "title": "We Review the Past to Open Up a New Path to the Future, talk with President Gustáv Husák of Czechoslovakia, 5 September 1988 (Selected Works of Deng Xiaoping, volume 3, Foreign Languages Press; translator not named)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/reference/archive/deng-xiaoping/1988/80.htm" },
+    { "id": "amnesty-1989", "kind": "web", "title": "What really happened in the 1989 Tiananmen Square protests", "publisher": "Amnesty International UK", "url": "https://www.amnesty.org.uk/knowledge-hub/all-resources/china-1989-tiananmen-square-protests-demonstration-massacre/" },
+    { "id": "wb-wdi", "kind": "web", "title": "World Development Indicators, China: GDP per capita (constant 2015 US$) and fertility rate (births per woman), data updated October 2026", "publisher": "World Bank", "year": 2026, "url": "https://data.worldbank.org/country/china" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "Deng Xiaoping, 1904–1997",
+      "narration": "Deng Xiaoping fought in China's communist revolution, rose to the top of the party under Mao Zedong, fell from power three times and came back each time, leading China from the late 1970s to the early 1990s. He opened the country to markets and foreign investment, beginning a transformation that lifted hundreds of millions of people out of poverty. He also defended the Communist Party's monopoly of power, and in 1989 he backed the use of the army against protesters in Beijing.",
+      "visual": { "kind": "portrait", "qid": "Q16977", "heading": "Deng Xiaoping", "sub": "1904–1997", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
+      "cites": ["vogel-2011", "pantsov-levine-2015", "deng-1988"]
+    },
+    {
+      "id": "france-moscow",
+      "title": "Sichuan, France and Moscow, 1904–1927",
+      "narration": "Deng was born on 22 August 1904 in Guang'an, in Sichuan province, the son of a landowner. At 16 he sailed for France on a work-study scheme, laboured in factories including the Renault works outside Paris, and joined the Chinese Communist Party in 1924. In 1926 he went on to study in Moscow, and early the next year he returned to China as a party organiser.",
+      "visual": {
+        "kind": "map",
+        "arrows": [
+          { "from": [121.47, 31.23], "via": [78, 6], "to": [5.37, 43.3], "tone": 1, "label": "By sea to France, 1920" },
+          { "from": [2.35, 48.86], "via": [20, 55], "to": [37.62, 55.75], "tone": 1, "label": "1926" },
+          { "from": [37.62, 55.75], "via": [78, 48], "to": [108.94, 34.34], "tone": 1, "label": "Back to China, 1927" }
+        ]
+      },
+      "focus": {
+        "countries": ["CHN", "FRA"],
+        "points": [[106.63, 30.47, "Guang'an, born 1904"], [121.47, 31.23, "Shanghai"], [2.35, 48.86, "Paris: in France 1920–1926"], [37.62, 55.75, "Moscow, 1926"]],
+        "bbox": [-6, 4, 124, 62]
+      },
+      "link": { "label": "Political Retrospective · China, 1927", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1927&c=710" },
+      "cites": ["pantsov-levine-2015", "vogel-2011"]
+    },
+    {
+      "id": "revolution",
+      "title": "Revolution and civil war, 1927–1949",
+      "narration": "For the next two decades Deng served in the communist movement's armed struggle, from guerrilla bases in the south, where in 1933 he was removed from his post as a supporter of Mao, to the Long March of 1934–1935. In the war against Japan he was political commissar of the 129th Division alongside its commander, Liu Bocheng, and in the civil war that followed he helped direct the Huaihai campaign of 1948–1949, one of the decisive battles of the war. After the communist victory he governed south-west China from Chongqing.",
+      "visual": {
+        "kind": "map",
+        "arrows": [{ "from": [116.03, 25.89], "via": [102.5, 29.0], "to": [109.49, 36.59], "tone": 1, "label": "Long March, 1934–1935" }]
+      },
+      "focus": {
+        "countries": ["CHN"],
+        "points": [[106.62, 23.9, "Baise, 1929"], [116.03, 25.89, "Ruijin, 1931–1934"], [109.49, 36.59, "Yan'an"], [117.18, 34.26, "Huaihai campaign, 1948–1949"], [106.55, 29.56, "Chongqing, from 1949"]],
+        "bbox": [97, 20, 124, 41]
+      },
+      "link": { "label": "War Focus · Chinese Civil War, November 1948", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=chinese-civil-war-2&m=1948-11" },
+      "cites": ["vogel-2011", "pantsov-levine-2015"]
+    },
+    {
+      "id": "under-mao",
+      "title": "Under Mao, 1949–1966",
+      "narration": "In the 1950s Deng became a vice-premier and the party's general secretary, and he helped direct the Anti-Rightist Campaign of 1957, which branded more than half a million people as rightists. After the Great Leap Forward ended in a famine in which tens of millions died, he supported letting farm households take on more of the work themselves. Defending that view in July 1962, he cited a Sichuan proverb that his wartime commander Liu Bocheng used about fighting battles.",
+      "visual": { "kind": "quote", "text": "It does not matter if it is a yellow cat or a black cat, as long as it catches mice.", "who": "Deng Xiaoping, citing a Sichuan proverb used by Liu Bocheng", "when": "7 July 1962", "cite": "deng-1962" },
+      "link": { "label": "Learning · Politics: the far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+      "cites": ["vogel-2011", "pantsov-levine-2015", "deng-1962"]
+    },
+    {
+      "id": "purged",
+      "title": "Purged and restored, 1966–1978",
+      "narration": "In the Cultural Revolution Deng was denounced as a capitalist roader and stripped of his posts, and from 1969 he worked in a tractor repair plant in Jiangxi province. His son Deng Pufang was left paralysed after a fall while held by Red Guards. Recalled in 1973, Deng was purged again in April 1976, but after Mao's death that September and the arrest of the Gang of Four he returned, and by December 1978 he was China's leading figure.",
+      "visual": {
+        "kind": "timeline", "from": "1966", "to": "1978-12",
+        "events": [
+          { "at": "1966-05", "label": "Cultural Revolution begins" },
+          { "at": "1966-10", "label": "Deng denounced" },
+          { "at": "1969-10", "label": "Sent to Jiangxi" },
+          { "at": "1973-03", "label": "Recalled" },
+          { "at": "1976-04", "label": "Purged again" },
+          { "at": "1976-09-09", "label": "Mao dies" },
+          { "at": "1976-10-06", "label": "Gang of Four arrested" },
+          { "at": "1977-07", "label": "Restored to office" },
+          { "at": "1978-12", "label": "Reform begins" }
+        ]
+      },
+      "link": { "label": "Political Retrospective · China, 1976", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1976&c=710" },
+      "cites": ["vogel-2011", "pantsov-levine-2015"]
+    },
+    {
+      "id": "opening-up",
+      "title": "Reform and opening, 1978–1980",
+      "narration": "From the end of 1978 Deng's leadership set China on a course of reform and opening to the outside world. Over the next few years collective farms gave way to household farming, which raised harvests quickly, and in January 1979, weeks after China and the United States established full diplomatic relations, Deng toured America and met President Jimmy Carter. In 1980 four special economic zones, among them Shenzhen next to Hong Kong, were opened to foreign investment and freer markets.",
+      "visual": { "kind": "portrait", "file": "File:Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored.jpg", "heading": "With Jimmy Carter", "sub": "Washington, 29 January 1979", "position": "50% 30%" },
+      "link": { "label": "Encyclopaedia · Chinese economic reform", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1205521" },
+      "cites": ["vogel-2011", "naughton-2007"]
+    },
+    {
+      "id": "vietnam",
+      "title": "War with Vietnam, 1979",
+      "narration": "In February 1979, less than two weeks after returning from America, Deng sent Chinese troops into northern Vietnam to punish it for invading Cambodia and overthrowing the Khmer Rouge, China's ally. The campaign lasted about a month and cost both sides heavy losses; Chinese forces took several provincial capitals and then withdrew. Fighting along the border went on through the 1980s.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "China", "tone": 1, "countries": ["CHN"] },
+          { "label": "Vietnam", "tone": 2, "countries": ["VNM"] },
+          { "label": "Cambodia, invaded by Vietnam in December 1978", "tone": 3, "countries": ["KHM"] }
+        ],
+        "arrows": [
+          { "from": [107.5, 22.45], "to": [106.8, 21.9], "tone": 1, "label": "February 1979" },
+          { "from": [106.55, 23.35], "to": [106.28, 22.72], "tone": 1 },
+          { "from": [103.55, 23.0], "to": [103.95, 22.52], "tone": 1 },
+          { "from": [106.6, 11.0], "to": [105.0, 11.5], "tone": 2 }
+        ]
+      },
+      "focus": {
+        "points": [[106.76, 21.85, "Lạng Sơn"], [106.26, 22.67, "Cao Bằng"], [103.98, 22.49, "Lào Cai"], [105.85, 21.03, "Hanoi"]],
+        "bbox": [99.5, 9, 112.5, 25]
+      },
+      "link": { "label": "Retrospective Battlefield · 1979, China and Vietnam", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1979&w=u334" },
+      "cites": ["zhang-2015", "vogel-2011"]
+    },
+    {
+      "id": "one-child",
+      "title": "One child, 1980",
+      "narration": "In September 1980 the party called on couples to have only one child, a policy shaped by scientists' projections of runaway population growth. Local officials enforced it with fines and, especially in the early 1980s, with forced sterilisations and abortions, and many rural couples were later allowed a second child if the first was a girl. As the chart shows, most of the fall in fertility had already happened in the 1970s; the policy lasted until 2015 and added to the rapid ageing of China's population.",
+      "visual": {
+        "kind": "chart", "type": "line", "title": "Births per woman in China, 1965–2000", "unit": "children per woman",
+        "data": [
+          { "label": "1965", "value": 6.6 },
+          { "label": "1970", "value": 6.1 },
+          { "label": "1975", "value": 3.6 },
+          { "label": "1980", "value": 2.7 },
+          { "label": "1985", "value": 2.6 },
+          { "label": "1990", "value": 2.5 },
+          { "label": "1995", "value": 1.6 },
+          { "label": "2000", "value": 1.6 }
+        ],
+        "note": "Total fertility rate (World Bank). The one-child policy was announced in September 1980.",
+        "cite": ["wb-wdi"]
+      },
+      "link": { "label": "National Analysis · China", "suite": "rt", "module": "pestle", "at": "q/national.html#country=CHN" },
+      "cites": ["greenhalgh-2008", "wb-wdi"]
+    },
+    {
+      "id": "hong-kong",
+      "title": "One country, two systems, 1984",
+      "narration": "Deng proposed that Hong Kong, then a British colony, could return to China while keeping its own economic and legal system for fifty years, under the formula of one country, two systems. Britain and China signed a joint declaration on those terms in December 1984, and Portugal agreed a similar settlement for Macau in 1987. Deng did not live to see the handover of Hong Kong on 1 July 1997.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "China", "tone": 1, "countries": ["CHN"] }]
+      },
+      "focus": {
+        "points": [[114.17, 22.3, "Hong Kong, handed over 1997"], [113.54, 22.19, "Macau, handed over 1999"], [114.06, 22.55, "Shenzhen"], [113.26, 23.13, "Guangzhou"]],
+        "bbox": [111.6, 20.9, 116.2, 24]
+      },
+      "link": { "label": "Historical Calendar · December 1984", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1984-12" },
+      "cites": ["vogel-2011"]
+    },
+    {
+      "id": "tiananmen",
+      "title": "Tiananmen, 1989",
+      "narration": "In the spring of 1989, after the death of the reformer Hu Yaobang, students and workers filled Tiananmen Square and protested in cities across China, calling for an end to corruption and for political freedoms. Deng backed martial law, and on the night of 3 June troops forced their way to the square with gunfire, killing many people, most of them in the streets leading to it. Chinese officials spoke of about 200 to 300 dead, soldiers included; other estimates run from several hundred to several thousand, and no full count has ever been published.",
+      "visual": { "kind": "map", "still": true },
+      "focus": {
+        "countries": ["CHN"],
+        "points": [[116.4, 39.9, "Beijing: Tiananmen Square"], [121.47, 31.23, "Shanghai"], [104.07, 30.67, "Chengdu"], [108.94, 34.34, "Xi'an"], [112.94, 28.23, "Changsha"]],
+        "bbox": [100, 24, 125, 43]
+      },
+      "link": { "label": "Historical Calendar · June 1989", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1989-06" },
+      "cites": ["brown-2021", "amnesty-1989", "vogel-2011"]
+    },
+    {
+      "id": "southern-tour",
+      "title": "The southern tour, 1992",
+      "narration": "After 1989 conservatives in the leadership slowed the reforms. Deng, who had given up his last formal post, as chairman of the military commission, by 1990, set out at the age of 87 to revive them: in January and February 1992 he toured Wuchang, Shenzhen, Zhuhai and Shanghai, urging bolder markets and faster growth. Later that year the party adopted the goal of a socialist market economy, and growth and foreign investment surged.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "China", "tone": 1, "countries": ["CHN"] }],
+        "arrows": [
+          { "from": [116.4, 39.9], "to": [114.31, 30.55], "tone": 1, "label": "January 1992" },
+          { "from": [114.31, 30.55], "to": [114.06, 22.62], "tone": 1 },
+          { "from": [113.58, 22.27], "via": [118.5, 26.5], "to": [121.4, 31.15], "tone": 1, "label": "February 1992" }
+        ]
+      },
+      "focus": {
+        "points": [[116.4, 39.9, "Beijing"], [114.31, 30.55, "Wuchang"], [114.06, 22.54, "Shenzhen"], [113.58, 22.27, "Zhuhai"], [121.47, 31.23, "Shanghai"]],
+        "bbox": [106, 19.5, 126, 41.5]
+      },
+      "link": { "label": "Political Retrospective · China, 1992", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1992&c=710" },
+      "cites": ["vogel-2011", "naughton-2007"]
+    },
+    {
+      "id": "growth",
+      "title": "Growth, 1978–1997",
+      "narration": "Between 1978 and Deng's death, China's output per person rose more than fourfold after allowing for inflation, and the share of its people in extreme poverty fell steeply. The gains were uneven: the coast raced ahead of the interior, inequality widened, and corruption grew with the markets. Economists still debate how much of the boom came from the reforms themselves and how much from cheap labour, high savings and a growing world economy.",
+      "visual": {
+        "kind": "chart", "type": "line", "title": "China's output per person, 1978–1997", "unit": "US dollars a year, at 2015 prices",
+        "data": [
+          { "label": "1978", "value": 386 },
+          { "label": "1982", "value": 487 },
+          { "label": "1986", "value": 726 },
+          { "label": "1989", "value": 896 },
+          { "label": "1992", "value": 1117 },
+          { "label": "1997", "value": 1819 }
+        ],
+        "note": "GDP per person at constant 2015 prices. Growth slowed after 1989 and quickened after the southern tour.",
+        "cite": ["wb-wdi"]
+      },
+      "link": { "label": "Encyclopaedia · People's Republic of China", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148" },
+      "cites": ["naughton-2007", "wb-wdi"]
+    },
+    {
+      "id": "legacy",
+      "title": "Legacy",
+      "narration": "Deng Xiaoping died on 19 February 1997, aged 92, and his ashes were scattered at sea. He left a China far richer and more open to the world than the one he had found, still ruled by a single party that tolerated no organised opposition. Admirers credit him with one of the largest reductions of poverty in history; critics remember the killings of June 1989 and the limits he set on political reform.",
+      "visual": { "kind": "module", "blurb": "Who holds power in China now: its leaders, its institutions and the questions they face." },
+      "link": { "label": "Political Atlas · China today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#CHN" },
+      "cites": ["vogel-2011", "pantsov-levine-2015", "brown-2021"]
+    }
+  ]
+}

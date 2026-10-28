@@ -109,6 +109,60 @@ test('view deep links open the right view of a page', async () => {
   }
 });
 
+test('deep links move their submodule\'s one frame: hash changes in place, other queries load in it', async () => {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+  try {
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    const WF = '#frames iframe[data-module="war-focus"]', CAL = '#frames iframe[data-module="historical-calendar"]';
+    const focus = m => `#/rs/war-focus?at=${encodeURIComponent(`${BASE}/battlefield/focus/index.html#war=korean-war&m=${m}`)}`;
+    const shown = (frame, want) => frame.waitForFunction(w => document.querySelector('#date')?.textContent === w, want, { timeout: 30000 });
+    await p.goto(`${BASE}/${focus('1950-06')}`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await p.waitForSelector(WF, { timeout: 20000 })).contentFrame();
+    await shown(frame, 'June 1950');
+    await frame.evaluate(() => { window.prpSameDocument = true; });
+    const before = await p.evaluate(() => history.length);
+    // Three War Focus places, as Kino's Follow along opens them: one frame, whose view changes each time, without reloading.
+    for (const [k, [m, label]] of [['1950-09', 'September 1950'], ['1952-10', 'October 1952'], ['1953-07', 'July 1953']].entries()) {
+      await p.evaluate(h => { location.hash = h; }, focus(m));
+      await shown(frame, label);
+      assert.equal(await p.locator(WF).count(), 1, `one War Focus frame after ${m}`);
+      assert.equal(await frame.evaluate(() => location.hash), `#war=korean-war&m=${m}`);
+      assert.equal(await frame.evaluate(() => window.prpSameDocument), true, `${m}: a hash change in the same page, not a reload`);
+      assert.equal(await p.evaluate(() => history.length), before + k + 1, 'only the shell\'s address adds to the history');
+    }
+    // Back follows the shell's address, and the frame follows it.
+    await p.evaluate(() => history.back());
+    await shown(frame, 'October 1952');
+    // A plain visit shows the frame as it was left; "New tab" opens the page where it is now.
+    await frame.click('#next');
+    await shown(frame, 'November 1952');
+    await p.click('#nav a[data-route="rs/war-focus"]');
+    await p.waitForFunction(() => location.hash === '#/rs/war-focus');
+    assert.equal(await p.locator(WF).count(), 1);
+    assert.equal(await frame.evaluate(() => document.querySelector('#date').textContent), 'November 1952');
+    await p.locator('#newtab').focus();
+    assert.equal(await p.locator('#newtab').getAttribute('href'), `${BASE}/battlefield/focus/index.html#war=korean-war&m=1952-11`);
+    // A deep link to the page's own address ("open War Focus", from another page) is a plain visit too.
+    await p.evaluate(h => { location.hash = h; }, `#/rs/war-focus?at=${encodeURIComponent(`${BASE}/battlefield/focus/index.html`)}`);
+    await p.waitForTimeout(1500);
+    assert.equal(await frame.evaluate(() => `${window.prpSameDocument} ${document.querySelector('#date').textContent}`), 'true November 1952');
+    // A different query loads the new address in the same frame; the Realtime Calendar (same page) keeps its own frame.
+    const cal = m => `#/rs/historical-calendar?at=${encodeURIComponent(`${BASE}/q/calendar.html?period=history&month=${m}`)}`;
+    await p.evaluate(h => { location.hash = h; }, cal('1989-11'));
+    const calendar = await (await p.waitForSelector(CAL, { timeout: 20000 })).contentFrame();
+    await calendar.waitForFunction(() => document.getElementById('monthpick')?.value === '1989-11', null, { timeout: 30000 });
+    await p.evaluate(h => { location.hash = h; }, cal('1991-08'));
+    await calendar.waitForFunction(() => document.getElementById('monthpick')?.value === '1991-08', null, { timeout: 30000 });
+    assert.equal(await p.locator(CAL).count(), 1);
+    await p.evaluate(() => { location.hash = '#/rt/calendar'; });
+    await p.waitForSelector('#frames iframe.active[data-module="calendar"]', { timeout: 10000 });
+    assert.equal(await p.locator(CAL).count(), 1);
+    assert.equal(await p.locator('#frames iframe').count(), 3, 'War Focus, Historical Calendar, Realtime Calendar');
+    assert.deepEqual(errors, []);
+  } finally { await p.close(); }
+});
+
 test('submodules use the PRP design system', async () => {
   const report = [];
   for (const { m } of modules.filter(x => x.m.url && !x.m.opensInNewTab && x.m.status === 'live')) {

@@ -1,0 +1,178 @@
+{
+  "id": "winston-churchill",
+  "title": "Winston Churchill",
+  "category": "political-figures",
+  "subjects": [{ "qid": "Q8016", "label": "Winston Churchill" }],
+  "era": [1874, 1965],
+  "summary": "Soldier, reporter, minister, historian and twice Prime Minister: Churchill's life from Blenheim to his state funeral, including the decisions still argued over. Thirteen scenes.",
+  "minutes": 7,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Winston Churchill (Q8016)", "url": "https://www.wikidata.org/wiki/Q8016" },
+    { "id": "gilbert-1991", "kind": "book", "author": "Martin Gilbert", "title": "Churchill: A Life", "year": 1991, "publisher": "Heinemann" },
+    { "id": "jenkins-2001", "kind": "book", "author": "Roy Jenkins", "title": "Churchill", "year": 2001, "publisher": "Macmillan" },
+    { "id": "addison-2005", "kind": "book", "author": "Paul Addison", "title": "Churchill: The Unexpected Hero", "year": 2005, "publisher": "Oxford University Press" },
+    { "id": "roberts-2018", "kind": "book", "author": "Andrew Roberts", "title": "Churchill: Walking with Destiny", "year": 2018, "publisher": "Allen Lane" },
+    { "id": "toye-2010", "kind": "book", "author": "Richard Toye", "title": "Churchill's Empire: The World That Made Him and the World He Made", "year": 2010, "publisher": "Macmillan" },
+    { "id": "kershaw-2007", "kind": "book", "author": "Ian Kershaw", "title": "Fateful Choices: Ten Decisions That Changed the World, 1940–1941", "year": 2007, "publisher": "Allen Lane" },
+    { "id": "keynes-1925", "kind": "book", "author": "John Maynard Keynes", "title": "The Economic Consequences of Mr. Churchill", "year": 1925, "publisher": "Hogarth Press" },
+    { "id": "sen-1981", "kind": "book", "author": "Amartya Sen", "title": "Poverty and Famines: An Essay on Entitlement and Deprivation", "year": 1981, "publisher": "Clarendon Press" },
+    { "id": "maharatna-1996", "kind": "book", "author": "Arup Maharatna", "title": "The Demography of Famines: An Indian Historical Perspective", "year": 1996, "publisher": "Oxford University Press" },
+    { "id": "mukerjee-2010", "kind": "book", "author": "Madhusree Mukerjee", "title": "Churchill's Secret War: The British Empire and the Ravaging of India during World War II", "year": 2010, "publisher": "Basic Books" },
+    { "id": "hansard-1938", "kind": "web", "title": "Policy of His Majesty's Government, HC Deb 5 October 1938, vol 339", "publisher": "Hansard (UK Parliament)", "url": "https://api.parliament.uk/historic-hansard/commons/1938/oct/05/policy-of-his-majestys-government" },
+    { "id": "hansard-1940-may", "kind": "web", "title": "His Majesty's Government, HC Deb 13 May 1940, vol 360, cc 1501–2", "publisher": "Hansard (UK Parliament)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/may/13/his-majestys-government-1" },
+    { "id": "hansard-1940-aug", "kind": "web", "title": "War Situation, HC Deb 20 August 1940, vol 364, c 1167", "publisher": "Hansard (UK Parliament)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/aug/20/war-situation" },
+    { "id": "fulton-1946", "kind": "web", "title": "The Sinews of Peace: address given at Fulton, Missouri, 5 March 1946", "publisher": "CVCE.eu, University of Luxembourg", "url": "https://www.cvce.eu/obj/address_given_by_winston_churchill_the_sinews_of_peace_fulton_5_march_1946-en-ce2084a4-8529-4ebc-b801-e1e39abe9476.html" },
+    { "id": "nobel-1953", "kind": "web", "title": "The Nobel Prize in Literature 1953", "publisher": "NobelPrize.org", "url": "https://www.nobelprize.org/prizes/literature/1953/summary/" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "Winston Churchill, 1874–1965",
+      "narration": "Winston Churchill was a soldier, a war correspondent, a historian and, twice, Prime Minister of the United Kingdom. He is remembered above all for leading Britain through the Second World War, but his long career also included failures, reversals and positions that are still argued over. This film follows his life from Blenheim Palace to his state funeral in 1965.",
+      "visual": { "kind": "portrait", "qid": "Q8016", "heading": "Winston Churchill", "sub": "1874–1965", "position": "50% 20%" },
+      "link": { "label": "Encyclopaedia · Winston Churchill", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8016" },
+      "cites": ["gilbert-1991", "roberts-2018"]
+    },
+    {
+      "id": "early-life",
+      "title": "A soldier and a reporter, 1874–1900",
+      "narration": "Churchill was born at Blenheim Palace in Oxfordshire on 30 November 1874, the elder son of Lord Randolph Churchill and his American wife, Jennie Jerome. After Harrow and Sandhurst he was commissioned into the cavalry in 1895 and went looking for wars to write about, in Cuba, on the North-West Frontier of India and in the Sudan, where he rode in the charge at Omdurman. In the Boer War he was captured and escaped, and the fame it brought helped him into Parliament.",
+      "visual": { "kind": "map" },
+      "focus": {
+        "points": [[-1.36, 51.84, "Blenheim Palace, 1874"], [-79.4, 21.9, "Cuba, 1895"], [71.93, 34.57, "North-West Frontier, 1897"], [32.48, 15.65, "Omdurman, 1898"], [28.19, -25.75, "Pretoria, 1899"]],
+        "bbox": [-95, -38, 85, 62]
+      },
+      "link": { "label": "Kardashev Tracker · the British Empire, 1900", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1900&p=britain" },
+      "cites": ["gilbert-1991", "jenkins-2001"]
+    },
+    {
+      "id": "parliament",
+      "title": "Into Parliament, 1900–1911",
+      "narration": "Churchill entered the House of Commons as a Conservative for Oldham in 1900, but in 1904 he crossed the floor to the Liberals over free trade. As President of the Board of Trade he set up labour exchanges and minimum wages in some of the worst-paid trades, part of the Liberal government's social reforms. As Home Secretary he was criticised for sending troops to the South Wales coalfield during the Tonypandy riots of 1910, a decision long held against him there.",
+      "visual": { "kind": "portrait", "file": "File:1904 Winston S. Churchill as MP.jpg", "heading": "A Liberal minister", "sub": "1904–1911", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Conservative Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9626" },
+      "cites": ["addison-2005", "jenkins-2001"]
+    },
+    {
+      "id": "first-world-war",
+      "title": "Gallipoli and the trenches, 1911–1918",
+      "narration": "As First Lord of the Admiralty from 1911, Churchill prepared the Royal Navy for war with Germany. In 1915 he championed the attempt to force the Dardanelles and knock the Ottoman Empire out of the war, but the naval attack and the landings at Gallipoli that followed failed, with very heavy losses on both sides. Churchill lost the Admiralty, served for some months as a battalion commander on the Western Front, and returned to government as Minister of Munitions in 1917.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "United Kingdom", "tone": 1, "countries": ["GBR"] },
+          { "label": "Ottoman Empire (present-day Turkey)", "tone": 2, "countries": ["TUR"] }
+        ],
+        "arrows": [{ "from": [14.5, 35.9], "via": [22.5, 37.2], "to": [26.1, 40.0], "tone": 1, "label": "Allied fleet, 1915" }]
+      },
+      "focus": { "countries": ["TUR"], "points": [[26.4, 40.2, "Gallipoli, 1915–1916"], [2.88, 50.72, "Western Front, 1916"]], "bbox": [-7, 34, 36, 57] },
+      "link": { "label": "Encyclopaedia · Gallipoli campaign", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q164983" },
+      "cites": ["gilbert-1991", "roberts-2018"]
+    },
+    {
+      "id": "between-wars",
+      "title": "Office and opposition, 1919–1939",
+      "narration": "After the war Churchill served as Secretary of State for War and then for the Colonies, and in 1924, back with the Conservatives, he became Chancellor of the Exchequer. In 1925 he returned the pound to the gold standard at its pre-war value, a decision that John Maynard Keynes attacked at once and that is now widely judged a mistake. Out of office from 1929, he opposed self-government for India and warned, with few allies, against German rearmament.",
+      "visual": {
+        "kind": "timeline", "from": "1919", "to": "1939-09",
+        "events": [
+          { "at": "1919-01", "label": "War Secretary" },
+          { "at": "1921-02", "label": "Colonial Secretary" },
+          { "at": "1924-11", "label": "Chancellor" },
+          { "at": "1925-04-28", "label": "Gold standard" },
+          { "at": "1926-05", "label": "General Strike" },
+          { "at": "1929-06", "label": "Out of office" },
+          { "at": "1935-08", "label": "India Act, which he opposed" },
+          { "at": "1938-09-30", "label": "Munich" },
+          { "at": "1939-09-03", "label": "Back at the Admiralty" }
+        ]
+      },
+      "link": { "label": "Learning · Economics: Keynes and the General Theory", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=keynes-and-the-general-theory" },
+      "cites": ["keynes-1925", "jenkins-2001", "addison-2005"]
+    },
+    {
+      "id": "munich",
+      "title": "Munich, 1938",
+      "narration": "When Neville Chamberlain returned from Munich in September 1938 with an agreement that handed the Sudetenland to Germany, much of Britain greeted him with relief. Churchill told the House of Commons that the country had suffered a total and unmitigated defeat, and he was heckled for it. Six months later Germany occupied the rest of Bohemia and Moravia, and opinion began to turn his way.",
+      "visual": { "kind": "quote", "text": "We have sustained a total and unmitigated defeat.", "who": "Winston Churchill, House of Commons", "when": "5 October 1938", "cite": "hansard-1938" },
+      "link": { "label": "Encyclopaedia · Neville Chamberlain", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q10664" },
+      "cites": ["hansard-1938", "gilbert-1991"]
+    },
+    {
+      "id": "may-1940",
+      "title": "Prime Minister, May 1940",
+      "narration": "On 10 May 1940, the day Germany attacked in the west, Chamberlain resigned and Churchill became Prime Minister at the head of a coalition with Labour and the Liberals. Three days later he told the Commons he had nothing to offer but blood, toil, tears and sweat. In the War Cabinet's debates of late May, as the army fell back on Dunkirk, he argued against asking Mussolini to broker terms, and Britain fought on.",
+      "visual": { "kind": "quote", "text": "I have nothing to offer but blood, toil, tears and sweat.", "who": "Winston Churchill, House of Commons", "when": "13 May 1940", "cite": "hansard-1940-may" },
+      "link": { "label": "War Focus · May 1940", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1940-05" },
+      "cites": ["kershaw-2007", "hansard-1940-may", "roberts-2018"]
+    },
+    {
+      "id": "battle-of-britain",
+      "title": "The Battle of Britain, 1940",
+      "narration": "Through the summer of 1940 the Luftwaffe tried to destroy the Royal Air Force as a prelude to invasion. On 20 August, with the battle at its height, Churchill told the Commons that never in the field of human conflict was so much owed by so many to so few, and the fighter pilots have been called the Few ever since. By October the invasion had been put off, though the night bombing of British cities went on into 1941.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "United Kingdom", "tone": 1, "countries": ["GBR"] },
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] }
+        ],
+        "arrows": [
+          { "from": [2.2, 50.2], "via": [1.0, 51.0], "to": [-0.1, 51.4], "tone": 2, "label": "Luftwaffe" },
+          { "from": [5.3, 58.9], "via": [2.0, 57.0], "to": [-1.5, 55.0], "tone": 2 }
+        ]
+      },
+      "focus": { "countries": ["GBR"], "points": [[-0.13, 51.51, "London"], [-0.33, 51.62, "Fighter Command, Bentley Priory"]], "bbox": [-9, 48.5, 12, 60] },
+      "link": { "label": "War Focus · August 1940", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1940-08" },
+      "cites": ["hansard-1940-aug", "roberts-2018"]
+    },
+    {
+      "id": "grand-alliance",
+      "title": "The Grand Alliance, 1941–1945",
+      "narration": "Churchill worked to bring the United States into the war, and in August 1941 he met Franklin Roosevelt off Newfoundland to agree the Atlantic Charter. After Germany invaded the Soviet Union and Japan attacked Pearl Harbor, Britain, the United States and the Soviet Union fought as allies, and their leaders met at Tehran in 1943 and at Yalta in February 1945. As American and Soviet power grew, Churchill's influence waned, and the future of eastern Europe was shaped above all by where the Red Army stood.",
+      "visual": { "kind": "portrait", "file": "File:Yalta summit 1945 with Churchill, Roosevelt, Stalin.jpg", "heading": "Yalta", "sub": "February 1945", "position": "50% 35%" },
+      "link": { "label": "Encyclopaedia · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
+      "cites": ["addison-2005", "roberts-2018"]
+    },
+    {
+      "id": "empire-bengal",
+      "title": "Empire, and the Bengal famine",
+      "narration": "Churchill was a lifelong defender of the British Empire, and his views on India and on race were criticised in his own time and are criticised still. In 1943 famine in Bengal killed between about 2.1 and 3 million people. Historians agree that war, the loss of rice from Burma and soaring prices all played a part, but they disagree over how far decisions by Churchill's War Cabinet on shipping and food imports made it worse.",
+      "visual": {
+        "kind": "map", "still": true,
+        "groups": [{ "label": "British India (present-day borders)", "tone": 1, "countries": ["IND", "PAK", "BGD"] }]
+      },
+      "focus": { "countries": ["IND", "BGD"], "points": [[88.36, 22.57, "Calcutta"], [90.41, 23.81, "Dacca"]], "bbox": [66, 5, 99, 37] },
+      "link": { "label": "Encyclopaedia · British Raj", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129286" },
+      "cites": ["toye-2010", "sen-1981", "maharatna-1996", "mukerjee-2010", "roberts-2018"]
+    },
+    {
+      "id": "iron-curtain",
+      "title": "Defeat, and the Iron Curtain, 1945–1946",
+      "narration": "In July 1945, during the Potsdam conference, the general election result was declared: Labour under Clement Attlee had won a landslide, and Churchill was out of office. Speaking at Fulton, Missouri, in March 1946, he warned that an iron curtain had descended across the continent, from Stettin in the Baltic to Trieste in the Adriatic. Later that year, in Zurich, he called for a kind of United States of Europe, built on reconciliation between France and Germany.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }],
+        "fronts": [{ "label": "From Stettin to Trieste", "line": [[14.55, 53.43], [13.4, 51.6], [12.4, 50.3], [13.8, 48.75], [16.9, 48.0], [16.2, 46.6], [13.77, 45.65]] }]
+      },
+      "focus": { "points": [[14.55, 53.43, "Stettin"], [13.77, 45.65, "Trieste"], [8.54, 47.37, "Zurich, September 1946"]], "bbox": [-4, 41, 32, 58] },
+      "link": { "label": "Political Retrospective · 1946", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1946" },
+      "cites": ["fulton-1946", "addison-2005"]
+    },
+    {
+      "id": "second-premiership",
+      "title": "Prime Minister again, 1951–1955",
+      "narration": "Churchill returned as Prime Minister in October 1951, at the age of 76, and became the first of Elizabeth the Second's prime ministers. He suffered a serious stroke in June 1953, which was kept from the public, and in the same year he was awarded the Nobel Prize in Literature for his histories and his speeches. He resigned in April 1955 and was succeeded by Anthony Eden.",
+      "visual": { "kind": "portrait", "file": "File:Truman-Churchill-1953.jpg", "heading": "With Harry Truman", "sub": "January 1953", "position": "50% 30%" },
+      "link": { "label": "Encyclopaedia · Anthony Eden", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128995" },
+      "cites": ["nobel-1953", "gilbert-1991"]
+    },
+    {
+      "id": "legacy",
+      "title": "Legacy",
+      "narration": "Churchill died on 24 January 1965, aged 90, and was given a state funeral, an honour rarely granted to anyone outside the royal family. Admirers remember the man who refused to make peace with Hitler in 1940; critics point to Gallipoli, to his views on empire and race, and to Bengal. Historians such as Paul Addison and Richard Toye have shown how far the legend and the man differ, and why both still matter in British politics.",
+      "visual": { "kind": "module", "blurb": "Who holds power in the United Kingdom now: its executive, parliament, courts and coming elections." },
+      "link": { "label": "Political Atlas · United Kingdom today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#GBR" },
+      "cites": ["addison-2005", "toye-2010"]
+    }
+  ]
+}

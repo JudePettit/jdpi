@@ -1,0 +1,173 @@
+{
+  "id": "end-of-the-soviet-union",
+  "title": "The End of the Soviet Union, 1985–1991",
+  "category": "geopolitical-events",
+  "subjects": [
+    { "qid": "Q5167679", "label": "dissolution of the Soviet Union" },
+    { "qid": "Q15180", "label": "Soviet Union" },
+    { "qid": "Q30487", "label": "Mikhail Gorbachev" }
+  ],
+  "era": [1985, 1991],
+  "summary": "How Gorbachev's attempt to save the Soviet system unravelled it: stagnation, reform, the national movements, the August coup and the December agreements that ended the Union, with the arguments over why it fell. Twelve scenes.",
+  "minutes": 6,
+  "preview": { "scene": "nations" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "dissolution of the Soviet Union (Q5167679), Soviet Union (Q15180), Mikhail Gorbachev (Q30487)", "url": "https://www.wikidata.org/wiki/Q5167679" },
+    { "id": "brown-1996", "kind": "book", "author": "Archie Brown", "title": "The Gorbachev Factor", "year": 1996, "publisher": "Oxford University Press" },
+    { "id": "kotkin-2001", "kind": "book", "author": "Stephen Kotkin", "title": "Armageddon Averted: The Soviet Collapse, 1970–2000", "year": 2001, "publisher": "Oxford University Press" },
+    { "id": "beissinger-2002", "kind": "book", "author": "Mark R. Beissinger", "title": "Nationalist Mobilization and the Collapse of the Soviet State", "year": 2002, "publisher": "Cambridge University Press" },
+    { "id": "plokhy-2014", "kind": "book", "author": "Serhii Plokhy", "title": "The Last Empire: The Final Days of the Soviet Union", "year": 2014, "publisher": "Basic Books" },
+    { "id": "zubok-2021", "kind": "book", "author": "Vladislav M. Zubok", "title": "Collapse: The Fall of the Soviet Union", "year": 2021, "publisher": "Yale University Press" },
+    { "id": "yekelchyk-2023", "kind": "article", "author": "Serhy Yekelchyk", "title": "The Making of Independent Ukraine", "year": 2023, "journal": "LSE Public Policy Review", "url": "https://ppr.lse.ac.uk/articles/90" },
+    { "id": "msu-1991", "kind": "web", "title": "The March Referendum (Seventeen Moments in Soviet History, 1991)", "publisher": "Michigan State University", "url": "https://soviethistory.msu.edu/1991/march-referendum/" },
+    { "id": "almaata-1991", "kind": "web", "title": "Alma-Ata Declaration, 21 December 1991 (English translation, from Diplomaticheskiy Vestnik, 1992, no. 1)", "publisher": "rrc.ge document archive", "url": "https://rrc.ge/law/Declar_1991_12_21_e.htm" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The End of the Soviet Union",
+      "narration": "On 25 December 1991 the Soviet flag was lowered over the Kremlin for the last time, and the Soviet Union, a superpower of about 290 million people, gave way to fifteen independent states. It happened with far less bloodshed than many had feared, and almost no one had predicted it even five years earlier. This film follows the six years from Mikhail Gorbachev's rise to the Union's end, and the arguments over why it fell.",
+      "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The End of the Soviet Union", "sub": "1985–1991" },
+      "focus": { "bbox": [15, 30, 180, 78] },
+      "link": { "label": "Encyclopaedia · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
+      "cites": ["plokhy-2014", "kotkin-2001"]
+    },
+    {
+      "id": "stagnation",
+      "title": "The years of stagnation, 1979–1985",
+      "narration": "By the early 1980s the Soviet economy was barely growing, and the country relied on exports of oil and gas to pay for imported grain and machinery. In December 1979 its army had invaded Afghanistan, beginning a war that would last more than nine years. Leonid Brezhnev died in 1982, and his two elderly successors, Yuri Andropov and Konstantin Chernenko, each died within fifteen months of taking office, until in March 1985 the Politburo chose its youngest member, Mikhail Gorbachev, who was 54.",
+      "visual": {
+        "kind": "timeline", "from": "1979-06", "to": "1985-12",
+        "events": [
+          { "at": "1979-12", "label": "Invasion of Afghanistan" },
+          { "at": "1980-07-19", "label": "Moscow Olympics boycotted" },
+          { "at": "1982-11-10", "label": "Brezhnev dies" },
+          { "at": "1984-02-09", "label": "Andropov dies" },
+          { "at": "1985-03-11", "label": "Chernenko dies; Gorbachev chosen" }
+        ]
+      },
+      "link": { "label": "War Focus · Soviet–Afghan War, December 1979", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=soviet-afghan&m=1979-12" },
+      "cites": ["kotkin-2001", "zubok-2021"]
+    },
+    {
+      "id": "gorbachev",
+      "title": "Reform from above",
+      "narration": "Gorbachev set out to revive the Soviet system, not to end it. He called for perestroika, the restructuring of the economy, and glasnost, or openness, which loosened censorship; after the authorities at first played down the Chernobyl nuclear disaster in April 1986, openness became a test of his sincerity. Abroad, his new thinking brought arms control agreements with Ronald Reagan, and in February 1989 the last Soviet troops left Afghanistan.",
+      "visual": { "kind": "portrait", "qid": "Q30487", "heading": "Mikhail Gorbachev", "sub": "Soviet leader, 1985–1991", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
+      "cites": ["brown-1996", "zubok-2021"]
+    },
+    {
+      "id": "economy",
+      "title": "An economy in trouble",
+      "narration": "Gorbachev's economic reforms weakened central planning without creating working markets. World oil prices collapsed in 1986, cutting the hard currency the state depended on, and the government covered its growing deficits by printing money. By 1990 shortages of basic goods were widespread and rationing had returned to many cities, and historians such as Vladislav Zubok see this economic collapse, and the policies behind it, as central to the Union's end.",
+      "visual": { "kind": "module", "blurb": "How planned economies worked in practice, and why reformers found them so hard to change: the Learning lesson on socialist economics." },
+      "link": { "label": "Learning · Economics: From Marx to socialist practice", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=from-marx-to-socialist-practice" },
+      "cites": ["zubok-2021", "kotkin-2001"]
+    },
+    {
+      "id": "eastern-europe",
+      "title": "1989: eastern Europe goes its own way",
+      "narration": "Gorbachev made it clear that the Soviet Union would no longer use force to keep its allies in line. In 1989 Communist rule ended across eastern Europe: Solidarity won Poland's partly free election in June, the Berlin Wall was opened on 9 November, and by the end of the year Communist leaders had fallen in East Germany, Czechoslovakia, Bulgaria and Romania. Soviet troops stayed in their barracks, and the lesson was not lost on the Soviet Union's own republics.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }]
+      },
+      "focus": { "points": [[21.01, 52.23, "Warsaw: election, June"], [13.4, 52.52, "Berlin: the Wall opens, 9 November"], [14.42, 50.09, "Prague: November"], [23.32, 42.7, "Sofia: November"], [26.1, 44.43, "Bucharest: December"]], "bbox": [5, 40, 45, 60] },
+      "link": { "label": "Historical Calendar · November 1989", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1989-11" },
+      "cites": ["kotkin-2001", "zubok-2021"]
+    },
+    {
+      "id": "nations",
+      "title": "The nations awake, 1988–1991",
+      "narration": "Glasnost let long-suppressed grievances into the open, and national movements grew across the Union. In August 1989 about two million people joined hands in a human chain across Estonia, Latvia and Lithuania, and in March 1990 Lithuania declared independence, while Armenians and Azerbaijanis fought over Nagorno-Karabakh and Soviet troops killed protesters in Tbilisi, Baku and Vilnius. The political scientist Mark Beissinger has shown how each movement's success encouraged the next, until a break-up that had seemed unthinkable came to seem inevitable.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Baltic republics", "tone": 1, "countries": ["EST", "LVA", "LTU"] },
+          { "label": "Caucasus republics", "tone": 2, "countries": ["GEO", "ARM", "AZE"] }
+        ],
+        "fronts": [{ "label": "The Baltic Way, 23 August 1989", "line": [[24.75, 59.44], [24.4, 58.4], [24.11, 56.95], [24.9, 55.9], [25.28, 54.69]] }]
+      },
+      "focus": { "points": [[25.28, 54.69, "Vilnius, January 1991"], [44.79, 41.72, "Tbilisi, April 1989"], [49.87, 40.41, "Baku, January 1990"], [46.75, 39.82, "Nagorno-Karabakh"]], "bbox": [18, 36, 52, 61] },
+      "link": { "label": "Retrospective Battlefield · 1990", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1990&w=u376" },
+      "cites": ["beissinger-2002", "plokhy-2014"]
+    },
+    {
+      "id": "referendum",
+      "title": "A vote to save the Union, March 1991",
+      "narration": "Gorbachev tried to hold the Union together with a new treaty and a referendum. On 17 March 1991, in the nine republics that took part, 76.4 per cent of voters backed a renewed Union of sovereign republics, and Russians also voted for a directly elected president, a post Boris Yeltsin won in June with 57 per cent. But the six republics that boycotted the vote were set on independence, and nine months later Ukraine's voters would back independence even more decisively.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Three votes in 1991: per cent of those voting who said yes", "unit": "per cent",
+        "data": [
+          { "label": "Keep a renewed Union (nine republics, 17 March)", "value": 76.4 },
+          { "label": "Elect a Russian president (Russia, 17 March)", "value": 70 },
+          { "label": "Ukraine's independence (1 December)", "value": 90.3 }
+        ],
+        "note": "Turnout was about 80 per cent in March, when Estonia, Latvia, Lithuania, Georgia, Armenia and Moldova did not take part, and 84 per cent in Ukraine in December.",
+        "cite": ["msu-1991", "yekelchyk-2023"]
+      },
+      "link": { "label": "Encyclopaedia · Boris Yeltsin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34453" },
+      "cites": ["msu-1991", "yekelchyk-2023", "plokhy-2014"]
+    },
+    {
+      "id": "coup",
+      "title": "The August coup, 1991",
+      "narration": "On 19 August 1991, the day before a treaty loosening the Union was due to be signed, hardliners including the head of the KGB and the defence minister declared a state of emergency and held Gorbachev at his holiday house in Crimea. Tanks entered Moscow, but Yeltsin climbed onto one outside the Russian parliament to call for resistance, crowds gathered to defend the building, and parts of the army refused to act. The coup collapsed within three days, three young men died in the streets of Moscow, and the authority of the Communist Party collapsed with it.",
+      "visual": { "kind": "portrait", "file": "File:Yeltsin's tanks (8000380340).jpg", "heading": "Moscow", "sub": "20 August 1991", "position": "50% 50%" },
+      "link": { "label": "Historical Calendar · August 1991", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1991-08" },
+      "cites": ["plokhy-2014", "zubok-2021"]
+    },
+    {
+      "id": "independence",
+      "title": "Fifteen states, August–December 1991",
+      "narration": "In the days after the coup, Ukraine and most of the other republics declared independence, and on 6 September the Soviet authorities recognised the independence of Estonia, Latvia and Lithuania. Yeltsin's Russia took over the Union's ministries one by one, and on 1 December more than 90 per cent of Ukraine's voters approved independence. Leonid Kravchuk, elected Ukraine's president the same day, refused to join any new union.",
+      "visual": {
+        "kind": "timeline", "from": "1990-01", "to": "1992-01",
+        "events": [
+          { "at": "1990-03-11", "label": "Lithuania declares independence" },
+          { "at": "1991-04-09", "label": "Georgia" },
+          { "at": "1991-08-24", "label": "Ukraine, after the coup" },
+          { "at": "1991-09-06", "label": "Baltic states recognised" },
+          { "at": "1991-10-27", "label": "Turkmenistan" },
+          { "at": "1991-12-01", "label": "Ukraine votes" },
+          { "at": "1991-12-16", "label": "Kazakhstan, the last" }
+        ]
+      },
+      "link": { "label": "Political Atlas · Ukraine today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#UKR" },
+      "cites": ["plokhy-2014", "yekelchyk-2023"]
+    },
+    {
+      "id": "the-end",
+      "title": "The end, December 1991",
+      "narration": "On 8 December the leaders of Russia, Ukraine and Belarus met at a hunting lodge in the Belovezha forest and declared that the Soviet Union had ceased to exist, creating in its place a Commonwealth of Independent States. On 21 December eleven republics confirmed the decision at Alma-Ata. Gorbachev resigned on 25 December, and the next day the upper house of the Soviet parliament voted the Union out of existence.",
+      "visual": { "kind": "quote", "text": "With the formation of the Commonwealth of Independent States the USSR ceases to exist.", "who": "Alma-Ata Declaration, signed by eleven former Soviet republics", "when": "21 December 1991", "cite": "almaata-1991" },
+      "link": { "label": "Encyclopaedia · Belovezh Accords", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q76986" },
+      "cites": ["almaata-1991", "plokhy-2014"]
+    },
+    {
+      "id": "why",
+      "title": "Why did it fall?",
+      "narration": "Historians still disagree about why the Soviet Union fell. Stephen Kotkin stresses the system's long decline and its rulers' unwillingness to use mass force to save it; Archie Brown and Vladislav Zubok put Gorbachev's choices at the centre, Brown seeing him as a liberator and Zubok as a reformer who lost control; and Mark Beissinger emphasises the national movements. Western pressure, the cost of the arms race and the war in Afghanistan all played a part, though how large a part is disputed.",
+      "visual": { "kind": "module", "blurb": "How Communist states worked in power, and what their critics on the left and the right said about them: the Learning lesson." },
+      "link": { "label": "Learning · Politics: The far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+      "cites": ["kotkin-2001", "brown-1996", "zubok-2021", "beissinger-2002"]
+    },
+    {
+      "id": "aftermath",
+      "title": "After the Union",
+      "narration": "Russia took the Soviet Union's seat on the United Nations Security Council and, by agreement, its nuclear arsenal: Ukraine, Belarus and Kazakhstan gave up the weapons on their soil during the 1990s. The decade brought economic collapse and falling life expectancy across much of the former Union, and wars in Moldova, Georgia, Azerbaijan, Tajikistan and Chechnya. Thirty years later, Russia's full-scale invasion of Ukraine in 2022 showed that the settlement of 1991 was still contested.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Baltic states, in the EU and NATO since 2004", "tone": 1, "countries": ["EST", "LVA", "LTU"] },
+          { "label": "The other successor states", "tone": 2, "countries": ["UKR", "BLR", "MDA", "GEO", "ARM", "AZE", "KAZ", "UZB", "TKM", "KGZ", "TJK"] },
+          { "label": "Russia", "tone": 3, "countries": ["RUS"] }
+        ]
+      },
+      "focus": { "points": [[37.62, 55.76, "Moscow"], [30.52, 50.45, "Kyiv"]], "bbox": [15, 30, 180, 78] },
+      "link": { "label": "Political Atlas · Russia today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#RUS" },
+      "cites": ["kotkin-2001", "plokhy-2014"]
+    }
+  ]
+}

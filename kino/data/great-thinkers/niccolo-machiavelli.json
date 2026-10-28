@@ -1,0 +1,178 @@
+{
+  "id": "niccolo-machiavelli",
+  "title": "Niccolò Machiavelli",
+  "category": "great-thinkers",
+  "subjects": [{ "qid": "Q1399", "label": "Niccolò Machiavelli" }],
+  "era": [1469, 1527],
+  "summary": "A course in three parts on the Florentine diplomat whose short book on princes made his name a byword: his career, The Prince and the Discourses, and five centuries of argument over what he meant. Eleven scenes and a short quiz.",
+  "minutes": 6,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Niccolò Machiavelli (Q1399), The Prince (Q131719), Discourses on Livy (Q924424)", "url": "https://www.wikidata.org/wiki/Q1399" },
+    { "id": "skinner-2000", "kind": "book", "author": "Quentin Skinner", "title": "Machiavelli: A Very Short Introduction", "year": 2000, "publisher": "Oxford University Press" },
+    { "id": "viroli-2000", "kind": "book", "author": "Maurizio Viroli", "title": "Niccolò's Smile: A Biography of Machiavelli (translated by Antony Shugaar)", "year": 2000, "publisher": "Farrar, Straus and Giroux" },
+    { "id": "najemy-2010", "kind": "book", "author": "John M. Najemy (ed.)", "title": "The Cambridge Companion to Machiavelli", "year": 2010, "publisher": "Cambridge University Press" },
+    { "id": "benner-2013", "kind": "book", "author": "Erica Benner", "title": "Machiavelli's Prince: A New Reading", "year": 2013, "publisher": "Oxford University Press" },
+    { "id": "strauss-1958", "kind": "book", "author": "Leo Strauss", "title": "Thoughts on Machiavelli", "year": 1958, "publisher": "Free Press" },
+    { "id": "berlin-1979", "kind": "book", "author": "Isaiah Berlin", "title": "The Originality of Machiavelli, in Against the Current: Essays in the History of Ideas (edited by Henry Hardy)", "year": 1979, "publisher": "Hogarth Press" },
+    { "id": "doyle-1997", "kind": "book", "author": "Michael W. Doyle", "title": "Ways of War and Peace: Realism, Liberalism, and Socialism", "year": 1997, "publisher": "W. W. Norton" },
+    { "id": "machiavelli-1513", "kind": "web", "author": "Niccolò Machiavelli", "title": "The Prince (written 1513), translated by W. K. Marriott, Project Gutenberg", "year": 1513, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/1232" },
+    { "id": "rousseau-1762", "kind": "web", "author": "Jean-Jacques Rousseau", "title": "The Social Contract (1762), book 3, chapter 6, translated by G. D. H. Cole (1913), Project Gutenberg", "year": 1762, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46333" }
+  ],
+  "parts": [
+    {
+      "id": "florence",
+      "title": "A servant of Florence",
+      "scenes": [
+        {
+          "id": "opening",
+          "title": "Niccolò Machiavelli, 1469–1527",
+          "narration": "Niccolò Machiavelli served the Florentine republic for fourteen years as a senior official and diplomat, and when the Medici family returned to power he lost his post and was imprisoned and tortured. In enforced retirement he wrote The Prince, a short book on how rulers win and keep power that made his name a byword for cunning. He also wrote a long defence of republics, comedies and a history of Florence, and scholars still disagree about what he really meant.",
+          "visual": { "kind": "portrait", "qid": "Q1399", "heading": "Niccolò Machiavelli", "sub": "1469–1527", "position": "50% 25%" },
+          "link": { "label": "Encyclopaedia · Niccolò Machiavelli", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1399" },
+          "cites": ["skinner-2000", "viroli-2000"]
+        },
+        {
+          "id": "italy-1494",
+          "title": "Italy invaded, 1494",
+          "narration": "Machiavelli was born in Florence on 3 May 1469, into an old family of modest means, and was given a humanist education in Latin. In 1494, when he was 25, King Charles the Eighth of France marched the length of Italy to claim Naples, the Medici were driven out of Florence, and the peninsula became a battleground for France, Spain and the Holy Roman Empire for decades. That experience of Italian weakness runs through much of what he wrote.",
+          "visual": {
+            "kind": "map",
+            "groups": [
+              { "label": "Italy", "tone": 1, "countries": ["ITA"] },
+              { "label": "France", "tone": 2, "countries": ["FRA"] }
+            ],
+            "arrows": [
+              { "from": [6.4, 45.2], "via": [10.3, 43.75], "to": [12.4, 42.0], "tone": 2, "label": "Charles the Eighth, 1494" },
+              { "from": [12.55, 41.85], "via": [13.6, 41.3], "to": [14.15, 40.9], "tone": 2 }
+            ]
+          },
+          "focus": {
+            "points": [[11.26, 43.77, "Florence"], [9.19, 45.46, "Milan"], [12.33, 45.44, "Venice"], [12.5, 41.9, "Rome"], [14.27, 40.85, "Naples, taken 1495"]],
+            "bbox": [4, 37.5, 19, 47.5]
+          },
+          "link": { "label": "Kardashev Tracker · the Kingdom of France, 1500", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1500&p=france" },
+          "cites": ["viroli-2000", "najemy-2010"]
+        },
+        {
+          "id": "chancery",
+          "title": "The Second Chancery, 1498–1512",
+          "narration": "In June 1498, weeks after the friar Girolamo Savonarola was executed in Florence's main square, Machiavelli was chosen to run the republic's Second Chancery, and soon afterwards to serve its council of war, the Ten. He was sent on missions to the King of France, the Pope and the Emperor, and he persuaded the city to raise a militia from its own countryside instead of relying on mercenaries. In 1512 Spanish troops routed that militia and sacked nearby Prato, the republic fell, the Medici returned, and in November Machiavelli was dismissed.",
+          "visual": {
+            "kind": "timeline", "from": "1494", "to": "1512-12",
+            "events": [
+              { "at": "1494-11-09", "label": "Medici expelled" },
+              { "at": "1498-05-23", "label": "Savonarola executed" },
+              { "at": "1498-06-19", "label": "Machiavelli in office" },
+              { "at": "1500-07", "label": "Mission to France" },
+              { "at": "1502-10", "label": "With Cesare Borgia" },
+              { "at": "1506-12", "label": "Militia law" },
+              { "at": "1509-06-08", "label": "Pisa recaptured" },
+              { "at": "1512-08-29", "label": "Prato sacked" },
+              { "at": "1512-11-07", "label": "Dismissed" }
+            ]
+          },
+          "link": { "label": "Encyclopaedia · Republic of Florence", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148540" },
+          "cites": ["viroli-2000", "najemy-2010"]
+        },
+        {
+          "id": "cesare-borgia",
+          "title": "Cesare Borgia, 1502–1503",
+          "narration": "In 1502 and 1503 Machiavelli spent months at the court of Cesare Borgia, son of Pope Alexander the Sixth, who was carving out a state for himself in the Romagna; Leonardo da Vinci was then serving Cesare as a military engineer. Machiavelli was with Cesare when he lured rebellious captains to Senigallia and had them killed, and he admired a speed and daring that his own cautious government lacked. Cesare's power collapsed after his father's death in 1503, and in The Prince he became the model of a new ruler undone by fortune.",
+          "visual": { "kind": "portrait", "qid": "Q187998", "heading": "Cesare Borgia", "sub": "About 1475–1507", "position": "50% 25%" },
+          "link": { "label": "Encyclopaedia · Leonardo da Vinci", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q762" },
+          "cites": ["viroli-2000", "skinner-2000"]
+        }
+      ]
+    },
+    {
+      "id": "works",
+      "title": "The Prince and the Discourses",
+      "scenes": [
+        {
+          "id": "exile",
+          "title": "Exile, 1513",
+          "narration": "In February 1513 Machiavelli was arrested on suspicion of plotting against the Medici and tortured, and he was freed only in an amnesty after Giovanni de' Medici became Pope Leo the Tenth. He withdrew to his farm at Sant'Andrea in Percussina, south of Florence. In a letter that December he described spending his days in his woods and at the local inn and his evenings in his study, conversing with the ancient writers, and announced that he had written a little work on principalities.",
+          "visual": { "kind": "map" },
+          "focus": {
+            "countries": ["ITA"],
+            "points": [[11.26, 43.77, "Florence"], [11.2, 43.69, "Sant'Andrea in Percussina"], [12.5, 41.9, "Rome: Leo the Tenth, 1513"]],
+            "bbox": [9.6, 41.3, 13.8, 44.5]
+          },
+          "link": { "label": "Encyclopaedia · Papal States", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q170174" },
+          "cites": ["viroli-2000", "skinner-2000"]
+        },
+        {
+          "id": "the-prince",
+          "title": "The Prince",
+          "narration": "The Prince, dedicated to Lorenzo de' Medici, the new Pope's nephew, breaks with a long tradition of advice books that urged rulers to be virtuous. A new prince, Machiavelli argued, must learn how to do wrong when necessity demands, and if he cannot be both loved and feared it is safer to be feared, provided he is not hated. What matters is virtù, the energy and skill to master fortune, which he thought governs about half of what happens to us.",
+          "visual": { "kind": "portrait", "file": "File:Portrait of Lorenzo di Medici.jpg", "heading": "Lorenzo de' Medici", "sub": "The Prince's dedicatee, painted by Raphael", "position": "50% 25%" },
+          "link": { "label": "Learning · Politics: the realist tradition", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-realist-tradition" },
+          "cites": ["machiavelli-1513", "skinner-2000"]
+        },
+        {
+          "id": "fox-and-lion",
+          "title": "The fox and the lion",
+          "narration": "A prince, Machiavelli wrote, must know how to act like a beast as well as a man, joining the cunning of the fox to the strength of the lion. He should seem merciful, faithful, humane and religious, but be ready to act otherwise when the state is at stake, because people judge by appearances and by results. These chapters, more than any others, earned the book its reputation.",
+          "visual": { "kind": "quote", "text": "It is necessary to be a fox to discover the snares and a lion to terrify the wolves.", "who": "Niccolò Machiavelli, The Prince, translated by W. K. Marriott", "when": "written in 1513", "cite": "machiavelli-1513" },
+          "cites": ["machiavelli-1513", "benner-2013"]
+        },
+        {
+          "id": "discourses",
+          "title": "The Discourses on Livy",
+          "narration": "In the longer Discourses on Livy, written over the following years, Machiavelli praised the Roman republic and argued that free states, in which citizens share in power, grow greater than principalities. Rome's liberty, he argued, came from conflict between the nobles and the people kept within the law, and from armies of its own citizens. Many scholars, among them Quentin Skinner, see him above all as a theorist of republican liberty.",
+          "visual": {
+            "kind": "timeline", "from": "1513", "to": "1559",
+            "events": [
+              { "at": "1513-12", "label": "The Prince written" },
+              { "at": "1518", "label": "The Mandrake, about 1518" },
+              { "at": "1519", "label": "Discourses finished, about 1519" },
+              { "at": "1521", "label": "The Art of War" },
+              { "at": "1525", "label": "Florentine Histories" },
+              { "at": "1527-06-21", "label": "Machiavelli dies" },
+              { "at": "1531", "label": "Discourses printed" },
+              { "at": "1532", "label": "The Prince printed" },
+              { "at": "1559", "label": "On the Index of banned books" }
+            ]
+          },
+          "link": { "label": "Kardashev Tracker · the Roman Republic, 200 BC", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=-200&p=rome-rep" },
+          "cites": ["skinner-2000", "najemy-2010"]
+        }
+      ]
+    },
+    {
+      "id": "afterlives",
+      "title": "Machiavellian?",
+      "scenes": [
+        {
+          "id": "last-years",
+          "title": "Last years, 1520–1527",
+          "narration": "The Medici slowly took Machiavelli back into favour: in 1520 Cardinal Giulio de' Medici commissioned him to write a history of Florence, which he presented in 1525 to Giulio, by then Pope Clement the Seventh. In May 1527 imperial troops sacked Rome, the Medici were again expelled from Florence, and the restored republic had no place for a man who had served them. Machiavelli died on 21 June 1527 and was buried in Santa Croce, where a monument paid for by public subscription was unveiled in 1787.",
+          "visual": { "kind": "portrait", "file": "File:Innocenzo Spinazzi, Monumental tomb of Niccolò Machiavelli, 1787, Santa Croce, Florence.jpg", "heading": "Santa Croce, Florence", "sub": "Monument by Innocenzo Spinazzi, unveiled in 1787", "position": "50% 35%" },
+          "cites": ["viroli-2000", "najemy-2010"]
+        },
+        {
+          "id": "readings",
+          "title": "Teacher of evil, or of liberty?",
+          "narration": "The Prince was placed on the Catholic Church's index of banned books in 1559, and English playwrights made the murderous Machiavel a stock stage villain. Jean-Jacques Rousseau read the book as a warning to the people disguised as advice to kings, Leo Strauss professed himself inclined to see its author as a teacher of evil, and Isaiah Berlin argued that Machiavelli had shown that political and Christian values cannot always be reconciled. More recently Erica Benner has read The Prince as an ironic book whose real lessons are republican.",
+          "visual": { "kind": "quote", "text": "He professed to teach kings; but it was the people he really taught. His Prince is the book of Republicans.", "who": "Jean-Jacques Rousseau, The Social Contract, translated by G. D. H. Cole", "when": "1762", "cite": "rousseau-1762" },
+          "link": { "label": "Encyclopaedia · Machiavellianism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q472246" },
+          "cites": ["rousseau-1762", "strauss-1958", "berlin-1979", "benner-2013", "najemy-2010"]
+        },
+        {
+          "id": "realism",
+          "title": "Machiavelli and political realism",
+          "narration": "Students of international relations count Machiavelli, with Thucydides and Thomas Hobbes, among the founders of realism, the view that states are, and should be, guided by power and interest rather than by moral ideals. Modern realists from Hans Morgenthau to John Mearsheimer place themselves in that tradition, while their critics argue that it underrates law, institutions and ideas. PRP's Learning course on politics follows the argument to the present day.",
+          "visual": { "kind": "module", "blurb": "The realist tradition today: John Mearsheimer's offensive realism and its critics." },
+          "link": { "label": "Learning · Politics: John Mearsheimer's offensive realism", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=john-mearsheimer-s-offensive-realism" },
+          "cites": ["doyle-1997", "najemy-2010"]
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    { "q": "What post did Machiavelli hold from 1498 to 1512?", "options": ["Head of Florence's Second Chancery", "Duke of Urbino", "Archbishop of Florence"], "answer": 0, "explain": "He ran the Second Chancery, served the republic's council of war and went on diplomatic missions until the Medici returned in 1512." },
+    { "q": "To whom was The Prince finally dedicated?", "options": ["Cesare Borgia", "Lorenzo de' Medici", "Pope Julius the Second"], "answer": 1, "explain": "He dedicated it to Lorenzo de' Medici, nephew of Pope Leo the Tenth, hoping to win back employment." },
+    { "q": "Which of Machiavelli's books argues that free republics, like ancient Rome, grow greater than principalities?", "options": ["The Art of War", "The Discourses on Livy", "The Mandrake"], "answer": 1, "explain": "The Discourses praise the Roman republic and argue that free states, in which citizens share in power, grow greater than principalities." },
+    { "q": "Which writer read The Prince as a book for republicans?", "options": ["Jean-Jacques Rousseau", "Thomas Hobbes", "Leo Strauss"], "answer": 0, "explain": "In The Social Contract (1762) Rousseau wrote that Machiavelli professed to teach kings but really taught the people, and called The Prince the book of republicans." }
+  ]
+}

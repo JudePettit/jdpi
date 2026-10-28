@@ -577,66 +577,60 @@
           "name": "Political Events",
           "kind": "retrospective",
           "icon": "◉",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=political-events",
-          "description": "Kino documentaries: political events."
+          "url": "kino/index.html?cat=political-events",
+          "description": "Documentaries on political turning points, starting with the Russian Revolutions of 1917, the Partition of India and the Revolutions of 1989."
         },
         {
           "id": "kino-political-figures",
           "name": "Political Figures",
           "kind": "retrospective",
           "icon": "☺",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=political-figures",
-          "description": "Kino documentaries: political figures."
+          "url": "kino/index.html?cat=political-figures",
+          "description": "Lives in power, told with maps, timelines, portraits and their own words: Winston Churchill, Franklin D. Roosevelt and Deng Xiaoping to begin with."
         },
         {
           "id": "kino-political-parties",
           "name": "Political Parties",
           "kind": "retrospective",
           "icon": "◧",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=political-parties",
-          "description": "Kino documentaries: political parties."
+          "url": "kino/index.html?cat=political-parties",
+          "description": "How parties rise, rule and adapt, starting with the Chinese Communist Party, Mexico's Institutional Revolutionary Party and Japan's Liberal Democratic Party."
         },
         {
           "id": "kino-wars",
           "name": "Wars",
           "kind": "retrospective",
           "icon": "⚔",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=wars",
-          "description": "Kino documentaries: wars."
+          "url": "kino/index.html?cat=wars",
+          "description": "Wars from their causes to their aftermath, starting with the Second World War in Europe, the Korean War and the Vietnam War, with maps that follow War Focus month by month."
         },
         {
           "id": "kino-geopolitical-events",
           "name": "Geopolitical Events",
           "kind": "retrospective",
           "icon": "⊕",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=geopolitical-events",
-          "description": "Kino documentaries: geopolitical events."
+          "url": "kino/index.html?cat=geopolitical-events",
+          "description": "Moments that reshaped the world order, starting with the Cuban Missile Crisis, the end of the Soviet Union and the end of empire in Africa."
         },
         {
           "id": "kino-great-thinkers",
           "name": "Great Thinkers",
           "kind": "learning",
           "icon": "✎",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "kino/index.html?cat=great-thinkers",
-          "description": "Kino documentaries: great thinkers."
+          "url": "kino/index.html?cat=great-thinkers",
+          "description": "Three-part courses with a short quiz on the great minds PRP draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
         }
       ]
     }

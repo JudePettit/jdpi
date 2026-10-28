@@ -1,0 +1,167 @@
+{
+  "id": "partition-of-india",
+  "title": "The Partition of India, 1947",
+  "category": "political-events",
+  "subjects": [{ "qid": "Q129053", "label": "partition of India" }],
+  "era": [1940, 1948],
+  "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with the founders' own words and the range of estimates of the dead and the displaced.",
+  "minutes": 7,
+  "preview": { "scene": "radcliffe" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "partition of India (Q129053)", "url": "https://www.wikidata.org/wiki/Q129053" },
+    { "id": "khan-2007", "kind": "book", "author": "Yasmin Khan", "title": "The Great Partition: The Making of India and Pakistan", "year": 2007, "publisher": "Yale University Press" },
+    { "id": "jalal-1985", "kind": "book", "author": "Ayesha Jalal", "title": "The Sole Spokesman: Jinnah, the Muslim League and the Demand for Pakistan", "year": 1985, "publisher": "Cambridge University Press" },
+    { "id": "talbot-singh-2009", "kind": "book", "author": "Ian Talbot and Gurharpal Singh", "title": "The Partition of India", "year": 2009, "publisher": "Cambridge University Press" },
+    { "id": "bharadwaj-2008", "kind": "article", "author": "Prashant Bharadwaj; Asim Khwaja; Atif Mian", "title": "The Big March: Migratory Flows after the Partition of India", "year": 2008, "journal": "Economic and Political Weekly 43 (35): 39–49" },
+    { "id": "butalia-1998", "kind": "book", "author": "Urvashi Butalia", "title": "The Other Side of Silence: Voices from the Partition of India", "year": 1998, "publisher": "Viking (Penguin India)" },
+    { "id": "nehru-1947", "kind": "web", "author": "Jawaharlal Nehru", "year": 1947, "title":"Constituent Assembly Debates, 14 August 1947: Jawaharlal Nehru's 'Tryst with Destiny' speech", "publisher": "Constitution of India (Centre for Law and Policy Research)", "url": "https://www.constitutionofindia.net/debates/14-aug-1947/" },
+    { "id": "jinnah-1947", "kind": "web", "author": "Muhammad Ali Jinnah", "year": 1947, "title":"Muhammad Ali Jinnah's address to the Constituent Assembly of Pakistan, 11 August 1947 (text from G. Allana, Pakistan Movement Historical Documents)", "publisher": "Frances W. Pritchett, Columbia University", "url": "https://franpritchett.com/00islamlinks/txt_jinnah_assembly_1947.html" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Partition of India, 1947",
+      "narration": "On 14 and 15 August 1947 British rule in India ended, and two independent states took its place: India, and Pakistan, in two wings far apart to the west and east. The division of the subcontinent along religious lines came with some of the worst communal violence of the twentieth century and one of the largest migrations in history. This film follows how partition came about, how the borders were drawn, and what it cost.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Events", "heading": "The Partition of India", "sub": "1947" },
+      "focus": { "bbox": [60, 5, 100, 38] },
+      "link": { "label": "Political Retrospective · India, 1947", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1947&c=750" },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "raj",
+      "title": "The British Raj",
+      "narration": "By the twentieth century Britain ruled most of the subcontinent directly and the rest through more than five hundred princely states bound to the Crown. The Indian National Congress, founded in 1885, became the main voice of the independence movement, and in 1906 Muslim leaders founded the All-India Muslim League to speak for a community that made up between a fifth and a quarter of the population. From 1909 British reforms gave Muslims separate electorates, which historians still debate as either a safeguard for a minority or a lasting division of Indian politics.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "British India and the princely states, 1947", "tone": 1, "countries": ["IND", "PAK", "BGD"] }]
+      },
+      "focus": { "points": [[88.36, 22.57, "Calcutta, the capital until 1911"], [77.21, 28.61, "New Delhi, the capital from 1931"]], "bbox": [60, 5, 100, 38] },
+      "link": { "label": "Kardashev Tracker · the British Empire, 1900", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1900&p=britain" },
+      "cites": ["talbot-singh-2009", "khan-2007"]
+    },
+    {
+      "id": "gandhi",
+      "title": "Gandhi and the national movement",
+      "narration": "From 1920 Mohandas Gandhi turned the Congress into a mass movement through non-violent non-cooperation, the Salt March of 1930 and, in August 1942, the Quit India campaign, after which most Congress leaders were held in prison until near the end of the Second World War. Gandhi and Jawaharlal Nehru wanted a single India in which religion would not decide citizenship. Many Muslims, though, feared that in a Hindu-majority democracy they would be a permanent minority, and the Muslim League grew strong during the war while the Congress was banned.",
+      "visual": { "kind": "portrait", "qid": "Q1001", "heading": "Mohandas Gandhi", "sub": "1869–1948", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Mahatma Gandhi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1001" },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "pakistan-demand",
+      "title": "The demand for Pakistan",
+      "narration": "In March 1940 the Muslim League, led by Muhammad Ali Jinnah, passed the Lahore Resolution, calling for independent states in the Muslim-majority regions of the north-west and east. What Jinnah meant by Pakistan is still argued over: the historian Ayesha Jalal has argued that he used the demand to bargain for an equal share of power for Muslims within a united India, while others see a settled aim of separation. In the elections of 1945 and 1946 the League won every Muslim seat in the central assembly and most of those in the provinces, and it could no longer be ignored.",
+      "visual": { "kind": "portrait", "qid": "Q160554", "heading": "Muhammad Ali Jinnah", "sub": "1876–1948", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Pakistan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q843" },
+      "cites": ["jalal-1985", "talbot-singh-2009"]
+    },
+    {
+      "id": "violence-1946",
+      "title": "1946: a plan fails and violence spreads",
+      "narration": "In 1946 a British Cabinet Mission proposed a loose federation that would have kept India united, but the Congress and the League could not agree on how it would work. The League called a Direct Action Day on 16 August, and in four days of rioting in Calcutta thousands of Hindus and Muslims were killed. Killings followed in Noakhali in eastern Bengal, in Bihar and, from March 1947, in the Punjab, each massacre provoking revenge elsewhere.",
+      "visual": { "kind": "map", "still": true },
+      "focus": { "points": [[88.36, 22.57, "Calcutta, August 1946"], [91.1, 22.87, "Noakhali, October 1946"], [85.14, 25.6, "Bihar, October and November 1946"], [73.05, 33.6, "Rawalpindi district, March 1947"]], "bbox": [66, 18, 95, 36] },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "decision",
+      "title": "The decision to divide",
+      "narration": "In February 1947 Clement Attlee's government announced that Britain would leave India by June 1948, and sent Lord Mountbatten to be the last Viceroy. On 3 June he announced a plan to divide British India into two dominions, splitting the provinces of the Punjab and Bengal, and brought independence forward to August. Parliament passed the Indian Independence Act in July. Between the plan and independence there were barely ten weeks to divide an army, a civil service and a treasury.",
+      "visual": {
+        "kind": "timeline", "from": "1946-03", "to": "1948-02",
+        "events": [
+          { "at": "1946-05-16", "label": "Cabinet Mission plan" },
+          { "at": "1946-08-16", "label": "Direct Action Day" },
+          { "at": "1947-02-20", "label": "Britain sets a deadline" },
+          { "at": "1947-03-22", "label": "Mountbatten arrives" },
+          { "at": "1947-06-03", "label": "Partition plan" },
+          { "at": "1947-07-18", "label": "Independence Act" },
+          { "at": "1947-08-15", "label": "Independence" },
+          { "at": "1947-08-17", "label": "Borders published" },
+          { "at": "1947-10-26", "label": "Kashmir accedes to India" },
+          { "at": "1948-01-30", "label": "Gandhi assassinated" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Clement Attlee", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129006" },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "midnight",
+      "title": "Freedom at midnight",
+      "narration": "Pakistan marked its independence on 14 August, with Jinnah as its Governor-General, and India at midnight, with Nehru as its first Prime Minister. In Delhi, Nehru told the Constituent Assembly that India would awake to life and freedom, while parts of the Punjab were already burning. Gandhi took no part in the celebrations: he spent the day in Calcutta, fasting and praying for peace between Hindus and Muslims.",
+      "visual": { "kind": "quote", "text": "At the stroke of the midnight hour, when the world sleeps, India will awake to life and freedom.", "who": "Jawaharlal Nehru, Constituent Assembly of India", "when": "14 August 1947", "cite": "nehru-1947" },
+      "link": { "label": "Encyclopaedia · India", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q668" },
+      "cites": ["nehru-1947", "khan-2007"]
+    },
+    {
+      "id": "promise",
+      "title": "A promise to minorities",
+      "narration": "Three days before independence, Jinnah told Pakistan's Constituent Assembly that its citizens were free to worship as they chose, and that religion had nothing to do with the business of the state. Both new governments promised to protect their minorities, but neither could stop the killing as Hindus and Sikhs fled western Punjab and Muslims fled the east. What the speech means for Pakistan, as a secular or an Islamic state, is still debated there.",
+      "visual": { "kind": "quote", "text": "You may belong to any religion or caste or creed — that has nothing to do with the business of the State.", "who": "Muhammad Ali Jinnah, Constituent Assembly of Pakistan", "when": "11 August 1947", "cite": "jinnah-1947" },
+      "link": { "label": "Political Retrospective · Pakistan, 1947", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1947&c=770" },
+      "cites": ["jinnah-1947", "jalal-1985"]
+    },
+    {
+      "id": "radcliffe",
+      "title": "Drawing the line",
+      "narration": "The new borders were drawn in about five weeks by Cyril Radcliffe, a British lawyer who had never been to India, working from census maps and the arguments of rival commissioners. His awards were published on 17 August, two days after independence, so millions of people learned only afterwards which country they were in. In the Punjab the line cut through farmland, canals and Sikh holy places; in the east it gave Calcutta to India but left most of the jute fields that fed its mills in East Pakistan.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "India", "tone": 1, "countries": ["IND"] },
+          { "label": "Pakistan, west and east (east Pakistan is now Bangladesh)", "tone": 2, "countries": ["PAK", "BGD"] }
+        ],
+        "fronts": [
+          { "label": "The Radcliffe Line in the Punjab (approximate)", "line": [[75.35, 32.45], [75.15, 32.22], [75.03, 32.03], [74.75, 31.85], [74.57, 31.6], [74.53, 31.0], [73.97, 30.38]] }
+        ]
+      },
+      "focus": { "points": [[74.34, 31.55, "Lahore, to Pakistan"], [74.87, 31.63, "Amritsar, to India"], [88.36, 22.57, "Calcutta, to India"], [90.41, 23.81, "Dacca, to East Pakistan"]], "bbox": [66, 18, 95, 36] },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "exodus",
+      "title": "The great migration",
+      "narration": "In the months around independence, Hindus and Sikhs moved into India and Muslims into Pakistan in their millions, on foot, by bullock cart and in crowded trains that were sometimes attacked. From census records, the economists Prashant Bharadwaj, Asim Khwaja and Atif Mian estimated 14.5 million arrivals and 17.9 million departures, a gap of about 3.4 million people whom the authors describe as missing. Estimates of the number killed range from about 200,000 to two million, and Urvashi Butalia cites an estimate of some 75,000 women abducted.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Partition in numbers: ranges of scholarly estimates", "unit": "million people",
+        "data": [
+          { "label": "People who moved across the new borders", "low": 14.5, "high": 17.9 },
+          { "label": "People killed in the violence", "low": 0.2, "high": 2 }
+        ],
+        "note": "Movement: 14.5 million arrivals and 17.9 million departures in the census records (Bharadwaj, Khwaja and Mian). Deaths: the range of estimates reviewed by Talbot and Singh.",
+        "cite": ["bharadwaj-2008", "talbot-singh-2009"]
+      },
+      "cites": ["bharadwaj-2008", "talbot-singh-2009", "butalia-1998"]
+    },
+    {
+      "id": "kashmir",
+      "title": "Kashmir, Hyderabad and the death of Gandhi",
+      "narration": "The princely states were pressed to join one dominion or the other. When tribal fighters from Pakistan invaded Kashmir in October 1947, its Hindu ruler acceded to India, a step Pakistan has never accepted, and the first war between the two states ended with a ceasefire on 1 January 1949 that left Kashmir divided. Indian troops took Hyderabad in September 1948. Before then, on 30 January 1948, Gandhi, who had fasted for communal peace, was shot dead in Delhi by a Hindu nationalist who blamed him for being too generous to Muslims and to Pakistan.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "India", "tone": 1, "countries": ["IND"] },
+          { "label": "Pakistan, west and east", "tone": 2, "countries": ["PAK", "BGD"] }
+        ],
+        "arrows": [
+          { "from": [71.6, 34.0], "via": [73.4, 34.3], "to": [74.55, 34.1], "tone": 2, "label": "Tribal invasion, October 1947" },
+          { "from": [75.91, 17.66], "via": [77.6, 17.68], "to": [78.3, 17.45], "tone": 1, "label": "Indian troops, September 1948" }
+        ],
+        "fronts": [
+          { "label": "Ceasefire line, 1949 (approximate)", "line": [[74.35, 32.88], [74.15, 33.15], [74.1, 33.45], [74.0, 33.8], [73.95, 34.1], [73.78, 34.38], [73.95, 34.65], [74.4, 34.78], [74.85, 34.72], [75.4, 34.66], [76.15, 34.7], [76.6, 34.78], [77.0, 35.0]] }
+        ]
+      },
+      "focus": { "points": [[74.8, 34.08, "Srinagar"], [78.47, 17.39, "Hyderabad"], [77.21, 28.61, "Delhi: Gandhi killed, 30 January 1948"]], "bbox": [64, 10, 92, 38] },
+      "link": { "label": "Retrospective Battlefield · India and Pakistan, 1948", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1948&w=u218" },
+      "cites": ["khan-2007", "talbot-singh-2009"]
+    },
+    {
+      "id": "legacy",
+      "title": "Partition's long shadow",
+      "narration": "Partition shaped the subcontinent's politics for generations. Pakistan's two wings, a thousand miles apart, split in 1971, when East Pakistan won independence as Bangladesh after a war in which India intervened. India and Pakistan have fought again over Kashmir, and both now hold nuclear weapons. For many families the memory of 1947 was long kept private, and only in recent decades have oral historians such as Urvashi Butalia set out to record it.",
+      "visual": { "kind": "module", "blurb": "Follow the war that turned East Pakistan into Bangladesh, month by month, in War Focus." },
+      "link": { "label": "War Focus · Bangladesh Liberation War, December 1971", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=bangladesh-liberation&m=1971-12" },
+      "cites": ["butalia-1998", "talbot-singh-2009"]
+    }
+  ]
+}

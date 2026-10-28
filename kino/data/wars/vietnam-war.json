@@ -1,0 +1,186 @@
+{
+  "id": "vietnam-war",
+  "title": "The Vietnam War, 1955–1975",
+  "category": "wars",
+  "subjects": [
+    { "qid": "Q8740", "label": "Vietnam War" },
+    { "qid": "Q180573", "label": "South Vietnam" },
+    { "qid": "Q36014", "label": "Ho Chi Minh" }
+  ],
+  "era": [1955, 1975],
+  "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Thirteen scenes, with maps that follow War Focus.",
+  "minutes": 7,
+  "preview": { "scene": "escalation" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Vietnam War (Q8740), South Vietnam (Q180573), Ho Chi Minh (Q36014)", "url": "https://www.wikidata.org/wiki/Q8740" },
+    { "id": "logevall-2012", "kind": "book", "author": "Fredrik Logevall", "title": "Embers of War: The Fall of an Empire and the Making of America's Vietnam", "year": 2012, "publisher": "Random House" },
+    { "id": "logevall-1999", "kind": "book", "author": "Fredrik Logevall", "title": "Choosing War: The Lost Chance for Peace and the Escalation of War in Vietnam", "year": 1999, "publisher": "University of California Press" },
+    { "id": "moyar-2006", "kind": "book", "author": "Mark Moyar", "title": "Triumph Forsaken: The Vietnam War, 1954–1965", "year": 2006, "publisher": "Cambridge University Press" },
+    { "id": "nguyen-2012", "kind": "book", "author": "Lien-Hang T. Nguyen", "title": "Hanoi's War: An International History of the War for Peace in Vietnam", "year": 2012, "publisher": "University of North Carolina Press" },
+    { "id": "goscha-2016", "kind": "book", "author": "Christopher Goscha", "title": "Vietnam: A New History", "year": 2016, "publisher": "Basic Books" },
+    { "id": "hirschman-1995", "kind": "article", "author": "Charles Hirschman, Samuel Preston and Vu Manh Loi", "title": "Vietnamese Casualties During the American War: A New Estimate", "year": 1995, "journal": "Population and Development Review 21 (4): 783–812" },
+    { "id": "ho-1945", "kind": "web", "title": "Declaration of Independence of the Democratic Republic of Vietnam, 2 September 1945 (from Ho Chi Minh, Selected Works, volume 3, Hanoi, 1960–1962)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/reference/archive/ho-chi-minh/works/1945/declaration-independence.htm" },
+    { "id": "tonkin-1964", "kind": "web", "title": "Tonkin Gulf Resolution (1964), Public Law 88-408", "publisher": "US National Archives", "url": "https://www.archives.gov/milestone-documents/tonkin-gulf-resolution" },
+    { "id": "nara-casualties", "kind": "web", "title": "Vietnam War US Military Fatal Casualty Statistics", "publisher": "US National Archives", "url": "https://www.archives.gov/research/military/vietnam-war/casualty-statistics" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Vietnam War",
+      "narration": "For thirty years after 1945 Vietnam was at war: first against French rule, then in a struggle between a Communist North and an anti-Communist South in which the United States fought for eight years. The war spread into Laos and Cambodia, divided American society and killed well over a million Vietnamese. This film follows it from the declaration of independence in Hanoi to the fall of Saigon, and what came after.",
+      "visual": { "kind": "title", "kicker": "Kino · Wars", "heading": "The Vietnam War", "sub": "From the French war to the fall of Saigon, 1945–1975" },
+      "focus": { "bbox": [98, 7, 113, 24.5] },
+      "link": { "label": "Retrospective Battlefield · 1965", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1965&w=u293" },
+      "cites": ["goscha-2016", "logevall-2012"]
+    },
+    {
+      "id": "independence",
+      "title": "Independence and the French war, 1945–1954",
+      "narration": "On 2 September 1945, as Japan's surrender left a vacuum, Ho Chi Minh declared Vietnam's independence in Hanoi, opening with words borrowed from the American Declaration of Independence. France returned to reclaim its colony, and from December 1946 the Communist-led Viet Minh fought a long war against French forces. As the Cold War hardened, China armed the Viet Minh, and the United States came to pay for much of France's war.",
+      "visual": { "kind": "quote", "text": "Vietnam has the right to be a free and independent country and in fact it is so already.", "who": "Ho Chi Minh, Declaration of Independence of the Democratic Republic of Vietnam", "when": "Hanoi, 2 September 1945", "cite": "ho-1945" },
+      "link": { "label": "War Focus · First Indochina War, December 1946", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=first-indochina&m=1946-12" },
+      "cites": ["ho-1945", "logevall-2012", "goscha-2016"]
+    },
+    {
+      "id": "geneva",
+      "title": "Dien Bien Phu and Geneva, 1954",
+      "narration": "In 1954 the Viet Minh under Vo Nguyen Giap besieged the French garrison at Dien Bien Phu, in the hills near the border with Laos, and it surrendered on 7 May. At the Geneva conference that July, France agreed to withdraw, and Vietnam was divided at the 17th parallel until national elections due in 1956. The elections were never held, because the government in the South, backed by the United States, refused them, and some 800,000 to a million people, most of them Catholics, moved from the North to the South.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Laos and Cambodia", "tone": 3, "countries": ["LAO", "KHM"] }],
+        "fronts": [{ "label": "17th parallel, July 1954", "line": [[106.45, 17.0], [106.8, 17.0], [107.12, 17.0]] }]
+      },
+      "focus": { "countries": ["VNM"], "points": [[103.02, 21.39, "Dien Bien Phu, 13 March – 7 May 1954"], [105.85, 21.03, "Hanoi"], [106.7, 10.78, "Saigon"]], "bbox": [99.5, 8, 112, 23.8] },
+      "link": { "label": "Encyclopaedia · Battle of Dien Bien Phu", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q604897" },
+      "cites": ["logevall-2012", "goscha-2016"]
+    },
+    {
+      "id": "two-vietnams",
+      "title": "Two Vietnams, 1955–1963",
+      "narration": "In the South, Ngo Dinh Diem proclaimed the Republic of Vietnam in October 1955 and, with American money and advisers, built an anti-Communist state that imprisoned and executed many of its opponents. In the North, a land reform campaign killed thousands of people denounced as landlords, and in 1959 Hanoi's leaders resolved to back armed struggle in the South, where the National Liberation Front was founded in December 1960. As the insurgency grew and Buddhist protests spread in 1963, American officials encouraged a coup in which Diem was overthrown and killed, and historians still argue over whether that decision doomed the South or merely exposed its weakness.",
+      "visual": { "kind": "portrait", "file": "File:Portrait of premier Ngô Đình Diệm with the flag of the State of Vietnam behind.jpg", "heading": "Ngo Dinh Diem", "sub": "President of the Republic of Vietnam, 1955–1963", "position": "50% 25%" },
+      "link": { "label": "War Focus · November 1963", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1963-11" },
+      "cites": ["moyar-2006", "logevall-1999", "nguyen-2012"]
+    },
+    {
+      "id": "tonkin",
+      "title": "The Gulf of Tonkin, August 1964",
+      "narration": "On 2 August 1964 North Vietnamese torpedo boats attacked the American destroyer Maddox in the Gulf of Tonkin. A second attack reported two days later almost certainly never happened, but President Lyndon Johnson ordered air strikes on the North, and on 7 August Congress passed a resolution giving him broad authority, with only two senators voting against. It became the legal basis for the American war that followed.",
+      "visual": { "kind": "quote", "text": "That the Congress approves and supports the determination of the President, as Commander in Chief, to take all necessary measures to repel any armed attack against the forces of the United States and to prevent further aggression.", "who": "The Gulf of Tonkin Resolution", "when": "7 August 1964", "cite": "tonkin-1964" },
+      "link": { "label": "Encyclopaedia · Gulf of Tonkin incident", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q482402" },
+      "cites": ["tonkin-1964", "logevall-1999"]
+    },
+    {
+      "id": "escalation",
+      "title": "The American war, 1965–1967",
+      "narration": "In March 1965 the United States began a sustained bombing campaign against the North and landed marines at Da Nang, and by the end of 1967 nearly half a million American troops were in South Vietnam. General William Westmoreland fought a war of attrition, while North Vietnamese troops and supplies moved south along the Ho Chi Minh Trail through Laos and Cambodia. China and the Soviet Union supplied the North with weapons, and South Korea, Australia, New Zealand, Thailand and the Philippines sent forces to the South.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Laos and Cambodia, crossed by the trail", "tone": 3, "countries": ["LAO", "KHM"] }],
+        "arrows": [
+          { "from": [102.8, 17.4], "via": [104.3, 19.6], "to": [105.75, 20.85], "tone": 1, "label": "Bombing of the North, from March 1965" },
+          { "from": [109.9, 16.6], "to": [108.32, 16.1], "tone": 1, "label": "Marines land at Da Nang" }
+        ],
+        "fronts": [{ "label": "Ho Chi Minh Trail (approximate)", "line": [[105.78, 17.68], [106.2, 16.75], [106.55, 15.9], [106.85, 14.8], [107.05, 13.9], [106.95, 13.0], [106.75, 12.2]] }]
+      },
+      "focus": { "countries": ["VNM"], "points": [[105.85, 21.03, "Hanoi"], [108.22, 16.07, "Da Nang, 8 March 1965"], [106.7, 10.78, "Saigon"]], "bbox": [99.5, 8, 112, 23.8] },
+      "link": { "label": "War Focus · March 1965", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1965-03" },
+      "cites": ["logevall-1999", "goscha-2016", "nguyen-2012"]
+    },
+    {
+      "id": "tet",
+      "title": "The Tet Offensive, 1968",
+      "narration": "At the lunar new year, at the end of January 1968, Communist forces attacked more than a hundred towns and cities across South Vietnam, including Saigon, where a squad briefly broke into the grounds of the American embassy. They were driven back with very heavy losses almost everywhere, except at Hue, where fighting lasted nearly a month and Communist troops executed thousands of civilians. Militarily Tet was a setback for Hanoi, but it shattered American confidence that the war was being won.",
+      "visual": { "kind": "map" },
+      "focus": { "countries": ["VNM"], "points": [[107.59, 16.46, "Hue, 31 January – 24 February"], [106.73, 16.62, "Khe Sanh, besieged January – April"], [108.22, 16.07, "Da Nang"], [106.7, 10.78, "Saigon, 31 January"]], "bbox": [102, 8.3, 112, 18.6] },
+      "link": { "label": "War Focus · January 1968", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1968-01" },
+      "cites": ["nguyen-2012", "goscha-2016"]
+    },
+    {
+      "id": "turning-point",
+      "title": "1968: the turning point",
+      "narration": "On 16 March 1968 American soldiers killed several hundred unarmed villagers at My Lai, a massacre that was covered up until late 1969. At the end of March Johnson limited the bombing of the North and announced that he would not seek re-election, and peace talks opened in Paris in May. In November Richard Nixon won the presidency, promising to end the war with honour.",
+      "visual": {
+        "kind": "timeline", "from": "1968-01", "to": "1969-01",
+        "events": [
+          { "at": "1968-01-30", "label": "Tet Offensive" },
+          { "at": "1968-02-24", "label": "Hue retaken" },
+          { "at": "1968-03-16", "label": "My Lai massacre" },
+          { "at": "1968-03-31", "label": "Johnson will not run again" },
+          { "at": "1968-05-13", "label": "Paris talks open" },
+          { "at": "1968-11-05", "label": "Nixon elected" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Lyndon B. Johnson", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9640" },
+      "cites": ["goscha-2016", "nguyen-2012"]
+    },
+    {
+      "id": "vietnamisation",
+      "title": "Vietnamisation and a wider war, 1969–1972",
+      "narration": "Nixon and his adviser Henry Kissinger began withdrawing American troops in 1969 while handing the fighting to the South Vietnamese army, a policy called Vietnamisation. To strike at Communist bases they secretly bombed Cambodia, sent troops into it in 1970 and backed a South Vietnamese incursion into Laos in 1971, and protests at home grew, among them at Kent State University, where the National Guard shot dead four students. In the spring of 1972 the North launched a conventional invasion of the South, which was halted with the help of massive American air power.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Cambodia and Laos", "tone": 3, "countries": ["KHM", "LAO"] }],
+        "arrows": [
+          { "from": [106.3, 11.25], "to": [105.55, 11.8], "tone": 1, "label": "Into Cambodia, 1970" },
+          { "from": [106.8, 16.62], "to": [106.15, 16.68], "tone": 1, "label": "Into Laos, 1971" },
+          { "from": [107.0, 17.35], "to": [107.17, 16.85], "tone": 2, "label": "Easter Offensive, 1972" },
+          { "from": [107.45, 14.65], "to": [107.95, 14.4], "tone": 2 },
+          { "from": [106.15, 12.15], "to": [106.55, 11.72], "tone": 2 }
+        ]
+      },
+      "focus": { "countries": ["VNM"], "points": [[107.19, 16.75, "Quang Tri, 1972"], [106.6, 11.65, "An Loc, 1972"], [104.92, 11.56, "Phnom Penh"]], "bbox": [101, 8.3, 111.5, 19] },
+      "link": { "label": "War Focus · April 1972", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1972-04" },
+      "cites": ["nguyen-2012", "goscha-2016"]
+    },
+    {
+      "id": "paris",
+      "title": "The Paris Peace Accords, 1973",
+      "narration": "After the heavy bombing of Hanoi and Haiphong in December 1972, the Paris Peace Accords were signed on 27 January 1973. American forces left by the end of March and American prisoners of war came home, but North Vietnamese troops remained in the South, and fighting between the Vietnamese sides soon resumed. Kissinger and the North's negotiator, Le Duc Tho, were awarded the Nobel Peace Prize for the accords, and Le Duc Tho declined it.",
+      "visual": { "kind": "portrait", "file": "File:Le duc Tho and Henry Kissinger White House photo.jpg", "heading": "Le Duc Tho and Henry Kissinger", "sub": "January 1973", "position": "50% 35%" },
+      "link": { "label": "Encyclopaedia · Henry Kissinger", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q66107" },
+      "cites": ["nguyen-2012", "goscha-2016"]
+    },
+    {
+      "id": "fall-of-saigon",
+      "title": "The fall of Saigon, 1975",
+      "narration": "In March 1975 the North's army attacked in the Central Highlands, and the southern forces, short of the American aid that Congress had cut, collapsed far faster than either side expected. Hue and Da Nang fell within weeks, and on 30 April North Vietnamese tanks broke through the gates of the presidential palace in Saigon, hours after the last Americans and some of the Vietnamese who had worked with them were lifted out by helicopter. The Khmer Rouge had taken Phnom Penh on 17 April, and by December Communists ruled Laos as well.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Cambodia and Laos, under Communist rule by December 1975", "tone": 3, "countries": ["KHM", "LAO"] }],
+        "arrows": [
+          { "from": [107.6, 13.3], "to": [108.0, 12.75], "tone": 2, "label": "Ban Me Thuot, 10 March" },
+          { "from": [107.2, 17.1], "via": [107.5, 16.6], "to": [108.1, 16.15], "tone": 2, "label": "Hue and Da Nang, late March" },
+          { "from": [108.0, 12.55], "via": [107.4, 11.6], "to": [106.78, 10.9], "tone": 2, "label": "Saigon, 30 April" }
+        ]
+      },
+      "focus": { "countries": ["VNM"], "points": [[106.7, 10.78, "Saigon, 30 April 1975"], [104.92, 11.56, "Phnom Penh, 17 April"]], "bbox": [101, 8.3, 111.5, 19] },
+      "link": { "label": "War Focus · April 1975", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1975-04" },
+      "cites": ["goscha-2016", "nguyen-2012"]
+    },
+    {
+      "id": "the-cost",
+      "title": "The human cost",
+      "narration": "How many died in the Vietnam War is still contested, so this chart shows ranges. A demographic study by Charles Hirschman and his colleagues estimated that between about 791,000 and 1.14 million Vietnamese, soldiers and civilians, died in the war from 1965 to 1975 alone. More than 58,000 American servicemen died, along with several thousand soldiers from South Korea, Australia and the other allied countries, and the wars in Cambodia and Laos killed hundreds of thousands more.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Deaths in the Vietnam War: two counts", "unit": "thousand people",
+        "data": [
+          { "label": "Vietnamese soldiers and civilians, 1965–1975", "low": 791, "high": 1141 },
+          { "label": "American servicemen: killed in action to all deaths", "low": 47.4, "high": 58.2 }
+        ],
+        "note": "The Vietnamese range is Hirschman, Preston and Vu Manh Loi's estimate for 1965–1975; deaths before 1965 and in Cambodia and Laos are not included. American figures from the National Archives: 47,434 hostile deaths, 58,220 deaths in all.",
+        "cite": ["hirschman-1995", "nara-casualties"]
+      },
+      "link": { "label": "Encyclopaedia · Vietnam War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8740" },
+      "cites": ["hirschman-1995", "nara-casualties", "goscha-2016"]
+    },
+    {
+      "id": "aftermath",
+      "title": "After the war",
+      "narration": "Vietnam was formally reunified in 1976. Hundreds of thousands of people who had served the southern state were sent to re-education camps, many of them for years, and large numbers fled the country by sea, many dying on the way. Vietnam overthrew the Khmer Rouge in Cambodia in January 1979 and fought a short border war with China weeks later; from 1986 its Communist Party turned to market reforms known as Doi Moi, and relations with the United States were restored in 1995.",
+      "visual": { "kind": "module", "blurb": "Vietnam today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "link": { "label": "National Analysis · Vietnam today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=VNM" },
+      "cites": ["goscha-2016"]
+    }
+  ]
+}

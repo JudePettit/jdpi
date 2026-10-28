@@ -66,6 +66,16 @@ External sites use the absolute URLs `https://jdpi.pages.dev/design/prp.css` and
 **anything drawn in canvas/SVG/Leaflet with theme colours must re-read the tokens and redraw on that event.**
 Read a token in JS with `getComputedStyle(document.documentElement).getPropertyValue('--prp-map-land').trim()`.
 
+### In the shell: one frame per submodule, and Kino's now-playing bar
+
+The shell keeps one frame per submodule (and view). A deep link (`#/<module>/<submodule>?at=<url>`) moves that frame:
+when only the hash differs the page stays loaded and its address changes in place, so **a page that can be linked to
+by hash must re-render on `hashchange`**; a different query loads in the same frame. While a Kino film follows along,
+the shell shows a compact bar over the bottom of the workspace (Kino accent, PRP tokens, a labelled region with a polite
+live caption): Kino posts `prp:nowplaying` messages and the bar posts `prp:kino-control` back, same origin only (the
+protocol is in `kino/README.md`, "Now playing"). It covers the bottom of the workspace (about 60 px, 80 px on phones),
+so a page should not pin anything it needs there.
+
 ## 3. Tokens (write CSS against these; no raw hex in page CSS)
 
 - Surfaces: `--prp-canvas` (page background), `--prp-surface` (panels, inputs), `--prp-surface-2` (table heads,

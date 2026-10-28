@@ -45,6 +45,17 @@
       </header>
       <section class="view" id="view" aria-live="polite"></section>
       <section class="frames" id="frames" hidden></section>
+      <!-- Kino's film while it follows along with its own frame hidden (shell.js, "Kino now playing") -->
+      <section class="np" id="np" aria-label="Now playing in Kino" hidden>
+        <p class="np-head"><b class="np-k">Kino</b><span class="np-sep" aria-hidden="true">·</span><span class="np-title" id="np-title"></span><span class="np-sep" aria-hidden="true">·</span><span class="np-n" id="np-n"></span></p>
+        <p class="np-cap" id="np-cap" lang="en-GB" aria-live="polite" aria-atomic="true"></p>
+        <div class="np-ctrl" role="group" aria-label="Film controls">
+          <button type="button" class="np-btn" id="np-prev" aria-label="Previous scene" title="Previous scene">⏮&#xFE0E;</button>
+          <button type="button" class="np-btn np-play" id="np-play" aria-label="Pause" title="Pause the film">❚❚</button>
+          <button type="button" class="np-btn" id="np-next" aria-label="Next scene" title="Next scene">⏭&#xFE0E;</button>
+        </div>
+        <a class="np-back" id="np-back" href="#/kino">Back to film</a>
+      </section>
     </div>
   </div>
   <script src="shell.js"></script>

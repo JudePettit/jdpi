@@ -1,0 +1,176 @@
+{
+  "id": "end-of-empire-in-africa",
+  "title": "The End of Empire in Africa, 1951–1980",
+  "category": "geopolitical-events",
+  "subjects": [
+    { "qid": "Q1146918", "label": "decolonisation of Africa" },
+    { "qid": "Q282739", "label": "Pan-Africanism" }
+  ],
+  "era": [1951, 1980],
+  "summary": "How the British, French, Belgian and Portuguese empires in Africa came to an end, peacefully in some places and through long wars in others, from Ghana and the Year of Africa to Algeria, the Congo, Kenya and Angola. Twelve scenes.",
+  "minutes": 7,
+  "preview": { "scene": "year-of-africa" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "decolonisation of Africa (Q1146918), Pan-Africanism (Q282739)", "url": "https://www.wikidata.org/wiki/Q1146918" },
+    { "id": "cooper-2002", "kind": "book", "author": "Frederick Cooper", "title": "Africa since 1940: The Past of the Present", "year": 2002, "publisher": "Cambridge University Press" },
+    { "id": "meredith-2005", "kind": "book", "author": "Martin Meredith", "title": "The State of Africa: A History of Fifty Years of Independence", "year": 2005, "publisher": "Free Press" },
+    { "id": "jansen-osterhammel-2017", "kind": "book", "author": "Jan C. Jansen and Jürgen Osterhammel", "title": "Decolonization: A Short History (translated by Jeremiah Riemer)", "year": 2017, "publisher": "Princeton University Press" },
+    { "id": "shepard-2006", "kind": "book", "author": "Todd Shepard", "title": "The Invention of Decolonization: The Algerian War and the Remaking of France", "year": 2006, "publisher": "Cornell University Press" },
+    { "id": "anderson-2005", "kind": "book", "author": "David Anderson", "title": "Histories of the Hanged: Britain's Dirty War in Kenya and the End of Empire", "year": 2005, "publisher": "Weidenfeld & Nicolson" },
+    { "id": "lacina-gleditsch-2005", "kind": "article", "author": "Bethany Lacina and Nils Petter Gleditsch", "title": "Monitoring Trends in Global Combat: A New Dataset of Battle Deaths", "year": 2005, "journal": "European Journal of Population 21 (2–3): 145–166 (PRIO Battle Deaths Dataset, version 3.1)", "url": "https://doi.org/10.1007/s10680-005-6851-6" },
+    { "id": "un-1514", "kind": "web", "title": "Declaration on the Granting of Independence to Colonial Countries and Peoples, General Assembly resolution 1514 (XV), 14 December 1960", "publisher": "United Nations", "url": "https://www.un.org/dppa/decolonization/en/history/declaration" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The End of Empire in Africa",
+      "narration": "In 1950 almost all of Africa was ruled from Europe. Thirty years later almost all of it was independent, and the map of the continent had become a map of new nation states. This film follows how the empires of Britain, France, Belgium and Portugal came to an end, peacefully in some places and through long wars in others, and what independence brought.",
+      "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The End of Empire in Africa", "sub": "1951–1980" },
+      "focus": { "bbox": [-20, -36, 53, 38] },
+      "link": { "label": "Encyclopaedia · Pan-Africanism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q282739" },
+      "cites": ["cooper-2002", "jansen-osterhammel-2017"]
+    },
+    {
+      "id": "empires",
+      "title": "Empires in Africa, 1945",
+      "narration": "At the end of the Second World War, Britain and France held most of Africa between them, Belgium ruled the vast Congo, and Portugal held Angola, Mozambique and Guinea-Bissau. Only Ethiopia, Liberia and Egypt were independent, and South Africa was a self-governing dominion ruled by its white minority. Hundreds of thousands of Africans had served in the war, and in 1945 a Pan-African Congress in Manchester, attended by Kwame Nkrumah and Jomo Kenyatta, demanded independence.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "British rule or administration", "tone": 1, "countries": ["NGA", "GHA", "SLE", "GMB", "KEN", "UGA", "TZA", "ZMB", "ZWE", "MWI", "BWA", "LSO", "SWZ", "SDN", "SSD", "LBY", "ERI", "SOM"] },
+          { "label": "French rule", "tone": 2, "countries": ["MAR", "DZA", "TUN", "MRT", "SEN", "MLI", "GIN", "CIV", "BFA", "NER", "BEN", "TGO", "TCD", "CAF", "COG", "GAB", "CMR", "MDG", "DJI"] },
+          { "label": "Belgian, Portuguese and Spanish rule", "tone": 3, "countries": ["COD", "RWA", "BDI", "AGO", "MOZ", "GNB", "GNQ", "ESH"] }
+        ]
+      },
+      "focus": { "bbox": [-20, -36, 53, 38] },
+      "link": { "label": "Kardashev Tracker · the British Empire, 1950", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1950&p=britain" },
+      "cites": ["cooper-2002", "meredith-2005"]
+    },
+    {
+      "id": "first-wave",
+      "title": "The first wave, 1951–1958",
+      "narration": "Libya became independent in 1951, and Sudan, Morocco and Tunisia followed in 1956, the year the failed Anglo-French invasion of Suez showed how far the old powers had weakened. In March 1957 the Gold Coast became Ghana, under Kwame Nkrumah, the first of Britain's colonies south of the Sahara to win independence. In 1958 Charles de Gaulle offered France's African territories a vote on membership of a new French Community: only Guinea voted no, and it became independent at once.",
+      "visual": {
+        "kind": "timeline", "from": "1951", "to": "1959",
+        "events": [
+          { "at": "1951-12-24", "label": "Libya" },
+          { "at": "1956-01-01", "label": "Sudan" },
+          { "at": "1956-03", "label": "Morocco and Tunisia" },
+          { "at": "1956-11", "label": "Suez crisis" },
+          { "at": "1957-03-06", "label": "Ghana" },
+          { "at": "1958-10-02", "label": "Guinea" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Suez Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49101" },
+      "cites": ["meredith-2005", "cooper-2002"]
+    },
+    {
+      "id": "ghana",
+      "title": "Ghana, 1957",
+      "narration": "Nkrumah had led a campaign of strikes and boycotts, was jailed by the British in 1950, and was released to lead the government after his party won the election of 1951. Ghana's independence on 6 March 1957 was celebrated across Africa and its diaspora as proof that colonial rule could be ended. Nkrumah became a leading voice for African unity, but by 1964 he had made Ghana a one-party state, and in 1966 he was overthrown by a military coup.",
+      "visual": { "kind": "portrait", "file": "File:Kwame Nkrumah - The National Archives UK - CO 1069-50-1.jpg", "heading": "Kwame Nkrumah", "sub": "Leader of Ghana, 1957–1966", "position": "50% 25%" },
+      "link": { "label": "Political Retrospective · 1957, Ghana", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1957&c=452" },
+      "cites": ["meredith-2005", "cooper-2002"]
+    },
+    {
+      "id": "year-of-africa",
+      "title": "1960, the Year of Africa",
+      "narration": "In 1960 seventeen African countries became independent: fourteen former French territories, along with Nigeria, Somalia and the Belgian Congo. In February the British Prime Minister, Harold Macmillan, told South Africa's parliament that a wind of change was blowing through the continent. France kept close ties with most of its former colonies through aid, a shared currency and defence agreements, which critics called neocolonialism.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Independent in 1960: from Britain and Italy", "tone": 1, "countries": ["NGA", "SOM"] },
+          { "label": "Independent in 1960: from France", "tone": 2, "countries": ["CMR", "TGO", "SEN", "MLI", "MDG", "BEN", "NER", "BFA", "CIV", "TCD", "CAF", "COG", "GAB", "MRT"] },
+          { "label": "Independent in 1960: from Belgium", "tone": 3, "countries": ["COD"] }
+        ]
+      },
+      "focus": { "countries": ["EGY", "ETH", "ERI", "LBR", "ZAF", "LBY", "SDN", "SSD", "MAR", "TUN", "GHA", "GIN"], "bbox": [-20, -36, 53, 38] },
+      "link": { "label": "Encyclopaedia · Harold Macmillan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128985" },
+      "cites": ["meredith-2005", "jansen-osterhammel-2017"]
+    },
+    {
+      "id": "united-nations",
+      "title": "The United Nations takes a side, December 1960",
+      "narration": "As newly independent states joined the United Nations, the balance in the General Assembly shifted. On 14 December 1960 it declared that colonial rule denied fundamental human rights and should be ended without conditions, with no country voting against, although the main colonial powers abstained. The declaration gave anti-colonial movements an international standard to appeal to, and a committee was soon set up to watch over the territories still ruled from abroad.",
+      "visual": { "kind": "quote", "text": "The subjection of peoples to alien subjugation, domination and exploitation constitutes a denial of fundamental human rights, is contrary to the Charter of the United Nations and is an impediment to the promotion of world peace and co-operation.", "who": "United Nations General Assembly, resolution 1514 (XV)", "when": "14 December 1960", "cite": "un-1514" },
+      "link": { "label": "Political Retrospective · 1960", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1960" },
+      "cites": ["un-1514", "jansen-osterhammel-2017"]
+    },
+    {
+      "id": "algeria",
+      "title": "Algeria's war, 1954–1962",
+      "narration": "Algeria was legally part of France and home to about a million European settlers, and France fought hard to keep it. From November 1954 the National Liberation Front waged a war in which both sides killed civilians and the French army made systematic use of torture. The crisis brought de Gaulle back to power in 1958; after the Evian Accords of March 1962 Algerians voted for independence, and most of the settlers left. PRIO's estimates of battle deaths alone run from about 100,000 to 440,000, and Algeria's government has long given a far higher figure for its dead.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "France", "tone": 2, "countries": ["FRA"] }],
+        "arrows": [{ "from": [3.0, 36.95], "via": [4.6, 40.4], "to": [5.3, 43.2], "tone": 2, "label": "Most settlers leave, 1962" }]
+      },
+      "focus": { "countries": ["DZA"], "points": [[3.06, 36.75, "Algiers"], [6.59, 46.4, "Evian, March 1962"]], "bbox": [-10, 18, 16, 50] },
+      "link": { "label": "War Focus · Algerian War, November 1954", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=algerian-war&m=1954-11" },
+      "cites": ["shepard-2006", "lacina-gleditsch-2005", "meredith-2005"]
+    },
+    {
+      "id": "congo",
+      "title": "The Congo crisis, 1960–1965",
+      "narration": "Belgium granted the Congo independence in June 1960 after little preparation, and within days the army mutinied and the mineral-rich province of Katanga, backed by Belgian interests, declared its own independence. United Nations forces were sent in, and the Cold War arrived with them: the Prime Minister, Patrice Lumumba, was deposed, handed over to his enemies in Katanga and killed in January 1961, with Belgian complicity and after American plotting against him. After years of rebellion, the army commander Joseph Mobutu seized power in 1965 and ruled for more than three decades.",
+      "visual": { "kind": "portrait", "file": "File:PatriceLumumba1960.jpg", "heading": "Patrice Lumumba", "sub": "Prime Minister of the Congo, 1960", "position": "50% 25%" },
+      "link": { "label": "Retrospective Battlefield · 1961, Katanga", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1961&w=u265" },
+      "cites": ["meredith-2005", "cooper-2002"]
+    },
+    {
+      "id": "settlers",
+      "title": "Settlers and resistance: Kenya and Rhodesia",
+      "narration": "Where European settlers had taken the best land, the end of empire was bitter. In Kenya the British fought the Mau Mau rising from 1952, detained tens of thousands of Kikuyu in camps and hanged more than a thousand convicted rebels; officially about 11,000 rebels were killed, and the historian David Anderson thinks the real number was over 20,000. Kenya became independent in 1963 under Jomo Kenyatta, whom the British had imprisoned, but in Rhodesia the white minority declared independence on its own in 1965, and majority rule came only in 1980, after a long guerrilla war, as Zimbabwe. South Africa's rule over Namibia lasted until 1990, and apartheid in South Africa itself until 1994.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Kenya, independent 1963", "tone": 1, "countries": ["KEN"] },
+          { "label": "Rhodesia, independent as Zimbabwe in 1980", "tone": 1, "countries": ["ZWE"] }
+        ]
+      },
+      "focus": { "countries": ["ZAF", "NAM"], "points": [[36.82, -1.29, "Nairobi"], [31.05, -17.83, "Salisbury, now Harare"], [17.08, -22.56, "Windhoek, 1990"]], "bbox": [8, -36, 52, 7] },
+      "link": { "label": "Retrospective Battlefield · 1953, Kenya", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1953&w=u241" },
+      "cites": ["anderson-2005", "meredith-2005"]
+    },
+    {
+      "id": "portugal",
+      "title": "Portugal's wars and the Carnation Revolution, 1961–1975",
+      "narration": "Portugal's dictatorship refused to let go, and from 1961 it fought liberation movements in Angola, then in Guinea-Bissau and Mozambique, wars that absorbed much of its budget and its young men. In April 1974 army officers weary of the wars overthrew the regime in Lisbon in the almost bloodless Carnation Revolution, and by November 1975 all five of Portugal's African colonies were independent. In Angola, rival movements fought for power, drawing in Cuban troops on one side and South African forces on the other, in a civil war that lasted until 2002.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Portugal's colonies, independent 1974–1975", "tone": 3, "countries": ["AGO", "MOZ", "GNB"] }]
+      },
+      "focus": { "points": [[13.23, -8.84, "Luanda, 11 November 1975"], [32.57, -25.97, "Maputo, June 1975"], [-15.6, 11.86, "Bissau, September 1974"]], "bbox": [-20, -30, 45, 17] },
+      "link": { "label": "War Focus · Angolan Civil War, November 1975", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=angolan-civil-war&m=1975-11" },
+      "cites": ["meredith-2005", "jansen-osterhammel-2017"]
+    },
+    {
+      "id": "independence-count",
+      "title": "Independence, year by year",
+      "narration": "Counted by today's states, six African countries won independence from European rule in the 1950s, twenty-six between 1960 and 1964, and most of the rest by 1980. Namibia followed in 1990, after seventy-five years of South African rule, and Eritrea and South Sudan later broke away from African states. In little more than a generation, the number of independent states in Africa grew from four to more than fifty.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "African states by when they became independent of European rule", "unit": "countries",
+        "data": [
+          { "label": "1951–1959", "value": 6 },
+          { "label": "1960", "value": 17 },
+          { "label": "1961–1964", "value": 9 },
+          { "label": "1965–1969", "value": 6 },
+          { "label": "1970–1974", "value": 1 },
+          { "label": "1975–1980", "value": 8 }
+        ],
+        "note": "Counted by today's states, from Libya in 1951 to Zimbabwe in 1980. Not shown: Egypt, Ethiopia, Liberia and South Africa, independent before 1951; Namibia, 1990; Eritrea, 1993; South Sudan, 2011.",
+        "cite": ["meredith-2005", "jansen-osterhammel-2017"]
+      },
+      "link": { "label": "Political Retrospective · 1980", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1980" },
+      "cites": ["meredith-2005", "jansen-osterhammel-2017", "wd"]
+    },
+    {
+      "id": "legacy",
+      "title": "What independence brought",
+      "narration": "The new states inherited borders drawn by Europeans, and in 1964 the Organisation of African Unity agreed to respect them, fearing the wars that redrawing them might bring. Many of the first governments became one-party states or fell to military coups, the Cold War brought foreign intervention, and economies built on exporting a few raw materials stayed vulnerable. Frederick Cooper has argued that the new rulers inherited the colonial gatekeeper state, which controlled the links between a country and the world economy, and historians still debate how much of Africa's later difficulty was colonialism's legacy and how much the choices made after it.",
+      "visual": { "kind": "module", "blurb": "Ghana today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "link": { "label": "National Analysis · Ghana today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=GHA" },
+      "cites": ["cooper-2002", "meredith-2005"]
+    }
+  ]
+}

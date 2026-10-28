@@ -3,9 +3,11 @@
    Routes: #/ · #/<module> · #/<module>/<submodule>[/<view>][?at=<url>]
    (In registry.json the four modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
-   that moved between modules, and old sub-entries that became views or their own submodule are redirected. */
+   that moved between modules, and old sub-entries that became views or their own submodule are redirected.
+   One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.
+   While Kino follows along with its frame hidden, the now-playing bar shows its captions and controls. */
 
-const state = { registry: null, frames: new Map(), route: null, theme: 'system' };
+const state = { registry: null, frames: new Map(), route: null, theme: 'system', np: null };
 const $ = sel => document.querySelector(sel);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const STATUS = { 'live': 'Live', 'in-build': 'In build', 'planned': 'Planned' };
@@ -34,6 +36,9 @@ function parseRoute() {
   }
   return { suite, module, view, at, query };
 }
+
+// The only addresses a page may move the shell to (Kino's 'prp:navigate', the now-playing bar's "Back to film").
+const SHELL_ROUTE = /^#\/[a-z-]+(\/[\w-]+){0,2}(\?at=[^#\s]*)?$/;
 
 // A deep link may only point at the submodule's own page (same origin and path), so the shell never frames other sites.
 function deepLink(r) {
@@ -65,7 +70,8 @@ function setupTheme() {
   window.addEventListener('message', e => {
     if (e.data?.type === 'jdpi:module-ready' || e.data?.type === 'prp:hello') state.frames.forEach(f => { if (f.contentWindow === e.source) postTheme(f); });
     // Kino's 'Follow along' (and any same-origin page) may move the shell to another submodule; only shell routes are accepted.
-    if (e.data?.type === 'prp:navigate' && e.origin === location.origin && /^#\/[a-z-]+(\/[\w-]+){0,2}(\?at=[^#\s]*)?$/.test(String(e.data.hash || ''))) location.hash = e.data.hash;
+    if (e.data?.type === 'prp:navigate' && e.origin === location.origin && SHELL_ROUTE.test(String(e.data.hash || ''))) location.hash = e.data.hash;
+    if (e.data?.type === 'prp:nowplaying' && e.origin === location.origin) nowPlayingMessage(e);
   });
   applyTheme(saved);
 }
@@ -96,7 +102,7 @@ function highlightNav(r) {
 }
 
 /* --- Top bar --------------------------------------------------------------- */
-function renderTop(r, frameUrl) {
+function renderTop(r, frame) {
   const P = state.registry.platform, parts = [r.suite ? `<a href="#/">${esc(P.name)}</a>` : `<b>${esc(P.name)} · ${esc(P.fullName)}</b>`];
   if (r.suite) parts.push(r.module ? `<a href="${href(r.suite)}">${esc(r.suite.name)}</a>` : `<b>${esc(r.suite.name)}</b>`);
   if (r.module) parts.push(r.view ? `<a href="${href(r.suite, r.module)}">${esc(r.module.name)}</a>` : `<b>${esc(r.module.name)}</b>`);
@@ -106,10 +112,15 @@ function renderTop(r, frameUrl) {
   $('#top-actions').innerHTML = m ? `
     ${m.kind ? `<span class="prp-kind">${esc(kindLabel(m.kind))}</span>` : ''}
     <span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status] || m.status)}</span>
-    ${frameUrl ? `<button class="prp-btn sm" type="button" id="reload" title="Reload this page">⟳<span class="btn-label">Reload</span></button>
-    <a class="prp-btn sm" href="${esc(new URL(frameUrl, location.href).href)}" target="_blank" rel="noopener" title="Open in a new tab">↗<span class="btn-label">New tab</span></a>` : ''}` : '';
-  const reload = $('#reload');
-  if (reload) reload.onclick = () => { const f = state.frames.get(frameUrl); if (f) { showLoading(); f.src = f.src; } };
+    ${frame ? `<button class="prp-btn sm" type="button" id="reload" title="Reload this page">⟳<span class="btn-label">Reload</span></button>
+    <a class="prp-btn sm" id="newtab" href="${esc(frameAddress(frame))}" target="_blank" rel="noopener" title="Open this page, as it is now, in a new tab">↗<span class="btn-label">New tab</span></a>` : ''}` : '';
+  if (!frame) return;
+  // The frame by its key, so a Reload that replaced the element is still found.
+  const current = () => state.frames.get(frame.dataset.key);
+  $('#reload').onclick = () => { const f = current(); if (f) reloadFrame(f); };
+  // "New tab" opens the page where it is now, not where the shell first put it: refresh the address just before use.
+  const tab = $('#newtab'), fresh = () => { const f = current(); if (f) tab.href = frameAddress(f); };
+  for (const ev of ['pointerenter', 'pointerdown', 'focus', 'contextmenu', 'click']) tab.addEventListener(ev, fresh);
 }
 
 /* --- Views ----------------------------------------------------------------- */
@@ -175,19 +186,137 @@ function renderLaunch(suite, m, url) {
     <div class="actions"><a class="prp-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(m.name)} ↗</a></div>`);
 }
 
-/* --- Frames: one persistent iframe per URL, so each submodule keeps its state -- */
-function showLoading() { if (!$('#frames .loading-bar')) $('#frames').insertAdjacentHTML('afterbegin', '<div class="loading-bar" role="progressbar" aria-label="Loading"></div>'); }
-function showFrame(url, title) {
-  let frame = state.frames.get(url);
-  if (!frame) {
-    frame = document.createElement('iframe');
-    frame.title = title; frame.src = url; frame.allow = 'clipboard-write; fullscreen'; frame.referrerPolicy = 'strict-origin-when-cross-origin';
-    showLoading();
-    frame.addEventListener('load', () => { $('#frames .loading-bar')?.remove(); postTheme(frame); });
-    $('#frames').appendChild(frame);
-    state.frames.set(url, frame);
-  }
+/* --- Frames: one persistent iframe per submodule and view, so each keeps its state ---------------------------------
+   Frames are keyed by submodule and view, never by address. A deep link to a submodule whose frame exists moves that
+   frame: when only the hash differs it is a same-document navigation (no reload; the page's hashchange handler
+   re-renders), otherwise the new address loads in the same frame. Frames move with location.replace, so they add
+   nothing to the browser's history and Back and Forward follow the shell's own address. A plain visit (no ?at=) shows
+   the frame as it was left. Submodules sharing one page with different queries (the calendars, the courses, Kino's
+   categories) are different submodules, so they keep separate frames. */
+const views = m => m.views || [];
+// A plain visit to a page whose address is one of its views is that view (Realtime Battlefield is its live map).
+const frameKey = r => `${r.module.id}/${r.view?.id || views(r.module).find(v => v.url === r.module.url)?.id || ''}`;
+const visibleFrame = () => ($('#frames').hidden ? null : $('#frames iframe.active'));
+// Where a frame is now: its own address when it is on this origin, otherwise the address the shell last gave it.
+function frameAddress(frame) {
+  try { const u = frame.contentWindow.location.href; if (u && u !== 'about:blank') return u; } catch { /* another origin */ }
+  return new URL(frame.dataset.url || frame.src, location.href).href;
+}
+// The loading bar shows while the frame in view loads (a frame's load event ends it; a safety timeout in case none comes).
+function setLoading(frame, on) {
+  frame.toggleAttribute('data-loading', on);
+  clearTimeout(frame.loadingTimer);
+  if (on) frame.loadingTimer = setTimeout(() => setLoading(frame, false), 20000);
+  syncLoading();
+}
+function syncLoading() {
+  const busy = !!visibleFrame()?.hasAttribute('data-loading'), bar = $('#frames .loading-bar');
+  if (busy && !bar) $('#frames').insertAdjacentHTML('afterbegin', '<div class="loading-bar" role="progressbar" aria-label="Loading"></div>');
+  else if (!busy && bar) bar.remove();
+}
+function createFrame(key, r, url) {
+  const frame = document.createElement('iframe');
+  frame.title = `${r.module.name}${r.view ? ' · ' + r.view.name : ''}`;
+  frame.allow = 'clipboard-write; fullscreen'; frame.referrerPolicy = 'strict-origin-when-cross-origin';
+  Object.assign(frame.dataset, { key, module: r.module.id, suite: r.suite.id, url: new URL(url, location.href).href });
+  if (r.view) frame.dataset.view = r.view.id;
+  frame.src = url;
+  frame.addEventListener('load', () => {
+    setLoading(frame, false); postTheme(frame);
+    if (state.np?.frame === frame) setNowPlaying(null); // a new page in Kino's frame: the film it was playing has gone
+  });
+  setLoading(frame, true);
+  return frame;
+}
+function moveFrame(frame, url) {
+  // While a page is loading, compare with where it is going rather than where it was.
+  const to = new URL(url, location.href), from = new URL(frame.hasAttribute('data-loading') ? frame.dataset.url : frameAddress(frame));
+  frame.dataset.url = to.href;
+  if (from.href === to.href) return;
+  const sameDocument = !!to.hash && from.origin === to.origin && from.pathname === to.pathname && from.search === to.search;
+  try { frame.contentWindow.location.replace(to.href); } catch { frame.src = to.href; }
+  if (!sameDocument) setLoading(frame, true);
+}
+function reloadFrame(frame) {
+  try { frame.contentWindow.location.reload(); setLoading(frame, true); return; } catch { /* another origin: load it afresh */ }
+  // Setting the same address with a hash would only scroll, so a page on another origin gets a new frame in its place.
+  const r = { module: findModule(frame.dataset.module).module, suite: { id: frame.dataset.suite }, view: null };
+  const fresh = createFrame(frame.dataset.key, r, frameAddress(frame));
+  if (frame.dataset.view) fresh.dataset.view = frame.dataset.view;
+  fresh.title = frame.title; fresh.className = frame.className;
+  if (state.np?.frame === frame) setNowPlaying(null);
+  frame.replaceWith(fresh);
+  state.frames.set(frame.dataset.key, fresh);
+  syncLoading();
+}
+function showFrame(r, url, deep) {
+  const key = frameKey(r);
+  let frame = state.frames.get(key);
+  if (!frame) { frame = createFrame(key, r, url); $('#frames').appendChild(frame); state.frames.set(key, frame); }
+  else if (deep) moveFrame(frame, url);
   state.frames.forEach(f => f.classList.toggle('active', f === frame));
+  syncLoading();
+  return frame;
+}
+
+/* --- Kino now playing ---------------------------------------------------------------------------------------------
+   While Kino follows along, its frame is hidden and the film's captions and controls can't be seen. Kino posts
+   { type: 'prp:nowplaying', doc, scene, caption, playing, route } (or { stopped: true }) to the shell, which shows a
+   compact bar over the bottom of the workspace; its buttons post { type: 'prp:kino-control', action } back to Kino's
+   frame. Same origin only. Protocol: kino/README.md ("Now playing"). */
+function nowPlayingMessage(e) {
+  const frame = [...state.frames.values()].find(f => f.contentWindow === e.source);
+  if (!frame) return;
+  const d = e.data;
+  if (d.stopped) { if (state.np?.frame === frame) setNowPlaying(null); return; }
+  const num = v => (Number.isFinite(+v) ? Math.max(0, Math.round(+v)) : 0);
+  const own = findModule(frame.dataset.module);
+  setNowPlaying({
+    frame, title: String(d.doc?.title || 'Kino'), index: num(d.scene?.index), count: num(d.scene?.count), scene: String(d.scene?.title || ''),
+    caption: String(d.caption || '').replace(/\s+/g, ' ').trim(), playing: d.playing === true,
+    route: SHELL_ROUTE.test(String(d.route || '')) ? d.route : href(own?.suite, own?.module),
+  });
+}
+function setNowPlaying(np) { state.np = np; syncNowPlaying(); }
+function syncNowPlaying() {
+  const np = state.np, bar = $('#np'), show = !!np && np.frame.isConnected && np.frame !== visibleFrame();
+  document.documentElement.classList.toggle('np-on', show); // lifts the Documentary button above the bar on phones
+  if (!show) {
+    if (!bar.hidden && bar.contains(document.activeElement)) visibleFrame()?.focus();
+    bar.hidden = true;
+    return;
+  }
+  $('#np-title').textContent = np.title;
+  $('#np-n').textContent = `${Math.min(np.index + 1, np.count || 1)}/${np.count || 1}`;
+  $('#np-n').title = np.scene ? `Scene ${np.index + 1}: ${np.scene}` : '';
+  const cap = $('#np-cap');
+  if (cap.textContent !== np.caption) { cap.textContent = np.caption; cap.title = np.caption; } // the live region speaks only on a new sentence
+  const play = $('#np-play'), label = np.playing ? 'Pause' : 'Play';
+  if (play.getAttribute('aria-label') !== label) { play.textContent = np.playing ? '❚❚' : '▶\uFE0E'; play.setAttribute('aria-label', label); play.title = `${label} the film`; }
+  $('#np-back').setAttribute('href', np.route);
+  bar.hidden = false;
+  document.documentElement.style.setProperty('--np-h', `${bar.offsetHeight}px`);
+}
+function kinoControl(action) {
+  const np = state.np;
+  if (!np) return;
+  if (action === 'play' || action === 'pause') { np.playing = action === 'play'; syncNowPlaying(); } // at once; Kino's reply confirms it
+  try { np.frame.contentWindow.postMessage({ type: 'prp:kino-control', action }, location.origin); } catch { /* the frame has gone */ }
+}
+function setupNowPlaying() {
+  $('#np-play').onclick = () => kinoControl(state.np?.playing ? 'pause' : 'play');
+  $('#np-prev').onclick = () => kinoControl('prev');
+  $('#np-next').onclick = () => kinoControl('next');
+  // "Back to film" is a link to the film's route (so it can also open in a new tab); after the shell has switched to
+  // Kino's frame, focus goes into it, where the film's own keys work.
+  $('#np-back').addEventListener('click', e => {
+    const frame = state.np?.frame;
+    if (!frame || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    if (location.hash === e.currentTarget.getAttribute('href')) { e.preventDefault(); route(); frame.focus(); return; }
+    const focus = () => frame.focus();
+    window.addEventListener('hashchange', focus, { once: true });
+    setTimeout(() => window.removeEventListener('hashchange', focus), 1500);
+  });
 }
 
 /* --- Router ---------------------------------------------------------------- */
@@ -199,23 +328,27 @@ function route() {
   state.route = r;
   if (r.suite) document.documentElement.dataset.suite = r.suite.id; else delete document.documentElement.dataset.suite;
 
-  const url = r.module?.url ? (deepLink(r) || r.view?.url || r.module.url) : null;
+  const at = r.module?.url ? deepLink(r) : null, base = r.module?.url ? (r.view?.url || r.module.url) : null;
+  const url = at || base;
   const newTab = r.view?.opensInNewTab ?? r.module?.opensInNewTab;
-  const frameUrl = url && !newTab ? url : null;
-  $('#view').hidden = !!frameUrl;
-  $('#frames').hidden = !frameUrl;
+  const framed = !!url && !newTab;
+  $('#view').hidden = framed;
+  $('#frames').hidden = !framed;
 
-  if (frameUrl) showFrame(frameUrl, `${r.module.name}${r.view ? ' · ' + r.view.name : ''}`);
+  let frame = null;
+  // A deep link to the page's own address (e.g. "open Volatility") is a plain visit: the frame shows as it was left.
+  if (framed) frame = showFrame(r, url, !!at && new URL(at).href !== new URL(base, location.href).href);
   else if (url) renderLaunch(r.suite, r.module, url);
   else if (r.module) renderNotice(r.suite, r.module, `<div class="prp-note" style="margin-top:18px"><b>Not published yet.</b> It will open here once it has a live address.</div>`);
   else if (r.suite) renderSuite(r.suite);
   else renderHome();
 
-  if (!frameUrl) $('#view').scrollTop = 0;
+  if (!framed) { $('#view').scrollTop = 0; syncLoading(); }
   const P = state.registry.platform;
   document.title = [r.view?.name, r.module?.name, r.suite && !r.module ? r.suite.name : null, r.suite ? P.name : `${P.name} · ${P.fullName}`].filter(Boolean).join(' · ');
-  renderTop(r, frameUrl);
+  renderTop(r, frame);
   highlightNav(r);
+  syncNowPlaying();
   closeMenu();
 }
 
@@ -257,6 +390,7 @@ function setupMenu() {
   renderNav();
   setupFind();
   setupMenu();
+  setupNowPlaying();
   window.addEventListener('hashchange', route);
   route();
 })();

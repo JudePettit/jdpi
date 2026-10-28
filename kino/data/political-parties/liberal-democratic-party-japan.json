@@ -1,0 +1,176 @@
+{
+  "id": "liberal-democratic-party-japan",
+  "title": "Japan's Liberal Democratic Party",
+  "category": "political-parties",
+  "subjects": [{ "qid": "Q232595", "label": "Liberal Democratic Party" }],
+  "era": [1955, 2026],
+  "summary": "Formed in 1955 from two conservative parties, the LDP has been in government for all but about four years since. Thirteen scenes on how it won, how it lost power twice, and how it came back each time, to a record victory in 2026.",
+  "minutes": 8,
+  "preview": { "scene": "growth" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Liberal Democratic Party (Q232595)", "url": "https://www.wikidata.org/wiki/Q232595" },
+    { "id": "krauss-pekkanen-2011", "kind": "book", "author": "Ellis S. Krauss and Robert J. Pekkanen", "title": "The Rise and Fall of Japan's LDP: Political Party Organizations as Historical Institutions", "year": 2011, "publisher": "Cornell University Press" },
+    { "id": "curtis-1999", "kind": "book", "author": "Gerald L. Curtis", "title": "The Logic of Japanese Politics: Leaders, Institutions, and the Limits of Change", "year": 1999, "publisher": "Columbia University Press" },
+    { "id": "scheiner-2006", "kind": "book", "author": "Ethan Scheiner", "title": "Democracy Without Competition in Japan: Opposition Failure in a One-Party Dominant State", "year": 2006, "publisher": "Cambridge University Press" },
+    { "id": "johnson-1982", "kind": "book", "author": "Chalmers Johnson", "title": "MITI and the Japanese Miracle: The Growth of Industrial Policy, 1925–1975", "year": 1982, "publisher": "Stanford University Press" },
+    { "id": "pekkanen-2013", "kind": "book", "author": "Robert Pekkanen; Steven R. Reed; Ethan Scheiner (eds)", "title": "Japan Decides 2012: The Japanese General Election", "year": 2013, "publisher": "Palgrave Macmillan" },
+    { "id": "harris-2020", "kind": "book", "author": "Tobias S. Harris", "title": "The Iconoclast: Shinzō Abe and the New Japan", "year": 2020, "publisher": "Hurst" },
+    { "id": "constitution", "kind": "web", "title": "The Constitution of Japan (English text), Articles 9 and 96", "publisher": "House of Representatives, Japan", "short": "Constitution of Japan 1947","url": "https://www.shugiin.go.jp/internet/itdb_kenpou.nsf/html/kenpou/en/constitution.htm" },
+    { "id": "aljazeera-2022", "kind": "web", "author": "Zaheena Rasheed", "title": "The church linked to Abe's killing, Japan's political troubles (27 September 2022)", "publisher": "Al Jazeera", "year": 2022, "url": "https://www.aljazeera.com/news/2022/9/27/unification-church-linked-to-shinzo-abes-killing-japan-political-crisis" },
+    { "id": "nippon-2024", "kind": "web", "author": "Takenaka Harukata", "short": "Takenaka 2024", "title": "Demise of Factions Boosts Prime Minister Kishida's Prospects, Clouding LDP Outlook (18 June 2024)", "publisher": "Nippon.com", "year": 2024,"url": "https://www.nippon.com/en/articles/-/15022" },
+    { "id": "ipu-2024", "kind": "web", "title": "Japan, House of Representatives: election of 27 October 2024", "publisher": "Inter-Parliamentary Union (IPU Parline)", "year": 2024,"url": "https://data.ipu.org/parliament/JP/JP-LC01/election/JP-LC01-E20241027/" },
+    { "id": "nippon-2025", "kind": "web", "title": "Ishiba's LDP Coalition Loses Majority in Japan's Upper House Election (22 July 2025)", "publisher": "Nippon.com", "year": 2025,"url": "https://www.nippon.com/en/articles/-/19060" },
+    { "id": "nippon-2026", "kind": "web", "title": "A Landslide for Takaichi's LDP: House of Representatives Election Results (9 February 2026)", "publisher": "Nippon.com", "year": 2026,"url": "https://www.nippon.com/en/articles/-/19222" },
+    { "id": "csm-2026", "kind": "web", "title": "As Japan shifts away from postwar pacifism, Takaichi eyes constitutional reform (24 April 2026)", "publisher": "The Christian Science Monitor", "year": 2026,"url": "https://www.csmonitor.com/World/Asia-Pacific/2026/0424/Japan-Takaichi-pacifist-constitution-reform" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "Japan's Liberal Democratic Party",
+      "narration": "Japan's Liberal Democratic Party was founded in November 1955, when the country's two main conservative parties merged. It has been in government for all but about four of the seven decades since, a record matched by few parties in any democracy. This film follows how it built that record, how it lost power twice, and how it returned each time.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Liberal Democratic Party", "sub": "Japan, 1955 to today" },
+      "focus": { "countries": ["JPN"], "bbox": [124, 26, 150, 46] },
+      "link": { "label": "Encyclopaedia · Liberal Democratic Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q232595" },
+      "cites": ["krauss-pekkanen-2011", "scheiner-2006", "pekkanen-2013"]
+    },
+    {
+      "id": "occupation",
+      "title": "Defeat, occupation and a new constitution",
+      "narration": "Japan surrendered in August 1945, and under the American occupation a new constitution came into force in May 1947, making the Emperor a symbol of the state and renouncing war. Shigeru Yoshida, a conservative former diplomat, was Prime Minister for most of the years from 1946 to 1954, and his strategy was to rely on the United States for security and concentrate on economic recovery. The occupation ended in 1952 under the San Francisco peace treaty, signed together with a security treaty that kept American bases in Japan.",
+      "visual": { "kind": "quote", "text": "… the Japanese people forever renounce war as a sovereign right of the nation and the threat or use of force as means of settling international disputes.", "who": "The Constitution of Japan, Article 9", "when": "In force from 3 May 1947", "cite": "constitution" },
+      "link": { "label": "Encyclopaedia · Shigeru Yoshida", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q301804" },
+      "cites": ["constitution", "curtis-1999"]
+    },
+    {
+      "id": "merger",
+      "title": "The merger of 1955",
+      "narration": "In October 1955 Japan's rival socialist parties reunited, and business leaders, fearing a left-wing government, pressed the conservatives to combine. On 15 November the Liberal Party and the Japan Democratic Party merged into the Liberal Democratic Party, with Ichirō Hatoyama as Prime Minister, committed to economic growth, the American alliance and, in time, a constitution of Japan's own making. The contest that followed, between a dominant LDP and a socialist opposition that never won a general election, became known as the 1955 system.",
+      "visual": { "kind": "module", "blurb": "Japan's prime ministers, parties and elections year by year, from the merger of 1955, in Political Retrospective." },
+      "link": { "label": "Political Retrospective · Japan, 1955", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1955&c=740" },
+      "cites": ["krauss-pekkanen-2011", "curtis-1999", "wd"]
+    },
+    {
+      "id": "anpo",
+      "title": "Kishi and the security treaty, 1960",
+      "narration": "Nobusuke Kishi, a wartime minister who had been held for three years as a suspected war criminal but never charged, became Prime Minister in 1957. He negotiated a revised security treaty with the United States and pushed it through the lower house in May 1960, after police removed Socialist members who were blocking the vote. Hundreds of thousands of people protested around the Diet in the largest demonstrations in Japan's post-war history, and Kishi announced his resignation on the day the treaty took effect.",
+      "visual": { "kind": "portrait", "qid": "Q315572", "heading": "Nobusuke Kishi", "sub": "Prime Minister, 1957–1960", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Nobusuke Kishi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315572" },
+      "cites": ["curtis-1999", "harris-2020"]
+    },
+    {
+      "id": "growth",
+      "title": "Income doubling and the economic miracle",
+      "narration": "Kishi's successor, Hayato Ikeda, turned politics towards prosperity with a plan to double national income in ten years, a goal reached well ahead of schedule. Through the 1960s the economy grew by about ten per cent a year, steered, in Chalmers Johnson's account, above all by powerful economic ministries working with big business under LDP governments, the model he called the developmental state. The first bullet train linked Tokyo and Osaka in time for the Tokyo Olympics of 1964, and by 1968 Japan's economy was the second largest in the capitalist world.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Japan", "tone": 1, "countries": ["JPN"] }],
+        "arrows": [{ "from": [139.6, 35.6], "via": [137.4, 35.0], "to": [135.6, 34.75], "tone": 1, "label": "Tōkaidō Shinkansen, 1964" }]
+      },
+      "focus": { "points": [[139.69, 35.69, "Tokyo: the Olympic Games, October 1964"], [135.5, 34.69, "Osaka: Expo 70"]], "bbox": [128, 30, 146, 42] },
+      "link": { "label": "Kardashev Tracker · Japan, 2000", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=2000&p=japan" },
+      "cites": ["johnson-1982", "curtis-1999"]
+    },
+    {
+      "id": "machine",
+      "title": "Factions, money and the kōenkai",
+      "narration": "Under Japan's old electoral system, several LDP candidates competed against one another in each multi-member district. They relied on personal support groups called kōenkai, on party factions that traded money and posts for loyalty, and on public works and subsidies for farmers and small businesses. Kakuei Tanaka, Prime Minister from 1972 to 1974, mastered the system but resigned over his finances, and although he was arrested in 1976 in the Lockheed bribery scandal, he remained the party's most powerful faction leader for almost a decade.",
+      "visual": { "kind": "portrait", "qid": "Q297644", "heading": "Kakuei Tanaka", "sub": "Prime Minister, 1972–1974", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Kakuei Tanaka", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q297644" },
+      "cites": ["krauss-pekkanen-2011", "scheiner-2006"]
+    },
+    {
+      "id": "bubble",
+      "title": "Nakasone, the bubble and the Recruit scandal",
+      "narration": "Yasuhiro Nakasone, Prime Minister from 1982 to 1987, privatised the national railways and the telephone monopoly, and in 1986 led the LDP to 300 seats, its best result yet. Cheap credit then fed a bubble in shares and land that burst at the start of the 1990s, leaving the banks with bad loans and Japan with a long period of slow growth. Meanwhile the Recruit scandal, over cheap shares given to politicians, brought down Prime Minister Noboru Takeshita in 1989, and that summer the LDP lost its majority in the upper house.",
+      "visual": {
+        "kind": "timeline", "from": "1982-10", "to": "1991-01",
+        "events": [
+          { "at": "1982-11-27", "label": "Nakasone Prime Minister" },
+          { "at": "1985-04-01", "label": "Telephones privatised" },
+          { "at": "1985-09-22", "label": "Plaza Accord" },
+          { "at": "1986-07-06", "label": "300 seats" },
+          { "at": "1987-04-01", "label": "Railways privatised" },
+          { "at": "1989-06-03", "label": "Takeshita resigns" },
+          { "at": "1989-07-23", "label": "Upper house majority gone" },
+          { "at": "1989-12-29", "label": "Share prices peak" },
+          { "at": "1990-10", "label": "Shares down by almost half" }
+        ]
+      },
+      "link": { "label": "Learning · Economics: The Quantity Theory of Credit, Japan and QE", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=the-quantity-theory-of-credit-japan-and-qe" },
+      "cites": ["curtis-1999", "krauss-pekkanen-2011"]
+    },
+    {
+      "id": "out-of-power",
+      "title": "Out of power, 1993–1994",
+      "narration": "In June 1993 LDP members led by Ichirō Ozawa and Tsutomu Hata voted with the opposition to bring down their own government over its failure to deliver political reform, and then left to found the Japan Renewal Party. In the July election the LDP remained the largest party but lost its majority, and an eight-party coalition under Morihiro Hosokawa took office, the first government without the LDP since 1955. It replaced the multi-member districts with a mixed system of single-member seats and proportional representation.",
+      "visual": { "kind": "module", "blurb": "What else happened in the month the LDP first lost power, in the Historical Calendar." },
+      "link": { "label": "Historical Calendar · August 1993", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1993-08" },
+      "cites": ["curtis-1999", "krauss-pekkanen-2011"]
+    },
+    {
+      "id": "koizumi",
+      "title": "An unlikely return, and Koizumi",
+      "narration": "The LDP was back in government within a year, in coalition with its old enemy the Socialist Party, whose leader Tomiichi Murayama became Prime Minister, and by 1996 the premiership was the LDP's again. From 1999 its partner was Kōmeitō, a party backed by the lay Buddhist movement Sōka Gakkai. In 2001 Junichiro Koizumi won the party leadership by promising to change the LDP or destroy it, and when party rebels blocked his privatisation of the postal service in 2005, he called a snap election, denied them the party's endorsement and won 296 seats.",
+      "visual": { "kind": "portrait", "qid": "Q130852", "heading": "Junichiro Koizumi", "sub": "Prime Minister, 2001–2006", "position": "50% 25%" },
+      "link": { "label": "Historical Calendar · April 2001", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=2001-04" },
+      "cites": ["krauss-pekkanen-2011", "scheiner-2006"]
+    },
+    {
+      "id": "seats",
+      "title": "Defeat in 2009, return in 2012",
+      "narration": "After Koizumi the party had three prime ministers in three years, and in August 2009 the Democratic Party of Japan won 308 seats, cutting the LDP to 119, its worst result. The new government struggled, above all after the earthquake, tsunami and nuclear disaster of March 2011, and in December 2012 the LDP won 294 seats and returned to power. As Ethan Scheiner has argued, its long dominance owed as much to a weak and divided opposition as to its own strength.",
+      "visual": {
+        "kind": "chart", "type": "line", "title": "LDP seats in the House of Representatives at selected elections", "unit": "seats",
+        "data": [
+          { "label": "1976", "value": 249 },
+          { "label": "1986", "value": 300 },
+          { "label": "1993", "value": 223 },
+          { "label": "2005", "value": 296 },
+          { "label": "2009", "value": 119 },
+          { "label": "2012", "value": 294 },
+          { "label": "2024", "value": 191 },
+          { "label": "2026", "value": 316 }
+        ],
+        "note": "Seats won at the election, before independents joined. The house had 511 or 512 seats until 1993, 480 from 2000 to 2012 and 465 since 2017, when a majority was 233.",
+        "cite": ["krauss-pekkanen-2011", "pekkanen-2013", "ipu-2024", "nippon-2026"]
+      },
+      "link": { "label": "Political Retrospective · Japan, 2009", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=2009&c=740" },
+      "cites": ["scheiner-2006", "pekkanen-2013"]
+    },
+    {
+      "id": "abe",
+      "title": "Shinzō Abe",
+      "narration": "Shinzō Abe, Kishi's grandson, led the LDP back to power in 2012 and became Japan's longest-serving Prime Minister before resigning through ill health in 2020. His programme of monetary easing, public spending and promised reforms, known as Abenomics, set out to end years of falling prices, with mixed results, and in 2015 his government passed laws allowing Japan's forces to help defend allies abroad, despite large protests. In July 2022 he was shot dead while campaigning in Nara by a man who blamed the Unification Church for his family's ruin, and the scrutiny that followed showed that nearly half of the LDP's members of parliament had ties to the church.",
+      "visual": { "kind": "portrait", "qid": "Q132345", "heading": "Shinzō Abe", "sub": "Prime Minister, 2006–2007 and 2012–2020", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Shinzō Abe", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q132345" },
+      "cites": ["harris-2020", "pekkanen-2013", "aljazeera-2022"]
+    },
+    {
+      "id": "takaichi",
+      "title": "Scandal, defeat and a record victory",
+      "narration": "In late 2023 prosecutors investigated factions that had kept income from fundraising parties off the books, and most factions, the party's building blocks for decades, announced that they would disband. Under Shigeru Ishiba the governing coalition lost its majority in the lower house in October 2024 and in the upper house in July 2025. Sanae Takaichi, elected party leader that October, became Japan's first woman Prime Minister after Kōmeitō left the coalition and the Japan Innovation Party took its place. In February 2026 she led the LDP to 316 of the 465 seats in the House of Representatives, the largest win by a single party since the war.",
+      "visual": {
+        "kind": "timeline", "from": "2023-12", "to": "2026-02",
+        "events": [
+          { "at": "2023-12-19", "label": "Faction offices raided" },
+          { "at": "2024-01-19", "label": "Factions disband" },
+          { "at": "2024-10-27", "label": "Lower house majority gone" },
+          { "at": "2025-07-20", "label": "Upper house majority gone" },
+          { "at": "2025-10-04", "label": "Takaichi elected leader" },
+          { "at": "2025-10-21", "label": "First woman Prime Minister" },
+          { "at": "2026-02-08", "label": "316 seats" }
+        ]
+      },
+      "link": { "label": "Historical Calendar · October 2025", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=2025-10" },
+      "cites": ["nippon-2024", "ipu-2024", "nippon-2025", "nippon-2026", "csm-2026"]
+    },
+    {
+      "id": "today",
+      "title": "The LDP today",
+      "narration": "Ellis Krauss and Robert Pekkanen show that the LDP survived by adapting its organisation when the rules changed around it, from factions and personal machines towards a party led from the top. Its critics see a party that has lived on patronage, inherited seats and a weak opposition; its supporters credit it with seven decades of stability, prosperity and a close alliance with the United States. Its oldest goal is back on the agenda: Takaichi wants to revise the constitution, which needs two-thirds of both houses and a national referendum.",
+      "visual": { "kind": "module", "blurb": "Who holds power in Japan now: its executive, parliament, courts and coming elections." },
+      "link": { "label": "Political Atlas · Japan today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#JPN" },
+      "cites": ["krauss-pekkanen-2011", "scheiner-2006", "csm-2026", "constitution"]
+    }
+  ]
+}

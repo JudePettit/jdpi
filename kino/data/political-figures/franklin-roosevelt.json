@@ -1,0 +1,185 @@
+{
+  "id": "franklin-roosevelt",
+  "title": "Franklin D. Roosevelt",
+  "category": "political-figures",
+  "subjects": [{ "qid": "Q8007", "label": "Franklin Delano Roosevelt" }],
+  "era": [1882, 1945],
+  "summary": "The only American president elected four times: Roosevelt's life from Hyde Park to Warm Springs, the New Deal, the war, and the decisions still argued over. Thirteen scenes.",
+  "minutes": 7,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Franklin Delano Roosevelt (Q8007), March of Dimes (Q751572), Executive Order 9066 (Q2159918)", "url": "https://www.wikidata.org/wiki/Q8007" },
+    { "id": "kennedy-1999", "kind": "book", "author": "David M. Kennedy", "title": "Freedom from Fear: The American People in Depression and War, 1929–1945", "year": 1999, "publisher": "Oxford University Press" },
+    { "id": "katznelson-2013", "kind": "book", "author": "Ira Katznelson", "title": "Fear Itself: The New Deal and the Origins of Our Time", "year": 2013, "publisher": "Liveright" },
+    { "id": "robinson-2001", "kind": "book", "author": "Greg Robinson", "title": "By Order of the President: FDR and the Internment of Japanese Americans", "year": 2001, "publisher": "Harvard University Press" },
+    { "id": "romer-1992", "kind": "article", "author": "Christina D. Romer", "title": "What Ended the Great Depression?", "year": 1992, "journal": "The Journal of Economic History 52 (4): 757–784", "url": "https://doi.org/10.1017/S002205070001189X" },
+    { "id": "cole-ohanian-2004", "kind": "article", "author": "Harold L. Cole and Lee E. Ohanian", "title": "New Deal Policies and the Persistence of the Great Depression: A General Equilibrium Analysis", "year": 2004, "journal": "Journal of Political Economy 112 (4): 779–816", "url": "https://doi.org/10.1086/421169" },
+    { "id": "margo-1993", "kind": "article", "author": "Robert A. Margo", "title": "Employment and Unemployment in the 1930s", "year": 1993, "journal": "Journal of Economic Perspectives 7 (2): 41–59", "url": "https://doi.org/10.1257/jep.7.2.41" },
+    { "id": "inaugural-1933", "kind": "web", "title": "First Inaugural Address of Franklin D. Roosevelt, 4 March 1933", "publisher": "The Avalon Project, Yale Law School", "short": "Roosevelt 1933", "url": "https://avalon.law.yale.edu/20th_century/froos1.asp" },
+    { "id": "infamy-1941", "kind": "web", "title": "Joint Address to Congress Leading to a Declaration of War Against Japan, 8 December 1941", "publisher": "National Archives (United States)", "short": "Roosevelt 1941", "url": "https://www.archives.gov/milestone-documents/joint-address-to-congress-declaration-of-war-against-japan" },
+    { "id": "nara-eo9066", "kind": "web", "title": "Executive Order 9066: Resulting in Japanese-American Incarceration (1942)", "publisher": "National Archives (United States)", "url": "https://www.archives.gov/milestone-documents/executive-order-9066" },
+    { "id": "cwric-1982", "kind": "web", "title": "Personal Justice Denied: Report of the Commission on Wartime Relocation and Internment of Civilians, summary (December 1982)", "publisher": "Commission on Wartime Relocation and Internment of Civilians (National Archives copy)", "short": "CWRIC 1982", "year": 1982, "url": "https://www.archives.gov/files/research/japanese-americans/justice-denied/summary.pdf" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "Franklin D. Roosevelt, 1882–1945",
+      "narration": "Franklin Delano Roosevelt led the United States through the worst economic depression in its history and through most of the Second World War. He is the only president to have been elected four times, and his New Deal changed what Americans expected of their federal government. This film follows his life from Hyde Park to Warm Springs, including decisions that are still argued over.",
+      "visual": { "kind": "portrait", "qid": "Q8007", "heading": "Franklin D. Roosevelt", "sub": "1882–1945", "position": "50% 22%" },
+      "link": { "label": "Encyclopaedia · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
+      "cites": ["kennedy-1999", "wd"]
+    },
+    {
+      "id": "early-life",
+      "title": "Hyde Park to Washington, 1882–1920",
+      "narration": "Roosevelt was born on 30 January 1882 at Hyde Park, in New York's Hudson Valley, into a wealthy family. After Groton School and Harvard he married Eleanor Roosevelt, a niece of his distant cousin President Theodore Roosevelt, in 1905. A Democrat, he was elected to the New York State Senate in 1910, served as Assistant Secretary of the Navy from 1913 to 1920, and ran for vice-president on the losing Democratic ticket in 1920.",
+      "visual": { "kind": "map" },
+      "focus": {
+        "countries": ["USA"],
+        "points": [[-73.93, 41.78, "Hyde Park, born 1882"], [-71.12, 42.37, "Harvard, 1900–1904"], [-73.76, 42.65, "Albany, state senator, 1911–1913"], [-77.04, 38.9, "Washington, Navy Department, 1913–1920"]],
+        "bbox": [-83, 36.5, -66, 46]
+      },
+      "link": { "label": "Kardashev Tracker · the United States, 1900", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1900&p=usa" },
+      "cites": ["wd", "kennedy-1999"]
+    },
+    {
+      "id": "polio",
+      "title": "Polio, 1921–1928",
+      "narration": "In August 1921, on holiday at Campobello Island in Canada, Roosevelt was struck by a paralysing illness, diagnosed as polio, and he never walked again without braces or help. He spent years trying to recover, much of it at Warm Springs in Georgia, and few photographs show him in his wheelchair; this one was taken in 1941. In 1928 he was elected Governor of New York, and in 1938 he founded the charity that became the March of Dimes, which later paid for the trials of Jonas Salk's polio vaccine.",
+      "visual": { "kind": "portrait", "file": "File:Roosevelt in a wheelchair.jpg", "heading": "At Hyde Park", "sub": "February 1941", "position": "50% 30%" },
+      "link": { "label": "Timeline of Progress · Salk's polio vaccine, 1955", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1955&e=polio-vaccine" },
+      "cites": ["kennedy-1999", "wd"]
+    },
+    {
+      "id": "depression",
+      "title": "Crash and depression, 1929–1933",
+      "narration": "The Wall Street Crash of October 1929 was followed by a collapse in output, prices and trade, and thousands of American banks failed. By early 1933 about a quarter of the labour force was out of work. In November 1932 Roosevelt defeated the Republican president, Herbert Hoover, carrying 42 of the 48 states, but under the rules of the time he had to wait four months to take office while the banking system collapsed.",
+      "visual": {
+        "kind": "timeline", "from": "1929-09", "to": "1933-03",
+        "events": [
+          { "at": "1929-10-29", "label": "Wall Street Crash" },
+          { "at": "1930-06-17", "label": "Smoot–Hawley tariff" },
+          { "at": "1930-12-11", "label": "Bank of United States fails" },
+          { "at": "1931-09-21", "label": "Britain leaves gold" },
+          { "at": "1932-11-08", "label": "Roosevelt elected" },
+          { "at": "1933-02-14", "label": "Bank panic spreads" },
+          { "at": "1933-03-04", "label": "Inauguration" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Herbert Hoover", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35236" },
+      "cites": ["kennedy-1999", "margo-1993"]
+    },
+    {
+      "id": "hundred-days",
+      "title": "The Hundred Days, 1933",
+      "narration": "In his inaugural address on 4 March 1933, Roosevelt declared that the only thing Americans had to fear was fear itself. He proclaimed a national bank holiday, Congress passed an emergency banking law within days, and on 12 March he explained it to the nation in the first of his radio fireside chats. In the hundred days that followed, Congress passed laws on banking, farming, industry, relief and public works, and in April the country left the gold standard.",
+      "visual": { "kind": "quote", "text": "So, first of all, let me assert my firm belief that the only thing we have to fear is fear itself—nameless, unreasoning, unjustified terror which paralyzes needed efforts to convert retreat into advance.", "who": "Franklin D. Roosevelt, first inaugural address", "when": "4 March 1933", "cite": "inaugural-1933" },
+      "link": { "label": "Political Retrospective · the United States, 1933", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1933&c=2" },
+      "cites": ["inaugural-1933", "kennedy-1999"]
+    },
+    {
+      "id": "new-deal",
+      "title": "The New Deal, 1933–1938",
+      "narration": "The New Deal put millions to work on public projects, and the Tennessee Valley Authority brought dams and electricity to one of the country's poorest regions. The Social Security Act of August 1935 created old-age pensions and unemployment insurance, and the Wagner Act protected workers' right to join unions. When the Supreme Court struck down key measures, Roosevelt, re-elected by a landslide in 1936, proposed adding up to six new justices; Congress rejected the plan, which critics saw as an attack on the courts' independence.",
+      "visual": { "kind": "portrait", "file": "File:Signing Of The Social Security Act.jpg", "heading": "Social Security", "sub": "Signed on 14 August 1935", "position": "50% 40%" },
+      "link": { "label": "Learning · Politics: the left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-left-in-power-and-its-critics" },
+      "cites": ["kennedy-1999", "katznelson-2013"]
+    },
+    {
+      "id": "southern-bargain",
+      "title": "The price of a coalition",
+      "narration": "The New Deal depended on the votes of Southern Democrats in Congress, who used their power to protect racial segregation. Farm and domestic workers, many of them Black, were left out of the first Social Security and labour laws, and many programmes were run locally in ways that excluded Black Americans. Roosevelt would not put his weight behind federal laws against lynching, while Eleanor Roosevelt campaigned openly for civil rights.",
+      "visual": { "kind": "portrait", "qid": "Q83396", "heading": "Eleanor Roosevelt", "sub": "1884–1962", "position": "50% 25%" },
+      "cites": ["katznelson-2013", "kennedy-1999"]
+    },
+    {
+      "id": "recovery",
+      "title": "Did the New Deal work?",
+      "narration": "Unemployment fell from its peak of about a quarter of the labour force in 1933, rose again in the recession of 1937–1938, and stayed high until war orders filled the factories. The figures depend on whether people on emergency relief jobs are counted as employed, which is why the chart shows ranges. Christina Romer found that monetary expansion, swelled by a huge inflow of gold, accounted for nearly all of the recovery before 1942, while Harold Cole and Lee Ohanian argued that New Deal rules that limited competition and raised wages held it back.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Unemployment in the United States, 1929–1940", "unit": "per cent of the labour force",
+        "data": [
+          { "label": "1929", "value": 3.2 },
+          { "label": "1933", "low": 20.6, "high": 24.9 },
+          { "label": "1937", "low": 9.1, "high": 14.3 },
+          { "label": "1938", "low": 12.5, "high": 19.0 },
+          { "label": "1940", "low": 9.5, "high": 14.6 }
+        ],
+        "note": "Lower figure: Darby's series, which counts relief workers as employed; higher: Lebergott's, which counts them as unemployed.",
+        "cite": ["margo-1993"]
+      },
+      "link": { "label": "Learning · Economics: Milton Friedman and monetarism", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=milton-friedman-and-monetarism" },
+      "cites": ["margo-1993", "romer-1992", "cole-ohanian-2004"]
+    },
+    {
+      "id": "arsenal",
+      "title": "The arsenal of democracy, 1939–1941",
+      "narration": "When war began in Europe in 1939, most Americans wanted to stay out of it, and Congress had passed a series of neutrality laws. Re-elected for an unprecedented third term in 1940, Roosevelt called on the country to become the arsenal of democracy, and from March 1941 the Lend-Lease Act sent weapons and supplies to Britain and later to the Soviet Union. In August 1941 he met Winston Churchill in Placentia Bay, off Newfoundland, where they agreed the Atlantic Charter.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "The United States and Britain", "tone": 1, "countries": ["USA", "GBR"] },
+          { "label": "Germany and Italy", "tone": 2, "countries": ["DEU", "ITA"] },
+          { "label": "Soviet Union", "tone": 3, "countries": ["SUN"] }
+        ],
+        "arrows": [
+          { "from": [-74.0, 40.7], "via": [-40, 52], "to": [-4.5, 54.2], "tone": 1, "label": "Lend-Lease, from 1941" },
+          { "from": [-21.9, 64.1], "via": [10, 71.5], "to": [33.1, 68.9], "tone": 1, "label": "Arctic convoys" }
+        ]
+      },
+      "focus": { "points": [[-53.9, 47.3, "Placentia Bay, August 1941"]], "bbox": [-82, 30, 45, 72] },
+      "link": { "label": "Kino · Winston Churchill: the Grand Alliance", "suite": "kino", "module": "kino-political-figures", "at": "kino/index.html?cat=political-figures#doc=winston-churchill&s=grand-alliance" },
+      "cites": ["kennedy-1999"]
+    },
+    {
+      "id": "pearl-harbor",
+      "title": "Pearl Harbor, December 1941",
+      "narration": "On the morning of 7 December 1941, Japanese aircraft attacked the American Pacific Fleet at Pearl Harbor in Hawaii. The next day Roosevelt asked Congress to declare war on Japan, and on 11 December Germany and Italy declared war on the United States. Roosevelt and Churchill agreed to defeat Germany first, while American forces also fought their way across the Pacific.",
+      "visual": { "kind": "quote", "text": "Yesterday, December 7, 1941—a date which will live in infamy—the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan.", "who": "Franklin D. Roosevelt, address to Congress", "when": "8 December 1941", "cite": "infamy-1941" },
+      "link": { "label": "War Focus · December 1941", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1941-12" },
+      "cites": ["infamy-1941", "kennedy-1999"]
+    },
+    {
+      "id": "internment",
+      "title": "Executive Order 9066, 1942",
+      "narration": "On 19 February 1942 Roosevelt signed Executive Order 9066, under which about 120,000 people of Japanese descent, most of them American citizens, were removed from their homes on the West Coast and held in camps inland. There was no comparable mass removal of Americans of German or Italian descent. In 1944 the Supreme Court upheld the exclusion, although it ruled that citizens whose loyalty was not in question could not be held. A federal commission later concluded that the removal had been driven not by military necessity but by race prejudice, war hysteria and a failure of political leadership, and in 1988 Congress formally apologised and granted compensation to the survivors.",
+      "visual": { "kind": "map", "still": true },
+      "focus": {
+        "countries": ["USA"],
+        "points": [
+          [-118.15, 36.73, "Manzanar"], [-121.37, 41.89, "Tule Lake"], [-114.4, 33.99, "Poston"], [-111.85, 33.06, "Gila River"], [-114.25, 42.68, "Minidoka"],
+          [-108.95, 44.67, "Heart Mountain"], [-112.75, 39.42, "Topaz"], [-102.32, 38.05, "Amache"], [-91.27, 33.77, "Rohwer"], [-91.47, 33.42, "Jerome"]
+        ],
+        "bbox": [-125, 30, -88, 49.5]
+      },
+      "link": { "label": "Political Retrospective · the United States, 1942", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1942&c=2" },
+      "cites": ["robinson-2001", "cwric-1982", "nara-eo9066", "kennedy-1999"]
+    },
+    {
+      "id": "war-leader",
+      "title": "Commander in chief, 1942–1945",
+      "narration": "In December 1942 the atomic programme Roosevelt had approved achieved the first nuclear chain reaction, in Chicago, and at Casablanca the following month he and Churchill declared that they would accept only the Axis powers' unconditional surrender. Allied armies landed in Normandy in June 1944, and that November Roosevelt won a fourth term. At Yalta in February 1945, visibly ill, he agreed with Churchill and Stalin on the occupation of Germany and on a new United Nations. Critics later said he gave Stalin too much over Poland; defenders reply that the Red Army already held it.",
+      "visual": {
+        "kind": "timeline", "from": "1942-06", "to": "1945-03",
+        "events": [
+          { "at": "1942-12-02", "label": "First chain reaction" },
+          { "at": "1943-01-24", "label": "Casablanca" },
+          { "at": "1943-11-28", "label": "Tehran" },
+          { "at": "1944-06-06", "label": "D-Day" },
+          { "at": "1944-07-22", "label": "Bretton Woods" },
+          { "at": "1944-11-07", "label": "Fourth term" },
+          { "at": "1945-02-04", "label": "Yalta" }
+        ]
+      },
+      "link": { "label": "Timeline of Progress · the first nuclear chain reaction, 1942", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1942&e=chicago-pile" },
+      "cites": ["kennedy-1999"]
+    },
+    {
+      "id": "legacy",
+      "title": "Death, and legacy",
+      "narration": "Roosevelt died of a stroke at Warm Springs on 12 April 1945, less than a month before Germany surrendered, and Harry Truman became president. He left a federal government that guaranteed bank deposits, paid pensions and regulated markets, and a country that had become the strongest power in the world; in 1951 the Twenty-second Amendment limited future presidents to two terms. Historians often rank him among the greatest presidents, while critics point to the internment of Japanese Americans, the bargain with segregation, the attempt to enlarge the Supreme Court and the lasting growth of federal power.",
+      "visual": { "kind": "module", "blurb": "Who holds power in the United States now: its president, Congress, courts and coming elections." },
+      "link": { "label": "Political Atlas · United States today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#USA" },
+      "cites": ["kennedy-1999", "katznelson-2013", "robinson-2001"]
+    }
+  ]
+}

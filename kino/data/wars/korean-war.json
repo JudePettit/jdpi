@@ -1,0 +1,204 @@
+{
+  "id": "korean-war",
+  "title": "The Korean War, 1950–1953",
+  "category": "wars",
+  "subjects": [
+    { "qid": "Q8663", "label": "Korean War" },
+    { "qid": "Q423", "label": "North Korea" },
+    { "qid": "Q884", "label": "South Korea" }
+  ],
+  "era": [1950, 1953],
+  "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Twelve scenes, with maps that follow War Focus through the war's turning points.",
+  "minutes": 7,
+  "preview": { "scene": "china" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Korean War (Q8663), North Korea (Q423), South Korea (Q884)", "url": "https://www.wikidata.org/wiki/Q8663" },
+    { "id": "cumings-2010", "kind": "book", "author": "Bruce Cumings", "title": "The Korean War: A History", "year": 2010, "publisher": "Modern Library" },
+    { "id": "stueck-1995", "kind": "book", "author": "William Stueck", "title": "The Korean War: An International History", "year": 1995, "publisher": "Princeton University Press" },
+    { "id": "millett-2010", "kind": "book", "author": "Allan R. Millett", "title": "The War for Korea, 1950–1951: They Came from the North", "year": 2010, "publisher": "University Press of Kansas" },
+    { "id": "shen-2012", "kind": "book", "author": "Shen Zhihua", "cite": "Shen 2012", "title": "Mao, Stalin and the Korean War: Trilateral Communist Relations in the 1950s (translated by Neil Silver)", "year": 2012, "publisher": "Routledge" },
+    { "id": "weathersby-1993", "kind": "article", "author": "Kathryn Weathersby", "title": "Soviet Aims in Korea and the Origins of the Korean War, 1945–1950: New Evidence from Russian Archives", "year": 1993, "journal": "Cold War International History Project, Working Paper 8 (Woodrow Wilson International Center for Scholars)" },
+    { "id": "lacina-gleditsch-2005", "kind": "article", "author": "Bethany Lacina and Nils Petter Gleditsch", "title": "Monitoring Trends in Global Combat: A New Dataset of Battle Deaths", "year": 2005, "journal": "European Journal of Population 21 (2–3): 145–166 (PRIO Battle Deaths Dataset, version 3.1)", "url": "https://doi.org/10.1007/s10680-005-6851-6" },
+    { "id": "unsc-83", "kind": "web", "title": "Security Council resolution 83 (1950), adopted 27 June 1950", "publisher": "United Nations Digital Library", "url": "https://digitallibrary.un.org/record/112026" },
+    { "id": "armistice-1953", "kind": "web", "title": "Korean Armistice Agreement, Panmunjom, 27 July 1953 (full text)", "publisher": "The World and Japan Database", "url": "https://worldjpn.net/documents/texts/JPKR/19530727.O1E.html" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Korean War",
+      "narration": "Before dawn on 25 June 1950 the army of North Korea crossed the 38th parallel and invaded South Korea. Within months the war had drawn in the United States and fifteen other countries under the flag of the United Nations, and then the People's Republic of China. It ended in July 1953 with an armistice, not a peace, close to where it began, and Korea is divided still.",
+      "visual": { "kind": "title", "kicker": "Kino · Wars", "heading": "The Korean War", "sub": "1950–1953" },
+      "focus": { "bbox": [116, 30.5, 138, 44.5] },
+      "link": { "label": "Retrospective Battlefield · 1950", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1950&w=u235" },
+      "cites": ["stueck-1995", "cumings-2010"]
+    },
+    {
+      "id": "division",
+      "title": "A divided country, 1945–1950",
+      "narration": "Korea had been a Japanese colony since 1910. When Japan surrendered in August 1945, the United States proposed and the Soviet Union accepted a temporary line along the 38th parallel, with Soviet troops occupying the north and American troops the south. Talks on a single government failed, and in 1948 two rival states were proclaimed: the Republic of Korea under Syngman Rhee in Seoul, and the Democratic People's Republic of Korea under Kim Il-sung in Pyongyang. Each claimed the whole peninsula, and by 1949 their armies were clashing along the border while the South crushed a Communist-led insurgency.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
+        ],
+        "fronts": [{ "label": "The 38th parallel, 1945", "line": [[124.65, 38.0], [125.9, 38.0], [127.2, 38.0], [128.65, 38.0]] }]
+      },
+      "focus": { "countries": ["PRK", "KOR"], "points": [[126.98, 37.57, "Seoul"], [125.75, 39.03, "Pyongyang"]], "bbox": [123, 33, 132, 43.2] },
+      "link": { "label": "Encyclopaedia · First Republic of South Korea", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q491559" },
+      "cites": ["cumings-2010", "millett-2010"]
+    },
+    {
+      "id": "decision",
+      "title": "Stalin's consent, 1949–1950",
+      "narration": "Kim Il-sung pressed Joseph Stalin for permission to reunify Korea by force, and in 1949 Stalin refused. Soviet records opened in the 1990s show that he changed his mind early in 1950, after the Communist victory in China and the first Soviet atomic test, and approved the plan in Moscow in April, on condition that Mao Zedong agreed. Mao gave his consent in May, and Soviet military advisers helped to plan the attack.",
+      "visual": {
+        "kind": "timeline", "from": "1949-01", "to": "1950-07",
+        "events": [
+          { "at": "1949-03", "label": "Kim asks Stalin" },
+          { "at": "1949-08-29", "label": "First Soviet atomic test" },
+          { "at": "1949-09-24", "label": "Moscow says no" },
+          { "at": "1949-10-01", "label": "People's Republic of China" },
+          { "at": "1950-01-30", "label": "Stalin agrees to talk" },
+          { "at": "1950-04", "label": "Stalin approves" },
+          { "at": "1950-05", "label": "Mao agrees" },
+          { "at": "1950-06-25", "label": "Invasion" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Kim Il-sung", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q41117" },
+      "cites": ["weathersby-1993", "shen-2012"]
+    },
+    {
+      "id": "invasion",
+      "title": "The invasion, June to September 1950",
+      "narration": "North Korea attacked with tanks and heavy artillery that the South lacked, and took Seoul three days later. The United States rushed troops from occupied Japan, but by early August they and the South Korean army had been pushed back to a perimeter around the port of Pusan, in the south-east corner of the peninsula. As the front moved, both sides killed civilians they suspected of siding with the enemy: South Korean forces executed tens of thousands of political prisoners and suspected leftists, and the North's occupiers killed officials, police and others they judged hostile.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
+        ],
+        "arrows": [
+          { "from": [126.9, 38.15], "via": [127.0, 37.5], "to": [127.35, 36.5], "tone": 2, "label": "Korean People's Army" },
+          { "from": [127.3, 36.2], "via": [126.85, 35.25], "to": [127.95, 35.2], "tone": 2 },
+          { "from": [127.75, 38.0], "via": [128.2, 37.0], "to": [128.55, 36.2], "tone": 2 },
+          { "from": [128.75, 38.0], "via": [129.2, 37.2], "to": [129.35, 36.4], "tone": 2 }
+        ],
+        "fronts": [{ "label": "Pusan Perimeter, August 1950 (approximate)", "line": [[128.42, 35.12], [128.45, 35.45], [128.38, 35.7], [128.4, 36.0], [128.65, 36.2], [129.0, 36.3], [129.4, 36.35]] }]
+      },
+      "focus": { "countries": ["KOR"], "points": [[126.98, 37.57, "Seoul, taken 28 June"], [127.38, 36.35, "Taejon, 20 July"], [129.05, 35.15, "Pusan"]], "bbox": [123.5, 33.3, 131.5, 39.5] },
+      "link": { "label": "War Focus · June 1950", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1950-06" },
+      "cites": ["millett-2010", "cumings-2010"]
+    },
+    {
+      "id": "united-nations",
+      "title": "The United Nations responds",
+      "narration": "The Security Council met on the day of the invasion and demanded a North Korean withdrawal, and on 27 June it called on members to help the South. The Soviet Union could have vetoed both resolutions, but it was boycotting the Council because China's seat was still held by the Nationalist government on Taiwan. President Harry Truman committed American air, naval and then ground forces, and in July the Council placed the troops sent by member states under a unified command led by the United States, with General Douglas MacArthur in command.",
+      "visual": { "kind": "quote", "text": "Recommends that the Members of the United Nations furnish such assistance to the Republic of Korea as may be necessary to repel the armed attack and to restore international peace and security in the area.", "who": "United Nations Security Council, resolution 83", "when": "27 June 1950", "cite": "unsc-83" },
+      "link": { "label": "Encyclopaedia · Harry S. Truman", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11613" },
+      "cites": ["unsc-83", "stueck-1995"]
+    },
+    {
+      "id": "inchon",
+      "title": "Inchon and the march north, September–October 1950",
+      "narration": "On 15 September MacArthur landed two divisions at Inchon, far behind the North Korean lines, and as the defenders of Pusan broke out, Seoul was retaken by the end of the month. South Korean troops crossed the 38th parallel on 1 October, and after a General Assembly resolution on 7 October backed the unification of Korea, American and other forces followed. Pyongyang fell on 19 October, and a week later South Korean units reached the Yalu River on the Chinese border.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
+        ],
+        "arrows": [
+          { "from": [125.2, 37.1], "to": [126.58, 37.45], "tone": 1, "label": "Inchon landing" },
+          { "from": [128.55, 35.95], "via": [127.9, 36.55], "to": [127.15, 37.15], "tone": 1, "label": "Breakout from Pusan" },
+          { "from": [126.85, 37.8], "via": [126.35, 38.5], "to": [125.85, 38.95], "tone": 1 },
+          { "from": [125.9, 39.3], "via": [126.0, 40.1], "to": [125.85, 40.7], "tone": 1 },
+          { "from": [128.9, 37.7], "via": [128.5, 38.9], "to": [127.55, 39.75], "tone": 1 }
+        ]
+      },
+      "focus": { "points": [[126.63, 37.47, "Inchon, 15 September"], [126.98, 37.57, "Seoul, retaken 28 September"], [125.75, 39.03, "Pyongyang, 19 October"], [125.8, 40.82, "The Yalu, 26 October"]], "bbox": [123, 33.5, 131.5, 42.5] },
+      "link": { "label": "War Focus · September 1950", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1950-09" },
+      "cites": ["millett-2010", "stueck-1995"]
+    },
+    {
+      "id": "china",
+      "title": "China enters the war, October 1950 – January 1951",
+      "narration": "China's premier, Zhou Enlai, had warned through India's ambassador that China would intervene if American troops crossed the parallel, and Washington discounted the warning. Chinese People's Volunteers under Peng Dehuai began crossing the Yalu on 19 October, struck in late October and, at the end of November, launched a general offensive that sent the United Nations forces into a long retreat. Pyongyang was abandoned in early December, American marines fought their way out from the Chosin Reservoir, and on 4 January 1951 Seoul fell for the second time.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "China", "tone": 3, "countries": ["CHN"] },
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
+        ],
+        "arrows": [
+          { "from": [124.5, 40.65], "via": [125.35, 40.05], "to": [125.95, 39.6], "tone": 3, "label": "Chinese People's Volunteers" },
+          { "from": [126.85, 41.35], "via": [127.15, 40.95], "to": [127.22, 40.6], "tone": 3 },
+          { "from": [126.0, 39.2], "via": [126.6, 38.3], "to": [126.95, 37.5], "tone": 3 }
+        ],
+        "fronts": [{ "label": "Front line, late January 1951 (approximate)", "line": [[126.75, 36.95], [127.4, 37.05], [128.2, 37.25], [129.15, 37.45]] }]
+      },
+      "focus": { "points": [[127.2, 40.45, "Chosin Reservoir"], [125.75, 39.03, "Pyongyang, abandoned 5 December"], [126.98, 37.57, "Seoul, lost 4 January"]], "bbox": [121.5, 34.5, 132, 43] },
+      "link": { "label": "War Focus · November 1950", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1950-11" },
+      "cites": ["shen-2012", "millett-2010"]
+    },
+    {
+      "id": "limited-war",
+      "title": "Ridgway, MacArthur and a limited war, 1951",
+      "narration": "Meeting Truman on Wake Island in October 1950, MacArthur had assured him that China was unlikely to intervene in strength. After the Chinese offensives, General Matthew Ridgway took command of the Eighth Army and rallied it, and by the end of March 1951 Seoul had been retaken and the front pushed back to around the 38th parallel. MacArthur argued in public for carrying the war into China, and on 11 April Truman dismissed him, choosing to keep the war limited to Korea.",
+      "visual": { "kind": "portrait", "file": "File:President Truman and General MacArthur at Wake Island.jpg", "heading": "Truman and MacArthur", "sub": "Wake Island, 15 October 1950", "position": "50% 30%" },
+      "link": { "label": "Encyclopaedia · Matthew Ridgway", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q494930" },
+      "cites": ["stueck-1995", "millett-2010"]
+    },
+    {
+      "id": "stalemate",
+      "title": "Talks and stalemate, 1951–1953",
+      "narration": "From July 1951 the two sides negotiated, first at Kaesong and then at Panmunjom, while fighting went on for hills along a line that barely moved. The longest dispute was over prisoners: many Chinese and North Korean prisoners did not want to go home, and the United Nations Command refused to return them by force. American bombing devastated North Korea's towns, dams and power stations, and the war dragged on until both sides, and Stalin's successors after his death in March 1953, were ready to settle.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
+        ],
+        "fronts": [{ "label": "Front line, 1951–1953 (approximate)", "line": [[126.15, 37.73], [126.68, 37.93], [127.05, 38.12], [127.4, 38.28], [127.85, 38.3], [128.15, 38.32], [128.35, 38.6]] }]
+      },
+      "focus": { "points": [[126.68, 37.96, "Panmunjom"], [124.96, 40.46, "Sup'ung dam, bombed June 1952"]], "bbox": [123.5, 35.5, 131, 41.6] },
+      "link": { "label": "War Focus · October 1952", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1952-10" },
+      "cites": ["stueck-1995", "shen-2012", "cumings-2010"]
+    },
+    {
+      "id": "armistice",
+      "title": "The armistice, 27 July 1953",
+      "narration": "The armistice was signed at Panmunjom on 27 July 1953 by the commanders of the United Nations Command, the Korean People's Army and the Chinese People's Volunteers; South Korea's president, Syngman Rhee, refused to sign. It created a demilitarised zone four kilometres wide along the final front line and arranged the exchange of prisoners, with neutral nations supervising those who refused to go home. The peace conference held at Geneva in 1954 failed, and no peace treaty has ever been signed.",
+      "visual": { "kind": "quote", "text": "… an armistice which will ensure a complete cessation of hostilities and of all acts of armed force in Korea until a final peaceful settlement is achieved.", "who": "Korean Armistice Agreement, preamble", "when": "Panmunjom, 27 July 1953", "cite": "armistice-1953" },
+      "link": { "label": "War Focus · July 1953", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1953-07" },
+      "cites": ["armistice-1953", "stueck-1995"]
+    },
+    {
+      "id": "the-cost",
+      "title": "The human cost",
+      "narration": "No one knows exactly how many people died in the Korean War, so this chart shows ranges. The Peace Research Institute Oslo estimates that between about 645,000 and 1.5 million soldiers and civilians were killed in the fighting itself, more than half of them in the first year. Civilians killed in massacres, or by hunger and disease, are not in that count, and estimates of all Korean deaths, soldiers and civilians together, are well above a million.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Battle deaths in the Korean War, year by year: PRIO's range of estimates", "unit": "thousand people",
+        "data": [
+          { "label": "1950", "low": 322, "high": 750 },
+          { "label": "1951", "low": 226, "high": 525 },
+          { "label": "1952", "low": 64, "high": 150 },
+          { "label": "1953, to July", "low": 32, "high": 75 }
+        ],
+        "note": "Deaths in combat among all the armies, including civilians killed in the fighting. One-sided killings of civilians and deaths from hunger and disease are not counted. PRIO's best estimate for the whole war is about 995,000.",
+        "cite": ["lacina-gleditsch-2005"]
+      },
+      "link": { "label": "Encyclopaedia · Korean War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8663" },
+      "cites": ["lacina-gleditsch-2005", "cumings-2010", "stueck-1995"]
+    },
+    {
+      "id": "two-koreas",
+      "title": "Two Koreas",
+      "narration": "The war fixed the division of Korea, with American troops stationed in the South under a defence treaty and North Korea allied to China. It also hardened the Cold War far beyond Korea: the United States rearmed on a large scale, and NATO became a standing military alliance with a permanent command. South Korea, ruled for most of the next three decades by authoritarian governments, became a democracy in 1987 and one of the world's leading industrial economies, while North Korea is still ruled by Kim Il-sung's family and has built nuclear weapons.",
+      "visual": { "kind": "module", "blurb": "South Korea today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "link": { "label": "National Analysis · South Korea today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=KOR" },
+      "cites": ["stueck-1995", "cumings-2010"]
+    }
+  ]
+}

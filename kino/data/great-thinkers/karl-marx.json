@@ -1,0 +1,192 @@
+{
+  "id": "karl-marx",
+  "title": "Karl Marx",
+  "category": "great-thinkers",
+  "subjects": [{ "qid": "Q9061", "label": "Karl Marx" }],
+  "era": [1818, 1883],
+  "summary": "A course in three parts on the German philosopher and revolutionary: a life in exile, the ideas of the Manifesto and Capital, and what was later done in his name. Twelve scenes and a short quiz.",
+  "minutes": 6,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Karl Marx (Q9061), Friedrich Engels (Q34787), The Communist Manifesto (Q40591), Capital (Q58784)", "url": "https://www.wikidata.org/wiki/Q9061" },
+    { "id": "stedman-jones-2016", "kind": "book", "author": "Gareth Stedman Jones", "title": "Karl Marx: Greatness and Illusion", "year": 2016, "publisher": "Allen Lane" },
+    { "id": "sperber-2013", "kind": "book", "author": "Jonathan Sperber", "title": "Karl Marx: A Nineteenth-Century Life", "year": 2013, "publisher": "Liveright" },
+    { "id": "mclellan-1973", "kind": "book", "author": "David McLellan", "title": "Karl Marx: His Life and Thought", "year": 1973, "publisher": "Macmillan" },
+    { "id": "allen-2009", "kind": "article", "author": "Robert C. Allen", "title": "Engels' pause: Technical change, capital accumulation, and inequality in the British industrial revolution", "year": 2009, "journal": "Explorations in Economic History 46 (4): 418–435", "url": "https://doi.org/10.1016/j.eeh.2009.04.004" },
+    { "id": "crafts-2022", "kind": "article", "author": "Nicholas Crafts", "title": "Slow real wage growth during the Industrial Revolution: productivity paradox or pro-rich growth?", "year": 2022, "journal": "Oxford Economic Papers 74 (1): 1–13", "url": "https://doi.org/10.1093/oep/gpab008" },
+    { "id": "kolakowski-1978", "kind": "book", "author": "Leszek Kołakowski", "title": "Main Currents of Marxism: Its Rise, Growth, and Dissolution (three volumes, translated by P. S. Falla)", "year": 1978, "publisher": "Clarendon Press" },
+    { "id": "hobsbawm-2011", "kind": "book", "author": "Eric Hobsbawm", "title": "How to Change the World: Tales of Marx and Marxism", "year": 2011, "publisher": "Little, Brown" },
+    { "id": "brown-2009", "kind": "book", "author": "Archie Brown", "title": "The Rise and Fall of Communism", "year": 2009, "publisher": "Bodley Head" },
+    { "id": "marx-engels-1848", "kind": "web", "author": "Karl Marx and Friedrich Engels", "title": "Manifesto of the Communist Party (1848), English edition of 1888, Project Gutenberg", "year": 1848, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/61" },
+    { "id": "marx-1859", "kind": "web", "author": "Karl Marx", "title": "A Contribution to the Critique of Political Economy (1859), translated by N. I. Stone (1904), Project Gutenberg", "year": 1859, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46423" }
+  ],
+  "parts": [
+    {
+      "id": "exile",
+      "title": "A life in exile",
+      "scenes": [
+        {
+          "id": "opening",
+          "title": "Karl Marx, 1818–1883",
+          "narration": "Karl Marx was a philosopher, economist, journalist and revolutionary who spent most of his adult life as a stateless exile in London. His analysis of capitalism, much of it researched in the reading room of the British Museum, inspired both the social democratic parties of Europe and the communist states of the twentieth century. Few thinkers have been so influential or so fiercely argued over, and this course tries to separate the man and his ideas from what was later done in his name.",
+          "visual": { "kind": "portrait", "qid": "Q9061", "heading": "Karl Marx", "sub": "1818–1883", "position": "50% 22%" },
+          "link": { "label": "Encyclopaedia · Karl Marx", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9061" },
+          "cites": ["sperber-2013", "stedman-jones-2016"]
+        },
+        {
+          "id": "wanderings",
+          "title": "From Trier to London, 1818–1849",
+          "narration": "Marx was born in Trier, in the Prussian Rhineland, on 5 May 1818, the son of a lawyer of Jewish descent who had become a Protestant. He studied in Bonn and Berlin, where he joined the radical young followers of the philosopher Hegel, and he edited a liberal newspaper in Cologne until the Prussian government banned it in 1843. He then moved to Paris, was expelled to Brussels in 1845, returned to Cologne in the revolution of 1848, and after its defeat settled in London in 1849.",
+          "visual": {
+            "kind": "map",
+            "arrows": [
+              { "from": [6.96, 50.94], "via": [4.6, 49.9], "to": [2.5, 48.95], "tone": 1, "label": "1843" },
+              { "from": [2.35, 48.86], "via": [3.1, 50.0], "to": [4.25, 50.8], "tone": 1, "label": "1845" },
+              { "from": [6.96, 50.94], "via": [3.0, 51.7], "to": [0.0, 51.5], "tone": 1, "label": "1849" }
+            ]
+          },
+          "focus": {
+            "countries": ["DEU", "FRA", "BEL", "GBR"],
+            "points": [[6.64, 49.75, "Trier, born 1818"], [13.4, 52.52, "Berlin, 1836–1841"], [6.96, 50.94, "Cologne, 1842–1843 and 1848–1849"], [2.35, 48.86, "Paris, 1843–1845"], [4.35, 50.85, "Brussels, 1845–1848"], [-0.13, 51.51, "London, from 1849"]],
+            "bbox": [-4, 46.5, 15.5, 55]
+          },
+          "link": { "label": "Encyclopaedia · Georg Wilhelm Friedrich Hegel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9235" },
+          "cites": ["sperber-2013", "mclellan-1973"]
+        },
+        {
+          "id": "engels",
+          "title": "Friedrich Engels",
+          "narration": "In Paris in 1844 Marx began a lifelong partnership with Friedrich Engels, the son of a German textile manufacturer whose family firm had a share in a mill in Manchester. Engels's book on the condition of the English working class appeared in 1845, and that summer the two men travelled together to Manchester. For decades Engels's income from the family business kept the Marx household afloat in London, through years of poverty in which only three of Marx's seven children lived to adulthood.",
+          "visual": { "kind": "portrait", "qid": "Q34787", "heading": "Friedrich Engels", "sub": "1820–1895", "position": "50% 25%" },
+          "link": { "label": "Encyclopaedia · Friedrich Engels", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34787" },
+          "cites": ["stedman-jones-2016", "sperber-2013"]
+        },
+        {
+          "id": "year-1848",
+          "title": "1848",
+          "narration": "In February 1848 a pamphlet written by Marx and Engels for a small group called the Communist League was printed in London: the Manifesto of the Communist Party. That same month revolution broke out in Paris, and within weeks in Vienna, Berlin, Milan and Budapest, though the Manifesto itself played little part in any of them. By the end of 1849 the old order had been restored almost everywhere.",
+          "visual": {
+            "kind": "map",
+            "groups": [{ "label": "Revolutions in 1848", "tone": 2, "countries": ["FRA", "DEU", "AUT", "HUN", "ITA", "CZE"] }]
+          },
+          "focus": {
+            "points": [[-0.08, 51.52, "London: the Manifesto, February"], [2.35, 48.86, "Paris, 22 February"], [16.37, 48.21, "Vienna, 13 March"], [13.4, 52.52, "Berlin, 18 March"], [9.19, 45.46, "Milan, 18 March"], [19.04, 47.5, "Budapest, 15 March"]],
+            "bbox": [-5, 40, 24, 56.5]
+          },
+          "link": { "label": "Encyclopaedia · Communist League", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q642562" },
+          "cites": ["stedman-jones-2016", "sperber-2013"]
+        }
+      ]
+    },
+    {
+      "id": "ideas",
+      "title": "The ideas",
+      "scenes": [
+        {
+          "id": "materialism",
+          "title": "History and class struggle",
+          "narration": "At the centre of Marx's thought is the claim that the way a society produces its material needs shapes its laws, politics and ideas, an approach later called historical materialism. The Manifesto declared that the history of all society so far is the history of class struggles, and that capitalism, by creating an industrial working class, was producing its own gravediggers. In a preface of 1859 Marx put the principle in a single sentence.",
+          "visual": { "kind": "quote", "text": "It is not the consciousness of men that determines their existence, but, on the contrary, their social existence determines their consciousness.", "who": "Karl Marx, preface to A Contribution to the Critique of Political Economy, translated by N. I. Stone", "when": "1859", "cite": "marx-1859" },
+          "link": { "label": "Encyclopaedia · Marxism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7264" },
+          "cites": ["marx-1859", "marx-engels-1848", "stedman-jones-2016"]
+        },
+        {
+          "id": "capital",
+          "title": "Capital, 1867",
+          "narration": "The first volume of Capital appeared in Hamburg in 1867. Building on Adam Smith and David Ricardo, Marx argued that labour creates value, and that profit comes from surplus value, the part of what workers produce for which they are not paid. Competition, he believed, forces capitalists to accumulate and mechanise, concentrating capital in fewer hands and producing recurring crises.",
+          "visual": { "kind": "portrait", "file": "File:Zentralbibliothek Zürich Das Kapital Marx 1867.jpg", "heading": "Das Kapital", "sub": "Volume one, Hamburg 1867", "position": "50% 30%" },
+          "link": { "label": "Learning · Economics: Marx's critique of capitalism", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=marx-s-critique-of-capitalism" },
+          "cites": ["mclellan-1973", "stedman-jones-2016"]
+        },
+        {
+          "id": "engels-pause",
+          "title": "Wages and output in industrial Britain",
+          "narration": "Engels's book of 1845 described a Britain in which output was growing fast while workers' living standards barely rose. The economic historian Robert Allen has called this Engels' pause: by his estimates, between 1780 and 1840 output per worker rose by about 46 per cent but real wages by only about 12, and from 1840 to 1900 wages rose faster than output. Other economic historians, among them Nicholas Crafts, find that the gap before 1840 was smaller. Whether capitalism must keep workers poor became one of the great arguments over Marx's legacy.",
+          "visual": {
+            "kind": "chart", "type": "bar", "title": "Britain: growth in output per worker and in real wages", "unit": "per cent increase over the period",
+            "data": [
+              { "label": "Output per worker, 1780–1840", "value": 46 },
+              { "label": "Real wage, 1780–1840", "value": 12 },
+              { "label": "Output per worker, 1840–1900", "value": 90 },
+              { "label": "Real wage, 1840–1900", "value": 123 }
+            ],
+            "note": "Allen's estimates (2009); for 1780–1840 output per worker follows Crafts and Harley and the real wage Feinstein's index. Crafts (2022), with newer data, finds a smaller gap before 1840.",
+            "cite": ["allen-2009", "crafts-2022"]
+          },
+          "link": { "label": "Kardashev Tracker · the British Empire, 1850", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1850&p=britain" },
+          "cites": ["allen-2009", "crafts-2022"]
+        },
+        {
+          "id": "critics",
+          "title": "Critics and defenders",
+          "narration": "From the 1870s most economists abandoned the labour theory of value for theories built on marginal utility, and critics argued that Marx's predictions of capitalist collapse were not borne out. Leszek Kołakowski, a Polish philosopher who broke with communism, argued that Stalinism was one possible reading of Marx's ideas rather than simply a betrayal of them. Eric Hobsbawm, a lifelong Marxist historian, held that Marx's analysis of how capitalism works, and of its crises, remained relevant.",
+          "visual": { "kind": "module", "blurb": "From Marx to socialist practice: Lenin, social democracy, market socialism and the socialist calculation debate." },
+          "link": { "label": "Learning · Economics: from Marx to socialist practice", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=from-marx-to-socialist-practice" },
+          "cites": ["kolakowski-1978", "hobsbawm-2011", "stedman-jones-2016"]
+        }
+      ]
+    },
+    {
+      "id": "legacy",
+      "title": "Marx after Marx",
+      "scenes": [
+        {
+          "id": "last-years",
+          "title": "The International, and the last years, 1864–1894",
+          "narration": "In 1864 Marx helped found the International Working Men's Association in London, and in 1871 his defence of the Paris Commune made him notorious. His wife Jenny died in 1881, and Marx died in London on 14 March 1883; at his graveside in Highgate Cemetery, Engels compared his friend's discoveries to Darwin's. Engels then edited the second and third volumes of Capital, which appeared in 1885 and 1894.",
+          "visual": {
+            "kind": "timeline", "from": "1864", "to": "1894",
+            "events": [
+              { "at": "1864-09-28", "label": "The International founded" },
+              { "at": "1867-09-14", "label": "Capital, volume one" },
+              { "at": "1871-06", "label": "Defends the Paris Commune" },
+              { "at": "1875", "label": "Critique of the Gotha Programme" },
+              { "at": "1881-12-02", "label": "Jenny Marx dies" },
+              { "at": "1883-03-14", "label": "Marx dies" },
+              { "at": "1885", "label": "Capital, volume two" },
+              { "at": "1894", "label": "Capital, volume three" }
+            ]
+          },
+          "link": { "label": "Timeline of Progress · Darwin's On the Origin of Species, 1859", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1859&e=origin-of-species" },
+          "cites": ["sperber-2013", "mclellan-1973"]
+        },
+        {
+          "id": "parties",
+          "title": "Parties and revolutions, 1875–1949",
+          "narration": "Marx's ideas spread first through mass parties such as Germany's Social Democrats, the largest party in the Reichstag by 1912, many of whose leaders came to seek socialism through elections rather than revolution. In Russia, Lenin's Bolsheviks seized power in 1917 in Marx's name. After the Second World War communist parties came to rule most of eastern Europe and, from 1949, China.",
+          "visual": {
+            "kind": "map",
+            "groups": [{ "label": "Ruled by communist parties by 1950", "tone": 3, "countries": ["SUN", "POL", "CSK", "HUN", "ROU", "BGR", "ALB", "YUG", "MNG", "CHN", "PRK"] }]
+          },
+          "focus": {
+            "points": [[13.4, 52.52, "East Berlin, 1949"], [30.32, 59.94, "Petrograd, 1917"], [116.4, 39.9, "Beijing, 1949"]],
+            "bbox": [-10, 18, 150, 72]
+          },
+          "link": { "label": "Encyclopaedia · Social Democratic Party of Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49768" },
+          "cites": ["hobsbawm-2011", "kolakowski-1978", "brown-2009"]
+        },
+        {
+          "id": "in-his-name",
+          "title": "In his name",
+          "narration": "The states that ruled in Marx's name industrialised quickly in places, but they were one-party dictatorships, and the famines and repression under Stalin and Mao alone cost tens of millions of lives. Most of these regimes collapsed between 1989 and 1991, though communist parties, or parties that grew out of them, still rule China, Vietnam, Laos, Cuba and North Korea. Historians still debate how much of this follows from Marx's ideas and how much from the choices of Lenin, Stalin, Mao and others.",
+          "visual": { "kind": "portrait", "file": "File:Highgate Cemetery - East - Marx 02.jpg", "heading": "Highgate Cemetery, London", "sub": "Marx's tomb, unveiled in 1956", "position": "50% 30%" },
+          "link": { "label": "Learning · Politics: the far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+          "cites": ["brown-2009", "kolakowski-1978", "hobsbawm-2011"]
+        },
+        {
+          "id": "why-read",
+          "title": "Why Marx is still read",
+          "narration": "Most economists reject much of Marx's economic theory, yet the questions he raised about inequality, crises and the power of capital are still at the centre of political argument, and interest in his work revived after the financial crisis of 2008. To see his answers set beside those of Adam Smith, Keynes and the free-market schools, PRP's Learning course reads a single recession six ways.",
+          "visual": { "kind": "module", "blurb": "One recession, six readings: the classical school, Marx, Keynes, the Austrians, Friedman and Werner." },
+          "link": { "label": "Learning · Economics: a recession seen six ways", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=a-recession-seen-six-ways" },
+          "cites": ["hobsbawm-2011", "stedman-jones-2016"]
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    { "q": "Where did Marx spend most of his adult life?", "options": ["Berlin", "Paris", "London"], "answer": 2, "explain": "He settled in London in 1849, after the defeat of the 1848 revolutions, and lived there until his death in 1883." },
+    { "q": "What did Marx call the value workers produce beyond what they are paid?", "options": ["Surplus value", "Use value", "Marginal utility"], "answer": 0, "explain": "In Capital, surplus value is the source of profit: the part of what workers produce for which they are not paid." },
+    { "q": "According to Robert Allen, what happened in Britain between 1780 and 1840?", "options": ["Real wages rose faster than output", "Output per worker rose by about 46 per cent, real wages by about 12", "Real wages halved"], "answer": 1, "explain": "Allen calls this Engels' pause. By his estimates the pattern reversed after 1840, when wages rose faster than output; other historians, such as Nicholas Crafts, find a smaller gap before 1840." },
+    { "q": "Who edited the second and third volumes of Capital?", "options": ["Friedrich Engels", "Vladimir Lenin", "Eduard Bernstein"], "answer": 0, "explain": "Engels prepared them from Marx's manuscripts; they appeared in 1885 and 1894." }
+  ]
+}

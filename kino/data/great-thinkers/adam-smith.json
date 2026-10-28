@@ -1,0 +1,178 @@
+{
+  "id": "adam-smith",
+  "title": "Adam Smith",
+  "category": "great-thinkers",
+  "subjects": [{ "qid": "Q9381", "label": "Adam Smith" }],
+  "era": [1723, 1790],
+  "summary": "A course in three parts on the Scottish philosopher often called the founder of modern economics: his life, The Wealth of Nations, and the very different uses made of him since. Eleven scenes and a short quiz.",
+  "minutes": 6,
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Adam Smith (Q9381), The Wealth of Nations (Q233562)", "url": "https://www.wikidata.org/wiki/Q9381" },
+    { "id": "phillipson-2010", "kind": "book", "author": "Nicholas Phillipson", "title": "Adam Smith: An Enlightened Life", "year": 2010, "publisher": "Allen Lane" },
+    { "id": "ross-2010", "kind": "book", "author": "Ian Simpson Ross", "title": "The Life of Adam Smith (second edition)", "year": 2010, "publisher": "Oxford University Press" },
+    { "id": "rae-1895", "kind": "book", "author": "John Rae", "title": "Life of Adam Smith", "year": 1895, "publisher": "Macmillan", "url": "https://www.gutenberg.org/ebooks/17196" },
+    { "id": "rothschild-2001", "kind": "book", "author": "Emma Rothschild", "title": "Economic Sentiments: Adam Smith, Condorcet, and the Enlightenment", "year": 2001, "publisher": "Harvard University Press" },
+    { "id": "muller-1993", "kind": "book", "author": "Jerry Z. Muller", "title": "Adam Smith in His Time and Ours: Designing the Decent Society", "year": 1993, "publisher": "Free Press" },
+    { "id": "rasmussen-2017", "kind": "book", "author": "Dennis C. Rasmussen", "title": "The Infidel and the Professor: David Hume, Adam Smith, and the Friendship That Shaped Modern Thought", "year": 2017, "publisher": "Princeton University Press" },
+    { "id": "sen-2011", "kind": "article", "author": "Amartya Sen", "title": "Uses and Abuses of Adam Smith", "year": 2011, "journal": "History of Political Economy 43 (2): 257–271", "url": "https://doi.org/10.1215/00182702-1257388" },
+    { "id": "smith-1759", "kind": "web", "author": "Adam Smith", "title": "The Theory of Moral Sentiments (1759), Project Gutenberg edition of the Dublin printing of 1777", "year": 1759, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/67363" },
+    { "id": "smith-1776", "kind": "web", "author": "Adam Smith", "title": "An Inquiry into the Nature and Causes of the Wealth of Nations (1776), Project Gutenberg edition", "year": 1776, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/3300" }
+  ],
+  "parts": [
+    {
+      "id": "life",
+      "title": "A Scottish life",
+      "scenes": [
+        {
+          "id": "opening",
+          "title": "Adam Smith, 1723–1790",
+          "narration": "Adam Smith was a Scottish moral philosopher whose Wealth of Nations, published in 1776, is often called the founding work of modern economics. He saw himself first as a student of human nature, and his earlier Theory of Moral Sentiments was, to him, part of the same project. This course follows his life, his main ideas, and the very different uses that later politicians and economists have made of him.",
+          "visual": { "kind": "portrait", "qid": "Q9381", "heading": "Adam Smith", "sub": "1723–1790", "position": "50% 25%" },
+          "link": { "label": "Encyclopaedia · Adam Smith", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9381" },
+          "cites": ["phillipson-2010", "ross-2010"]
+        },
+        {
+          "id": "scotland",
+          "title": "Kirkcaldy, Glasgow and Oxford, 1723–1764",
+          "narration": "Smith was baptised in Kirkcaldy, on the Firth of Forth, on 5 June 1723; his father, a customs official, had died a few months before. At 14 he went to the University of Glasgow, where Francis Hutcheson taught him moral philosophy, and he then spent six years at Balliol College, Oxford, where he found that most professors had given up teaching. He lectured in Edinburgh and in 1751 became a professor at Glasgow, where he taught until 1764 and where the university gave a workshop to a young instrument maker, James Watt.",
+          "visual": { "kind": "map" },
+          "focus": {
+            "countries": ["GBR"],
+            "points": [[-3.16, 56.11, "Kirkcaldy, 1723"], [-4.29, 55.87, "Glasgow, 1737–1740 and 1751–1764"], [-3.19, 55.95, "Edinburgh, 1748–1751"], [-1.25, 51.75, "Balliol College, Oxford, 1740–1746"]],
+            "bbox": [-8, 50.5, 2, 57.5]
+          },
+          "link": { "label": "Timeline of Progress · Watt's separate condenser, 1769", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1769&e=watt-engine" },
+          "cites": ["ross-2010", "phillipson-2010"]
+        },
+        {
+          "id": "moral-sentiments",
+          "title": "The Theory of Moral Sentiments, 1759",
+          "narration": "Smith's first book, The Theory of Moral Sentiments, appeared in 1759 and made his name. It argues that moral judgement grows out of sympathy, our ability to imagine ourselves in another's place, and out of the verdict of an imagined impartial spectator. It begins by observing that even a selfish person takes an interest in the happiness of others.",
+          "visual": { "kind": "quote", "text": "How selfish soever man may be supposed, there are evidently some principles in his nature, which interest him in the fortune of others, and render their happiness necessary to him, though he derives nothing from it, except the pleasure of seeing it.", "who": "Adam Smith, The Theory of Moral Sentiments", "when": "1759", "cite": "smith-1759" },
+          "cites": ["smith-1759", "phillipson-2010"]
+        },
+        {
+          "id": "grand-tour",
+          "title": "Toulouse, Geneva and Paris, 1764–1766",
+          "narration": "In 1764 Smith gave up his chair to travel as tutor to the young Duke of Buccleuch, for a salary of 300 pounds a year and a pension of the same for life, about twice his Glasgow income. They spent eighteen months in Toulouse, where Smith told Hume that he had begun to write a book to pass away the time; near Geneva he visited Voltaire, and in Paris he met François Quesnay and the other economists known as the physiocrats. Back in Kirkcaldy, and later in London, he spent nearly ten years finishing The Wealth of Nations.",
+          "visual": {
+            "kind": "map",
+            "arrows": [
+              { "from": [-0.13, 51.5], "via": [2.35, 48.86], "to": [1.44, 43.65], "tone": 1, "label": "1764" },
+              { "from": [1.44, 43.6], "via": [4.85, 45.0], "to": [6.1, 46.15], "tone": 1, "label": "1765" },
+              { "from": [6.14, 46.2], "via": [4.6, 47.8], "to": [2.45, 48.8], "tone": 1 }
+            ]
+          },
+          "focus": {
+            "countries": ["FRA"],
+            "points": [[1.44, 43.6, "Toulouse, 1764–1765"], [6.14, 46.2, "Geneva: Voltaire, 1765"], [2.35, 48.86, "Paris: the physiocrats, 1766"]],
+            "bbox": [-3, 42, 9, 52.5]
+          },
+          "link": { "label": "Encyclopaedia · François Quesnay", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q13575" },
+          "cites": ["ross-2010", "rae-1895", "phillipson-2010"]
+        }
+      ]
+    },
+    {
+      "id": "wealth",
+      "title": "The Wealth of Nations",
+      "scenes": [
+        {
+          "id": "pin-factory",
+          "title": "The division of labour",
+          "narration": "The Wealth of Nations opens with a pin factory. Ten workers sharing out its eighteen or so operations could make upwards of 48,000 pins a day between them, Smith reported, where one worker alone, untrained, could not make twenty. The division of labour, he argued, is the main source of rising productivity, and it is limited by the extent of the market, which is why wider markets and freer trade make nations richer.",
+          "visual": {
+            "kind": "chart", "type": "bar", "title": "Smith's pin factory: pins made per worker per day", "unit": "pins",
+            "data": [
+              { "label": "Working alone, untrained (at most)", "value": 20 },
+              { "label": "One of ten, dividing the work", "value": 4800 }
+            ],
+            "note": "Smith's figures: ten workers made 'upwards of forty-eight thousand pins in a day'; working alone, they 'could not each of them have made twenty, perhaps not one pin in a day'.",
+            "cite": ["smith-1776"]
+          },
+          "link": { "label": "Learning · Economics: Adam Smith and The Wealth of Nations", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=adam-smith-and-the-wealth-of-nations" },
+          "cites": ["smith-1776", "muller-1993"]
+        },
+        {
+          "id": "self-interest",
+          "title": "Self-interest and the invisible hand",
+          "narration": "Exchange, Smith argued, rests on self-interest: we get our dinner by appealing to the interests of the butcher and the baker, not to their kindness. In a famous passage he wrote that someone who employs his capital at home, intending only his own gain, is led by an invisible hand to promote an end which was no part of his intention. The phrase appears only once in the book, and historians such as Emma Rothschild argue that later readers made far more of it than Smith did.",
+          "visual": { "kind": "quote", "text": "It is not from the benevolence of the butcher, the brewer, or the baker that we expect our dinner, but from their regard to their own interest.", "who": "Adam Smith, The Wealth of Nations", "when": "1776", "cite": "smith-1776" },
+          "cites": ["smith-1776", "rothschild-2001"]
+        },
+        {
+          "id": "mercantile-system",
+          "title": "Against the mercantile system",
+          "narration": "Much of the book attacks what Smith called the mercantile system: tariffs, monopolies and colonial trade rules that treated a nation's wealth as its stock of gold and silver. Real wealth, he argued, is what people can produce and consume, and monopolies such as the East India Company enriched a few merchants at the public's expense. The book appeared in March 1776, as Britain's American colonies moved towards independence, and Smith argued that Britain should either give them seats in Parliament in proportion to the taxes they paid or let them go.",
+          "visual": {
+            "kind": "map",
+            "groups": [{ "label": "Great Britain", "tone": 1, "countries": ["GBR"] }],
+            "arrows": [
+              { "from": [-2.5, 51.0], "via": [-38, 46], "to": [-70.5, 42.0], "tone": 1, "label": "Colonial trade" },
+              { "from": [-1.0, 50.3], "via": [18.5, -35.5], "to": [88.0, 21.4], "tone": 1, "label": "East India Company" }
+            ]
+          },
+          "focus": {
+            "points": [[-71.06, 42.36, "Boston"], [-75.16, 39.95, "Philadelphia: independence, July 1776"], [88.36, 22.57, "Calcutta"]],
+            "bbox": [-95, -42, 100, 62]
+          },
+          "link": { "label": "Kardashev Tracker · the British Empire, 1800", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1800&p=britain" },
+          "cites": ["smith-1776", "muller-1993"]
+        },
+        {
+          "id": "government",
+          "title": "What governments should do",
+          "narration": "Smith was no enemy of government. He gave the state three duties: defence, the administration of justice, and public works and institutions that markets would not provide, including cheap parish schools for the children of the common people. He warned that people of the same trade seldom meet without conspiring against the public, and that the endless repetition of a few simple tasks could stunt workers' minds unless the government took pains to prevent it.",
+          "visual": { "kind": "portrait", "file": "File:Wealth of Nations title.jpg", "heading": "The Wealth of Nations", "sub": "London, 1776", "position": "50% 30%" },
+          "cites": ["smith-1776", "muller-1993"]
+        }
+      ]
+    },
+    {
+      "id": "afterlives",
+      "title": "Smith after Smith",
+      "scenes": [
+        {
+          "id": "last-years",
+          "title": "Edinburgh, 1776–1790",
+          "narration": "Hume died in August 1776, and Smith's account of his friend's calm, unbelieving end brought him, he later said, ten times more abuse than his whole attack on Britain's commercial system. In 1778 he became a Commissioner of Customs in Edinburgh, enforcing duties some of which he had criticised, and he went on revising his two books. A week before his death on 17 July 1790 he had two friends burn sixteen volumes of his unpublished manuscripts.",
+          "visual": { "kind": "portrait", "file": "File:The Author of the Wealth of Nations (BM 1935,0522.13.129).jpg", "heading": "The author of The Wealth of Nations", "sub": "Etching by John Kay, 1790", "position": "50% 25%" },
+          "link": { "label": "Encyclopaedia · David Hume", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q37160" },
+          "cites": ["rasmussen-2017", "ross-2010", "rae-1895"]
+        },
+        {
+          "id": "heirs",
+          "title": "Smith's heirs, 1776–1846",
+          "narration": "Within a generation Smith's book was shaping policy: William Pitt the Younger praised it in Parliament in 1792, and David Ricardo built on it in 1817 to explain the gains from trade. In 1846 Britain repealed the Corn Laws, its tariffs on imported grain, after a free-trade campaign that drew on Smith's arguments. Smith's idea that labour is the source and measure of value also passed, through Ricardo, to Karl Marx, who drew very different conclusions from it.",
+          "visual": {
+            "kind": "timeline", "from": "1776", "to": "1846",
+            "events": [
+              { "at": "1776-03-09", "label": "The Wealth of Nations" },
+              { "at": "1778", "label": "Commissioner of Customs" },
+              { "at": "1790-07-17", "label": "Smith dies" },
+              { "at": "1792-02-17", "label": "Pitt's budget speech" },
+              { "at": "1817-04-19", "label": "Ricardo's Principles" },
+              { "at": "1846-06", "label": "Corn Laws repealed" }
+            ]
+          },
+          "link": { "label": "Learning · Economics: classical economics and modern capitalism", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=classical-economics-and-modern-capitalism" },
+          "cites": ["ross-2010", "muller-1993"]
+        },
+        {
+          "id": "which-smith",
+          "title": "Which Adam Smith?",
+          "narration": "Nineteenth-century German scholars thought his two books contradicted each other, one built on sympathy and the other on self-interest; most historians now read them as parts of a single account of human nature. Free-market thinkers have claimed Smith as their founder, while others, including Amartya Sen, stress his concern for the poor, his suspicion of merchants and his moral philosophy. That both sides can quote him is one reason he is still read.",
+          "visual": { "kind": "module", "blurb": "Six schools of economics, from Smith's classical school to Marx, Keynes, the Austrians, Friedman and Werner, answer the same questions." },
+          "link": { "label": "Learning · Economics: six answers to the same questions", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=six-answers-to-the-same-questions" },
+          "cites": ["sen-2011", "rothschild-2001", "phillipson-2010"]
+        }
+      ]
+    }
+  ],
+  "quiz": [
+    { "q": "What did Smith's pin factory illustrate?", "options": ["The gains from dividing labour", "The dangers of machinery", "The value of gold and silver"], "answer": 0, "explain": "Ten workers sharing about eighteen operations made upwards of 48,000 pins a day; working alone, each might not have made twenty." },
+    { "q": "Where was Smith when he told Hume, in 1764, that he had begun writing a book to pass away the time?", "options": ["Oxford", "Toulouse", "London"], "answer": 1, "explain": "He was in Toulouse as tutor to the young Duke of Buccleuch. The book is usually taken to be the start of The Wealth of Nations, though many of its ideas go back to his Glasgow lectures." },
+    { "q": "Which of these did Smith count among the duties of government?", "options": ["Setting prices", "Defence, justice and some public works and schooling", "Shielding merchants from foreign competition"], "answer": 1, "explain": "Book Five of The Wealth of Nations gives the state three duties: defence, justice, and public works and institutions that markets would not provide." },
+    { "q": "Which of Smith's ideas passed through Ricardo to Karl Marx?", "options": ["That labour is the source of value", "That trade surpluses make nations rich", "That prices should be fixed by guilds"], "answer": 0, "explain": "Smith treated labour as the real measure of value, Ricardo made the labour needed to produce a good the basis of its value, and Marx built his theory of surplus value on that." }
+  ]
+}

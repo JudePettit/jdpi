@@ -1,0 +1,32 @@
+name: Check Kino
+# Every change to Kino: validate the documentary scripts and their links into PRP, then run the Kino tests
+# (schema, ISO codes, sources, built data, speech rules). No network needed: the built files are committed.
+on:
+  push:
+    paths:
+      - 'kino/**'
+      - 'tests/kino.test.mjs'
+      - 'registry.json'
+      - 'battlefield/**/data/**'
+      - 'lake/data/index.json'
+  pull_request:
+    paths:
+      - 'kino/**'
+      - 'tests/kino.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node kino/scripts/validate.mjs
+      - run: node kino/scripts/build-index.mjs --offline
+      - name: Built files are up to date
+        run: git diff --exit-code -- kino/data/index.json kino/data/media.json || (echo "Run node kino/scripts/build-index.mjs and commit kino/data." && exit 1)
+      - run: node --test tests/kino.test.mjs

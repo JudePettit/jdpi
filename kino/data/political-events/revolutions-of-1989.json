@@ -1,0 +1,174 @@
+{
+  "id": "revolutions-of-1989",
+  "title": "The Revolutions of 1989",
+  "category": "political-events",
+  "subjects": [{ "qid": "Q382861", "label": "Revolutions of 1989" }],
+  "era": [1985, 1991],
+  "summary": "In a single year the communist regimes of central and eastern Europe fell, all but one of them without bloodshed, and within two more years the Soviet Union itself was gone. Twelve scenes, country by country, from the Gdańsk shipyard to Bucharest.",
+  "minutes": 6,
+  "preview": { "scene": "hungary" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Revolutions of 1989 (Q382861)", "url": "https://www.wikidata.org/wiki/Q382861" },
+    { "id": "garton-ash-1990", "kind": "book", "author": "Timothy Garton Ash", "short": "Garton Ash 1990","title": "We the People: The Revolution of '89 Witnessed in Warsaw, Budapest, Berlin and Prague", "year": 1990, "publisher": "Granta Books" },
+    { "id": "kenney-2002", "kind": "book", "author": "Padraic Kenney", "title": "A Carnival of Revolution: Central Europe 1989", "year": 2002, "publisher": "Princeton University Press" },
+    { "id": "kotkin-gross-2009", "kind": "book", "author": "Stephen Kotkin, with a contribution by Jan T. Gross", "short": "Kotkin 2009", "title": "Uncivil Society: 1989 and the Implosion of the Communist Establishment", "year": 2009, "publisher": "Modern Library" },
+    { "id": "sarotte-2014", "kind": "book", "author": "Mary Elise Sarotte", "title": "The Collapse: The Accidental Opening of the Berlin Wall", "year": 2014, "publisher": "Basic Books" },
+    { "id": "sarotte-2009", "kind": "book", "author": "Mary Elise Sarotte", "title": "1989: The Struggle to Create Post-Cold War Europe", "year": 2009, "publisher": "Princeton University Press" },
+    { "id": "brown-1996", "kind": "book", "author": "Archie Brown", "title": "The Gorbachev Factor", "year": 1996, "publisher": "Oxford University Press" },
+    { "id": "siani-davies-2005", "kind": "book", "author": "Peter Siani-Davies", "title": "The Romanian Revolution of December 1989", "year": 2005, "publisher": "Cornell University Press" },
+    { "id": "gorbachev-1988", "kind": "web", "author": "Mikhail Gorbachev", "year": 1988, "title": "Address to the 43rd United Nations General Assembly, 7 December 1988", "publisher": "Wikisource (text of the United Nations record)", "url": "https://en.wikisource.org/wiki/Address_to_the_43rd_U.N._General_Assembly_Session" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Revolutions of 1989",
+      "narration": "In 1989 the communist regimes that the Soviet Union had imposed on central and eastern Europe after the Second World War fell one after another: in Poland, Hungary, East Germany, Bulgaria, Czechoslovakia and Romania. Except in Romania, they fell almost without bloodshed. Within two more years Germany was reunited and the Soviet Union itself had dissolved. This film follows the year that ended the Cold War division of Europe.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Events", "heading": "The Revolutions of 1989", "sub": "From Gdańsk to Bucharest" },
+      "focus": { "countries": ["POL", "HUN", "CZE", "SVK", "BGR", "ROU"], "bbox": [3, 40, 35, 58] },
+      "link": { "label": "Historical Calendar · November 1989", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1989-11" },
+      "cites": ["garton-ash-1990", "kotkin-gross-2009"]
+    },
+    {
+      "id": "bloc",
+      "title": "The Soviet bloc in the 1980s",
+      "narration": "Since the late 1940s the Soviet Union had kept its hold on the region by force when it had to, crushing risings in East Germany in 1953 and Hungary in 1956 and invading Czechoslovakia in 1968. By the 1980s the planned economies were stagnating, and several were heavily in debt to Western lenders. In Poland the independent trade union Solidarity, born in the Gdańsk shipyard strikes of 1980, had nearly ten million members before martial law drove it underground in December 1981.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Soviet Union", "tone": 3, "countries": ["SUN"] },
+          { "label": "Its allies in the Warsaw Pact (East Germany marked by its capital)", "tone": 2, "countries": ["POL", "CZE", "SVK", "HUN", "ROU", "BGR"] }
+        ],
+        "fronts": [
+          { "label": "The Iron Curtain (approximate)", "line": [[10.9, 53.96], [10.8, 53.68], [10.63, 53.36], [11.57, 53.04], [10.95, 52.75], [11.05, 52.2], [10.65, 51.75], [10.28, 51.48], [10.0, 50.85], [9.93, 50.72], [10.4, 50.38], [11.2, 50.33], [11.4, 50.5], [12.1, 50.32], [12.45, 50.0], [12.85, 49.33], [13.84, 48.77], [14.3, 48.58], [14.97, 48.77], [15.1, 48.98], [16.05, 48.77], [16.94, 48.62], [16.98, 48.17], [17.16, 48.01], [17.1, 47.93], [16.45, 47.68], [16.5, 47.5], [16.15, 46.95], [16.11, 46.87]] }
+        ]
+      },
+      "focus": { "points": [[13.4, 52.52, "East Berlin"], [18.65, 54.35, "Gdańsk shipyard, 1980"]], "bbox": [-2, 40, 42, 62] },
+      "link": { "label": "Kino · The Second World War in Europe: a divided continent", "suite": "kino", "module": "kino-wars", "at": "kino/index.html?cat=wars#doc=ww2-europe&s=aftermath" },
+      "cites": ["kenney-2002", "kotkin-gross-2009"]
+    },
+    {
+      "id": "gorbachev",
+      "title": "Gorbachev changes the rules",
+      "narration": "Mikhail Gorbachev became the Soviet leader in March 1985 and set out to revive the Soviet system through perestroika, or restructuring, and glasnost, or openness. At the United Nations in December 1988 he announced deep unilateral cuts in Soviet forces and declared that every people had the right to choose its own path. In effect it signalled that Soviet tanks would no longer keep unpopular governments in power, though few in the region yet believed it.",
+      "visual": { "kind": "quote", "text": "Freedom of choice is a universal principle and there should be no exceptions.", "who": "Mikhail Gorbachev, United Nations General Assembly", "when": "7 December 1988", "cite": "gorbachev-1988" },
+      "link": { "label": "Encyclopaedia · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
+      "cites": ["brown-1996", "gorbachev-1988"]
+    },
+    {
+      "id": "poland",
+      "title": "Poland: the Round Table and the June election",
+      "narration": "Faced with strikes and a failing economy, Poland's communist leaders opened talks with Solidarity in February 1989. The Round Table agreement legalised the union and called elections for June, in which 161 of the 460 seats in the lower house, the Sejm, and every seat in a new Senate were open to free contest. Solidarity's candidates won all 161 of those Sejm seats and 99 of the 100 in the Senate, and in August Tadeusz Mazowiecki became the first prime minister in the Soviet bloc in four decades who was not a communist.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Poland's election of June 1989: the freely contested seats", "unit": "seats",
+        "data": [
+          { "label": "Sejm: seats open to free contest", "value": 161 },
+          { "label": "Sejm: seats won by Solidarity", "value": 161 },
+          { "label": "Senate: seats, all open", "value": 100 },
+          { "label": "Senate: seats won by Solidarity", "value": 99 }
+        ],
+        "note": "The other 299 Sejm seats, 65 per cent, were reserved for the communist party and its allies under the Round Table agreement.",
+        "cite": ["kenney-2002", "garton-ash-1990"]
+      },
+      "link": { "label": "Encyclopaedia · Solidarity", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1003" },
+      "cites": ["kenney-2002", "garton-ash-1990"]
+    },
+    {
+      "id": "hungary",
+      "title": "Hungary opens the border",
+      "narration": "In Hungary, reformers in the ruling party had already allowed new parties to form. In May 1989 Hungary began taking down the fence on its border with Austria, and in June it gave a hero's reburial to Imre Nagy, the prime minister executed after the rising of 1956. In August hundreds of East Germans escaped through a border gate opened for a picnic near Sopron, and on 11 September Hungary let thousands more cross into Austria and on to West Germany, the first time a Warsaw Pact state had openly let them leave for the West.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Hungary", "tone": 2, "countries": ["HUN"] },
+          { "label": "Austria", "tone": 1, "countries": ["AUT"] }
+        ],
+        "arrows": [
+          { "from": [17.2, 47.45], "via": [16.75, 47.8], "to": [16.4, 48.15], "tone": 1, "label": "Into Austria, 11 September" },
+          { "from": [16.2, 48.25], "via": [14.6, 48.35], "to": [13.45, 48.55], "tone": 1, "label": "On to West Germany" }
+        ]
+      },
+      "focus": { "points": [[19.04, 47.5, "Budapest: Imre Nagy reburied, 16 June"], [16.59, 47.68, "Sopron: the Pan-European Picnic, 19 August"]], "bbox": [9, 44.5, 24, 51] },
+      "link": { "label": "Political Retrospective · Hungary, 1989", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1989&c=310" },
+      "cites": ["kenney-2002", "garton-ash-1990"]
+    },
+    {
+      "id": "leipzig",
+      "title": "East Germany: ‘We are the people’",
+      "narration": "Through the autumn tens of thousands of East Germans left through Hungary and Czechoslovakia, while many who stayed took to the streets. On 9 October some 70,000 people marched around Leipzig's ring road chanting ‘We are the people’, and the security forces, armed and waiting, did not open fire. Erich Honecker was removed as party leader nine days later, and on 4 November a vast crowd filled East Berlin's Alexanderplatz to demand free speech and free elections.",
+      "visual": {
+        "kind": "timeline", "from": "1989-09", "to": "1989-12",
+        "events": [
+          { "at": "1989-09-11", "label": "Hungary opens its border" },
+          { "at": "1989-10-09", "label": "70,000 march in Leipzig" },
+          { "at": "1989-10-18", "label": "Honecker removed" },
+          { "at": "1989-11-04", "label": "Alexanderplatz rally" },
+          { "at": "1989-11-09", "label": "The Wall opens" },
+          { "at": "1989-11-10", "label": "Zhivkov ousted in Bulgaria" },
+          { "at": "1989-11-17", "label": "Prague students march" },
+          { "at": "1989-12-22", "label": "Ceaușescu flees" }
+        ]
+      },
+      "link": { "label": "Political Retrospective · East Germany, 1989", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1989&c=265" },
+      "cites": ["sarotte-2014", "kotkin-gross-2009"]
+    },
+    {
+      "id": "wall",
+      "title": "The Wall opens, 9 November",
+      "narration": "On the evening of 9 November the Politburo's spokesman, Günter Schabowski, announced new travel rules at a press conference and, unsure of the details, said that they took effect immediately. Crowds gathered at the crossings in Berlin, and shortly before midnight the officer in charge at Bornholmer Strasse, unable to get orders, opened the gate. As Mary Elise Sarotte has shown, the opening was not a planned concession but the result of confusion, pressure from the crowds and decisions taken by individuals on the night.",
+      "visual": { "kind": "portrait", "file": "File:BerlinWall-BrandenburgGate.jpg", "heading": "The Berlin Wall", "sub": "At the Brandenburg Gate, November 1989", "position": "50% 40%" },
+      "link": { "label": "Encyclopaedia · fall of the Berlin Wall", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q69163529" },
+      "cites": ["sarotte-2014"]
+    },
+    {
+      "id": "prague",
+      "title": "Czechoslovakia: the Velvet Revolution",
+      "narration": "In Prague, police beat students on a commemorative march on 17 November. Within days the dissident playwright Václav Havel and his colleagues founded Civic Forum, crowds of hundreds of thousands filled Wenceslas Square, and a two-hour general strike on 27 November showed that workers had joined them. The Communist Party gave up its leading role, and on 29 December the federal parliament elected Havel president.",
+      "visual": { "kind": "portrait", "qid": "Q36233", "heading": "Václav Havel", "sub": "President from 29 December 1989", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Václav Havel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q36233" },
+      "cites": ["garton-ash-1990", "kenney-2002"]
+    },
+    {
+      "id": "romania",
+      "title": "Romania: the one violent revolution",
+      "narration": "Romania's revolution was different. Protests in Timișoara from 16 December were met with gunfire, and when Nicolae Ceaușescu addressed a mass rally in Bucharest on 21 December, the crowd turned against him. He fled by helicopter the next day, was captured, and after a hurried trial was shot with his wife Elena on 25 December. About 1,100 people died in the revolution, most of them after Ceaușescu had fallen, in confused fighting whose causes are still disputed.",
+      "visual": {
+        "kind": "map", "still": true,
+        "groups": [{ "label": "Romania", "tone": 2, "countries": ["ROU"] }]
+      },
+      "focus": { "points": [[21.23, 45.75, "Timișoara, from 16 December"], [26.1, 44.43, "Bucharest, 21 to 25 December"], [25.46, 44.93, "Târgoviște, 25 December"]], "bbox": [19, 42.5, 31, 49] },
+      "link": { "label": "Retrospective Battlefield · Romania, 1989", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1989&w=u370" },
+      "cites": ["siani-davies-2005", "kotkin-gross-2009"]
+    },
+    {
+      "id": "why",
+      "title": "Why did the regimes fall?",
+      "narration": "Historians weigh the causes differently. Timothy Garton Ash and Padraic Kenney stress the dissidents, churches, unions and protest movements that had built an independent civil society under communism. Stephen Kotkin argues instead that the regimes were bankrupt and their own ruling establishments lost the will to defend them, so that what he calls an uncivil society of party officials simply gave way. Most agree that Gorbachev's refusal to use force was decisive.",
+      "visual": { "kind": "module", "blurb": "What happened when the far left held power, and what its critics and defenders say, in the Learning course on Politics." },
+      "link": { "label": "Learning · Politics: The far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+      "cites": ["garton-ash-1990", "kenney-2002", "kotkin-gross-2009"]
+    },
+    {
+      "id": "aftermath",
+      "title": "Reunification and the end of the Soviet Union",
+      "narration": "East Germany held its first free election in March 1990, and on 3 October it joined the Federal Republic, uniting Germany within NATO. Lithuania declared independence in March 1990, and after a failed coup by communist hardliners in Moscow in August 1991, the Soviet republics broke away one by one. Gorbachev resigned on 25 December 1991, and the Soviet Union was dissolved.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Germany, reunited 3 October 1990", "tone": 1, "countries": ["DEU"] },
+          { "label": "The fifteen Soviet republics, independent by the end of 1991", "tone": 3, "countries": ["SUN"] }
+        ]
+      },
+      "focus": { "points": [[13.4, 52.52, "Berlin"], [25.28, 54.69, "Vilnius, March 1990"], [37.62, 55.76, "Moscow: the coup fails, August 1991"]], "bbox": [0, 36, 62, 64] },
+      "link": { "label": "Encyclopaedia · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
+      "cites": ["sarotte-2009", "brown-1996"]
+    },
+    {
+      "id": "legacy",
+      "title": "After 1989",
+      "narration": "The revolutions brought free elections, open borders and market economies, and most of the countries went on to join NATO in 1999 and 2004 and the European Union in 2004 and 2007. The transition also brought unemployment, inequality and, in Yugoslavia, war. More than three decades on, voters across the region still argue over what 1989 promised and what it delivered.",
+      "visual": { "kind": "module", "blurb": "Who holds power in Poland now: its executive, parliament, courts and coming elections." },
+      "link": { "label": "Political Atlas · Poland today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#POL" },
+      "cites": ["kenney-2002", "kotkin-gross-2009"]
+    }
+  ]
+}

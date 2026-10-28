@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" class="prp" data-suite="kino">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>Kino · PRP</title>
+  <meta name="description" content="Kino: PRP's documentaries on wars, political events, parties, people and thinkers, narrated with maps, timelines and portraits that open the matching place in PRP.">
+  <link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../design/prp.css">
+  <link rel="stylesheet" href="kino.css">
+  <script src="../design/prp-bar.js" data-suite="kino" data-module="wars" data-shell="../" defer></script>
+  <!-- One page, six submodules: ?cat= picks the category; the connector (deferred, so it runs after this) is told which. -->
+  <script>(function(){var C={'political-events':'Political Events','political-figures':'Political Figures','political-parties':'Political Parties','wars':'Wars','geopolitical-events':'Geopolitical Events','great-thinkers':'Great Thinkers'},c=new URLSearchParams(location.search).get('cat');if(!C[c])c='wars';var s=document.querySelector('script[src*="prp-bar.js"]');if(s)s.dataset.module='kino-'+c;document.documentElement.dataset.cat=c;document.title=C[c]+' · Kino · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
+</head>
+<body>
+  <div class="kn-page">
+    <header class="kn-front">
+      <p class="prp-eyebrow" data-jdpi-standalone><span>Kino <span class="sep">·</span> <span id="eyebrow-cat">Wars</span></span></p>
+      <h1 class="prp-title" id="cat-title">Wars</h1>
+      <p class="prp-dek" id="cat-dek">Documentaries narrated with maps, timelines and portraits; every scene can open its place in PRP.</p>
+      <p class="prp-meta" id="cat-meta"><span>Loading…</span></p>
+      <nav class="kn-cats" id="cats" aria-label="Kino categories"></nav>
+    </header>
+
+    <main>
+      <section id="catalogue" aria-labelledby="cat-title">
+        <div class="kn-toolbar">
+          <label class="sr-only" for="find">Find a documentary</label>
+          <input id="find" class="prp-input" type="search" placeholder="Find a documentary, person or place" autocomplete="off">
+          <label class="sr-only" for="sort">Sort</label>
+          <select id="sort" class="prp-select"><option value="era">By period</option><option value="title">By title</option><option value="short">Shortest first</option></select>
+          <span class="count" id="count"></span>
+        </div>
+        <div class="kn-cards" id="cards" aria-live="polite"></div>
+        <section class="kn-planned" id="planned" hidden aria-labelledby="planned-h">
+          <h2 class="prp-h2" id="planned-h">In preparation</h2>
+          <ul id="planned-list"></ul>
+        </section>
+      </section>
+
+      <section id="player" hidden aria-labelledby="doc-title">
+        <div class="kn-player-head">
+          <a class="kn-back" id="back" href="#">← <span id="back-label">All documentaries</span></a>
+          <h2 id="doc-title"></h2>
+          <span class="meta" id="doc-meta"></span>
+        </div>
+        <div class="kn-grid">
+          <figure class="kn-theatre" id="theatre">
+            <div class="kn-stage" id="stage" role="img" aria-roledescription="documentary stage" aria-label="">
+              <div class="kn-layer fade"></div>
+              <div class="kn-legend"></div>
+              <div class="kn-credit"></div>
+              <div class="kn-badge" id="badge"></div>
+              <button type="button" class="kn-bigplay" id="bigplay">Play</button>
+            </div>
+            <figcaption class="kn-captions" id="captions">
+              <div class="kn-cap-head"><span id="cap-no"></span><b id="cap-title"></b></div>
+              <p class="kn-cap-text" id="cap-text" lang="en-GB"></p>
+              <div class="kn-cap-foot" id="cap-foot"></div>
+            </figcaption>
+            <div class="kn-controls" role="toolbar" aria-label="Player controls" id="controls">
+              <button type="button" class="prp-btn" id="prev" title="Previous scene (←)" aria-label="Previous scene">⏮</button>
+              <button type="button" class="prp-btn primary" id="play" title="Play or pause (Space)" aria-label="Play">▶</button>
+              <button type="button" class="prp-btn" id="next" title="Next scene (→)" aria-label="Next scene">⏭</button>
+              <span class="count" id="scene-count" aria-live="polite"></span>
+              <div class="kn-progress" id="progress" aria-label="Scenes"></div>
+              <label class="sr-only" for="speed">Speed</label>
+              <select id="speed" class="prp-select" title="Speed (&lt; and &gt;)">
+                <option value="0.8">0.8×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="1.5">1.5×</option>
+              </select>
+              <button type="button" class="prp-btn" id="voice" aria-pressed="true" title="Voice on or captions only (C)"><span class="lbl-text">Voice</span></button>
+              <button type="button" class="prp-btn" id="music" aria-pressed="false" title="Quiet classical music (M)"><span aria-hidden="true">♫</span> Music</button>
+              <button type="button" class="prp-btn" id="follow" aria-pressed="false" title="Follow along in PRP: open each scene's place as the film plays (P)"><span aria-hidden="true">↗</span> Follow<span class="wide"> in PRP</span></button>
+              <details class="kn-settings" id="settings">
+                <summary class="prp-btn" title="Voice and shortcuts" aria-label="Settings">⚙</summary>
+                <div class="pop">
+                  <label>Voice <select class="prp-select" id="voice-pick"></select></label>
+                  <div class="np" id="now-playing">Music is off.</div>
+                  <ul class="kn-help" aria-label="Keyboard shortcuts">
+                    <li><kbd>Space</kbd></li><li>Play or pause</li>
+                    <li><kbd>←</kbd> <kbd>→</kbd></li><li>Previous or next scene</li>
+                    <li><kbd>Home</kbd> <kbd>End</kbd></li><li>First or last scene</li>
+                    <li><kbd>&lt;</kbd> <kbd>&gt;</kbd></li><li>Slower or faster</li>
+                    <li><kbd>C</kbd></li><li>Voice or captions only</li>
+                    <li><kbd>M</kbd></li><li>Music</li>
+                    <li><kbd>P</kbd></li><li>Follow along in PRP</li>
+                    <li><kbd>O</kbd></li><li>Open this scene's place in PRP</li>
+                    <li><kbd>F</kbd></li><li>Full screen</li>
+                  </ul>
+                </div>
+              </details>
+              <button type="button" class="prp-btn" id="fullscreen" title="Full screen (F)" aria-label="Full screen">⛶</button>
+            </div>
+            <p class="kn-note" id="note" role="status"></p>
+          </figure>
+          <nav class="kn-chapters" aria-labelledby="chapters-h">
+            <h3 id="chapters-h">Chapters</h3>
+            <ol id="chapter-list"></ol>
+          </nav>
+        </div>
+
+        <div class="kn-about">
+          <section class="prp-panel" aria-labelledby="about-h">
+            <div class="prp-panel-head"><b id="about-h">About this documentary</b></div>
+            <div class="prp-panel-body">
+              <p class="prp-prose" id="doc-summary"></p>
+              <div class="prp-label">Subjects</div>
+              <div class="kn-subjects" id="doc-subjects"></div>
+            </div>
+          </section>
+          <section class="prp-panel" aria-labelledby="links-h">
+            <div class="prp-panel-head"><b id="links-h">In PRP</b><span class="prp-muted" id="links-hint"></span></div>
+            <div class="prp-panel-body"><ul class="kn-links" id="doc-links"></ul></div>
+          </section>
+        </div>
+        <section class="prp-panel kn-quiz" id="quiz" hidden aria-labelledby="quiz-h">
+          <div class="prp-panel-head"><b id="quiz-h">Quiz</b></div>
+          <div class="prp-panel-body" id="quiz-body"></div>
+        </section>
+        <div class="prp-sources kn-doc-sources" id="doc-sources"></div>
+      </section>
+    </main>
+
+    <footer class="prp-sources kn-footer" id="sources">
+      <p><b>Sources.</b> Each documentary is written by PRP in its own words from the scholarly books and articles it lists, with names, dates and images checked against Wikidata (CC0). Maps: world-atlas 2.0.2 (Natural Earth, public domain), drawn with d3 7.9.0 on present-day borders for orientation. Images: Wikimedia Commons, each credited on screen with its author and licence. Music: public-domain and CC0 recordings from Wikimedia Commons. Voice: your browser's own speech synthesis (a British English voice where one is installed).</p>
+      <p><b>Method.</b> Figures for deaths are given as ranges from named sources, never as single uncertain numbers. Arrows and front lines are simplified sketches of movements described in the sources, marked approximate where they are. A full stop with no space after it is read as “point” between digits and “dot” between letters, never as the end of a sentence.</p>
+      <p><b>See also.</b> <span id="see-also"></span></p>
+    </footer>
+  </div>
+  <script type="module" src="kino.js"></script>
+</body>
+</html>

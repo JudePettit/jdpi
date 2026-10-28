@@ -1,0 +1,23 @@
+{
+  "_note": "Documentaries in preparation, shown under each category's catalogue. Remove an entry when its script is published. qid (optional) is checked against Wikidata by build-index.mjs.",
+  "political-events": [],
+  "political-figures": [
+    { "title": "Charles de Gaulle", "era": [1890, 1970], "qid": "Q2042" },
+    { "title": "Margaret Thatcher", "era": [1925, 2013], "qid": "Q7416" }
+  ],
+  "political-parties": [
+    { "title": "The Labour Party, 1900–1951", "era": [1900, 1951], "qid": "Q9630" },
+    { "title": "The Indian National Congress", "era": [1885, 2026], "qid": "Q10225" }
+  ],
+  "wars": [
+    { "title": "The Spanish Civil War, 1936–1939", "era": [1936, 1939], "qid": "Q10859" }
+  ],
+  "geopolitical-events": [],
+  "great-thinkers": [
+    { "title": "Thucydides and the origins of realism", "era": [-460, -400], "qid": "Q41683", "from": "Learning · Politics" },
+    { "title": "Thomas Hobbes", "era": [1588, 1679], "qid": "Q37621", "from": "Learning · Politics" },
+    { "title": "John Maynard Keynes", "era": [1883, 1946], "qid": "Q9317", "from": "Learning · Economics" },
+    { "title": "Isaac Newton", "era": [1642, 1727], "qid": "Q935", "from": "Timeline of Progress" },
+    { "title": "Albert Einstein", "era": [1879, 1955], "qid": "Q937", "from": "Timeline of Progress" }
+  ]
+}

@@ -61,10 +61,14 @@
     const bar = document.createElement('div');
     bar.className = 'jdpi-returnbar prp-returnbar';
     const link = SHELL + (suite ? `#/${suite}${moduleId ? '/' + moduleId : ''}` : '');
-    const title = document.title.replace(/\s*[·|—-]\s*PRP.*$/, '').replace(/</g, '&lt;');
     bar.innerHTML = `<a href="${link}"><span aria-hidden="true">←</span><b>PRP</b></a>` +
       (NAMES[suite] ? `<span class="sep">/</span><span class="suite">${NAMES[suite]}</span>` : '') +
-      `<span class="sep">/</span><span>${title}</span><button type="button" class="theme"></button>`;
+      `<span class="sep">/</span><span class="page-title"></span><button type="button" class="theme"></button>`;
+    // Follow the page's title, which some pages change as you move within them (an Encyclopaedia entry, a Kino film).
+    const pageTitle = bar.querySelector('.page-title');
+    const syncTitle = () => { pageTitle.textContent = document.title.replace(/\s*[·|—-]\s*PRP.*$/, ''); };
+    syncTitle();
+    new MutationObserver(syncTitle).observe(document.head, { childList: true, characterData: true, subtree: true });
     const btn = bar.querySelector('.theme');
     const show = () => { btn.textContent = LABEL[store.get() || 'system']; };
     btn.onclick = () => { const next = { system: 'light', light: 'dark', dark: 'system' }[store.get() || 'system']; store.set(next); setTheme(next); show(); };

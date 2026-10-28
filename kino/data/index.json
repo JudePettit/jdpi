@@ -1,0 +1,1356 @@
+{
+ "generated": "2026-10-28",
+ "categories": [
+  {
+   "id": "political-events",
+   "name": "Political Events",
+   "dek": "Revolutions, elections, treaties and crises that changed how countries are governed.",
+   "count": 3
+  },
+  {
+   "id": "political-figures",
+   "name": "Political Figures",
+   "dek": "The lives of leaders, reformers and revolutionaries, told from their sources.",
+   "count": 3
+  },
+  {
+   "id": "political-parties",
+   "name": "Political Parties",
+   "dek": "How parties formed, what they stood for, and how they won and lost power.",
+   "count": 3
+  },
+  {
+   "id": "wars",
+   "name": "Wars",
+   "dek": "Wars from their causes to their aftermath, with the maps and figures that explain them.",
+   "count": 3
+  },
+  {
+   "id": "geopolitical-events",
+   "name": "Geopolitical Events",
+   "dek": "Shifts in the balance between powers: alliances, partitions, blockades and the end of empires.",
+   "count": 3
+  },
+  {
+   "id": "great-thinkers",
+   "name": "Great Thinkers",
+   "dek": "Multi-part courses on the great minds met across PRP: economists, philosophers, political theorists and scientists.",
+   "courses": true,
+   "count": 3
+  }
+ ],
+ "docs": [
+  {
+   "id": "niccolo-machiavelli",
+   "title": "Niccolò Machiavelli",
+   "category": "great-thinkers",
+   "era": [
+    1469,
+    1527
+   ],
+   "minutes": 6,
+   "summary": "A course in three parts on the Florentine diplomat whose short book on princes made his name a byword: his career, The Prince and the Discourses, and five centuries of argument over what he meant. Eleven scenes and a short quiz.",
+   "subjects": [
+    {
+     "qid": "Q1399",
+     "label": "Niccolò Machiavelli"
+    }
+   ],
+   "scenes": 11,
+   "parts": 3,
+   "quiz": 4,
+   "sources": 10,
+   "scholarly": 7,
+   "links": [
+    "rs/encyclopedia",
+    "rs/kardashev",
+    "rs/learning-politics"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:Portrait of Niccolò Machiavelli by Santi di Tito.jpg",
+    "position": "50% 25%"
+   },
+   "path": "great-thinkers/niccolo-machiavelli.json"
+  },
+  {
+   "id": "adam-smith",
+   "title": "Adam Smith",
+   "category": "great-thinkers",
+   "era": [
+    1723,
+    1790
+   ],
+   "minutes": 6,
+   "summary": "A course in three parts on the Scottish philosopher often called the founder of modern economics: his life, The Wealth of Nations, and the very different uses made of him since. Eleven scenes and a short quiz.",
+   "subjects": [
+    {
+     "qid": "Q9381",
+     "label": "Adam Smith"
+    }
+   ],
+   "scenes": 11,
+   "parts": 3,
+   "quiz": 4,
+   "sources": 10,
+   "scholarly": 7,
+   "links": [
+    "rs/encyclopedia",
+    "ns/progress",
+    "mm/learning",
+    "rs/kardashev"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:AdamSmith.jpg",
+    "position": "50% 25%"
+   },
+   "path": "great-thinkers/adam-smith.json"
+  },
+  {
+   "id": "karl-marx",
+   "title": "Karl Marx",
+   "category": "great-thinkers",
+   "era": [
+    1818,
+    1883
+   ],
+   "minutes": 6,
+   "summary": "A course in three parts on the German philosopher and revolutionary: a life in exile, the ideas of the Manifesto and Capital, and what was later done in his name. Twelve scenes and a short quiz.",
+   "subjects": [
+    {
+     "qid": "Q9061",
+     "label": "Karl Marx"
+    }
+   ],
+   "scenes": 12,
+   "parts": 3,
+   "quiz": 4,
+   "sources": 11,
+   "scholarly": 8,
+   "links": [
+    "rs/encyclopedia",
+    "mm/learning",
+    "rs/kardashev",
+    "ns/progress",
+    "rs/learning-politics"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:Karl Marx 001 restored.jpg",
+    "position": "50% 22%"
+   },
+   "path": "great-thinkers/karl-marx.json"
+  },
+  {
+   "id": "winston-churchill",
+   "title": "Winston Churchill",
+   "category": "political-figures",
+   "era": [
+    1874,
+    1965
+   ],
+   "minutes": 7,
+   "summary": "Soldier, reporter, minister, historian and twice Prime Minister: Churchill's life from Blenheim to his state funeral, including the decisions still argued over. Thirteen scenes.",
+   "subjects": [
+    {
+     "qid": "Q8016",
+     "label": "Winston Churchill"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 16,
+   "scholarly": 10,
+   "links": [
+    "rs/encyclopedia",
+    "rs/kardashev",
+    "mm/learning",
+    "rs/war-focus",
+    "rs/retrospective",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:Winston Churchill C3519635.jpg",
+    "position": "50% 20%"
+   },
+   "path": "political-figures/winston-churchill.json"
+  },
+  {
+   "id": "franklin-roosevelt",
+   "title": "Franklin D. Roosevelt",
+   "category": "political-figures",
+   "era": [
+    1882,
+    1945
+   ],
+   "minutes": 7,
+   "summary": "The only American president elected four times: Roosevelt's life from Hyde Park to Warm Springs, the New Deal, the war, and the decisions still argued over. Thirteen scenes.",
+   "subjects": [
+    {
+     "qid": "Q8007",
+     "label": "Franklin Delano Roosevelt"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 11,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/kardashev",
+    "ns/progress",
+    "rs/retrospective",
+    "rs/learning-politics",
+    "mm/learning",
+    "kino/kino-political-figures",
+    "rs/war-focus",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:FDR 1944 Color Portrait.jpg",
+    "position": "50% 22%"
+   },
+   "path": "political-figures/franklin-roosevelt.json"
+  },
+  {
+   "id": "deng-xiaoping",
+   "title": "Deng Xiaoping",
+   "category": "political-figures",
+   "era": [
+    1904,
+    1997
+   ],
+   "minutes": 7,
+   "summary": "Revolutionary, party leader who fell from power three times, and architect of China's market reforms: Deng's life from Sichuan to the southern tour, including the war with Vietnam and the killings of June 1989. Thirteen scenes.",
+   "subjects": [
+    {
+     "qid": "Q16977",
+     "label": "Deng Xiaoping"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 11,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/retrospective",
+    "rs/war-focus",
+    "rs/learning-politics",
+    "rs/battlefield-history",
+    "rt/pestle",
+    "rs/historical-calendar",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "portrait",
+    "file": "File:Deng Xiaoping at the arrival ceremony for the Vice Premier of China (cropped).jpg",
+    "position": "50% 25%"
+   },
+   "path": "political-figures/deng-xiaoping.json"
+  },
+  {
+   "id": "russian-revolutions-1917",
+   "title": "The Russian Revolutions of 1917",
+   "category": "political-events",
+   "era": [
+    1905,
+    1924
+   ],
+   "minutes": 7,
+   "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and the words of Lenin and one of his sharpest critics on the left.",
+   "subjects": [
+    {
+     "qid": "Q8729",
+     "label": "Russian Revolution"
+    },
+    {
+     "qid": "Q101534",
+     "label": "February Revolution"
+    },
+    {
+     "qid": "Q42976",
+     "label": "October Revolution"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 9,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/kardashev",
+    "rs/learning-politics",
+    "rs/retrospective"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "POL",
+     "LTU",
+     "LVA",
+     "EST",
+     "FIN",
+     "UKR"
+    ],
+    "tones": {
+     "POL": 2,
+     "LTU": 2,
+     "LVA": 2,
+     "EST": 2,
+     "FIN": 2,
+     "UKR": 2
+    },
+    "bbox": [
+     18,
+     43,
+     66,
+     66
+    ],
+    "arrows": [
+     {
+      "from": [
+       61.4,
+       55.2
+      ],
+      "to": [
+       50.2,
+       55.6
+      ],
+      "via": [
+       55.5,
+       55.4
+      ],
+      "tone": 3
+     },
+     {
+      "from": [
+       39.7,
+       47.2
+      ],
+      "to": [
+       36.4,
+       52.6
+      ],
+      "via": [
+       37.6,
+       50.3
+      ],
+      "tone": 3
+     },
+     {
+      "from": [
+       27.6,
+       58.9
+      ],
+      "to": [
+       29.9,
+       59.6
+      ],
+      "tone": 3
+     }
+    ]
+   },
+   "path": "political-events/russian-revolutions-1917.json"
+  },
+  {
+   "id": "chinese-communist-party",
+   "title": "The Chinese Communist Party",
+   "category": "political-parties",
+   "era": [
+    1921,
+    2026
+   ],
+   "minutes": 7,
+   "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
+   "subjects": [
+    {
+     "qid": "Q17427",
+     "label": "Chinese Communist Party"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 11,
+   "scholarly": 5,
+   "links": [
+    "rs/encyclopedia",
+    "rs/war-focus",
+    "rs/retrospective",
+    "mm/learning",
+    "rs/learning-politics",
+    "ns/progress",
+    "rs/historical-calendar",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "CHN"
+    ],
+    "tones": {},
+    "bbox": [
+     96,
+     20,
+     122,
+     42
+    ],
+    "arrows": [
+     {
+      "from": [
+       116.03,
+       25.89
+      ],
+      "to": [
+       107.1,
+       27.6
+      ],
+      "via": [
+       111.2,
+       25.6
+      ],
+      "tone": 1
+     },
+     {
+      "from": [
+       106.8,
+       27.6
+      ],
+      "to": [
+       102.3,
+       29.7
+      ],
+      "via": [
+       102.6,
+       26.6
+      ],
+      "tone": 1
+     },
+     {
+      "from": [
+       102.4,
+       30.1
+      ],
+      "to": [
+       108,
+       36.8
+      ],
+      "via": [
+       103.2,
+       33.2
+      ],
+      "tone": 1
+     }
+    ]
+   },
+   "path": "political-parties/chinese-communist-party.json"
+  },
+  {
+   "id": "institutional-revolutionary-party",
+   "title": "Mexico's Institutional Revolutionary Party",
+   "category": "political-parties",
+   "era": [
+    1929,
+    2026
+   ],
+   "minutes": 7,
+   "summary": "For seventy-one years one party, under three names, won every presidential election in Mexico. Twelve scenes on how the PRI was built out of a revolution, how it held power, and how it lost it.",
+   "subjects": [
+    {
+     "qid": "Q682969",
+     "label": "Institutional Revolutionary Party"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 14,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/battlefield-history",
+    "rs/retrospective",
+    "rs/historical-calendar",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "MEX"
+    ],
+    "tones": {
+     "MEX": 1
+    },
+    "bbox": [
+     -120,
+     12,
+     -84,
+     34
+    ],
+    "arrows": []
+   },
+   "path": "political-parties/institutional-revolutionary-party.json"
+  },
+  {
+   "id": "ww2-europe",
+   "title": "The Second World War in Europe, 1939–1945",
+   "category": "wars",
+   "era": [
+    1939,
+    1945
+   ],
+   "minutes": 7,
+   "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga, what it cost, and how it divided the continent. Fourteen scenes, with maps that follow War Focus month by month.",
+   "subjects": [
+    {
+     "qid": "Q362",
+     "label": "World War II"
+    },
+    {
+     "qid": "Q7318",
+     "label": "Nazi Germany"
+    },
+    {
+     "qid": "Q15180",
+     "label": "Soviet Union"
+    }
+   ],
+   "scenes": 14,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 15,
+   "scholarly": 13,
+   "links": [
+    "rs/battlefield-history",
+    "rs/encyclopedia",
+    "rs/war-focus",
+    "kino/kino-political-figures",
+    "ns/progress",
+    "rs/historical-calendar"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "SUN",
+     "DEU",
+     "ROU",
+     "HUN",
+     "FIN",
+     "SVK"
+    ],
+    "tones": {
+     "DEU": 2,
+     "ROU": 2,
+     "HUN": 2,
+     "FIN": 2,
+     "SVK": 2,
+     "SUN": 3
+    },
+    "bbox": [
+     14,
+     43,
+     46,
+     62
+    ],
+    "arrows": [
+     {
+      "from": [
+       21.5,
+       54.9
+      ],
+      "to": [
+       29.8,
+       59.4
+      ],
+      "via": [
+       25.6,
+       57.1
+      ],
+      "tone": 2
+     },
+     {
+      "from": [
+       23.8,
+       52.1
+      ],
+      "to": [
+       36.6,
+       55.6
+      ],
+      "via": [
+       30,
+       54.5
+      ],
+      "tone": 2
+     },
+     {
+      "from": [
+       23.6,
+       50.6
+      ],
+      "to": [
+       30.1,
+       50.4
+      ],
+      "via": [
+       27,
+       50.1
+      ],
+      "tone": 2
+     }
+    ]
+   },
+   "path": "wars/ww2-europe.json"
+  },
+  {
+   "id": "partition-of-india",
+   "title": "The Partition of India, 1947",
+   "category": "political-events",
+   "era": [
+    1940,
+    1948
+   ],
+   "minutes": 7,
+   "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with the founders' own words and the range of estimates of the dead and the displaced.",
+   "subjects": [
+    {
+     "qid": "Q129053",
+     "label": "partition of India"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 8,
+   "scholarly": 5,
+   "links": [
+    "rs/retrospective",
+    "rs/kardashev",
+    "rs/encyclopedia",
+    "rs/battlefield-history",
+    "rs/war-focus"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "IND",
+     "PAK",
+     "BGD"
+    ],
+    "tones": {
+     "IND": 1,
+     "PAK": 2,
+     "BGD": 2
+    },
+    "bbox": [
+     66,
+     18,
+     95,
+     36
+    ],
+    "arrows": []
+   },
+   "path": "political-events/partition-of-india.json"
+  },
+  {
+   "id": "korean-war",
+   "title": "The Korean War, 1950–1953",
+   "category": "wars",
+   "era": [
+    1950,
+    1953
+   ],
+   "minutes": 7,
+   "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Twelve scenes, with maps that follow War Focus through the war's turning points.",
+   "subjects": [
+    {
+     "qid": "Q8663",
+     "label": "Korean War"
+    },
+    {
+     "qid": "Q423",
+     "label": "North Korea"
+    },
+    {
+     "qid": "Q884",
+     "label": "South Korea"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 9,
+   "scholarly": 6,
+   "links": [
+    "rs/battlefield-history",
+    "rs/encyclopedia",
+    "rs/war-focus",
+    "rt/pestle"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "CHN",
+     "PRK",
+     "KOR"
+    ],
+    "tones": {
+     "CHN": 3,
+     "PRK": 2,
+     "KOR": 1
+    },
+    "bbox": [
+     121.5,
+     34.5,
+     132,
+     43
+    ],
+    "arrows": [
+     {
+      "from": [
+       124.5,
+       40.65
+      ],
+      "to": [
+       125.95,
+       39.6
+      ],
+      "via": [
+       125.35,
+       40.05
+      ],
+      "tone": 3
+     },
+     {
+      "from": [
+       126.85,
+       41.35
+      ],
+      "to": [
+       127.22,
+       40.6
+      ],
+      "via": [
+       127.15,
+       40.95
+      ],
+      "tone": 3
+     },
+     {
+      "from": [
+       126,
+       39.2
+      ],
+      "to": [
+       126.95,
+       37.5
+      ],
+      "via": [
+       126.6,
+       38.3
+      ],
+      "tone": 3
+     }
+    ]
+   },
+   "path": "wars/korean-war.json"
+  },
+  {
+   "id": "end-of-empire-in-africa",
+   "title": "The End of Empire in Africa, 1951–1980",
+   "category": "geopolitical-events",
+   "era": [
+    1951,
+    1980
+   ],
+   "minutes": 7,
+   "summary": "How the British, French, Belgian and Portuguese empires in Africa came to an end, peacefully in some places and through long wars in others, from Ghana and the Year of Africa to Algeria, the Congo, Kenya and Angola. Twelve scenes.",
+   "subjects": [
+    {
+     "qid": "Q1146918",
+     "label": "decolonisation of Africa"
+    },
+    {
+     "qid": "Q282739",
+     "label": "Pan-Africanism"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 8,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/kardashev",
+    "rs/retrospective",
+    "rs/war-focus",
+    "rs/battlefield-history",
+    "rt/pestle"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "EGY",
+     "ETH",
+     "ERI",
+     "LBR",
+     "ZAF",
+     "LBY",
+     "SDN",
+     "SSD",
+     "MAR",
+     "TUN",
+     "GHA",
+     "GIN",
+     "NGA",
+     "SOM",
+     "CMR",
+     "TGO",
+     "SEN",
+     "MLI",
+     "MDG",
+     "BEN",
+     "NER",
+     "BFA",
+     "CIV",
+     "TCD",
+     "CAF",
+     "COG",
+     "GAB",
+     "MRT",
+     "COD"
+    ],
+    "tones": {
+     "NGA": 1,
+     "SOM": 1,
+     "CMR": 2,
+     "TGO": 2,
+     "SEN": 2,
+     "MLI": 2,
+     "MDG": 2,
+     "BEN": 2,
+     "NER": 2,
+     "BFA": 2,
+     "CIV": 2,
+     "TCD": 2,
+     "CAF": 2,
+     "COG": 2,
+     "GAB": 2,
+     "MRT": 2,
+     "COD": 3
+    },
+    "bbox": [
+     -20,
+     -36,
+     53,
+     38
+    ],
+    "arrows": []
+   },
+   "path": "geopolitical-events/end-of-empire-in-africa.json"
+  },
+  {
+   "id": "liberal-democratic-party-japan",
+   "title": "Japan's Liberal Democratic Party",
+   "category": "political-parties",
+   "era": [
+    1955,
+    2026
+   ],
+   "minutes": 8,
+   "summary": "Formed in 1955 from two conservative parties, the LDP has been in government for all but about four years since. Thirteen scenes on how it won, how it lost power twice, and how it came back each time, to a record victory in 2026.",
+   "subjects": [
+    {
+     "qid": "Q232595",
+     "label": "Liberal Democratic Party"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 14,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/retrospective",
+    "rs/kardashev",
+    "mm/learning",
+    "rs/historical-calendar",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "JPN"
+    ],
+    "tones": {
+     "JPN": 1
+    },
+    "bbox": [
+     128,
+     30,
+     146,
+     42
+    ],
+    "arrows": [
+     {
+      "from": [
+       139.6,
+       35.6
+      ],
+      "to": [
+       135.6,
+       34.75
+      ],
+      "via": [
+       137.4,
+       35
+      ],
+      "tone": 1
+     }
+    ]
+   },
+   "path": "political-parties/liberal-democratic-party-japan.json"
+  },
+  {
+   "id": "vietnam-war",
+   "title": "The Vietnam War, 1955–1975",
+   "category": "wars",
+   "era": [
+    1955,
+    1975
+   ],
+   "minutes": 7,
+   "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Thirteen scenes, with maps that follow War Focus.",
+   "subjects": [
+    {
+     "qid": "Q8740",
+     "label": "Vietnam War"
+    },
+    {
+     "qid": "Q180573",
+     "label": "South Vietnam"
+    },
+    {
+     "qid": "Q36014",
+     "label": "Ho Chi Minh"
+    }
+   ],
+   "scenes": 13,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 10,
+   "scholarly": 6,
+   "links": [
+    "rs/battlefield-history",
+    "rs/war-focus",
+    "rs/encyclopedia",
+    "rt/pestle"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "VNM",
+     "LAO",
+     "KHM"
+    ],
+    "tones": {
+     "LAO": 3,
+     "KHM": 3
+    },
+    "bbox": [
+     99.5,
+     8,
+     112,
+     23.8
+    ],
+    "arrows": [
+     {
+      "from": [
+       102.8,
+       17.4
+      ],
+      "to": [
+       105.75,
+       20.85
+      ],
+      "via": [
+       104.3,
+       19.6
+      ],
+      "tone": 1
+     },
+     {
+      "from": [
+       109.9,
+       16.6
+      ],
+      "to": [
+       108.32,
+       16.1
+      ],
+      "tone": 1
+     }
+    ]
+   },
+   "path": "wars/vietnam-war.json"
+  },
+  {
+   "id": "cuban-missile-crisis",
+   "title": "The Cuban Missile Crisis, 1962",
+   "category": "geopolitical-events",
+   "era": [
+    1962,
+    1962
+   ],
+   "minutes": 6,
+   "summary": "Why Khrushchev sent nuclear missiles to Cuba, how Kennedy found and answered them, the secret bargain that ended the thirteen days, and what both sides kept quiet for decades. Eleven scenes, with the words of Kennedy and Khrushchev themselves.",
+   "subjects": [
+    {
+     "qid": "Q128160",
+     "label": "Cuban Missile Crisis"
+    },
+    {
+     "qid": "Q9696",
+     "label": "John F. Kennedy"
+    },
+    {
+     "qid": "Q35314",
+     "label": "Nikita Khrushchev"
+    },
+    {
+     "qid": "Q11256",
+     "label": "Fidel Castro"
+    }
+   ],
+   "scenes": 11,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 9,
+   "scholarly": 5,
+   "links": [
+    "rs/encyclopedia",
+    "rs/battlefield-history",
+    "ns/progress",
+    "rs/retrospective",
+    "rs/learning-politics",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "USA",
+     "SUN",
+     "CUB"
+    ],
+    "tones": {
+     "USA": 1,
+     "SUN": 2,
+     "CUB": 3
+    },
+    "bbox": [
+     -105,
+     5,
+     50,
+     72
+    ],
+    "arrows": [
+     {
+      "from": [
+       33.5,
+       44.6
+      ],
+      "to": [
+       -80.6,
+       23.3
+      ],
+      "via": [
+       -20,
+       33
+      ],
+      "tone": 2
+     },
+     {
+      "from": [
+       33.4,
+       69
+      ],
+      "to": [
+       -79.8,
+       23.9
+      ],
+      "via": [
+       -25,
+       47
+      ],
+      "tone": 2
+     }
+    ]
+   },
+   "path": "geopolitical-events/cuban-missile-crisis.json"
+  },
+  {
+   "id": "end-of-the-soviet-union",
+   "title": "The End of the Soviet Union, 1985–1991",
+   "category": "geopolitical-events",
+   "era": [
+    1985,
+    1991
+   ],
+   "minutes": 6,
+   "summary": "How Gorbachev's attempt to save the Soviet system unravelled it: stagnation, reform, the national movements, the August coup and the December agreements that ended the Union, with the arguments over why it fell. Twelve scenes.",
+   "subjects": [
+    {
+     "qid": "Q5167679",
+     "label": "dissolution of the Soviet Union"
+    },
+    {
+     "qid": "Q15180",
+     "label": "Soviet Union"
+    },
+    {
+     "qid": "Q30487",
+     "label": "Mikhail Gorbachev"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 9,
+   "scholarly": 6,
+   "links": [
+    "rs/encyclopedia",
+    "rs/war-focus",
+    "mm/learning",
+    "rs/historical-calendar",
+    "rs/battlefield-history",
+    "rt/atlas",
+    "rs/learning-politics"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "EST",
+     "LVA",
+     "LTU",
+     "GEO",
+     "ARM",
+     "AZE"
+    ],
+    "tones": {
+     "EST": 1,
+     "LVA": 1,
+     "LTU": 1,
+     "GEO": 2,
+     "ARM": 2,
+     "AZE": 2
+    },
+    "bbox": [
+     18,
+     36,
+     52,
+     61
+    ],
+    "arrows": []
+   },
+   "path": "geopolitical-events/end-of-the-soviet-union.json"
+  },
+  {
+   "id": "revolutions-of-1989",
+   "title": "The Revolutions of 1989",
+   "category": "political-events",
+   "era": [
+    1985,
+    1991
+   ],
+   "minutes": 6,
+   "summary": "In a single year the communist regimes of central and eastern Europe fell, all but one of them without bloodshed, and within two more years the Soviet Union itself was gone. Twelve scenes, country by country, from the Gdańsk shipyard to Bucharest.",
+   "subjects": [
+    {
+     "qid": "Q382861",
+     "label": "Revolutions of 1989"
+    }
+   ],
+   "scenes": 12,
+   "parts": 0,
+   "quiz": 0,
+   "sources": 9,
+   "scholarly": 7,
+   "links": [
+    "rs/historical-calendar",
+    "kino/kino-wars",
+    "rs/encyclopedia",
+    "rs/retrospective",
+    "rs/battlefield-history",
+    "rs/learning-politics",
+    "rt/atlas"
+   ],
+   "preview": {
+    "kind": "map",
+    "countries": [
+     "HUN",
+     "AUT"
+    ],
+    "tones": {
+     "HUN": 2,
+     "AUT": 1
+    },
+    "bbox": [
+     9,
+     44.5,
+     24,
+     51
+    ],
+    "arrows": [
+     {
+      "from": [
+       17.2,
+       47.45
+      ],
+      "to": [
+       16.4,
+       48.15
+      ],
+      "via": [
+       16.75,
+       47.8
+      ],
+      "tone": 1
+     },
+     {
+      "from": [
+       16.2,
+       48.25
+      ],
+      "to": [
+       13.45,
+       48.55
+      ],
+      "via": [
+       14.6,
+       48.35
+      ],
+      "tone": 1
+     }
+    ]
+   },
+   "path": "political-events/revolutions-of-1989.json"
+  }
+ ],
+ "plan": {
+  "political-events": [],
+  "political-figures": [
+   {
+    "title": "Charles de Gaulle",
+    "era": [
+     1890,
+     1970
+    ],
+    "qid": "Q2042",
+    "label": "Charles de Gaulle"
+   },
+   {
+    "title": "Margaret Thatcher",
+    "era": [
+     1925,
+     2013
+    ],
+    "qid": "Q7416",
+    "label": "Margaret Thatcher"
+   }
+  ],
+  "political-parties": [
+   {
+    "title": "The Labour Party, 1900–1951",
+    "era": [
+     1900,
+     1951
+    ],
+    "qid": "Q9630",
+    "label": "Labour Party"
+   },
+   {
+    "title": "The Indian National Congress",
+    "era": [
+     1885,
+     2026
+    ],
+    "qid": "Q10225",
+    "label": "Indian National Congress"
+   }
+  ],
+  "wars": [
+   {
+    "title": "The Spanish Civil War, 1936–1939",
+    "era": [
+     1936,
+     1939
+    ],
+    "qid": "Q10859",
+    "label": "Spanish Civil War"
+   }
+  ],
+  "geopolitical-events": [],
+  "great-thinkers": [
+   {
+    "title": "Thucydides and the origins of realism",
+    "era": [
+     -460,
+     -400
+    ],
+    "qid": "Q41683",
+    "from": "Learning · Politics",
+    "label": "Thucydides"
+   },
+   {
+    "title": "Thomas Hobbes",
+    "era": [
+     1588,
+     1679
+    ],
+    "qid": "Q37621",
+    "from": "Learning · Politics",
+    "label": "Thomas Hobbes"
+   },
+   {
+    "title": "John Maynard Keynes",
+    "era": [
+     1883,
+     1946
+    ],
+    "qid": "Q9317",
+    "from": "Learning · Economics",
+    "label": "John Maynard Keynes"
+   },
+   {
+    "title": "Isaac Newton",
+    "era": [
+     1642,
+     1727
+    ],
+    "qid": "Q935",
+    "from": "Timeline of Progress",
+    "label": "Isaac Newton"
+   },
+   {
+    "title": "Albert Einstein",
+    "era": [
+     1879,
+     1955
+    ],
+    "qid": "Q937",
+    "from": "Timeline of Progress",
+    "label": "Albert Einstein"
+   }
+  ]
+ }
+}

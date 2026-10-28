@@ -1,0 +1,161 @@
+{
+  "id": "institutional-revolutionary-party",
+  "title": "Mexico's Institutional Revolutionary Party",
+  "category": "political-parties",
+  "subjects": [{ "qid": "Q682969", "label": "Institutional Revolutionary Party" }],
+  "era": [1929, 2026],
+  "summary": "For seventy-one years one party, under three names, won every presidential election in Mexico. Twelve scenes on how the PRI was built out of a revolution, how it held power, and how it lost it.",
+  "minutes": 7,
+  "preview": { "scene": "crisis-1994" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Institutional Revolutionary Party (Q682969)", "url": "https://www.wikidata.org/wiki/Q682969" },
+    { "id": "knight-1986", "kind": "book", "author": "Alan Knight", "title": "The Mexican Revolution (two volumes)", "year": 1986, "publisher": "Cambridge University Press" },
+    { "id": "krauze-1997", "kind": "book", "author": "Enrique Krauze", "title": "Mexico: Biography of Power: A History of Modern Mexico, 1810–1996", "year": 1997, "publisher": "HarperCollins" },
+    { "id": "magaloni-2006", "kind": "book", "author": "Beatriz Magaloni", "title": "Voting for Autocracy: Hegemonic Party Survival and Its Demise in Mexico", "year": 2006, "publisher": "Cambridge University Press" },
+    { "id": "greene-2007", "kind": "book", "author": "Kenneth F. Greene", "title": "Why Dominant Parties Lose: Mexico's Democratization in Comparative Perspective", "year": 2007, "publisher": "Cambridge University Press" },
+    { "id": "langston-2017", "kind": "book", "author": "Joy K. Langston", "title": "Democratization and Authoritarian Party Survival: Mexico's PRI", "year": 2017, "publisher": "Oxford University Press" },
+    { "id": "nohlen-2005", "kind": "book", "author": "Dieter Nohlen (ed.)", "title": "Elections in the Americas: A Data Handbook, Volume 1: North America, Central America, and the Caribbean", "year": 2005, "publisher": "Oxford University Press" },
+    { "id": "nsa-2006", "kind": "web", "author": "Kate Doyle", "year": 2006, "title": "The Dead of Tlatelolco: Using the Archives to Exhume the Past (Electronic Briefing Book 201, 1 October 2006)", "publisher": "National Security Archive", "url": "https://nsarchive2.gwu.edu/NSAEBB/NSAEBB201/" },
+    { "id": "nsa-2006-dirty-war", "kind": "web", "author": "Kate Doyle", "short": "Doyle 2006b", "year": 2006, "title": "Official Report Released on Mexico's 'Dirty War' (Electronic Briefing Book 209, 21 November 2006)", "publisher": "National Security Archive", "url": "https://nsarchive2.gwu.edu/NSAEBB/NSAEBB209/index.htm" },
+    { "id": "el-pais-1990", "kind": "web", "title": "Vargas Llosa: 'México es la dictadura perfecta' (1 September 1990; in Spanish, the quotation translated by PRP)", "publisher": "El País", "year": 1990,"url": "https://elpais.com/diario/1990/09/01/cultura/652140001_850215.html" },
+    { "id": "pdba-2006", "kind": "web", "title": "Mexico: Presidential Election 2006, official results", "publisher": "Political Database of the Americas, Georgetown University", "short": "Georgetown election data 2006", "url": "https://pdba.georgetown.edu/Elecdata/Mexico/pres06.html" },
+    { "id": "pdba-2012", "kind": "web", "title": "Mexico: Presidential Election 2012, official results", "publisher": "Political Database of the Americas, Georgetown University", "short": "Georgetown election data 2012", "url": "https://pdba.georgetown.edu/Elecdata/Mexico/pres12.html" },
+    { "id": "ine-2019", "kind": "web", "title": "Presentación del Sistema de Consulta de la Estadística de los Procesos Electorales 2017–2018 (June 2019), with the definitive results of the 2018 presidential election", "publisher": "Instituto Nacional Electoral", "year": 2019,"url": "https://repositoriodocumental.ine.mx/xmlui/bitstream/handle/123456789/119445/20190619-O-1-3-60-6-1.pdf" },
+    { "id": "ipu-2024", "kind": "web", "title": "Mexico, Chamber of Deputies: election of 2 June 2024", "publisher": "Inter-Parliamentary Union (IPU Parline)", "year": 2024, "url": "https://data.ipu.org/parliament/MX/MX-LC01/election/MX-LC01-E20240602/" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "Mexico's Institutional Revolutionary Party",
+      "narration": "From 1929 to 2000 one party governed Mexico without a break, winning every presidential election under three successive names. The Institutional Revolutionary Party, the PRI, claimed the legacy of the Mexican Revolution, built a political machine that reached into every union and village, and moved from land reform to free trade while keeping power. This film follows how it was built, how it ruled, how it lost, and what has become of it.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Institutional Revolutionary Party", "sub": "Mexico, 1929 to today" },
+      "focus": { "countries": ["MEX"], "bbox": [-118, 13, -85, 33] },
+      "link": { "label": "Encyclopaedia · Institutional Revolutionary Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q682969" },
+      "cites": ["magaloni-2006", "greene-2007"]
+    },
+    {
+      "id": "revolution",
+      "title": "The Revolution, 1910–1920",
+      "narration": "In 1910 Francisco Madero called for revolt against Porfirio Díaz, who had ruled Mexico for more than thirty years. A decade of civil war followed, in which peasant armies under Emiliano Zapata in the south and Francisco Villa in the north fought first alongside and then against the constitutionalist generals of Coahuila and Sonora. The constitution of 1917 promised land reform, workers' rights and national ownership of the subsoil, and the Sonoran generals who came out on top, Álvaro Obregón and Plutarco Elías Calles, ruled through the 1920s.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Mexico", "tone": 1, "countries": ["MEX"] }]
+      },
+      "focus": { "points": [[-99.13, 19.43, "Mexico City"], [-99.23, 18.92, "Morelos: Zapata's south"], [-106.07, 28.63, "Chihuahua: Villa's north"], [-100.39, 20.59, "Querétaro: the constitution of 1917"]], "bbox": [-118, 13, -85, 33] },
+      "link": { "label": "Encyclopaedia · Mexican Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q214426" },
+      "cites": ["knight-1986", "krauze-1997"]
+    },
+    {
+      "id": "founding",
+      "title": "From strongmen to a party, 1928–1929",
+      "narration": "In July 1928 Obregón, just re-elected president, was assassinated by a Catholic militant during the Cristero rebellion against the government's anti-clerical laws. In his last address to Congress that September, Calles called on Mexico to pass from rule by strongmen to a nation of institutions and laws. In March 1929 he founded the National Revolutionary Party to unite the revolution's regional bosses and generals, and through the years known as the Maximato he remained the power behind three short-lived presidents.",
+      "visual": { "kind": "portrait", "qid": "Q315066", "heading": "Plutarco Elías Calles", "sub": "President 1924–1928, founder of the party", "position": "50% 30%" },
+      "link": { "label": "Retrospective Battlefield · the Cristero rebellion, 1929", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1929&w=c701" },
+      "cites": ["krauze-1997", "magaloni-2006", "wd"]
+    },
+    {
+      "id": "cardenas",
+      "title": "Cárdenas remakes the party, 1934–1940",
+      "narration": "Lázaro Cárdenas, president from 1934, broke with Calles and sent him into exile in 1936. He distributed about 18 million hectares of land to peasant communities, backed a new national labour confederation, and on 18 March 1938 expropriated the foreign oil companies, a day still celebrated in Mexico. That month he rebuilt the party as the Party of the Mexican Revolution, organised in sectors for peasants, workers, the army and the middle classes, a corporatist structure that tied millions of Mexicans to it.",
+      "visual": { "kind": "portrait", "qid": "Q296718", "heading": "Lázaro Cárdenas", "sub": "President, 1934–1940", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Lázaro Cárdenas", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q296718" },
+      "cites": ["knight-1986", "krauze-1997"]
+    },
+    {
+      "id": "system",
+      "title": "The PRI system, 1946–1970",
+      "narration": "Renamed the Institutional Revolutionary Party in January 1946, with a civilian, Miguel Alemán, as its presidential candidate, the party presided over growth of around six per cent a year until about 1970, the so-called Mexican miracle. Presidents served a single six-year term, as the constitution required, and by an unwritten rule each chose his own successor, the dedazo or tap of the finger, whom voters then elected by overwhelming margins. Beatriz Magaloni argues that the PRI survived less by fraud than by patronage, divided opponents and voters' fear of what turning against it might cost them.",
+      "visual": { "kind": "module", "blurb": "Mexico's presidents, parties and elections year by year since 1926, in Political Retrospective." },
+      "link": { "label": "Political Retrospective · Mexico, 1946", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1946&c=70" },
+      "cites": ["magaloni-2006", "krauze-1997"]
+    },
+    {
+      "id": "tlatelolco",
+      "title": "Tlatelolco, 1968",
+      "narration": "The system also rested on repression. On 2 October 1968, ten days before the Olympic Games opened in Mexico City, soldiers and security agents opened fire on a student rally in the Plaza of the Three Cultures at Tlatelolco. The government's spokesman spoke of 20 dead; a search of the official archives led by Kate Doyle in 2006 confirmed 44, while the figure most often repeated, about 300, has never been documented. In the dirty war that followed against left-wing guerrillas and dissidents, a special prosecutor's report of 2006 named the victims of 645 disappearances.",
+      "visual": { "kind": "map", "still": true },
+      "focus": { "countries": ["MEX"], "points": [[-99.14, 19.45, "Tlatelolco, Mexico City, 2 October 1968"]], "bbox": [-108, 15, -90, 26] },
+      "cites": ["nsa-2006", "nsa-2006-dirty-war", "krauze-1997"]
+    },
+    {
+      "id": "crisis-1988",
+      "title": "Crisis, and the election of 1988",
+      "narration": "The debt crisis of 1982 ended an oil-fuelled boom, and the government's slow response to the Mexico City earthquake of 1985 fed a new civic opposition. In 1987 Cuauhtémoc Cárdenas, the former president's son, left the PRI to run for president on the left, and on election night in July 1988 the count stopped when the computer system was said to have crashed. Carlos Salinas was declared the winner with just over half the vote, a result his opponents never accepted, and Congress later had the ballots burned.",
+      "visual": {
+        "kind": "timeline", "from": "1982", "to": "1994-04",
+        "events": [
+          { "at": "1982-08", "label": "Debt crisis" },
+          { "at": "1985-09-19", "label": "Mexico City earthquake" },
+          { "at": "1987-10", "label": "Cárdenas leaves the PRI" },
+          { "at": "1988-07-06", "label": "Disputed election" },
+          { "at": "1989-05-05", "label": "Left founds the PRD" },
+          { "at": "1989-07-02", "label": "First opposition governor" },
+          { "at": "1994-01-01", "label": "NAFTA and the Zapatistas" },
+          { "at": "1994-03-23", "label": "Colosio assassinated" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Carlos Salinas de Gortari", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315633" },
+      "cites": ["greene-2007", "magaloni-2006"]
+    },
+    {
+      "id": "perfect-dictatorship",
+      "title": "Free trade and the perfect dictatorship",
+      "narration": "Salinas privatised hundreds of state companies and the banks, opened the economy and negotiated the North American Free Trade Agreement with the United States and Canada. In August 1990 the Peruvian novelist Mario Vargas Llosa, speaking on Mexican television, called Mexico the perfect dictatorship, a camouflaged one in which not a man but a party stayed in power. His host, the poet Octavio Paz, objected that Mexico had known the hegemony of one party but not a dictatorship, and none of the military dictatorships seen elsewhere in Latin America.",
+      "visual": { "kind": "quote", "text": "Mexico is the perfect dictatorship. The perfect dictatorship is not communism. It is not the USSR. It is not Fidel Castro. The perfect dictatorship is Mexico.", "who": "Mario Vargas Llosa, in a televised debate in Mexico, as reported by El País (translated)", "when": "30 August 1990", "cite": "el-pais-1990" },
+      "link": { "label": "Political Retrospective · Mexico, 1990", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1990&c=70" },
+      "cites": ["el-pais-1990", "krauze-1997", "langston-2017"]
+    },
+    {
+      "id": "crisis-1994",
+      "title": "1994: rebellion, murder and a crash",
+      "narration": "On 1 January 1994, the day NAFTA came into force, the Zapatista Army of National Liberation rose in Chiapas in the name of the indigenous poor. In March the PRI's presidential candidate, Luis Donaldo Colosio, was shot dead at a rally in Tijuana, and in September the party's secretary-general was murdered too. Ernesto Zedillo won the presidency in August, but within weeks of his taking office a run on the peso plunged Mexico into its worst recession in decades.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Mexico", "tone": 1, "countries": ["MEX"] }]
+      },
+      "focus": { "points": [[-92.64, 16.74, "Chiapas: the Zapatista rising, 1 January"], [-117.04, 32.51, "Tijuana: Colosio killed, 23 March"], [-99.13, 19.43, "Mexico City: the peso crisis, December"]], "bbox": [-120, 12, -84, 34] },
+      "link": { "label": "Retrospective Battlefield · Mexico, 1994", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1994&w=u400" },
+      "cites": ["greene-2007", "langston-2017"]
+    },
+    {
+      "id": "defeat",
+      "title": "Defeat, 2000",
+      "narration": "Zedillo allowed the electoral institute full independence in 1996, and in 1997 the PRI lost its majority in the Chamber of Deputies for the first time. On 2 July 2000 Vicente Fox of the conservative National Action Party won the presidency, and Zedillo conceded on television that night, ending seventy-one years of PRI rule peacefully. Kenneth Greene argues that the PRI lost once it could no longer draw on public resources to outspend its opponents and keep them on the margins.",
+      "visual": {
+        "kind": "chart", "type": "line", "title": "The PRI candidate's share of the presidential vote", "unit": "per cent of valid votes",
+        "data": [
+          { "label": "1934", "value": 98.2 },
+          { "label": "1958", "value": 90.4 },
+          { "label": "1970", "value": 86.0 },
+          { "label": "1982", "value": 74.3 },
+          { "label": "1988", "value": 50.7 },
+          { "label": "1994", "value": 50.1 },
+          { "label": "2000", "value": 36.9 },
+          { "label": "2006", "value": 22.7 },
+          { "label": "2012", "value": 39.2 },
+          { "label": "2018", "value": 16.9 }
+        ],
+        "note": "Official results as shares of valid votes (spoiled ballots left out), including allied parties' votes for the same candidate: Nohlen to 2000, then the official counts. The PRI's predecessor stood in 1934; it lost the presidency in 2000, 2006 and 2018.",
+        "cite": ["nohlen-2005", "pdba-2006", "pdba-2012", "ine-2019"]
+      },
+      "link": { "label": "Encyclopaedia · Vicente Fox", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190572" },
+      "cites": ["greene-2007", "magaloni-2006"]
+    },
+    {
+      "id": "return",
+      "title": "Return and collapse, 2012–2024",
+      "narration": "The PRI kept its strength in the states, and in 2012 Enrique Peña Nieto won back the presidency, carried, as Joy Langston explains, by the party's governors and their machines. His Pact for Mexico with the main opposition parties brought reforms of education and telecommunications, and in 2013 the oil industry was opened to private investment, but the disappearance of 43 students from the Ayotzinapa teachers' college in 2014 and a run of corruption scandals cost the party dearly. In 2018 Andrés Manuel López Obrador's new party, Morena, won a landslide and the PRI's candidate came third. In 2024, even in alliance with its old rival the National Action Party, the PRI won only 35 of the 500 seats in the Chamber of Deputies.",
+      "visual": { "kind": "portrait", "qid": "Q296741", "heading": "Enrique Peña Nieto", "sub": "President, 2012–2018", "position": "50% 25%" },
+      "link": { "label": "Historical Calendar · December 2012", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=2012-12" },
+      "cites": ["langston-2017", "ine-2019", "ipu-2024"]
+    },
+    {
+      "id": "legacy",
+      "title": "The PRI's legacy",
+      "narration": "Mexico's democracy grew out of the PRI's long decline, as independent electoral authorities, competitive state elections and a freer press were won step by step. Historians still argue over the party's record, between the stability, mass schooling and land reform it oversaw and the corruption, fraud and violence that sustained it. Political scientists study it as the model of a dominant party that ruled through elections, and of how such a party can lose them.",
+      "visual": { "kind": "module", "blurb": "Who holds power in Mexico now: its executive, congress, courts and coming elections." },
+      "link": { "label": "Political Atlas · Mexico today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#MEX" },
+      "cites": ["magaloni-2006", "greene-2007", "langston-2017"]
+    }
+  ]
+}

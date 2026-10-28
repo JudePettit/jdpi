@@ -1,0 +1,180 @@
+{
+  "id": "russian-revolutions-1917",
+  "title": "The Russian Revolutions of 1917",
+  "category": "political-events",
+  "subjects": [
+    { "qid": "Q8729", "label": "Russian Revolution" },
+    { "qid": "Q101534", "label": "February Revolution" },
+    { "qid": "Q42976", "label": "October Revolution" }
+  ],
+  "era": [1905, 1924],
+  "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and the words of Lenin and one of his sharpest critics on the left.",
+  "minutes": 7,
+  "preview": { "scene": "civil-war" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Russian Revolution (Q8729), February Revolution (Q101534), October Revolution (Q42976)", "url": "https://www.wikidata.org/wiki/Q8729" },
+    { "id": "figes-1996", "kind": "book", "author": "Orlando Figes", "title": "A People's Tragedy: The Russian Revolution, 1891–1924", "year": 1996, "publisher": "Jonathan Cape" },
+    { "id": "fitzpatrick-2017", "kind": "book", "author": "Sheila Fitzpatrick", "title": "The Russian Revolution (fourth edition)", "year": 2017, "publisher": "Oxford University Press" },
+    { "id": "smith-2017", "kind": "book", "author": "S. A. Smith", "title": "Russia in Revolution: An Empire in Crisis, 1890 to 1928", "year": 2017, "publisher": "Oxford University Press" },
+    { "id": "pipes-1990", "kind": "book", "author": "Richard Pipes", "title": "The Russian Revolution", "year": 1990, "publisher": "Alfred A. Knopf" },
+    { "id": "radkey-1990", "kind": "book", "author": "Oliver H. Radkey", "title": "Russia Goes to the Polls: The Election to the All-Russian Constituent Assembly, 1917", "year": 1990, "publisher": "Cornell University Press" },
+    { "id": "radkey-1950", "kind": "book", "author": "Oliver H. Radkey", "title": "The Election to the Russian Constituent Assembly of 1917 (Harvard Historical Monographs 21)", "year": 1950, "publisher": "Harvard University Press" },
+    { "id": "lenin-1917", "kind": "web", "author": "Vladimir Lenin", "year": 1917, "title": "The Tasks of the Proletariat in the Present Revolution (the April Theses), Pravda, 7 April 1917, from Lenin's Collected Works, volume 24 (Progress Publishers, 1964), translated by Isaacs Bernard", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/archive/lenin/works/1917/apr/04.htm" },
+    { "id": "luxemburg-1918", "kind": "web", "author": "Rosa Luxemburg", "year": 1918, "title": "The Russian Revolution, chapter 6: The Problem of Dictatorship (written 1918, published 1922), translated by Bertram Wolfe (Workers Age Publishers, 1940)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/archive/luxemburg/1918/russian-revolution/ch06.htm" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Russian Revolutions of 1917",
+      "narration": "In 1917 the Russian Empire, the largest country on earth, went through two revolutions in eight months. The first, in February, ended three centuries of rule by the Romanov dynasty; the second, in October, brought Lenin's Bolshevik party to power. Civil war followed, and out of it came the Soviet Union, ruled by its Communist Party until 1991. This film follows the revolutions from their causes to their consequences.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Events", "heading": "The Russian Revolutions of 1917", "sub": "February and October" },
+      "focus": { "bbox": [15, 38, 110, 72] },
+      "link": { "label": "Encyclopaedia · Russian Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8729" },
+      "cites": ["smith-2017", "figes-1996"]
+    },
+    {
+      "id": "empire",
+      "title": "An empire under strain, 1894–1914",
+      "narration": "Nicholas the Second, who came to the throne in 1894, ruled as an autocrat, answerable to no parliament. The census of 1897 counted about 126 million subjects, most of them peasants who wanted more land. Industry was growing fast in Saint Petersburg, Moscow and the mining regions, and so were the grievances of workers who until 1906 had no legal unions. Liberals demanded a constitution, while underground parties, among them the Socialist Revolutionaries and the Marxist Social Democrats, who split in 1903 into Bolsheviks and Mensheviks, worked for revolution.",
+      "visual": { "kind": "portrait", "qid": "Q40787", "heading": "Nicholas the Second", "sub": "Emperor of Russia, 1894–1917", "position": "50% 20%" },
+      "link": { "label": "Kardashev Tracker · the Russian Empire, 1900", "suite": "rs", "module": "kardashev", "at": "kardashev/index.html#y=1900&p=russia-emp" },
+      "cites": ["figes-1996", "smith-2017"]
+    },
+    {
+      "id": "1905",
+      "title": "A dress rehearsal: the revolution of 1905",
+      "narration": "On 22 January 1905 troops in Saint Petersburg fired on a peaceful procession of workers bringing a petition to the Tsar; the official count was 96 dead, though most later estimates are higher. Strikes, mutinies and peasant risings spread across the empire, and in October the capital's workers elected a soviet, or council, to lead their strikes. In his October Manifesto Nicholas conceded an elected parliament, the Duma, but within two years he had curbed its powers and narrowed the franchise, and the promise of reform was never fully kept.",
+      "visual": {
+        "kind": "timeline", "from": "1905", "to": "1914-08",
+        "events": [
+          { "at": "1905-01-22", "label": "Bloody Sunday" },
+          { "at": "1905-10-30", "label": "October Manifesto" },
+          { "at": "1906-05-10", "label": "First Duma meets" },
+          { "at": "1907-06-16", "label": "Franchise narrowed" },
+          { "at": "1911-09-14", "label": "Stolypin shot" },
+          { "at": "1914-08-01", "label": "War with Germany" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Russian Revolution of 1905", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q184928" },
+      "cites": ["figes-1996", "pipes-1990"]
+    },
+    {
+      "id": "war",
+      "title": "The strain of war, 1914–1916",
+      "narration": "Russia went to war with Germany and Austria-Hungary in August 1914; its armies were routed at Tannenberg within weeks, suffered millions of casualties and lost Poland in the Great Retreat of 1915. Nicholas took personal command at the front, leaving the government in Petrograd, as the capital had been renamed, to the Empress and a succession of short-lived ministers. Food and fuel ran short in the cities and prices soared. In December 1916 a group of monarchists murdered Grigori Rasputin, the healer whose influence at court had become a scandal.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Russian Empire, 1914, without its Polish provinces (approximate)", "tone": 1, "countries": ["SUN", "FIN"] },
+          { "label": "Germany and Austria-Hungary", "tone": 2, "countries": ["DEU", "AUT", "HUN", "CZE", "SVK"] }
+        ],
+        "arrows": [
+          { "from": [20.2, 52.0], "via": [22.6, 52.4], "to": [25.0, 52.7], "tone": 2, "label": "Great Retreat, 1915" },
+          { "from": [21.0, 50.1], "via": [23.0, 50.4], "to": [25.0, 50.6], "tone": 2 }
+        ],
+        "fronts": [
+          { "label": "Eastern Front, 1916 (approximate)", "line": [[24.1, 56.95], [26.5, 55.87], [26.4, 54.48], [26.0, 53.13], [26.1, 52.11], [25.3, 50.75], [25.6, 49.55], [25.94, 48.29]] }
+        ]
+      },
+      "focus": { "points": [[30.32, 59.94, "Petrograd, the capital"], [20.2, 53.5, "Tannenberg, August 1914"]], "bbox": [12, 42, 45, 62] },
+      "link": { "label": "Encyclopaedia · World War I", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q361" },
+      "cites": ["smith-2017", "figes-1996"]
+    },
+    {
+      "id": "february",
+      "title": "The February Revolution",
+      "narration": "Russia still used the old Julian calendar, thirteen days behind the West, which is why its revolutions of March and November 1917 are known as February and October. On 8 March, International Women's Day, women queuing for bread in Petrograd began protests that grew within days into a general strike. When the city's garrison refused to fire on the crowds and joined them, the monarchy had no force left to defend it. Nicholas abdicated on 15 March, and power passed to a Provisional Government, watched over by the Petrograd Soviet of workers' and soldiers' deputies.",
+      "visual": { "kind": "map" },
+      "focus": { "points": [[30.32, 59.94, "Petrograd: protests from 8 March"], [28.33, 57.82, "Pskov: the Tsar abdicates, 15 March"], [37.62, 55.76, "Moscow"]], "bbox": [22, 52, 44, 63] },
+      "cites": ["fitzpatrick-2017", "smith-2017"]
+    },
+    {
+      "id": "lenin-returns",
+      "title": "Dual power, and Lenin's return",
+      "narration": "The Provisional Government promised elections to a Constituent Assembly, but it kept Russia in the war and put off the land reform the peasants demanded. On 16 April Lenin arrived at Petrograd's Finland Station from exile in Switzerland, having crossed Germany with the help of a German government that hoped he would take Russia out of the war. His April Theses rejected any support for the new government and called for power to pass to the soviets, a stance that at first isolated him even among Bolsheviks.",
+      "visual": { "kind": "quote", "text": "No support for the Provisional Government", "who": "Vladimir Lenin, the April Theses", "when": "Pravda, 7 April 1917 (Russian calendar)", "cite": "lenin-1917" },
+      "link": { "label": "Encyclopaedia · Vladimir Lenin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1394" },
+      "cites": ["lenin-1917", "pipes-1990", "fitzpatrick-2017"]
+    },
+    {
+      "id": "summer",
+      "title": "From the July Days to the Kornilov affair",
+      "narration": "An offensive against Austria-Hungary in July collapsed, and armed demonstrators in Petrograd demanded that the Soviet take power; the government blamed the Bolsheviks and Lenin fled to Finland. Alexander Kerensky, a moderate socialist, became Prime Minister. In September the army's commander, General Lavr Kornilov, sent troops towards the capital in what Kerensky denounced as an attempted coup, and the Bolsheviks helped to arm the workers who stopped them. By the autumn they had majorities in the Petrograd and Moscow soviets, and Leon Trotsky chaired the Petrograd Soviet.",
+      "visual": {
+        "kind": "timeline", "from": "1917-03", "to": "1917-11",
+        "events": [
+          { "at": "1917-03-15", "label": "Tsar abdicates" },
+          { "at": "1917-04-16", "label": "Lenin returns" },
+          { "at": "1917-07-01", "label": "Offensive begins" },
+          { "at": "1917-07-16", "label": "July Days" },
+          { "at": "1917-07-21", "label": "Kerensky Prime Minister" },
+          { "at": "1917-09-09", "label": "Kornilov affair" },
+          { "at": "1917-10-08", "label": "Trotsky leads the Soviet" },
+          { "at": "1917-11-07", "label": "Bolsheviks take power" }
+        ]
+      },
+      "link": { "label": "Encyclopaedia · Leon Trotsky", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q33391" },
+      "cites": ["figes-1996", "smith-2017"]
+    },
+    {
+      "id": "october",
+      "title": "The October Revolution",
+      "narration": "On 7 November, 25 October by the Russian calendar, the Petrograd Soviet's Military Revolutionary Committee occupied the capital's bridges, stations and telegraph offices, and in the early hours of the next day its forces entered the Winter Palace and arrested the ministers. A Congress of Soviets, from which the Mensheviks and the right-wing Socialist Revolutionaries walked out in protest, approved a government headed by Lenin, whose first decrees called for peace and gave the landlords' estates to the peasants. Historians still argue over whether October was a popular revolution or a coup by a disciplined party; Richard Pipes stressed the coup, while Sheila Fitzpatrick and others stress the radicalised workers and soldiers behind it.",
+      "visual": { "kind": "portrait", "qid": "Q42976", "heading": "The Winter Palace", "sub": "After its capture, Petrograd, November 1917", "position": "50% 40%" },
+      "link": { "label": "Encyclopaedia · October Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q42976" },
+      "cites": ["pipes-1990", "fitzpatrick-2017", "smith-2017"]
+    },
+    {
+      "id": "assembly",
+      "title": "The election the Bolsheviks lost",
+      "narration": "In late November tens of millions of Russians, women among them, voted for the Constituent Assembly that was to decide the country's future. The Socialist Revolutionaries, the party of the peasants, won the most votes, while the Bolsheviks, strong in the cities and the army but weak in the villages, took less than a quarter. When the Assembly met on 18 January 1918 and refused to accept Soviet power, the Bolsheviks dispersed it after a single session.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "The Constituent Assembly election, November 1917", "unit": "per cent of the votes counted",
+        "data": [
+          { "label": "Socialist Revolutionaries", "value": 38.0 },
+          { "label": "Bolsheviks", "value": 23.6 },
+          { "label": "Ukrainian socialist parties", "value": 11.9 },
+          { "label": "Kadets (liberals)", "value": 4.8 },
+          { "label": "Mensheviks", "value": 3.3 }
+        ],
+        "note": "Shares of the 41.7 million votes Oliver Radkey could trace, in 60 of 79 electoral districts (1950); no complete count survives. Joint, national, religious and other lists won the rest.",
+        "cite": ["radkey-1950"]
+      },
+      "link": { "label": "Learning · Politics: The far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+      "cites": ["radkey-1990", "radkey-1950", "smith-2017"]
+    },
+    {
+      "id": "dictatorship",
+      "title": "A critic on the left",
+      "narration": "The Bolsheviks argued that the soviets were a higher form of democracy than a parliament elected from out-of-date party lists, but other socialists disagreed. A new security police, the Cheka, set up in December 1917, was soon arresting opponents, and in June 1918 the Mensheviks and the right-wing Socialist Revolutionaries were expelled from the soviets' central executive. Writing in a German prison that autumn, the Polish-born revolutionary Rosa Luxemburg welcomed the revolution but warned that without free elections, a free press and the right of opponents to organise, public life would wither and only a small group of leaders would rule.",
+      "visual": { "kind": "quote", "text": "Freedom is always and exclusively freedom for the one who thinks differently.", "who": "Rosa Luxemburg, The Russian Revolution", "when": "1918", "cite": "luxemburg-1918" },
+      "link": { "label": "Learning · Politics: Thinkers of the far left", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=thinkers-of-the-far-left" },
+      "cites": ["luxemburg-1918", "figes-1996", "pipes-1990"]
+    },
+    {
+      "id": "civil-war",
+      "title": "Peace abroad, war at home, 1918–1921",
+      "narration": "To end the war with Germany, Lenin's government signed the Treaty of Brest-Litovsk in March 1918, giving up Poland, the Baltic lands, Finland and Ukraine. Civil war followed between the Red Army, organised by Trotsky, and White armies led by former imperial officers and backed at times by Allied troops, while national movements fought for independence on the empire's edges. The former Tsar and his family were shot at Yekaterinburg in July 1918. Fighting, terror on both sides and epidemics killed millions before the Reds prevailed, and the famine of 1921 and 1922 killed millions more.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Given up at Brest-Litovsk, March 1918 (approximate)", "tone": 2, "countries": ["POL", "LTU", "LVA", "EST", "FIN", "UKR"] }],
+        "arrows": [
+          { "from": [61.4, 55.2], "via": [55.5, 55.4], "to": [50.2, 55.6], "tone": 3, "label": "Kolchak, 1919" },
+          { "from": [39.7, 47.2], "via": [37.6, 50.3], "to": [36.4, 52.6], "tone": 3, "label": "Denikin, 1919" },
+          { "from": [27.6, 58.9], "to": [29.9, 59.6], "tone": 3, "label": "Yudenich, 1919" }
+        ]
+      },
+      "focus": { "points": [[37.62, 55.76, "Moscow, capital from March 1918"], [60.6, 56.84, "Yekaterinburg, July 1918"], [23.69, 52.1, "Brest-Litovsk, March 1918"]], "bbox": [18, 43, 66, 66] },
+      "link": { "label": "Encyclopaedia · Russian Civil War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q79911" },
+      "cites": ["smith-2017", "figes-1996"]
+    },
+    {
+      "id": "legacy",
+      "title": "From revolution to the Soviet state",
+      "narration": "In March 1921, after sailors at Kronstadt rose against the regime they had once supported, Lenin's New Economic Policy allowed private trade again, while the party banned organised factions within its own ranks. The Union of Soviet Socialist Republics was founded in December 1922, and Lenin died in January 1924. Historians still disagree over whether Stalin's dictatorship grew out of Lenin's methods or betrayed the revolution's aims, but the one-party state that 1917 created lasted until 1991.",
+      "visual": { "kind": "module", "blurb": "The Soviet Union's party, leaders and government year by year, from 1926, in Political Retrospective." },
+      "link": { "label": "Political Retrospective · the Soviet Union, 1926", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1926&c=365" },
+      "cites": ["fitzpatrick-2017", "pipes-1990", "smith-2017"]
+    }
+  ]
+}

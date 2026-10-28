@@ -1,0 +1,176 @@
+{
+  "id": "chinese-communist-party",
+  "title": "The Chinese Communist Party",
+  "category": "political-parties",
+  "subjects": [{ "qid": "Q17427", "label": "Chinese Communist Party" }],
+  "era": [1921, 2026],
+  "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
+  "minutes": 7,
+  "preview": { "scene": "long-march" },
+  "sources": [
+    { "id": "wd", "kind": "wikidata", "title": "Chinese Communist Party (Q17427)", "url": "https://www.wikidata.org/wiki/Q17427" },
+    { "id": "saich-2021", "kind": "book", "author": "Tony Saich", "title": "From Rebel to Ruler: One Hundred Years of the Chinese Communist Party", "year": 2021, "publisher": "Belknap Press of Harvard University Press" },
+    { "id": "mcgregor-2010", "kind": "book", "author": "Richard McGregor", "title": "The Party: The Secret World of China's Communist Rulers", "year": 2010, "publisher": "Allen Lane" },
+    { "id": "dikotter-2010", "kind": "book", "author": "Frank Dikötter", "title": "Mao's Great Famine: The History of China's Most Devastating Catastrophe, 1958–62", "year": 2010, "publisher": "Bloomsbury" },
+    { "id": "ograda-2011", "kind": "web", "author": "Cormac Ó Gráda", "short": "Ó Gráda 2011", "title": "Great Leap into Famine (Working Paper WP11/03, a review of Dikötter's Mao's Great Famine)", "year": 2011, "publisher": "UCD Centre for Economic Research, University College Dublin", "url": "https://www.ucd.ie/economics/t4media/WP11_03.pdf" },
+    { "id": "walder-su-2003", "kind": "article", "author": "Andrew G. Walder and Yang Su", "title": "The Cultural Revolution in the Countryside: Scope, Timing and Human Impact", "year": 2003, "journal": "The China Quarterly 173: 74–99", "url": "https://doi.org/10.1017/S0009443903000068" },
+    { "id": "vogel-2011", "kind": "book", "author": "Ezra F. Vogel", "title": "Deng Xiaoping and the Transformation of China", "year": 2011, "publisher": "Belknap Press of Harvard University Press" },
+    { "id": "mao-1949", "kind": "web", "author": "Mao Zedong", "short": "Mao 1949", "year": 1949,"title": "The Chinese People Have Stood Up! Opening address to the Chinese People's Political Consultative Conference, 21 September 1949 (English translation in Selected Works of Mao Tse-tung, volume 5, Foreign Languages Press, Peking, 1977)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/reference/archive/mao/selected-works/volume-5/mswv5_01.htm" },
+    { "id": "nobel-2015", "kind": "web", "title": "The Nobel Prize in Physiology or Medicine 2015", "publisher": "NobelPrize.org", "year": 2015,"url": "https://www.nobelprize.org/prizes/medicine/2015/summary/" },
+    { "id": "cpc-2025", "kind": "web", "title": "CPC grows stronger as membership exceeds 100 mln (30 June 2025)", "publisher": "Xinhua (on the website of the State Council of the People's Republic of China)", "year": 2025,"url": "https://english.www.gov.cn/news/202506/30/content_WS686225fbc6d0868f4e8f3bea.html" },
+    { "id": "ohchr-2022", "kind": "web", "title": "OHCHR Assessment of human rights concerns in the Xinjiang Uyghur Autonomous Region, People's Republic of China (31 August 2022)", "publisher": "United Nations Human Rights Office", "year": 2022,"url": "https://www.ohchr.org/en/documents/country-reports/ohchr-assessment-human-rights-concerns-xinjiang-uyghur-autonomous-region" }
+  ],
+  "scenes": [
+    {
+      "id": "opening",
+      "title": "The Chinese Communist Party",
+      "narration": "The Chinese Communist Party was founded in 1921 by a few dozen intellectuals, fought two civil wars and a war against Japan, and in 1949 took power over the most populous country on earth. It has ruled the People's Republic of China ever since, through famine and upheaval under Mao Zedong and four decades of rapid growth after his death. With more than 100 million members by its own count, it is among the largest political organisations in the world. This film follows its history and the arguments about it.",
+      "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Chinese Communist Party", "sub": "1921 to today" },
+      "focus": { "countries": ["CHN"], "bbox": [72, 15, 136, 54] },
+      "link": { "label": "Encyclopaedia · Chinese Communist Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q17427" },
+      "cites": ["saich-2021", "cpc-2025"]
+    },
+    {
+      "id": "founding",
+      "title": "Shanghai, 1921",
+      "narration": "After the revolution of 1911 brought down the Qing dynasty, China fell apart among rival warlords, and the May Fourth Movement of 1919 turned many young intellectuals towards radical ideas. With help from the Communist International in Moscow, thirteen delegates representing about fifty members met in Shanghai's French Concession in July 1921, finishing their congress on a boat on South Lake at Jiaxing after the police found them. Mao Zedong, then a young teacher from Hunan, was one of them.",
+      "visual": { "kind": "map" },
+      "focus": { "points": [[121.47, 31.23, "Shanghai: the first congress, July 1921"], [120.76, 30.75, "Jiaxing: the congress ends on a boat"], [116.4, 39.9, "Beijing: May Fourth protests, 1919"], [112.94, 28.23, "Changsha, Hunan: Mao's home province"]], "bbox": [100, 20, 128, 44] },
+      "link": { "label": "Encyclopaedia · Xinhai Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190517" },
+      "cites": ["saich-2021", "wd"]
+    },
+    {
+      "id": "united-front",
+      "title": "Alliance and massacre, 1923–1927",
+      "narration": "On Moscow's advice the communists joined Sun Yat-sen's Nationalist Party, the Kuomintang, in a united front, and helped it build the army that set out from Guangzhou in 1926 to reunify China in the Northern Expedition. In April 1927 the Nationalist commander Chiang Kai-shek turned on his allies in Shanghai, and in the purges that followed across the country thousands of communists and union activists were killed. The party lost most of its members, and its survivors took up arms.",
+      "visual": {
+        "kind": "map",
+        "arrows": [
+          { "from": [113.26, 23.13], "via": [112.94, 28.2], "to": [114.2, 30.5], "tone": 2, "label": "Northern Expedition, 1926" },
+          { "from": [114.4, 30.4], "via": [116.4, 29.4], "to": [118.7, 31.9], "tone": 2 },
+          { "from": [118.8, 32.3], "via": [117.6, 36.2], "to": [116.5, 39.6], "tone": 2, "label": "To Beijing, 1928" }
+        ]
+      },
+      "focus": { "points": [[121.47, 31.23, "Shanghai, April 1927"], [115.86, 28.68, "Nanchang uprising, 1 August 1927"]], "bbox": [104, 20, 126, 42] },
+      "link": { "label": "War Focus · Northern Expedition, April 1927", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=northern-expedition&m=1927-04" },
+      "cites": ["saich-2021"]
+    },
+    {
+      "id": "long-march",
+      "title": "The Long March, 1934–1935",
+      "narration": "In the countryside the communists set up rural soviets, the largest in Jiangxi province, until Nationalist encirclement campaigns forced the Red Army to break out in October 1934. The Long March took it thousands of kilometres through the south-west, across rivers, mountains and marshes, to Shaanxi in the north. Of about 86,000 who left Jiangxi, fewer than 10,000 arrived a year later, but at Zunyi in January 1935 Mao began his rise to the leadership, and the march became the party's founding legend.",
+      "visual": {
+        "kind": "map",
+        "arrows": [
+          { "from": [116.03, 25.89], "via": [111.2, 25.6], "to": [107.1, 27.6], "tone": 1, "label": "Long March, from October 1934" },
+          { "from": [106.8, 27.6], "via": [102.6, 26.6], "to": [102.3, 29.7], "tone": 1 },
+          { "from": [102.4, 30.1], "via": [103.2, 33.2], "to": [108.0, 36.8], "tone": 1 }
+        ]
+      },
+      "focus": { "countries": ["CHN"], "points": [[116.03, 25.89, "Ruijin, the Jiangxi Soviet"], [106.93, 27.73, "Zunyi, January 1935"], [109.49, 36.59, "Yan'an, the party's base from 1937"]], "bbox": [96, 20, 122, 42] },
+      "link": { "label": "War Focus · Chinese Civil War, October 1934", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=chinese-civil-war-1&m=1934-10" },
+      "cites": ["saich-2021"]
+    },
+    {
+      "id": "japan",
+      "title": "War with Japan, 1937–1945",
+      "narration": "Japan seized Manchuria in 1931 and launched a full-scale invasion of China in July 1937. The Communists and Nationalists formed a second united front, and while the Nationalist armies bore the brunt of the great battles, the Communists expanded guerrilla bases behind Japanese lines. By 1945 the party had more than a million members and governed areas with tens of millions of people from its capital at Yan'an, where Mao's Rectification campaign, launched in 1942, enforced loyalty to his line.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "Japan", "tone": 3, "countries": ["JPN"] }],
+        "arrows": [
+          { "from": [123.4, 41.8], "via": [119.5, 40.6], "to": [116.6, 39.8], "tone": 3, "label": "Japanese advance, July 1937" },
+          { "from": [121.4, 31.3], "via": [120.0, 31.7], "to": [118.9, 32.0], "tone": 3, "label": "Shanghai and Nanjing, 1937" }
+        ]
+      },
+      "focus": { "points": [[109.49, 36.59, "Yan'an, the Communist capital"], [106.55, 29.56, "Chongqing, the Nationalists' wartime capital"]], "bbox": [100, 22, 136, 46] },
+      "link": { "label": "War Focus · Second Sino-Japanese War, July 1937", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=second-sino-japanese&m=1937-07" },
+      "cites": ["saich-2021"]
+    },
+    {
+      "id": "victory",
+      "title": "Victory, 1949",
+      "narration": "Civil war resumed in 1946. Better organised, promising land to the peasants and helped by the Nationalists' inflation and corruption, the communists won decisive campaigns in Manchuria and around the Huai River between September 1948 and January 1949, and entered Beijing at the end of January. Days before Mao proclaimed the People's Republic from the Tiananmen gate on 1 October, he told a conference of the new regime's allies that the Chinese people had stood up, and by December Chiang Kai-shek's government had withdrawn to Taiwan.",
+      "visual": { "kind": "quote", "text": "Ours will no longer be a nation subject to insult and humiliation. We have stood up.", "who": "Mao Zedong, Chinese People's Political Consultative Conference", "when": "21 September 1949", "cite": "mao-1949" },
+      "link": { "label": "Political Retrospective · China, 1949", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1949&c=710" },
+      "cites": ["mao-1949", "saich-2021"]
+    },
+    {
+      "id": "party-state",
+      "title": "Building the party-state, 1949–1957",
+      "narration": "The new state carried out a land reform in which landlords were dispossessed and many were killed, sent its troops into Korea in October 1950, and launched Soviet-style five-year plans. The party placed its committees alongside every ministry, factory and village, the parallel structure that Richard McGregor describes as the core of its rule to this day. In 1956 and 1957 Mao invited criticism in the Hundred Flowers campaign, but from June 1957 the Anti-Rightist Campaign punished hundreds of thousands of people who had spoken out.",
+      "visual": {
+        "kind": "timeline", "from": "1949-10", "to": "1957-12",
+        "events": [
+          { "at": "1949-10-01", "label": "People's Republic proclaimed" },
+          { "at": "1950-06-30", "label": "Land reform law" },
+          { "at": "1950-10-19", "label": "Troops enter Korea" },
+          { "at": "1953-01", "label": "First five-year plan" },
+          { "at": "1953-07-27", "label": "Korean armistice" },
+          { "at": "1954-09-20", "label": "First constitution" },
+          { "at": "1956-05", "label": "Hundred Flowers" },
+          { "at": "1957-06", "label": "Anti-Rightist Campaign" }
+        ]
+      },
+      "link": { "label": "War Focus · Korean War, October 1950", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1950-10" },
+      "cites": ["saich-2021", "mcgregor-2010"]
+    },
+    {
+      "id": "famine",
+      "title": "The Great Leap Forward and the famine",
+      "narration": "In 1958 Mao launched the Great Leap Forward to overtake Britain's industrial output within fifteen years, merging farms into vast people's communes and diverting labour to backyard furnaces. Local officials reported impossible harvests, the state took grain on the strength of those figures, and when the defence minister Peng Dehuai criticised the policy in 1959 he was purged. Specialist demographers have put the excess deaths in the famine of 1959 to 1961 at between 18 and 32.5 million, and Frank Dikötter, working from party archives, at no fewer than 45 million. On any of these counts it was the deadliest famine on record.",
+      "visual": {
+        "kind": "chart", "type": "bar", "title": "Deaths under Mao: ranges of scholarly estimates", "unit": "million people",
+        "data": [
+          { "label": "Great Leap famine, 1959–1961", "low": 18, "high": 45 },
+          { "label": "Cultural Revolution, rural China", "low": 0.75, "high": 1.5 }
+        ],
+        "note": "Famine: excess deaths of 18 to 32.5 million in demographers' estimates (as summarised by Ó Gráda), and at least 45 million in Dikötter's archival estimate. Cultural Revolution: deaths in rural counties alone (Walder and Su).",
+        "cite": ["ograda-2011", "dikotter-2010", "walder-su-2003"]
+      },
+      "link": { "label": "Learning · Economics: From Marx to socialist practice", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=from-marx-to-socialist-practice" },
+      "cites": ["dikotter-2010", "ograda-2011"]
+    },
+    {
+      "id": "cultural-revolution",
+      "title": "The Cultural Revolution, 1966–1976",
+      "narration": "In 1966 Mao, whose authority had been weakened by the famine, called on students organised as Red Guards to attack capitalist roaders within the party itself. Schools closed, officials and teachers were humiliated and beaten, the head of state Liu Shaoqi died in custody, and millions of young people were sent to the countryside. Andrew Walder and Yang Su estimate that between 750,000 and 1.5 million people died in rural China alone, most of them between 1968 and 1971, after new local authorities had taken charge. The upheaval ended only with Mao's death in September 1976 and the arrest of the radical Gang of Four a month later.",
+      "visual": { "kind": "portrait", "qid": "Q5816", "heading": "Mao Zedong", "sub": "1893–1976", "position": "50% 25%" },
+      "link": { "label": "Learning · Politics: The far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
+      "cites": ["walder-su-2003", "saich-2021"]
+    },
+    {
+      "id": "science",
+      "title": "Science behind closed doors",
+      "narration": "Even in the years of upheaval, secret state projects went on. China tested its first atomic bomb in 1964 and put a satellite into orbit in 1970, and a military project against malaria set up in 1967 led Tu Youyou's team to artemisinin in 1972, a discovery that later won her a Nobel Prize. After 1978 science and technology, one of the Four Modernisations first proposed by Zhou Enlai, became a national priority.",
+      "visual": { "kind": "module", "blurb": "See where artemisinin was found, among humanity's breakthroughs on the Timeline of Progress." },
+      "link": { "label": "Timeline of Progress · Tu Youyou discovers artemisinin, 1972", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1972&e=artemisinin" },
+      "cites": ["nobel-2015", "saich-2021"]
+    },
+    {
+      "id": "reform",
+      "title": "Reform and opening, 1978–1992",
+      "narration": "Deng Xiaoping, twice purged under Mao, emerged as China's paramount leader and in December 1978 turned the party towards reform and opening. Collective farms were broken up, special economic zones such as Shenzhen welcomed foreign investment, and markets spread, while Deng insisted on the party's monopoly of power. In 1981 the party passed judgement on Mao himself, finding that his achievements outweighed his errors but that the Cultural Revolution had been a catastrophe.",
+      "visual": { "kind": "portrait", "qid": "Q16977", "heading": "Deng Xiaoping", "sub": "Paramount leader, 1978–1989", "position": "50% 25%" },
+      "link": { "label": "Encyclopaedia · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
+      "cites": ["vogel-2011", "saich-2021"]
+    },
+    {
+      "id": "tiananmen",
+      "title": "Tiananmen, 1989",
+      "narration": "In the spring of 1989 students occupied Tiananmen Square calling for political reform and an end to corruption, and protests spread to cities across China. The leadership split, and the party's general secretary, Zhao Ziyang, who opposed martial law, spent the rest of his life under house arrest. On the night of 3 to 4 June the army cleared the way to the square with live fire. Estimates of the number killed range from several hundred to several thousand, and the party has never allowed an independent inquiry.",
+      "visual": { "kind": "map", "still": true },
+      "focus": { "points": [[116.39, 39.91, "Tiananmen Square, Beijing"], [121.47, 31.23, "Shanghai"], [104.07, 30.67, "Chengdu"]], "bbox": [100, 22, 126, 44] },
+      "link": { "label": "Historical Calendar · June 1989", "suite": "rs", "module": "historical-calendar", "at": "q/calendar.html?period=history&month=1989-06" },
+      "cites": ["vogel-2011", "saich-2021"]
+    },
+    {
+      "id": "xi",
+      "title": "The party under Xi Jinping",
+      "narration": "After 1989 the party combined tight political control with a market economy that lifted hundreds of millions out of extreme poverty and made China the world's second-largest economy. Xi Jinping, general secretary since 2012, has led a sweeping campaign against corruption; the presidential term limit was abolished in 2018, and in 2022 he began a third term as party leader. Supporters credit the party with stability and growth; critics point to the curbing of Hong Kong's freedoms and tighter control of speech. In 2022 the United Nations human rights office found that detention in Xinjiang may amount to crimes against humanity, a finding the government rejects, describing its policies there as a campaign against terrorism and extremism.",
+      "visual": { "kind": "portrait", "qid": "Q15031", "heading": "Xi Jinping", "sub": "General Secretary since 2012", "position": "50% 25%" },
+      "link": { "label": "Political Atlas · China today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#CHN" },
+      "cites": ["mcgregor-2010", "saich-2021", "ohchr-2022"]
+    }
+  ]
+}

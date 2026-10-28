@@ -14,14 +14,14 @@ const OUT = new URL('../data/investors.json', import.meta.url);
 // CIKs are checked against EDGAR's registered names when the script runs.
 const INVESTORS = [
   { cik: 1067983, person: 'Warren Buffett', fund: 'Berkshire Hathaway', style: 'Value investing; long-term holdings of quality businesses' },
-  { cik: 1336528, person: 'Bill Ackman', fund: 'Pershing Square Capital Management', style: 'Concentrated activist investing' },
-  { cik: 1649339, person: 'Michael Burry', fund: 'Scion Asset Management', style: 'Contrarian value; known for shorting US housing before 2008' },
+  { cik: 2026053, person: 'Bill Ackman', fund: 'Pershing Square (Pershing Square Inc.; filed as Pershing Square Capital Management, CIK 1336528, until Q1 2026)', style: 'Concentrated activist investing' },
+  { cik: 1649339, person: 'Michael Burry', fund: 'Scion Asset Management', style: 'Contrarian value; known for shorting US housing before 2008', stale: 'Scion deregistered in November 2025; its last 13F covers Q3 2025 and will not update.' },
   { cik: 1350694, person: 'Ray Dalio', fund: 'Bridgewater Associates', style: 'Global macro; "All Weather" risk parity' },
   { cik: 1536411, person: 'Stanley Druckenmiller', fund: 'Duquesne Family Office', style: 'Global macro; growth and technology' },
   { cik: 1656456, person: 'David Tepper', fund: 'Appaloosa Management', style: 'Distressed debt and opportunistic equities' },
   { cik: 1029160, person: 'George Soros', fund: 'Soros Fund Management', style: 'Global macro' },
   { cik: 1040273, person: 'Dan Loeb', fund: 'Third Point', style: 'Event-driven and activist' },
-  { cik: 1079114, person: 'David Einhorn', fund: 'Greenlight Capital', style: 'Value and short selling' },
+  { cik: 1489933, person: 'David Einhorn', fund: 'Greenlight Capital (files as DME Capital Management)', style: 'Value and short selling' },
   { cik: 921669, person: 'Carl Icahn', fund: 'Icahn Capital', style: 'Activist investing' },
 ];
 

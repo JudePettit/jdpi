@@ -4,6 +4,9 @@
 // today, `limit` per call; meant to be called every ~10 minutes by pg_cron.
 // Deploy: supabase functions deploy refresh-top-stories --no-verify-jwt
 // Secret needed: ANTHROPIC_API_KEY (without it, non-English titles are stored untranslated).
+// Access: the schedule calls it with no key and gets the defaults, bounded by the once-a-day guard. Anything that
+// spends Claude credits beyond that (one named country, a batch over 6, a larger translation backfill) needs a server
+// key: the service-role key the function already holds, or one of the project's secret keys.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 import Anthropic from "npm:@anthropic-ai/sdk@0.110.0";
@@ -15,6 +18,17 @@ const ENGLISH = new Set(["US", "CA", "GB", "IE", "JM", "BS", "BB", "TT", "AG", "
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
 const claude = apiKey ? new Anthropic({ apiKey }) : null;
+
+// Server keys: SUPABASE_SECRET_KEYS is a JSON object of named keys on newer projects.
+const keysFrom = (raw?: string) => {
+  if (!raw) return [];
+  try { const v = JSON.parse(raw); return v && typeof v === "object" ? Object.values(v).map(String) : [String(v)]; } catch { return [raw]; }
+};
+const SERVER_KEYS = new Set([Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), ...keysFrom(Deno.env.get("SUPABASE_SECRET_KEYS"))].filter((k): k is string => !!k));
+const isServer = (req: Request) =>
+  SERVER_KEYS.has((req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "")) || SERVER_KEYS.has(req.headers.get("apikey") ?? "");
+const BACKFILL_EVERY_MS = 9 * 60 * 1000; // callers without a server key: no more often than the schedule runs
+const BACKFILL_DAYS = 3; // older stories whose translation keeps failing stay untranslated rather than retried forever
 
 const decode = (s: string) => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, "")
   .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
@@ -93,11 +107,13 @@ async function refreshCountry(cc: string, outlets: { name: string; home: string;
 
 Deno.serve(async (req) => {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
-  const limit = Math.min(Math.max(Number(body.limit) || 6, 1), 12);
+  const server = isServer(req);
+  const limit = Math.min(Math.max(Number(body.limit) || 6, 1), server ? 12 : 6);
   const today = new Date().toISOString().slice(0, 10);
   const all: Record<string, any[]> = await fetch(OUTLETS_URL).then(r => r.json());
+  const one = server && body.country_code && all[body.country_code] ? String(body.country_code) : null;
   let targets: string[];
-  if (body.country_code && all[body.country_code]) targets = [body.country_code];
+  if (one) targets = [one];
   else {
     const { data } = await db.from("country_top_stories").select("country_code").eq("snapshot_date", today);
     const done = new Set((data ?? []).map((r: any) => r.country_code));
@@ -108,18 +124,34 @@ Deno.serve(async (req) => {
     try { results[cc] = await refreshCountry(cc, all[cc], today); }
     catch (e) { results[cc] = `error: ${(e as Error).message}`; }
   }
-  // Catch up on stories saved before translation was configured (or whose translation failed), newest first.
-  let backfilled = 0, backfillError: string | null = null;
-  if (claude && !body.country_code) {
-    const { data: pending } = await db.from("country_top_stories").select("*").is("title_en", null)
-      .order("snapshot_date", { ascending: false }).limit(Math.min(Number(body.backfill) || 60, 200));
-    if (pending?.length) {
-      const rows = pending.map(({ id: _id, ...r }: any) => ({ ...r, title_original: decode(r.title_original) }));
-      const out = await translate(rows.map((r: any) => r.title_original));
-      rows.forEach((r: any, k: number) => { r.title_en = out[k]; });
-      const { error } = await db.from("country_top_stories").upsert(rows, { onConflict: "snapshot_date,country_code,outlet_domain,story_rank" });
-      if (error) backfillError = error.message; else backfilled = out.filter(Boolean).length;
+  // Catch up on recent stories whose translation failed (or predates it), newest first; without a server key, no more
+  // often than the schedule. Each run is logged first, so the next caller sees it.
+  let backfilled = 0, backfillError: string | null = null, backfillSkipped: string | null = null;
+  if (claude && !one) {
+    let due = true;
+    if (!server) {
+      const { data: last } = await db.from("source_status_history").select("checked_at").eq("source_key", "country_top_stories_backfill")
+        .order("checked_at", { ascending: false }).limit(1);
+      due = !last?.length || Date.now() - new Date(last[0].checked_at).getTime() >= BACKFILL_EVERY_MS;
+    }
+    if (!due) backfillSkipped = "a backfill ran less than 9 minutes ago";
+    else {
+      const since = new Date(Date.now() - BACKFILL_DAYS * 864e5).toISOString().slice(0, 10);
+      let query = db.from("country_top_stories").select("*").is("title_en", null);
+      if (!server) query = query.gte("snapshot_date", since);
+      const { data: pending } = await query.order("snapshot_date", { ascending: false }).limit(server ? Math.min(Number(body.backfill) || 60, 200) : 60);
+      if (pending?.length) {
+        await db.from("source_status_history").insert({
+          source_key: "country_top_stories_backfill", state: "ready", message: `Translating ${pending.length} stories`,
+          item_count: pending.length, metadata: { server },
+        });
+        const rows = pending.map(({ id: _id, ...r }: any) => ({ ...r, title_original: decode(r.title_original) }));
+        const out = await translate(rows.map((r: any) => r.title_original));
+        rows.forEach((r: any, k: number) => { r.title_en = out[k]; });
+        const { error } = await db.from("country_top_stories").upsert(rows, { onConflict: "snapshot_date,country_code,outlet_domain,story_rank" });
+        if (error) backfillError = error.message; else backfilled = out.filter(Boolean).length;
+      }
     }
   }
-  return new Response(JSON.stringify({ date: today, translation: claude ? "claude" : "not configured", results, backfilled, backfillError }), { headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify({ date: today, translation: claude ? "claude" : "not configured", results, backfilled, backfillError, backfillSkipped }), { headers: { "Content-Type": "application/json" } });
 });

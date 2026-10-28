@@ -150,14 +150,14 @@ const embedded = (() => { try { return window.self !== window.top; } catch { ret
 // Every submodule's module in PRP (registry.json): rt Realtime Intelligence, rs Retrospective Intelligence,
 // mm Money Management, ns Natural Science. Old ids (q, hp, fe) are not used here any more.
 const MODULE_SUITE = {
-  briefing: 'rt', headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'rt',
+  briefing: 'rt', headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
   encyclopedia: 'rs', retrospective: 'rs', 'historical-calendar': 'rs', 'battlefield-history': 'rs', 'war-focus': 'rs', kardashev: 'rs', 'learning-politics': 'rs',
   markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', traders: 'mm', learning: 'mm',
   'science-briefing': 'ns', progress: 'ns',
 };
 // Submodule names as PRP shows them; the data may still carry older names (H&P Retrospective, Trader Tracker, …).
 const MODULE_NAME = {
-  briefing: 'Intelligence Briefing', headlines: 'Global Headline Tracker', volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', atlas: 'Political Atlas', calendar: 'Realtime Calendar', 'osint-training': 'OSINT Training',
+  briefing: 'Intelligence Briefing', headlines: 'Global Headline Tracker', volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', atlas: 'Political Atlas', calendar: 'Realtime Calendar', 'osint-training': 'Intel Training',
   encyclopedia: 'Encyclopaedia', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
   markets: 'TD Markets', 'tally-stick': 'Tally Stick', 'algo-trader': 'Algo Trader', traders: 'Auto Trader', learning: 'Learning · Finance & Economics',
   'science-briefing': 'Scientific Briefing', progress: 'Timeline of Progress',

@@ -12,3 +12,56 @@
 /traders/data/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=3600
+
+# Integration Hub (Digital Science): the catalogue, its shards and calendar files, llms.txt and every dataset the
+# catalogue lists are readable by browser-based tools on any origin. All public, read-only data.
+/integration/*
+  Access-Control-Allow-Origin: *
+
+/llms.txt
+  Access-Control-Allow-Origin: *
+
+/registry.json
+  Access-Control-Allow-Origin: *
+
+/calendar/data/*
+  Access-Control-Allow-Origin: *
+
+/briefing/data/*
+  Access-Control-Allow-Origin: *
+
+/science/briefing/data/*
+  Access-Control-Allow-Origin: *
+
+/science/progress/data/*
+  Access-Control-Allow-Origin: *
+
+/econ/briefing/data/*
+  Access-Control-Allow-Origin: *
+
+/digital/briefing/data/*
+  Access-Control-Allow-Origin: *
+
+/battlefield/data/*
+  Access-Control-Allow-Origin: *
+
+/battlefield/history/data/*
+  Access-Control-Allow-Origin: *
+
+/battlefield/focus/data/*
+  Access-Control-Allow-Origin: *
+
+/volatility/data/*
+  Access-Control-Allow-Origin: *
+
+/national/data/*
+  Access-Control-Allow-Origin: *
+
+/kardashev/data/*
+  Access-Control-Allow-Origin: *
+
+/kino/data/*
+  Access-Control-Allow-Origin: *
+
+/headlines/outlets.json
+  Access-Control-Allow-Origin: *

@@ -253,4 +253,4 @@ Signals you can lawfully receive are open sources. In investigations they are ev
 - **GNSS interference as an indicator.** Persistent jamming or spoofing in GPSJam or Flightradar24 maps often tracks military activity and conflict zones. It is a lead: interference has many sources, and the maps can’t say who is responsible.
 - **Space weather and HF.** When a radio link or GNSS service fails, check **Space weather** before suspecting anything else: flares and storms cause outages too.
 
-Method matters more than tools: record what you saw, when and from which source; grade how reliable each source is; and look for independent confirmation. PRP’s [OSINT Training](#/rt/osint-training) course covers the intelligence cycle, source grading, verification and geolocation, with exercises.
+Method matters more than tools: record what you saw, when and from which source; grade how reliable each source is; and look for independent confirmation. PRP’s [OSINT Training](#/oi/osint-training) course covers the intelligence cycle, source grading, verification and geolocation, with exercises.

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digital Briefing · PRP</title>
+<meta name="description" content="Computing and technology papers and news by field: AI, software, cybersecurity, chips, networks, quantum computing, data and privacy, and digital policy, from the major journals, arXiv, labs, government advisories and technology desks.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../design/prp.css">
+<link rel="stylesheet" href="briefing.css">
+<script src="../../design/prp-bar.js" data-suite="ds" data-module="digital-briefing" data-shell="../../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="db">
+  <header class="front">
+    <div class="prp-eyebrow">Digital Science <span class="sep">·</span> Digital Briefing</div>
+    <h1 class="prp-title">Digital Briefing</h1>
+    <p class="prp-dek">New papers, preprints, lab research, security advisories and the best technology journalism, refreshed every six hours. Pick a field, choose papers (research) or news, and open any item at its publisher.</p>
+    <div class="prp-meta" id="meta"><span>Loading the latest papers and stories…</span></div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-stories" aria-controls="panel-stories" aria-selected="true">Stories</button>
+    <button type="button" role="tab" id="tab-sources" aria-controls="panel-sources" aria-selected="false" tabindex="-1">Sources</button>
+  </div>
+
+  <section id="panel-stories" role="tabpanel" aria-labelledby="tab-stories">
+    <div class="toolbar prp-panel">
+      <div class="chips" id="chips" role="group" aria-label="Field"></div>
+      <div class="controls">
+        <div class="field"><span class="prp-label" id="lbl-type">Show</span>
+          <div class="seg" id="type" role="group" aria-labelledby="lbl-type">
+            <button type="button" data-v="paper" aria-pressed="false" title="Research: journal articles, preprints, labs’ research and institutes’ analysis">Papers</button><button type="button" data-v="news" aria-pressed="false" title="Journalism, commentary, advocacy, official releases and advisories">News</button><button type="button" data-v="both" aria-pressed="true">Both</button>
+          </div></div>
+        <div class="field"><span class="prp-label" id="lbl-w">Window</span>
+          <div class="seg" id="window" role="group" aria-labelledby="lbl-w">
+            <button type="button" data-v="24h" aria-pressed="false">24 h</button><button type="button" data-v="3d" aria-pressed="true">3 days</button><button type="button" data-v="7d" aria-pressed="false">7 days</button>
+          </div></div>
+        <label class="field"><span class="prp-label">Source</span><select class="prp-select" id="source"><option value="">All sources</option></select></label>
+        <label class="field grow"><span class="prp-label">Search</span><input class="prp-input" type="search" id="q" placeholder="Title, author, summary, DOI…" autocomplete="off"></label>
+        <label class="field"><span class="prp-label">Order</span><select class="prp-select" id="order"><option value="tier">Major sources first</option><option value="newest">Newest first</option></select></label>
+      </div>
+    </div>
+
+    <div class="layout">
+      <main class="prp-panel toc" aria-labelledby="toc-title">
+        <div class="prp-panel-head toc-head"><h2 class="prp-h2" id="toc-title">All fields</h2><span class="status" id="status" aria-live="polite"></span></div>
+        <div id="list"><p class="prp-empty">Loading…</p></div>
+      </main>
+      <aside class="side" aria-label="Overview">
+        <section class="prp-panel">
+          <div class="prp-panel-head"><b>The week by field</b><span class="prp-label">7 days</span></div>
+          <div class="prp-panel-body">
+            <figure class="prp-figure">
+              <div id="chart" class="chart" role="img" aria-label="Items per day by field over the last seven days"></div>
+              <figcaption><b>Figure 1.</b> Papers and stories per day over the last seven days, by field, for the current type, source and search. An item can count under more than one field. Source: the journal, preprint, lab, agency and news feeds listed under Sources.</figcaption>
+            </figure>
+            <details class="as-table"><summary>Show as a table</summary><div class="scroll" id="chart-table"></div></details>
+          </div>
+        </section>
+        <section class="prp-panel">
+          <div class="prp-panel-head"><b>Most active sources</b><span class="prp-label" id="top-scope">in this view</span></div>
+          <ol class="top" id="top"></ol>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <section id="panel-sources" role="tabpanel" aria-labelledby="tab-sources" hidden>
+    <div class="prp-kpis" id="kpis"></div>
+    <div class="prp-panel src-panel">
+      <div class="prp-panel-head"><b>Feeds</b><span class="prp-label" id="src-checked"></span></div>
+      <div class="scroll"><table class="prp-table" id="src-table">
+        <thead><tr><th scope="col">Source</th><th scope="col">Kind</th><th scope="col">Tier</th><th scope="col">Default fields</th><th scope="col">Status</th><th scope="col" class="num">Items, 7 days</th><th scope="col" class="num">In feed</th><th scope="col">Latest item</th></tr></thead>
+        <tbody id="src-rows"></tbody>
+      </table></div>
+    </div>
+    <p class="prp-note src-note">Tier 1 is the flagship journals (Nature Machine Intelligence, Nature Electronics, the Journal of the ACM and PRX Quantum); tier 2 other major journals and Nature Portfolio’s subject feeds, the major labs’ research blogs and the government agencies and regulators; tier 3 arXiv preprints, research institutes, engineering and security research blogs and advocacy groups; tier 4 technology journalism and commentary. “Major sources first” orders each day by tier, research before news. A feed with no default field is general: its items are sorted into fields by keywords, and those marked “technology only” keep only the items that match a field. Each arXiv category gives at most the stated number of new submissions a day (no cross-lists or revisions), the papers with the most authors first, and quant-ph only those on quantum computing and quantum information. “In feed” is what the feed returned at the last check after front matter, corrections, sponsored posts and off-topic items were dropped; for arXiv it is the papers picked, of the new submissions that qualified.</p>
+  </section>
+
+  <footer class="prp-sources" id="sources-note">
+    <p><b>Sources.</b> RSS and Atom feeds from Nature Portfolio (Nature Machine Intelligence, Nature Electronics, Nature Computational Science, npj Quantum Information, and its computer science, electrical engineering and quantum information subject feeds), the ACM Digital Library (the Journal of the ACM, ACM Computing Surveys and the Transactions on Privacy and Security, on Architecture and Code Optimization and on Quantum Computing), PRX Quantum, Quantum, the Journal of Artificial Intelligence Research and eleven arXiv categories; the research and engineering blogs of Google Research, Google DeepMind, OpenAI, Microsoft Research, Apple, IBM Research, Hugging Face, Meta, Cloudflare and Google Project Zero; Citizen Lab, CSET, APNIC and RIPE Labs; CISA, the NCSC, NIST, the European Data Protection Board, the European Commission, the US Federal Trade Commission and the UK Department for Science, Innovation and Technology; EFF, noyb and Access Now; and MIT Technology Review, IEEE Spectrum, Ars Technica, The Register, WIRED, The Verge, Rest of World, 404 Media, Krebs on Security, BleepingComputer, The Record, Schneier on Security, The Quantum Insider, EE Times, Light Reading, DatacenterDynamics, LWN.net and the technology desks of the Financial Times, The Guardian, BBC News, The New York Times, Bloomberg and POLITICO Europe. Headlines, links, authors and short summaries only; every item links to its publisher, and the text remains theirs. DOIs resolve through doi.org (arXiv’s own DOIs begin 10.48550).</p>
+    <p><b>Not covered.</b> Communications of the ACM turns feed readers away (403), JMLR’s feed dates every paper to the first day of the volume and TMLR has no feed, and IEEE Xplore’s tables of contents list each issue weeks after its articles went online, so almost nothing in them is new within a week. Meta AI, Anthropic, Stanford HAI, Tech Policy Press and the ICO publish no working feed, and Ofcom, Lawfare and Euractiv block feed readers. Reuters and AP publish no public feeds.</p>
+    <p><b>Method.</b> Items are classed by their feed’s default field, refined by a keyword classifier (an item can belong to several fields; general feeds are classed by keywords alone, and items matching none appear under All). Words about government, courts, regulators and work count towards Digital policy &amp; society only when an item is otherwise about technology. Papers are research: journal articles, preprints, labs’ research write-ups and institutes’ analysis. News is journalism, commentary, advocacy, official releases and advisories, and labs’ product and company announcements where their feeds label them. Journal front matter, corrections, sponsored posts, white papers, webinars, podcasts, newsletters, deals and routine notices (CISA’s catalogue additions, LWN’s daily lists of security updates) are left out. Duplicates (same URL or DOI, or near-identical titles across outlets) are merged and the copy from the highest tier is kept. Items stay for seven days, at most 2,500 in all and 150 per feed (fewer for arXiv and the busiest trade titles). Times are shown in your time zone; feeds that give only a date (arXiv, most journals, CISA, NIST and the FTC) are grouped by that date and shown without a time.</p>
+    <p><b>Refresh.</b> Every six hours by a GitHub Actions workflow (<code>digital/scripts/build-briefing.mjs</code>). <span id="refreshed"></span></p>
+  </footer>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+</body>
+</html>

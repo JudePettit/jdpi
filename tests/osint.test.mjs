@@ -1,4 +1,4 @@
-// OSINT Dashboard (Realtime Intelligence): the pure helpers behind every tab (search syntax per engine, archive and
+// OSINT Dashboard (Offensive Intelligence): the pure helpers behind every tab (search syntax per engine, archive and
 // RDAP/DNS/certificate/GLEIF/OpenSanctions/GDELT parsing, the case notebook's import and export), the image-metadata
 // reader, the guide renderer and its content files, and the page's static contract (tabs, hookup, tokens only).
 //   node --test tests/osint.test.mjs
@@ -627,11 +627,11 @@ test('guides: the content files render, and every link points somewhere real', (
 /* ---------------------------------------------------------------- page contract */
 test('page: hookup, tabs, tokens only, pinned libraries, no old brand names', () => {
   const html = read('osint/index.html');
-  assert.match(html, /<html lang="en" data-suite="rt"/);
+  assert.match(html, /<html lang="en" data-suite="oi"/);
   assert.match(html, /<title>OSINT Dashboard · PRP<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/design\/prp\.css">/);
-  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="rt" data-module="osint" data-shell="\.\.\/" defer><\/script>/);
-  assert.match(html, /class="prp-eyebrow">Realtime Intelligence <span class="sep">·<\/span> OSINT Dashboard/);
+  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="osint" data-shell="\.\.\/" defer><\/script>/);
+  assert.match(html, /class="prp-eyebrow">Offensive Intelligence <span class="sep">·<\/span> OSINT Dashboard/);
   assert.match(html, /class="prp-title">OSINT Dashboard</); assert.match(html, /class="prp-dek"/); assert.match(html, /class="prp-meta"/);
   for (const t of L.TABS) {
     assert.match(html, new RegExp(`<button type="button" role="tab" id="tab-${t.id}" aria-controls="panel-${t.id}" data-tab="${t.id}"`), t.id);

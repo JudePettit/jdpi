@@ -1,0 +1,962 @@
+{
+ "generated": "2026-10-27T12:00:00.000Z",
+ "source": "Data Analytics test fixture",
+ "events": [
+  {
+   "id": "e001",
+   "date": "2018-01-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "election",
+   "title": "Event 1 in France",
+   "deaths": null,
+   "place": {
+    "lat": -69.95,
+    "lon": 8.36
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e002",
+   "date": "2019-06-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "treaty",
+   "title": "Event 2 in Germany",
+   "deaths": 88,
+   "place": {
+    "lat": -33.14,
+    "lon": -42.08
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e003",
+   "date": "2020-11-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "court",
+   "title": "Event 3 in United Kingdom",
+   "deaths": 24,
+   "place": {
+    "lat": 66.62,
+    "lon": 4.19
+   },
+   "tags": []
+  },
+  {
+   "id": "e004",
+   "date": "2021-04-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "crisis",
+   "title": "Event 4 in United States",
+   "deaths": 64,
+   "place": {
+    "lat": -34.01,
+    "lon": -133.59
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e005",
+   "date": "2022-09-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "summit",
+   "title": "Event 5 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": 44.17,
+    "lon": 136.19
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e006",
+   "date": "2023-02-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "referendum",
+   "title": "Event 6 in India",
+   "deaths": 54,
+   "place": {
+    "lat": -35.65,
+    "lon": -85.88
+   },
+   "tags": []
+  },
+  {
+   "id": "e007",
+   "date": "2024-07-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "sanctions",
+   "title": "Event 7 in Nigeria",
+   "deaths": 23,
+   "place": {
+    "lat": -24.73,
+    "lon": -134.82
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e008",
+   "date": "2018-12-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "protest",
+   "title": "Event 8 in Japan",
+   "deaths": 97,
+   "place": {
+    "lat": 4.82,
+    "lon": 117.11
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e009",
+   "date": "2019-05-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "coup",
+   "title": "Event 9 in France",
+   "deaths": null,
+   "place": {
+    "lat": 33.18,
+    "lon": -143.37
+   },
+   "tags": []
+  },
+  {
+   "id": "e010",
+   "date": "2020-10-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "ceasefire",
+   "title": "Event 10 in Germany",
+   "deaths": 65,
+   "place": {
+    "lat": -51.66,
+    "lon": 123.26
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e011",
+   "date": "2021-03-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "election",
+   "title": "Event 11 in United Kingdom",
+   "deaths": 56,
+   "place": {
+    "lat": -3.92,
+    "lon": -17
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e012",
+   "date": "2022-08-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "treaty",
+   "title": "Event 12 in United States",
+   "deaths": 28,
+   "place": {
+    "lat": -68.28,
+    "lon": -162.17
+   },
+   "tags": []
+  },
+  {
+   "id": "e013",
+   "date": "2023-01-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "court",
+   "title": "Event 13 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": 69.09,
+    "lon": 141.25
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e014",
+   "date": "2024-06-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "crisis",
+   "title": "Event 14 in India",
+   "deaths": 94,
+   "place": {
+    "lat": 9.91,
+    "lon": 91.54
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e015",
+   "date": "2018-11-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "summit",
+   "title": "Event 15 in Nigeria",
+   "deaths": 75,
+   "place": {
+    "lat": -21.81,
+    "lon": -42.28
+   },
+   "tags": []
+  },
+  {
+   "id": "e016",
+   "date": "2019-04-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "referendum",
+   "title": "Event 16 in Japan",
+   "deaths": 32,
+   "place": {
+    "lat": -20.76,
+    "lon": 47.92
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e017",
+   "date": "2020-09-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "sanctions",
+   "title": "Event 17 in France",
+   "deaths": null,
+   "place": {
+    "lat": -19.07,
+    "lon": -152.05
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e018",
+   "date": "2021-02-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "protest",
+   "title": "Event 18 in Germany",
+   "deaths": 63,
+   "place": {
+    "lat": -47.92,
+    "lon": -15.7
+   },
+   "tags": []
+  },
+  {
+   "id": "e019",
+   "date": "2022-07-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "coup",
+   "title": "Event 19 in United Kingdom",
+   "deaths": 40,
+   "place": {
+    "lat": -43.01,
+    "lon": -147.99
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e020",
+   "date": "2023-12-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "ceasefire",
+   "title": "Event 20 in United States",
+   "deaths": 118,
+   "place": {
+    "lat": 6.45,
+    "lon": -139.7
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e021",
+   "date": "2024-05-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "election",
+   "title": "Event 21 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": 69.06,
+    "lon": -22.53
+   },
+   "tags": []
+  },
+  {
+   "id": "e022",
+   "date": "2018-10-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "treaty",
+   "title": "Event 22 in India",
+   "deaths": 84,
+   "place": {
+    "lat": -43.86,
+    "lon": 14.86
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e023",
+   "date": "2019-03-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "court",
+   "title": "Event 23 in Nigeria",
+   "deaths": 119,
+   "place": {
+    "lat": -43.41,
+    "lon": 62.65
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e024",
+   "date": "2020-08-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "crisis",
+   "title": "Event 24 in Japan",
+   "deaths": 48,
+   "place": {
+    "lat": -8.54,
+    "lon": 83.99
+   },
+   "tags": []
+  },
+  {
+   "id": "e025",
+   "date": "2021-01-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "summit",
+   "title": "Event 25 in France",
+   "deaths": null,
+   "place": {
+    "lat": -45.07,
+    "lon": 105.67
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e026",
+   "date": "2022-06-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "referendum",
+   "title": "Event 26 in Germany",
+   "deaths": 97,
+   "place": {
+    "lat": -56.36,
+    "lon": -159.9
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e027",
+   "date": "2023-11-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "sanctions",
+   "title": "Event 27 in United Kingdom",
+   "deaths": 16,
+   "place": {
+    "lat": 19.24,
+    "lon": -40.69
+   },
+   "tags": []
+  },
+  {
+   "id": "e028",
+   "date": "2024-04-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "protest",
+   "title": "Event 28 in United States",
+   "deaths": 30,
+   "place": {
+    "lat": 0.94,
+    "lon": 7.19
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e029",
+   "date": "2018-09-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "coup",
+   "title": "Event 29 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": -55.51,
+    "lon": 164.42
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e030",
+   "date": "2019-02-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "ceasefire",
+   "title": "Event 30 in India",
+   "deaths": 42,
+   "place": {
+    "lat": 37.57,
+    "lon": -79.78
+   },
+   "tags": []
+  },
+  {
+   "id": "e031",
+   "date": "2020-07-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "election",
+   "title": "Event 31 in Nigeria",
+   "deaths": 80,
+   "place": {
+    "lat": 58.12,
+    "lon": -11.43
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e032",
+   "date": "2021-12-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "treaty",
+   "title": "Event 32 in Japan",
+   "deaths": 53,
+   "place": {
+    "lat": 59,
+    "lon": -11.12
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e033",
+   "date": "2022-05-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "court",
+   "title": "Event 33 in France",
+   "deaths": null,
+   "place": {
+    "lat": 66.81,
+    "lon": -61.19
+   },
+   "tags": []
+  },
+  {
+   "id": "e034",
+   "date": "2023-10-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "crisis",
+   "title": "Event 34 in Germany",
+   "deaths": 95,
+   "place": {
+    "lat": 51.17,
+    "lon": 82.5
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e035",
+   "date": "2024-03-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "summit",
+   "title": "Event 35 in United Kingdom",
+   "deaths": 67,
+   "place": {
+    "lat": 45.75,
+    "lon": 10.62
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e036",
+   "date": "2018-08-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "referendum",
+   "title": "Event 36 in United States",
+   "deaths": 37,
+   "place": {
+    "lat": -21.92,
+    "lon": -64.15
+   },
+   "tags": []
+  },
+  {
+   "id": "e037",
+   "date": "2019-01-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "sanctions",
+   "title": "Event 37 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": -7.48,
+    "lon": 22.7
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e038",
+   "date": "2020-06-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "protest",
+   "title": "Event 38 in India",
+   "deaths": 78,
+   "place": {
+    "lat": -61.19,
+    "lon": -3.48
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e039",
+   "date": "2021-11-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "coup",
+   "title": "Event 39 in Nigeria",
+   "deaths": 55,
+   "place": {
+    "lat": -68.67,
+    "lon": 68.35
+   },
+   "tags": []
+  },
+  {
+   "id": "e040",
+   "date": "2022-04-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "ceasefire",
+   "title": "Event 40 in Japan",
+   "deaths": 47,
+   "place": {
+    "lat": -7.43,
+    "lon": 148.3
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e041",
+   "date": "2023-09-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "election",
+   "title": "Event 41 in France",
+   "deaths": null,
+   "place": {
+    "lat": -52.48,
+    "lon": -24.38
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e042",
+   "date": "2024-02-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "treaty",
+   "title": "Event 42 in Germany",
+   "deaths": 35,
+   "place": {
+    "lat": -12.46,
+    "lon": -87.15
+   },
+   "tags": []
+  },
+  {
+   "id": "e043",
+   "date": "2018-07-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "court",
+   "title": "Event 43 in United Kingdom",
+   "deaths": 44,
+   "place": {
+    "lat": 29.43,
+    "lon": 148.09
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e044",
+   "date": "2019-12-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "crisis",
+   "title": "Event 44 in United States",
+   "deaths": 2,
+   "place": {
+    "lat": -3.09,
+    "lon": 109.34
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e045",
+   "date": "2020-05-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "summit",
+   "title": "Event 45 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": 4.58,
+    "lon": -127.17
+   },
+   "tags": []
+  },
+  {
+   "id": "e046",
+   "date": "2021-10-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "referendum",
+   "title": "Event 46 in India",
+   "deaths": 48,
+   "place": {
+    "lat": -51.97,
+    "lon": 106.22
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e047",
+   "date": "2022-03-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "sanctions",
+   "title": "Event 47 in Nigeria",
+   "deaths": 47,
+   "place": {
+    "lat": -59.32,
+    "lon": 33.19
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e048",
+   "date": "2023-08-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "protest",
+   "title": "Event 48 in Japan",
+   "deaths": 40,
+   "place": {
+    "lat": -34.49,
+    "lon": -38.6
+   },
+   "tags": []
+  },
+  {
+   "id": "e049",
+   "date": "2024-01-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "coup",
+   "title": "Event 49 in France",
+   "deaths": null,
+   "place": {
+    "lat": -26.03,
+    "lon": 39.62
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e050",
+   "date": "2018-06-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "ceasefire",
+   "title": "Event 50 in Germany",
+   "deaths": 25,
+   "place": {
+    "lat": -30.18,
+    "lon": 166.3
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e051",
+   "date": "2019-11-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "election",
+   "title": "Event 51 in United Kingdom",
+   "deaths": 24,
+   "place": {
+    "lat": 22.66,
+    "lon": 4.82
+   },
+   "tags": []
+  },
+  {
+   "id": "e052",
+   "date": "2020-04-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "treaty",
+   "title": "Event 52 in United States",
+   "deaths": 94,
+   "place": {
+    "lat": -52.2,
+    "lon": -48.23
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e053",
+   "date": "2021-09-01",
+   "country": "Brazil",
+   "iso3": "BRA",
+   "type": "court",
+   "title": "Event 53 in Brazil",
+   "deaths": null,
+   "place": {
+    "lat": -38.87,
+    "lon": -68.4
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e054",
+   "date": "2022-02-08",
+   "country": "India",
+   "iso3": "IND",
+   "type": "crisis",
+   "title": "Event 54 in India",
+   "deaths": 20,
+   "place": {
+    "lat": 63.9,
+    "lon": 76.75
+   },
+   "tags": []
+  },
+  {
+   "id": "e055",
+   "date": "2023-07-15",
+   "country": "Nigeria",
+   "iso3": "NGA",
+   "type": "summit",
+   "title": "Event 55 in Nigeria",
+   "deaths": 71,
+   "place": {
+    "lat": 2.47,
+    "lon": -3.64
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e056",
+   "date": "2024-12-22",
+   "country": "Japan",
+   "iso3": "JPN",
+   "type": "referendum",
+   "title": "Event 56 in Japan",
+   "deaths": 44,
+   "place": {
+    "lat": -28.94,
+    "lon": -37.47
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e057",
+   "date": "2018-05-01",
+   "country": "France",
+   "iso3": "FRA",
+   "type": "sanctions",
+   "title": "Event 57 in France",
+   "deaths": null,
+   "place": {
+    "lat": -12.81,
+    "lon": -24.04
+   },
+   "tags": []
+  },
+  {
+   "id": "e058",
+   "date": "2019-10-08",
+   "country": "Germany",
+   "iso3": "DEU",
+   "type": "protest",
+   "title": "Event 58 in Germany",
+   "deaths": 39,
+   "place": {
+    "lat": -20.63,
+    "lon": -133.07
+   },
+   "tags": [
+    "politics",
+    "europe"
+   ]
+  },
+  {
+   "id": "e059",
+   "date": "2020-03-15",
+   "country": "United Kingdom",
+   "iso3": "GBR",
+   "type": "coup",
+   "title": "Event 59 in United Kingdom",
+   "deaths": 87,
+   "place": {
+    "lat": -12.69,
+    "lon": -166.55
+   },
+   "tags": [
+    "politics"
+   ]
+  },
+  {
+   "id": "e060",
+   "date": "2021-08-22",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "ceasefire",
+   "title": "Event 60 in United States",
+   "deaths": 42,
+   "place": {
+    "lat": 5.11,
+    "lon": -104.8
+   },
+   "tags": []
+  },
+  {
+   "id": "e061",
+   "date": "2024-07-04",
+   "country": "United States",
+   "iso3": "USA",
+   "type": "election",
+   "title": "A \"quoted\", comma, title\nwith a new line <b>&</b>",
+   "deaths": 0,
+   "place": {
+    "lat": 38.9,
+    "lon": -77.04
+   },
+   "tags": [
+    "=formula"
+   ]
+  }
+ ]
+}

@@ -28,6 +28,11 @@ jobs:
           node-version: 22
       - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json --atlas=political-atlas
       - run: node calendar/scripts/enrich-summaries.mjs
+      # Integration Hub: the calendars as iCalendar files, plus the data catalogue, its shards, the Encyclopaedia name index,
+      # the country profiles, openapi.json and llms.txt, rebuilt from today's data. It never blocks the calendar commit.
+      - name: Rebuild the Integration Hub catalogue and calendar files
+        continue-on-error: true
+        run: node integration/scripts/build-catalog.mjs --quiet && git add integration/catalog.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"

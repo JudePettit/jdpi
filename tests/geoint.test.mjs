@@ -342,13 +342,13 @@ test('renderer: headings, contents, lists, tables, code and callouts', () => {
 });
 
 test('renderer: links are sanitised, PRP links go through the shell, tab links stay in the page', () => {
-  const ctx = { opts: { prpLink: p => ({ href: `https://shell/#/rt/${p.split('/')[0]}`, target: '_top' }) } };
+  const ctx = { opts: { prpLink: p => ({ href: `https://shell/#/oi/${p.split('/')[0]}`, target: '_top' }) } };
   assert.equal(inline('[x](https://a.org/b?c=1&d=2)', ctx), '<a href="https://a.org/b?c=1&amp;d=2" target="_blank" rel="noopener noreferrer">x</a>');
   assert.equal(inline('[x](javascript:alert(1))', ctx), 'x');
   assert.equal(inline('[x](data:text/html,hi)', ctx), 'x');
   assert.equal(inline('[x](//evil.example/a)', ctx), 'x');
   assert.equal(inline('[Imagery](#tab=imagery&l=bm)', ctx), '<a href="#tab=imagery&amp;l=bm" data-tab-link>Imagery</a>');
-  assert.equal(inline('[L](prp://osint-training/fe/learning.html?course=osint)', ctx), '<a href="https://shell/#/rt/osint-training" target="_top">L</a>');
+  assert.equal(inline('[L](prp://osint-training/fe/learning.html?course=osint)', ctx), '<a href="https://shell/#/oi/osint-training" target="_top">L</a>');
   assert.equal(inline('**[bold link](https://a.org)**', ctx), '<b><a href="https://a.org" target="_blank" rel="noopener noreferrer">bold link</a></b>');
   assert.equal(inline('<script>alert(1)</script>', ctx), '&lt;script&gt;alert(1)&lt;/script&gt;');
   assert.equal(inline('see <https://gdal.org/en/stable/>', ctx), 'see <a href="https://gdal.org/en/stable/" target="_blank" rel="noopener noreferrer">gdal.org/en/stable/</a>');
@@ -439,11 +439,11 @@ test('safety: no tools for finding or profiling private people are named', () =>
 /* ---------------------------------------------------------------- the page */
 test('page wiring follows the PRP contract', () => {
   const html = read('index.html');
-  assert.match(html, /<html lang="en" data-suite="rt" class="prp">/);
+  assert.match(html, /<html lang="en" data-suite="oi" class="prp">/);
   assert.match(html, /<title>GEOINT &amp; IMINT Dashboard · PRP<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/design\/prp\.css">/);
-  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="rt" data-module="geoint" data-shell="\.\.\/" defer><\/script>/);
-  assert.match(html, /class="prp-eyebrow">Realtime Intelligence <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
+  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="geoint" data-shell="\.\.\/" defer><\/script>/);
+  assert.match(html, /class="prp-eyebrow">Offensive Intelligence <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
   assert.ok(!/JDP-I\b|H&amp;P|F&amp;E/.test(html), 'no old brand names');
   const tabs = [...html.matchAll(/role="tab" id="tab-([a-z]+)" aria-controls="panel-([a-z]+)"/g)];
   assert.deepEqual(tabs.map(t => t[1]), U.TABS);

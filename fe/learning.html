@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="mm" data-module="learning" data-shell="../" defer></script>
 <script>/* Each course belongs to a module: tell the connector before it runs, and apply the saved theme before first paint. */
-(function(){var c=new URLSearchParams(location.search).get('course'),g={politics:['rs','learning-politics','Learning · Politics'],osint:['rt','osint-training','OSINT Training']}[c]||['mm','learning','Learning · Finance & Economics'],s=document.querySelector('script[src*="prp-bar.js"]');if(s){s.dataset.suite=g[0];s.dataset.module=g[1]}document.documentElement.dataset.suite=g[0];document.title=g[2]+' · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
+(function(){var c=new URLSearchParams(location.search).get('course'),g={politics:['rs','learning-politics','Learning · Politics'],osint:['oi','osint-training','Intel Training'],sigint:['oi','osint-training','Intel Training'],geoint:['oi','osint-training','Intel Training']}[c]||['mm','learning','Learning · Finance & Economics'],s=document.querySelector('script[src*="prp-bar.js"]');if(s){s.dataset.suite=g[0];s.dataset.module=g[1]}document.documentElement.dataset.suite=g[0];document.title=g[2]+' · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <style>
 *{box-sizing:border-box}[hidden]{display:none!important}
 button{font:inherit;cursor:pointer}
@@ -83,7 +83,7 @@ button{font:inherit;cursor:pointer}
     <div class="prp-meta" id="meta"></div>
   </header>
   <div class="prp-tabs tabs" role="tablist" aria-label="Courses">
-    <a href="learning.html?course=finance" role="tab" data-course="finance" data-group="mm">Finance</a><a href="learning.html?course=economics" role="tab" data-course="economics" data-group="mm">Economics</a><a href="learning.html?course=politics" role="tab" data-course="politics" data-group="rs">Politics</a><a href="learning.html?course=osint" role="tab" data-course="osint" data-group="rt">OSINT</a>
+    <a href="learning.html?course=finance" role="tab" data-course="finance" data-group="mm">Finance</a><a href="learning.html?course=economics" role="tab" data-course="economics" data-group="mm">Economics</a><a href="learning.html?course=politics" role="tab" data-course="politics" data-group="rs">Politics</a><a href="learning.html?course=osint" role="tab" data-course="osint" data-group="oi">OSINT</a><a href="learning.html?course=sigint" role="tab" data-course="sigint" data-group="oi">SIGINT</a><a href="learning.html?course=geoint" role="tab" data-course="geoint" data-group="oi">GEOINT &amp; IMINT</a>
   </div>
   <div class="layout">
     <nav class="toc prp-panel" aria-label="Course contents">
@@ -105,15 +105,17 @@ const COURSES = {
   finance: { file: 'learning/finance.md', group: 'mm' },
   economics: { file: 'learning/economics.md', group: 'mm' },
   politics: { file: 'learning/politics.md', group: 'rs' },
-  osint: { file: 'learning/osint.md', group: 'rt' },
+  osint: { file: 'learning/osint.md', group: 'oi' },
+  sigint: { file: 'learning/sigint.md', group: 'oi' },
+  geoint: { file: 'learning/geoint.md', group: 'oi' },
 };
 const GROUPS = {
   mm: { module: 'Money Management', submodule: 'Learning · Finance & Economics', note: 'Not financial advice: worked examples are for learning only.',
     intro: 'Two courses: Finance, a university-style introduction with worked examples, and Economics, taught through its great thinkers and rival schools.' },
   rs: { module: 'Retrospective Intelligence', submodule: 'Learning · Politics', note: 'Each movement is presented as its own thinkers explained it, then what happened when it held power and what its critics say.',
     intro: 'The political spectrum through the leaders and thinkers who shaped it, with quizzes.' },
-  rt: { module: 'Realtime Intelligence', submodule: 'OSINT Training', note: 'Use open-source methods lawfully and ethically: respect each tool’s terms, people’s privacy and the law where you work.',
-    intro: 'Open-source intelligence tools and methods, from the intelligence cycle and source grading to verification, geolocation and structured analysis, and how to use PRP itself as an intelligence tool.' },
+  oi: { module: 'Offensive Intelligence', submodule: 'Intel Training', note: 'Use these methods lawfully and ethically: respect each tool’s terms, people’s privacy and the law where you work. Signals work is receive-only: never transmit without a licence, jam, or try to read private communications.',
+    intro: 'Three courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT, SIGINT, and GEOINT & IMINT, and how to use PRP’s dashboards for each.' },
 };
 const params = new URLSearchParams(location.search);
 let course = COURSES[params.get('course')] ? params.get('course') : 'finance';

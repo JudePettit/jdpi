@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integration Hub · PRP</title>
+<meta name="description" content="Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="hub.css">
+<link rel="alternate" type="application/json" title="PRP data catalogue" href="catalog.json">
+<script src="../design/prp-bar.js" data-suite="ds" data-module="integration-hub" data-shell="../" defer></script>
+<script type="module" src="hub.js"></script>
+</head>
+<body>
+<div class="ih">
+  <header class="front">
+    <div class="prp-eyebrow">Digital Science <span class="sep">·</span> Integration Hub</div>
+    <h1 class="prp-title">Integration Hub</h1>
+    <p class="prp-dek">PRP's data, open to AI assistants and plugins: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars. Everything is public and read-only, and needs no key.</p>
+    <div class="prp-meta" id="meta"><span>Loading the catalogue…</span></div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" id="tab-catalogue" aria-controls="panel-catalogue" aria-selected="false" tabindex="-1">Data catalogue</button>
+    <button type="button" role="tab" id="tab-mcp" aria-controls="panel-mcp" aria-selected="false" tabindex="-1">MCP server</button>
+    <button type="button" role="tab" id="tab-api" aria-controls="panel-api" aria-selected="false" tabindex="-1">JSON API</button>
+    <button type="button" role="tab" id="tab-feeds" aria-controls="panel-feeds" aria-selected="false" tabindex="-1">Feeds &amp; calendars</button>
+    <button type="button" role="tab" id="tab-skills" aria-controls="panel-skills" aria-selected="false" tabindex="-1">Plugins &amp; skills</button>
+    <button type="button" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">Security &amp; terms</button>
+  </div>
+
+  <!-- ============================================================ Overview -->
+  <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="panel">
+    <div class="prp-kpis" id="kpis" aria-live="polite"></div>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">What PRP offers an AI assistant</h2></div>
+        <div class="prp-panel-body prp-prose">
+          <p>PRP collects what is happening in the world, and what happened before, into one workspace: elections and political events, wars and armed conflict, each country's condition and volatility, a century of political history, the news across the political spectrum, new research in science, economics and technology, disclosures by members of Congress and famous investors, and an Encyclopaedia that links them all.</p>
+          <p>The Integration Hub lets an assistant such as Claude read all of it directly, so it can answer with PRP's figures and say where each came from. It can list the datasets, look at their fields, filter and sort rows, search the Encyclopaedia, read the latest briefings, check the political calendar and pull together one country's picture.</p>
+          <p>Nothing can be changed through it, nothing private is in it, and there is nothing to sign up for.</p>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Five ways in</h2></div>
+        <ol class="ways">
+          <li><button type="button" data-go="mcp"><b>Connect an assistant</b><span>MCP server at <code>/mcp</code>, or run it locally</span></button></li>
+          <li><button type="button" data-go="api"><b>Call the JSON API</b><span>Plain HTTPS GET under <code>/api/v1/</code></span></button></li>
+          <li><button type="button" data-go="catalogue"><b>Download the data</b><span>Static JSON, described in the catalogue</span></button></li>
+          <li><button type="button" data-go="feeds"><b>Subscribe</b><span>RSS and JSON feeds, iCalendar files</span></button></li>
+          <li><button type="button" data-go="skills"><b>Teach an assistant</b><span>A ready-made Claude skill and an llms.txt guide</span></button></li>
+        </ol>
+      </div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">How it fits together</h2></div>
+      <div class="prp-panel-body">
+        <figure class="prp-figure">
+          <div class="diagram" role="img" aria-labelledby="fig1-cap">
+            <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-arrowhead"/></marker></defs>
+              <g class="d-box"><rect x="10" y="20" width="200" height="210" rx="6"/></g>
+              <text x="110" y="46" class="d-title" text-anchor="middle">PRP submodules</text>
+              <text x="110" y="74" class="d-text" text-anchor="middle">Calendars · Battlefield</text>
+              <text x="110" y="96" class="d-text" text-anchor="middle">Volatility · National Analysis</text>
+              <text x="110" y="118" class="d-text" text-anchor="middle">Briefings · Encyclopaedia</text>
+              <text x="110" y="140" class="d-text" text-anchor="middle">War Focus · Kardashev</text>
+              <text x="110" y="162" class="d-text" text-anchor="middle">Auto Trader · Progress · Kino</text>
+              <text x="110" y="200" class="d-note" text-anchor="middle">refreshed by scheduled builds</text>
+              <g class="d-box accent"><rect x="270" y="70" width="180" height="110" rx="6"/></g>
+              <text x="360" y="104" class="d-title" text-anchor="middle">Data catalogue</text>
+              <text x="360" y="128" class="d-text" text-anchor="middle">catalog.json · shards</text>
+              <text x="360" y="150" class="d-text" text-anchor="middle">name and country indexes</text>
+              <g class="d-box"><rect x="520" y="14" width="170" height="52" rx="6"/></g>
+              <text x="605" y="45" class="d-title" text-anchor="middle">MCP server /mcp</text>
+              <g class="d-box"><rect x="520" y="76" width="170" height="52" rx="6"/></g>
+              <text x="605" y="107" class="d-title" text-anchor="middle">JSON API /api/v1</text>
+              <g class="d-box"><rect x="520" y="138" width="170" height="52" rx="6"/></g>
+              <text x="605" y="169" class="d-title" text-anchor="middle">Feeds · iCalendar</text>
+              <g class="d-box"><rect x="520" y="200" width="170" height="40" rx="6"/></g>
+              <text x="605" y="225" class="d-title" text-anchor="middle">Static JSON files</text>
+              <g class="d-box"><rect x="750" y="70" width="140" height="110" rx="6"/></g>
+              <text x="820" y="104" class="d-title" text-anchor="middle">Assistants</text>
+              <text x="820" y="128" class="d-text" text-anchor="middle">Claude, plugins,</text>
+              <text x="820" y="150" class="d-text" text-anchor="middle">scripts, apps</text>
+              <g class="d-line">
+                <path d="M210 125H266" marker-end="url(#arr)"/>
+                <path d="M450 110L516 42" marker-end="url(#arr)"/><path d="M450 120L516 102" marker-end="url(#arr)"/>
+                <path d="M450 132L516 162" marker-end="url(#arr)"/><path d="M450 145L516 218" marker-end="url(#arr)"/>
+                <path d="M690 42L746 100" marker-end="url(#arr)"/><path d="M690 102L746 116" marker-end="url(#arr)"/>
+                <path d="M690 164L746 134" marker-end="url(#arr)"/><path d="M690 220L746 150" marker-end="url(#arr)"/>
+              </g>
+            </svg>
+          </div>
+          <figcaption id="fig1-cap"><b>Figure 1.</b> PRP's submodules publish their data as static files; the Integration Hub describes every dataset in one catalogue and serves it read-only to assistants through an MCP server, a JSON API, feeds and calendars, or as plain files. Arrows show the direction data flows; nothing flows back.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Data catalogue -->
+  <section id="panel-catalogue" role="tabpanel" aria-labelledby="tab-catalogue" class="panel" hidden>
+    <div class="toolbar prp-panel">
+      <label class="field grow"><span class="prp-label">Search</span><input class="prp-input" type="search" id="cat-q" placeholder="Dataset, field or source…" autocomplete="off"></label>
+      <div class="field"><span class="prp-label" id="cat-m-label">Module</span><div class="chips" id="cat-m" role="group" aria-labelledby="cat-m-label"></div></div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><b id="cat-count">Datasets</b><span class="prp-label"><a href="catalog.json" class="mono-link">catalog.json</a></span></div>
+      <div class="scroll"><table class="prp-table cat" id="cat-table">
+        <thead><tr><th scope="col">Dataset</th><th scope="col">Module</th><th scope="col" class="num">Rows</th><th scope="col" class="num">Fields</th><th scope="col">Updated</th><th scope="col">Refresh</th><th scope="col">Licence</th><th scope="col">Files</th></tr></thead>
+        <tbody id="cat-rows"><tr><td colspan="8" class="prp-empty">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+    <p class="prp-note">Select a dataset's name for its fields and sources. Every file is JSON on this site, readable from any origin; the record array sits at the path shown under <i>records</i>. Large datasets are split into shards (a list of files). The same catalogue is at <a href="catalog.json"><code>/integration/catalog.json</code></a> and <code>/api/v1/catalog</code>.</p>
+  </section>
+
+  <!-- ============================================================ MCP server -->
+  <section id="panel-mcp" role="tabpanel" aria-labelledby="tab-mcp" class="panel" hidden>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Connect</h2><span class="prp-label">Remote · Streamable HTTP</span></div>
+        <div class="prp-panel-body stack">
+          <p>The server address is <code class="addr" id="mcp-url">https://jdpi.pages.dev/mcp</code>. It needs no key or sign-in.</p>
+          <h3 class="prp-h3">Claude Code</h3>
+          <div class="code"><pre><code id="cc-cmd">claude mcp add --transport http prp https://jdpi.pages.dev/mcp</code></pre><button type="button" class="prp-btn sm copy" data-copy="cc-cmd">Copy</button></div>
+          <h3 class="prp-h3">Claude (desktop and web)</h3>
+          <p>Open <b>Settings → Connectors → Add custom connector</b>, name it <i>PRP</i> and paste the server address. Leave the authentication settings empty.</p>
+          <h3 class="prp-h3">Other MCP clients</h3>
+          <p>Any client that speaks MCP over Streamable HTTP can use the address directly. A client that only runs local (stdio) servers can use the local server below, or a bridge such as <code>mcp-remote</code>.</p>
+          <div class="code"><pre><code id="json-cfg">{
+  "mcpServers": {
+    "prp": { "type": "http", "url": "https://jdpi.pages.dev/mcp" }
+  }
+}</code></pre><button type="button" class="prp-btn sm copy" data-copy="json-cfg">Copy</button></div>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Run it locally</h2><span class="prp-label">stdio · Node 18+</span></div>
+        <div class="prp-panel-body stack">
+          <p>The same tools as one file with no dependencies. It reads PRP's files over HTTPS and has no edge time limit, so it can read every shard of a big dataset in one call.</p>
+          <p><a class="prp-btn" href="mcp/prp-mcp.mjs" download>Download prp-mcp.mjs</a></p>
+          <h3 class="prp-h3">Claude Code</h3>
+          <div class="code"><pre><code id="local-cc">claude mcp add prp-local -- node /path/to/prp-mcp.mjs</code></pre><button type="button" class="prp-btn sm copy" data-copy="local-cc">Copy</button></div>
+          <h3 class="prp-h3">Claude Desktop (claude_desktop_config.json)</h3>
+          <div class="code"><pre><code id="local-cfg">{
+  "mcpServers": {
+    "prp": { "command": "node", "args": ["/path/to/prp-mcp.mjs"] }
+  }
+}</code></pre><button type="button" class="prp-btn sm copy" data-copy="local-cfg">Copy</button></div>
+          <p class="prp-muted small">Options: <code>--base &lt;url&gt;</code> to read another copy of the site, <code>--max-rows</code>, <code>--tools</code> to list the tools, <code>--call &lt;tool&gt; '&lt;json&gt;'</code> to run one from a terminal, <code>--help</code>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Tools</h2><span class="prp-label" id="tool-count"></span></div>
+      <div class="scroll"><table class="prp-table" id="tool-table"><thead><tr><th scope="col">Tool</th><th scope="col">What it does</th><th scope="col">Arguments</th></tr></thead><tbody id="tool-rows"></tbody></table></div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Try a tool</h2><span class="prp-label">runs in this page, on the same files</span></div>
+      <div class="prp-panel-body try">
+        <div class="try-controls">
+          <label class="field"><span class="prp-label">Tool</span><select class="prp-select" id="try-tool"></select></label>
+          <label class="field grow"><span class="prp-label">Arguments (JSON)</span><textarea class="prp-input" id="try-args" rows="4" spellcheck="false"></textarea></label>
+          <div class="field"><span class="prp-label">&nbsp;</span><button type="button" class="prp-btn primary" id="try-run">Run</button></div>
+        </div>
+        <p class="status" id="try-status" aria-live="polite"></p>
+        <pre class="out" id="try-out" tabindex="0" aria-label="Tool result"></pre>
+      </div>
+    </div>
+    <p class="prp-note">The protocol: JSON-RPC 2.0 over POST, JSON responses, no sessions. It answers <code>initialize</code>, <code>ping</code>, <code>tools/list</code> and <code>tools/call</code>; notifications get <i>202 Accepted</i>; any other method gets <i>Method not found</i>; GET gets <i>405</i> as it offers no event stream. Protocol versions 2025-06-18, 2025-03-26 and 2024-11-05.</p>
+  </section>
+
+  <!-- ============================================================ JSON API -->
+  <section id="panel-api" role="tabpanel" aria-labelledby="tab-api" class="panel" hidden>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Endpoints</h2><span class="prp-label"><a href="openapi.json" class="mono-link">openapi.json</a></span></div>
+      <div class="scroll"><table class="prp-table" id="api-table"><thead><tr><th scope="col">Endpoint</th><th scope="col">Returns</th><th scope="col">Example</th></tr></thead><tbody id="api-rows"></tbody></table></div>
+    </div>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Filtering rows</h2></div>
+        <div class="prp-panel-body stack">
+          <p>Add <code>f.&lt;field&gt;=&lt;value&gt;</code> for equality, or <code>f.&lt;field&gt;.&lt;op&gt;=&lt;value&gt;</code> with an op: <code>ne</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>, <code>contains</code>, <code>starts_with</code>, <code>in</code> (comma-separated) or <code>exists</code>. Text matches ignore case and accents. Then <code>select=a,b</code>, <code>sort=-date</code>, <code>limit</code> (up to 100), <code>offset</code> and <code>text</code> for words anywhere in a row.</p>
+          <div class="code"><pre><code id="curl-ex">curl "https://jdpi.pages.dev/api/v1/datasets/congress-trades/rows?f.ticker=NVDA&amp;select=filed,name,type,amount&amp;limit=10"</code></pre><button type="button" class="prp-btn sm copy" data-copy="curl-ex">Copy</button></div>
+          <p>Big datasets are split into shards, read newest first within a time budget. If a result says <code>"complete": false</code>, narrow it by date or by the field it names, or pass its <code>next_cursor</code> as <code>cursor</code>.</p>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">From a browser or a script</h2></div>
+        <div class="prp-panel-body stack">
+          <p>Responses carry <code>Access-Control-Allow-Origin: *</code>, so any web page can read them.</p>
+          <div class="code"><pre><code id="fetch-ex">const res = await fetch('https://jdpi.pages.dev/api/v1/events?country=France&amp;type=election');
+const { events } = await res.json();
+for (const e of events) console.log(e.date, e.title);</code></pre><button type="button" class="prp-btn sm copy" data-copy="fetch-ex">Copy</button></div>
+          <p>Errors are JSON too: <code>{"error": {"code", "message"}}</code> with status 400, 404, 405 or 429. The static files listed in the catalogue need no API at all.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Feeds & calendars -->
+  <section id="panel-feeds" role="tabpanel" aria-labelledby="tab-feeds" class="panel" hidden>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Briefing feeds</h2><span class="prp-label">RSS 2.0 · JSON Feed 1.1</span></div>
+      <div class="scroll"><table class="prp-table" id="feed-table"><thead><tr><th scope="col">Briefing</th><th scope="col">RSS</th><th scope="col">JSON Feed</th><th scope="col">Topics (add <code>?topic=</code>)</th></tr></thead><tbody id="feed-rows"></tbody></table></div>
+    </div>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Calendars</h2><span class="prp-label">iCalendar · all-day events</span></div>
+        <div class="prp-panel-body stack">
+          <p>Subscribe in any calendar app (add a calendar by address) or download the file. The Realtime Calendar file covers six months back to eighteen months ahead and is rebuilt every morning.</p>
+          <ul class="files" id="ics-files"></ul>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">Build your own calendar</h2></div>
+        <div class="prp-panel-body stack">
+          <label class="field"><span class="prp-label">Country</span><input class="prp-input" id="ics-country" list="ics-countries" placeholder="Any country" autocomplete="off"><datalist id="ics-countries"></datalist></label>
+          <div class="field"><span class="prp-label" id="ics-types-label">Event types</span><div class="chips" id="ics-types" role="group" aria-labelledby="ics-types-label"></div></div>
+          <div class="code"><pre><code id="ics-url"></code></pre><button type="button" class="prp-btn sm copy" data-copy="ics-url">Copy</button></div>
+          <p><a class="prp-btn" id="ics-subscribe" href="#">Subscribe</a> <a class="prp-btn ghost" id="ics-open" href="#">Download</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Plugins & skills -->
+  <section id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" class="panel" hidden>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">The PRP skill for Claude</h2></div>
+        <div class="prp-panel-body stack">
+          <p>A skill teaches Claude when and how to use PRP's data: which tool answers which question, how to query well, what each dataset's caveats are and how to credit sources. It works with the MCP server connected, or with plain web access through the API.</p>
+          <p><a class="prp-btn primary" href="skill/prp-data.zip" download>Download prp-data.zip</a> <a class="prp-btn ghost" href="skill/prp-data/SKILL.md">Read SKILL.md</a></p>
+          <h3 class="prp-h3">Claude (desktop and web)</h3>
+          <p><b>Settings → Capabilities → Skills → Upload skill</b>, then choose the zip.</p>
+          <h3 class="prp-h3">Claude Code</h3>
+          <div class="code"><pre><code id="skill-cc">mkdir -p ~/.claude/skills &amp;&amp; cd ~/.claude/skills \
+  &amp;&amp; curl -fsSLO https://jdpi.pages.dev/integration/skill/prp-data.zip \
+  &amp;&amp; unzip -o prp-data.zip &amp;&amp; rm prp-data.zip</code></pre><button type="button" class="prp-btn sm copy" data-copy="skill-cc">Copy</button></div>
+          <h3 class="prp-h3">Any other assistant</h3>
+          <p>Point it at <a href="../llms.txt"><code>/llms.txt</code></a>, a short guide for language models: what PRP is, where the catalogue, MCP server and API are, and the licences.</p>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">For plugin authors</h2></div>
+        <div class="prp-panel-body stack">
+          <p><b>Build on the catalogue.</b> <code>catalog.json</code> is the contract: dataset ids, file paths, record paths and field names stay stable, and new fields are only added. Read it rather than hard-coding file names.</p>
+          <p><b>Bundle the server.</b> A Claude Code plugin can declare PRP in its <code>.mcp.json</code> (either the remote address or the local file) and ship the skill in its <code>skills/</code> folder.</p>
+          <div class="code"><pre><code id="plugin-mcp">{
+  "mcpServers": {
+    "prp": { "type": "http", "url": "https://jdpi.pages.dev/mcp" }
+  }
+}</code></pre><button type="button" class="prp-btn sm copy" data-copy="plugin-mcp">Copy</button></div>
+          <p><b>Be a good neighbour.</b> Cache what you read (most data change daily or less), keep to about two requests a second, and for bulk work download the static files once. Show the licence and sources the catalogue gives, and link back to the PRP page (<code>page</code>) where people can see the data in context.</p>
+          <p><b>Versioning.</b> The API lives under <code>/api/v1/</code>; a breaking change would come as <code>/api/v2/</code>, with v1 kept running.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Security & terms -->
+  <section id="panel-security" role="tabpanel" aria-labelledby="tab-security" class="panel" hidden>
+    <div class="two">
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">What it can and cannot do</h2></div>
+        <div class="prp-panel-body stack">
+          <ul class="ticks">
+            <li><b>Read-only.</b> Every tool and endpoint only reads; none accepts data to store, and none changes anything in PRP.</li>
+            <li><b>Public data only.</b> It serves the same files as PRP's public pages. There are no accounts, cookies or keys, and it keeps nothing about you beyond a one-minute request count used for rate limiting.</li>
+            <li><b>Fixed files.</b> The server reads only the files the catalogue lists (plus the Encyclopaedia shards and country profiles). A tool argument can never name a file, and nothing is fetched from anywhere else.</li>
+            <li><b>Capped.</b> At most 100 rows and about 48 KB per answer; long texts are shortened; a search uses at most eight words; big datasets are read in shards within a work budget. Every answer says when it was cut.</li>
+            <li><b>Rate-limited.</b> About 120 MCP calls and 240 API calls a minute per client, and one tool call per request (a batch included). Over that you get <i>429</i> with <i>Retry-After</i>. For heavy use, run the local server or download the files.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="prp-panel">
+        <div class="prp-panel-head"><h2 class="prp-h2">What is never exposed</h2></div>
+        <div class="prp-panel-body stack">
+          <p><b>Tally Stick and Algo Trader</b>, PRP's private trading tools, are not part of the Integration Hub. There are no balances, positions, orders, brokers, rules, risk limits or keys here. Tally Stick's own MCP connection for trading agents is a separate, private server behind its own sign-in; this server cannot reach it and shares nothing with it.</p>
+          <p><b>Nothing personal.</b> Your topics in the Intelligence Briefing, your OSINT case notebook and other things you keep in PRP pages stay in your browser and never reach these servers.</p>
+          <h3 class="prp-h3">Text is data, not instructions</h3>
+          <p>Headlines, summaries and notes come from publishers, Wikipedia and Wikidata. The server returns them as data fields and tells assistants not to follow instructions found inside them. If you build on PRP, do the same.</p>
+        </div>
+      </div>
+    </div>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Licences and attribution</h2></div>
+      <div class="scroll"><table class="prp-table" id="lic-table">
+        <thead><tr><th scope="col">Source</th><th scope="col">Licence</th><th scope="col">What to do</th><th scope="col">Used in</th></tr></thead>
+        <tbody>
+          <tr><td>Wikidata</td><td>CC0</td><td>Nothing required; credit appreciated.</td><td>Encyclopaedia, Timeline of Progress, War Focus battles, calendars</td></tr>
+          <tr><td>Wikipedia</td><td>CC BY-SA 4.0</td><td>Credit Wikipedia, link the article, keep the licence on reuse.</td><td>Calendar summaries, Encyclopaedia summaries</td></tr>
+          <tr><td>UCDP (Uppsala Conflict Data Program), PRIO</td><td>CC BY 4.0</td><td>Credit and cite (e.g. Davies, Pettersson &amp; Öberg 2026; Hegre et al. 2020).</td><td>Realtime and Retrospective Battlefield, War Focus, National Analysis</td></tr>
+          <tr><td>World Bank WDI and WGI</td><td>CC BY 4.0</td><td>Credit the World Bank.</td><td>National Analysis</td></tr>
+          <tr><td>GDELT Project</td><td>Free to use with attribution</td><td>Credit the GDELT Project.</td><td>Geopolitical Volatility</td></tr>
+          <tr><td>Correlates of War</td><td>Free to use with citation</td><td>Cite Sarkees &amp; Wayman (2010).</td><td>Retrospective Battlefield, War Focus</td></tr>
+          <tr><td>CShapes 2.0</td><td>CC BY-NC-SA 4.0</td><td>Non-commercial use only; credit Schvitz et al. (2022).</td><td>Historical state names and borders</td></tr>
+          <tr><td>US House Clerk, SEC EDGAR</td><td>Public records</td><td>No restriction; not investment advice.</td><td>Auto Trader</td></tr>
+          <tr><td>News and journal publishers</td><td>© the publishers</td><td>Quote headlines briefly and link to the original.</td><td>Intelligence, Scientific, Economics and Digital Briefings</td></tr>
+          <tr><td>PRP's own text and compilations</td><td>© JDP-Iq</td><td>Credit "PRP (jdpi.pages.dev)" and link back.</td><td>War backgrounds, monthly notes, indices, Kino</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="prp-note warn"><b>No warranty, no advice.</b> PRP is a personal project run on free hosting; the service may be slow or down, and data can be late, incomplete or wrong. Check figures against the sources each dataset names. Nothing here is investment, legal or security advice.</p>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> Every dataset in the catalogue names its own sources, licence and refresh cadence; the Licences table above summarises them. The catalogue, the derived shards, the Encyclopaedia name index, the country profiles and the calendar files are rebuilt each morning by <code>integration/scripts/build-catalog.mjs</code>, after the calendars refresh.</p>
+    <p><b>Method.</b> The MCP server and the JSON API run as Cloudflare Pages Functions and read only this site's static files. Large datasets are split into shards of about a millisecond's parsing each, with date ranges and value indexes so a query reads only the shards it needs. The local server runs the same code without the time budget.</p>
+  </footer>
+</div>
+</body>
+</html>

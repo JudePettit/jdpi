@@ -1,4 +1,4 @@
-// GEOINT & IMINT Dashboard (PRP · Realtime Intelligence). One page, eight tabs, state in the URL hash:
+// GEOINT & IMINT Dashboard (PRP · Offensive Intelligence). One page, eight tabs, state in the URL hash:
 //   #tab=imagery&ll=47.15,34.1&z=8&l=terra&d=2023-05-28&d2=2023-06-18&cmp=1   (old ?tab= links open the same tab)
 // Each tab's code loads the first time the tab opens. Maps share one view (ll, z) so a place follows you between tabs.
 import { TABS, parseHash, buildHash, parseLatLon, fmtLatLon, clamp, isoDay, addDays, esc } from './util.js';
@@ -7,7 +7,7 @@ import { lessonPath, IMAGERY, gibsDomainsUrl, parseGibsDomains, latestDay } from
 const $ = s => document.querySelector(s);
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const SHELL = new URL('../', location.href).href;
-const SUITE_OF = { 'osint-training': 'rt', osint: 'rt', sigint: 'rt', geoint: 'rt', battlefield: 'rt' };
+const SUITE_OF = { 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi', battlefield: 'rt' };
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const state = parseHash(location.hash, location.search);

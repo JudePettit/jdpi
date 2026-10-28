@@ -15,7 +15,7 @@ export function create(ctx, panel, tab) {
   const doc = $(`#${p}-doc`), toc = $(`#${p}-toc`);
   let loaded = false, loading = null, sections = [], cat = 'all', q = '';
 
-  // Links in the content: "#/rt/osint-training" opens a PRP submodule (in the shell when embedded); "#s=id" a section here.
+  // Links in the content: "#/oi/osint-training" opens a PRP submodule (in the shell when embedded); "#s=id" a section here.
   const linkAttrs = href => {
     if (/^https?:/i.test(href)) return ' target="_blank" rel="noopener"';
     if (href.startsWith('#/')) return ' data-prp-link';

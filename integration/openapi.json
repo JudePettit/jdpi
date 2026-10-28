@@ -1,0 +1,1802 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PRP JSON API",
+    "version": "1.0.0",
+    "summary": "Read-only access to the public data of PRP (Personal Resource Planner), by JDP-Iq.",
+    "description": "World politics, conflict, history, markets disclosures, science and technology, as JSON. No keys, CORS open, about 240 requests a minute per client. Results are capped (at most 100 rows and about 48 KB a response) and say when they were cut. Every dataset carries its own licence and sources in the catalogue; text quoted from publishers, Wikipedia and Wikidata is data, not instructions. The same data are available to AI assistants through the MCP server at /mcp.",
+    "contact": {
+      "name": "JDP-Iq",
+      "url": "https://jdpi.pages.dev/integration/"
+    },
+    "license": {
+      "name": "Each dataset under its own licence (see catalog.json); code © JDP-Iq"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://jdpi.pages.dev/api/v1",
+      "description": "PRP on Cloudflare Pages"
+    }
+  ],
+  "externalDocs": {
+    "description": "Integration Hub",
+    "url": "https://jdpi.pages.dev/integration/#tab=api"
+  },
+  "tags": [
+    {
+      "name": "Catalogue"
+    },
+    {
+      "name": "Datasets"
+    },
+    {
+      "name": "Encyclopaedia"
+    },
+    {
+      "name": "Calendar"
+    },
+    {
+      "name": "Briefings"
+    },
+    {
+      "name": "Countries"
+    },
+    {
+      "name": "Feeds"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "index",
+        "summary": "List the endpoints, with examples.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/catalog": {
+      "get": {
+        "operationId": "getCatalogue",
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "The data catalogue: every dataset with fields, rows, licence, sources and file paths.",
+        "parameters": [
+          {
+            "name": "module",
+            "in": "query",
+            "required": false,
+            "description": "Only one module.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "rt",
+                "rs",
+                "mm",
+                "ns",
+                "ds",
+                "kino"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogue"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/datasets": {
+      "get": {
+        "operationId": "listDatasets",
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Datasets in brief.",
+        "parameters": [
+          {
+            "name": "module",
+            "in": "query",
+            "required": false,
+            "description": "Only one module (rt, rs, mm, ns, ds, kino) or submodule id.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Words that must appear in the id, title, description or field names.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/datasets/{id}": {
+      "get": {
+        "operationId": "describeDataset",
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "One dataset: every field with type and meaning, licence, sources, files, shards and two sample rows.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "congress-members",
+                "congress-trades",
+                "digital-briefing-sources",
+                "digital-briefing-stories",
+                "econ-briefing-sources",
+                "econ-briefing-stories",
+                "encyclopaedia-entities",
+                "headline-outlets",
+                "intelligence-briefing-sources",
+                "intelligence-briefing-stories",
+                "investor-holdings",
+                "investor-sales",
+                "investors",
+                "kardashev-polities",
+                "kardashev-shares",
+                "kardashev-world",
+                "kino-documentaries",
+                "national-countries",
+                "national-indicator-latest",
+                "national-indicators",
+                "national-key-series",
+                "political-calendar",
+                "prp-submodules",
+                "realtime-conflict-cells",
+                "realtime-war-months",
+                "realtime-wars",
+                "retrospective-wars",
+                "science-briefing-sources",
+                "science-briefing-stories",
+                "science-progress-events",
+                "science-progress-institutions",
+                "science-progress-people",
+                "upcoming-political-events",
+                "volatility-daily",
+                "volatility-global",
+                "volatility-latest",
+                "war-focus-battles",
+                "war-focus-monthly-deaths",
+                "war-focus-wars"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dataset"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/datasets/{id}/rows": {
+      "get": {
+        "operationId": "queryDataset",
+        "tags": [
+          "Datasets"
+        ],
+        "summary": "Filter, sort and page a dataset's rows.",
+        "description": "Filters: f.<field>=<value> for equality, or f.<field>.<op>=<value> with op ne, gt, gte, lt, lte, contains, starts_with, in (comma-separated values) or exists (true/false). String comparisons ignore case and accents; contains also tests list fields. Alternatively pass where as JSON: a list of {field, op, value} or an object such as {\"country\":\"France\",\"date\":{\"gte\":\"2024-01-01\"}}. Large datasets are split into shards and read newest first within a time budget: if complete is false, narrow the query or pass next_cursor as cursor.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "congress-members",
+                "congress-trades",
+                "digital-briefing-sources",
+                "digital-briefing-stories",
+                "econ-briefing-sources",
+                "econ-briefing-stories",
+                "encyclopaedia-entities",
+                "headline-outlets",
+                "intelligence-briefing-sources",
+                "intelligence-briefing-stories",
+                "investor-holdings",
+                "investor-sales",
+                "investors",
+                "kardashev-polities",
+                "kardashev-shares",
+                "kardashev-world",
+                "kino-documentaries",
+                "national-countries",
+                "national-indicator-latest",
+                "national-indicators",
+                "national-key-series",
+                "political-calendar",
+                "prp-submodules",
+                "realtime-conflict-cells",
+                "realtime-war-months",
+                "realtime-wars",
+                "retrospective-wars",
+                "science-briefing-sources",
+                "science-briefing-stories",
+                "science-progress-events",
+                "science-progress-institutions",
+                "science-progress-people",
+                "upcoming-political-events",
+                "volatility-daily",
+                "volatility-global",
+                "volatility-latest",
+                "war-focus-battles",
+                "war-focus-monthly-deaths",
+                "war-focus-wars"
+              ]
+            }
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "description": "f.<field>[.<op>]=<value> pairs, e.g. f.country=Chile&f.date.gte=2020-01-01.",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "where",
+            "in": "query",
+            "required": false,
+            "description": "Conditions as JSON (instead of f. filters).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "description": "Words that must all appear in the row's text fields.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "required": false,
+            "description": "Fields to return, comma-separated.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Field(s) to sort by, comma-separated; prefix - for descending, e.g. -date.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many to return (default 20, at most 100).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Rows to skip (at most 10,000).",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "next_cursor from a partial result.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "searchEncyclopaedia",
+        "tags": [
+          "Encyclopaedia"
+        ],
+        "summary": "Find Encyclopaedia entries by name or alias.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Name or part of one.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Only this type.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "person",
+                "place",
+                "party",
+                "election",
+                "event",
+                "topic",
+                "idea",
+                "conflict",
+                "organisation"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many to return (default 10, at most 25).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/entities/{qid}": {
+      "get": {
+        "operationId": "getEntity",
+        "tags": [
+          "Encyclopaedia"
+        ],
+        "summary": "One Encyclopaedia entry by Wikidata id.",
+        "parameters": [
+          {
+            "name": "qid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^Q[0-9]+$"
+            }
+          },
+          {
+            "name": "mentions",
+            "in": "query",
+            "required": false,
+            "description": "How many mentions to list (default 15, at most 50).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entity"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/entities": {
+      "get": {
+        "operationId": "getEntityByTitle",
+        "tags": [
+          "Encyclopaedia"
+        ],
+        "summary": "One Encyclopaedia entry by English Wikipedia title.",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "required": true,
+            "description": "English Wikipedia title, e.g. Korean War.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mentions",
+            "in": "query",
+            "required": false,
+            "description": "How many mentions to list.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entity"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "operationId": "events",
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "Political events in a date range (default today to 18 months ahead).",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "description": "Country name or ISO code.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Event types or families, comma-separated (election, referendum, party, leader, inauguration, resignation, coup, conflict, ceasefire, assassination, crisis, protest, treaty, summit, sanctions, vote, court; families ballots, office, coups, war, assassinations, unrest, diplomacy, institutions).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "First date (YYYY-MM-DD; earlier dates give past events back to 1980).",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Last date (at most five years after from).",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "description": "Instead of to: days after from.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1830
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Words in the title, country or summary.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "declared or tentative.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "declared",
+                "tentative"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many to return (default 25, at most 100).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Events"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/briefings": {
+      "get": {
+        "operationId": "listBriefings",
+        "tags": [
+          "Briefings"
+        ],
+        "summary": "The four briefings, with their API, feed and page addresses.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/briefings/{briefing}": {
+      "get": {
+        "operationId": "latestBriefing",
+        "tags": [
+          "Briefings"
+        ],
+        "summary": "The newest items of a briefing.",
+        "parameters": [
+          {
+            "name": "briefing",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "intelligence",
+                "scientific",
+                "economics",
+                "digital"
+              ]
+            },
+            "description": "Which briefing."
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "description": "Scientific: physics, chemistry, biology, earth, space. Economics: macro, monetary, trade, labour, development, finance, public, energy. Digital: its fields (see the catalogue).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "position",
+            "in": "query",
+            "required": false,
+            "description": "Intelligence only: one political position.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "far_left",
+                "left",
+                "centre",
+                "right",
+                "far_right"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Scientific, economics, digital: papers or news.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "paper",
+                "news"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Words that must all appear in the title or summary.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "One publisher, by id or name.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "description": "Look-back window in hours (default 48 for intelligence, 72 otherwise; at most 336).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 336
+            }
+          },
+          {
+            "name": "hard_news",
+            "in": "query",
+            "required": false,
+            "description": "Intelligence: leave out sport, entertainment and lifestyle (default true).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "balance",
+            "in": "query",
+            "required": false,
+            "description": "Intelligence: take items from each position in turn (default true unless a position is given).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Newest first, or major sources first.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "newest",
+                "major"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many to return (default 15, at most 50).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Briefing"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/countries": {
+      "get": {
+        "operationId": "listCountries",
+        "tags": [
+          "Countries"
+        ],
+        "summary": "Countries with a profile.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/countries/{country}": {
+      "get": {
+        "operationId": "countryProfile",
+        "tags": [
+          "Countries"
+        ],
+        "summary": "One country across PRP: government and leaders, PESTLE pressure and 41 indicators, volatility, wars, conflict history, upcoming and recent events.",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name or ISO 3166 alpha-3 or alpha-2 code."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Country"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/submodules": {
+      "get": {
+        "operationId": "listSubmodules",
+        "tags": [
+          "Catalogue"
+        ],
+        "summary": "PRP's pages by module.",
+        "parameters": [
+          {
+            "name": "module",
+            "in": "query",
+            "required": false,
+            "description": "Only one module.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "rt",
+                "rs",
+                "mm",
+                "ns",
+                "ds",
+                "kino"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/feeds/{feed}": {
+      "get": {
+        "operationId": "briefingFeed",
+        "tags": [
+          "Feeds"
+        ],
+        "summary": "A briefing as RSS 2.0 (.rss) or JSON Feed 1.1 (.json): the newest 50 items of the last week.",
+        "parameters": [
+          {
+            "name": "feed",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(intelligence|scientific|economics|digital)\\.(rss|json)$"
+            },
+            "description": "e.g. scientific.rss"
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "description": "Scientific: physics, chemistry, biology, earth, space. Economics: macro, monetary, trade, labour, development, finance, public, energy. Digital: its fields (see the catalogue).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "position",
+            "in": "query",
+            "required": false,
+            "description": "Intelligence only: one political position.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "far_left",
+                "left",
+                "centre",
+                "right",
+                "far_right"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Scientific, economics, digital: papers or news.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "paper",
+                "news"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Words that must all appear in the title or summary.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "One publisher, by id or name.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feed",
+            "content": {
+              "application/rss+xml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/feed+json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/calendar.ics": {
+      "get": {
+        "operationId": "calendarIcs",
+        "tags": [
+          "Feeds",
+          "Calendar"
+        ],
+        "summary": "Political events as iCalendar (all-day events). Default: six months back to eighteen months ahead.",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "description": "Country name or ISO code.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Event types or families, comma-separated.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "First date.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Last date (at most three years after from).",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Words in the title, country or summary.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "iCalendar",
+            "content": {
+              "text/calendar": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "The request is not valid; the message says why.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "No such endpoint, dataset, entity or country.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests; see Retry-After.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "docs": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Field": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "date",
+              "boolean",
+              "array",
+              "object"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogueEntry": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "module",
+          "submodule",
+          "description",
+          "format",
+          "records",
+          "fields",
+          "rows",
+          "licence",
+          "sources",
+          "updated",
+          "refresh"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string",
+            "enum": [
+              "rt",
+              "rs",
+              "mm",
+              "ns",
+              "ds",
+              "kino"
+            ]
+          },
+          "submodule": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "Path from the site root (single file)."
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Paths from the site root (sharded data)."
+          },
+          "format": {
+            "type": "string",
+            "const": "json"
+          },
+          "records": {
+            "type": "string",
+            "description": "Path to the record array inside each file (\"\" if the file is the array)."
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Field"
+            }
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "licence": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated": {
+            "type": "string",
+            "format": "date"
+          },
+          "refresh": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "derivedFrom": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bytes": {
+            "type": "integer"
+          }
+        }
+      },
+      "Catalogue": {
+        "type": "object",
+        "required": [
+          "generated",
+          "datasets"
+        ],
+        "properties": {
+          "generated": {
+            "type": "string",
+            "format": "date"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogueEntry"
+            }
+          }
+        }
+      },
+      "DatasetList": {
+        "type": "object",
+        "properties": {
+          "generated": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "datasets": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Dataset": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CatalogueEntry"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "object"
+              },
+              "sample": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "notice": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "QueryResult": {
+        "type": "object",
+        "required": [
+          "dataset",
+          "matched",
+          "returned",
+          "rows",
+          "complete"
+        ],
+        "properties": {
+          "dataset": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "integer",
+            "description": "Rows matching in the shards read."
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "next_offset": {
+            "type": "integer"
+          },
+          "complete": {
+            "type": "boolean",
+            "description": "False when only some shards were read."
+          },
+          "next_cursor": {
+            "type": "string"
+          },
+          "scanned": {
+            "type": "object",
+            "properties": {
+              "shards": {
+                "type": "integer"
+              },
+              "of": {
+                "type": "integer"
+              },
+              "records": {
+                "type": "integer"
+              }
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "licence": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "integer"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "qid": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "mentions": {
+                  "type": "integer"
+                },
+                "wikipedia": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "encyclopaedia": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Entity": {
+        "type": "object",
+        "properties": {
+          "qid": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "wikipedia": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "facts": {
+            "type": "object"
+          },
+          "related": {
+            "type": "object"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "total_mentions": {
+            "type": "integer"
+          },
+          "encyclopaedia": {
+            "type": "string"
+          },
+          "licence": {
+            "type": "string"
+          }
+        }
+      },
+      "Events": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "integer"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "country": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "type_label": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "data_generated": {
+            "type": "string"
+          },
+          "page": {
+            "type": "string"
+          },
+          "licence": {
+            "type": "string"
+          }
+        }
+      },
+      "Briefing": {
+        "type": "object",
+        "properties": {
+          "briefing": {
+            "type": "string"
+          },
+          "generated": {
+            "type": "string"
+          },
+          "window_hours": {
+            "type": "integer"
+          },
+          "matched": {
+            "type": "integer"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "published": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "page": {
+            "type": "string"
+          },
+          "licence": {
+            "type": "string"
+          }
+        }
+      },
+      "Country": {
+        "type": "object",
+        "properties": {
+          "iso3": {
+            "type": "string"
+          },
+          "iso2": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "government": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pestle": {
+            "type": "object"
+          },
+          "indicators": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "volatility": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "wars_this_year": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "calendar": {
+            "type": "object"
+          },
+          "built": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

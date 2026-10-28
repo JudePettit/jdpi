@@ -1,0 +1,181 @@
+{
+  "generated": "2026-10-28",
+  "name": "Data Analytics test catalogue",
+  "description": "A small catalogue in the Integration Hub schema, for tests of Data Analytics. Not real data.",
+  "datasets": [
+    {
+      "id": "fixture-events",
+      "title": "Fixture: political events",
+      "module": "rt",
+      "submodule": "calendar",
+      "description": "Sixty-one made-up events with a date, a country, a type, a death toll, a place and tags.",
+      "url": "analytics/test-fixtures/data/events.json",
+      "format": "json",
+      "records": "events",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Event id"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Day of the event"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country name"
+        },
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "ISO 3166-1 alpha-3 code"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Kind of event"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Headline"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Deaths reported (empty when unknown)"
+        },
+        {
+          "name": "place",
+          "type": "object",
+          "description": "Latitude and longitude"
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "description": "Topic tags"
+        }
+      ],
+      "rows": 61,
+      "licence": "CC0 (test data)",
+      "sources": [
+        "Made up for tests"
+      ],
+      "updated": "2026-10-27",
+      "refresh": "static"
+    },
+    {
+      "id": "fixture-countries",
+      "title": "Fixture: country indicators",
+      "module": "rt",
+      "submodule": "pestle",
+      "description": "Twelve countries (one made up) with population, income and a score.",
+      "url": "analytics/test-fixtures/data/countries.json",
+      "format": "json",
+      "records": "",
+      "fields": [
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "ISO 3166-1 alpha-3 code"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Country"
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "description": "World Bank region"
+        },
+        {
+          "name": "population_m",
+          "type": "number",
+          "description": "Population, millions"
+        },
+        {
+          "name": "gdp_per_person",
+          "type": "number",
+          "description": "GDP per person, US$"
+        },
+        {
+          "name": "score",
+          "type": "number",
+          "description": "A 0–1 score"
+        },
+        {
+          "name": "member",
+          "type": "boolean",
+          "description": "Whether the score is above 0.5"
+        }
+      ],
+      "rows": 12,
+      "licence": "CC0 (test data)",
+      "sources": [
+        "Made up for tests"
+      ],
+      "updated": "2026-10-27",
+      "refresh": "static"
+    },
+    {
+      "id": "fixture-energy",
+      "title": "Fixture: electricity by source (two shards)",
+      "module": "rs",
+      "submodule": "kardashev",
+      "description": "Made-up electricity generation by source, 2000–2009, split across two files.",
+      "urls": [
+        "analytics/test-fixtures/data/energy-1.json",
+        "analytics/test-fixtures/data/energy-2.json"
+      ],
+      "format": "json",
+      "records": "items",
+      "fields": [
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Coal, Gas or Solar"
+        },
+        {
+          "name": "twh",
+          "type": "number",
+          "description": "Terawatt-hours"
+        }
+      ],
+      "rows": 30,
+      "licence": "CC0 (test data)",
+      "sources": [
+        "Made up for tests"
+      ],
+      "updated": "2026-10-02",
+      "refresh": "static"
+    },
+    {
+      "id": "fixture-huge",
+      "title": "Fixture: a dataset too large to load",
+      "module": "ds",
+      "submodule": "data-analytics",
+      "description": "Declares 500 MB, so the page refuses it before downloading.",
+      "url": "analytics/test-fixtures/data/countries.json",
+      "format": "json",
+      "records": "",
+      "fields": [],
+      "rows": 1,
+      "bytes": 524288000,
+      "licence": "CC0 (test data)",
+      "sources": [
+        "Made up for tests"
+      ],
+      "updated": "2026-10-27",
+      "refresh": "static"
+    }
+  ]
+}

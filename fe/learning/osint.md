@@ -1,4 +1,4 @@
-title: OSINT Training
+title: Open-source intelligence (OSINT)
 intro: A practical, university-style course in open-source intelligence (OSINT) for the individual analyst: the intelligence cycle, source grading, search and archives, image and video verification, records, movement tracking, conflict data, structured analysis, writing up, and the law, ethics and safety that bound the work. The last unit shows how to use PRP itself as an intelligence tool and ends with two capstone exercises.
 
 # Unit 1 · Foundations

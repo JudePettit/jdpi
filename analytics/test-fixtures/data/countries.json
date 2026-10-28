@@ -1,0 +1,110 @@
+[
+ {
+  "iso3": "FRA",
+  "name": "France",
+  "region": "Europe & Central Asia",
+  "population_m": 68.4,
+  "gdp_per_person": 41000,
+  "score": 0.63,
+  "member": true
+ },
+ {
+  "iso3": "DEU",
+  "name": "Germany",
+  "region": "Europe & Central Asia",
+  "population_m": 84.5,
+  "gdp_per_person": 48000,
+  "score": 0.71,
+  "member": true
+ },
+ {
+  "iso3": "GBR",
+  "name": "United Kingdom",
+  "region": "Europe & Central Asia",
+  "population_m": 68.3,
+  "gdp_per_person": 46000,
+  "score": 0.58,
+  "member": true
+ },
+ {
+  "iso3": "USA",
+  "name": "United States",
+  "region": "North America",
+  "population_m": 335,
+  "gdp_per_person": 76000,
+  "score": 0.49,
+  "member": false
+ },
+ {
+  "iso3": "BRA",
+  "name": "Brazil",
+  "region": "Latin America & Caribbean",
+  "population_m": 216.4,
+  "gdp_per_person": 9000,
+  "score": 0.37,
+  "member": false
+ },
+ {
+  "iso3": "IND",
+  "name": "India",
+  "region": "South Asia",
+  "population_m": 1428.6,
+  "gdp_per_person": 2400,
+  "score": 0.33,
+  "member": false
+ },
+ {
+  "iso3": "NGA",
+  "name": "Nigeria",
+  "region": "Sub-Saharan Africa",
+  "population_m": 223.8,
+  "gdp_per_person": 1600,
+  "score": 0.21,
+  "member": false
+ },
+ {
+  "iso3": "JPN",
+  "name": "Japan",
+  "region": "East Asia & Pacific",
+  "population_m": 124.5,
+  "gdp_per_person": 34000,
+  "score": 0.81,
+  "member": true
+ },
+ {
+  "iso3": "CHN",
+  "name": "China",
+  "region": "East Asia & Pacific",
+  "population_m": 1410.7,
+  "gdp_per_person": 12600,
+  "score": 0.44,
+  "member": false
+ },
+ {
+  "iso3": "ZAF",
+  "name": "South Africa",
+  "region": "Sub-Saharan Africa",
+  "population_m": 60.4,
+  "gdp_per_person": 6200,
+  "score": 0.41,
+  "member": false
+ },
+ {
+  "iso3": "KOR",
+  "name": "Korea, Rep.",
+  "region": "East Asia & Pacific",
+  "population_m": 51.7,
+  "gdp_per_person": 33000,
+  "score": 0.69,
+  "member": true
+ },
+ {
+  "iso3": "XXX",
+  "name": "Atlantis",
+  "region": "Nowhere",
+  "population_m": 1,
+  "gdp_per_person": 1,
+  "score": 0.5,
+  "member": false
+ }
+]

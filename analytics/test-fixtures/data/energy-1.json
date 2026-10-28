@@ -1,0 +1,81 @@
+{
+ "generated": "2026-10-01T00:00:00.000Z",
+ "part": 1,
+ "items": [
+  {
+   "year": 2000,
+   "source": "Coal",
+   "twh": 200
+  },
+  {
+   "year": 2000,
+   "source": "Gas",
+   "twh": 100
+  },
+  {
+   "year": 2000,
+   "source": "Solar",
+   "twh": 3
+  },
+  {
+   "year": 2001,
+   "source": "Coal",
+   "twh": 194
+  },
+  {
+   "year": 2001,
+   "source": "Gas",
+   "twh": 104
+  },
+  {
+   "year": 2001,
+   "source": "Solar",
+   "twh": 6
+  },
+  {
+   "year": 2002,
+   "source": "Coal",
+   "twh": 188
+  },
+  {
+   "year": 2002,
+   "source": "Gas",
+   "twh": 108
+  },
+  {
+   "year": 2002,
+   "source": "Solar",
+   "twh": 9
+  },
+  {
+   "year": 2003,
+   "source": "Coal",
+   "twh": 182
+  },
+  {
+   "year": 2003,
+   "source": "Gas",
+   "twh": 112
+  },
+  {
+   "year": 2003,
+   "source": "Solar",
+   "twh": 12
+  },
+  {
+   "year": 2004,
+   "source": "Coal",
+   "twh": 176
+  },
+  {
+   "year": 2004,
+   "source": "Gas",
+   "twh": 116
+  },
+  {
+   "year": 2004,
+   "source": "Solar",
+   "twh": 15
+  }
+ ]
+}

@@ -12,8 +12,8 @@
   const moduleId = (script && script.dataset.module) || '';
   // Old suite ids, and submodules that moved to another module in PRP 2.0.
   const CANON = { q: 'rt', hp: 'rs', fe: 'mm' };
-  const MOVED = { atlas: 'rt', 'trade-desk': 'mm', markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', 'double-signal': 'mm', traders: 'mm', 'learning-politics': 'rs', 'osint-training': 'rt' };
-  const NAMES = { rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' };
+  const MOVED = { atlas: 'rt', 'trade-desk': 'mm', markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', 'double-signal': 'mm', traders: 'mm', 'learning-politics': 'rs', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi' };
+  const NAMES = { rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', oi: 'Offensive Intelligence', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' };
   const given = (script && script.dataset.suite) || '';
   const suite = MOVED[moduleId] || CANON[given] || given;
 

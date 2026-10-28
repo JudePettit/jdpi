@@ -16,7 +16,7 @@ export function prpLink(suite, module, path) {
   return embedded ? { href: `${SHELL}#/${suite}/${module}?at=${encodeURIComponent(url)}`, target: '_top' } : { href: url, target: '_self' };
 }
 /** A link to an OSINT Training lesson (by slug; '' for the course home). */
-export const courseLink = slug => prpLink('rt', 'osint-training', lessonUrl(slug));
+export const courseLink = slug => prpLink('oi', 'osint-training', lessonUrl(slug));
 
 /** Resolve links in guides: http(s) opens a new tab, #… stays here, course:slug and prp:module[#hash] go to PRP pages. */
 export function guideLink(href) {

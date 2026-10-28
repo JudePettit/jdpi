@@ -137,6 +137,110 @@
           "description": "Who holds power across 78 countries now: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
         },
         {
+          "id": "calendar",
+          "name": "Realtime Calendar",
+          "kind": "realtime",
+          "icon": "▦",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/calendar.html?period=contemporary",
+          "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
+        }
+      ]
+    },
+    {
+      "id": "rs",
+      "aliases": [
+        "hp"
+      ],
+      "code": "RS",
+      "name": "Retrospective Intelligence",
+      "title": "Retrospective Intelligence",
+      "description": "What happened and why: an Encyclopaedia of everyone and everything in PRP, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
+      "modules": [
+        {
+          "id": "encyclopedia",
+          "name": "Encyclopaedia",
+          "kind": "reference",
+          "icon": "◈",
+          "status": "live",
+          "host": "PRP",
+          "url": "encyclopedia/index.html",
+          "description": "Every person, place, war, party, idea, scientist and discovery in PRP. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
+        },
+        {
+          "id": "retrospective",
+          "name": "Political Retrospective",
+          "kind": "retrospective",
+          "icon": "◷",
+          "status": "live",
+          "host": "Cloudflare Pages",
+          "url": "https://hp-retrospective.pages.dev",
+          "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
+        },
+        {
+          "id": "battlefield-history",
+          "name": "Retrospective Battlefield",
+          "kind": "retrospective",
+          "icon": "⚔",
+          "status": "live",
+          "host": "PRP",
+          "url": "battlefield/history/index.html",
+          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
+          "aliases": [
+            "world-map"
+          ]
+        },
+        {
+          "id": "war-focus",
+          "name": "War Focus",
+          "kind": "retrospective",
+          "icon": "⌖",
+          "status": "live",
+          "host": "PRP",
+          "url": "battlefield/focus/index.html",
+          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a slider, battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
+        },
+        {
+          "id": "kardashev",
+          "name": "Kardashev Tracker",
+          "kind": "retrospective",
+          "icon": "☼",
+          "status": "live",
+          "host": "PRP",
+          "url": "kardashev/index.html",
+          "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
+        },
+        {
+          "id": "historical-calendar",
+          "name": "Historical Calendar",
+          "kind": "retrospective",
+          "icon": "▤",
+          "status": "live",
+          "host": "PRP",
+          "url": "q/calendar.html?period=history",
+          "description": "Political history from 1980 to today in one calendar: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account."
+        },
+        {
+          "id": "learning-politics",
+          "name": "Learning · Politics",
+          "kind": "learning",
+          "icon": "✎",
+          "status": "live",
+          "host": "PRP",
+          "url": "fe/learning.html?course=politics",
+          "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (Mearsheimer and the Realists) and far right, with quizzes."
+        }
+      ]
+    },
+    {
+      "id": "oi",
+      "code": "OI",
+      "name": "Offensive Intelligence",
+      "title": "Offensive Intelligence",
+      "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
+      "modules": [
+        {
           "id": "osint",
           "name": "OSINT Dashboard",
           "kind": "realtime",
@@ -323,109 +427,34 @@
           ]
         },
         {
-          "id": "calendar",
-          "name": "Realtime Calendar",
-          "kind": "realtime",
-          "icon": "▦",
-          "status": "live",
-          "host": "PRP",
-          "url": "q/calendar.html?period=contemporary",
-          "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
-        },
-        {
           "id": "osint-training",
-          "name": "OSINT Training",
+          "name": "Intel Training",
           "kind": "learning",
           "icon": "✎",
           "status": "live",
           "host": "PRP",
           "url": "fe/learning.html?course=osint",
-          "description": "Open-source intelligence tools and methods (the intelligence cycle, source grading, verification, geolocation, imagery, records and structured analysis) and how to use PRP itself as an intelligence tool, with exercises and quizzes."
-        }
-      ]
-    },
-    {
-      "id": "rs",
-      "aliases": [
-        "hp"
-      ],
-      "code": "RS",
-      "name": "Retrospective Intelligence",
-      "title": "Retrospective Intelligence",
-      "description": "What happened and why: an Encyclopaedia of everyone and everything in PRP, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
-      "modules": [
-        {
-          "id": "encyclopedia",
-          "name": "Encyclopaedia",
-          "kind": "reference",
-          "icon": "◈",
-          "status": "live",
-          "host": "PRP",
-          "url": "encyclopedia/index.html",
-          "description": "Every person, place, war, party, idea, scientist and discovery in PRP. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
-        },
-        {
-          "id": "retrospective",
-          "name": "Political Retrospective",
-          "kind": "retrospective",
-          "icon": "◷",
-          "status": "live",
-          "host": "Cloudflare Pages",
-          "url": "https://hp-retrospective.pages.dev",
-          "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
-        },
-        {
-          "id": "battlefield-history",
-          "name": "Retrospective Battlefield",
-          "kind": "retrospective",
-          "icon": "⚔",
-          "status": "live",
-          "host": "PRP",
-          "url": "battlefield/history/index.html",
-          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
+          "description": "Courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT (the intelligence cycle, sources, search, verification, records, analysis and the law), SIGINT (radio fundamentals and lawful, receive-only monitoring of aircraft, ships, satellites and the spectrum) and GEOINT & IMINT (satellite imagery, geolocation, chronolocation and measurement), and how to use PRP’s dashboards for each.",
           "aliases": [
-            "world-map"
+            "intel-training"
+          ],
+          "views": [
+            {
+              "id": "course-osint",
+              "name": "OSINT",
+              "url": "fe/learning.html?course=osint"
+            },
+            {
+              "id": "course-sigint",
+              "name": "SIGINT",
+              "url": "fe/learning.html?course=sigint"
+            },
+            {
+              "id": "course-geoint",
+              "name": "GEOINT & IMINT",
+              "url": "fe/learning.html?course=geoint"
+            }
           ]
-        },
-        {
-          "id": "war-focus",
-          "name": "War Focus",
-          "kind": "retrospective",
-          "icon": "⌖",
-          "status": "live",
-          "host": "PRP",
-          "url": "battlefield/focus/index.html",
-          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a slider, battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
-        },
-        {
-          "id": "kardashev",
-          "name": "Kardashev Tracker",
-          "kind": "retrospective",
-          "icon": "☼",
-          "status": "live",
-          "host": "PRP",
-          "url": "kardashev/index.html",
-          "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
-        },
-        {
-          "id": "historical-calendar",
-          "name": "Historical Calendar",
-          "kind": "retrospective",
-          "icon": "▤",
-          "status": "live",
-          "host": "PRP",
-          "url": "q/calendar.html?period=history",
-          "description": "Political history from 1980 to today in one calendar: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account."
-        },
-        {
-          "id": "learning-politics",
-          "name": "Learning · Politics",
-          "kind": "learning",
-          "icon": "✎",
-          "status": "live",
-          "host": "PRP",
-          "url": "fe/learning.html?course=politics",
-          "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (Mearsheimer and the Realists) and far right, with quizzes."
         }
       ]
     },
@@ -577,10 +606,9 @@
           "name": "Digital Briefing",
           "kind": "realtime",
           "icon": "⌬",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "digital/briefing/index.html",
+          "url": "digital/briefing/index.html",
           "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
         },
         {
@@ -588,10 +616,9 @@
           "name": "Data Analytics",
           "kind": "operations",
           "icon": "▤",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "analytics/index.html",
+          "url": "analytics/index.html",
           "description": "Explore and chart PRP’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in PRP’s style, export them, and hand the analysis to an AI assistant."
         },
         {
@@ -599,11 +626,47 @@
           "name": "Integration Hub",
           "kind": "reference",
           "icon": "⇄",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "pendingUrl": "integration/index.html",
-          "description": "Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools."
+          "url": "integration/index.html",
+          "description": "Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.",
+          "views": [
+            {
+              "id": "overview",
+              "name": "Overview",
+              "url": "integration/index.html#tab=overview"
+            },
+            {
+              "id": "catalogue",
+              "name": "Data catalogue",
+              "url": "integration/index.html#tab=catalogue"
+            },
+            {
+              "id": "mcp",
+              "name": "MCP server",
+              "url": "integration/index.html#tab=mcp"
+            },
+            {
+              "id": "api",
+              "name": "JSON API",
+              "url": "integration/index.html#tab=api"
+            },
+            {
+              "id": "feeds",
+              "name": "Feeds & calendars",
+              "url": "integration/index.html#tab=feeds"
+            },
+            {
+              "id": "skills",
+              "name": "Plugins & skills",
+              "url": "integration/index.html#tab=skills"
+            },
+            {
+              "id": "security",
+              "name": "Security & terms",
+              "url": "integration/index.html#tab=security"
+            }
+          ]
         }
       ]
     },

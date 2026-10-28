@@ -1,4 +1,4 @@
-// SIGINT Dashboard (Realtime Intelligence): pure helpers (geodesy, NMEA, pass prediction, feed normalisers, Meshtastic
+// SIGINT Dashboard (Offensive Intelligence): pure helpers (geodesy, NMEA, pass prediction, feed normalisers, Meshtastic
 // protobuf framing, Markdown), the PRP bridge and edge proxy, the content files, and a page smoke test.
 //   node --test tests/sigint.test.mjs
 //   JDPI_URL=http://localhost:8787 node --test tests/sigint.test.mjs      (also runs the page test in Edge)
@@ -369,13 +369,13 @@ test('content: cookbook, hardware guide and law cover what the brief asks for', 
 
 test('page: structure, tabs and tokens-only CSS', () => {
   const html = read('index.html');
-  assert.match(html, /<html lang="en" data-suite="rt" class="prp">/);
+  assert.match(html, /<html lang="en" data-suite="oi" class="prp">/);
   assert.match(html, /<title>SIGINT Dashboard · PRP<\/title>/);
-  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="rt" data-module="sigint" data-shell="\.\.\/" defer><\/script>/);
+  assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="sigint" data-shell="\.\.\/" defer><\/script>/);
   const tabs = [...html.matchAll(/role="tab" id="tab-([a-z]+)" aria-controls="panel-([a-z]+)"/g)];
   assert.equal(tabs.length, 11);
   for (const [, a, b] of tabs) { assert.equal(a, b); assert.match(html, new RegExp(`<section id="panel-${a}" role="tabpanel" aria-labelledby="tab-${a}"`)); }
-  assert.match(html, /Realtime Intelligence <span class="sep">·<\/span> SIGINT Dashboard/);
+  assert.match(html, /Offensive Intelligence <span class="sep">·<\/span> SIGINT Dashboard/);
   const css = read('styles.css');
   assert.ok(!/#[0-9a-f]{3,8}\b/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')), 'no raw hex colours in page CSS');
   assert.ok(!/rgba?\(/.test(css), 'no raw rgb colours');

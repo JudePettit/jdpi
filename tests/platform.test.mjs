@@ -21,8 +21,8 @@ after(async () => { await browser?.close(); });
 test('registry is well formed', () => {
   assert.equal(registry.platform.name, 'PRP');
   assert.equal(registry.platform.company, 'JDP-Iq');
-  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'mm', 'ns', 'ds', 'kino']);
-  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'Offensive Intelligence', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
   const ids = modules.map(x => x.m.id);
   assert.equal(new Set(ids).size, ids.length, 'submodule ids are unique across modules');
   for (const { m } of modules) {
@@ -35,7 +35,7 @@ test('registry is well formed', () => {
   assert.equal(where('atlas'), 'rt'); assert.equal(where('war-focus'), 'rs'); assert.equal(where('traders'), 'mm');
   assert.equal(where('markets'), 'mm'); assert.equal(where('tally-stick'), 'mm'); assert.equal(where('algo-trader'), 'mm');
   assert.equal(where('science-briefing'), 'ns'); assert.equal(where('progress'), 'ns');
-  for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'rt');
+  for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
   assert.equal(where('econ-briefing'), 'mm');
   for (const id of ['digital-briefing', 'data-analytics', 'integration-hub']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
@@ -75,7 +75,7 @@ test('each module overview lists its submodules', async () => {
 
 test('old addresses redirect to the new structure', async () => {
   for (const [from, to] of [['#/q/briefing', '#/rt/briefing'], ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
-    ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus']]) {
+    ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus']]) {
     await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(t => location.hash === t, to, { timeout: 5000 }).catch(() => {});
     assert.equal(await page.evaluate(() => location.hash), to, `${from} → ${to}`);

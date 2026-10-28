@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Analytics · PRP</title>
+<meta name="description" content="Explore and chart PRP's own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in PRP's style, export them, and hand the analysis to an AI assistant.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="analytics.css">
+<script src="../design/prp-bar.js" data-suite="ds" data-module="data-analytics" data-shell="../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="da">
+  <header class="front">
+    <div class="prp-eyebrow">Digital Science <span class="sep">·</span> Data Analytics</div>
+    <h1 class="prp-title">Data Analytics</h1>
+    <p class="prp-dek">Explore and chart PRP's own data. Pick a dataset, filter, group and aggregate it, draw a chart and export it, or copy the whole analysis for an AI assistant. It all runs in your browser, and the address holds the analysis, so a link shares it.</p>
+    <div class="prp-meta" id="meta"><span>Loading the catalogue…</span></div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-work" aria-controls="panel-work" aria-selected="true">Workbench</button>
+    <button type="button" role="tab" id="tab-catalogue" aria-controls="panel-catalogue" aria-selected="false" tabindex="-1">Catalogue</button>
+  </div>
+
+  <section id="panel-work" role="tabpanel" aria-labelledby="tab-work">
+    <div class="layout">
+      <aside class="prp-panel picker" id="picker" aria-labelledby="picker-title">
+        <div class="prp-panel-head"><b id="picker-title">Datasets</b><span class="prp-label grow" id="picker-count"></span>
+          <button type="button" class="prp-btn sm ghost picker-toggle" id="picker-toggle" aria-controls="picker-body" aria-expanded="true">Hide list</button></div>
+        <div class="picker-tools" id="picker-body">
+          <label class="field"><span class="prp-label">Search</span><input class="prp-input" type="search" id="ds-q" placeholder="Name, field or description" autocomplete="off"></label>
+          <label class="field"><span class="prp-label">Module</span><select class="prp-select" id="ds-module"><option value="">All modules</option></select></label>
+        </div>
+        <ul class="ds-list" id="ds-list" aria-label="Datasets"><li class="ds-empty">Loading the catalogue…</li></ul>
+      </aside>
+
+      <div class="main">
+        <section class="prp-panel" id="ds-panel" aria-labelledby="ds-title">
+          <div class="prp-panel-body intro" id="intro">
+            <h2 class="prp-h2" id="ds-title">Start with a dataset</h2>
+            <p class="desc">Every dataset PRP publishes is listed on the left (above, on a phone), from the Integration Hub's catalogue. Choose one to see its fields, licence and sources; it loads into this page, where you can transform and chart it.</p>
+            <ul class="examples" id="examples"></ul>
+          </div>
+        </section>
+
+        <section class="prp-panel" id="steps-panel" aria-labelledby="steps-title" hidden>
+          <div class="prp-panel-head"><b id="steps-title">Transforms</b>
+            <div class="seg" id="mode" role="group" aria-label="How to transform the data">
+              <button type="button" data-v="steps" aria-pressed="true">Steps</button><button type="button" data-v="sql" aria-pressed="false">SQL</button>
+            </div>
+          </div>
+          <div class="prp-panel-body">
+            <div id="steps-box">
+              <ol class="steps" id="steps"></ol>
+              <p class="hint" id="steps-empty">No steps yet: the result is the whole dataset. Add steps to filter, choose columns, derive new ones, group and aggregate, sort and limit. They run in order.</p>
+              <div class="add" role="group" aria-label="Add a step"><span class="prp-label">Add</span>
+                <button type="button" class="prp-btn sm" data-add="filter">Filter</button>
+                <button type="button" class="prp-btn sm" data-add="where">Expression filter</button>
+                <button type="button" class="prp-btn sm" data-add="select">Columns</button>
+                <button type="button" class="prp-btn sm" data-add="derive">Derive</button>
+                <button type="button" class="prp-btn sm" data-add="unnest">List to rows</button>
+                <button type="button" class="prp-btn sm" data-add="group">Group</button>
+                <button type="button" class="prp-btn sm" data-add="sort">Sort</button>
+                <button type="button" class="prp-btn sm" data-add="limit">Limit</button>
+              </div>
+            </div>
+            <div class="sql-box" id="sql-box" hidden>
+              <label class="field"><span class="prp-label">SQL over the table <code>data</code></span>
+                <textarea class="prp-input" id="sql" rows="5" spellcheck="false" autocomplete="off"></textarea></label>
+              <div class="row"><button type="button" class="prp-btn primary sm" id="sql-run">Run SQL</button><span class="status" id="sql-status" aria-live="polite"></span></div>
+              <pre class="sql-out" id="sql-out" role="alert" hidden></pre>
+              <p class="hint">DuckDB runs the query in your browser. It is downloaded only when you first run one (about 7 MB from jsDelivr), and the query can read only this dataset: access to files and the web is switched off. Column names with dots or spaces need double quotes, as in <code>"place.lat"</code>.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="prp-panel result" id="result-panel" aria-labelledby="result-title" hidden>
+          <div class="prp-panel-head"><b id="result-title">Result</b><span class="status grow" id="result-count" aria-live="polite"></span>
+            <button type="button" class="prp-btn sm" id="csv">Export CSV</button></div>
+          <div class="scroll" id="result-scroll"><table class="prp-table" id="result-table"></table></div>
+          <div class="pager" id="pager"></div>
+        </section>
+
+        <section class="prp-panel" id="chart-panel" aria-labelledby="chart-title" hidden>
+          <div class="prp-panel-head"><b id="chart-title">Chart</b>
+            <div class="seg wrap" id="chart-type" role="group" aria-label="Chart type">
+              <button type="button" data-v="bar" aria-pressed="false">Bar</button><button type="button" data-v="line" aria-pressed="false">Line</button><button type="button" data-v="area" aria-pressed="false">Area</button><button type="button" data-v="scatter" aria-pressed="false">Scatter</button><button type="button" data-v="hist" aria-pressed="false">Histogram</button><button type="button" data-v="map" aria-pressed="false">Map</button><button type="button" data-v="" aria-pressed="false">None</button>
+            </div>
+          </div>
+          <div class="prp-panel-body">
+            <div class="chart-controls" id="chart-controls">
+              <label class="field"><span class="prp-label" id="lbl-x">Categories</span><select class="prp-select" id="cx"></select></label>
+              <label class="field" id="f-y"><span class="prp-label" id="lbl-y">Value</span><select class="prp-select" id="cy"></select></label>
+              <label class="field" id="f-fn"><span class="prp-label">Combine with</span><select class="prp-select" id="cfn"></select></label>
+              <label class="field" id="f-color"><span class="prp-label" id="lbl-color">Colour by</span><select class="prp-select" id="ccolor"></select></label>
+              <label class="field" id="f-bins"><span class="prp-label">Bins</span><input class="prp-input" type="number" id="cbins" min="2" max="200" step="1" placeholder="auto"></label>
+            </div>
+            <div class="figure-wrap">
+              <figure class="prp-figure" id="figure">
+                <ul class="legend" id="legend" aria-label="Legend"></ul>
+                <div class="ramp" id="ramp"></div>
+                <div class="chart" id="chart"><p class="prp-empty">Choose a chart.</p></div>
+                <figcaption id="caption"></figcaption>
+              </figure>
+              <ul class="chart-notes" id="chart-notes"></ul>
+              <details class="as-table" id="chart-table-box"><summary>Show the chart as a table</summary><p class="hint" id="chart-table-note" hidden></p><div class="scroll" id="chart-table"></div></details>
+              <div class="row chart-actions"><button type="button" class="prp-btn sm" id="png">Download PNG</button><button type="button" class="prp-btn sm" id="svg">Download SVG</button><button type="button" class="prp-btn sm ghost" id="chart-csv">Chart data as CSV</button><span class="status" id="export-status" aria-live="polite"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="prp-panel" id="ai-panel" aria-labelledby="ai-title" hidden>
+          <div class="prp-panel-head"><b id="ai-title">Ask an AI assistant</b></div>
+          <div class="prp-panel-body ai">
+            <label class="field"><span class="prp-label">Your question</span>
+              <textarea class="prp-input" id="ai-q" rows="2" placeholder="For example: what stands out here, and what should I check next?"></textarea></label>
+            <div class="row"><button type="button" class="prp-btn primary" id="ai-copy">Copy for AI</button><span class="status" id="ai-status" aria-live="polite"></span></div>
+            <details id="ai-preview-box"><summary>Preview what is copied</summary><pre id="ai-preview"></pre></details>
+            <div class="prp-note">
+              <p><b>Use with an AI assistant.</b> “Copy for AI” puts a compact description of this analysis on your clipboard (the dataset, its fields, a small sample, your steps and chart, a link back here and your question) to paste into Claude or another assistant.</p>
+              <p>To let the assistant run queries itself, connect it to PRP's read-only MCP server: it can list the catalogue and run the same query with <code>query_dataset</code>. <a id="hub-link" href="../integration/index.html#tab=mcp">Set it up in the Integration Hub</a>.</p>
+              <p>This page stores no keys and calls no AI service; nothing leaves your browser unless you paste it somewhere.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-catalogue" role="tabpanel" aria-labelledby="tab-catalogue" hidden>
+    <div class="prp-panel cat-panel">
+      <div class="prp-panel-head"><b>Every dataset in the catalogue</b><span class="status grow" id="cat-count"></span></div>
+      <div class="scroll"><table class="prp-table">
+        <thead><tr><th scope="col">Dataset</th><th scope="col">Module · submodule</th><th scope="col" class="num">Rows</th><th scope="col" class="num">Size</th><th scope="col" class="num">Fields</th><th scope="col">Refresh</th><th scope="col">Updated</th><th scope="col">Licence</th></tr></thead>
+        <tbody id="cat-rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> The datasets are PRP's own published data, listed in the Integration Hub's catalogue (<a href="../integration/catalog.json">integration/catalog.json</a>, <span id="cat-generated">date to follow</span>); each dataset names its own sources and licence above, and they apply to anything you export from it.</p>
+    <p><b>Method.</b> Files load straight from this site into your browser and every step runs there: filters, expression filters and derived columns (a small expression language, never run as code), one row per list item, grouping with count, sum, mean, median, minimum, maximum and distinct values, sorting and limits. On dates a filter value is a period: 2026 is the whole year. Nested objects are spread into dotted columns (<code>place.lat</code>). Charts follow PRP's style: categorical colours in a fixed order, at most eight series (three on scatter plots) with the rest grouped as “Other”, and a table for every chart. Maps match ISO codes and English country names to Natural Earth borders (world-atlas, 1:110m).</p>
+    <p><b>Limits.</b> The page asks before loading more than 20 MB and will not load more than 120 MB; for larger data use the Integration Hub's API or MCP server, which query in parts. SQL is optional and runs locally in DuckDB.</p>
+    <p><b>Libraries.</b> Observable Plot 0.6.17 and d3 7.9.0 (ISC licence), topojson-client 3.1.0 and world-atlas 2.0.2, and DuckDB-WASM 1.32.0 (MIT) with Apache Arrow 17.0.0 (Apache 2.0) when you use SQL, all pinned on jsDelivr and loaded only when needed.</p>
+  </footer>
+</div>
+</body>
+</html>

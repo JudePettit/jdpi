@@ -11,11 +11,12 @@ is what every page in the suite follows. The stylesheet is `design/prp.css`; the
 | Q · Geopolitical Intelligence | **Realtime Intelligence** | `rt` (alias `q`) | RT |
 | H&P · History & Politics | **Retrospective Intelligence** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
+| (new) | **Offensive Intelligence** | `oi` | OI |
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
 
-In the registry the six are "suites" and their pages "modules"; in the interface we say **module** for the six and
+In the registry the seven are "suites" and their pages "modules"; in the interface we say **module** for the seven and
 **submodule** for the pages.
 
 | Submodule | Module | Notes |
@@ -24,8 +25,8 @@ In the registry the six are "suites" and their pages "modules"; in the interface
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
-| OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | RT (new) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
-| OSINT Training | RT (new) | `fe/learning.html?course=osint` |
+| OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | OI (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
+| Intel Training (was OSINT Training) | OI | `fe/learning.html?course=osint|sigint|geoint`: three courses as tabs |
 | Encyclopaedia | RS | |
 | Political Retrospective (was H&P Retrospective) | RS | external site hp-retrospective.pages.dev |
 | Historical Calendar, Kardashev Tracker | RS | |
@@ -55,7 +56,7 @@ the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tab
 ## 2. Hooking a page up
 
 ```html
-<html lang="en" data-suite="rt">              <!-- rt | rs | mm | ns | ds | kino -->
+<html lang="en" data-suite="rt">              <!-- rt | rs | oi | mm | ns | ds | kino -->
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
@@ -84,7 +85,7 @@ so a page should not pin anything it needs there.
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|mm|ns|ds|kn` and `-soft`.
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|oi|mm|ns|ds|kn` and `-soft`.
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,

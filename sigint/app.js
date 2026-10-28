@@ -1,4 +1,4 @@
-// SIGINT Dashboard (Realtime Intelligence). Entry module: in-page tabs kept in the URL (#tab=…), the location setting,
+// SIGINT Dashboard (Offensive Intelligence). Entry module: in-page tabs kept in the URL (#tab=…), the location setting,
 // shared settings, feed status, and views loaded when their tab first opens. Views poll only while visible.
 import { store, esc } from './lib/util.js';
 import { maidenhead, fromMaidenhead, parseCoord, fmtLatLon } from './lib/geo.js';

@@ -1,0 +1,3415 @@
+{
+  "generated": "2026-10-28",
+  "name": "PRP data catalogue",
+  "publisher": "JDP-Iq",
+  "description": "Every public dataset in PRP (Personal Resource Planner), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
+  "site": "https://jdpi.pages.dev/",
+  "mcp": "https://jdpi.pages.dev/mcp",
+  "api": "https://jdpi.pages.dev/api/v1/",
+  "openapi": "https://jdpi.pages.dev/integration/openapi.json",
+  "docs": "https://jdpi.pages.dev/integration/",
+  "llms": "https://jdpi.pages.dev/llms.txt",
+  "datasets": [
+    {
+      "id": "intelligence-briefing-stories",
+      "title": "Intelligence Briefing: stories",
+      "module": "rt",
+      "submodule": "briefing",
+      "description": "Every story from the Intelligence Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.",
+      "url": "briefing/data/latest.json",
+      "format": "json",
+      "records": "items",
+      "fields": [
+        {
+          "name": "s",
+          "type": "string",
+          "description": "Source id; join to `id` in intelligence-briefing-sources"
+        },
+        {
+          "name": "t",
+          "type": "string",
+          "description": "Headline"
+        },
+        {
+          "name": "u",
+          "type": "string",
+          "description": "Link to the article at its publisher"
+        },
+        {
+          "name": "p",
+          "type": "date",
+          "description": "Publication time (ISO 8601, UTC)"
+        },
+        {
+          "name": "d",
+          "type": "string",
+          "description": "Standfirst or opening lines from the feed"
+        },
+        {
+          "name": "c",
+          "type": "string",
+          "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
+        }
+      ],
+      "rows": 3267,
+      "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
+        "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "twice daily",
+      "page": "q/briefing.html",
+      "bytes": 1410944
+    },
+    {
+      "id": "intelligence-briefing-sources",
+      "title": "Intelligence Briefing: publishers",
+      "module": "rt",
+      "submodule": "briefing",
+      "description": "The Intelligence Briefing's publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.",
+      "url": "briefing/data/latest.json",
+      "format": "json",
+      "records": "sources",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Source id, as used in `s` of intelligence-briefing-stories"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Publisher"
+        },
+        {
+          "name": "position",
+          "type": "string",
+          "description": "Political position: far_left, left, centre, right or far_right"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country of the publisher (ISO 3166-1 alpha-2)"
+        },
+        {
+          "name": "caution",
+          "type": "boolean",
+          "description": "True when the outlet is rated mixed or low for factual reliability"
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "description": "True when the outlet is one of the ten shown for its position"
+        },
+        {
+          "name": "reserve",
+          "type": "boolean",
+          "description": "True for a reserve outlet that stands in when an active one fails"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Feed status at the last refresh (ok or an error)"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "description": "Items in the publisher's feed at the last refresh"
+        }
+      ],
+      "rows": 64,
+      "licence": "Metadata © JDP-Iq; position ratings after AllSides and Media Bias/Fact Check.",
+      "sources": [
+        "AllSides Media Bias Ratings",
+        "Media Bias/Fact Check",
+        "The publishers' own feeds"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "twice daily",
+      "page": "q/briefing.html",
+      "bytes": 1410944
+    },
+    {
+      "id": "headline-outlets",
+      "title": "Global Headline Tracker: outlets",
+      "module": "rt",
+      "submodule": "headlines",
+      "description": "The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself lives in a database, not in a static file, so it is not in this catalogue.)",
+      "url": "integration/data/headline-outlets.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-2)"
+        },
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3), when known"
+        },
+        {
+          "name": "outlet",
+          "type": "string",
+          "description": "Outlet name"
+        },
+        {
+          "name": "home",
+          "type": "string",
+          "description": "Outlet home page"
+        },
+        {
+          "name": "rss",
+          "type": "string",
+          "description": "Feed the tracker reads"
+        },
+        {
+          "name": "via",
+          "type": "string",
+          "description": "site (the outlet's own feed) or google-news (Google News restricted to the site)"
+        }
+      ],
+      "rows": 296,
+      "licence": "List © JDP-Iq; feeds and articles belong to the outlets.",
+      "sources": [
+        "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "static",
+      "page": "q/headlines.html?view=current",
+      "derivedFrom": [
+        "headlines/outlets.json"
+      ],
+      "bytes": 44896
+    },
+    {
+      "id": "volatility-latest",
+      "title": "Geopolitical Volatility: latest scores",
+      "module": "rt",
+      "submodule": "volatility",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-10-27), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "url": "integration/data/volatility-latest.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Country"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Day scored"
+        },
+        {
+          "name": "score",
+          "type": "number",
+          "description": "Geopolitical Volatility Index, 0–100 (null when too few events or sources)"
+        },
+        {
+          "name": "conflict",
+          "type": "number",
+          "description": "Component: conflict & security, 0–100"
+        },
+        {
+          "name": "political",
+          "type": "number",
+          "description": "Component: political/diplomatic escalation, 0–100"
+        },
+        {
+          "name": "unrest",
+          "type": "number",
+          "description": "Component: civil unrest, 0–100"
+        },
+        {
+          "name": "economic",
+          "type": "number",
+          "description": "Component: economic disruption, 0–100"
+        },
+        {
+          "name": "spread",
+          "type": "number",
+          "description": "Component: cross-border spread, 0–100"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "GDELT events located in the country that day"
+        },
+        {
+          "name": "articles",
+          "type": "number",
+          "description": "News articles behind those events"
+        },
+        {
+          "name": "sources",
+          "type": "number",
+          "description": "Distinct news sources"
+        },
+        {
+          "name": "tone",
+          "type": "number",
+          "description": "Mean GDELT tone of the coverage (negative is hostile)"
+        },
+        {
+          "name": "coverage",
+          "type": "string",
+          "description": "Coverage level: high, medium or low"
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "description": "Why no score was given, if none"
+        }
+      ],
+      "rows": 235,
+      "licence": "Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.",
+      "sources": [
+        "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "daily",
+      "page": "q/volatility.html",
+      "derivedFrom": [
+        "volatility/data/index.json"
+      ],
+      "bytes": 57112
+    },
+    {
+      "id": "volatility-daily",
+      "title": "Geopolitical Volatility: daily scores",
+      "module": "rt",
+      "submodule": "volatility",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 32 days, for trends and comparisons.",
+      "urls": [
+        "integration/data/volatility-daily/0.json",
+        "integration/data/volatility-daily/1.json",
+        "integration/data/volatility-daily/2.json",
+        "integration/data/volatility-daily/3.json",
+        "integration/data/volatility-daily/4.json",
+        "integration/data/volatility-daily/5.json",
+        "integration/data/volatility-daily/6.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Day"
+        },
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Country"
+        },
+        {
+          "name": "score",
+          "type": "number",
+          "description": "Geopolitical Volatility Index, 0–100"
+        },
+        {
+          "name": "conflict",
+          "type": "number",
+          "description": "Component: conflict & security"
+        },
+        {
+          "name": "political",
+          "type": "number",
+          "description": "Component: political/diplomatic escalation"
+        },
+        {
+          "name": "unrest",
+          "type": "number",
+          "description": "Component: civil unrest"
+        },
+        {
+          "name": "economic",
+          "type": "number",
+          "description": "Component: economic disruption"
+        },
+        {
+          "name": "spread",
+          "type": "number",
+          "description": "Component: cross-border spread"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "GDELT events that day"
+        },
+        {
+          "name": "tone",
+          "type": "number",
+          "description": "Mean tone of the coverage"
+        },
+        {
+          "name": "coverage",
+          "type": "string",
+          "description": "Coverage level: high, medium or low"
+        }
+      ],
+      "rows": 6731,
+      "licence": "Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.",
+      "sources": [
+        "GDELT 2.0 event exports (the GDELT Project)"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "daily",
+      "page": "q/volatility.html",
+      "derivedFrom": [
+        "volatility/data/index.json"
+      ],
+      "bytes": 1236319
+    },
+    {
+      "id": "volatility-global",
+      "title": "Geopolitical Volatility: global mean",
+      "module": "rt",
+      "submodule": "volatility",
+      "description": "The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.",
+      "url": "integration/data/volatility-global.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Day"
+        },
+        {
+          "name": "mean_score",
+          "type": "number",
+          "description": "Mean index across scored countries"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "GDELT events processed"
+        },
+        {
+          "name": "files",
+          "type": "number",
+          "description": "Quarter-hour GDELT files processed (96 is a full day)"
+        }
+      ],
+      "rows": 32,
+      "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
+      "sources": [
+        "GDELT 2.0 event exports (the GDELT Project)"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "daily",
+      "page": "q/volatility.html",
+      "derivedFrom": [
+        "volatility/data/index.json"
+      ],
+      "bytes": 2311
+    },
+    {
+      "id": "realtime-wars",
+      "title": "Realtime Battlefield: wars this year",
+      "module": "rt",
+      "submodule": "battlefield",
+      "description": "Every armed conflict recorded so far in 2026, grouped into wars, with deaths, events, status and a plain-English background. UCDP candidate events through 2026-09.",
+      "url": "integration/data/realtime-wars.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "War id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "zone",
+          "type": "string",
+          "description": "Region"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "active, or quiet when no event in the last three months"
+        },
+        {
+          "name": "countries",
+          "type": "array",
+          "description": "Countries where fighting was recorded"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Best-estimate deaths this year"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "Recorded events this year"
+        },
+        {
+          "name": "deaths_last_3_months",
+          "type": "number",
+          "description": "Deaths in the last three recorded months"
+        },
+        {
+          "name": "last_active",
+          "type": "date",
+          "description": "Date of the last recorded event"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "One-line summary"
+        },
+        {
+          "name": "background",
+          "type": "string",
+          "description": "Plain-English background (PRP)"
+        },
+        {
+          "name": "conflicts",
+          "type": "array",
+          "description": "UCDP conflicts grouped into this war"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article, if any"
+        }
+      ],
+      "rows": 59,
+      "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
+      "sources": [
+        "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "weekly",
+      "page": "q/battlefield.html",
+      "derivedFrom": [
+        "battlefield/data/realtime.json"
+      ],
+      "bytes": 43758
+    },
+    {
+      "id": "realtime-war-months",
+      "title": "Realtime Battlefield: war by month",
+      "module": "rt",
+      "submodule": "battlefield",
+      "description": "Each war's deaths, events and civilian deaths month by month in 2026, with PRP's monthly note (change on the previous month, deadliest areas).",
+      "url": "integration/data/realtime-war-months.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "war_id",
+          "type": "string",
+          "description": "War id (realtime-wars)"
+        },
+        {
+          "name": "war",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "zone",
+          "type": "string",
+          "description": "Region"
+        },
+        {
+          "name": "month",
+          "type": "date",
+          "description": "Month (YYYY-MM)"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Best-estimate deaths"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "Recorded events"
+        },
+        {
+          "name": "civilians",
+          "type": "number",
+          "description": "Civilian deaths"
+        },
+        {
+          "name": "deadliest_place",
+          "type": "string",
+          "description": "Place with the most deaths that month"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "description": "Monthly note (PRP, from the events)"
+        }
+      ],
+      "rows": 531,
+      "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
+      "sources": [
+        "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "weekly",
+      "page": "q/battlefield.html?view=archive",
+      "derivedFrom": [
+        "battlefield/data/realtime.json"
+      ],
+      "bytes": 213863
+    },
+    {
+      "id": "realtime-conflict-cells",
+      "title": "Realtime Battlefield: events on a 0.1° grid",
+      "module": "rt",
+      "submodule": "battlefield",
+      "description": "Conflict events this year summed by war, month and 0.1° grid cell (about 11 km): the points on the Realtime Battlefield map.",
+      "urls": [
+        "integration/data/realtime-conflict-cells/0.json",
+        "integration/data/realtime-conflict-cells/1.json",
+        "integration/data/realtime-conflict-cells/2.json",
+        "integration/data/realtime-conflict-cells/3.json",
+        "integration/data/realtime-conflict-cells/4.json",
+        "integration/data/realtime-conflict-cells/5.json",
+        "integration/data/realtime-conflict-cells/6.json",
+        "integration/data/realtime-conflict-cells/7.json",
+        "integration/data/realtime-conflict-cells/8.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "war_id",
+          "type": "string",
+          "description": "War id (realtime-wars)"
+        },
+        {
+          "name": "war",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "month",
+          "type": "date",
+          "description": "Month (YYYY-MM)"
+        },
+        {
+          "name": "lat",
+          "type": "number",
+          "description": "Latitude of the cell (0.1°)"
+        },
+        {
+          "name": "lon",
+          "type": "number",
+          "description": "Longitude of the cell (0.1°)"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Best-estimate deaths in the cell that month"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "Recorded events in the cell that month"
+        }
+      ],
+      "rows": 9783,
+      "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
+      "sources": [
+        "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "weekly",
+      "page": "q/battlefield.html",
+      "derivedFrom": [
+        "battlefield/data/realtime.json"
+      ],
+      "bytes": 1200191
+    },
+    {
+      "id": "national-countries",
+      "title": "National Analysis: countries",
+      "module": "rt",
+      "submodule": "pestle",
+      "description": "One row per country: region, income group, government, heads of state and government, PESTLE pressure (the share of each dimension's indicators that are worsening), leadership turnover, conflict history and a few headline indicators.",
+      "url": "integration/data/national-countries.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3)"
+        },
+        {
+          "name": "iso2",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-2)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Common name"
+        },
+        {
+          "name": "official_name",
+          "type": "string",
+          "description": "World Bank name"
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "description": "World Bank region"
+        },
+        {
+          "name": "income",
+          "type": "string",
+          "description": "World Bank income group"
+        },
+        {
+          "name": "capital",
+          "type": "string",
+          "description": "Capital"
+        },
+        {
+          "name": "government",
+          "type": "array",
+          "description": "System(s) of government (Wikidata)"
+        },
+        {
+          "name": "head_of_state",
+          "type": "string",
+          "description": "Head of state (Wikidata)"
+        },
+        {
+          "name": "head_of_government",
+          "type": "string",
+          "description": "Head of government (Wikidata)"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id (also the Encyclopaedia entry)"
+        },
+        {
+          "name": "pestle_overall",
+          "type": "number",
+          "description": "Overall PESTLE pressure, 0–1: mean of the six dimensions"
+        },
+        {
+          "name": "pestle_political",
+          "type": "number",
+          "description": "Political pressure: share of scored indicators worsening, 0–1"
+        },
+        {
+          "name": "pestle_economic",
+          "type": "number",
+          "description": "Economic pressure, 0–1"
+        },
+        {
+          "name": "pestle_social",
+          "type": "number",
+          "description": "Social pressure, 0–1"
+        },
+        {
+          "name": "pestle_technological",
+          "type": "number",
+          "description": "Technological pressure, 0–1"
+        },
+        {
+          "name": "pestle_legal",
+          "type": "number",
+          "description": "Legal pressure, 0–1"
+        },
+        {
+          "name": "pestle_environmental",
+          "type": "number",
+          "description": "Environmental pressure, 0–1"
+        },
+        {
+          "name": "pestle_coverage",
+          "type": "number",
+          "description": "Share of indicators with data, 0–1"
+        },
+        {
+          "name": "population",
+          "type": "number",
+          "description": "Population (latest year)"
+        },
+        {
+          "name": "gdp_usd",
+          "type": "number",
+          "description": "GDP, current US$ (latest year)"
+        },
+        {
+          "name": "gdp_growth",
+          "type": "number",
+          "description": "GDP growth, % (latest year)"
+        },
+        {
+          "name": "gdp_per_capita",
+          "type": "number",
+          "description": "GDP per capita, constant 2015 US$"
+        },
+        {
+          "name": "inflation",
+          "type": "number",
+          "description": "Consumer price inflation, %"
+        },
+        {
+          "name": "life_expectancy",
+          "type": "number",
+          "description": "Life expectancy at birth, years"
+        },
+        {
+          "name": "current_leader",
+          "type": "string",
+          "description": "Current leader (Political Retrospective)"
+        },
+        {
+          "name": "leader_since",
+          "type": "date",
+          "description": "In office since"
+        },
+        {
+          "name": "leader_party",
+          "type": "string",
+          "description": "Leader's party"
+        },
+        {
+          "name": "leaders_since_1926",
+          "type": "number",
+          "description": "Leaders since 1926"
+        },
+        {
+          "name": "average_tenure_years",
+          "type": "number",
+          "description": "Average leader tenure, years"
+        },
+        {
+          "name": "irregular_exits",
+          "type": "number",
+          "description": "Leaders removed irregularly (coups, assassinations)"
+        },
+        {
+          "name": "elections_since_1926",
+          "type": "number",
+          "description": "National elections since 1926"
+        },
+        {
+          "name": "conflict_years",
+          "type": "number",
+          "description": "Years with armed conflict since 1946"
+        },
+        {
+          "name": "years_at_war",
+          "type": "number",
+          "description": "Years at war (1,000+ battle deaths)"
+        },
+        {
+          "name": "wars_active_this_year",
+          "type": "number",
+          "description": "Wars the country is involved in this year (Realtime Battlefield)"
+        },
+        {
+          "name": "energy_share",
+          "type": "number",
+          "description": "Share of world energy capture (Kardashev Tracker)"
+        }
+      ],
+      "rows": 217,
+      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.",
+      "sources": [
+        "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)",
+        "Wikidata (CC0): government, heads of state, capitals",
+        "Political Retrospective (Archigos and Wikidata): leaders and elections since 1926",
+        "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and Correlates of War: conflict history",
+        "Kardashev Tracker: energy share"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "q/national.html",
+      "derivedFrom": [
+        "national/data/index.json",
+        "volatility/data/index.json"
+      ],
+      "bytes": 184863
+    },
+    {
+      "id": "national-indicators",
+      "title": "National Analysis: indicator definitions",
+      "module": "rt",
+      "submodule": "pestle",
+      "description": "The 41 indicators behind National Analysis: PESTLE dimension, unit, which direction is better and the change that counts as improving or worsening.",
+      "url": "integration/data/national-indicators.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "code",
+          "type": "string",
+          "description": "World Bank indicator code"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "description": "Indicator"
+        },
+        {
+          "name": "dimension",
+          "type": "string",
+          "description": "PESTLE dimension"
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "description": "Unit"
+        },
+        {
+          "name": "better",
+          "type": "string",
+          "description": "up or down: which direction is an improvement"
+        },
+        {
+          "name": "threshold",
+          "type": "number",
+          "description": "Change between the last two values that counts as improving or worsening"
+        },
+        {
+          "name": "scored",
+          "type": "boolean",
+          "description": "True when the indicator counts towards the PESTLE pressure scores"
+        }
+      ],
+      "rows": 41,
+      "licence": "World Bank CC BY 4.0; definitions © JDP-Iq.",
+      "sources": [
+        "World Bank World Development Indicators and Worldwide Governance Indicators"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "q/national.html",
+      "derivedFrom": [
+        "national/data/index.json"
+      ],
+      "bytes": 6248
+    },
+    {
+      "id": "national-indicator-latest",
+      "title": "National Analysis: latest indicator values",
+      "module": "rt",
+      "submodule": "pestle",
+      "description": "For each country and indicator, the latest value, its year, the change on the previous value and whether that counts as improving, stable or worsening.",
+      "urls": [
+        "integration/data/national-indicator-latest/0.json",
+        "integration/data/national-indicator-latest/1.json",
+        "integration/data/national-indicator-latest/2.json",
+        "integration/data/national-indicator-latest/3.json",
+        "integration/data/national-indicator-latest/4.json",
+        "integration/data/national-indicator-latest/5.json",
+        "integration/data/national-indicator-latest/6.json",
+        "integration/data/national-indicator-latest/7.json",
+        "integration/data/national-indicator-latest/8.json",
+        "integration/data/national-indicator-latest/9.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3)"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country"
+        },
+        {
+          "name": "dimension",
+          "type": "string",
+          "description": "PESTLE dimension"
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "description": "Indicator code"
+        },
+        {
+          "name": "indicator",
+          "type": "string",
+          "description": "Indicator"
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "description": "Unit"
+        },
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year of the latest value"
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "description": "Latest value"
+        },
+        {
+          "name": "previous_year",
+          "type": "number",
+          "description": "Year of the previous value"
+        },
+        {
+          "name": "change",
+          "type": "number",
+          "description": "Change on the previous value"
+        },
+        {
+          "name": "trend",
+          "type": "string",
+          "description": "improving, stable or worsening (by the indicator's threshold)"
+        }
+      ],
+      "rows": 7884,
+      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.",
+      "sources": [
+        "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "q/national.html",
+      "derivedFrom": [
+        "national/data/index.json"
+      ],
+      "bytes": 1763655
+    },
+    {
+      "id": "national-key-series",
+      "title": "National Analysis: key indicator time series",
+      "module": "rt",
+      "submodule": "pestle",
+      "description": "Yearly values since 1980 for every country of eight headline indicators (NY.GDP.MKTP.KD.ZG: GDP growth, % a year; FP.CPI.TOTL.ZG: Inflation (consumer prices), % a year; NY.GDP.PCAP.KD: GDP per person (constant 2015 US$), US$; SP.POP.TOTL: Population, people; SP.DYN.LE00.IN: Life expectancy at birth, years; SL.UEM.TOTL.ZS: Unemployment, % of labour force; MS.MIL.XPND.GD.ZS: Military spending, % of GDP; EN.GHG.CO2.PC.CE.AR5: CO₂ emissions per person, t CO₂e). Sharded by indicator, then by country; filter on indicator (and iso3) to read one shard. Labels and units are in national-indicators; all 41 indicators for one country are at national/data/series/<ISO3>.json.",
+      "urls": [
+        "integration/data/national-key-series/0.json",
+        "integration/data/national-key-series/1.json",
+        "integration/data/national-key-series/2.json",
+        "integration/data/national-key-series/3.json",
+        "integration/data/national-key-series/4.json",
+        "integration/data/national-key-series/5.json",
+        "integration/data/national-key-series/6.json",
+        "integration/data/national-key-series/7.json",
+        "integration/data/national-key-series/8.json",
+        "integration/data/national-key-series/9.json",
+        "integration/data/national-key-series/10.json",
+        "integration/data/national-key-series/11.json",
+        "integration/data/national-key-series/12.json",
+        "integration/data/national-key-series/13.json",
+        "integration/data/national-key-series/14.json",
+        "integration/data/national-key-series/15.json",
+        "integration/data/national-key-series/16.json",
+        "integration/data/national-key-series/17.json",
+        "integration/data/national-key-series/18.json",
+        "integration/data/national-key-series/19.json",
+        "integration/data/national-key-series/20.json",
+        "integration/data/national-key-series/21.json",
+        "integration/data/national-key-series/22.json",
+        "integration/data/national-key-series/23.json",
+        "integration/data/national-key-series/24.json",
+        "integration/data/national-key-series/25.json",
+        "integration/data/national-key-series/26.json",
+        "integration/data/national-key-series/27.json",
+        "integration/data/national-key-series/28.json",
+        "integration/data/national-key-series/29.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "indicator",
+          "type": "string",
+          "description": "Indicator code (see national-indicators)"
+        },
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "Country (ISO 3166-1 alpha-3)"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country"
+        },
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year"
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "description": "Value, in the indicator's unit"
+        }
+      ],
+      "rows": 67168,
+      "licence": "World Bank WDI, CC BY 4.0.",
+      "sources": [
+        "World Bank World Development Indicators (CC BY 4.0)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "q/national.html#compare=USA,CHN,RUS,IND",
+      "derivedFrom": [
+        "national/data/series/*.json",
+        "national/data/index.json"
+      ],
+      "bytes": 6340770
+    },
+    {
+      "id": "upcoming-political-events",
+      "title": "Realtime Calendar: recent and upcoming events",
+      "module": "rt",
+      "submodule": "calendar",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-04-28 to 2028-04-28 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "url": "integration/data/upcoming-political-events.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Date (YYYY-MM-DD)"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country, or International"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Event"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "election, referendum, party, leader, inauguration, resignation, coup, conflict, ceasefire, assassination, crisis, protest, treaty, summit, sanctions, vote or court"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "declared, or tentative when the date is not yet fixed"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Wikipedia (or other) page for the event"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Plain-English account (Wikipedia, CC BY-SA)"
+        },
+        {
+          "name": "ref",
+          "type": "string",
+          "description": "News report cited for events since 2026, if any"
+        },
+        {
+          "name": "refName",
+          "type": "string",
+          "description": "Name of that news outlet"
+        }
+      ],
+      "rows": 298,
+      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
+      "sources": [
+        "Wikipedia national electoral calendars and lists of summits",
+        "Political Atlas (Europe, North America and the major powers)",
+        "Political Retrospective (Archigos and Wikidata)",
+        "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0)",
+        "Wikidata (CC0)",
+        "Wikipedia Current events portal (CC BY-SA), from January 2026"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "daily",
+      "page": "q/calendar.html?period=contemporary",
+      "derivedFrom": [
+        "calendar/data/1980s.json",
+        "calendar/data/1990s.json",
+        "calendar/data/2000s.json",
+        "calendar/data/2010s.json",
+        "calendar/data/2020s.json"
+      ],
+      "bytes": 149522
+    },
+    {
+      "id": "political-calendar",
+      "title": "Historical Calendar: political events since 1980",
+      "module": "rs",
+      "submodule": "historical-calendar",
+      "description": "Political history from 1980 to today and scheduled events ahead, one file per decade: elections and referendums, new leaders, inaugurations and resignations, coups, wars and ceasefires, assassinations, summits, treaties, sanctions, protests, parliamentary votes and court rulings, each with a plain-English account. The Realtime Calendar shows the same records for the current window.",
+      "urls": [
+        "calendar/data/1980s.json",
+        "calendar/data/1990s.json",
+        "calendar/data/2000s.json",
+        "calendar/data/2010s.json",
+        "calendar/data/2020s.json"
+      ],
+      "format": "json",
+      "records": "events",
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Date (YYYY-MM-DD)"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country, or International"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Event"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "election, referendum, party, leader, inauguration, resignation, coup, conflict, ceasefire, assassination, crisis, protest, treaty, summit, sanctions, vote or court"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "declared, or tentative when the date is not yet fixed"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Wikipedia (or other) page for the event"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Plain-English account (Wikipedia, CC BY-SA)"
+        },
+        {
+          "name": "ref",
+          "type": "string",
+          "description": "News report cited for events since 2026, if any"
+        },
+        {
+          "name": "refName",
+          "type": "string",
+          "description": "Name of that news outlet"
+        }
+      ],
+      "rows": 5656,
+      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
+      "sources": [
+        "Wikipedia national electoral calendars and lists of summits",
+        "Political Atlas (Europe, North America and the major powers)",
+        "Political Retrospective (Archigos and Wikidata)",
+        "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0)",
+        "Wikidata (CC0)",
+        "Wikipedia Current events portal (CC BY-SA), from January 2026"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "daily",
+      "page": "q/calendar.html?period=history",
+      "bytes": 2603646
+    },
+    {
+      "id": "encyclopaedia-entities",
+      "title": "Encyclopaedia: entities",
+      "module": "rs",
+      "submodule": "encyclopedia",
+      "description": "Every person, place, party, election, war, event, idea and organisation in the PRP Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often PRP mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.",
+      "urls": [
+        "integration/data/encyclopaedia-entities/0.json",
+        "integration/data/encyclopaedia-entities/1.json",
+        "integration/data/encyclopaedia-entities/2.json",
+        "integration/data/encyclopaedia-entities/3.json",
+        "integration/data/encyclopaedia-entities/4.json",
+        "integration/data/encyclopaedia-entities/5.json",
+        "integration/data/encyclopaedia-entities/6.json",
+        "integration/data/encyclopaedia-entities/7.json",
+        "integration/data/encyclopaedia-entities/8.json",
+        "integration/data/encyclopaedia-entities/9.json",
+        "integration/data/encyclopaedia-entities/10.json",
+        "integration/data/encyclopaedia-entities/11.json",
+        "integration/data/encyclopaedia-entities/12.json",
+        "integration/data/encyclopaedia-entities/13.json",
+        "integration/data/encyclopaedia-entities/14.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id; the Encyclopaedia page is encyclopedia/index.html#<qid>"
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "description": "Name"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "person, place, party, election, event, topic, idea, conflict, organisation"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Short description (Wikidata)"
+        },
+        {
+          "name": "start",
+          "type": "string",
+          "description": "Born, founded, held or started (as precise as Wikidata records it)"
+        },
+        {
+          "name": "end",
+          "type": "string",
+          "description": "Died, dissolved or ended"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "description": "Country, citizenship or jurisdiction (the first Wikidata gives)"
+        },
+        {
+          "name": "mentions",
+          "type": "number",
+          "description": "How many times PRP mentions it"
+        },
+        {
+          "name": "appears_in",
+          "type": "array",
+          "description": "PRP submodule ids that mention it"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "English Wikipedia article"
+        }
+      ],
+      "rows": 12051,
+      "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
+      "sources": [
+        "Wikidata (CC0)",
+        "Every PRP submodule that mentions the entity"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "monthly",
+      "page": "encyclopedia/index.html",
+      "derivedFrom": [
+        "lake/data/index.json",
+        "lake/data/e/*.json"
+      ],
+      "bytes": 3552175
+    },
+    {
+      "id": "retrospective-wars",
+      "title": "Retrospective Battlefield: wars and armed conflicts 1926–2025",
+      "module": "rs",
+      "submodule": "battlefield-history",
+      "description": "Every war and armed conflict from 1926 to 2025: UCDP/PRIO from 1946 (25+ battle deaths a year; intensity 2 means 1,000+), Correlates of War before (wars of 1,000+ battle deaths), with type, aim, sides, where it was fought and its active years.",
+      "url": "integration/data/retrospective-wars.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Conflict id (u… UCDP, c… Correlates of War)"
+        },
+        {
+          "name": "dataset",
+          "type": "string",
+          "description": "UCDP/PRIO or Correlates of War"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Conflict"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Conflict type (civil, internationalised civil, interstate, colonial…)"
+        },
+        {
+          "name": "aim",
+          "type": "string",
+          "description": "Incompatibility: government or territory (UCDP)"
+        },
+        {
+          "name": "start",
+          "type": "date",
+          "description": "Start date, where recorded"
+        },
+        {
+          "name": "first_year",
+          "type": "number",
+          "description": "First active year"
+        },
+        {
+          "name": "last_year",
+          "type": "number",
+          "description": "Last active year"
+        },
+        {
+          "name": "active_years",
+          "type": "number",
+          "description": "Number of active years"
+        },
+        {
+          "name": "peak_intensity",
+          "type": "number",
+          "description": "Highest yearly intensity: 1 = 25–999 battle deaths, 2 = 1,000 or more"
+        },
+        {
+          "name": "war_years",
+          "type": "number",
+          "description": "Years at intensity 2"
+        },
+        {
+          "name": "fought_in",
+          "type": "array",
+          "description": "States where it was fought"
+        },
+        {
+          "name": "states_involved",
+          "type": "array",
+          "description": "States taking part"
+        },
+        {
+          "name": "side_a",
+          "type": "array",
+          "description": "Side A"
+        },
+        {
+          "name": "side_b",
+          "type": "array",
+          "description": "Side B"
+        },
+        {
+          "name": "battle_deaths",
+          "type": "number",
+          "description": "Battle deaths (Correlates of War only)"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article, where known"
+        }
+      ],
+      "rows": 343,
+      "licence": "UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); Correlates of War data free to use with citation (Sarkees & Wayman 2010); state names from CShapes 2.0 (CC BY-NC-SA 4.0).",
+      "sources": [
+        "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
+        "Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees & Wayman 2010)",
+        "CShapes 2.0 (Schvitz et al. 2022) for state names"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "static",
+      "page": "battlefield/history/index.html",
+      "derivedFrom": [
+        "battlefield/history/data/wars.json",
+        "battlefield/history/data/borders.topo.json"
+      ],
+      "bytes": 170063
+    },
+    {
+      "id": "war-focus-wars",
+      "title": "War Focus: major wars",
+      "module": "rs",
+      "submodule": "war-focus",
+      "description": "The major wars of the last hundred years that War Focus follows month by month: dates, sides, total deaths and where the figure comes from, and how many battles are recorded and mapped.",
+      "url": "battlefield/focus/data/index.json",
+      "format": "json",
+      "records": "wars",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "War id (also the file battlefield/focus/data/wars/<id>.json)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id"
+        },
+        {
+          "name": "wiki",
+          "type": "string",
+          "description": "Wikipedia title"
+        },
+        {
+          "name": "bf",
+          "type": "string",
+          "description": "Matching conflict id in retrospective-wars"
+        },
+        {
+          "name": "start",
+          "type": "date",
+          "description": "Start date"
+        },
+        {
+          "name": "end",
+          "type": "date",
+          "description": "End date (null if ongoing)"
+        },
+        {
+          "name": "ongoing",
+          "type": "boolean",
+          "description": "True if still being fought"
+        },
+        {
+          "name": "totalDeaths",
+          "type": "number",
+          "description": "Total deaths"
+        },
+        {
+          "name": "deathsSource",
+          "type": "string",
+          "description": "Where the death figure comes from"
+        },
+        {
+          "name": "battles",
+          "type": "number",
+          "description": "Battles, sieges and operations recorded (Wikidata)"
+        },
+        {
+          "name": "mappedBattles",
+          "type": "number",
+          "description": "Of those, how many have coordinates"
+        },
+        {
+          "name": "events",
+          "type": "number",
+          "description": "UCDP georeferenced events"
+        },
+        {
+          "name": "sides",
+          "type": "array",
+          "description": "The two sides"
+        },
+        {
+          "name": "bbox",
+          "type": "array",
+          "description": "Map extent [west, south, east, north]"
+        }
+      ],
+      "rows": 39,
+      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "sources": [
+        "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
+        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
+        "Correlates of War Project war data (Sarkees & Wayman 2010)",
+        "Wikidata (CC0): battles, sieges and operations that are part of each war",
+        "CShapes 2.0 (Schvitz et al. 2022)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "battlefield/focus/index.html",
+      "bytes": 16359
+    },
+    {
+      "id": "war-focus-battles",
+      "title": "War Focus: battles, sieges and operations",
+      "module": "rs",
+      "submodule": "war-focus",
+      "description": "Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped.",
+      "urls": [
+        "integration/data/war-focus-battles/0.json",
+        "integration/data/war-focus-battles/1.json",
+        "integration/data/war-focus-battles/2.json",
+        "integration/data/war-focus-battles/3.json",
+        "integration/data/war-focus-battles/4.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "war_id",
+          "type": "string",
+          "description": "War id (war-focus-wars)"
+        },
+        {
+          "name": "war",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id of the battle"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Battle, siege or operation"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Wikidata description"
+        },
+        {
+          "name": "start",
+          "type": "date",
+          "description": "Start date"
+        },
+        {
+          "name": "end",
+          "type": "date",
+          "description": "End date"
+        },
+        {
+          "name": "precision",
+          "type": "string",
+          "description": "Precision of the dates: day, month or year"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Deaths (Wikidata), if recorded"
+        },
+        {
+          "name": "casualties",
+          "type": "number",
+          "description": "Casualties (Wikidata), if recorded"
+        },
+        {
+          "name": "lat",
+          "type": "number",
+          "description": "Latitude, if mapped"
+        },
+        {
+          "name": "lon",
+          "type": "number",
+          "description": "Longitude, if mapped"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article"
+        }
+      ],
+      "rows": 4347,
+      "licence": "Wikidata CC0.",
+      "sources": [
+        "Wikidata (CC0): battles, sieges and operations that are part of each war"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "battlefield/focus/index.html",
+      "derivedFrom": [
+        "battlefield/focus/data/wars/*.json"
+      ],
+      "bytes": 1408589
+    },
+    {
+      "id": "war-focus-monthly-deaths",
+      "title": "War Focus: deaths by month",
+      "module": "rs",
+      "submodule": "war-focus",
+      "description": "Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.",
+      "urls": [
+        "integration/data/war-focus-monthly-deaths/0.json",
+        "integration/data/war-focus-monthly-deaths/1.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "war_id",
+          "type": "string",
+          "description": "War id (war-focus-wars)"
+        },
+        {
+          "name": "war",
+          "type": "string",
+          "description": "War"
+        },
+        {
+          "name": "month",
+          "type": "date",
+          "description": "Month (YYYY-MM)"
+        },
+        {
+          "name": "deaths",
+          "type": "number",
+          "description": "Deaths that month"
+        },
+        {
+          "name": "estimated",
+          "type": "boolean",
+          "description": "True when spread from an annual or war total"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Where the war's death figures come from"
+        }
+      ],
+      "rows": 3494,
+      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "sources": [
+        "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
+        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
+        "Correlates of War Project war data (Sarkees & Wayman 2010)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "monthly",
+      "page": "battlefield/focus/index.html",
+      "derivedFrom": [
+        "battlefield/focus/data/wars/*.json"
+      ],
+      "bytes": 706394
+    },
+    {
+      "id": "kardashev-polities",
+      "title": "Kardashev Tracker: powers",
+      "module": "rs",
+      "submodule": "kardashev",
+      "description": "The empires and countries the Kardashev Tracker follows from 2000 BC to today, with their capital's position and years.",
+      "url": "kardashev/data/energy.json",
+      "format": "json",
+      "records": "polities",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Power id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Empire or country"
+        },
+        {
+          "name": "lat",
+          "type": "number",
+          "description": "Latitude of its centre"
+        },
+        {
+          "name": "lon",
+          "type": "number",
+          "description": "Longitude of its centre"
+        },
+        {
+          "name": "region",
+          "type": "string",
+          "description": "Region"
+        },
+        {
+          "name": "wiki",
+          "type": "string",
+          "description": "Wikipedia title"
+        },
+        {
+          "name": "from",
+          "type": "number",
+          "description": "First year (negative = BC)"
+        },
+        {
+          "name": "to",
+          "type": "number",
+          "description": "Last year"
+        }
+      ],
+      "rows": 82,
+      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "sources": [
+        "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
+        "McEvedy & Jones, Maddison: populations",
+        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "static",
+      "page": "kardashev/index.html",
+      "bytes": 54158
+    },
+    {
+      "id": "kardashev-shares",
+      "title": "Kardashev Tracker: shares of world energy",
+      "module": "rs",
+      "submodule": "kardashev",
+      "description": "Each power's population, energy capture per person and share of humanity's energy capture, century by century from 2000 BC (then 1850, 1900, 1950, 2000 and 2025), with its own Kardashev rating. \"Rest of world\" rows complete each year.",
+      "url": "integration/data/kardashev-shares.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year (negative = BC)"
+        },
+        {
+          "name": "polity_id",
+          "type": "string",
+          "description": "Power id (kardashev-polities), or rest"
+        },
+        {
+          "name": "polity",
+          "type": "string",
+          "description": "Power"
+        },
+        {
+          "name": "population",
+          "type": "number",
+          "description": "Population"
+        },
+        {
+          "name": "kcal_per_person_day",
+          "type": "number",
+          "description": "Energy capture per person, kcal a day"
+        },
+        {
+          "name": "watts",
+          "type": "number",
+          "description": "Total energy capture, watts"
+        },
+        {
+          "name": "share",
+          "type": "number",
+          "description": "Share of world energy capture, 0–1"
+        },
+        {
+          "name": "kardashev",
+          "type": "number",
+          "description": "Kardashev rating of the power alone"
+        }
+      ],
+      "rows": 349,
+      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "sources": [
+        "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
+        "McEvedy & Jones, Maddison: populations",
+        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "static",
+      "page": "kardashev/index.html",
+      "derivedFrom": [
+        "kardashev/data/energy.json"
+      ],
+      "bytes": 61764
+    },
+    {
+      "id": "kardashev-world",
+      "title": "Kardashev Tracker: humanity",
+      "module": "rs",
+      "submodule": "kardashev",
+      "description": "World population, total energy capture and humanity's Kardashev rating (Sagan: K = (log10 P − 6) / 10, P in watts) for each step from 2000 BC to 2025.",
+      "url": "integration/data/kardashev-world.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year (negative = BC)"
+        },
+        {
+          "name": "world_population",
+          "type": "number",
+          "description": "World population"
+        },
+        {
+          "name": "world_watts",
+          "type": "number",
+          "description": "Humanity's energy capture, watts"
+        },
+        {
+          "name": "kardashev",
+          "type": "number",
+          "description": "Kardashev rating"
+        }
+      ],
+      "rows": 44,
+      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "sources": [
+        "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
+        "McEvedy & Jones, Maddison: populations",
+        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+      ],
+      "updated": "2026-10-26",
+      "refresh": "static",
+      "page": "kardashev/index.html",
+      "derivedFrom": [
+        "kardashev/data/energy.json"
+      ],
+      "bytes": 4157
+    },
+    {
+      "id": "econ-briefing-stories",
+      "title": "Economics Briefing: stories and papers",
+      "module": "mm",
+      "submodule": "econ-briefing",
+      "description": "Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.",
+      "url": "econ/briefing/data/stories.json",
+      "format": "json",
+      "records": "items",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Item id"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Title"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Link to the item at its publisher"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Source id; join to `id` in econ-briefing-sources"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source: journal, working, research, official, news"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Source tier: 1 Top journal or flagship series; 2 Major journal, central bank or institution; 3 Think tank or research column; 4 Journalism and commentary"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "description": "Fields it is classed under (macro, monetary, trade, labour, development, finance, public, energy)"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "paper (research) or news"
+        },
+        {
+          "name": "published",
+          "type": "date",
+          "description": "Publication time (ISO 8601, UTC)"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Short summary from the feed (the text remains the publisher's)"
+        },
+        {
+          "name": "section",
+          "type": "string",
+          "description": "Publisher's section or journal heading"
+        },
+        {
+          "name": "doi",
+          "type": "string",
+          "description": "DOI, if any"
+        },
+        {
+          "name": "authors",
+          "type": "string",
+          "description": "Authors, if given"
+        },
+        {
+          "name": "also",
+          "type": "array",
+          "description": "Other outlets that carried the same item"
+        },
+        {
+          "name": "undated",
+          "type": "boolean",
+          "description": "True when the feed gave no date (the time is when PRP first saw it)"
+        }
+      ],
+      "rows": 348,
+      "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "econ/briefing/index.html",
+      "bytes": 208857
+    },
+    {
+      "id": "econ-briefing-sources",
+      "title": "Economics Briefing: sources",
+      "module": "mm",
+      "submodule": "econ-briefing",
+      "description": "The journals, preprint servers, institutions and news desks the Economics Briefing reads, with their tier, default fields and feed status.",
+      "url": "econ/briefing/data/stories.json",
+      "format": "json",
+      "records": "sources",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Source id"
+        },
+        {
+          "name": "outlet",
+          "type": "string",
+          "description": "Outlet or publisher"
+        },
+        {
+          "name": "outletId",
+          "type": "string",
+          "description": "Outlet id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Feed name"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Home page"
+        },
+        {
+          "name": "feed",
+          "type": "string",
+          "description": "Feed URL"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Tier (1 is the most authoritative)"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "description": "Default fields for the feed"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id of the outlet"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Feed status at the last refresh"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "description": "Items in the feed at the last check"
+        },
+        {
+          "name": "stored",
+          "type": "number",
+          "description": "Items kept from this feed"
+        },
+        {
+          "name": "latest",
+          "type": "date",
+          "description": "Latest item time"
+        },
+        {
+          "name": "checked",
+          "type": "date",
+          "description": "Last checked"
+        },
+        {
+          "name": "lastOk",
+          "type": "date",
+          "description": "Last successful read"
+        },
+        {
+          "name": "etag",
+          "type": "string",
+          "description": "HTTP ETag of the feed"
+        },
+        {
+          "name": "lastModified",
+          "type": "string",
+          "description": "HTTP Last-Modified of the feed"
+        },
+        {
+          "name": "notModified",
+          "type": "boolean",
+          "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
+        },
+        {
+          "name": "strict",
+          "type": "boolean",
+          "description": "True when items matching none of the briefing's fields are dropped (feeds that also carry other subjects)"
+        },
+        {
+          "name": "badge",
+          "type": "string",
+          "description": "Label shown on this source's items instead of its kind (e.g. Opinion)"
+        }
+      ],
+      "rows": 50,
+      "licence": "Metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "econ/briefing/index.html",
+      "bytes": 208857
+    },
+    {
+      "id": "congress-members",
+      "title": "Auto Trader: members of Congress who trade",
+      "module": "mm",
+      "submodule": "traders",
+      "description": "Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades PRP read from their filings.",
+      "url": "integration/data/congress-members.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Member id (join to member in congress-trades)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Member"
+        },
+        {
+          "name": "party",
+          "type": "string",
+          "description": "Party"
+        },
+        {
+          "name": "district",
+          "type": "string",
+          "description": "State and district, e.g. CA31"
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "description": "State (USPS code)"
+        },
+        {
+          "name": "bioguide",
+          "type": "string",
+          "description": "Congressional Bioguide id"
+        },
+        {
+          "name": "filings",
+          "type": "number",
+          "description": "Filings read"
+        },
+        {
+          "name": "trades",
+          "type": "number",
+          "description": "Trades read from them"
+        },
+        {
+          "name": "unreadable_filings",
+          "type": "number",
+          "description": "Scanned paper filings linked but not read"
+        }
+      ],
+      "rows": 143,
+      "licence": "Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.",
+      "sources": [
+        "Clerk of the US House of Representatives — Periodic Transaction Reports (STOCK Act)"
+      ],
+      "updated": "2026-10-27",
+      "refresh": "weekly",
+      "page": "fe/traders.html?tab=congress",
+      "derivedFrom": [
+        "traders/data/congress.json"
+      ],
+      "bytes": 23943
+    },
+    {
+      "id": "congress-trades",
+      "title": "Auto Trader: trades by members of Congress",
+      "module": "mm",
+      "submodule": "traders",
+      "description": "Every stock, bond and option trade reported by members of the House in 2025 and 2026 (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.",
+      "urls": [
+        "integration/data/congress-trades/0.json",
+        "integration/data/congress-trades/1.json",
+        "integration/data/congress-trades/2.json",
+        "integration/data/congress-trades/3.json",
+        "integration/data/congress-trades/4.json",
+        "integration/data/congress-trades/5.json",
+        "integration/data/congress-trades/6.json",
+        "integration/data/congress-trades/7.json",
+        "integration/data/congress-trades/8.json",
+        "integration/data/congress-trades/9.json",
+        "integration/data/congress-trades/10.json",
+        "integration/data/congress-trades/11.json",
+        "integration/data/congress-trades/12.json",
+        "integration/data/congress-trades/13.json",
+        "integration/data/congress-trades/14.json",
+        "integration/data/congress-trades/15.json",
+        "integration/data/congress-trades/16.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "filed",
+          "type": "date",
+          "description": "Date the report was filed"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "description": "Date of the trade"
+        },
+        {
+          "name": "member",
+          "type": "string",
+          "description": "Member id (congress-members)"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Member"
+        },
+        {
+          "name": "party",
+          "type": "string",
+          "description": "Party"
+        },
+        {
+          "name": "district",
+          "type": "string",
+          "description": "State and district"
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "description": "Whose account: self, spouse, joint or dependent child"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "buy, sell, partial sale or exchange"
+        },
+        {
+          "name": "ticker",
+          "type": "string",
+          "description": "Ticker, where the filing gives one"
+        },
+        {
+          "name": "asset",
+          "type": "string",
+          "description": "Asset as described in the filing"
+        },
+        {
+          "name": "asset_type",
+          "type": "string",
+          "description": "House asset-type code (ST stock, GS government security, OP option, CS corporate security…)"
+        },
+        {
+          "name": "amount",
+          "type": "string",
+          "description": "Amount range as filed"
+        },
+        {
+          "name": "amount_min",
+          "type": "number",
+          "description": "Lower bound of the range, US$"
+        },
+        {
+          "name": "amount_max",
+          "type": "number",
+          "description": "Upper bound of the range, US$"
+        },
+        {
+          "name": "account",
+          "type": "string",
+          "description": "Account or broker, if given"
+        },
+        {
+          "name": "filing",
+          "type": "string",
+          "description": "Link to the filing (PDF)"
+        }
+      ],
+      "rows": 11263,
+      "licence": "Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.",
+      "sources": [
+        "Clerk of the US House of Representatives — Periodic Transaction Reports (STOCK Act)"
+      ],
+      "updated": "2026-10-27",
+      "refresh": "weekly",
+      "page": "fe/traders.html?tab=congress",
+      "derivedFrom": [
+        "traders/data/congress.json"
+      ],
+      "bytes": 4861067
+    },
+    {
+      "id": "investors",
+      "title": "Auto Trader: famous investors",
+      "module": "mm",
+      "submodule": "traders",
+      "description": "The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.",
+      "url": "integration/data/investors.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "cik",
+          "type": "number",
+          "description": "SEC CIK"
+        },
+        {
+          "name": "person",
+          "type": "string",
+          "description": "Investor"
+        },
+        {
+          "name": "fund",
+          "type": "string",
+          "description": "Fund"
+        },
+        {
+          "name": "style",
+          "type": "string",
+          "description": "Investment style (PRP)"
+        },
+        {
+          "name": "registered_name",
+          "type": "string",
+          "description": "Name on the filing"
+        },
+        {
+          "name": "period",
+          "type": "date",
+          "description": "Quarter end of the latest 13F"
+        },
+        {
+          "name": "filed",
+          "type": "date",
+          "description": "Filing date"
+        },
+        {
+          "name": "previous_period",
+          "type": "date",
+          "description": "Quarter end of the filing compared against"
+        },
+        {
+          "name": "total_value",
+          "type": "number",
+          "description": "Reported value of positions, US$"
+        },
+        {
+          "name": "positions",
+          "type": "number",
+          "description": "Positions held"
+        },
+        {
+          "name": "sold_out",
+          "type": "number",
+          "description": "Positions sold out since the previous filing"
+        },
+        {
+          "name": "filing",
+          "type": "string",
+          "description": "Filing index on EDGAR"
+        }
+      ],
+      "rows": 10,
+      "licence": "Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.",
+      "sources": [
+        "SEC EDGAR Form 13F-HR (the latest two filings per manager)",
+        "OpenFIGI (CUSIP to US listing): CUSIP to US listing"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "weekly",
+      "page": "fe/traders.html?tab=investors",
+      "derivedFrom": [
+        "traders/data/investors.json"
+      ],
+      "bytes": 4164
+    },
+    {
+      "id": "investor-holdings",
+      "title": "Auto Trader: famous investors' holdings",
+      "module": "mm",
+      "submodule": "traders",
+      "description": "Every position in the latest 13F filing of each famous investor, with value, shares, weight in the portfolio and the change since the previous filing (new, added, reduced, unchanged).",
+      "urls": [
+        "integration/data/investor-holdings/0.json",
+        "integration/data/investor-holdings/1.json"
+      ],
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "person",
+          "type": "string",
+          "description": "Investor"
+        },
+        {
+          "name": "fund",
+          "type": "string",
+          "description": "Fund"
+        },
+        {
+          "name": "period",
+          "type": "date",
+          "description": "Quarter end"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Issuer"
+        },
+        {
+          "name": "ticker",
+          "type": "string",
+          "description": "Ticker (OpenFIGI)"
+        },
+        {
+          "name": "class",
+          "type": "string",
+          "description": "Class of security"
+        },
+        {
+          "name": "cusip",
+          "type": "string",
+          "description": "CUSIP"
+        },
+        {
+          "name": "put_call",
+          "type": "string",
+          "description": "Put or Call for options, else null"
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "description": "Reported value, US$"
+        },
+        {
+          "name": "shares",
+          "type": "number",
+          "description": "Shares or principal"
+        },
+        {
+          "name": "weight",
+          "type": "number",
+          "description": "Share of the portfolio by value, 0–1"
+        },
+        {
+          "name": "change",
+          "type": "string",
+          "description": "Change since the previous filing: new, added, reduced or unchanged"
+        },
+        {
+          "name": "shares_change",
+          "type": "number",
+          "description": "Change in shares since the previous filing"
+        }
+      ],
+      "rows": 1537,
+      "licence": "Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.",
+      "sources": [
+        "SEC EDGAR Form 13F-HR (the latest two filings per manager)",
+        "OpenFIGI (CUSIP to US listing): CUSIP to US listing"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "weekly",
+      "page": "fe/traders.html?tab=investors",
+      "derivedFrom": [
+        "traders/data/investors.json"
+      ],
+      "bytes": 404148
+    },
+    {
+      "id": "investor-sales",
+      "title": "Auto Trader: famous investors' exits",
+      "module": "mm",
+      "submodule": "traders",
+      "description": "Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.",
+      "url": "integration/data/investor-sales.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "person",
+          "type": "string",
+          "description": "Investor"
+        },
+        {
+          "name": "fund",
+          "type": "string",
+          "description": "Fund"
+        },
+        {
+          "name": "period",
+          "type": "date",
+          "description": "Quarter end of the latest filing"
+        },
+        {
+          "name": "previous_period",
+          "type": "date",
+          "description": "Quarter end when it was last held"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Issuer"
+        },
+        {
+          "name": "ticker",
+          "type": "string",
+          "description": "Ticker"
+        },
+        {
+          "name": "class",
+          "type": "string",
+          "description": "Class of security"
+        },
+        {
+          "name": "cusip",
+          "type": "string",
+          "description": "CUSIP"
+        },
+        {
+          "name": "put_call",
+          "type": "string",
+          "description": "Put or Call for options"
+        },
+        {
+          "name": "previous_value",
+          "type": "number",
+          "description": "Value at the previous quarter end, US$"
+        },
+        {
+          "name": "previous_shares",
+          "type": "number",
+          "description": "Shares at the previous quarter end"
+        }
+      ],
+      "rows": 370,
+      "licence": "Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.",
+      "sources": [
+        "SEC EDGAR Form 13F-HR (the latest two filings per manager)",
+        "OpenFIGI (CUSIP to US listing): CUSIP to US listing"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "weekly",
+      "page": "fe/traders.html?tab=investors",
+      "derivedFrom": [
+        "traders/data/investors.json"
+      ],
+      "bytes": 94165
+    },
+    {
+      "id": "science-briefing-stories",
+      "title": "Scientific Briefing: stories and papers",
+      "module": "ns",
+      "submodule": "science-briefing",
+      "description": "Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.",
+      "url": "science/briefing/data/stories.json",
+      "format": "json",
+      "records": "items",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Item id"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Title"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Link to the item at its publisher"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Source id; join to `id` in science-briefing-sources"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source: journal, news"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Source tier: 1 Flagship journal; 2 Major journal; 3 Science journalism"
+        },
+        {
+          "name": "disciplines",
+          "type": "array",
+          "description": "Disciplines it is classed under (physics, chemistry, biology, earth, space)"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "paper (research) or news"
+        },
+        {
+          "name": "published",
+          "type": "date",
+          "description": "Publication time (ISO 8601, UTC)"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Short summary from the feed (the text remains the publisher's)"
+        },
+        {
+          "name": "section",
+          "type": "string",
+          "description": "Publisher's section or journal heading"
+        },
+        {
+          "name": "doi",
+          "type": "string",
+          "description": "DOI, if any"
+        },
+        {
+          "name": "also",
+          "type": "array",
+          "description": "Other outlets that carried the same item"
+        }
+      ],
+      "rows": 857,
+      "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "science/briefing/index.html",
+      "bytes": 497892
+    },
+    {
+      "id": "science-briefing-sources",
+      "title": "Scientific Briefing: sources",
+      "module": "ns",
+      "submodule": "science-briefing",
+      "description": "The journals, preprint servers, institutions and news desks the Scientific Briefing reads, with their tier, default disciplines and feed status.",
+      "url": "science/briefing/data/stories.json",
+      "format": "json",
+      "records": "sources",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Source id"
+        },
+        {
+          "name": "outlet",
+          "type": "string",
+          "description": "Outlet or publisher"
+        },
+        {
+          "name": "outletId",
+          "type": "string",
+          "description": "Outlet id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Feed name"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Home page"
+        },
+        {
+          "name": "feed",
+          "type": "string",
+          "description": "Feed URL"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Tier (1 is the most authoritative)"
+        },
+        {
+          "name": "disciplines",
+          "type": "array",
+          "description": "Default disciplines for the feed"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id of the outlet"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Feed status at the last refresh"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "description": "Items in the feed at the last check"
+        },
+        {
+          "name": "stored",
+          "type": "number",
+          "description": "Items kept from this feed"
+        },
+        {
+          "name": "latest",
+          "type": "date",
+          "description": "Latest item time"
+        },
+        {
+          "name": "checked",
+          "type": "date",
+          "description": "Last checked"
+        },
+        {
+          "name": "lastOk",
+          "type": "date",
+          "description": "Last successful read"
+        },
+        {
+          "name": "etag",
+          "type": "string",
+          "description": "HTTP ETag of the feed"
+        },
+        {
+          "name": "lastModified",
+          "type": "string",
+          "description": "HTTP Last-Modified of the feed"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "description": "Last error, if any"
+        },
+        {
+          "name": "notModified",
+          "type": "boolean",
+          "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
+        }
+      ],
+      "rows": 45,
+      "licence": "Metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "science/briefing/index.html",
+      "bytes": 497892
+    },
+    {
+      "id": "science-progress-events",
+      "title": "Timeline of Progress: breakthroughs",
+      "module": "ns",
+      "submodule": "progress",
+      "description": "Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.",
+      "url": "integration/data/science-progress-events.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Event id"
+        },
+        {
+          "name": "year",
+          "type": "number",
+          "description": "Year (negative = BC)"
+        },
+        {
+          "name": "circa",
+          "type": "boolean",
+          "description": "True when the year is approximate"
+        },
+        {
+          "name": "disciplines",
+          "type": "array",
+          "description": "Disciplines"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Breakthrough"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "description": "One-line explanation (PRP)"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article"
+        },
+        {
+          "name": "place",
+          "type": "string",
+          "description": "Where it happened"
+        },
+        {
+          "name": "place_qid",
+          "type": "string",
+          "description": "Wikidata id of the place"
+        },
+        {
+          "name": "lat",
+          "type": "number",
+          "description": "Latitude"
+        },
+        {
+          "name": "lon",
+          "type": "number",
+          "description": "Longitude"
+        },
+        {
+          "name": "position_basis",
+          "type": "string",
+          "description": "How the place was chosen: curated, discovery, site, shared-institution, institution-at-time, work-location, institution, education, birthplace, fallback"
+        },
+        {
+          "name": "people",
+          "type": "array",
+          "description": "People involved"
+        },
+        {
+          "name": "people_qids",
+          "type": "array",
+          "description": "Their Wikidata ids (science-progress-people)"
+        },
+        {
+          "name": "institutions",
+          "type": "array",
+          "description": "Institutions involved"
+        }
+      ],
+      "rows": 570,
+      "licence": "Facts from Wikidata (CC0); titles and notes © JDP-Iq.",
+      "sources": [
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP",
+        "Natural Earth (public domain) for the map"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "monthly",
+      "page": "science/progress/index.html",
+      "derivedFrom": [
+        "science/progress/data/events.json"
+      ],
+      "bytes": 299026
+    },
+    {
+      "id": "science-progress-people",
+      "title": "Timeline of Progress: people",
+      "module": "ns",
+      "submodule": "progress",
+      "description": "The scientists, inventors and thinkers behind the Timeline of Progress, with life dates, countries, occupations and fields (Wikidata).",
+      "url": "integration/data/science-progress-people.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Name"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Wikidata description"
+        },
+        {
+          "name": "born",
+          "type": "number",
+          "description": "Year of birth (negative = BC)"
+        },
+        {
+          "name": "died",
+          "type": "number",
+          "description": "Year of death"
+        },
+        {
+          "name": "countries",
+          "type": "array",
+          "description": "Countries of citizenship"
+        },
+        {
+          "name": "occupations",
+          "type": "array",
+          "description": "Occupations"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "description": "Fields of work"
+        },
+        {
+          "name": "institutions",
+          "type": "array",
+          "description": "Institutions"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article"
+        }
+      ],
+      "rows": 720,
+      "licence": "Wikidata CC0.",
+      "sources": [
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "monthly",
+      "page": "science/progress/index.html",
+      "derivedFrom": [
+        "science/progress/data/events.json"
+      ],
+      "bytes": 320231
+    },
+    {
+      "id": "science-progress-institutions",
+      "title": "Timeline of Progress: institutions",
+      "module": "ns",
+      "submodule": "progress",
+      "description": "Universities, laboratories, companies and academies linked to the Timeline of Progress, with coordinates (Wikidata).",
+      "url": "integration/data/science-progress-institutions.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Institution"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Wikidata description"
+        },
+        {
+          "name": "lat",
+          "type": "number",
+          "description": "Latitude"
+        },
+        {
+          "name": "lon",
+          "type": "number",
+          "description": "Longitude"
+        },
+        {
+          "name": "wikipedia",
+          "type": "string",
+          "description": "Wikipedia article"
+        }
+      ],
+      "rows": 1187,
+      "licence": "Wikidata CC0.",
+      "sources": [
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "monthly",
+      "page": "science/progress/index.html",
+      "derivedFrom": [
+        "science/progress/data/events.json"
+      ],
+      "bytes": 242606
+    },
+    {
+      "id": "digital-briefing-stories",
+      "title": "Digital Briefing: stories and papers",
+      "module": "ds",
+      "submodule": "digital-briefing",
+      "description": "Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.",
+      "url": "digital/briefing/data/stories.json",
+      "format": "json",
+      "records": "items",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Item id"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Title"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Link to the item at its publisher"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Source id; join to `id` in digital-briefing-sources"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source: journal, preprint, lab, research, official, news"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Source tier: 1 Flagship journal; 2 Major journal, lab or agency; 3 Preprint, institute, engineering blog or advocacy; 4 Technology journalism and commentary"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "description": "Fields it is classed under (ai, software, security, hardware, networks, quantum, privacy, policy)"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "paper (research) or news"
+        },
+        {
+          "name": "published",
+          "type": "date",
+          "description": "Publication time (ISO 8601, UTC)"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Short summary from the feed (the text remains the publisher's)"
+        },
+        {
+          "name": "section",
+          "type": "string",
+          "description": "Publisher's section or journal heading"
+        },
+        {
+          "name": "doi",
+          "type": "string",
+          "description": "DOI, if any"
+        },
+        {
+          "name": "authors",
+          "type": "string",
+          "description": "Authors, if given"
+        },
+        {
+          "name": "also",
+          "type": "array",
+          "description": "Other outlets that carried the same item"
+        }
+      ],
+      "rows": 526,
+      "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "digital/briefing/index.html",
+      "bytes": 320109
+    },
+    {
+      "id": "digital-briefing-sources",
+      "title": "Digital Briefing: sources",
+      "module": "ds",
+      "submodule": "digital-briefing",
+      "description": "The journals, preprint servers, institutions and news desks the Digital Briefing reads, with their tier, default fields and feed status.",
+      "url": "digital/briefing/data/stories.json",
+      "format": "json",
+      "records": "sources",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Source id"
+        },
+        {
+          "name": "outlet",
+          "type": "string",
+          "description": "Outlet or publisher"
+        },
+        {
+          "name": "outletId",
+          "type": "string",
+          "description": "Outlet id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Feed name"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Home page"
+        },
+        {
+          "name": "feed",
+          "type": "string",
+          "description": "Feed URL"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "Kind of source"
+        },
+        {
+          "name": "tier",
+          "type": "number",
+          "description": "Tier (1 is the most authoritative)"
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "description": "Default fields for the feed"
+        },
+        {
+          "name": "qid",
+          "type": "string",
+          "description": "Wikidata id of the outlet"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "Feed status at the last refresh"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "description": "Items in the feed at the last check"
+        },
+        {
+          "name": "stored",
+          "type": "number",
+          "description": "Items kept from this feed"
+        },
+        {
+          "name": "latest",
+          "type": "date",
+          "description": "Latest item time"
+        },
+        {
+          "name": "checked",
+          "type": "date",
+          "description": "Last checked"
+        },
+        {
+          "name": "lastOk",
+          "type": "date",
+          "description": "Last successful read"
+        },
+        {
+          "name": "etag",
+          "type": "string",
+          "description": "HTTP ETag of the feed"
+        },
+        {
+          "name": "lastModified",
+          "type": "string",
+          "description": "HTTP Last-Modified of the feed"
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "description": "Last error, if any"
+        },
+        {
+          "name": "notModified",
+          "type": "boolean",
+          "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
+        },
+        {
+          "name": "strict",
+          "type": "boolean",
+          "description": "True when items matching none of the briefing's fields are dropped (feeds that also carry other subjects)"
+        },
+        {
+          "name": "badge",
+          "type": "string",
+          "description": "Label shown on this source's items instead of its kind (e.g. Opinion)"
+        },
+        {
+          "name": "perDay",
+          "type": "number",
+          "description": "Preprint servers: at most this many new submissions kept from each daily announcement"
+        },
+        {
+          "name": "matched",
+          "type": "number",
+          "description": "Items in the feed that matched the briefing before the daily cap"
+        }
+      ],
+      "rows": 79,
+      "licence": "Metadata © JDP-Iq.",
+      "sources": [
+        "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "6-hourly",
+      "page": "digital/briefing/index.html",
+      "bytes": 320109
+    },
+    {
+      "id": "prp-submodules",
+      "title": "PRP: modules and submodules",
+      "module": "ds",
+      "submodule": "integration-hub",
+      "description": "Every PRP submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.",
+      "url": "integration/data/prp-submodules.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "module",
+          "type": "string",
+          "description": "Module id (rt, rs, mm, ns, ds, kino)"
+        },
+        {
+          "name": "module_code",
+          "type": "string",
+          "description": "Module code"
+        },
+        {
+          "name": "module_name",
+          "type": "string",
+          "description": "Module"
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Submodule id"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Submodule"
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "description": "realtime, retrospective, reference, learning, operations or automation"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "live, in-build or planned"
+        },
+        {
+          "name": "private",
+          "type": "boolean",
+          "description": "True for private submodules behind their own sign-in"
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "description": "Address"
+        },
+        {
+          "name": "planned_url",
+          "type": "string",
+          "description": "Address once built (in-build submodules)"
+        },
+        {
+          "name": "host",
+          "type": "string",
+          "description": "Where it is hosted"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "What it does"
+        },
+        {
+          "name": "views",
+          "type": "array",
+          "description": "Tabs inside the page"
+        }
+      ],
+      "rows": 35,
+      "licence": "© JDP-Iq.",
+      "sources": [
+        "registry.json"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "on change",
+      "page": "index.html",
+      "derivedFrom": [
+        "registry.json"
+      ],
+      "bytes": 17624
+    },
+    {
+      "id": "kino-documentaries",
+      "title": "Kino: documentaries and courses",
+      "module": "kino",
+      "submodule": "kino-political-events",
+      "description": "Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the PRP submodules its scenes link to.",
+      "url": "kino/data/index.json",
+      "format": "json",
+      "records": "docs",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Documentary id"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Title"
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "description": "Kino category (the submodule kino-<category>)"
+        },
+        {
+          "name": "era",
+          "type": "array",
+          "description": "[first year, last year]"
+        },
+        {
+          "name": "minutes",
+          "type": "number",
+          "description": "Approximate running time, minutes"
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "description": "Summary"
+        },
+        {
+          "name": "subjects",
+          "type": "array",
+          "description": "Subjects, each {qid, label}"
+        },
+        {
+          "name": "scenes",
+          "type": "number",
+          "description": "Scenes"
+        },
+        {
+          "name": "parts",
+          "type": "number",
+          "description": "Parts (courses)"
+        },
+        {
+          "name": "quiz",
+          "type": "number",
+          "description": "Quiz questions"
+        },
+        {
+          "name": "sources",
+          "type": "number",
+          "description": "Sources cited"
+        },
+        {
+          "name": "scholarly",
+          "type": "number",
+          "description": "Of those, scholarly"
+        },
+        {
+          "name": "links",
+          "type": "array",
+          "description": "PRP submodules the scenes link to (module/submodule)"
+        },
+        {
+          "name": "preview",
+          "type": "object",
+          "description": "Preview image: {kind, file, position}"
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "description": "Script file under kino/data/"
+        }
+      ],
+      "rows": 18,
+      "licence": "Documentary texts and index © JDP-Iq; images from Wikimedia Commons, each under its own licence (kino/data/media.json).",
+      "sources": [
+        "Scholarly books and articles listed in each documentary",
+        "Wikidata (CC0)",
+        "Wikimedia Commons"
+      ],
+      "updated": "2026-10-28",
+      "refresh": "monthly",
+      "page": "kino/index.html",
+      "submodules": [
+        "kino-political-events",
+        "kino-political-figures",
+        "kino-political-parties",
+        "kino-wars",
+        "kino-geopolitical-events",
+        "kino-great-thinkers"
+      ],
+      "bytes": 25705
+    }
+  ]
+}

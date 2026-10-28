@@ -1,0 +1,30 @@
+name: Refresh Scientific Briefing
+# Every six hours: fetch every journal and science-desk feed and roll the seven-day store forward.
+on:
+  schedule:
+    - cron: '20 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: science-briefing-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node science/scripts/build-briefing.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add science/briefing/data
+          if git diff --cached --quiet; then echo "No changes."; exit 0; fi
+          git commit -m "Scientific Briefing: refresh stories"
+          git pull --rebase
+          git push

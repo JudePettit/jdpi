@@ -111,7 +111,7 @@ Legacy `.jdpi-*` classes still work and look new.
 Colour follows the entity, never its rank; categorical colours in the fixed order; sequential = one hue light→dark;
 diverging = two hues with a grey midpoint; status colours only for status and always with a word or icon. Thin marks,
 recessive gridlines (`--prp-grid`), a legend for ≥2 series, direct labels where few, text in text tokens (never in the
-series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes.
+series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes. Exception: a map may use more than three categorical colours (e.g. Timeline of Progress, one per discipline) only when every mark is also named in a legend with counts that filters, in its tooltip and in a list.
 
 ## 7. Accessibility
 

@@ -395,11 +395,10 @@
           "name": "Timeline of Progress",
           "kind": "retrospective",
           "icon": "⟡",
-          "status": "in-build",
+          "status": "live",
           "host": "PRP",
-          "url": null,
-          "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia.",
-          "pendingUrl": "science/progress/index.html"
+          "url": "science/progress/index.html",
+          "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
         }
       ]
     }

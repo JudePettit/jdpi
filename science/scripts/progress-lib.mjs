@@ -19,13 +19,17 @@ export const BASIS = {
   curated: 'Set by hand where Wikidata’s facts would mislead',
   discovery: 'Location of discovery (Wikidata)',
   site: 'The site itself (Wikidata coordinates)',
+  'shared-institution': 'Institution the discoverers shared (Wikidata)',
   'institution-at-time': 'Discoverer’s institution at the time (Wikidata, dated)',
   'work-location': 'Discoverer’s work location (Wikidata)',
   institution: 'Discoverer’s main institution (Wikidata)',
   education: 'Where the discoverer studied (Wikidata)',
   birthplace: 'Discoverer’s birthplace (Wikidata)',
-  fallback: 'Approximate place set by hand (no usable Wikidata location)',
+  fallback: 'Place set by hand (Wikidata gives no location for the discoverers near it)',
 };
+/** How far (km) a discoverer's institution or work place may lie from the seed's hand-set place; for the weaker
+ *  proxies (where they studied, where they were born) it must be the same town. */
+export const ANCHOR_KM = 100, ANCHOR_KM_WEAK = 20;
 
 /** "Q935 Isaac Newton" → { qid: 'Q935', name: 'Isaac Newton' }; "Isaac Newton" → { qid: null, name }. */
 export function parseRef(s) {
@@ -118,11 +122,13 @@ export const looksInstitutional = (label, desc) => ACADEMIC.test(`${label || ''}
  *           st = { q, s?, e?, preferred? }
  *   place(q) → { lat, lon, label, inst? } or null (has coordinates)
  *   weight(q) → how many seed scientists share this institution (to prefer main ones when undated)
- * Rules, in order: curated override; location of discovery (P189); the item's own coordinates; the discoverer's
- * employer, affiliation or place of study dated around the event year; dated work location; main employer or
- * affiliation; work location; education; birthplace; curated fallback.
+ * Rules, in order: curated override; location of discovery (P189); the item's own coordinates; an institution two or
+ * more of the discoverers shared at the time; the discoverer's employer, affiliation or place of study dated around
+ * the event year; dated work location; main employer or affiliation; work location; education; birthplace; curated
+ * fallback. The fallback place, when the seed gives one, also anchors the person-based rules: a candidate more than
+ * maxKm from it is skipped (Wikidata often lists later, earlier or honorary posts without dates).
  */
-export function choosePlace(event, people, place, weight = () => 0) {
+export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCHOR_KM) {
   const y = event.year;
   const at = q => (q ? place(q) : null);
   const out = (q, basis, p, via) => ({ qid: q, name: p.label, lat: p.lat, lon: p.lon, basis, ...(via ? { via } : {}) });
@@ -132,43 +138,56 @@ export function choosePlace(event, people, place, weight = () => 0) {
     const [lat, lon] = event.item.coord;
     return { qid: event.item.qid, name: event.item.label || event.item.qid, lat, lon, basis: 'site' };
   }
+  const anchor = at(event.fb);
+  const fits = (q, km = maxKm) => { const p = at(q); return !!p && (!anchor || distanceKm([p.lat, p.lon], [anchor.lat, anchor.lon]) <= km); };
+  const weak = Math.min(maxKm, ANCHOR_KM_WEAK);
   const life = p => ({ born: p.born, died: p.died });
   const width = (st, p) => { const r = span(st, life(p)); return r ? r[1] - r[0] : 999; };
+  // 0. An employer or affiliation shared by two or more of the people (current at the time, or undated).
+  if (people.length > 1) {
+    const who = new Map();
+    for (const p of people) {
+      const qs = new Set(['employer', 'affiliation'].flatMap(k => (p[k] || []).filter(st => (!span(st, life(p)) || covers(st, y, life(p))) && fits(st.q)).map(st => st.q)));
+      for (const q of qs) who.set(q, [...(who.get(q) || []), p.qid]);
+    }
+    const best = [...who].filter(([, ps]) => ps.length > 1).sort((a, b) => b[1].length - a[1].length || !!at(b[0]).inst - !!at(a[0]).inst)[0];
+    if (best) return out(best[0], 'shared-institution', at(best[0]), best[1][0]);
+  }
   // 1. Institution at the time: employer > affiliation > education, narrowest span first.
   for (const p of people) {
     const dated = [['employer', 0], ['affiliation', 1], ['educated', 2]]
       .flatMap(([k, rank]) => (p[k] || []).filter(st => covers(st, y, life(p))).map(st => ({ st, rank })))
-      .filter(({ st }) => at(st.q))
+      .filter(({ st }) => fits(st.q))
       .sort((a, b) => a.rank - b.rank || width(a.st, p) - width(b.st, p) || !!b.st.preferred - !!a.st.preferred);
     if (dated.length) return out(dated[0].st.q, 'institution-at-time', at(dated[0].st.q), p.qid);
   }
   // 2. Work location in use at the time.
   for (const p of people) {
-    const w = (p.work || []).filter(st => covers(st, y, life(p)) && at(st.q)).sort((a, b) => width(a, p) - width(b, p));
+    const w = (p.work || []).filter(st => covers(st, y, life(p)) && fits(st.q)).sort((a, b) => width(a, p) - width(b, p));
     if (w.length) return out(w[0].q, 'work-location', at(w[0].q), p.qid);
   }
   // 3. Main institution: preferred rank, then the one nearest in time, then the most shared, academic ones first.
   const near = (st, p) => { const r = span(st, life(p)); return r ? Math.max(0, r[0] - y, y - r[1]) : 500; };
   for (const p of people) {
     for (const k of ['employer', 'affiliation']) {
-      const c = (p[k] || []).filter(st => at(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
+      const c = (p[k] || []).filter(st => fits(st.q)).sort((a, b) => !!b.preferred - !!a.preferred || near(a, p) - near(b, p)
         || !!at(b.q).inst - !!at(a.q).inst || weight(b.q) - weight(a.q));
       if (c.length) return out(c[0].q, 'institution', at(c[0].q), p.qid);
     }
   }
   // 4. Work location (only if there is one obvious candidate, or the preferred one).
   for (const p of people) {
-    const w = (p.work || []).filter(st => at(st.q));
+    const w = (p.work || []).filter(st => fits(st.q));
     const pick = w.find(st => st.preferred) || (w.length === 1 ? w[0] : w.sort((a, b) => near(a, p) - near(b, p))[0]);
     if (pick) return out(pick.q, 'work-location', at(pick.q), p.qid);
   }
   // 5. Education (the latest: usually the most advanced), then birthplace.
   for (const p of people) {
-    const ed = (p.educated || []).filter(st => at(st.q) && at(st.q).inst).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
+    const ed = (p.educated || []).filter(st => fits(st.q, weak) && at(st.q).inst).sort((a, b) => (span(b, life(p))?.[1] ?? -1e9) - (span(a, life(p))?.[1] ?? -1e9));
     if (ed.length) return out(ed[0].q, 'education', at(ed[0].q), p.qid);
   }
-  for (const p of people) for (const q of p.birthplace || []) { const pl = at(q); if (pl) return out(q, 'birthplace', pl, p.qid); }
-  if (event.fb) { const p = at(event.fb); if (p) return out(event.fb, 'fallback', p); }
+  for (const p of people) for (const q of p.birthplace || []) { if (fits(q, weak)) return out(q, 'birthplace', at(q), p.qid); }
+  if (anchor) return out(event.fb, 'fallback', anchor);
   return null;
 }
 
@@ -176,7 +195,7 @@ export function choosePlace(event, people, place, weight = () => 0) {
 export function eventInstitutions(event, people, place, chosen) {
   const y = event.year, out = [];
   const add = q => { if (q && !out.includes(q)) out.push(q); };
-  if (chosen && ['institution-at-time', 'institution', 'education'].includes(chosen.basis)) add(chosen.qid);
+  if (chosen && ['shared-institution', 'institution-at-time', 'institution', 'education'].includes(chosen.basis)) add(chosen.qid);
   if (chosen && chosen.basis === 'curated' && place(chosen.qid)?.inst) add(chosen.qid);
   for (const p of people) {
     for (const k of ['employer', 'affiliation', 'educated']) {

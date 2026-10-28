@@ -140,4 +140,32 @@ export function learning({ jdpiDir }) {
   return out;
 }
 
-export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning };
+/** Timeline of Progress (Natural Science): breakthroughs by their Wikidata item, the scientists behind them and the
+ *  institutions involved, each linked to the breakthrough's place on the timeline. */
+export function progress({ jdpiDir }) {
+  const d = json(join(jdpiDir, 'science/progress/data/events.json'));
+  const disc = Object.fromEntries(d.disciplines.map(x => [x.id, x.name]));
+  const when = e => `${e.ca ? 'c. ' : ''}${e.y < 0 ? `${-e.y} BC` : e.y < 1000 ? `AD ${e.y}` : e.y}`;
+  const url = e => `${JDPI}science/progress/index.html#y=${e.y}&e=${e.id}`;
+  const date = e => (e.y > 0 ? String(e.y).padStart(4, '0') : undefined);
+  const out = [];
+  for (const e of d.events) {
+    const disciplines = e.d.map(x => disc[x] || x), dtags = disciplines.map(n => ['Discipline', n]);
+    if (e.q) out.push({ key: { qid: e.q }, label: e.t, module: 'progress', url: url(e), date: date(e),
+      context: `${when(e)} · ${disciplines.join(', ')} · ${e.place.n}`, tags: [['Event type', 'Scientific breakthrough'], ...dtags] });
+    for (const q of e.people) {
+      const p = d.people[q];
+      if (!p) continue;
+      out.push({ key: { qid: q }, label: p.name, module: 'progress', url: url(e), date: date(e), context: `${e.t} (${when(e)})`,
+        tags: [['Role', 'Scientist'], ...dtags, ...(p.inst || []).map(i => ['Institution', d.institutions[i]?.name]).filter(([, n]) => n)] });
+    }
+    for (const q of e.inst) {
+      const i = d.institutions[q];
+      if (i) out.push({ key: { qid: q }, label: i.name, module: 'progress', url: url(e), date: date(e), context: `${e.t} (${when(e)})`,
+        tags: [['Role', 'Scientific institution'], ...dtags] });
+    }
+  }
+  return out;
+}
+
+export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress };

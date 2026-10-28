@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" class="prp" data-suite="ns">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>Timeline of Progress · PRP</title>
+  <meta name="description" content="Humanity's key scientific breakthroughs from 3000 BC to today on a world map, with the people and institutions behind them.">
+  <link rel="icon" href="../../design/brand-prp.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="../../design/prp.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="../../design/prp-bar.js" data-suite="ns" data-module="progress" data-shell="../../" defer></script>
+</head>
+<body>
+  <div class="screen">
+    <header class="head">
+      <div class="front">
+        <p class="prp-eyebrow" data-jdpi-standalone><span>Natural Science <span class="sep">·</span> Timeline of Progress</span></p>
+        <h1 class="prp-title">Timeline of Progress</h1>
+        <p class="prp-dek">Key breakthroughs in science and technology from 3000 BC to today, placed where they happened. Move through time, filter by discipline, and open any breakthrough for the people and institutions behind it.</p>
+        <p class="prp-meta" id="status">Loading the timeline…</p>
+      </div>
+      <dl class="kpis" aria-live="polite">
+        <div class="kpi when"><dt>Year</dt><dd id="year-big">–</dd></div>
+        <div class="kpi"><dt>Breakthroughs</dt><dd id="k-events">–</dd></div>
+        <div class="kpi"><dt>Scientists</dt><dd id="k-people">–</dd></div>
+      </dl>
+    </header>
+
+    <div class="prp-tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tab-map" data-view="map" aria-controls="view-map" aria-selected="true">Map</button>
+      <button type="button" role="tab" id="tab-people" data-view="scientists" aria-controls="view-people" aria-selected="false" tabindex="-1">Scientists</button>
+      <button type="button" role="tab" id="tab-list" data-view="list" aria-controls="view-list" aria-selected="false" tabindex="-1">List</button>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input id="search" class="prp-input" type="search" placeholder="Search a breakthrough or scientist…" autocomplete="off" aria-label="Search breakthroughs and scientists" aria-controls="search-results" aria-expanded="false">
+        <ul id="search-results" class="search-results" role="listbox" aria-label="Matches" hidden></ul>
+      </div>
+      <div class="timeline" role="group" aria-label="Year">
+        <button type="button" id="prev" class="tl-btn" aria-label="Step back in time" title="Step back (←)">‹</button>
+        <button type="button" id="play" class="tl-btn play" aria-label="Play through history" title="Play or pause (space)">▶</button>
+        <button type="button" id="next" class="tl-btn" aria-label="Step forward in time" title="Step forward (→)">›</button>
+        <div class="slider-wrap">
+          <svg id="density" class="density" aria-hidden="true" focusable="false" preserveAspectRatio="none"></svg>
+          <input type="range" id="year" min="0" max="1" step="1" value="1" aria-label="Year">
+          <div class="ticks" id="ticks" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="trail" role="group" aria-labelledby="trail-label">
+        <span class="prp-label" id="trail-label">Earlier</span>
+        <div class="seg" id="trail">
+          <button type="button" data-v="all" aria-pressed="true" title="Keep earlier breakthroughs on the map, faded">Shown</button><button type="button" data-v="recent" aria-pressed="false" title="Only breakthroughs from the last few steps of the timeline">Hidden</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="work" data-view="map">
+      <figure class="prp-figure view mapfig" id="view-map" role="tabpanel" aria-labelledby="tab-map">
+        <div class="map-wrap" id="map-wrap">
+          <div class="map-canvas" id="map-canvas">
+            <svg id="map" role="img" aria-label="World map of scientific breakthroughs up to the selected year"></svg>
+            <div class="map-tools">
+              <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+              <button type="button" id="zoom-reset" aria-label="Reset view">⟲</button>
+            </div>
+            <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+          </div>
+          <div class="legend" id="legend">
+            <div class="legend-head"><h4 id="legend-title">Discipline</h4><button type="button" id="legend-reset" class="legend-reset" hidden>Show all</button></div>
+            <ul id="legend-list" aria-labelledby="legend-title"></ul>
+          </div>
+        </div>
+        <figcaption><b>Figure 1.</b> <span id="caption">Breakthroughs up to the selected year, coloured by main discipline; the most recent are drawn larger, earlier ones faded.</span> Each sits where Wikidata places its discovery, or the discoverer’s institution at the time (the card says which). Drag to pan, scroll or use + and − to zoom. Facts: Wikidata (CC0); outline: Natural Earth.</figcaption>
+      </figure>
+
+      <section class="view" id="view-people" role="tabpanel" aria-labelledby="tab-people" hidden>
+        <div class="prp-panel listpanel">
+          <div class="prp-panel-head"><b id="people-title">Scientists</b><span>Ordered by their first breakthrough · select one to open it</span></div>
+          <div class="scroll"><ul class="people-grid" id="people-list"></ul>
+            <p class="more-row"><button type="button" class="more" id="people-more" hidden>Show more</button></p></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-list" role="tabpanel" aria-labelledby="tab-list" hidden>
+        <div class="prp-panel listpanel">
+          <div class="prp-panel-head"><b id="list-title">Breakthroughs</b><span>Newest first · select a row to open it</span></div>
+          <div class="scroll">
+            <table class="prp-table">
+              <thead><tr><th class="num">Year</th><th>Breakthrough</th><th>Discipline</th><th>Where</th><th>People</th></tr></thead>
+              <tbody id="list-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <aside id="panel" class="panel" aria-live="polite" aria-label="Details"></aside>
+    </main>
+  </div>
+
+  <footer class="sources">
+    <div class="prp-sources">
+      <p><b>Sources.</b> Every fact on this page (people, life dates, nationalities, fields, institutions, places and coordinates) comes from <a href="https://www.wikidata.org/">Wikidata</a>, which is public domain (CC0), fetched through its API and refreshed monthly. Articles: Wikipedia. World outline: Natural Earth (public domain), via world-atlas.</p>
+      <p><b>Selection.</b> The choice of breakthroughs, their dates, titles and one-line notes are PRP’s own, informed by the standard histories of science. No copyrighted reference work, list or text is reproduced.</p>
+      <p><b>Method.</b> Each breakthrough is placed by the first rule that finds a location: a place set by hand where Wikidata would mislead; Wikidata’s location of discovery; the site itself; the discoverer’s employer, affiliation or university in the year of the breakthrough; their main institution; their work location; where they studied; their birthplace; and finally an approximate place set by hand. The rule used is shown on every card. Dates before about 500 BC are approximate.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

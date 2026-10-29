@@ -51,16 +51,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 3909,
+      "rows": 4313,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-10-29",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 1683121
+      "bytes": 1862520
     },
     {
       "id": "intelligence-briefing-sources",
@@ -125,10 +125,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-10-29",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 1683121
+      "bytes": 1862520
     },
     {
       "id": "headline-outlets",
@@ -1959,7 +1959,7 @@
           "description": "True when the feed gave no date (the time is when PRP first saw it)"
         }
       ],
-      "rows": 395,
+      "rows": 405,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1967,7 +1967,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 234540
+      "bytes": 240112
     },
     {
       "id": "econ-briefing-sources",
@@ -2093,7 +2093,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 234540
+      "bytes": 240112
     },
     {
       "id": "congress-members",
@@ -2620,7 +2620,7 @@
           "description": "Other outlets that carried the same item"
         }
       ],
-      "rows": 981,
+      "rows": 976,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -2628,7 +2628,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 562363
+      "bytes": 569704
     },
     {
       "id": "science-briefing-sources",
@@ -2749,7 +2749,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 562363
+      "bytes": 569704
     },
     {
       "id": "science-progress-events",
@@ -3065,7 +3065,7 @@
           "description": "Other outlets that carried the same item"
         }
       ],
-      "rows": 560,
+      "rows": 586,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -3073,7 +3073,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 338719
+      "bytes": 351200
     },
     {
       "id": "digital-briefing-sources",
@@ -3214,7 +3214,7 @@
       "updated": "2026-10-29",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 338719
+      "bytes": 351200
     },
     {
       "id": "prp-submodules",

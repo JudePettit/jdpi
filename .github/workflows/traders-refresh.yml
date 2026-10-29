@@ -54,3 +54,8 @@ jobs:
         with:
           paths: traders/data/investors.json traders/scripts/figi-cache.json
           message: 'Auto Trader: weekly 13F holdings refresh'
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    secrets: inherit

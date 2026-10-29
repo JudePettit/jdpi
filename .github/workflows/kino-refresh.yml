@@ -29,3 +29,8 @@ jobs:
         with:
           paths: kino/data/index.json kino/data/media.json kino/data/iso.json kino/scripts/cache.json
           message: 'Kino: monthly Wikidata and Commons refresh'
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    secrets: inherit

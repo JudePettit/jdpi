@@ -1,0 +1,42 @@
+name: Test and deploy
+# Every push to main and every pull request: the whole suite (unit, data and page tests, in Microsoft Edge against
+# a local copy of the site served like Cloudflare Pages). On main, a passing suite then deploys (pages-deploy.yml).
+# Pushes the data refreshes make with the Actions token never start this workflow; they test their own data and
+# deploy themselves.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Serve the site locally, like Pages
+        run: |
+          node tests/tools/serve.mjs 8787 . > serve.log 2>&1 &
+          for i in $(seq 1 50); do curl -sf -o /dev/null http://localhost:8787/registry.json && break; sleep 0.2; done
+          curl -sf -o /dev/null http://localhost:8787/registry.json || { echo "::error::serve.mjs did not start"; cat serve.log; exit 1; }
+      - name: Run the suite
+        env:
+          JDPI_URL: http://localhost:8787
+          PRP_URL: http://localhost:8787
+          PRP_CPU_LIMIT_MS: '80'
+        run: npm test
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/pages-deploy.yml
+    secrets: inherit

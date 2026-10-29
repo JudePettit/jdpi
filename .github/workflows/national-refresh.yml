@@ -31,3 +31,8 @@ jobs:
         with:
           paths: national/data
           message: 'National Analysis: monthly data refresh'
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    secrets: inherit

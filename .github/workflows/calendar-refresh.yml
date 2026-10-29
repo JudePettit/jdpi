@@ -67,3 +67,8 @@ jobs:
         run: |
           echo "::error::The Integration Hub rebuild or its tests failed (see those steps); the calendars were committed without it."
           exit 1
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    secrets: inherit

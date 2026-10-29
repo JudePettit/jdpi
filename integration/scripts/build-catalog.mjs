@@ -482,7 +482,7 @@ const DISC = new Map(PROG.disciplines.map(d => [d.id, d.name]));
 const progLicence = 'Facts from Wikidata (CC0); titles and notes © JDP-Iq.';
 const progSources = [PROG.source, 'Natural Earth (public domain) for the map'];
 spec({
-  id: 'science-progress-events', title: 'Timeline of Progress: breakthroughs', module: 'ns', submodule: 'progress',
+  id: 'science-progress-events', title: 'Invention Timeline: breakthroughs', module: 'ns', submodule: 'progress',
   description: `Key scientific and technical breakthroughs from ${-PROG.firstYear} BC to ${PROG.lastYear}, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.`,
   derive: () => PROG.events.map(e => ({ id: e.id, year: e.y, circa: !!e.ca, disciplines: (e.d || []).map(d => DISC.get(d) || d), title: e.t, note: e.n || null, qid: e.q || null, wikipedia: wiki(e.w), place: e.place?.n || null, place_qid: e.place?.q || null,
     lat: e.place?.lat ?? null, lon: e.place?.lon ?? null, position_basis: e.positionBasis || null, people: (e.people || []).map(q => PROG.people[q]?.name || q), people_qids: e.people || [], institutions: (e.inst || []).map(q => PROG.institutions[q]?.name || q) })),
@@ -491,15 +491,15 @@ spec({
     ['place', 'Where it happened'], ['place_qid', 'Wikidata id of the place'], ['lat', 'Latitude'], ['lon', 'Longitude'], ['position_basis', `How the place was chosen: ${Object.keys(PROG.basis).join(', ')}`], ['people', 'People involved'], ['people_qids', 'Their Wikidata ids (science-progress-people)'], ['institutions', 'Institutions involved']]
 });
 spec({
-  id: 'science-progress-people', title: 'Timeline of Progress: people', module: 'ns', submodule: 'progress',
-  description: 'The scientists, inventors and thinkers behind the Timeline of Progress, with life dates, countries, occupations and fields (Wikidata).',
+  id: 'science-progress-people', title: 'Invention Timeline: people', module: 'ns', submodule: 'progress',
+  description: 'The scientists, inventors and thinkers behind the Invention Timeline, with life dates, countries, occupations and fields (Wikidata).',
   derive: () => Object.entries(PROG.people).map(([qid, p]) => ({ qid, name: p.name, description: p.desc || null, born: p.born ?? null, died: p.died ?? null, countries: p.country || [], occupations: p.occupation || [], fields: p.field || [], institutions: (p.inst || []).map(q => PROG.institutions[q]?.name || q), wikipedia: wiki(p.wiki) })).sort((a, b) => (a.born ?? 0) - (b.born ?? 0)),
   from: ['science/progress/data/events.json'], refresh: 'monthly', updatedFrom: 'science/progress/data/events.json', page: 'science/progress/index.html', licence: 'Wikidata CC0.', sources: [PROG.source],
   fields: [['qid', 'Wikidata id'], ['name', 'Name'], ['description', 'Wikidata description'], ['born', 'Year of birth (negative = BC)'], ['died', 'Year of death'], ['countries', 'Countries of citizenship'], ['occupations', 'Occupations'], ['fields', 'Fields of work'], ['institutions', 'Institutions'], ['wikipedia', 'Wikipedia article']]
 });
 spec({
-  id: 'science-progress-institutions', title: 'Timeline of Progress: institutions', module: 'ns', submodule: 'progress',
-  description: 'Universities, laboratories, companies and academies linked to the Timeline of Progress, with coordinates (Wikidata).',
+  id: 'science-progress-institutions', title: 'Invention Timeline: institutions', module: 'ns', submodule: 'progress',
+  description: 'Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).',
   derive: () => Object.entries(PROG.institutions).map(([qid, p]) => ({ qid, name: p.name, description: p.desc || null, lat: p.lat ?? null, lon: p.lon ?? null, wikipedia: wiki(p.wiki) })),
   from: ['science/progress/data/events.json'], refresh: 'monthly', updatedFrom: 'science/progress/data/events.json', page: 'science/progress/index.html', licence: 'Wikidata CC0.', sources: [PROG.source],
   fields: [['qid', 'Wikidata id'], ['name', 'Institution'], ['description', 'Wikidata description'], ['lat', 'Latitude'], ['lon', 'Longitude'], ['wikipedia', 'Wikipedia article']]

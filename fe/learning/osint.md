@@ -610,7 +610,7 @@ Trades reported by members of the US House of Representatives under the STOCK Ac
 1. Read them as **late, partial records**: they give value ranges rather than exact amounts, and 13F filings omit short positions and most non-US holdings.
 2. Treat patterns, such as trades in a sector shortly before a committee acts on it, as leads: check the committee's records and the filing itself, and describe exactly what the record shows. Nothing here is investment advice.
 
-### Workflow: Scientific Briefing and Timeline of Progress (science and technology intelligence)
+### Workflow: Scientific Briefing and Invention Timeline (science and technology intelligence)
 New papers and science news by discipline, and a map-and-slider timeline of breakthroughs with the people and institutions behind them, linked to the Encyclopaedia.
 1. Follow the disciplines that matter to your question, and separate peer-reviewed results from preprints and press releases.
 2. Map who does the work: institutions, countries and collaborations show where capability is concentrated and how it moves.

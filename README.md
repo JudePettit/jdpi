@@ -11,7 +11,7 @@ Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo). 
 | **Realtime Intelligence**: what is happening now | RT | Intelligence Briefing · Global Headline Tracker · Geopolitical Volatility · National Analysis · Realtime Battlefield · Political Atlas · Realtime Calendar · OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · OSINT Training |
 | **Retrospective Intelligence**: what happened and why | RS | Encyclopaedia · Political Retrospective · Historical Calendar · Retrospective Battlefield · War Focus · Kardashev Tracker · Learning · Politics |
 | **Money Management**: your money end to end | MM | TD Markets · Tally Stick · Algo Trader · Auto Trader · Learning · Finance & Economics |
-| **Natural Science**: science now and through history | NS | Scientific Briefing · Timeline of Progress |
+| **Natural Science**: science now and through history | NS | Scientific Briefing · Invention Timeline |
 
 (In `registry.json` the four modules are "suites" and their submodules "modules". The old ids `q`, `hp` and `fe` still
 work as aliases.)
@@ -55,7 +55,7 @@ page**, listed under `views` in the registry, never extra sidebar entries.
 ## Data refreshes
 
 GitHub Actions (`.github/workflows/`) rebuild data and commit it: Briefing (twice daily), Scientific Briefing (every six
-hours), Volatility, National Analysis, Battlefield and War Focus, Auto Trader (weekly), Timeline of Progress and the
+hours), Volatility, National Analysis, Battlefield and War Focus, Auto Trader (weekly), Invention Timeline and the
 Encyclopaedia (monthly).
 
 ## Tests

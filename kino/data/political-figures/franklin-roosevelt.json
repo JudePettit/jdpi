@@ -46,7 +46,7 @@
       "title": "Polio, 1921–1928",
       "narration": "In August 1921, on holiday at Campobello Island in Canada, Roosevelt was struck by a paralysing illness, diagnosed as polio, and he never walked again without braces or help. He spent years trying to recover, much of it at Warm Springs in Georgia, and few photographs show him in his wheelchair; this one was taken in 1941. In 1928 he was elected Governor of New York, and in 1938 he founded the charity that became the March of Dimes, which later paid for the trials of Jonas Salk's polio vaccine.",
       "visual": { "kind": "portrait", "file": "File:Roosevelt in a wheelchair.jpg", "heading": "At Hyde Park", "sub": "February 1941", "position": "50% 30%" },
-      "link": { "label": "Timeline of Progress · Salk's polio vaccine, 1955", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1955&e=polio-vaccine" },
+      "link": { "label": "Invention Timeline · Salk's polio vaccine, 1955", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1955&e=polio-vaccine" },
       "cites": ["kennedy-1999", "wd"]
     },
     {
@@ -170,7 +170,7 @@
           { "at": "1945-02-04", "label": "Yalta" }
         ]
       },
-      "link": { "label": "Timeline of Progress · the first nuclear chain reaction, 1942", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1942&e=chicago-pile" },
+      "link": { "label": "Invention Timeline · the first nuclear chain reaction, 1942", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1942&e=chicago-pile" },
       "cites": ["kennedy-1999"]
     },
     {

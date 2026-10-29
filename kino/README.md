@@ -134,7 +134,7 @@ page's data.
 | Political Retrospective (`rs/retrospective`) | `https://hp-retrospective.pages.dev/#y=<year>&c=<GW code>` | year 1926 onwards |
 | National Analysis (`rt/pestle`) | `q/national.html#country=<ISO3>` | country in `national/data/index.json` |
 | Political Atlas (`rt/atlas`) | `https://political-atlas.pages.dev/#<ISO3>` | one of its 78 countries |
-| Timeline of Progress (`ns/progress`) | `science/progress/index.html#y=<year>&e=<event id>` | event in `science/progress/data/events.json` |
+| Invention Timeline (`ns/progress`) | `science/progress/index.html#y=<year>&e=<event id>` | event in `science/progress/data/events.json` |
 | Learning (`mm/learning`, `rs/learning-politics`) | `fe/learning.html?course=<course>&lesson=<lesson id>` | lesson heading in `fe/learning/<course>.md` |
 | Another Kino film (`kino/kino-<category>`) | `kino/index.html?cat=<category>#doc=<id>&s=<scene>` | documentary and scene exist |
 
@@ -149,7 +149,7 @@ category plays in that category's submodule (through the shell), and this one pa
 The shell keeps **one frame per submodule** (and view). Following a film through twelve War Focus months moves the one
 War Focus frame twelve times: when only the hash differs the page is not reloaded but its address changes in place,
 so every page Kino links to by hash re-renders on `hashchange` (War Focus, Retrospective Battlefield, the
-Encyclopaedia, Kardashev, Timeline of Progress, National Analysis, Volatility, and the two external sites all do).
+Encyclopaedia, Kardashev, Invention Timeline, National Analysis, Volatility, and the two external sites all do).
 A different query (the calendars' `month`, Learning's `course` and `lesson`) loads the new address in the same frame.
 The frames move without adding to the browser's history, so Back and Forward step through the places the film opened.
 

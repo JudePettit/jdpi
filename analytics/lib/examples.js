@@ -7,7 +7,7 @@ export const EXAMPLES = [
     hash: 'chart=map&x=country' },
   { d: 'realtime-wars', fields: ['name', 'deaths'], label: 'Deadliest wars this year', note: 'Realtime Battlefield · bar chart',
     hash: 'sort=-deaths&limit=15&chart=bar&x=name&y=deaths' },
-  { d: 'science-progress-events', fields: ['year', 'disciplines'], label: 'Breakthroughs since 1500 by field', note: 'Timeline of Progress · histogram',
+  { d: 'science-progress-events', fields: ['year', 'disciplines'], label: 'Breakthroughs since 1500 by field', note: 'Invention Timeline · histogram',
     hash: 'unnest=disciplines&filter=year:ge:1500&chart=hist&x=year&color=disciplines' },
   { d: 'kardashev-world', fields: ['year', 'kardashev'], label: 'Humanity on the Kardashev scale', note: 'Kardashev Tracker · line chart',
     hash: 'filter=year:ge:1800&chart=line&x=year&y=kardashev&fn=mean' },

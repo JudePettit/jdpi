@@ -584,7 +584,7 @@
         },
         {
           "id": "progress",
-          "name": "Timeline of Progress",
+          "name": "Invention Timeline",
           "kind": "retrospective",
           "icon": "⟡",
           "status": "live",

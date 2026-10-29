@@ -1,4 +1,4 @@
-// Timeline of Progress: pure helpers for the data build (build-progress.mjs) and its tests.
+// Invention Timeline: pure helpers for the data build (build-progress.mjs) and its tests.
 // No I/O here, so tests can import everything without touching the network.
 
 /** The eight disciplines, in the fixed order of the categorical colour tokens (--prp-cat-1 … --prp-cat-8). */

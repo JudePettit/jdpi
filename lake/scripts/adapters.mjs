@@ -142,7 +142,7 @@ export function learning({ jdpiDir }) {
   return out;
 }
 
-/** Timeline of Progress (Natural Science): breakthroughs by their Wikidata item, the scientists behind them and the
+/** Invention Timeline (Natural Science): breakthroughs by their Wikidata item, the scientists behind them and the
  *  institutions involved, each linked to the breakthrough's place on the timeline. */
 export function progress({ jdpiDir }) {
   const d = json(join(jdpiDir, 'science/progress/data/events.json'));

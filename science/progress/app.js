@@ -1,4 +1,4 @@
-/* Timeline of Progress (PRP · Natural Science): humanity's key scientific breakthroughs, 3000 BC to today, on a world map.
+/* Invention Timeline (PRP · Natural Science): humanity's key scientific breakthroughs, 3000 BC to today, on a world map.
    Data: data/events.json, built by science/scripts/build-progress.mjs from PRP's curated list and Wikidata (CC0).
    Views (tabs): Map, Scientists and List; all three follow the year slider and the discipline filter.
    URL: #y=<year>&e=<event id>[&v=scientists|list][&d=<shown discipline ids>]. Dots and swatches are var(--prp-cat-n)
@@ -428,7 +428,7 @@ function setupSearch() {
 const ERAS = [[-3000, -501, 'The Bronze and Iron Ages'], [-500, 500, 'Classical antiquity'], [501, 1450, 'The medieval world'], [1451, 1700, 'The Scientific Revolution'],
   [1701, 1800, 'The Enlightenment'], [1801, 1900, 'The nineteenth century'], [1901, 1945, 'The early twentieth century'], [1946, 2000, 'The late twentieth century'], [2001, 9999, 'The twenty-first century']];
 window.jdpiDocumentary = {
-  get title() { return `Timeline of Progress · ${yearText(state.year)}`; },
+  get title() { return `Invention Timeline · ${yearText(state.year)}`; },
   async *story() {
     if (state.playing) stopPlay();
     if (state.view !== 'map') setView('map');

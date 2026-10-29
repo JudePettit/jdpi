@@ -41,7 +41,7 @@
             "points": [[-3.16, 56.11, "Kirkcaldy, 1723"], [-4.29, 55.87, "Glasgow, 1737–1740 and 1751–1764"], [-3.19, 55.95, "Edinburgh, 1748–1751"], [-1.25, 51.75, "Balliol College, Oxford, 1740–1746"]],
             "bbox": [-8, 50.5, 2, 57.5]
           },
-          "link": { "label": "Timeline of Progress · Watt's separate condenser, 1769", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1769&e=watt-engine" },
+          "link": { "label": "Invention Timeline · Watt's separate condenser, 1769", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1769&e=watt-engine" },
           "cites": ["ross-2010", "phillipson-2010"]
         },
         {

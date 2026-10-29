@@ -1,4 +1,4 @@
-/* Timeline of Progress (PRP · Natural Science): front matter, view tabs, a toolbar with search and a non-linear year
+/* Invention Timeline (PRP · Natural Science): front matter, view tabs, a toolbar with search and a non-linear year
    slider, the map figure beside a detail panel, then sources. Every colour is a design/prp.css token; SVG fills are
    var(--…) values, so the map follows light and dark without a redraw. Discipline colours are --prp-cat-1…8 in the
    fixed order of the data's discipline list, always named in the legend, tooltips, cards and tables. */

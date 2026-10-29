@@ -143,8 +143,8 @@
       "id": "science",
       "title": "Science behind closed doors",
       "narration": "Even in the years of upheaval, secret state projects went on. China tested its first atomic bomb in 1964 and put a satellite into orbit in 1970, and a military project against malaria set up in 1967 led Tu Youyou's team to artemisinin in 1972, a discovery that later won her a Nobel Prize. After 1978 science and technology, one of the Four Modernisations first proposed by Zhou Enlai, became a national priority.",
-      "visual": { "kind": "module", "blurb": "See where artemisinin was found, among humanity's breakthroughs on the Timeline of Progress." },
-      "link": { "label": "Timeline of Progress · Tu Youyou discovers artemisinin, 1972", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1972&e=artemisinin" },
+      "visual": { "kind": "module", "blurb": "See where artemisinin was found, among humanity's breakthroughs on the Invention Timeline." },
+      "link": { "label": "Invention Timeline · Tu Youyou discovers artemisinin, 1972", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1972&e=artemisinin" },
       "cites": ["nobel-2015", "saich-2021"]
     },
     {

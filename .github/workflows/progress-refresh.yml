@@ -1,4 +1,4 @@
-name: Refresh Timeline of Progress
+name: Refresh Invention Timeline
 # Monthly: re-read the facts behind the curated breakthroughs from Wikidata (people, life dates, institutions, places)
 # and rebuild science/progress/data/events.json. --refresh refetches cached items older than 25 days; the cache is
 # committed so that each run asks Wikidata only for what is due.
@@ -29,7 +29,7 @@ jobs:
       - uses: ./.github/actions/commit-data
         with:
           paths: science/progress/data science/scripts/progress-cache.json
-          message: 'Timeline of Progress: monthly Wikidata refresh'
+          message: 'Invention Timeline: monthly Wikidata refresh'
   deploy:
     needs: refresh
     if: ${{ !cancelled() }}

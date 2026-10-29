@@ -17,7 +17,7 @@
     { "title": "Thucydides and the origins of realism", "era": [-460, -400], "qid": "Q41683", "from": "Learning · Politics" },
     { "title": "Thomas Hobbes", "era": [1588, 1679], "qid": "Q37621", "from": "Learning · Politics" },
     { "title": "John Maynard Keynes", "era": [1883, 1946], "qid": "Q9317", "from": "Learning · Economics" },
-    { "title": "Isaac Newton", "era": [1642, 1727], "qid": "Q935", "from": "Timeline of Progress" },
-    { "title": "Albert Einstein", "era": [1879, 1955], "qid": "Q937", "from": "Timeline of Progress" }
+    { "title": "Isaac Newton", "era": [1642, 1727], "qid": "Q935", "from": "Invention Timeline" },
+    { "title": "Albert Einstein", "era": [1879, 1955], "qid": "Q937", "from": "Invention Timeline" }
   ]
 }

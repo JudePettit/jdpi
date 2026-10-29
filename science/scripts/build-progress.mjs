@@ -1,4 +1,4 @@
-// Timeline of Progress (PRP · Natural Science): enrich the curated canon (progress-seed.mjs) with facts from
+// Invention Timeline (PRP · Natural Science): enrich the curated canon (progress-seed.mjs) with facts from
 // Wikidata and write science/progress/data/events.json.
 //   node science/scripts/build-progress.mjs [--refresh] [--offline] [--allow-drop]
 //

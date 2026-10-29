@@ -40,7 +40,7 @@ In the registry the seven are "suites" and their pages "modules"; in the interfa
 | Auto Trader (was Trader Tracker) | MM | `fe/traders.html` |
 | Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
 | Scientific Briefing | NS (new) | `science/briefing/` |
-| Timeline of Progress | NS (new) | `science/progress/` |
+| Invention Timeline | NS (new) | `science/progress/` |
 | Digital Briefing, Data Analytics, Integration Hub | DS (new) | `digital/briefing/`, `analytics/`, `integration/` |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
 
@@ -130,7 +130,7 @@ Legacy `.jdpi-*` classes still work and look new.
 Colour follows the entity, never its rank; categorical colours in the fixed order; sequential = one hue light→dark;
 diverging = two hues with a grey midpoint; status colours only for status and always with a word or icon. Thin marks,
 recessive gridlines (`--prp-grid`), a legend for ≥2 series, direct labels where few, text in text tokens (never in the
-series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes. Exception: a map may use more than three categorical colours (e.g. Timeline of Progress, one per discipline) only when every mark is also named in a legend with counts that filters, in its tooltip and in a list.
+series colour), a hover tooltip on marks, and a table or list view for anything a map or chart shows. No dual axes. Exception: a map may use more than three categorical colours (e.g. Invention Timeline, one per discipline) only when every mark is also named in a legend with counts that filters, in its tooltip and in a list.
 More than eight categories (e.g. the calendars' seventeen event types): group related types into families, give each
 family one categorical colour in the fixed order and each type in it its own shape (● ■ ◆), and name every mark in
 chips that count and filter, a legend, the tooltip and the list. Never cycle the eight colours.

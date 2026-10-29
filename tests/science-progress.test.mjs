@@ -1,4 +1,4 @@
-// Timeline of Progress (Natural Science): the curated seed, the built data (science/progress/data/events.json), the
+// Invention Timeline (Natural Science): the curated seed, the built data (science/progress/data/events.json), the
 // placement rules and the lake adapter. The page test runs when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787), and
 // never with PRP_PAGES=0 (the refresh workflow's check before it commits).
 import { test } from 'node:test';

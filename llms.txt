@@ -64,9 +64,9 @@ Ground rules for assistants:
 
 - [science-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/science-briefing-stories): Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news).
 - [science-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/science-briefing-sources): Scientific Briefing: sources. The journals, preprint servers, institutions and news desks the Scientific Briefing reads, with their tier, default disciplines and feed status.
-- [science-progress-events](https://jdpi.pages.dev/api/v1/datasets/science-progress-events): Timeline of Progress: breakthroughs. Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.
-- [science-progress-people](https://jdpi.pages.dev/api/v1/datasets/science-progress-people): Timeline of Progress: people. The scientists, inventors and thinkers behind the Timeline of Progress, with life dates, countries, occupations and fields (Wikidata).
-- [science-progress-institutions](https://jdpi.pages.dev/api/v1/datasets/science-progress-institutions): Timeline of Progress: institutions. Universities, laboratories, companies and academies linked to the Timeline of Progress, with coordinates (Wikidata).
+- [science-progress-events](https://jdpi.pages.dev/api/v1/datasets/science-progress-events): Invention Timeline: breakthroughs. Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.
+- [science-progress-people](https://jdpi.pages.dev/api/v1/datasets/science-progress-people): Invention Timeline: people. The scientists, inventors and thinkers behind the Invention Timeline, with life dates, countries, occupations and fields (Wikidata).
+- [science-progress-institutions](https://jdpi.pages.dev/api/v1/datasets/science-progress-institutions): Invention Timeline: institutions. Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).
 
 ### Digital Science
 

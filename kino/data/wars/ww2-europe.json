@@ -193,7 +193,7 @@
       "title": "A war of factories and laboratories",
       "narration": "The war was decided in factories and laboratories as well as on battlefields. Richard Overy has argued that the Allies won partly because they outproduced the Axis in aircraft, tanks and ships, and used that output well. British radar, the Colossus code-breaking computers at Bletchley Park and the Anglo-American atomic bomb project were all shaped by the war.",
       "visual": { "kind": "module", "blurb": "See where radar, Colossus and the first nuclear reactor were built, on the map of humanity's breakthroughs." },
-      "link": { "label": "Timeline of Progress · Colossus, 1943", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1943&e=colossus" },
+      "link": { "label": "Invention Timeline · Colossus, 1943", "suite": "ns", "module": "progress", "at": "science/progress/index.html#y=1943&e=colossus" },
       "cites": ["overy-1995"]
     },
     {

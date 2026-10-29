@@ -1,4 +1,4 @@
-// Timeline of Progress: the curated canon of breakthroughs (input to build-progress.mjs).
+// Invention Timeline: the curated canon of breakthroughs (input to build-progress.mjs).
 // The selection is informed by the standard histories of science; every fact shown on the page (people, dates,
 // institutions, places, coordinates, descriptions) comes from Wikidata (CC0). Titles and notes here are PRP's own
 // short wording. Nothing is taken from any copyrighted reference work.

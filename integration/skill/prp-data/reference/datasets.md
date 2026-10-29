@@ -268,7 +268,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 ### science-progress-events
 
-Timeline of Progress: breakthroughs. Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.
+Invention Timeline: breakthroughs. Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.
 
 - Rows: 570 · refresh: monthly · licence: Facts from Wikidata (CC0); titles and notes © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/science-progress-events.json (records at `records`)
@@ -276,7 +276,7 @@ Timeline of Progress: breakthroughs. Key scientific and technical breakthroughs 
 
 ### science-progress-people
 
-Timeline of Progress: people. The scientists, inventors and thinkers behind the Timeline of Progress, with life dates, countries, occupations and fields (Wikidata).
+Invention Timeline: people. The scientists, inventors and thinkers behind the Invention Timeline, with life dates, countries, occupations and fields (Wikidata).
 
 - Rows: 720 · refresh: monthly · licence: Wikidata CC0.
 - File: https://jdpi.pages.dev/integration/data/science-progress-people.json (records at `records`)
@@ -284,7 +284,7 @@ Timeline of Progress: people. The scientists, inventors and thinkers behind the 
 
 ### science-progress-institutions
 
-Timeline of Progress: institutions. Universities, laboratories, companies and academies linked to the Timeline of Progress, with coordinates (Wikidata).
+Invention Timeline: institutions. Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).
 
 - Rows: 1,187 · refresh: monthly · licence: Wikidata CC0.
 - File: https://jdpi.pages.dev/integration/data/science-progress-institutions.json (records at `records`)

@@ -9,7 +9,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = new Intl.NumberFormat('en-GB');
 const fmtDate = d => (d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–');
-const MODULES = { rt: ['RT', 'Realtime Intelligence'], rs: ['RS', 'Retrospective Intelligence'], oi: ['OI', 'Offensive Intelligence'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
+const MODULES = { rt: ['RT', 'Realtime Intelligence'], rs: ['RS', 'Retrospective Intelligence'], oi: ['OI', 'i-Spy'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
 const TABS = ['overview', 'catalogue', 'mcp', 'api', 'feeds', 'skills', 'security'];
 
 /* ------------------------------------------------------------------ state in the hash */

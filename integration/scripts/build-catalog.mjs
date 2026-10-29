@@ -735,7 +735,7 @@ putJson('integration/data/query-index.json', {
   const lines = ['# PRP datasets', '', `Generated ${TODAY} from ${BASE_URL}integration/catalog.json. Read the live catalogue for current row counts.`, ''];
   for (const m of MODULE_ORDER) {
     const list = catalogue.filter(d => d.module === m); if (!list.length) continue;
-    lines.push(`## ${{ rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', oi: 'Offensive Intelligence', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
+    lines.push(`## ${{ rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', oi: 'i-Spy', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
     for (const d of list) {
       lines.push(`### ${d.id}`, '', `${d.title}. ${d.description}`, '', `- Rows: ${d.rows.toLocaleString('en-GB')} · refresh: ${d.refresh} · licence: ${d.licence}`, `- File${d.urls ? 's' : ''}: ${(d.urls || [d.url]).slice(0, 3).map(u => BASE_URL + u).join(', ')}${(d.urls || []).length > 3 ? ` (+${d.urls.length - 3} more)` : ''} (records at \`${d.records || '(root)'}\`)`,
         `- Fields: ${d.fields.map(f => `\`${f.name}\` (${f.type})`).join(', ')}`, '');

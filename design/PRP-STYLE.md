@@ -11,7 +11,7 @@ is what every page in the suite follows. The stylesheet is `design/prp.css`; the
 | Q · Geopolitical Intelligence | **Realtime Intelligence** | `rt` (alias `q`) | RT |
 | H&P · History & Politics | **Retrospective Intelligence** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
-| (new) | **Offensive Intelligence** | `oi` | OI |
+| (new) | **i-Spy** | `oi` | OI |
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |

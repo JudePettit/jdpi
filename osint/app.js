@@ -1,4 +1,4 @@
-// OSINT Dashboard (Offensive Intelligence). One page, eleven in-page tabs. The URL hash holds the view
+// OSINT Dashboard (i-Spy). One page, eleven in-page tabs. The URL hash holds the view
 // (#tab=domains&q=example.org, #tab=cookbook&s=exiftool) so the shell and other pages can link to it; the case notebook
 // is shared by every tab. Each tab's code loads the first time the tab opens (tab-*.js); pure helpers are in lib.js,
 // exif.js and md.js, tested by tests/osint.test.mjs.

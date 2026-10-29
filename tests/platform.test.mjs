@@ -22,7 +22,7 @@ test('registry is well formed', () => {
   assert.equal(registry.platform.name, 'PRP');
   assert.equal(registry.platform.company, 'JDP-Iq');
   assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
-  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'Offensive Intelligence', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'i-Spy', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
   const ids = modules.map(x => x.m.id);
   assert.equal(new Set(ids).size, ids.length, 'submodule ids are unique across modules');
   for (const { m } of modules) {

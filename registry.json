@@ -236,8 +236,8 @@
     {
       "id": "oi",
       "code": "OI",
-      "name": "Offensive Intelligence",
-      "title": "Offensive Intelligence",
+      "name": "i-Spy",
+      "title": "i-Spy",
       "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
       "modules": [
         {

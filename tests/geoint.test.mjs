@@ -443,7 +443,7 @@ test('page wiring follows the PRP contract', () => {
   assert.match(html, /<title>GEOINT &amp; IMINT Dashboard · PRP<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/design\/prp\.css">/);
   assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="geoint" data-shell="\.\.\/" defer><\/script>/);
-  assert.match(html, /class="prp-eyebrow">Offensive Intelligence <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
+  assert.match(html, /class="prp-eyebrow">i-Spy <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
   assert.ok(!/JDP-I\b|H&amp;P|F&amp;E/.test(html), 'no old brand names');
   const tabs = [...html.matchAll(/role="tab" id="tab-([a-z]+)" aria-controls="panel-([a-z]+)"/g)];
   assert.deepEqual(tabs.map(t => t[1]), U.TABS);

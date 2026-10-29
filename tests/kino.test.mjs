@@ -293,6 +293,15 @@ test('page: following along in the shell, the now-playing bar shows the film and
     assert.deepEqual([...modules].sort(), ['battlefield-history', 'encyclopedia', 'kino-wars', 'war-focus']);
     assert.equal(await kino.evaluate(() => document.querySelector('#badge').textContent), '4 / 12');
 
+    // Moving the shell yourself while the film follows along pauses it (it would otherwise drag the shell back); the
+    // bar stays, and its Play resumes the film. Kino's own moves (Next above) never pause it.
+    await page.evaluate(() => { location.hash = '#/rs/battlefield-history'; }); // a submodule already open: no new frame
+    await page.waitForFunction(() => document.querySelector('#np-play').getAttribute('aria-label') === 'Play', null, { timeout: 5000 });
+    await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Play', null, { timeout: 5000 });
+    assert.equal(await bar.isVisible(), true, 'the bar stays while paused');
+    await page.click('#np-play');
+    await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Pause', null, { timeout: 5000 });
+
     // Pause from the bar, then back to the film: Kino's frame shows at that scene and the bar goes.
     await page.click('#np-play');
     await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Play', null, { timeout: 5000 });
@@ -303,7 +312,14 @@ test('page: following along in the shell, the now-playing bar shows the film and
     assert.equal(await bar.isHidden(), true, 'no bar over Kino itself');
     assert.equal(await page.locator('#frames iframe').count(), 4);
 
-    // Leaving Kino shows the bar again; switching Follow along off takes it away.
+    // Leaving Kino shows the bar again; its Stop ends the film and closes the bar; switching Follow along off takes it away.
+    await page.click('#nav a[data-route="rs/war-focus"]');
+    await bar.waitFor({ state: 'visible', timeout: 5000 });
+    await page.click('#np-stop');
+    await bar.waitFor({ state: 'hidden', timeout: 5000 });
+    assert.equal(await kino.evaluate(() => document.querySelector('#play').getAttribute('aria-label')), 'Play', 'Stop leaves the film paused in Kino');
+    await page.click('#nav a[data-route="kino/kino-wars"]');
+    await kino.click('#play');
     await page.click('#nav a[data-route="rs/war-focus"]');
     await bar.waitFor({ state: 'visible', timeout: 5000 });
     await page.click('#nav a[data-route="kino/kino-wars"]');

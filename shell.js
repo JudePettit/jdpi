@@ -7,7 +7,7 @@
    One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.
    While Kino follows along with its frame hidden, the now-playing bar shows its captions and controls. */
 
-const state = { registry: null, frames: new Map(), route: null, theme: 'system', np: null };
+const state = { registry: null, frames: new Map(), route: null, theme: 'system', np: null, kinoMove: null };
 const $ = sel => document.querySelector(sel);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const STATUS = { 'live': 'Live', 'in-build': 'In build', 'planned': 'Planned' };
@@ -73,7 +73,10 @@ function setupTheme() {
   window.addEventListener('message', e => {
     if (e.data?.type === 'jdpi:module-ready' || e.data?.type === 'prp:hello') state.frames.forEach(f => { if (f.contentWindow === e.source) postTheme(f); });
     // Kino's 'Follow along' (and any same-origin page) may move the shell to another submodule; only shell routes are accepted.
-    if (e.data?.type === 'prp:navigate' && e.origin === location.origin && SHELL_ROUTE.test(String(e.data.hash || ''))) location.hash = e.data.hash;
+    if (e.data?.type === 'prp:navigate' && e.origin === location.origin && SHELL_ROUTE.test(String(e.data.hash || ''))) {
+      if (e.source === state.np?.frame?.contentWindow) state.kinoMove = e.data.hash; // the film moving the shell, not the viewer
+      location.hash = e.data.hash;
+    }
     if (e.data?.type === 'prp:nowplaying' && e.origin === location.origin) nowPlayingMessage(e);
   });
   applyTheme(saved);
@@ -303,7 +306,7 @@ function syncNowPlaying() {
   const play = $('#np-play'), label = np.playing ? 'Pause' : 'Play';
   if (play.getAttribute('aria-label') !== label) { play.textContent = np.playing ? '❚❚' : '▶\uFE0E'; play.setAttribute('aria-label', label); play.title = `${label} the film`; }
   $('#np-back').setAttribute('href', np.route);
-  bar.querySelector('.np-ctrl').hidden = np.ended; // a finished film offers only "Back to film"
+  for (const id of ['#np-prev', '#np-play', '#np-next']) $(id).hidden = np.ended; // a finished film offers only Stop and "Back to film"
   bar.hidden = false;
   document.documentElement.style.setProperty('--np-h', `${bar.offsetHeight}px`);
 }
@@ -311,12 +314,22 @@ function kinoControl(action) {
   const np = state.np;
   if (!np) return;
   if (action === 'play' || action === 'pause') { np.playing = action === 'play'; syncNowPlaying(); } // at once; Kino's reply confirms it
+  if (action === 'stop') setNowPlaying(null); // the bar goes at once, even if Kino's frame has gone
   try { np.frame.contentWindow.postMessage({ type: 'prp:kino-control', action }, location.origin); } catch { /* the frame has gone */ }
+}
+// A film that follows along moves the shell to each scene's place. When you move the shell yourself while it plays (the
+// sidebar, a link, Back), you have left it behind, so it pauses; the bar's Play resumes it. Kino's own moves are told
+// apart by the prp:navigate message that precedes each: the address it asked for is the one exempt move.
+function pauseFilmOnManualMove() {
+  const np = state.np;
+  if (location.hash === state.kinoMove) { state.kinoMove = null; return; }
+  if (np?.playing && np.frame !== visibleFrame()) kinoControl('pause');
 }
 function setupNowPlaying() {
   $('#np-play').onclick = () => kinoControl(state.np?.playing ? 'pause' : 'play');
   $('#np-prev').onclick = () => kinoControl('prev');
   $('#np-next').onclick = () => kinoControl('next');
+  $('#np-stop').onclick = () => kinoControl('stop');
   // "Back to film" is a link to the film's route (so it can also open in a new tab); after the shell has switched to
   // Kino's frame, focus goes into it, where the film's own keys work.
   $('#np-back').addEventListener('click', e => {
@@ -445,6 +458,6 @@ function setupMenu() {
   renderNav();
   setupFind();
   setupNowPlaying();
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', () => { route(); pauseFilmOnManualMove(); });
   route();
 })();

@@ -231,7 +231,7 @@ state is always sent), while Follow along is on and a film is open:
 left), ends, or Follow along is switched off, Kino sends `{ "type": "prp:nowplaying", "stopped": true }`; it sends
 nothing while Follow along is off. A paused film stays in the bar with `"playing": false`.
 
-Shell → Kino: the bar's buttons post `{ "type": "prp:kino-control", "action": "pause" | "play" | "next" | "prev" }` to
+Shell → Kino: the bar's buttons post `{ "type": "prp:kino-control", "action": "pause" | "play" | "next" | "prev" | "stop" }` to
 the frame that sent the message. Kino accepts it only from `window.parent` on its own origin, and answers with a new
 `prp:nowplaying`. "Back to film" moves the shell to `route` and puts the keyboard focus in Kino's frame. The shell
 accepts `prp:nowplaying` only from its own origin and its own frames, shows only text from it, and uses `route` only

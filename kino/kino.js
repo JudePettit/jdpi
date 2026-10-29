@@ -204,7 +204,7 @@ function nowPlayingStop() {
 // The bar's buttons, from the shell only.
 function control(e) {
   if (e.source !== window.parent || e.origin !== location.origin || e.data?.type !== 'prp:kino-control' || !S.doc) return;
-  const act = { play: () => S.playing || play(), pause, next: () => go(S.i + 1), prev: () => go(S.i - 1) }[e.data.action];
+  const act = { play: () => S.playing || play(), pause, stop, next: () => go(S.i + 1), prev: () => go(S.i - 1) }[e.data.action];
   if (act) act();
 }
 
@@ -404,6 +404,9 @@ function wire() {
   const check = () => { if (S.playing && !S.follow && hidden()) pause(); };
   window.addEventListener('resize', check);
   new IntersectionObserver(check).observe($('#stage'));
+  // In a background browser tab the scene timers are throttled while the voice carries on, so the film would drift
+  // out of step: it pauses instead, following along or not, and Resume is there when the tab is back.
+  document.addEventListener('visibilitychange', () => { if (document.hidden && S.playing) pause(); });
   window.addEventListener('hashchange', route);
   window.addEventListener('popstate', route);
   window.addEventListener('message', control);

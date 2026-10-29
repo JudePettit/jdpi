@@ -55,11 +55,14 @@
       }));
     },
 
-    // Top 3 stories from each of the country's 5 most-read outlets (front-page order), English titles.
+    // Top 3 stories from each of the country's 5 most-read outlets (front-page order), English titles. Stories the
+    // lowbrow filter hid (lowbrow = true, headlines/refresh-top-stories/lowbrow.js) are left out of every query here;
+    // lowbrow is null while a story waits for its verdict.
     async topStories(countryCode, startDate, endDate) {
       return request(tablePath("country_top_stories", {
-        select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at",
+        select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at,lowbrow",
         country_code: `eq.${countryCode}`,
+        lowbrow: "not.is.true",
         and: `(snapshot_date.gte.${startDate},snapshot_date.lte.${endDate})`,
         order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
         limit: "2000"
@@ -68,7 +71,7 @@
 
     async latestTopStories(countryCode) {
       const latest = await request(tablePath("country_top_stories", {
-        select: "snapshot_date", country_code: `eq.${countryCode}`, order: "snapshot_date.desc", limit: "1"
+        select: "snapshot_date", country_code: `eq.${countryCode}`, lowbrow: "not.is.true", order: "snapshot_date.desc", limit: "1"
       }));
       if (!latest?.length) return [];
       const d = latest[0].snapshot_date;
@@ -82,6 +85,7 @@
       return request(tablePath("country_top_stories", {
         select: "snapshot_date,country_code,outlet,title_original,title_en,url,published_at",
         snapshot_date: `gte.${sinceDate}`,
+        lowbrow: "not.is.true",
         or: `(${terms.flatMap(t => [`title_en.ilike.*${t}*`, `title_original.ilike.*${t}*`]).join(",")})`,
         order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
         limit: String(limit)

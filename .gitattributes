@@ -1,0 +1,2 @@
+# iCalendar files must keep CRLF line endings (RFC 5545): store the bytes build-catalog.mjs writes, on every platform.
+*.ics -text

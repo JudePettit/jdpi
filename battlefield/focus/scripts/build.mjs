@@ -1,5 +1,7 @@
 // War Focus data build: one file per war in battlefield/focus/data/wars/<id>.json plus an index.
-//   node battlefield/focus/scripts/build.mjs [--cache dir] [--only id,id]
+//   node battlefield/focus/scripts/build.mjs [--cache dir] [--only id,id] [--allow-drop]
+// Guard: nothing is written when a war lost its Wikidata item (its Wikipedia title no longer resolves), all or half
+// of its battles, or a tenth of its UCDP events, or when the UCDP data ends earlier than before; --allow-drop writes.
 // Sources (downloaded into the cache directory once):
 //   · UCDP Georeferenced Event Dataset v26.1 (1989–2025) and the 2026 candidate events: geolocated clashes with deaths.
 //   · PRIO Battle Deaths Dataset v3.1 (annual battle deaths, 1946–2008).
@@ -15,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
+import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -137,8 +140,8 @@ for (const path of [join(gedDir, 'GEDEvent_v26_1.csv'), gedCand]) {
 }
 console.log('GED loaded through', maxGed);
 
-// ---- Per war
-const index = [];
+// ---- Per war (the files are kept in memory and written only once the whole build has passed the guard)
+const index = [], pending = [];
 for (const w of wars) {
   const qid = await qidOf(w.wiki);
   const end = w.end || maxGed;
@@ -207,15 +210,32 @@ for (const w of wars) {
     bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, deaths, cas, w: art }) => ({ q, n, desc, lat, lon, s, e, p: p || null, deaths: deaths || null, cas: cas || null, w: art || null })),
     cells: cellsOut, top: topOut, events: ev.length,
   };
-  writeFileSync(join(WAR_DIR, w.id + '.json'), JSON.stringify(data));
+  pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);
   index.push({ id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, totalDeaths: total, deathsSource: source,
     battles: battles.length, mappedBattles: battles.filter(b => b.lat != null).length, events: ev.length, sides: [w.sides.a.label, w.sides.b.label], bbox });
   console.log(`${w.id}: ${qid} ${months.length} months, ${battles.length} battles (${battles.filter(b => b.lat != null).length} mapped), ${ev.length} events, ${total.toLocaleString('en-GB')} deaths`);
 }
 const IDX = join(OUT, 'index.json');
-const prev = existsSync(IDX) && ONLY ? JSON.parse(readFileSync(IDX, 'utf8')).wars.filter(x => !ONLY.includes(x.id)) : [];
-const all = [...prev, ...index].sort((a, b) => (a.start < b.start ? -1 : 1));
-writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThrough: maxGed,
+const old = existsSync(IDX) ? JSON.parse(readFileSync(IDX, 'utf8')) : { wars: [] };
+// The guard (see the top), against the committed index; with --only, just the wars rebuilt. Wikidata edits move a few
+// battles, never half, and UCDP revises events by a few per cent: more than that is a lookup or a download that failed
+// (a title that no longer resolves has no item and so no battles; a missing candidate file loses the year's events).
+const rebuilt = new Map(index.map(x => [x.id, x])), lost = [];
+for (const o of old.wars) {
+  const x = rebuilt.get(o.id);
+  if (!x) continue; // not rebuilt this time (--only)
+  if (o.qid && !x.qid) { lost.push(`${o.id}: no Wikidata item for ${o.wiki}`); continue; }
+  if (o.battles && (!x.battles || (o.battles > 20 && x.battles < o.battles / 2))) lost.push(`${o.id} battles ${o.battles} → ${x.battles}`);
+  if (o.events > 100 && x.events < o.events * 0.9) lost.push(`${o.id} UCDP events ${o.events} → ${x.events}`);
+}
+if (!ONLY && old.gedThrough > maxGed) lost.push(`UCDP events through ${old.gedThrough} → ${maxGed}`);
+refuseIfLost(lost);
+for (const [file, text] of pending) writeFileSync(file, text);
+const others = ONLY ? old.wars.filter(x => !ONLY.includes(x.id)) : [];
+const all = [...others, ...index].sort((a, b) => (a.start < b.start ? -1 : 1));
+// A partial build (--only) may not reach the latest UCDP events, so it keeps the index's later date.
+const gedThrough = ONLY && old.gedThrough > maxGed ? old.gedThrough : maxGed;
+writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThrough,
   sources: { ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0',
     prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)', cow: 'Correlates of War Project war data (Sarkees & Wayman 2010)',
     wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)' },

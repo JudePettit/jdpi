@@ -70,4 +70,6 @@ node tests/tools/shoot.mjs <url> <out.png> [--dark] [--width 390]   # screenshot
 ## Licences
 
 Code © JDP-Iq. Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0 and are credited where shown. Each data source
-is credited on the page that uses it.
+is credited on the page that uses it. `volatility/scripts/fips-iso3.json` is a table of country codes and names extracted
+from the countrycode project (Arel-Bundock, Enevoldsen and Yetman, GPL-3.0), recorded with its source commit and checksum;
+the codes themselves are facts, and the file is not part of PRP's code.

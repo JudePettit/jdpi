@@ -1,13 +1,15 @@
-// Realtime and Retrospective Battlefield: the history build's names and places, then the pages (against JDPI_URL,
-// default live).
+// Realtime and Retrospective Battlefield: the history build's names and places, the Realtime data (the committed
+// battlefield/data/realtime.json, which battlefield-refresh tests before committing), then the pages (against
+// JDPI_URL, default live; PRP_PAGES=0 leaves them out).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { chromium } from 'playwright-core';
+import { pageTest, launch } from './tools/pages.mjs';
 import { actors, stateName, interstateName, parties } from '../battlefield/scripts/ucdp.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const HISTORY = JSON.parse(readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8'));
+const REALTIME = JSON.parse(readFileSync(new URL('../battlefield/data/realtime.json', import.meta.url), 'utf8'));
 const war = id => HISTORY.wars.find(w => w.id === id);
 const locIn = (w, y) => w.locYears?.[y] || w.loc;
 const activeIn = y => HISTORY.wars.filter(w => w.years.some(([yy]) => yy === y));
@@ -65,8 +67,35 @@ test('Retrospective data: war names list each side once, without "Government of"
   for (const w of HISTORY.wars) for (const s of [...w.sideA, ...w.sideB]) assert.equal((s.match(/\(/g) || []).length, (s.match(/\)/g) || []).length, `${w.name}: ${s}`);
 });
 
+test('Realtime data: the year so far month by month, with enough wars and conflict cells to map', () => {
+  const r = REALTIME, sum = f => r.wars.reduce((s, w) => s + (f(w) || 0), 0);
+  assert.equal(r.generated, new Date(Date.parse(r.generated)).toISOString());
+  assert.match(r.version, /^\d{2}\.01\.\d{2}\.\d{2}$/);
+  // A year-to-date file: every month from January to the one its release covers to ('26.01.26.09': September 2026).
+  const [, , yy, mm] = r.version.split('.');
+  assert.equal(r.latest, `20${yy}-${mm}`, `release ${r.version}`);
+  assert.deepEqual(r.months, Array.from({ length: +mm }, (_, i) => `${r.year}-${String(i + 1).padStart(2, '0')}`));
+  // The page plots and lists these; the live view asks for as much (10 wars, 100 markers). Each month of 2026 has had
+  // 1,400–2,000 events, 9,000–40,000 deaths and 50–56 wars with events, so a month under 300 events, 1,000 deaths or
+  // 10 wars is a short file, not a quiet month.
+  assert.ok(r.wars.filter(w => w.status === 'active').length >= 10, `${r.wars.filter(w => w.status === 'active').length} active wars`);
+  assert.ok(sum(w => w.points?.length) >= 100, 'conflict cells to plot');
+  r.months.forEach((m, i) => {
+    const events = sum(w => w.monthly[i]?.events), deaths = sum(w => w.monthly[i]?.deaths), wars = r.wars.filter(w => w.monthly[i]?.events).length;
+    assert.ok(events >= 300 && deaths >= 1000 && wars >= 10, `${m}: ${events} events, ${deaths} deaths, ${wars} wars`);
+  });
+  assert.ok(sum(w => w.events) <= r.totals.events && sum(w => w.deaths) <= r.totals.deaths, 'wars within the totals');
+  // Every war has a summary and an entry for every month, in order (the archive view looks each month up).
+  assert.equal(new Set(r.wars.map(w => w.id)).size, r.wars.length, 'war ids are unique');
+  for (const w of r.wars) {
+    assert.ok(w.id && w.name && w.summary && /^\d{4}-\d{2}-\d{2}$/.test(w.lastActive), w.id);
+    assert.deepEqual(w.monthly.map(m => m.month), r.months, w.id);
+    assert.ok(w.points.every(p => Math.abs(p[0]) <= 90 && Math.abs(p[1]) <= 180 && p[2] >= 0 && p[2] < r.months.length && p[4] > 0), `${w.id}: points`);
+  }
+});
+
 async function open(path) {
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -74,7 +103,7 @@ async function open(path) {
   return { browser, page, errors };
 }
 
-test('Realtime: live view lists extant wars and plots events; a war opens its briefing', async () => {
+test('Realtime: live view lists extant wars and plots events; a war opens its briefing', pageTest, async () => {
   const { browser, page, errors } = await open('q/battlefield?view=live');
   await page.waitForSelector('.warrow', { timeout: 20000 });
   const wars = await page.locator('.warrow').count();
@@ -90,20 +119,25 @@ test('Realtime: live view lists extant wars and plots events; a war opens its br
   assert.deepEqual(errors, []);
 });
 
-test('Realtime: archive view shows a month with an insight per war', async () => {
-  const { browser, page, errors } = await open('q/battlefield?view=archive&month=2026-03');
+test('Realtime: archive view shows a month with an insight per war', pageTest, async () => {
+  // The month in which the most wars recorded events, from the data the page itself loads (a new year's file replaces
+  // the last year's months).
+  const data = await (await fetch(`${BASE}/battlefield/data/realtime.json`)).json();
+  const busiest = data.months.map((m, i) => [m, data.wars.filter(w => w.monthly[i].events).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const name = new Date(`${busiest}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+  const { browser, page, errors } = await open(`q/battlefield?view=archive&month=${busiest}`);
   await page.waitForSelector('.arow', { timeout: 20000 });
   const month = await page.locator('#month').inputValue();
   const rows = await page.locator('.arow').count();
   const first = await page.locator('.arow p').first().innerText();
   await browser.close();
-  assert.equal(month, '2026-03');
+  assert.equal(month, busiest);
   assert.ok(rows >= 10, `rows: ${rows}`);
-  assert.match(first, /^March: .* events, about .* deaths/);
+  assert.match(first, new RegExp(`^${name}: .* events, about .* deaths`));
   assert.deepEqual(errors, []);
 });
 
-test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', async () => {
+test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=1939');
   await page.waitForSelector('#panel .war', { timeout: 20000 });
   const y1939 = await page.locator('#panel').innerText();
@@ -129,7 +163,7 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', a
   assert.deepEqual(errors, []);
 });
 
-test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad; 1942 shows the war in North Africa and the Pacific', async () => {
+test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad; 1942 shows the war in North Africa and the Pacific', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=2003');
   await page.waitForSelector('#panel .war', { timeout: 20000 });
   const fills = () => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('path.shape')].map(p => [p.__data__.properties.gw, p.getAttribute('fill')])));

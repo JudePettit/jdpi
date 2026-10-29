@@ -2,13 +2,14 @@
 // the parser reads arXiv's announcement feeds (new submissions only, a few a day, dated by announcement), journal and
 // government feeds, the page's view logic reads deep links and orders "Major sources first", and the stored data
 // (digital/briefing/data/stories.json) is well formed, free of duplicates and inside its seven-day window.
-// The page test runs where the submodule is deployed (JDPI_URL, e.g. http://localhost:8787, or the live site).
+// The page test runs where the submodule is deployed (JDPI_URL, e.g. http://localhost:8787, or the live site);
+// PRP_PAGES=0 leaves it out, so a data workflow can run the rest on the file it is about to commit.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { chromium } from 'playwright-core';
+import { pageTest, launch } from './tools/pages.mjs';
 import { FIELDS, FIELD_IDS, classify, detectType, fieldId, isDroppedTitle } from '../digital/scripts/classify.mjs';
-import { SOURCES, TIERS, KINDS, DEFAULT_CAP, outletId } from '../digital/scripts/briefing-sources.mjs';
+import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from '../digital/scripts/briefing-sources.mjs';
 import {
   parseDigitalFeed, normalise, mergeStore, pickDaily, isSkipped, formatAuthors, authorCount, keepsByline, tidyTex, parseFeedDate,
   urlKey, titleKey, SUMMARY_MAX, AUTHORS_MAX,
@@ -38,6 +39,8 @@ test('catalogue: 60–90 unique feeds with known kinds, tiers and default fields
       assert.ok(s.newOnly && s.perDay >= 1 && s.perDay <= 8, `${s.id}: new submissions only, a few a day`);
       assert.ok(s.cap >= s.perDay * 6, `${s.id}: the cap keeps a week of daily picks`);
     }
+    // An empty feed counts as an error, except arXiv's announcements, which are empty at weekends and on holidays.
+    assert.equal(!!s.mayBeEmpty, s.kind === 'preprint', `${s.id}: only arXiv's announcement feeds may be empty`);
   }
   assert.deepEqual(FIELD_IDS, ['ai', 'software', 'security', 'hardware', 'networks', 'quantum', 'privacy', 'policy']);
   assert.deepEqual(FIELDS.map(f => f.label), ['AI & machine learning', 'Software & computing', 'Cybersecurity', 'Hardware & semiconductors', 'Internet & networks', 'Quantum computing', 'Data & privacy', 'Digital policy & society']);
@@ -330,7 +333,7 @@ test('data: stories.json has the expected shape', () => {
     assert.ok(Number.isInteger(s.count) && Number.isInteger(s.stored) && s.stored >= 0, `${s.id} counts`);
     if (SRC.get(s.id).perDay) assert.ok(s.perDay === SRC.get(s.id).perDay && s.count <= s.perDay, `${s.id} keeps at most ${s.perDay} a day`);
   }
-  assert.ok(DATA.counts.working >= Math.ceil(DATA.counts.feeds * 0.75), `${DATA.counts.working} of ${DATA.counts.feeds} feeds working`);
+  assert.ok(DATA.counts.working >= Math.ceil(DATA.counts.feeds * MIN_WORKING_SHARE), `${DATA.counts.working} of ${DATA.counts.feeds} feeds working`);
   assert.ok(DATA.items.length >= 100 && DATA.items.length <= DATA.maxItems, `${DATA.items.length} items`);
 
   for (const i of DATA.items) {
@@ -412,10 +415,10 @@ test('data: every item is dated inside the seven-day window', () => {
 });
 
 // ---- Page ----------------------------------------------------------------------------------------------------------------
-test('page: field deep link, papers/news toggle, theme redraw, hash changes and the Sources tab at phone width', async t => {
+test('page: field deep link, papers/news toggle, theme redraw, hash changes and the Sources tab at phone width', pageTest, async t => {
   const live = await fetch(`${BASE}/digital/briefing/data/stories.json`).then(r => (r.ok ? r.json() : null)).catch(() => null);
   if (!live?.items) { t.skip(`Digital Briefing is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 900 } });
     const errors = [];

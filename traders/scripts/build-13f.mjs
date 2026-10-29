@@ -7,7 +7,11 @@
 // Tickers: OpenFIGI's mapping API turns each CUSIP into its US composite listing. Answers are cached in
 // traders/scripts/figi-cache.json, so a refresh only looks up CUSIPs it has not seen (and re-checks old answers
 // now and then, as tickers change). Without OPENFIGI_API_KEY the API takes 10 jobs a request, 25 requests a minute.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+// Guard: when EDGAR gives nothing the build exits 1, and nothing is written when an investor still listed below is
+// missing (its filings could not be read), has no positions where it had some, or a tenth fewer in the same quarter;
+// --allow-drop writes anyway.
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const UA = { 'User-Agent': 'PRP Auto Trader judep92@gmail.com' };
 const OUT = new URL('../data/investors.json', import.meta.url);
@@ -28,8 +32,10 @@ const INVESTORS = [
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function get(url, json = true) {
   for (let i = 0; i < 4; i++) {
-    const res = await fetch(url, { headers: UA });
-    if (res.ok) return json ? res.json() : res.text();
+    try {
+      const res = await fetch(url, { headers: UA });
+      if (res.ok) return json ? await res.json() : await res.text();
+    } catch {} // a refused connection or a body cut off mid-read: tried again like an HTTP error
     await sleep(1500 * (i + 1));
   }
   throw new Error(`EDGAR ${url}`);
@@ -188,7 +194,21 @@ async function addTickers(data) {
 
 const tickersOnly = process.argv.includes('--tickers-only');
 const data = tickersOnly ? JSON.parse(readFileSync(OUT, 'utf8')) : await build13f();
-if (!data.investors.length) { console.warn('No 13F filings could be read; keeping the existing investors.json'); process.exit(0); }
+// Nothing read at all is EDGAR failing (or blocking us), not a quiet week: the run must go red, not green with old data.
+if (!data.investors.length) { console.error('No 13F filings could be read; investors.json is unchanged'); process.exit(1); }
+// The guard, against the committed file, for investors still listed (one taken out on purpose is not compared). A new
+// quarter may change the positions freely, but not to none; the same quarter is the same filing, so a tenth fewer
+// positions is a holdings file read short.
+if (!tickersOnly) {
+  const now = new Map(data.investors.map(i => [i.cik, i]));
+  const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { investors: [] };
+  refuseIfLost(prev.investors.filter(p => INVESTORS.some(i => i.cik === p.cik)).flatMap(p => {
+    const n = now.get(p.cik);
+    if (!n) return [`${p.person}: no 13F read`];
+    if (p.positions.length && !n.positions.length) return [`${p.person} positions ${p.positions.length} → 0`];
+    return n.period === p.period && n.positions.length < p.positions.length * 0.9 ? [`${p.person} positions ${p.positions.length} → ${n.positions.length}`] : [];
+  }));
+}
 await addTickers(data);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data));

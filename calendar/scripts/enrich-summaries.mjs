@@ -19,11 +19,15 @@ function shorten(text) {
   return end > 120 ? cut.slice(0, end + 1) : cut.replace(/\s+\S*$/, '') + '…';
 }
 
+// A network error (a reset socket, a cut-off answer) is retried like an HTTP error, so one bad connection costs one
+// summary until the next run, not the day's whole refresh.
 async function summary(title) {
   for (let i = 0; i < 4; i++) {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`, { headers: UA });
-    if (res.status === 404) return '';
-    if (res.ok) return shorten((await res.json()).extract);
+    try {
+      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=true`, { headers: UA });
+      if (res.status === 404) return '';
+      if (res.ok) return shorten((await res.json()).extract);
+    } catch { /* try again */ }
     await new Promise(r => setTimeout(r, 1500 * (i + 1)));
   }
   return null; // leave uncached; try again next run

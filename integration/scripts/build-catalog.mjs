@@ -8,10 +8,11 @@
 //   integration/feeds/*.ics               the Realtime Calendar and the Historical Calendar (one file per decade) as iCalendar
 //   integration/skill/prp-data.zip        the downloadable Claude skill (SKILL.md plus a generated dataset reference)
 //
-//   node integration/scripts/build-catalog.mjs [--quiet] [--calibrate]
+//   node integration/scripts/build-catalog.mjs [--quiet] [--calibrate] [--allow-drop]
 //
 // Deterministic: a file is rewritten only when its content changes (generated stamps and DTSTAMPs aside), and generated files
-// that are no longer produced are removed, so the daily run in calendar-refresh.yml does not churn git.
+// that are no longer produced are removed, so the daily run in calendar-refresh.yml does not churn git. Nothing is written if
+// a dataset would lose more than half of its rows since the last catalogue (see "guard" below); --allow-drop writes anyway.
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ import { deflateRawSync } from 'node:zlib';
 import { toICS, foldText, tokenize, jsonCost, BASE_URL } from '../mcp/prp-mcp.mjs';
 import { openapi } from './openapi.mjs';
 import { llmsTxt } from './llms.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -105,7 +107,8 @@ const pick = (obj, path) => (!path ? obj : path.split('.').reduce((o, k) => (o =
 //   source: { urls: [...], records: 'items' }          (served as is), or
 //   derive: () => rows, partition?, parts?             (written to integration/data/), from: [source files]
 // Optional: page (a PRP page that shows the data), sort ('-field'), rangeFields (date fields whose min/max per part let a
-// query skip parts), partitionBy (one part per value), partBudget (cost per part), sampleFrom.
+// query skip parts), partitionBy (one part per value), partBudget (cost per part), sampleFrom, resets ('yearly' or
+// 'quarterly': the dataset covers only the latest period, so it shrinks when a new one starts; see the guard).
 const SPECS = [];
 // A field a source has added since its catalogue entry was written: listed honestly, and flagged in the build log.
 const UNDESCRIBED = 'Not yet described in the catalogue (a field the source has added)';
@@ -184,7 +187,7 @@ spec({
   derive: () => BF.wars.map(w => ({ id: w.id, name: w.name, zone: w.zone, status: w.status, countries: w.countries || [], deaths: w.deaths, events: w.events,
     deaths_last_3_months: (w.monthly || []).slice(-3).reduce((a, m) => a + (m.deaths || 0), 0), last_active: w.lastActive || null, summary: w.summary || null, background: w.background || null,
     conflicts: (w.conflicts || []).map(c => c.name), wikipedia: wiki(w.wiki) })).sort((a, b) => b.deaths - a.deaths),
-  from: ['battlefield/data/realtime.json'], refresh: 'weekly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html',
+  from: ['battlefield/data/realtime.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html',
   licence: bfLicence, sources: BF_SRC,
   fields: [['id', 'War id'], ['name', 'War'], ['zone', 'Region'], ['status', 'active, or quiet when no event in the last three months'], ['countries', 'Countries where fighting was recorded'], ['deaths', 'Best-estimate deaths this year'],
     ['events', 'Recorded events this year'], ['deaths_last_3_months', 'Deaths in the last three recorded months'], ['last_active', 'Date of the last recorded event'], ['summary', 'One-line summary'], ['background', 'Plain-English background (PRP)'],
@@ -194,7 +197,7 @@ spec({
   id: 'realtime-war-months', title: 'Realtime Battlefield: war by month', module: 'rt', submodule: 'battlefield',
   description: `Each war's deaths, events and civilian deaths month by month in ${BF.year}, with PRP's monthly note (change on the previous month, deadliest areas).`,
   derive: () => BF.wars.flatMap(w => (w.monthly || []).map(m => ({ war_id: w.id, war: w.name, zone: w.zone, month: m.month, deaths: m.deaths ?? 0, events: m.events ?? 0, civilians: m.civilians ?? 0, deadliest_place: m.places?.[0]?.place || null, note: m.text || null }))),
-  from: ['battlefield/data/realtime.json'], refresh: 'weekly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html?view=archive',
+  from: ['battlefield/data/realtime.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html?view=archive',
   licence: bfLicence, sources: BF_SRC,
   fields: [['war_id', 'War id (realtime-wars)'], ['war', 'War'], ['zone', 'Region'], ['month', 'Month (YYYY-MM)'], ['deaths', 'Best-estimate deaths'], ['events', 'Recorded events'], ['civilians', 'Civilian deaths'], ['deadliest_place', 'Place with the most deaths that month'], ['note', 'Monthly note (PRP, from the events)']]
 });
@@ -202,7 +205,7 @@ spec({
   id: 'realtime-conflict-cells', title: 'Realtime Battlefield: events on a 0.1° grid', module: 'rt', submodule: 'battlefield',
   description: 'Conflict events this year summed by war, month and 0.1° grid cell (about 11 km): the points on the Realtime Battlefield map.',
   derive: () => BF.wars.flatMap(w => (w.points || []).map(([lat, lon, mi, deaths, events]) => ({ war_id: w.id, war: w.name, month: BF.months[mi] || null, lat, lon, deaths, events }))).sort((a, b) => (a.month < b.month ? 1 : a.month > b.month ? -1 : 0)),
-  from: ['battlefield/data/realtime.json'], refresh: 'weekly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html', partitionBy: 'month', indexFields: ['war_id'],
+  from: ['battlefield/data/realtime.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html', partitionBy: 'month', indexFields: ['war_id'],
   licence: bfLicence, sources: BF_SRC,
   fields: [['war_id', 'War id (realtime-wars)'], ['war', 'War'], ['month', 'Month (YYYY-MM)'], ['lat', 'Latitude of the cell (0.1°)'], ['lon', 'Longitude of the cell (0.1°)'], ['deaths', 'Best-estimate deaths in the cell that month'], ['events', 'Recorded events in the cell that month']]
 });
@@ -432,7 +435,7 @@ spec({
   id: 'congress-members', title: 'Auto Trader: members of Congress who trade', module: 'mm', submodule: 'traders',
   description: `Members of the US House of Representatives with Periodic Transaction Reports in ${CONG.years.join(' and ')}, with party, district and how many trades PRP read from their filings.`,
   derive: () => CONG.members.map(m => ({ id: m.id, name: m.name, party: m.party, district: m.district, state: (m.district || '').slice(0, 2) || null, bioguide: m.bioguide || null, filings: m.filings ?? 0, trades: m.trades ?? 0, unreadable_filings: m.unreadable ?? 0 })).sort((a, b) => b.trades - a.trades),
-  from: ['traders/data/congress.json'], refresh: 'weekly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', licence: congLicence, sources: [CONG.source],
+  from: ['traders/data/congress.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', licence: congLicence, sources: [CONG.source],
   fields: [['id', 'Member id (join to member in congress-trades)'], ['name', 'Member'], ['party', 'Party'], ['district', 'State and district, e.g. CA31'], ['state', 'State (USPS code)'], ['bioguide', 'Congressional Bioguide id'], ['filings', 'Filings read'], ['trades', 'Trades read from them'], ['unreadable_filings', 'Scanned paper filings linked but not read']]
 });
 spec({
@@ -440,7 +443,7 @@ spec({
   description: `Every stock, bond and option trade reported by members of the House in ${CONG.years.join(' and ')} (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.`,
   derive: () => CONG.trades.map(t => { const m = MEMBERS.get(t.member) || {}; const [lo, hi] = AMT(t.amount); return { filed: t.filed, date: t.date || null, member: t.member, name: m.name || null, party: m.party || null, district: m.district || null, owner: OWNER[t.owner] || t.owner || null,
     type: t.type, ticker: t.ticker || null, asset: t.asset || null, asset_type: t.assetType || null, amount: t.amount || null, amount_min: lo, amount_max: hi, account: t.account || null, filing: t.url || null }; }).sort((a, b) => (a.filed < b.filed ? 1 : a.filed > b.filed ? -1 : 0)),
-  from: ['traders/data/congress.json'], refresh: 'weekly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', rangeFields: ['filed', 'date'], indexFields: ['ticker', 'member', 'name'], licence: congLicence, sources: [CONG.source],
+  from: ['traders/data/congress.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', rangeFields: ['filed', 'date'], indexFields: ['ticker', 'member', 'name'], licence: congLicence, sources: [CONG.source],
   fields: [['filed', 'Date the report was filed'], ['date', 'Date of the trade'], ['member', 'Member id (congress-members)'], ['name', 'Member'], ['party', 'Party'], ['district', 'State and district'], ['owner', 'Whose account: self, spouse, joint or dependent child'],
     ['type', 'buy, sell, partial sale or exchange'], ['ticker', 'Ticker, where the filing gives one'], ['asset', 'Asset as described in the filing'], ['asset_type', 'House asset-type code (ST stock, GS government security, OP option, CS corporate security…)'],
     ['amount', 'Amount range as filed'], ['amount_min', 'Lower bound of the range, US$'], ['amount_max', 'Upper bound of the range, US$'], ['account', 'Account or broker, if given'], ['filing', 'Link to the filing (PDF)']]
@@ -468,7 +471,7 @@ spec({
   id: 'investor-sales', title: 'Auto Trader: famous investors\' exits', module: 'mm', submodule: 'traders',
   description: 'Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.',
   derive: () => INV.investors.flatMap(i => (i.sold || []).map(p => ({ person: i.person, fund: i.fund, period: i.period, previous_period: i.previousPeriod || null, name: p.name, ticker: p.ticker || null, class: p.cls || null, cusip: p.cusip || null, put_call: p.putCall || null, previous_value: p.value ?? null, previous_shares: p.shares ?? null }))),
-  from: ['traders/data/investors.json'], refresh: 'weekly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', licence: invLicence, sources: invSources,
+  from: ['traders/data/investors.json'], refresh: 'weekly', resets: 'quarterly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', licence: invLicence, sources: invSources,
   fields: [['person', 'Investor'], ['fund', 'Fund'], ['period', 'Quarter end of the latest filing'], ['previous_period', 'Quarter end when it was last held'], ['name', 'Issuer'], ['ticker', 'Ticker'], ['class', 'Class of security'], ['cusip', 'CUSIP'], ['put_call', 'Put or Call for options'], ['previous_value', 'Value at the previous quarter end, US$'], ['previous_shares', 'Shares at the previous quarter end']]
 });
 
@@ -762,6 +765,26 @@ function zip(entries) {
   const cd = Buffer.concat(central);
   const end = Buffer.alloc(22); end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(entries.length, 8); end.writeUInt16LE(entries.length, 10); end.writeUInt32LE(cd.length, 12); end.writeUInt32LE(offset, 16);
   return Buffer.concat([...local, cd, end]);
+}
+
+/* ------------------------------------------------------------------ guard */
+// Nothing is written yet. A dataset that would lose more than half of its rows since the last catalogue (it had more than
+// 20), or empty or vanish whatever its size, stops the build here, by the calendar build's rule (calendar/scripts/guard.mjs;
+// --allow-drop writes anyway, for a deliberate change). The catalogue republishes whatever the modules committed and removes
+// the shards it no longer makes, so this is the last check on a source that was wiped or cut short, a dataset that vanished,
+// or a derive that no longer fits its source. Two kinds shrink by design, so only emptying or vanishing counts for them:
+// datasets that `resets` with each new year or quarter (UCDP's year to date starts again in January, the House filings drop
+// their older year, a new 13F quarter brings a new list of exits), and the briefings, which refresh several times between
+// catalogue builds and whose rows the MCP server and the API read from the briefings' own files.
+{
+  const LIVE = new Set(['6-hourly', 'twice daily']);
+  const rows = list => Object.fromEntries(list.map(d => [d.id, d.rows]));
+  // A dataset taken out of SPECS is a decision, not a loss: only the ones still specified are compared.
+  const was = rows((has('integration/catalog.json') ? J('integration/catalog.json').datasets : []).filter(d => SPECS.some(s => s.id === d.id))), now = rows(catalogue);
+  const shrinks = new Set(SPECS.filter(s => s.resets || LIVE.has(s.refresh)).map(s => s.id));
+  const steady = Object.fromEntries(Object.entries(was).filter(([id]) => !shrinks.has(id)));
+  const emptied = Object.keys(was).filter(id => was[id] > 0 && !now[id]).map(id => `${id} ${was[id]} → 0`);
+  refuseIfLost([...new Set([...lostCounts(steady, now), ...emptied])]);
 }
 
 /* ------------------------------------------------------------------ write */

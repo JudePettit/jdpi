@@ -1,19 +1,21 @@
 // Political Calendar (Realtime and Historical): the pipeline's news classifier and Wikipedia parsers, the elections
-// outlook and the build's guard, the built data, and the page (event types, month jump, year view, country
-// highlighting) running against JDPI_URL.
+// outlook and the build's guard, the built data (read from this checkout), and the page (event types, month jump, year
+// view, country highlighting) running against JDPI_URL.
 //   node --test tests/calendar.test.mjs                                   (page tests against https://jdpi.pages.dev)
 //   JDPI_URL=http://localhost:8787 node --test tests/calendar.test.mjs    (page tests against a local server)
+//   PRP_PAGES=0 node --test tests/calendar.test.mjs                       (no page tests: the daily workflow's check)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { chromium } from 'playwright-core';
+import { spawnSync } from 'node:child_process';
+import { pageTest, launch } from './tools/pages.mjs';
 import { classify, headline, parseDay, eventsFromItems } from '../calendar/scripts/current-events.mjs';
 import { countryOf, countryInText, normaliseCountry } from '../calendar/scripts/countries.mjs';
 import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar } from '../calendar/scripts/wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from '../calendar/scripts/outlook.mjs';
-import { lostTypes } from '../calendar/scripts/guard.mjs';
+import { lostTypes, lostCounts, lostEvents } from '../calendar/scripts/guard.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const TYPES = ['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'];
@@ -240,6 +242,38 @@ test('build guard: a type of event that would lose more than half of its records
   assert.deepEqual(lostTypes([...of('summit', 649), ...of('vote', 30), ...of('treaty', 10)], [...of('summit', 12), ...of('vote', 15), ...of('treaty', 0)]), ['summit 649 → 12']);
   assert.deepEqual(lostTypes(of('court', 77), of('court', 39)), []);
   assert.deepEqual(lostTypes(of('court', 77), []), ['court 77 → 0']);
+  // The same rule on plain counts, which the other modules' builds use with their own share to keep.
+  assert.deepEqual(lostCounts({ rows: 100, few: 5 }, { rows: 89, few: 0 }, { keep: 0.9 }), ['rows 100 → 89']);
+  assert.deepEqual(lostCounts({ rows: 100 }, { rows: 90 }, { keep: 0.9 }), []);
+  assert.deepEqual(lostCounts({ rows: 30 }, {}), ['rows 30 → 0']);
+});
+
+test('build guard: a source that feeds only the news or the outlook stops the build too', () => {
+  const of = (n, type, date, more = {}) => Array.from({ length: n }, () => ({ type, date, ...more }));
+  const days = { from: '2026-01-01', today: '2026-10-28', to: '2028-04-28' };
+  const archive = of(300, 'court', '1999-05-01'), news = of(30, 'court', '2026-05-01', { ref: 'https://example.com/report' }), outlook = of(15, 'summit', '2027-03-01');
+  const before = [...archive, ...news, ...outlook];
+  assert.deepEqual(lostEvents(before, before, days), []);
+  // The Current events portal fails: 30 of 330 court rulings go, which the whole history does not notice.
+  assert.deepEqual(lostTypes(before, [...archive, ...outlook]), []);
+  assert.deepEqual(lostEvents(before, [...archive, ...outlook], days), ['court 30 → 0 since 2026-01-01', 'news items 30 → 0']);
+  // Wikipedia's lists fail: the outlook loses its summits (15 are too few for the whole-history count to look at).
+  assert.deepEqual(lostEvents(before, [...archive, ...news], days), ['summit 15 → 0 in the outlook to 2028-04-28']);
+  // On the calendar as built: rebuilt unchanged, nothing is lost; rebuilt without its news items, the build stops.
+  const built = { from: [shiftMonths(GENERATED, -6), '2026-01-01'].sort()[0], today: GENERATED, to: shiftMonths(GENERATED, 18) };
+  assert.deepEqual(lostEvents(ALL, ALL, built), []);
+  const lost = lostEvents(ALL, ALL.filter(e => !e.ref), built);
+  assert.ok(lost.some(x => /^news items \d+ → 0$/.test(x)) && lost.some(x => / since \d{4}-\d{2}-\d{2}$/.test(x)), lost.join(', '));
+});
+
+test('build guard: refuseIfLost exits 1 before anything is written, unless --allow-drop', () => {
+  const guard = JSON.stringify(new URL('../calendar/scripts/guard.mjs', import.meta.url).href);
+  const run = (...args) => spawnSync(process.execPath, ['--input-type=module', '-e',
+    `import { refuseIfLost } from ${guard}; refuseIfLost(process.argv.includes('nothing') ? [] : ['summit 649 → 12']); console.log('written');`, '--', ...args], { encoding: 'utf8' });
+  const stopped = run(), allowed = run('--allow-drop'), clean = run('nothing');
+  assert.equal(stopped.status, 1); assert.equal(stopped.stdout, ''); assert.match(stopped.stderr, /Not written: summit 649 → 12\. A source probably failed; --allow-drop writes anyway\./);
+  assert.equal(allowed.status, 0); assert.equal(allowed.stdout.trim(), 'written'); assert.match(allowed.stderr, /Writing despite: summit 649 → 12 \(--allow-drop\)/);
+  assert.equal(clean.status, 0); assert.equal(clean.stdout.trim(), 'written'); assert.doesNotMatch(clean.stderr, /Not written|Writing despite/);
 });
 
 test('calendar data: seventeen types, clean records, the new types in the last six months, the outlook and the archive', () => {
@@ -275,9 +309,9 @@ test('calendar data: seventeen types, clean records, the new types in the last s
   assert.equal(ALL.find(e => e.date === '2003-03-23' && e.type === 'conflict' && /– Iraq/.test(e.title))?.country, 'Iraq');
 });
 
-// ---- the page --------------------------------------------------------------------------------------------------
+// ---- the page (pageTest: left out with PRP_PAGES=0) --------------------------------------------------------------
 async function withPage(fn, { width = 1300, dark = false } = {}) {
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width, height: 900 }, colorScheme: dark ? 'dark' : 'light' });
     const errors = [];
@@ -287,7 +321,7 @@ async function withPage(fn, { width = 1300, dark = false } = {}) {
   } finally { await browser.close(); }
 }
 
-test('Historical Calendar: Feb 2022 shows the invasion of Ukraine; highlighting and the year view work', async () => {
+test('Historical Calendar: Feb 2022 shows the invasion of Ukraine; highlighting and the year view work', pageTest, async () => {
   await withPage(async page => {
     await page.goto(`${BASE}/q/calendar.html?period=2020s&month=2022-02`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForSelector('.eventrow', { timeout: 20000 });
@@ -326,7 +360,7 @@ const MONTH = (() => {
   return [...by].filter(([, x]) => x.resignation && x.court).sort((a, b) => (b[1].resignation + b[1].court) - (a[1].resignation + a[1].court))[0]?.[0];
 })();
 
-test('Realtime Calendar: type chips count, filter (one or several), link and legend the new event types', async () => {
+test('Realtime Calendar: type chips count, filter (one or several), link and legend the new event types', pageTest, async () => {
   assert.ok(MONTH, 'a month with resignations and court rulings in the last six months');
   await withPage(async page => {
     await page.goto(`${BASE}/q/calendar.html?period=contemporary&month=${MONTH}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -362,7 +396,7 @@ test('Realtime Calendar: type chips count, filter (one or several), link and leg
   });
 });
 
-test('Realtime Calendar: ?types= opens with those types; marks take the categorical colours in light and dark', async () => {
+test('Realtime Calendar: ?types= opens with those types; marks take the categorical colours in light and dark', pageTest, async () => {
   const colour = async page => page.locator('#filters .filter[data-filter=court] .eventdot').evaluate(el => getComputedStyle(el).backgroundColor);
   let light, dark;
   await withPage(async page => {
@@ -376,7 +410,7 @@ test('Realtime Calendar: ?types= opens with those types; marks take the categori
   assert.ok(light && dark && light !== dark, `court mark: light ${light}, dark ${dark}`);
 });
 
-test('Realtime Calendar fits a phone: no horizontal scroll at 360px', async () => {
+test('Realtime Calendar fits a phone: no horizontal scroll at 360px', pageTest, async () => {
   await withPage(async page => {
     await page.goto(`${BASE}/q/calendar.html?period=contemporary&month=${MONTH}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForSelector('#filters .filter', { timeout: 20000 });
@@ -384,7 +418,7 @@ test('Realtime Calendar fits a phone: no horizontal scroll at 360px', async () =
   }, { width: 360 });
 });
 
-test('Realtime Calendar: upcoming elections come from the daily build, with no hand-kept list or snapshot archive', async () => {
+test('Realtime Calendar: upcoming elections come from the daily build, with no hand-kept list or snapshot archive', pageTest, async () => {
   // The first expected election from the Political Atlas, known only to the month.
   const atlas = ALL.find(e => e.date > GENERATED && e.type === 'election' && /political-atlas\.pages\.dev/.test(e.source || '') && /date to be confirmed/.test(e.title));
   assert.ok(atlas, 'an expected Political Atlas election in the outlook');

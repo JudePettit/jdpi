@@ -205,22 +205,29 @@ export const ARTICLES = [
   { article: 'APEC Vietnam 2027' },
 ];
 
+// Wikitext by title, 50 titles per request. A batch with no answer after four tries (a network error, an HTTP error, an
+// API error with no pages) throws, as Current events does: build-events.mjs then skips the lists and its guard stops the
+// write if that costs the calendar its summits or its outlook, instead of the batch's articles vanishing without a word.
 async function wikitexts(titles) {
   const out = new Map();
   for (let i = 0; i < titles.length; i += 50) {
     const batch = titles.slice(i, i + 50);
     const url = 'https://en.wikipedia.org/w/api.php?' + new URLSearchParams({ action: 'query', prop: 'revisions', rvprop: 'content', rvslots: 'main', titles: batch.join('|'), redirects: '1', format: 'json', formatversion: '2' });
-    for (let attempt = 0; attempt < 4; attempt++) {
+    let j = null;
+    for (let attempt = 0; attempt < 4 && !j; attempt++) {
+      if (attempt) await new Promise(r => setTimeout(r, 3000 * attempt));
       try {
-        const j = await (await fetch(url, { headers: UA })).json();
-        const redirect = new Map((j.query?.redirects || []).map(r => [r.to, r.from]));
-        const normal = new Map((j.query?.normalized || []).map(r => [r.to, r.from]));
-        for (const p of j.query?.pages || []) {
-          const from = redirect.get(p.title) || p.title;
-          out.set(normal.get(from) || from, p.revisions?.[0]?.slots?.main?.content || '');
-        }
-        break;
-      } catch { await new Promise(r => setTimeout(r, 3000 * (attempt + 1))); }
+        const res = await fetch(url, { headers: UA });
+        const body = res.ok ? await res.json() : null;
+        if (Array.isArray(body?.query?.pages)) j = body;
+      } catch {}
+    }
+    if (!j) throw new Error(`could not fetch ${batch.length} articles from the Wikipedia API (${batch[0]}…)`);
+    const redirect = new Map((j.query.redirects || []).map(r => [r.to, r.from]));
+    const normal = new Map((j.query.normalized || []).map(r => [r.to, r.from]));
+    for (const p of j.query.pages) {
+      const from = redirect.get(p.title) || p.title;
+      out.set(normal.get(from) || from, p.revisions?.[0]?.slots?.main?.content || '');
     }
   }
   return out;

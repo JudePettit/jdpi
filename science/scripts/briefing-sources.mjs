@@ -5,6 +5,8 @@
 //   outlet  the publication shown on each item (several feeds can share one, e.g. the Phys.org sections)
 //   qid  the outlet's Wikidata item (CC0), for the Encyclopaedia
 //   cap  optional per-feed limit on stored items (default 150)
+//   accept  optional: the Accept header to send instead of the feed types (eLife answers 406 to every specific type,
+//           even the text/xml it serves, and 200 to */*)
 // Every candidate was fetched before it went in (October 2026). Tested and left out: JACS and ACS Central Science
 // (HTTP 403 to feed readers), Nature Astronomy (its feed sends readers to a sign-in page; the Nature Portfolio astronomy
 // subject feed stands in), New Scientist (HTTP 406), EurekAlert! (no RSS any more), Sky & Telescope (403), Chemical
@@ -15,6 +17,10 @@
 export const TIERS = { 1: 'Flagship journal', 2: 'Major journal', 3: 'Science journalism' };
 export const KINDS = { journal: 'Journal', news: 'Science desk' };
 export const DEFAULT_CAP = 150;
+// A refresh is written only if at least this share of the feeds answers with items (or "not modified"); otherwise the
+// build exits 1 and leaves the store as it was. The data test holds the stored counts to the same share. 75% is 34 of
+// the 45 feeds: normal runs have had 41–44, and losing all ten nature.com feeds at once still leaves 35.
+export const MIN_WORKING_SHARE = 0.75;
 
 const S = (id, outlet, section, url, feed, kind, tier, disciplines, qid, extra = {}) =>
   ({ id, outlet, name: section ? `${outlet} · ${section}` : outlet, url, feed, kind, tier, disciplines, qid, ...extra });
@@ -38,7 +44,7 @@ export const SOURCES = [
   S('angew', 'Angewandte Chemie', '', 'https://onlinelibrary.wiley.com/journal/15213773', 'https://onlinelibrary.wiley.com/feed/15213773/most-recent', 'journal', 2, ['chemistry'], 'Q538683', { cap: 120 }),
   S('chem', 'Chem', '', 'https://www.cell.com/chem/home', 'https://www.cell.com/chem/inpress.rss', 'journal', 2, ['chemistry'], 'Q112205030'),
   S('curbio', 'Current Biology', '', 'https://www.cell.com/current-biology/home', 'https://www.cell.com/current-biology/inpress.rss', 'journal', 2, ['biology'], 'Q1144851'),
-  S('elife', 'eLife', '', 'https://elifesciences.org', 'https://elifesciences.org/rss/recent.xml', 'journal', 2, ['biology'], 'Q2000008'),
+  S('elife', 'eLife', '', 'https://elifesciences.org', 'https://elifesciences.org/rss/recent.xml', 'journal', 2, ['biology'], 'Q2000008', { accept: '*/*' }),
   S('plosbio', 'PLOS Biology', '', 'https://journals.plos.org/plosbiology/', 'https://journals.plos.org/plosbiology/feed/atom', 'journal', 2, ['biology'], 'Q1771695'),
   S('natecolevol', 'Nature Ecology & Evolution', '', 'https://www.nature.com/natecolevol/', 'https://www.nature.com/natecolevol.rss', 'journal', 2, ['biology'], 'Q39049712'),
   S('ngeo', 'Nature Geoscience', '', 'https://www.nature.com/ngeo/', 'https://www.nature.com/ngeo.rss', 'journal', 2, ['earth'], 'Q1337483'),

@@ -1,6 +1,8 @@
 // Integration Hub (Digital Science): the catalogue contract, the MCP server and JSON API Pages Functions (called with a fake
 // env whose ASSETS reads this checkout), caps and errors, the file allowlist, feeds and calendars, the local stdio server,
 // and the page.   node --test tests/integration-hub.test.mjs
+// PRP_PAGES=0 leaves the page test out (the daily workflow's check after the catalogue build); PRP_CPU_LIMIT_MS raises the
+// time limit of the hostile-requests test on a slower machine (default 40 ms).
 import { test, describe, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
@@ -9,7 +11,7 @@ import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { join, normalize, resolve, dirname, extname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright-core';
+import { pageTest, launch } from './tools/pages.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const J = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -622,6 +624,11 @@ describe('abuse and robustness', () => {
     assert.equal(light.complete, undefined, 'a light search covers everything');
   });
 
+  // The fastest of three runs must stay under 40 ms: about four times the slowest case on a fast desktop core (the batch of
+  // 20 in-lists, some 10 ms), and well below the 50 ms to 1.5 s these requests took before they were bounded. A shared CI
+  // runner is slower and noisier, so PRP_CPU_LIMIT_MS raises the limit there (80 still catches that old cost on a runner
+  // half as fast) rather than the check being dropped.
+  const CPU_LIMIT_MS = Number(process.env.PRP_CPU_LIMIT_MS) || 40;
   test('hostile requests that took 50 ms to 1.5 s of CPU now take a few', async () => {
     resetRateLimits();
     const env = makeEnv();
@@ -637,7 +644,7 @@ describe('abuse and robustness', () => {
       await run(); // files parsed: what remains is the work the request asks for
       const times = [];
       for (let i = 0; i < 3; i++) { const t = performance.now(); const r = await run(); times.push(performance.now() - t); assert.equal(r.status, 200, name); }
-      assert.ok(Math.min(...times) < 40, `${name}: ${Math.min(...times).toFixed(1)} ms`);
+      assert.ok(Math.min(...times) < CPU_LIMIT_MS, `${name}: ${Math.min(...times).toFixed(1)} ms (limit ${CPU_LIMIT_MS} ms)`);
     }
   });
 
@@ -727,9 +734,9 @@ describe('page under hostile data', () => {
     fields: [{ name: XSS, type: XSS, description: XSS + ' (' + XSS + ')' }], rows: 3, licence: XSS.repeat(3), sources: [XSS], updated: '2026-10-28', refresh: XSS,
     page: 'javascript:window.__xss=1', derivedFrom: [XSS], bytes: 5000, ...extra });
   const catalogue = { generated: '2026-10-28', datasets: [entry('evil-set'), entry('x' + XSS, { module: XSS, urls: ['a/' + XSS, 'b.json'], url: undefined }), entry('science-briefing-stories', { fields: [{ name: 'disciplines', type: 'array', description: `Fields (${XSS}, b)` }] })] };
-  test('hostile catalogue text and addresses are shown as text, never run', async t => {
+  test('hostile catalogue text and addresses are shown as text, never run', pageTest, async t => {
     if (!(await fetch(BASE + '/integration/').then(r => r.ok).catch(() => false))) { t.skip(`the Hub is not served at ${BASE}`); return; }
-    const browser = await chromium.launch({ channel: 'msedge' });
+    const browser = await launch();
     try {
       const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
       await context.route('**/integration/catalog.json*', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(catalogue) }));

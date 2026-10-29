@@ -1,6 +1,6 @@
 // Timeline of Progress (PRP · Natural Science): enrich the curated canon (progress-seed.mjs) with facts from
 // Wikidata and write science/progress/data/events.json.
-//   node science/scripts/build-progress.mjs [--refresh] [--offline]
+//   node science/scripts/build-progress.mjs [--refresh] [--offline] [--allow-drop]
 //
 // 1. Resolve every name in the seed (discoveries, people, curated places) to a Wikidata item through English
 //    Wikipedia (normalised titles, redirects and disambiguation flags), 50 titles per request.
@@ -16,7 +16,8 @@
 //    The seed's hand-set place anchors the person-based rules: an institution or birthplace more than ANCHOR_KM from
 //    it is skipped, since Wikidata often lists later or honorary posts without dates. Locations of discovery that are
 //    whole countries are not used; discovery sites far from the hand-set place are logged for review.
-// 5. Write events.json: events, plus people and institution lookups.
+// 5. Write events.json: events, plus people and institution lookups; but not if a seed event found no place, people or
+//    institutions fell below 90% of the last build's, or the file would pass 1.5 MB (--allow-drop writes the first two).
 // Answers are cached in progress-cache.json (compact, per item, with the date fetched). --refresh refetches anything
 // older than 25 days (the monthly workflow uses it); --offline builds from the cache alone.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -24,6 +25,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SEED } from './progress-seed.mjs';
 import { DISCIPLINES, BASIS, ANCHOR_KM, parseRef, nameMatches, choosePlace, eventInstitutions, looksInstitutional, seedProblems, distanceKm } from './progress-lib.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, '../..');
@@ -374,12 +376,23 @@ const out = {
   counts: { events: events.length, people: Object.keys(people).length, institutions: Object.keys(institutions).length, positionBasis: basisCount },
   events, people, institutions,
 };
-mkdirSync(dirname(OUT_FILE), { recursive: true });
 const text = JSON.stringify(out);
-writeFileSync(OUT_FILE, text);
-saveCache();
-
-console.log(`\n${calls} API requests. Wrote ${OUT_FILE} (${(text.length / 1024).toFixed(0)} KB): ${events.length} events, ${Object.keys(people).length} people, ${Object.keys(institutions).length} institutions.`);
+console.log(`\n${calls} API requests. Built ${events.length} events, ${Object.keys(people).length} people, ${Object.keys(institutions).length} institutions (${(text.length / 1024).toFixed(0)} KB).`);
 console.log('Positions:', Object.entries(basisCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(', '));
 for (const [k, list] of Object.entries(report)) if (list.length) console.log(`\n${k} (${list.length}):\n  ${list.join('\n  ')}`);
-if (text.length > 1.5 * 1024 * 1024) { console.error('events.json is over 1.5 MB'); process.exitCode = 1; }
+
+// ---------------------------------------------------------------- guard, then write
+// Nothing is written (the report above says why) unless every seed event found its place, as tests/science-progress.test.mjs
+// requires; people and institutions are at least 90% of the last build's (fewer means Wikidata answers stopped resolving or
+// validating, not a month's edits, which move a handful); and the file stays under 1.5 MB, since the page loads it whole.
+// --allow-drop (calendar/scripts/guard.mjs) writes the first two anyway, for a deliberate change to the seed.
+if (text.length > 1.5 * 1024 * 1024) { console.error(`Not written: events.json would be ${(text.length / 1048576).toFixed(2)} MB, over 1.5 MB.`); process.exit(1); }
+const last = (existsSync(OUT_FILE) && JSON.parse(readFileSync(OUT_FILE, 'utf8')).counts) || {};
+refuseIfLost([
+  ...(events.length < SEED.length ? [`${SEED.length - events.length} of ${SEED.length} seed events not placed (see "dropped")`] : []),
+  ...lostCounts({ people: last.people || 0, institutions: last.institutions || 0 }, out.counts, { keep: 0.9 }),
+]);
+mkdirSync(dirname(OUT_FILE), { recursive: true });
+writeFileSync(OUT_FILE, text);
+saveCache();
+console.log(`\nWrote ${OUT_FILE}.`);

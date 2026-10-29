@@ -2,13 +2,17 @@ name: Refresh War Focus
 # UCDP publishes candidate events monthly; this re-scores the ongoing wars and picks up new Wikidata battles.
 on:
   schedule:
-    - cron: '40 7 3 * *'
+    - cron: '53 2 2 * *'
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: warfocus-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,9 +20,11 @@ jobs:
           node-version: 22
       - run: npm ci --ignore-scripts
       - run: node battlefield/focus/scripts/build.mjs --cache /tmp/warfocus-src
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add battlefield/focus/data
-          git diff --cached --quiet || git commit -m "War Focus: refresh UCDP events and battles" && git pull --rebase && git push
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/warfocus.test.mjs tests/kino.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: battlefield/focus/data
+          message: 'War Focus: refresh UCDP events and battles'

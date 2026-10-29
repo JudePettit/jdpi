@@ -1,12 +1,17 @@
 // War Focus (Retrospective Battlefield submodule): data covers the major wars, and the page plays a war month by month.
+// The data tests read the committed battlefield/focus/data (which warfocus-refresh tests before committing), or the
+// site's when JDPI_URL is set; the page tests run against JDPI_URL (default live) and PRP_PAGES=0 leaves them out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chromium } from 'playwright-core';
+import { readFileSync } from 'node:fs';
+import { pageTest, launch } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
+const fromSite = process.env.JDPI_URL && !pageTest.skip;
+const dataFile = async path => (fromSite ? (await fetch(`${BASE}/${path}`)).json() : JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')));
 
 test('index lists the major wars with Wikidata IDs and deaths', async () => {
-  const d = await (await fetch(`${BASE}/battlefield/focus/data/index.json`)).json();
+  const d = await dataFile('battlefield/focus/data/index.json');
   const ids = d.wars.map(w => w.id);
   for (const id of ['ww2', 'korean-war', 'vietnam-war', 'iran-iraq', 'russia-ukraine']) assert.ok(ids.includes(id), id);
   assert.ok(d.wars.length >= 35, `wars: ${d.wars.length}`);
@@ -15,8 +20,20 @@ test('index lists the major wars with Wikidata IDs and deaths', async () => {
   assert.ok(ww2.mappedBattles > 500, `WWII mapped battles: ${ww2.mappedBattles}`);
 });
 
-test('WWII plays month by month with sides, occupation and battles', async () => {
-  const browser = await chromium.launch({ channel: 'msedge' });
+test('every war in the index has its file, and the two agree', async () => {
+  const d = await dataFile('battlefield/focus/data/index.json');
+  assert.match(d.gedThrough, /^\d{4}-\d{2}-\d{2}$/);
+  for (const x of d.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    assert.deepEqual([w.id, w.qid, w.battles.length, w.events, w.totalDeaths], [x.id, x.qid, x.battles, x.events, x.totalDeaths], x.id);
+    // One entry a month in each monthly series; an ongoing war runs no later than the UCDP data.
+    for (const k of ['deaths', 'estimated', 'cells', 'top']) assert.equal(w[k].length, w.months.length, `${x.id}: ${k}`);
+    if (w.ongoing) assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(w.dataThrough) && w.dataThrough <= d.gedThrough, `${x.id}: data through ${w.dataThrough}`);
+  }
+});
+
+test('WWII plays month by month with sides, occupation and battles', pageTest, async () => {
+  const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -38,8 +55,8 @@ test('WWII plays month by month with sides, occupation and battles', async () =>
   assert.deepEqual(errors, []);
 });
 
-test('Russia–Ukraine shows UCDP clashes and a running death toll; Battlefield links to War Focus', async () => {
-  const browser = await chromium.launch({ channel: 'msedge' });
+test('Russia–Ukraine shows UCDP clashes and a running death toll; Battlefield links to War Focus', pageTest, async () => {
+  const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));

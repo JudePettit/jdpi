@@ -9,6 +9,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: calendar-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -28,14 +31,39 @@ jobs:
           node-version: 22
       - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json --atlas=political-atlas
       - run: node calendar/scripts/enrich-summaries.mjs
+      - name: Test the new calendars
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/calendar.test.mjs
       # Integration Hub: the calendars as iCalendar files, plus the data catalogue, its shards, the Encyclopaedia name index,
-      # the country profiles, openapi.json and llms.txt, rebuilt from today's data. It never blocks the calendar commit.
+      # the country profiles, openapi.json and llms.txt, rebuilt from today's data and tested. A failed rebuild, or one that
+      # fails its tests, never blocks the calendars: its files are thrown away, the calendars are committed, and the run
+      # then ends red.
       - name: Rebuild the Integration Hub catalogue and calendar files
+        id: hub
         continue-on-error: true
-        run: node integration/scripts/build-catalog.mjs --quiet && git add integration/catalog.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
-      - name: Commit if changed
+        run: node integration/scripts/build-catalog.mjs --quiet
+      - name: Test the new catalogue
+        id: hubtest
+        if: steps.hub.outcome == 'success'
+        continue-on-error: true
+        env:
+          PRP_PAGES: '0'
+          PRP_CPU_LIMIT_MS: '80'
+        run: node --test --test-concurrency=1 tests/integration-hub.test.mjs tests/data-analytics.test.mjs
+      - name: Throw away the Integration Hub's changes
+        if: steps.hub.outcome == 'failure' || steps.hubtest.outcome == 'failure'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add calendar/data calendar/scripts/summary-cache.json
-          git diff --cached --quiet || git commit -m "Calendars: daily event refresh" && git pull --rebase && git push
+          git checkout -- integration llms.txt
+          git clean -fdq -- integration
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: >-
+            calendar/data calendar/scripts/summary-cache.json
+            integration/catalog.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
+          message: 'Calendars: daily event refresh'
+      - name: Fail the run if the Integration Hub was not committed
+        if: steps.hub.outcome == 'failure' || steps.hubtest.outcome == 'failure'
+        run: |
+          echo "::error::The Integration Hub rebuild or its tests failed (see those steps); the calendars were committed without it."
+          exit 1

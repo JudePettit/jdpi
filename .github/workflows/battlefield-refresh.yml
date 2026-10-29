@@ -6,18 +6,24 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: battlefield-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: node battlefield/scripts/fetch-latest.mjs
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add battlefield/data/realtime.json
-          git diff --cached --quiet || git commit -m "Battlefield: refresh UCDP candidate events" && git pull --rebase && git push
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/battlefield.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: battlefield/data/realtime.json
+          message: 'Battlefield: refresh UCDP candidate events'

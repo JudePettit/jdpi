@@ -1,0 +1,55 @@
+name: Commit data
+description: >-
+  Stages the given paths and, if anything in them changed, commits and pushes to the branch the workflow runs on.
+  When another workflow pushed first, the commit is rebased onto it and the push retried; a conflict, or a fifth
+  failed attempt, fails the step, so the run goes red instead of losing the refresh quietly.
+inputs:
+  paths:
+    description: Paths to stage, separated by spaces or new lines. Files deleted inside them are staged too.
+    required: true
+  message:
+    description: The commit message.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Commit and push if changed
+      shell: bash
+      env:
+        PATHS: ${{ inputs.paths }}
+        MESSAGE: ${{ inputs.message }}
+        BRANCH: ${{ github.ref_name }}
+      run: |
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        set -f                        # the paths are git pathspecs: the shell must not expand them
+        paths=($PATHS)
+        set +f
+        stage=()
+        for p in "${paths[@]}"; do
+          if [ -e "$p" ] || git ls-files --error-unmatch -- "$p" > /dev/null 2>&1; then stage+=("$p")
+          else echo "::warning::Nothing at $p to commit."; fi
+        done
+        if [ ${#stage[@]} -eq 0 ]; then echo "::error::None of these paths exist: $PATHS"; exit 1; fi
+        git add -A -- "${stage[@]}"
+        if git diff --cached --quiet; then echo "No changes to commit."; exit 0; fi
+        git commit -q -m "$MESSAGE"
+        # Leaves the paths as the branch has them, so a later step in the same job starts from a clean tree.
+        undo() { git reset -q --mixed HEAD~1; git checkout -q -- "${stage[@]}"; git clean -fdq -- "${stage[@]}"; }
+        for attempt in 1 2 3 4 5; do
+          if git pull --rebase -q origin "$BRANCH" && git push origin "HEAD:$BRANCH"; then
+            echo "Committed and pushed: $MESSAGE"; exit 0
+          fi
+          if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then
+            git rebase --abort > /dev/null 2>&1 || true
+            echo "::error::Someone else changed the same files on $BRANCH; this refresh could not be rebased onto theirs and was dropped."
+            undo; exit 1
+          fi
+          if [ "$attempt" -lt 5 ]; then
+            echo "::warning::Push attempt $attempt of 5 failed; trying again."
+            sleep $((attempt * 15))
+          fi
+        done
+        echo "::error::Could not push the commit after 5 attempts (see the warnings above); the refresh was dropped."
+        undo; exit 1

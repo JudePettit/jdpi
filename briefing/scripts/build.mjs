@@ -1,11 +1,11 @@
 // Briefing feed build: fetch every catalogue feed, keep the first PER_POSITION sources per political position that
 // return fresh stories (so each position contributes the same number of publishers), and merge the stories into a
 // rolling seven-day store at briefing/data/latest.json. Topic matching happens in the page, so topics stay private
-// to each browser.
+// to each browser. A run with too few working feeds (see MIN_WORKING_SHARE in sources.mjs) exits 1 without writing.
 //   node briefing/scripts/build.mjs
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { POSITIONS, PER_POSITION, SOURCES } from './sources.mjs';
+import { POSITIONS, PER_POSITION, MIN_WORKING_SHARE, MIN_ACTIVE, SOURCES } from './sources.mjs';
 import { parseFeed, titleKey } from './rss.mjs';
 import { categorize } from './categorize.mjs';
 
@@ -41,6 +41,24 @@ for (const p of POSITIONS) {
   }
   console.log(`${p.key}: ${used}/${PER_POSITION} active`);
 }
+
+// Refuse a degraded run before it touches the store: enough of the catalogue must return fresh stories, and every
+// position needs its active publishers. Otherwise the run fails (exit 1) and the store stays as it was, so the stories
+// already stored stay on the page and its `generated` time ages, which the page and the freshness check report.
+const activeIn = key => sources.filter(s => s.position === key && s.active).length;
+const working = sources.filter(s => s.active || s.reserve).length, need = Math.ceil(SOURCES.length * MIN_WORKING_SHARE);
+const short = POSITIONS.filter(p => activeIn(p.key) < MIN_ACTIVE).map(p => `${p.key} ${activeIn(p.key)}`);
+const refused = [
+  working < need && `only ${working} of ${SOURCES.length} feeds returned fresh stories (need ${need})`,
+  short.length && `fewer than ${MIN_ACTIVE} active publishers in ${short.join(', ')}`,
+].filter(Boolean);
+if (refused.length) {
+  console.error(`The store was left as it was: ${refused.join('; ')}. Not working: ${sources.filter(s => !s.active && !s.reserve).map(s => `${s.id} (${s.status})`).join(', ')}.`);
+  process.exit(1);
+}
+// One or two publishers short in a position is written, with a warning on the workflow run.
+const thin = POSITIONS.filter(p => activeIn(p.key) < PER_POSITION).map(p => `${p.key} ${activeIn(p.key)}`);
+if (thin.length) console.log(`::warning::Fewer than ${PER_POSITION} active publishers in ${thin.join(', ')}`);
 
 // Merge with the previous store: same URL → keep the earliest sighting; drop items older than KEEP_DAYS.
 const seen = new Map(prev.items.map(i => [i.u, i]));

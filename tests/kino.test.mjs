@@ -1,5 +1,6 @@
 // Kino (PRP's documentary module): the script format, links into PRP, sources, the built data, the speech rules and
-// the validator itself. The page tests run when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787).
+// the validator itself. The page tests run when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787), and never with
+// PRP_PAGES=0 (the refresh workflows' check before they commit).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -9,6 +10,7 @@ import { loadContext, validateAll, validateScript, checkLink, validCountry, HIST
 import { CATEGORY_IDS, VISUAL_KINDS, flatScenes, shortCite } from '../kino/lib/format.js';
 import { tokens, sentences, utterances, wordAt, spoken, speechRule, countSentences, speechWarnings } from '../kino/lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from '../kino/lib/links.js';
+import { pageTest, launch } from './tools/pages.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const read = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -198,9 +200,9 @@ test('links: shell routes and Kino deep links', () => {
 });
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
-test('page: catalogue, deep link, map, captions-only playback with highlighted words', { skip: !BASE && 'set JDPI_URL to test the page' }, async () => {
-  const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+const PAGE = BASE ? pageTest : { skip: 'set JDPI_URL to test the page' };
+test('page: catalogue, deep link, map, captions-only playback with highlighted words', PAGE, async () => {
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
     const errors = [];
@@ -226,9 +228,8 @@ test('page: catalogue, deep link, map, captions-only playback with highlighted w
   } finally { await browser.close(); }
 });
 
-test('page: inside the shell, a scene link moves the shell to that place', { skip: !BASE && 'set JDPI_URL to test the page' }, async () => {
-  const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+test('page: inside the shell, a scene link moves the shell to that place', PAGE, async () => {
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
     // Serve the registry with Kino's submodules live, as they will be once published.
@@ -248,9 +249,8 @@ test('page: inside the shell, a scene link moves the shell to that place', { ski
   } finally { await browser.close(); }
 });
 
-test('page: following along in the shell, the now-playing bar shows the film and controls it', { skip: !BASE && 'set JDPI_URL to test the page' }, async () => {
-  const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+test('page: following along in the shell, the now-playing bar shows the film and controls it', PAGE, async () => {
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
     const errors = [];

@@ -1,5 +1,5 @@
 // Builds national/data/: one profile per country for National Analysis.
-//   node national/scripts/build.mjs [--retro ../hp-retrospective]
+//   node national/scripts/build.mjs [--retro ../hp-retrospective] [--allow-drop]
 // - PESTLE pressure, exactly as Country PESTLE scored it: for each of its 22 World Bank indicators, the latest value is
 //   compared with the previous one; past the indicator's threshold it is "improving" or "worsening". A dimension's
 //   pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the dimensions.
@@ -8,11 +8,15 @@
 // - Country overview from JDP-I data: system of government (Wikidata), leaders since 1926 and average tenure
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
 //   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Encyclopaedia entry.
+// Guard: nothing is written when an indicator's countries halve, or the countries, their Wikidata matches, GW codes or
+// leadership data fall by a tenth, against the committed index (a World Bank series, the code list or the
+// Retrospective that failed); --allow-drop writes anyway.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { INDICATORS, DIMENSIONS } from './indicators.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -25,7 +29,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
 async function getJson(url, init = {}) {
   for (let i = 0; i < 5; i++) {
-    try { const r = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } }); if (r.ok) return r.json(); } catch {}
+    try { const r = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } }); if (r.ok) return await r.json(); } catch {} // a cut-off body is tried again too
     await sleep(2000 * (i + 1));
   }
   throw new Error('Failed: ' + url.slice(0, 120));
@@ -56,9 +60,16 @@ console.log(`${wbCountries.length} countries; Wikidata matched ${wbCountries.fil
 const series = new Map(wbCountries.map(c => [c.id, {}]));
 for (const ind of INDICATORS) {
   const url = `https://api.worldbank.org/v2/country/all/indicator/${ind.code}?format=json&per_page=20000&date=${FIRST}:${LAST}&source=${ind.source}`;
-  const r = await getJson(url).catch(e => { console.warn(ind.code, e.message); return null; });
+  // The World Bank answers a moved, archived or mistyped series with a 200 and a message instead of rows, and a reply
+  // longer than a page would be cut short (it asks for 20,000 rows a page; a series has about 12,500 today).
+  // Either leaves the indicator empty here; the guard below stops the build if it had values before.
+  const rows = await getJson(url).then(r => {
+    if (!Array.isArray(r?.[1])) throw new Error(r?.[0]?.message?.map(m => m.value).join('; ') || 'no rows');
+    if (r[0].pages > 1) throw new Error(`${r[0].total} rows, more than one page`);
+    return r[1];
+  }).catch(e => { console.warn(`${ind.code}: ${e.message}`); return []; });
   let n = 0;
-  for (const row of r?.[1] || []) {
+  for (const row of rows) {
     const iso3 = row.countryiso3code, s = series.get(iso3);
     if (!s || row.value == null) continue;
     (s[ind.code] ||= []).push([+row.date, round(row.value, 4)]); n++;
@@ -98,8 +109,11 @@ const decadePick = d => pts => { const inD = pts.filter(p => p[0] >= d && p[0] <
 const { COUNTRIES: RETRO_COUNTRIES } = existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : { COUNTRIES: {} };
 const retro = existsSync(join(retroDir, 'data/countries.json')) ? json(join(retroDir, 'data/countries.json')) : { countries: {} };
 const gwByIso3 = new Map(Object.entries(RETRO_COUNTRIES).map(([gw, c]) => [c.iso3, +gw]));
-// Gleditsch–Ward codes for every state (the codes UCDP uses), from the countrycode project's code list.
-const codelist = parseCsv(await (await fetch('https://raw.githubusercontent.com/vincentarelbundock/countrycode/main/dictionary/codelist_without_cldr.csv', { headers: UA })).text());
+// Gleditsch–Ward codes for every state (the codes UCDP uses), from the countrycode project's code list. An error page
+// would parse to no rows and cost about a hundred countries their codes, conflict history and wars this year.
+const codes = await fetch('https://raw.githubusercontent.com/vincentarelbundock/countrycode/main/dictionary/codelist_without_cldr.csv', { headers: UA });
+if (!codes.ok) throw new Error(`countrycode code list: HTTP ${codes.status}`);
+const codelist = parseCsv(await codes.text());
 const nameKey = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').replace(/[^a-z]/g, '');
 const aliasToIso3 = new Map();
 for (const r of codelist) {
@@ -161,10 +175,22 @@ function conflict(gw) {
 function nameOfGw(gw) { return (retro.countries[gw]?.name || '').replace(/ \/.*$/, ''); }
 const iso3Of = new Map([...gwByIso3].map(([iso, gw]) => [gw, iso]));
 
-// ---- Assemble
-rmSync(OUT, { recursive: true, force: true });
-mkdirSync(join(OUT, 'series'), { recursive: true });
-const countries = [];
+// ---- The guard, against the committed index. An indicator's coverage is the countries with a latest value, which
+// they have exactly when their series has a point. World Bank revisions move a few countries, a failed or deprecated
+// series all of them; a failed code list or Retrospective costs dozens of countries their GW code or leadership.
+const OLD = existsSync(join(OUT, 'index.json')) ? json(join(OUT, 'index.json')) : { indicators: [], countries: [] };
+// An indicator taken out of indicators.mjs is a decision, not a loss: only the ones still listed are compared.
+const coverage = Object.fromEntries(OLD.indicators.filter(i => INDICATORS.some(x => x.code === i.code)).map(i => [i.code, OLD.countries.filter(c => c.latest?.[i.code]).length]));
+const covered = Object.fromEntries(INDICATORS.map(i => [i.code, wbCountries.filter(c => series.get(c.id)[i.code]?.length).length]));
+const tally = (list, qid, gw, lead) => ({ countries: list.length, 'with Wikidata': list.filter(qid).length, 'with a GW code': list.filter(gw).length, 'with leadership': list.filter(lead).length });
+refuseIfLost([
+  ...lostCounts(coverage, covered).map(x => `${x} countries`),
+  ...lostCounts(tally(OLD.countries, c => c.qid, c => c.gw != null, c => c.leadership),
+    tally(wbCountries, c => wdBy.has(c.id), c => gwByIso3.has(c.id), c => retro.countries[gwByIso3.get(c.id)]), { keep: 0.9 }),
+]);
+
+// ---- Assemble (in memory; national/data is replaced only once every country is done)
+const countries = [], seriesFiles = [];
 for (const c of wbCountries) {
   const s = series.get(c.id), w = wdBy.get(c.id) || {}, gw = gwByIso3.get(c.id);
   const latest = scorePeriod(s, latestPick);
@@ -181,8 +207,11 @@ for (const c of wbCountries) {
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,
   });
-  writeFileSync(join(OUT, `series/${c.id}.json`), JSON.stringify(s));
+  seriesFiles.push([join(OUT, `series/${c.id}.json`), JSON.stringify(s)]);
 }
+rmSync(OUT, { recursive: true, force: true });
+mkdirSync(join(OUT, 'series'), { recursive: true });
+for (const [file, text] of seriesFiles) writeFileSync(file, text);
 writeFileSync(join(OUT, 'index.json'), JSON.stringify({
   generated: new Date().toISOString(), years: [FIRST, LAST],
   indicators: INDICATORS.map(({ code, dimension, label, unit, better, threshold, core, source }) => ({ code, dimension, label, unit, better, threshold, core, source })),

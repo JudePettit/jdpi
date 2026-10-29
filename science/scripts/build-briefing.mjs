@@ -2,12 +2,13 @@
 // seven-day store and write science/briefing/data/stories.json (items plus a per-feed status for the Sources tab).
 //   node science/scripts/build-briefing.mjs
 // Polite fetching: an honest user agent, a 20-second timeout, one retry for server errors and timeouts, at most six
-// hosts at a time and one request at a time per host (with a pause between them), and conditional requests (ETag /
-// Last-Modified) so unchanged feeds cost the publisher almost nothing. Headlines, links and short summaries only: full
-// articles are never stored.
+// hosts at a time and one request at a time per host (with a pause between them, longer for nature.com), and
+// conditional requests (ETag / Last-Modified) so unchanged feeds cost the publisher almost nothing. Headlines, links
+// and short summaries only: full articles are never stored. A run with too few working feeds (MIN_WORKING_SHARE in
+// briefing-sources.mjs) exits 1 without writing.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { SOURCES, TIERS, KINDS, DEFAULT_CAP, outletId } from './briefing-sources.mjs';
+import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from './briefing-sources.mjs';
 import { DISCIPLINES } from './classify.mjs';
 import { parseScienceFeed, normalise, mergeStore } from './briefing-feeds.mjs';
 
@@ -16,6 +17,8 @@ const OUT = OUT_DIR + 'stories.json';
 const UA = 'Mozilla/5.0 (compatible; PRP Scientific Briefing; +https://jdpi.pages.dev)';
 const ACCEPT = 'application/rss+xml, application/atom+xml, application/rdf+xml;q=0.9, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.5';
 const KEEP_DAYS = 7, MAX_ITEMS = 2500, TIMEOUT = 20000, HOSTS_AT_ONCE = 6, GAP_MS = 400;
+// nature.com sometimes answers quick successive requests with a bot challenge, and it carries ten of the feeds.
+const HOST_GAP = { 'www.nature.com': 2500 };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const now = Date.now(), stamp = new Date(now).toISOString();
@@ -24,7 +27,7 @@ const prevStatus = new Map((prev.sources || []).map(s => [s.id, s]));
 
 async function fetchFeed(s) {
   const p = prevStatus.get(s.id);
-  const headers = { 'User-Agent': UA, Accept: ACCEPT };
+  const headers = { 'User-Agent': UA, Accept: s.accept || ACCEPT };
   if (p?.status === 'ok' && p.etag) headers['If-None-Match'] = p.etag;
   if (p?.status === 'ok' && p.lastModified) headers['If-Modified-Since'] = p.lastModified;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -37,7 +40,10 @@ async function fetchFeed(s) {
       }
       const text = await r.text();
       if (!/<(?:rss|feed|rdf:RDF)\b/i.test(text.slice(0, 5000))) return { status: 'error', error: 'not a feed (HTML or sign-in page)' };
-      return { status: 'ok', items: parseScienceFeed(text), etag: r.headers.get('etag') || undefined, lastModified: r.headers.get('last-modified') || undefined };
+      // A feed with no items delivers nothing, so it does not count as working.
+      const items = parseScienceFeed(text);
+      if (!items.length) return { status: 'error', error: 'empty feed (no items)' };
+      return { status: 'ok', items, etag: r.headers.get('etag') || undefined, lastModified: r.headers.get('last-modified') || undefined };
     } catch (e) {
       if (attempt === 0) { await sleep(3000); continue; }
       return { status: 'error', error: e.name === 'TimeoutError' ? 'timeout' : String(e.cause?.code || e.message || 'network error') };
@@ -48,9 +54,12 @@ async function fetchFeed(s) {
 // One queue per host, at most HOSTS_AT_ONCE hosts in flight.
 const byHost = new Map();
 for (const s of SOURCES) { const h = new URL(s.feed).hostname; (byHost.get(h) || byHost.set(h, []).get(h)).push(s); }
-const hosts = [...byHost.values()], results = new Map();
+const hosts = [...byHost.entries()], results = new Map();
 await Promise.all(Array.from({ length: HOSTS_AT_ONCE }, async () => {
-  for (let list; (list = hosts.shift());) for (const s of list) { results.set(s.id, await fetchFeed(s)); await sleep(GAP_MS); }
+  for (let next; (next = hosts.shift());) {
+    const [host, list] = next;
+    for (const s of list) { results.set(s.id, await fetchFeed(s)); await sleep(HOST_GAP[host] || GAP_MS); }
+  }
 }));
 
 // Normalise this run's items (dropping corrections, errata, sponsored posts) and merge them into the store.
@@ -60,8 +69,13 @@ for (const s of SOURCES) {
   r.kept = 0;
   for (const raw of r.items || []) { const it = normalise(raw, s, stamp); if (it) { fresh.push(it); r.kept++; } }
 }
-const working = SOURCES.filter(s => results.get(s.id).status === 'ok').length;
-if (!working) { console.error('No feed could be fetched; the store was left as it was.'); process.exit(1); }
+// Refuse a degraded run before it touches the store: the run fails (exit 1), and the store's `generated` time ages,
+// which the page ("Data is N hours old") and the freshness check report.
+const working = SOURCES.filter(s => results.get(s.id).status === 'ok').length, need = Math.ceil(SOURCES.length * MIN_WORKING_SHARE);
+if (working < need) {
+  console.error(`Only ${working} of ${SOURCES.length} feeds could be fetched (need ${need}); the store was left as it was. Failed: ${SOURCES.filter(s => results.get(s.id).status !== 'ok').map(s => `${s.id} (${results.get(s.id).error})`).join(', ')}.`);
+  process.exit(1);
+}
 const prevIds = new Set((prev.items || []).map(i => i.id));
 const items = mergeStore({ prevItems: prev.items || [], freshItems: fresh, sources: SOURCES, now, keepDays: KEEP_DAYS, maxItems: MAX_ITEMS, defaultCap: DEFAULT_CAP });
 

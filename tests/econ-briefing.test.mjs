@@ -2,13 +2,14 @@
 // the parser keeps authors, DOIs and dates (and dates NBER's undated list), the page's view logic reads deep links and
 // orders "Major sources first", and the stored data (econ/briefing/data/stories.json) is well formed, free of
 // duplicates and inside its seven-day window.
-// The page test runs where the submodule is deployed (JDPI_URL, e.g. http://localhost:8787, or the live site).
+// The page test runs where the submodule is deployed (JDPI_URL, e.g. http://localhost:8787, or the live site);
+// PRP_PAGES=0 leaves it out, so a data workflow can run the rest on the file it is about to commit.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { chromium } from 'playwright-core';
+import { pageTest, launch } from './tools/pages.mjs';
 import { FIELDS, FIELD_IDS, classify, detectType, fieldId, isDroppedTitle, isForeign } from '../econ/scripts/classify.mjs';
-import { SOURCES, TIERS, KINDS, DEFAULT_CAP, outletId } from '../econ/scripts/briefing-sources.mjs';
+import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from '../econ/scripts/briefing-sources.mjs';
 import { parseEconFeed, normalise, mergeStore, formatAuthors, fixEntities, keepsByline, urlKey, titleKey, SUMMARY_MAX, AUTHORS_MAX } from '../econ/scripts/briefing-feeds.mjs';
 import { DEFAULTS, parseHash, toHash, filterItems, arrange, countByField, badgeOf, timeLabel } from '../econ/briefing/view.js';
 
@@ -286,7 +287,7 @@ test('data: stories.json has the expected shape', () => {
     assert.equal(s.outletId, outletId(s.outlet), `${s.id} outletId`);
     assert.ok(Number.isInteger(s.count) && Number.isInteger(s.stored) && s.stored >= 0, `${s.id} counts`);
   }
-  assert.ok(DATA.counts.working >= Math.ceil(DATA.counts.feeds * 0.75), `${DATA.counts.working} of ${DATA.counts.feeds} feeds working`);
+  assert.ok(DATA.counts.working >= Math.ceil(DATA.counts.feeds * MIN_WORKING_SHARE), `${DATA.counts.working} of ${DATA.counts.feeds} feeds working`);
   assert.ok(DATA.items.length >= 100 && DATA.items.length <= DATA.maxItems, `${DATA.items.length} items`);
 
   for (const i of DATA.items) {
@@ -363,10 +364,10 @@ test('data: every item is dated inside the seven-day window', () => {
 });
 
 // ---- Page ----------------------------------------------------------------------------------------------------------------
-test('page: field deep link, papers/news toggle and the Sources tab at phone width', async t => {
+test('page: field deep link, papers/news toggle and the Sources tab at phone width', pageTest, async t => {
   const live = await fetch(`${BASE}/econ/briefing/data/stories.json`).then(r => (r.ok ? r.json() : null)).catch(() => null);
   if (!live?.items) { t.skip(`Economics Briefing is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 900 } });
     const errors = [];

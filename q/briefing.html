@@ -194,9 +194,14 @@ const matches = (topic, it) => matcher(topic.keywords)(it.t + ' ' + it.d);
 
 /* ---------- topics panel ---------- */
 const SOFT_KEY = 'jdpi.briefing.hideSoft';
+// Windows count back from now, or from the last refresh if the data is more than a day old (twice the refresh
+// interval): a failed refresh then leaves the last stories on the page, and the meta line says how old they are.
+const STALE_H = 24;
+const ageHours = () => (Date.now() - Date.parse(D.generated)) / 36e5;
+const windowEnd = () => (ageHours() > STALE_H ? Date.parse(D.generated) : Date.now());
 // Stories in the time window, minus sport, entertainment and lifestyle unless the filter is off (tagged by categorize.mjs).
 function windowed() {
-  const since = Date.now() - +$('#window').value * 36e5, inWin = D.items.filter(i => Date.parse(i.p) >= since);
+  const since = windowEnd() - +$('#window').value * 36e5, inWin = D.items.filter(i => Date.parse(i.p) >= since);
   if (!$('#hardnews').checked) { $('#hiddencount').textContent = ''; return inWin; }
   const kept = inWin.filter(i => !i.c);
   $('#hiddencount').textContent = inWin.length > kept.length ? `· ${num(inWin.length - kept.length)} hidden` : '';
@@ -295,7 +300,8 @@ fetch('../briefing/data/latest.json').then(r => r.json()).then(d => {
   const groups = d.positions.map(p => `<optgroup label="${esc(p.label)}">${d.sources.filter(s => s.position === p.key && d.items.some(i => i.s === s.id)).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
   $('#publisher').innerHTML += groups;
   const active = d.sources.filter(s => s.active).length;
-  $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> stories from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>`;
+  $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> stories from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>` +
+    (ageHours() > STALE_H ? `<span>Data is ${Math.round(ageHours())} hours old</span>` : '');
   for (const id of ['#view', '#publisher']) $(id).onchange = render;
   $('#window').onchange = () => { renderTopics(); render(); };
   try { $('#hardnews').checked = localStorage.getItem(SOFT_KEY) !== '0'; } catch {}

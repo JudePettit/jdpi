@@ -2,7 +2,8 @@
 // writes the catalogue (kino/data/index.json), the image credits (kino/data/media.json) and the country codes the
 // map draws (kino/data/iso.json).
 //   node kino/scripts/build-index.mjs             fetch only what the cache lacks
-//   node kino/scripts/build-index.mjs --refresh   refetch cached entries older than 25 days (the monthly job)
+//   node kino/scripts/build-index.mjs --refresh   refetch cached entries older than 25 days (the monthly job; stamps the
+//                                                 cache's `generated`, which the freshness check reads)
 //   node kino/scripts/build-index.mjs --offline   use the cache only; fails if something is missing
 // Wikidata items are CC0; images keep their own Commons licences, which media.json records for the credit line.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -159,7 +160,11 @@ const credited = f => { const c = cache.files[f]; return !!(c && c.licence && (c
     writeFileSync(file, JSON.stringify(obj, null, name === 'index.json' ? 1 : 0) + '\n');
   };
   write('index.json', index); write('media.json', media); write('iso.json', iso);
-  writeFileSync(CACHE_FILE, JSON.stringify({ note: 'Wikidata and Commons answers for kino/scripts/build-index.mjs; safe to delete.', entities: Object.fromEntries(Object.entries(cache.entities).sort()), files: Object.fromEntries(Object.entries(cache.files).sort()) }, null, 1) + '\n');
+  // The cache's `generated` is the last --refresh (the monthly job), after which no entry is older than 25 days: the
+  // freshness check reads it, since index.json and media.json keep their date through a month with no changes. A run
+  // without --refresh fetches only what the cache lacks, and --offline nothing, so both keep the stamp they found.
+  const generated = REFRESH ? today : cache.generated;
+  writeFileSync(CACHE_FILE, JSON.stringify({ note: 'Wikidata and Commons answers for kino/scripts/build-index.mjs; safe to delete.', generated, entities: Object.fromEntries(Object.entries(cache.entities).sort()), files: Object.fromEntries(Object.entries(cache.files).sort()) }, null, 1) + '\n');
   console.log(`✓ ${list.length} documentaries in ${index.categories.filter(c => c.count).length} categories · ${used.length} images · ${Object.keys(codes).length} country codes`);
   process.exit(0); // fetch keeps idle sockets open for a while; do not wait for them
 })().catch(e => { console.error(e); process.exit(1); });

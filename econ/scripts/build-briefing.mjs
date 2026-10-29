@@ -4,10 +4,11 @@
 // Polite fetching: an honest user agent, a 20-second timeout, one retry for server errors and timeouts, at most six
 // hosts at a time and one request at a time per host (with a pause between them), and conditional requests (ETag /
 // Last-Modified) so unchanged feeds cost the publisher almost nothing. Headlines, links, authors and short summaries
-// only: full articles are never stored.
+// only: full articles are never stored. A run with too few working feeds (MIN_WORKING_SHARE in briefing-sources.mjs)
+// exits 1 without writing.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { SOURCES, TIERS, KINDS, DEFAULT_CAP, outletId } from './briefing-sources.mjs';
+import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from './briefing-sources.mjs';
 import { FIELDS } from './classify.mjs';
 import { parseEconFeed, normalise, mergeStore } from './briefing-feeds.mjs';
 
@@ -37,7 +38,10 @@ async function fetchFeed(s) {
       }
       const text = await r.text();
       if (!/<(?:rss|feed|rdf:RDF)\b/i.test(text.slice(0, 5000))) return { status: 'error', error: 'not a feed (HTML or sign-in page)' };
-      return { status: 'ok', items: parseEconFeed(text), etag: r.headers.get('etag') || undefined, lastModified: r.headers.get('last-modified') || undefined };
+      // A feed with no items delivers nothing, so it does not count as working.
+      const items = parseEconFeed(text);
+      if (!items.length) return { status: 'error', error: 'empty feed (no items)' };
+      return { status: 'ok', items, etag: r.headers.get('etag') || undefined, lastModified: r.headers.get('last-modified') || undefined };
     } catch (e) {
       if (attempt === 0) { await sleep(3000); continue; }
       return { status: 'error', error: e.name === 'TimeoutError' ? 'timeout' : String(e.cause?.code || e.message || 'network error') };
@@ -64,8 +68,13 @@ for (const s of SOURCES) {
   const fallback = Number.isFinite(lm) && lm <= now && lm >= now - KEEP_DAYS * 864e5 ? new Date(lm).toISOString() : stamp;
   for (const raw of r.items || []) { const it = normalise(raw, s, stamp, fallback); if (it) { fresh.push(it); r.kept++; } }
 }
-const working = SOURCES.filter(s => results.get(s.id).status === 'ok').length;
-if (!working) { console.error('No feed could be fetched; the store was left as it was.'); process.exit(1); }
+// Refuse a degraded run before it touches the store: the run fails (exit 1), and the store's `generated` time ages,
+// which the page ("Data is N hours old") and the freshness check report.
+const working = SOURCES.filter(s => results.get(s.id).status === 'ok').length, need = Math.ceil(SOURCES.length * MIN_WORKING_SHARE);
+if (working < need) {
+  console.error(`Only ${working} of ${SOURCES.length} feeds could be fetched (need ${need}); the store was left as it was. Failed: ${SOURCES.filter(s => results.get(s.id).status !== 'ok').map(s => `${s.id} (${results.get(s.id).error})`).join(', ')}.`);
+  process.exit(1);
+}
 const prevIds = new Set((prev.items || []).map(i => i.id));
 const items = mergeStore({ prevItems: prev.items || [], freshItems: fresh, sources: SOURCES, now, keepDays: KEEP_DAYS, maxItems: MAX_ITEMS, defaultCap: DEFAULT_CAP });
 

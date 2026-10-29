@@ -19,12 +19,11 @@ jobs:
         with:
           node-version: 22
       - run: node econ/scripts/build-briefing.mjs
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add econ/briefing/data
-          if git diff --cached --quiet; then echo "No changes."; exit 0; fi
-          git commit -m "Economics Briefing: refresh stories"
-          git pull --rebase
-          git push
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/econ-briefing.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: econ/briefing/data
+          message: 'Economics Briefing: refresh stories'

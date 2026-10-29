@@ -303,7 +303,8 @@ export async function fetchDays(from, to) {
     for (let attempt = 0; attempt < 4 && !pages; attempt++) {
       try {
         const res = await fetch(url, { headers: UA });
-        if (res.ok) pages = (await res.json()).query?.pages || [];
+        // A 200 carrying an API error (no pages) is retried like any failure, never read as fifty empty days.
+        if (res.ok) { const body = await res.json(); if (Array.isArray(body?.query?.pages)) pages = body.query.pages; }
       } catch {}
       if (!pages) await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
     }

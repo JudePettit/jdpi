@@ -2,10 +2,13 @@ name: Refresh Encyclopaedia entity layer
 # Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries.
 on:
   schedule:
-    - cron: '23 4 3 * *'
+    - cron: '31 3 3 * *'
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: lake-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -20,9 +23,11 @@ jobs:
         with:
           node-version: 22
       - run: node lake/scripts/build.mjs --retro hp-retrospective
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lake/data lake/scripts/summary-cache.json
-          git diff --cached --quiet || git commit -m "Encyclopaedia: monthly refresh of the entity layer" && git pull --rebase && git push
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/encyclopedia.test.mjs tests/kino.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: lake/data lake/scripts/summary-cache.json
+          message: 'Encyclopaedia: monthly refresh of the entity layer'

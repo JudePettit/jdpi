@@ -1,11 +1,14 @@
-﻿name: Refresh National Analysis data
+name: Refresh National Analysis data
 # World Bank indicators are revised several times a year; JDP-I's leadership and conflict data change monthly.
 on:
   schedule:
-    - cron: '47 4 5 * *'
+    - cron: '47 3 5 * *'
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: national-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -20,9 +23,11 @@ jobs:
         with:
           node-version: 22
       - run: node national/scripts/build.mjs --retro hp-retrospective
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add national/data
-          git diff --cached --quiet || git commit -m "National Analysis: monthly data refresh" && git pull --rebase && git push
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/national.test.mjs tests/kino.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: national/data
+          message: 'National Analysis: monthly data refresh'

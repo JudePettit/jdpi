@@ -1,31 +1,42 @@
 // Builds traders/data/congress.json: stock trades disclosed by members of the US House of Representatives.
-//   node traders/scripts/build-congress.mjs [years…]      (default: this year and last)
+//   node traders/scripts/build-congress.mjs [years…] [--allow-drop]      (default: this year and last)
 // Source: Clerk of the House, Periodic Transaction Reports (STOCK Act). Electronic filings are parsed from
 // their PDFs; scanned paper filings can't be read and are listed with a link only. Parsed reports are cached
 // in traders/scripts/ptr-cache.json, so weekly runs only fetch new filings.
+// Guard: a yearly index or the legislators list that can't be fetched stops the build, and nothing is written when a
+// year both builds cover loses a tenth of its trades, or half the members, or half their parties; --allow-drop writes.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const UA = { 'User-Agent': 'JDP-I Trader Tracker (https://jdpi.pages.dev; judep92@gmail.com)' };
 const CACHE = new URL('./ptr-cache.json', import.meta.url);
+const OUT = new URL('../data/congress.json', import.meta.url);
 const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {};
 const thisYear = new Date().getUTCFullYear();
 const years = process.argv.slice(2).map(Number).filter(Boolean);
 if (!years.length) years.push(thisYear - 1, thisYear);
 
+// The body, or null when the file does not exist (404), or undefined when it could not be fetched (four failures):
+// a missing file is an answer, a failed download is not, and is never cached as one.
 async function get(url, as = 'text') {
   for (let i = 0; i < 4; i++) {
-    const res = await fetch(url, { headers: UA });
-    if (res.ok) return as === 'buffer' ? new Uint8Array(await res.arrayBuffer()) : res.text();
-    if (res.status === 404) return null;
+    try {
+      const res = await fetch(url, { headers: UA });
+      if (res.ok) return as === 'buffer' ? new Uint8Array(await res.arrayBuffer()) : await res.text();
+      if (res.status === 404) return null;
+    } catch {} // a refused connection or a body cut off mid-read: tried again like an HTTP error
     await new Promise(r => setTimeout(r, 2000 * (i + 1)));
   }
-  return null;
+  return undefined;
 }
 
 // The yearly index: a zip containing <year>FD.txt (tab-separated). Unzip with the built-in DecompressionStream.
+// No index yet (404) is a year with no filings so far (early January); an index that failed, or a zip with no .txt in
+// it, would otherwise empty the year.
 async function indexFor(year) {
   const zip = await get(`https://disclosures-clerk.house.gov/public_disc/financial-pdfs/${year}FD.zip`, 'buffer');
+  if (zip === undefined) throw new Error(`House index ${year}: could not be fetched`);
   if (!zip) return [];
   const view = new DataView(zip.buffer);
   for (let i = 0; i < zip.length - 30; i++) {
@@ -40,7 +51,7 @@ async function indexFor(year) {
     const cols = head.split('\t');
     return rows.map(r => Object.fromEntries(r.split('\t').map((v, k) => [cols[k], v.trim()]))).filter(r => r.FilingType === 'P');
   }
-  return [];
+  throw new Error(`House index ${year}: no .txt file in the zip`);
 }
 
 const TYPE = { P: 'buy', S: 'sell', 'S (partial)': 'partial sale', E: 'exchange' };
@@ -91,9 +102,12 @@ function parseLines(lines) {
   });
 }
 
+// A report's trades; null when the PDF does not exist, undefined when it could not be fetched or what came back is not
+// a PDF (a challenge page, say; not cached, so the next run tries again), [] when pdf.js can't read a real PDF.
 async function parsePdf(url) {
   const data = await get(url, 'buffer');
-  if (!data) return null;
+  if (!data) return data;
+  if (String.fromCharCode(...data.subarray(0, 5)) !== '%PDF-') return undefined;
   try {
     const doc = await getDocument({ data, verbosity: 0 }).promise;
     const lines = [];
@@ -111,8 +125,14 @@ async function parsePdf(url) {
 // Party and chamber from the public congress-legislators dataset.
 // Matched by surname and state, falling back to district (handles compound surnames); the historical list
 // covers members who have left since filing.
-const current = JSON.parse(await get('https://unitedstates.github.io/congress-legislators/legislators-current.json') || '[]');
-const historical = JSON.parse(await get('https://unitedstates.github.io/congress-legislators/legislators-historical.json') || '[]');
+// Without them every member would lose party and Bioguide ID (and with it the Encyclopaedia entry), so they must load.
+async function legislators(list) {
+  const text = await get(`https://unitedstates.github.io/congress-legislators/legislators-${list}.json`);
+  if (!text) throw new Error(`congress-legislators ${list}: could not be fetched`);
+  return JSON.parse(text);
+}
+const current = await legislators('current');
+const historical = await legislators('historical');
 const party = new Map(), byDistrict = new Map();
 for (const l of [...historical, ...current]) {
   const t = l.terms.at(-1);
@@ -130,7 +150,8 @@ await Promise.all(Array.from({ length: 6 }, async () => {
   for (let f; (f = todo.shift());) {
     const url = `https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/${f.Year}/${f.DocID}.pdf`;
     // Paper filings (8-digit IDs not starting with 2) are scanned images.
-    cache[f.DocID] = /^2\d{7}$/.test(f.DocID) ? await parsePdf(url) : null;
+    const rows = /^2\d{7}$/.test(f.DocID) ? await parsePdf(url) : null;
+    if (rows !== undefined) cache[f.DocID] = rows;
     if (++done % 100 === 0) { console.log(done); writeFileSync(CACHE, JSON.stringify(cache)); }
   }
 }));
@@ -155,8 +176,15 @@ for (const f of filings) {
 }
 const sortDate = t => (t.dateAsFiled ? t.filed : t.date);
 trades.sort((a, b) => sortDate(b).localeCompare(sortDate(a)) || b.filed.localeCompare(a.filed));
+// The guard, against the committed file. Trades are compared per filing year, and only for the years both builds
+// cover, so January's move from [last year, this year] to the next pair compares just the year they share. A year's
+// trades grow as reports arrive, so a tenth fewer means a lost index or lost reports.
+const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { trades: [], members: [] };
+const perYear = list => list.reduce((n, t) => { const y = +t.filed.slice(0, 4); if (years.includes(y)) n[`trades filed in ${y}`] = (n[`trades filed in ${y}`] || 0) + 1; return n; }, {});
+const people = list => ({ members: list.length, 'members with a party': list.filter(m => m.party).length });
+refuseIfLost([...lostCounts(perYear(prev.trades), perYear(trades), { keep: 0.9 }), ...lostCounts(people(prev.members), people([...members.values()]))]);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
-writeFileSync(new URL('../data/congress.json', import.meta.url), JSON.stringify({
+writeFileSync(OUT, JSON.stringify({
   generated: new Date().toISOString(), years,
   source: 'Clerk of the US House of Representatives — Periodic Transaction Reports (STOCK Act)',
   members: [...members.values()].sort((a, b) => b.trades - a.trades), trades,

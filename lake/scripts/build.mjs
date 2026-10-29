@@ -1,5 +1,5 @@
 // Builds the JDP-I entity layer ("data lake") behind the Encyclopaedia.
-//   node lake/scripts/build.mjs [--retro ../hp-retrospective]
+//   node lake/scripts/build.mjs [--retro ../hp-retrospective] [--allow-drop]
 // 1. Collect mentions from every module (adapters.mjs).
 // 2. Resolve each mention's key to a Wikidata ID.
 // 3. Fetch facts from Wikidata, plus one level of related entities (party, ideology, country, conflicts),
@@ -9,10 +9,14 @@
 //    e/<n>.json   entities by Wikidata number % 512    t/<n>.json   English Wikipedia title → QID
 //    index.json   compact search index                 keys.json    module keys (e.g. congress:P000197) → QID
 //    manifest.json counts, sources, build time
-import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
+// Guard: the build stops when a module's adapter fails, or a module's mentions halve, or the entities fall by a tenth
+// against the committed manifest; --allow-drop goes on anyway. The new lake/data is written beside the old one and
+// swapped in at the end, so a build that fails part-way leaves the committed files whole.
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ADAPTERS } from './adapters.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpiDir = resolve(here, '../..');
@@ -30,21 +34,40 @@ const entityShard = qid => +qid.slice(1) % E_SHARDS;
 
 async function getJson(url, init = {}) {
   for (let i = 0; i < 5; i++) {
-    const res = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } });
-    if (res.ok) return res.json();
-    if (res.status === 404) return null;
+    try {
+      const res = await fetch(url, { ...init, headers: { ...UA, ...(init.headers || {}) } });
+      if (res.ok) return await res.json();
+      if (res.status === 404) return null;
+    } catch {} // a refused connection or a body cut off mid-read: tried again like an HTTP error
     await sleep(1500 * (i + 1));
   }
   throw new Error(`HTTP failure: ${url.slice(0, 120)}`);
 }
 const wbget = params => getJson('https://www.wikidata.org/w/api.php?' + new URLSearchParams({ action: 'wbgetentities', format: 'json', ...params }));
 
-// ---- 1. Mentions
-const mentions = [];
+// ---- 1. Mentions. An adapter that throws (a module's file missing or re-shaped) would drop all of that module's
+// mentions, thousands of them, and a module whose mentions halve against the committed manifest has lost its links.
+// Either stops the build here, before an hour of Wikidata and Wikipedia requests. The Realtime Calendar's mentions
+// (its last 180 days) pass into the Historical Calendar as they age, so the two calendars are counted together.
+const MODULE_ORDER = ['retrospective', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress'];
+// The new lake is written beside the old one and swapped in at the end (below). A build interrupted between the two
+// renames leaves the old data as lake/data.old: it is put back first, so this build compares against it rather than
+// against nothing. With no previous manifest at all (a first build), the guards have nothing to compare with, and only
+// --allow-drop goes on.
+const NEW = `${OUT}.new`, OLD = `${OUT}.old`;
+if (!existsSync(OUT) && existsSync(OLD)) renameSync(OLD, OUT);
+if (!existsSync(join(OUT, 'manifest.json'))) refuseIfLost(['the previous lake/data/manifest.json (nothing to compare this build with)']);
+const prevManifest = existsSync(join(OUT, 'manifest.json')) ? JSON.parse(readFileSync(join(OUT, 'manifest.json'), 'utf8')) : {};
+const mentions = [], failed = [];
 for (const [name, adapter] of Object.entries(ADAPTERS)) {
   try { const m = await adapter({ jdpiDir, retroDir }); mentions.push(...m); console.log(`${name}: ${m.length} mentions`); }
-  catch (e) { console.warn(`${name}: skipped (${e.message})`); }
+  catch (e) { failed.push(`the ${name} adapter (${e.message})`); console.warn(`${name}: skipped (${e.message})`); }
 }
+const moduleCounts = mentions.reduce((n, m) => { n[m.module] = (n[m.module] || 0) + 1; return n; }, {});
+const calendarsTogether = ({ calendar = 0, 'historical-calendar': history = 0, ...rest }) => ({ ...rest, calendars: calendar + history });
+// A module taken out of MODULE_ORDER is a decision, not a loss: only the ones still listed are compared.
+const prevModules = Object.fromEntries(Object.entries(prevManifest.modules || {}).filter(([m]) => MODULE_ORDER.includes(m)));
+refuseIfLost([...failed, ...lostCounts(calendarsTogether(prevModules), calendarsTogether(moduleCounts))]);
 
 // ---- 2. Resolve keys → QIDs
 const titleToQid = new Map(), bioguideToQid = new Map();
@@ -147,6 +170,10 @@ for (const batch of chunks(citizenships, 50)) {
   await sleep(150);
 }
 console.log(`fetched ${raw.size} entities (${related.size} related), ${labelOnly.size} labels, ${demonym.size} demonyms`);
+// Wikidata batches that come back empty (an error object read as no entities, a title lookup that failed) leave
+// fewer entities; a tenth fewer than the committed manifest is not a month's ordinary change.
+refuseIfLost(lostCounts({ entities: prevManifest.entities || 0, 'entities with mentions': prevManifest.withMentions || 0 },
+  { entities: raw.size, 'entities with mentions': byQid.size }, { keep: 0.9 }));
 
 // ---- 4. Summaries (cache shared with the calendar's)
 const cachePath = join(here, 'summary-cache.json');
@@ -155,19 +182,21 @@ const calCache = join(jdpiDir, 'calendar/scripts/summary-cache.json');
 if (existsSync(calCache)) for (const [k, v] of Object.entries(JSON.parse(readFileSync(calCache, 'utf8')))) if (!(normTitle(k) in cache)) cache[normTitle(k)] = v;
 const shorten = t => { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= 600) return t; const c = t.slice(0, 600), e = c.lastIndexOf('. '); return e > 200 ? c.slice(0, e + 1) : c + '…'; };
 const needSummary = [...raw.values()].map(e => e.sitelinks?.enwiki?.title).filter(t => t && !(normTitle(t) in cache));
-let done = 0;
+let done = 0, unfetched = 0;
 const queue = [...needSummary];
 await Promise.all(Array.from({ length: 8 }, async () => {
   for (let t; (t = queue.shift());) {
-    const r = await getJson(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, '_'))}?redirect=true`).catch(() => null);
-    cache[normTitle(t)] = shorten(r?.extract);
+    // A missing article (404, null) is cached as no summary; a request that failed is left out of the cache, so the
+    // next build asks again rather than keeping '' for good.
+    const r = await getJson(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, '_'))}?redirect=true`).catch(() => undefined);
+    if (r === undefined) unfetched++; else cache[normTitle(t)] = shorten(r?.extract);
     if (++done % 500 === 0) { console.log(`summaries ${done}/${needSummary.length}`); writeFileSync(cachePath, JSON.stringify(cache)); }
   }
 }));
 writeFileSync(cachePath, JSON.stringify(cache));
+if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries could not be fetched; the next build tries them again`);
 
 // ---- 5. Entity records and shards
-const MODULE_ORDER = ['retrospective', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress'];
 const MODULE_NAMES = { retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Timeline of Progress', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training' };
 const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
 function tagsFor(e, type, ms) {
@@ -197,8 +226,9 @@ function record(q) {
     tags: tagsFor(e, typeOf(e), ms),
   };
 }
-if (existsSync(OUT)) rmSync(OUT, { recursive: true });
-mkdirSync(join(OUT, 'e'), { recursive: true }); mkdirSync(join(OUT, 't'), { recursive: true });
+// Everything is written into lake/data.new; only when all of it is there does it replace lake/data.
+rmSync(NEW, { recursive: true, force: true });
+mkdirSync(join(NEW, 'e'), { recursive: true }); mkdirSync(join(NEW, 't'), { recursive: true });
 const eShards = Array.from({ length: E_SHARDS }, () => ({})), tShards = Array.from({ length: T_SHARDS }, () => ({}));
 const index = [], typeCounts = {}, tagIds = new Map(), tagList = [];
 const tagId = t => { if (!tagIds.has(t)) { tagIds.set(t, tagList.length); tagList.push(t); } return tagIds.get(t); };
@@ -214,16 +244,26 @@ for (const q of raw.keys()) {
 }
 // Requested titles that were redirects also map to their entity.
 for (const [t, q] of titleToQid) if (raw.has(q)) tShards[titleShard(t)][t] = q;
-eShards.forEach((s, i) => writeFileSync(join(OUT, `e/${i}.json`), JSON.stringify(s)));
-tShards.forEach((s, i) => writeFileSync(join(OUT, `t/${i}.json`), JSON.stringify(s)));
+eShards.forEach((s, i) => writeFileSync(join(NEW, `e/${i}.json`), JSON.stringify(s)));
+tShards.forEach((s, i) => writeFileSync(join(NEW, `t/${i}.json`), JSON.stringify(s)));
 index.sort((a, b) => b[4] - a[4] || a[1].localeCompare(b[1]));
 // index.json: { tags: ["Facet:Value", …], modules: {id: name}, rows: [[qid, label, type, desc, mentions, aliases, tagIds, [[module, url, count]]]] }
-writeFileSync(join(OUT, 'index.json'), JSON.stringify({ tags: tagList, modules: MODULE_NAMES, rows: index }));
-writeFileSync(join(OUT, 'keys.json'), JSON.stringify(keys));
-writeFileSync(join(OUT, 'manifest.json'), JSON.stringify({
+writeFileSync(join(NEW, 'index.json'), JSON.stringify({ tags: tagList, modules: MODULE_NAMES, rows: index }));
+writeFileSync(join(NEW, 'keys.json'), JSON.stringify(keys));
+writeFileSync(join(NEW, 'manifest.json'), JSON.stringify({
   generated: new Date().toISOString(), entities: raw.size, withMentions: byQid.size, mentions: mentions.length - unmatched,
   types: typeCounts, shards: { entities: E_SHARDS, titles: T_SHARDS },
-  modules: Object.fromEntries(MODULE_ORDER.map(m => [m, mentions.filter(x => x.module === m).length])),
+  modules: Object.fromEntries(MODULE_ORDER.map(m => [m, moduleCounts[m] || 0])),
   sources: ['Wikidata (CC0)', 'Wikipedia summaries (CC BY-SA 4.0)', 'JDP-I modules'],
 }, null, 1));
+// The swap: the old lake/data steps aside, the new one takes its name, and the old one goes. If the second rename
+// fails, the old one is put back; if even that fails (a file held open on Windows), it stays in lake/data.old, where the
+// next build finds it.
+rmSync(OLD, { recursive: true, force: true });
+if (existsSync(OUT)) renameSync(OUT, OLD);
+try { renameSync(NEW, OUT); } catch (e) {
+  try { if (existsSync(OLD)) renameSync(OLD, OUT); } catch (e2) { console.error(`Putting lake/data back failed too (${e2.message}); the previous data is in lake/data.old.`); }
+  throw e;
+}
+rmSync(OLD, { recursive: true, force: true });
 console.log(`wrote ${raw.size} entities`, typeCounts);

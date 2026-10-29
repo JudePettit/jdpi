@@ -28,6 +28,10 @@
 export const TIERS = { 1: 'Top journal or flagship series', 2: 'Major journal, central bank or institution', 3: 'Think tank or research column', 4: 'Journalism and commentary' };
 export const KINDS = { journal: 'Journal', working: 'Working papers', research: 'Research & analysis', official: 'Central bank & official', news: 'News & commentary' };
 export const DEFAULT_CAP = 150;
+// A refresh is written only if at least this share of the feeds answers with items (or "not modified"); otherwise the
+// build exits 1 and leaves the store as it was. The data test holds the stored counts to the same share. 75% is 38 of
+// the 50 feeds: normal runs have had all 50, and the largest single host carries only four.
+export const MIN_WORKING_SHARE = 0.75;
 
 const S = (id, outlet, section, url, feed, kind, tier, fields, qid, extra = {}) =>
   ({ id, outlet, name: section ? `${outlet} · ${section}` : outlet, url, feed, kind, tier, fields, qid, ...extra });

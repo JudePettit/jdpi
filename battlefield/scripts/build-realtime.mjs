@@ -1,12 +1,22 @@
 // Builds battlefield/data/realtime.json from a UCDP Candidate Events CSV (year to date).
-//   node battlefield/scripts/build-realtime.mjs path/to/GEDEvent_v26_01_26_09.csv
+//   node battlefield/scripts/build-realtime.mjs path/to/GEDEvent_v26_01_26_09.csv [version] [--allow-drop]
 // Source: UCDP Candidate Events Dataset (Hegre et al. 2020), CC BY 4.0.
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+// Guard: within a year the file only grows (each release adds a month), so a build with fewer months, or with far
+// fewer events or deaths than the committed file, is not written; --allow-drop writes it anyway.
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { parseCsv } from './csv.mjs';
 import { WARS, cleanName } from './wars.mjs';
+import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
-const [csvPath, version = ''] = process.argv.slice(2);
-const events = parseCsv(readFileSync(csvPath, 'utf8')).filter(e => e.date_start);
+const [csvPath, version = ''] = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const rows = parseCsv(readFileSync(csvPath, 'utf8'));
+// An empty download, an error page or a re-shaped file would otherwise build quietly into zeros or "other" wars.
+const COLUMNS = ['date_start', 'best', 'deaths_civilians', 'conflict_new_id', 'conflict_name', 'dyad_name', 'type_of_violence', 'country', 'region', 'adm_1', 'latitude', 'longitude'];
+if (!rows.length) throw new Error(`${csvPath} has no events`);
+const missing = COLUMNS.filter(k => !(k in rows[0]));
+if (missing.length) throw new Error(`${csvPath} is not a UCDP candidate events file this build can read: no ${missing.join(', ')}`);
+const events = rows.filter(e => e.date_start);
+if (!events.length) throw new Error(`${csvPath} has no dated events`);
 const TYPES = { 1: 'state-based', 2: 'non-state', 3: 'one-sided violence against civilians' };
 const MONTH = m => new Date(`${m}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
 const fmt = n => n.toLocaleString('en-GB');
@@ -91,6 +101,18 @@ const data = {
   year: +latest.slice(0, 4), months, latest, totals: { deaths: events.reduce((s, e) => s + (+e.best || 0), 0), events: events.length },
   wars: out,
 };
+// The guard compares with the committed file of the same year; a new year's first file starts again from January.
+// UCDP revises candidate events by a few per cent, so a tenth fewer events or deaths means a short or broken file,
+// and half the events falling out of the named wars into "Other armed violence" means the conflict ids have changed.
+const OUT = new URL('../data/realtime.json', import.meta.url);
+const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : null;
+const named = list => list.filter(w => !w.id.startsWith('other-')).reduce((s, w) => s + w.events, 0);
+if (prev && data.year < prev.year) refuseIfLost([`year ${prev.year} → ${data.year}`]);
+if (prev?.year === data.year) refuseIfLost([
+  ...lostCounts({ months: prev.months.length }, { months: months.length }, { over: 0, keep: 1 }),
+  ...lostCounts({ events: prev.totals.events, deaths: prev.totals.deaths }, { events: data.totals.events, deaths: data.totals.deaths }, { over: 0, keep: 0.9 }),
+  ...lostCounts({ 'events in named wars': named(prev.wars) }, { 'events in named wars': named(out) }),
+]);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
-writeFileSync(new URL('../data/realtime.json', import.meta.url), JSON.stringify(data));
+writeFileSync(OUT, JSON.stringify(data));
 console.log(`${out.length} wars/warzones, ${events.length} events, months ${months[0]}..${latest}`);

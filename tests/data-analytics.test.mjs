@@ -2,13 +2,14 @@
 // AI prompt and its MCP query, the catalogue contract with the Integration Hub, and the page in Edge.
 //   node --test tests/data-analytics.test.mjs                                   (page tests against http://localhost:8787)
 //   JDPI_URL=https://jdpi.pages.dev node --test tests/data-analytics.test.mjs   (page tests against the live site)
-// Page tests skip when the page is not served at JDPI_URL; the SQL test also needs jsDelivr.
+// Page tests skip when the page is not served at JDPI_URL; the SQL test also needs jsDelivr. PRP_PAGES=0 leaves them all out
+// (the daily workflow's check after the catalogue build).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright-core';
+import { pageTest, launch } from './tools/pages.mjs';
 import { compileExpr, parseExpr, dateParts, ExprLimit, MAX_TEXT } from '../analytics/lib/expr.js';
 import { toTable, runPipeline, inferType, toCSV, formatValue, profile, aggregate, median, MAX_UNNEST_ROWS } from '../analytics/lib/engine.js';
 import { toHash, parseHash, emptySpec, emptyChart, describeStep, describeChart, MAX_STEPS } from '../analytics/lib/spec.js';
@@ -660,13 +661,13 @@ test('page code: every <option value> built from text is escaped', () => {
 async function served(path) { return fetch(BASE + path).then(r => r.ok).catch(() => false); }
 const shownCount = (rows, cols, from) => `${num(rows)} ${rows === 1 ? 'row' : 'rows'} × ${num(cols)} ${cols === 1 ? 'column' : 'columns'}${from != null && from !== rows ? ` · from ${num(from)}` : ''}`;
 
-test('page: pick a dataset, group it, chart it, and reopen the analysis from its address', async t => {
+test('page: pick a dataset, group it, chart it, and reopen the analysis from its address', pageTest, async t => {
   if (!(await served('/analytics/'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
   const cat = await fetch(`${BASE}/${CAT_FILE}`).then(r => (r.ok ? r.json() : null)).catch(() => null);
   if (!cat) { t.skip('no catalogue'); return; }
   const id = cat.datasets.some(d => d.id === 'realtime-wars') ? 'realtime-wars' : cat.datasets[0].id;
   const ds = cat.datasets.find(d => d.id === id);
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
@@ -715,9 +716,9 @@ test('page: pick a dataset, group it, chart it, and reopen the analysis from its
   }
 });
 
-test('page: theme, phone width, Copy for AI, exports, a map and the size limit (test catalogue)', async t => {
+test('page: theme, phone width, Copy for AI, exports, a map and the size limit (test catalogue)', pageTest, async t => {
   if (!(await served('/analytics/test-fixtures/catalog.json'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
     await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: BASE });
@@ -784,9 +785,9 @@ test('page: theme, phone width, Copy for AI, exports, a map and the size limit (
   }
 });
 
-test('page: the first load is light; chart libraries wait for a chart', async t => {
+test('page: the first load is light; chart libraries wait for a chart', pageTest, async t => {
   if (!(await served('/analytics/'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const seen = [];
@@ -802,10 +803,10 @@ test('page: the first load is light; chart libraries wait for a chart', async t 
   }
 });
 
-test('page: optional SQL runs in DuckDB (from jsDelivr) and cannot reach files or the web', async t => {
+test('page: optional SQL runs in DuckDB (from jsDelivr) and cannot reach files or the web', pageTest, async t => {
   if (!(await served('/analytics/test-fixtures/catalog.json'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
   if (!(await fetch('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.32.0/package.json').then(r => r.ok).catch(() => false))) { t.skip('jsDelivr is not reachable'); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [], hosts = new Set();
@@ -849,9 +850,9 @@ const hostileData = () => ({ generated: XSS, records: [
   { name: 'ok', [XSS]: 'https://example.com/"><img src=x onerror=window.__xss=1>', link: 'https://example.com/a', n: 2 },
   { name: XSS, [XSS]: XSS, link: 'https://example.com/b"onmouseover="window.__xss=1', n: 3 }
 ] });
-test('page: hostile catalogue text, data and addresses are shown as text, never run', async t => {
+test('page: hostile catalogue text, data and addresses are shown as text, never run', pageTest, async t => {
   if (!(await served('/analytics/'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await launch();
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     await context.route('**/integration/catalog.json*', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(hostileCatalogue()) }));

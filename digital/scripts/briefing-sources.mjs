@@ -12,6 +12,8 @@
 //   cap  optional per-feed limit on stored items (default 150)
 //   perDay  arXiv: at most this many new submissions from each daily announcement (most authors first; see
 //           briefing-feeds.mjs pickDaily); newOnly drops cross-lists and revisions; match keeps only items on topic
+//   mayBeEmpty  optional: the feed is empty on days with nothing to announce (arXiv on Saturdays, Sundays and
+//               holidays: its <skipDays>), so an empty feed still counts as working; any other empty feed is an error
 //   strict  optional: drop items that match no field (feeds that also carry science, business, culture or other policy)
 //   skip / skipUrl / skipCat  optional: titles, addresses and categories that are never stories for this feed
 //   needsCat  optional: drop items without a category (OpenAI's uncategorised posts are customer stories)
@@ -36,14 +38,20 @@
 export const TIERS = { 1: 'Flagship journal', 2: 'Major journal, lab or agency', 3: 'Preprint, institute, engineering blog or advocacy', 4: 'Technology journalism and commentary' };
 export const KINDS = { journal: 'Journal', preprint: 'Preprints', lab: 'Labs & companies', research: 'Research institutes', official: 'Government & advisories', news: 'News & commentary' };
 export const DEFAULT_CAP = 150;
+// A refresh is written only if at least this share of the feeds answers with items (or "not modified", or an empty
+// arXiv announcement); otherwise the build exits 1 and leaves the store as it was. The data test holds the stored
+// counts to the same share. 75% is 60 of the 79 feeds: a normal run has 78, and losing arXiv (11) and nature.com (7)
+// together still leaves 61.
+export const MIN_WORKING_SHARE = 0.75;
 
 const S = (id, outlet, section, url, feed, kind, tier, fields, qid, extra = {}) =>
   ({ id, outlet, name: section ? `${outlet} · ${section}` : outlet, url, feed, kind, tier, fields, qid, ...extra });
 
-// arXiv: one feed per category, new submissions only, a few a day (see pickDaily).
+// arXiv: one feed per category, new submissions only, a few a day (see pickDaily). arXiv announces Sunday to Thursday
+// evenings (US Eastern), so its feeds are empty from Saturday to early Monday (UTC) and on holidays.
 const ARXIV = (code, name, fields, perDay, extra = {}) =>
   S(`arxiv-${code.toLowerCase().replace(/^cs\./, '').replace(/[^a-z]+/g, '')}`, 'arXiv', `${code} · ${name}`, `https://arxiv.org/list/${code}/new`,
-    `https://rss.arxiv.org/rss/${code}`, 'preprint', 3, fields, 'Q118398', { perDay, newOnly: true, cap: perDay * 7, ...extra });
+    `https://rss.arxiv.org/rss/${code}`, 'preprint', 3, fields, 'Q118398', { perDay, newOnly: true, cap: perDay * 7, mayBeEmpty: true, ...extra });
 // quant-ph is all of quantum physics: keep quantum computing and quantum information.
 const QUANTUM_INFO = /qubit|qudit|quantum (?:comput|circuit|algorithm|error|advantage|supremacy|processor|network|internet|key|software|simulat|machine learning|device|hardware|memor|repeater|communication|cryptograph|information|gate|annealing|sensing)|error[- ]correct|fault[- ]toleran|logical qubit|surface code|stabili[sz]er|entangle|\bQKD\b|\bNISQ\b|variational quantum|\bQAOA\b|teleportation|magic state|post-quantum/i;
 // Nature Portfolio subject feeds: Scientific Reports is left out (a mega-journal; the flagship journals come through).

@@ -9,6 +9,10 @@ on:
       - 'registry.json'
       - 'battlefield/**/data/**'
       - 'lake/data/index.json'
+      - 'national/data/index.json'
+      - 'science/progress/data/events.json'
+      - 'kardashev/data/**'
+      - 'fe/learning/*.md'
   pull_request:
     paths:
       - 'kino/**'
@@ -29,4 +33,7 @@ jobs:
       - run: node kino/scripts/build-index.mjs --offline
       - name: Built files are up to date
         run: git diff --exit-code -- kino/data/index.json kino/data/media.json || (echo "Run node kino/scripts/build-index.mjs and commit kino/data." && exit 1)
-      - run: node --test tests/kino.test.mjs
+      - name: Kino tests (the page tests need a browser and are left out)
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/kino.test.mjs

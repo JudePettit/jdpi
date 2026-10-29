@@ -1,5 +1,6 @@
 // Timeline of Progress (Natural Science): the curated seed, the built data (science/progress/data/events.json), the
-// placement rules and the lake adapter. The page test runs when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787).
+// placement rules and the lake adapter. The page test runs when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787), and
+// never with PRP_PAGES=0 (the refresh workflow's check before it commits).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
@@ -8,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { SEED } from '../science/scripts/progress-seed.mjs';
 import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, distanceKm, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
 import { progress, ADAPTERS } from '../lake/scripts/adapters.mjs';
+import { pageTest, launch } from './tools/pages.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const FILE = join(ROOT, 'science/progress/data/events.json');
@@ -139,9 +141,8 @@ test('lake adapter: breakthroughs, scientists and institutions with deep links',
 });
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
-test('page: deep link, slider, discipline filter and tabs', { skip: !BASE && 'set JDPI_URL to test the page' }, async () => {
-  const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async () => {
+  const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));

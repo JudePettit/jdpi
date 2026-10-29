@@ -1,0 +1,27 @@
+name: Check data freshness
+# Daily, after the morning refreshes: every store is younger than about twice its schedule, each refresh workflow's
+# last run succeeded, the site serves the repository's latest data, and the JSON API, the MCP server and llms.txt
+# answer (.github/scripts/freshness.mjs). This run failing is how a stalled data job shows up, even one GitHub never
+# started; the run's summary page has the table.
+on:
+  schedule:
+    - cron: '33 9 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: freshness
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node .github/scripts/freshness.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

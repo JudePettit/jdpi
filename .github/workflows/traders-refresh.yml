@@ -3,26 +3,54 @@ name: Refresh Auto Trader data
 # 13F holdings get US tickers from OpenFIGI (cached in figi-cache.json); an optional OPENFIGI_API_KEY secret speeds that up.
 on:
   schedule:
-    - cron: '41 5 * * 2'
+    - cron: '41 3 * * 2'
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: traders-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
-      - run: node traders/scripts/build-congress.mjs
-      - run: node traders/scripts/build-13f.mjs
+      # The House trades and the 13F holdings come from different places and are committed separately, so a problem with
+      # one never holds back the other's refresh; either one failing still ends the run red.
+      - name: Build the House trades
+        id: congress
+        run: node traders/scripts/build-congress.mjs
+      - name: Test the new House trades
+        id: congresstest
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/traders.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: traders/data/congress.json traders/scripts/ptr-cache.json
+          message: 'Auto Trader: weekly House trades refresh'
+      - name: Put back the committed House trades
+        if: ${{ !cancelled() && steps.congresstest.outcome != 'success' }}
+        run: git checkout -- traders/data/congress.json traders/scripts/ptr-cache.json
+      - name: Build the 13F holdings
+        id: holdings
+        if: ${{ !cancelled() }}
+        run: node traders/scripts/build-13f.mjs
         env:
           OPENFIGI_API_KEY: ${{ secrets.OPENFIGI_API_KEY }}
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add traders/data traders/scripts/ptr-cache.json traders/scripts/figi-cache.json
-          git diff --cached --quiet || git commit -m "Auto Trader: weekly refresh" && git pull --rebase && git push
+      - name: Test the new 13F holdings
+        id: holdingstest
+        if: ${{ !cancelled() && steps.holdings.outcome == 'success' }}
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/traders.test.mjs
+      - if: ${{ !cancelled() && steps.holdingstest.outcome == 'success' }}
+        uses: ./.github/actions/commit-data
+        with:
+          paths: traders/data/investors.json traders/scripts/figi-cache.json
+          message: 'Auto Trader: weekly 13F holdings refresh'

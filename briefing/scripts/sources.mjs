@@ -13,6 +13,12 @@ export const POSITIONS = [
   { key: 'far_right', label: 'Far right' },
 ];
 export const PER_POSITION = 10;
+// A refresh is written only if at least MIN_WORKING_SHARE of the catalogue returns fresh stories (an active publisher
+// or a reserve) and every position has at least MIN_ACTIVE active publishers; otherwise the build exits 1 and leaves
+// the store as it was. The data test holds the stored file to the same numbers. 75% is 48 of the 64 feeds: a normal
+// run has 58–62 (four feeds are dead on most days). The far right has had no spare feed on some runs, so one more
+// failure there must not stop the refresh, but losing three of its ten would.
+export const MIN_WORKING_SHARE = 0.75, MIN_ACTIVE = PER_POSITION - 2;
 // [id, name, position, country, feed, caution?]
 export const SOURCES = [
   // ---- Far left

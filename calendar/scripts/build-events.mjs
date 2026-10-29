@@ -3,7 +3,8 @@
 //        [--atlas=<political-atlas folder>] [--news-from=YYYY-MM-DD] [--allow-drop]
 //   node calendar/scripts/enrich-summaries.mjs        (then: a plain-text summary for every event with an article)
 // The build stops without writing if a type of event with more than 20 records would lose more than half of them
-// (a failed source); --allow-drop writes anyway, for a deliberate change.
+// (a failed source), or one with more than 10 since the news start or in the 18-month outlook, or half the news items
+// (guard.mjs); --allow-drop writes anyway, for a deliberate change.
 // Sources:
 //   - H&P Retrospective (Archigos + Wikidata): new leaders, irregular seizures of power, elections, referendums
 //   - Political Atlas (political-atlas/data/countries/*.json, with --atlas): each country's national elections, held
@@ -31,7 +32,7 @@ import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from '
 import { currentEvents } from './current-events.mjs';
 import { listEvents } from './wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from './outlook.mjs';
-import { lostTypes } from './guard.mjs';
+import { lostEvents, refuseIfLost } from './guard.mjs';
 
 const args = process.argv.slice(2);
 const option = name => args.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -108,12 +109,18 @@ if (acdPath) {
 const SPARQL = 'https://query.wikidata.org/sparql';
 async function sparql(q) {
   for (let i = 0; ; i++) {
-    const res = await fetch(SPARQL + '?format=json&query=' + encodeURIComponent(q), { headers: { 'User-Agent': 'JDP-Iq Political Calendar (https://jdpi.pages.dev)', Accept: 'application/sparql-results+json' } });
-    if (res.ok) return (await res.json()).results.bindings;
-    if (i > 3) throw new Error(`SPARQL HTTP ${res.status}`);
+    // A refused connection or a body cut off mid-read is retried like an HTTP error, five tries in all.
+    try {
+      const res = await fetch(SPARQL + '?format=json&query=' + encodeURIComponent(q), { headers: { 'User-Agent': 'JDP-Iq Political Calendar (https://jdpi.pages.dev)', Accept: 'application/sparql-results+json' } });
+      if (res.ok) return (await res.json()).results.bindings;
+      if (i > 3) throw new Error(`SPARQL HTTP ${res.status}`);
+    } catch (e) { if (i > 3) throw e; }
     await new Promise(r => setTimeout(r, 5000 * (i + 1)));
   }
 }
+// A source that fails is skipped with a warning the workflow run shows; the guard then decides whether what is left is
+// enough to write.
+const skipped = (what, err) => console.log(`::warning title=Calendar::${what} skipped: ${err.message}`);
 // minLinks: Wikipedia languages an item needs; recentLinks: the bar for items from the last two years or upcoming.
 // direct: instances of the class itself, not its subclasses. dates: the date properties to read (court rulings are
 // dated by their publication, P577).
@@ -197,7 +204,7 @@ for (const k of KINDS) {
       n++;
     }
     console.log(`Wikidata ${k.type} ${k.cls}: ${n}`);
-  } catch (err) { console.warn(`Wikidata ${k.type} ${k.cls} skipped:`, err.message); }
+  } catch (err) { skipped(`Wikidata ${k.type} ${k.cls}`, err); }
 }
 
 // ---- Resignations: office-holders whose term ended with "resignation" (P39 with end cause Q796919)
@@ -235,7 +242,7 @@ try {
       summary: `${x.name} resigned as ${list} on ${longDate(x.date)}${x.start && x.start < x.date ? `, having held ${pos.length > 1 ? 'office' : 'the office'} since ${longDate(x.start)}` : ''}.` }, 'wikidata');
   }
   console.log(`Wikidata resignations (position held, end cause resignation): ${byPerson.size}`);
-} catch (err) { console.warn('Wikidata resignations skipped:', err.message); }
+} catch (err) { skipped('Wikidata resignations', err); }
 
 // ---- Landmark events that the Wikidata classes above don't capture
 const LANDMARKS = [
@@ -276,7 +283,7 @@ try {
   undated = new Set([...unknown].map(wiki));
   calendarsFrom = first;
   console.log('Wikipedia lists:', log.join(' · '));
-} catch (err) { console.warn('Wikipedia lists skipped:', err.message); }
+} catch (err) { skipped('Wikipedia lists', err); }
 
 // ---- Political Atlas: each country's national elections, as the Atlas keeps them (outlook.mjs)
 if (atlasDir) {
@@ -290,7 +297,7 @@ try {
   const news = await currentEvents(NEWS_FROM, TODAY);
   for (const e of news.events) add(e, 'news');
   console.log(`Current events ${NEWS_FROM}…${TODAY}: ${news.days} days, ${news.items} items, ${news.events.length} events`);
-} catch (err) { console.warn('Current events skipped:', err.message); }
+} catch (err) { skipped('Current events', err); }
 
 // ---- Ballots: one record per vote and round, with the best date known; then the expected events whose day has passed
 // are held or dropped (outlook.mjs).
@@ -326,12 +333,10 @@ for (const { via, precision, ...e } of kept) if (!unique.has(`${e.date}|${e.titl
 
 const all = [...unique.values()].sort((a, b) => a.date.localeCompare(b.date) || a.country.localeCompare(b.country));
 
-// ---- Guard (guard.mjs): stop before writing if a type of event would lose more than half of its records.
-const lost = lostTypes(previous, all);
-if (lost.length && !args.includes('--allow-drop')) {
-  console.error(`Not written: ${lost.join(', ')}. A source probably failed; --allow-drop writes anyway.`);
-  process.exit(1);
-}
+// ---- Guard (guard.mjs): stop before writing if a type of event would lose more than half of its records over the
+// whole history, since the news start or in the 18-month outlook, or if half the news items would go. Both builds are
+// counted over today's days, so the window moving on does not count as a loss.
+refuseIfLost(lostEvents(previous, all, { from: NEWS_FROM, today: TODAY, to: shiftMonths(TODAY, 18) }));
 
 // ---- write one file per decade
 mkdirSync(DATA, { recursive: true });

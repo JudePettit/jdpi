@@ -266,3 +266,40 @@ test('phone drawer: out of the tab order when closed, modal when open, closed by
     assert.equal(await p.evaluate(() => location.hash), '#/ns/progress');
   } finally { await p.close(); }
 });
+
+test('the sidebar can be hidden to give the page the whole width, remembered, and "/" brings it back', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  try {
+    const p = await ctx.newPage();
+    const errors = []; p.on('pageerror', e => errors.push(e.message));
+    await p.goto(`${BASE}/#/rt/briefing`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#nav .nav-item');
+    const state = () => p.evaluate(() => ({ side: getComputedStyle(document.querySelector('#side')).display,
+      main: Math.round(document.querySelector('#main').getBoundingClientRect().width), expanded: document.querySelector('#collapse').getAttribute('aria-expanded') }));
+    const open = await state();
+    assert.equal(open.side, 'flex');
+    await p.click('#collapse');
+    const shut = await state();
+    assert.deepEqual([shut.side, shut.expanded], ['none', 'false']);
+    assert.ok(shut.main > open.main, `the page widens: ${open.main} -> ${shut.main}`);
+    assert.equal(await p.getAttribute('#collapse', 'aria-label'), 'Show navigation');
+    // Remembered, and applied before first paint.
+    await p.reload({ waitUntil: 'domcontentloaded' });
+    assert.equal((await state()).side, 'none');
+    // "/" brings the sidebar back at its search box.
+    await p.keyboard.press('/');
+    assert.equal((await state()).side, 'flex');
+    assert.equal(await p.evaluate(() => document.activeElement?.id), 'find');
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+  // On a phone the sidebar is the drawer: no switch, and ☰ still opens it.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const p = await phone.newPage();
+    await p.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#menu');
+    assert.equal(await p.evaluate(() => getComputedStyle(document.querySelector('#collapse')).display), 'none');
+    await p.click('#menu');
+    assert.equal(await p.evaluate(() => document.querySelector('#side').classList.contains('open')), true);
+  } finally { await phone.close(); }
+});

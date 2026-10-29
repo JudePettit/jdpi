@@ -398,7 +398,7 @@ function setupFind() {
     } else if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input')); input.blur(); }
   });
   // On a phone the search box is in the drawer, so "/" opens the drawer at it when it is closed.
-  document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement?.tagName)) { e.preventDefault(); if (phone.matches && !$('#side').classList.contains('open')) setDrawer(true, true); else input.focus(); } });
+  document.addEventListener('keydown', e => { if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement?.tagName)) { e.preventDefault(); if (phone.matches && !$('#side').classList.contains('open')) setDrawer(true, true); else { if (isCollapsed()) setCollapsed(false, false); input.focus(); } } });
 }
 
 /* --- Skip link: focus the workspace (the page in its frame, or the heading of a shell page) without touching the
@@ -437,6 +437,28 @@ function setDrawer(open, toSearch = false) {
   }
 }
 function closeMenu() { setDrawer(false); }
+
+/* --- Sidebar collapse -----------------------------------------------------------------------------------------------
+   Above 900 px the sidebar can be hidden so the page you are looking at gets the whole width; the choice is remembered
+   in this browser (prp.sidebar) and applied before first paint by index.html. At 900 px and below the sidebar is the
+   phone drawer instead, so the switch is hidden there and the class does nothing (shell.css). */
+const SIDE_KEY = 'prp.sidebar';
+const isCollapsed = () => document.documentElement.classList.contains('side-collapsed') && !phone.matches;
+function setCollapsed(collapsed, remember = true) {
+  document.documentElement.classList.toggle('side-collapsed', collapsed);
+  const b = $('#collapse');
+  b.setAttribute('aria-expanded', String(!collapsed));
+  b.setAttribute('aria-label', collapsed ? 'Show navigation' : 'Hide navigation');
+  b.title = collapsed ? 'Show navigation' : 'Hide navigation (give the page the whole width)';
+  b.textContent = collapsed ? '☰' : '⇤';
+  // Hiding the sidebar while focus is in it would drop focus onto the page body: keep it on the switch.
+  if (collapsed && $('#side').contains(document.activeElement)) b.focus();
+  if (remember) { try { if (collapsed) localStorage.setItem(SIDE_KEY, 'collapsed'); else localStorage.removeItem(SIDE_KEY); } catch { /* private mode */ } }
+}
+function setupCollapse() {
+  setCollapsed(document.documentElement.classList.contains('side-collapsed'), false); // the label and icon match what index.html applied
+  $('#collapse').addEventListener('click', () => setCollapsed(!document.documentElement.classList.contains('side-collapsed')));
+}
 function setupMenu() {
   // A click from the keyboard (Enter or Space) has detail 0: the drawer then opens at its search box.
   $('#menu').addEventListener('click', e => setDrawer(!$('#side').classList.contains('open'), e.detail === 0));
@@ -453,6 +475,7 @@ function setupMenu() {
   setupTheme();
   setupSkip();
   setupMenu();
+  setupCollapse();
   try { state.registry = await fetch('registry.json', { cache: 'no-cache' }).then(r => r.json()); }
   catch (err) { $('#view').innerHTML = '<div class="page"><div class="prp-note">Could not load the module registry. Serve this folder over HTTP.</div></div>'; console.error(err); return; }
   renderNav();

@@ -10,7 +10,7 @@
   <link rel="icon" href="design/brand-prp.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <script>/* Apply the saved theme and sidebar before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;if(localStorage.getItem('prp.sidebar')==='collapsed')document.documentElement.classList.add('side-collapsed')}catch(e){}</script>
   <link rel="stylesheet" href="design/prp.css">
   <link rel="stylesheet" href="shell.css">
 </head>
@@ -43,6 +43,8 @@
     <div class="main" id="main">
       <header class="top">
         <button class="menu" id="menu" type="button" aria-label="Open navigation" aria-controls="side" aria-expanded="false">☰</button>
+        <!-- Above 900 px: hide the sidebar to give the page the whole width (shell.js, "Sidebar collapse") -->
+        <button class="collapse" id="collapse" type="button" aria-controls="side" aria-expanded="true" aria-label="Hide navigation" title="Hide navigation (give the page the whole width)">⇤</button>
         <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
         <div class="top-actions" id="top-actions"></div>
       </header>

@@ -23,9 +23,9 @@ const HOUR = 3600e3;
 // monthly. `live` stores are also compared with the copy the site serves.
 const generated = j => j.generated;
 const STORES = [
-  { file: 'science/briefing/data/stories.json', workflow: 'science-briefing-refresh.yml', every: 6, live: true },
-  { file: 'econ/briefing/data/stories.json', workflow: 'econ-briefing-refresh.yml', every: 6, live: true },
-  { file: 'digital/briefing/data/stories.json', workflow: 'digital-briefing-refresh.yml', every: 6, live: true },
+  { file: 'science/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
+  { file: 'econ/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
+  { file: 'digital/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
   { file: 'briefing/data/latest.json', workflow: 'briefing-refresh.yml', every: 12 },
   { file: 'calendar/data/2020s.json', workflow: 'calendar-refresh.yml', every: 24, live: true },
   { file: 'integration/catalog.json', workflow: 'calendar-refresh.yml', every: 24 },

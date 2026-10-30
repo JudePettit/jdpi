@@ -4,13 +4,13 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
-<title>Learning · Finance &amp; Economics · PRP</title>
-<meta name="description" content="PRP courses with quizzes: Finance and Economics (Money Management), Politics (Retrospective Intelligence) and OSINT Training (Realtime Intelligence).">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<title>Learning · Finance &amp; Economics · VM</title>
+<meta name="description" content="Vitruvian Manager courses with quizzes: Finance and Economics (Money Management), Politics (Retrospective Geopolitics) and Intel Training in OSINT, SIGINT and GEOINT (International Mystery Management).">
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="mm" data-module="learning" data-shell="../" defer></script>
 <script>/* Each course belongs to a module: tell the connector before it runs, and apply the saved theme before first paint. */
-(function(){var c=new URLSearchParams(location.search).get('course'),g={politics:['rs','learning-politics','Learning · Politics'],osint:['oi','osint-training','Intel Training'],sigint:['oi','osint-training','Intel Training'],geoint:['oi','osint-training','Intel Training']}[c]||['mm','learning','Learning · Finance & Economics'],s=document.querySelector('script[src*="prp-bar.js"]');if(s){s.dataset.suite=g[0];s.dataset.module=g[1]}document.documentElement.dataset.suite=g[0];document.title=g[2]+' · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
+(function(){var c=new URLSearchParams(location.search).get('course'),g={politics:['rs','learning-politics','Learning · Politics'],osint:['oi','osint-training','Intel Training'],sigint:['oi','osint-training','Intel Training'],geoint:['oi','osint-training','Intel Training']}[c]||['mm','learning','Learning · Finance & Economics'],s=document.querySelector('script[src*="prp-bar.js"]');if(s){s.dataset.suite=g[0];s.dataset.module=g[1]}document.documentElement.dataset.suite=g[0];document.title=g[2]+' · VM';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <style>
 *{box-sizing:border-box}[hidden]{display:none!important}
 button{font:inherit;cursor:pointer}
@@ -112,10 +112,10 @@ const COURSES = {
 const GROUPS = {
   mm: { module: 'Money Management', submodule: 'Learning · Finance & Economics', note: 'Not financial advice: worked examples are for learning only.',
     intro: 'Two courses: Finance, a university-style introduction with worked examples, and Economics, taught through its great thinkers and rival schools.' },
-  rs: { module: 'Retrospective Intelligence', submodule: 'Learning · Politics', note: 'Each movement is presented as its own thinkers explained it, then what happened when it held power and what its critics say.',
+  rs: { module: 'Retrospective Geopolitics', submodule: 'Learning · Politics', note: 'Each movement is presented as its own thinkers explained it, then what happened when it held power and what its critics say.',
     intro: 'The political spectrum through the leaders and thinkers who shaped it, with quizzes.' },
-  oi: { module: 'i-Spy', submodule: 'Intel Training', note: 'Use these methods lawfully and ethically: respect each tool’s terms, people’s privacy and the law where you work. Signals work is receive-only: never transmit without a licence, jam, or try to read private communications.',
-    intro: 'Three courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT, SIGINT, and GEOINT & IMINT, and how to use PRP’s dashboards for each.' },
+  oi: { module: 'International Mystery Management', submodule: 'Intel Training', note: 'Use these methods lawfully and ethically: respect each tool’s terms, people’s privacy and the law where you work. Signals work is receive-only: never transmit without a licence, jam, or try to read private communications.',
+    intro: 'Three courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT, SIGINT, and GEOINT & IMINT, and how to use Vitruvian Manager’s dashboards for each.' },
 };
 const params = new URLSearchParams(location.search);
 let course = COURSES[params.get('course')] ? params.get('course') : 'finance';
@@ -235,7 +235,7 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
 
 function sources() {
   const file = COURSES[course].file;
-  $('#sources').innerHTML = `<p><b>About this course.</b> ${doc?.meta?.sources ? inline(doc.meta.sources) + ' ' : ''}The text is written for PRP and kept as plain text (<a href="${esc(file)}" target="_blank" rel="noreferrer">fe/${esc(file)}</a>); quotations name their source in the text. ${esc(G.note)}</p>
+  $('#sources').innerHTML = `<p><b>About this course.</b> ${doc?.meta?.sources ? inline(doc.meta.sources) + ' ' : ''}The text is written for Vitruvian Manager and kept as plain text (<a href="${esc(file)}" target="_blank" rel="noreferrer">fe/${esc(file)}</a>); quotations name their source in the text. ${esc(G.note)}</p>
     <p><b>Progress.</b> Completed lessons are saved only in this browser; quiz answers are not stored or sent anywhere.</p>`;
 }
 

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="vml-title vml-desc">
+  <title id="vml-title">Loading</title>
+  <desc id="vml-desc">The Vitruvian Manager runs on his four legs inside his wheel until it turns, then rolls away to the right, spinning inside it and dragging the page in behind him.</desc>
+  <!-- A 3 s loop, CSS only, so it plays as an <img> as well as inline. 0-40% (1.2 s): the figure runs in place, leaning
+       12° into it, his four legs scissoring every 0.4 s, while the wheel spins up from rest (ease-in to 200°, clockwise:
+       his feet push the rim's foot backwards). 40-76%: wheel and figure roll right from x 60 to 260, out of the box, at
+       constant speed; the wheel turns the 240° that rolling 200 px on a radius of 48 takes (it rolls, it does not skid)
+       and the figure tumbles a full turn inside it. Behind them the page comes in: the four PRP bars grow from the left,
+       each one's right end held at the hub (hidden by the disc) until the hub passes its length, so its scale runs from
+       40 / length at 40% to 1 at 40% + 36% × (length - 40) / 200. 76-92% the page stands alone; it fades as the next
+       loop fades the wheel in at the left (the bars switch on at 6%, once the disc in front of them is opaque). The
+       wheel is a dark disc (the tile colour) with a four-colour rim, so the white figure reads on light and dark pages
+       alike. Reduced motion: every animation stops and the base styles hold one still frame, the figure standing in his
+       wheel at the centre, no page. Class and keyframe names carry a vml- prefix, as an inlined copy's <style> is global
+       to the page. -->
+  <style>
+    .vml-u{transform:translate(100px,100px);animation:vml-u 3s infinite}
+    .vml-w{animation:vml-w 3s infinite}
+    .vml-f{animation:vml-f 3s infinite}
+    .vml-bob{animation:vml-bob .2s ease-in-out infinite alternate}
+    .vml-l{animation:vml-run .2s ease-in-out infinite alternate}
+    .vml-l1{transform:rotate(15deg)}
+    .vml-l2{transform:rotate(-15deg);animation-delay:-.2s}
+    .vml-l3{transform:rotate(32deg);animation-delay:-.1s}
+    .vml-l4{transform:rotate(-32deg);animation-delay:-.3s}
+    .vml-b{opacity:0;transform-box:fill-box;transform-origin:0 50%;animation:3s linear infinite}
+    .vml-b1{animation-name:vml-b1}.vml-b2{animation-name:vml-b2}.vml-b3{animation-name:vml-b3}.vml-b4{animation-name:vml-b4}
+    @keyframes vml-u{0%{transform:translate(60px,100px);opacity:0}5%{opacity:1}40%{transform:translate(60px,100px);animation-timing-function:linear}76%,100%{transform:translate(260px,100px);opacity:1}}
+    @keyframes vml-w{0%{transform:rotate(0);animation-timing-function:cubic-bezier(.55,0,1,.45)}40%{transform:rotate(200deg);animation-timing-function:linear}76%,100%{transform:rotate(440deg)}}
+    @keyframes vml-f{0%{transform:rotate(0);animation-timing-function:ease-out}30%,40%{transform:rotate(12deg);animation-timing-function:cubic-bezier(.45,0,.85,.55)}76%,100%{transform:rotate(372deg)}}
+    @keyframes vml-bob{to{transform:translateY(-1.6px)}}
+    @keyframes vml-run{from{transform:rotate(-32deg)}to{transform:rotate(32deg)}}
+    @keyframes vml-b1{0%,5%{opacity:0;transform:scaleX(.25)}6%,92%{opacity:1}40%{transform:scaleX(.25)}61.6%,100%{transform:scaleX(1)}100%{opacity:0}}
+    @keyframes vml-b2{0%,5%{opacity:0;transform:scaleX(.357)}6%,92%{opacity:1}40%{transform:scaleX(.357)}53%,100%{transform:scaleX(1)}100%{opacity:0}}
+    @keyframes vml-b3{0%,5%{opacity:0;transform:scaleX(.294)}6%,92%{opacity:1}40%{transform:scaleX(.294)}57.3%,100%{transform:scaleX(1)}100%{opacity:0}}
+    @keyframes vml-b4{0%,5%{opacity:0;transform:scaleX(.5)}6%,92%{opacity:1}40%{transform:scaleX(.5)}47.2%,100%{transform:scaleX(1)}100%{opacity:0}}
+    @media (prefers-reduced-motion:reduce){.vml-u,.vml-w,.vml-f,.vml-bob,.vml-l,.vml-b{animation:none}}
+  </style>
+  <!-- The page: the four bars of the PRP tile (blue 20, amber 14, green 17, violet 10, here 8 px a unit) -->
+  <rect class="vml-b vml-b1" x="20" y="69" width="160" height="8" rx="4" fill="#6da7ec"/>
+  <rect class="vml-b vml-b2" x="20" y="87" width="112" height="8" rx="4" fill="#d9a35c"/>
+  <rect class="vml-b vml-b3" x="20" y="105" width="136" height="8" rx="4" fill="#4fbf85"/>
+  <rect class="vml-b vml-b4" x="20" y="123" width="80" height="8" rx="4" fill="#a193f0"/>
+  <g class="vml-u">
+    <ellipse cy="55" rx="34" ry="3" fill="#14181f" opacity=".18"/>
+    <!-- The wheel (Leonardo's circle): disc and rim, the rim in four 90° arcs (circumference 301.6: 70.4 drawn, 5 gap) -->
+    <g class="vml-w" fill="none" stroke-width="5" stroke-dasharray="70.4 231.2">
+      <circle r="48" fill="#14181f" stroke="none"/>
+      <circle r="48" stroke="#6da7ec"/>
+      <circle r="48" stroke="#d9a35c" stroke-dashoffset="-75.4"/>
+      <circle r="48" stroke="#4fbf85" stroke-dashoffset="-150.8"/>
+      <circle r="48" stroke="#a193f0" stroke-dashoffset="-226.2"/>
+    </g>
+    <!-- The figure, navel at the hub: design/brand-vm.svg at about half size. The raised hands grip the rim; each leg
+         hangs from its hip (±6, 9) in its own group, so its swing turns about the hip (an SVG element's CSS transform
+         turns about its own user-space origin). -->
+    <g class="vml-f"><g class="vml-bob">
+      <g fill="none" stroke="#f3f4f6" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M0-14V5.5M-6 9Q0 2 6 9M-38-9H38M-6-9L-35.5-27.5M6-9L35.5-27.5"/>
+        <g transform="translate(-6 9)"><path class="vml-l vml-l1" d="M0 0V36"/></g>
+        <g transform="translate(6 9)"><path class="vml-l vml-l2" d="M0 0V36"/></g>
+        <g transform="translate(-6 9)"><path class="vml-l vml-l3" d="M0 0V36"/></g>
+        <g transform="translate(6 9)"><path class="vml-l vml-l4" d="M0 0V36"/></g>
+      </g>
+      <circle cy="-19.5" r="5.6" fill="#f3f4f6"/>
+      <path d="M-7.2-22.5a7.2 7.2 0 0 1 14.4 0z" fill="#d9a35c"/>
+      <rect x="-9.6" y="-24" width="19.2" height="3.2" rx="1.6" fill="#d9a35c"/>
+    </g></g>
+  </g>
+</svg>

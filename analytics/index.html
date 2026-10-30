@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Data Analytics · PRP</title>
-<meta name="description" content="Explore and chart PRP's own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in PRP's style, export them, and hand the analysis to an AI assistant.">
+<title>Data Analytics · VM</title>
+<meta name="description" content="Explore and chart Vitruvian Manager's own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in Vitruvian Manager's style, export them, and hand the analysis to an AI assistant.">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../design/prp.css">
 <link rel="stylesheet" href="analytics.css">
 <script src="../design/prp-bar.js" data-suite="ds" data-module="data-analytics" data-shell="../" defer></script>
@@ -18,7 +18,7 @@
   <header class="front">
     <div class="prp-eyebrow">Digital Science <span class="sep">·</span> Data Analytics</div>
     <h1 class="prp-title">Data Analytics</h1>
-    <p class="prp-dek">Explore and chart PRP's own data. Pick a dataset, filter, group and aggregate it, draw a chart and export it, or copy the whole analysis for an AI assistant. It all runs in your browser, and the address holds the analysis, so a link shares it.</p>
+    <p class="prp-dek">Explore and chart Vitruvian Manager's own data. Pick a dataset, filter, group and aggregate it, draw a chart and export it, or copy the whole analysis for an AI assistant. It all runs in your browser, and the address holds the analysis, so a link shares it.</p>
     <div class="prp-meta" id="meta"><span>Loading the catalogue…</span></div>
   </header>
 
@@ -43,7 +43,7 @@
         <section class="prp-panel" id="ds-panel" aria-labelledby="ds-title">
           <div class="prp-panel-body intro" id="intro">
             <h2 class="prp-h2" id="ds-title">Start with a dataset</h2>
-            <p class="desc">Every dataset PRP publishes is listed on the left (above, on a phone), from the Integration Hub's catalogue. Choose one to see its fields, licence and sources; it loads into this page, where you can transform and chart it.</p>
+            <p class="desc">Every dataset Vitruvian Manager publishes is listed on the left (above, on a phone), from the Integration Hub's catalogue. Choose one to see its fields, licence and sources; it loads into this page, where you can transform and chart it.</p>
             <ul class="examples" id="examples"></ul>
           </div>
         </section>
@@ -123,7 +123,7 @@
             <details id="ai-preview-box"><summary>Preview what is copied</summary><pre id="ai-preview"></pre></details>
             <div class="prp-note">
               <p><b>Use with an AI assistant.</b> “Copy for AI” puts a compact description of this analysis on your clipboard (the dataset, its fields, a small sample, your steps and chart, a link back here and your question) to paste into Claude or another assistant.</p>
-              <p>To let the assistant run queries itself, connect it to PRP's read-only MCP server: it can list the catalogue and run the same query with <code>query_dataset</code>. <a id="hub-link" href="../integration/index.html#tab=mcp">Set it up in the Integration Hub</a>.</p>
+              <p>To let the assistant run queries itself, connect it to Vitruvian Manager's read-only MCP server: it can list the catalogue and run the same query with <code>query_dataset</code>. <a id="hub-link" href="../integration/index.html#tab=mcp">Set it up in the Integration Hub</a>.</p>
               <p>This page stores no keys and calls no AI service; nothing leaves your browser unless you paste it somewhere.</p>
             </div>
           </div>
@@ -143,8 +143,8 @@
   </section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> The datasets are PRP's own published data, listed in the Integration Hub's catalogue (<a href="../integration/catalog.json">integration/catalog.json</a>, <span id="cat-generated">date to follow</span>); each dataset names its own sources and licence above, and they apply to anything you export from it.</p>
-    <p><b>Method.</b> Files load straight from this site into your browser and every step runs there: filters, expression filters and derived columns (a small expression language, never run as code), one row per list item, grouping with count, sum, mean, median, minimum, maximum and distinct values, sorting and limits. On dates a filter value is a period: 2026 is the whole year. Nested objects are spread into dotted columns (<code>place.lat</code>). Charts follow PRP's style: categorical colours in a fixed order, at most eight series (three on scatter plots) with the rest grouped as “Other”, and a table for every chart. Maps match ISO codes and English country names to Natural Earth borders (world-atlas, 1:110m).</p>
+    <p><b>Sources.</b> The datasets are Vitruvian Manager's own published data, listed in the Integration Hub's catalogue (<a href="../integration/catalog.json">integration/catalog.json</a>, <span id="cat-generated">date to follow</span>); each dataset names its own sources and licence above, and they apply to anything you export from it.</p>
+    <p><b>Method.</b> Files load straight from this site into your browser and every step runs there: filters, expression filters and derived columns (a small expression language, never run as code), one row per list item, grouping with count, sum, mean, median, minimum, maximum and distinct values, sorting and limits. On dates a filter value is a period: 2026 is the whole year. Nested objects are spread into dotted columns (<code>place.lat</code>). Charts follow Vitruvian Manager's style: categorical colours in a fixed order, at most eight series (three on scatter plots) with the rest grouped as “Other”, and a table for every chart. Maps match ISO codes and English country names to Natural Earth borders (world-atlas, 1:110m).</p>
     <p><b>Limits.</b> The page asks before loading more than 20 MB and will not load more than 120 MB; for larger data use the Integration Hub's API or MCP server, which query in parts. SQL is optional and runs locally in DuckDB.</p>
     <p><b>Libraries.</b> Observable Plot 0.6.17 and d3 7.9.0 (ISC licence), topojson-client 3.1.0 and world-atlas 2.0.2, and DuckDB-WASM 1.32.0 (MIT) with Apache Arrow 17.0.0 (Apache 2.0) when you use SQL, all pinned on jsDelivr and loaded only when needed.</p>
   </footer>

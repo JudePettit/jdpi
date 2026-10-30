@@ -1,4 +1,4 @@
-// OSINT Dashboard (i-Spy): the pure helpers behind every tab (search syntax per engine, archive and
+// OSINT Dashboard (International Mystery Management): the pure helpers behind every tab (search syntax per engine, archive and
 // RDAP/DNS/certificate/GLEIF/OpenSanctions/GDELT parsing, the case notebook's import and export), the image-metadata
 // reader, the guide renderer and its content files, and the page's static contract (tabs, hookup, tokens only).
 //   node --test tests/osint.test.mjs
@@ -628,17 +628,17 @@ test('guides: the content files render, and every link points somewhere real', (
 test('page: hookup, tabs, tokens only, pinned libraries, no old brand names', () => {
   const html = read('osint/index.html');
   assert.match(html, /<html lang="en" data-suite="oi"/);
-  assert.match(html, /<title>OSINT Dashboard · PRP<\/title>/);
+  assert.match(html, /<title>OSINT Dashboard · VM<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/design\/prp\.css">/);
   assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="osint" data-shell="\.\.\/" defer><\/script>/);
-  assert.match(html, /class="prp-eyebrow">i-Spy <span class="sep">·<\/span> OSINT Dashboard/);
+  assert.match(html, /class="prp-eyebrow">International Mystery Management <span class="sep">·<\/span> OSINT Dashboard/);
   assert.match(html, /class="prp-title">OSINT Dashboard</); assert.match(html, /class="prp-dek"/); assert.match(html, /class="prp-meta"/);
   for (const t of L.TABS) {
     assert.match(html, new RegExp(`<button type="button" role="tab" id="tab-${t.id}" aria-controls="panel-${t.id}" data-tab="${t.id}"`), t.id);
     assert.match(html, new RegExp(`id="panel-${t.id}"[^>]*role="tabpanel"`), t.id);
   }
   const visible = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ');
-  assert.ok(!/JDP-I\b|\bH&amp;P\b|\bF&amp;E\b/.test(visible), 'old brand names');
+  assert.ok(!/JDP-I\b|\bH&amp;P\b|\bF&amp;E\b|\bPRP\b|Personal Resource Planner|i-Spy|Realtime Intelligence/.test(visible), 'old brand names');
   const css = read('osint/osint.css');
   assert.deepEqual(css.match(/#[0-9a-f]{3,8}\b/gi) || [], [], 'no raw colours in page CSS');
   // Guide callouts are "callout tip|warn|bad|legal": a bare rule for one of those names would restyle every callout

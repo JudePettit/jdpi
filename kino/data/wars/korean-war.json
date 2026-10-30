@@ -196,7 +196,7 @@
       "id": "two-koreas",
       "title": "Two Koreas",
       "narration": "The war fixed the division of Korea, with American troops stationed in the South under a defence treaty and North Korea allied to China. It also hardened the Cold War far beyond Korea: the United States rearmed on a large scale, and NATO became a standing military alliance with a permanent command. South Korea, ruled for most of the next three decades by authoritarian governments, became a democracy in 1987 and one of the world's leading industrial economies, while North Korea is still ruled by Kim Il-sung's family and has built nuclear weapons.",
-      "visual": { "kind": "module", "blurb": "South Korea today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "visual": { "kind": "module", "blurb": "South Korea today: its economy, its governance and the pressures on it, in Vitruvian Manager's National Analysis." },
       "link": { "label": "National Analysis · South Korea today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=KOR" },
       "cites": ["stueck-1995", "cumings-2010"]
     }

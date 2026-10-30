@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PRP bridge: a tiny local relay for the PRP SIGINT Dashboard (https://jdpi.pages.dev/sigint/). No dependencies.
+// Vitruvian Manager bridge (prp-bridge.mjs): a tiny local relay for the Vitruvian Manager SIGINT Dashboard (https://jdpi.pages.dev/sigint/). No dependencies.
 //
 // Web pages may only read local receivers that send CORS headers, and an HTTPS page may not load plain-HTTP addresses
 // on your network at all. This script runs on your own computer, listens on localhost only, fetches the endpoints you
@@ -262,7 +262,7 @@ export function createBridge(o) {
   return server;
 }
 
-const HELP = `PRP bridge ${VERSION}: local relay for the PRP SIGINT Dashboard.
+const HELP = `Vitruvian Manager bridge ${VERSION}: local relay for the Vitruvian Manager SIGINT Dashboard.
 Usage: node prp-bridge.mjs [--port ${DEFAULT_PORT}] [--route name=URL ...] [--origin URL ...] [--config bridge.json] [--no-public] [--quiet]
 See the comments at the top of this file, or the dashboard's Overview tab, for examples.`;
 
@@ -277,7 +277,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   v6.on('error', () => {});
   v6.listen(o.port, '::1');
   server.listen(o.port, '127.0.0.1', () => {
-    console.log(`PRP bridge ${VERSION} on http://localhost:${o.port} (loopback only)`);
+    console.log(`Vitruvian Manager bridge ${VERSION} on http://localhost:${o.port} (loopback only)`);
     for (const [k, v] of Object.entries(o.routes)) console.log(`  /local/${k.padEnd(6)} → ${redact(v)}`);
     console.log(`  public relays ${o.public ? 'on (adsb.lol, OpenSky)' : 'off'} · aisstream.io ${o.aisstreamKey ? 'key set' : 'key from the page'}${typeof WebSocket === 'undefined' ? ' (needs Node 22+)' : ''}`);
     console.log(`  allowed origins: ${o.origins.join(', ')}`);

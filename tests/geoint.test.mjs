@@ -440,10 +440,10 @@ test('safety: no tools for finding or profiling private people are named', () =>
 test('page wiring follows the PRP contract', () => {
   const html = read('index.html');
   assert.match(html, /<html lang="en" data-suite="oi" class="prp">/);
-  assert.match(html, /<title>GEOINT &amp; IMINT Dashboard · PRP<\/title>/);
+  assert.match(html, /<title>GEOINT &amp; IMINT Dashboard · VM<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/design\/prp\.css">/);
   assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="geoint" data-shell="\.\.\/" defer><\/script>/);
-  assert.match(html, /class="prp-eyebrow">i-Spy <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
+  assert.match(html, /class="prp-eyebrow">International Mystery Management <span class="sep">·<\/span> GEOINT &amp; IMINT Dashboard</);
   assert.ok(!/JDP-I\b|H&amp;P|F&amp;E/.test(html), 'no old brand names');
   const tabs = [...html.matchAll(/role="tab" id="tab-([a-z]+)" aria-controls="panel-([a-z]+)"/g)];
   assert.deepEqual(tabs.map(t => t[1]), U.TABS);

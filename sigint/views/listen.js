@@ -28,7 +28,7 @@ export function create(ctx, panel) {
     ctx.save({ owrxUrl: base }); open.href = base;
     const problem = via.checked ? '' : mixedContentProblem(base, location.protocol);
     if (problem) { setState('bad', 'Blocked'); $('#ow-info').innerHTML = `<p class="prp-note warn">${esc(problem)}</p>`; return; }
-    if (via.checked && !ctx.bridge.on) { setState('warn', 'Bridge off'); $('#ow-info').innerHTML = '<p class="prp-note warn">Turn on the PRP bridge in the Overview first.</p>'; return; }
+    if (via.checked && !ctx.bridge.on) { setState('warn', 'Bridge off'); $('#ow-info').innerHTML = '<p class="prp-note warn">Turn on the Vitruvian Manager bridge in the Overview first.</p>'; return; }
     setState('', 'Checking…');
     try {
       const s = normaliseOwrxStatus(await fetchReceiverJSON(ctx, { url: `${base}/status.json`, viaBridge: via.checked, route: 'owrx' }));
@@ -40,7 +40,7 @@ export function create(ctx, panel) {
     } catch (e) {
       setState('bad', 'Not reachable');
       ctx.setStatus('rx-owrx', 'bad', explainError(e));
-      $('#ow-info').innerHTML = `<p class="prp-note warn">No status from <code>${esc(base)}/status.json</code>: ${esc(explainError(e))}. OpenWebRX doesn’t send CORS headers, so from this site use the PRP bridge (route <code>owrx</code>). The receiver itself still opens in its own tab.</p>`;
+      $('#ow-info').innerHTML = `<p class="prp-note warn">No status from <code>${esc(base)}/status.json</code>: ${esc(explainError(e))}. OpenWebRX doesn’t send CORS headers, so from this site use the Vitruvian Manager bridge (route <code>owrx</code>). The receiver itself still opens in its own tab.</p>`;
     }
   });
   return { show() {}, hide() {} };

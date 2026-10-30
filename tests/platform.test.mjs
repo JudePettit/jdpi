@@ -1,4 +1,4 @@
-// Platform tests for PRP: the shell, its registry, and a smoke test of every submodule.
+// Platform tests for Vitruvian Manager (internally PRP): the shell, its registry, and a smoke test of every submodule.
 //   PRP_URL=https://jdpi.pages.dev node --test tests/platform.test.mjs      (or a local server: tests/tools/serve.mjs)
 // Submodule-specific suites live with each submodule (e.g. political-atlas/tests).
 import { test, before, after } from 'node:test';
@@ -19,10 +19,12 @@ before(async () => {
 after(async () => { await browser?.close(); });
 
 test('registry is well formed', () => {
-  assert.equal(registry.platform.name, 'PRP');
-  assert.equal(registry.platform.company, 'JDP-Iq');
+  assert.deepEqual([registry.platform.name, registry.platform.fullName, registry.platform.company], ['VM', 'Vitruvian Manager', 'JDP-Iq']);
   assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
-  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Intelligence', 'Retrospective Intelligence', 'i-Spy', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  // A module's name is what the sidebar shows; its title is its overview page's heading and its pages' eyebrow.
+  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Geopolitics', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Realtime Geopolitics', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.ok(!/\bPRP\b|Personal Resource Planner|Realtime Intelligence|Retrospective Intelligence|i-Spy/.test(JSON.stringify(registry)), 'no old product or module name in the registry');
   const ids = modules.map(x => x.m.id);
   assert.equal(new Set(ids).size, ids.length, 'submodule ids are unique across modules');
   for (const { m } of modules) {
@@ -61,7 +63,18 @@ test('shell home shows every module and submodule', async () => {
   assert.equal(await page.locator('.tile').count(), modules.length);
   const nav = await page.textContent('#nav');
   for (const { m } of modules) assert.ok(nav.includes(m.name), `${m.name} in sidebar`);
-  assert.ok(!/JDP-I(?!q)|H&P|F&E/.test(await page.textContent('body')), 'no old brand names on the home page');
+  assert.ok(!/JDP-I(?!q)|H&P|F&E|Personal Resource Planner|Realtime Intelligence|Retrospective Intelligence|i-Spy/.test(await page.textContent('body')), 'no old brand names on the home page');
+  // The brand: the Vitruvian Manager mark and name in the sidebar, its favicon, and the tab title (as index.html's <title>).
+  assert.equal(await page.getAttribute('.brand img', 'src'), 'design/brand-vm.svg');
+  assert.equal(await page.getAttribute('link[rel="icon"]', 'href'), 'design/brand-vm-icon.svg');
+  assert.deepEqual([await page.textContent('.brand b'), await page.textContent('.brand small')], ['VM', 'Vitruvian Manager']);
+  assert.equal(await page.title(), 'Vitruvian Manager');
+  assert.equal((await page.textContent('#view .prp-eyebrow')).replace(/\s+/g, ' ').trim(), 'Vitruvian Manager · by JDP-Iq');
+  // International Mystery Management: its short name in the sidebar (the full title on hover), the full title on the home.
+  const oi = page.locator('#nav details[data-suite="oi"] > summary');
+  assert.match(await oi.textContent(), /^OIInt-Myst Mngmnt/);
+  assert.equal(await oi.getAttribute('title'), 'International Mystery Management');
+  assert.match(await page.textContent('.group[data-suite="oi"] h2'), /International Mystery Management$/);
   assert.deepEqual(errors, []);
 });
 
@@ -70,6 +83,10 @@ test('each module overview lists its submodules', async () => {
     await page.goto(`${BASE}/#/${s.id}`, { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.list tbody tr').count(), s.modules.length, `${s.id} rows`);
     assert.equal(await page.evaluate(() => document.documentElement.dataset.suite), s.id);
+    // The overview is the module's landing page: its full title as the heading and in the tab, the short name in the breadcrumb.
+    assert.equal(await page.textContent('#view h1'), s.title, `${s.id} heading`);
+    assert.equal(await page.title(), `${s.title} · VM`);
+    assert.equal(await page.textContent('#crumbs b'), s.name);
   }
 });
 
@@ -165,6 +182,74 @@ test('deep links move their submodule\'s one frame: hash changes in place, other
   } finally { await p.close(); }
 });
 
+test('the Vitruvian Manager figure plays while a submodule loads, goes with the load, and never for a hash-only move', async () => {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+  try {
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#nav .nav-item');
+    // A log, kept by the page itself, of each new frame (when its load starts) and its load event, and of the figure
+    // going up and down.
+    await p.evaluate(() => {
+      window.loaderLog = [];
+      const log = what => loaderLog.push([what, performance.now()]);
+      new MutationObserver(ms => { for (const m of ms) {
+        for (const n of m.addedNodes) { if (n.classList?.contains('vm-loader')) log('shown'); if (n.tagName === 'IFRAME') { log('frame'); n.addEventListener('load', () => log('load')); } }
+        for (const n of m.removedNodes) if (n.classList?.contains('vm-loader')) log('removed');
+      } }).observe(document.getElementById('frames'), { childList: true });
+    });
+    // War Focus is held back 1.2 s so its load is slow for certain: the figure goes up 300 ms in and comes down with the load.
+    await p.route(u => u.pathname.endsWith('/battlefield/focus/index.html'), async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue(); });
+    await p.evaluate(() => { location.hash = '#/rs/war-focus'; });
+    const figure = p.locator('#frames .vm-loader');
+    await figure.waitFor({ state: 'attached', timeout: 5000 });
+    // design/vm-loading.svg inlined, centred in the workspace over the loading frame, playing, hidden from screen readers
+    // (the loading bar is the progress bar) and letting every click through.
+    const look = await figure.evaluate(el => {
+      const w = document.getElementById('frames').getBoundingClientRect(), r = el.getBoundingClientRect();
+      return { dx: Math.round(r.left + r.width / 2 - (w.left + w.width / 2)), dy: Math.round(r.top + r.height / 2 - (w.top + w.height / 2)), size: Math.round(r.width),
+        art: el.querySelector(':scope > svg > title')?.textContent, hidden: el.getAttribute('aria-hidden'), events: getComputedStyle(el).pointerEvents,
+        playing: el.getAnimations({ subtree: true }).length };
+    });
+    assert.ok(Math.abs(look.dx) <= 1 && Math.abs(look.dy) <= 1, `centred (${look.dx}, ${look.dy})`);
+    assert.ok(look.size >= 112 && look.size <= 160, `size ${look.size}`);
+    assert.deepEqual([look.art, look.hidden, look.events], ['Loading', 'true', 'none']);
+    assert.ok(look.playing > 5, `the figure is animated (${look.playing} animations)`);
+    await figure.waitFor({ state: 'detached', timeout: 30000 });
+    const log = await p.evaluate(() => loaderLog);
+    const at = what => log.find(e => e[0] === what)?.[1];
+    assert.deepEqual(log.map(e => e[0]).filter(w => w === 'shown' || w === 'removed'), ['shown', 'removed'], JSON.stringify(log));
+    // Up no sooner than 300 ms into the load (timers run late on a busy machine, so no upper bound short of the load
+    // itself), and down with the load event, never held past it.
+    const shownAfter = at('shown') - at('frame'), after = at('removed') - at('load');
+    assert.ok(shownAfter >= 280, `shown ${Math.round(shownAfter)} ms into the load (expected 300 or later)`);
+    assert.ok(after >= -5 && after <= 300, `removed ${Math.round(after)} ms after the load event (expected with it)`);
+    // A hash-only move (a deep link into the same page), and a plain visit to a frame that has loaded: no figure.
+    await p.evaluate(() => { loaderLog.length = 0; });
+    await p.evaluate(h => { location.hash = h; }, `#/rs/war-focus?at=${encodeURIComponent(`${BASE}/battlefield/focus/index.html#war=korean-war&m=1950-06`)}`);
+    await p.waitForTimeout(1200);
+    await p.evaluate(() => { location.hash = '#/rs'; });
+    await p.waitForSelector('#view h1');
+    await p.evaluate(() => { location.hash = '#/rs/war-focus'; });
+    await p.waitForTimeout(800);
+    assert.deepEqual(await p.evaluate(() => loaderLog), [], 'no figure without a new page to load');
+    assert.equal(await p.locator('#frames iframe[data-module="war-focus"]').count(), 1);
+    assert.deepEqual(errors, []);
+  } finally { await p.close(); }
+  // With reduced motion nothing moves: no fade, and the SVG's own rule stops every animation in it (one still frame,
+  // the figure standing in his wheel). The page is held back a moment so the figure can be looked at.
+  const still = await browser.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce' });
+  try {
+    const p = await still.newPage();
+    await p.route(u => u.pathname.endsWith('/science/progress/index.html'), async route => { await new Promise(r => setTimeout(r, 1500)); await route.continue(); });
+    await p.goto(`${BASE}/#/ns/progress`, { waitUntil: 'domcontentloaded' });
+    const figure = p.locator('#frames .vm-loader');
+    await figure.waitFor({ state: 'attached', timeout: 10000 });
+    assert.deepEqual(await figure.evaluate(el => [el.querySelector(':scope > svg > title')?.textContent, el.getAnimations({ subtree: true }).length]), ['Loading', 0]);
+  } finally { await still.close(); }
+});
+
 test('submodules use the PRP design system', async () => {
   const report = [];
   for (const { m } of modules.filter(x => x.m.url && !x.m.opensInNewTab && x.m.status === 'live')) {
@@ -207,7 +292,7 @@ test('shell works at phone width', async () => {
 });
 
 test('"Skip to content" moves focus into the workspace and keeps the route', async () => {
-  for (const [route, target] of [['#/ns/progress', 'frame'], ['#/rt', 'Realtime Intelligence'], ['#/', 'Workspace']]) {
+  for (const [route, target] of [['#/ns/progress', 'frame'], ['#/rt', 'Realtime Geopolitics'], ['#/', 'Workspace']]) {
     const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
     try {
       await p.goto(`${BASE}/${route}`, { waitUntil: 'domcontentloaded' });

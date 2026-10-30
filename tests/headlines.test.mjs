@@ -147,6 +147,48 @@ test('the country list works at phone width without a horizontal scroll', async 
   } finally { await browser.close(); }
 });
 
+// ---- Highbrowse: what the page calls the lowbrow filter (the code and the database keep "lowbrow") ----
+
+// The wordmark's drawing (design/highbrowse-wordmark.svg, without its comments, title, desc and standalone style), as
+// the page inlines it: on one line, so the two can be compared exactly.
+const wordmarkDrawing = svg => svg.slice(svg.indexOf('<g fill="currentColor">'), svg.lastIndexOf('</svg>')).replace(/<!--[\s\S]*?-->/g, '').replace(/\s*\r?\n\s*/g, '').trim();
+
+test('Highbrowse: the caption names the filter, and its footer note opens with the wordmark, inlined in step with its file', () => {
+  const html = readFileSync(new URL('../q/headlines.html', import.meta.url), 'utf8');
+  const file = readFileSync(new URL('../design/highbrowse-wordmark.svg', import.meta.url), 'utf8');
+  // The caption as served and as the view switch rewrites it.
+  const caption = 'Top 3 stories from each of the country’s 5 most-read outlets · lowbrow stories left out by Highbrowse · translated to English';
+  assert.equal(html.split(caption).length - 1, 2, 'the 24-hour caption names Highbrowse, in the markup and in VIEW_CAPTION');
+  assert.ok(!/Lowbrow filter/.test(html), 'the old name is gone from what people read');
+  // The note: the wordmark first, named for screen readers (its "alt text"), then what the filter does.
+  const note = html.match(/<p class="hb-note">([\s\S]*?)<\/p>/)?.[1] || '';
+  const mark = note.match(/^<svg class="hb-mark"[^>]*>([\s\S]*?)<\/svg>/);
+  assert.ok(mark, 'the note opens with the inline wordmark');
+  assert.match(mark[0], /^<svg class="hb-mark" viewBox="0 0 520 120" width="95" height="22" role="img" aria-labelledby="hb-name"/);
+  assert.match(mark[1], /^<title id="hb-name">Highbrowse<\/title>/);
+  assert.equal(mark[1].replace(/^<title id="hb-name">Highbrowse<\/title>/, ''), wordmarkDrawing(file), 'the inline copy draws exactly what design/highbrowse-wordmark.svg draws');
+  assert.match(note.slice(mark[0].length), /^ keeps lowbrow stories out of the tracker\. Celebrity and showbiz gossip/);
+});
+
+test('Highbrowse: the wordmark heads the note at 40 px (large enough for the face) and takes the page\'s ink in light and dark', async () => {
+  const browser = await chromium.launch({ channel: 'msedge' });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
+    await page.goto(`${BASE}/q/headlines.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const look = () => page.evaluate(() => {
+      const m = document.querySelector('.hb-note .hb-mark'), r = m.getBoundingClientRect();
+      const [R, G, B] = getComputedStyle(m).color.match(/\d+/g).map(Number);
+      return { height: Math.round(r.height), width: Math.round(r.width), luminance: (0.2126 * R + 0.7152 * G + 0.0722 * B) / 255, name: m.getAttribute('aria-labelledby') && document.getElementById(m.getAttribute('aria-labelledby')).textContent };
+    });
+    const light = await look();
+    assert.deepEqual([light.height, light.width, light.name], [40, 173, 'Highbrowse']);
+    assert.ok(light.luminance < 0.3, `dark letters on the light page (${light.luminance.toFixed(2)})`);
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+    const dark = await look();
+    assert.ok(dark.luminance > 0.7, `light letters on the dark page (${dark.luminance.toFixed(2)})`);
+  } finally { await browser.close(); }
+});
+
 // ---- The lowbrow filter (headlines/refresh-top-stories/lowbrow.js) and the Edge Function that applies it ----
 
 test('the lowbrow rules catch the obvious cases by site section or headline', () => {

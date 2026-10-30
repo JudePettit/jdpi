@@ -371,7 +371,7 @@ for (const q of [...usedInst].sort((a, b) => +a.slice(1) - +b.slice(1))) {
 const out = {
   generated: new Date().toISOString(),
   firstYear: -3000, lastYear: THIS_YEAR,
-  source: 'Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP',
+  source: 'Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager',
   disciplines: DISCIPLINES, basis: BASIS,
   counts: { events: events.length, people: Object.keys(people).length, institutions: Object.keys(institutions).length, positionBasis: basisCount },
   events, people, institutions,

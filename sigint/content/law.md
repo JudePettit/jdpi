@@ -75,7 +75,7 @@ Some tools in the Software Cookbook and Hardware Guide can transmit or attack as
 # Ethics {#ethics}
 
 - **Track things and patterns, not people.** Aircraft, ships and mesh nodes often belong to private individuals. Don’t compile, publish or use their movements to follow anyone.
-- **Respect the privacy schemes.** The FAA’s LADD and PIA programmes exist so aircraft owners can limit what is shown; PRP withholds those identities by default.
+- **Respect the privacy schemes.** The FAA’s LADD and PIA programmes exist so aircraft owners can limit what is shown; Vitruvian Manager withholds those identities by default.
 - **Don’t republish private content.** If you overhear something not meant for you (a medical call, a business conversation, airline data-link messages), don’t record it, post it or act on it.
 - **Mind the data’s terms.** Credit adsb.lol (ODbL), keep aisstream.io keys out of web pages, and use wspr.live only for free, open projects as it asks.
 - **Conflict zones.** Interference maps and tracks from war zones can endanger people. Share analysis, not raw positions of people on the ground.

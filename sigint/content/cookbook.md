@@ -262,9 +262,9 @@ sudo readsb-set-location 53.35 -6.26
 
 Use your own latitude and longitude. The map is then at `http://<pi>/tar1090` and the data at `http://<pi>/tar1090/data/aircraft.json`. For a no-terminal setup, the **ADSB.im** image installs the same software with a web setup page and feeds the aggregators you choose.
 
-### Connect it to PRP
+### Connect it to Vitruvian Manager
 
-In **Aircraft**, choose *My receiver* and enter the `aircraft.json` address. Then either tick *Through the bridge* (the PRP bridge with `--route adsb=…`), or let the browser read it directly by allowing this site in lighttpd:
+In **Aircraft**, choose *My receiver* and enter the `aircraft.json` address. Then either tick *Through the bridge* (the Vitruvian Manager bridge with `--route adsb=…`), or let the browser read it directly by allowing this site in lighttpd:
 
 ```
 # /etc/lighttpd/conf-enabled/89-prp-cors.conf
@@ -301,11 +301,11 @@ Follow FlightAware’s *PiAware* instructions, which add FlightAware’s package
 
 ### Pitfalls
 
-- dump1090 has many forks. For a new station not tied to FlightAware, readsb is the actively developed one; the JSON format is compatible, and PRP reads both.
+- dump1090 has many forks. For a new station not tied to FlightAware, readsb is the actively developed one; the JSON format is compatible, and Vitruvian Manager reads both.
 
 ## AIS-catcher {#ais-catcher .decoders}
 
-- **For:** decoding ships’ AIS messages (161.975 and 162.025 MHz) with an RTL-SDR, Airspy, SDRplay or HackRF, with a built-in web map and a JSON feed PRP reads; it can share data with community maps.
+- **For:** decoding ships’ AIS messages (161.975 and 162.025 MHz) with an RTL-SDR, Airspy, SDRplay or HackRF, with a built-in web map and a JSON feed Vitruvian Manager reads; it can share data with community maps.
 - **Systems:** Windows, Linux, Raspberry Pi, macOS, Android
 - **Official source:** [aiscatcher.org](https://www.aiscatcher.org/) · [GitHub](https://github.com/jvde-github/AIS-catcher) · [documentation](https://docs.aiscatcher.org/)
 - **Licence:** GPL, free
@@ -328,7 +328,7 @@ Download the latest (“Edge”) x64 zip linked from the documentation, unzip it
 
 Build from source with Homebrew, as the documentation describes.
 
-### Connect it to PRP
+### Connect it to Vitruvian Manager
 
 In **Ships**, enter `http://<host>:8100/api/ships.json`. AIS-catcher already sends CORS headers, so `localhost` works directly; for another machine, tick *Through the bridge* or rely on Chrome’s local-network permission.
 
@@ -464,7 +464,7 @@ Linux: `sudo apt install multimon-ng`; macOS: `brew install multimon-ng`; Window
 
 APRS and packet you are entitled to hear, DTMF from your own equipment, public weather-alert broadcasts (NOAA Weather Radio SAME headers in the US), and test signals you generate yourself.
 
-> [!bad] **Don’t decode pagers.** multimon-ng can also decode paging protocols (POCSAG, FLEX). Pager messages carry medical, police and personal information; in Ireland and the UK listening with intent and disclosing are offences, and in the US the ECPA protects display-pager messages. PRP gives no recipe for it.
+> [!bad] **Don’t decode pagers.** multimon-ng can also decode paging protocols (POCSAG, FLEX). Pager messages carry medical, police and personal information; in Ireland and the UK listening with intent and disclosing are offences, and in the US the ECPA protects display-pager messages. Vitruvian Manager gives no recipe for it.
 
 # Analysis {#analysis}
 
@@ -519,7 +519,7 @@ Record a few seconds of your own key fob or weather sensor with `rtl_sdr -f 433.
 
 ## Wireshark {#wireshark .analysis}
 
-- **For:** the standard network protocol analyser. In this hobby it helps debug **your own** network: a Meshtastic MQTT gateway, a Pi feeder’s uploads, the PRP bridge.
+- **For:** the standard network protocol analyser. In this hobby it helps debug **your own** network: a Meshtastic MQTT gateway, a Pi feeder’s uploads, the Vitruvian Manager bridge.
 - **Systems:** Windows, Linux, macOS
 - **Official source:** [wireshark.org](https://www.wireshark.org/download.html)
 - **Licence:** GPL, free
@@ -568,7 +568,7 @@ Programming cables with counterfeit USB chips fail on modern Windows; buy a cabl
 
 ## Meshtastic {#meshtastic .mesh}
 
-- **For:** off-grid text messaging and position sharing over a LoRa mesh of low-cost radios, licence-free in the ISM bands. PRP reads your radio’s node list over USB or Wi-Fi.
+- **For:** off-grid text messaging and position sharing over a LoRa mesh of low-cost radios, licence-free in the ISM bands. Vitruvian Manager reads your radio’s node list over USB or Wi-Fi.
 - **Systems:** web flasher and web client in Chrome or Edge; apps for Android, iOS/iPadOS and macOS; a Python command-line tool
 - **Official source:** [meshtastic.org](https://meshtastic.org/docs/getting-started/) · [web flasher](https://flasher.meshtastic.org/) · [web client](https://client.meshtastic.org/)
 - **Licence:** GPL firmware and apps, free
@@ -579,7 +579,7 @@ Programming cables with counterfeit USB chips fail on modern Windows; buy a cabl
 2. Open the app or the web client, connect, and set the **region**: `EU_868` in Ireland, the UK and the EU; `US` in North America. Give the node a name.
 3. Optional: `pip install meshtastic`, then `meshtastic --info` and `meshtastic --nodes`.
 
-### Connect it to PRP
+### Connect it to Vitruvian Manager
 
 **Mesh & APRS → Connect over USB** (Chrome or Edge), or on Wi-Fi boards the radio’s address with *Read node list* (it serves `/json/nodes` with CORS), or the bridge with `--route mesh=http://meshtastic.local/json/nodes`.
 
@@ -609,7 +609,7 @@ The simplest route is an OpenWebRX+ SD-card image from its GitHub releases: flas
 
 Create an admin user (`sudo openwebrx admin adduser <name>`), log in to the settings, add your SDR and a profile (for example 2 m, or an HF band with a V4), and listen from another device.
 
-### Connect it to PRP
+### Connect it to Vitruvian Manager
 
 **Listen → My SDR**: the receiver opens in its own tab; its status (`/status.json`) comes through the bridge with `--route owrx=http://<host>:8073/status.json`.
 
@@ -626,7 +626,7 @@ Chains of the recipes above that make a working station.
 
 ## Raspberry Pi ADS-B feeder {#pipeline-adsb .pipelines}
 
-- **For:** a 24/7 aircraft receiver that feeds the community networks and gives PRP your own live data.
+- **For:** a 24/7 aircraft receiver that feeds the community networks and gives Vitruvian Manager your own live data.
 - **Hardware:** Raspberry Pi 4 or 5 (a Pi 3 or Zero 2 W copes with ADS-B alone), RTL-SDR or FlightAware Pro Stick Plus, a 1090 MHz antenna outdoors, short low-loss coax, optionally a 1090 MHz filtered LNA at the antenna.
 - **Software:** readsb + tar1090 (or the ADSB.im image), feed clients.
 
@@ -636,25 +636,25 @@ Chains of the recipes above that make a working station.
 2. Install readsb and tar1090 with the installer above and set your location.
 3. Check the map at `http://<pi>/tar1090` for a day; move the antenna higher if the range is poor.
 4. Feed the networks you want: adsb.lol (open data, and the API this dashboard uses), FlightAware (PiAware), ADS-B Exchange, each with its own feeder instructions.
-5. In PRP, **Aircraft → My receiver**, through the bridge or with the lighttpd CORS line.
+5. In Vitruvian Manager, **Aircraft → My receiver**, through the bridge or with the lighttpd CORS line.
 
 ## Weather-satellite station {#pipeline-wxsat .pipelines}
 
 - **For:** receiving Meteor-M N2-3 and N2-4 images at 137 MHz automatically.
 - **Hardware:** V-dipole (two 53.4 cm arms at 120°, horizontal, opening to the north or south) or a QFH; RTL-SDR V4/V4L; optionally a 137 MHz filtered LNA; Raspberry Pi 4 or 5, or any PC.
-- **Software:** SatDump (with its scheduler), PRP **Satellites** for planning.
+- **Software:** SatDump (with its scheduler), Vitruvian Manager **Satellites** for planning.
 
 ### Steps
 
 1. Put the antenna outside with a clear view of the sky; even a balcony works for high passes.
-2. Check the next pass above 20° in PRP **Satellites** or SatDump’s tracker.
+2. Check the next pass above 20° in Vitruvian Manager **Satellites** or SatDump’s tracker.
 3. In SatDump, set the Meteor LRPT pipeline, 137.900 MHz, and record the pass; review the images.
 4. Turn on SatDump’s automatic scheduling (auto-track) so every good pass is recorded.
 5. Next step up: an L-band dish and LNA for METOP and FengYun HRPT, which need tracking.
 
 ## Meshtastic node {#pipeline-meshtastic .pipelines}
 
-- **For:** joining or starting a local LoRa mesh, and seeing it in PRP.
+- **For:** joining or starting a local LoRa mesh, and seeing it in Vitruvian Manager.
 - **Hardware:** Heltec V3 or V4, RAK WisBlock 4631 starter kit or LilyGO T-Beam; a better 868 MHz antenna than the stock one; a battery or a small solar panel for a fixed node.
 - **Software:** Meshtastic web flasher, app or web client.
 
@@ -663,7 +663,7 @@ Chains of the recipes above that make a working station.
 1. Flash, set region and name (recipe above).
 2. Check who you hear in the app; a node high up (a window facing the town, a rooftop) hears far more.
 3. For a fixed relay, set the role to *Router* only if the local community agrees; most fixed nodes should stay *Client*.
-4. In PRP, **Mesh & APRS → Connect over USB**, or read `/json/nodes` over Wi-Fi.
+4. In Vitruvian Manager, **Mesh & APRS → Connect over USB**, or read `/json/nodes` over Wi-Fi.
 
 ## AIS station {#pipeline-ais .pipelines}
 
@@ -676,7 +676,7 @@ Chains of the recipes above that make a working station.
 1. Install AIS-catcher with the managed-mode installer and complete the wizard.
 2. Watch the built-in map for a day; tune the gain for the most messages.
 3. Share with the AIS-catcher community map, or with sites that accept feeders, using their instructions.
-4. In PRP, **Ships → My receiver** with `/api/ships.json`.
+4. In Vitruvian Manager, **Ships → My receiver** with `/api/ships.json`.
 
 ## HF propagation monitor {#pipeline-wspr .pipelines}
 

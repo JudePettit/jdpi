@@ -22,7 +22,7 @@ const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const day = s => { if (!s) return ''; const d = new Date(String(s).length <= 10 ? s + 'T00:00:00Z' : s); return Number.isNaN(+d) ? String(s) : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
 const SITE = new URL('../', import.meta.url);
 const dict = o => Object.assign(Object.create(null), o); // lookups by ids from data, without a prototype
-const MODULES = dict({ rt: ['RT', 'Realtime Intelligence'], rs: ['RS', 'Retrospective Intelligence'], oi: ['OI', 'i-Spy'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] });
+const MODULES = dict({ rt: ['RT', 'Realtime Geopolitics'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] });
 const ORDER = ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
 let embedded = false;
 try { embedded = window.self !== window.top; } catch { embedded = true; }
@@ -35,7 +35,7 @@ const S = {
   page: 0, pageSize: 50,
   chart: null, drawSeq: 0, geo: null, match: null,
 };
-const moduleInfo = id => MODULES[id] || [String(id || '').toUpperCase().slice(0, 3), id || 'PRP'];
+const moduleInfo = id => MODULES[id] || [String(id || '').toUpperCase().slice(0, 3), id || 'Vitruvian Manager'];
 const subName = id => S.sub[id] || '';
 const currentDs = () => S.cat?.datasets.find(d => d.id === S.spec.d) || null;
 // A link to another PRP page: through the shell when this page is inside it, so the shell's frame for that page moves.
@@ -524,7 +524,7 @@ function figureCaption(prep) {
   const how = isSql() ? ' From an SQL query over the dataset.' : steps.length ? ` Steps: ${steps.length > 3 ? steps.slice(0, 3).join('; ') + `; and ${steps.length - 3} more` : steps.join('; ')}.` : '';
   const src = ds.sources || [];
   const from = src.length ? ', from ' + (src.length > 3 ? `${src.slice(0, 3).join('; ')} and ${src.length - 3} more` : src.join('; ')) : '';
-  const source = `Source: ${ds.title} (PRP ${modName}${sub ? ' · ' + sub : ''})${from}${ds.licence ? '. ' + ds.licence.replace(/\.$/, '') : ''}.`;
+  const source = `Source: ${ds.title} (Vitruvian Manager, ${modName}${sub ? ' · ' + sub : ''})${from}${ds.licence ? '. ' + ds.licence.replace(/\.$/, '') : ''}.`;
   return { lead: 'Figure 1.', title: what, text: `${what}.${how} ${source}` };
 }
 async function drawFigure() {

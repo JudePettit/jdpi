@@ -1,8 +1,8 @@
 {
   "generated": "2026-10-30",
-  "name": "PRP data catalogue",
+  "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
-  "description": "Every public dataset in PRP (Personal Resource Planner), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
+  "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
   "site": "https://jdpi.pages.dev/",
   "mcp": "https://jdpi.pages.dev/mcp",
   "api": "https://jdpi.pages.dev/api/v1/",
@@ -51,16 +51,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 4920,
+      "rows": 5309,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-10-29",
+      "updated": "2026-10-30",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2120288
+      "bytes": 2294260
     },
     {
       "id": "intelligence-briefing-sources",
@@ -125,17 +125,17 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-10-29",
+      "updated": "2026-10-30",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2120288
+      "bytes": 2294260
     },
     {
       "id": "headline-outlets",
       "title": "Global Headline Tracker: outlets",
       "module": "rt",
       "submodule": "headlines",
-      "description": "The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself lives in a database, not in a static file, so it is not in this catalogue.)",
+      "description": "The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself, with lowbrow stories left out by the tracker's Highbrowse filter, lives in a database, not in a static file, so it is not in this catalogue.)",
       "url": "integration/data/headline-outlets.json",
       "format": "json",
       "records": "records",
@@ -482,7 +482,7 @@
         {
           "name": "background",
           "type": "string",
-          "description": "Plain-English background (PRP)"
+          "description": "Plain-English background (Vitruvian Manager)"
         },
         {
           "name": "conflicts",
@@ -513,7 +513,7 @@
       "title": "Realtime Battlefield: war by month",
       "module": "rt",
       "submodule": "battlefield",
-      "description": "Each war's deaths, events and civilian deaths month by month in 2026, with PRP's monthly note (change on the previous month, deadliest areas).",
+      "description": "Each war's deaths, events and civilian deaths month by month in 2026, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).",
       "url": "integration/data/realtime-war-months.json",
       "format": "json",
       "records": "records",
@@ -561,7 +561,7 @@
         {
           "name": "note",
           "type": "string",
-          "description": "Monthly note (PRP, from the events)"
+          "description": "Monthly note (Vitruvian Manager, from the events)"
         }
       ],
       "rows": 531,
@@ -1245,7 +1245,7 @@
       "title": "Encyclopaedia: entities",
       "module": "rs",
       "submodule": "encyclopedia",
-      "description": "Every person, place, party, election, war, event, idea and organisation in the PRP Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often PRP mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.",
+      "description": "Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.",
       "urls": [
         "integration/data/encyclopaedia-entities/0.json",
         "integration/data/encyclopaedia-entities/1.json",
@@ -1304,12 +1304,12 @@
         {
           "name": "mentions",
           "type": "number",
-          "description": "How many times PRP mentions it"
+          "description": "How many times Vitruvian Manager mentions it"
         },
         {
           "name": "appears_in",
           "type": "array",
-          "description": "PRP submodule ids that mention it"
+          "description": "Vitruvian Manager submodule ids that mention it"
         },
         {
           "name": "wikipedia",
@@ -1321,7 +1321,7 @@
       "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
       "sources": [
         "Wikidata (CC0)",
-        "Every PRP submodule that mentions the entity"
+        "Every Vitruvian Manager submodule that mentions the entity"
       ],
       "updated": "2026-10-28",
       "refresh": "monthly",
@@ -1956,10 +1956,10 @@
         {
           "name": "undated",
           "type": "boolean",
-          "description": "True when the feed gave no date (the time is when PRP first saw it)"
+          "description": "True when the feed gave no date (the time is when Vitruvian Manager first saw it)"
         }
       ],
-      "rows": 465,
+      "rows": 510,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1967,7 +1967,7 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 268911
+      "bytes": 289270
     },
     {
       "id": "econ-briefing-sources",
@@ -2093,14 +2093,14 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 268911
+      "bytes": 289270
     },
     {
       "id": "congress-members",
       "title": "Auto Trader: members of Congress who trade",
       "module": "mm",
       "submodule": "traders",
-      "description": "Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades PRP read from their filings.",
+      "description": "Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.",
       "url": "integration/data/congress-members.json",
       "format": "json",
       "records": "records",
@@ -2314,7 +2314,7 @@
         {
           "name": "style",
           "type": "string",
-          "description": "Investment style (PRP)"
+          "description": "Investment style (Vitruvian Manager)"
         },
         {
           "name": "registered_name",
@@ -2620,7 +2620,7 @@
           "description": "Other outlets that carried the same item"
         }
       ],
-      "rows": 1133,
+      "rows": 1089,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -2628,7 +2628,7 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 655909
+      "bytes": 639383
     },
     {
       "id": "science-briefing-sources",
@@ -2749,7 +2749,7 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 655909
+      "bytes": 639383
     },
     {
       "id": "science-progress-events",
@@ -2789,7 +2789,7 @@
         {
           "name": "note",
           "type": "string",
-          "description": "One-line explanation (PRP)"
+          "description": "One-line explanation (Vitruvian Manager)"
         },
         {
           "name": "qid",
@@ -2845,10 +2845,10 @@
       "rows": 570,
       "licence": "Facts from Wikidata (CC0); titles and notes © JDP-Iq.",
       "sources": [
-        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP",
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager",
         "Natural Earth (public domain) for the map"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-10-30",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -2920,9 +2920,9 @@
       "rows": 720,
       "licence": "Wikidata CC0.",
       "sources": [
-        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP"
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-10-30",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -2974,9 +2974,9 @@
       "rows": 1187,
       "licence": "Wikidata CC0.",
       "sources": [
-        "Wikidata (CC0), via wbgetentities; selection, titles and notes by PRP"
+        "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-10-30",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -3065,7 +3065,7 @@
           "description": "Other outlets that carried the same item"
         }
       ],
-      "rows": 747,
+      "rows": 832,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -3073,7 +3073,7 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 435230
+      "bytes": 485969
     },
     {
       "id": "digital-briefing-sources",
@@ -3176,11 +3176,6 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
-          "name": "error",
-          "type": "string",
-          "description": "Last error, if any"
-        },
-        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -3214,14 +3209,14 @@
       "updated": "2026-10-30",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 435230
+      "bytes": 485969
     },
     {
       "id": "prp-submodules",
-      "title": "PRP: modules and submodules",
+      "title": "Vitruvian Manager: modules and submodules",
       "module": "ds",
       "submodule": "integration-hub",
-      "description": "Every PRP submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.",
+      "description": "Every Vitruvian Manager submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.",
       "url": "integration/data/prp-submodules.json",
       "format": "json",
       "records": "records",
@@ -3229,7 +3224,7 @@
         {
           "name": "module",
           "type": "string",
-          "description": "Module id (rt, rs, mm, ns, ds, kino)"
+          "description": "Module id (rt, rs, oi, mm, ns, ds, kino)"
         },
         {
           "name": "module_code",
@@ -3239,7 +3234,7 @@
         {
           "name": "module_name",
           "type": "string",
-          "description": "Module"
+          "description": "Module (its full title, as on its overview page)"
         },
         {
           "name": "id",
@@ -3292,7 +3287,7 @@
           "description": "Tabs inside the page"
         }
       ],
-      "rows": 35,
+      "rows": 36,
       "licence": "© JDP-Iq.",
       "sources": [
         "registry.json"
@@ -3303,14 +3298,14 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 17651
+      "bytes": 18839
     },
     {
       "id": "kino-documentaries",
       "title": "Kino: documentaries and courses",
       "module": "kino",
       "submodule": "kino-political-events",
-      "description": "Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the PRP submodules its scenes link to.",
+      "description": "Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the Vitruvian Manager submodules its scenes link to.",
       "url": "kino/data/index.json",
       "format": "json",
       "records": "docs",
@@ -3378,7 +3373,7 @@
         {
           "name": "links",
           "type": "array",
-          "description": "PRP submodules the scenes link to (module/submodule)"
+          "description": "Vitruvian Manager submodules the scenes link to (module/submodule)"
         },
         {
           "name": "preview",
@@ -3407,9 +3402,10 @@
         "kino-political-parties",
         "kino-wars",
         "kino-geopolitical-events",
+        "bibliotheca",
         "kino-great-thinkers"
       ],
-      "bytes": 25701
+      "bytes": 25715
     }
   ]
 }

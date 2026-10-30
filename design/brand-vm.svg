@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="vm-title vm-desc">
+  <title id="vm-title">Vitruvian Manager</title>
+  <desc id="vm-desc">The Vitruvian Manager mark, by JDP-Iq: Leonardo's figure in a circle and a square, in both poses at once, wearing a hard hat and holding the Antikythera mechanism, a book, a wrench and a computer mouse, with a small radio antenna at the pelvis.</desc>
+  <!-- Geometry, after Leonardo: the circle is centred on the navel, which is the tile's centre (128,128), and its foot
+       touches the square's base (222); the square's side (156) is the figure's height and arm span. So the square-pose
+       hands reach its sides, and the circle-pose hands (raised to the level of the crown) and feet (legs spread 30°
+       from the vertical) reach the circle. Weights: 6 for every limb and the wrench, 3 for the antenna, the mouse's cable
+       and the wheel's spokes, 2 for the dark cuts that draw detail into the colour shapes, 2.5 at 30% for the circle and
+       the square. Legible down to 128 px (every stroke at least 1 px there); below that use design/brand-vm-icon.svg. -->
+  <rect width="256" height="256" rx="48" fill="#14181f"/>
+  <g fill="none" stroke="#f3f4f6" stroke-opacity=".3" stroke-width="2.5">
+    <circle cx="128" cy="128" r="94"/>
+    <rect x="50" y="66" width="156" height="156"/>
+  </g>
+  <!-- The figure. Shoulders (114/142) and hips (116/140) sit apart, so both poses spring from joints rather than one
+       point; the hips hang from an arch, which leaves the antenna room between the legs. -->
+  <g fill="none" stroke="#f3f4f6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 96V140M116 147Q128 133 140 147"/>
+    <path d="M53 110H203"/>
+    <path d="M114 110L56 74M142 110L200 74"/>
+    <path d="M116 147L104 219M140 147L152 219"/>
+    <path d="M116 147L83 206M140 147L173 206"/>
+  </g>
+  <circle cx="128" cy="89" r="11" fill="#f3f4f6"/>
+  <!-- The antenna, in place of the genitals (it stands for the intelligence modules): a short mast from the arch, a
+       knob, and a signal arc either side of it -->
+  <g fill="none" stroke="#f3f4f6" stroke-width="3" stroke-linecap="round">
+    <path d="M128 140V158"/>
+    <path d="M123 157A7 7 0 0 0 123 167M133 157A7 7 0 0 1 133 167"/>
+  </g>
+  <circle cx="128" cy="162" r="3.5" fill="#f3f4f6"/>
+  <!-- Hard hat: dome, brim and a centre ridge, over the head -->
+  <path d="M114 83a14 14 0 0 1 28 0z" fill="#d9a35c"/>
+  <rect x="109" y="80" width="38" height="6" rx="3" fill="#d9a35c"/>
+  <path d="M128 71v8" stroke="#14181f" stroke-width="2" stroke-linecap="round"/>
+  <!-- The Antikythera mechanism, raised in the left hand: the four-spoked main wheel of Fragment A (16 teeth drawn by
+       a dashed ring: circumference 2π × 15.5 = 97.4, so dashes of 3.04) -->
+  <g transform="translate(56 56)">
+    <circle r="14" fill="#a193f0"/>
+    <circle r="15.5" fill="none" stroke="#a193f0" stroke-width="4" stroke-dasharray="3.04 3.04"/>
+    <circle r="9" fill="#14181f"/>
+    <path d="M-9 0H9M0-9V9" stroke="#a193f0" stroke-width="3"/>
+    <circle r="3" fill="#a193f0"/>
+  </g>
+  <!-- A book, raised open in the right hand and held by the foot of its spine -->
+  <g transform="translate(200 72)">
+    <path d="M-1.5 0Q-8-5-17-4V-23Q-8-24-1.5-19z" fill="#d9a35c"/>
+    <path d="M1.5 0Q8-5 17-4V-23Q8-24 1.5-19z" fill="#d9a35c"/>
+    <path d="M-13-17Q-9-17.5-5-15M-13-11Q-9-11.5-5-9M13-17Q9-17.5 5-15M13-11Q9-11.5 5-9" fill="none" stroke="#14181f" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <!-- A wrench in the left hand (square pose), held by the handle with its open jaw down and out -->
+  <g transform="translate(53 110) rotate(20)">
+    <path d="M0-14V18" stroke="#4fbf85" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-3.5 34.3A9.5 9.5 0 1 1 3.5 34.3V27H-3.5z" fill="#4fbf85"/>
+  </g>
+  <!-- A computer mouse in the right hand (square pose): buttons, wheel, and the cable curling up -->
+  <g transform="translate(210 112)">
+    <path d="M0-16q0-7 6-9t6-10" fill="none" stroke="#6da7ec" stroke-width="3" stroke-linecap="round"/>
+    <rect x="-10" y="-16" width="20" height="32" rx="10" fill="#6da7ec"/>
+    <path d="M0-16v11" stroke="#14181f" stroke-width="2"/>
+    <rect x="-1.5" y="-12" width="3" height="5" rx="1.5" fill="#14181f"/>
+  </g>
+  <!-- Hands, drawn last so each one grips its object -->
+  <g fill="#f3f4f6">
+    <circle cx="56" cy="74" r="4.5"/><circle cx="200" cy="74" r="4.5"/><circle cx="53" cy="110" r="4.5"/><circle cx="203" cy="110" r="4.5"/>
+  </g>
+</svg>

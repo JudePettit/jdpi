@@ -1,6 +1,6 @@
-# PRP bridge
+# Vitruvian Manager bridge
 
-A tiny local relay that lets the **PRP SIGINT Dashboard** (`https://jdpi.pages.dev/sigint/`) read receivers on your own
+A tiny local relay that lets the **Vitruvian Manager SIGINT Dashboard** (`https://jdpi.pages.dev/sigint/`) read receivers on your own
 network, the public aircraft feed, and aisstream.io. One file, `prp-bridge.mjs`, no dependencies.
 
 ## Why it exists
@@ -31,7 +31,7 @@ node prp-bridge.mjs \
 ```
 
 On Windows PowerShell put it on one line (or end lines with a backtick). The Overview tab in the dashboard builds this
-command from your own settings. Then, in the dashboard: **Overview → Connect your own receivers → Use the PRP bridge**,
+command from your own settings. Then, in the dashboard: **Overview → Connect your own receivers → Use the Vitruvian Manager bridge**,
 and tick **Through the bridge** in each tab that should use it.
 
 | Option | Meaning |
@@ -77,7 +77,7 @@ Linux (systemd user service, `~/.config/systemd/user/prp-bridge.service`):
 
 ```
 [Unit]
-Description=PRP bridge
+Description=Vitruvian Manager bridge
 [Service]
 ExecStart=/usr/bin/node /home/you/prp-bridge.mjs --config /home/you/prp-bridge.json
 Restart=on-failure

@@ -1,5 +1,5 @@
 // SIGINT Dashboard · Mesh & APRS: the node database of the user's own Meshtastic radio, over USB (Web Serial, protobuf
-// frames) or from the radio's HTTP API (/json/nodes) directly or through the PRP bridge. Messages are never decoded.
+// frames) or from the radio's HTTP API (/json/nodes) directly or through the Vitruvian Manager bridge. Messages are never decoded.
 import { esc, fmt, ago, explainError, mixedContentProblem } from '../lib/util.js';
 import { distanceKm } from '../lib/geo.js';
 import { normaliseMeshNodes } from '../lib/feeds.js';
@@ -72,7 +72,7 @@ export function create(ctx, panel) {
     ctx.save({ meshUrl: base });
     const problem = via.checked ? '' : mixedContentProblem(base, location.protocol);
     if (problem) { tick.msg(problem); return; }
-    if (via.checked && !ctx.bridge.on) { tick.msg('Turn on the PRP bridge in the Overview first.'); return; }
+    if (via.checked && !ctx.bridge.on) { tick.msg('Turn on the Vitruvian Manager bridge in the Overview first.'); return; }
     tick.msg('Reading the node list…');
     try {
       const json = await fetchReceiverJSON(ctx, { url: `${base}/json/nodes`, viaBridge: via.checked, route: 'mesh' }, 15000);

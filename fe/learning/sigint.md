@@ -1,6 +1,6 @@
 title: Signals intelligence (SIGINT)
-intro: A practical, university-style course in signals intelligence (SIGINT) for the individual analyst, taught entirely within the law and receive-only: what SIGINT is and what you may lawfully do, radio fundamentals, software-defined radio, tracking aircraft and ships, satellites and space weather, satellite-navigation interference, the near spectrum of mesh and amateur data, and the tradecraft, law and ethics that bound the work. Each practical unit ends with how to do it in PRP's SIGINT Dashboard, and the course closes with two capstone exercises.
-sources: Written for PRP from public, primary material checked in October 2026: regulators and legislation (ComReg and the Irish Statute Book, Ofcom and legislation.gov.uk, the FCC), NOAA's Space Weather Prediction Center, CelesTrak, ARISS, IMO and ICAO documentation, and the dashboards' own sources. Frequencies and satellite status change; the text says so where it matters and points to a live status page rather than guessing.
+intro: A practical, university-style course in signals intelligence (SIGINT) for the individual analyst, taught entirely within the law and receive-only: what SIGINT is and what you may lawfully do, radio fundamentals, software-defined radio, tracking aircraft and ships, satellites and space weather, satellite-navigation interference, the near spectrum of mesh and amateur data, and the tradecraft, law and ethics that bound the work. Each practical unit ends with how to do it in Vitruvian Manager's SIGINT Dashboard, and the course closes with two capstone exercises.
+sources: Written for Vitruvian Manager from public, primary material checked in October 2026: regulators and legislation (ComReg and the Irish Statute Book, Ofcom and legislation.gov.uk, the FCC), NOAA's Space Weather Prediction Center, CelesTrak, ARISS, IMO and ICAO documentation, and the dashboards' own sources. Frequencies and satellite status change; the text says so where it matters and points to a live status page rather than guessing.
 
 # Unit 1 · Foundations
 
@@ -70,7 +70,7 @@ The spectrum is divided into **bands**, and what you can hear depends on which o
 | UHF | 0.3–3 GHz | 70 cm amateur, LoRa (868/915 MHz), ADS-B (1090 MHz), GNSS (around 1.1–1.6 GHz) |
 | SHF | 3–30 GHz | Satellite television, the QO-100 amateur downlink (10.5 GHz), X-band satellites |
 
-**Frequency allocation** is why the dashboard can tell you where to look: every service has its slice. It also marks the bands you leave alone. Mobile networks, cordless phones, Wi-Fi, pagers and encrypted public-safety radio carry private traffic; receiving their content is interception, and PRP gives no help with any of them.
+**Frequency allocation** is why the dashboard can tell you where to look: every service has its slice. It also marks the bands you leave alone. Mobile networks, cordless phones, Wi-Fi, pagers and encrypted public-safety radio carry private traffic; receiving their content is interception, and Vitruvian Manager gives no help with any of them.
 
 ! Caution: Numbers here are the published allocations in Region 1 and Region 2 as they stood in October 2026. Allocations change, and a frequency legal to monitor in one country can be a private service in another. When in doubt, check the regulator (ComReg, Ofcom, the FCC).
 
@@ -224,7 +224,7 @@ Capturing the spectrum is only the first step; a **decoder** turns a signal into
 
 Two working methods matter beyond any single tool.
 - **Live versus recorded.** You can decode in real time, or record the raw samples (an **IQ file**) and analyse later. Recording lets you replay a one-off satellite pass through a different decoder, or study a signal slowly. The files are large, and you record only signals you may lawfully receive.
-- **Decode locally, keep it yours.** PRP decodes some signals in the browser itself (satellite-navigation NMEA over a USB cable, a Meshtastic radio's node list) and connects to your own decoders through a small **bridge** that runs on your own computer, so your receivers' data reach the page without passing through anyone's server. Your location is kept in your browser and leaves it only as a rounded position in requests to the public feeds. The [Overview](#/oi/sigint) and the [Hardware Guide](#/oi/sigint/hardware?at=sigint%2Findex.html%23tab%3Dhardware%26s%3Dpatterns) explain how the receiver, decoder, bridge and page fit together.
+- **Decode locally, keep it yours.** Vitruvian Manager decodes some signals in the browser itself (satellite-navigation NMEA over a USB cable, a Meshtastic radio's node list) and connects to your own decoders through a small **bridge** that runs on your own computer, so your receivers' data reach the page without passing through anyone's server. Your location is kept in your browser and leaves it only as a rounded position in requests to the public feeds. The [Overview](#/oi/sigint) and the [Hardware Guide](#/oi/sigint/hardware?at=sigint%2Findex.html%23tab%3Dhardware%26s%3Dpatterns) explain how the receiver, decoder, bridge and page fit together.
 
 ! Caution: A decoder only decodes; it does not change what you are allowed to receive. Several tools can also decode private traffic (pagers, data links); those recipes are deliberately absent, and Unit 11 explains why.
 
@@ -234,7 +234,7 @@ Two working methods matter beyond any single tool.
 + You can replay the same capture later through different decoders and study it slowly
 = An IQ recording preserves the raw signal, so a one-off event such as a satellite pass can be decoded again with other tools or analysed carefully offline. It holds only what your receiver captured, and the files are large, so record only what you may lawfully receive.
 
-? PRP decodes a USB satellite-navigation receiver in the browser and keeps your position on the page. Why does this matter?
+? Vitruvian Manager decodes a USB satellite-navigation receiver in the browser and keeps your position on the page. Why does this matter?
 + It keeps your receiver's data and your location on your own computer rather than sending them to a website
 * It makes the satellites transmit faster
 * It is the only way to decode NMEA
@@ -273,7 +273,7 @@ Aircraft data is powerful precisely because it is open, but reading it well mean
 - **Some aircraft are hidden or masked.** Military aircraft often fly with transponders off or with changing identities. In the US, privacy programmes let operators limit what is shown: **LADD** (Limiting Aircraft Data Displayed) limits what the FAA's own data feeds pass on to flight-tracking websites, though it cannot stop anyone receiving the aircraft's ADS-B directly, and **PIA** (Privacy ICAO Address) lets an aircraft broadcast a temporary address not tied to its registration. Aggregators differ: some honour operators' requests to hide aircraft, others show everything they receive.
 - **The ethics are real.** These same data could track a private person's movements. The famous jet-tracking accounts that follow billionaires' aircraft run on exactly this public data, and the tension they caused — a platform banning them in December 2022 while the data stayed public — is the whole ethical question in miniature. Study organisations, states and patterns, not individuals, and never publish a private person's live location.
 
-! Ethics: PRP withholds the identities of aircraft in the US privacy programmes by default. Keep that setting on unless you have a lawful, specific reason, and never use flight data to follow or expose a private individual.
+! Ethics: Vitruvian Manager withholds the identities of aircraft in the US privacy programmes by default. Keep that setting on unless you have a lawful, specific reason, and never use flight data to follow or expose a private individual.
 
 ? An aircraft that broadcasts no ADS-B position still appears on a community map with a position, tagged "MLAT". How is that position derived?
 * The aircraft is transmitting ADS-B normally after all
@@ -285,7 +285,7 @@ Aircraft data is powerful precisely because it is open, but reading it well mean
 * Identify them anyway, since the data is public
 + Respect the privacy choice: study patterns and organisations, and don't expose a private individual's movements
 * Report them to the authorities
-= LADD and PIA exist to limit tracking of private aircraft. The hobby's ethics, and PRP's default, are to withhold those identities and to avoid following individuals.
+= LADD and PIA exist to limit tracking of private aircraft. The hobby's ethics, and Vitruvian Manager's default, are to withhold those identities and to avoid following individuals.
 
 # Unit 6 · Ships (AIS)
 
@@ -297,7 +297,7 @@ AIS comes in classes. **Class A** (the larger, mandated ships) transmits often a
 From AIS you can watch a port's traffic, a strait's flow, fishing patterns, a naval vessel's movements when it chooses to transmit, and the comings and goings that matter to sanctions and smuggling work. As with aircraft, it is line-of-sight: a coastal receiver hears tens of kilometres, so most open-ocean coverage comes from satellites and shared networks.
 
 ### In the SIGINT Dashboard
-[Ships (AIS)](#/oi/sigint/ships) plots vessels near you, coloured by type, from your own AIS-catcher receiver or, through the PRP bridge, aisstream.io's free feed, with name, type, speed, course and destination; the [Hardware Guide](#/oi/sigint/hardware) covers a marine antenna with a view of the water.
+[Ships (AIS)](#/oi/sigint/ships) plots vessels near you, coloured by type, from your own AIS-catcher receiver or, through the Vitruvian Manager bridge, aisstream.io's free feed, with name, type, speed, course and destination; the [Hardware Guide](#/oi/sigint/hardware) covers a marine antenna with a view of the water.
 
 Follow a specific ship's history on the public trackers the tab links to, and its flag, managers and inspection record on [Equasis](https://www.equasis.org) (free registration).
 
@@ -345,7 +345,7 @@ To receive a satellite you must know where it will be, and that comes from its *
 
 An orbit is described by a set of **orbital elements**, published for the public as **TLEs** (two-line element sets) or the newer **OMM** format. CelesTrak distributes them; software propagates them with the standard **SGP4** model to predict passes for your exact location: when the satellite rises, how high it climbs (its maximum **elevation**), where it sets and how long it is up. Elements age, so refresh them every few days.
 
-One housekeeping change is worth knowing. On 11 July 2026 the catalogue ran out of five-digit numbers (the permanent series stops at 69,999; the block above it is reserved for provisional objects), so newly catalogued objects are numbered from 100,000. The classic TLE has room for only five characters: CelesTrak no longer issues TLEs for these objects, Space-Track offers a stop-gap "Alpha-5" form with a letter in the first place, and the OMM formats have no such limit. PRP reads CelesTrak's OMM data, so it is unaffected.
+One housekeeping change is worth knowing. On 11 July 2026 the catalogue ran out of five-digit numbers (the permanent series stops at 69,999; the block above it is reserved for provisional objects), so newly catalogued objects are numbered from 100,000. The classic TLE has room for only five characters: CelesTrak no longer issues TLEs for these objects, Space-Track offers a stop-gap "Alpha-5" form with a letter in the first place, and the OMM formats have no such limit. Vitruvian Manager reads CelesTrak's OMM data, so it is unaffected.
 
 A satellite's signal **shifts in frequency** as it passes (the Doppler effect), by several kilohertz at VHF and more at UHF, so tracking software or a wide receiver setting is needed to follow it.
 
@@ -468,7 +468,7 @@ These maps are a genuine conflict indicator: persistent interference shows plain
 
 ## LoRa mesh and APRS
 Two systems, one licence-exempt and one amateur, let individuals send and relay small amounts of data by radio. Amateur APRS is sent in the clear for anyone to receive; a mesh is different, because its messages belong to its users and are encrypted.
-- **LoRa mesh (Meshtastic).** Cheap LoRa radios form an off-grid text-and-position mesh in the licence-exempt bands: **868 MHz** in Ireland, the UK and the EU, **915 MHz** in North America. They are popular with hikers, community groups and emergency volunteers. In Europe the band carries a **duty-cycle limit** (in the sub-band Meshtastic uses, no more than 10% of each hour), which the firmware's EU region setting enforces; using the wrong region either fails to reach your neighbours or breaks the rules. A Meshtastic radio keeps a **node database** — names, hardware, signal quality and the positions owners choose to share — which PRP can read from your own radio. Message contents are a different matter: they are encrypted, and PRP does not decode them.
+- **LoRa mesh (Meshtastic).** Cheap LoRa radios form an off-grid text-and-position mesh in the licence-exempt bands: **868 MHz** in Ireland, the UK and the EU, **915 MHz** in North America. They are popular with hikers, community groups and emergency volunteers. In Europe the band carries a **duty-cycle limit** (in the sub-band Meshtastic uses, no more than 10% of each hour), which the firmware's EU region setting enforces; using the wrong region either fails to reach your neighbours or breaks the rules. A Meshtastic radio keeps a **node database** — names, hardware, signal quality and the positions owners choose to share — which Vitruvian Manager can read from your own radio. Message contents are a different matter: they are encrypted, and Vitruvian Manager does not decode them.
 - **APRS.** The Automatic Packet Reporting System carries amateur positions, weather and short messages on **144.800 MHz** in Europe and **144.390 MHz** in North America, relayed by digipeaters and gated to the internet. The public map (aprs.fi) shows most of what reaches the internet. **Receiving APRS needs no licence**; relaying it to the internet (an iGate) needs a callsign, and transmitting needs an amateur licence.
 
 The licensing rule is the thread through both: **listening is free; transmitting is regulated.** You may build a receive-only station for either and watch all day; the moment you put energy into the air you are in licensed or licence-exempt-device territory, with its own limits.
@@ -560,7 +560,7 @@ Lawful reception can still do harm, and the ethics matter as much as the law.
 = Receiving is physically safe; antenna work is where people are hurt. Ladders, power lines and storms are the hazards to respect, along with lithium batteries in outdoor nodes.
 
 ## Capstone 1: the airport that lost its bearings
-**Scenario (fictional).** Over two evenings, air-traffic recordings and local posts report that aircraft approaching a regional airport near a conflict zone are having satellite-navigation trouble, and one flight circled before landing. A commentator blames enemy jamming. **Your task**: establish, from lawfully received signals, what can and cannot be shown about GNSS interference around that airport and when, rule out other causes, and finish with a judgement stated as likelihood and confidence, using at least three tabs of the SIGINT Dashboard, other parts of PRP and the OSINT method.
+**Scenario (fictional).** Over two evenings, air-traffic recordings and local posts report that aircraft approaching a regional airport near a conflict zone are having satellite-navigation trouble, and one flight circled before landing. A commentator blames enemy jamming. **Your task**: establish, from lawfully received signals, what can and cannot be shown about GNSS interference around that airport and when, rule out other causes, and finish with a judgement stated as likelihood and confidence, using at least three tabs of the SIGINT Dashboard, other parts of Vitruvian Manager and the OSINT method.
 
 ### Model answer
 1. **Frame the question and observe, don't infer.** The claim is "enemy jamming on these dates". Break it into what signals can show: degraded aircraft navigation reports over the area, their timing, and whether a natural cause fits.

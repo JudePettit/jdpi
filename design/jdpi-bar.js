@@ -3,7 +3,8 @@
      <script src="https://jdpi.pages.dev/design/prp-bar.js" data-suite="rt" data-module="atlas" defer></script>
    - Inside the PRP shell (iframe): adds .prp-embedded/.jdpi-embedded to <html> so elements marked data-jdpi-standalone
      hide, announces the page to the shell, and takes the shell's light/dark theme (postMessage "prp:theme").
-   - Opened directly: shows a slim "PRP / Module / Submodule" bar linking back to the shell, with a theme switch.
+   - Opened directly: shows a slim "VM / Module / Submodule" bar linking back to the shell (Vitruvian Manager, short VM),
+     with a theme switch.
    - Everywhere: applies the saved theme, sets the module accent, and loads the Encyclopaedia linker.
    Pages that draw in canvas or SVG with theme colours should redraw on the window event "prp:themechange". */
 (function () {
@@ -13,7 +14,10 @@
   // Old suite ids, and submodules that moved to another module in PRP 2.0.
   const CANON = { q: 'rt', hp: 'rs', fe: 'mm' };
   const MOVED = { atlas: 'rt', 'trade-desk': 'mm', markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', 'double-signal': 'mm', traders: 'mm', 'learning-politics': 'rs', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi' };
-  const NAMES = { rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', oi: 'i-Spy', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' };
+  // Module names as the sidebar shows them (registry "name"), and the full title where the name is abbreviated (registry
+  // "title"), which the bar gives as a tooltip.
+  const NAMES = { rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'Int-Myst Mngmnt', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' };
+  const TITLES = { oi: 'International Mystery Management' };
   const given = (script && script.dataset.suite) || '';
   const suite = MOVED[moduleId] || CANON[given] || given;
 
@@ -61,12 +65,13 @@
     const bar = document.createElement('div');
     bar.className = 'jdpi-returnbar prp-returnbar';
     const link = SHELL + (suite ? `#/${suite}${moduleId ? '/' + moduleId : ''}` : '');
-    bar.innerHTML = `<a href="${link}"><span aria-hidden="true">←</span><b>PRP</b></a>` +
-      (NAMES[suite] ? `<span class="sep">/</span><span class="suite">${NAMES[suite]}</span>` : '') +
+    bar.innerHTML = `<a href="${link}" title="Vitruvian Manager"><span aria-hidden="true">←</span><b>VM</b></a>` +
+      (NAMES[suite] ? `<span class="sep">/</span><span class="suite"${TITLES[suite] ? ` title="${TITLES[suite]}"` : ''}>${NAMES[suite]}</span>` : '') +
       `<span class="sep">/</span><span class="page-title"></span><button type="button" class="theme"></button>`;
-    // Follow the page's title, which some pages change as you move within them (an Encyclopaedia entry, a Kino film).
+    // Follow the page's title, which some pages change as you move within them (an Encyclopaedia entry, a Kino film),
+    // less its product suffix: "· VM", or the older "· PRP" and the full "· Vitruvian Manager" on pages not yet moved.
     const pageTitle = bar.querySelector('.page-title');
-    const syncTitle = () => { pageTitle.textContent = document.title.replace(/\s*[·|—-]\s*PRP.*$/, ''); };
+    const syncTitle = () => { pageTitle.textContent = document.title.replace(/\s*[·|—-]\s*(?:VM|PRP|Vitruvian Manager)\b.*$/, ''); };
     syncTitle();
     new MutationObserver(syncTitle).observe(document.head, { childList: true, characterData: true, subtree: true });
     const btn = bar.querySelector('.theme');

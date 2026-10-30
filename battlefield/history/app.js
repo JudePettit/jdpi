@@ -1,4 +1,4 @@
-/* Retrospective Battlefield (PRP · Retrospective Intelligence) — every war and armed conflict, year by year, 1926–2025.
+/* Retrospective Battlefield (PRP · Retrospective Geopolitics) — every war and armed conflict, year by year, 1926–2025.
    Borders: CShapes 2.0. Conflicts: UCDP/PRIO ACD (1946–2025) and Correlates of War (1926–1945).
    Views (tabs): the map and a table of the year's conflicts; both follow the year slider. URL: #y=<year>&c=<gw>&w=<war>&v=table */
 import { displayName } from './names.mjs';

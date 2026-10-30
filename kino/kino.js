@@ -1,4 +1,4 @@
-/* Kino, PRP's documentary module: the catalogue and player for one category (kino/index.html?cat=<category>).
+/* Kino, Vitruvian Manager's documentary module: the catalogue and player for one category (kino/index.html?cat=<category>).
    Deep links: #doc=<id>&s=<scene id or number>. Scripts live in data/<category>/<id>.json (see README.md);
    data/index.json, media.json and iso.json are built by scripts/build-index.mjs. */
 import { CATEGORIES, categoryOf, flatScenes, shortCite } from './lib/format.js';
@@ -276,7 +276,7 @@ function renderSources() {
     return `${who}<cite>${esc(s.title)}</cite>. ${where}${url}`;
   };
   const media = [...new Set(S.scenes.filter(s => s.visual?.kind === 'portrait').map(s => s.visual.file || S.media.qids?.[s.visual.qid]).filter(Boolean))].map(f => S.media.files?.[f]).filter(Boolean);
-  $('#doc-sources').innerHTML = `<p><b>Sources for this documentary.</b> The narration is PRP's own summary of these works; facts were checked against Wikidata.</p>
+  $('#doc-sources').innerHTML = `<p><b>Sources for this documentary.</b> The narration is Vitruvian Manager's own summary of these works; facts were checked against Wikidata.</p>
     <ol>${S.doc.sources.map(s => `<li id="src-${esc(s.id || '')}">${fmt(s)}</li>`).join('')}</ol>
     ${media.length ? `<p><b>Images.</b> ${media.map(m => `<a href="${esc(m.page)}" target="_blank" rel="noopener">${esc(m.title || 'Image')}</a> (${esc(m.artist || m.credit || 'unknown author')}; ${esc(m.licence || 'see licence')})`).join('; ')}, via Wikimedia Commons.</p>` : ''}`;
 }

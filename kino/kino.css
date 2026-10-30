@@ -1,4 +1,4 @@
-/* Kino (PRP's documentary module): catalogue, player and stage. Written against the PRP tokens in design/prp.css only.
+/* Kino (Vitruvian Manager's documentary module): catalogue, player and stage. Written against the PRP tokens in design/prp.css only.
    The accent is Kino's own (--prp-kn); a copy of prp.css without it falls back to Natural Science's. */
 [data-suite="kino"] { --prp-accent: var(--prp-kn, var(--prp-ns)); --prp-accent-soft: var(--prp-kn-soft, var(--prp-ns-soft)); }
 

@@ -15,7 +15,7 @@ const TILES = [
   { id: 'rx-mesh', name: 'My Meshtastic radio', kind: 'USB or Wi-Fi', tab: 'mesh', idle: 'Node list over Web Serial or /json/nodes.' },
   { id: 'rx-gnss', name: 'My GNSS receiver', kind: 'USB · Web Serial', tab: 'gnss', idle: 'NMEA from a USB GPS.' },
   { id: 'rx-owrx', name: 'My OpenWebRX', kind: 'Your receiver', tab: 'listen', idle: 'Receiver status from /status.json.' },
-  { id: 'bridge', name: 'PRP bridge', kind: 'On this computer', tab: 'overview', anchor: 'connect', idle: 'Off. Needed for local receivers on other machines, aisstream.io and OpenSky.' },
+  { id: 'bridge', name: 'Vitruvian Manager bridge', kind: 'On this computer', tab: 'overview', anchor: 'connect', idle: 'Off. Needed for local receivers on other machines, aisstream.io and OpenSky.' },
   { id: 'webusb', name: 'RTL-SDR in the browser', kind: 'WebUSB', tab: 'listen' },
 ];
 const WORD = { ok: ['good', 'Working'], warn: ['warn', 'Needs attention'], bad: ['bad', 'Not reachable'], idle: ['', 'Not set up'], link: ['', 'Link only'], planned: ['warn', 'Planned'], na: ['', 'Not supported here'], checking: ['', 'Checking…'] };
@@ -81,7 +81,7 @@ export function create(ctx, panel) {
       try { ctx.setStatus(id, 'ok', await fn()); }
       catch (e) {
         const why = e.budget ? e.message : explainError(e);
-        const extra = id === 'adsb' ? ' adsb.lol sends no CORS headers: this works once the site’s PRP proxy is deployed, or with the PRP bridge turned on.' : '';
+        const extra = id === 'adsb' ? ' adsb.lol sends no CORS headers: this works once the site’s Vitruvian Manager proxy is deployed, or with the Vitruvian Manager bridge turned on.' : '';
         ctx.setStatus(id, 'bad', `${why}.${extra}`);
       }
     }));

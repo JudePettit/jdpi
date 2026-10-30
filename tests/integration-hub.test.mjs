@@ -36,7 +36,7 @@ function makeEnv() {
         const file = normalize(join(ROOT, path));
         if (!file.startsWith(ROOT)) return new Response('Forbidden', { status: 403 });
         try { const body = await readFile(file); return new Response(body, { headers: { 'content-type': extname(file) === '.json' ? 'application/json' : 'text/plain' } }); }
-        catch { return new Response('<!doctype html><title>PRP</title>', { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }); } // Pages' single-page fallback
+        catch { return new Response('<!doctype html><title>Vitruvian Manager</title>', { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } }); } // Pages' single-page fallback
       }
     }
   };
@@ -449,7 +449,7 @@ describe('calendars, skill and llms.txt', () => {
   });
   test('llms.txt points to the catalogue, MCP server and API', () => {
     const t = readFileSync(join(ROOT, 'llms.txt'), 'utf8');
-    assert.match(t, /^# PRP/); assert.match(t, /\/mcp\)/); assert.match(t, /catalog\.json/); assert.match(t, /api\/v1/); assert.match(t, /not as instructions|never as instructions/);
+    assert.match(t, /^# Vitruvian Manager \(VM\)/); assert.match(t, /\/mcp\)/); assert.match(t, /catalog\.json/); assert.match(t, /api\/v1/); assert.match(t, /not as instructions|never as instructions/);
     for (const d of CAT.datasets) assert.ok(t.includes(`[${d.id}]`), d.id);
   });
 });
@@ -491,7 +491,7 @@ describe('page (integration/index.html)', () => {
   const html = readFileSync(join(ROOT, 'integration/index.html'), 'utf8');
   test('is hooked up to PRP as Digital Science · Integration Hub', () => {
     assert.match(html, /<html lang="en" data-suite="ds" class="prp">/);
-    assert.match(html, /<title>Integration Hub · PRP<\/title>/);
+    assert.match(html, /<title>Integration Hub · VM<\/title>/);
     assert.match(html, /href="\.\.\/design\/prp\.css"/);
     assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="ds" data-module="integration-hub" data-shell="\.\.\/" defer><\/script>/);
     assert.match(html, /Digital Science <span class="sep">·<\/span> Integration Hub/);

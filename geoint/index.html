@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GEOINT &amp; IMINT Dashboard · PRP</title>
+<title>GEOINT &amp; IMINT Dashboard · VM</title>
 <meta name="description" content="Geospatial and imagery intelligence from open sources: daily satellite imagery and night lights with before/after comparison, fires and hazards, OpenStreetMap features, terrain, measuring and sun-and-shadow tools for geolocation and chronolocation, plus a Software Cookbook, a Hardware Guide and law and ethics.">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../design/prp.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="stylesheet" href="geoint.css">
@@ -25,7 +25,7 @@
 <body>
 <div class="gi">
   <header class="front">
-    <div class="prp-eyebrow">i-Spy <span class="sep">·</span> GEOINT &amp; IMINT Dashboard</div>
+    <div class="prp-eyebrow">International Mystery Management <span class="sep">·</span> GEOINT &amp; IMINT Dashboard</div>
     <h1 class="prp-title">GEOINT &amp; IMINT Dashboard</h1>
     <p class="prp-dek">Geospatial and imagery intelligence from public sources: compare daily satellite imagery and night lights between two dates, follow fires, earthquakes and disasters, query OpenStreetMap for infrastructure, and measure distances, terrain, sun and shadows to find where and when a picture was taken. It covers places, events and infrastructure, never private individuals.</p>
     <div class="prp-meta" id="meta">
@@ -271,7 +271,7 @@
 
   <footer class="prp-sources">
     <p><b>Sources.</b> Imagery: NASA EOSDIS Global Imagery Browse Services (GIBS), MODIS Terra and Aqua corrected reflectance (true colour and bands 7-2-1), VIIRS Suomi NPP, NOAA-20 and NOAA-21 corrected reflectance, VIIRS Black Marble (VNP46A2, moonlight-corrected and gap-filled) and the Day/Night Band, no restrictions on use, credit NASA. Fires: GIBS VIIRS and MODIS thermal anomalies (drawn by the GIBS WMS) and NASA FIRMS with your own free MAP_KEY. Earthquakes: USGS Earthquake Hazards Program GeoJSON feeds (public domain). Disaster alerts: GDACS, a cooperation of the United Nations and the European Commission. Features: © OpenStreetMap contributors (ODbL) through the public Overpass API servers of Private.coffee or VK Maps; place search by Nominatim under the <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener">OSM Foundation's usage policy</a>. Elevation: Terrain Tiles on AWS Open Data (Mapzen/Tilezen; SRTM, GMTED, ETOPO1, 3DEP, EU-DEM and other sources, see <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" target="_blank" rel="noopener">attribution</a>). Base maps: Esri Canvas and World Imagery (Esri's terms of use apply), EOxCloudless Sentinel-2 2025 (CC BY-NC-SA 4.0). Sun positions: SunCalc 2.1.1 (BSD-2-Clause); time zones: tz-lookup (CC0).</p>
-    <p><b>Refresh.</b> Everything is fetched live by your browser when you open a view: GIBS daily imagery appears about three hours after each satellite pass and the newest complete day is shown by default; FIRMS updates every 15 minutes; USGS feeds every minute; GDACS as events change. Nothing is stored on a PRP server.</p>
+    <p><b>Refresh.</b> Everything is fetched live by your browser when you open a view: GIBS daily imagery appears about three hours after each satellite pass and the newest complete day is shown by default; FIRMS updates every 15 minutes; USGS feeds every minute; GDACS as events change. Nothing is stored on a Vitruvian Manager server.</p>
     <p><b>Method and privacy.</b> Distances and bearings are computed on the WGS84 ellipsoid (Vincenty), areas on the equal-area sphere. Your FIRMS key is kept only in this browser's storage and sent only to firms.modaps.eosdis.nasa.gov. Place searches go to nominatim.openstreetmap.org (one per second at most, never as you type), feature queries to the Overpass server you choose (Private.coffee unless you pick VK Maps), and identify this site by its address only. Use the tools for places, events and infrastructure, never to find or follow private people.</p>
   </footer>
 </div>

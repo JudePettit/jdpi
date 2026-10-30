@@ -7,7 +7,7 @@ export const CATEGORIES = [
   { id: 'political-parties', name: 'Political Parties', dek: 'How parties formed, what they stood for, and how they won and lost power.' },
   { id: 'wars', name: 'Wars', dek: 'Wars from their causes to their aftermath, with the maps and figures that explain them.' },
   { id: 'geopolitical-events', name: 'Geopolitical Events', dek: 'Shifts in the balance between powers: alliances, partitions, blockades and the end of empires.' },
-  { id: 'great-thinkers', name: 'Great Thinkers', dek: 'Multi-part courses on the great minds met across PRP: economists, philosophers, political theorists and scientists.', courses: true },
+  { id: 'great-thinkers', name: 'Great Thinkers', dek: 'Multi-part courses on the great minds met across Vitruvian Manager: economists, philosophers, political theorists and scientists.', courses: true },
 ];
 export const CATEGORY_IDS = CATEGORIES.map(c => c.id);
 export const categoryOf = id => CATEGORIES.find(c => c.id === id) || null;

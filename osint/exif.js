@@ -551,7 +551,7 @@ export function toDms(x) {
 export function sampleExif() {
   const lat = 53.347420, lon = -6.253350;
   return writeExif({
-    ifd0: [[0x010F, 2, 'PRP'], [0x0110, 2, 'Sample Camera S1'], [0x0131, 2, 'PRP sample generator 1.0'], [0x0132, 2, '2026:10:27 15:42:10'], [0x0112, 3, 1]],
+    ifd0: [[0x010F, 2, 'Vitruvian Manager'], [0x0110, 2, 'Sample Camera S1'], [0x0131, 2, 'Vitruvian Manager sample generator 1.0'], [0x0132, 2, '2026:10:27 15:42:10'], [0x0112, 3, 1]],
     exif: [[0x9003, 2, '2026:10:27 15:41:58'], [0x9011, 2, '+00:00'], [0x829A, 5, [1, 250]], [0x829D, 5, [28, 10]], [0x8827, 3, 100], [0x920A, 5, [52, 10]], [0xA434, 2, 'Sample lens 5.2mm f/2.8']],
     gps: [[0x0000, 1, [2, 3, 0, 0]], [0x0001, 2, 'N'], [0x0002, 5, toDms(lat)], [0x0003, 2, 'W'], [0x0004, 5, toDms(lon)], [0x0005, 1, 0], [0x0006, 5, [6, 1]],
       [0x0007, 5, [[15, 1], [41, 1], [57, 1]]], [0x0010, 2, 'T'], [0x0011, 5, [3550, 10]], [0x001D, 2, '2026:10:27'], [0x001F, 5, [8, 1]]],

@@ -1,6 +1,6 @@
 # Data Analytics (Digital Science)
 
-A workbench for PRP's own data: pick a dataset from the Integration Hub's catalogue, transform it, chart it, export it,
+A workbench for Vitruvian Manager's own data: pick a dataset from the Integration Hub's catalogue, transform it, chart it, export it,
 or copy the analysis for an AI assistant. Everything runs in the browser; the page stores no keys and calls no AI service.
 
 ## Files

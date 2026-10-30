@@ -1,4 +1,4 @@
-// War Focus (PRP · Retrospective Intelligence): one war, month by month. Data: data/index.json and data/wars/<id>.json
+// War Focus (PRP · Retrospective Geopolitics): one war, month by month. Data: data/index.json and data/wars/<id>.json
 // (scripts/build.mjs); borders from Retrospective Battlefield's CShapes file. Wars and battles carry their Wikidata IDs
 // (data-qid), so the PRP entity linker adds Encyclopaedia links, and lake/scripts/adapters.mjs links the Encyclopaedia back here.
 // Views (tabs): the map, a table of the war's battles and a table of deaths by month. URL: #war=<id>&m=<yyyy-mm>&v=battles|months

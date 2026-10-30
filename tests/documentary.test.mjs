@@ -40,7 +40,7 @@ test('money: the amount with "point", then the currency', () => {
 });
 
 test('versions: each part a number', () => {
-  assert.equal(spoken('PRP 2.0 is out'), 'PRP 2 point 0 is out');
+  assert.equal(spoken('VM 2.0 is out'), 'VM 2 point 0 is out');
   assert.equal(spoken('Version 2.11 and v1.2.3 shipped.'), 'Version 2 point 11 and version 1 point 2 point 3 shipped.');
   assert.equal(spoken('macOS 10.15.7'), 'macOS 10 point 15 point 7');
 });
@@ -76,7 +76,7 @@ test('real sentence ends: ". " or the end of the text, and ! ? … as before; no
 /* ---------- narrator ---------- */
 test('narrator: quoted text splits into the same sentences as the reader speaks', () => {
   const samples = ['World War II, or the Second World War, killed 70–85 million people (about 3.5% of the 1940 population). The U.S. entered in 1941. It ended in 1945.',
-    'Dr. Smith wrote e.g. this. Then St. Paul spoke at 3.5 p.m. Done!', 'jdpi.pages.dev is PRP. It is free… Isn’t it?'];
+    'Dr. Smith wrote e.g. this. Then St. Paul spoke at 3.5 p.m. Done!', 'jdpi.pages.dev is Vitruvian Manager. It is free… Isn’t it?'];
   for (const s of samples) assert.deepEqual(N.sentences(s), sentences(s));
   assert.equal(N.sentences(samples[0]).length, 3);
 });

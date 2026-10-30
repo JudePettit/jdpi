@@ -1,7 +1,7 @@
 {
   "platform": {
-    "name": "PRP",
-    "fullName": "Personal Resource Planner",
+    "name": "VM",
+    "fullName": "Vitruvian Manager",
     "company": "JDP-Iq",
     "tagline": "What an ERP does for an enterprise, for one person: intelligence, history, money and science in one workspace.",
     "version": "2.0"
@@ -21,8 +21,8 @@
         "q"
       ],
       "code": "RT",
-      "name": "Realtime Intelligence",
-      "title": "Realtime Intelligence",
+      "name": "Realtime Geopolitics",
+      "title": "Realtime Geopolitics",
       "description": "What is happening now: the news across the political spectrum, country conditions and volatility, armed conflict, who holds power, and the political calendar.",
       "modules": [
         {
@@ -31,7 +31,7 @@
           "kind": "realtime",
           "icon": "↗",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/briefing.html",
           "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
         },
@@ -41,7 +41,7 @@
           "kind": "realtime",
           "icon": "◎",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/headlines.html?view=current",
           "description": "Any country's last 24 hours of news on a map, with daily, weekly, monthly and yearly archives of its top stories in the same view.",
           "views": [
@@ -78,7 +78,7 @@
           "kind": "realtime",
           "icon": "⌁",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/volatility.html",
           "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT. Compare up to four countries."
         },
@@ -88,7 +88,7 @@
           "kind": "realtime",
           "icon": "✕",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/battlefield.html?view=live",
           "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive and related coverage. UCDP data, refreshed monthly.",
           "views": [
@@ -110,7 +110,7 @@
           "kind": "realtime",
           "icon": "◉",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/national.html",
           "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
           "views": [
@@ -142,7 +142,7 @@
           "kind": "realtime",
           "icon": "▦",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/calendar.html?period=contemporary",
           "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
         }
@@ -154,9 +154,9 @@
         "hp"
       ],
       "code": "RS",
-      "name": "Retrospective Intelligence",
-      "title": "Retrospective Intelligence",
-      "description": "What happened and why: an Encyclopaedia of everyone and everything in PRP, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
+      "name": "Retrospective Geopolitics",
+      "title": "Retrospective Geopolitics",
+      "description": "What happened and why: an Encyclopaedia of everyone and everything in Vitruvian Manager, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
       "modules": [
         {
           "id": "encyclopedia",
@@ -164,9 +164,9 @@
           "kind": "reference",
           "icon": "◈",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "encyclopedia/index.html",
-          "description": "Every person, place, war, party, idea, scientist and discovery in PRP. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
+          "description": "Every person, place, war, party, idea, scientist and discovery in Vitruvian Manager. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
         },
         {
           "id": "retrospective",
@@ -184,7 +184,7 @@
           "kind": "retrospective",
           "icon": "⚔",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "battlefield/history/index.html",
           "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
           "aliases": [
@@ -197,7 +197,7 @@
           "kind": "retrospective",
           "icon": "⌖",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "battlefield/focus/index.html",
           "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a slider, battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
         },
@@ -207,7 +207,7 @@
           "kind": "retrospective",
           "icon": "☼",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kardashev/index.html",
           "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
         },
@@ -217,7 +217,7 @@
           "kind": "retrospective",
           "icon": "▤",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "q/calendar.html?period=history",
           "description": "Political history from 1980 to today in one calendar: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account."
         },
@@ -227,7 +227,7 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=politics",
           "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (Mearsheimer and the Realists) and far right, with quizzes."
         }
@@ -236,8 +236,8 @@
     {
       "id": "oi",
       "code": "OI",
-      "name": "i-Spy",
-      "title": "i-Spy",
+      "name": "Int-Myst Mngmnt",
+      "title": "International Mystery Management",
       "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
       "modules": [
         {
@@ -246,7 +246,7 @@
           "kind": "realtime",
           "icon": "⌕",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "osint/index.html",
           "description": "An investigator's workbench for open sources: search across engines and archives, domains, company and sanctions records, event monitoring and image checks, with a case notebook that grades every source. Plus a Software Cookbook and a Kit Guide.",
           "views": [
@@ -313,7 +313,7 @@
           "kind": "realtime",
           "icon": "⌇",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "sigint/index.html",
           "description": "Receive-only signals monitoring: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather from public feeds or your own receivers, plus a Software Cookbook and a Hardware Guide for hobbyists.",
           "views": [
@@ -380,7 +380,7 @@
           "kind": "realtime",
           "icon": "◫",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "geoint/index.html",
           "description": "Geospatial and imagery intelligence: daily satellite imagery and night lights with before/after comparison, active fires, terrain, OpenStreetMap features, measuring and sun/shadow tools for geolocation and chronolocation. Plus a Software Cookbook and a Hardware Guide.",
           "views": [
@@ -432,9 +432,9 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=osint",
-          "description": "Courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT (the intelligence cycle, sources, search, verification, records, analysis and the law), SIGINT (radio fundamentals and lawful, receive-only monitoring of aircraft, ships, satellites and the spectrum) and GEOINT & IMINT (satellite imagery, geolocation, chronolocation and measurement), and how to use PRP’s dashboards for each.",
+          "description": "Courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT (the intelligence cycle, sources, search, verification, records, analysis and the law), SIGINT (radio fundamentals and lawful, receive-only monitoring of aircraft, ships, satellites and the spectrum) and GEOINT & IMINT (satellite imagery, geolocation, chronolocation and measurement), and how to use Vitruvian Manager’s dashboards for each.",
           "aliases": [
             "intel-training"
           ],
@@ -487,7 +487,7 @@
           "kind": "realtime",
           "icon": "⊿",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "econ/briefing/index.html",
           "description": "Economics news and scholarly articles from 50 feeds: NBER and CEPR working papers, the top journals, the BIS, ECB, Fed and Bank of England, VoxEU, Brookings and other think tanks, and the FT, Economist and Bloomberg, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
         },
@@ -500,7 +500,7 @@
           "kind": "realtime",
           "icon": "⇄",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "fe/traders.html",
           "description": "What members of Congress (including Nancy Pelosi) and famous investors such as Buffett, Burry and Ackman are buying and selling, from STOCK Act and SEC 13F filings, and an agent that mirrors any of them or trades in their style.",
           "views": [
@@ -547,7 +547,7 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=finance",
           "description": "Two courses: Finance, a university-style introduction with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
           "views": [
@@ -578,7 +578,7 @@
           "kind": "realtime",
           "icon": "◬",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "science/briefing/index.html",
           "description": "New papers and news from the major journals and science desks (Nature, Science, Cell, PNAS, PRL and more), with a toggle for physics, chemistry, biology, earth & environment, and astronomy & space."
         },
@@ -588,7 +588,7 @@
           "kind": "retrospective",
           "icon": "⟡",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "science/progress/index.html",
           "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
         }
@@ -599,7 +599,7 @@
       "code": "DS",
       "name": "Digital Science",
       "title": "Digital Science",
-      "description": "Computing, AI and the digital world: the week’s papers and technology news by field, a Data Analytics workbench for exploring and charting PRP’s own data, and an Integration Hub that opens PRP to AI assistants and plugins.",
+      "description": "Computing, AI and the digital world: the week’s papers and technology news by field, a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, and an Integration Hub that opens Vitruvian Manager to AI assistants and plugins.",
       "modules": [
         {
           "id": "digital-briefing",
@@ -607,7 +607,7 @@
           "kind": "realtime",
           "icon": "⌬",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "digital/briefing/index.html",
           "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
         },
@@ -617,9 +617,9 @@
           "kind": "operations",
           "icon": "▤",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "analytics/index.html",
-          "description": "Explore and chart PRP’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in PRP’s style, export them, and hand the analysis to an AI assistant."
+          "description": "Explore and chart Vitruvian Manager’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in Vitruvian Manager’s style, export them, and hand the analysis to an AI assistant."
         },
         {
           "id": "integration-hub",
@@ -627,9 +627,9 @@
           "kind": "reference",
           "icon": "⇄",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "integration/index.html",
-          "description": "Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.",
+          "description": "Connect AI assistants and plugins to Vitruvian Manager: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.",
           "views": [
             {
               "id": "overview",
@@ -675,7 +675,7 @@
       "code": "KN",
       "name": "Kino",
       "title": "Kino",
-      "description": "Documentaries that play across PRP: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
+      "description": "Documentaries that play across Vitruvian Manager: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
       "modules": [
         {
           "id": "kino-political-events",
@@ -683,7 +683,7 @@
           "kind": "retrospective",
           "icon": "◉",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-events",
           "description": "Documentaries on political turning points, starting with the Russian Revolutions of 1917, the Partition of India and the Revolutions of 1989."
         },
@@ -693,7 +693,7 @@
           "kind": "retrospective",
           "icon": "☺",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-figures",
           "description": "Lives in power, told with maps, timelines, portraits and their own words: Winston Churchill, Franklin D. Roosevelt and Deng Xiaoping to begin with."
         },
@@ -703,7 +703,7 @@
           "kind": "retrospective",
           "icon": "◧",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-parties",
           "description": "How parties rise, rule and adapt, starting with the Chinese Communist Party, Mexico's Institutional Revolutionary Party and Japan's Liberal Democratic Party."
         },
@@ -713,7 +713,7 @@
           "kind": "retrospective",
           "icon": "⚔",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=wars",
           "description": "Wars from their causes to their aftermath, starting with the Second World War in Europe, the Korean War and the Vietnam War, with maps that follow War Focus month by month."
         },
@@ -723,9 +723,26 @@
           "kind": "retrospective",
           "icon": "⊕",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=geopolitical-events",
           "description": "Moments that reshaped the world order, starting with the Cuban Missile Crisis, the end of the Soviet Union and the end of empire in Africa."
+        },
+        {
+          "id": "bibliotheca",
+          "name": "Bibliotheca",
+          "kind": "learning",
+          "icon": "¶",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "bibliotheca/neo/index.html",
+          "description": "Public-domain classics read on screen, starting with Machiavelli's The Prince in W. K. Marriott's 1908 translation: every term the Encyclopaedia knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Encyclopaedia entry or the other screens for the book's era.",
+          "views": [
+            {
+              "id": "neo-classic",
+              "name": "Neo Classic",
+              "url": "bibliotheca/neo/index.html"
+            }
+          ]
         },
         {
           "id": "kino-great-thinkers",
@@ -733,9 +750,9 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
-          "host": "PRP",
+          "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=great-thinkers",
-          "description": "Three-part courses with a short quiz on the great minds PRP draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
+          "description": "Three-part courses with a short quiz on the great minds Vitruvian Manager draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
         }
       ]
     }

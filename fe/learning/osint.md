@@ -1,5 +1,5 @@
 title: Open-source intelligence (OSINT)
-intro: A practical, university-style course in open-source intelligence (OSINT) for the individual analyst: the intelligence cycle, source grading, search and archives, image and video verification, records, movement tracking, conflict data, structured analysis, writing up, and the law, ethics and safety that bound the work. The last unit shows how to use PRP itself as an intelligence tool and ends with two capstone exercises.
+intro: A practical, university-style course in open-source intelligence (OSINT) for the individual analyst: the intelligence cycle, source grading, search and archives, image and video verification, records, movement tracking, conflict data, structured analysis, writing up, and the law, ethics and safety that bound the work. The last unit shows how to use Vitruvian Manager itself as an intelligence tool and ends with two capstone exercises.
 
 # Unit 1 · Foundations
 
@@ -66,7 +66,7 @@ Intelligence services grade every item on two separate scales, known as the **Ad
 - **Grade the two separately.** A usually reliable news agency can relay a claim it could not check (**B3**); an anonymous new account can post something that satellite imagery confirms (**F1**). F and 6 are honest grades, and reliability is earned claim by claim, not because you like what a source says.
 - **The source is the originator, not the platform.** A news site quoting an anonymous official is a channel; the official is the source.
 
-Establish **provenance** (who created the material, when, where, how, and how it reached you) and work back towards the **primary source**: the video as first uploaded, the judgment, the filing, the image, the official statement. News reports are **secondary** sources. Compilations such as encyclopaedias, the ACLED and UCDP datasets and PRP's own submodules are **tertiary**: excellent for orientation and base rates, but not the final word on a specific claim.
+Establish **provenance** (who created the material, when, where, how, and how it reached you) and work back towards the **primary source**: the video as first uploaded, the judgment, the filing, the image, the official statement. News reports are **secondary** sources. Compilations such as encyclopaedias, the ACLED and UCDP datasets and Vitruvian Manager's own submodules are **tertiary**: excellent for orientation and base rates, but not the final word on a specific claim.
 
 **Corroboration** means confirmation by an **independent** source, one with separate access to the facts. Ten outlets running the same wire story are one source; so are a thousand accounts sharing one clip. Beware **circular reporting**, where a claim travels from an unsourced post to a news story to an encyclopaedia and back again as "established".
 
@@ -302,7 +302,7 @@ Three datasets dominate open conflict analysis. They measure different things in
 | Access | Free | Free registration; use governed by a licence | Free, open licence (CC BY 4.0) |
 | Main bias | Counts media attention, not events; duplicates and misplaced locations | Depends on what is reported; start dates vary by region | Conservative death counts; slower; leaves out non-lethal events |
 
-**Normalise GDELT**: it reads more sources every year, so raw counts drift upwards; use shares or rankings, as PRP's Geopolitical Volatility does. Use ACLED for protest and local violence and UCDP for strict comparisons across countries and decades, and when datasets disagree, look for different definitions, thresholds and sources before suspecting error.
+**Normalise GDELT**: it reads more sources every year, so raw counts drift upwards; use shares or rankings, as Vitruvian Manager's Geopolitical Volatility does. Use ACLED for protest and local violence and UCDP for strict comparisons across countries and decades, and when datasets disagree, look for different definitions, thresholds and sources before suspecting error.
 
 **Base rates.** Before asking what is special about a case, ask how often such things happen. That frequency is your starting estimate; the details of the case then move it up or down. Taking this **outside view** first is a habit of the best performers in Philip Tetlock's forecasting tournaments (Tetlock and Gardner, _Superforecasting_, 2015).
 - **Armed conflict**: UCDP counted 65 state-based armed conflicts in 2025, the most since its records began in 1946. Thirteen reached war intensity (1,000 or more battle deaths) and eight were fought between states.
@@ -497,10 +497,10 @@ The **[Berkeley Protocol on Digital Open Source Investigations](https://humanrig
 * Encrypts the files on your computer
 = A VPN moves trust from your internet provider and the sites you visit to the VPN provider. It is one layer of protection, not anonymity.
 
-# Unit 11 · Using PRP as an intelligence tool
+# Unit 11 · Using Vitruvian Manager as an intelligence tool
 
-## PRP as a source: news and framing
-PRP brings many open sources into one workspace: live views in Realtime Intelligence, history and the Encyclopaedia in Retrospective Intelligence, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
+## Vitruvian Manager as a source: news and framing
+Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Encyclopaedia in Retrospective Geopolitics, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
 
 ### Workflow: Intelligence Briefing (framing across the spectrum)
 1. Add a **topic** with the keywords people actually use, including names, places and alternative spellings. Topics are saved in your browser only.
@@ -514,7 +514,7 @@ PRP brings many open sources into one workspace: live views in Realtime Intellig
 3. Use the daily, weekly, monthly and yearly archives to see what the domestic press has led with; stories that persist for days show what matters there.
 4. Compare with the Intelligence Briefing: stories that are big at home but invisible abroad, or the reverse, are often the most telling.
 
-? Where should you look first to understand how a PRP view was built?
+? Where should you look first to understand how a Vitruvian Manager view was built?
 * The colour key on the map
 + The page's Sources block: data source, refresh cadence and method
 * The page's title
@@ -576,7 +576,7 @@ Upcoming elections and the last six months of new leaders, coups, wars, assassin
 3. After each event, compare the outcome with what you expected and record it: that is the feedback stage.
 
 ### Workflow: Encyclopaedia (entity resolution and link analysis)
-Every person, place, party, war, idea and organisation in PRP, keyed to its **Wikidata Q-number**, with links to everywhere it appears in the suite.
+Every person, place, party, war, idea and organisation in Vitruvian Manager, keyed to its **Wikidata Q-number**, with links to everywhere it appears in the suite.
 1. **Resolve** each entity to its Q-number, which separates namesakes and gathers spellings and transliterations under one record.
 2. **Read across** the places it appears to turn scattered mentions into one timeline.
 3. **Query by tags** with + or AND, | or OR, - or NOT, brackets, quotation marks for phrases and Facet:Value to be exact. For example, leaders who took power irregularly, and this century's coups:
@@ -629,13 +629,13 @@ New papers and science news by discipline, and a map-and-slider timeline of brea
 = The Hype Tracker measures talk, trading volume and searches, not facts. It is a lead for investigation.
 
 ## Capstone 1: the burning depot
-**Scenario (fictional).** At 01:22 UTC on 12 May a Telegram channel posts a 40-second night video of a large fire, captioned "Drone strike destroys army fuel depot at Northport". One side's officials call it a successful operation; the other side's call it an accident at a civilian site. **Your task**: establish what happened, when and where, and how confident you can be, using OSINT methods and at least four PRP submodules, and finish with a BLUF.
+**Scenario (fictional).** At 01:22 UTC on 12 May a Telegram channel posts a 40-second night video of a large fire, captioned "Drone strike destroys army fuel depot at Northport". One side's officials call it a successful operation; the other side's call it an accident at a civilian site. **Your task**: establish what happened, when and where, and how confident you can be, using OSINT methods and at least four Vitruvian Manager submodules, and finish with a BLUF.
 
 ### Model answer
 1. **Provenance**: reverse searches of keyframes find no earlier copies. The earliest upload is the 01:22 post, from a channel whose past local reports have mostly proved accurate (source grade C). Archive it twice, download the file, hash it and log it.
 2. **Place**: storage tanks, a water tower and a rail spur in the frame match the Northport depot on satellite and street-level imagery: three independent features. Record the coordinates.
 3. **Time and corroboration**: FIRMS shows two heat detections at the depot at 00:58 UTC, and the next clear Sentinel-2 image, on 15 May, shows burn scars on two tanks 200 m apart, matching the two seats of fire in the video.
-4. **PRP context**: Realtime Battlefield shows strikes on fuel infrastructure in this war in each of the last three months, and War Focus shows such strikes rising in comparable wars when the front stalled. The Intelligence Briefing splits along partisan lines, but the Global Headline Tracker shows the country's own outlets leading with an air-raid alert that night. Volatility's conflict component is at the top of its 90-day range.
+4. **Vitruvian Manager context**: Realtime Battlefield shows strikes on fuel infrastructure in this war in each of the last three months, and War Focus shows such strikes rising in comparable wars when the front stalled. The Intelligence Briefing splits along partisan lines, but the Global Headline Tracker shows the country's own outlets leading with an air-raid alert that night. Volatility's conflict component is at the top of its 90-day range.
 5. **Hypotheses**: two seats of fire are inconsistent with a single accident; the air-raid alert and the recent pattern fit a drone strike; sabotage has no supporting evidence. The judgement rests most on the alert reports, so confirm them next.
 
 ! BLUF: A fire destroyed at least two fuel tanks at the Northport depot at about 01:00 UTC on 12 May, very likely (80–95%) as a result of a drone strike. We have moderate confidence in this judgement: the timing and damage are well corroborated, but no weapon debris has been verified. The strike fits a three-month pattern of attacks on fuel infrastructure in this war.
@@ -653,7 +653,7 @@ New papers and science news by discipline, and a map-and-slider timeline of brea
 = Keeping them apart, as ICD 203 requires, stops readers confusing the probability of an event with the strength of the evidence for it.
 
 ## Capstone 2: six weeks to the vote
-**Scenario (fictional).** Country C holds a presidential election in six weeks. The president's party controls parliament and the constitutional court, the main opposition leader has been barred from standing, the currency has fallen 12% in three months and Geopolitical Volatility's civil-unrest component is climbing. **Your task**: assess the likelihood of serious unrest (sustained mass protests or deadly clashes) between now and four weeks after the vote, using at least five PRP submodules, and set out the indicators to watch.
+**Scenario (fictional).** Country C holds a presidential election in six weeks. The president's party controls parliament and the constitutional court, the main opposition leader has been barred from standing, the currency has fallen 12% in three months and Geopolitical Volatility's civil-unrest component is climbing. **Your task**: assess the likelihood of serious unrest (sustained mass protests or deadly clashes) between now and four weeks after the vote, using at least five Vitruvian Manager submodules, and set out the indicators to watch.
 
 ### Model answer
 1. **Base rate**: the Historical Calendar and Political Retrospective show mass protests after two of the country's last five presidential elections, one of them followed by a coup attempt: about 40% before considering current conditions.

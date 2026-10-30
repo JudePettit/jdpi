@@ -1,4 +1,4 @@
-/* GEOINT & IMINT Dashboard (Realtime Intelligence). Written against the PRP tokens in design/prp.css only. */
+/* GEOINT & IMINT Dashboard (International Mystery Management). Written against the PRP tokens in design/prp.css only. */
 /* Page tokens: ink for labels set inside a coloured fill (the same two in both themes, chosen by the fill's lightness). */
 :root { --gi-ink-on-dark-fill: #ffffff; --gi-ink-on-light-fill: #14181f; }
 *, *::before, *::after { box-sizing: border-box; }

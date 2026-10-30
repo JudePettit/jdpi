@@ -370,7 +370,7 @@ test('chart: histograms, areas, maps and what does not fit', () => {
   const map = prepareChart(countries, { type: 'map', x: 'iso3', y: 'score', fn: 'max' }, { country: m });
   assert.ok(map.ok);
   assert.equal(map.data.length, 11);
-  assert.match(map.notes[0], /1 value is not a country PRP recognises and is left out: XXX/);
+  assert.match(map.notes[0], /1 value is not a country Vitruvian Manager recognises and is left out: XXX/);
   assert.equal(map.data[0].iso3, 'JPN');
   assert.ok(countryShare(countries, 'name', m) > 0.9);
   assert.equal(countryShare(countries, 'region', m), 0);
@@ -510,9 +510,9 @@ test('ai: the prompt is compact and complete', () => {
   const run = runPipeline(events(), spec.steps);
   const link = analysisLink('https://jdpi.pages.dev/analytics/', spec);
   assert.equal(link, 'https://jdpi.pages.dev/analytics/#d=fixture-events&filter=type:eq:election&group=country:count&sort=-count&chart=bar&x=country&y=count');
-  const text = buildPrompt({ ds, moduleName: 'Realtime Intelligence', submoduleName: 'Realtime Calendar', siteUrl: 'https://jdpi.pages.dev/', hubUrl: 'https://jdpi.pages.dev/integration/index.html#tab=mcp',
+  const text = buildPrompt({ ds, moduleName: 'Realtime Geopolitics', submoduleName: 'Realtime Calendar', siteUrl: 'https://jdpi.pages.dev/', hubUrl: 'https://jdpi.pages.dev/integration/index.html#tab=mcp',
     result: run.table, types: { type: 'string' }, spec, question: 'Which country holds the most elections?', link, chartNote: describeChart(spec.chart), errors: run.errors });
-  for (const want of ['## Dataset: Fixture: political events', 'id `fixture-events` · Realtime Intelligence · Realtime Calendar', 'https://jdpi.pages.dev/analytics/test-fixtures/data/events.json (JSON), records at "events"; 61 rows.',
+  for (const want of ['## Dataset: Fixture: political events', 'id `fixture-events` · Realtime Geopolitics · Realtime Calendar', 'https://jdpi.pages.dev/analytics/test-fixtures/data/events.json (JSON), records at "events"; 61 rows.',
     '- `deaths` (number): Deaths reported (empty when unknown)', '1. keep rows where type = “election”', 'Chart: bar chart of count by country.', '`country` (string), `count` (number)',
     `First ${Math.min(8, run.table.rows.length)} rows as CSV:`, link, '{"id":"fixture-events","where":[{"field":"type","op":"eq","value":"election"}]}', 'Then, on those rows (or on the data files above): group by country: count of rows; sort by count (descending).',
     '## My question\nWhich country holds the most elections?']) assert.ok(text.includes(want), want);
@@ -690,7 +690,7 @@ test('page: pick a dataset, group it, chart it, and reopen the analysis from its
     await page.waitForFunction(() => /chart=bar/.test(location.hash) && document.querySelector('#chart svg g[aria-label="bar"] rect'));
     const bars = Math.min(expected.rows.length, LIMITS.bars);
     assert.equal(await page.$$eval('#chart svg g[aria-label="bar"] rect', r => r.length), bars);
-    assert.ok((await page.textContent('#caption')).startsWith(`Figure 1. Bar chart of count by ${by}. Steps: group by ${by}: count of rows. Source: ${ds.title} (PRP `));
+    assert.ok((await page.textContent('#caption')).startsWith(`Figure 1. Bar chart of count by ${by}. Steps: group by ${by}: count of rows. Source: ${ds.title} (Vitruvian Manager, `));
     assert.equal(await page.$$eval('#chart-table tbody tr', r => r.length), bars);
     const total = await page.$$eval('#chart-table tbody tr td:last-child', tds => tds.reduce((a, td) => a + Number(td.textContent.replace(/,/g, '')), 0));
     assert.equal(total, expected.rows.sort((a, b) => b.count - a.count).slice(0, bars).reduce((a, r) => a + r.count, 0));

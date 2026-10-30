@@ -1,6 +1,6 @@
 /* ==========================================================================
-   PRP design system — Personal Resource Planner, by JDP-Iq.
-   One stylesheet for the shell and every module (Realtime Intelligence, Retrospective Intelligence, Money Management,
+   PRP design system (the internal name) — Vitruvian Manager, by JDP-Iq.
+   One stylesheet for the shell and every module (Realtime Geopolitics, Retrospective Geopolitics, Money Management,
    Natural Science), on any host:   <link rel="stylesheet" href="https://jdpi.pages.dev/design/prp.css">
    Module accent:  <html data-suite="rt|rs|mm|ns">  (the old ids q, hp, fe still work).
    Theme: light by default; dark follows the system, or <html data-theme="light|dark"> (set by the shell / prp-bar).
@@ -42,10 +42,10 @@
   --prp-focus: #2a78d6;
 
   /* Modules (identity marks: code chips, rules, active nav) */
-  --prp-rt: #1c5cab; --prp-rt-soft: #e9f1fb;   /* Realtime Intelligence */
-  --prp-rs: #8a5a1f; --prp-rs-soft: #f7f0e6;   /* Retrospective Intelligence */
+  --prp-rt: #1c5cab; --prp-rt-soft: #e9f1fb;   /* Realtime Geopolitics */
+  --prp-rs: #8a5a1f; --prp-rs-soft: #f7f0e6;   /* Retrospective Geopolitics */
   --prp-mm: #1f7a4d; --prp-mm-soft: #e8f4ee;   /* Money Management */
-  --prp-oi: #5c6512; --prp-oi-soft: #f2f4e3;   /* i-Spy */
+  --prp-oi: #5c6512; --prp-oi-soft: #f2f4e3;   /* International Mystery Management */
   --prp-ns: #5b47c7; --prp-ns-soft: #f0edfb;   /* Natural Science */
   --prp-ds: #0e7490; --prp-ds-soft: #e5f4f7;   /* Digital Science */
   --prp-kn: #a3266b; --prp-kn-soft: #fbeaf2;   /* Kino */

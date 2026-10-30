@@ -3,9 +3,9 @@ VERSION:2.0
 PRODID:-//JDP-Iq//PRP Calendars//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:PRP Realtime Calendar
+X-WR-CALNAME:Vitruvian Manager Realtime Calendar
 X-WR-CALDESC:Political events from six months ago to eighteen months ahead 
- (2026-04-30 to 2028-04-30)\, from PRP's Realtime Calendar.
+ (2026-04-30 to 2028-04-30)\, from Vitruvian Manager's Realtime Calendar.
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
@@ -20,7 +20,8 @@ DESCRIPTION:General elections were held in Antigua and Barbuda on 30 April
  election\, making further gains in Parliament following the election of Ra
  wdon Turner and the unofficial floor walk of Anthony Smith.\n\nElection: A
  ntigua and Barbuda\nSource: https://en.wikipedia.org/wiki/2026_Antiguan_ge
- neral_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ neral_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Antiguan_general_election
 STATUS:CONFIRMED
@@ -40,7 +41,7 @@ DESCRIPTION:Official results from yesterday's election indicated that the A
  ion: Antigua and Barbuda\nReported by Antigua.news: https://antigua.news/2
  026/05/01/pm-browne-and-ag-benjamin-officially-sworn-in-following-election
  -victory/\nSource: https://en.wikipedia.org/wiki/Gaston_Browne\nText: Wiki
- pedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ pedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Gaston_Browne
 STATUS:CONFIRMED
@@ -58,7 +59,8 @@ DESCRIPTION:May Day protests are held across the U.S.\, including an econom
  w York Stock Exchange.\n\nProtest: United States\nReported by Time: https:
  //time.com/article/2026/05/01/may-day-international-workers-day-protests-r
  allies-marches-us/\nSource: https://en.wikipedia.org/wiki/2026_May_Day_pro
- tests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ tests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.
+ dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_May_Day_protests
 STATUS:CONFIRMED
@@ -75,7 +77,8 @@ DESCRIPTION:The 8th Summit of the European Political Community was held on
  tergovernmental forum that facilitates political and strategic dialogue ab
  out the future of Europe. It holds biannual summits.\n\nSummit: Armenia\nS
  ource: https://en.wikipedia.org/wiki/8th_European_Political_Community_Summ
- it\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ it\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev
+ ).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/8th_European_Political_Community_Summit
 STATUS:CONFIRMED
@@ -94,7 +97,7 @@ DESCRIPTION:The Parliament of Romania votes 281–4 to pass a motion of no
  : Romania\nReported by AP: https://apnews.com/article/romania-government-n
  o-confidence-motion-european-union-cae251a0ef62c9941d9355c0b2c927ea\nSourc
  e: https://en.wikipedia.org/wiki/Politics_of_Romania\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Parliament vote
 URL:https://en.wikipedia.org/wiki/Politics_of_Romania
 STATUS:CONFIRMED
@@ -111,8 +114,8 @@ DESCRIPTION:The 2026 ASEAN Summits are two series of diplomatic conferences
  re held in the Philippines in 2026. It comprised the 48th ASEAN Summit hel
  d on 6–8 May in Cebu and the 49th ASEAN Summit scheduled for 16–18 Nov
  ember in Metro Manila.\n\nSummit: Philippines\nSource: https://en.wikipedi
- a.org/wiki/2026_ASEAN_Summits\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (j
- dpi.pages.dev).
+ a.org/wiki/2026_ASEAN_Summits\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruv
+ ian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_ASEAN_Summits
 STATUS:CONFIRMED
@@ -131,8 +134,8 @@ DESCRIPTION:Manele is ousted from the premiership following a successful no
  w prime minister.\n\nParliament vote: Solomon Islands\nReported by Reuters
  : https://www.reuters.com/world/china/solomon-islands-pm-ousted-after-losi
  ng-confidence-vote-2026-05-07/\nSource: https://en.wikipedia.org/wiki/Poli
- tics_of_Solomon_Islands\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ tics_of_Solomon_Islands\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Parliament vote
 URL:https://en.wikipedia.org/wiki/Politics_of_Solomon_Islands
 STATUS:CONFIRMED
@@ -148,7 +151,8 @@ DESCRIPTION:Rumen Georgiev Radev is a Bulgarian politician and former Bulga
  rian Air Force officer who is the prime minister of Bulgaria. He previousl
  y served as president of Bulgaria from 2017 until his resignation in 2026.
  \n\nNew leader: Bulgaria\nSource: https://en.wikipedia.org/wiki/Rumen_Rade
- v\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ v\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev)
+ .
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Rumen_Radev
 STATUS:CONFIRMED
@@ -165,7 +169,7 @@ DESCRIPTION:Rumen Radev is sworn in as prime minister of Bulgaria after bei
  embly.\n\nInauguration: Bulgaria\nReported by AP: https://apnews.com/artic
  le/bulgaria-parliament-rumen-radev-government-f11cc9fda465a508f09e84e04226
  5a0d\nSource: https://en.wikipedia.org/wiki/Rumen_Radev\nText: Wikipedia (
- CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Rumen_Radev
 STATUS:CONFIRMED
@@ -182,7 +186,7 @@ DESCRIPTION:Laura Virginia Fernández Delgado is a Costa Rican politician a
   2026. As the presidential candidate of the Sovereign People's Party\, Fer
  nández won the 2026 presidential election.\n\nNew leader: Costa Rica\nSou
  rce: https://en.wikipedia.org/wiki/Laura_Fern%C3%A1ndez\nText: Wikipedia (
- CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Laura_Fern%C3%A1ndez
 STATUS:CONFIRMED
@@ -199,7 +203,7 @@ DESCRIPTION:Laura Fernández Delgado is sworn in as president of Costa Rica
   by Reuters: https://www.reuters.com/world/china/costa-ricas-laura-fernand
  ez-vows-war-crime-ahead-inauguration-2026-05-08/\nSource: https://en.wikip
  edia.org/wiki/Laura_Fern%C3%A1ndez_Delgado\nText: Wikipedia (CC BY-SA 4.0)
- \, via PRP (jdpi.pages.dev).
+ \, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Laura_Fern%C3%A1ndez_Delgado
 STATUS:CONFIRMED
@@ -217,7 +221,8 @@ DESCRIPTION:Welsh Labour leader and First Minister of Wales Eluned Morgan r
  n Wales.\n\nResignation: United Kingdom\nReported by The National: https:/
  /www.thenational.scot/news/26090656.welsh-labour-leader-eluned-morgan-lose
  s-seat-senedd-elections/\nSource: https://en.wikipedia.org/wiki/Eluned_Mor
- gan\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ gan\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Eluned_Morgan
 STATUS:CONFIRMED
@@ -237,7 +242,8 @@ DESCRIPTION:Brazilian Supreme Federal Court justice Alexandre de Moraes sus
  \n\nCourt ruling: Brazil\nReported by AFP via France 24: https://www.franc
  e24.com/en/live-news/20260509-brazil-court-suspends-law-aimed-at-reducing-
  bolsonaro-sentence\nSource: https://en.wikipedia.org/wiki/Arrest_of_Jair_B
- olsonaro\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ olsonaro\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pag
+ es.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Arrest_of_Jair_Bolsonaro
 STATUS:CONFIRMED
@@ -253,8 +259,8 @@ DESCRIPTION:Péter Magyar is a Hungarian politician who has served as prime
   minister of Hungary since May 2026. He has been the president of the Tisz
  a Party since 2024 and was a member of the European Parliament (MEP) from 
  2024 to 2026.\n\nNew leader: Hungary\nSource: https://en.wikipedia.org/wik
- i/P%C3%A9ter_Magyar\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.
- dev).
+ i/P%C3%A9ter_Magyar\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manage
+ r (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/P%C3%A9ter_Magyar
 STATUS:CONFIRMED
@@ -272,7 +278,7 @@ DESCRIPTION:Péter Magyar of the Tisza Party is sworn in as the prime minis
  nauguration: Hungary\nReported by Reuters: https://www.reuters.com/world/m
  agyar-sworn-hungarys-prime-minister-promises-change-2026-05-09/\nSource: h
  ttps://en.wikipedia.org/wiki/P%C3%A9ter_Magyar\nText: Wikipedia (CC BY-SA 
- 4.0)\, via PRP (jdpi.pages.dev).
+ 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/P%C3%A9ter_Magyar
 STATUS:CONFIRMED
@@ -291,7 +297,7 @@ DESCRIPTION:The National Assembly of Hungary reconvenes for the first time
  s Journal: https://bbj.hu/politics/domestic/parliament/agnes-forsthoffer-e
  lected-speaker-only-2nd-woman-to-hold-role/\nSource: https://en.wikipedia.
  org/wiki/2026_Hungarian_parliamentary_election\nText: Wikipedia (CC BY-SA 
- 4.0)\, via PRP (jdpi.pages.dev).
+ 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/2026_Hungarian_parliamentary_election
 STATUS:CONFIRMED
@@ -308,7 +314,7 @@ DESCRIPTION:Andris Sprūds resigns as Latvian defence minister after Ukrain
  ation: Latvia\nReported by Politico EU: https://www.politico.eu/article/la
  tvia-defense-minister-resigns-leadership-turnover-nato-eastern-flank/\nSou
  rce: https://en.wikipedia.org/wiki/Andris_Spr%C5%ABds\nText: Wikipedia (CC
-  BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Andris_Spr%C5%ABds
 STATUS:CONFIRMED
@@ -326,7 +332,8 @@ DESCRIPTION:Christian Schmidt announces his resignation as High Representat
   is found.\n\nResignation: Bosnia and Herzegovina\nReported by AP: https:/
  /apnews.com/article/bosnia-international-envoy-resigns-serbs-a67c7c974cd16
  42a36831efba66929ba\nSource: https://en.wikipedia.org/wiki/Christian_Schmi
- dt\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ dt\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev
+ ).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Christian_Schmidt
 STATUS:CONFIRMED
@@ -344,7 +351,7 @@ DESCRIPTION:The U.S. government issues sanctions against three people and n
  ions: Iran\nReported by Reuters: https://www.reuters.com/world/china/us-is
  sues-new-sanctions-over-irans-oil-shipments-china-2026-05-11/\nSource: htt
  ps://en.wikipedia.org/wiki/United_States_sanctions_against_Iran\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_sanctions_against_Iran
 STATUS:CONFIRMED
@@ -362,7 +369,7 @@ DESCRIPTION:Philippine vice president Sara Duterte is impeached by the Hous
  nReported by AFP via RFI: https://www.rfi.fr/en/international-news/2026051
  1-philippine-lawmakers-vote-to-impeach-vp-sara-duterte\nSource: https://en
  .wikipedia.org/wiki/Second_impeachment_of_Sara_Duterte\nText: Wikipedia (C
- C BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ C BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Parliament vote
 URL:https://en.wikipedia.org/wiki/Second_impeachment_of_Sara_Duterte
 STATUS:CONFIRMED
@@ -379,7 +386,7 @@ DESCRIPTION:A federal budget was presented to the House of Representatives
  lbanese government since winning the 2025 federal election and its fifth s
  ince being elected to government in 2022.\n\nParliament vote: Australia\nS
  ource: https://en.wikipedia.org/wiki/2026_Australian_federal_budget\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Parliament vote
 URL:https://en.wikipedia.org/wiki/2026_Australian_federal_budget
 STATUS:CONFIRMED
@@ -396,7 +403,7 @@ DESCRIPTION:General elections were held in the Bahamas on 12 May 2026 to el
   by Prime Minister Philip Davis\, with Parliament dissolved on 8 April 202
  6 and the writs of election issued the following day.\n\nElection: Bahamas
  \nSource: https://en.wikipedia.org/wiki/2026_Bahamian_general_election\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Bahamian_general_election
 STATUS:CONFIRMED
@@ -413,7 +420,8 @@ DESCRIPTION:Ministers of the new Cabinet of Prime Minister Péter Magyar ar
  e sworn in and take office.\n\nInauguration: Hungary\nReported by AP: http
  s://apnews.com/article/hungary-government-takes-office-magyar-orban-620729
  3383e991b96c64e94ef425f10c\nSource: https://en.wikipedia.org/wiki/P%C3%A9t
- er_Magyar\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ er_Magyar\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pa
+ ges.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/P%C3%A9ter_Magyar
 STATUS:CONFIRMED
@@ -429,7 +437,7 @@ DESCRIPTION:Ugandan president Yoweri Museveni is re-inaugurated for a 7th t
  erm.\n\nInauguration: Uganda\nReported by Africanews: https://www.africane
  ws.com/2026/05/12/ugandas-president-yoweri-museveni-sworn-in-to-seventh-co
  nsecutive-term/\nSource: https://en.wikipedia.org/wiki/Yoweri_Museveni\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Yoweri_Museveni
 STATUS:CONFIRMED
@@ -446,7 +454,7 @@ DESCRIPTION:Miatta Fahnbulleh resigned as Parliamentary Under-Secretary of
  State for Devolution\, Faith and Communities on 12 May 2026\, having held 
  the office since 6 September 2025.\n\nResignation: United Kingdom\nSource:
   https://en.wikipedia.org/wiki/Miatta_Fahnbulleh\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Miatta_Fahnbulleh
 STATUS:CONFIRMED
@@ -464,7 +472,7 @@ DESCRIPTION:In the Central African Republic\, the Government of Prime Minis
  ted by Koaci: https://www.koaci.com/article/2026/05/15/centrafrique/politi
  que/centrafrique-felix-moloua-demissionne-avec-lensemble-de-son-gouverneme
  nt_196682.html\nSource: https://en.wikipedia.org/wiki/F%C3%A9lix_Moloua\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/F%C3%A9lix_Moloua
 STATUS:CONFIRMED
@@ -482,7 +490,8 @@ DESCRIPTION:From 13 to 15 May 2026\, the president of the United States Don
  mp's first state visit to China occurred in November 2017. This trip was a
  lso the first by a U.S. president since Trump's visit in 2017.\n\nSummit: 
  China\nSource: https://en.wikipedia.org/wiki/2026_state_visit_by_Donald_Tr
- ump_to_China\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ump_to_China\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi
+ .pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_state_visit_by_Donald_Trump_to_China
 STATUS:CONFIRMED
@@ -500,7 +509,8 @@ DESCRIPTION:Bolivian police clash with protesting miners who attempt to rea
  rotest: Bolivia\nReported by Reuters: https://www.reuters.com/world/americ
  as/explosions-heard-during-bolivia-march-by-mining-groups-calling-resignat
  ion-2026-05-14/\nSource: https://en.wikipedia.org/wiki/2026_Bolivian_prote
- sts\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ sts\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Bolivian_protests
 STATUS:CONFIRMED
@@ -515,7 +525,7 @@ SUMMARY:Evika Siliņa resigns as Prime Minister of Latvia
 DESCRIPTION:Evika Siliņa resigned as Prime Minister of Latvia on 14 May 20
  26\, having held the office since 15 September 2023.\n\nResignation: Latvi
  a\nSource: https://en.wikipedia.org/wiki/Evika_Sili%C5%86a\nText: Wikipedi
- a (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ a (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Evika_Sili%C5%86a
 STATUS:CONFIRMED
@@ -531,7 +541,8 @@ SUMMARY:Wes Streeting resigns as Secretary of State for Health and Social C
 DESCRIPTION:Wes Streeting resigned as Secretary of State for Health and Soc
  ial Care on 14 May 2026\, having held the office since 5 July 2024.\n\nRes
  ignation: United Kingdom\nSource: https://en.wikipedia.org/wiki/Wes_Street
- ing\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ing\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Wes_Streeting
 STATUS:CONFIRMED
@@ -551,7 +562,7 @@ DESCRIPTION:The United States announces that Israel and Lebanon agreed to e
  l.com/liveblog_entry/us-announces-45-day-extension-of-porous-lebanon-cease
  fire-after-3rd-round-of-beirut-jlem-talks/\nSource: https://en.wikipedia.o
  rg/wiki/2026_Israel%E2%80%93Lebanon_peace_talks\nText: Wikipedia (CC BY-SA
-  4.0)\, via PRP (jdpi.pages.dev).
+  4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Ceasefire
 URL:https://en.wikipedia.org/wiki/2026_Israel%E2%80%93Lebanon_peace_talks
 STATUS:CONFIRMED
@@ -569,7 +580,7 @@ DESCRIPTION:One person dies and five others are injured in clashes between
  otest: Comoros\nReported by Reuters: https://www.reuters.com/world/africa/
  one-dead-comoros-clashes-erupt-over-rising-fuel-prices-2026-05-16/\nSource
  : https://en.wikipedia.org/wiki/Protests_against_the_2026_Iran_war\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_against_the_2026_Iran_war
 STATUS:CONFIRMED
@@ -586,8 +597,8 @@ DESCRIPTION:The Long Island Rail Road is a railroad owned by the Metropolit
  t United States railroad still operating under its original name and chart
  er. It consolidated several other companies in the late 19th century.\n\nP
  rotest: United States\nSource: https://en.wikipedia.org/wiki/2026_Long_Isl
- and_Rail_Road_strike\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ and_Rail_Road_strike\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Long_Island_Rail_Road_strike
 STATUS:CONFIRMED
@@ -605,7 +616,8 @@ DESCRIPTION:Parliamentary elections were held in Cape Verde on 17 May 2026
  he Movement for Democracy (MpD). PAICV leader Francisco Carvalho has been 
  named prime minister–designate of Cape Verde.\n\nElection: Cape Verde\nS
  ource: https://en.wikipedia.org/wiki/2026_Cape_Verdean_parliamentary_elect
- ion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Cape_Verdean_parliamentary_election
 STATUS:CONFIRMED
@@ -624,7 +636,7 @@ DESCRIPTION:The U.S. Office of Foreign Assets Control imposes sanctions on
  's energy and financial crisis.\n\nSanctions: Cuba\nReported by AFP via Ar
  ab News: https://www.arabnews.com/node/2644070/world\nSource: https://en.w
  ikipedia.org/wiki/2026_Cuban_crisis\nText: Wikipedia (CC BY-SA 4.0)\, via 
- PRP (jdpi.pages.dev).
+ Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/2026_Cuban_crisis
 STATUS:CONFIRMED
@@ -642,7 +654,7 @@ DESCRIPTION:Four people are killed and more than 30 others are injured in n
  than 20% to record highs in Nairobi\, Kenya.\n\nProtest: Iran\nReported by
   BBC News: https://bbc.com/news/articles/cm2p0n44drvo\nSource: https://en.
  wikipedia.org/wiki/Protests_against_the_2026_Iran_war\nText: Wikipedia (CC
-  BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_against_the_2026_Iran_war
 STATUS:CONFIRMED
@@ -662,8 +674,8 @@ DESCRIPTION:The U.S. Office of Foreign Assets Control removes sanctions on
  ions in Gaza.\n\nSanctions: Palestine\nReported by AFP via ABS-CBN News: h
  ttps://www.abs-cbn.com/news/world/2026/5/21/us-lifts-sanctions-on-un-exper
  t-on-palestinians-1006\nSource: https://en.wikipedia.org/wiki/United_State
- s_and_the_United_Nations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ s_and_the_United_Nations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_and_the_United_Nations
 STATUS:CONFIRMED
@@ -683,7 +695,8 @@ DESCRIPTION:The U.S. Supreme Court dismisses an appeal by the state of Alab
  .\n\nCourt ruling: United States\nReported by The Guardian: https://www.th
  eguardian.com/us-news/2026/may/21/supreme-court-hamm-v-smith-death-penalty
  -intellectual-disability\nSource: https://en.wikipedia.org/wiki/Hamm_v._Sm
- ith\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ith\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Hamm_v._Smith
 STATUS:CONFIRMED
@@ -700,7 +713,8 @@ DESCRIPTION:The Flamingo Revolution is a decentralised social movement and
  l protests took place in Baks-Rrjoll on 2 February 2026 when residents pro
  tested against the planned Blue Borgo resort and disputed land ownership.\
  n\nProtest: Albania\nSource: https://en.wikipedia.org/wiki/Flamingo_Revolu
- tion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ tion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Flamingo_Revolution
 STATUS:CONFIRMED
@@ -718,7 +732,8 @@ DESCRIPTION:Tens of thousands of people rally in Belgrade\, Serbia\, to pro
  ported by Al Jazeera: https://www.aljazeera.com/news/2026/5/23/tens-of-tho
  usands-rally-in-serbia-for-antigovernment-demonstrations\nSource: https://
  en.wikipedia.org/wiki/2024%E2%80%93present_Serbian_anti-corruption_protest
- s\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ s\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev)
+ .
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2024%E2%80%93present_Serbian_anti-corrupt
  ion_protests
@@ -736,8 +751,8 @@ DESCRIPTION:Thousands of people march through Madrid\, Spain\, demanding th
  n scandals involving his cabinet and his family.\n\nProtest: Spain\nReport
  ed by Reuters: https://www.reuters.com/world/tens-thousands-march-madrid-d
  emand-spanish-prime-minister-resigns-2026-05-23/\nSource: https://en.wikip
- edia.org/wiki/Madrid\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ edia.org/wiki/Madrid\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Madrid
 STATUS:CONFIRMED
@@ -753,7 +768,8 @@ DESCRIPTION:Romuald Wadagni is sworn in as the president of Benin\, succeed
  ing Patrice Talon.\n\nInauguration: Benin\nReported by Reuters: https://ww
  w.reuters.com/world/africa/benins-wadagni-takes-office-vows-better-living-
  standards-security-2026-05-24/\nSource: https://en.wikipedia.org/wiki/Romu
- ald_Wadagni\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ald_Wadagni\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.
+ pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Romuald_Wadagni
 STATUS:CONFIRMED
@@ -768,7 +784,8 @@ SUMMARY:2026 Cypriot legislative election (Cyprus)
 DESCRIPTION:Parliamentary elections were held in Cyprus on 24 May 2026 to e
  lect 56 of the 80 members of the House of Representatives.\n\nElection: Cy
  prus\nSource: https://en.wikipedia.org/wiki/2026_Cypriot_legislative_elect
- ion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Cypriot_legislative_election
 STATUS:CONFIRMED
@@ -784,7 +801,7 @@ DESCRIPTION:On 24 May 2026\, a vehicle-borne suicide bombing targeted a shu
  ttle train near Chaman Phatak in Quetta\, Balochistan\, Pakistan. The expl
  osion killed at least 47 people and injured 98 others.\n\nCrisis: Pakistan
  \nSource: https://en.wikipedia.org/wiki/2026_Quetta_train_bombing\nText: W
- ikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Quetta_train_bombing
 STATUS:CONFIRMED
@@ -804,8 +821,8 @@ DESCRIPTION:Residents of Kraków\, Poland\, have overwhelmingly backed the
  dismissing Miszalski\, while 96.0% supported removing the council.\n\nRefe
  rendum: Poland\nReported by TVP World: https://tvpworld.com/93433594/krako
  w-mayor-miszalski-ousted-in-referendum-exit-poll-show\nSource: https://en.
- wikipedia.org/wiki/Krak%C3%B3w\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (
- jdpi.pages.dev).
+ wikipedia.org/wiki/Krak%C3%B3w\nText: Wikipedia (CC BY-SA 4.0)\, via Vitru
+ vian Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/Krak%C3%B3w
 STATUS:CONFIRMED
@@ -824,7 +841,7 @@ DESCRIPTION:In Senegal\, Malick Ndiaye resigns as National Assembly preside
  https://www.lemonde.fr/en/international/article/2026/05/24/senegal-s-parli
  ament-speaker-steps-down-amid-political-crisis_6753784_4.html\nSource: htt
  ps://en.wikipedia.org/wiki/Malick_Ndiaye\nText: Wikipedia (CC BY-SA 4.0)\,
-  via PRP (jdpi.pages.dev).
+  via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Malick_Ndiaye
 STATUS:CONFIRMED
@@ -840,7 +857,7 @@ DESCRIPTION:Thousands of people protest in Madrid\, Spain\, against increas
  ing housing costs.\n\nProtest: Spain\nReported by AP: https://apnews.com/a
  rticle/spain-housing-crisis-protest-airbnb-4faabcdaa459c5544cb8b7aacc6c67d
  0\nSource: https://en.wikipedia.org/wiki/Madrid\nText: Wikipedia (CC BY-SA
-  4.0)\, via PRP (jdpi.pages.dev).
+  4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Madrid
 STATUS:CONFIRMED
@@ -859,8 +876,8 @@ DESCRIPTION:The United States Office of Foreign Assets Control announces un
  Strait of Hormuz.\n\nSanctions: Iran\nReported by Reuters: https://www.reu
  ters.com/world/us/carlos-de-la-cruz-wins-republican-nomination-texas-compe
  titive-35th-2026-05-27/\nSource: https://en.wikipedia.org/wiki/United_Stat
- es_sanctions_against_Iran\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.
- pages.dev).
+ es_sanctions_against_Iran\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
+ Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_sanctions_against_Iran
 STATUS:CONFIRMED
@@ -880,7 +897,8 @@ DESCRIPTION:The Council of the European Union sanctions four Israeli settle
  ons: Israel\nReported by Al Jazeera: https://www.aljazeera.com/news/2026/5
  /28/eu-imposes-sanctions-on-extremist-israeli-settlers-in-occupied-west-ba
  nk\nSource: https://en.wikipedia.org/wiki/International_reactions_to_the_G
- aza_war\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ aza_war\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_reactions_to_the_Gaza_war
 STATUS:CONFIRMED
@@ -898,7 +916,7 @@ DESCRIPTION:Andris Kulbergs is a Latvian businessman and politician serving
  in a number of roles in the private sector. He also serves as the presiden
  t of the Latvian Authorised Automobile Dealers Association.\n\nNew leader:
   Latvia\nSource: https://en.wikipedia.org/wiki/Andris_Kulbergs\nText: Wiki
- pedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ pedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Andris_Kulbergs
 STATUS:CONFIRMED
@@ -915,7 +933,8 @@ DESCRIPTION:General elections were held in Malta on 30 May 2026\, with 356\
  of Representatives. The ruling Labour Party led by Robert Abela won the el
  ection\, securing 36 seats with 52% of the first preference vote.\n\nElect
  ion: Malta\nSource: https://en.wikipedia.org/wiki/2026_Maltese_general_ele
- ction\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ction\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.
+ dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Maltese_general_election
 STATUS:CONFIRMED
@@ -932,8 +951,8 @@ DESCRIPTION:Presidential elections were held in Colombia on 31 May 2026. In
  arred from seeking a second term. Abelardo de la Espriella defeated Iván 
  Cepeda by less than 1% in the run-off election held on 21 June 2026.\n\nEl
  ection: Colombia\nSource: https://en.wikipedia.org/wiki/2026_Colombian_pre
- sidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.d
- ev).
+ sidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager
+  (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Colombian_presidential_election
 STATUS:CONFIRMED
@@ -949,8 +968,8 @@ DESCRIPTION:Parliamentary elections were held in Guinea on 31 May 2026. Thi
  s was the first legislative election since the 2021 Guinean coup d'état\,
   in which President Alpha Condé was deposed by General Mamady Doumbouya.\
  n\nElection: Guinea\nSource: https://en.wikipedia.org/wiki/2026_Guinean_pa
- rliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ rliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Guinean_parliamentary_election
 STATUS:CONFIRMED
@@ -968,7 +987,7 @@ DESCRIPTION:The 2026 Hamburg Olympic referendum was a citywide referendum h
  y with Hamburg as the host city for the Olympic and Paralympic Games in 20
  36\, 2040 or 2044.\n\nReferendum: West Germany / Germany\nSource: https://
  en.wikipedia.org/wiki/2026_Hamburg_Olympics_referendum\nText: Wikipedia (C
- C BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ C BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Hamburg_Olympics_referendum
 STATUS:CONFIRMED
@@ -984,7 +1003,8 @@ DESCRIPTION:General elections were held in Ethiopia on 1 June 2026 to elect
   members of the House of Peoples' Representatives. The ruling Prosperity P
  arty of prime minister Abiy Ahmed won a majority of 438 seats.\n\nElection
  : Ethiopia\nSource: https://en.wikipedia.org/wiki/2026_Ethiopian_general_e
- lection\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ lection\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Ethiopian_general_election
 STATUS:CONFIRMED
@@ -1001,7 +1021,7 @@ DESCRIPTION:Youths gather in Nanyuki\, Kenya to protest against the establi
  ns exposed to the Ebola virus.\n\nProtest: Kenya\nReported by AP: https://
  apnews.com/article/ebola-kenya-us-quarantine-c90132fd6c858ee2fa8fa2c425994
  1e6\nSource: https://en.wikipedia.org/wiki/Gen_Z_protests\nText: Wikipedia
-  (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Gen_Z_protests
 STATUS:CONFIRMED
@@ -1020,7 +1040,7 @@ DESCRIPTION:The Philippines and Vietnam upgrade bilateral relations to an e
  .reuters.com/world/asia-pacific/philippines-vietnam-elevate-ties-enhanced-
  strategic-partnership-2026-06-01/\nSource: https://en.wikipedia.org/wiki/P
  hilippines%E2%80%93Vietnam_relations\nText: Wikipedia (CC BY-SA 4.0)\, via
-  PRP (jdpi.pages.dev).
+  Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/Philippines%E2%80%93Vietnam_relations
 STATUS:CONFIRMED
@@ -1040,7 +1060,7 @@ DESCRIPTION:The U.S. embassy in Beirut confirms that Hezbollah has accepted
  reuters.com/world/middle-east/hezbollah-accepts-us-proposal-mutual-halt-at
  tacks-with-israel-lebanese-embassy-2026-06-01/\nSource: https://en.wikiped
  ia.org/wiki/2026_Israel%E2%80%93Lebanon_ceasefire\nText: Wikipedia (CC BY-
- SA 4.0)\, via PRP (jdpi.pages.dev).
+ SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Ceasefire
 URL:https://en.wikipedia.org/wiki/2026_Israel%E2%80%93Lebanon_ceasefire
 STATUS:CONFIRMED
@@ -1058,8 +1078,8 @@ DESCRIPTION:The United States House of Representatives passes legislation t
  .\n\nSanctions: Russia\nReported by Reuters: https://www.reuters.com/world
  /us/us-house-backs-russia-sanctions-ukraine-aid-latest-blow-trump-2026-06-
  05/\nSource: https://en.wikipedia.org/wiki/International_sanctions_during_
- the_Russo-Ukrainian_war\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ the_Russo-Ukrainian_war\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russo-
  Ukrainian_war
@@ -1078,7 +1098,7 @@ DESCRIPTION:Ivan Janša\, better known as Janez Janša\, is a Slovenian pol
  to 2022. Since 1993\, Janša has led the Slovenian Democratic Party\, whic
  h has emerged as the pre-eminent Slovenian right-wing party.\n\nNew leader
  : Slovenia\nSource: https://en.wikipedia.org/wiki/Janez_Jan%C5%A1a\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Janez_Jan%C5%A1a
 STATUS:CONFIRMED
@@ -1095,8 +1115,8 @@ DESCRIPTION:South Korea's election commission chairperson resigns after bal
  ng protests.\n\nResignation: South Korea\nReported by AFP via UCA News: ht
  tps://www.ucanews.com/amp/south-korea-election-chief-resigns-after-ballot-
  shortage-protests/113643\nSource: https://en.wikipedia.org/wiki/2026_South
- _Korean_local_elections\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ _Korean_local_elections\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/2026_South_Korean_local_elections
 STATUS:CONFIRMED
@@ -1114,8 +1134,8 @@ DESCRIPTION:A series of demonstrations took place in Jantar Mantar\, New De
  vement\, along with left-wing student organisations including the All Indi
  a Students Federation\, All India Students Association\, and Students' Fed
  eration…\n\nProtest: India\nSource: https://en.wikipedia.org/wiki/2026_D
- elhi_Jantar_Mantar_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdp
- i.pages.dev).
+ elhi_Jantar_Mantar_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvia
+ n Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Delhi_Jantar_Mantar_protests
 STATUS:CONFIRMED
@@ -1133,8 +1153,8 @@ DESCRIPTION:High school students in Iran hold protests in 20 Iranian provin
  d by The Times of Israel: https://www.timesofisrael.com/liveblog_entry/ira
  nian-students-hold-protests-in-some-20-provinces-over-exam-changes-some-me
  t-with-arrests-violence/\nSource: https://en.wikipedia.org/wiki/2025%E2%80
- %932026_Iranian_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ %932026_Iranian_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2025%E2%80%932026_Iranian_protests
 STATUS:CONFIRMED
@@ -1151,8 +1171,8 @@ DESCRIPTION:Pope Leo XIV made an apostolic journey to Spain on 6–12 June
  hrist of the Sagrada Família\, and strengthen ties with the Spanish gover
  nment and the Spanish people. He visited Madrid\, Barcelona\, Gran Canaria
  \, and Tenerife.\n\nSummit: Spain\nSource: https://en.wikipedia.org/wiki/V
- isit_by_Pope_Leo_XIV_to_Spain\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (j
- dpi.pages.dev).
+ isit_by_Pope_Leo_XIV_to_Spain\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruv
+ ian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/Visit_by_Pope_Leo_XIV_to_Spain
 STATUS:CONFIRMED
@@ -1170,7 +1190,7 @@ DESCRIPTION:Parliamentary elections were held in Armenia on 7 June 2026 to
  ract won with 56.7% of the vote\, followed by the pro-Russian Strong Armen
  ia of Samvel Karapetyan with 17.5%.\n\nElection: Armenia\nSource: https://
  en.wikipedia.org/wiki/2026_Armenian_parliamentary_election\nText: Wikipedi
- a (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ a (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Armenian_parliamentary_election
 STATUS:CONFIRMED
@@ -1186,7 +1206,7 @@ DESCRIPTION:Parliamentary elections were held in Kosovo on 7 June 2026. The
   elections follow a constitutional crisis triggered by the Assembly's fail
  ure to elect a president.\n\nElection: Kosovo\nSource: https://en.wikipedi
  a.org/wiki/2026_Kosovan_parliamentary_election\nText: Wikipedia (CC BY-SA 
- 4.0)\, via PRP (jdpi.pages.dev).
+ 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Kosovan_parliamentary_election
 STATUS:CONFIRMED
@@ -1204,8 +1224,8 @@ DESCRIPTION:A series of ongoing demonstrations\, strikes and clashes in Pak
  )\, which presented a 38-point charter of demands to the Government of Aza
  d Kashmir\, including its opposition of reservation of 12 seats in the Aza
  d…\n\nProtest: Pakistan\nSource: https://en.wikipedia.org/wiki/2026_Azad
- _Kashmir_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.de
- v).
+ _Kashmir_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager 
+ (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Azad_Kashmir_protests
 STATUS:CONFIRMED
@@ -1222,7 +1242,7 @@ DESCRIPTION:General elections were held in Peru from 12 to 13 April 2026 to
  of Peru. As no presidential candidate achieved a majority of votes in the 
  first round\, a runoff election was held on 7 June.\n\nElection: Peru\nSou
  rce: https://en.wikipedia.org/wiki/2026_Peruvian_general_election\nText: W
- ikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Peruvian_general_election
 STATUS:CONFIRMED
@@ -1240,7 +1260,7 @@ DESCRIPTION:Former Supreme Court justice and United Nations High Commission
   of Canada.\n\nInauguration: Canada\nReported by CTV: https://www.ctvnews.
  ca/politics/article/louise-arbour-becomes-canadas-31st-governor-general/\n
  Source: https://en.wikipedia.org/wiki/Louise_Arbour\nText: Wikipedia (CC B
- Y-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Y-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Louise_Arbour
 STATUS:CONFIRMED
@@ -1258,8 +1278,8 @@ DESCRIPTION:On June 8\, 2026\, at 07:37:40 PhST\, a Mw 7.8 earthquake struc
  Kablalan at a depth of about 57 km (35 mi)\, while the Philippine Institut
  e of Volcanology and Seismology located it 32 km (20 mi) south of Maasim\,
  …\n\nCrisis: Philippines\nSource: https://en.wikipedia.org/wiki/2026_Min
- danao_earthquake\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev
- ).
+ danao_earthquake\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (
+ jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Mindanao_earthquake
 STATUS:CONFIRMED
@@ -1277,7 +1297,8 @@ DESCRIPTION:From 8 to 9 June 2026\, Xi Jinping\, the general secretary of t
  al secretary of the Workers' Party of Korea and the president of the State
   Affairs Commission\, and his wife Ri Sol-ju.\n\nSummit: North Korea\nSour
  ce: https://en.wikipedia.org/wiki/2026_state_visit_by_Xi_Jinping_to_North_
- Korea\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Korea\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.
+ dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_state_visit_by_Xi_Jinping_to_North_K
  orea
@@ -1295,7 +1316,8 @@ DESCRIPTION:On 9 June 2026\, riots broke out across Belfast following a sta
  urther protests were reported across Northern Ireland and in Glasgow and E
  dinburgh in Scotland\, as well as Southampton in England.\n\nProtest: Unit
  ed Kingdom\nSource: https://en.wikipedia.org/wiki/2026_Northern_Ireland_ri
- ots\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ots\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Northern_Ireland_riots
 STATUS:CONFIRMED
@@ -1313,7 +1335,7 @@ DESCRIPTION:Hundreds of people rally in Hezbollah strongholds in southern s
  orts a similar gathering in Sanaa\, Yemen.\n\nProtest: Lebanon\nReported b
  y AFP via Arab News: https://www.arabnews.com/node/2646693/middle-east\nSo
  urce: https://en.wikipedia.org/wiki/Protests_against_the_2026_Iran_war\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_against_the_2026_Iran_war
 STATUS:CONFIRMED
@@ -1334,7 +1356,7 @@ DESCRIPTION:China imposes sanctions on Philippine defense secretary Gilbert
  thestar.com.my/aseanplus/aseanplus-news/2026/06/11/china-sanctions-philipp
  ine-defence-chief-for-039irresponsible-remarks039\nSource: https://en.wiki
  pedia.org/wiki/China%E2%80%93Philippines_relations\nText: Wikipedia (CC BY
- -SA 4.0)\, via PRP (jdpi.pages.dev).
+ -SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/China%E2%80%93Philippines_relations
 STATUS:CONFIRMED
@@ -1350,7 +1372,7 @@ SUMMARY:John Healey resigns as Secretary of State for Defence (United Kingd
 DESCRIPTION:John Healey resigned as Secretary of State for Defence on 11 Ju
  ne 2026\, having held the office since 5 July 2024.\n\nResignation: United
   Kingdom\nSource: https://en.wikipedia.org/wiki/John_Healey\nText: Wikiped
- ia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/John_Healey
 STATUS:CONFIRMED
@@ -1367,7 +1389,7 @@ DESCRIPTION:June 2026 Indonesia protest also known as Indonesian Bankruptcy
  to protest the poor management of the state and its budget during the lead
  ership of Prabowo Subianto and Gibran Rakabuming Raka.\n\nProtest: Indones
  ia\nSource: https://en.wikipedia.org/wiki/June_2026_Indonesian_protests\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/June_2026_Indonesian_protests
 STATUS:CONFIRMED
@@ -1385,7 +1407,7 @@ DESCRIPTION:Hundreds of students protest against Indonesian president Prabo
  est: Indonesia\nReported by AP: https://apnews.com/article/indonesia-stude
  nts-protest-economic-pressures-fc758948bc547075d62bcf80d8a7e827\nSource: h
  ttps://en.wikipedia.org/wiki/2025%E2%80%932026_Indonesian_protests\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2025%E2%80%932026_Indonesian_protests
 STATUS:CONFIRMED
@@ -1405,7 +1427,8 @@ DESCRIPTION:Pakistani prime minister Shehbaz Sharif and United States presi
   on Friday.\n\nCeasefire: Iran\nReported by Reuters: https://www.reuters.c
  om/world/asia-pacific/us-iran-reach-peace-deal-signing-set-friday-pakistan
  -says-2026-06-14/\nSource: https://en.wikipedia.org/wiki/Pakistan_in_the_2
- 026_Iran_war\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ 026_Iran_war\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi
+ .pages.dev).
 CATEGORIES:Ceasefire
 URL:https://en.wikipedia.org/wiki/Pakistan_in_the_2026_Iran_war
 STATUS:CONFIRMED
@@ -1420,8 +1443,8 @@ SUMMARY:2026 Swiss referendums (Switzerland)
 DESCRIPTION:Several referendums were held in Switzerland during 2026\, with
   national votes on 8 March\, 14 June\, 27 September and one planned for 29
   November.\n\nReferendum: Switzerland\nSource: https://en.wikipedia.org/wi
- ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.
- pages.dev).
+ ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
+ Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Swiss_referendums
 STATUS:CONFIRMED
@@ -1436,7 +1459,7 @@ SUMMARY:52nd G7 summit (France)
 DESCRIPTION:The 52nd G7 Summit was an annual summit of the G7 held from 15 
  to 17 June 2026 in Évian-les-Bains\, Haute-Savoie\, France.\n\nSummit: Fr
  ance\nSource: https://en.wikipedia.org/wiki/52nd_G7_summit\nText: Wikipedi
- a (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ a (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/52nd_G7_summit
 STATUS:CONFIRMED
@@ -1456,8 +1479,8 @@ DESCRIPTION:Brazil's Supreme Federal Court sentences former São Paulo cong
  urt ruling: Brazil\nReported by AFP via The Manila Times: https://www.mani
  latimes.net/2026/06/17/world/americas-emea/brazil-supreme-court-sentences-
  bolsonaros-son-over-us-lobbying/2367135\nSource: https://en.wikipedia.org/
- wiki/Supreme_Federal_Court\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ wiki/Supreme_Federal_Court\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Supreme_Federal_Court
 STATUS:CONFIRMED
@@ -1475,7 +1498,7 @@ DESCRIPTION:The entire cabinet of Equatorial Guinea\, led by prime minister
  nding economic diversification.\n\nResignation: Equatorial Guinea\nReporte
  d by BBC News: https://www.bbc.com/news/articles/c4gy27dyq0ro\nSource: htt
  ps://en.wikipedia.org/wiki/Manuel_Osa_Nsue_Nsua\nText: Wikipedia (CC BY-SA
-  4.0)\, via PRP (jdpi.pages.dev).
+  4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Manuel_Osa_Nsue_Nsua
 STATUS:CONFIRMED
@@ -1490,7 +1513,8 @@ SUMMARY:European Council meeting (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (s
  cheduled meeting). Council presidency: Cyprus.\n\nSummit: European Union\n
  Source: https://www.consilium.europa.eu/en/meetings/european-council/2026/
- 06/18-19/\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ 06/18-19/\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pa
+ ges.dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/meetings/european-council/2026/06/18
  -19/
@@ -1510,7 +1534,7 @@ DESCRIPTION:Bolivian president Rodrigo Paz and the Bolivian Workers' Confed
  Reported by Reuters: https://www.reuters.com/3fec1b0a85a0/world/americas/b
  olivia-signs-deal-with-cob-labor-union-after-50-days-anti-govt-protests-20
  26-06-19/\nSource: https://en.wikipedia.org/wiki/2026_Bolivian_protests\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Bolivian_protests
 STATUS:CONFIRMED
@@ -1527,7 +1551,8 @@ DESCRIPTION:The United States announces that Israel and Hezbollah agreed to
   a ceasefire.\n\nCeasefire: Israel\nReported by NBC News: https://www.nbcn
  ews.com/world/iran/us-iran-talks-postponed-vance-cancels-trip-israel-strik
  es-lebanon-rcna350830\nSource: https://en.wikipedia.org/wiki/2026_Lebanon_
- war\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ war\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Ceasefire
 URL:https://en.wikipedia.org/wiki/2026_Lebanon_war
 STATUS:CONFIRMED
@@ -1544,8 +1569,8 @@ DESCRIPTION:Presidential elections were held in Colombia on 31 May 2026. In
  arred from seeking a second term. Abelardo de la Espriella defeated Iván 
  Cepeda by less than 1% in the run-off election held on 21 June 2026.\n\nEl
  ection: Colombia\nSource: https://en.wikipedia.org/wiki/2026_Colombian_pre
- sidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.d
- ev).
+ sidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager
+  (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Colombian_presidential_election
 STATUS:CONFIRMED
@@ -1564,7 +1589,7 @@ DESCRIPTION:The U.S. treasury department lifts sanctions against Iran and a
   NDTV: https://www.ndtv.com/world-news/us-lifts-oil-sanctions-on-iran-till
  -august-21-as-deal-talks-continue-11672356\nSource: https://en.wikipedia.o
  rg/wiki/Iran%E2%80%93United_States_relations\nText: Wikipedia (CC BY-SA 4.
- 0)\, via PRP (jdpi.pages.dev).
+ 0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Iran%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -1581,8 +1606,8 @@ DESCRIPTION:The Supreme Court of Japan upholds the Tokyo High Court's order
   to dissolve the Unification Church.\n\nCourt ruling: Japan\nReported by J
  apan Times: https://www.japantimes.co.jp/news/2026/06/23/japan/crime-legal
  /top-court-unification-church-dissolve/\nSource: https://en.wikipedia.org/
- wiki/Supreme_Court_of_Japan\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdp
- i.pages.dev).
+ wiki/Supreme_Court_of_Japan\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvia
+ n Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Supreme_Court_of_Japan
 STATUS:CONFIRMED
@@ -1601,7 +1626,7 @@ DESCRIPTION:Keir Starmer announces his resignation as British prime ministe
  new party leader is elected.\n\nResignation: United Kingdom\nReported by A
  P: https://apnews.com/live/keir-starmer-resignation-uk-prime-minister-upda
  tes-06-22-2026\nSource: https://en.wikipedia.org/wiki/Keir_Starmer\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Keir_Starmer
 STATUS:CONFIRMED
@@ -1619,7 +1644,7 @@ DESCRIPTION:On 24 June 2026\, doublet large strike-slip earthquakes affecte
  racuy. This earthquake\, which measured Mw 7.2\, occurred at 18:04 VET and
   was classified as a foreshock.\n\nCrisis: Venezuela\nSource: https://en.w
  ikipedia.org/wiki/2026_Venezuela_earthquakes\nText: Wikipedia (CC BY-SA 4.
- 0)\, via PRP (jdpi.pages.dev).
+ 0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Venezuela_earthquakes
 STATUS:CONFIRMED
@@ -1638,7 +1663,7 @@ DESCRIPTION:In Spain\, the Congress of Deputies approves a motion calling o
  y.\n\nParliament vote: Spain\nReported by Reuters: https://www.reuters.com
  /world/spains-lower-house-calls-pm-sanchez-resign-non-binding-vote-2026-06
  -25/\nSource: https://en.wikipedia.org/wiki/Corruption_in_Spain\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Parliament vote
 URL:https://en.wikipedia.org/wiki/Corruption_in_Spain
 STATUS:CONFIRMED
@@ -1657,7 +1682,8 @@ DESCRIPTION:Indonesian police arrest at least 24 protesters following a dem
  ed by AFP via South China Morning Post: https://www.scmp.com/news/asia/sou
  theast-asia/article/3358587/dozens-arrested-indonesia-after-anti-governmen
  t-protest-turns-violent\nSource: https://en.wikipedia.org/wiki/Gen_Z_prote
- sts\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ sts\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Gen_Z_protests
 STATUS:CONFIRMED
@@ -1675,7 +1701,7 @@ DESCRIPTION:Argentine cabinet chief and government spokesperson Manuel Ador
   Argentina\nReported by Clarín: https://www.clarin.com/politica/cuestiona
  do-respaldo-interno-adorni-renuncio-va-gobierno_0_GNjEz7xIRi.html\nSource:
   https://en.wikipedia.org/wiki/Manuel_Adorni\nText: Wikipedia (CC BY-SA 4.
- 0)\, via PRP (jdpi.pages.dev).
+ 0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Manuel_Adorni
 STATUS:CONFIRMED
@@ -1694,7 +1720,7 @@ DESCRIPTION:Serbian president Aleksandar Vučić announces his intention to
  d by AP: https://apnews.com/article/serbia-president-resign-election-vucic
  -protests-opposition-af12b9ce0a06568444ad41d388e6e232\nSource: https://en.
  wikipedia.org/wiki/Aleksandar_Vu%C4%8Di%C4%87\nText: Wikipedia (CC BY-SA 4
- .0)\, via PRP (jdpi.pages.dev).
+ .0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Aleksandar_Vu%C4%8Di%C4%87
 STATUS:CONFIRMED
@@ -1711,8 +1737,8 @@ DESCRIPTION:Demonstrators rally in central Stockholm\, Sweden\, including t
  n humanitarian aid entering the enclave.\n\nProtest: Sweden\nReported by M
  iddle East Monitor: https://www.middleeastmonitor.com/20260627-hundreds-ra
  lly-in-stockholm-against-israeli-strikes-on-gaza/\nSource: https://en.wiki
- pedia.org/wiki/Gaza_war_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP
-  (jdpi.pages.dev).
+ pedia.org/wiki/Gaza_war_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vit
+ ruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Gaza_war_protests
 STATUS:CONFIRMED
@@ -1731,8 +1757,8 @@ DESCRIPTION:The U.S. treasury department announces sanctions on two men and
  ns: Mexico\nReported by AFP via France 24: https://www.france24.com/en/liv
  e-news/20260630-us-treasury-sanctions-target-alleged-drug-cartel-linked-fu
  el-smuggling-ring\nSource: https://en.wikipedia.org/wiki/Mexico%E2%80%93Un
- ited_States_relations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.page
- s.dev).
+ ited_States_relations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Mana
+ ger (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Mexico%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -1752,7 +1778,7 @@ DESCRIPTION:More than 14\,000 people participate in rallies organized by th
  ed by Bloomberg via Taipei Times: https://www.taipeitimes.com/News/front/a
  rchives/2026/07/01/2003860031\nSource: https://en.wikipedia.org/wiki/2025%
  E2%80%932026_Philippine_anti-corruption_protests\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2025%E2%80%932026_Philippine_anti-corrupt
  ion_protests
@@ -1769,7 +1795,7 @@ SUMMARY:Tulsi Gabbard resigns as Director of National Intelligence (United
 DESCRIPTION:Tulsi Gabbard resigned as Director of National Intelligence on 
  30 June 2026\, having held the office since 12 February 2025.\n\nResignati
  on: United States\nSource: https://en.wikipedia.org/wiki/Tulsi_Gabbard\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Tulsi_Gabbard
 STATUS:CONFIRMED
@@ -1789,7 +1815,7 @@ DESCRIPTION:The Supreme Court of the United States rules 6–3 that preside
  ported by AP: https://apnews.com/article/supreme-court-birthright-citizens
  hip-trump-immigration-c73cf0c70bb550ebf0a55fafddbd935c\nSource: https://en
  .wikipedia.org/wiki/Trump_v._Barbara\nText: Wikipedia (CC BY-SA 4.0)\, via
-  PRP (jdpi.pages.dev).
+  Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Trump_v._Barbara
 STATUS:CONFIRMED
@@ -1808,7 +1834,7 @@ DESCRIPTION:Christian Schmidt resigns as the High Representative for Bosnia
  ted by The Guardian: https://www.theguardian.com/world/2026/jun/30/eu-dipl
  omats-clash-with-trump-administration-over-top-bosnia-and-herzegovina-post
  \nSource: https://en.wikipedia.org/wiki/Christian_Schmidt\nText: Wikipedia
-  (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Christian_Schmidt
 STATUS:CONFIRMED
@@ -1825,7 +1851,7 @@ DESCRIPTION:Police clash with demonstrators in Albania during a protest aga
  ia\nReported by AP: https://apnews.com/article/albania-kushner-trump-devel
  opment-protest-tourism-clashes-063288405ee82156e32e6bde500d0569\nSource: h
  ttps://en.wikipedia.org/wiki/Flamingo_Revolution\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Flamingo_Revolution
 STATUS:CONFIRMED
@@ -1839,8 +1865,8 @@ DTEND;VALUE=DATE:20260703
 SUMMARY:2026 Algerian parliamentary election
 DESCRIPTION:Parliamentary elections were held in Algeria on 2 July 2026.\n\
  nElection: Algeria\nSource: https://en.wikipedia.org/wiki/2026_Algerian_pa
- rliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ rliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Algerian_parliamentary_election
 STATUS:CONFIRMED
@@ -1858,8 +1884,8 @@ DESCRIPTION:A man protesting against the annexation of Tibet by China light
  e dies from his injuries.\n\nProtest: China\nReported by AA: https://www.a
  a.com.tr/en/americas/protester-sets-himself-on-fire-outside-un-headquarter
  s-in-new-york/3984839\nSource: https://en.wikipedia.org/wiki/Protests_and_
- uprisings_in_Tibet_since_1950\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (j
- dpi.pages.dev).
+ uprisings_in_Tibet_since_1950\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruv
+ ian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_and_uprisings_in_Tibet_since_195
  0
@@ -1876,7 +1902,7 @@ DESCRIPTION:Moldovan prime minister Alexandru Munteanu resigns.\n\nResignat
  ion: Moldova\nReported by Politico: https://www.politico.eu/article/moldov
  a-prime-minister-alexandru-munteanu-resign-scandals/\nSource: https://en.w
  ikipedia.org/wiki/Alexandru_Munteanu\nText: Wikipedia (CC BY-SA 4.0)\, via
-  PRP (jdpi.pages.dev).
+  Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Alexandru_Munteanu
 STATUS:CONFIRMED
@@ -1893,7 +1919,7 @@ DESCRIPTION:A two-part referendum was held in Slovakia on 4 July 2026. The
  terms expire\, and whether to reestablish the Special Prosecutor's Office 
  and the National Criminal Agency.\n\nReferendum: Slovakia\nSource: https:/
  /en.wikipedia.org/wiki/2026_Slovak_referendum\nText: Wikipedia (CC BY-SA 4
- .0)\, via PRP (jdpi.pages.dev).
+ .0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Slovak_referendum
 STATUS:CONFIRMED
@@ -1912,7 +1938,8 @@ DESCRIPTION:Pakistani president Asif Ali Zardari begins a four-day visit to
  21 years.\n\nSummit: Pakistan\nReported by Pakistan Observer: https://pako
  bserver.net/president-zardari-begins-four-day-official-visit-to-kyrgyzstan
  /\nSource: https://en.wikipedia.org/wiki/Kyrgyzstan%E2%80%93Pakistan_relat
- ions\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ions\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/Kyrgyzstan%E2%80%93Pakistan_relations
 STATUS:CONFIRMED
@@ -1929,8 +1956,8 @@ DESCRIPTION:The 2026 Ankara summit was a meeting of heads of state and head
   July 2026. It is the 36th NATO summit and the second hosted by Turkey fol
  lowing the 2004 summit in Istanbul. The summit took place at the President
  ial Complex.\n\nSummit: Turkey\nSource: https://en.wikipedia.org/wiki/2026
- _Ankara_NATO_summit\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.
- dev).
+ _Ankara_NATO_summit\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manage
+ r (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_Ankara_NATO_summit
 STATUS:CONFIRMED
@@ -1949,7 +1976,7 @@ DESCRIPTION:Thousands of people protest in Budapest\, Hungary\, against the
  n.\n\nProtest: Hungary\nReported by AP: https://apnews.com/article/hungary
  -orban-supporters-protest-president-95f0bf6a5adb74ac02281d4017f05b62\nSour
  ce: https://en.wikipedia.org/wiki/Budapest\nText: Wikipedia (CC BY-SA 4.0)
- \, via PRP (jdpi.pages.dev).
+ \, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Budapest
 STATUS:CONFIRMED
@@ -1970,7 +1997,8 @@ DESCRIPTION:Senegal's Constitutional Council strikes down a parliamentary b
  enegal_s_constitutional_court_rejects_move_to_balance_powers&news_id=17354
  30&group_news=ALLNEWS&taging_subtype=SENEGAL&name=&search=y_general&q=SENE
  GAL\,%20&halaman=1\nSource: https://en.wikipedia.org/wiki/Constitution_of_
- Senegal\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Senegal\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Constitution_of_Senegal
 STATUS:CONFIRMED
@@ -1989,7 +2017,7 @@ DESCRIPTION:The European Parliament votes 476–28 with 96 abstentions to a
  s responsible for attacks on civilians in El-Obeid\, North Kordofan.\n\nSa
  nctions: Sudan\nReported by Sudan Tribune: https://sudantribune.com/articl
  e/316049\nSource: https://en.wikipedia.org/wiki/Siege_of_El_Obeid\nText: W
- ikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Siege_of_El_Obeid
 STATUS:CONFIRMED
@@ -2008,7 +2036,7 @@ DESCRIPTION:Ukrainian prime minister Yulia Svyrydenko steps down as preside
  trategy during Russia's invasion.\n\nResignation: Ukraine\nReported by The
   Hill: https://thehill.com/policy/international/5964901-yulia-svyrydenko-r
  esigns-ukraine/\nSource: https://en.wikipedia.org/wiki/Yulia_Svyrydenko\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Yulia_Svyrydenko
 STATUS:CONFIRMED
@@ -2025,7 +2053,7 @@ DESCRIPTION:The European Union imposes sanctions against Sudan's gold trade
  Sudan\nReported by Mining.com: https://www.mining.com/web/eu-announces-res
  trictions-on-trading-sudanese-gold/\nSource: https://en.wikipedia.org/wiki
  /Sudan%E2%80%93European_Union_relations\nText: Wikipedia (CC BY-SA 4.0)\, 
- via PRP (jdpi.pages.dev).
+ via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Sudan%E2%80%93European_Union_relations
 STATUS:CONFIRMED
@@ -2042,8 +2070,8 @@ DESCRIPTION:Mindaugas Sinkevičius is a Lithuanian manager and politician\,
  . He also served as Mayor of Jonava District Municipality\, former Ministe
  r of Economy of Lithuania (2016–2017) and Vice-Mayor of Jonava (2008–2
  011).\n\nNew leader: Lithuania\nSource: https://en.wikipedia.org/wiki/Mind
- augas_Sinkevi%C4%8Dius\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pag
- es.dev).
+ augas_Sinkevi%C4%8Dius\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Man
+ ager (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Mindaugas_Sinkevi%C4%8Dius
 STATUS:CONFIRMED
@@ -2061,8 +2089,8 @@ DESCRIPTION:A prosecutor at the International Criminal Court drop charges a
  n African Union peacekeepers during Sudan's Darfur conflict.\n\nCourt ruli
  ng: Sudan\nReported by AFP via Arab News: https://www.arabnews.com/node/26
  50922/amp\nSource: https://en.wikipedia.org/wiki/International_Criminal_Co
- urt_investigation_in_Darfur\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdp
- i.pages.dev).
+ urt_investigation_in_Darfur\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvia
+ n Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/International_Criminal_Court_investigatio
  n_in_Darfur
@@ -2083,7 +2111,7 @@ DESCRIPTION:South Korea's Supreme Court upholds People Power Party lawmaker
  d by AFP via The Straits Times: https://www.straitstimes.com/asia/east-asi
  a/south-korea-top-court-upholds-jail-term-for-mp-over-church-bribes\nSourc
  e: https://en.wikipedia.org/wiki/Unification_Church_and_politics\nText: Wi
- kipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ kipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Unification_Church_and_politics
 STATUS:CONFIRMED
@@ -2100,7 +2128,7 @@ DESCRIPTION:Ukrainian Air Force deputy commander Pavlo Yelizarov resigns fr
  om his position in protest of Fedorov's removal as defense minister.\n\nRe
  signation: Ukraine\nReported by BBC News: https://www.bbc.com/news/article
  s/cdx76069n3do\nSource: https://en.wikipedia.org/wiki/Pavlo_Yelizarov\nTex
- t: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Pavlo_Yelizarov
 STATUS:CONFIRMED
@@ -2116,8 +2144,8 @@ DESCRIPTION:Andy Burnham is elected as the new leader of the British Labour
   Party. He will formally succeed Keir Starmer as prime minister on Monday.
  \n\nParty contest: United Kingdom\nReported by BBC News: https://www.bbc.c
  om/news/articles/c2lq12z1xdlo\nSource: https://en.wikipedia.org/wiki/2026_
- Labour_Party_leadership_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP
-  (jdpi.pages.dev).
+ Labour_Party_leadership_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vit
+ ruvian Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_Labour_Party_leadership_election
 STATUS:CONFIRMED
@@ -2136,7 +2164,8 @@ DESCRIPTION:Jens Spahn resigns as leader of the governing CDU/CSU alliance
  o the practice.\n\nResignation: Germany\nReported by AFP via Channels TV: 
  https://www.channelstv.com/2026/07/18/german-lawmaker-steps-down-for-using
  -us-surrogacy-to-have-a-child/\nSource: https://en.wikipedia.org/wiki/Jens
- _Spahn\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ _Spahn\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages
+ .dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Jens_Spahn
 STATUS:CONFIRMED
@@ -2156,7 +2185,7 @@ DESCRIPTION:Students hold protests in several cities across India after act
  aljazeera.com/video/newsfeed/2026/7/18/cockroach-party-protest-intensifies
  -after-wangchuk-forcibly-hospitalised\nSource: https://en.wikipedia.org/wi
  ki/2026_Delhi_Jantar_Mantar_protests\nText: Wikipedia (CC BY-SA 4.0)\, via
-  PRP (jdpi.pages.dev).
+  Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Delhi_Jantar_Mantar_protests
 STATUS:CONFIRMED
@@ -2175,7 +2204,7 @@ DESCRIPTION:Presidential elections were held in São Tomé and Príncipe on
  n candidate\, Nito Abreu\, who was supported by Vila Nova's former party I
  ndependent…\n\nElection: São Tomé and Príncipe\nSource: https://en.wi
  kipedia.org/wiki/2026_S%C3%A3o_Tom%C3%A9an_presidential_election\nText: Wi
- kipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ kipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_S%C3%A3o_Tom%C3%A9an_presidential_el
  ection
@@ -2193,7 +2222,7 @@ DESCRIPTION:The Sansad Chalo march was a political march organised by the I
  ountability for national competitive examination paper leaks and the resig
  nation of Union Minister of Education Dharmendra Pradhan.\n\nProtest: Indi
  a\nSource: https://en.wikipedia.org/wiki/Sansad_Chalo_march\nText: Wikiped
- ia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Sansad_Chalo_march
 STATUS:CONFIRMED
@@ -2208,8 +2237,8 @@ SUMMARY:2026 The Democrats primaries (Israel)
 DESCRIPTION:A primary election was held by The Democrats on 20 July 2026 to
   select its list of candidates ahead of the 2026 Israeli legislative elect
  ion.\n\nParty contest: Israel\nSource: https://en.wikipedia.org/wiki/2026_
- The_Democrats_primaries\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ The_Democrats_primaries\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_The_Democrats_primaries
 STATUS:CONFIRMED
@@ -2227,8 +2256,8 @@ DESCRIPTION:The United States imposes new sanctions upon the Sudanese milit
   the civil war.\n\nSanctions: Sudan\nReported by RFI: https://www.rfi.fr/e
  n/africa/20260720-us-slaps-new-sanctions-on-sudan-after-chlorine-gas-deplo
  yment-claims\nSource: https://en.wikipedia.org/wiki/Sudan%E2%80%93United_S
- tates_relations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev)
- .
+ tates_relations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (j
+ dpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Sudan%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -2243,8 +2272,8 @@ SUMMARY:Andy Burnham takes power (United Kingdom)
 DESCRIPTION:Andrew Murray Burnham is a British politician who has served as
   Prime Minister of the United Kingdom and Leader of the Labour Party since
   July 2026.\n\nNew leader: United Kingdom\nSource: https://en.wikipedia.or
- g/wiki/Andy_Burnham\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.
- dev).
+ g/wiki/Andy_Burnham\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manage
+ r (jdpi.pages.dev).
 CATEGORIES:New leader
 URL:https://en.wikipedia.org/wiki/Andy_Burnham
 STATUS:CONFIRMED
@@ -2260,7 +2289,7 @@ DESCRIPTION:Sir Keir Starmer resigns as Prime Minister of the United Kingdo
  m\, and is succeeded by Andy Burnham.\n\nResignation: United Kingdom\nRepo
  rted by CNN: https://edition.cnn.com/2026/07/20/uk/andy-burnham-new-uk-pri
  me-minister-intl\nSource: https://en.wikipedia.org/wiki/Keir_Starmer\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Keir_Starmer
 STATUS:CONFIRMED
@@ -2276,8 +2305,8 @@ DESCRIPTION:The 2026 Australian Labor Party National Conference was the 50t
  h triennial political party conference of the Australian Labor Party. It t
  ook place in Adelaide\, South Australia from 23 to 25 July 2026.\n\nParty 
  contest: Australia\nSource: https://en.wikipedia.org/wiki/2026_Australian_
- Labor_Party_National_Conference\nText: Wikipedia (CC BY-SA 4.0)\, via PRP 
- (jdpi.pages.dev).
+ Labor_Party_National_Conference\nText: Wikipedia (CC BY-SA 4.0)\, via Vitr
+ uvian Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_Australian_Labor_Party_National_Conf
  erence
@@ -2298,7 +2327,8 @@ DESCRIPTION:The International Criminal Court at The Hague\, Netherlands\, o
  ported by Reuters: https://www.reuters.com/world/africa/international-crim
  inal-court-drops-case-against-darfur-militia-leader-2026-07-23/\nSource: h
  ttps://en.wikipedia.org/wiki/International_Criminal_Court_investigation_in
- _Darfur\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ _Darfur\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/International_Criminal_Court_investigatio
  n_in_Darfur
@@ -2315,8 +2345,8 @@ DESCRIPTION:Bangladeshi president Mohammed Shahabuddin resigns from office\
  , citing health reasons.\n\nResignation: Bangladesh\nReported by Reuters: 
  https://www.reuters.com/world/asia-pacific/bangladesh-president-shahabuddi
  n-resigns-local-media-says-2026-07-24/\nSource: https://en.wikipedia.org/w
- iki/Mohammed_Shahabuddin\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ iki/Mohammed_Shahabuddin\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Mohammed_Shahabuddin
 STATUS:CONFIRMED
@@ -2334,7 +2364,8 @@ DESCRIPTION:The European Union sanctions five Iranian judges over alleged h
  n.\n\nSanctions: Iran\nReported by Reuters: https://www.reuters.com/world/
  middle-east/eu-sanctions-iranian-judges-leading-cyber-group-figure-2026-07
  -24/\nSource: https://en.wikipedia.org/wiki/Iran%E2%80%93European_Union_re
- lations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ lations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Iran%E2%80%93European_Union_relations
 STATUS:CONFIRMED
@@ -2352,7 +2383,8 @@ DESCRIPTION:On the evening of 25 July 2026\, 21-year-old Lebanese-German Ab
   Germany. One woman was killed and 29 people were injured\, several critic
  ally. Ballout fled on foot\, and a large-scale manhunt was launched.\n\nCr
  isis: Germany\nSource: https://en.wikipedia.org/wiki/2026_Berlin_Pride_att
- ack\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ack\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Berlin_Pride_attack
 STATUS:CONFIRMED
@@ -2371,7 +2403,7 @@ DESCRIPTION:Indian education minister Dharmendra Pradhan resigns after prot
   Le Monde: https://www.lemonde.fr/en/international/article/2026/07/25/indi
  a-education-minister-announces-resignation-after-countrywide-protests_6755
  822_4.html\nSource: https://en.wikipedia.org/wiki/Dharmendra_Pradhan\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Dharmendra_Pradhan
 STATUS:CONFIRMED
@@ -2389,7 +2421,7 @@ DESCRIPTION:In Australia\, Victorian premier Jacinta Allan resigns\, trigge
   by ABC News Australia: https://www.abc.net.au/news/2026-07-28/ben-carroll
  -new-victorian-premier-jacinta-allan-successor/106787490\nSource: https://
  en.wikipedia.org/wiki/Premier_of_Victoria\nText: Wikipedia (CC BY-SA 4.0)\
- , via PRP (jdpi.pages.dev).
+ , via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Premier_of_Victoria
 STATUS:CONFIRMED
@@ -2406,7 +2438,7 @@ DESCRIPTION:On 28 July 2026 at approximately 16:27:15 JST\, an earthquake s
   a depth of 10 km (6.2 mi)\, later revised to 16 km (9.9 mi). At least 38 
  people were killed and more than 368 were injured.\n\nCrisis: Japan\nSourc
  e: https://en.wikipedia.org/wiki/2026_Kumamoto_earthquake\nText: Wikipedia
-  (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Kumamoto_earthquake
 STATUS:CONFIRMED
@@ -2422,7 +2454,7 @@ DESCRIPTION:Keiko Fujimori is sworn in as President of Peru after winning t
  he general election in June.\n\nInauguration: Peru\nReported by AP: https:
  //apnews.com/article/peru-keiko-fujimori-inauguration-84d08998b1629c95f038
  3d7b5a7a7f6b\nSource: https://en.wikipedia.org/wiki/Keiko_Fujimori\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Keiko_Fujimori
 STATUS:CONFIRMED
@@ -2442,7 +2474,7 @@ DESCRIPTION:The United States Senate votes 86–12 to advance legislation i
  tico: https://www.politico.com/news/2026/07/28/senators-advance-russia-san
  ctions-bill-lindsey-graham-01014368\nSource: https://en.wikipedia.org/wiki
  /International_sanctions_during_the_Russian_invasion_of_Ukraine\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russia
  n_invasion_of_Ukraine
@@ -2462,7 +2494,7 @@ DESCRIPTION:Bolivian prosecutors issue an arrest warrant for former preside
  post: https://www.firstpost.com/world/bolivian-prosecutors-issue-arrest-wa
  rrant-against-ex-leader-morales-over-protests-14034772.html\nSource: https
  ://en.wikipedia.org/wiki/2026_Bolivian_protests\nText: Wikipedia (CC BY-SA
-  4.0)\, via PRP (jdpi.pages.dev).
+  4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Bolivian_protests
 STATUS:CONFIRMED
@@ -2481,7 +2513,7 @@ DESCRIPTION:The United States Treasury Department lifts sanctions against F
  ed by Al-Monitor: https://www.al-monitor.com/originals/2026/08/us-lifts-sa
  nctions-fly-baghdad-previously-linked-irans-irgc\nSource: https://en.wikip
  edia.org/wiki/International_sanctions_against_Iran\nText: Wikipedia (CC BY
- -SA 4.0)\, via PRP (jdpi.pages.dev).
+ -SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_against_Iran
 STATUS:CONFIRMED
@@ -2498,7 +2530,8 @@ DESCRIPTION:Abelardo de la Espriella's inauguration as the 36th President o
  an presidential inauguration marking the beginning of his four-year term a
  s president and José Manuel Restrepo as vice president.\n\nInauguration: 
  Colombia\nSource: https://en.wikipedia.org/wiki/Inauguration_of_Abelardo_d
- e_la_Espriella\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ e_la_Espriella\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Inauguration_of_Abelardo_de_la_Espriella
 STATUS:CONFIRMED
@@ -2519,7 +2552,7 @@ DESCRIPTION:The United States Senate votes 86–11 to pass a bill imposing
  tps://www.reuters.com/legal/government/sweeping-russia-energy-sanctions-he
  ad-toward-us-senate-passage-2026-08-07/\nSource: https://en.wikipedia.org/
  wiki/International_sanctions_during_the_Russian_invasion_of_Ukraine\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russia
  n_invasion_of_Ukraine
@@ -2536,8 +2569,8 @@ DESCRIPTION:The Mecca Defence Alliance\, also known as the Mecca Pact or Ma
  kkah Alliance\, is an intergovernmental military alliance in the Muslim wo
  rld that was signed into force by Pakistan\, Saudi Arabia\, and Turkey on 
  7 August 2026.\n\nTreaty: Turkey\nSource: https://en.wikipedia.org/wiki/Me
- cca_Defence_Alliance\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ cca_Defence_Alliance\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Treaty
 URL:https://en.wikipedia.org/wiki/Mecca_Defence_Alliance
 STATUS:CONFIRMED
@@ -2553,8 +2586,8 @@ DESCRIPTION:On 10 August 2026\, a Mw 7.4–7.5 earthquake struck the depart
  ment of Chocó in Colombia\, killing at least 335 people\, injuring more t
  han 4\,600 others\, leaving 111 confirmed missing and causing extensive da
  mage across the country.\n\nCrisis: Colombia\nSource: https://en.wikipedia
- .org/wiki/2026_Colombia_earthquake\nText: Wikipedia (CC BY-SA 4.0)\, via P
- RP (jdpi.pages.dev).
+ .org/wiki/2026_Colombia_earthquake\nText: Wikipedia (CC BY-SA 4.0)\, via V
+ itruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Colombia_earthquake
 STATUS:CONFIRMED
@@ -2571,8 +2604,8 @@ DESCRIPTION:An early indirect presidential election was held in Hungary on
  nt. András Baka\, a former president of the Supreme Court of Hungary\, wa
  s nominated by the governing Tisza Party and was elected with a two-thirds
   majority.\n\nElection: Hungary\nSource: https://en.wikipedia.org/wiki/202
- 6_Hungarian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PR
- P (jdpi.pages.dev).
+ 6_Hungarian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vi
+ truvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Hungarian_presidential_election
 STATUS:CONFIRMED
@@ -2589,7 +2622,8 @@ DESCRIPTION:The Rapid Support Forces-appointed governor of Sudan's Kordofan
   region\, Hamad Mohammad Hamad Khalifa\, resigns and announces he will def
  ect.\n\nResignation: Sudan\nReported by Sudan Tribune: https://sudantribun
  e.com/article/317318\nSource: https://en.wikipedia.org/wiki/Rapid_Support_
- Forces\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Forces\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages
+ .dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Rapid_Support_Forces
 STATUS:CONFIRMED
@@ -2604,8 +2638,8 @@ SUMMARY:2026 Zambian general election
 DESCRIPTION:General elections were held in Zambia on 13 August 2026 to elec
  t a president\, members of the National Assembly\, councillors and council
   chairs.\n\nElection: Zambia\nSource: https://en.wikipedia.org/wiki/2026_Z
- ambian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ ambian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Zambian_general_election
 STATUS:CONFIRMED
@@ -2624,8 +2658,8 @@ DESCRIPTION:The Constitutional Council of France blocks a bill proposing a
  gislation and resubmit it to the Council.\n\nCourt ruling: France\nReporte
  d by RFI: https://www.rfi.fr/en/france/20260814-top-french-court-scraps-so
  cial-media-ban-for-children-under-15\nSource: https://en.wikipedia.org/wik
- i/Internet_censorship_in_France\nText: Wikipedia (CC BY-SA 4.0)\, via PRP 
- (jdpi.pages.dev).
+ i/Internet_censorship_in_France\nText: Wikipedia (CC BY-SA 4.0)\, via Vitr
+ uvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Internet_censorship_in_France
 STATUS:CONFIRMED
@@ -2640,7 +2674,8 @@ SUMMARY:2026 Likud primary (Israel)
 DESCRIPTION:A primary election was held by Likud on 17 August 2026 to selec
  t its list of candidates ahead of the 2026 Israeli legislative election.\n
  \nParty contest: Israel\nSource: https://en.wikipedia.org/wiki/2026_Likud_
- primary\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ primary\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_Likud_primary
 STATUS:CONFIRMED
@@ -2658,8 +2693,8 @@ DESCRIPTION:Former South Korean prime minister Kim Min-seok is elected as t
  former leader Jung Chung-rae.\n\nParty contest: South Korea\nReported by T
  he Diplomat: https://thediplomat.com/2026/08/kim-min-seok-wins-democratic-
  party-chair-in-ranked-choice-runoff/\nSource: https://en.wikipedia.org/wik
- i/Kim_Min-seok_(politician)\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdp
- i.pages.dev).
+ i/Kim_Min-seok_(politician)\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvia
+ n Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/Kim_Min-seok_(politician)
 STATUS:CONFIRMED
@@ -2679,7 +2714,7 @@ DESCRIPTION:Pakistan's Supreme Court orders imprisoned former prime ministe
  stan\nReported by AFP via RFI: https://www.rfi.fr/en/international-news/20
  260818-pakistan-supreme-court-orders-ex-pm-khan-moved-from-jail-to-hospita
  l\nSource: https://en.wikipedia.org/wiki/Imprisonment_of_Imran_Khan\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Imprisonment_of_Imran_Khan
 STATUS:CONFIRMED
@@ -2699,7 +2734,8 @@ DESCRIPTION:The United States imposes sanctions on International Criminal C
  eported by AFP via France 24: https://www.france24.com/en/live-news/202608
  18-us-sanctions-international-criminal-court-chief-tomoko-akane-of-japan\n
  Source: https://en.wikipedia.org/wiki/United_States_and_the_International_
- Criminal_Court\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Criminal_Court\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_and_the_International_Crimi
  nal_Court
@@ -2717,7 +2753,7 @@ DESCRIPTION:U.S. president Donald Trump announces an economic war against I
  ns: Iran\nReported by The Hill: https://thehill.com/homenews/administratio
  n/6040249-trump-announces-economic-warfare-iran/\nSource: https://en.wikip
  edia.org/wiki/Iranian_economic_crisis\nText: Wikipedia (CC BY-SA 4.0)\, vi
- a PRP (jdpi.pages.dev).
+ a Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Iranian_economic_crisis
 STATUS:CONFIRMED
@@ -2736,7 +2772,8 @@ DESCRIPTION:The U.S. Treasury Department issues sanctions on 15 people alle
  ns: Ecuador\nReported by AP: https://apnews.com/article/us-treasury-ecuado
  r-mexico-drug-trafficking-choneros-lobos-82270ff419944177276b7d655647739d\
  nSource: https://en.wikipedia.org/wiki/Ecuador%E2%80%93United_States_relat
- ions\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ions\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Ecuador%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -2754,8 +2791,8 @@ DESCRIPTION:India's Supreme Court orders states to protect elephant corrido
  hant conflict.\n\nCourt ruling: India\nReported by AFP via France 24: http
  s://www.france24.com/en/live-news/20260821-top-india-court-orders-new-step
  s-to-protect-threatened-elephants\nSource: https://en.wikipedia.org/wiki/P
- roject_Elephant\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev)
- .
+ roject_Elephant\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (j
+ dpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Project_Elephant
 STATUS:CONFIRMED
@@ -2773,7 +2810,7 @@ DESCRIPTION:Pope Leo XIV makes a half-day papal visit to San Marino\, inclu
  by Vatican News: https://www.vaticannews.va/en/pope/news/2026-08/pope-leo-
  xiv-republic-san-marino-civil-leaders-human-person.html\nSource: https://e
  n.wikipedia.org/wiki/List_of_pastoral_trips_made_by_Pope_Leo_XIV\nText: Wi
- kipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ kipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/List_of_pastoral_trips_made_by_Pope_Leo_X
  IV
@@ -2792,7 +2829,7 @@ DESCRIPTION:Legislative elections were held in Kazakhstan on 23 August 2026
  he first election to the country's new unicameral legislature established 
  by the 2026 Constitution.\n\nElection: Kazakhstan\nSource: https://en.wiki
  pedia.org/wiki/2026_Kazakh_legislative_election\nText: Wikipedia (CC BY-SA
-  4.0)\, via PRP (jdpi.pages.dev).
+  4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Kazakh_legislative_election
 STATUS:CONFIRMED
@@ -2809,7 +2846,7 @@ DESCRIPTION:Emmanuel Nchimbi announces his resignation as the vice presiden
  t of Tanzania.\n\nResignation: Tanzania\nReported by Africanews: https://w
  ww.africanews.com/amp/2026/08/26/tanzanias-vice-president-emmanuel-nchimbi
  -resigns/\nSource: https://en.wikipedia.org/wiki/Emmanuel_Nchimbi\nText: W
- ikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Emmanuel_Nchimbi
 STATUS:CONFIRMED
@@ -2827,7 +2864,7 @@ DESCRIPTION:On the morning of 26 August 2026\, a series of flash floods and
  River in Nepal. These events are also known as the 2026 Nepal-China floods
  \, Bhotekoshi flood\, or Rasuwa flood.\n\nCrisis: China\nSource: https://e
  n.wikipedia.org/wiki/2026_Nepal%E2%80%93Tibet_floods\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Nepal%E2%80%93Tibet_floods
 STATUS:CONFIRMED
@@ -2844,8 +2881,8 @@ DESCRIPTION:A referendum on the resumption of European Union membership neg
  6. Its result was to reject the proposal for resuming accession negotiatio
  ns with 52.84% voting no and 47.16% voting yes.\n\nReferendum: Iceland\nSo
  urce: https://en.wikipedia.org/wiki/2026_Icelandic_European_Union_membersh
- ip_negotiations_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ ip_negotiations_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Icelandic_European_Union_membership_
  negotiations_referendum
@@ -2862,8 +2899,8 @@ DESCRIPTION:On 28–29 August 2026\, a mutinous faction of the Niger Armed
  Forces calling themselves the Armed Forces for the Restoration of the Fath
  erland attempted a coup against President Abdourahamane Tiani in the count
  ry's capital Niamey.\n\nCoup: Niger\nSource: https://en.wikipedia.org/wiki
- /2026_Nigerien_coup_attempt\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdp
- i.pages.dev).
+ /2026_Nigerien_coup_attempt\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvia
+ n Manager (jdpi.pages.dev).
 CATEGORIES:Coup
 URL:https://en.wikipedia.org/wiki/2026_Nigerien_coup_attempt
 STATUS:CONFIRMED
@@ -2879,7 +2916,8 @@ DESCRIPTION:A constitutional referendum on expanding presidential powers wa
  s held on 30 August 2026 by the ruling military junta in Guinea-Bissau. Th
  e proposal was accepted with a majority of 70%.\n\nReferendum: Guinea-Biss
  au\nSource: https://en.wikipedia.org/wiki/2026_Guinea-Bissau_constitutiona
- l_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ l_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi
+ .pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Guinea-Bissau_constitutional_referen
  dum
@@ -2896,7 +2934,7 @@ DESCRIPTION:The 2026 Bishkek SCO summit was the 26th meeting of the Council
   of Heads of State of the Shanghai Cooperation Organisation (SCO)\, held f
  rom 31 August to 1 September 2026 in Bishkek\, Kyrgyzstan.\n\nSummit: Kyrg
  yzstan\nSource: https://en.wikipedia.org/wiki/2026_Bishkek_SCO_summit\nTex
- t: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_Bishkek_SCO_summit
 STATUS:CONFIRMED
@@ -2913,8 +2951,8 @@ DESCRIPTION:Haakon VIII takes the oath as King of Norway before the Stortin
  andra\, takes the oath as Crown Princess.\n\nInauguration: Norway\nReporte
  d by AP: https://apnews.com/article/norway-king-haakon-oath-allegiance-con
  stitution-harald-0c4e5de3b7bcc7069af52500e34ec86c\nSource: https://en.wiki
- pedia.org/wiki/Haakon_VIII\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ pedia.org/wiki/Haakon_VIII\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Haakon_VIII
 STATUS:CONFIRMED
@@ -2933,7 +2971,7 @@ DESCRIPTION:Former British prime minister Keir Starmer resigns as a member
  ncras.\n\nResignation: United Kingdom\nReported by Al Jazeera: https://www
  .aljazeera.com/news/2026/9/1/ousted-uk-prime-minister-keir-starmer-to-quit
  -domestic-politics\nSource: https://en.wikipedia.org/wiki/Keir_Starmer\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Keir_Starmer
 STATUS:CONFIRMED
@@ -2950,7 +2988,7 @@ DESCRIPTION:The second inauguration of Hakainde Hichilema\, as President of
  cond and final term\, with Mutale Nalumango continuing as Vice President o
  f Zambia.\n\nInauguration: Zambia\nSource: https://en.wikipedia.org/wiki/S
  econd_inauguration_of_Hakainde_Hichilema\nText: Wikipedia (CC BY-SA 4.0)\,
-  via PRP (jdpi.pages.dev).
+  via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Second_inauguration_of_Hakainde_Hichilema
 STATUS:CONFIRMED
@@ -2964,7 +3002,8 @@ DTEND;VALUE=DATE:20260903
 SUMMARY:Presidential election (by Riigikogu) (Estonia)
 DESCRIPTION:Madise elected unopposed with 71 votes. Political Atlas\, check
  ed 25 October 2026.\n\nElection: Estonia\nSource: https://political-atlas.
- pages.dev/#EST\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ pages.dev/#EST\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#EST
 STATUS:CONFIRMED
@@ -2982,7 +3021,7 @@ DESCRIPTION:Starting in September 2026\, workers at the Victoria and Albert
  pect and the Public and Commercial Services Union (PCS)\, over half of the
   museum's employees.\n\nProtest: United Kingdom\nSource: https://en.wikipe
  dia.org/wiki/2026_Victoria_and_Albert_Museum_strikes\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Victoria_and_Albert_Museum_strikes
 STATUS:CONFIRMED
@@ -3000,7 +3039,7 @@ DESCRIPTION:Tens of thousands of people rally in Zagreb\, Croatia\, demandi
  dwater contamination.\n\nProtest: Croatia\nReported by AP: https://apnews.
  com/article/croatia-protest-toxic-waste-environment-1db8bad3c3d03d352d99c3
  cb2d6afd24\nSource: https://en.wikipedia.org/wiki/Zagreb\nText: Wikipedia 
- (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Zagreb
 STATUS:CONFIRMED
@@ -3017,8 +3056,8 @@ DESCRIPTION:Hundreds of masked anti-immigration protesters block the Port o
  isruption to traffic and train services.\n\nProtest: United Kingdom\nRepor
  ted by BBC News: https://www.bbc.com/news/live/cmwyzxlzxpzgt\nSource: http
  s://en.wikipedia.org/wiki/United_Kingdom_anti-immigration_protests_(2025%E
- 2%80%93present)\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev)
- .
+ 2%80%93present)\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (j
+ dpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/United_Kingdom_anti-immigration_protests_
  (2025%E2%80%93present)
@@ -3037,7 +3076,8 @@ DESCRIPTION:The U.S. treasury department imposes sanctions against 27 Irani
  an's economy.\n\nSanctions: Iran\nReported by Al-Monitor: https://www.al-m
  onitor.com/originals/2026/09/us-hits-27-iranian-airlines-latest-sanctions\
  nSource: https://en.wikipedia.org/wiki/United_States_sanctions_against_Ira
- n\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ n\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev)
+ .
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_sanctions_against_Iran
 STATUS:CONFIRMED
@@ -3057,7 +3097,7 @@ DESCRIPTION:Brazilian Supreme Court president Edson Fachin suspends conflic
  t ruling: Brazil\nReported by Reuters: https://www.reuters.com/world/ameri
  cas/brazil-top-court-judge-orders-reinstatement-federal-police-chief-2026-
  09-09/\nSource: https://en.wikipedia.org/wiki/Supreme_Federal_Court\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Supreme_Federal_Court
 STATUS:CONFIRMED
@@ -3074,7 +3114,8 @@ DESCRIPTION:The 2026 Republican National Convention\, referred to colloquia
  tember 9 to 10\, 2026\, at the American Airlines Center in Dallas\, Texas\
  , ahead of the 2026 United States midterm elections.\n\nParty contest: Uni
  ted States\nSource: https://en.wikipedia.org/wiki/2026_Republican_National
- _Convention\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ _Convention\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.
+ pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_Republican_National_Convention
 STATUS:CONFIRMED
@@ -3094,7 +3135,7 @@ DESCRIPTION:Sri Lanka's Supreme Court overturns a 2019 presidential pardon
  rted by AFP via France 24: https://www.france24.com/en/live-news/20260910-
  sri-lanka-court-revokes-monk-s-pardon-orders-return-to-prison\nSource: htt
  ps://en.wikipedia.org/wiki/Supreme_Court_of_Sri_Lanka\nText: Wikipedia (CC
-  BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Supreme_Court_of_Sri_Lanka
 STATUS:CONFIRMED
@@ -3111,7 +3152,7 @@ DESCRIPTION:The 18th BRICS Summit was held at Bharat Mandapam in New Delhi\
   brought together delegations from the BRICS members\, partner countries\,
   invitees and several international organisations.\n\nSummit: India\nSourc
  e: https://en.wikipedia.org/wiki/18th_BRICS_summit\nText: Wikipedia (CC BY
- -SA 4.0)\, via PRP (jdpi.pages.dev).
+ -SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/18th_BRICS_summit
 STATUS:CONFIRMED
@@ -3129,7 +3170,7 @@ DESCRIPTION:Thousands of demonstrators gather in Dublin and Doonbeg\, Irela
  rted by Irish Times: https://www.irishtimes.com/ireland/2026/09/12/the-onl
  y-people-on-the-streets-are-here-to-oppose-him-thousands-protest-trump-vis
  it/\nSource: https://en.wikipedia.org/wiki/Protests_against_Donald_Trump\n
- Text: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Text: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_against_Donald_Trump
 STATUS:CONFIRMED
@@ -3144,8 +3185,8 @@ SUMMARY:2026 Swedish general election (Sweden)
 DESCRIPTION:General elections were held in Sweden on 13 September 2026 to e
  lect the 349 members of the Riksdag\, alongside municipal and regional ele
  ctions.\n\nElection: Sweden\nSource: https://en.wikipedia.org/wiki/2026_Sw
- edish_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pag
- es.dev).
+ edish_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Man
+ ager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Swedish_general_election
 STATUS:CONFIRMED
@@ -3162,8 +3203,8 @@ DESCRIPTION:The 2026 Thai Senate election protests were a series of politic
  nternet Law Reform Dialogue (iLaw) and allied networks\, in front of the B
  angkok Art and Culture Centre (BACC) in Pathum Wan District\, Bangkok.\n\n
  Protest: Thailand\nSource: https://en.wikipedia.org/wiki/2026_Thai_Senate_
- election_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.de
- v).
+ election_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager 
+ (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Thai_Senate_election_protests
 STATUS:CONFIRMED
@@ -3184,7 +3225,8 @@ DESCRIPTION:The United States House of Representatives passes a bipartisan
  n\nSanctions: Russia\nReported by Kyiv Independent: https://kyivindependen
  t.com/us-house-approves-grahams-russia-sanctions-bill/\nSource: https://en
  .wikipedia.org/wiki/International_sanctions_during_the_Russian_invasion_of
- _Ukraine\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ _Ukraine\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pag
+ es.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russia
  n_invasion_of_Ukraine
@@ -3202,7 +3244,8 @@ DESCRIPTION:The first summit between South Korea and the five countries of
  Central Asia is held in Seoul.\n\nSummit: South Korea\nReported by Euronew
  s: https://www.euronews.com/2026/09/16/silk-road-spirit-meets-supply-chain
  s-at-korea-central-asia-summit\nSource: https://en.wikipedia.org/wiki/Cent
- ral_Asia\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ral_Asia\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pag
+ es.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/Central_Asia
 STATUS:CONFIRMED
@@ -3220,8 +3263,8 @@ DESCRIPTION:Demonstrations and protests against poor school and economic co
  n involving students\, teachers\, parents\, political organizations and tr
  ade unions\, with an estimated 550\,000–800\,000 people participating na
  tionwide.\n\nProtest: France\nSource: https://en.wikipedia.org/wiki/2026_F
- rench_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pag
- es.dev).
+ rench_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Man
+ ager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_French_student_protests
 STATUS:CONFIRMED
@@ -3240,8 +3283,8 @@ DESCRIPTION:Pakistan's Supreme Court suspends 17-year prison sentences impo
  ling.\n\nCourt ruling: Pakistan\nReported by Reuters: https://www.reuters.
  com/world/asia-pacific/pakistans-top-court-suspends-sentences-rights-lawye
  r-mazari-husband-2026-09-17/\nSource: https://en.wikipedia.org/wiki/Human_
- rights_in_Pakistan\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.d
- ev).
+ rights_in_Pakistan\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager
+  (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Human_rights_in_Pakistan
 STATUS:CONFIRMED
@@ -3260,7 +3303,7 @@ DESCRIPTION:Ulf Kristersson announces his resignation as Prime Minister of
   Sweden\nReported by Al Jazeera: https://www.aljazeera.com/news/2026/9/17/
  sweden-prime-minister-to-resign-as-left-wing-bloc-seals-narrow-election-wi
  n\nSource: https://en.wikipedia.org/wiki/Ulf_Kristersson\nText: Wikipedia 
- (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Ulf_Kristersson
 STATUS:CONFIRMED
@@ -3277,7 +3320,7 @@ DESCRIPTION:On 18 September 2026\, armed insurgents attacked and occupied t
  n the Old Police Lines mosque\, a battle and clearance operation continued
   for about 22 hours\, resulting in 31 deaths and 103 injuries.\n\nCrisis: 
  Pakistan\nSource: https://en.wikipedia.org/wiki/2026_Kohat_attack\nText: W
- ikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Crisis
 URL:https://en.wikipedia.org/wiki/2026_Kohat_attack
 STATUS:CONFIRMED
@@ -3295,7 +3338,8 @@ DESCRIPTION:The U.S. treasury department lifts the sanctions against Eritre
  dministration.\n\nSanctions: Eritrea\nReported by AP: https://apnews.com/a
  rticle/us-eritrea-sanctions-tigray-houthi-red-sea-c3a4056f2c69b841d97b1bdd
  8d259716\nSource: https://en.wikipedia.org/wiki/Eritrea%E2%80%93United_Sta
- tes_relations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ tes_relations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdp
+ i.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Eritrea%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -3312,7 +3356,8 @@ DESCRIPTION:Legislative elections were held in Russia from 18 to 20 Septemb
  f the Federal Assembly. Going into the election\, United Russia was the in
  cumbent and largest party with 310 seats.\n\nElection: Soviet Union / Russ
  ia\nSource: https://en.wikipedia.org/wiki/2026_Russian_legislative_electio
- n\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ n\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev)
+ .
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Russian_legislative_election
 STATUS:CONFIRMED
@@ -3333,7 +3378,8 @@ DESCRIPTION:European Union ambassadors agree in principle to remove Russian
  res.Africa: https://www.billionaires.africa/2026/09/21/billionaire-alisher
  -usmanov-is-set-to-come-off-eu-sanctions-after-four-years/\nSource: https:
  //en.wikipedia.org/wiki/International_sanctions_during_the_Russo-Ukrainian
- _war\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ _war\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russo-
  Ukrainian_war
@@ -3352,7 +3398,7 @@ DESCRIPTION:The general debate of the eighty-first session of the United Na
  er 2026. Leaders from a number of member states addressed the UNGA.\n\nSum
  mit: United Nations\nSource: https://en.wikipedia.org/wiki/General_debate_
  of_the_eighty-first_session_of_the_United_Nations_General_Assembly\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/General_debate_of_the_eighty-first_sessio
  n_of_the_United_Nations_General_Assembly
@@ -3371,7 +3417,7 @@ DESCRIPTION:General elections were held in Morocco on 23 September 2026 to
  ting took place under direct universal suffrage using a party-list proport
  ional representation system.\n\nElection: Morocco\nSource: https://en.wiki
  pedia.org/wiki/2026_Moroccan_general_election\nText: Wikipedia (CC BY-SA 4
- .0)\, via PRP (jdpi.pages.dev).
+ .0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Moroccan_general_election
 STATUS:CONFIRMED
@@ -3389,7 +3435,7 @@ DESCRIPTION:From September 23 to 25\, 2026\, Xi Jinping\, the general secre
  Donald Trump and First Lady Melania Trump. It reciprocated Trump's state v
  isit to China in May 2026.\n\nSummit: United States\nSource: https://en.wi
  kipedia.org/wiki/2026_state_visit_by_Xi_Jinping_to_the_United_States\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_state_visit_by_Xi_Jinping_to_the_Uni
  ted_States
@@ -3407,7 +3453,7 @@ DESCRIPTION:A series of protests began in Spain following the high-profile
  armen" Abascal\, which brought the country's ongoing affordable housing cr
  isis back into the spotlight.\n\nProtest: Spain\nSource: https://en.wikipe
  dia.org/wiki/2026_Spanish_housing_protests\nText: Wikipedia (CC BY-SA 4.0)
- \, via PRP (jdpi.pages.dev).
+ \, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Spanish_housing_protests
 STATUS:CONFIRMED
@@ -3422,7 +3468,8 @@ SUMMARY:2026 French Senate election (France)
 DESCRIPTION:Senatorial elections were held in France on 27 September 2026 t
  o select 178 members of the French Senate in indirect elections.\n\nElecti
  on: France\nSource: https://en.wikipedia.org/wiki/2026_French_Senate_elect
- ion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_French_Senate_election
 STATUS:CONFIRMED
@@ -3439,7 +3486,7 @@ DESCRIPTION:Parliamentary elections were held in São Tomé and Príncipe o
  – Social Democratic Party winning a plurality of 24 seats out of 55 in t
  he National Assembly.\n\nElection: São Tomé and Príncipe\nSource: https
  ://en.wikipedia.org/wiki/2026_S%C3%A3o_Tom%C3%A9an_parliamentary_election\
- nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_S%C3%A3o_Tom%C3%A9an_parliamentary_e
  lection
@@ -3458,7 +3505,7 @@ DESCRIPTION:Serbian president Aleksandar Vučić resigns in order to run fo
  bia\nReported by Reuters: https://www.reuters.com/world/europe/serbias-pre
  sident-vucic-resigns-paving-way-early-elections-2026-09-27/\nSource: https
  ://en.wikipedia.org/wiki/Aleksandar_Vu%C4%8Di%C4%87\nText: Wikipedia (CC B
- Y-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Y-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Aleksandar_Vu%C4%8Di%C4%87
 STATUS:CONFIRMED
@@ -3473,8 +3520,8 @@ SUMMARY:2026 Swiss referendums (Switzerland)
 DESCRIPTION:Several referendums were held in Switzerland during 2026\, with
   national votes on 8 March\, 14 June\, 27 September and one planned for 29
   November.\n\nReferendum: Switzerland\nSource: https://en.wikipedia.org/wi
- ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.
- pages.dev).
+ ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
+ Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Swiss_referendums
 STATUS:CONFIRMED
@@ -3493,7 +3540,7 @@ DESCRIPTION:Former Turkish family minister Fatma Betül Sayan Kaya resigns
  tal Markets Board to liquidate 131 funds and led to 51 arrests.\n\nResigna
  tion: Turkey\nReported by AFP: https://www.afp.com/de/node/3843873\nSource
  : https://en.wikipedia.org/wiki/Fatma_Bet%C3%BCl_Sayan_Kaya\nText: Wikiped
- ia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Fatma_Bet%C3%BCl_Sayan_Kaya
 STATUS:CONFIRMED
@@ -3513,7 +3560,7 @@ DESCRIPTION:The Supreme Court of Mexico invalidates the state of Chihuahua'
  ol de México: https://oem.com.mx/elheraldodechihuahua/local/rechaza-scjn-
  que-chihuahua-pueda-anular-elecciones-por-intervencion-del-crimen-organiza
  do-32345286\nSource: https://en.wikipedia.org/wiki/Crime_in_Mexico\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Crime_in_Mexico
 STATUS:CONFIRMED
@@ -3530,8 +3577,8 @@ DESCRIPTION:Temukisa Auina Penehuro Hauma is sworn in as the first woman Go
  vernor-General of Tuvalu.\n\nInauguration: Tuvalu\nReported by RNZ: https:
  //www.rnz.co.nz/news/pacific/1667715/tuvalu-appoints-first-woman-governor-
  general-ahead-of-48th-independence-day\nSource: https://en.wikipedia.org/w
- iki/Temukisa_Auina_Penehuro_Hauma\nText: Wikipedia (CC BY-SA 4.0)\, via PR
- P (jdpi.pages.dev).
+ iki/Temukisa_Auina_Penehuro_Hauma\nText: Wikipedia (CC BY-SA 4.0)\, via Vi
+ truvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Temukisa_Auina_Penehuro_Hauma
 STATUS:CONFIRMED
@@ -3552,7 +3599,8 @@ DESCRIPTION:The U.S. Court of Appeals for the Sixth Circuit halts Christa P
  rt ruling: United States\nReported by AFP via France 24: https://www.franc
  e24.com/en/live-news/20260930-court-halts-tennessee-s-first-execution-of-w
  oman-in-200-years\nSource: https://en.wikipedia.org/wiki/Capital_punishmen
- t_in_Tennessee\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t_in_Tennessee\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Capital_punishment_in_Tennessee
 STATUS:CONFIRMED
@@ -3570,7 +3618,8 @@ DESCRIPTION:Gerardo Giovagnoli and William Casali are sworn in as the new C
  n\nInauguration: San Marino\nReported by San Marino RTV: https://www.sanma
  rinortv.sm/news/politica-c2/gerardo-giovagnoli-e-william-casali-sono-i-nuo
  vi-capitani-reggenti-a296659\nSource: https://en.wikipedia.org/wiki/Gerard
- o_Giovagnoli\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ o_Giovagnoli\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi
+ .pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Gerardo_Giovagnoli
 STATUS:CONFIRMED
@@ -3586,8 +3635,8 @@ DESCRIPTION:Mass rioting continues for a third day across France with hundr
  eds reportedly injured and over 735 schools shut\, while more than 2\,000 
  people are arrested.\n\nProtest: France\nReported by BBC News: https://www
  .bbc.co.uk/news/live/cmx2z20vz124t\nSource: https://en.wikipedia.org/wiki/
- 2026_French_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jd
- pi.pages.dev).
+ 2026_French_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvi
+ an Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_French_student_protests
 STATUS:CONFIRMED
@@ -3604,8 +3653,8 @@ DESCRIPTION:Swiss president Guy Parmelin announces his resignation from the
   Federal Council effective December 31. Parliament is expected to elect hi
  s successor on 9 December.\n\nResignation: Switzerland\nReported by AFP: h
  ttps://www.afp.com/en/swiss-president-quit-government\nSource: https://en.
- wikipedia.org/wiki/Guy_Parmelin\nText: Wikipedia (CC BY-SA 4.0)\, via PRP 
- (jdpi.pages.dev).
+ wikipedia.org/wiki/Guy_Parmelin\nText: Wikipedia (CC BY-SA 4.0)\, via Vitr
+ uvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Guy_Parmelin
 STATUS:CONFIRMED
@@ -3620,8 +3669,8 @@ SUMMARY:2026 Latvian parliamentary election
 DESCRIPTION:Parliamentary elections were held in Latvia on 3 October 2026\,
   following the end of the term of the fourteenth Saeima elected in 2022.\n
  \nElection: Latvia\nSource: https://en.wikipedia.org/wiki/2026_Latvian_par
- liamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.
- dev).
+ liamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manage
+ r (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Latvian_parliamentary_election
 STATUS:CONFIRMED
@@ -3638,8 +3687,8 @@ DESCRIPTION:General elections were held in Republika Srpska on 4 October 20
  of Republika Srpska\, the two Vice-Presidents of Republika Srpska\, and th
  e 83 members of the National Assembly of Republika Srpska.\n\nElection: Bo
  snia and Herzegovina\nSource: https://en.wikipedia.org/wiki/2026_Republika
- _Srpska_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ _Srpska_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Republika_Srpska_general_election
 STATUS:CONFIRMED
@@ -3657,8 +3706,8 @@ DESCRIPTION:The Federation of Bosnia and Herzegovina held general elections
  ia and Herzegovina\, as well as the assemblies of the ten cantons of the F
  ederation of Bosnia and Herzegovina.\n\nElection: Bosnia and Herzegovina\n
  Source: https://en.wikipedia.org/wiki/2026_Federation_of_Bosnia_and_Herzeg
- ovina_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pag
- es.dev).
+ ovina_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Man
+ ager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Federation_of_Bosnia_and_Herzegovina
  _general_election
@@ -3677,8 +3726,8 @@ DESCRIPTION:General elections were held in Bosnia and Herzegovina on 4 Octo
  tial election\, and 44.26% for the parliamentary election\, the lowest eve
  r voter turnout for a general election in Bosnia and Herzegovina.\n\nElect
  ion: Bosnia and Herzegovina\nSource: https://en.wikipedia.org/wiki/2026_Bo
- snian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pag
- es.dev).
+ snian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Man
+ ager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Bosnian_general_election
 STATUS:CONFIRMED
@@ -3695,7 +3744,7 @@ DESCRIPTION:General elections were held in Brazil on 4 October 2026 to elec
  governors\, vice governors and legislative assemblies of all federative un
  its\, and the district council of Fernando de Noronha.\n\nElection: Brazil
  \nSource: https://en.wikipedia.org/wiki/2026_Brazilian_general_election\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Brazilian_general_election
 STATUS:CONFIRMED
@@ -3715,7 +3764,8 @@ DESCRIPTION:The International Criminal Court unseals arrest warrants for Ta
  y AFP via France 24: https://www.france24.com/en/live-news/20261005-icc-un
  seals-arrest-warrants-for-taliban-education-ministers\nSource: https://en.
  wikipedia.org/wiki/International_Criminal_Court_investigation_in_Afghanist
- an\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ an\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev
+ ).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/International_Criminal_Court_investigatio
  n_in_Afghanistan
@@ -3733,7 +3783,7 @@ DESCRIPTION:thumb|Orator dari LMND saat berunjuk rasa di Gedung DPR RI pada
  a tanggal 20 Oktober 2026 On October 2026 a series of protests broke out a
  gain in Indonesia.\n\nProtest: Indonesia\nSource: https://en.wikipedia.org
  /wiki/October_2026_Indonesian_protests\nText: Wikipedia (CC BY-SA 4.0)\, v
- ia PRP (jdpi.pages.dev).
+ ia Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/October_2026_Indonesian_protests
 STATUS:CONFIRMED
@@ -3751,8 +3801,8 @@ DESCRIPTION:For a second consecutive day\, riots occur in Liège\, Belgium\
  0 people are arrested.\n\nProtest: Belgium\nReported by Al Jazeera: https:
  //www.aljazeera.com/news/2026/10/7/over-100-arrested-in-belgium-student-pr
  otests-over-education-costs\nSource: https://en.wikipedia.org/wiki/2026_Fr
- ench_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.page
- s.dev).
+ ench_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Mana
+ ger (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_French_student_protests
 STATUS:CONFIRMED
@@ -3772,7 +3822,7 @@ DESCRIPTION:The Supreme Federal Court of Brazil issues an arrest warrant fo
  y Al Jazeera: https://www.aljazeera.com/news/2026/10/9/brazilian-supreme-c
  ourt-judge-issues-arrest-warrant-for-eduardo-bolsonaro\nSource: https://en
  .wikipedia.org/wiki/Supreme_Federal_Court\nText: Wikipedia (CC BY-SA 4.0)\
- , via PRP (jdpi.pages.dev).
+ , via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Court ruling
 URL:https://en.wikipedia.org/wiki/Supreme_Federal_Court
 STATUS:CONFIRMED
@@ -3790,7 +3840,7 @@ DESCRIPTION:The first round of the election to the Senate\, the upper house
  ound run-off was necessary\, voters elected a Senator by a simple majority
   on 16 and 17 October.\n\nElection: Czechia\nSource: https://en.wikipedia.
  org/wiki/2026_Czech_Senate_election\nText: Wikipedia (CC BY-SA 4.0)\, via 
- PRP (jdpi.pages.dev).
+ Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Czech_Senate_election
 STATUS:CONFIRMED
@@ -3809,7 +3859,7 @@ DESCRIPTION:The Mauritanian government of Prime Minister Moctar Ould Diay r
  n: Mauritania\nReported by AFP via Arab News: https://www.arabnews.com/wor
  ld/mauritanian-pm-reappointed-hours-after-resignation-over-power-outages-3
  005549\nSource: https://en.wikipedia.org/wiki/Moctar_Ould_Diay\nText: Wiki
- pedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ pedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Moctar_Ould_Diay
 STATUS:CONFIRMED
@@ -3829,7 +3879,7 @@ DESCRIPTION:The U.S. issues sanctions against the International Criminal Co
   by Al Jazeera: https://www.aljazeera.com/news/2026/10/10/why-is-the-us-sa
  nctioning-the-international-criminal-court\nSource: https://en.wikipedia.o
  rg/wiki/United_States_and_the_International_Criminal_Court\nText: Wikipedi
- a (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ a (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/United_States_and_the_International_Crimi
  nal_Court
@@ -3847,7 +3897,7 @@ DESCRIPTION:Indian authorities are placing New Delhi under a security lockd
  ganized by the Gen Z-led Cockroach Janta Party.\n\nProtest: India\nReporte
  d by BBC News: https://www.bbc.com/news/articles/c65yn7xvde7vo\nSource: ht
  tps://en.wikipedia.org/wiki/2026_anti-CEC_protests\nText: Wikipedia (CC BY
- -SA 4.0)\, via PRP (jdpi.pages.dev).
+ -SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_anti-CEC_protests
 STATUS:CONFIRMED
@@ -3866,7 +3916,7 @@ DESCRIPTION:Raphaël Glucksmann is elected as a candidate in the 2027 Frenc
  rted by AFP via RFI: https://www.rfi.fr/en/international-news/20261011-rap
  hael-glucksmann-elected-centre-left-french-presidential-candidate\nSource:
   https://en.wikipedia.org/wiki/2027_French_presidential_election\nText: Wi
- kipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ kipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2027_French_presidential_election
 STATUS:CONFIRMED
@@ -3884,8 +3934,8 @@ DESCRIPTION:A four-question non-binding referendum was held in Slovenia on
  social assistance conditional on carrying out of community service Limitin
  g voting rights in local elections to Slovenian and EU citizens Abolition
  …\n\nReferendum: Slovenia\nSource: https://en.wikipedia.org/wiki/2026_Sl
- ovenian_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.d
- ev).
+ ovenian_referendum\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager
+  (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Slovenian_referendum
 STATUS:CONFIRMED
@@ -3903,7 +3953,7 @@ DESCRIPTION:Ülle Madise\, who was elected by the Riigikogu in September\,
  ion: Estonia\nReported by Estonian World: https://estonianworld.com/life/u
  lle-madise-takes-office-as-estonias-president-with-call-to-rebuild-trust/\
  nSource: https://en.wikipedia.org/wiki/%C3%9Clle_Madise\nText: Wikipedia (
- CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/%C3%9Clle_Madise
 STATUS:CONFIRMED
@@ -3924,7 +3974,7 @@ DESCRIPTION:The Council of the European Union approves the 22nd package of
  r-package-of-listings-targeting-almost-1600-individuals-and-entities-in-ru
  ssia-s-military-industrial-complex/\nSource: https://en.wikipedia.org/wiki
  /International_sanctions_during_the_Russian_invasion_of_Ukraine\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/International_sanctions_during_the_Russia
  n_invasion_of_Ukraine
@@ -3942,8 +3992,8 @@ DESCRIPTION:Student-led demonstrations in Albania escalated into violent cl
  student movement began on 13 October\, when demonstrators gathered outside
   the Ministry of Education and threw stones and other objects at the build
  ing and police.\n\nProtest: Albania\nSource: https://en.wikipedia.org/wiki
- /2026_Albanian_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via PRP 
- (jdpi.pages.dev).
+ /2026_Albanian_student_protests\nText: Wikipedia (CC BY-SA 4.0)\, via Vitr
+ uvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Albanian_student_protests
 STATUS:CONFIRMED
@@ -3958,7 +4008,8 @@ SUMMARY:European Council meeting (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (s
  cheduled meeting). Council presidency: Ireland.\n\nSummit: European Union\
  nSource: https://www.consilium.europa.eu/en/meetings/european-council/2026
- /10/15/\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ /10/15/\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/meetings/european-council/2026/10/15
  /
@@ -3977,7 +4028,7 @@ DESCRIPTION:The first round of the election to the Senate\, the upper house
  ound run-off was necessary\, voters elected a Senator by a simple majority
   on 16 and 17 October.\n\nElection: Czechia\nSource: https://en.wikipedia.
  org/wiki/2026_Czech_Senate_election\nText: Wikipedia (CC BY-SA 4.0)\, via 
- PRP (jdpi.pages.dev).
+ Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Czech_Senate_election
 STATUS:CONFIRMED
@@ -3994,8 +4045,8 @@ DESCRIPTION:The 2026 Italian unrest is an ongoing series of protests\, demo
   The unrest has involved student movements and other protesters expressing
   discontent over the cost of living\, rising fuel prices\, education polic
  ies\, and public spending.\n\nProtest: Italy\nSource: https://en.wikipedia
- .org/wiki/2026_Italian_unrest\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (j
- dpi.pages.dev).
+ .org/wiki/2026_Italian_unrest\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruv
+ ian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_Italian_unrest
 STATUS:CONFIRMED
@@ -4014,7 +4065,7 @@ DESCRIPTION:Fatima Ezzahra El Mansouri\, who was named Prime Minister by Ki
  rocco World News: https://www.moroccoworldnews.com/2026/10/342507/the-mans
  ouri-government-when-ministry-names-become-a-map-of-the-morocco-being-buil
  t/\nSource: https://en.wikipedia.org/wiki/Fatima_Ezzahra_El_Mansouri\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Fatima_Ezzahra_El_Mansouri
 STATUS:CONFIRMED
@@ -4031,7 +4082,7 @@ DESCRIPTION:Yellow vests activists hold mass demonstrations across France a
  e\nReported by Al Jazeera: https://www.aljazeera.com/news/2026/10/17/franc
  e-braces-for-nationwide-protests-with-yellow-vest-members-set-to-join\nSou
  rce: https://en.wikipedia.org/wiki/Gen_Z_protests\nText: Wikipedia (CC BY-
- SA 4.0)\, via PRP (jdpi.pages.dev).
+ SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Gen_Z_protests
 STATUS:CONFIRMED
@@ -4048,8 +4099,8 @@ DESCRIPTION:The fourth round of No Kings protests are held across the Unite
  urage early voting ahead of the upcoming midterm elections.\n\nProtest: Un
  ited States\nReported by AFP: https://www.afp.com/en/no-kings-movement-see
  ks-boost-early-voting\nSource: https://en.wikipedia.org/wiki/Protests_agai
- nst_Donald_Trump\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev
- ).
+ nst_Donald_Trump\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (
+ jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Protests_against_Donald_Trump
 STATUS:CONFIRMED
@@ -4067,7 +4118,8 @@ DESCRIPTION:The independence question of the 2026 Alberta referendum is one
  to remain in Canada or for the province of Alberta to take steps toward ho
  lding a binding referendum on separating from Canada.\n\nReferendum: Canad
  a\nSource: https://en.wikipedia.org/wiki/2026_Alberta_independence_referen
- dum\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ dum\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Alberta_independence_referendum
 STATUS:CONFIRMED
@@ -4085,7 +4137,7 @@ DESCRIPTION:On October 19\, 2026 a referendum was held in Alberta on ten se
  rendum in February of the same year. In her address\, she announced that A
  lbertans will be asked to vote on nine questions.\n\nReferendum: Canada\nS
  ource: https://en.wikipedia.org/wiki/2026_Alberta_referendum\nText: Wikipe
- dia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ dia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Alberta_referendum
 STATUS:CONFIRMED
@@ -4103,8 +4155,8 @@ DESCRIPTION:Paul St-Pierre Plamondon is sworn in as the 34th premier of Que
  ection.\n\nInauguration: Canada\nReported by The Globe and Mail: https://w
  ww.theglobeandmail.com/canada/article-paul-st-pierre-plamondon-quebec-prem
  ier-cabinet-independence-minister/\nSource: https://en.wikipedia.org/wiki/
- Paul_St-Pierre_Plamondon\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ Paul_St-Pierre_Plamondon\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://en.wikipedia.org/wiki/Paul_St-Pierre_Plamondon
 STATUS:CONFIRMED
@@ -4124,7 +4176,7 @@ DESCRIPTION:The Australian Government imposes financial sanctions and trave
  ttps://www.rfi.fr/en/international-news/20261023-australia-sanctions-north
  -koreans-over-fraudulent-it-work-cybercrime\nSource: https://en.wikipedia.
  org/wiki/Australia%E2%80%93North_Korea_relations\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Australia%E2%80%93North_Korea_relations
 STATUS:CONFIRMED
@@ -4142,8 +4194,8 @@ DESCRIPTION:The Conservative Party of British Columbia wins the provincial
  remier David Eby resigns as NDP leader.\n\nResignation: Canada\nReported b
  y CBC: https://www.cbc.ca/news/canada/british-columbia/livestory/bc-provin
  cial-election-results-live-updates-2026-9.7389208\nSource: https://en.wiki
- pedia.org/wiki/David_Eby\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ pedia.org/wiki/David_Eby\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/David_Eby
 STATUS:CONFIRMED
@@ -4161,7 +4213,7 @@ DESCRIPTION:The Yellow vests hold a second wave of mass demonstrations acro
  ian.com/world/live/2026/oct/24/france-demonstrations-police-macron-italy-a
  lbania-belgium-spain-ukraine-russia-europe-latest-news#top-of-blog\nSource
  : https://en.wikipedia.org/wiki/2026_European_unrest\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/2026_European_unrest
 STATUS:CONFIRMED
@@ -4179,7 +4231,7 @@ DESCRIPTION:Party leader Marine Le Pen holds the National Rally congress in
   in opposition.\n\nParty contest: France\nReported by CBS: https://www.cbs
  news.com/news/paris-france-new-protests-riots-museums-shops/\nSource: http
  s://en.wikipedia.org/wiki/2026_French_fuel_protests\nText: Wikipedia (CC B
- Y-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Y-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://en.wikipedia.org/wiki/2026_French_fuel_protests
 STATUS:CONFIRMED
@@ -4196,8 +4248,8 @@ DESCRIPTION:Thousands of Israelis rally in Hostages Square in Tel Aviv to p
  t\, and the continuation of the Gaza war.\n\nProtest: Israel\nReported by 
  Al Jazeera: https://www.aljazeera.com/news/2026/10/24/thousands-of-israeli
  s-rally-against-netanyahu-govt-days-before-election\nSource: https://en.wi
- kipedia.org/wiki/Hostages_Square\nText: Wikipedia (CC BY-SA 4.0)\, via PRP
-  (jdpi.pages.dev).
+ kipedia.org/wiki/Hostages_Square\nText: Wikipedia (CC BY-SA 4.0)\, via Vit
+ ruvian Manager (jdpi.pages.dev).
 CATEGORIES:Protest
 URL:https://en.wikipedia.org/wiki/Hostages_Square
 STATUS:CONFIRMED
@@ -4214,7 +4266,7 @@ DESCRIPTION:General elections were held in Brazil on 4 October 2026 to elec
  governors\, vice governors and legislative assemblies of all federative un
  its\, and the district council of Fernando de Noronha.\n\nElection: Brazil
  \nSource: https://en.wikipedia.org/wiki/2026_Brazilian_general_election\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Brazilian_general_election
 STATUS:CONFIRMED
@@ -4230,7 +4282,7 @@ DESCRIPTION:Presidential elections were held in Bulgaria on 25 October 2026
  . Incumbent president Iliana Iotova is eligible and has declared her inten
  tion to run for a full term.\n\nElection: Bulgaria\nSource: https://en.wik
  ipedia.org/wiki/2026_Bulgarian_presidential_election\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Bulgarian_presidential_election
 STATUS:CONFIRMED
@@ -4248,7 +4300,8 @@ DESCRIPTION:Early parliamentary elections were held in Serbia on 25 October
  bia\, dissolved the National Assembly and called the elections on 9 Septem
  ber 2026\, on the proposal of the government.\n\nElection: Yugoslavia / Se
  rbia\nSource: https://en.wikipedia.org/wiki/2026_Serbian_parliamentary_ele
- ction\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ction\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.
+ dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Serbian_parliamentary_election
 STATUS:CONFIRMED
@@ -4265,7 +4318,7 @@ DESCRIPTION:Legislative elections are scheduled to be held in Israel on 27
  the governing coalition that succeeds the 37th government led by Prime Min
  ister Benjamin Netanyahu.\n\nElection: Israel\nSource: https://en.wikipedi
  a.org/wiki/2026_Israeli_legislative_election\nText: Wikipedia (CC BY-SA 4.
- 0)\, via PRP (jdpi.pages.dev).
+ 0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Israeli_legislative_election
 STATUS:CONFIRMED
@@ -4284,7 +4337,8 @@ DESCRIPTION:The United States imposes sanctions on the Rwandan ministry of
  Congolese forces.\n\nSanctions: Rwanda\nReported by Reuters: https://www.r
  euters.com/world/africa/us-imposes-sanctions-rwandas-ministry-defense-2026
  -10-28/\nSource: https://en.wikipedia.org/wiki/Rwanda%E2%80%93United_State
- s_relations\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ s_relations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.
+ pages.dev).
 CATEGORIES:Sanctions
 URL:https://en.wikipedia.org/wiki/Rwanda%E2%80%93United_States_relations
 STATUS:CONFIRMED
@@ -4303,7 +4357,8 @@ DESCRIPTION:Christine Lagarde\, the president of the European Central Bank\
  ficially ends.\n\nResignation: International\nReported by Reuters: https:/
  /www.reuters.com/business/finance/ecb-hold-rates-investors-focus-french-bo
  nds-lagardes-future-2026-10-28/\nSource: https://en.wikipedia.org/wiki/Chr
- istine_Lagarde\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ istine_Lagarde\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Resignation
 URL:https://en.wikipedia.org/wiki/Christine_Lagarde
 STATUS:CONFIRMED
@@ -4321,8 +4376,8 @@ DESCRIPTION:The 2026 Commonwealth Heads of Government Meeting\, also known
  r states of the Commonwealth of Nations. It is to be held in St. John's\, 
  Antigua and Barbuda\, from 1 to 4 November 2026.\n\nSummit: Antigua and Ba
  rbuda\nSource: https://en.wikipedia.org/wiki/2026_Commonwealth_Heads_of_Go
- vernment_Meeting\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev
- ).
+ vernment_Meeting\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (
+ jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_Commonwealth_Heads_of_Government_Mee
  ting
@@ -4339,7 +4394,7 @@ DESCRIPTION:Presidential elections were held in Bulgaria on 25 October 2026
  . Incumbent president Iliana Iotova is eligible and has declared her inten
  tion to run for a full term.\n\nElection: Bulgaria\nSource: https://en.wik
  ipedia.org/wiki/2026_Bulgarian_presidential_election\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Bulgarian_presidential_election
 STATUS:CONFIRMED
@@ -4357,7 +4412,7 @@ DESCRIPTION:The 2026 Navajo Nation presidential election will take place on
  \, June 23 in Utah\, and July 21 in Arizona to align with each state's pri
  mary elections.\n\nElection: United States\nSource: https://en.wikipedia.o
  rg/wiki/2026_Navajo_Nation_presidential_election\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Navajo_Nation_presidential_election
 STATUS:CONFIRMED
@@ -4375,7 +4430,7 @@ DESCRIPTION:The 2026 United States Senate elections are scheduled to be hel
  tes to six-year terms that begin on January 3\, 2027\, and expire on Janua
  ry 3\, 2033.\n\nElection: United States\nSource: https://en.wikipedia.org/
  wiki/2026_United_States_Senate_elections\nText: Wikipedia (CC BY-SA 4.0)\,
-  via PRP (jdpi.pages.dev).
+  via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_United_States_Senate_elections
 STATUS:CONFIRMED
@@ -4393,7 +4448,8 @@ DESCRIPTION:The 2026 United States House of Representatives elections are s
  m. Voters will elect representatives from all 435 congressional districts 
  across each of the fifty U.S.\n\nElection: United States\nSource: https://
  en.wikipedia.org/wiki/2026_United_States_House_of_Representatives_election
- s\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ s\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev)
+ .
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_United_States_House_of_Representativ
  es_elections
@@ -4408,8 +4464,8 @@ DTEND;VALUE=DATE:20261106
 SUMMARY:2026 Grenadian general election (Grenada)
 DESCRIPTION:General elections are scheduled to be held in Grenada on 5 Nove
  mber 2026.\n\nElection: Grenada\nSource: https://en.wikipedia.org/wiki/202
- 6_Grenadian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jd
- pi.pages.dev).
+ 6_Grenadian_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvi
+ an Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Grenadian_general_election
 STATUS:CONFIRMED
@@ -4427,7 +4483,8 @@ DESCRIPTION:The 2026 New Zealand general election is scheduled to be held o
   comprising 71 members elected from single-member electorates and 49 membe
  rs elected from closed party lists to achieve proportionality.\n\nElection
  : New Zealand\nSource: https://en.wikipedia.org/wiki/2026_New_Zealand_gene
- ral_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ral_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi
+ .pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_New_Zealand_general_election
 STATUS:CONFIRMED
@@ -4444,8 +4501,8 @@ DESCRIPTION:The 2026 United Nations Climate Change Conference or Conference
  ming 31st session of the United Nations Climate Change Conference\, to be 
  held at the Expo Center in Antalya\, Turkey from 9 to 20 November 2026.\n\
  nSummit: Turkey\nSource: https://en.wikipedia.org/wiki/2026_United_Nations
- _Climate_Change_Conference\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ _Climate_Change_Conference\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_United_Nations_Climate_Change_Confer
  ence
@@ -4461,8 +4518,8 @@ SUMMARY:9th European Political Community Summit (Ireland)
 DESCRIPTION:The Ninth European Political Community Summit is a meeting of t
  he European Political Community to be held on 12 November 2026 in Ireland.
  \n\nSummit: Ireland\nSource: https://en.wikipedia.org/wiki/9th_European_Po
- litical_Community_Summit\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ litical_Community_Summit\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/9th_European_Political_Community_Summit
 STATUS:CONFIRMED
@@ -4477,7 +4534,8 @@ SUMMARY:European Council meeting (informal) (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (i
  nformal meeting). Council presidency: Ireland.\n\nSummit: European Union\n
  Source: https://www.consilium.europa.eu/en/meetings/european-council/2026/
- 11/13/\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ 11/13/\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages
+ .dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/meetings/european-council/2026/11/13
  /
@@ -4493,7 +4551,7 @@ SUMMARY:2026 Cape Verdean presidential election
 DESCRIPTION:Presidential elections are scheduled to be held in Cape Verde o
  n 15 November 2026.\n\nElection: Cape Verde\nSource: https://en.wikipedia.
  org/wiki/2026_Cape_Verdean_presidential_election\nText: Wikipedia (CC BY-S
- A 4.0)\, via PRP (jdpi.pages.dev).
+ A 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Cape_Verdean_presidential_election
 STATUS:CONFIRMED
@@ -4510,8 +4568,8 @@ DESCRIPTION:The 2026 ASEAN Summits are two series of diplomatic conferences
  re held in the Philippines in 2026. It comprised the 48th ASEAN Summit hel
  d on 6–8 May in Cebu and the 49th ASEAN Summit scheduled for 16–18 Nov
  ember in Metro Manila.\n\nSummit: Philippines\nSource: https://en.wikipedi
- a.org/wiki/2026_ASEAN_Summits\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (j
- dpi.pages.dev).
+ a.org/wiki/2026_ASEAN_Summits\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruv
+ ian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_ASEAN_Summits
 STATUS:CONFIRMED
@@ -4528,7 +4586,7 @@ DESCRIPTION:The APEC China 2026 will be a year-long hosting of the Asia-Pac
  PEC Economic Leaders' Meeting in November 2026. It will be the third time 
  China hosted the summit\, having previously hosted in 2001 and 2014.\n\nSu
  mmit: China\nSource: https://en.wikipedia.org/wiki/APEC_China_2026\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/APEC_China_2026
 STATUS:CONFIRMED
@@ -4543,7 +4601,8 @@ SUMMARY:European Council meeting (extraordinary) (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (e
  xtraordinary meeting). Council presidency: Ireland.\n\nSummit: European Un
  ion\nSource: https://www.consilium.europa.eu/en/meetings/european-council/
- 2026/11/26-27/\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ 2026/11/26-27/\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/meetings/european-council/2026/11/26
  -27/
@@ -4560,7 +4619,7 @@ DESCRIPTION:A referendum is scheduled to be held in Taiwan on 28 November 2
  026 asking voters if the country should adopt nuclear power. The referendu
  m will take place alongside local elections.\n\nReferendum: Taiwan\nSource
  : https://en.wikipedia.org/wiki/2026_Taiwanese_referendum\nText: Wikipedia
-  (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Taiwanese_referendum
 STATUS:CONFIRMED
@@ -4577,7 +4636,7 @@ DESCRIPTION:A general election will be held in Spain on 29 November 2026 to
  tion of 1978. All 350 seats in the Congress of Deputies will be up for ele
  ction\, as well as 209 of 267 seats in the Senate.\n\nElection: Spain\nSou
  rce: https://en.wikipedia.org/wiki/2026_Spanish_general_election\nText: Wi
- kipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ kipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Spanish_general_election
 STATUS:CONFIRMED
@@ -4592,8 +4651,8 @@ SUMMARY:2026 Swiss referendums (Switzerland)
 DESCRIPTION:Several referendums were held in Switzerland during 2026\, with
   national votes on 8 March\, 14 June\, 27 September and one planned for 29
   November.\n\nReferendum: Switzerland\nSource: https://en.wikipedia.org/wi
- ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.
- pages.dev).
+ ki/2026_Swiss_referendums\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
+ Manager (jdpi.pages.dev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Swiss_referendums
 STATUS:CONFIRMED
@@ -4608,7 +4667,7 @@ SUMMARY:General election (second round\, planned\; date to be confirmed) (H
  aiti)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Haiti (
  date not yet fixed)\nSource: https://political-atlas.pages.dev/#HTI\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#HTI
 STATUS:TENTATIVE
@@ -4623,8 +4682,8 @@ SUMMARY:2026 Gambian presidential election (The Gambia)
 DESCRIPTION:Presidential elections are scheduled to be held in the Gambia o
  n 5 December 2026. Incumbent president Adama Barrow is running for a third
   term.\n\nElection: The Gambia\nSource: https://en.wikipedia.org/wiki/2026
- _Gambian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (
- jdpi.pages.dev).
+ _Gambian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitru
+ vian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Gambian_presidential_election
 STATUS:CONFIRMED
@@ -4642,7 +4701,8 @@ DESCRIPTION:A constitutional referendum has been provisionally scheduled to
  ced the referendum date\, it cannot take place unless parliament approves 
  the third reading of the constitutional amendment bill.\n\nReferendum: Fij
  i\nSource: https://en.wikipedia.org/wiki/2026_Fijian_constitutional_refere
- ndum\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ndum\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Referendum
 URL:https://en.wikipedia.org/wiki/2026_Fijian_constitutional_referendum
 STATUS:CONFIRMED
@@ -4659,8 +4719,8 @@ DESCRIPTION:The 2026 G20 Doral Summit will be the twenty-first meeting of t
  ned from 14 to 15 December 2026. It will be held at the Trump National Dor
  al Miami\, a property of the host\, U.S. president Donald Trump\, in Doral
  \, Florida.\n\nSummit: United States\nSource: https://en.wikipedia.org/wik
- i/2026_G20_Miami_summit\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ i/2026_G20_Miami_summit\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2026_G20_Miami_summit
 STATUS:CONFIRMED
@@ -4675,7 +4735,8 @@ SUMMARY:European Council meeting (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (s
  cheduled meeting). Council presidency: Ireland.\n\nSummit: European Union\
  nSource: https://www.consilium.europa.eu/en/meetings/european-council/2026
- /12/17/\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ /12/17/\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.page
+ s.dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/meetings/european-council/2026/12/17
  /
@@ -4691,7 +4752,7 @@ SUMMARY:2026 South Sudanese general election
 DESCRIPTION:General elections are due to be held in South Sudan on 22 Decem
  ber 2026\, the first since independence.\n\nElection: South Sudan\nSource:
   https://en.wikipedia.org/wiki/2026_South_Sudanese_general_election\nText:
-  Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_South_Sudanese_general_election
 STATUS:CONFIRMED
@@ -4709,7 +4770,7 @@ DESCRIPTION:Presidential elections will be held in Serbia by 26 December 20
  Vučić is ineligible to run again as president\, as he has served two con
  secutive terms.\n\nElection: Serbia\nSource: https://en.wikipedia.org/wiki
  /2026_Serbian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via 
- PRP (jdpi.pages.dev).
+ Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Serbian_presidential_election
 STATUS:CONFIRMED
@@ -4726,7 +4787,7 @@ DESCRIPTION:General elections will be held in Nigeria on 16 January 2027 to
  of Representatives. Elections to elect state governors\, and members of th
  e house of assembly will be held on 6 February 2027.\n\nElection: Nigeria\
  nSource: https://en.wikipedia.org/wiki/2027_Nigerian_general_election\nTex
- t: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Nigerian_general_election
 STATUS:CONFIRMED
@@ -4742,7 +4803,7 @@ DESCRIPTION:Presidential elections are scheduled to be held in Kyrgyzstan o
  n 27 January 2027. Incumbent president Sadyr Japarov has announced that he
   will seek a second term in office.\n\nElection: Kyrgyzstan\nSource: https
  ://en.wikipedia.org/wiki/2027_Kyrgyz_presidential_election\nText: Wikipedi
- a (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ a (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Kyrgyz_presidential_election
 STATUS:CONFIRMED
@@ -4757,7 +4818,7 @@ SUMMARY:Federal Convention (presidential election\; date to be confirmed) (
  Germany)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Germany
   (date not yet fixed)\nSource: https://political-atlas.pages.dev/#DEU\nTex
- t: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#DEU
 STATUS:TENTATIVE
@@ -4774,7 +4835,7 @@ DESCRIPTION:EU heads of state or government meet as the European Council (i
  \nSource: https://www.consilium.europa.eu/en/press/press-releases/2026/10/
  16/remarks-by-president-antonio-costa-at-the-press-conference-following-th
  e-european-council-meeting-of-15-16-october-2026/\nText: Wikipedia (CC BY-
- SA 4.0)\, via PRP (jdpi.pages.dev).
+ SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://www.consilium.europa.eu/en/press/press-releases/2026/10/16/rema
  rks-by-president-antonio-costa-at-the-press-conference-following-the-europ
@@ -4790,7 +4851,7 @@ DTEND;VALUE=DATE:20270208
 SUMMARY:Inauguration of elected president (target) (Haiti)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nInauguration: Hai
  ti (date not yet fixed)\nSource: https://political-atlas.pages.dev/#HTI\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Inauguration
 URL:https://political-atlas.pages.dev/#HTI
 STATUS:TENTATIVE
@@ -4808,7 +4869,8 @@ DESCRIPTION:Presidential elections are scheduled to be held in El Salvador
   2025\, the Legislative Assembly of El Salvador voted to move the date of 
  the next presidential election from 2029 to 2027.\n\nElection: El Salvador
  \nSource: https://en.wikipedia.org/wiki/2027_Salvadoran_presidential_elect
- ion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
+ v).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Salvadoran_presidential_election
 STATUS:CONFIRMED
@@ -4826,8 +4888,8 @@ DESCRIPTION:Legislative and municipal elections are scheduled to be held in
  y of El Salvador and all members of the country's 44 municipal councils. T
  he election will occur with concurrent presidential elections.\n\nElection
  : El Salvador\nSource: https://en.wikipedia.org/wiki/2027_Salvadoran_legis
- lative_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev)
- .
+ lative_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (j
+ dpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Salvadoran_legislative_election
 STATUS:CONFIRMED
@@ -4841,7 +4903,7 @@ DTEND;VALUE=DATE:20270302
 SUMMARY:Provincial / Senate elections (date to be confirmed) (Netherlands)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Netherl
  ands (date not yet fixed)\nSource: https://political-atlas.pages.dev/#NLD\
- nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#NLD
 STATUS:TENTATIVE
@@ -4856,7 +4918,7 @@ SUMMARY:2027 Micronesian general election
 DESCRIPTION:General elections are scheduled to be held in the Federated Sta
  tes of Micronesia on 2 March 2027.\n\nElection: Micronesia\nSource: https:
  //en.wikipedia.org/wiki/2027_Micronesian_general_election\nText: Wikipedia
-  (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+  (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Micronesian_general_election
 STATUS:CONFIRMED
@@ -4871,7 +4933,7 @@ SUMMARY:Next Estonian parliamentary election
 DESCRIPTION:Parliamentary elections will be held in Estonia by 7 March 2027
   to elect all 101 members of the Riigikogu.\n\nElection: Estonia\nSource: 
  https://en.wikipedia.org/wiki/Next_Estonian_parliamentary_election\nText: 
- Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/Next_Estonian_parliamentary_election
 STATUS:CONFIRMED
@@ -4886,8 +4948,8 @@ SUMMARY:European Council meeting (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (s
  cheduled meeting). Council presidency: Lithuania.\n\nSummit: European Unio
  n (date not yet fixed)\nSource: https://en.wikipedia.org/wiki/List_of_Euro
- pean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.page
- s.dev).
+ pean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Mana
+ ger (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/List_of_European_Council_meetings
 STATUS:TENTATIVE
@@ -4904,7 +4966,7 @@ DESCRIPTION:Parliamentary elections are expected to take place in Andorra n
  le of running again due to the country's two term limit for the office.\n\
  nElection: Andorra (date not yet fixed)\nSource: https://en.wikipedia.org/
  wiki/2027_Andorran_parliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\
- , via PRP (jdpi.pages.dev).
+ , via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Andorran_parliamentary_election
 STATUS:TENTATIVE
@@ -4921,7 +4983,7 @@ DESCRIPTION:The Tenth European Political Community Summit is a meeting of t
  he European Political Community to be held in April 2027 in the Switzerlan
  d.\n\nSummit: Switzerland (date not yet fixed)\nSource: https://en.wikiped
  ia.org/wiki/10th_European_Political_Community_Summit\nText: Wikipedia (CC 
- BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/10th_European_Political_Community_Summit
 STATUS:TENTATIVE
@@ -4936,7 +4998,7 @@ SUMMARY:2027 Gambian parliamentary election (The Gambia)
 DESCRIPTION:Parliamentary elections are scheduled to be held in The Gambia 
  on 10 April 2027.\n\nElection: The Gambia\nSource: https://en.wikipedia.or
  g/wiki/2027_Gambian_parliamentary_election\nText: Wikipedia (CC BY-SA 4.0)
- \, via PRP (jdpi.pages.dev).
+ \, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Gambian_parliamentary_election
 STATUS:CONFIRMED
@@ -4953,8 +5015,8 @@ DESCRIPTION:Parliamentary elections will be held in Finland on 18 April 202
  first parliamentary election in Finland since the country acceded to NATO 
  on 4 April 2023\, ending 75 years of military non-alignment for the countr
  y.\n\nElection: Finland\nSource: https://en.wikipedia.org/wiki/2027_Finnis
- h_parliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.p
- ages.dev).
+ h_parliamentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
+ anager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Finnish_parliamentary_election
 STATUS:CONFIRMED
@@ -4971,7 +5033,7 @@ DESCRIPTION:Presidential elections are scheduled to be held in France on 18
  ity vote. The election may be held earlier under exceptional circumstances
   if the presidency falls vacant before then.\n\nElection: France\nSource: 
  https://en.wikipedia.org/wiki/2027_French_presidential_election\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_French_presidential_election
 STATUS:CONFIRMED
@@ -4985,7 +5047,7 @@ DTEND;VALUE=DATE:20270502
 SUMMARY:Presidential election (by Saeima\; date to be confirmed) (Latvia)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Latvia 
  (date not yet fixed)\nSource: https://political-atlas.pages.dev/#LVA\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#LVA
 STATUS:TENTATIVE
@@ -5002,7 +5064,7 @@ DESCRIPTION:Presidential elections are scheduled to be held in France on 18
  ity vote. The election may be held earlier under exceptional circumstances
   if the presidency falls vacant before then.\n\nElection: France\nSource: 
  https://en.wikipedia.org/wiki/2027_French_presidential_election\nText: Wik
- ipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_French_presidential_election
 STATUS:CONFIRMED
@@ -5016,8 +5078,8 @@ DTEND;VALUE=DATE:20270504
 SUMMARY:2027 Burundian presidential election
 DESCRIPTION:Presidential elections are expected to be held in Burundi in 20
  27.\n\nElection: Burundi\nSource: https://en.wikipedia.org/wiki/2027_Burun
- dian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ dian_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Burundian_presidential_election
 STATUS:CONFIRMED
@@ -5032,8 +5094,8 @@ SUMMARY:European Council meeting (informal) (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (i
  nformal meeting). Council presidency: Lithuania.\n\nSummit: European Union
   (date not yet fixed)\nSource: https://en.wikipedia.org/wiki/List_of_Europ
- ean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ ean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/List_of_European_Council_meetings
 STATUS:TENTATIVE
@@ -5050,8 +5112,8 @@ DESCRIPTION:Presidential elections are expected to be held in Mongolia in 2
  e Law on Mongolian Presidential Election. It will be the ninth presidentia
  l election since Mongolia's democratization in 1990.\n\nElection: Mongolia
   (date not yet fixed)\nSource: https://en.wikipedia.org/wiki/2027_Mongolia
- n_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pa
- ges.dev).
+ n_presidential_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Ma
+ nager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Mongolian_presidential_election
 STATUS:TENTATIVE
@@ -5068,7 +5130,8 @@ DESCRIPTION:Legislative elections are scheduled to be held in Mexico on 6 J
  ho will serve during the LXVII Legislature (2027–2030). These elections 
  will take place concurrently with the 2027 state elections.\n\nElection: M
  exico\nSource: https://en.wikipedia.org/wiki/2027_Mexican_legislative_elec
- tion\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ tion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.d
+ ev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Mexican_legislative_election
 STATUS:CONFIRMED
@@ -5083,8 +5146,8 @@ SUMMARY:European Council meeting (European Union)
 DESCRIPTION:EU heads of state or government meet as the European Council (s
  cheduled meeting). Council presidency: Lithuania.\n\nSummit: European Unio
  n (date not yet fixed)\nSource: https://en.wikipedia.org/wiki/List_of_Euro
- pean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.page
- s.dev).
+ pean_Council_meetings\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Mana
+ ger (jdpi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/List_of_European_Council_meetings
 STATUS:TENTATIVE
@@ -5102,8 +5165,8 @@ DESCRIPTION:General elections will be held in Guatemala in June 2027 to ele
  cils for all the country's 340 municipalities\, with a second round of the
   presidential elections to be held in August if no candidate wins a majori
  ty…\n\nElection: Guatemala\nSource: https://en.wikipedia.org/wiki/2027_G
- uatemalan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi
- .pages.dev).
+ uatemalan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian
+  Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Guatemalan_general_election
 STATUS:CONFIRMED
@@ -5120,8 +5183,8 @@ DESCRIPTION:The 2027 Kenyan general election is scheduled to be held on 10
  nators\, county governors\, women representatives and members of county as
  semblies. It will be the fourth general election held under the 2010 Const
  itution of Kenya.\n\nElection: Kenya\nSource: https://en.wikipedia.org/wik
- i/2027_Kenyan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (
- jdpi.pages.dev).
+ i/2027_Kenyan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitru
+ vian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Kenyan_general_election
 STATUS:CONFIRMED
@@ -5135,8 +5198,8 @@ DTEND;VALUE=DATE:20270825
 SUMMARY:2027 Angolan general election
 DESCRIPTION:General elections are scheduled to be held in Angola by August 
  2027.\n\nElection: Angola\nSource: https://en.wikipedia.org/wiki/2027_Ango
- lan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages
- .dev).
+ lan_general_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manag
+ er (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Angolan_general_election
 STATUS:CONFIRMED
@@ -5150,7 +5213,7 @@ DTEND;VALUE=DATE:20270902
 SUMMARY:LDP leadership election (date to be confirmed) (Japan)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nParty contest: Ja
  pan (date not yet fixed)\nSource: https://political-atlas.pages.dev/#JPN\n
- Text: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ Text: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Party contest
 URL:https://political-atlas.pages.dev/#JPN
 STATUS:TENTATIVE
@@ -5165,8 +5228,8 @@ SUMMARY:Next Slovak parliamentary election (Slovakia)
 DESCRIPTION:Parliamentary elections are scheduled to be held in Slovakia by
   28 September 2027 to elect all 150 members of the National Council.\n\nEl
  ection: Slovakia\nSource: https://en.wikipedia.org/wiki/Next_Slovak_parlia
- mentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev
- ).
+ mentary_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (
+ jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/Next_Slovak_parliamentary_election
 STATUS:CONFIRMED
@@ -5183,7 +5246,7 @@ DESCRIPTION:General elections are due to be held in Oman by October 2027. A
  ry body. Political parties are banned\, as such all candidates will run as
   independents.\n\nElection: Oman (date not yet fixed)\nSource: https://en.
  wikipedia.org/wiki/2027_Omani_general_election\nText: Wikipedia (CC BY-SA 
- 4.0)\, via PRP (jdpi.pages.dev).
+ 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Omani_general_election
 STATUS:TENTATIVE
@@ -5197,7 +5260,7 @@ DTEND;VALUE=DATE:20271002
 SUMMARY:Parliamentary election (date to be confirmed) (Poland)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Poland 
  (date not yet fixed)\nSource: https://political-atlas.pages.dev/#POL\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#POL
 STATUS:TENTATIVE
@@ -5211,7 +5274,7 @@ DTEND;VALUE=DATE:20271002
 SUMMARY:Presidential election (date to be confirmed) (Slovenia)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Sloveni
  a (date not yet fixed)\nSource: https://political-atlas.pages.dev/#SVN\nTe
- xt: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ xt: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#SVN
 STATUS:TENTATIVE
@@ -5229,7 +5292,7 @@ DESCRIPTION:General elections are scheduled to take place in Argentina on 2
  of most provinces. Incumbent president Javier Milei is running for re-elec
  tion for a second term.\n\nElection: Argentina\nSource: https://en.wikiped
  ia.org/wiki/2027_Argentine_general_election\nText: Wikipedia (CC BY-SA 4.0
- )\, via PRP (jdpi.pages.dev).
+ )\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Argentine_general_election
 STATUS:CONFIRMED
@@ -5242,8 +5305,8 @@ DTSTART;VALUE=DATE:20271024
 DTEND;VALUE=DATE:20271025
 SUMMARY:2027 Swiss federal election (Switzerland)
 DESCRIPTION:Election: Switzerland\nSource: https://en.wikipedia.org/wiki/20
- 27_Swiss_federal_election\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.
- pages.dev).
+ 27_Swiss_federal_election\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian 
+ Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Swiss_federal_election
 STATUS:CONFIRMED
@@ -5259,7 +5322,7 @@ SUMMARY:2027 Marshallese general election (date to be confirmed) (Marshall
 DESCRIPTION:General elections are scheduled to be held in the Marshall Isla
  nds by November 2027.\n\nElection: Marshall Islands (date not yet fixed)\n
  Source: https://en.wikipedia.org/wiki/2027_Marshallese_general_election\nT
- ext: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ ext: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2027_Marshallese_general_election
 STATUS:TENTATIVE
@@ -5276,7 +5339,7 @@ DESCRIPTION:General elections were due to be held in Nicaragua to elect the
  for November 2026\, a constitutional amendment pushed back the election da
  te to November 2027.\n\nElection: Nicaragua (date not yet fixed)\nSource: 
  https://en.wikipedia.org/wiki/2026_Nicaraguan_general_election\nText: Wiki
- pedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ pedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://en.wikipedia.org/wiki/2026_Nicaraguan_general_election
 STATUS:TENTATIVE
@@ -5289,7 +5352,8 @@ DTSTART;VALUE=DATE:20271127
 DTEND;VALUE=DATE:20271128
 SUMMARY:2027 G20 summit (United Kingdom)
 DESCRIPTION:Summit: United Kingdom\nSource: https://en.wikipedia.org/wiki/2
- 027_G20_summit\nText: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ 027_G20_summit\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jd
+ pi.pages.dev).
 CATEGORIES:Summit
 URL:https://en.wikipedia.org/wiki/2027_G20_summit
 STATUS:CONFIRMED
@@ -5303,7 +5367,7 @@ DTEND;VALUE=DATE:20280102
 SUMMARY:Presidential election (date to be confirmed) (Czechia)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Czechia
   (date not yet fixed)\nSource: https://political-atlas.pages.dev/#CZE\nTex
- t: Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ t: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#CZE
 STATUS:TENTATIVE
@@ -5317,7 +5381,7 @@ DTEND;VALUE=DATE:20280202
 SUMMARY:Presidential election (date to be confirmed) (Cyprus)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Cyprus 
  (date not yet fixed)\nSource: https://political-atlas.pages.dev/#CYP\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#CYP
 STATUS:TENTATIVE
@@ -5331,7 +5395,7 @@ DTEND;VALUE=DATE:20280202
 SUMMARY:National Council election (date to be confirmed) (Monaco)
 DESCRIPTION:Political Atlas\, checked 25 October 2026.\n\nElection: Monaco 
  (date not yet fixed)\nSource: https://political-atlas.pages.dev/#MCO\nText
- : Wikipedia (CC BY-SA 4.0)\, via PRP (jdpi.pages.dev).
+ : Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.dev).
 CATEGORIES:Election
 URL:https://political-atlas.pages.dev/#MCO
 STATUS:TENTATIVE

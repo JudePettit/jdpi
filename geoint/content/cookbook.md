@@ -517,7 +517,7 @@ gdal_calc.py -A nbr_before.tif -B nbr_after.tif --calc="A-B" --outfile=dnbr.tif
 
 1. **Start in QGIS** with dated imagery or a plain base map, your evidence layers on top, and a metric CRS for the area (the local UTM zone).
 2. **Open Project › New Print Layout.** Add the map, a **scale bar**, a **north arrow**, a small **inset map** showing where in the country this is, and a **legend** if you use more than one symbol.
-3. **Write a caption** in the publication style used across PRP: "Figure 1. What it shows, where and when. Source." Give the imagery date and the coordinates of the key point.
+3. **Write a caption** in the publication style used across Vitruvian Manager: "Figure 1. What it shows, where and when. Source." Give the imagery date and the coordinates of the key point.
 4. **Credit every source:** "Contains modified Copernicus Sentinel data 2026", "© OpenStreetMap contributors", "Imagery: NASA Worldview", "Vantor Open Data (CC BY-NC 4.0)", as each licence asks.
 5. **Choose colours that survive colour-blindness and print:** few colours, labels as well as colour, thin outlines.
 6. **Check what the map reveals.** Remove or blur faces, number plates and house numbers that are not needed; consider reducing precision where a location could put people at risk (see [Law & ethics](#tab=law)).

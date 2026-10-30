@@ -10,7 +10,7 @@
    A page can tell its own story by defining window.jdpiDocumentary = { title, story() } where story() is an async
    generator yielding { text, el?, focus? } steps and { chapterEnd: true, label } pauses ("Continue Reading" or, with
    autoplay, an automatic pause). Such pages get the reader in any module; without one, the page's headings and
-   paragraphs are read in order (offered in Retrospective Intelligence).
+   paragraphs are read in order (offered in Retrospective Geopolitics).
    Map focus: each step may say where it is. A step's focus ({ countries, points, bbox, qids, padding } or { reset: true };
    null leaves the map as it is) is sent to the page as the window event 'prp:focus', which a map page answers by
    highlighting those places and zooming to fit them all (design/prp-focus.js). A step without focus is offered to the

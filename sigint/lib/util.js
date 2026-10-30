@@ -82,7 +82,7 @@ export function mixedContentProblem(url, pageProtocol) {
   let u;
   try { u = new URL(url); } catch { return 'That is not a valid URL.'; }
   if (!/^https?:$/.test(u.protocol)) return 'Use an http:// or https:// address.';
-  if (pageProtocol === 'https:' && u.protocol === 'http:' && hostKind(url) === 'public') return 'This page is served over HTTPS, so browsers block plain-HTTP addresses on the internet. Use https://, or reach it through the PRP bridge on localhost.';
+  if (pageProtocol === 'https:' && u.protocol === 'http:' && hostKind(url) === 'public') return 'This page is served over HTTPS, so browsers block plain-HTTP addresses on the internet. Use https://, or reach it through the Vitruvian Manager bridge on localhost.';
   return '';
 }
 

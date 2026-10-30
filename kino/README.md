@@ -1,8 +1,8 @@
 # Kino
 
-Kino is PRP's fifth module: preprogrammed documentaries on wars, political events, parties, people and thinkers,
+Kino is Vitruvian Manager's fifth module: preprogrammed documentaries on wars, political events, parties, people and thinkers,
 narrated over simple looping animations (maps, timelines, portraits, quotations, charts) and linked scene by scene to
-the exact place in PRP's other submodules that tells the same story.
+the exact place in Vitruvian Manager's other submodules that tells the same story.
 
 One page, six submodules. `kino/index.html?cat=<category>` is the catalogue and player for one category:
 
@@ -90,7 +90,7 @@ publisher or title.
 {
   "id": "poland",                           // unique in the documentary; used in deep links (&s=poland)
   "title": "The invasion of Poland, September 1939",
-  "narration": "Two to five sentences in PRP's own words …",
+  "narration": "Two to five sentences in Vitruvian Manager's own words …",
   "visual": { "kind": "map", … },           // see below
   "focus": {                                // optional (required for maps): what the stage shows and zooms to
     "countries": ["POL", "DEU"],            // ISO 3166-1 alpha-3; also SUN, YUG, CSK (drawn as their successors)
@@ -170,7 +170,7 @@ The chapter list shows the parts; the quiz appears under the player when the cou
 ## Writing a documentary
 
 - **Facts** come from Wikidata and the scholarly works the script cites; verify every work exists before citing it.
-  **Write in PRP's own words**: never copy a source's sentences. Quotations are short, attributed and from a
+  **Write in Vitruvian Manager's own words**: never copy a source's sentences. Quotations are short, attributed and from a
   primary source you cite (Hansard, a treaty text, a speech transcript).
 - **Plain British English**, a measured documentary tone, balanced and non-partisan. Where historians disagree, say so
   and cite both sides. No glorification of violence; no graphic detail.

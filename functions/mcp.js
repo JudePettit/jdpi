@@ -38,12 +38,12 @@ export async function onRequest({ request, env }) {
   const method = request.method;
   if (method === 'OPTIONS') return new Response(null, { status: 204, headers: { ...CORS, 'Cache-Control': 'max-age=86400' } });
   if (method !== 'POST') {
-    return json(405, { error: 'This is PRP\'s MCP endpoint (Streamable HTTP, stateless). POST JSON-RPC 2.0 messages to it; it offers no event stream.', docs: DOCS, connect: 'claude mcp add --transport http prp https://jdpi.pages.dev/mcp' },
+    return json(405, { error: 'This is Vitruvian Manager\'s MCP endpoint (Streamable HTTP, stateless). POST JSON-RPC 2.0 messages to it; it offers no event stream.', docs: DOCS, connect: 'claude mcp add --transport http prp https://jdpi.pages.dev/mcp' },
       { Allow: 'POST, OPTIONS', 'Cache-Control': 'no-store' });
   }
 
   const wait = await rateLimit(request, env, { limit: 120, scope: 'mcp' });
-  if (wait) return rpcError(429, -32000, `Too many requests: PRP allows about 120 a minute per client. Try again in ${wait} s, or run the local server (integration/mcp/prp-mcp.mjs).`, { 'Retry-After': String(wait) });
+  if (wait) return rpcError(429, -32000, `Too many requests: Vitruvian Manager allows about 120 a minute per client. Try again in ${wait} s, or run the local server (integration/mcp/prp-mcp.mjs).`, { 'Retry-After': String(wait) });
 
   const version = request.headers.get('mcp-protocol-version');
   if (version && !PROTOCOL_VERSIONS.includes(version)) return rpcError(400, -32600, `Unsupported MCP-Protocol-Version ${version}. Supported: ${PROTOCOL_VERSIONS.join(', ')}.`);
@@ -75,7 +75,7 @@ export async function onRequest({ request, env }) {
       const isCall = m && typeof m === 'object' && m.jsonrpc === '2.0' && m.method === 'tools/call' && Object.prototype.hasOwnProperty.call(m, 'id');
       if (isCall && ++toolCalls > MAX_TOOL_CALLS) {
         const ok = typeof m.id === 'string' || (typeof m.id === 'number' && Number.isFinite(m.id));
-        res.push({ jsonrpc: '2.0', id: ok ? m.id : null, error: { code: -32000, message: `Server error: PRP's remote server runs ${MAX_TOOL_CALLS === 1 ? 'one tools/call' : `${MAX_TOOL_CALLS} tools/call messages`} per request. Send the others as separate requests.` } });
+        res.push({ jsonrpc: '2.0', id: ok ? m.id : null, error: { code: -32000, message: `Server error: Vitruvian Manager's remote server runs ${MAX_TOOL_CALLS === 1 ? 'one tools/call' : `${MAX_TOOL_CALLS} tools/call messages`} per request. Send the others as separate requests.` } });
         continue;
       }
       const r = await prp.handleMessage(m); if (r) res.push(r);

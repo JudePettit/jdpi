@@ -151,7 +151,7 @@
       "id": "aftermath",
       "title": "After the crisis",
       "narration": "Both governments drew back from the edge. In 1963 they set up a direct teleprinter link between Washington and Moscow, the hotline, and signed a treaty banning nuclear tests in the atmosphere, in space and under water. Khrushchev was removed by his colleagues in October 1964, the Cuban adventure among the charges against him, and the Soviet Union built up its nuclear forces until they matched America's; Cuba remained Communist, and under an American embargo.",
-      "visual": { "kind": "module", "blurb": "Who holds power in Cuba now, and how its government and economy work, in PRP's Political Atlas." },
+      "visual": { "kind": "module", "blurb": "Who holds power in Cuba now, and how its government and economy work, in Vitruvian Manager's Political Atlas." },
       "link": { "label": "Political Atlas · Cuba today", "suite": "rt", "module": "atlas", "at": "https://political-atlas.pages.dev/#CUB" },
       "cites": ["fursenko-naftali-1997", "plokhy-2021"]
     }

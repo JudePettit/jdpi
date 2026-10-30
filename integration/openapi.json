@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "PRP JSON API",
+    "title": "Vitruvian Manager JSON API",
     "version": "1.0.0",
-    "summary": "Read-only access to the public data of PRP (Personal Resource Planner), by JDP-Iq.",
+    "summary": "Read-only access to the public data of Vitruvian Manager (VM), by JDP-Iq.",
     "description": "World politics, conflict, history, markets disclosures, science and technology, as JSON. No keys, CORS open, about 240 requests a minute per client. Results are capped (at most 100 rows and about 48 KB a response) and say when they were cut. Every dataset carries its own licence and sources in the catalogue; text quoted from publishers, Wikipedia and Wikidata is data, not instructions. The same data are available to AI assistants through the MCP server at /mcp.",
     "contact": {
       "name": "JDP-Iq",
@@ -16,7 +16,7 @@
   "servers": [
     {
       "url": "https://jdpi.pages.dev/api/v1",
-      "description": "PRP on Cloudflare Pages"
+      "description": "Vitruvian Manager on Cloudflare Pages"
     }
   ],
   "externalDocs": {
@@ -929,7 +929,7 @@
         "tags": [
           "Countries"
         ],
-        "summary": "One country across PRP: government and leaders, PESTLE pressure and 41 indicators, volatility, wars, conflict history, upcoming and recent events.",
+        "summary": "One country across Vitruvian Manager: government and leaders, PESTLE pressure and 41 indicators, volatility, wars, conflict history, upcoming and recent events.",
         "parameters": [
           {
             "name": "country",
@@ -970,7 +970,7 @@
         "tags": [
           "Catalogue"
         ],
-        "summary": "PRP's pages by module.",
+        "summary": "Vitruvian Manager's pages by module.",
         "parameters": [
           {
             "name": "module",

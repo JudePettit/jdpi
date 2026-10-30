@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
-<title>Encyclopaedia · PRP</title>
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<title>Encyclopaedia · VM</title>
 <meta name="description" content="Every person, place, war, party and idea in PRP, with Boolean tag filters and links to everywhere each one appears.">
 <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
@@ -93,7 +93,7 @@ main{min-width:0}
 <div class="wrap">
   <header class="head">
     <div class="front">
-      <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Intelligence <span class="sep">·</span> Encyclopaedia</span></p>
+      <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Encyclopaedia</span></p>
       <h1 class="prp-title">Encyclopaedia</h1>
       <p class="prp-dek">Every person, place, war, party and idea that appears in PRP, and everywhere it appears. Filter with a Boolean tag query or the facets, or go straight to an entry.</p>
       <p class="prp-meta" id="meta">Loading…</p>
@@ -147,7 +147,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const LAKE = '../lake/data/', SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
-// Every submodule's module in PRP (registry.json): rt Realtime Intelligence, rs Retrospective Intelligence,
+// Every submodule's module in Vitruvian Manager (registry.json): rt Realtime Geopolitics, rs Retrospective Geopolitics,
 // mm Money Management, ns Natural Science. Old ids (q, hp, fe) are not used here any more.
 const MODULE_SUITE = {
   briefing: 'rt', headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',

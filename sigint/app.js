@@ -1,4 +1,4 @@
-// SIGINT Dashboard (i-Spy). Entry module: in-page tabs kept in the URL (#tab=…), the location setting,
+// SIGINT Dashboard (International Mystery Management). Entry module: in-page tabs kept in the URL (#tab=…), the location setting,
 // shared settings, feed status, and views loaded when their tab first opens. Views poll only while visible.
 import { store, esc } from './lib/util.js';
 import { maidenhead, fromMaidenhead, parseCoord, fmtLatLon } from './lib/geo.js';
@@ -110,7 +110,7 @@ async function select(tab, params = {}, { focusTab = false, fromHash = false } =
     const h = '#' + [...p].map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
     if (h !== location.hash) history.replaceState(null, '', h);
   }
-  document.title = `${tab === 'overview' ? '' : $(`#tab-${tab}`).textContent + ' · '}SIGINT Dashboard · PRP`;
+  document.title = `${tab === 'overview' ? '' : $(`#tab-${tab}`).textContent + ' · '}SIGINT Dashboard · VM`;
   let view = views.get(tab);
   if (!view) {
     try {

@@ -1,14 +1,14 @@
-# PRP datasets
+# Vitruvian Manager datasets
 
 Generated 2026-10-30 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
-## Realtime Intelligence
+## Realtime Geopolitics
 
 ### intelligence-briefing-stories
 
 Intelligence Briefing: stories. Every story from the Intelligence Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 4,920 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 5,309 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -22,7 +22,7 @@ Intelligence Briefing: publishers. The Intelligence Briefing's publishers with t
 
 ### headline-outlets
 
-Global Headline Tracker: outlets. The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself lives in a database, not in a static file, so it is not in this catalogue.)
+Global Headline Tracker: outlets. The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself, with lowbrow stories left out by the tracker's Highbrowse filter, lives in a database, not in a static file, so it is not in this catalogue.)
 
 - Rows: 296 · refresh: static · licence: List © JDP-Iq; feeds and articles belong to the outlets.
 - File: https://jdpi.pages.dev/integration/data/headline-outlets.json (records at `records`)
@@ -62,7 +62,7 @@ Realtime Battlefield: wars this year. Every armed conflict recorded so far in 20
 
 ### realtime-war-months
 
-Realtime Battlefield: war by month. Each war's deaths, events and civilian deaths month by month in 2026, with PRP's monthly note (change on the previous month, deadliest areas).
+Realtime Battlefield: war by month. Each war's deaths, events and civilian deaths month by month in 2026, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).
 
 - Rows: 531 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/realtime-war-months.json (records at `records`)
@@ -116,7 +116,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string)
 
-## Retrospective Intelligence
+## Retrospective Geopolitics
 
 ### political-calendar
 
@@ -128,7 +128,7 @@ Historical Calendar: political events since 1980. Political history from 1980 to
 
 ### encyclopaedia-entities
 
-Encyclopaedia: entities. Every person, place, party, election, war, event, idea and organisation in the PRP Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often PRP mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
+Encyclopaedia: entities. Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
 
 - Rows: 12,051 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
 - Files: https://jdpi.pages.dev/integration/data/encyclopaedia-entities/0.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/1.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/2.json (+12 more) (records at `records`)
@@ -196,7 +196,7 @@ Kardashev Tracker: humanity. World population, total energy capture and humanity
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 465 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 510 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean)
 
@@ -210,7 +210,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 ### congress-members
 
-Auto Trader: members of Congress who trade. Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades PRP read from their filings.
+Auto Trader: members of Congress who trade. Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.
 
 - Rows: 144 · refresh: weekly · licence: Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.
 - File: https://jdpi.pages.dev/integration/data/congress-members.json (records at `records`)
@@ -254,7 +254,7 @@ Auto Trader: famous investors' exits. Positions each famous investor held at the
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,133 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,089 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array)
 
@@ -296,7 +296,7 @@ Invention Timeline: institutions. Universities, laboratories, companies and acad
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 747 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 832 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array)
 
@@ -306,13 +306,13 @@ Digital Briefing: sources. The journals, preprint servers, institutions and news
 
 - Rows: 79 · refresh: 6-hourly · licence: Metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `sources`)
-- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `error` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `perDay` (number), `matched` (number)
+- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `perDay` (number), `matched` (number)
 
 ### prp-submodules
 
-PRP: modules and submodules. Every PRP submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.
+Vitruvian Manager: modules and submodules. Every Vitruvian Manager submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.
 
-- Rows: 35 · refresh: on change · licence: © JDP-Iq.
+- Rows: 36 · refresh: on change · licence: © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/prp-submodules.json (records at `records`)
 - Fields: `module` (string), `module_code` (string), `module_name` (string), `id` (string), `name` (string), `kind` (string), `status` (string), `private` (boolean), `url` (string), `planned_url` (string), `host` (string), `description` (string), `views` (array)
 
@@ -320,7 +320,7 @@ PRP: modules and submodules. Every PRP submodule: its module, kind, status, addr
 
 ### kino-documentaries
 
-Kino: documentaries and courses. Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the PRP submodules its scenes link to.
+Kino: documentaries and courses. Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the Vitruvian Manager submodules its scenes link to.
 
 - Rows: 18 · refresh: monthly · licence: Documentary texts and index © JDP-Iq; images from Wikimedia Commons, each under its own licence (kino/data/media.json).
 - File: https://jdpi.pages.dev/kino/data/index.json (records at `docs`)

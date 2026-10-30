@@ -1,4 +1,4 @@
-/* PRP Documentary mode — the reader, in the shell. Offered on Retrospective Intelligence submodules and on any page
+/* PRP Documentary mode — the reader, in the shell. Offered on Retrospective Geopolitics submodules and on any page
    that tells its own story (the courses, the calendars), wherever it sits.
    - Voice: the browser's speech synthesis, preferring a British English male voice (Edge's natural "Ryan" or
      "Thomas", Chrome's "Google UK English Male", Apple's "Daniel"); pace slowed slightly for a lecture feel.
@@ -244,7 +244,7 @@
     S.playing = true; S.stopFlag = false; setPlayButton();
     if (S.music) setMusic(true);
     const f = activeFrame();
-    if (!f) { $('#doc-sub').textContent = 'Open a Retrospective Intelligence submodule or a course to have it read to you.'; S.playing = false; setPlayButton(); return; }
+    if (!f) { $('#doc-sub').textContent = 'Open a Retrospective Geopolitics submodule or a course to have it read to you.'; S.playing = false; setPlayButton(); return; }
     S.frame = f; // the page being read: told to stop (and to clear its highlight and map focus) even after the route moves on
     if (fresh) { ask('start'); S.resume = null; }
     // Resuming after a pause repeats the passage that was interrupted.

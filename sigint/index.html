@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SIGINT Dashboard · PRP</title>
+<title>SIGINT Dashboard · VM</title>
 <meta name="description" content="Receive-only monitoring of public, unencrypted signals: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather, from public feeds or your own receivers, with a Software Cookbook, a Hardware Guide and the law.">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../design/prp.css">
 <link rel="stylesheet" href="styles.css">
 <script src="../design/prp-bar.js" data-suite="oi" data-module="sigint" data-shell="../" defer></script>
@@ -16,7 +16,7 @@
 <body>
 <div class="sg">
   <header class="front">
-    <div class="prp-eyebrow">i-Spy <span class="sep">·</span> SIGINT Dashboard</div>
+    <div class="prp-eyebrow">International Mystery Management <span class="sep">·</span> SIGINT Dashboard</div>
     <h1 class="prp-title">SIGINT Dashboard</h1>
     <p class="prp-dek">Receive-only monitoring of public, unencrypted signals: aircraft, ships, satellites, LoRa mesh nodes, satellite navigation and space weather. Every view works without hardware from public feeds and connects to your own receiver when you have one. Nothing here transmits, decrypts or listens to private communications.</p>
     <div class="prp-meta" id="meta">
@@ -76,8 +76,8 @@
       <div class="scroll"><table class="prp-table matrix">
         <thead><tr><th scope="col">Signal</th><th scope="col">Where</th><th scope="col">With no hardware (this page)</th><th scope="col">With a €30 RTL-SDR</th><th scope="col">With more</th></tr></thead>
         <tbody>
-          <tr><th scope="row"><button type="button" class="linkish" data-goto="aircraft">Aircraft (ADS-B)</button></th><td class="mono">1090 MHz</td><td>Live map and table of aircraft near you from adsb.lol (through the PRP proxy or bridge)</td><td>Your own receiver (readsb + tar1090); hear 150–250 km with an outdoor antenna; feed the aggregators</td><td>Filtered LNA, collinear on a mast, a Raspberry Pi feeding 24/7, MLAT</td></tr>
-          <tr><th scope="row"><button type="button" class="linkish" data-goto="ships">Ships (AIS)</button></th><td class="mono">161.975 / 162.025 MHz</td><td>Links to public ship maps; aisstream.io through the PRP bridge (free key)</td><td>AIS-catcher with a marine VHF antenna, if you can see the sea or a big river</td><td>Dedicated AIS antenna high up; share with aggregators</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="aircraft">Aircraft (ADS-B)</button></th><td class="mono">1090 MHz</td><td>Live map and table of aircraft near you from adsb.lol (through the Vitruvian Manager proxy or bridge)</td><td>Your own receiver (readsb + tar1090); hear 150–250 km with an outdoor antenna; feed the aggregators</td><td>Filtered LNA, collinear on a mast, a Raspberry Pi feeding 24/7, MLAT</td></tr>
+          <tr><th scope="row"><button type="button" class="linkish" data-goto="ships">Ships (AIS)</button></th><td class="mono">161.975 / 162.025 MHz</td><td>Links to public ship maps; aisstream.io through the Vitruvian Manager bridge (free key)</td><td>AIS-catcher with a marine VHF antenna, if you can see the sea or a big river</td><td>Dedicated AIS antenna high up; share with aggregators</td></tr>
           <tr><th scope="row"><button type="button" class="linkish" data-goto="satellites">Weather satellites</button></th><td class="mono">137 MHz · 1.7 GHz</td><td>Pass predictions for your location</td><td>Meteor-M LRPT images with a V-dipole and SatDump (NOAA APT ended in 2025)</td><td>QFH antenna and LNA; an L-band dish for METOP and FengYun HRPT; GOES HRIT in the Americas</td></tr>
           <tr><th scope="row"><button type="button" class="linkish" data-goto="satellites">ISS and amateur satellites</button></th><td class="mono">145 / 435 MHz</td><td>Passes, sky plots, downlink frequencies</td><td>Hear the ISS (145.800 MHz FM, SSTV events, APRS) and FM repeaters</td><td>Hand-held yagi; a QO-100 dish; an amateur licence to transmit</td></tr>
           <tr><th scope="row"><button type="button" class="linkish" data-goto="spaceweather">Space weather and HF</button></th><td class="mono">Data · 1–30 MHz</td><td>NOAA SWPC indices and WSPR spots near you</td><td>Decode WSPR and FT8 yourself (RTL-SDR V4 or V4L covers HF)</td><td>HF SDR (Airspy HF+, SDRplay) with an active loop; a KiwiSDR</td></tr>
@@ -93,14 +93,14 @@
       <div class="prp-panel-head"><h2 class="prp-h3" id="h-connect">Connect your own receivers</h2><a class="prp-btn sm" href="bridge/prp-bridge.mjs" download>Download prp-bridge.mjs</a></div>
       <div class="prp-panel-body connect-body">
         <div class="prp-prose small-prose">
-          <p>Decoders such as readsb, AIS-catcher, a Meshtastic radio or OpenWebRX publish JSON on your network, but a web page may only read it if the receiver allows it (CORS), and an HTTPS page may not load plain-HTTP addresses on your network at all. The <b>PRP bridge</b> is one small Node.js file with no dependencies that you run on your own computer: it listens on <code>localhost</code> only, fetches the endpoints you name (read-only), and passes them to this page with the right headers. It also relays the public aircraft feed and connects to aisstream.io for you, so your key never goes to a website.</p>
+          <p>Decoders such as readsb, AIS-catcher, a Meshtastic radio or OpenWebRX publish JSON on your network, but a web page may only read it if the receiver allows it (CORS), and an HTTPS page may not load plain-HTTP addresses on your network at all. The <b>Vitruvian Manager bridge</b> is one small Node.js file with no dependencies that you run on your own computer: it listens on <code>localhost</code> only, fetches the endpoints you name (read-only), and passes them to this page with the right headers. It also relays the public aircraft feed and connects to aisstream.io for you, so your key never goes to a website.</p>
         </div>
         <ol class="steps">
           <li>Install <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js</a> 22 or newer and download the bridge.</li>
           <li>Run it with your receivers’ addresses (built from the settings in each tab):
             <pre class="md-code" id="bridge-cmd"><code>node prp-bridge.mjs</code></pre>
             <button type="button" class="prp-btn sm" id="copy-bridge">Copy command</button></li>
-          <li>Turn on <label class="inline-check"><input type="checkbox" id="bridge-on"> Use the PRP bridge at</label> <input class="prp-input mono sm-input" id="bridge-url" value="http://localhost:8790" aria-label="Bridge address"> <button type="button" class="prp-btn sm" id="bridge-check">Check</button> <span class="prp-status" id="bridge-state">Off</span></li>
+          <li>Turn on <label class="inline-check"><input type="checkbox" id="bridge-on"> Use the Vitruvian Manager bridge at</label> <input class="prp-input mono sm-input" id="bridge-url" value="http://localhost:8790" aria-label="Bridge address"> <button type="button" class="prp-btn sm" id="bridge-check">Check</button> <span class="prp-status" id="bridge-state">Off</span></li>
           <li>The first time, Chrome and Edge ask to let this site “look for and connect to devices on your local network” (or “apps on this device”). Allow it for the bridge to work; you can withdraw it in the site settings.</li>
         </ol>
         <p class="hint">Without the bridge, a receiver on <code>localhost</code> works directly if it sends CORS headers (AIS-catcher and Meshtastic do; readsb’s web server can be told to; see the <button type="button" class="linkish" data-goto="cookbook" data-section="tar1090">cookbook</button>). Firefox and Safari block plain-HTTP addresses on your network from HTTPS pages: use the bridge there.</p>
@@ -258,7 +258,7 @@
           <div class="prp-prose small-prose">
             <p>Airliners broadcast how accurate their satellite position is (the <abbr title="Navigation Accuracy Category for Position">NACp</abbr> field in ADS-B). When many aircraft over one area suddenly report poor accuracy, someone is jamming GNSS there. Spoofing, where false signals move the computed position, shows up differently: aircraft tracks jump or circle impossibly.</p>
             <p>These maps cannot see where there are no aircraft, mix jamming with equipment faults at low percentages, and lag by hours to a day. Persistent interference has been widely reported around the Baltic Sea, the eastern Mediterranean, the Black Sea and parts of the Middle East: a useful indicator for conflict monitoring, never proof on its own of who is responsible.</p>
-            <p class="hint">Why only links: GPSJam’s data files don’t allow other websites to read them and carry no licence for re-use, so PRP sends you to the source instead of copying it.</p>
+            <p class="hint">Why only links: GPSJam’s data files don’t allow other websites to read them and carry no licence for re-use, so Vitruvian Manager sends you to the source instead of copying it.</p>
           </div>
         </div>
       </section>
@@ -338,7 +338,7 @@
             <li><a href="https://www.wsprnet.org/drupal/wsprnet/map" target="_blank" rel="noopener">WSPRnet</a> <span>Map of low-power WSPR beacon reports; the database behind wspr.live.</span></li>
             <li><a href="https://prop.kc2g.com/" target="_blank" rel="noopener">KC2G MUF map</a> <span>Maximum usable frequency from ionosondes, updated every 15 minutes.</span></li>
           </ul>
-          <p class="hint">PRP’s own read of WSPR spots near you is in <button type="button" class="linkish" data-goto="spaceweather">Space weather</button>.</p>
+          <p class="hint">Vitruvian Manager’s own read of WSPR spots near you is in <button type="button" class="linkish" data-goto="spaceweather">Space weather</button>.</p>
         </div>
       </section>
     </div>

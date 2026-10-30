@@ -87,7 +87,7 @@ export function buildPrompt(o) {
   const files = (ds.urls?.length ? ds.urls : [ds.url]).filter(Boolean).map(u => new URL(u, o.siteUrl).href);
   const errors = o.errors || [];
   const L = [];
-  L.push(`I am analysing a dataset from PRP (Personal Resource Planner, ${o.siteUrl}) in its Data Analytics workbench. Please help with my question at the end.`);
+  L.push(`I am analysing a dataset from Vitruvian Manager (by JDP-Iq, ${o.siteUrl}) in its Data Analytics workbench. Please help with my question at the end.`);
   L.push(DATA_NOTICE);
   L.push('', `## Dataset: ${one(ds.title, 160)}`);
   L.push(`id ${code(ds.id)} · ${[o.moduleName, o.submoduleName].filter(Boolean).map(x => one(x, 80)).join(' · ')}`);
@@ -118,10 +118,10 @@ export function buildPrompt(o) {
   if (n) L.push(`First ${n} rows as CSV:`, fence('csv', csv));
 
   L.push('', '## Reproduce');
-  if (o.link) L.push(`Open this analysis in PRP: ${o.link}`);
+  if (o.link) L.push(`Open this analysis in Vitruvian Manager: ${o.link}`);
   const m = mcpQuery(spec, o.types || {}, new Set(errors.map(e => e.step)));
   const did = spec.sql ? 0 : m.upTo;
-  L.push(`PRP has a read-only MCP server (set-up: ${o.hubUrl}). Its \`query_dataset\` tool filters, sorts, selects and pages rows, at most ${MCP_MAX_ROWS} per call; it does not derive, group or aggregate. ` +
+  L.push(`Vitruvian Manager has a read-only MCP server (set-up: ${o.hubUrl}). Its \`query_dataset\` tool filters, sorts, selects and pages rows, at most ${MCP_MAX_ROWS} per call; it does not derive, group or aggregate. ` +
     (did ? `It can repeat ${did === 1 ? 'step 1' : `steps 1–${did}`}:` : 'The starting call:'));
   L.push(fence('json', JSON.stringify(m.query).replace(SEPARATORS, c => '\\u' + c.charCodeAt(0).toString(16))));
   if (m.capped) L.push(`(It returns at most ${MCP_MAX_ROWS} rows a call; use offset to page.)`);

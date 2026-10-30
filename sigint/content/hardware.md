@@ -27,7 +27,7 @@ Prices are indicative EU retail prices including VAT in October 2026, rounded, f
 | Heltec WiFi LoRa 32 V3 / V4 | Meshtastic | €20–30 | ESP32-S3 + SX1262, screen, Wi-Fi (so it serves /json/nodes). |
 | LilyGO T-Beam | Meshtastic with GPS | €35–50 | GNSS and an 18650 battery holder; check polarity. |
 | RAK WisBlock starter kit (RAK4631) | Meshtastic, low power | €30–40 | nRF52840: weeks on a battery; Bluetooth and USB, no Wi-Fi. |
-| u-blox M8/M9/M10 USB receiver | GNSS, Web Serial in PRP | €12–30 | NMEA at 9600 baud out of the box; add an active patch antenna outdoors. |
+| u-blox M8/M9/M10 USB receiver | GNSS, Web Serial in Vitruvian Manager | €12–30 | NMEA at 9600 baud out of the box; add an active patch antenna outdoors. |
 | u-blox ZED-F9P board | Multi-band GNSS, RTK | €200–300 | L1 and L2/L5 signals; reports jamming and spoofing indicators (in u-blox’s own UBX messages). |
 | Analogue hand-held scanner | VHF/UHF listening | from €130 | Uniden BC125AT class. Digital (trunking) scanners cost €500+ and mostly suit US systems. |
 
@@ -101,22 +101,22 @@ Buy from the projects’ listed sellers ([nanovna.com](https://nanovna.com/), [t
 
 # How software and hardware fit together {#patterns}
 
-Six patterns cover almost every station. PRP’s connectors use the first three; the others are how bigger setups grow.
+Six patterns cover almost every station. Vitruvian Manager’s connectors use the first three; the others are how bigger setups grow.
 
-<figure class="dg" id="pattern-a"><div class="dg-wrap"><svg viewBox="0 0 860 160" role="img" aria-labelledby="dga-t"><title id="dga-t">Receiver, decoder, local web API, optional PRP bridge, PRP page</title><defs><marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
+<figure class="dg" id="pattern-a"><div class="dg-wrap"><svg viewBox="0 0 860 160" role="img" aria-labelledby="dga-t"><title id="dga-t">Receiver, decoder, local web API, optional Vitruvian Manager bridge, Vitruvian Manager page</title><defs><marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
 <rect class="dg-box" x="11" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="23" y="80">Antenna + SDR</text><text class="dg-s" x="23" y="100">RTL-SDR, Airspy,</text><text class="dg-s" x="23" y="116">a LoRa radio</text>
 <rect class="dg-box" x="188" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="200" y="80">Decoder</text><text class="dg-s" x="200" y="100">readsb, AIS-catcher,</text><text class="dg-s" x="200" y="116">OpenWebRX</text>
 <rect class="dg-box" x="365" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="377" y="80">Local web API</text><text class="dg-s" x="377" y="100">aircraft.json,</text><text class="dg-s" x="377" y="116">ships.json…</text>
-<rect class="dg-box alt" x="542" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="554" y="80">PRP bridge</text><text class="dg-s" x="554" y="100">localhost only;</text><text class="dg-s" x="554" y="116">adds CORS</text>
-<rect class="dg-box accent" x="719" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="731" y="80">PRP page</text><text class="dg-s" x="731" y="100">in your browser,</text><text class="dg-s" x="731" y="116">polls every 5–15 s</text>
+<rect class="dg-box alt" x="542" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="554" y="80">VM bridge</text><text class="dg-s" x="554" y="100">localhost only;</text><text class="dg-s" x="554" y="116">adds CORS</text>
+<rect class="dg-box accent" x="719" y="56" width="130" height="86" rx="6"/><text class="dg-t" x="731" y="80">VM page</text><text class="dg-s" x="731" y="100">in your browser,</text><text class="dg-s" x="731" y="116">polls every 5–15 s</text>
 <path class="dg-line" d="M141,99H185" marker-end="url(#ah-a)"/><text class="dg-m" x="163" y="92" text-anchor="middle">IQ</text>
 <path class="dg-line" d="M318,99H362" marker-end="url(#ah-a)"/><text class="dg-m" x="340" y="92" text-anchor="middle">msgs</text>
 <path class="dg-line" d="M495,99H539" marker-end="url(#ah-a)"/><text class="dg-m" x="517" y="92" text-anchor="middle">HTTP</text>
 <path class="dg-line" d="M672,99H716" marker-end="url(#ah-a)"/><text class="dg-m" x="694" y="92" text-anchor="middle">CORS</text>
 <path class="dg-line soft" d="M430,56V28H784V53" marker-end="url(#ah-a)"/><text class="dg-m" x="607" y="21" text-anchor="middle">direct, when the receiver sends CORS headers (AIS-catcher, Meshtastic)</text>
-</svg></div><figcaption><b>Figure H1.</b> Pattern (a): receiver → decoder → local JSON over HTTP → PRP. The decoder publishes JSON on your network; PRP reads it directly when the decoder allows other sites (CORS), otherwise through the PRP bridge on your computer.</figcaption></figure>
+</svg></div><figcaption><b>Figure H1.</b> Pattern (a): receiver → decoder → local JSON over HTTP → Vitruvian Manager. The decoder publishes JSON on your network; Vitruvian Manager reads it directly when the decoder allows other sites (CORS), otherwise through the Vitruvian Manager bridge on your computer.</figcaption></figure>
 
-<figure class="dg" id="pattern-b"><div class="dg-wrap"><svg viewBox="0 0 860 230" role="img" aria-labelledby="dgb-t"><title id="dgb-t">Feeders send data to aggregators; adsb.lol publishes an open API that PRP reads</title><defs><marker id="ah-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
+<figure class="dg" id="pattern-b"><div class="dg-wrap"><svg viewBox="0 0 860 230" role="img" aria-labelledby="dgb-t"><title id="dgb-t">Feeders send data to aggregators; adsb.lol publishes an open API that Vitruvian Manager reads</title><defs><marker id="ah-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
 <rect class="dg-box accent" x="10" y="20" width="135" height="50" rx="6"/><text class="dg-t" x="22" y="41">Your Pi feeder</text><text class="dg-s" x="22" y="59">readsb + feed clients</text>
 <rect class="dg-box" x="10" y="90" width="135" height="50" rx="6"/><text class="dg-t" x="22" y="111">Other feeders</text><text class="dg-s" x="22" y="129">volunteers nearby</text>
 <rect class="dg-box alt" x="10" y="160" width="135" height="50" rx="6"/><text class="dg-t" x="22" y="181">…thousands</text><text class="dg-s" x="22" y="199">worldwide</text>
@@ -126,18 +126,18 @@ Six patterns cover almost every station. PRP’s connectors use the first three;
 <path class="dg-line" d="M145,45H182" marker-end="url(#ah-b)"/><path class="dg-line" d="M145,45L182,112" marker-end="url(#ah-b)"/><path class="dg-line" d="M145,45L182,180" marker-end="url(#ah-b)"/>
 <path class="dg-line soft" d="M145,115L182,50"/><path class="dg-line soft" d="M145,115H182"/><path class="dg-line soft" d="M145,115L182,185"/><path class="dg-line soft" d="M145,185L182,55"/><path class="dg-line soft" d="M145,185L182,120"/><path class="dg-line soft" d="M145,185H182"/>
 <rect class="dg-box" x="370" y="20" width="140" height="50" rx="6"/><text class="dg-t" x="382" y="41">Public API</text><text class="dg-s" x="382" y="59">api.adsb.lol</text>
-<rect class="dg-box alt" x="550" y="20" width="135" height="50" rx="6"/><text class="dg-t" x="562" y="41">PRP proxy</text><text class="dg-s" x="562" y="59">or your bridge</text>
-<rect class="dg-box accent" x="725" y="20" width="125" height="50" rx="6"/><text class="dg-t" x="737" y="41">PRP Aircraft</text><text class="dg-s" x="737" y="59">map and table</text>
+<rect class="dg-box alt" x="550" y="20" width="135" height="50" rx="6"/><text class="dg-t" x="562" y="41">VM proxy</text><text class="dg-s" x="562" y="59">or your bridge</text>
+<rect class="dg-box accent" x="725" y="20" width="125" height="50" rx="6"/><text class="dg-t" x="737" y="41">VM Aircraft</text><text class="dg-s" x="737" y="59">map and table</text>
 <path class="dg-line" d="M325,45H367" marker-end="url(#ah-b)"/><path class="dg-line" d="M510,45H547" marker-end="url(#ah-b)"/><path class="dg-line" d="M685,45H722" marker-end="url(#ah-b)"/>
-<text class="dg-s" x="370" y="112">Feeders send raw messages to aggregators, and each aggregator</text><text class="dg-s" x="370" y="130">decides what to publish. adsb.lol publishes its merged data openly</text><text class="dg-s" x="370" y="148">under the ODbL, so PRP can show it (through a small proxy, because</text><text class="dg-s" x="370" y="166">the API sends no CORS headers). The others keep their data on their</text><text class="dg-s" x="370" y="184">own sites and apps, with free access in return for feeding.</text>
-</svg></div><figcaption><b>Figure H2.</b> Pattern (b): Raspberry Pi feeder → aggregators → public API → PRP. One feeder can send to several networks at once; what you get back depends on each network’s data policy.</figcaption></figure>
+<text class="dg-s" x="370" y="112">Feeders send raw messages to aggregators, and each aggregator</text><text class="dg-s" x="370" y="130">decides what to publish. adsb.lol publishes its merged data openly</text><text class="dg-s" x="370" y="148">under the ODbL, so VM can show it (through a small proxy, because</text><text class="dg-s" x="370" y="166">the API sends no CORS headers). The others keep their data on their</text><text class="dg-s" x="370" y="184">own sites and apps, with free access in return for feeding.</text>
+</svg></div><figcaption><b>Figure H2.</b> Pattern (b): Raspberry Pi feeder → aggregators → public API → Vitruvian Manager. One feeder can send to several networks at once; what you get back depends on each network’s data policy.</figcaption></figure>
 
 <figure class="dg" id="pattern-c"><div class="dg-wrap"><svg viewBox="0 0 860 170" role="img" aria-labelledby="dgc-t"><title id="dgc-t">USB devices connect straight into the browser through Web Serial or WebUSB</title><defs><marker id="ah-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
 <rect class="dg-box" x="10" y="12" width="180" height="44" rx="6"/><text class="dg-t" x="22" y="31">USB GNSS receiver</text><text class="dg-m" x="22" y="47">NMEA text</text>
 <rect class="dg-box" x="10" y="63" width="180" height="44" rx="6"/><text class="dg-t" x="22" y="82">Meshtastic radio</text><text class="dg-m" x="22" y="98">protobuf frames</text>
 <rect class="dg-box alt" x="10" y="114" width="180" height="44" rx="6"/><text class="dg-t" x="22" y="133">RTL-SDR (planned)</text><text class="dg-m" x="22" y="149">raw IQ samples</text>
 <rect class="dg-box" x="250" y="12" width="270" height="146" rx="6"/><text class="dg-t" x="266" y="38">Your browser (Chrome, Edge)</text><text class="dg-s" x="266" y="62">Web Serial: GNSS, Meshtastic</text><text class="dg-s" x="266" y="80">WebUSB: RTL-SDR (planned)</text><text class="dg-s" x="266" y="108">You pick the device in a prompt;</text><text class="dg-s" x="266" y="126">the page can’t see anything else.</text>
-<rect class="dg-box accent" x="590" y="48" width="260" height="74" rx="6"/><text class="dg-t" x="606" y="76">PRP decodes in the page</text><text class="dg-s" x="606" y="96">No server and nothing uploaded</text>
+<rect class="dg-box accent" x="590" y="48" width="260" height="74" rx="6"/><text class="dg-t" x="606" y="76">VM decodes in the page</text><text class="dg-s" x="606" y="96">No server and nothing uploaded</text>
 <path class="dg-line" d="M190,34H247" marker-end="url(#ah-c)"/><path class="dg-line" d="M190,85H247" marker-end="url(#ah-c)"/><path class="dg-line soft" d="M190,136H247" marker-end="url(#ah-c)"/><text class="dg-m" x="219" y="27" text-anchor="middle">USB</text>
 <path class="dg-line" d="M520,85H587" marker-end="url(#ah-c)"/>
 </svg></div><figcaption><b>Figure H3.</b> Pattern (c): browser-direct. Chrome and Edge on desktop can talk to a USB serial device (Web Serial) or a USB device (WebUSB) after you choose it, so a GNSS receiver or a Meshtastic radio needs no software at all. Firefox and Safari don’t support this.</figcaption></figure>
@@ -147,11 +147,11 @@ Six patterns cover almost every station. PRP’s connectors use the first three;
 <rect class="dg-box" x="10" y="100" width="150" height="50" rx="6"/><text class="dg-t" x="22" y="121">Meshtastic gateway</text><text class="dg-s" x="22" y="139">mesh → MQTT uplink</text>
 <rect class="dg-box" x="225" y="45" width="175" height="80" rx="6"/><text class="dg-t" x="239" y="69">MQTT broker</text><text class="dg-s" x="239" y="89">Mosquitto on a Pi</text><text class="dg-m" x="239" y="108">rtl_433/…  msh/…</text>
 <rect class="dg-box" x="460" y="45" width="165" height="80" rx="6"/><text class="dg-t" x="474" y="69">Subscriber</text><text class="dg-s" x="474" y="89">Node-RED, Home</text><text class="dg-s" x="474" y="106">Assistant, a script</text>
-<rect class="dg-box accent" x="685" y="45" width="165" height="80" rx="6"/><text class="dg-t" x="699" y="69">Dashboard</text><text class="dg-s" x="699" y="89">PRP (via JSON),</text><text class="dg-s" x="699" y="106">Grafana, Home Asst.</text>
+<rect class="dg-box accent" x="685" y="45" width="165" height="80" rx="6"/><text class="dg-t" x="699" y="69">Dashboard</text><text class="dg-s" x="699" y="89">VM (via JSON),</text><text class="dg-s" x="699" y="106">Grafana, Home Asst.</text>
 <path class="dg-line" d="M160,45L222,72" marker-end="url(#ah-d)"/><path class="dg-line" d="M160,125L222,98" marker-end="url(#ah-d)"/><text class="dg-m" x="190" y="92" text-anchor="middle">publish</text>
 <path class="dg-line" d="M400,85H457" marker-end="url(#ah-d)"/><text class="dg-m" x="429" y="78" text-anchor="middle">subscribe</text>
 <path class="dg-line" d="M625,85H682" marker-end="url(#ah-d)"/><text class="dg-m" x="654" y="78" text-anchor="middle">HTTP</text>
-</svg></div><figcaption><b>Figure H4.</b> Pattern (d): a message bus. Decoders publish to an MQTT broker; anything can subscribe. A small subscriber can expose the latest values as JSON for PRP (through the bridge) or feed Home Assistant and Grafana. Keep only your own devices’ data.</figcaption></figure>
+</svg></div><figcaption><b>Figure H4.</b> Pattern (d): a message bus. Decoders publish to an MQTT broker; anything can subscribe. A small subscriber can expose the latest values as JSON for Vitruvian Manager (through the bridge) or feed Home Assistant and Grafana. Keep only your own devices’ data.</figcaption></figure>
 
 <figure class="dg" id="pattern-e"><div class="dg-wrap"><svg viewBox="0 0 860 160" role="img" aria-labelledby="dge-t"><title id="dge-t">Record IQ to a file, then analyse offline</title><defs><marker id="ah-e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" class="dg-head"/></marker></defs>
 <rect class="dg-box" x="10" y="30" width="140" height="80" rx="6"/><text class="dg-t" x="22" y="54">SDR</text><text class="dg-s" x="22" y="74">any receiver</text>
@@ -253,4 +253,4 @@ Signals you can lawfully receive are open sources. In investigations they are ev
 - **GNSS interference as an indicator.** Persistent jamming or spoofing in GPSJam or Flightradar24 maps often tracks military activity and conflict zones. It is a lead: interference has many sources, and the maps can’t say who is responsible.
 - **Space weather and HF.** When a radio link or GNSS service fails, check **Space weather** before suspecting anything else: flares and storms cause outages too.
 
-Method matters more than tools: record what you saw, when and from which source; grade how reliable each source is; and look for independent confirmation. PRP’s [OSINT Training](#/oi/osint-training) course covers the intelligence cycle, source grading, verification and geolocation, with exercises.
+Method matters more than tools: record what you saw, when and from which source; grade how reliable each source is; and look for independent confirmation. Vitruvian Manager’s [OSINT Training](#/oi/osint-training) course covers the intelligence cycle, source grading, verification and geolocation, with exercises.

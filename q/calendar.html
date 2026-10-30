@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml"><title>Realtime Calendar · PRP</title>
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml"><title>Realtime Calendar · VM</title>
 <script src="observability-config.js"></script><script src="observability.js" data-module="Political Calendar"></script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="rt" data-module="calendar" data-shell="../" defer></script>
-<script>(function(){var h=(new URLSearchParams(location.search).get('period')||'contemporary')!=='contemporary',r=document.documentElement,s=document.querySelector('script[src*="prp-bar.js"]');r.dataset.period=h?'history':'contemporary';if(h){s.dataset.suite='rs';s.dataset.module='historical-calendar';r.dataset.suite='rs';document.title='Historical Calendar · PRP'}else document.title='Realtime Calendar · PRP'})();</script>
+<script>(function(){var h=(new URLSearchParams(location.search).get('period')||'contemporary')!=='contemporary',r=document.documentElement,s=document.querySelector('script[src*="prp-bar.js"]');r.dataset.period=h?'history':'contemporary';if(h){s.dataset.suite='rs';s.dataset.module='historical-calendar';r.dataset.suite='rs';document.title='Historical Calendar · VM'}else document.title='Realtime Calendar · VM'})();</script>
 <style>
 *{box-sizing:border-box}[hidden]{display:none!important}
 button,input{font:inherit}button{cursor:pointer}
@@ -159,12 +159,12 @@ button,input{font:inherit}button{cursor:pointer}
 <body>
 <main class="page">
   <header>
-    <div class="prp-eyebrow" id="hero-eyebrow">Realtime Intelligence <span class="sep">·</span> Realtime Calendar</div>
+    <div class="prp-eyebrow" id="hero-eyebrow">Realtime Geopolitics <span class="sep">·</span> Realtime Calendar</div>
     <h1 class="prp-title" id="hero-title">Realtime Calendar</h1>
     <p class="prp-dek" id="hero-text">Upcoming elections, referendums and summits, and the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests, parliamentary votes, court rulings, sanctions and more. See a month or a whole year, for every country or just the ones you highlight.</p>
     <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span>Events updated <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Status of the daily data build"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Daily build · checking</span></span><span class="source-health-note" id="calendar-source-note"></span></span><span class="rt-only">Now <b id="clock"></b></span></div>
   </header>
-  <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Intelligence <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
+  <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Geopolitics <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
   <div class="prp-tabs" role="tablist" aria-label="Calendar views">
     <button type="button" role="tab" class="viewbtn active" id="tab-month" data-view="month" aria-controls="calpanel" aria-selected="true">Month</button>
     <button type="button" role="tab" class="viewbtn" id="tab-year" data-view="year" aria-controls="calpanel" aria-selected="false" tabindex="-1">Year</button>
@@ -229,7 +229,7 @@ const SHAPES = ['', 'sq', 'dia'];
 for (const f of FAMILIES) f.types.forEach((t, i) => Object.assign(TYPES[t], { family: f.id, colour: f.colour, shape: SHAPES[i] }));
 const TYPE_ORDER = FAMILIES.flatMap(f => f.types);
 const params = new URLSearchParams(location.search);
-// "contemporary" = Realtime Calendar (Realtime Intelligence). Anything else = the Historical Calendar (Retrospective
+// "contemporary" = Realtime Calendar (Realtime Geopolitics). Anything else = the Historical Calendar (Retrospective
 // Intelligence): one archive from 1980 to today. Old decade links (?period=1990s) still work and open that decade's first month.
 const requestedPeriod = params.get('period') || 'contemporary';
 const activePeriod = requestedPeriod === 'contemporary' ? 'contemporary' : 'history';

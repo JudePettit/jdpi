@@ -3,8 +3,8 @@ import { store, fetchWithTimeout, fetchJSON, localFetchOptions, isoDay } from '.
 
 /* ---- Public ADS-B: adsb.lol ------------------------------------------------------------------------------------------
    adsb.lol sends no CORS headers, so a browser can't read it directly. Routes, in order:
-     1. the PRP proxy on this site (a Cloudflare Pages Function, sigint/edge/adsb-proxy.js, if the site deploys it),
-     2. the PRP bridge on this computer (its /public/adsb.lol relay),
+     1. the Vitruvian Manager proxy on this site (a Cloudflare Pages Function, sigint/edge/adsb-proxy.js, if the site deploys it),
+     2. the Vitruvian Manager bridge on this computer (its /public/adsb.lol relay),
      3. direct, in case adsb.lol enables CORS later.
    The winning route is remembered for the session. */
 export const ADSB_PROXY_PATH = '/api/sigint/adsb';
@@ -13,8 +13,8 @@ export const adsbRouteNow = () => adsbRoute;
 export function adsbCandidates(ctx, lat, lon, nm) {
   const path = `v2/point/${lat.toFixed(3)}/${lon.toFixed(3)}/${Math.max(1, Math.min(250, Math.round(nm)))}`;
   const out = [];
-  if (/^https?:$/.test(location.protocol)) out.push({ id: 'proxy', label: 'PRP proxy', url: `${location.origin}${ADSB_PROXY_PATH}/${path}` });
-  if (ctx.bridge.on) out.push({ id: 'bridge', label: 'PRP bridge', url: `${ctx.bridge.url}/public/adsb.lol/${path}` });
+  if (/^https?:$/.test(location.protocol)) out.push({ id: 'proxy', label: 'Vitruvian Manager proxy', url: `${location.origin}${ADSB_PROXY_PATH}/${path}` });
+  if (ctx.bridge.on) out.push({ id: 'bridge', label: 'Vitruvian Manager bridge', url: `${ctx.bridge.url}/public/adsb.lol/${path}` });
   out.push({ id: 'direct', label: 'adsb.lol direct', url: `https://api.adsb.lol/${path}` });
   return out;
 }

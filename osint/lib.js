@@ -1113,7 +1113,7 @@ export function sourcesMarkdown(c) {
 
 /** A Markdown write-up of a case that importMarkdown reads back. */
 export function exportMarkdown(c, now = new Date()) {
-  const L = [`# Case: ${c.title}`, '', `Exported from the PRP OSINT Dashboard on ${utcLabel(now)}. ${c.items.length} item${c.items.length === 1 ? '' : 's'}. Grades use the Admiralty (NATO) system: a letter for the source's reliability (A–F) and a number for the information's credibility (1–6).`, ''];
+  const L = [`# Case: ${c.title}`, '', `Exported from the Vitruvian Manager OSINT Dashboard on ${utcLabel(now)}. ${c.items.length} item${c.items.length === 1 ? '' : 's'}. Grades use the Admiralty (NATO) system: a letter for the source's reliability (A–F) and a number for the information's credibility (1–6).`, ''];
   c.items.forEach((i, k) => {
     L.push(`## ${k + 1}. ${short(i.claim || i.url, 120)}`);
     L.push(`- Claim: ${clean(i.claim)}`);

@@ -53,7 +53,7 @@ async function sample() {
   g.fillStyle = tok('--prp-surface-3'); g.beginPath(); g.moveTo(430, 250); g.lineTo(480, 200); g.lineTo(530, 250); g.fill(); // pediment
   g.beginPath(); g.arc(480, 175, 34, Math.PI, 0); g.fill(); g.fillRect(470, 120, 20, 30); // dome and drum
   g.fillStyle = tok('--prp-text'); g.font = '600 22px system-ui, sans-serif';
-  g.fillText('PRP sample image: not a real photograph', 24, 40);
+  g.fillText('Vitruvian Manager sample image: not a real photograph', 24, 40);
   g.font = '16px system-ui, sans-serif'; g.fillText('Generated in your browser, with metadata for a public place', 24, 66);
   const blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.85));
   const bytes = insertExif(new Uint8Array(await blob.arrayBuffer()), sampleExif());

@@ -1,4 +1,4 @@
-// Kino (PRP's documentary module): the script format, links into PRP, sources, the built data, the speech rules and
+// Kino (Vitruvian Manager's documentary module): the script format, links into the suite, sources, the built data, the speech rules and
 // the validator itself. The page tests run when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787), and never with
 // PRP_PAGES=0 (the refresh workflows' check before they commit).
 import { test } from 'node:test';

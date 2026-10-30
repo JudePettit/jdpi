@@ -161,7 +161,7 @@
         {
           "id": "realism",
           "title": "Machiavelli and political realism",
-          "narration": "Students of international relations count Machiavelli, with Thucydides and Thomas Hobbes, among the founders of realism, the view that states are, and should be, guided by power and interest rather than by moral ideals. Modern realists from Hans Morgenthau to John Mearsheimer place themselves in that tradition, while their critics argue that it underrates law, institutions and ideas. PRP's Learning course on politics follows the argument to the present day.",
+          "narration": "Students of international relations count Machiavelli, with Thucydides and Thomas Hobbes, among the founders of realism, the view that states are, and should be, guided by power and interest rather than by moral ideals. Modern realists from Hans Morgenthau to John Mearsheimer place themselves in that tradition, while their critics argue that it underrates law, institutions and ideas. Vitruvian Manager's Learning course on politics follows the argument to the present day.",
           "visual": { "kind": "module", "blurb": "The realist tradition today: John Mearsheimer's offensive realism and its critics." },
           "link": { "label": "Learning · Politics: John Mearsheimer's offensive realism", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=john-mearsheimer-s-offensive-realism" },
           "cites": ["doyle-1997", "najemy-2010"]

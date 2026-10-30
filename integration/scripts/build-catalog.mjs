@@ -115,7 +115,7 @@ const UNDESCRIBED = 'Not yet described in the catalogue (a field the source has 
 const spec = s => SPECS.push(s);
 const genOf = p => { try { const j = J(p); return day(j.generated || j.day || null); } catch { return null; } };
 
-// ---- Realtime Intelligence ------------------------------------------------------------------------------------
+// ---- Realtime Geopolitics -------------------------------------------------------------------------------------
 const BRIEF = has('briefing/data/latest.json') ? J('briefing/data/latest.json') : null;
 const POSITION = { far_left: 'Far left', left: 'Left', centre: 'Centre', right: 'Right', far_right: 'Far right' };
 if (BRIEF) {
@@ -141,7 +141,7 @@ if (BRIEF) {
 
 spec({
   id: 'headline-outlets', title: 'Global Headline Tracker: outlets', module: 'rt', submodule: 'headlines',
-  description: 'The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself lives in a database, not in a static file, so it is not in this catalogue.)',
+  description: 'The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads. (The daily top-story archive itself, with lowbrow stories left out by the tracker\'s Highbrowse filter, lives in a database, not in a static file, so it is not in this catalogue.)',
   derive: () => Object.entries(J('headlines/outlets.json')).flatMap(([cc, list]) => (Array.isArray(list) ? list : []).map(o => ({ country: cc, iso3: iso3Of(cc), outlet: o.name, home: o.home || null, rss: o.rss || null, via: o.via || null }))),
   from: ['headlines/outlets.json'], refresh: 'static', updatedFrom: 'headlines/outlets.json',
   licence: 'List © JDP-Iq; feeds and articles belong to the outlets.', sources: ['The outlets\' own RSS feeds, or Google News restricted to the outlet\'s site'],
@@ -190,16 +190,16 @@ spec({
   from: ['battlefield/data/realtime.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html',
   licence: bfLicence, sources: BF_SRC,
   fields: [['id', 'War id'], ['name', 'War'], ['zone', 'Region'], ['status', 'active, or quiet when no event in the last three months'], ['countries', 'Countries where fighting was recorded'], ['deaths', 'Best-estimate deaths this year'],
-    ['events', 'Recorded events this year'], ['deaths_last_3_months', 'Deaths in the last three recorded months'], ['last_active', 'Date of the last recorded event'], ['summary', 'One-line summary'], ['background', 'Plain-English background (PRP)'],
+    ['events', 'Recorded events this year'], ['deaths_last_3_months', 'Deaths in the last three recorded months'], ['last_active', 'Date of the last recorded event'], ['summary', 'One-line summary'], ['background', 'Plain-English background (Vitruvian Manager)'],
     ['conflicts', 'UCDP conflicts grouped into this war'], ['wikipedia', 'Wikipedia article, if any']]
 });
 spec({
   id: 'realtime-war-months', title: 'Realtime Battlefield: war by month', module: 'rt', submodule: 'battlefield',
-  description: `Each war's deaths, events and civilian deaths month by month in ${BF.year}, with PRP's monthly note (change on the previous month, deadliest areas).`,
+  description: `Each war's deaths, events and civilian deaths month by month in ${BF.year}, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).`,
   derive: () => BF.wars.flatMap(w => (w.monthly || []).map(m => ({ war_id: w.id, war: w.name, zone: w.zone, month: m.month, deaths: m.deaths ?? 0, events: m.events ?? 0, civilians: m.civilians ?? 0, deadliest_place: m.places?.[0]?.place || null, note: m.text || null }))),
   from: ['battlefield/data/realtime.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'battlefield/data/realtime.json', page: 'q/battlefield.html?view=archive',
   licence: bfLicence, sources: BF_SRC,
-  fields: [['war_id', 'War id (realtime-wars)'], ['war', 'War'], ['zone', 'Region'], ['month', 'Month (YYYY-MM)'], ['deaths', 'Best-estimate deaths'], ['events', 'Recorded events'], ['civilians', 'Civilian deaths'], ['deadliest_place', 'Place with the most deaths that month'], ['note', 'Monthly note (PRP, from the events)']]
+  fields: [['war_id', 'War id (realtime-wars)'], ['war', 'War'], ['zone', 'Region'], ['month', 'Month (YYYY-MM)'], ['deaths', 'Best-estimate deaths'], ['events', 'Recorded events'], ['civilians', 'Civilian deaths'], ['deadliest_place', 'Place with the most deaths that month'], ['note', 'Monthly note (Vitruvian Manager, from the events)']]
 });
 spec({
   id: 'realtime-conflict-cells', title: 'Realtime Battlefield: events on a 0.1° grid', module: 'rt', submodule: 'battlefield',
@@ -278,7 +278,7 @@ spec({
   licence: calLicence, sources: calSources, fields: calFields
 });
 
-// ---- Retrospective Intelligence -------------------------------------------------------------------------------
+// ---- Retrospective Geopolitics --------------------------------------------------------------------------------
 spec({
   id: 'political-calendar', title: 'Historical Calendar: political events since 1980', module: 'rs', submodule: 'historical-calendar',
   description: 'Political history from 1980 to today and scheduled events ahead, one file per decade: elections and referendums, new leaders, inaugurations and resignations, coups, wars and ceasefires, assassinations, summits, treaties, sanctions, protests, parliamentary votes and court rulings, each with a plain-English account. The Realtime Calendar shows the same records for the current window.',
@@ -303,7 +303,7 @@ const lakeEntities = () => {
 const ENC_TYPE_ORDER = ['person', 'conflict', 'election', 'event', 'topic', 'party', 'place', 'idea', 'organisation'];
 spec({
   id: 'encyclopaedia-entities', title: 'Encyclopaedia: entities', module: 'rs', submodule: 'encyclopedia',
-  description: 'Every person, place, party, election, war, event, idea and organisation in the PRP Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often PRP mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
+  description: 'Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
   derive: () => lakeEntities().map(({ e, appears }) => {
     const f = e.facts || {}, rel = e.rel || {};
     const country = (rel.Country || rel.Citizenship || rel.Jurisdiction || [])[0];
@@ -311,10 +311,10 @@ spec({
       country: country ? country[1] : null, mentions: e.total || 0, appears_in: appears, wikipedia: wiki(e.wiki) };
   }).sort((a, b) => ENC_TYPE_ORDER.indexOf(a.type) - ENC_TYPE_ORDER.indexOf(b.type) || b.mentions - a.mentions || (a.qid < b.qid ? -1 : 1)),
   from: ['lake/data/index.json', 'lake/data/e/*.json'], refresh: 'monthly', updatedFrom: 'lake/data/manifest.json', page: 'encyclopedia/index.html', partitionBy: 'type',
-  licence: 'Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)', sources: ['Wikidata (CC0)', 'Every PRP submodule that mentions the entity'],
+  licence: 'Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)', sources: ['Wikidata (CC0)', 'Every Vitruvian Manager submodule that mentions the entity'],
   fields: [['qid', 'Wikidata id; the Encyclopaedia page is encyclopedia/index.html#<qid>'], ['label', 'Name'], ['type', LAKE_TYPES.join(', ')], ['description', 'Short description (Wikidata)'],
     ['start', 'Born, founded, held or started (as precise as Wikidata records it)'], ['end', 'Died, dissolved or ended'], ['country', 'Country, citizenship or jurisdiction (the first Wikidata gives)'],
-    ['mentions', 'How many times PRP mentions it'], ['appears_in', 'PRP submodule ids that mention it'], ['wikipedia', 'English Wikipedia article']]
+    ['mentions', 'How many times Vitruvian Manager mentions it'], ['appears_in', 'Vitruvian Manager submodule ids that mention it'], ['wikipedia', 'English Wikipedia article']]
 });
 
 const borders = J('battlefield/history/data/borders.topo.json');
@@ -404,7 +404,7 @@ const briefSpecs = (id, file, module, submodule, title, facetKey, refresh, sourc
   const itemKeys = new Set(d.items.flatMap(i => Object.keys(i)));
   const F = { id: 'Item id', title: 'Title', url: 'Link to the item at its publisher', source: `Source id; join to \`id\` in ${id}-sources`, kind: `Kind of source: ${Object.keys(d.kinds || {}).join(', ')}`, tier: `Source tier: ${Object.entries(d.tiers || {}).map(([k, v]) => `${k} ${v}`).join('; ')}`,
     [facetKey]: `${facetKey[0].toUpperCase() + facetKey.slice(1)} it is classed under (${facets})`, type: 'paper (research) or news', published: 'Publication time (ISO 8601, UTC)', summary: 'Short summary from the feed (the text remains the publisher\'s)', section: 'Publisher\'s section or journal heading',
-    doi: 'DOI, if any', authors: 'Authors, if given', also: 'Other outlets that carried the same item', undated: 'True when the feed gave no date (the time is when PRP first saw it)' };
+    doi: 'DOI, if any', authors: 'Authors, if given', also: 'Other outlets that carried the same item', undated: 'True when the feed gave no date (the time is when Vitruvian Manager first saw it)' };
   spec({
     id: `${id}-stories`, title: `${title}: stories and papers`, module, submodule,
     description: `Every paper and story in the ${title} over the last ${d.keepDays || 7} days, classed by ${facetKey} (${facets}) and by type (papers or news). Join \`source\` to ${id}-sources.`,
@@ -433,7 +433,7 @@ const OWNER = { self: 'self', JT: 'joint', SP: 'spouse', DC: 'dependent child' }
 const congLicence = 'Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.';
 spec({
   id: 'congress-members', title: 'Auto Trader: members of Congress who trade', module: 'mm', submodule: 'traders',
-  description: `Members of the US House of Representatives with Periodic Transaction Reports in ${CONG.years.join(' and ')}, with party, district and how many trades PRP read from their filings.`,
+  description: `Members of the US House of Representatives with Periodic Transaction Reports in ${CONG.years.join(' and ')}, with party, district and how many trades Vitruvian Manager read from their filings.`,
   derive: () => CONG.members.map(m => ({ id: m.id, name: m.name, party: m.party, district: m.district, state: (m.district || '').slice(0, 2) || null, bioguide: m.bioguide || null, filings: m.filings ?? 0, trades: m.trades ?? 0, unreadable_filings: m.unreadable ?? 0 })).sort((a, b) => b.trades - a.trades),
   from: ['traders/data/congress.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', licence: congLicence, sources: [CONG.source],
   fields: [['id', 'Member id (join to member in congress-trades)'], ['name', 'Member'], ['party', 'Party'], ['district', 'State and district, e.g. CA31'], ['state', 'State (USPS code)'], ['bioguide', 'Congressional Bioguide id'], ['filings', 'Filings read'], ['trades', 'Trades read from them'], ['unreadable_filings', 'Scanned paper filings linked but not read']]
@@ -456,7 +456,7 @@ spec({
   description: 'The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.',
   derive: () => INV.investors.map(i => ({ cik: i.cik, person: i.person, fund: i.fund, style: i.style || null, registered_name: i.registeredName || null, period: i.period || null, filed: i.filed || null, previous_period: i.previousPeriod || null, total_value: i.total ?? null, positions: (i.positions || []).length, sold_out: (i.sold || []).length, filing: i.filingUrl || null })),
   from: ['traders/data/investors.json'], refresh: 'weekly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', licence: invLicence, sources: invSources,
-  fields: [['cik', 'SEC CIK'], ['person', 'Investor'], ['fund', 'Fund'], ['style', 'Investment style (PRP)'], ['registered_name', 'Name on the filing'], ['period', 'Quarter end of the latest 13F'], ['filed', 'Filing date'], ['previous_period', 'Quarter end of the filing compared against'],
+  fields: [['cik', 'SEC CIK'], ['person', 'Investor'], ['fund', 'Fund'], ['style', 'Investment style (Vitruvian Manager)'], ['registered_name', 'Name on the filing'], ['period', 'Quarter end of the latest 13F'], ['filed', 'Filing date'], ['previous_period', 'Quarter end of the filing compared against'],
     ['total_value', 'Reported value of positions, US$'], ['positions', 'Positions held'], ['sold_out', 'Positions sold out since the previous filing'], ['filing', 'Filing index on EDGAR']]
 });
 spec({
@@ -487,7 +487,7 @@ spec({
   derive: () => PROG.events.map(e => ({ id: e.id, year: e.y, circa: !!e.ca, disciplines: (e.d || []).map(d => DISC.get(d) || d), title: e.t, note: e.n || null, qid: e.q || null, wikipedia: wiki(e.w), place: e.place?.n || null, place_qid: e.place?.q || null,
     lat: e.place?.lat ?? null, lon: e.place?.lon ?? null, position_basis: e.positionBasis || null, people: (e.people || []).map(q => PROG.people[q]?.name || q), people_qids: e.people || [], institutions: (e.inst || []).map(q => PROG.institutions[q]?.name || q) })),
   from: ['science/progress/data/events.json'], refresh: 'monthly', updatedFrom: 'science/progress/data/events.json', page: 'science/progress/index.html', licence: progLicence, sources: progSources,
-  fields: [['id', 'Event id'], ['year', 'Year (negative = BC)'], ['circa', 'True when the year is approximate'], ['disciplines', 'Disciplines'], ['title', 'Breakthrough'], ['note', 'One-line explanation (PRP)'], ['qid', 'Wikidata id'], ['wikipedia', 'Wikipedia article'],
+  fields: [['id', 'Event id'], ['year', 'Year (negative = BC)'], ['circa', 'True when the year is approximate'], ['disciplines', 'Disciplines'], ['title', 'Breakthrough'], ['note', 'One-line explanation (Vitruvian Manager)'], ['qid', 'Wikidata id'], ['wikipedia', 'Wikipedia article'],
     ['place', 'Where it happened'], ['place_qid', 'Wikidata id of the place'], ['lat', 'Latitude'], ['lon', 'Longitude'], ['position_basis', `How the place was chosen: ${Object.keys(PROG.basis).join(', ')}`], ['people', 'People involved'], ['people_qids', 'Their Wikidata ids (science-progress-people)'], ['institutions', 'Institutions involved']]
 });
 spec({
@@ -512,22 +512,22 @@ if (has('digital/briefing/data/stories.json')) {
   briefSpecs('digital-briefing', 'digital/briefing/data/stories.json', 'ds', 'digital-briefing', 'Digital Briefing', key, '6-hourly', 'RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources');
 }
 spec({
-  id: 'prp-submodules', title: 'PRP: modules and submodules', module: 'ds', submodule: 'integration-hub',
-  description: 'Every PRP submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.',
-  derive: () => REG.suites.flatMap(s => s.modules.map(m => ({ module: s.id, module_code: s.code, module_name: s.name, id: m.id, name: m.name, kind: m.kind, status: m.status, private: !!m.opensInNewTab || /Private\.?$/.test(m.description || ''),
+  id: 'prp-submodules', title: 'Vitruvian Manager: modules and submodules', module: 'ds', submodule: 'integration-hub',
+  description: 'Every Vitruvian Manager submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.',
+  derive: () => REG.suites.flatMap(s => s.modules.map(m => ({ module: s.id, module_code: s.code, module_name: s.title || s.name, id: m.id, name: m.name, kind: m.kind, status: m.status, private: !!m.opensInNewTab || /Private\.?$/.test(m.description || ''),
     url: m.url ? (/^https?:/.test(m.url) ? m.url : BASE_URL + m.url) : null, planned_url: m.pendingUrl ? BASE_URL + m.pendingUrl : null, host: m.host || null, description: m.description || null, views: (m.views || []).map(v => v.name) }))),
   from: ['registry.json'], refresh: 'on change', updated: TODAY, page: 'index.html', licence: '© JDP-Iq.', sources: ['registry.json'],
-  fields: [['module', 'Module id (rt, rs, mm, ns, ds, kino)'], ['module_code', 'Module code'], ['module_name', 'Module'], ['id', 'Submodule id'], ['name', 'Submodule'], ['kind', 'realtime, retrospective, reference, learning, operations or automation'], ['status', 'live, in-build or planned'],
+  fields: [['module', 'Module id (rt, rs, oi, mm, ns, ds, kino)'], ['module_code', 'Module code'], ['module_name', 'Module (its full title, as on its overview page)'], ['id', 'Submodule id'], ['name', 'Submodule'], ['kind', 'realtime, retrospective, reference, learning, operations or automation'], ['status', 'live, in-build or planned'],
     ['private', 'True for private submodules behind their own sign-in'], ['url', 'Address'], ['planned_url', 'Address once built (in-build submodules)'], ['host', 'Where it is hosted'], ['description', 'What it does'], ['views', 'Tabs inside the page']]
 });
 
 // ---- Kino -----------------------------------------------------------------------------------------------------
 spec({
   id: 'kino-documentaries', title: 'Kino: documentaries and courses', module: 'kino', submodule: 'kino-political-events', submodules: REG.suites.find(s => s.id === 'kino')?.modules.map(m => m.id) || [],
-  description: 'Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the PRP submodules its scenes link to.',
+  description: 'Every Kino documentary and Great Thinkers course: category, era, running time, subjects (Wikidata ids), scenes, parts, quiz questions, how many sources (and scholarly sources) it draws on, and the Vitruvian Manager submodules its scenes link to.',
   source: { urls: ['kino/data/index.json'], records: 'docs' }, refresh: 'monthly', page: 'kino/index.html', licence: 'Documentary texts and index © JDP-Iq; images from Wikimedia Commons, each under its own licence (kino/data/media.json).', sources: ['Scholarly books and articles listed in each documentary', 'Wikidata (CC0)', 'Wikimedia Commons'],
   fields: [['id', 'Documentary id'], ['title', 'Title'], ['category', 'Kino category (the submodule kino-<category>)'], ['era', '[first year, last year]'], ['minutes', 'Approximate running time, minutes'], ['summary', 'Summary'], ['subjects', 'Subjects, each {qid, label}'], ['scenes', 'Scenes'], ['parts', 'Parts (courses)'],
-    ['quiz', 'Quiz questions'], ['sources', 'Sources cited'], ['scholarly', 'Of those, scholarly'], ['links', 'PRP submodules the scenes link to (module/submodule)'], ['preview', 'Preview image: {kind, file, position}'], ['path', 'Script file under kino/data/']]
+    ['quiz', 'Quiz questions'], ['sources', 'Sources cited'], ['scholarly', 'Of those, scholarly'], ['links', 'Vitruvian Manager submodules the scenes link to (module/submodule)'], ['preview', 'Preview image: {kind, file, position}'], ['path', 'Script file under kino/data/']]
 });
 
 /* ------------------------------------------------------------------ build datasets */
@@ -610,9 +610,9 @@ const MODULE_ORDER = ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
 catalogue.sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module));
 const CATALOGUE = {
   generated: TODAY,
-  name: 'PRP data catalogue',
+  name: 'Vitruvian Manager data catalogue',
   publisher: 'JDP-Iq',
-  description: 'Every public dataset in PRP (Personal Resource Planner), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.',
+  description: 'Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.',
   site: BASE_URL, mcp: BASE_URL + 'mcp', api: BASE_URL + 'api/v1/', openapi: BASE_URL + 'integration/openapi.json', docs: BASE_URL + 'integration/', llms: BASE_URL + 'llms.txt',
   datasets: catalogue
 };
@@ -725,17 +725,17 @@ putJson('integration/data/query-index.json', {
 /* ------------------------------------------------------------------ ICS calendars */
 {
   const opts = { stamp: CAL_GENERATED };
-  put('integration/feeds/realtime-calendar.ics', toICS(CAL_EVENTS.filter(e => e.date >= RT_FROM && e.date <= RT_TO), { ...opts, name: 'PRP Realtime Calendar', description: `Political events from six months ago to eighteen months ahead (${RT_FROM} to ${RT_TO}), from PRP's Realtime Calendar.` }));
-  for (const c of CAL) put(`integration/feeds/historical-calendar-${c.decade}.ics`, toICS(c.data.events, { ...opts, name: `PRP Historical Calendar · ${c.decade}`, description: `Political events of the ${c.decade} from PRP's Historical Calendar.` }));
+  put('integration/feeds/realtime-calendar.ics', toICS(CAL_EVENTS.filter(e => e.date >= RT_FROM && e.date <= RT_TO), { ...opts, name: 'Vitruvian Manager Realtime Calendar', description: `Political events from six months ago to eighteen months ahead (${RT_FROM} to ${RT_TO}), from Vitruvian Manager's Realtime Calendar.` }));
+  for (const c of CAL) put(`integration/feeds/historical-calendar-${c.decade}.ics`, toICS(c.data.events, { ...opts, name: `Vitruvian Manager Historical Calendar · ${c.decade}`, description: `Political events of the ${c.decade} from Vitruvian Manager's Historical Calendar.` }));
 }
 
 /* ------------------------------------------------------------------ Claude skill */
 {
   const skillDir = 'integration/skill/prp-data';
-  const lines = ['# PRP datasets', '', `Generated ${TODAY} from ${BASE_URL}integration/catalog.json. Read the live catalogue for current row counts.`, ''];
+  const lines = ['# Vitruvian Manager datasets', '', `Generated ${TODAY} from ${BASE_URL}integration/catalog.json. Read the live catalogue for current row counts.`, ''];
   for (const m of MODULE_ORDER) {
     const list = catalogue.filter(d => d.module === m); if (!list.length) continue;
-    lines.push(`## ${{ rt: 'Realtime Intelligence', rs: 'Retrospective Intelligence', oi: 'i-Spy', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
+    lines.push(`## ${{ rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'International Mystery Management', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
     for (const d of list) {
       lines.push(`### ${d.id}`, '', `${d.title}. ${d.description}`, '', `- Rows: ${d.rows.toLocaleString('en-GB')} · refresh: ${d.refresh} · licence: ${d.licence}`, `- File${d.urls ? 's' : ''}: ${(d.urls || [d.url]).slice(0, 3).map(u => BASE_URL + u).join(', ')}${(d.urls || []).length > 3 ? ` (+${d.urls.length - 3} more)` : ''} (records at \`${d.records || '(root)'}\`)`,
         `- Fields: ${d.fields.map(f => `\`${f.name}\` (${f.type})`).join(', ')}`, '');

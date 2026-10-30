@@ -1,4 +1,4 @@
-// Learning: the Finance and Economics (Money Management) and Politics (Retrospective Intelligence) courses render,
+// Learning: the Finance and Economics (Money Management) and Politics (Retrospective Geopolitics) courses render,
 // quizzes respond, progress saves.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

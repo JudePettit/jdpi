@@ -113,7 +113,7 @@ export const SHIP_GROUPS = [
   { id: 'fishing', label: 'Fishing', token: '--prp-cat-3' },
   { id: 'other', label: 'Other and unknown', token: '--prp-faint' },
 ];
-/** Normalise AIS-catcher's web viewer JSON (/api/ships.json) or the PRP bridge's aisstream.io snapshot. */
+/** Normalise AIS-catcher's web viewer JSON (/api/ships.json) or the Vitruvian Manager bridge's aisstream.io snapshot. */
 export function normaliseShips(json) {
   const arr = Array.isArray(json?.ships) ? json.ships : Array.isArray(json) ? json : [];
   const ships = arr.filter(s => s && num(s.mmsi) != null).map(s => {

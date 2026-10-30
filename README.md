@@ -1,25 +1,35 @@
-# PRP — Personal Resource Planner
+# Vitruvian Manager (VM), by JDP-Iq
 
-**PRP** is a product of **JDP-Iq**. It does for one person what an ERP does for an enterprise: one workspace for
-intelligence, history, money and science. You pick a submodule in the sidebar, it opens in the main area, and every
-submodule shares one design system, one Encyclopaedia and one light/dark theme.
+**Vitruvian Manager** (short **VM**) is a product of **JDP-Iq**. It does for one person what an ERP does for an
+enterprise: one workspace for geopolitics, intelligence tradecraft, history, money and science. You pick a submodule in
+the sidebar, it opens in the main area, and every submodule shares one design system, one Encyclopaedia and one
+light/dark theme. Its mark is Leonardo's Vitruvian figure in a hard hat (`design/brand-vm.svg`).
 
-Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo). Formerly "JDP-I".
+Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo). Formerly PRP, and before that "JDP-I".
+"prp" is still the internal name: file names (`design/prp.css`, `design/PRP-STYLE.md`), tokens (`--prp-*`), classes,
+registry ids and storage keys keep it, and only what people read says Vitruvian Manager.
 
 | Module | Code | Submodules |
 |---|---|---|
-| **Realtime Intelligence**: what is happening now | RT | Intelligence Briefing · Global Headline Tracker · Geopolitical Volatility · National Analysis · Realtime Battlefield · Political Atlas · Realtime Calendar · OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · OSINT Training |
-| **Retrospective Intelligence**: what happened and why | RS | Encyclopaedia · Political Retrospective · Historical Calendar · Retrospective Battlefield · War Focus · Kardashev Tracker · Learning · Politics |
-| **Money Management**: your money end to end | MM | TD Markets · Tally Stick · Algo Trader · Auto Trader · Learning · Finance & Economics |
+| **Realtime Geopolitics**: what is happening now | RT | Intelligence Briefing · Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
+| **Retrospective Geopolitics**: what happened and why | RS | Encyclopaedia · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
+| **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
+| **Money Management**: your money end to end | MM | Market Briefing · Economics Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
 | **Natural Science**: science now and through history | NS | Scientific Briefing · Invention Timeline |
+| **Digital Science**: computing, AI and the digital world | DS | Digital Briefing · Data Analytics · Integration Hub |
+| **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
 
-(In `registry.json` the four modules are "suites" and their submodules "modules". The old ids `q`, `hp` and `fe` still
-work as aliases.)
+(In `registry.json` the seven modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
+shows and its `title` what its overview page and page eyebrows show. The old ids `q`, `hp` and `fe` still work as
+aliases.)
+
+The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait and other lowbrow stories is called
+**Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`.
 
 ## Architecture
 
 ```
-  PRP shell (this repo): sidebar → modules → submodules · breadcrumb · search · theme · registry.json
+  VM shell (this repo): sidebar → modules → submodules · breadcrumb · search · theme · registry.json
         │ one persistent iframe per submodule page (state is kept when you switch)
         ├── pages in this repo: q/, battlefield/, kardashev/, encyclopedia/, fe/, science/, osint/, sigint/, geoint/
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
@@ -33,7 +43,8 @@ work as aliases.)
 | Registry | `registry.json` | Modules, submodules, URLs, kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
-| Connector | `design/prp-bar.js` (`design/jdpi-bar.js` is an identical copy) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "PRP / Module / Submodule" bar when a page is opened on its own. |
+| Connector | `design/prp-bar.js` (`design/jdpi-bar.js` is an identical copy) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
+| Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
 
@@ -72,4 +83,4 @@ node tests/tools/shoot.mjs <url> <out.png> [--dark] [--width 390]   # screenshot
 Code © JDP-Iq. Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0 and are credited where shown. Each data source
 is credited on the page that uses it. `volatility/scripts/fips-iso3.json` is a table of country codes and names extracted
 from the countrycode project (Arel-Bundock, Enevoldsen and Yetman, GPL-3.0), recorded with its source commit and checksum;
-the codes themselves are facts, and the file is not part of PRP's code.
+the codes themselves are facts, and the file is not part of Vitruvian Manager's code.

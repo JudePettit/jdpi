@@ -1,5 +1,9 @@
-/* PRP shell: renders the four modules (Realtime Intelligence, Retrospective Intelligence, Money Management, Natural
-   Science) and their submodules from registry.json, and hosts each submodule page in a persistent workspace frame.
+/* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
+   and storage keys): renders the modules (Realtime Geopolitics, Retrospective Geopolitics, International Mystery
+   Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from registry.json, and
+   hosts each submodule page in a persistent workspace frame. A module has a short name (registry "name", for the
+   sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, the home's headings,
+   page eyebrows and the tab title); they differ only where the full title is too long for the sidebar.
    Routes: #/ · #/<module> · #/<module>/<submodule>[/<view>][?at=<url>]
    (In registry.json the four modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
@@ -85,7 +89,7 @@ function setupTheme() {
 /* --- Navigation ------------------------------------------------------------ */
 function navItem(suite, m) {
   const flag = m.status === 'live' ? '' : `<span class="flag">${esc(STATUS[m.status] || m.status)}</span>`;
-  const search = [m.name, suite.name, suite.code, kindLabel(m.kind), ...(m.aliases || [])].join(' ').toLowerCase();
+  const search = [m.name, suite.name, suite.title, suite.code, kindLabel(m.kind), ...(m.aliases || [])].join(' ').toLowerCase();
   return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}">
     <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}</a>`;
 }
@@ -94,7 +98,7 @@ function renderNav() {
   $('#nav').innerHTML = `<a class="nav-item" href="#/" data-route=""><span class="icon" aria-hidden="true">⌂</span><span class="grow">Home</span></a>` +
     state.registry.suites.map(suite => `
       <details class="suite" data-suite="${suite.id}" open>
-        <summary><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
+        <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
         <a class="suite-link" href="${href(suite)}" data-route="${suite.id}">Module overview</a>
         ${suite.modules.map(m => navItem(suite, m)).join('')}
       </details>`).join('') +
@@ -109,7 +113,7 @@ function highlightNav(r) {
 
 /* --- Top bar --------------------------------------------------------------- */
 function renderTop(r, frame) {
-  const P = state.registry.platform, parts = [r.suite ? `<a href="#/">${esc(P.name)}</a>` : `<b>${esc(P.name)} · ${esc(P.fullName)}</b>`];
+  const P = state.registry.platform, parts = [r.suite ? `<a href="#/">${esc(P.name)}</a>` : `<b>${esc(P.fullName)}</b>`];
   if (r.suite) parts.push(r.module ? `<a href="${href(r.suite)}">${esc(r.suite.name)}</a>` : `<b>${esc(r.suite.name)}</b>`);
   if (r.module) parts.push(r.view ? `<a href="${href(r.suite, r.module)}">${esc(r.module.name)}</a>` : `<b>${esc(r.module.name)}</b>`);
   if (r.view) parts.push(`<b>${esc(r.view.name)}</b>`);
@@ -139,25 +143,34 @@ const tile = (suite, m) => `<a class="tile" href="${href(suite, m)}" data-suite=
 function renderHome() {
   const P = state.registry.platform, mods = allModules();
   const kinds = mods.reduce((a, x) => ((a[x.module.kind] = (a[x.module.kind] || 0) + 1), a), {});
+  // The Today panel (PRP-ANALYSIS.md item 3): above the catalogue, the few lines that actually change. Its data loads
+  // lazily after this paint (loadToday), so the cards are never held up; a cached session result is dropped in here
+  // synchronously so a return visit shows it with no flash and no jump. The product counts move below it, as the
+  // analysis asks ("The counts can stay, below.").
+  const today = TODAY_PANEL ? readTodayCache() : null;
   $('#view').innerHTML = `<div class="page">
     <header class="head">
-      <div class="prp-eyebrow">${esc(P.name)} <span class="sep">·</span> ${esc(P.fullName)}</div>
+      <div class="prp-eyebrow">${esc(P.fullName)} <span class="sep">·</span> by ${esc(P.company)}</div>
       <h1 class="prp-title">Workspace</h1>
       <p class="prp-dek">${esc(P.tagline)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
-      <div class="prp-kpis">
-        <div class="prp-kpi"><span>Modules</span><b>${state.registry.suites.length}</b></div>
-        <div class="prp-kpi"><span>Submodules</span><b>${mods.length}</b></div>
-        <div class="prp-kpi"><span>Realtime</span><b>${kinds.realtime || 0}</b></div>
-        <div class="prp-kpi"><span>Retrospective</span><b>${kinds.retrospective || 0}</b></div>
-      </div>
     </header>
+    ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today in your workspace"${today ? '' : ' aria-busy="true"'}>${today ? todayInnerHtml(today) : TODAY_LOADING}</section>` : ''}
+    <div class="prp-kpis today-kpis">
+      <div class="prp-kpi"><span>Modules</span><b>${state.registry.suites.length}</b></div>
+      <div class="prp-kpi"><span>Submodules</span><b>${mods.length}</b></div>
+      <div class="prp-kpi"><span>Realtime</span><b>${kinds.realtime || 0}</b></div>
+      <div class="prp-kpi"><span>Retrospective</span><b>${kinds.retrospective || 0}</b></div>
+    </div>
     ${state.registry.suites.map((s, i) => `<section class="group" data-suite="${s.id}">
-      <div class="group-head"><span class="prp-code">${esc(s.code)}</span><h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.name)}</h2><a class="more" href="${href(s)}">Module overview →</a></div>
+      <div class="group-head"><span class="prp-code">${esc(s.code)}</span><h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">Module overview →</a></div>
       <p>${esc(s.description)}</p>
       <div class="tiles">${s.modules.map(m => tile(s, m)).join('')}</div>
     </section>`).join('')}
-    <footer class="footer"><span>${esc(P.name)}, the ${esc(P.fullName)}. A product of ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span></footer>
+    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span></footer>
   </div>`;
+  // The cards have painted. Fill the panel when the browser is idle (never on the first-paint path): a cache miss fetches
+  // through the highlights module, a hit renders at once. It never throws into route().
+  if (TODAY_PANEL) (window.requestIdleCallback ? requestIdleCallback(loadToday, { timeout: 1500 }) : setTimeout(loadToday, 0));
 }
 
 function renderSuite(suite) {
@@ -165,7 +178,7 @@ function renderSuite(suite) {
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}">
     <header class="head">
       <div class="prp-eyebrow">${esc(state.registry.platform.name)} <span class="sep">/</span> Module ${esc(suite.code)}</div>
-      <h1 class="prp-title">${esc(suite.name)}</h1><p class="prp-dek">${esc(suite.description)}</p>
+      <h1 class="prp-title">${esc(suite.title || suite.name)}</h1><p class="prp-dek">${esc(suite.description)}</p>
       <div class="prp-meta"><span><b>${suite.modules.length}</b> submodules</span><span><b>${live}</b> live</span></div>
     </header>
     <div class="list prp-panel"><table class="prp-table">
@@ -181,7 +194,7 @@ function renderSuite(suite) {
 
 function renderNotice(suite, m, body) {
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}"><div class="prp-panel launch">
-    <div class="prp-eyebrow">${esc(suite.name)} <span class="sep">·</span> ${esc(kindLabel(m.kind))}</div>
+    <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(kindLabel(m.kind))}</div>
     <h1 class="prp-title">${esc(m.name)}</h1><p class="prp-dek">${esc(m.description)}</p>${body}</div></div>`;
 }
 // Submodules behind their own sign-in (Cloudflare Access) can't sign in inside another site's frame: browsers block
@@ -190,6 +203,86 @@ function renderLaunch(suite, m, url) {
   const abs = new URL(url, location.href).href;
   renderNotice(suite, m, `<div class="prp-note" style="margin-top:18px"><b>Opens in its own tab.</b> ${esc(m.name)} is private and asks you to sign in, which browsers don't allow inside another site's frame.</div>
     <div class="actions"><a class="prp-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(m.name)} ↗</a></div>`);
+}
+
+/* --- Workspace "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
+   The home's cards never change, so above them we show the few things that do — the biggest 7-day volatility movers,
+   how busy the briefings have been this week, the next votes and summits, and a market snapshot — each line a link into
+   the submodule it came from. The data is design/prp-highlights.js over small public JSON and the trade-desk public API.
+   To honour the analysis's performance mandate it is NEVER on the first-paint path: renderHome() paints the cards, then
+   schedules loadToday() for idle time. The result is cached in sessionStorage for the session (computed once), and every
+   failure is quiet — a source that cannot be read drops its own group, and a total failure just leaves the panel hidden;
+   nothing here can block first paint or throw into the shell. Every string is DATA from the module and is escaped with
+   esc() before it reaches the DOM, exactly as tile()/navItem() do (the module returns plain text and never touches the
+   DOM). The honest time-window label the module computes for each group is shown verbatim, never sharpened. */
+// Off until the fixes from its two reviews land: the "7-day change" must be the Volatility page's own measure (not a
+// two-day difference), a rise must be coloured as worse, the briefing counts must come from a small derived file rather
+// than 1.35 MB of stores, the panel must reserve its filled height, fetch with a timeout and revalidate its cache.
+const TODAY_PANEL = false;
+const TODAY_KEY = 'prp.today.v1';   // the session cache key; bump the version if the stored shape ever changes
+let todayPending = false;           // one in-flight load at a time; the session cache serves every later home visit
+// Placeholder cards while the data loads, sized (shell.css) to reserve the panel's space so the cards below do not jump.
+// The grid is aria-hidden, so a screen reader hears nothing until the real lines arrive.
+const TODAY_LOADING = `<h2 class="today-title">Today</h2>
+  <div class="today-grid" aria-hidden="true">${('<div class="today-card today-skeleton"><span class="sk sk-title"></span>' + '<span class="sk"></span>'.repeat(5) + '</div>').repeat(4)}</div>`;
+
+// The session cache, read and written exactly like the theme's localStorage (setupTheme / applyTheme): every access is
+// wrapped so private mode, blocked storage or a bad value can never throw. An empty or malformed cache reads as none.
+function readTodayCache() {
+  try { const g = JSON.parse(sessionStorage.getItem(TODAY_KEY) || 'null'); return Array.isArray(g) && g.length ? g : null; } catch { return null; }
+}
+function writeTodayCache(groups) {
+  try { sessionStorage.setItem(TODAY_KEY, JSON.stringify(groups)); } catch { /* private mode or quota: just skip the cache */ }
+}
+
+// One line: a link into its submodule, the headline value toned up/down (the module's only styling hint), the quieter
+// detail below. Every field is data, so each is escaped; the title gives the full label back when the line is clipped.
+function todayItem(it) {
+  const tone = it.tone === 'up' ? ' up' : it.tone === 'down' ? ' down' : '';
+  const value = it.value ? `<span class="today-val${tone}">${esc(it.value)}</span>` : '';
+  const detail = it.detail ? `<span class="today-detail">${esc(it.detail)}</span>` : '';
+  return `<a class="today-row" href="${esc(it.href)}" title="${esc(it.label)}"><span class="today-label">${esc(it.label)}</span>${value}${detail}</a>`;
+}
+// One group: a titled card (title, the honest window and source line, a link into the module) over its lines.
+function todayGroupCard(g) {
+  const items = Array.isArray(g.items) ? g.items : [];
+  return `<section class="today-card">
+    <div class="today-head"><h3 class="prp-h3">${esc(g.title)}</h3><a class="more" href="${esc(g.href)}">View →</a>
+      <p class="today-win">${esc(g.window)}<span class="today-src"> · ${esc(g.source)}</span></p></div>
+    <div class="today-list">${items.map(todayItem).join('')}</div>
+  </section>`;
+}
+const todayInnerHtml = groups => `<h2 class="today-title">Today</h2><div class="today-grid">${groups.map(todayGroupCard).join('')}</div>`;
+
+// Put the groups into the panel, or hide it when there are none (an off day leaves no empty box, not a broken one).
+function renderToday(groups) {
+  const panel = $('#today');
+  if (!panel) return;
+  panel.removeAttribute('aria-busy');
+  if (!Array.isArray(groups) || !groups.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+  panel.innerHTML = todayInnerHtml(groups);
+  panel.hidden = false;
+}
+
+// Load the panel after the home is interactive. A cache hit renders at once; a miss imports the highlights module and
+// lets it fetch its sources concurrently (it reads the smallest derived files and never rejects), then caches the small
+// result. The viewer may leave the home while this runs, so it checks again before touching the DOM; any failure is
+// swallowed and the panel left hidden. Called from renderHome() at idle time, so it must never throw.
+async function loadToday() {
+  if (!$('#today') || state.route?.suite || state.route?.module) return; // only on the Workspace home (#/), only while shown
+  const cached = readTodayCache();
+  if (cached) { renderToday(cached); return; }
+  if (todayPending) return;
+  todayPending = true;
+  try {
+    const { buildTodayHighlights } = await import(new URL('design/prp-highlights.js', document.baseURI).href);
+    // base '' (the default) → same-origin data paths resolve like the shell's own fetch('registry.json'); the wrapper
+    // keeps fetch bound to the window and resolves relative URLs against the document, same as registry.json.
+    const groups = await buildTodayHighlights({ fetch: u => fetch(u) });
+    if (Array.isArray(groups) && groups.length) writeTodayCache(groups);
+    if (!state.route?.suite && !state.route?.module) renderToday(groups || []); // still on the home? then show it
+  } catch { renderToday([]); } // the import or every source failed: hide the panel, never break the shell
+  finally { todayPending = false; }
 }
 
 /* --- Frames: one persistent iframe per submodule and view, so each keeps its state ---------------------------------
@@ -208,17 +301,54 @@ function frameAddress(frame) {
   try { const u = frame.contentWindow.location.href; if (u && u !== 'about:blank') return u; } catch { /* another origin */ }
   return new URL(frame.dataset.url || frame.src, location.href).href;
 }
-// The loading bar shows while the frame in view loads (a frame's load event ends it; a safety timeout in case none comes).
+/* Loading. While the frame in view loads a new page, a thin bar runs along the top of the workspace and the Vitruvian
+   Manager figure (design/vm-loading.svg: he runs on all fours, then rolls off in his wheel) plays in its middle. Both
+   start where a frame starts a new document (createFrame, moveFrame to another page, reloadFrame) and end at the frame's
+   load event, or after a safety timeout in case none comes. A hash-only move never calls setLoading, so neither shows
+   for one; nor do switches to a frame that has already loaded. The figure waits LOADER_DELAY_MS before it goes up, so a
+   page that lands within that never shows it (no flash), and it comes down with the load event, never after it. The
+   figure is laid over the frame with no pointer events and hidden from screen readers (the bar is the progress bar): it
+   covers nothing you could click and holds up nothing. The SVG carries its own colours, so it reads in both themes.
+   It is inlined rather than an <img>: as an image in Edge it ignored the page's (emulated) reduced-motion setting and
+   kept rolling, where inline its own prefers-reduced-motion rule stops every animation and leaves one still frame; and
+   an inline copy starts its loop afresh each time it is put up, so the figure is always seen setting off. Its class
+   and keyframe names carry a vml- prefix, so its <style> cannot touch the shell's. The markup is fetched once, when a
+   frame first loads, beside the frame's own load: until it has come, only the bar shows. */
+const LOADER_DELAY_MS = 300;
+let loaderCheck = 0; // the one pending re-check that puts the figure up once a load has run long enough
+const loaderArt = { svg: '', asked: false };
+function loaderSvg() {
+  if (!loaderArt.asked) {
+    loaderArt.asked = true;
+    fetch('design/vm-loading.svg').then(r => (r.ok ? r.text() : '')).then(t => {
+      if (!/^\s*<svg[\s>]/.test(t)) return; // a missing file (or a host's HTML fallback page) leaves just the bar
+      loaderArt.svg = t; syncLoading();
+    }).catch(() => { /* offline: the bar alone */ });
+  }
+  return loaderArt.svg;
+}
 function setLoading(frame, on) {
+  const was = frame.hasAttribute('data-loading');
   frame.toggleAttribute('data-loading', on);
   clearTimeout(frame.loadingTimer);
-  if (on) frame.loadingTimer = setTimeout(() => setLoading(frame, false), 20000);
+  if (on) {
+    if (!was) frame.loadingSince = performance.now(); // a move while loading keeps the first start
+    frame.loadingTimer = setTimeout(() => setLoading(frame, false), 20000);
+  }
   syncLoading();
 }
 function syncLoading() {
-  const busy = !!visibleFrame()?.hasAttribute('data-loading'), bar = $('#frames .loading-bar');
+  const frame = visibleFrame(), busy = !!frame?.hasAttribute('data-loading');
+  const bar = $('#frames .loading-bar'), figure = $('#frames .vm-loader');
   if (busy && !bar) $('#frames').insertAdjacentHTML('afterbegin', '<div class="loading-bar" role="progressbar" aria-label="Loading"></div>');
   else if (!busy && bar) bar.remove();
+  // The figure goes up once the load has run LOADER_DELAY_MS, and comes down the moment the frame is no longer loading.
+  const due = busy ? frame.loadingSince + LOADER_DELAY_MS - performance.now() : 0;
+  if (busy && due <= 0 && !figure) { const svg = loaderSvg(); if (svg) $('#frames').insertAdjacentHTML('beforeend', `<div class="vm-loader" aria-hidden="true">${svg}</div>`); }
+  else if (!busy && figure) figure.remove();
+  // Not due yet: fetch the art meanwhile and look again when it is (switching frames meanwhile re-runs this anyway).
+  clearTimeout(loaderCheck);
+  if (busy && due > 0) { loaderSvg(); loaderCheck = setTimeout(syncLoading, due + 15); }
 }
 function createFrame(key, r, url) {
   const frame = document.createElement('iframe');
@@ -368,7 +498,8 @@ function route() {
 
   if (!framed) { $('#view').scrollTop = 0; syncLoading(); }
   const P = state.registry.platform;
-  document.title = [r.view?.name, r.module?.name, r.suite && !r.module ? r.suite.name : null, r.suite ? P.name : `${P.name} · ${P.fullName}`].filter(Boolean).join(' · ');
+  // "<Submodule> · VM", "<Module title> · VM", and the product's full name on the home (as index.html's own <title>).
+  document.title = [r.view?.name, r.module?.name, r.suite && !r.module ? r.suite.title || r.suite.name : null, r.suite ? P.name : P.fullName].filter(Boolean).join(' · ');
   renderTop(r, frame);
   highlightNav(r);
   syncNowPlaying();

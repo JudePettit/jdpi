@@ -1,4 +1,4 @@
-// SIGINT Dashboard · Ships (AIS): the user's AIS-catcher web viewer JSON, or aisstream.io through the PRP bridge
+// SIGINT Dashboard · Ships (AIS): the user's AIS-catcher web viewer JSON, or aisstream.io through the Vitruvian Manager bridge
 // (aisstream.io does not permit direct browser connections, so the key stays on this computer and the bridge connects).
 import { esc, fmt, store, explainError, mixedContentProblem, fetchWithTimeout } from '../lib/util.js';
 import { distanceKm, bearingDeg, compass, bboxAround } from '../lib/geo.js';
@@ -38,7 +38,7 @@ export function create(ctx, panel) {
   const setupNote = () => {
     $('#sh-note').innerHTML = `<p><b>No public AIS feed can be read straight from a web page.</b> aisstream.io gives a free API key but forbids browser connections, and the big ship-tracking sites are commercial. Two ways to see ships here:</p>
       <p>1. <b>Your own receiver</b>: AIS-catcher with an RTL-SDR and a marine VHF antenna in sight of the sea or a busy river. Its web viewer serves <code>/api/ships.json</code> with CORS already on (start it with <code>AIS-catcher -N 8100</code>, or set the web viewer in its setup wizard).</p>
-      <p>2. <b>aisstream.io through the PRP bridge</b>: sign up free at <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a>, paste the key above (kept in this browser and sent only to the bridge on this computer), and run the bridge.</p>
+      <p>2. <b>aisstream.io through the Vitruvian Manager bridge</b>: sign up free at <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a>, paste the key above (kept in this browser and sent only to the bridge on this computer), and run the bridge.</p>
       <p>Or open the public maps listed here.</p>`;
   };
   setupNote();
@@ -82,7 +82,7 @@ export function create(ctx, panel) {
     try {
       let json, viaText;
       if (mode === 'aisstream') {
-        if (!ctx.bridge.on) throw Object.assign(new Error('aisstream.io needs the PRP bridge: turn it on under Overview → Connect your own receivers.'), { setup: true });
+        if (!ctx.bridge.on) throw Object.assign(new Error('aisstream.io needs the Vitruvian Manager bridge: turn it on under Overview → Connect your own receivers.'), { setup: true });
         const k = key.value.trim();
         const b = bboxAround(ctx.loc.lat, ctx.loc.lon, +radius.value);
         const r = await fetchWithTimeout(`${ctx.bridge.url}/aisstream/ships.json?bbox=${[b.south, b.west, b.north, b.east].map(v => v.toFixed(3)).join(',')}`, { timeout: 10000, cache: 'no-store', headers: k ? { 'X-AISStream-Key': k } : {} });
@@ -94,7 +94,7 @@ export function create(ctx, panel) {
         const u = url.value.trim();
         const problem = S.aisViaBridge ? '' : mixedContentProblem(u, location.protocol);
         if (problem) throw Object.assign(new Error(problem), { setup: true });
-        if (S.aisViaBridge && !ctx.bridge.on) throw Object.assign(new Error('Turn on the PRP bridge in the Overview first.'), { setup: true });
+        if (S.aisViaBridge && !ctx.bridge.on) throw Object.assign(new Error('Turn on the Vitruvian Manager bridge in the Overview first.'), { setup: true });
         json = await fetchReceiverJSON(ctx, { url: u, viaBridge: S.aisViaBridge, route: 'ais' });
         viaText = S.aisViaBridge ? 'your AIS-catcher via the bridge' : 'your AIS-catcher';
       }

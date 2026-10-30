@@ -1,5 +1,5 @@
-// SIGINT Dashboard (i-Spy): pure helpers (geodesy, NMEA, pass prediction, feed normalisers, Meshtastic
-// protobuf framing, Markdown), the PRP bridge and edge proxy, the content files, and a page smoke test.
+// SIGINT Dashboard (International Mystery Management): pure helpers (geodesy, NMEA, pass prediction, feed normalisers, Meshtastic
+// protobuf framing, Markdown), the Vitruvian Manager bridge and edge proxy, the content files, and a page smoke test.
 //   node --test tests/sigint.test.mjs
 //   JDPI_URL=http://localhost:8787 node --test tests/sigint.test.mjs      (also runs the page test in Edge)
 //   SIGINT_LIVE=1 node --test tests/sigint.test.mjs                        (also checks the public feeds and their CORS)
@@ -370,12 +370,12 @@ test('content: cookbook, hardware guide and law cover what the brief asks for', 
 test('page: structure, tabs and tokens-only CSS', () => {
   const html = read('index.html');
   assert.match(html, /<html lang="en" data-suite="oi" class="prp">/);
-  assert.match(html, /<title>SIGINT Dashboard · PRP<\/title>/);
+  assert.match(html, /<title>SIGINT Dashboard · VM<\/title>/);
   assert.match(html, /<script src="\.\.\/design\/prp-bar\.js" data-suite="oi" data-module="sigint" data-shell="\.\.\/" defer><\/script>/);
   const tabs = [...html.matchAll(/role="tab" id="tab-([a-z]+)" aria-controls="panel-([a-z]+)"/g)];
   assert.equal(tabs.length, 11);
   for (const [, a, b] of tabs) { assert.equal(a, b); assert.match(html, new RegExp(`<section id="panel-${a}" role="tabpanel" aria-labelledby="tab-${a}"`)); }
-  assert.match(html, /i-Spy <span class="sep">·<\/span> SIGINT Dashboard/);
+  assert.match(html, /International Mystery Management <span class="sep">·<\/span> SIGINT Dashboard/);
   const css = read('styles.css');
   assert.ok(!/#[0-9a-f]{3,8}\b/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')), 'no raw hex colours in page CSS');
   assert.ok(!/rgba?\(/.test(css), 'no raw rgb colours');
@@ -486,7 +486,7 @@ test('live: public feeds answer, and which allow browsers (CORS)', { skip: !proc
   }
   const lol = await get('https://api.adsb.lol/v2/point/53.35/-6.26/25');
   assert.equal(lol.status, 200); assert.ok(Array.isArray((await lol.json()).ac));
-  assert.equal(lol.headers.get('access-control-allow-origin'), null, 'adsb.lol: no CORS (needs the PRP proxy or bridge)');
+  assert.equal(lol.headers.get('access-control-allow-origin'), null, 'adsb.lol: no CORS (needs the Vitruvian Manager proxy or bridge)');
 });
 
 /* ---- Page (opt-in: JDPI_URL=http://localhost:8787) ----------------------------------------------------------------------------- */

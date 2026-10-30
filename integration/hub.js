@@ -9,7 +9,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = new Intl.NumberFormat('en-GB');
 const fmtDate = d => (d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–');
-const MODULES = { rt: ['RT', 'Realtime Intelligence'], rs: ['RS', 'Retrospective Intelligence'], oi: ['OI', 'i-Spy'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
+const MODULES = { rt: ['RT', 'Realtime Geopolitics'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
 const TABS = ['overview', 'catalogue', 'mcp', 'api', 'feeds', 'skills', 'security'];
 
 /* ------------------------------------------------------------------ state in the hash */
@@ -66,7 +66,7 @@ async function load() {
   const mods = new Set(cat.datasets.map(d => d.module));
   $('#meta').innerHTML = [`<span>Catalogue built <b>${esc(fmtDate(cat.generated))}</b></span>`, `<span><b>${cat.datasets.length}</b> datasets</span>`, `<span><b>${nf.format(rows)}</b> rows</span>`,
     `<span>Modules <b>${mods.size}</b></span>`, '<span>Access <b>read-only · no keys</b></span>'].join('');
-  $('#kpis').innerHTML = [['Datasets', cat.datasets.length, 'described in one catalogue'], ['Rows', nf.format(rows), 'across every dataset'], ['MCP tools', prp.tools.length, 'read-only'], ['Modules covered', mods.size, 'of PRP\'s six'], ['Keys needed', 0, 'all public']]
+  $('#kpis').innerHTML = [['Datasets', cat.datasets.length, 'described in one catalogue'], ['Rows', nf.format(rows), 'across every dataset'], ['MCP tools', prp.tools.length, 'read-only'], ['Modules covered', mods.size, REG?.suites?.length ? `of Vitruvian Manager’s ${REG.suites.length}` : 'with datasets'], ['Keys needed', 0, 'all public']]
     .map(([l, v, s]) => `<div class="prp-kpi"><span>${esc(l)}</span><b>${esc(v)}</b><small>${esc(s)}</small></div>`).join('');
   buildChips(); renderFeeds(); renderIcs(); render();
 }
@@ -161,8 +161,8 @@ const API = [
   ['/api/v1/entities/{qid}', 'An Encyclopaedia entry (or ?title=).', 'api/v1/entities/Q8663'],
   ['/api/v1/events', 'Political calendar (?country=, &type=, &from=, &to=, &q=).', 'api/v1/events?country=France&type=election'],
   ['/api/v1/briefings/{briefing}', 'Latest items: intelligence, scientific, economics, digital.', 'api/v1/briefings/scientific?topic=physics&type=paper'],
-  ['/api/v1/countries/{country}', 'One country across PRP (name or ISO code).', 'api/v1/countries/FRA'],
-  ['/api/v1/submodules', 'PRP\'s pages by module.', 'api/v1/submodules?module=ns'],
+  ['/api/v1/countries/{country}', 'One country across Vitruvian Manager (name or ISO code).', 'api/v1/countries/FRA'],
+  ['/api/v1/submodules', 'Vitruvian Manager\'s pages by module.', 'api/v1/submodules?module=ns'],
   ['/api/v1/feeds/{briefing}.rss', 'RSS 2.0 (or .json for JSON Feed 1.1).', 'api/v1/feeds/economics.rss?topic=monetary'],
   ['/api/v1/calendar.ics', 'iCalendar of political events, filterable.', 'api/v1/calendar.ics?country=Germany&type=election,referendum']
 ];

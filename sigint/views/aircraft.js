@@ -1,4 +1,4 @@
-// SIGINT Dashboard · Aircraft (ADS-B): public adsb.lol (via the PRP proxy or bridge), OpenSky (via the bridge), or the
+// SIGINT Dashboard · Aircraft (ADS-B): public adsb.lol (via the Vitruvian Manager proxy or bridge), OpenSky (via the bridge), or the
 // user's own readsb/dump1090/tar1090 aircraft.json. Polls every 15 s (public) or 5 s (own receiver) while visible.
 import { esc, fmt, explainError, mixedContentProblem, fetchWithTimeout } from '../lib/util.js';
 import { distanceKm, bearingDeg, compass, kmToNm, nmToKm, bboxAround } from '../lib/geo.js';
@@ -79,11 +79,11 @@ export function create(ctx, panel) {
         const u = url.value.trim();
         const problem = S.rxViaBridge ? '' : mixedContentProblem(u, location.protocol);
         if (problem) throw Object.assign(new Error(problem), { setup: true });
-        if (S.rxViaBridge && !ctx.bridge.on) throw Object.assign(new Error('Turn on the PRP bridge in the Overview first.'), { setup: true });
+        if (S.rxViaBridge && !ctx.bridge.on) throw Object.assign(new Error('Turn on the Vitruvian Manager bridge in the Overview first.'), { setup: true });
         json = await fetchReceiverJSON(ctx, { url: u, viaBridge: S.rxViaBridge, route: 'adsb' });
         viaText = S.rxViaBridge ? 'your receiver via the bridge' : 'your receiver';
       } else if (mode === 'opensky') {
-        if (!ctx.bridge.on) throw Object.assign(new Error('OpenSky blocks other websites (CORS). Turn on the PRP bridge in the Overview to use it.'), { setup: true });
+        if (!ctx.bridge.on) throw Object.assign(new Error('OpenSky blocks other websites (CORS). Turn on the Vitruvian Manager bridge in the Overview to use it.'), { setup: true });
         const b = bboxAround(lat, lon, nmToKm(nm));
         const r = await fetchWithTimeout(`${ctx.bridge.url}/public/opensky/states?lamin=${b.south.toFixed(3)}&lomin=${b.west.toFixed(3)}&lamax=${b.north.toFixed(3)}&lomax=${b.east.toFixed(3)}`, { timeout: 15000, cache: 'no-store' });
         if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status });
@@ -116,10 +116,10 @@ export function create(ctx, panel) {
     }
   }
   function setupHelp(mode, e) {
-    if (mode === 'receiver') return `Couldn’t read your receiver: ${esc(e.setup ? e.message : explainError(e))}.<br>Check the address (tar1090: <code>http://pi/tar1090/data/aircraft.json</code>; dump1090-fa: <code>http://pi:8080/data/aircraft.json</code>), that the receiver allows this site (CORS), or route it through the PRP bridge.`;
+    if (mode === 'receiver') return `Couldn’t read your receiver: ${esc(e.setup ? e.message : explainError(e))}.<br>Check the address (tar1090: <code>http://pi/tar1090/data/aircraft.json</code>; dump1090-fa: <code>http://pi:8080/data/aircraft.json</code>), that the receiver allows this site (CORS), or route it through the Vitruvian Manager bridge.`;
     if (mode === 'opensky') return esc(e.message);
     if (e.budget) return esc(e.message) + '. It resets at midnight UTC.';
-    return `The public aircraft feed isn’t reachable from this browser: adsb.lol doesn’t allow other websites to read it directly.<br>It works once this site’s PRP proxy is deployed, or right now with the <button type="button" class="linkish" data-goto="overview" data-anchor="connect">PRP bridge</button>. Meanwhile, open the area on a public map below.`;
+    return `The public aircraft feed isn’t reachable from this browser: adsb.lol doesn’t allow other websites to read it directly.<br>It works once this site’s Vitruvian Manager proxy is deployed, or right now with the <button type="button" class="linkish" data-goto="overview" data-anchor="connect">Vitruvian Manager bridge</button>. Meanwhile, open the area on a public map below.`;
   }
 
   function render({ data, via, mode }) {

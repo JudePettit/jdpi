@@ -154,7 +154,7 @@ A virtual private network sends your traffic through an encrypted tunnel to the 
 ### Being seen
 - Every site you visit logs your address unless a VPN or Tor hides it. Some platforms show account owners who viewed their profile; check your research account's privacy settings.
 - Links and documents can carry trackers that report when and where they were opened. Open unknown links in the research profile, and documents in the VM or Dangerzone.
-- This dashboard's own lookups go straight from your browser to the service named on each tab (the Wayback Machine, IANA and the domain registries' RDAP servers, Google or Cloudflare DNS, crt.sh, GLEIF, GDELT, OpenSanctions). Those services see your address and what you looked up; PRP sees nothing.
+- This dashboard's own lookups go straight from your browser to the service named on each tab (the Wayback Machine, IANA and the domain registries' RDAP servers, Google or Cloudflare DNS, crt.sh, GLEIF, GDELT, OpenSanctions). Those services see your address and what you looked up; Vitruvian Manager sees nothing.
 
 ## Screen capture and recording
 Capture so that a reader can see what you saw, where and when: include the address bar and the system clock where you can, and note the time in UTC.
@@ -234,7 +234,7 @@ Several tabs read public APIs straight from your browser. Their results go into 
 
 ::: figure flow
 label: Public API, then the dashboard, then the notebook, then an export
-caption: How data moves from public APIs to your write-up. Nothing passes through PRP's servers: the browser calls each API directly, the notebook lives in this browser, and exports are files you keep.
+caption: How data moves from public APIs to your write-up. Nothing passes through Vitruvian Manager's servers: the browser calls each API directly, the notebook lives in this browser, and exports are files you keep.
 - Public APIs | Wayback, RDAP, DNS, crt.sh, GLEIF, GDELT
 - This dashboard | in your browser; any API key stays here
 - [accent] Case notebook | stored in this browser only
@@ -260,6 +260,6 @@ caption: How data moves from public APIs to your write-up. Nothing passes throug
 Degrees, minutes and seconds become decimal degrees as degrees + minutes ÷ 60 + seconds ÷ 3,600, negative for south and west. 53° 20′ 54.4″ N, 6° 15′ 11.1″ W is 53.34844, -6.25308.
 
 ### Further reading
-- [OSINT Training](course:) in PRP: the course behind these tools, especially [Archives and preservation](course:archives-and-preservation) and [Doing no harm and staying safe](course:doing-no-harm-and-staying-safe).
+- [OSINT Training](course:) in Vitruvian Manager: the course behind these tools, especially [Archives and preservation](course:archives-and-preservation) and [Doing no harm and staying safe](course:doing-no-harm-and-staying-safe).
 - Bellingcat's [Online Investigations Toolkit](https://bellingcat.gitbook.io/toolkit).
 - The [Law & ethics](#tab=law) tab for what is lawful and what is fair.

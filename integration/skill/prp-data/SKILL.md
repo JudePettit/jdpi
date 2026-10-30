@@ -1,11 +1,11 @@
 ---
 name: prp-data
-description: Read PRP (Personal Resource Planner, jdpi.pages.dev), a public read-only collection of data on world politics, elections and political calendars, wars and armed conflict, country risk and volatility, political history since 1926, the news across the political spectrum, new research in science, economics and technology, US Congress members' trades, famous investors' 13F holdings and an encyclopaedia of people, parties, wars and ideas. Use when a question touches any of these, or when the user mentions PRP or jdpi.pages.dev.
+description: Read Vitruvian Manager (VM, by JDP-Iq, formerly PRP; jdpi.pages.dev), a public read-only collection of data on world politics, elections and political calendars, wars and armed conflict, country risk and volatility, political history since 1926, the news across the political spectrum, new research in science, economics and technology, US Congress members' trades, famous investors' 13F holdings and an encyclopaedia of people, parties, wars and ideas. Use when a question touches any of these, or when the user mentions Vitruvian Manager, VM, PRP or jdpi.pages.dev.
 ---
 
-# Using PRP's data
+# Using Vitruvian Manager's data
 
-PRP (Personal Resource Planner, by JDP-Iq) publishes its data as static JSON with a catalogue, a read-only MCP server and a
+Vitruvian Manager (VM, by JDP-Iq) publishes its data as static JSON with a catalogue, a read-only MCP server and a
 small JSON API. Everything is public; no keys, no sign-in. Nothing here can change anything.
 
 ## 1. Pick the access route
@@ -14,7 +14,7 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
    quickest and they cap results for you.
 2. **No MCP, but you can make HTTP requests**: use the JSON API at `https://jdpi.pages.dev/api/v1/` (OpenAPI description at
    `https://jdpi.pages.dev/integration/openapi.json`), or read the static files listed in the catalogue.
-3. **Neither**: tell the person which PRP page answers the question (each dataset has a `page`), or ask them to connect the
+3. **Neither**: tell the person which Vitruvian Manager page answers the question (each dataset has a `page`), or ask them to connect the
    server: `claude mcp add --transport http prp https://jdpi.pages.dev/mcp`.
 
 ## 2. Which tool for which question
@@ -26,9 +26,9 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 | How is country X doing? | `country_profile` | `GET /api/v1/countries/FRA` |
 | Today's news across the political spectrum | `latest_briefing` with `briefing: "intelligence"` | `GET /api/v1/briefings/intelligence` |
 | New papers or news in science, economics or technology | `latest_briefing` with `scientific`, `economics` or `digital`, and a `topic` | `GET /api/v1/briefings/scientific?topic=physics` |
-| Who or what is X? Where does PRP mention it? | `search_encyclopaedia`, then `get_entity` | `GET /api/v1/search?q=…`, `GET /api/v1/entities/{qid}` |
+| Who or what is X? Where does Vitruvian Manager mention it? | `search_encyclopaedia`, then `get_entity` | `GET /api/v1/search?q=…`, `GET /api/v1/entities/{qid}` |
 | Any table: wars, volatility, indicators, trades, holdings, breakthroughs… | `query_dataset` | `GET /api/v1/datasets/{id}/rows?f.<field>=<value>&sort=-date` |
-| Which PRP page shows this? | `list_submodules` | `GET /api/v1/submodules` |
+| Which Vitruvian Manager page shows this? | `list_submodules` | `GET /api/v1/submodules` |
 
 ## 3. Querying well
 
@@ -59,12 +59,13 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 
 Each dataset has a `licence` and `sources`. In short: Wikidata facts are CC0; Wikipedia text (calendar summaries, entity
 summaries) is CC BY-SA 4.0, so credit Wikipedia and keep the licence if you reuse it; UCDP and World Bank data are CC BY 4.0
-(credit them); headlines and summaries belong to their publishers (quote briefly and link); PRP's own text and compilations
-are © JDP-Iq. Credit "PRP (jdpi.pages.dev)" when you use PRP's data.
+(credit them); headlines and summaries belong to their publishers (quote briefly and link); Vitruvian Manager's own text and
+compilations are © JDP-Iq. Credit "Vitruvian Manager (jdpi.pages.dev)" when you use Vitruvian Manager's data.
 
-## 6. What PRP does not expose
+## 6. What Vitruvian Manager does not expose
 
-Tally Stick and Algo Trader (PRP's private trading tools) are not part of this data. There are no balances, positions,
-orders, brokers or keys here, and the separate private Tally Stick MCP connection is not reachable through this server.
+Tally Stick and Algo Trader (Vitruvian Manager's private trading tools) are not part of this data. There are no balances,
+positions, orders, brokers or keys here, and the separate private Tally Stick MCP connection is not reachable through this
+server.
 
 See `reference/datasets.md` for every dataset with its fields.

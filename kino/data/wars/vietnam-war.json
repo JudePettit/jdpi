@@ -178,7 +178,7 @@
       "id": "aftermath",
       "title": "After the war",
       "narration": "Vietnam was formally reunified in 1976. Hundreds of thousands of people who had served the southern state were sent to re-education camps, many of them for years, and large numbers fled the country by sea, many dying on the way. Vietnam overthrew the Khmer Rouge in Cambodia in January 1979 and fought a short border war with China weeks later; from 1986 its Communist Party turned to market reforms known as Doi Moi, and relations with the United States were restored in 1995.",
-      "visual": { "kind": "module", "blurb": "Vietnam today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "visual": { "kind": "module", "blurb": "Vietnam today: its economy, its governance and the pressures on it, in Vitruvian Manager's National Analysis." },
       "link": { "label": "National Analysis · Vietnam today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=VNM" },
       "cites": ["goscha-2016"]
     }

@@ -11,7 +11,7 @@
 //   /api/v1/events                 political calendar (?country= &type= &from= &to= &days= &q= &status= &limit=)
 //   /api/v1/briefings/{briefing}   latest items: intelligence, scientific, economics, digital (?topic= &position= &type= &q= &source= &hours= &order= &limit=)
 //   /api/v1/countries[/{country}]  country list, or one country's profile
-//   /api/v1/submodules             PRP's pages (?module=)
+//   /api/v1/submodules             Vitruvian Manager's pages (?module=)
 //   /api/v1/feeds/{briefing}.rss | .json   RSS 2.0 or JSON Feed 1.1 of a briefing (?topic= &position= &type=)
 //   /api/v1/calendar.ics           iCalendar of political events (?country= &type= &from= &to=; default the Realtime Calendar window)
 import { toRSS, toJSONFeed, toICS, ToolError, briefingKey } from '../../../integration/mcp/prp-mcp.mjs';
@@ -62,8 +62,8 @@ const ENDPOINTS = [
   ['GET /api/v1/entities/{qid}', 'One Encyclopaedia entry (or ?title= with a Wikipedia title).', '/api/v1/entities/Q8663'],
   ['GET /api/v1/events', 'Political calendar in a date range (default today to 18 months ahead).', '/api/v1/events?country=France&type=election'],
   ['GET /api/v1/briefings/{briefing}', 'Latest items of the intelligence, scientific, economics or digital briefing.', '/api/v1/briefings/scientific?topic=physics&type=paper'],
-  ['GET /api/v1/countries/{country}', 'One country across PRP.', '/api/v1/countries/FRA'],
-  ['GET /api/v1/submodules', 'PRP\'s pages by module.', '/api/v1/submodules?module=ns'],
+  ['GET /api/v1/countries/{country}', 'One country across Vitruvian Manager.', '/api/v1/countries/FRA'],
+  ['GET /api/v1/submodules', 'Vitruvian Manager\'s pages by module.', '/api/v1/submodules?module=ns'],
   ['GET /api/v1/feeds/{briefing}.rss', 'RSS 2.0 of a briefing (.json for JSON Feed 1.1).', '/api/v1/feeds/economics.rss?topic=monetary'],
   ['GET /api/v1/calendar.ics', 'iCalendar of political events (filterable).', '/api/v1/calendar.ics?country=Germany&type=election,referendum']
 ];
@@ -90,7 +90,7 @@ async function route(request, env, params) {
   try {
     const [a, b, c, ...rest] = seg;
     if (rest.length) return err(404, 'not_found', 'No such endpoint.');
-    if (!a) return ok({ name: 'PRP JSON API', version: 'v1', publisher: 'JDP-Iq', about: 'Read-only access to PRP\'s public data. No keys; CORS open; about 240 requests a minute per client.', openapi: site + 'integration/openapi.json', mcp: site + 'mcp', docs: site + 'integration/#api', catalogue: site + 'integration/catalog.json', endpoints: ENDPOINTS.map(([route, description, example]) => ({ route, description, example: site.replace(/\/$/, '') + example })) }, 3600);
+    if (!a) return ok({ name: 'Vitruvian Manager JSON API', version: 'v1', publisher: 'JDP-Iq', about: 'Read-only access to Vitruvian Manager\'s public data. No keys; CORS open; about 240 requests a minute per client.', openapi: site + 'integration/openapi.json', mcp: site + 'mcp', docs: site + 'integration/#api', catalogue: site + 'integration/catalog.json', endpoints: ENDPOINTS.map(([route, description, example]) => ({ route, description, example: site.replace(/\/$/, '') + example })) }, 3600);
     switch (a) {
       case 'catalog': {
         if (b) break;
@@ -124,8 +124,8 @@ async function route(request, env, params) {
         const B = prp.BRIEFINGS[key];
         const r = await call('latest_briefing', { briefing: key, ...briefingArgs(q), limit: 50, hours: 168 });
         const self = `${site}api/v1/feeds/${b}${url.search}`;
-        const feed = { title: `PRP ${B.name}${r.topic ? ` · ${r.topics?.find(t => t.id === r.topic)?.label || r.topic}` : ''}${r.position ? ` · ${r.position.replace('_', ' ')}` : ''}`, link: site + B.page, self, updated: r.generated,
-          description: `The newest items in PRP's ${B.name} (${B.module}). Headlines and summaries belong to their publishers; follow the links to read them.`, items: r.items };
+        const feed = { title: `Vitruvian Manager ${B.name}${r.topic ? ` · ${r.topics?.find(t => t.id === r.topic)?.label || r.topic}` : ''}${r.position ? ` · ${r.position.replace('_', ' ')}` : ''}`, link: site + B.page, self, updated: r.generated,
+          description: `The newest items in Vitruvian Manager's ${B.name} (${B.module}). Headlines and summaries belong to their publishers; follow the links to read them.`, items: r.items };
         return m[2] === 'json' ? text(toJSONFeed(feed), 'application/feed+json; charset=utf-8') : text(toRSS(feed), 'application/rss+xml; charset=utf-8');
       }
       case 'calendar.ics': {
@@ -140,14 +140,14 @@ async function route(request, env, params) {
         // Writing iCalendar costs about 8 µs an event here: at most MAX_ICS_EVENTS, the earliest first, keep a call within budget.
         const events = r.hits.slice(0, MAX_ICS_EVENTS);
         const cut = r.hits.length > events.length ? ` The first ${MAX_ICS_EVENTS} of ${r.hits.length} events, to ${events[events.length - 1].date}: narrow the dates, country or types for the rest, or use the static calendar files.` : '';
-        const name = `PRP political calendar${r.country ? ` · ${r.country.name}` : ''}${r.types ? ` · ${[...r.types].join(', ')}` : ''}`;
-        return text(toICS(events, { name, description: `Political events ${r.from} to ${r.to} from PRP's Realtime and Historical Calendars.${cut}`, stamp: r.generated || undefined }), 'text/calendar; charset=utf-8', 3600, { 'Content-Disposition': 'inline; filename="prp-calendar.ics"', ...(cut ? { 'X-PRP-Truncated': String(r.hits.length) } : {}) });
+        const name = `Vitruvian Manager political calendar${r.country ? ` · ${r.country.name}` : ''}${r.types ? ` · ${[...r.types].join(', ')}` : ''}`;
+        return text(toICS(events, { name, description: `Political events ${r.from} to ${r.to} from Vitruvian Manager's Realtime and Historical Calendars.${cut}`, stamp: r.generated || undefined }), 'text/calendar; charset=utf-8', 3600, { 'Content-Disposition': 'inline; filename="prp-calendar.ics"', ...(cut ? { 'X-PRP-Truncated': String(r.hits.length) } : {}) });
       }
     }
     return err(404, 'not_found', `No endpoint ${url.pathname}. See ${site}api/v1/ for the list.`);
   } catch (e) {
     if (e instanceof ToolError) return err(e.status || 400, e.status === 404 ? 'not_found' : e.status === 403 ? 'forbidden' : 'bad_request', e.message);
-    return err(500, 'internal', 'Something went wrong reading PRP\'s data. Try again, or narrow the request.');
+    return err(500, 'internal', 'Something went wrong reading Vitruvian Manager\'s data. Try again, or narrow the request.');
   }
 }
 function briefingArgs(q) {

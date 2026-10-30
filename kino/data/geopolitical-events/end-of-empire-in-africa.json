@@ -168,7 +168,7 @@
       "id": "legacy",
       "title": "What independence brought",
       "narration": "The new states inherited borders drawn by Europeans, and in 1964 the Organisation of African Unity agreed to respect them, fearing the wars that redrawing them might bring. Many of the first governments became one-party states or fell to military coups, the Cold War brought foreign intervention, and economies built on exporting a few raw materials stayed vulnerable. Frederick Cooper has argued that the new rulers inherited the colonial gatekeeper state, which controlled the links between a country and the world economy, and historians still debate how much of Africa's later difficulty was colonialism's legacy and how much the choices made after it.",
-      "visual": { "kind": "module", "blurb": "Ghana today: its economy, its governance and the pressures on it, in PRP's National Analysis." },
+      "visual": { "kind": "module", "blurb": "Ghana today: its economy, its governance and the pressures on it, in Vitruvian Manager's National Analysis." },
       "link": { "label": "National Analysis · Ghana today", "suite": "rt", "module": "pestle", "at": "q/national.html#country=GHA" },
       "cites": ["cooper-2002", "meredith-2005"]
     }

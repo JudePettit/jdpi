@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
-<title>Geopolitical Volatility · PRP</title>
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<title>Geopolitical Volatility · VM</title>
 <meta name="description" content="A daily 0–100 index of how unusually turbulent each country's news is, from GDELT. Compare up to four countries.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -108,7 +108,7 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
 <body>
 <div class="wrap">
   <header class="front">
-    <div class="prp-eyebrow">Realtime Intelligence <span class="sep">·</span> Geopolitical Volatility</div>
+    <div class="prp-eyebrow">Realtime Geopolitics <span class="sep">·</span> Geopolitical Volatility</div>
     <h1 class="prp-title">Geopolitical Volatility</h1>
     <p class="prp-dek">A daily 0–100 index of how unusually turbulent each country’s news is (conflict, political escalation, civil unrest, economic disruption and cross-border spread), measured against the past 90 days of every country. Map it, rank it, and compare up to four countries.</p>
     <div class="prp-meta" id="meta" aria-live="polite">Loading…</div>
@@ -337,7 +337,7 @@ function colourMap() {
   $('#legend').innerHTML = `<span class="ramp"><i style="background:linear-gradient(90deg,${stops})"></i>${ticks.map(([p, l], k) => `<b class="${k === 0 ? 'first' : k === ticks.length - 1 ? 'last' : ''}" style="left:${p}%">${esc(l)}</b>`).join('')}</span>` +
     '<span><i class="sw hatch" aria-hidden="true"></i>not scored that day</span><span><i class="sw nodata" aria-hidden="true"></i>no data</span>';
   const what = m.scale === 'gvi' ? '; 40 and above is elevated, 70 and above high' : m.scale === 'div' ? '; red is more volatile than a week before, blue calmer' : m.scale === 'tone' ? '; red is more hostile or less stable, blue more cooperative or stable' : m.log ? ' (log scale)' : '';
-  $('#mapcap').innerHTML = `<b>Figure 1.</b> ${esc(m.label)} by country on ${esc(DAYS[dayIdx])}${what}. Hatched countries had too few events or sources to be scored. Source: ${esc(m.src || 'GDELT 2.0, scored by PRP')}.`;
+  $('#mapcap').innerHTML = `<b>Figure 1.</b> ${esc(m.label)} by country on ${esc(DAYS[dayIdx])}${what}. Hatched countries had too few events or sources to be scored. Source: ${esc(m.src || 'GDELT 2.0, scored by Vitruvian Manager')}.`;
 }
 
 /* ---------- ranking ---------- */
@@ -504,7 +504,7 @@ function renderMethod() {
     <p><b>Components.</b> ${V.components.map(c => `${esc(c.label)} (${Math.round(c.weight * 100)}%)`).join(' · ')}. Conflict is CAMEO 17–20 (coerce, assault, fight, mass violence); political is 10–13, 15 and 16 (demands, disapproval, rejection, threats, force posture, reduced relations); unrest is 14 (protest); economic is 162–163 (sanctions, embargoes); cross-border spread counts conflict and political events between actors from different countries.</p>
     <p><b>Intensity.</b> Each event weighs 0.1 + max(0, −Goldstein)/10, so hostile events count up to eleven times a neutral one. A component’s intensity is its weighted events divided by all of the country’s events that day, so large and small countries are comparable.</p>
     <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. It is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
-    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in PRP from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
+    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in Vitruvian Manager from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
     <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. Use the evidence links to check.</p>`;
 }
 

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="vmi-title vmi-desc">
+  <title id="vmi-title">Vitruvian Manager</title>
+  <desc id="vmi-desc">The Vitruvian Manager icon, by JDP-Iq: the hard-hatted Vitruvian figure, four arms and four legs, in Leonardo's circle.</desc>
+  <!-- The favicon reduction of design/brand-vm.svg, drawn for 16 and 32 px. The square, the four objects and the antenna
+       go (at 16 px they are one or two pixels of noise); what stays is what says VM at a glance: the amber hard hat and
+       the spread-limbed figure inside the circle. Built on the 16 px grid (two units a pixel): the torso is 4 units wide
+       on x 14-18, so it lands on two whole pixels instead of smearing grey across three; the limbs are 2.6 (one solid
+       pixel at 16); the head stops a unit short of the arm line so a dark neck parts head from body at 32. -->
+  <rect width="32" height="32" rx="6" fill="#14181f"/>
+  <circle cx="16" cy="17" r="13.5" fill="none" stroke="#f3f4f6" stroke-opacity=".45" stroke-width="1.4"/>
+  <g fill="none" stroke="#f3f4f6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 15.5H28M14.2 15.5L5.6 9.4M17.8 15.5L26.4 9.4"/>
+    <path d="M15 20L8.2 27.2M17 20L23.8 27.2M15 20L13 28.8M17 20L19 28.8"/>
+  </g>
+  <rect x="14" y="14.5" width="4" height="7" rx="2" fill="#f3f4f6"/>
+  <circle cx="16" cy="10.4" r="2.7" fill="#f3f4f6"/>
+  <path d="M11.8 8.6a4.2 4.2 0 0 1 8.4 0z" fill="#d9a35c"/>
+  <rect x="10" y="7.4" width="12" height="2.3" rx="1.15" fill="#d9a35c"/>
+</svg>

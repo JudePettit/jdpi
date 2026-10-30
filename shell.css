@@ -1,4 +1,4 @@
-/* PRP shell: sidebar navigation, top bar, launchpad and module overviews, and the module workspace. */
+/* PRP shell (Vitruvian Manager): sidebar navigation, top bar, launchpad and module overviews, and the module workspace. */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 body { overflow: hidden; }
@@ -13,7 +13,9 @@ button { font: inherit; }
 /* --- Sidebar --------------------------------------------------------------- */
 .side { display: flex; flex-direction: column; min-height: 0; background: var(--prp-surface); border-right: 1px solid var(--prp-line); }
 .brand { display: flex; align-items: center; gap: 11px; padding: 14px 16px 12px; text-decoration: none; color: var(--prp-text); }
-.brand img { border-radius: 6px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
+/* The Vitruvian Manager mark (design/brand-vm.svg) at 40 px, where the figure and his four objects still read; the ring
+   follows the mark's own tile corner (rx 48 of 256 = 7.5 px at this size). */
+.brand img { flex: none; border-radius: 7.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
 .brand b { display: block; font: 700 19px/1 var(--prp-font-serif); letter-spacing: .02em; }
 .brand small { display: block; margin-top: 3px; color: var(--prp-muted); font: 500 11px var(--prp-font-ui); }
 .find { position: relative; margin: 0 12px 10px; }
@@ -74,6 +76,15 @@ button { font: inherit; }
 .frames iframe.active { display: block; }
 .loading-bar { position: absolute; top: 0; left: 0; z-index: 2; height: 2px; width: 40%; background: var(--prp-primary); animation: prp-load 1.1s ease-in-out infinite; }
 @keyframes prp-load { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+/* The loading figure (shell.js, "Loading"): design/vm-loading.svg, inlined, centred in the workspace over the loading
+   frame. It lets every click through and has no box of its own (the SVG is transparent), so the page shows round it as
+   it lands. */
+.vm-loader { position: absolute; inset: 0; z-index: 2; margin: auto; width: clamp(112px, 26vmin, 160px); height: clamp(112px, 26vmin, 160px);
+  pointer-events: none; user-select: none; animation: vm-loader-in .2s ease-out both; }
+.vm-loader svg { display: block; width: 100%; height: 100%; overflow: hidden; }
+@keyframes vm-loader-in { from { opacity: 0; } }
+/* Reduced motion: no fade here, and the SVG's own rule stills the figure (standing in his wheel). */
+@media (prefers-reduced-motion: reduce) { .vm-loader { animation: none; } }
 
 /* --- Kino now playing: the film's caption and controls while Kino follows along with its frame hidden ----------- */
 .main { position: relative; }
@@ -109,7 +120,8 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 /* --- Pages (launchpad, module overview, launch) ---------------------------- */
 .page { max-width: 1280px; margin: 0 auto; padding: 26px 28px 40px; }
 .head { padding-bottom: 18px; border-bottom: 1px solid var(--prp-line); }
-.head .prp-kpis { margin-top: 18px; max-width: 760px; }
+/* The four product counts, moved below the Today panel on the home (shell.js renderHome). */
+.today-kpis { margin-top: 22px; max-width: 760px; }
 .group { margin-top: 28px; }
 .group-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .group-head .prp-code { transform: translateY(-2px); }
@@ -134,6 +146,37 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .launch .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 .search-results { margin-top: 6px; }
 .footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 34px; padding-top: 12px; border-top: 1px solid var(--prp-line); color: var(--prp-muted); font: 11px var(--prp-font-ui); }
+
+/* --- Workspace "Today" panel (shell.js, "Workspace Today panel") -------------
+   A titled band of up to four cards at the top of the home, each card a group of links into a submodule. Built only on
+   the design tokens, so light, dark and phone all follow for free; the auto-fill grid collapses to one column on a
+   phone just like .tiles, and the skeleton reserves the panel's height so the cards below do not jump as it loads. */
+.today { margin-top: 22px; }
+.today-title { margin: 0 0 10px; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.today-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; align-items: start; }
+.today-card { display: flex; flex-direction: column; overflow: hidden; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
+.today-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 10px; align-items: baseline; padding: 11px 13px 9px; border-bottom: 1px solid var(--prp-line-soft); }
+.today-head .prp-h3 { min-width: 0; }
+.today-head .more { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-link); text-decoration: none; font: 12.5px var(--prp-font-ui); }
+.today-head .more:hover { text-decoration: underline; }
+.today-win { grid-column: 1 / -1; margin: 1px 0 0; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
+.today-src { color: var(--prp-faint); }
+.today-list { display: flex; flex-direction: column; }
+.today-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 1px; padding: 8px 13px; text-decoration: none; color: var(--prp-text); }
+.today-row + .today-row { border-top: 1px solid var(--prp-line-soft); }
+.today-row:hover { background: var(--prp-surface-3); }
+.today-label { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 13px/1.35 var(--prp-font-ui); }
+.today-row:hover .today-label { text-decoration: underline; }
+.today-val { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-text); font: 600 13px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.today-val.up { color: var(--prp-up); }
+.today-val.down { color: var(--prp-down); }
+.today-detail { grid-column: 1 / -1; grid-row: 2; min-width: 0; overflow: hidden; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui);
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+/* Loading skeleton: token-coloured bars that hold the panel's space until the real lines replace them. */
+.today-skeleton { gap: 9px; min-height: 200px; padding: 15px 13px; }
+.today-skeleton .sk { height: 11px; border-radius: var(--prp-radius-sm); background: var(--prp-surface-3); animation: today-pulse 1.4s ease-in-out infinite; }
+.today-skeleton .sk-title { height: 14px; width: 52%; margin-bottom: 5px; }
+@keyframes today-pulse { 50% { opacity: .5; } }
 
 /* --- Small screens --------------------------------------------------------- */
 .scrim, .side-close { display: none; }
@@ -161,4 +204,4 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   .np-cap { -webkit-line-clamp: 3; line-clamp: 3; }
   html.np-on .doc { bottom: calc(var(--np-h, 72px) + 14px); }
 }
-@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side, .side.open { transition: none; } .kino-np { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .loading-bar { animation: none; } .side, .side.open { transition: none; } .kino-np { animation: none; } .today-skeleton .sk { animation: none; } }

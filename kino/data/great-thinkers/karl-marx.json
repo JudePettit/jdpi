@@ -175,7 +175,7 @@
         {
           "id": "why-read",
           "title": "Why Marx is still read",
-          "narration": "Most economists reject much of Marx's economic theory, yet the questions he raised about inequality, crises and the power of capital are still at the centre of political argument, and interest in his work revived after the financial crisis of 2008. To see his answers set beside those of Adam Smith, Keynes and the free-market schools, PRP's Learning course reads a single recession six ways.",
+          "narration": "Most economists reject much of Marx's economic theory, yet the questions he raised about inequality, crises and the power of capital are still at the centre of political argument, and interest in his work revived after the financial crisis of 2008. To see his answers set beside those of Adam Smith, Keynes and the free-market schools, Vitruvian Manager's Learning course reads a single recession six ways.",
           "visual": { "kind": "module", "blurb": "One recession, six readings: the classical school, Marx, Keynes, the Austrians, Friedman and Werner." },
           "link": { "label": "Learning · Economics: a recession seen six ways", "suite": "mm", "module": "learning", "at": "fe/learning.html?course=economics&lesson=a-recession-seen-six-ways" },
           "cites": ["hobsbawm-2011", "stedman-jones-2016"]

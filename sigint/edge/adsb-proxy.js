@@ -1,4 +1,4 @@
-// PRP proxy for the public aircraft feed (Cloudflare Pages Function). adsb.lol sends no CORS headers, so the SIGINT
+// Vitruvian Manager proxy for the public aircraft feed (Cloudflare Pages Function). adsb.lol sends no CORS headers, so the SIGINT
 // Dashboard can't read it from the browser; this same-origin endpoint relays one validated query shape with a short
 // edge cache, so many viewers in one area share one upstream request.
 //

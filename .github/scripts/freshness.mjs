@@ -120,7 +120,7 @@ if (!OFFLINE) {
   await smoke('GET /llms.txt', async () => {
     const res = await fetch(`${SITE}/llms.txt`, { signal: AbortSignal.timeout(30e3) });
     const text = await res.text();
-    if (!res.ok || !text.includes('PRP')) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok || !text.includes('Vitruvian Manager')) throw new Error(`HTTP ${res.status}`);
     return `${text.length} characters`;
   });
 }
@@ -130,7 +130,7 @@ const width = Math.max(...rows.map(r => r.what.length));
 for (const r of rows) console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${r.what.padEnd(width)}  ${r.detail}`);
 if (process.env.GITHUB_STEP_SUMMARY) {
   const cell = s => String(s).replace(/\|/g, '\\|');
-  const md = [`## PRP data health: ${problems.length ? `${problems.length} problem${problems.length > 1 ? 's' : ''}` : 'all fresh'}`, '', '| | Check | Detail |', '|---|---|---|',
+  const md = [`## Vitruvian Manager data health: ${problems.length ? `${problems.length} problem${problems.length > 1 ? 's' : ''}` : 'all fresh'}`, '', '| | Check | Detail |', '|---|---|---|',
     ...rows.map(r => `| ${r.ok ? '✅' : '❌'} | ${cell(r.what)} | ${cell(r.detail)} |`)].join('\n');
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
 }

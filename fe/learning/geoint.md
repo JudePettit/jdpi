@@ -1,5 +1,5 @@
 title: Geospatial and imagery intelligence (GEOINT & IMINT)
-intro: A practical, university-style course in geospatial and imagery intelligence for the individual analyst: how satellite and aerial images are made and read, change over time, geolocation and chronolocation, measurement and terrain, coordinates and map data, verification and reporting, and the legal, ethical and safety limits of the work. Each practical unit closes with a walkthrough in PRP's GEOINT & IMINT Dashboard, and two capstone exercises bring the methods together at the end.
+intro: A practical, university-style course in geospatial and imagery intelligence for the individual analyst: how satellite and aerial images are made and read, change over time, geolocation and chronolocation, measurement and terrain, coordinates and map data, verification and reporting, and the legal, ethical and safety limits of the work. Each practical unit closes with a walkthrough in Vitruvian Manager's GEOINT & IMINT Dashboard, and two capstone exercises bring the methods together at the end.
 
 # Unit 1 · Foundations
 
@@ -59,8 +59,8 @@ Pictures of the Earth from above have served intelligence for as long as people 
 
 Three habits are older than satellites: compare the same place over time, measure against known sizes, and recognise patterns from what you have studied before. And imagery persuades most when its date and source are open to checking.
 
-### In PRP: the dashboard at a glance
-PRP's [GEOINT & IMINT Dashboard](#/oi/geoint) puts the free data and tools this course uses in one place, with a tab for each job:
+### In Vitruvian Manager: the dashboard at a glance
+Vitruvian Manager's [GEOINT & IMINT Dashboard](#/oi/geoint) puts the free data and tools this course uses in one place, with a tab for each job:
 - [Overview](#/oi/geoint/overview): which tool answers which question, and the limits to remember for each.
 - [Imagery](#/oi/geoint/imagery): NASA's daily satellite images since 2000 and night lights since 2012, with a before-and-after swipe and links to sharper imagery of the same place.
 - [Fires & hazards](#/oi/geoint/hazards): satellite fire detections, earthquakes and disaster alerts.
@@ -134,7 +134,7 @@ The resolutions pull against each other. A sensor with fine pixels sees a narrow
 | Night lights | Faint visible light at night | Clear nights | Electricity, settlements, gas flares, lit fishing fleets | Moonlight, cloud, snow, twilight |
 | Radar (SAR) | Echoes of microwave pulses it sends | Day and night, through cloud | Floods, ships, ground movement, damage | Not a photograph: it takes practice to read |
 
-**False colour** shows invisible bands as visible colours. Leaves reflect near-infrared strongly, so in the classic colour-infrared view (near-infrared shown as red) healthy vegetation glows red. In short-wave infrared composites, such as the MODIS bands 7-2-1 view in PRP, water is dark blue to black, vegetation green, bare soil brown, ice and snow cyan and fresh burn scars a deep red-brown, while thin smoke almost disappears. Indices turn bands into numbers; the best known measures vegetation:
+**False colour** shows invisible bands as visible colours. Leaves reflect near-infrared strongly, so in the classic colour-infrared view (near-infrared shown as red) healthy vegetation glows red. In short-wave infrared composites, such as the MODIS bands 7-2-1 view in Vitruvian Manager, water is dark blue to black, vegetation green, bare soil brown, ice and snow cyan and fresh burn scars a deep red-brown, while thin smoke almost disappears. Indices turn bands into numbers; the best known measures vegetation:
 
 $ NDVI = (near-infrared − red) ÷ (near-infrared + red)
 
@@ -189,7 +189,7 @@ Where to find them:
 
 ! Rule of thumb: Start coarse and daily to learn when something happened, use Sentinel at 10 m to see what happened, and look for sharper archive or commercial images to identify it. Note every image's date, source and licence as you go.
 
-### In PRP: choosing a product in the Imagery tab
+### In Vitruvian Manager: choosing a product in the Imagery tab
 1. Open [Imagery](#/oi/geoint/imagery) and pick a **Product**: VIIRS (NOAA-20, NOAA-21, or Suomi NPP for days up to 2 November 2026) or MODIS (Terra or Aqua) in true colour, MODIS bands 7-2-1 in false colour, or one of the night-lights products. The **This view** panel gives each product's pixel size and the local time it was taken, checks whether your day has imagery and offers the nearest day that does.
 2. Zoom in only as far as the pixels allow: at 250–750 m you will see towns, rivers, fields, smoke, floods and burn scars, not buildings.
 3. For sharper views, use **Open the same place in**: the Copernicus Browser's Sentinel-2 (colour or short-wave infrared), Sentinel-1 radar and pan-sharpened Landsat 8–9, each with a date window ending on your day, as well as NASA Worldview, Esri Wayback, Google Earth, USGS EarthExplorer and LandsatLook.
@@ -269,7 +269,7 @@ Keep a consistent ladder of confidence for identifications:
 
 Use these words for what something is, and estimative language for judgements about what will happen or why (the OSINT course's lesson on [biases and estimative language](#/oi/osint-training/course-osint?at=fe%2Flearning.html%3Fcourse%3Dosint%26lesson%3Dbiases-and-estimative-language)). Write the observation and the inference separately: "Observed: six objects about 7 m long, in two rows behind earth banks. Assessed: probably self-propelled guns, from their size, the gun-like shadows and the tracks leading to them." Annotate a copy and keep the clean original beside it.
 
-### In PRP: practising interpretation
+### In Vitruvian Manager: practising interpretation
 1. In [Measure & geolocate](#/oi/geoint/measure), set the **Base** to **Imagery** (Esri World Imagery: sub-metre in many places, but stitched from captures of different dates, none shown on the map) or **Sentinel-2** (a cloud-free 10 m mosaic made in 2025), and zoom into a port, an airport and a power station you know. Name each element you use.
 2. Check sizes with the **Distance** and **Area** tools against the [known sizes](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dhardware%26s%3Dhardware-known-sizes-for-measuring-in-imagery) in the Hardware Guide.
 3. Use [Features](#/oi/geoint/features) as an answer key, since OpenStreetMap often names what you are looking at, and for dated, sharper captures open the place in Esri Wayback or Google Earth from the [Imagery](#/oi/geoint/imagery) tab's links.
@@ -337,7 +337,7 @@ A single pair of images can mislead; a long series shows what is normal for the 
 - Heat that recurs at one spot night after night is usually industrial.
 - Check the same place in the same season of earlier years before calling anything unusual. The Economist's tracker of the fighting in Ukraine worked on this principle, flagging fires that the usual pattern for that place and season did not explain.
 
-### In PRP: before and after, lights and fires
+### In Vitruvian Manager: before and after, lights and fires
 1. In [Imagery](#/oi/geoint/imagery), tick **Before/after swipe**, set the two dates and drag the divider, or focus it and use the arrow keys. The presets show what to look for: [the Kakhovka reservoir draining after the dam was breached on 6 June 2023](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dimagery%26preset%3Dkakhovka), [the Aral Sea in 2000 and 2025](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dimagery%26preset%3Daral), [the Indus floods of 2022 in false colour](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dimagery%26preset%3Dindus), [the Houston blackout of February 2021](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dimagery%26preset%3Dhouston) and [the Los Angeles fires of January 2025](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dimagery%26preset%3Dla-fires), with fire detections on top.
 2. For night lights, set **Black Marble** beside the unprocessed **Day/Night Band** of the same night, and check the moon and the cloud before you call a blackout. For nights after 2 November 2026, when Suomi NPP's data stop, choose the NOAA-20 Black Marble.
 3. In [Fires & hazards](#/oi/geoint/hazards), set the **Fire day**, compare the VIIRS and MODIS detections, and step back through earlier days and the same season in earlier years. Add your own free NASA FIRMS key to list the last 24 hours to 7 days with times and intensities. The same map shows USGS earthquakes and GDACS disaster alerts, which are often the first sign that imagery is worth checking.
@@ -406,7 +406,7 @@ The standard of proof:
 
 ! Worked example: A photo shows a domed church directly in front of a brick chimney: on the map, the line through the chimney and the dome, extended past the dome, runs west across a river. A second alignment in the photo, the west pier of a three-arched bridge in front of a mast on the hill beyond, gives a second line, which crosses the first on the riverbank 400 m west of the church. That is the candidate camera position: check the rest of the scene from there at street level.
 
-### In PRP: geolocating with Features and Measure & geolocate
+### In Vitruvian Manager: geolocating with Features and Measure & geolocate
 1. In [Features](#/oi/geoint/features), use **Find a place** to move to the area of the claim, choose a preset that makes a good landmark (places of worship, water towers, telecom masts and lighthouses under Landmarks for geolocation, or bridges and railway stations under Transport), and tick **Only within** to require a second feature nearby, for example [any place of worship no more than 200 m from a railway station](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dfeatures%26fp%3Dworship%26fn%3Dstations%26fnr%3D200). Run the query on the current view or around a point, or open it in Overpass Turbo.
 2. In [Measure & geolocate](#/oi/geoint/measure), set the base to **Imagery** and check each candidate. For an alignment, use **Bearing** to measure from the farther feature to the nearer one, then choose **Bearing line**, click the nearer feature and add a line on that bearing, which is filled in for you: the camera lies somewhere along it. Add a second alignment, and the page marks where the lines cross. If you know the bearing on which the camera saw a landmark, from a compass heading in the metadata for example, click the landmark, enter that bearing and tick "seen from the camera".
 3. Open the candidate in **Street level and 3D**: Mapillary, KartaView, Google Street View, PeakVisor (looking along your last bearing), Google Earth and OpenStreetMap.
@@ -476,7 +476,7 @@ Shadows are not the only clock. Combine them with these:
 - Re-uploads give old pictures new dates, so find the earliest appearance (the OSINT course's lesson on [reverse image search and metadata](#/oi/osint-training/course-osint?at=fe%2Flearning.html%3Fcourse%3Dosint%26lesson%3Dreverse-image-search-metadata-and-synthetic-media)).
 - Work in UTC, convert only at the end, and say which zone you mean.
 
-### In PRP: the Sun and shadows and chronolocation panels
+### In Vitruvian Manager: the Sun and shadows and chronolocation panels
 1. In [Measure & geolocate](#/oi/geoint/measure), click the place with **Inspect** or paste its coordinates into **Go to coordinates**. The **Sun and shadows** panel estimates the time zone from the position: check it, and whether summer time applied.
 2. Set the claimed **Day** and **Local time** to read the sun's azimuth and altitude, and the direction of shadows and their length for the object height you enter. The chart shows the sun's altitude through the day.
 3. On sharp imagery, use the **Shadow** tool: click the base of an upright object, then the tip of its shadow, and the direction and length go into the chronolocation form. For a ground photo, type in the direction, height and length you estimated.
@@ -502,7 +502,7 @@ Measure on the Earth, not on the screen. Web maps use the **Web Mercator** proje
 
 $ metres per pixel = 156,543 × cos(latitude) ÷ 2^zoom   (for standard 256-pixel map tiles)
 
-At zoom 17 a pixel covers 1.19 m at the equator but 0.71 m in Dublin (53.35° N), where distances are drawn 1.68 times as long as at the equator and areas 2.8 times as large. That is why Greenland looks as big as Africa, which is about fourteen times larger. Tools that measure on the Earth's surface rather than the screen avoid the problem: PRP's measure distances and bearings on the WGS84 ellipsoid and areas on an equal-area sphere.
+At zoom 17 a pixel covers 1.19 m at the equator but 0.71 m in Dublin (53.35° N), where distances are drawn 1.68 times as long as at the equator and areas 2.8 times as large. That is why Greenland looks as big as Africa, which is about fourteen times larger. Tools that measure on the Earth's surface rather than the screen avoid the problem: Vitruvian Manager's measure distances and bearings on the WGS84 ellipsoid and areas on an equal-area sphere.
 - **Distance.** The shortest route is a great circle (a geodesic on the ellipsoid). A straight line on a Mercator map is a rhumb line of constant bearing, which is longer except along the equator or a meridian.
 - **Bearing.** There are three norths. **True** north, which the dashboard uses, points to the geographic pole. **Magnetic** north, a compass's, differs by the declination, a few degrees at most in Ireland and Britain today but more elsewhere, and it changes year by year (the Hardware Guide's note on [true, magnetic and grid north](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dhardware%26s%3Dhardware-true-magnetic-and-grid-north)). **Grid** north, on UTM and the Irish and British grids, parts from true north by an angle that grows with distance from each grid's central meridian, reaching a degree or more. A back bearing is the bearing plus or minus 180°.
 - **Area.** Measure on the ellipsoid or in an equal-area projection, and give a margin. On a 10 m image an outline is uncertain by about half a pixel all round: for a site 500 m square, that is 2,000 m of edge × 5 m, about ±1 ha of its 25 ha, or ±4%.
@@ -545,7 +545,7 @@ Uses: can a camera on this ridge see the valley floor? Which hilltops overlook a
 
 ! Caution: A terrain model leaves out most buildings, walls and trees, and a surface model may include trees felled since it was made. A clear line of sight means "possible", not "proven": confirm it with imagery or a photo from the spot.
 
-### In PRP: measuring in the Measure & geolocate tab
+### In Vitruvian Manager: measuring in the Measure & geolocate tab
 1. In [Measure & geolocate](#/oi/geoint/measure), **Inspect** a point to read its decimal degrees, DMS, MGRS and terrain height (±10–30 m), or go to coordinates you paste in.
 2. **Distance** (click points, then double-click, press Enter or choose Finish) gives the ellipsoidal length in kilometres, miles and nautical miles, with a table of each segment's length and bearing when there are several. **Area** gives the area and perimeter, and **Bearing** the true bearing, back bearing and distance.
 3. With a distance line drawn, open **Elevation profile and line of sight**, enter the observer's and the target's heights above the ground, and read whether the line is clear and, if not, where it is blocked. The profile allows for curvature and refraction, and a table view lists the numbers.
@@ -623,7 +623,7 @@ So 29U PV 823 146 is the 100 m square that contains the Spire. References are tr
 ## Gazetteers, OpenStreetMap and Overpass
 **Gazetteers** are directories of place names with their coordinates and types:
 - **[GeoNames](https://www.geonames.org)**, worldwide and free under a Creative Commons licence, and the US National Geospatial-Intelligence Agency's **GEOnet Names Server**, for places outside the US, with variant and historical spellings.
-- **Wikidata**, where each place has a Q-number linked to its other names and to everything else recorded about it; PRP's [Encyclopaedia](#/rs/encyclopedia) keys every entry to one.
+- **Wikidata**, where each place has a Q-number linked to its other names and to everything else recorded about it; Vitruvian Manager's [Encyclopaedia](#/rs/encyclopedia) keys every entry to one.
 - National gazetteers such as Ireland's Placenames Database, **[logainm.ie](https://www.logainm.ie)**, with the official Irish and English forms, and Great Britain's **OS Open Names**.
 
 Names are slippery. They differ by language and script (Baile Átha Cliath and Dublin; Kharkiv, Kharkov and Харків), by politics (Derry and Londonderry) and over time (Dnipropetrovsk became Dnipro in 2016; Artemivsk became Bakhmut the same year, though Russian officials still call it Artyomovsk), and many places share a name (Ireland alone has a great many called Newtown). Search every variant, and record the identifier, not only the name.
@@ -637,9 +637,9 @@ Names are slippery. They differ by language and script (Baile Átha Cliath and D
 
 $ nwr["man_made"="water_tower"]({{bbox}})->.towers; nwr["railway"="station"](around.towers:300); out center;
 
-**Nominatim**, OSM's place search, asks for no more than one search a second and no searching as you type, and PRP keeps to that.
+**Nominatim**, OSM's place search, asks for no more than one search a second and no searching as you type, and Vitruvian Manager keeps to that.
 
-### In PRP: querying OpenStreetMap in the Features tab
+### In Vitruvian Manager: querying OpenStreetMap in the Features tab
 1. In [Features](#/oi/geoint/features), use **Find a place** to move the map; it searches once, when you press Search.
 2. Choose a preset under **Features**: transport (airfields, helipads, ports, stations, bridges, border crossings), energy and water (power plants, substations, wind turbines, fuel depots, dams), civil (hospitals, and military areas as tagged in OSM) or landmarks for geolocation. Search the **Current view**, or **Around a point** within 1–25 km, and tick **Only within** to require another feature nearby.
 3. **Run query**, click a point for its tags, read the table and **Download GeoJSON** to keep a copy; note the date of the OSM data shown above the table.
@@ -715,7 +715,7 @@ An imagery report, in order:
 
 ! Caption example: Figure 2. A new embankment about 120 m long (arrow) at a quarry, seen on 3 May (left) and 11 May 2026 (right). Sentinel-2 Level-2A true colour, 10 m pixels. Contains modified Copernicus Sentinel data 2026. (A fictional example.)
 
-### In PRP: keeping the record and building the figure
+### In Vitruvian Manager: keeping the record and building the figure
 1. Fingerprint each file you download in the OSINT Dashboard's [Archives](#/oi/osint/archives) tab, which computes its SHA-256 hash in your browser, and log each finding in its [Case notebook](#/oi/osint/notebook) with the image's provider, scene and date, the source grade, an archived link and the hash. Export the notebook with your report.
 2. Copy coordinates and MGRS references from [Measure & geolocate](#/oi/geoint/measure), and each image's product, date and credit from the caption under the [Imagery](#/oi/geoint/imagery) map.
 3. Build map figures with the Software Cookbook's [Recipe 4: make a map figure for a report](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dcookbook%26s%3Dcookbook-recipe-4-make-a-map-figure-for-a-report), with a scale bar, a north arrow, an inset map, a caption and credits.
@@ -798,7 +798,7 @@ Services have rules of their own: Nominatim allows one search a second, the publ
 - Imagery of disasters and war can be distressing: limit your exposure, take breaks and talk to someone.
 - The Berkeley Protocol's ethical principles (dignity, humility, inclusivity, independence and transparency) apply to imagery as to any other open source; the OSINT course's lesson on [doing no harm and staying safe](#/oi/osint-training/course-osint?at=fe%2Flearning.html%3Fcourse%3Dosint%26lesson%3Ddoing-no-harm-and-staying-safe) puts them into practice.
 
-### In PRP: the Law & ethics tab
+### In Vitruvian Manager: the Law & ethics tab
 1. Read the GEOINT & IMINT Dashboard's [Law & ethics](#/oi/geoint/law). It covers data protection when people are in the picture, the rules on flying and on access to land, the places where photographing a military site is a crime, imagery licences and safe publication.
 2. Keep its four ground rules: public sources, on their own terms; places, events and infrastructure, never private people; corroboration before publication; and no harm.
 3. Answer every question in its checklist before you publish an image or a map.

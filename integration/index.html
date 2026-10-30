@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Integration Hub · PRP</title>
-<meta name="description" content="Connect AI assistants and plugins to PRP: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.">
+<title>Integration Hub · VM</title>
+<meta name="description" content="Connect AI assistants and plugins to Vitruvian Manager: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.">
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="../design/brand-prp.svg" type="image/svg+xml">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../design/prp.css">
 <link rel="stylesheet" href="hub.css">
-<link rel="alternate" type="application/json" title="PRP data catalogue" href="catalog.json">
+<link rel="alternate" type="application/json" title="Vitruvian Manager data catalogue" href="catalog.json">
 <script src="../design/prp-bar.js" data-suite="ds" data-module="integration-hub" data-shell="../" defer></script>
 <script type="module" src="hub.js"></script>
 </head>
@@ -19,7 +19,7 @@
   <header class="front">
     <div class="prp-eyebrow">Digital Science <span class="sep">·</span> Integration Hub</div>
     <h1 class="prp-title">Integration Hub</h1>
-    <p class="prp-dek">PRP's data, open to AI assistants and plugins: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars. Everything is public and read-only, and needs no key.</p>
+    <p class="prp-dek">Vitruvian Manager's data, open to AI assistants and plugins: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars. Everything is public and read-only, and needs no key.</p>
     <div class="prp-meta" id="meta"><span>Loading the catalogue…</span></div>
   </header>
 
@@ -38,10 +38,10 @@
     <div class="prp-kpis" id="kpis" aria-live="polite"></div>
     <div class="two">
       <div class="prp-panel">
-        <div class="prp-panel-head"><h2 class="prp-h2">What PRP offers an AI assistant</h2></div>
+        <div class="prp-panel-head"><h2 class="prp-h2">What Vitruvian Manager offers an AI assistant</h2></div>
         <div class="prp-panel-body prp-prose">
-          <p>PRP collects what is happening in the world, and what happened before, into one workspace: elections and political events, wars and armed conflict, each country's condition and volatility, a century of political history, the news across the political spectrum, new research in science, economics and technology, disclosures by members of Congress and famous investors, and an Encyclopaedia that links them all.</p>
-          <p>The Integration Hub lets an assistant such as Claude read all of it directly, so it can answer with PRP's figures and say where each came from. It can list the datasets, look at their fields, filter and sort rows, search the Encyclopaedia, read the latest briefings, check the political calendar and pull together one country's picture.</p>
+          <p>Vitruvian Manager collects what is happening in the world, and what happened before, into one workspace: elections and political events, wars and armed conflict, each country's condition and volatility, a century of political history, the news across the political spectrum, new research in science, economics and technology, disclosures by members of Congress and famous investors, and an Encyclopaedia that links them all.</p>
+          <p>The Integration Hub lets an assistant such as Claude read all of it directly, so it can answer with Vitruvian Manager's figures and say where each came from. It can list the datasets, look at their fields, filter and sort rows, search the Encyclopaedia, read the latest briefings, check the political calendar and pull together one country's picture.</p>
           <p>Nothing can be changed through it, nothing private is in it, and there is nothing to sign up for.</p>
         </div>
       </div>
@@ -64,7 +64,7 @@
             <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
               <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-arrowhead"/></marker></defs>
               <g class="d-box"><rect x="10" y="20" width="200" height="210" rx="6"/></g>
-              <text x="110" y="46" class="d-title" text-anchor="middle">PRP submodules</text>
+              <text x="110" y="46" class="d-title" text-anchor="middle">VM submodules</text>
               <text x="110" y="74" class="d-text" text-anchor="middle">Calendars · Battlefield</text>
               <text x="110" y="96" class="d-text" text-anchor="middle">Volatility · National Analysis</text>
               <text x="110" y="118" class="d-text" text-anchor="middle">Briefings · Encyclopaedia</text>
@@ -96,7 +96,7 @@
               </g>
             </svg>
           </div>
-          <figcaption id="fig1-cap"><b>Figure 1.</b> PRP's submodules publish their data as static files; the Integration Hub describes every dataset in one catalogue and serves it read-only to assistants through an MCP server, a JSON API, feeds and calendars, or as plain files. Arrows show the direction data flows; nothing flows back.</figcaption>
+          <figcaption id="fig1-cap"><b>Figure 1.</b> Vitruvian Manager's submodules publish their data as static files; the Integration Hub describes every dataset in one catalogue and serves it read-only to assistants through an MCP server, a JSON API, feeds and calendars, or as plain files. Arrows show the direction data flows; nothing flows back.</figcaption>
         </figure>
       </div>
     </div>
@@ -128,7 +128,7 @@
           <h3 class="prp-h3">Claude Code</h3>
           <div class="code"><pre><code id="cc-cmd">claude mcp add --transport http prp https://jdpi.pages.dev/mcp</code></pre><button type="button" class="prp-btn sm copy" data-copy="cc-cmd">Copy</button></div>
           <h3 class="prp-h3">Claude (desktop and web)</h3>
-          <p>Open <b>Settings → Connectors → Add custom connector</b>, name it <i>PRP</i> and paste the server address. Leave the authentication settings empty.</p>
+          <p>Open <b>Settings → Connectors → Add custom connector</b>, name it <i>Vitruvian Manager</i> and paste the server address. Leave the authentication settings empty.</p>
           <h3 class="prp-h3">Other MCP clients</h3>
           <p>Any client that speaks MCP over Streamable HTTP can use the address directly. A client that only runs local (stdio) servers can use the local server below, or a bridge such as <code>mcp-remote</code>.</p>
           <div class="code"><pre><code id="json-cfg">{
@@ -141,7 +141,7 @@
       <div class="prp-panel">
         <div class="prp-panel-head"><h2 class="prp-h2">Run it locally</h2><span class="prp-label">stdio · Node 18+</span></div>
         <div class="prp-panel-body stack">
-          <p>The same tools as one file with no dependencies. It reads PRP's files over HTTPS and has no edge time limit, so it can read every shard of a big dataset in one call.</p>
+          <p>The same tools as one file with no dependencies. It reads Vitruvian Manager's files over HTTPS and has no edge time limit, so it can read every shard of a big dataset in one call.</p>
           <p><a class="prp-btn" href="mcp/prp-mcp.mjs" download>Download prp-mcp.mjs</a></p>
           <h3 class="prp-h3">Claude Code</h3>
           <div class="code"><pre><code id="local-cc">claude mcp add prp-local -- node /path/to/prp-mcp.mjs</code></pre><button type="button" class="prp-btn sm copy" data-copy="local-cc">Copy</button></div>
@@ -232,9 +232,9 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
   <section id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" class="panel" hidden>
     <div class="two">
       <div class="prp-panel">
-        <div class="prp-panel-head"><h2 class="prp-h2">The PRP skill for Claude</h2></div>
+        <div class="prp-panel-head"><h2 class="prp-h2">The Vitruvian Manager skill for Claude</h2></div>
         <div class="prp-panel-body stack">
-          <p>A skill teaches Claude when and how to use PRP's data: which tool answers which question, how to query well, what each dataset's caveats are and how to credit sources. It works with the MCP server connected, or with plain web access through the API.</p>
+          <p>A skill teaches Claude when and how to use Vitruvian Manager's data: which tool answers which question, how to query well, what each dataset's caveats are and how to credit sources. It works with the MCP server connected, or with plain web access through the API.</p>
           <p><a class="prp-btn primary" href="skill/prp-data.zip" download>Download prp-data.zip</a> <a class="prp-btn ghost" href="skill/prp-data/SKILL.md">Read SKILL.md</a></p>
           <h3 class="prp-h3">Claude (desktop and web)</h3>
           <p><b>Settings → Capabilities → Skills → Upload skill</b>, then choose the zip.</p>
@@ -243,20 +243,20 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
   &amp;&amp; curl -fsSLO https://jdpi.pages.dev/integration/skill/prp-data.zip \
   &amp;&amp; unzip -o prp-data.zip &amp;&amp; rm prp-data.zip</code></pre><button type="button" class="prp-btn sm copy" data-copy="skill-cc">Copy</button></div>
           <h3 class="prp-h3">Any other assistant</h3>
-          <p>Point it at <a href="../llms.txt"><code>/llms.txt</code></a>, a short guide for language models: what PRP is, where the catalogue, MCP server and API are, and the licences.</p>
+          <p>Point it at <a href="../llms.txt"><code>/llms.txt</code></a>, a short guide for language models: what Vitruvian Manager is, where the catalogue, MCP server and API are, and the licences.</p>
         </div>
       </div>
       <div class="prp-panel">
         <div class="prp-panel-head"><h2 class="prp-h2">For plugin authors</h2></div>
         <div class="prp-panel-body stack">
           <p><b>Build on the catalogue.</b> <code>catalog.json</code> is the contract: dataset ids, file paths, record paths and field names stay stable, and new fields are only added. Read it rather than hard-coding file names.</p>
-          <p><b>Bundle the server.</b> A Claude Code plugin can declare PRP in its <code>.mcp.json</code> (either the remote address or the local file) and ship the skill in its <code>skills/</code> folder.</p>
+          <p><b>Bundle the server.</b> A Claude Code plugin can declare Vitruvian Manager in its <code>.mcp.json</code> (either the remote address or the local file) and ship the skill in its <code>skills/</code> folder.</p>
           <div class="code"><pre><code id="plugin-mcp">{
   "mcpServers": {
     "prp": { "type": "http", "url": "https://jdpi.pages.dev/mcp" }
   }
 }</code></pre><button type="button" class="prp-btn sm copy" data-copy="plugin-mcp">Copy</button></div>
-          <p><b>Be a good neighbour.</b> Cache what you read (most data change daily or less), keep to about two requests a second, and for bulk work download the static files once. Show the licence and sources the catalogue gives, and link back to the PRP page (<code>page</code>) where people can see the data in context.</p>
+          <p><b>Be a good neighbour.</b> Cache what you read (most data change daily or less), keep to about two requests a second, and for bulk work download the static files once. Show the licence and sources the catalogue gives, and link back to the Vitruvian Manager page (<code>page</code>) where people can see the data in context.</p>
           <p><b>Versioning.</b> The API lives under <code>/api/v1/</code>; a breaking change would come as <code>/api/v2/</code>, with v1 kept running.</p>
         </div>
       </div>
@@ -270,8 +270,8 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
         <div class="prp-panel-head"><h2 class="prp-h2">What it can and cannot do</h2></div>
         <div class="prp-panel-body stack">
           <ul class="ticks">
-            <li><b>Read-only.</b> Every tool and endpoint only reads; none accepts data to store, and none changes anything in PRP.</li>
-            <li><b>Public data only.</b> It serves the same files as PRP's public pages. There are no accounts, cookies or keys, and it keeps nothing about you beyond a one-minute request count used for rate limiting.</li>
+            <li><b>Read-only.</b> Every tool and endpoint only reads; none accepts data to store, and none changes anything in Vitruvian Manager.</li>
+            <li><b>Public data only.</b> It serves the same files as Vitruvian Manager's public pages. There are no accounts, cookies or keys, and it keeps nothing about you beyond a one-minute request count used for rate limiting.</li>
             <li><b>Fixed files.</b> The server reads only the files the catalogue lists (plus the Encyclopaedia shards and country profiles). A tool argument can never name a file, and nothing is fetched from anywhere else.</li>
             <li><b>Capped.</b> At most 100 rows and about 48 KB per answer; long texts are shortened; a search uses at most eight words; big datasets are read in shards within a work budget. Every answer says when it was cut.</li>
             <li><b>Rate-limited.</b> About 120 MCP calls and 240 API calls a minute per client, and one tool call per request (a batch included). Over that you get <i>429</i> with <i>Retry-After</i>. For heavy use, run the local server or download the files.</li>
@@ -281,10 +281,10 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
       <div class="prp-panel">
         <div class="prp-panel-head"><h2 class="prp-h2">What is never exposed</h2></div>
         <div class="prp-panel-body stack">
-          <p><b>Tally Stick and Algo Trader</b>, PRP's private trading tools, are not part of the Integration Hub. There are no balances, positions, orders, brokers, rules, risk limits or keys here. Tally Stick's own MCP connection for trading agents is a separate, private server behind its own sign-in; this server cannot reach it and shares nothing with it.</p>
-          <p><b>Nothing personal.</b> Your topics in the Intelligence Briefing, your OSINT case notebook and other things you keep in PRP pages stay in your browser and never reach these servers.</p>
+          <p><b>Tally Stick and Algo Trader</b>, Vitruvian Manager's private trading tools, are not part of the Integration Hub. There are no balances, positions, orders, brokers, rules, risk limits or keys here. Tally Stick's own MCP connection for trading agents is a separate, private server behind its own sign-in; this server cannot reach it and shares nothing with it.</p>
+          <p><b>Nothing personal.</b> Your topics in the Intelligence Briefing, your OSINT case notebook and other things you keep in Vitruvian Manager pages stay in your browser and never reach these servers.</p>
           <h3 class="prp-h3">Text is data, not instructions</h3>
-          <p>Headlines, summaries and notes come from publishers, Wikipedia and Wikidata. The server returns them as data fields and tells assistants not to follow instructions found inside them. If you build on PRP, do the same.</p>
+          <p>Headlines, summaries and notes come from publishers, Wikipedia and Wikidata. The server returns them as data fields and tells assistants not to follow instructions found inside them. If you build on Vitruvian Manager, do the same.</p>
         </div>
       </div>
     </div>
@@ -302,11 +302,11 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
           <tr><td>CShapes 2.0</td><td>CC BY-NC-SA 4.0</td><td>Non-commercial use only; credit Schvitz et al. (2022).</td><td>Historical state names and borders</td></tr>
           <tr><td>US House Clerk, SEC EDGAR</td><td>Public records</td><td>No restriction; not investment advice.</td><td>Auto Trader</td></tr>
           <tr><td>News and journal publishers</td><td>© the publishers</td><td>Quote headlines briefly and link to the original.</td><td>Intelligence, Scientific, Economics and Digital Briefings</td></tr>
-          <tr><td>PRP's own text and compilations</td><td>© JDP-Iq</td><td>Credit "PRP (jdpi.pages.dev)" and link back.</td><td>War backgrounds, monthly notes, indices, Kino</td></tr>
+          <tr><td>Vitruvian Manager's own text and compilations</td><td>© JDP-Iq</td><td>Credit "Vitruvian Manager (jdpi.pages.dev)" and link back.</td><td>War backgrounds, monthly notes, indices, Kino</td></tr>
         </tbody>
       </table></div>
     </div>
-    <p class="prp-note warn"><b>No warranty, no advice.</b> PRP is a personal project run on free hosting; the service may be slow or down, and data can be late, incomplete or wrong. Check figures against the sources each dataset names. Nothing here is investment, legal or security advice.</p>
+    <p class="prp-note warn"><b>No warranty, no advice.</b> Vitruvian Manager is a personal project run on free hosting; the service may be slow or down, and data can be late, incomplete or wrong. Check figures against the sources each dataset names. Nothing here is investment, legal or security advice.</p>
   </section>
 
   <footer class="prp-sources">

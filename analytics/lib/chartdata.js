@@ -216,10 +216,10 @@ export function prepareChart(table, c, opts = {}) {
       return true;
     });
     keyX = r => { const m = match(r[X.name]); names.set(m.iso3, m); return m.iso3; };
-    if (!rows.length) return { ok: false, error: `None of the values in “${X.name}” are countries PRP recognises (ISO codes or English names)` };
+    if (!rows.length) return { ok: false, error: `None of the values in “${X.name}” are countries Vitruvian Manager recognises (ISO codes or English names)` };
     if (unknown.size) {
       const list = [...unknown.entries()].sort((a, b) => b[1] - a[1]);
-      notes.push(`${list.length.toLocaleString('en-GB')} value${list.length === 1 ? ' is' : 's are'} not a country PRP recognises and ${list.length === 1 ? 'is' : 'are'} left out: ${list.slice(0, 8).map(e => e[0]).join(', ')}${list.length > 8 ? ', …' : ''}.`);
+      notes.push(`${list.length.toLocaleString('en-GB')} value${list.length === 1 ? ' is' : 's are'} not a country Vitruvian Manager recognises and ${list.length === 1 ? 'is' : 'are'} left out: ${list.slice(0, 8).map(e => e[0]).join(', ')}${list.length > 8 ? ', …' : ''}.`);
     }
   }
   const f = S && c.type !== 'map' ? foldSeries(rows, getS, () => 1, LIMITS.series, LIMITS.series - 1) : null;

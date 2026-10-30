@@ -88,7 +88,7 @@ function eventTypes(input) {
 
 /* ============================================================================ briefings */
 const BRIEFINGS = {
-  intelligence: { file: 'briefing/data/latest.json', name: 'Intelligence Briefing', page: 'q/briefing.html', module: 'Realtime Intelligence' },
+  intelligence: { file: 'briefing/data/latest.json', name: 'Intelligence Briefing', page: 'q/briefing.html', module: 'Realtime Geopolitics' },
   scientific: { file: 'science/briefing/data/stories.json', name: 'Scientific Briefing', page: 'science/briefing/index.html', module: 'Natural Science' },
   economics: { file: 'econ/briefing/data/stories.json', name: 'Economics Briefing', page: 'econ/briefing/index.html', module: 'Money Management' },
   digital: { file: 'digital/briefing/data/stories.json', name: 'Digital Briefing', page: 'digital/briefing/index.html', module: 'Digital Science' }
@@ -146,7 +146,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     return !!qi && Object.values(qi.datasets).some(d => d.parts.some(p => p.url === path));
   }
   async function getJson(path, { optional = false } = {}) {
-    if (!allowed(path)) throw new ToolError('That file is not part of the PRP catalogue.', 403);
+    if (!allowed(path)) throw new ToolError('That file is not part of the Vitruvian Manager catalogue.', 403);
     const hit = cache.get(path);
     if (hit && (!L.ttlMs || Date.now() - hit.at < L.ttlMs)) { cache.delete(path); cache.set(path, hit); return hit.value; }
     if (hit) { cache.delete(path); cacheSize -= hit.size; }
@@ -515,7 +515,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       .sort((x, y) => y.exact - x.exact || y.c.hits - x.c.hits || y.c.s - x.c.s || (y.e.total || 0) - (x.e.total || 0))
       .slice(0, limit)
       .map(({ e }) => ({ qid: e.q, label: e.label, type: e.type, description: e.desc || null, mentions: e.total || 0, wikipedia: e.wiki ? wikiUrl(e.wiki) : null, encyclopaedia: `${site}encyclopedia/index.html#${e.q}`, summary: clip(e.summary || '', 280) || null }));
-    return { query: q, ...(type ? { type } : {}), matched: total, returned: results.length, results, ...(notes.length ? { notes } : {}), hint: 'get_entity gives the full record: facts, relations, tags and where PRP mentions it.', licence: 'Wikidata CC0; summaries from Wikipedia, CC BY-SA 4.0.', notice: NOTICE };
+    return { query: q, ...(type ? { type } : {}), matched: total, returned: results.length, results, ...(notes.length ? { notes } : {}), hint: 'get_entity gives the full record: facts, relations, tags and where Vitruvian Manager mentions it.', licence: 'Wikidata CC0; summaries from Wikipedia, CC BY-SA 4.0.', notice: NOTICE };
   }
   const wikiUrl = t => 'https://en.wikipedia.org/wiki/' + encodeURIComponent(String(t).replace(/ /g, '_')).replace(/%2F/g, '/').replace(/%3A/g, ':').replace(/%2C/g, ',').replace(/%28/g, '(').replace(/%29/g, ')');
   const titleShard = t => { let h = 2166136261; const s = String(t).replace(/_/g, ' ').trim().replace(/^./, c => c.toUpperCase()); for (const c of s) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return [h % 256, s]; };
@@ -530,7 +530,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     }
     if (!qid || !/^Q\d{1,10}$/.test(qid)) throw new ToolError('Give a Wikidata id such as "Q725556", or a Wikipedia title.');
     const e = (await getJson(`lake/data/e/${+qid.slice(1) % 512}.json`, { optional: true }) || {})[qid];
-    if (!e) throw new ToolError(`${qid} is not in the PRP Encyclopaedia. Try search_encyclopaedia.`, 404);
+    if (!e) throw new ToolError(`${qid} is not in the Vitruvian Manager Encyclopaedia. Try search_encyclopaedia.`, 404);
     const reg = await getJson('registry.json', { optional: true });
     const names = {}; for (const s of reg?.suites || []) for (const m of s.modules) names[m.id] = m.name;
     const mentions = (e.mentions || []);
@@ -559,7 +559,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     const partial = idx.countries.filter(c => c.names.some(n => foldText(n).replace(/[^\p{L}\p{N}]+/gu, ' ').trim().startsWith(key)));
     if (partial.length === 1) return partial[0];
     if (partial.length > 1) throw new ToolError(`"${s}" could be ${partial.slice(0, 6).map(c => `${c.name} (${c.iso3})`).join(', ')}. Use an ISO code.`);
-    throw new ToolError(`No country "${s}" in PRP. Use a name or an ISO 3166 code.`, 404);
+    throw new ToolError(`No country "${s}" in Vitruvian Manager. Use a name or an ISO 3166 code.`, 404);
   }
   async function countryProfile(a = {}) {
     const c = await resolveCountry(a.country ?? a.iso3 ?? a.name);
@@ -691,7 +691,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
   async function listSubmodules(a = {}) {
     const reg = await getJson('registry.json');
     const m = a.module ? foldText(a.module).trim() : null;
-    const list = reg.suites.filter(s => !m || s.id === m || (s.aliases || []).includes(m) || foldText(s.name) === m).flatMap(s => s.modules.map(x => ({ module: s.id, module_name: s.name, id: x.id, name: x.name, kind: x.kind, status: x.status,
+    const list = reg.suites.filter(s => !m || s.id === m || (s.aliases || []).includes(m) || foldText(s.name) === m || foldText(s.title || '') === m).flatMap(s => s.modules.map(x => ({ module: s.id, module_name: s.title || s.name, id: x.id, name: x.name, kind: x.kind, status: x.status,
       private: !!x.opensInNewTab, url: x.url ? (/^https?:/.test(x.url) ? x.url : site + x.url) : null, description: x.description })));
     return { platform: `${reg.platform.fullName} (${reg.platform.name}), by ${reg.platform.company}`, count: list.length, submodules: list,
       note: 'Private submodules (Tally Stick, Algo Trader) sit behind their own sign-in; this server has no access to them.' };
@@ -702,9 +702,9 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
   const S = (properties, required = []) => ({ type: 'object', properties, required, additionalProperties: false });
   const cond = { type: 'object', properties: { field: { type: 'string' }, op: { type: 'string', enum: Object.keys(OPS) }, value: { description: 'String, number, boolean or null; a list for `in`.' } }, required: ['field', 'value'] };
   const tools = [
-    { name: 'list_datasets', title: 'List PRP datasets', fn: listDatasets,
-      description: 'List the public datasets in PRP (Personal Resource Planner): world politics and conflict, history, markets and disclosures, science and technology. Returns each dataset\'s id, title, module, row count, refresh cadence, licence and field names. Start here.',
-      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt (Realtime Intelligence), rs (Retrospective Intelligence), mm (Money Management), ns (Natural Science), ds (Digital Science), kino; or a submodule id.' }, query: { type: 'string', description: 'Words that must appear in the id, title, description or field names.' } }) },
+    { name: 'list_datasets', title: 'List Vitruvian Manager datasets', fn: listDatasets,
+      description: 'List the public datasets in Vitruvian Manager (VM, by JDP-Iq): world politics and conflict, history, markets and disclosures, science and technology. Returns each dataset\'s id, title, module, row count, refresh cadence, licence and field names. Start here.',
+      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt (Realtime Geopolitics), rs (Retrospective Geopolitics), mm (Money Management), ns (Natural Science), ds (Digital Science), kino; or a submodule id.' }, query: { type: 'string', description: 'Words that must appear in the id, title, description or field names.' } }) },
     { name: 'describe_dataset', title: 'Describe a dataset', fn: describeDataset,
       description: 'Everything about one dataset: what it is, every field with its type and meaning, row count, licence, sources, refresh, file URLs, how it is sharded, and two sample rows.',
       inputSchema: S({ id: { type: 'string', description: 'Dataset id from list_datasets, e.g. "political-calendar".' } }, ['id']) },
@@ -719,29 +719,29 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
         offset: { type: 'integer', minimum: 0, maximum: L.maxOffset, description: 'Rows to skip, for paging.' },
         cursor: { type: 'string', description: 'next_cursor from a partial result, to read the next shards.' } }, ['id']) },
     { name: 'search_encyclopaedia', title: 'Search the Encyclopaedia', fn: searchEncyclopaedia,
-      description: 'Find people, places, parties, elections, wars, events, ideas and organisations in the PRP Encyclopaedia (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often PRP mentions each.',
+      description: 'Find people, places, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Encyclopaedia (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
     { name: 'get_entity', title: 'Get an Encyclopaedia entry', fn: getEntity,
-      description: 'The full Encyclopaedia record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place PRP mentions it, with links.',
+      description: 'The full Encyclopaedia record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
       inputSchema: S({ qid: { type: 'string', description: 'Wikidata id, e.g. "Q725556".' }, title: { type: 'string', description: 'English Wikipedia title instead of a qid, e.g. "John Mearsheimer".' }, mentions: { type: 'integer', minimum: 1, maximum: 50, description: 'How many mentions to list (default 15).' } }) },
     { name: 'upcoming_events', title: 'Political calendar', fn: upcomingEvents,
-      description: `Political events from PRP's Realtime and Historical Calendars in a date range (default: today to 18 months ahead): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more. Filter by country and type. Types: ${Object.keys(EVENT_TYPES).join(', ')}; families: ${Object.keys(EVENT_FAMILIES).join(', ')}.`,
+      description: `Political events from Vitruvian Manager's Realtime and Historical Calendars in a date range (default: today to 18 months ahead): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more. Filter by country and type. Types: ${Object.keys(EVENT_TYPES).join(', ')}; families: ${Object.keys(EVENT_FAMILIES).join(', ')}.`,
       inputSchema: S({ country: { type: 'string', description: 'Country name or ISO code.' }, type: { description: 'Event type(s) or a family, e.g. "election" or ["election","referendum"].', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
         from: { type: 'string', description: 'First date, YYYY-MM-DD (default today). Earlier dates give past events back to 1980.' }, to: { type: 'string', description: 'Last date, YYYY-MM-DD (default 18 months after from; at most 5 years).' },
         days: { type: 'integer', minimum: 1, maximum: 1830, description: 'Instead of `to`: how many days after `from`.' }, query: { type: 'string', description: 'Words that must appear in the title, country or summary.' },
         status: { type: 'string', enum: ['declared', 'tentative'] }, limit: { type: 'integer', minimum: 1, maximum: L.maxRows, description: 'Events to return (default 25).' } }) },
     { name: 'latest_briefing', title: 'Latest briefing', fn: latestBriefing,
-      description: 'The newest items from one of PRP\'s briefings: intelligence (news from fifty publishers across the political spectrum, far left to far right), scientific (papers and science news by discipline), economics (working papers, journals, central banks and economics news by field) or digital (AI, computing and technology). Headlines, links and short summaries.',
+      description: 'The newest items from one of Vitruvian Manager\'s briefings: intelligence (news from fifty publishers across the political spectrum, far left to far right), scientific (papers and science news by discipline), economics (working papers, journals, central banks and economics news by field) or digital (AI, computing and technology). Headlines, links and short summaries.',
       inputSchema: S({ briefing: { type: 'string', enum: Object.keys(BRIEFINGS), description: 'Which briefing (default intelligence).' }, topic: { type: 'string', description: 'Scientific: physics, chemistry, biology, earth, space. Economics: macro, monetary, trade, labour, development, finance, public, energy. Digital: its fields.' },
         position: { type: 'string', enum: POSITIONS, description: 'Intelligence only: one political position.' }, type: { type: 'string', enum: ['paper', 'news'], description: 'Scientific, economics, digital: papers or news.' },
         query: { type: 'string', description: 'Words that must appear in the title or summary.' }, source: { type: 'string', description: 'One publisher, by id or name.' }, hours: { type: 'integer', minimum: 1, maximum: 336, description: 'Look-back window in hours (default 48 for intelligence, 72 otherwise).' },
         hard_news: { type: 'boolean', description: 'Intelligence: leave out sport, entertainment and lifestyle (default true).' }, balance: { type: 'boolean', description: 'Intelligence: take items from each position in turn (default true unless a position is given).' },
         order: { type: 'string', enum: ['newest', 'major'], description: 'Newest first, or major sources first.' }, limit: { type: 'integer', minimum: 1, maximum: 50, description: 'Items (default 15).' } }) },
     { name: 'country_profile', title: 'Country profile', fn: countryProfile,
-      description: 'One country across PRP: government and leaders, PESTLE pressure and the latest of 41 indicators (World Bank), today\'s Geopolitical Volatility score and rank with its last 30 days, wars it is in this year, its conflict and leadership history, and its upcoming and recent political events.',
+      description: 'One country across Vitruvian Manager: government and leaders, PESTLE pressure and the latest of 41 indicators (World Bank), today\'s Geopolitical Volatility score and rank with its last 30 days, wars it is in this year, its conflict and leadership history, and its upcoming and recent political events.',
       inputSchema: S({ country: { type: 'string', description: 'Country name or ISO 3166 code, e.g. "France", "FRA", "FR".' } }, ['country']) },
-    { name: 'list_submodules', title: 'List PRP submodules', fn: listSubmodules,
-      description: 'The pages of PRP (Personal Resource Planner) by module, with what each does and its address, so you can point a person to the right page.',
+    { name: 'list_submodules', title: 'List Vitruvian Manager submodules', fn: listSubmodules,
+      description: 'The pages of Vitruvian Manager by module, with what each does and its address, so you can point a person to the right page.',
       inputSchema: S({ module: { type: 'string', description: 'Only one module: rt, rs, mm, ns, ds or kino.' } }) }
   ];
   for (const t of tools) t.annotations = { title: t.title, ...RO };
@@ -771,7 +771,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
   }
 
   /* ---------------------------------------------------------------- MCP (JSON-RPC 2.0) */
-  const INSTRUCTIONS = `PRP (Personal Resource Planner, by JDP-Iq) is a public, read-only collection of data on world politics, conflict, history, markets, science and technology. Start with list_datasets or a specific tool: upcoming_events for political calendars, latest_briefing for news and new research, country_profile for one country, search_encyclopaedia and get_entity for people, parties, wars and ideas, query_dataset for any table. ${NOTICE} Cite the licence and source a result gives; Wikipedia text is CC BY-SA 4.0.`;
+  const INSTRUCTIONS = `Vitruvian Manager (VM, by JDP-Iq) is a public, read-only collection of data on world politics, conflict, history, markets, science and technology. Start with list_datasets or a specific tool: upcoming_events for political calendars, latest_briefing for news and new research, country_profile for one country, search_encyclopaedia and get_entity for people, parties, wars and ideas, query_dataset for any table. ${NOTICE} Cite the licence and source a result gives; Wikipedia text is CC BY-SA 4.0.`;
   const rpcError = (id, code, message, data) => ({ jsonrpc: '2.0', id: id ?? null, error: { code, message, ...(data !== undefined ? { data } : {}) } });
   async function handleMessage(msg) {
     if (!isObj(msg)) return rpcError(null, -32600, 'Invalid Request: expected a JSON-RPC 2.0 object.');
@@ -788,7 +788,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
         case 'initialize': {
           const asked = params.protocolVersion;
           const protocolVersion = PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0];
-          return { jsonrpc: '2.0', id, result: { protocolVersion, capabilities: { tools: { listChanged: false } }, serverInfo: { name: SERVER_NAME, title: 'PRP data (read-only)', version: VERSION, websiteUrl: site + 'integration/' }, instructions: INSTRUCTIONS } };
+          return { jsonrpc: '2.0', id, result: { protocolVersion, capabilities: { tools: { listChanged: false } }, serverInfo: { name: SERVER_NAME, title: 'Vitruvian Manager data (read-only)', version: VERSION, websiteUrl: site + 'integration/' }, instructions: INSTRUCTIONS } };
         }
         case 'ping': return { jsonrpc: '2.0', id, result: {} };
         case 'tools/list': return { jsonrpc: '2.0', id, result: { tools: tools.map(({ fn, ...t }) => t) } };
@@ -800,7 +800,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
             const clean = JSON.parse(JSON.stringify(result));
             return { jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: JSON.stringify(clean) }], structuredContent: clean, isError: false } };
           } catch (e) {
-            const message = e instanceof ToolError ? e.message : 'The tool failed while reading PRP\'s data. Try again, or narrow the request.';
+            const message = e instanceof ToolError ? e.message : 'The tool failed while reading Vitruvian Manager\'s data. Try again, or narrow the request.';
             return { jsonrpc: '2.0', id, result: { content: [{ type: 'text', text: message }], structuredContent: { error: message }, isError: true } };
           }
         }
@@ -826,7 +826,7 @@ function hash(s) { s = String(s); let a = 2166136261, b = 5381; for (let i = 0; 
 export function toRSS({ title, link, self, description, items, updated }) {
   const out = ['<?xml version="1.0" encoding="UTF-8"?>', '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">', '<channel>',
     `<title>${esc(title)}</title>`, `<link>${esc(link)}</link>`, `<atom:link href="${esc(self)}" rel="self" type="application/rss+xml"/>`, `<description>${esc(xmlSafe(description))}</description>`,
-    '<language>en-gb</language>', `<lastBuildDate>${rfc822(updated || new Date().toISOString())}</lastBuildDate>`, '<ttl>60</ttl>', '<generator>PRP Integration Hub</generator>'];
+    '<language>en-gb</language>', `<lastBuildDate>${rfc822(updated || new Date().toISOString())}</lastBuildDate>`, '<ttl>60</ttl>', '<generator>Vitruvian Manager Integration Hub</generator>'];
   for (const i of items) {
     out.push('<item>', `<title>${esc(xmlSafe(i.title))}</title>`, `<link>${esc(i.url)}</link>`, `<guid isPermaLink="false">prp-${hash(i.url || i.title)}</guid>`,
       ...(i.published ? [`<pubDate>${rfc822(i.published)}</pubDate>`] : []), ...(i.summary ? [`<description>${esc(xmlSafe(i.summary))}</description>`] : []),
@@ -839,7 +839,7 @@ export function toRSS({ title, link, self, description, items, updated }) {
 /** Briefing items → JSON Feed 1.1. */
 export function toJSONFeed({ title, link, self, description, items }) {
   return JSON.stringify({
-    version: 'https://jsonfeed.org/version/1.1', title, home_page_url: link, feed_url: self, description, language: 'en-GB', authors: [{ name: 'PRP (JDP-Iq)', url: BASE_URL }],
+    version: 'https://jsonfeed.org/version/1.1', title, home_page_url: link, feed_url: self, description, language: 'en-GB', authors: [{ name: 'Vitruvian Manager (JDP-Iq)', url: BASE_URL }],
     items: items.map(i => ({ id: `prp-${hash(i.url || i.title)}`, url: i.url, title: i.title, ...(i.summary ? { content_text: i.summary, summary: i.summary } : { content_text: i.title }), ...(i.published ? { date_published: i.published } : {}),
       ...(i.authors ? { authors: [{ name: i.authors }] } : {}), tags: [...(i.topics || []), ...(i.position ? [i.position] : [])], _prp: { source: i.outlet || i.source || null, ...(i.type ? { type: i.type } : {}), ...(i.tier ? { tier: i.tier } : {}), ...(i.doi ? { doi: i.doi } : {}) } }))
   }, null, 1) + '\n';
@@ -871,7 +871,7 @@ function icsFold(line) {
 }
 const icsStamp = iso => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
 /** Calendar events → iCalendar (RFC 5545): all-day events, one per record, stable UIDs. */
-export function toICS(events, { name = 'PRP calendar', description = '', stamp, ttlHours = 12 } = {}) {
+export function toICS(events, { name = 'Vitruvian Manager calendar', description = '', stamp, ttlHours = 12 } = {}) {
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//JDP-Iq//PRP Calendars//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${icsText(name)}`, `X-WR-CALDESC:${icsText(description)}`,
     `REFRESH-INTERVAL;VALUE=DURATION:PT${ttlHours}H`, `X-PUBLISHED-TTL:PT${ttlHours}H`];
   const dtstamp = icsStamp(stamp || new Date().toISOString());
@@ -879,7 +879,7 @@ export function toICS(events, { name = 'PRP calendar', description = '', stamp, 
     if (!ISO_DAY.test(e.date || '')) continue;
     const type = EVENT_TYPES[e.type] || 'Event';
     const country = e.country && e.country !== 'International' && !foldText(e.title).includes(foldText(e.country)) ? ` (${e.country})` : '';
-    const desc = [e.summary || '', '', `${type}: ${e.country || 'International'}${e.status === 'tentative' ? ' (date not yet fixed)' : ''}`, ...(e.ref ? [`Reported by ${e.refName || 'the news'}: ${e.ref}`] : []), ...(e.source ? [`Source: ${e.source}`] : []), 'Text: Wikipedia (CC BY-SA 4.0), via PRP (jdpi.pages.dev).'].join('\n').trim();
+    const desc = [e.summary || '', '', `${type}: ${e.country || 'International'}${e.status === 'tentative' ? ' (date not yet fixed)' : ''}`, ...(e.ref ? [`Reported by ${e.refName || 'the news'}: ${e.ref}`] : []), ...(e.source ? [`Source: ${e.source}`] : []), 'Text: Wikipedia (CC BY-SA 4.0), via Vitruvian Manager (jdpi.pages.dev).'].join('\n').trim();
     lines.push('BEGIN:VEVENT', `UID:${hash(`${e.date}|${e.country}|${e.title}`)}@jdpi.pages.dev`, `DTSTAMP:${dtstamp}`, `DTSTART;VALUE=DATE:${e.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${nextDay(e.date).replace(/-/g, '')}`,
       `SUMMARY:${icsText(e.title + country)}`, `DESCRIPTION:${icsText(desc)}`, `CATEGORIES:${icsText(type)}`, ...(e.source && /^https?:\/\/[^\s]+$/.test(e.source) ? [`URL:${e.source}`] : []),
       `STATUS:${e.status === 'tentative' ? 'TENTATIVE' : 'CONFIRMED'}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
@@ -898,7 +898,7 @@ function isMainModule() {
   } catch { return false; }
 }
 
-const HELP = `PRP MCP server ${VERSION}: read-only access to PRP's public data (https://jdpi.pages.dev).
+const HELP = `Vitruvian Manager MCP server ${VERSION}: read-only access to Vitruvian Manager's public data (https://jdpi.pages.dev).
 
 Usage: node prp-mcp.mjs [options]      (speaks MCP over stdio: newline-delimited JSON-RPC)
 
@@ -940,7 +940,7 @@ async function main() {
     process.stdout.write(JSON.stringify(res.result?.structuredContent ?? res, null, 2) + '\n');
     return;
   }
-  process.stderr.write(`PRP MCP server ${VERSION} on stdio, reading ${base}\n`);
+  process.stderr.write(`Vitruvian Manager MCP server ${VERSION} on stdio, reading ${base}\n`);
   const lines = stdioLines(prp);
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', chunk => lines.push(chunk));

@@ -19,11 +19,11 @@
       <div class="front">
         <p class="prp-eyebrow" data-jdpi-standalone><span>Natural Science <span class="sep">·</span> Invention Timeline</span></p>
         <h1 class="prp-title">Invention Timeline</h1>
-        <p class="prp-dek">Key breakthroughs in science and technology from 3000 BC to today, placed where they happened. Move through time, filter by discipline, and open any breakthrough for the people and institutions behind it.</p>
+        <p class="prp-dek">Key breakthroughs in science and technology from 3000 BC to today, placed where they happened. Move through time, or set a period with the timeline’s two handles, filter by discipline, and open any breakthrough for the people and institutions behind it.</p>
         <p class="prp-meta" id="status">Loading the timeline…</p>
       </div>
       <dl class="kpis" aria-live="polite">
-        <div class="kpi when"><dt>Year</dt><dd id="year-big">–</dd></div>
+        <div class="kpi when"><dt id="year-label">Year</dt><dd id="year-big">–</dd></div>
         <div class="kpi"><dt>Breakthroughs</dt><dd id="k-events">–</dd></div>
         <div class="kpi"><dt>Scientists</dt><dd id="k-people">–</dd></div>
       </dl>
@@ -40,13 +40,19 @@
         <input id="search" class="prp-input" type="search" placeholder="Search a breakthrough or scientist…" autocomplete="off" aria-label="Search breakthroughs and scientists" aria-controls="search-results" aria-expanded="false">
         <ul id="search-results" class="search-results" role="listbox" aria-label="Matches" hidden></ul>
       </div>
-      <div class="timeline" role="group" aria-label="Year">
+      <div class="timeline" role="group" aria-label="Period">
         <button type="button" id="prev" class="tl-btn" aria-label="Step back in time" title="Step back (←)">‹</button>
         <button type="button" id="play" class="tl-btn play" aria-label="Play through history" title="Play or pause (space)">▶</button>
         <button type="button" id="next" class="tl-btn" aria-label="Step forward in time" title="Step forward (→)">›</button>
         <div class="slider-wrap">
           <svg id="density" class="density" aria-hidden="true" focusable="false" preserveAspectRatio="none"></svg>
-          <input type="range" id="year" min="0" max="1" step="1" value="1" aria-label="Year">
+          <!-- Two handles on one track: the start of the period (hollow) and its end (filled). Each is a range input, so
+               the keyboard works as usual; the track between them is drawn by app.js (#fill). -->
+          <div class="range" id="range">
+            <div class="track" id="track" aria-hidden="true"><div class="fill" id="fill"></div></div>
+            <input type="range" id="from" class="from" min="0" max="1" step="1" value="0" aria-label="Start of the period" title="Start of the period">
+            <input type="range" id="year" class="to" min="0" max="1" step="1" value="1" aria-label="End of the period" title="End of the period">
+          </div>
           <div class="ticks" id="ticks" aria-hidden="true"></div>
         </div>
       </div>

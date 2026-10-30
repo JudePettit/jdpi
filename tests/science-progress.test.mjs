@@ -141,8 +141,9 @@ test('lake adapter: breakthroughs, scientists and institutions with deep links',
 });
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
-test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async () => {
+test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
   const browser = await launch();
+  t.after(() => browser.close()); // a failed assertion must not leave the browser open (the run would hang)
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -161,6 +162,28 @@ test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { 
   assert.match(page.url(), /#y=-3000(&|$)/);
   await page.keyboard.press('End');
   assert.equal(await page.locator('#year-big').innerText(), String(data.lastYear));
+  // The period's start handle: from 1900 to the end, in the address, the KPI and the map; it cannot pass the end
+  // handle, and pulling the end handle back past it brings it along. (The slider's stops are single years from 1800,
+  // so 1900's position counts back from the last stop; app.js's state is module-scoped, so the page is read as a user sees it.)
+  const at1900 = +(await page.locator('#from').getAttribute('max')) - (data.lastYear - 1900);
+  await page.locator('#from').fill(String(at1900));
+  await page.locator('#from').dispatchEvent('input');
+  assert.match(page.url(), /#y=\d+&f=1900(&|$)/);
+  assert.equal(await page.locator('#year-big').innerText(), `1900–${data.lastYear}`);
+  assert.equal((await page.locator('#year-label').textContent()).trim(), 'Period'); // textContent: the CSS upper-cases it
+  assert.equal(await page.locator('circle.dot').count(), data.events.filter(e => e.y >= 1900).length);
+  await page.keyboard.press('Escape'); // closes Principia's card, so the panel shows the period
+  assert.match(await page.locator('#panel .side-title').innerText(), new RegExp(`^1900 to ${data.lastYear}$`));
+  await page.locator('#year').fill(String(at1900 - 20));
+  await page.locator('#year').dispatchEvent('input');
+  assert.deepEqual([await page.locator('#from').inputValue(), await page.locator('#year').inputValue()], [String(at1900 - 20), String(at1900 - 20)]);
+  assert.equal(await page.locator('#year-big').innerText(), '1880');
+  assert.match(page.url(), /#y=1880&f=1880(&|$)/);
+  await page.locator('#from').fill('0');
+  await page.locator('#from').dispatchEvent('input');
+  await page.locator('#year').press('End'); // End on the focused end handle (on the start handle it would move that one)
+  assert.equal(await page.locator('#year-big').innerText(), String(data.lastYear));
+  assert.doesNotMatch(page.url(), /f=/);
   await page.locator('.lg[data-d="math"]').dblclick();
   const maths = data.events.filter(e => e.d.includes('math')).length;
   assert.equal(await page.locator('circle.dot').count(), maths);
@@ -171,6 +194,5 @@ test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { 
   await page.waitForSelector('.sci');
   assert.ok(await page.locator('.sci').count() > 20);
   assert.match(page.url(), /v=scientists/);
-  await browser.close();
   assert.deepEqual(errors, []);
 });

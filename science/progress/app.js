@@ -1,8 +1,9 @@
 /* Invention Timeline (PRP · Natural Science): humanity's key scientific breakthroughs, 3000 BC to today, on a world map.
    Data: data/events.json, built by science/scripts/build-progress.mjs from PRP's curated list and Wikidata (CC0).
-   Views (tabs): Map, Scientists and List; all three follow the year slider and the discipline filter.
-   URL: #y=<year>&e=<event id>[&v=scientists|list][&d=<shown discipline ids>]. Dots and swatches are var(--prp-cat-n)
-   fills, so a theme change needs no redraw. */
+   Views (tabs): Map, Scientists and List; all three follow the period (the timeline's two handles: a start, at the
+   beginning unless moved, and an end) and the discipline filter.
+   URL: #y=<end year>[&f=<start year>]&e=<event id>[&v=scientists|list][&d=<shown discipline ids>]. Dots and swatches
+   are var(--prp-cat-n) fills, so a theme change needs no redraw. */
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -10,7 +11,8 @@ const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matc
 const WORLD = 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json';
 const RECENT_STOPS = 10; // "recent" = the last ten steps of the timeline (decades in antiquity, years in the modern era)
 
-const state = { data: null, year: 0, stop: 0, sel: null, view: 'map', off: new Set(), trail: 'all', playing: null, q: '', peopleShown: 120 };
+// year/stop: the end of the period and its slider position; from/fromStop: its start (the first year and stop unless moved).
+const state = { data: null, year: 0, stop: 0, from: -Infinity, fromStop: 0, sel: null, view: 'map', off: new Set(), trail: 'all', playing: null, q: '', peopleShown: 120 };
 let D, EVENTS = [], byId = new Map(), DISC = [], DIDX = {}, STOPS = [];
 
 /* ---------------------------------------------------------------- formatting */
@@ -48,10 +50,13 @@ function buildStops(first, last) {
 const stopFor = y => { let i = 0; while (i + 1 < STOPS.length && STOPS[i + 1] <= y) i++; return i; };
 const recentFrom = () => (state.stop - RECENT_STOPS >= 0 ? STOPS[state.stop - RECENT_STOPS] : -Infinity);
 const prevStopYear = () => (state.stop > 0 ? STOPS[state.stop - 1] : -Infinity);
-const upTo = () => EVENTS.filter(e => e.y <= state.year);
-const isRecent = e => e.y > recentFrom() && e.y <= state.year;
-const isNew = e => e.y > prevStopYear() && e.y <= state.year;
+const inPeriod = e => e.y >= state.from && e.y <= state.year;
+const upTo = () => EVENTS.filter(inPeriod);
+const isRecent = e => inPeriod(e) && e.y > recentFrom();
+const isNew = e => inPeriod(e) && e.y > prevStopYear();
 const visible = () => upTo().filter(e => isShown(e) && (state.trail === 'all' || isRecent(e)));
+// "up to 1687"; once the start handle has been moved, "1500 to 1687", or "in 1687" when the handles meet.
+const periodText = () => (state.fromStop === 0 ? `up to ${yearText(state.year)}` : state.from === state.year ? `in ${yearText(state.year)}` : `${yearText(state.from)} to ${yearText(state.year)}`);
 
 /* ---------------------------------------------------------------- map */
 let svg, gBase, gDots, gLabels, projection, path, zoom, transform = d3.zoomIdentity, W = 0, H = 0, land = null, focusView = null, focusFit = null;
@@ -121,7 +126,7 @@ function renderMap() {
   const labelled = list.filter(e => e.id === state.sel || focusIds.has(e.id) || (recent.length <= 4 && isRecent(e)));
   gLabels.selectAll('text').data(labelled, e => e.id).join('text').attr('class', e => (e.id === state.sel ? 'sel' : '')).text(e => e.t.length > 46 ? `${e.t.slice(0, 44)}…` : e.t);
   placeDots();
-  $('#caption').textContent = `${state.trail === 'all' ? 'Breakthroughs up to' : 'Breakthroughs in the steps leading to'} ${yearText(state.year)}, coloured by main discipline; ${state.trail === 'all' ? 'the most recent are drawn larger, earlier ones faded.' : 'earlier ones are hidden.'}`;
+  $('#caption').textContent = `${state.trail === 'all' ? `Breakthroughs ${periodText()}` : `Breakthroughs in the steps leading to ${yearText(state.year)}`}, coloured by main discipline; ${state.trail === 'all' ? 'the most recent are drawn larger, earlier ones faded.' : 'earlier ones are hidden.'}`;
 }
 function showTip(ev, e) {
   const tip = $('#tooltip'), box = $('#map-canvas').getBoundingClientRect();
@@ -143,7 +148,7 @@ window.PRPFocus?.listen({
     if (!D || !focusView || !projection) return;
     const ids = new Set();
     const r = PRPFocus.resolve(t, {
-      qid: q => { const es = EVENTS.filter(e => e.q === q && e.y <= state.year); es.forEach(e => ids.add(e.id)); return es.length ? es.map(e => [e.place.lon, e.place.lat]) : null; },
+      qid: q => { const es = EVENTS.filter(e => e.q === q && inPeriod(e)); es.forEach(e => ids.add(e.id)); return es.length ? es.map(e => [e.place.lon, e.place.lat]) : null; },
       minSpan: 10,
     });
     if (!r.box) return;
@@ -184,7 +189,7 @@ function renderDensity() {
   s.selectAll('rect').data(counts).join('rect')
     .attr('x', (_, i) => i + 0.1).attr('width', 0.8)
     .attr('y', c => 1 - (c ? 0.12 + 0.88 * Math.sqrt(c / max) : 0)).attr('height', c => (c ? 0.12 + 0.88 * Math.sqrt(c / max) : 0))
-    .attr('class', (_, i) => (i <= state.stop ? 'past' : 'future'));
+    .attr('class', (_, i) => (i >= state.fromStop && i <= state.stop ? 'past' : 'future'));
 }
 
 /* ---------------------------------------------------------------- side panel: the card, or what happened up to the year */
@@ -224,9 +229,10 @@ function renderPanel() {
   } else {
     const all = upTo().filter(isShown).sort((a, b) => b.y - a.y || a.id.localeCompare(b.id));
     const recent = all.filter(isRecent), earlier = all.filter(x => !isRecent(x)).slice(0, Math.max(0, 40 - recent.length));
-    panel.innerHTML = `<h2 class="side-title">Up to ${esc(yearText(state.year))}</h2>
-      <p class="sub">${all.length ? `${all.length} breakthrough${all.length === 1 ? '' : 's'}${state.off.size ? ' in the disciplines shown' : ''}. Select one for its people, institutions and place.` : 'No breakthroughs in the disciplines shown yet. Move the slider forward.'}</p>
-      ${recent.length ? `<h3 class="side-h">Recent <span class="count">since ${esc(yearText(Math.max(recentFrom() + 1, STOPS[0])))}</span></h3><ul class="evlist">${recent.map(x => `<li>${evButton(x)}</li>`).join('')}</ul>` : ''}
+    const title = periodText();
+    panel.innerHTML = `<h2 class="side-title">${esc(title[0].toUpperCase() + title.slice(1))}</h2>
+      <p class="sub">${all.length ? `${all.length} breakthrough${all.length === 1 ? '' : 's'}${state.off.size ? ' in the disciplines shown' : ''}. Select one for its people, institutions and place.` : state.fromStop > 0 ? 'No breakthroughs in the disciplines shown in this period. Widen it with the timeline’s handles.' : 'No breakthroughs in the disciplines shown yet. Move the slider forward.'}</p>
+      ${recent.length ? `<h3 class="side-h">Recent <span class="count">since ${esc(yearText(Math.max(recentFrom() + 1, state.from, STOPS[0])))}</span></h3><ul class="evlist">${recent.map(x => `<li>${evButton(x)}</li>`).join('')}</ul>` : ''}
       ${earlier.length ? `<h3 class="side-h">Earlier</h3><ul class="evlist">${earlier.map(x => `<li>${evButton(x)}</li>`).join('')}</ul>` : ''}
       ${all.length > recent.length + earlier.length ? `<p class="more-row"><button type="button" class="more" id="to-list">All ${all.length} in the List tab</button></p>` : ''}`;
     $('#to-list')?.addEventListener('click', () => setView('list'));
@@ -248,7 +254,7 @@ function renderPeople() {
   for (const e of evs.sort((a, b) => a.y - b.y)) for (const p of e.people) { if (!firstOf.has(p)) firstOf.set(p, e.y); (evsOf.get(p) || evsOf.set(p, []).get(p)).push(e); }
   const rows = [...firstOf.keys()].filter(p => matches(`${personName(p)} ${D.people[p]?.field?.join(' ') || ''} ${D.people[p]?.country?.join(' ') || ''}`, q))
     .sort((a, b) => firstOf.get(a) - firstOf.get(b) || personName(a).localeCompare(personName(b)));
-  $('#people-title').textContent = `Scientists up to ${yearText(state.year)} · ${rows.length}`;
+  $('#people-title').textContent = `Scientists ${periodText()} · ${rows.length}`;
   $('#people-list').innerHTML = rows.slice(0, state.peopleShown).map(p => {
     const x = D.people[p] || {}, meta = [life(x), x.country?.slice(0, 2).join(', ')].filter(Boolean).join(' · ');
     const fields = (x.field?.length ? x.field : x.occupation || []).slice(0, 3).join(', ');
@@ -256,7 +262,7 @@ function renderPeople() {
       ${meta ? `<p class="sci-meta">${esc(meta)}</p>` : ''}${fields ? `<p class="sci-meta">${esc(fields)}</p>` : ''}
       ${x.inst?.length ? `<p class="sci-inst">${esc(x.inst.slice(0, 3).map(instName).join(' · '))}</p>` : ''}
       <ul class="sci-evs">${evsOf.get(p).map(e => `<li>${evButton(e, 'ev compact')}</li>`).join('')}</ul></li>`;
-  }).join('') || `<li class="empty">No scientists match${q ? ` “${esc(state.q)}”` : ''} up to ${esc(yearText(state.year))}.</li>`;
+  }).join('') || `<li class="empty">No scientists match${q ? ` “${esc(state.q)}”` : ''} ${esc(periodText())}.</li>`;
   const more = $('#people-more');
   more.hidden = rows.length <= state.peopleShown;
   more.textContent = `Show more (${rows.length - state.peopleShown} left)`;
@@ -266,12 +272,12 @@ function renderList() {
   if (state.view !== 'list' || !D) return;
   const q = state.q.trim().toLowerCase();
   const list = upTo().filter(e => isShown(e) && matches(`${e.t} ${e.place.n} ${e.people.map(personName).join(' ')}`, q)).sort((a, b) => b.y - a.y || a.id.localeCompare(b.id));
-  $('#list-title').textContent = `Breakthroughs up to ${yearText(state.year)} · ${list.length}`;
+  $('#list-title').textContent = `Breakthroughs ${periodText()} · ${list.length}`;
   $('#list-rows').innerHTML = list.map(e => `<tr data-e="${esc(e.id)}"${e.id === state.sel ? ' class="sel"' : ''}>
     <td class="num mono">${esc(evYear(e))}</td><td><button type="button" class="rowbtn" data-e="${esc(e.id)}">${esc(e.t)}</button></td>
     <td class="disc-cell">${e.d.map(d => `<span class="dtag"><i style="background:${colourVar(d)}"></i>${esc(discName(d))}</span>`).join('')}</td>
     <td class="wrap">${esc(e.place.n)}</td><td class="wrap">${esc(e.people.slice(0, 3).map(personName).join(', '))}${e.people.length > 3 ? ` +${e.people.length - 3}` : ''}</td></tr>`).join('')
-    || `<tr><td colspan="5" class="empty">No breakthroughs match${q ? ` “${esc(state.q)}”` : ''} up to ${esc(yearText(state.year))}.</td></tr>`;
+    || `<tr><td colspan="5" class="empty">No breakthroughs match${q ? ` “${esc(state.q)}”` : ''} ${esc(periodText())}.</td></tr>`;
 }
 
 /* ---------------------------------------------------------------- tabs */
@@ -297,30 +303,53 @@ TABS.forEach((t, i) => {
 /* ---------------------------------------------------------------- year, selection, URL */
 function renderKpis() {
   const list = upTo().filter(isShown);
-  $('#year-big').textContent = yearText(state.year);
+  $('#year-label').textContent = state.fromStop > 0 ? 'Period' : 'Year';
+  $('#year-big').textContent = state.fromStop > 0 && state.from !== state.year ? `${yearText(state.from)}–${yearText(state.year)}` : yearText(state.year);
   $('#k-events').textContent = list.length.toLocaleString('en-GB');
   $('#k-people').textContent = new Set(list.flatMap(e => e.people)).size.toLocaleString('en-GB');
 }
 function renderAll() { renderMap(); renderLegend(); renderDensity(); renderPanel(); renderKpis(); renderPeople(); renderList(); }
-function setYear(y, { push = true, stop = null } = {}) {
-  state.year = Math.max(D.firstYear, Math.min(D.lastYear, Math.round(y)));
-  state.stop = stop ?? stopFor(state.year);
-  const s = $('#year');
+const clampYear = y => Math.max(D.firstYear, Math.min(D.lastYear, Math.round(y)));
+// The two handles, the track between them, and which handle is in front when they meet.
+function syncHandles() {
+  const f = $('#from'), s = $('#year'), n = STOPS.length - 1;
+  f.value = state.fromStop; f.setAttribute('aria-valuetext', yearText(state.from));
   s.value = state.stop; s.setAttribute('aria-valuetext', yearText(state.year));
+  $('#fill').style.left = `${(state.fromStop / n) * 100}%`; $('#fill').style.width = `${((state.stop - state.fromStop) / n) * 100}%`;
+  $('#range').classList.toggle('top-from', state.fromStop >= state.stop && state.stop > 0);
+}
+// The end of the period. Pulled back past the start, it brings the start with it.
+function setYear(y, { push = true, stop = null } = {}) {
+  state.year = clampYear(y);
+  state.stop = stop ?? stopFor(state.year);
+  if (state.from > state.year) { state.fromStop = state.stop; state.from = STOPS[state.stop]; }
+  syncHandles();
+  renderAll();
+  if (push) writeHash();
+}
+// The start of the period. Pushed past the end, it takes the end with it.
+function setFrom(y, { push = true, stop = null } = {}) {
+  state.from = clampYear(y);
+  state.fromStop = stop ?? stopFor(state.from);
+  if (state.from > state.year) return setYear(state.from, { push, stop: state.fromStop });
+  syncHandles();
   renderAll();
   if (push) writeHash();
 }
 const setStop = (i, opts) => { const k = Math.max(0, Math.min(STOPS.length - 1, i)); setYear(STOPS[k], { ...opts, stop: k }); };
+const setFromStop = (i, opts) => { const k = Math.max(0, Math.min(STOPS.length - 1, i)); setFrom(STOPS[k], { ...opts, stop: k }); };
 function select(id, { reveal = false, push = true } = {}) {
   const e = id && byId.get(id);
   state.sel = e ? e.id : null;
   if (e && e.y > state.year) { setYear(e.y, { push: false }); }
+  else if (e && e.y < state.from) { setFrom(e.y, { push: false }); } // a breakthrough before the period widens it
   else renderAll();
   if (e && reveal && window.matchMedia('(max-width: 900px)').matches) $('#panel').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
   if (push) writeHash();
 }
 function writeHash() {
   const parts = [`y=${state.year}`];
+  if (state.fromStop > 0) parts.push(`f=${state.from}`);
   if (state.sel) parts.push(`e=${state.sel}`);
   if (state.view !== 'map') parts.push(`v=${state.view}`);
   if (state.off.size) parts.push(`d=${DISC.filter(d => !state.off.has(d.id)).map(d => d.id).join(',')}`);
@@ -329,17 +358,21 @@ function writeHash() {
 }
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1)), e = byId.get(p.get('e') || '');
-  let y = parseInt(p.get('y'), 10);
+  let y = parseInt(p.get('y'), 10), f = parseInt(p.get('f'), 10);
   if (!Number.isFinite(y)) y = e ? e.y : D.lastYear;
   if (e && e.y > y) y = e.y;
+  if (!Number.isFinite(f) || f <= D.firstYear) f = D.firstYear;
+  if (f > y) f = y;
+  if (e && e.y < f) f = e.y;
   const shown = (p.get('d') || '').split(',').filter(d => d in DIDX);
-  return { y, e: e?.id || null, v: p.get('v') || 'map', off: new Set(shown.length ? DISC.map(d => d.id).filter(d => !shown.includes(d)) : []) };
+  return { y, f, e: e?.id || null, v: p.get('v') || 'map', off: new Set(shown.length ? DISC.map(d => d.id).filter(d => !shown.includes(d)) : []) };
 }
 function applyHash() {
   const h = readHash();
   state.off = h.off;
   if (h.v !== state.view) setView(h.v, { push: false });
   state.sel = h.e;
+  state.from = h.f; state.fromStop = h.f > D.firstYear ? stopFor(h.f) : 0;
   setYear(h.y, { push: false });
 }
 
@@ -350,7 +383,7 @@ function stopPlay() {
 }
 function togglePlay() {
   if (state.playing) return stopPlay();
-  if (state.stop >= STOPS.length - 1) setStop(0);
+  if (state.stop >= STOPS.length - 1) setStop(state.fromStop); // play from the start of the period
   state.sel = null;
   $('#play').textContent = '❚❚'; $('#play').setAttribute('aria-label', 'Pause');
   state.playing = setInterval(() => { if (state.stop >= STOPS.length - 1) stopPlay(); else setStop(state.stop + 1); }, 420);
@@ -362,9 +395,16 @@ function jump(dir) {
   if (y != null) setYear(y);
 }
 function setupTimeline() {
-  const s = $('#year');
-  s.min = 0; s.max = STOPS.length - 1;
+  const s = $('#year'), f = $('#from');
+  s.min = f.min = 0; s.max = f.max = STOPS.length - 1;
   s.addEventListener('input', () => { stopPlay(); setStop(+s.value); });
+  f.addEventListener('input', () => { stopPlay(); setFromStop(+f.value); });
+  // A click on the track (the inputs only answer at their thumbs) moves the nearer handle there.
+  $('#track').addEventListener('click', ev => {
+    const box = $('#track').getBoundingClientRect(), k = Math.round(((ev.clientX - box.left) / Math.max(1, box.width)) * (STOPS.length - 1));
+    stopPlay();
+    if (Math.abs(k - state.fromStop) < Math.abs(k - state.stop)) setFromStop(k); else setStop(k);
+  });
   $('#prev').onclick = () => { stopPlay(); setStop(state.stop - (STOPS[state.stop] < state.year ? 0 : 1)); };
   $('#next').onclick = () => { stopPlay(); setStop(state.stop + 1); };
   $('#play').onclick = togglePlay;
@@ -433,6 +473,7 @@ window.jdpiDocumentary = {
     if (state.playing) stopPlay();
     if (state.view !== 'map') setView('map');
     state.off.clear(); state.sel = null;
+    if (state.fromStop) setFromStop(0, { push: false }); // the whole of history, whatever period was set
     yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened.`, el: $('#year-big'), focus: { reset: true } };
     for (const [a, b, name] of ERAS) {
       if (a > D.lastYear) break;

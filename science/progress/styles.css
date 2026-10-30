@@ -46,8 +46,26 @@ button, input, select { font: inherit; }
 .density { position: absolute; left: 8px; right: 8px; top: 0; width: calc(100% - 16px); height: 16px; overflow: visible; }
 .density rect.past { fill: var(--prp-accent); opacity: .75; }
 .density rect.future { fill: var(--prp-line-strong); }
-.slider-wrap input[type="range"] { display: block; width: 100%; margin: 2px 0 0; accent-color: var(--prp-accent); cursor: pointer; }
-.slider-wrap input[type="range"]:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+/* The period: two range inputs stacked on one drawn track. The inputs themselves take no pointer events, only their
+   thumbs do, so each handle can be dragged where the other isn't; the start handle is hollow, the end handle filled.
+   The 8px insets match half a thumb, where a native range input's thumb travels, so the track, the fill, the density
+   strip and the ticks line up. */
+.range { position: relative; height: 20px; margin: 2px 0 0; }
+.range .track { position: absolute; left: 8px; right: 8px; top: 8px; height: 4px; border-radius: 2px; background: var(--prp-line-strong); cursor: pointer; }
+.range .fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--prp-accent); }
+.range input[type="range"] { position: absolute; inset: 0; z-index: 1; width: 100%; height: 20px; margin: 0; padding: 0; background: transparent; appearance: none; -webkit-appearance: none; pointer-events: none; }
+.range input.to { z-index: 2; }
+.range.top-from input.from { z-index: 3; } /* the handles meet: the start handle comes to the front so it can be pulled back */
+.range input[type="range"]::-webkit-slider-runnable-track { height: 20px; background: transparent; }
+.range input[type="range"]::-moz-range-track { height: 20px; background: transparent; }
+.range input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; pointer-events: auto; width: 16px; height: 16px; margin-top: 2px; border: 2px solid var(--prp-accent); border-radius: 50%; background: var(--prp-accent); box-shadow: 0 0 0 1px var(--prp-surface); cursor: grab; }
+.range input[type="range"]::-moz-range-thumb { pointer-events: auto; width: 12px; height: 12px; border: 2px solid var(--prp-accent); border-radius: 50%; background: var(--prp-accent); box-shadow: 0 0 0 1px var(--prp-surface); cursor: grab; }
+.range input.from::-webkit-slider-thumb { background: var(--prp-surface); }
+.range input.from::-moz-range-thumb { background: var(--prp-surface); }
+.range input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
+.range input[type="range"]:focus-visible { outline: none; }
+.range input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.range input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
 .ticks { position: absolute; left: 8px; right: 8px; bottom: 0; height: 14px; color: var(--prp-muted); font: 10.5px/14px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
 .ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
 .ticks span.start { transform: translateX(-8px); }

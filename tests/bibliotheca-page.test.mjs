@@ -337,11 +337,14 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     await page.evaluate(() => document.fonts.ready);
     // Opened at a chapter, the chapter's head is at the top and stays there while the fonts arrive.
     await page.waitForTimeout(300);
-    assert.equal(await page.evaluate(() => document.querySelector('#head').getBoundingClientRect().top), 0);
+    // (Within half a pixel: Chromium on Linux lays the sticky head out at a fraction, 0.48 px on the CI runner.)
+    const headTop = await page.evaluate(() => document.querySelector('#head').getBoundingClientRect().top);
+    assert.ok(Math.abs(headTop) < 0.5, `the chapter head is at the top (${headTop})`);
     const still = await place();
     await page.click('#bar-toggle');
     await page.waitForSelector('#popout:not([hidden])');
-    assert.equal(await place(), still, 'no layout shift when the bar opens');
+    const opened = await place();
+    assert.ok(Math.abs(opened - still) < 0.5, `no layout shift when the bar opens (${still} -> ${opened})`);
     // The bar lists the terms in view; scrolled on, others; the address follows the current paragraph.
     const top = await barShows(page);
     assert.equal(await page.locator('#bar-count').innerText(), String(top.length));

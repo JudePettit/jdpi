@@ -148,34 +148,72 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 34px; padding-top: 12px; border-top: 1px solid var(--prp-line); color: var(--prp-muted); font: 11px var(--prp-font-ui); }
 
 /* --- Workspace "Today" panel (shell.js, "Workspace Today panel") -------------
-   A titled band of up to four cards at the top of the home, each card a group of links into a submodule. Built only on
-   the design tokens, so light, dark and phone all follow for free; the auto-fill grid collapses to one column on a
-   phone just like .tiles, and the skeleton reserves the panel's height so the cards below do not jump as it loads. */
-.today { margin-top: 22px; }
-.today-title { margin: 0 0 10px; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
-.today-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; align-items: start; }
-.today-card { display: flex; flex-direction: column; overflow: hidden; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
-.today-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 10px; align-items: baseline; padding: 11px 13px 9px; border-bottom: 1px solid var(--prp-line-soft); }
-.today-head .prp-h3 { min-width: 0; }
-.today-head .more { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-link); text-decoration: none; font: 12.5px var(--prp-font-ui); }
+   A titled band of four cards at the top of the home (volatility, briefings, calendar, markets), each a group of links
+   into a submodule. Built only on the design tokens, so light, dark and phone all follow for free; the grid goes from
+   four columns to two to one as the panel narrows (a container query on the panel's own width), one on a phone.
+   NO LAYOUT SHIFT. Every card reserves the height of the fullest content it can hold: a head of one title line over two
+   window lines, and five lines, each a label of at most two lines over a one-line detail (a note under fewer lines takes
+   no more than one line's room). Every text is clamped to those lines and the reserve is a hair more than they can take,
+   so a card is exactly as tall loading, full, half full, empty or "not available", and the panel is the same height
+   before and after it fills, and after a refresh, at every width. A card 280px wide or more has room for every label but
+   an event's on one line, so then all but the calendar's keep to one and reserve that much less.
+   Focus: the card clips its corners (overflow: hidden), so every focus ring in it is drawn inset, where it shows. */
+.today { container: today / inline-size; margin-top: 22px;
+  --today-lh-title: calc(var(--prp-fs) * 1.35);       /* .prp-h3: 14px / 1.35 */
+  --today-lh-label: calc(13px * 1.35);
+  --today-lh-small: calc(var(--prp-fs-xs) * 1.4);    /* the window, a detail, a note */
+  --today-row-pad: 7px; }
+.today-title { margin: 0 0 10px; color: var(--prp-muted); font: 500 var(--prp-fs-xs)/1.4 var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+/* Four cards in one row, two rows of two, or one column: 240px at least each, never three and an orphan. Cards in a row
+   share its height (each card's own height is fixed, so the row's is too). */
+.today-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: stretch; }
+@container today (width >= 492px) { .today-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container today (width >= 996px) { .today-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.today-card { --today-label-lines: 2; --today-note-lines: 3; container-type: inline-size;
+  display: flex; flex-direction: column; overflow: hidden; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
+.today-card :focus-visible { outline-offset: -2px; }
+/* The head: padding, border, the title line, a 1px gap and two window lines, plus 2px to spare. */
+.today-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start; align-items: baseline; gap: 1px 10px; padding: 11px 13px 9px; border-bottom: 1px solid var(--prp-line-soft);
+  min-height: calc(11px + 9px + 1px + var(--today-lh-title) + 1px + 2 * var(--today-lh-small) + 2px); }
+.today-h { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.today-head .more { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-link); text-decoration: none; font: 12.5px/1.35 var(--prp-font-ui); }
 .today-head .more:hover { text-decoration: underline; }
-.today-win { grid-column: 1 / -1; margin: 1px 0 0; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
-.today-src { color: var(--prp-faint); }
-.today-list { display: flex; flex-direction: column; }
-.today-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 1px; padding: 8px 13px; text-decoration: none; color: var(--prp-text); }
-.today-row + .today-row { border-top: 1px solid var(--prp-line-soft); }
+/* The honest window and its source, at most two lines (the texts are written to fit two at the narrowest card). */
+.today-win { grid-column: 1 / -1; margin: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
+/* The lines: five of them at their tallest (two label lines, a detail, padding and a divider), plus 2px to spare. */
+.today-list { display: flex; flex-direction: column;
+  min-height: calc(5 * (2 * var(--today-row-pad) + var(--today-label-lines) * var(--today-lh-label) + 1px + var(--today-lh-small) + 1px) + 2px); }
+.today-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 1px; padding: var(--today-row-pad) 13px; text-decoration: none; color: var(--prp-text); }
+.today-row + .today-row, .today-row + .today-note { border-top: 1px solid var(--prp-line-soft); }
 .today-row:hover { background: var(--prp-surface-3); }
-.today-label { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 500 13px/1.35 var(--prp-font-ui); }
+.today-label { grid-column: 1; grid-row: 1; min-width: 0; overflow: hidden; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--today-label-lines); font: 500 13px/1.35 var(--prp-font-ui); }
 .today-row:hover .today-label { text-decoration: underline; }
-.today-val { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-text); font: 600 13px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.today-val { grid-column: 2; grid-row: 1; justify-self: end; white-space: nowrap; color: var(--prp-text); font: 600 13px/1.35 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+/* Tones: a market's gain or loss; a rise in volatility is worse and a fall better, coloured as the Volatility page does. */
 .today-val.up { color: var(--prp-up); }
 .today-val.down { color: var(--prp-down); }
-.today-detail { grid-column: 1 / -1; grid-row: 2; min-width: 0; overflow: hidden; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui);
-  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
-/* Loading skeleton: token-coloured bars that hold the panel's space until the real lines replace them. */
-.today-skeleton { gap: 9px; min-height: 200px; padding: 15px 13px; }
-.today-skeleton .sk { height: 11px; border-radius: var(--prp-radius-sm); background: var(--prp-surface-3); animation: today-pulse 1.4s ease-in-out infinite; }
-.today-skeleton .sk-title { height: 14px; width: 52%; margin-bottom: 5px; }
+.today-val.worse { color: var(--prp-bad); }
+.today-val.better { color: var(--prp-good); }
+.today-detail { grid-column: 1 / -1; grid-row: 2; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui); }
+.today-note { margin: 0; padding: 8px 13px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--today-note-lines);
+  color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui); }
+.today-card[data-state="unavailable"] .today-note { padding-top: 12px; }
+/* A card 280px wide or more fits a country's, a briefing's or a market's name on one line, so those keep to one and
+   reserve that much less (a note gets a line less to match); an event's name still gets two. */
+@container (width >= 280px) { .today-card:not([data-group="calendar"]) > .today-list { --today-label-lines: 1; --today-note-lines: 2; } }
+/* Loading: token-coloured bars in the card's reserved space, shaped like its head and five one-line rows, until the
+   group replaces them. */
+.today-skeleton .today-head { gap: 7px 10px; padding-top: 14px; }
+.today-skeleton .sk-row { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 0 13px;
+  min-height: calc(2 * var(--today-row-pad) + var(--today-lh-label) + 1px + var(--today-lh-small)); }
+.today-skeleton .sk-row + .sk-row { border-top: 1px solid var(--prp-line-soft); }
+.today-skeleton .sk { display: block; height: 11px; border-radius: var(--prp-radius-sm); background: var(--prp-surface-3); animation: today-pulse 1.4s ease-in-out infinite; }
+.today-skeleton .sk-title { grid-column: 1 / -1; height: 14px; width: 52%; }
+.today-skeleton .sk-win { grid-column: 1 / -1; width: 78%; }
+.today-skeleton .sk-row .sk { width: 62%; }
+.today-skeleton .sk-row .sk-sub { height: 9px; width: 40%; }
 @keyframes today-pulse { 50% { opacity: .5; } }
 
 /* --- Small screens --------------------------------------------------------- */

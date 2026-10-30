@@ -144,9 +144,9 @@ function renderHome() {
   const P = state.registry.platform, mods = allModules();
   const kinds = mods.reduce((a, x) => ((a[x.module.kind] = (a[x.module.kind] || 0) + 1), a), {});
   // The Today panel (PRP-ANALYSIS.md item 3): above the catalogue, the few lines that actually change. Its data loads
-  // lazily after this paint (loadToday), so the cards are never held up; a cached session result is dropped in here
-  // synchronously so a return visit shows it with no flash and no jump. The product counts move below it, as the
-  // analysis asks ("The counts can stay, below.").
+  // lazily after this paint (loadToday), so the cards are never held up; a cached session result, fresh or stale, is
+  // dropped in here synchronously so a return visit shows it with no flash and no jump (a stale one is then refreshed
+  // in place). The product counts move below it, as the analysis asks ("The counts can stay, below.").
   const today = TODAY_PANEL ? readTodayCache() : null;
   $('#view').innerHTML = `<div class="page">
     <header class="head">
@@ -154,7 +154,7 @@ function renderHome() {
       <h1 class="prp-title">Workspace</h1>
       <p class="prp-dek">${esc(P.tagline)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
     </header>
-    ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today in your workspace"${today ? '' : ' aria-busy="true"'}>${today ? todayInnerHtml(today) : TODAY_LOADING}</section>` : ''}
+    ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today in your workspace" aria-live="off"${today ? '' : ' aria-busy="true"'}>${todayInnerHtml(today?.groups)}</section>` : ''}
     <div class="prp-kpis today-kpis">
       <div class="prp-kpi"><span>Modules</span><b>${state.registry.suites.length}</b></div>
       <div class="prp-kpi"><span>Submodules</span><b>${mods.length}</b></div>
@@ -208,81 +208,125 @@ function renderLaunch(suite, m, url) {
 /* --- Workspace "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
    The home's cards never change, so above them we show the few things that do — the biggest 7-day volatility movers,
    how busy the briefings have been this week, the next votes and summits, and a market snapshot — each line a link into
-   the submodule it came from. The data is design/prp-highlights.js over small public JSON and the trade-desk public API.
+   the submodule it came from. The data is design/prp-highlights.js over about 3 KB of files the Integration Hub derives
+   for it, the Realtime Calendar's window and the trade-desk public API.
    To honour the analysis's performance mandate it is NEVER on the first-paint path: renderHome() paints the cards, then
-   schedules loadToday() for idle time. The result is cached in sessionStorage for the session (computed once), and every
-   failure is quiet — a source that cannot be read drops its own group, and a total failure just leaves the panel hidden;
-   nothing here can block first paint or throw into the shell. Every string is DATA from the module and is escaped with
-   esc() before it reaches the DOM, exactly as tile()/navItem() do (the module returns plain text and never touches the
-   DOM). The honest time-window label the module computes for each group is shown verbatim, never sharpened. */
-// Off until the fixes from its two reviews land: the "7-day change" must be the Volatility page's own measure (not a
-// two-day difference), a rise must be coloured as worse, the briefing counts must come from a small derived file rather
-// than 1.35 MB of stores, the panel must reserve its filled height, fetch with a timeout and revalidate its cache.
-const TODAY_PANEL = false;
-const TODAY_KEY = 'prp.today.v1';   // the session cache key; bump the version if the stored shape ever changes
-let todayPending = false;           // one in-flight load at a time; the session cache serves every later home visit
-// Placeholder cards while the data loads, sized (shell.css) to reserve the panel's space so the cards below do not jump.
-// The grid is aria-hidden, so a screen reader hears nothing until the real lines arrive.
-const TODAY_LOADING = `<h2 class="today-title">Today</h2>
-  <div class="today-grid" aria-hidden="true">${('<div class="today-card today-skeleton"><span class="sk sk-title"></span>' + '<span class="sk"></span>'.repeat(5) + '</div>').repeat(4)}</div>`;
+   schedules loadToday() for idle time. The panel has four fixed slots (TODAY_SLOTS); each shows a loading card until its
+   group settles, then the group, as soon as its own sources have answered (the slowest is never waited on: every request
+   gives up after TODAY_FETCH_MS). Every card reserves the height of its fullest content (shell.css), so neither the fill
+   nor a refresh moves anything below it. A group whose source failed shows a quiet "not available" in its slot; only when
+   every source fails is the panel hidden.
+   The result is kept in sessionStorage with when it was written and until when it is fresh (45 minutes, or the next UTC
+   midnight if that is sooner: the module's cacheEntry). A fresh entry is shown and nothing is fetched; a stale one is
+   shown at once and refreshed in place, slot by slot; and while the home stays open the panel refreshes itself when its
+   entry goes stale. The panel is aria-live="off" inside the view's polite live region, so its fill and refreshes are not
+   read out over whatever the reader is doing; it is a labelled region with headings, there to be visited.
+   Every string is DATA from the module (or the session cache) and is escaped with esc() before it reaches the DOM,
+   exactly as tile()/navItem() do, and a link is only ever a shell route. The honest time-window label the module
+   computes for each group is shown verbatim, never sharpened. */
+const TODAY_PANEL = true;
+const TODAY_KEY = 'prp.today.v2';   // the session cache, { v: 2, at, until, groups }; bump the version if its shape changes
+const TODAY_SLOTS = ['volatility', 'briefings', 'calendar', 'markets']; // the module's GROUP_IDS, in order (tests compare)
+const TODAY_LINES = 5;              // the module's MAX_LINES: the most lines a card shows, and the room it reserves for
+const TODAY_FETCH_MS = 8000;        // no source is waited on longer than this
+let todayPending = false;           // one load at a time
+let todayLoads = 0;                 // numbers each load, so a slot filled by this load is not filled again
+let todayTimer = 0;                 // looks again when the entry goes stale while the home stays open
+const onHome = () => !!$('#today') && !state.route?.suite && !state.route?.module;
+const shellRoute = h => (SHELL_ROUTE.test(String(h || '')) ? h : '#/'); // a link is only ever a shell route
+const abortAfter = ms => (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(ms) : undefined);
 
 // The session cache, read and written exactly like the theme's localStorage (setupTheme / applyTheme): every access is
-// wrapped so private mode, blocked storage or a bad value can never throw. An empty or malformed cache reads as none.
+// wrapped so private mode, blocked storage or a bad value can never throw. An empty or malformed entry reads as none.
 function readTodayCache() {
-  try { const g = JSON.parse(sessionStorage.getItem(TODAY_KEY) || 'null'); return Array.isArray(g) && g.length ? g : null; } catch { return null; }
+  try {
+    const e = JSON.parse(sessionStorage.getItem(TODAY_KEY) || 'null');
+    return e && e.v === 2 && Number.isFinite(e.at) && Number.isFinite(e.until) && Array.isArray(e.groups) && e.groups.length ? e : null;
+  } catch { return null; }
 }
-function writeTodayCache(groups) {
-  try { sessionStorage.setItem(TODAY_KEY, JSON.stringify(groups)); } catch { /* private mode or quota: just skip the cache */ }
+function writeTodayCache(entry) {
+  try { sessionStorage.setItem(TODAY_KEY, JSON.stringify(entry)); sessionStorage.removeItem('prp.today.v1'); } catch { /* private mode or quota: just skip the cache */ }
 }
+const todayFresh = e => !!e && Date.now() >= e.at && Date.now() < e.until;
 
-// One line: a link into its submodule, the headline value toned up/down (the module's only styling hint), the quieter
-// detail below. Every field is data, so each is escaped; the title gives the full label back when the line is clipped.
+// One line: a link into its submodule, the headline value toned (the module's only styling hint: up/down for a market's
+// gain or loss, worse/better for a rise or fall in volatility), the quieter detail below. Every field is data, so each is
+// escaped; the title gives the full line back when it is clipped.
+const TONES = { up: 'up', down: 'down', worse: 'worse', better: 'better' };
 function todayItem(it) {
-  const tone = it.tone === 'up' ? ' up' : it.tone === 'down' ? ' down' : '';
+  const tone = TONES[it.tone] ? ' ' + TONES[it.tone] : '';
   const value = it.value ? `<span class="today-val${tone}">${esc(it.value)}</span>` : '';
   const detail = it.detail ? `<span class="today-detail">${esc(it.detail)}</span>` : '';
-  return `<a class="today-row" href="${esc(it.href)}" title="${esc(it.label)}"><span class="today-label">${esc(it.label)}</span>${value}${detail}</a>`;
+  const full = [it.label, it.value, it.detail].filter(Boolean).join(' · ');
+  return `<a class="today-row" href="${esc(shellRoute(it.href))}" title="${esc(full)}"><span class="today-label">${esc(it.label)}</span>${value}${detail}</a>`;
 }
-// One group: a titled card (title, the honest window and source line, a link into the module) over its lines.
-function todayGroupCard(g) {
-  const items = Array.isArray(g.items) ? g.items : [];
-  return `<section class="today-card">
-    <div class="today-head"><h3 class="prp-h3">${esc(g.title)}</h3><a class="more" href="${esc(g.href)}">View →</a>
-      <p class="today-win">${esc(g.window)}<span class="today-src"> · ${esc(g.source)}</span></p></div>
-    <div class="today-list">${items.map(todayItem).join('')}</div>
+// One group: a titled card (title, a link into the module named for where it goes, the honest window and source line)
+// over its lines and its note (what was left out, or why there is nothing to show).
+function todayCard(g, load = 0) {
+  const items = (Array.isArray(g.items) ? g.items : []).slice(0, TODAY_LINES);
+  const src = g.source ? `<span class="today-src">${g.window ? ' · ' : ''}${esc(g.source)}</span>` : '';
+  return `<section class="today-card" data-group="${esc(g.id)}" data-state="${g.unavailable ? 'unavailable' : 'ready'}"${load ? ` data-load="${load}"` : ''}>
+    <div class="today-head"><h3 class="prp-h3 today-h" title="${esc(g.title)}">${esc(g.title)}</h3><a class="more" href="${esc(shellRoute(g.href))}" aria-label="View ${esc(g.link || g.title)}">View →</a>
+      <p class="today-win">${esc(g.window)}${src}</p></div>
+    <div class="today-list">${items.map(todayItem).join('')}${g.note ? `<p class="today-note">${esc(g.note)}</p>` : ''}</div>
   </section>`;
 }
-const todayInnerHtml = groups => `<h2 class="today-title">Today</h2><div class="today-grid">${groups.map(todayGroupCard).join('')}</div>`;
+// A slot while its group loads: the same card, the same reserved height, bars for text; hidden from screen readers.
+const todaySkeleton = id => `<section class="today-card today-skeleton" data-group="${id}" data-state="loading" aria-hidden="true">
+    <div class="today-head"><span class="sk sk-title"></span><span class="sk sk-win"></span></div>
+    <div class="today-list">${'<span class="sk-row"><span class="sk"></span><span class="sk sk-sub"></span></span>'.repeat(TODAY_LINES)}</div></section>`;
+// The panel: a slot per group, from the session cache when there is one, otherwise loading.
+const todayInnerHtml = groups => `<h2 class="today-title">Today</h2><div class="today-grid">${TODAY_SLOTS.map(id => {
+  const g = Array.isArray(groups) ? groups.find(x => x?.id === id) : null;
+  return g ? todayCard(g) : todaySkeleton(id);
+}).join('')}</div>`;
 
-// Put the groups into the panel, or hide it when there are none (an off day leaves no empty box, not a broken one).
-function renderToday(groups) {
-  const panel = $('#today');
-  if (!panel) return;
-  panel.removeAttribute('aria-busy');
-  if (!Array.isArray(groups) || !groups.length) { panel.hidden = true; panel.innerHTML = ''; return; }
-  panel.innerHTML = todayInnerHtml(groups);
-  panel.hidden = false;
+// Put one group into its slot. A refresh can land while a reader is on one of the card's links, so focus goes back to
+// the link in the same place (the replacement has the same links in the same order, or fewer).
+function renderTodaySlot(g, load) {
+  const old = TODAY_SLOTS.includes(g?.id) ? $(`#today .today-card[data-group="${g.id}"]`) : null;
+  if (!old) return;
+  const links = [...old.querySelectorAll('a')], at = links.indexOf(document.activeElement);
+  old.insertAdjacentHTML('afterend', todayCard(g, load));
+  const card = old.nextElementSibling;
+  old.remove();
+  if (at >= 0) (card.querySelectorAll('a')[at] || card.querySelector('a'))?.focus({ preventScroll: true });
 }
 
-// Load the panel after the home is interactive. A cache hit renders at once; a miss imports the highlights module and
-// lets it fetch its sources concurrently (it reads the smallest derived files and never rejects), then caches the small
-// result. The viewer may leave the home while this runs, so it checks again before touching the DOM; any failure is
-// swallowed and the panel left hidden. Called from renderHome() at idle time, so it must never throw.
+// Load the panel after the home is interactive, and again whenever its entry has gone stale. A fresh entry needs
+// nothing. Otherwise the highlights module fetches every source at once (it never rejects) and hands each group over as
+// it settles; each goes straight into its slot, replacing the loading card or the stale group. The viewer may leave the
+// home while this runs, so the DOM is checked before every touch; called at idle time and by a timer, so it never throws.
 async function loadToday() {
-  if (!$('#today') || state.route?.suite || state.route?.module) return; // only on the Workspace home (#/), only while shown
+  clearTimeout(todayTimer);
+  if (!onHome()) return; // only on the Workspace home (#/), only while shown
+  const again = e => { todayTimer = setTimeout(loadToday, Math.max(0, e.until - Date.now()) + 1000); };
   const cached = readTodayCache();
-  if (cached) { renderToday(cached); return; }
+  if (todayFresh(cached)) { again(cached); return; }
   if (todayPending) return;
   todayPending = true;
+  const load = ++todayLoads, settled = {};
+  $('#today').setAttribute('aria-busy', 'true');
   try {
-    const { buildTodayHighlights } = await import(new URL('design/prp-highlights.js', document.baseURI).href);
-    // base '' (the default) → same-origin data paths resolve like the shell's own fetch('registry.json'); the wrapper
-    // keeps fetch bound to the window and resolves relative URLs against the document, same as registry.json.
-    const groups = await buildTodayHighlights({ fetch: u => fetch(u) });
-    if (Array.isArray(groups) && groups.length) writeTodayCache(groups);
-    if (!state.route?.suite && !state.route?.module) renderToday(groups || []); // still on the home? then show it
-  } catch { renderToday([]); } // the import or every source failed: hide the panel, never break the shell
-  finally { todayPending = false; }
+    const { buildTodayHighlights, cacheEntry } = await import(new URL('design/prp-highlights.js', document.baseURI).href);
+    await buildTodayHighlights({
+      // base '' (the default) → same-origin data paths resolve like the shell's own fetch('registry.json'). Every request
+      // carries AbortSignal.timeout(TODAY_FETCH_MS), and the module stops waiting for it then too, so no slow source can
+      // hold its slot (or any other) beyond that.
+      fetch: url => fetch(url, { signal: abortAfter(TODAY_FETCH_MS) }),
+      timeoutMs: TODAY_FETCH_MS,
+      onGroup: g => { if (!TODAY_SLOTS.includes(g?.id)) return; settled[g.id] = g; if (onHome()) renderTodaySlot(g, load); },
+    });
+    const groups = TODAY_SLOTS.map(id => settled[id]).filter(Boolean);
+    const any = groups.some(g => !g.unavailable);
+    if (any) { const entry = cacheEntry(groups); writeTodayCache(entry); if (onHome()) again(entry); }
+    if (onHome()) {
+      // A slot this load has not filled (the viewer left the home and came back meanwhile) gets its group now.
+      for (const g of groups) if (!$(`#today .today-card[data-group="${g.id}"][data-load="${load}"]`)) renderTodaySlot(g, load);
+      if (!any) $('#today').hidden = true; // nothing could be read at all (offline): no box of four apologies
+    }
+  } catch { if (onHome()) $('#today').hidden = true; } // the module itself could not be loaded: hide the panel, never break the shell
+  finally { todayPending = false; $('#today')?.removeAttribute('aria-busy'); }
 }
 
 /* --- Frames: one persistent iframe per submodule and view, so each keeps its state ---------------------------------

@@ -1,6 +1,6 @@
-// Integration Hub (Digital Science): the catalogue contract, the MCP server and JSON API Pages Functions (called with a fake
-// env whose ASSETS reads this checkout), caps and errors, the file allowlist, feeds and calendars, the local stdio server,
-// and the page.   node --test tests/integration-hub.test.mjs
+// Integration Hub (Digital Science): the catalogue contract, the Workspace Today panel's two derived files, the MCP server
+// and JSON API Pages Functions (called with a fake env whose ASSETS reads this checkout), caps and errors, the file
+// allowlist, feeds and calendars, the local stdio server, and the page.   node --test tests/integration-hub.test.mjs
 // PRP_PAGES=0 leaves the page test out (the daily workflow's check after the catalogue build); PRP_CPU_LIMIT_MS raises the
 // time limit of the hostile-requests test on a slower machine (default 40 ms).
 import { test, describe, before } from 'node:test';
@@ -121,6 +121,72 @@ describe('catalogue (integration/catalog.json)', () => {
   });
   test('derived files carry provenance', () => {
     for (const d of CAT.datasets.filter(x => x.derivedFrom)) for (const u of d.urls || [d.url]) { const f = J(u); assert.equal(f.dataset, d.id); assert.ok(f.generated && f.licence && Array.isArray(f.derivedFrom)); }
+  });
+});
+
+/* ================================================================ the Workspace "Today" panel's files */
+// integration/data/volatility-movers.json and briefing-activity.json are derived for the shell's Today panel
+// (design/prp-highlights.js), not catalogued: each must say what its page or store says, in a few KB. Their sources refresh
+// between catalogue builds (Volatility before the daily build, the briefings every six hours), so a file is compared with
+// its source exactly when it was built from that version of it, and otherwise only shown to be the older of the two.
+describe('Workspace Today files (integration/data)', () => {
+  const provenance = (f, id) => { assert.equal(f.dataset, id); assert.ok(f.generated && f.licence && f.about && Array.isArray(f.derivedFrom) && Array.isArray(f.records)); };
+  test('volatility-movers.json holds the Volatility page\'s "Biggest movers · 7 days" lists, worked out as the page does', () => {
+    const path = 'integration/data/volatility-movers.json', f = J(path);
+    provenance(f, 'volatility-movers');
+    assert.deepEqual(f.derivedFrom, ['volatility/data/index.json']); assert.equal(f.page, 'q/volatility.html'); assert.match(f.date, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(readFileSync(join(ROOT, path)).length < 4096, 'a few KB');
+    assert.ok(f.records.length <= 12 && f.records.length <= f.countries, 'at most the six rising and six easing');
+    const LEVELS = new Set(['high', 'medium', 'low', 'insufficient', null]), oneDecimal = v => Number.isFinite(v) && +v.toFixed(1) === v;
+    for (const r of f.records) {
+      assert.deepEqual(Object.keys(r), ['iso3', 'name', 'score', 'avg7', 'change7', 'coverage', 'date'], 'per country: iso3, name, score, avg7, change7, coverage, date');
+      assert.match(r.iso3, /^[A-Z]{3}$/); assert.ok(typeof r.name === 'string' && r.name.length);
+      assert.ok(r.score === null || (r.score >= 0 && r.score <= 100), `${r.iso3} score`);
+      assert.ok(oneDecimal(r.avg7) && oneDecimal(r.change7), `${r.iso3}: the page's one decimal`);
+      assert.ok(LEVELS.has(r.coverage), `${r.iso3} coverage ${r.coverage}`); assert.equal(r.date, f.date);
+    }
+    for (let k = 1; k < f.records.length; k++) assert.ok(f.records[k - 1].change7 >= f.records[k].change7, 'in the page\'s order, change descending');
+    const VOL = J('volatility/data/index.json');
+    if (f.date !== VOL.latest) { assert.ok(f.date < VOL.latest, `built from ${f.date}, the index is at ${VOL.latest}`); return; }
+    // q/volatility.html derive() on the latest day, then renderMovers(), written out again from the page's code.
+    const DAYS = VOL.global.map(g => g[0]), i = DAYS.length - 1, d = DAYS[i], d7 = DAYS[Math.max(0, i - 7)], d14 = DAYS[Math.max(0, i - 14)];
+    const mean = a => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
+    const C = Object.entries(VOL.countries).map(([iso3, c]) => {
+      const rows = c.days.filter(r => r[0] <= d), row = rows.at(-1)?.[0] === d ? rows.at(-1) : null, scored = rows.filter(r => r[1] != null);
+      const last7 = scored.filter(r => r[0] > d7), prev7 = scored.filter(r => r[0] <= d7 && r[0] > d14);
+      return { iso3, score: row?.[1] ?? null, cov: row?.[5] || null, avg7: mean(last7.map(r => r[1])), change7: last7.length && prev7.length ? mean(last7.map(r => r[1])) - mean(prev7.map(r => r[1])) : null };
+    });
+    const l = C.filter(c => c.change7 != null).sort((a, b) => b.change7 - a.change7), rising = l.slice(0, 6), easing = l.slice(-6).reverse();
+    assert.equal(f.countries, l.length, 'countries with a 7-day change');
+    assert.deepEqual(f.records.map(r => r.iso3), l.filter(c => rising.includes(c) || easing.includes(c)).map(c => c.iso3), 'exactly the page\'s Rising and Easing countries, in its order');
+    for (const r of f.records) {
+      const c = l.find(x => x.iso3 === r.iso3);
+      assert.ok(Math.abs(r.change7 - +c.change7.toFixed(1)) < 1e-9 && Math.abs(r.avg7 - +c.avg7.toFixed(1)) < 1e-9, `${r.iso3}: the page shows ${c.change7.toFixed(1)} on ${c.avg7.toFixed(1)}`);
+      assert.equal(r.score, c.score);
+      assert.equal(r.coverage, { h: 'high', m: 'medium', l: 'low', i: 'insufficient' }[c.cov] || null, `${r.iso3}: the latest day's coverage, as the page's profile shows it`);
+    }
+  });
+  test('briefing-activity.json counts each briefing\'s store: stories held, top topic, when it was generated', () => {
+    const path = 'integration/data/briefing-activity.json', f = J(path);
+    provenance(f, 'briefing-activity');
+    assert.ok(readFileSync(join(ROOT, path)).length < 2048, 'a few hundred bytes a briefing');
+    const STORES = { 'science-briefing': 'science/briefing/data/stories.json', 'econ-briefing': 'econ/briefing/data/stories.json', 'digital-briefing': 'digital/briefing/data/stories.json', briefing: 'briefing/data/latest.json' };
+    assert.deepEqual(f.records.map(r => r.id), Object.keys(STORES).filter(id => existsSync(join(ROOT, STORES[id]))), 'every briefing with a store, in order');
+    assert.deepEqual(f.derivedFrom, f.records.map(r => STORES[r.id]));
+    for (const r of f.records) {
+      assert.deepEqual(Object.keys(r), ['id', 'name', 'items', 'days', 'topic', 'facet', 'generated'], 'per briefing: items this week, the top topic\'s label, generated');
+      assert.ok(Number.isInteger(r.items) && r.items > 0 && typeof r.topic === 'string' && r.topic.length, r.id);
+      assert.match(r.generated, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+      const s = J(STORES[r.id]);
+      if (r.generated !== s.generated) { assert.ok(r.generated < s.generated, `${r.id}: built from ${r.generated}, the store is at ${s.generated}`); continue; }
+      assert.equal(r.items, s.items.length, `${r.id}: every story the store holds`); assert.equal(r.days, s.keepDays);
+      // The top topic: the briefing's own tally of its topics; for the Intelligence Briefing, stories by their outlet's position.
+      let tally, defs, key;
+      if (r.facet === 'positions') { const pos = new Map(s.sources.map(x => [x.id, x.position])); tally = {}; for (const it of s.items) { const p = pos.get(it.s); if (p) tally[p] = (tally[p] || 0) + 1; } defs = s.positions; key = 'key'; }
+      else { assert.ok(Array.isArray(s[r.facet]), `${r.id}: ${r.facet} is the store's topic list`); tally = s.counts[r.facet]; defs = s[r.facet]; key = 'id'; }
+      const most = Math.max(...defs.map(x => tally[x[key]] || 0));
+      assert.equal(r.topic, defs.find(x => (tally[x[key]] || 0) === most).label, `${r.id}: the most-covered`);
+    }
   });
 });
 

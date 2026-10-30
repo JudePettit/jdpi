@@ -1,0 +1,190 @@
+/* Bibliotheca · Neo Classic (Kino): a reading page for public-domain classics with the Encyclopaedia's terms
+   highlighted, a popout bar of the terms on screen and a companion pane beside the text. Written against the tokens
+   in design/prp.css only (no colour is set here that is not a token), so light and dark both follow the system or the
+   shell. The accent is Kino's (--prp-kn); a copy of prp.css without it falls back to Natural Science's, as kino.css does.
+
+   Reading comfort: the text is the design system's serif (--prp-font-serif, Source Serif 4) at 18px on a 1.7 leading,
+   and one column carries the reading width for everything in the book (front matter, the sticky chapter head, the
+   text, the notes, the sources), set once in the reading font: a `ch` is the width of that font's "0", so a width
+   written on an element in the interface font would be a different width. 66ch of Source Serif 4 at 18px (606px)
+   holds 70 to 73 characters of running text on a full line (measured over chapter III of The Prince), inside the
+   65–75 a comfortable measure allows; the design system's --prp-measure, 72ch, would give about 80 in this face. The
+   popout bar and the contents list hang from the sticky head over the text, so opening them moves nothing; the head's
+   height never changes. From 1150 px with the pane shut the bar is a list in the margin beside the column instead:
+   (1150 − 48 − 606) / 2 = 248 px beside it holds the 14rem list and its 20 px gap, so the shell's frame at a 1440 px
+   window (1168 px) has it too. As a strip it covers the line under the head, and the page counts what is in view from
+   the strip's bottom (app.js: stripH; --nc-bar below, so a jump lands clear of it). */
+[data-suite="kino"] { --prp-accent: var(--prp-kn, var(--prp-ns)); --prp-accent-soft: var(--prp-kn-soft, var(--prp-ns-soft)); }
+
+:root { --nc-size: 18px; --nc-sheet: 52dvh; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--prp-canvas); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.nc-page { max-width: 1440px; margin: 0 auto; padding: 22px 24px 40px; }
+.nc-front { display: grid; gap: 2px; margin-bottom: 12px; }
+.nc-front .prp-title { margin-bottom: 4px; }
+
+/* --- Toolbar: the shelf and the bar switch (scrolls away with the front matter) ----------------------------------- */
+.nc-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 4px 0 16px; }
+.nc-toolbar .prp-label { flex: none; }
+.nc-toolbar .prp-select { min-width: 0; flex: 0 1 380px; }
+.nc-toolbar .spacer { flex: 1 1 auto; }
+.nc-toolbar .keys { color: var(--prp-muted); font: var(--prp-fs-xs) var(--prp-font-mono); }
+.nc-toolbar .keys kbd { font: inherit; padding: 0 4px; border: 1px solid var(--prp-line); border-radius: 3px; background: var(--prp-surface); color: var(--prp-text-2); }
+.prp-btn[aria-pressed="true"], .prp-btn[aria-expanded="true"] { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
+
+/* --- Layout: the book alone, or the book beside the pane (above 1100 px) ------------------------------------------ */
+.nc-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 24px; align-items: start; }
+.nc-layout.split { grid-template-columns: minmax(0, 1fr) minmax(380px, 44%); }
+.nc-book { min-width: 0; }
+.nc-col { max-width: 66ch; margin: 0 auto; font: var(--nc-size)/1.7 var(--prp-font-serif); color: var(--prp-text); }
+
+/* The book's own front matter (scrolls away). */
+.nc-book-front { padding: 2px 0 14px; margin-bottom: 4px; border-bottom: 1px solid var(--prp-line-soft); }
+.nc-book-title { margin: 0; font: 600 var(--prp-fs-xl)/1.2 var(--prp-font-serif); letter-spacing: -.01em; color: var(--prp-text); }
+.nc-byline { margin: 6px 0 0; color: var(--prp-text-2); font: italic var(--prp-fs-md)/1.5 var(--prp-font-serif); }
+.nc-byline a.term { font-style: normal; }
+.nc-book-front .prp-meta { margin-top: 8px; }
+
+/* --- The reader: a sticky chapter head (contents, title, position, terms, pane), the text ----------------------------- */
+.nc-reader { position: relative; }
+.nc-head { position: sticky; top: 0; z-index: 6; background: var(--prp-canvas); padding-top: 8px; font: var(--prp-fs)/1.4 var(--prp-font-ui); }
+.nc-chapter-row { display: flex; align-items: center; gap: 6px; height: 36px; }
+.nc-chapter-row .prp-btn { flex: none; }
+.nc-chapter-title { flex: 1 1 auto; min-width: 0; margin: 0 4px; display: flex; align-items: baseline; gap: 8px; font: 600 var(--prp-fs-md)/1.3 var(--prp-font-serif); color: var(--prp-text); white-space: nowrap; overflow: hidden; }
+.nc-chapter-title .no { flex: none; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.nc-chapter-title .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nc-chapter-row .icon { width: 28px; padding: 0; font-size: 15px; }
+.nc-chapter-row .nav[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+.nc-bar-toggle .n { display: inline-block; min-width: 1.4em; text-align: center; font: 600 var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+/* The reading position: how far through the chapter, and which paragraph of how many. */
+.nc-progress-row { display: flex; align-items: center; gap: 10px; height: 16px; margin-top: 4px; }
+.nc-progress { position: relative; flex: 1 1 auto; height: 3px; background: var(--prp-line-soft); border-radius: 2px; overflow: hidden; }
+.nc-progress i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--prp-accent); transition: width .15s linear; }
+.nc-progress-row .pos { flex: none; min-width: 9.5em; text-align: right; color: var(--prp-muted); font: var(--prp-fs-xs)/1 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.nc-head::after { content: ""; display: block; height: 12px; background: linear-gradient(var(--prp-canvas), transparent); margin-bottom: -12px; position: relative; pointer-events: none; }
+
+/* The contents list and the popout bar hang from the head, over the text. */
+.nc-toc, .nc-popout { position: absolute; top: calc(100% - 6px); z-index: 7; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); }
+.nc-toc { left: 0; width: min(100%, 36rem); max-height: min(65vh, 560px); overflow: auto; padding: 6px 0; }
+.nc-toc ol { list-style: none; margin: 0; padding: 0; }
+.nc-toc a { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 14px; color: var(--prp-text); text-decoration: none; font: var(--prp-fs-sm)/1.45 var(--prp-font-ui); }
+.nc-toc a:hover, .nc-toc a:focus-visible { background: var(--prp-surface-3); }
+.nc-toc a[aria-current="page"] { background: var(--prp-accent-soft); }
+.nc-toc .no { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .04em; text-transform: uppercase; }
+.nc-toc .w { color: var(--prp-muted); font: var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* The bar: one row of chips under the head, scrolling sideways, so it covers a line of text at most. The row is a
+   chip's height (28px and its 1px padding) whether or not any chip is in view, so the strip's depth, which the page
+   takes out of the reading region, does not change as the reader scrolls. */
+.nc-popout { left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 6px 4px 6px 12px; }
+.nc-popout-label { flex: none; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
+.nc-chips { flex: 1 1 auto; min-width: 0; min-height: 30px; display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding: 1px; }
+.nc-popout .icon { flex: none; width: 26px; padding: 0; }
+.nc-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--prp-line-strong); border-radius: 99px; background: var(--prp-surface); color: var(--prp-text); font: 500 var(--prp-fs-sm) var(--prp-font-ui); white-space: nowrap; }
+.nc-chip:hover { background: var(--prp-surface-3); }
+.nc-chip[aria-pressed="true"] { border-color: var(--prp-primary); background: var(--prp-primary-soft); }
+.nc-chip .n { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.nc-popout .none { margin: 0; color: var(--prp-muted); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); white-space: nowrap; }
+/* Wide, with the pane shut: the bar is a list in the margin beside the text, covering nothing (app.js MARGIN_BAR
+   matches this width). */
+@media (min-width: 1150px) {
+  .nc-layout:not(.split) .nc-popout { display: block; left: calc(100% + 20px); right: auto; top: 8px; width: 14rem; padding: 10px 12px 12px; max-height: calc(100dvh - 40px); overflow: auto; box-shadow: var(--prp-shadow-1); }
+  .nc-layout:not(.split) .nc-popout-label { display: block; margin: 0 28px 10px 0; }
+  .nc-layout:not(.split) .nc-chips { flex-wrap: wrap; overflow: visible; }
+  .nc-layout:not(.split) .nc-popout .none { white-space: normal; }
+  .nc-layout:not(.split) #popout-close { position: absolute; top: 6px; right: 6px; }
+}
+
+/* --- The text ------------------------------------------------------------------------------------------------------- */
+.nc-text { padding-top: 6px; }
+/* A jump lands a paragraph 12px under the head, and under the terms strip when it is open (--nc-bar, its depth below
+   the head, set by app.js; 0 when the bar is collapsed or in the margin). */
+.nc-text p.para { position: relative; margin: 0 0 1em; scroll-margin-top: calc(var(--nc-head, 56px) + var(--nc-bar, 0px) + 12px); hyphens: auto; -webkit-hyphens: auto; }
+.nc-text p.para::before { content: ""; position: absolute; left: -16px; top: .3em; bottom: .3em; width: 3px; border-radius: 2px; background: transparent; transition: background .2s; }
+.nc-text p.para.current::before { background: var(--prp-accent); }
+.nc-text p.note { font-size: .86em; line-height: 1.6; color: var(--prp-text-2); padding-left: 1.1em; border-left: 1px solid var(--prp-line); margin-left: .2em; }
+.nc-text p.verse { font-style: italic; padding-left: 2em; }
+.nc-text sup.fn { font: 600 .62em/0 var(--prp-font-mono); color: var(--prp-muted); vertical-align: .55em; margin-left: 1px; }
+.nc-text .prp-empty { font: var(--prp-fs) var(--prp-font-ui); }
+
+/* A term the Encyclopaedia knows: a soft wash in the accent with a hairline under it, in the ink colour; the term in
+   use (all its occurrences) is ringed in the action colour. */
+a.term { color: inherit; text-decoration: none; background: var(--prp-accent-soft); border-radius: 3px; padding: 0 2px; margin: 0 -2px;
+  box-shadow: inset 0 -1px 0 var(--prp-accent); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+a.term:hover { background: var(--prp-surface-3); }
+a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px var(--prp-primary); }
+
+.nc-chapter-nav { display: flex; justify-content: space-between; gap: 10px; margin: 26px 0 0; padding-top: 14px; border-top: 1px solid var(--prp-line-soft); }
+.nc-chapter-nav .prp-btn { max-width: 48%; overflow: hidden; text-overflow: ellipsis; }
+.nc-chapter-nav .prp-btn[aria-disabled="true"] { visibility: hidden; }
+.nc-book .prp-sources { margin-top: 28px; }
+.nc-book .prp-sources p { margin: 0 0 6px; }
+
+/* --- The companion pane: the Encyclopaedia entry, or the other screens for the era ------------------------------------ */
+.nc-pane { position: sticky; top: 8px; display: flex; flex-direction: column; height: calc(100vh - 16px); height: calc(100dvh - 16px); min-height: 420px;
+  background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); overflow: hidden; }
+.nc-pane-head { display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); }
+.nc-pane-titles { flex: 1 1 auto; min-width: 0; display: grid; }
+.nc-pane-titles b { font: 600 var(--prp-fs)/1.35 var(--prp-font-ui); color: var(--prp-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nc-pane .prp-tabs { padding: 0 8px; flex: none; }
+.nc-pane-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.nc-pane-body [role="tabpanel"] { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.nc-pane iframe { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; background: var(--prp-canvas); }
+.nc-pane-empty { margin: 0; padding: 20px 16px; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.6 var(--prp-font-ui); }
+.nc-pane-empty b { color: var(--prp-text); }
+.nc-pane .nc-tall { display: none; }
+
+/* "In Vitruvian Manager": whose era, one row per screen, the places the term itself appears, then the frame. */
+.nc-vm-list { flex: none; max-height: 100%; overflow: auto; border-bottom: 1px solid var(--prp-line-soft); }
+.nc-vm-list.with-frame { max-height: 42%; }
+.nc-era-title { margin: 0; padding: 10px 14px 6px; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); }
+.nc-era-title b { color: var(--prp-text); font-weight: 600; }
+.nc-era-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 8px; }
+.nc-era-pick label { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid var(--prp-line-strong); border-radius: 99px; color: var(--prp-text-2); font: 500 var(--prp-fs-xs) var(--prp-font-ui); cursor: pointer; }
+.nc-era-pick label:has(input:checked) { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
+.nc-era-pick input { margin: 0; accent-color: var(--prp-accent); }
+.nc-rows { list-style: none; margin: 0; padding: 0 0 6px; }
+.nc-rows-label { margin: 6px 14px 2px; }
+.nc-rows li { display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 14px; font: var(--prp-fs-sm)/1.4 var(--prp-font-ui); }
+.nc-rows li + li { border-top: 1px solid var(--prp-line-soft); }
+.nc-rows li[aria-current="true"] { background: var(--prp-accent-soft); }
+.nc-rows .what { flex: 1 1 auto; min-width: 0; display: grid; }
+.nc-rows .what b { color: var(--prp-text); font-weight: 600; }
+.nc-rows .what span { color: var(--prp-muted); font: var(--prp-fs-xs)/1.45 var(--prp-font-mono); overflow: hidden; text-overflow: ellipsis; }
+.nc-rows li.off .what b { color: var(--prp-text-2); font-weight: 500; }
+.nc-rows .acts { flex: none; display: flex; gap: 4px; }
+.nc-rows .prp-kind { margin-left: 6px; vertical-align: 1px; }
+
+/* --- Narrower than 1100 px: the pane is a sheet docked under the text, which keeps the width ------------------------ */
+@media (max-width: 1100px) {
+  .nc-layout.split { grid-template-columns: minmax(0, 1fr); }
+  .nc-layout.split .nc-book { padding-bottom: var(--nc-sheet); }
+  .nc-pane { position: fixed; left: 0; right: 0; bottom: 0; top: auto; height: var(--nc-sheet); min-height: 0; z-index: 30;
+    border-width: 1px 0 0; border-radius: var(--prp-radius-lg) var(--prp-radius-lg) 0 0; box-shadow: var(--prp-shadow-2); }
+  .nc-pane.tall { height: 88dvh; }
+  .nc-pane .nc-tall { display: inline-flex; }
+}
+@media (max-width: 640px) {
+  :root { --nc-size: 17px; }
+  .nc-page { padding: 16px 16px 32px; }
+  .nc-toolbar .keys { display: none; }
+  .nc-chapter-row { gap: 4px; }
+  .nc-chapter-row .lbl { display: none; }
+  .nc-chapter-title { margin: 0 2px; }
+  .nc-text p.para::before { left: -10px; }
+  .nc-toc a { grid-template-columns: 4.8em minmax(0, 1fr); }
+  .nc-toc .w { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nc-progress i, .nc-text p.para::before { transition: none; }
+}
+@media print {
+  .nc-toolbar, .nc-chapter-row .prp-btn, .nc-progress, .nc-popout, .nc-toc, .nc-pane, .nc-chapter-nav { display: none !important; }
+  .nc-head { position: static; }
+  a.term { background: none; box-shadow: none; }
+}

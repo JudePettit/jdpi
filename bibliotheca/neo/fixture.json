@@ -1,0 +1,300 @@
+{
+ "slug": "fixture-the-prince",
+ "title": "The Prince (test fixture)",
+ "author": {
+  "name": "Niccolò Machiavelli",
+  "qid": "Q1399",
+  "born": 1469,
+  "died": 1527
+ },
+ "translator": {
+  "name": "W. K. Marriott",
+  "died": 1927
+ },
+ "work": {
+  "qid": "Q131719",
+  "written": 1513,
+  "published": 1532
+ },
+ "era": [
+  1494,
+  1527
+ ],
+ "edition": {
+  "source": "Project Gutenberg",
+  "id": "pg1232",
+  "url": "https://www.gutenberg.org/ebooks/1232",
+  "published": 1908,
+  "licence": "Project Gutenberg eBook #1232 (W. K. Marriott's translation, 1908). The Project Gutenberg header, footer and licence have been removed, so this text is redistributed as public-domain text without the Project Gutenberg trademark, as its licence provides (gutenberg.org/policy/license.html). This fixture is three excerpts of that text (chapters I, III and XXVI), cut from bibliotheca/data/books/the-prince.json with its terms, for the page tests (tests/bibliotheca-page.test.mjs) only."
+ },
+ "rights": {
+  "us": "pd",
+  "uk": "pd",
+  "basis": "Machiavelli died in 1527 and the translator W. K. Marriott in 1927, so the UK term (life plus 70 years, CDPA s.12) ended on 31 December 1997. The translation was first published in 1908, and every work published before 1931 is in the public domain in the United States (a 1908 publication could be protected for at most 75 years, to 31 December 1983; the 95-year term applies only to works published from 1923). The Project Gutenberg licence allows the text to be used freely once its header, footer and licence are removed (gutenberg.org/policy/license.html).",
+  "checked": "2026-10-30"
+ },
+ "generated": "2026-10-30T20:03:08.077Z",
+ "fixture": true,
+ "chapters": [
+  {
+   "n": 1,
+   "heading": "Chapter I",
+   "title": "How many kinds of principalities there are, and by what means they are acquired",
+   "words": 118,
+   "paragraphs": [
+    {
+     "id": "c01-p01",
+     "kind": "para",
+     "text": "All states, all powers, that have held and hold rule over men have been and are either republics or principalities.",
+     "terms": []
+    },
+    {
+     "id": "c01-p02",
+     "kind": "para",
+     "text": "Principalities are either hereditary, in which the family has been long established; or they are new.",
+     "terms": []
+    },
+    {
+     "id": "c01-p03",
+     "kind": "para",
+     "text": "The new are either entirely new, as was Milan to Francesco Sforza, or they are, as it were, members annexed to the hereditary state of the prince who has acquired them, as was the kingdom of Naples to that of the King of Spain.",
+     "terms": [
+      {
+       "s": 40,
+       "e": 45,
+       "qid": "Q153529",
+       "label": "Duchy of Milan"
+      },
+      {
+       "s": 221,
+       "e": 226,
+       "qid": "Q80702",
+       "label": "Spanish Empire"
+      }
+     ]
+    },
+    {
+     "id": "c01-p04",
+     "kind": "para",
+     "text": "Such dominions thus acquired are either accustomed to live under a prince, or to live in freedom; and are acquired either by the arms of the prince himself, or of others, or else by fortune or by ability.",
+     "terms": []
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "heading": "Chapter III",
+   "title": "Concerning mixed principalities",
+   "words": 872,
+   "paragraphs": [
+    {
+     "id": "c03-p01",
+     "kind": "para",
+     "text": "But the difficulties occur in a new principality. And firstly, if it be not entirely new, but is, as it were, a member of a state which, taken collectively, may be called composite, the changes arise chiefly from an inherent difficulty which there is in all new principalities; for men change their rulers willingly, hoping to better themselves, and this hope induces them to take up arms against him who rules: wherein they are deceived, because they afterwards find by experience they have gone from bad to worse. This follows also on another natural and common necessity, which always causes a new prince to burden those who have submitted to him with his soldiery and with infinite other hardships which he must put upon his new acquisition.",
+     "terms": []
+    },
+    {
+     "id": "c03-p02",
+     "kind": "para",
+     "text": "In this way you have enemies in all those whom you have injured in seizing that principality, and you are not able to keep those friends who put you there because of your not being able to satisfy them in the way they expected, and you cannot take strong measures against them, feeling bound to them. For, although one may be very strong in armed forces, yet in entering a province one has always need of the goodwill of the natives.",
+     "terms": []
+    },
+    {
+     "id": "c03-p03",
+     "kind": "para",
+     "text": "For these reasons Louis the Twelfth, King of France, quickly occupied Milan, and as quickly lost it; and to turn him out the first time it only needed Lodovico’s own forces; because those who had opened the gates to him, finding themselves deceived in their hopes of future benefit, would not endure the ill-treatment of the new prince. It is very true that, after acquiring rebellious provinces a second time, they are not so lightly lost afterwards, because the prince, with little reluctance, takes the opportunity of the rebellion to punish the delinquents, to clear out the suspects, and to strengthen himself in the weakest places. Thus to cause France to lose Milan the first time it was enough for the Duke Lodovico[1] to raise insurrections on the borders; but to cause him to lose it a second time it was necessary to bring the whole world against him, and that his armies should be defeated and driven out of Italy; which followed from the causes above mentioned.",
+     "terms": [
+      {
+       "s": 45,
+       "e": 51,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      },
+      {
+       "s": 70,
+       "e": 75,
+       "qid": "Q153529",
+       "label": "Duchy of Milan"
+      },
+      {
+       "s": 652,
+       "e": 658,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      },
+      {
+       "s": 667,
+       "e": 672,
+       "qid": "Q153529",
+       "label": "Duchy of Milan"
+      }
+     ]
+    },
+    {
+     "id": "c03-n04",
+     "kind": "note",
+     "note": 1,
+     "text": "[1] Duke Lodovico was Lodovico Moro, a son of Francesco Sforza, who married Beatrice d’Este. He ruled over Milan from 1494 to 1500, and died in 1510.",
+     "terms": [
+      {
+       "s": 107,
+       "e": 112,
+       "qid": "Q153529",
+       "label": "Duchy of Milan"
+      }
+     ]
+    },
+    {
+     "id": "c03-p05",
+     "kind": "para",
+     "text": "Nevertheless Milan was taken from France both the first and the second time. The general reasons for the first have been discussed; it remains to name those for the second, and to see what resources he had, and what any one in his situation would have had for maintaining himself more securely in his acquisition than did the King of France.",
+     "terms": [
+      {
+       "s": 13,
+       "e": 18,
+       "qid": "Q153529",
+       "label": "Duchy of Milan"
+      },
+      {
+       "s": 34,
+       "e": 40,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      },
+      {
+       "s": 334,
+       "e": 340,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      }
+     ]
+    },
+    {
+     "id": "c03-p06",
+     "kind": "para",
+     "text": "Now I say that those dominions which, when acquired, are added to an ancient state by him who acquires them, are either of the same country and language, or they are not. When they are, it is easier to hold them, especially when they have not been accustomed to self-government; and to hold them securely it is enough to have destroyed the family of the prince who was ruling them; because the two peoples, preserving in other things the old conditions, and not being unlike in customs, will live quietly together, as one has seen in Brittany, Burgundy, Gascony, and Normandy, which have been bound to France for so long a time: and, although there may be some difference in language, nevertheless the customs are alike, and the people will easily be able to get on amongst themselves. He who has annexed them, if he wishes to hold them, has only to bear in mind two considerations: the one, that the family of their former lord is extinguished; the other, that neither their laws nor their taxes are altered, so that in a very short time they will become entirely one body with the old principality.",
+     "terms": [
+      {
+       "s": 602,
+       "e": 608,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      }
+     ]
+    },
+    {
+     "id": "c03-p07",
+     "kind": "para",
+     "text": "But when states are acquired in a country differing in language, customs, or laws, there are difficulties, and good fortune and great energy are needed to hold them, and one of the greatest and most real helps would be that he who has acquired them should go and reside there. This would make his position more secure and durable, as it has made that of the Turk in Greece, who, notwithstanding all the other measures taken by him for holding that state, if he had not settled there, would not have been able to keep it. Because, if one is on the spot, disorders are seen as they spring up, and one can quickly remedy them; but if one is not at hand, they are heard of only when they are great, and then one can no longer remedy them. Besides this, the country is not pillaged by your officials; the subjects are satisfied by prompt recourse to the prince; thus, wishing to be good, they have more cause to love him, and wishing to be otherwise, to fear him. He who would attack that state from the outside must have the utmost caution; as long as the prince resides there it can only be wrested from him with the greatest difficulty.",
+     "terms": [
+      {
+       "s": 358,
+       "e": 362,
+       "qid": "Q12560",
+       "label": "Ottoman Empire"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "n": 26,
+   "heading": "Chapter XXVI",
+   "title": "An exhortation to liberate Italy from the barbarians",
+   "words": 424,
+   "paragraphs": [
+    {
+     "id": "c26-p11",
+     "kind": "para",
+     "text": "And although Swiss and Spanish infantry may be considered very formidable, nevertheless there is a defect in both, by reason of which a third order would not only be able to oppose them, but might be relied upon to overthrow them. For the Spaniards cannot resist cavalry, and the Switzers are afraid of infantry whenever they encounter them in close combat. Owing to this, as has been and may again be seen, the Spaniards are unable to resist French cavalry, and the Switzers are overthrown by Spanish infantry. And although a complete proof of this latter cannot be shown, nevertheless there was some evidence of it at the battle of Ravenna, when the Spanish infantry were confronted by German battalions, who follow the same tactics as the Swiss; when the Spaniards, by agility of body and with the aid of their shields, got in under the pikes of the Germans and stood out of danger, able to attack, while the Germans stood helpless, and, if the cavalry had not dashed up, all would have been over with them. It is possible, therefore, knowing the defects of both these infantries, to invent a new one, which will resist cavalry and not be afraid of infantry; this need not create a new order of arms, but a variation upon the old. And these are the kind of improvements which confer reputation and power upon a new prince.",
+     "terms": [
+      {
+       "s": 13,
+       "e": 18,
+       "qid": "Q435583",
+       "label": "Old Swiss Confederacy"
+      },
+      {
+       "s": 239,
+       "e": 248,
+       "qid": "Q80702",
+       "label": "Spanish Empire"
+      },
+      {
+       "s": 280,
+       "e": 288,
+       "qid": "Q435583",
+       "label": "Old Swiss Confederacy"
+      },
+      {
+       "s": 412,
+       "e": 421,
+       "qid": "Q80702",
+       "label": "Spanish Empire"
+      },
+      {
+       "s": 443,
+       "e": 449,
+       "qid": "Q70972",
+       "label": "Kingdom of France"
+      },
+      {
+       "s": 467,
+       "e": 475,
+       "qid": "Q435583",
+       "label": "Old Swiss Confederacy"
+      },
+      {
+       "s": 742,
+       "e": 747,
+       "qid": "Q435583",
+       "label": "Old Swiss Confederacy"
+      },
+      {
+       "s": 758,
+       "e": 767,
+       "qid": "Q80702",
+       "label": "Spanish Empire"
+      },
+      {
+       "s": 853,
+       "e": 860,
+       "qid": "Q12548",
+       "label": "Holy Roman Empire"
+      },
+      {
+       "s": 912,
+       "e": 919,
+       "qid": "Q12548",
+       "label": "Holy Roman Empire"
+      }
+     ]
+    },
+    {
+     "id": "c26-p12",
+     "kind": "para",
+     "text": "This opportunity, therefore, ought not to be allowed to pass for letting Italy at last see her liberator appear. Nor can one express the love with which he would be received in all those provinces which have suffered so much from these foreign scourings, with what thirst for revenge, with what stubborn faith, with what devotion, with what tears. What door would be closed to him? Who would refuse obedience to him? What envy would hinder him? What Italian would refuse him homage? To all of us this barbarous dominion stinks. Let, therefore, your illustrious house take up this charge with that courage and hope with which all just enterprises are undertaken, so that under its standard our native country may be ennobled, and under its auspices may be verified that saying of Petrarch:",
+     "terms": []
+    },
+    {
+     "id": "c26-v13",
+     "kind": "verse",
+     "text": "Virtu contro al Furore\nPrendera l’arme, e fia il combatter corto:\nChe l’antico valore\nNegli italici cuor non e ancor morto.",
+     "terms": []
+    },
+    {
+     "id": "c26-v14",
+     "kind": "verse",
+     "text": "Virtue against fury shall advance the fight,\nAnd it i’ th’ combat soon shall put to flight:\nFor the old Roman valour is not dead,\nNor in th’ Italians’ brests extinguished.",
+     "terms": []
+    },
+    {
+     "id": "c26-p15",
+     "kind": "para",
+     "text": "Edward Dacre, 1640.",
+     "terms": []
+    }
+   ]
+  }
+ ]
+}

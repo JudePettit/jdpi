@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" class="prp" data-suite="kino">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+  <title>Neo Classic · Bibliotheca · VM</title>
+  <meta name="description" content="Public-domain classics read on screen: every term the Encyclopaedia knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Encyclopaedia entry or the other screens of Vitruvian Manager for that era.">
+  <link rel="icon" href="../../design/brand-vm-icon.svg" type="image/svg+xml">
+  <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="../../design/prp.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="../../design/prp-bar.js" data-suite="kino" data-module="bibliotheca" data-shell="../../" defer></script>
+  <!-- The reader (a module script, so it runs after the deferred connector above, in document order). -->
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="nc-page">
+    <header class="nc-front">
+      <p class="prp-eyebrow" data-jdpi-standalone><span>Kino <span class="sep">·</span> Bibliotheca <span class="sep">·</span> Neo Classic</span></p>
+      <h1 class="prp-title">Neo Classic</h1>
+      <p class="prp-dek">Public-domain classics read on screen. Every name the Encyclopaedia knows is highlighted: use one to read its entry beside the text, or to open the other screens of Vitruvian Manager for its era.</p>
+      <p class="prp-meta" id="meta"><span>Loading the shelf…</span></p>
+    </header>
+
+    <main>
+      <div class="nc-toolbar" role="group" aria-label="Book and reading options">
+        <label class="prp-label" for="shelf">Book</label>
+        <select id="shelf" class="prp-select"></select>
+        <span class="spacer"></span>
+        <span class="keys" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>J</kbd> <kbd>K</kbd> paragraphs · <kbd>T</kbd> terms · <kbd>P</kbd> pane</span>
+        <button type="button" class="prp-btn" id="bar-switch" aria-pressed="true" title="Show or hide the bar of the terms on screen">Terms bar</button>
+      </div>
+
+      <div class="nc-layout" id="layout">
+        <article class="nc-book" id="book" aria-labelledby="book-title">
+          <div class="nc-col">
+            <header class="nc-book-front">
+              <h2 class="nc-book-title" id="book-title">…</h2>
+              <p class="nc-byline" id="byline"></p>
+              <p class="prp-meta" id="book-meta"></p>
+            </header>
+
+            <section class="nc-reader" id="reader" aria-labelledby="chapter-title">
+              <div class="nc-head" id="head">
+                <div class="nc-chapter-row">
+                  <button type="button" class="prp-btn sm ghost icon" id="toc-toggle" aria-expanded="false" aria-controls="toc" aria-label="Contents" title="Contents">☰</button>
+                  <h3 class="nc-chapter-title" id="chapter-title"><span class="no" id="chapter-no"></span><span class="t" id="chapter-name">…</span></h3>
+                  <a class="prp-btn sm ghost icon nav" id="prev" href="#" aria-label="Previous chapter" title="Previous chapter (←)">‹</a>
+                  <a class="prp-btn sm ghost icon nav" id="next" href="#" aria-label="Next chapter" title="Next chapter (→)">›</a>
+                  <button type="button" class="prp-btn sm nc-bar-toggle" id="bar-toggle" aria-expanded="false" aria-controls="popout" title="The terms on screen (T)">◈ <span class="n" id="bar-count">0</span></button>
+                  <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" title="The companion pane: the Encyclopaedia and the screens for the era (P)">▥<span class="lbl">Pane</span></button>
+                </div>
+                <div class="nc-progress-row">
+                  <div class="nc-progress" id="progress" role="progressbar" aria-label="Position in the chapter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
+                  <span class="pos" id="pos"></span>
+                </div>
+                <nav class="nc-toc" id="toc" hidden aria-label="Contents"><ol id="toc-list"></ol></nav>
+                <div class="nc-popout" id="popout" hidden role="region" aria-label="Terms on screen">
+                  <span class="nc-popout-label">On screen</span>
+                  <div class="nc-chips" id="chips"></div>
+                  <button type="button" class="prp-btn sm ghost icon" id="popout-close" aria-label="Collapse the terms bar" title="Collapse (T)">×</button>
+                </div>
+              </div>
+              <div class="nc-text" id="text" lang="en"></div>
+              <nav class="nc-chapter-nav" aria-label="Chapters"><a class="prp-btn" id="prev2" href="#">‹ Previous chapter</a><a class="prp-btn" id="next2" href="#">Next chapter ›</a></nav>
+            </section>
+
+            <footer class="prp-sources" id="sources"></footer>
+          </div>
+        </article>
+
+        <aside class="nc-pane" id="pane" hidden aria-labelledby="pane-title">
+          <div class="nc-pane-head">
+            <div class="nc-pane-titles"><span class="prp-label" id="pane-kicker">Companion</span><b id="pane-title">…</b></div>
+            <a class="prp-btn sm ghost" id="pane-open" href="#" hidden>Open ↗</a>
+            <button type="button" class="prp-btn sm ghost nc-tall" id="pane-tall" aria-pressed="false">Taller</button>
+            <button type="button" class="prp-btn sm ghost" id="pane-close" aria-label="Close the companion pane" title="Close (Esc)">×</button>
+          </div>
+          <div class="prp-tabs" role="tablist" aria-label="Companion pane">
+            <button type="button" role="tab" id="tab-ency" aria-selected="true" aria-controls="panel-ency">Encyclopaedia</button>
+            <button type="button" role="tab" id="tab-vm" aria-selected="false" aria-controls="panel-vm" tabindex="-1">In Vitruvian Manager</button>
+          </div>
+          <div class="nc-pane-body">
+            <div id="panel-ency" role="tabpanel" aria-labelledby="tab-ency">
+              <p class="nc-pane-empty" id="ency-empty">Choose a highlighted term in the text, or one from the <b>terms</b> bar, to read its Encyclopaedia entry here.</p>
+              <p class="nc-pane-empty" id="ency-fallback" hidden>This entry cannot be shown inside the page. <a id="ency-link" href="#">Open it in the Encyclopaedia ↗</a></p>
+              <iframe id="ency-frame" title="Encyclopaedia entry" hidden referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <div id="panel-vm" role="tabpanel" aria-labelledby="tab-vm" hidden>
+              <div class="nc-vm-list" id="vm-list">
+                <p class="nc-era-title" id="era-title"></p>
+                <div class="nc-era-pick" id="era-pick" role="radiogroup" aria-label="Whose era" hidden></div>
+                <ul class="nc-rows" id="era-rows"></ul>
+                <div id="mentions" hidden><p class="prp-label nc-rows-label" id="mentions-label"></p><ul class="nc-rows" id="mention-rows"></ul></div>
+              </div>
+              <p class="nc-pane-empty" id="vm-empty">Pick a screen to show it here, or open it in Vitruvian Manager.</p>
+              <iframe id="vm-frame" title="Vitruvian Manager" hidden referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

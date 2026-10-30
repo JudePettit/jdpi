@@ -1,0 +1,4 @@
+# Downloaded source texts (build-book.mjs). A Project Gutenberg file carries the trademark and licence that the built
+# book must not, so the raw files stay out of the repository; only this file is tracked.
+*
+!.gitignore

@@ -1,0 +1,21 @@
+{
+ "generated": "2026-10-30T20:03:08.091Z",
+ "books": [
+  {
+   "slug": "the-prince",
+   "title": "The Prince",
+   "author": "Niccolò Machiavelli",
+   "translator": "W. K. Marriott",
+   "year": 1532,
+   "era": [
+    1494,
+    1527
+   ],
+   "words": 32453,
+   "chapters": 27,
+   "paragraphs": 254,
+   "terms": 245,
+   "generated": "2026-10-30T20:03:08.077Z"
+  }
+ ]
+}

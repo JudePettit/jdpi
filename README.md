@@ -65,9 +65,9 @@ page**, listed under `views` in the registry, never extra sidebar entries.
 
 ## Data refreshes
 
-GitHub Actions (`.github/workflows/`) rebuild data and commit it: Briefing (twice daily), Scientific Briefing (every six
-hours), Volatility, National Analysis, Battlefield and War Focus, Auto Trader (weekly), Invention Timeline and the
-Encyclopaedia (monthly).
+Every timed job (the GitHub workflows that rebuild and commit the data, the trading Worker's jobs, Double Signal's
+scan, the Supabase jobs) is listed in [OPERATIONS.md](OPERATIONS.md): when it runs, what it writes, and how you know it
+broke. Each refresh runs its tests before it commits, and the site deploys from GitHub once the suite passes.
 
 ## Tests
 

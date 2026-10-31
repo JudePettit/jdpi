@@ -21,6 +21,9 @@ test('catalogue has enough sources per position', () => {
 test('parses RSS and Atom and strips tracking', () => {
   const rss = parseFeed('<rss><channel><item><title><![CDATA[A &amp; B]]></title><link>https://x.com/a?utm_source=rss&id=2#top</link><pubDate>Mon, 26 Oct 2026 10:00:00 GMT</pubDate></item></channel></rss>');
   assert.deepEqual([rss[0].title, rss[0].url, rss[0].published], ['A & B', 'https://x.com/a?id=2', '2026-10-26T10:00:00.000Z']);
+  // Google News: the " - <publisher>" suffix its titles carry is dropped when <source> names that publisher, and only then.
+  const gn = parseFeed('<rss><channel><item><title>Senate passes the bill - Newsmax</title><link>https://news.google.com/rss/articles/CBMi1</link><pubDate>Fri, 30 Oct 2026 15:22:37 GMT</pubDate><source url="https://www.newsmax.com">Newsmax</source></item><item><title>Cats - Dogs</title><link>https://x.com/c</link></item></channel></rss>');
+  assert.deepEqual(gn.map(i => i.title), ['Senate passes the bill', 'Cats - Dogs']);
   const atom = parseFeed('<feed><entry><title>T</title><link rel="self" href="https://x.com/self"/><link rel="alternate" href="https://x.com/post"/><updated>2026-10-26T10:00:00Z</updated></entry></feed>');
   assert.equal(atom[0].url, 'https://x.com/post');
   assert.equal(canonicalUrl('https://x.com/?fbclid=1'), 'https://x.com/');

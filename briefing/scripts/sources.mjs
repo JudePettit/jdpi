@@ -20,6 +20,11 @@ export const PER_POSITION = 10;
 // failure there must not stop the refresh, but losing three of its ten would.
 export const MIN_WORKING_SHARE = 0.75, MIN_ACTIVE = PER_POSITION - 2;
 // [id, name, position, country, feed, caution?]
+// WND, One America News and Newsmax refuse automated readers of their own feeds (TLS failure, HTTP 403, timeouts from
+// every runner), so their stories come through Google News's search for the site, as the Headline Tracker's outlets
+// do; links go through Google News to the article. The Gateway Pundit's own feed fails the same way; its FeedBurner
+// copy works.
+const GNEWS = site => `https://news.google.com/rss/search?q=site%3A${site}%20when%3A2d&hl=en-US&gl=US&ceid=US:en`;
 export const SOURCES = [
   // ---- Far left
   ['jacobin', 'Jacobin', 'far_left', 'US', 'https://jacobin.com/feed'],
@@ -80,14 +85,14 @@ export const SOURCES = [
   // ---- Far right
   ['breitbart', 'Breitbart', 'far_right', 'US', 'https://feeds.feedburner.com/breitbart', true],
   ['federalist', 'The Federalist', 'far_right', 'US', 'https://thefederalist.com/feed/'],
-  ['wnd', 'WND', 'far_right', 'US', 'https://www.wnd.com/feed/', true],
-  ['gatewaypundit', 'The Gateway Pundit', 'far_right', 'US', 'https://www.thegatewaypundit.com/feed/', true],
-  ['oann', 'One America News', 'far_right', 'US', 'https://www.oann.com/feed/', true],
+  ['wnd', 'WND', 'far_right', 'US', GNEWS('wnd.com'), true],
+  ['gatewaypundit', 'The Gateway Pundit', 'far_right', 'US', 'https://feeds.feedburner.com/thegatewaypundit', true],
+  ['oann', 'One America News', 'far_right', 'US', GNEWS('oann.com'), true],
   ['amgreatness', 'American Greatness', 'far_right', 'US', 'https://amgreatness.com/feed/'],
   ['nationalpulse', 'The National Pulse', 'far_right', 'US', 'https://thenationalpulse.com/feed/', true],
   ['zerohedge', 'ZeroHedge', 'far_right', 'US', 'https://feeds.feedburner.com/zerohedge/feed', true],
   ['remix', 'Remix News', 'far_right', 'EU', 'https://rmx.news/feed/', true],
   ['blaze', 'TheBlaze', 'far_right', 'US', 'https://www.theblaze.com/feeds/feed.rss'],
   ['pjmedia', 'PJ Media', 'far_right', 'US', 'https://pjmedia.com/feed', true],
-  ['newsmax', 'Newsmax', 'far_right', 'US', 'https://www.newsmax.com/rss/Newsfront/16/', true],
+  ['newsmax', 'Newsmax', 'far_right', 'US', GNEWS('newsmax.com'), true],
 ].map(([id, name, position, country, feed, caution]) => ({ id, name, position, country, feed, caution: !!caution }));

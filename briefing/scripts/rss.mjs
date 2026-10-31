@@ -27,7 +27,10 @@ export function parseFeed(xml) {
   const items = [];
   const blocks = xml.match(/<item\b[\s\S]*?<\/item>/gi) || xml.match(/<entry\b[\s\S]*?<\/entry>/gi) || [];
   for (const b of blocks) {
-    const title = strip(tag(b, 'title'));
+    // Google News items end their title with " - <publisher>" and name the publisher in <source>: drop the suffix.
+    const source = strip(tag(b, 'source'));
+    let title = strip(tag(b, 'title'));
+    if (source && title.endsWith(` - ${source}`)) title = title.slice(0, -(source.length + 3));
     let link = strip(tag(b, 'link'));
     if (!/^https?:/i.test(link)) {
       const links = b.match(/<link\b[^>]*>/gi) || [];

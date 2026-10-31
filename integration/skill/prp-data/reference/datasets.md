@@ -8,7 +8,7 @@ Generated 2026-10-31 from https://jdpi.pages.dev/integration/catalog.json. Read 
 
 Intelligence Briefing: stories. Every story from the Intelligence Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 5,827 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,088 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -130,7 +130,7 @@ Historical Calendar: political events since 1980. Political history from 1980 to
 
 Encyclopaedia: entities. Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
 
-- Rows: 12,051 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
+- Rows: 12,150 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
 - Files: https://jdpi.pages.dev/integration/data/encyclopaedia-entities/0.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/1.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/2.json (+12 more) (records at `records`)
 - Fields: `qid` (string), `label` (string), `type` (string), `description` (string), `start` (string), `end` (string), `country` (string), `mentions` (number), `appears_in` (array), `wikipedia` (string)
 
@@ -196,7 +196,7 @@ Kardashev Tracker: humanity. World population, total energy capture and humanity
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 549 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 562 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean)
 
@@ -254,7 +254,7 @@ Auto Trader: famous investors' exits. Positions each famous investor held at the
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,189 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,210 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array)
 
@@ -296,7 +296,7 @@ Invention Timeline: institutions. Universities, laboratories, companies and acad
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 943 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 955 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array)
 

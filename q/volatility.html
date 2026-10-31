@@ -176,7 +176,8 @@ button,input,select{font:inherit}button{cursor:pointer}
 <script>
 // Geopolitical Volatility (rebuilt from the Lovable app). Data: ../volatility/data/index.json, built daily by
 // volatility/scripts/ingest.mjs from GDELT 2.0. Country metadata, political stability and active wars come from
-// National Analysis (../national/data/index.json), which draws on Realtime Battlefield.
+// National Analysis (../national/data/brief.json, the few fields this page shows, made from its index by
+// national/scripts/brief.mjs), which draws on Realtime Battlefield.
 // Every colour comes from the PRP tokens: read at draw time, and again on the 'prp:themechange' event.
 // The days shown follow the timeline (design/prp-period.js): its start rests on the end, so one day is shown, as before;
 // pulled back, it opens a period of days, and every measure becomes the period's (mean GVI, its change, volatility,
@@ -289,8 +290,8 @@ function deriveDay(i) {
   for (const c of C) c.cur.rankChange = c.cur.rank && c.cur.rankPrev ? c.cur.rankPrev - c.cur.rank : null;
 }
 const nat = c => N.get(c.iso3) || {};
-const pv = c => nat(c).latest?.['GOV_WGI_PV.EST']?.[1] ?? null;
-const warDeaths = c => (nat(c).conflict?.active2026 || []).reduce((s, w) => s + (w.deaths || 0), 0);
+const pv = c => nat(c).pv ?? null;
+const warDeaths = c => (nat(c).wars || []).reduce((s, w) => s + (w.deaths || 0), 0);
 const isLatest = () => dayIdx === DAYS.length - 1;
 const lat = c => (isLatest() ? c.latest : null);
 
@@ -500,7 +501,7 @@ function renderProfile() {
     ['Share of world events', L ? (L.share * 100).toFixed(2) + '%' : '–', 'latest day'],
     ['Rank', k.rankEnd ? String(k.rankEnd) : '–', k.rankPrev ? `${k.rankPrev} on ${esc(DAYS[fromIdx])}` : `not scored on ${esc(DAYS[fromIdx])}`],
     ['Political stability', pv(c) == null ? '–' : pv(c).toFixed(2), 'World Bank WGI, −2.5…2.5'],
-    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.conflict?.active2026 || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
+    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.wars || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
   ] : [
     ['GVI score', k.score == null ? '–' : k.score.toFixed(1), `<span class="band ${bandOf(k.score)}">${bandOf(k.score) === 'none' ? 'not scored' : bandOf(k.score)}</span>${k.rank ? ` · rank ${k.rank} of ${C.filter(x => x.cur.score != null).length}` : ''}`],
     ['7-day average', k.avg7 == null ? '–' : k.avg7.toFixed(1), k.change7 == null ? '' : `${k.change7 > 0 ? '+' : ''}${k.change7.toFixed(1)} vs prior week`],
@@ -511,14 +512,14 @@ function renderProfile() {
     ['Coverage', ({ h: 'High', m: 'Medium', l: 'Low', i: 'Insufficient' })[k.cov] || '–', L?.reason || `${k.daysScored30} scored days of last 30`],
     ['Share of world events', L ? (L.share * 100).toFixed(2) + '%' : '–', 'latest day'],
     ['Political stability', pv(c) == null ? '–' : pv(c).toFixed(2), 'World Bank WGI, −2.5…2.5'],
-    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.conflict?.active2026 || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
+    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.wars || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
   ];
   // A component's events are counted for the latest day only, so a period's mean percentile stands alone; the evidence
   // (the latest day's too) says so in its heading.
   const compRows = comps.map((m, j) => { const v = k.comps?.[j]; const cnt = per() ? null : L?.counts?.[m.key]; return `<div class="comp"><span>${esc(m.label)} <small>${Math.round(m.weight * 100)}%</small></span><div class="track"><div class="fill" style="width:${v || 0}%;background:${gviColour(v)}"></div></div><b>${v == null ? '–' : v.toFixed(0)}</b><small>${cnt == null ? '' : cnt + ' events'}</small></div>`; }).join('');
   const ev = (L?.evidence || []).map(e => `<div class="ev"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 120))}</a><small>${esc(CAT_LABEL[e.cat] || 'Other')} · CAMEO ${esc(e.code)} · Goldstein ${e.g} · ${e.a} articles${e.a1 || e.a2 ? ` · ${esc([e.a1, e.a2].filter(Boolean).join(' → '))}` : ''}${e.loc ? ` · ${esc(e.loc)}` : ''}</small></div>`).join('');
   const links = [link('rt', 'pestle', `q/national.html#country=${c.iso3}`, 'National Analysis ↗'), link('rt', 'headlines', `q/headlines.html`, 'Global Headline Tracker ↗')];
-  if (n.conflict?.active2026?.length) links.push(link('rt', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
+  if (n.wars?.length) links.push(link('rt', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
   if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#/e/${n.qid}`, 'Encyclopaedia ↗'));
   const inCmp = compare.includes(c.iso3);
   const days = [...c.days].reverse();
@@ -641,7 +642,7 @@ window.addEventListener('prp:themechange', () => { readPalette(); if (!V) return
 let resizeTimer;
 window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (!V) return; if (!$('#tab-map').hidden) renderGlobal(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); }, 200); });
 
-Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('../national/data/index.json').then(r => r.json()).catch(() => ({ countries: [] })), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json())]).then(([v, n, world]) => {
+Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('../national/data/brief.json').then(r => r.json()).catch(() => ({ countries: [] })), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json())]).then(([v, n, world]) => {
   V = v; N = new Map(n.countries.map(c => [c.iso3, c]));
   for (const c of n.countries) if (c.num) numToIso.set(String(c.num).padStart(3, '0'), c.iso3);
   DAYS = v.global.map(g => g[0]);

@@ -12,6 +12,16 @@ const read = path => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.u
 // indicator API does not serve, so it has no values until national/scripts/indicators.mjs drops or replaces it.
 const ARCHIVED = new Set(['SM.POP.REFG.OR']);
 
+test('data: the brief Geopolitical Volatility reads is the index\'s, field for field, and stays small', async () => {
+  const { brief } = await import('../national/scripts/brief.mjs');
+  const committed = read('national/data/brief.json');
+  assert.deepEqual(committed, brief(read('national/data/index.json')), 'rebuild it with: node national/scripts/brief.mjs');
+  const ukr = committed.countries.find(c => c.iso3 === 'UKR');
+  assert.ok(ukr.num && ukr.region && ukr.qid && typeof ukr.pv === 'number' && ukr.wars.some(w => w.deaths > 0), JSON.stringify(ukr));
+  assert.ok(readFileSync(new URL('../national/data/brief.json', import.meta.url)).length < 80 * 1024, 'brief.json stays under 80 KB');
+  assert.doesNotMatch(readFileSync(new URL('../q/volatility.html', import.meta.url), 'utf8'), /national\/data\/index\.json'/, 'Volatility reads the brief, not the index');
+});
+
 test('data: countries, their codes and leaders, every indicator, and a series file for each country', () => {
   const n = read('national/data/index.json'), has = f => n.countries.filter(f).length;
   // October 2026: 217 World Bank economies; 215 with an ISO numeric code (Kosovo and the Channel Islands have none)

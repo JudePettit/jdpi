@@ -15,6 +15,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { INDICATORS, DIMENSIONS } from './indicators.mjs';
+import { writeBrief } from './brief.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
@@ -212,9 +213,11 @@ for (const c of wbCountries) {
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'series'), { recursive: true });
 for (const [file, text] of seriesFiles) writeFileSync(file, text);
-writeFileSync(join(OUT, 'index.json'), JSON.stringify({
+const index = {
   generated: new Date().toISOString(), years: [FIRST, LAST],
   indicators: INDICATORS.map(({ code, dimension, label, unit, better, threshold, core, source }) => ({ code, dimension, label, unit, better, threshold, core, source })),
   countries,
-}));
+};
+writeFileSync(join(OUT, 'index.json'), JSON.stringify(index));
+writeBrief(index); // the small file Geopolitical Volatility reads (brief.mjs)
 console.log(`wrote ${countries.length} countries; with leadership data ${countries.filter(c => c.leadership).length}`);

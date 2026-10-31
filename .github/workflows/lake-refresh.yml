@@ -1,5 +1,7 @@
 name: Refresh Encyclopaedia entity layer
-# Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries.
+# Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries. Then every
+# Bibliotheca book is tagged again against the new lake (its casts are in it, bibliotheca/data/cast), so a book shows
+# the terms the lake has learnt the day it learns them.
 on:
   schedule:
     - cron: '31 3 3 * *'
@@ -23,14 +25,16 @@ jobs:
         with:
           node-version: 22
       - run: node lake/scripts/build.mjs --retro hp-retrospective
+      - name: Tag every Bibliotheca book again
+        run: for slug in $(node -p "require('./bibliotheca/data/index.json').books.map(b => b.slug).join(' ')"); do node bibliotheca/scripts/tag-terms.mjs "$slug" > /dev/null; done
       - name: Test the new data
         env:
           PRP_PAGES: '0'
-        run: node --test tests/encyclopedia.test.mjs tests/kino.test.mjs
+        run: node --test tests/encyclopedia.test.mjs tests/kino.test.mjs tests/bibliotheca-data.test.mjs tests/bibliotheca-cast.test.mjs
       - uses: ./.github/actions/commit-data
         with:
-          paths: lake/data lake/scripts/summary-cache.json
-          message: 'Encyclopaedia: monthly refresh of the entity layer'
+          paths: lake/data lake/scripts/summary-cache.json bibliotheca/data/books bibliotheca/data/index.json
+          message: 'Encyclopaedia: monthly refresh of the entity layer, and the Bibliotheca books tagged against it'
   deploy:
     needs: refresh
     if: ${{ !cancelled() }}

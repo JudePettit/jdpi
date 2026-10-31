@@ -109,6 +109,9 @@ button { cursor: pointer; }
 .nc-text p.para.current::before { background: var(--prp-accent); }
 .nc-text p.note { font-size: .86em; line-height: 1.6; color: var(--prp-text-2); padding-left: 1.1em; border-left: 1px solid var(--prp-line); margin-left: .2em; }
 .nc-text p.verse { font-style: italic; padding-left: 2em; }
+/* A table of figures (lib/text.js, isTable) keeps its spaces in a fixed-width face, so a figure stands under its
+   heading; a table wider than the column scrolls inside itself, never the page. */
+.nc-text p.verse.table { font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); font-style: normal; padding-left: 0; white-space: pre; overflow-x: auto; hyphens: manual; -webkit-hyphens: manual; }
 .nc-text sup.fn { font: 600 .62em/0 var(--prp-font-mono); color: var(--prp-muted); vertical-align: .55em; margin-left: 1px; }
 .nc-text .prp-empty { font: var(--prp-fs) var(--prp-font-ui); }
 

@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T20:03:08.091Z",
+ "generated": "2026-10-31T05:33:52.499Z",
  "books": [
   {
    "slug": "the-prince",
@@ -14,8 +14,232 @@
    "words": 32453,
    "chapters": 27,
    "paragraphs": 254,
-   "terms": 245,
-   "generated": "2026-10-30T20:03:08.077Z"
+   "terms": 550,
+   "generated": "2026-10-31T05:32:16.691Z"
+  },
+  {
+   "slug": "peloponnesian-war",
+   "title": "The History of the Peloponnesian War",
+   "author": "Thucydides",
+   "translator": "Richard Crawley",
+   "year": -400,
+   "era": [
+    -431,
+    -411
+   ],
+   "words": 204119,
+   "chapters": 26,
+   "paragraphs": 998,
+   "terms": 1112,
+   "generated": "2026-10-31T05:32:19.804Z"
+  },
+  {
+   "slug": "origin-of-species",
+   "title": "On the Origin of Species",
+   "author": "Charles Darwin",
+   "translator": null,
+   "year": 1859,
+   "era": [
+    1831,
+    1872
+   ],
+   "words": 196098,
+   "chapters": 16,
+   "paragraphs": 972,
+   "terms": 267,
+   "generated": "2026-10-31T05:32:22.424Z"
+  },
+  {
+   "slug": "wealth-of-nations-1",
+   "title": "The Wealth of Nations, Volume I",
+   "author": "Adam Smith",
+   "translator": null,
+   "year": 1776,
+   "era": [
+    1763,
+    1776
+   ],
+   "words": 162323,
+   "chapters": 22,
+   "paragraphs": 950,
+   "terms": 707,
+   "generated": "2026-10-31T05:32:25.141Z",
+   "set": {
+    "slug": "wealth-of-nations",
+    "title": "The Wealth of Nations",
+    "volume": 1,
+    "volumes": 2
+   }
+  },
+  {
+   "slug": "wealth-of-nations-2",
+   "title": "The Wealth of Nations, Volume II",
+   "author": "Adam Smith",
+   "translator": null,
+   "year": 1776,
+   "era": [
+    1763,
+    1776
+   ],
+   "words": 217807,
+   "chapters": 14,
+   "paragraphs": 1194,
+   "terms": 1196,
+   "generated": "2026-10-31T05:32:28.408Z",
+   "set": {
+    "slug": "wealth-of-nations",
+    "title": "The Wealth of Nations",
+    "volume": 2,
+    "volumes": 2
+   }
+  },
+  {
+   "slug": "decline-and-fall-1",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume I",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1776,
+   "era": [
+    98,
+    324
+   ],
+   "words": 261444,
+   "chapters": 16,
+   "paragraphs": 2415,
+   "terms": 1448,
+   "generated": "2026-10-31T05:33:52.185Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 1
+   }
+  },
+  {
+   "slug": "decline-and-fall-2",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume II",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1781,
+   "era": [
+    306,
+    378
+   ],
+   "words": 288405,
+   "chapters": 11,
+   "paragraphs": 2082,
+   "terms": 764,
+   "generated": "2026-10-31T05:32:34.256Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 2
+   }
+  },
+  {
+   "slug": "decline-and-fall-3",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume III",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1781,
+   "era": [
+    378,
+    600
+   ],
+   "words": 242252,
+   "chapters": 12,
+   "paragraphs": 1718,
+   "terms": 847,
+   "generated": "2026-10-31T05:32:37.000Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 3
+   }
+  },
+  {
+   "slug": "decline-and-fall-4",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume IV",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1788,
+   "era": [
+    474,
+    1204
+   ],
+   "words": 276026,
+   "chapters": 10,
+   "paragraphs": 1642,
+   "terms": 972,
+   "generated": "2026-10-31T05:32:39.843Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 4
+   }
+  },
+  {
+   "slug": "decline-and-fall-5",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume V",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1788,
+   "era": [
+    570,
+    1099
+   ],
+   "words": 260464,
+   "chapters": 10,
+   "paragraphs": 1698,
+   "terms": 1273,
+   "generated": "2026-10-31T05:32:43.894Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 5
+   }
+  },
+  {
+   "slug": "decline-and-fall-6",
+   "title": "The History of the Decline and Fall of the Roman Empire, Volume VI",
+   "author": "Edward Gibbon",
+   "translator": null,
+   "year": 1788,
+   "era": [
+    1096,
+    1500
+   ],
+   "words": 233699,
+   "chapters": 13,
+   "paragraphs": 1520,
+   "terms": 974,
+   "generated": "2026-10-31T05:32:46.479Z",
+   "set": {
+    "slug": "decline-and-fall",
+    "title": "The History of the Decline and Fall of the Roman Empire",
+    "volumes": 6,
+    "volume": 6
+   }
+  },
+  {
+   "slug": "on-war",
+   "title": "On War",
+   "author": "Carl von Clausewitz",
+   "translator": "J. J. Graham",
+   "year": 1832,
+   "era": [
+    1792,
+    1815
+   ],
+   "words": 291958,
+   "chapters": 130,
+   "paragraphs": 3210,
+   "terms": 291,
+   "generated": "2026-10-31T05:32:50.426Z"
   }
  ]
 }

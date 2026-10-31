@@ -1,2 +1,5 @@
 # iCalendar files must keep CRLF line endings (RFC 5545): store the bytes build-catalog.mjs writes, on every platform.
 *.ics -text
+# The Bibliotheca books and casts are written with LF by bookJson and castJson, and the tests compare the files with
+# what those functions make: keep LF on every checkout, so core.autocrlf=true cannot turn them CRLF.
+bibliotheca/data/** text eol=lf

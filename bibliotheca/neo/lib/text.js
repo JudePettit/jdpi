@@ -11,8 +11,11 @@ export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;'
 const QID = /^Q[1-9]\d*$/;
 
 // Plain text between terms: escaped, a footnote marker "[3]" set small (a term never contains one, so a marker is
-// never split by a link), and a verse's line breaks kept.
-const plain = s => esc(s).replace(/\[(\d{1,3})\]/g, '<sup class="fn">[$1]</sup>').replace(/\n/g, '<br>');
+// never split by a link; Gibbon's run to four figures, "[1023]"), and a verse's line breaks kept.
+const plain = s => esc(s).replace(/\[(\d{1,4})\]/g, '<sup class="fn">[$1]</sup>').replace(/\n/g, '<br>');
+// A table of figures (Smith's prices of wheat) is a 'verse' block that keeps the spaces of its columns (the build's
+// normalise, columns): the page sets it in a fixed-width face with its spaces, so a figure stands under its heading.
+export const isTable = p => p?.kind === 'verse' && / {2}/.test(p.text || '');
 
 /** The terms of a paragraph that are well formed: whole offsets in order inside the text, a Wikidata ID, a label. */
 export function validTerms(p) {
@@ -40,7 +43,7 @@ export function paragraphHtml(p, { href = q => `#${q}` } = {}) {
   }
   html += plain(p.text.slice(at));
   const kind = p.kind === 'note' || p.kind === 'verse' ? p.kind : 'para';
-  return `<p class="para${kind === 'para' ? '' : ' ' + kind}" id="${esc(p.id)}" data-p="${esc(p.id)}">${html}</p>`;
+  return `<p class="para${kind === 'para' ? '' : ' ' + kind}${isTable(p) ? ' table' : ''}" id="${esc(p.id)}" data-p="${esc(p.id)}">${html}</p>`;
 }
 
 /** Occurrences ([{ qid, label, form }], in reading order) folded into distinct terms, in order of first appearance,

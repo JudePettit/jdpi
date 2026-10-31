@@ -1,17 +1,17 @@
 {
- "generated": "2026-10-28T01:06:29.552Z",
- "entities": 12051,
- "withMentions": 10624,
- "mentions": 16807,
+ "generated": "2026-10-31T05:50:16.760Z",
+ "entities": 12150,
+ "withMentions": 10699,
+ "mentions": 16883,
  "types": {
-  "place": 510,
-  "person": 2672,
-  "party": 702,
   "election": 2546,
-  "event": 1072,
-  "topic": 916,
+  "party": 703,
+  "conflict": 3311,
+  "event": 1074,
+  "person": 2716,
+  "topic": 930,
   "idea": 289,
-  "conflict": 3301,
+  "place": 538,
   "organisation": 43
  },
  "shards": {
@@ -29,7 +29,8 @@
   "traders": 139,
   "learning": 96,
   "learning-politics": 97,
-  "progress": 1790
+  "progress": 1790,
+  "bibliotheca": 76
  },
  "sources": [
   "Wikidata (CC0)",

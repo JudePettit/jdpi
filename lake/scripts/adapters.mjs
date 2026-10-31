@@ -1,11 +1,13 @@
 // Mention adapters: each JDP-I module reports the entities it mentions and where.
-// A mention is { key, label, module, url, date?, context, tags? }, where key identifies the entity:
+// A mention is { key, label, module, url, date?, context, tags?, aliases? }, where key identifies the entity:
 //   { title }    an English Wikipedia article title (most modules link to Wikipedia already)
 //   { qid }      a Wikidata ID
 //   { bioguide } a US Congress Bioguide ID (resolved through Wikidata property P1157)
-// `url` is the exact place in JDP-I (absolute), and `module` the registry module id.
+// `url` is the exact place in JDP-I (absolute), and `module` the registry module id. `aliases` are the names the
+// module's own text uses for the entity where Wikidata may not have them (a book's "Duke Valentino" for Cesare
+// Borgia): build.mjs adds them to the entity's aliases.
 // To bring a new module into the Encyclopaedia, add an adapter here and to ADAPTERS.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { THINKERS, SPECTRUM } from './thinkers.mjs';
@@ -170,4 +172,41 @@ export function progress({ jdpiDir }) {
   return out;
 }
 
-export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress };
+/** Bibliotheca (Kino): each book's cast, bibliotheca/data/cast/<slug>.json, made by bibliotheca/scripts/cast.mjs: the
+ *  people, places, states, battles, wars, organisations and works a book's text names, resolved to Wikidata. Only the
+ *  records decided 'auto' are fed in ('review' waits for a human to flip it in the cast file's overrides). One
+ *  mention per book and entity, whichever names the book gives it, so an entity the lake has already (by Wikidata ID)
+ *  gains the mention and the book's names rather than a second entry; its link opens Neo Classic at the first
+ *  paragraph that names it, the term in use; its aliases are the book's own forms of the name, which build.mjs adds to
+ *  the entity's so the tagger (bibliotheca/scripts/tag-terms.mjs) finds them in the text. `source` records which
+ *  book's cast gave the mention ("bibliotheca:<slug>"); the build reads the module and the url. */
+export function bibliotheca({ jdpiDir }) {
+  const dir = join(jdpiDir, 'bibliotheca/data/cast');
+  if (!existsSync(dir)) return [];
+  // A paragraph's place in book order (one counter per chapter runs through c07-p01, c07-n02 …).
+  const order = f => f.ch * 1000 + +String(f.p).split('-')[1].slice(1);
+  const out = [];
+  for (const file of readdirSync(dir).filter(f => f.endsWith('.json')).sort()) {
+    const cast = json(join(dir, file));
+    const byQid = new Map();
+    for (const r of cast.records || []) {
+      if (r.decision !== 'auto' || !/^Q\d+$/.test(r.qid || '')) continue;
+      const g = byQid.get(r.qid) || { label: r.label, names: new Set(), fed: new Set(), mentions: 0, first: r.first };
+      // A record's `local` names (given names, alone or after a regnal title: "Julian", "Pope Alexander") stay the
+      // book's, since they would tag the man in every book; a shelf decision gives them to him in this one.
+      for (const n of [r.name, ...(r.aliases || [])]) { g.names.add(n); if (!(r.local || []).includes(n)) g.fed.add(n); }
+      g.mentions += r.mentions;
+      if (order(r.first) < order(g.first)) g.first = r.first;
+      byQid.set(r.qid, g);
+    }
+    for (const [qid, g] of byQid) out.push({
+      key: { qid }, label: g.label, module: 'bibliotheca', source: `bibliotheca:${cast.slug}`,
+      url: `${JDPI}bibliotheca/neo/index.html#book=${cast.slug}&ch=${g.first.ch}&p=${g.first.p}&t=${qid}`, date: String(cast.year),
+      context: `Named in ${cast.title} (${cast.author}, ${cast.year < 0 ? `${-cast.year} BC` : cast.year}), ${g.mentions} time${g.mentions === 1 ? '' : 's'}, as ${[...g.names].join(', ')}`,
+      aliases: [...g.fed],
+    });
+  }
+  return out;
+}
+
+export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca };

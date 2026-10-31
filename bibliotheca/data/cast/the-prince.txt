@@ -1,0 +1,194 @@
+The Prince: the cast — 133 names the lake does not know, seen at least twice (Wikidata: 0 requests, 1222 answers from the cache)
+  resolved 110 into 96 records: 76 auto (fed to the lake), 20 review (fed once a human flips them); 18 unresolved; 5 skipped by the overrides
+  threshold 0.75; 59 overrides; era 1494–1527, names bound to 1532 (1532 for a name only a note uses)
+
+Auto: fed to the lake: 76
+  conf  qid        type         dates       name (mentions) + other forms                  label — description
+  0.49  Q855303    organisation             Orsini (16)                                     House of Orsini — Italian noble family
+  0.94  Q187998    person       1475–1507   Cesare Borgia (15) + Cesare, Duke Valentino, V  Cesare Borgia — Duke of Romagna and former Catholic cardinal
+  0.81  Q244482    place                    Romagna (14)                                    Romagna — Italian historical region that approximately corresponds to the south-eastern portion of
+  0.58  Q173065    polity       1282–1816   Naples (12)                                     Kingdom of Naples — Italian state (1282–1816)
+  0.91  Q108316    person       1431–1503   Alexander the Sixth (11) + Pope Alexander, Ale  Alexander VI — pope of the Catholic Church 1492–1503 from the Borgia family (1430/32-1503)
+  0.77  Q134452    person       1470–1498   Charles (11) + Charles VIII                     Charles VIII of France — King of France from 1483 to 1498
+  0.89  Q1891      place                    Bologna (10)                                    Bologna — city and commune in Emilia-Romagna, Italy
+  0.82  Q80516     person       1443–1513   Pope Julius (10) + Pope Julius the Second, Jul  Julius II — pope of the Catholic Church from 1503 to 1513 (1443–1513)
+  0.67  Q310536    person       1401–1466   Francesco Sforza (9) + Francesco                Francesco I Sforza — Italian condottiero and Sforza dynasty founder (1401–1466)
+  0.75  Q1442      person       146–211     Severus (9)                                     Septimius Severus — Roman emperor from 193 to 211
+  0.59  Q327202    organisation             Colonnesi (8) + Colonna                         House of Colonna — Italian noble family
+  0.90  Q8423      person       600 BC–530 BC Cyrus (8)                                       Cyrus the Great — founder of the Achaemenid Empire (559–529 BC)
+  0.76  Q1399      person       1469–1527   Machiavelli (8)                                 Niccolò Machiavelli — Florentine statesman, diplomat, and political theorist (1469–1527)
+  0.73  Q312326    person       361 BC–289 BC Agathocles (6)                                  Agathocles of Syracuse — Greek tyrant of Syracuse from 317 to 289 BC
+  0.59  Q1777      person       173–238     Maximinus (6)                                   Maximinus Thrax — Roman Emperor (173-238)
+  0.93  Q9077      person       1393 BC–1273 BC Moses (6)                                       Moses — Abrahamic prophet said to have led the Israelites out of Egypt
+  0.81  Q1436      person       126–193     Pertinax (6)                                    Pertinax — emperor of Ancient Rome (126-193)
+  0.58  Q3365      person       242 BC–187 BC Antiochus (5)                                   Antiochus III the Great — sixth Seleucid emperor (223–187 BC)
+  0.89  Q1434      person       161–192     Commodus (5)                                    Commodus — 17th Roman Emperor (180–192)
+  0.69  Q12860     person       1452–1516   Ferdinand (5) + Ferdinand of Aragon             Ferdinand II of Aragon — King of Aragon, Sicily, Naples, and Valencia (1452-1516)
+  0.78  Q13362     place                    Ferrara (5)                                     Ferrara — comune in Emilia-Romagna, Italy
+  0.66  Q2253      person       235 BC–183 BC Scipio (5)                                      Scipio Africanus — Roman general and politician (236/235–183 BC)
+  0.85  Q1273      place                    Tuscany (5)                                     Tuscany — region of Italy
+  0.50  Q1754732   battle       1509–       Vaila (5)                                       Battle of Agnadello — 1509 battle during the War of the League of Cambrai
+  0.85  Q15        place                    Africa (4)                                      Africa — continent
+  0.91  Q8409      person       356 BC–323 BC Alexander the Great (4)                         Alexander the Great — king of Macedonia and conqueror of Achaemenid Persia (356–323 BC)
+  0.62  Q1446      person       188–217     Antoninus (4) + Antoninus Caracalla             Caracalla — Roman emperor from 198 to 217
+  0.39  Q2365088   organisation             Bentivogli (4)                                  House of Bentivoglio — family
+  0.60  Q1048      person       100 BC–44 BC Caesar (4)                                      Julius Caesar — Roman general and dictator
+  0.82  Q13139     place                    Fermo (4)                                       Fermo — Italian comune
+  0.88  Q13367     place        187 BC–     Forli (4)                                       Forlì — Italian comune
+  0.81  Q432036    person       1452–1512   Pandolfo (4) + Pandolfo Petrucci                Pandolfo Petrucci — Italian politician (1452-1512)
+  0.59  Q124925    place                    Sinigalia (4)                                   Senigallia — Italian comune
+  0.88  Q1320718   person                   Theseus (4)                                     Theseus — legendary king of Athens, son of Aegeus and Aethra; famous for slaying the Minotaur
+  0.80  Q58477     place                    Capua (3)                                       Capua — Italian comune
+  0.77  Q1449      place                    Genoa (3)                                       Genoa — Italian city
+  0.76  Q93121691  person       –1502       Giovanni Fogliani (3)                           Giovanni Fogliani
+  0.71  Q1440      person       133–193     Julian (3)                                      Didius Julianus — emperor of ancient Rome (193 CE)
+  0.67  Q1641665   person       1475–1502   Oliverotto (3)                                  Oliverotto Euffreducci — Italian politician (1475-1503)
+  0.75  Q2186      person       771 BC–717 BC Romulus (3)                                     Romulus — legendary founder and first king of Rome
+  0.70  Q4951156   place                    Sicily (3)                                      Sicily — Italian island in the Mediterranean Sea
+  0.76  Q2751      place                    Siena (3)                                       Siena — city in Tuscany, Italy and capital of the province of Siena
+  0.85  Q41746     person                   Achilles (2)                                    Achilles — Greek mythological hero of the Trojan War
+  0.56  Q1379848   person       1349–1409   Alberigo da Conio (2)                           Alberico da Barbiano — first of the Italian condottieri
+  0.53  Q561411    person       1455–1505   Ascanio (2)                                     Ascanio Sforza — 1455-1505, Italian Cardinal of the Catholic Church
+  0.69  Q48        place                    Asia (2)                                        Asia — part of terrestrial continent, mainly in the northeastern quadrant
+  0.49  Q896536    person       1368–1424   Braccio (2)                                     Braccio da Montone — Italian noble and condottiero
+  0.77  Q100145    place                    Caravaggio (2)                                  Caravaggio — Italian comune
+  0.57  Q1440968   person       1385–1432   Carmignuola (2)                                 Francesco Bussone — Italian condottiere
+  0.81  Q80992     person       1463–1509   Catherine Sforza (2)                            Caterina Sforza — Lady of Imola and Countess of Forlì (1463-1509)
+  0.86  Q41370     person       1040 BC–969 BC David (2)                                       David — king of Israel and Judah
+  0.84  Q649202    polity       1443–1631   Duchy of Urbino (2)                             Duchy of Urbino — former Italian state (1213–1625)
+  0.68  Q236853    person       1452–1508   Duke Lodovico (2)                               Ludovico Sforza — duke of Milan
+  0.78  Q52981     place                    Faenza (2)                                      Faenza — town and comune in Italy
+  0.72  Q93582438  person       1400–1382   Giorgio Scali (2)                               Giorgio Scali
+  0.59  Q323446    person       1321–1394   Giovanni Acuto (2)                              John Hawkwood — English condottiero
+  0.46  Q194996    person       1443–1508   Giovanni Bentivogli (2)                         Giovanni II Bentivoglio — Italian noble (1443-1508)
+  0.81  Q1762      person       203–222     Heliogabalus (2)                                Elagabalus — Roman Emperor (218-222)
+  0.60  Q764793    battle       1495–       Il Taro (2)                                     Battle of Fornovo — 1495 battle
+  0.73  Q8058      person       1423–1483   Louis XI (2)                                    Louis XI of France — king of France from 1461 to 1483 (1423–1483)
+  0.77  Q58514     person       1462–1515   Louis XII (2)                                   Louis XII of France — King of France from 1498 to 1515
+  0.84  Q1752      person       164–218     Macrinus (2)                                    Macrinus — Roman emperor from 217 to 218
+  0.82  Q312689    person       300 BC–192 BC Nabis (2)                                       Nabis — Last king of Sparta from 207 to 192 BC
+  0.57  Q3894583   person       1461–1499   Pagolo Vitelli (2)                              Paolo Vitelli — Italian condottiero
+  0.74  Q3437      place                    Perugia (2)                                     Perugia — Italian comune
+  0.82  Q366117    person       253 BC–183 BC Philopoemen (2)                                 Philopoemen — ancient Greek general
+  0.63  Q157824    place                    Piombino (2)                                    Piombino — Italian comune
+  0.72  Q13376     place                    Pistoia (2)                                     Pistoia — Italian comune
+  0.78  Q214929    place                    Pitigliano (2)                                  Pitigliano — Italian comune
+  0.71  Q13364     place                    Ravenna (2)                                     Ravenna — city in northern Italy
+  0.85  Q13369     place        268 BC–     Rimini (2)                                      Rimini — Italian comune
+  0.45  Q966188    person       1461–1521   San Giorgio (2)                                 Raffaele Riario — Italian Catholic cardinal (1461-1521)
+  0.78  Q5690      polity       900 BC–192 BC Sparta (2)                                      Sparta — city and city-state in ancient Greece
+  0.68  Q2759      place                    Urbino (2)                                      Urbino — town in the Marche region of Italy
+  0.53  Q2714004   person       1458–1502   Vitellozzo (2)                                  Vitellozzo Vitelli — Italian politician
+  0.84  Q129772    person       430 BC–354 BC Xenophon (2)                                    Xenophon — Greek philosopher, historian, and soldier (c.430–355/354 BC)
+
+Review: not fed until a human flips them (overrides): 20
+  conf  qid        type         dates       name (mentions) + other forms                  label — description
+  0.87  Q8409      person       356 BC–323 BC Alexander (23)                                  Alexander the Great — king of Macedonia and conqueror of Achaemenid Persia (356–323 BC)
+        the name is one of its aliases; 356 BC–323 BC, before the era; 262 sitelinks; 23 mentions; next: Q108316 Alexander VI; held: the book's longer names give "Alexander" to Q8409 Alexander the Great (Alexander the Great) and Q108316 Alexander VI (Alexander the Sixth, Pope Alexander, Alexander VI)
+  0.66  Q302       person       7 BC–30     God (12)                                        Jesus Christ — central figure of Christianity (c. 6 or 4 BC – AD 30 or 33)
+        the name is one word of its name; 7 BC–30, before the era; 346 sitelinks; 12 mentions; next: Q345 Mary; held: Q345 Mary is close behind
+  0.67  Q194996    person       1443–1508   Giovanni (8)                                    Giovanni II Bentivoglio — Italian noble (1443-1508)
+        the name is one word of its name; 1443–1508, in the era 1494–1527; 17 sitelinks; 8 mentions; next: Q108573379 Giovanni; held: a one-word name for an item known to 17 sites; the book's longer names give "Giovanni" to Q93121691 Giovanni Fogliani (Giovanni Fogliani) and Q323446 John Hawkwood (Giovanni Acuto) and Q194996 Giovanni II Bentivoglio (Giovanni Bentivogli)
+  0.63  Q1430      person       121–180     Marcus (8)                                      Marcus Aurelius — 16th Roman Emperor from 161 to 180 and Stoic philosopher
+        override: Marcus Aurelius, "Marcus the philosopher" (chapter XIX), held back: his Wikidata alias Antoninus would take the two bare "Antoninus" of chapter XIX, who are Caracalla. Flip to auto together with the shelf decisions "Marcus": Q1430 and "Antoninus": Q1446; the name is one word of its name; 121–180, before the era; 176 sitelinks; 8 mentions; next: Q31966 Mark the Evangelist; noted: Q31966 Mark the Evangelist is close behind; its name "Antoninus" is the book's for Q1446 Caracalla
+  0.78  Q202458    place        1234–       Roman (8)                                       Roman — city in Neamț County, Romania
+        the name is its label; 1234–, in the era 1494–1527; 51 sitelinks; 8 mentions; next: Q9592 Catholic Church; held: Q9592 Catholic Church is close behind
+  0.76  Q657941    person       100–200     Albinus (5)                                     Albinus — ancient Greek philosopher
+        the name is its label; 100–200, before the era; 19 sitelinks; 5 mentions; next: Q4712450 Albino; held: a one-word name for an item known to 19 sites
+  0.66  Q43974     person       778–840     King Louis (5)                                  Louis the Pious — King of the Franks
+        only the start of its name matches; 778–840, before the era; 86 sitelinks; 5 mentions; next: Q28018880 Portrait of Louis II, king van Hungary; held: only the start of its name matches
+  0.57  Q1417      person       15–69       Vitelli (5)                                     Vitellius — eighth Roman Emperor (69)
+        only the start of its name matches; 15–69, before the era; 85 sitelinks; 5 mentions; next: Q2714004 Vitellozzo Vitelli; held: only the start of its name matches
+  0.62  Q1479      place        500 BC–     Burd (4)                                        Bordeaux — city and commune in Gironde, New Aquitaine, France
+        only the start of its name matches; 500 BC–, in the era 1494–1527; 184 sitelinks; 4 mentions; next: Q80088 Burdur Province; held: only the start of its name matches
+  0.60  Q58514     person       1462–1515   Louis (4)                                       Louis XII of France — King of France from 1498 to 1515
+        the name is one word of its name; 1462–1515, in the era 1494–1527; 81 sitelinks; 4 mentions; next: Q43974 Louis the Pious; held: Q43974 Louis the Pious is close behind; the book's longer names give "Louis" to Q43974 Louis the Pious (King Louis) and Q8058 Louis XI of France (Louis XI) and Q58514 Louis XII of France (Louis XII)
+  0.62  Q130858    organisation             Sforza (4)                                      House of Sforza — noble family of the Italian Renaissance, dukes of Milan
+        the name is one of its aliases; undated; 42 sitelinks; 4 mentions; next: Q236853 Ludovico Sforza; held: Q236853 Ludovico Sforza is close behind; the book's longer names give "Sforza" to Q310536 Francesco I Sforza (Francesco Sforza) and Q80992 Caterina Sforza (Catherine Sforza)
+  0.65  Q10264223  person       500 BC–465 BC Darius (3)                                      Darius — Crown Prince of Achaemenid Persia (died 465 BC)
+        the name is its label; 500 BC–465 BC, before the era; 7 sitelinks; 3 mentions; next: Q10264221 Darius; held: Q10264221 Darius is close behind; a one-word name for an item known to 7 sites
+  0.51  Q34640     place                    English (3)                                     English Channel — arm of the Atlantic Ocean that separates southern England from northern France
+        the name is one word of its name; undated; 130 sitelinks; 3 mentions; next: Q2017605 English; held: Q2017605 English is close behind
+  0.56  Q100837    place                    Medes (3)                                       Medesano — Italian comune
+        only the start of its name matches; undated; 51 sitelinks; 3 mentions; no other candidate; held: only the start of its name matches
+  0.63  Q130650    person       385 BC–336 BC Philip (3)                                      Philip II of Macedon — King of Macedon from 359 to 336 BC
+        the name is one word of its name; 385 BC–336 BC, before the era; 93 sitelinks; 3 mentions; next: Q176912 Philip
+  0.56  Q269816    place                    Soldan (3)                                      Soldano — Italian comune
+        only the start of its name matches; undated; 49 sitelinks; 3 mentions; no other candidate; held: only the start of its name matches
+  0.60  Q9592      organisation 1–          Catholic (2)                                    Catholic Church — largest Christian Church, made up of 24 autonomous Churches in communion with th
+        the name is one word of its name; 1–, in the era 1494–1527; 208 sitelinks; 2 mentions; next: Q1841 Catholicism; held: Q1841 Catholicism is close behind
+  0.70  Q148540    polity       1115–1569   Florentine (2)                                  Republic of Florence — city-state on the Appenine Peninsula between 1115–1532/69
+        the name is one word of its name; 1115–1569, in the era 1494–1527; 59 sitelinks; 2 mentions; no other candidate
+  0.50  Q34457     place                    Mestri (2)                                      Mestrino — Italian comune
+        only the start of its name matches; undated; 49 sitelinks; 2 mentions; next: Q89101305 Mestrius Florus; held: only the start of its name matches
+  0.49  Q7124447   person       –1563       Pagolo (2)                                      Pagolo Arsago — Italian goldsmith
+        the name is one word of its name; 1493–1563, in the era 1494–1527; 1 sitelinks; 2 mentions; next: Q105611584 Pagolo di Matteo Petriboni; held: a one-word name for an item known to 1 sites
+
+Book-only names: 21, names the lake does not get as aliases, since they would tag the man in every book (given names, alone or after a regnal title, that Wikidata does not give him) or are the book's sense alone (the overrides' "local": a title, a name other books give other men); their entities are fed, and these shelf decisions (shelf.mjs, decisions) give the names to them in this book:
+  "Cesare": 'Q187998', // Cesare Borgia
+  "Valentino": 'Q187998', // Cesare Borgia
+  "Naples": 'Q173065', // Kingdom of Naples (in the shelf)
+  "Pope Alexander": 'Q108316', // Alexander VI
+  "Pope Julius": 'Q80516', // Julius II
+  "Julius": 'Q80516', // Julius II
+  "Francesco": 'Q310536', // Francesco I Sforza
+  "Cyrus": 'Q8423', // Cyrus the Great (in the shelf)
+  "Maximinus": 'Q1777', // Maximinus Thrax
+  "Antiochus": 'Q3365', // Antiochus III the Great (in the shelf)
+  "Ferdinand": 'Q12860', // Ferdinand II of Aragon
+  "Scipio": 'Q2253', // Scipio Africanus
+  "Antoninus": 'Q1446', // Caracalla
+  "Pandolfo": 'Q432036', // Pandolfo Petrucci
+  "Julian": 'Q1440', // Didius Julianus
+  "Ascanio": 'Q561411', // Ascanio Sforza
+  "Braccio": 'Q896536', // Braccio da Montone (in the shelf)
+  "San Giorgio": 'Q966188', // Raffaele Riario (in the shelf)
+  "Vitellozzo": 'Q2714004', // Vitellozzo Vitelli
+  None proposed for 2, whose bare form the book uses for others too (the overrides' "shelf": false):
+    "Charles" (Q134452 Charles VIII of France): Charles VIII of France, as a rule; but the bare name is also Charles VII (“Charles the Seventh” and “the ordinance of Charles”, chapter XIII) and Charles the Bold (a note to chapter XXIII), so no shelf decision gives it to him
+    "Caesar" (Q1048 Julius Caesar): Julius Caesar (chapters XIV and XVI); the "title of Caesar" of chapter XIX is the title his name became, so no shelf decision gives the bare name to him
+
+Skipped by the overrides: 5
+  "Rouen" (5) → Q30974 Rouen: the Cardinal of Rouen, Georges d’Amboise, every time (chapters III and VII), not the city: a book-only sense for a shelf decision
+  "Annibale" (2) → Q36456 Hannibal: two Bentivoglio, Annibale I and his grandson Annibale II (chapter XIX); not Hannibal, whom Wikidata also calls Annibale
+  "Il Principe" (2) → Q131719 The Prince: the book itself, The Prince, which the tagger would hold as "Prince" and match at every capitalised Prince
+  "Philip of Macedon" (2) → Q130650 Philip II of Macedon: two kings: Philip II in chapter XII, Philip V ("not the father of Alexander the Great") in chapter XXIV
+  "Saul" (2) → Q9200 Paul the Apostle: King Saul (chapter XIII), whom Wikidata’s search did not return; not Paul the Apostle, who has Saul as an alias
+
+Unresolved: 18
+  "Lombardy" (10): no candidate fits: Q1210 Lombardy (first dated 1948, after 1532); Q25617977 Lombardy (undated and little known (5 sitelinks): a namesake); Q6669398 Lombardy (undated and little known (2 sitelinks): a namesake)
+        c03-p16: …ans, who desired to obtain half the state of [Lombardy] by his intervention. I will not blame the co…
+  "Italian" (9): no candidate fits: Q38 Italy (first dated 1946, after 1532)
+        c11-p02: …er, seeing that from Alexander backwards the [Italian] potentates (not only those who have been cal…
+  "Achaeans" (5): no candidate fits: Q59107435 ACHAEANS AND HITTITES. By G. L. Huxley. Oxford, 1960. pp. 54. 5s (dated 1961, after 1532)
+        c03-p11: …appears to me sufficient for an example. The [Achaeans] and Ætolians were kept friendly by them, the…
+  "Ætolians" (4): no candidate is a person, place, polity, battle, war, organisation or work
+        c03-p10: …. The Romans were brought into Greece by the [Ætolians]; and in every other country where they obtai…
+  "Carthaginians" (4): no candidate is a person, place, polity, battle, war, organisation or work
+        c08-p02: …ion. And although he was twice routed by the [Carthaginians], and ultimately besieged, yet not only was h…
+  "Italians" (4): no candidate fits: Q19887567 Italians (undated and little known (0 sitelinks): a namesake)
+        c03-p24: …d on Cardinal Rouen observing to me that the [Italians] did not understand war, I replied to him tha…
+  "Spartans" (4): no candidate fits: Q270222 Michigan State University (first dated 1855, after 1532)
+        c05-p02: There are, for example, the [Spartans] and the Romans. The Spartans held Athens and…
+  "Athenians" (3): no candidate fits: Q97016174 Athenians being Delivered to the Minotaur in the Cretan Labyrinth (first dated 1855, after 1532)
+        c06-p04: … have shown his ability had he not found the [Athenians] dispersed. These opportunities, therefore, m…
+  "Persians" (3): no candidate is a person, place, polity, battle, war, organisation or work
+        c06-p04: … It was necessary that Cyrus should find the [Persians] discontented with the government of the Mede…
+  "San Pietro ad Vincula" (3): Wikidata has no item of that name
+        c07-n16: …us II was Giuliano della Rovere, Cardinal of [San Pietro ad Vincula], born 1443, died 1513.
+  "Spanish" (3): no candidate fits: Q10859 Spanish Civil War (first dated 1936, after 1532); Q478249 Spanish River (undated and little known (9 sitelinks): a namesake); Q41705771 Spanish Biographical Dictionary (dated 2011, after 1532)
+        c26-p11: And although Swiss and [Spanish] infantry may be considered very formidable, …
+  "Testina" (3): no candidate is a person, place, polity, battle, war, organisation or work
+        c18-n05: …m).” The words “ad votum” are omitted in the [Testina] addition, 1550.
+  "Canneschi" (2): Wikidata has no item of that name
+        c19-p07: …esent Annibale), having been murdered by the [Canneschi], who had conspired against him, not one of h…
+  "Fermians" (2): Wikidata has no item of that name
+        c08-p05: …that he should be received honourably by the [Fermians], all of which would be not only to his honou…
+  "Fortunati" (2): no candidate fits: Q1537367 José Fortunati (first dated 1955, after 1532); Q102281085 Fortunati (undated and little known (0 sitelinks): a namesake)
+        c20-n07: …lli was sent as envoy on 1499. A letter from [Fortunati] to the countess announces the appointment: “…
+  "Frenchmen" (2): no candidate fits: Q122551250 Frenchmens Estates (undated and little known (0 sitelinks): a namesake)
+        c12-n04: …hat Pope Alexander was wont to say: That the [Frenchmen] came into Italy with chalk in their hands, t…
+  "Ramiro d’Orco" (2): Wikidata has no item of that name
+        c07-p10: … good governor. Thereupon he promoted Messer [Ramiro d’Orco],[4] a swift and cruel man, to whom he gave t…
+  "Syracusans" (2): Wikidata has no item of that name
+        c06-p08: …anything to fortune but opportunity; for the [Syracusans], being oppressed, chose him for their captai…

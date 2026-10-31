@@ -24,18 +24,22 @@ export function stripBoilerplate(raw) {
   return lines.slice(start + 1, end).join('\n');
 }
 
-/** Typography of one paragraph (see the rules above). Newlines are kept: verse arrives with them. */
-export function normalise(text) {
-  return String(text)
+/** Typography of one paragraph (see the rules above). Newlines are kept: verse arrives with them. With `columns` (a
+    table of figures, set in lines: Smith's prices of wheat) the spaces inside a line stay and only the indent the
+    lines share goes, so each figure stays in its column (£ s d) and a heading over its own; the first line keeps any
+    indent of its own, and the page sets such a block in a fixed-width face (bibliotheca/neo/lib/text.js). */
+export function normalise(text, { columns = false } = {}) {
+  const t = String(text)
     .replace(/ /g, ' ')
     .replace(/_/g, '')
     .replace(/(\d)-(?=\d)/g, '$1–')
     .replace(/--/g, '—')
     .replace(/(^|[\s(\[—–/])"/g, '$1“').replace(/"/g, '”')
-    .replace(/(^|[\s(\[—–/])'(?=\p{L})/gu, '$1‘').replace(/'/g, '’')
-    .replace(/[ \t]+/g, ' ')
-    .split('\n').map(l => l.trim()).join('\n')
-    .trim();
+    .replace(/(^|[\s(\[—–/])'(?=\p{L})/gu, '$1‘').replace(/'/g, '’');
+  if (!columns) return t.replace(/[ \t]+/g, ' ').split('\n').map(l => l.trim()).join('\n').trim();
+  const lines = t.replace(/\t/g, ' ').split('\n').map(l => l.replace(/\s+$/, '')).filter(Boolean);
+  const indent = Math.min(...lines.map(l => l.match(/^ */)[0].length));
+  return lines.map(l => l.slice(indent)).join('\n');
 }
 
 /** A Roman numeral's value ("XVIII" → 18); throws on anything else. */

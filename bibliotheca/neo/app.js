@@ -37,7 +37,7 @@
    (book | pane); below, the pane is a sheet docked under the text. */
 import { readHash, writeHash } from './lib/hash.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
-import { eraRows, eraFromFacts, bookEra, fmtEra, kardashevStep, kardashevPolity, KARDASHEV_STEPS } from './lib/era.js';
+import { eraRows, eraFromFacts, bookEra, fmtEra, fmtYear, kardashevStep, kardashevPolity, KARDASHEV_STEPS } from './lib/era.js';
 import { frameMove, samePage } from './lib/frame.js';
 import { shellHash, shellUrl } from '../../kino/lib/links.js';
 
@@ -125,6 +125,10 @@ function moduleInfo(reg, id) {
 async function loadBook(slug) {
   const seq = ++S.bookSeq;
   $('#text').innerHTML = '<p class="prp-empty">Loading the book…</p>';
+  // The old chapter's paragraphs have just left the page: nothing may ask where they are while the next book loads (a
+  // frame scheduled by the observer would look for them, and a big volume takes a moment).
+  S.observer?.disconnect(); S.observer = null;
+  S.ci = -1; S.visible = new Set(); S.current = null; S.pin = null; S.chipsKey = '';
   let book;
   try { book = await getJson(`${DATA}books/${encodeURIComponent(slug)}.json`); } catch (e) {
     if (seq === S.bookSeq) $('#text').innerHTML = `<p class="prp-empty">This book could not load: ${esc(e.message)}</p>`;
@@ -146,22 +150,34 @@ function renderMeta() {
   $('#meta').innerHTML = [`<span><b>${n}</b> book${n === 1 ? '' : 's'} on the shelf</span>`, `<span><b>${fmt(words)}</b> words</span>`,
     '<span>Rights <b>public domain in the US and the UK</b></span>', '<span>Terms <b>the Encyclopaedia</b></span>', day ? `<span>Built <b>${esc(day)}</b></span>` : ''].join('');
 }
+// Years as the companion pane gives them: 431 BC, not -431 (lib/era.js).
+const year = y => (Number.isFinite(y) ? fmtYear(y) : String(y ?? ''));
 function renderShelf() {
-  $('#shelf').innerHTML = S.shelf.map(b => `<option value="${esc(b.slug)}">${esc(b.title)} · ${esc(b.author || '')}${b.year ? ` (${esc(b.year)})` : ''}</option>`).join('');
+  $('#shelf').innerHTML = S.shelf.map(b => `<option value="${esc(b.slug)}">${esc(b.title)} · ${esc(b.author || '')}${b.year != null ? ` (${esc(year(b.year))})` : ''}</option>`).join('');
 }
 const pd = v => /^(pd|public domain)$/i.test(String(v || ''));
+/* The book's chapters as it numbers them ("Chapter XII", "Book II, Chapter III"), and what else it has: the one other
+   piece by its title ("26 chapters and the dedication", "15 chapters and the prefaces"), or how many there are (Smith's
+   introductions and appendix, the five pieces before On War's Book I). */
+function contentsLine(chapters) {
+  const numbered = chapters.filter(c => /\bChapter [IVXLCDM]+$/.test(c.heading || '')).length, other = chapters.length - numbered;
+  const rest = other === 1 ? ` and the ${(chapters.find(c => !/\bChapter [IVXLCDM]+$/.test(c.heading || '')).title || 'front matter').toLowerCase()}`
+    : other > 1 ? ` and ${other} other pieces` : '';
+  return `<b>${numbered}</b> chapter${numbered === 1 ? '' : 's'}${esc(rest)}`;
+}
 function renderBookFront() {
   const b = S.book, a = b.author || {}, t = b.translator;
   document.title = `${b.title} · Neo Classic · Bibliotheca · ${SHORT}`;
   $('#book-title').textContent = b.title;
   const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Encyclopaedia">${esc(a.name)}</a>` : esc(a.name || '');
-  const life = a.born && a.died ? ` (${esc(a.born)}–${esc(a.died)})` : '';
-  $('#byline').innerHTML = `${who}${life}${t ? `, translated by ${esc(t.name)}${b.edition?.published ? ` (${esc(b.edition.published)})` : ''}` : ''}`;
-  const all = S.chapters.flatMap(c => c.paragraphs), terms = termCount(all), numbered = S.chapters.filter(c => c.n > 0).length;
+  const life = Number.isFinite(a.born) && Number.isFinite(a.died) ? ` (${esc(fmtEra([a.born, a.died]))})` : '';
+  // The year after the translator is the edition's (Graham's On War of 1873 is read in Maude's revision of 1908).
+  $('#byline').innerHTML = `${who}${life}${t ? `, translated by ${esc(t.name)}${b.edition?.published ? ` (edition of ${esc(year(b.edition.published))})` : ''}` : ''}`;
+  const all = S.chapters.flatMap(c => c.paragraphs), terms = termCount(all);
   const words = S.chapters.reduce((x, c) => x + (c.words || 0), 0);
-  $('#book-meta').innerHTML = [`<span><b>${numbered}</b> chapters${S.chapters.length > numbered ? ` and ${S.chapters.length - numbered === 1 ? 'a dedication' : 'front matter'}` : ''}</span>`,
+  $('#book-meta').innerHTML = [`<span>${contentsLine(S.chapters)}</span>`,
     `<span><b>${fmt(words)}</b> words</span>`, `<span><b>${fmt(terms.n)}</b> terms · <b>${terms.distinct}</b> entries</span>`,
-    b.work?.written ? `<span>Written <b>${esc(b.work.written)}</b>${b.work.published ? `, printed <b>${esc(b.work.published)}</b>` : ''}</span>` : '',
+    b.work?.written != null ? `<span>Written <b>${esc(year(b.work.written))}</b>${b.work.published != null ? `, published <b>${esc(year(b.work.published))}</b>` : ''}</span>` : '',
     pd(b.rights?.us) && pd(b.rights?.uk) ? '<span>Public domain <b>US · UK</b></span>' : ''].join('');
 }
 function renderToc() {
@@ -272,7 +288,7 @@ function updateCurrent() {
   if (S.pin && document.getElementById(S.pin)) cur = S.pin;
   else if (shown.length) {
     const { top, bottom } = region(), line = top + (bottom - top) * 0.3;
-    for (const p of shown) { if (document.getElementById(p.id).getBoundingClientRect().top <= line) cur = p.id; else break; }
+    for (const p of shown) { const el = document.getElementById(p.id); if (!el) continue; if (el.getBoundingClientRect().top <= line) cur = p.id; else break; }
     cur ||= shown[0].id;
     if (atBottom()) cur = shown.at(-1).id; // the last lines can never reach the reading line
   }
@@ -297,7 +313,7 @@ function updateProgress() {
 // half off screen keeps the terms of its hidden half out of the bar), in reading order.
 function termsInView() {
   const { top, bottom } = region(), seen = [];
-  for (const p of onScreen()) for (const a of document.getElementById(p.id).querySelectorAll('a.term')) {
+  for (const p of onScreen()) for (const a of document.getElementById(p.id)?.querySelectorAll('a.term') || []) {
     const r = a.getBoundingClientRect();
     if (r.bottom > top && r.top < bottom) seen.push({ qid: a.dataset.qid, label: S.labels.get(a.dataset.qid), form: a.textContent });
   }

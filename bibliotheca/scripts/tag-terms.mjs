@@ -20,7 +20,10 @@
 //     book to its era; a string shared by several entities goes to one alive in the book's era, then by type (a
 //     place before a person before a war …), then by how often the Encyclopaedia mentions it;
 //   - the book's own decisions (shelf.mjs) come last and win: a string sent to another entity, a string or an entity
-//     left out, a word the lake lacks added.
+//     left out, a word the lake lacks added. A string left untagged is left untagged whole: it stands in the dictionary
+//     as a span with no entity, so where it is the longest match the shorter names inside it are not terms either
+//     (Gibbon's "Two Sicilies" are not the Bourbons' kingdom through its alias "Sicilies", nor Darwin's "South Africa"
+//     the continent).
 // Every choice is counted and printed in the report, so a human can read the top matches, the strings skipped by the
 // era rule and the shared strings resolved, and put a wrong one right with a decision in the shelf.
 //   node bibliotheca/scripts/tag-terms.mjs <slug>    re-tag bibliotheca/data/books/<slug>.json in place, rewrite the
@@ -136,7 +139,8 @@ export function buildAliasIndex(entities, { decisions = {} } = {}) {
     }
   }
   for (const [key, d] of decided) {
-    if (!d.q) continue;
+    // Left untagged: a span with no entity (choose gives null for it, and tagText steps over it).
+    if (!d.q) { const proper = /^\p{Lu}/u.test(key); addTo(proper ? exact : loose, proper ? key : lower(key), { q: null, label: null, alias: d.text, exact: true, proper, decided: true }); continue; }
     const e = entities.get(d.q);
     if (!e) throw new Error(`decision "${d.text}" names ${d.q}, which the lake has no entry for`);
     const proper = /^\p{Lu}/u.test(key);
@@ -162,10 +166,11 @@ function context(text, s, e) {
   return `${a > 0 ? '…' : ''}${text.slice(a, s)}[${text.slice(s, e)}]${text.slice(e, b)}${b < text.length ? '…' : ''}`.replace(/\n/g, ' ');
 }
 
-/** Which candidate a matched string means, by the era rule, the type order and the mention count. */
+/** Which candidate a matched string means, by the era rule, the type order and the mention count; null for none (a
+    string the shelf leaves untagged, or one whose every entity is out of era). */
 export function choose(ends, year, stats) {
   const decided = ends.find(c => c.decided);
-  if (decided) return decided;
+  if (decided) return decided.q ? decided : null;
   const after = c => year != null && c.first != null && c.first > year;
   const pool = ends.filter(c => !after(c) || c.exact);
   if (stats) for (const c of ends) if (after(c) && !c.exact) {

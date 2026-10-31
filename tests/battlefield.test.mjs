@@ -127,13 +127,40 @@ test('Realtime: archive view shows a month with an insight per war', pageTest, a
   const name = new Date(`${busiest}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
   const { browser, page, errors } = await open(`q/battlefield?view=archive&month=${busiest}`);
   await page.waitForSelector('.arow', { timeout: 20000 });
-  const month = await page.locator('#month').inputValue();
+  const month = await page.locator('#month').getAttribute('data-value'); // the timeline's end handle (design/prp-period.js)
   const rows = await page.locator('.arow').count();
   const first = await page.locator('.arow p').first().innerText();
   await browser.close();
   assert.equal(month, busiest);
   assert.ok(rows >= 10, `rows: ${rows}`);
   assert.match(first, new RegExp(`^${name}: .* events, about .* deaths`));
+  assert.deepEqual(errors, []);
+});
+
+test('Realtime: an archive period sums each war over its months; the start handle on the end gives one month again', pageTest, async () => {
+  const data = await (await fetch(`${BASE}/battlefield/data/realtime.json`)).json();
+  const [first, last] = [data.months[0], data.months.at(-1)], year = last.slice(0, 4);
+  const name = m => new Date(`${m}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+  const deaths = w => w.monthly.reduce((s, x) => s + x.deaths, 0);
+  const top = data.wars.filter(w => w.monthly.some(x => x.events)).sort((a, b) => deaths(b) - deaths(a))[0];
+  const { browser, page, errors } = await open(`q/battlefield?view=archive&month=${last}&from=${first}`);
+  await page.waitForSelector('.arow', { timeout: 20000 });
+  const title = await page.locator('#archtitle').innerText();
+  const side = await page.locator('#sidetitle').innerText();
+  const row = await page.locator('.arow h4').first().innerText();
+  const perMonth = await page.locator('.arow').first().locator('.permonth span').count();
+  // The start handle pushed onto the end: one month, as before, and no from= in the address.
+  await page.locator('#month-from').focus();
+  await page.keyboard.press('End');
+  const one = { title: await page.locator('#archtitle').innerText(), url: page.url(), months: await page.locator('.permonth').count() };
+  await browser.close();
+  assert.equal(title, `${name(first)}–${name(last)} ${year}`);
+  assert.equal(side, `Wars in ${name(first)}–${name(last)} ${year}`);
+  assert.ok(row.includes(top.name) && row.includes(`${deaths(top).toLocaleString('en-GB')} deaths`), `first row: ${row}; expected ${top.name}, ${deaths(top)}`);
+  assert.equal(perMonth, data.months.length);
+  assert.equal(one.title, `${name(last)} ${year}`);
+  assert.match(one.url, new RegExp(`\\?view=archive&month=${last}$`));
+  assert.equal(one.months, 0);
   assert.deepEqual(errors, []);
 });
 
@@ -184,5 +211,66 @@ test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad
   assert.match(falklands, /over territory in the Falkland Islands/);
   for (const gw of [620, 651, 840, 775, 911]) assert.equal(y1942[gw], 'var(--c-war)', `1942: ${gw}`);
   for (const gw of [560, 920]) assert.equal(y1942[gw], 'var(--c-abroad)', `1942: ${gw}`);
+  assert.deepEqual(errors, []);
+});
+
+test('Retrospective: a period of years shows every conflict active in it at its peak; the end handle pulled onto the start gives one year', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=1942');
+  await page.waitForSelector('#panel .war', { timeout: 20000 });
+  const atWar = () => page.locator('path.shape[fill="var(--c-war)"]').count();
+  const red1942 = await atWar();
+  await page.evaluate(() => { location.hash = '#y=1945&f=1939'; });
+  await page.waitForFunction(() => document.querySelector('#year-big').textContent === '1939–1945');
+  const period = {
+    label: (await page.locator('#year-label').textContent()).trim(), // textContent: the CSS upper-cases it
+    sub: await page.locator('#panel .sub').innerText(),
+    red: await atWar(),
+    card: (await page.locator('#panel .war[data-id] .lvl').first().textContent()).trim(), // textContent: the CSS upper-cases it
+    handles: [await page.locator('#from').inputValue(), await page.locator('#year').inputValue()],
+  };
+  // A redraw (a country chosen) keeps the period in the address.
+  await page.evaluate(() => { location.hash = '#y=1945&f=1939&c=2'; });
+  await page.waitForFunction(() => /on its territory in 1939–1945/.test(document.querySelector('#panel .sub')?.textContent || ''));
+  const kept = page.url();
+  // The end handle pulled back onto the start: one year again, the start at rest, and no f in the address.
+  await page.locator('#year').fill('1939');
+  await page.locator('#year').dispatchEvent('input');
+  const one = { big: await page.locator('#year-big').innerText(), url: page.url(), handles: [await page.locator('#from').inputValue(), await page.locator('#year').inputValue()] };
+  await browser.close();
+  assert.equal(period.label, 'Period');
+  assert.match(period.sub, /^\d+ armed conflicts, \d+ at war level at some point$/);
+  assert.ok(period.red >= red1942, `countries at war 1939–1945: ${period.red}; 1942: ${red1942}`);
+  assert.equal(period.card, 'War · 1939–45 · 7 yrs'); // World War II leads: at war level, active in all seven years
+  assert.deepEqual(period.handles, ['1939', '1945']);
+  assert.match(kept, /#y=1945&f=1939&c=2$/);
+  assert.equal(one.big, '1939');
+  assert.match(one.url, /#y=1939&c=2$/);
+  assert.deepEqual(one.handles, ['1939', '1939']);
+  assert.deepEqual(errors, []);
+});
+
+// The year keeps a period's width at rest too, so on a phone opening a period narrows no figure into another line:
+// before, "At war level" wrapped and dropped the timeline and the map 13px under the reader's finger.
+test('Retrospective: on a phone, opening a period keeps the timeline where it was', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 360, height: 800 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/history/#y=1945`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#panel .war', { timeout: 20000 });
+  await page.waitForSelector('.jdpi-returnbar', { timeout: 15000 }); // prp-bar.js adds it after load, moving the page down
+  await page.evaluate(() => document.fonts.ready);
+  const track = () => page.evaluate(() => { const r = document.querySelector('#timeline .prp-period-range').getBoundingClientRect(); return { top: Math.round(r.top + scrollY), sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
+  const rest = await track();
+  await page.locator('#from').focus();
+  await page.keyboard.press('ArrowLeft'); // a drag's first move
+  const first = await track();
+  for (let k = 1; k < 6; k++) await page.keyboard.press('ArrowLeft');
+  const period = await track();
+  assert.equal(await page.locator('#year-big').textContent(), '1939–1945');
+  assert.deepEqual(first, rest, 'the first move');
+  assert.deepEqual(period, rest, 'the period opened');
+  assert.equal(rest.sideways, 0);
   assert.deepEqual(errors, []);
 });

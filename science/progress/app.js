@@ -1,7 +1,7 @@
 /* Invention Timeline (PRP · Natural Science): humanity's key scientific breakthroughs, 3000 BC to today, on a world map.
    Data: data/events.json, built by science/scripts/build-progress.mjs from PRP's curated list and Wikidata (CC0).
-   Views (tabs): Map, Scientists and List; all three follow the period (the timeline's two handles: a start, at the
-   beginning unless moved, and an end) and the discipline filter.
+   Views (tabs): Map, Scientists and List; all three follow the period (the timeline's two handles, design/prp-period.js:
+   a start, at the beginning unless moved, and an end) and the discipline filter.
    URL: #y=<end year>[&f=<start year>]&e=<event id>[&v=scientists|list][&d=<shown discipline ids>]. Dots and swatches
    are var(--prp-cat-n) fills, so a theme change needs no redraw. */
 
@@ -12,7 +12,7 @@ const WORLD = 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/land-110m.json';
 const RECENT_STOPS = 10; // "recent" = the last ten steps of the timeline (decades in antiquity, years in the modern era)
 
 // year/stop: the end of the period and its slider position; from/fromStop: its start (the first year and stop unless moved).
-const state = { data: null, year: 0, stop: 0, from: -Infinity, fromStop: 0, sel: null, view: 'map', off: new Set(), trail: 'all', playing: null, q: '', peopleShown: 120 };
+const state = { data: null, year: 0, stop: 0, from: -Infinity, fromStop: 0, sel: null, view: 'map', off: new Set(), trail: 'all', q: '', peopleShown: 120 };
 let D, EVENTS = [], byId = new Map(), DISC = [], DIDX = {}, STOPS = [];
 
 /* ---------------------------------------------------------------- formatting */
@@ -181,15 +181,11 @@ function renderLegend() {
 function filterChanged() { state.peopleShown = 120; renderAll(); writeHash(); }
 
 /* ---------------------------------------------------------------- density strip above the slider */
-function renderDensity() {
-  const n = STOPS.length, counts = new Array(n).fill(0);
+// How many breakthroughs in the disciplines shown fall at each step; the control draws them, the period's in the accent.
+function densityCounts() {
+  const counts = new Array(STOPS.length).fill(0);
   for (const e of EVENTS) if (isShown(e)) counts[stopFor(e.y)]++;
-  const max = Math.max(1, ...counts);
-  const s = d3.select('#density').attr('viewBox', `0 0 ${n} 1`);
-  s.selectAll('rect').data(counts).join('rect')
-    .attr('x', (_, i) => i + 0.1).attr('width', 0.8)
-    .attr('y', c => 1 - (c ? 0.12 + 0.88 * Math.sqrt(c / max) : 0)).attr('height', c => (c ? 0.12 + 0.88 * Math.sqrt(c / max) : 0))
-    .attr('class', (_, i) => (i >= state.fromStop && i <= state.stop ? 'past' : 'future'));
+  return counts;
 }
 
 /* ---------------------------------------------------------------- side panel: the card, or what happened up to the year */
@@ -308,41 +304,32 @@ function renderKpis() {
   $('#k-events').textContent = list.length.toLocaleString('en-GB');
   $('#k-people').textContent = new Set(list.flatMap(e => e.people)).size.toLocaleString('en-GB');
 }
-function renderAll() { renderMap(); renderLegend(); renderDensity(); renderPanel(); renderKpis(); renderPeople(); renderList(); }
-const clampYear = y => Math.max(D.firstYear, Math.min(D.lastYear, Math.round(y)));
-// The two handles, the track between them, and which handle is in front when they meet.
-function syncHandles() {
-  const f = $('#from'), s = $('#year'), n = STOPS.length - 1;
-  f.value = state.fromStop; f.setAttribute('aria-valuetext', yearText(state.from));
-  s.value = state.stop; s.setAttribute('aria-valuetext', yearText(state.year));
-  $('#fill').style.left = `${(state.fromStop / n) * 100}%`; $('#fill').style.width = `${((state.stop - state.fromStop) / n) * 100}%`;
-  $('#range').classList.toggle('top-from', state.fromStop >= state.stop && state.stop > 0);
-}
-// The end of the period. Pulled back past the start, it brings the start with it.
-function setYear(y, { push = true, stop = null } = {}) {
-  state.year = clampYear(y);
-  state.stop = stop ?? stopFor(state.year);
-  if (state.from > state.year) { state.fromStop = state.stop; state.from = STOPS[state.stop]; }
-  syncHandles();
+function renderAll() { renderMap(); renderLegend(); period.strip(densityCounts()); renderPanel(); renderKpis(); renderPeople(); renderList(); }
+// The period's two handles (design/prp-period.js): the start rests on the first stop until it is moved, and the end
+// keeps a year between stops (#y=1687 sits on the 1684 stop). The start pushed past the end takes it along, the end
+// pulled back past the start brings it; a click on the track moves the nearer handle; play runs from the start. Every
+// move by the reader, from a handle, the track, ‹ ›, play or the keys, lands in onChange.
+const fromPeriod = p => { state.from = p.from; state.fromStop = p.fromIndex; state.year = p.to; state.stop = p.toIndex; };
+const period = PRPPeriod.mount($('#timeline'), {
+  rest: 'first', exact: true, labels: y => yearText(y),
+  ids: { from: 'from', to: 'year', prev: 'prev', play: 'play', next: 'next' },
+  titles: { prev: 'Step back (←)', play: 'Play or pause (space)', next: 'Step forward (→)' },
+  play: { interval: 420, label: 'Play through history' },
+  onChange: p => { fromPeriod(p); renderAll(); writeHash(); },
+  onPlay: on => { if (on) state.sel = null; },
+});
+// The period from code (the selection, the address, the keys, Documentary mode), in years: a start after the end
+// becomes the end; the start's own first year puts it back at rest.
+function setPeriod(from, to, { push = true } = {}) {
+  fromPeriod(period.set(from, to, { silent: true }));
   renderAll();
   if (push) writeHash();
 }
-// The start of the period. Pushed past the end, it takes the end with it.
-function setFrom(y, { push = true, stop = null } = {}) {
-  state.from = clampYear(y);
-  state.fromStop = stop ?? stopFor(state.from);
-  if (state.from > state.year) return setYear(state.from, { push, stop: state.fromStop });
-  syncHandles();
-  renderAll();
-  if (push) writeHash();
-}
-const setStop = (i, opts) => { const k = Math.max(0, Math.min(STOPS.length - 1, i)); setYear(STOPS[k], { ...opts, stop: k }); };
-const setFromStop = (i, opts) => { const k = Math.max(0, Math.min(STOPS.length - 1, i)); setFrom(STOPS[k], { ...opts, stop: k }); };
 function select(id, { reveal = false, push = true } = {}) {
   const e = id && byId.get(id);
   state.sel = e ? e.id : null;
-  if (e && e.y > state.year) { setYear(e.y, { push: false }); }
-  else if (e && e.y < state.from) { setFrom(e.y, { push: false }); } // a breakthrough before the period widens it
+  if (e && e.y > state.year) setPeriod(state.from, e.y, { push: false });
+  else if (e && e.y < state.from) setPeriod(e.y, state.year, { push: false }); // a breakthrough before the period widens it
   else renderAll();
   if (e && reveal && window.matchMedia('(max-width: 900px)').matches) $('#panel').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
   if (push) writeHash();
@@ -372,47 +359,23 @@ function applyHash() {
   state.off = h.off;
   if (h.v !== state.view) setView(h.v, { push: false });
   state.sel = h.e;
-  state.from = h.f; state.fromStop = h.f > D.firstYear ? stopFor(h.f) : 0;
-  setYear(h.y, { push: false });
+  setPeriod(h.f, h.y, { push: false }); // readHash has put an f at or before the first year at rest and capped it at y
 }
 
-/* ---------------------------------------------------------------- play, steps and keys */
-function stopPlay() {
-  clearInterval(state.playing); state.playing = null;
-  $('#play').textContent = '▶'; $('#play').setAttribute('aria-label', 'Play through history');
-}
-function togglePlay() {
-  if (state.playing) return stopPlay();
-  if (state.stop >= STOPS.length - 1) setStop(state.fromStop); // play from the start of the period
-  state.sel = null;
-  $('#play').textContent = '❚❚'; $('#play').setAttribute('aria-label', 'Pause');
-  state.playing = setInterval(() => { if (state.stop >= STOPS.length - 1) stopPlay(); else setStop(state.stop + 1); }, 420);
-}
-// Jump to the previous or next year with a breakthrough in the disciplines shown.
+/* ---------------------------------------------------------------- steps, keys and the timeline's setup */
+// Jump to the previous or next year with a breakthrough in the disciplines shown (back past the start of the period,
+// the start comes along, to that year's stop).
 function jump(dir) {
   const ys = [...new Set(EVENTS.filter(isShown).map(e => e.y))].sort((a, b) => a - b);
   const y = dir > 0 ? ys.find(v => v > state.year) : ys.filter(v => v < state.year).at(-1);
-  if (y != null) setYear(y);
+  if (y != null) setPeriod(state.from > y ? STOPS[stopFor(y)] : state.from, y);
 }
 function setupTimeline() {
-  const s = $('#year'), f = $('#from');
-  s.min = f.min = 0; s.max = f.max = STOPS.length - 1;
-  s.addEventListener('input', () => { stopPlay(); setStop(+s.value); });
-  f.addEventListener('input', () => { stopPlay(); setFromStop(+f.value); });
-  // A click on the track (the inputs only answer at their thumbs) moves the nearer handle there.
-  $('#track').addEventListener('click', ev => {
-    const box = $('#track').getBoundingClientRect(), k = Math.round(((ev.clientX - box.left) / Math.max(1, box.width)) * (STOPS.length - 1));
-    stopPlay();
-    if (Math.abs(k - state.fromStop) < Math.abs(k - state.stop)) setFromStop(k); else setStop(k);
-  });
-  $('#prev').onclick = () => { stopPlay(); setStop(state.stop - (STOPS[state.stop] < state.year ? 0 : 1)); };
-  $('#next').onclick = () => { stopPlay(); setStop(state.stop + 1); };
-  $('#play').onclick = togglePlay;
-  const at = y => `${(stopFor(y) / (STOPS.length - 1)) * 100}%`;
   // minor ticks drop out below 900px; on phones only the key ones (and the ends) stay.
-  const ticks = [[-3000, '3000 BC'], [1, 'AD 1'], [1000, '1000', 'minor'], [1500, '1500'], [1700, '1700', 'minor'], [1800, '1800', 'key'], [1850, '1850', 'minor'], [1900, '1900', 'key'], [1950, '1950', 'minor'], [2000, '2000']];
-  $('#ticks').innerHTML = ticks.filter(([y]) => y >= D.firstYear && y <= D.lastYear)
-    .map(([y, l, c], i, a) => `<span class="${[c, i === 0 ? 'start' : '', i === a.length - 1 ? 'end' : ''].filter(Boolean).join(' ')}" style="left:${at(y)}">${l}</span>`).join('');
+  const ticks = [[-3000, '3000 BC'], [1, 'AD 1'], [1000, '1000', 'minor'], [1500, '1500'], [1700, '1700', 'minor'], [1800, '1800', 'key'], [1850, '1850', 'minor'], [1900, '1900', 'key'], [1950, '1950', 'minor'], [2000, '2000']]
+    .filter(([y]) => y >= D.firstYear && y <= D.lastYear)
+    .map(([y, text, kind], i, a) => ({ at: y, text, kind: [kind, i === 0 ? 'start' : '', i === a.length - 1 ? 'end' : ''].filter(Boolean).join(' ') }));
+  period.update({ stops: STOPS, ticks, strip: densityCounts(), from: null, to: D.lastYear });
   for (const b of document.querySelectorAll('#trail button')) b.onclick = () => {
     state.trail = b.dataset.v;
     for (const x of document.querySelectorAll('#trail button')) x.setAttribute('aria-pressed', String(x === b));
@@ -422,15 +385,15 @@ function setupTimeline() {
     if (e.key === 'Escape') { $('#search-results').hidden = true; if (state.sel) select(null); return; }
     const t = e.target, typing = t.closest?.('input, textarea, select, [contenteditable="true"]');
     if (typing || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (e.key === ' ' && !t.closest('button, a')) { e.preventDefault(); togglePlay(); }
+    if (e.key === ' ' && !t.closest('button, a')) { e.preventDefault(); period.toggle(); }
     else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       if (t.closest('[role="tab"]')) return;
-      e.preventDefault(); stopPlay();
+      e.preventDefault(); period.stop();
       const dir = e.key === 'ArrowRight' ? 1 : -1;
-      if (e.shiftKey) jump(dir); else (dir > 0 ? $('#next') : $('#prev')).click();
+      if (e.shiftKey) jump(dir); else period.step(dir);
     }
-    else if (e.key === 'Home') { stopPlay(); setStop(0); }
-    else if (e.key === 'End') { stopPlay(); setStop(STOPS.length - 1); }
+    else if (e.key === 'Home') { period.stop(); setPeriod(state.from, STOPS[0]); }
+    else if (e.key === 'End') { period.stop(); setPeriod(state.from, STOPS.at(-1)); }
   });
 }
 
@@ -470,15 +433,15 @@ const ERAS = [[-3000, -501, 'The Bronze and Iron Ages'], [-500, 500, 'Classical 
 window.jdpiDocumentary = {
   get title() { return `Invention Timeline · ${yearText(state.year)}`; },
   async *story() {
-    if (state.playing) stopPlay();
+    period.stop();
     if (state.view !== 'map') setView('map');
     state.off.clear(); state.sel = null;
-    if (state.fromStop) setFromStop(0, { push: false }); // the whole of history, whatever period was set
+    if (state.fromStop) setPeriod(null, state.year, { push: false }); // the whole of history, whatever period was set
     yield { text: `Five thousand years of discovery, from the first written numbers to the latest telescopes: ${EVENTS.length} breakthroughs, each placed where it happened.`, el: $('#year-big'), focus: { reset: true } };
     for (const [a, b, name] of ERAS) {
       if (a > D.lastYear) break;
       const list = EVENTS.filter(e => e.y >= a && e.y <= Math.min(b, D.lastYear));
-      setYear(Math.min(b, D.lastYear), { push: false });
+      setPeriod(state.from, Math.min(b, D.lastYear), { push: false });
       await new Promise(r => setTimeout(r, 400));
       const top = list.filter(e => e.people.length).slice(0, 3).concat(list.filter(e => !e.people.length)).slice(0, 3);
       const places = [...new Set(list.map(e => e.place.n))].slice(0, 3);

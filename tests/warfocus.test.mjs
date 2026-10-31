@@ -71,3 +71,89 @@ test('Russia–Ukraine shows UCDP clashes and a running death toll; Battlefield 
   assert.ok(+total.replace(/,/g, '') > 1000, `deaths so far: ${total}`);
   assert.deepEqual(errors, []);
 });
+
+test('a period of months sums its deaths and groups its clashes by place; the start handle back on the first month is the war so far', pageTest, async t => {
+  const w = await dataFile('battlefield/focus/data/wars/russia-ukraine.json');
+  const a = w.months.indexOf('2023-06'), b = w.months.indexOf('2023-11');
+  const deaths = w.deaths.slice(a, b + 1).reduce((s, v) => s + v, 0);
+  const places = new Set(w.cells.slice(a, b + 1).flat().map(c => `${c[0]},${c[1]}`)).size;
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=russia-ukraine&m=2023-11&f=2023-06`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'Jun – Nov 2023', null, { timeout: 20000 });
+  const period = {
+    label: (await page.locator('#date-label').textContent()).trim(), // textContent: the CSS upper-cases it
+    inPeriod: (await page.locator('#c-month-label').textContent()).trim(),
+    deaths: +(await page.locator('#c-month').innerText()).replace(/[~,]/g, ''),
+    cells: await page.locator('circle.cell').count(),
+    hash: await page.evaluate(() => location.hash),
+    strip: await page.locator('#timeline .prp-period-strip path.area.in').count(),
+  };
+  await page.locator('#month-from').focus();
+  await page.keyboard.press('Home');
+  const rest = { date: await page.locator('#date').innerText(), hash: await page.evaluate(() => location.hash), label: (await page.locator('#c-month-label').textContent()).trim() };
+  assert.deepEqual([period.label, period.inPeriod], ['Period', 'In the period']);
+  assert.equal(period.deaths, deaths);
+  assert.equal(period.cells, places, 'one clash circle per place over the period');
+  assert.equal(period.hash, '#war=russia-ukraine&m=2023-11&f=2023-06');
+  assert.equal(period.strip, 1, 'the strip draws the period solid');
+  assert.deepEqual(rest, { date: 'November 2023', hash: '#war=russia-ukraine&m=2023-11', label: 'This month' });
+  assert.deepEqual(errors, []);
+});
+
+test('a period of months: its battles figure is the panel\'s, a one-month period reads as its month, and an earlier month in the table widens it', pageTest, async t => {
+  const w = await dataFile('battlefield/focus/data/wars/ww2.json');
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1943-11&f=1943-06`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'Jun – Nov 1943', null, { timeout: 20000 });
+  // textContent: the CSS upper-cases the heading
+  const battles = { figure: (await page.locator('#c-battles').textContent()).replace(/,/g, ''), panel: (await page.locator('#panel h3 .count').first().textContent()).match(/^[\d,]+/)?.[0].replace(/,/g, '') };
+  // The start on the end, away from the first month: still a period (its own figures), named as one month.
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-11&f=1943-11'; });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'November 1943', null, { timeout: 10000 });
+  const one = { label: (await page.locator('#date-label').textContent()).trim(), legend: await page.locator('#legend h4').textContent() };
+  // A month in the deaths table before the period's start: the period begins there, its end kept.
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-11&f=1943-06&v=months'; });
+  await page.waitForSelector('#months-rows tr.end', { timeout: 10000 });
+  await page.locator(`#months-rows tr[data-k="${w.months.indexOf('1939-11')}"]`).click();
+  const widened = { hash: await page.evaluate(() => location.hash), date: await page.locator('#date').textContent() };
+  assert.equal(battles.figure, battles.panel, 'the battles in the period are those the panel lists as under way');
+  assert.deepEqual(one, { label: 'Period', legend: 'November 1943' });
+  assert.deepEqual(widened, { hash: '#war=ww2&m=1943-11&f=1939-11&v=months', date: 'Nov 1939 – Nov 1943' });
+  assert.deepEqual(errors, []);
+});
+
+// The header figures keep their widths, so opening a period moves nothing under the reader's pointer: before, the
+// longer figures wrapped under the dek (or onto a new row on a phone) and dropped the timeline and the map mid-drag.
+test('opening a period keeps the timeline where it was, on a desktop and on a phone, and nothing scrolls sideways', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  // The start's first move off the first month, then a period: June 1943 ("Jun – Nov 1943"), and on a phone September
+  // 2022 (the widest kind of label, "Sep 2022 – Sep 2024").
+  for (const [width, war, month, from, label] of [[1280, 'ww2', '1943-11', '1943-06', 'Jun – Nov 1943'], [390, 'russia-ukraine', '2024-09', '2022-09', 'Sep 2022 – Sep 2024']]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.goto(`${BASE}/battlefield/focus/#war=${war}&m=${month}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelector('#date')?.textContent !== '–' && document.querySelectorAll('path.state').length > 10, null, { timeout: 20000 });
+    await page.waitForSelector('.jdpi-returnbar', { timeout: 15000 }); // prp-bar.js adds it after load, moving the page down
+    await page.evaluate(() => document.fonts.ready);
+    const track = () => page.evaluate(() => { const r = document.querySelector('#timeline .prp-period-range').getBoundingClientRect(); return { top: Math.round(r.top + scrollY), width: Math.round(r.width), sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
+    const rest = await track();
+    await page.locator('#month-from').focus();
+    await page.keyboard.press('ArrowRight'); // a drag's first move
+    const first = await track();
+    await page.evaluate(h => { location.hash = h; }, `#war=${war}&m=${month}&f=${from}`);
+    await page.waitForFunction(l => document.querySelector('#date').textContent === l, label, { timeout: 10000 });
+    const open = await track();
+    assert.deepEqual(first, rest, `${width}px, the first move`);
+    assert.deepEqual(open, rest, `${width}px, ${label}`);
+    assert.equal(rest.sideways, 0, `${width}px scrolls sideways`);
+    await page.close();
+  }
+});

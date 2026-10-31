@@ -40,22 +40,10 @@
         <input id="search" class="prp-input" type="search" placeholder="Search a breakthrough or scientist…" autocomplete="off" aria-label="Search breakthroughs and scientists" aria-controls="search-results" aria-expanded="false">
         <ul id="search-results" class="search-results" role="listbox" aria-label="Matches" hidden></ul>
       </div>
-      <div class="timeline" role="group" aria-label="Period">
-        <button type="button" id="prev" class="tl-btn" aria-label="Step back in time" title="Step back (←)">‹</button>
-        <button type="button" id="play" class="tl-btn play" aria-label="Play through history" title="Play or pause (space)">▶</button>
-        <button type="button" id="next" class="tl-btn" aria-label="Step forward in time" title="Step forward (→)">›</button>
-        <div class="slider-wrap">
-          <svg id="density" class="density" aria-hidden="true" focusable="false" preserveAspectRatio="none"></svg>
-          <!-- Two handles on one track: the start of the period (hollow) and its end (filled). Each is a range input, so
-               the keyboard works as usual; the track between them is drawn by app.js (#fill). -->
-          <div class="range" id="range">
-            <div class="track" id="track" aria-hidden="true"><div class="fill" id="fill"></div></div>
-            <input type="range" id="from" class="from" min="0" max="1" step="1" value="0" aria-label="Start of the period" title="Start of the period">
-            <input type="range" id="year" class="to" min="0" max="1" step="1" value="1" aria-label="End of the period" title="End of the period">
-          </div>
-          <div class="ticks" id="ticks" aria-hidden="true"></div>
-        </div>
-      </div>
+      <!-- The period (design/prp-period.js): ‹ ▶ ›, the density of breakthroughs, and two handles on one track, the start
+           of the period (hollow; #from) and its end (filled; #year). Each handle is a range input, so the keyboard
+           works as usual. -->
+      <div class="timeline" id="timeline" role="group" aria-label="Period"></div>
       <div class="trail" role="group" aria-labelledby="trail-label">
         <span class="prp-label" id="trail-label">Earlier</span>
         <div class="seg" id="trail">
@@ -119,6 +107,7 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="../../design/prp-focus.js"></script>
+  <script src="../../design/prp-period.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

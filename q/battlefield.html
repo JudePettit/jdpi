@@ -24,8 +24,8 @@ button,select{font:inherit}button{cursor:pointer}
 /* map */
 .mapwrap{position:relative;height:440px;background:var(--prp-map-water)}
 #map{width:100%;height:100%}
-.monthctl{display:flex;align-items:center;gap:6px}
-.monthctl .prp-btn{width:32px;height:32px;padding:0;font-size:15px}
+/* The archive's months: design/prp-period.js (‹ › and two handles on one track, one month or a period), styled by prp.css. */
+.monthctl{flex:0 1 380px}
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
 .legend .lg{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left}
 .legend button.lg:hover{color:var(--prp-link);text-decoration:underline}
@@ -71,8 +71,10 @@ button,select{font:inherit}button{cursor:pointer}
 .arow h4 button:hover{color:var(--prp-link);text-decoration:underline}
 .arow h4 span{color:var(--prp-muted);font:11px var(--prp-font-mono);white-space:nowrap}
 .arow p{margin:4px 0 0;color:var(--prp-text-2);font:14px/1.6 var(--prp-font-serif)}
+.arow .permonth{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:6px;color:var(--prp-muted);font:11px/1.6 var(--prp-font-mono)}
+.arow .permonth b{color:var(--prp-text-2);font-weight:500}
 @media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"map" "side" "tail"}.mapwrap{height:380px}.warlist{max-height:480px!important}}
-@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.mapwrap{height:300px}.detail{padding:10px 14px 16px}.warrow{padding:10px 12px}.arow{padding:12px}}
+@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.mapwrap{height:300px}.detail{padding:10px 14px 16px}.warrow{padding:10px 12px}.arow{padding:12px}.monthctl{flex:1 1 100%}}
 </style>
 </head>
 <body>
@@ -90,7 +92,9 @@ button,select{font:inherit}button{cursor:pointer}
   <div class="layout" id="views" role="tabpanel">
     <figure class="prp-figure">
       <div class="prp-panel">
-        <div class="prp-panel-head"><b id="maptitle">Conflict map</b><div class="monthctl" id="monthctl" hidden><button class="prp-btn sm" id="prev" aria-label="Previous month">‹</button><select class="prp-select" id="month" aria-label="Month"></select><button class="prp-btn sm" id="next" aria-label="Next month">›</button></div></div>
+        <!-- The archive's months (design/prp-period.js): ‹ › and two handles on one track. The start (hollow; #month-from)
+             rests on the end (filled; #month), so one month is shown; drag it back for a period of months. -->
+        <div class="prp-panel-head"><b id="maptitle">Conflict map</b><div class="monthctl" id="monthctl" role="group" aria-label="Months shown" hidden></div></div>
         <div class="mapwrap"><div id="map" role="region" aria-label="Map of armed-conflict events"></div></div>
         <div class="legend" id="legend"></div>
       </div>
@@ -109,9 +113,13 @@ button,select{font:inherit}button{cursor:pointer}
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="../design/prp-focus.js"></script>
+<script src="../design/prp-period.js"></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
 // battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
+// The archive follows its timeline (design/prp-period.js): one month, as before, with the start resting on the end;
+// pulled back, the start opens a period of months, whose deaths and events are summed war by war and place by place.
+// URL: ?view=live|archive[&month=<yyyy-mm, the month shown or the period's last>][&from=<yyyy-mm, its first>][&war=<id>]
 const DATA_URL = '../battlefield/data/realtime.json';
 const RELOAD_MS = 6 * 3600 * 1000; // data changes monthly; re-check every six hours
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -119,7 +127,8 @@ const fmt = n => Number(n).toLocaleString('en-GB');
 const monthName = (m, opts = { month: 'long', year: 'numeric' }) => new Date(m + '-01T00:00:00Z').toLocaleString('en-GB', { ...opts, timeZone: 'UTC' });
 const params = new URLSearchParams(location.search);
 let view = params.get('view') === 'archive' ? 'archive' : 'live';
-let data, selectedWar = params.get('war'), month = params.get('month');
+// month: the archive's month shown (the end of the period); from: a period's first month (null for one month).
+let data, selectedWar = params.get('war'), month = params.get('month'), from = params.get('from');
 const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
 
 /* ---------- views: in-page tabs, linked by ?view= ---------- */
@@ -149,7 +158,12 @@ const layer = L.layerGroup().addTo(map);
 // Documentary focus (design/prp-focus.js): the map flies to fit what is being discussed and the events inside it stand
 // out; "Reset view" or the end of the reading brings back the page's own view (the selected war, or the world).
 let focusBox = null;
-const shownMonths = () => new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+// The archive's months: the month shown, or every month of the period; and their name ("June 2026", "March–June 2026").
+const archiveMonths = () => { const b = data.months.indexOf(month), a = from ? data.months.indexOf(from) : b; return data.months.slice(Math.max(0, a), b + 1); };
+const spanName = (a, b, month = 'long') => (a === b ? monthName(b, { month, year: 'numeric' }) : a.slice(0, 4) === b.slice(0, 4)
+  ? `${monthName(a, { month })}–${monthName(b, { month, year: 'numeric' })}` : `${monthName(a, { month, year: 'numeric' })} – ${monthName(b, { month, year: 'numeric' })}`);
+const periodName = (len = 'long') => spanName(from || month, month, len);
+const shownMonths = () => new Set((view === 'archive' ? archiveMonths() : data.months.slice(-3)).map(m => data.months.indexOf(m)));
 const warPoints = w => { const idx = shownMonths(); return w.points.filter(p => idx.has(p[2])).map(p => [p[1], p[0]]); };
 const focusReset = window.PRPFocus?.resetButton(document.querySelector('.mapwrap'), () => clearFocus(true));
 function home() {
@@ -203,24 +217,31 @@ const colour = w => w.colour;
 function setUrl() {
   const p = new URLSearchParams({ view });
   if (view === 'archive' && month) p.set('month', month);
+  if (view === 'archive' && from) p.set('from', from);
   if (selectedWar) p.set('war', selectedWar);
   history.replaceState(null, '', '?' + p);
 }
 
 function drawMap() {
   layer.clearLayers();
-  const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+  const idx = shownMonths(), grouped = view === 'archive' && !!from;
   const ink = token('--prp-text');
   // "Other" wars first, the three named wars over them, the selected war on top. While Documentary mode is discussing
   // a place, the events inside it are drawn as if selected and the rest fade, as they do for a selected war.
   const order = [...data.wars].sort((a, b) => (a.id === selectedWar) - (b.id === selectedWar) || (a.rank >= 0) - (b.rank >= 0) || b.rank - a.rank);
   for (const w of order) {
-    for (const [lat, lon, mi, deaths, events] of w.points) {
-      if (!idx.has(mi)) continue;
+    // One circle per place and month; over a period of months, one per place, its deaths and events summed (mi -1).
+    let pts = w.points.filter(p => idx.has(p[2]));
+    if (grouped) {
+      const by = new Map();
+      for (const [lat, lon, , deaths, events] of pts) { const k = `${lat},${lon}`, p = by.get(k) || by.set(k, [lat, lon, -1, 0, 0]).get(k); p[3] += deaths; p[4] += events; }
+      pts = [...by.values()];
+    }
+    for (const [lat, lon, mi, deaths, events] of pts) {
       const inFocus = focusBox && PRPFocus.contains(focusBox, [lon, lat]);
       const sel = selectedWar === w.id || inFocus, faded = (selectedWar || focusBox) && !sel, quiet = w.rank < 0 && !sel, col = selectedWar === w.id && w.rank < 0 ? ink : colour(w);
       L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: col, weight: sel ? 1.5 : .6, fillColor: col, fillOpacity: faded ? .08 : quiet ? .3 : .55, opacity: faded ? .2 : quiet ? .6 : .95 })
-        .bindTooltip(`<b>${esc(w.name)}</b><br>${monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
+        .bindTooltip(`<b>${esc(w.name)}</b><br>${mi < 0 ? periodName('short') : monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
         .on('click', () => selectWar(w.id))
         .addTo(layer);
     }
@@ -234,33 +255,40 @@ function renderLegend() {
   box.querySelectorAll('[data-war]').forEach(b => b.onclick = () => selectWar(b.dataset.war));
 }
 function renderCaption() {
-  const when = view === 'archive' ? monthName(month) : `${monthName(data.months.at(-3) || data.latest, { month: 'long' })} to ${monthName(data.latest)}`;
-  document.getElementById('mapcap').textContent = `Armed-conflict events, ${when}: one circle per place and month, sized by deaths. The three deadliest wars of ${data.year} have their own colours; click a circle to open its war's briefing. Source: UCDP Candidate Events Dataset${data.version ? ', version ' + data.version : ''}.`;
+  const when = view === 'archive' ? periodName() : `${monthName(data.months.at(-3) || data.latest, { month: 'long' })} to ${monthName(data.latest)}`;
+  document.getElementById('mapcap').textContent = `Armed-conflict events, ${when}: ${view === 'archive' && from ? 'one circle per place, its deaths and events over the period summed' : 'one circle per place and month'}, sized by deaths. The three deadliest wars of ${data.year} have their own colours; click a circle to open its war's briefing. Source: UCDP Candidate Events Dataset${data.version ? ', version ' + data.version : ''}.`;
 }
 
-function warRow(w, m) {
-  const mm = m ? w.monthly.find(x => x.month === m) : null;
-  const deaths = m ? mm.deaths : w.monthly.slice(-3).reduce((s, x) => s + x.deaths, 0);
-  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${m ? 'deaths' : '3-month deaths'}</small></div></button>`;
+// A war in the list: its deaths in the months given (the archive's month or period), or in the last three months (Live).
+function warRow(w, months) {
+  const deaths = (months ? w.monthly.filter(x => months.includes(x.month)) : w.monthly.slice(-3)).reduce((s, x) => s + x.deaths, 0);
+  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${months ? 'deaths' : '3-month deaths'}</small></div></button>`;
 }
 
+// Deaths month by month, the month shown (or every month of the archive's period) highlighted.
 function bars(w) {
-  const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = view === 'archive' ? month : data.latest;
-  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${x.month === cur ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${monthName(cur)}</div>`;
+  const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = new Set(view === 'archive' ? archiveMonths() : [data.latest]);
+  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${cur.has(x.month) ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${cur.size > 1 ? periodName() : monthName([...cur][0])}</div>`;
 }
 
 function warDetail(w) {
-  const m = view === 'archive' ? month : data.latest;
+  const months = view === 'archive' ? archiveMonths() : [data.latest], m = months.at(-1);
   const mm = w.monthly.find(x => x.month === m);
   const prev = w.monthly.filter(x => x.month < m && x.events).slice(-2).reverse();
+  const sources = x => x.sources.filter(s => s.headline).map(s => `<div class="src">${esc(s.headline)}<small>${esc(s.office)} · ${s.date}${s.place ? ' · ' + esc(s.place) : ''} · ${fmt(s.deaths)} deaths</small></div>`).join('');
+  // Over a period of months: its deaths and events, then each of its months with events, newest first.
+  const told = w.monthly.filter(x => months.includes(x.month) && x.events).reverse(), sum = k => w.monthly.filter(x => months.includes(x.month)).reduce((s, x) => s + x[k], 0);
+  const shown = months.length > 1
+    ? `<h3>${periodName()}</h3><p>About ${fmt(sum('deaths'))} deaths in ${fmt(sum('events'))} events over the ${months.length} months.</p>${told.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>${sources(x)}`).join('')}`
+    : `<h3>${monthName(m)}</h3><p>${esc(mm.text)}</p>
+    ${sources(mm)}
+    ${prev.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>`).join('')}`;
   return `<div class="detail">
     <button class="prp-btn sm" id="back">‹ All wars</button>
     <h2>${esc(w.name)}</h2><div class="small">${esc(w.zone)} · ${esc(w.countries.join(', '))}</div>
     <p>${esc(w.summary)}</p>
     ${bars(w)}
-    <h3>${monthName(m)}</h3><p>${esc(mm.text)}</p>
-    ${mm.sources.filter(s => s.headline).map(s => `<div class="src">${esc(s.headline)}<small>${esc(s.office)} · ${s.date}${s.place ? ' · ' + esc(s.place) : ''} · ${fmt(s.deaths)} deaths</small></div>`).join('')}
-    ${prev.map(x => `<h3>${monthName(x.month)}</h3><p>${esc(x.text)}</p>`).join('')}
+    ${shown}
     ${w.background ? `<h3>Background</h3><p>${esc(w.background)}</p>` : ''}
     ${w.wiki ? `<p><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(w.wiki)}" target="_blank" rel="noreferrer">Read more on Wikipedia ↗</a></p>` : ''}
     <h3>Conflicts in this war (UCDP)</h3>
@@ -295,23 +323,28 @@ function renderSide() {
     loadStories(w);
     return;
   }
-  const m = view === 'archive' ? month : null;
-  const list = data.wars.filter(x => m ? x.monthly.find(y => y.month === m).events : x.status === 'active')
-    .sort((a, b) => m ? b.monthly.find(y => y.month === m).deaths - a.monthly.find(y => y.month === m).deaths : 0);
-  document.getElementById('sidetitle').textContent = m ? `Wars in ${monthName(m)}` : 'Extant wars and warzones';
+  // Archive: the wars with events in the month shown (or any month of the period), by their deaths then.
+  const months = view === 'archive' ? archiveMonths() : null, sum = (x, k) => x.monthly.filter(y => months.includes(y.month)).reduce((s, y) => s + y[k], 0);
+  const list = data.wars.filter(x => months ? sum(x, 'events') : x.status === 'active')
+    .sort((a, b) => months ? sum(b, 'deaths') - sum(a, 'deaths') : 0);
+  document.getElementById('sidetitle').textContent = months ? `Wars in ${periodName()}` : 'Extant wars and warzones';
   document.getElementById('sidecaption').textContent = list.length + ' groups';
-  side.innerHTML = `<div class="warlist" style="max-height:${m ? 'none' : '760px'}">${list.map(x => warRow(x, m)).join('')}</div>`;
+  side.innerHTML = `<div class="warlist" style="max-height:${months ? 'none' : '760px'}">${list.map(x => warRow(x, months)).join('')}</div>`;
   side.querySelectorAll('.warrow').forEach(b => b.onclick = () => selectWar(b.dataset.war));
 }
 
 function renderArchive() {
   const tail = document.getElementById('lefttail');
-  // Archive: the selected month's insight for every war. Live: the latest month's eight deadliest.
-  const m = view === 'archive' ? month : data.latest;
-  const list = data.wars.map(w => ({ w, mm: w.monthly.find(x => x.month === m) })).filter(x => x.mm.events).sort((a, b) => b.mm.deaths - a.mm.deaths);
-  const total = list.reduce((s, x) => s + x.mm.deaths, 0);
-  tail.innerHTML = `<section class="prp-panel" aria-labelledby="archtitle"><div class="prp-panel-head"><b id="archtitle">${view === 'archive' ? '' : 'Latest month · '}${monthName(m)}</b><span class="hint">${fmt(total)} deaths across ${list.length} wars and warzones</span></div>
-    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, mm }) => `<div class="arow"><h4><button type="button" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button><span>${fmt(mm.deaths)} deaths</span></h4><p>${esc(mm.text)}</p></div>`).join('')}</section>`;
+  // Archive: the selected month's insight for every war; over a period of months, each war's deaths in it, the insight of
+  // its latest month with events and its deaths month by month. Live: the latest month's eight deadliest.
+  const months = view === 'archive' ? archiveMonths() : [data.latest], span = months.length > 1;
+  const list = data.wars.map(w => {
+    const ms = w.monthly.filter(x => months.includes(x.month));
+    return { w, ms, deaths: ms.reduce((s, x) => s + x.deaths, 0), events: ms.reduce((s, x) => s + x.events, 0), mm: [...ms].reverse().find(x => x.events) || ms.at(-1) };
+  }).filter(x => x.events).sort((a, b) => b.deaths - a.deaths);
+  const total = list.reduce((s, x) => s + x.deaths, 0);
+  tail.innerHTML = `<section class="prp-panel" aria-labelledby="archtitle"><div class="prp-panel-head"><b id="archtitle">${view === 'archive' ? periodName() : `Latest month · ${monthName(data.latest)}`}</b><span class="hint">${fmt(total)} deaths across ${list.length} wars and warzones</span></div>
+    ${list.slice(0, view === 'archive' ? 25 : 8).map(({ w, ms, deaths, mm }) => `<div class="arow"><h4><button type="button" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button><span>${fmt(deaths)} deaths</span></h4><p>${esc(mm.text)}</p>${span ? `<div class="permonth" aria-label="Deaths month by month">${ms.map(x => `<span>${monthName(x.month, { month: 'short' })} <b>${fmt(x.deaths)}</b></span>`).join('')}</div>` : ''}</div>`).join('')}</section>`;
   tail.querySelectorAll('button[data-war]').forEach(h => h.onclick = () => selectWar(h.dataset.war));
 }
 
@@ -319,7 +352,7 @@ function selectWar(id) {
   selectedWar = id; setUrl(); renderSide(); drawMap();
   const w = data.wars.find(x => x.id === id);
   if (w) {
-    const idx = new Set(view === 'archive' ? [data.months.indexOf(month)] : data.months.slice(-3).map(m => data.months.indexOf(m)));
+    const idx = shownMonths();
     const pts = w.points.filter(p => idx.has(p[2])).map(p => [p[0], p[1]]);
     if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 5 });
     // One column (phones, narrow windows): bring the briefing into view.
@@ -327,7 +360,14 @@ function selectWar(id) {
   }
 }
 
-function setMonth(m) { month = m; document.getElementById('month').value = m; setUrl(); renderSide(); renderArchive(); drawMap(); renderCaption(); }
+// The archive's months (design/prp-period.js): ‹ ›, the end handle and a click on the track move one month as before;
+// the start handle pulled back opens a period. Hidden in the Live view, which keeps its last three months.
+const period = PRPPeriod.mount(document.getElementById('monthctl'), {
+  rest: 'end', labels: m => monthName(m), steps: true,
+  ids: { from: 'month-from', to: 'month', prev: 'prev', next: 'next' },
+  names: { from: 'First month of the period', to: 'Month shown, or the last of the period', prev: 'Previous month', next: 'Next month' },
+  onChange: p => { month = p.to; from = p.atRest ? null : p.from; setUrl(); renderSide(); renderArchive(); drawMap(); renderCaption(); },
+});
 
 function render() {
   paint();
@@ -338,11 +378,9 @@ function render() {
   document.getElementById('monthctl').hidden = view !== 'archive';
   if (view === 'archive') {
     document.getElementById('maptitle').textContent = 'Conflict map by month';
-    const sel = document.getElementById('month');
-    sel.innerHTML = data.months.map(m => `<option value="${m}">${monthName(m)}</option>`).join('');
-    sel.value = month; sel.onchange = () => setMonth(sel.value);
-    document.getElementById('prev').onclick = () => { const i = data.months.indexOf(month); if (i > 0) setMonth(data.months[i - 1]); };
-    document.getElementById('next').onclick = () => { const i = data.months.indexOf(month); if (i < data.months.length - 1) setMonth(data.months[i + 1]); };
+    // The year's months, each tick its initial; a from at or after the month shown, or not in the data, is one month.
+    const p = period.update({ stops: data.months, ticks: data.months.map(m => ({ at: m, text: monthName(m, { month: 'narrow' }), kind: 'key' })), from: PRPPeriod.rules.readStart(data.months, data.months.includes(from) ? from : null, month, 'end'), to: month });
+    month = p.to; from = p.atRest ? null : p.from;
   } else {
     document.getElementById('maptitle').textContent = `Conflict map · ${monthName(data.months.at(-3) || data.latest, { month: 'short' })}–${monthName(data.latest)}`;
   }

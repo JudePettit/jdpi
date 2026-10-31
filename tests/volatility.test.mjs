@@ -379,3 +379,80 @@ test('page: map, country page and comparison work', pageTest, async () => {
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+test('page: a period of days turns each measure into the period\'s, in the address too', pageTest, async () => {
+  const v = await (await fetch(`${BASE}/volatility/data/index.json`)).json();
+  const days = v.global.map(g => g[0]), b = days.at(-2), a = days.at(-9), before = days.at(-10);
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/volatility#day=${b}&from=${a}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows tr', { timeout: 20000 });
+    const map = { title: await page.locator('#maptitle').innerText(), label: (await page.locator('#day-lbl').textContent()).trim(), day: await page.locator('#daylabel').innerText(), movers: await page.locator('#movers-title').innerText() };
+    // One day further back with the start handle's own key: the address keeps the day shown and the new start.
+    await page.locator('#day-from').focus();
+    await page.keyboard.press('ArrowLeft');
+    const hash = await page.evaluate(() => location.hash);
+    await page.goto(`${BASE}/q/volatility#country=UKR&day=${b}&from=${a}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    const profile = await page.locator('#profile').innerText();
+    // A period ending on the latest day: the components show the period's mean percentiles without the latest day's
+    // event counts beside them, and the evidence (the latest day's) says whose it is.
+    const sub = await page.locator('#profile .ptitle .sub').innerText();
+    await page.goto(`${BASE}/q/volatility#country=UKR&from=${a}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(old => { const s = document.querySelector('#profile .ptitle .sub')?.textContent; return /^Over /.test(s || '') && s !== old; }, sub, { timeout: 20000 });
+    const latest = { counts: await page.locator('#profile .comp > small').allInnerTexts(), evidence: await page.locator('#profile .prp-panel-head b', { hasText: 'Evidence' }).innerText() };
+    assert.ok(latest.counts.length === 5 && latest.counts.every(t => t === ''), `component event counts: ${latest.counts.join(' | ')}`);
+    assert.equal(latest.evidence, 'Evidence · strongest events · latest day');
+    assert.match(map.title, /^Mean GVI · \d+(\s\w+)?–\d+ \w+ \d{4}$/);
+    assert.equal(map.label, 'Period');
+    assert.match(map.day, /^\d+(\s\w+)?–\d+ \w+ \d{4}$/);
+    assert.match(map.movers, /^Biggest movers · \d/);
+    assert.equal(hash, `#day=${b}&from=${before}`);
+    assert.match(profile, /Over \d/);
+    assert.match(profile, /mean gvi/i);
+    assert.match(profile, /Volatility over the period/i);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// A real pointer, as a reader drags: the keys and fill() above cannot see a layout that changes under the pointer
+// mid-drag, which made the start handle jump back and forth and carried the end (the day shown) along with it.
+test('page: dragging the start handle with the pointer opens a period and leaves the day shown where it was', pageTest, async () => {
+  const v = await (await fetch(`${BASE}/volatility/data/index.json`)).json();
+  const day = v.global.map(g => g[0]).at(-10);
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/volatility#day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows tr', { timeout: 20000 });
+    // The shell's return bar (design/prp-bar.js) arrives after the page loads and moves it down: the thumb is found after.
+    await page.waitForSelector('.jdpi-returnbar', { timeout: 15000 });
+    await page.evaluate(() => document.fonts.ready);
+    // The start handle's thumb, resting on the end: a thumb's centre runs from half a thumb in from each end of its input.
+    const at = await page.locator('#day-from').evaluate(e => {
+      const r = e.getBoundingClientRect(), t = parseFloat(getComputedStyle(e.closest('.prp-period')).getPropertyValue('--prp-period-thumb')) || 16;
+      return { x: r.left + t / 2 + ((+e.value - +e.min) / Math.max(1, +e.max - +e.min)) * (r.width - t), y: r.top + r.height / 2 };
+    });
+    const handles = () => page.evaluate(() => [document.querySelector('#day-from').dataset.value, document.querySelector('#day').dataset.value]);
+    const starts = [], ends = [];
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    for (let k = 1; k <= 10; k++) { // 60px back, 6px at a time
+      await page.mouse.move(at.x - 6 * k, at.y);
+      const [from, to] = await handles();
+      starts.push(from); ends.push(to);
+    }
+    await page.mouse.up();
+    const hash = await page.evaluate(() => location.hash);
+    assert.deepEqual([...new Set(ends)], [day], `the end handle stays on the day shown: ${ends.join(' ')}`);
+    assert.ok(starts.every((d, k) => d <= (k ? starts[k - 1] : day)), `the start only moves back: ${starts.join(' ')}`);
+    assert.ok(starts.at(-1) < day, `a period opened: ${starts.at(-1)}`);
+    assert.equal(hash, `#day=${day}&from=${starts.at(-1)}`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

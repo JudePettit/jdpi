@@ -147,6 +147,25 @@ badge), `.prp-status` (`data-status="live|in-build"` or `.good|.warn|.bad`), `.p
 `.prp-label`, `.prp-meta`, `.prp-prose` (serif reading text), `.prp-num`, `.prp-up`/`.prp-down`.
 Legacy `.jdpi-*` classes still work and look new.
 
+**Time sliders: the period control** (`design/prp-period.js`, styled by `.prp-period` in prp.css). Every map that moves
+through time uses it: ‹ ▶ › (optional), an optional strip of counts above, two handles on one track, the start of the
+period (hollow) and its end (filled), and labelled ticks. A page loads the script before its own and calls
+`PRPPeriod.mount(el, { stops, rest, labels, ids, play, ticks, strip, onChange })`; `period.set(from, to)` moves it from
+code (`from` null puts the start at rest) and `period.update({ stops, ticks, from, to })` swaps its data. `rest` says where
+the start sits until it is moved: `'first'` on an up-to page (the Invention Timeline, War Focus: everything up to the
+end), `'end'` on a snapshot page (one year, month or day: the start rides on the end, and ‹ ›, play, the track and the
+end handle move that one time as before). At rest a page behaves exactly as it did with one handle and writes no start to
+its address; moved, the page shows the period and adds its start after the end parameter (`&f=` in a hash, `from=` beside
+word keys). The start pushed past the end takes it along, the end pulled back past the start brings it, a click on the
+track moves the nearer handle, and play runs from the start handle. Consecutive whole-number stops (years) keep the
+inputs' values as the stops themselves, other stops as indices; each input carries `data-value`. The rules are pure
+functions in `PRPPeriod.rules`, tested in `tests/prp-period.test.mjs`. Keep the page still around it while a handle
+moves: whatever shares its row or sits above it (the year or period named beside it, header figures, a picker whose
+names change with a period) keeps one width and one number of lines at rest and in a period, by reserving the widest
+text or by giving the control a row of its own. Otherwise the first move of the start handle shrinks or drops the track
+under the pointer mid-drag, and the handles jump (the end too). Test a drag with a real pointer (`page.mouse`), not only
+with keys or `fill()`.
+
 ## 6. Data visualisation rules
 
 Colour follows the entity, never its rank; categorical colours in the fixed order; sequential = one hue light→dark;
@@ -173,6 +192,12 @@ of the text: "3.5" is read "3 point 5", "jdpi.pages.dev" "jdpi dot pages dot dev
 
 Contrast ≥4.5:1 for text (use `--prp-muted` or darker for anything readable), visible focus (`:focus-visible`), keyboard
 operable tabs and sliders, `prefers-reduced-motion` respected, form labels, `aria-live` for updating feeds.
+The period control is a labelled group of two native range inputs ("Start of the period", "End of the period" or the
+page's own names), each with an `aria-valuetext` in words ("1939", "July 1940", "29 Oct 2026"; a resting start adds "(the same
+as the end)") and the native keys (arrows, Page Up/Down, Home, End) with the same push and pull; ▶ toggles its name to
+"Pause"; focus rings use `--prp-focus` (the end's is drawn outside the ring the resting start wears); handles grow to
+22px on touch screens; in forced-colours mode the track, the period and the handles take system colours. The KPI or
+label naming the year or period sits in an `aria-live` region.
 
 ## 8. Checklist before you finish a page
 

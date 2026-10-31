@@ -20,14 +20,14 @@
       <div class="front">
         <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> War Focus</span></p>
         <h1 class="prp-title">War Focus</h1>
-        <p class="prp-dek">The major wars of the last hundred years, month by month: who held what, where the battles were, and the running death toll. Choose a war, then play it or step through the months.</p>
+        <p class="prp-dek">The major wars of the last hundred years, month by month: who held what, where the battles were, and the running death toll. Choose a war, then play it, step through the months, or set a period with the timeline’s two handles.</p>
         <p class="prp-meta" id="status">Loading wars…</p>
       </div>
       <dl class="kpis counters" aria-live="polite">
-        <div class="kpi when date"><dt>Month</dt><dd id="date">–</dd></div>
+        <div class="kpi when date"><dt id="date-label">Month</dt><dd id="date">–</dd></div>
         <div class="kpi"><dt>Deaths so far</dt><dd id="c-total">–</dd></div>
-        <div class="kpi"><dt>This month</dt><dd id="c-month">–</dd></div>
-        <div class="kpi"><dt>Battles so far</dt><dd id="c-battles">–</dd></div>
+        <div class="kpi"><dt id="c-month-label">This month</dt><dd id="c-month">–</dd></div>
+        <div class="kpi battles"><dt id="c-battles-label">Battles so far</dt><dd id="c-battles">–</dd></div>
       </dl>
     </header>
 
@@ -39,15 +39,11 @@
 
     <div class="toolbar">
       <label class="field war-field"><span class="prp-label">War</span><select id="war" class="prp-select" aria-label="Choose a war"></select></label>
-      <div class="timeline focus-timeline" aria-label="Month selector">
-        <button type="button" id="prev" class="tl-btn" aria-label="Previous month">‹</button>
-        <button type="button" id="play" class="tl-btn play" aria-label="Play month by month">▶</button>
-        <div class="slider-wrap">
-          <svg id="spark" aria-hidden="true"></svg>
-          <input type="range" id="month" min="0" max="0" step="1" value="0" aria-label="Month">
-          <div class="ticks" id="ticks" aria-hidden="true"></div>
-        </div>
-        <button type="button" id="next" class="tl-btn" aria-label="Next month">›</button>
+      <!-- The months shown (design/prp-period.js): ‹ ▶ ›, the deaths month by month above the track, and two handles.
+           The start (hollow; #month-from) rests on the war's first month, so the map shows the war up to the end
+           (filled; #month); moved, it sets a period. -->
+      <div class="focus-timeline">
+        <div id="timeline" role="group" aria-label="Months"></div>
         <select id="speed" class="prp-select" aria-label="Playback speed"><option value="900">Slow</option><option value="450" selected>Normal</option><option value="180">Fast</option></select>
       </div>
     </div>
@@ -100,7 +96,7 @@
   <footer class="sources">
     <div class="prp-sources" id="sources">
       <p><b>Sources.</b> Battle deaths: UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg &amp; Melander 2013; Davies et al. 2026), CC BY 4.0, recorded event by event; where no monthly record exists, PRIO Battle Deaths Dataset v3.1 annual totals (Lacina &amp; Gleditsch 2005) or Correlates of War war totals (Sarkees &amp; Wayman 2010), spread across months by UCDP events or recorded battles. Each war's panel names the source it uses. Battles, sieges and operations: Wikidata (CC0). Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA. Articles: Wikipedia.</p>
-      <p><b>Method.</b> States are coloured by the side they fought on that month and hatched while wholly occupied; in a civil war the contested state is shaded as a whole. Front lines are not drawn: no open data records them month by month. Months marked ~ are estimates; yearly and war totals are as published.</p>
+      <p><b>Method.</b> States are coloured by the side they fought on that month and hatched while wholly occupied; in a civil war the contested state is shaded as a whole. Front lines are not drawn: no open data records them month by month. Months marked ~ are estimates; yearly and war totals are as published. Over a period of months, states take their side in its last month and are outlined where their side or occupation changed since its first; the period's deaths are summed, its battles are those under way at some point in it, and UCDP clashes are grouped by place, sized by deaths a month.</p>
       <p><b>See also.</b> <a href="../history/index.html" id="sibling">Retrospective Battlefield</a>, every war and armed conflict from 1926 to 2025 on a world map, a sibling submodule in Retrospective Geopolitics.</p>
     </div>
   </footer>
@@ -112,6 +108,7 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="../../design/prp-focus.js"></script>
+  <script src="../../design/prp-period.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

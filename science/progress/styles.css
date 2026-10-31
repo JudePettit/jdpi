@@ -34,42 +34,10 @@ button, input, select { font: inherit; }
 .search-results li small { display: block; color: var(--prp-muted); font-size: 11.5px; }
 .search-results li:hover, .search-results li[aria-selected="true"] { background: var(--prp-surface-3); }
 
-.timeline { display: flex; align-items: center; gap: 6px; flex: 1 1 560px; min-width: 0; }
-.tl-btn { flex: none; display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; cursor: pointer;
-  border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); background: var(--prp-surface); color: var(--prp-text); font: 16px/1 var(--prp-font-ui); }
-.tl-btn:hover { background: var(--prp-surface-3); }
-.tl-btn.play { width: 36px; height: 36px; border-radius: 50%; border-color: var(--prp-primary); background: var(--prp-primary); color: var(--prp-on-primary); font-size: 12px; }
-.tl-btn.play:hover { border-color: var(--prp-primary-hover); background: var(--prp-primary-hover); }
-.tl-btn:focus-visible, .seg button:focus-visible, .lg:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 1px; }
-.slider-wrap { position: relative; flex: 1; min-width: 0; margin-left: 6px; padding: 16px 0 16px; }
-/* How many breakthroughs fall at each step: past steps in the module accent, the future in a neutral line. */
-.density { position: absolute; left: 8px; right: 8px; top: 0; width: calc(100% - 16px); height: 16px; overflow: visible; }
-.density rect.past { fill: var(--prp-accent); opacity: .75; }
-.density rect.future { fill: var(--prp-line-strong); }
-/* The period: two range inputs stacked on one drawn track. The inputs themselves take no pointer events, only their
-   thumbs do, so each handle can be dragged where the other isn't; the start handle is hollow, the end handle filled.
-   The 8px insets match half a thumb, where a native range input's thumb travels, so the track, the fill, the density
-   strip and the ticks line up. */
-.range { position: relative; height: 20px; margin: 2px 0 0; }
-.range .track { position: absolute; left: 8px; right: 8px; top: 8px; height: 4px; border-radius: 2px; background: var(--prp-line-strong); cursor: pointer; }
-.range .fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; background: var(--prp-accent); }
-.range input[type="range"] { position: absolute; inset: 0; z-index: 1; width: 100%; height: 20px; margin: 0; padding: 0; background: transparent; appearance: none; -webkit-appearance: none; pointer-events: none; }
-.range input.to { z-index: 2; }
-.range.top-from input.from { z-index: 3; } /* the handles meet: the start handle comes to the front so it can be pulled back */
-.range input[type="range"]::-webkit-slider-runnable-track { height: 20px; background: transparent; }
-.range input[type="range"]::-moz-range-track { height: 20px; background: transparent; }
-.range input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; pointer-events: auto; width: 16px; height: 16px; margin-top: 2px; border: 2px solid var(--prp-accent); border-radius: 50%; background: var(--prp-accent); box-shadow: 0 0 0 1px var(--prp-surface); cursor: grab; }
-.range input[type="range"]::-moz-range-thumb { pointer-events: auto; width: 12px; height: 12px; border: 2px solid var(--prp-accent); border-radius: 50%; background: var(--prp-accent); box-shadow: 0 0 0 1px var(--prp-surface); cursor: grab; }
-.range input.from::-webkit-slider-thumb { background: var(--prp-surface); }
-.range input.from::-moz-range-thumb { background: var(--prp-surface); }
-.range input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
-.range input[type="range"]:focus-visible { outline: none; }
-.range input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
-.range input[type="range"]:focus-visible::-moz-range-thumb { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
-.ticks { position: absolute; left: 8px; right: 8px; bottom: 0; height: 14px; color: var(--prp-muted); font: 10.5px/14px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
-.ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
-.ticks span.start { transform: translateX(-8px); }
-.ticks span.end { transform: translateX(calc(8px - 100%)); }
+/* The period: design/prp-period.js draws it, and the "Period control" section of design/prp.css styles it (‹ ▶ ›, the
+   density of breakthroughs above, two handles on one track, ticks below); here it only takes its share of the row. */
+.timeline { flex: 1 1 560px; }
+.seg button:focus-visible, .lg:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 1px; }
 .trail { display: flex; align-items: center; gap: 8px; flex: none; }
 .seg { display: inline-flex; border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); overflow: hidden; background: var(--prp-surface); }
 .seg button { height: 30px; padding: 0 11px; border: 0; background: none; color: var(--prp-text-2); font: 500 12.5px var(--prp-font-ui); cursor: pointer; white-space: nowrap; }
@@ -231,7 +199,6 @@ button, input, select { font: inherit; }
   .timeline { flex: 1 1 100%; }
   .trail { flex: 1 1 100%; }
   .trail .prp-label { display: inline; }
-  .ticks span.minor { display: none; }
   .sources { padding: 0 16px 20px; }
 }
 @media (max-width: 480px) {
@@ -239,7 +206,6 @@ button, input, select { font: inherit; }
   .kpi { padding: 7px 9px 8px; }
   .kpi dd { font-size: 18px; }
   .kpi.when dd { font-size: 19px; }
-  .ticks span:not(.start, .end, .key) { display: none; }
   .people-grid { grid-template-columns: minmax(0, 1fr); padding: 10px; }
   .ev, .ev.compact { grid-template-columns: 9px 72px minmax(0, 1fr); column-gap: 6px; }
   .ev .ev-y { font-size: 11px; }

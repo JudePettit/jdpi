@@ -19,11 +19,11 @@
       <div class="front">
         <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Retrospective Battlefield</span></p>
         <h1 class="prp-title">Retrospective Battlefield</h1>
-        <p class="prp-dek">Every war and armed conflict from 1926 to 2025, drawn on the borders of its day. Move through the years, then choose a country or a war to read its record.</p>
+        <p class="prp-dek">Every war and armed conflict from 1926 to 2025, drawn on the borders of its day. Move through the years, or set a period with the timeline’s two handles, then choose a country or a war to read its record.</p>
         <p class="prp-meta" id="status">Loading conflict history…</p>
       </div>
       <dl class="kpis" aria-live="polite">
-        <div class="kpi when"><dt>Year</dt><dd id="year-big">2025</dd></div>
+        <div class="kpi when"><dt id="year-label">Year</dt><dd id="year-big">2025</dd></div>
         <div class="kpi"><dt>Conflicts</dt><dd id="k-conflicts">–</dd></div>
         <div class="kpi"><dt>At war level</dt><dd id="k-wars">–</dd></div>
       </dl>
@@ -39,15 +39,10 @@
         <input id="search" class="prp-input" type="search" placeholder="Search a war or country…" autocomplete="off" aria-label="Search wars and countries">
         <ul id="search-results" class="search-results" role="listbox" hidden></ul>
       </div>
-      <div class="timeline" aria-label="Year selector">
-        <button type="button" id="prev" class="tl-btn" aria-label="Previous year">‹</button>
-        <button type="button" id="play" class="tl-btn play" aria-label="Play through the years">▶</button>
-        <div class="slider-wrap">
-          <input type="range" id="year" min="1926" max="2025" step="1" value="2025" aria-label="Year">
-          <div class="ticks" id="ticks" aria-hidden="true"></div>
-        </div>
-        <button type="button" id="next" class="tl-btn" aria-label="Next year">›</button>
-      </div>
+      <!-- The years shown (design/prp-period.js): ‹ ▶ ›, the conflicts under way each year, and two handles on one
+           track. The start (hollow; #from) rests on the end (filled; #year), so one year is shown; drag the start back
+           to see a period. -->
+      <div class="timeline" id="timeline" role="group" aria-label="Year or period"></div>
     </div>
 
     <main class="work">
@@ -90,7 +85,7 @@
   <footer class="sources">
     <div class="prp-sources">
       <p><b>Sources.</b> 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (Uppsala Conflict Data Program and PRIO; Davies, Pettersson &amp; Öberg 2026; Gleditsch et al. 2002), CC BY 4.0. 1926–1945: Correlates of War Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees &amp; Wayman 2010). Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA, as they stood on 1 July of each year. Articles: Wikipedia.</p>
-      <p><b>Method.</b> A country is shaded red when a conflict with 1,000 or more battle deaths that year was fought on its territory, amber for 25–999 deaths, and violet when its forces fought only abroad. Before 1946 the Correlates of War lists only wars with 1,000+ battle deaths, so smaller conflicts are missing. Battle-death totals are as published by each dataset.</p>
+      <p><b>Method.</b> A country is shaded red when a conflict with 1,000 or more battle deaths that year was fought on its territory, amber for 25–999 deaths, and violet when its forces fought only abroad. Over a period of years, each country takes the most intense of its years and is drawn on the borders of the period’s last year; the lists include every conflict active in at least one year of the period. Before 1946 the Correlates of War lists only wars with 1,000+ battle deaths, so smaller conflicts are missing. Battle-death totals are as published by each dataset.</p>
       <p><b>See also.</b> <a href="../focus/index.html" id="sibling">War Focus</a>, the major wars of the last hundred years month by month, a sibling submodule in Retrospective Geopolitics.</p>
     </div>
   </footer>
@@ -102,6 +97,7 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="../../design/prp-focus.js"></script>
+  <script src="../../design/prp-period.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

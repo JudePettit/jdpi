@@ -80,7 +80,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "q/volatility.html",
-          "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT. Compare up to four countries."
+          "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT, for one day or a period of days. Compare up to four countries."
         },
         {
           "id": "battlefield",
@@ -90,7 +90,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "q/battlefield.html?view=live",
-          "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive and related coverage. UCDP data, refreshed monthly.",
+          "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive (one month or a period of months) and related coverage. UCDP data, refreshed monthly.",
           "views": [
             {
               "id": "live",
@@ -176,7 +176,7 @@
           "status": "live",
           "host": "Cloudflare Pages",
           "url": "https://hp-retrospective.pages.dev",
-          "description": "Move a slider from 1926 to today: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
+          "description": "Move through the years from 1926 to today, or set a period of years with the timeline's two handles: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
         },
         {
           "id": "battlefield-history",
@@ -186,7 +186,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "battlefield/history/index.html",
-          "description": "Move a slider from 1926 to 2025 to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
+          "description": "Move through the years from 1926 to 2025, or set a period of years with the timeline's two handles, to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
           "aliases": [
             "world-map"
           ]
@@ -199,7 +199,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "battlefield/focus/index.html",
-          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a slider, battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
+          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a timeline of months (one month, or a period with its two handles), battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
         },
         {
           "id": "kardashev",
@@ -209,7 +209,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "kardashev/index.html",
-          "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century."
+          "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century, or the two ends of a period compared."
         },
         {
           "id": "historical-calendar",
@@ -590,7 +590,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "science/progress/index.html",
-          "description": "Move a slider through history to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
+          "description": "Move through history, or set a period with the timeline's two handles, to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
         }
       ]
     },

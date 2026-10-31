@@ -23,8 +23,14 @@ button,input,select{font:inherit}button{cursor:pointer}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px}
 .field{display:inline-flex;align-items:center;gap:8px;min-width:0}
 .field .prp-select{max-width:100%}
-input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
-.daylabel{min-width:84px;color:var(--prp-text);font:500 12.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+/* The days shown: design/prp-period.js draws two handles on one track (styled by design/prp.css), one day or a period.
+   The control has a row of its own at every width, under its label and the day or period it names, so its track is
+   as wide as the toolbar whatever the text beside it says: when the start handle opens a period, "Day 2026-10-29"
+   becomes "Period 26 Sep – 29 Oct 2026" and the measure picker's names change width, and a track sharing their row
+   would shrink under the pointer mid-drag, so the handles jumped and the day shown moved. */
+.field.days{flex:1 1 100%;flex-wrap:wrap}
+#days{order:3;flex:1 1 100%;min-width:140px}
+.daylabel{min-width:84px;color:var(--prp-text);font:500 12.5px var(--prp-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .cols{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
 .prp-panel-head .tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .prp-panel-head .tools .prp-input{width:180px}.prp-panel-head .tools .prp-select{max-width:200px}
@@ -100,7 +106,7 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
 
 @media(max-width:980px){.cols{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:700px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}
-  .toolbar .field{flex-wrap:wrap}.toolbar .field .prp-select{width:100%}input[type=range]{width:150px}
+  .toolbar .field{flex-wrap:wrap}.toolbar .field .prp-select{width:100%}
   .prp-panel-head .tools .prp-input{width:100%}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpis .prp-kpi{padding:10px 12px}.comp{grid-template-columns:minmax(0,118px) minmax(0,1fr) 30px}.comp small{display:none}.ramp{width:210px}}
 @media(prefers-reduced-motion:reduce){.land{transition:none}}
 </style>
@@ -124,7 +130,9 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
   <section id="tab-map" class="stack" role="tabpanel" aria-labelledby="tabbtn-map">
     <div class="toolbar" role="group" aria-label="Map settings">
       <label class="field"><span class="prp-label">Colour by</span><select class="prp-select" id="metric"></select></label>
-      <label class="field"><span class="prp-label">Day</span><input type="range" id="day"><output class="daylabel" id="daylabel" for="day"></output></label>
+      <!-- The days shown (design/prp-period.js): two handles on one track. The start (hollow; #day-from) rests on the end
+           (filled; #day), so one day is shown; drag it back for a period, and every measure becomes the period's. -->
+      <div class="field days"><span class="prp-label" id="day-lbl">Day</span><div id="days" aria-labelledby="day-lbl"></div><output class="daylabel" id="daylabel" for="day-from day"></output></div>
     </div>
     <div class="prp-panel">
       <div class="prp-panel-head"><b id="maptitle">GVI score</b></div>
@@ -138,10 +146,10 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
       <div class="prp-panel">
         <div class="prp-panel-head"><b>Ranking</b><span class="tools"><input class="prp-input" type="search" id="search" placeholder="Search countries…" aria-label="Search countries"><select class="prp-select" id="region" aria-label="Region"><option value="">All regions</option></select><label class="check"><input type="checkbox" id="scoredOnly" checked> Scored only</label></span></div>
         <div class="tbl"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
-        <p class="note">Tick up to four countries to compare them. Countries without a score had too few events or sources that day; their event counts and tone are still shown.</p>
+        <p class="note" id="rank-note">Tick up to four countries to compare them. Countries without a score had too few events or sources that day; their event counts and tone are still shown.</p>
       </div>
       <div class="stack">
-        <div class="prp-panel movers"><div class="prp-panel-head"><b>Biggest movers · 7 days</b></div><div id="movers"></div></div>
+        <div class="prp-panel movers"><div class="prp-panel-head"><b id="movers-title">Biggest movers · 7 days</b></div><div id="movers"></div></div>
         <div class="prp-panel"><div class="prp-panel-head"><b>Global activity</b></div>
           <figure class="prp-figure chartfig"><div class="chart" id="globalchart"></div>
             <figcaption><b>Figure 2.</b> Worldwide, the evidence-weighted mean GVI (top) and the number of located events per day (bottom). Source: GDELT 2.0.</figcaption>
@@ -164,11 +172,17 @@ input[type=range]{width:240px;margin:0;accent-color:var(--prp-accent)}
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="../design/prp-focus.js"></script>
+<script src="../design/prp-period.js"></script>
 <script>
 // Geopolitical Volatility (rebuilt from the Lovable app). Data: ../volatility/data/index.json, built daily by
 // volatility/scripts/ingest.mjs from GDELT 2.0. Country metadata, political stability and active wars come from
 // National Analysis (../national/data/index.json), which draws on Realtime Battlefield.
 // Every colour comes from the PRP tokens: read at draw time, and again on the 'prp:themechange' event.
+// The days shown follow the timeline (design/prp-period.js): its start rests on the end, so one day is shown, as before;
+// pulled back, it opens a period of days, and every measure becomes the period's (mean GVI, its change, volatility,
+// peak, events summed, components averaged); the latest day's own measures (articles, sources, evidence) only while the
+// period ends on the latest day. URL: #country=ISO3 | #tab=compare|method, &compare=A,B, &day=<day shown, unless the
+// latest>, &from=<a period's first day>.
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const SHELL = new URL('../', location.href).href;
@@ -176,7 +190,8 @@ const embedded = (() => { try { return window.self !== window.top; } catch { ret
 const go = (suite, module, url) => embedded ? { href: `${SHELL}#/${suite}/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}`, target: '_top' } : { href: new URL(url, SHELL).href, target: '_blank' };
 const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="prp-btn sm" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 const CAT_LABEL = { conflict: 'Conflict', political: 'Political', unrest: 'Unrest', economic: 'Economic', spread: 'Cross-border' };
-let V, N = new Map(), DAYS = [], C = [], byIso = new Map(), numToIso = new Map(), METRICS, dayIdx, compare = [], selected = null, sortKey = 'metric', sortDir = -1;
+// dayIdx: the day shown (the end of the period); fromIdx: a period's first day (the same day while the start rests).
+let V, N = new Map(), DAYS = [], C = [], byIso = new Map(), numToIso = new Map(), METRICS, dayIdx, fromIdx, compare = [], selected = null, sortKey = 'metric', sortDir = -1;
 
 /* ---------- colours (PRP tokens) ---------- */
 let PAL = {};
@@ -212,7 +227,46 @@ const mean = a => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 const sd = a => { if (a.length < 3) return null; const m = mean(a); return Math.sqrt(mean(a.map(x => (x - m) ** 2))); };
 const bandOf = s => (s == null ? 'none' : s >= 70 ? 'high' : s >= 40 ? 'elevated' : 'normal');
 function rowsUpTo(c, i) { const d = DAYS[i]; return c.days.filter(r => r[0] <= d); }
-function derive(i) {
+// One day, or a period of days, and its name: the day as before ("2026-10-29"), a period in words ("22–29 Oct 2026").
+const per = () => fromIdx !== dayIdx;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dayText = d => { const [y, m, dd] = d.split('-'); return `${+dd} ${MONTHS[m - 1]} ${y}`; };
+function spanText(a, b) {
+  const [ya, ma, da] = a.split('-'), [yb, mb, db] = b.split('-');
+  if (ya !== yb) return `${dayText(a)} – ${dayText(b)}`;
+  return ma !== mb ? `${+da} ${MONTHS[ma - 1]} – ${dayText(b)}` : `${+da}–${dayText(b)}`;
+}
+const when = () => (per() ? spanText(DAYS[fromIdx], DAYS[dayIdx]) : DAYS[dayIdx]);
+const onWhen = () => (per() ? `over ${when()}` : `on ${DAYS[dayIdx]}`);
+const rank = (key, getter) => { const l = C.filter(c => getter(c) != null).sort((a, b) => getter(b) - getter(a)); l.forEach((c, k) => { c.cur[key] = k + 1; }); };
+// The measures behind the map, the ranking, the movers, a country's page and the comparison: of one day (a === b) or
+// of the period a..b (day indices).
+function derive(a, b) {
+  if (a === b) return deriveDay(b);
+  const da = DAYS[a], db = DAYS[b], n = b - a + 1;
+  // The change over a period: the mean of its last week minus its first week's (its halves when shorter than two weeks).
+  const wk = n >= 14 ? 7 : Math.max(1, Math.floor(n / 2)), lastFrom = DAYS[b - wk + 1], firstTo = DAYS[a + wk - 1], d7 = DAYS[Math.max(0, b - 7)];
+  for (const c of C) {
+    const rows = c.days.filter(r => r[0] >= da && r[0] <= db), scored = rows.filter(r => r[1] != null), vals = scored.map(r => r[1]);
+    const events = rows.reduce((s, r) => s + (r[3] || 0), 0), toned = rows.filter(r => r[4] != null && r[3] > 0), toneN = toned.reduce((s, r) => s + r[3], 0);
+    const last = scored.filter(r => r[0] >= lastFrom).map(r => r[1]), first = scored.filter(r => r[0] <= firstTo).map(r => r[1]);
+    const week = c.days.filter(r => r[0] > d7 && r[0] <= db && r[1] != null).map(r => r[1]);
+    c.cur = {
+      score: mean(vals), comps: scored.length ? V.components.map((_, j) => mean(scored.map(r => r[2]?.[j]).filter(v => v != null))) : null,
+      events, tone: toneN ? toned.reduce((s, r) => s + r[4] * r[3], 0) / toneN : null, cov: null, days: n,
+      avg7: mean(week), change7: last.length && first.length ? mean(last) - mean(first) : null,
+      vol30: sd(vals), peak30: vals.length ? Math.max(...vals) : null, daysScored30: vals.length,
+      events7: events / n, high30: vals.filter(v => v >= 70).length,
+    };
+  }
+  rank('rank', c => c.cur.score);
+  rank('rank7', c => c.cur.avg7);
+  // Rank on the period's last day against its first.
+  const dayRanks = d => new Map(C.map(c => [c, c.days.find(r => r[0] === d)?.[1] ?? null]).filter(x => x[1] != null).sort((x, y) => y[1] - x[1]).map(([c], k) => [c, k + 1]));
+  const ra = dayRanks(da), rb = dayRanks(db);
+  for (const c of C) { c.cur.rankPrev = ra.get(c) ?? null; c.cur.rankEnd = rb.get(c) ?? null; c.cur.rankChange = c.cur.rankPrev && c.cur.rankEnd ? c.cur.rankPrev - c.cur.rankEnd : null; }
+}
+function deriveDay(i) {
   const d = DAYS[i], d7 = DAYS[Math.max(0, i - 7)];
   for (const c of C) {
     const rows = rowsUpTo(c, i), row = rows.at(-1)?.[0] === d ? rows.at(-1) : null;
@@ -227,7 +281,6 @@ function derive(i) {
       high30: last30.filter(r => r[1] >= 70).length,
     };
   }
-  const rank = (key, getter) => { const l = C.filter(c => getter(c) != null).sort((a, b) => getter(b) - getter(a)); l.forEach((c, k) => { c.cur[key] = k + 1; }); };
   rank('rank', c => c.cur.score);
   rank('rank7', c => c.cur.avg7);
   // Rank a week ago, for rank change.
@@ -241,27 +294,32 @@ const warDeaths = c => (nat(c).conflict?.active2026 || []).reduce((s, w) => s + 
 const isLatest = () => dayIdx === DAYS.length - 1;
 const lat = c => (isLatest() ? c.latest : null);
 
+// The measures; `span` names a measure over a period (the label is the day's until a period is set, then the span's).
 function metricList() {
   const f1 = v => (v == null ? '–' : v.toFixed(1)), sgn = v => (v == null ? '–' : (v > 0 ? '+' : '') + v.toFixed(1)), int = v => (v == null ? '–' : Math.round(v).toLocaleString('en-GB'));
-  return [
-    { id: 'score', label: 'GVI score', get: c => c.cur.score, fmt: f1, group: 'Index', scale: 'gvi' },
-    { id: 'avg7', label: '7-day average', get: c => c.cur.avg7, fmt: f1, group: 'Index', scale: 'gvi' },
-    { id: 'change7', label: '7-day change', get: c => c.cur.change7, fmt: sgn, group: 'Index', scale: 'div' },
-    { id: 'vol30', label: '30-day volatility (std. dev.)', get: c => c.cur.vol30, fmt: f1, group: 'Index' },
-    { id: 'peak30', label: '30-day peak', get: c => c.cur.peak30, fmt: f1, group: 'Index', scale: 'gvi' },
-    { id: 'high30', label: 'High-band days (30 days)', get: c => c.cur.high30, fmt: int, group: 'Index' },
-    { id: 'rankChange', label: 'Rank change vs a week ago', get: c => c.cur.rankChange, fmt: v => (v == null ? '–' : v > 0 ? '▲' + v : v < 0 ? '▼' + -v : '0'), group: 'Index', scale: 'div' },
-    ...V.components.map((k, j) => ({ id: 'c_' + k.key, label: `${k.label} (${Math.round(k.weight * 100)}%)`, get: c => c.cur.comps?.[j] ?? null, fmt: f1, group: 'Components', scale: 'gvi' })),
-    { id: 'events', label: 'Events that day', get: c => c.cur.events || null, fmt: int, group: 'Activity', log: true },
-    { id: 'events7', label: 'Events, last 7 days', get: c => c.cur.events7 || null, fmt: int, group: 'Activity', log: true },
-    { id: 'tone', label: 'Average Goldstein (−10 hostile … +10 cooperative)', get: c => c.cur.tone, fmt: v => (v == null ? '–' : v.toFixed(2)), group: 'Activity', scale: 'tone' },
+  const list = [
+    { id: 'score', label: 'GVI score', span: 'Mean GVI', get: c => c.cur.score, fmt: f1, group: 'Index', scale: 'gvi' },
+    { id: 'avg7', label: '7-day average', span: '7-day average to the last day', get: c => c.cur.avg7, fmt: f1, group: 'Index', scale: 'gvi' },
+    { id: 'change7', label: '7-day change', span: 'Change over the period (last week vs first)', get: c => c.cur.change7, fmt: sgn, group: 'Index', scale: 'div' },
+    { id: 'vol30', label: '30-day volatility (std. dev.)', span: 'Volatility over the period (std. dev.)', get: c => c.cur.vol30, fmt: f1, group: 'Index' },
+    { id: 'peak30', label: '30-day peak', span: 'Peak over the period', get: c => c.cur.peak30, fmt: f1, group: 'Index', scale: 'gvi' },
+    { id: 'high30', label: 'High-band days (30 days)', span: 'High-band days in the period', get: c => c.cur.high30, fmt: int, group: 'Index' },
+    { id: 'rankChange', label: 'Rank change vs a week ago', span: 'Rank change over the period', get: c => c.cur.rankChange, fmt: v => (v == null ? '–' : v > 0 ? '▲' + v : v < 0 ? '▼' + -v : '0'), group: 'Index', scale: 'div' },
+    ...V.components.map((k, j) => ({ id: 'c_' + k.key, label: `${k.label} (${Math.round(k.weight * 100)}%)`, span: `${k.label} (${Math.round(k.weight * 100)}%), mean`, get: c => c.cur.comps?.[j] ?? null, fmt: f1, group: 'Components', scale: 'gvi' })),
+    { id: 'events', label: 'Events that day', span: 'Events in the period', get: c => c.cur.events || null, fmt: int, group: 'Activity', log: true },
+    { id: 'events7', label: 'Events, last 7 days', span: 'Events a day, on average', get: c => c.cur.events7 || null, fmt: int, group: 'Activity', log: true },
+    { id: 'tone', label: 'Average Goldstein (−10 hostile … +10 cooperative)', span: 'Average Goldstein over the period (−10 … +10)', get: c => c.cur.tone, fmt: v => (v == null ? '–' : v.toFixed(2)), group: 'Activity', scale: 'tone' },
     { id: 'articles', label: 'Articles (latest day)', get: c => lat(c)?.articles ?? null, fmt: int, group: 'Activity', log: true },
     { id: 'sources', label: 'Distinct news sources (latest day)', get: c => lat(c)?.sources ?? null, fmt: int, group: 'Activity', log: true },
     { id: 'share', label: 'Share of world events (latest day)', get: c => lat(c)?.share ?? null, fmt: v => (v == null ? '–' : (v * 100).toFixed(2) + '%'), group: 'Activity', log: true },
     { id: 'pv', label: 'Political stability (World Bank, −2.5…2.5)', get: pv, fmt: v => (v == null ? '–' : v.toFixed(2)), group: 'Context', scale: 'tone', src: 'World Bank Worldwide Governance Indicators, via National Analysis' },
     { id: 'war', label: 'Battle deaths in active wars, 2026', get: c => warDeaths(c) || null, fmt: int, group: 'Context', log: true, src: 'UCDP, via Realtime Battlefield' },
   ];
+  for (const m of list) if (m.span) { const day = m.label; Object.defineProperty(m, 'label', { get: () => (per() ? m.span : day), enumerable: true }); }
+  return list;
 }
+// The measure picker's names follow the day or the period.
+function relabel() { for (const o of $('#metric').options) o.textContent = METRICS.find(m => m.id === o.value).label; }
 const gviColour = v => (v == null ? 'transparent' : PAL.gvi(v));
 // A colour function for the metric's values; also the domain its legend shows.
 function scaleFor(m, vals) {
@@ -329,22 +387,25 @@ function colourMap() {
     .classed('sel', f => compare.includes(numToIso.get(f.id)));
   mapG.selectAll('.land.sel').raise();
   mapG.selectAll('.land.prp-focus-hit').raise();
-  $('#maptitle').textContent = `${m.label} · ${DAYS[dayIdx]}`;
+  $('#maptitle').textContent = `${m.label} · ${when()}`;
   // Legend: a colour bar over the scale's domain, plus the two kinds of missing data.
   const at = p => (lo == null ? null : log ? lo * (hi / lo) ** p : lo + (hi - lo) * p);
   const stops = d3.range(0, 1.0001, 0.05).map(p => { const v = at(p); return `${v == null ? 'transparent' : s(v)} ${Math.round(p * 100)}%`; }).join(',');
   const ticks = m.scale === 'gvi' ? [[0, '0'], [40, '40 elevated'], [70, '70 high'], [100, '100']] : lo == null ? [] : mid ? [[0, m.fmt(lo)], [50, '0'], [100, m.fmt(hi)]] : [[0, m.fmt(lo)], [100, m.fmt(hi)]];
   $('#legend').innerHTML = `<span class="ramp"><i style="background:linear-gradient(90deg,${stops})"></i>${ticks.map(([p, l], k) => `<b class="${k === 0 ? 'first' : k === ticks.length - 1 ? 'last' : ''}" style="left:${p}%">${esc(l)}</b>`).join('')}</span>` +
-    '<span><i class="sw hatch" aria-hidden="true"></i>not scored that day</span><span><i class="sw nodata" aria-hidden="true"></i>no data</span>';
-  const what = m.scale === 'gvi' ? '; 40 and above is elevated, 70 and above high' : m.scale === 'div' ? '; red is more volatile than a week before, blue calmer' : m.scale === 'tone' ? '; red is more hostile or less stable, blue more cooperative or stable' : m.log ? ' (log scale)' : '';
-  $('#mapcap').innerHTML = `<b>Figure 1.</b> ${esc(m.label)} by country on ${esc(DAYS[dayIdx])}${what}. Hatched countries had too few events or sources to be scored. Source: ${esc(m.src || 'GDELT 2.0, scored by Vitruvian Manager')}.`;
+    `<span><i class="sw hatch" aria-hidden="true"></i>not scored ${per() ? 'in the period' : 'that day'}</span><span><i class="sw nodata" aria-hidden="true"></i>no data</span>`;
+  const what = m.scale === 'gvi' ? '; 40 and above is elevated, 70 and above high' : m.scale === 'div' ? (per() ? '; red is more volatile at the end of the period than at its start, blue calmer' : '; red is more volatile than a week before, blue calmer') : m.scale === 'tone' ? '; red is more hostile or less stable, blue more cooperative or stable' : m.log ? ' (log scale)' : '';
+  $('#mapcap').innerHTML = `<b>Figure 1.</b> ${esc(m.label)} by country ${esc(onWhen())}${what}. Hatched countries had too few events or sources to be scored${per() ? ' on any day of the period' : ''}. Source: ${esc(m.src || 'GDELT 2.0, scored by Vitruvian Manager')}.`;
 }
 
 /* ---------- ranking ---------- */
 function renderTable() {
   const m = cur(), q = $('#search').value.toLowerCase(), reg = $('#region').value, only = $('#scoredOnly').checked;
-  const cols = [['rank', '#', 'num'], ['name', 'Country', ''], ['metric', m.label, 'num'], ['band', 'Band', ''], ['change7', '7d Δ', 'num'], ['rankChange', 'Rank Δ', 'num'], ['events', 'Events', 'num']];
-  if (m.id === 'score') cols.splice(2, 1, ['metric', 'GVI', 'num']);
+  const cols = [['rank', '#', 'num'], ['name', 'Country', ''], ['metric', m.label, 'num'], ['band', 'Band', ''], ['change7', per() ? 'Δ' : '7d Δ', 'num'], ['rankChange', 'Rank Δ', 'num'], ['events', 'Events', 'num']];
+  if (m.id === 'score') cols.splice(2, 1, ['metric', per() ? 'Mean GVI' : 'GVI', 'num']);
+  $('#rank-note').textContent = per()
+    ? `Tick up to four countries to compare them. Over ${when()}: the mean of the days scored, the change from the first week to the last (Δ), the rank on the last day against the first (Rank Δ) and all the events. Countries scored on no day of the period are left out unless “Scored only” is cleared.`
+    : 'Tick up to four countries to compare them. Countries without a score had too few events or sources that day; their event counts and tone are still shown.';
   $('#thead').innerHTML = '<th title="Tick up to four countries to compare them">Cmp</th>' + cols.map(([k, l, cl]) => `<th class="${cl}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}${sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : ''}</button></th>`).join('');
   const val = (c, k) => ({ rank: c.cur.rank ? -c.cur.rank : null, name: c.name, metric: m.get(c), band: c.cur.score, change7: c.cur.change7, rankChange: c.cur.rankChange, events: c.cur.events })[k];
   const list = C.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || nat(c).region === reg) && (!only || c.cur.score != null))
@@ -358,11 +419,14 @@ function renderTable() {
   $('#thead').querySelectorAll('[data-sort]').forEach(th => th.onclick = () => { const k = th.dataset.sort; sortDir = sortKey === k ? -sortDir : k === 'name' ? 1 : -1; sortKey = k; renderTable(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
+// The biggest changes: over the last week against the one before, or over a period, its last week against its first.
 function renderMovers() {
-  const l = C.filter(c => c.cur.change7 != null).sort((a, b) => b.cur.change7 - a.cur.change7);
-  const row = c => `<tr><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${c.cur.avg7.toFixed(1)}</td><td class="num ${c.cur.change7 > 0 ? 'up' : 'down'}">${c.cur.change7 > 0 ? '▲ +' : '▼ '}${c.cur.change7.toFixed(1)}</td></tr>`;
-  $('#movers').innerHTML = l.length ? `<table class="prp-table"><thead><tr><th>Rising</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(0, 6).map(row).join('')}</tbody></table>
-    <table class="prp-table"><thead><tr><th>Easing</th><th class="num">7d avg</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : '<div class="prp-empty">Needs two weeks of scores.</div>';
+  const p = per(), avg = c => (p ? c.cur.score : c.cur.avg7), head = p ? 'Mean' : '7d avg';
+  $('#movers-title').textContent = `Biggest movers · ${p ? when() : '7 days'}`;
+  const l = C.filter(c => c.cur.change7 != null && avg(c) != null).sort((a, b) => b.cur.change7 - a.cur.change7);
+  const row = c => `<tr><td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="num">${avg(c).toFixed(1)}</td><td class="num ${c.cur.change7 > 0 ? 'up' : 'down'}">${c.cur.change7 > 0 ? '▲ +' : '▼ '}${c.cur.change7.toFixed(1)}</td></tr>`;
+  $('#movers').innerHTML = l.length ? `<table class="prp-table"><thead><tr><th>Rising</th><th class="num">${head}</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(0, 6).map(row).join('')}</tbody></table>
+    <table class="prp-table"><thead><tr><th>Easing</th><th class="num">${head}</th><th class="num">Δ</th></tr></thead><tbody>${l.slice(-6).reverse().map(row).join('')}</tbody></table>` : `<div class="prp-empty">${p ? 'Needs scores in the first and last days of the period.' : 'Needs two weeks of scores.'}</div>`;
 }
 // Two small panels on one time axis (no dual axis): mean GVI above, located events below.
 function renderGlobal() {
@@ -394,7 +458,8 @@ function lineChart(lines, { w = 640, h = 220, yMax = 100, bands = true } = {}) {
   const svg = d3.create('svg').attr('viewBox', `0 0 ${w} ${h}`);
   if (bands) { svg.append('rect').attr('x', m.l).attr('width', w - m.l - m.r).attr('y', y(100)).attr('height', y(70) - y(100)).style('fill', 'var(--prp-bad-soft)'); svg.append('rect').attr('x', m.l).attr('width', w - m.l - m.r).attr('y', y(70)).attr('height', y(40) - y(70)).style('fill', 'var(--prp-warn-soft)'); }
   svg.append('g').attr('class', 'gridl').selectAll('line').data(y.ticks(5)).join('line').attr('x1', m.l).attr('x2', w - m.r).attr('y1', y).attr('y2', y);
-  svg.append('line').attr('x1', x(new Date(DAYS[dayIdx]))).attr('x2', x(new Date(DAYS[dayIdx]))).attr('y1', m.t).attr('y2', h - m.b).attr('stroke-dasharray', '3 3').style('stroke', 'var(--prp-faint)');
+  // The day shown, dashed; over a period, its first and last days.
+  for (const k of per() ? [fromIdx, dayIdx] : [dayIdx]) svg.append('line').attr('x1', x(new Date(DAYS[k]))).attr('x2', x(new Date(DAYS[k]))).attr('y1', m.t).attr('y2', h - m.b).attr('stroke-dasharray', '3 3').style('stroke', 'var(--prp-faint)');
   for (const l of lines) {
     svg.append('path').datum(l.points).attr('fill', 'none').attr('stroke-width', l.width || 1.75).attr('stroke-linejoin', 'round').style('stroke', l.colour).attr('d', d3.line().defined(p => p[1] != null).x(p => x(new Date(p[0]))).y(p => y(p[1])));
     if (l.dots !== false) svg.append('g').selectAll('circle').data(l.points.filter(p => p[1] != null)).join('circle').attr('cx', p => x(new Date(p[0]))).attr('cy', p => y(p[1])).attr('r', 2.2).style('fill', l.colour);
@@ -422,7 +487,21 @@ function renderProfile() {
   const c = byIso.get(selected); if (!c) return;
   const n = nat(c), L = lat(c), k = c.cur, comps = V.components;
   const fmtN = v => (v == null ? '–' : Math.round(v).toLocaleString('en-GB'));
-  const stats = [
+  // Over a period: the period's mean, change, spread, events and tone; the latest day's own measures only while it ends
+  // on the latest day.
+  const stats = per() ? [
+    ['Mean GVI', k.score == null ? '–' : k.score.toFixed(1), `<span class="band ${bandOf(k.score)}">${bandOf(k.score) === 'none' ? 'not scored' : bandOf(k.score)}</span>${k.rank ? ` · rank ${k.rank} of ${C.filter(x => x.cur.score != null).length}` : ''}`],
+    ['Change over the period', k.change7 == null ? '–' : `${k.change7 > 0 ? '+' : ''}${k.change7.toFixed(1)}`, 'last week vs first'],
+    ['Volatility over the period', k.vol30 == null ? '–' : k.vol30.toFixed(1), `peak ${k.peak30 == null ? '–' : k.peak30.toFixed(1)} · ${k.high30} high-band days`],
+    ['Events', fmtN(k.events), `${fmtN(k.events7)} a day`],
+    ['Articles', fmtN(L?.articles), L ? `${fmtN(L.sources)} distinct sources, latest day` : 'latest day only'],
+    ['Average Goldstein', k.tone == null ? '–' : k.tone.toFixed(2), 'weighted by events · −10 … +10'],
+    ['Coverage', `${k.daysScored30} of ${k.days} days`, 'scored in the period'],
+    ['Share of world events', L ? (L.share * 100).toFixed(2) + '%' : '–', 'latest day'],
+    ['Rank', k.rankEnd ? String(k.rankEnd) : '–', k.rankPrev ? `${k.rankPrev} on ${esc(DAYS[fromIdx])}` : `not scored on ${esc(DAYS[fromIdx])}`],
+    ['Political stability', pv(c) == null ? '–' : pv(c).toFixed(2), 'World Bank WGI, −2.5…2.5'],
+    ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.conflict?.active2026 || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
+  ] : [
     ['GVI score', k.score == null ? '–' : k.score.toFixed(1), `<span class="band ${bandOf(k.score)}">${bandOf(k.score) === 'none' ? 'not scored' : bandOf(k.score)}</span>${k.rank ? ` · rank ${k.rank} of ${C.filter(x => x.cur.score != null).length}` : ''}`],
     ['7-day average', k.avg7 == null ? '–' : k.avg7.toFixed(1), k.change7 == null ? '' : `${k.change7 > 0 ? '+' : ''}${k.change7.toFixed(1)} vs prior week`],
     ['30-day volatility', k.vol30 == null ? '–' : k.vol30.toFixed(1), `peak ${k.peak30 == null ? '–' : k.peak30.toFixed(1)} · ${k.high30} high-band days`],
@@ -434,23 +513,25 @@ function renderProfile() {
     ['Political stability', pv(c) == null ? '–' : pv(c).toFixed(2), 'World Bank WGI, −2.5…2.5'],
     ['Battle deaths, 2026', warDeaths(c) ? fmtN(warDeaths(c)) : '0', esc((n.conflict?.active2026 || []).map(w => w.name).join(', ')) || 'none recorded in 2026'],
   ];
-  const compRows = comps.map((m, j) => { const v = k.comps?.[j]; const cnt = L?.counts?.[m.key]; return `<div class="comp"><span>${esc(m.label)} <small>${Math.round(m.weight * 100)}%</small></span><div class="track"><div class="fill" style="width:${v || 0}%;background:${gviColour(v)}"></div></div><b>${v == null ? '–' : v.toFixed(0)}</b><small>${cnt == null ? '' : cnt + ' events'}</small></div>`; }).join('');
+  // A component's events are counted for the latest day only, so a period's mean percentile stands alone; the evidence
+  // (the latest day's too) says so in its heading.
+  const compRows = comps.map((m, j) => { const v = k.comps?.[j]; const cnt = per() ? null : L?.counts?.[m.key]; return `<div class="comp"><span>${esc(m.label)} <small>${Math.round(m.weight * 100)}%</small></span><div class="track"><div class="fill" style="width:${v || 0}%;background:${gviColour(v)}"></div></div><b>${v == null ? '–' : v.toFixed(0)}</b><small>${cnt == null ? '' : cnt + ' events'}</small></div>`; }).join('');
   const ev = (L?.evidence || []).map(e => `<div class="ev"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 120))}</a><small>${esc(CAT_LABEL[e.cat] || 'Other')} · CAMEO ${esc(e.code)} · Goldstein ${e.g} · ${e.a} articles${e.a1 || e.a2 ? ` · ${esc([e.a1, e.a2].filter(Boolean).join(' → '))}` : ''}${e.loc ? ` · ${esc(e.loc)}` : ''}</small></div>`).join('');
   const links = [link('rt', 'pestle', `q/national.html#country=${c.iso3}`, 'National Analysis ↗'), link('rt', 'headlines', `q/headlines.html`, 'Global Headline Tracker ↗')];
   if (n.conflict?.active2026?.length) links.push(link('rt', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
   if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#/e/${n.qid}`, 'Encyclopaedia ↗'));
   const inCmp = compare.includes(c.iso3);
   const days = [...c.days].reverse();
-  $('#profile').innerHTML = `<div class="prp-panel"><div class="ptitle"><div><div class="prp-label">${esc(n.region || 'Country')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(DAYS[dayIdx])}${n.government ? ' · ' + esc(n.government) : ''}</div></div>
+  $('#profile').innerHTML = `<div class="prp-panel"><div class="ptitle"><div><div class="prp-label">${esc(n.region || 'Country')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(per() ? `Over ${when()}` : DAYS[dayIdx])}${n.government ? ' · ' + esc(n.government) : ''}</div></div>
       <div class="links">${links.join('')}<button type="button" class="prp-btn sm ${inCmp ? '' : 'primary'}" id="addcmp">${inCmp ? '✓ In comparison' : '+ Compare'}</button></div></div>
       <div class="prp-kpis kpis">${stats.map(([a, b, s]) => `<div class="stat prp-kpi"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('')}</div></div>
     <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>GVI over time</b></div>
-      <figure class="prp-figure chartfig"><div class="chart" id="pf-gvi"></div><figcaption><b>Figure 3.</b> Daily GVI for ${esc(c.name)}; the elevated (40–70) and high (70+) bands are shaded and the dashed line marks the selected day. Source: GDELT 2.0.</figcaption></figure>
+      <figure class="prp-figure chartfig"><div class="chart" id="pf-gvi"></div><figcaption><b>Figure 3.</b> Daily GVI for ${esc(c.name)}; the elevated (40–70) and high (70+) bands are shaded and ${per() ? 'the dashed lines mark the first and last days of the period' : 'the dashed line marks the selected day'}. Source: GDELT 2.0.</figcaption></figure>
       <figure class="prp-figure chartfig"><div class="chart" id="pf-comp"></div><div class="key">${comps.map((m, j) => `<span>${sw(COMP_COLOUR(j))}${esc(m.label)}</span>`).join('')}</div><figcaption><b>Figure 4.</b> The five components of ${esc(c.name)}’s GVI, each a percentile against the trailing 90 days.</figcaption>
         <details class="datatable"><summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">GVI</th>${comps.map(m => `<th class="num">${esc(CAT_LABEL[m.key] || m.label)}</th>`).join('')}<th class="num">Events</th></tr></thead>
           <tbody>${days.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1] == null ? '–' : r[1].toFixed(1)}</td>${comps.map((m, j) => `<td class="num">${r[2]?.[j] == null ? '–' : r[2][j].toFixed(0)}</td>`).join('')}<td class="num">${(r[3] || 0).toLocaleString('en-GB')}</td></tr>`).join('')}</tbody></table></div></details></figure></div>
-    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs 90 days</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in the trailing 90 days (100 = the most intense seen), on ${esc(DAYS[dayIdx])}.</figcaption></figure></div>
-      <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
+    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs 90 days</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in the trailing 90 days (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
+      <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events${per() ? ' · latest day' : ''}</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
   $('#pf-gvi').replaceChildren(lineChart([{ name: 'GVI', colour: 'var(--prp-text)', points: pts(c) }], { w: width('#pf-gvi') }));
   $('#pf-comp').replaceChildren(lineChart(comps.map((m, j) => ({ name: m.label, colour: COMP_COLOUR(j), width: 1.5, dots: false, points: pts(c, j) })), { w: width('#pf-comp'), h: 180, bands: false }));
   $('#addcmp').onclick = () => toggleCompare(c.iso3, !compare.includes(c.iso3));
@@ -473,10 +554,10 @@ function renderCompare() {
   const groups = [...new Set(rows.map(r => r.m.group))];
   $('#compare').innerHTML = `<div class="prp-panel"><div class="prp-panel-head"><b>GVI over time</b><span class="links">${cs.map(c => `<button type="button" class="prp-btn sm" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison">${sw(cc(c.iso3))}${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
       <figure class="prp-figure chartfig"><div class="chart" id="cmp-gvi"></div><div class="key">${cs.map(c => `<span>${sw(cc(c.iso3))}${esc(c.name)}</span>`).join('')}</div><figcaption><b>Figure 6.</b> Daily GVI for the countries compared; the elevated (40–70) and high (70+) bands are shaded. Source: GDELT 2.0.</figcaption></figure></div>
-    <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>Side by side · ${esc(DAYS[dayIdx])}</b></div><div class="tbl full"><table class="prp-table"><thead><tr><th>Metric</th>${cs.map(c => `<th class="num">${sw(cc(c.iso3))}<a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
+    <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>Side by side · ${esc(per() ? `over ${when()}` : DAYS[dayIdx])}</b></div><div class="tbl full"><table class="prp-table"><thead><tr><th>Metric</th>${cs.map(c => `<th class="num">${sw(cc(c.iso3))}<a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
       <tbody>${groups.map(g => `<tr><td colspan="${cs.length + 1}" class="grp">${esc(g)}</td></tr>` + rows.filter(r => r.m.group === g).map(r => `<tr><td>${esc(r.m.label)}</td>${cs.map((_, j) => cell(r, j)).join('')}</tr>`).join('')).join('')}</tbody></table></div>
       <p class="note"><span class="best">✓</span> marks the calmer or more stable value, <span class="worst">▲</span> the more volatile.</p></div>
-    <div class="prp-panel"><div class="prp-panel-head"><b>Components</b></div><figure class="prp-figure chartfig"><div class="chart" id="cmp-comp"></div><figcaption><b>Figure 7.</b> Component percentiles on ${esc(DAYS[dayIdx])} (100 = the most intense country-day in the trailing 90 days).</figcaption></figure></div></div>`;
+    <div class="prp-panel"><div class="prp-panel-head"><b>Components</b></div><figure class="prp-figure chartfig"><div class="chart" id="cmp-comp"></div><figcaption><b>Figure 7.</b> Component percentiles ${per() ? `averaged over ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`} (100 = the most intense country-day in the trailing 90 days).</figcaption></figure></div></div>`;
   $('#cmp-gvi').replaceChildren(lineChart(cs.map(c => ({ name: c.name, colour: cc(c.iso3), points: pts(c) })), { w: width('#cmp-gvi') }));
   $('#cmp-comp').replaceChildren(componentBars(cs, width('#cmp-comp')));
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => toggleCompare(b.dataset.rm, false));
@@ -508,7 +589,7 @@ function renderMethod() {
     <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. Use the evidence links to check.</p>`;
 }
 
-/* ---------- tabs & routing (#country=ISO3, #tab=compare|method, &compare=A,B) ---------- */
+/* ---------- tabs & routing (#country=ISO3, #tab=compare|method, &compare=A,B, &day=…, &from=…) ---------- */
 const TABS = ['map', 'profile', 'compare', 'method'], tabs = [...document.querySelectorAll('.prp-tabs [role=tab]')];
 function setTab(t) {
   if (!TABS.includes(t)) t = 'map';
@@ -517,15 +598,36 @@ function setTab(t) {
   hideTip();
   if (t === 'compare') renderCompare(); if (t === 'profile') renderProfile(); if (t === 'map' && V) renderGlobal();
 }
-function writeHash() { const t = document.querySelector('.prp-tabs [role=tab].active').dataset.tab, p = new URLSearchParams(); if (t === 'profile' && selected) p.set('country', selected); else if (t !== 'map') p.set('tab', t); if (compare.length) p.set('compare', compare.join(',')); history.replaceState(null, '', '#' + p.toString()); }
+// The days shown go after the view: day= the day shown (left out for the latest), from= a period's first day.
+function writeHash() {
+  const t = document.querySelector('.prp-tabs [role=tab].active').dataset.tab, p = new URLSearchParams();
+  if (t === 'profile' && selected) p.set('country', selected); else if (t !== 'map') p.set('tab', t);
+  if (compare.length) p.set('compare', compare.join(','));
+  if (DAYS.length && dayIdx !== DAYS.length - 1) p.set('day', DAYS[dayIdx]);
+  const f = PRPPeriod.rules.startParam(period.get()); if (f) p.set('from', f);
+  history.replaceState(null, '', '#' + p.toString());
+}
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   compare = (p.get('compare') || '').split(',').filter(i => byIso.has(i)).slice(0, 4); slots.clear(); compare.forEach(slotOf);
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
+  // A day the data does not have is the latest; a from at or after it, or unreadable, is that one day.
+  const to = DAYS.includes(p.get('day')) ? p.get('day') : DAYS.at(-1), q = period.set(PRPPeriod.rules.readStart(DAYS, p.get('from'), to, 'end'), to, { silent: true });
+  if (q.fromIndex !== fromIdx || q.toIndex !== dayIdx) { fromIdx = q.fromIndex; dayIdx = q.toIndex; derive(fromIdx, dayIdx); showDay(); renderMovers(); }
   if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); }
   else setTab(p.get('tab') || 'map');
   colourMap(); renderTable();
 }
+// The days shown (design/prp-period.js): one day, as before, with the start resting on the end; pulled back, the start
+// opens a period. Every move by the reader lands in onChange.
+const period = PRPPeriod.mount($('#days'), {
+  rest: 'end', labels: d => dayText(d),
+  ids: { from: 'day-from', to: 'day' },
+  names: { from: 'First day of the period', to: 'Day shown, or the last of the period' },
+  onChange: p => { fromIdx = p.fromIndex; dayIdx = p.toIndex; refresh(); writeHash(); },
+});
+function showDay() { $('#day-lbl').textContent = per() ? 'Period' : 'Day'; $('#daylabel').textContent = when(); relabel(); }
+function refresh() { derive(fromIdx, dayIdx); showDay(); colourMap(); renderTable(); renderMovers(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); }
 tabs.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
 $('.prp-tabs').addEventListener('keydown', e => {
   const i = tabs.indexOf(document.activeElement), j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
@@ -548,14 +650,16 @@ Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('
   METRICS = metricList();
   $('#metric').innerHTML = [...new Set(METRICS.map(m => m.group))].map(g => `<optgroup label="${esc(g)}">${METRICS.filter(m => m.group === g).map(m => `<option value="${m.id}">${esc(m.label)}</option>`).join('')}</optgroup>`).join('');
   $('#region').innerHTML += [...new Set(n.countries.map(c => c.region).filter(Boolean))].sort().map(r => `<option>${esc(r)}</option>`).join('');
-  const slider = $('#day'); slider.min = 0; slider.max = DAYS.length - 1; slider.value = dayIdx = DAYS.length - 1;
-  const showDay = () => { $('#daylabel').textContent = DAYS[dayIdx]; slider.setAttribute('aria-valuetext', DAYS[dayIdx]); };
-  const setDay = () => { dayIdx = +slider.value; showDay(); derive(dayIdx); colourMap(); renderTable(); renderMovers(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
-  derive(dayIdx); showDay();
+  // The timeline's days, with a tick a week back from the latest (none crowding the first).
+  dayIdx = fromIdx = DAYS.length - 1;
+  const ticks = [{ at: DAYS[0], text: dayText(DAYS[0]).slice(0, -5) }];
+  for (let k = DAYS.length - 1; k >= 7; k -= 7) ticks.push({ at: DAYS[k], text: dayText(DAYS[k]).slice(0, -5), kind: k === DAYS.length - 1 ? '' : 'minor' });
+  period.update({ stops: DAYS, ticks, from: null, to: DAYS.at(-1) });
+  derive(dayIdx, dayIdx); showDay();
   const scored = C.filter(c => c.cur.score != null).length;
   $('#meta').innerHTML = `<span><b>${scored}</b> countries scored on ${esc(v.latest)}</span><span><b>${C.length}</b> with events</span><span><b>${DAYS.length}</b> days of history</span><span>Source: GDELT 2.0</span><span>Updated <b>${esc(v.generated.slice(0, 16).replace('T', ' '))} UTC</b></span>`;
   drawMap(world); renderMovers(); renderMethod();
-  $('#metric').onchange = () => { colourMap(); renderTable(); }; slider.oninput = setDay; $('#search').oninput = renderTable; $('#region').onchange = renderTable; $('#scoredOnly').onchange = renderTable;
+  $('#metric').onchange = () => { colourMap(); renderTable(); }; $('#search').oninput = renderTable; $('#region').onchange = renderTable; $('#scoredOnly').onchange = renderTable;
   readHash();
   if ($('#tab-map').hidden) renderGlobal(); // drawn at its fallback width until the map tab is shown
 }).catch(e => { $('#meta').textContent = 'Data could not load: ' + e.message; });

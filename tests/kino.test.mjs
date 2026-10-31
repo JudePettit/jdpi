@@ -308,7 +308,8 @@ test('page: following along in the shell, the now-playing bar shows the film and
     await page.click('#np-back');
     await page.waitForFunction(() => location.hash.startsWith('#/kino/kino-wars?at='), null, { timeout: 5000 });
     assert.match(decodeURIComponent(await page.evaluate(() => location.hash)), /kino\/index\.html\?cat=wars#doc=korean-war&s=invasion$/);
-    assert.equal(await page.locator('#frames iframe.active').getAttribute('data-module'), 'kino-wars');
+    // The address changes a moment before the shell switches frames, so wait for the switch rather than racing it.
+    await page.waitForFunction(() => document.querySelector('#frames iframe.active')?.dataset.module === 'kino-wars', null, { timeout: 5000 });
     assert.equal(await bar.isHidden(), true, 'no bar over Kino itself');
     assert.equal(await page.locator('#frames iframe').count(), 4);
 

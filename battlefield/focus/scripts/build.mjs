@@ -3,7 +3,7 @@
 // Guard: nothing is written when a war lost its Wikidata item (its Wikipedia title no longer resolves), all or half
 // of its battles, or a tenth of its UCDP events, or when the UCDP data ends earlier than before; --allow-drop writes.
 // Sources (downloaded into the cache directory once):
-//   · UCDP Georeferenced Event Dataset v26.1 (1989–2025) and the 2026 candidate events: geolocated clashes with deaths.
+//   · UCDP Georeferenced Event Dataset v26.1 (1989–2025) and the candidate events of every later year: geolocated clashes with deaths.
 //   · PRIO Battle Deaths Dataset v3.1 (annual battle deaths, 1946–2008).
 //   · Correlates of War totals (already in Retrospective Battlefield's wars.json).
 //   · Wikidata: the war's item and every battle, siege or military operation that is part of it, with coordinates,
@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
+import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
 const require = createRequire(import.meta.url);
@@ -118,10 +119,14 @@ const prio = new Map(); // id -> year -> best
 for (const r of prioRows) { const v = r.bdeadbes > 0 ? r.bdeadbes : r.bdeadlow > 0 ? r.bdeadlow : 0; const m = prio.get(r.id) || new Map(); m.set(r.year, (m.get(r.year) || 0) + v); prio.set(r.id, m); }
 const cow = new Map(JSON.parse(readFileSync(join(ROOT, '../history/data/wars.json'), 'utf8')).wars.filter(w => w.src === 'cow').map(w => [+w.id.slice(1), w]));
 const gedDir = unzip(await download('https://ucdp.uu.se/downloads/ged/ged261-csv.zip', 'ged261.zip'), 'ged');
-// The latest cumulative candidate file for the current year (UCDP publishes one a month, e.g. GEDEvent_v26_01_26_09).
+// The candidate files for every year GED v26.1 does not cover yet: 2026's latest now, and 2026's last plus 2027's
+// latest once UCDP's first 2027 file is out (until a GED release covering 2026 replaces ged261 above and GED_THROUGH).
+const GED_THROUGH = 2025;
 const page = await (await fetch('https://ucdp.uu.se/downloads/', { headers: UA })).text();
-const cand = [...page.matchAll(/candidateged\/(GEDEvent_v(\d+)_01_(\d+)_(\d+)\.csv)/g)].sort((a, b) => (+a[3] * 100 + +a[4]) - (+b[3] * 100 + +b[4])).at(-1);
-const gedCand = await download(`https://ucdp.uu.se/downloads/candidateged/${cand[1]}`, cand[1]);
+const candNames = candidateFiles(page, GED_THROUGH);
+if (!candNames.length) throw new Error(`No UCDP candidate events file after ${GED_THROUGH} on https://ucdp.uu.se/downloads/`);
+const gedCands = [];
+for (const name of candNames) gedCands.push(await download(`https://ucdp.uu.se/downloads/candidateged/${name}`, name));
 const wars = WARS.filter(w => !ONLY || ONLY.includes(w.id));
 const today = new Date().toISOString().slice(0, 10);
 
@@ -129,7 +134,7 @@ const today = new Date().toISOString().slice(0, 10);
 const gedIds = new Map(); for (const w of wars) for (const id of w.ged || []) (gedIds.get(String(id)) || gedIds.set(String(id), []).get(String(id))).push(w);
 const events = new Map(wars.map(w => [w.id, []]));
 let maxGed = '1989-01-01';
-for (const path of [join(gedDir, 'GEDEvent_v26_1.csv'), gedCand]) {
+for (const path of [join(gedDir, 'GEDEvent_v26_1.csv'), ...gedCands]) {
   for await (const e of csvRows(path)) {
     if (e.type_of_violence !== '1') continue;
     const ws = gedIds.get(e.conflict_new_id); if (!ws) continue;

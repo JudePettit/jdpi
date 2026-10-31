@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
-import { actors, stateName, interstateName, parties } from '../battlefield/scripts/ucdp.mjs';
+import { actors, stateName, interstateName, parties, candidateFiles } from '../battlefield/scripts/ucdp.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const HISTORY = JSON.parse(readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8'));
@@ -13,6 +13,18 @@ const REALTIME = JSON.parse(readFileSync(new URL('../battlefield/data/realtime.j
 const war = id => HISTORY.wars.find(w => w.id === id);
 const locIn = (w, y) => w.locYears?.[y] || w.loc;
 const activeIn = y => HISTORY.wars.filter(w => w.years.some(([yy]) => yy === y));
+
+test('UCDP candidate files: the latest of each year after the GED release, so a new year never drops the old one', () => {
+  const page = y => y.map(f => `<a href="https://ucdp.uu.se/downloads/candidateged/${f}">${f}</a>`).join('\n');
+  // Now: only 2026's monthly files, and the GED release's own year is ignored.
+  assert.deepEqual(candidateFiles(page(['GEDEvent_v25_01_25_12.csv', 'GEDEvent_v26_01_26_08.csv', 'GEDEvent_v26_01_26_09.csv']), 2025), ['GEDEvent_v26_01_26_09.csv']);
+  // Spring 2027, before a GED release covers 2026: 2026's last file and 2027's latest, oldest first.
+  assert.deepEqual(candidateFiles(page(['GEDEvent_v27_01_27_02.csv', 'GEDEvent_v26_01_26_12.csv', 'GEDEvent_v27_01_27_01.csv', 'GEDEvent_v26_01_26_11.csv']), 2025),
+    ['GEDEvent_v26_01_26_12.csv', 'GEDEvent_v27_01_27_02.csv']);
+  // Once GED covers 2026 (GED_THROUGH = 2026), only 2027's.
+  assert.deepEqual(candidateFiles(page(['GEDEvent_v26_01_26_12.csv', 'GEDEvent_v27_01_27_05.csv']), 2026), ['GEDEvent_v27_01_27_05.csv']);
+  assert.deepEqual(candidateFiles('no files here', 2025), []);
+});
 
 test('UCDP names: each actor once, without "Government of", by the name that fits the date', () => {
   assert.deepEqual(actors('Government of Australia, Government of United Kingdom, Government of United States of America', '156, 28, 3'),

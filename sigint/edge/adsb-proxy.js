@@ -8,6 +8,22 @@
 
 const UPSTREAM = 'https://api.adsb.lol/';
 const TTL = 10; // seconds; aircraft move ~2.5 km in that time, and the page polls every 15 s
+// Per client: the page asks 4 times a minute, so 30 leaves room for several tabs while a runaway client is turned away
+// before it reaches adsb.lol. The count is kept in this isolate (Cloudflare runs several), so the cap is approximate;
+// it is self-contained so this file can still be copied into place on its own.
+const LIMIT = 30, WINDOW_MS = 60_000;
+const hits = new Map(); // client ip → { start, count }
+
+/** Seconds a client must wait before its next request, or 0. */
+export function adsbWait(request, now = Date.now()) {
+  const key = request.headers.get('cf-connecting-ip') || 'unknown';
+  let h = hits.get(key);
+  if (!h || now - h.start >= WINDOW_MS) hits.set(key, (h = { start: now, count: 0 }));
+  if (++h.count <= LIMIT) return 0;
+  if (hits.size > 5000) for (const [k, v] of hits) if (now - v.start >= WINDOW_MS) hits.delete(k);
+  return Math.max(1, Math.ceil((h.start + WINDOW_MS - now) / 1000));
+}
+export const resetAdsbLimits = () => hits.clear(); // for the tests
 
 /** Validate and normalise the path: only v2/point/{lat}/{lon}/{nm}, coordinates rounded to 0.01° to share cache entries. */
 export function proxyPath(parts) {
@@ -19,6 +35,8 @@ export function proxyPath(parts) {
 }
 
 export async function onRequestGet({ request, params, waitUntil }) {
+  const wait = adsbWait(request);
+  if (wait) return json(429, { error: `Too many requests: about ${LIMIT} a minute per client. Try again in ${wait} s.` }, { 'Retry-After': String(wait) });
   const path = proxyPath(params.path);
   if (!path) return json(400, { error: 'Use /api/sigint/adsb/v2/point/{lat}/{lon}/{radius_nm 1–250}' });
   const key = new Request(new URL(`/api/sigint/adsb/${path}`, request.url).href);
@@ -36,4 +54,4 @@ export async function onRequestGet({ request, params, waitUntil }) {
   waitUntil(cache.put(key, res.clone()));
   return res;
 }
-const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+const json = (status, body, extra = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra } });

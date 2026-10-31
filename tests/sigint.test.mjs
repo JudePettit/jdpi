@@ -16,7 +16,7 @@ import * as M from '../sigint/lib/meshtastic.js';
 import { renderMarkdown, inline, slug } from '../sigint/lib/md.js';
 import { SAT_META, satMeta, RECEIVERS, DIRECTORIES, LINKS, NOAA_POES_END } from '../sigint/lib/catalog.js';
 import * as B from '../sigint/bridge/prp-bridge.mjs';
-import { proxyPath, onRequestGet } from '../sigint/edge/adsb-proxy.js';
+import { proxyPath, onRequestGet, adsbWait, resetAdsbLimits } from '../sigint/edge/adsb-proxy.js';
 
 const read = p => readFileSync(new URL(`../sigint/${p}`, import.meta.url), 'utf8');
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''} expected ${b} ± ${tol}, got ${a}`);
@@ -471,6 +471,28 @@ test('edge proxy: validates the one query shape and caches upstream replies', as
   } finally {
     globalThis.fetch = saved.fetch; globalThis.caches = saved.caches;
   }
+});
+
+test('edge proxy: about 30 requests a minute per client, then 429 with Retry-After, before adsb.lol is asked', async () => {
+  resetAdsbLimits();
+  const from = ip => new Request('https://jdpi.pages.dev/api/sigint/adsb/v2/point/53.35/-6.26/50', { headers: { 'cf-connecting-ip': ip } });
+  const t0 = 1_000_000;
+  for (let i = 0; i < 30; i++) assert.equal(adsbWait(from('203.0.113.7'), t0 + i), 0, `request ${i + 1} is allowed`);
+  assert.equal(adsbWait(from('203.0.113.7'), t0 + 30), 60, 'the 31st waits out the minute');
+  assert.equal(adsbWait(from('198.51.100.9'), t0 + 30), 0, 'another client is not affected');
+  assert.equal(adsbWait(from('203.0.113.7'), t0 + 60_000), 0, 'a new minute starts afresh');
+  // Through the handler: a client over the limit is answered without a fetch.
+  resetAdsbLimits();
+  const saved = globalThis.fetch;
+  let fetched = 0;
+  globalThis.fetch = async () => { fetched++; return new Response('{}'); };
+  try {
+    for (let i = 0; i < 30; i++) adsbWait(from('192.0.2.1'));
+    const res = await onRequestGet({ request: from('192.0.2.1'), params: { path: ['v2', 'point', '53.35', '-6.26', '50'] }, waitUntil() {} });
+    assert.equal(res.status, 429);
+    assert.match(res.headers.get('retry-after'), /^\d+$/);
+    assert.equal(fetched, 0);
+  } finally { globalThis.fetch = saved; resetAdsbLimits(); }
 });
 
 /* ---- Public feeds (opt-in: SIGINT_LIVE=1) ----------------------------------------------------------------------------------- */

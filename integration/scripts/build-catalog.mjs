@@ -122,8 +122,8 @@ const BRIEF = has('briefing/data/latest.json') ? J('briefing/data/latest.json') 
 const POSITION = { far_left: 'Far left', left: 'Left', centre: 'Centre', right: 'Right', far_right: 'Far right' };
 if (BRIEF) {
   spec({
-    id: 'intelligence-briefing-stories', title: 'Intelligence Briefing: stories', module: 'rt', submodule: 'briefing',
-    description: 'Every story from the Intelligence Briefing\'s publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet\'s name and position.',
+    id: 'intelligence-briefing-stories', title: 'Political Briefing: stories', module: 'rt', submodule: 'briefing',
+    description: 'Every story from the Political Briefing\'s publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet\'s name and position.',
     source: { urls: ['briefing/data/latest.json'], records: 'items' }, refresh: 'twice daily',
     licence: 'Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.',
     sources: ['RSS and Atom feeds of the publishers listed in intelligence-briefing-sources', 'Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps'],
@@ -131,8 +131,8 @@ if (BRIEF) {
       ['d', 'Standfirst or opening lines from the feed'], ['c', 'Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news']]
   });
   spec({
-    id: 'intelligence-briefing-sources', title: 'Intelligence Briefing: publishers', module: 'rt', submodule: 'briefing',
-    description: 'The Intelligence Briefing\'s publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.',
+    id: 'intelligence-briefing-sources', title: 'Political Briefing: publishers', module: 'rt', submodule: 'briefing',
+    description: 'The Political Briefing\'s publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.',
     source: { urls: ['briefing/data/latest.json'], records: 'sources' }, refresh: 'twice daily',
     licence: 'Metadata © JDP-Iq; position ratings after AllSides and Media Bias/Fact Check.', sources: ['AllSides Media Bias Ratings', 'Media Bias/Fact Check', 'The publishers\' own feeds'],
     fields: [['id', 'Source id, as used in `s` of intelligence-briefing-stories'], ['name', 'Publisher'], ['position', 'Political position: far_left, left, centre, right or far_right'],
@@ -754,11 +754,11 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
 
   // briefing-activity.json: each briefing's last seven days in three facts: `items`, the stories its rolling store holds
   // (the store keeps keepDays of them and is pruned at every refresh, so this is the week's count), `topic`, the label of
-  // its most-covered topic (the topic briefings' own tally; the Intelligence Briefing has political positions rather than
+  // its most-covered topic (the topic briefings' own tally; the Political Briefing has political positions rather than
   // topics, so its most-represented position, by the stories of each position's outlets), and `generated`, when the store
   // was built, so the panel can date the window and leave out a briefing that has stopped refreshing.
   const BRIEFINGS = [['science-briefing', 'Scientific Briefing', 'science/briefing/data/stories.json'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/data/stories.json'],
-    ['digital-briefing', 'Digital Briefing', 'digital/briefing/data/stories.json'], ['briefing', 'Intelligence Briefing', 'briefing/data/latest.json']].filter(([, , f]) => has(f));
+    ['digital-briefing', 'Digital Briefing', 'digital/briefing/data/stories.json'], ['briefing', 'Political Briefing', 'briefing/data/latest.json']].filter(([, , f]) => has(f));
   const top = (tally, defs, key) => { let best = null; for (const def of defs || []) if (Number(tally?.[def[key]]) > 0 && (!best || tally[def[key]] > tally[best[key]])) best = def; return best?.label || null; };
   const ap = 'integration/data/briefing-activity.json';
   putJson(ap, {

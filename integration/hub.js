@@ -169,7 +169,7 @@ const API = [
 function renderApi() { $('#api-rows').innerHTML = API.map(([r, d, ex]) => `<tr><td><code>GET ${esc(r)}</code></td><td>${esc(d)}</td><td class="ex"><a href="${esc(SITE + ex)}">${esc('/' + ex)}</a></td></tr>`).join(''); }
 
 /* ------------------------------------------------------------------ feeds and calendars */
-const BRIEF = [['intelligence', 'Intelligence Briefing', 'intelligence-briefing-stories'], ['scientific', 'Scientific Briefing', 'science-briefing-stories'], ['economics', 'Economics Briefing', 'econ-briefing-stories'], ['digital', 'Digital Briefing', 'digital-briefing-stories']];
+const BRIEF = [['intelligence', 'Political Briefing', 'intelligence-briefing-stories'], ['scientific', 'Scientific Briefing', 'science-briefing-stories'], ['economics', 'Economics Briefing', 'econ-briefing-stories'], ['digital', 'Digital Briefing', 'digital-briefing-stories']];
 function topicsOf(id) {
   const d = CAT.datasets.find(x => x.id === id); if (!d) return null;
   const f = d.fields.find(x => ['disciplines', 'fields', 'topics', 'areas'].includes(x.name));

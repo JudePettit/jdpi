@@ -1,7 +1,7 @@
 // Economics Briefing feed handling: parse journal, working-paper, central-bank and news feeds (RSS 2.0, RSS 1.0/RDF
 // with Dublin Core and PRISM, Atom) into plain items with DOIs, authors and the feed's own section labels; normalise
 // them; de-duplicate; and roll the seven-day store forward. Pure functions (no network), so tests can run them on
-// fixtures. Entity decoding, canonical URLs and title keys come from the Intelligence Briefing's parser
+// fixtures. Entity decoding, canonical URLs and title keys come from the Political Briefing's parser
 // (briefing/scripts/rss.mjs); the text clean-up (plain text, summaries, DOIs, dates) from the Scientific Briefing's
 // (science/scripts/briefing-feeds.mjs).
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';

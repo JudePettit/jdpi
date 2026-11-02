@@ -27,7 +27,7 @@
       "modules": [
         {
           "id": "briefing",
-          "name": "Intelligence Briefing",
+          "name": "Political Briefing",
           "kind": "realtime",
           "icon": "↗",
           "status": "live",

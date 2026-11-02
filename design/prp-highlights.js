@@ -178,7 +178,7 @@ async function buildVolatility(ctx) {
 /* --- METRIC 2: briefing activity over the last 7 days -------------------------------------------------------------
    integration/data/briefing-activity.json: per briefing, its id and name, `items` (the stories its rolling store holds,
    which is the last `days` days, pruned at every refresh), `topic` (the label of its most-covered topic; for the
-   Intelligence Briefing, which has positions rather than topics, its most-represented political position, `facet:
+   Political Briefing, which has positions rather than topics, its most-represented political position, `facet:
    'positions'`) and `generated` (when the store was last built). */
 const BRIEFING_ROUTES = { 'science-briefing': ROUTES.scienceBriefing, 'econ-briefing': ROUTES.econBriefing, 'digital-briefing': ROUTES.digitalBriefing, briefing: ROUTES.intelligenceBriefing };
 async function buildBriefings(ctx) {

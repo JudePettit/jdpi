@@ -1,7 +1,7 @@
 // Scientific Briefing feed handling: parse journal and news feeds (RSS 2.0, RSS 1.0/RDF with Dublin Core and PRISM,
 // Atom) into plain items with DOIs and the feed's own section labels; normalise them; de-duplicate; and roll the
 // seven-day store forward. Pure functions (no network), so tests can run them on fixtures.
-// Entity decoding, canonical URLs and title keys come from the Intelligence Briefing's parser (briefing/scripts/rss.mjs).
+// Entity decoding, canonical URLs and title keys come from the Political Briefing's parser (briefing/scripts/rss.mjs).
 import { createHash } from 'node:crypto';
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';
 import { classify, detectType, isGenre, isDroppedTitle, DISCIPLINE_IDS } from './classify.mjs';

@@ -88,7 +88,7 @@ function eventTypes(input) {
 
 /* ============================================================================ briefings */
 const BRIEFINGS = {
-  intelligence: { file: 'briefing/data/latest.json', name: 'Intelligence Briefing', page: 'q/briefing.html', module: 'Realtime Geopolitics' },
+  intelligence: { file: 'briefing/data/latest.json', name: 'Political Briefing', page: 'q/briefing.html', module: 'Realtime Geopolitics' },
   scientific: { file: 'science/briefing/data/stories.json', name: 'Scientific Briefing', page: 'science/briefing/index.html', module: 'Natural Science' },
   economics: { file: 'econ/briefing/data/stories.json', name: 'Economics Briefing', page: 'econ/briefing/index.html', module: 'Money Management' },
   digital: { file: 'digital/briefing/data/stories.json', name: 'Digital Briefing', page: 'digital/briefing/index.html', module: 'Digital Science' }

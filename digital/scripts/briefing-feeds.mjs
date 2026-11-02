@@ -2,7 +2,7 @@
 // Dublin Core and PRISM, Atom, and arXiv's announcement feeds) into plain items with DOIs, authors and the feed's own
 // section labels; normalise them; pick a day's preprints; de-duplicate; and roll the seven-day store forward. Pure
 // functions (no network), so tests can run them on fixtures. Entity decoding, canonical URLs and title keys come from
-// the Intelligence Briefing's parser (briefing/scripts/rss.mjs); the text clean-up (plain text, summaries, DOIs, dates,
+// the Political Briefing's parser (briefing/scripts/rss.mjs); the text clean-up (plain text, summaries, DOIs, dates,
 // ids, title similarity) from the Scientific Briefing's (science/scripts/briefing-feeds.mjs). The shape of the store
 // follows the Economics Briefing (econ/scripts/briefing-feeds.mjs).
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';

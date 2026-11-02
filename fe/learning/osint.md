@@ -502,7 +502,7 @@ The **[Berkeley Protocol on Digital Open Source Investigations](https://humanrig
 ## Vitruvian Manager as a source: news and framing
 Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Encyclopaedia in Retrospective Geopolitics, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
 
-### Workflow: Intelligence Briefing (framing across the spectrum)
+### Workflow: Political Briefing (framing across the spectrum)
 1. Add a **topic** with the keywords people actually use, including names, places and alternative spellings. Topics are saved in your browser only.
 2. Use the **balanced columns** view, which sets fifty publishers' coverage side by side in five positions (far left, left, centre, right and far right), and leave "Hard news only" on.
 3. Compare the framing: which positions cover the story at all, the verbs in the headlines ("killed", "died", "eliminated"), who is quoted and what is left out. Coverage on one side only is a finding in itself. Positions describe editorial slant, not accuracy, and outlets marked ⚠ have mixed or low factual-reliability ratings.
@@ -512,7 +512,7 @@ Vitruvian Manager brings many open sources into one workspace: live views in Rea
 1. Pick a covered country on the map to see its last 24 hours of headlines.
 2. Read the **top stories** from its most-read outlets, translated into English, and open the original-language article for anything important.
 3. Use the daily, weekly, monthly and yearly archives to see what the domestic press has led with; stories that persist for days show what matters there.
-4. Compare with the Intelligence Briefing: stories that are big at home but invisible abroad, or the reverse, are often the most telling.
+4. Compare with the Political Briefing: stories that are big at home but invisible abroad, or the reverse, are often the most telling.
 
 ? Where should you look first to understand how a Vitruvian Manager view was built?
 * The colour key on the map
@@ -520,7 +520,7 @@ Vitruvian Manager brings many open sources into one workspace: live views in Rea
 * The page's title
 = Knowing a view's sources and refresh cadence is the first step in grading it, as with any other source.
 
-? A story appears only in far-right outlets in the Intelligence Briefing. What is the right reading?
+? A story appears only in far-right outlets in the Political Briefing. What is the right reading?
 * It must be false
 * It must be true and suppressed elsewhere
 + The asymmetry is a finding to investigate: trace the claim to its primary source and look for independent confirmation
@@ -635,7 +635,7 @@ New papers and science news by discipline, and a map-and-slider timeline of brea
 1. **Provenance**: reverse searches of keyframes find no earlier copies. The earliest upload is the 01:22 post, from a channel whose past local reports have mostly proved accurate (source grade C). Archive it twice, download the file, hash it and log it.
 2. **Place**: storage tanks, a water tower and a rail spur in the frame match the Northport depot on satellite and street-level imagery: three independent features. Record the coordinates.
 3. **Time and corroboration**: FIRMS shows two heat detections at the depot at 00:58 UTC, and the next clear Sentinel-2 image, on 15 May, shows burn scars on two tanks 200 m apart, matching the two seats of fire in the video.
-4. **Vitruvian Manager context**: Realtime Battlefield shows strikes on fuel infrastructure in this war in each of the last three months, and War Focus shows such strikes rising in comparable wars when the front stalled. The Intelligence Briefing splits along partisan lines, but the Global Headline Tracker shows the country's own outlets leading with an air-raid alert that night. Volatility's conflict component is at the top of its 90-day range.
+4. **Vitruvian Manager context**: Realtime Battlefield shows strikes on fuel infrastructure in this war in each of the last three months, and War Focus shows such strikes rising in comparable wars when the front stalled. The Political Briefing splits along partisan lines, but the Global Headline Tracker shows the country's own outlets leading with an air-raid alert that night. Volatility's conflict component is at the top of its 90-day range.
 5. **Hypotheses**: two seats of fire are inconsistent with a single accident; the air-raid alert and the recent pattern fit a drone strike; sabotage has no supporting evidence. The judgement rests most on the alert reports, so confirm them next.
 
 ! BLUF: A fire destroyed at least two fuel tanks at the Northport depot at about 01:00 UTC on 12 May, very likely (80–95%) as a result of a drone strike. We have moderate confidence in this judgement: the timing and damage are well corroborated, but no weapon debris has been verified. The strike fits a three-month pattern of attacks on fuel infrastructure in this war.

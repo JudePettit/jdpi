@@ -60,14 +60,14 @@ const PAGE_LISTS = [
 ];
 const VOL_MOVERS = movers(PAGE_LISTS);
 // integration/data/briefing-activity.json. NOW is 29 Oct 12:00 UTC: Digital was last generated 2 days 16 hours ago (out),
-// the Intelligence Briefing yesterday evening (in, with its own day).
+// the Political Briefing yesterday evening (in, with its own day).
 const BRIEFS = {
   dataset: 'briefing-activity', generated: '2026-10-29T05:23:10Z', derivedFrom: ['science/briefing/data/stories.json'],
   records: [
     { id: 'science-briefing', name: 'Scientific Briefing', items: 1036, days: 7, topic: 'Biology', facet: 'disciplines', generated: '2026-10-29T01:45:12Z' },
     { id: 'econ-briefing', name: 'Economics Briefing', items: 453, days: 7, topic: 'Monetary policy & central banks', facet: 'fields', generated: '2026-10-29T01:45:40Z' },
     { id: 'digital-briefing', name: 'Digital Briefing', items: 664, days: 7, topic: 'AI & machine learning', facet: 'fields', generated: '2026-10-26T19:45:00Z' },
-    { id: 'briefing', name: 'Intelligence Briefing', items: 4920, days: 7, topic: 'Centre', facet: 'positions', generated: '2026-10-28T18:05:00Z' },
+    { id: 'briefing', name: 'Political Briefing', items: 4920, days: 7, topic: 'Centre', facet: 'positions', generated: '2026-10-28T18:05:00Z' },
   ],
 };
 // Past events and non-want types are present on purpose; only future elections/referendums/summits should survive.
@@ -216,13 +216,13 @@ test('logic: briefings come from the derived file, dated "last 7 days, to <day>"
   assert.equal(g.title, 'Briefing activity');
   assert.equal(g.source, 'Vitruvian Manager Briefings');
   assert.equal(g.window, 'last 7 days, to 29 Oct', 'dated to the newest store');
-  assert.deepEqual(g.items.map(i => i.label), ['Scientific Briefing', 'Economics Briefing', 'Intelligence Briefing'], 'Digital (2 days 16 hours old) is left out');
+  assert.deepEqual(g.items.map(i => i.label), ['Scientific Briefing', 'Economics Briefing', 'Political Briefing'], 'Digital (2 days 16 hours old) is left out');
   assert.deepEqual(g.items.map(i => i.value), ['1,036 stories', '453 stories', '4,920 stories'], 'counts with thousands separators');
   assert.deepEqual(g.items.map(i => i.detail), ['most in Biology', 'most in Monetary policy & central banks', 'most from Centre · to 28 Oct'], 'top topic; a store that ends on another day says so');
   assert.deepEqual(g.items.map(i => i.href), [ROUTES.scienceBriefing, ROUTES.econBriefing, ROUTES.intelligenceBriefing], 'each line links to its own briefing');
   assert.equal(g.note, 'Left out, not refreshed for two days: Digital Briefing.');
   assert.equal(g.href, ROUTES.intelligenceBriefing, 'the group links to the busiest briefing (Intelligence, 4,920)');
-  assert.equal(g.link, 'Intelligence Briefing');
+  assert.equal(g.link, 'Political Briefing');
   assert.ok(g.items.every(i => i.tone === undefined), 'a count is not a rise or fall');
 });
 
@@ -502,7 +502,7 @@ test('page: rows and links show their focus ring; the four links have their own 
     await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
     await filled(page);
     const names = await page.$$eval('#today .today-head .more', a => a.map(x => x.getAttribute('aria-label')));
-    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Intelligence Briefing', 'View Realtime Calendar', 'View Market Briefing']);
+    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Political Briefing', 'View Realtime Calendar', 'View Market Briefing']);
     // Keyboard through the panel from the heading above it: every link shows a 2px ring drawn inside the card.
     await page.evaluate(() => { const h = document.querySelector('#view h1'); h.tabIndex = -1; h.focus(); });
     const links = await page.$$eval('#today a', a => a.length);

@@ -37,7 +37,7 @@ Management, whose sidebar name is **Int-Myst Mngmnt**.
 
 | Submodule | Module | Notes |
 |---|---|---|
-| Intelligence Briefing (was Briefing) | RT | `q/briefing.html` |
+| Political Briefing (was Intelligence Briefing, before that Briefing) | RT | `q/briefing.html` |
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`) |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
@@ -63,7 +63,7 @@ Management, whose sidebar name is **Int-Myst Mngmnt**.
 **Sidebar order.** Within each module the strongest submodules come first, the calendar second-last and the course last.
 
 Never write "JDP-I", "PRP", "Q", "H&P" or "F&E", or a module's former name, in visible text any more (code identifiers,
-file names and URLs may keep them). Page titles: `<Submodule> · VM` (e.g. `Intelligence Briefing · VM`).
+file names and URLs may keep them). Page titles: `<Submodule> · VM` (e.g. `Political Briefing · VM`).
 
 **One page, one submodule.** A page's own views (archives, map/compare, live/archive, course parts) are **tabs inside
 the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tablist"`, update the URL
@@ -119,12 +119,12 @@ so a page should not pin anything it needs there.
   timestamps, numbers in tables). Sizes `--prp-fs-xs|sm|(base)|md|lg|xl|2xl`. Numbers: `font-variant-numeric: tabular-nums`.
 - Shape: `--prp-radius-sm|radius|radius-lg`, `--prp-shadow-1|2`, `--prp-measure` (72ch reading width).
 
-Political-position colours in the Intelligence Briefing (far left … far right) stay as the page's own named tokens,
+Political-position colours in the Political Briefing (far left … far right) stay as the page's own named tokens,
 defined for both themes.
 
 ## 4. Page anatomy (publication front matter + ERP object page)
 
-1. **Header**: `.prp-eyebrow` "Realtime Geopolitics · Intelligence Briefing", always with the module's full title
+1. **Header**: `.prp-eyebrow` "Realtime Geopolitics · Political Briefing", always with the module's full title
    ("International Mystery Management · OSINT Dashboard", never the sidebar's "Int-Myst Mngmnt"); mark the eyebrow and
    any standalone brand with `data-jdpi-standalone` only if it duplicates the shell. Then `.prp-title` (serif h1),
    `.prp-dek` (one or two plain sentences: what this is and what you can do), `.prp-meta` line (Updated … · Source … ·

@@ -44,7 +44,7 @@ test('registry is well formed', () => {
   assert.equal(where('econ-briefing'), 'mm');
   for (const id of ['digital-briefing', 'data-analytics', 'integration-hub']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
-  assert.equal(modules.find(x => x.m.id === 'briefing').m.name, 'Intelligence Briefing');
+  assert.equal(modules.find(x => x.m.id === 'briefing').m.name, 'Political Briefing');
 });
 
 test('every live submodule URL responds', pageTest, async () => {

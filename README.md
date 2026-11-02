@@ -11,7 +11,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 
 | Module | Code | Submodules |
 |---|---|---|
-| **Realtime Geopolitics**: what is happening now | RT | Intelligence Briefing · Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
+| **Realtime Geopolitics**: what is happening now | RT | Political Briefing · Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
 | **Retrospective Geopolitics**: what happened and why | RS | Encyclopaedia · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
 | **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
 | **Money Management**: your money end to end | MM | Market Briefing · Economics Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |

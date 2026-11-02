@@ -52,7 +52,7 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 - Congress trade amounts are the **ranges** members file, not exact values; filings can be late. 13F filings show US
   long positions at the quarter end only, up to 45 days late. None of this is investment advice.
 - Battlefield deaths are UCDP best estimates; months marked `estimated` in War Focus are spread from yearly totals.
-- Intelligence Briefing positions (far left … far right) describe editorial slant, not accuracy; `caution` marks outlets
+- Political Briefing positions (far left … far right) describe editorial slant, not accuracy; `caution` marks outlets
   rated mixed or low for factual reliability.
 
 ## 5. Licences and attribution

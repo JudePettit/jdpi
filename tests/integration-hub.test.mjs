@@ -180,7 +180,7 @@ describe('Workspace Today files (integration/data)', () => {
       const s = J(STORES[r.id]);
       if (r.generated !== s.generated) { assert.ok(r.generated < s.generated, `${r.id}: built from ${r.generated}, the store is at ${s.generated}`); continue; }
       assert.equal(r.items, s.items.length, `${r.id}: every story the store holds`); assert.equal(r.days, s.keepDays);
-      // The top topic: the briefing's own tally of its topics; for the Intelligence Briefing, stories by their outlet's position.
+      // The top topic: the briefing's own tally of its topics; for the Political Briefing, stories by their outlet's position.
       let tally, defs, key;
       if (r.facet === 'positions') { const pos = new Map(s.sources.map(x => [x.id, x.position])); tally = {}; for (const it of s.items) { const p = pos.get(it.s); if (p) tally[p] = (tally[p] || 0) + 1; } defs = s.positions; key = 'key'; }
       else { assert.ok(Array.isArray(s[r.facet]), `${r.id}: ${r.facet} is the store's topic list`); tally = s.counts[r.facet]; defs = s[r.facet]; key = 'id'; }

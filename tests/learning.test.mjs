@@ -3,10 +3,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
+import { pageTest } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
-test('each course renders its lessons and quiz, in the right suite', async () => {
+test('each course renders its lessons and quiz, in the right suite', pageTest, async () => {
   const browser = await chromium.launch({ channel: 'msedge' });
   const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
   const errors = [];

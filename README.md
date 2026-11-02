@@ -74,6 +74,8 @@ broke. Each refresh runs its tests before it commits, and the site deploys from 
 ## Tests
 
 ```bash
+npm run test:unit                                 # the fast tests: no browser, no network (any platform)
+npm run test:e2e                                  # everything, pages included, against a local copy it starts itself
 node --test tests/*.test.mjs                      # data and page tests
 PRP_URL=http://localhost:8787 node --test tests/platform.test.mjs   # shell and pages, with Edge via playwright-core
 node tests/tools/serve.mjs 8787                   # local static server (keeps .html and query strings)

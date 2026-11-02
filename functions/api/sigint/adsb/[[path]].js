@@ -2,8 +2,8 @@
 // Dashboard can't read it from the browser; this same-origin endpoint relays one validated query shape with a short
 // edge cache, so many viewers in one area share one upstream request.
 //
-// INSTALL (site owner): copy this file to  functions/api/sigint/adsb/[[path]].js  at the repository root. Pages then
-// serves it at  /api/sigint/adsb/v2/point/{lat}/{lon}/{radius_nm}  and the dashboard uses it automatically.
+// Pages serves it at  /api/sigint/adsb/v2/point/{lat}/{lon}/{radius_nm}, and the dashboard uses it automatically
+// (sigint/lib/sources.js). This is the only copy; tests/sigint.test.mjs tests it.
 // Data: adsb.lol, ODbL 1.0 (attribution shown on the page). adsb.lol asks heavy or production users to get in touch.
 
 const UPSTREAM = 'https://api.adsb.lol/';

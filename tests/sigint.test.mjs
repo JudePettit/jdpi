@@ -16,7 +16,7 @@ import * as M from '../sigint/lib/meshtastic.js';
 import { renderMarkdown, inline, slug } from '../sigint/lib/md.js';
 import { SAT_META, satMeta, RECEIVERS, DIRECTORIES, LINKS, NOAA_POES_END } from '../sigint/lib/catalog.js';
 import * as B from '../sigint/bridge/prp-bridge.mjs';
-import { proxyPath, onRequestGet, adsbWait, resetAdsbLimits } from '../sigint/edge/adsb-proxy.js';
+import { proxyPath, onRequestGet, adsbWait, resetAdsbLimits } from '../functions/api/sigint/adsb/[[path]].js';
 
 const read = p => readFileSync(new URL(`../sigint/${p}`, import.meta.url), 'utf8');
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg ?? ''} expected ${b} ± ${tol}, got ${a}`);

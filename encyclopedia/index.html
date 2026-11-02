@@ -252,7 +252,7 @@ function suggest(raw) {
   const counts = new Map();
   for (const r of rows) for (const t of r[6]) if (tagValue[t].toLowerCase().includes(last)) counts.set(t, (counts.get(t) || 0) + 1);
   const top = [...counts].sort((a, b) => b[1] - a[1]).slice(0, 8);
-  $('#sugg').innerHTML = top.map(([t, n]) => `<button type="button" class="chip" data-t="${t}" title="${esc(tagShown[t])}">${esc(tagValue[t])} <small>${esc(tagFacet[t])} · ${n}</small></button>`).join('');
+  $('#sugg').innerHTML = top.map(([t, n]) => `<button type="button" class="chip" data-t="${esc(t)}" title="${esc(tagShown[t])}">${esc(tagValue[t])} <small>${esc(tagFacet[t])} · ${n}</small></button>`).join('');
   $('#sugg').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
     const v = tagValue[+b.dataset.t], q = $('#query'), cut = q.value.toLowerCase().lastIndexOf(last);
     const phrase = /[\s+&|!()-]/.test(v) ? `"${v}"` : v;
@@ -281,7 +281,7 @@ function renderFacets() {
     const more = opts.length > limit; opts = opts.slice(0, limit);
     return `<div class="facet"><button type="button" data-toggle="${esc(f)}" aria-expanded="${!!open}"><span class="chev" aria-hidden="true">▶</span><span class="f">${esc(f)}</span><span class="n">${chosen.size ? chosen.size + ' selected · ' : ''}${counts.size.toLocaleString('en-GB')}</span></button>
       ${open ? `<div class="fbody">${counts.size > 12 ? `<input class="prp-input" type="search" data-fsearch="${esc(f)}" placeholder="Search ${esc(f.toLowerCase())}…" aria-label="Search ${esc(f.toLowerCase())}" value="${esc(search)}">` : ''}
-        ${opts.map(([t, n]) => `<label class="opt"><input type="checkbox" data-f="${esc(f)}" data-t="${t}" ${chosen.has(t) ? 'checked' : ''}><span title="${esc(tagValue[t])}">${esc(tagValue[t])}</span><small>${n.toLocaleString('en-GB')}</small></label>`).join('') || '<div class="none">No values with the current filters</div>'}
+        ${opts.map(([t, n]) => `<label class="opt"><input type="checkbox" data-f="${esc(f)}" data-t="${esc(t)}" ${chosen.has(t) ? 'checked' : ''}><span title="${esc(tagValue[t])}">${esc(tagValue[t])}</span><small>${n.toLocaleString('en-GB')}</small></label>`).join('') || '<div class="none">No values with the current filters</div>'}
         ${more ? `<button type="button" class="more" data-all="${esc(f)}">Show all values</button>` : ''}</div>` : ''}</div>`;
   }).join('');
   $('#facets').querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => { const f = b.dataset.toggle; openFacets.has(f) ? openFacets.delete(f) : openFacets.add(f); renderFacets(); document.querySelector(`[data-toggle="${CSS.escape(f)}"]`)?.focus(); });
@@ -303,13 +303,13 @@ function renderResults() {
     const tags = [...r[6]].sort((a, b) => (chosen.has(b) - chosen.has(a)) || ((FACET_ORDER.indexOf(tagFacet[a]) + 1 || 99) - (FACET_ORDER.indexOf(tagFacet[b]) + 1 || 99))).filter(t => tagFacet[t] !== 'Appears in' && tagFacet[t] !== 'Type').slice(0, 6);
     return `<tr><td class="name"><a href="#${r[0]}">${esc(r[1])}</a><div>${esc(r[3])}</div></td>
       <td class="type">${esc(tagValue[r[6].find(t => tagFacet[t] === 'Type')] || r[2])}</td>
-      <td><div class="tags">${tags.map(t => `<button type="button" class="chip${chosen.has(t) ? ' on' : ''}" data-add="${t}" title="${esc(tagShown[t])}">${esc(tagValue[t])}</button>`).join('')}</div></td>
+      <td><div class="tags">${tags.map(t => `<button type="button" class="chip${chosen.has(t) ? ' on' : ''}" data-add="${esc(t)}" title="${esc(tagShown[t])}">${esc(tagValue[t])}</button>`).join('')}</div></td>
       <td><div class="where">${r[7].map(([m, u, n]) => linkHtml(m, u, `${esc(modName(m))}${n > 1 ? ` <small>${n}</small>` : ''}`, 'chip')).join('') || '<span class="type">Related entry</span>'}</div></td></tr>`;
   }).join('') || '<tr><td colspan="4" class="empty">No entries match. Remove a filter or change the query.</td></tr>';
   $('#rows').querySelectorAll('[data-add]').forEach(b => b.onclick = () => addTag(+b.dataset.add));
   $('#pager').innerHTML = list.length > shown ? `<button type="button" class="prp-btn" id="showmore">Show ${Math.min(PAGE, list.length - shown)} more of ${(list.length - shown).toLocaleString('en-GB')}</button>` : '';
   $('#showmore')?.addEventListener('click', () => { shown += PAGE; renderResults(); });
-  const act = [...sel].flatMap(([f, s]) => [...s].map(t => `<button type="button" class="chip on" data-rm="${t}" data-f="${esc(f)}" aria-label="Remove ${esc(f)}: ${esc(tagValue[t])}">${esc(f)}: ${esc(tagValue[t])} ✕</button>`));
+  const act = [...sel].flatMap(([f, s]) => [...s].map(t => `<button type="button" class="chip on" data-rm="${esc(t)}" data-f="${esc(f)}" aria-label="Remove ${esc(f)}: ${esc(tagValue[t])}">${esc(f)}: ${esc(tagValue[t])} ✕</button>`));
   $('#active').hidden = !act.length; $('#active').innerHTML = act.join('');
   $('#active').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { sel.get(b.dataset.f)?.delete(+b.dataset.rm); update(); });
 }
@@ -351,7 +351,7 @@ async function renderEntity(q) {
   const popouts = [];
   const groupHtml = [...groups].map(([mod, list]) => {
     let more = '';
-    if (list.length > 6) { popouts.push({ title: `${e.label} in ${modName(mod)}`, html: list.map(ment).join('') }); more = `<button type="button" class="more" data-pop="${popouts.length - 1}">See more (${list.length - 6} more)</button>`; }
+    if (list.length > 6) { popouts.push({ title: `${e.label} in ${modName(mod)}`, html: list.map(ment).join('') }); more = `<button type="button" class="more" data-pop="${esc(popouts.length - 1)}">See more (${list.length - 6} more)</button>`; }
     return `<div class="group"><h4>${esc(modName(mod))}<span>${list.length}</span></h4>${list.slice(0, 6).map(ment).join('')}${more}</div>`;
   }).join('');
   const img = e.img ? `<img src="https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(e.img)}?width=240" alt="" loading="lazy">` : '';
@@ -363,7 +363,7 @@ async function renderEntity(q) {
       <div class="card"><h3>Appears in PRP · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
     </div><div>
       ${factRows.length || relRows.length ? `<div class="card"><h3>Facts</h3><dl class="facts">${factRows.join('')}${relRows.join('')}</dl></div>` : ''}
-      <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${tagIdOf.get(t)}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>
+      <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${esc(tagIdOf.get(t))}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>
     </div></div>`;
   box.querySelectorAll('[data-add]').forEach(b => b.onclick = () => addTag(+b.dataset.add));
   box.querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openModal(popouts[+b.dataset.pop].title, popouts[+b.dataset.pop].html));

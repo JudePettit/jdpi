@@ -5,6 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
+import { pageTest } from './tools/pages.mjs';
 import '../design/jdpi-documentary.js';
 import '../design/jdpi-narrator.js';
 import '../design/prp-focus.js';
@@ -184,7 +185,7 @@ test('focus: the zoom that fits a pixel extent', () => {
 });
 
 /* ---------- in a browser: War Focus answers 'prp:focus' ---------- */
-test('War Focus zooms to the states and battles in focus, and back', async t => {
+test('War Focus zooms to the states and battles in focus, and back', pageTest, async t => {
   const browser = await chromium.launch({ channel: 'msedge' });
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

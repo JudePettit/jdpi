@@ -2,7 +2,8 @@
 
 Every timed job behind Vitruvian Manager: when it runs, what it writes, and how you know it broke. Checked against the
 files on 31 October 2026 (jdpi `fb8c85b`, trade-desk `8e7873d`, political-atlas `dabbb34`, double-signal `fd64ae8`).
-Updated 2 November: Double Signal now has a private GitHub repository, and Political Atlas skipped its November update.
+Updated 2 November: Double Signal now has a private GitHub repository, and Political Atlas skipped its November update
+(its monthly update is on again for December).
 
 **Times** are UTC. In winter London keeps UTC (GMT), so the times read the same there. In summer (BST, from the last
 Sunday in March to the last Sunday in October) London is an hour ahead, and the summer London time is in brackets:
@@ -56,7 +57,7 @@ run fails, so the page keeps its last good data and simply ages.
 | **Kino** (`kino-refresh.yml`) | 4th of the month, 04:13 (05:13) | Re-reads the documentaries' Wikidata labels and Wikimedia Commons image credits (entries older than 25 days) and rebuilds the catalogue. Guard: stops before writing the catalogue if a script fails its checks or a Commons image it names is gone. | `kino/data/index.json`, `media.json`, `iso.json`, and `kino/scripts/cache.json` | Red run. Freshness: the cache older than about 62 days. |
 | **National Analysis** (`national-refresh.yml`) | 5th of the month, 03:47 (04:47) | World Bank indicators, plus leadership and conflict data from the Retrospective. Guard: not written if an indicator's countries halve, or the countries, their Wikidata matches, GW codes or leadership data fall by a tenth. | `national/data` | Red run. Freshness: `national/data/index.json` older than about 62 days. |
 | **Check data freshness** (`freshness.yml`) | Daily 09:33 (10:33) | The alarm: see below. | Nothing in the repository; a table on the run's summary page | It is the signal. |
-| **Political Atlas monthly update** (political-atlas, `monthly-update.yml`) | 1st of the month, 06:00 (07:00) | Asks Claude, with web search, to check and update all 78 country records (paid: the Atlas README puts a full run at a few to low tens of US dollars), validates them, and opens a pull request, "Monthly political data update", for you to review. Nothing goes live until you merge it; merging redeploys Political Atlas. | `data/` in political-atlas, on the `data-update` branch (the pull request) | Red run in political-atlas's Actions tab, or no new pull request on the 1st. The freshness check does not watch it. **Switched off on 31 October**, so the November run was skipped; for December's it must be on again (Actions → Monthly data update → Enable workflow). |
+| **Political Atlas monthly update** (political-atlas, `monthly-update.yml`) | 1st of the month, 06:00 (07:00) | Asks Claude, with web search, to check and update all 78 country records (paid: the Atlas README puts a full run at a few to low tens of US dollars), validates them, and opens a pull request, "Monthly political data update", for you to review. Nothing goes live until you merge it; merging redeploys Political Atlas. | `data/` in political-atlas, on the `data-update` branch (the pull request) | Red run in political-atlas's Actions tab, or no new pull request on the 1st. The freshness check does not watch it. It was switched off from 31 October to 2 November, so the November run was skipped; it runs again from 1 December. |
 
 **Not timed.** These run when code is pushed. They are listed so that a red run there is not mistaken for a data failure.
 

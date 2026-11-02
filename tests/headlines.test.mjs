@@ -6,11 +6,12 @@ import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { pageTest } from './tools/pages.mjs';
 import { RUBRIC, SECTIONS, TITLES, pickStories, ruleHit } from '../headlines/refresh-top-stories/lowbrow.js';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
-test('UK shows top stories grouped by outlet, linking to the original articles', async () => {
+test('UK shows top stories grouped by outlet, linking to the original articles', pageTest, async () => {
   const browser = await chromium.launch({ channel: 'msedge' });
   const page = await browser.newPage();
   const errors = [];
@@ -62,7 +63,7 @@ const shown = page => page.evaluate(() => ({ name: document.getElementById('coun
   inList: [...document.querySelectorAll('#countryList [aria-current="true"]')].map(b => b.textContent), onMap: document.querySelectorAll('#map path.country.selected').length,
   country: new URLSearchParams(location.search).get('country') }));
 
-test('the map loads its small boundary file from the repo, with markers for the smallest countries', async () => {
+test('the map loads its small boundary file from the repo, with markers for the smallest countries', pageTest, async () => {
   const { browser, page, errors, requests } = await openTracker('?view=current');
   try {
     assert.equal(await page.textContent('#status-boundaries'), `Boundaries · ${Object.keys(outlets).length} covered countries`);
@@ -84,7 +85,7 @@ test('the map loads its small boundary file from the repo, with markers for the 
   } finally { await browser.close(); }
 });
 
-test('a country can be chosen with the keyboard, and the picker, list, map and address agree', async () => {
+test('a country can be chosen with the keyboard, and the picker, list, map and address agree', pageTest, async () => {
   const { browser, page, errors } = await openTracker('?view=current');
   try {
     await page.waitForFunction(() => !document.getElementById('countryPick').disabled);
@@ -110,7 +111,7 @@ test('a country can be chosen with the keyboard, and the picker, list, map and a
   } finally { await browser.close(); }
 });
 
-test('?country= selects the country once the boundaries are ready, by name, older name or code', async () => {
+test('?country= selects the country once the boundaries are ready, by name, older name or code', pageTest, async () => {
   for (const [query, name, code] of [['El%20Salvador', 'El Salvador', 'SV'], ['Kosovo', 'Kosovo', 'XK'], ['Republic%20of%20Serbia', 'Serbia', 'RS'],
     ['United%20States%20of%20America', 'United States', 'US'], ['Soviet%20Union%20%2F%20Russia', 'Russia', 'RU'], ['Vatican', 'Vatican City', 'VA']]) {
     const { browser, page, errors } = await openTracker(`?view=current&country=${query}`);
@@ -130,7 +131,7 @@ test('?country= selects the country once the boundaries are ready, by name, olde
   } finally { await browser.close(); }
 });
 
-test('the country list works at phone width without a horizontal scroll', async () => {
+test('the country list works at phone width without a horizontal scroll', pageTest, async () => {
   const { browser, page, errors } = await openTracker('?view=current', { width: 390 });
   try {
     await page.click('details.country-az summary');
@@ -170,7 +171,7 @@ test('Highbrowse: the caption names the filter, and its footer note opens with t
   assert.match(note.slice(mark[0].length), /^ keeps lowbrow stories out of the tracker\. Celebrity and showbiz gossip/);
 });
 
-test('Highbrowse: the wordmark heads the note at 40 px (large enough for the face) and takes the page\'s ink in light and dark', async () => {
+test('Highbrowse: the wordmark heads the note at 40 px (large enough for the face) and takes the page\'s ink in light and dark', pageTest, async () => {
   const browser = await chromium.launch({ channel: 'msedge' });
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });

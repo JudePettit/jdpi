@@ -3,7 +3,7 @@ import { store, fetchWithTimeout, fetchJSON, localFetchOptions, isoDay } from '.
 
 /* ---- Public ADS-B: adsb.lol ------------------------------------------------------------------------------------------
    adsb.lol sends no CORS headers, so a browser can't read it directly. Routes, in order:
-     1. the Vitruvian Manager proxy on this site (a Cloudflare Pages Function, sigint/edge/adsb-proxy.js, if the site deploys it),
+     1. the Vitruvian Manager proxy on this site (a Cloudflare Pages Function, functions/api/sigint/adsb/[[path]].js),
      2. the Vitruvian Manager bridge on this computer (its /public/adsb.lol relay),
      3. direct, in case adsb.lol enables CORS later.
    The winning route is remembered for the session. */

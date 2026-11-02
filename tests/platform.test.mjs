@@ -1,10 +1,12 @@
 // Platform tests for Vitruvian Manager (internally PRP): the shell, its registry, and a smoke test of every submodule.
 //   PRP_URL=https://jdpi.pages.dev node --test tests/platform.test.mjs      (or a local server: tests/tools/serve.mjs)
+// PRP_PAGES=0 (npm run test:unit) leaves out everything but the registry check.
 // Submodule-specific suites live with each submodule (e.g. political-atlas/tests).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { pageTest } from './tools/pages.mjs';
 
 const BASE = (process.env.PRP_URL || process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const registry = JSON.parse(readFileSync(new URL('../registry.json', import.meta.url), 'utf8'));
@@ -13,6 +15,7 @@ const absolute = url => new URL(url, BASE + '/').href;
 let browser, page;
 
 before(async () => {
+  if (pageTest.skip) return; // PRP_PAGES=0: only the registry check runs, with no browser
   browser = await chromium.launch({ channel: 'msedge' });
   page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 });
@@ -44,7 +47,7 @@ test('registry is well formed', () => {
   assert.equal(modules.find(x => x.m.id === 'briefing').m.name, 'Intelligence Briefing');
 });
 
-test('every live submodule URL responds', async () => {
+test('every live submodule URL responds', pageTest, async () => {
   const failures = [];
   for (const { m } of modules.filter(x => x.m.url && x.m.status === 'live')) {
     // Private pages that open in their own tab only need to answer: locked (401/403, or 503 while sign-in isn't set
@@ -55,7 +58,7 @@ test('every live submodule URL responds', async () => {
   assert.deepEqual(failures, []);
 });
 
-test('shell home shows every module and submodule', async () => {
+test('shell home shows every module and submodule', pageTest, async () => {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(`${BASE}/#/`, { waitUntil: 'networkidle' });
@@ -78,7 +81,7 @@ test('shell home shows every module and submodule', async () => {
   assert.deepEqual(errors, []);
 });
 
-test('each module overview lists its submodules', async () => {
+test('each module overview lists its submodules', pageTest, async () => {
   for (const s of registry.suites) {
     await page.goto(`${BASE}/#/${s.id}`, { waitUntil: 'networkidle' });
     assert.equal(await page.locator('.list tbody tr').count(), s.modules.length, `${s.id} rows`);
@@ -90,7 +93,7 @@ test('each module overview lists its submodules', async () => {
   }
 });
 
-test('old addresses redirect to the new structure', async () => {
+test('old addresses redirect to the new structure', pageTest, async () => {
   for (const [from, to] of [['#/q/briefing', '#/rt/briefing'], ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
     ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus']]) {
     await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
@@ -99,7 +102,7 @@ test('old addresses redirect to the new structure', async () => {
   }
 });
 
-test('each live submodule opens inside the shell workspace', async () => {
+test('each live submodule opens inside the shell workspace', pageTest, async () => {
   const problems = [];
   for (const { suite, m } of modules.filter(x => x.m.status === 'live')) {
     await page.goto(`${BASE}/#/${suite.id}/${m.id}`, { waitUntil: 'domcontentloaded' });
@@ -119,7 +122,7 @@ test('each live submodule opens inside the shell workspace', async () => {
   assert.deepEqual(problems, []);
 });
 
-test('view deep links open the right view of a page', async () => {
+test('view deep links open the right view of a page', pageTest, async () => {
   const h = modules.find(x => x.m.id === 'headlines');
   for (const v of h.m.views) {
     await page.goto(`${BASE}/#/rt/headlines/${v.id}`, { waitUntil: 'domcontentloaded' });
@@ -127,7 +130,7 @@ test('view deep links open the right view of a page', async () => {
   }
 });
 
-test('deep links move their submodule\'s one frame: hash changes in place, other queries load in it', async () => {
+test('deep links move their submodule\'s one frame: hash changes in place, other queries load in it', pageTest, async () => {
   const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
   try {
     const errors = [];
@@ -182,7 +185,7 @@ test('deep links move their submodule\'s one frame: hash changes in place, other
   } finally { await p.close(); }
 });
 
-test('the Vitruvian Manager figure plays while a submodule loads, goes with the load, and never for a hash-only move', async () => {
+test('the Vitruvian Manager figure plays while a submodule loads, goes with the load, and never for a hash-only move', pageTest, async () => {
   const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
   try {
     const errors = [];
@@ -250,7 +253,7 @@ test('the Vitruvian Manager figure plays while a submodule loads, goes with the 
   } finally { await still.close(); }
 });
 
-test('submodules use the PRP design system', async () => {
+test('submodules use the PRP design system', pageTest, async () => {
   const report = [];
   for (const { m } of modules.filter(x => x.m.url && !x.m.opensInNewTab && x.m.status === 'live')) {
     const html = await fetch(absolute(m.url)).then(r => r.text()).catch(() => '');
@@ -260,7 +263,7 @@ test('submodules use the PRP design system', async () => {
   assert.deepEqual(report, []);
 });
 
-test('the shell\'s theme reaches module pages', async () => {
+test('the shell\'s theme reaches module pages', pageTest, async () => {
   await page.goto(`${BASE}/#/rt/volatility`, { waitUntil: 'domcontentloaded' });
   await page.click('[data-theme-choice=dark]');
   const frame = page.frameLocator('#frames iframe.active');
@@ -269,7 +272,7 @@ test('the shell\'s theme reaches module pages', async () => {
   await page.click('[data-theme-choice=system]');
 });
 
-test('the Documentary reader keeps its own styles beside the Kino now-playing bar', async () => {
+test('the Documentary reader keeps its own styles beside the Kino now-playing bar', pageTest, async () => {
   // The reader's music credit is .np inside .doc; the shell's bar is .kino-np, so the bar's rules must not reach it.
   const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await p.goto(`${BASE}/#/rs/war-focus`, { waitUntil: 'domcontentloaded' });
@@ -281,7 +284,7 @@ test('the Documentary reader keeps its own styles beside the Kino now-playing ba
   assert.notEqual(style.display, 'grid');
 });
 
-test('shell works at phone width', async () => {
+test('shell works at phone width', pageTest, async () => {
   const p = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await p.goto(`${BASE}/#/rs`, { waitUntil: 'networkidle' });
   const { scroll, width } = await p.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
@@ -291,7 +294,7 @@ test('shell works at phone width', async () => {
   await p.close();
 });
 
-test('"Skip to content" moves focus into the workspace and keeps the route', async () => {
+test('"Skip to content" moves focus into the workspace and keeps the route', pageTest, async () => {
   for (const [route, target] of [['#/ns/progress', 'frame'], ['#/rt', 'Realtime Geopolitics'], ['#/', 'Workspace']]) {
     const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
     try {
@@ -310,7 +313,7 @@ test('"Skip to content" moves focus into the workspace and keeps the route', asy
   }
 });
 
-test('phone drawer: out of the tab order when closed, modal when open, closed by Escape, the scrim and its links', async () => {
+test('phone drawer: out of the tab order when closed, modal when open, closed by Escape, the scrim and its links', pageTest, async () => {
   const p = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const open = () => p.evaluate(() => document.getElementById('side').classList.contains('open'));
   try {
@@ -352,7 +355,7 @@ test('phone drawer: out of the tab order when closed, modal when open, closed by
   } finally { await p.close(); }
 });
 
-test('the sidebar can be hidden to give the page the whole width, remembered, and "/" brings it back', async () => {
+test('the sidebar can be hidden to give the page the whole width, remembered, and "/" brings it back', pageTest, async () => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   try {
     const p = await ctx.newPage();

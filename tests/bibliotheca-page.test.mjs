@@ -443,8 +443,12 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     const before = await page.evaluate(() => { const p = document.querySelector('#text p.current'); return { id: p.id, top: p.getBoundingClientRect().top }; });
     await page.click('#pane-close');
     assert.equal(await page.locator('#pane').isHidden(), true);
+    // The text re-flows to its full width and the place is restored a frame or two later, so wait for it to settle
+    // rather than measure the reflow itself (CI once caught it 9 px short).
+    const settled = await page.waitForFunction(([id, top]) => Math.abs(document.getElementById(id).getBoundingClientRect().top - top) <= 2,
+      [before.id, before.top], { timeout: 3000 }).then(() => true, () => false);
     const after = await page.evaluate(id => document.getElementById(id).getBoundingClientRect().top, before.id);
-    assert.ok(Math.abs(after - before.top) <= 2, `the reader's place kept: ${before.top} → ${after}`);
+    assert.ok(settled && Math.abs(after - before.top) <= 2, `the reader's place kept: ${before.top} → ${after}`);
     await page.waitForFunction(() => !/pane=|show=/.test(location.hash) && /t=Q70972/.test(location.hash));
 
     // Keys: → and ← move between chapters, and the address says which.

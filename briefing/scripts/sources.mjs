@@ -2,7 +2,9 @@
 // a balanced view can draw the same number of stories from each. Positions follow AllSides Media Bias Ratings where
 // they rate the outlet and Media Bias/Fact Check otherwise; "far" means the outlet sits at the extreme of those scales.
 // They describe editorial slant, not accuracy: `caution` marks outlets with poor fact-check records (MBFC "mixed" or
-// "low" factual reporting), which the page flags.
+// "low" factual reporting), which the page flags. Checked against MBFC's ratings on 2 November 2026: the data file behind MBFC's
+// browser extension (drmikecrowe/mbfcext, docs/v5/data/sources.json), and the review page of every outlet whose flag
+// that changed. MBFC re-rates outlets, so check again now and then.
 // Each position lists its sources in priority order. Every refresh uses the first PER_POSITION that return fresh
 // stories, so a feed that breaks is replaced by the next one and the positions stay equal.
 export const POSITIONS = [
@@ -32,15 +34,15 @@ export const SOURCES = [
   ['commondreams', 'Common Dreams', 'far_left', 'US', 'https://www.commondreams.org/feeds/feed.rss'],
   ['truthout', 'Truthout', 'far_left', 'US', 'https://truthout.org/feed/'],
   ['wsws', 'World Socialist Web Site', 'far_left', 'Intl', 'https://www.wsws.org/en/rss.xml'],
-  ['novara', 'Novara Media', 'far_left', 'UK', 'https://novaramedia.com/feed/'],
+  ['novara', 'Novara Media', 'far_left', 'UK', 'https://novaramedia.com/feed/', true],
   ['morningstar', 'Morning Star', 'far_left', 'UK', 'https://morningstaronline.co.uk/rss.xml'],
-  ['mondoweiss', 'Mondoweiss', 'far_left', 'US', 'https://mondoweiss.net/feed/'],
-  ['leftvoice', 'Left Voice', 'far_left', 'US', 'https://www.leftvoice.org/feed/'],
+  ['mondoweiss', 'Mondoweiss', 'far_left', 'US', 'https://mondoweiss.net/feed/', true],
+  ['leftvoice', 'Left Voice', 'far_left', 'US', 'https://www.leftvoice.org/feed/', true],
   ['counterfire', 'Counterfire', 'far_left', 'UK', 'https://www.counterfire.org/feed'],
   ['therealnews', 'The Real News Network', 'far_left', 'US', 'https://therealnews.com/feed'],
   ['truthdig', 'Truthdig', 'far_left', 'US', 'https://www.truthdig.com/feed/'],
-  ['canary', 'The Canary', 'far_left', 'UK', 'https://www.thecanary.co/feed/', true],
-  ['blackagendareport', 'Black Agenda Report', 'far_left', 'US', 'https://www.blackagendareport.com/rss.xml'],
+  ['canary', 'The Canary', 'far_left', 'UK', 'https://www.thecanary.co/feed/'],
+  ['blackagendareport', 'Black Agenda Report', 'far_left', 'US', 'https://www.blackagendareport.com/rss.xml', true],
   // ---- Left
   ['guardian', 'The Guardian', 'left', 'UK', 'https://www.theguardian.com/world/rss'],
   ['nyt', 'The New York Times', 'left', 'US', 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml'],
@@ -50,7 +52,7 @@ export const SOURCES = [
   ['democracynow', 'Democracy Now!', 'left', 'US', 'https://www.democracynow.org/democracynow.rss'],
   ['slate', 'Slate', 'left', 'US', 'https://slate.com/feeds/all.rss'],
   ['newrepublic', 'The New Republic', 'left', 'US', 'https://newrepublic.com/rss.xml'],
-  ['independent', 'The Independent', 'left', 'UK', 'https://www.independent.co.uk/news/world/rss'],
+  ['independent', 'The Independent', 'left', 'UK', 'https://www.independent.co.uk/news/world/rss', true],
   ['atlantic', 'The Atlantic', 'left', 'US', 'https://www.theatlantic.com/feed/all/'],
   ['salon', 'Salon', 'left', 'US', 'https://www.salon.com/feed/'],
   ['huffpost', 'HuffPost', 'left', 'US', 'https://chaski.huffpost.com/us/auto/vertical/world-news'],
@@ -68,31 +70,31 @@ export const SOURCES = [
   ['realclear', 'RealClearPolitics', 'centre', 'US', 'https://www.realclearpolitics.com/index.xml'],
   ['bloomberg', 'Bloomberg Politics', 'centre', 'US', 'https://feeds.bloomberg.com/politics/news.rss'],
   // ---- Right
-  ['foxnews', 'Fox News', 'right', 'US', 'https://moxie.foxnews.com/google-publisher/politics.xml'],
+  ['foxnews', 'Fox News', 'right', 'US', 'https://moxie.foxnews.com/google-publisher/politics.xml', true],
   ['nationalreview', 'National Review', 'right', 'US', 'https://www.nationalreview.com/feed/'],
   ['washingtonexaminer', 'Washington Examiner', 'right', 'US', 'https://www.washingtonexaminer.com/feed/'],
-  ['nypost', 'New York Post', 'right', 'US', 'https://nypost.com/feed/'],
-  ['washingtontimes', 'The Washington Times', 'right', 'US', 'https://www.washingtontimes.com/rss/headlines/news/'],
-  ['telegraph', 'The Telegraph', 'right', 'UK', 'https://www.telegraph.co.uk/rss.xml'],
+  ['nypost', 'New York Post', 'right', 'US', 'https://nypost.com/feed/', true],
+  ['washingtontimes', 'The Washington Times', 'right', 'US', 'https://www.washingtontimes.com/rss/headlines/news/', true],
+  ['telegraph', 'The Telegraph', 'right', 'UK', 'https://www.telegraph.co.uk/rss.xml', true],
   ['reason', 'Reason', 'right', 'US', 'https://reason.com/feed/'],
   ['amconmag', 'The American Conservative', 'right', 'US', 'https://www.theamericanconservative.com/feed/'],
-  ['freebeacon', 'Washington Free Beacon', 'right', 'US', 'https://freebeacon.com/feed/'],
-  ['dailymail', 'Daily Mail', 'right', 'UK', 'https://www.dailymail.co.uk/news/index.rss', true],
-  ['dailycaller', 'The Daily Caller', 'right', 'US', 'https://dailycaller.com/feed/'],
-  ['dailywire', 'The Daily Wire', 'right', 'US', 'https://www.dailywire.com/feeds/rss.xml'],
-  ['dailysignal', 'The Daily Signal', 'right', 'US', 'https://www.dailysignal.com/feed/'],
-  ['gbnews', 'GB News', 'right', 'UK', 'https://www.gbnews.com/feeds/news.rss'],
+  ['freebeacon', 'Washington Free Beacon', 'right', 'US', 'https://freebeacon.com/feed/', true],
+  ['dailymail', 'Daily Mail', 'right', 'UK', 'https://www.dailymail.co.uk/news/index.rss'],
+  ['dailycaller', 'The Daily Caller', 'right', 'US', 'https://dailycaller.com/feed/', true],
+  ['dailywire', 'The Daily Wire', 'right', 'US', 'https://www.dailywire.com/feeds/rss.xml', true],
+  ['dailysignal', 'The Daily Signal', 'right', 'US', 'https://www.dailysignal.com/feed/', true],
+  ['gbnews', 'GB News', 'right', 'UK', 'https://www.gbnews.com/feeds/news.rss', true],
   // ---- Far right
   ['breitbart', 'Breitbart', 'far_right', 'US', 'https://feeds.feedburner.com/breitbart', true],
-  ['federalist', 'The Federalist', 'far_right', 'US', 'https://thefederalist.com/feed/'],
+  ['federalist', 'The Federalist', 'far_right', 'US', 'https://thefederalist.com/feed/', true],
   ['wnd', 'WND', 'far_right', 'US', GNEWS('wnd.com'), true],
   ['gatewaypundit', 'The Gateway Pundit', 'far_right', 'US', 'https://feeds.feedburner.com/thegatewaypundit', true],
   ['oann', 'One America News', 'far_right', 'US', GNEWS('oann.com'), true],
-  ['amgreatness', 'American Greatness', 'far_right', 'US', 'https://amgreatness.com/feed/'],
+  ['amgreatness', 'American Greatness', 'far_right', 'US', 'https://amgreatness.com/feed/', true],
   ['nationalpulse', 'The National Pulse', 'far_right', 'US', 'https://thenationalpulse.com/feed/', true],
   ['zerohedge', 'ZeroHedge', 'far_right', 'US', 'https://feeds.feedburner.com/zerohedge/feed', true],
   ['remix', 'Remix News', 'far_right', 'EU', 'https://rmx.news/feed/', true],
-  ['blaze', 'TheBlaze', 'far_right', 'US', 'https://www.theblaze.com/feeds/feed.rss'],
+  ['blaze', 'TheBlaze', 'far_right', 'US', 'https://www.theblaze.com/feeds/feed.rss', true],
   ['pjmedia', 'PJ Media', 'far_right', 'US', 'https://pjmedia.com/feed', true],
   ['newsmax', 'Newsmax', 'far_right', 'US', GNEWS('newsmax.com'), true],
 ].map(([id, name, position, country, feed, caution]) => ({ id, name, position, country, feed, caution: !!caution }));

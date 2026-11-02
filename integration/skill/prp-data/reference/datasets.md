@@ -1,6 +1,6 @@
 # Vitruvian Manager datasets
 
-Generated 2026-11-01 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
+Generated 2026-11-02 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
 ## Realtime Geopolitics
 
@@ -8,7 +8,7 @@ Generated 2026-11-01 from https://jdpi.pages.dev/integration/catalog.json. Read 
 
 Intelligence Briefing: stories. Every story from the Intelligence Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 6,362 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,672 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -30,7 +30,7 @@ Global Headline Tracker: outlets. The most-read news outlets of each covered cou
 
 ### volatility-latest
 
-Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-10-31), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
+Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-01), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
 
 - Rows: 236 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-latest.json (records at `records`)
@@ -38,9 +38,9 @@ Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–1
 
 ### volatility-daily
 
-Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 36 days, for trends and comparisons.
+Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 37 days, for trends and comparisons.
 
-- Rows: 7,596 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.
+- Rows: 7,795 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.
 - Files: https://jdpi.pages.dev/integration/data/volatility-daily/0.json, https://jdpi.pages.dev/integration/data/volatility-daily/1.json, https://jdpi.pages.dev/integration/data/volatility-daily/2.json (+5 more) (records at `records`)
 - Fields: `date` (date), `iso3` (string), `name` (string), `score` (number), `conflict` (number), `political` (number), `unrest` (number), `economic` (number), `spread` (number), `events` (number), `tone` (number), `coverage` (string)
 
@@ -48,7 +48,7 @@ Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index score
 
 Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.
 
-- Rows: 36 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
+- Rows: 37 · refresh: daily · licence: Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-global.json (records at `records`)
 - Fields: `date` (date), `mean_score` (number), `events` (number), `files` (number)
 
@@ -110,9 +110,9 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 ### upcoming-political-events
 
-Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-01 to 2028-05-01 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-02 to 2028-05-02 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 304 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.
+- Rows: 302 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string)
 
@@ -154,7 +154,7 @@ War Focus: major wars. The major wars of the last hundred years that War Focus f
 
 War Focus: battles, sieges and operations. Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped.
 
-- Rows: 4,347 · refresh: monthly · licence: Wikidata CC0.
+- Rows: 4,384 · refresh: monthly · licence: Wikidata CC0.
 - Files: https://jdpi.pages.dev/integration/data/war-focus-battles/0.json, https://jdpi.pages.dev/integration/data/war-focus-battles/1.json, https://jdpi.pages.dev/integration/data/war-focus-battles/2.json (+2 more) (records at `records`)
 - Fields: `war_id` (string), `war` (string), `qid` (string), `name` (string), `description` (string), `start` (date), `end` (date), `precision` (string), `deaths` (number), `casualties` (number), `lat` (number), `lon` (number), `wikipedia` (string)
 
@@ -196,7 +196,7 @@ Kardashev Tracker: humanity. World population, total energy capture and humanity
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 580 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 568 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean)
 
@@ -254,7 +254,7 @@ Auto Trader: famous investors' exits. Positions each famous investor held at the
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,210 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,231 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array)
 
@@ -296,7 +296,7 @@ Invention Timeline: institutions. Universities, laboratories, companies and acad
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 981 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,000 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array)
 
@@ -306,7 +306,7 @@ Digital Briefing: sources. The journals, preprint servers, institutions and news
 
 - Rows: 79 · refresh: 6-hourly · licence: Metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `sources`)
-- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `perDay` (number), `matched` (number)
+- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `error` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `perDay` (number), `matched` (number)
 
 ### prp-submodules
 

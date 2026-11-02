@@ -72,8 +72,9 @@ run fails, so the page keeps its last good data and simply ages.
   runs the Kino tests. Deploys nothing.
 - trade-desk `ci.yml` (Test and deploy): every push to main and every pull request runs the tests; on main a passing
   suite deploys the trade-desk Worker (`DEPLOY_FROM_GITHUB` is `true` there too).
-- hp-retrospective has no workflows. Neither has Double Signal's private repository (`JudePettit/double-signal`, since
-  2 November): nothing tests it on a push, and it is deployed by hand.
+- hp-retrospective has no workflows. Double Signal's private repository (`JudePettit/double-signal`, since 2 November)
+  has one, `ci.yml` (Test): every push to main and every pull request runs its tests. It deploys nothing; Double
+  Signal is still deployed by hand.
 
 ### The alarm: Check data freshness, daily at 09:33 (10:33)
 
@@ -120,7 +121,7 @@ difference.
   a timer that has stopped writes nothing either. Check that the agents' Last run times move.
 - **Deploys.** trade-desk is deployed by its GitHub `ci.yml` once the tests pass. Double Signal is deployed by hand
   (`npm run deploy` in its folder); its code has been in the private repository `JudePettit/double-signal` since
-  2 November, which has no workflows yet.
+  2 November, where every push runs the tests (no deploy).
 - **On demand, not timed:** trade-desk's `/mcp` (about 120 requests a minute per client, 64 KB a request, one tool call
   each) and its public market data (`/api/public/…`, cached for 30 seconds).
 

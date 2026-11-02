@@ -43,7 +43,7 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
 | Registry | `registry.json` | Modules, submodules, URLs, kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
-| Connector | `design/prp-bar.js` (`design/jdpi-bar.js` is an identical copy) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
+| Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
 | Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |

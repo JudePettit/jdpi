@@ -27,7 +27,7 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
   - `t/<n>.json`: English Wikipedia title → Wikidata ID, sharded by hash. The linker uses these.
   - `keys.json`: module keys (e.g. `congress:P000197`) → Wikidata ID.
   - `manifest.json`: counts and build time.
-- **Linker** (`design/jdpi-entities.js`, loaded by `jdpi-bar.js`): adds ◈ Encyclopaedia links next to Wikipedia links, `data-qid="Q…"` and `data-entity-key="…"` elements on any JDP-I page.
+- **Linker** (`design/jdpi-entities.js`, loaded by `prp-bar.js`): adds ◈ Encyclopaedia links next to Wikipedia links, `data-qid="Q…"` and `data-entity-key="…"` elements on any JDP-I page.
 - **Deep links**: Encyclopaedia links open modules through the shell as `#/<suite>/<module>?at=<url>`. The shell only accepts URLs on that module's own page.
 
 ## Adding a module

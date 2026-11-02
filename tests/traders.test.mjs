@@ -1,4 +1,4 @@
-﻿// Trader Tracker: House trades (filters, member view) and 13F investors (runs against JDPI_URL).
+// Trader Tracker: House trades (filters, member view) and 13F investors (runs against JDPI_URL).
 // The data test reads the committed traders/data (which traders-refresh tests before committing); PRP_PAGES=0 leaves
 // out the page test.
 import { test } from 'node:test';

@@ -1,0 +1,14 @@
+# Editor settings for every file in the repository (editorconfig.org; most editors read this file).
+# charset = utf-8 saves without a byte-order mark (BOM), the invisible bytes at the start of a file that some tools
+# trip over. Line endings are left to git (core.autocrlf), except where .gitattributes fixes them.
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+# iCalendar files keep CRLF line endings (RFC 5545); they are generated, not edited (see .gitattributes).
+[*.ics]
+end_of_line = crlf

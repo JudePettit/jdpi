@@ -57,6 +57,9 @@
 
   const script = document.currentScript;
   const SHELL = new URL((script && script.dataset.shell) || 'https://jdpi.pages.dev/', location.href);
+  // On a local test server the shell's address is not known in advance (any port, and pages default to the live
+  // shell), so there the narrator answers whichever page framed it. Keep this to localhost and 127.0.0.1: on any
+  // public host only the shell's own origin may start or stop a reading, and replies go to that origin alone.
   const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   let iter = null, lit = null;
 

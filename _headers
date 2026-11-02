@@ -1,8 +1,16 @@
+# Every page: no camera, microphone, payments or USB devices (no page uses them). Location stays allowed for this
+# site's own pages, which the SIGINT Dashboard needs; serial ports (its GNSS and mesh radios) are not limited here.
+# Allow microphone=(self) here first if a page ever takes voice input.
+/*
+  Permissions-Policy: camera=(), microphone=(), payment=(), usb=(), geolocation=(self)
+
 /design/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=300
 
+# The registry: always revalidated, and readable by other sites and tools (one block: Pages reads each path once).
 /registry.json
+  Access-Control-Allow-Origin: *
   Cache-Control: no-cache
 
 /lake/*
@@ -19,9 +27,6 @@
   Access-Control-Allow-Origin: *
 
 /llms.txt
-  Access-Control-Allow-Origin: *
-
-/registry.json
   Access-Control-Allow-Origin: *
 
 /calendar/data/*

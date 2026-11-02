@@ -112,7 +112,11 @@ const retro = existsSync(join(retroDir, 'data/countries.json')) ? json(join(retr
 const gwByIso3 = new Map(Object.entries(RETRO_COUNTRIES).map(([gw, c]) => [c.iso3, +gw]));
 // Gleditsch–Ward codes for every state (the codes UCDP uses), from the countrycode project's code list. An error page
 // would parse to no rows and cost about a hundred countries their codes, conflict history and wars this year.
-const codes = await fetch('https://raw.githubusercontent.com/vincentarelbundock/countrycode/main/dictionary/codelist_without_cldr.csv', { headers: UA });
+// Read at a fixed commit, not the moving main branch, so an upstream change cannot alter the codes unseen. To update,
+// set COUNTRYCODE_COMMIT to a newer commit of vincentarelbundock/countrycode and rebuild (2 October 2026: "Update
+// dictionaries (#390)").
+const COUNTRYCODE_COMMIT = '9546912ab023a6445cbe7b5620f5103446d84e52';
+const codes = await fetch(`https://raw.githubusercontent.com/vincentarelbundock/countrycode/${COUNTRYCODE_COMMIT}/dictionary/codelist_without_cldr.csv`, { headers: UA });
 if (!codes.ok) throw new Error(`countrycode code list: HTTP ${codes.status}`);
 const codelist = parseCsv(await codes.text());
 const nameKey = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').replace(/[^a-z]/g, '');

@@ -1,4 +1,4 @@
-﻿// National Analysis: map, country profile (overview + PESTLE), and side-by-side comparison.
+// National Analysis: map, country profile (overview + PESTLE), and side-by-side comparison.
 // The data test reads the committed national/data (which national-refresh tests before committing); the page test
 // runs against JDPI_URL (default live), and PRP_PAGES=0 leaves it out.
 import { test } from 'node:test';

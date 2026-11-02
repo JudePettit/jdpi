@@ -32,7 +32,9 @@ function moduleInfo(link) {
   return m ? { name: m.name, icon: m.icon, code: suite.code, suite: suite.id, suiteName: suite.name, url: m.url } : { name: link.label.split(' · ')[0], code: link.suite.toUpperCase(), suite: link.suite };
 }
 // Kino's submodules are "kino-<category>" in registry.json. Once one is live (it has a url), links between categories
-// go through the shell so its sidebar and breadcrumb follow; until then they open the page directly.
+// go through the shell so its sidebar and breadcrumb follow; until then they open the page directly. They are plain
+// links, not tabs, on purpose: each category is its own submodule page, so a tab list would promise views of this one.
+// Revisit when Kino is restructured.
 const kinoModule = id => S.registry?.suites.find(s => s.id === 'kino')?.modules.find(m => m.id === `kino-${id}`) || null;
 function catLink(id) {
   if (embedded && kinoModule(id)?.url) return { href: `${SHELL}#/kino/kino-${id}`, target: '_top' };

@@ -2,6 +2,7 @@
 
 Every timed job behind Vitruvian Manager: when it runs, what it writes, and how you know it broke. Checked against the
 files on 31 October 2026 (jdpi `fb8c85b`, trade-desk `8e7873d`, political-atlas `dabbb34`, double-signal `fd64ae8`).
+Updated 2 November: Double Signal now has a private GitHub repository, and Political Atlas skipped its November update.
 
 **Times** are UTC. In winter London keeps UTC (GMT), so the times read the same there. In summer (BST, from the last
 Sunday in March to the last Sunday in October) London is an hour ahead, and the summer London time is in brackets:
@@ -55,7 +56,7 @@ run fails, so the page keeps its last good data and simply ages.
 | **Kino** (`kino-refresh.yml`) | 4th of the month, 04:13 (05:13) | Re-reads the documentaries' Wikidata labels and Wikimedia Commons image credits (entries older than 25 days) and rebuilds the catalogue. Guard: stops before writing the catalogue if a script fails its checks or a Commons image it names is gone. | `kino/data/index.json`, `media.json`, `iso.json`, and `kino/scripts/cache.json` | Red run. Freshness: the cache older than about 62 days. |
 | **National Analysis** (`national-refresh.yml`) | 5th of the month, 03:47 (04:47) | World Bank indicators, plus leadership and conflict data from the Retrospective. Guard: not written if an indicator's countries halve, or the countries, their Wikidata matches, GW codes or leadership data fall by a tenth. | `national/data` | Red run. Freshness: `national/data/index.json` older than about 62 days. |
 | **Check data freshness** (`freshness.yml`) | Daily 09:33 (10:33) | The alarm: see below. | Nothing in the repository; a table on the run's summary page | It is the signal. |
-| **Political Atlas monthly update** (political-atlas, `monthly-update.yml`) | 1st of the month, 06:00 (07:00) | Asks Claude, with web search, to check and update all 78 country records (paid: the Atlas README puts a full run at a few to low tens of US dollars), validates them, and opens a pull request, "Monthly political data update", for you to review. Nothing goes live until you merge it; merging redeploys Political Atlas. | `data/` in political-atlas, on the `data-update` branch (the pull request) | Red run in political-atlas's Actions tab, or no new pull request on the 1st. The freshness check does not watch it. |
+| **Political Atlas monthly update** (political-atlas, `monthly-update.yml`) | 1st of the month, 06:00 (07:00) | Asks Claude, with web search, to check and update all 78 country records (paid: the Atlas README puts a full run at a few to low tens of US dollars), validates them, and opens a pull request, "Monthly political data update", for you to review. Nothing goes live until you merge it; merging redeploys Political Atlas. | `data/` in political-atlas, on the `data-update` branch (the pull request) | Red run in political-atlas's Actions tab, or no new pull request on the 1st. The freshness check does not watch it. **Switched off on 31 October**, so the November run was skipped; for December's it must be on again (Actions → Monthly data update → Enable workflow). |
 
 **Not timed.** These run when code is pushed. They are listed so that a red run there is not mistaken for a data failure.
 
@@ -70,7 +71,8 @@ run fails, so the page keeps its last good data and simply ages.
   runs the Kino tests. Deploys nothing.
 - trade-desk `ci.yml` (Test and deploy): every push to main and every pull request runs the tests; on main a passing
   suite deploys the trade-desk Worker (`DEPLOY_FROM_GITHUB` is `true` there too).
-- hp-retrospective has no workflows, and Double Signal has no GitHub repository.
+- hp-retrospective has no workflows. Neither has Double Signal's private repository (`JudePettit/double-signal`, since
+  2 November): nothing tests it on a push, and it is deployed by hand.
 
 ### The alarm: Check data freshness, daily at 09:33 (10:33)
 
@@ -96,21 +98,6 @@ its summary page has a table with a tick or a cross on every line.
 
 It watches only jdpi. Political Atlas, the Workers, Supabase and the aircraft proxy are outside it.
 
-### Where the README is out of date
-
-The README's "Data refreshes" paragraph lists the Briefing twice daily, the Scientific Briefing every six hours,
-"Volatility, National Analysis, Battlefield and War Focus, Auto Trader (weekly)", and the Invention Timeline and the
-Encyclopaedia monthly. Where they disagree, the workflow files are right:
-
-- Volatility runs **daily**; Battlefield and Auto Trader are **weekly**; War Focus and National Analysis are
-  **monthly**. The README gives Volatility, National Analysis, Battlefield and War Focus no schedule of their own, or,
-  read as one group with Auto Trader, calls them all weekly.
-- The Economics and Digital Briefings run with the Scientific one.
-- It leaves out the Calendars and Integration Hub (daily), Kino (monthly), the Bibliotheca tags, the freshness check,
-  the deploy at the end of every refresh, and everything outside jdpi.
-- "Commit. Cloudflare redeploys automatically" (under "Adding a submodule") is still true in effect, but the deploy now
-  comes from GitHub after the tests pass, so a commit that fails a test is not deployed.
-
 ## 2. Cloudflare Workers
 
 Two Workers have timers (Cloudflare calls them cron triggers). They run around the clock, so London time makes no
@@ -131,7 +118,8 @@ difference.
 - **Silence is the failure nobody announces.** With no rule or agent switched on, a healthy minute writes nothing, and
   a timer that has stopped writes nothing either. Check that the agents' Last run times move.
 - **Deploys.** trade-desk is deployed by its GitHub `ci.yml` once the tests pass. Double Signal is deployed by hand
-  (`npm run deploy` in its folder).
+  (`npm run deploy` in its folder); its code has been in the private repository `JudePettit/double-signal` since
+  2 November, which has no workflows yet.
 - **On demand, not timed:** trade-desk's `/mcp` (about 120 requests a minute per client, 64 KB a request, one tool call
   each) and its public market data (`/api/public/…`, cached for 30 seconds).
 
@@ -200,12 +188,23 @@ repository; the workflow's page then shows a banner with a button to enable it a
 
 Change this file in the same commit as any change to a timed job, and:
 
-- **A new or changed jdpi refresh:** copy an existing workflow (a test step, `./.github/actions/commit-data`, the
-  deploy job), stamp the data file with `generated`, and add the file to `STORES` in `.github/scripts/freshness.mjs`
-  (its workflow, how often it can change in hours, and `live: true` if the site's copy should be compared). Without
-  that entry the alarm will not notice the job stopping.
+- **A new or changed jdpi refresh.** Every pipeline today has each of these; a new one needs them all:
+  1. **A guard in the build:** before writing, compare the new data with the last good copy and stop, writing
+     nothing, when a source failed and a count would fall too far (usually by more than half, for some by a tenth).
+     The run then fails and the page keeps its last good data.
+  2. **A `generated` stamp** in the main data file, with the time it was made.
+  3. **A data test** in `tests/` that checks the committed files (their shape and the counts the guard protects) and
+     passes with `PRP_PAGES=0`, so the refresh can run it with no browser.
+  4. **A workflow** copied from an existing one: a schedule staggered from the others (in data order), a time limit
+     and a no-overlap group, the test step before `./.github/actions/commit-data` (which commits only its own
+     paths), then the deploy job.
+  5. **A freshness entry:** add the file to `STORES` in `.github/scripts/freshness.mjs` (its workflow, how often it
+     can change in hours, and `live: true` if the site's copy should be compared). Without that entry the alarm will
+     not notice the job stopping.
+  6. **A row in section 1 of this file.** If the data names people, places, wars or parties, also add an adapter in
+     `lake/scripts/adapters.mjs` so the Encyclopaedia links to it.
 - **A Worker timer:** trade-desk's are `triggers.crons` in `wrangler.jsonc` with the matching branch of `scheduled()` in
   `src/index.js`; Double Signal's is in `vite.config.ts`.
 - **A Supabase job:** its schedule and SQL exist only in the database, so write them down here.
 - **A server function with a limit:** add it to section 4.
-- The README's "Data refreshes" paragraph should point here rather than repeat the list.
+- The README's "Data refreshes" paragraph points here: keep it that way rather than repeating the list.

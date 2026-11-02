@@ -5,7 +5,7 @@ enterprise: one workspace for geopolitics, intelligence tradecraft, history, mon
 the sidebar, it opens in the main area, and every submodule shares one design system, one Encyclopaedia and one
 light/dark theme. Its mark is Leonardo's Vitruvian figure in a hard hat (`design/brand-vm.svg`).
 
-Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo). Formerly PRP, and before that "JDP-I".
+Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo by GitHub Actions once the tests pass). Formerly PRP, and before that "JDP-I".
 "prp" is still the internal name: file names (`design/prp.css`, `design/PRP-STYLE.md`), tokens (`--prp-*`), classes,
 registry ids and storage keys keep it, and only what people read says Vitruvian Manager.
 
@@ -33,7 +33,7 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
         │ one persistent iframe per submodule page (state is kept when you switch)
         ├── pages in this repo: q/, battlefield/, kardashev/, encyclopedia/, fe/, science/, osint/, sigint/, geoint/
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
-        └── trade-desk Worker (TD Markets, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
+        └── trade-desk Worker (Market Briefing, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
   lake/ (the Encyclopaedia's entity layer, keyed by Wikidata IDs) links every page to every other
 ```
@@ -47,6 +47,8 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
 | Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
+| Data for programs and AI tools | `functions/api/v1/[[path]].js`, `functions/mcp.js`, `integration/openapi.json`, `llms.txt` | The site's public data, read-only and with no sign-in: a JSON API at `/api/v1/` (described by `openapi.json`), an MCP server at `/mcp` for AI assistants, and `/llms.txt`, a short guide for language models. The Integration Hub rebuilds `openapi.json` and `llms.txt` every day. |
+| Aircraft proxy | `functions/api/sigint/adsb/[[path]].js` | Relays adsb.lol's aircraft positions to the SIGINT Dashboard, which a browser cannot read from adsb.lol directly. |
 
 ### One page, one submodule
 
@@ -61,7 +63,7 @@ page**, listed under `views` in the registry, never extra sidebar entries.
 2. Hook the page up to the design system (see `design/PRP-STYLE.md` §2) and follow its anatomy and checklist.
 3. If the page mentions people, places, wars, parties or ideas, add an adapter in `lake/scripts/adapters.mjs` so the
    Encyclopaedia links to it.
-4. Commit. Cloudflare redeploys automatically.
+4. Commit and push. GitHub runs the whole test suite, and the site deploys only if it passes.
 
 ## Data refreshes
 
@@ -77,6 +79,12 @@ PRP_URL=http://localhost:8787 node --test tests/platform.test.mjs   # shell and 
 node tests/tools/serve.mjs 8787                   # local static server (keeps .html and query strings)
 node tests/tools/shoot.mjs <url> <out.png> [--dark] [--width 390]   # screenshot a page in light or dark
 ```
+
+CI (`.github/workflows/ci.yml`) runs the whole suite on every push and pull request, against a local copy of the site
+served like Cloudflare Pages, and deploys main when it passes. The page tests read the site at `JDPI_URL` (the
+platform test prefers `PRP_URL`); CI points both at its local copy, and without them most page tests fetch the live
+site. `PRP_PAGES=0` leaves out every test that needs a browser or the network: the data refreshes test their new data
+that way before they commit it.
 
 ## Licences
 

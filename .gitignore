@@ -1,2 +1,4 @@
 node_modules/
 .DS_Store
+# Temporary files from running the server functions locally with wrangler (wrangler pages dev).
+.wrangler/

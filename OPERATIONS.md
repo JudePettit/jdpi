@@ -53,7 +53,7 @@ run fails, so the page keeps its last good data and simply ages.
 | **Auto Trader** (`traders-refresh.yml`) | Tuesdays 03:41 (04:41) | US House members' trade reports, then large investors' 13F holdings (tickers from OpenFIGI), each tested and committed on its own. Guard: trades not written if a year loses a tenth of its trades or half its members or parties; holdings not written if a listed investor goes missing or has a tenth fewer positions. | `traders/data/congress.json` and `traders/scripts/ptr-cache.json`; `traders/data/investors.json` and `traders/scripts/figi-cache.json` | Red run if either half failed (the other is still committed). Freshness: either file older than about 14 days. |
 | **War Focus** (`warfocus-refresh.yml`) | 2nd of the month, 02:53 (03:53) | Re-scores the ongoing wars from UCDP's events and picks up new battles from Wikidata. Guard: not written if a war loses its Wikidata item, half its battles or a tenth of its UCDP events. | `battlefield/focus/data` | Red run. Freshness: older than about 62 days. |
 | **Invention Timeline** (`progress-refresh.yml`) | 2nd of the month, 04:37 (05:37) | Re-reads the facts behind the breakthroughs from Wikidata (entries older than 25 days). Guard: not written if a curated event cannot be placed, people or institutions fall by a tenth, or the file would pass 1.5 MB. | `science/progress/data`, `science/scripts/progress-cache.json` | Red run. Freshness: older than about 62 days. |
-| **Encyclopaedia, and the Bibliotheca tags** (`lake-refresh.yml`) | 3rd of the month, 03:31 (04:31) | Rebuilds the entity layer (mentions from every module, Wikidata facts, Wikipedia summaries), then tags every Bibliotheca book again against it. Guard: stops if a module's adapter fails, its mentions halve, or the entities fall by a tenth. | `lake/data`, `lake/scripts/summary-cache.json`, `bibliotheca/data/books`, `bibliotheca/data/index.json` | Red run. Freshness: `lake/data/manifest.json` older than about 62 days. |
+| **Master Index, and the Bibliotheca tags** (`lake-refresh.yml`) | 3rd of the month, 03:31 (04:31) | Rebuilds the entity layer (mentions from every module, Wikidata facts, Wikipedia summaries), then tags every Bibliotheca book again against it. Guard: stops if a module's adapter fails, its mentions halve, or the entities fall by a tenth. | `lake/data`, `lake/scripts/summary-cache.json`, `bibliotheca/data/books`, `bibliotheca/data/index.json` | Red run. Freshness: `lake/data/manifest.json` older than about 62 days. |
 | **Kino** (`kino-refresh.yml`) | 4th of the month, 04:13 (05:13) | Re-reads the documentaries' Wikidata labels and Wikimedia Commons image credits (entries older than 25 days) and rebuilds the catalogue. Guard: stops before writing the catalogue if a script fails its checks or a Commons image it names is gone. | `kino/data/index.json`, `media.json`, `iso.json`, and `kino/scripts/cache.json` | Red run. Freshness: the cache older than about 62 days. |
 | **National Analysis** (`national-refresh.yml`) | 5th of the month, 03:47 (04:47) | World Bank indicators, plus leadership and conflict data from the Retrospective. Guard: not written if an indicator's countries halve, or the countries, their Wikidata matches, GW codes or leadership data fall by a tenth. | `national/data` | Red run. Freshness: `national/data/index.json` older than about 62 days. |
 | **Check data freshness** (`freshness.yml`) | Daily 09:33 (10:33) | The alarm: see below. | Nothing in the repository; a table on the run's summary page | It is the signal. |
@@ -143,17 +143,42 @@ repository holds them.
 
 ## 4. The site's server functions (Cloudflare Pages Functions)
 
-None is timed. Three run on demand and have limits:
+None is timed. Five run on demand and have limits:
 
 | Job | When | What it does | What it writes | How you know it broke |
 |---|---|---|---|---|
-| **JSON API**, `/api/v1/` (`functions/api/v1/[[path]].js`) | On demand | Answers questions about the site's public data (catalogue, datasets, Encyclopaedia, events, briefings, RSS and JSON feeds, `calendar.ics`) from the deployment's own files. Limits: about 240 requests a minute per client; 100 rows a page; 400 events in a `.ics`. | Nothing | The 09:33 check fails if `/api/v1/datasets` lists fewer than 30 datasets. A caller over the limit is told "Too many requests" (429). |
+| **JSON API**, `/api/v1/` (`functions/api/v1/[[path]].js`) | On demand | Answers questions about the site's public data (catalogue, datasets, Master Index, events, briefings, RSS and JSON feeds, `calendar.ics`) from the deployment's own files. Limits: about 240 requests a minute per client; 100 rows a page; 400 events in a `.ics`. | Nothing | The 09:33 check fails if `/api/v1/datasets` lists fewer than 30 datasets. A caller over the limit is told "Too many requests" (429). |
 | **MCP server**, `/mcp` (`functions/mcp.js`) | On demand | Lets AI tools such as Claude read the same data. Limits: about 120 requests a minute per client; 64 KB a request; 20 messages a batch; one tool call a request. | Nothing | The 09:33 check fails if it lists fewer than 9 tools or `list_datasets` does not answer. |
 | **Aircraft proxy**, `/api/sigint/adsb/` (`functions/api/sigint/adsb/[[path]].js`) | On demand: the SIGINT Dashboard asks every 15 seconds while it is open | Relays adsb.lol's aircraft positions, which a browser cannot read from adsb.lol directly. Limits: about 30 requests a minute per client; answers cached for 10 seconds; adsb.lol's own refusals passed on. | Cloudflare's cache only | Nothing watches it. The SIGINT Dashboard shows no aircraft, and the proxy answers "adsb.lol did not answer" (502) or passes on adsb.lol's error. |
+| **Voice proxy**, `/api/voice/v1/` (`functions/api/voice/v1/[[path]].js`, with `functions/_lib/voice.js` and `voice-providers.js`) | On demand: once a page when the Documentary panel or Kino's settings open (`GET voices`), then one `POST say` a sentence while an online voice reads | Speaks a sentence with an Azure neural voice, the key kept on the server. Only the site's own pages may call it. Limits: 1,000 characters a request; about 90 requests a minute per client; 30,000 characters a person a UTC day (`VOICE_DAILY_CHARS`) and 450,000 for the whole site a UTC month (`VOICE_MONTHLY_CHARS`, below Azure's free 500,000). Cache hits are free. | With an R2 bucket bound as `VOICE`: each clip and its `.vtt`, once (`azure/<voice>/<key>`). With a D1 database bound as `VOICE_DB`: the character counts (table `voice_usage`). Without them, nothing (the counts live in each copy's memory) | Nothing watches it, and by design nobody notices: every failure falls back to the device voice. `GET /api/voice/v1/voices` says `available: false, reason: "not configured"` without the secrets; the panel or Kino's note says "The online voice is not answering" or "has used today's allowance". |
+| **Voice clips**, `/voice/<provider>/<voice>/<key>.mp3` and `.vtt` (`functions/voice/[[path]].js`) | On demand, when a page plays a stored clip | Serves the clips the voice proxy stored in R2, cached for a year (a clip never changes), with ranges for seeking. | Nothing | 404 for every clip while no bucket is bound as `VOICE`. |
 
 The limits are counted separately in each of Cloudflare's copies of the function, so they are approximate, unless a
 rate-limiting binding named `PRP_RATE_LIMITER` is added in Cloudflare; neither the repository nor the jdpi Pages
-project's settings (checked 30 October) has one. The aircraft proxy always counts this way.
+project's settings (checked 30 October) has one. The aircraft proxy always counts this way. So do the voice proxy's
+character counts until a D1 database is bound as `VOICE_DB` (then they are shared and exact); until then only Azure's own
+free-tier cap is hard, so bind D1 before moving the Speech resource to a paid tier. On the free tier (F0) Azure itself takes about 20 requests a minute
+for the whole site, roughly two listeners at once; beyond that a listener hears the device voice for 30 seconds at a
+time. The Speech resource is `vm-voice-speech` (free tier, UK South) in Jude's personal Azure subscription, made by
+`PRP-azure-speech.mjs` (in the OneDrive folder, beside the vault script); its key is the Pages secret
+`AZURE_SPEECH_KEY` (vault item "PRP / Azure / Speech key"), its region `AZURE_SPEECH_REGION`.
+
+**The voice proxy's settings** (Cloudflare dashboard → Workers & Pages → jdpi → Settings → Variables and Secrets, for
+Production; the vault script, `PRP-set-secrets.mjs`, has no Pages target yet, so these are set in the dashboard or with
+`npx wrangler pages secret put <NAME> --project-name=jdpi`):
+
+| Name | Kind | What |
+|---|---|---|
+| `AZURE_SPEECH_KEY` | Secret (Encrypt) | Key 1 of the Azure Speech resource (Azure portal → the Speech resource → Keys and Endpoint). Without it, and the region, the online voice is "not configured". |
+| `AZURE_SPEECH_REGION` | Text | The resource's region as Azure writes it, e.g. `uksouth`. |
+| `VOICE_SALT` | Secret (Encrypt), optional | Any long random string: salts the hash of each listener's IP address the counts are kept under. Without it each copy of the function draws its own. |
+| `VOICE_DAILY_CHARS`, `VOICE_MONTHLY_CHARS` | Text, optional | The two character limits (defaults 30000 and 450000). |
+| `VOICE_ORIGINS` | Text, optional | Other origins allowed to call the proxy, comma-separated (a custom domain, or `http://localhost:8788` for `wrangler pages dev`). |
+| `VOICE` | R2 bucket binding, optional | The clip cache (Settings → Bindings → R2 bucket; a bucket such as `prp-voice`). |
+| `VOICE_DB` | D1 database binding, optional | The shared character counts (Settings → Bindings → D1 database; the table is created on first use). |
+
+Bindings and variables apply from the next deployment. The repository has no `wrangler.toml` for Pages: if one is ever
+added it becomes the only source of the project's bindings, so it must then list these as well.
 
 ## When something breaks
 
@@ -204,7 +229,7 @@ Change this file in the same commit as any change to a timed job, and:
      can change in hours, and `live: true` if the site's copy should be compared). Without that entry the alarm will
      not notice the job stopping.
   6. **A row in section 1 of this file.** If the data names people, places, wars or parties, also add an adapter in
-     `lake/scripts/adapters.mjs` so the Encyclopaedia links to it.
+     `lake/scripts/adapters.mjs` so the Master Index links to it.
 - **A Worker timer:** trade-desk's are `triggers.crons` in `wrangler.jsonc` with the matching branch of `scheduled()` in
   `src/index.js`; Double Signal's is in `vite.config.ts`.
 - **A Supabase job:** its schedule and SQL exist only in the database, so write them down here.

@@ -1,7 +1,8 @@
 /* PRP Documentary mode — the reader, in the shell. Offered on Retrospective Geopolitics submodules and on any page
    that tells its own story (the courses, the calendars), wherever it sits.
-   - Voice: the browser's speech synthesis, preferring a British English male voice (Edge's natural "Ryan" or
-     "Thomas", Chrome's "Google UK English Male", Apple's "Daniel"); pace slowed slightly for a lecture feel.
+   - Voice: through the shared voice layer (design/prp-voice.js): the browser's speech synthesis, preferring a British
+     English male voice (Edge's natural "Ryan" or "Thomas", Chrome's "Google UK English Male", Apple's "Daniel"), or an
+     online voice (Azure, through the site's proxy) when one is chosen and set up; pace slowed slightly for a lecture feel.
    - Music: public-domain and CC0 classical recordings from Wikimedia Commons, played quietly and dipped further while
      the voice speaks. It lives in the shell, so it carries on across submodules and "Continue Reading".
    - Story: asked of the submodule in view, one step at a time, through design/jdpi-narrator.js (postMessage). A page
@@ -82,6 +83,7 @@
   globalThis.PRPSpeech = PRPSpeech;
   if (typeof document === 'undefined') return; // loaded by the tests, outside a browser
 
+  const SELF = document.currentScript?.src || new URL('design/jdpi-documentary.js', location.href).href;
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -132,6 +134,7 @@
   .doc input[type=range],.doc input[type=checkbox]{accent-color:var(--prp-primary)}
   .doc input[type=range]{width:110px}
   .doc .np{padding:7px 14px 10px;border-top:1px solid var(--prp-line-soft);color:var(--prp-muted);font:10.5px/1.5 var(--prp-font-mono)}.doc .np a{color:inherit}.doc .np:empty{display:none}
+  .doc .vnote{padding:0 14px 8px;color:var(--prp-muted);font-size:12px}.doc .vnote:empty{display:none}
   @media(max-width:600px){.doc{right:8px;left:8px;width:auto;bottom:8px}.doc-fab{right:10px;bottom:10px}}
   @media(prefers-reduced-motion:reduce){.doc button.cont{animation:none}}`;
   document.head.appendChild(css);
@@ -145,6 +148,7 @@
     <div class="ctrl"><button type="button" class="prp-btn primary sm" id="doc-play">▶ Play</button><button type="button" class="prp-btn sm" id="doc-skip" title="Skip this passage" aria-label="Skip this passage">⏭</button><button type="button" class="prp-btn primary sm cont" id="doc-cont" hidden>Continue Reading</button>
       <label class="auto"><input type="checkbox" id="doc-auto"> Autoplay</label></div>
     <div class="row2"><label>Voice <select class="prp-select" id="doc-voice"></select></label><label>Pace <input type="range" id="doc-rate" min="0.7" max="1.2" step="0.02"></label></div>
+    <div class="vnote" id="doc-vnote" role="status"></div>
     <div class="row2"><label><input type="checkbox" id="doc-music"> Music</label><input type="range" id="doc-vol" min="0" max="0.5" step="0.01" aria-label="Music volume"><button type="button" class="prp-btn ghost sm" id="doc-nexttrack" title="Next piece">♫ Next piece</button></div>
     <div class="np" id="doc-np"></div>`;
   document.body.append(fab, panel);
@@ -160,37 +164,55 @@
   window.addEventListener('hashchange', () => setTimeout(() => { syncFab(); routeChanged(); }, 0));
   syncFab();
 
-  /* ---------- voice ---------- */
-  const PREFER = [/Microsoft (Ryan|Thomas|Oliver|Alfie|Elliot|Noah|Ethan).*(Online|Natural)/i, /Microsoft.*(Online|Natural).*United Kingdom/i, /Google UK English Male/i, /^Daniel\b/i, /^Arthur\b/i, /Microsoft George/i, /Microsoft Ryan/i];
-  function voices() { return speechSynthesis.getVoices().filter(v => /^en(-|_)/i.test(v.lang)); }
-  function pickVoice() {
-    const all = voices();
-    if (S.voiceName) { const v = all.find(x => x.name === S.voiceName); if (v) return v; }
-    for (const re of PREFER) { const v = all.find(x => re.test(x.name) && /GB|UK|United Kingdom/i.test(x.lang + x.name)); if (v) return v; }
-    return all.find(v => /en-GB/i.test(v.lang)) || all[0] || null;
+  /* ---------- voice: the shared layer (design/prp-voice.js) ----------
+     This device's voice, chosen and spoken exactly as before (PRPVoice.WEBSPEECH.documentary keeps this reader's habits:
+     the default voice when the browser lists none, on to the next utterance after one fails, a plain wait where there is
+     no speech at all), or an online voice when one is chosen and the site's proxy answers. When the online voice cannot
+     carry on, this device's voice reads on from the same sentence and the panel says so once. index.html loads the layer
+     before this file; anywhere else it is loaded from beside this file. */
+  let V = globalThis.PRPVoice || null, device = null, online = null, reader = null, onlineList = [];
+  function setUpVoice() {
+    device = V.webspeech(V.WEBSPEECH.documentary); online = V.stream();
+    reader = V.reader({
+      utterances: text => PRPSpeech.utterances(text).map(t => ({ text: t, words: [] })), norm: V.NORM.documentary,
+      backends: { stream: online, webspeech: device },
+      onBackend: (id, why) => {
+        if (!why || id !== 'webspeech' || S.voiceNoted) return;
+        S.voiceNoted = true;
+        $('#doc-vnote').textContent = why.reason === 'quota' ? 'The online voice has used today’s allowance, so this device’s voice reads on.' : 'The online voice is not answering, so this device’s voice reads on.';
+      },
+    });
+    if (device.device.has()) { fillVoices(); device.device.onChange(fillVoices); }
   }
+  const voiceReady = V ? Promise.resolve(setUpVoice()) : new Promise(resolve => {
+    const s = Object.assign(document.createElement('script'), { src: new URL('prp-voice.js', SELF).href });
+    s.onload = s.onerror = () => resolve();
+    document.head.appendChild(s);
+  }).then(() => { V = globalThis.PRPVoice || null; if (V) setUpVoice(); });
+  // The online voices, asked of the proxy when the panel opens (not on every page load); [] when it is not set up.
+  const onlineVoices = () => (online ? online.voices().then(list => { onlineList = list; fillVoices(); }) : Promise.resolve());
+  // This device's voices (saved by name, as always) and, once the proxy says it is set up, its online voices, each group
+  // labelled for what it is. Without online voices the list is exactly as before.
   function fillVoices() {
-    const all = voices(), chosen = pickVoice();
-    const gb = all.filter(v => /en-GB/i.test(v.lang)), rest = all.filter(v => !/en-GB/i.test(v.lang));
-    $('#doc-voice').innerHTML = [...gb, ...rest].map(v => `<option${v === chosen ? ' selected' : ''}>${esc(v.name)}</option>`).join('') || '<option>Default voice</option>';
+    if (!device) return;
+    const chosen = device.device.pick(S.voiceName), pickWeb = onlineList.find(v => v.id === S.voiceName) || null;
+    const opt = (value, label, on) => `<option value="${esc(value)}"${on ? ' selected' : ''}>${esc(label)}</option>`;
+    const here = device.device.list().map(v => opt(v.name, v.name, !pickWeb && v === chosen)).join('');
+    $('#doc-voice').innerHTML = onlineList.length
+      ? `<optgroup label="This device">${here || '<option value="">Default voice</option>'}</optgroup><optgroup label="Azure (online)">${onlineList.map(v => opt(v.id, v.label, v === pickWeb)).join('')}</optgroup>`
+      : here || '<option>Default voice</option>';
   }
-  if ('speechSynthesis' in window) { fillVoices(); speechSynthesis.addEventListener?.('voiceschanged', fillVoices); }
+  // Inside a click, before anything waits: iOS plays an online voice's clips only then (nothing happens for a device voice).
+  const unlock = () => reader?.unlock({ voice: S.voiceName });
 
   // Sentence by sentence, as the voice should say it (PRPSpeech above).
   async function speak(text) {
-    if (!('speechSynthesis' in window)) { await sleep(Math.min(9000, 60 * text.length)); return; }
-    S.speaking = true; S.skip = false; duck(true);
-    for (const part of PRPSpeech.utterances(text)) {
-      if (S.stopFlag || S.skip) break;
-      await new Promise(resolve => {
-        const u = new SpeechSynthesisUtterance(part);
-        const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-GB';
-        u.rate = S.rate; u.pitch = 0.94;
-        u.onend = u.onerror = () => resolve();
-        speechSynthesis.speak(u);
-      });
-    }
-    S.speaking = false; duck(false);
+    await voiceReady;
+    if (!reader) { await sleep(Math.min(9000, 60 * text.length)); return; } // the voice layer did not load: as with no speech
+    const voiced = device.device.has() || onlineList.some(v => v.id === S.voiceName);
+    if (voiced) { S.speaking = true; S.skip = false; duck(true); }
+    await reader.read(text, { voice: () => S.voiceName, rate: () => S.rate });
+    if (voiced) { S.speaking = false; duck(false); }
   }
 
   /* ---------- music ---------- */
@@ -270,7 +292,7 @@
       await sleep(350);
     }
   }
-  function pause() { S.playing = false; S.stopFlag = true; speechSynthesis?.cancel(); setPlayButton(); }
+  function pause() { S.playing = false; S.stopFlag = true; reader?.stop(); setPlayButton(); }
   function stopReading() { pause(); S.resume = null; const f = S.frame?.isConnected ? S.frame : activeFrame(); S.frame = null; ask('stop', f); }
   function routeChanged() {
     if (!S.open) return;
@@ -281,11 +303,12 @@
   }
 
   /* ---------- controls ---------- */
-  fab.onclick = () => { S.open = true; panel.hidden = false; syncFab(); fillVoices(); if (S.music) setMusic(true); run(true); };
+  fab.onclick = () => { unlock(); S.open = true; panel.hidden = false; syncFab(); fillVoices(); onlineVoices(); if (S.music) setMusic(true); run(true); };
   $('#doc-close').onclick = () => { stopReading(); S.open = false; panel.hidden = true; audio.pause(); syncFab(); };
-  $('#doc-play').onclick = () => { if (S.playing) pause(); else { $('#doc-cont').hidden = true; const fresh = S.ended; S.ended = false; run(fresh); } };
-  $('#doc-skip').onclick = () => { S.skip = true; speechSynthesis?.cancel(); };
+  $('#doc-play').onclick = () => { if (S.playing) pause(); else { unlock(); $('#doc-cont').hidden = true; const fresh = S.ended; S.ended = false; run(fresh); } };
+  $('#doc-skip').onclick = () => { S.skip = true; reader?.stop(); };
   $('#doc-cont').onclick = () => {
+    unlock();
     $('#doc-cont').hidden = true;
     if (S.waiting) { const w = S.waiting; S.waiting = null; w(); return; }
     S.ended = false; run(true);
@@ -294,6 +317,6 @@
   $('#doc-music').checked = S.music; $('#doc-music').onchange = e => setMusic(e.target.checked);
   $('#doc-vol').value = S.vol; $('#doc-vol').oninput = e => { S.vol = +e.target.value; store.set('vol', S.vol); audio.volume = S.speaking ? S.vol * 0.5 : S.vol; };
   $('#doc-rate').value = S.rate; $('#doc-rate').oninput = e => { S.rate = +e.target.value; store.set('rate', S.rate); };
-  $('#doc-voice').onchange = e => { S.voiceName = e.target.value; store.set('voice', S.voiceName); };
+  $('#doc-voice').onchange = e => { S.voiceName = e.target.value; store.set('voice', S.voiceName); unlock(); };
   $('#doc-nexttrack').onclick = nextTrack;
 })();

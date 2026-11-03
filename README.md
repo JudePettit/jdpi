@@ -2,7 +2,7 @@
 
 **Vitruvian Manager** (short **VM**) is a product of **JDP-Iq**. It does for one person what an ERP does for an
 enterprise: one workspace for geopolitics, intelligence tradecraft, history, money and science. You pick a submodule in
-the sidebar, it opens in the main area, and every submodule shares one design system, one Encyclopaedia and one
+the sidebar, it opens in the main area, and every submodule shares one design system, one Master Index and one
 light/dark theme. Its mark is Leonardo's Vitruvian figure in a hard hat (`design/brand-vm.svg`).
 
 Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo by GitHub Actions once the tests pass). Formerly PRP, and before that "JDP-I".
@@ -12,7 +12,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | Module | Code | Submodules |
 |---|---|---|
 | **Realtime Geopolitics**: what is happening now | RT | Political Briefing · Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
-| **Retrospective Geopolitics**: what happened and why | RS | Encyclopaedia · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
+| **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
 | **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
 | **Money Management**: your money end to end | MM | Market Briefing · Economics Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
 | **Natural Science**: science now and through history | NS | Scientific Briefing · Invention Timeline |
@@ -35,7 +35,7 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
         └── trade-desk Worker (Market Briefing, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
-  lake/ (the Encyclopaedia's entity layer, keyed by Wikidata IDs) links every page to every other
+  lake/ (the Master Index's entity layer, keyed by Wikidata IDs) links every page to every other
 ```
 
 | Piece | File | Role |
@@ -43,10 +43,11 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
 | Registry | `registry.json` | Modules, submodules, URLs, kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
-| Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Encyclopaedia links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
+| Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Master Index links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
 | Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
+| Voice | `design/prp-voice.js`, `functions/api/voice/v1/[[path]].js`, `functions/voice/[[path]].js` | One narration layer for the Documentary reader and Kino: this device's voice, or an online Azure voice through the site's own proxy (key, quota and cache on the server; set-up in `OPERATIONS.md`, section 4), falling back to the device voice whenever the online one cannot carry on. |
 | Data for programs and AI tools | `functions/api/v1/[[path]].js`, `functions/mcp.js`, `integration/openapi.json`, `llms.txt` | The site's public data, read-only and with no sign-in: a JSON API at `/api/v1/` (described by `openapi.json`), an MCP server at `/mcp` for AI assistants, and `/llms.txt`, a short guide for language models. The Integration Hub rebuilds `openapi.json` and `llms.txt` every day. |
 | Aircraft proxy | `functions/api/sigint/adsb/[[path]].js` | Relays adsb.lol's aircraft positions to the SIGINT Dashboard, which a browser cannot read from adsb.lol directly. |
 
@@ -62,7 +63,7 @@ page**, listed under `views` in the registry, never extra sidebar entries.
    sign-in.
 2. Hook the page up to the design system (see `design/PRP-STYLE.md` §2) and follow its anatomy and checklist.
 3. If the page mentions people, places, wars, parties or ideas, add an adapter in `lake/scripts/adapters.mjs` so the
-   Encyclopaedia links to it.
+   Master Index links to it.
 4. Commit and push. GitHub runs the whole test suite, and the site deploys only if it passes.
 
 ## Data refreshes

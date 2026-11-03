@@ -1,13 +1,18 @@
 /* Kino narration and music (browser only).
-   Voice: the browser's speech synthesis, choosing a British voice the same way as the shell's Documentary reader
-   (design/jdpi-documentary.js), and sharing its saved choice of voice ("jdpi.doc.voice"). Each sentence is one
-   utterance (long ones get cut off in some browsers); a full stop inside a word is never a sentence break, and the
-   decimal rule in lib/text.js reads it as "point" or "dot". The word being spoken is reported for the caption, from
-   the voice's boundary events where it sends them and from an estimate where it does not.
-   Captions-only mode runs the same timing without the voice.
+   Voice: the shared voice layer (design/prp-voice.js), choosing and sharing the voice as the shell's Documentary reader
+   does (design/jdpi-documentary.js, the saved choice "jdpi.doc.voice"). By default that is this device's British voice,
+   spoken exactly as before (Kino's quirks are the layer's defaults: PRPVoice.WEBSPEECH.kino); a lifelike online voice
+   (Azure, through the site's proxy) reads instead when one is chosen in the settings and the proxy answers, and when it
+   cannot carry on (not set up, offline, the day's quota spent) the device voice reads on from the same sentence. Each
+   sentence is one utterance or clip (long utterances get cut off in some browsers); a full stop inside a word is never
+   a sentence break, and the decimal rule in lib/text.js reads it as "point" or "dot". The word being spoken is reported
+   for the caption: from the voice's boundary events where it sends them, from an estimate where it does not, and from
+   the clip's clock for an online voice. Captions-only mode runs the same timing without the voice.
    Music: the reader's public-domain and CC0 classical recordings from Wikimedia Commons, quiet, ducked under speech. */
-import { utterances, wordAt } from './text.js';
+import '../../design/prp-voice.js';
+import { utterances } from './text.js';
 
+const V = globalThis.PRPVoice;
 const store = {
   get: (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private mode */ } },
@@ -15,93 +20,44 @@ const store = {
 export { store };
 
 /* ---------- voice ---------- */
-export const hasSpeech = () => 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
-const PREFER = [/Microsoft (Ryan|Thomas|Oliver|Alfie|Elliot|Noah|Ethan).*(Online|Natural)/i, /Microsoft.*(Online|Natural).*United Kingdom/i, /Google UK English Male/i, /^Daniel\b/i, /^Arthur\b/i, /Microsoft George/i, /Microsoft Ryan/i];
-export function voices() { return hasSpeech() ? speechSynthesis.getVoices().filter(v => /^en(-|_)/i.test(v.lang)) : []; }
-export function pickVoice(name = store.get('jdpi.doc.voice', null)) {
-  const all = voices();
-  if (name) { const v = all.find(x => x.name === name); if (v) return v; }
-  for (const re of PREFER) { const v = all.find(x => re.test(x.name) && /GB|UK|United Kingdom/i.test(x.lang + x.name)); if (v) return v; }
-  return all.find(v => /en-GB/i.test(v.lang)) || all[0] || null;
-}
+const device = V.webspeech(V.WEBSPEECH.kino), online = V.stream();
+let onlineList = []; // the proxy's voices, once it has answered (it is asked only when they are wanted)
+export const hasSpeech = () => device.device.has();
+export function voices() { return device.device.voices(); }
+export function pickVoice(name = store.get('jdpi.doc.voice', null)) { return device.device.pick(name); }
 /** British voices first, then the other English ones. */
-export function voiceList() { const all = voices(); return [...all.filter(v => /en-GB/i.test(v.lang)), ...all.filter(v => !/en-GB/i.test(v.lang))]; }
-export function onVoices(fn) { if (hasSpeech()) speechSynthesis.addEventListener?.('voiceschanged', fn); }
-
-const CHARS_PER_SEC = 14.2; // about 165 words a minute at rate 1
+export function voiceList() { return device.device.list(); }
+export function onVoices(fn) { device.device.onChange(fn); }
+/** The online voices ([] when the proxy is not set up or not reachable): asks the proxy once a page. */
+export async function onlineVoices() { onlineList = await online.voices(); return onlineList; }
+/** The online voices known so far, without asking. */
+export const knownOnline = () => onlineList;
+// The voice to read with: the saved one; with no device voice at all, an online voice rather than silence.
+function chosenVoice() {
+  const saved = store.get('jdpi.doc.voice', null);
+  if (voices().length || !onlineList.length || onlineList.some(v => v.id === saved)) return saved;
+  return onlineList[0].id;
+}
 
 /**
  * Reads a passage sentence by sentence, aloud or silently (captions only).
- *   const r = new Reader({ onWord: i => …, onSentence: k => … });
- *   await r.read(text, { voice: true, rate: 0.92, from: 0 });   // resolves { done: true } or { done: false, sentence }
- *   r.stop();
+ *   const r = new Reader({ onWord: i => …, onSentence: k => …, onBackend: (id, why) => … });
+ *   r.unlock();                                         // in the Play click handler, before any await (iOS)
+ *   await r.read(text, { voice: true, rate: 0.92, from: 0, next: nextText });
+ *     // resolves { done: true, … } or { done: false, sentence, … }; next: the following scene, whose first sentence an
+ *     // online voice fetches while this scene's last one plays
+ *   r.stop(); r.sentence
  */
 export class Reader {
-  constructor({ onWord = () => {}, onSentence = () => {} } = {}) { this.onWord = onWord; this.onSentence = onSentence; this.token = 0; this.sentence = 0; this.pending = null; }
-  stop() {
-    this.token++;
-    if (hasSpeech()) speechSynthesis.cancel();
-    clearTimeout(this.timer); cancelAnimationFrame(this.raf);
-    const p = this.pending; this.pending = null; p?.(false);
+  constructor({ onWord = () => {}, onSentence = () => {}, onBackend = () => {} } = {}) {
+    this.r = V.reader({ utterances, norm: V.NORM.kino, backends: { stream: online, webspeech: device }, onWord, onSentence, onBackend });
   }
-  async read(text, { voice = true, rate = 0.92, from = 0 } = {}) {
-    const busy = hasSpeech() && (speechSynthesis.speaking || speechSynthesis.pending);
-    this.stop();
-    const token = ++this.token, list = utterances(text);
-    const useVoice = voice && hasSpeech() && voices().length > 0;
-    if (busy) await new Promise(r => setTimeout(r, 90)); // Chrome can drop an utterance queued straight after cancel()
-    if (token !== this.token) return { done: false, sentence: from };
-    for (let k = Math.max(0, from); k < list.length; k++) {
-      if (token !== this.token) return { done: false, sentence: k };
-      this.sentence = k; this.onSentence(k);
-      const ok = useVoice ? await this.speakOne(list[k], rate, token) : await this.timeOne(list[k], rate, token);
-      if (!ok || token !== this.token) return { done: false, sentence: k };
-    }
-    return { done: true };
-  }
-  // Word timing from an estimate: each word's share of the sentence by its length, with a pause after punctuation.
-  schedule(utt, rate, token, t0 = performance.now(), speakingFrom = 0) {
-    const weights = utt.words.map(w => (w.to - w.from) + 1.5 + (/[,;:]$/.test(utt.text.slice(w.from, w.to)) ? 4 : 0));
-    const total = weights.reduce((a, b) => a + b, 0), dur = (total / (CHARS_PER_SEC * rate)) * 1000;
-    const marks = []; let acc = 0; for (const w of weights) { marks.push(acc / total); acc += w; }
-    const tick = now => {
-      if (token !== this.token || this.boundaryMode) return;
-      const p = (now - t0) / dur; let i = 0;
-      while (i + 1 < marks.length && marks[i + 1] <= p) i++;
-      this.onWord(utt.words[Math.max(i, speakingFrom)].i);
-      if (p < 1) this.raf = requestAnimationFrame(tick);
-    };
-    this.raf = requestAnimationFrame(tick);
-    return dur;
-  }
-  timeOne(utt, rate, token) {
-    return new Promise(resolve => {
-      this.boundaryMode = false;
-      this.pending = resolve;
-      const dur = this.schedule(utt, rate, token);
-      this.timer = setTimeout(() => { if (this.pending === resolve) this.pending = null; resolve(token === this.token); }, dur + 380);
-    });
-  }
-  speakOne(utt, rate, token) {
-    return new Promise(resolve => {
-      const u = new SpeechSynthesisUtterance(utt.text);
-      const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-GB';
-      u.rate = rate; u.pitch = 0.94;
-      this.boundaryMode = false;
-      let settled = false;
-      const finish = ok => { if (settled) return; settled = true; clearTimeout(watchdog); clearTimeout(fallback); if (this.pending === finish) this.pending = null; resolve(ok); };
-      this.pending = finish;
-      u.onboundary = e => { if (token !== this.token) return; if (e.name && e.name !== 'word') return; this.boundaryMode = true; this.onWord(wordAt(utt, e.charIndex)); };
-      u.onstart = () => { if (token === this.token && !this.boundaryMode) this.onWord(utt.words[0].i); };
-      u.onend = () => finish(token === this.token);
-      u.onerror = e => finish(token === this.token && e.error !== 'interrupted' && e.error !== 'canceled');
-      // Voices that send no word boundaries: highlight by estimate once speech has had a moment to start.
-      const fallback = setTimeout(() => { if (!this.boundaryMode && token === this.token) this.schedule(utt, rate, token); }, 450);
-      // Some engines never fire "end": give up well after the sentence should have finished.
-      const watchdog = setTimeout(() => finish(token === this.token), Math.max(6000, (utt.text.length / (CHARS_PER_SEC * rate)) * 2500 + 4000));
-      speechSynthesis.speak(u);
-      if (speechSynthesis.paused) speechSynthesis.resume(); // Chrome can leave the queue paused
-    });
+  get sentence() { return this.r.sentence; }
+  unlock() { this.r.unlock({ voice: chosenVoice }); } // only when an online voice will read (see PRPVoice.reader)
+  stop() { this.r.stop(); }
+  async read(text, { voice = true, rate = 0.92, from = 0, next } = {}) {
+    this.r.stop(); // as before: a new reading starts by cancelling whatever was being said
+    return this.r.read(text, { silent: !voice, voice: chosenVoice, rate, from, next: voice ? next : undefined });
   }
 }
 

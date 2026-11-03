@@ -43,7 +43,7 @@ Management, whose sidebar name is **Int-Myst Mngmnt**.
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
 | OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | OI (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
 | Intel Training (was OSINT Training) | OI | `fe/learning.html?course=osint|sigint|geoint`: three courses as tabs |
-| Encyclopaedia | RS | |
+| Master Index | RS | |
 | Political Retrospective (was H&P Retrospective) | RS | external site hp-retrospective.pages.dev |
 | Historical Calendar, Kardashev Tracker | RS | |
 | Retrospective Battlefield | RS | world map 1926–2025 (`battlefield/history/`) |
@@ -187,6 +187,19 @@ The narrator (`design/jdpi-narrator.js`) sends each step's places to the page as
 with `.prp-focus-hit` and offers a way back. All targets of a step are fitted at once; motion follows
 `prefers-reduced-motion`. Read-aloud text treats a full stop as the end of a sentence only before a space or the end
 of the text: "3.5" is read "3 point 5", "jdpi.pages.dev" "jdpi dot pages dot dev".
+
+### Narration: one voice layer
+
+Every page that reads aloud speaks through `design/prp-voice.js` (`PRPVoice.reader`), never `speechSynthesis` directly:
+the Documentary reader and Kino today, Bibliotheca, Auteur and Personal Genius when they speak. The reader tries its
+backends in order for each passage (`'prerendered'`, not built yet; `'stream'`, an online voice through the site's proxy
+`/api/voice/v1/`; `'webspeech'`, this device's voice) and falls back silently, from the sentence where one stopped, telling
+the page once (`onBackend`) so it can say so in a status line. Voice lists group this device's voices ("This device") and
+the proxy's ("Azure (online)"), the online group only once the proxy says it is set up; the choice is saved in
+`jdpi.doc.voice` (a device voice by its name, an online one as `azure:<voice>`). Call `reader.unlock({ voice })` at the top
+of every Play click handler, before anything waits: iOS plays clips only on an element first played inside a tap. Words a
+voice gets wrong go in `PRPVoice.lexicon` (bump its version: it is part of every clip's key), as Vitruvius's "Ave"
+("ah-way") does.
 
 ## 7. Accessibility
 

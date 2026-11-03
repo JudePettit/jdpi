@@ -4,7 +4,7 @@
 import { CATEGORIES, categoryOf, flatScenes, shortCite } from './lib/format.js';
 import { tokens, sentences, estimateSeconds } from './lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from './lib/links.js';
-import { Reader, Music, store, voiceList, pickVoice, onVoices, hasSpeech, voices } from './lib/voice.js';
+import { Reader, Music, store, voiceList, pickVoice, onVoices, hasSpeech, voices, onlineVoices, knownOnline } from './lib/voice.js';
 import { Stage, preview, esc, reduced } from './lib/stage.js';
 
 const $ = s => document.querySelector(s);
@@ -53,7 +53,7 @@ function renderHeader() {
   $('#cats').innerHTML = CATEGORIES.map(c => { const l = catLink(c.id), n = S.index.categories.find(x => x.id === c.id)?.count || 0;
     return `<a class="prp-chip" href="${esc(l.href)}" target="${l.target}"${c.id === CAT ? ' aria-current="page"' : ''}>${esc(c.name)} <span class="n">${n}</span></a>`; }).join('');
   $('#see-also').innerHTML = CATEGORIES.filter(c => c.id !== CAT).map(c => { const l = catLink(c.id); return `<a href="${esc(l.href)}" target="${l.target}">Kino · ${esc(c.name)}</a>`; }).join(', ')
-    + '. War Focus, Retrospective Battlefield, the Encyclopaedia and the other submodules each documentary links to.';
+    + '. War Focus, Retrospective Battlefield, the Master Index and the other submodules each documentary links to.';
 }
 
 function renderCatalogue() {
@@ -134,8 +134,9 @@ function go(i, { initial = false } = {}) {
 }
 async function runScene(run, i, from) {
   const sc = S.scenes[i], t0 = performance.now();
-  if (S.voice && hasSpeech()) music.duck(true);
-  const r = await reader.read(sc.narration, { voice: S.voice, rate: rate(), from });
+  if (S.voice && (hasSpeech() || knownOnline().length)) music.duck(true);
+  // next: an online voice fetches the next scene's first sentence while this scene's last one plays
+  const r = await reader.read(sc.narration, { voice: S.voice, rate: rate(), from, next: S.scenes[i + 1]?.narration });
   music.duck(false);
   if (run !== S.run || !S.playing || !r.done) return;
   highlight(-1); updateProgress(1);
@@ -145,6 +146,7 @@ async function runScene(run, i, from) {
 }
 function play() {
   if (!S.doc) return;
+  reader.unlock(); // inside the click or key press, before anything waits: iOS plays an online voice's clips only then
   if (S.ended) { S.ended = false; go(0); }
   S.playing = true; S.started = true; setPlayUi();
   if (S.music) music.set(true);
@@ -341,9 +343,16 @@ function note(msg, inCatalogue = false) {
 }
 
 /* ---------- voice, music and settings ---------- */
+// This device's voices (saved by name, as always) and, once the site's voice proxy says it is set up, its online voices,
+// each group labelled for what it is. Without online voices the list is exactly as before.
 function fillVoices() {
-  const list = voiceList(), chosen = pickVoice();
-  $('#voice-pick').innerHTML = list.map(v => `<option${v === chosen ? ' selected' : ''}>${esc(v.name)}</option>`).join('') || '<option>No voices installed</option>';
+  const list = voiceList(), chosen = pickVoice(), web = knownOnline(), saved = store.get('jdpi.doc.voice', null);
+  const pickWeb = web.find(v => v.id === saved) || (!list.length ? web[0] : null); // as the reader chooses (lib/voice.js)
+  const opt = (value, label, on) => `<option value="${esc(value)}"${on ? ' selected' : ''}>${esc(label)}</option>`;
+  const here = list.map(v => opt(v.name, v.name, !pickWeb && v === chosen)).join('');
+  $('#voice-pick').innerHTML = web.length
+    ? `<optgroup label="This device">${here || '<option value="" disabled>No voices installed</option>'}</optgroup><optgroup label="Azure (online)">${web.map(v => opt(v.id, v.label, v === pickWeb)).join('')}</optgroup>`
+    : here || '<option>No voices installed</option>';
 }
 function setVoice(on) {
   S.voice = on; store.set('prp.kino.voice', on);
@@ -361,7 +370,12 @@ function setMusic(on) {
 
 /* ---------- start ---------- */
 function wire() {
-  reader = new Reader({ onWord: highlight, onSentence: k => { S.sentence = k; nowPlaying(); } });
+  reader = new Reader({ onWord: highlight, onSentence: k => { S.sentence = k; nowPlaying(); }, onBackend: (id, why) => {
+    // The online voice could not carry on, so this device's voice reads on from the same sentence: say so, once.
+    if (!why || id !== 'webspeech' || S.voiceNoted) return;
+    S.voiceNoted = true;
+    note(why.reason === 'quota' ? 'The online voice has used today’s allowance, so this device’s voice reads on.' : 'The online voice is not answering, so this device’s voice reads on.');
+  } });
   music = new Music({ onTrack: t => { $('#now-playing').innerHTML = `♫ ${esc(t.composer)}: ${esc(t.title)} · <a href="${esc(t.page)}" target="_blank" rel="noopener">Wikimedia Commons</a>`; } });
   stage = new Stage($('#stage'), { media: S.media, base: 'data/', embedded, moduleInfo, onLink: l => navigate(l, { user: true }), onLegend: legendKey });
 
@@ -384,10 +398,17 @@ function wire() {
   $('#music').onclick = () => setMusic(!S.music);
   $('#follow').onclick = () => setFollow(!S.follow);
   $('#fullscreen').onclick = () => (document.fullscreenElement ? document.exitFullscreen() : $('#theatre').requestFullscreen?.().catch(() => {}));
-  $('#voice-pick').onchange = e => { store.set('jdpi.doc.voice', e.target.value); restartSentence(); };
+  $('#voice-pick').onchange = e => { store.set('jdpi.doc.voice', e.target.value); reader.unlock(); restartSentence(); };
   setVoice(S.voice); $('#music').setAttribute('aria-pressed', String(S.music));
   if (hasSpeech()) { fillVoices(); onVoices(fillVoices); }
-  setTimeout(() => { if (!hasSpeech() || !voices().length) { $('#voice').disabled = true; if (S.voice) { S.voice = false; $('#voice').setAttribute('aria-pressed', 'false'); $('#voice').querySelector('.lbl-text').textContent = 'Captions only'; } note('This browser has no speech voices, so Kino plays with captions only.'); } }, 1600);
+  // The online voices are asked for when the settings open (and by the reader when one is chosen), not on every load.
+  $('#settings').addEventListener('toggle', () => { if ($('#settings').open) onlineVoices().then(fillVoices); });
+  // No voice on this device: captions only, unless the site's online voice can read instead.
+  setTimeout(async () => {
+    if (hasSpeech() && voices().length) return;
+    if ((await onlineVoices()).length) { fillVoices(); return; }
+    $('#voice').disabled = true; if (S.voice) { S.voice = false; $('#voice').setAttribute('aria-pressed', 'false'); $('#voice').querySelector('.lbl-text').textContent = 'Captions only'; } note('This browser has no speech voices, so Kino plays with captions only.');
+  }, 1600);
 
   document.addEventListener('keydown', e => {
     if (!S.doc || e.ctrlKey || e.metaKey || e.altKey || /input|select|textarea/i.test(e.target.tagName)) return;

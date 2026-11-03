@@ -128,7 +128,7 @@ page's data.
 |---|---|---|
 | War Focus (`rs/war-focus`) | `battlefield/focus/index.html#war=<id>&m=YYYY-MM` | war in `battlefield/focus/data/index.json`, month in the war |
 | Retrospective Battlefield (`rs/battlefield-history`) | `battlefield/history/index.html#y=<year>&w=<war id>` | year 1926–2025, war fought that year |
-| Encyclopaedia (`rs/encyclopedia`) | `encyclopedia/index.html#<QID>` | QID in `lake/data/index.json` |
+| Master Index (`rs/encyclopedia`) | `encyclopedia/index.html#<QID>` | QID in `lake/data/index.json` |
 | Kardashev Tracker (`rs/kardashev`) | `kardashev/index.html#y=<step>&p=<polity>` | a step year and polity id |
 | Historical Calendar (`rs/historical-calendar`) | `q/calendar.html?period=history&month=YYYY-MM` | 1980-01 onwards |
 | Political Retrospective (`rs/retrospective`) | `https://hp-retrospective.pages.dev/#y=<year>&c=<GW code>` | year 1926 onwards |
@@ -149,7 +149,7 @@ category plays in that category's submodule (through the shell), and this one pa
 The shell keeps **one frame per submodule** (and view). Following a film through twelve War Focus months moves the one
 War Focus frame twelve times: when only the hash differs the page is not reloaded but its address changes in place,
 so every page Kino links to by hash re-renders on `hashchange` (War Focus, Retrospective Battlefield, the
-Encyclopaedia, Kardashev, Invention Timeline, National Analysis, Volatility, and the two external sites all do).
+Master Index, Kardashev, Invention Timeline, National Analysis, Volatility, and the two external sites all do).
 A different query (the calendars' `month`, Learning's `course` and `lesson`) loads the new address in the same frame.
 The frames move without adding to the browser's history, so Back and Forward step through the places the film opened.
 
@@ -195,10 +195,17 @@ The chapter list shows the parts; the quiz appears under the player when the cou
 ## The player
 
 - **Stage** 16:9, scaled to the screen so stage, captions and controls fit together; text keeps legible minimums.
-- **Captions** always on, in the serif reading face, the spoken word highlighted (from the voice's word boundaries, or
-  timed when a voice sends none). Under them: the scene's PRP link, its sources, and the map key on phones.
-- **Voice**: the browser's speech synthesis, a British voice chosen as the shell's Documentary reader chooses it, and
-  sharing its saved choice (`jdpi.doc.voice`). **Captions only** plays the same timing silently.
+- **Captions** always on, in the serif reading face, the spoken word highlighted (from the voice's word boundaries,
+  timed when a voice sends none, or from the clip's clock for an online voice). Under them: the scene's PRP link, its
+  sources, and the map key on phones.
+- **Voice**: through the shared voice layer (`design/prp-voice.js`), as the shell's Documentary reader speaks, and sharing
+  its saved choice (`jdpi.doc.voice`). By default the browser's speech synthesis, a British voice chosen as the
+  Documentary chooses it, spoken exactly as before. The settings also list the site's online voices (group "Azure
+  (online)") once its voice proxy (`functions/api/voice/v1/`) says it is set up: each sentence is then fetched as a clip
+  (the next one while this one plays, the next scene's first during this scene's last) and played on one audio element,
+  and whenever the online voice cannot carry on (not set up, offline, the day's allowance spent) the device voice reads on
+  from the same sentence, with a note saying so once. With no device voice at all, an online voice reads rather than
+  captions only. **Captions only** plays the same timing silently and never asks the proxy.
 - **Music**: the reader's public-domain and CC0 Commons recordings, quiet and ducked under the voice; off by default.
 - **Controls**: play/pause, previous/next scene, scene bar, chapters, speed (0.8× to 1.5×), voice or captions only,
   music, follow along, full screen. **Keys**: Space or K play/pause · ← → or J L scene · Home End · < > speed ·

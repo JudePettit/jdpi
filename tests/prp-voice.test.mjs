@@ -457,23 +457,29 @@ describe('webspeech backend', () => {
 
 /* ---------- the online stream, against a fake proxy and <audio> ---------- */
 const ONLINE = [{ id: 'azure:en-GB-RyanNeural', name: 'Ryan', label: 'Ryan, British English', lang: 'en-GB' }];
-function streamRig({ say, voices = ONLINE, available = true } = {}) {
+// hang: 'voices' or 'say', a request that never answers until its signal gives up on it (fetch then rejects with the
+// signal's reason). limits: AbortSignal.timeout played by the test (the stream's o.abortAfter), each signal kept with its
+// time limit (rig.limits) until the test times it out; without it the stream uses the real AbortSignal.timeout.
+function streamRig({ say, voices = ONLINE, available = true, hang = null, limits = false } = {}) {
   let t = 0, id = 0;
   const frames = new Map(), calls = [];
-  const rig = { calls, audio: null };
+  const rig = { calls, audio: null, limits: [] };
   class Audio {
     constructor() { this.paused = true; this.currentTime = 0; this.duration = NaN; this.plays = []; rig.audio = this; }
     play() { if (rig.refuse) return Promise.reject(Object.assign(new Error('no'), { name: 'NotAllowedError' })); this.paused = false; this.plays.push(this.src); return Promise.resolve(); }
     pause() { this.paused = true; }
   }
+  const never = signal => new Promise((_, reject) => signal?.addEventListener('abort', () => reject(signal.reason), { once: true }));
   const fetch = async (url, init = {}) => {
-    const call = { url, method: init.method || 'GET', body: init.body ? JSON.parse(init.body) : null };
+    const call = { url, method: init.method || 'GET', body: init.body ? JSON.parse(init.body) : null, signal: init.signal };
     calls.push(call);
-    if (url.endsWith('voices')) return Response.json(available ? { available: true, engine: 'azure', voices } : { available: false, reason: 'not configured', voices: [] });
+    if (url.endsWith('voices')) return hang === 'voices' ? never(init.signal) : Response.json(available ? { available: true, engine: 'azure', voices } : { available: false, reason: 'not configured', voices: [] });
+    if (hang === 'say') return never(init.signal);
     if (say) return say(call, calls.filter(c => c.method === 'POST').length);
     return new Response(new Uint8Array(64), { headers: { 'content-type': 'audio/mpeg', 'x-prp-voice-duration': '2', 'x-prp-voice-key': 'k'.repeat(64), 'x-prp-voice-cache': 'miss' } });
   };
-  rig.b = V.stream({ fetch, Audio, now: () => t, raf: f => { frames.set(++id, f); return id; }, caf: k => frames.delete(k) });
+  const limit = ms => { const c = new AbortController(); rig.limits.push({ ms, timeout: () => c.abort(new DOMException('The operation timed out.', 'TimeoutError')) }); return c.signal; };
+  rig.b = V.stream({ fetch, Audio, now: () => t, raf: f => { frames.set(++id, f); return id; }, caf: k => frames.delete(k), ...(limits && { abortAfter: limit }) });
   rig.frame = () => { const fs = [...frames.values()]; frames.clear(); fs.forEach(f => f()); };
   rig.later = s => { t += s * 1000; };
   rig.posts = () => calls.filter(c => c.method === 'POST').map(c => c.body.text);
@@ -545,6 +551,79 @@ describe('stream backend', () => {
     assert.equal((await offline.b.say(p, RYAN_ON, {})).reason, 'unavailable');
   });
 
+  test('the next sentence is asked for once this one\'s clip has come, and a failure is kept for the reading that asked for it: a failing proxy is asked once', async () => {
+    const p = { text: TEXT, units: V.utterances(TEXT) }, texts = p.units.map(u => u.text);
+    const ok = () => new Response(new Uint8Array(8), { headers: { 'x-prp-voice-duration': '1' } });
+    // Down from the start: one request, and none for the sentences ahead.
+    const down = streamRig({ say: () => Response.json({ error: 'unavailable', reason: 'provider down' }, { status: 503 }) });
+    assert.deepEqual(await down.b.say(p, RYAN_ON, {}), { done: false, sentence: 0, reason: 'unavailable' });
+    assert.deepEqual(down.posts(), texts.slice(0, 1));
+    // Failing from the second sentence: that one is asked for once, ahead, while the first plays, and the failure kept
+    // then answers the reading when it gets there; the reading hands over at it, and nothing after it is asked for.
+    const mid = streamRig({ say: (call, n) => (n === 1 ? ok() : Response.json({}, { status: 500 })) });
+    const done = mid.b.say(p, RYAN_ON, {});
+    await mid.until(1);
+    assert.deepEqual(await done, { done: false, sentence: 1, reason: 'error' });
+    assert.deepEqual(mid.posts(), texts.slice(0, 2));
+    // The same however long the sentence before it plays (most of Kino's take 7 to 17 s): the reading that asked ahead
+    // takes the failure when it gets there, rather than asking for that sentence again.
+    const long = streamRig({ say: (call, n) => (n === 1 ? ok() : Response.json({}, { status: 500 })) });
+    const reading = long.b.say(p, RYAN_ON, {});
+    await long.until(1, false); long.later(12); await long.until(1);
+    assert.deepEqual(await reading, { done: false, sentence: 1, reason: 'error' });
+    assert.deepEqual(long.posts(), texts.slice(0, 2), 'sentence 1 asked for once, 12 s before the reading got to it');
+    // Another reading takes a failure only for 5 s: within them the same sentence is answered with the failure; after
+    // them it is asked for afresh, so a failure never stands in the way of a later try.
+    let failing = true;
+    const rig = streamRig({ say: () => (failing ? Response.json({}, { status: 500 }) : ok()) }), one = { text: 'One sentence only.', units: V.utterances('One sentence only.') };
+    assert.equal((await rig.b.say(one, RYAN_ON, {})).reason, 'error');
+    rig.later(5);
+    assert.equal((await rig.b.say(one, RYAN_ON, {})).reason, 'error');
+    assert.equal(rig.posts().length, 1, 'within 5 s: the same failure, not another request');
+    failing = false; rig.later(0.001);
+    const again = rig.b.say(one, RYAN_ON, {});
+    await rig.until(1);
+    assert.deepEqual(await again, { done: true, sentence: 0 });
+    assert.equal(rig.posts().length, 2, 'after them: asked again, and it plays');
+  });
+
+  test('requests give up in time (AbortSignal.timeout): the probe after 5 s, as not set up; a clip after 8 s, as unavailable', async () => {
+    const p = { text: TEXT, units: V.utterances(TEXT) };
+    // The probe hangs: given up on, the online voice is not set up, so a reading with it saved starts on the device voice
+    // instead of waiting for ever.
+    const probe = streamRig({ hang: 'voices', limits: true });
+    const can = probe.b.canSay(p, RYAN_ON);
+    await flush();
+    assert.deepEqual(probe.limits.map(l => l.ms), [5000]);
+    probe.limits[0].timeout();
+    assert.equal(await can, false);
+    assert.deepEqual(await probe.b.voices(), []);
+    // A clip hangs: given up on, the reading stops at that sentence as unavailable (the device voice reads on from it),
+    // nothing was asked for ahead of it, and the stream stands aside.
+    const slow = streamRig({ hang: 'say', limits: true });
+    assert.equal(await slow.b.canSay(p, RYAN_ON), true);
+    const done = slow.b.say(p, RYAN_ON, {});
+    await flush();
+    assert.deepEqual(slow.limits.map(l => l.ms), [5000, 8000]);
+    slow.limits[1].timeout();
+    assert.deepEqual(await done, { done: false, sentence: 0, reason: 'unavailable' });
+    assert.deepEqual(slow.posts(), [p.units[0].text]);
+    assert.equal(await slow.b.canSay(p, RYAN_ON), false);
+    // In a browser the signals are AbortSignal.timeout's own; one without it sends none, and waits as it always did.
+    const timeout = AbortSignal.timeout, asked = [];
+    try {
+      AbortSignal.timeout = ms => { asked.push(ms); return timeout.call(AbortSignal, ms); };
+      const real = streamRig();
+      await real.b.prefetch(p, RYAN_ON); await flush();
+      assert.deepEqual(asked, [5000, 8000]);
+      assert.deepEqual(real.calls.map(c => c.signal instanceof AbortSignal), [true, true]);
+      AbortSignal.timeout = undefined;
+      const old = streamRig();
+      await old.b.prefetch(p, RYAN_ON); await flush();
+      assert.deepEqual(old.calls.map(c => [c.method, c.signal]), [['GET', undefined], ['POST', undefined]]);
+    } finally { AbortSignal.timeout = timeout; }
+  });
+
   test('stop() pauses the clip and ends the reading; a clip that may not play hands over to the device voice', async () => {
     const rig = streamRig(), p = { text: TEXT, units: V.utterances(TEXT) };
     const done = rig.b.say(p, RYAN_ON, {});
@@ -561,6 +640,49 @@ describe('stream backend', () => {
     shy.refuse = false; shy.b.unlock(RYAN_ON);
     assert.equal(await shy.b.canSay(p, RYAN_ON), true, 'the next Play tap lets it try again');
   });
+
+  test('a clip that stalls is given up on after twice its length at its rate, and 5 s more: the device voice reads on; a pause holds the watchdog', withTimers(async () => {
+    const p = { text: TEXT, units: V.utterances(TEXT) };
+    const allow = s => Math.ceil((s / RYAN_ON.rate) * 2000 + 5000); // the allowance for s seconds of clip, in ms
+    const tick = async ms => { mock.timers.tick(ms); await flush(); };
+    const settled = q => { let yes = false; q.then(() => { yes = true; }); return () => yes; };
+    // It never ends: given up on at this sentence, and stopped, so it cannot start up later over the device voice; the
+    // stream stands aside for a minute.
+    const rig = streamRig();
+    const done = rig.b.say(p, RYAN_ON, {}), over = settled(done);
+    await rig.until(1, false); // the first clip, 2 s long, plays and never ends
+    await tick(allow(2) - 1); assert.equal(over(), false, 'within its allowance');
+    await tick(1);
+    assert.deepEqual(await done, { done: false, sentence: 0, reason: 'error' });
+    assert.equal(rig.audio.paused, true);
+    assert.equal(await rig.b.canSay(p, RYAN_ON), false);
+    // Paused in place (pause()), or by the system (headphones, a call): the watchdog waits with the clip, and playing
+    // again gives it what is left of the clip.
+    const held = streamRig();
+    const reading = held.b.say(p, RYAN_ON, {}), ended = settled(reading);
+    await held.until(1, false);
+    await tick(1000);
+    assert.equal(held.b.pause(), true);
+    await tick(10 * 60000); assert.equal(ended(), false, 'a pause is not a stall');
+    held.audio.currentTime = 1.5; held.b.resume();
+    await tick(allow(0.5) - 1); assert.equal(ended(), false, 'resumed: the half second left, twice over, and 5 s');
+    held.audio.paused = true; held.audio.onpause();
+    await tick(10 * 60000); assert.equal(ended(), false, 'the system\'s pause holds it too');
+    held.audio.paused = false; held.audio.currentTime = 1.9; held.audio.onplay();
+    await tick(allow(0.1) - 1); assert.equal(ended(), false);
+    await tick(1);
+    assert.deepEqual(await reading, { done: false, sentence: 0, reason: 'error' });
+    // A clip that did end, whose "ended" was lost, counts as said: the reading goes on to the next sentence.
+    const lost = streamRig();
+    const on = lost.b.say(p, RYAN_ON, {});
+    await lost.until(1, false);
+    lost.audio.ended = true;
+    await tick(allow(2));
+    lost.audio.ended = false;
+    await lost.until(2); await lost.until(3);
+    assert.deepEqual(await on, { done: true, sentence: 2 });
+    assert.equal(lost.audio.plays.length, 3);
+  }));
 
   test('unlock(): a silent clip played inside the tap, then paused; a clip restarted after a pause comes from memory', async () => {
     const rig = streamRig();

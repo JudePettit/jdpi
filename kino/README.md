@@ -27,7 +27,7 @@ kino/
   lib/links.js       shell routes (#/<suite>/<module>?at=…) and Kino deep links (shared)
   lib/format.js      the six categories, the visual kinds, scene flattening, short citations (shared)
   lib/stage.js       the 16:9 stage: map, timeline, portrait, quote, chart, module and title visuals
-  lib/voice.js       speech synthesis (British voice, word timing) and the background music
+  lib/voice.js       the narration (this device's British voice or an online voice, word timing) and the background music
   data/<category>/<id>.json   the scripts (hand-written; the only files you edit to add a documentary)
   data/plan.json     titles in preparation, listed under each catalogue
   data/index.json    built: the catalogue
@@ -204,8 +204,11 @@ The chapter list shows the parts; the quiz appears under the player when the cou
   (online)") once its voice proxy (`functions/api/voice/v1/`) says it is set up: each sentence is then fetched as a clip
   (the next one while this one plays, the next scene's first during this scene's last) and played on one audio element,
   and whenever the online voice cannot carry on (not set up, offline, the day's allowance spent) the device voice reads on
-  from the same sentence, with a note saying so once. With no device voice at all, an online voice reads rather than
-  captions only. **Captions only** plays the same timing silently and never asks the proxy.
+  from the same sentence, with a note saying so once. When the browser has no English voice of its own, Kino asks the
+  proxy (1.6 s after it loads) and, if it is set up, reads with an online voice even though none was chosen in the
+  settings (the first one the proxy lists), so each sentence then goes to Azure, as the page's footer says; with neither
+  a device voice nor the proxy, it plays with captions only and its Voice button is disabled. **Captions only** plays
+  the same timing silently and never asks the proxy.
 - **Music**: the reader's public-domain and CC0 Commons recordings, quiet and ducked under the voice; off by default.
 - **Controls**: play/pause, previous/next scene, scene bar, chapters, speed (0.8× to 1.5×), voice or captions only,
   music, follow along, full screen. **Keys**: Space or K play/pause · ← → or J L scene · Home End · < > speed ·
@@ -240,7 +243,10 @@ nothing while Follow along is off. A paused film stays in the bar with `"playing
 
 Shell → Kino: the bar's buttons post `{ "type": "prp:kino-control", "action": "pause" | "play" | "next" | "prev" | "stop" }` to
 the frame that sent the message. Kino accepts it only from `window.parent` on its own origin, and answers with a new
-`prp:nowplaying`. "Back to film" moves the shell to `route` and puts the keyboard focus in Kino's frame. The shell
+`prp:nowplaying`. Before it posts `play`, the shell calls the frame's `window.prpKinoUnlock()` directly (same origin),
+synchronously inside the click: iOS lets audio play only from inside a tap, and the message arrives after it, so without
+this an online voice's first clip would be refused (once the proxy had made and counted it) and the device voice would
+read instead. "Back to film" moves the shell to `route` and puts the keyboard focus in Kino's frame. The shell
 accepts `prp:nowplaying` only from its own origin and its own frames, shows only text from it, and uses `route` only
 when it is a shell route; a new page loading in Kino's frame clears the bar.
 

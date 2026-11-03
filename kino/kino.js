@@ -376,6 +376,9 @@ function wire() {
     S.voiceNoted = true;
     note(why.reason === 'quota' ? 'The online voice has used today’s allowance, so this device’s voice reads on.' : 'The online voice is not answering, so this device’s voice reads on.');
   } });
+  // The shell's now-playing bar reaches play() by postMessage, which arrives after the tap is over: too late for iOS to let
+  // an online voice's clips play. So the shell calls this first, synchronously inside its click (same origin; shell.js).
+  window.prpKinoUnlock = () => reader.unlock();
   music = new Music({ onTrack: t => { $('#now-playing').innerHTML = `♫ ${esc(t.composer)}: ${esc(t.title)} · <a href="${esc(t.page)}" target="_blank" rel="noopener">Wikimedia Commons</a>`; } });
   stage = new Stage($('#stage'), { media: S.media, base: 'data/', embedded, moduleInfo, onLink: l => navigate(l, { user: true }), onLegend: legendKey });
 

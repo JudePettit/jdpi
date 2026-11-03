@@ -449,7 +449,8 @@ function showFrame(r, url, deep) {
    While Kino follows along, its frame is hidden and the film's captions and controls can't be seen. Kino posts
    { type: 'prp:nowplaying', doc, scene, caption, playing, route } (or { stopped: true }) to the shell, which shows a
    compact bar over the bottom of the workspace; its buttons post { type: 'prp:kino-control', action } back to Kino's
-   frame. Same origin only. Protocol: kino/README.md ("Now playing"). */
+   frame (Play calls the frame's prpKinoUnlock() first, inside the tap, for iOS). Same origin only. Protocol:
+   kino/README.md ("Now playing"). */
 function nowPlayingMessage(e) {
   const frame = [...state.frames.values()].find(f => f.contentWindow === e.source);
   if (!frame) return;
@@ -500,7 +501,14 @@ function pauseFilmOnManualMove() {
   if (np?.playing && np.frame !== visibleFrame()) kinoControl('pause');
 }
 function setupNowPlaying() {
-  $('#np-play').onclick = () => kinoControl(state.np?.playing ? 'pause' : 'play');
+  $('#np-play').onclick = () => {
+    const action = state.np?.playing ? 'pause' : 'play';
+    // iOS lets audio play only from inside a tap, and Kino hears this button by postMessage, after the tap is over: its
+    // frame (same origin) is unlocked here first, synchronously (prpKinoUnlock, kino.js), or an online voice's first clip
+    // would be refused once the proxy had already made and counted it, and the device voice would read instead.
+    if (action === 'play') { try { state.np?.frame.contentWindow.prpKinoUnlock?.(); } catch { /* another origin, or the frame has gone */ } }
+    kinoControl(action);
+  };
   $('#np-prev').onclick = () => kinoControl('prev');
   $('#np-next').onclick = () => kinoControl('next');
   $('#np-stop').onclick = () => kinoControl('stop');

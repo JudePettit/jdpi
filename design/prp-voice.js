@@ -7,8 +7,8 @@
    when they are used (the tests hand them fakes).
 
    The fallback chain. A passage is read by the first backend in the reader's order that can say it, and when one cannot
-   carry on (not set up, offline, the day's quota spent, the provider down) the next one reads on from that sentence,
-   silently; the page is told once (onBackend) so it can say so.
+   carry on (not set up, offline or too slow to answer, the day's quota spent, the provider down, a clip that stalls) the
+   next one reads on from that sentence, silently; the page is told once (onBackend) so it can say so.
      'prerendered'  clips made ahead of time (R2 and manifests). Not built yet: the reader skips an id it has no backend for.
      'stream'       PRPVoice.stream(): an online voice through the site's own proxy (functions/api/voice/v1/), one sentence
                     per request (Azure's REST synthesis sends no word timings, so the clip's length times the sentence
@@ -427,21 +427,38 @@
   // word timings when the proxy has real ones, else the estimate spread over the clip's length. After a failure the stream
   // stands aside (canSay false) for the Retry-After it was given, or 10 minutes for the quota, 5 when unavailable, 1 for an
   // error, or, when a clip was not allowed to play (iOS before a tap), until the next unlock(); meanwhile the reader falls
-  // back to the device voice. Clips are kept in memory (the last `keep`), so a sentence
-  // restarted after a pause or a speed change plays at once. o.fetch, o.Audio, o.raf, o.caf and o.now replace the browser's.
+  // back to the device voice. Clips are kept in memory (the last `keep`), so a sentence restarted after a pause or a speed
+  // change plays at once.
+  // Requests. The next sentence (`ahead` of them, and at the last sentence the next passage's first) is asked for only
+  // once this sentence's clip has come, so a proxy that fails is asked once, not once for each sentence ahead too: every
+  // request that reaches Azure counts, and its free tier takes 20 a minute for the whole site. A request that failed is
+  // kept: the reading that asked ahead for that sentence takes the failure when it gets there, however long the sentence
+  // before it played (most of Kino's take 7 to 17 s), rather than asking again; another reading takes it only within
+  // `keepFailed` ms, and after that asks afresh. Each request gives up after `sayTimeout` ms (a clip) or `voicesTimeout`
+  // ms (the probe), through AbortSignal.timeout where the browser has it: no answer in time counts as no answer at all
+  // (unavailable, or not set up), and the device voice reads instead of the listener hearing silence until the proxy's
+  // own 15 s timeout.
+  // Playback. A clip that has not ended by twice its length at its rate, and 5 s more, has stalled (an output or a decoder
+  // that hangs, an "ended" that never comes): the watchdog stops it, and the device voice reads on from that sentence. It
+  // counts only while the clip should be heard: a pause, this backend's own (pause()) or the system's (headphones, a call),
+  // holds it, and playing again gives it what is left of the clip, afresh.
+  // o.fetch, o.Audio, o.raf, o.caf, o.now and o.abortAfter (AbortSignal.timeout) replace the browser's.
   const SILENT = silentWav(0.05);
   function stream(opt = {}) {
-    const o = { endpoint: '/api/voice/v1/', ahead: 1, keep: 12, ...opt };
+    const o = { endpoint: '/api/voice/v1/', ahead: 1, keep: 12, keepFailed: 5000, sayTimeout: 8000, voicesTimeout: 5000, ...opt };
     const clock = o.now || (() => Date.now());
     const http = (...a) => (o.fetch || root.fetch)(...a);
+    // A signal that gives up on a request after `ms` (as the shell's abortAfter); none in a browser without
+    // AbortSignal.timeout, which waits as before.
+    const abortAfter = ms => (o.abortAfter ? o.abortAfter(ms) : typeof root.AbortSignal?.timeout === 'function' ? root.AbortSignal.timeout(ms) : undefined);
     const raf = f => (o.raf ? o.raf(f) : root.requestAnimationFrame ? root.requestAnimationFrame(f) : setTimeout(f, 16));
     const caf = id => (o.caf ? o.caf(id) : root.cancelAnimationFrame ? root.cancelAnimationFrame(id) : clearTimeout(id));
-    const clips = new Map(); // voice + text → Promise<{ url, duration, timings, key, cache }>
-    let probe = null, list = [], el = null, unlocked = false, token = 0, frame = 0, waiting = null, blocked = null, silentUrl = null;
+    const clips = new Map(); // voice + text → Promise<{ url, duration, timings, key, cache }>, marked failedAt (ms) if it failed
+    let probe = null, list = [], el = null, unlocked = false, token = 0, frame = 0, waiting = null, blocked = null, silentUrl = null, watchdog = 0;
     const element = () => (el ||= Object.assign(new (o.Audio || root.Audio)(), { preload: 'auto' }));
 
     function available() {
-      return (probe ||= Promise.resolve().then(() => http(o.endpoint + 'voices', { headers: { Accept: 'application/json' }, cache: 'no-store' }))
+      return (probe ||= Promise.resolve().then(() => http(o.endpoint + 'voices', { headers: { Accept: 'application/json' }, cache: 'no-store', signal: abortAfter(o.voicesTimeout) }))
         .then(r => (r.ok ? r.json() : null))
         .then(j => (j && j.available === true && Array.isArray(j.voices) ? j : { available: false, voices: [] }))
         .catch(() => ({ available: false, voices: [] }))
@@ -450,13 +467,19 @@
     const block = (reason, s) => { blocked = { reason, until: clock() + 1000 * (s || { quota: 600, unavailable: 300 }[reason] || 60) }; };
     const isBlocked = () => !!blocked && clock() < blocked.until;
 
-    function clip(u, voice, p) {
+    // by: the reading asking (say()'s token), so that a failure it asked for ahead is still its own when it gets there.
+    function clip(u, voice, p, by = 0) {
       const id = `${voice}\n${p.private ? 'private\n' : ''}${canon(u.text)}`;
       let c = clips.get(id);
-      if (c) { clips.delete(id); clips.set(id, c); return c; } // most recently used last
+      if (c) {
+        clips.delete(id);
+        // Asked for already, or on its way: shared, most recently used last. A failure: for the reading that asked for it,
+        // whenever it gets there; for any other, only keepFailed ms after it.
+        if (c.failedAt == null || (by && c.by === by) || clock() - c.failedAt <= o.keepFailed) { clips.set(id, c); return c; }
+      }
       c = (async () => {
         const res = await http(o.endpoint + 'say', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'audio/mpeg, application/json' },
-          body: JSON.stringify({ text: u.text, voice, lang: p.lang || 'en-GB', norm: p.norm || NORM.plain, private: !!p.private }) });
+          body: JSON.stringify({ text: u.text, voice, lang: p.lang || 'en-GB', norm: p.norm || NORM.plain, private: !!p.private }), signal: abortAfter(o.sayTimeout) });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
           const reason = res.status === 429 && j.error !== 'rate' ? 'quota' : res.status === 503 || res.status === 404 || res.status === 405 ? 'unavailable' : 'error';
@@ -468,8 +491,9 @@
         const blob = await res.blob();
         return { url: URL.createObjectURL(blob), duration: +head('Duration') || 0, key: head('Key') || '', cache: head('Cache') || '', timings };
       })();
+      c.by = by;
       clips.set(id, c);
-      c.catch(() => { if (clips.get(id) === c) clips.delete(id); }); // a failure is not kept: the next try asks again
+      c.catch(() => { c.failedAt = clock(); }); // kept (above): the reading that asked ahead takes it, not a new request
       while (clips.size > o.keep) { const [k, old] = clips.entries().next().value; clips.delete(k); old.then(x => URL.revokeObjectURL(x.url), () => {}); }
       return c;
     }
@@ -482,18 +506,26 @@
       for (const [s, e, j] of t.words || []) { const i = wordAt(u, starts[j] ?? 0); if (words.length && words[words.length - 1][2] === i) words[words.length - 1][1] = e; else words.push([s, e, i]); }
       return { ...t, words };
     }
-    // One clip on the element; resolves 'ended', 'stopped', 'error' (it would not play through), 'locked' (not allowed to
-    // play before a tap: iOS) or 'unavailable' (it will not play at all here).
+    // One clip on the element; resolves 'ended', 'stopped', 'error' (it would not play through, or it stalled), 'locked'
+    // (not allowed to play before a tap: iOS) or 'unavailable' (it will not play at all here).
     function play(c, u, so, ev, my) {
       return new Promise(resolve => {
-        const a = element();
+        const a = element(), rate = valueOf(so.rate, 1);
         let tl = null, last = null, over = false;
-        const done = why => { if (over) return; over = true; if (waiting === done) waiting = null; caf(frame); a.onended = a.onerror = null; resolve(why); };
-        waiting = done;
+        // The watchdog (above): what is left of the clip after `at` seconds, twice over at this rate, and 5 s more. The
+        // clip's length is the proxy's, the element's once it knows, or the text's at Web Speech pace, whichever is longest.
+        const length = () => Math.max(c.duration || 0, Number.isFinite(a.duration) ? a.duration : 0, u.text.length / CHARS_PER_SEC);
+        const hold = () => { clearTimeout(watchdog); watchdog = 0; };
+        const arm = (at = 0) => { hold(); watchdog = setTimeout(stalled, (Math.max(0, length() - at) / rate) * 2000 + 5000); };
+        const done = why => { if (over) return; over = true; hold(); if (waiting === done) waiting = null; caf(frame); a.onended = a.onerror = a.onpause = a.onplay = null; resolve(why); };
+        // Stalled: stopped, so it cannot start up later over the device voice (unless it did end, and only "ended" was lost).
+        const stalled = () => { if (over) return; if (a.ended) { done('ended'); return; } a.pause(); done('error'); };
+        waiting = Object.assign(done, { hold, arm: () => arm(a.currentTime || 0) }); // pause() and resume() hold and arm it
         a.onended = () => done('ended');
         a.onerror = () => done('error');
+        a.onpause = () => { if (!over && a.paused) hold(); }; // the system's pause (headphones, a call): the clip waits, so does the watchdog
+        a.onplay = () => { if (!over && !a.paused) arm(a.currentTime || 0); };
         a.src = c.url;
-        const rate = valueOf(so.rate, 1);
         a.defaultPlaybackRate = rate; a.playbackRate = rate; a.preservesPitch = true; // after src: a new source resets the rate
         const tick = () => {
           if (my !== token || over) return;
@@ -504,6 +536,7 @@
           if (tl) { const w = tl.at(a.currentTime).word; if (w >= 0 && w !== last) { last = w; ev.onWord?.(w); } }
           frame = raf(tick);
         };
+        arm();
         let started;
         try { started = a.play(); } catch (e) { started = Promise.reject(e); }
         Promise.resolve(started).then(() => { if (my === token && !over) { if (u.words.length) { last = u.words[0].i; ev.onWord?.(last); } tick(); } },
@@ -527,17 +560,18 @@
         let first = true;
         for (let k = Math.max(0, so.from || 0); k < units.length; k++) {
           if (my !== token) return stopped(k);
-          const here = clip(units[k], voice, p);
-          for (let j = 1; j <= o.ahead && k + j < units.length; j++) clip(units[k + j], voice, p).catch(() => {});
-          if (k === units.length - 1 && so.next?.units?.length) clip(so.next.units[0], voice, so.next).catch(() => {});
           let c;
-          try { c = await here; } catch (e) {
+          try { c = await clip(units[k], voice, p, my); } catch (e) {
             if (my !== token) return stopped(k);
-            const reason = e.reason || 'unavailable'; // no answer at all: offline
-            block(reason, e.retryAfter);
+            const reason = e?.reason || 'unavailable'; // no answer at all, or none in time: offline, or the proxy hangs
+            block(reason, e?.retryAfter);
             return { done: false, sentence: k, reason };
           }
           if (my !== token) return stopped(k);
+          // The proxy has answered for this sentence: now the next, while this one plays (and at the last sentence the next
+          // passage's first). Asked any sooner, a proxy that fails would be asked for every sentence ahead as well.
+          for (let j = 1; j <= o.ahead && k + j < units.length; j++) clip(units[k + j], voice, p, my).catch(() => {});
+          if (k === units.length - 1 && so.next?.units?.length) clip(so.next.units[0], voice, so.next).catch(() => {});
           if (first) { first = false; ev.onStart?.(null); }
           ev.onSentence?.(k);
           const end = await play(c, units[k], so, ev, my);
@@ -553,8 +587,8 @@
         const u = p.units?.[0];
         if (u && (await b.canSay(p, so))) clip(u, valueOf(so.voice, null), p).catch(() => {});
       },
-      pause() { if (el && waiting && !el.paused) { el.pause(); return true; } return false; },
-      resume() { if (el && waiting && el.paused) el.play().catch(() => {}); },
+      pause() { if (el && waiting && !el.paused) { el.pause(); waiting.hold(); return true; } return false; },
+      resume() { if (el && waiting && el.paused) { el.play().catch(() => {}); waiting.arm(); } },
       stop() { token++; caf(frame); if (el && !el.paused) el.pause(); const w = waiting; waiting = null; w?.('stopped'); },
       // Only for an online voice: on iOS even a silent clip takes over the phone's audio (another app's music stops).
       unlock(so) {

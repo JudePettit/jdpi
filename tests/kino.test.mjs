@@ -10,6 +10,7 @@ import { loadContext, validateAll, validateScript, checkLink, validCountry, HIST
 import { CATEGORY_IDS, VISUAL_KINDS, flatScenes, shortCite } from '../kino/lib/format.js';
 import { tokens, sentences, utterances, wordAt, spoken, speechRule, countSentences, speechWarnings } from '../kino/lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from '../kino/lib/links.js';
+import '../design/prp-voice.js';
 import { pageTest, launch } from './tools/pages.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -328,6 +329,85 @@ test('page: following along in the shell, the now-playing bar shows the film and
     await page.click('#nav a[data-route="rs/war-focus"]');
     await page.waitForTimeout(600);
     assert.equal(await bar.isHidden(), true, 'no bar once Follow along is off');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// For the test browser, in every frame: a speech engine with one British voice, each utterance kept (window.__spoken) and
+// "said" in 150 ms; and audio as iOS allows it, an element playing only from inside a tap (a click in this frame or in the
+// shell) or once it has played inside one, each play() kept (window.__plays) with whether it came inside a tap.
+const FAKE_SPEECH = () => {
+  const voices = [{ name: 'Microsoft Ryan Online (Natural) - English (United Kingdom)', lang: 'en-GB' }], spoken = (window.__spoken = []);
+  const synth = { speaking: false, pending: false, paused: false, current: null, getVoices: () => voices, addEventListener() {}, resume() {},
+    speak(u) { spoken.push(u.text); this.current = u; this.speaking = true; setTimeout(() => { if (this.current !== u) return; this.current = null; this.speaking = false; u.onend?.(); }, 150); },
+    cancel() { const u = this.current; this.current = null; this.speaking = false; u?.onerror?.({ error: 'interrupted' }); } };
+  Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
+  window.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
+};
+const IOS_AUDIO = () => {
+  addEventListener('click', () => { window.__tap = true; }, true);
+  addEventListener('click', () => { window.__tap = false; });
+  const inTap = () => { try { return window.__tap === true || window.top.__tap === true; } catch { return false; } };
+  const blessed = new WeakSet(), play = HTMLMediaElement.prototype.play;
+  window.__plays = [];
+  HTMLMediaElement.prototype.play = function () {
+    const tap = inTap();
+    window.__plays.push({ src: String(this.src).split(':')[0], tap });
+    if (!tap && !blessed.has(this)) return Promise.reject(new DOMException('Not allowed before a tap', 'NotAllowedError'));
+    blessed.add(this);
+    return play.call(this);
+  };
+};
+const ONLINE_ID = 'azure:en-GB-RyanNeural';
+
+test('page: the now-playing bar\'s Play unlocks Kino\'s audio inside the tap, as iOS needs, so the online voice reads', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/registry.json', async route => {
+      const reg = await (await route.fetch()).json();
+      for (const m of reg.suites.find(s => s.id === 'kino')?.modules || []) { m.url ||= m.pendingUrl; m.status = 'live'; }
+      await route.fulfill({ json: reg });
+    });
+    // The site's voice proxy, played by the test: set up, with one voice; each sentence a short silent clip.
+    const said = [];
+    await page.route('**/api/voice/v1/voices', route => route.fulfill({ json: { available: true, engine: 'azure', voices: [{ id: ONLINE_ID, name: 'Ryan', label: 'Ryan, British English', lang: 'en-GB' }] } }));
+    await page.route('**/api/voice/v1/say', route => {
+      said.push(route.request().postDataJSON().text);
+      return route.fulfill({ status: 200, body: Buffer.from(globalThis.PRPVoice.silentWav(0.3)), headers: { 'content-type': 'audio/wav', 'x-prp-voice-duration': '0.3' } });
+    });
+    await page.addInitScript(FAKE_SPEECH);
+    await page.addInitScript(IOS_AUDIO);
+    await page.addInitScript(id => { try { localStorage.setItem('jdpi.doc.voice', JSON.stringify(id)); } catch { /* none */ } }, ONLINE_ID); // chosen in the settings
+    await page.goto(`${BASE}/#/kino/kino-wars`, { waitUntil: 'domcontentloaded' });
+    const kino = await (await page.waitForSelector('#frames iframe[data-module="kino-wars"]', { timeout: 20000 })).contentFrame();
+    await kino.waitForSelector('.kn-card[data-doc="korean-war"]', { timeout: 20000 });
+    await kino.evaluate(() => { location.hash = '#doc=korean-war'; });
+    await kino.waitForSelector('#cap-text .w', { timeout: 20000 });
+    await kino.click('#follow');
+    await page.locator('#np').waitFor({ state: 'visible', timeout: 10000 });
+    assert.equal(await kino.evaluate(() => typeof window.prpKinoUnlock), 'function');
+
+    // Play from the bar: Kino's audio first plays the silent clip inside the tap (the shell calls prpKinoUnlock before it
+    // posts "play"), so the clips that follow, outside any tap, may play on that element; the device voice never reads.
+    await page.click('#np-play');
+    await kino.waitForFunction(() => window.__plays.filter(p => p.src === 'blob').length >= 2, null, { timeout: 15000 });
+    const plays = await kino.evaluate(() => window.__plays);
+    assert.deepEqual(plays[0], { src: 'data', tap: true }, 'unlocked inside the tap');
+    assert.ok(plays.slice(1).every(p => p.src === 'blob' && !p.tap), JSON.stringify(plays));
+    assert.ok(said.length >= 2, `${said.length} sentences asked for`);
+    assert.deepEqual(await kino.evaluate(() => window.__spoken), [], 'the online voice read; the device voice never had to');
+
+    // The hook failing never stands in the way of the bar's Play.
+    await page.click('#np-play');
+    await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Play', null, { timeout: 5000 });
+    await kino.evaluate(() => { window.prpKinoUnlock = () => { throw new Error('unlock failed'); }; });
+    await page.click('#np-play');
+    await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Pause', null, { timeout: 5000 });
+    await page.click('#np-play');
+    await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Play', null, { timeout: 5000 });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

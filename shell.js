@@ -1,13 +1,17 @@
 /* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
-   and storage keys): renders the modules (Realtime Geopolitics, Retrospective Geopolitics, International Mystery
-   Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from registry.json, and
-   hosts each submodule page in a persistent workspace frame. A module has a short name (registry "name", for the
+   and storage keys): renders the modules (Realtime Geopolitics, Highbrowse, Retrospective Geopolitics, International
+   Mystery Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from registry.json,
+   and hosts each submodule page in a persistent workspace frame. A module has a short name (registry "name", for the
    sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, the home's headings,
-   page eyebrows and the tab title); they differ only where the full title is too long for the sidebar.
+   page eyebrows and the tab title); they differ only where the full title is too long for the sidebar. A module with
+   its own variant of the Vitruvian figure (Highbrowse's, so far) names it in the registry: "mark", the small one, beside
+   its code in the sidebar and on the home page, and "figure" at the head of its overview page.
    Routes: #/ · #/<module> · #/<module>/<submodule>[/<view>][?at=<url>]
-   (In registry.json the four modules are "suites" and their submodules "modules", as before.)
+   (In registry.json the modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
-   that moved between modules, and old sub-entries that became views or their own submodule are redirected.
+   that moved between modules (the four briefings into Highbrowse: #/rt/briefing, #/ns/science-briefing,
+   #/mm/econ-briefing, #/ds/digital-briefing), and old sub-entries that became views or their own submodule are
+   redirected.
    One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.
    While Kino follows along with its frame hidden, the now-playing bar shows its captions and controls. */
 
@@ -93,12 +97,14 @@ function navItem(suite, m) {
   return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}">
     <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}</a>`;
 }
+// A module's own figure, small, beside its code (decorative: the module's name is beside it).
+const suiteMark = (suite, size) => (suite.mark ? `<img class="suite-mark" src="${esc(suite.mark)}" alt="" width="${size}" height="${size}">` : '');
 function renderNav() {
   const P = state.registry.platform;
   $('#nav').innerHTML = `<a class="nav-item" href="#/" data-route=""><span class="icon" aria-hidden="true">⌂</span><span class="grow">Home</span></a>` +
     state.registry.suites.map(suite => `
       <details class="suite" data-suite="${suite.id}" open>
-        <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
+        <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${suiteMark(suite, 20)}${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
         <a class="suite-link" href="${href(suite)}" data-route="${suite.id}">Module overview</a>
         ${suite.modules.map(m => navItem(suite, m)).join('')}
       </details>`).join('') +
@@ -162,7 +168,7 @@ function renderHome() {
       <div class="prp-kpi"><span>Retrospective</span><b>${kinds.retrospective || 0}</b></div>
     </div>
     ${state.registry.suites.map((s, i) => `<section class="group" data-suite="${s.id}">
-      <div class="group-head"><span class="prp-code">${esc(s.code)}</span><h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">Module overview →</a></div>
+      <div class="group-head"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 22)}<h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">Module overview →</a></div>
       <p>${esc(s.description)}</p>
       <div class="tiles">${s.modules.map(m => tile(s, m)).join('')}</div>
     </section>`).join('')}
@@ -175,12 +181,15 @@ function renderHome() {
 
 function renderSuite(suite) {
   const live = suite.modules.filter(m => m.status === 'live').length;
+  // A module with its own figure shows it at the head of its overview, as its landing page does; here it is decorative
+  // (no alt text), since the module's name is the heading beside it.
+  const figure = suite.figure ? `<img class="suite-figure" src="${esc(suite.figure)}" alt="" width="104" height="104">` : '';
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}">
-    <header class="head">
+    <header class="head${figure ? ' has-figure' : ''}">${figure}<div>
       <div class="prp-eyebrow">${esc(state.registry.platform.name)} <span class="sep">/</span> Module ${esc(suite.code)}</div>
       <h1 class="prp-title">${esc(suite.title || suite.name)}</h1><p class="prp-dek">${esc(suite.description)}</p>
       <div class="prp-meta"><span><b>${suite.modules.length}</b> submodules</span><span><b>${live}</b> live</span></div>
-    </header>
+    </div></header>
     <div class="list prp-panel"><table class="prp-table">
       <thead><tr><th>Submodule</th><th>Kind</th><th>Status</th><th>Host</th><th></th></tr></thead>
       <tbody>${suite.modules.map(m => `<tr>

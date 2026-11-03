@@ -119,3 +119,79 @@ test('page shows five columns and filters by topic', pageTest, async () => {
   assert.equal(cols2, 4);
   assert.deepEqual(errors, []);
 });
+
+// Highbrowse opens a story here by its headline: #q=<words in a headline>&w=7d, which the page reads on load and again
+// when the shell moves its frame by hash, and writes back as the search box and the window change.
+test('page follows #q= and #w= deep links, and keeps them in its address', pageTest, async t => {
+  const d = await (await fetch(`${BASE}/briefing/data/latest.json`)).json();
+  // A hard-news story four to six days old: outside the page's default three days, inside the link's seven.
+  const story = d.items.find(i => !i.c && Date.parse(d.generated) - Date.parse(i.p) > 100 * 36e5 && Date.parse(d.generated) - Date.parse(i.p) < 140 * 36e5);
+  if (!story) { t.skip('no story four to six days old in the store'); return; }
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/briefing#w=7d&q=${encodeURIComponent(story.t.slice(0, 120))}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector(`#out .story a.t[href="${story.u}"]`, { timeout: 20000 });
+    assert.deepEqual([await page.inputValue('#window'), await page.inputValue('#q')], ['168', story.t.slice(0, 120)], 'a story older than three days, in the seven-day window');
+    // A move by hash (as the shell makes): the page follows without reloading.
+    await page.evaluate(() => { window.sameDocument = true; location.hash = '#w=24h&q=zzzz-nothing'; });
+    await page.waitForFunction(() => document.querySelector('#window').value === '24' && document.querySelector('#out .prp-empty'), null, { timeout: 10000 });
+    assert.equal(await page.evaluate(() => window.sameDocument), true);
+    // Typing writes the search back to the address; the default window (3 days) is left out of it.
+    await page.selectOption('#window', '72');
+    await page.fill('#q', 'trump');
+    assert.equal(await page.evaluate(() => location.hash), '#q=trump');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+// In the shell the page keeps its frame, so a Highbrowse link often arrives after the viewer has used the page: a move
+// by hash must still show the story it names (the topic, publisher and positions picked before go back to all), a link
+// without a search must clear the old one, and soft=1 must show a sport, entertainment or lifestyle story, which Hard news
+// only hides, on that visit, without changing the saved choice. (Each of these failed before: the story was hidden.)
+test('page: a move by hash shows the story it names whatever was picked before, and soft=1 shows sport for one visit', pageTest, async t => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/briefing`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('.cols5 .col', { timeout: 20000 });
+    // Pick a topic (US politics), a publisher and one position off, then link to a far-left story none of them shows.
+    const pick = await page.evaluate(() => {
+      const since = Date.now() - 70 * 36e5, pos = id => SRC.get(id)?.position;
+      const story = D.items.find(i => !i.c && Date.parse(i.p) >= since && pos(i.s) === 'far_left' && !matches(topics[0], i));
+      const other = D.items.find(i => !i.c && Date.parse(i.p) >= since && pos(i.s) === 'right');
+      const soft = D.items.find(i => i.c && Date.parse(i.p) >= Date.now() - 150 * 36e5);
+      return story && other && soft && { u: story.u, t: story.t, pub: other.s, soft: { u: soft.u, t: soft.t } };
+    });
+    if (!pick) { t.skip('no recent far-left story outside US politics, right-wing publisher or soft story in the store'); return; }
+    await page.locator('.topic[data-id="t0"] button.n').click();
+    await page.selectOption('#publisher', pick.pub);
+    await page.locator('[data-pos="far_left"]').click();
+    assert.equal(await page.locator(`#out .story a.t[href="${pick.u}"]`).count(), 0, 'the story is filtered out before the link');
+    await page.evaluate(h => { location.hash = h; }, `#w=7d&q=${encodeURIComponent(pick.t.slice(0, 120))}`);
+    await page.waitForSelector(`#out .story a.t[href="${pick.u}"]`, { timeout: 10000 });
+    assert.deepEqual(await page.evaluate(() => [document.querySelector('#viewtitle').textContent, document.querySelector('#publisher').value,
+      [...document.querySelectorAll('#posbtns [data-pos]')].every(b => b.getAttribute('aria-pressed') === 'true')]), ['All stories', '', true]);
+    // A link with no search (Highbrowse's "Open the Political Briefing") clears the one before.
+    await page.evaluate(() => { location.hash = '#w=24h'; });
+    await page.waitForFunction(() => document.querySelector('#window').value === '24', null, { timeout: 10000 });
+    assert.equal(await page.inputValue('#q'), '');
+    // soft=1: a lifestyle, entertainment or sport story shows, Hard news only is off for this visit and still saved on.
+    const { soft } = pick;
+    await page.evaluate(h => { location.hash = h; }, `#w=7d&q=${encodeURIComponent(soft.t.slice(0, 120))}&soft=1`);
+    await page.waitForSelector(`#out .story a.t[href="${soft.u}"]`, { timeout: 10000 });
+    assert.deepEqual([await page.isChecked('#hardnews'), await page.evaluate(() => localStorage.getItem('jdpi.briefing.hideSoft'))], [false, null]);
+    // Ticking Hard news only again is a choice: saved, and the address no longer says soft=1.
+    await page.check('#hardnews');
+    assert.deepEqual([await page.evaluate(() => localStorage.getItem('jdpi.briefing.hideSoft')), await page.evaluate(() => location.hash.includes('soft'))], ['1', false]);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

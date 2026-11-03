@@ -1,4 +1,4 @@
-// Scientific Briefing (Natural Science): the classifier sorts items into the five disciplines and tells papers from
+// Scientific Briefing (Highbrowse): the classifier sorts items into the five disciplines and tells papers from
 // news, the page's view logic reads deep links and orders "Major journals first", and the stored data
 // (science/briefing/data/stories.json) is well formed, free of duplicates and inside its seven-day window.
 // The page test runs where the submodule is deployed (JDPI_URL, e.g. http://localhost:8787, or the live site);

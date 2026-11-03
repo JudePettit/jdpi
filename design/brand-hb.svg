@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="hb-fig-title hb-fig-desc">
+  <title id="hb-fig-title">Highbrowse</title>
+  <desc id="hb-fig-desc">The Highbrowse figure, by JDP-Iq: the Vitruvian Manager figure in his hard hat, in Leonardo's circle and square, peering over a large newspaper he holds open by its edges, headed ACTA DIURNA over the headline NOVA VERITATIS, one eyebrow raised high and a monocle in that eye.</desc>
+  <!-- The Highbrowse module's variant of design/brand-vm.svg, on the same geometry: the circle centred on the navel (the
+       tile's centre, 128,128), the square of side 156, the shoulders at 114/142 and the hips at 116/140, the same limbs
+       in both poses and the same weights (6 for every limb, 2 for the dark cuts, 2.5 at 30% for the circle and the
+       square). The four objects give way to the newspaper, a broadsheet the square-pose hands hold open by its edges in
+       front of the body, so the torso, the hips and the antenna are behind it; the circle-pose arms rise from behind its
+       top edge, and the legs show below it. The head is drawn a little lower and larger than the mark's, so that between
+       the brim and the paper there is room for the face: two eyes looking up and to the right, a look down the nose (as in
+       design/highbrowse-wordmark.svg), the left brow level, the right one arched high, and an amber monocle in the right
+       eye on a chain that runs down behind the paper. The paper is the light ink of the dark theme with the ink of the
+       light theme for its type; the picture on it is the module's accent (the light theme's prp-hb). The two lines of type are
+       <text> in the serif the system has (Georgia, Times New Roman or another), each held to its measure by textLength,
+       so they fill the same width whatever the font; the type reads from about 128 px up, and below that the reduction,
+       design/brand-hb-icon.svg, takes over. -->
+  <rect width="256" height="256" rx="48" fill="#14181f"/>
+  <g fill="none" stroke="#f3f4f6" stroke-opacity=".3" stroke-width="2.5">
+    <circle cx="128" cy="128" r="94"/>
+    <rect x="50" y="66" width="156" height="156"/>
+  </g>
+  <!-- The figure, as in the mark; the paper, drawn after it, covers what is behind it. -->
+  <g fill="none" stroke="#f3f4f6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 100V140M116 147Q128 133 140 147"/>
+    <path d="M53 110H203"/>
+    <path d="M114 110L56 74M142 110L200 74"/>
+    <path d="M116 147L104 219M140 147L152 219"/>
+    <path d="M116 147L83 206M140 147L173 206"/>
+  </g>
+  <!-- The head, peering over the paper -->
+  <circle cx="128" cy="93" r="12.5" fill="#f3f4f6"/>
+  <!-- Eyes: whites drawn in, pupils up and to the right -->
+  <g fill="#ffffff" stroke="#14181f" stroke-width="1.4">
+    <ellipse cx="122.4" cy="95.6" rx="3.5" ry="3.1"/>
+    <ellipse cx="133.6" cy="95.6" rx="3.5" ry="3.1"/>
+  </g>
+  <g fill="#14181f">
+    <circle cx="123.6" cy="94.7" r="1.6"/>
+    <circle cx="134.8" cy="94.7" r="1.6"/>
+  </g>
+  <!-- Brows: the left level, the right arched high (the highbrow) -->
+  <g fill="none" stroke="#14181f" stroke-width="2.2" stroke-linecap="round">
+    <path d="M118.2 90.4Q122.2 88.6 126.2 90"/>
+    <path d="M129.9 89.6Q133.4 84.6 138.1 88.2"/>
+  </g>
+  <!-- The monocle, in the right eye, and its chain, which runs down behind the paper -->
+  <circle cx="133.6" cy="95.6" r="5.3" fill="none" stroke="#d9a35c" stroke-width="1.8"/>
+  <path d="M138.5 97.8Q142.2 100.4 141.2 106" fill="none" stroke="#d9a35c" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Hard hat: dome, brim and a centre ridge, over the head -->
+  <path d="M114 81a14 14 0 0 1 28 0z" fill="#d9a35c"/>
+  <rect x="109" y="78" width="38" height="6" rx="3" fill="#d9a35c"/>
+  <path d="M128 69v8" stroke="#14181f" stroke-width="2" stroke-linecap="round"/>
+  <!-- The newspaper: a broadsheet held open, its dark edge parting it from the face and the arms behind it -->
+  <rect x="56" y="102.5" width="144" height="79.5" rx="2.5" fill="#e9edf2" stroke="#14181f" stroke-width="2.5"/>
+  <g fill="#14181f" font-family="Georgia, 'Times New Roman', Times, 'Noto Serif', 'DejaVu Serif', serif" font-weight="700" text-anchor="middle">
+    <text x="128" y="124" font-size="17.5" textLength="130" lengthAdjust="spacingAndGlyphs">ACTA DIURNA</text>
+    <text x="128" y="147" font-size="10.5" textLength="116" lengthAdjust="spacingAndGlyphs">NOVA VERITATIS</text>
+  </g>
+  <!-- The nameplate's double rule, and a rule above the columns -->
+  <g fill="#14181f">
+    <rect x="62" y="128" width="132" height="1.5"/>
+    <rect x="62" y="131" width="132" height=".75"/>
+    <rect x="62" y="150" width="132" height=".75"/>
+  </g>
+  <!-- Three columns of type, a picture at the head of the middle one -->
+  <g stroke="#5c6470" stroke-width="1.8" stroke-linecap="round">
+    <path d="M63 155H103M63 159.5H103M63 164H103M63 168.5H103M63 173H103M63 177.5H95"/>
+    <path d="M108 168.5H148M108 173H148M108 177.5H140"/>
+    <path d="M153 155H193M153 159.5H193M153 164H193M153 168.5H193M153 173H193M153 177.5H185"/>
+  </g>
+  <rect x="107.5" y="153.5" width="41" height="11" rx="1" fill="#7a2e8e"/>
+  <g fill="none" stroke="#f3f4f6" stroke-width="1">
+    <circle cx="128" cy="159" r="4"/>
+    <rect x="124.6" y="155.6" width="6.8" height="6.8"/>
+  </g>
+  <!-- Hands, drawn last: the square-pose hands grip the paper's edges, the circle-pose hands are raised -->
+  <g fill="#f3f4f6" stroke="#14181f" stroke-width="2">
+    <circle cx="54" cy="111" r="5"/><circle cx="202" cy="111" r="5"/>
+  </g>
+  <g fill="#f3f4f6">
+    <circle cx="56" cy="74" r="4.5"/><circle cx="200" cy="74" r="4.5"/>
+  </g>
+</svg>

@@ -62,7 +62,7 @@ async function get(path, { method = 'GET', env = makeEnv() } = {}) {
 
 /* ================================================================ catalogue contract */
 describe('catalogue (integration/catalog.json)', () => {
-  const MODULES = new Set(['rt', 'rs', 'mm', 'ns', 'ds', 'kino']);
+  const MODULES = new Set(['rt', 'hb', 'rs', 'mm', 'ns', 'ds', 'kino']); // hb: the four briefings, in Highbrowse since November 2026
   const TYPES = new Set(['string', 'number', 'date', 'boolean', 'array', 'object']);
   const SUBMODULES = new Set(REG.suites.flatMap(s => s.modules.map(m => m.id)));
   test('follows the schema', () => {

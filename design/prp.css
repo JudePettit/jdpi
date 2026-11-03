@@ -43,6 +43,7 @@
 
   /* Modules (identity marks: code chips, rules, active nav) */
   --prp-rt: #1c5cab; --prp-rt-soft: #e9f1fb;   /* Realtime Geopolitics */
+  --prp-hb: #7a2e8e; --prp-hb-soft: #f5ecf8;   /* Highbrowse (Tyrian purple, the senator's stripe) */
   --prp-rs: #8a5a1f; --prp-rs-soft: #f7f0e6;   /* Retrospective Geopolitics */
   --prp-mm: #1f7a4d; --prp-mm-soft: #e8f4ee;   /* Money Management */
   --prp-oi: #5c6512; --prp-oi-soft: #f2f4e3;   /* International Mystery Management */
@@ -114,7 +115,7 @@
     --prp-line: #2b343f; --prp-line-soft: #232b35; --prp-line-strong: #3b4654; --prp-scrim: rgba(0, 0, 0, .55);
     --prp-text: #e9edf2; --prp-text-2: #c6ced8; --prp-muted: #9aa5b2; --prp-faint: #808b98; --prp-on-primary: #0f1318;
     --prp-primary: #6da7ec; --prp-primary-hover: #86b6ef; --prp-primary-soft: #18263a; --prp-link: #86b6ef; --prp-focus: #86b6ef;
-    --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217;
+    --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217; --prp-hb: #cb8fde; --prp-hb-soft: #2a1b31;
     --prp-mm: #4fbf85; --prp-mm-soft: #15291f; --prp-oi: #bcc56b; --prp-oi-soft: #23260f; --prp-ns: #a193f0; --prp-ns-soft: #221e3a; --prp-ds: #4fc3d8; --prp-ds-soft: #13282d; --prp-kn: #e98bb6; --prp-kn-soft: #2e1724;
     --prp-good: #4fbf85; --prp-good-soft: #15291f; --prp-warn: #e2ad4a; --prp-warn-soft: #2d2412;
     --prp-bad: #f07a6e; --prp-bad-soft: #321a19; --prp-info: #6da7ec; --prp-info-soft: #18263a; --prp-up: #4fbf85; --prp-down: #f07a6e;
@@ -136,7 +137,7 @@
   --prp-line: #2b343f; --prp-line-soft: #232b35; --prp-line-strong: #3b4654; --prp-scrim: rgba(0, 0, 0, .55);
   --prp-text: #e9edf2; --prp-text-2: #c6ced8; --prp-muted: #9aa5b2; --prp-faint: #808b98; --prp-on-primary: #0f1318;
   --prp-primary: #6da7ec; --prp-primary-hover: #86b6ef; --prp-primary-soft: #18263a; --prp-link: #86b6ef; --prp-focus: #86b6ef;
-  --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217;
+  --prp-rt: #6da7ec; --prp-rt-soft: #18263a; --prp-rs: #d9a35c; --prp-rs-soft: #2b2217; --prp-hb: #cb8fde; --prp-hb-soft: #2a1b31;
   --prp-mm: #4fbf85; --prp-mm-soft: #15291f; --prp-oi: #bcc56b; --prp-oi-soft: #23260f; --prp-ns: #a193f0; --prp-ns-soft: #221e3a; --prp-ds: #4fc3d8; --prp-ds-soft: #13282d; --prp-kn: #e98bb6; --prp-kn-soft: #2e1724;
   --prp-good: #4fbf85; --prp-good-soft: #15291f; --prp-warn: #e2ad4a; --prp-warn-soft: #2d2412;
   --prp-bad: #f07a6e; --prp-bad-soft: #321a19; --prp-info: #6da7ec; --prp-info-soft: #18263a; --prp-up: #4fbf85; --prp-down: #f07a6e;
@@ -154,6 +155,7 @@
 
 /* Module accent: new ids and the old ones */
 [data-suite="rt"], [data-suite="q"]  { --prp-accent: var(--prp-rt); --prp-accent-soft: var(--prp-rt-soft); }
+[data-suite="hb"]                    { --prp-accent: var(--prp-hb); --prp-accent-soft: var(--prp-hb-soft); }
 [data-suite="rs"], [data-suite="hp"] { --prp-accent: var(--prp-rs); --prp-accent-soft: var(--prp-rs-soft); }
 [data-suite="mm"], [data-suite="fe"] { --prp-accent: var(--prp-mm); --prp-accent-soft: var(--prp-mm-soft); }
 [data-suite="ns"]                    { --prp-accent: var(--prp-ns); --prp-accent-soft: var(--prp-ns-soft); }

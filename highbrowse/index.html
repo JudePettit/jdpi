@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" data-suite="hb" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Highbrowse · VM</title>
+<meta name="description" content="The day's and the week's news across Vitruvian Manager's four briefings, Political, Scientific, Economics and Digital: the biggest stories and topics, what each briefing covers most, the stories they share and the political press across five positions, with one search across all four.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="highbrowse.css">
+<script src="../design/prp-bar.js" data-suite="hb" data-module="highbrowse" data-shell="../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="hb">
+  <header class="front">
+    <img class="figure" src="../design/brand-hb.svg" width="136" height="136" alt="The Highbrowse figure: Vitruvian Manager's figure, eyebrows raised and a monocle in one eye, peering over a large newspaper headed Acta Diurna">
+    <div class="front-text">
+      <div class="prp-eyebrow">Highbrowse <span class="sep">·</span> <span id="edition">The four briefings</span></div>
+      <h1 class="prp-title">Highbrowse</h1>
+      <p class="prp-dek">The day's and the week's news across the Political, Scientific, Economics and Digital Briefings: the biggest stories and topics, what each briefing covers most, the stories they share, and how the political press spreads across five positions. Search all four at once, and open any story at its publisher or in its briefing.</p>
+      <div class="prp-meta" id="meta" aria-live="polite"><span>Loading the four briefings…</span></div>
+    </div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-today" aria-controls="panel-today" aria-selected="true">Today</button>
+    <button type="button" role="tab" id="tab-week" aria-controls="panel-week" aria-selected="false" tabindex="-1">This week</button>
+    <button type="button" role="tab" id="tab-search" aria-controls="panel-search" aria-selected="false" tabindex="-1">Search</button>
+  </div>
+
+  <form class="toolbar prp-panel" id="find" role="search" aria-label="Search the four briefings">
+    <div class="controls">
+      <label class="field grow"><span class="prp-label">Search the four briefings</span>
+        <input class="prp-input" type="search" id="q" placeholder="Words in headlines and summaries, or a &quot;phrase&quot;" autocomplete="off" maxlength="200"></label>
+      <label class="field" data-search-only><span class="prp-label">When</span><select class="prp-select" id="w"></select></label>
+      <label class="field" data-search-only><span class="prp-label">Topic</span><select class="prp-select" id="t"><option value="">All topics</option></select></label>
+      <label class="field" data-search-only><span class="prp-label">Order</span><select class="prp-select" id="sort"><option value="">Best match first</option><option value="newest">Newest first</option></select></label>
+      <label class="check" data-search-only title="The Political Briefing's own tag: sport results, celebrity and entertainment coverage, and lifestyle sections. Its Hard news only filter hides them, and so does Highbrowse unless this is ticked."><input type="checkbox" id="soft"> Include sport, entertainment and lifestyle</label>
+    </div>
+    <div class="chips" id="b" role="group" aria-label="Briefings to search" data-search-only></div>
+  </form>
+
+  <section id="panel-today" role="tabpanel" aria-labelledby="tab-today"><p class="prp-empty">Loading…</p></section>
+  <section id="panel-week" role="tabpanel" aria-labelledby="tab-week" hidden></section>
+  <section id="panel-search" role="tabpanel" aria-labelledby="tab-search" hidden>
+    <div class="prp-panel">
+      <div class="results-head"><h2 class="prp-h2" id="r-title">All four briefings</h2><span class="status" id="r-status" aria-live="polite"></span></div>
+      <ol class="results" id="results"></ol>
+      <div class="more" id="r-more" hidden></div>
+    </div>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> The four briefings' own stores, read when this page opens: the Political Briefing (<code>briefing/data/latest.json</code>, refreshed twice a day from fifty publishers, ten for each political position), and the Scientific, Economics and Digital Briefings (their <code>data/stories.json</code>, refreshed every six hours from journals, preprint servers, institutions and news desks). Each keeps seven days. Headlines, links and short summaries belong to their publishers; every story links to its article and to its briefing.</p>
+    <p><b>Method.</b> Hard news only: the Political Briefing's sport, entertainment and lifestyle stories are left out of the analysis, as its own Hard news only filter does, and out of the search unless you include them. A story is a group of headlines that share enough of their words, the rarer words counting for more; stories are ranked by the outlets that covered them, and an outlet in two briefings counts once. Topics are the names headlines capitalise (people, places, organisations, AI), ranked by the outlets that used them; other words count in full only as far as they come from stories three outlets or more covered. Political positions are the Political Briefing's (AllSides Media Bias Ratings where available, otherwise Media Bias/Fact Check, adjusted to five steps): they describe a publisher's editorial slant, not its accuracy, and each position has ten active publishers. The Political Briefing's topics are its default topics, or yours if you have changed them there. Today is the last 24 hours and this week the last 7 days, counted back from now, or from the newest refresh when the briefings are more than a day old; days are in your time zone.</p>
+    <p><b>Search.</b> Every word must be in the headline or the summary, at the start of a word; a word of three letters or fewer must be a whole word, and a plural finds its singular (“companies” finds “company”, and the other way round). Initials find their other spellings: US finds U.S., USA and United States, AI finds A.I. Put several words in quotes to find them together. A headline match counts four times a summary match. The same article in two briefings is one result.</p>
+    <p><b>Refresh.</b> Nothing of its own: the page reads the briefings' latest stores each time it opens. <span id="refreshed"></span></p>
+  </footer>
+</div>
+</body>
+</html>

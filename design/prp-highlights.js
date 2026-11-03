@@ -43,12 +43,13 @@
    never used to build a URL: every address fetched is a fixed path, and every link is one of ROUTES. */
 
 // Shell hash routes into each submodule (shell.js parses '#/<suite>/<submodule>'). Hard-coded, never from fetched data.
+// The four briefings are in Highbrowse (hb) since November 2026; their old routes redirect there too.
 export const ROUTES = {
   volatility: '#/rt/volatility',
-  scienceBriefing: '#/ns/science-briefing',
-  econBriefing: '#/mm/econ-briefing',
-  digitalBriefing: '#/ds/digital-briefing',
-  intelligenceBriefing: '#/rt/briefing',
+  scienceBriefing: '#/hb/science-briefing',
+  econBriefing: '#/hb/econ-briefing',
+  digitalBriefing: '#/hb/digital-briefing',
+  intelligenceBriefing: '#/hb/briefing',
   calendar: '#/rt/calendar',
   markets: '#/mm/markets',
 };

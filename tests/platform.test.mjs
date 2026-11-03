@@ -4,7 +4,7 @@
 // Submodule-specific suites live with each submodule (e.g. political-atlas/tests).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { pageTest } from './tools/pages.mjs';
 
@@ -23,10 +23,14 @@ after(async () => { await browser?.close(); });
 
 test('registry is well formed', () => {
   assert.deepEqual([registry.platform.name, registry.platform.fullName, registry.platform.company], ['VM', 'Vitruvian Manager', 'JDP-Iq']);
-  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
+  // Highbrowse (hb), the four briefings' module, comes second, after Realtime Geopolitics (November 2026).
+  assert.deepEqual(registry.suites.map(s => s.id), ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
   // A module's name is what the sidebar shows; its title is its overview page's heading and its pages' eyebrow.
-  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Geopolitics', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
-  assert.deepEqual(registry.suites.map(s => s.title), ['Realtime Geopolitics', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  // A module's own figure: the small one for the sidebar ("mark") and the large one for its overview ("figure"), files here.
+  for (const s of registry.suites) for (const f of [s.mark, s.figure].filter(Boolean)) assert.ok(existsSync(new URL('../' + f, import.meta.url)), `${s.id}: ${f}`);
+  assert.deepEqual(registry.suites.filter(s => s.mark).map(s => [s.id, s.mark, s.figure]), [['hb', 'design/brand-hb-icon.svg', 'design/brand-hb.svg']]);
   assert.ok(!/\bPRP\b|Personal Resource Planner|Realtime Intelligence|Retrospective Intelligence|i-Spy/.test(JSON.stringify(registry)), 'no old product or module name in the registry');
   const ids = modules.map(x => x.m.id);
   assert.equal(new Set(ids).size, ids.length, 'submodule ids are unique across modules');
@@ -39,12 +43,17 @@ test('registry is well formed', () => {
   const where = id => modules.find(x => x.m.id === id).suite.id;
   assert.equal(where('atlas'), 'rt'); assert.equal(where('war-focus'), 'rs'); assert.equal(where('traders'), 'mm');
   assert.equal(where('markets'), 'mm'); assert.equal(where('tally-stick'), 'mm'); assert.equal(where('algo-trader'), 'mm');
-  assert.equal(where('science-briefing'), 'ns'); assert.equal(where('progress'), 'ns');
+  assert.equal(where('progress'), 'ns');
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
-  assert.equal(where('econ-briefing'), 'mm');
-  for (const id of ['digital-briefing', 'data-analytics', 'integration-hub']) assert.equal(where(id), 'ds');
+  for (const id of ['data-analytics', 'integration-hub']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
-  assert.equal(modules.find(x => x.m.id === 'briefing').m.name, 'Political Briefing');
+  // The four briefings moved into Highbrowse from Realtime Geopolitics, Natural Science, Money Management and Digital
+  // Science (they were asserted there before); each keeps its id and its page. The Global Headline Tracker stays.
+  const hb = registry.suites.find(s => s.id === 'hb');
+  assert.deepEqual(hb.modules.map(m => [m.id, m.name, m.url]), [['highbrowse', 'Highbrowse', 'highbrowse/index.html'], ['briefing', 'Political Briefing', 'q/briefing.html'],
+    ['science-briefing', 'Scientific Briefing', 'science/briefing/index.html'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/index.html'], ['digital-briefing', 'Digital Briefing', 'digital/briefing/index.html']]);
+  assert.equal(where('headlines'), 'rt');
+  assert.deepEqual(modules.find(x => x.m.id === 'highbrowse').m.views.map(v => [v.id, v.url]), [['today', 'highbrowse/index.html'], ['week', 'highbrowse/index.html#tab=week'], ['search', 'highbrowse/index.html#tab=search']]);
 });
 
 test('every live submodule URL responds', pageTest, async () => {
@@ -94,12 +103,45 @@ test('each module overview lists its submodules', pageTest, async () => {
 });
 
 test('old addresses redirect to the new structure', pageTest, async () => {
-  for (const [from, to] of [['#/q/briefing', '#/rt/briefing'], ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
+  // The four briefings' old addresses (and the oldest, #/q/briefing, which went to #/rt/briefing before) now land in
+  // Highbrowse, where the briefings moved in November 2026.
+  for (const [from, to] of [['#/q/briefing', '#/hb/briefing'], ['#/rt/briefing', '#/hb/briefing'], ['#/ns/science-briefing', '#/hb/science-briefing'],
+    ['#/mm/econ-briefing', '#/hb/econ-briefing'], ['#/fe/econ-briefing', '#/hb/econ-briefing'], ['#/ds/digital-briefing', '#/hb/digital-briefing'],
+    ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
     ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus']]) {
     await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(t => location.hash === t, to, { timeout: 5000 }).catch(() => {});
     assert.equal(await page.evaluate(() => location.hash), to, `${from} → ${to}`);
   }
+  // A bookmarked deep link keeps its place: the old address with ?at= lands in Highbrowse with it, and the briefing's
+  // frame opens there.
+  const at = encodeURIComponent(`${BASE}/science/briefing/index.html#d=physics&w=7d`);
+  await page.goto(`${BASE}/#/ns/science-briefing?at=${at}`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(t => location.hash === t, `#/hb/science-briefing?at=${at}`, { timeout: 5000 }).catch(() => {});
+  assert.equal(await page.evaluate(() => location.hash), `#/hb/science-briefing?at=${at}`);
+  const sci = await (await page.waitForSelector('#frames iframe.active[data-module="science-briefing"]', { timeout: 15000 })).contentFrame();
+  await sci.waitForFunction(() => document.querySelector('#chips [data-v="physics"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 30000 });
+  assert.match(await page.textContent('#crumbs'), /Highbrowse.*Scientific Briefing/);
+});
+
+test('a module with its own figure shows it in the sidebar, on the home page and on its overview', pageTest, async () => {
+  const p = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+  try {
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(`${BASE}/#/`, { waitUntil: 'networkidle' });
+    // Highbrowse's mark beside its code (decorative: the name is beside it), and no other module's.
+    assert.deepEqual(await p.$$eval('#nav details > summary img.suite-mark', imgs => imgs.map(i => [i.closest('details').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
+      [['hb', 'design/brand-hb-icon.svg', '', true]]);
+    assert.match(await p.textContent('#nav details[data-suite="hb"] > summary'), /^HBHighbrowse/);
+    assert.equal(await p.getAttribute('.group[data-suite="hb"] .group-head img.suite-mark', 'src'), 'design/brand-hb-icon.svg');
+    await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });
+    assert.deepEqual(await p.$eval('#view .head img.suite-figure', i => [i.getAttribute('src'), i.naturalWidth > 0]), ['design/brand-hb.svg', true]);
+    assert.equal(await p.textContent('#view h1'), 'Highbrowse');
+    await p.goto(`${BASE}/#/rs`, { waitUntil: 'networkidle' });
+    assert.equal(await p.locator('#view .head img').count(), 0, 'a module without one shows none');
+    assert.deepEqual(errors, []);
+  } finally { await p.close(); }
 });
 
 test('each live submodule opens inside the shell workspace', pageTest, async () => {

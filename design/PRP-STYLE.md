@@ -19,10 +19,20 @@ tight: page titles (`<Submodule> · VM`), the sidebar's brand chip, the breadcru
 wrench and a mouse; for 40 px and up) and `design/brand-vm-icon.svg` (the favicon, drawn for 16 and 32 px). The shell
 plays `design/vm-loading.svg` while a page loads. `design/brand-prp.svg` stays in place only for old external links.
 
+**A module's own figure.** A module may have its variant of the figure, on the mark's geometry and in the design
+system's colours, on the mark's dark tile so that it reads in both themes. The registry names it on the module:
+`"figure"` (the full drawing, for 72 px and up) and `"mark"` (its reduction, for 16 to 40 px). The shell shows the mark
+beside the module's code in the sidebar and on the home page, and the figure at the head of the module's overview; the
+module's landing page shows the figure in its header, as its `<img>` with alt text. So far there is one: **Highbrowse**,
+`design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA DIURNA over NOVA VERITATIS, one
+eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a figure's type in `<text>` held by
+`textLength`, and no double hyphen inside its comments (an SVG with one is not XML, and does not draw).
+
 | Old | New | id (registry) | Code |
 |---|---|---|---|
 | JDP-I, then PRP (platform) | **Vitruvian Manager** (**VM**), by **JDP-Iq** | | |
 | Q · Geopolitical Intelligence | **Realtime Geopolitics** | `rt` (alias `q`) | RT |
+| (new, November 2026) | **Highbrowse** (the four briefings) | `hb` | HB |
 | H&P · History & Politics | **Retrospective Geopolitics** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
 | (new) | **International Mystery Management** (sidebar: **Int-Myst Mngmnt**) | `oi` | OI |
@@ -30,15 +40,16 @@ plays `design/vm-loading.svg` while a page loads. `design/brand-prp.svg` stays i
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
 
-In the registry the seven are "suites" and their pages "modules"; in the interface we say **module** for the seven and
+In the registry the eight are "suites" and their pages "modules"; in the interface we say **module** for the eight and
 **submodule** for the pages. A module has a short `name` (the sidebar, the breadcrumb, search) and a full `title` (its
 overview page, the home's headings, page eyebrows, the tab title); they differ only for International Mystery
 Management, whose sidebar name is **Int-Myst Mngmnt**.
 
 | Submodule | Module | Notes |
 |---|---|---|
-| Political Briefing (was Intelligence Briefing, before that Briefing) | RT | `q/briefing.html` |
-| Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`) |
+| Highbrowse (the module's landing page) | HB (new) | `highbrowse/`: the day's and the week's news across the four briefings (the biggest stories and topics, each briefing's coverage, the stories they share, the political spread) and one search across them; Today, This week and Search are tabs; it reads the briefings' own stores and has no data of its own |
+| Political Briefing (was Intelligence Briefing, before that Briefing) | HB (moved from RT) | `q/briefing.html`; reads `#q=` and `#w=` as the other briefings do, and `soft=1` to show sport, entertainment and lifestyle on one visit; a move by hash also puts back All stories, every publisher and all five positions |
+| Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`), the name the Highbrowse module shares |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
 | OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | OI (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
@@ -50,14 +61,15 @@ Management, whose sidebar name is **Int-Myst Mngmnt**.
 | War Focus | RS | now its own submodule (`battlefield/focus/`) |
 | Learning · Politics | RS | `fe/learning.html?course=politics` |
 | Market Briefing (was TD Markets) | MM | trade-desk `/markets/` |
-| Economics Briefing | MM (new) | `econ/briefing/` |
+| Economics Briefing | HB (moved from MM) | `econ/briefing/` |
 | Tally Stick | MM | trade-desk `/tally/` (private) |
 | Algo Trader (was Double Signal) | MM | trade-desk `/tally/algo/` (private); Double Signal's logic is the **Double Agent** ruleset |
 | Auto Trader (was Trader Tracker) | MM | `fe/traders.html` |
 | Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
-| Scientific Briefing | NS (new) | `science/briefing/` |
+| Scientific Briefing | HB (moved from NS) | `science/briefing/` |
 | Invention Timeline | NS (new) | `science/progress/` |
-| Digital Briefing, Data Analytics, Integration Hub | DS (new) | `digital/briefing/`, `analytics/`, `integration/` |
+| Digital Briefing | HB (moved from DS) | `digital/briefing/` |
+| Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/` |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
 
 **Sidebar order.** Within each module the strongest submodules come first, the calendar second-last and the course last.
@@ -72,7 +84,7 @@ the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tab
 ## 2. Hooking a page up
 
 ```html
-<html lang="en" data-suite="rt">              <!-- rt | rs | oi | mm | ns | ds | kino -->
+<html lang="en" data-suite="rt">              <!-- rt | hb | rs | oi | mm | ns | ds | kino -->
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
@@ -105,7 +117,8 @@ so a page should not pin anything it needs there.
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|rs|oi|mm|ns|ds|kn` and `-soft`.
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|hb|rs|oi|mm|ns|ds|kn` and `-soft`
+  (Highbrowse's `--prp-hb` is Tyrian purple, the senator's stripe).
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,
@@ -124,7 +137,7 @@ defined for both themes.
 
 ## 4. Page anatomy (publication front matter + ERP object page)
 
-1. **Header**: `.prp-eyebrow` "Realtime Geopolitics · Political Briefing", always with the module's full title
+1. **Header**: `.prp-eyebrow` "Highbrowse · Political Briefing", always with the module's full title
    ("International Mystery Management · OSINT Dashboard", never the sidebar's "Int-Myst Mngmnt"); mark the eyebrow and
    any standalone brand with `data-jdpi-standalone` only if it duplicates the shell. Then `.prp-title` (serif h1),
    `.prp-dek` (one or two plain sentences: what this is and what you can do), `.prp-meta` line (Updated … · Source … ·

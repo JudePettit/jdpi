@@ -34,6 +34,7 @@ const STORIES = 'stories, not entities: news items whose names carry no Wikidata
 const EXEMPT = {
   encyclopedia: 'the Master Index itself: it reads the lake that every other submodule feeds',
   briefing: STORIES, 'econ-briefing': STORIES, 'science-briefing': STORIES, 'digital-briefing': STORIES, headlines: STORIES,
+  highbrowse: 'a view of the four briefings’ stories (exempt above): its stories, topics and search are theirs, with no entities of its own',
   atlas: 'another repository (political-atlas), whose leaders, parties and countries have no Wikidata IDs yet: its adapter, by Wikipedia title, is queued',
   markets: 'another repository (trade-desk): its tickers become company items (Wikidata P414 and P249) later',
   osint: 'a workbench of search tools and a case notebook, with few names of its own',

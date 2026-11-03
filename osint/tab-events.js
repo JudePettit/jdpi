@@ -53,7 +53,7 @@ export function init(panel, ctx) {
   });
   const links = [
     ['Global Headline Tracker', prpLink('rt', 'headlines', 'q/headlines.html?view=current'), 'Any country’s last 24 hours of news on a map, with archives'],
-    ['Political Briefing', prpLink('rt', 'briefing', 'q/briefing.html'), 'Your topics across fifty publishers, left to right'],
+    ['Political Briefing', prpLink('hb', 'briefing', 'q/briefing.html'), 'Your topics across fifty publishers, left to right'],
     ['Geopolitical Volatility', prpLink('rt', 'volatility', 'q/volatility.html'), 'A daily 0–100 index per country, also built from GDELT'],
     [`Course: ${LESSONS.events}`, courseLink(lessonSlug(LESSONS.events)), 'Why raw GDELT counts drift, and how to read them'],
   ];

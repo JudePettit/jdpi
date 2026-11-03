@@ -88,10 +88,10 @@ function eventTypes(input) {
 
 /* ============================================================================ briefings */
 const BRIEFINGS = {
-  intelligence: { file: 'briefing/data/latest.json', name: 'Political Briefing', page: 'q/briefing.html', module: 'Realtime Geopolitics' },
-  scientific: { file: 'science/briefing/data/stories.json', name: 'Scientific Briefing', page: 'science/briefing/index.html', module: 'Natural Science' },
-  economics: { file: 'econ/briefing/data/stories.json', name: 'Economics Briefing', page: 'econ/briefing/index.html', module: 'Money Management' },
-  digital: { file: 'digital/briefing/data/stories.json', name: 'Digital Briefing', page: 'digital/briefing/index.html', module: 'Digital Science' }
+  intelligence: { file: 'briefing/data/latest.json', name: 'Political Briefing', page: 'q/briefing.html', module: 'Highbrowse' },
+  scientific: { file: 'science/briefing/data/stories.json', name: 'Scientific Briefing', page: 'science/briefing/index.html', module: 'Highbrowse' },
+  economics: { file: 'econ/briefing/data/stories.json', name: 'Economics Briefing', page: 'econ/briefing/index.html', module: 'Highbrowse' },
+  digital: { file: 'digital/briefing/data/stories.json', name: 'Digital Briefing', page: 'digital/briefing/index.html', module: 'Highbrowse' }
 };
 const BRIEFING_ALIAS = { intel: 'intelligence', news: 'intelligence', politics: 'intelligence', geopolitics: 'intelligence', science: 'scientific', sci: 'scientific', econ: 'economics', economic: 'economics', economy: 'economics',
   finance: 'economics', tech: 'digital', technology: 'digital', computing: 'digital', ai: 'digital' };
@@ -742,7 +742,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       inputSchema: S({ country: { type: 'string', description: 'Country name or ISO 3166 code, e.g. "France", "FRA", "FR".' } }, ['country']) },
     { name: 'list_submodules', title: 'List Vitruvian Manager submodules', fn: listSubmodules,
       description: 'The pages of Vitruvian Manager by module, with what each does and its address, so you can point a person to the right page.',
-      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt, rs, mm, ns, ds or kino.' } }) }
+      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt, hb, rs, mm, ns, ds or kino.' } }) }
   ];
   for (const t of tools) t.annotations = { title: t.title, ...RO };
   const byName = new Map(tools.map(t => [t.name, t]));

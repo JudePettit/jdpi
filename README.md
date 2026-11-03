@@ -11,27 +11,33 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 
 | Module | Code | Submodules |
 |---|---|---|
-| **Realtime Geopolitics**: what is happening now | RT | Political Briefing · Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
+| **Realtime Geopolitics**: what is happening now | RT | Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
+| **Highbrowse**: the news worth reading, in four briefings | HB | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
 | **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
-| **Money Management**: your money end to end | MM | Market Briefing · Economics Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
-| **Natural Science**: science now and through history | NS | Scientific Briefing · Invention Timeline |
-| **Digital Science**: computing, AI and the digital world | DS | Digital Briefing · Data Analytics · Integration Hub |
+| **Money Management**: your money end to end | MM | Market Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
+| **Natural Science**: science through history | NS | Invention Timeline |
+| **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
 
-(In `registry.json` the seven modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
+(In `registry.json` the eight modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
 shows and its `title` what its overview page and page eyebrows show. The old ids `q`, `hp` and `fe` still work as
-aliases.)
+aliases, and so do the addresses of submodules that moved to another module: the four briefings, which came to
+Highbrowse in November 2026 from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open
+at `#/rt/briefing`, `#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`.)
 
 The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait and other lowbrow stories is called
-**Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`.
+**Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`. The
+Highbrowse module shares the name: its landing page (`highbrowse/`) analyses the four briefings' own stores in the
+browser, with no data or timed job of its own, and its figure is the first module variant of the Vitruvian figure
+(`design/brand-hb.svg`, and `design/brand-hb-icon.svg` for the sidebar).
 
 ## Architecture
 
 ```
   VM shell (this repo): sidebar → modules → submodules · breadcrumb · search · theme · registry.json
         │ one persistent iframe per submodule page (state is kept when you switch)
-        ├── pages in this repo: q/, battlefield/, kardashev/, encyclopedia/, fe/, science/, osint/, sigint/, geoint/
+        ├── pages in this repo: q/, highbrowse/, battlefield/, kardashev/, encyclopedia/, fe/, science/, econ/, digital/, osint/, sigint/, geoint/, …
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
         └── trade-desk Worker (Market Briefing, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
@@ -44,7 +50,7 @@ The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait 
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
 | Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Master Index links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
-| Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. |
+| Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. A module may have its own variant of the figure (registry `mark` and `figure`): Highbrowse's is `design/brand-hb.svg` and `design/brand-hb-icon.svg`. |
 | Entity layer | `lake/` | See `lake/README.md`. |
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
 | Voice | `design/prp-voice.js`, `functions/api/voice/v1/[[path]].js`, `functions/voice/[[path]].js` | One narration layer for the Documentary reader and Kino: this device's voice, or an online Azure voice through the site's own proxy (key, quota and cache on the server; set-up in `OPERATIONS.md`, section 4), falling back to the device voice whenever the online one cannot carry on. |

@@ -122,7 +122,7 @@ const BRIEF = has('briefing/data/latest.json') ? J('briefing/data/latest.json') 
 const POSITION = { far_left: 'Far left', left: 'Left', centre: 'Centre', right: 'Right', far_right: 'Far right' };
 if (BRIEF) {
   spec({
-    id: 'intelligence-briefing-stories', title: 'Political Briefing: stories', module: 'rt', submodule: 'briefing',
+    id: 'intelligence-briefing-stories', title: 'Political Briefing: stories', module: 'hb', submodule: 'briefing',
     description: 'Every story from the Political Briefing\'s publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet\'s name and position.',
     source: { urls: ['briefing/data/latest.json'], records: 'items' }, refresh: 'twice daily',
     licence: 'Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.',
@@ -131,7 +131,7 @@ if (BRIEF) {
       ['d', 'Standfirst or opening lines from the feed'], ['c', 'Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news']]
   });
   spec({
-    id: 'intelligence-briefing-sources', title: 'Political Briefing: publishers', module: 'rt', submodule: 'briefing',
+    id: 'intelligence-briefing-sources', title: 'Political Briefing: publishers', module: 'hb', submodule: 'briefing',
     description: 'The Political Briefing\'s publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.',
     source: { urls: ['briefing/data/latest.json'], records: 'sources' }, refresh: 'twice daily',
     licence: 'Metadata © JDP-Iq; position ratings after AllSides and Media Bias/Fact Check.', sources: ['AllSides Media Bias Ratings', 'Media Bias/Fact Check', 'The publishers\' own feeds'],
@@ -426,7 +426,7 @@ const briefSpecs = (id, file, module, submodule, title, facetKey, refresh, sourc
     fields: [...Object.keys(S).filter(k => srcKeys.has(k)).map(k => [k, S[k]]), ...[...srcKeys].filter(k => !S[k]).map(k => [k, UNDESCRIBED])]
   });
 };
-briefSpecs('econ-briefing', 'econ/briefing/data/stories.json', 'mm', 'econ-briefing', 'Economics Briefing', 'fields', '6-hourly', 'RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources');
+briefSpecs('econ-briefing', 'econ/briefing/data/stories.json', 'hb', 'econ-briefing', 'Economics Briefing', 'fields', '6-hourly', 'RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources');
 
 const CONG = J('traders/data/congress.json');
 const MEMBERS = new Map(CONG.members.map(m => [m.id, m]));
@@ -478,7 +478,7 @@ spec({
 });
 
 // ---- Natural Science ------------------------------------------------------------------------------------------
-briefSpecs('science-briefing', 'science/briefing/data/stories.json', 'ns', 'science-briefing', 'Scientific Briefing', 'disciplines', '6-hourly', 'RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)');
+briefSpecs('science-briefing', 'science/briefing/data/stories.json', 'hb', 'science-briefing', 'Scientific Briefing', 'disciplines', '6-hourly', 'RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)');
 const PROG = J('science/progress/data/events.json');
 const DISC = new Map(PROG.disciplines.map(d => [d.id, d.name]));
 const progLicence = 'Facts from Wikidata (CC0); titles and notes © JDP-Iq.';
@@ -511,7 +511,7 @@ spec({
 if (has('digital/briefing/data/stories.json')) {
   const d = J('digital/briefing/data/stories.json');
   const key = ['fields', 'topics', 'disciplines', 'areas'].find(k => Array.isArray(d[k])) || 'fields';
-  briefSpecs('digital-briefing', 'digital/briefing/data/stories.json', 'ds', 'digital-briefing', 'Digital Briefing', key, '6-hourly', 'RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources');
+  briefSpecs('digital-briefing', 'digital/briefing/data/stories.json', 'hb', 'digital-briefing', 'Digital Briefing', key, '6-hourly', 'RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources');
 }
 spec({
   id: 'prp-submodules', title: 'Vitruvian Manager: modules and submodules', module: 'ds', submodule: 'integration-hub',
@@ -608,7 +608,7 @@ for (const s of SPECS) {
   log(`${s.id.padEnd(34)} ${String(allRows.length).padStart(6)} rows  ${String(parts.length).padStart(2)} part(s)  ${(entry.bytes / 1024).toFixed(0).padStart(5)} KB  max part cost ${Math.max(...parts.map(p => p.cost))}`);
 }
 
-const MODULE_ORDER = ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
+const MODULE_ORDER = ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
 catalogue.sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module));
 const CATALOGUE = {
   generated: TODAY,

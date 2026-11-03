@@ -1,4 +1,4 @@
-// Economics Briefing (Money Management): the classifier sorts items into the eight fields and tells research from news,
+// Economics Briefing (Highbrowse): the classifier sorts items into the eight fields and tells research from news,
 // the parser keeps authors, DOIs and dates (and dates NBER's undated list), the page's view logic reads deep links and
 // orders "Major sources first", and the stored data (econ/briefing/data/stories.json) is well formed, free of
 // duplicates and inside its seven-day window.

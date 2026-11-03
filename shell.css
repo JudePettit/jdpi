@@ -40,6 +40,14 @@ button { font: inherit; }
 .suite[open] > summary .chev { transform: rotate(90deg); }
 .suite .suite-link { display: block; margin: 0 0 2px 36px; padding: 2px 9px; color: var(--prp-muted); font: 12px var(--prp-font-ui); text-decoration: none; }
 .suite .suite-link:hover, .suite .suite-link[aria-current="page"] { color: var(--prp-text); text-decoration: underline; }
+/* A module's own figure (registry "mark": Highbrowse's design/brand-hb-icon.svg), beside its code in the sidebar and on
+   the home page; and its large figure ("figure") at the head of its overview page. Each carries its own dark tile, so
+   it reads on both themes; the ring follows the tile's corner (6 of 32, 48 of 256). */
+.suite-mark { flex: none; border-radius: 3.75px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
+.group-head .suite-mark { align-self: center; border-radius: 4.1px; }
+.head.has-figure { display: flex; align-items: center; gap: 20px; }
+.suite-figure { flex: none; border-radius: 19.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
+@media (max-width: 600px) { .suite-figure { width: 72px; height: 72px; border-radius: 13.5px; } .head.has-figure { align-items: flex-start; gap: 14px; } }
 
 .side-foot { padding: 10px 12px 12px; border-top: 1px solid var(--prp-line); }
 .theme { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); overflow: hidden; }

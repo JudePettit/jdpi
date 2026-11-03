@@ -1,4 +1,4 @@
-// Digital Briefing (Digital Science): the classifier sorts items into the eight fields and tells research from news,
+// Digital Briefing (Highbrowse): the classifier sorts items into the eight fields and tells research from news,
 // the parser reads arXiv's announcement feeds (new submissions only, a few a day, dated by announcement), journal and
 // government feeds, the page's view logic reads deep links and orders "Major sources first", and the stored data
 // (digital/briefing/data/stories.json) is well formed, free of duplicates and inside its seven-day window.
@@ -431,8 +431,9 @@ test('page: field deep link, papers/news toggle, theme redraw, hash changes and 
     assert.ok(types.length && types.every(x => x === 'news'), 'only news');
     assert.equal(await page.textContent('#toc-title'), 'Cybersecurity · last 7 days');
     assert.equal(await page.isVisible('#chips [data-v="hardware"] .short'), true, 'short field names on a phone');
-    assert.equal(await page.textContent('.prp-eyebrow'), 'Digital Science · Digital Briefing');
-    assert.equal(await page.getAttribute('html', 'data-suite'), 'ds');
+    // The Digital Briefing moved from Digital Science into Highbrowse (November 2026): its eyebrow and accent follow.
+    assert.equal(await page.textContent('.prp-eyebrow'), 'Highbrowse · Digital Briefing');
+    assert.equal(await page.getAttribute('html', 'data-suite'), 'hb');
     await page.click('#type [data-v="paper"]');
     assert.match(await page.evaluate(() => location.hash), /type=paper/);
     assert.ok((await page.$$eval('#list .entry', els => els.map(e => e.dataset.type))).every(x => x === 'paper'), 'only papers');

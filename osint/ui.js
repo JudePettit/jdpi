@@ -28,7 +28,9 @@ export function guideLink(href) {
   m = h.match(/^prp:(geoint|sigint|headlines|briefing|volatility)(#.*)?$/i);
   if (m) {
     const paths = { geoint: 'geoint/index.html', sigint: 'sigint/index.html', headlines: 'q/headlines.html?view=current', briefing: 'q/briefing.html', volatility: 'q/volatility.html' };
-    const r = prpLink('rt', m[1], paths[m[1]] + (m[2] || ''));
+    // Each page's own module (registry.json), so the shell has nothing to redirect: the Political Briefing is in Highbrowse.
+    const suites = { geoint: 'oi', sigint: 'oi', headlines: 'rt', briefing: 'hb', volatility: 'rt' }, k = m[1].toLowerCase();
+    const r = prpLink(suites[k], k, paths[k] + (m[2] || ''));
     return { ...r, cls: 'prp-link' };
   }
   return null;

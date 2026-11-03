@@ -22,8 +22,8 @@ const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const day = s => { if (!s) return ''; const d = new Date(String(s).length <= 10 ? s + 'T00:00:00Z' : s); return Number.isNaN(+d) ? String(s) : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
 const SITE = new URL('../', import.meta.url);
 const dict = o => Object.assign(Object.create(null), o); // lookups by ids from data, without a prototype
-const MODULES = dict({ rt: ['RT', 'Realtime Geopolitics'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] });
-const ORDER = ['rt', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
+const MODULES = dict({ rt: ['RT', 'Realtime Geopolitics'], hb: ['HB', 'Highbrowse'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] });
+const ORDER = ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
 let embedded = false;
 try { embedded = window.self !== window.top; } catch { embedded = true; }
 

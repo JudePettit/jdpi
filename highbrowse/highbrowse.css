@@ -1,0 +1,213 @@
+/* Highbrowse (the module's landing page). Written against the PRP tokens in design/prp.css only; the five political
+   positions are the Political Briefing's own named tokens, copied from q/briefing.html for both themes. */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, input, select { font: inherit; }
+
+/* Each briefing's mark: the categorical palette in its fixed order, always beside the briefing's name. */
+[data-b="political"] { --bc: var(--prp-cat-1); }
+[data-b="scientific"] { --bc: var(--prp-cat-2); }
+[data-b="economics"] { --bc: var(--prp-cat-3); }
+[data-b="digital"] { --bc: var(--prp-cat-4); }
+/* The Political Briefing's positions (red · grey · blue), as on its page. */
+/* --hb-shade is the most of a position's colour a cell of Table 1 takes: light enough under the ink at 4.5:1 or more in
+   both themes (the dark theme's positions are lighter, so less of them). */
+:root { --pos-far_left: #b42318; --pos-left: #e06258; --pos-centre: #868c96; --pos-right: #3d87df; --pos-far_right: #184f95; --hb-shade: 60%; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) { --pos-far_left: #f07a6e; --pos-left: #b9473f; --pos-centre: #6f7782; --pos-right: #2a78d6; --pos-far_right: #86b6ef; --hb-shade: 42%; } }
+:root[data-theme="dark"] { --pos-far_left: #f07a6e; --pos-left: #b9473f; --pos-centre: #6f7782; --pos-right: #2a78d6; --pos-far_right: #86b6ef; --hb-shade: 42%; }
+
+.hb { max-width: 1440px; margin: 0 auto; padding: 24px 24px 40px; }
+
+/* ---- Front matter: the figure beside the masthead ---- */
+.front { display: flex; align-items: center; gap: 22px; }
+/* The figure (design/brand-hb.svg) carries its own dark tile, so it reads on both themes; the ring follows the tile's
+   corner (rx 48 of 256). */
+.front .figure { flex: none; width: 136px; height: 136px; border-radius: 25.5px; box-shadow: 0 0 0 1px var(--prp-line-strong); }
+.front-text { min-width: 0; }
+.front .prp-meta { gap: 4px 10px; }
+.front .prp-meta span + span::before { content: "·"; margin-right: 10px; color: var(--prp-faint); }
+.front .prp-meta .stale { color: var(--prp-warn); }
+.hb .prp-tabs { margin-top: 18px; }
+
+/* ---- The search bar (every tab) and its filters (the Search tab) ---- */
+.toolbar { margin-top: 14px; padding: 12px 14px; display: grid; gap: 10px; }
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field.grow { flex: 1 1 280px; }
+.field .prp-input { width: 100%; }
+.field .prp-select { max-width: 260px; }
+.check { display: inline-flex; align-items: center; gap: 7px; height: 32px; color: var(--prp-text-2); font-size: 13px; cursor: pointer; }
+.check input { width: 15px; height: 15px; margin: 0; accent-color: var(--prp-primary); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips .prp-chip { height: 30px; padding: 0 12px; gap: 7px; font-size: 13px; cursor: pointer; }
+.chips .prp-chip:hover { border-color: var(--prp-line-strong); background: var(--prp-surface-3); }
+.chips .prp-chip.on { border-color: var(--prp-primary); background: var(--prp-primary-soft); }
+.chips .n { color: var(--prp-muted); font: 500 11px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--bc, var(--prp-faint)); flex: none; }
+
+/* A briefing's name as a small pill with its mark */
+.bchip { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 8px; border: 1px solid var(--prp-line); border-radius: 99px; background: var(--prp-surface);
+  color: var(--prp-text-2); font: 500 11px var(--prp-font-ui); white-space: nowrap; }
+.bchip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--bc); }
+
+/* ---- Sections of the analysis ---- */
+.lede { margin: 18px 0 0; max-width: 110ch; color: var(--prp-text); font: var(--prp-fs-md)/1.6 var(--prp-font-serif); }
+.lede b { font-weight: 600; }
+.sec { margin-top: 26px; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 10px; }
+.sec-note { margin: 0; color: var(--prp-muted); font-size: var(--prp-fs-sm); max-width: 90ch; }
+.empty-note { margin: 0; }
+
+/* Stories: the lead across the page, the rest two to a row */
+.stories { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.story { padding: 13px 16px 14px; min-width: 0; }
+.story.lead { grid-column: 1 / -1; }
+.st-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.st-meta .rank { color: var(--prp-text-2); font-weight: 500; }
+.story h3 { margin: 7px 0 0; font: 600 17px/1.32 var(--prp-font-serif); }
+.story.lead h3 { font-size: 23px; line-height: 1.25; }
+.story h3 a, .r-title a { color: var(--prp-text); text-decoration: none; }
+.story h3 a:hover, .r-title a:hover { color: var(--prp-link); text-decoration: underline; text-underline-offset: 2px; }
+.st-src { margin: 5px 0 0; color: var(--prp-muted); font-size: 12.5px; }
+.st-src .caution, .r1 .caution, .st-list .caution { margin-left: 3px; color: var(--prp-warn); }
+.bp { color: var(--prp-link); text-decoration: none; white-space: nowrap; }
+.bp:hover { text-decoration: underline; }
+.st-terms { margin: 7px 0 0; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); }
+.st-list { margin: 10px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--prp-line-soft); }
+.st-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 7px 0; border-bottom: 1px solid var(--prp-line-soft); font-size: 13px; line-height: 1.45; }
+.st-list li:last-child { border-bottom: 0; }
+.st-list .o { color: var(--prp-text-2); font-weight: 600; }
+.st-list a.h { color: var(--prp-text); text-decoration: none; }
+.st-list a.h:hover { color: var(--prp-link); text-decoration: underline; }
+.st-list .bp { align-self: start; font-size: 12px; }
+.story details { margin-top: 2px; }
+.story summary { cursor: pointer; padding: 6px 0 0; color: var(--prp-link); font-size: 12.5px; }
+/* The Political Briefing's publishers per position, as text with each position's mark */
+.pkey { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 9px; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.pkey i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; background: var(--c); }
+.pkey .z { color: var(--prp-faint); }
+.pkey .z i { background: none; box-shadow: inset 0 0 0 1.5px var(--c); }
+.pkey .bp { font-family: var(--prp-font-ui); font-size: 12px; }
+
+/* Topics: a ranked list, each with its seven days as small bars */
+.topics { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; }
+.topics li { break-inside: avoid; display: grid; grid-template-columns: 22px minmax(0, 1fr) 84px; grid-template-areas: "no name spark" "no meta spark"; gap: 0 10px; align-items: center;
+  padding: 8px 4px; border-bottom: 1px solid var(--prp-line-soft); }
+.topics .no { grid-area: no; color: var(--prp-faint); font: var(--prp-fs-xs) var(--prp-font-mono); }
+.topics .nm { grid-area: name; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--prp-text); font: 600 15px/1.35 var(--prp-font-serif); text-decoration: none; }
+.topics .nm:hover { color: var(--prp-link); text-decoration: underline; }
+.topics .mt { grid-area: meta; display: flex; flex-wrap: wrap; gap: 2px 10px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.topics .mt .bn { display: inline-flex; align-items: center; gap: 4px; }
+.topics .mt .bn::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--bc); }
+.spark { grid-area: spark; display: block; width: 84px; height: 26px; }
+.spark rect { fill: var(--prp-seq-300); }
+.spark rect.in { fill: var(--prp-seq-600); }
+.spark line { stroke: var(--prp-axis); stroke-width: 1; }
+.as-table { margin-top: 10px; }
+.as-table summary { cursor: pointer; color: var(--prp-link); font-size: 12.5px; }
+.scroll { overflow-x: auto; }
+.scroll .prp-table th { position: static; }
+
+/* What each briefing covers most */
+.briefs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.brief { min-width: 0; }
+.brief .prp-panel-head { border-left: 3px solid var(--bc); }
+.brief .prp-panel-head h3 { display: inline-flex; align-items: center; gap: 8px; }
+.brief .open { color: var(--prp-link); font-size: 12.5px; text-decoration: none; }
+.brief .open:hover { text-decoration: underline; }
+.b-count { margin: 0 0 10px; color: var(--prp-text-2); font-size: 13px; }
+.b-count b { color: var(--prp-text); font: 600 20px/1 var(--prp-font-ui); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.bars { display: grid; gap: 4px; }
+.bar { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 3.5em; align-items: center; gap: 10px; padding: 2px 0; color: var(--prp-text); text-decoration: none; font-size: 12.5px; }
+.bar:hover .lbl { color: var(--prp-link); text-decoration: underline; }
+.bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 10px; border-radius: 2px; background: var(--prp-surface-3); overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--bc); border-radius: 2px; }
+.bar .n { text-align: right; color: var(--prp-muted); font: var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.b-row { margin: 12px 0 0; }
+.b-row .prp-label { display: block; margin-bottom: 5px; }
+.tchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tchips a { text-decoration: none; }
+.tchips a:hover { border-color: var(--prp-line-strong); background: var(--prp-surface-3); color: var(--prp-text); }
+.b-story { font: 600 14.5px/1.35 var(--prp-font-serif); }
+.b-story a { color: var(--prp-text); text-decoration: none; }
+.b-story a:hover { color: var(--prp-link); text-decoration: underline; }
+.b-story small { display: block; margin-top: 3px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-ui); }
+
+/* Shared across briefings */
+.shared { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; align-items: start; }
+.shared .prp-panel-body { padding-top: 6px; }
+.sh-story { padding: 10px 0; border-bottom: 1px solid var(--prp-line-soft); }
+.sh-story:last-child { border-bottom: 0; }
+.sh-story .st-meta { margin-bottom: 4px; }
+.sh-story h4 { margin: 0; font: 600 15px/1.35 var(--prp-font-serif); }
+.sh-story h4 a { color: var(--prp-text); text-decoration: none; }
+.sh-story h4 a:hover { color: var(--prp-link); text-decoration: underline; }
+.sh-story ul { margin: 6px 0 0; padding: 0; list-style: none; }
+.sh-story li { margin: 3px 0; color: var(--prp-text-2); font-size: 12.5px; line-height: 1.45; }
+.sh-story li a { color: var(--prp-text-2); }
+.cnt { display: inline-flex; align-items: center; gap: 6px; }
+.cnt i { display: inline-block; height: 8px; border-radius: 2px; background: var(--bc); }
+.prp-table td.zero { color: var(--prp-faint); }
+.prp-table a.term { color: var(--prp-text); font-weight: 600; text-decoration: none; }
+.prp-table a.term:hover { color: var(--prp-link); text-decoration: underline; }
+
+/* The Political Briefing across positions */
+.positions { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 12px; align-items: start; }
+.meter { display: flex; gap: 2px; height: 12px; overflow: hidden; border-radius: 3px; background: var(--prp-surface-3); }
+.meter span { height: 100%; background: var(--c); }
+.meterkey { display: grid; gap: 4px; margin-top: 10px; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.meterkey i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 2px; background: var(--c); }
+.meterkey b { color: var(--prp-text); font-weight: 500; }
+.sided { margin-top: 14px; display: grid; gap: 12px; }
+.sided h4 { margin: 0 0 4px; font: 600 13px var(--prp-font-ui); color: var(--prp-text); }
+.sided ol { margin: 0; padding-left: 18px; }
+.sided li { margin: 5px 0; font-size: 13px; line-height: 1.45; }
+.sided li a { color: var(--prp-text); }
+.sided small { display: block; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); }
+.ptable td.pc { text-align: center; font: var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; color: var(--prp-text);
+  background: color-mix(in srgb, var(--c) calc(var(--v) * var(--hb-shade)), transparent); }
+.ptable td.pc.z { color: var(--prp-faint); }
+.ptable th.pc { text-align: center; }
+.ptable th.pc i { display: block; width: 8px; height: 8px; margin: 0 auto 3px; border-radius: 2px; background: var(--c); }
+.ptable td.st a { color: var(--prp-text); text-decoration: none; font-weight: 500; }
+.ptable td.st a:hover { color: var(--prp-link); text-decoration: underline; }
+.ptable td.st small { display: block; color: var(--prp-muted); font-size: 11.5px; }
+
+/* ---- Search results ---- */
+.results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; padding: 12px 16px; border-bottom: 1px solid var(--prp-line-soft); }
+.results-head .prp-h2 { font-size: 18px; }
+.status { color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.results { margin: 0; padding: 0; list-style: none; }
+.res { display: grid; gap: 4px; padding: 12px 16px 13px; border-bottom: 1px solid var(--prp-line-soft); }
+.res:last-child { border-bottom: 0; }
+.r1 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; color: var(--prp-muted); font: 12px/1.4 var(--prp-font-ui); }
+.r1 .src { color: var(--prp-text); font-weight: 600; }
+.r1 time { font: 11.5px var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid var(--prp-line-strong); border-radius: 3px; color: var(--prp-text-2);
+  font: 600 9.5px var(--prp-font-mono); letter-spacing: .07em; text-transform: uppercase; }
+.ptag { display: inline-flex; align-items: center; gap: 5px; color: var(--prp-text-2); font-size: 11.5px; }
+.ptag i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.r-title { margin: 0; font: 600 16px/1.35 var(--prp-font-serif); }
+.r-sum { margin: 0; max-width: 100ch; color: var(--prp-text-2); font-size: 13px; line-height: 1.55; }
+.r3 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; }
+.tag { display: inline-flex; align-items: center; height: 19px; padding: 0 7px; border-radius: 3px; background: var(--prp-surface-3); color: var(--prp-text-2); font: 500 11px var(--prp-font-ui); }
+.res mark, .story mark { background: var(--prp-accent-soft); color: inherit; border-radius: 2px; box-shadow: 0 0 0 1px var(--prp-accent-soft); }
+.more { padding: 12px 16px; border-top: 1px solid var(--prp-line-soft); }
+.empty-actions { margin-top: 10px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+.prp-sources p { margin: 0 0 5px; max-width: 120ch; }
+
+@media (max-width: 1100px) { .shared, .positions { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .stories, .briefs { grid-template-columns: minmax(0, 1fr); } .topics { columns: 1; } }
+@media (max-width: 600px) {
+  .hb { padding: 16px 16px 32px; }
+  .front { gap: 14px; align-items: flex-start; }
+  .front .figure { width: 76px; height: 76px; border-radius: 14.25px; }
+  .prp-title { font-size: 26px; }
+  .front .prp-meta span + span::before { display: none; }
+  .story.lead h3 { font-size: 19px; }
+  .field .prp-select { max-width: none; }
+  .controls > .field { flex: 1 1 140px; }
+  .bar { grid-template-columns: minmax(0, 8em) minmax(0, 1fr) 3em; }
+}

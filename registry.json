@@ -23,18 +23,8 @@
       "code": "RT",
       "name": "Realtime Geopolitics",
       "title": "Realtime Geopolitics",
-      "description": "What is happening now: the news across the political spectrum, country conditions and volatility, armed conflict, who holds power, and the political calendar.",
+      "description": "What is happening now: every country's headlines, country conditions and volatility, armed conflict, who holds power, and the political calendar. The news across the political spectrum is in Highbrowse.",
       "modules": [
-        {
-          "id": "briefing",
-          "name": "Political Briefing",
-          "kind": "realtime",
-          "icon": "↗",
-          "status": "live",
-          "host": "Vitruvian Manager",
-          "url": "q/briefing.html",
-          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
-        },
         {
           "id": "headlines",
           "name": "Global Headline Tracker",
@@ -145,6 +135,84 @@
           "host": "Vitruvian Manager",
           "url": "q/calendar.html?period=contemporary",
           "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
+        }
+      ]
+    },
+    {
+      "id": "hb",
+      "code": "HB",
+      "name": "Highbrowse",
+      "title": "Highbrowse",
+      "mark": "design/brand-hb-icon.svg",
+      "figure": "design/brand-hb.svg",
+      "description": "The news worth reading, from four briefings: politics from fifty publishers, far left to far right, science, economics and the digital world, each on its own page, and an analysis of what they all cover today and this week, with one search across the four.",
+      "modules": [
+        {
+          "id": "highbrowse",
+          "name": "Highbrowse",
+          "kind": "realtime",
+          "icon": "❦",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "highbrowse/index.html",
+          "description": "The day's and the week's news across the four briefings: the biggest stories and topics, what each briefing covers most, the stories they share and how the political press spreads across five positions, with one search across all four by words, briefing, date and topic.",
+          "views": [
+            {
+              "id": "today",
+              "name": "Today",
+              "url": "highbrowse/index.html"
+            },
+            {
+              "id": "week",
+              "name": "This week",
+              "url": "highbrowse/index.html#tab=week"
+            },
+            {
+              "id": "search",
+              "name": "Search",
+              "url": "highbrowse/index.html#tab=search"
+            }
+          ]
+        },
+        {
+          "id": "briefing",
+          "name": "Political Briefing",
+          "kind": "realtime",
+          "icon": "↗",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "q/briefing.html",
+          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
+        },
+        {
+          "id": "science-briefing",
+          "name": "Scientific Briefing",
+          "kind": "realtime",
+          "icon": "◬",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "science/briefing/index.html",
+          "description": "New papers and news from the major journals and science desks (Nature, Science, Cell, PNAS, PRL and more), with a toggle for physics, chemistry, biology, earth & environment, and astronomy & space."
+        },
+        {
+          "id": "econ-briefing",
+          "name": "Economics Briefing",
+          "kind": "realtime",
+          "icon": "⊿",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "econ/briefing/index.html",
+          "description": "Economics news and scholarly articles from 50 feeds: NBER and CEPR working papers, the top journals, the BIS, ECB, Fed and Bank of England, VoxEU, Brookings and other think tanks, and the FT, Economist and Bloomberg, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
+        },
+        {
+          "id": "digital-briefing",
+          "name": "Digital Briefing",
+          "kind": "realtime",
+          "icon": "⌬",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "digital/briefing/index.html",
+          "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
         }
       ]
     },
@@ -482,16 +550,6 @@
           "description": "Markets now: indices, rates, FX, commodities and crypto, movers, news, ticker pages and the Hype Tracker of tickers suddenly talked about or traded far more than usual."
         },
         {
-          "id": "econ-briefing",
-          "name": "Economics Briefing",
-          "kind": "realtime",
-          "icon": "⊿",
-          "status": "live",
-          "host": "Vitruvian Manager",
-          "url": "econ/briefing/index.html",
-          "description": "Economics news and scholarly articles from 50 feeds: NBER and CEPR working papers, the top journals, the BIS, ECB, Fed and Bank of England, VoxEU, Brookings and other think tanks, and the FT, Economist and Bloomberg, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
-        },
-        {
           "id": "traders",
           "aliases": [
             "auto-trader"
@@ -570,18 +628,8 @@
       "code": "NS",
       "name": "Natural Science",
       "title": "Natural Science",
-      "description": "The natural sciences now and through history: the week's major papers and science news by discipline, and a map-and-slider timeline of humanity's key breakthroughs and the people and institutions behind them.",
+      "description": "The natural sciences through history: a map-and-slider timeline of humanity's key breakthroughs and the people and institutions behind them. The week's major papers and science news are in Highbrowse.",
       "modules": [
-        {
-          "id": "science-briefing",
-          "name": "Scientific Briefing",
-          "kind": "realtime",
-          "icon": "◬",
-          "status": "live",
-          "host": "Vitruvian Manager",
-          "url": "science/briefing/index.html",
-          "description": "New papers and news from the major journals and science desks (Nature, Science, Cell, PNAS, PRL and more), with a toggle for physics, chemistry, biology, earth & environment, and astronomy & space."
-        },
         {
           "id": "progress",
           "name": "Invention Timeline",
@@ -599,18 +647,8 @@
       "code": "DS",
       "name": "Digital Science",
       "title": "Digital Science",
-      "description": "Computing, AI and the digital world: the week’s papers and technology news by field, a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, and an Integration Hub that opens Vitruvian Manager to AI assistants and plugins.",
+      "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, and an Integration Hub that opens Vitruvian Manager to AI assistants and plugins. The week’s papers and technology news are in Highbrowse.",
       "modules": [
-        {
-          "id": "digital-briefing",
-          "name": "Digital Briefing",
-          "kind": "realtime",
-          "icon": "⌬",
-          "status": "live",
-          "host": "Vitruvian Manager",
-          "url": "digital/briefing/index.html",
-          "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
-        },
         {
           "id": "data-analytics",
           "name": "Data Analytics",
@@ -757,5 +795,5 @@
       ]
     }
   ],
-  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them."
+  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page."
 }

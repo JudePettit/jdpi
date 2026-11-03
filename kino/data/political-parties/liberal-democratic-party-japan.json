@@ -30,7 +30,7 @@
       "narration": "Japan's Liberal Democratic Party was founded in November 1955, when the country's two main conservative parties merged. It has been in government for all but about four of the seven decades since, a record matched by few parties in any democracy. This film follows how it built that record, how it lost power twice, and how it returned each time.",
       "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Liberal Democratic Party", "sub": "Japan, 1955 to today" },
       "focus": { "countries": ["JPN"], "bbox": [124, 26, 150, 46] },
-      "link": { "label": "Encyclopaedia · Liberal Democratic Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q232595" },
+      "link": { "label": "Master Index · Liberal Democratic Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q232595" },
       "cites": ["krauss-pekkanen-2011", "scheiner-2006", "pekkanen-2013"]
     },
     {
@@ -38,7 +38,7 @@
       "title": "Defeat, occupation and a new constitution",
       "narration": "Japan surrendered in August 1945, and under the American occupation a new constitution came into force in May 1947, making the Emperor a symbol of the state and renouncing war. Shigeru Yoshida, a conservative former diplomat, was Prime Minister for most of the years from 1946 to 1954, and his strategy was to rely on the United States for security and concentrate on economic recovery. The occupation ended in 1952 under the San Francisco peace treaty, signed together with a security treaty that kept American bases in Japan.",
       "visual": { "kind": "quote", "text": "… the Japanese people forever renounce war as a sovereign right of the nation and the threat or use of force as means of settling international disputes.", "who": "The Constitution of Japan, Article 9", "when": "In force from 3 May 1947", "cite": "constitution" },
-      "link": { "label": "Encyclopaedia · Shigeru Yoshida", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q301804" },
+      "link": { "label": "Master Index · Shigeru Yoshida", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q301804" },
       "cites": ["constitution", "curtis-1999"]
     },
     {
@@ -54,7 +54,7 @@
       "title": "Kishi and the security treaty, 1960",
       "narration": "Nobusuke Kishi, a wartime minister who had been held for three years as a suspected war criminal but never charged, became Prime Minister in 1957. He negotiated a revised security treaty with the United States and pushed it through the lower house in May 1960, after police removed Socialist members who were blocking the vote. Hundreds of thousands of people protested around the Diet in the largest demonstrations in Japan's post-war history, and Kishi announced his resignation on the day the treaty took effect.",
       "visual": { "kind": "portrait", "qid": "Q315572", "heading": "Nobusuke Kishi", "sub": "Prime Minister, 1957–1960", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Nobusuke Kishi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315572" },
+      "link": { "label": "Master Index · Nobusuke Kishi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315572" },
       "cites": ["curtis-1999", "harris-2020"]
     },
     {
@@ -75,7 +75,7 @@
       "title": "Factions, money and the kōenkai",
       "narration": "Under Japan's old electoral system, several LDP candidates competed against one another in each multi-member district. They relied on personal support groups called kōenkai, on party factions that traded money and posts for loyalty, and on public works and subsidies for farmers and small businesses. Kakuei Tanaka, Prime Minister from 1972 to 1974, mastered the system but resigned over his finances, and although he was arrested in 1976 in the Lockheed bribery scandal, he remained the party's most powerful faction leader for almost a decade.",
       "visual": { "kind": "portrait", "qid": "Q297644", "heading": "Kakuei Tanaka", "sub": "Prime Minister, 1972–1974", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Kakuei Tanaka", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q297644" },
+      "link": { "label": "Master Index · Kakuei Tanaka", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q297644" },
       "cites": ["krauss-pekkanen-2011", "scheiner-2006"]
     },
     {
@@ -142,7 +142,7 @@
       "title": "Shinzō Abe",
       "narration": "Shinzō Abe, Kishi's grandson, led the LDP back to power in 2012 and became Japan's longest-serving Prime Minister before resigning through ill health in 2020. His programme of monetary easing, public spending and promised reforms, known as Abenomics, set out to end years of falling prices, with mixed results, and in 2015 his government passed laws allowing Japan's forces to help defend allies abroad, despite large protests. In July 2022 he was shot dead while campaigning in Nara by a man who blamed the Unification Church for his family's ruin, and the scrutiny that followed showed that nearly half of the LDP's members of parliament had ties to the church.",
       "visual": { "kind": "portrait", "qid": "Q132345", "heading": "Shinzō Abe", "sub": "Prime Minister, 2006–2007 and 2012–2020", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Shinzō Abe", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q132345" },
+      "link": { "label": "Master Index · Shinzō Abe", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q132345" },
       "cites": ["harris-2020", "pekkanen-2013", "aljazeera-2022"]
     },
     {

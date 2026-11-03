@@ -5,7 +5,7 @@
      hide, announces the page to the shell, and takes the shell's light/dark theme (postMessage "prp:theme").
    - Opened directly: shows a slim "VM / Module / Submodule" bar linking back to the shell (Vitruvian Manager, short VM),
      with a theme switch.
-   - Everywhere: applies the saved theme, sets the module accent, and loads the Encyclopaedia linker.
+   - Everywhere: applies the saved theme, sets the module accent, and loads the Master Index linker.
    Pages that draw in canvas or SVG with theme colours should redraw on the window event "prp:themechange". */
 (function () {
   const script = document.currentScript;
@@ -44,7 +44,7 @@
     Object.assign(s.dataset, extra);
     document.head.appendChild(s);
   };
-  // Encyclopaedia links on every page (the Encyclopaedia links natively).
+  // Master Index links on every page (the Master Index links natively).
   if (moduleId !== 'encyclopedia') load('jdpi-entities.js');
 
   let embedded = false;
@@ -68,7 +68,7 @@
     bar.innerHTML = `<a href="${link}" title="Vitruvian Manager"><span aria-hidden="true">←</span><b>VM</b></a>` +
       (NAMES[suite] ? `<span class="sep">/</span><span class="suite"${TITLES[suite] ? ` title="${TITLES[suite]}"` : ''}>${NAMES[suite]}</span>` : '') +
       `<span class="sep">/</span><span class="page-title"></span><button type="button" class="theme"></button>`;
-    // Follow the page's title, which some pages change as you move within them (an Encyclopaedia entry, a Kino film),
+    // Follow the page's title, which some pages change as you move within them (a Master Index entry, a Kino film),
     // less its product suffix: "· VM", or the older "· PRP" and the full "· Vitruvian Manager" on pages not yet moved.
     const pageTitle = bar.querySelector('.page-title');
     const syncTitle = () => { pageTitle.textContent = document.title.replace(/\s*[·|—-]\s*(?:VM|PRP|Vitruvian Manager)\b.*$/, ''); };

@@ -1,6 +1,6 @@
 // Economics Briefing page. Data: data/stories.json, built every six hours by econ/scripts/build-briefing.mjs.
 // State lives in the URL hash (#f=monetary&type=paper&w=7d&src=nber&q=…&sort=newest&tab=sources) so the shell and the
-// Encyclopaedia can deep-link; the chosen field is also remembered in this browser (localStorage, best effort).
+// Master Index can deep-link; the chosen field is also remembered in this browser (localStorage, best effort).
 import {
   WINDOW_LABELS, esc, parseHash, toHash, filterItems, countByField, arrange, dailySeries, topOutlets, badgeOf,
   dayLabel, timeLabel,

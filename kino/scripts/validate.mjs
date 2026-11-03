@@ -1,6 +1,6 @@
 // Kino script validator. Checks every documentary in kino/data/<category>/<id>.json against the format in
 // kino/README.md, and every link into PRP against the target submodule's own data (the war and month exist in War
-// Focus, the QID is in the Encyclopaedia, the year is a Kardashev step, and so on).
+// Focus, the QID is in the Master Index, the year is a Kardashev step, and so on).
 //   node kino/scripts/validate.mjs            all scripts; exit code 1 on any error
 //   node kino/scripts/validate.mjs <file>…    just these
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';

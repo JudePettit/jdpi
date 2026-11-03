@@ -17,7 +17,7 @@ test('data: House trades and 13F holdings are complete enough to show', () => {
   const filedIn = y => c.trades.filter(t => t.filed.startsWith(`${y}-`)).length;
   assert.ok(c.members.length >= 50, `${c.members.length} members`);
   assert.ok(filedIn(c.years[0]) >= 1000, `${filedIn(c.years[0])} trades filed in ${c.years[0]}`);
-  // Party and Bioguide ID come from the congress-legislators lists (all 143 matched now; the Encyclopaedia needs the ID).
+  // Party and Bioguide ID come from the congress-legislators lists (all 143 matched now; the Master Index needs the ID).
   assert.ok(c.members.filter(m => m.party && m.bioguide).length >= c.members.length * 0.9, 'members with a party and a Bioguide ID');
   const ids = new Set(c.members.map(m => m.id));
   assert.equal(ids.size, c.members.length, 'member ids are unique');

@@ -44,7 +44,7 @@ test('address: reads every key, and anything malformed as absent', () => {
   for (const k of ['progress', 'retrospective', 'battlefield-history', 'historical-calendar', 'pestle', 'war-focus:korean-war', 'm0', 'm7']) assert.equal(readHash(`#pane=vm&show=${k}`).show, k, k);
   assert.equal(readHash('#pane=vm&show=War-Focus:Korean-War').show, 'war-focus:korean-war', 'typed in capitals');
   for (const k of ['kardashev2', 'war-focus:', 'war-focus:<b>', 'm10', 'mx', 'encyclopedia', '']) assert.equal(readHash(`#pane=vm&show=${encodeURIComponent(k)}`).show, null, `"${k}"`);
-  assert.equal(readHash('#pane=ency&show=kardashev').show, null, 'a screen means nothing on the Encyclopaedia tab');
+  assert.equal(readHash('#pane=ency&show=kardashev').show, null, 'a screen means nothing on the Master Index tab');
   assert.equal(readHash('#show=kardashev').show, null, 'nor with the pane shut');
   // Whose era: the term's, or (absent) the book's.
   assert.equal(readHash('#era=TERM').era, 'term');
@@ -66,7 +66,7 @@ test('address: writes a canonical hash that reads back, leaving out what would n
 });
 
 /* ---------- a paragraph and its terms ---------- */
-test('text: a paragraph renders its terms as Encyclopaedia links, in the words of the text, and nothing else changes', () => {
+test('text: a paragraph renders its terms as Master Index links, in the words of the text, and nothing else changes', () => {
   const href = q => `/encyclopedia/index.html#${q}`;
   for (const c of FIXTURE.chapters) for (const p of c.paragraphs) {
     const html = paragraphHtml(p, { href });
@@ -325,7 +325,7 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     assert.equal((await page.locator('#chapter-title').innerText()).replace(/\s+/g, ' '), 'III Concerning mixed principalities');
     assert.equal(await page.locator('#text p.para').count(), ch3.paragraphs.length);
 
-    // Every term is a link into the Encyclopaedia, in the data's order and the text's own words.
+    // Every term is a link into the Master Index, in the data's order and the text's own words.
     const links = await page.locator('#text a.term').evaluateAll(as => as.map(a => ({ qid: a.dataset.qid, text: a.textContent, href: a.href })));
     assert.deepEqual(links.map(({ qid, text }) => ({ qid, text })), ch3.paragraphs.flatMap(p => p.terms.map(t => ({ qid: t.qid, text: p.text.slice(t.s, t.e) }))));
     for (const l of links) assert.equal(l.href, `${BASE}/encyclopedia/index.html#${l.qid}`);
@@ -384,7 +384,7 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     assert.ok(pane.x >= book.x + book.width, 'book | pane, side by side above 1100 px');
     await page.waitForFunction(() => /&t=Q12560&pane=ency$/.test(location.hash));
     assert.equal(await page.locator('#pane-title').innerText(), 'Ottoman Empire');
-    // The Encyclopaedia page frames (same origin, no X-Frame-Options), on the entry.
+    // The Master Index page frames (same origin, no X-Frame-Options), on the entry.
     const ency = await frameOf(page, '#ency-frame');
     await ency.waitForFunction(() => location.hash === '#Q12560' && document.querySelector('#entity h2')?.textContent === 'Ottoman Empire', null, { timeout: 30000 });
     assert.equal(await page.locator('#ency-fallback').isHidden(), true);
@@ -396,7 +396,7 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     await ency.waitForFunction(() => location.hash === '#Q70972' && document.querySelector('#entity h2')?.textContent === 'Kingdom of France', null, { timeout: 15000 });
     assert.equal(await ency.evaluate(() => window.stillHere), true, 'no reload');
     assert.equal(await page.getAttribute('#pane-open', 'href'), `${BASE}/#/rs/encyclopedia?at=${encodeURIComponent(`${BASE}/encyclopedia/index.html#Q70972`)}`);
-    // A link in the entry that opens at the top (the framed Encyclopaedia believes it is in the shell): on its own,
+    // A link in the entry that opens at the top (the framed Master Index believes it is in the shell): on its own,
     // the page sends it to a new tab, the shell at that place, and the book stays where it is.
     const topLink = ency.locator('#entity a[target="_top"]').first();
     await topLink.waitFor({ timeout: 15000 });
@@ -458,7 +458,7 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     assert.equal(await page.locator('#text p.verse').count(), 2);
     await page.keyboard.press('ArrowLeft');
     await page.waitForFunction(() => /^#book=fixture-the-prince&ch=3\b/.test(location.hash));
-    // A term first dated after the book's period (an address may still name one: the Encyclopaedia's Italy, 1946)
+    // A term first dated after the book's period (an address may still name one: the Master Index's Italy, 1946)
     // offers no era of its own: the pane keeps the book's period, whatever the address asks.
     await page.evaluate(() => { location.hash = '#book=fixture-the-prince&ch=3&t=Q38&pane=vm&era=term'; });
     await page.waitForFunction(() => !document.querySelector('#pane').hidden && /the book’s period/.test(document.querySelector('#era-title').textContent), null, { timeout: 15000 });

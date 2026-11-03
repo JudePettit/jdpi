@@ -1,4 +1,4 @@
-/* Bibliotheca · Neo Classic (Kino): public-domain classics read on screen, every term the Encyclopaedia knows
+/* Bibliotheca · Neo Classic (Kino): public-domain classics read on screen, every term the Master Index knows
    highlighted, a popout bar of the terms on screen, and a companion pane beside the text.
 
    Data, built by bibliotheca/scripts/build-book.mjs (its header holds the contract):
@@ -25,10 +25,10 @@
    only where it is the margin list.
 
    A term is "used" by clicking it, in the text or in the bar: all its occurrences are ringed and the pane opens on its
-   Encyclopaedia entry. The pane holds two same-origin frames moved the way the shell moves its own (lib/frame.js): the
-   Encyclopaedia page for the entry (encyclopedia/index.html#<QID>; nothing on this site sends X-Frame-Options, and if
+   Master Index entry. The pane holds two same-origin frames moved the way the shell moves its own (lib/frame.js): the
+   Master Index page for the entry (encyclopedia/index.html#<QID>; nothing on this site sends X-Frame-Options, and if
    the page cannot be shown a link replaces it), and "In Vitruvian Manager": the screens that take a year or period in
-   their address, for the book's period or the term's own dates (lib/era.js), plus the places the Encyclopaedia records
+   their address, for the book's period or the term's own dates (lib/era.js), plus the places the Master Index records
    for the term. Each can be shown in the pane or opened in the shell: inside the shell through its 'prp:navigate'
    message (as Kino's follow-along does), on its own in a new tab. The frames get the page's theme (prp:theme) as the
    shell gives it to its own frames. A framed page believes it is in the shell (window.self !== window.top) and opens
@@ -79,7 +79,7 @@ const chapter = () => S.chapters[S.ci] || null;
 
 /* ---------- addresses ---------- */
 // Links recorded for the live site (the lake's mentions) point at this copy when it is served elsewhere, as the
-// Encyclopaedia does.
+// Master Index does.
 const here = url => (SHELL !== LIVE && String(url).startsWith(LIVE) ? SHELL + url.slice(LIVE.length) : url);
 const pageUrl = at => new URL(here(at), SHELL).href;
 const entryUrl = qid => pageUrl(`encyclopedia/index.html#${qid}`);
@@ -112,7 +112,7 @@ const once = f => { let p = null; return () => (p ||= f().catch(e => { p = null;
 const loadRegistry = once(() => getJson(new URL('registry.json', SHELL)));
 const loadWars = once(() => getJson(new URL('battlefield/focus/data/index.json', SHELL)).then(d => d.wars || []));
 const loadEnergy = once(() => getJson(new URL('kardashev/data/energy.json', SHELL)));
-// An Encyclopaedia entity from the lake's shards (lake/data/e/<qid mod 512>.json, as encyclopedia/index.html reads them).
+// A Master Index entity from the lake's shards (lake/data/e/<qid mod 512>.json, as encyclopedia/index.html reads them).
 function entity(qid) {
   if (!S.entities.has(qid)) S.entities.set(qid, getJson(`${LAKE}e/${+qid.slice(1) % 512}.json`).then(s => s[qid] || null).catch(() => null));
   return S.entities.get(qid);
@@ -148,7 +148,7 @@ function renderMeta() {
   const n = S.shelf.length, words = S.shelf.reduce((a, b) => a + (b.words || 0), 0);
   const day = S.generated ? new Date(S.generated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
   $('#meta').innerHTML = [`<span><b>${n}</b> book${n === 1 ? '' : 's'} on the shelf</span>`, `<span><b>${fmt(words)}</b> words</span>`,
-    '<span>Rights <b>public domain in the US and the UK</b></span>', '<span>Terms <b>the Encyclopaedia</b></span>', day ? `<span>Built <b>${esc(day)}</b></span>` : ''].join('');
+    '<span>Rights <b>public domain in the US and the UK</b></span>', '<span>Terms <b>the Master Index</b></span>', day ? `<span>Built <b>${esc(day)}</b></span>` : ''].join('');
 }
 // Years as the companion pane gives them: 431 BC, not -431 (lib/era.js).
 const year = y => (Number.isFinite(y) ? fmtYear(y) : String(y ?? ''));
@@ -169,7 +169,7 @@ function renderBookFront() {
   const b = S.book, a = b.author || {}, t = b.translator;
   document.title = `${b.title} · Neo Classic · Bibliotheca · ${SHORT}`;
   $('#book-title').textContent = b.title;
-  const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Encyclopaedia">${esc(a.name)}</a>` : esc(a.name || '');
+  const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Master Index">${esc(a.name)}</a>` : esc(a.name || '');
   const life = Number.isFinite(a.born) && Number.isFinite(a.died) ? ` (${esc(fmtEra([a.born, a.died]))})` : '';
   // The year after the translator is the edition's (Graham's On War of 1873 is read in Maude's revision of 1908).
   $('#byline').innerHTML = `${who}${life}${t ? `, translated by ${esc(t.name)}${b.edition?.published ? ` (edition of ${esc(year(b.edition.published))})` : ''}` : ''}`;
@@ -193,7 +193,7 @@ function renderSources() {
   $('#sources').innerHTML = `
     <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
     <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? 'public domain in the United Kingdom' : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
-    <p><b>Terms.</b> Every highlighted term is an entry of the Encyclopaedia, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. The bar lists those in the text on screen.</p>
+    <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. The bar lists those in the text on screen.</p>
     <p><b>In ${PRODUCT}.</b> The companion pane offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>
     <p><b>Keys.</b> ← → chapters · J K paragraphs · T the terms bar · P the companion pane · Esc closes.</p>`;
 }
@@ -417,7 +417,7 @@ function selectTab(tab) {
     $(`#panel-${t}`).hidden = !on;
   }
 }
-function renderPane() { if (S.pane === 'ency') renderEncyclopaedia(); else if (S.pane === 'vm') renderVm(); }
+function renderPane() { if (S.pane === 'ency') renderMasterIndex(); else if (S.pane === 'vm') renderVm(); }
 function setPaneHead(kicker, title, link) {
   $('#pane-kicker').textContent = kicker;
   $('#pane-title').textContent = title;
@@ -426,12 +426,12 @@ function setPaneHead(kicker, title, link) {
   if (link) { open.href = link.href; open.target = link.target; open.rel = 'noopener'; open.dataset.shellHash = link.hash; open.title = `Open in ${PRODUCT}`; }
 }
 
-function renderEncyclopaedia() {
+function renderMasterIndex() {
   const q = S.term, f = $('#ency-frame');
   $('#ency-empty').hidden = !!q;
-  if (!q) { f.hidden = true; $('#ency-fallback').hidden = true; setPaneHead('Encyclopaedia', 'No term chosen', null); return; }
+  if (!q) { f.hidden = true; $('#ency-fallback').hidden = true; setPaneHead('Master Index', 'No term chosen', null); return; }
   const label = S.labels.get(q);
-  setPaneHead('Encyclopaedia', label || q, placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`));
+  setPaneHead('Master Index', label || q, placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`));
   if (!label) entity(q).then(e => { if (e && S.term === q && S.pane === 'ency') $('#pane-title').textContent = e.label; });
   const fallback = $('#ency-link'), l = placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`);
   fallback.href = l.href; fallback.target = l.target; fallback.rel = 'noopener'; fallback.dataset.shellHash = l.hash;
@@ -459,7 +459,7 @@ function moveFrame(f, url) {
   if (!f.getAttribute('src')) f.src = move.url; else { try { f.contentWindow.location.replace(move.url); } catch { f.src = move.url; } }
   return 'load';
 }
-// The Encyclopaedia frame is checked when it loads: a page that could not be framed, or failed, leaves a link instead.
+// The Master Index frame is checked when it loads: a page that could not be framed, or failed, leaves a link instead.
 function encyFrameLoaded() {
   const f = $('#ency-frame');
   let ok = false;
@@ -468,7 +468,7 @@ function encyFrameLoaded() {
   f.hidden = !ok || !S.term;
   if (ok) watchEntry(f);
 }
-/* The Encyclopaedia opens with its own front matter (title, search, counts), a third of a pane's height; in the pane
+/* The Master Index opens with its own front matter (title, search, counts), a third of a pane's height; in the pane
    the entry is the point. Once the page has drawn the entry asked for (it replaces #entity's contents: "Loading…",
    then the entry with its h2), the frame is scrolled to the page's tabs, just above the entry. Same origin, and only
    the frame's scroll position is touched; a page that never draws an h2 (no such entry) is left where it is. */
@@ -503,7 +503,7 @@ async function renderVm() {
   const label = ent?.label || S.labels.get(q) || q;
   const byTerm = S.eraOf === 'term' && termOk;
   const years = byTerm ? termEra : own?.years;
-  // Whose era: the book's (or the chapter's), or the term's own dates when the Encyclopaedia has them.
+  // Whose era: the book's (or the chapter's), or the term's own dates when the Master Index has them.
   const pick = $('#era-pick');
   pick.hidden = !termOk || !own;
   if (termOk && own) {
@@ -521,7 +521,7 @@ async function renderVm() {
   // With the term's own era, War Focus lists only the war that is the term (the wars of its centuries are not its own).
   const rows = eraRows(years, { wars, qid: q, ownEra: !!byTerm, polity: ent ? kardashevPolity(ent.wiki, energy?.polities, step) : null, steps });
   const name = r => moduleInfo(reg, r.module)?.name || r.name;
-  // The places the Encyclopaedia records for the term (its "Appears in"), when it has any.
+  // The places the Master Index records for the term (its "Appears in"), when it has any.
   const ments = (ent?.mentions || []).slice(0, 8).map((m, i) => {
     const info = moduleInfo(reg, m.m);
     const l = info ? placeLink(info.suite, m.m, m.u) : { href: pageUrl(m.u), hash: '', page: pageUrl(m.u), target: '_blank' };
@@ -575,7 +575,7 @@ function showVm(key) {
 }
 /* On a phone the pane is a sheet, and a screen's own front matter (title, description, readings) fills a frame that
    tall; every era screen ends that front matter with its .prp-meta line, so once the screen has loaded the frame is
-   scrolled to just below it, as watchEntry does for the Encyclopaedia. A screen is still drawing as it loads: its body
+   scrolled to just below it, as watchEntry does for the Master Index. A screen is still drawing as it loads: its body
    (a map, a timeline) may not yet make the page tall enough to scroll that far, and the meta line itself grows when
    its "Loading…" becomes the readings, so the scroll follows both (a ResizeObserver of the frame's own) for a few
    seconds, until the reader touches the frame. Same origin; only the frame's scroll moves. */

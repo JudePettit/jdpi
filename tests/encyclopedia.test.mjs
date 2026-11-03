@@ -1,4 +1,4 @@
-// Encyclopaedia: the entity layer it reads (the committed lake/data, which lake-refresh tests before committing), then
+// Master Index: the entity layer it reads (the committed lake/data, which lake-refresh tests before committing), then
 // the Boolean tag Explorer, entity pages with links into modules, and the cross-suite linker (pages, against JDPI_URL,
 // default live; PRP_PAGES=0 leaves them out).
 import { test } from 'node:test';
@@ -73,7 +73,7 @@ test('a Boolean tag query finds John Mearsheimer, and his page links to where he
   assert.deepEqual(errors, []);
 });
 
-test('other modules link names into the Encyclopaedia', pageTest, async () => {
+test('other modules link names into the Master Index', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
   await page.goto(`${BASE}/q/calendar?period=2020s&month=2022-02`, { waitUntil: 'domcontentloaded', timeout: 30000 });

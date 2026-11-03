@@ -8,7 +8,7 @@
 //         research institutes, engineering blogs and advocacy groups; 4 = technology journalism and commentary
 //   fields  the feed's default fields ([] = general: keywords decide; see classify.mjs)
 //   outlet  the publication shown on each item (several feeds can share one, e.g. the arXiv categories)
-//   qid  the outlet's Wikidata item (CC0), for the Encyclopaedia (null where Wikidata has none)
+//   qid  the outlet's Wikidata item (CC0), for the Master Index (null where Wikidata has none)
 //   cap  optional per-feed limit on stored items (default 150)
 //   perDay  arXiv: at most this many new submissions from each daily announcement (most authors first; see
 //           briefing-feeds.mjs pickDaily); newOnly drops cross-lists and revisions; match keeps only items on topic

@@ -1,5 +1,5 @@
 // A book's cast: the people, places, states, battles, wars, organisations and works its text names that the
-// Encyclopaedia's lake does not know yet, each resolved to its Wikidata item (CC0), so the lake's Bibliotheca adapter
+// Master Index's lake does not know yet, each resolved to its Wikidata item (CC0), so the lake's Bibliotheca adapter
 // (lake/scripts/adapters.mjs) feeds them into the lake and the tagger (tag-terms.mjs) finds them in the text.
 //   node bibliotheca/scripts/cast.mjs <slug> [--refresh] [--offline]
 //     --refresh   ask Wikidata again, though the cache has the answer

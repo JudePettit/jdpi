@@ -27,7 +27,7 @@
       "narration": "In 1950 almost all of Africa was ruled from Europe. Thirty years later almost all of it was independent, and the map of the continent had become a map of new nation states. This film follows how the empires of Britain, France, Belgium and Portugal came to an end, peacefully in some places and through long wars in others, and what independence brought.",
       "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The End of Empire in Africa", "sub": "1951–1980" },
       "focus": { "bbox": [-20, -36, 53, 38] },
-      "link": { "label": "Encyclopaedia · Pan-Africanism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q282739" },
+      "link": { "label": "Master Index · Pan-Africanism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q282739" },
       "cites": ["cooper-2002", "jansen-osterhammel-2017"]
     },
     {
@@ -61,7 +61,7 @@
           { "at": "1958-10-02", "label": "Guinea" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Suez Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49101" },
+      "link": { "label": "Master Index · Suez Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49101" },
       "cites": ["meredith-2005", "cooper-2002"]
     },
     {
@@ -85,7 +85,7 @@
         ]
       },
       "focus": { "countries": ["EGY", "ETH", "ERI", "LBR", "ZAF", "LBY", "SDN", "SSD", "MAR", "TUN", "GHA", "GIN"], "bbox": [-20, -36, 53, 38] },
-      "link": { "label": "Encyclopaedia · Harold Macmillan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128985" },
+      "link": { "label": "Master Index · Harold Macmillan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128985" },
       "cites": ["meredith-2005", "jansen-osterhammel-2017"]
     },
     {

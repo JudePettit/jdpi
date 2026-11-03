@@ -128,7 +128,7 @@ Historical Calendar: political events since 1980. Political history from 1980 to
 
 ### encyclopaedia-entities
 
-Encyclopaedia: entities. Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
+Master Index: entities. Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
 
 - Rows: 12,150 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
 - Files: https://jdpi.pages.dev/integration/data/encyclopaedia-entities/0.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/1.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/2.json (+12 more) (records at `records`)

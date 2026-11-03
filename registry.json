@@ -156,11 +156,11 @@
       "code": "RS",
       "name": "Retrospective Geopolitics",
       "title": "Retrospective Geopolitics",
-      "description": "What happened and why: an Encyclopaedia of everyone and everything in Vitruvian Manager, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
+      "description": "What happened and why: a Master Index of everyone and everything in Vitruvian Manager, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
       "modules": [
         {
           "id": "encyclopedia",
-          "name": "Encyclopaedia",
+          "name": "Master Index",
           "kind": "reference",
           "icon": "◈",
           "status": "live",
@@ -590,7 +590,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "science/progress/index.html",
-          "description": "Move through history, or set a period with the timeline's two handles, to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Encyclopaedia."
+          "description": "Move through history, or set a period with the timeline's two handles, to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Master Index."
         }
       ]
     },
@@ -735,7 +735,7 @@
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "bibliotheca/neo/index.html",
-          "description": "Public-domain classics read on screen, starting with Machiavelli's The Prince in W. K. Marriott's 1908 translation: every term the Encyclopaedia knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Encyclopaedia entry or the other screens for the book's era.",
+          "description": "Public-domain classics read on screen, starting with Machiavelli's The Prince in W. K. Marriott's 1908 translation: every term the Master Index knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Master Index entry or the other screens for the book's era.",
           "views": [
             {
               "id": "neo-classic",

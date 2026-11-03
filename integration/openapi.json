@@ -31,7 +31,7 @@
       "name": "Datasets"
     },
     {
-      "name": "Encyclopaedia"
+      "name": "Master Index"
     },
     {
       "name": "Calendar"
@@ -421,9 +421,9 @@
       "get": {
         "operationId": "searchEncyclopaedia",
         "tags": [
-          "Encyclopaedia"
+          "Master Index"
         ],
-        "summary": "Find Encyclopaedia entries by name or alias.",
+        "summary": "Find Master Index entries by name or alias.",
         "parameters": [
           {
             "name": "q",
@@ -493,9 +493,9 @@
       "get": {
         "operationId": "getEntity",
         "tags": [
-          "Encyclopaedia"
+          "Master Index"
         ],
-        "summary": "One Encyclopaedia entry by Wikidata id.",
+        "summary": "One Master Index entry by Wikidata id.",
         "parameters": [
           {
             "name": "qid",
@@ -545,9 +545,9 @@
       "get": {
         "operationId": "getEntityByTitle",
         "tags": [
-          "Encyclopaedia"
+          "Master Index"
         ],
-        "summary": "One Encyclopaedia entry by English Wikipedia title.",
+        "summary": "One Master Index entry by English Wikipedia title.",
         "parameters": [
           {
             "name": "title",

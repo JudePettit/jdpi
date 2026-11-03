@@ -1,4 +1,4 @@
-// Builds the JDP-I entity layer ("data lake") behind the Encyclopaedia.
+// Builds the JDP-I entity layer ("data lake") behind the Master Index.
 //   node lake/scripts/build.mjs [--retro ../hp-retrospective] [--allow-drop] [--only <adapter,…>]
 //   --only adds the named adapters' mentions to the committed lake between full builds (below, at ONLY).
 // 1. Collect mentions from every module (adapters.mjs).
@@ -25,10 +25,10 @@ const jdpiDir = resolve(here, '../..');
 const retroArg = process.argv.indexOf('--retro');
 const retroDir = resolve(retroArg > 0 ? process.argv[retroArg + 1] : join(jdpiDir, '../hp-retrospective'));
 const OUT = join(jdpiDir, 'lake/data');
-const UA = { 'User-Agent': 'JDP-I Encyclopaedia (https://jdpi.pages.dev; judep92@gmail.com)' };
+const UA = { 'User-Agent': 'JDP-I Master Index (https://jdpi.pages.dev; judep92@gmail.com)' };
 const E_SHARDS = 512, T_SHARDS = 256;
 // --only <adapter,…>: the named adapters' mentions added to the committed lake/data, so a module's new entities (a
-// Bibliotheca book's cast) reach the Encyclopaedia before the monthly build, which makes the same records from scratch.
+// Bibliotheca book's cast) reach the Master Index before the monthly build, which makes the same records from scratch.
 // Only their entities, and the related entities the lake lacks, are fetched, a request a second at most. An entity
 // only these modules mention is made again, or goes with its last mention unless an entity with mentions relates to it;
 // an entity other modules mention too keeps its record, with these modules' mentions, names and "Appears in" tags

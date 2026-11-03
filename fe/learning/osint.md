@@ -500,7 +500,7 @@ The **[Berkeley Protocol on Digital Open Source Investigations](https://humanrig
 # Unit 11 · Using Vitruvian Manager as an intelligence tool
 
 ## Vitruvian Manager as a source: news and framing
-Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Encyclopaedia in Retrospective Geopolitics, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
+Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Master Index in Retrospective Geopolitics, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
 
 ### Workflow: Political Briefing (framing across the spectrum)
 1. Add a **topic** with the keywords people actually use, including names, places and alternative spellings. Topics are saved in your browser only.
@@ -575,7 +575,7 @@ Upcoming elections and the last six months of new leaders, coups, wars, assassin
 2. Treat scheduled events (elections, referendums, summits, anniversaries) as **stress points** with indicators to watch beforehand, and check what happened around previous ones.
 3. After each event, compare the outcome with what you expected and record it: that is the feedback stage.
 
-### Workflow: Encyclopaedia (entity resolution and link analysis)
+### Workflow: Master Index (entity resolution and link analysis)
 Every person, place, party, war, idea and organisation in Vitruvian Manager, keyed to its **Wikidata Q-number**, with links to everywhere it appears in the suite.
 1. **Resolve** each entity to its Q-number, which separates namesakes and gathers spellings and transliterations under one record.
 2. **Read across** the places it appears to turn scattered mentions into one timeline.
@@ -611,7 +611,7 @@ Trades reported by members of the US House of Representatives under the STOCK Ac
 2. Treat patterns, such as trades in a sector shortly before a committee acts on it, as leads: check the committee's records and the filing itself, and describe exactly what the record shows. Nothing here is investment advice.
 
 ### Workflow: Scientific Briefing and Invention Timeline (science and technology intelligence)
-New papers and science news by discipline, and a map-and-slider timeline of breakthroughs with the people and institutions behind them, linked to the Encyclopaedia.
+New papers and science news by discipline, and a map-and-slider timeline of breakthroughs with the people and institutions behind them, linked to the Master Index.
 1. Follow the disciplines that matter to your question, and separate peer-reviewed results from preprints and press releases.
 2. Map who does the work: institutions, countries and collaborations show where capability is concentrated and how it moves.
 3. Handle dual-use subjects with care: describe capabilities and trends, and never publish anything that would help someone cause harm.
@@ -658,7 +658,7 @@ New papers and science news by discipline, and a map-and-slider timeline of brea
 ### Model answer
 1. **Base rate**: the Historical Calendar and Political Retrospective show mass protests after two of the country's last five presidential elections, one of them followed by a coup attempt: about 40% before considering current conditions.
 2. **Structure and power**: National Analysis shows rising economic and political pressure and a history of irregular changes of leader. The Political Atlas shows that the president's camp controls parliament and the court, so legal challenges to the result will probably fail and the opposition is likely to turn to the street; confirm the court's membership on its own website.
-3. **Actors**: the Encyclopaedia resolves the main figures and parties to Q-numbers and shows the security chiefs' party ties and their roles in past crises.
+3. **Actors**: the Master Index resolves the main figures and parties to Q-numbers and shows the security chiefs' party ties and their roles in past crises.
 4. **Signals**: Volatility's unrest component has risen for three weeks; the Global Headline Tracker shows domestic outlets dominated by the candidate ban; TD Markets shows the currency and bond yields weakening as investors price in political risk.
 5. **Hypotheses and assumptions**: a calm vote is inconsistent with the ban, the currency's fall and rising unrest, and nothing yet points to postponement. The key assumption, that the security forces stay loyal to the president, is supported but untested.
 

@@ -44,7 +44,7 @@
       "title": "Gandhi and the national movement",
       "narration": "From 1920 Mohandas Gandhi turned the Congress into a mass movement through non-violent non-cooperation, the Salt March of 1930 and, in August 1942, the Quit India campaign, after which most Congress leaders were held in prison until near the end of the Second World War. Gandhi and Jawaharlal Nehru wanted a single India in which religion would not decide citizenship. Many Muslims, though, feared that in a Hindu-majority democracy they would be a permanent minority, and the Muslim League grew strong during the war while the Congress was banned.",
       "visual": { "kind": "portrait", "qid": "Q1001", "heading": "Mohandas Gandhi", "sub": "1869–1948", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Mahatma Gandhi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1001" },
+      "link": { "label": "Master Index · Mahatma Gandhi", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1001" },
       "cites": ["khan-2007", "talbot-singh-2009"]
     },
     {
@@ -52,7 +52,7 @@
       "title": "The demand for Pakistan",
       "narration": "In March 1940 the Muslim League, led by Muhammad Ali Jinnah, passed the Lahore Resolution, calling for independent states in the Muslim-majority regions of the north-west and east. What Jinnah meant by Pakistan is still argued over: the historian Ayesha Jalal has argued that he used the demand to bargain for an equal share of power for Muslims within a united India, while others see a settled aim of separation. In the elections of 1945 and 1946 the League won every Muslim seat in the central assembly and most of those in the provinces, and it could no longer be ignored.",
       "visual": { "kind": "portrait", "qid": "Q160554", "heading": "Muhammad Ali Jinnah", "sub": "1876–1948", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Pakistan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q843" },
+      "link": { "label": "Master Index · Pakistan", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q843" },
       "cites": ["jalal-1985", "talbot-singh-2009"]
     },
     {
@@ -82,7 +82,7 @@
           { "at": "1948-01-30", "label": "Gandhi assassinated" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Clement Attlee", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129006" },
+      "link": { "label": "Master Index · Clement Attlee", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129006" },
       "cites": ["khan-2007", "talbot-singh-2009"]
     },
     {
@@ -90,7 +90,7 @@
       "title": "Freedom at midnight",
       "narration": "Pakistan marked its independence on 14 August, with Jinnah as its Governor-General, and India at midnight, with Nehru as its first Prime Minister. In Delhi, Nehru told the Constituent Assembly that India would awake to life and freedom, while parts of the Punjab were already burning. Gandhi took no part in the celebrations: he spent the day in Calcutta, fasting and praying for peace between Hindus and Muslims.",
       "visual": { "kind": "quote", "text": "At the stroke of the midnight hour, when the world sleeps, India will awake to life and freedom.", "who": "Jawaharlal Nehru, Constituent Assembly of India", "when": "14 August 1947", "cite": "nehru-1947" },
-      "link": { "label": "Encyclopaedia · India", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q668" },
+      "link": { "label": "Master Index · India", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q668" },
       "cites": ["nehru-1947", "khan-2007"]
     },
     {

@@ -25,7 +25,7 @@
       "title": "Deng Xiaoping, 1904–1997",
       "narration": "Deng Xiaoping fought in China's communist revolution, rose to the top of the party under Mao Zedong, fell from power three times and came back each time, leading China from the late 1970s to the early 1990s. He opened the country to markets and foreign investment, beginning a transformation that lifted hundreds of millions of people out of poverty. He also defended the Communist Party's monopoly of power, and in 1989 he backed the use of the army against protesters in Beijing.",
       "visual": { "kind": "portrait", "qid": "Q16977", "heading": "Deng Xiaoping", "sub": "1904–1997", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
+      "link": { "label": "Master Index · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
       "cites": ["vogel-2011", "pantsov-levine-2015", "deng-1988"]
     },
     {
@@ -98,7 +98,7 @@
       "title": "Reform and opening, 1978–1980",
       "narration": "From the end of 1978 Deng's leadership set China on a course of reform and opening to the outside world. Over the next few years collective farms gave way to household farming, which raised harvests quickly, and in January 1979, weeks after China and the United States established full diplomatic relations, Deng toured America and met President Jimmy Carter. In 1980 four special economic zones, among them Shenzhen next to Hong Kong, were opened to foreign investment and freer markets.",
       "visual": { "kind": "portrait", "file": "File:Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored.jpg", "heading": "With Jimmy Carter", "sub": "Washington, 29 January 1979", "position": "50% 30%" },
-      "link": { "label": "Encyclopaedia · Chinese economic reform", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1205521" },
+      "link": { "label": "Master Index · Chinese economic reform", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1205521" },
       "cites": ["vogel-2011", "naughton-2007"]
     },
     {
@@ -213,7 +213,7 @@
         "note": "GDP per person at constant 2015 prices. Growth slowed after 1989 and quickened after the southern tour.",
         "cite": ["wb-wdi"]
       },
-      "link": { "label": "Encyclopaedia · People's Republic of China", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148" },
+      "link": { "label": "Master Index · People's Republic of China", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148" },
       "cites": ["naughton-2007", "wb-wdi"]
     },
     {

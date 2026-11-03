@@ -54,7 +54,7 @@
           { "at": "1939-09-01", "label": "Poland invaded" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Nazi Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7318" },
+      "link": { "label": "Master Index · Nazi Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7318" },
       "cites": ["kershaw-2015", "weinberg-1994"]
     },
     {
@@ -249,7 +249,7 @@
         "note": "Rows overlap: most Jewish victims were Polish or Soviet citizens. German military dead: about 5.3 million (Overmans).",
         "cite": ["harrison-2019", "materski-szarota-2009", "hilberg-2003", "yad-vashem", "overmans-1999"]
       },
-      "link": { "label": "Encyclopaedia · World War II", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q362" },
+      "link": { "label": "Master Index · World War II", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q362" },
       "cites": ["harrison-2019", "materski-szarota-2009", "overmans-1999", "hilberg-2003"]
     },
     {

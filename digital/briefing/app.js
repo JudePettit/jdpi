@@ -1,6 +1,6 @@
 // Digital Briefing page. Data: data/stories.json, built every six hours by digital/scripts/build-briefing.mjs.
 // State lives in the URL hash (#f=security&type=paper&w=7d&src=arxiv&q=…&sort=newest&tab=sources) so the shell and the
-// Encyclopaedia can deep-link; the chosen field is also remembered in this browser (localStorage, best effort).
+// Master Index can deep-link; the chosen field is also remembered in this browser (localStorage, best effort).
 import {
   WINDOW_LABELS, KIND_ORDER, esc, parseHash, toHash, filterItems, countByField, arrange, dailySeries, topOutlets, badgeOf,
   dayLabel, timeLabel, fieldColours,

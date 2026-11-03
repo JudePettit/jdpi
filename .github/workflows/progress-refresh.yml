@@ -4,7 +4,7 @@ name: Refresh Invention Timeline
 # committed so that each run asks Wikidata only for what is due.
 on:
   schedule:
-    # On the 2nd, a day before the Encyclopaedia refresh (3rd, 03:31), which reads this output and also leans on Wikidata.
+    # On the 2nd, a day before the Master Index refresh (3rd, 03:31), which reads this output and also leans on Wikidata.
     - cron: '37 4 2 * *'
   workflow_dispatch:
 permissions:

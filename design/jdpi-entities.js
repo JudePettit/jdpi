@@ -1,5 +1,5 @@
 /* PRP entity linker. Loaded by prp-bar.js on every submodule page.
-   Adds a small ◈ link to the PRP Encyclopaedia next to anything the entity layer (lake/) knows about:
+   Adds a small ◈ link to the PRP Master Index next to anything the entity layer (lake/) knows about:
      - links to English Wikipedia articles (most submodules already link people, wars and events there);
      - elements with data-qid="Q…" (a Wikidata ID);
      - elements with data-entity-key="congress:P000197" (submodule keys listed in lake/data/keys.json).
@@ -19,7 +19,7 @@
   const getShard = n => { if (!shards.has(n)) shards.set(n, fetch(`${LAKE}t/${n}.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({}))); return shards.get(n); };
   const getKeys = () => (keys ||= fetch(`${LAKE}keys.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({})));
 
-  // Inside the shell the Encyclopaedia opens as a submodule (Retrospective Geopolitics); on its own it opens directly.
+  // Inside the shell the Master Index opens as a submodule (Retrospective Geopolitics); on its own it opens directly.
   const pageUrl = q => new URL(`encyclopedia/index.html#${q}`, SHELL).href;
   const linkUrl = q => (embedded ? `${SHELL}#/rs/encyclopedia?at=${encodeURIComponent(pageUrl(q))}` : pageUrl(q));
 
@@ -33,7 +33,7 @@
     el.dataset.jdpiEncy = q;
     const a = document.createElement('a');
     a.className = 'jdpi-ency'; a.href = linkUrl(q); a.target = embedded ? '_top' : '_self';
-    a.title = `${label ? `Open ${label}` : 'Open'} in the Vitruvian Manager Encyclopaedia`; a.setAttribute('aria-label', a.title);
+    a.title = `${label ? `Open ${label}` : 'Open'} in the Vitruvian Manager Master Index`; a.setAttribute('aria-label', a.title);
     a.textContent = '◈';
     a.addEventListener('click', e => e.stopPropagation());
     el.insertAdjacentElement('afterend', a);

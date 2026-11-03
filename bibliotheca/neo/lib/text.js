@@ -1,4 +1,4 @@
-/* The reader's text: a paragraph of a book file as HTML with its Encyclopaedia terms as links, and the distinct terms
+/* The reader's text: a paragraph of a book file as HTML with its Master Index terms as links, and the distinct terms
    in a set of paragraphs (the popout bar). Pure (no DOM): the page renders with it and the tests call it in Node.
    The book data contract (bibliotheca/scripts/build-book.mjs) gives each paragraph
      { id, kind: 'para' | 'note' | 'verse', note?, text, terms: [{ s, e, qid, label }] }
@@ -30,7 +30,7 @@ export function validTerms(p) {
 }
 
 /** One paragraph as HTML: <p class="para [note|verse]" id data-p> with each term an <a class="term" data-qid href>.
-    `href(qid)` gives the link's address (the Encyclopaedia entry, through the shell when the page is embedded), so a
+    `href(qid)` gives the link's address (the Master Index entry, through the shell when the page is embedded), so a
     term still opens its entry in a new tab with Ctrl or the middle button; a plain click is the page's to handle.
     data-jdpi-ency on the link tells the entity linker (design/jdpi-entities.js) the term is linked already, so it adds
     no second ◈ link after it; data-qid stays for the Documentary narrator's map focus (design/jdpi-narrator.js). */
@@ -38,7 +38,7 @@ export function paragraphHtml(p, { href = q => `#${q}` } = {}) {
   let html = '', at = 0;
   for (const t of validTerms(p)) {
     html += plain(p.text.slice(at, t.s))
-      + `<a class="term" data-qid="${t.qid}" data-jdpi-ency="${t.qid}" href="${esc(href(t.qid))}" title="${esc(t.label)} · Encyclopaedia">${esc(p.text.slice(t.s, t.e))}</a>`;
+      + `<a class="term" data-qid="${t.qid}" data-jdpi-ency="${t.qid}" href="${esc(href(t.qid))}" title="${esc(t.label)} · Master Index">${esc(p.text.slice(t.s, t.e))}</a>`;
     at = t.e;
   }
   html += plain(p.text.slice(at));

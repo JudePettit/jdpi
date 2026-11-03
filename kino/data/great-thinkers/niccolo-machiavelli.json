@@ -28,7 +28,7 @@
           "title": "Niccolò Machiavelli, 1469–1527",
           "narration": "Niccolò Machiavelli served the Florentine republic for fourteen years as a senior official and diplomat, and when the Medici family returned to power he lost his post and was imprisoned and tortured. In enforced retirement he wrote The Prince, a short book on how rulers win and keep power that made his name a byword for cunning. He also wrote a long defence of republics, comedies and a history of Florence, and scholars still disagree about what he really meant.",
           "visual": { "kind": "portrait", "qid": "Q1399", "heading": "Niccolò Machiavelli", "sub": "1469–1527", "position": "50% 25%" },
-          "link": { "label": "Encyclopaedia · Niccolò Machiavelli", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1399" },
+          "link": { "label": "Master Index · Niccolò Machiavelli", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1399" },
           "cites": ["skinner-2000", "viroli-2000"]
         },
         {
@@ -71,7 +71,7 @@
               { "at": "1512-11-07", "label": "Dismissed" }
             ]
           },
-          "link": { "label": "Encyclopaedia · Republic of Florence", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148540" },
+          "link": { "label": "Master Index · Republic of Florence", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q148540" },
           "cites": ["viroli-2000", "najemy-2010"]
         },
         {
@@ -79,7 +79,7 @@
           "title": "Cesare Borgia, 1502–1503",
           "narration": "In 1502 and 1503 Machiavelli spent months at the court of Cesare Borgia, son of Pope Alexander the Sixth, who was carving out a state for himself in the Romagna; Leonardo da Vinci was then serving Cesare as a military engineer. Machiavelli was with Cesare when he lured rebellious captains to Senigallia and had them killed, and he admired a speed and daring that his own cautious government lacked. Cesare's power collapsed after his father's death in 1503, and in The Prince he became the model of a new ruler undone by fortune.",
           "visual": { "kind": "portrait", "qid": "Q187998", "heading": "Cesare Borgia", "sub": "About 1475–1507", "position": "50% 25%" },
-          "link": { "label": "Encyclopaedia · Leonardo da Vinci", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q762" },
+          "link": { "label": "Master Index · Leonardo da Vinci", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q762" },
           "cites": ["viroli-2000", "skinner-2000"]
         }
       ]
@@ -98,7 +98,7 @@
             "points": [[11.26, 43.77, "Florence"], [11.2, 43.69, "Sant'Andrea in Percussina"], [12.5, 41.9, "Rome: Leo the Tenth, 1513"]],
             "bbox": [9.6, 41.3, 13.8, 44.5]
           },
-          "link": { "label": "Encyclopaedia · Papal States", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q170174" },
+          "link": { "label": "Master Index · Papal States", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q170174" },
           "cites": ["viroli-2000", "skinner-2000"]
         },
         {
@@ -155,7 +155,7 @@
           "title": "Teacher of evil, or of liberty?",
           "narration": "The Prince was placed on the Catholic Church's index of banned books in 1559, and English playwrights made the murderous Machiavel a stock stage villain. Jean-Jacques Rousseau read the book as a warning to the people disguised as advice to kings, Leo Strauss professed himself inclined to see its author as a teacher of evil, and Isaiah Berlin argued that Machiavelli had shown that political and Christian values cannot always be reconciled. More recently Erica Benner has read The Prince as an ironic book whose real lessons are republican.",
           "visual": { "kind": "quote", "text": "He professed to teach kings; but it was the people he really taught. His Prince is the book of Republicans.", "who": "Jean-Jacques Rousseau, The Social Contract, translated by G. D. H. Cole", "when": "1762", "cite": "rousseau-1762" },
-          "link": { "label": "Encyclopaedia · Machiavellianism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q472246" },
+          "link": { "label": "Master Index · Machiavellianism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q472246" },
           "cites": ["rousseau-1762", "strauss-1958", "berlin-1979", "benner-2013", "najemy-2010"]
         },
         {

@@ -1,6 +1,6 @@
 // Bibliotheca data: the corpus importer (Gutenberg boilerplate cut, chapters and paragraphs split by a book's layout,
 // typography set: text.mjs's one level of chapters, and build-book.mjs's splitWork for books of books, notes of other
-// shapes, front matter and titles in Title Case), the Encyclopaedia tagger (whole words, longest match first, names
+// shapes, front matter and titles in Title Case), the Master Index tagger (whole words, longest match first, names
 // exact, common nouns by their own name, the era rule, the shelf's decisions) on fixtures, the rights rule, and the
 // built files of every book on the shelf (bibliotheca/data/books/*.json, bibliotheca/data/index.json) against the data
 // contract in bibliotheca/scripts/build-book.mjs, the chapters stated for each below, the lake, and the book's own
@@ -593,7 +593,7 @@ test('built: every term is of its text’s time: first dated by the time the tex
     }
   }
   assert.deepEqual(late, []);
-  // The rule bites: the Encyclopaedia's Italy is first dated 1946, after the Prince's 1532.
+  // The rule bites: the Master Index's Italy is first dated 1946, after the Prince's 1532.
   assert.ok(firstYear(lake.get('Q38').facts) > Math.max(prince.era[1], prince.work.published));
 });
 

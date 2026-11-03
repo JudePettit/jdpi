@@ -51,7 +51,7 @@
       "title": "Gorbachev changes the rules",
       "narration": "Mikhail Gorbachev became the Soviet leader in March 1985 and set out to revive the Soviet system through perestroika, or restructuring, and glasnost, or openness. At the United Nations in December 1988 he announced deep unilateral cuts in Soviet forces and declared that every people had the right to choose its own path. In effect it signalled that Soviet tanks would no longer keep unpopular governments in power, though few in the region yet believed it.",
       "visual": { "kind": "quote", "text": "Freedom of choice is a universal principle and there should be no exceptions.", "who": "Mikhail Gorbachev, United Nations General Assembly", "when": "7 December 1988", "cite": "gorbachev-1988" },
-      "link": { "label": "Encyclopaedia · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
+      "link": { "label": "Master Index · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
       "cites": ["brown-1996", "gorbachev-1988"]
     },
     {
@@ -69,7 +69,7 @@
         "note": "The other 299 Sejm seats, 65 per cent, were reserved for the communist party and its allies under the Round Table agreement.",
         "cite": ["kenney-2002", "garton-ash-1990"]
       },
-      "link": { "label": "Encyclopaedia · Solidarity", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1003" },
+      "link": { "label": "Master Index · Solidarity", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1003" },
       "cites": ["kenney-2002", "garton-ash-1990"]
     },
     {
@@ -116,7 +116,7 @@
       "title": "The Wall opens, 9 November",
       "narration": "On the evening of 9 November the Politburo's spokesman, Günter Schabowski, announced new travel rules at a press conference and, unsure of the details, said that they took effect immediately. Crowds gathered at the crossings in Berlin, and shortly before midnight the officer in charge at Bornholmer Strasse, unable to get orders, opened the gate. As Mary Elise Sarotte has shown, the opening was not a planned concession but the result of confusion, pressure from the crowds and decisions taken by individuals on the night.",
       "visual": { "kind": "portrait", "file": "File:BerlinWall-BrandenburgGate.jpg", "heading": "The Berlin Wall", "sub": "At the Brandenburg Gate, November 1989", "position": "50% 40%" },
-      "link": { "label": "Encyclopaedia · fall of the Berlin Wall", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q69163529" },
+      "link": { "label": "Master Index · fall of the Berlin Wall", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q69163529" },
       "cites": ["sarotte-2014"]
     },
     {
@@ -124,7 +124,7 @@
       "title": "Czechoslovakia: the Velvet Revolution",
       "narration": "In Prague, police beat students on a commemorative march on 17 November. Within days the dissident playwright Václav Havel and his colleagues founded Civic Forum, crowds of hundreds of thousands filled Wenceslas Square, and a two-hour general strike on 27 November showed that workers had joined them. The Communist Party gave up its leading role, and on 29 December the federal parliament elected Havel president.",
       "visual": { "kind": "portrait", "qid": "Q36233", "heading": "Václav Havel", "sub": "President from 29 December 1989", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Václav Havel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q36233" },
+      "link": { "label": "Master Index · Václav Havel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q36233" },
       "cites": ["garton-ash-1990", "kenney-2002"]
     },
     {
@@ -159,7 +159,7 @@
         ]
       },
       "focus": { "points": [[13.4, 52.52, "Berlin"], [25.28, 54.69, "Vilnius, March 1990"], [37.62, 55.76, "Moscow: the coup fails, August 1991"]], "bbox": [0, 36, 62, 64] },
-      "link": { "label": "Encyclopaedia · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
+      "link": { "label": "Master Index · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
       "cites": ["sarotte-2009", "brown-1996"]
     },
     {

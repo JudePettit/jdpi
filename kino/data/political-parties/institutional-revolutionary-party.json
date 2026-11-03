@@ -30,7 +30,7 @@
       "narration": "From 1929 to 2000 one party governed Mexico without a break, winning every presidential election under three successive names. The Institutional Revolutionary Party, the PRI, claimed the legacy of the Mexican Revolution, built a political machine that reached into every union and village, and moved from land reform to free trade while keeping power. This film follows how it was built, how it ruled, how it lost, and what has become of it.",
       "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Institutional Revolutionary Party", "sub": "Mexico, 1929 to today" },
       "focus": { "countries": ["MEX"], "bbox": [-118, 13, -85, 33] },
-      "link": { "label": "Encyclopaedia · Institutional Revolutionary Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q682969" },
+      "link": { "label": "Master Index · Institutional Revolutionary Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q682969" },
       "cites": ["magaloni-2006", "greene-2007"]
     },
     {
@@ -42,7 +42,7 @@
         "groups": [{ "label": "Mexico", "tone": 1, "countries": ["MEX"] }]
       },
       "focus": { "points": [[-99.13, 19.43, "Mexico City"], [-99.23, 18.92, "Morelos: Zapata's south"], [-106.07, 28.63, "Chihuahua: Villa's north"], [-100.39, 20.59, "Querétaro: the constitution of 1917"]], "bbox": [-118, 13, -85, 33] },
-      "link": { "label": "Encyclopaedia · Mexican Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q214426" },
+      "link": { "label": "Master Index · Mexican Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q214426" },
       "cites": ["knight-1986", "krauze-1997"]
     },
     {
@@ -58,7 +58,7 @@
       "title": "Cárdenas remakes the party, 1934–1940",
       "narration": "Lázaro Cárdenas, president from 1934, broke with Calles and sent him into exile in 1936. He distributed about 18 million hectares of land to peasant communities, backed a new national labour confederation, and on 18 March 1938 expropriated the foreign oil companies, a day still celebrated in Mexico. That month he rebuilt the party as the Party of the Mexican Revolution, organised in sectors for peasants, workers, the army and the middle classes, a corporatist structure that tied millions of Mexicans to it.",
       "visual": { "kind": "portrait", "qid": "Q296718", "heading": "Lázaro Cárdenas", "sub": "President, 1934–1940", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Lázaro Cárdenas", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q296718" },
+      "link": { "label": "Master Index · Lázaro Cárdenas", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q296718" },
       "cites": ["knight-1986", "krauze-1997"]
     },
     {
@@ -94,7 +94,7 @@
           { "at": "1994-03-23", "label": "Colosio assassinated" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Carlos Salinas de Gortari", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315633" },
+      "link": { "label": "Master Index · Carlos Salinas de Gortari", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q315633" },
       "cites": ["greene-2007", "magaloni-2006"]
     },
     {
@@ -138,7 +138,7 @@
         "note": "Official results as shares of valid votes (spoiled ballots left out), including allied parties' votes for the same candidate: Nohlen to 2000, then the official counts. The PRI's predecessor stood in 1934; it lost the presidency in 2000, 2006 and 2018.",
         "cite": ["nohlen-2005", "pdba-2006", "pdba-2012", "ine-2019"]
       },
-      "link": { "label": "Encyclopaedia · Vicente Fox", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190572" },
+      "link": { "label": "Master Index · Vicente Fox", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190572" },
       "cites": ["greene-2007", "magaloni-2006"]
     },
     {

@@ -1,4 +1,4 @@
-name: Refresh Encyclopaedia entity layer
+name: Refresh Master Index entity layer
 # Rebuilds lake/data monthly: mentions from every module, Wikidata facts and tags, Wikipedia summaries. Then every
 # Bibliotheca book is tagged again against the new lake (its casts are in it, bibliotheca/data/cast), so a book shows
 # the terms the lake has learnt the day it learns them.
@@ -34,7 +34,7 @@ jobs:
       - uses: ./.github/actions/commit-data
         with:
           paths: lake/data lake/scripts/summary-cache.json bibliotheca/data/books bibliotheca/data/index.json
-          message: 'Encyclopaedia: monthly refresh of the entity layer, and the Bibliotheca books tagged against it'
+          message: 'Master Index: monthly refresh of the entity layer, and the Bibliotheca books tagged against it'
   deploy:
     needs: refresh
     if: ${{ !cancelled() }}

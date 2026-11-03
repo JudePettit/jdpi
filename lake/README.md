@@ -1,11 +1,11 @@
 # JDP-I entity layer ("data lake")
 
-One record per person, place, war, party, election or idea that appears anywhere in JDP-I, keyed by its **Wikidata ID** (e.g. John Mearsheimer = Q725556). It powers the Encyclopaedia (`encyclopedia/`) and the ◈ links added across every module.
+One record per person, place, war, party, election or idea that appears anywhere in JDP-I, keyed by its **Wikidata ID** (e.g. John Mearsheimer = Q725556). It powers the Master Index (`encyclopedia/`) and the ◈ links added across every module.
 
 ## How it fits together
 
 ```
-module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ──► Encyclopaedia (Explorer + entity pages)
+module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ──► Master Index (Explorer + entity pages)
  (Retrospective,   mentions:      resolve IDs,     static      └► jdpi-entities.js linker on every module page
   calendars,       key + link     Wikidata facts,  shards
   Battlefield,     + context      tags, summaries
@@ -27,8 +27,8 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
   - `t/<n>.json`: English Wikipedia title → Wikidata ID, sharded by hash. The linker uses these.
   - `keys.json`: module keys (e.g. `congress:P000197`) → Wikidata ID.
   - `manifest.json`: counts and build time.
-- **Linker** (`design/jdpi-entities.js`, loaded by `prp-bar.js`): adds ◈ Encyclopaedia links next to Wikipedia links, `data-qid="Q…"` and `data-entity-key="…"` elements on any JDP-I page.
-- **Deep links**: Encyclopaedia links open modules through the shell as `#/<suite>/<module>?at=<url>`. The shell only accepts URLs on that module's own page.
+- **Linker** (`design/jdpi-entities.js`, loaded by `prp-bar.js`): adds ◈ Master Index links next to Wikipedia links, `data-qid="Q…"` and `data-entity-key="…"` elements on any JDP-I page.
+- **Deep links**: Master Index links open modules through the shell as `#/<suite>/<module>?at=<url>`. The shell only accepts URLs on that module's own page.
 
 ## Adding a module
 
@@ -50,4 +50,4 @@ A record's book-only names (`local`) feed its entity but not the name, since the
 
 ## Licences
 
-Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0: the Encyclopaedia credits them on every page, and that text stays under the same licence.
+Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0: the Master Index credits them on every page, and that text stays under the same licence.

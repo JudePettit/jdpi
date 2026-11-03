@@ -333,7 +333,7 @@ async function renderProfile() {
   const s = await series(c.iso3), L = c.leadership, K = c.conflict, period = $('#period').value, P = pdata(c);
   const stat = (label, value, small = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}</div>`;
   const links = [
-    c.encyclopedia && link('rs', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Encyclopaedia'),
+    c.encyclopedia && link('rs', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Master Index'),
     c.gw != null && link('rs', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.gw}`, 'Political Retrospective'),
     c.gw != null && link('rs', 'battlefield-history', `battlefield/history/index.html#y=2025&c=${c.gw}`, 'Retrospective Battlefield'),
     link('rs', 'historical-calendar', `q/calendar.html?period=history&countries=${encodeURIComponent(c.name)}&view=year`, 'Historical Calendar'),

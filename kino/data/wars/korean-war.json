@@ -45,7 +45,7 @@
         "fronts": [{ "label": "The 38th parallel, 1945", "line": [[124.65, 38.0], [125.9, 38.0], [127.2, 38.0], [128.65, 38.0]] }]
       },
       "focus": { "countries": ["PRK", "KOR"], "points": [[126.98, 37.57, "Seoul"], [125.75, 39.03, "Pyongyang"]], "bbox": [123, 33, 132, 43.2] },
-      "link": { "label": "Encyclopaedia · First Republic of South Korea", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q491559" },
+      "link": { "label": "Master Index · First Republic of South Korea", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q491559" },
       "cites": ["cumings-2010", "millett-2010"]
     },
     {
@@ -65,7 +65,7 @@
           { "at": "1950-06-25", "label": "Invasion" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Kim Il-sung", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q41117" },
+      "link": { "label": "Master Index · Kim Il-sung", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q41117" },
       "cites": ["weathersby-1993", "shen-2012"]
     },
     {
@@ -95,7 +95,7 @@
       "title": "The United Nations responds",
       "narration": "The Security Council met on the day of the invasion and demanded a North Korean withdrawal, and on 27 June it called on members to help the South. The Soviet Union could have vetoed both resolutions, but it was boycotting the Council because China's seat was still held by the Nationalist government on Taiwan. President Harry Truman committed American air, naval and then ground forces, and in July the Council placed the troops sent by member states under a unified command led by the United States, with General Douglas MacArthur in command.",
       "visual": { "kind": "quote", "text": "Recommends that the Members of the United Nations furnish such assistance to the Republic of Korea as may be necessary to repel the armed attack and to restore international peace and security in the area.", "who": "United Nations Security Council, resolution 83", "when": "27 June 1950", "cite": "unsc-83" },
-      "link": { "label": "Encyclopaedia · Harry S. Truman", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11613" },
+      "link": { "label": "Master Index · Harry S. Truman", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11613" },
       "cites": ["unsc-83", "stueck-1995"]
     },
     {
@@ -147,7 +147,7 @@
       "title": "Ridgway, MacArthur and a limited war, 1951",
       "narration": "Meeting Truman on Wake Island in October 1950, MacArthur had assured him that China was unlikely to intervene in strength. After the Chinese offensives, General Matthew Ridgway took command of the Eighth Army and rallied it, and by the end of March 1951 Seoul had been retaken and the front pushed back to around the 38th parallel. MacArthur argued in public for carrying the war into China, and on 11 April Truman dismissed him, choosing to keep the war limited to Korea.",
       "visual": { "kind": "portrait", "file": "File:President Truman and General MacArthur at Wake Island.jpg", "heading": "Truman and MacArthur", "sub": "Wake Island, 15 October 1950", "position": "50% 30%" },
-      "link": { "label": "Encyclopaedia · Matthew Ridgway", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q494930" },
+      "link": { "label": "Master Index · Matthew Ridgway", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q494930" },
       "cites": ["stueck-1995", "millett-2010"]
     },
     {
@@ -189,7 +189,7 @@
         "note": "Deaths in combat among all the armies, including civilians killed in the fighting. One-sided killings of civilians and deaths from hunger and disease are not counted. PRIO's best estimate for the whole war is about 995,000.",
         "cite": ["lacina-gleditsch-2005"]
       },
-      "link": { "label": "Encyclopaedia · Korean War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8663" },
+      "link": { "label": "Master Index · Korean War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8663" },
       "cites": ["lacina-gleditsch-2005", "cumings-2010", "stueck-1995"]
     },
     {

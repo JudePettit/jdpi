@@ -3,7 +3,7 @@
 //   integration/data/<id>.json            flat datasets derived from sources that are not simple record arrays, or too heavy to
 //   integration/data/<id>/<n>.json        query at the edge (sharded, with each shard's date ranges or partition values)
 //   integration/data/query-index.json     what the MCP server and the API may read: every part, its size, cost and ranges, a sample
-//   integration/data/names/…              a compact name index for the Encyclopaedia (token prefixes → Wikidata ids)
+//   integration/data/names/…              a compact name index for the Master Index (token prefixes → Wikidata ids)
 //   integration/data/countries/…          one small profile per country, joining National Analysis, Volatility, Battlefield and the calendars
 //   integration/data/volatility-movers.json  the Volatility page's "Biggest movers · 7 days" lists  } for the Workspace "Today"
 //   integration/data/briefing-activity.json  each briefing's 7-day story count and top topic        } panel (shell.js)
@@ -231,7 +231,7 @@ spec({
   from: ['national/data/index.json', 'volatility/data/index.json'], refresh: 'monthly', updatedFrom: 'national/data/index.json', page: 'q/national.html',
   licence: natLicence, sources: natSources,
   fields: [['iso3', 'Country (ISO 3166-1 alpha-3)'], ['iso2', 'Country (ISO 3166-1 alpha-2)'], ['name', 'Common name'], ['official_name', 'World Bank name'], ['region', 'World Bank region'], ['income', 'World Bank income group'], ['capital', 'Capital'],
-    ['government', 'System(s) of government (Wikidata)'], ['head_of_state', 'Head of state (Wikidata)'], ['head_of_government', 'Head of government (Wikidata)'], ['qid', 'Wikidata id (also the Encyclopaedia entry)'],
+    ['government', 'System(s) of government (Wikidata)'], ['head_of_state', 'Head of state (Wikidata)'], ['head_of_government', 'Head of government (Wikidata)'], ['qid', 'Wikidata id (also the Master Index entry)'],
     ['pestle_overall', 'Overall PESTLE pressure, 0–1: mean of the six dimensions'], ['pestle_political', 'Political pressure: share of scored indicators worsening, 0–1'], ['pestle_economic', 'Economic pressure, 0–1'], ['pestle_social', 'Social pressure, 0–1'],
     ['pestle_technological', 'Technological pressure, 0–1'], ['pestle_legal', 'Legal pressure, 0–1'], ['pestle_environmental', 'Environmental pressure, 0–1'], ['pestle_coverage', 'Share of indicators with data, 0–1'],
     ['population', 'Population (latest year)'], ['gdp_usd', 'GDP, current US$ (latest year)'], ['gdp_growth', 'GDP growth, % (latest year)'], ['gdp_per_capita', 'GDP per capita, constant 2015 US$'], ['inflation', 'Consumer price inflation, %'], ['life_expectancy', 'Life expectancy at birth, years'],
@@ -288,7 +288,7 @@ spec({
   refresh: 'daily', page: 'q/calendar.html?period=history', licence: calLicence, sources: calSources, fields: calFields
 });
 
-// Encyclopaedia: every entity (the lake), flattened with its main dates and country.
+// Master Index: every entity (the lake), flattened with its main dates and country.
 const LAKE_TYPES = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation'];
 let LAKE_ENTITIES = null;
 const lakeEntities = () => {
@@ -304,8 +304,8 @@ const lakeEntities = () => {
 };
 const ENC_TYPE_ORDER = ['person', 'conflict', 'election', 'event', 'topic', 'party', 'place', 'idea', 'organisation'];
 spec({
-  id: 'encyclopaedia-entities', title: 'Encyclopaedia: entities', module: 'rs', submodule: 'encyclopedia',
-  description: 'Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
+  id: 'encyclopaedia-entities', title: 'Master Index: entities', module: 'rs', submodule: 'encyclopedia',
+  description: 'Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
   derive: () => lakeEntities().map(({ e, appears }) => {
     const f = e.facts || {}, rel = e.rel || {};
     const country = (rel.Country || rel.Citizenship || rel.Jurisdiction || [])[0];
@@ -314,7 +314,7 @@ spec({
   }).sort((a, b) => ENC_TYPE_ORDER.indexOf(a.type) - ENC_TYPE_ORDER.indexOf(b.type) || b.mentions - a.mentions || (a.qid < b.qid ? -1 : 1)),
   from: ['lake/data/index.json', 'lake/data/e/*.json'], refresh: 'monthly', updatedFrom: 'lake/data/manifest.json', page: 'encyclopedia/index.html', partitionBy: 'type',
   licence: 'Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)', sources: ['Wikidata (CC0)', 'Every Vitruvian Manager submodule that mentions the entity'],
-  fields: [['qid', 'Wikidata id; the Encyclopaedia page is encyclopedia/index.html#<qid>'], ['label', 'Name'], ['type', LAKE_TYPES.join(', ')], ['description', 'Short description (Wikidata)'],
+  fields: [['qid', 'Wikidata id; the Master Index page is encyclopedia/index.html#<qid>'], ['label', 'Name'], ['type', LAKE_TYPES.join(', ')], ['description', 'Short description (Wikidata)'],
     ['start', 'Born, founded, held or started (as precise as Wikidata records it)'], ['end', 'Died, dissolved or ended'], ['country', 'Country, citizenship or jurisdiction (the first Wikidata gives)'],
     ['mentions', 'How many times Vitruvian Manager mentions it'], ['appears_in', 'Vitruvian Manager submodule ids that mention it'], ['wikipedia', 'English Wikipedia article']]
 });
@@ -622,7 +622,7 @@ putJson('integration/catalog.json', CATALOGUE, true);
 putJson('integration/openapi.json', openapi(CATALOGUE, { site: BASE_URL }), true);
 put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
 
-/* ------------------------------------------------------------------ Encyclopaedia name index */
+/* ------------------------------------------------------------------ Master Index name index */
 // Tokens of every label and alias → entity codes (qid number × 1000 + min(mentions, 99) × 10 + type), sorted by mentions.
 // Shards are keyed by token prefix (two characters, extended where a shard grows past ~24 KB) and packed into ~40 files.
 {
@@ -668,7 +668,7 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   }
   if (Object.keys(cur).length) files.push(cur);
   files.forEach((f, i) => { const p = `integration/data/names/${i}.json`; put(p, JSON.stringify(f) + '\n'); derivedFiles.add(p); });
-  putJson('integration/data/names/index.json', { generated: STAMP, about: 'Encyclopaedia name index: token prefix → file. Codes are qid number × 1000 + min(mentions, 99) × 10 + type index.', types: LAKE_TYPES, entities: ents.length, split: [...split].sort(), keys: keyFile });
+  putJson('integration/data/names/index.json', { generated: STAMP, about: 'Master Index name index: token prefix → file. Codes are qid number × 1000 + min(mentions, 99) × 10 + type index.', types: LAKE_TYPES, entities: ents.length, split: [...split].sort(), keys: keyFile });
   log(`names: ${tok.size} tokens, ${keys.length} keys, ${files.length} files, ${(files.reduce((a, f) => a + JSON.stringify(f).length, 0) / 1024).toFixed(0)} KB`);
 }
 

@@ -30,7 +30,7 @@
       "title": "Winston Churchill, 1874–1965",
       "narration": "Winston Churchill was a soldier, a war correspondent, a historian and, twice, Prime Minister of the United Kingdom. He is remembered above all for leading Britain through the Second World War, but his long career also included failures, reversals and positions that are still argued over. This film follows his life from Blenheim Palace to his state funeral in 1965.",
       "visual": { "kind": "portrait", "qid": "Q8016", "heading": "Winston Churchill", "sub": "1874–1965", "position": "50% 20%" },
-      "link": { "label": "Encyclopaedia · Winston Churchill", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8016" },
+      "link": { "label": "Master Index · Winston Churchill", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8016" },
       "cites": ["gilbert-1991", "roberts-2018"]
     },
     {
@@ -50,7 +50,7 @@
       "title": "Into Parliament, 1900–1911",
       "narration": "Churchill entered the House of Commons as a Conservative for Oldham in 1900, but in 1904 he crossed the floor to the Liberals over free trade. As President of the Board of Trade he set up labour exchanges and minimum wages in some of the worst-paid trades, part of the Liberal government's social reforms. As Home Secretary he was criticised for sending troops to the South Wales coalfield during the Tonypandy riots of 1910, a decision long held against him there.",
       "visual": { "kind": "portrait", "file": "File:1904 Winston S. Churchill as MP.jpg", "heading": "A Liberal minister", "sub": "1904–1911", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Conservative Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9626" },
+      "link": { "label": "Master Index · Conservative Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9626" },
       "cites": ["addison-2005", "jenkins-2001"]
     },
     {
@@ -66,7 +66,7 @@
         "arrows": [{ "from": [14.5, 35.9], "via": [22.5, 37.2], "to": [26.1, 40.0], "tone": 1, "label": "Allied fleet, 1915" }]
       },
       "focus": { "countries": ["TUR"], "points": [[26.4, 40.2, "Gallipoli, 1915–1916"], [2.88, 50.72, "Western Front, 1916"]], "bbox": [-7, 34, 36, 57] },
-      "link": { "label": "Encyclopaedia · Gallipoli campaign", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q164983" },
+      "link": { "label": "Master Index · Gallipoli campaign", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q164983" },
       "cites": ["gilbert-1991", "roberts-2018"]
     },
     {
@@ -95,7 +95,7 @@
       "title": "Munich, 1938",
       "narration": "When Neville Chamberlain returned from Munich in September 1938 with an agreement that handed the Sudetenland to Germany, much of Britain greeted him with relief. Churchill told the House of Commons that the country had suffered a total and unmitigated defeat, and he was heckled for it. Six months later Germany occupied the rest of Bohemia and Moravia, and opinion began to turn his way.",
       "visual": { "kind": "quote", "text": "We have sustained a total and unmitigated defeat.", "who": "Winston Churchill, House of Commons", "when": "5 October 1938", "cite": "hansard-1938" },
-      "link": { "label": "Encyclopaedia · Neville Chamberlain", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q10664" },
+      "link": { "label": "Master Index · Neville Chamberlain", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q10664" },
       "cites": ["hansard-1938", "gilbert-1991"]
     },
     {
@@ -130,7 +130,7 @@
       "title": "The Grand Alliance, 1941–1945",
       "narration": "Churchill worked to bring the United States into the war, and in August 1941 he met Franklin Roosevelt off Newfoundland to agree the Atlantic Charter. After Germany invaded the Soviet Union and Japan attacked Pearl Harbor, Britain, the United States and the Soviet Union fought as allies, and their leaders met at Tehran in 1943 and at Yalta in February 1945. As American and Soviet power grew, Churchill's influence waned, and the future of eastern Europe was shaped above all by where the Red Army stood.",
       "visual": { "kind": "portrait", "file": "File:Yalta summit 1945 with Churchill, Roosevelt, Stalin.jpg", "heading": "Yalta", "sub": "February 1945", "position": "50% 35%" },
-      "link": { "label": "Encyclopaedia · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
+      "link": { "label": "Master Index · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
       "cites": ["addison-2005", "roberts-2018"]
     },
     {
@@ -142,7 +142,7 @@
         "groups": [{ "label": "British India (present-day borders)", "tone": 1, "countries": ["IND", "PAK", "BGD"] }]
       },
       "focus": { "countries": ["IND", "BGD"], "points": [[88.36, 22.57, "Calcutta"], [90.41, 23.81, "Dacca"]], "bbox": [66, 5, 99, 37] },
-      "link": { "label": "Encyclopaedia · British Raj", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129286" },
+      "link": { "label": "Master Index · British Raj", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q129286" },
       "cites": ["toye-2010", "sen-1981", "maharatna-1996", "mukerjee-2010", "roberts-2018"]
     },
     {
@@ -163,7 +163,7 @@
       "title": "Prime Minister again, 1951–1955",
       "narration": "Churchill returned as Prime Minister in October 1951, at the age of 76, and became the first of Elizabeth the Second's prime ministers. He suffered a serious stroke in June 1953, which was kept from the public, and in the same year he was awarded the Nobel Prize in Literature for his histories and his speeches. He resigned in April 1955 and was succeeded by Anthony Eden.",
       "visual": { "kind": "portrait", "file": "File:Truman-Churchill-1953.jpg", "heading": "With Harry Truman", "sub": "January 1953", "position": "50% 30%" },
-      "link": { "label": "Encyclopaedia · Anthony Eden", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128995" },
+      "link": { "label": "Master Index · Anthony Eden", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128995" },
       "cites": ["nobel-1953", "gilbert-1991"]
     },
     {

@@ -14,7 +14,7 @@
 //      Workers unchanged.
 //
 // Safety: every tool is read-only. Files are read only from an allowlist built from the catalogue (integration/catalog.json
-// and integration/data/query-index.json) plus the Encyclopaedia shards and country profiles; a path never comes from a
+// and integration/data/query-index.json) plus the Master Index shards and country profiles; a path never comes from a
 // tool argument. Rows, scanned data and response size are capped, and a result says when it was cut. Text from datasets
 // (headlines, summaries, notes) is returned as data in structured content, never as instructions.
 
@@ -121,7 +121,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     // text words multiply the cost of a row, so the estimate above alone cannot bound it (100 values for `in` cost 50 ms).
     workBudget: 1_500_000,
     maxRows: 100, defaultRows: 20, maxBytes: 48_000, maxString: 600, maxOffset: 10_000,
-    // The Encyclopaedia search reads one entry shard per result; at most this many not yet parsed in this isolate.
+    // The Master Index search reads one entry shard per result; at most this many not yet parsed in this isolate.
     coldEntryShards: 16,
     cacheBytes: 12_000_000, ttlMs: 0, ...limits
   };
@@ -451,7 +451,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
 
   async function nameIndex() { return getJson('integration/data/names/index.json'); }
   const TYPE_LIST = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation'];
-  async function searchEncyclopaedia(a = {}) {
+  async function searchMasterIndex(a = {}) {
     const q = String(a.query ?? a.q ?? '').trim();
     if (!q) throw new ToolError('Give a name to search for, e.g. "Mearsheimer" or "Korean War".');
     if (q.length > 200) throw new ToolError('Search for a name of at most 200 characters.');
@@ -526,11 +526,11 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       let decoded = title; try { decoded = decodeURIComponent(title); } catch { /* keep */ }
       const [n, norm] = titleShard(decoded);
       qid = (await getJson(`lake/data/t/${n}.json`, { optional: true }) || {})[norm] || null;
-      if (!qid) throw new ToolError(`No Encyclopaedia entry has the Wikipedia title "${decoded}". Try search_encyclopaedia.`, 404);
+      if (!qid) throw new ToolError(`No Master Index entry has the Wikipedia title "${decoded}". Try search_encyclopaedia.`, 404);
     }
     if (!qid || !/^Q\d{1,10}$/.test(qid)) throw new ToolError('Give a Wikidata id such as "Q725556", or a Wikipedia title.');
     const e = (await getJson(`lake/data/e/${+qid.slice(1) % 512}.json`, { optional: true }) || {})[qid];
-    if (!e) throw new ToolError(`${qid} is not in the Vitruvian Manager Encyclopaedia. Try search_encyclopaedia.`, 404);
+    if (!e) throw new ToolError(`${qid} is not in the Vitruvian Manager Master Index. Try search_encyclopaedia.`, 404);
     const reg = await getJson('registry.json', { optional: true });
     const names = {}; for (const s of reg?.suites || []) for (const m of s.modules) names[m.id] = m.name;
     const mentions = (e.mentions || []);
@@ -718,11 +718,11 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
         limit: { type: 'integer', minimum: 1, maximum: L.maxRows, description: `Rows to return (default ${L.defaultRows}).` },
         offset: { type: 'integer', minimum: 0, maximum: L.maxOffset, description: 'Rows to skip, for paging.' },
         cursor: { type: 'string', description: 'next_cursor from a partial result, to read the next shards.' } }, ['id']) },
-    { name: 'search_encyclopaedia', title: 'Search the Encyclopaedia', fn: searchEncyclopaedia,
-      description: 'Find people, places, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Encyclopaedia (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
+    { name: 'search_encyclopaedia', title: 'Search the Master Index', fn: searchMasterIndex,
+      description: 'Find people, places, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
-    { name: 'get_entity', title: 'Get an Encyclopaedia entry', fn: getEntity,
-      description: 'The full Encyclopaedia record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
+    { name: 'get_entity', title: 'Get a Master Index entry', fn: getEntity,
+      description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
       inputSchema: S({ qid: { type: 'string', description: 'Wikidata id, e.g. "Q725556".' }, title: { type: 'string', description: 'English Wikipedia title instead of a qid, e.g. "John Mearsheimer".' }, mentions: { type: 'integer', minimum: 1, maximum: 50, description: 'How many mentions to list (default 15).' } }) },
     { name: 'upcoming_events', title: 'Political calendar', fn: upcomingEvents,
       description: `Political events from Vitruvian Manager's Realtime and Historical Calendars in a date range (default: today to 18 months ahead): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more. Filter by country and type. Types: ${Object.keys(EVENT_TYPES).join(', ')}; families: ${Object.keys(EVENT_FAMILIES).join(', ')}.`,

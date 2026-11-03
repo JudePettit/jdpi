@@ -44,7 +44,7 @@ export function onOwnPage(link, moduleUrl, shell = SHELL_URL) {
   } catch { return false; }
 }
 
-/** The place an "at" names, read the way the target page reads it: { war, m } for War Focus, { qid } for the Encyclopaedia… */
+/** The place an "at" names, read the way the target page reads it: { war, m } for War Focus, { qid } for the Master Index… */
 export function readAt(link, shell = SHELL_URL) {
   const u = new URL(link.at, shell), hash = u.hash.slice(1), q = Object.fromEntries(u.searchParams);
   switch (link.module) {

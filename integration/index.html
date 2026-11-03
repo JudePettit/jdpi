@@ -40,8 +40,8 @@
       <div class="prp-panel">
         <div class="prp-panel-head"><h2 class="prp-h2">What Vitruvian Manager offers an AI assistant</h2></div>
         <div class="prp-panel-body prp-prose">
-          <p>Vitruvian Manager collects what is happening in the world, and what happened before, into one workspace: elections and political events, wars and armed conflict, each country's condition and volatility, a century of political history, the news across the political spectrum, new research in science, economics and technology, disclosures by members of Congress and famous investors, and an Encyclopaedia that links them all.</p>
-          <p>The Integration Hub lets an assistant such as Claude read all of it directly, so it can answer with Vitruvian Manager's figures and say where each came from. It can list the datasets, look at their fields, filter and sort rows, search the Encyclopaedia, read the latest briefings, check the political calendar and pull together one country's picture.</p>
+          <p>Vitruvian Manager collects what is happening in the world, and what happened before, into one workspace: elections and political events, wars and armed conflict, each country's condition and volatility, a century of political history, the news across the political spectrum, new research in science, economics and technology, disclosures by members of Congress and famous investors, and a Master Index that links them all.</p>
+          <p>The Integration Hub lets an assistant such as Claude read all of it directly, so it can answer with Vitruvian Manager's figures and say where each came from. It can list the datasets, look at their fields, filter and sort rows, search the Master Index, read the latest briefings, check the political calendar and pull together one country's picture.</p>
           <p>Nothing can be changed through it, nothing private is in it, and there is nothing to sign up for.</p>
         </div>
       </div>
@@ -67,7 +67,7 @@
               <text x="110" y="46" class="d-title" text-anchor="middle">VM submodules</text>
               <text x="110" y="74" class="d-text" text-anchor="middle">Calendars · Battlefield</text>
               <text x="110" y="96" class="d-text" text-anchor="middle">Volatility · National Analysis</text>
-              <text x="110" y="118" class="d-text" text-anchor="middle">Briefings · Encyclopaedia</text>
+              <text x="110" y="118" class="d-text" text-anchor="middle">Briefings · Master Index</text>
               <text x="110" y="140" class="d-text" text-anchor="middle">War Focus · Kardashev</text>
               <text x="110" y="162" class="d-text" text-anchor="middle">Auto Trader · Progress · Kino</text>
               <text x="110" y="200" class="d-note" text-anchor="middle">refreshed by scheduled builds</text>
@@ -272,7 +272,7 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
           <ul class="ticks">
             <li><b>Read-only.</b> Every tool and endpoint only reads; none accepts data to store, and none changes anything in Vitruvian Manager.</li>
             <li><b>Public data only.</b> It serves the same files as Vitruvian Manager's public pages. There are no accounts, cookies or keys, and it keeps nothing about you beyond a one-minute request count used for rate limiting.</li>
-            <li><b>Fixed files.</b> The server reads only the files the catalogue lists (plus the Encyclopaedia shards and country profiles). A tool argument can never name a file, and nothing is fetched from anywhere else.</li>
+            <li><b>Fixed files.</b> The server reads only the files the catalogue lists (plus the Master Index shards and country profiles). A tool argument can never name a file, and nothing is fetched from anywhere else.</li>
             <li><b>Capped.</b> At most 100 rows and about 48 KB per answer; long texts are shortened; a search uses at most eight words; big datasets are read in shards within a work budget. Every answer says when it was cut.</li>
             <li><b>Rate-limited.</b> About 120 MCP calls and 240 API calls a minute per client, and one tool call per request (a batch included). Over that you get <i>429</i> with <i>Retry-After</i>. For heavy use, run the local server or download the files.</li>
           </ul>
@@ -293,8 +293,8 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
       <div class="scroll"><table class="prp-table" id="lic-table">
         <thead><tr><th scope="col">Source</th><th scope="col">Licence</th><th scope="col">What to do</th><th scope="col">Used in</th></tr></thead>
         <tbody>
-          <tr><td>Wikidata</td><td>CC0</td><td>Nothing required; credit appreciated.</td><td>Encyclopaedia, Invention Timeline, War Focus battles, calendars</td></tr>
-          <tr><td>Wikipedia</td><td>CC BY-SA 4.0</td><td>Credit Wikipedia, link the article, keep the licence on reuse.</td><td>Calendar summaries, Encyclopaedia summaries</td></tr>
+          <tr><td>Wikidata</td><td>CC0</td><td>Nothing required; credit appreciated.</td><td>Master Index, Invention Timeline, War Focus battles, calendars</td></tr>
+          <tr><td>Wikipedia</td><td>CC BY-SA 4.0</td><td>Credit Wikipedia, link the article, keep the licence on reuse.</td><td>Calendar summaries, Master Index summaries</td></tr>
           <tr><td>UCDP (Uppsala Conflict Data Program), PRIO</td><td>CC BY 4.0</td><td>Credit and cite (e.g. Davies, Pettersson &amp; Öberg 2026; Hegre et al. 2020).</td><td>Realtime and Retrospective Battlefield, War Focus, National Analysis</td></tr>
           <tr><td>World Bank WDI and WGI</td><td>CC BY 4.0</td><td>Credit the World Bank.</td><td>National Analysis</td></tr>
           <tr><td>GDELT Project</td><td>Free to use with attribution</td><td>Credit the GDELT Project.</td><td>Geopolitical Volatility</td></tr>
@@ -310,7 +310,7 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
   </section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> Every dataset in the catalogue names its own sources, licence and refresh cadence; the Licences table above summarises them. The catalogue, the derived shards, the Encyclopaedia name index, the country profiles and the calendar files are rebuilt each morning by <code>integration/scripts/build-catalog.mjs</code>, after the calendars refresh.</p>
+    <p><b>Sources.</b> Every dataset in the catalogue names its own sources, licence and refresh cadence; the Licences table above summarises them. The catalogue, the derived shards, the Master Index name index, the country profiles and the calendar files are rebuilt each morning by <code>integration/scripts/build-catalog.mjs</code>, after the calendars refresh.</p>
     <p><b>Method.</b> The MCP server and the JSON API run as Cloudflare Pages Functions and read only this site's static files. Large datasets are split into shards of about a millisecond's parsing each, with date ranges and value indexes so a query reads only the shards it needs. The local server runs the same code without the time budget.</p>
   </footer>
 </div>

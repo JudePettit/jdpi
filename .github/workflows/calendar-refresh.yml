@@ -35,7 +35,7 @@ jobs:
         env:
           PRP_PAGES: '0'
         run: node --test tests/calendar.test.mjs
-      # Integration Hub: the calendars as iCalendar files, plus the data catalogue, its shards, the Encyclopaedia name index,
+      # Integration Hub: the calendars as iCalendar files, plus the data catalogue, its shards, the Master Index name index,
       # the country profiles, openapi.json and llms.txt, rebuilt from today's data and tested. A failed rebuild, or one that
       # fails its tests, never blocks the calendars: its files are thrown away, the calendars are committed, and the run
       # then ends red.

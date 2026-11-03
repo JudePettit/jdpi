@@ -51,7 +51,7 @@ test('WWII plays month by month with sides, occupation and battles', pageTest, a
   assert.ok(july40.occupied >= 6, `occupied countries July 1940: ${july40.occupied}`);
   assert.ok(jan42.battles > 100, `battles shown: ${jan42.battles}`);
   assert.match(jan42.panel, /United States/);
-  assert.ok(jan42.qids > 3, 'battles carry Wikidata IDs for the Encyclopaedia linker');
+  assert.ok(jan42.qids > 3, 'battles carry Wikidata IDs for the Master Index linker');
   assert.deepEqual(errors, []);
 });
 

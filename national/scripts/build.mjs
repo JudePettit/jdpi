@@ -7,7 +7,7 @@
 // - Extra World Bank metrics (debt, military spending, trade, homicide, poverty, patents…), shown and compared.
 // - Country overview from JDP-I data: system of government (Wikidata), leaders since 1926 and average tenure
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
-//   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Encyclopaedia entry.
+//   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Master Index entry.
 // Guard: nothing is written when an indicator's countries halve, or the countries, their Wikidata matches, GW codes or
 // leadership data fall by a tenth, against the committed index (a World Bank series, the code list or the
 // Retrospective that failed); --allow-drop writes anyway.

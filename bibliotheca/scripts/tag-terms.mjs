@@ -1,4 +1,4 @@
-// Tags a book's paragraphs with the terms the Encyclopaedia knows, so NEO CLASSIC can highlight them and open their
+// Tags a book's paragraphs with the terms the Master Index knows, so NEO CLASSIC can highlight them and open their
 // entries. The dictionary is every label and alias in the lake (lake/data/e/*.json, built by lake/scripts/build.mjs
 // from Wikidata's labels and aliases); the rules are:
 //   - whole words only: a match starts and ends at a word boundary (letters and digits make a word; a hyphen or an
@@ -18,7 +18,7 @@
 //     name a later author in full); a present-day state let through that way where the text means an older place
 //     ("Italy" and "Greece" in The Prince) is put right by a shelf decision, and the data test holds every term of a
 //     book to its era; a string shared by several entities goes to one alive in the book's era, then by type (a
-//     place before a person before a war …), then by how often the Encyclopaedia mentions it;
+//     place before a person before a war …), then by how often the Master Index mentions it;
 //   - the book's own decisions (shelf.mjs) come last and win: a string sent to another entity, a string or an entity
 //     left out, a word the lake lacks added. A string left untagged is left untagged whole: it stands in the dictionary
 //     as a span with no entity, so where it is the longest match the shorter names inside it are not terms either
@@ -42,7 +42,7 @@ export const TYPE_RANK = ['place', 'person', 'conflict', 'event', 'organisation'
 const COMMON_TYPES = new Set(['idea', 'topic']);
 const END = Symbol('end');
 
-/** The Encyclopaedia's entities, read from the lake's shards: Map qid → { q, label, type, aliases, facts, total }. */
+/** The Master Index's entities, read from the lake's shards: Map qid → { q, label, type, aliases, facts, total }. */
 export function loadLake(dir = LAKE) {
   const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
   const entities = new Map();
@@ -179,7 +179,7 @@ export function choose(ends, year, stats) {
   }
   if (!pool.length) return null;
   // Alive in the era first; then the entity whose own name the string is, before one that has it as an alias (the
-  // Roman Empire before the Byzantine Empire for "Roman Empire"); then by type; then by the Encyclopaedia's mentions.
+  // Roman Empire before the Byzantine Empire for "Roman Empire"); then by type; then by the Master Index's mentions.
   if (pool.length > 1) pool.sort((a, b) => (after(a) - after(b)) || (b.exact - a.exact) || (TYPE_RANK.indexOf(a.type) - TYPE_RANK.indexOf(b.type)) || (b.total - a.total) || a.q.localeCompare(b.q));
   return pool[0];
 }

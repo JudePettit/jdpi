@@ -1,5 +1,5 @@
 /* Moving the companion pane's frames the way the shell moves its own (shell.js, moveFrame): when only the hash
-   differs the frame's page stays loaded and its address changes in place, so the Encyclopaedia goes from one entry to
+   differs the frame's page stays loaded and its address changes in place, so the Master Index goes from one entry to
    the next without reloading its 3 MB index, and the Invention Timeline from one period to another; anything else
    loads in the same frame. Pure (URLs in, a decision out), so the tests call it in Node; the page does the DOM part.
    Cloudflare Pages serves /x/index.html at /x/ and /x.html at /x (with a 308, as tests/tools/serve.mjs does

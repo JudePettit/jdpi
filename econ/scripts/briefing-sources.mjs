@@ -7,7 +7,7 @@
 //   fields  the feed's default fields ([] = general: keywords decide; see classify.mjs)
 //   outlet  the publication shown on each item (several feeds can share one, e.g. the ECB's working papers, blog and
 //           press releases)
-//   qid  the outlet's Wikidata item (CC0), for the Encyclopaedia (null where Wikidata has none)
+//   qid  the outlet's Wikidata item (CC0), for the Master Index (null where Wikidata has none)
 //   cap  optional per-feed limit on stored items (default 150)
 //   strict  optional: drop items that match no field (feeds that also carry politics, culture or science)
 //   skip  optional: titles that are never stories for this feed (cost estimates for single bills, scam warnings, …)

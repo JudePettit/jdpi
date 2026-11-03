@@ -550,7 +550,7 @@ function route() {
   closeMenu();
 }
 
-/* --- Search: submodules, plus a jump into the Encyclopaedia ------------------ */
+/* --- Search: submodules, plus a jump into the Master Index ------------------ */
 function setupFind() {
   const input = $('#find'), results = () => $('#search-results');
   const enc = findModule('encyclopedia');
@@ -562,7 +562,7 @@ function setupFind() {
     const box = results();
     if (q && enc) {
       const at = new URL(`${enc.module.url}#explore?q=${encodeURIComponent(input.value.trim())}`, location.href).href;
-      box.innerHTML = `<a class="nav-item" href="${href(enc.suite, enc.module)}?at=${encodeURIComponent(at)}" data-entity-search><span class="icon" aria-hidden="true">◈</span><span class="grow">Search the Encyclopaedia for “${esc(input.value.trim())}”</span></a>`;
+      box.innerHTML = `<a class="nav-item" href="${href(enc.suite, enc.module)}?at=${encodeURIComponent(at)}" data-entity-search><span class="icon" aria-hidden="true">◈</span><span class="grow">Search the Master Index for “${esc(input.value.trim())}”</span></a>`;
       box.hidden = false;
     } else box.hidden = true;
   });

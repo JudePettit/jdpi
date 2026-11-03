@@ -6,7 +6,7 @@
 // `url` is the exact place in JDP-I (absolute), and `module` the registry module id. `aliases` are the names the
 // module's own text uses for the entity where Wikidata may not have them (a book's "Duke Valentino" for Cesare
 // Borgia): build.mjs adds them to the entity's aliases.
-// To bring a new module into the Encyclopaedia, add an adapter here and to ADAPTERS.
+// To bring a new module into the Master Index, add an adapter here and to ADAPTERS.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';

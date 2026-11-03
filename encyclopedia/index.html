@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
-<title>Encyclopaedia · VM</title>
+<title>Master Index · VM</title>
 <meta name="description" content="Every person, place, war, party and idea in PRP, with Boolean tag filters and links to everywhere each one appears.">
 <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
@@ -93,8 +93,8 @@ main{min-width:0}
 <div class="wrap">
   <header class="head">
     <div class="front">
-      <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Encyclopaedia</span></p>
-      <h1 class="prp-title">Encyclopaedia</h1>
+      <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Master Index</span></p>
+      <h1 class="prp-title">Master Index</h1>
       <p class="prp-dek">Every person, place, war, party and idea that appears in PRP, and everywhere it appears. Filter with a Boolean tag query or the facets, or go straight to an entry.</p>
       <p class="prp-meta" id="meta">Loading…</p>
     </div>
@@ -140,7 +140,7 @@ main{min-width:0}
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox"><button class="mclose" id="mclose" type="button" aria-label="Close">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
 
 <script>
-// PRP Encyclopaedia: reads the entity layer in ../lake/data (built by lake/scripts/build.mjs).
+// PRP Master Index: reads the entity layer in ../lake/data (built by lake/scripts/build.mjs).
 //   #explore[?q=…]  the Explorer (Boolean tag query + Excel-style facet filters)
 //   #Q9061          an entry (entity page)
 const $ = s => document.querySelector(s);
@@ -159,7 +159,7 @@ const MODULE_SUITE = {
 // Submodule names as PRP shows them; the data may still carry older names (H&P Retrospective, Trader Tracker, …).
 const MODULE_NAME = {
   briefing: 'Political Briefing', headlines: 'Global Headline Tracker', volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', atlas: 'Political Atlas', calendar: 'Realtime Calendar', 'osint-training': 'Intel Training',
-  encyclopedia: 'Encyclopaedia', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
+  encyclopedia: 'Master Index', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
   markets: 'TD Markets', 'tally-stick': 'Tally Stick', 'algo-trader': 'Algo Trader', traders: 'Auto Trader', learning: 'Learning · Finance & Economics',
   'science-briefing': 'Scientific Briefing', progress: 'Invention Timeline',
   bibliotheca: 'Bibliotheca',
@@ -339,7 +339,7 @@ async function renderEntity(q) {
   box.innerHTML = '<div class="empty">Loading…</div>';
   const e = await entity(q).catch(() => null);
   if (!e) { box.innerHTML = `<div class="prp-panel empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; setEntryTab(q, q); return; }
-  document.title = `${e.label} · Encyclopaedia · PRP`;
+  document.title = `${e.label} · Master Index · PRP`;
   setEntryTab(q, e.label);
   const tagIdOf = new Map(idx.tags.map((t, i) => [t, i]));
   const factRows = [['Born', e.facts.born], ['Died', e.facts.died], ['Founded', e.facts.founded], ['Dissolved', e.facts.dissolved], ['Began', e.facts.start], ['Ended', e.facts.end], ['Date', e.facts.date]].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(fmtDate(v))}</dd>`);
@@ -394,7 +394,7 @@ document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
 function route() {
   const h = location.hash.slice(1);
   if (/^Q\d+$/.test(h)) { show('entity'); renderEntity(h); window.scrollTo(0, 0); return; }
-  show('explore'); document.title = 'Encyclopaedia · PRP';
+  show('explore'); document.title = 'Master Index · PRP';
   const q = new URLSearchParams(h.split('?')[1] || '').get('q');
   if (q !== null && q !== $('#query').value) $('#query').value = q;
   update();
@@ -417,7 +417,7 @@ fetch(`${LAKE}index.json`).then(r => r.json()).then(d => {
   $('#clear').onclick = () => { sel.clear(); $('#query').value = ''; $('#name').value = ''; shown = PAGE; update(); };
   window.addEventListener('hashchange', route);
   route();
-}).catch(e => { $('#meta').textContent = 'The Encyclopaedia data could not load: ' + e.message; });
+}).catch(e => { $('#meta').textContent = 'The Master Index data could not load: ' + e.message; });
 </script>
 </body>
 </html>

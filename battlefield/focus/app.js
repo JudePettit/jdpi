@@ -1,6 +1,6 @@
 // War Focus (PRP · Retrospective Geopolitics): one war, month by month. Data: data/index.json and data/wars/<id>.json
 // (scripts/build.mjs); borders from Retrospective Battlefield's CShapes file. Wars and battles carry their Wikidata IDs
-// (data-qid), so the PRP entity linker adds Encyclopaedia links, and lake/scripts/adapters.mjs links the Encyclopaedia back here.
+// (data-qid), so the PRP entity linker adds Master Index links, and lake/scripts/adapters.mjs links the Master Index back here.
 // Views (tabs): the map, a table of the war's battles and a table of deaths by month. All follow the timeline
 // (design/prp-period.js): its start rests on the war's first month, so the map shows the war up to the month shown, as
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
@@ -255,7 +255,7 @@ function seeMoreList(items, limit, title) {
   return `<ul class="blist">${items.slice(0, limit).join('')}</ul><button class="more" data-pop="${addPop(title, `<ul class="blist">${items.join('')}</ul>`)}">See all ${items.length} ›</button>`;
 }
 function battleItem(b) {
-  // The Wikidata ID sits on the name, so the Encyclopaedia linker puts its ◈ beside it (and not again by the Wikipedia link).
+  // The Wikidata ID sits on the name, so the Master Index linker puts its ◈ beside it (and not again by the Wikipedia link).
   return `<li><button class="bname" data-b="${esc(b.q)}" data-qid="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl jdpi-no-ency" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <small>${esc(bDates(b))}${b.deaths ? ` · ${num(b.deaths)} deaths` : b.cas ? ` · ${num(b.cas)} casualties` : ''}${b.lat == null ? ' · not mapped' : ''}</small></li>`;
 }

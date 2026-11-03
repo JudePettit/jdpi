@@ -284,7 +284,7 @@ export const SHELF = [
       // Machiavelli's Germany (chapter X: "the cities of Germany are absolutely free") is the Empire's German lands;
       // the lake's bare word is the Federal Republic of 1949, let through by its exact name.
       Germany: 'Q12548',
-      // The Encyclopaedia's "Republic" is a party founded in 2021, let through by its exact name; in this book a
+      // The Master Index's "Republic" is a party founded in 2021, let through by its exact name; in this book a
       // republic is a form of state, so the word is left untagged.
       Republic: null,
       // Three more exact names of modern states that mean something else here: Pescennius Niger, the rival of

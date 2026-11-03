@@ -3,7 +3,7 @@
 //   2. downloads the UTF-8 text (kept in scripts/cache/, which is not committed) unless --source gives a local file;
 //   3. cuts the Gutenberg header, footer and licence, splits chapters and paragraphs, sets the typography (text.mjs,
 //      and splitWork below for the books text.mjs's one level of chapters does not fit);
-//   4. tags every paragraph with the Encyclopaedia's terms (tag-terms.mjs) and prints the tagging report;
+//   4. tags every paragraph with the Master Index's terms (tag-terms.mjs) and prints the tagging report;
 //   5. writes bibliotheca/data/books/<slug>.json and the shelf index bibliotheca/data/index.json.
 //   node bibliotheca/scripts/build-book.mjs <slug> [--refresh] [--source <file>] [--no-tag]
 //     --refresh   download the text again even though the cache has it

@@ -51,7 +51,7 @@
         "fronts": [{ "label": "17th parallel, July 1954", "line": [[106.45, 17.0], [106.8, 17.0], [107.12, 17.0]] }]
       },
       "focus": { "countries": ["VNM"], "points": [[103.02, 21.39, "Dien Bien Phu, 13 March – 7 May 1954"], [105.85, 21.03, "Hanoi"], [106.7, 10.78, "Saigon"]], "bbox": [99.5, 8, 112, 23.8] },
-      "link": { "label": "Encyclopaedia · Battle of Dien Bien Phu", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q604897" },
+      "link": { "label": "Master Index · Battle of Dien Bien Phu", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q604897" },
       "cites": ["logevall-2012", "goscha-2016"]
     },
     {
@@ -67,7 +67,7 @@
       "title": "The Gulf of Tonkin, August 1964",
       "narration": "On 2 August 1964 North Vietnamese torpedo boats attacked the American destroyer Maddox in the Gulf of Tonkin. A second attack reported two days later almost certainly never happened, but President Lyndon Johnson ordered air strikes on the North, and on 7 August Congress passed a resolution giving him broad authority, with only two senators voting against. It became the legal basis for the American war that followed.",
       "visual": { "kind": "quote", "text": "That the Congress approves and supports the determination of the President, as Commander in Chief, to take all necessary measures to repel any armed attack against the forces of the United States and to prevent further aggression.", "who": "The Gulf of Tonkin Resolution", "when": "7 August 1964", "cite": "tonkin-1964" },
-      "link": { "label": "Encyclopaedia · Gulf of Tonkin incident", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q482402" },
+      "link": { "label": "Master Index · Gulf of Tonkin incident", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q482402" },
       "cites": ["tonkin-1964", "logevall-1999"]
     },
     {
@@ -111,7 +111,7 @@
           { "at": "1968-11-05", "label": "Nixon elected" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Lyndon B. Johnson", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9640" },
+      "link": { "label": "Master Index · Lyndon B. Johnson", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9640" },
       "cites": ["goscha-2016", "nguyen-2012"]
     },
     {
@@ -138,7 +138,7 @@
       "title": "The Paris Peace Accords, 1973",
       "narration": "After the heavy bombing of Hanoi and Haiphong in December 1972, the Paris Peace Accords were signed on 27 January 1973. American forces left by the end of March and American prisoners of war came home, but North Vietnamese troops remained in the South, and fighting between the Vietnamese sides soon resumed. Kissinger and the North's negotiator, Le Duc Tho, were awarded the Nobel Peace Prize for the accords, and Le Duc Tho declined it.",
       "visual": { "kind": "portrait", "file": "File:Le duc Tho and Henry Kissinger White House photo.jpg", "heading": "Le Duc Tho and Henry Kissinger", "sub": "January 1973", "position": "50% 35%" },
-      "link": { "label": "Encyclopaedia · Henry Kissinger", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q66107" },
+      "link": { "label": "Master Index · Henry Kissinger", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q66107" },
       "cites": ["nguyen-2012", "goscha-2016"]
     },
     {
@@ -171,7 +171,7 @@
         "note": "The Vietnamese range is Hirschman, Preston and Vu Manh Loi's estimate for 1965–1975; deaths before 1965 and in Cambodia and Laos are not included. American figures from the National Archives: 47,434 hostile deaths, 58,220 deaths in all.",
         "cite": ["hirschman-1995", "nara-casualties"]
       },
-      "link": { "label": "Encyclopaedia · Vietnam War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8740" },
+      "link": { "label": "Master Index · Vietnam War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8740" },
       "cites": ["hirschman-1995", "nara-casualties", "goscha-2016"]
     },
     {

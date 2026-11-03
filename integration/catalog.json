@@ -710,7 +710,7 @@
         {
           "name": "qid",
           "type": "string",
-          "description": "Wikidata id (also the Encyclopaedia entry)"
+          "description": "Wikidata id (also the Master Index entry)"
         },
         {
           "name": "pestle_overall",
@@ -1243,10 +1243,10 @@
     },
     {
       "id": "encyclopaedia-entities",
-      "title": "Encyclopaedia: entities",
+      "title": "Master Index: entities",
       "module": "rs",
       "submodule": "encyclopedia",
-      "description": "Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Encyclopaedia, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.",
+      "description": "Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.",
       "urls": [
         "integration/data/encyclopaedia-entities/0.json",
         "integration/data/encyclopaedia-entities/1.json",
@@ -1270,7 +1270,7 @@
         {
           "name": "qid",
           "type": "string",
-          "description": "Wikidata id; the Encyclopaedia page is encyclopedia/index.html#<qid>"
+          "description": "Wikidata id; the Master Index page is encyclopedia/index.html#<qid>"
         },
         {
           "name": "label",

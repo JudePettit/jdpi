@@ -623,7 +623,7 @@ So 29U PV 823 146 is the 100 m square that contains the Spire. References are tr
 ## Gazetteers, OpenStreetMap and Overpass
 **Gazetteers** are directories of place names with their coordinates and types:
 - **[GeoNames](https://www.geonames.org)**, worldwide and free under a Creative Commons licence, and the US National Geospatial-Intelligence Agency's **GEOnet Names Server**, for places outside the US, with variant and historical spellings.
-- **Wikidata**, where each place has a Q-number linked to its other names and to everything else recorded about it; Vitruvian Manager's [Encyclopaedia](#/rs/encyclopedia) keys every entry to one.
+- **Wikidata**, where each place has a Q-number linked to its other names and to everything else recorded about it; Vitruvian Manager's [Master Index](#/rs/encyclopedia) keys every entry to one.
 - National gazetteers such as Ireland's Placenames Database, **[logainm.ie](https://www.logainm.ie)**, with the official Irish and English forms, and Great Britain's **OS Open Names**.
 
 Names are slippery. They differ by language and script (Baile Átha Cliath and Dublin; Kharkiv, Kharkov and Харків), by politics (Derry and Londonderry) and over time (Dnipropetrovsk became Dnipro in 2016; Artemivsk became Bakhmut the same year, though Russian officials still call it Artyomovsk), and many places share a name (Ireland alone has a great many called Newtown). Search every variant, and record the identifier, not only the name.

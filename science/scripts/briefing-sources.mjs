@@ -3,7 +3,7 @@
 //   tier  1 = flagship journals (Nature, Science, Cell, PNAS, PRL); 2 = other major journals; 3 = quality science journalism
 //   disciplines  the feed's default disciplines ([] = multidisciplinary: keywords decide; see classify.mjs)
 //   outlet  the publication shown on each item (several feeds can share one, e.g. the Phys.org sections)
-//   qid  the outlet's Wikidata item (CC0), for the Encyclopaedia
+//   qid  the outlet's Wikidata item (CC0), for the Master Index
 //   cap  optional per-feed limit on stored items (default 150)
 //   accept  optional: the Accept header to send instead of the feed types (eLife answers 406 to every specific type,
 //           even the text/xml it serves, and 200 to */*)

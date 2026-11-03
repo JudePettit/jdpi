@@ -29,7 +29,7 @@
       "narration": "In 1917 the Russian Empire, the largest country on earth, went through two revolutions in eight months. The first, in February, ended three centuries of rule by the Romanov dynasty; the second, in October, brought Lenin's Bolshevik party to power. Civil war followed, and out of it came the Soviet Union, ruled by its Communist Party until 1991. This film follows the revolutions from their causes to their consequences.",
       "visual": { "kind": "title", "kicker": "Kino · Political Events", "heading": "The Russian Revolutions of 1917", "sub": "February and October" },
       "focus": { "bbox": [15, 38, 110, 72] },
-      "link": { "label": "Encyclopaedia · Russian Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8729" },
+      "link": { "label": "Master Index · Russian Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8729" },
       "cites": ["smith-2017", "figes-1996"]
     },
     {
@@ -55,7 +55,7 @@
           { "at": "1914-08-01", "label": "War with Germany" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Russian Revolution of 1905", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q184928" },
+      "link": { "label": "Master Index · Russian Revolution of 1905", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q184928" },
       "cites": ["figes-1996", "pipes-1990"]
     },
     {
@@ -77,7 +77,7 @@
         ]
       },
       "focus": { "points": [[30.32, 59.94, "Petrograd, the capital"], [20.2, 53.5, "Tannenberg, August 1914"]], "bbox": [12, 42, 45, 62] },
-      "link": { "label": "Encyclopaedia · World War I", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q361" },
+      "link": { "label": "Master Index · World War I", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q361" },
       "cites": ["smith-2017", "figes-1996"]
     },
     {
@@ -93,7 +93,7 @@
       "title": "Dual power, and Lenin's return",
       "narration": "The Provisional Government promised elections to a Constituent Assembly, but it kept Russia in the war and put off the land reform the peasants demanded. On 16 April Lenin arrived at Petrograd's Finland Station from exile in Switzerland, having crossed Germany with the help of a German government that hoped he would take Russia out of the war. His April Theses rejected any support for the new government and called for power to pass to the soviets, a stance that at first isolated him even among Bolsheviks.",
       "visual": { "kind": "quote", "text": "No support for the Provisional Government", "who": "Vladimir Lenin, the April Theses", "when": "Pravda, 7 April 1917 (Russian calendar)", "cite": "lenin-1917" },
-      "link": { "label": "Encyclopaedia · Vladimir Lenin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1394" },
+      "link": { "label": "Master Index · Vladimir Lenin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1394" },
       "cites": ["lenin-1917", "pipes-1990", "fitzpatrick-2017"]
     },
     {
@@ -113,7 +113,7 @@
           { "at": "1917-11-07", "label": "Bolsheviks take power" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Leon Trotsky", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q33391" },
+      "link": { "label": "Master Index · Leon Trotsky", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q33391" },
       "cites": ["figes-1996", "smith-2017"]
     },
     {
@@ -121,7 +121,7 @@
       "title": "The October Revolution",
       "narration": "On 7 November, 25 October by the Russian calendar, the Petrograd Soviet's Military Revolutionary Committee occupied the capital's bridges, stations and telegraph offices, and in the early hours of the next day its forces entered the Winter Palace and arrested the ministers. A Congress of Soviets, from which the Mensheviks and the right-wing Socialist Revolutionaries walked out in protest, approved a government headed by Lenin, whose first decrees called for peace and gave the landlords' estates to the peasants. Historians still argue over whether October was a popular revolution or a coup by a disciplined party; Richard Pipes stressed the coup, while Sheila Fitzpatrick and others stress the radicalised workers and soldiers behind it.",
       "visual": { "kind": "portrait", "qid": "Q42976", "heading": "The Winter Palace", "sub": "After its capture, Petrograd, November 1917", "position": "50% 40%" },
-      "link": { "label": "Encyclopaedia · October Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q42976" },
+      "link": { "label": "Master Index · October Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q42976" },
       "cites": ["pipes-1990", "fitzpatrick-2017", "smith-2017"]
     },
     {
@@ -165,7 +165,7 @@
         ]
       },
       "focus": { "points": [[37.62, 55.76, "Moscow, capital from March 1918"], [60.6, 56.84, "Yekaterinburg, July 1918"], [23.69, 52.1, "Brest-Litovsk, March 1918"]], "bbox": [18, 43, 66, 66] },
-      "link": { "label": "Encyclopaedia · Russian Civil War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q79911" },
+      "link": { "label": "Master Index · Russian Civil War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q79911" },
       "cites": ["smith-2017", "figes-1996"]
     },
     {

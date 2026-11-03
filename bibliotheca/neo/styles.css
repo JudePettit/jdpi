@@ -1,4 +1,4 @@
-/* Bibliotheca · Neo Classic (Kino): a reading page for public-domain classics with the Encyclopaedia's terms
+/* Bibliotheca · Neo Classic (Kino): a reading page for public-domain classics with the Master Index's terms
    highlighted, a popout bar of the terms on screen and a companion pane beside the text. Written against the tokens
    in design/prp.css only (no colour is set here that is not a token), so light and dark both follow the system or the
    shell. The accent is Kino's (--prp-kn); a copy of prp.css without it falls back to Natural Science's, as kino.css does.
@@ -115,7 +115,7 @@ button { cursor: pointer; }
 .nc-text sup.fn { font: 600 .62em/0 var(--prp-font-mono); color: var(--prp-muted); vertical-align: .55em; margin-left: 1px; }
 .nc-text .prp-empty { font: var(--prp-fs) var(--prp-font-ui); }
 
-/* A term the Encyclopaedia knows: a soft wash in the accent with a hairline under it, in the ink colour; the term in
+/* A term the Master Index knows: a soft wash in the accent with a hairline under it, in the ink colour; the term in
    use (all its occurrences) is ringed in the action colour. */
 a.term { color: inherit; text-decoration: none; background: var(--prp-accent-soft); border-radius: 3px; padding: 0 2px; margin: 0 -2px;
   box-shadow: inset 0 -1px 0 var(--prp-accent); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
@@ -128,7 +128,7 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 .nc-book .prp-sources { margin-top: 28px; }
 .nc-book .prp-sources p { margin: 0 0 6px; }
 
-/* --- The companion pane: the Encyclopaedia entry, or the other screens for the era ------------------------------------ */
+/* --- The companion pane: the Master Index entry, or the other screens for the era ------------------------------------ */
 .nc-pane { position: sticky; top: 8px; display: flex; flex-direction: column; height: calc(100vh - 16px); height: calc(100dvh - 16px); min-height: 420px;
   background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); overflow: hidden; }
 .nc-pane-head { display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); }

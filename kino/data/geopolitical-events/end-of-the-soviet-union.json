@@ -29,7 +29,7 @@
       "narration": "On 25 December 1991 the Soviet flag was lowered over the Kremlin for the last time, and the Soviet Union, a superpower of about 290 million people, gave way to fifteen independent states. It happened with far less bloodshed than many had feared, and almost no one had predicted it even five years earlier. This film follows the six years from Mikhail Gorbachev's rise to the Union's end, and the arguments over why it fell.",
       "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The End of the Soviet Union", "sub": "1985–1991" },
       "focus": { "bbox": [15, 30, 180, 78] },
-      "link": { "label": "Encyclopaedia · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
+      "link": { "label": "Master Index · dissolution of the Soviet Union", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q5167679" },
       "cites": ["plokhy-2014", "kotkin-2001"]
     },
     {
@@ -54,7 +54,7 @@
       "title": "Reform from above",
       "narration": "Gorbachev set out to revive the Soviet system, not to end it. He called for perestroika, the restructuring of the economy, and glasnost, or openness, which loosened censorship; after the authorities at first played down the Chernobyl nuclear disaster in April 1986, openness became a test of his sincerity. Abroad, his new thinking brought arms control agreements with Ronald Reagan, and in February 1989 the last Soviet troops left Afghanistan.",
       "visual": { "kind": "portrait", "qid": "Q30487", "heading": "Mikhail Gorbachev", "sub": "Soviet leader, 1985–1991", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
+      "link": { "label": "Master Index · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
       "cites": ["brown-1996", "zubok-2021"]
     },
     {
@@ -107,7 +107,7 @@
         "note": "Turnout was about 80 per cent in March, when Estonia, Latvia, Lithuania, Georgia, Armenia and Moldova did not take part, and 84 per cent in Ukraine in December.",
         "cite": ["msu-1991", "yekelchyk-2023"]
       },
-      "link": { "label": "Encyclopaedia · Boris Yeltsin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34453" },
+      "link": { "label": "Master Index · Boris Yeltsin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34453" },
       "cites": ["msu-1991", "yekelchyk-2023", "plokhy-2014"]
     },
     {
@@ -142,7 +142,7 @@
       "title": "The end, December 1991",
       "narration": "On 8 December the leaders of Russia, Ukraine and Belarus met at a hunting lodge in the Belovezha forest and declared that the Soviet Union had ceased to exist, creating in its place a Commonwealth of Independent States. On 21 December eleven republics confirmed the decision at Alma-Ata. Gorbachev resigned on 25 December, and the next day the upper house of the Soviet parliament voted the Union out of existence.",
       "visual": { "kind": "quote", "text": "With the formation of the Commonwealth of Independent States the USSR ceases to exist.", "who": "Alma-Ata Declaration, signed by eleven former Soviet republics", "when": "21 December 1991", "cite": "almaata-1991" },
-      "link": { "label": "Encyclopaedia · Belovezh Accords", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q76986" },
+      "link": { "label": "Master Index · Belovezh Accords", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q76986" },
       "cites": ["almaata-1991", "plokhy-2014"]
     },
     {

@@ -30,7 +30,7 @@
       "narration": "In October 1962 the United States discovered that the Soviet Union was secretly installing nuclear missiles in Cuba, about ninety miles from Florida. For thirteen days the two superpowers stood closer to nuclear war than at any other time. This film follows how the missiles got there, how the crisis was resolved, and what each side kept secret for decades afterwards.",
       "visual": { "kind": "title", "kicker": "Kino · Geopolitical Events", "heading": "The Cuban Missile Crisis", "sub": "October 1962" },
       "focus": { "bbox": [-100, 10, -60, 38] },
-      "link": { "label": "Encyclopaedia · Cuban Missile Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128160" },
+      "link": { "label": "Master Index · Cuban Missile Crisis", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q128160" },
       "cites": ["stern-2005", "plokhy-2021"]
     },
     {
@@ -74,7 +74,7 @@
         ]
       },
       "focus": { "points": [[-77.04, 38.9, "Washington"], [27.14, 38.42, "Jupiter missiles, Izmir"], [16.92, 40.8, "Jupiter missiles, Apulia"]], "bbox": [-105, 5, 50, 72] },
-      "link": { "label": "Encyclopaedia · Nikita Khrushchev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35314" },
+      "link": { "label": "Master Index · Nikita Khrushchev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35314" },
       "cites": ["fursenko-naftali-1997", "plokhy-2021", "dobbs-2008"]
     },
     {
@@ -82,7 +82,7 @@
       "title": "Discovery, 14–16 October",
       "narration": "On 14 October an American U-2 spy plane photographed missile sites under construction near San Cristóbal in western Cuba. Kennedy was shown the pictures on the morning of 16 October and called together a group of advisers, later known as the ExComm, whose meetings he secretly recorded. Most of them at first favoured air strikes, perhaps followed by an invasion, but over the following days a naval blockade won out, as the step that left Khrushchev room to retreat.",
       "visual": { "kind": "portrait", "file": "File:Photograph of MRBM Field Launch Site No. 1 in San Cristobal, Cuba, 14 October 1962 - DPLA - 6f2b0f566d82e64633864b99154ce957.gif", "heading": "A missile site at San Cristóbal", "sub": "U-2 photograph, 14 October 1962", "position": "50% 50%" },
-      "link": { "label": "Encyclopaedia · John F. Kennedy", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9696" },
+      "link": { "label": "Master Index · John F. Kennedy", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9696" },
       "cites": ["stern-2005", "dobbs-2008"]
     },
     {
@@ -116,7 +116,7 @@
           { "at": "1962-11-20", "label": "Quarantine lifted" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Cold War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8683" },
+      "link": { "label": "Master Index · Cold War", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8683" },
       "cites": ["dobbs-2008", "plokhy-2021", "stern-2005"]
     },
     {
@@ -136,7 +136,7 @@
         ]
       },
       "focus": { "points": [[27.14, 38.42, "Izmir, Jupiter base"]], "bbox": [-100, 8, 48, 66] },
-      "link": { "label": "Encyclopaedia · Fidel Castro", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11256" },
+      "link": { "label": "Master Index · Fidel Castro", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11256" },
       "cites": ["fursenko-naftali-1997", "dobbs-2008"]
     },
     {

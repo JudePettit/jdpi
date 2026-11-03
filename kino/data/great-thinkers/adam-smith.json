@@ -28,7 +28,7 @@
           "title": "Adam Smith, 1723–1790",
           "narration": "Adam Smith was a Scottish moral philosopher whose Wealth of Nations, published in 1776, is often called the founding work of modern economics. He saw himself first as a student of human nature, and his earlier Theory of Moral Sentiments was, to him, part of the same project. This course follows his life, his main ideas, and the very different uses that later politicians and economists have made of him.",
           "visual": { "kind": "portrait", "qid": "Q9381", "heading": "Adam Smith", "sub": "1723–1790", "position": "50% 25%" },
-          "link": { "label": "Encyclopaedia · Adam Smith", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9381" },
+          "link": { "label": "Master Index · Adam Smith", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9381" },
           "cites": ["phillipson-2010", "ross-2010"]
         },
         {
@@ -68,7 +68,7 @@
             "points": [[1.44, 43.6, "Toulouse, 1764–1765"], [6.14, 46.2, "Geneva: Voltaire, 1765"], [2.35, 48.86, "Paris: the physiocrats, 1766"]],
             "bbox": [-3, 42, 9, 52.5]
           },
-          "link": { "label": "Encyclopaedia · François Quesnay", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q13575" },
+          "link": { "label": "Master Index · François Quesnay", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q13575" },
           "cites": ["ross-2010", "rae-1895", "phillipson-2010"]
         }
       ]
@@ -137,7 +137,7 @@
           "title": "Edinburgh, 1776–1790",
           "narration": "Hume died in August 1776, and Smith's account of his friend's calm, unbelieving end brought him, he later said, ten times more abuse than his whole attack on Britain's commercial system. In 1778 he became a Commissioner of Customs in Edinburgh, enforcing duties some of which he had criticised, and he went on revising his two books. A week before his death on 17 July 1790 he had two friends burn sixteen volumes of his unpublished manuscripts.",
           "visual": { "kind": "portrait", "file": "File:The Author of the Wealth of Nations (BM 1935,0522.13.129).jpg", "heading": "The author of The Wealth of Nations", "sub": "Etching by John Kay, 1790", "position": "50% 25%" },
-          "link": { "label": "Encyclopaedia · David Hume", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q37160" },
+          "link": { "label": "Master Index · David Hume", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q37160" },
           "cites": ["rasmussen-2017", "ross-2010", "rae-1895"]
         },
         {

@@ -5,12 +5,12 @@
      ch    the book's own chapter number `n` (0 for a dedication or preface, as the-prince.json numbers them), not a
            position in the list; none means the book's first chapter;
      p     the paragraph being read (c12-p03, c03-n04, c26-v13); none means the top of the chapter;
-     t     the term in use: its occurrences are highlighted and the pane's Encyclopaedia tab shows its entry;
-     pane  which tab of the companion pane is open (ency: the Encyclopaedia, vm: the other screens of Vitruvian
+     t     the term in use: its occurrences are highlighted and the pane's Master Index tab shows its entry;
+     pane  which tab of the companion pane is open (ency: the Master Index, vm: the other screens of Vitruvian
            Manager); none means the pane is closed, so a term can stay highlighted with the pane shut;
      show  the screen shown in the pane's "In Vitruvian Manager" tab, by its row's key there: a screen for the era
            (progress, kardashev, retrospective, battlefield-history, historical-calendar, pestle, or one War Focus war,
-           war-focus:<war id>) or one of the places the term appears (m0 to m9, in the Encyclopaedia's order); kept
+           war-focus:<war id>) or one of the places the term appears (m0 to m9, in the Master Index's order); kept
            only with pane=vm, since it means nothing on the other tab or with the pane shut;
      era   'term' when that tab shows the screens for the term's own dates rather than the book's; none means the
            book's (or the chapter's) period.

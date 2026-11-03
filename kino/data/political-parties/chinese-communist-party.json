@@ -27,7 +27,7 @@
       "narration": "The Chinese Communist Party was founded in 1921 by a few dozen intellectuals, fought two civil wars and a war against Japan, and in 1949 took power over the most populous country on earth. It has ruled the People's Republic of China ever since, through famine and upheaval under Mao Zedong and four decades of rapid growth after his death. With more than 100 million members by its own count, it is among the largest political organisations in the world. This film follows its history and the arguments about it.",
       "visual": { "kind": "title", "kicker": "Kino · Political Parties", "heading": "The Chinese Communist Party", "sub": "1921 to today" },
       "focus": { "countries": ["CHN"], "bbox": [72, 15, 136, 54] },
-      "link": { "label": "Encyclopaedia · Chinese Communist Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q17427" },
+      "link": { "label": "Master Index · Chinese Communist Party", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q17427" },
       "cites": ["saich-2021", "cpc-2025"]
     },
     {
@@ -36,7 +36,7 @@
       "narration": "After the revolution of 1911 brought down the Qing dynasty, China fell apart among rival warlords, and the May Fourth Movement of 1919 turned many young intellectuals towards radical ideas. With help from the Communist International in Moscow, thirteen delegates representing about fifty members met in Shanghai's French Concession in July 1921, finishing their congress on a boat on South Lake at Jiaxing after the police found them. Mao Zedong, then a young teacher from Hunan, was one of them.",
       "visual": { "kind": "map" },
       "focus": { "points": [[121.47, 31.23, "Shanghai: the first congress, July 1921"], [120.76, 30.75, "Jiaxing: the congress ends on a boat"], [116.4, 39.9, "Beijing: May Fourth protests, 1919"], [112.94, 28.23, "Changsha, Hunan: Mao's home province"]], "bbox": [100, 20, 128, 44] },
-      "link": { "label": "Encyclopaedia · Xinhai Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190517" },
+      "link": { "label": "Master Index · Xinhai Revolution", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q190517" },
       "cites": ["saich-2021", "wd"]
     },
     {
@@ -152,7 +152,7 @@
       "title": "Reform and opening, 1978–1992",
       "narration": "Deng Xiaoping, twice purged under Mao, emerged as China's paramount leader and in December 1978 turned the party towards reform and opening. Collective farms were broken up, special economic zones such as Shenzhen welcomed foreign investment, and markets spread, while Deng insisted on the party's monopoly of power. In 1981 the party passed judgement on Mao himself, finding that his achievements outweighed his errors but that the Cultural Revolution had been a catastrophe.",
       "visual": { "kind": "portrait", "qid": "Q16977", "heading": "Deng Xiaoping", "sub": "Paramount leader, 1978–1989", "position": "50% 25%" },
-      "link": { "label": "Encyclopaedia · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
+      "link": { "label": "Master Index · Deng Xiaoping", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q16977" },
       "cites": ["vogel-2011", "saich-2021"]
     },
     {

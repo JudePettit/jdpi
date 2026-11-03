@@ -6,8 +6,8 @@
 //   /api/v1/datasets               datasets in brief (?module= &q=)
 //   /api/v1/datasets/{id}          one dataset: fields, licence, sources, sample
 //   /api/v1/datasets/{id}/rows     rows: f.<field>=<value>, f.<field>.<op>=<value>, where=<json>, text, select, sort, limit, offset, cursor
-//   /api/v1/search?q=              Encyclopaedia search (&type= &limit=)
-//   /api/v1/entities/{qid}         an Encyclopaedia entry (or /api/v1/entities?title=)
+//   /api/v1/search?q=              Master Index search (&type= &limit=)
+//   /api/v1/entities/{qid}         a Master Index entry (or /api/v1/entities?title=)
 //   /api/v1/events                 political calendar (?country= &type= &from= &to= &days= &q= &status= &limit=)
 //   /api/v1/briefings/{briefing}   latest items: intelligence, scientific, economics, digital (?topic= &position= &type= &q= &source= &hours= &order= &limit=)
 //   /api/v1/countries[/{country}]  country list, or one country's profile
@@ -58,8 +58,8 @@ const ENDPOINTS = [
   ['GET /api/v1/datasets', 'Datasets in brief.', '/api/v1/datasets?q=election'],
   ['GET /api/v1/datasets/{id}', 'One dataset: fields with types and meanings, licence, sources, shards and a sample.', '/api/v1/datasets/realtime-wars'],
   ['GET /api/v1/datasets/{id}/rows', 'Filter, sort and page rows: f.<field>=<value>, f.<field>.<op>=<value> (ops: ' + OPS.join(', ') + '), select, sort, limit (max 100), offset, text, cursor.', '/api/v1/datasets/political-calendar/rows?f.country=Chile&f.date.gte=2020-01-01&sort=-date&limit=5'],
-  ['GET /api/v1/search', 'Search the Encyclopaedia by name.', '/api/v1/search?q=Mearsheimer'],
-  ['GET /api/v1/entities/{qid}', 'One Encyclopaedia entry (or ?title= with a Wikipedia title).', '/api/v1/entities/Q8663'],
+  ['GET /api/v1/search', 'Search the Master Index by name.', '/api/v1/search?q=Mearsheimer'],
+  ['GET /api/v1/entities/{qid}', 'One Master Index entry (or ?title= with a Wikipedia title).', '/api/v1/entities/Q8663'],
   ['GET /api/v1/events', 'Political calendar in a date range (default today to 18 months ahead).', '/api/v1/events?country=France&type=election'],
   ['GET /api/v1/briefings/{briefing}', 'Latest items of the intelligence, scientific, economics or digital briefing.', '/api/v1/briefings/scientific?topic=physics&type=paper'],
   ['GET /api/v1/countries/{country}', 'One country across Vitruvian Manager.', '/api/v1/countries/FRA'],

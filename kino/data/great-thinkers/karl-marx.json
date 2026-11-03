@@ -29,7 +29,7 @@
           "title": "Karl Marx, 1818–1883",
           "narration": "Karl Marx was a philosopher, economist, journalist and revolutionary who spent most of his adult life as a stateless exile in London. His analysis of capitalism, much of it researched in the reading room of the British Museum, inspired both the social democratic parties of Europe and the communist states of the twentieth century. Few thinkers have been so influential or so fiercely argued over, and this course tries to separate the man and his ideas from what was later done in his name.",
           "visual": { "kind": "portrait", "qid": "Q9061", "heading": "Karl Marx", "sub": "1818–1883", "position": "50% 22%" },
-          "link": { "label": "Encyclopaedia · Karl Marx", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9061" },
+          "link": { "label": "Master Index · Karl Marx", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9061" },
           "cites": ["sperber-2013", "stedman-jones-2016"]
         },
         {
@@ -49,7 +49,7 @@
             "points": [[6.64, 49.75, "Trier, born 1818"], [13.4, 52.52, "Berlin, 1836–1841"], [6.96, 50.94, "Cologne, 1842–1843 and 1848–1849"], [2.35, 48.86, "Paris, 1843–1845"], [4.35, 50.85, "Brussels, 1845–1848"], [-0.13, 51.51, "London, from 1849"]],
             "bbox": [-4, 46.5, 15.5, 55]
           },
-          "link": { "label": "Encyclopaedia · Georg Wilhelm Friedrich Hegel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9235" },
+          "link": { "label": "Master Index · Georg Wilhelm Friedrich Hegel", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q9235" },
           "cites": ["sperber-2013", "mclellan-1973"]
         },
         {
@@ -57,7 +57,7 @@
           "title": "Friedrich Engels",
           "narration": "In Paris in 1844 Marx began a lifelong partnership with Friedrich Engels, the son of a German textile manufacturer whose family firm had a share in a mill in Manchester. Engels's book on the condition of the English working class appeared in 1845, and that summer the two men travelled together to Manchester. For decades Engels's income from the family business kept the Marx household afloat in London, through years of poverty in which only three of Marx's seven children lived to adulthood.",
           "visual": { "kind": "portrait", "qid": "Q34787", "heading": "Friedrich Engels", "sub": "1820–1895", "position": "50% 25%" },
-          "link": { "label": "Encyclopaedia · Friedrich Engels", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34787" },
+          "link": { "label": "Master Index · Friedrich Engels", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q34787" },
           "cites": ["stedman-jones-2016", "sperber-2013"]
         },
         {
@@ -72,7 +72,7 @@
             "points": [[-0.08, 51.52, "London: the Manifesto, February"], [2.35, 48.86, "Paris, 22 February"], [16.37, 48.21, "Vienna, 13 March"], [13.4, 52.52, "Berlin, 18 March"], [9.19, 45.46, "Milan, 18 March"], [19.04, 47.5, "Budapest, 15 March"]],
             "bbox": [-5, 40, 24, 56.5]
           },
-          "link": { "label": "Encyclopaedia · Communist League", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q642562" },
+          "link": { "label": "Master Index · Communist League", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q642562" },
           "cites": ["stedman-jones-2016", "sperber-2013"]
         }
       ]
@@ -86,7 +86,7 @@
           "title": "History and class struggle",
           "narration": "At the centre of Marx's thought is the claim that the way a society produces its material needs shapes its laws, politics and ideas, an approach later called historical materialism. The Manifesto declared that the history of all society so far is the history of class struggles, and that capitalism, by creating an industrial working class, was producing its own gravediggers. In a preface of 1859 Marx put the principle in a single sentence.",
           "visual": { "kind": "quote", "text": "It is not the consciousness of men that determines their existence, but, on the contrary, their social existence determines their consciousness.", "who": "Karl Marx, preface to A Contribution to the Critique of Political Economy, translated by N. I. Stone", "when": "1859", "cite": "marx-1859" },
-          "link": { "label": "Encyclopaedia · Marxism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7264" },
+          "link": { "label": "Master Index · Marxism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7264" },
           "cites": ["marx-1859", "marx-engels-1848", "stedman-jones-2016"]
         },
         {
@@ -161,7 +161,7 @@
             "points": [[13.4, 52.52, "East Berlin, 1949"], [30.32, 59.94, "Petrograd, 1917"], [116.4, 39.9, "Beijing, 1949"]],
             "bbox": [-10, 18, 150, 72]
           },
-          "link": { "label": "Encyclopaedia · Social Democratic Party of Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49768" },
+          "link": { "label": "Master Index · Social Democratic Party of Germany", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q49768" },
           "cites": ["hobsbawm-2011", "kolakowski-1978", "brown-2009"]
         },
         {

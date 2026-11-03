@@ -25,7 +25,7 @@
       "title": "Franklin D. Roosevelt, 1882–1945",
       "narration": "Franklin Delano Roosevelt led the United States through the worst economic depression in its history and through most of the Second World War. He is the only president to have been elected four times, and his New Deal changed what Americans expected of their federal government. This film follows his life from Hyde Park to Warm Springs, including decisions that are still argued over.",
       "visual": { "kind": "portrait", "qid": "Q8007", "heading": "Franklin D. Roosevelt", "sub": "1882–1945", "position": "50% 22%" },
-      "link": { "label": "Encyclopaedia · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
+      "link": { "label": "Master Index · Franklin Delano Roosevelt", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q8007" },
       "cites": ["kennedy-1999", "wd"]
     },
     {
@@ -65,7 +65,7 @@
           { "at": "1933-03-04", "label": "Inauguration" }
         ]
       },
-      "link": { "label": "Encyclopaedia · Herbert Hoover", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35236" },
+      "link": { "label": "Master Index · Herbert Hoover", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q35236" },
       "cites": ["kennedy-1999", "margo-1993"]
     },
     {

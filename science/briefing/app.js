@@ -1,6 +1,6 @@
 // Scientific Briefing page. Data: data/stories.json, built every six hours by science/scripts/build-briefing.mjs.
 // State lives in the URL hash (#d=physics&type=paper&w=7d&src=nature&q=…&sort=newest&tab=sources) so the shell and the
-// Encyclopaedia can deep-link; the chosen discipline is also remembered in this browser (localStorage, best effort).
+// Master Index can deep-link; the chosen discipline is also remembered in this browser (localStorage, best effort).
 import {
   WINDOW_LABELS, ORDERS, esc, parseHash, toHash, filterItems, countByDiscipline, arrange, dailySeries, topOutlets,
   dayLabel, timeLabel,

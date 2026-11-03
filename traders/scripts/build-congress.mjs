@@ -125,7 +125,7 @@ async function parsePdf(url) {
 // Party and chamber from the public congress-legislators dataset.
 // Matched by surname and state, falling back to district (handles compound surnames); the historical list
 // covers members who have left since filing.
-// Without them every member would lose party and Bioguide ID (and with it the Encyclopaedia entry), so they must load.
+// Without them every member would lose party and Bioguide ID (and with it the Master Index entry), so they must load.
 async function legislators(list) {
   const text = await get(`https://unitedstates.github.io/congress-legislators/legislators-${list}.json`);
   if (!text) throw new Error(`congress-legislators ${list}: could not be fetched`);

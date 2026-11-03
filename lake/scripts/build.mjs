@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ADAPTERS } from './adapters.mjs';
+import { ADAPTERS, ADAPTER_MODULES } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
@@ -33,7 +33,8 @@ const E_SHARDS = 512, T_SHARDS = 256;
 // only these modules mention is made again, or goes with its last mention unless an entity with mentions relates to it;
 // an entity other modules mention too keeps its record, with these modules' mentions, names and "Appears in" tags
 // replaced; every other record, title and key stays as committed. Wikipedia summaries wait for the full build (an
-// entity new to the lake shows its summary only if the cache has it). A module's id is its adapter's name here.
+// entity new to the lake shows its summary only if the cache has it). The modules a run speaks for are its adapters'
+// own (ADAPTER_MODULES in adapters.mjs: --only kino is Kino's six submodules), and any module they report.
 const onlyAt = process.argv.indexOf('--only');
 const ONLY = onlyAt > 0 ? new Set(String(process.argv[onlyAt + 1] || '').split(',').filter(Boolean)) : null;
 if (ONLY) for (const n of ONLY) if (!ADAPTERS[n]) { console.error(`--only ${n}: adapters.mjs has no such adapter (${Object.keys(ADAPTERS).join(', ')})`); process.exit(2); }
@@ -61,7 +62,10 @@ const wbget = params => getJson('https://www.wikidata.org/w/api.php?' + new URLS
 // mentions, thousands of them, and a module whose mentions halve against the committed manifest has lost its links.
 // Either stops the build here, before an hour of Wikidata and Wikipedia requests. The Realtime Calendar's mentions
 // (its last 180 days) pass into the Historical Calendar as they age, so the two calendars are counted together.
-const MODULE_ORDER = ['retrospective', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress', 'bibliotheca'];
+// Every module an adapter reports is listed (tests/master-index.test.mjs): the order of an entity's appearances on its
+// Master Index page, so a country's profile pages (National Analysis, Volatility) follow its Retrospective entry.
+const MODULE_ORDER = ['retrospective', 'pestle', 'volatility', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress', 'bibliotheca',
+  'kino-political-events', 'kino-political-figures', 'kino-political-parties', 'kino-wars', 'kino-geopolitical-events', 'kino-great-thinkers'];
 // The new lake is written beside the old one and swapped in at the end (below). A build interrupted between the two
 // renames leaves the old data as lake/data.old: it is put back first, so this build compares against it rather than
 // against nothing. With no previous manifest at all (a first build), the guards have nothing to compare with, and only
@@ -77,8 +81,11 @@ for (const [name, adapter] of Object.entries(ADAPTERS)) {
   catch (e) { failed.push(`the ${name} adapter (${e.message})`); console.warn(`${name}: skipped (${e.message})`); }
 }
 const moduleCounts = mentions.reduce((n, m) => { n[m.module] = (n[m.module] || 0) + 1; return n; }, {});
-// --only: the modules this run speaks for (the adapters named, and any module they report).
-const MODS = ONLY ? new Set([...ONLY, ...Object.keys(moduleCounts)]) : null;
+// --only: the modules this run speaks for (the named adapters' own, and any module they report), so a submodule an
+// adapter has stopped reporting (a Kino category with no film left) loses its mentions rather than keeping them.
+const MODS = ONLY ? new Set([...[...ONLY].flatMap(n => ADAPTER_MODULES[n] || [n]), ...Object.keys(moduleCounts)]) : null;
+// --only: whether these modules give entities names of their own (a mention's `aliases`; only Bibliotheca does yet).
+const NAMED = mentions.some(m => m.aliases?.length);
 const calendarsTogether = ({ calendar = 0, 'historical-calendar': history = 0, ...rest }) => ({ ...rest, calendars: calendar + history });
 // A module taken out of MODULE_ORDER is a decision, not a loss: only the ones still listed are compared.
 const prevModules = Object.fromEntries(Object.entries(prevManifest.modules || {}).filter(([m]) => MODULE_ORDER.includes(m) && (!MODS || MODS.has(m))));
@@ -218,7 +225,9 @@ if (!ONLY) writeFileSync(cachePath, JSON.stringify(cache));
 if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries could not be fetched; the next build tries them again`);
 
 // ---- 5. Entity records and shards
-const MODULE_NAMES = { retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', bibliotheca: 'Bibliotheca' };
+// The names "Appears in" shows; a Kino category's carries the suite's name, since "Wars" alone would be anyone's.
+const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', bibliotheca: 'Bibliotheca',
+  'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers' };
 const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
 function tagsFor(e, type, ms) {
   const tags = new Set([`Type:${TYPE_NAMES[type]}`]);
@@ -258,6 +267,10 @@ function record(q) {
 // and "Appears in" tags replaced (a tag a mention gave of its own waits for the full build to go); an entity left with
 // no mention stays only if one with mentions relates to it, as the full build would fetch it, and the related entities
 // it brought go with it on the same terms; the related entities the lake lacked are made as the full build makes them.
+// Names: a record keeps no note of which module gave which, so modules that give names (NAMED: Bibliotheca) have the
+// record's made again from Wikidata and their mentions, as before; modules that give none (Kino, National Analysis,
+// Volatility) leave them as committed, or Cesare Borgia would lose the Prince's "Duke Valentino" to a Kino portrait,
+// and the books their terms.
 function onlyMerge() {
   const out = new Map(committed), gone = new Set(), own = m => MODS.has(m.m), mine = q => byQid.get(q) || [];
   const touched = new Set([...byQid.keys(), ...before]);
@@ -269,7 +282,7 @@ function onlyMerge() {
     const ms = [...others, ...fresh.mentions].sort((a, b) => MODULE_ORDER.indexOf(a.m) - MODULE_ORDER.indexOf(b.m) || String(a.d || '').localeCompare(String(b.d || ''))).slice(0, 300);
     const appears = new Set([...MODS].map(m => `Appears in:${MODULE_NAMES[m] || m}`));
     const add = mine(q).flatMap(m => [`Appears in:${MODULE_NAMES[m.module] || m.module}`, ...(m.tags || []).filter(([, v]) => v).map(([f, v]) => `${f}:${v}`)]);
-    out.set(q, { ...old, aliases: fresh.aliases, mentions: ms, total: old.total - (old.mentions.length - others.length) + mine(q).length,
+    out.set(q, { ...old, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total: old.total - (old.mentions.length - others.length) + mine(q).length,
       tags: [...new Set([...old.tags.filter(t => !appears.has(t)), ...add])] });
   }
   const pageRel = new Set(PAGE_RELATIONS.map(p => REL[p]));

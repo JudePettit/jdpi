@@ -520,7 +520,9 @@ function renderProfile() {
   const ev = (L?.evidence || []).map(e => `<div class="ev"><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 120))}</a><small>${esc(CAT_LABEL[e.cat] || 'Other')} · CAMEO ${esc(e.code)} · Goldstein ${e.g} · ${e.a} articles${e.a1 || e.a2 ? ` · ${esc([e.a1, e.a2].filter(Boolean).join(' → '))}` : ''}${e.loc ? ` · ${esc(e.loc)}` : ''}</small></div>`).join('');
   const links = [link('rt', 'pestle', `q/national.html#country=${c.iso3}`, 'National Analysis ↗'), link('rt', 'headlines', `q/headlines.html`, 'Global Headline Tracker ↗')];
   if (n.wars?.length) links.push(link('rt', 'battlefield', 'q/battlefield.html', 'Realtime Battlefield ↗'));
-  if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#/e/${n.qid}`, 'Master Index ↗'));
+  // The Master Index opens an entry at #<Wikidata ID> (encyclopedia/index.html, route); every country with an ID has one,
+  // since National Analysis lists them all there (lake/scripts/adapters.mjs, pestle).
+  if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#${n.qid}`, 'Master Index ↗'));
   const inCmp = compare.includes(c.iso3);
   const days = [...c.days].reverse();
   $('#profile').innerHTML = `<div class="prp-panel"><div class="ptitle"><div><div class="prp-label">${esc(n.region || 'Country')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(per() ? `Over ${when()}` : DAYS[dayIdx])}${n.government ? ' · ' + esc(n.government) : ''}</div></div>

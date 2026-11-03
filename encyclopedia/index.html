@@ -148,13 +148,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const LAKE = '../lake/data/', SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 // Every submodule's module in Vitruvian Manager (registry.json): rt Realtime Geopolitics, rs Retrospective Geopolitics,
-// mm Money Management, ns Natural Science. Old ids (q, hp, fe) are not used here any more.
+// oi Int-Myst Mngmnt, mm Money Management, ns Natural Science, kino Kino. Old ids (q, hp, fe) are not used here any
+// more. Every module a lake adapter reports must be here (tests/master-index.test.mjs), or its links open outside the shell.
 const MODULE_SUITE = {
   briefing: 'rt', headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
   encyclopedia: 'rs', retrospective: 'rs', 'historical-calendar': 'rs', 'battlefield-history': 'rs', 'war-focus': 'rs', kardashev: 'rs', 'learning-politics': 'rs',
   markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', traders: 'mm', learning: 'mm',
   'science-briefing': 'ns', progress: 'ns',
-  bibliotheca: 'kino',
+  bibliotheca: 'kino', 'kino-political-events': 'kino', 'kino-political-figures': 'kino', 'kino-political-parties': 'kino', 'kino-wars': 'kino', 'kino-geopolitical-events': 'kino', 'kino-great-thinkers': 'kino',
 };
 // Submodule names as PRP shows them; the data may still carry older names (H&P Retrospective, Trader Tracker, …).
 const MODULE_NAME = {
@@ -162,7 +163,8 @@ const MODULE_NAME = {
   encyclopedia: 'Master Index', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
   markets: 'TD Markets', 'tally-stick': 'Tally Stick', 'algo-trader': 'Algo Trader', traders: 'Auto Trader', learning: 'Learning · Finance & Economics',
   'science-briefing': 'Scientific Briefing', progress: 'Invention Timeline',
-  bibliotheca: 'Bibliotheca',
+  bibliotheca: 'Bibliotheca', 'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties',
+  'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers',
 };
 const modName = m => MODULE_NAME[m] || idx?.modules?.[m] || m;
 const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School or tag', 'Political spectrum', 'Occupation', 'Field', 'Movement', 'Ideology', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Century', 'Appears in'];

@@ -8,13 +8,18 @@ One record per person, place, war, party, election or idea that appears anywhere
 module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ──► Master Index (Explorer + entity pages)
  (Retrospective,   mentions:      resolve IDs,     static      └► jdpi-entities.js linker on every module page
   calendars,       key + link     Wikidata facts,  shards
-  Battlefield,     + context      tags, summaries
+  battlefields,    + context      tags, summaries
   Kardashev,       + tags
-  Traders,
-  Learning)
+  Auto Trader,
+  Learning,
+  Invention Timeline,
+  Bibliotheca,
+  Kino,
+  National Analysis,
+  Volatility)
 ```
 
-- **Adapters** (`scripts/adapters.mjs`): each module reports what it mentions as `{ key, label, module, url, date, context, tags }`. The key is a Wikipedia title, a Wikidata ID, or a module ID that Wikidata can resolve, such as a Congress Bioguide ID. `url` is the exact place in JDP-I.
+- **Adapters** (`scripts/adapters.mjs`): each module reports what it mentions as `{ key, label, module, url, date, context, tags }`. The key is a Wikipedia title, a Wikidata ID, or a module ID that Wikidata can resolve, such as a Congress Bioguide ID; a Wikidata ID wherever the module's data has one. `module` is the submodule's id in `registry.json`, and `url` the exact place in JDP-I, written as that page reads its own address. `ADAPTER_MODULES` lists the submodules each adapter files its mentions under.
 - **Build** (`scripts/build.mjs`):
   - Resolves every key to a Wikidata ID.
   - Fetches facts, plus one level of related entities (parties, ideologies, movements, countries, conflicts), so those get pages too.
@@ -30,13 +35,35 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
 - **Linker** (`design/jdpi-entities.js`, loaded by `prp-bar.js`): adds ◈ Master Index links next to Wikipedia links, `data-qid="Q…"` and `data-entity-key="…"` elements on any JDP-I page.
 - **Deep links**: Master Index links open modules through the shell as `#/<suite>/<module>?at=<url>`. The shell only accepts URLs on that module's own page.
 
+## Adapters
+
+| Adapter | Submodules | What it reports, and where it links |
+|---|---|---|
+| `retrospective` | `retrospective` | Countries (by Wikidata ID), leaders, office-holders, their parties, elections and events, from the hp-retrospective repository (`--retro`); the country in the year |
+| `calendar` | `historical-calendar`, `calendar` | Every event with a Wikipedia source, the last 180 days the Realtime Calendar's; its month |
+| `battlefield` | `battlefield-history`, `war-focus`, `battlefield` | Retrospective Battlefield's wars, War Focus's wars and their battles and operations (by Wikidata ID), this year's wars; each at its year or month |
+| `kardashev` | `kardashev` | Empires and countries, at the step of their largest share of world energy |
+| `traders` | `traders` | Members of Congress who trade (by Bioguide ID) and famous investors |
+| `learning` | `learning`, `learning-politics` | Thinkers and schools of thought taught in the Finance, Economics and Politics courses; the lesson |
+| `progress` | `progress` | Breakthroughs, their scientists and institutions (by Wikidata ID); the breakthrough on the timeline |
+| `bibliotheca` | `bibliotheca` | Each book's cast (by Wikidata ID, with the book's names); the first paragraph that names it |
+| `kino` | `kino-<category>`, all six | What each documentary names by Wikidata ID: its subjects, each scene's Master Index link and portrait, and the War Focus wars, National Analysis and Political Atlas countries and Invention Timeline breakthroughs its scenes link to (not the items its Wikidata sources list, which are where its facts come from). One mention per film and entity, at the first scene that names it, or at the start for a subject |
+| `pestle` | `pestle` (National Analysis) | Every country with its Wikidata ID (the Channel Islands and Kosovo have none there yet); its profile, `q/national.html#country=<ISO3>` |
+| `volatility` | `volatility` | Every country scored on a day the index holds, with the Wikidata ID National Analysis gives it (Taiwan, Jersey and Vatican City have none); the country, `q/volatility.html#country=<ISO3>`, with its latest score |
+
+The submodules with no entities of their own report nothing, each exempt with its reason in `tests/master-index.test.mjs`: the Master Index itself; the four briefings and the Global Headline Tracker (stories, whose names carry no Wikidata ID or Wikipedia link for the page linker to badge: marking the countries each story is filed under is to come); the OSINT, SIGINT and GEOINT dashboards and Intel Training; Data Analytics and the Integration Hub; Tally Stick and Algo Trader (private); Market Briefing and the Political Atlas (other repositories, whose adapters are to come).
+
 ## Adding a module
 
-1. Write an adapter in `scripts/adapters.mjs` and add it to `ADAPTERS`. Give the module's name in `MODULE_NAMES` (build.mjs) and its suite in `MODULE_SUITE` (encyclopedia page).
+1. Write an adapter in `scripts/adapters.mjs`, add it to `ADAPTERS`, and list the submodules its mentions are filed under in `ADAPTER_MODULES`. Give each submodule its name in `MODULE_NAMES` and its place in `MODULE_ORDER` (build.mjs), and its suite in `MODULE_SUITE` (encyclopedia page).
 2. Where the module shows a name without a Wikipedia link, add `data-qid` or `data-entity-key` so the linker can find it.
-3. Run `npm run build:lake`, or `node lake/scripts/build.mjs --only <adapter>` to add just that module's entities to the committed `data/` (Wikidata only, a request a second; summaries wait for the next full build).
+3. Run `npm run build:lake`, or `node lake/scripts/build.mjs --only <adapter>` to add just that module's entities to the committed `data/` (Wikidata only, a request a second; summaries wait for the next full build). `--only` speaks for the adapter's `ADAPTER_MODULES`, so a submodule it no longer reports loses its mentions.
 
-A mention may carry `aliases`, the names the module's own text uses: the build adds them to the entity's (Bibliotheca does, so its tagger finds a book's "Duke Valentino").
+`tests/master-index.test.mjs` holds the suite to this: every live submodule in `registry.json` is an adapter's or exempt with its reason, and every adapter's submodules are named, ordered, in their suite and in the committed lake. A new submodule in neither fails it, with the steps above.
+
+Every name in the lake is also a term to the Bibliotheca tagger, which reads every label and alias when the refresh tags the books again. So an adapter feeds what its submodule shows, by Wikidata ID: a work named only in a module's sources ("The Prince" is "Prince" with its "The" dropped, Marx's "Capital" is "Capital") would be a term wherever a book uses the common word, and fail the books' tests; a title is a key only where the module's data links that article, not a display name taken for one ("Jersey" would be the island wherever Smith writes "New Jersey"). Before committing a module's first build, tag the books again in a copy of the repository (`bibliotheca/scripts/tag-terms.mjs <slug>` for each) and run `tests/bibliotheca-data.test.mjs` there.
+
+A mention may carry `aliases`, the names the module's own text uses: the build adds them to the entity's (Bibliotheca does, so its tagger finds a book's "Duke Valentino"). The lake does not record which module gave which name, so `--only` makes an entity's names again only when the adapters it runs give names; a run of adapters that give none (Kino, National Analysis, Volatility) leaves the committed names as they are, the books' among them.
 
 ## Bibliotheca
 

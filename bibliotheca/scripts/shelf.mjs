@@ -553,8 +553,11 @@ export const SHELF = [
     carries: 'and in Chapter XLIV those of L. A. Warnkönig (died 1866), from the French translation of that chapter (Liège, 1821), two '
       + 'of them Gustav Hugo’s (died 1844)',
     // From here Rome is the city of the Goths, the exarchs and the popes, which the lake has no entry for (Ancient Rome
-    // ends in 476), so the bare word is left untagged; the Roman Empire under its own name is still a term.
-    decisions: { Rome: null, Germany: null, Socrates: null, ...untag('Severus', 'Cyrus', 'David', 'Moses') },
+    // ends in 476), so the bare word is left untagged; the Roman Empire under its own name is still a term. Proclus is
+    // four men in this volume (the Neoplatonist, Justin's quaestor, the engineer said to have burned the Gothic fleet,
+    // and a bishop of Constantinople), and the lake has only the philosopher (one of Hegel's "Influenced by"), so the
+    // name is left untagged like Severus and Cyrus: tagged, nine of its fourteen would be him and wrong.
+    decisions: { Rome: null, Germany: null, Socrates: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Proclus') },
   }),
   gibbon(5, {
     gutenberg: 735, first: 49, count: 10, written: 1787, published: 1788, appeared: '1788',

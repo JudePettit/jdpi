@@ -6,11 +6,14 @@
 // `url` is the exact place in JDP-I (absolute), and `module` the registry module id. `aliases` are the names the
 // module's own text uses for the entity where Wikidata may not have them (a book's "Duke Valentino" for Cesare
 // Borgia): build.mjs adds them to the entity's aliases.
-// To bring a new module into the Master Index, add an adapter here and to ADAPTERS.
+// To bring a new module into the Master Index, add an adapter here, to ADAPTERS, and its submodules to ADAPTER_MODULES
+// (tests/master-index.test.mjs holds every live submodule in registry.json to that, or to its written exemption).
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { THINKERS, SPECTRUM } from './thinkers.mjs';
+import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
+import { readAt, kinoHash } from '../../kino/lib/links.js';
 
 export const JDPI = 'https://jdpi.pages.dev/';
 const RETRO = 'https://hp-retrospective.pages.dev/';
@@ -209,4 +212,99 @@ export function bibliotheca({ jdpiDir }) {
   return out;
 }
 
-export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca };
+/** Kino: the people, places, wars and events each documentary names by its Wikidata ID (kino/data/<category>/<id>.json,
+ *  in the format of kino/README.md): its subjects, and in each scene its Master Index link and its portrait (a
+ *  portrait's qid is the item whose image it shows); then the places a scene links to whose own data holds the ID: a
+ *  War Focus war (battlefield/focus/data/index.json), a National Analysis or Political Atlas country
+ *  (national/data/index.json) and an Invention Timeline breakthrough (science/progress/data/events.json). A link is
+ *  read as the player and the validator read it (kino/lib/links.js); one to a submodule whose data has no Wikidata IDs
+ *  (Retrospective Battlefield's conflicts, Kardashev's polities, the Retrospective's countries by GW code) names
+ *  nothing here. The Wikidata items a script's sources list are where its facts come from, not what it shows, and
+ *  they include works whose names are common words ("The Prince", Marx's "Capital"): in the lake those would be terms
+ *  wherever a Bibliotheca book says "Prince" or "Capital" (tag-terms.mjs reads every name in it), so they stay out.
+ *  One mention per documentary and entity, filed under its category's submodule (kino-<category>, as registry.json
+ *  names it) and linked to the film on its category's page (kino/index.html?cat=<category>#doc=<id>): at the first
+ *  scene that names the entity (&s=<scene id>), or at the start for a subject, which the whole film is about. The
+ *  context is the film's title, the date the year it opens. */
+export function kino({ jdpiDir }) {
+  const root = join(jdpiDir, 'kino/data');
+  if (!existsSync(root)) return [];
+  const focus = new Map(json(join(jdpiDir, 'battlefield/focus/data/index.json')).wars.map(w => [w.id, w]));
+  const countries = new Map(json(join(jdpiDir, 'national/data/index.json')).countries.map(c => [c.iso3, c]));
+  const events = new Map(json(join(jdpiDir, 'science/progress/data/events.json')).events.map(e => [e.id, e]));
+  // The entity a scene's link names, as [qid, label], or null.
+  const named = link => {
+    let at;
+    try { at = readAt(link); } catch { return null; }
+    switch (link.module) {
+      case 'encyclopedia': return [at.qid, String(link.label).replace(/^Master Index · /, '')];
+      case 'war-focus': { const w = focus.get(at.war); return w?.qid ? [w.qid, w.name] : null; }
+      case 'pestle': case 'atlas': { const c = countries.get(at.country); return c?.qid ? [c.qid, c.name] : null; }
+      case 'progress': { const e = events.get(at.e); return e?.q ? [e.q, e.t] : null; }
+      default: return null;
+    }
+  };
+  const out = [];
+  for (const category of CATEGORY_IDS) {
+    const dir = join(root, category);
+    if (!existsSync(dir)) continue;
+    for (const file of readdirSync(dir).filter(f => f.endsWith('.json')).sort()) {
+      const doc = json(join(dir, file)), found = new Map();
+      const add = (qid, label, scene) => { if (/^Q\d+$/.test(qid || '') && !found.has(qid)) found.set(qid, { label: label || qid, scene }); };
+      for (const s of doc.subjects || []) add(s.qid, s.label, null);
+      for (const s of flatScenes(doc)) {
+        const l = s.link && named(s.link);
+        if (l) add(l[0], l[1], s.id);
+        if (s.visual?.kind === 'portrait') add(s.visual.qid, s.visual.heading, s.id);
+      }
+      for (const [qid, { label, scene }] of found) out.push({
+        key: { qid }, label, module: `kino-${category}`, url: `${JDPI}kino/index.html?cat=${category}${kinoHash(doc.id, scene)}`,
+        date: Number.isInteger(doc.era?.[0]) ? String(doc.era[0]) : undefined, context: doc.title,
+      });
+    }
+  }
+  return out;
+}
+
+/** National Analysis (registry id pestle): every country in its data (national/data/index.json, the page's own) with
+ *  its Wikidata ID, linked to its profile (q/national.html#country=<ISO3>). The two the World Bank lists under codes
+ *  Wikidata does not use (the Channel Islands, Kosovo) have none there, and wait for national/scripts/build.mjs to find
+ *  theirs: a World Bank name taken for a Wikipedia title is no key, and in the lake it is a term wherever a Bibliotheca
+ *  book has it. */
+export function pestle({ jdpiDir }) {
+  const d = json(join(jdpiDir, 'national/data/index.json'));
+  return d.countries.filter(c => c.qid).map(c => ({ key: { qid: c.qid }, label: c.name, module: 'pestle', url: `${JDPI}q/national.html#country=${c.iso3}`,
+    context: `Country profile: ${d.indicators.length} political, economic, social, technological, legal and environmental indicators, ${d.years[0]}–${d.years[1]}` }));
+}
+
+/** Geopolitical Volatility: every country the index has scored on at least one of the days it holds
+ *  (volatility/data/index.json; a day's row is [day, score, components, events, tone, coverage], the score null when
+ *  too few events or sources were seen), with the Wikidata ID National Analysis gives it (national/data/brief.json,
+ *  ISO3 → qid), linked to the country on q/volatility.html (#country=<ISO3>, as the page's own rows link to it). The
+ *  few National Analysis does not list (Taiwan, Jersey, Vatican City) have no ID here and are left out: keyed by its
+ *  name taken for a title, Jersey would be the island wherever the Wealth of Nations says "New Jersey". The context and
+ *  date are its latest score. */
+export function volatility({ jdpiDir }) {
+  const v = json(join(jdpiDir, 'volatility/data/index.json'));
+  const qid = new Map(json(join(jdpiDir, 'national/data/brief.json')).countries.filter(c => c.qid).map(c => [c.iso3, c.qid]));
+  const out = [];
+  for (const [iso3, c] of Object.entries(v.countries)) {
+    const scored = c.days.filter(d => d[1] != null), last = scored.at(-1);
+    if (!last || !qid.has(iso3)) continue;
+    out.push({ key: { qid: qid.get(iso3) }, label: c.name, module: 'volatility', url: `${JDPI}q/volatility.html#country=${iso3}`, date: last[0],
+      context: `Volatility index ${last[1].toFixed(1)} of 100 on its latest scored day, from GDELT news events; scored on ${scored.length} of ${c.days.length} days` });
+  }
+  return out;
+}
+
+export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca, kino, pestle, volatility };
+
+// The submodules (registry.json ids) each adapter files its mentions under: the modules `--only <adapter>` speaks for
+// in build.mjs (it makes their entities again, and drops what they no longer mention), and what
+// tests/master-index.test.mjs holds to the registry, to MODULE_NAMES and MODULE_ORDER (build.mjs) and to MODULE_SUITE
+// (encyclopedia/index.html). An adapter reports under no other module.
+export const ADAPTER_MODULES = {
+  retrospective: ['retrospective'], calendar: ['historical-calendar', 'calendar'], battlefield: ['battlefield-history', 'war-focus', 'battlefield'],
+  kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['bibliotheca'],
+  kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'],
+};

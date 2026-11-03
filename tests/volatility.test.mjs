@@ -410,7 +410,7 @@ test('page: a period of days turns each measure into the period\'s, in the addre
     // day the data ends on: the page spaces the dash when the two ends name different months.
     assert.match(map.title, /^Mean GVI · \d+(?: \w+(?: \d{4})?)? ?– ?\d+ \w+ \d{4}$/);
     assert.equal(map.label, 'Period');
-    assert.match(map.day, /^\d+(\s\w+)?–\d+ \w+ \d{4}$/);
+    assert.match(map.day, /^\d+(?: \w+(?: \d{4})?)? ?– ?\d+ \w+ \d{4}$/); // as the title above
     assert.match(map.movers, /^Biggest movers · \d/);
     assert.equal(hash, `#day=${b}&from=${before}`);
     assert.match(profile, /Over \d/);

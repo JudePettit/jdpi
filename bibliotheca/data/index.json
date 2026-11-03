@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-31T05:33:52.499Z",
+ "generated": "2026-11-03T04:39:10.791Z",
  "books": [
   {
    "slug": "the-prince",
@@ -15,7 +15,7 @@
    "chapters": 27,
    "paragraphs": 254,
    "terms": 550,
-   "generated": "2026-10-31T05:32:16.691Z"
+   "generated": "2026-11-03T04:39:02.431Z"
   },
   {
    "slug": "peloponnesian-war",
@@ -31,7 +31,7 @@
    "chapters": 26,
    "paragraphs": 998,
    "terms": 1112,
-   "generated": "2026-10-31T05:32:19.804Z"
+   "generated": "2026-11-03T04:39:03.263Z"
   },
   {
    "slug": "origin-of-species",
@@ -46,8 +46,8 @@
    "words": 196098,
    "chapters": 16,
    "paragraphs": 972,
-   "terms": 267,
-   "generated": "2026-10-31T05:32:22.424Z"
+   "terms": 274,
+   "generated": "2026-11-03T04:39:03.963Z"
   },
   {
    "slug": "wealth-of-nations-1",
@@ -62,8 +62,8 @@
    "words": 162323,
    "chapters": 22,
    "paragraphs": 950,
-   "terms": 707,
-   "generated": "2026-10-31T05:32:25.141Z",
+   "terms": 710,
+   "generated": "2026-11-03T04:39:04.712Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -84,8 +84,8 @@
    "words": 217807,
    "chapters": 14,
    "paragraphs": 1194,
-   "terms": 1196,
-   "generated": "2026-10-31T05:32:28.408Z",
+   "terms": 1199,
+   "generated": "2026-11-03T04:39:05.472Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -106,8 +106,8 @@
    "words": 261444,
    "chapters": 16,
    "paragraphs": 2415,
-   "terms": 1448,
-   "generated": "2026-10-31T05:33:52.185Z",
+   "terms": 1453,
+   "generated": "2026-11-03T04:39:06.185Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -128,8 +128,8 @@
    "words": 288405,
    "chapters": 11,
    "paragraphs": 2082,
-   "terms": 764,
-   "generated": "2026-10-31T05:32:34.256Z",
+   "terms": 777,
+   "generated": "2026-11-03T04:39:06.949Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -150,8 +150,8 @@
    "words": 242252,
    "chapters": 12,
    "paragraphs": 1718,
-   "terms": 847,
-   "generated": "2026-10-31T05:32:37.000Z",
+   "terms": 861,
+   "generated": "2026-11-03T04:39:07.669Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -172,8 +172,8 @@
    "words": 276026,
    "chapters": 10,
    "paragraphs": 1642,
-   "terms": 972,
-   "generated": "2026-10-31T05:32:39.843Z",
+   "terms": 966,
+   "generated": "2026-11-03T04:39:08.408Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -194,8 +194,8 @@
    "words": 260464,
    "chapters": 10,
    "paragraphs": 1698,
-   "terms": 1273,
-   "generated": "2026-10-31T05:32:43.894Z",
+   "terms": 960,
+   "generated": "2026-11-03T04:39:09.140Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -216,8 +216,8 @@
    "words": 233699,
    "chapters": 13,
    "paragraphs": 1520,
-   "terms": 974,
-   "generated": "2026-10-31T05:32:46.479Z",
+   "terms": 977,
+   "generated": "2026-11-03T04:39:09.851Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -238,8 +238,8 @@
    "words": 291958,
    "chapters": 130,
    "paragraphs": 3210,
-   "terms": 291,
-   "generated": "2026-10-31T05:32:50.426Z"
+   "terms": 292,
+   "generated": "2026-11-03T04:39:10.589Z"
   }
  ]
 }

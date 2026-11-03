@@ -406,7 +406,9 @@ test('page: a period of days turns each measure into the period\'s, in the addre
     const latest = { counts: await page.locator('#profile .comp > small').allInnerTexts(), evidence: await page.locator('#profile .prp-panel-head b', { hasText: 'Evidence' }).innerText() };
     assert.ok(latest.counts.length === 5 && latest.counts.every(t => t === ''), `component event counts: ${latest.counts.join(' | ')}`);
     assert.equal(latest.evidence, 'Evidence · strongest events · latest day');
-    assert.match(map.title, /^Mean GVI · \d+(\s\w+)?–\d+ \w+ \d{4}$/);
+    // One month ("25–31 Oct 2026"), two ("25 Oct – 1 Nov 2026") or two years ("28 Dec 2026 – 3 Jan 2027"), whatever
+    // day the data ends on: the page spaces the dash when the two ends name different months.
+    assert.match(map.title, /^Mean GVI · \d+(?: \w+(?: \d{4})?)? ?– ?\d+ \w+ \d{4}$/);
     assert.equal(map.label, 'Period');
     assert.match(map.day, /^\d+(\s\w+)?–\d+ \w+ \d{4}$/);
     assert.match(map.movers, /^Biggest movers · \d/);

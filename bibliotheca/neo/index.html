@@ -50,7 +50,7 @@
                   <a class="prp-btn sm ghost icon nav" id="prev" href="#" aria-label="Previous chapter" title="Previous chapter (←)">‹</a>
                   <a class="prp-btn sm ghost icon nav" id="next" href="#" aria-label="Next chapter" title="Next chapter (→)">›</a>
                   <button type="button" class="prp-btn sm nc-bar-toggle" id="bar-toggle" aria-expanded="false" aria-controls="popout" title="The terms on screen (T)">◈ <span class="n" id="bar-count">0</span></button>
-                  <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" title="The companion pane: the Master Index and the screens for the era (P)">▥<span class="lbl">Pane</span></button>
+                  <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" title="Links: a term's Master Index entry and the screens for the era, beside the text (P)">▥<span class="lbl">Links</span></button>
                 </div>
                 <div class="nc-progress-row">
                   <div class="nc-progress" id="progress" role="progressbar" aria-label="Position in the chapter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
@@ -73,12 +73,12 @@
 
         <aside class="nc-pane" id="pane" hidden aria-labelledby="pane-title">
           <div class="nc-pane-head">
-            <div class="nc-pane-titles"><span class="prp-label" id="pane-kicker">Companion</span><b id="pane-title">…</b></div>
+            <div class="nc-pane-titles"><span class="prp-label" id="pane-kicker">Links</span><b id="pane-title">…</b></div>
             <a class="prp-btn sm ghost" id="pane-open" href="#" hidden>Open ↗</a>
             <button type="button" class="prp-btn sm ghost nc-tall" id="pane-tall" aria-pressed="false">Taller</button>
-            <button type="button" class="prp-btn sm ghost" id="pane-close" aria-label="Close the companion pane" title="Close (Esc)">×</button>
+            <button type="button" class="prp-btn sm ghost" id="pane-close" aria-label="Close Links" title="Close (Esc)">×</button>
           </div>
-          <div class="prp-tabs" role="tablist" aria-label="Companion pane">
+          <div class="prp-tabs" role="tablist" aria-label="Links">
             <button type="button" role="tab" id="tab-ency" aria-selected="true" aria-controls="panel-ency">Master Index</button>
             <button type="button" role="tab" id="tab-vm" aria-selected="false" aria-controls="panel-vm" tabindex="-1">In Vitruvian Manager</button>
           </div>

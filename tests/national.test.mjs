@@ -66,3 +66,51 @@ test('map, profile and comparison work', pageTest, async () => {
   assert.equal(cmpCols, 4);
   assert.deepEqual(errors, []);
 });
+
+test('compare: countries are added and removed on the Compare page itself', pageTest, async () => {
+  const browser = await launch();
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/q/national#compare`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#cmpadd', { timeout: 20000 });
+  const names = () => page.locator('#compare thead th a.cname').allTextContents(); // as written: the heading shows them in capitals
+  const count = n => page.waitForFunction(k => document.querySelectorAll('#compare thead th a.cname').length === k, n, { timeout: 10000 });
+  const add = async text => { await page.fill('#cmpq', text); await page.press('#cmpq', 'Enter'); };
+  // Nothing chosen yet: the box is there, with every country on offer.
+  assert.deepEqual(await names(), []);
+  assert.ok(await page.locator('#cmplist option').count() > 200, 'every country is offered');
+  assert.equal(await page.textContent('#cmpmsg'), '0 of 4 chosen');
+  // A name in full, in any case; then the start of a name that only one country has.
+  await add('france'); await count(1);
+  await add('Germ'); await count(2);
+  assert.deepEqual(await names(), ['France', 'Germany']);
+  assert.equal(await page.evaluate(() => location.hash), '#compare=FRA,DEU');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'cmpq', 'the box keeps the focus for the next country');
+  assert.equal(await page.locator('#cmplist option[value="France"]').count(), 0, 'a chosen country is no longer offered');
+  // What cannot be added says why, and changes nothing.
+  await add('zzzz');
+  assert.match(await page.textContent('#cmpmsg'), /^No country matches “zzzz”\.$/);
+  await add('France');
+  assert.equal(await page.textContent('#cmpmsg'), 'France is already in the comparison.');
+  await add('Ko');
+  assert.match(await page.textContent('#cmpmsg'), /^Several match: Korea, Rep\., .*Kosovo\. Type more of the name\.$/);
+  assert.deepEqual(await names(), ['France', 'Germany']);
+  // A name that is also the start of another (Niger, Nigeria) means the country of that name.
+  await add('Niger'); await count(3);
+  await add('Japan'); await count(4);
+  assert.deepEqual(await names(), ['France', 'Germany', 'Niger', 'Japan']);
+  // Four is the limit: the box is switched off until one is removed, here on the page.
+  assert.equal(await page.isDisabled('#cmpq'), true);
+  assert.equal(await page.getAttribute('#cmpq', 'placeholder'), 'Four chosen: remove one to add another');
+  await page.click('#compare [data-rm="DEU"]'); await count(3);
+  assert.equal(await page.isDisabled('#cmpq'), false);
+  assert.equal(await page.textContent('#ccount'), '3');
+  assert.equal(await page.evaluate(() => location.hash), '#compare=FRA,NER,JPN');
+  // The ranking's ticks follow what was chosen here.
+  await page.click('#tab-btn-map');
+  await page.waitForSelector('#rows [data-cmp="NER"]');
+  assert.deepEqual(await page.$$eval('#rows [data-cmp]:checked', bs => bs.map(b => b.dataset.cmp).sort()), ['FRA', 'JPN', 'NER']);
+  await browser.close();
+  assert.deepEqual(errors, []);
+});

@@ -82,6 +82,9 @@ a.prp-chip{text-decoration:none}a.prp-chip:hover{border-color:var(--prp-primary)
 .story small{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
 /* comparison */
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.cmp-add{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px;border-bottom:1px solid var(--prp-line)}
+.cmp-add .prp-input{flex:0 1 300px;min-width:0}
+.cmp-add .msg{color:var(--prp-muted);font-size:var(--prp-fs-sm)}
 button.prp-chip{cursor:pointer}button.prp-chip:hover{border-color:var(--prp-bad)}
 .cmpfig{padding:12px 14px 14px;border-bottom:1px solid var(--prp-line-soft)}
 #cmpsvg{display:block;width:100%;height:auto;margin-top:8px}
@@ -390,8 +393,52 @@ async function renderProfile() {
 }
 
 /* ---------- compare ---------- */
-async function renderCompare() {
-  if (!compare.length) { $('#compare').innerHTML = '<div class="prp-panel"><div class="prp-empty">Tick up to four countries in the list, or use “Add to comparison” on a profile.</div></div>'; return; }
+// Countries are added on this page too, by name (until November 2026 it took a tick in the ranking or the button on a
+// profile). Four at most: with four chosen the box says so and waits for one to be removed, where a tick in the
+// ranking replaces the oldest.
+const CMP_MAX = 4;
+const foldName = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+function cmpPicker() {
+  const full = compare.length >= CMP_MAX, rest = D.countries.filter(c => !compare.includes(c.iso3));
+  return `<form class="cmp-add" id="cmpadd" autocomplete="off">
+    <label class="prp-label" for="cmpq">Add a country</label>
+    <input class="prp-input" id="cmpq" type="search" list="cmplist" ${full ? 'disabled placeholder="Four chosen: remove one to add another"' : 'placeholder="Type a country’s name"'}>
+    <datalist id="cmplist">${rest.map(c => `<option value="${esc(c.name)}"></option>`).join('')}</datalist>
+    <button type="submit" class="prp-btn" ${full ? 'disabled' : ''}>Add</button>
+    <span class="msg" id="cmpmsg" role="status">${compare.length} of ${CMP_MAX} chosen</span>
+  </form>`;
+}
+// The country a typed name means: its name in full (or its three-letter code), else the one country whose name starts
+// with it or, failing that, contains it. Anything else gets a message and changes nothing.
+function cmpFind(text) {
+  const q = foldName(text);
+  if (!q) return { msg: 'Type a country’s name, then Add.' };
+  const exact = D.countries.find(c => foldName(c.name) === q || c.iso3.toLowerCase() === q);
+  if (exact) return compare.includes(exact.iso3) ? { msg: `${exact.name} is already in the comparison.` } : { c: exact };
+  const rest = D.countries.filter(c => !compare.includes(c.iso3));
+  let hits = rest.filter(c => foldName(c.name).startsWith(q));
+  if (!hits.length) hits = rest.filter(c => foldName(c.name).includes(q));
+  if (hits.length === 1) return { c: hits[0] };
+  if (!hits.length) return { msg: `No country matches “${text.trim()}”.` };
+  return { msg: `Several match: ${hits.slice(0, 5).map(c => c.name).join(', ')}${hits.length > 5 ? '…' : ''}. Type more of the name.` };
+}
+function wireCmpPicker(focus) {
+  const q = $('#cmpq');
+  $('#cmpadd').onsubmit = e => {
+    e.preventDefault();
+    const hit = cmpFind(q.value);
+    if (!hit.c) { $('#cmpmsg').textContent = hit.msg; return; }
+    toggleCompare(hit.c.iso3, true);
+    renderCompare(true); // the box keeps the focus, ready for the next country
+  };
+  if (focus && !q.disabled) q.focus();
+}
+async function renderCompare(focus) {
+  if (!compare.length) {
+    $('#compare').innerHTML = `<div class="prp-panel"><div class="prp-panel-head"><b>Compare countries</b></div>${cmpPicker()}<div class="prp-empty">Add up to four countries above. You can also tick them in the list, or use “Add to comparison” on a profile.</div></div>`;
+    wireCmpPicker(focus);
+    return;
+  }
   const cs = compare.map(i => byIso.get(i)).filter(Boolean);
   const groups = [...new Set(METRICS.map(m => m.group))];
   const row = m => {
@@ -404,6 +451,7 @@ async function renderCompare() {
   const chartable = D.indicators;
   $('#compare').innerHTML = `<div class="prp-panel">
     <div class="prp-panel-head"><b>Comparing ${cs.length} ${cs.length === 1 ? 'country' : 'countries'}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
+    ${cmpPicker()}
     <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}">${esc(i.label)}</option>`).join('')}</select></label>
       <svg id="cmpsvg" viewBox="0 0 900 280" role="img" aria-label="Indicator over time for the compared countries"></svg>
       <figcaption><b>Figure 2.</b> <span id="cmpcap"></span></figcaption>
@@ -415,6 +463,7 @@ async function renderCompare() {
     <tr><td>Current leader</td>${cs.map(c => `<td class="num">${esc(c.leadership?.current?.name || c.headOfGovernment || c.headOfState || '–')}</td>`).join('')}</tr>
     </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction. Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
+  wireCmpPicker(focus);
   $('#cmpind').onchange = drawCmpChart;
   $('#cmpdt').ontoggle = drawCmpTable;
   drawCmpChart();

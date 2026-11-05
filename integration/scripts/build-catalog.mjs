@@ -5,7 +5,7 @@
 //   integration/data/query-index.json     what the MCP server and the API may read: every part, its size, cost and ranges, a sample
 //   integration/data/names/…              a compact name index for the Master Index (token prefixes → Wikidata ids)
 //   integration/data/countries/…          one small profile per country, joining National Analysis, Volatility, Battlefield and the calendars
-//   integration/data/volatility-movers.json  the Volatility page's "Biggest movers · 7 days" lists  } for the Workspace "Today"
+//   integration/data/volatility-movers.json  the Volatility page's "Biggest movers · 7 days" lists  } for the Dashboard "Today"
 //   integration/data/briefing-activity.json  each briefing's 7-day story count and top topic        } panel (shell.js)
 //   integration/feeds/*.ics               the Realtime Calendar and the Historical Calendar (one file per decade) as iCalendar
 //   integration/skill/prp-data.zip        the downloadable Claude skill (SKILL.md plus a generated dataset reference)
@@ -717,10 +717,10 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   putJson('integration/data/countries/index.json', { generated: STAMP, countries: index });
 }
 
-/* ------------------------------------------------------------------ Workspace "Today" panel */
-// Two small files for the shell's Today panel (design/prp-highlights.js), so the home reads about 3 KB where it read 1.35 MB
+/* ------------------------------------------------------------------ Dashboard "Today" panel */
+// Two small files for the shell's Today panel (design/prp-highlights.js), so the Dashboard reads about 3 KB where it read 1.35 MB
 // of briefing stores and a 258 KB Volatility day file. They are not catalogue datasets (the MCP server and the API do not
-// serve them): each restates what one page or store says, so the home and the page it links to agree.
+// serve them): each restates what one page or store says, so the Dashboard and the page it links to agree.
 {
   // volatility-movers.json: the Geopolitical Volatility page's "Biggest movers · 7 days" panel, worked out exactly as
   // q/volatility.html does it on its latest day (derive, then renderMovers). A country's 7-day change is the mean of its
@@ -746,7 +746,7 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   putJson(vp, {
     dataset: 'volatility-movers', generated: STAMP, derivedFrom: ['volatility/data/index.json'],
     licence: 'Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.',
-    about: 'The "Biggest movers · 7 days" lists of q/volatility.html on its latest day (the six biggest rises and the six biggest falls of the 7-day average GVI, all coverage levels), for the Workspace Today panel.',
+    about: 'The "Biggest movers · 7 days" lists of q/volatility.html on its latest day (the six biggest rises and the six biggest falls of the 7-day average GVI, all coverage levels), for the Dashboard\'s Today panel.',
     page: 'q/volatility.html', date: d, countries: moved.length,
     records: moved.filter((c, k) => k < 6 || k >= moved.length - 6).map(c => ({ iso3: c.iso3, name: c.name, score: c.score, avg7: one(c.avg7), change7: one(c.change7), coverage: c.coverage, date: d }))
   });
@@ -763,7 +763,7 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   const ap = 'integration/data/briefing-activity.json';
   putJson(ap, {
     dataset: 'briefing-activity', generated: STAMP, derivedFrom: BRIEFINGS.map(b => b[2]), licence: 'Counts and labels © JDP-Iq; the stories belong to their publishers.',
-    about: 'Each briefing\'s rolling store in three facts (stories held, most-covered topic, when it was generated), for the Workspace Today panel.',
+    about: 'Each briefing\'s rolling store in three facts (stories held, most-covered topic, when it was generated), for the Dashboard\'s Today panel.',
     records: BRIEFINGS.map(([id, name, file]) => {
       const s = file === 'briefing/data/latest.json' && BRIEF ? BRIEF : J(file);
       const items = Array.isArray(s.items) ? s.items : [];

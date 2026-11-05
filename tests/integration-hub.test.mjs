@@ -1,4 +1,4 @@
-// Integration Hub (Digital Science): the catalogue contract, the Workspace Today panel's two derived files, the MCP server
+// Integration Hub (Digital Science): the catalogue contract, the Dashboard Today panel's two derived files, the MCP server
 // and JSON API Pages Functions (called with a fake env whose ASSETS reads this checkout), caps and errors, the file
 // allowlist, feeds and calendars, the local stdio server, and the page.   node --test tests/integration-hub.test.mjs
 // PRP_PAGES=0 leaves the page test out (the daily workflow's check after the catalogue build); PRP_CPU_LIMIT_MS raises the
@@ -124,12 +124,12 @@ describe('catalogue (integration/catalog.json)', () => {
   });
 });
 
-/* ================================================================ the Workspace "Today" panel's files */
+/* ================================================================ the Dashboard "Today" panel's files */
 // integration/data/volatility-movers.json and briefing-activity.json are derived for the shell's Today panel
 // (design/prp-highlights.js), not catalogued: each must say what its page or store says, in a few KB. Their sources refresh
 // between catalogue builds (Volatility before the daily build, the briefings every six hours), so a file is compared with
 // its source exactly when it was built from that version of it, and otherwise only shown to be the older of the two.
-describe('Workspace Today files (integration/data)', () => {
+describe('Dashboard Today files (integration/data)', () => {
   const provenance = (f, id) => { assert.equal(f.dataset, id); assert.ok(f.generated && f.licence && f.about && Array.isArray(f.derivedFrom) && Array.isArray(f.records)); };
   test('volatility-movers.json holds the Volatility page\'s "Biggest movers · 7 days" lists, worked out as the page does', () => {
     const path = 'integration/data/volatility-movers.json', f = J(path);

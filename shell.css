@@ -1,4 +1,5 @@
-/* PRP shell (Vitruvian Manager): sidebar navigation, top bar, launchpad and module overviews, and the module workspace. */
+/* PRP shell (Vitruvian Manager): sidebar navigation, top bar, the Home page, the Dashboard and module overviews, and
+   the module workspace. */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
 body { overflow: hidden; }
@@ -125,11 +126,61 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 @media (min-width: 1101px) { html:has(.doc:not([hidden])) .kino-np { width: min(640px, calc(100% - 464px)); } }
 @media (max-width: 1100px) { html.np-on .doc { bottom: calc(var(--np-h, 54px) + 22px); } }
 
-/* --- Pages (launchpad, module overview, launch) ---------------------------- */
+/* --- Pages (Home page, Dashboard, module overview, launch) ------------------ */
 .page { max-width: 1280px; margin: 0 auto; padding: 26px 28px 40px; }
 .head { padding-bottom: 18px; border-bottom: 1px solid var(--prp-line); }
-/* The four product counts, moved below the Today panel on the home (shell.js renderHome). */
+/* The four product counts, below the Today panel on the Dashboard (shell.js renderDashboard). */
 .today-kpis { margin-top: 22px; max-width: 760px; }
+
+/* --- Home page (shell.js, "Home page") ------------------------------------------------------------------------------
+   The intro, with a small button to the Dashboard at its end, over every module but Home as a box: four across on a
+   wide screen, three on a tablet, one on a phone (360 px wide included), and every box as tall as the tallest
+   (grid-auto-rows: 1fr), so the rows line up whatever a summary's length. A box is one link (.mod-card) holding a
+   turntable (.mod-turn) whose two faces share one grid cell, so each face is the whole box. The front: the module's
+   code, its mark where it has one, its full title and its submodules' icons, under a rule in its accent. The back: its
+   summary on its accent's soft tint (every text on every tint is 5:1 or better, light and dark), and "Module
+   overview →".
+   THE TURN: the turntable rotates half a turn about its upright axis (perspective on the link, preserve-3d on the
+   turntable, each face's back hidden) while a mouse is over the box ((hover: hover), so a touch screen's sticky hover
+   turns nothing), while the link has keyboard focus (:focus-visible), and after a first tap (.flipped, shell.js
+   setupHome). The link itself never moves, so the pointer stays over it all through the turn and its focus ring stays
+   square to the page; a box on the turn rises above its neighbours.
+   REDUCED MOTION: no turn at all. Both faces stay square to the page and the back, laid over the front, shows in its
+   place at once: by opacity, never visibility or display, so a screen reader keeps both faces. */
+.home-head { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+.home-head > div { flex: 1 1 420px; min-width: 0; }
+.home-dash { flex: none; gap: 7px; }
+/* Columns 216 px wide at least, and a quarter of the row at least, so never more than four (the eight modules in two
+   rows of four from a 1280 px screen up, with the sidebar hidden too); one column once two no longer fit. */
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, max(216px, (100% - 42px) / 4)), 1fr)); grid-auto-rows: 1fr;
+  gap: 14px; margin: 22px 0 0; padding: 0; list-style: none; }
+.mod { display: flex; min-width: 0; }
+.mod-card { position: relative; flex: 1; display: block; min-width: 0; border-radius: var(--prp-radius); color: var(--prp-text); text-decoration: none; perspective: 1100px; }
+.mod-card:hover, .mod-card:focus-visible, .mod-card.flipped { z-index: 1; }
+.mod-turn { display: grid; height: 100%; min-height: 156px; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3, .7, .25, 1); }
+.mod-face { grid-area: 1 / 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px 16px 15px;
+  background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.mod-front { box-shadow: inset 0 3px var(--prp-accent), var(--prp-shadow-1); }
+.mod-id { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.mod-id .suite-mark { border-radius: 7.5px; } /* the mark's tile corner, 48 of 256, at 40 px */
+.mod-name { margin-top: auto; overflow-wrap: anywhere; font: 600 20px/1.25 var(--prp-font-serif); letter-spacing: -.005em; }
+.mod-subs { display: flex; flex-wrap: wrap; gap: 2px 9px; margin-top: -4px; color: var(--prp-muted); font: 13px/1.4 var(--prp-font-ui); }
+.mod-back { transform: rotateY(180deg); border-color: var(--prp-accent); background: var(--prp-accent-soft); }
+.mod-does { color: var(--prp-text); font: 14px/1.5 var(--prp-font-ui); }
+.mod-go { margin-top: auto; color: var(--prp-link); font: 500 12.5px var(--prp-font-ui); }
+.mod-card:focus-visible .mod-turn, .mod-card.flipped .mod-turn { transform: rotateY(180deg); }
+@media (hover: hover) { .mod-card:hover .mod-turn { transform: rotateY(180deg); } }
+@media (max-width: 600px) { .mod-turn { min-height: 132px; } .mod-name { font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) {
+  .mod-turn, .mod-card:focus-visible .mod-turn, .mod-card.flipped .mod-turn { transform: none; transition: none; }
+  .mod-back { transform: none; opacity: 0; }
+  .mod-card:focus-visible .mod-back, .mod-card.flipped .mod-back { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
+  .mod-card:hover .mod-turn { transform: none; }
+  .mod-card:hover .mod-back { opacity: 1; }
+}
 .group { margin-top: 28px; }
 .group-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .group-head .prp-code { transform: translateY(-2px); }
@@ -155,10 +206,10 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .search-results { margin-top: 6px; }
 .footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 34px; padding-top: 12px; border-top: 1px solid var(--prp-line); color: var(--prp-muted); font: 11px var(--prp-font-ui); }
 
-/* --- Workspace "Today" panel (shell.js, "Workspace Today panel") -------------
-   A titled band of four cards at the top of the home (volatility, briefings, calendar, markets), each a group of links
-   into a submodule. Built only on the design tokens, so light, dark and phone all follow for free; the grid goes from
-   four columns to two to one as the panel narrows (a container query on the panel's own width), one on a phone.
+/* --- Dashboard "Today" panel (shell.js, "Dashboard Today panel") -------------
+   A titled band of four cards at the top of the Dashboard (volatility, briefings, calendar, markets), each a group of
+   links into a submodule. Built only on the design tokens, so light, dark and phone all follow for free; the grid goes
+   from four columns to two to one as the panel narrows (a container query on the panel's own width), one on a phone.
    NO LAYOUT SHIFT. Every card reserves the height of the fullest content it can hold: a head of one title line over two
    window lines, and five lines, each a label of at most two lines over a one-line detail (a note under fewer lines takes
    no more than one line's room). Every text is clamped to those lines and the reserve is a hair more than they can take,

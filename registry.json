@@ -3,7 +3,7 @@
     "name": "VM",
     "fullName": "Vitruvian Manager",
     "company": "JDP-Iq",
-    "tagline": "What an ERP does for an enterprise, for one person: intelligence, history, money and science in one workspace.",
+    "tagline": "Vitruvian Manager's modules allow you to learn, earn, create, and control.",
     "version": "2.0"
   },
   "kinds": {
@@ -16,6 +16,29 @@
   },
   "suites": [
     {
+      "id": "home",
+      "code": "HM",
+      "name": "Home",
+      "title": "Home",
+      "summary": "Start here: every module on one page, and what changed today on the Dashboard.",
+      "description": "Where Vitruvian Manager starts: the Home page shows every module, and the Dashboard what changed today across them.",
+      "modules": [
+        {
+          "id": "dashboard",
+          "aliases": [
+            "workspace"
+          ],
+          "name": "Dashboard",
+          "kind": "realtime",
+          "icon": "⊞",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "shell": "dashboard",
+          "description": "What changed today across Vitruvian Manager: volatility's biggest movers, the briefings' week, the next votes and summits, and the markets, over every module and submodule."
+        }
+      ]
+    },
+    {
       "id": "rt",
       "aliases": [
         "q"
@@ -23,6 +46,7 @@
       "code": "RT",
       "name": "Realtime Geopolitics",
       "title": "Realtime Geopolitics",
+      "summary": "Follow today's politics, conflicts and country risk: headlines, volatility, wars, leaders and coming votes.",
       "description": "What is happening now: every country's headlines, country conditions and volatility, armed conflict, who holds power, and the political calendar. The news across the political spectrum is in Highbrowse.",
       "modules": [
         {
@@ -145,6 +169,7 @@
       "title": "Highbrowse",
       "mark": "design/brand-hb-icon.svg",
       "figure": "design/brand-hb.svg",
+      "summary": "Read the news worth reading: politics from far left to far right, plus science, economics and tech.",
       "description": "The news worth reading, from four briefings: politics from fifty publishers, far left to far right, science, economics and the digital world, each on its own page, and an analysis of what they all cover today and this week, with one search across the four.",
       "modules": [
         {
@@ -224,6 +249,7 @@
       "code": "RS",
       "name": "Retrospective Geopolitics",
       "title": "Retrospective Geopolitics",
+      "summary": "Explore a century of borders, leaders and wars, and look up anyone or anything in the Master Index.",
       "description": "What happened and why: a Master Index of everyone and everything in Vitruvian Manager, a century of borders, leaders, wars and political events, humanity's energy capture, and the ideas behind the political spectrum.",
       "modules": [
         {
@@ -306,6 +332,7 @@
       "code": "OI",
       "name": "Int-Myst Mngmnt",
       "title": "International Mystery Management",
+      "summary": "Learn lawful intelligence tradecraft: open-source research, receive-only signals and satellite imagery.",
       "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
       "modules": [
         {
@@ -534,6 +561,7 @@
       "code": "MM",
       "name": "Money Management",
       "title": "Money Management",
+      "summary": "Watch the markets and famous investors' trades, run trading agents, and keep every account in one ledger.",
       "description": "Your money end to end: markets and the Hype Tracker, every brokerage account in one ledger, trading agents that follow rules you choose or mirror famous investors, all drawing on one shared pool under one set of risk limits.",
       "modules": [
         {
@@ -628,6 +656,7 @@
       "code": "NS",
       "name": "Natural Science",
       "title": "Natural Science",
+      "summary": "Trace humanity's scientific breakthroughs through history, on a map and a timeline.",
       "description": "The natural sciences through history: a map-and-slider timeline of humanity's key breakthroughs and the people and institutions behind them. The week's major papers and science news are in Highbrowse.",
       "modules": [
         {
@@ -647,6 +676,7 @@
       "code": "DS",
       "name": "Digital Science",
       "title": "Digital Science",
+      "summary": "Chart Vitruvian Manager's own data, and connect it to AI assistants through its API and MCP server.",
       "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, and an Integration Hub that opens Vitruvian Manager to AI assistants and plugins. The week’s papers and technology news are in Highbrowse.",
       "modules": [
         {
@@ -713,6 +743,7 @@
       "code": "KN",
       "name": "Kino",
       "title": "Kino",
+      "summary": "Watch narrated documentaries on wars, leaders and turning points, read the classics and take short courses.",
       "description": "Documentaries that play across Vitruvian Manager: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
       "modules": [
         {
@@ -795,5 +826,5 @@
       ]
     }
   ],
-  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page."
+  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page. A module's \"summary\" is what you can do with it, in a line or two: the back of its box on the Home page. The Home module (home) is where VM starts: its overview is the Home page (#/), where every other module has a box, and its one submodule, the Dashboard (#/home/dashboard, the Today panel over every module and submodule), is drawn by the shell itself (\"shell\": \"dashboard\", in place of a url)."
 }

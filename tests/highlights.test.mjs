@@ -1,16 +1,18 @@
-// Vitruvian Manager highlights: the Workspace "Today" panel (design/prp-highlights.js and its renderer in shell.js and
-// shell.css, PRP-ANALYSIS.md item 3), with a test for each finding of the panel's two reviews.
+// Vitruvian Manager highlights: the Dashboard's "Today" panel (design/prp-highlights.js and its renderer in shell.js
+// and shell.css, PRP-ANALYSIS.md item 3), with a test for each finding of the panel's two reviews. The panel was the
+// Workspace home page's (#/) until November 2026; it moved with the Workspace to the Dashboard (#/home/dashboard), the
+// Home module's submodule, so the page tests open it there.
 //   node --test tests/highlights.test.mjs
 // logic: tests run buildTodayHighlights() in Node against small inline fixtures through a stub fetch (no browser, no
 // network): the shape of each group; the volatility movers taken from the page's own lists, narrowed to medium and high
 // coverage and toned as worse/better; the briefings dated and a stale one left out; each quote with its own time and the
 // window saying when the quotes were fetched; five lines at most; the timeout and the order groups arrive in; the session
 // cache's lifetime; and that a failing or empty source never throws. source: tests check that the shell and its styles
-// agree with the module (slots, tones, the focus ring). page: tests drive Microsoft Edge through the home at JDPI_URL
-// (by default the local server, tests/tools/serve.mjs; they skip when nothing is served there), with every source of the
-// panel served by the test: the panel keeps its height from loading to filled at 1440 and 390 px, focus rings show, the
-// fill is not announced, the cache is honoured and refreshed, and a stalled source is given up on. PRP_PAGES=0 leaves
-// the page: tests out.
+// agree with the module (slots, tones, the focus ring). page: tests drive Microsoft Edge through the Dashboard at
+// JDPI_URL (by default the local server, tests/tools/serve.mjs; they skip when nothing is served there), with every
+// source of the panel served by the test: the panel keeps its height from loading to filled at 1440 and 390 px, focus
+// rings show, the fill is not announced, the cache is honoured and refreshed, a stalled source is given up on, and the
+// Home page loads none of it. PRP_PAGES=0 leaves the page: tests out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -404,7 +406,7 @@ test('source: the shell\'s slots, line cap and timeout are the module\'s', () =>
   assert.match(shell, /AbortSignal\.timeout\(ms\)/, 'the shell\'s requests carry AbortSignal.timeout');
   assert.match(shell, /fetch\(url, \{ signal: abortAfter\(TODAY_FETCH_MS\) \}\)/);
   assert.match(shell, /const TODAY_KEY = 'prp\.today\.v2';/, 'the cache key moved on with its shape');
-  assert.match(shell, /aria-label="Today in your workspace" aria-live="off"/, 'the panel opts out of the view\'s live region');
+  assert.match(shell, /aria-label="Today on your Dashboard" aria-live="off"/, 'the panel opts out of the view\'s live region');
   assert.match(shell, /aria-label="View \$\{esc\(g\.link \|\| g\.title\)\}"/, 'each card\'s link is named for where it goes');
 });
 
@@ -472,7 +474,7 @@ test('page: the panel is the same height loading and filled, at 1440 and 390 px;
       const page = await context.newPage();
       const errors = [];
       page.on('pageerror', e => errors.push(e.message));
-      await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('#today .today-card[data-state="loading"]');
       await page.evaluate(() => document.fonts.ready.then(() => true));
       assert.equal(await page.getAttribute('#today', 'aria-busy'), 'true', `${width}: busy while loading`);
@@ -499,7 +501,7 @@ test('page: rows and links show their focus ring; the four links have their own 
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     await servePanel(context);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
     await filled(page);
     const names = await page.$$eval('#today .today-head .more', a => a.map(x => x.getAttribute('aria-label')));
     assert.deepEqual(names, ['View Geopolitical Volatility', 'View Political Briefing', 'View Realtime Calendar', 'View Market Briefing']);
@@ -537,7 +539,7 @@ test('page: the session cache: a fresh entry fetches nothing; a stale one shows 
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const seen = await servePanel(context);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
     await filled(page);
     const entry = await page.evaluate(() => JSON.parse(sessionStorage.getItem('prp.today.v2')));
     assert.equal(entry.v, 2);
@@ -578,13 +580,51 @@ test('page: a source that stalls is given up on after 8 s; the other groups show
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     await servePanel(context, { hypeDelay: 30000 });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => ['volatility', 'briefings', 'calendar'].every(id => document.querySelector(`#today [data-group="${id}"]`)?.dataset.state === 'ready'), null, { timeout: 6000 });
     assert.equal(await page.getAttribute('#today [data-group="markets"]', 'data-state'), 'loading', 'the markets slot alone still waits');
     const t0 = Date.now();
     await page.waitForFunction(() => document.querySelector('#today [data-group="markets"]')?.dataset.state !== 'loading', null, { timeout: 12000 });
     assert.ok(Date.now() - t0 < 9500, 'given up on within the 8 s timeout');
     assert.deepEqual(await page.$$eval('#today [data-group="markets"] .today-label', l => l.map(x => x.textContent)), ['S&P 500', 'FTSE 100', 'Gold', 'Bitcoin USD'], 'the quotes that did answer');
+    await context.close();
+  } finally { await browser.close(); }
+});
+
+test('page: the panel is the Dashboard\'s alone: the Home page asks for none of it, even with a stale entry, and its button opens the Dashboard, where the panel fills', pageTest, async t => {
+  if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
+  const browser = await launch();
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const seen = await servePanel(context);
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    // The Home page (#/), where the panel was until November 2026: no panel, and none of its sources asked for.
+    await page.goto(`${BASE}/#/`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#view .mods .mod');
+    await page.waitForTimeout(1800); // past the idle callback's 1.5 s timeout
+    assert.equal(await page.locator('#today').count(), 0, 'no panel on the Home page');
+    assert.deepEqual(seen, [], 'none of its sources read');
+    // Its button opens the Dashboard, where the panel fills from its five sources.
+    await page.click('#view .home-dash');
+    await page.waitForFunction(() => location.hash === '#/home/dashboard');
+    await filled(page);
+    assert.equal(seen.length, 5, 'five requests for the fill');
+    assert.deepEqual(await page.$$eval('#today .today-card', c => c.map(x => [x.dataset.group, x.dataset.state])), GROUP_IDS.map(id => [id, 'ready']));
+    // A stale entry is refreshed on the Dashboard only: back on the Home page nothing is asked for; on the Dashboard
+    // again, it is refreshed.
+    await page.evaluate(() => { const e = JSON.parse(sessionStorage.getItem('prp.today.v2')); e.at -= 46 * 60e3; e.until = Date.now() - 1; sessionStorage.setItem('prp.today.v2', JSON.stringify(e)); });
+    seen.length = 0;
+    await page.click('#nav a.home-link');
+    await page.waitForFunction(() => location.hash === '#/' && !!document.querySelector('#view .mods'));
+    await page.waitForTimeout(1800);
+    assert.deepEqual(seen, [], 'the Home page refreshes nothing');
+    await page.click('#nav a[data-route="home/dashboard"]');
+    await page.waitForFunction(() => location.hash === '#/home/dashboard');
+    await page.waitForFunction(() => JSON.parse(sessionStorage.getItem('prp.today.v2')).until > Date.now() && !document.querySelector('#today[aria-busy]'), null, { timeout: 15000 });
+    assert.equal(seen.length, 5, 'the Dashboard refreshed it');
+    assert.deepEqual(errors, []);
     await context.close();
   } finally { await browser.close(); }
 });

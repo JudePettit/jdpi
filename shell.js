@@ -1,17 +1,24 @@
 /* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
-   and storage keys): renders the modules (Realtime Geopolitics, Highbrowse, Retrospective Geopolitics, International
-   Mystery Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from registry.json,
-   and hosts each submodule page in a persistent workspace frame. A module has a short name (registry "name", for the
-   sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, the home's headings,
-   page eyebrows and the tab title); they differ only where the full title is too long for the sidebar. A module with
-   its own variant of the Vitruvian figure (Highbrowse's, so far) names it in the registry: "mark", the small one, beside
-   its code in the sidebar and on the home page, and "figure" at the head of its overview page.
+   and storage keys): renders the modules (Home, Realtime Geopolitics, Highbrowse, Retrospective Geopolitics,
+   International Mystery Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from
+   registry.json, and hosts each submodule page in a persistent workspace frame. A module has a short name (registry
+   "name", for the sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, its
+   box on the Home page, the Dashboard's headings, page eyebrows and the tab title); they differ only where the full
+   title is too long for the sidebar. A module with its own variant of the Vitruvian figure (Highbrowse's, so far) names
+   it in the registry: "mark", the small one, beside its code in the sidebar, in its box on the Home page and on the
+   Dashboard, and "figure" at the head of its overview page.
+   The Home module (registry id "home", first in the sidebar) is where VM starts. Its overview is the Home page (#/):
+   every other module as a box that turns over to what you can do with it (registry "summary"), and a small button to
+   its one submodule, the Dashboard (#/home/dashboard), which was the home page until November 2026: the Today panel
+   over every module and submodule. The Dashboard is the one submodule the shell draws itself (registry "shell":
+   "dashboard", in place of a url), so it has no frame.
    Routes: #/ · #/<module> · #/<module>/<submodule>[/<view>][?at=<url>]
    (In registry.json the modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
    that moved between modules (the four briefings into Highbrowse: #/rt/briefing, #/ns/science-briefing,
    #/mm/econ-briefing, #/ds/digital-briefing), and old sub-entries that became views or their own submodule are
-   redirected.
+   redirected. A lone submodule id or alias opens its submodule, so the old Workspace's #/workspace (and
+   #/home/workspace) lands on the Dashboard; #/home lands on the Home page.
    One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.
    While Kino follows along with its frame hidden, the now-playing bar shows its captions and controls. */
 
@@ -24,15 +31,24 @@ const kindLabel = k => state.registry.kinds?.[k] || '';
 function allModules() { return state.registry.suites.flatMap(s => s.modules.map(m => ({ suite: s, module: m }))); }
 const findSuite = id => state.registry.suites.find(s => s.id === id || s.aliases?.includes(id)) || null;
 const findModule = id => allModules().find(x => x.module.id === id || x.module.aliases?.includes(id)) || null;
+// The Home module: its overview is the Home page (#/), and its submodule the Dashboard, which the shell draws itself.
+const HOME = 'home';
 
 /* --- Routing --------------------------------------------------------------- */
-function href(suite, module, view) { return '#/' + [suite?.id, module?.id, view?.id].filter(Boolean).map(encodeURIComponent).join('/'); }
+// The Home module's overview is the Home page, so its address is #/ (and #/home is redirected there).
+function href(suite, module, view) {
+  if (suite?.id === HOME && !module) return '#/';
+  return '#/' + [suite?.id, module?.id, view?.id].filter(Boolean).map(encodeURIComponent).join('/');
+}
 
 function parseRoute() {
   const [path, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
   const [suiteId, moduleId, viewId] = path.split('/').filter(Boolean).map(decodeURIComponent);
   const at = new URLSearchParams(query).get('at');
   let suite = suiteId ? findSuite(suiteId) : null, module = null, view = null;
+  // A lone submodule id or alias, where a module's would be, opens that submodule: #/workspace, the old Workspace, is
+  // the Dashboard's alias.
+  if (suiteId && !suite && !moduleId) { const own = findModule(suiteId); if (own) ({ suite, module } = own); }
   if (moduleId) {
     const hit = (suite && suite.modules.find(m => m.id === moduleId || m.aliases?.includes(moduleId))) || findModule(moduleId)?.module || null;
     if (hit) { module = hit; suite = state.registry.suites.find(s => s.modules.includes(hit)); }
@@ -42,7 +58,10 @@ function parseRoute() {
     // An old sub-entry that is now its own submodule (e.g. War Focus under Retrospective Battlefield).
     if (!view) { const own = findModule(viewId); if (own) { module = own.module; suite = own.suite; } }
   }
-  return { suite, module, view, at, query };
+  // The Home module's overview is the Home page: #/home shows it, and route() moves the address to #/.
+  const home = suite?.id === HOME && !module;
+  if (home) suite = null;
+  return { suite, module, view, at, query, home };
 }
 
 // The only addresses a page may move the shell to (Kino's 'prp:navigate', the now-playing bar's "Back to film").
@@ -99,13 +118,18 @@ function navItem(suite, m) {
 }
 // A module's own figure, small, beside its code (decorative: the module's name is beside it).
 const suiteMark = (suite, size) => (suite.mark ? `<img class="suite-mark" src="${esc(suite.mark)}" alt="" width="${size}" height="${size}">` : '');
+// Each module's link to its overview. The Home module's is the Home page, an item of its own with the ⌂ the sidebar
+// always opened with; every other module's is a quiet "Module overview" under its name.
+const overviewName = suite => (suite.id === HOME ? 'Home page' : 'Module overview');
+const overviewLink = suite => (suite.id === HOME
+  ? `<a class="nav-item home-link" href="${href(suite)}" data-route=""><span class="icon" aria-hidden="true">⌂</span><span class="grow">${overviewName(suite)}</span></a>`
+  : `<a class="suite-link" href="${href(suite)}" data-route="${suite.id}">${overviewName(suite)}</a>`);
 function renderNav() {
   const P = state.registry.platform;
-  $('#nav').innerHTML = `<a class="nav-item" href="#/" data-route=""><span class="icon" aria-hidden="true">⌂</span><span class="grow">Home</span></a>` +
-    state.registry.suites.map(suite => `
+  $('#nav').innerHTML = state.registry.suites.map(suite => `
       <details class="suite" data-suite="${suite.id}" open>
         <summary${suite.title && suite.title !== suite.name ? ` title="${esc(suite.title)}"` : ''}><span class="prp-code" data-suite="${suite.id}">${esc(suite.code)}</span>${suiteMark(suite, 20)}${esc(suite.name)}<span class="chev" aria-hidden="true">›</span></summary>
-        <a class="suite-link" href="${href(suite)}" data-route="${suite.id}">Module overview</a>
+        ${overviewLink(suite)}
         ${suite.modules.map(m => navItem(suite, m)).join('')}
       </details>`).join('') +
     `<div class="search-results" id="search-results" hidden></div>`;
@@ -146,7 +170,63 @@ const tile = (suite, m) => `<a class="tile" href="${href(suite, m)}" data-suite=
     <div class="foot"><span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status] || m.status)}</span><span>${esc(m.host)}</span>${m.opensInNewTab ? '<span>Opens in a new tab</span>' : ''}</div>
   </a>`;
 
+/* --- Home page (#/) --------------------------------------------------------------------------------------------------
+   The Home module's overview, where VM starts: its intro (the registry's tagline), a small button to the Dashboard, and
+   every other module as a box, in registry order (Home has none: this page is its own). Each box is one link to the
+   module's overview: on the front the module's code, its mark where it has one, its full title and its submodules'
+   icons, and on the back its "summary", what you can do with it in a line or two. The box turns over (a 3D card flip,
+   shell.css "Home page") while a mouse is over it, while it has keyboard focus, and on a touch screen at the first tap,
+   the second tap opening it (setupHome); with reduced motion the back shows in place of the front, with no turn. The
+   link is named by the title and described by the summary (aria-labelledby, aria-describedby), so a screen reader gets
+   both whichever face is showing; the icons and "Module overview →" on the back only decorate or repeat what the link
+   says and does, so they are hidden from it. */
+const modBox = s => {
+  const id = `mod-${esc(s.id)}`;
+  return `<li class="mod" data-suite="${esc(s.id)}">
+    <a class="mod-card" href="${href(s)}" aria-labelledby="${id}-name" aria-describedby="${id}-does">
+      <span class="mod-turn">
+        <span class="mod-face mod-front"><span class="mod-id"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 40)}</span><span class="mod-name" id="${id}-name">${esc(s.title || s.name)}</span><span class="mod-subs" aria-hidden="true">${s.modules.map(m => `<span>${esc(m.icon)}</span>`).join('')}</span></span>
+        <span class="mod-face mod-back"><span class="mod-does" id="${id}-does">${esc(s.summary || s.description)}</span><span class="mod-go" aria-hidden="true">Module overview →</span></span>
+      </span>
+    </a>
+  </li>`;
+};
 function renderHome() {
+  const P = state.registry.platform, home = findSuite(HOME), dash = home?.modules.find(m => m.shell === 'dashboard');
+  $('#view').innerHTML = `<div class="page home" data-suite="${HOME}">
+    <header class="head home-head"><div>
+      <div class="prp-eyebrow">${esc(P.fullName)} <span class="sep">·</span> by ${esc(P.company)}</div>
+      <h1 class="prp-title">${esc(home?.title || 'Home')}</h1>
+      <p class="prp-dek">${esc(P.tagline)}</p></div>
+      ${dash ? `<a class="prp-btn sm home-dash" href="${href(home, dash)}" title="${esc(dash.description)}"><span aria-hidden="true">${esc(dash.icon)}</span>${esc(dash.name)}</a>` : ''}
+    </header>
+    <ul class="mods" role="list" aria-label="Modules">${state.registry.suites.filter(s => s.id !== HOME).map(modBox).join('')}</ul>
+    <footer class="footer"><span>${esc(P.fullName)} (${esc(P.name)}), by ${esc(P.company)}.</span><span>Registry v${esc(P.version)}</span></footer>
+  </div>`;
+}
+// A tap turns a box over and a second tap on it opens its module; a tap anywhere else in the view turns it back (one on
+// the sidebar or the top bar leaves it, and the next visit redraws it unturned). A mouse turns a box by hovering and the
+// keyboard by focus (shell.css), so neither is held up here. A tap is told from a click by the pointer that made it: the
+// click's own pointerType where the browser gives one, otherwise a touch pressed just before it (a click from the
+// keyboard, or one a screen reader makes, is never a tap: it opens the module at once). Set up once: the boxes are
+// redrawn on every visit.
+function setupHome() {
+  let down = { type: '', at: -Infinity };
+  $('#view').addEventListener('pointerdown', e => { down = { type: e.pointerType, at: performance.now() }; }, { capture: true, passive: true });
+  $('#view').addEventListener('click', e => {
+    const card = e.target.closest?.('.mod-card');
+    document.querySelectorAll('#view .mod-card.flipped').forEach(c => { if (c !== card) c.classList.remove('flipped'); });
+    const tap = e.pointerType ? e.pointerType === 'touch' : !!e.detail && down.type === 'touch' && performance.now() - down.at < 1500;
+    if (!card || !tap || card.classList.contains('flipped')) return;
+    e.preventDefault();
+    card.classList.add('flipped');
+  });
+}
+
+/* --- Dashboard (#/home/dashboard) ---------------------------------------------------------------------------------
+   The Home module's one submodule, drawn by the shell itself: the Today panel over every module and submodule. It was
+   the home page, the Workspace, until November 2026; its catalogue still lists every module, Home's included. */
+function renderDashboard(suite, module) {
   const P = state.registry.platform, mods = allModules();
   const kinds = mods.reduce((a, x) => ((a[x.module.kind] = (a[x.module.kind] || 0) + 1), a), {});
   // The Today panel (PRP-ANALYSIS.md item 3): above the catalogue, the few lines that actually change. Its data loads
@@ -154,13 +234,13 @@ function renderHome() {
   // dropped in here synchronously so a return visit shows it with no flash and no jump (a stale one is then refreshed
   // in place). The product counts move below it, as the analysis asks ("The counts can stay, below.").
   const today = TODAY_PANEL ? readTodayCache() : null;
-  $('#view').innerHTML = `<div class="page">
+  $('#view').innerHTML = `<div class="page" data-suite="${esc(suite.id)}">
     <header class="head">
-      <div class="prp-eyebrow">${esc(P.fullName)} <span class="sep">·</span> by ${esc(P.company)}</div>
-      <h1 class="prp-title">Workspace</h1>
-      <p class="prp-dek">${esc(P.tagline)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
+      <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(module.name)}</div>
+      <h1 class="prp-title">${esc(module.name)}</h1>
+      <p class="prp-dek">${esc(module.description)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
     </header>
-    ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today in your workspace" aria-live="off"${today ? '' : ' aria-busy="true"'}>${todayInnerHtml(today?.groups)}</section>` : ''}
+    ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today on your Dashboard" aria-live="off"${today ? '' : ' aria-busy="true"'}>${todayInnerHtml(today?.groups)}</section>` : ''}
     <div class="prp-kpis today-kpis">
       <div class="prp-kpi"><span>Modules</span><b>${state.registry.suites.length}</b></div>
       <div class="prp-kpi"><span>Submodules</span><b>${mods.length}</b></div>
@@ -168,7 +248,7 @@ function renderHome() {
       <div class="prp-kpi"><span>Retrospective</span><b>${kinds.retrospective || 0}</b></div>
     </div>
     ${state.registry.suites.map((s, i) => `<section class="group" data-suite="${s.id}">
-      <div class="group-head"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 22)}<h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">Module overview →</a></div>
+      <div class="group-head"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 22)}<h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">${overviewName(s)} →</a></div>
       <p>${esc(s.description)}</p>
       <div class="tiles">${s.modules.map(m => tile(s, m)).join('')}</div>
     </section>`).join('')}
@@ -178,6 +258,8 @@ function renderHome() {
   // through the highlights module, a hit renders at once. It never throws into route().
   if (TODAY_PANEL) (window.requestIdleCallback ? requestIdleCallback(loadToday, { timeout: 1500 }) : setTimeout(loadToday, 0));
 }
+// The submodules the shell draws itself, by their registry "shell" value.
+const SHELL_PAGES = new Map([['dashboard', renderDashboard]]);
 
 function renderSuite(suite) {
   const live = suite.modules.filter(m => m.status === 'live').length;
@@ -214,22 +296,24 @@ function renderLaunch(suite, m, url) {
     <div class="actions"><a class="prp-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(m.name)} ↗</a></div>`);
 }
 
-/* --- Workspace "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
-   The home's cards never change, so above them we show the few things that do — the biggest 7-day volatility movers,
-   how busy the briefings have been this week, the next votes and summits, and a market snapshot — each line a link into
-   the submodule it came from. The data is design/prp-highlights.js over about 3 KB of files the Integration Hub derives
-   for it, the Realtime Calendar's window and the trade-desk public API.
-   To honour the analysis's performance mandate it is NEVER on the first-paint path: renderHome() paints the cards, then
-   schedules loadToday() for idle time. The panel has four fixed slots (TODAY_SLOTS); each shows a loading card until its
-   group settles, then the group, as soon as its own sources have answered (the slowest is never waited on: every request
-   gives up after TODAY_FETCH_MS). Every card reserves the height of its fullest content (shell.css), so neither the fill
-   nor a refresh moves anything below it. A group whose source failed shows a quiet "not available" in its slot; only when
-   every source fails is the panel hidden.
+/* --- Dashboard "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
+   The Dashboard's cards never change, so above them we show the few things that do — the biggest 7-day volatility
+   movers, how busy the briefings have been this week, the next votes and summits, and a market snapshot — each line a
+   link into the submodule it came from. (It was the Workspace home's, at #/, until the Home page took that address in
+   November 2026; it is only ever on the Dashboard, #/home/dashboard, now.) The data is design/prp-highlights.js over
+   about 3 KB of files the Integration Hub derives for it, the Realtime Calendar's window and the trade-desk public API.
+   To honour the analysis's performance mandate it is NEVER on the first-paint path: renderDashboard() paints the cards,
+   then schedules loadToday() for idle time. The panel has four fixed slots (TODAY_SLOTS); each shows a loading card
+   until its group settles, then the group, as soon as its own sources have answered (the slowest is never waited on:
+   every request gives up after TODAY_FETCH_MS). Every card reserves the height of its fullest content (shell.css), so
+   neither the fill nor a refresh moves anything below it. A group whose source failed shows a quiet "not available" in
+   its slot; only when every source fails is the panel hidden.
    The result is kept in sessionStorage with when it was written and until when it is fresh (45 minutes, or the next UTC
    midnight if that is sooner: the module's cacheEntry). A fresh entry is shown and nothing is fetched; a stale one is
-   shown at once and refreshed in place, slot by slot; and while the home stays open the panel refreshes itself when its
-   entry goes stale. The panel is aria-live="off" inside the view's polite live region, so its fill and refreshes are not
-   read out over whatever the reader is doing; it is a labelled region with headings, there to be visited.
+   shown at once and refreshed in place, slot by slot; and while the Dashboard stays open the panel refreshes itself
+   when its entry goes stale. The panel is aria-live="off" inside the view's polite live region, so its fill and
+   refreshes are not read out over whatever the reader is doing; it is a labelled region with headings, there to be
+   visited.
    Every string is DATA from the module (or the session cache) and is escaped with esc() before it reaches the DOM,
    exactly as tile()/navItem() do, and a link is only ever a shell route. The honest time-window label the module
    computes for each group is shown verbatim, never sharpened. */
@@ -240,8 +324,9 @@ const TODAY_LINES = 5;              // the module's MAX_LINES: the most lines a 
 const TODAY_FETCH_MS = 8000;        // no source is waited on longer than this
 let todayPending = false;           // one load at a time
 let todayLoads = 0;                 // numbers each load, so a slot filled by this load is not filled again
-let todayTimer = 0;                 // looks again when the entry goes stale while the home stays open
-const onHome = () => !!$('#today') && !state.route?.suite && !state.route?.module;
+let todayTimer = 0;                 // looks again when the entry goes stale while the Dashboard stays open
+// The panel is drawn and filled only while the Dashboard is shown (and only there).
+const onDashboard = () => !!$('#today') && state.route?.suite?.id === HOME && state.route?.module?.shell === 'dashboard';
 const shellRoute = h => (SHELL_ROUTE.test(String(h || '')) ? h : '#/'); // a link is only ever a shell route
 const abortAfter = ms => (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(ms) : undefined);
 
@@ -302,13 +387,14 @@ function renderTodaySlot(g, load) {
   if (at >= 0) (card.querySelectorAll('a')[at] || card.querySelector('a'))?.focus({ preventScroll: true });
 }
 
-// Load the panel after the home is interactive, and again whenever its entry has gone stale. A fresh entry needs
+// Load the panel after the Dashboard is interactive, and again whenever its entry has gone stale. A fresh entry needs
 // nothing. Otherwise the highlights module fetches every source at once (it never rejects) and hands each group over as
 // it settles; each goes straight into its slot, replacing the loading card or the stale group. The viewer may leave the
-// home while this runs, so the DOM is checked before every touch; called at idle time and by a timer, so it never throws.
+// Dashboard while this runs, so the DOM is checked before every touch; called at idle time and by a timer, so it never
+// throws.
 async function loadToday() {
   clearTimeout(todayTimer);
-  if (!onHome()) return; // only on the Workspace home (#/), only while shown
+  if (!onDashboard()) return; // only on the Dashboard (#/home/dashboard), only while shown
   const again = e => { todayTimer = setTimeout(loadToday, Math.max(0, e.until - Date.now()) + 1000); };
   const cached = readTodayCache();
   if (todayFresh(cached)) { again(cached); return; }
@@ -324,17 +410,17 @@ async function loadToday() {
       // hold its slot (or any other) beyond that.
       fetch: url => fetch(url, { signal: abortAfter(TODAY_FETCH_MS) }),
       timeoutMs: TODAY_FETCH_MS,
-      onGroup: g => { if (!TODAY_SLOTS.includes(g?.id)) return; settled[g.id] = g; if (onHome()) renderTodaySlot(g, load); },
+      onGroup: g => { if (!TODAY_SLOTS.includes(g?.id)) return; settled[g.id] = g; if (onDashboard()) renderTodaySlot(g, load); },
     });
     const groups = TODAY_SLOTS.map(id => settled[id]).filter(Boolean);
     const any = groups.some(g => !g.unavailable);
-    if (any) { const entry = cacheEntry(groups); writeTodayCache(entry); if (onHome()) again(entry); }
-    if (onHome()) {
-      // A slot this load has not filled (the viewer left the home and came back meanwhile) gets its group now.
+    if (any) { const entry = cacheEntry(groups); writeTodayCache(entry); if (onDashboard()) again(entry); }
+    if (onDashboard()) {
+      // A slot this load has not filled (the viewer left the Dashboard and came back meanwhile) gets its group now.
       for (const g of groups) if (!$(`#today .today-card[data-group="${g.id}"][data-load="${load}"]`)) renderTodaySlot(g, load);
       if (!any) $('#today').hidden = true; // nothing could be read at all (offline): no box of four apologies
     }
-  } catch { if (onHome()) $('#today').hidden = true; } // the module itself could not be loaded: hide the panel, never break the shell
+  } catch { if (onDashboard()) $('#today').hidden = true; } // the module itself could not be loaded: hide the panel, never break the shell
   finally { todayPending = false; $('#today')?.removeAttribute('aria-busy'); }
 }
 
@@ -536,9 +622,9 @@ function setupNowPlaying() {
 /* --- Router ---------------------------------------------------------------- */
 function route() {
   const r = parseRoute();
-  // Rewrite old addresses (aliases, moved submodules, views that became submodules) to their canonical form.
-  const canon = href(r.suite, r.module, r.view) + (r.query ? '?' + r.query : '');
-  if ((r.suite || r.module) && location.hash !== canon && location.hash.replace(/^#\/?/, '#/') !== canon) { history.replaceState(null, '', canon); }
+  // Rewrite old addresses (aliases, moved submodules, views that became submodules, #/home) to their canonical form.
+  const canon = href(r.suite, r.module, r.view) + (r.query && !r.home ? '?' + r.query : '');
+  if ((r.suite || r.module || r.home) && location.hash !== canon && location.hash.replace(/^#\/?/, '#/') !== canon) { history.replaceState(null, '', canon); }
   state.route = r;
   if (r.suite) document.documentElement.dataset.suite = r.suite.id; else delete document.documentElement.dataset.suite;
 
@@ -553,13 +639,14 @@ function route() {
   // A deep link to the page's own address (e.g. "open Volatility") is a plain visit: the frame shows as it was left.
   if (framed) frame = showFrame(r, url, !!at && new URL(at).href !== new URL(base, location.href).href);
   else if (url) renderLaunch(r.suite, r.module, url);
+  else if (SHELL_PAGES.has(r.module?.shell)) SHELL_PAGES.get(r.module.shell)(r.suite, r.module); // the Dashboard
   else if (r.module) renderNotice(r.suite, r.module, `<div class="prp-note" style="margin-top:18px"><b>Not published yet.</b> It will open here once it has a live address.</div>`);
   else if (r.suite) renderSuite(r.suite);
   else renderHome();
 
   if (!framed) { $('#view').scrollTop = 0; syncLoading(); }
   const P = state.registry.platform;
-  // "<Submodule> · VM", "<Module title> · VM", and the product's full name on the home (as index.html's own <title>).
+  // "<Submodule> · VM", "<Module title> · VM", and the product's full name on the Home page (index.html's own <title>).
   document.title = [r.view?.name, r.module?.name, r.suite && !r.module ? r.suite.title || r.suite.name : null, r.suite ? P.name : P.fullName].filter(Boolean).join(' · ');
   renderTop(r, frame);
   highlightNav(r);
@@ -575,7 +662,7 @@ function setupFind() {
     const q = input.value.trim().toLowerCase();
     document.querySelectorAll('#nav [data-search]').forEach(el => { el.hidden = !!q && !el.dataset.search.includes(q); });
     document.querySelectorAll('#nav .suite').forEach(s => { const any = [...s.querySelectorAll('[data-search]')].some(el => !el.hidden); s.hidden = !!q && !any; if (q) s.open = true; });
-    document.querySelectorAll('#nav .suite-link, #nav > .nav-item').forEach(el => { el.hidden = !!q; });
+    document.querySelectorAll('#nav .suite-link, #nav .home-link').forEach(el => { el.hidden = !!q; });
     const box = results();
     if (q && enc) {
       const at = new URL(`${enc.module.url}#explore?q=${encodeURIComponent(input.value.trim())}`, location.href).href;
@@ -668,6 +755,7 @@ function setupMenu() {
   setupSkip();
   setupMenu();
   setupCollapse();
+  setupHome();
   try { state.registry = await fetch('registry.json', { cache: 'no-cache' }).then(r => r.json()); }
   catch (err) { $('#view').innerHTML = '<div class="page"><div class="prp-note">Could not load the module registry. Serve this folder over HTTP.</div></div>'; console.error(err); return; }
   renderNav();

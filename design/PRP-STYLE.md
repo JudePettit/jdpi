@@ -22,15 +22,17 @@ plays `design/vm-loading.svg` while a page loads. `design/brand-prp.svg` stays i
 **A module's own figure.** A module may have its variant of the figure, on the mark's geometry and in the design
 system's colours, on the mark's dark tile so that it reads in both themes. The registry names it on the module:
 `"figure"` (the full drawing, for 72 px and up) and `"mark"` (its reduction, for 16 to 40 px). The shell shows the mark
-beside the module's code in the sidebar and on the home page, and the figure at the head of the module's overview; the
-module's landing page shows the figure in its header, as its `<img>` with alt text. So far there is one: **Highbrowse**,
-`design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA DIURNA over NOVA VERITATIS, one
-eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a figure's type in `<text>` held by
-`textLength`, and no double hyphen inside its comments (an SVG with one is not XML, and does not draw).
+beside the module's code in the sidebar, in its box on the Home page and on the Dashboard, and the figure at the head of
+the module's overview; the module's landing page shows the figure in its header, as its `<img>` with alt text. So far
+there is one: **Highbrowse**, `design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA
+DIURNA over NOVA VERITATIS, one eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a
+figure's type in `<text>` held by `textLength`, and no double hyphen inside its comments (an SVG with one is not XML,
+and does not draw).
 
 | Old | New | id (registry) | Code |
 |---|---|---|---|
 | JDP-I, then PRP (platform) | **Vitruvian Manager** (**VM**), by **JDP-Iq** | | |
+| (new, November 2026) | **Home** (the Home page and the Dashboard) | `home` | HM |
 | Q · Geopolitical Intelligence | **Realtime Geopolitics** | `rt` (alias `q`) | RT |
 | (new, November 2026) | **Highbrowse** (the four briefings) | `hb` | HB |
 | H&P · History & Politics | **Retrospective Geopolitics** | `rs` (alias `hp`) | RS |
@@ -40,13 +42,17 @@ eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
 
-In the registry the eight are "suites" and their pages "modules"; in the interface we say **module** for the eight and
+In the registry the nine are "suites" and their pages "modules"; in the interface we say **module** for the nine and
 **submodule** for the pages. A module has a short `name` (the sidebar, the breadcrumb, search) and a full `title` (its
-overview page, the home's headings, page eyebrows, the tab title); they differ only for International Mystery
-Management, whose sidebar name is **Int-Myst Mngmnt**.
+overview page, its box on the Home page, the Dashboard's headings, page eyebrows, the tab title); they differ only for
+International Mystery Management, whose sidebar name is **Int-Myst Mngmnt**. It also has a `summary`: what you can do
+with it, in a line or two (about 110 characters at most), for the back of its box on the Home page. Write it from what
+its submodules do, beginning with a verb: "Follow today's politics, conflicts and country risk: headlines, volatility,
+wars, leaders and coming votes."
 
 | Submodule | Module | Notes |
 |---|---|---|
+| Dashboard (was the Workspace, the home page) | HM (new, November 2026) | drawn by the shell itself (`"shell": "dashboard"`, no `url`): the Today panel over every module and submodule, at `#/home/dashboard`; `#/workspace` lands there |
 | Highbrowse (the module's landing page) | HB (new) | `highbrowse/`: the day's and the week's news across the four briefings (the biggest stories and topics, each briefing's coverage, the stories they share, the political spread) and one search across them; Today, This week and Search are tabs; it reads the briefings' own stores and has no data of its own |
 | Political Briefing (was Intelligence Briefing, before that Briefing) | HB (moved from RT) | `q/briefing.html`; reads `#q=` and `#w=` as the other briefings do, and `soft=1` to show sport, entertainment and lifestyle on one visit; a move by hash also puts back All stories, every publisher and all five positions |
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`), the name the Highbrowse module shares |
@@ -72,7 +78,8 @@ Management, whose sidebar name is **Int-Myst Mngmnt**.
 | Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/` |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
 
-**Sidebar order.** Within each module the strongest submodules come first, the calendar second-last and the course last.
+**Sidebar order.** Home comes first, its Home page item (with ⌂) where every other module has its "Module overview".
+Within each module the strongest submodules come first, the calendar second-last and the course last.
 
 Never write "JDP-I", "PRP", "Q", "H&P" or "F&E", or a module's former name, in visible text any more (code identifiers,
 file names and URLs may keep them). Page titles: `<Submodule> · VM` (e.g. `Political Briefing · VM`).
@@ -111,14 +118,35 @@ live caption): Kino posts `prp:nowplaying` messages and the bar posts `prp:kino-
 protocol is in `kino/README.md`, "Now playing"). It covers the bottom of the workspace (about 60 px, 80 px on phones),
 so a page should not pin anything it needs there.
 
+### In the shell: the Home page and the Dashboard
+
+The shell draws two pages itself, both the Home module's (`shell.js`, `shell.css`), on the same anatomy as any other.
+
+**The Home page** (`#/`) is where VM starts: the eyebrow "Vitruvian Manager · by JDP-Iq", the title "Home", the intro
+(the registry's `platform.tagline`: "Vitruvian Manager's modules allow you to learn, earn, create, and control.") and a
+small button (`.prp-btn.sm`) to the Dashboard; then every other module as a box, in registry order, four across on a
+wide screen and one on a phone. A box is one link to the module's overview. Its front shows the module's code, its mark
+where it has one, its full title and its submodules' icons, under a rule in its accent; its back, its `summary` on its
+accent's soft tint, and "Module overview →". It turns over (a 3D card flip about its upright axis) while a mouse is
+over it, while it has keyboard focus, and at a first tap on a touch screen, a second tap opening it; a click or Enter
+opens it at once. With reduced motion nothing turns: the back shows in place of the front. The link is named by the
+title and described by the summary (`aria-labelledby`, `aria-describedby`), so a screen reader gets both whichever face
+is up; the faces swap by transform and opacity, never `visibility` or `display`, which would take one from it.
+
+**The Dashboard** (`#/home/dashboard`, breadcrumb VM / Home / Dashboard) was the home page, the Workspace, until
+November 2026: the Today panel (`design/prp-highlights.js`), the four counts, and every module and submodule as tiles.
+It is the one submodule without a page of its own: the registry gives it `"shell": "dashboard"` in place of a `url`, and
+the shell draws it in its view, with no frame. `#/workspace` lands on it, and `#/home` on the Home page.
+
 ## 3. Tokens (write CSS against these; no raw hex in page CSS)
 
 - Surfaces: `--prp-canvas` (page background), `--prp-surface` (panels, inputs), `--prp-surface-2` (table heads,
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-rt|hb|rs|oi|mm|ns|ds|kn` and `-soft`
-  (Highbrowse's `--prp-hb` is Tyrian purple, the senator's stripe).
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-hm|rt|hb|rs|oi|mm|ns|ds|kn` and
+  `-soft` (Home's `--prp-hm` is a neutral, the secondary ink `--prp-text-2` in each theme, since Home is VM itself;
+  Highbrowse's `--prp-hb` is Tyrian purple, the senator's stripe).
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,
@@ -218,6 +246,9 @@ voice gets wrong go in `PRPVoice.lexicon` (bump its version: it is part of every
 
 Contrast ≥4.5:1 for text (use `--prp-muted` or darker for anything readable), visible focus (`:focus-visible`), keyboard
 operable tabs and sliders, `prefers-reduced-motion` respected, form labels, `aria-live` for updating feeds.
+A card that turns over (the Home page's boxes) turns for the keyboard as it does for the mouse (on focus), at a first
+tap on a touch screen, keeps both faces in the accessibility tree (its name and its description), and with reduced
+motion shows its back without turning.
 The period control is a labelled group of two native range inputs ("Start of the period", "End of the period" or the
 page's own names), each with an `aria-valuetext` in words ("1939", "July 1940", "29 Oct 2026"; a resting start adds "(the same
 as the end)") and the native keys (arrows, Page Up/Down, Home, End) with the same push and pull; ▶ toggles its name to

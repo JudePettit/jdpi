@@ -1,14 +1,15 @@
-/* Vitruvian Manager highlights: the data behind the Workspace "Today" panel (PRP-ANALYSIS.md item 3, "Make the
-   Workspace a workspace, not a catalogue"). The home page's four counts and 35 cards never change; this builds the few
-   lines that do — the countries whose geopolitical volatility moved most over the last week, how busy each briefing has
-   been, the next votes and summits on the calendar, and a market snapshot — each line linking back into the submodule it
-   came from, so the home page points at what actually needs attention today.
+/* Vitruvian Manager highlights: the data behind the Dashboard's "Today" panel (#/home/dashboard; the panel was the
+   Workspace home page's until November 2026, PRP-ANALYSIS.md item 3, "Make the Workspace a workspace, not a
+   catalogue"). The Dashboard's four counts and its cards never change; this builds the few lines that do — the
+   countries whose geopolitical volatility moved most over the last week, how busy each briefing has been, the next
+   votes and summits on the calendar, and a market snapshot — each line linking back into the submodule it came from, so
+   the Dashboard points at what actually needs attention today.
 
    Pure and DOM-free, so the same code runs in the Node test and in the shell: it takes an injected fetch, reads only
    small public JSON (two files the Integration Hub derives for this panel, about 3 KB together, and the Realtime
-   Calendar's window) and the trade-desk public API, and returns plain data. The shell loads it lazily after the home is
-   interactive, renders each group the moment it settles (onGroup), and keeps the result in the session for 45 minutes
-   (cacheEntry); nothing here can block or break the shell.
+   Calendar's window) and the trade-desk public API, and returns plain data. The shell loads it lazily after the
+   Dashboard is interactive, renders each group the moment it settles (onGroup), and keeps the result in the session for
+   45 minutes (cacheEntry); nothing here can block or break the shell.
 
    HONESTY (PRP-ANALYSIS.md item 3, and the two reviews of this panel): every group is labelled by what its data
    genuinely is, and says what the page it links to says.

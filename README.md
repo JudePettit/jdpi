@@ -1,9 +1,10 @@
 # Vitruvian Manager (VM), by JDP-Iq
 
-**Vitruvian Manager** (short **VM**) is a product of **JDP-Iq**. It does for one person what an ERP does for an
-enterprise: one workspace for geopolitics, intelligence tradecraft, history, money and science. You pick a submodule in
-the sidebar, it opens in the main area, and every submodule shares one design system, one Master Index and one
-light/dark theme. Its mark is Leonardo's Vitruvian figure in a hard hat (`design/brand-vm.svg`).
+**Vitruvian Manager** (short **VM**) is a product of **JDP-Iq**. Vitruvian Manager's modules allow you to learn, earn,
+create, and control. It opens on the Home page, where every module is a box that turns over to what you can do with it,
+with a button to the Dashboard of what changed today. You pick a submodule in the sidebar, it opens in the main area,
+and every submodule shares one design system, one Master Index and one light/dark theme. Its mark is Leonardo's
+Vitruvian figure in a hard hat (`design/brand-vm.svg`).
 
 Live at **https://jdpi.pages.dev** (Cloudflare Pages, deployed from this repo by GitHub Actions once the tests pass). Formerly PRP, and before that "JDP-I".
 "prp" is still the internal name: file names (`design/prp.css`, `design/PRP-STYLE.md`), tokens (`--prp-*`), classes,
@@ -11,6 +12,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 
 | Module | Code | Submodules |
 |---|---|---|
+| **Home**: where VM starts; its overview is the Home page, every other module as a box that turns over to what you can do with it | HM | Dashboard (what changed today: volatility's biggest movers, the briefings' week, the next votes and summits, the markets; then every module and submodule) |
 | **Realtime Geopolitics**: what is happening now | RT | Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
 | **Highbrowse**: the news worth reading, in four briefings | HB | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
@@ -20,11 +22,20 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
 
-(In `registry.json` the eight modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
-shows and its `title` what its overview page and page eyebrows show. The old ids `q`, `hp` and `fe` still work as
-aliases, and so do the addresses of submodules that moved to another module: the four briefings, which came to
-Highbrowse in November 2026 from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open
-at `#/rt/briefing`, `#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`.)
+(In `registry.json` the nine modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
+shows, its `title` what its overview page, its box on the Home page and page eyebrows show, and its `summary` the line
+or two on the back of its box: what you can do with it. The old ids `q`, `hp` and `fe` still work as aliases, and so do
+the addresses of submodules that moved to another module: the four briefings, which came to Highbrowse in November 2026
+from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open at `#/rt/briefing`,
+`#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`.)
+
+The Home module (`home`, first in the sidebar, November 2026) is where VM starts. Its overview is the Home page (`#/`;
+`#/home` lands there): the intro, a small button to the Dashboard, and every other module as a box in registry order,
+which turns over (a 3D card flip) on hover, on keyboard focus or at a first tap on a touch screen, a second tap or a
+click opening the module's overview; with reduced motion its back shows without the turn. Its one submodule is the
+Dashboard (`#/home/dashboard`, breadcrumb VM / Home / Dashboard), which was the home page, the Workspace, until then:
+the Today panel (`design/prp-highlights.js`) over every module and submodule. The shell draws it itself (`"shell":
+"dashboard"` in the registry, in place of a `url`), and the Workspace's old name, `#/workspace`, lands on it.
 
 The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait and other lowbrow stories is called
 **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`. The
@@ -36,6 +47,7 @@ browser, with no data or timed job of its own, and its figure is the first modul
 
 ```
   VM shell (this repo): sidebar → modules → submodules · breadcrumb · search · theme · registry.json
+        │ draws the Home page (#/) and the Dashboard (#/home/dashboard) itself
         │ one persistent iframe per submodule page (state is kept when you switch)
         ├── pages in this repo: q/, highbrowse/, battlefield/, kardashev/, encyclopedia/, fe/, science/, econ/, digital/, osint/, sigint/, geoint/, …
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
@@ -46,8 +58,8 @@ browser, with no data or timed job of its own, and its figure is the first modul
 
 | Piece | File | Role |
 |---|---|---|
-| Registry | `registry.json` | Modules, submodules, URLs, kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
-| Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames. |
+| Registry | `registry.json` | Modules (each with its `summary`, the back of its box on the Home page), submodules, URLs (the Dashboard has `"shell": "dashboard"` instead: the shell draws it), kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
+| Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames; the Home page (every module as a box that turns over to its `summary`) and the Dashboard (the Today panel over every module and submodule). |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
 | Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Master Index links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
 | Brand | `design/brand-vm.svg`, `design/brand-vm-icon.svg`, `design/vm-loading.svg` | The mark (sidebar), the favicon (every page), and the figure the shell plays while a page loads. `design/brand-prp.svg`, the old mark, stays for external links. A module may have its own variant of the figure (registry `mark` and `figure`): Highbrowse's is `design/brand-hb.svg` and `design/brand-hb-icon.svg`. |

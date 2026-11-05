@@ -32,6 +32,7 @@ const SUBMODULE = new Map(registry.suites.flatMap(s => s.modules.map(m => [m.id,
 const STORIES = 'stories, not entities: news items whose names carry no Wikidata ID or Wikipedia link, so the page linker has '
   + 'nothing to badge yet; marking the countries each story is filed under with data-qid is to come';
 const EXEMPT = {
+  dashboard: 'the shell’s own page (the Home module’s, once the Workspace): a few lines from other submodules’ data over every module and submodule, with no entities of its own',
   encyclopedia: 'the Master Index itself: it reads the lake that every other submodule feeds',
   briefing: STORIES, 'econ-briefing': STORIES, 'science-briefing': STORIES, 'digital-briefing': STORIES, headlines: STORIES,
   highbrowse: 'a view of the four briefings’ stories (exempt above): its stories, topics and search are theirs, with no entities of its own',

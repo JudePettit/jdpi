@@ -202,7 +202,10 @@ export function dedupe(items, sourceOf) {
     if (hit) {
       if (it.source !== hit.source && !(hit.also || []).includes(it.source)) hit.also = [...(hit.also || []), it.source];
       for (const s of it.also || []) if (s !== hit.source && !(hit.also || []).includes(s)) hit.also = [...(hit.also || []), s];
-      hit.disciplines = [...new Set([...hit.disciplines, ...it.disciplines])];
+      // In the canonical order, as every stored item's are (the data test checks it): added at the end, a physics
+      // feed's copy of a paper first seen in a space feed made "space, physics", and the refresh was refused.
+      const merged = new Set([...hit.disciplines, ...it.disciplines]);
+      hit.disciplines = DISCIPLINE_IDS.filter(d => merged.has(d));
       if (!hit.summary && it.summary) hit.summary = it.summary;
       if (!hit.doi && it.doi) hit.doi = it.doi;
       if (it.doi) byDoi.set(it.doi.toLowerCase(), hit);

@@ -122,6 +122,23 @@ test('store: duplicates merge into the highest tier, stale and dropped items lea
   assert.deepEqual(merged[0].disciplines, ['physics']);
 });
 
+test('store: a duplicate from another discipline\'s feed adds its discipline in the canonical order', () => {
+  // A Nature Physics paper that Nature Astronomy's feed listed first. When Nature Physics' own feed carried it too, on
+  // 4 November 2026, the merged copy came out as space, physics; the data test refused that order, and the Scientific
+  // Briefing went unrefreshed until the merge was fixed.
+  const now = Date.parse('2026-11-04T12:00:00Z');
+  const paper = { kind: 'journal', tier: 2, type: 'paper', summary: '', disciplines: [], title: 'The challenge of recognition in large scientific collaborations',
+    url: 'https://www.nature.com/articles/s41567-026-03511-0', doi: '10.1038/s41567-026-03511-0', published: '2026-10-30T00:00:00.000Z' };
+  const merged = mergeStore({
+    prevItems: [{ ...paper, id: 'a1', source: 'nature-astro', disciplines: ['space'] }],
+    freshItems: [{ ...paper, id: 'b1', source: 'nphys' }],
+    sources: SOURCES, now, keepDays: 7,
+  });
+  assert.deepEqual(merged.map(i => i.id), ['a1']);
+  assert.deepEqual(merged[0].also, ['nphys']);
+  assert.deepEqual(merged[0].disciplines, ['physics', 'space']);
+});
+
 // ---- View logic (science/briefing/view.js) ---------------------------------------------------------------------------
 test('view: deep links (#d=<discipline>) and the URL hash', () => {
   const D = DATA.disciplines;

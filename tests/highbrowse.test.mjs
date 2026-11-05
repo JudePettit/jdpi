@@ -458,15 +458,27 @@ test('page: the analysis renders, the search finds a known story, and its links 
   assert.equal(weekCount, `${metaCount} stories`);
   assert.ok(Math.abs(Number(metaCount.replace(/,/g, '')) - m.week.length) <= 5, `${metaCount} stories in the week, ${m.week.length} by the model`);
 
-  // The search finds a known story: the week's biggest, by two of its main terms.
+  // The search finds a known story: the week's biggest, by two of its main terms. A big story has more headlines than
+  // the first page shows (on 3 November its lead ranked 59th of 100 for "Stevens Rogers"), so the page is asked for
+  // more until it reaches the place the model ranks the lead at, and the two must agree on that place.
   const known = week.stories[0].lead, q = week.stories[0].key.slice(0, 2).join(' ');
   await page.fill('#q', q);
   await page.waitForFunction(w => document.querySelector('#r-title')?.textContent.startsWith(`“${w}”`), q, { timeout: 10000 });
   assert.equal(await page.evaluate(() => location.hash.startsWith('#q=')), true, 'the search is in the address');
   const expect = search(m, { q });
   assert.match(await page.textContent('#r-status'), new RegExp(`^${expect.total.toLocaleString('en-GB')} stor`));
+  const rank = expect.results.findIndex(r => r.item.u === known.u);
+  assert.ok(rank >= 0, `"${q}" finds ${known.t} (the model)`);
   const hit = page.locator('#results .res', { has: page.locator(`.r-title a[href="${known.u}"]`) });
+  for (let more = 0; more < 20 && !(await hit.count()); more++) {
+    const before = await page.locator('#results .res').count();
+    assert.equal(await page.locator('#r-more [data-more]').count(), 1, `"${q}": ${known.t} is not among the ${before} shown, and there is no "Show more"`);
+    await page.click('#r-more [data-more]');
+    await page.waitForFunction(n => document.querySelectorAll('#results .res').length > n, before, { timeout: 10000 });
+  }
   assert.equal(await hit.count(), 1, `"${q}" finds ${known.t}`);
+  assert.equal(await page.$$eval('#results .res', (rs, u) => rs.findIndex(r => r.querySelector('.r-title a')?.getAttribute('href') === u), known.u), rank,
+    'the page lists it where the model ranks it');
   // Its links: the article at its publisher in a new tab, and the story in its briefing (on its own: this tab).
   assert.deepEqual(await hit.locator('.r-title a').evaluate(a => [a.target, a.rel]), ['_blank', 'noopener']);
   const toBriefing = await hit.locator('.r3 a.bp').first().evaluate(a => [a.href, a.target]);

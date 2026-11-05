@@ -91,6 +91,7 @@
               "type": "string",
               "enum": [
                 "rt",
+                "hb",
                 "rs",
                 "mm",
                 "ns",
@@ -135,7 +136,7 @@
             "name": "module",
             "in": "query",
             "required": false,
-            "description": "Only one module (rt, rs, mm, ns, ds, kino) or submodule id.",
+            "description": "Only one module (rt, hb, rs, mm, ns, ds, kino) or submodule id.",
             "schema": {
               "type": "string"
             }
@@ -980,8 +981,11 @@
             "schema": {
               "type": "string",
               "enum": [
+                "home",
                 "rt",
+                "hb",
                 "rs",
+                "oi",
                 "mm",
                 "ns",
                 "ds",
@@ -1303,6 +1307,7 @@
             "type": "string",
             "enum": [
               "rt",
+              "hb",
               "rs",
               "mm",
               "ns",

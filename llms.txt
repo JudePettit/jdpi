@@ -23,11 +23,9 @@ Ground rules for assistants:
 
 ### Realtime Geopolitics
 
-- [intelligence-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-stories): Intelligence Briefing: stories. Every story from the Intelligence Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right).
-- [intelligence-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-sources): Intelligence Briefing: publishers. The Intelligence Briefing's publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.
 - [headline-outlets](https://jdpi.pages.dev/api/v1/datasets/headline-outlets): Global Headline Tracker: outlets. The most-read news outlets of each covered country whose front pages the Global Headline Tracker follows, with the feed it reads.
-- [volatility-latest](https://jdpi.pages.dev/api/v1/datasets/volatility-latest): Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-01), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%).
-- [volatility-daily](https://jdpi.pages.dev/api/v1/datasets/volatility-daily): Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 37 days, for trends and comparisons.
+- [volatility-latest](https://jdpi.pages.dev/api/v1/datasets/volatility-latest): Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-04), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%).
+- [volatility-daily](https://jdpi.pages.dev/api/v1/datasets/volatility-daily): Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 40 days, for trends and comparisons.
 - [volatility-global](https://jdpi.pages.dev/api/v1/datasets/volatility-global): Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatility Index each day, with the number of GDELT events and quarter-hour files processed.
 - [realtime-wars](https://jdpi.pages.dev/api/v1/datasets/realtime-wars): Realtime Battlefield: wars this year. Every armed conflict recorded so far in 2026, grouped into wars, with deaths, events, status and a plain-English background.
 - [realtime-war-months](https://jdpi.pages.dev/api/v1/datasets/realtime-war-months): Realtime Battlefield: war by month. Each war's deaths, events and civilian deaths month by month in 2026, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).
@@ -36,7 +34,18 @@ Ground rules for assistants:
 - [national-indicators](https://jdpi.pages.dev/api/v1/datasets/national-indicators): National Analysis: indicator definitions. The 41 indicators behind National Analysis: PESTLE dimension, unit, which direction is better and the change that counts as improving or worsening.
 - [national-indicator-latest](https://jdpi.pages.dev/api/v1/datasets/national-indicator-latest): National Analysis: latest indicator values. For each country and indicator, the latest value, its year, the change on the previous value and whether that counts as improving, stable or worsening.
 - [national-key-series](https://jdpi.pages.dev/api/v1/datasets/national-key-series): National Analysis: key indicator time series. Yearly values since 1980 for every country of eight headline indicators (NY.GDP.MKTP.KD.ZG: GDP growth, % a year.
-- [upcoming-political-events](https://jdpi.pages.dev/api/v1/datasets/upcoming-political-events): Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-02 to 2028-05-02 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+- [upcoming-political-events](https://jdpi.pages.dev/api/v1/datasets/upcoming-political-events): Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-05 to 2028-05-05 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+
+### Highbrowse
+
+- [intelligence-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-stories): Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right).
+- [intelligence-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-sources): Political Briefing: publishers. The Political Briefing's publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.
+- [econ-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/econ-briefing-stories): Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news).
+- [econ-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/econ-briefing-sources): Economics Briefing: sources. The journals, preprint servers, institutions and news desks the Economics Briefing reads, with their tier, default fields and feed status.
+- [science-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/science-briefing-stories): Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news).
+- [science-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/science-briefing-sources): Scientific Briefing: sources. The journals, preprint servers, institutions and news desks the Scientific Briefing reads, with their tier, default disciplines and feed status.
+- [digital-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/digital-briefing-stories): Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news).
+- [digital-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/digital-briefing-sources): Digital Briefing: sources. The journals, preprint servers, institutions and news desks the Digital Briefing reads, with their tier, default fields and feed status.
 
 ### Retrospective Geopolitics
 
@@ -52,8 +61,6 @@ Ground rules for assistants:
 
 ### Money Management
 
-- [econ-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/econ-briefing-stories): Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news).
-- [econ-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/econ-briefing-sources): Economics Briefing: sources. The journals, preprint servers, institutions and news desks the Economics Briefing reads, with their tier, default fields and feed status.
 - [congress-members](https://jdpi.pages.dev/api/v1/datasets/congress-members): Auto Trader: members of Congress who trade. Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.
 - [congress-trades](https://jdpi.pages.dev/api/v1/datasets/congress-trades): Auto Trader: trades by members of Congress. Every stock, bond and option trade reported by members of the House in 2025 and 2026 (STOCK Act), newest filing first, sharded by filing date.
 - [investors](https://jdpi.pages.dev/api/v1/datasets/investors): Auto Trader: famous investors. The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.
@@ -62,16 +69,12 @@ Ground rules for assistants:
 
 ### Natural Science
 
-- [science-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/science-briefing-stories): Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news).
-- [science-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/science-briefing-sources): Scientific Briefing: sources. The journals, preprint servers, institutions and news desks the Scientific Briefing reads, with their tier, default disciplines and feed status.
 - [science-progress-events](https://jdpi.pages.dev/api/v1/datasets/science-progress-events): Invention Timeline: breakthroughs. Key scientific and technical breakthroughs from 3000 BC to 2026, with year, discipline, where they happened (and on what basis that place was chosen), the people and the institutions involved.
 - [science-progress-people](https://jdpi.pages.dev/api/v1/datasets/science-progress-people): Invention Timeline: people. The scientists, inventors and thinkers behind the Invention Timeline, with life dates, countries, occupations and fields (Wikidata).
 - [science-progress-institutions](https://jdpi.pages.dev/api/v1/datasets/science-progress-institutions): Invention Timeline: institutions. Universities, laboratories, companies and academies linked to the Invention Timeline, with coordinates (Wikidata).
 
 ### Digital Science
 
-- [digital-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/digital-briefing-stories): Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news).
-- [digital-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/digital-briefing-sources): Digital Briefing: sources. The journals, preprint servers, institutions and news desks the Digital Briefing reads, with their tier, default fields and feed status.
 - [prp-submodules](https://jdpi.pages.dev/api/v1/datasets/prp-submodules): Vitruvian Manager: modules and submodules. Every Vitruvian Manager submodule: its module, kind, status, address and what it does.
 
 ### Kino

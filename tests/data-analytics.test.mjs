@@ -527,7 +527,10 @@ test('ai: the prompt is compact and complete', () => {
 });
 
 /* ================================ the catalogue ================================ */
-const MODULE_IDS = new Set(['rt', 'rs', 'mm', 'ns', 'ds', 'kino']);
+// A dataset's module is one of the registry's. (The list was written out here until November 2026. The four briefings
+// then moved to a new module, Highbrowse, and for three days this test refused every catalogue the daily job rebuilt,
+// while still passing on the old one in the repository: read from the registry, the list cannot fall behind again.)
+const MODULE_IDS = new Set(json('registry.json').suites.map(s => s.id));
 const FIELD_TYPES = new Set(['string', 'number', 'date', 'boolean', 'array', 'object']);
 function checkEntry(d, registryIds) {
   assert.match(d.id, /^[a-z0-9]+(-[a-z0-9]+)*$/, d.id);

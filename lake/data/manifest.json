@@ -1,17 +1,17 @@
 {
- "generated": "2026-11-03T04:39:01.537Z",
+ "generated": "2026-11-06T22:28:26.485Z",
  "entities": 13984,
  "withMentions": 12540,
  "mentions": 19302,
  "types": {
-  "place": 599,
-  "person": 2852,
-  "party": 752,
   "election": 3052,
+  "party": 752,
+  "conflict": 3391,
+  "person": 2852,
   "event": 1936,
   "topic": 1056,
+  "place": 599,
   "idea": 300,
-  "conflict": 3391,
   "organisation": 46
  },
  "shards": {

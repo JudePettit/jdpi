@@ -33,6 +33,19 @@ test('data: the entity layer is complete, consistent, and every entity is in its
   assert.ok(withArticle.filter(r => r.summary).length >= withArticle.length * 0.9, 'summaries');
 });
 
+test('data: realism is not on the line from left to right; the Realists carry "Sui generis (Realist)" and their critics no position from them', () => {
+  const m = read('lake/data/manifest.json'), all = [];
+  for (let i = 0; i < m.shards.entities; i++) all.push(...Object.values(read(`lake/data/e/${i}.json`)));
+  const spectrum = r => (r.tags || []).filter(t => t.startsWith('Political spectrum:')).map(t => t.slice(19));
+  assert.deepEqual(all.filter(r => spectrum(r).includes('Right wing (Realist)')).map(r => r.label), [], 'the old tag is gone');
+  const realists = all.filter(r => (r.tags || []).includes('School or tag:Realist'));
+  assert.ok(realists.length >= 10, `${realists.length} realists`);
+  for (const r of realists) assert.ok(!spectrum(r).some(s => /right/i.test(s)), `${r.label}: ${spectrum(r)}`);
+  const sui = all.filter(r => spectrum(r).includes('Sui generis (Realist)'));
+  for (const name of ['John Mearsheimer', 'Kenneth Waltz', 'Hans Morgenthau', 'Thucydides', 'Henry Kissinger']) assert.ok(sui.some(r => r.label === name), `${name} carries Sui generis (Realist)`);
+  assert.ok(sui.every(r => realists.includes(r)), `only Realists: ${sui.filter(r => !realists.includes(r)).map(r => r.label)}`);
+});
+
 test('a Boolean tag query finds John Mearsheimer, and his page links to where he appears', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

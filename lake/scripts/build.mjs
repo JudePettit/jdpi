@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ADAPTERS, ADAPTER_MODULES } from './adapters.mjs';
+import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
@@ -264,7 +264,8 @@ function record(q) {
 }
 // --only: the committed records with these modules' entities made again (ONLY, at the top). An entity only they
 // mention is made from scratch; one other modules mention too keeps its record, with these modules' mentions, names
-// and "Appears in" tags replaced (a tag a mention gave of its own waits for the full build to go); an entity left with
+// and "Appears in" tags replaced, and the tag groups only these adapters give (ADAPTER_TAG_GROUPS) made again (any
+// other tag a mention gave of its own waits for the full build to go), the tags it keeps in their order; an entity left with
 // no mention stays only if one with mentions relates to it, as the full build would fetch it, and the related entities
 // it brought go with it on the same terms; the related entities the lake lacked are made as the full build makes them.
 // Names: a record keeps no note of which module gave which, so modules that give names (NAMED: Bibliotheca) have the
@@ -273,6 +274,7 @@ function record(q) {
 // and the books their terms.
 function onlyMerge() {
   const out = new Map(committed), gone = new Set(), own = m => MODS.has(m.m), mine = q => byQid.get(q) || [];
+  const ownGroups = new Set([...ONLY].flatMap(n => ADAPTER_TAG_GROUPS[n] || []));
   const touched = new Set([...byQid.keys(), ...before]);
   for (const q of touched) {
     if (!raw.has(q)) { console.warn(`--only: Wikidata did not return ${q}; its record stays as committed`); continue; }
@@ -282,8 +284,9 @@ function onlyMerge() {
     const ms = [...others, ...fresh.mentions].sort((a, b) => MODULE_ORDER.indexOf(a.m) - MODULE_ORDER.indexOf(b.m) || String(a.d || '').localeCompare(String(b.d || ''))).slice(0, 300);
     const appears = new Set([...MODS].map(m => `Appears in:${MODULE_NAMES[m] || m}`));
     const add = mine(q).flatMap(m => [`Appears in:${MODULE_NAMES[m.module] || m.module}`, ...(m.tags || []).filter(([, v]) => v).map(([f, v]) => `${f}:${v}`)]);
+    const next = new Set([...old.tags.filter(t => !appears.has(t) && !ownGroups.has(t.split(':')[0])), ...add]);
     out.set(q, { ...old, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total: old.total - (old.mentions.length - others.length) + mine(q).length,
-      tags: [...new Set([...old.tags.filter(t => !appears.has(t)), ...add])] });
+      tags: [...old.tags.filter(t => next.has(t)), ...[...next].filter(t => !old.tags.includes(t))] });
   }
   const pageRel = new Set(PAGE_RELATIONS.map(p => REL[p]));
   const relOf = r => Object.entries(r?.rel || {}).filter(([k]) => pageRel.has(k)).flatMap(([, list]) => list.map(([x]) => x));

@@ -11,7 +11,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { THINKERS, SPECTRUM } from './thinkers.mjs';
+import { THINKERS, spectrumTag } from './thinkers.mjs';
 import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
 
@@ -130,9 +130,9 @@ export function learning({ jdpiDir }) {
     let unit = '', lesson = null, body = '';
     const flush = () => {
       if (!lesson) return;
-      const spectrum = course === 'politics' ? SPECTRUM[unit.split(' · ')[0]] : null;
       for (const [title, re, tags] of THINKERS) {
         if (!re.test(body) && !re.test(lesson)) continue;
+        const spectrum = course === 'politics' ? spectrumTag(unit, tags) : null;
         out.push({ key: { title }, label: title, module, url: `${JDPI}fe/learning.html?course=${course}&lesson=${slug(lesson)}`,
           context: `Taught in ${label}: ${lesson}`, tags: [...tags.map(x => ['School or tag', x]), ...(spectrum ? [['Political spectrum', spectrum]] : [])] });
       }
@@ -308,3 +308,7 @@ export const ADAPTER_MODULES = {
   kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['bibliotheca'],
   kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'],
 };
+// The tag groups only one adapter gives. A --only run of that adapter makes these groups again on every entity it
+// mentions, so a curated tag it no longer gives (a thinker's school, a spectrum position) goes at once, not at the
+// next full build, also on an entity other modules mention too.
+export const ADAPTER_TAG_GROUPS = { learning: ['School or tag', 'Political spectrum'] };

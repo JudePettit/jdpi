@@ -2,10 +2,32 @@
 // quizzes respond, progress saves.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { pageTest } from './tools/pages.mjs';
+import { spectrumTag } from '../lake/scripts/thinkers.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
+
+test('politics: realism is taught as a school of its own, outside the line from left to right', () => {
+  const md = readFileSync(new URL('../fe/learning/politics.md', import.meta.url), 'utf8').replace(/\r/g, '');
+  const units = md.split('\n').filter(l => l.startsWith('# ')).map(l => l.slice(2));
+  assert.deepEqual(units.map(u => u.split(' · ')[0]), ['Introduction', 'Far left', 'Left wing', 'Centre', 'Outside the spectrum', 'Far right', 'Comparing the spectrum'], 'the units, in their places');
+  assert.match(units[4], /Mearsheimer and the Realists/);
+  // No sentence, heading, table cell or answer files the Realists or realism under the right.
+  for (const line of md.split('\n')) assert.doesNotMatch(line, /\bright( wing)?\s*\((Realists?|Mearsheimer)|realism is closer to the right|the right is represented by|^# Right wing/i, line);
+  // The quiz on the crisis: its right answer is the Realists, not a place on the line.
+  const crisis = md.slice(md.indexOf('? Which of these would most stress the balance of power'));
+  assert.match(crisis.split('\n').find(l => l.startsWith('+ ')), /^\+ The Realists$/);
+  // The Master Index takes its spectrum tag from the unit: Realists only, and none of them "Right wing".
+  assert.equal(spectrumTag(units[4], ['Realist', 'Offensive realism']), 'Sui generis (Realist)');
+  assert.equal(spectrumTag(units[4], ['Liberal institutionalist']), null, 'a critic taught in the unit takes no position from it');
+  assert.equal(spectrumTag(units[5], ['Fascist']), 'Far right');
+  const reg = JSON.parse(readFileSync(new URL('../registry.json', import.meta.url), 'utf8'));
+  const desc = reg.suites.flatMap(s => s.modules).find(m => m.id === 'learning-politics').description;
+  assert.doesNotMatch(desc, /right \(Mearsheimer/i);
+  assert.match(desc, /Realists/);
+});
 
 test('each course renders its lessons and quiz, in the right suite', pageTest, async () => {
   const browser = await chromium.launch({ channel: 'msedge' });

@@ -108,5 +108,15 @@ export const THINKERS = [
   ['Quantitative easing', /quantitative easing/i, ['Policy', 'Economics']],
 ];
 
-// Spectrum position by Politics course unit (the unit title's first segment).
-export const SPECTRUM = { 'Far left': 'Far left', 'Left wing': 'Left wing', 'Centre': 'Centrist', 'Right wing': 'Right wing (Realist)', 'Far right': 'Far right' };
+// Spectrum position by Politics course unit (the unit title's first segment). Realism is a school of thought about
+// power among states, held by people of the left, the centre and the right, so it has no place on the line from left
+// to right: its unit ("Outside the spectrum") gives "Sui generis (Realist)", in the same tag group, so the Realists
+// can still be found together.
+export const SPECTRUM = { 'Far left': 'Far left', 'Left wing': 'Left wing', 'Centre': 'Centrist', 'Outside the spectrum': 'Sui generis (Realist)', 'Far right': 'Far right' };
+// A spectrum tag that only a school's own members take: the realist unit also teaches realism's critics (liberal
+// institutionalists, constructivists), who are not Realists and take no position from it.
+export const SPECTRUM_SCHOOL = { 'Sui generis (Realist)': 'Realist' };
+export const spectrumTag = (unit, tags) => {
+  const s = SPECTRUM[String(unit).split(' · ')[0]];
+  return s && (!SPECTRUM_SCHOOL[s] || tags.includes(SPECTRUM_SCHOOL[s])) ? s : null;
+};

@@ -1,5 +1,5 @@
 title: Politics
-intro: The political spectrum through the leaders and thinkers who shaped it: the far left, the left, the centre, the right (taught here through John Mearsheimer and the Realists) and the far right. Each area is presented as its own thinkers explained it, followed by what happened when it held power and what its critics say.
+intro: The political spectrum through the leaders and thinkers who shaped it: the far left, the left, the centre and the far right, together with John Mearsheimer and the Realists, a school of thought about power among states that stands outside the line from left to right. Each is presented as its own thinkers explained it, followed by what happened when it held power and what its critics say.
 
 # Introduction · The political spectrum
 
@@ -14,7 +14,7 @@ Today the spectrum usually arranges views by attitudes to **equality** and **cha
 
 A single line hides a lot. Political scientists often add a second axis, from **libertarian** (individual freedom) to **authoritarian** (order and state power), which places, for example, free-market libertarians and social conservatives in different spots although both are "on the right". Some argue the extremes resemble each other in methods ("horseshoe theory"); others reject this as ignoring their opposite goals.
 
-! How to use this course: Each unit presents an area of the spectrum in its own terms, then in practice, then through its critics. The final unit compares all five on the same questions.
+! How to use this course: Each unit presents an area of the spectrum, or a school of thought that stands outside it, in its own terms, then in practice, then through its critics. The final unit compares all five on the same questions.
 
 ? Where do the terms "left" and "right" come from?
 * The two houses of the British Parliament
@@ -145,10 +145,10 @@ Centrists favour **pragmatism over ideology**: market economies with a social sa
 * The Maastricht Treaty
 = Clause IV committed Labour to common ownership of the means of production; Blair replaced it with a statement of democratic socialist values.
 
-# Right wing · John Mearsheimer and the Realists
+# Outside the spectrum · John Mearsheimer and the Realists
 
 ## The realist tradition
-For this course the right is represented by **realism**, the school of international relations that sees world politics as a struggle for **power and security** among states. Realism is closer to the right than the left in its scepticism of idealism, its focus on national interest and its view of human nature, though realists themselves come from across party lines and often criticise right-wing as well as left-wing governments.
+**Realism** is the school of international relations that sees world politics as a struggle for **power and security** among states, with a scepticism of idealism, a focus on national interest and, in its classical form, a view of human nature as self-interested. It is sui generis (of its own kind): a theory of how states behave towards one another, not a position on the line from left to right. People of the left, the centre and the right have held it, and realists often criticise left-wing and right-wing governments alike.
 
 ### Classical roots
 - **Thucydides**, in his history of the Peloponnesian War (5th century BC), recorded the Athenian envoys telling the people of Melos that "the strong do what they can and the weak suffer what they must."
@@ -257,26 +257,28 @@ France's Front National, founded in 1972 by Jean-Marie Le Pen, is a classic post
 # Comparing the spectrum
 
 ## Five answers to the same questions
-| Question | Far left | Left | Centre | Right (Realists) | Far right |
+The first four columns run along the line from left to right; the Realists, who stand outside it, come last.
+
+| Question | Far left | Left | Centre | Far right | Realists (outside the line) |
 |---|---|---|---|---|---|
-| Core value | Equality; end of class | Social justice and equality of opportunity | Pragmatism, liberty and stability | Security and national interest | The nation (ethnic or cultural), order |
-| View of human nature | Shaped by social conditions | Improvable through institutions | Mixed; reform carefully | Self-interested; states seek power | Hierarchical; groups unequal |
-| Role of the state | Owns or directs the economy | Redistributes and provides services | Regulates markets and supports a safety net | Protects the nation's security first | Strong, often authoritarian state |
-| Attitude to democracy | Often "bourgeois"; revolutionary path | Committed democrats | Committed liberal democrats | Domestic regime matters little abroad | Rejects or restricts liberal democracy |
-| Foreign policy | Internationalist revolution | Multilateralism, development aid | Alliances, trade, international institutions | Balance of power; avoid crusades | Nationalism, expansion or isolation |
-| Key thinkers | Lenin, Luxemburg, Trotsky, Mao, Gramsci | Bernstein, Beveridge, Rawls | Mill, Popper, Giddens | Thucydides, Morgenthau, Waltz, Mearsheimer | Mussolini, theorists of national rebirth |
+| Core value | Equality; end of class | Social justice and equality of opportunity | Pragmatism, liberty and stability | The nation (ethnic or cultural), order | Security and national interest |
+| View of human nature | Shaped by social conditions | Improvable through institutions | Mixed; reform carefully | Hierarchical; groups unequal | Self-interested; states seek power |
+| Role of the state | Owns or directs the economy | Redistributes and provides services | Regulates markets and supports a safety net | Strong, often authoritarian state | Protects the nation's security first |
+| Attitude to democracy | Often "bourgeois"; revolutionary path | Committed democrats | Committed liberal democrats | Rejects or restricts liberal democracy | Domestic regime matters little abroad |
+| Foreign policy | Internationalist revolution | Multilateralism, development aid | Alliances, trade, international institutions | Nationalism, expansion or isolation | Balance of power; avoid crusades |
+| Key thinkers | Lenin, Luxemburg, Trotsky, Mao, Gramsci | Bernstein, Beveridge, Rawls | Mill, Popper, Giddens | Mussolini, theorists of national rebirth | Thucydides, Morgenthau, Waltz, Mearsheimer |
 
 ## A crisis seen five ways
-Imagine a large neighbouring country invades a smaller one that has been moving closer to a Western alliance. How would each area tend to respond?
+Imagine a large neighbouring country invades a smaller one that has been moving closer to a Western alliance. How would each area of the spectrum, and the Realists, tend to respond?
 
 - **Far left**: oppose the imperialism of both blocs; argue workers on both sides are victims of rival ruling classes; some groups have backed whichever side opposes Western power.
 - **Left**: condemn the invasion as a breach of international law, support sanctions and humanitarian aid, work through the UN.
 - **Centre**: support the victim through alliances, sanctions and military aid; strengthen collective security.
-- **Realists (Mearsheimer)**: see the war as a predictable reaction by a great power to a rival alliance on its border; urge a negotiated settlement that recognises spheres of influence, and warn against escalation with a nuclear power.
 - **Far right**: divided between nationalist hostility to the invader and admiration for a strong nationalist leader; often focused on keeping the home country out.
+- **Realists (Mearsheimer)**, outside the line: see the war as a predictable reaction by a great power to a rival alliance on its border; urge a negotiated settlement that recognises spheres of influence, and warn against escalation with a nuclear power.
 
-? Which area of the spectrum would most stress the balance of power and spheres of influence in this crisis?
+? Which of these would most stress the balance of power and spheres of influence in this crisis?
 * Left
 * Centre
-+ Right (Realists)
-= Realists analyse such crises in terms of great-power security and relative power, not law or ideology.
++ The Realists
+= Realists analyse such crises in terms of great-power security and relative power, not law or ideology; they hold no place on the line from left to right.

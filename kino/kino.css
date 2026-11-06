@@ -47,10 +47,101 @@
 .kn-back { display: inline-flex; align-items: center; gap: 6px; color: var(--prp-link); font: 500 13px var(--prp-font-ui); text-decoration: none; }
 .kn-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
 /* The stage, captions and controls fit in one screen: the stage is never taller than the viewport allows. */
-.kn-theatre { margin: 0; width: 100%; max-width: max(520px, calc((100vh - 400px) * 16 / 9)); justify-self: center; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); overflow: hidden; }
-.kn-theatre:fullscreen { display: flex; flex-direction: column; justify-content: center; border: 0; border-radius: 0; background: var(--prp-canvas); }
-.kn-theatre:fullscreen .kn-stage { width: min(100vw, calc((100vh - 230px) * 16 / 9)); margin: 0 auto; }
-.kn-theatre:fullscreen .kn-captions, .kn-theatre:fullscreen .kn-controls { width: min(100vw, calc((100vh - 230px) * 16 / 9)); margin: 0 auto; box-sizing: border-box; }
+.kn-theatre { position: relative; margin: 0; width: 100%; max-width: max(520px, calc((100vh - 400px) * 16 / 9)); justify-self: center; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); overflow: hidden; }
+.kn-fit { min-width: 0; }
+.kn-theatre > .kn-fit { grid-area: fit; } .kn-theatre > .kn-captions { grid-area: cap; } .kn-theatre > .kn-related { grid-area: strip; }
+.kn-theatre > .kn-controls { grid-area: ctl; } .kn-theatre > .kn-note { grid-area: note; } .kn-theatre > .kn-side { grid-area: side; }
+
+/* Split view (design/prp-split.css draws the pane): the chapter list goes under the player and the theatre's width limit
+   is lifted, so the film and the page have the whole width. Side by side (data-dir="row", from 901 px of page width),
+   the pane runs beside the stage and the sentence box, as tall as both and at least 360 px, and the strip, the
+   controls and the note run under both. One above the other, the pane follows the controls. */
+.kn-grid.split { grid-template-columns: minmax(0, 1fr); }
+.kn-grid.split .kn-chapters { position: static; max-height: none; }
+.kn-theatre[data-side="on"] { max-width: none; }
+.kn-theatre[data-side="on"][data-dir="row"] { display: grid; grid-template-columns: minmax(0, 1fr) var(--prp-split-share, 40%); grid-template-areas: "fit side" "cap side" "strip strip" "ctl ctl" "note note"; }
+.kn-theatre[data-side="on"][data-dir="row"] > .kn-side { min-height: 360px; }
+.kn-theatre[data-side="on"][data-dir="column"] > .kn-side { height: clamp(300px, 55vh, 560px); }
+/* The text gives way to the sentence being read, in a box three lines tall that never changes height (kino.js marks
+   its words .cur and scrolls the box by whole lines to the word being said). Full screen uses the same box. */
+.kn-theatre[data-side="on"] .kn-cap-text, .kn-theatre:fullscreen .kn-cap-text { height: 4.65em; min-height: 0; overflow: hidden; }
+.kn-theatre[data-side="on"] .kn-cap-text .w:not(.cur), .kn-theatre:fullscreen .kn-cap-text .w:not(.cur) { display: none; }
+.kn-theatre[data-side="on"] .kn-cap-foot [data-open-link] { display: none; } /* the pane shows the place */
+/* Side by side the captions keep one height: the title on one line, the box, the sources on one line. */
+.kn-theatre[data-side="on"][data-dir="row"] .kn-cap-head { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-theatre[data-side="on"][data-dir="row"] .kn-cap-head > span { margin-right: 10px; }
+.kn-theatre[data-side="on"][data-dir="row"] .kn-cap-foot { display: block; height: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kn-theatre[data-side="on"][data-dir="row"] .kn-cap-foot .key, .kn-theatre[data-side="on"][data-dir="row"] .kn-cap-foot .legend-key { display: none; }
+
+/* Full screen: a grid as large as the screen. CSS alone fits the largest 16:9 stage into the room the sentence box, the
+   strip, the controls and the note leave, the same size in every scene, at the foot of its room. With Split view on,
+   a second column holds the pane, running the full height above the strip and the controls; under 901 px there is one
+   column and the pane takes the spare height between the sentence box and the controls. */
+.kn-theatre:fullscreen { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto auto auto; grid-template-areas: "fit" "cap" "strip" "ctl" "note";
+  width: 100vw; height: 100vh; max-width: none; border: 0; border-radius: 0; box-shadow: none; background: var(--prp-canvas); }
+.kn-theatre:fullscreen > .kn-fit { container-type: size; min-width: 0; min-height: 0; display: grid; place-items: end center; }
+.kn-theatre:fullscreen .kn-stage { width: min(100cqw, calc(100cqh * 16 / 9)); }
+.kn-theatre:fullscreen .kn-captions { padding: 4px 18px; }
+.kn-theatre:fullscreen[data-side] .kn-cap-head, .kn-theatre:fullscreen[data-side] .kn-cap-foot { display: none; } /* the badge on the stage counts the scenes */
+.kn-theatre:fullscreen .kn-cap-text { font-size: clamp(18px, 1.3vw, 28px); text-align: center; }
+.kn-theatre:fullscreen[data-side="on"][data-dir="row"] { grid-template-columns: minmax(0, 1fr) var(--prp-split-share, 40%); grid-template-rows: minmax(0, 1fr) auto auto auto auto;
+  grid-template-areas: "fit side" "cap side" "strip strip" "ctl ctl" "note note"; }
+.kn-theatre:fullscreen[data-side="on"][data-dir="column"] { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto auto auto; grid-template-areas: "fit" "cap" "side" "strip" "ctl" "note"; }
+.kn-theatre:fullscreen[data-side="on"] > .kn-side { min-height: 0; height: auto; }
+/* Text on the stage keeps its share of the picture in full screen: each ceiling becomes its cqw value with its floor. */
+.kn-theatre:fullscreen .kn-v-title h3 { font-size: max(22px, 5.6cqw); }
+.kn-theatre:fullscreen .kn-v-title .sub { font-size: max(14px, 2.4cqw); }
+.kn-theatre:fullscreen .kn-v-portrait .text h3 { font-size: max(20px, 4.4cqw); }
+.kn-theatre:fullscreen .kn-v-portrait .text .sub { font-size: max(13px, 2cqw); }
+.kn-theatre:fullscreen .kn-v-quote blockquote { font-size: max(20px, 4.1cqw); }
+.kn-theatre:fullscreen .kn-v-module .card { width: 76cqw; }
+.kn-theatre:fullscreen .kn-v-module h3 { font-size: max(18px, 3.4cqw); }
+.kn-theatre:fullscreen .kn-v-module .at { font-size: max(13px, 1.8cqw); }
+.kn-theatre:fullscreen .kn-chart .hd h4 { font-size: max(14px, 2.7cqw); }
+.kn-theatre:fullscreen .kn-v-end h3 { font-size: max(20px, 4.2cqw); }
+/* A short screen (a phone held sideways): two lines of text and one row of controls, signs only, no scene count. */
+@media (max-height: 520px) {
+  .kn-theatre:fullscreen .kn-captions { padding: 2px 12px; }
+  .kn-theatre:fullscreen .kn-cap-text { font-size: 16px; height: 3.1em; }
+  .kn-theatre:fullscreen .kn-controls { padding: 4px 10px; gap: 4px 6px; }
+  .kn-theatre:fullscreen .kn-controls .wide, .kn-theatre:fullscreen .kn-controls .lbl, .kn-theatre:fullscreen .kn-controls .count { display: none; }
+}
+
+/* Related screens: one row, always the same height, under the sentence box; See more is a panel over the lower part of
+   the player (placed by kino.js just above the strip). Nothing in either moves or fades. */
+.kn-related { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 14px; border-top: 1px solid var(--prp-line-soft); background: var(--prp-surface); overflow: hidden; }
+.kn-related .lbl { flex: none; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.kn-related .chips { flex: 1 1 auto; display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.kn-related .chips::-webkit-scrollbar { display: none; }
+.kn-related .prp-btn { flex: none; }
+.kn-related .n { color: var(--prp-muted); font: 500 11px var(--prp-font-mono); }
+/* A chip keeps its own width (up to 300 px) and the row scrolls sideways when the three do not fit: shrunk to the
+   width left, a chip's label would vanish behind its code. */
+.kn-rel { flex: none; display: inline-flex; align-items: center; gap: 6px; max-width: 300px; height: 30px; padding: 0 10px; border: 1px solid var(--prp-line); border-radius: 99px;
+  background: var(--prp-surface); color: var(--prp-text); font: 12.5px var(--prp-font-ui); white-space: nowrap; cursor: pointer; }
+.kn-rel .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.kn-rel:hover { border-color: var(--prp-accent); }
+.kn-rel[aria-current="true"], .kn-more li button[aria-current="true"] { border-color: var(--prp-accent); background: var(--prp-accent-soft); }
+.kn-more { position: absolute; left: 12px; right: 12px; z-index: 6; display: flex; flex-direction: column; max-height: 60%; background: var(--prp-surface); border: 1px solid var(--prp-line);
+  border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); }
+.kn-more:focus { outline: none; }
+.kn-more:focus-visible { box-shadow: 0 0 0 2px var(--prp-focus), var(--prp-shadow-2); }
+.kn-more-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--prp-line-soft); }
+.kn-more-head b { font: 600 14px var(--prp-font-ui); color: var(--prp-text); }
+.kn-more-head .prp-muted { font: var(--prp-fs-xs) var(--prp-font-mono); }
+.kn-more-head .prp-btn { margin-left: auto; }
+.kn-more-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; min-height: 0; overflow: auto; padding: 4px 12px 12px; }
+.kn-more section { min-width: 0; }
+.kn-more h4 { margin: 10px 0 4px; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.kn-more ul { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin: 0; padding: 0; list-style: none; }
+.kn-more li { display: flex; align-items: center; gap: 8px; }
+.kn-more li.none { color: var(--prp-muted); font-size: var(--prp-fs-sm); padding: 4px; }
+.kn-more li button { flex: 1 1 auto; display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px; border: 1px solid transparent; border-radius: var(--prp-radius-sm); background: none;
+  color: var(--prp-text); font: 13px/1.35 var(--prp-font-ui); text-align: left; cursor: pointer; }
+.kn-more li button:hover { background: var(--prp-surface-2); }
+.kn-more li .t { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kn-more li small { flex: none; color: var(--prp-muted); font: 11px var(--prp-font-mono); }
+.kn-more li a { flex: none; color: var(--prp-link); font: 12px var(--prp-font-ui); }
 
 /* The stage: 16:9, sized by its container so text scales with it (cqw), with legible minimums. */
 .kn-stage { position: relative; aspect-ratio: 16 / 9; overflow: hidden; container-type: inline-size; background: var(--prp-map-water); color: var(--prp-text); isolation: isolate; }
@@ -195,13 +286,16 @@
 .kn-cap-foot .key { flex-basis: 100%; }
 
 /* Controls */
-.kn-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 10px 14px 12px; border-top: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); }
+.kn-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 10px 14px 12px; border-top: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); container: kn-controls / inline-size; }
+/* The two newest buttons show their sign alone (their name is in the tooltip and the accessible name) unless the row
+   is at least 1,050 px wide, so the player keeps one row of controls where it has one. */
+@container kn-controls (max-width: 1049.98px) { .kn-controls .wide.new { display: none; } }
 .kn-controls .prp-btn { min-width: 34px; }
 .kn-controls .prp-btn[aria-pressed="true"] { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
 .kn-controls .prp-select { height: 32px; }
 .kn-controls .count { min-width: 52px; color: var(--prp-text-2); font: 500 12px var(--prp-font-mono); text-align: center; }
 .kn-controls .sp { flex: 1; }
-.kn-progress { flex: 1 1 140px; display: flex; gap: 3px; height: 32px; align-items: center; min-width: 110px; }
+.kn-progress { flex: 1 1 60px; display: flex; gap: 3px; height: 32px; align-items: center; min-width: 60px; }
 .kn-progress button { flex: 1 1 0; height: 8px; padding: 0; border: 0; border-radius: 2px; background: var(--prp-line); cursor: pointer; position: relative; overflow: hidden; }
 .kn-progress button:hover { background: var(--prp-line-strong); }
 .kn-progress button.done { background: color-mix(in srgb, var(--prp-accent) 45%, var(--prp-line)); }
@@ -269,6 +363,10 @@
   .kn-progress { order: -1; flex-basis: 100%; height: 22px; }
   .kn-controls .sp { display: none; }
   .kn-controls .wide { display: none; }
+  .kn-rel { flex: none; max-width: 220px; }
+  .kn-related { padding: 0 10px; }
+  .kn-related .lbl { display: none; }
+  .kn-more { left: 6px; right: 6px; }
   .kn-v-portrait { grid-template-columns: 1fr 1fr; }
   .kn-v-portrait .text { padding: 4cqw 2cqw 4cqw 4cqw; }
   /* The stage is small: the map key moves under it, and the play button to a corner. */
@@ -298,4 +396,4 @@
   .kn-v-title h3, .kn-v-title .sub, .kn-v-title .rule, .kn-v-portrait .text h3, .kn-v-portrait .text .sub, .kn-v-quote blockquote, .kn-v-quote .who, .kn-v-module .card { animation: none; }
   .kn-map .c, .kn-layer, .kn-stage > svg.kn-map { transition: none; }
 }
-@media print { .kn-controls, .kn-bigplay, .kn-chapters { display: none !important; } }
+@media print { .kn-controls, .kn-bigplay, .kn-chapters, .kn-related, .kn-more, .kn-side { display: none !important; } }

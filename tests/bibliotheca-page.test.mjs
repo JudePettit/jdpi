@@ -681,3 +681,692 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+/* ---------- Augmented Reading, the shared pane and full screen (B1, B2) ----------
+   The narrator's page tests, with the fake speech engine and the fake proxy of tests/tools/voice-fakes.mjs. The pure
+   parts are tested in tests/bibliotheca-narrator.test.mjs. Imported here, at the end, so nothing above changes. */
+const { chapterPassages, costFrom, speakable } = await import('../bibliotheca/neo/lib/narrate.js');
+const { chapterTerms, span, nearestTerm, follow } = await import('../bibliotheca/neo/lib/follow.js');
+const { FAKE_SPEECH, fakeProxy, RYAN_ID } = await import('./tools/voice-fakes.mjs');
+const CH3 = PRINCE.chapters.find(c => c.n === 3), FX1 = FIXTURE.chapters.find(c => c.n === 1), FX3 = FIXTURE.chapters.find(c => c.n === 3);
+// A page with the fake speech engine (and the fixture on the shelf), opened at an address, Augmented Reading turned on.
+async function reading(browser, hash, { viewport = { width: 1366, height: 768 }, speech = {}, proxy = null, ar = true, context = {}, fixture = false } = {}) {
+  const ctx = await browser.newContext({ viewport, ...context });
+  const page = await ctx.newPage();
+  const errors = watch(page);
+  await page.addInitScript(FAKE_SPEECH, speech);
+  if (fixture) await withFixture(page);
+  // With no proxy played, it answers as the real one does before it is set up (the local server has no Functions).
+  const said = proxy ? await fakeProxy(page, proxy) : await fakeProxy(page, { available: false }).then(() => null);
+  await page.goto(`${BASE}/bibliotheca/neo/${hash}`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#text p.para.current', { timeout: 20000 });
+  await page.evaluate(() => document.fonts.ready);
+  // On its own the page gains the connector's return bar a moment after it loads, which moves the text down: wait
+  // for it, so that nothing measured below moves under the test.
+  await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
+  if (ar) { await page.keyboard.press('a'); await page.waitForSelector('#nar:not([hidden])'); }
+  return { ctx, page, errors, said };
+}
+const spokenN = page => page.evaluate(() => window.__spoken.length);
+const narAt = page => page.evaluate(() => ({ pid: window.__narrator.passage?.id, k: window.__narrator.pos.k, playing: window.__narrator.playing }));
+// The unit being read, as the page marks it: the highlight's text, and its box against the reading region.
+const marked = page => page.evaluate(() => {
+  // The box is the unit's: the piece being read of a long sentence (nc-say-part), else the sentence.
+  const r = [...(CSS.highlights.get('nc-say') || [])][0], part = [...(CSS.highlights.get('nc-say-part') || [])][0], head = document.querySelector('#head').getBoundingClientRect().bottom;
+  const pane = document.querySelector('#pane'), sheet = !pane.hidden && getComputedStyle(pane).position === 'fixed' && !document.querySelector('#layout').classList.contains('fill') ? pane.getBoundingClientRect().top : innerHeight;
+  const box = (part || r)?.getBoundingClientRect();
+  return { text: r?.toString() || '', top: box?.top, bottom: box?.bottom, region: [head, sheet], pid: window.__narrator.passage?.id, k: window.__narrator.pos.k };
+});
+const unitOf = (chapterData, pid, k) => speakable(chapterData.paragraphs.find(p => p.id === pid)).units[k];
+
+test('page: Augmented Reading: the button and the kicker say so, the pane shows the nearest term before Play, the narrator reads and marks the unit, keeps it in view, and R pauses and resumes it', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p03', { speech: { ms: 250 } });
+    assert.match(await page.textContent('#ar-toggle'), /Augmented Reading/);
+    assert.equal(await page.getAttribute('#ar-toggle', 'aria-pressed'), 'true');
+    await page.waitForFunction(() => /&pane=ency&ar=1$/.test(location.hash));
+    assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · Master Index');
+    // Before Play, the term nearest the reader's paragraph.
+    const { terms, base } = chapterTerms(CH3), p3 = CH3.paragraphs.find(p => p.id === 'c03-p03');
+    const near = nearestTerm(terms, base.get('c03-p03'), base.get('c03-p03') + p3.text.length);
+    const ency = await frameOf(page, '#ency-frame');
+    await ency.waitForFunction(q => location.hash === `#${q}` && document.querySelector('#entity h2'), near, { timeout: 30000 });
+    assert.deepEqual(await page.evaluate(() => window.__spoken), [], 'nothing is read until Play');
+    // Play: the first unit of the paragraph under the reading line, without its footnote marks; it is the one marked.
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => window.__spoken.length >= 1);
+    const first = speakable(p3).units[0];
+    assert.equal((await page.evaluate(() => window.__spoken[0])).text, first.text);
+    assert.doesNotMatch(first.text, /\[\d+\]/);
+    for (let i = 0; i < 4; i++) {
+      const m = await marked(page), u = unitOf(CH3, m.pid, m.k);
+      assert.equal(m.text, CH3.paragraphs.find(p => p.id === m.pid).text.slice(u.say[0], u.say[1]), `the mark is the unit being read (${m.pid}:${m.k})`);
+      await page.waitForTimeout(200);
+    }
+    // Past a screenful the page scrolls by itself, the unit stays in the reading region, and after the deep link the
+    // current paragraph moves on with the voice.
+    await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p07', null, { timeout: 30000 });
+    await page.waitForTimeout(400);
+    const m = await marked(page);
+    assert.ok(m.top >= m.region[0] - 1 && m.bottom <= m.region[1] + 1, `the unit is in the reading region: ${JSON.stringify(m)}`);
+    await page.waitForFunction(() => document.querySelector('#text p.current')?.id === 'c03-p07' && /&p=c03-p07&/.test(location.hash), null, { timeout: 5000 });
+    // Scrolled away by hand, the page stays where the reader put it while the voice reads on.
+    await page.mouse.move(300, 400);
+    await page.mouse.wheel(0, -1500);
+    await page.waitForTimeout(400);
+    const y = await page.evaluate(() => scrollY), n = await spokenN(page);
+    await page.waitForFunction(n => window.__spoken.length >= n + 3, n, { timeout: 10000 });
+    assert.ok(Math.abs(await page.evaluate(() => scrollY) - y) <= 1, 'the page stayed put');
+    // R pauses; R again reads the same unit from its start, and brings it back into view.
+    await page.keyboard.press('r');
+    const at = await narAt(page);
+    assert.equal(at.playing, false);
+    const stopped = await spokenN(page);
+    await page.waitForTimeout(600);
+    assert.equal(await spokenN(page), stopped, 'silent while paused');
+    await page.keyboard.press('r');
+    await page.waitForFunction(n => window.__spoken.length > n, stopped);
+    assert.equal((await page.evaluate(n => window.__spoken[n], stopped)).text, unitOf(CH3, at.pid, at.k).text, 'the same unit again');
+    await page.waitForTimeout(700);
+    const back = await marked(page);
+    assert.ok(back.top >= back.region[0] - 1 && back.bottom <= back.region[1] + 1, 'Play follows the voice again');
+    await page.keyboard.press('r');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: the pane follows the rule\'s entries as it reads, with no reload; H holds and lets go; a term clicked holds; P opens the Master Index tab', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3', { speech: { ms: 150 } });
+    const ency = await frameOf(page, '#ency-frame');
+    await ency.waitForFunction(() => document.querySelector('#entity h2'), null, { timeout: 30000 });
+    // The frame is loaded: from now on it must only move by hash. What the pane is sent is recorded inside it.
+    await ency.evaluate(() => { window.stillHere = true; window.__sent = []; addEventListener('hashchange', () => window.__sent.push(location.hash.slice(1))); });
+    const showing = (await ency.evaluate(() => location.hash)).slice(1);
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p11', null, { timeout: 30000 });
+    await page.keyboard.press('r');
+    await page.waitForTimeout(300);
+    const at = await narAt(page);
+    // The same units through the rule, from Play (the first sentence shown at once).
+    const { terms, base } = chapterTerms(CH3), want = [];
+    let state = { showing, read: 0, fresh: true };
+    outer: for (const p of chapterPassages(CH3)) for (const [k, u] of p.units.entries()) {
+      const r = follow(state, span(base, p.id, u), terms); state = r.state;
+      if (r.show) want.push(r.show);
+      if (p.id === at.pid && k === at.k) break outer;
+    }
+    assert.ok(want.length >= 2, `the rule moves the pane ${want.length} times`);
+    assert.deepEqual(await ency.evaluate(() => window.__sent), want, 'the entries the pane was sent are the rule\'s');
+    assert.equal(await ency.evaluate(() => window.stillHere), true, 'and the frame was never reloaded');
+    // H holds: the term showing becomes the reader's (t=), and the pane stays while the reading goes on.
+    const held = want.at(-1);
+    await page.keyboard.press('h');
+    await page.waitForFunction(q => new RegExp(`&t=${q}&pane=ency&ar=1$`).test(location.hash), held);
+    assert.equal(await page.getAttribute('#nar-hold', 'aria-pressed'), 'true');
+    const sent = (await ency.evaluate(() => window.__sent)).length, n = await spokenN(page);
+    await page.keyboard.press('r');
+    await page.waitForFunction(n => window.__spoken.length >= n + 12, n, { timeout: 15000 });
+    assert.equal((await ency.evaluate(() => window.__sent)).length, sent, 'held: the pane did not move');
+    // H again: t= goes, and the pane shows the term nearest the unit being read.
+    await page.keyboard.press('r');
+    await page.keyboard.press('h');
+    await page.waitForFunction(() => !/&t=/.test(location.hash));
+    const now = await page.evaluate(() => ({ pid: window.__narrator.passage.id, k: window.__narrator.pos.k }));
+    const u = unitOf(CH3, now.pid, now.k), sp = span(base, now.pid, u);
+    await ency.waitForFunction(q => location.hash === `#${q}`, nearestTerm(terms, sp.from, sp.to), { timeout: 5000 });
+    // A term clicked while it reads holds the pane on that term.
+    await page.keyboard.press('r');
+    const term = page.locator('#text a.term[data-qid="Q38"], #text a.term[data-qid="Q70972"]').first();
+    const q = await term.getAttribute('data-qid');
+    await term.scrollIntoViewIfNeeded();
+    await term.click();
+    await page.waitForFunction(q => new RegExp(`&t=${q}&`).test(location.hash), q);
+    const n2 = await spokenN(page);
+    await page.waitForFunction(n => window.__spoken.length >= n + 8, n2, { timeout: 15000 });
+    assert.equal(await ency.evaluate(() => location.hash), `#${q}`, 'the reader\'s term stays');
+    await page.keyboard.press('r');
+    // P, with the mode on, opens the Master Index tab.
+    await page.click('#tab-vm');
+    await page.keyboard.press('p');
+    await page.waitForSelector('#pane', { state: 'hidden' });
+    await page.keyboard.press('p');
+    await page.waitForSelector('#pane:not([hidden])');
+    assert.equal(await page.getAttribute('#tab-ency', 'aria-selected'), 'true');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: the divider between the text and the pane, with a real pointer: the pane widens, the reader\'s paragraph stays within 2 px, and the share is kept', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage(), errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=3&p=c03-p06&t=Q70972&pane=ency`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#pane:not([hidden])');
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(500);
+    const bar = page.locator('#pane > .prp-split-bar');
+    assert.equal(await bar.getAttribute('role'), 'separator');
+    assert.equal(await bar.getAttribute('aria-valuenow'), '44');
+    const place = () => page.evaluate(() => { const p = document.querySelector('#text p.current'); return { id: p.id, top: p.getBoundingClientRect().top }; });
+    const before = await place(), w0 = (await page.locator('#pane').boundingBox()).width;
+    const b = await bar.boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + 300);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) await page.mouse.move(b.x + b.width / 2 - i * 15, b.y + 300);
+    await page.mouse.up();
+    const w1 = (await page.locator('#pane').boundingBox()).width;
+    assert.ok(w1 > w0 + 100, `the pane widened: ${w0} → ${w1}`);
+    const kept = await page.waitForFunction(([id, top]) => Math.abs(document.getElementById(id).getBoundingClientRect().top - top) <= 2, [before.id, before.top], { timeout: 3000 }).then(() => true, () => false);
+    assert.ok(kept, `the reader's paragraph stayed: ${JSON.stringify(before)} → ${JSON.stringify(await place())}`);
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('prp.split.bibliotheca')));
+    assert.ok(saved > 44 && saved <= 60, `saved ${saved}`);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#pane:not([hidden])');
+    assert.ok(Math.abs((await page.locator('#pane').boundingBox()).width - w1) <= 2, 'and kept after a reload');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: full screen is the whole page: the text and the pane side by side with no width limit, P leaves the text alone and centred; inside the shell it is Bibliotheca\'s frame', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+    const page = await ctx.newPage(), errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=3&p=c03-p06&t=Q70972&pane=ency`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#pane:not([hidden])');
+    await page.evaluate(() => document.fonts.ready);
+    const before = await page.evaluate(() => document.querySelector('#text p.current').id);
+    await page.keyboard.press('f');
+    await page.waitForFunction(() => document.fullscreenElement === document.documentElement && document.documentElement.hasAttribute('data-prp-fs'));
+    const look = await page.evaluate(() => {
+      const col = document.querySelector('#book .nc-col').getBoundingClientRect(), pane = document.querySelector('#pane').getBoundingClientRect();
+      return { max: getComputedStyle(document.querySelector('.nc-page')).maxWidth, front: getComputedStyle(document.querySelector('.nc-front')).display, colRight: col.right, paneLeft: pane.left, paneRight: pane.right, w: innerWidth, size: getComputedStyle(document.querySelector('.nc-col')).fontSize };
+    });
+    assert.equal(look.max, 'none', 'the page\'s width limit is gone');
+    assert.equal(look.front, 'none', 'and its own header');
+    assert.ok(look.paneLeft >= look.colRight && look.paneRight > 1850, `side by side across the screen: ${JSON.stringify(look)}`);
+    assert.equal(look.size, '20.16px', 'the reading size grows with the screen (1.05vw at 1920)');
+    await page.waitForFunction(id => document.querySelector('#text p.current')?.id === id, before, { timeout: 3000 });
+    await page.keyboard.press('p');
+    await page.waitForSelector('#pane', { state: 'hidden' });
+    const col = await page.locator('#book .nc-col').boundingBox();
+    assert.ok(Math.abs(col.x + col.width / 2 - 960) <= 3, `the text alone, centred: ${JSON.stringify(col)}`);
+    await page.keyboard.press('f');
+    await page.waitForFunction(() => !document.fullscreenElement && !document.documentElement.hasAttribute('data-prp-fs'));
+    // Inside the shell, the shell's full-screen element is Bibliotheca's frame.
+    await page.goto(`${BASE}/#/kino/bibliotheca`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="bibliotheca"]', { timeout: 20000 })).contentFrame();
+    await frame.waitForSelector('#text p.para', { timeout: 20000 });
+    await frame.locator('#chapter-title').click(); // focus into the frame (the head's fade lies over the text's first 12 px)
+    await page.keyboard.press('f');
+    await page.waitForFunction(() => document.fullscreenElement?.matches?.('iframe[data-module="bibliotheca"]'), null, { timeout: 5000 });
+    await page.keyboard.press('f');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: Screens only lays the pane over the text under the head (1366 and 360 wide); the reading, the current paragraph and the address carry on; Escape gives the text back', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [viewport, context] of [[{ width: 1366, height: 768 }, {}], [{ width: 360, height: 780 }, { isMobile: true, hasTouch: true }]]) {
+      const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p02', { viewport, context, speech: { ms: 120 } });
+      await page.keyboard.press('d');
+      await page.waitForFunction(() => document.querySelector('#layout').classList.contains('fill'));
+      const box = await page.evaluate(() => { const p = document.querySelector('#pane').getBoundingClientRect(), h = document.querySelector('#head').getBoundingClientRect(); return { top: p.top, left: p.left, right: p.right, bottom: p.bottom, head: h.bottom, w: innerWidth, h: innerHeight, sw: document.documentElement.scrollWidth }; });
+      assert.ok(Math.abs(box.top - box.head) <= 1 && box.left === 0 && Math.round(box.right) === box.w && Math.round(box.bottom) === box.h, `over the text, under the head: ${JSON.stringify(box)}`);
+      assert.equal(box.sw, box.w, 'nothing scrolls sideways');
+      assert.equal(await page.locator('#popout').isHidden(), true, 'the terms strip is put away');
+      // The head's buttons still work, and the reading goes on beneath, the current paragraph and the address with it.
+      await page.click('#nar-play');
+      await page.waitForFunction(() => window.__spoken.length >= 2);
+      await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p05', null, { timeout: 20000 });
+      await page.waitForFunction(() => /&p=c03-p0[56]&/.test(location.hash) && /^c03-p0[56]$/.test(document.querySelector('#text p.current')?.id), null, { timeout: 5000 });
+      await page.click('#nar-play');
+      assert.equal(await page.getAttribute('#nar-play', 'aria-pressed'), 'false');
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.querySelector('#layout').classList.contains('fill'));
+      assert.equal(await page.locator('#pane').isVisible(), true, 'the pane stays open');
+      assert.deepEqual(errors, []);
+      await page.context().close();
+    }
+  } finally { await browser.close(); }
+});
+
+test('page: subtitles in Screens only show the unit being read; S hides and shows them, and the choice is kept; in a 360 px pane each word of a long unit is in the strip when it is said', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=3&p=c03-p06', { speech: { ms: 120 } });
+    assert.equal(await page.locator('#nar-subs').isHidden(), true, 'not offered while the text is in view');
+    await page.keyboard.press('d');
+    await page.waitForSelector('#subs:not([hidden])');
+    assert.equal(await page.getAttribute('#subs', 'aria-hidden'), 'true');
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => window.__spoken.length >= 2);
+    await page.keyboard.press('r');
+    const at = await narAt(page);
+    assert.equal((await page.textContent('#subs-box')).replace(/\s+/g, ' ').trim(), unitOf(CH3, at.pid, at.k).text);
+    await page.keyboard.press('s');
+    await page.waitForSelector('#subs', { state: 'hidden' });
+    await page.keyboard.press('s');
+    await page.waitForSelector('#subs:not([hidden])');
+    await page.keyboard.press('s');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#nar:not([hidden])', { timeout: 20000 }); // ar=1 in the address
+    await page.keyboard.press('d');
+    await page.waitForFunction(() => document.querySelector('#layout').classList.contains('fill'));
+    assert.equal(await page.locator('#subs').isHidden(), true, 'hidden, as the reader left them');
+    assert.equal(await page.getAttribute('#nar-subs', 'aria-pressed'), 'false');
+    await page.keyboard.press('s');
+    assert.deepEqual(errors, []);
+    await ctx.close();
+
+    // 360 px: a unit of 200 characters needs five or six lines; each word said is inside the three the strip shows.
+    const long = CH3.paragraphs.flatMap(p => speakable(p).units.map((u, k) => ({ p, u, k }))).find(x => x.u.text.length >= 175);
+    const phone = await reading(browser, `#book=the-prince&ch=3&p=${long.p.id}`, { viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, speech: { ms: 3000 } });
+    await phone.page.keyboard.press('d');
+    await phone.page.waitForSelector('#subs:not([hidden])');
+    await phone.page.evaluate(() => {
+      const box = document.querySelector('#subs-box');
+      window.__subs = { seen: 0, out: [] };
+      new MutationObserver(() => {
+        const w = box.querySelector('span.on');
+        if (!w) return;
+        const a = w.getBoundingClientRect(), b = box.getBoundingClientRect();
+        window.__subs.seen++;
+        if (a.top < b.top - 1 || a.bottom > b.bottom + 1) window.__subs.out.push(w.textContent);
+      }).observe(box, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+    // Read from the long unit.
+    await phone.page.evaluate(k => window.__narrator.at(window.__narrator.passage.pi, { k }), long.k);
+    await phone.page.keyboard.press('r');
+    await phone.page.waitForFunction(n => window.__subs.seen >= n - 1, long.u.words.length, { timeout: 15000 });
+    await phone.page.keyboard.press('r');
+    const subs = await phone.page.evaluate(() => window.__subs);
+    assert.deepEqual(subs.out, [], `${subs.seen} words lit, all inside the strip`);
+    assert.ok(await phone.page.evaluate(() => document.querySelector('#subs-box').scrollHeight > document.querySelector('#subs-box').clientHeight * 1.4), 'the unit needed more than the three lines');
+    assert.deepEqual(phone.errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: a screen of "In Vitruvian Manager" held in the pane stays while the reading goes on', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p02', { speech: { ms: 120 } });
+    await page.click('#tab-vm');
+    await page.locator('#era-rows li[data-key="progress"] [data-show]').click();
+    const vm = await frameOf(page, '#vm-frame');
+    await vm.waitForFunction(() => /\/science\/progress\//.test(location.pathname), null, { timeout: 20000 });
+    await vm.evaluate(() => { window.stillHere = true; });
+    assert.equal(await page.getAttribute('#nar-hold', 'aria-pressed'), 'true', 'a screen chosen by hand holds the pane');
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => window.__spoken.length >= 10, null, { timeout: 15000 });
+    await page.keyboard.press('r');
+    assert.equal(await vm.evaluate(() => window.stillHere), true);
+    assert.equal(await page.getAttribute('#tab-vm', 'aria-selected'), 'true');
+    assert.match(page.url(), /&pane=vm&show=progress&ar=1$/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: at 360 × 780 the pane is the sheet, the narrator\'s row fits, the sentence being read stays above the sheet, and nothing scrolls sideways', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=fixture-the-prince&ch=3&p=c03-p03', { fixture: true, viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, speech: { ms: 1500 } });
+    const sheet = await page.evaluate(() => { const p = document.querySelector('#pane'); return { position: getComputedStyle(p).position, top: p.getBoundingClientRect().top }; });
+    assert.equal(sheet.position, 'fixed');
+    const row = await page.evaluate(() => { const r = document.querySelector('#nar'); return { right: Math.max(...[...r.children].filter(c => c.offsetParent).map(c => c.getBoundingClientRect().right)), sw: r.scrollWidth, cw: r.clientWidth }; });
+    assert.ok(row.right <= 360 - 15 && row.sw <= row.cw, `the row fits: ${JSON.stringify(row)}`);
+    await page.click('#nar-play');
+    for (let i = 0; i < 4; i++) {
+      // Each new unit, once the page has scrolled to it.
+      await page.waitForFunction(n => window.__spoken.length > n, i, { timeout: 5000 });
+      await page.waitForTimeout(900);
+      const m = await marked(page);
+      assert.ok(m.bottom <= sheet.top + 1 && m.top >= m.region[0] - 1, `above the sheet: ${JSON.stringify(m)}`);
+    }
+    await page.click('#nar-play');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), 360);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: with reduced motion the text jumps to the sentence without gliding', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p06', { context: { reducedMotion: 'reduce' }, speech: { ms: 3000 } });
+    await page.evaluate(() => window.scrollTo(0, 0)); // away from the paragraph to be read
+    await page.waitForTimeout(300);
+    await page.evaluate(() => { window.__ys = []; const tick = () => { window.__ys.push(Math.round(scrollY)); if (window.__ys.length < 40) requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+    await page.click('#nar-play');
+    await page.waitForFunction(() => window.__ys.length >= 40);
+    await page.click('#nar-play');
+    const ys = [...new Set(await page.evaluate(() => window.__ys))];
+    assert.equal(ys.length, 2, `one jump, no glide: ${ys}`);
+    const m = await marked(page);
+    assert.ok(m.top >= m.region[0] - 1 && m.bottom <= m.region[1], 'the sentence is in view');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: the sentence\'s mark has a background that is not the canvas\'s, in light and in dark', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p02', { speech: { ms: 2000 } });
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => [...(CSS.highlights.get('nc-say') || [])].length === 1);
+    const look = () => page.evaluate(() => {
+      const css = getComputedStyle(document.documentElement), probe = document.createElement('i');
+      document.body.append(probe); probe.style.color = css.getPropertyValue('--prp-canvas').trim();
+      const canvas = getComputedStyle(probe).color; probe.remove();
+      return { canvas, mark: getComputedStyle(document.querySelector('#text p.para'), '::highlight(nc-say)').backgroundColor };
+    });
+    for (const scheme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: scheme });
+      const l = await look();
+      assert.ok(l.mark && !/^rgba\(0, 0, 0, 0\)$|^transparent$/.test(l.mark) && l.mark !== l.canvas, `${scheme}: ${JSON.stringify(l)}`);
+    }
+    await page.keyboard.press('r');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: in the shell, moving the shell to another submodule pauses the narrator within one unit', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page, /\/bibliotheca\//);
+    await page.addInitScript(FAKE_SPEECH, { ms: 300 });
+    await page.goto(`${BASE}/#/kino/bibliotheca?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&p=c03-p02`)}`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="bibliotheca"]', { timeout: 20000 })).contentFrame();
+    await frame.waitForSelector('#text p.para.current', { timeout: 20000 });
+    await frame.click('#ar-toggle');
+    await frame.click('#nar-play');
+    await frame.waitForFunction(() => window.__spoken.length >= 2, null, { timeout: 10000 });
+    await page.evaluate(() => { location.hash = '#/rs/encyclopedia'; });
+    await page.waitForSelector('#frames iframe.active[data-module="encyclopedia"]', { timeout: 20000 });
+    const at = await frame.evaluate(() => window.__spoken.length);
+    await frame.waitForFunction(() => !window.__narrator.playing, null, { timeout: 2000 });
+    await page.waitForTimeout(1200);
+    assert.ok(await frame.evaluate(() => window.__spoken.length) <= at + 1, 'at most the unit it was on');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+/* The online voice and its allowance. */
+test('page: with jdpi.doc.voice set to an online voice and the proxy ready, Play makes no request: this device\'s voice reads', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    await ctx.addInitScript(id => { try { localStorage.setItem('jdpi.doc.voice', JSON.stringify(id)); } catch { /* none */ } }, RYAN_ID);
+    const page = await ctx.newPage(), errors = watch(page);
+    await page.addInitScript(FAKE_SPEECH, { ms: 120 });
+    const said = await fakeProxy(page);
+    await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=3&p=c03-p02`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#text p.para.current', { timeout: 20000 });
+    await page.keyboard.press('a');
+    await page.keyboard.press('r');
+    await page.waitForFunction(() => window.__spoken.length >= 4);
+    await page.keyboard.press('r');
+    assert.equal(said.length, 0, 'no request to say');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('jdpi.doc.voice'))), RYAN_ID, 'Kino\'s choice is left alone');
+    assert.match(await page.inputValue('#nar-voice'), /^device:/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: choosing the online voice reads nothing and shows the cost and what is left; "Read with it" makes one request a unit, never past what was allowed, and none for a paragraph it could not finish', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const ps = chapterPassages(FX3), allowed = costFrom(ps.slice(0, 2));
+    const { page, errors, said } = await reading(browser, '#book=fixture-the-prince&ch=3', { fixture: true, proxy: { clip: 0.05, left: { today: allowed + 50, month: 450000 } }, speech: { ms: 120 } });
+    await page.waitForSelector(`#nar-voice option[value="${RYAN_ID}"]`, { state: 'attached', timeout: 10000 });
+    assert.deepEqual(await page.$$eval('#nar-voice optgroup', gs => gs.map(g => g.label)), ['This device', 'Azure (online)']);
+    const at = await narAt(page);
+    await page.selectOption('#nar-voice', RYAN_ID);
+    await page.waitForFunction(() => !document.querySelector('#nar-offer').hidden && document.querySelector('#nar-offer').dataset.cost);
+    assert.equal(said.length, 0, 'choosing reads nothing');
+    const offer = await page.textContent('#nar-offer-text'), cost = costFrom(ps, at.pid, at.k);
+    assert.equal(+(await page.getAttribute('#nar-offer', 'data-cost')), cost, 'the cost is the units\' own sum');
+    assert.match(offer, new RegExp(`is ${cost.toLocaleString('en-GB')} characters, about \\d+ minutes?\\. About ${(allowed + 50).toLocaleString('en-GB')} are left to you today, and about 450,000 to the site this month\\. Each sentence is sent to Microsoft Azure`));
+    assert.match(offer, new RegExp(`covers the first ${allowed.toLocaleString('en-GB')},`), 'to the end of the second paragraph');
+    await page.click('#nar-accept');
+    await page.waitForFunction(() => window.__spoken.length >= 1, null, { timeout: 30000 });
+    const units = ps.slice(0, 2).flatMap(p => p.units.map(u => u.text));
+    assert.deepEqual(said.map(b => b.text), units, 'one request a unit, the two paragraphs allowed, nothing ahead of the third');
+    assert.ok(said.every(b => b.norm === 'plain@1' && b.voice === RYAN_ID && b.private === false));
+    assert.equal(said.reduce((n, b) => n + b.text.length, 0), allowed);
+    assert.equal((await page.evaluate(() => window.__spoken[0])).text, ps[2].units[0].text, 'this device\'s voice reads on from the third');
+    await page.waitForFunction(n => document.querySelector('#nar-msg-text').textContent.includes(`The ${n} characters you allowed have been read`), allowed.toLocaleString('en-GB'));
+    await page.keyboard.press('r');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: when the proxy says the day\'s allowance is spent, this device\'s voice reads on from that unit and says so, the next paragraph asks nothing, and the row\'s offer reads online again at once', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const ps = chapterPassages(FX3);
+    const { page, errors, said } = await reading(browser, '#book=fixture-the-prince&ch=3', { fixture: true, proxy: { clip: 0.05, quotaAfter: 2 }, speech: { ms: 150 } });
+    await page.waitForSelector(`#nar-voice option[value="${RYAN_ID}"]`, { state: 'attached', timeout: 10000 });
+    await page.selectOption('#nar-voice', RYAN_ID);
+    await page.waitForFunction(() => !document.querySelector('#nar-accept').disabled);
+    await page.click('#nar-accept');
+    await page.waitForFunction(() => window.__spoken.length >= 1, null, { timeout: 20000 });
+    assert.equal((await page.evaluate(() => window.__spoken[0])).text, ps[0].units[2].text, 'from the unit the proxy refused');
+    await page.waitForFunction(() => /today’s allowance/.test(document.querySelector('#nar-msg-text').textContent));
+    await page.waitForFunction(id => window.__narrator.passage?.id === id, ps[1].id, { timeout: 20000 });
+    await page.waitForTimeout(500);
+    assert.equal(said.length, 3, 'two read, one refused, and nothing for the next paragraph');
+    await page.waitForSelector('#nar-again:not([hidden])');
+    assert.match(await page.textContent('#nar-again'), /^Read on with Ryan \(online\): [\d,]+ characters$/);
+    // The proxy has its allowance back: the one press reads online again at once, not with the device's voice.
+    await page.unroute('**/api/voice/v1/say');
+    const again = [];
+    await page.route('**/api/voice/v1/say', route => { again.push(route.request().postDataJSON().text); return route.fulfill({ status: 200, body: Buffer.from(globalThis.PRPVoice.silentWav(0.05)), headers: { 'content-type': 'audio/wav', 'x-prp-voice-duration': '0.05' } }); });
+    const spoke = await spokenN(page);
+    await page.click('#nar-again');
+    const at = await narAt(page);
+    await page.waitForFunction(() => window.__narrator.voiceKind === 'stream');
+    await new Promise(r => setTimeout(r, 800));
+    assert.ok(again.length >= 1, 'the online voice asked');
+    assert.equal(again[0], unitOf(FX3, at.pid, at.k).text, 'from the unit being read');
+    assert.ok(await spokenN(page) <= spoke + 1, 'and the device voice stopped');
+    await page.keyboard.press('r');
+    // (The browser reports the proxy's 429 as a resource that failed to load: that is the answer the test played.)
+    assert.deepEqual(errors.filter(e => !/status of 429/.test(e)), []);
+  } finally { await browser.close(); }
+});
+
+test('page: at the next chapter no request is made and the row offers the new chapter\'s cost', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors, said } = await reading(browser, '#book=fixture-the-prince&ch=1', { fixture: true, proxy: { clip: 0.05 }, speech: { ms: 120 } });
+    await page.waitForSelector(`#nar-voice option[value="${RYAN_ID}"]`, { state: 'attached', timeout: 10000 });
+    await page.selectOption('#nar-voice', RYAN_ID);
+    await page.waitForFunction(() => !document.querySelector('#nar-accept').disabled);
+    await page.click('#nar-accept');
+    const asked = said.voices;
+    await page.waitForFunction(() => /&ch=3\b/.test(location.hash), null, { timeout: 30000 });
+    await page.waitForFunction(() => window.__spoken.length >= 2, null, { timeout: 20000 });
+    assert.deepEqual(said.map(b => b.text), chapterPassages(FX1).flatMap(p => p.units.map(u => u.text)), 'chapter I online, and nothing of chapter III');
+    await page.waitForSelector('#nar-again:not([hidden])');
+    assert.equal(said.voices, asked + 1, 'the proxy is asked afresh what is left for the new chapter\'s offer');
+    await page.keyboard.press('r');
+    const ps = chapterPassages(FX3), at = await narAt(page);
+    assert.equal(await page.textContent('#nar-again'), `Read on with Ryan (online): ${costFrom(ps, at.pid, at.k).toLocaleString('en-GB')} characters`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: with no voice on the device Play is off and says why, and no request is made; a voice the browser lists after a second turns Play on', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const none = await reading(browser, '#book=fixture-the-prince&ch=3', { fixture: true, proxy: {}, speech: { voices: 0 } });
+    await none.page.waitForFunction(() => document.querySelector('#nar-play').disabled, null, { timeout: 5000 });
+    assert.match(await none.page.textContent('#nar-msg-text'), /This browser has no voice of its own\. Choose an online voice to hear the book\./);
+    await none.page.keyboard.press('r');
+    await none.page.waitForTimeout(500);
+    assert.equal(none.said.length, 0);
+    assert.deepEqual(none.errors, []);
+    await none.ctx.close();
+    const late = await reading(browser, '#book=fixture-the-prince&ch=3', { fixture: true, speech: { late: 1000 } });
+    await late.page.waitForTimeout(2000);
+    assert.equal(await late.page.locator('#nar-play').isDisabled(), false, 'Play is on');
+    await late.page.click('#nar-play');
+    await late.page.waitForFunction(() => window.__spoken.length >= 1, null, { timeout: 5000 });
+    await late.page.click('#nar-play');
+    assert.deepEqual(late.errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: Bibliotheca shown in another page\'s pane (a frame named prp-side) offers no Augmented Reading', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    await page.goto(`${BASE}/registry.json`);
+    await page.setContent(`<iframe name="prp-side" style="width:1200px;height:800px" src="${BASE}/bibliotheca/neo/#book=the-prince&ch=3"></iframe>`);
+    const f = await (await page.waitForSelector('iframe')).contentFrame();
+    await f.waitForSelector('#text p.para', { timeout: 20000 });
+    assert.equal(await f.evaluate(() => window.name), 'prp-side');
+    assert.equal(await f.locator('#ar-toggle').isHidden(), true);
+    await f.locator('#chapter-title').click(); // focus into the frame
+    await page.keyboard.press('a');
+    await page.waitForTimeout(300);
+    assert.equal(await f.locator('#nar').isHidden(), true, 'A does nothing there');
+    assert.doesNotMatch(await f.evaluate(() => location.hash), /ar=1/);
+  } finally { await browser.close(); }
+});
+
+/* ---------- The review's findings (R1, R2, B1, F1, B2) ---------- */
+test('page: a jump lands its paragraph 12 px under the head, whose fade is inside its own height; the pane runs to its border', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 }, reducedMotion: 'reduce' });
+    const errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=7&p=c07-p01`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#text p.para.current', { timeout: 20000 });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForSelector('.prp-returnbar', { state: 'attached', timeout: 8000 }).catch(() => {});
+    // R1: the head's fade (::after, 12 px with a -12 px margin) counts in its height, as before the mode's button asked
+    // the head's width: the head is not a container (that would lay it out on its own and leave the fade outside).
+    // The head's last line is the progress row; under it, inside the head, the 12 px fade.
+    const head = await page.evaluate(() => { const h = document.querySelector('#head'); return { container: getComputedStyle(h).containerType, fade: h.getBoundingClientRect().bottom - document.querySelector('.nc-progress-row').getBoundingClientRect().bottom, nc: getComputedStyle(document.documentElement).getPropertyValue('--nc-head').trim(), offset: h.offsetHeight }; });
+    assert.equal(head.container, 'normal', 'the head is not a container');
+    assert.ok(head.fade >= 11.5 && head.fade <= 12.5, `the fade is inside the head: ${JSON.stringify(head)}`);
+    assert.equal(head.nc, `${head.offset}px`);
+    // J (with reduced motion, so the jump is not a glide): 12 px under the head and its fade, 24 under its last line.
+    await page.keyboard.press('j');
+    await page.waitForFunction(() => /&p=c07-p02/.test(location.hash));
+    const at = await page.evaluate(() => ({ p: document.getElementById('c07-p02').getBoundingClientRect().top, head: document.querySelector('#head').getBoundingClientRect().bottom, line: document.querySelector('.nc-progress-row').getBoundingClientRect().bottom }));
+    assert.ok(at.p - at.head >= 11 && at.p - at.head <= 13, `12 px under the head and its fade: ${JSON.stringify(at)}`);
+    assert.ok(at.p - at.line >= 23, `clear of the fade: ${JSON.stringify(at)}`);
+    // R2: with the pane beside the text, its head, tabs and frame start at its border: Kino's gutter for its divider is
+    // not Bibliotheca's, whose divider lies over the border.
+    await page.evaluate(() => { location.hash = '#book=the-prince&ch=7&p=c07-p02&t=Q1399&pane=ency'; });
+    await page.waitForSelector('#pane:not([hidden])');
+    const pane = await page.evaluate(() => { const p = document.querySelector('#pane'), r = p.getBoundingClientRect(); return { dir: document.querySelector('#layout').dataset.dir, pad: getComputedStyle(p).paddingLeft, head: document.querySelector('.nc-pane-head').getBoundingClientRect().left - r.left, frame: document.querySelector('#ency-frame').getBoundingClientRect().left - r.left }; });
+    assert.equal(pane.dir, 'row');
+    assert.equal(pane.pad, '0px');
+    assert.ok(pane.head <= 1.5 && pane.frame <= 1.5, `no gutter inside the border: ${JSON.stringify(pane)}`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: in a frame 1,094 px wide (the shell at 1366 × 768) the pane is beside the text, not a sheet under it; under 1,000 px it is the sheet', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [width, height, beside] of [[1094, 716, true], [1000, 716, true], [999, 716, false]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      const errors = watch(page);
+      await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=7&p=c07-p02&t=Q1399&pane=ency`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('#pane:not([hidden])', { timeout: 20000 });
+      await page.waitForSelector('#text p.para.current', { timeout: 20000 });
+      const m = await page.evaluate(() => {
+        const p = document.querySelector('#pane').getBoundingClientRect(), t = document.querySelector('#text').getBoundingClientRect();
+        return { dir: document.querySelector('#layout').dataset.dir, position: getComputedStyle(document.querySelector('#pane')).position, pane: p.width, text: t.width, beside: p.left >= t.right, scroll: document.documentElement.scrollWidth <= innerWidth };
+      });
+      if (beside) {
+        assert.deepEqual([m.dir, m.position, m.beside], ['row', 'sticky', true], `${width}: ${JSON.stringify(m)}`);
+        assert.ok(m.text >= 420 && m.pane >= 380, `${width}: the text at least 420 px and the pane 380: ${JSON.stringify(m)}`);
+      } else assert.deepEqual([m.dir, m.position], ['column', 'fixed'], `${width}: the sheet: ${JSON.stringify(m)}`);
+      assert.ok(m.scroll, `${width}: nothing scrolls sideways`);
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+});
+
+test('page: "In Vitruvian Manager" frames only what the shell would: a private page is a card with its link, and a page without the connector leaves the pane', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = watch(page);
+    const asked = [];
+    page.on('request', r => { if (/trade-desk|cloudflareaccess/.test(r.url())) asked.push(r.url()); });
+    const reg = read('registry.json'), tally = reg.suites.flatMap(s => s.modules).find(m => m.id === 'tally-stick');
+    // Machiavelli's entry (shard 375) with two more mentions: Tally Stick (private) and an Invention Timeline page that is missing.
+    await page.route('**/lake/data/e/375.json', async route => {
+      const json = await (await route.fetch()).json();
+      json.Q1399 = { ...json.Q1399, mentions: [{ m: 'tally-stick', u: tally.url, c: 'A private page' }, { m: 'progress', u: 'https://jdpi.pages.dev/science/progress/index.html#y=1513&f=1494', c: 'A missing page' }, ...json.Q1399.mentions] };
+      return route.fulfill({ json });
+    });
+    await page.route(url => /^\/science\/progress\/(index\.html)?$/.test(url.pathname), route => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Not here</title><p>Not here.</p>' }));
+    await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=7&p=c07-p01&t=Q1399&pane=vm&show=m0`, { waitUntil: 'domcontentloaded' });
+    const card = await page.waitForSelector('#panel-vm .prp-side-card[data-why="private"]', { timeout: 20000 });
+    assert.match(await card.textContent(), /Tally Stick is private/);
+    assert.equal(await card.$eval('a', a => [a.href, a.target].join(' ')), `${tally.url} _blank`, 'its link instead');
+    assert.equal(await page.locator('#vm-frame').isHidden(), true);
+    assert.notEqual(await page.getAttribute('#vm-frame', 'data-url'), tally.url, 'never framed');
+    // The missing page: shown, found to have no connector, and its frame emptied.
+    await page.click('#mention-rows li[data-key="m1"] [data-show]');
+    await page.waitForSelector('#panel-vm .prp-side-card[data-why="missing"]', { timeout: 20000 });
+    assert.equal(await page.locator('#vm-frame').isHidden(), true);
+    await page.waitForFunction(() => document.querySelector('#vm-frame').dataset.url === 'about:blank');
+    // A screen that can be framed still is.
+    await page.click('#era-rows li[data-key="kardashev"] [data-show]');
+    await page.waitForSelector('#vm-frame:not([hidden])');
+    assert.equal(await page.locator('#panel-vm .prp-side-card').count(), 0);
+    assert.deepEqual(asked, [], 'nothing was asked of the private page');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: in Screens only the book\'s picture and the screens for its era take their turn with the entries, unheld; Hold keeps a screen', PAGE, async () => {
+  const browser = await launch();
+  try {
+    // On War, Book I chapter IV: a chapter that names no term, so only pictures and screens can have the pane.
+    const { page, errors } = await reading(browser, '#book=on-war&ch=104', { speech: { ms: 400 } });
+    await page.keyboard.press('d');
+    await page.waitForSelector('#layout.fill');
+    await page.keyboard.press('r');
+    // The chapter's picture comes first, drawn by Kino's stage, and says what it is.
+    await page.waitForSelector('#picture:not([hidden])', { timeout: 30000 });
+    assert.equal(await page.getAttribute('#picture-stage', 'data-key'), 'picture:0');
+    assert.match(await page.textContent('#picture-cap'), /^The wars of 1792 to 1815 · a picture made for On War$/);
+    assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · A picture for the book');
+    assert.equal(await page.locator('#picture-stage .kn-layer').count(), 1);
+    assert.equal(await page.locator('#nar-hold').isDisabled(), true, 'a picture passes by itself');
+    // Then a screen for the book's era, in its own frame on the Master Index tab: not held, not in the address.
+    await page.waitForSelector('#tour-frame:not([hidden])', { timeout: 30000 });
+    const screen = await page.evaluate(() => ({ url: document.querySelector('#tour-frame').dataset.url, key: document.querySelector('#tour-frame').dataset.key, picture: document.querySelector('#picture').hidden, kicker: document.querySelector('#pane-kicker').textContent, hash: location.hash }));
+    assert.match(screen.url, /\/(science\/progress|kardashev)\/index\.html#y=/);
+    assert.equal(screen.picture, true);
+    assert.equal(screen.kicker, 'Augmented Reading · Vitruvian Manager');
+    assert.doesNotMatch(screen.hash, /pane=vm|show=/);
+    assert.match(screen.hash, /pane=ency/);
+    // Hold keeps it: the other tab, with the screen named in the address.
+    await page.keyboard.press('r');
+    await page.keyboard.press('h');
+    await page.waitForFunction(k => location.hash.includes(`pane=vm&show=${encodeURIComponent(k)}`) || location.hash.includes(`pane=vm&show=${k}`), screen.key);
+    await page.waitForSelector('#vm-frame:not([hidden])');
+    assert.equal(await page.locator('#tour-frame').isHidden(), true);
+    // Screens only off: no picture or screen is left running.
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#picture').isHidden(), true);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

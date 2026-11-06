@@ -62,6 +62,28 @@ export function readKinoHash(hash) {
 }
 export function kinoHash(doc, scene) { return doc ? `#doc=${encodeURIComponent(doc)}${scene ? `&s=${encodeURIComponent(scene)}` : ''}` : ''; }
 
+/** The player's view, after the film and scene: &split=1 while Split view is on (Vitruvian Manager beside the film).
+    Read and written apart from readKinoHash and kinoHash, which keep their two keys. */
+export function readKinoView(hash) {
+  const p = new URLSearchParams(String(hash || '').replace(/^#/, ''));
+  return { split: p.get('split') === '1' };
+}
+export function kinoViewHash(doc, scene, { split = false } = {}) { const h = kinoHash(doc, scene); return h && split ? `${h}&split=1` : h; }
+
+/** A scene's link as a place for the pane beside the film (design/prp-split.js): what to frame, what "Open" opens and
+    the shell route. info is the submodule's { name, code } from the registry, where known. */
+export function linkPlace(link, shell = SHELL_URL, info = {}) {
+  const text = String(link.label || ''), [first, ...rest] = text.split(' · ');
+  const name = info.name || first;
+  // The place is the label after the submodule's name ("War Focus · September 1939"); a name with a " · " of its own
+  // ("Learning · Politics") is taken off whole. info.label, where given, is the place itself.
+  const label = info.label ?? (text.startsWith(`${name} · `) ? text.slice(name.length + 3) : rest.join(' · ') || (name !== first ? first : ''));
+  return {
+    module: link.module, suite: link.suite, name, label, code: info.code || '',
+    page: absAt(link.at, shell), href: shellUrl(link, shell), hash: shellHash(link, shell),
+  };
+}
+
 /** The shell route back to a film at a scene, in the category page that plays it (kino/README.md, "Now playing"):
     #/kino/kino-<category>?at=<absolute url of kino/index.html?cat=<category>#doc=<id>&s=<scene>>. */
 export function filmRoute(category, doc, scene, shell = SHELL_URL) {

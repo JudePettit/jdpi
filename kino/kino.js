@@ -1,17 +1,26 @@
 /* Kino, Vitruvian Manager's documentary module: the catalogue and player for one category (kino/index.html?cat=<category>).
-   Deep links: #doc=<id>&s=<scene id or number>. Scripts live in data/<category>/<id>.json (see README.md);
-   data/index.json, media.json and iso.json are built by scripts/build-index.mjs. */
+   Deep links: #doc=<id>&s=<scene id or number>, and &split=1 while Split view is on. Scripts live in
+   data/<category>/<id>.json (see README.md); data/index.json, media.json and iso.json are built by scripts/build-index.mjs.
+   Split view (V) shows each scene's place in Vitruvian Manager in a pane beside the film (design/prp-split.js), in place
+   of the block of text, which gives way to the sentence being read; Related (T) is a strip of the screens related to
+   the scene, with a See more panel; full screen (F) fits the 16:9 stage to the screen, beside the pane when it is on. */
 import { CATEGORIES, categoryOf, flatScenes, shortCite } from './lib/format.js';
-import { tokens, sentences, estimateSeconds } from './lib/text.js';
-import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from './lib/links.js';
+import { tokens, sentences, sentenceRuns, estimateSeconds } from './lib/text.js';
+import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute, readKinoView, kinoViewHash, linkPlace } from './lib/links.js';
+import { relatedPlaces, sceneEntities, tagTables, shardOf, CHIPS } from './lib/related.js';
 import { Reader, Music, store, voiceList, pickVoice, onVoices, hasSpeech, voices, onlineVoices, knownOnline } from './lib/voice.js';
 import { Stage, preview, esc, reduced } from './lib/stage.js';
+import { sidePane, splitter, fullScreen, inSidePane, shellGo } from '../design/prp-split.js';
 
 const $ = s => document.querySelector(s);
 const CAT = categoryOf(new URLSearchParams(location.search).get('cat'))?.id || 'wars';
 const CATINFO = categoryOf(CAT);
-const SHELL = new URL('../', location.href).href; // the PRP root, where the shell lives
+const SHELL = new URL('../', location.href).href; // the Vitruvian Manager root, where the shell lives
+const LAKE = new URL('lake/data/', SHELL).href;   // the Master Index's shards, for Related screens
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
+// Shown in another page's pane (a frame named 'prp-side'): no pane of its own, no Related and no Follow (rule 5 of
+// design/prp-split.js), so a film cannot open a book that opens a film.
+const inSide = inSidePane();
 const BASE_RATE = 0.92; // the shell reader's lecture pace
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const yr = y => (y < 0 ? `${-y} BC` : String(y));
@@ -22,11 +31,14 @@ const S = {
   index: null, media: { files: {}, qids: {} }, registry: null,
   doc: null, scenes: [], i: 0, playing: false, run: 0, sentence: 0, words: [], lit: null, started: false,
   voice: store.get('prp.kino.voice', true), speed: store.get('prp.kino.speed', 1), music: store.get('prp.kino.music', false), follow: false, followWin: null,
+  // Split view, the pane held on a place, the Related strip (shown or not), the sentence runs of the scene on screen,
+  // the sentence shown in the sentence box, and the scene's related places.
+  split: false, hold: false, related: !inSide && store.get('prp.kino.related', false), runs: [], shown: 0, rel: [], relOwn: true,
 };
 
-/* ---------- PRP registry: names, icons and codes for links ---------- */
+/* ---------- the registry: names, icons and codes for links ---------- */
 function moduleInfo(link) {
-  if (link.suite === 'kino') { const c = categoryOf(link.module.replace(/^kino-/, '')); return { name: `Kino · ${c?.name || ''}`, icon: '▶', code: 'KN', suite: 'kino', suiteName: 'Kino' }; }
+  if (/^kino-/.test(link.module)) { const c = categoryOf(link.module.replace(/^kino-/, '')); return { name: `Kino · ${c?.name || ''}`, icon: '▶', code: 'KN', suite: 'kino', suiteName: 'Kino' }; }
   const suite = S.registry?.suites.find(s => s.id === link.suite || s.aliases?.includes(link.suite));
   const m = suite?.modules.find(x => x.id === link.module || x.aliases?.includes(link.module));
   return m ? { name: m.name, icon: m.icon, code: suite.code, suite: suite.id, suiteName: suite.name, url: m.url } : { name: link.label.split(' · ')[0], code: link.suite.toUpperCase(), suite: link.suite };
@@ -45,7 +57,7 @@ function catLink(id) {
 function renderHeader() {
   $('#eyebrow-cat').textContent = CATINFO.name;
   $('#cat-title').textContent = CATINFO.name;
-  $('#cat-dek').textContent = `${CATINFO.dek} ${CATINFO.courses ? 'Each course plays in parts, with a short quiz at the end.' : 'Each documentary is narrated over maps, timelines and portraits, and every scene can open its place in PRP.'}`;
+  $('#cat-dek').textContent = `${CATINFO.dek} ${CATINFO.courses ? 'Each course plays in parts, with a short quiz at the end.' : 'Each documentary is narrated over maps, timelines and portraits, and every scene can open its place in Vitruvian Manager, or show it beside the film.'}`;
   const docs = S.index.docs.filter(d => d.category === CAT), mins = docs.reduce((a, d) => a + d.minutes, 0);
   $('#cat-meta').innerHTML = [`<span><b>${docs.length}</b> ${CATINFO.courses ? 'course' : 'documentar'}${docs.length === 1 ? (CATINFO.courses ? '' : 'y') : (CATINFO.courses ? 's' : 'ies')}</span>`,
     docs.length ? `<span><b>${mins}</b> minutes</span>` : '', `<span><b>${S.index.docs.length}</b> in Kino</span>`, '<span>Sources <b>scholarly works · Wikidata · Wikimedia Commons</b></span>',
@@ -82,7 +94,12 @@ function renderCatalogue() {
 async function route() {
   const { doc, s } = readKinoHash(location.hash);
   if (!doc) return closeDoc();
-  if (S.doc?.id === doc) { if (s) go(sceneIndex(s)); return; }
+  if (S.doc?.id === doc) {
+    // A later address in the same film can turn Split view on, never off (only the button, V and Follow do).
+    if (readKinoView(location.hash).split && !S.split) setSplit(true, { remember: false });
+    if (s) go(sceneIndex(s));
+    return;
+  }
   await openDoc(doc, s);
 }
 const sceneIndex = ref => { if (!ref) return 0; const k = S.scenes.findIndex(x => x.id === ref); if (k >= 0) return k; const n = parseInt(ref, 10); return Number.isFinite(n) ? Math.max(0, Math.min(S.scenes.length - 1, n - 1)) : 0; };
@@ -95,24 +112,29 @@ async function openDoc(id, sceneRef) {
   let doc;
   try { doc = await fetch(`data/${entry.path}`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }); }
   catch (e) { note(`The documentary could not load (${e.message}).`, true); return; }
-  S.doc = doc; S.scenes = flatScenes(doc); S.started = false;
+  S.doc = doc; S.scenes = flatScenes(doc); S.started = false; S.rel = [];
   $('#catalogue').hidden = true; $('#player').hidden = false;
   $('.kn-front').classList.add('compact');
-  document.title = `${doc.title} · Kino · PRP`;
+  document.title = `${doc.title} · Kino · VM`;
   $('#doc-title').textContent = doc.title;
   $('#back-label').textContent = `All ${CATINFO.name.toLowerCase()} ${CATINFO.courses ? 'courses' : 'documentaries'}`;
   $('#doc-meta').textContent = `${era(doc.era)} · ${doc.minutes} min · ${S.scenes.length} scenes · ${doc.sources.length} sources${doc.category !== CAT ? ` · ${categoryOf(doc.category)?.name}` : ''}`;
   renderChapters(); renderProgress(); renderAbout(); renderSources(); renderQuiz();
   note('');
   window.scrollTo({ top: 0 });
+  // split=1 in the address turns Split view on; with no such key the film starts as the viewer last left it.
+  S.hold = false; S.i = sceneIndex(sceneRef);
+  setSplit(readKinoView(location.hash).split || store.get('prp.kino.split', false), { remember: false, show: false });
   go(sceneIndex(sceneRef), { initial: true });
 }
 function closeDoc() {
   stop(); music?.set(false);
+  closeMore({ focus: false });
+  pane?.drop(); // a page in a hidden frame keeps running
   S.doc = null; S.scenes = [];
   $('#player').hidden = true; $('#catalogue').hidden = false; $('.kn-front').classList.remove('compact');
-  document.title = `${CATINFO.name} · Kino · PRP`;
-  if (document.fullscreenElement) document.exitFullscreen?.();
+  document.title = `${CATINFO.name} · Kino · VM`;
+  fs?.exit();
 }
 
 /* ---------- playback ---------- */
@@ -126,9 +148,11 @@ function go(i, { initial = false } = {}) {
   $('#badge').textContent = `${S.i + 1} / ${S.scenes.length}`;
   $('#scene-count').textContent = `${S.i + 1} / ${S.scenes.length}`;
   $('#stage').setAttribute('aria-label', `Scene ${S.i + 1}: ${sc.title}`);
-  history.replaceState(null, '', location.pathname + location.search + kinoHash(S.doc.id, sc.id));
+  writeAddress();
   stage.show(sc, S.doc);
   if (S.follow && sc.link && !initial) navigate(sc.link);
+  showScenePlace(); // Split view: the pane follows the film, unless it is held
+  updateRelated();
   if (S.playing) runScene(run, S.i, 0);
   nowPlaying();
 }
@@ -164,9 +188,11 @@ function finish() {
   const list = S.index.docs.filter(d => d.id !== S.doc.id), next = list.find(d => d.category === S.doc.category) || list[0];
   const card = stage.end(S.doc, next);
   card.querySelector('[data-act="again"]').onclick = () => { S.ended = false; go(0); play(); };
-  card.querySelector('[data-act="sources"]').onclick = () => $('#doc-sources').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
+  // The sources and the quiz are under the player: full screen ends so they can be seen.
+  card.querySelector('[data-act="sources"]').onclick = async () => { await fs?.exit(); $('#doc-sources').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' }); };
   if (S.doc.quiz?.length) {
-    $('#quiz').hidden = false; $('#quiz').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+    $('#quiz').hidden = false;
+    (fs?.on ? fs.exit() : Promise.resolve()).then(() => $('#quiz').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }));
     // Following along, the course ended on another page: bring Kino back into view for its quiz.
     if (embedded && S.follow) shellGo(`#/kino/kino-${CAT}`);
   }
@@ -219,6 +245,8 @@ function renderCaption(sc) {
   $('#cap-title').textContent = sc.title;
   $('#cap-text').innerHTML = words.map((w, k) => `<span class="w" data-i="${k}">${esc(w)}</span>`).join(' ');
   S.words = [...$('#cap-text').querySelectorAll('.w')]; S.lit = null;
+  S.runs = sentenceRuns(sc.narration);
+  markSentence(S.sentence);
   const foot = [];
   if (sc.link) { const info = moduleInfo(sc.link); foot.push(`<button type="button" class="prp-btn sm" data-open-link><span class="prp-code" data-suite="${esc(info.suite)}">${esc(info.code)}</span>${esc(sc.link.label)} ↗</button>`); }
   const cites = [].concat(sc.cites || []).map(id => S.doc.sources.find(s => s.id === id)).filter(Boolean);
@@ -230,10 +258,33 @@ function renderCaption(sc) {
 }
 const legendKey = html => { const k = $('#cap-foot .legend-key'); if (k) k.innerHTML = html; };
 function highlight(k) {
+  if (k >= 0 && S.lit && S.lit === S.words[k]) return; // the same word, reported again (each frame of an estimate)
   if (S.lit) S.lit.classList.remove('on');
   S.lit = k >= 0 ? S.words[k] : null;
-  if (S.lit) S.lit.classList.add('on');
+  if (S.lit) {
+    S.lit.classList.add('on');
+    if (!S.lit.classList.contains('cur')) markSentence(Math.max(0, S.runs.findIndex(r => r.includes(k))));
+    keepWordInView(S.lit);
+  }
   if (k >= 0) updateProgress((k + 1) / S.words.length);
+}
+/* The sentence box (Split view and full screen): #cap-text keeps every word, but only the sentence being read shows
+   (its words carry .cur), in a box three lines tall that never changes height. A sentence that needs more lines is not
+   set smaller: as each word is said, if its line is outside the box, the box scrolls by whole lines to it. */
+const sentenceMode = () => S.split || !!fs?.on;
+function markSentence(k) {
+  S.shown = k;
+  const run = new Set(S.runs[k] || S.runs[0] || []);
+  S.words.forEach((w, i) => w.classList.toggle('cur', run.has(i)));
+  $('#cap-text').scrollTop = 0;
+}
+function keepWordInView(w) {
+  const box = $('#cap-text');
+  if (!w || !sentenceMode() || box.scrollHeight <= box.clientHeight + 1) return;
+  const lh = parseFloat(getComputedStyle(box).lineHeight) || 26;
+  const b = box.getBoundingClientRect(), r = w.getBoundingClientRect();
+  const top = Math.floor((r.top + r.height / 2 - b.top + box.scrollTop) / lh) * lh;
+  if (top < box.scrollTop - 0.5 || top + lh > box.scrollTop + box.clientHeight + 0.5) box.scrollTop = Math.min(top, box.scrollHeight - box.clientHeight);
 }
 
 /* ---------- chapters, progress ---------- */
@@ -242,7 +293,7 @@ function renderChapters() {
   $('#chapter-list').innerHTML = S.scenes.map((sc, i) => {
     const head = sc.part && sc.part !== part ? `<li class="part">Part ${sc.partNo} · ${esc(sc.partTitle)}</li>` : ''; part = sc.part;
     const secs = Math.max(estimateSeconds(sc.narration, BASE_RATE), sc.seconds || 0) + 1.5;
-    return `${head}<li><button type="button" data-i="${i}"><span class="no">${i + 1}</span><span>${esc(sc.title)}${sc.link ? ' <span class="lk" title="Opens a place in PRP">↗</span>' : ''}</span><span class="t">${mmss(secs)}</span></button></li>`;
+    return `${head}<li><button type="button" data-i="${i}"><span class="no">${i + 1}</span><span>${esc(sc.title)}${sc.link ? ' <span class="lk" title="Opens a place in Vitruvian Manager">↗</span>' : ''}</span><span class="t">${mmss(secs)}</span></button></li>`;
   }).join('');
 }
 function updateChapters() {
@@ -268,7 +319,7 @@ function renderAbout() {
   $('#doc-subjects').innerHTML = d.subjects.map(s => `<span class="prp-chip" data-qid="${esc(s.qid)}">${esc(s.label)}</span>`).join('');
   const seen = new Set(), links = [];
   S.scenes.forEach((sc, i) => { if (sc.link && !seen.has(sc.link.at)) { seen.add(sc.link.at); links.push([sc.link, i]); } });
-  $('#links-hint').textContent = embedded ? 'Opens in PRP' : 'Opens PRP in a new tab';
+  $('#links-hint').textContent = embedded ? 'Opens in Vitruvian Manager' : 'Opens Vitruvian Manager in a new tab';
   $('#doc-links').innerHTML = links.map(([l, i]) => { const info = moduleInfo(l); return `<li><button type="button" data-link-scene="${i}"><span class="prp-code code" data-suite="${esc(info.suite)}">${esc(info.code)}</span><span>${esc(l.label)} <small>· scene ${i + 1}</small></span></button></li>`; }).join('') || '<li class="prp-muted">No links in this documentary.</li>';
 }
 function renderSources() {
@@ -302,14 +353,9 @@ function renderQuiz() {
   };
 }
 
-/* ---------- links into PRP ---------- */
-// Inside the shell: move the shell to a route. The shell listens for this (see README.md); until it does, move the
-// shell's address directly.
-function shellGo(hash) {
-  let before = null; try { before = window.top.location.hash; } catch { /* the shell is on another origin */ }
-  window.parent.postMessage({ type: 'prp:navigate', hash }, location.origin); // the shell only accepts its own origin
-  setTimeout(() => { try { if (before !== null && window.top.location.hash === before) window.top.location.hash = hash; } catch { /* only the listener can */ } }, 350);
-}
+/* ---------- links into Vitruvian Manager ---------- */
+// Inside the shell, a link moves the shell to a route: shellGo (design/prp-split.js) asks the shell (see README.md),
+// and sets its address directly if an older shell does not answer; in another page's pane it only asks that page.
 function navigate(link, { user = false } = {}) {
   if (link.suite === 'kino') {
     if (!user) return; // following along never leaves the film for another film
@@ -329,17 +375,199 @@ function navigate(link, { user = false } = {}) {
   if (!S.followWin) note('The browser blocked the companion tab. Allow pop-ups for this site to follow along, or use each scene’s link.');
 }
 function setFollow(on) {
+  if (inSide) on = false;
+  // Follow takes the viewer to the place; Split view brings the place to the film. One at a time: with both, the shell
+  // would leave Kino and hide the pane it had just filled.
+  if (on && S.split) setSplit(false);
   S.follow = on; $('#follow').setAttribute('aria-pressed', String(on));
   nowPlaying(); // the shell's now-playing bar appears (or goes, with Follow off)
   if (!on) { note(''); return; }
   const sc = S.scenes[S.i];
-  if (embedded) note('Following along: each scene with a place in PRP opens it while the narration carries on. The bar at the bottom of PRP shows the captions and controls; Back to film returns here.');
-  else { note('Following along in a second tab: it moves to each scene’s place in PRP.'); if (!S.followWin || S.followWin.closed) { S.followWin = window.open(sc?.link ? shellUrl(sc.link, SHELL) : SHELL, 'prp-kino-follow'); if (!S.followWin) note('The browser blocked the companion tab. Allow pop-ups for this site to follow along.'); } }
+  if (embedded) note('Following along: each scene with a place in Vitruvian Manager opens it while the narration carries on. The bar at the bottom of Vitruvian Manager shows the captions and controls; Back to film returns here.');
+  else { note('Following along in a second tab: it moves to each scene’s place in Vitruvian Manager.'); if (!S.followWin || S.followWin.closed) { S.followWin = window.open(sc?.link ? shellUrl(sc.link, SHELL) : SHELL, 'prp-kino-follow'); if (!S.followWin) note('The browser blocked the companion tab. Allow pop-ups for this site to follow along.'); } }
   if (sc?.link && embedded) navigate(sc.link);
 }
 function note(msg, inCatalogue = false) {
   $('#note').textContent = msg;
   if (inCatalogue && msg) $('#cards').insertAdjacentHTML('afterbegin', `<div class="kn-empty">${esc(msg)}</div>`);
+}
+
+/* ---------- Split view: each scene's place in Vitruvian Manager beside the film (K1) ----------
+   The pane is built by design/prp-split.js: one frame per submodule (the six shown last), moved by hash where it can
+   be, given the player's theme; a card where a page cannot be framed. It shows the place of the scene on screen and
+   follows the film, unless it is held (H, or a place chosen by hand). */
+let pane = null, split = null, fs = null;
+function writeAddress() {
+  if (!S.doc) return;
+  const sc = S.scenes[S.i];
+  history.replaceState(null, '', location.pathname + location.search + kinoViewHash(S.doc.id, sc?.id, { split: S.split }));
+}
+/** A link as a place for the pane: a submodule's page, or (a scene that points to another film) a film card. */
+function placeFor(link, label) {
+  if (/^kino-/.test(link.module)) {
+    const u = new URL(link.at, SHELL), film = S.index.docs.find(d => d.id === readKinoHash(u.hash).doc);
+    return { film: true, module: link.module, suite: 'kino', name: 'Kino', code: 'KN', label: film?.title || link.label, page: u.href, href: u.href, hash: '', onOpen: () => navigate(link, { user: true }) };
+  }
+  const info = moduleInfo(link);
+  return linkPlace(link, SHELL, { name: info.name, code: info.code, label });
+}
+function ensurePane() {
+  pane ||= sidePane($('#side'), {
+    registry: S.registry, base: SHELL, embedded, toShell: shellGo,
+    holdTitle: 'Hold: keep this page while the film moves on (H)', closeLabel: 'Close Split view (V)',
+    onHold: on => setHold(on), onClose: () => setSplit(false),
+    onOpen: () => { fs?.exit(); }, // "Open" does once what Follow does at every scene, so full screen ends
+    onBlocked: url => note(`The browser blocked the new tab. Allow pop-ups for this site, or open ${url}`),
+  });
+  return pane;
+}
+function showLink(link, label) {
+  if (!S.split) return;
+  ensurePane();
+  if (!link) pane.clear('This scene has no place in Vitruvian Manager.'); else pane.show(placeFor(link, label));
+  markRelated();
+}
+function showScenePlace() { if (S.split && !S.hold && S.doc) showLink(S.scenes[S.i]?.link || null); }
+function setHold(on) {
+  S.hold = !!on && S.split;
+  pane?.setHold(S.hold);
+  if (!S.hold) showScenePlace(); // let go: back to the scene's place
+}
+/** Shows a place chosen by hand (the scene's place button, O, the list under the player, a module card, Related),
+    turning Split view on if it was off; it is held unless it is the scene's own place. */
+function showHeld(link, label, always = false) {
+  if (!S.split) setSplit(true, { show: false });
+  const own = S.scenes[S.i]?.link;
+  S.hold = always || !(own && link && own.at === link.at && own.module === link.module);
+  pane.setHold(S.hold);
+  showLink(link, label);
+  // On a narrow screen the pane is under the player: bring it into view.
+  if ($('#theatre').dataset.dir === 'column' && !fs?.on) $('#side').scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
+}
+function setSplit(on, { show = true, remember = true } = {}) {
+  on = !!on && !inSide;
+  const was = S.split;
+  S.split = on;
+  if (remember) store.set('prp.kino.split', on);
+  $('#split').setAttribute('aria-pressed', String(on));
+  $('#theatre').dataset.side = on ? 'on' : 'off';
+  $('.kn-grid').classList.toggle('split', on);
+  $('#side').hidden = !on;
+  if (on) {
+    if (S.follow) setFollow(false);
+    ensurePane(); split?.update();
+    if (!was) { S.hold = false; pane.setHold(false); }
+    if (show) showScenePlace();
+  } else {
+    pane?.drop(); // no frame stays behind: a page in a hidden frame keeps running
+    S.hold = false; pane?.setHold(false);
+  }
+  markSentence(S.shown);
+  writeAddress();
+}
+/** The scene's place button, O, the list under the player and a module card: as before, the shell moves there (or a
+    new tab opens); with Split view on, or in full screen, the pane shows it instead. */
+function openPlace(link) {
+  if (!link) return;
+  if (!inSide && (S.split || fs?.on)) { showHeld(link); return; }
+  navigate(link, { user: true });
+}
+
+/* ---------- Related screens (K2): a strip under the film, and See more ---------- */
+const shards = new Map();
+const shard = n => {
+  // A missing file on the live site is answered with a page, not an error: a body that is not JSON counts as not loaded.
+  if (!shards.has(n)) shards.set(n, fetch(`${LAKE}e/${n}.json`).then(r => (r.ok ? r.json() : null)).catch(() => null));
+  return shards.get(n);
+};
+async function entitiesFor(qids) {
+  const m = new Map();
+  await Promise.all(qids.map(async q => { const s = await shard(shardOf(q)); m.set(q, s?.[q] || null); }));
+  return m;
+}
+// The site's tables of wars and countries, which tag a scene with the war or the country its link names and the
+// countries on its map (kino/lib/related.js, tagTables): fetched once, when Related is first wanted; either may fail.
+let tablesP = null;
+const json = url => fetch(url).then(r => (r.ok ? r.json() : null)).catch(() => null);
+const tagTablesNow = () => (tablesP ||= Promise.all([json(`${SHELL}battlefield/focus/data/index.json`), json(`${SHELL}national/data/brief.json`)]).then(([w, b]) => tagTables(w, b)));
+let relSeq = 0;
+async function updateRelated() {
+  if (!S.doc || inSide || (!S.related && !moreOpen())) return;
+  const seq = ++relSeq, i = S.i, sc = S.scenes[i], doc = S.doc;
+  const tables = await tagTablesNow();
+  const things = sceneEntities(sc, doc.subjects, tables), ents = await entitiesFor(things.qids);
+  if (seq !== relSeq || S.doc !== doc || S.i !== i) return;
+  S.rel = relatedPlaces(S.scenes, i, { subjects: doc.subjects, entities: ents, registry: S.registry, shell: SHELL, tables });
+  S.relOwn = things.own;
+  renderRelated();
+}
+const relPlace = it => placeFor(it.link, it.place);
+function relText(it) { const p = relPlace(it); return { code: p.code || it.link.suite.toUpperCase(), suite: p.suite, name: p.name, label: p.label || p.name }; }
+function renderRelated() {
+  $('#related-chips').innerHTML = S.rel.slice(0, CHIPS).map((it, k) => {
+    const t = relText(it);
+    return `<button type="button" class="kn-rel" data-rel="${k}" title="${esc(`${t.name} · ${t.label}`)}"><span class="prp-code" data-suite="${esc(t.suite)}">${esc(t.code)}</span><span class="t">${esc(t.label)}</span></button>`;
+  }).join('');
+  $('#related-n').textContent = String(S.rel.length);
+  $('#related-see').setAttribute('aria-label', `See all ${S.rel.length} related screens`);
+  if (moreOpen()) renderMore();
+  markRelated();
+}
+// The chip or row of the place the pane shows is marked.
+function markRelated() {
+  const at = S.split ? pane?.current?.page : null;
+  document.querySelectorAll('[data-rel]').forEach(b => { const it = S.rel[+b.dataset.rel]; if (it && at && relPlace(it).page === at) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+}
+function renderMore() {
+  const groups = [['scene', 'This scene'], ['tagged', S.relOwn ? 'Tagged in the Master Index' : 'Tagged in the Master Index, from the film’s subjects'], ['film', 'This film']];
+  $('#related-more-hint').textContent = `${S.rel.length} screens · scene ${S.i + 1}`;
+  $('#related-more-body').innerHTML = groups.map(([g, head]) => {
+    const rows = S.rel.map((it, k) => [it, k]).filter(([it]) => it.group === g);
+    const body = rows.length ? rows.map(([it, k]) => {
+      const t = relText(it), p = relPlace(it);
+      return `<li><button type="button" data-rel="${k}"><span class="prp-code" data-suite="${esc(t.suite)}">${esc(t.code)}</span><span class="t"><b>${esc(t.name)}</b> · ${esc(t.label)}</span>${it.scene && g === 'film' ? `<small>scene ${it.scene}</small>` : ''}</button><a href="${esc(p.page)}" target="_blank" rel="noopener" aria-label="Open ${esc(`${t.name} · ${t.label}`)} in a new tab">Open ↗</a></li>`;
+    }).join('') : `<li class="none">${g === 'tagged' ? 'The Master Index records no other place for what this scene names.' : 'None.'}</li>`;
+    return `<section data-group="${g}"><h4>${esc(head)}</h4><ul>${body}</ul></section>`;
+  }).join('');
+  markRelated();
+}
+const moreOpen = () => !$('#related-more').hidden;
+function placeMore() {
+  // A panel over the lower part of the player, just above the strip.
+  const th = $('#theatre').getBoundingClientRect(), strip = $('#related-strip').getBoundingClientRect(), more = $('#related-more');
+  more.style.bottom = `${Math.max(0, th.bottom - strip.top + 6)}px`;
+  more.style.maxHeight = `${Math.max(160, strip.top - th.top - 12)}px`;
+}
+async function openMore() {
+  if (!S.rel.length) await updateRelatedNow();
+  renderMore();
+  $('#related-more').hidden = false;
+  $('#related-see').setAttribute('aria-expanded', 'true');
+  placeMore();
+  $('#related-more').focus();
+}
+async function updateRelatedNow() { const was = S.related; S.related = true; await updateRelated(); S.related = was; }
+function closeMore({ focus = true } = {}) {
+  if (!moreOpen()) return;
+  $('#related-more').hidden = true;
+  $('#related-see').setAttribute('aria-expanded', 'false');
+  if (focus && S.related) $('#related-see').focus();
+}
+function setRelated(on) {
+  S.related = !!on && !inSide;
+  store.set('prp.kino.related', S.related);
+  $('#related').setAttribute('aria-expanded', String(S.related));
+  $('#related-strip').hidden = !S.related;
+  if (!S.related) closeMore({ focus: false });
+  else updateRelated();
+}
+/** A screen chosen in the strip or the panel shows in the pane, held, so the next scene does not take it away; Split
+    view turns on if it was off (and Follow off). The same everywhere: in a window, in full screen, in the shell. */
+function chooseRelated(k) {
+  const it = S.rel[k];
+  if (!it) return;
+  closeMore();
+  showHeld(it.link, it.place, true);
 }
 
 /* ---------- voice, music and settings ---------- */
@@ -369,8 +597,12 @@ function setMusic(on) {
 }
 
 /* ---------- start ---------- */
+// Inside the shell, leaving Kino hides this frame: stop talking unless the viewer chose to follow along. The frame's
+// window keeps its size when the shell hides it (innerWidth does not become 0 in Edge); the theatre's box does.
+const hidden = () => { const r = $('#theatre').getBoundingClientRect(); return r.width === 0 && r.height === 0; };
+function check() { if (S.playing && !S.follow && hidden()) pause(); }
 function wire() {
-  reader = new Reader({ onWord: highlight, onSentence: k => { S.sentence = k; nowPlaying(); }, onBackend: (id, why) => {
+  reader = new Reader({ onWord: highlight, onSentence: k => { S.sentence = k; markSentence(k); nowPlaying(); check(); }, onBackend: (id, why) => {
     // The online voice could not carry on, so this device's voice reads on from the same sentence: say so, once.
     if (!why || id !== 'webspeech' || S.voiceNoted) return;
     S.voiceNoted = true;
@@ -380,7 +612,7 @@ function wire() {
   // an online voice's clips play. So the shell calls this first, synchronously inside its click (same origin; shell.js).
   window.prpKinoUnlock = () => reader.unlock();
   music = new Music({ onTrack: t => { $('#now-playing').innerHTML = `♫ ${esc(t.composer)}: ${esc(t.title)} · <a href="${esc(t.page)}" target="_blank" rel="noopener">Wikimedia Commons</a>`; } });
-  stage = new Stage($('#stage'), { media: S.media, base: 'data/', embedded, moduleInfo, onLink: l => navigate(l, { user: true }), onLegend: legendKey });
+  stage = new Stage($('#stage'), { media: S.media, base: 'data/', embedded, moduleInfo, onLink: openPlace, onLegend: legendKey });
 
   $('#find').oninput = renderCatalogue; $('#sort').onchange = renderCatalogue;
   $('#back').onclick = e => { e.preventDefault(); history.pushState(null, '', location.pathname + location.search); closeDoc(); };
@@ -389,18 +621,42 @@ function wire() {
   $('#progress').onclick = e => { const b = e.target.closest('button[data-i]'); if (b) go(+b.dataset.i); };
   $('#chapter-list').onclick = e => { const b = e.target.closest('button[data-i]'); if (b) go(+b.dataset.i); };
   $('#cap-foot').onclick = e => {
-    if (e.target.closest('[data-open-link]')) return navigate(S.scenes[S.i].link, { user: true });
+    if (e.target.closest('[data-open-link]')) return openPlace(S.scenes[S.i].link);
     // The page's hash is the film's address, so source links scroll instead of changing it.
     const a = e.target.closest('[data-src]');
     if (a) { e.preventDefault(); document.getElementById(`src-${a.dataset.src}`)?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' }); }
   };
-  $('#doc-links').onclick = e => { const b = e.target.closest('[data-link-scene]'); if (b) navigate(S.scenes[+b.dataset.linkScene].link, { user: true }); };
+  $('#doc-links').onclick = e => { const b = e.target.closest('[data-link-scene]'); if (b) openPlace(S.scenes[+b.dataset.linkScene].link); };
   $('#speed').value = String(S.speed);
   $('#speed').onchange = e => { S.speed = +e.target.value; store.set('prp.kino.speed', S.speed); restartSentence(); };
   $('#voice').onclick = () => setVoice(!S.voice);
   $('#music').onclick = () => setMusic(!S.music);
   $('#follow').onclick = () => setFollow(!S.follow);
-  $('#fullscreen').onclick = () => (document.fullscreenElement ? document.exitFullscreen() : $('#theatre').requestFullscreen?.().catch(() => {}));
+  // Full screen: the stage is fitted, 16:9, as large as the screen allows (kino.css), beside the pane with Split view on.
+  fs = fullScreen($('#theatre'), { onChange: on => {
+    const b = $('#fullscreen');
+    b.setAttribute('aria-label', on ? 'Leave full screen' : 'Full screen'); b.title = on ? 'Leave full screen (F)' : 'Full screen (F)';
+    markSentence(S.shown);
+    if (moreOpen()) requestAnimationFrame(placeMore);
+  } });
+  $('#fullscreen').hidden = !fs.supported;
+  $('#fullscreen').onclick = () => fs.toggle();
+  // Split view, Hold and Related: not offered in another page's pane.
+  $('#theatre').classList.add('prp-split'); $('#theatre').dataset.side = 'off'; $('#side').hidden = true;
+  if (inSide) for (const id of ['#split', '#related', '#follow']) $(id).hidden = true;
+  else {
+    split = splitter($('#theatre'), $('#side'), { share: 40, min: 25, max: 60, minMain: 480, minSide: 328, rowFrom: 901, storeKey: 'prp.split.kino', label: 'Resize the film and the Vitruvian Manager page' });
+    $('#split').onclick = () => setSplit(!S.split);
+    $('#related').onclick = () => setRelated(!S.related);
+    $('#related-hide').onclick = () => { setRelated(false); $('#related').focus(); };
+    $('#related-see').onclick = () => (moreOpen() ? closeMore() : openMore());
+    $('#related-close').onclick = () => closeMore();
+    $('#related-chips').onclick = e => { const b = e.target.closest('[data-rel]'); if (b) chooseRelated(+b.dataset.rel); };
+    $('#related-more-body').onclick = e => { const b = e.target.closest('button[data-rel]'); if (b) chooseRelated(+b.dataset.rel); };
+    // A click outside the panel closes it (after the click, so the focus can go back to See more).
+    document.addEventListener('click', e => { if (moreOpen() && !e.target.closest?.('#related-more, #related-see')) closeMore(); });
+    setRelated(S.related);
+  }
   $('#voice-pick').onchange = e => { store.set('jdpi.doc.voice', e.target.value); reader.unlock(); restartSentence(); };
   setVoice(S.voice); $('#music').setAttribute('aria-pressed', String(S.music));
   if (hasSpeech()) { fillVoices(); onVoices(fillVoices); }
@@ -414,20 +670,24 @@ function wire() {
   }, 1600);
 
   document.addEventListener('keydown', e => {
-    if (!S.doc || e.ctrlKey || e.metaKey || e.altKey || /input|select|textarea/i.test(e.target.tagName)) return;
+    // A key something else has handled (the divider's arrows, Home and End) is left alone.
+    if (!S.doc || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || /input|select|textarea/i.test(e.target.tagName)) return;
+    if (e.key === 'Escape' && moreOpen()) { e.preventDefault(); closeMore(); return; } // in full screen the browser keeps Escape
+    const view = inSide ? {} : {
+      v: () => setSplit(!S.split), V: () => setSplit(!S.split), t: () => setRelated(!S.related), T: () => setRelated(!S.related),
+      h: () => S.split && setHold(!S.hold), H: () => S.split && setHold(!S.hold), p: () => setFollow(!S.follow), P: () => setFollow(!S.follow),
+    };
     const k = e.key, act = {
       ' ': toggle, k: toggle, K: toggle, ArrowLeft: () => go(S.i - 1), ArrowRight: () => go(S.i + 1), j: () => go(S.i - 1), l: () => go(S.i + 1), Home: () => go(0), End: () => go(S.scenes.length - 1),
-      c: () => setVoice(!S.voice), C: () => setVoice(!S.voice), m: () => setMusic(!S.music), M: () => setMusic(!S.music), p: () => setFollow(!S.follow), P: () => setFollow(!S.follow),
-      f: () => $('#fullscreen').click(), F: () => $('#fullscreen').click(), o: () => S.scenes[S.i]?.link && navigate(S.scenes[S.i].link, { user: true }),
+      c: () => setVoice(!S.voice), C: () => setVoice(!S.voice), m: () => setMusic(!S.music), M: () => setMusic(!S.music),
+      f: () => $('#fullscreen').click(), F: () => $('#fullscreen').click(), o: () => openPlace(S.scenes[S.i]?.link), O: () => openPlace(S.scenes[S.i]?.link),
       '<': () => stepSpeed(-1), ',': () => stepSpeed(-1), '>': () => stepSpeed(1), '.': () => stepSpeed(1), '?': () => { $('#settings').open = !$('#settings').open; },
+      ...view,
     }[k];
     if (!act) return;
     if (k === ' ' && e.target.closest('button, a, summary')) return; // let Space press a focused control
     e.preventDefault(); act();
   });
-  // Inside the shell, leaving Kino hides this frame: stop talking unless the viewer chose to follow along.
-  const hidden = () => window.innerWidth === 0 || window.innerHeight === 0;
-  const check = () => { if (S.playing && !S.follow && hidden()) pause(); };
   window.addEventListener('resize', check);
   new IntersectionObserver(check).observe($('#stage'));
   // In a background browser tab the scene timers are throttled while the voice carries on, so the film would drift

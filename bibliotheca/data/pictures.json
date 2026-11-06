@@ -1,0 +1,169 @@
+{
+  "about": "Pictures for the books, shown in Augmented Reading's Screens only, taking their turn with the Master Index entries and the screens for the book's era (bibliotheca/neo/app.js, tour). Each is a scene of Kino's stage (kino/lib/stage.js): a map, a timeline or a portrait drawn in SVG and CSS and looping quietly, like a GIF, and still with reduced motion. A picture is either a scene of the Kino film about the book's author (film and scene), or one written here for the book (scene). chapters gives the chapters it goes with, by their numbers in the book's file, from and to; without it, every chapter. Credits: portraits are Kino's (kino/data/media.json: Wikimedia Commons, with author and licence, shown on the picture); maps are world-atlas 2.0.2 (Natural Earth, public domain), drawn with present-day borders for orientation, as Kino's maps are. Checked by tests/bibliotheca-page.test.mjs.",
+  "books": {
+    "the-prince": {
+      "film": "great-thinkers/niccolo-machiavelli",
+      "pictures": [
+        { "chapters": [0, 0], "scene": "the-prince" },
+        { "chapters": [1, 5], "scene": "italy-1494" },
+        { "chapters": [6, 7], "scene": "cesare-borgia" },
+        { "chapters": [8, 11], "scene": "chancery" },
+        { "chapters": [12, 14], "scene": "italy-1494" },
+        { "chapters": [15, 17], "scene": "readings" },
+        { "chapters": [18, 18], "scene": "fox-and-lion" },
+        { "chapters": [19, 23], "scene": "opening" },
+        { "chapters": [24, 26], "scene": "exile" }
+      ]
+    },
+    "wealth-of-nations-1": {
+      "film": "great-thinkers/adam-smith",
+      "pictures": [
+        { "chapters": [0, 0], "scene": "opening" },
+        { "chapters": [101, 103], "scene": "pin-factory" },
+        { "chapters": [104, 111], "scene": "self-interest" },
+        { "chapters": [200, 205], "scene": "scotland" },
+        { "chapters": [301, 304], "scene": "grand-tour" }
+      ]
+    },
+    "wealth-of-nations-2": {
+      "film": "great-thinkers/adam-smith",
+      "pictures": [
+        { "chapters": [400, 499], "scene": "mercantile-system" },
+        { "chapters": [501, 503], "scene": "government" }
+      ]
+    },
+    "peloponnesian-war": {
+      "pictures": [
+        { "scene": {
+          "id": "greek-world", "title": "The Greek world in 431 BC",
+          "visual": { "kind": "map", "groups": [], "arrows": [{ "from": [23.6, 37.9], "via": [19.5, 36.6], "to": [15.4, 37.1], "tone": 1, "label": "The Sicilian expedition, 415 BC" }] },
+          "focus": { "countries": ["GRC"], "points": [
+            [23.73, 37.98, "Athens, at the head of the Delian League"], [22.43, 37.07, "Sparta, at the head of the Peloponnesian League"],
+            [22.88, 37.91, "Corinth"], [23.32, 38.32, "Thebes"], [21.70, 36.91, "Pylos and Sphacteria, 425 BC"],
+            [23.85, 40.82, "Amphipolis, 422 BC"], [15.29, 37.07, "Syracuse, 415 to 413 BC"]
+          ], "bbox": [12, 35, 30, 42.5] } } }
+      ]
+    },
+    "origin-of-species": {
+      "pictures": [
+        { "scene": {
+          "id": "beagle", "title": "The voyage of the Beagle, 1831 to 1836",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [-4.1, 50.3], "via": [-25, 18], "to": [-38.5, -13], "tone": 1, "label": "The Beagle, from December 1831" },
+            { "from": [-38.5, -13], "via": [-43.2, -22.9], "to": [-59.5, -51.7], "tone": 1 },
+            { "from": [-59.5, -51.7], "via": [-67.3, -56], "to": [-71.6, -33.1], "tone": 1 },
+            { "from": [-71.6, -33.1], "via": [-82, -12], "to": [-90.5, -0.7], "tone": 1 },
+            { "from": [151.2, -33.9], "via": [96.9, -12.2], "to": [18.4, -33.9], "tone": 1 },
+            { "from": [18.4, -33.9], "via": [-25, 5], "to": [-5.1, 50.2], "tone": 1, "label": "Home, October 1836" }
+          ] },
+          "focus": { "countries": ["GBR", "BRA", "ARG", "CHL", "ECU", "AUS", "ZAF"], "points": [
+            [-4.14, 50.37, "Plymouth: sailed 27 December 1831"], [-38.5, -12.97, "Bahia, 1832"], [-43.2, -22.9, "Rio de Janeiro, 1832"],
+            [-59.5, -51.7, "The Falkland Islands, 1833 and 1834"], [-71.6, -33.05, "Valparaíso, 1834"],
+            [-90.5, -0.7, "The Galápagos Islands, September and October 1835"], [151.2, -33.87, "Sydney, 1836"],
+            [18.42, -33.92, "Cape Town, 1836"], [-5.07, 50.15, "Falmouth: home, 2 October 1836"]
+          ], "bbox": [-160, -60, 160, 62] } } },
+        { "scene": {
+          "id": "to-the-origin", "title": "From the Beagle to the Origin, 1831 to 1872",
+          "visual": { "kind": "timeline", "from": "1831", "to": "1872", "events": [
+            { "at": "1831-12", "label": "The Beagle sails" }, { "at": "1835-09", "label": "The Galápagos" }, { "at": "1836-10", "label": "Home" },
+            { "at": "1838-09", "label": "Darwin reads Malthus" }, { "at": "1844", "label": "The essay of 1844" },
+            { "at": "1858-07", "label": "Darwin and Wallace at the Linnean Society" }, { "at": "1859-11", "label": "On the Origin of Species" },
+            { "at": "1872", "label": "The sixth edition" }
+          ] } } }
+      ]
+    },
+    "decline-and-fall-1": {
+      "pictures": [
+        { "scene": {
+          "id": "empire-117", "title": "The empire at its widest, AD 117",
+          "visual": { "kind": "map", "groups": [{ "label": "Lands of the empire under Trajan, roughly", "tone": 1, "countries": ["ITA", "ESP", "PRT", "FRA", "BEL", "CHE", "SVN", "HRV", "BIH", "SRB", "MNE", "ALB", "MKD", "GRC", "BGR", "ROU", "TUR", "CYP", "SYR", "LBN", "ISR", "JOR", "EGY", "LBY", "TUN"] }], "arrows": [] },
+          "focus": { "countries": ["ITA"], "points": [[12.48, 41.89, "Rome"], [28.98, 41.01, "Byzantium"], [29.92, 31.2, "Alexandria"], [36.16, 36.2, "Antioch"], [10.32, 36.85, "Carthage"]], "bbox": [-12, 24, 48, 58] } } }
+      ]
+    },
+    "decline-and-fall-2": {
+      "pictures": [
+        { "scene": {
+          "id": "constantine-to-adrianople", "title": "From Constantine to Adrianople, 312 to 378",
+          "visual": { "kind": "map", "groups": [], "arrows": [] },
+          "focus": { "countries": ["ITA", "GRC", "TUR"], "points": [
+            [12.47, 41.94, "The Milvian Bridge, 312"], [29.72, 40.43, "The Council of Nicaea, 325"], [28.98, 41.01, "Constantinople, founded in 330"],
+            [44.58, 33.09, "Ctesiphon: Julian's Persian war, 363"], [26.56, 41.68, "Adrianople, 378"]
+          ], "bbox": [5, 28, 50, 50] } } }
+      ]
+    },
+    "decline-and-fall-3": {
+      "pictures": [
+        { "scene": {
+          "id": "the-west-falls", "title": "The western empire falls, 378 to 476",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [27.5, 44.5], "via": [19, 44.5], "to": [12.6, 42], "tone": 2, "label": "Alaric's Visigoths take Rome, 410" },
+            { "from": [-5.6, 36.1], "via": [3, 36.2], "to": [10.2, 36.8], "tone": 3, "label": "The Vandals cross to Africa, 429, and take Carthage, 439" },
+            { "from": [30, 47.5], "via": [17, 48.5], "to": [4.6, 48.8], "tone": 1, "label": "Attila's Huns, turned back in Gaul in 451" }
+          ] },
+          "focus": { "countries": ["ITA", "FRA", "TUN"], "points": [
+            [12.48, 41.89, "Rome, sacked in 410 and 455"], [12.2, 44.42, "Ravenna: the last western emperor deposed, 476"], [10.32, 36.85, "Carthage"], [28.98, 41.01, "Constantinople"]
+          ], "bbox": [-10, 30, 36, 54] } } }
+      ]
+    },
+    "decline-and-fall-4": {
+      "pictures": [
+        { "scene": {
+          "id": "justinian", "title": "Justinian's wars of reconquest, 533 to 554",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [28.9, 40.9], "via": [20, 34.5], "to": [10.4, 36.8], "tone": 1, "label": "Belisarius to Africa, 533" },
+            { "from": [28.9, 40.9], "via": [19.5, 39.5], "to": [12.3, 44.3], "tone": 1, "label": "To Italy: Ravenna taken, 540" }
+          ] },
+          "focus": { "countries": ["TUR", "ITA", "TUN"], "points": [
+            [28.98, 41.01, "Constantinople: Hagia Sophia, 537"], [10.32, 36.85, "Carthage"], [12.2, 44.42, "Ravenna"]
+          ], "bbox": [2, 30, 36, 48] } } }
+      ]
+    },
+    "decline-and-fall-5": {
+      "pictures": [
+        { "scene": {
+          "id": "the-arab-conquests", "title": "The Arab conquests, from the 630s",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [39.6, 24.5], "via": [37.5, 29.5], "to": [36.3, 33.5], "tone": 1, "label": "Syria, the 630s" },
+            { "from": [39.6, 24.5], "via": [43, 30], "to": [44.6, 33.1], "tone": 1, "label": "Persia, the 630s to the 650s" },
+            { "from": [39.6, 24.5], "via": [34, 28], "to": [29.9, 31.2], "tone": 1, "label": "Egypt, the 640s" }
+          ] },
+          "focus": { "countries": ["SAU", "SYR", "IRQ", "EGY"], "points": [
+            [39.83, 21.42, "Mecca"], [39.61, 24.47, "Medina: the hijra, 622"], [35.23, 31.78, "Jerusalem"], [28.98, 41.01, "Constantinople"]
+          ], "bbox": [22, 16, 56, 44] } } }
+      ]
+    },
+    "decline-and-fall-6": {
+      "pictures": [
+        { "scene": {
+          "id": "crusades-to-1453", "title": "From the First Crusade to the fall of Constantinople, 1096 to 1453",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [4.5, 47], "via": [22, 43], "to": [35.1, 31.9], "tone": 1, "label": "The First Crusade, 1096 to 1099" }
+          ] },
+          "focus": { "countries": ["TUR", "ISR", "ITA"], "points": [
+            [35.23, 31.78, "Jerusalem, taken in 1099"], [28.98, 41.01, "Constantinople: taken by the Fourth Crusade in 1204, and by the Ottomans on 29 May 1453"], [12.48, 41.89, "Rome"]
+          ], "bbox": [-2, 28, 42, 52] } } }
+      ]
+    },
+    "on-war": {
+      "pictures": [
+        { "scene": {
+          "id": "napoleons-wars", "title": "The wars of 1792 to 1815",
+          "visual": { "kind": "map", "groups": [], "arrows": [
+            { "from": [23.9, 54.9], "via": [30.5, 55.6], "to": [37.5, 55.7], "tone": 2, "label": "The Grande Armée to Moscow, 1812" }
+          ] },
+          "focus": { "countries": ["FRA", "DEU", "AUT", "CZE", "BEL", "RUS"], "points": [
+            [4.77, 49.08, "Valmy, 1792"], [16.76, 49.13, "Austerlitz, 1805"], [11.59, 50.93, "Jena and Auerstedt, 1806"],
+            [35.82, 55.52, "Borodino, 1812"], [12.37, 51.34, "Leipzig, 1813"], [4.4, 50.68, "Waterloo, 1815"]
+          ], "bbox": [-5, 42, 42, 60] } } },
+        { "scene": {
+          "id": "clausewitz", "title": "Carl von Clausewitz, 1792 to 1832",
+          "visual": { "kind": "timeline", "from": "1792", "to": "1832", "events": [
+            { "at": "1792", "label": "Joins the Prussian army, aged twelve" }, { "at": "1806-10", "label": "Jena and Auerstedt: taken prisoner" },
+            { "at": "1812", "label": "Into Russian service" }, { "at": "1812-12", "label": "The Convention of Tauroggen" },
+            { "at": "1815-06", "label": "The Waterloo campaign" }, { "at": "1831-11", "label": "Dies at Breslau" },
+            { "at": "1832", "label": "On War published by his widow, Marie" }
+          ] } } }
+      ]
+    }
+  }
+}

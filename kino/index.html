@@ -6,20 +6,21 @@
   <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
   <title>Kino · VM</title>
-  <meta name="description" content="Kino: Vitruvian Manager's documentaries on wars, political events, parties, people and thinkers, narrated with maps, timelines and portraits that open the matching place in PRP.">
+  <meta name="description" content="Kino: Vitruvian Manager's documentaries on wars, political events, parties, people and thinkers, narrated with maps, timelines and portraits that open the matching place in Vitruvian Manager, or show it beside the film.">
   <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../design/prp.css">
+  <link rel="stylesheet" href="../design/prp-split.css">
   <link rel="stylesheet" href="kino.css">
   <script src="../design/prp-bar.js" data-suite="kino" data-module="wars" data-shell="../" defer></script>
   <!-- One page, six submodules: ?cat= picks the category; the connector (deferred, so it runs after this) is told which. -->
-  <script>(function(){var C={'political-events':'Political Events','political-figures':'Political Figures','political-parties':'Political Parties','wars':'Wars','geopolitical-events':'Geopolitical Events','great-thinkers':'Great Thinkers'},c=new URLSearchParams(location.search).get('cat');if(!C[c])c='wars';var s=document.querySelector('script[src*="prp-bar.js"]');if(s)s.dataset.module='kino-'+c;document.documentElement.dataset.cat=c;document.title=C[c]+' · Kino · PRP';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
+  <script>(function(){var C={'political-events':'Political Events','political-figures':'Political Figures','political-parties':'Political Parties','wars':'Wars','geopolitical-events':'Geopolitical Events','great-thinkers':'Great Thinkers'},c=new URLSearchParams(location.search).get('cat');if(!C[c])c='wars';var s=document.querySelector('script[src*="prp-bar.js"]');if(s)s.dataset.module='kino-'+c;document.documentElement.dataset.cat=c;document.title=C[c]+' · Kino · VM';try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}})();</script>
 </head>
 <body>
   <div class="kn-page">
     <header class="kn-front">
       <p class="prp-eyebrow" data-jdpi-standalone><span>Kino <span class="sep">·</span> <span id="eyebrow-cat">Wars</span></span></p>
       <h1 class="prp-title" id="cat-title">Wars</h1>
-      <p class="prp-dek" id="cat-dek">Documentaries narrated with maps, timelines and portraits; every scene can open its place in PRP.</p>
+      <p class="prp-dek" id="cat-dek">Documentaries narrated with maps, timelines and portraits; every scene can open its place in Vitruvian Manager.</p>
       <p class="prp-meta" id="cat-meta"><span>Loading…</span></p>
       <nav class="kn-cats" id="cats" aria-label="Kino categories"></nav>
     </header>
@@ -48,18 +49,30 @@
         </div>
         <div class="kn-grid">
           <figure class="kn-theatre" id="theatre">
-            <div class="kn-stage" id="stage" role="img" aria-roledescription="documentary stage" aria-label="">
-              <div class="kn-layer fade"></div>
-              <div class="kn-legend"></div>
-              <div class="kn-credit"></div>
-              <div class="kn-badge" id="badge"></div>
-              <button type="button" class="kn-bigplay" id="bigplay">Play</button>
+            <div class="kn-fit">
+              <div class="kn-stage" id="stage" role="img" aria-roledescription="documentary stage" aria-label="">
+                <div class="kn-layer fade"></div>
+                <div class="kn-legend"></div>
+                <div class="kn-credit"></div>
+                <div class="kn-badge" id="badge"></div>
+                <button type="button" class="kn-bigplay" id="bigplay">Play</button>
+              </div>
             </div>
             <figcaption class="kn-captions" id="captions">
               <div class="kn-cap-head"><span id="cap-no"></span><b id="cap-title"></b></div>
               <p class="kn-cap-text" id="cap-text" lang="en-GB"></p>
               <div class="kn-cap-foot" id="cap-foot"></div>
             </figcaption>
+            <div class="kn-related" id="related-strip" role="region" aria-label="Related screens" hidden>
+              <span class="lbl" aria-hidden="true">Related</span>
+              <div class="chips" id="related-chips"></div>
+              <button type="button" class="prp-btn sm" id="related-see" aria-expanded="false" aria-controls="related-more" aria-haspopup="dialog">See more <span class="n" id="related-n"></span></button>
+              <button type="button" class="prp-btn sm ghost" id="related-hide" aria-label="Hide related screens" title="Hide related screens (T)">✕</button>
+            </div>
+            <div class="kn-more" id="related-more" role="dialog" aria-modal="false" aria-labelledby="related-more-h" tabindex="-1" hidden>
+              <div class="kn-more-head"><b id="related-more-h">Related screens</b><span class="prp-muted" id="related-more-hint"></span><button type="button" class="prp-btn sm ghost" id="related-close" aria-label="Close related screens">✕</button></div>
+              <div class="kn-more-body" id="related-more-body"></div>
+            </div>
             <div class="kn-controls" role="toolbar" aria-label="Player controls" id="controls">
               <button type="button" class="prp-btn" id="prev" title="Previous scene (←)" aria-label="Previous scene">⏮</button>
               <button type="button" class="prp-btn primary" id="play" title="Play or pause (Space)" aria-label="Play">▶</button>
@@ -71,8 +84,10 @@
                 <option value="0.8">0.8×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="1.5">1.5×</option>
               </select>
               <button type="button" class="prp-btn" id="voice" aria-pressed="true" title="Voice on or captions only (C)"><span class="lbl-text">Voice</span></button>
-              <button type="button" class="prp-btn" id="music" aria-pressed="false" title="Quiet classical music (M)"><span aria-hidden="true">♫</span> Music</button>
-              <button type="button" class="prp-btn" id="follow" aria-pressed="false" title="Follow along in PRP: open each scene's place as the film plays (P)"><span aria-hidden="true">↗</span> Follow<span class="wide"> in PRP</span></button>
+              <button type="button" class="prp-btn" id="music" aria-pressed="false" aria-label="Music" title="Quiet classical music (M)"><span aria-hidden="true">♫</span><span class="wide"> Music</span></button>
+              <button type="button" class="prp-btn" id="follow" aria-pressed="false" aria-label="Follow in VM" title="Follow along in Vitruvian Manager: open each scene's place as the film plays (P)"><span aria-hidden="true">↗</span><span class="lbl">Follow<span class="wide"> in VM</span></span></button>
+              <button type="button" class="prp-btn" id="split" aria-pressed="false" aria-label="Split view" title="Split view: each scene's place in Vitruvian Manager beside the film, in place of the text (V)"><span aria-hidden="true">▥</span><span class="wide new"> Split view</span></button>
+              <button type="button" class="prp-btn" id="related" aria-expanded="false" aria-controls="related-strip" aria-label="Related" title="Screens related to this scene (T)"><span aria-hidden="true">◈</span><span class="wide new"> Related</span></button>
               <details class="kn-settings" id="settings">
                 <summary class="prp-btn" title="Voice and shortcuts" aria-label="Settings">⚙</summary>
                 <div class="pop">
@@ -85,8 +100,11 @@
                     <li><kbd>&lt;</kbd> <kbd>&gt;</kbd></li><li>Slower or faster</li>
                     <li><kbd>C</kbd></li><li>Voice or captions only</li>
                     <li><kbd>M</kbd></li><li>Music</li>
-                    <li><kbd>P</kbd></li><li>Follow along in PRP</li>
-                    <li><kbd>O</kbd></li><li>Open this scene's place in PRP</li>
+                    <li><kbd>P</kbd></li><li>Follow along in Vitruvian Manager</li>
+                    <li><kbd>O</kbd></li><li>Open this scene's place in Vitruvian Manager</li>
+                    <li><kbd>V</kbd></li><li>Split view: the place beside the film</li>
+                    <li><kbd>T</kbd></li><li>Related screens</li>
+                    <li><kbd>H</kbd></li><li>Hold the page beside the film, or let go</li>
                     <li><kbd>F</kbd></li><li>Full screen</li>
                   </ul>
                 </div>
@@ -94,6 +112,7 @@
               <button type="button" class="prp-btn" id="fullscreen" title="Full screen (F)" aria-label="Full screen">⛶</button>
             </div>
             <p class="kn-note" id="note" role="status"></p>
+            <aside class="kn-side" id="side" aria-label="Vitruvian Manager beside the film"></aside>
           </figure>
           <nav class="kn-chapters" aria-labelledby="chapters-h">
             <h3 id="chapters-h">Chapters</h3>
@@ -111,7 +130,7 @@
             </div>
           </section>
           <section class="prp-panel" aria-labelledby="links-h">
-            <div class="prp-panel-head"><b id="links-h">In PRP</b><span class="prp-muted" id="links-hint"></span></div>
+            <div class="prp-panel-head"><b id="links-h">In Vitruvian Manager</b><span class="prp-muted" id="links-hint"></span></div>
             <div class="prp-panel-body"><ul class="kn-links" id="doc-links"></ul></div>
           </section>
         </div>
@@ -124,7 +143,7 @@
     </main>
 
     <footer class="prp-sources kn-footer" id="sources">
-      <p><b>Sources.</b> Each documentary is written by PRP in its own words from the scholarly books and articles it lists, with names, dates and images checked against Wikidata (CC0). Maps: world-atlas 2.0.2 (Natural Earth, public domain), drawn with d3 7.9.0 on present-day borders for orientation. Images: Wikimedia Commons, each credited on screen with its author and licence. Music: public-domain and CC0 recordings from Wikimedia Commons. Voice: your browser's own speech synthesis (a British English voice where one is installed), or an online Microsoft Azure voice, when you choose one in the settings, or when this browser has no English voice of its own and the site's online voice is available; each sentence is then sent to Azure to be spoken.</p>
+      <p><b>Sources.</b> Each documentary is written by Vitruvian Manager in its own words from the scholarly books and articles it lists, with names, dates and images checked against Wikidata (CC0). Maps: world-atlas 2.0.2 (Natural Earth, public domain), drawn with d3 7.9.0 on present-day borders for orientation. Images: Wikimedia Commons, each credited on screen with its author and licence. Music: public-domain and CC0 recordings from Wikimedia Commons. Voice: your browser's own speech synthesis (a British English voice where one is installed), or an online Microsoft Azure voice, when you choose one in the settings, or when this browser has no English voice of its own and the site's online voice is available; each sentence is then sent to Azure to be spoken.</p>
       <p><b>Method.</b> Figures for deaths are given as ranges from named sources, never as single uncertain numbers. Arrows and front lines are simplified sketches of movements described in the sources, marked approximate where they are. A full stop with no space after it is read as “point” between digits and “dot” between letters, never as the end of a sentence.</p>
       <p><b>See also.</b> <span id="see-also"></span></p>
     </footer>

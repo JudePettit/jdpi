@@ -33,13 +33,30 @@
    message (as Kino's follow-along does), on its own in a new tab. The frames get the page's theme (prp:theme) as the
    shell gives it to its own frames. A framed page believes it is in the shell (window.self !== window.top) and opens
    its cross-links at the top (target="_top"): inside the shell that is the shell, but on its own the top is this page,
-   so there such a link opens in a new tab instead of replacing the book (keepTop). Above 1100 px the page splits
-   (book | pane); below, the pane is a sheet docked under the text. */
+   so there such a link opens in a new tab instead of replacing the book (keepTop). From 1000 px the page splits
+   (book | pane), with a divider the reader can drag (design/prp-split.js, splitter); below, the pane is a sheet docked
+   under the text. The frames are the shared pane's (sideFrame), and full screen is the whole page's (fullScreen).
+
+   Augmented Reading (A; &ar=1 in the address, lib/mode.js): a narrator (lib/narrator.js, on design/prp-voice.js)
+   reads the chapter aloud from the paragraph under the reading line; the unit being read is marked with the CSS
+   Custom Highlight API (nc-say, and nc-say-part for a piece of a long sentence) and kept in view; the pane's Master
+   Index tab follows the term nearest it (lib/follow.js) unless it is held (the reader has a term of their own, t=, or
+   is on the other tab; Hold, H, makes the term showing theirs). The pane can fill the page (Screens only, D), with the
+   words under it as subtitles (S); there the book's pictures (../data/pictures.json, drawn by Kino's stage: maps,
+   timelines and portraits looping like GIFs, from the Kino film about the author or made for the book) and the
+   screens for its era take their turn with the entries (lib/follow.js, tour; lib/pictures.js). The online voice is used only when the reader chooses it, after an offer that
+   shows what it costs, and never for more than the offer allowed. */
 import { readHash, writeHash } from './lib/hash.js';
+import { readMode, writeMode } from './lib/mode.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
 import { eraRows, eraFromFacts, bookEra, fmtEra, fmtYear, kardashevStep, kardashevPolity, KARDASHEV_STEPS } from './lib/era.js';
-import { frameMove, samePage } from './lib/frame.js';
+import { inSidePane, sideFrame, splitter, fullScreen, skipFrontMatter as skipMatter, watchEntry, shellGo, SHELL_ROUTE, canFrame, card } from '../../design/prp-split.js';
 import { shellHash, shellUrl } from '../../kino/lib/links.js';
+import { SPEEDS } from './lib/narrate.js';
+import { chapterTerms, span, nearestTerm, follow, fresh, tour, SCREEN, TOUR_EVERY } from './lib/follow.js';
+import { picturesFor, turnOf } from './lib/pictures.js';
+import { flatScenes } from '../../kino/lib/format.js';
+import { Narrator, KEYS } from './lib/narrator.js';
 
 const $ = s => document.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -51,11 +68,10 @@ const DATA = new URL('../data/', import.meta.url).href;
 const LAKE = new URL('lake/data/', SHELL).href;
 const LIVE = 'https://jdpi.pages.dev/';
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
-const SHELL_ROUTE = /^#\/[a-z-]+(\/[\w-]+){0,2}(\?at=[^#\s]*)?$/; // the only routes shell.js accepts from a page
 // styles.css: with the pane shut the bar is a list in the margin. 1150 px leaves (1150 − 48 − 606) / 2 = 248 px beside
 // the 66ch column for the 14rem list and its 20 px gap, so the shell's frame at a 1440 px window (1168 px) has it too.
 const MARGIN_BAR = matchMedia('(min-width: 1150px)');
-const SPLIT = matchMedia('(min-width: 1101px)');                    // styles.css: book | pane side by side
+const SPLIT = matchMedia('(min-width: 1000px)');                    // styles.css: book | pane side by side (the shell's frame at 1366 too)
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt = n => Number(n || 0).toLocaleString('en-GB');
 const plainClick = e => e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey;
@@ -74,7 +90,17 @@ const S = {
   // popout: the reader's own choice, open or collapsed (null until made: popoutOpen below gives the default).
   bar: store.get('prp.bibliotheca.bar', true), popout: store.get('prp.bibliotheca.popout', null),
   entities: new Map(), observer: null, headH: 56,
+  // Augmented Reading: the mode; the term the narrator has reached (near), and the follow rule's state (fs) over the
+  // chapter's terms (terms); the unit being read (say); whether the next unit is to be kept in view whatever (look);
+  // the pane filling the page (fill) and the subtitles under it (subs); a message for the narrator's row (msg).
+  ar: false, near: null, fs: fresh(), terms: { terms: [], base: new Map() }, say: null, look: false,
+  fill: false, subs: store.get(KEYS.subs, true), msg: null, offer: null,
+  // Screens only: the era screen that has the pane now (tour), the next one's turn, and the chapter's screens.
+  // (since: characters read since the last turn, from TOUR_EVERY at each chapter so its picture comes early.)
+  tour: null, turn: 0, eraI: 0, since: TOUR_EVERY, tourList: null,
 };
+const inSide = inSidePane();
+let narr = null; // the narrator, made when the mode is first turned on
 const chapter = () => S.chapters[S.ci] || null;
 
 /* ---------- addresses ---------- */
@@ -94,13 +120,7 @@ const termHref = qid => (embedded ? placeLink('rs', 'encyclopedia', `encyclopedi
 const linkAttrs = l => `href="${esc(l.href)}" target="${l.target}" rel="noopener" data-shell-hash="${esc(l.hash)}"`;
 const hashFor = (n, extra = {}) => writeHash({ book: S.book?.slug, ch: n, ...extra });
 
-/** Move the shell to a route, as kino.js does: the shell's listener first; if the shell has not moved in 350 ms (an
-    older shell), set its address directly. */
-function shellGo(hash) {
-  let before = null; try { before = window.top.location.hash; } catch { /* the shell is on another origin */ }
-  window.parent.postMessage({ type: 'prp:navigate', hash }, location.origin);
-  setTimeout(() => { try { if (before !== null && window.top.location.hash === before) window.top.location.hash = hash; } catch { /* only the listener can */ } }, 350);
-}
+// Moving the shell to a route: shellGo (design/prp-split.js), as Kino does.
 
 /* ---------- loading ---------- */
 async function getJson(url) {
@@ -195,7 +215,9 @@ function renderSources() {
     <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? 'public domain in the United Kingdom' : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
     <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. The bar lists those in the text on screen.</p>
     <p><b>In ${PRODUCT}.</b> Links (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>
-    <p><b>Keys.</b> ← → chapters · J K paragraphs · T the terms bar · P Links · Esc closes.</p>`;
+    <p><b>Augmented Reading.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>
+    <p><b>Voice.</b> This device's own voice reads the book, and nothing leaves the browser. An online voice (Microsoft Azure, through ${PRODUCT}'s own proxy) reads only when you choose it, after it says what it will cost: each sentence it reads is then sent to Microsoft Azure to be spoken, and counts against the site's allowance of characters. It is never remembered from one visit to the next.</p>
+    <p><b>Keys.</b> ← → chapters · J K paragraphs · T the terms bar · P Links · A Augmented Reading · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
 }
 
 /* ---------- the chapter ---------- */
@@ -206,7 +228,13 @@ function renderChapter(ci) {
   $('#chapter-name').textContent = l.title;
   $('#chapter-title').title = [l.no, l.title].filter(Boolean).join(': ');
   document.title = `${S.book.title}${l.no ? `, ${l.no}` : `: ${l.title}`} · Neo Classic · Bibliotheca · ${SHORT}`;
+  unmark(); // the marks are on ranges of the old text, which is about to go
+  S.say = null;
   $('#text').innerHTML = c.paragraphs.map(p => paragraphHtml(p, { href: termHref })).join('') || '<p class="prp-empty">This chapter has no text.</p>';
+  S.terms = chapterTerms(c);
+  if (S.tour) endTour(); // a screen of the last chapter's era
+  S.turn = 0; S.since = TOUR_EVERY; // each chapter's turns begin with its picture, early
+  if (S.ar) { narr?.load(c, chapterKey(), 0); S.look = true; nearHere(c.paragraphs[0]?.id); }
   for (const [a, b, d] of [['#prev', '#prev2', -1], ['#next', '#next2', 1]]) {
     const to = S.chapters[ci + d];
     for (const el of [$(a), $(b)]) {
@@ -238,9 +266,11 @@ function stripH() {
 // out from under it.
 function region() {
   const top = $('#head').getBoundingClientRect().bottom + stripH();
-  const sheet = S.pane && !SPLIT.matches ? $('#pane').getBoundingClientRect().height : 0;
-  return { top: Math.max(0, top), bottom: window.innerHeight - sheet };
+  return { top: Math.max(0, top), bottom: window.innerHeight - sheetH() };
 }
+// The pane's sheet over the foot of the screen (narrow screens); none while the pane fills the page (Screens only),
+// which the reading region ignores: the text is still laid out, and read, beneath it.
+const sheetH = () => (S.pane && !S.fill && !SPLIT.matches ? Math.round($('#pane').getBoundingClientRect().height) : 0);
 /* (Re)builds the observer for the layout as it is now: called when a chapter is drawn, the pane opens, closes or grows,
    the window resizes, and the bar opens or collapses (syncBar). The strip's depth goes into the root margin and into
    --nc-bar, which the paragraphs' scroll-margin-top adds, so a jump (scrollIntoView) lands below the strip. */
@@ -250,7 +280,7 @@ function observe() {
   const strip = stripH();
   document.documentElement.style.setProperty('--nc-head', `${S.headH}px`);
   document.documentElement.style.setProperty('--nc-bar', `${strip}px`);
-  const sheet = S.pane && !SPLIT.matches ? Math.round($('#pane').getBoundingClientRect().height) : 0;
+  const sheet = sheetH();
   // Until the new observer reports, the set is what the layout shows now, so the bar never empties for a frame (the
   // strip opening forces a redraw of the chips straight after this); the observer's first report covers every
   // paragraph and keeps the set from then on. The pin is not known to have been seen until the observer says so.
@@ -267,7 +297,9 @@ function observe() {
 
 let frame = 0;
 function schedule() { if (!frame) frame = requestAnimationFrame(() => { frame = 0; update(); }); }
-function update() { if (!chapter()) return; updateCurrent(); renderChips(); updateProgress(); }
+function update() { if (!chapter()) return; updateCurrent(); renderChips(); updateProgress(); fillTop(); }
+// Screens only: the pane lies over the text from under the sticky head (wherever the head is now) to the foot.
+function fillTop() { if (S.fill) document.documentElement.style.setProperty('--nc-fill-top', `${Math.max(0, Math.round($('#head').getBoundingClientRect().bottom))}px`); }
 
 function onScreen() { return chapter().paragraphs.filter(p => S.visible.has(p.id)); }
 // Scrolled to the end of the page (a page too short to scroll has not been read to its end just by opening it).
@@ -342,7 +374,7 @@ const marginBar = () => MARGIN_BAR.matches && !S.pane;
 const popoutOpen = () => S.bar && (S.popout ?? marginBar());
 // The bar's DOM state alone (inside keepPlace, which re-observes after it).
 function drawBar() {
-  const open = popoutOpen();
+  const open = popoutOpen() && !S.fill; // put away while the pane fills the page
   $('#bar-switch').setAttribute('aria-pressed', String(S.bar));
   $('#bar-toggle').hidden = !S.bar;
   $('#popout').hidden = !open;
@@ -365,12 +397,15 @@ function useTerm(qid, from = null) {
   from ||= $$(`#text a.term[data-qid="${qid}"]`).find(a => { const r = a.getBoundingClientRect(); return r.bottom > top && r.top < bottom; }) || null;
   S.term = qid;
   highlight(); renderChips(true);
+  if (S.tour) endTour();
   openPane('ency');
   reveal(from);
 }
 function clearTerm() {
   S.term = null;
   highlight(); renderChips(true);
+  // In Augmented Reading, letting go of a term is letting go of the pane: it shows the nearest term at once.
+  if (S.ar) { letGo(); return; }
   if (S.pane) renderPane();
   writeState();
 }
@@ -399,6 +434,7 @@ function reveal(a) {
 function openPane(tab) {
   if (!S.pane) keepPlace(() => { S.pane = tab; $('#pane').hidden = false; $('#layout').classList.add('split'); drawBar(); });
   S.pane = tab;
+  if (tab !== 'ency' && S.tour) endTour();
   $('#pane-toggle').setAttribute('aria-pressed', 'true');
   selectTab(tab);
   renderPane();
@@ -406,6 +442,7 @@ function openPane(tab) {
 }
 function closePane() {
   if (!S.pane) return;
+  if (S.fill) setFill(false);
   keepPlace(() => { S.pane = null; $('#pane').hidden = true; $('#layout').classList.remove('split'); drawBar(); });
   $('#pane-toggle').setAttribute('aria-pressed', 'false');
   writeState();
@@ -426,67 +463,53 @@ function setPaneHead(kicker, title, link) {
   if (link) { open.href = link.href; open.target = link.target; open.rel = 'noopener'; open.dataset.shellHash = link.hash; open.title = `Open in ${PRODUCT}`; }
 }
 
+/* The entry the Master Index tab shows: the reader's own term; in Augmented Reading, while the pane is not held (no
+   term of the reader's own), the term the narrator has reached. */
+const shownTerm = () => S.term || (S.ar ? S.near : null);
+const held = () => !!S.term || S.pane === 'vm';
 function renderMasterIndex() {
-  const q = S.term, f = $('#ency-frame');
+  const q = shownTerm(), f = $('#ency-frame');
+  // Screens only, an era screen's turn: it has the tab, in its own frame.
+  const t = touring();
+  $('#tour-frame').hidden = !t || !!t.picture;
+  $('#picture').hidden = !t?.picture;
+  if (!t?.picture) stopPicture();
+  if (t) {
+    f.hidden = true; $('#ency-empty').hidden = true; $('#ency-fallback').hidden = true;
+    if (t.picture) {
+      const tf = $('#tour-frame');
+      if (tf.getAttribute('src') && tf.dataset.url !== 'about:blank') frames.tour.go('about:blank'); // the last screen's page goes
+      setPaneHead('Augmented Reading · A picture for the book', t.name, t.film?.link || null);
+      drawPicture(t);
+      return;
+    }
+    $('#tour-frame').title = `${t.name} · ${t.place}`;
+    $('#tour-frame').dataset.key = t.key;
+    setPaneHead(`Augmented Reading · ${PRODUCT}`, `${t.name} · ${t.place}`, t);
+    frames.tour.go(t.page);
+    return;
+  }
+  const kicker = S.ar ? 'Augmented Reading · Master Index' : 'Master Index';
   $('#ency-empty').hidden = !!q;
-  if (!q) { f.hidden = true; $('#ency-fallback').hidden = true; setPaneHead('Master Index', 'No term chosen', null); return; }
+  $('#ency-empty').innerHTML = S.ar ? 'This chapter names nothing the Master Index knows.' : EMPTY_ENCY;
+  if (!q) { f.hidden = true; $('#ency-fallback').hidden = true; setPaneHead(kicker, S.ar ? 'Nothing to show' : 'No term chosen', null); return; }
   const label = S.labels.get(q);
-  setPaneHead('Master Index', label || q, placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`));
-  if (!label) entity(q).then(e => { if (e && S.term === q && S.pane === 'ency') $('#pane-title').textContent = e.label; });
+  setPaneHead(kicker, label || q, placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`));
+  if (!label) entity(q).then(e => { if (e && shownTerm() === q && S.pane === 'ency') $('#pane-title').textContent = e.label; });
   const fallback = $('#ency-link'), l = placeLink('rs', 'encyclopedia', `encyclopedia/index.html#${q}`);
   fallback.href = l.href; fallback.target = l.target; fallback.rel = 'noopener'; fallback.dataset.shellHash = l.hash;
   if ($('#ency-fallback').hidden) f.hidden = false;
-  if (moveFrame(f, entryUrl(q)) === 'hash') watchEntry(f);
+  if (frames.ency.go(entryUrl(q)) === 'hash') watchEntry(f);
 }
-
-/** Send a pane frame to an address, by hash alone when only the hash differs (no reload), as shell.js does.
-    Returns how it moved: 'none', 'hash' or 'load'. */
-function moveFrame(f, url) {
-  // Where the frame is: on this origin, its own address (the clean one it was redirected to, which a hash move must
-  // be written on); but while a page it was sent to has not yet replaced the one before, that is the old page, so the
-  // new address loads afresh. On another origin, the address it was last sent to.
-  let from = null;
-  try {
-    const here = f.contentWindow?.location.href;
-    if (here && here !== 'about:blank' && !(f.dataset.loading && !samePage(new URL(here), new URL(f.dataset.url)))) from = here;
-  } catch { from = f.dataset.url || null; }
-  const move = frameMove(from, url, location.href);
-  f.dataset.url = new URL(url, location.href).href;
-  if (move.how === 'none') return 'none';
-  if (move.how === 'hash') { try { f.contentWindow.location.replace(move.url); return 'hash'; } catch { /* load it below */ } }
-  f.dataset.loading = '1';
-  // location.replace keeps the frame's moves out of the page's history; the first load sets src.
-  if (!f.getAttribute('src')) f.src = move.url; else { try { f.contentWindow.location.replace(move.url); } catch { f.src = move.url; } }
-  return 'load';
-}
+let EMPTY_ENCY = '';
 // The Master Index frame is checked when it loads: a page that could not be framed, or failed, leaves a link instead.
 function encyFrameLoaded() {
   const f = $('#ency-frame');
   let ok = false;
   try { ok = !!f.contentDocument?.querySelector('#entity, #explorer'); } catch { ok = false; }
-  $('#ency-fallback').hidden = ok || !S.term;
-  f.hidden = !ok || !S.term;
+  $('#ency-fallback').hidden = ok || !shownTerm() || !!touring();
+  f.hidden = !ok || !shownTerm() || !!touring();
   if (ok) watchEntry(f);
-}
-/* The Master Index opens with its own front matter (title, search, counts), a third of a pane's height; in the pane
-   the entry is the point. Once the page has drawn the entry asked for (it replaces #entity's contents: "Loading…",
-   then the entry with its h2), the frame is scrolled to the page's tabs, just above the entry. Same origin, and only
-   the frame's scroll position is touched; a page that never draws an h2 (no such entry) is left where it is. */
-function watchEntry(f) {
-  let doc, win;
-  try { doc = f.contentDocument; win = f.contentWindow; } catch { return; }
-  const box = doc?.getElementById('entity');
-  if (!box || !win) return;
-  S.entryWatch?.disconnect();
-  const mo = new MutationObserver(() => {
-    if (!box.querySelector('h2')) return;
-    mo.disconnect();
-    const tabs = doc.querySelector('[role="tablist"]') || box;
-    win.scrollTo({ top: Math.max(0, tabs.getBoundingClientRect().top + win.scrollY - 4), behavior: 'auto' });
-  });
-  mo.observe(box, { childList: true });
-  S.entryWatch = mo;
-  setTimeout(() => mo.disconnect(), 20000);
 }
 
 /* "In Vitruvian Manager": the screens for an era, and where the term itself appears. */
@@ -521,14 +544,16 @@ async function renderVm() {
   // With the term's own era, War Focus lists only the war that is the term (the wars of its centuries are not its own).
   const rows = eraRows(years, { wars, qid: q, ownEra: !!byTerm, polity: ent ? kardashevPolity(ent.wiki, energy?.polities, step) : null, steps });
   const name = r => moduleInfo(reg, r.module)?.name || r.name;
-  // The places the Master Index records for the term (its "Appears in"), when it has any.
+  // The places the Master Index records for the term (its "Appears in"), when it has any. Each place is shown in the
+  // pane only where the shell's own rule allows (canFrame): a private page (Tally Stick, Algo Trader), a page off its
+  // submodule's own page or a submodule the registry does not list gets a card with its link instead.
   const ments = (ent?.mentions || []).slice(0, 8).map((m, i) => {
     const info = moduleInfo(reg, m.m);
     const l = info ? placeLink(info.suite, m.m, m.u) : { href: pageUrl(m.u), hash: '', page: pageUrl(m.u), target: '_blank' };
-    return { key: `m${i}`, ...l, name: info?.name || m.m, place: m.c || '' };
+    return { key: `m${i}`, ...l, module: m.m, name: info?.name || m.m, place: m.c || '', fit: canFrame({ module: m.m, page: l.page }, reg, SHELL) };
   });
   const places = new Map([
-    ...rows.filter(r => r.available).map(r => [r.id, { ...placeLink(r.suite, r.module, r.at), name: name(r), place: r.place }]),
+    ...rows.filter(r => r.available).map(r => { const l = placeLink(r.suite, r.module, r.at); return [r.id, { ...l, module: r.module, name: name(r), place: r.place, fit: canFrame({ module: r.module, page: l.page }, reg, SHELL) }]; }),
     ...ments.map(m => [m.key, m]),
   ]);
   // The screen shown in the pane follows the era (the same screen, at the new place); one the new era closes, or a
@@ -544,7 +569,7 @@ async function renderVm() {
   $('#mentions-label').textContent = `Where ${label} appears`;
   $('#mention-rows').innerHTML = ments.map(m => `<li data-key="${m.key}"${cur(m.key)}><div class="what"><b>${esc(m.name)}</b><span>${esc(m.place)}</span></div>${acts(m.key, m, m.name)}</li>`).join('');
   const shown = S.vmShown && places.get(S.vmShown);
-  if (shown) moveFrame($('#vm-frame'), shown.page);
+  if (shown) vmShow(shown);
   setPaneHead(`In ${PRODUCT}`, shown ? `${shown.name} · ${shown.place}` : fmtEra(years), shown || null);
   // The screen the address names (show=, on a reload or an edited link) once its row exists; one this era does not
   // offer is dropped from the address.
@@ -557,8 +582,32 @@ async function renderVm() {
 function hideVm() {
   S.vmShown = null;
   $('#vm-frame').hidden = true;
+  $('#panel-vm .prp-side-card')?.remove();
   $('#vm-list').classList.remove('with-frame');
   $('#vm-empty').hidden = false;
+}
+/* A place in the pane's frame, or, where it cannot be framed (canFrame) or its page turned out not to be a submodule's
+   (vmLoaded), a card with its link; the frame is then emptied, so nothing of it runs in the pane. */
+function vmCard(r, why) {
+  const f = $('#vm-frame');
+  f.hidden = true;
+  if (f.getAttribute('src') && f.dataset.url !== 'about:blank') frames.vm.go('about:blank');
+  $('#panel-vm .prp-side-card')?.remove();
+  $('#panel-vm').appendChild(card(r, why, { embedded, toShell: shellGo }));
+}
+function vmShow(r) {
+  if (!r.fit?.ok) { vmCard(r, r.fit?.why || 'unlisted'); return; }
+  $('#panel-vm .prp-side-card')?.remove();
+  $('#vm-frame').hidden = false;
+  frames.vm.go(r.page);
+}
+// The frame has loaded: a page without the connector (a missing page; the live site answers one with the shell itself)
+// leaves the pane, and a card says so.
+function vmLoaded({ ok, frame }) {
+  if (frame.dataset.url === 'about:blank') return;
+  const r = S.vmShown && S.vmRows?.get(S.vmShown);
+  if (!ok) { if (r) vmCard(r, 'missing'); else { frame.hidden = true; frames.vm.go('about:blank'); } return; }
+  if (!SPLIT.matches) skipMatter(frame);
 }
 function showVm(key) {
   const r = S.vmRows?.get(key);
@@ -567,51 +616,473 @@ function showVm(key) {
   $$('#vm-list li').forEach(li => { if (li.dataset.key === key) li.setAttribute('aria-current', 'true'); else li.removeAttribute('aria-current'); });
   $('#vm-list').classList.add('with-frame');
   $('#vm-empty').hidden = true;
-  const f = $('#vm-frame');
-  f.hidden = false; f.title = `${r.name} · ${r.place}`;
-  moveFrame(f, r.page);
+  $('#vm-frame').title = `${r.name} · ${r.place}`;
+  vmShow(r);
   setPaneHead(`In ${PRODUCT}`, `${r.name} · ${r.place}`, r);
   writeState(); // the address names the screen, so a reload shows it again
 }
-/* On a phone the pane is a sheet, and a screen's own front matter (title, description, readings) fills a frame that
-   tall; every era screen ends that front matter with its .prp-meta line, so once the screen has loaded the frame is
-   scrolled to just below it, as watchEntry does for the Master Index. A screen is still drawing as it loads: its body
-   (a map, a timeline) may not yet make the page tall enough to scroll that far, and the meta line itself grows when
-   its "Loading…" becomes the readings, so the scroll follows both (a ResizeObserver of the frame's own) for a few
-   seconds, until the reader touches the frame. Same origin; only the frame's scroll moves. */
-function skipFrontMatter(f) {
-  if (SPLIT.matches) return;
-  let win, doc;
-  try { win = f.contentWindow; doc = f.contentDocument; } catch { return; } // another origin (the Political Retrospective)
-  const meta = doc?.querySelector('.prp-meta');
-  if (!meta || !win) return;
-  let ro = null, timer = 0, done = false;
-  const stop = () => { done = true; ro?.disconnect(); clearTimeout(timer); };
-  const go = () => { if (!done) win.scrollTo(0, Math.max(0, Math.round(meta.getBoundingClientRect().bottom + win.scrollY + 4))); };
-  try { ro = new win.ResizeObserver(go); ro.observe(doc.documentElement); ro.observe(meta); } catch { /* no ResizeObserver: once is all */ }
-  timer = setTimeout(stop, 8000);
-  for (const ev of ['wheel', 'touchstart', 'pointerdown', 'keydown']) win.addEventListener(ev, stop, { once: true, passive: true });
-  go();
+/* The pane's two frames, as the shared pane moves its own (design/prp-split.js, sideFrame): named 'prp-side', moved by
+   hash where they can be, given the page's theme, their top links kept out of the book when it is on its own, and a
+   framed page's request to move the shell passed on (inside the shell) or opened in a new tab (on its own). On a phone
+   the pane is a sheet, and a screen's own front matter (title, description, readings) fills a frame that tall: once the
+   screen has loaded it is scrolled to just below its .prp-meta line (skipFrontMatter), as the Master Index frame is to
+   the entry (watchEntry). */
+const frames = {};
+function makeFrames() {
+  const common = { embedded, shell: SHELL, toShell: shellGo, onBlocked: url => notice(`The browser did not open a new tab for this page. <a href="${esc(url)}" target="_blank" rel="noopener">Open it</a>`) };
+  frames.ency = sideFrame($('#ency-frame'), { ...common, onLoad: () => encyFrameLoaded() });
+  frames.vm = sideFrame($('#vm-frame'), { ...common, onLoad: vmLoaded });
+  // Screens only's era screens: a page that loaded without the connector ends the screen's turn.
+  frames.tour = sideFrame($('#tour-frame'), { ...common, onLoad: ({ ok, frame }) => {
+    if (frame.dataset.url === 'about:blank') return;
+    if (!ok) { const i = S.tourList?.list.findIndex(p => p.key === frame.dataset.key) ?? -1; if (i >= 0) S.tourList.list.splice(i, 1); endTour(); return; }
+    skipMatter(frame);
+  } });
 }
-/* On its own, a link in a pane frame that would open at the top (the framed page's cross-links: it believes it is in
-   the shell) opens in a new tab instead of replacing the book; its address is already the shell's route to the place.
-   The link's target is changed as the click goes down to it (capture), so the browser's own new-tab handling does the
-   rest, with any button or key. Inside the shell the top is the shell, which is right. Called on each page a frame
-   loads (a move by hash keeps the page and the listener). */
-function keepTop(f) {
-  if (embedded) return;
-  try {
-    f.contentDocument?.addEventListener('click', e => {
-      const a = e.target.closest?.('a[target="_top"], a[target="_parent"]');
-      if (a) { a.target = '_blank'; a.relList.add('noopener'); }
-    }, true);
-  } catch { /* another origin: its links are its own */ }
+// A line hanging from the head (a new tab the browser refused): one at a time, closed by its × or Escape.
+function notice(html) {
+  const n = $('#notice');
+  $('#notice-text').innerHTML = html;
+  n.hidden = !html;
 }
 
-// The pane's frames take the page's theme, as the shell's frames take the shell's (design/prp-bar.js listens for it).
-const paneFrames = () => [$('#ency-frame'), $('#vm-frame')];
-const theme = () => window.prpTheme?.() || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-function postTheme(f) { try { f.contentWindow?.postMessage({ type: 'prp:theme', theme: theme() }, '*'); } catch { /* not loaded */ } }
+/* ---------- Augmented Reading ---------- */
+const chapterKey = () => `${S.book?.slug}#${chapter()?.n}`;
+const HL = typeof CSS !== 'undefined' && !!CSS.highlights && typeof Highlight === 'function';
+
+/* The mode. Turned on (the button, A, or ar=1 in the address): the narrator's row in the head, the pane on its Master
+   Index tab showing the term nearest the reader's paragraph (only when it was turned on by hand: an address says
+   itself whether the pane is open). Turned off: the narrator stops and the marks go; the pane stays as it is. */
+function setAr(on, { byHand = false } = {}) {
+  on = !!on && !inSide && !!chapter();
+  if (on === S.ar) return;
+  keepPlace(() => {
+    S.ar = on;
+    $('#nar').hidden = !on; $('#nar-msg').hidden = !on;
+    $('#ar-toggle').setAttribute('aria-pressed', String(on));
+    $('#pane-fill').hidden = !on;
+  });
+  if (on) {
+    makeNarrator();
+    narr.load(chapter(), chapterKey(), Math.max(0, chapter().paragraphs.findIndex(p => p.id === S.current)));
+    nearHere(S.current);
+    if (byHand && S.pane !== 'ency') openPane('ency');
+    else if (S.pane === 'ency') renderMasterIndex();
+    // The proxy is asked whether it is set up (and which voices it has) when the mode is first turned on.
+    if (!narr.online) narr.refresh().then(drawNar);
+    deviceCheck();
+  } else {
+    narr?.pause();
+    unmark(); S.say = null; S.near = null; S.msg = null; closeOffer();
+    if (S.fill) setFill(false);
+    if (S.pane === 'ency') renderMasterIndex();
+  }
+  drawNar();
+  writeState();
+}
+
+// The term nearest a paragraph (or the next one that is read, if it is a note or a table), shown at once.
+function nearHere(pid) {
+  const c = chapter();
+  if (!c) return;
+  const i = Math.max(0, c.paragraphs.findIndex(p => p.id === pid));
+  const p = c.paragraphs.slice(i).find(x => S.terms.base.has(x.id)) || [...c.paragraphs].reverse().find(x => S.terms.base.has(x.id));
+  const b = p ? S.terms.base.get(p.id) : 0;
+  S.near = nearestTerm(S.terms.terms, b, b + (p?.text.length || 0));
+  if (S.tour) endTour();
+  S.fs = fresh(S.near);
+  if (S.pane === 'ency' && !S.term) renderMasterIndex();
+  drawNar();
+}
+// Letting go of the pane (Hold pressed again, or the reader's term cleared): the Master Index tab, the nearest term.
+function letGo() {
+  S.term = null; highlight(); renderChips(true);
+  if (S.tour) endTour();
+  const u = S.say;
+  if (u) { const sp = span(S.terms.base, u.pid, u.unit); S.near = nearestTerm(S.terms.terms, sp.from, sp.to); S.fs = { showing: S.near, read: 0, fresh: false }; }
+  else nearHere(S.current);
+  if (S.pane !== 'ency') openPane('ency'); else { renderMasterIndex(); writeState(); }
+  drawNar();
+}
+/* Hold: the term showing becomes the reader's own (ringed, and t= in the address), exactly as if they had chosen it;
+   pressed again, it lets go. */
+function setHold(on) {
+  if (!S.ar) return;
+  if (!on) { letGo(); return; }
+  // An era screen's turn in Screens only: Hold keeps that screen, on the "In Vitruvian Manager" tab (show= in the
+  // address), as if the reader had chosen it there.
+  const t = touring();
+  if (t?.picture) return; // a picture's turn passes by itself: there is nothing to hold it on
+  if (t) { S.pendingShow = t.key; endTour(); openPane('vm'); drawNar(); return; }
+  const q = shownTerm();
+  if (!q) return;
+  S.term = q; highlight(); renderChips(true);
+  if (S.pane) renderPane();
+  writeState(); drawNar();
+}
+
+/* ---------- the narrator ---------- */
+function makeNarrator() {
+  if (narr) return;
+  narr = new Narrator({
+    store,
+    onUnit: onUnit,
+    onWord: i => subsWord(i),
+    onState: () => { drawNar(); keepAwake(narr.playing); },
+    onMessage: m => { S.msg = m; if (m && /^(used|daily|monthly|unavailable|error)$/.test(m.why)) narr.refresh().then(drawNar); drawNar(); },
+    onChapterEnd: () => chapterEnd(),
+  });
+  window.__narrator = narr; // for the page tests: the narrator's position and count, read only
+  fillVoices();
+  narr.device.device.onChange(() => { fillVoices(); deviceCheck(); });
+}
+// No voice on this device, decided only once the browser has listed its voices or 1.6 s after the mode is turned on
+// (Chrome and Edge list them a moment after the page loads: before that, every browser looks as if it had none).
+let deviceTimer = 0;
+function deviceCheck() {
+  if (narr.hasDeviceVoice()) { S.noDevice = false; drawNar(); return; }
+  clearTimeout(deviceTimer);
+  deviceTimer = setTimeout(() => { S.noDevice = !narr.hasDeviceVoice(); drawNar(); }, 1600);
+}
+function play() {
+  if (!narr || S.noDevice && !narr.permit) return;
+  // From the start of the unit it paused on (or the paragraph the mode, or a jump, put it at), brought into view.
+  S.look = true; S.fs.fresh = true;
+  if (S.msg?.why === 'end' || S.msg?.why === 'nodevice' || S.msg?.why === 'failed') S.msg = null;
+  narr.play();
+}
+function toggleRead() { if (!narr) return; if (narr.playing) narr.pause(); else play(); }
+
+// Each unit as it starts: marked, kept in view, the pane's rule asked, the subtitles drawn.
+function onUnit({ pid, unit }) {
+  if (!S.ar) return;
+  const prev = S.say, followed = S.look || (prev && inRegion(rangeRect(prev)));
+  S.say = { pid, unit };
+  S.look = false;
+  mark();
+  if (followed) keepInView();
+  if (S.pin && S.pin !== pid) S.pin = null; // the jump's paragraph is read: the current one follows the voice now
+  const { state, show } = follow(S.fs, span(S.terms.base, pid, unit), S.terms.terms);
+  S.fs = state;
+  if (show) { S.near = show; if (S.tour) endTour(); if (!held() && S.pane === 'ency') renderMasterIndex(); }
+  else if (S.fill && !held() && S.pane === 'ency') {
+    // Screens only: a picture of the book or a screen for its era takes its turn (lib/follow.js, tour).
+    if (S.tourList?.key !== chapterKey()) loadTour();
+    const tl = S.tourList?.key === chapterKey() ? S.tourList : { list: [], pictures: [] };
+    const t = tour(S.fs, show, { screens: tl.list.length + tl.pictures.length, since: S.since });
+    if (t.screen) {
+      const turn = turnOf(S.turn++, tl.pictures.length, tl.list.length);
+      S.fs = t.state; S.since = 0;
+      S.tour = turn.kind === 'picture' ? tl.pictures[turn.i] : tl.list[S.eraI++ % tl.list.length];
+      renderMasterIndex();
+    }
+  }
+  S.since += unit.text.length;
+  drawSubs();
+  if (S.offer) drawOffer();
+  drawNar();
+  if (textHidden()) narr.pause();
+}
+function chapterEnd() {
+  if (S.ci >= S.chapters.length - 1) { S.msg = { why: 'end' }; drawNar(); return; }
+  const at = S.ci;
+  // A moment between chapters, then the next one, read from its start (unless the reader has done something else).
+  setTimeout(() => { if (!S.ar || S.ci !== at || narr.playing) return; goChapter(at + 1); S.look = true; S.fs.fresh = true; narr.play(); }, 900);
+}
+// Inside the shell, leaving the page hides its frame: the text then has no box, and the narrator pauses. (The
+// frame's window keeps its size; an IntersectionObserver hears the moment it goes, and each unit looks again.)
+const textHidden = () => { const r = $('#text').getBoundingClientRect(); return r.width === 0 && r.height === 0; };
+
+/* ---------- the marks ---------- */
+// A range over a paragraph's text offsets: its text nodes in order, each <br> of a verse counted as the one
+// character ("\n") it stands for, which the element's own text leaves out.
+function rangeIn(el, s, e) {
+  const r = document.createRange();
+  let at = 0, started = false;
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    if (n.nodeType === 1) {
+      if (n.tagName !== 'BR') continue;
+      if (!started && s <= at) { r.setStartBefore(n); started = true; }
+      at += 1;
+      if (started && e <= at) { r.setEndAfter(n); return r; }
+      continue;
+    }
+    const len = n.data.length;
+    if (!started && s < at + len) { r.setStart(n, Math.max(0, s - at)); started = true; }
+    if (started && e <= at + len) { r.setEnd(n, e - at); return r; }
+    at += len;
+  }
+  if (!started) r.setStart(el, 0);
+  r.setEnd(el, el.childNodes.length);
+  return r;
+}
+function unmark() {
+  if (HL) { CSS.highlights.delete('nc-say'); CSS.highlights.delete('nc-say-part'); }
+  $$('#text p.saying').forEach(p => p.classList.remove('saying'));
+}
+function mark() {
+  unmark();
+  const u = S.say, el = u && document.getElementById(u.pid);
+  if (!el) return;
+  if (HL) {
+    CSS.highlights.set('nc-say', new Highlight(rangeIn(el, u.unit.say[0], u.unit.say[1])));
+    if (u.unit.part) CSS.highlights.set('nc-say-part', new Highlight(rangeIn(el, u.unit.from, u.unit.to)));
+  } else el.classList.add('saying'); // no Highlight API: a rule down the paragraph's side
+}
+function rangeRect(u) {
+  const el = u && document.getElementById(u.pid);
+  if (!el) return null;
+  const r = rangeIn(el, u.unit.from, u.unit.to).getBoundingClientRect();
+  return r.width || r.height ? r : el.getBoundingClientRect();
+}
+function inRegion(r) { if (!r) return false; const { top, bottom } = region(); return r.bottom > top && r.top < bottom; }
+/* Kept in view: a unit outside the upper three quarters of the reading region is scrolled to the reading line, 30% of
+   the way down (the line that decides the current paragraph, so it, the progress and p= in the address follow the
+   voice). Smooth, or at once with reduced motion. The narrator's scroll lets go of a pinned paragraph. */
+function keepInView() {
+  const r = rangeRect(S.say);
+  if (!r) return;
+  const { top, bottom } = region(), h = bottom - top;
+  if (r.top >= top && r.bottom <= top + h * 0.75) return;
+  S.pin = null;
+  // A unit taller than the room under the reading line (a phone, with the sheet) sits as low as it can and still
+  // clear the foot of the region; one taller than the region, at its top.
+  let want = top + h * 0.3;
+  if (r.height > bottom - want - 4) want = Math.max(top + 4, bottom - r.height - 4);
+  window.scrollBy({ top: Math.round(r.top - want), behavior: reduced() ? 'auto' : 'smooth' });
+}
+
+/* ---------- Screens only, and the subtitles ---------- */
+function setFill(on) {
+  on = !!on && S.ar;
+  if (on && !S.pane) openPane('ency');
+  if (on === S.fill) return;
+  S.fill = on;
+  $('#layout').classList.toggle('fill', on);
+  $('#pane-fill').setAttribute('aria-pressed', String(on));
+  if (on) loadTour(); else endTour();
+  fillTop(); drawBar(); drawSubs();
+  if (chapter()) observe();
+}
+
+/* Screens only: the era's screens take their turn with the entries (lib/follow.js, tour), so the documentary shows
+   Vitruvian Manager's data and screens, not only Master Index entries. They are the rows of the "In Vitruvian Manager"
+   tab for the book's (or the chapter's) era that can be framed, less National Analysis, which shows countries as they
+   are today. A screen in turn is shown in its own frame on the Master Index tab, so the pane is not held by it: the
+   next term takes the pane back, and Hold keeps the screen (it moves to the other tab, with show= in the address). */
+const touring = () => (S.tour && S.ar && S.fill && !S.term && S.pane === 'ency' ? S.tour : null);
+const KINO_DATA = new URL('kino/data/', SHELL).href;
+const loadPictures = once(() => getJson(`${DATA}pictures.json`));
+const loadMedia = once(() => getJson(`${KINO_DATA}media.json`));
+const films = new Map();
+const loadFilm = path => { if (!films.has(path)) films.set(path, getJson(`${KINO_DATA}${path}.json`).catch(() => null)); return films.get(path); };
+let tourSeq = 0;
+/* The chapter's turns: its pictures (lib/pictures.js; a film's scene is looked up in the film) and the era's screens
+   that can be framed. Kept for the chapter (S.tourList); the turns count from 0 with each chapter (S.turn), and the
+   era's screens go round across chapters (S.eraI). */
+async function loadTour() {
+  const key = chapterKey();
+  if (S.tourList?.key === key || S.tourList?.loading === key) return;
+  const seq = ++tourSeq, own = bookEra(S.book, S.row, chapter()), slug = S.book?.slug, n = chapter()?.n;
+  S.tourList = { key: null, loading: key, list: [], pictures: [] };
+  const [reg, wars, energy, pics] = await Promise.all([loadRegistry().catch(() => null), loadWars().catch(() => []), loadEnergy().catch(() => null), loadPictures().catch(() => null)]);
+  const steps = energy?.steps?.map(s => s.year) || KARDASHEV_STEPS;
+  const list = !own ? [] : eraRows(own.years, { wars, steps }).filter(r => r.available && !r.today).map(r => {
+    const l = placeLink(r.suite, r.module, r.at);
+    return { key: r.id, ...l, module: r.module, name: moduleInfo(reg, r.module)?.name || r.name, place: r.place, fit: canFrame({ module: r.module, page: l.page }, reg, SHELL) };
+  }).filter(p => p.fit.ok);
+  const pictures = [];
+  for (const p of picturesFor(pics, slug, n)) {
+    let scene = p.scene, doc = null;
+    if (p.film) {
+      doc = await loadFilm(p.film);
+      scene = doc ? flatScenes(doc).find(s => s.id === p.scene) : null;
+    }
+    if (!scene?.visual || scene.visual.kind === 'module') continue;
+    const film = doc ? { title: doc.title, link: placeLink('kino', `kino-${p.film.split('/')[0]}`, `kino/index.html?cat=${p.film.split('/')[0]}#doc=${doc.id}&s=${scene.id}`) } : null;
+    pictures.push({ key: p.key, picture: true, scene, doc: doc || { title: S.book.title, sources: [] }, film, name: scene.title, place: film ? `from the Kino film ${film.title}` : `made for ${S.book.title}` });
+  }
+  if (seq !== tourSeq || key !== chapterKey()) return;
+  S.tourList = { key, list, pictures };
+}
+/* A picture's turn: Kino's stage (kino/lib/stage.js, loaded the first time) draws the scene, with Kino's credited
+   images (kino/data/media.json); its loops stop when the turn ends. */
+let stage = null, stagePromise = null;
+async function drawPicture(t) {
+  const el = $('#picture-stage');
+  el.setAttribute('aria-label', t.name);
+  el.dataset.key = t.key;
+  $('#picture-cap').innerHTML = `<b>${esc(t.name)}</b> · ${t.film ? `from the Kino film ${esc(t.film.title)}` : `a picture made for ${esc(S.book.title)}`}`;
+  try {
+    stagePromise ||= Promise.all([import('../../kino/lib/stage.js'), loadMedia().catch(() => ({ files: {}, qids: {} }))])
+      .then(([m, media]) => new m.Stage(el, { media, base: KINO_DATA, embedded, moduleInfo: () => ({}), onLink: () => {} }));
+    stage = await stagePromise;
+  } catch { stagePromise = null; $('#picture-cap').textContent = 'The picture could not load.'; return; }
+  if (touring() !== t) return;
+  await stage.show(t.scene, t.doc);
+}
+function stopPicture() { if (stage?.scene) { stage.scene = null; stage.stopLoops(); } }
+// The screen's turn is over (a term took the pane back, the chapter changed, Screens only or the mode ended): its
+// frame is emptied, so no page runs hidden in the pane.
+function endTour() {
+  if (S.fs?.showing === SCREEN) S.fs.showing = S.near;
+  const was = !!S.tour;
+  S.tour = null;
+  $('#picture').hidden = true; stopPicture();
+  const f = $('#tour-frame');
+  f.hidden = true;
+  if (f.getAttribute('src') && f.dataset.url !== 'about:blank') frames.tour.go('about:blank');
+  if (was && S.pane === 'ency') renderMasterIndex();
+}
+function setSubs(on) { S.subs = !!on; store.set(KEYS.subs, S.subs); drawSubs(); }
+// The strip at the foot of the pane, in Screens only: the unit being read, three lines, scrolled by whole lines to
+// the word being said. Hidden from screen readers: the same words are spoken, and marked in the text.
+function drawSubs() {
+  const on = S.fill && S.subs;
+  $('#nar-subs').hidden = !S.fill;
+  $('#nar-subs').setAttribute('aria-pressed', String(S.subs));
+  $('#subs').hidden = !on;
+  if (!on) return;
+  const u = S.say?.unit, box = $('#subs-box');
+  const key = u ? `${S.say.pid}:${u.s}` : '';
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.innerHTML = u ? u.words.map(w => `<span data-i="${w.i}">${esc(u.text.slice(w.from, w.to))}</span>`).join(' ') : '';
+  box.scrollTop = 0;
+}
+function subsWord(i) {
+  if (!S.fill || !S.subs) return;
+  const box = $('#subs-box'), w = box.querySelector(`span[data-i="${i}"]`);
+  if (!w) return;
+  box.querySelector('span.on')?.classList.remove('on');
+  w.classList.add('on');
+  const line = parseFloat(getComputedStyle(box).lineHeight) || w.offsetHeight || 1;
+  const top = w.offsetTop - box.offsetTop;
+  if (top < box.scrollTop || top + w.offsetHeight > box.scrollTop + box.clientHeight + 1) box.scrollTop = Math.floor(top / line) * line;
+}
+
+/* ---------- the narrator's row ---------- */
+const deviceId = name => `device:${name}`;
+function fillVoices() {
+  if (!narr) return;
+  const sel = $('#nar-voice'), dev = narr.deviceVoices(), online = narr.online?.available ? narr.online.voices : [];
+  const groups = [];
+  groups.push(`<optgroup label="This device">${dev.length ? dev.map(v => `<option value="${esc(deviceId(v.name))}">${esc(v.name)}</option>`).join('') : '<option value="" disabled>No voice on this device</option>'}</optgroup>`);
+  if (online.length) groups.push(`<optgroup label="Azure (online)">${online.map(v => `<option value="${esc(v.id)}">${esc(v.label)}</option>`).join('')}</optgroup>`);
+  const html = groups.join('');
+  if (sel.dataset.html !== html) { sel.innerHTML = html; sel.dataset.html = html; }
+  sel.value = narr.permit ? narr.permit.voice : narr.deviceVoice ? deviceId(narr.deviceVoice) : '';
+}
+function drawNar() {
+  if (!narr || !S.ar) return;
+  fillVoices();
+  const playing = narr.playing, b = $('#nar-play');
+  b.setAttribute('aria-pressed', String(playing));
+  b.setAttribute('aria-label', playing ? 'Pause' : 'Read aloud');
+  b.title = playing ? 'Pause (R)' : 'Read aloud (R)';
+  b.querySelector('.ico').textContent = playing ? '❚❚' : '▶';
+  b.querySelector('.lbl').textContent = playing ? 'Pause' : 'Read';
+  b.disabled = !!S.noDevice && !narr.permit;
+  $('#nar-speed').value = String(narr.speed);
+  $('#nar-hold').setAttribute('aria-pressed', String(held()));
+  $('#nar-hold').disabled = !held() && (touring() ? !!touring().picture : !shownTerm());
+  const fsOn = !!fs?.on;
+  $('#nar-full').setAttribute('aria-pressed', String(fsOn));
+  // Where the narrator is, for the page tests (and nothing else).
+  const nar = $('#nar');
+  nar.dataset.pid = narr.passage?.id || ''; nar.dataset.k = String(narr.pos.k); nar.dataset.voice = narr.voiceKind;
+  // The message line: what happened; else the running count of the online voice; else nothing. And, when an online
+  // voice has been chosen this visit and none is reading now, one button that offers the rest of the chapter.
+  let text = '';
+  const m = S.msg, fmtc = n => `${fmt(n)} character${n === 1 ? '' : 's'}`;
+  if (m) {
+    text = {
+      used: `The ${fmtc(m.permit?.chars || 0)} you allowed have been read. This device's voice reads on.`,
+      daily: 'The online voice has used today’s allowance. This device’s voice reads on.',
+      monthly: 'The online voice has used this month’s allowance. This device’s voice reads on.',
+      unavailable: 'The online voice is not answering. This device’s voice reads on.',
+      error: 'The online voice is not answering. This device’s voice reads on.',
+      nodevice: narr.online?.available ? 'This browser has no voice of its own: the reading pauses. Choose an online voice to hear the book.' : 'This browser has no voice of its own, so it cannot read the book aloud.',
+      failed: 'This device’s voice could not read this paragraph.',
+      end: 'The end of the book.',
+    }[m.why] || '';
+  } else if (S.noDevice && !narr.permit) {
+    text = narr.online?.available ? 'This browser has no voice of its own. Choose an online voice to hear the book.' : 'This browser has no voice of its own, so it cannot read the book aloud.';
+  } else if (narr.count) text = `Online voice: ${fmt(narr.count.used)} of ${fmtc(narr.count.chars)}`;
+  $('#nar-msg-text').textContent = text;
+  const again = $('#nar-again');
+  // (At a new chapter the narrator asks the proxy afresh what is left; the offer waits for that answer.)
+  const f = narr.lastOnline && !narr.permit && !narr.stale && !S.offer && narr.online?.available ? narr.figures(narr.lastOnline) : null;
+  again.hidden = !(f && f.allow.chars > 0);
+  if (f && f.allow.chars > 0) {
+    again.dataset.voice = f.voice;
+    again.textContent = `Read on with ${f.name} (online): ${fmtc(f.allow.chars)}`;
+    again.title = f.allow.all ? `From here to the end of this chapter, ${fmtc(f.cost)}, about ${f.minutes} minutes` : `Of ${fmtc(f.cost)} to the end of this chapter, today’s allowance covers ${fmtc(f.allow.chars)}, to the end of a paragraph`;
+  }
+}
+
+/* The offer of an online voice, hanging from the head: what it costs from here to the end of the chapter, and what is
+   left (asked afresh). Choosing the voice in the list reads nothing: "Read with it" gives permission for the figure
+   shown, worked out again at the press; "Keep this device's voice" closes it. */
+async function openOffer(voiceId) {
+  S.offer = { voice: voiceId, ready: false };
+  const o = $('#nar-offer');
+  o.hidden = false;
+  $('#nar-offer-text').textContent = 'Asking the online voice what is left…';
+  $('#nar-accept').disabled = true;
+  await narr.offer(voiceId);
+  if (S.offer?.voice !== voiceId) return;
+  S.offer.ready = true;
+  drawOffer();
+  $('#nar-accept').focus({ preventScroll: true });
+}
+function drawOffer() {
+  if (!S.offer?.ready) return;
+  const f = narr.figures(S.offer.voice), about = f.about ? 'about ' : '', About = f.about ? 'About ' : '';
+  const today = Math.min(f.today, narr.day.allowed(f.today));
+  let t = `${f.name} (online): from here to the end of this chapter is ${fmt(f.cost)} characters, about ${f.minutes} minute${f.minutes === 1 ? '' : 's'}. ${About}${fmt(today)} are left to you today, and ${about}${fmt(f.month)} to the site this month. Each sentence is sent to Microsoft Azure to be spoken.`;
+  if (!f.allow.chars) t += ' Nothing more can be read with it today: this device’s voice reads on.';
+  else if (!f.allow.all) t += ` Today’s allowance covers the first ${fmt(f.allow.chars)}, about ${f.allow.minutes} minute${f.allow.minutes === 1 ? '' : 's'}, to the end of a paragraph; this device’s voice reads the rest.`;
+  $('#nar-offer-text').textContent = t;
+  $('#nar-offer').dataset.cost = String(f.cost); $('#nar-offer').dataset.allow = String(f.allow.chars);
+  $('#nar-accept').disabled = !f.allow.chars;
+}
+function closeOffer() { S.offer = null; $('#nar-offer').hidden = true; if (narr) { fillVoices(); drawNar(); } }
+// In the press: permission, the audio unlocked, the unit read again with the online voice.
+function acceptOnline(voiceId) {
+  if (!narr) return;
+  S.msg = null;
+  if (!narr.accept(voiceId)) { drawOffer(); return; }
+  S.look = true;
+  closeOffer(); drawNar();
+}
+
+/* ---------- full screen: the whole page ---------- */
+let fs = null;
+function toggleFull() {
+  if (!fs?.supported) return;
+  const el = S.current && document.getElementById(S.current);
+  S.fsKeep = el ? { id: S.current, top: el.getBoundingClientRect().top } : null;
+  fs.toggle();
+}
+// The reader's paragraph is kept where it was on the way in and on the way out.
+function fullChanged() {
+  const k = S.fsKeep, el = k && document.getElementById(k.id);
+  if (el) { window.scrollBy(0, el.getBoundingClientRect().top - k.top); pinAt(k.id, k.top); }
+  S.fsKeep = null;
+  if (chapter()) observe();
+  drawNar();
+}
+
+// While it reads the screen is kept awake (where the browser can), and let go on pause.
+let wake = null;
+async function keepAwake(on) {
+  try {
+    if (on && !wake && navigator.wakeLock && document.visibilityState === 'visible') { wake = await navigator.wakeLock.request('screen'); wake.addEventListener?.('release', () => { wake = null; }); }
+    else if (!on && wake) { const w = wake; wake = null; await w.release(); }
+  } catch { wake = null; }
+}
 
 /* ---------- the address ---------- */
 let writeTimer = 0;
@@ -622,8 +1093,9 @@ function writeState() {
   // The screen shown in the pane, or the one the address named and the pane has not drawn yet (so a write in between
   // does not drop it); the era choice whenever it is the term's.
   const show = S.pane === 'vm' ? S.vmShown || S.pendingShow : null;
-  const hash = writeHash({ book: S.book.slug, ch: chapter()?.n, p: S.p, t: S.term, pane: S.pane, show, era: S.eraOf === 'term' ? 'term' : null });
+  const hash = writeMode(writeHash({ book: S.book.slug, ch: chapter()?.n, p: S.p, t: S.term, pane: S.pane, show, era: S.eraOf === 'term' ? 'term' : null }), { ar: S.ar });
   if (hash !== location.hash) { try { history.replaceState(history.state, '', hash); } catch { /* rate-limited: the next move writes it */ } }
+  if (S.ar) drawNar(); // Hold follows the reader's term and the tab
 }
 // A chapter opens with its head at the top of the screen, its first paragraph pinned there (lest the web fonts,
 // arriving, reflow the front matter above and push it down).
@@ -639,6 +1111,9 @@ function jumpTo(id, { smooth = false } = {}) {
   el.scrollIntoView({ block: 'start', behavior: glide ? 'smooth' : 'auto' });
   pinAt(id, glide ? null : el.getBoundingClientRect().top); // a glide lands later: nothing to hold yet
   S.p = id;
+  // In Augmented Reading the reading moves too: it carries on from the paragraph landed on (the term nearest it shown
+  // at once while it is paused; the first sentence read there while it reads).
+  if (S.ar && narr) { narr.at(chapter().paragraphs.findIndex(p => p.id === id)); S.look = true; S.fs.fresh = true; if (!narr.playing) nearHere(id); }
   schedule(); writeState();
 }
 function goChapter(i) {
@@ -649,7 +1124,7 @@ function goChapter(i) {
 }
 
 async function applyHash({ first = false } = {}) {
-  const h = readHash(location.hash);
+  const h = readHash(location.hash), mode = readMode(location.hash); // read before anything rewrites the address
   const slug = S.shelf.some(b => b.slug === h.book) ? h.book : S.shelf[0].slug;
   if (S.book?.slug !== slug) { if (S.vmShown) hideVm(); if (!(await loadBook(slug))) return; }
   let ci = h.ch === null ? 0 : S.chapters.findIndex(c => c.n === h.ch);
@@ -665,6 +1140,8 @@ async function applyHash({ first = false } = {}) {
   if (h.pane && h.pane !== S.pane) openPane(h.pane);
   else if (!h.pane && S.pane) closePane();
   else if (S.pane) renderPane();
+  // ar=1 turns the mode on, and its absence turns it off, as the pane follows pane=.
+  if (mode.ar !== S.ar) setAr(mode.ar);
   if (h.p && document.getElementById(h.p) && h.p !== S.current) jumpTo(h.p);
   else if (moved && !(first && h.ch === null)) scrollToReader();
   renderChips(true);
@@ -711,7 +1188,7 @@ function wire() {
   });
 
   // The pane.
-  $('#pane-toggle').addEventListener('click', () => (S.pane ? closePane() : openPane(S.term ? 'ency' : 'vm')));
+  $('#pane-toggle').addEventListener('click', () => (S.pane ? closePane() : openPane(S.term || S.ar ? 'ency' : 'vm')));
   $('#pane-close').addEventListener('click', () => { closePane(); $('#pane-toggle').focus({ preventScroll: true }); });
   const setTall = tall => {
     $('#pane').classList.toggle('tall', tall); $('#pane-tall').setAttribute('aria-pressed', String(tall));
@@ -735,8 +1212,7 @@ function wire() {
     showVm(b.dataset.show);
     if (!SPLIT.matches && !$('#pane').classList.contains('tall')) setTall(true);
   });
-  $('#ency-frame').addEventListener('load', () => { const f = $('#ency-frame'); delete f.dataset.loading; postTheme(f); keepTop(f); encyFrameLoaded(); });
-  $('#vm-frame').addEventListener('load', () => { const f = $('#vm-frame'); delete f.dataset.loading; postTheme(f); keepTop(f); skipFrontMatter(f); });
+  makeFrames();
 
   // Links into the shell: inside it, move it without reloading it; on its own, the link opens the shell in a new tab.
   document.addEventListener('click', e => {
@@ -744,14 +1220,43 @@ function wire() {
     if (!a || !embedded || !plainClick(e) || !SHELL_ROUTE.test(a.dataset.shellHash || '')) return;
     e.preventDefault(); shellGo(a.dataset.shellHash);
   });
-  // The frames announce themselves (and may ask the shell to move): answer with the theme; pass moves on to the shell.
-  window.addEventListener('message', e => {
-    const f = paneFrames().find(x => x.contentWindow === e.source);
-    if (!f || !e.data || typeof e.data !== 'object') return;
-    if (e.data.type === 'jdpi:module-ready' || e.data.type === 'prp:hello') postTheme(f);
-    if (e.data.type === 'prp:navigate' && e.origin === location.origin && embedded && SHELL_ROUTE.test(String(e.data.hash || ''))) shellGo(e.data.hash);
+  $('#notice-close').addEventListener('click', () => notice(''));
+
+  // The divider between the text and the pane (beside each other from 1,000 px): dragged, or moved with the keys. A
+  // drag reflows the text, so the reader's paragraph is pinned where it is while it lasts (the reflow watcher below
+  // holds it there), and the reading region is measured again after.
+  splitter($('#layout'), $('#pane'), { share: 44, min: 30, max: 60, minMain: 420, minSide: 380, rowFrom: 1000, storeKey: 'prp.split.bibliotheca', label: 'Resize the text and the pane',
+    onStart: () => { const el = S.current && document.getElementById(S.current); if (el) pinAt(S.current, el.getBoundingClientRect().top); },
+    onEnd: () => { holdPin(); if (chapter()) observe(); } });
+  // Full screen: the whole page, so it scrolls and reads as it always does.
+  fs = fullScreen(document.documentElement, { onChange: fullChanged });
+  $('#nar-full').hidden = !fs.supported;
+  $('#nar-full').addEventListener('click', toggleFull);
+
+  // Augmented Reading.
+  if (inSide) $('#ar-toggle').hidden = true; // a page shown in another page's pane offers no pane, and no narrator, of its own
+  $('#ar-toggle').addEventListener('click', () => setAr(!S.ar, { byHand: true }));
+  $('#nar-play').addEventListener('click', toggleRead);
+  $('#nar-speed').innerHTML = SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('');
+  $('#nar-speed').addEventListener('change', e => { narr && (narr.speed = +e.target.value); });
+  $('#nar-voice').addEventListener('change', e => {
+    const v = e.target.value;
+    if (!narr || !v) return;
+    if (/^device:/.test(v)) { closeOffer(); if (narr.permit) { narr.endPermit(null); } narr.deviceVoice = v.slice(7); return; }
+    openOffer(v); // an online voice: an offer first, nothing read
   });
-  window.addEventListener('prp:themechange', () => paneFrames().forEach(postTheme));
+  $('#nar-accept').addEventListener('click', () => S.offer && acceptOnline(S.offer.voice));
+  $('#nar-decline').addEventListener('click', () => { closeOffer(); $('#nar-voice').focus({ preventScroll: true }); });
+  $('#nar-again').addEventListener('click', e => acceptOnline(e.currentTarget.dataset.voice));
+  $('#nar-hold').addEventListener('click', () => setHold(!held()));
+  $('#pane-fill').addEventListener('click', () => setFill(!S.fill));
+  $('#nar-subs').addEventListener('click', () => setSubs(!S.subs));
+  document.addEventListener('click', e => { if (S.offer && !e.target.closest('#nar-offer, #nar-voice, #nar-again')) closeOffer(); });
+  // The narrator pauses when the page is left inside the shell (its text has no box any more); the screen stays awake
+  // while it reads.
+  new IntersectionObserver(() => { if (narr?.playing && textHidden()) narr.pause(); }).observe($('#reader'));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && narr?.playing) keepAwake(true); });
+  window.addEventListener('pagehide', () => narr?.pause());
 
   // Reading: the observer and the scroll keep the current paragraph, the bar and the progress; a hand scroll unpins.
   window.addEventListener('scroll', schedule, { passive: true });
@@ -772,6 +1277,9 @@ function wire() {
     const typing = /^(input|select|textarea)$/i.test(e.target.tagName) || e.target.isContentEditable;
     if (e.key === 'Escape') {
       if (!$('#toc').hidden) { toc(false); $('#toc-toggle').focus({ preventScroll: true }); }
+      else if (S.offer) { closeOffer(); $('#nar-voice').focus({ preventScroll: true }); }
+      else if (!$('#notice').hidden) notice('');
+      else if (S.fill) setFill(false); // Screens only gives the text back before the pane closes
       else if (S.pane) { closePane(); $('#pane-toggle').focus({ preventScroll: true }); }
       else if (popoutOpen() && !marginBar()) setPopout(false); // the strip collapses; the margin list stays
       return;
@@ -782,14 +1290,28 @@ function wire() {
     const act = {
       ArrowLeft: () => goChapter(S.ci - 1), ArrowRight: () => goChapter(S.ci + 1),
       j: () => paras[i + 1] && jumpTo(paras[i + 1].id, { smooth: true }), k: () => i > 0 && jumpTo(paras[i - 1].id, { smooth: true }),
-      t: () => (S.bar ? setPopout(!popoutOpen()) : setBar(true)), p: () => (S.pane ? closePane() : openPane(S.term ? 'ency' : 'vm')),
+      t: () => (S.bar ? setPopout(!popoutOpen()) : setBar(true)), p: () => (S.pane ? closePane() : openPane(S.term || S.ar ? 'ency' : 'vm')),
+      f: toggleFull,
+      ...(inSide ? {} : { a: () => setAr(!S.ar, { byHand: true }) }),
+      // The narrator's keys, while the mode is on.
+      ...(S.ar ? {
+        r: toggleRead, h: () => setHold(!held()), d: () => setFill(!S.fill), s: () => S.fill && setSubs(!S.subs),
+        '<': () => stepSpeed(-1), ',': () => stepSpeed(-1), '>': () => stepSpeed(1), '.': () => stepSpeed(1),
+      } : {}),
     }[e.key.length === 1 ? e.key.toLowerCase() : e.key];
     if (!act) return;
     e.preventDefault(); act();
   });
 }
 
+function stepSpeed(d) {
+  if (!narr) return;
+  const i = SPEEDS.indexOf(narr.speed), j = Math.max(0, Math.min(SPEEDS.length - 1, (i < 0 ? 1 : i) + d));
+  narr.speed = SPEEDS[j];
+}
+
 async function init() {
+  EMPTY_ENCY = $('#ency-empty').innerHTML;
   wire(); syncBar();
   try {
     const idx = await getJson(`${DATA}index.json`);

@@ -37,9 +37,12 @@ button { cursor: pointer; }
 .nc-toolbar .keys kbd { font: inherit; padding: 0 4px; border: 1px solid var(--prp-line); border-radius: 3px; background: var(--prp-surface); color: var(--prp-text-2); }
 .prp-btn[aria-pressed="true"], .prp-btn[aria-expanded="true"] { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
 
-/* --- Layout: the book alone, or the book beside the pane (above 1100 px) ------------------------------------------ */
+/* --- Layout: the book alone, or the book beside the pane (from 1000 px) -------------------------------------------- */
+/* From 1000 px, so the shell's frame at a 1366 px window (1094 px) splits too: the text keeps at least 420 px and the
+   pane at least 380 px (app.js, splitter), and at 1094 px the pane's 44% (460 px) leaves the text 562 px. */
 .nc-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 24px; align-items: start; }
-.nc-layout.split { grid-template-columns: minmax(0, 1fr) minmax(380px, 44%); }
+/* The pane's share is the divider's (design/prp-split.js, splitter: --prp-split-share, 44% unless moved, 30% to 60%). */
+.nc-layout.split { grid-template-columns: minmax(0, 1fr) minmax(380px, var(--prp-split-share, 44%)); }
 .nc-book { min-width: 0; }
 .nc-col { max-width: 66ch; margin: 0 auto; font: var(--nc-size)/1.7 var(--prp-font-serif); color: var(--prp-text); }
 
@@ -53,7 +56,10 @@ button { cursor: pointer; }
 /* --- The reader: a sticky chapter head (contents, title, position, terms, pane), the text ----------------------------- */
 .nc-reader { position: relative; }
 .nc-head { position: sticky; top: 0; z-index: 6; background: var(--prp-canvas); padding-top: 8px; font: var(--prp-fs)/1.4 var(--prp-font-ui); }
-.nc-chapter-row { display: flex; align-items: center; gap: 6px; height: 36px; }
+/* The chapter row is the container the mode's button asks about (below, @container nc-head), not the head: a container
+   is laid out on its own, and on the head that would keep its fade (::after, with its -12px margin) out of its height,
+   so every jump would land 12 px higher, tight under the head. */
+.nc-chapter-row { display: flex; align-items: center; gap: 6px; height: 36px; container: nc-head / inline-size; }
 .nc-chapter-row .prp-btn { flex: none; }
 .nc-chapter-title { flex: 1 1 auto; min-width: 0; margin: 0 4px; display: flex; align-items: baseline; gap: 8px; font: 600 var(--prp-fs-md)/1.3 var(--prp-font-serif); color: var(--prp-text); white-space: nowrap; overflow: hidden; }
 .nc-chapter-title .no { flex: none; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .06em; text-transform: uppercase; }
@@ -141,6 +147,9 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 .nc-pane-empty { margin: 0; padding: 20px 16px; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.6 var(--prp-font-ui); }
 .nc-pane-empty b { color: var(--prp-text); }
 .nc-pane .nc-tall { display: none; }
+/* The pane's divider lies over the pane's own border (design/prp-split.css), so the pane keeps none of the gutter
+   Kino's pane needs for it: the head, the tabs and the frames run to the border. */
+.nc-layout.prp-split[data-dir="row"] > .nc-pane { padding-left: 0; }
 
 /* "In Vitruvian Manager": whose era, one row per screen, the places the term itself appears, then the frame. */
 .nc-vm-list { flex: none; max-height: 100%; overflow: auto; border-bottom: 1px solid var(--prp-line-soft); }
@@ -163,8 +172,8 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 .nc-rows .acts { flex: none; display: flex; gap: 4px; }
 .nc-rows .prp-kind { margin-left: 6px; vertical-align: 1px; }
 
-/* --- Narrower than 1100 px: the pane is a sheet docked under the text, which keeps the width ------------------------ */
-@media (max-width: 1100px) {
+/* --- Narrower than 1000 px: the pane is a sheet docked under the text, which keeps the width ------------------------ */
+@media (max-width: 999px) {
   .nc-layout.split { grid-template-columns: minmax(0, 1fr); }
   .nc-layout.split .nc-book { padding-bottom: var(--nc-sheet); }
   .nc-pane { position: fixed; left: 0; right: 0; bottom: 0; top: auto; height: var(--nc-sheet); min-height: 0; z-index: 30;
@@ -178,16 +187,93 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
   .nc-toolbar .keys { display: none; }
   .nc-chapter-row { gap: 4px; }
   .nc-chapter-row .lbl { display: none; }
+  #nar-play { min-width: 0; }
+  #nar-play .lbl { display: none; }
+  #nar-play .ico { margin-right: 0; }
   .nc-chapter-title { margin: 0 2px; }
   .nc-text p.para::before { left: -10px; }
   .nc-toc a { grid-template-columns: 4.8em minmax(0, 1fr); }
   .nc-toc .w { display: none; }
 }
+/* --- Augmented Reading (app.js): the narrator's row and its message line in the head, the offer hanging from it,
+   the marks on the sentence being read, Screens only, the subtitles, full screen ------------------------------------ */
+/* The mode's button drops its words wherever they would leave the chapter's title under 200 px (the head is one
+   reading column wide at every screen size). */
+@container nc-head (max-width: 660px) { #ar-toggle .lbl { display: none; } }
+.nc-chapter-row .lbl { margin-left: 5px; }
+.nc-nar { display: flex; align-items: center; gap: 6px; height: 30px; margin-top: 6px; }
+.nc-nar .prp-btn { flex: none; }
+.nc-nar .prp-select { height: 26px; padding: 0 6px; font-size: 12px; }
+.nc-nar-speed { flex: none; width: 5.2em; }
+.nc-nar-voice { flex: 1 1 auto; min-width: 0; max-width: 24rem; }
+#nar-play { min-width: 4.6rem; }
+#nar-play .ico { display: inline-block; width: 1.1em; margin-right: 4px; text-align: center; font-size: 10px; }
+#nar-play:disabled, #nar-hold:disabled { opacity: .5; cursor: default; }
+.nc-nar .icon { width: 28px; padding: 0; }
+/* One line, the same height whether or not it has anything to say: the head changes height once, when the mode is
+   switched, and never at a message. */
+.nc-nar-msg { display: flex; align-items: center; gap: 8px; height: 22px; overflow: hidden; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.3 var(--prp-font-ui); white-space: nowrap; }
+.nc-nar-msg > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.nc-nar-msg[hidden] { display: none; }
+.nc-again { flex: none; max-width: 100%; height: 20px; padding: 0 8px; border: 1px solid var(--prp-accent); border-radius: 99px; background: var(--prp-accent-soft); color: var(--prp-text);
+  font: 500 var(--prp-fs-xs)/1 var(--prp-font-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc-again:hover { background: var(--prp-surface-3); }
+.nc-again:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 1px; }
+/* The offer, and a notice, hang from the head over the text, as the contents list does. */
+.nc-offer, .nc-notice { position: absolute; top: calc(100% - 6px); right: 0; z-index: 8; width: min(100%, 32rem); padding: 12px 14px; background: var(--prp-surface);
+  border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); color: var(--prp-text); font: var(--prp-fs-sm)/1.55 var(--prp-font-ui); }
+.nc-offer p { margin: 0 0 10px; }
+.nc-offer .acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.nc-notice { display: flex; align-items: center; gap: 10px; }
+.nc-notice > span { flex: 1 1 auto; min-width: 0; }
+
+/* The sentence being read: a see-through tint of the action colour, so the wash of a term shows through it (the
+   opaque --prp-primary-soft is close to invisible on the light canvas, and would hide the terms); a piece of a long
+   sentence underlined. Without the Highlight API, a rule down the paragraph's side instead. */
+::highlight(nc-say) { background-color: color-mix(in srgb, var(--prp-primary) 16%, transparent); }
+::highlight(nc-say-part) { text-decoration: underline 2px var(--prp-primary); text-underline-offset: 3px; }
+.nc-text p.para.saying::before { background: var(--prp-primary); }
+
+/* Screens only: the pane over the text, from under the sticky head (--nc-fill-top, set by app.js) to the foot of the
+   page, at every width. The text is still laid out beneath (its grid column keeps its width), so the narrator's
+   marks, its scrolling, the current paragraph and the address carry on. */
+.nc-layout.fill .nc-pane { position: fixed; top: var(--nc-fill-top, 0px); left: 0; right: 0; bottom: 0; height: auto; min-height: 0; z-index: 5;
+  border-width: 1px 0 0; border-radius: 0; box-shadow: var(--prp-shadow-2); }
+.nc-layout.fill .nc-pane .prp-split-bar { display: none; }
+.nc-layout.fill .nc-pane .nc-tall { display: none; }
+/* A picture for the book (Screens only): Kino's 16:9 stage, as large as the pane's room allows, with its caption. */
+.nc-picture { flex: 1 1 auto; min-height: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; background: var(--prp-canvas); }
+.nc-picture[hidden] { display: none; }
+.nc-picture-fit { flex: 1 1 auto; min-height: 0; width: 100%; container-type: size; display: grid; place-items: center; }
+.nc-picture .kn-stage { width: min(100cqw, calc(100cqh * 16 / 9)); border-radius: var(--prp-radius); }
+.nc-picture-cap { flex: none; max-width: 100%; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.45 var(--prp-font-ui); text-align: center; }
+.nc-picture-cap b { color: var(--prp-text); font-weight: 600; }
+/* The pane's two buttons of the mode: their words, or on a phone their signs (the name stays in aria-label). */
+#pane-fill .sign, #nar-subs .sign { display: none; }
+@media (max-width: 640px) {
+  #pane-fill .sign, #nar-subs .sign { display: inline; }
+  #pane-fill .lbl, #nar-subs .lbl { display: none; }
+}
+.nc-pane-titles .prp-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The subtitles: at the foot of the pane, three lines that scroll by whole lines to the word being said; the frame
+   above is that much shorter, so nothing is covered. */
+.nc-subs { flex: none; padding: 8px 16px 10px; border-top: 1px solid var(--prp-line); background: var(--prp-surface); }
+.nc-subs-box { --nc-subs-line: 1.4; height: calc(3em * var(--nc-subs-line)); overflow: hidden; color: var(--prp-text); font: clamp(18px, 1.2vw, 26px)/var(--nc-subs-line) var(--prp-font-serif); text-align: center; }
+.nc-subs-box span.on { color: var(--prp-text); text-decoration: underline 2px var(--prp-primary); text-underline-offset: 4px; }
+
+/* Full screen (the whole page; data-prp-fs on <html>, design/prp-split.js): the page's own header and toolbar go, the
+   1,440 px limit is lifted, and the reading size grows with the screen (the 66-character column is about 606 px at
+   1366, 680 at 1920 and 808 at 2560). */
+:root[data-prp-fs] { --nc-size: clamp(18px, 1.05vw, 24px); }
+:root[data-prp-fs] .nc-front, :root[data-prp-fs] .nc-toolbar, :root[data-prp-fs] .prp-returnbar { display: none !important; }
+:root[data-prp-fs] .nc-page { max-width: none; }
+:root[data-prp-fs] body { overflow-y: auto; }
+
 @media (prefers-reduced-motion: reduce) {
   .nc-progress i, .nc-text p.para::before { transition: none; }
 }
 @media print {
-  .nc-toolbar, .nc-chapter-row .prp-btn, .nc-progress, .nc-popout, .nc-toc, .nc-pane, .nc-chapter-nav { display: none !important; }
+  .nc-toolbar, .nc-chapter-row .prp-btn, .nc-progress, .nc-popout, .nc-toc, .nc-pane, .nc-chapter-nav, .nc-nar, .nc-nar-msg, .nc-offer, .nc-notice { display: none !important; }
   .nc-head { position: static; }
   a.term { background: none; box-shadow: none; }
 }

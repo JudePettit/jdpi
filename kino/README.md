@@ -16,15 +16,18 @@ One page, six submodules. `kino/index.html?cat=<category>` is the catalogue and 
 | Great Thinkers | `kino-great-thinkers` | `kino/index.html?cat=great-thinkers` (multi-part courses with a quiz) |
 
 A documentary opens in the player with `#doc=<id>`, at a scene with `#doc=<id>&s=<scene id or number>`
-(e.g. `kino/index.html?cat=wars#doc=ww2-europe&s=barbarossa`). Any category's page can play any documentary.
+(e.g. `kino/index.html?cat=wars#doc=ww2-europe&s=barbarossa`), and with Split view on with `&split=1` at the end
+(`#doc=ww2-europe&s=barbarossa&split=1`; read and written by `readKinoView` and `kinoViewHash` in `lib/links.js`, apart
+from `readKinoHash` and `kinoHash`). Any category's page can play any documentary.
 
 ## Files
 
 ```
 kino/
-  index.html, kino.css, kino.js   the page: catalogue, player, captions, controls, links into PRP
+  index.html, kino.css, kino.js   the page: catalogue, player, captions, controls, Split view, Related, links into VM
   lib/text.js        caption words, sentences and the speech rules (shared with the validator)
-  lib/links.js       shell routes (#/<suite>/<module>?at=…) and Kino deep links (shared)
+  lib/links.js       shell routes (#/<suite>/<module>?at=…), Kino deep links and a scene's link as a place (shared)
+  lib/related.js     the Related screens of a scene, from the scripts and the Master Index (shared)
   lib/format.js      the six categories, the visual kinds, scene flattening, short citations (shared)
   lib/stage.js       the 16:9 stage: map, timeline, portrait, quote, chart, module and title visuals
   lib/voice.js       the narration (this device's British voice or an online voice, word timing) and the background music
@@ -140,8 +143,8 @@ page's data.
 
 The player opens a link through the shell route `https://jdpi.pages.dev/#/<suite>/<module>?at=<absolute url>`. Inside the
 shell it posts `{ type: 'prp:navigate', hash }` to the parent (shell.js moves there), and if the shell's address has not
-changed a moment later it sets it directly (same origin). Outside the shell, a link opens PRP in a new tab.
-**Follow along in PRP** opens each scene's place as the film reaches it: inside the shell the narration carries on while
+changed a moment later (and has not moved at all meanwhile) it sets it directly (same origin). Outside the shell, a
+link opens Vitruvian Manager in a new tab. **Follow along in VM** opens each scene's place as the film reaches it: inside the shell the narration carries on while
 the shell shows the submodule, and the now-playing bar (below) shows the captions and controls; outside it, one
 companion tab follows. Links to other Kino films are never followed automatically; opened by hand, a film in another
 category plays in that category's submodule (through the shell), and this one pauses.
@@ -195,9 +198,13 @@ The chapter list shows the parts; the quiz appears under the player when the cou
 ## The player
 
 - **Stage** 16:9, scaled to the screen so stage, captions and controls fit together; text keeps legible minimums.
+  In full screen it is the largest 16:9 box the screen leaves above the sentence box and the controls, the same size in
+  every scene, at the foot of its room, and the text drawn on it keeps its share of the picture (no ceilings).
 - **Captions** always on, in the serif reading face, the spoken word highlighted (from the voice's word boundaries,
-  timed when a voice sends none, or from the clip's clock for an online voice). Under them: the scene's PRP link, its
-  sources, and the map key on phones.
+  timed when a voice sends none, or from the clip's clock for an online voice). Under them: the scene's place in Vitruvian
+  Manager, its sources, and the map key on phones. With Split view on, and in full screen, the block of text gives way
+  to the sentence being read, in a box three lines tall that never changes height; a longer sentence scrolls by whole
+  lines to the word being said. `#cap-text` still holds every word.
 - **Voice**: through the shared voice layer (`design/prp-voice.js`), as the shell's Documentary reader speaks, and sharing
   its saved choice (`jdpi.doc.voice`). By default the browser's speech synthesis, a British voice chosen as the
   Documentary chooses it, spoken exactly as before. The settings also list the site's online voices (group "Azure
@@ -211,9 +218,63 @@ The chapter list shows the parts; the quiz appears under the player when the cou
   the same timing silently and never asks the proxy.
 - **Music**: the reader's public-domain and CC0 Commons recordings, quiet and ducked under the voice; off by default.
 - **Controls**: play/pause, previous/next scene, scene bar, chapters, speed (0.8× to 1.5×), voice or captions only,
-  music, follow along, full screen. **Keys**: Space or K play/pause · ← → or J L scene · Home End · < > speed ·
-  C captions only · M music · P follow along · O open this scene's place · F full screen · ? shortcuts.
-- Inside the shell, leaving Kino (its frame hidden) pauses the film unless it is following along.
+  music, follow along, Split view, Related, full screen. The two newest buttons show their sign alone unless the row of
+  controls is at least 1,050 px wide (their names are in their tooltips). **Keys**: Space or K play/pause · ← → or J L
+  scene · Home End · < > speed · C captions only · M music · P follow along · O open this scene's place · V Split view ·
+  T Related · H hold the pane or let go · F full screen · ? shortcuts. On the pane's divider: ← → Home End Enter. A key
+  something else has handled (the divider's) is left alone.
+- Inside the shell, leaving Kino (its frame hidden) pauses the film unless it is following along: the theatre's box
+  becomes 0 × 0 (the frame's window keeps its size in Edge), seen by an IntersectionObserver and as each sentence starts.
+
+### Split view (V): the place beside the film
+
+Follow takes the viewer to each scene's place; **Split view** brings the place to the film. The same page at the same
+address (`link.at`) shows in a pane beside the stage and its sentence box, built by the shared piece
+`design/prp-split.js` (and `design/prp-split.css`), which Bibliotheca's pane uses too. The two are alternatives:
+turning one on turns the other off. Split view is remembered (`prp.kino.split`) and written into the address
+(`split=1`); a film opened with no such key starts as the viewer last left it, and a later address in the same film
+never turns it off.
+
+- **Side by side** from 901 px of page width (in the shell, the frame's): the pane takes 40% at first (25 to 60%,
+  never leaving the film under 480 px or the pane's frame under 320 px), as tall as the stage and its captions and at
+  least 360 px; the chapter list moves under the player. Its left edge is a divider: drag it with any pointer, or
+  focus it and use the keys; the share is saved in `prp.split.kino`. Under 901 px the pane follows the controls,
+  `clamp(300px, 55vh, 560px)` tall, and a place chosen there is scrolled into view.
+- The pane's head: the submodule's code, the place, **Hold** (H: the pane stays while the film moves on; again, back to
+  the scene's place), **Open** (once what Follow does at every scene: the shell moves there, or a new tab; full screen
+  ends) and close (Split view off).
+- With it on, the scene's place button, O, the list under the player and a module card show their place in the pane,
+  held unless it is the scene's own. In full screen with Split view off they turn it on.
+- One frame for each submodule, the six shown most recently, moved by hash where only the hash differs; all are
+  dropped when Split view is turned off or the film is closed. A framed page gets the player's theme; on its own,
+  its links that would open at the top open a new tab, and its requests to move the shell (`prp:navigate`) open the
+  shell at that route in a new tab (inside the shell they are passed on).
+- A card in place of a frame: a scene with no place, a scene whose place is another film ("Open the film"), a private
+  submodule (`opensInNewTab`: offered as a link), an address that is not its submodule's own page, and a page that
+  loaded without the connector (`design/prp-bar.js`), which is how a missing page looks on the live site and locally.
+- A film shown in another page's pane (a frame named `prp-side`) offers no Split view, Related or Follow.
+
+### Related (T): the screens tagged with the scene
+
+A strip under the sentence box, hidden at first and remembered (`prp.kino.related`): three chips and **See more** with
+the count of all the screens, which opens a panel over the lower part of the player (a non-modal dialog: its close
+button, Escape outside full screen, a click outside, See more again or a choice close it, and the focus goes back to
+See more). The list (`relatedPlaces` in `lib/related.js`) is the scene's own place; then the places the Master Index
+records (its "Appears in", from the lake's shards `lake/data/e/<n mod 512>.json`) for what the scene names: the entry
+its link names, the person in its portrait, the war or the country its link names (War Focus, PESTLE, the Atlas) and up
+to four countries on its map, the last two through `battlefield/focus/data/index.json` and `national/data/brief.json`
+(`tagTables`); or else the film's subjects; up to four each, leaving out other films; then the film's other places,
+nearest scene first. That tags 155 of the 221 scenes by what they show (86 by the links and portraits alone), and
+leaves 31 with no tagged screen. A chosen screen shows in the pane, held, turning Split view on if it was off.
+
+### Full screen (F)
+
+The theatre goes full screen as a grid: the stage fitted by CSS alone (`.kn-fit`, `container-type: size`), the sentence
+box three lines tall at `clamp(18px, 1.3vw, 28px)`, the strip, the controls (one row from 1,280 px wide, with words), the
+note. With Split view on the pane is a second column running the full height above the strip and the controls (one
+column under 901 px). On a short screen (a phone held sideways) the box is two lines and the controls one row of signs.
+F, the button and Escape leave it; so do a course's end (its quiz is under the player), "Sources" on the end card, Open
+in the pane, and any move of the shell (`shell.js` leaves full screen when it changes the frame in view).
 
 ## Now playing (inside the shell)
 
@@ -256,6 +317,6 @@ sentence; every control is a button or link that works from the keyboard; it sli
 
 ## Data and licences
 
-Scripts: written by PRP. Wikidata: CC0. Maps: world-atlas 2.0.2 (Natural Earth, public domain) with d3 7.9.0 and
+Scripts: written by Vitruvian Manager. Wikidata: CC0. Maps: world-atlas 2.0.2 (Natural Earth, public domain) with d3 7.9.0 and
 topojson-client 3.1.0 from jsDelivr. Images: Wikimedia Commons, each under its own licence, credited on screen and in
 `data/media.json`. Music: public-domain and CC0 recordings on Wikimedia Commons.

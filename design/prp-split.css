@@ -1,0 +1,38 @@
+/* A page of Vitruvian Manager in a pane beside a page's main content (design/prp-split.js): the pane, its head, its
+   frames and cards, and the divider. Written against the tokens in design/prp.css only. The host lays out the
+   container (.prp-split, with data-side="on|off" and data-dir="row|column" and the pane's share in
+   --prp-split-share) in its own CSS, because Kino and Bibliotheca place the pane differently on a narrow screen. */
+.prp-split[data-side="off"] > .prp-side { display: none; }
+.prp-side { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--prp-surface); color: var(--prp-text); }
+.prp-split[data-dir="row"] > .prp-side { padding-left: 8px; border-left: 1px solid var(--prp-line); }
+.prp-split[data-dir="column"] > .prp-side { border-top: 1px solid var(--prp-line); }
+
+/* The divider: the pane's own left edge, 8 px (20 px on a touch screen), a 2 px line in the accent when it is hovered,
+   focused or dragged. touch-action: none, or a finger's drag would scroll the page and the browser would cancel it. */
+.prp-split-bar { position: absolute; left: 0; top: 0; bottom: 0; z-index: 2; width: 8px; cursor: col-resize; touch-action: none; background: transparent; outline: none; }
+.prp-split-bar::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 2px; background: transparent; }
+.prp-split-bar:hover::after, .prp-split-bar:focus-visible::after, .prp-split.dragging .prp-split-bar::after { background: var(--prp-accent); }
+.prp-split-bar:focus-visible { box-shadow: inset 0 0 0 2px var(--prp-focus); }
+.prp-split-bar[hidden] { display: none; }
+@media (pointer: coarse) {
+  .prp-split-bar { width: 20px; }
+  .prp-split-bar::after { left: 9px; }
+  .prp-split[data-dir="row"] > .prp-side { padding-left: 20px; }
+}
+/* While the divider is held, the frames ignore the pointer, or the drag would stop the moment it crossed a framed page. */
+.prp-split.dragging, .prp-split.dragging * { cursor: col-resize; user-select: none; }
+.prp-split.dragging iframe { pointer-events: none; }
+
+.prp-side-head { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 6px 10px; border-bottom: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); }
+.prp-side-head .prp-code[hidden], .prp-side-head [hidden] { display: none; }
+.prp-side-label { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--prp-text-2); font: 13px/1.35 var(--prp-font-ui); }
+.prp-side-label b { color: var(--prp-text); font-weight: 600; }
+.prp-side-head .prp-btn { flex: none; }
+.prp-side-head .prp-btn[aria-pressed="true"] { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
+.prp-side-body { position: relative; flex: 1 1 0; min-height: 0; background: var(--prp-canvas); }
+.prp-side-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--prp-canvas); }
+.prp-side-frame[hidden] { display: none; }
+.prp-side-card { display: grid; gap: 12px; align-content: start; justify-items: start; padding: 22px 18px; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); }
+.prp-side-card p { margin: 0; max-width: 46ch; }
+
+@media print { .prp-side, .prp-split-bar { display: none !important; } }

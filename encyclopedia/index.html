@@ -123,7 +123,7 @@ main{min-width:0}
         <div class="prp-panel results">
           <div class="prp-panel-head"><b id="count">–</b><label class="sortby">Sort <select class="prp-select" id="sort" aria-label="Sort by"><option value="mentions">Most appearances in PRP</option><option value="name">Name</option><option value="type">Type</option></select></label></div>
           <div class="active" id="active" hidden></div>
-          <div class="tbl"><table class="prp-table"><thead><tr><th>Name</th><th>Type</th><th>Tags</th><th>Appears in PRP</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <div class="tbl"><table class="prp-table"><thead><tr><th>Name</th><th>Type</th><th>Tags</th><th>Appears in Vitruvian Manager</th></tr></thead><tbody id="rows"></tbody></table></div>
           <div class="pager" id="pager"></div>
         </div>
       </main>
@@ -364,7 +364,7 @@ async function renderEntity(q) {
         ${e.aliases.length ? `<div class="also">Also: ${esc(e.aliases.join(' · '))}</div>` : ''}</div></div>
       <div class="card"><h3>Summary</h3><p class="summary">${esc(e.summary || 'No summary available.')}</p>
         ${e.wiki ? `<p class="links"><button type="button" class="more" id="fullintro">See more</button><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a><a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
-      <div class="card"><h3>Appears in PRP · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
+      <div class="card"><h3>Appears in Vitruvian Manager · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
     </div><div>
       ${factRows.length || relRows.length ? `<div class="card"><h3>Facts</h3><dl class="facts">${factRows.join('')}${relRows.join('')}</dl></div>` : ''}
       <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${esc(tagIdOf.get(t))}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>

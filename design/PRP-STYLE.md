@@ -118,6 +118,31 @@ live caption): Kino posts `prp:nowplaying` messages and the bar posts `prp:kino-
 protocol is in `kino/README.md`, "Now playing"). It covers the bottom of the workspace (about 60 px, 80 px on phones),
 so a page should not pin anything it needs there.
 
+### A page of Vitruvian Manager beside a page's content: the shared pane
+
+When a page shows another submodule's page beside its own content (Kino's Split view, Bibliotheca's pane), it uses
+`design/prp-split.js` and `design/prp-split.css`, never a frame of its own making. The module is exports only (its pure
+parts, `frameMove`, `clampShare` and `canFrame`, are tested in Node in `tests/prp-split.test.mjs`); the host marks its
+container `.prp-split` (`data-side="on|off"`) and the pane `.prp-side`, and lays out the narrow case in its own CSS.
+
+- **What may be framed** is the shell's own rule (`canFrame`): a submodule in the registry, not `opensInNewTab`, at an
+  address on its own page. A private page (Tally Stick, Algo Trader) is offered as a link in a new tab; a page on another
+  site that is its submodule's own page (Political Atlas, the Political Retrospective) is framed, as the shell frames it.
+  A page that loads without the connector (`design/prp-bar.js`) is a missing page, on the live site and locally: its
+  frame goes and a card says so, so the shell never runs inside a pane.
+- **Frames** are named `prp-side`, with no `allow` and no `sandbox`, and are moved like the shell's (`frameMove`: by hash
+  where only the hash differs, with `location.replace`). They get the host's theme (`prp:theme`), and on its own the
+  host turns their top links into new tabs. A framed page's `prp:navigate` is passed on to the shell inside it, and opens
+  the shell at that route in a new tab without one. A page whose `window.name` is `prp-side` (`inSidePane()`) offers no
+  pane, Follow or narrator of its own, and its `shellGo` only posts its message.
+- **The divider** (`splitter`) is the pane's own left edge: 8 px (20 px on a touch screen), `role="separator"` with its
+  value, dragged with any pointer (the frames ignore the pointer meanwhile) or moved with ← → (two points), Home, End and
+  Enter (back to the start). The share is a per-viewer convenience in `localStorage`, never in the address.
+- **Full screen** (`fullScreen`) sets `data-prp-fs` on `<html>` however it ends; the host hides its button where
+  `supported` is false. Full screen with the pane on shows both, with it off the content alone: the same key turns the
+  pane on and off in both. The shell leaves full screen whenever it changes the frame in view.
+- Tokens only, light and dark; nothing in the pane slides or fades; no sideways scroll at 360 px.
+
 ### In the shell: the Home page and the Dashboard
 
 The shell draws two pages itself, both the Home module's (`shell.js`, `shell.css`), on the same anatomy as any other.
@@ -232,7 +257,7 @@ of the text: "3.5" is read "3 point 5", "jdpi.pages.dev" "jdpi dot pages dot dev
 ### Narration: one voice layer
 
 Every page that reads aloud speaks through `design/prp-voice.js` (`PRPVoice.reader`), never `speechSynthesis` directly:
-the Documentary reader and Kino today, Bibliotheca, Auteur and Personal Genius when they speak. The reader tries its
+the Documentary reader, Kino and Bibliotheca's narrator (Augmented Reading) today, Auteur and Personal Genius when they speak. The reader tries its
 backends in order for each passage (`'prerendered'`, not built yet; `'stream'`, an online voice through the site's proxy
 `/api/voice/v1/`; `'webspeech'`, this device's voice) and falls back silently, from the sentence where one stopped, telling
 the page once (`onBackend`) so it can say so in a status line. Voice lists group this device's voices ("This device") and
@@ -241,6 +266,13 @@ the proxy's ("Azure (online)"), the online group only once the proxy says it is 
 of every Play click handler, before anything waits: iOS plays clips only on an element first played inside a tap. Words a
 voice gets wrong go in `PRPVoice.lexicon` (bump its version: it is part of every clip's key), as Vitruvius's "Ave"
 ("ah-way") does.
+
+Bibliotheca's narrator (`bibliotheca/neo/lib/narrator.js`) keeps its own choice of voice (`prp.bibliotheca.voice`, a
+device voice only) and never reads or writes `jdpi.doc.voice`: a book is far longer than a film, so every visit starts
+with this device's voice, it never switches to an online voice by itself, and it uses one only after an offer that shows
+what it will cost in characters, for that chapter and no more (`gate`, the `fetch` it hands `PRPVoice.stream`, refuses
+anything else). It cuts its own units (`lib/narrate.js`: sentences, short ones read together, at most 200 characters), so
+the online voice gets about 6 requests a minute. A page that narrates a long text should do the same.
 
 ## 7. Accessibility
 

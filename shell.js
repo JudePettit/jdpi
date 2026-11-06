@@ -643,6 +643,8 @@ function route() {
   else if (r.module) renderNotice(r.suite, r.module, `<div class="prp-note" style="margin-top:18px"><b>Not published yet.</b> It will open here once it has a live address.</div>`);
   else if (r.suite) renderSuite(r.suite);
   else renderHome();
+  // A frame in full screen (Kino's film) is left when the shell shows anything else, however the shell moved.
+  if (document.fullscreenElement && document.fullscreenElement !== frame) document.exitFullscreen().catch(() => {});
 
   if (!framed) { $('#view').scrollTop = 0; syncLoading(); }
   const P = state.registry.platform;

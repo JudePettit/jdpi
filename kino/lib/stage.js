@@ -5,8 +5,8 @@
    - timeline: a sweep along an axis that lights labelled events as it passes.
    - portrait: a Commons image (Wikidata P18 or a named file) with a slow Ken Burns drift, credited with its licence.
    - quote: large serif text with its attribution.   - chart: bars or ranges, or a line, drawn in.
-   - module: a card that opens the linked PRP submodule.   - title: the documentary's title card.
-   Colours are PRP tokens set in kino.css, so light and dark need no redraw. Text sizes follow the frame's width with
+   - module: a card that opens the linked Vitruvian Manager submodule.   - title: the documentary's title card.
+   Colours are the design tokens set in kino.css, so light and dark need no redraw. Text sizes follow the frame's width with
    legible minimums (u = viewBox units per screen pixel). */
 import { flatScenes, shortCite } from './format.js';
 
@@ -133,7 +133,7 @@ class MapView {
   /** Arrows, fronts, points and labels, in screen-sized units at the current view. */
   drawOverlay() {
     const s = this.scene; if (!s) return;
-    const u = this.unit(), fs = Math.max(11, Math.min(14.5, (W / u) / 75)) * u, ov = this.overlay;
+    const u = this.unit(), fs = Math.max(11, (W / u) / 75) * u, ov = this.overlay;
     ov.innerHTML = '';
     const v = s.visual || {}, d3 = this.g.d3, placed = [];
     const box = (x, y, w, h) => ({ x, y, w, h });
@@ -265,7 +265,7 @@ export class Stage {
     this.scene = null; this.redraw = null; this.stopLoops(); this.mapSvg.classList.add('off');
     this.legend.innerHTML = ''; this.credit.innerHTML = '';
     this.layer.className = 'kn-layer kn-v-end';
-    this.layer.innerHTML = `<h3>The end</h3><p>${esc(doc.title)}. ${doc.sources.length} sources are listed under the player; every scene's link opens its place in PRP.</p>
+    this.layer.innerHTML = `<h3>The end</h3><p>${esc(doc.title)}. ${doc.sources.length} sources are listed under the player; every scene's link opens its place in Vitruvian Manager.</p>
       <div class="row"><button type="button" class="prp-btn primary" data-act="again">Watch again</button>${next ? `<a class="prp-btn" href="#doc=${esc(next.id)}">Next: ${esc(next.title)}</a>` : ''}<button type="button" class="prp-btn" data-act="sources">Sources</button></div>`;
     return this.layer;
   }
@@ -302,7 +302,7 @@ export class Stage {
       <div><div class="where"><span class="prp-code" data-suite="${esc(info.suite || l.suite)}">${esc(info.code || l.suite.toUpperCase())}</span>${esc(info.suiteName || '')}</div>
       <h3>${esc(info.name || name)}</h3>${place ? `<p class="at">${esc(place)}</p>` : ''}</div>
       ${scene.visual.blurb ? `<p class="blurb">${esc(scene.visual.blurb)}</p>` : ''}
-      <button type="button" class="prp-btn primary go">${inShell ? 'Show in PRP' : 'Open in PRP'} ↗</button></div>`;
+      <button type="button" class="prp-btn primary go">${inShell ? 'Show in Vitruvian Manager' : 'Open in Vitruvian Manager'} ↗</button></div>`;
   }
 
   /* Timeline (drawn in screen pixels): an axis with year ticks and a sweep that lights each event as it passes.
@@ -314,7 +314,7 @@ export class Stage {
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
     const fy = d => { const [y, m = 1, dd = 1] = String(d).split('-').map(Number); return y + (m - 1) / 12 + (dd - 1) / 365; };
     const date = s => { const [y, m, d] = String(s).split('-'); return [d && +d, m && MONTHS[+m - 1], y].filter(Boolean).join(' '); };
-    const compact = w < 640, fs = compact ? 12 : Math.max(13, Math.min(18, w / 68));
+    const compact = w < 640, fs = compact ? 12 : Math.max(13, w / 68);
     const pad = Math.max(26, w * 0.06), x0 = pad, x1 = w - pad, axisY = Math.round(compact ? h * 0.66 : h * 0.5);
     const a = fy(v.from), b = Math.max(fy(v.to), a + 0.1), X = t => x0 + ((t - a) / (b - a)) * (x1 - x0);
     const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000].find(s => (b - a) / s <= (compact ? 5 : 9)) || 1000;
@@ -371,7 +371,7 @@ export class Stage {
       <div class="ft">${v.note ? `<p>${esc(v.note)}</p>` : ''}${cites ? `<p class="src">Sources: ${esc(cites)}</p>` : ''}</div></div>`;
     const svg = this.layer.querySelector('svg'), w = svg.clientWidth || 800, h = svg.clientHeight || 300;
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-    const rows = v.data, n = rows.length, fs = Math.max(12, Math.min(18, w / 58));
+    const rows = v.data, n = rows.length, fs = Math.max(12, w / 58);
     const fmt = x => (Math.round(x * 10) / 10).toLocaleString('en-GB'), valText = r => (r.low != null ? `${fmt(r.low)}–${fmt(r.high)}` : fmt(r.value));
     const top = Math.max(...rows.map(r => r.high ?? r.value)), step = [1, 2, 2.5, 5, 10].map(m => m * 10 ** Math.floor(Math.log10(top || 1))).find(s => top / s <= 6) || top / 4;
     const max = Math.ceil((top * 1.02) / step) * step, ticks = []; for (let t = 0; t <= max + 1e-9; t += step) ticks.push(t);

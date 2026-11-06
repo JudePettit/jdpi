@@ -13,7 +13,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
-const UA = { 'User-Agent': 'PRP Auto Trader judep92@gmail.com' };
+const UA = { 'User-Agent': 'PRP Auto Trader (https://jdpi.pages.dev)' };
 const OUT = new URL('../data/investors.json', import.meta.url);
 // CIKs are checked against EDGAR's registered names when the script runs.
 const INVESTORS = [

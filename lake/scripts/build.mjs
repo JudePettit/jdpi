@@ -25,7 +25,7 @@ const jdpiDir = resolve(here, '../..');
 const retroArg = process.argv.indexOf('--retro');
 const retroDir = resolve(retroArg > 0 ? process.argv[retroArg + 1] : join(jdpiDir, '../hp-retrospective'));
 const OUT = join(jdpiDir, 'lake/data');
-const UA = { 'User-Agent': 'JDP-I Master Index (https://jdpi.pages.dev; judep92@gmail.com)' };
+const UA = { 'User-Agent': 'JDP-I Master Index (https://jdpi.pages.dev)' };
 const E_SHARDS = 512, T_SHARDS = 256;
 // --only <adapter,…>: the named adapters' mentions added to the committed lake/data, so a module's new entities (a
 // Bibliotheca book's cast) reach the Master Index before the monthly build, which makes the same records from scratch.

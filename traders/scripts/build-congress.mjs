@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
-const UA = { 'User-Agent': 'JDP-I Trader Tracker (https://jdpi.pages.dev; judep92@gmail.com)' };
+const UA = { 'User-Agent': 'JDP-I Trader Tracker (https://jdpi.pages.dev)' };
 const CACHE = new URL('./ptr-cache.json', import.meta.url);
 const OUT = new URL('../data/congress.json', import.meta.url);
 const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : {};

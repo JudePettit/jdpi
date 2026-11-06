@@ -12,7 +12,10 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const num = n => Math.round(n).toLocaleString('en-GB');
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthLabel = m => `${MONTHS[+m.slice(5, 7) - 1]} ${m.slice(0, 4)}`;
-const fmtDate = d => (d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '');
+// One formatter for every date: toLocaleDateString with options builds a new one on each call, and a long war's battle
+// list formats thousands of dates (seconds of a slow machine's time, with the shell and Kino waiting on the same thread).
+const DAY = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const fmtDate = d => { if (!d) return ''; const t = new Date(d + 'T00:00:00Z'); return Number.isNaN(+t) ? 'Invalid Date' : DAY.format(t); };
 // A battle's dates at the precision Wikidata records (p: 'm' month, 'y' year).
 const bDates = b => { const f = d => (b.p === 'y' ? d.slice(0, 4) : b.p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d)); const a = f(b.s), z = b.e ? f(b.e) : a; return a === z ? a : `${a} – ${z}`; };
 const wikiUrl = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;

@@ -435,6 +435,8 @@ const views = m => m.views || [];
 // A plain visit to a page whose address is one of its views is that view (Realtime Battlefield is its live map).
 const frameKey = r => `${r.module.id}/${r.view?.id || views(r.module).find(v => v.url === r.module.url)?.id || ''}`;
 const visibleFrame = () => ($('#frames').hidden ? null : $('#frames iframe.active'));
+// The page in a frame, when it is on this origin (null otherwise).
+const frameDocument = frame => { try { return frame.contentDocument; } catch { return null; } };
 // Where a frame is now: its own address when it is on this origin, otherwise the address the shell last gave it.
 function frameAddress(frame) {
   try { const u = frame.contentWindow.location.href; if (u && u !== 'about:blank') return u; } catch { /* another origin */ }
@@ -498,14 +500,21 @@ function createFrame(key, r, url) {
   frame.src = url;
   frame.addEventListener('load', () => {
     setLoading(frame, false); postTheme(frame);
-    if (state.np?.frame === frame) setNowPlaying(null); // a new page in Kino's frame: the film it was playing has gone
+    // A new page in Kino's frame: the film it was playing has gone. The first page's own load event can come after it has
+    // already posted (Follow pressed while its fonts or the map's scripts were still loading), so a load only clears
+    // the bar when the page in the frame is not the one that posted it.
+    if (state.np?.frame === frame && frameDocument(frame) !== state.np.doc) setNowPlaying(null);
   });
   setLoading(frame, true);
   return frame;
 }
 function moveFrame(frame, url) {
-  // While a page is loading, compare with where it is going rather than where it was.
-  const to = new URL(url, location.href), from = new URL(frame.hasAttribute('data-loading') ? frame.dataset.url : frameAddress(frame));
+  // While a page is loading, compare with where it is going rather than where it was; but once the page it was sent to
+  // has arrived (only its images, fonts or scripts from other sites still coming, which can take seconds), its own
+  // address is where it is: the address it was sent to can differ in form (kino/index.html is served at kino/, with a
+  // 308), and a hash written on that form would load the page afresh and lose its state (a film following along).
+  const to = new URL(url, location.href), sent = new URL(frame.dataset.url || frameAddress(frame)), at = new URL(frameAddress(frame));
+  const from = frame.hasAttribute('data-loading') && !samePage(at, sent) ? sent : at;
   frame.dataset.url = to.href;
   if (from.href === to.href) return;
   // The same page with another hash: change only the hash, on the page's own address, so it stays in place (no reload).
@@ -554,7 +563,7 @@ function nowPlayingMessage(e) {
   const num = v => (Number.isFinite(+v) ? Math.max(0, Math.round(+v)) : 0);
   const own = findModule(frame.dataset.module);
   setNowPlaying({
-    frame, title: String(d.doc?.title || 'Kino'), index: num(d.scene?.index), count: num(d.scene?.count), scene: String(d.scene?.title || ''),
+    frame, doc: frameDocument(frame), title: String(d.doc?.title || 'Kino'), index: num(d.scene?.index), count: num(d.scene?.count), scene: String(d.scene?.title || ''),
     caption: String(d.caption || '').replace(/\s+/g, ' ').trim(), playing: d.playing === true, ended: d.ended === true,
     route: SHELL_ROUTE.test(String(d.route || '')) ? d.route : href(own?.suite, own?.module),
   });

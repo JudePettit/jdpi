@@ -74,7 +74,9 @@
 .kn-theatre[data-side="on"][data-dir="row"] .kn-cap-foot .key, .kn-theatre[data-side="on"][data-dir="row"] .kn-cap-foot .legend-key { display: none; }
 
 /* Full screen: a grid as large as the screen. CSS alone fits the largest 16:9 stage into the room the sentence box, the
-   strip, the controls and the note leave, the same size in every scene, at the foot of its room. With Split view on,
+   strip and the controls leave, the same size in every scene, at the foot of its room. A note (the player's own word,
+   which can come at any moment: no voice on this device, the online voice's allowance spent) lies over the top of the
+   screen instead of taking a row, so it never shrinks the picture under the viewer. With Split view on,
    a second column holds the pane, running the full height above the strip and the controls; under 901 px there is one
    column and the pane takes the spare height between the sentence box and the controls. */
 .kn-theatre:fullscreen { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto auto auto; grid-template-areas: "fit" "cap" "strip" "ctl" "note";
@@ -82,6 +84,9 @@
 .kn-theatre:fullscreen > .kn-fit { container-type: size; min-width: 0; min-height: 0; display: grid; place-items: end center; }
 .kn-theatre:fullscreen .kn-stage { width: min(100cqw, calc(100cqh * 16 / 9)); }
 .kn-theatre:fullscreen .kn-captions { padding: 4px 18px; }
+/* grid-area auto: placed against the whole screen, not its own (empty) row at the foot. */
+.kn-theatre:fullscreen > .kn-note { grid-area: auto; position: absolute; z-index: 7; top: 12px; left: 50%; transform: translateX(-50%); width: max-content;
+  max-width: min(720px, calc(100% - 32px)); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); }
 .kn-theatre:fullscreen[data-side] .kn-cap-head, .kn-theatre:fullscreen[data-side] .kn-cap-foot { display: none; } /* the badge on the stage counts the scenes */
 .kn-theatre:fullscreen .kn-cap-text { font-size: clamp(18px, 1.3vw, 28px); text-align: center; }
 .kn-theatre:fullscreen[data-side="on"][data-dir="row"] { grid-template-columns: minmax(0, 1fr) var(--prp-split-share, 40%); grid-template-rows: minmax(0, 1fr) auto auto auto auto;

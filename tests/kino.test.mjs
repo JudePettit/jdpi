@@ -416,6 +416,52 @@ test('page: the now-playing bar\'s Play unlocks Kino\'s audio inside the tap, as
   } finally { await browser.close(); }
 });
 
+test('page: Follow pressed while Kino\'s page is still loading keeps the now-playing bar once the page has loaded, and Back to film keeps the film', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 860 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/registry.json', async route => {
+      const reg = await (await route.fetch()).json();
+      for (const m of reg.suites.find(s => s.id === 'kino')?.modules || []) { m.url ||= m.pendingUrl; m.status = 'live'; }
+      await route.fulfill({ json: reg });
+    });
+    // The web fonts and the map's scripts are held until Follow has been pressed, so Kino's page has not finished loading
+    // then (its load event waits for them): as on a runner where they come over the network more slowly than the site.
+    let release;
+    const held = new Promise(r => { release = r; });
+    await page.route(/^https:\/\/(fonts\.gstatic\.com|cdn\.jsdelivr\.net)\//, async route => { await held; await route.fallback(); });
+    await page.goto(`${BASE}/#/kino/kino-wars`, { waitUntil: 'domcontentloaded' });
+    const frame = await page.waitForSelector('#frames iframe[data-module="kino-wars"]', { timeout: 20000 });
+    const kino = await frame.contentFrame();
+    await kino.waitForSelector('.kn-card[data-doc="korean-war"]', { timeout: 20000 });
+    await kino.evaluate(() => { location.hash = '#doc=korean-war'; });
+    await kino.waitForSelector('#cap-text .w', { timeout: 20000 });
+    assert.notEqual(await kino.evaluate(() => document.readyState), 'complete', 'Kino\'s page is still loading');
+    const loaded = frame.evaluate(f => new Promise(r => f.addEventListener('load', r, { once: true })));
+    loaded.catch(() => { /* awaited below; a failure before then closes the browser, and its own message is the one to see */ });
+    await kino.click('#follow');
+    await page.waitForFunction(() => location.hash.startsWith('#/rs/battlefield-history?at='), null, { timeout: 10000 });
+    await page.locator('#np').waitFor({ state: 'visible', timeout: 10000 });
+    // Back to film, still loading: the shell moves Kino's page by its hash on the page's own address (kino/, where the
+    // server put kino/index.html), so the film that was following along is the one shown, not the page loaded afresh.
+    await kino.evaluate(() => { window.__sameDocument = true; });
+    await page.click('#np-back');
+    await page.waitForFunction(() => document.querySelector('#frames iframe.active')?.dataset.module === 'kino-wars', null, { timeout: 5000 });
+    await kino.waitForFunction(() => /^#doc=korean-war&s=/.test(location.hash), null, { timeout: 5000 });
+    assert.notEqual(await kino.evaluate(() => document.readyState), 'complete', 'Kino\'s page was still loading');
+    assert.equal(await kino.evaluate(() => window.__sameDocument === true && document.querySelector('#follow').getAttribute('aria-pressed')), 'true', 'Back to film keeps the page and its Follow along');
+    await page.evaluate(() => { location.hash = '#/rs/battlefield-history'; });
+    await page.locator('#np').waitFor({ state: 'visible', timeout: 5000 });
+    release();
+    await loaded; // the shell's own listener on the frame ran first: it was added when the frame was made
+    assert.equal(await page.locator('#np').isVisible(), true, 'the bar stays: the page that loaded is the one following along');
+    assert.match((await page.locator('.np-head').innerText()).replace(/\s+/g, ' '), /^Kino · The Korean War, 1950–1953 · 1\/12$/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 /* ---------- Split view, full screen and Related screens (Jude, 29 October and 5 November 2026) ----------
    K1: "The video player should give you the option to replace the text shown in the documentaries and similar with the
    relevant content which is accessible from the 'Follow on PRP' button. There should also be a way to correctly scale the
@@ -775,6 +821,10 @@ test('page: full screen fits the 16:9 stage to the screen, the same in every sce
       const page = await browser.newPage({ viewport: { width: w, height: h } });
       const errors = [];
       page.on('pageerror', e => errors.push(e.message));
+      // No voice on this device and none online, as on a Linux runner, on every machine: 1.6 s in, the player says so in
+      // its note, which must not shrink the picture in full screen.
+      await page.addInitScript(() => { try { Object.defineProperty(window.speechSynthesis, 'getVoices', { value: () => [], configurable: true }); } catch { /* no speech at all */ } });
+      await page.route('**/api/voice/v1/voices', route => route.fulfill({ json: { available: false, voices: [] } }));
       // The film's longest scene (a portrait) and its shortest.
       await openFilm(page, 'political-events', '#doc=russian-revolutions-1917&s=october');
       await page.click('#fullscreen');
@@ -790,6 +840,11 @@ test('page: full screen fits the 16:9 stage to the screen, the same in every sce
       assert.ok(Math.abs(m.stage.width - m.fit.width) <= 1 || Math.abs(m.stage.height - m.fit.height) <= 1, `${at}: the stage fills its room one way`);
       assert.ok(Math.abs(m.stage.width - ew) <= 12 && Math.abs(m.stage.height - eh) <= 12, `${at}: ${m.stage.width}×${m.stage.height}`);
       assert.ok(Math.abs(m.name / m.stage.width - 0.044) <= 0.001, `${at}: a portrait's name is ${(100 * m.name / m.stage.width).toFixed(2)}% of the stage`);
+      // The note comes while the film is in full screen: it lies over the screen, and the stage keeps its box.
+      await page.waitForFunction(() => /no speech voices/.test(document.querySelector('#note').textContent), null, { timeout: 10000 });
+      const noted = await rect(page, '#stage'), said = await rect(page, '#note');
+      assert.deepEqual([noted.x, noted.y, noted.w, noted.h].map(Math.round), [m.stage.x, m.stage.y, m.stage.width, m.stage.height].map(Math.round), `${at}: the note leaves the stage as it was`);
+      assert.ok(said.h > 0 && said.y >= 0 && said.b <= h && said.x >= 0 && said.r <= w, `${at}: the note is on the screen`);
       // The shortest scene: the same box.
       await page.evaluate(() => { location.hash = '#doc=russian-revolutions-1917&s=assembly'; });
       await page.waitForFunction(() => /s=assembly/.test(location.hash));

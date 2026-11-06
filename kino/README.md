@@ -270,9 +270,11 @@ leaves 31 with no tagged screen. A chosen screen shows in the pane, held, turnin
 ### Full screen (F)
 
 The theatre goes full screen as a grid: the stage fitted by CSS alone (`.kn-fit`, `container-type: size`), the sentence
-box three lines tall at `clamp(18px, 1.3vw, 28px)`, the strip, the controls (one row from 1,280 px wide, with words), the
-note. With Split view on the pane is a second column running the full height above the strip and the controls (one
-column under 901 px). On a short screen (a phone held sideways) the box is two lines and the controls one row of signs.
+box three lines tall at `clamp(18px, 1.3vw, 28px)`, the strip, the controls (one row from 1,280 px wide, with words). The
+note lies over the top of the screen instead of taking a row: it can come at any moment (no voice on the device, the
+online voice's allowance spent), and the stage keeps its size when it does. With Split view on the pane is a second
+column running the full height above the strip and the controls (one column under 901 px). On a short screen (a phone
+held sideways) the box is two lines and the controls one row of signs.
 F, the button and Escape leave it; so do a course's end (its quiz is under the player), "Sources" on the end card, Open
 in the pane, and any move of the shell (`shell.js` leaves full screen when it changes the frame in view).
 
@@ -284,7 +286,8 @@ workspace: "Kino · <title> · <n>/<count>", the sentence being read (one line),
 same-origin windows (`postMessage` with the page's own origin as the target).
 
 Kino → shell (`window.parent`), on every scene, sentence and play-state change, at most one every 300 ms (the latest
-state is always sent), while Follow along is on and a film is open:
+state is always sent), while Follow along is on and a film is open. A change of play state (playing, paused, ended) goes
+at once: held back, it could reach the shell after the viewer's next press on the bar and undo it.
 
 ```jsonc
 {
@@ -307,9 +310,12 @@ the frame that sent the message. Kino accepts it only from `window.parent` on it
 `prp:nowplaying`. Before it posts `play`, the shell calls the frame's `window.prpKinoUnlock()` directly (same origin),
 synchronously inside the click: iOS lets audio play only from inside a tap, and the message arrives after it, so without
 this an online voice's first clip would be refused (once the proxy had made and counted it) and the device voice would
-read instead. "Back to film" moves the shell to `route` and puts the keyboard focus in Kino's frame. The shell
+read instead. "Back to film" moves the shell to `route` and puts the keyboard focus in Kino's frame; the film is moved
+by its hash on the page's own address (`kino/`, where the server puts `kino/index.html`), even while the page is still
+loading its fonts or pictures, so it is the same film, still following along, not the page loaded afresh. The shell
 accepts `prp:nowplaying` only from its own origin and its own frames, shows only text from it, and uses `route` only
-when it is a shell route; a new page loading in Kino's frame clears the bar.
+when it is a shell route; a new page loading in Kino's frame clears the bar (the page's own load event, which can come
+after it has posted, does not: the shell keeps the document that posted and clears the bar only for another).
 
 The bar is a labelled region ("Now playing in Kino"); its caption is a polite live region that changes once a
 sentence; every control is a button or link that works from the keyboard; it slides in only without

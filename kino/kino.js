@@ -208,14 +208,16 @@ function setPlayUi() {
 /* ---------- now playing: while the film follows along in the shell, its own frame is hidden, so the shell shows its
    caption and controls in a bar. Protocol: README.md, "Now playing". ---------- */
 const NP_EVERY = 300; // ms: at most one message this often (the last state is always sent)
-const np = { timer: 0, last: 0, live: false };
+const np = { timer: 0, last: 0, live: false, state: '' };
 const toShell = msg => { try { window.parent.postMessage(msg, location.origin); } catch { /* no shell */ } };
 function nowPlaying() {
   if (!embedded) return;
   if (!S.follow || !S.doc) { nowPlayingStop(); return; }
-  const wait = np.last + NP_EVERY - Date.now();
-  if (wait > 0) { np.timer ||= setTimeout(() => { np.timer = 0; nowPlaying(); }, wait); return; }
-  clearTimeout(np.timer); np.timer = 0; np.last = Date.now(); np.live = true;
+  // Playing, paused or ended goes at once; only new captions wait their turn. The bar's Play/Pause acts on the state it
+  // was last told: a pause held back here would reach the shell after the viewer's next press and undo it.
+  const state = `${S.playing && !S.ended}/${S.ended}`, wait = np.last + NP_EVERY - Date.now();
+  if (wait > 0 && state === np.state) { np.timer ||= setTimeout(() => { np.timer = 0; nowPlaying(); }, wait); return; }
+  clearTimeout(np.timer); np.timer = 0; np.last = Date.now(); np.live = true; np.state = state;
   const sc = S.scenes[S.i];
   toShell({
     type: 'prp:nowplaying',
@@ -228,7 +230,7 @@ function nowPlaying() {
   });
 }
 function nowPlayingStop() {
-  clearTimeout(np.timer); np.timer = 0;
+  clearTimeout(np.timer); np.timer = 0; np.state = '';
   if (np.live) { np.live = false; toShell({ type: 'prp:nowplaying', stopped: true }); }
 }
 // The bar's buttons, from the shell only.

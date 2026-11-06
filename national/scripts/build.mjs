@@ -8,6 +8,8 @@
 // - Country overview from JDP-I data: system of government (Wikidata), leaders since 1926 and average tenure
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
 //   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Master Index entry.
+// - Heads of state and government (Wikidata statements, with leader-corrections.json) and the current leader:
+//   leaders.mjs has the rules.
 // Guard: nothing is written when an indicator's countries halve, or the countries, their Wikidata matches, GW codes or
 // leadership data fall by a tenth, against the committed index (a World Bank series, the code list or the
 // Retrospective that failed); --allow-drop writes anyway.
@@ -16,6 +18,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { INDICATORS, DIMENSIONS } from './indicators.mjs';
 import { writeBrief } from './brief.mjs';
+import { headsFromRows, applyCorrections, currentLeader, PRESIDENTIAL } from './leaders.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
@@ -24,7 +27,7 @@ const jdpi = resolve(here, '../..');
 const arg = process.argv.indexOf('--retro');
 const retroDir = resolve(arg > 0 ? process.argv[arg + 1] : join(jdpi, '../hp-retrospective'));
 const OUT = join(jdpi, 'national/data');
-const UA = { 'User-Agent': 'JDP-I National Analysis (https://jdpi.pages.dev; judep92@gmail.com)' };
+const UA = { 'User-Agent': 'JDP-I National Analysis (https://jdpi.pages.dev)' };
 const FIRST = 1980, LAST = new Date().getUTCFullYear() - 1, TODAY = new Date().toISOString().slice(0, 10);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
@@ -39,22 +42,53 @@ const round = (x, d = 3) => (x == null ? null : Math.round(x * 10 ** d) / 10 ** 
 
 // ---- Countries: World Bank list (non-aggregates) + Wikidata codes and government
 const wbCountries = (await getJson('https://api.worldbank.org/v2/country?format=json&per_page=400'))[1].filter(c => c.region.id !== 'NA');
-const sparql = `SELECT ?c ?iso3 ?iso2 ?num (GROUP_CONCAT(DISTINCT ?govL; separator="|") AS ?gov) ?capL ?hosL ?hogL WHERE {
+const sparql = `SELECT ?c ?iso3 ?iso2 ?num (GROUP_CONCAT(DISTINCT ?govL; separator="|") AS ?gov) ?capL WHERE {
   ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?end }
   OPTIONAL { ?c wdt:P297 ?iso2 } OPTIONAL { ?c wdt:P299 ?num }
   OPTIONAL { ?c wdt:P122 ?gv. ?gv rdfs:label ?govL FILTER(LANG(?govL)="en") }
   OPTIONAL { ?c wdt:P36 ?cap. ?cap rdfs:label ?capL FILTER(LANG(?capL)="en") }
-  OPTIONAL { ?c wdt:P35 ?hos. ?hos rdfs:label ?hosL FILTER(LANG(?hosL)="en") }
-  OPTIONAL { ?c wdt:P6 ?hog. ?hog rdfs:label ?hogL FILTER(LANG(?hogL)="en") }
-} GROUP BY ?c ?iso3 ?iso2 ?num ?capL ?hosL ?hogL`;
+} GROUP BY ?c ?iso3 ?iso2 ?num ?capL`;
+// Wikidata's ISO code for Kosovo is XKS; the World Bank's is XKX (which is why Kosovo had no Wikidata item or heads).
+const WD_ISO3 = { XKS: 'XKX' };
 const wd = (await getJson('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparql), { headers: { Accept: 'application/sparql-results+json' } })).results.bindings;
 const wdBy = new Map();
 for (const b of wd) {
-  const k = b.iso3.value, x = wdBy.get(k) || { qid: b.c.value.split('/').pop(), num: b.num?.value || null, iso2: b.iso2?.value || null, gov: new Set(), capital: null, hos: null, hog: null };
+  const k = WD_ISO3[b.iso3.value] || b.iso3.value, x = wdBy.get(k) || { qid: b.c.value.split('/').pop(), num: b.num?.value || null, iso2: b.iso2?.value || null, gov: new Set(), capital: null };
   (b.gov?.value || '').split('|').filter(Boolean).forEach(g => x.gov.add(g));
-  x.capital ||= b.capL?.value || null; x.hos ||= b.hosL?.value || null; x.hog ||= b.hogL?.value || null;
+  x.capital ||= b.capL?.value || null;
   wdBy.set(k, x);
 }
+// Heads of state (P35) and government (P6), read as statements, not through the truthy wdt: shortcut (which returns
+// ended statements too), and the "position held" (P39) statements of the country's offices of head of state (P1906)
+// and government (P1313), ended ones included, against which the country's statements are checked (two requests);
+// leaders.mjs chooses among them. The label is the English one, or else the item's "mul" label, which Wikidata now uses
+// in place of an English one for many people (Donald Trump and Claudia Sheinbaum have no "en" label: why the United
+// States and Mexico had no heads).
+const HEAD_FIELDS = `?st wikibase:rank ?rank. FILTER(?rank != wikibase:DeprecatedRank)
+  OPTIONAL { ?st pq:P580 ?start } OPTIONAL { ?st pq:P582 ?end } OPTIONAL { ?st pq:P1366 ?repl }
+  OPTIONAL { ?h rdfs:label ?en FILTER(LANG(?en)="en") } OPTIONAL { ?h rdfs:label ?mul FILTER(LANG(?mul)="mul") }
+  BIND(COALESCE(?en, ?mul) AS ?hL) OPTIONAL { ?h wdt:P570 ?dead } BIND(EXISTS { ?h wdt:P31 wd:Q5 } AS ?human)`;
+const headsQuery = `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
+  ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?gone }
+  VALUES (?p ?ps ?prop) { (p:P35 ps:P35 "hos") (p:P6 ps:P6 "hog") }
+  ?c ?p ?st. ?st ?ps ?h. ${HEAD_FIELDS}
+}`;
+const officeQuery = `SELECT ?c ?prop ?h ?hL ?rank ?start ?end ?repl ?dead ?human WHERE {
+  ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?gone }
+  VALUES (?op ?prop) { (wdt:P1906 "hos") (wdt:P1313 "hog") }
+  ?c ?op ?office. ?h p:P39 ?st. ?st ps:P39 ?office. ${HEAD_FIELDS}
+}`;
+const sparqlRows = async q => (await getJson('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q), { headers: { Accept: 'application/sparql-results+json' } })).results.bindings;
+await sleep(1000);
+const headRows = await sparqlRows(headsQuery);
+await sleep(1000);
+const officeRows = await sparqlRows(officeQuery);
+console.log(`heads: ${headRows.length} country statements, ${officeRows.length} office statements`);
+const headsByQid = headsFromRows(headRows, officeRows, TODAY);
+const heads = new Map([...wdBy].map(([iso3, x]) => { const h = headsByQid.get(x.qid) || {}; return [iso3, { headOfState: h.hos || null, headOfGovernment: h.hog || null }]; }));
+// Corrections (leader-corrections.json), each applied only while Wikidata still gives the value it replaces.
+const fixes = applyCorrections(heads, json(join(here, 'leader-corrections.json')).corrections || [], m => console.log(m));
+console.log(`heads: ${[...heads.values()].filter(h => h.headOfState).length} of state, ${[...heads.values()].filter(h => h.headOfGovernment).length} of government; corrections: ${fixes.applied.length} applied, ${fixes.lapsed.length} lapsed`);
 console.log(`${wbCountries.length} countries; Wikidata matched ${wbCountries.filter(c => wdBy.has(c.id)).length}`);
 
 // ---- World Bank series
@@ -135,7 +169,7 @@ const lakeIdx = existsSync(join(jdpi, 'lake/data/index.json')) ? new Set(json(jo
 const calendar = ['1980s', '1990s', '2000s', '2010s', '2020s'].flatMap(d => existsSync(join(jdpi, `calendar/data/${d}.json`)) ? json(join(jdpi, `calendar/data/${d}.json`)).events : []);
 const years = (a, b) => Math.max(0, (Date.parse(b || TODAY) - Date.parse(a)) / (365.25 * 864e5));
 
-function leadership(gw) {
+function leadership(gw, current) {
   const c = retro.countries[gw];
   if (!c) return null;
   const since = '1926-10-26';
@@ -143,8 +177,6 @@ function leadership(gw) {
   const full = ls.filter(l => l.start >= since);
   const tenures = full.map(l => years(l.start, l.end)).filter(x => x > 0);
   const longest = [...ls].sort((a, b) => years(b.start, b.end) - years(a.start, a.end))[0];
-  const current = c.leaders.filter(l => !l.end).at(-1) || c.leaders.at(-1);
-  const party = current?.parties?.filter(p => !p.e).map(p => p.name)[0] || current?.parties?.[0]?.name || null;
   return {
     leaders100: ls.length,
     avgTenure: tenures.length ? round(tenures.reduce((a, b) => a + b, 0) / tenures.length, 1) : null,
@@ -152,7 +184,7 @@ function leadership(gw) {
     longest: longest ? { name: longest.full || longest.name, years: round(years(longest.start, longest.end), 1), from: longest.start.slice(0, 4), to: longest.end ? longest.end.slice(0, 4) : 'present' } : null,
     irregular: c.leaders.filter(l => l.start >= since && l.entry && l.entry !== 'Regular').length,
     elections: c.events.filter(e => (e.type === 'election' || e.type === 'referendum') && e.date >= since).length,
-    current: current ? { name: current.full || current.name, since: current.start, party, url: current.url || null } : null,
+    current, // the country's `leader`, repeated here for the Integration Hub's catalog
   };
 }
 function conflict(gw) {
@@ -192,12 +224,17 @@ refuseIfLost([
   ...lostCounts(coverage, covered).map(x => `${x} countries`),
   ...lostCounts(tally(OLD.countries, c => c.qid, c => c.gw != null, c => c.leadership),
     tally(wbCountries, c => wdBy.has(c.id), c => gwByIso3.has(c.id), c => retro.countries[gwByIso3.get(c.id)]), { keep: 0.9 }),
+  // The heads query is a second request: a failed or changed one would leave every country without heads.
+  ...lostCounts({ 'with a head of state': OLD.countries.filter(c => c.headOfState).length, 'with a head of government': OLD.countries.filter(c => c.headOfGovernment).length },
+    { 'with a head of state': wbCountries.filter(c => heads.get(c.id)?.headOfState).length, 'with a head of government': wbCountries.filter(c => heads.get(c.id)?.headOfGovernment).length }, { keep: 0.9 }),
 ]);
 
 // ---- Assemble (in memory; national/data is replaced only once every country is done)
 const countries = [], seriesFiles = [];
 for (const c of wbCountries) {
   const s = series.get(c.id), w = wdBy.get(c.id) || {}, gw = gwByIso3.get(c.id);
+  const h = heads.get(c.id) || {}, rc = gw != null ? retro.countries[gw] : null;
+  const leader = currentLeader(rc?.leaders, { hos: h.headOfState, hog: h.headOfGovernment }, { presidential: [...(w.gov || [])].some(g => PRESIDENTIAL.includes(g)) });
   const latest = scorePeriod(s, latestPick);
   const decades = Object.fromEntries([1980, 1990, 2000, 2010, 2020].map(d => { const x = scorePeriod(s, decadePick(d)); return [d, { pressure: x.pressure, overall: x.overall, coverage: x.coverage }]; }));
   const calEvents = calendar.filter(e => e.country === c.name || e.country === nameOfGw(gw) || aliasToIso3.get(nameKey(e.country)) === c.id);
@@ -205,9 +242,10 @@ for (const c of wbCountries) {
   countries.push({
     iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: w.capital || c.capitalCity || null,
     qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, gw: gw ?? null,
-    government: [...(w.gov || [])].slice(0, 4), headOfState: w.hos || null, headOfGovernment: w.hog || null,
+    government: [...(w.gov || [])].slice(0, 4), headOfState: h.headOfState?.name || null, headOfGovernment: h.headOfGovernment?.name || null,
+    leader, // the current leader, { name, since, party, url, source: 'retrospective' | 'wikidata' }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
-    leadership: gw != null && retro.countries[gw] ? leadership(gw) : null,
+    leadership: rc ? leadership(gw, leader) : null,
     conflict: gw != null ? conflict(gw) : null,
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,

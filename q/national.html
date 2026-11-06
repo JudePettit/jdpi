@@ -329,6 +329,15 @@ async function openProfile(iso) { selected = iso; setTab('profile'); await rende
 const CAL_TYPES = { election: 'elections', referendum: 'referendums', party: 'party contests', leader: 'new leaders', inauguration: 'inaugurations',
   resignation: 'resignations', coup: 'coups', conflict: 'conflicts', ceasefire: 'ceasefires', assassination: 'assassinations', crisis: 'crises',
   protest: 'protests', treaty: 'treaties', summit: 'summits', sanctions: 'sanctions', vote: 'parliamentary votes', court: 'court rulings' };
+// The current leader, the same field in the profile and the comparison: c.leader, from the Political Retrospective
+// when its last leader is still in office, or else the head who governs, from Wikidata (national/scripts/leaders.mjs).
+// "since" only when the source gives a start date.
+const leaderName = c => c.leader?.name || '–';
+const leaderNote = c => {
+  const l = c.leader;
+  if (!l) return '';
+  return [l.since ? 'since ' + esc(String(l.since).slice(0, 4)) : '', l.party ? esc(l.party) : '', l.source === 'wikidata' ? 'Wikidata' : ''].filter(Boolean).join(' · ');
+};
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
@@ -365,7 +374,7 @@ async function renderProfile() {
     <div class="grid">
       ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')))}
       ${stat('Head of state', esc(c.headOfState || '–'), c.headOfGovernment && c.headOfGovernment !== c.headOfState ? 'Head of government: ' + esc(c.headOfGovernment) : '')}
-      ${L ? stat('Current leader', esc(L.current?.name || '–'), L.current ? 'since ' + esc(L.current.since.slice(0, 4)) + (L.current.party ? ' · ' + esc(L.current.party) : '') : '') : ''}
+      ${stat('Current leader', esc(leaderName(c)), leaderNote(c))}
       ${L ? stat('Leaders in the last 100 years', L.leaders100) : ''}
       ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs') : ''}
       ${L?.longest ? stat('Longest-serving leader', esc(L.longest.name), `${L.longest.years} years (${L.longest.from}–${L.longest.to})`) : ''}
@@ -460,7 +469,7 @@ async function renderCompare(focus) {
     <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}</td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
     <tr class="grp"><td colspan="${cs.length + 1}">Profile</td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
-    <tr><td>Current leader</td>${cs.map(c => `<td class="num">${esc(c.leadership?.current?.name || c.headOfGovernment || c.headOfState || '–')}</td>`).join('')}</tr>
+    <tr><td>Current leader</td>${cs.map(c => `<td class="num">${esc(leaderName(c))}</td>`).join('')}</tr>
     </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction. Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
   wireCmpPicker(focus);

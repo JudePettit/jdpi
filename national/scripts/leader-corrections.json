@@ -1,0 +1,185 @@
+{
+  "about": "Corrections to Wikidata's heads of state and government, applied by build.mjs after Wikidata (leaders.mjs, applyCorrections). Each: iso3 (World Bank code), field (headOfState or headOfGovernment), name (the right name), source (the address it was checked at), checked (YYYY-MM-DD), replaces (the Wikidata value it replaces, or null for none), note (why, optional). A correction applies only while Wikidata still gives the value it replaces, so it lapses by itself once Wikidata is put right; the build logs each one applied and each one lapsed.",
+  "corrections": [
+    {
+      "iso3": "GUY",
+      "field": "headOfGovernment",
+      "name": "Mark Phillips",
+      "source": "https://dpi.gov.gy/tag/prime-minister-brigadier-retd-mark-phillips-2",
+      "checked": "2026-11-06",
+      "replaces": "Hugo Chávez",
+      "note": "The Prime Minister item is labelled with another name on Wikidata."
+    },
+    {
+      "iso3": "SWZ",
+      "field": "headOfGovernment",
+      "name": "Russell Mmiso Dlamini",
+      "source": "https://mofa.gov.qa/en/qatar/latest-articles/latest-news/details/2026/05/18/prime-minister-of-kingdom-of-eswatini-meets-qatari-charge-d'-affaires",
+      "checked": "2026-11-06",
+      "replaces": "Edeupa Yerimin",
+      "note": "The Prime Minister item is labelled with another name on Wikidata."
+    },
+    {
+      "iso3": "TUV",
+      "field": "headOfGovernment",
+      "name": "Feleti Teo",
+      "source": "https://www.stac.school.nz/community/old-collegians/prime-minister-feleti-teo",
+      "checked": "2026-11-06",
+      "replaces": "Ben Do",
+      "note": "The Prime Minister item is labelled with another name on Wikidata."
+    },
+    {
+      "iso3": "MUS",
+      "field": "headOfGovernment",
+      "name": "Navin Ramgoolam",
+      "source": "https://fr.allafrica.com/stories/202601010187.html",
+      "checked": "2026-11-06",
+      "replaces": "Pravind Jugnauth",
+      "note": "Prime Minister since November 2024; Wikidata has no statement for him and still gives his predecessor."
+    },
+    {
+      "iso3": "VUT",
+      "field": "headOfGovernment",
+      "name": "Jotham Napat",
+      "source": "https://pina.com.fj/2026/10/20/vanuatu-pm-says-government-remains-stable-amid-leadership-challenge-claims/",
+      "checked": "2026-11-06",
+      "replaces": null,
+      "note": "Wikidata has no open statement for the Prime Minister."
+    },
+    {
+      "iso3": "NCL",
+      "field": "headOfGovernment",
+      "name": "Milakulo Tukumuli",
+      "source": "https://asiapacificreport.nz/2026/08/01/kingmaker-candidate-elected-new-president-of-new-caledonias-government/",
+      "checked": "2026-11-06",
+      "replaces": "Philippe Germain",
+      "note": "President of the Government, elected by Congress at the end of July 2026."
+    },
+    {
+      "iso3": "PYF",
+      "field": "headOfGovernment",
+      "name": "Moetai Brotherson",
+      "source": "https://www.hawaii.edu/news/2026/03/05/french-polynesia-president-visits-uh/",
+      "checked": "2026-11-06",
+      "replaces": "Édouard Fritch",
+      "note": "President of French Polynesia since 2023."
+    },
+    {
+      "iso3": "SEN",
+      "field": "headOfGovernment",
+      "name": "Ahmadou Al Aminou Lo",
+      "source": "https://www.africanews.com/2026/05/26/senegals-power-rift-deepens-as-faye-replaces-sonko-with-economist-pm/",
+      "checked": "2026-11-06",
+      "replaces": "Bassirou Diomaye Faye",
+      "note": "Prime Minister since May 2026; Wikidata has no open statement for the office."
+    },
+    {
+      "iso3": "TCD",
+      "field": "headOfGovernment",
+      "name": "Allah-Maye Halina",
+      "source": "https://www.alwihdainfo.com/le-tchad-represente-par-le-premier-ministre-a-l-investiture-du-president-centrafricain-a148881/",
+      "checked": "2026-11-06",
+      "replaces": "Mahamat Déby",
+      "note": "Prime Minister (article of 30 March 2026)."
+    },
+    {
+      "iso3": "GNB",
+      "field": "headOfGovernment",
+      "name": "Ilidio Vieira Te",
+      "source": "https://www.thecitizen.co.tz/africa/news/guinea-bissau-s-transitional-military-adopts-charter-barring-leaders-from-elections-5293016",
+      "checked": "2026-11-06",
+      "replaces": "Rui Duarte de Barros",
+      "note": "Transitional Prime Minister after the coup of 26 November 2025 (spelt as the source spells it)."
+    },
+    {
+      "iso3": "GAB",
+      "field": "headOfGovernment",
+      "name": "Hermann Immongault",
+      "source": "https://gabonmediatime.com/gabon-composition-du-gouvernement-oligui-nguema-ii/",
+      "checked": "2026-11-06",
+      "replaces": "Raymond Ndong Sima",
+      "note": "Vice-President of the Government since 1 January 2026; the 2024 constitution abolished the office of Prime Minister. Gabon is presidential, so the President is the current leader."
+    },
+    {
+      "iso3": "LAO",
+      "field": "headOfGovernment",
+      "name": "Saleumxay Kommasith",
+      "source": "https://vietnamnews.vn/politics-laws/1801288/viet-nam-offers-congratulations-to-newly-elected-leaders-of-laos.html",
+      "checked": "2026-11-06",
+      "replaces": "Sonexay Siphandone",
+      "note": "Elected Prime Minister on 5 October 2026."
+    },
+    {
+      "iso3": "SLE",
+      "field": "headOfGovernment",
+      "name": "Julius Maada Bio",
+      "source": "https://sierraleoneembassy.brussels/?p=115",
+      "checked": "2026-11-06",
+      "replaces": "David Sengeh",
+      "note": "The President is head of state and of government; Wikidata gives the Chief Minister."
+    },
+    {
+      "iso3": "VNM",
+      "field": "headOfGovernment",
+      "name": "Lê Minh Hưng",
+      "source": "https://theinvestor.vn/le-minh-hung-elected-as-vietnams-prime-minister-d18794.html",
+      "checked": "2026-11-06",
+      "replaces": "Phạm Minh Chính",
+      "note": "Elected Prime Minister on 7 April 2026; his predecessor's statement is still open."
+    },
+    {
+      "iso3": "ABW",
+      "field": "headOfGovernment",
+      "name": "Mike Eman",
+      "source": "https://www.dutchnews.nl/2026/06/aruba-prime-minister-eman-announces-surprise-resignation/",
+      "checked": "2026-11-06",
+      "replaces": "Evelyn Wever-Croes",
+      "note": "Prime Minister since 2025; he has said he will step down on 1 January 2027."
+    },
+    {
+      "iso3": "FRO",
+      "field": "headOfGovernment",
+      "name": "Beinir Johannesen",
+      "source": "https://www.government.fo/en/news/news/beinir-johannesen-elected-prime-minister-of-the-faroe-islands",
+      "checked": "2026-11-06",
+      "replaces": "Aksel V. Johannesen",
+      "note": "Elected Prime Minister (announcement of 13 April 2026); his predecessor's statement is still open."
+    },
+    {
+      "iso3": "XKX",
+      "field": "headOfState",
+      "name": "Justina Shiroka-Pula",
+      "source": "https://president-ksgov.net/en/the-inauguration-ceremony-of-the-president-of-the-republic-of-kosovo-her-excellency-justina-shiroka-pula-was-held-today/",
+      "checked": "2026-11-06",
+      "replaces": "Albulena Haxhiu",
+      "note": "Inaugurated on 7 October 2026, succeeding the acting president."
+    },
+    {
+      "iso3": "CHE",
+      "field": "headOfState",
+      "name": "Guy Parmelin",
+      "source": "https://www.admin.ch/en/federal-presidency-2026",
+      "checked": "2026-11-06",
+      "replaces": "Martin Pfister",
+      "note": "President of the Confederation for 2026; Wikidata's office is a seat on the Federal Council."
+    },
+    {
+      "iso3": "SMR",
+      "field": "headOfState",
+      "name": "Gerardo Giovagnoli and William Casali",
+      "source": "https://reggenzadellarepubblica.sm/pub1/ReggenzaSM/en/Capitani_Reggenti/Capitani_Reggenti_In_Carica.html",
+      "checked": "2026-11-06",
+      "replaces": "Denise Bronzetti",
+      "note": "Captains Regent from 1 October 2026 to 1 April 2027."
+    },
+    {
+      "iso3": "BMU",
+      "field": "headOfState",
+      "name": "Andrew Murdoch",
+      "source": "https://www.gov.uk/government/people/andrew-murdoch",
+      "checked": "2026-11-06",
+      "replaces": "John Rankin",
+      "note": "Governor since January 2025 (the King's representative); Wikidata still gives the governor who left in 2020."
+    }
+  ]
+}

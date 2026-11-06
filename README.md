@@ -99,6 +99,7 @@ node --test tests/*.test.mjs                      # data and page tests
 PRP_URL=http://localhost:8787 node --test tests/platform.test.mjs   # shell and pages, with Edge via playwright-core
 node tests/tools/serve.mjs 8787                   # local static server (keeps .html and query strings)
 node tests/tools/shoot.mjs <url> <out.png> [--dark] [--width 390]   # screenshot a page in light or dark
+node integration/scripts/coverage.mjs --json coverage.json --md coverage.md   # which countries each piece of content covers, and the gaps (no network)
 ```
 
 CI (`.github/workflows/ci.yml`) runs the whole suite on every push and pull request, against a local copy of the site

@@ -23,10 +23,12 @@
   const pageUrl = q => new URL(`encyclopedia/index.html#${q}`, SHELL).href;
   const linkUrl = q => (embedded ? `${SHELL}#/rs/encyclopedia?at=${encodeURIComponent(pageUrl(q))}` : pageUrl(q));
 
-  const style = document.createElement('style');
-  style.textContent = '.jdpi-ency{display:inline-block;margin-left:3px;font-size:.78em;line-height:1;text-decoration:none!important;opacity:.75;vertical-align:.1em;color:var(--prp-link,currentColor)!important}'
+  // A constructed stylesheet where the browser has them: a page with a strict Content-Security-Policy (IoT Connect's)
+  // refuses an inline <style>, but not a sheet made through the CSSOM.
+  const css = '.jdpi-ency{display:inline-block;margin-left:3px;font-size:.78em;line-height:1;text-decoration:none!important;opacity:.75;vertical-align:.1em;color:var(--prp-link,currentColor)!important}'
     + '.jdpi-ency:hover,.jdpi-ency:focus-visible{opacity:1}';
-  document.head.appendChild(style);
+  try { const sheet = new CSSStyleSheet(); sheet.replaceSync(css); document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]; }
+  catch { const el = document.createElement('style'); el.textContent = css; document.head.appendChild(el); }
 
   function badge(el, q, label) {
     if (el.dataset.jdpiEncy) return;

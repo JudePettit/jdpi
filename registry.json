@@ -676,8 +676,8 @@
       "code": "DS",
       "name": "Digital Science",
       "title": "Digital Science",
-      "summary": "Chart Vitruvian Manager's own data, and connect it to AI assistants through its API and MCP server.",
-      "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, and an Integration Hub that opens Vitruvian Manager to AI assistants and plugins. The week’s papers and technology news are in Highbrowse.",
+      "summary": "Chart Vitruvian Manager's data, connect it to AI assistants, and run your own devices.",
+      "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, an Integration Hub that opens Vitruvian Manager to AI assistants and plugins, and IoT Connect for commanding your own smart devices through the Vitruvian Manager bridge. The week’s papers and technology news are in Highbrowse.",
       "modules": [
         {
           "id": "data-analytics",
@@ -730,9 +730,56 @@
               "url": "integration/index.html#tab=skills"
             },
             {
+              "id": "agents",
+              "name": "Agents",
+              "url": "integration/index.html#tab=agents"
+            },
+            {
               "id": "security",
               "name": "Security & terms",
               "url": "integration/index.html#tab=security"
+            }
+          ]
+        },
+        {
+          "id": "iot-connect",
+          "name": "IoT Connect",
+          "kind": "operations",
+          "icon": "⌂",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "digital/iot-connect/index.html",
+          "description": "Command your own smart bulbs, speakers, TVs and the EZCast receiver from one page through the Vitruvian Manager bridge, with Hermes Messenger to identify devices and walk through their pairing, an MQTT and Sparkplug link to a unified namespace, and your phone as the remote.",
+          "views": [
+            {
+              "id": "overview",
+              "name": "Overview",
+              "url": "digital/iot-connect/index.html#tab=overview"
+            },
+            {
+              "id": "devices",
+              "name": "Devices",
+              "url": "digital/iot-connect/index.html#tab=devices"
+            },
+            {
+              "id": "remote",
+              "name": "Remote",
+              "url": "digital/iot-connect/index.html#tab=remote"
+            },
+            {
+              "id": "hermes",
+              "name": "Hermes",
+              "url": "digital/iot-connect/index.html#tab=hermes"
+            },
+            {
+              "id": "uns",
+              "name": "UNS",
+              "url": "digital/iot-connect/index.html#tab=uns"
+            },
+            {
+              "id": "law",
+              "name": "Law & safety",
+              "url": "digital/iot-connect/index.html#tab=law"
             }
           ]
         }

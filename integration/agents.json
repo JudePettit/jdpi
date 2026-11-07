@@ -1,0 +1,29 @@
+{
+  "about": "Vitruvian Manager's agents: preconfigured processes that run on your own computer and report to the Integration Hub as messages. The Hub lists them and, when you press Check, reads their status from the bridge on your computer; it holds no keys.",
+  "security": "The Hub holds no keys. Hermes Messenger runs in the bridge on your own computer; an AI key you give it stays there.",
+  "updated": "2026-11-07",
+  "agents": [
+    {
+      "id": "hermes-messenger",
+      "name": "Hermes Messenger",
+      "kind": "preconfigured process",
+      "status": "live",
+      "submodule": "iot-connect",
+      "page": "digital/iot-connect/index.html#tab=hermes",
+      "route": "#/ds/iot-connect/hermes",
+      "runsIn": "The Vitruvian Manager bridge on your own computer (sigint/bridge/prp-bridge.mjs, version 2.0.0 or later), started with --iot.",
+      "does": [
+        "Identifies what answers each kind's standard discovery question (SSDP, mDNS, Yeelight's and WiZ's own) or an address you type, by fixed rules.",
+        "Explains how the maker says to connect it, and what VM cannot do with it.",
+        "Does the documented pairing step when you click and press Y in the bridge window, then checks it with one harmless read.",
+        "Reports each finding as a Hub message, and publishes your devices to your own MQTT broker as a plain-JSON tree and, if you switch it on, a Sparkplug B edge node."
+      ],
+      "message": { "type": "hermes.finding", "v": 1, "read": "GET http://localhost:8790/iot/hermes", "fields": ["type", "v", "at", "candidate", "known", "device", "says", "pairing", "routes", "limits", "source"] },
+      "ai": "Optional and off by default: it needs ai.enabled in the bridge's config file and your own key in the bridge's environment, shows you the exact text and host before each question, sends no name, room or address, and its answer never becomes a command.",
+      "limits": [
+        "It drives only the devices you add, on your own home network, and never scans, guesses passwords or goes round a pairing.",
+        "The computer running the bridge must be awake."
+      ]
+    }
+  ]
+}

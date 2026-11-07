@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <friendlyName>[TV] Samsung Living room</friendlyName>
+    <manufacturer>Samsung Electronics</manufacturer>
+    <modelName>QE55Q60</modelName>
+    <UDN>uuid:0d0c0b0a-1111-2222-3333-444455556666</UDN>
+  </device>
+</root>

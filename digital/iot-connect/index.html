@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IoT Connect · VM</title>
+<meta name="description" content="Command your own smart bulbs, speakers, TVs and the EZCast receiver from one page through the Vitruvian Manager bridge, with Hermes Messenger to identify devices and walk through their pairing, an MQTT and Sparkplug link to a unified namespace, and your phone as the remote.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../../design/brand-vm-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../design/prp.css">
+<link rel="stylesheet" href="iot.css">
+<script src="../../design/prp-bar.js" data-suite="ds" data-module="iot-connect" data-shell="../../" defer></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="iot">
+  <header class="front">
+    <div class="prp-eyebrow">Digital Science <span class="sep">·</span> IoT Connect</div>
+    <h1 class="prp-title">IoT Connect</h1>
+    <p class="prp-dek">Switch, dim, colour, play, pause and turn up or down your own smart devices from one page: bulbs, speakers, TVs and the EZCast receiver. The page talks to the Vitruvian Manager bridge on your computer, where Hermes Messenger finds your devices, says how their makers connect them and can publish them to your own MQTT broker.</p>
+    <div class="prp-meta" id="meta">
+      <span><b>Bridge</b> <span id="meta-bridge">not checked</span></span>
+      <span><b>Devices</b> <span id="meta-devices">–</span></span>
+      <span><b>Agent</b> Hermes Messenger, in the bridge</span>
+      <span><b>Reach</b> Your own home network only</span>
+    </div>
+  </header>
+
+  <div class="prp-tabs" role="tablist" aria-label="IoT Connect views" id="tabs">
+    <button type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button type="button" role="tab" id="tab-devices" aria-controls="panel-devices" aria-selected="false" tabindex="-1">Devices</button>
+    <button type="button" role="tab" id="tab-remote" aria-controls="panel-remote" aria-selected="false" tabindex="-1">Remote</button>
+    <button type="button" role="tab" id="tab-hermes" aria-controls="panel-hermes" aria-selected="false" tabindex="-1">Hermes</button>
+    <button type="button" role="tab" id="tab-uns" aria-controls="panel-uns" aria-selected="false" tabindex="-1">UNS</button>
+    <button type="button" role="tab" id="tab-law" aria-controls="panel-law" aria-selected="false" tabindex="-1">Law &amp; safety</button>
+  </div>
+  <noscript><p class="prp-note warn">IoT Connect needs JavaScript to talk to the bridge on your computer.</p></noscript>
+
+  <!-- ============================================================ Overview -->
+  <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="tabpanel">
+    <div class="prp-kpis" id="kpis" aria-live="polite"></div>
+    <section class="prp-panel" aria-labelledby="h-bridge" id="connect">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-bridge">The Vitruvian Manager bridge</h2><a class="prp-btn sm" href="../../sigint/bridge/prp-bridge.mjs" download>Download prp-bridge.mjs</a></div>
+      <div class="prp-panel-body">
+        <p class="prose" id="why-bridge"></p>
+        <ol class="steps">
+          <li>Install <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js</a> 22 or newer and download the bridge (version 2.0.0 or later).</li>
+          <li>Write its config file once (below), naming your home connection as Windows names it (for example <code>Wi-Fi</code>), and start it from a terminal, so that it can ask you Y or N:
+            <pre class="code" id="bridge-cmd"><code>node prp-bridge.mjs --iot --config vm-bridge.json</code></pre></li>
+          <li>When Windows asks, allow Node.js on <b>Private networks</b> only, never Public ones.</li>
+          <li>Turn on <label class="inline-check"><input type="checkbox" id="bridge-on"> Use the bridge on this computer</label> <button type="button" class="prp-btn sm" id="bridge-check">Check</button> <span class="prp-status" id="bridge-state" role="status">Off</span></li>
+          <li>The first time, Chrome and Edge ask to let this site reach apps on this device. Allow it for the bridge; you can withdraw it in the site settings.</li>
+        </ol>
+        <p class="hint">The page contacts the bridge only once you turn it on or press Check. Without <code>--iot</code> the bridge answers the SIGINT Dashboard as before and IoT Connect stays off.</p>
+        <details class="cfg">
+          <summary>The config file (<code>vm-bridge.json</code>)</summary>
+          <pre class="code" id="bridge-config"><code>{ "port": 8790, "iot": { "enabled": true, "origins": [], "interface": "Wi-Fi",
+  "state": "C:/Users/&lt;you&gt;/AppData/Roaming/VM/bridge/iot-state.json",
+  "lan": { "enabled": false, "address": "192.168.1.20", "port": 8791 },
+  "homeAssistant": { "url": "http://homeassistant.local:8123" },
+  "broker": { "url": "ws://192.168.1.20:9001", "username": "vm", "site": "home", "json": true,
+    "sparkplug": false, "group": "VM", "edgeNode": "hermes", "acceptCommands": false },
+  "ai": { "enabled": false } } }</code></pre>
+          <p class="hint">Leave out what you do not run: without <code>homeAssistant</code> or <code>broker</code> those routes stay off. The page can change none of this: only you can, in the file. Passwords and tokens never go in it: the broker's password is <code>VM_MQTT_PASSWORD</code> in the bridge's environment.</p>
+        </details>
+      </div>
+    </section>
+    <div class="two">
+      <section class="prp-panel" aria-labelledby="h-does">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-does">What it drives</h2></div>
+        <div class="prp-panel-body">
+          <ul class="ticks">
+            <li><b>Players:</b> the EZCast U02 and other DLNA players, and Sonos: play an address, pause, stop, set volume.</li>
+            <li><b>Lights:</b> Philips Hue, LIFX, WiZ and Yeelight: switch, dim and colour.</li>
+            <li><b>Switches:</b> Shelly (second generation and later) and Tasmota.</li>
+            <li><b>TVs:</b> Roku, LG webOS and Samsung Tizen: the remote's keys, volume and power.</li>
+            <li><b>Everything else</b> through your own Home Assistant, including a Broadlink infrared blaster.</li>
+            <li><b>A unified namespace:</b> each device's state on your MQTT broker as plain JSON, and as a Sparkplug B node if you switch it on.</li>
+            <li><b>Your phone as the remote</b>, on your own Wi-Fi.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-limits">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-limits">What it does not do</h2><span class="prp-label">Limits, not plans</span></div>
+        <div class="prp-panel-body"><dl class="limits" id="limits"></dl></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================ Devices -->
+  <section id="panel-devices" role="tabpanel" aria-labelledby="tab-devices" class="tabpanel" hidden>
+    <p class="prp-note" id="dev-off">Turn on the bridge on the Overview tab first: this page reaches your devices only through it.</p>
+    <div class="prp-note warn" id="shared" hidden role="alert">
+      <p><b id="shared-words"></b> <span id="shared-why"></span></p>
+      <p>Devices that need no pairing cannot be added until you confirm this is your own home network (and press Y in the bridge window).</p>
+      <p><label class="inline-check"><input type="checkbox" id="own-home"> <span id="own-home-words"></span></label> <button type="button" class="prp-btn sm" id="own-home-save" disabled>Confirm</button></p>
+    </div>
+    <section class="prp-panel" aria-labelledby="h-find">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-find">Find your devices</h2><span class="prp-label" id="find-state" role="status"></span></div>
+      <div class="prp-panel-body find">
+        <div class="find-col">
+          <button type="button" class="prp-btn primary" id="discover">Look for devices</button>
+          <p class="hint" id="discover-hint"></p>
+        </div>
+        <form class="find-col" id="typed" novalidate>
+          <div class="typed-row">
+            <label class="field"><span class="prp-label">Kind</span><select class="prp-select" id="typed-kind"></select></label>
+            <label class="field grow"><span class="prp-label">Address (no port)</span><input class="prp-input mono" id="typed-address" inputmode="decimal" autocomplete="off" placeholder="192.168.1.31" maxlength="45"></label>
+            <button type="submit" class="prp-btn" id="typed-go">Type an address</button>
+          </div>
+          <p class="hint" id="typed-hint"></p>
+        </form>
+      </div>
+      <p class="say" id="find-say" role="status" aria-live="polite"></p>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-cands">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-cands">Found on this network</h2><span class="prp-label" id="cand-count"></span></div>
+      <div class="prp-panel-body"><ul class="cards" id="candidates" aria-live="polite"></ul></div>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-mine">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-mine">Your devices</h2><span class="prp-label" id="dev-count"></span></div>
+      <div class="prp-panel-body" id="rooms"></div>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-roku" id="roku-panel" hidden>
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-roku">Roku's policy</h2></div>
+      <div class="prp-panel-body">
+        <p>Roku's developer policy says ECP commands “may not be sent from 3rd-party platforms (for example, mobile applications)”. VM's Roku route stays off until you say you have read it.</p>
+        <p><label class="inline-check"><input type="checkbox" id="roku-tick"> I have read Roku's policy on ECP commands and want the Roku route</label> <button type="button" class="prp-btn sm" id="roku-save" disabled>Confirm</button> <span class="say" id="roku-say" role="status"></span></p>
+      </div>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-ha" id="ha-panel" hidden>
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-ha">Home Assistant</h2><span class="prp-label" id="ha-state"></span></div>
+      <div class="prp-panel-body">
+        <p>Other brands come through your own Home Assistant, at the address set in the bridge's config file. Make a Home Assistant user for VM that is <b>not</b> an administrator, and a long-lived token for it (its profile &gt; Security). The token passes through this page once, to the bridge, which keeps it in its own file.</p>
+        <form class="ha-token" id="ha-form" novalidate>
+          <label class="field grow"><span class="prp-label">Long-lived token</span><input class="prp-input mono" id="ha-token" type="password" autocomplete="off" spellcheck="false"></label>
+          <button type="submit" class="prp-btn">Give the token to the bridge</button>
+        </form>
+        <p class="prp-note warn" id="ha-warn"></p>
+        <div class="scroll"><table class="prp-table" id="ha-table" hidden>
+          <thead><tr><th scope="col">Entity</th><th scope="col">Name</th><th scope="col">Reaches VM</th><th scope="col">Commands (remotes only)</th></tr></thead>
+          <tbody id="ha-rows"></tbody>
+        </table></div>
+        <p class="say" id="ha-say" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================================================ Remote -->
+  <section id="panel-remote" role="tabpanel" aria-labelledby="tab-remote" class="tabpanel" hidden>
+    <div class="two remote-grid">
+      <section class="prp-panel" aria-labelledby="h-pad">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-pad">Remote</h2></div>
+        <div class="prp-panel-body remote">
+          <label class="field"><span class="prp-label">Device</span><select class="prp-select" id="remote-device"></select></label>
+          <p class="hint" id="remote-none" hidden>No device that takes remote keys, volume or playback yet: add one on the Devices tab.</p>
+          <div class="pad" id="pad" role="group" aria-label="Arrow keys"></div>
+          <div class="pad-row" id="pad-row" role="group" aria-label="Back, Home and volume"></div>
+          <div class="pad-row" id="pad-play" role="group" aria-label="Playback and power"></div>
+          <p class="say" id="remote-say" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-phone">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-phone">Your phone as the remote</h2><span class="prp-label" id="lan-state"></span></div>
+        <div class="prp-panel-body phone">
+          <p>Start the bridge with <code>--lan</code> and <code>iot.lan.address</code> set to this computer's address on your home Wi-Fi; this page cannot switch it on. Then pair a phone: scan the code with its camera, type the six digits if asked, and press Y in the bridge window.</p>
+          <p><button type="button" class="prp-btn primary" id="pair-phone">Pair a phone</button></p>
+          <div class="pairing" id="pairing" hidden>
+            <figure class="prp-figure qr-figure"><div class="qr" id="qr"></div><figcaption><b>Scan with the phone's camera.</b> <span id="pair-expiry"></span></figcaption></figure>
+            <div class="pair-text">
+              <p class="prp-label">Code</p><p class="code-digits" id="pair-code"></p>
+              <p class="prp-label">Or open on the phone</p><p class="mono pair-url" id="pair-url"></p>
+            </div>
+          </div>
+          <div class="scroll"><table class="prp-table" id="phones-table" hidden>
+            <thead><tr><th scope="col">Phone</th><th scope="col">Address</th><th scope="col">Paired</th><th scope="col">Until</th><th scope="col"><span class="vh">Revoke</span></th></tr></thead>
+            <tbody id="phones"></tbody>
+          </table></div>
+          <p><button type="button" class="prp-btn sm danger" id="revoke-all" hidden>Revoke all phones</button></p>
+          <p class="say" id="phone-say" role="status" aria-live="polite"></p>
+          <ul class="limits-list" id="phone-limits"></ul>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================================================ Hermes -->
+  <section id="panel-hermes" role="tabpanel" aria-labelledby="tab-hermes" class="tabpanel" hidden>
+    <section class="prp-panel" aria-labelledby="h-hermes">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-hermes">Hermes Messenger</h2><span class="prp-status" id="hermes-state">Not checked</span></div>
+      <div class="prp-panel-body">
+        <p class="prose">Hermes Messenger is a preconfigured process inside the bridge, not a service on the internet. It works by fixed rules: it <b>identifies</b> what answered the standard discovery questions, <b>explains</b> how its maker says to connect it, <b>does</b> the documented step when you click and press Y, checking it with one harmless read, and <b>reports</b> each finding as a message the Integration Hub can read. An AI is optional and never in charge.</p>
+        <p class="hint" id="hermes-rules"></p>
+      </div>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-findings">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-findings">Findings</h2><button type="button" class="prp-btn sm" id="hermes-refresh">Refresh</button></div>
+      <div class="prp-panel-body"><ul class="cards" id="findings"></ul></div>
+    </section>
+    <section class="prp-panel" aria-labelledby="h-ai">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-ai">Ask an AI about an unknown device</h2><span class="prp-label" id="ai-state">Off</span></div>
+      <div class="prp-panel-body">
+        <p id="ai-words"></p>
+        <p>It sends only the maker, the model, the device type, the service types and the server's product token, never a name, a room or an address. Its answer shows as “AI suggestion, not checked” and never becomes a command.</p>
+        <div id="ai-box"></div>
+        <p class="say" id="ai-say" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================================================ UNS -->
+  <section id="panel-uns" role="tabpanel" aria-labelledby="tab-uns" class="tabpanel" hidden>
+    <div class="prp-kpis" id="uns-kpis" aria-live="polite"></div>
+    <div class="two">
+      <section class="prp-panel" aria-labelledby="h-uns">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-uns">A unified namespace for the house</h2><button type="button" class="prp-btn sm" id="uns-refresh">Refresh</button></div>
+        <div class="prp-panel-body prose-body">
+          <p>A unified namespace (UNS) is one live, shared directory of everything in the house, kept on an MQTT broker that you run. The bridge holds one connection to it, set in its config file (<code>iot.broker</code>), and publishes each device's state there.</p>
+          <h3 class="prp-h3">The plain-JSON tree</h3>
+          <p>On whenever a broker is set, because any MQTT tool can read it: a retained JSON message at <code class="mono" id="uns-topic">vm/&lt;site&gt;/&lt;area&gt;/&lt;device&gt;/state</code> for each device, and <code class="mono">vm/&lt;site&gt;/hermes/status</code>, which the broker turns to <code>offline</code> when the bridge's connection is lost.</p>
+          <h3 class="prp-h3">Sparkplug B</h3>
+          <p>With <code>"sparkplug": true</code>, Hermes is also a Sparkplug B edge node, as SCADA hosts such as Ignition expect: its birth and death certificates (NBIRTH, NDEATH with <code>bdSeq</code>), a DBIRTH for each device, then DDATA with only what changed, and DDEATH when a device goes or stops answering. Metrics: Online, Power, Brightness, Volume, Playback and Kind.</p>
+          <h3 class="prp-h3">Commands from the broker</h3>
+          <p>Off by default (<code>"acceptCommands": false</code>): the bridge then listens only for a Rebirth request, at most every 10 seconds. Switched on, the broker may send simple commands only (power, dimming, colour, volume, play, pause, stop), never an address to play, a key, an app or a Home Assistant service, and always under each device's limits.</p>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-uns-recent">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-uns-recent">Last messages</h2><span class="prp-label" id="uns-root"></span></div>
+        <div class="prp-panel-body">
+          <div class="scroll"><table class="prp-table">
+            <thead><tr><th scope="col">Topic</th><th scope="col">When</th><th scope="col" class="num">Bytes</th><th scope="col">Retained</th></tr></thead>
+            <tbody id="uns-rows"><tr><td colspan="4" class="prp-empty">Turn on the bridge on the Overview tab to see the broker link.</td></tr></tbody>
+          </table></div>
+          <ul class="limits-list" id="uns-limits"></ul>
+        </div>
+      </section>
+    </div>
+    <section class="prp-panel" aria-labelledby="h-mosq">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-mosq">A broker of your own: Mosquitto</h2></div>
+      <div class="prp-panel-body">
+        <p>Listen on your home address only, with no anonymous users and an access list that lets only the VM user publish commands:</p>
+        <pre class="code"><code>listener 9001 192.168.1.20
+protocol websockets
+allow_anonymous false
+password_file C:\mosquitto\passwords
+acl_file C:\mosquitto\acl</code></pre>
+        <p class="hint"><b>Limit:</b> over <code>ws://</code> the password and the messages cross the Wi-Fi in clear; <code>wss://</code> fixes that. The bridge's README has the whole set-up.</p>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================================================ Law & safety -->
+  <section id="panel-law" role="tabpanel" aria-labelledby="tab-law" class="tabpanel" hidden>
+    <section class="prp-panel" aria-labelledby="h-law">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-law">Law &amp; safety</h2></div>
+      <div class="prp-panel-body"><p class="prp-prose law" id="law-words"></p></div>
+    </section>
+    <div class="two">
+      <section class="prp-panel" aria-labelledby="h-may">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-may">What this page may and may not do</h2></div>
+        <div class="prp-panel-body">
+          <p><b>It may</b> look for devices, identify one at an address you type, add, remove and pair your devices, send them commands, give the bridge your Home Assistant token, tick Home Assistant entities, pair and revoke phones, and send an AI question you have confirmed.</p>
+          <p><b>It may not</b> read a key or a token, choose a port or the Home Assistant or broker address, aim the bridge outside your home connection, send raw protocol data, or switch on the phone remote, broker commands or the AI: those are yours, in the bridge's config file and its command line.</p>
+          <p>Every jdpi.pages.dev page shares one web origin, so a script injected anywhere on the site could send what this page sends. That is an accepted limit, kept small: the site's security policy, device text shown only as text, every setup step waiting for a key press at your computer, Home Assistant entities off until ticked, and the rate limits and the volume ceiling.</p>
+        </div>
+      </section>
+      <section class="prp-panel" aria-labelledby="h-stored">
+        <div class="prp-panel-head"><h2 class="prp-h3" id="h-stored">What is stored where</h2></div>
+        <div class="prp-panel-body"><p id="stored-words"></p><p>This page keeps only whether you turned the bridge on, in this browser.</p></div>
+      </section>
+    </div>
+  </section>
+
+  <footer class="prp-sources">
+    <p><b>Sources.</b> The makers' own documents where they publish them: UPnP AV (AVTransport and RenderingControl, upnp.org), Philips Hue CLIP v2 (developers.meethue.com), LIFX LAN (lan.developer.lifx.com), Yeelight's inter-operation specification, Shelly Gen2 RPC (shelly-api-docs.shelly.cloud), Tasmota's commands (tasmota.github.io), Roku's External Control Protocol (developer.roku.com), Home Assistant's REST API, MQTT 3.1.1 (OASIS) and Sparkplug 3.0 (Eclipse). WiZ, Sonos, LG webOS and Samsung Tizen are community-documented, and Hermes says so for each.</p>
+    <p><b>Method.</b> Everything runs in the bridge on your computer: this page holds no keys and keeps no device data. Discovery sends each kind's standard question once (SSDP for players and TVs, mDNS for Hue, LIFX, Shelly and others, Yeelight's and WiZ's own) and listens; nothing scans.</p>
+  </footer>
+</div>
+</body>
+</html>

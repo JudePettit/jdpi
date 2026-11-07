@@ -51,7 +51,7 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
 | `pestle` | `pestle` (National Analysis) | Every country with its Wikidata ID (the Channel Islands and Kosovo have none there yet); its profile, `q/national.html#country=<ISO3>` |
 | `volatility` | `volatility` | Every country scored on a day the index holds, with the Wikidata ID National Analysis gives it (Taiwan, Jersey and Vatican City have none); the country, `q/volatility.html#country=<ISO3>`, with its latest score |
 
-The submodules with no entities of their own report nothing, each exempt with its reason in `tests/master-index.test.mjs`: the Master Index itself; the four briefings and the Global Headline Tracker (stories, whose names carry no Wikidata ID or Wikipedia link for the page linker to badge: marking the countries each story is filed under is to come); the OSINT, SIGINT and GEOINT dashboards and Intel Training; Data Analytics and the Integration Hub; Tally Stick and Algo Trader (private); Market Briefing and the Political Atlas (other repositories, whose adapters are to come).
+The submodules with no entities of their own report nothing, each exempt with its reason in `tests/master-index.test.mjs`: the Master Index itself; the four briefings and the Global Headline Tracker (stories, whose names carry no Wikidata ID or Wikipedia link for the page linker to badge: marking the countries each story is filed under is to come); the OSINT, SIGINT and GEOINT dashboards and Intel Training; Data Analytics, the Integration Hub and IoT Connect (which controls the user's own devices through the local bridge); Tally Stick and Algo Trader (private); Market Briefing and the Political Atlas (other repositories, whose adapters are to come).
 
 ## Adding a module
 

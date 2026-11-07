@@ -30,6 +30,7 @@
     <button type="button" role="tab" id="tab-api" aria-controls="panel-api" aria-selected="false" tabindex="-1">JSON API</button>
     <button type="button" role="tab" id="tab-feeds" aria-controls="panel-feeds" aria-selected="false" tabindex="-1">Feeds &amp; calendars</button>
     <button type="button" role="tab" id="tab-skills" aria-controls="panel-skills" aria-selected="false" tabindex="-1">Plugins &amp; skills</button>
+    <button type="button" role="tab" id="tab-agents" aria-controls="panel-agents" aria-selected="false" tabindex="-1">Agents</button>
     <button type="button" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">Security &amp; terms</button>
   </div>
 
@@ -263,6 +264,18 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
     </div>
   </section>
 
+  <!-- ============================================================ Agents -->
+  <section id="panel-agents" role="tabpanel" aria-labelledby="tab-agents" class="panel" hidden>
+    <div class="prp-panel">
+      <div class="prp-panel-head"><h2 class="prp-h2">Vitruvian Manager's agents</h2><span class="prp-label" id="agents-count"></span></div>
+      <div class="prp-panel-body stack">
+        <p id="agents-about">Preconfigured processes that run on your own computer and report here as messages.</p>
+        <p class="prp-note" id="agents-security"><b>The Hub holds no keys.</b> Hermes Messenger runs in the bridge on your own computer; an AI key you give it stays there.</p>
+      </div>
+    </div>
+    <ul class="agents" id="agents" aria-live="polite"><li class="prp-empty">Loading the agents…</li></ul>
+  </section>
+
   <!-- ============================================================ Security & terms -->
   <section id="panel-security" role="tabpanel" aria-labelledby="tab-security" class="panel" hidden>
     <div class="two">
@@ -282,6 +295,7 @@ for (const e of events) console.log(e.date, e.title);</code></pre><button type="
         <div class="prp-panel-head"><h2 class="prp-h2">What is never exposed</h2></div>
         <div class="prp-panel-body stack">
           <p><b>Tally Stick and Algo Trader</b>, Vitruvian Manager's private trading tools, are not part of the Integration Hub. There are no balances, positions, orders, brokers, rules, risk limits or keys here. Tally Stick's own MCP connection for trading agents is a separate, private server behind its own sign-in; this server cannot reach it and shares nothing with it.</p>
+          <p><b>No keys.</b> The Hub holds no keys. Hermes Messenger runs in the bridge on your own computer; an AI key you give it stays there.</p>
           <p><b>Nothing personal.</b> Your topics in the Political Briefing, your OSINT case notebook and other things you keep in Vitruvian Manager pages stay in your browser and never reach these servers.</p>
           <h3 class="prp-h3">Text is data, not instructions</h3>
           <p>Headlines, summaries and notes come from publishers, Wikipedia and Wikidata. The server returns them as data fields and tells assistants not to follow instructions found inside them. If you build on Vitruvian Manager, do the same.</p>

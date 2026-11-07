@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <friendlyName>[LG] webOS TV UK6300</friendlyName>
+    <manufacturer>LG Electronics.</manufacturer>
+    <modelName>55UK6300PLB</modelName>
+    <UDN>uuid:1c4e0000-0000-4000-8000-00000000lg48</UDN>
+  </device>
+</root>

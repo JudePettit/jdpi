@@ -74,3 +74,17 @@
 
 /headlines/outlets.json
   Access-Control-Allow-Origin: *
+
+# IoT Connect (Digital Science): the page may reach only this site and the Vitruvian Manager bridge on this computer, on
+# its port 8790, and nothing else: no inline script or style, and no framing but by the shell (which frames it). The
+# design (PRP-IOT-CONNECT-DESIGN.md §4.2) gives the policy, less its http://[::1]:8790: a CSP source may not be an IPv6
+# address (browsers ignore it and report an error), so the page reaches the bridge as localhost or 127.0.0.1 only.
+/digital/iot-connect/*
+  Content-Security-Policy: default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:8790 http://127.0.0.1:8790; img-src 'self' data:; frame-ancestors 'self'
+
+# The installable app: its manifest and its offline worker are always revalidated, so a new version reaches phones.
+/manifest.json
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache

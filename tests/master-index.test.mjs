@@ -44,6 +44,7 @@ const EXEMPT = {
   'osint-training': 'courses in tradecraft, which name few entities; the Learning adapter reads only the Finance, Economics and Politics courses',
   'data-analytics': 'a tool over the other submodules’ datasets, with no entities of its own',
   'integration-hub': 'a catalogue and API of the other submodules’ datasets (the Master Index’s among them), with no entities of its own',
+  'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
   'tally-stick': 'private: a trading ledger, which has no place in a public index',
   'algo-trader': 'private: trading agents and their rules, which have no place in a public index',
 };

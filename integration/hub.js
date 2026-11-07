@@ -10,7 +10,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const nf = new Intl.NumberFormat('en-GB');
 const fmtDate = d => (d ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T00:00:00Z' : d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–');
 const MODULES = { rt: ['RT', 'Realtime Geopolitics'], hb: ['HB', 'Highbrowse'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
-const TABS = ['overview', 'catalogue', 'mcp', 'api', 'feeds', 'skills', 'security'];
+const TABS = ['overview', 'catalogue', 'mcp', 'api', 'feeds', 'skills', 'agents', 'security'];
 
 /* ------------------------------------------------------------------ state in the hash */
 const state = { tab: 'overview', q: '', m: '', ds: '' };
@@ -206,8 +206,48 @@ function updateIcs() {
   $('#ics-open').href = url;
 }
 
+/* ------------------------------------------------------------------ agents (integration/agents.json) */
+// Each agent runs on the reader's own computer: the Hub shows what agents.json says and, only when Check is pressed,
+// asks the bridge on this computer (http://localhost:8790, or the loopback address kept in prp.iot.bridgeUrl, which IoT
+// Connect shares) for the agent's status. It sends nothing else and holds no keys.
+let AGENTS = null;
+const bridgeBase = () => {
+  try { const v = JSON.parse(localStorage.getItem('prp.iot.bridgeUrl') || 'null'); if (/^http:\/\/(localhost|127\.0\.0\.1):\d{1,5}$/.test(v || '')) return v; } catch { /* storage blocked */ }
+  return 'http://localhost:8790';
+};
+async function loadAgents() {
+  if (AGENTS) return;
+  try { AGENTS = await fetch(new URL('agents.json', import.meta.url)).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  catch { $('#agents').innerHTML = '<li class="prp-empty">The list of agents could not be loaded. Try again shortly.</li>'; return; }
+  $('#agents-about').textContent = AGENTS.about; $('#agents-security').textContent = AGENTS.security;
+  $('#agents-count').textContent = `${AGENTS.agents.length} agent${AGENTS.agents.length === 1 ? '' : 's'}`;
+  $('#agents').innerHTML = AGENTS.agents.map(a => `<li class="prp-panel agent" data-agent="${esc(a.id)}">
+    <div class="prp-panel-head"><h3 class="prp-h3">${esc(a.name)}</h3><span class="prp-status" data-status="${esc(a.status)}">${esc(a.kind)} · ${esc(a.status)}</span></div>
+    <div class="prp-panel-body stack">
+      <p>${esc(a.runsIn)}</p>
+      <ul class="ticks">${a.does.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+      <p><b>Messages.</b> <code>${esc(a.message.type)}</code> version ${esc(a.message.v)}, read at <code>${esc(a.message.read)}</code>.</p>
+      <p><b>AI.</b> ${esc(a.ai)}</p>
+      <ul>${a.limits.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+      <p class="acts"><a class="prp-btn primary" href="${esc(ROOT + a.route)}" target="_top">Open IoT Connect</a> <button type="button" class="prp-btn" data-check="${esc(a.id)}">Check</button>
+        <span class="agent-state" role="status" aria-live="polite">Not checked: the Hub asks the bridge on your computer only when you press Check.</span></p>
+    </div></li>`).join('');
+}
+$('#agents').addEventListener('click', async e => {
+  const b = e.target.closest('[data-check]'); if (!b) return;
+  const out = b.parentElement.querySelector('.agent-state'), base = bridgeBase();
+  b.disabled = true; out.textContent = 'Asking the bridge…';
+  try {
+    const r = await fetch(base + '/iot/hermes', { cache: 'no-store', credentials: 'omit', signal: AbortSignal.timeout(8000) });
+    const j = await r.json();
+    if (!r.ok || !j.ok) throw new Error(j.error || `The bridge answered ${r.status}.`);
+    out.textContent = `${j.agent}: ${j.status} · ${j.rules.length} rules · ${j.findings.length} finding${j.findings.length === 1 ? '' : 's'} · AI ${j.ai?.enabled ? 'on' : 'off'}`;
+  } catch (err) { out.textContent = err.name === 'TypeError' || err.name === 'TimeoutError' ? `The bridge did not answer at ${base}. Is it running with --iot?` : err.message; }
+  finally { b.disabled = false; }
+});
+
 /* ------------------------------------------------------------------ render */
-function render() { showTab(); if (state.tab === 'catalogue') renderCatalogue(); }
+function render() { showTab(); if (state.tab === 'catalogue') renderCatalogue(); if (state.tab === 'agents') loadAgents(); }
 readHash(); renderTools(); renderApi(); render();
 window.addEventListener('hashchange', () => { readHash(); render(); });
 load().catch(() => { $('#meta').innerHTML = '<span>The catalogue could not be loaded. Try again shortly.</span>'; $('#cat-rows').innerHTML = '<tr><td colspan="8" class="prp-empty">The catalogue could not be loaded.</td></tr>'; });

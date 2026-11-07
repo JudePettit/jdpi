@@ -5,6 +5,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
+import vm from 'node:vm';
 import { chromium } from 'playwright-core';
 import { pageTest } from './tools/pages.mjs';
 
@@ -61,7 +62,7 @@ test('registry is well formed', () => {
   assert.equal(where('markets'), 'mm'); assert.equal(where('tally-stick'), 'mm'); assert.equal(where('algo-trader'), 'mm');
   assert.equal(where('progress'), 'ns');
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
-  for (const id of ['data-analytics', 'integration-hub']) assert.equal(where(id), 'ds');
+  for (const id of ['data-analytics', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
   // The four briefings moved into Highbrowse from Realtime Geopolitics, Natural Science, Money Management and Digital
   // Science (they were asserted there before); each keeps its id and its page. The Global Headline Tracker stays.
@@ -692,4 +693,88 @@ test('the sidebar can be hidden to give the page the whole width, remembered, an
     await p.click('#menu');
     assert.equal(await p.evaluate(() => document.querySelector('#side').classList.contains('open')), true);
   } finally { await phone.close(); }
+});
+
+/* ---- The installable app (November 2026): manifest.json, its icons, and the offline worker sw.js ------------------- */
+const fileOf = p => new URL('../' + p, import.meta.url);
+/** A PNG's width and height, from its IHDR chunk. */
+const pngSize = p => { const b = readFileSync(fileOf(p)); assert.equal(b.toString('latin1', 1, 4), 'PNG', `${p} is a PNG`); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+
+test('the app: the manifest meets Chrome’s install criteria, its icons are the sizes it says, and iOS has its icon', () => {
+  const m = JSON.parse(readFileSync(fileOf('manifest.json'), 'utf8'));
+  assert.deepEqual([m.name, m.short_name, m.start_url, m.scope, m.display, m.id], ['Vitruvian Manager', 'VM', '/', '/', 'standalone', '/']);
+  assert.match(m.theme_color, /^#[0-9a-f]{6}$/); assert.match(m.background_color, /^#[0-9a-f]{6}$/);
+  for (const i of m.icons) { const [w, h] = pngSize(i.src); assert.equal(`${w}x${h}`, i.sizes, i.src); assert.equal(i.type, 'image/png'); }
+  const has = (size, purpose) => m.icons.some(i => i.sizes === size && (i.purpose || 'any').split(' ').includes(purpose));
+  assert.ok(has('192x192', 'any') && has('512x512', 'any') && has('512x512', 'maskable'), 'icons of 192 and 512 px, and a maskable 512');
+  // The one shortcut only opens IoT Connect's Remote tab: an address, never an action.
+  assert.deepEqual(m.shortcuts.map(s => [s.name, s.url]), [['Remote', '/#/ds/iot-connect/remote']]);
+  assert.ok(registry.suites.find(s => s.id === 'ds').modules.find(x => x.id === 'iot-connect').views.some(v => v.id === 'remote'));
+  assert.deepEqual(pngSize('apple-touch-icon.png'), [180, 180]);
+  const html = readFileSync(fileOf('index.html'), 'utf8');
+  assert.match(html, /<link rel="manifest" href="manifest.json">/); assert.match(html, /<link rel="apple-touch-icon" href="apple-touch-icon.png">/);
+  assert.match(readFileSync(fileOf('shell.js'), 'utf8'), /navigator\.serviceWorker\.register\('sw\.js'\)/, 'the shell registers the worker');
+  const headers = readFileSync(fileOf('_headers'), 'utf8');
+  for (const p of ['/manifest.json', '/sw.js']) assert.match(headers, new RegExp(`\\n${p.replace('.', '\\.')}\\r?\\n  Cache-Control: no-cache`), `${p} is always revalidated`);
+  assert.ok(existsSync(fileOf('design/scripts/render-icons.mjs')), 'the icons’ script');
+});
+
+test('the app: the offline worker keeps the shell and IoT Connect’s own files, and leaves every other request alone', async () => {
+  const handlers = {}, cached = new Map(), fetched = [];
+  const self = { addEventListener: (t, f) => { handlers[t] = f; }, registration: { scope: 'https://jdpi.pages.dev/' }, skipWaiting: async () => {} };
+  const sandbox = {
+    self, URL, Promise, console,
+    fetch: async url => { fetched.push(String(url.url || url)); return { ok: true, type: 'basic', redirected: false, clone() { return this; } }; },
+    caches: { open: async () => ({ put: async (k, v) => { cached.set(k, v); } }), match: async k => cached.get(k), keys: async () => ['vm-shell-0', 'vm-shell-1', 'other'], delete: async () => true },
+    Response: { error: () => 'error' },
+  };
+  vm.runInNewContext(readFileSync(fileOf('sw.js'), 'utf8'), sandbox);
+  const keyOf = (url, method = 'GET') => self.vmKeyOf({ url, method }, self.registration.scope);
+  // Every file it keeps exists (the site root and IoT Connect's folder are their index.html).
+  let waits = [];
+  handlers.install({ waitUntil: p => waits.push(p) });
+  await Promise.all(waits);
+  assert.ok(fetched.length >= 25, `${fetched.length} files fetched at install`);
+  for (const u of fetched) {
+    const p = new URL(u).pathname.slice(1);
+    assert.ok(existsSync(fileOf(p === '' || p.endsWith('/') ? p + 'index.html' : p)), `${p} exists`);
+  }
+  for (const u of ['https://jdpi.pages.dev/', 'https://jdpi.pages.dev/index.html', 'https://jdpi.pages.dev/?x=1', 'https://jdpi.pages.dev/shell.js', 'https://jdpi.pages.dev/registry.json',
+    'https://jdpi.pages.dev/digital/iot-connect/', 'https://jdpi.pages.dev/digital/iot-connect/index.html', 'https://jdpi.pages.dev/digital/iot-connect/lib/qr.js', 'https://jdpi.pages.dev/manifest.json']) assert.ok(keyOf(u), `keeps ${u}`);
+  for (const u of ['https://jdpi.pages.dev/api/v1/catalog', 'https://jdpi.pages.dev/mcp', 'https://jdpi.pages.dev/lake/data/manifest.json', 'https://jdpi.pages.dev/integration/catalog.json',
+    'https://jdpi.pages.dev/digital/briefing/data/stories.json', 'https://jdpi.pages.dev/status/health.json', 'https://jdpi.pages.dev/sw.js', 'https://jdpi.pages.dev/sigint/',
+    'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans', 'https://jdpi.pages.dev.evil.example/shell.js', 'http://localhost:8790/iot/status', 'http://127.0.0.1:8790/health']) assert.equal(keyOf(u), null, `leaves ${u} alone`);
+  assert.equal(keyOf('https://jdpi.pages.dev/registry.json', 'POST'), null, 'never a POST');
+  // A request it leaves alone is not answered by it at all; one it keeps is network first, from the copy offline.
+  let answered = null;
+  handlers.fetch({ request: { url: 'http://localhost:8790/iot/devices', method: 'GET' }, respondWith: p => { answered = p; }, waitUntil() {} });
+  assert.equal(answered, null);
+  handlers.fetch({ request: { url: 'https://jdpi.pages.dev/shell.js', method: 'GET' }, respondWith: p => { answered = p; }, waitUntil() {} });
+  assert.ok(answered && (await answered).ok);
+  sandbox.fetch = async () => { throw new TypeError('offline'); };
+  handlers.fetch({ request: { url: 'https://jdpi.pages.dev/shell.js', method: 'GET' }, respondWith: p => { answered = p; }, waitUntil() {} });
+  assert.equal(await answered, cached.get('https://jdpi.pages.dev/shell.js'), 'offline: the copy');
+  waits = [];
+  handlers.activate({ waitUntil: p => waits.push(p) });
+  await Promise.all(waits);
+});
+
+test('the app: with the worker, the shell and IoT Connect open with no connection', pageTest, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    const p = await ctx.newPage();
+    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
+    // The shell does not register the worker in a browser a test drives (so routed requests stay visible): register it here.
+    await p.evaluate(async () => { await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; });
+    await p.waitForFunction(async () => (await (await caches.open('vm-shell-1')).keys()).length >= 25, null, { timeout: 20000 });
+    await ctx.setOffline(true);
+    await p.reload({ waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#nav details.suite', { state: 'attached' }); // in the phone drawer, closed
+    assert.equal(await p.locator('#nav details.suite').count(), registry.suites.length, 'the shell, offline');
+    await p.goto(`${BASE}/digital/iot-connect/#tab=remote`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#tab-remote[aria-selected="true"]');
+    assert.equal(await p.textContent('h1'), 'IoT Connect', 'IoT Connect, offline');
+    await ctx.setOffline(false);
+    await p.evaluate(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); });
+  } finally { await ctx.close(); }
 });

@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=1800
+LOCATION: http://127.0.0.48:1781/
+SERVER: WebOS/4.1.0 UPnP/1.0
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+USN: uuid:1c4e0000-0000-4000-8000-00000000lg48::urn:schemas-upnp-org:device:MediaRenderer:1
+

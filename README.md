@@ -19,7 +19,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
 | **Money Management**: your money end to end | MM | Market Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
 | **Natural Science**: science through history | NS | Invention Timeline |
-| **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub |
+| **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
 
 (In `registry.json` the nine modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
@@ -50,6 +50,8 @@ browser, with no data or timed job of its own, and its figure is the first modul
         │ draws the Home page (#/) and the Dashboard (#/home/dashboard) itself
         │ one persistent iframe per submodule page (state is kept when you switch)
         ├── pages in this repo: q/, highbrowse/, battlefield/, kardashev/, encyclopedia/, fe/, science/, econ/, digital/, osint/, sigint/, geoint/, …
+        ├── the Vitruvian Manager bridge on the user's own computer (sigint/bridge/prp-bridge.mjs): SIGINT's relays, and with --iot IoT Connect and Hermes Messenger
+        ├── the installable app: manifest.json, sw.js (offline worker for the shell and IoT Connect), design/icons/
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
         └── trade-desk Worker (Market Briefing, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
@@ -67,6 +69,8 @@ browser, with no data or timed job of its own, and its figure is the first modul
 | Documentary mode | `design/jdpi-documentary.js`, `design/jdpi-narrator.js` | Reads a page aloud as a documentary, with quiet classical music. |
 | Voice | `design/prp-voice.js`, `functions/api/voice/v1/[[path]].js`, `functions/voice/[[path]].js` | One narration layer for the Documentary reader, Kino and Bibliotheca's narrator (Augmented Reading, which uses an online voice only when the reader chooses it, after it shows the cost in characters): this device's voice, or an online Azure voice through the site's own proxy (key, quota and cache on the server; set-up in `OPERATIONS.md`, section 4), falling back to the device voice whenever the online one cannot carry on. |
 | Data for programs and AI tools | `functions/api/v1/[[path]].js`, `functions/mcp.js`, `integration/openapi.json`, `llms.txt` | The site's public data, read-only and with no sign-in: a JSON API at `/api/v1/` (described by `openapi.json`), an MCP server at `/mcp` for AI assistants, and `/llms.txt`, a short guide for language models. The Integration Hub rebuilds `openapi.json` and `llms.txt` every day. |
+| Bridge | `sigint/bridge/prp-bridge.mjs` (and its `README.md`) | One Node file with no packages that the user runs on their own computer, on `localhost` only: SIGINT's relays, and, started with `--iot`, IoT Connect (Digital Science): discovery by each kind's standard question, the ownership tick, documented pairing with Y in its window, fixed command tables, an MQTT 3.1.1 and Sparkplug B link to the user's own broker, the phone remote with `--lan`, and Hermes Messenger, whose findings the Integration Hub's Agents tab lists (`integration/agents.json`). Secrets stay in its own state file, never in the repository or a page. |
+| App | `manifest.json`, `sw.js`, `design/icons/`, `apple-touch-icon.png`, `design/scripts/render-icons.mjs` | Vitruvian Manager as a free installable app (Android and iPhone, from the browser): the manifest, icons rendered once from the mark, and an offline worker that keeps only the shell's and IoT Connect's own files, network first, and leaves every other request (other sites, data, `/api/`, `/mcp`, the bridge) alone. The shell registers it. |
 | Aircraft proxy | `functions/api/sigint/adsb/[[path]].js` | Relays adsb.lol's aircraft positions to the SIGINT Dashboard, which a browser cannot read from adsb.lol directly. |
 
 ### One page, one submodule

@@ -64,10 +64,12 @@
   let iter = null, lit = null;
 
   // The passage being read: the module accent as an outline, on its soft tint (PRP tokens, so both themes work).
-  const style = document.createElement('style');
-  style.textContent = '.jdpi-reading{outline:2px solid var(--prp-accent,currentColor)!important;outline-offset:4px;border-radius:4px;background:var(--prp-accent-soft,transparent)!important;transition:outline-color .3s}'
+  // A constructed stylesheet where the browser has them, so a page with a strict Content-Security-Policy (IoT Connect's)
+  // keeps it; an inline <style> otherwise.
+  const css = '.jdpi-reading{outline:2px solid var(--prp-accent,currentColor)!important;outline-offset:4px;border-radius:4px;background:var(--prp-accent-soft,transparent)!important;transition:outline-color .3s}'
     + '@media(prefers-reduced-motion:reduce){.jdpi-reading{transition:none}}';
-  document.head.appendChild(style);
+  try { const sheet = new CSSStyleSheet(); sheet.replaceSync(css); document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]; }
+  catch { const el = document.createElement('style'); el.textContent = css; document.head.appendChild(el); }
 
   const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function highlight(el) {

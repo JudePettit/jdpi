@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <device>
+    <deviceType>urn:roku-com:device:player:1-0</deviceType>
+    <friendlyName>Bedroom Roku</friendlyName>
+    <manufacturer>Roku</manufacturer>
+    <modelName>Roku Express</modelName>
+    <serialNumber>X00800ABCDEF</serialNumber>
+    <UDN>uuid:29600000-0000-1000-8000-d8313f000000</UDN>
+  </device>
+</root>

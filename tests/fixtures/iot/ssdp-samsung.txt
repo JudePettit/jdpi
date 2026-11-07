@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=1800
+LOCATION: http://127.0.0.49:9197/dmr
+SERVER: SHP, UPnP/1.0, Samsung UPnP SDK/1.0
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+USN: uuid:0d0c0b0a-1111-2222-3333-444455556666::urn:schemas-upnp-org:device:MediaRenderer:1
+

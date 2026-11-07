@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "Vitruvian Manager",
+  "short_name": "VM",
+  "description": "Vitruvian Manager's modules allow you to learn, earn, create, and control.",
+  "lang": "en-GB",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#14181f",
+  "theme_color": "#14181f",
+  "icons": [
+    { "src": "design/icons/vm-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "design/icons/vm-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "design/icons/vm-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Remote", "short_name": "Remote", "description": "IoT Connect's remote for your own devices", "url": "/#/ds/iot-connect/remote",
+      "icons": [{ "src": "design/icons/vm-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}

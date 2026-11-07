@@ -795,7 +795,16 @@ function setupMenu() {
   closeMenu();
 }
 
+/* --- The installable app: the offline worker (sw.js), which keeps the shell and IoT Connect's own page for use
+   without a connection and leaves every other request alone. A browser driven by a test (navigator.webdriver) does not
+   register it, so the requests a test intercepts never pass through it; the offline test registers it itself. */
+function setupApp() {
+  if (!('serviceWorker' in navigator) || navigator.webdriver || !window.isSecureContext) return;
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.warn('The offline worker did not start:', err.message)); }, { once: true });
+}
+
 (async function init() {
+  setupApp();
   setupTheme();
   setupSkip();
   setupMenu();

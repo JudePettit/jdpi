@@ -75,7 +75,8 @@ wars, leaders and coming votes."
 | Scientific Briefing | HB (moved from NS) | `science/briefing/` |
 | Invention Timeline | NS (new) | `science/progress/` |
 | Digital Briefing | HB (moved from DS) | `digital/briefing/` |
-| Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/` |
+| Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/`; the Hub's Agents tab lists Vitruvian Manager's agents (`integration/agents.json`, Hermes Messenger first) |
+| IoT Connect | DS (new, November 2026) | `digital/iot-connect/`: your own smart devices through the Vitruvian Manager bridge, with Hermes Messenger, a UNS (MQTT, Sparkplug B) and the phone as the remote; tabs Overview, Devices, Remote, Hermes, UNS and Law & safety. Its page runs under its own strict Content-Security-Policy (`_headers`): no inline script or style, no style attributes, device text only ever as text, and only the bridge on `localhost:8790` besides the site itself |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
 
 **Sidebar order.** Home comes first, its Home page item (with ⌂) where every other module has its "Module overview".

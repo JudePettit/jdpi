@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+    <friendlyName>&lt;img src=x onerror=alert(1)&gt;</friendlyName>
+    <manufacturer>Nobody Ltd</manufacturer>
+    <modelName>MR-1</modelName>
+    <UDN>uuid:0badc0de-1111-4222-8333-000000000045</UDN>
+    <serviceList>
+      <service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType><controlURL>/AVTransport/control</controlURL><SCPDURL>/AVTransport/scpd.xml</SCPDURL></service>
+      <service><serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType><controlURL>http://192.168.1.1:5000/upnp/control/WANIPConn1</controlURL><SCPDURL>/RenderingControl/scpd.xml</SCPDURL></service>
+    </serviceList>
+  </device>
+</root>

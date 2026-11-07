@@ -149,3 +149,8 @@ pre code { background: none; border: 0; padding: 0; }
   .prp-table tbody tr:hover td { background: none; }
 }
 @media (prefers-reduced-motion: reduce) { .cat .ds-name::before { transition: none; } }
+
+/* Agents (integration/agents.json) */
+.agents { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.agent .acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.agent .agent-state { color: var(--prp-text-2); font-size: var(--prp-fs-sm); }

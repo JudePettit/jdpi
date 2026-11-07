@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=1800
+EXT:
+LOCATION: http://127.0.0.44:49152/description.xml
+SERVER: Linux/4.9.118 UPnP/1.0 EZCast/1.0
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+USN: uuid:e2c4a5f0-0000-4000-8000-0000ezc00u02::urn:schemas-upnp-org:device:MediaRenderer:1
+

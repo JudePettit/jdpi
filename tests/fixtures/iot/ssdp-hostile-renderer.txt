@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=1800
+LOCATION: http://127.0.0.45:49153/description.xml
+SERVER: Linux UPnP/1.0 MiniRenderer/2.1
+ST: urn:schemas-upnp-org:device:MediaRenderer:1
+USN: uuid:0badc0de-1111-4222-8333-000000000045::urn:schemas-upnp-org:device:MediaRenderer:1
+

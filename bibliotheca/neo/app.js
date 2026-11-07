@@ -178,21 +178,27 @@ function renderShelf() {
 const pd = v => /^(pd|public domain)$/i.test(String(v || ''));
 /* The book's chapters as it numbers them ("Chapter XII", "Book II, Chapter III"), and what else it has: the one other
    piece by its title ("26 chapters and the dedication", "15 chapters and the prefaces"), or how many there are (Smith's
-   introductions and appendix, the five pieces before On War's Book I). */
+   introductions and appendix, the five pieces before On War's Book I). A book divided into sections counts sections
+   (the Communist Manifesto's four). */
 function contentsLine(chapters) {
-  const numbered = chapters.filter(c => /\bChapter [IVXLCDM]+$/.test(c.heading || '')).length, other = chapters.length - numbered;
-  const rest = other === 1 ? ` and the ${(chapters.find(c => !/\bChapter [IVXLCDM]+$/.test(c.heading || '')).title || 'front matter').toLowerCase()}`
+  const unit = chapters.some(c => /\bSection [IVXLCDM]+$/.test(c.heading || '')) ? 'Section' : 'Chapter';
+  const isNumbered = c => new RegExp(`\\b${unit} [IVXLCDM]+$`).test(c.heading || '');
+  const numbered = chapters.filter(isNumbered).length, other = chapters.length - numbered;
+  const rest = other === 1 ? ` and the ${(chapters.find(c => !isNumbered(c)).title || 'front matter').toLowerCase()}`
     : other > 1 ? ` and ${other} other pieces` : '';
-  return `<b>${numbered}</b> chapter${numbered === 1 ? '' : 's'}${esc(rest)}`;
+  return `<b>${numbered}</b> ${unit.toLowerCase()}${numbered === 1 ? '' : 's'}${esc(rest)}`;
 }
+// A second author stands with the edition's others, his part named "co-author" (shelf.mjs: Engels, of the Manifesto).
+const coauthors = b => (b.editors || []).filter(e => /^co-author/.test(e.role || '')).map(e => e.name);
 function renderBookFront() {
   const b = S.book, a = b.author || {}, t = b.translator;
   document.title = `${b.title} · Neo Classic · Bibliotheca · ${SHORT}`;
   $('#book-title').textContent = b.title;
   const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Master Index">${esc(a.name)}</a>` : esc(a.name || '');
   const life = Number.isFinite(a.born) && Number.isFinite(a.died) ? ` (${esc(fmtEra([a.born, a.died]))})` : '';
+  const co = coauthors(b).map(n => ` and ${esc(n)}`).join('');
   // The year after the translator is the edition's (Graham's On War of 1873 is read in Maude's revision of 1908).
-  $('#byline').innerHTML = `${who}${life}${t ? `, translated by ${esc(t.name)}${b.edition?.published ? ` (edition of ${esc(year(b.edition.published))})` : ''}` : ''}`;
+  $('#byline').innerHTML = `${who}${life}${co}${t ? `, translated by ${esc(t.name)}${b.edition?.published ? ` (edition of ${esc(year(b.edition.published))})` : ''}` : ''}`;
   const all = S.chapters.flatMap(c => c.paragraphs), terms = termCount(all);
   const words = S.chapters.reduce((x, c) => x + (c.words || 0), 0);
   $('#book-meta').innerHTML = [`<span>${contentsLine(S.chapters)}</span>`,
@@ -211,7 +217,7 @@ function renderSources() {
   const checked = r.checked ? new Date(r.checked).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : null;
   const terms = termCount(S.chapters.flatMap(c => c.paragraphs));
   $('#sources').innerHTML = `
-    <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
+    <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${coauthors(b).map(n => ` and ${esc(n)}`).join('')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
     <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? 'public domain in the United Kingdom' : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
     <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. The bar lists those in the text on screen.</p>
     <p><b>In ${PRODUCT}.</b> Links (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>

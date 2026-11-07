@@ -226,6 +226,75 @@ function smith(volume, { start, end, parts, chapters, sections }) {
   };
 }
 
+/* Böhm-Bawerk's Kapital und Kapitalzins in William Smart's translation: Capital and Interest (the history and criticism of
+   the theories, 1884; London, 1890) and The Positive Theory of Capital (1889; London, 1891). Neither is on Project
+   Gutenberg, so the text is the Internet Archive's scan of the University of Toronto's copy (`scan`), its OCR checked
+   word by word against Econlib's transcription of the same edition (`econlib`, its pages `files`), which says "The text
+   of this edition is in the public domain", and against the OCR of a second copy (`witness`: Harvard's copy of the 1890
+   edition, scanned by Google; Duke's copy of the 1923 reprint): bibliotheca/scripts/scan-text.mjs aligns them, keeps
+   the scan's word where it and Econlib agree, Econlib's where the OCR misread, and the scans' where both read a word
+   Econlib's own OCR got wrong ("aides" for "sides", "œ100" for "£100") or dropped; and it takes the
+   chapters, paragraphs, the notes and their marks from Econlib's pages, leaving out Econlib's own matter (its
+   bracketed editorial notes and cross-references, its links and headings). The edition's notes, numbered on each
+   page, run 1, 2 … through each chapter here, each after the paragraph that cites it; Smart's are signed "W. S.". The
+   two books' rights finding is one: Böhm-Bawerk and Smart died in 1914 and 1915. `copy` and `printing` say which copy
+   was scanned and what it is ("the University of Toronto’s copy of the London edition", "Macmillan, 1890");
+   `second` is the second copy, and what its record says of its rights (the Internet Archive's records of the two
+   Toronto scans give no copyright status: the books are free by the dates alone). */
+function bohmBawerk({ slug, title, work, era, published, edition, scan, econlib, files, pages, witness, cut, fix, copy, printing, second, sections, books, chapters, proper, lower, decisions }) {
+  return {
+    slug, title,
+    author: { name: 'Eugen von Böhm-Bawerk', qid: 'Q311535', born: 1851, died: 1914 },
+    translator: { name: 'William Smart', died: 1915 },
+    work, era, published, edition,
+    scan: {
+      id: scan, econlib: `https://www.econlib.org/library/BohmBawerk/${econlib}.html`, files, pages, witness, ...(cut ? { cut } : {}), ...(fix ? { fix } : {}),
+      licence: `Internet Archive scan ${scan}, ${copy} (${printing}), `
+        + `its OCR checked word by word against Econlib’s transcription of the same edition (econlib.org/library/BohmBawerk/${econlib}.html), `
+        + `which states that the text of this edition is in the public domain, and against the OCR of a second copy (archive.org/details/${witness}). `
+        + 'The words are the edition’s; Econlib’s own notes, links and layout are not used.',
+    },
+    rights: {
+      us: 'pd', uk: 'pd',
+      basis: 'Eugen von Böhm-Bawerk died on 27 August 1914 and the translator William Smart on 19 March 1915 (Edwin Cannan’s obituary '
+        + 'of him, Economic Journal, 1915), so the last term in Ireland and the UK (life plus 70 years: Copyright and Related Rights Act '
+        + `2000, s.24; CDPA s.12) ended on 31 December 1985. ${published === 1890 ? 'Smart’s translation was published in London by Macmillan in 1890'
+          : `Smart’s translation was published in London by Macmillan in 1891 and reprinted in New York by G. E. Stechert in ${published}, the printing scanned here`}, `
+        + 'and every work published before 1931 is in the public domain in the United States. The text is from the Internet Archive’s '
+        + `scan of ${copy} (archive.org/details/${scan}), whose record gives no copyright status, read against a second copy `
+        + `(archive.org/details/${witness}), ${second}; Econlib, whose `
+        + 'transcription the OCR was checked against, says that the text of this edition is in the public domain, and none of Econlib’s own '
+        + 'matter is used.',
+      checked: '2026-11-07',
+    },
+    layout: {
+      sections,
+      part: { heading: /^BOOK ([IVX]+)$/, label: 'Book', title: 'block', count: books },
+      chapter: { heading: /^CHAPTER ([IVX]+)$/, title: 'block', within: true, count: chapters },
+      // tables of every size, Carey's of one row too (build-book.mjs): scan-text.mjs sets the cells of Econlib's
+      // tables in columns, in a quotation or a note as well
+      notes: 'bracket', verse: false, tables: 'rows', ...(proper ? { proper } : {}), ...(lower ? { lower } : {}),
+    },
+    // Tagging decisions (see the Prince's for the form), the two books' and each one's own.
+    decisions: {
+      ...untag(...LATER_STATES),
+      // The economists by the names the books give them, which the lake has in full only. Smith is Adam Smith in
+      // both; the bare "Say" is left alone, since a sentence may open on the verb ("Say, then, that …"), and so is
+      // "Mill" (James Mill in Book V of the history, J. S. Mill elsewhere); the Physiocrats are physiocracy.
+      'Böhm-Bawerk': 'Q311535', Smith: 'Q9381', Ricardo: 'Q160270', Malthus: 'Q13526', Marx: 'Q9061', Menger: 'Q84177',
+      Hume: 'Q37160', Bentham: 'Q60887', Quesnay: 'Q13575', Locke: 'Q9353', Proudhon: 'Q5749', 'J. B. Say': 'Q13513',
+      Physiocrats: 'Q183244', physiocrats: 'Q183244', Grotius: 'Q154959',
+      // Böhm-Bawerk's Rome is the ancient city and its law, his Great Britain the United Kingdom of his day; England
+      // in the 1880s has no entry of its time (the lake's is the kingdom of 927–1707). "Man" is mankind, not the Isle;
+      // "Elements" are other men's books (Elements of Political Economy); Brutus, John Murray (the publisher) and
+      // Walker (Francis A. Walker, the economist) are not the lake's Samuel Morse, John Murray and John Walker.
+      Rome: 'Q1747689', 'Great Britain': 'Q174193',
+      ...untag('England', 'Man', 'Elements', 'Élements', 'Brutus', 'John Murray', 'Walker'),
+      ...decisions,
+    },
+  };
+}
+
 export const SHELF = [
   {
     slug: 'the-prince',
@@ -671,6 +740,182 @@ export const SHELF = [
       ...untag('States', 'King\'s', 'Unity', 'Republic', 'Luxembourg', 'Bologna', 'North German Confederation'),
     },
   },
+  {
+    slug: 'communist-manifesto',
+    title: 'Manifesto of the Communist Party',
+    author: { name: 'Karl Marx', qid: 'Q9061', born: 1818, died: 1883 },
+    translator: { name: 'Samuel Moore', died: 1911 },
+    // The book has two authors; the contract has one, so the second stands with the others whose words the edition
+    // carries, his part named (the page's byline and shelf row give both names: app.js).
+    editors: [{ name: 'Frederick Engels', died: 1895, role: 'co-author; preface to the English edition (1888) and its notes' }],
+    // The work: written in December 1847 and January 1848 for the Communist League, printed in London in February
+    // 1848. Its era runs from the League's congress that commissioned it (November 1847) to Engels's preface of 1888.
+    work: { qid: 'Q40591', written: 1848, published: 1848 },
+    era: [1847, 1888],
+    // The edition: Samuel Moore's authorised translation (London: William Reeves, 1888), with Engels's preface of 30
+    // January 1888 and his notes, in the New York Labor News Company's reprint of 1908: Project Gutenberg eBook #31193
+    // (its preface: "The present translation is by Mr. Samuel Moore"; Gutenberg #61 has neither the preface nor the
+    // notes). The reprint spells in the American way ("specter", "labor").
+    gutenberg: 31193,
+    published: 1908,
+    edition: 'Samuel Moore’s authorised translation of 1888, edited and annotated by Engels',
+    rights: {
+      us: 'pd', uk: 'pd',
+      basis: 'Karl Marx died on 14 March 1883 and Frederick Engels, his co-author, who wrote the preface of 1888 and its notes, on 5 '
+        + 'August 1895; the translator Samuel Moore died in 1911, so the last term in Ireland and the UK (life plus 70 years: '
+        + 'Copyright and Related Rights Act 2000, s.24; CDPA s.12) ended on 31 December 1981. Moore’s translation was first published in '
+        + 'London in 1888 (William Reeves) with Engels’s preface and notes; this text is the New York Labor News Company’s reprint of 1908, '
+        + 'and every work published before 1931 is in the public domain in the United States. The reprint’s own words are left out: its '
+        + 'notice in the preface’s second note ("To be had from the N. Y. Labor News Co. …") and its advertisements after the text. The '
+        + 'Project Gutenberg licence allows the text to be used freely once its header, footer and licence are removed '
+        + '(gutenberg.org/policy/license.html).',
+      checked: '2026-11-07',
+    },
+    // Engels's preface to the English edition of 1888 (its signature and date kept; headed "Preface" as printed), then the Manifesto's own opening, under its title, share chapter
+    // 0; its four sections ("I." alone on a line, the title in capitals in the block after it) are numbered once
+    // through and called sections, as the book calls them ("Section IV."). Engels's notes are lettered through each
+    // section and set together at its end, "(a) …"; the mark "(a)" stands against its word, and Section I's first is on
+    // the section's title. The title page and the reprint's notice and advertisements go (`start`, `fix`, `end`), and
+    // the three lines of the Manifesto's title (`drop`). Section III's subheadings ("I. REACTIONARY SOCIALISM.", "(a)
+    // Feudal Socialism.") are paragraphs of the section, as printed.
+    layout: {
+      start: /^PREFACE$/,
+      end: /^THE END\.$/,
+      fix: [['  To be had\nfrom the N. Y. Labor News Co., 28 City Hall Place, New York.', '']],
+      front: {
+        title: 'Preface and preamble',
+        pieces: [
+          { heading: /^PREFACE$/, title: 'Preface' },
+          { heading: /^MANIFESTO$/, title: 'Manifesto of the Communist Party' },
+        ],
+      },
+      drop: [/^OF THE$/, /^COMMUNIST PARTY\.$/, /^BY KARL MARX AND FREDERICK ENGELS\.$/],
+      chapter: { heading: /^([IV]+)\.$/, title: 'next', count: 4, label: 'Section' },
+      notes: 'letter', verse: false,
+    },
+    // Tagging decisions (see the Prince's for the form).
+    decisions: {
+      ...untag(...LATER_STATES),
+      // The authors by the names the preface gives them, which the lake has only in full; Saint-Simon, Fourier and
+      // Proudhon as the text names them (Section III, the preface). Robert Owen is not in the lake, and its bare "Owen"
+      // is Richard Owen the anatomist; England in 1848 and 1888 is no entry of its time (the lake's is the kingdom of
+      // 927–1707); ancient Rome is Ancient Rome, not the Republic alone; the "nucleus" of the Manifesto is no topic.
+      Marx: 'Q9061', Engels: 'Q34787', 'St. Simon': 'Q82934', Fourier: 'Q181707', Proudhon: 'Q5749',
+      // and the preface's Darwin, Herzen (his "Kolokol") and Bakunin, whom Moore's English spells as the French do
+      Darwin: 'Q1035', Herzen: 'Q201221', Bakounine: 'Q27645',
+      Rome: 'Q1747689',
+      ...untag('Owen', 'England', 'nucleus'),
+    },
+  },
+  bohmBawerk({
+    slug: 'capital-and-interest',
+    title: 'Capital and Interest',
+    // The work: Kapital und Kapitalzins, volume I, Geschichte und Kritik der Kapitalzins-Theorien (Innsbruck, 1884),
+    // the history and criticism of the theories of interest. Its era runs from the Wealth of Nations (1776), where the
+    // book has the modern problem begin (Book I, Chapter IV), to the book; Book I's survey of the canonists and of the
+    // sixteenth to eighteenth centuries is its preface.
+    work: { qid: 'Q4212911', written: 1884, published: 1884 },
+    era: [1776, 1884],
+    // Smart's translation (London: Macmillan, 1890), "translated with a preface and analysis".
+    published: 1890,
+    edition: 'William Smart’s translation (London: Macmillan, 1890)',
+    scan: 'capitalinterestc00bhuoft', econlib: 'bbCI', files: 31, copy: 'the University of Toronto’s copy of the London edition', printing: 'Macmillan, 1890',
+    second: 'Harvard’s, scanned by Google, which the Internet Archive’s record marks as not in copyright',
+    // The scan's pages: Smart's preface (9–26) and the text (53–481); not his "Analysis" (27–52) or the index.
+    // The transcription's slips that the merge leaves (one scan's reading alone, or a word of the edition's foreign
+    // quotations that the shelf does not know), each read again in the scans: a stop and a comma for a space, and
+    // the letters its own OCR got wrong ("soprappi\uFFFD" for "soprappiù").
+    pages: '9-26,53-481', witness: 'capitalandinter00smargoog',
+    fix: [['but.not destroyed', 'but not destroyed'], ['Nations,book', 'Nations, book'], ['Nutzung voll Grundstücken', 'Nutzung von Grundstücken'],
+      ['soprappi\uFFFD', 'soprappiù'], ['justIce', 'justice'], ['Sozialwirthscaftslehre', 'Sozialwirthschaftslehre'], ['Undarum Foenus', 'Unciarum Foenus'],
+      ['lucrum aliqod', 'lucrum aliquod'], ['huc deterta est', 'huc detorta est'], ['censequetur', 'consequetur'], ['(si’l n’avait', '(s’il n’avait'],
+      ['Handlungswisenschaft', 'Handlungswissenschaft'], ['etc. , 1849', 'etc., 1849'], ['(p. 21 , etc.)', '(p. 21, etc.)'],
+      // Econlib's slips that are words too, where both scans read the edition's ("quid lex dicat", "After saying",
+      // "Here he puts", "Thus, instead"), a stop for a comma; and its own matter ending two notes: its next heading
+      // ("Introduction") and a stray "s".
+      ['quid leg dicat', 'quid lex dicat'], ['After saving that', 'After saying that'], ['Here be puts down', 'Here he puts down'],
+      ['interest. This, instead of the existence', 'interest. Thus, instead of the existence'], ['wrong name to one of them,\n', 'wrong name to one of them.\n'],
+      ['April 1889. Introduction\n', 'April 1889.\n'], ['etc. (p. 93).s\n', 'etc. (p. 93)\n'], ['economical loss.’ “\n', 'economical loss.’”\n']],
+    // Smart's preface (0, signed and dated at Glasgow, April 1890) and the Introduction (1); seven books of chapters
+    // numbered within each (n = book × 100 + chapter), Book V's one chapter under the book's own title (its three
+    // groups, English, French and German, are headings in it, as printed), and the Conclusion after Book VII (800).
+    // Smart's "Analysis", the contents in detail, is a contents list and goes, as does the index of authors.
+    sections: [
+      { heading: /^TRANSLATOR’S PREFACE$/, n: 0, title: 'Translator’s preface' },
+      { heading: /^INTRODUCTION$/, n: 1, title: 'Introduction: the problem of interest' },
+      { heading: /^CONCLUSION$/, n: 800, title: 'Conclusion', after: true },
+    ],
+    books: 7, chapters: 28,
+    // The Say-Hermann school keeps both its names in the titles of Book III, Chapters IV and VI.
+    proper: ['Say-Hermann'],
+    decisions: {},
+  }),
+  bohmBawerk({
+    slug: 'positive-theory-of-capital',
+    title: 'The Positive Theory of Capital',
+    // The work: Kapital und Kapitalzins, volume II, Positive Theorie des Kapitales (Innsbruck, 1889; the author's
+    // preface is dated November 1888). Its era runs from Menger's Grundsätze (1871), from which the book's theory of
+    // value comes, to the book.
+    work: { qid: null, written: 1888, published: 1889 },
+    era: [1871, 1889],
+    // Smart's translation (London: Macmillan, 1891) in G. E. Stechert's New York reprint of 1923, the copy the
+    // University of Toronto has and the Internet Archive scanned (no scan of the London printing is public). The OCR of
+    // both copies' title pages reads its year "1928" and "i9‘J8", the 3 taken for an 8; the catalogues read "reprint,
+    // 1923" (HathiTrust's record of the University of California's copy, OCLC 1632238, LCCN agr23001126, which also
+    // holds Duke's), as do both scans' records.
+    published: 1923,
+    edition: 'William Smart’s translation (London: Macmillan, 1891), reprinted New York: G. E. Stechert, 1923',
+    scan: 'positivetheoryof00bhuoft', econlib: 'bbPTC', files: 53, copy: 'the University of Toronto’s copy of the New York reprint',
+    printing: 'G. E. Stechert, 1923; first published London: Macmillan, 1891',
+    second: 'Duke University’s, whose record gives no copyright status either and which HathiTrust, holding the same scan, classes as public domain',
+    // The scan's pages: the two prefaces (9–32) and the text (45–470); not the "Analysis" or the index. Its notes are
+    // set close to the text's size, so a line under 50 (the OCR's x_size) is a note. The transcription's slips that the
+    // merge leaves, each read again in the scans (two commas for a space, "Walrus" for Walras, "Loris" for Lexis), and
+    // one word both scans misread alike ("alio" for the Italian "allo").
+    pages: '9-32,45-470', witness: 'positivetheoryof01bohm', cut: 50,
+    fix: [['Élements,d’Économie', 'Élements d’Économie'], ['above,p.', 'above, p.'], ['alio scopo', 'allo scopo'], ['pi\uFFFD la sua', 'più la sua'],
+      ['Ziepulnkt', 'Zielpunkt'], ['Steurlehre', 'Steuerlehre'], ['Rechtsprinicip', 'Rechtsprincip'], ['theoretischen Staatswirthshaft', 'theoretischen Staatswirthschaft'],
+      ['twelve oclock', 'twelve o’clock'], ['B 5‘s horse', 'B 5’s horse'], ['See Manger’s', 'See Menger’s'], ['Emil has (', 'Emil Sax ('],
+      ['tortures aye must', 'tortures we must'], ['L. Walrus', 'L. Walras'], ['and Walrus,', 'and Walras,'], ['log but', 'log-hut'], ['future—conipete', 'future—compete'],
+      ['successivea', 'successiva'], ['Arbeitskal und', 'Arbeitskapital und'], ['und irh Grundbegriff', 'und ihr Grundbegriff'],
+      ['Staatswirthschaftstlehre', 'Staatswirthschaftslehre'], ['of Loris (', 'of Lexis ('], ['Grudsätze', 'Grundsätze'], ['shape[2] :—', 'shape[2]:—'],
+      // Econlib's slips that are words too, where both scans read the edition's: Walras's year, the title of the
+      // author's Rechte und Verhältnisse (three times), "hand to mouth", "as", "he", "an", "my", "buy", "now", "in",
+      // "hand", the French "que" and "ne", Smart's "labour", "pp." for two pages.
+      ['Lausanne, 1814', 'Lausanne, 1874'], ['Rechte and Verhältnisse', 'Rechte und Verhältnisse', 3], ['from hand to month', 'from hand to mouth'],
+      ['distinguishes them an “', 'distinguishes them as “'], ['clear of themselves se we go on', 'clear of themselves as we go on'], ['p. 50) be makes', 'p. 50) he makes'],
+      ['quoi quo ce soit', 'quoi que ce soit'], ['frais de production no sont', 'frais de production ne sont'], ['bring me all intensity', 'bring me an intensity'],
+      ['In 1889 be has', 'In 1889 he has'], ['as equivalent, be gives', 'as equivalent, he gives'], ['produced by the labor of his', 'produced by the labour of his'],
+      ['Einkommens, p. 155, 168', 'Einkommens, pp. 155, 168'], ['the utility, us will be', 'the utility, as will be'], ['on the other band,', 'on the other hand,'],
+      ['compelled to bay,', 'compelled to buy,'], ['another plan than new,', 'another plan than now,'], ['figures given is the text', 'figures given in the text'],
+      ['in taking it is a strong', 'in taking it as a strong'], ['majority of many readers', 'majority of my readers'],
+      // Note ends Econlib cut short (a word, three stops) or ran on into its next heading.
+      ['had perhaps a dim\n', 'had perhaps a dim presentiment.\n'], ['to his economical position\n', 'to his economical position.\n'],
+      ['out of his rent, and so on\n', 'out of his rent, and so on.\n'], ['zero, not 100.—W. S. Book III, Chapter V\n', 'zero, not 100.—W. S.\n'],
+      // Two sentences of Book II, Chapter V that Econlib breaks at its tables: "The" opens the first table's first row,
+      // and "1 million labour-years." ends the paragraph before the second (the edition's "an addition of 1 million
+      // labour-years. The 3d class needs an addition of 1 ” ”").
+      ['circles. The\n\n1st circle contains', 'circles.\n\nThe 1st circle contains'],
+      [`an addition of\n\n${' '.repeat(40)}1 million labour-years.\n`, 'an addition of 1 million labour-years.\n\n']],
+    // Smart's preface (0, Glasgow, June 1891), the author's (1, Innsbruck, November 1888) and the Introduction (2);
+    // seven books of chapters numbered within each, and the "Appendix to page 327" (Book VI, Chapter V) after Book VII
+    // (800). The book's tables keep their columns; its figure, the concentric circles of Book II, Chapter V, is a
+    // picture and is not here (the text describes it); its two worked averages (Book II, Chapter II) are set in one
+    // line each.
+    sections: [
+      { heading: /^TRANSLATOR’S PREFACE$/, n: 0, title: 'Translator’s preface' },
+      { heading: /^AUTHOR’S PREFACE$/, n: 1, title: 'Author’s preface' },
+      { heading: /^INTRODUCTION$/, n: 2, title: 'Introduction' },
+      { heading: /^APPENDIX TO PAGE 327$/, n: 800, title: 'Appendix to page 327: amount of subsistence fund necessary before entering on a production period of given length', after: true },
+    ],
+    books: 7, chapters: 49,
+    // A chapter that carries one on is "(continued)", in lower case, as Darwin's are.
+    lower: ['continued'],
+    // The book's own "degree of capitalism" is how roundabout a process of production is, and "the joint capitalism of
+    // the worker" his share in owning capital: neither is capitalism the economic system (its "Capitalism and
+    // Socialism" is).
+    decisions: { ...untag('degree of capitalism', 'degrees of capitalism', 'joint capitalism', 'degrees of “Capitalism') },
+  }),
 ];
 
 export const shelfEntry = slug => {
@@ -733,7 +978,10 @@ export function writeBook(book) {
 export function indexEntry(book) {
   const paragraphs = book.chapters.flatMap(c => c.paragraphs);
   return {
-    slug: book.slug, title: book.title, author: book.author.name, translator: book.translator?.name || null,
+    // a co-author (an editor whose part is "co-author …": Engels, of the Manifesto) is named with the author
+    slug: book.slug, title: book.title,
+    author: [book.author.name, ...(book.editors || []).filter(e => /^co-author/.test(e.role || '')).map(e => e.name)].join(' and '),
+    translator: book.translator?.name || null,
     year: book.work.published, era: book.era,
     words: paragraphs.reduce((n, p) => n + wordCount(p.text), 0),
     chapters: book.chapters.length, paragraphs: paragraphs.length,

@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-03T04:39:10.791Z",
+ "generated": "2026-11-07T11:16:10.355Z",
  "books": [
   {
    "slug": "the-prince",
@@ -240,6 +240,54 @@
    "paragraphs": 3210,
    "terms": 292,
    "generated": "2026-11-03T04:39:10.589Z"
+  },
+  {
+   "slug": "communist-manifesto",
+   "title": "Manifesto of the Communist Party",
+   "author": "Karl Marx and Frederick Engels",
+   "translator": "Samuel Moore",
+   "year": 1848,
+   "era": [
+    1847,
+    1888
+   ],
+   "words": 13630,
+   "chapters": 5,
+   "paragraphs": 243,
+   "terms": 91,
+   "generated": "2026-11-07T11:14:18.697Z"
+  },
+  {
+   "slug": "capital-and-interest",
+   "title": "Capital and Interest",
+   "author": "Eugen von Böhm-Bawerk",
+   "translator": "William Smart",
+   "year": 1884,
+   "era": [
+    1776,
+    1884
+   ],
+   "words": 168907,
+   "chapters": 31,
+   "paragraphs": 1736,
+   "terms": 449,
+   "generated": "2026-11-07T11:16:02.216Z"
+  },
+  {
+   "slug": "positive-theory-of-capital",
+   "title": "The Positive Theory of Capital",
+   "author": "Eugen von Böhm-Bawerk",
+   "translator": "William Smart",
+   "year": 1889,
+   "era": [
+    1871,
+    1889
+   ],
+   "words": 168361,
+   "chapters": 53,
+   "paragraphs": 1146,
+   "terms": 112,
+   "generated": "2026-11-07T11:16:05.946Z"
   }
  ]
 }

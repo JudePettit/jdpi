@@ -164,6 +164,40 @@
             { "at": "1832", "label": "On War published by his widow, Marie" }
           ] } } }
       ]
+    },
+    "communist-manifesto": {
+      "film": "great-thinkers/karl-marx",
+      "pictures": [
+        { "chapters": [0, 0], "scene": "engels" },
+        { "chapters": [0, 0], "scene": "last-years" },
+        { "chapters": [1, 1], "scene": "materialism" },
+        { "chapters": [2, 3], "scene": "opening" },
+        { "chapters": [4, 4], "scene": "year-1848" }
+      ]
+    },
+    "capital-and-interest": {
+      "pictures": [
+        { "scene": {
+          "id": "theories-of-interest", "title": "The theories of interest the book reviews, 1766 to 1884",
+          "visual": { "kind": "timeline", "from": "1766", "to": "1890", "events": [
+            { "at": "1766", "label": "Turgot writes the Réflexions" }, { "at": "1776", "label": "Adam Smith, The Wealth of Nations" },
+            { "at": "1803", "label": "J. B. Say, Traité d’économie politique" }, { "at": "1817", "label": "Ricardo, Principles" },
+            { "at": "1836", "label": "Senior, the Abstinence theory" }, { "at": "1842", "label": "Rodbertus, Zur Erkenntniss" },
+            { "at": "1867", "label": "Marx, Capital" }, { "at": "1884", "label": "Kapital und Kapitalzins, volume I" },
+            { "at": "1890", "label": "Smart’s translation" }
+          ] } } }
+      ]
+    },
+    "positive-theory-of-capital": {
+      "pictures": [
+        { "scene": {
+          "id": "positive-theory", "title": "From Menger to The Positive Theory of Capital, 1871 to 1891",
+          "visual": { "kind": "timeline", "from": "1871", "to": "1891", "events": [
+            { "at": "1871", "label": "Menger, Grundsätze der Volkswirthschaftslehre" }, { "at": "1871", "label": "Jevons, The Theory of Political Economy" },
+            { "at": "1884", "label": "Kapital und Kapitalzins, volume I" }, { "at": "1888-11", "label": "The author’s preface, Innsbruck" },
+            { "at": "1889", "label": "Positive Theorie des Kapitales" }, { "at": "1891-06", "label": "Smart’s translation" }
+          ] } } }
+      ]
     }
   }
 }

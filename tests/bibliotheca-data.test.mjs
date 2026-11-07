@@ -12,7 +12,8 @@ import { join } from 'node:path';
 import { stripBoilerplate, normalise, roman, sentenceCase, splitChapters } from '../bibliotheca/scripts/text.mjs';
 import { buildAliasIndex, tagText, tagBook, newStats, report, firstYear, fold, loadLake } from '../bibliotheca/scripts/tag-terms.mjs';
 import { SHELF, shelfEntry, checkRights, indexEntry, bookJson, BOOKS, INDEX, ROOT, MAX_BYTES, CACHE } from '../bibliotheca/scripts/shelf.mjs';
-import { bookRecord, splitWork, splitBook, titleCase, caseCounts } from '../bibliotheca/scripts/build-book.mjs';
+import { bookRecord, splitWork, splitBook, titleCase, caseCounts, sourceFile, bookText } from '../bibliotheca/scripts/build-book.mjs';
+import { readEconlib, merge as mergeReadings, sourceOf, textWords, table as tableText } from '../bibliotheca/scripts/scan-text.mjs';
 import { tidyAlias } from '../lake/scripts/aliases.mjs';
 import { wordCount } from '../kino/lib/text.js';
 
@@ -308,7 +309,11 @@ test('shelf: every book is public domain in the US and the UK by its dates, and 
   for (const e of SHELF) {
     assert.match(e.slug, /^[a-z0-9-]+$/);
     const chapter = e.layout?.chapter instanceof RegExp ? e.layout.chapter : e.layout?.chapter?.heading;
-    assert.ok(e.title && e.author?.qid && Number.isInteger(e.gutenberg) && chapter instanceof RegExp && Number.isInteger(e.work?.published) && e.era?.length === 2, `${e.slug} is complete`);
+    // Its source: a Project Gutenberg file, or (for a book Gutenberg lacks) an Internet Archive scan with the
+    // transcription its OCR is checked against, the scan's pages and the licence in words (scan-text.mjs).
+    const source = Number.isInteger(e.gutenberg) !== Boolean(e.scan)
+      && (!e.scan || (/^[\w.-]+$/.test(e.scan.id) && /^https:\/\/www\.econlib\.org\//.test(e.scan.econlib) && Number.isInteger(e.scan.files) && /^\d+-\d+(,\d+-\d+)*$/.test(e.scan.pages) && /public domain/.test(e.scan.licence)));
+    assert.ok(e.title && e.author?.qid && source && chapter instanceof RegExp && Number.isInteger(e.work?.published) && e.era?.length === 2, `${e.slug} is complete`);
     // A reason for every person whose words the edition carries, and one for the publication; the finding in words
     // names each one's death and the edition's year, and the dates bear it out.
     const people = [e.author, e.translator, ...(e.editors || [])].filter(Boolean);
@@ -364,6 +369,14 @@ const STATED = {
   'decline-and-fall-6': { n: range(59, 71), notes: 1245, verse: 0, words: [233000, 234500] },
   'on-war': { n: [...range(0, 4), ...range(101, 108), ...range(201, 206), ...range(301, 318), ...range(401, 414), ...range(501, 518), ...range(601, 630), ...range(701, 722), ...range(801, 809)],
     books: 8, notes: 61, unmarked: 2, verse: 3, words: [291000, 293000] },
+  // Engels's first note of Section I is on its title.
+  'communist-manifesto': { n: range(0, 4), notes: 10, unmarked: 1, verse: 0, words: [13500, 13800] },
+  'capital-and-interest': { n: [0, 1, ...range(101, 105), ...range(201, 203), ...range(301, 311), ...range(401, 403), 501, ...range(601, 603), 701, 702, 800],
+    books: 7, notes: 452, verse: 4, words: [168000, 170000] },
+  // Book III, Chapter I has a note on its title; the tables of Books II and IV–VII keep their columns, three of them
+  // in notes, two of which go on after their table (a block "[n] …" again).
+  'positive-theory-of-capital': { n: [0, 1, 2, ...range(101, 106), ...range(201, 206), ...range(301, 310), ...range(401, 407), ...range(501, 505), ...range(601, 610), ...range(701, 705), 800],
+    books: 7, notes: 331, unmarked: 1, verse: 21, words: [167500, 169500] },
 };
 
 test('built: the-prince.json follows the data contract', () => {
@@ -408,15 +421,22 @@ test('built: every book on the shelf follows the data contract, with the chapter
     assert.deepEqual({ ...book.edition }, head.edition, at('edition'));
     assert.deepEqual([book.rights.us, book.rights.uk], ['pd', 'pd'], at('pd/pd'));
     assert.ok(checkRights(e).length > 1, at('the dates bear the finding out'));
-    assert.match(book.edition.licence, /header, footer and licence have been removed/, at('licence'));
-    assert.equal(book.edition.url, `https://www.gutenberg.org/ebooks/${e.gutenberg}`, at('edition url'));
+    if (e.scan) {
+      assert.deepEqual([book.edition.source, book.edition.id, book.edition.url], ['Internet Archive', e.scan.id, `https://archive.org/details/${e.scan.id}`], at('edition'));
+      assert.match(book.edition.licence, /OCR checked word by word against Econlib’s transcription.*public domain/, at('licence'));
+    } else {
+      assert.match(book.edition.licence, /header, footer and licence have been removed/, at('licence'));
+      assert.equal(book.edition.url, `https://www.gutenberg.org/ebooks/${e.gutenberg}`, at('edition url'));
+    }
     assert.ok(Number.isInteger(book.work.published) && book.era.every(Number.isInteger) && book.era[0] <= book.era[1], at('work and era'));
     assert.match(book.generated, /^\d{4}-\d{2}-\d{2}T/, at('generated'));
     // Chapters: the numbers stated, rising, each with its heading, title, words and paragraphs.
     assert.deepEqual(book.chapters.map(c => c.n), s.n, at('chapter numbers'));
     if (s.books) {
       const parts = new Map();
-      for (const c of book.chapters.filter(c => c.n >= 100 || e.slug === 'peloponnesian-war')) {
+      // (a piece after the last book, Böhm-Bawerk's Conclusion, belongs to none: `after` in its layout)
+      const after = new Set((e.layout.sections || []).filter(x => x.after).map(x => x.n));
+      for (const c of book.chapters.filter(c => (c.n >= 100 && !after.has(c.n)) || e.slug === 'peloponnesian-war')) {
         assert.ok(c.part && Number.isInteger(c.part.n) && c.heading.startsWith(c.part.heading), at(`${c.heading} names its book`));
         if (c.n >= 100) assert.equal(c.part.n, Math.floor(c.n / 100), at(`${c.heading} is in book ${Math.floor(c.n / 100)}`));
         parts.set(c.part.n, c.part);
@@ -447,7 +467,8 @@ test('built: every book on the shelf follows the data contract, with the chapter
           notes++;
           if (!marks.some(t => t.includes(`[${p.note}]`))) unmarked++;
         }
-        if (p.kind === 'verse') { assert.ok(p.text.includes('\n'), at(`${p.id} keeps its lines`)); verse++; }
+        // (a table of one row keeps its columns: Carey's last distribution in Capital and Interest)
+        if (p.kind === 'verse') { assert.ok(p.text.includes('\n') || /\S {3,}\S/.test(p.text), at(`${p.id} keeps its lines`)); verse++; }
         if (p.kind === 'para') assert.ok(!p.text.includes('\n'), at(`${p.id} is one paragraph`));
         // No Gutenberg boilerplate, no note label left in the text, and the typography set.
         assert.doesNotMatch(p.text, /gutenberg|\*\*\* ?(START|END)|™|\(return\)/i, at(`${p.id}: no boilerplate`));
@@ -659,11 +680,12 @@ test('built: the next full lake build keeps every alias as the books were tagged
 
 // A book file is what the scripts make of its source: a fix to the layout or the splitter (a title's typo, a note's mark)
 // with no rebuild leaves the file stale (eight of Gibbon's titles were). The Gutenberg files stay out of the repository
-// (bibliotheca/scripts/cache/.gitignore), so this runs where they are, on the machine that builds the books.
-const cached = SHELF.filter(e => existsSync(join(CACHE, `pg${e.gutenberg}.txt`)));
+// (bibliotheca/scripts/cache/.gitignore), so this runs where they are, on the machine that builds the books; so do the
+// texts scan-text.mjs makes from a scan (cache/<scan id>.txt).
+const cached = SHELF.filter(e => existsSync(sourceFile(e)));
 test('built: every book whose source is cached is what the current scripts make of it (terms aside)', cached.length ? {} : { skip: 'no Gutenberg file in bibliotheca/scripts/cache' }, () => {
   for (const e of cached) {
-    const fresh = splitBook(stripBoilerplate(readFileSync(join(CACHE, `pg${e.gutenberg}.txt`), 'utf8')), e.layout, { notes: 0, unmarked: [] });
+    const fresh = splitBook(bookText(e, readFileSync(sourceFile(e), 'utf8')), e.layout, { notes: 0, unmarked: [] });
     const built = shelfBooks.find(([x]) => x.slug === e.slug)[1].chapters;
     const shape = cs => cs.map(c => ({ ...c, paragraphs: c.paragraphs.map(({ terms, ...p }) => p) }));
     // Compared as text first (fast); the structures only when they differ, for the message.
@@ -700,4 +722,249 @@ test('built: index.json lists the shelf with the counts of the book files, a wor
     const ns = shelfBooks.filter(([e]) => e.set?.slug === slug).flatMap(([, b]) => b.chapters.map(c => c.n));
     assert.deepEqual(ns, [...new Set(ns)].sort((a, b) => a - b), `${slug}: chapter numbers unique and rising through the volumes`);
   }
+});
+
+// ---- The books of 7 November 2026: Marx and Engels's Manifesto (Project Gutenberg) and Böhm-Bawerk's two volumes in
+// Smart's translation, made from scans (scan-text.mjs) since Gutenberg has neither.
+test('importer: notes lettered through a section and set at its end, a section after the last book, divisions called sections', () => {
+  const text = [
+    'PREFACE', '', 'The Manifesto(a) was written in 1848.', '', '(a) A note of the preface.', '', '',
+    'I.', '', 'OF CLASSES.(a)', '', 'The history of society(b) is a history.', '', 'Freeman and slave(c) stood opposed.', '', 'More text.', '',
+    '(a) On the title.', '', '(b) That is, all written history.', '', '(c) A note on slaves.', '', '',
+    'II.', '', 'OF PARTIES.', '', '(_a_) _Feudal Socialism_.', '', 'The restoration period(a) had passed.', '', '(a) The French Restoration.', '',
+  ].join('\n');
+  const chapters = splitWork(text, {
+    front: { title: 'Preface', pieces: [{ heading: /^PREFACE$/, title: 'Preface' }] },
+    chapter: { heading: /^([IV]+)\.$/, title: 'next', count: 2, label: 'Section' }, notes: 'letter', verse: false,
+  }, { notes: 0, unmarked: [] });
+  const paras = c => c.paragraphs.map(p => [p.kind, p.note ?? null, p.text]);
+  assert.deepEqual(chapters.map(c => [c.n, c.heading, c.title]), [[0, 'Preface', 'Preface'], [1, 'Section I', 'Of classes'], [2, 'Section II', 'Of parties']]);
+  assert.deepEqual(paras(chapters[0]), [['para', null, 'Preface'], ['para', null, 'The Manifesto[1] was written in 1848.'], ['note', 1, '[1] A note of the preface.']]);
+  assert.deepEqual(paras(chapters[1]), [
+    ['note', 1, '[1] On the title.'], ['para', null, 'The history of society[2] is a history.'], ['note', 2, '[2] That is, all written history.'],
+    ['para', null, 'Freeman and slave[3] stood opposed.'], ['note', 3, '[3] A note on slaves.'], ['para', null, 'More text.']], 'each note after its paragraph, one on the title first');
+  assert.deepEqual(paras(chapters[2]), [['para', null, '(a) Feudal Socialism.'], ['para', null, 'The restoration period[1] had passed.'], ['note', 1, '[1] The French Restoration.']],
+    'a subheading "(a)" opening its paragraph is no mark');
+  const book = splitWork(['PREFACE', '', 'A preface.', '', 'BOOK I', 'THE HISTORY', '', 'CHAPTER I', 'THE START', '', 'Text one.', '', 'CONCLUSION', '', 'The end.', ''].join('\n'), {
+    sections: [{ heading: /^PREFACE$/, n: 0, title: 'Preface' }, { heading: /^CONCLUSION$/, n: 800, title: 'Conclusion', after: true }],
+    part: { heading: /^BOOK ([IVX]+)$/, label: 'Book', title: 'block', count: 1 }, chapter: { heading: /^CHAPTER ([IVX]+)$/, title: 'block', within: true, count: 1 },
+  });
+  assert.deepEqual(book.map(c => [c.n, c.heading, c.title, c.part?.n ?? null]), [[0, 'Preface', 'Preface', null], [101, 'Book I, Chapter I', 'The start', 1], [800, 'Conclusion', 'Conclusion', null]]);
+});
+
+test('scan-text: Econlib\'s page read, its own matter left out, and the scan\'s word against the transcription\'s by the rule', () => {
+  const page = '<div class="book-reader-content"><h5>The Problem</h5><h2>Book I, Chapter I</h2><h4>HISTORY</h4><h2>BOOK I</h2>'
+    + '<p class="para">Interest is income.<br /> <span class="footnote" id="anchor_a1"><a href="#a1">*1</a></span></p>'
+    + '<p class="para">See above, p. 90 [ <a href="x">Book I, Chapter II</a>, par. I.II.47.—Econlib Ed.]. The term Usury ( <img src="https://www.econlib.org/u/BohmBawerkGreek1.gif" alt="tokos" /> ) is old.</p>'
+    + '<p><center><img src="https://www.econlib.org/u/bbPTCmath1.gif" /></center></p><p>That is, half a year.</p>'
+    + '<p></rec><rec id="a1" type="N"></p><div class="li"><div class="text" id="a1">A note.</div></div><p>Its second paragraph.</p>'
+    + '<p></rec><rec id="a2" type="N"></p><div class="text" id="a2">[<a href="y">Book III</a>, par. 3.—Econlib Ed.]</div>'
+    + '<div class="book-reader-tools"></div>';
+  const blocks = readEconlib(page);
+  assert.deepEqual(blocks.map(b => [b.kind, b.text]), [
+    ['h', 'The Problem'], ['h', 'Book I, Chapter I'], ['h', 'HISTORY'], ['h', 'BOOK I'], ['p', 'Interest is income. \u0001a1\u0001'],
+    ['p', 'See above, p. 90. The term Usury (τόκος) is old.'], ['p', '(10 + 9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1) / 100 = 55/100'], ['p', 'That is, half a year.'],
+    ['note', 'A note. Its second paragraph.'], ['note', '']]);
+  const source = sourceOf([blocks.map(b => ({ ...b }))]);
+  assert.equal(source, 'BOOK I\nHISTORY\n\nCHAPTER I\nTHE PROBLEM\n\nInterest is income.[1]\n\n [1] A note. Its second paragraph.\n\nSee above, p. 90. The term Usury (τόκος) is old.\n\n'
+    + '(10 + 9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1) / 100 = 55/100\n\nThat is, half a year.\n');
+  // The rule: a misreading of the OCR's is the transcription's; a word the transcription's OCR got wrong, read so by
+  // both scans, is the scans'; a look-alike of the transcription's stays the transcription's however the scans agree.
+  const toks = (s, c = 96) => s.split(' ').map(t => ({ t, c }));
+  const vocab = new Set(['the', 'two', 'sides', 'aides', 'must', 'most', 'be', 'case', 'ease', 'of', 'houses']);
+  vocab.common = vocab;
+  const run = (ocr, ed, witness, c) => { const e = toks(ed); mergeReadings(toks(ocr, c), e, vocab, [], witness ? textWords(witness) : null); return e.map(x => x.final).join(' '); };
+  assert.equal(run('the tvvo sides must be', 'the two sides must be'), 'the two sides must be', 'the OCR’s misreading');
+  assert.equal(run('the two sides must be', 'the two aides must be', 'the two sides\nmust be', 60), 'the two sides must be', 'both scans against the transcription');
+  assert.equal(run('the two sides must be', 'the two aides must be', null, 60), 'the two aides must be', 'one scan read without confidence does not outvote the transcription');
+  assert.equal(run('the two sides must be', 'the two aides must be'), 'the two sides must be', 'one read with confidence does, on a known word that is no look-alike');
+  assert.equal(run('the ease of houses', 'the case of houses', 'the ease of houses'), 'the case of houses', 'c for e is an OCR’s slip, two OCRs’ too');
+  // ... unless the transcription's word is its own slip, which no other book has and it has once ("theoiogical")
+  vocab.shelf = new Set(['the', 'is', 'theological', 'case', 'ease']); vocab.ed = new Map([['theoiogical', 1]]);
+  vocab.add('theological');
+  assert.equal(run('the theological case', 'the theoiogical case', 'the theological case'), 'the theological case', 'a lone slip of the transcription’s, read right by both scans');
+  assert.deepEqual(textWords('a com-\nmodity and labour-\nPower').map(w => w.t), ['a', 'commodity', 'and', 'labour-', 'Power']);
+});
+
+test('built: the new books carry their rights findings, the Irish term among them, and their chapters as their editions print them', () => {
+  const book = slug => shelfBooks.find(([e]) => e.slug === slug)[1];
+  const ch = (slug, n) => book(slug).chapters.find(c => c.n === n);
+  // The rights: every person's death and the edition, the Irish statute, the day of the finding.
+  for (const [slug, deaths, year] of [['communist-manifesto', [1883, 1895, 1911], 1908], ['capital-and-interest', [1914, 1915], 1890], ['positive-theory-of-capital', [1914, 1915], 1923]]) {
+    const e = shelfEntry(slug), r = book(slug).rights;
+    for (const d of deaths) assert.match(r.basis, new RegExp(String(d)), `${slug}: ${d}`);
+    assert.match(r.basis, new RegExp(`${year}`), `${slug}: the edition's year`);
+    assert.match(r.basis, /Copyright and Related Rights Act 2000, s\.24/, `${slug}: the Irish term`);
+    assert.equal(r.checked, '2026-11-07');
+    assert.deepEqual(checkRights(e, 2026).length, [e.author, e.translator, ...(e.editors || [])].length + 1);
+  }
+  assert.deepEqual(shelfEntry('communist-manifesto').editors.map(x => [x.name, x.died]), [['Frederick Engels', 1895]]);
+  assert.match(shelfEntry('communist-manifesto').editors[0].role, /^co-author/);
+  assert.deepEqual(['capital-and-interest', 'positive-theory-of-capital'].map(s => book(s).edition.url),
+    ['https://archive.org/details/capitalinterestc00bhuoft', 'https://archive.org/details/positivetheoryof00bhuoft']);
+  // The Manifesto: Engels's preface, the opening, four sections and the last words; his notes after their paragraphs.
+  assert.equal(ch('communist-manifesto', 0).paragraphs[0].text, 'Preface', 'headed as the edition heads it');
+  assert.ok(ch('communist-manifesto', 0).paragraphs.some(p => p.text === 'London, January 30, 1888.'));
+  assert.ok(texts(book('communist-manifesto')).every(p => !/Labor News|City Hall Place|Price 10 Cents|De Leon/.test(p.text)), 'the reprint’s notice and advertisements are not the work');
+  assert.deepEqual(book('communist-manifesto').chapters.slice(1).map(c => [c.heading, c.title]), [['Section I', 'Bourgeois and proletarians'], ['Section II', 'Proletarians and Communists'],
+    ['Section III', 'Socialist and Communist literature'], ['Section IV', 'Position of the Communists in relation to the various existing opposition parties']]);
+  assert.match(ch('communist-manifesto', 1).paragraphs.find(p => p.kind === 'para').text, /^The history of all hitherto existing society\[2\] is the history of class struggles\.$/);
+  assert.equal(ch('communist-manifesto', 4).paragraphs.at(-1).text, 'Workingmen of all countries unite!');
+  // Capital and Interest: Smart's preface, the Introduction, seven books, the Conclusion; Book VI on Rodbertus and Marx.
+  assert.match(ch('capital-and-interest', 0).paragraphs[0].text, /^My only reasons for writing a preface to a work so exhaustive/);
+  assert.equal(ch('capital-and-interest', 0).paragraphs.at(-1).text, 'GLASGOW, April 1890.');
+  assert.match(ch('capital-and-interest', 1).paragraphs[0].text, /^It is generally possible for any one who owns capital to obtain from it a permanent net income, called Interest\.\[1\]$/);
+  assert.deepEqual([602, 603].map(n => ch('capital-and-interest', n).title), ['Rodbertus', 'Marx']);
+  assert.equal(ch('capital-and-interest', 304).title, 'The use of capital according to the Say-Hermann school');
+  assert.match(ch('capital-and-interest', 800).paragraphs.at(-1).text, /must be the task of the second and positive part of my work\.$/);
+  assert.ok(texts(book('capital-and-interest')).some(p => p.text.includes('this term Usury (τόκος)')), 'the edition’s Greek, which Econlib sets as a picture');
+  // The Positive Theory: two prefaces, the Introduction, seven books, the appendix; its tables in columns.
+  assert.deepEqual([0, 1, 2].map(n => ch('positive-theory-of-capital', n).title), ['Translator’s preface', 'Author’s preface', 'Introduction']);
+  assert.equal(ch('positive-theory-of-capital', 1).paragraphs.at(-1).text, 'INNSBRUCK, November 1888.');
+  assert.equal(ch('positive-theory-of-capital', 310).title, 'The value of productive goods. Value and costs');
+  assert.match(ch('positive-theory-of-capital', 800).paragraphs.at(-1).text, /must be sufficient for half the production period plus half the usual stage period\.$/);
+  // Words Econlib's own OCR got wrong, which both scans read right.
+  const ptc = texts(book('positive-theory-of-capital')).map(p => p.text).join('\n');
+  for (const [right, wrong] of [['two sides must', 'two aides must'], ['kinds of goods, and', 'kings of goods, and'], ['£80', 'œ80']]) {
+    assert.ok(ptc.includes(right) && !ptc.includes(wrong), `“${right}”, not “${wrong}”`);
+  }
+  for (const slug of ['capital-and-interest', 'positive-theory-of-capital']) {
+    assert.ok(texts(book(slug)).every(p => !/Econlib|\u0001|Ed\.\]/.test(p.text)), `${slug}: none of Econlib’s own matter`);
+    // nothing of an OCR's left: no replacement character, no figure with a letter for its 1, no spaced quotation mark
+    // (a table's ditto marks, “, stand alone in their columns)
+    assert.ok(texts(book(slug)).every(p => !/�|(?<![\p{L}\p{N}])[£(]?[lI]\d|\d[lI]\d/u.test(p.text) && (p.kind === 'verse' || !/ ”|“ /.test(p.text))), `${slug}: no scanning rubbish`);
+  }
+  // The slips of the transcription's own OCR that the scans put right (the shelf's `fix` lists and the merge).
+  const ci = texts(book('capital-and-interest')).map(p => p.text).join('\n');
+  for (const [right, wrong] of [['essentially theological', 'theoiogical'], ['first printed, 1804', 'l804'], ['Nutzung von Grundstücken', 'Nutzung voll'],
+    ['(soprappiù)', 'soprappi�'], ['full justice', 'justIce'], ['Unciarum Foenus', 'Undarum'], ['(s’il n’avait', 'si’l']]) {
+    assert.ok(ci.includes(right) && !ci.includes(wrong), `Capital and Interest: “${right}”, not “${wrong}”`);
+  }
+  for (const [right, wrong] of [['L. Walras', 'Walrus'], ['the investigations of Lexis', 'of Loris'], ['See Menger’s Grundsätze', 'Manger’s'],
+    ['whose log-hut', 'log but'], ['say £100—will', '£I00'], ['allo scopo', 'alio scopo'], ['twelve o’clock', 'oclock']]) {
+    assert.ok(ptc.includes(right) && !ptc.includes(wrong), `The Positive Theory of Capital: “${right}”, not “${wrong}”`);
+  }
+});
+
+// ---- The reviews of 7 November 2026: the rights records stated exactly, the transcription's slips that are words put
+// right where both scans read the edition, Econlib's tables set as tables (in quotations and notes too, their spanning
+// cells honoured), the note ends the edition prints, and the tagging of four names and Böhm-Bawerk's "capitalism".
+test('scan-text: a table in a quotation or a note is a table, its spanning cells and rows honoured', () => {
+  const page = '<div class="book-reader-content"><h5>The Problem</h5><h2>Book I, Chapter I</h2><h4>HISTORY</h4><h2>BOOK I</h2>'
+    + '<blockquote><p>“The axe being made,<span class="footnote" id="anchor_a1"><a href="#a1">*1</a></span> as follows:—</p>'
+    + '<table><tr><td /><td>Total<br /><br />Product.</td><td>Share.</td></tr><tr><td>First</td><td>4</td><td>1</td></tr></table>'
+    + '<br /><br />“The reward has doubled.</blockquote>'
+    + '<p></rec><rec id="a1" type="N"></p><div class="text" id="a1">The position is as follows:—</p>'
+    + '<table><tr><td>A 5</td><td>£22</td></tr><tr><td /><td>£26</td></tr></table><p>Here we see the pair.</div>'
+    + '<div class="book-reader-tools"></div>';
+  const blocks = readEconlib(page);
+  assert.deepEqual(blocks.map(b => b.kind), ['h', 'h', 'h', 'h', 'p', 'table', 'p', 'note']);
+  assert.deepEqual(blocks[5].rows.map(r => r.map(c => c.t)), [['', 'Total Product.', 'Share.'], ['First', '4', '1']]);
+  assert.equal(blocks[7].text, 'The position is as follows:— \u00020\u0002 Here we see the pair.');
+  assert.equal(sourceOf([blocks]), 'BOOK I\nHISTORY\n\nCHAPTER I\nTHE PROBLEM\n\n“The axe being made,[1] as follows:—\n\n [1] The position is as follows:—\n\n'
+    + 'A 5    £22\n       £26\n\n [1] Here we see the pair.\n\n         Total Product.    Share.\nFirst    4                 1\n\n“The reward has doubled.\n',
+    'the note’s table after its words, and its words on after the table as the note again');
+  // Spanning: a heading over two columns, a cell held down over two rows, an empty spacer column left out.
+  const cell = (t, span = 1, down = 1) => ({ t, span, down });
+  assert.equal(tableText([[cell('Period.'), cell('A', 2), cell('B', 2)], [cell(''), cell('Return.'), cell('Surplus.'), cell('Return.'), cell('Surplus.')],
+    [cell('1 year'), cell('£50'), cell('—'), cell('£50'), cell('£1')]]),
+  'Period.    A                      B\n           Return.    Surplus.    Return.    Surplus.\n1 year     £50        —           £50        £1');
+  assert.equal(tableText([[cell('Amount per piece', 1, 3), cell('', 1, 3), cell('Now.'), cell('In five years.')], [cell('6'), cell('7.05')], [cell('5'), cell('6.26')]]),
+    'Amount per piece    Now.    In five years.\n                    6       7.05\n                    5       6.26', 'a figure under its heading, past a cell held down');
+  // A table of one row is a table, in a book whose text has runs of spaces only between a table's cells.
+  const one = splitWork(['CHAPTER I', 'THE START', '', 'As follows:—', '', 'Fourth    32    19.20    12.80', ''].join('\n'),
+    { chapter: { heading: /^CHAPTER ([IVX]+)$/, title: 'block', count: 1 }, notes: 'bracket', verse: false, tables: 'rows' });
+  assert.deepEqual(one[0].paragraphs.map(p => [p.kind, p.text]), [['para', 'As follows:—'], ['verse', 'Fourth    32    19.20    12.80']]);
+});
+
+test('built: the reviews of the new books put right (rights records, slips, tables, note ends, terms)', async () => {
+  const book = slug => shelfBooks.find(([e]) => e.slug === slug)[1];
+  const paras = slug => texts(book(slug));
+  const byId = (slug, id) => paras(slug).find(p => p.id === id);
+  const { paragraphHtml, isTable } = await import('../bibliotheca/neo/lib/text.js');
+  const { readable } = await import('../bibliotheca/neo/lib/narrate.js');
+  // The rights records say what the Internet Archive's records say: nothing of copyright for the two Toronto scans,
+  // "not in copyright" for Harvard's (Google's) copy alone; the licence line names the printing, its brackets closed.
+  for (const slug of ['capital-and-interest', 'positive-theory-of-capital']) {
+    const { rights, edition } = book(slug);
+    assert.doesNotMatch(rights.basis, /which marks the book as not in copyright/, `${slug}: no status the record does not give`);
+    assert.match(rights.basis, /whose record gives no copyright status/);
+    const depth = [...edition.licence].reduce((d, ch) => (d < 0 ? d : d + (ch === '(') - (ch === ')')), 0);
+    assert.equal(depth, 0, `${slug}: the licence line’s brackets are balanced`);
+  }
+  assert.match(book('capital-and-interest').rights.basis, /Harvard’s, scanned by Google, which the Internet Archive’s record marks as not in copyright/);
+  assert.match(book('positive-theory-of-capital').edition.licence, /copy of the New York reprint \(G\. E\. Stechert, 1923; first published London: Macmillan, 1891\), its OCR/);
+  assert.doesNotMatch(book('positive-theory-of-capital').edition.licence, /reprint \(London/);
+  assert.match(book('communist-manifesto').rights.basis, /Samuel Moore died in 1911,/);
+  assert.doesNotMatch(book('communist-manifesto').rights.basis, /20 January 1911/);
+  // Econlib's slips that are words too, where both scans read the edition's word.
+  const ptc = paras('positive-theory-of-capital').map(p => p.text).join('\n'), ci = paras('capital-and-interest').map(p => p.text).join('\n');
+  for (const [right, wrong] of [['Lausanne, 1874', 'Lausanne, 1814'], ['Rechte und Verhältnisse', 'Rechte and'], ['from hand to mouth', 'hand to month'],
+    ['distinguishes them as “', 'them an “'], ['clear of themselves as we go on', 'themselves se we'], ['p. 50) he makes', ') be makes'], ['quoi que ce soit', 'quoi quo'],
+    ['de production ne sont', 'production no sont'], ['bring me an intensity', 'me all intensity'], ['In 1889 he has', '1889 be has'], ['as equivalent, he gives', 'equivalent, be gives'],
+    ['the labour of his employé', 'labor of his'], ['Einkommens, pp. 155, 168', 'Einkommens, p. 155'], ['the utility, as will be', 'utility, us will'],
+    ['on the other hand, which lasts six years', 'other band'], ['compelled to buy,', 'compelled to bay'], ['another plan than now,', 'plan than new'],
+    ['given in the text', 'given is the text'], ['taking it as a strong', 'taking it is a strong'], ['majority of my readers', 'majority of many readers']]) {
+    assert.ok(ptc.includes(right) && !ptc.includes(wrong), `The Positive Theory of Capital: “${right}”, not “${wrong}”`);
+  }
+  for (const [right, wrong] of [['quid lex dicat', 'quid leg dicat'], ['After saying that', 'After saving'], ['Here he puts down', 'Here be puts'],
+    ['interest. Thus, instead of the existence', 'This, instead'], ['a wrong name to one of them.', 'one of them,\n']]) {
+    assert.ok(ci.includes(right) && !ci.includes(wrong), `Capital and Interest: “${right}”, not “${wrong}”`);
+  }
+  // Every Econlib table is a table block: Carey's three in Capital and Interest (the last of one row), and The
+  // Positive Theory's 21, three of them in notes; none is run into a paragraph.
+  const tables = slug => paras(slug).filter(isTable);
+  assert.equal(tables('capital-and-interest').length, 4);
+  assert.equal(tables('positive-theory-of-capital').length, 21);
+  assert.deepEqual(['c203-v70', 'c203-v73', 'c203-v75'].map(id => byId('capital-and-interest', id).text.split('\n').at(-1).split(/ {2,}/)),
+    [['Second', '8', '2.66', '5.33'], ['Third', '16', '8', '8'], ['Fourth', '32', '19.20', '12.80']]);
+  assert.ok(paras('capital-and-interest').every(p => isTable(p) || !/First 4 1 3|Share\. Capitalist|as follows:— (Total|Fourth)/.test(p.text)), 'no table run into a paragraph');
+  const carey = byId('capital-and-interest', 'c203-v75');
+  assert.match(paragraphHtml(carey), /class="para verse table"/);
+  assert.equal(readable(carey), false, 'the narrator does not read a table of one row as a sentence');
+  for (const [note, table, after] of [['c404-n30', 'c404-v31', 'c404-n32'], ['c607-n04', 'c607-v05', 'c607-n06'], ['c607-n19', 'c607-v20', null]]) {
+    const all = paras('positive-theory-of-capital'), i = all.findIndex(p => p.id === note);
+    assert.deepEqual([all[i].kind, all[i + 1].id, all[i + 1].kind], ['note', table, 'verse'], `${note}: its table after it`);
+    if (after) assert.deepEqual([all[i + 2].id, all[i + 2].kind, all[i + 2].note], [after, 'note', all[i].note], `${note}: its words on after the table`);
+  }
+  assert.ok(paras('positive-theory-of-capital').every(p => p.kind !== 'note' || !/Economical Means of Satisfaction|1893 95\.23|A 5 £22 B 1/.test(p.text)), 'no table in a note’s words');
+  // The columns: a figure stands under its heading, past spanning headings and cells held down.
+  const col = (text, row, s) => text.split('\n')[row].indexOf(s);
+  const ptcTable = id => byId('positive-theory-of-capital', id).text;
+  const abc = ptcTable('c704-v03');
+  assert.deepEqual([col(abc, 1, 'Return.'), col(abc, 2, '£50'), col(abc, 0, 'A')], [col(abc, 1, 'Return.'), col(abc, 1, 'Return.'), col(abc, 1, 'Return.')]);
+  assert.equal(col(abc, 3, '£10'), abc.split('\n')[1].lastIndexOf('Surplus.'), 'C’s surplus under C’s heading');
+  const uses = ptcTable('c603-v12');
+  assert.deepEqual([col(uses, 2, '6'), col(uses, 2, '7.05'), col(uses, 2, '9.82')],
+    [col(uses, 1, 'In immediate'), col(uses, 1, 'In a five'), col(uses, 1, 'In a ten')]);
+  for (const id of ['c504-v07', 'c504-v24']) {
+    const t = ptcTable(id);
+    assert.deepEqual(['1888.', '1891.'].map(y => col(t, 1, y)), [col(t, 2, '1888') + 8, t.split('\n')[5].search(/\S+$/)], `${id}: each year over its month’s labour`);
+  }
+  const horses = ptcTable('c404-v03');
+  assert.equal(col(horses, 3, 'B 2'), col(horses, 1, 'B 1 values'), 'the sellers in one column');
+  assert.equal(col(horses, 3, '£28'), col(horses, 1, '£30'), 'the buyers’ prices in one column');
+  // The two sentences Econlib broke at its tables.
+  assert.match(byId('positive-theory-of-capital', 'c205-p07').text, /the following division of the circles\.$/);
+  assert.match(ptcTable('c205-v08'), /^The 1st circle contains the intermediate products of 6 million labour-years\.\n/);
+  assert.match(byId('positive-theory-of-capital', 'c205-p12').text, /an addition of 1 million labour-years\.$/);
+  assert.match(ptcTable('c205-v13'), /^The {4}3d class needs an addition of/);
+  // Note ends: none ends on Econlib's next heading or a stray letter, none cut short; each ends as the edition does.
+  for (const slug of ['capital-and-interest', 'positive-theory-of-capital']) {
+    for (const p of paras(slug).filter(x => x.kind === 'note')) {
+      assert.doesNotMatch(p.text, /\s(Introduction|Conclusion|Preface|Book [IVX]+(, Chapter [IVX]+)?)$|[.)]\p{Ll}{1,2}$/u, `${slug} ${p.id}: no heading or stray letters at its end`);
+      assert.match(p.text, /[.!?:;)\]”’—*\d…]$/, `${slug} ${p.id}: ends as a note ends`);
+    }
+  }
+  assert.match(byId('positive-theory-of-capital', 'c702-n42').text, /of which he had perhaps a dim presentiment\.$/);
+  assert.match(byId('capital-and-interest', 'c602-n56').text, /represents no ‘economical loss\.’”$/);
+  assert.match(byId('capital-and-interest', 'c00-n53').text, /^\[3\] Quarterly Journal of Economics, April 1889\.$/);
+  // Terms: Böhm-Bawerk's "degree of capitalism" is no capitalism; the Manifesto's Darwin, Herzen and Bakounine, and
+  // Capital and Interest's bare Grotius, are their entries.
+  const termsOf = slug => paras(slug).flatMap(p => p.terms.map(t => ({ ...t, id: p.id, form: p.text.slice(t.s, t.e) })));
+  assert.deepEqual(termsOf('positive-theory-of-capital').filter(t => t.qid === 'Q6206').map(t => [t.id, t.form]), [['c105-p25', 'Capitalism']]);
+  const cm = termsOf('communist-manifesto');
+  for (const [form, qid] of [['Darwin', 'Q1035'], ['Herzen', 'Q201221'], ['Bakounine', 'Q27645']]) assert.ok(cm.some(t => t.form === form && t.qid === qid), `the Manifesto’s ${form}`);
+  const grotius = (ci.match(/Grotius/g) || []).length;
+  assert.equal(termsOf('capital-and-interest').filter(t => /Grotius/.test(t.form) && t.qid === 'Q154959').length, grotius, 'every Grotius is Hugo Grotius');
 });

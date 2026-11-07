@@ -1370,3 +1370,49 @@ test('page: in Screens only the book\'s picture and the screens for its era take
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+test('page: the Manifesto names both its authors and counts its four sections; Böhm-Bawerk\'s books name the scan and the transcription their text was checked against', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/#book=communist-manifesto&ch=1`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#text p.para', { timeout: 20000 });
+    assert.match(await page.locator('#byline').innerText(), /^Karl Marx \(1818–1883\) and Frederick Engels, translated by Samuel Moore \(edition of 1908\)$/);
+    assert.match(await page.locator('#book-meta').innerText(), /4 sections and the preface and preamble/);
+    assert.match(await page.locator('#sources').innerText(), /Manifesto of the Communist Party by Karl Marx and Frederick Engels, translated by Samuel Moore \(1908\): Project Gutenberg pg31193/);
+    assert.match(await page.locator('#shelf option[value="communist-manifesto"]').innerText(), /Karl Marx and Frederick Engels \(1848\)/);
+    // Engels's notes stand after the paragraphs that cite them, his first, on the section's title, first.
+    assert.equal(await page.locator('#c01-n01').count(), 1);
+    assert.match(await page.locator('#c01-p02').innerText(), /^The history of all hitherto existing society\[?2\]? is the history of class struggles\.$/);
+    for (const [slug, id] of [['capital-and-interest', 'capitalinterestc00bhuoft'], ['positive-theory-of-capital', 'positivetheoryof00bhuoft']]) {
+      await page.goto(`${BASE}/bibliotheca/neo/#book=${slug}&ch=1`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(s => document.querySelector('#shelf')?.value === s && document.querySelector('#text p.para'), slug, { timeout: 20000 });
+      const sources = await page.locator('#sources').innerText();
+      assert.match(sources, new RegExp(`Internet Archive ${id}`), `${slug}: the scan`);
+      assert.match(sources, /Econlib’s transcription of the same edition[\s\S]*public domain/, `${slug}: the transcription`);
+      assert.match(sources, /William Smart on 19 March 1915/, `${slug}: the rights`);
+      assert.match(await page.locator('#byline').innerText(), /^Eugen von Böhm-Bawerk \(1851–1914\), translated by William Smart/);
+    }
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: in Screens the new books show their pictures: the Marx film\'s scene for the Manifesto, the timeline made for Capital and Interest', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [hash, cap] of [['#book=communist-manifesto&ch=1', /\S · /], ['#book=capital-and-interest&ch=101', /^The theories of interest the book reviews, 1766 to 1884 · a picture made for Capital and Interest$/]]) {
+      const { ctx, page, errors } = await reading(browser, hash, { speech: { ms: 400 } });
+      await page.keyboard.press('d');
+      await page.waitForSelector('#layout.fill');
+      await page.keyboard.press('r');
+      await page.waitForSelector('#picture:not([hidden])', { timeout: 60000 });
+      assert.match(await page.getAttribute('#picture-stage', 'data-key'), /^picture:\d+$/, hash);
+      assert.match(await page.textContent('#picture-cap'), cap, hash);
+      assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · A picture for the book');
+      await page.keyboard.press('Escape');
+      assert.deepEqual(errors, [], hash);
+      await ctx.close();
+    }
+  } finally { await browser.close(); }
+});

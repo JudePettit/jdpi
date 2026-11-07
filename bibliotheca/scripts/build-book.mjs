@@ -1,4 +1,6 @@
-// Builds one book of the Bibliotheca shelf (shelf.mjs) from its Project Gutenberg plain-text file:
+// Builds one book of the Bibliotheca shelf (shelf.mjs) from its Project Gutenberg plain-text file, or for a book the
+// shelf has from a scan (an entry with `scan`: no Gutenberg edition exists) from the text scan-text.mjs made of the
+// scan's OCR, checked against the other readings the entry names (cache/<scan id>.txt):
 //   1. checks the rights finding (both US and UK must be "pd", and the dates must bear it out), else stops;
 //   2. downloads the UTF-8 text (kept in scripts/cache/, which is not committed) unless --source gives a local file;
 //   3. cuts the Gutenberg header, footer and licence, splits chapters and paragraphs, sets the typography (text.mjs,
@@ -49,10 +51,15 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /** The Gutenberg plain-text file (UTF-8) for a shelf entry, from the cache, a local file or gutenberg.org. The file
     is checked for its START marker before it is cached, so a maintenance page or an error body is never kept. */
+export const sourceFile = entry => join(CACHE, entry.scan ? `${entry.scan.id}.txt` : `pg${entry.gutenberg}.txt`);
 export async function sourceText(entry, { refresh = false, source = null } = {}) {
   if (source) return readFileSync(resolve(source), 'utf8');
   mkdirSync(CACHE, { recursive: true });
-  const cached = join(CACHE, `pg${entry.gutenberg}.txt`);
+  const cached = sourceFile(entry);
+  if (entry.scan) {
+    if (refresh || !existsSync(cached)) throw new Error(`${cached} is made from the scan by scan-text.mjs: node bibliotheca/scripts/scan-text.mjs ${entry.slug}`);
+    return readFileSync(cached, 'utf8');
+  }
   if (!refresh && existsSync(cached)) return readFileSync(cached, 'utf8');
   const url = `https://www.gutenberg.org/cache/epub/${entry.gutenberg}/pg${entry.gutenberg}.txt`;
   for (let attempt = 1; ; attempt++) {
@@ -70,6 +77,9 @@ export async function sourceText(entry, { refresh = false, source = null } = {})
     }
   }
 }
+/** The book's text from its source file: a Gutenberg file without its header, footer and licence (text.mjs), a text
+    made from a scan as it is (it has no boilerplate), line endings "\n". */
+export const bookText = (entry, raw) => (entry.scan ? String(raw).replace(/^﻿/, '').replace(/\r\n?/g, '\n') : stripBoilerplate(raw));
 
 /* ---------- the layouts text.mjs's splitChapters does not cover ----------
    splitChapters reads a book of one level of chapters set flush left, the Prince's shape. The other books of the shelf
@@ -91,10 +101,13 @@ export async function sourceText(entry, { refresh = false, source = null } = {})
                a heading block that only carries the chapter on (the Gutenberg Gibbon cuts every chapter into "Part I",
                "Part II" …, which are no divisions of Gibbon's: its first group is the part's numeral, and any part after
                the first joins the chapter before); first and count: the numbers the chapters run through (checked);
-               case 'text' sets a title printed in Title Case in sentence case too (a title in capitals always is)
-     sections  [{ heading, n, title, part }]: pieces kept as chapters of their own (an introduction, a preface, a
+               case 'text' sets a title printed in Title Case in sentence case too (a title in capitals always is);
+               label: what the book calls its divisions, 'Chapter' unless it says otherwise (the Communist Manifesto's
+               four are sections: "Section I")
+     sections  [{ heading, n, title, part, after }]: pieces kept as chapters of their own (an introduction, a preface, a
                memoir) before the first chapter; with part: true one that follows a part's chapters (Smith's appendix to
-               Book IV, n = 499: book × 100 + 99), its heading naming the part
+               Book IV, n = 499: book × 100 + 99), its heading naming the part; with after: true one that follows the
+               last chapter and belongs to no part (Böhm-Bawerk's Conclusion, n = 800, after Book VII)
      front     { title, pieces: [{ heading, title }] }: the pieces before chapter 1 of a book numbered once through, which
                share chapter 0 (`title`), each opening with its title as a paragraph of its own; text before the first
                of them (an epigraph) opens chapter 0 too
@@ -103,8 +116,11 @@ export async function sourceText(entry, { refresh = false, source = null } = {})
      notes     'bracket' (a block opening "[n]", its mark "[n]" already in the text: Marriott, Darwin), 'return'
                (Gibbon: a block "12 (return) [ … ]" or "12a (return) [ … ]", which may run over several blocks to its
                closing bracket, with its label, "12" or "12a", standing in the text it annotates) or 'star' (Clausewitz: a block "(*) …", the mark "(*)" in the
-               text; "(**)" for a second): each becomes a 'note' numbered "[n] …", and its mark in the paragraph before
-               it becomes "[n]" too; notes are numbered by the edition (Gibbon), or 1, 2 … through each chapter
+               text; "(**)" for a second) or 'letter' (the Communist Manifesto: Engels's notes "(a) …", "(b) …" set
+               together at the end of each section, the mark "(a)" against its word anywhere in the section): each
+               becomes a 'note' numbered "[n] …", and its mark in the paragraph before it becomes "[n]" too; notes are
+               numbered by the edition (Gibbon), or 1, 2 … through each chapter (a letter by its place, a = 1); a
+               letter note is set after the paragraph that cites it, as the others stand, and one on a heading first
      indent    the text's own left margin, so a file with every line indented (Smith, Gibbon) is not all verse
      verse     false: no block is verse by its indentation (Gibbon's and Darwin's indents are quotations and asides
                rewrapped as prose); otherwise a block with a line indented four spaces past the margin keeps its lines
@@ -112,7 +128,10 @@ export async function sourceText(entry, { refresh = false, source = null } = {})
      tables    true: a block of three lines or more, most with a gap of three spaces inside them, is a table of figures
                and keeps its lines (as 'verse', the contract's only kind with lines) and its columns: the spaces inside
                each line, less the indent the lines share, so a figure stays under its £, s or d (the page sets a verse
-               block with a run of spaces in a fixed-width face, as a table)
+               block with a run of spaces in a fixed-width face, as a table); 'rows': any block with such a gap in
+               half its lines or more is a table, however short, even of one row (a text made from a scan, whose
+               paragraphs never have a run of spaces: scan-text.mjs sets only a table's cells apart so; Carey's last
+               distribution in Capital and Interest is a table of one row)
      lower, proper  words a title set in sentence case has in lower case, or with a capital, whatever the text's
                usage says (a verb the past-tense text never has: Gibbon's "The Germans Overrun Gaul")
      drop      [regexp]: blocks that are not the book's text and are left out (the Gutenberg's links to pictures of
@@ -171,12 +190,15 @@ export function titleCase(title, counts, { lower = [], proper = [] } = {}) {
   return t.replace(/(\p{L}[\p{L}’'-]*)|(—)/gu, (m, w, dash, at) => {
     if (!w) { start = true; return m; }
     const word = set => { out.push({ w: set, at, end: at + w.length }); return set; };
-    const k = w.toLowerCase(), first = start;
+    // In a title in capitals a full stop between two phrases begins the second ("The value of productive goods. Value
+    // and costs").
+    const k = w.toLowerCase(), first = start || (caps && /\p{L}\. $/u.test(t.slice(Math.max(0, at - 3), at)));
     // An item's numeral ("—II. Factions of the circus") leaves the item's first word to begin it.
     const numeral = !caps && w === w.toUpperCase() && ROMAN.test(w);
     start = first && numeral && t[at + w.length] === '.';
     if (numeral && (w.length > 1 || first)) return word(w); // "Valentinian II", "—I. The empress Theodora"
-    if (proper.includes(w) || proper.includes(cap(w))) return word(cap(w));
+    const pr = proper.find(p => p.toLowerCase() === k); // as given, a hyphened name too ("Say-Hermann")
+    if (pr) return word(pr);
     if (lower.includes(k)) return word(k);
     if (first && /^\p{Lu}/u.test(w)) return word(cap(w)); // not Darwin's "DISTRIBUTION—_continued_", lower case in italics
     if (ORDINAL.test(k)) {
@@ -269,7 +291,7 @@ export function splitWork(text, layout, stats = { notes: 0, unmarked: [] }) {
   const counts = caseCounts(bl.map(joined));
   const titleOf = (s, mode) => {
     // A note's mark on a title goes with it (its note opens the chapter): Clausewitz's "(*)", Gibbon's trailing "101".
-    let t = normalise(String(s).replace(/\s+/g, ' ').replace(/\(\*+\)/g, ''));
+    let t = normalise(String(s).replace(/\s+/g, ' ').replace(/\(\*+\)/g, '').replace(layout.notes === 'letter' ? /\([a-z]\)/g : /$^/, ''));
     if (layout.notes === 'return') t = t.replace(/\s+\d{1,4}[a-z]?$/, '');
     return (inCapitals(t) || mode === 'text') ? titleCase(t, counts, layout) : t.replace(/\s*—\s*/g, '—').replace(/\.$/, '');
   };
@@ -306,17 +328,17 @@ export function splitWork(text, layout, stats = { notes: 0, unmarked: [] }) {
       else if (C.title === 'line') title = titleOf([cm[2] || '', ...b.lines.slice(1)].join(' '), C.case);
       else title = titleOf(b.lines.slice(1).join(' '), C.case);
       const n = C.within ? part.n * 100 + num : num;
-      const label = `Chapter ${cm[1].toUpperCase()}`;
+      const label = `${C.label || 'Chapter'} ${cm[1].toUpperCase()}`;
       open({ n, num, heading: part ? `${part.heading}, ${label}` : label, title, ...(part ? { part: { ...part } } : {}) });
       numbered = true;
       continue;
     }
     // A piece kept as a chapter of its own (before the chapters, or with `part` after a part's last: an appendix to a
     // book), or one of the pieces sharing chapter 0.
-    const s = (layout.sections || []).find(x => (x.part ? part : !numbered) && x.heading.test(line));
+    const s = (layout.sections || []).find(x => (x.part ? part : x.after ? numbered : !numbered) && x.heading.test(line));
     if (s) {
       if (s.part) open({ n: s.n, heading: `${part.heading}, ${s.title}`, title: s.title, part: { ...part } });
-      else open({ n: s.n, heading: s.title, title: s.title });
+      else { open({ n: s.n, heading: s.title, title: s.title }); if (s.after) part = null; }
       continue;
     }
     const f = !numbered && layout.front && layout.front.pieces.find(x => x.heading.test(line));
@@ -372,17 +394,33 @@ export function splitWork(text, layout, stats = { notes: 0, unmarked: [] }) {
         continue;
       }
     }
+    if (layout.notes === 'letter') {
+      const m = line.match(/^\s*\(([a-z])\)\s/);
+      if (m) {
+        const num = m[1].charCodeAt(0) - 96, mark = new RegExp(`(?<=\\S)\\(${m[1]}\\)`);
+        const note = { kind: 'note', note: num, text: `[${num}] ${normalise(whole.replace(/^\s*\([a-z]\)\s*/, ''))}` };
+        const host = textParas(ch).find(p => mark.test(p.text));
+        stats.notes++;
+        if (host) {
+          host.text = host.text.replace(mark, `[${num}]`);
+          let at = ch.ps.indexOf(host) + 1;
+          while (ch.ps[at]?.kind === 'note') at++;
+          ch.ps.splice(at, 0, note);
+        } else { stats.unmarked.push(`${ch.heading}: note (${m[1]})`); ch.ps.splice(ch.ps.findIndex(p => !p.head), 0, note); }
+        continue;
+      }
+    }
     if (layout.notes === 'bracket') {
       const m = line.match(BRACKET);
       if (m) { stats.notes++; ch.ps.push({ kind: 'note', note: +m[1], text: normalise(whole) }); continue; }
     }
     // Prose, verse, a table.
     const inner = b.lines.filter(l => /\S {3,}\S/.test(l.trim())).length;
-    const table = layout.tables && b.lines.length >= 3 && inner * 2 >= b.lines.length;
+    const table = layout.tables === 'rows' ? inner > 0 && inner * 2 >= b.lines.length : layout.tables && b.lines.length >= 3 && inner * 2 >= b.lines.length;
     const verse = table || (layout.keep || []).some(re => re.test(line)) || (layout.verse !== false && b.lines.some(l => indentOf(l) >= margin + 4));
     // A table keeps its columns: the spaces inside its lines, less the indent they share (text.mjs, normalise).
     const t = table ? normalise(b.lines.join('\n'), { columns: true }) : verse ? normalise(b.lines.join('\n')) : normalise(whole);
-    if (t) ch.ps.push({ kind: verse && t.includes('\n') ? 'verse' : 'para', text: t });
+    if (t) ch.ps.push({ kind: verse && (t.includes('\n') || table) ? 'verse' : 'para', text: t });
   }
 
   // Ids, words and the checks.
@@ -418,6 +456,15 @@ export function splitBook(text, layout, stats) {
 export function bookRecord(entry, chapters) {
   const id = `pg${entry.gutenberg}`;
   const edition = entry.edition || (entry.translator ? `${entry.translator.name}'s translation` : null);
+  // A book from a scan names the scan, and the reading its OCR was checked against, in the shelf's own words.
+  const source = entry.scan
+    ? { source: 'Internet Archive', id: entry.scan.id, url: `https://archive.org/details/${entry.scan.id}`, published: entry.published, licence: entry.scan.licence }
+    : {
+      source: 'Project Gutenberg', id, url: `https://www.gutenberg.org/ebooks/${entry.gutenberg}`, published: entry.published,
+      licence: `Project Gutenberg eBook #${entry.gutenberg} (${edition ? `${edition}, ` : ''}${entry.published}). `
+        + 'The Project Gutenberg header, footer and licence have been removed, so this text is redistributed as public-domain text '
+        + 'without the Project Gutenberg trademark, as its licence provides (gutenberg.org/policy/license.html).',
+    };
   return {
     slug: entry.slug, title: entry.title,
     author: { ...entry.author },
@@ -426,12 +473,7 @@ export function bookRecord(entry, chapters) {
     ...(entry.set ? { set: { ...entry.set } } : {}),
     work: { ...entry.work },
     era: [...entry.era],
-    edition: {
-      source: 'Project Gutenberg', id, url: `https://www.gutenberg.org/ebooks/${entry.gutenberg}`, published: entry.published,
-      licence: `Project Gutenberg eBook #${entry.gutenberg} (${edition ? `${edition}, ` : ''}${entry.published}). `
-        + 'The Project Gutenberg header, footer and licence have been removed, so this text is redistributed as public-domain text '
-        + 'without the Project Gutenberg trademark, as its licence provides (gutenberg.org/policy/license.html).',
-    },
+    edition: source,
     rights: { ...entry.rights },
     generated: new Date().toISOString(),
     chapters,
@@ -447,7 +489,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   console.log(`${entry.title}: rights pd/pd (${reasons.join('; ')})`);
   const raw = await sourceText(entry, { refresh: args.includes('--refresh'), source: args.includes('--source') ? args[args.indexOf('--source') + 1] : null });
   const notes = { notes: 0, unmarked: [] };
-  const chapters = splitBook(stripBoilerplate(raw), entry.layout, notes);
+  const chapters = splitBook(bookText(entry, raw), entry.layout, notes);
   const book = bookRecord(entry, chapters);
   const words = chapters.reduce((n, c) => n + c.words, 0), paragraphs = chapters.reduce((n, c) => n + c.paragraphs.length, 0);
   console.log(`${chapters.length} chapters, ${paragraphs.toLocaleString('en-GB')} paragraphs, ${words.toLocaleString('en-GB')} words`);

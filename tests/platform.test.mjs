@@ -281,6 +281,66 @@ test('the Dashboard: the old Workspace at #/home/dashboard (VM / Home / Dashboar
   } finally { await p.close(); }
 });
 
+test('the Dashboard\'s health mark: quiet while the daily data check passes, naming what failed and when once it fails (status/health.json)', pageTest, async () => {
+  // status/health.json as .github/scripts/freshness.mjs writes it, served in place of the real one.
+  const at = (hoursAgo) => new Date(Date.now() - hoursAgo * 3600e3).toISOString();
+  const short = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const RUN = 'https://github.com/JudePettit/jdpi/actions/runs/123';
+  const failing = { generated: at(2), ok: false, problems: 3, run: RUN, failing: [
+    { name: 'Scientific Briefing', what: 'science/briefing/data/stories.json', detail: '20 h old' },
+    { name: 'Integration Hub catalogue', what: 'integration/catalog.json', detail: '3 days old' },
+    { name: 'Scientific Briefing', what: 'live science/briefing/data/stories.json', detail: 'HTTP 500' }] };
+  const open = async body => {
+    const p = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    let asked = 0;
+    await p.route('**/status/health.json', r => { asked++; return body === 404 ? r.fulfill({ status: 404, body: 'not found' }) : r.fulfill({ json: body }); });
+    await p.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'networkidle' });
+    await p.waitForSelector('#view #today');
+    await p.waitForFunction(() => document.readyState === 'complete');
+    await p.waitForTimeout(400); // the mark fills at idle time, like the Today panel
+    const mark = await p.$eval('#view .head #health', el => ({ hidden: el.hidden, shown: !!el.offsetParent, cls: el.className, text: el.textContent.trim(), links: [...el.querySelectorAll('a')].map(a => [a.textContent, a.getAttribute('href'), a.target]) }));
+    return { p, errors, asked, mark };
+  };
+  // Failed: a visible mark in the header, in the "bad" status colour with words, naming each failing store once and the
+  // check's date, with a link to the run.
+  {
+    const { p, errors, asked, mark } = await open(failing);
+    try {
+      assert.equal(asked, 1, 'read once');
+      assert.deepEqual([mark.hidden, mark.shown, mark.cls], [false, true, 'prp-status bad dash-health']);
+      assert.equal(mark.text, `Data check failed on ${short(failing.generated)}: Scientific Briefing, Integration Hub catalogue. Details`);
+      assert.deepEqual(mark.links, [['Details', RUN, '_blank']]);
+      // The mark sits under the intro, and the rest of the Dashboard is as before.
+      assert.equal(await p.$eval('#view .head', h => h.lastElementChild.id), 'health');
+      assert.equal(await p.textContent('#view h1'), 'Dashboard');
+      assert.deepEqual(errors, []);
+    } finally { await p.close(); }
+  }
+  // Passed (and recently): nothing to see. Nor when the file is missing or not yet written.
+  for (const body of [{ generated: at(2), ok: true, problems: 0, failing: [], run: RUN }, 404, { nonsense: true }]) {
+    const { p, errors, mark } = await open(body);
+    try {
+      assert.deepEqual([mark.hidden, mark.shown, mark.text], [true, false, ''], JSON.stringify(body));
+      assert.deepEqual(errors, []);
+    } finally { await p.close(); }
+  }
+  // The check has not run for more than three days: a warning that says since when, pass or fail.
+  {
+    const old = at(4 * 24);
+    const { p, mark } = await open({ generated: old, ok: true, problems: 0, failing: [], run: RUN });
+    try {
+      assert.deepEqual([mark.hidden, mark.cls, mark.text], [false, 'prp-status warn dash-health', `The data check has not run since ${short(old)}. Details`]);
+    } finally { await p.close(); }
+  }
+  // A run address that is not a GitHub Actions run is not linked.
+  {
+    const { p, mark } = await open({ ...failing, run: 'javascript:alert(1)' });
+    try { assert.deepEqual([mark.hidden, mark.links], [false, []]); } finally { await p.close(); }
+  }
+});
+
 test('each module overview lists its submodules', pageTest, async () => {
   // (Home's overview is the Home page, with its own tests above; #/home lands there.)
   for (const s of boxed) {

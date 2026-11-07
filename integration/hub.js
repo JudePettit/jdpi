@@ -8,7 +8,7 @@ const ROOT = new URL('../', import.meta.url).href; // the site root this page is
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nf = new Intl.NumberFormat('en-GB');
-const fmtDate = d => (d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–');
+const fmtDate = d => (d ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + 'T00:00:00Z' : d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '–');
 const MODULES = { rt: ['RT', 'Realtime Geopolitics'], hb: ['HB', 'Highbrowse'], rs: ['RS', 'Retrospective Geopolitics'], oi: ['OI', 'International Mystery Management'], mm: ['MM', 'Money Management'], ns: ['NS', 'Natural Science'], ds: ['DS', 'Digital Science'], kino: ['KN', 'Kino'] };
 const TABS = ['overview', 'catalogue', 'mcp', 'api', 'feeds', 'skills', 'security'];
 

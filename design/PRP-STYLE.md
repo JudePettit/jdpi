@@ -161,7 +161,9 @@ is up; the faces swap by transform and opacity, never `visibility` or `display`,
 **The Dashboard** (`#/home/dashboard`, breadcrumb VM / Home / Dashboard) was the home page, the Workspace, until
 November 2026: the Today panel (`design/prp-highlights.js`), the four counts, and every module and submodule as tiles.
 It is the one submodule without a page of its own: the registry gives it `"shell": "dashboard"` in place of a `url`, and
-the shell draws it in its view, with no frame. `#/workspace` lands on it, and `#/home` on the Home page.
+the shell draws it in its view, with no frame. `#/workspace` lands on it, and `#/home` on the Home page. Under its intro a health
+mark (`.prp-status`, a dot with words) appears only when the daily data check failed, naming what failed and the
+check's date, or when the check has not run for three days (`status/health.json`, OPERATIONS.md "The alarm").
 
 ## 3. Tokens (write CSS against these; no raw hex in page CSS)
 

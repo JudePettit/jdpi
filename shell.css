@@ -131,6 +131,8 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .head { padding-bottom: 18px; border-bottom: 1px solid var(--prp-line); }
 /* The four product counts, below the Today panel on the Dashboard (shell.js renderDashboard). */
 .today-kpis { margin-top: 22px; max-width: 760px; }
+/* The health mark under the Dashboard's intro, shown only when the daily data check failed or stopped (shell.js loadHealth). */
+.dash-health { margin: 10px 0 0; }
 
 /* --- Home page (shell.js, "Home page") ------------------------------------------------------------------------------
    The intro, with a small button to the Dashboard at its end, over every module but Home as a box: four across on a

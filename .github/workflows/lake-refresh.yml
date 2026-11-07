@@ -35,8 +35,11 @@ jobs:
         with:
           paths: lake/data lake/scripts/summary-cache.json bibliotheca/data/books bibliotheca/data/index.json
           message: 'Master Index: monthly refresh of the entity layer, and the Bibliotheca books tagged against it'
+  # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit

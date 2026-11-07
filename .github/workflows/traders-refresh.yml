@@ -54,8 +54,11 @@ jobs:
         with:
           paths: traders/data/investors.json traders/scripts/figi-cache.json
           message: 'Auto Trader: weekly 13F holdings refresh'
+  # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit

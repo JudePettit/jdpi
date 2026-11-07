@@ -38,8 +38,11 @@ workflow**). GitHub often starts scheduled runs late when it is busy; the freshn
 **What every jdpi refresh does.** It builds its data, runs that module's tests on the new data, and commits only its own
 files through one shared step (`.github/actions/commit-data`). Nothing is committed when nothing changed. If another run
 pushed first, the commit is rebased onto it and the push retried, up to five times; a clash, or a fifth failure, turns
-the run red and drops that run's data (the next run tries again). Then the run deploys the site (`pages-deploy.yml`),
-even when the refresh failed, so anything it did commit goes live. Every build also has a **guard**: when a source fails
+the run red and drops that run's data (the next run tries again). Then the run hands main, with its commit on it, to the
+pipeline (`pages-deploy.yml`), even when the refresh failed, so anything it did commit goes live, but only once the
+whole test suite has passed on that very commit: the module's own tests guard its data, the whole suite guards the site.
+If the suite fails, nothing is deployed and the run goes red; the next refresh, or any push, tries again (since 7
+November 2026; before, a refresh deployed main without the suite). Every build also has a **guard**: when a source fails
 and the new file would lose too much (usually more than half of a count, for some a tenth), nothing is written and the
 run fails, so the page keeps its last good data and simply ages.
 
@@ -56,18 +59,42 @@ run fails, so the page keeps its last good data and simply ages.
 | **Master Index, and the Bibliotheca tags** (`lake-refresh.yml`) | 3rd of the month, 03:31 (04:31) | Rebuilds the entity layer (mentions from every module, Wikidata facts, Wikipedia summaries), then tags every Bibliotheca book again against it. Guard: stops if a module's adapter fails, its mentions halve, or the entities fall by a tenth. | `lake/data`, `lake/scripts/summary-cache.json`, `bibliotheca/data/books`, `bibliotheca/data/index.json` | Red run. Freshness: `lake/data/manifest.json` older than about 62 days. |
 | **Kino** (`kino-refresh.yml`) | 4th of the month, 04:13 (05:13) | Re-reads the documentaries' Wikidata labels and Wikimedia Commons image credits (entries older than 25 days) and rebuilds the catalogue. Guard: stops before writing the catalogue if a script fails its checks or a Commons image it names is gone. | `kino/data/index.json`, `media.json`, `iso.json`, and `kino/scripts/cache.json` | Red run. Freshness: the cache older than about 62 days. |
 | **National Analysis** (`national-refresh.yml`) | 5th of the month, 03:47 (04:47) | World Bank indicators, plus leadership and conflict data from the Retrospective; heads of state and government from Wikidata, and from Political Atlas (checked out beside it, `--atlas`) the office whose holder is each country's current leader. The log lists where the Atlas and Wikidata name different people for that office, and the countries no data or `national/scripts/leader-offices.json` decides. Guard: not written if an indicator's countries halve, or the countries, their Wikidata matches, GW codes or leadership data fall by a tenth. | `national/data` | Red run. Freshness: `national/data/index.json` older than about 62 days. |
-| **Check data freshness** (`freshness.yml`) | Daily 09:33 (10:33) | The alarm: see below. | Nothing in the repository; a table on the run's summary page | It is the signal. |
+| **Check data freshness** (`freshness.yml`) | Daily 09:33 (10:33) | The alarm: see below. | `status/health.json` (the Dashboard's health mark), committed and deployed through the pipeline; the issue "Data health check failing"; a table on the run's summary page | It is the signal: the issue, a red run and the Dashboard's mark. |
 | **Political Atlas monthly update** (political-atlas, `monthly-update.yml`) | 1st of the month, 06:00 (07:00) | Asks Claude, with web search, to check and update all 78 country records (paid: the Atlas README puts a full run at a few to low tens of US dollars), validates them, and opens a pull request, "Monthly political data update", for you to review. Nothing goes live until you merge it; merging redeploys Political Atlas. | `data/` in political-atlas, on the `data-update` branch (the pull request) | Red run in political-atlas's Actions tab, or no new pull request on the 1st. The freshness check does not watch it. It was switched off from 31 October to 2 November, so the November run was skipped; it runs again from 1 December. |
 
 **Not timed.** These run when code is pushed. They are listed so that a red run there is not mistaken for a data failure.
 
 - jdpi `ci.yml` (Test and deploy): every push to main and every pull request runs the whole test suite, the pages
-  included (in Microsoft Edge); on main a passing suite deploys. A red run means a change broke a test, so it was not
-  deployed. The refreshes' own commits do not start it: they test their own data.
-- jdpi `pages-deploy.yml` (Deploy the site): uploads main to Cloudflare Pages (project `jdpi`). Called by `ci.yml` and
-  by every refresh, and runs only while the repository variable `DEPLOY_FROM_GITHUB` is `true` (it was on 31 October
-  2026). A red deploy means the site was not updated (for example, the `CLOUDFLARE_API_TOKEN` secret is missing or
-  was rejected); the data was still committed.
+  included (in Microsoft Edge); on main a passing suite deploys that commit. A red run means a change broke a test, so
+  it was not deployed. The refreshes' own commits do not start it: each refresh calls the same pipeline itself. To
+  test and deploy by hand: Actions → Test and deploy → Run workflow, on main (the only Run workflow button that
+  deploys).
+- jdpi `pages-deploy.yml` (Test and deploy the site): the only way the site reaches Cloudflare Pages (project `jdpi`),
+  called by `ci.yml`, by every refresh and by the freshness check; it cannot be run on its own. Its `test` job runs the
+  whole suite on one commit; its `deploy` job then uploads exactly that commit, only if the suite passed, the commit is
+  still the head of main (a newer commit's own run deploys it, and an older one never overwrites it) and the repository
+  variable `DEPLOY_TESTED_ONLY` is `true`. Runs from another branch test but never deploy. A passing run that deploys
+  nothing because the variable is not `true` says so in a warning. wrangler, the upload tool, is pinned to one exact
+  version there, with the date it was pinned beside it; the version is written only in that file. A red `test` job
+  means the suite failed on that commit, so nothing was deployed; a red `deploy` job means the site was not updated
+  (for example, the `CLOUDFLARE_API_TOKEN` secret is missing or was rejected). Either way the data was still committed.
+  A skipped `deploy` job with the notice "main has moved on" is normal.
+
+  **Only tested commits go live.** Re-running an Actions run uses the workflow files of that run's own commit, so a
+  run from before 7 November 2026 would still use the old pipeline, which deployed main untested whenever
+  `DEPLOY_FROM_GITHUB` was `true`. Two locks keep those out. Both are settings only you can change, from your terminal
+  (`gh` signed in to GitHub):
+  1. The switch. Before the push that brings this pipeline, `gh variable set DEPLOY_TESTED_ONLY --body true --repo
+     JudePettit/jdpi`; right after it, `gh variable set DEPLOY_FROM_GITHUB --body false --repo JudePettit/jdpi`. Old
+     runs, re-run or still queued, then deploy nothing, and the new pipeline goes on deploying. Leave
+     `DEPLOY_FROM_GITHUB` off: it no longer switches anything on in jdpi (trade-desk keeps its own).
+  2. The token. The deploy job runs in the GitHub environment `production`, which GitHub makes on the first deploy.
+     Let it admit main only, then keep the Cloudflare token there and nowhere else:
+     `gh api -X PUT repos/JudePettit/jdpi/environments/production -F "deployment_branch_policy[protected_branches]=false" -F "deployment_branch_policy[custom_branch_policies]=true"`,
+     `gh api -X POST repos/JudePettit/jdpi/environments/production/deployment-branch-policies -f name=main -f type=branch`,
+     `gh secret set CLOUDFLARE_API_TOKEN --env production --repo JudePettit/jdpi` (it asks for the token), then
+     `gh secret delete CLOUDFLARE_API_TOKEN --repo JudePettit/jdpi`. A pull request, another branch or an old copy of
+     the pipeline then cannot read the token at all, whatever its workflow files say.
 - jdpi `kino-check.yml` (Check Kino): on pushes that touch Kino or the files its films link to, checks the scripts and
   runs the Kino tests. Deploys nothing.
 - trade-desk `ci.yml` (Test and deploy): every push to main and every pull request runs the tests; on main a passing
@@ -97,6 +124,19 @@ its summary page has a table with a tick or a cross on every line.
    three minutes). A failure here means a stuck deploy.
 4. **What AI tools and other sites read still answers:** `/api/v1/datasets` lists at least 30 datasets, the MCP server
    lists at least 9 tools and answers `list_datasets`, and `/llms.txt` loads and names Vitruvian Manager.
+
+**How it reaches you.** When the check fails it opens one GitHub issue, "Data health check failing", assigned to the
+repository's owner, so GitHub's own notifications (email and the mobile app, as your GitHub notification settings
+allow) carry it. Each further day it still fails, it adds a comment with that day's table; it never opens a second
+issue. The first day it passes again, it comments "The check passed on …: all fresh" and closes the issue. It also
+writes `status/health.json` (when it ran, whether it passed, and the plain names of what failed), commits it and
+deploys it through the pipeline; the Dashboard (Home → Dashboard) reads that file and shows a small mark under its
+intro, naming the failing stores and the check's date, or saying the check has not run for three days. While the
+check passes the mark stays hidden. Because the file goes live through the tested pipeline, the mark lags when main is
+red; the issue does not.
+
+Every store's time is read as written: a full time as it is, and a bare date (as old copies may carry) as the end of
+that day. The Integration Hub catalogue carries a full time since 7 November 2026, and is restamped on every build.
 
 It watches only jdpi. Political Atlas, the Workers, Supabase and the aircraft proxy are outside it.
 
@@ -184,7 +224,8 @@ added it becomes the only source of the project's bindings, so it must then list
 
 Look in this order:
 
-1. **The freshness check** (github.com/JudePettit/jdpi → Actions → Check data freshness). Red means a jdpi refresh has
+1. **The freshness check**: the open issue "Data health check failing" (github.com/JudePettit/jdpi → Issues), or
+   Actions → Check data freshness. Red means a jdpi refresh has
    stopped, the site is serving old data, or the API, the MCP server or `llms.txt` is not answering. Its summary table
    names each file, its age and its workflow, with a link to that workflow's last run.
 2. **That workflow's red run.** Open the red step; the line marked as an error says what happened:
@@ -194,7 +235,10 @@ Look in this order:
    - A failed test step: the new data broke a test, so it was not committed.
    - "Someone else changed the same files …" or "Could not push the commit after 5 attempts": run it again (Run
      workflow).
-   - A failed deploy step: the data was committed but the site was not updated (see `pages-deploy.yml` above).
+   - A failed `deploy / test` job: the whole suite failed on main after the commit, so nothing was deployed. Open
+     its "Run the suite" step for the failing test; main stays undeployed until a commit makes it pass.
+   - A failed `deploy / deploy` job: the data was committed but the site was not updated (see `pages-deploy.yml`
+     above).
 3. **The site itself.** Pages say when their data is old (for example "Data is N hours old" on the Intelligence
    Briefing). If the files on GitHub are fresh but the site is not, the deploy is stuck: Cloudflare dashboard →
    Workers & Pages → jdpi → Deployments.
@@ -208,7 +252,8 @@ Look in this order:
 7. **Double Signal.** Its page's status, then its Worker logs in Cloudflare.
 
 GitHub emails you about a failed scheduled run if your GitHub notification settings allow it (Settings → Notifications,
-under Actions). GitHub can also switch a schedule off altogether, for example after 60 days without activity in a public
+under Actions), and about the freshness check's issue as it does about any issue assigned to you (Settings →
+Notifications, Participating: email, and GitHub Mobile for the phone). GitHub can also switch a schedule off altogether, for example after 60 days without activity in a public
 repository; the workflow's page then shows a banner with a button to enable it again.
 
 ## Keep this current
@@ -224,8 +269,11 @@ Change this file in the same commit as any change to a timed job, and:
      passes with `PRP_PAGES=0`, so the refresh can run it with no browser.
   4. **A workflow** copied from an existing one: a schedule staggered from the others (in data order), a time limit
      and a no-overlap group, the test step before `./.github/actions/commit-data` (which commits only its own
-     paths), then the deploy job.
-  5. **A freshness entry:** add the file to `STORES` in `.github/scripts/freshness.mjs` (its workflow, how often it
+     paths), then the deploy job (`needs` the refresh job, `if: ${{ !cancelled() }}`, `uses:
+     ./.github/workflows/pages-deploy.yml`, `with: deploy: ${{ github.ref == 'refs/heads/main' }}`, `secrets:
+     inherit`); `tests/freshness.test.mjs` checks every workflow has it.
+  5. **A freshness entry:** add the file to `STORES` in `.github/scripts/freshness.mjs` (its plain name, which the
+     issue and the Dashboard's mark show, its workflow, how often it
      can change in hours, and `live: true` if the site's copy should be compared). Without that entry the alarm will
      not notice the job stopping.
   6. **A row in section 1 of this file.** If the data names people, places, wars or parties, also add an adapter in

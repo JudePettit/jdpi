@@ -4,53 +4,64 @@
 // else would say so. The check also asks GitHub for each refresh workflow's last finished run, compares a few live
 // files with the repository (a stuck Cloudflare Pages deploy serves old data), and smoke-tests the JSON API, the MCP
 // server and llms.txt. It exits 1 when anything is wrong, and writes a table to the run's summary.
-// Options: --site <url> (default https://jdpi.pages.dev), --offline (only the repository checks).
+// Options: --site <url> (default https://jdpi.pages.dev), --offline (only the repository checks),
+//   --health <file>  also write the result there (status/health.json, which the Dashboard reads),
+//   --alert          open, update or close the one "Data health check failing" issue (needs GITHUB_TOKEN with
+//                    issues: write; never with --offline, whose partial check must not close it).
+// The report and the alarm are in health.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stamp, healthReport, runUrl, summaryTable, summaryHeading, syncIssue } from './health.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = name => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : undefined; };
 const SITE = (arg('--site') || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const OFFLINE = process.argv.includes('--offline');
+const HEALTH = arg('--health');
+const ALERT = process.argv.includes('--alert');
 const HOUR = 3600e3;
 
-// Each store, the workflow that writes it and how often new data can arrive (hours). A store may be up to twice that
-// old, plus three hours for GitHub's habit of starting scheduled runs late. `when` reads the store's time: by default
-// its `generated`, which every run rewrites; Volatility's `latest` is the newest complete GDELT day instead (its
-// `generated` moves even on a night that added no day), and Kino's index keeps its date while the films don't change,
-// so Kino is read from its fetch cache. Battlefield's weekly run only looks for UCDP's monthly release, so it counts as
-// monthly. `live` stores are also compared with the copy the site serves.
+// Each store, its plain name (the Dashboard's mark and the issue use it), the workflow that writes it and how often new
+// data can arrive (hours). A store may be up to twice that old, plus three hours for GitHub's habit of starting
+// scheduled runs late. `when` reads the store's time: by default its `generated`, which every run rewrites; Volatility's
+// `latest` is the newest complete GDELT day instead (its `generated` moves even on a night that added no day), and
+// Kino's index keeps its date while the films don't change, so Kino is read from its fetch cache. Battlefield's weekly
+// run only looks for UCDP's monthly release, so it counts as monthly. `live` stores are also compared with the copy the
+// site serves.
 const generated = j => j.generated;
 const STORES = [
-  { file: 'science/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
-  { file: 'econ/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
-  { file: 'digital/briefing/data/stories.json', workflow: 'briefings-refresh.yml', every: 6, live: true },
-  { file: 'briefing/data/latest.json', workflow: 'briefing-refresh.yml', every: 12 },
-  { file: 'calendar/data/2020s.json', workflow: 'calendar-refresh.yml', every: 24, live: true },
-  { file: 'integration/catalog.json', workflow: 'calendar-refresh.yml', every: 24 },
-  { file: 'volatility/data/index.json', workflow: 'volatility-refresh.yml', every: 24, live: true, when: j => j.latest },
-  { file: 'traders/data/congress.json', workflow: 'traders-refresh.yml', every: 7 * 24 },
-  { file: 'traders/data/investors.json', workflow: 'traders-refresh.yml', every: 7 * 24 },
-  { file: 'battlefield/data/realtime.json', workflow: 'battlefield-refresh.yml', every: 31 * 24 },
-  { file: 'battlefield/focus/data/index.json', workflow: 'warfocus-refresh.yml', every: 31 * 24 },
-  { file: 'science/progress/data/events.json', workflow: 'progress-refresh.yml', every: 31 * 24 },
-  { file: 'lake/data/manifest.json', workflow: 'lake-refresh.yml', every: 31 * 24 },
-  { file: 'national/data/index.json', workflow: 'national-refresh.yml', every: 31 * 24 },
+  { file: 'science/briefing/data/stories.json', name: 'Scientific Briefing', workflow: 'briefings-refresh.yml', every: 6, live: true },
+  { file: 'econ/briefing/data/stories.json', name: 'Economics Briefing', workflow: 'briefings-refresh.yml', every: 6, live: true },
+  { file: 'digital/briefing/data/stories.json', name: 'Digital Briefing', workflow: 'briefings-refresh.yml', every: 6, live: true },
+  { file: 'briefing/data/latest.json', name: 'Political Briefing', workflow: 'briefing-refresh.yml', every: 12 },
+  { file: 'calendar/data/2020s.json', name: 'Realtime Calendar', workflow: 'calendar-refresh.yml', every: 24, live: true },
+  { file: 'integration/catalog.json', name: 'Integration Hub catalogue', workflow: 'calendar-refresh.yml', every: 24 },
+  { file: 'volatility/data/index.json', name: 'Geopolitical Volatility', workflow: 'volatility-refresh.yml', every: 24, live: true, when: j => j.latest },
+  { file: 'traders/data/congress.json', name: 'Auto Trader House trades', workflow: 'traders-refresh.yml', every: 7 * 24 },
+  { file: 'traders/data/investors.json', name: 'Auto Trader 13F holdings', workflow: 'traders-refresh.yml', every: 7 * 24 },
+  { file: 'battlefield/data/realtime.json', name: 'Realtime Battlefield', workflow: 'battlefield-refresh.yml', every: 31 * 24 },
+  { file: 'battlefield/focus/data/index.json', name: 'War Focus', workflow: 'warfocus-refresh.yml', every: 31 * 24 },
+  { file: 'science/progress/data/events.json', name: 'Invention Timeline', workflow: 'progress-refresh.yml', every: 31 * 24 },
+  { file: 'lake/data/manifest.json', name: 'Master Index', workflow: 'lake-refresh.yml', every: 31 * 24 },
+  { file: 'national/data/index.json', name: 'National Analysis', workflow: 'national-refresh.yml', every: 31 * 24 },
   // The cache's own stamp once the Kino build writes one; until then its newest fetch.
-  { file: 'kino/scripts/cache.json', workflow: 'kino-refresh.yml', every: 31 * 24,
+  { file: 'kino/scripts/cache.json', name: 'Kino', workflow: 'kino-refresh.yml', every: 31 * 24,
     when: j => j.generated ?? [...Object.values(j.entities || {}), ...Object.values(j.files || {})].map(e => e?.at).filter(Boolean).sort().at(-1) },
 ];
+// Each refresh workflow by its plain name.
+const WORKFLOWS = {
+  'briefings-refresh.yml': 'Scientific, Economics and Digital Briefings refresh', 'briefing-refresh.yml': 'Political Briefing refresh',
+  'calendar-refresh.yml': 'Calendars and Integration Hub refresh', 'volatility-refresh.yml': 'Geopolitical Volatility refresh',
+  'traders-refresh.yml': 'Auto Trader refresh', 'battlefield-refresh.yml': 'Realtime Battlefield refresh', 'warfocus-refresh.yml': 'War Focus refresh',
+  'progress-refresh.yml': 'Invention Timeline refresh', 'lake-refresh.yml': 'Master Index refresh', 'national-refresh.yml': 'National Analysis refresh',
+  'kino-refresh.yml': 'Kino refresh',
+};
 
-/** The time a `generated` value stands for. A bare date counts as the end of that day, so it never looks too old. */
-function stamp(value) {
-  if (typeof value !== 'string') return NaN;
-  return Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T23:59:59Z` : value);
-}
 const age = ms => ms < 48 * HOUR ? `${Math.round(ms / HOUR)} h` : `${Math.round(ms / (24 * HOUR))} days`;
 
 const rows = [], problems = [];
-const note = (what, ok, detail) => { rows.push({ what, ok, detail }); if (!ok) problems.push(`${what}: ${detail}`); };
+const note = (what, ok, detail, name) => { rows.push({ what, name, ok, detail }); if (!ok) problems.push(`${what}: ${detail}`); };
 
 async function getJSON(url, init) {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(30e3), headers: { 'User-Agent': 'PRP freshness check (github.com/JudePettit/jdpi)', ...(init?.headers || {}) } });
@@ -63,11 +74,11 @@ const now = Date.now();
 for (const s of STORES) {
   let value;
   try { value = (s.when || generated)(JSON.parse(fs.readFileSync(path.join(ROOT, s.file), 'utf8'))); }
-  catch (e) { note(s.file, false, `unreadable (${e.message})`); continue; }
+  catch (e) { note(s.file, false, `unreadable (${e.message})`, s.name); continue; }
   const at = stamp(value), limit = (2 * s.every + 3) * HOUR;
-  if (Number.isNaN(at)) { note(s.file, false, `no usable time (${JSON.stringify(value)})`); continue; }
+  if (Number.isNaN(at)) { note(s.file, false, `no usable time (${JSON.stringify(value)})`, s.name); continue; }
   s.at = at;
-  note(s.file, now - at <= limit, `${age(Math.max(0, now - at))} old, limit ${age(limit)} (${s.workflow})`);
+  note(s.file, now - at <= limit, `${age(Math.max(0, now - at))} old, limit ${age(limit)} (${s.workflow})`, s.name);
 }
 
 if (!OFFLINE) {
@@ -79,9 +90,9 @@ if (!OFFLINE) {
       try {
         const j = await getJSON(`https://api.github.com/repos/${repo}/actions/workflows/${workflow}/runs?branch=main&event=schedule&status=completed&per_page=5`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } });
         const run = (j.workflow_runs || []).find(r => r.conclusion !== 'cancelled');
-        if (!run) { note(workflow, true, 'no finished scheduled run yet'); continue; }
-        note(workflow, ['success', 'skipped'].includes(run.conclusion), `last scheduled run ${run.conclusion} on ${run.created_at.slice(0, 16).replace('T', ' ')} UTC: ${run.html_url}`);
-      } catch (e) { note(workflow, false, `could not read its runs (${e.message})`); }
+        if (!run) { note(workflow, true, 'no finished scheduled run yet', WORKFLOWS[workflow]); continue; }
+        note(workflow, ['success', 'skipped'].includes(run.conclusion), `last scheduled run ${run.conclusion} on ${run.created_at.slice(0, 16).replace('T', ' ')} UTC: ${run.html_url}`, WORKFLOWS[workflow]);
+      } catch (e) { note(workflow, false, `could not read its runs (${e.message})`, WORKFLOWS[workflow]); }
     }
   } else rows.push({ what: 'workflow runs', ok: true, detail: 'skipped (no GITHUB_TOKEN)' });
 
@@ -89,35 +100,36 @@ if (!OFFLINE) {
   // that landed moments ago may still be deploying, so a failed comparison is tried once more after three minutes.
   const liveTime = async s => stamp((s.when || generated)(await getJSON(`${SITE}/${s.file}`, { cache: 'no-store' })));
   for (const s of STORES.filter(s => s.live && s.at)) {
+    const name = `${s.name} on the site`;
     for (let attempt = 1; ; attempt++) {
       try {
         const live = await liveTime(s);
-        if (live >= s.at - 2 * HOUR) { note(`live ${s.file}`, true, live >= s.at ? 'the site serves the latest' : `the site serves a copy ${age(s.at - live)} older than the repository`); break; }
-        if (attempt === 2) { note(`live ${s.file}`, false, `the site serves a copy ${age(s.at - live)} older than the repository`); break; }
-      } catch (e) { if (attempt === 2) { note(`live ${s.file}`, false, e.message); break; } }
+        if (live >= s.at - 2 * HOUR) { note(`live ${s.file}`, true, live >= s.at ? 'the site serves the latest' : `the site serves a copy ${age(s.at - live)} older than the repository`, name); break; }
+        if (attempt === 2) { note(`live ${s.file}`, false, `the site serves a copy ${age(s.at - live)} older than the repository`, name); break; }
+      } catch (e) { if (attempt === 2) { note(`live ${s.file}`, false, e.message, name); break; } }
       await new Promise(r => setTimeout(r, 180e3));
     }
   }
 
   // 4. Smoke tests of what AI tools and other sites read.
-  const smoke = async (what, fn) => { try { note(what, true, await fn()); } catch (e) { note(what, false, e.message); } };
-  await smoke('GET /api/v1/datasets', async () => {
+  const smoke = async (what, name, fn) => { try { note(what, true, await fn(), name); } catch (e) { note(what, false, e.message, name); } };
+  await smoke('GET /api/v1/datasets', 'JSON API', async () => {
     const j = await getJSON(`${SITE}/api/v1/datasets`);
     if (!(j.count >= 30)) throw new Error(`only ${j.count} datasets`);
     return `${j.count} datasets`;
   });
-  await smoke('POST /mcp tools/list', async () => {
+  await smoke('POST /mcp tools/list', 'MCP server', async () => {
     const j = await getJSON(`${SITE}/mcp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }) });
     const tools = j.result?.tools?.length || 0;
     if (tools < 9) throw new Error(`${tools} tools`);
     return `${tools} tools`;
   });
-  await smoke('POST /mcp list_datasets', async () => {
+  await smoke('POST /mcp list_datasets', 'MCP server', async () => {
     const j = await getJSON(`${SITE}/mcp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'list_datasets', arguments: {} } }) });
     if (j.error || j.result?.isError || !j.result?.content?.length) throw new Error(JSON.stringify(j.error || j.result).slice(0, 200));
     return 'answers';
   });
-  await smoke('GET /llms.txt', async () => {
+  await smoke('GET /llms.txt', 'llms.txt', async () => {
     const res = await fetch(`${SITE}/llms.txt`, { signal: AbortSignal.timeout(30e3) });
     const text = await res.text();
     if (!res.ok || !text.includes('Vitruvian Manager')) throw new Error(`HTTP ${res.status}`);
@@ -125,14 +137,24 @@ if (!OFFLINE) {
   });
 }
 
-// Report: the console, and the run's summary page on GitHub.
+// Report: the console, the run's summary page on GitHub, status/health.json and the issue.
+const health = healthReport(rows, { now, run: runUrl() });
 const width = Math.max(...rows.map(r => r.what.length));
 for (const r of rows) console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${r.what.padEnd(width)}  ${r.detail}`);
-if (process.env.GITHUB_STEP_SUMMARY) {
-  const cell = s => String(s).replace(/\|/g, '\\|');
-  const md = [`## Vitruvian Manager data health: ${problems.length ? `${problems.length} problem${problems.length > 1 ? 's' : ''}` : 'all fresh'}`, '', '| | Check | Detail |', '|---|---|---|',
-    ...rows.map(r => `| ${r.ok ? '✅' : '❌'} | ${cell(r.what)} | ${cell(r.detail)} |`)].join('\n');
-  fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
+if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## ${summaryHeading(health)}\n\n${summaryTable(rows)}\n`);
+if (HEALTH) {
+  const file = path.resolve(ROOT, HEALTH);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(health, null, 2) + '\n');
+  console.log(`Wrote ${path.relative(ROOT, file).replace(/\\/g, '/')}`);
+}
+if (ALERT) {
+  if (OFFLINE) console.log('::warning::--alert is ignored with --offline: a partial check must not open or close the issue.');
+  else {
+    const done = await syncIssue(health, { repo: process.env.GITHUB_REPOSITORY, token: process.env.GITHUB_TOKEN, owner: process.env.GITHUB_REPOSITORY_OWNER, rows });
+    if (done.error) console.log(`::warning::The "Data health check failing" issue could not be updated: ${done.error}`);
+    else if (done.action !== 'none') console.log(`Issue #${done.number}: ${{ open: 'opened', update: 'updated', close: 'closed' }[done.action]}`);
+  }
 }
 if (problems.length) {
   for (const p of problems) console.log(`::error::${p}`);

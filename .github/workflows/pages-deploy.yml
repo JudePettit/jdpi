@@ -1,32 +1,107 @@
-name: Deploy the site
-# Publishes the current main to Cloudflare Pages by direct upload (no Pages build, so it never counts against the
-# monthly build allowance). Called by ci.yml once the tests pass, and by every data refresh after its commit; it runs
-# only while the repository variable DEPLOY_FROM_GITHUB is 'true', which is switched on once the CLOUDFLARE_API_TOKEN
-# secret is set and Pages' own automatic deployments are switched off (otherwise the two would deploy twice).
+name: Test and deploy the site
+# The only way the site reaches Cloudflare Pages. Every caller (ci.yml on a push, every data refresh after its commit,
+# the freshness check after it writes status/health.json) goes through these two jobs, so nothing is deployed unless the
+# whole test suite passed on that very commit:
+#   test    checks out one commit (`sha`, or else the head of the branch the caller runs on, which for a refresh is main
+#           with the refresh's own commit on it), runs the whole suite, and says whether that commit is still main's head.
+#   deploy  uploads exactly the tested commit by direct upload (no Pages build, so it never counts against the monthly
+#           build allowance), and only when `deploy` is true, the commit is still main's head and the repository
+#           variable DEPLOY_TESTED_ONLY is 'true'. A commit that main has moved past is not deployed: the newer commit's
+#           own run tests and deploys it, and an older commit never overwrites a newer one.
+# Two locks keep out runs that do not go through these jobs (OPERATIONS.md, "Only tested commits go live"):
+#   - The switch is DEPLOY_TESTED_ONLY, not DEPLOY_FROM_GITHUB, which the untested pipeline before 7 November 2026 read.
+#     A re-run of an older run uses that run's own files, so with DEPLOY_FROM_GITHUB off it deploys nothing.
+#   - The deploy job runs in the `production` environment. Once the Cloudflare token is kept there, and that environment
+#     admits main only, no other branch, pull request or older file can read the token.
+# To deploy by hand: Actions → Test and deploy → Run workflow (ci.yml), on main.
 on:
   workflow_call:
-  workflow_dispatch:
-concurrency:
-  group: pages-deploy
-  cancel-in-progress: false
+    inputs:
+      sha:
+        description: The commit to test and deploy. Empty means the head of the caller's branch when the tests start.
+        type: string
+        default: ''
+      deploy:
+        description: Deploy once the tests pass. Callers pass true only on main.
+        type: boolean
+        default: true
 permissions:
   contents: read
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      sha: ${{ steps.head.outputs.sha }}
+      current: ${{ steps.current.outputs.current }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.ref_name }}
+      - name: The commit under test
+        id: head
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Serve the site locally, like Pages
+        run: |
+          node tests/tools/serve.mjs 8787 . > serve.log 2>&1 &
+          for i in $(seq 1 50); do curl -sf -o /dev/null http://localhost:8787/registry.json && break; sleep 0.2; done
+          curl -sf -o /dev/null http://localhost:8787/registry.json || { echo "::error::serve.mjs did not start"; cat serve.log; exit 1; }
+      - name: Run the suite
+        env:
+          JDPI_URL: http://localhost:8787
+          PRP_URL: http://localhost:8787
+          PRP_CPU_LIMIT_MS: '80'
+        run: npm test
+      - name: Is this commit still the head of main?
+        id: current
+        if: inputs.deploy
+        env:
+          TESTED: ${{ steps.head.outputs.sha }}
+        run: |
+          head=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$head" = "$TESTED" ]; then echo "current=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "current=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::The tests passed on $TESTED, but main has moved on to $head, whose own run tests and deploys it; $TESTED is not deployed."
+      - name: Say so when deploys are switched off
+        if: inputs.deploy && steps.current.outputs.current == 'true' && vars.DEPLOY_TESTED_ONLY != 'true'
+        run: echo "::warning::The tests passed on main's head, but the repository variable DEPLOY_TESTED_ONLY is not 'true', so nothing was deployed."
+      - name: Say why nothing was deployed
+        if: failure()
+        env:
+          TESTED: ${{ steps.head.outputs.sha }}
+        run: echo "::error::The whole test suite did not pass on $TESTED, so it was not deployed. The next refresh or push tries again."
   deploy:
-    if: vars.DEPLOY_FROM_GITHUB == 'true'
+    needs: test
+    if: inputs.deploy && needs.test.outputs.current == 'true' && vars.DEPLOY_TESTED_ONLY == 'true'
+    # The Cloudflare token's home once it is moved out of the repository's secrets: an environment that admits main only.
+    environment: production
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ needs.test.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Upload to Cloudflare Pages
+      - name: Upload the tested commit to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: 0a2b1580add4ec2edb8f3c49a538b43b
+          TESTED: ${{ needs.test.outputs.sha }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::The CLOUDFLARE_API_TOKEN secret is not set."; exit 1; fi
-          npx --yes wrangler@4 pages deploy . --project-name=jdpi --branch=main --commit-hash="$(git rev-parse HEAD)" --commit-message="$(git log -1 --pretty=%s)" --commit-dirty=true
+          if [ "$(git rev-parse HEAD)" != "$TESTED" ]; then echo "::error::Checked out $(git rev-parse HEAD), not the tested $TESTED."; exit 1; fi
+          # Deploys wait their turn: while this one waited, main may have moved on, and the newer commit deploys itself.
+          head=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$head" != "$TESTED" ]; then echo "::notice::main moved on to $head while this deploy waited; that commit's own run deploys it, so $TESTED is not deployed over it."; exit 0; fi
+          # Pinned 7 Nov 2026 to wrangler 4.158.0, the current release then (npm view wrangler version); change it only here.
+          npx --yes wrangler@4.158.0 pages deploy . --project-name=jdpi --branch=main --commit-hash="$TESTED" --commit-message="$(git log -1 --pretty=%s)" --commit-dirty=true

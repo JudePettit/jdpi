@@ -12,7 +12,8 @@
 //
 //   node integration/scripts/build-catalog.mjs [--quiet] [--calibrate] [--allow-drop]
 //
-// Deterministic: a file is rewritten only when its content changes (generated stamps and DTSTAMPs aside), and generated files
+// Deterministic: a file is rewritten only when its content changes (generated stamps and DTSTAMPs aside; the catalogue
+// itself is always restamped, since its time says when it was last built), and generated files
 // that are no longer produced are removed, so the daily run in calendar-refresh.yml does not churn git. Nothing is written if
 // a dataset would lose more than half of its rows since the last catalogue (see "guard" below); --allow-drop writes anyway.
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, rmSync } from 'node:fs';
@@ -615,7 +616,7 @@ for (const s of SPECS) {
 const MODULE_ORDER = ['rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino'];
 catalogue.sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module));
 const CATALOGUE = {
-  generated: TODAY,
+  generated: STAMP, // a full time, as every shard has: the freshness check reads a bare date as the end of its day
   name: 'Vitruvian Manager data catalogue',
   publisher: 'JDP-Iq',
   description: 'Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.',
@@ -869,7 +870,9 @@ for (const [p, data] of out) {
   if (existsSync(file)) {
     const old = readFileSync(file);
     const same = Buffer.isBuffer(data) ? old.equals(data) : normalise(p, old.toString('utf8')) === normalise(p, data);
-    if (same) { kept++; continue; }
+    // The catalogue is restamped on every build even when nothing in it changed: its time is when it was last built, which
+    // the freshness check reads, so a quiet day never looks like a stopped refresh.
+    if (same && p !== 'integration/catalog.json') { kept++; continue; }
   }
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, data); written++;

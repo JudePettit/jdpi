@@ -66,7 +66,8 @@ describe('catalogue (integration/catalog.json)', () => {
   const TYPES = new Set(['string', 'number', 'date', 'boolean', 'array', 'object']);
   const SUBMODULES = new Set(REG.suites.flatMap(s => s.modules.map(m => m.id)));
   test('follows the schema', () => {
-    assert.match(CAT.generated, /^\d{4}-\d{2}-\d{2}$/);
+    // A full time since November 2026, as every shard has: the freshness check reads a bare date as the end of its day.
+    assert.match(CAT.generated, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/);
     assert.ok(CAT.datasets.length >= 35, 'covers PRP\'s datasets');
     const ids = new Set();
     for (const d of CAT.datasets) {

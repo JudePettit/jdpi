@@ -2,26 +2,51 @@ name: Check data freshness
 # Daily, after the morning refreshes: every store is younger than about twice its schedule, each refresh workflow's
 # last run succeeded, the site serves the repository's latest data, and the JSON API, the MCP server and llms.txt
 # answer (.github/scripts/freshness.mjs). This run failing is how a stalled data job shows up, even one GitHub never
-# started; the run's summary page has the table.
+# started; the run's summary page has the table. The check also reaches you: it opens one issue, "Data health check
+# failing" (assigned to the repository's owner, so GitHub's own notifications carry it), comments on it each day it
+# still fails and closes it once it passes; and it writes status/health.json, which the Dashboard's health mark reads,
+# commits it and deploys it through the tested pipeline (pages-deploy.yml).
 on:
   schedule:
     - cron: '33 9 * * *'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   actions: read
+  issues: write
 concurrency:
   group: freshness
   cancel-in-progress: false
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Up to five live comparisons may each wait three minutes for a deploy in progress.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node .github/scripts/freshness.mjs
+      - name: Check every store, refresh, the live site and the API
+        id: check
+        continue-on-error: true
+        run: node .github/scripts/freshness.mjs --health status/health.json --alert
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: status/health.json
+          message: 'Data health: the daily check'
+      - name: Fail the run if the check failed
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::The data health check failed: see the check step and the summary table."
+          exit 1
+  # Deploys status/health.json (and whatever else main holds) once the whole suite passes on it.
+  deploy:
+    needs: check
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
+    secrets: inherit

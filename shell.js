@@ -239,6 +239,7 @@ function renderDashboard(suite, module) {
       <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(module.name)}</div>
       <h1 class="prp-title">${esc(module.name)}</h1>
       <p class="prp-dek">${esc(module.description)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
+      <p id="health" class="prp-status dash-health" hidden></p>
     </header>
     ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today on your Dashboard" aria-live="off"${today ? '' : ' aria-busy="true"'}>${todayInnerHtml(today?.groups)}</section>` : ''}
     <div class="prp-kpis today-kpis">
@@ -257,6 +258,39 @@ function renderDashboard(suite, module) {
   // The cards have painted. Fill the panel when the browser is idle (never on the first-paint path): a cache miss fetches
   // through the highlights module, a hit renders at once. It never throws into route().
   if (TODAY_PANEL) (window.requestIdleCallback ? requestIdleCallback(loadToday, { timeout: 1500 }) : setTimeout(loadToday, 0));
+  (window.requestIdleCallback ? requestIdleCallback(loadHealth, { timeout: 1500 }) : setTimeout(loadHealth, 0));
+}
+
+/* --- The Dashboard's health mark ----------------------------------------------------------------------------------
+   The daily data check (.github/workflows/freshness.yml, OPERATIONS.md "The alarm") writes status/health.json: when it
+   ran, whether it passed and the plain names of what failed. The mark stays quiet while the last check passed; it names
+   the failing stores and the check's date when it failed, and says so when the check has not run for three days. One
+   small same-origin file, read at idle time (never the GitHub API from a visitor's browser); any problem reading it
+   leaves the mark hidden, and it never throws into route(). */
+const HEALTH_STALE_MS = 3 * 24 * 3600e3;
+const HEALTH_NAMES = 4; // the most names the line lists before "and N more"
+const shortDay = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const onDashboardHealth = () => (state.route?.suite?.id === HOME && state.route?.module?.shell === 'dashboard' ? $('#health') : null);
+async function loadHealth() {
+  if (!onDashboardHealth()) return;
+  try {
+    const res = await fetch('status/health.json', { cache: 'no-cache', signal: abortAfter(TODAY_FETCH_MS) });
+    if (!res.ok) return;
+    const h = await res.json(), at = Date.parse(h?.generated), el = onDashboardHealth();
+    if (!el || !Number.isFinite(at)) return;
+    let tone, text;
+    if (Date.now() - at > HEALTH_STALE_MS) [tone, text] = ['warn', `The data check has not run since ${shortDay(at)}.`];
+    else if (h.ok === false) {
+      const names = [...new Set((Array.isArray(h.failing) ? h.failing : []).map(f => String(f?.name || f?.what || '')).filter(Boolean))];
+      const shown = names.slice(0, HEALTH_NAMES).join(', ') + (names.length > HEALTH_NAMES ? ` and ${names.length - HEALTH_NAMES} more` : '');
+      [tone, text] = ['bad', `Data check failed on ${shortDay(at)}${shown ? `: ${shown}` : ''}.`];
+    } else return; // passed, and recently: quiet
+    const run = typeof h.run === 'string' && /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/actions\/runs\/\d+$/.test(h.run) ? h.run : '';
+    el.className = `prp-status ${tone} dash-health`;
+    // The link flows on in the same line of words, so on a phone the dot stays beside them.
+    el.innerHTML = `<span>${esc(text)}${run ? ` <a href="${esc(run)}" target="_blank" rel="noopener">Details</a>` : ''}</span>`;
+    el.hidden = false;
+  } catch { /* offline, no file yet, or not JSON: no mark */ }
 }
 // The submodules the shell draws itself, by their registry "shell" value.
 const SHELL_PAGES = new Map([['dashboard', renderDashboard]]);

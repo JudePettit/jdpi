@@ -444,9 +444,12 @@ function pageFixtures() {
   };
 }
 // Serve every source of the panel from the fixtures, each held until `gate` resolves (if given) and the hype feed after
-// `hypeDelay` ms; `seen` collects the requests.
-async function servePanel(context, { gate = null, hypeDelay = 0, seen = [] } = {}) {
+// `hypeDelay` ms; `seen` collects the requests. The Dashboard's health mark reads status/health.json, which the daily
+// data check commits: these tests serve their own (`health`, by default none, so no mark), never the repository's, so a
+// failing check can never turn the suite, and with it every deploy, red. The mark's own test below passes one.
+async function servePanel(context, { gate = null, hypeDelay = 0, seen = [], health = 404 } = {}) {
   const fx = pageFixtures();
+  await context.route('**/status/health.json', route => (health === 404 ? route.fulfill({ status: 404, body: 'not found' }) : route.fulfill({ json: health })));
   await context.route(/\/integration\/data\/(volatility-movers|briefing-activity|upcoming-political-events)\.json/, async route => {
     seen.push(route.request().url()); if (gate) await gate;
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(fx[/(volatility-movers|briefing-activity|upcoming-political-events)/.exec(route.request().url())[1]]) });
@@ -494,6 +497,25 @@ test('page: the panel is the same height loading and filled, at 1440 and 390 px;
   } finally { await browser.close(); }
 });
 
+// Tab through the panel's `links` links from where focus is now: each must be a link in a Today card, showing a 2px ring
+// drawn inside it.
+async function tabThroughPanel(page, links, label = '') {
+  for (let i = 0; i < links; i++) {
+    await page.keyboard.press('Tab');
+    const ring = await page.evaluate(() => {
+      const el = document.activeElement, card = el.closest('.today-card');
+      if (!card) return { cls: el.className, text: el.textContent.trim().slice(0, 40), card: false };
+      const cs = getComputedStyle(el), r = el.getBoundingClientRect(), c = card.getBoundingClientRect();
+      const off = parseFloat(cs.outlineOffset), w = parseFloat(cs.outlineWidth);
+      // The ring's outer edge, which the card's overflow: hidden would cut off if it lay outside the card's border box.
+      return { cls: el.className, card: true, visible: el.matches(':focus-visible'), style: cs.outlineStyle, w, inside: r.left - off - w >= c.left - 0.5 && r.right + off + w <= c.right + 0.5 && r.top - off - w >= c.top - 0.5 && r.bottom + off + w <= c.bottom + 0.5 };
+    });
+    assert.ok(ring.card, `${label}link ${i}: focus is in a Today card, not on "${ring.text}" (${ring.cls})`);
+    assert.ok(ring.visible && ring.style === 'solid' && ring.w === 2, `${label}link ${i} (${ring.cls}) shows its ring`);
+    assert.ok(ring.inside, `${label}link ${i} (${ring.cls}): the whole ring is inside the card`);
+  }
+}
+
 test('page: rows and links show their focus ring; the four links have their own names; tones use their tokens', pageTest, async t => {
   if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
   const browser = await launch();
@@ -508,17 +530,7 @@ test('page: rows and links show their focus ring; the four links have their own 
     // Keyboard through the panel from the heading above it: every link shows a 2px ring drawn inside the card.
     await page.evaluate(() => { const h = document.querySelector('#view h1'); h.tabIndex = -1; h.focus(); });
     const links = await page.$$eval('#today a', a => a.length);
-    for (let i = 0; i < links; i++) {
-      await page.keyboard.press('Tab');
-      const ring = await page.evaluate(() => {
-        const el = document.activeElement, cs = getComputedStyle(el), r = el.getBoundingClientRect(), c = el.closest('.today-card').getBoundingClientRect();
-        const off = parseFloat(cs.outlineOffset), w = parseFloat(cs.outlineWidth);
-        // The ring's outer edge, which the card's overflow: hidden would cut off if it lay outside the card's border box.
-        return { cls: el.className, visible: el.matches(':focus-visible'), style: cs.outlineStyle, w, inside: r.left - off - w >= c.left - 0.5 && r.right + off + w <= c.right + 0.5 && r.top - off - w >= c.top - 0.5 && r.bottom + off + w <= c.bottom + 0.5 };
-      });
-      assert.ok(ring.visible && ring.style === 'solid' && ring.w === 2, `link ${i} (${ring.cls}) shows its ring`);
-      assert.ok(ring.inside, `link ${i} (${ring.cls}): the whole ring is inside the card`);
-    }
+    await tabThroughPanel(page, links);
     // Tones: a rise in volatility in the bad colour, a fall in the good; a market gain and loss in up/down.
     const tones = await page.evaluate(() => {
       const probe = v => { const s = document.createElement('span'); s.style.color = `var(${v})`; document.body.append(s); const c = getComputedStyle(s).color; s.remove(); return c; };
@@ -529,6 +541,48 @@ test('page: rows and links show their focus ring; the four links have their own 
     for (const [k, [got, want]] of Object.entries(tones)) assert.equal(got, want, `${k} is coloured with its token`);
     assert.match(await page.textContent('#today [data-group="markets"] .today-win'), /^quotes fetched \d+ \w{3} \d\d:\d\d UTC · trade-desk$/, 'never "live"');
     await context.close();
+  } finally { await browser.close(); }
+});
+
+test('page: with the health mark showing (a failed or a stalled data check), the panel works as before, at 1440 and 390 px', pageTest, async t => {
+  if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
+  // status/health.json as the daily check writes it when it fails, and one it last wrote four days ago.
+  const RUN = 'https://github.com/JudePettit/jdpi/actions/runs/123';
+  const failing = { generated: iso(Date.now() - 2 * H), ok: false, problems: 1, run: RUN, failing: [{ name: 'Scientific Briefing', what: 'science/briefing/data/stories.json', detail: '20 h old' }] };
+  const stale = { generated: iso(Date.now() - 4 * DAY), ok: true, problems: 0, failing: [], run: RUN };
+  const browser = await launch();
+  try {
+    for (const [kind, health] of [['failing', failing], ['stale', stale]]) {
+      for (const [width, height, phone] of [[1440, 900, false], [390, 844, true]]) {
+        const label = `${kind}, ${width}: `;
+        const context = await browser.newContext({ viewport: { width, height }, isMobile: phone, hasTouch: phone });
+        await servePanel(context, { health });
+        const page = await context.newPage();
+        const errors = [];
+        page.on('pageerror', e => errors.push(e.message));
+        await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
+        await filled(page);
+        await page.waitForSelector('#health:not([hidden])');
+        await page.evaluate(() => document.fonts.ready.then(() => true));
+        const mark = await page.$eval('#health', el => {
+          const b = el.getBoundingClientRect(), span = el.querySelector('span'), w = span.getBoundingClientRect(), a = el.querySelector('a');
+          return { cls: el.className, top: b.top, spanTop: w.top, left: b.left, spanLeft: w.left, right: b.right, inLine: !!a && span.contains(a) };
+        });
+        assert.equal(mark.cls, `prp-status ${kind === 'failing' ? 'bad' : 'warn'} dash-health`, label);
+        // The dot stays beside its words (not on a line of its own), Details flows on after them, and it all fits.
+        assert.ok(Math.abs(mark.spanTop - mark.top) <= 1 && mark.spanLeft > mark.left, `${label}the dot is beside its words (${JSON.stringify(mark)})`);
+        assert.ok(mark.inLine, `${label}Details is in the line of words`);
+        assert.ok(mark.right <= width, `${label}the mark fits`);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${label}no sideways scroll`);
+        // From the heading, the first Tab is the mark's Details link; every link of the panel follows, with its ring.
+        await page.evaluate(() => { const h = document.querySelector('#view h1'); h.tabIndex = -1; h.focus(); });
+        await page.keyboard.press('Tab');
+        assert.deepEqual(await page.evaluate(() => [document.activeElement.textContent, !!document.activeElement.closest('#health')]), ['Details', true], label);
+        await tabThroughPanel(page, await page.$eval('#today a', a => a.length), label);
+        assert.deepEqual(errors, [], label);
+        await context.close();
+      }
+    }
   } finally { await browser.close(); }
 });
 

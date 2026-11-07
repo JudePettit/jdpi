@@ -88,7 +88,8 @@ page**, listed under `views` in the registry, never extra sidebar entries.
 
 Every timed job (the GitHub workflows that rebuild and commit the data, the trading Worker's jobs, Double Signal's
 scan, the Supabase jobs) is listed in [OPERATIONS.md](OPERATIONS.md): when it runs, what it writes, and how you know it
-broke. Each refresh runs its tests before it commits, and the site deploys from GitHub once the suite passes.
+broke. Each refresh runs its tests before it commits, and the site deploys from GitHub only once the whole suite has passed
+on that very commit (.github/workflows/pages-deploy.yml, which every deploy goes through).
 
 ## Tests
 
@@ -103,7 +104,7 @@ node integration/scripts/coverage.mjs --json coverage.json --md coverage.md   # 
 ```
 
 CI (`.github/workflows/ci.yml`) runs the whole suite on every push and pull request, against a local copy of the site
-served like Cloudflare Pages, and deploys main when it passes. The page tests read the site at `JDPI_URL` (the
+served like Cloudflare Pages, and deploys that commit from main when it passes. The page tests read the site at `JDPI_URL` (the
 platform test prefers `PRP_URL`); CI points both at its local copy, and without them most page tests fetch the live
 site. `PRP_PAGES=0` leaves out every test that needs a browser or the network: the data refreshes test their new data
 that way before they commit it.

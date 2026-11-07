@@ -1,5 +1,5 @@
 title: Politics
-intro: The political spectrum through the leaders and thinkers who shaped it: the far left, the left, the centre and the far right, together with John Mearsheimer and the Realists, a school of thought about power among states that stands outside the line from left to right. Each is presented as its own thinkers explained it, followed by what happened when it held power and what its critics say.
+intro: The political spectrum through the leaders and thinkers who shaped it: the far left, the left, the centre, the right and the far right, together with John Mearsheimer and the Realists, a school of thought about power among states that stands outside the line from left to right. Each is presented as its own thinkers explained it, followed by what happened when it held power and what its critics say.
 
 # Introduction · The political spectrum
 
@@ -8,13 +8,13 @@ The words "left" and "right" come from the French National Assembly of 1789, whe
 
 Today the spectrum usually arranges views by attitudes to **equality** and **change**:
 - The **left** tends to favour greater equality, redistribution and reform of existing hierarchies.
-- The **right** tends to favour tradition, order, national interest and acceptance of some inequality as natural or useful.
+- The **right** tends to favour tradition and established institutions, free markets and limited government, order and the national interest, and accepts some inequality as natural or as the price of liberty.
 - The **centre** combines elements of both and prefers gradual, pragmatic change.
 - The **far left and far right** reject the existing liberal-democratic order itself, in favour of revolution or authoritarian rule.
 
 A single line hides a lot. Political scientists often add a second axis, from **libertarian** (individual freedom) to **authoritarian** (order and state power), which places, for example, free-market libertarians and social conservatives in different spots although both are "on the right". Some argue the extremes resemble each other in methods ("horseshoe theory"); others reject this as ignoring their opposite goals.
 
-! How to use this course: Each unit presents an area of the spectrum, or a school of thought that stands outside it, in its own terms, then in practice, then through its critics. The final unit compares all five on the same questions.
+! How to use this course: Each unit presents an area of the spectrum, or a school of thought that stands outside it, in its own terms, then in practice, then through its critics. The final unit compares the five positions on the line, and the Realists beside them, on the same questions.
 
 ? Where do the terms "left" and "right" come from?
 * The two houses of the British Parliament
@@ -145,6 +145,53 @@ Centrists favour **pragmatism over ideology**: market economies with a social sa
 * The Maastricht Treaty
 = Clause IV committed Labour to common ownership of the means of production; Blair replaced it with a statement of democratic socialist values.
 
+# Right wing · Conservatism and market liberalism
+
+## Thinkers of the right
+The mainstream right accepts **democracy and the market economy**. It joins **conservatism**, which values inherited institutions and gradual change, with **classical liberalism** (or market liberalism), which defends free markets and limited government.
+
+- **Edmund Burke** (1729–1797), often called the founder of modern conservatism, attacked the French revolutionaries in _Reflections on the Revolution in France_ (1790) for tearing down institutions in the name of abstract rights. Society, he wrote, is a partnership "between those who are living, those who are dead, and those who are to be born".
+- **Michael Oakeshott** (1901–1990) criticised **rationalism in politics**, governing by blueprints instead of experience. To be conservative, he wrote, is "to prefer the familiar to the unknown".
+- **Friedrich Hayek** (1899–1992), in _The Road to Serfdom_ (1944), and **Milton Friedman** (1912–2006), in _Capitalism and Freedom_ (1962), argued that central planning threatens liberty and that economic freedom underpins political freedom (see the Economics course).
+- **Robert Nozick** (1938–2002), replying to Rawls in _Anarchy, State, and Utopia_ (1974), defended a **minimal state**: holdings are just if justly acquired or transferred, or if past injustice has been rectified.
+- In the United States **Russell Kirk** (_The Conservative Mind_, 1953) traced a conservative tradition from Burke, and **William F. Buckley Jr.**, founder of _National Review_ (1955), promoted **fusionism**: an alliance of traditionalists, free-market libertarians and anti-communists.
+- **Roger Scruton** (1944–2020), in _The Meaning of Conservatism_ (1980), grounded conservatism in authority, allegiance and tradition rather than in the free market.
+
+### Shared commitments
+- Liberty under the rule of law, private property and free markets.
+- Inherited institutions (family, religion, nation, common law) carry the experience of generations; reform should be gradual.
+- A limited state in the economy, a strong one in defence and order; equality before the law, not of outcomes.
+
+? Why did Burke condemn the French revolutionaries' approach to reform?
+* Because he opposed every kind of political change
++ Because they tore down inherited institutions in the name of abstract rights
+* Because they did not go far enough in redistributing property
+= Burke held that a state must change to conserve itself, but by growing out of its institutions, not by a plan that replaces them.
+
+## The right in power and its critics
+- **Britain after 1945**: **One Nation** Conservatives, named after Benjamin Disraeli's warning in _Sybil_ (1845) of "two nations", rich and poor, accepted the welfare state and the NHS.
+- **Margaret Thatcher** (UK prime minister 1979–90) used monetarism against inflation, curbed trade-union power and privatised state industries, from British Aerospace (1981) to British Telecom (1984) and British Gas (1986). She won three elections; the poll tax helped bring her down in 1990.
+- **Ronald Reagan** (US president 1981–89) said in his first inaugural address: "In this present crisis, government is not the solution to our problem; government is the problem." He cut taxes, deregulated and built up the military, then negotiated arms cuts with Mikhail Gorbachev.
+- In continental Europe the main centre-right parties are often **Christian democrats** (see the Centre unit).
+
+**Neoliberalism.** Liberal thinkers meeting in Paris in 1938 chose the word for a renewed liberalism of competition under a strong state. Today it is used mostly by critics, for the privatisation, deregulation and free trade that spread from the 1980s.
+
+### What critics say
+- **From the left**: inequality rose sharply; in 1982 unemployment passed three million in Britain and reached 10.8% in the United States, and closed mines and factories left whole regions behind.
+- **On the record**: the US national debt nearly tripled under Reagan, and British inflation rose again to about 10% in 1990.
+- **From within the right**: traditionalists warn that markets and consumerism wear away family, community and religion; market liberals reply, with Hayek, that conservatism resists change without saying where to go.
+
+### What defenders say
+- Thatcher and Reagan ended the stagflation of the 1970s: inflation fell from 18% in 1980 to about 4% in Britain, and from 13.5% to about 4% in the United States, within the decade.
+- Their opponents kept most of the reforms: Tony Blair later wrote that Britain had needed the industrial and economic reforms of the Thatcher years.
+- The Cold War ended without war between the superpowers, after the West's military build-up and Reagan's negotiations with Gorbachev.
+
+? Which policy is most associated with Margaret Thatcher's governments?
+* Nationalising coal, rail and steel
++ Privatising state industries such as British Telecom and British Gas
+* Founding the National Health Service
+= Thatcher's governments sold most large state utilities; the nationalisations and the NHS were the work of Attlee's Labour government.
+
 # Outside the spectrum · John Mearsheimer and the Realists
 
 ## The realist tradition
@@ -257,16 +304,22 @@ France's Front National, founded in 1972 by Jean-Marie Le Pen, is a classic post
 # Comparing the spectrum
 
 ## Five answers to the same questions
-The first four columns run along the line from left to right; the Realists, who stand outside it, come last.
+The first five columns run along the line from left to right; the Realists, who stand outside it, come last.
 
-| Question | Far left | Left | Centre | Far right | Realists (outside the line) |
-|---|---|---|---|---|---|
-| Core value | Equality; end of class | Social justice and equality of opportunity | Pragmatism, liberty and stability | The nation (ethnic or cultural), order | Security and national interest |
-| View of human nature | Shaped by social conditions | Improvable through institutions | Mixed; reform carefully | Hierarchical; groups unequal | Self-interested; states seek power |
-| Role of the state | Owns or directs the economy | Redistributes and provides services | Regulates markets and supports a safety net | Strong, often authoritarian state | Protects the nation's security first |
-| Attitude to democracy | Often "bourgeois"; revolutionary path | Committed democrats | Committed liberal democrats | Rejects or restricts liberal democracy | Domestic regime matters little abroad |
-| Foreign policy | Internationalist revolution | Multilateralism, development aid | Alliances, trade, international institutions | Nationalism, expansion or isolation | Balance of power; avoid crusades |
-| Key thinkers | Lenin, Luxemburg, Trotsky, Mao, Gramsci | Bernstein, Beveridge, Rawls | Mill, Popper, Giddens | Mussolini, theorists of national rebirth | Thucydides, Morgenthau, Waltz, Mearsheimer |
+| Question | Far left | Left | Centre | Right | Far right | Realists (outside the line) |
+|---|---|---|---|---|---|---|
+| Core value | Equality; end of class | Social justice and equality of opportunity | Pragmatism, liberty and stability | Liberty under law, tradition and order | The nation (ethnic or cultural), order | Security and national interest |
+| View of human nature | Shaped by social conditions | Improvable through institutions | Mixed; reform carefully | Imperfect, with limited knowledge; distrust grand designs | Hierarchical; groups unequal | Self-interested; states seek power |
+| Role of the state | Owns or directs the economy | Redistributes and provides services | Regulates markets and supports a safety net | Limited in the economy, with markets leading; strong in law, order and defence; many keep a welfare safety net | Strong, often authoritarian state | Protects the nation's security first |
+| Attitude to democracy | Often "bourgeois"; revolutionary path | Committed democrats | Committed liberal democrats | Committed democrats; constitutional limits on power | Rejects or restricts liberal democracy | Domestic regime matters little abroad |
+| Foreign policy | Internationalist revolution | Multilateralism, development aid | Alliances, trade, international institutions | Strong defence, alliances and free trade in the national interest | Nationalism, expansion or isolation | Balance of power; avoid crusades |
+| Key thinkers | Lenin, Luxemburg, Trotsky, Mao, Gramsci | Bernstein, Beveridge, Rawls | Mill, Popper, Giddens | Burke, Oakeshott, Hayek, Friedman, Kirk, Scruton | Mussolini, theorists of national rebirth | Thucydides, Morgenthau, Waltz, Mearsheimer |
+
+? According to the table, which position wants a state limited in the economy, with markets leading, but strong in law, order and defence?
+* Left
++ Right
+* Far right
+= The mainstream right wants a limited state in the economy and a strong one in law and defence; the left wants the state to redistribute and provide services, and the far right a strong, often authoritarian state.
 
 ## A crisis seen five ways
 Imagine a large neighbouring country invades a smaller one that has been moving closer to a Western alliance. How would each area of the spectrum, and the Realists, tend to respond?
@@ -274,6 +327,7 @@ Imagine a large neighbouring country invades a smaller one that has been moving 
 - **Far left**: oppose the imperialism of both blocs; argue workers on both sides are victims of rival ruling classes; some groups have backed whichever side opposes Western power.
 - **Left**: condemn the invasion as a breach of international law, support sanctions and humanitarian aid, work through the UN.
 - **Centre**: support the victim through alliances, sanctions and military aid; strengthen collective security.
+- **Right**: condemn the aggressor and arm the victim; stress deterrence, defence spending and strong alliances; some on the right ask how far their own country's interest is at stake, and how much aid to give.
 - **Far right**: divided between nationalist hostility to the invader and admiration for a strong nationalist leader; often focused on keeping the home country out.
 - **Realists (Mearsheimer)**, outside the line: see the war as a predictable reaction by a great power to a rival alliance on its border; urge a negotiated settlement that recognises spheres of influence, and warn against escalation with a nuclear power.
 

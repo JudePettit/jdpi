@@ -1987,20 +1987,20 @@
           "description": "English Wikipedia article"
         }
       ],
-      "rows": 13984,
+      "rows": 14001,
       "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
       "sources": [
         "Wikidata (CC0)",
         "Every Vitruvian Manager submodule that mentions the entity"
       ],
-      "updated": "2026-11-03",
+      "updated": "2026-11-06",
       "refresh": "monthly",
       "page": "encyclopedia/index.html",
       "derivedFrom": [
         "lake/data/index.json",
         "lake/data/e/*.json"
       ],
-      "bytes": 4152748
+      "bytes": 4158131
     },
     {
       "id": "retrospective-wars",
@@ -3312,7 +3312,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 20121
+      "bytes": 20213
     },
     {
       "id": "kino-documentaries",

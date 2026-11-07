@@ -46,6 +46,30 @@ test('data: realism is not on the line from left to right; the Realists carry "S
   assert.ok(sui.every(r => realists.includes(r)), `only Realists: ${sui.filter(r => !realists.includes(r)).map(r => r.label)}`);
 });
 
+test('data: the mainstream right is on the line; its thinkers and schools carry "Right wing", and no Realist or other position does', () => {
+  const m = read('lake/data/manifest.json'), all = [];
+  for (let i = 0; i < m.shards.entities; i++) all.push(...Object.values(read(`lake/data/e/${i}.json`)));
+  const spectrum = r => (r.tags || []).filter(t => t.startsWith('Political spectrum:')).map(t => t.slice(19));
+  const byLabel = new Map(all.map(r => [r.label, r]));
+  for (const name of ['Edmund Burke', 'Michael Oakeshott', 'Friedrich Hayek', 'Milton Friedman', 'Robert Nozick', 'Russell Kirk', 'William F. Buckley Jr.',
+    'Roger Scruton', 'Benjamin Disraeli', 'Margaret Thatcher', 'Ronald Reagan', 'conservatism', 'classical liberalism', 'one-nation conservatism']) {
+    const r = byLabel.get(name);
+    assert.ok(r, `${name} is in the lake`);
+    assert.deepEqual(spectrum(r), ['Right wing'], `${name}: ${spectrum(r)}`);
+    assert.ok(r.tags.includes('School or tag:Right wing') && r.tags.includes('Appears in:Learning · Politics'), name);
+  }
+  for (const name of ['Edmund Burke', 'Michael Oakeshott', 'Roger Scruton', 'Margaret Thatcher', 'Ronald Reagan']) assert.ok(byLabel.get(name).tags.includes('School or tag:Conservative'), `${name} is a Conservative`);
+  for (const name of ['Friedrich Hayek', 'Milton Friedman']) assert.ok(byLabel.get(name).tags.includes('School or tag:Classical liberal'), `${name} is a Classical liberal`);
+  // The right's unit gives its position to its own only: not to the Realists, the left, the centre or the far right it names.
+  const right = all.filter(r => spectrum(r).includes('Right wing'));
+  assert.ok(right.every(r => r.tags.includes('School or tag:Right wing')), `only the right's own: ${right.filter(r => !r.tags.includes('School or tag:Right wing')).map(r => r.label)}`);
+  for (const r of right) assert.ok(!r.tags.includes('School or tag:Realist'), `${r.label} is no Realist`);
+  for (const name of ['John Rawls', 'Clement Attlee', 'Tony Blair', 'Christian democracy', 'neoliberalism']) assert.ok(!spectrum(byLabel.get(name)).includes('Right wing'), name);
+  // A thinker with a place on the line keeps that place only (Marx is named in the left's and the centre's lessons).
+  assert.deepEqual(spectrum(byLabel.get('Karl Marx')), ['Far left']);
+  assert.deepEqual(spectrum(byLabel.get('Nazism')), ['Far right']);
+});
+
 test('a Boolean tag query finds John Mearsheimer, and his page links to where he appears', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

@@ -20,9 +20,9 @@ export const THINKERS = [
   ['Ludwig von Mises', /Mises/, ['Austrian School', 'Classical liberal', 'Economist']],
   ['Carl Menger', /Menger/, ['Austrian School', 'Economist']],
   ['Eugen von Böhm-Bawerk', /Böhm-Bawerk/, ['Austrian School', 'Economist']],
-  ['Friedrich Hayek', /Hayek/, ['Austrian School', 'Classical liberal', 'Economist', 'Philosopher']],
+  ['Friedrich Hayek', /Hayek/, ['Austrian School', 'Classical liberal', 'Right wing', 'Economist', 'Philosopher']],
   ['Murray Rothbard', /Rothbard/, ['Austrian School', 'Anarcho-capitalist', 'Economist']],
-  ['Milton Friedman', /Friedman/, ['Chicago School', 'Monetarist', 'Economist']],
+  ['Milton Friedman', /Friedman/, ['Chicago School', 'Monetarist', 'Classical liberal', 'Right wing', 'Economist']],
   ['Anna Schwartz', /Schwartz/, ['Chicago School', 'Monetarist', 'Economist']],
   ['Edmund Phelps', /Phelps/, ['Economist']],
   ['Frank Knight', /Frank Knight/, ['Chicago School', 'Economist']],
@@ -60,6 +60,15 @@ export const THINKERS = [
   ['Tony Blair', /Blair/, ['Third Way', 'Centrist', 'Head of government']],
   ['Gerhard Schröder', /Schröder/, ['Third Way', 'Centrist', 'Head of government']],
   ['Emmanuel Macron', /Macron/, ['Centrist', 'Head of state']],
+  ['Edmund Burke', /Burke/, ['Conservative', 'Right wing', 'Philosopher']],
+  ['Michael Oakeshott', /Oakeshott/, ['Conservative', 'Right wing', 'Philosopher']],
+  ['Robert Nozick', /Nozick/, ['Libertarian', 'Right wing', 'Philosopher', 'Political philosophy']],
+  ['Russell Kirk', /\bKirk\b/, ['Conservative', 'Traditionalist conservative', 'Right wing']],
+  ['William F. Buckley Jr.', /Buckley/, ['Conservative', 'Fusionist', 'Right wing', 'Journalist']],
+  ['Roger Scruton', /Scruton/, ['Conservative', 'Right wing', 'Philosopher']],
+  ['Benjamin Disraeli', /Disraeli/, ['Conservative', 'One-nation conservative', 'Right wing', 'Head of government']],
+  ['Margaret Thatcher', /Thatcher/, ['Conservative', 'Right wing', 'Head of government']],
+  ['Ronald Reagan', /Reagan/, ['Conservative', 'Right wing', 'Head of state']],
   ['Thucydides', /Thucydides/, ['Realist', 'Classical realism', 'Historian']],
   ['Niccolò Machiavelli', /Machiavelli/, ['Realist', 'Classical realism', 'Philosopher']],
   ['Thomas Hobbes', /Hobbes/, ['Realist', 'Classical realism', 'Philosopher']],
@@ -99,6 +108,12 @@ export const THINKERS = [
   ['Offensive realism', /offensive realism/i, ['School of thought', 'Realist', 'Structural realism', 'International relations']],
   ['Liberal institutionalism', /liberal institutionalis/i, ['School of thought', 'International relations']],
   ['Constructivism (international relations)', /constructivis/i, ['School of thought', 'International relations']],
+  ['Conservatism', /conservatis[mt]/i, ['School of thought', 'Right wing']],
+  ['Classical liberalism', /classical liberal|market liberal/i, ['School of thought', 'Right wing']],
+  ['One-nation conservatism', /One Nation/, ['School of thought', 'Conservative', 'Right wing']],
+  // A word for the free-market policies that spread from the 1980s, used mostly by their critics and applied to the
+  // Third Way as well as the right: it takes no place on the line.
+  ['Neoliberalism', /neo-?liberal/i, ['School of thought', 'Economics']],
   ['Third Way', /Third Way/, ['School of thought', 'Centrist']],
   ['Christian democracy', /Christian democra/i, ['School of thought', 'Centre right']],
   ['Efficient-market hypothesis', /efficient market hypothesis|efficient-market/i, ['Theory', 'Finance']],
@@ -111,12 +126,20 @@ export const THINKERS = [
 // Spectrum position by Politics course unit (the unit title's first segment). Realism is a school of thought about
 // power among states, held by people of the left, the centre and the right, so it has no place on the line from left
 // to right: its unit ("Outside the spectrum") gives "Sui generis (Realist)", in the same tag group, so the Realists
-// can still be found together.
-export const SPECTRUM = { 'Far left': 'Far left', 'Left wing': 'Left wing', 'Centre': 'Centrist', 'Outside the spectrum': 'Sui generis (Realist)', 'Far right': 'Far right' };
+// can still be found together. The mainstream right (conservatism and market liberalism) has its own unit, "Right
+// wing", between the centre and the Realists.
+export const SPECTRUM = { 'Far left': 'Far left', 'Left wing': 'Left wing', 'Centre': 'Centrist', 'Right wing': 'Right wing', 'Outside the spectrum': 'Sui generis (Realist)', 'Far right': 'Far right' };
 // A spectrum tag that only a school's own members take: the realist unit also teaches realism's critics (liberal
-// institutionalists, constructivists), who are not Realists and take no position from it.
-export const SPECTRUM_SCHOOL = { 'Sui generis (Realist)': 'Realist' };
+// institutionalists, constructivists), who are not Realists and take no position from it; the right's unit also names
+// the people and schools it is compared with (Rawls, Attlee, Blair, Christian democracy, realism, monetarism), who are
+// not of the right, so only those tagged 'Right wing' above take its position.
+export const SPECTRUM_SCHOOL = { 'Sui generis (Realist)': 'Realist', 'Right wing': 'Right wing' };
+// A thinker given a position on the line above keeps it: a unit that only names them (Thatcher in a quiz on the left,
+// Marx in the centre's lesson) gives them no other.
+const OWN = new Set(Object.values(SPECTRUM));
 export const spectrumTag = (unit, tags) => {
   const s = SPECTRUM[String(unit).split(' · ')[0]];
-  return s && (!SPECTRUM_SCHOOL[s] || tags.includes(SPECTRUM_SCHOOL[s])) ? s : null;
+  if (!s || (SPECTRUM_SCHOOL[s] && !tags.includes(SPECTRUM_SCHOOL[s]))) return null;
+  const own = tags.filter(t => OWN.has(t));
+  return own.length && !own.includes(s) ? null : s;
 };

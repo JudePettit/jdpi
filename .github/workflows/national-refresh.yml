@@ -19,10 +19,16 @@ jobs:
         with:
           repository: JudePettit/hp-retrospective
           path: hp-retrospective
+      # Political Atlas names, for each country it covers, the office that holds the most power (its executive.leader):
+      # the current leader is that office's holder.
+      - uses: actions/checkout@v4
+        with:
+          repository: JudePettit/political-atlas
+          path: political-atlas
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node national/scripts/build.mjs --retro hp-retrospective
+      - run: node national/scripts/build.mjs --retro hp-retrospective --atlas political-atlas
       - name: Test the new data
         env:
           PRP_PAGES: '0'

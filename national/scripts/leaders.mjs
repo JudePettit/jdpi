@@ -14,10 +14,14 @@
 // for the office are the candidates. The country's statements still come first otherwise: P39 statements of past
 // holders are often left open too. What Wikidata still gets wrong is put right in leader-corrections.json.
 //
-// The current leader is the Retrospective's last leader only when that entry is still open, is a name (has letters)
-// and agrees with the present head of state or government by family name. Otherwise it is the head who governs: the
-// head of state in a presidential system, the head of government elsewhere, or whichever of the two there is.
-// `source` says which.
+// The current leader is the holder of the office that holds the most power in practice (Jude, 6 November 2026: "the
+// most powerful political figure, not the head of state"). leaderOffice() chooses the office: the one Political Atlas
+// names (its executive.leader) where the Atlas has the country; otherwise a dated decision (leader-offices.json), then
+// what the data says about the system of government (one person in both offices, one office for both, Wikidata's forms
+// of government, a head of state shared with other countries), then the only office with a holder, then the
+// Retrospective's open entry where it is one of the heads; the rest are undecided and get the head of government.
+// currentLeader() then names its holder from National Analysis's own heads (refreshed more often than the Atlas), or
+// "Vacant" where the office has no holder.
 
 export const hasLetters = s => /\p{L}/u.test(String(s ?? ''));
 
@@ -30,8 +34,17 @@ export function pickHead(statements = [], today = new Date().toISOString().slice
   return [...open].sort((a, b) => String(b.start || '').localeCompare(String(a.start || '')) || rank(b) - rank(a) || String(a.name || '').localeCompare(String(b.name || '')))[0];
 }
 
-// Wikidata's forms of government (P122 labels) in which the head of state governs.
-export const PRESIDENTIAL = ['presidential system', 'super-presidential republic'];
+// Wikidata's forms of government (P122 labels): those in which the head of state governs (presidential systems, ruling
+// monarchies, juntas and one-party states, whose leader is head of state), and the parliamentary ones, in which the
+// head of government does. A country with forms of both kinds, or of neither (a bare "republic"), is not decided by
+// them. A semi-presidential country is never decided by a head of state it shares with another country (France and
+// Andorra).
+export const HEAD_OF_STATE_FORMS = ['presidential system', 'super-presidential republic', 'presidential republic', 'absolute monarchy', 'Emirate',
+  'islamic theocracy', 'Islamic state', 'military junta', 'one-party state', 'communist dictatorship', 'Juche', 'family dictatorship'];
+export const HEAD_OF_GOVERNMENT_FORMS = ['parliamentary republic', 'parliamentary system', 'parliamentary monarchy', 'constitutional monarchy',
+  'federal parliamentary republic', 'parliamentary democracy', 'Westminster system', 'parliamentary coprincipality'];
+const MIXED_FORMS = ['semi-presidential system'];
+export const OFFICES = ['headOfState', 'headOfGovernment'];
 
 // A name's letters only, without accents or case, with doubled letters collapsed and a closing -iy/-ij read as -y,
 // so that Zelensky, Zelenskyy and Zelenskiy compare equal.
@@ -61,21 +74,113 @@ export function lastLeader(leaders = []) {
   return last;
 }
 
-// heads: { hos, hog }, each { name, qid, start } or null. presidential: true where the head of state governs.
-export function currentLeader(leaders, heads = {}, { presidential = false } = {}) {
-  const { hos = null, hog = null } = heads;
+// The Retrospective's last leader when that entry is still open, is a name and is the given head by family name (the
+// short name, or else the last word of the full one: the short name can be misspelt, "Ilhma Aliyev").
+export function openRetroEntry(leaders, head) {
   const last = lastLeader(leaders || []);
   const display = last && (hasLetters(last.full) ? last.full : last.name);
-  // The short name, or else the last word of the full one (the short name can be misspelt: "Ilhma Aliyev").
-  const families = last ? [familyName(last), words(last.full).at(-1)].filter(Boolean) : [];
-  if (last && !last.end && hasLetters(display) && families.some(f => sameFamily(f, hos?.name) || sameFamily(f, hog?.name))) {
-    const party = last.parties?.filter(p => !p.e).map(p => p.name)[0] || last.parties?.[0]?.name || null;
-    return { name: display, since: last.start || null, party, url: last.url || null, source: 'retrospective' };
+  if (!last || last.end || !hasLetters(display) || !hasLetters(head?.name)) return null;
+  const families = [familyName(last), words(last.full).at(-1)].filter(Boolean);
+  return families.some(f => sameFamily(f, head.name)) || samePerson(display, head.name) ? last : null;
+}
+
+// True when two names are one person as the Atlas and Wikidata write them: the family names agree (or differ by one
+// letter in a longer name: Lukashenko and Lukashenka), and so do the first initials where both give a first name
+// (Mohammed bin Salman is not Salman bin Abdulaziz). What follows a comma, a bracket or " of " is a title or a note
+// ("Albert II, Prince of Monaco", "Hans-Adam II (Hereditary Prince Alois as regent)", "Mohammed VI of Morocco"); a
+// Roman numeral is no family name; "A and B" (and a list after a colon) is several people, any of whom may match.
+const ROMAN = /^(?=[IVXLC])(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})$/;
+function lev(a, b) {
+  const d = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = d[0]; d[0] = i;
+    for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; }
   }
-  const [first, second] = presidential ? [hos, hog] : [hog, hos];
-  const gov = hasLetters(first?.name) ? first : hasLetters(second?.name) ? second : null;
-  if (!gov) return null;
-  return { name: gov.name, since: gov.start || null, party: null, url: gov.qid ? `https://www.wikidata.org/wiki/${gov.qid}` : null, source: 'wikidata' };
+  return d[b.length];
+}
+const people = s => String(s ?? '').replace(/\([^)]*\)/g, ' ').replace(/^[^:]*:\s*/, '').split(/\s+and\s+|;/i)
+  .map(p => p.split(',')[0].replace(/\s+of\s+.*$/i, '')).map(p => words(p).filter(w => !ROMAN.test(w)).map(fold).filter(Boolean)).filter(p => p.length);
+export function samePerson(a, b) {
+  for (const x of people(a)) for (const y of people(b)) {
+    const fx = x.at(-1), fy = y.at(-1);
+    // The family name may be one of several (Laura Fernández Delgado, Mohammed bin Salman Al Saud).
+    const family = fx === fy || (Math.min(fx.length, fy.length) >= 5 && lev(fx, fy) <= 1) || y.includes(fx) || x.includes(fy);
+    if (family && (x.length === 1 || y.length === 1 || x[0][0] === y[0][0])) return true;
+  }
+  return false;
+}
+
+const named = h => hasLetters(h?.name);
+// Which office's holder is the current leader, and the rule that decided it. heads: { headOfState, headOfGovernment },
+// each { name, qid, start } or null. atlas: the country's Political Atlas record, or null. decision: its entry in
+// leader-offices.json, or null. government: Wikidata's forms of government. sameOffice: Wikidata names one office as
+// the country's head of state and head of government (P1906 and P1313). sharedHead: its head of state heads another
+// country too (a realm or a territory). retro: the Retrospective's leader list.
+export function leaderOffice({ atlas = null, decision = null, government = [], heads = {}, sameOffice = false, sharedHead = false, retro = null } = {}) {
+  const hos = heads.headOfState || null, hog = heads.headOfGovernment || null;
+  if (OFFICES.includes(atlas?.executive?.leader)) return { office: atlas.executive.leader, rule: 'atlas' };
+  if (OFFICES.includes(decision?.office)) return { office: decision.office, rule: 'decision' };
+  if (named(hos) && named(hog) && ((hos.qid && hos.qid === hog.qid) || hos.name === hog.name)) return { office: 'headOfState', rule: 'same-person' };
+  if (sameOffice) return { office: 'headOfState', rule: 'same-office' };
+  const s = government.some(g => HEAD_OF_STATE_FORMS.includes(g)), p = government.some(g => HEAD_OF_GOVERNMENT_FORMS.includes(g));
+  if (s !== p) return { office: s ? 'headOfState' : 'headOfGovernment', rule: 'system' };
+  if (sharedHead && !s && !government.some(g => MIXED_FORMS.includes(g))) return { office: 'headOfGovernment', rule: 'shared-head-of-state' };
+  if (named(hos) !== named(hog)) return { office: named(hos) ? 'headOfState' : 'headOfGovernment', rule: 'only-holder' };
+  if (openRetroEntry(retro, hos)) return { office: 'headOfState', rule: 'retrospective' };
+  if (openRetroEntry(retro, hog)) return { office: 'headOfGovernment', rule: 'retrospective' };
+  return { office: named(hog) || !named(hos) ? 'headOfGovernment' : 'headOfState', rule: 'undecided' };
+}
+
+// The current leader: the holder of the chosen office, from National Analysis's heads, with the Retrospective's party,
+// article and start where its open entry is that person. An office with no holder is "Vacant" where it is known to
+// be (vacant: the offices Wikidata or the Atlas give as having no holder now); with nothing known, the other office's
+// holder (San Marino: the Atlas names its Congress of State, which Wikidata does not give as head of government). Null
+// only where there is no head at all.
+// { name, qid, office, rule, since, party, url, source: 'wikidata' | 'correction' | 'vacant' }
+export function currentLeader({ office, rule }, heads = {}, { retro = null, vacant = [] } = {}) {
+  const h = heads[office];
+  if (!named(h)) {
+    if (vacant.includes(office)) return { name: 'Vacant', qid: null, office, rule, since: null, party: null, url: null, source: 'vacant' };
+    const other = OFFICES.find(o => o !== office);
+    return named(heads[other]) ? currentLeader({ office: other, rule: 'only-holder' }, heads, { retro }) : null;
+  }
+  const r = openRetroEntry(retro, h);
+  const party = r ? r.parties?.filter(p => !p.e).map(p => p.name)[0] || r.parties?.[0]?.name || null : null;
+  return {
+    name: h.name, qid: h.qid || null, office, rule, since: h.start || r?.start || null, party,
+    url: r?.url || (h.qid ? `https://www.wikidata.org/wiki/${h.qid}` : null), source: h.corrected ? 'correction' : 'wikidata',
+  };
+}
+
+// The Wikidata IDs of a country's heads and current leader that the Master Index has an entry for (has: the lake's
+// lake/data/index.json IDs), in order and once each. The page tags only these with data-qid: design/jdpi-entities.js
+// puts a link to the Master Index beside every data-qid, and one with no entry would open "No entry for Q…". The lake's
+// National Analysis adapter registers countries, not their heads, so most heads have no entry until it does.
+export function peopleInIndex(country, has) {
+  const ids = [country?.headOfStateQid, country?.headOfGovernmentQid, country?.leader?.qid];
+  return [...new Set(ids.filter(q => /^Q[1-9]\d*$/.test(q || '') && has(q)))];
+}
+
+// Political Atlas records (political-atlas/data/manifest.json lists the files, each an array of records) by ISO3, or
+// null when the folder is not there.
+export function readAtlas(dir, read) {
+  let manifest;
+  try { manifest = read(`${dir}/data/manifest.json`); } catch { return null; }
+  const out = new Map();
+  for (const f of manifest.files || []) for (const c of read(`${dir}/data/${f}`)) if (/^[A-Z]{3}$/.test(c?.iso3 || '')) out.set(c.iso3, c);
+  return out;
+}
+
+// Where the Atlas and National Analysis name different people for the leader's office (or one names someone and the
+// other no one): for a person to look at; nothing on the page.
+export function atlasDisagreement(atlas, office, heads, vacant = []) {
+  const a = atlas?.executive?.[office]?.name || null, n = heads?.[office]?.name || null;
+  const aVacant = /^\s*vacant\b/i.test(a || '');
+  if (!a && !n) return null;
+  if (aVacant && !n) return null;
+  if (aVacant || !a) return { office, atlas: a, national: n };
+  if (!n) return vacant.includes(office) ? { office, atlas: a, national: 'Vacant' } : { office, atlas: a, national: null };
+  return samePerson(a, n) ? null : { office, atlas: a, national: n };
 }
 
 // Corrections: [{ iso3, field: 'headOfState' | 'headOfGovernment', name, source, checked, replaces }]. One applies only
@@ -142,9 +247,12 @@ export function headsFromRows(rows, officeRows = [], today = new Date().toISOStr
         return live.some(h => h.qid !== o.qid && h.start && h.start >= began);
       };
       const s = pickHead(own.filter(o => !succeeded(o)), today) || pickHead(live.filter(h => h.start), today);
+      // Statements for the office, and none current (all ended, or held by a body or the dead): it has no holder now.
+      if (!s && (own.length || live.length)) return 'vacant';
       return s && hasLetters(s.name) ? { name: s.name, qid: s.qid, start: s.start } : null;
     };
-    out.set(qid, { hos: pick(x.hos), hog: pick(x.hog) });
+    const hos = pick(x.hos), hog = pick(x.hog), vacant = [hos === 'vacant' && 'hos', hog === 'vacant' && 'hog'].filter(Boolean);
+    out.set(qid, { hos: hos === 'vacant' ? null : hos, hog: hog === 'vacant' ? null : hog, ...(vacant.length ? { vacant } : {}) });
   }
   return out;
 }

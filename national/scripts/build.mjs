@@ -1,5 +1,5 @@
 // Builds national/data/: one profile per country for National Analysis.
-//   node national/scripts/build.mjs [--retro ../hp-retrospective] [--allow-drop]
+//   node national/scripts/build.mjs [--retro ../hp-retrospective] [--atlas ../political-atlas] [--report <file.json>] [--allow-drop]
 // - PESTLE pressure, exactly as Country PESTLE scored it: for each of its 22 World Bank indicators, the latest value is
 //   compared with the previous one; past the indicator's threshold it is "improving" or "worsening". A dimension's
 //   pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the dimensions.
@@ -8,8 +8,11 @@
 // - Country overview from JDP-I data: system of government (Wikidata), leaders since 1926 and average tenure
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
 //   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Master Index entry.
-// - Heads of state and government (Wikidata statements, with leader-corrections.json) and the current leader:
-//   leaders.mjs has the rules.
+// - Heads of state and government (Wikidata statements, with leader-corrections.json) and the current leader: the
+//   holder of the office Political Atlas names as the most powerful (--atlas, the political-atlas folder), or else of
+//   the office the system of government gives (leader-offices.json where the data cannot decide). leaders.mjs has the
+//   rules. The build lists where the Atlas and these heads name different people for that office, for a person to look
+//   at; --report writes every country's leader, rule and those disagreements to a JSON file.
 // Guard: nothing is written when an indicator's countries halve, or the countries, their Wikidata matches, GW codes or
 // leadership data fall by a tenth, against the committed index (a World Bank series, the code list or the
 // Retrospective that failed); --allow-drop writes anyway.
@@ -18,14 +21,16 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { INDICATORS, DIMENSIONS } from './indicators.mjs';
 import { writeBrief } from './brief.mjs';
-import { headsFromRows, applyCorrections, currentLeader, PRESIDENTIAL } from './leaders.mjs';
+import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas, atlasDisagreement, peopleInIndex, OFFICES } from './leaders.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
-const arg = process.argv.indexOf('--retro');
-const retroDir = resolve(arg > 0 ? process.argv[arg + 1] : join(jdpi, '../hp-retrospective'));
+// --name <value> or --name=<value>
+const option = name => { const i = process.argv.indexOf(`--${name}`); if (i > 0) return process.argv[i + 1]; return process.argv.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3) || null; };
+const retroDir = resolve(option('retro') || join(jdpi, '../hp-retrospective'));
+const atlasDir = option('atlas') ? resolve(option('atlas')) : null, reportFile = option('report');
 const OUT = join(jdpi, 'national/data');
 const UA = { 'User-Agent': 'JDP-I National Analysis (https://jdpi.pages.dev)' };
 const FIRST = 1980, LAST = new Date().getUTCFullYear() - 1, TODAY = new Date().toISOString().slice(0, 10);
@@ -48,15 +53,28 @@ const sparql = `SELECT ?c ?iso3 ?iso2 ?num (GROUP_CONCAT(DISTINCT ?govL; separat
   OPTIONAL { ?c wdt:P122 ?gv. ?gv rdfs:label ?govL FILTER(LANG(?govL)="en") }
   OPTIONAL { ?c wdt:P36 ?cap. ?cap rdfs:label ?capL FILTER(LANG(?capL)="en") }
 } GROUP BY ?c ?iso3 ?iso2 ?num ?capL`;
+// The offices of head of state (P1906) and of government (P1313), a request of their own (in the query above they
+// would reorder its forms of government): one office for both is an executive presidency (leaders.mjs, leaderOffice).
+const officesQuery = `SELECT ?c ?hosO ?hogO WHERE {
+  ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?end }
+  { ?c wdt:P1906 ?hosO } UNION { ?c wdt:P1313 ?hogO }
+}`;
 // Wikidata's ISO code for Kosovo is XKS; the World Bank's is XKX (which is why Kosovo had no Wikidata item or heads).
 const WD_ISO3 = { XKS: 'XKX' };
 const wd = (await getJson('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(sparql), { headers: { Accept: 'application/sparql-results+json' } })).results.bindings;
 const wdBy = new Map();
 for (const b of wd) {
-  const k = WD_ISO3[b.iso3.value] || b.iso3.value, x = wdBy.get(k) || { qid: b.c.value.split('/').pop(), num: b.num?.value || null, iso2: b.iso2?.value || null, gov: new Set(), capital: null };
+  const k = WD_ISO3[b.iso3.value] || b.iso3.value, x = wdBy.get(k) || { qid: b.c.value.split('/').pop(), num: b.num?.value || null, iso2: b.iso2?.value || null, gov: new Set(), capital: null, hosOffices: new Set(), hogOffices: new Set() };
   (b.gov?.value || '').split('|').filter(Boolean).forEach(g => x.gov.add(g));
   x.capital ||= b.capL?.value || null;
   wdBy.set(k, x);
+}
+await sleep(1000);
+const wdByQid = new Map([...wdBy.values()].map(x => [x.qid, x]));
+for (const b of (await getJson('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(officesQuery), { headers: { Accept: 'application/sparql-results+json' } })).results.bindings) {
+  const x = wdByQid.get(b.c.value.split('/').pop());
+  if (b.hosO) x?.hosOffices.add(b.hosO.value);
+  if (b.hogO) x?.hogOffices.add(b.hogO.value);
 }
 // Heads of state (P35) and government (P6), read as statements, not through the truthy wdt: shortcut (which returns
 // ended statements too), and the "position held" (P39) statements of the country's offices of head of state (P1906)
@@ -85,11 +103,24 @@ await sleep(1000);
 const officeRows = await sparqlRows(officeQuery);
 console.log(`heads: ${headRows.length} country statements, ${officeRows.length} office statements`);
 const headsByQid = headsFromRows(headRows, officeRows, TODAY);
-const heads = new Map([...wdBy].map(([iso3, x]) => { const h = headsByQid.get(x.qid) || {}; return [iso3, { headOfState: h.hos || null, headOfGovernment: h.hog || null }]; }));
+const heads = new Map([...wdBy].map(([iso3, x]) => { const h = headsByQid.get(x.qid) || {}; return [iso3, { headOfState: h.hos || null, headOfGovernment: h.hog || null, vacant: (h.vacant || []).map(v => (v === 'hos' ? 'headOfState' : 'headOfGovernment')) }]; }));
 // Corrections (leader-corrections.json), each applied only while Wikidata still gives the value it replaces.
 const fixes = applyCorrections(heads, json(join(here, 'leader-corrections.json')).corrections || [], m => console.log(m));
+for (const h of heads.values()) h.vacant = h.vacant.filter(o => !h[o]?.name); // a correction fills an office
 console.log(`heads: ${[...heads.values()].filter(h => h.headOfState).length} of state, ${[...heads.values()].filter(h => h.headOfGovernment).length} of government; corrections: ${fixes.applied.length} applied, ${fixes.lapsed.length} lapsed`);
 console.log(`${wbCountries.length} countries; Wikidata matched ${wbCountries.filter(c => wdBy.has(c.id)).length}`);
+
+// ---- Which office the current leader holds: Political Atlas's executive.leader, else leader-offices.json, else the
+// system of government (leaders.mjs, leaderOffice).
+const atlas = atlasDir ? readAtlas(atlasDir, json) : null;
+if (atlasDir && !atlas) throw new Error(`--atlas ${atlasDir}: no data/manifest.json there`);
+if (atlas) console.log(`Political Atlas: ${atlas.size} records (${atlasDir}); the current leader holds the office each names`);
+else console.warn('Political Atlas: no --atlas <political-atlas folder>, so every current leader is chosen by the system of government');
+const decisions = new Map((json(join(here, 'leader-offices.json')).decisions || []).map(d => [d.iso3, d]));
+// A head of state who heads another country too (a monarch's realms and territories).
+const hosCount = new Map();
+for (const h of heads.values()) if (h.headOfState?.qid) hosCount.set(h.headOfState.qid, (hosCount.get(h.headOfState.qid) || 0) + 1);
+const leaderLog = [], disagreements = [];
 
 // ---- World Bank series
 const series = new Map(wbCountries.map(c => [c.id, {}]));
@@ -234,16 +265,29 @@ const countries = [], seriesFiles = [];
 for (const c of wbCountries) {
   const s = series.get(c.id), w = wdBy.get(c.id) || {}, gw = gwByIso3.get(c.id);
   const h = heads.get(c.id) || {}, rc = gw != null ? retro.countries[gw] : null;
-  const leader = currentLeader(rc?.leaders, { hos: h.headOfState, hog: h.headOfGovernment }, { presidential: [...(w.gov || [])].some(g => PRESIDENTIAL.includes(g)) });
+  const ar = atlas?.get(c.id) || null, sameOffice = [...(w.hosOffices || [])].some(o => w.hogOffices.has(o));
+  const vacant = [...(h.vacant || [])];
+  // The Atlas's "Vacant" counts where National Analysis has no holder either (Haiti's head of state).
+  for (const o of OFFICES) if (!h[o]?.name && /^\s*vacant\b/i.test(ar?.executive?.[o]?.name || '') && !vacant.includes(o)) vacant.push(o);
+  const choice = leaderOffice({ atlas: ar, decision: decisions.get(c.id), government: [...(w.gov || [])], heads: h, sameOffice, sharedHead: (hosCount.get(h.headOfState?.qid) || 0) > 1, retro: rc?.leaders });
+  const leader = currentLeader(choice, h, { retro: rc?.leaders, vacant });
+  const differ = ar ? atlasDisagreement(ar, choice.office, h, vacant) : null;
+  if (differ) disagreements.push({ iso3: c.id, country: c.name, ...differ });
+  if (ar && decisions.has(c.id)) console.log(`leader-offices.json: ${c.id} is decided by the Atlas (${ar.executive?.leader}); its decision (${decisions.get(c.id).office}) is not needed`);
+  leaderLog.push({ iso3: c.id, country: c.name, office: choice.office, rule: choice.rule, leader: leader?.name || null });
   const latest = scorePeriod(s, latestPick);
   const decades = Object.fromEntries([1980, 1990, 2000, 2010, 2020].map(d => { const x = scorePeriod(s, decadePick(d)); return [d, { pressure: x.pressure, overall: x.overall, coverage: x.coverage }]; }));
   const calEvents = calendar.filter(e => e.country === c.name || e.country === nameOfGw(gw) || aliasToIso3.get(nameKey(e.country)) === c.id);
   const ks = KARDASHEV[c.id] ? energy.steps.at(-1).polities.find(p => p.id === KARDASHEV[c.id]) : null;
+  const people = peopleInIndex({ headOfStateQid: h.headOfState?.qid, headOfGovernmentQid: h.headOfGovernment?.qid, leader }, q => lakeIdx.has(q));
   countries.push({
     iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: w.capital || c.capitalCity || null,
     qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, gw: gw ?? null,
     government: [...(w.gov || [])].slice(0, 4), headOfState: h.headOfState?.name || null, headOfGovernment: h.headOfGovernment?.name || null,
-    leader, // the current leader, { name, since, party, url, source: 'retrospective' | 'wikidata' }, or null (leaders.mjs)
+    headOfStateQid: h.headOfState?.qid || null, headOfGovernmentQid: h.headOfGovernment?.qid || null,
+    ...(people.length ? { peopleInIndex: people } : {}), // those of these IDs with a Master Index entry: the page tags only them
+    ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
+    leader, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
     leadership: rc ? leadership(gw, leader) : null,
     conflict: gw != null ? conflict(gw) : null,
@@ -263,3 +307,11 @@ const index = {
 writeFileSync(join(OUT, 'index.json'), JSON.stringify(index));
 writeBrief(index); // the small file Geopolitical Volatility reads (brief.mjs)
 console.log(`wrote ${countries.length} countries; with leadership data ${countries.filter(c => c.leadership).length}`);
+const byRule = {};
+for (const l of leaderLog) byRule[l.rule] = (byRule[l.rule] || 0) + 1;
+console.log(`current leader, by the rule that chose the office: ${Object.entries(byRule).map(([r, n]) => `${r} ${n}`).join(', ')}`);
+const open = leaderLog.filter(l => l.leader && ['retrospective', 'undecided'].includes(l.rule));
+if (open.length) console.log(`no data decides the office for ${open.length}: ${open.map(l => `${l.iso3} (${l.rule}: ${l.office})`).join(', ')}; add a decision to leader-offices.json`);
+for (const d of disagreements) console.log(`Atlas and National Analysis differ: ${d.iso3} ${d.office}: Atlas "${d.atlas ?? '(none)'}", National Analysis "${d.national ?? '(none)'}"`);
+if (atlas) console.log(`${disagreements.length} disagreements with the Atlas, for a person to look at`);
+if (reportFile) writeFileSync(resolve(reportFile), JSON.stringify({ generated: index.generated, atlas: atlas ? atlasDir : null, leaders: leaderLog, disagreements }, null, 1));

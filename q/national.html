@@ -61,7 +61,7 @@ a.prp-chip{text-decoration:none}a.prp-chip:hover{border-color:var(--prp-primary)
 .prp-chip small{color:var(--prp-muted);font-size:10.5px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px;padding:14px}
 .stat{min-width:0;padding:10px 12px;background:var(--prp-surface-2);border:1px solid var(--prp-line-soft);border-radius:var(--prp-radius-sm)}
-.stat span{display:block;color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.3 var(--prp-font-mono);letter-spacing:.05em;text-transform:uppercase}
+.stat>span{display:block;color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.3 var(--prp-font-mono);letter-spacing:.05em;text-transform:uppercase}
 .stat b{display:block;margin-top:4px;color:var(--prp-text);font:600 17px/1.25 var(--prp-font-ui);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{display:block;margin-top:3px;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.4}
 .wars{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
@@ -143,7 +143,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
   <section id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare" hidden><div id="compare"></div></section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and capitals; Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
+    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
     <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored.</p>
     <p><b>Refresh.</b> Rebuilt monthly from the sources above.</p>
   </footer>
@@ -329,15 +329,23 @@ async function openProfile(iso) { selected = iso; setTab('profile'); await rende
 const CAL_TYPES = { election: 'elections', referendum: 'referendums', party: 'party contests', leader: 'new leaders', inauguration: 'inaugurations',
   resignation: 'resignations', coup: 'coups', conflict: 'conflicts', ceasefire: 'ceasefires', assassination: 'assassinations', crisis: 'crises',
   protest: 'protests', treaty: 'treaties', summit: 'summits', sanctions: 'sanctions', vote: 'parliamentary votes', court: 'court rulings' };
-// The current leader, the same field in the profile and the comparison: c.leader, from the Political Retrospective
-// when its last leader is still in office, or else the head who governs, from Wikidata (national/scripts/leaders.mjs).
-// "since" only when the source gives a start date.
-const leaderName = c => c.leader?.name || '–';
+// The current leader, the same field in the profile and the comparison: c.leader, the holder of the office with the
+// most power (the one Political Atlas names, or else the one the system of government gives), by name from the heads
+// of state and government (national/scripts/leaders.mjs). "since" only when the source gives a start date. An office
+// with no holder shows "Vacant". A name whose Wikidata ID has a Master Index entry (the build lists these in
+// peopleInIndex) carries it (data-qid), so the Master Index links it (design/jdpi-entities.js); an ID with no entry
+// would get a link to "No entry", so it is left untagged.
+const OFFICE = { headOfState: 'head of state', headOfGovernment: 'head of government' };
+const person = (c, name, qid) => (/^Q[1-9]\d*$/.test(qid || '') && c.peopleInIndex?.includes(qid) ? `<span class="person" data-qid="${esc(qid)}">${esc(name)}</span>` : esc(name));
+const headHtml = (c, o) => (c[o] ? person(c, c[o], c[o + 'Qid']) : c.vacant?.includes(o) ? 'Vacant' : '–');
+const leaderHtml = c => (!c.leader ? '–' : c.leader.source === 'vacant' ? 'Vacant' : person(c, c.leader.name, c.leader.qid));
 const leaderNote = c => {
   const l = c.leader;
   if (!l) return '';
-  return [l.since ? 'since ' + esc(String(l.since).slice(0, 4)) : '', l.party ? esc(l.party) : '', l.source === 'wikidata' ? 'Wikidata' : ''].filter(Boolean).join(' · ');
+  return [OFFICE[l.office] ? esc(OFFICE[l.office][0].toUpperCase() + OFFICE[l.office].slice(1)) : '', l.since ? 'since ' + esc(String(l.since).slice(0, 4)) : '', l.party ? esc(l.party) : ''].filter(Boolean).join(' · ');
 };
+// The head of government under the head of state, where it is someone else (or no one).
+const hogNote = c => (c.headOfGovernment ? (c.headOfGovernment !== c.headOfState ? 'Head of government: ' + headHtml(c, 'headOfGovernment') : '') : c.vacant?.includes('headOfGovernment') ? 'Head of government: Vacant' : '');
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
@@ -370,11 +378,11 @@ async function renderProfile() {
     <div class="ptitle"><div><div class="prp-label">${esc(c.region)} · ${esc(c.income)}</div><h2>${esc(c.name)}</h2>
       <div class="sub">${esc(c.government.join(', ') || 'System of government not recorded')}${c.capital ? ' · capital ' + esc(c.capital) : ''}</div></div>
       <div class="pact"><div class="links">${links}</div><button type="button" class="prp-btn sm${inCmp ? '' : ' primary'}" id="addcmp" aria-pressed="${inCmp}">${inCmp ? '✓ In comparison' : '+ Add to comparison'}</button></div></div>
-    <div class="prp-panel-head"><b>Overview</b><span class="hint">Leadership: Political Retrospective (Archigos + Wikidata) · Conflict: UCDP/PRIO 1946–2025 · Government: Wikidata</span></div>
+    <div class="prp-panel-head"><b>Overview</b><span class="hint">Heads: Wikidata · Current leader: the office Political Atlas names, or the system of government · Leadership: Political Retrospective (Archigos + Wikidata) · Conflict: UCDP/PRIO 1946–2025</span></div>
     <div class="grid">
       ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')))}
-      ${stat('Head of state', esc(c.headOfState || '–'), c.headOfGovernment && c.headOfGovernment !== c.headOfState ? 'Head of government: ' + esc(c.headOfGovernment) : '')}
-      ${stat('Current leader', esc(leaderName(c)), leaderNote(c))}
+      ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c))}
+      ${stat('Current leader', leaderHtml(c), leaderNote(c))}
       ${L ? stat('Leaders in the last 100 years', L.leaders100) : ''}
       ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs') : ''}
       ${L?.longest ? stat('Longest-serving leader', esc(L.longest.name), `${L.longest.years} years (${L.longest.from}–${L.longest.to})`) : ''}
@@ -469,7 +477,9 @@ async function renderCompare(focus) {
     <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}</td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
     <tr class="grp"><td colspan="${cs.length + 1}">Profile</td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
-    <tr><td>Current leader</td>${cs.map(c => `<td class="num">${esc(leaderName(c))}</td>`).join('')}</tr>
+    <tr><td>Current leader</td>${cs.map(c => `<td class="num" data-leader="${c.iso3}">${leaderHtml(c)}</td>`).join('')}</tr>
+    <tr><td>Head of state</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfState')}</td>`).join('')}</tr>
+    <tr><td>Head of government</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfGovernment')}</td>`).join('')}</tr>
     </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction. Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
   wireCmpPicker(focus);

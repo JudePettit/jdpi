@@ -70,6 +70,30 @@ test('data: the mainstream right is on the line; its thinkers and schools carry 
   assert.deepEqual(spectrum(byLabel.get('Nazism')), ['Far right']);
 });
 
+test('data: no scholar or critic of a movement carries its position; every position is carried by its own school only', () => {
+  const m = read('lake/data/manifest.json'), all = [];
+  for (let i = 0; i < m.shards.entities; i++) all.push(...Object.values(read(`lake/data/e/${i}.json`)));
+  const spectrum = r => (r.tags || []).filter(t => t.startsWith('Political spectrum:')).map(t => t.slice(19));
+  const byLabel = new Map(all.map(r => [r.label, r]));
+  // The far right's historians and political scientists are taught in its unit; they study it and do not belong to it.
+  for (const name of ['Cas Mudde', 'Robert Paxton', 'Roger Griffin']) {
+    const r = byLabel.get(name);
+    assert.ok(r && r.tags.includes('Appears in:Learning · Politics'), `${name} is in the lake, taught in Politics`);
+    assert.deepEqual(spectrum(r), [], `${name}: ${spectrum(r)}`);
+  }
+  // Every unit, not only the right's and the Realists': a position goes only to those whose own school is that position.
+  const SCHOOL = { 'Far left': ['Far left'], 'Left wing': ['Left wing'], 'Centrist': ['Centrist', 'Christian democrat', 'Centre right'],
+    'Right wing': ['Right wing'], 'Sui generis (Realist)': ['Realist'], 'Far right': ['Far right'] };
+  for (const r of all) for (const s of spectrum(r)) {
+    assert.ok(SCHOOL[s], `${r.label}: unknown position ${s}`);
+    assert.ok(SCHOOL[s].some(t => r.tags.includes(`School or tag:${t}`)), `${r.label} carries ${s} without belonging to its school`);
+  }
+  // The members keep their places: Beveridge is the left's (the centre names his report only in a quiz), Mill the
+  // centre's, Deng the far left's, and the Christian democrats the centre's, where the course teaches them.
+  for (const [name, s] of [['William Beveridge', 'Left wing'], ['John Stuart Mill', 'Centrist'], ['Deng Xiaoping', 'Far left'], ['Konrad Adenauer', 'Centrist'],
+    ['Ludwig Erhard', 'Centrist'], ['Benito Mussolini', 'Far right'], ['Jean-Marie Le Pen', 'Far right'], ['fascism', 'Far right']]) assert.deepEqual(spectrum(byLabel.get(name)), [s], name);
+});
+
 test('a Boolean tag query finds John Mearsheimer, and his page links to where he appears', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

@@ -6,7 +6,7 @@ export const THINKERS = [
   ['Adam Smith', /Adam Smith|\bSmith\b/, ['Classical economics', 'Capitalism', 'Economist', 'Philosopher']],
   ['David Ricardo', /Ricardo/, ['Classical economics', 'Economist']],
   ['Jean-Baptiste Say', /Jean-Baptiste Say|Say's law/, ['Classical economics', 'Economist']],
-  ['John Stuart Mill', /John Stuart Mill|\bMill\b/, ['Classical economics', 'Liberal', 'Philosopher', 'Economist']],
+  ['John Stuart Mill', /John Stuart Mill|\bMill\b/, ['Classical economics', 'Liberal', 'Centrist', 'Philosopher', 'Economist']],
   ['Karl Marx', /\bMarx\b/, ['Marxist', 'Communist', 'Socialist', 'Far left', 'Philosopher', 'Economist']],
   ['Friedrich Engels', /Engels/, ['Marxist', 'Communist', 'Socialist', 'Far left', 'Philosopher']],
   ['Vladimir Lenin', /Lenin/, ['Marxist', 'Communist', 'Revolutionary socialist', 'Far left', 'Head of government']],
@@ -44,7 +44,7 @@ export const THINKERS = [
   ['Peter Kropotkin', /Kropotkin/, ['Anarchist', 'Far left']],
   ['Joseph Stalin', /Stalin/, ['Communist', 'Far left', 'Head of government']],
   ['Fidel Castro', /Castro/, ['Communist', 'Far left', 'Head of state']],
-  ['William Beveridge', /Beveridge/, ['Liberal', 'Welfare state', 'Economist']],
+  ['William Beveridge', /Beveridge/, ['Liberal', 'Welfare state', 'Left wing', 'Economist']],
   ['Anthony Crosland', /Crosland/, ['Social democrat', 'Left wing']],
   ['John Rawls', /Rawls/, ['Liberal', 'Left wing', 'Philosopher', 'Political philosophy']],
   ['Franklin D. Roosevelt', /Roosevelt/, ['New Deal', 'Left wing', 'Head of state']],
@@ -88,7 +88,7 @@ export const THINKERS = [
   ['Roger Griffin', /Griffin/, ['Political science', 'Scholar of fascism']],
   ['Cas Mudde', /Mudde/, ['Political science', 'Scholar of the radical right']],
   ['Jean-Marie Le Pen', /Le Pen/, ['Far right']],
-  ['Deng Xiaoping', /Deng Xiaoping/, ['Communist', 'Head of state']],
+  ['Deng Xiaoping', /Deng Xiaoping/, ['Communist', 'Far left', 'Head of state']],
   // ---- Schools of thought and theories
   ['Classical economics', /classical (economics|school)/i, ['School of thought', 'Economics']],
   ['Marxism', /Marxis[mt]/, ['School of thought', 'Far left']],
@@ -129,17 +129,23 @@ export const THINKERS = [
 // can still be found together. The mainstream right (conservatism and market liberalism) has its own unit, "Right
 // wing", between the centre and the Realists.
 export const SPECTRUM = { 'Far left': 'Far left', 'Left wing': 'Left wing', 'Centre': 'Centrist', 'Right wing': 'Right wing', 'Outside the spectrum': 'Sui generis (Realist)', 'Far right': 'Far right' };
-// A spectrum tag that only a school's own members take: the realist unit also teaches realism's critics (liberal
-// institutionalists, constructivists), who are not Realists and take no position from it; the right's unit also names
-// the people and schools it is compared with (Rawls, Attlee, Blair, Christian democracy, realism, monetarism), who are
-// not of the right, so only those tagged 'Right wing' above take its position.
-export const SPECTRUM_SCHOOL = { 'Sui generis (Realist)': 'Realist', 'Right wing': 'Right wing' };
+// Every unit gives its position only to its school's own members, the thinkers and schools tagged with it above: a
+// unit also teaches the scholars, critics and rivals of its movement, who take no position from it. The far right's
+// unit teaches its historians and political scientists (Paxton, Griffin, Mudde), who study the far right and do not
+// belong to it; the realist unit teaches realism's critics (liberal institutionalists, constructivists); the right's
+// unit names the people and schools it is compared with (Rawls, Attlee, Blair, Christian democracy, realism,
+// monetarism); the centre's names the Beveridge Report in a quiz. The centre's unit teaches Christian democracy as its
+// own, though it is often placed centre-right, so the Christian democrats take the centre's position too.
+export const SPECTRUM_SCHOOL = {
+  'Far left': ['Far left'], 'Left wing': ['Left wing'], 'Centrist': ['Centrist', 'Christian democrat', 'Centre right'],
+  'Right wing': ['Right wing'], 'Sui generis (Realist)': ['Realist'], 'Far right': ['Far right'],
+};
 // A thinker given a position on the line above keeps it: a unit that only names them (Thatcher in a quiz on the left,
 // Marx in the centre's lesson) gives them no other.
 const OWN = new Set(Object.values(SPECTRUM));
 export const spectrumTag = (unit, tags) => {
   const s = SPECTRUM[String(unit).split(' · ')[0]];
-  if (!s || (SPECTRUM_SCHOOL[s] && !tags.includes(SPECTRUM_SCHOOL[s]))) return null;
+  if (!s || !SPECTRUM_SCHOOL[s].some(t => tags.includes(t))) return null;
   const own = tags.filter(t => OWN.has(t));
   return own.length && !own.includes(s) ? null : s;
 };

@@ -77,6 +77,27 @@ test('links: every scene link opens a real place in PRP, through the shell', () 
   assert.ok(checkLink({ label: 'x', suite: 'rt', module: 'atlas', at: 'https://political-atlas.pages.dev/#BRA' }, ctx).length);
 });
 
+test('links: a scene link to a Learning lesson names that lesson by its title, and its address by the same title', () => {
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  const titles = {};
+  for (const course of ['economics', 'finance', 'politics']) titles[course] = readFileSync(join(ROOT, `fe/learning/${course}.md`), 'utf8').replace(/\r/g, '').split('\n').filter(l => l.startsWith('## ')).map(l => l.slice(3));
+  let n = 0;
+  for (const d of docs) for (const s of flatScenes(d)) {
+    if (!/^learning/.test(s.link?.module || '')) continue;
+    const at = new URLSearchParams(s.link.at.split('?')[1]), course = at.get('course'), lesson = at.get('lesson');
+    if (!lesson) continue;
+    const title = titles[course].find(t => slug(t) === lesson);
+    assert.ok(title, `${d.id}/${s.id}: no lesson ${lesson} in ${course}`);
+    assert.equal(s.link.label.replace(/^Learning · \w+: /, '').toLowerCase(), title.toLowerCase(), `${d.id}/${s.id}: the label names another lesson`);
+    n++;
+  }
+  assert.ok(n >= 20, `${n} lesson links`);
+  // The Cuban Missile Crisis links the politics course's crisis lesson, which gives six answers.
+  const cuba = flatScenes(ctx.docs.get('cuban-missile-crisis')).find(s => s.id === 'lessons');
+  assert.deepEqual([cuba.link.label, cuba.link.module, cuba.link.at], ['Learning · Politics: A crisis seen six ways', 'learning-politics', 'fe/learning.html?course=politics&lesson=a-crisis-seen-six-ways']);
+  assert.ok(!docs.some(d => flatScenes(d).some(s => /five-ways/.test(s.link?.at || ''))), 'no link to the old title');
+});
+
 test('sources: scholarly works and Wikidata behind every documentary, cited scene by scene', () => {
   for (const d of docs) {
     const ids = new Set(d.sources.map(s => s.id));

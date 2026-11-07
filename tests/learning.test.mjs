@@ -5,7 +5,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { pageTest } from './tools/pages.mjs';
-import { spectrumTag } from '../lake/scripts/thinkers.mjs';
+import { fileURLToPath } from 'node:url';
+import { THINKERS, SPECTRUM_SCHOOL, spectrumTag } from '../lake/scripts/thinkers.mjs';
+import { learning } from '../lake/scripts/adapters.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
@@ -23,7 +25,8 @@ test('politics: realism is taught as a school of its own, outside the line from 
   // The Master Index takes its spectrum tag from the unit: Realists only, and none of them "Right wing".
   assert.equal(spectrumTag(units[5], ['Realist', 'Offensive realism']), 'Sui generis (Realist)');
   assert.equal(spectrumTag(units[5], ['Liberal institutionalist']), null, 'a critic taught in the unit takes no position from it');
-  assert.equal(spectrumTag(units[6], ['Fascist']), 'Far right');
+  assert.equal(spectrumTag(units[6], ['Fascist', 'Far right']), 'Far right');
+  assert.equal(spectrumTag(units[6], ['Historian', 'Scholar of fascism']), null, 'a scholar taught in the unit takes no position from it');
   const reg = JSON.parse(readFileSync(new URL('../registry.json', import.meta.url), 'utf8'));
   const desc = reg.suites.flatMap(s => s.modules).find(m => m.id === 'learning-politics').description;
   assert.doesNotMatch(desc, /right \(Mearsheimer/i);
@@ -61,6 +64,33 @@ test('politics: the mainstream right has its unit, in the form of the others, wi
   for (const tags of [['Realist', 'Classical realism'], ['Liberal', 'Left wing', 'Philosopher'], ['School of thought', 'Centre right'], ['Third Way', 'Centrist']]) assert.equal(spectrumTag(unit, tags), null, tags.join(', '));
   // A thinker of the right named in another unit (Thatcher in a quiz on the left) takes no position from it.
   assert.equal(spectrumTag('Left wing · Social democracy and progressive liberalism', ['Conservative', 'Right wing', 'Head of government']), null);
+});
+
+test('politics: a unit gives its position to its own school only, never to the scholars and critics it teaches', () => {
+  const md = readFileSync(new URL('../fe/learning/politics.md', import.meta.url), 'utf8').replace(/\r/g, '');
+  const units = md.split('\n').filter(l => l.startsWith('# ')).map(l => l.slice(2));
+  const farRight = units.find(u => u.startsWith('Far right · '));
+  const tagsOf = name => THINKERS.find(t => t[0] === name)[2];
+  // Mudde, Paxton and Griffin are taught in the far right's unit as its scholars: they take no position from it.
+  for (const name of ['Cas Mudde', 'Robert Paxton', 'Roger Griffin']) assert.equal(spectrumTag(farRight, tagsOf(name)), null, name);
+  for (const name of ['Benito Mussolini', 'Adolf Hitler', 'Jean-Marie Le Pen', 'Fascism']) assert.equal(spectrumTag(farRight, tagsOf(name)), 'Far right', name);
+  // In every unit, everyone the Master Index places there belongs to that position's school.
+  const mentions = learning({ jdpiDir: fileURLToPath(new URL('..', import.meta.url)) }).filter(x => x.module === 'learning-politics');
+  const placed = mentions.flatMap(x => x.tags.filter(t => t[0] === 'Political spectrum').map(t => [x.label, t[1], x.tags.map(g => g[1])]));
+  assert.ok(placed.length >= 60, `${placed.length} placed`);
+  for (const [label, s, tags] of placed) assert.ok(SPECTRUM_SCHOOL[s].some(t => tags.includes(t)), `${label} takes ${s} without belonging to its school`);
+  for (const name of ['Cas Mudde', 'Robert Paxton', 'Roger Griffin']) assert.ok(mentions.some(x => x.label === name) && !placed.some(p => p[0] === name), `${name} is taught and placed nowhere`);
+  // Beveridge's report is a wrong answer in a quiz on the centre: he stays the left's only.
+  assert.deepEqual([...new Set(placed.filter(p => p[0] === 'William Beveridge').map(p => p[1]))], ['Left wing']);
+});
+
+test('politics: the crisis lesson is titled for its six answers (Kino\'s link to it: tests/kino.test.mjs)', () => {
+  const md = readFileSync(new URL('../fe/learning/politics.md', import.meta.url), 'utf8').replace(/\r/g, '');
+  const heads = md.split('\n').filter(l => l.startsWith('## ')).map(l => l.slice(3));
+  assert.ok(heads.includes('A crisis seen six ways') && !heads.some(h => /five ways/.test(h)), 'the new title');
+  assert.ok(heads.includes('Five answers to the same questions'), 'the comparison table keeps its title');
+  const crisis = md.slice(md.indexOf('## A crisis seen six ways')).split('\n## ')[0].split('\n? ')[0];
+  assert.equal([...crisis.matchAll(/^- \*\*/gm)].length, 6, 'six answers');
 });
 
 test('each course renders its lessons and quiz, in the right suite', pageTest, async () => {

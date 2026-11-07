@@ -321,7 +321,7 @@ The first five columns run along the line from left to right; the Realists, who 
 * Far right
 = The mainstream right wants a limited state in the economy and a strong one in law and defence; the left wants the state to redistribute and provide services, and the far right a strong, often authoritarian state.
 
-## A crisis seen five ways
+## A crisis seen six ways
 Imagine a large neighbouring country invades a smaller one that has been moving closer to a Western alliance. How would each area of the spectrum, and the Realists, tend to respond?
 
 - **Far left**: oppose the imperialism of both blocs; argue workers on both sides are victims of rival ruling classes; some groups have backed whichever side opposes Western power.

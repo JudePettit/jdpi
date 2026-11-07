@@ -114,6 +114,7 @@ button,select{font:inherit}button{cursor:pointer}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="../design/prp-focus.js"></script>
 <script src="../design/prp-period.js"></script>
+<script src="../design/prp-access.js"></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
 // battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
@@ -304,10 +305,14 @@ async function loadStories(w) {
   if (!globalThis.GTTSDB?.storiesMatching) { box.innerHTML = '<div class="small">News archive unavailable.</div>'; return; }
   try {
     const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
-    const rows = await globalThis.GTTSDB.storiesMatching(w.keywords, since, 60);
-    const seen = new Set(), list = rows.filter(r => !seen.has(r.url) && seen.add(r.url)).slice(0, 12);
+    const [rows, acc] = await Promise.all([globalThis.GTTSDB.storiesMatching(w.keywords, since, 60), PRPAccess.load('../design/prp-access.json')]);
+    // Free sources lead (design/prp-access.js): the first story from a free outlet takes the top place, the rest keep
+    // their order, and a link to an outlet behind a paywall or a sign-up is labelled.
+    const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
+    const seen = new Set(), list = PRPAccess.leadFree(rows.filter(r => !seen.has(r.url) && seen.add(r.url)), r => PRPAccess.isFree(cls(r))).slice(0, 12);
     if (selectedWar !== w.id) return;
-    box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · ${esc(r.snapshot_date)}</small></div>`).join('')
+    box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · ${esc(r.snapshot_date)}</small></div>`).join('')
+      + '<div class="small" style="margin-top:6px">Free sources lead: a story from an outlet behind a paywall or a sign-up never comes first.</div>'
       : '<div class="small">No front-page stories about this war in the tracked outlets in the last 30 days.</div>';
   } catch (e) { box.innerHTML = `<div class="small">News archive unavailable: ${esc(e.message)}</div>`; }
 }

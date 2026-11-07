@@ -5,8 +5,12 @@
 // (briefing/scripts/rss.mjs); the text clean-up (plain text, summaries, DOIs, dates) from the Scientific Briefing's
 // (science/scripts/briefing-feeds.mjs).
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';
-import { plain, clip, summarise, extractDoi, parseDate, urlKey, makeId, titleSimilarity, SUMMARY_MAX } from '../../science/scripts/briefing-feeds.mjs';
+// Free sources lead: the access table and its helpers (design/prp-access.js) come from there too.
+import { plain, clip, summarise, extractDoi, parseDate, urlKey, makeId, titleSimilarity, SUMMARY_MAX, ACCESS } from '../../science/scripts/briefing-feeds.mjs';
 import { classify, detectType, isGenre, isDroppedTitle, FIELD_IDS } from './classify.mjs';
+
+const A = globalThis.PRPAccess;
+export { ACCESS };
 
 export { titleKey, urlKey, SUMMARY_MAX };
 export const AUTHORS_MAX = 120;
@@ -134,7 +138,10 @@ export function parseEconFeed(xml) {
     if (lead && !authors.some(a => txt(a))) authors.push(lead[1]);
     const summary = tidySummary(fixEntities(summarise(candidates.map(preClean), title)));
     const section = categories.filter(c => !GENERIC_CAT.test(c) && c.length <= 60).slice(0, 2).join(' · ').slice(0, 80);
-    out.push({ title, url, published, summary, doi, authors, categories, genres, section });
+    const it = { title, url, published, summary, doi, authors, categories, genres, section };
+    const mark = A.feedMark(b); // the publisher's own mark on this article, if it gives one
+    if (mark) it.mark = mark;
+    out.push(it);
   }
   return out;
 }
@@ -179,6 +186,7 @@ export function normalise(raw, source, seen, fallback = seen) {
   if (raw.doi) item.doi = raw.doi;
   if (raw.section) item.section = raw.section;
   if (!published) item.undated = true;
+  if (raw.mark) item.accessMark = raw.mark;
   return item;
 }
 
@@ -188,12 +196,14 @@ const KIND_RANK = { journal: 0, working: 1, research: 2, official: 3, news: 4 };
 /**
  * Merge duplicates: the same DOI, the same URL, the same normalised title, or near-identical titles (Dice ≥ 0.88, five
  * or more words) from different outlets within three days. The best copy is kept (lower tier, research before releases
- * and news, paper before news, earliest); the others' sources go into `also`, their fields are added and a missing
- * summary, DOI or author list is filled in.
+ * and news, paper before news, earliest); the others' sources go into `also` and their links into `alt`, their fields
+ * are added and a missing summary, DOI or author list is filled in. Free sources lead (design/prp-access.js): where the best copy is not free and a merged copy is, only the link
+ * is swapped (source, address and title from the free copy); the story keeps the best copy's tier, kind, type, date and DOI.
  * @param {object[]} items  stored-shape items
  * @param {(id: string) => {outlet: string}} sourceOf
+ * @param {{free?: (item: object) => boolean}} [o]  whether a copy is free to read (by default its stored `access`)
  */
-export function dedupe(items, sourceOf) {
+export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {}) {
   const rank = i => [i.tier, KIND_RANK[i.kind] ?? 9, i.type === 'paper' ? 0 : 1, Date.parse(i.published) || 0];
   const sorted = [...items].sort((a, b) => { const x = rank(a), y = rank(b); for (let k = 0; k < x.length; k++) if (x[k] !== y[k]) return x[k] - y[k]; return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
   const STOP = new Set(['of', 'in', 'on', 'for', 'and', 'to', 'with', 'by', 'from', 'at', 'as', 'is', 'are', 'its', 'new', 'how', 'why', 'what']);
@@ -216,6 +226,7 @@ export function dedupe(items, sourceOf) {
     if (hit) {
       if (it.source !== hit.source && !(hit.also || []).includes(it.source)) hit.also = [...(hit.also || []), it.source];
       for (const s of it.also || []) if (s !== hit.source && !(hit.also || []).includes(s)) hit.also = [...(hit.also || []), s];
+      A.addCopy(hit, it);
       const merged = new Set([...hit.fields, ...it.fields]);
       hit.fields = FIELD_IDS.filter(f => merged.has(f));
       if (!hit.summary && it.summary) hit.summary = it.summary;
@@ -231,28 +242,40 @@ export function dedupe(items, sourceOf) {
     if (tk.length > 12 && !byTitle.has(tk)) byTitle.set(tk, copy);
     for (const w of toks) (postings.get(w) || postings.set(w, []).get(w)).push(k);
   }
-  return kept;
+  return kept.map(i => A.promote(i, free));
 }
+
+/** The source a story stands under (its tier and kind): the best of its own and the ones merged into it, as dedupe
+ *  ranks them, so a story whose link was swapped to a free copy keeps its standing (and its type) on every run. */
+const standing = (i, byId) => [i.source, ...(i.also || [])].map(id => byId.get(id)).filter(Boolean)
+  .reduce((b, s) => (!b || s.tier < b.tier || (s.tier === b.tier && (KIND_RANK[s.kind] ?? 9) < (KIND_RANK[b.kind] ?? 9)) ? s : b), null);
 
 /**
  * Roll the store forward: previous items + this run's items → de-duplicated, re-classified, inside the window, at most
  * `cap` per source and `maxItems` overall, newest first.
  * @param {{prevItems: object[], freshItems: object[], sources: object[], now: number, keepDays?: number, maxItems?: number, defaultCap?: number}} o
  */
-export function mergeStore({ prevItems = [], freshItems = [], sources, now, keepDays = 7, maxItems = 2500, defaultCap = 150 }) {
+export function mergeStore({ prevItems = [], freshItems = [], sources, now, keepDays = 7, maxItems = 2500, defaultCap = 150, access = ACCESS }) {
   const byId = new Map(sources.map(s => [s.id, s]));
   const since = now - keepDays * 864e5;
+  // Each copy's class: its feed's, a part of the site its address shows, or the publisher's own mark on it.
+  const cls = x => access.classify({ briefing: 'econ', id: x.source, url: x.url, mark: x.accessMark });
   // Items from feeds that left the catalogue go, and so do titles the drop and skip rules now catch; the rest are
-  // re-classified so rule changes apply to the whole store (and strict feeds lose items that no longer match a field).
+  // re-classified so rule changes apply to the whole store (and strict feeds lose items that no longer match a field),
+  // and classed again for access (an item holding a free copy turned round).
   const pool = [];
-  for (const i of [...prevItems, ...freshItems]) {
+  for (const i0 of A.carryMarks([...prevItems, ...freshItems])) {
+    if (!byId.has(i0.source)) continue;
+    const i = A.restamp(i0, cls, id => byId.has(id));
+    if (i.accessMark && cls({ ...i, accessMark: null }) === i.accessMark) delete i.accessMark; // a mark that says what its feed's class does
     const s = byId.get(i.source);
     if (!s || isDroppedTitle(i.title) || (s.skip && s.skip.test(i.title))) continue;
     const set = new Set(classify(i, s.fields));
     for (const a of i.also || []) for (const f of byId.get(a)?.fields || []) set.add(f);
     const fieldsOf = FIELD_IDS.filter(f => set.has(f));
     if (s.strict && !fieldsOf.length) continue;
-    const item = { ...i, kind: s.kind, tier: s.tier, fields: fieldsOf, type: ['news', 'official'].includes(s.kind) ? 'news' : i.type };
+    const st = standing(i, byId);
+    const item = { ...i, kind: st.kind, tier: st.tier, fields: fieldsOf, type: ['news', 'official'].includes(st.kind) ? 'news' : i.type };
     if (!keepsByline(s)) delete item.authors;
     const also = (i.also || []).filter(a => byId.has(a));
     if (also.length) item.also = also; else delete item.also;

@@ -20,6 +20,7 @@ import {
 import * as SCI from '../science/briefing/view.js';
 import * as ECON from '../econ/briefing/view.js';
 import * as DIG from '../digital/briefing/view.js';
+import '../design/prp-access.js'; // the access table the page reads (free sources lead)
 
 const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const json = p => JSON.parse(read(p));
@@ -421,7 +422,9 @@ test('page: the analysis renders, the search finds a known story, and its links 
   if (!res?.ok) { t.skip(`Highbrowse is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
   // The stores the page reads, from the same site, and what the page should make of them.
   const stores = await Promise.all(BRIEFINGS.map(b => fetch(`${BASE}/${b.data}`).then(r => (r.ok ? r.json() : null)).catch(() => null)));
-  const m = buildModel(stores), today = digest(m, '24h'), week = digest(m, '7d');
+  // The page classes every item by the access table, as here (design/prp-access.js: free sources lead).
+  const access = globalThis.PRPAccess.table(await fetch(`${BASE}/design/prp-access.json`).then(r => r.json()));
+  const m = buildModel(stores, { access }), today = digest(m, '24h'), week = digest(m, '7d');
   const browser = await launch();
   t.after(() => browser.close());
   const errors = [];
@@ -433,7 +436,7 @@ test('page: the analysis renders, the search finds a known story, and its links 
   // The analysis: its five sections, the stories and topics the analysis finds, the four briefings.
   const shown = await page.evaluate(() => ({
     sections: [...document.querySelectorAll('#panel-today .sec h2')].map(h => h.textContent.replace(/^\d+\./, '')),
-    stories: document.querySelectorAll('#panel-today .story').length, lead: document.querySelector('#panel-today .story h3 a')?.textContent,
+    stories: document.querySelectorAll('#panel-today .story').length, lead: document.querySelector('#panel-today .story h3 a')?.firstChild?.textContent,
     topics: [...document.querySelectorAll('#panel-today .topics .nm')].map(a => a.textContent),
     briefs: [...document.querySelectorAll('#panel-today .brief')].map(b => b.dataset.b), eyebrow: document.querySelector('.prp-eyebrow').textContent.replace(/\s+/g, ' ').trim(),
   }));
@@ -451,7 +454,7 @@ test('page: the analysis renders, the search finds a known story, and its links 
   await page.click('#tab-week');
   await page.waitForSelector('#panel-week .story', { timeout: 20000 });
   assert.equal(await page.evaluate(() => location.hash), '#tab=week');
-  assert.equal(await page.textContent('#panel-week .story h3 a'), week.stories[0].lead.t);
+  assert.equal(await page.$eval('#panel-week .story h3 a', a => a.firstChild.textContent), week.stories[0].lead.t);
   // The header's count is the week's hard news, as This week counts it (it once counted every stored story: soft ones
   // and those a little over seven days old too).
   const [metaCount, weekCount] = await page.evaluate(() => [document.querySelector('#meta b').textContent, document.querySelector('#panel-week .lede b').textContent]);
@@ -469,7 +472,7 @@ test('page: the analysis renders, the search finds a known story, and its links 
   assert.match(await page.textContent('#r-status'), new RegExp(`^${expect.total.toLocaleString('en-GB')} stor`));
   const rank = expect.results.findIndex(r => r.item.u === known.u);
   assert.ok(rank >= 0, `"${q}" finds ${known.t} (the model)`);
-  const hit = page.locator('#results .res', { has: page.locator(`.r-title a[href="${known.u}"]`) });
+  const hit = page.locator('#results .res', { has: page.locator(`.r-title a:not(.prp-access-alt)[href="${known.u}"]`) });
   for (let more = 0; more < 20 && !(await hit.count()); more++) {
     const before = await page.locator('#results .res').count();
     assert.equal(await page.locator('#r-more [data-more]').count(), 1, `"${q}": ${known.t} is not among the ${before} shown, and there is no "Show more"`);
@@ -480,7 +483,7 @@ test('page: the analysis renders, the search finds a known story, and its links 
   assert.equal(await page.$$eval('#results .res', (rs, u) => rs.findIndex(r => r.querySelector('.r-title a')?.getAttribute('href') === u), known.u), rank,
     'the page lists it where the model ranks it');
   // Its links: the article at its publisher in a new tab, and the story in its briefing (on its own: this tab).
-  assert.deepEqual(await hit.locator('.r-title a').evaluate(a => [a.target, a.rel]), ['_blank', 'noopener']);
+  assert.deepEqual(await hit.locator('.r-title a').first().evaluate(a => [a.target, a.rel]), ['_blank', 'noopener']);
   const toBriefing = await hit.locator('.r3 a.bp').first().evaluate(a => [a.href, a.target]);
   assert.deepEqual(toBriefing, [new URL(itemPage(known), `${BASE}/`).href, '_self']);
   // A briefing chip narrows the search, and every count agrees.

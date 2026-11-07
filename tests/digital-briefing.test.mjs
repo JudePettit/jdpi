@@ -345,12 +345,16 @@ test('data: stories.json has the expected shape', () => {
     assert.ok(!/\$\$|\\(?:mathcal|mathbb|mathrm|textbf|emph)\b/.test(i.title), `TeX left in a title: ${where}`);
     assert.match(i.url, /^https?:\/\/[^\s]+$/, where);
     assert.ok(s, `unknown source: ${where}`);
-    assert.equal(i.kind, s.kind, where);
-    assert.equal(i.tier, s.tier, where);
+    // The story stands under the best of its sources (its own and the ones merged into it): where its link was swapped
+    // to a free copy (free sources lead), it keeps the best copy's tier, kind and type.
+    const R = { journal: 0, preprint: 1, lab: 2, research: 3, official: 4, news: 5 };
+    const st = [s, ...(i.also || []).map(a => SRC.get(a)).filter(Boolean)].reduce((b, x) => (x.tier < b.tier || (x.tier === b.tier && (R[x.kind] ?? 9) < (R[b.kind] ?? 9)) ? x : b));
+    assert.equal(i.kind, st.kind, where);
+    assert.equal(i.tier, st.tier, where);
     assert.ok(['paper', 'news'].includes(i.type), where);
-    if (['news', 'official'].includes(s.kind)) assert.equal(i.type, 'news', `release or journalism typed as paper: ${where}`);
-    if (['preprint', 'research'].includes(s.kind)) assert.equal(i.type, 'paper', `research typed as news: ${where}`);
-    if (s.kind === 'preprint') assert.match(i.published, /T00:00:00\.000Z$/, `an arXiv item is dated by its announcement: ${where}`);
+    if (['news', 'official'].includes(st.kind)) assert.equal(i.type, 'news', `release or journalism typed as paper: ${where}`);
+    if (['preprint', 'research'].includes(st.kind)) assert.equal(i.type, 'paper', `research typed as news: ${where}`);
+    if (st.kind === 'preprint') assert.match(i.published, /T00:00:00\.000Z$/, `an arXiv item is dated by its announcement: ${where}`);
     assert.deepEqual(i.fields, FIELD_IDS.filter(f => i.fields.includes(f)), `fields in canonical order, no repeats: ${where}`);
     for (const f of s.fields) assert.ok(i.fields.includes(f), `feed default ${f} missing: ${where}`);
     if (s.strict) assert.ok(i.fields.length, `off-topic item from a strict feed: ${where}`);

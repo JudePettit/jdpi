@@ -6,6 +6,7 @@
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <title>National Analysis · VM</title>
 <script src="supabase-config.js"></script><script src="supabase-client.js"></script>
+<script src="../design/prp-access.js"></script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="rt" data-module="pestle" data-shell="../" defer></script>
 <style>
@@ -144,7 +145,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 
   <footer class="prp-sources">
     <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
-    <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored.</p>
+    <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored. The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
     <p><b>Refresh.</b> Rebuilt monthly from the sources above.</p>
   </footer>
 </main>
@@ -400,12 +401,15 @@ async function renderProfile() {
     ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">Realtime Battlefield</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
     <div class="prp-panel-head"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="hint">Improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
-    <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
+    <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
   $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
   try {
-    const rows = globalThis.GTTSDB ? await globalThis.GTTSDB.latestTopStories(c.iso2) : [];
-    $('#stories').innerHTML = rows.length ? rows.slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}</a><small>${esc(r.outlet)} · ${esc(r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
+    const [rows, acc] = await Promise.all([globalThis.GTTSDB ? globalThis.GTTSDB.latestTopStories(c.iso2) : [], PRPAccess.load('../design/prp-access.json')]);
+    // Free sources lead (design/prp-access.js): the first headline is from an outlet anyone can read wherever one of the
+    // country's outlets is free (the rest keep the tracker's order); a link to one that is not free carries a label.
+    const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
+    $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
   } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
 }
 

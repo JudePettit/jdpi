@@ -232,6 +232,23 @@ text or by giving the control a row of its own. Otherwise the first move of the 
 under the pointer mid-drag, and the handles jump (the end too). Test a drag with a real pointer (`page.mouse`), not only
 with keys or `fill()`.
 
+**Free sources lead: the access rule** (`design/prp-access.js`, styled by `.prp-access` and `.prp-access-alt` in
+prp.css; Jude's rule of 6 November 2026). Every section that gathers the day's biggest stories from many outlets uses it:
+Highbrowse's Today and This week, the Political, Scientific, Economics and Digital Briefings, the Global Headline Tracker
+and National Analysis's latest headlines. `design/prp-access.json` classes every source VM collects from as `free`,
+`signup`, `metered`, `paid` or `unknown` (could not be checked: counts as free), with the evidence and the day it was
+checked; a publisher's own mark on one article (an open licence or `isAccessibleForFree` in its feed, LWN's "[$]")
+overrides its source. A page loads the script and the table (`PRPAccess.load(…)`, a table that cannot be read counts
+every source as free), classes each link (`T.classify({ briefing, id, host, name, url, mark })`: by feed id, then the
+home page's host, never a Google News relay's), and orders every list it shows with `PRPAccess.leadFree` (or
+`leadFreeGroups` for groups, such as the Tracker's outlets) after its own sort and filters: the first free entry takes
+the top place, the rest keep their order. A story grouped from several outlets leads with a free copy. Links to sources
+that are not free carry `PRPAccess.label(cls)` inside the link, at its end ("Paywall" or "Sign-up", read as part of the
+link's name), and, where VM's data already groups the same story, `PRPAccess.altLink(…)` beside it ("Free at …"); where
+it does not, nothing is offered. The subject briefings' builders apply it when they merge copies (`alt` keeps each
+copy's link); the pages apply it again on load, so a table changed since the last refresh holds at once. Each section's
+method note says that free sources lead. Tested in `tests/prp-access.test.mjs`.
+
 ## 6. Data visualisation rules
 
 Colour follows the entity, never its rank; categorical colours in the fixed order; sequential = one hue light→dark;

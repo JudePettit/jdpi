@@ -329,6 +329,25 @@ html.prp, .prp body { background: var(--prp-canvas); color: var(--prp-text); fon
   .prp-period-range input[type="range"]:focus-visible::-moz-range-thumb { outline-color: Highlight; }
 }
 
+/* --- Access labels (design/prp-access.js) -------------------------------------
+   A small label after a link to a source that is not free to read: "Paywall" (paid or metered) in the warning tone,
+   "Sign-up" (a free account) in the information tone; words, never colour alone. Beside it, where VM has grouped the
+   same story from a free source, a link to that copy ("Free at …"). Both are inline text, so they wrap with the line
+   at phone width; in forced-colours mode the label keeps a system-coloured border. */
+.prp-access { display: inline-flex; align-items: center; height: 17px; margin-left: 6px; padding: 0 5px; vertical-align: 1px;
+  border: 1px solid var(--prp-warn); border-radius: var(--prp-radius-sm); background: var(--prp-warn-soft); color: var(--prp-warn);
+  font: 600 10.5px/1 var(--prp-font-ui); letter-spacing: .02em; white-space: nowrap; font-style: normal; text-transform: none; }
+.prp-access[data-access="signup"] { border-color: var(--prp-info); background: var(--prp-info-soft); color: var(--prp-info); }
+.prp-access-alt { margin-left: 6px; color: var(--prp-link); font: 500 12px/1.4 var(--prp-font-ui); font-style: normal; text-decoration: underline;
+  text-underline-offset: 2px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+.prp-access-alt:hover { color: var(--prp-primary-hover); }
+.prp-access-alt:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; border-radius: 2px; }
+a .prp-access { text-decoration: none; }
+/* Text for screen readers only, kept in the line (the comma that makes a link read "Headline, Paywall"): no size, so it
+   takes no room, but still in the accessibility tree, and inline, so no space is read around it. */
+.prp-vh { font-size: 0; line-height: 0; letter-spacing: 0; }
+@media (forced-colors: active) { .prp-access { border-color: CanvasText; } }
+
 /* --- Legacy JDP-I classes, restyled ---------------------------------------- */
 .jdpi, .jdpi body { background: var(--prp-canvas); color: var(--prp-text); font: var(--prp-fs)/1.55 var(--prp-font-ui); }
 .jdpi-eyebrow { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }

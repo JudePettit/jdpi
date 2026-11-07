@@ -1,6 +1,9 @@
 // Digital Briefing: view logic with no DOM (URL hash state, filtering, ordering, grouping by day, chart series, item
 // badges), shared by the page (app.js) and the tests (tests/digital-briefing.test.mjs).
 
+import '../../design/prp-access.js'; // globalThis.PRPAccess: the free-sources-lead rule
+const { PRPAccess } = globalThis;
+
 export const WINDOWS = { '24h': 24, '3d': 72, '7d': 168 };
 export const WINDOW_LABELS = { '24h': '24 h', '3d': '3 days', '7d': '7 days' };
 export const TYPE_LABELS = { paper: 'Papers', news: 'News', both: 'Both' };
@@ -120,15 +123,17 @@ export function countByField(items, fields) {
  * Items grouped by day, newest day first. Within a day, 'tier' puts the major sources first (flagship journals, then
  * other journals, the major labs and government agencies, then preprints, institutes, engineering blogs and advocacy,
  * then journalism; research before news; newest first), 'newest' is newest first.
+ * Free sources lead (design/prp-access.js): a day's first item is free to read wherever that day has one free item; the
+ * rest keep this order. `free(item)` says whether an item is free (by default its `access`, as the builder stored it).
  * @returns {{key: string, items: object[]}[]}
  */
-export function arrange(items, order = 'tier') {
+export function arrange(items, order = 'tier', { free = i => PRPAccess.isFree(i.access) } = {}) {
   const cmp = order === 'newest'
     ? (a, b) => effectiveTime(b) - effectiveTime(a)
     : (a, b) => a.tier - b.tier || (a.type === b.type ? 0 : a.type === 'paper' ? -1 : 1) || effectiveTime(b) - effectiveTime(a);
   const days = new Map();
   for (const i of items) { const k = dayKey(i.published); (days.get(k) || days.set(k, []).get(k)).push(i); }
-  return [...days.keys()].sort().reverse().map(key => ({ key, items: days.get(key).sort((a, b) => cmp(a, b) || (a.id < b.id ? -1 : 1)) }));
+  return [...days.keys()].sort().reverse().map(key => ({ key, items: PRPAccess.leadFree(days.get(key).sort((a, b) => cmp(a, b) || (a.id < b.id ? -1 : 1)), free) }));
 }
 
 /** Per-field counts for each of the last `n` local days, oldest first (for Figure 1). */

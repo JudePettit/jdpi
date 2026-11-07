@@ -125,6 +125,7 @@
 @media(prefers-reduced-motion:reduce){.country{transition:none}.source-chip[data-state=loading]::before{animation:none}}
 </style>
 <script src="../design/prp-bar.js" data-suite="rt" data-module="headlines" data-shell="../" defer></script>
+<script src="../design/prp-access.js"></script>
 </head>
 <body><div class="wrap">
 <header class="front">
@@ -154,7 +155,7 @@
   </section>
 </main>
 <footer class="prp-sources">
-  <p><b>Top stories.</b> For each covered country, the top three front-page stories of its five most-read news outlets, collected once a day into Vitruvian Manager’s headline archive and translated into English; links go to the original-language articles. A day lists each outlet’s stories in front-page order; a week, month or year ranks the stories that stayed on front pages longest.</p>
+  <p><b>Top stories.</b> For each covered country, the top three front-page stories of its five most-read news outlets, collected once a day into Vitruvian Manager’s headline archive and translated into English; links go to the original-language articles. A day lists each outlet’s stories in front-page order; a week, month or year ranks the stories that stayed on front pages longest. <b>Free sources lead:</b> the first outlet of a day, each outlet's first story and the first story of a ranked list are ones anyone can read wherever there is one, so an outlet behind a paywall or a sign-up never takes the top place (it keeps its place lower down, as does the fallback's list); its links are labelled “Paywall” or “Sign-up”. Each outlet's class, with the evidence and the day it was checked, is in <code>design/prp-access.json</code>; one that could not be checked counts as free.</p>
   <!-- Highbrowse, the tracker's filter (in the code and the database it is "lowbrow": headlines/refresh-top-stories/lowbrow.js).
        Its wordmark is design/highbrowse-wordmark.svg inlined, so the letters take the page's ink in both themes (as an <img>
        they would stay dark); tests/headlines.test.mjs keeps this copy in step with the file. -->
@@ -162,7 +163,11 @@
   <p><b>Fallback.</b> When the archive cannot be reached, the tracker queries <a href="https://www.gdeltproject.org/" target="_blank" rel="noreferrer">GDELT DOC 2.0 ↗</a>: the 100 highest relevance-ranked results, from which up to 20 stories are spread across publishers. Relevance is a proxy for prominence, not a popularity score, and English-language coverage varies by country. Windows you load are also saved in this browser.</p>
   <p><b>Map.</b> Boundaries: Natural Earth 1:10m via datasets/geo-countries, simplified for this map (headlines/boundaries.json). Basemap tiles © Esri: Esri, HERE, Garmin, © OpenStreetMap contributors. <b>Research tools.</b> The evidence board and watchlist are stored in this browser only.</p>
 </footer>
-</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script>function setSourceStatus(id,state,label){const el=document.getElementById(id);if(!el)return;el.dataset.state=state;const text=el.querySelector('.source-label');if(text)text.textContent=label}const dateFmt=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});let selected=null;let articlesCache={};function showUpdated(){let t=new Date();document.getElementById('updated').textContent=dateFmt.format(t)+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'}showUpdated();setInterval(showUpdated,60000);function selectDiverseArticles(rows,limit=20){const publishers=new Map(),seenUrls=new Set();for(const article of rows||[]){if(!article||typeof article!=="object")continue;const url=String(article.url||article.article_url||"").trim(),title=String(article.title||article.socialimage||"").trim();if(!/^https?:\/\//i.test(url)||!title||seenUrls.has(url.toLowerCase()))continue;seenUrls.add(url.toLowerCase());let domain=String(article.domain||"").trim();if(!domain){try{domain=new URL(url).hostname}catch{domain="Unknown source"}}const key=domain.toLowerCase().replace(/^www\./,"");if(!publishers.has(key))publishers.set(key,[]);publishers.get(key).push({...article,domain})}const selected=[];for(let offset=0;selected.length<limit;offset++){let added=false;for(const articles of publishers.values()){if(!articles[offset])continue;selected.push(articles[offset]);added=true;if(selected.length===limit)break}if(!added)break}return selected}// Clickable countries from headlines/boundaries.json (Natural Earth, simplified by headlines/scripts/build-boundaries.mjs). Article lookup uses GDELT's rolling 24-hour DOC index.
+</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script>
+// The sources' access classes (design/prp-access.json, read by design/prp-access.js): free sources lead (see storyHtml).
+let ACC=null;
+const ACCESS_READY=PRPAccess.load('../design/prp-access.json').then(t=>{ACC=t.size?t:null});
+function setSourceStatus(id,state,label){const el=document.getElementById(id);if(!el)return;el.dataset.state=state;const text=el.querySelector('.source-label');if(text)text.textContent=label}const dateFmt=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});let selected=null;let articlesCache={};function showUpdated(){let t=new Date();document.getElementById('updated').textContent=dateFmt.format(t)+' · '+t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC'}showUpdated();setInterval(showUpdated,60000);function selectDiverseArticles(rows,limit=20){const publishers=new Map(),seenUrls=new Set();for(const article of rows||[]){if(!article||typeof article!=="object")continue;const url=String(article.url||article.article_url||"").trim(),title=String(article.title||article.socialimage||"").trim();if(!/^https?:\/\//i.test(url)||!title||seenUrls.has(url.toLowerCase()))continue;seenUrls.add(url.toLowerCase());let domain=String(article.domain||"").trim();if(!domain){try{domain=new URL(url).hostname}catch{domain="Unknown source"}}const key=domain.toLowerCase().replace(/^www\./,"");if(!publishers.has(key))publishers.set(key,[]);publishers.get(key).push({...article,domain})}const selected=[];for(let offset=0;selected.length<limit;offset++){let added=false;for(const articles of publishers.values()){if(!articles[offset])continue;selected.push(articles[offset]);added=true;if(selected.length===limit)break}if(!added)break}return selected}// Clickable countries from headlines/boundaries.json (Natural Earth, simplified by headlines/scripts/build-boundaries.mjs). Article lookup uses GDELT's rolling 24-hour DOC index.
 // Basemap: Esri light or dark grey to match the PRP theme, swapped on 'prp:themechange'. Country fills are page tokens in CSS.
 // Without Leaflet (its CDN unreachable) there is no map, but the country list still works.
 const prpThemeNow=()=>document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');const tileUrl=()=>'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/'+(prpThemeNow()==='dark'?'World_Dark_Gray_Base':'World_Light_Gray_Base')+'/MapServer/tile/{z}/{y}/{x}';
@@ -252,6 +257,7 @@ function rankArchivedHeadlineRows(rows){
 // Keep ?country= in the address so the view can be linked (research-workspace.js selects it on load).
 function syncCountryParam(name){try{const u=new URL(location.href);if(u.searchParams.get('country')===name)return;u.searchParams.set('country',name);history.replaceState(history.state,'',u)}catch{}}
 async function loadNews(code,name,force=false){
+  await ACCESS_READY; // the sources' access classes, for the order and the labels (free for all when it cannot be read)
   if(typeof code!=='string'||!/^[A-Z]{2,3}$/.test(code)){
     selected=null;
     document.getElementById('countryname').textContent=name||'Country unavailable';
@@ -314,7 +320,7 @@ async function loadNews(code,name,force=false){
   if(refreshAttempted){const sourceReady=refreshResult?.ok&&Number(refreshResult.count)===0||latestStatus?.state==='ready';setSourceStatus('status-news',sourceReady?'ready':'stale',sourceReady?'GDELT available · no headlines returned':'No headlines returned · no saved snapshot');document.getElementById('newsstate').textContent=sourceReady?'No matching stories':'No saved stories';document.getElementById('articles').innerHTML='<div class="empty">No headlines were returned for this country today.<br>Try another country or check again later.</div>';return}
   setSourceStatus('status-news','stale','No saved snapshot for this period');setSourceStatus('status-archive','stale','Archive history · no saved snapshot for this period');document.getElementById('newsstate').textContent='No archived stories';document.getElementById('articles').innerHTML='<div class="empty">No historical snapshot is stored for this period yet.<br>The archive starts collecting when a country is refreshed.</div>';
 }
-function renderArticles(rows){document.getElementById('newsstate').textContent=rows.length+' stories';document.getElementById('articles').innerHTML=rows.length?rows.map((a,i)=>{let title=a.title||a.socialimage||'Untitled story',url=a.url||a.article_url||'#',domain=a.domain||(url.startsWith('http')?new URL(url).hostname:'Unknown source');let published=a.seendate?new Date(a.seendate.slice(0,4)+'-'+a.seendate.slice(4,6)+'-'+a.seendate.slice(6,8)+'T'+a.seendate.slice(8,10)+':'+a.seendate.slice(10,12)+':00Z'):a.published_at?new Date(a.published_at):null;return '<div class="article"><span class="rank">'+String(i+1).padStart(2,'0')+'</span><div><a class="headline" href="'+url.replace(/"/g,'&quot;')+'" target="_blank" rel="noreferrer">'+title.replace(/[<>]/g,'')+'</a><div class="source"><span>'+domain.replace(/[<>]/g,'')+'</span><span>'+(published?published.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'Recent')+'</span></div></div></div>'}).join(''):'<div class="empty">No matching headlines found<br>for this country in this time window.</div>'}
+function renderArticles(rows){document.getElementById('newsstate').textContent=rows.length+' stories';document.getElementById('articles').innerHTML=rows.length?PRPAccess.leadFree(rows,rowFree).map((a,i)=>{let title=a.title||a.socialimage||'Untitled story',url=a.url||a.article_url||'#',domain=a.domain||(url.startsWith('http')?new URL(url).hostname:'Unknown source');let published=a.seendate?new Date(a.seendate.slice(0,4)+'-'+a.seendate.slice(4,6)+'-'+a.seendate.slice(6,8)+'T'+a.seendate.slice(8,10)+':'+a.seendate.slice(10,12)+':00Z'):a.published_at?new Date(a.published_at):null;return '<div class="article"><span class="rank">'+String(i+1).padStart(2,'0')+'</span><div><a class="headline" href="'+url.replace(/"/g,'&quot;')+'" target="_blank" rel="noreferrer">'+title.replace(/[<>]/g,'')+PRPAccess.label(rowAccess(a))+'</a><div class="source"><span>'+domain.replace(/[<>]/g,'')+'</span><span>'+(published?published.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'Recent')+'</span></div></div></div>'}).join(''):'<div class="empty">No matching headlines found<br>for this country in this time window.</div>'}
 document.getElementById('refresh').onclick=()=>selected?loadNews(selected.code,selected.name,true):null;const historyDate=document.getElementById('historyDate');historyDate.max=new Date().toISOString().slice(0,10);historyDate.value=historyDate.max;historyDate.onchange=()=>selected?loadNews(selected.code,selected.name):null;
 /* ---------- views: one page, five tabs; the address keeps ?view=…&period=… so old links still open the right tab ---------- */
 const moduleParams=new URLSearchParams(location.search);let moduleView='current';const historyControls=document.querySelector('.history-controls');const viewTabs=[...document.querySelectorAll('.headlines-submodule')];
@@ -353,6 +359,7 @@ async function loadTopStories(code,name){
   setSourceStatus('status-news','loading','Top stories · loading');setSourceStatus('status-database','loading','Headline archive · checking');
   try{
     let rows=await globalThis.GTTSDB.topStories(code,s,e),note='';
+    await ACCESS_READY;
     if(!rows.length&&period==='day'&&day===today){rows=await globalThis.GTTSDB.latestTopStories(code);if(rows.length)note=' · today\'s refresh pending, showing '+rows[0].snapshot_date}
     const hit=await lowbrowRule;rows=rows.filter(r=>r.lowbrow!=null||!hit(r.url,r.title_original,r.title_en));
     if(seq!==loadSeq)return;
@@ -363,18 +370,31 @@ async function loadTopStories(code,name){
     document.getElementById('newsstate').textContent=(period==='day'?rows.length+' stories from '+new Set(rows.map(r=>r.outlet)).size+' outlets':'Most persistent stories')+note;
   }catch(err){if(seq!==loadSeq)return;setSourceStatus('status-news','unavailable','Top stories · unavailable');setSourceStatus('status-database','unavailable','Headline archive · unavailable');document.getElementById('newsstate').textContent='Unavailable';document.getElementById('articles').innerHTML='<div class="empty">Top stories are unavailable right now.<br><span style="font-size:11px">'+escHtml(err.message)+'</span></div>'}
 }
+// Free sources lead (design/prp-access.js): each outlet's access class from design/prp-access.json, by its home page's
+// host (outlet_domain; 50 outlets' links go through Google News, so never by the link's own host alone) or its name. The
+// panel's first outlet is one anyone can read wherever the day has one, each outlet's first story is free where it has
+// a free one (a paid part of a site, such as CNBC Pro, is told by its address), the archive's ranked list starts with a
+// free story, and so does the GDELT fallback; everything else keeps its order. A link to a source that is not free
+// carries a label. The tracker does not group one story across outlets, so no free copy is offered beside it.
+// (ACC and ACCESS_READY are set at the top of this script, before anything can load a country.)
+// The class is kept beside the row, never on it: the GDELT rows are saved to this device's history, and a saved row must
+// be classed by the table of the day it is shown.
+const ROW_ACC=new WeakMap();
+const rowAccess=r=>{if(!ACC)return 'free';let c=ROW_ACC.get(r);if(!c){c=ACC.classify({host:r.outlet_domain||r.domain,name:r.outlet,url:r.url||r.article_url});ROW_ACC.set(r,c)}return c};
+const rowFree=r=>PRPAccess.isFree(rowAccess(r));
 function storyHtml(r,rank,extra){
   const en=r.title_en||r.title_original,orig=r.title_en&&r.title_en!==r.title_original?r.title_original:'';
-  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+'</a>'+(orig?'<div class="orig" lang="">'+escHtml(orig)+'</div>':(!r.title_en?'<div class="orig">translation pending</div>':''))+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
+  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+PRPAccess.label(rowAccess(r))+'</a>'+(orig?'<div class="orig" lang="">'+escHtml(orig)+'</div>':(!r.title_en?'<div class="orig">translation pending</div>':''))+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
 }
 function renderByOutlet(rows){
   const latest=rows[0].snapshot_date,day=rows.filter(r=>r.snapshot_date===latest),outlets=[...new Map(day.map(r=>[r.outlet_rank,r.outlet])).entries()].sort((a,b)=>a[0]-b[0]);
-  document.getElementById('articles').innerHTML=outlets.map(([rank,outlet])=>'<div class="outlet-group"><h3 class="outlet-name">'+escHtml(outlet)+'</h3>'+day.filter(r=>r.outlet_rank===rank).map((r,k)=>storyHtml(r,k+1)).join('')+'</div>').join('');
+  const groups=PRPAccess.leadFreeGroups(outlets.map(([rank])=>day.filter(r=>r.outlet_rank===rank)),rowFree);
+  document.getElementById('articles').innerHTML=groups.map(g=>'<div class="outlet-group"><h3 class="outlet-name">'+escHtml(g[0].outlet)+'</h3>'+g.map((r,k)=>storyHtml(r,k+1)).join('')+'</div>').join('');
 }
 function renderMostPersistent(rows){
   const by=new Map();
   for(const r of rows){const k=r.url;const x=by.get(k)||{...r,days:new Set()};x.days.add(r.snapshot_date);by.set(k,x)}
-  const top=[...by.values()].sort((a,b)=>b.days.size-a.days.size||a.outlet_rank-b.outlet_rank||a.story_rank-b.story_rank).slice(0,20);
+  const top=PRPAccess.leadFree([...by.values()].sort((a,b)=>b.days.size-a.days.size||a.outlet_rank-b.outlet_rank||a.story_rank-b.story_rank),rowFree).slice(0,20);
   document.getElementById('articles').innerHTML=top.map((r,i)=>storyHtml(r,i+1,'on the front page '+r.days.size+' day'+(r.days.size>1?'s':''))).join('');
 }
 // Refresh visible country headlines on each UTC day boundary while the page stays open.

@@ -102,7 +102,7 @@ test('feeds: an RSS 1.0 table of contents parses, normalises and drops correctio
   assert.equal(normalise(raw[1], source, '2026-10-27T21:00:00.000Z'), null);
 });
 
-test('store: duplicates merge into the highest tier, stale and dropped items leave', () => {
+test('store: duplicates merge into a free copy where the story has one, stale and dropped items leave', () => {
   const now = Date.parse('2026-10-28T00:00:00Z');
   const base = { kind: 'news', tier: 3, type: 'news', summary: '', disciplines: [] };
   const merged = mergeStore({
@@ -116,10 +116,22 @@ test('store: duplicates merge into the highest tier, stale and dropped items lea
     ],
     sources: SOURCES, now, keepDays: 7,
   });
+  // Free sources lead (design/prp-access.js): the story's link is the free Phys.org copy's, and the paid journal's copy
+  // keeps its link, labelled, in `alt`. (Before 7 November 2026 the highest tier was kept and Phys.org's link was lost.)
+  // Only the link is swapped: the story is still the PRL paper, under PRL's tier, on the paper's day, so it stays in the
+  // Papers filter and under "Major journals first".
   assert.deepEqual(merged.map(i => i.id), ['b2']);
-  assert.equal(merged[0].source, 'prl');
-  assert.deepEqual(merged[0].also, ['physorg-physics']);
+  assert.deepEqual([merged[0].source, merged[0].url, merged[0].title], ['physorg-physics', 'https://phys.org/news/positron.html', 'Physicists trap a single positron in a cyclotron']);
+  assert.deepEqual([merged[0].tier, merged[0].kind, merged[0].type, merged[0].published, merged[0].doi], [1, 'journal', 'paper', '2026-10-27T10:00:00.000Z', '10.1103/gbkc-6nlj']);
+  // The next run keeps it so: its standing comes from the best of its sources, not from the link's.
+  assert.deepEqual(mergeStore({ prevItems: merged, sources: SOURCES, now }), merged);
+  assert.equal(merged[0].access, undefined, 'free to read');
+  assert.deepEqual(merged[0].also, ['prl']);
+  assert.deepEqual(merged[0].alt, [{ source: 'prl', url: 'http://link.aps.org/doi/10.1103/gbkc-6nlj', title: 'One-Positron Quantum Cyclotron', access: 'paid' }]);
   assert.deepEqual(merged[0].disciplines, ['physics']);
+  // With no free copy, the highest tier is kept, as before.
+  const paid = mergeStore({ freshItems: merged[0].alt.map(a => ({ ...base, kind: 'journal', tier: 1, type: 'paper', id: 'c1', title: a.title, url: a.url, source: a.source, published: '2026-10-27T10:00:00.000Z', doi: '10.1103/gbkc-6nlj' })), sources: SOURCES, now });
+  assert.deepEqual([paid[0].source, paid[0].access], ['prl', 'paid']);
 });
 
 test('store: a duplicate from another discipline\'s feed adds its discipline in the canonical order', () => {
@@ -210,10 +222,13 @@ test('data: stories.json has the expected shape', () => {
     assert.ok(!isDroppedTitle(i.title), `dropped title kept: ${where}`);
     assert.match(i.url, /^https?:\/\/[^\s]+$/, where);
     assert.ok(s, `unknown source: ${where}`);
-    assert.equal(i.kind, s.kind, where);
-    assert.equal(i.tier, s.tier, where);
+    // The story stands under the best of its sources (its own and the ones merged into it): where its link was swapped
+    // to a free copy (free sources lead), it keeps the journal's tier and kind.
+    const st = [s, ...(i.also || []).map(a => SRC.get(a)).filter(Boolean)].reduce((b, x) => (x.tier < b.tier || (x.tier === b.tier && x.kind === 'journal' && b.kind !== 'journal') ? x : b));
+    assert.equal(i.kind, st.kind, where);
+    assert.equal(i.tier, st.tier, where);
     assert.ok(['paper', 'news'].includes(i.type), where);
-    if (s.kind === 'news') assert.equal(i.type, 'news', `science-desk item typed as paper: ${where}`);
+    if (st.kind === 'news') assert.equal(i.type, 'news', `science-desk item typed as paper: ${where}`);
     assert.deepEqual(i.disciplines, DISCIPLINE_IDS.filter(d => i.disciplines.includes(d)), `disciplines in canonical order, no repeats: ${where}`);
     for (const d of s.disciplines) assert.ok(i.disciplines.includes(d), `feed default ${d} missing: ${where}`);
     assert.equal(typeof i.summary, 'string', where);

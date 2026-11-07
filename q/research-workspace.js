@@ -280,7 +280,10 @@
       if (row.dataset.researchWired) return;
       row.dataset.researchWired = "true";
       const anchor = row.querySelector(".headline");
-      const title = anchor?.textContent.trim() || "Country headline";
+      // The headline's own words: an access label inside the link (design/prp-access.js, ", Paywall") is not part of it.
+      const plain = anchor?.cloneNode(true);
+      plain?.querySelectorAll(".prp-vh, .prp-access").forEach((el) => el.remove());
+      const title = plain?.textContent.trim() || "Country headline";
       const sourceUrl = safeHttpUrl(anchor?.href || "");
       const country = document.getElementById("countryname")?.textContent.trim() || "";
       const code = document.getElementById("countrycode")?.textContent.match(/ISO\s+([A-Z]{2,3})/)?.[1] || "";

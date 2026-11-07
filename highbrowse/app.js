@@ -4,8 +4,10 @@
 // the shell and other pages can link to a view or a search, and the page follows a hash the shell moves it to.
 import {
   BRIEFINGS, BRIEFING, POSITIONS, POSITION_LABELS, TOPICS_KEY, WINDOW_LABELS, DEFAULTS, esc, fold, buildModel, digest, search, parseHash, toHash,
-  briefingPage, itemPage, findWord, localDay,
+  briefingPage, itemPage, findWord, localDay, freeAlt,
 } from './analysis.js';
+
+const { PRPAccess } = globalThis; // design/prp-access.js, loaded by analysis.js: free sources lead
 
 const $ = s => document.querySelector(s);
 const SHELL = new URL('../', location.href).href;
@@ -39,6 +41,10 @@ const toItem = (i, label = `${BRIEFING[i.b].short} ›`) => `<a class="bp" ${goA
 // A search on this page, as a hash link (the page follows its own hash).
 const searchHref = patch => toHash({ ...DEFAULTS, b: [], ...patch, tab: 'search' }) || '#tab=search';
 const quoteTerm = t => (/\s/.test(t) ? `"${t}"` : t);
+// Free sources lead: the label inside a link to a source that is not free to read ("Paywall", "Sign-up"), and beside it
+// the same story's free headline where the analysis grouped one with it.
+const acc = i => PRPAccess.label(i.acc);
+const alt = (i, s) => { const a = freeAlt(M, i, s); return a ? PRPAccess.altLink({ url: a.u, outlet: a.src, title: a.t }) : ''; };
 
 /* ---------- small marks ---------- */
 const bchip = k => `<span class="bchip" data-b="${k}">${esc(BRIEFING[k].short)}</span>`;
@@ -46,9 +52,9 @@ const caution = '<span class="caution" title="Mixed or low factual reliability r
 const pkey = (s, w) => `<div class="pkey"><span class="prp-label">Political Briefing publishers</span>${POSITIONS.map(p => `<span class="${s.positions[p] ? '' : 'z'}" style="--c:var(--pos-${p})"><i aria-hidden="true"></i>${esc(posLabel(p))} ${num(s.positions[p])}</span>`).join('')}` +
   `<a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: w === '24h' ? '24h' : '7d' }))}>Compare the positions ›</a></div>`;
 // One headline of a story: its outlet, the headline at its publisher, and a link into each briefing that carries it.
-const entryLi = e => {
+const entryLi = s => e => {
   const i = e.item;
-  return `<li><span><span class="o">${esc(i.src)}</span>${i.caution ? caution : ''} <a class="h" ${art(i.u)}>${esc(i.t)}</a></span><span>${[i, ...e.also].map(x => toItem(x)).join(' ')}</span></li>`;
+  return `<li><span><span class="o">${esc(i.src)}</span>${i.caution ? caution : ''} <a class="h" ${art(i.u)}>${esc(i.t)}${acc(i)}</a>${alt(i, s)}</span><span>${[i, ...e.also].map(x => toItem(x)).join(' ')}</span></li>`;
 };
 // "Political", "Political and Digital", "Political, Economics and Digital".
 const andList = xs => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs.join(''));
@@ -80,7 +86,7 @@ function lede(d) {
   const parts = BRIEFINGS.map(b => `${num(d.counts[b.key])} ${{ political: 'political', scientific: 'scientific', economics: 'economic', digital: 'digital' }[b.key]}`);
   const top = d.stories[0], names = d.topics.filter(t => t.named).slice(0, 3).map(t => esc(t.term));
   let s = `${period}, the four briefings carried <b>${plural(d.counts.all, 'story', 'stories')}</b>: ${parts.slice(0, 3).join(', ')} and ${parts[3]}.`;
-  if (top) s += ` The biggest, from ${plural(top.outlets, 'outlet')} in the ${andList(top.briefings.map(k => BRIEFING[k].short))} Briefing${top.briefings.length > 1 ? 's' : ''}: <a ${art(top.lead.u)}>${esc(top.lead.t)}</a>.`;
+  if (top) s += ` The biggest, from ${plural(top.outlets, 'outlet')} in the ${andList(top.briefings.map(k => BRIEFING[k].short))} Briefing${top.briefings.length > 1 ? 's' : ''}: <a ${art(top.lead.u)}>${esc(top.lead.t)}${acc(top.lead)}</a>.`;
   if (names.length) s += ` The names most outlets used: ${andList(names)}.`;
   return `<p class="lede">${s}</p>`;
 }
@@ -91,12 +97,12 @@ function storyCard(s, k, w) {
   // The lead's own line links to each briefing that carries it (an article in two briefings is listed once).
   return `<article class="story prp-panel${lead ? ' lead' : ''}" data-story="${esc(s.id)}">
     <div class="st-meta"><span class="rank">${k + 1}</span>${s.briefings.map(bchip).join('')}<span>${plural(s.outlets, 'outlet')} · ${plural(s.headlines, 'headline')}</span><span>${esc(span(s))}</span></div>
-    <h3><a ${art(s.lead.u)}>${esc(s.lead.t)}</a></h3>
+    <h3><a ${art(s.lead.u)}>${esc(s.lead.t)}${acc(s.lead)}</a></h3>
     <p class="st-src">${esc(s.lead.src)}${s.lead.caution ? caution : ''} · ${esc(timeOf(s.lead))} · ${[s.lead, ...s.entries[0].also].map(x => toItem(x, `In the ${BRIEFING[x.b].name} ›`)).join(' · ')}</p>
     ${s.key.length ? `<p class="st-terms" aria-label="Its main terms">${s.key.map(esc).join(' · ')}</p>` : ''}
     ${s.publishers ? pkey(s, w) : ''}
-    ${shown.length ? `<ul class="st-list">${shown.map(entryLi).join('')}</ul>` : ''}
-    ${rest.length ? `<details><summary>${plural(rest.length, 'more headline')}</summary><ul class="st-list">${rest.map(entryLi).join('')}</ul></details>` : ''}
+    ${shown.length ? `<ul class="st-list">${shown.map(entryLi(s)).join('')}</ul>` : ''}
+    ${rest.length ? `<details><summary>${plural(rest.length, 'more headline')}</summary><ul class="st-list">${rest.map(entryLi(s)).join('')}</ul></details>` : ''}
   </article>`;
 }
 
@@ -104,7 +110,7 @@ function secStories(d) {
   const body = d.stories.length ? `<div class="stories">${d.stories.map((s, k) => storyCard(s, k, d.w)).join('')}</div>`
     : '<p class="prp-note empty-note">No story was covered by two outlets or more in this window.</p>';
   return `<section class="sec" aria-labelledby="h-stories-${d.w}"><div class="sec-head"><h2 class="prp-h2" id="h-stories-${d.w}"><span class="prp-section-no">1.</span>The biggest stories</h2>
-    <p class="sec-note">Headlines from different outlets grouped as one story, ranked by the outlets that covered it (${plural(d.storyCount, 'story', 'stories')} had two or more). Each headline opens at its publisher; “›” opens it in its briefing.</p></div>${body}</section>`;
+    <p class="sec-note">Headlines from different outlets grouped as one story, ranked by the outlets that covered it (${plural(d.storyCount, 'story', 'stories')} had two or more). Each headline opens at its publisher; “›” opens it in its briefing. Free sources lead: a story's first headline is from an outlet anyone can read wherever one covered it, a story only paywalled outlets covered never comes first, and a headline behind a paywall or a sign-up is labelled, with the same story's free headline beside it.</p></div>${body}</section>`;
 }
 
 // A term's seven days as small bars (Figure 1), the window's days darker.
@@ -138,7 +144,7 @@ function briefPanel(c, d) {
   const bars = facets.length ? `<figure class="prp-figure"><div class="bars">${facets.map(f => `<a class="bar" ${link(f)}><span class="lbl">${esc(f.short || f.label)}</span><span class="track" aria-hidden="true"><i style="width:${(f.count / max * 100).toFixed(1)}%"></i></span><span class="n">${num(f.count)}</span></a>`).join('')}</div>
     <figcaption>${c.key === 'political' ? `Stories by the Political Briefing's topics (keyword matches; ${num(c.untagged)} match none, and a story can match several).` : `Stories by the ${esc(b.short)} Briefing's ${b.hashTopic === 'd' ? 'disciplines' : 'fields'} (an item can be in several).`}</figcaption></figure>` : '';
   const terms = c.terms.length ? `<div class="b-row"><span class="prp-label">Most-used names and terms</span><div class="tchips">${c.terms.map(t => `<a class="prp-chip" href="${esc(searchHref({ q: quoteTerm(t.term), b: [b.key], w: d.w }))}">${esc(t.term)} <span class="prp-muted">${num(t.by[b.key])}</span></a>`).join('')}</div></div>` : '';
-  const st = c.story ? `<div class="b-row"><span class="prp-label">Its biggest story</span><p class="b-story"><a ${art(c.story.here.u)}>${esc(c.story.here.t)}</a><small>${esc(c.story.here.src)} · ${plural(c.story.mineOutlets, 'outlet')} in this briefing${c.story.outlets > c.story.mineOutlets ? `, ${num(c.story.outlets)} in all` : ''} · ${toItem(c.story.here, `In the ${b.name} ›`)}</small></p></div>` : '';
+  const st = c.story ? `<div class="b-row"><span class="prp-label">Its biggest story</span><p class="b-story"><a ${art(c.story.here.u)}>${esc(c.story.here.t)}${acc(c.story.here)}</a>${alt(c.story.here, c.story)}<small>${esc(c.story.here.src)} · ${plural(c.story.mineOutlets, 'outlet')} in this briefing${c.story.outlets > c.story.mineOutlets ? `, ${num(c.story.outlets)} in all` : ''} · ${toItem(c.story.here, `In the ${b.name} ›`)}</small></p></div>` : '';
   const note = !c.count ? `<p class="prp-note warn">No stories in ${d.w === '24h' ? 'the last 24 hours' : 'the last 7 days'}${stale ? `: it was last refreshed ${esc(utc(Date.parse(c.generated)))}` : ''}.</p>`
     : stale ? `<p class="prp-note warn">Last refreshed ${esc(utc(Date.parse(c.generated)))}, ${Math.round(age)} hours ago: its newest stories may be missing.</p>` : '';
   return `<section class="prp-panel brief" data-b="${c.key}" aria-labelledby="bh-${c.key}-${d.w}">${head}<div class="prp-panel-body">
@@ -162,7 +168,7 @@ function secShared(d) {
       return e && copy(e, k);
     };
     return `<div class="sh-story"><div class="st-meta">${s.briefings.map(bchip).join('')}<span>${plural(s.outlets, 'outlet')} · ${plural(s.headlines, 'headline')}</span></div>
-      <h4><a ${art(s.lead.u)}>${esc(s.lead.t)}</a></h4><ul>${s.briefings.map(k => { const i = pick(k); return i ? `<li>${bchip(k)} ${esc(i.src)}: <a ${art(i.u)}>${esc(clip(i.t, 110))}</a> ${toItem(i)}</li>` : ''; }).join('')}</ul></div>`;
+      <h4><a ${art(s.lead.u)}>${esc(s.lead.t)}${acc(s.lead)}</a></h4><ul>${s.briefings.map(k => { const i = pick(k); return i ? `<li>${bchip(k)} ${esc(i.src)}: <a ${art(i.u)}>${esc(clip(i.t, 110))}${acc(i)}</a>${alt(i, s)} ${toItem(i)}</li>` : ''; }).join('')}</ul></div>`;
   };
   const left = `<div class="prp-panel"><div class="prp-panel-head"><b>Stories in more than one briefing</b><span class="prp-label">${plural(sh.storyCount, 'story', 'stories')}</span></div><div class="prp-panel-body">${sh.stories.length ? sh.stories.map(story).join('') : '<p class="prp-empty">No story was in two briefings in this window.</p>'}</div></div>`;
   const maxShare = Object.fromEntries(BRIEFINGS.map(b => [b.key, Math.max(1e-9, ...sh.terms.map(t => (d.counts[b.key] ? t.by[b.key] / d.counts[b.key] : 0)))]));
@@ -180,11 +186,11 @@ function secPositions(d) {
   const total = sp.total || 1, pct = n => Math.round(n / total * 100);
   const meter = `<div class="meter" role="img" aria-label="${esc('Political Briefing stories by position: ' + sp.positions.map(p => `${p.label} ${pct(p.items)}%`).join(', '))}">${sp.positions.filter(p => p.items).map(p => `<span style="width:${(p.items / total * 100).toFixed(2)}%;--c:var(--pos-${p.key})" title="${esc(p.label)}: ${num(p.items)}"></span>`).join('')}</div>`;
   const key = `<div class="meterkey">${sp.positions.map(p => `<span><i style="--c:var(--pos-${p.key})" aria-hidden="true"></i>${esc(p.label)} <b>${num(p.items)}</b> (${pct(p.items)}%) · ${plural(p.publishers, 'publisher')}</span>`).join('')}</div>`;
-  const side = (list, none) => (list.length ? `<ol>${list.map(s => `<li><a ${art(s.lead.u)}>${esc(s.lead.t)}</a><small>${POSITIONS.map(p => `${posLabel(p)} ${s.positions[p]}`).join(' · ')} · <a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: d.w === '24h' ? '24h' : '7d' }))}>Compare ›</a></small></li>`).join('')}</ol>` : `<p class="prp-muted">${none}</p>`);
+  const side = (list, none) => (list.length ? `<ol>${list.map(s => `<li><a ${art(s.lead.u)}>${esc(s.lead.t)}${acc(s.lead)}</a><small>${POSITIONS.map(p => `${posLabel(p)} ${s.positions[p]}`).join(' · ')} · <a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: d.w === '24h' ? '24h' : '7d' }))}>Compare ›</a></small></li>`).join('')}</ol>` : `<p class="prp-muted">${none}</p>`);
   const leftCol = `<div class="prp-panel prp-panel-body"><figure class="prp-figure">${meter}${key}<figcaption><b>Figure 3.</b> The Political Briefing's ${num(sp.total)} hard-news stories by position, with the publishers each position had in the window (${num(sp.perPosition)} are active in each at a time; a reserve that stepped in counts too). Positions describe editorial slant, not accuracy.</figcaption></figure>
     <div class="sided"><div><h4>Covered more from the left</h4>${side(sp.left, 'No story four publishers or more covered was covered mostly from the left.')}</div><div><h4>Covered more from the right</h4>${side(sp.right, 'No story four publishers or more covered was covered mostly from the right.')}</div></div></div>`;
   const max = Math.max(1, ...sp.stories.flatMap(s => POSITIONS.map(p => s.positions[p])));
-  const rows = sp.stories.map(s => `<tr><td class="st"><a ${art(s.lead.u)}>${esc(s.lead.t)}</a><small>${plural(s.publishers, 'publisher')} · <a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: d.w === '24h' ? '24h' : '7d' }))}>Compare the positions ›</a></small></td>` +
+  const rows = sp.stories.map(s => `<tr><td class="st"><a ${art(s.lead.u)}>${esc(s.lead.t)}${acc(s.lead)}</a><small>${plural(s.publishers, 'publisher')} · <a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: d.w === '24h' ? '24h' : '7d' }))}>Compare the positions ›</a></small></td>` +
     POSITIONS.map(p => `<td class="pc${s.positions[p] ? '' : ' z'}" style="--c:var(--pos-${p});--v:${(s.positions[p] / max).toFixed(2)}">${num(s.positions[p])}</td>`).join('') + '</tr>').join('');
   const rightCol = `<div class="prp-panel"><div class="prp-panel-head"><b>The biggest political stories, publisher by publisher</b></div><div class="scroll"><table class="prp-table ptable"><thead><tr><th scope="col">Story</th>${POSITIONS.map(p => `<th scope="col" class="pc"><i style="--c:var(--pos-${p})" aria-hidden="true"></i>${esc(posLabel(p))}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="6" class="prp-muted">No political story had three publishers or more.</td></tr>`}</tbody></table></div>
     <p class="prp-panel-body prp-caption"><b>Table 1.</b> How many of each position's publishers ran each of the biggest political stories (three publishers or more); the deeper the shade, the more.</p></div>`;
@@ -235,7 +241,7 @@ function resultLi(r, words) {
   const tags = i.tp.map(id => topicLabel.get(`${i.b}.${id}`)).filter(Boolean).map(l => `<span class="tag">${esc(l)}</span>`).join('');
   const links = [i, ...r.also].map(x => toItem(x, `In the ${BRIEFING[x.b].name} ›`)).join('');
   return `<li class="res" data-b="${i.b}"><div class="r1">${chips}<span class="src">${esc(i.src)}</span>${i.caution ? caution : ''}${pos}<time datetime="${esc(new Date(i.at).toISOString())}">${esc(timeOf(i))}</time>${badge}</div>
-    <h3 class="r-title"><a ${art(i.u)}>${mark(i.t, words)}</a></h3>${i.d ? `<p class="r-sum">${mark(clip(i.d, 320), words)}</p>` : ''}<div class="r3">${tags}${links}</div></li>`;
+    <h3 class="r-title"><a ${art(i.u)}>${mark(i.t, words)}${acc(i)}</a>${alt(i)}</h3>${i.d ? `<p class="r-sum">${mark(clip(i.d, 320), words)}</p>` : ''}<div class="r3">${tags}${links}</div></li>`;
 }
 
 function renderSearch() {
@@ -324,6 +330,7 @@ function wire() {
 }
 
 /* ---------- boot ---------- */
+const ACCESS = PRPAccess.load(new URL('design/prp-access.json', SHELL)); // the sources' access classes (free when it cannot be read)
 async function boot() {
   render();
   const stores = await Promise.all(BRIEFINGS.map(b => fetch(new URL(b.data, SHELL), { cache: 'no-cache' })
@@ -338,7 +345,7 @@ async function boot() {
   await new Promise(r => setTimeout(r, 0)); // let the status paint before the analysis runs
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(TOPICS_KEY) || 'null'); } catch { /* storage blocked or not JSON: the defaults */ }
-  M = buildModel(stores, { savedTopics: saved });
+  M = buildModel(stores, { savedTopics: saved, access: await ACCESS });
   topicLabel = new Map(M.briefings.flatMap(x => x.topics.map(t => [`${x.key}.${t.id}`, t.short || t.label])));
   if (!topicLabel.has(state.t)) state.t = '';
   renderMeta(); wire(); render();

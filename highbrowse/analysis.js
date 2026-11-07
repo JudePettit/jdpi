@@ -6,6 +6,17 @@
 // briefing covers most, the stories and terms several briefings share, and how the Political Briefing's five positions
 // spread across its stories. It also searches all four at once, by words in titles and summaries, with briefing, date
 // and topic filters. Everything here is plain data: the page escapes every string before it reaches the DOM.
+// Free sources lead (design/prp-access.js, Jude's rule of 6 November 2026): each item carries its source's access class
+// (`acc`), a story's lead is a headline anyone can read wherever one of its outlets is free, and a story only paywalled
+// or sign-up sources carry never takes the top place of a list (it keeps its place lower down).
+
+import '../design/prp-access.js'; // globalThis.PRPAccess
+const { PRPAccess } = globalThis;
+/** Whether an item is free to read: its source's class, as normalise gave it (no class counts as free). */
+export const isFree = i => PRPAccess.isFree(i?.acc);
+const leadFree = (list, free) => PRPAccess.leadFree(list, free);
+// The access table's name for each briefing (design/prp-access.json keys sources as "<briefing>:<feed id>").
+const ACCESS_KEY = { political: 'political', scientific: 'science', economics: 'econ', digital: 'digital' };
 
 /* ---------------------------------------------------------------- the four briefings */
 // `page` and `data` are paths from the site root; `cat` is the briefing's categorical colour (--prp-cat-<n>, in the
@@ -203,10 +214,14 @@ function matcher(keywords) {
  *     no time (or, in the Economics Briefing, no date: `at` is when the feed changed), src: outlet, sid: outlet id,
  *     tp: [topic ids], type: 'paper' | 'news' (the three subject briefings), pos: position (the Political Briefing),
  *     soft: sport, entertainment or lifestyle (the Political Briefing's own tag, hidden by its "Hard news only"),
- *     tier, caution: the outlet's factual reliability is rated mixed or low }
+ *     tier, caution: the outlet's factual reliability is rated mixed or low, acc: its access class }
  * with the briefing's topics ([{id, label, short}]), when it was generated and how many days it keeps.
+ * `access` is the access table (PRPAccess.table): each item is classed by its feed, its address and its publisher's own
+ * mark. Without one, an item keeps the class its briefing's builder stored (`access`), and the Political Briefing's
+ * count as free.
  */
-export function normalise(key, data, { topics = topicsFrom(null) } = {}) {
+export function normalise(key, data, { topics = topicsFrom(null), access = null } = {}) {
+  const cls = (id, url, stored, mark) => (access ? access.classify({ briefing: ACCESS_KEY[key], id, url, mark }) : stored || 'free');
   const b = BRIEFING[key];
   const base = { key, generated: data?.generated || null, keepDays: data?.keepDays || 7, topics: [], items: [] };
   if (!b || !data || !Array.isArray(data.items)) return { ...base, missing: true };
@@ -215,7 +230,8 @@ export function normalise(key, data, { topics = topicsFrom(null) } = {}) {
     const items = data.items.filter(i => i && i.t && i.u).map((i, n) => {
       const s = src.get(i.s) || {}, text = `${i.t} ${i.d || ''}`, words = wordsOf(text);
       return { b: key, id: `p${n}`, t: String(i.t), d: i.d && i.d !== i.t ? String(i.d) : '', u: String(i.u), at: Date.parse(i.p) || 0, day: dayKey(i.p), src: s.name || String(i.s), sid: String(i.s),
-        tp: topics.filter(t => t.test(text, words)).map(t => t.id), type: null, pos: POSITIONS.includes(s.position) ? s.position : null, soft: !!i.c, tier: null, caution: !!s.caution };
+        tp: topics.filter(t => t.test(text, words)).map(t => t.id), type: null, pos: POSITIONS.includes(s.position) ? s.position : null, soft: !!i.c, tier: null, caution: !!s.caution,
+        acc: cls(String(i.s), String(i.u), null, null) };
     });
     const labels = Object.fromEntries((data.positions || []).map(p => [p.key, p.label]));
     return { ...base, topics: topics.map(({ id, label }) => ({ id, label, short: label })), positions: POSITIONS.map(k => ({ key: k, label: labels[k] || POSITION_LABELS[k] })),
@@ -227,7 +243,8 @@ export function normalise(key, data, { topics = topicsFrom(null) } = {}) {
     const s = src.get(i.source) || {};
     return { b: key, id: String(i.id), t: String(i.title), d: i.summary ? String(i.summary) : '', u: String(i.url), at: effectiveTime(i.published), day: dayKey(i.published),
       dateOnly: isDateOnly(i.published) || !!i.undated, src: s.outlet || s.name || String(i.source), sid: String(s.outletId || i.source), tp: Array.isArray(i[fk]) ? i[fk].map(String) : [],
-      type: i.type === 'paper' ? 'paper' : 'news', pos: null, soft: false, tier: Number.isFinite(i.tier) ? i.tier : null, caution: false };
+      type: i.type === 'paper' ? 'paper' : 'news', pos: null, soft: false, tier: Number.isFinite(i.tier) ? i.tier : null, caution: false,
+      acc: cls(String(i.source), String(i.url), i.access, i.accessMark) };
   });
   return { ...base, topics: facets.map(f => ({ id: String(f.id), label: String(f.label), short: String(f.short || f.label) })), items };
 }
@@ -366,9 +383,9 @@ function formsTable() {
  * once, over the last seven days' hard news (the Political Briefing's sport, entertainment and lifestyle left out, as
  * its "Hard news only" does by default); each window then ranks them by its own headlines.
  */
-export function buildModel(stores, { now = Date.now(), savedTopics = null } = {}) {
+export function buildModel(stores, { now = Date.now(), savedTopics = null, access = null } = {}) {
   const topics = topicsFrom(savedTopics);
-  const briefings = BRIEFINGS.map((b, k) => normalise(b.key, stores[k], { topics }));
+  const briefings = BRIEFINGS.map((b, k) => normalise(b.key, stores[k], { topics, access }));
   const items = briefings.flatMap(x => x.items);
   items.forEach((it, n) => { it.n = n; it.ht = fold(it.t); it.hay = it.ht + '\n' + fold(it.d); });
   const ref = referenceTime(stores.filter(Boolean), now);
@@ -377,7 +394,8 @@ export function buildModel(stores, { now = Date.now(), savedTopics = null } = {}
   for (const i of week) { i.tm = terms(i.t); for (const w of i.tm) forms.add(w.k, w.f); }
   const { groups, idf } = cluster(week, { keys: week.map(i => [...new Set(i.tm.map(w => w.k))]) });
   groups.forEach((g, n) => { g.id = 's' + n; });
-  return { ref, now, briefings, items, week, groups, idf, forms, topics, days: weekDays(ref) };
+  const groupOf = new Map(groups.flatMap(g => g.items.map(i => [i.n, g])));
+  return { ref, now, briefings, items, week, groups, groupOf, idf, forms, topics, days: weekDays(ref) };
 }
 
 // An outlet is one outlet in whichever briefings carry it (BBC News in the Political and the Digital Briefing), and an
@@ -407,17 +425,29 @@ function storyOf(model, g, win) {
     const e = { item: i, also: [] };
     byUrl.set(urlKey(i.u), e); entries.push(e);
   }
-  const lead = entries[0], seen = new Set([outletKey(lead.item)]), rest = [], dupes = [];
-  for (const e of entries.slice(1)) (seen.has(outletKey(e.item)) ? dupes : (seen.add(outletKey(e.item)), rest)).push(e);
+  // Free sources lead: the most typical headline anyone can read, where one of the story's outlets is free.
+  const lead = leadFree(entries, e => isFree(e.item))[0], seen = new Set([outletKey(lead.item)]), rest = [], dupes = [];
+  for (const e of entries) if (e !== lead) (seen.has(outletKey(e.item)) ? dupes : (seen.add(outletKey(e.item)), rest)).push(e);
   const order = (a, b) => byNewest(a.item, b.item);
   const briefings = BRIEFINGS.map(b => b.key).filter(k => inWin.some(i => i.b === k));
   const positions = Object.fromEntries(POSITIONS.map(p => [p, new Set(inWin.filter(i => i.pos === p).map(i => i.sid)).size]));
   return {
-    id: g.id, lead: lead.item, entries: [lead, ...rest.sort(order), ...dupes.sort(order)], headlines: entries.length, outlets: countOutlets(inWin), briefings,
+    id: g.id, lead: lead.item, free: isFree(lead.item), entries: [lead, ...rest.sort(order), ...dupes.sort(order)], headlines: entries.length, outlets: countOutlets(inWin), briefings,
     keys: g.key, key: g.key.map(k => model.forms.show(k)), positions, publishers: POSITIONS.reduce((a, p) => a + positions[p], 0),
     first: Math.min(...inWin.map(i => i.at)), last: Math.max(...inWin.map(i => i.at)), query: politicalQuery(model, g, inWin.filter(i => i.b === 'political')),
   };
 }
+/**
+ * A free headline of the same story, to offer beside one that is not free: the story's free lead (or another of its
+ * free headlines) from another outlet, or, for an item shown outside a story (the search), a free headline that the
+ * analysis grouped with it as one story. null for a free item, and wherever VM has not grouped a free copy with it.
+ */
+export function freeAlt(model, item, story = null) {
+  if (!item || isFree(item)) return null;
+  const pool = story ? story.entries.map(e => e.item) : (model?.groupOf?.get(item.n)?.items || []);
+  return pool.find(x => x !== item && isFree(x) && outletKey(x) !== outletKey(item) && /^https?:\/\//i.test(x.u)) || null;
+}
+
 // What the Political Briefing's search box needs to show a story's headlines side by side: words its political
 // headlines contain (the box matches within a headline), either one of the story's main terms as written or two of them
 // side by side ("hunter biden"), whichever best covers those headlines and is rarest elsewhere: the square of the share
@@ -459,7 +489,9 @@ export function digest(model, w = '24h', { stories: nStories = 8, topics: nTopic
   const storiesAll = model.groups.filter(g => g.items.length > 1 && g.items.filter(i => win.has(i.n)).length > 1).map(g => storyOf(model, g, win));
   const big = s => s.outlets >= 2;
   const rank = (a, b) => b.outlets - a.outlets || b.headlines - a.headlines || b.last - a.last;
-  const stories = storiesAll.filter(big).sort(rank);
+  // Free sources lead: a story only paywalled or sign-up sources carry (its lead is not free) never comes first.
+  const free = s => s.free;
+  const stories = leadFree(storiesAll.filter(big).sort(rank), free);
 
   // The biggest topics: names (what headlines capitalise: Trump, AI, Binance, Michigan) by the outlets that used them;
   // other words by the share of those outlets that used them in stories three outlets or more covered, where the word
@@ -480,19 +512,20 @@ export function digest(model, w = '24h', { stories: nStories = 8, topics: nTopic
     for (const i of mine) for (const t of i.tp) if (tally.has(t)) tally.set(t, tally.get(t) + 1);
     const facets = (meta?.topics || []).map(t => ({ ...t, count: tally.get(t.id) })).sort((x, y) => y.count - x.count || 0);
     const untagged = mine.filter(i => !i.tp.length).length;
-    // Its biggest story: the story the most of its own outlets covered, shown by its own headline.
-    const own = storiesAll.map(s => ({ s, mine: s.entries.map(e => [e.item, ...e.also].find(i => i.b === b.key)).filter(Boolean) })).filter(x => countOutlets(x.mine) >= 2)
-      .sort((x, y) => countOutlets(y.mine) - countOutlets(x.mine) || y.mine.length - x.mine.length || y.s.last - x.s.last);
+    // Its biggest story: the story the most of its own outlets covered, shown by its own headline (a free one where it
+    // has one; a story none of its free outlets carried comes after those that one did).
+    const own = leadFree(storiesAll.map(s => ({ s, mine: s.entries.map(e => [e.item, ...e.also].find(i => i.b === b.key)).filter(Boolean) })).filter(x => countOutlets(x.mine) >= 2)
+      .sort((x, y) => countOutlets(y.mine) - countOutlets(x.mine) || y.mine.length - x.mine.length || y.s.last - x.s.last), x => x.mine.some(isFree));
     return {
       key: b.key, name: b.name, count: mine.length, generated: meta?.generated || null, missing: !!meta?.missing,
       papers: mine.filter(i => i.type === 'paper').length, news: mine.filter(i => i.type === 'news').length,
       facets, untagged, terms: topics.filter(t => t.by[b.key] > 0).sort((x, y) => weight(y) - weight(x) || y.byOutlets[b.key] - x.byOutlets[b.key] || y.by[b.key] - x.by[b.key]).slice(0, 6),
-      story: own[0] ? { ...own[0].s, here: own[0].mine[0], mine: own[0].mine.length, mineOutlets: countOutlets(own[0].mine) } : null,
+      story: own[0] ? { ...own[0].s, here: own[0].mine.find(isFree) || own[0].mine[0], mine: own[0].mine.length, mineOutlets: countOutlets(own[0].mine) } : null,
     };
   });
 
-  const sharedStories = storiesAll.filter(s => s.briefings.length >= 2)
-    .sort((a, b) => b.briefings.length - a.briefings.length || b.outlets - a.outlets || b.headlines - a.headlines || b.last - a.last);
+  const sharedStories = leadFree(storiesAll.filter(s => s.briefings.length >= 2)
+    .sort((a, b) => b.briefings.length - a.briefings.length || b.outlets - a.outlets || b.headlines - a.headlines || b.last - a.last), free);
   // Terms two briefings or more use (twice each at least): names first (a term the headlines capitalise, such as AI,
   // China or Binance, says more across briefings than "world" or "prices"), then the most briefings, then the term
   // with the largest share of the smallest of its briefings, so the Political Briefing's size does not decide.
@@ -578,14 +611,16 @@ function spread(model, items, stories) {
   const meta = model.briefings.find(b => b.key === 'political');
   const per = POSITIONS.map(p => ({ key: p, label: meta?.positions?.find(x => x.key === p)?.label || POSITION_LABELS[p], items: pol.filter(i => i.pos === p).length,
     publishers: new Set(pol.filter(i => i.pos === p).map(i => i.sid)).size }));
-  const covered = stories.filter(s => s.publishers >= 3);
+  // Free sources lead in each list, as in the biggest stories.
+  const free = x => (x.s || x).free;
+  const covered = leadFree(stories.filter(s => s.publishers >= 3), free);
   const lean = s => { const L = s.positions.far_left + s.positions.left, R = s.positions.right + s.positions.far_right; return (R - L) / (s.publishers || 1); };
   const sided = covered.filter(s => s.publishers >= 4).map(s => ({ s, lean: lean(s) }));
   return {
     total: pol.length, perPosition: meta?.perPosition || 10, positions: per,
     stories: covered.slice(0, 10),
-    left: sided.filter(x => x.lean <= -0.5).sort((a, b) => a.lean - b.lean || b.s.publishers - a.s.publishers).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
-    right: sided.filter(x => x.lean >= 0.5).sort((a, b) => b.lean - a.lean || b.s.publishers - a.s.publishers).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
+    left: leadFree(sided.filter(x => x.lean <= -0.5).sort((a, b) => a.lean - b.lean || b.s.publishers - a.s.publishers), free).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
+    right: leadFree(sided.filter(x => x.lean >= 0.5).sort((a, b) => b.lean - a.lean || b.s.publishers - a.s.publishers), free).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
   };
 }
 
@@ -694,7 +729,9 @@ export function search(model, { q = '', b = [], w = '7d', t = '', soft = false, 
   }
   const order = sort === 'newest' || sort === 'best' ? sort : words.length ? 'best' : 'newest';
   results.sort(order === 'best' ? (x, y) => y.score - x.score || byNewest(x.item, y.item) : (x, y) => byNewest(x.item, y.item));
-  return { results, total: results.length, all: articles.length, byBriefing, byTopic, words, order };
+  // Free sources lead here too, in both orders and after every filter: the first free result takes the top place.
+  const led = leadFree(results, r => isFree(r.item));
+  return { results: led, total: led.length, all: articles.length, byBriefing, byTopic, words, order };
 }
 
 /* ---------------------------------------------------------------- the page's address */

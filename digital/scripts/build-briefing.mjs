@@ -11,7 +11,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from './briefing-sources.mjs';
 import { FIELDS } from './classify.mjs';
-import { parseDigitalFeed, normalise, mergeStore, pickDaily } from './briefing-feeds.mjs';
+import { parseDigitalFeed, normalise, mergeStore, ACCESS, pickDaily } from './briefing-feeds.mjs';
 
 const OUT_DIR = fileURLToPath(new URL('../briefing/data/', import.meta.url));
 const OUT = OUT_DIR + 'stories.json';
@@ -96,7 +96,7 @@ const sources = SOURCES.map(s => {
   const newest = Math.max(0, ...mine.map(i => Date.parse(i.published) || 0), ...(r.items || []).map(i => Date.parse(i.published) || 0).filter(t => t <= now + 36e5));
   const out = {
     id: s.id, outlet: s.outlet, outletId: outletId(s.outlet), name: s.name, url: s.url, feed: s.feed, kind: s.kind, tier: s.tier,
-    fields: s.fields, qid: s.qid, status: r.status,
+    fields: s.fields, qid: s.qid, access: ACCESS.classify({ briefing: 'digital', id: s.id }), status: r.status,
     count: r.notModified ? (p.count ?? 0) : r.kept, stored: mine.length, latest: newest ? new Date(newest).toISOString() : (p.latest || null),
     checked: stamp, lastOk: r.status === 'ok' ? stamp : (p.lastOk || null),
   };
@@ -119,7 +119,7 @@ const counts = {
 };
 mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(OUT, JSON.stringify({
-  generated: stamp, keepDays: KEEP_DAYS, maxItems: MAX_ITEMS,
+  generated: stamp, keepDays: KEEP_DAYS, maxItems: MAX_ITEMS, accessChecked: ACCESS.checked,
   fields: FIELDS.map(({ id, label, short, qid, aliases }) => ({ id, label, short, qid, aliases })), tiers: TIERS, kinds: KINDS, counts, sources, items,
 }));
 

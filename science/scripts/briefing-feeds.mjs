@@ -2,10 +2,17 @@
 // Atom) into plain items with DOIs and the feed's own section labels; normalise them; de-duplicate; and roll the
 // seven-day store forward. Pure functions (no network), so tests can run them on fixtures.
 // Entity decoding, canonical URLs and title keys come from the Political Briefing's parser (briefing/scripts/rss.mjs).
+// Free sources lead (design/prp-access.js): each item is classed from design/prp-access.json, a merged story keeps every
+// copy's link (alt) and stands under a free copy where one exists.
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';
 import { classify, detectType, isGenre, isDroppedTitle, DISCIPLINE_IDS } from './classify.mjs';
+import '../../design/prp-access.js';
 
+const A = globalThis.PRPAccess;
+/** The access table every store is classed by (design/prp-access.json). */
+export const ACCESS = A.table(JSON.parse(readFileSync(new URL('../../design/prp-access.json', import.meta.url), 'utf8')));
 export { titleKey };
 export const SUMMARY_MAX = 280;
 
@@ -125,7 +132,10 @@ export function parseScienceFeed(xml) {
     const genres = uniq.filter(isGenre), categories = uniq.filter(l => !isGenre(l));
     const doi = extractDoi({ prismDoi: field(b, 'prism:doi'), identifier: field(b, 'dc:identifier'), guid: field(b, 'guid'), atomId: field(b, 'id'), url });
     const summary = summarise([field(b, 'dc:description'), field(b, 'description'), field(b, 'summary'), field(b, 'content'), field(b, 'content:encoded')], title);
-    out.push({ title, url, published, summary, doi, categories, genres, section: categories.slice(0, 3).join(' · ').slice(0, 80) });
+    const it = { title, url, published, summary, doi, categories, genres, section: categories.slice(0, 3).join(' · ').slice(0, 80) };
+    const mark = A.feedMark(b); // the publisher's own mark on this article (an open licence), if it gives one
+    if (mark) it.mark = mark;
+    out.push(it);
   }
   return out;
 }
@@ -160,6 +170,7 @@ export function normalise(raw, source, seen) {
   if (raw.doi) item.doi = raw.doi;
   if (raw.section) item.section = raw.section;
   if (!published) item.undated = true;
+  if (raw.mark) item.accessMark = raw.mark;
   return item;
 }
 
@@ -176,12 +187,15 @@ export function titleSimilarity(a, b) {
 /**
  * Merge duplicates: the same DOI, the same URL, the same normalised title, or near-identical titles (Dice ≥ 0.88, five
  * or more words) from different outlets within three days. The best copy is kept (lower tier, journal before news,
- * paper before news, earliest); the others' sources go into `also`, their disciplines are added and a missing
- * summary or DOI is filled in.
+ * paper before news, earliest); the others' sources go into `also` and their links into `alt`, their disciplines are
+ * added and a missing summary or DOI is filled in. Free sources lead (design/prp-access.js): where the best copy is not
+ * free and a merged copy is, only the link is swapped (source, address and title from the free copy); the story keeps
+ * the best copy's tier, kind, type, date and DOI, so a paper stays a paper, under its journal's tier, on its own day.
  * @param {object[]} items  stored-shape items
  * @param {(id: string) => {outlet: string, tier: number, kind: string}} sourceOf
+ * @param {{free?: (item: object) => boolean}} [o]  whether a copy is free to read (by default its stored `access`)
  */
-export function dedupe(items, sourceOf) {
+export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {}) {
   const rank = i => [i.tier, i.kind === 'journal' ? 0 : 1, i.type === 'paper' ? 0 : 1, Date.parse(i.published) || 0];
   const sorted = [...items].sort((a, b) => { const x = rank(a), y = rank(b); for (let k = 0; k < x.length; k++) if (x[k] !== y[k]) return x[k] - y[k]; return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; });
   const kept = [], byDoi = new Map(), byUrl = new Map(), byTitle = new Map(), postings = new Map();
@@ -202,6 +216,7 @@ export function dedupe(items, sourceOf) {
     if (hit) {
       if (it.source !== hit.source && !(hit.also || []).includes(it.source)) hit.also = [...(hit.also || []), it.source];
       for (const s of it.also || []) if (s !== hit.source && !(hit.also || []).includes(s)) hit.also = [...(hit.also || []), s];
+      A.addCopy(hit, it);
       // In the canonical order, as every stored item's are (the data test checks it): added at the end, a physics
       // feed's copy of a paper first seen in a space feed made "space, physics", and the refresh was refused.
       const merged = new Set([...hit.disciplines, ...it.disciplines]);
@@ -218,24 +233,34 @@ export function dedupe(items, sourceOf) {
     if (tk.length > 12 && !byTitle.has(tk)) byTitle.set(tk, copy);
     for (const w of toks) (postings.get(w) || postings.set(w, []).get(w)).push(k);
   }
-  return kept;
+  return kept.map(i => A.promote(i, free));
 }
+
+/** The source a story stands under (its tier and kind): the best of its own and the ones merged into it, as dedupe
+ *  ranks them, so a story whose link was swapped to a free copy keeps its journal's standing on every run. */
+const standing = (i, byId) => [i.source, ...(i.also || [])].map(id => byId.get(id)).filter(Boolean)
+  .reduce((b, s) => (!b || s.tier < b.tier || (s.tier === b.tier && s.kind === 'journal' && b.kind !== 'journal') ? s : b), null);
 
 /**
  * Roll the store forward: previous items + this run's items → de-duplicated, re-classified, inside the window, at most
  * `cap` per source and `maxItems` overall, newest first.
  * @param {{prevItems: object[], freshItems: object[], sources: object[], now: number, keepDays?: number, maxItems?: number, defaultCap?: number}} o
  */
-export function mergeStore({ prevItems = [], freshItems = [], sources, now, keepDays = 7, maxItems = 2500, defaultCap = 150 }) {
+export function mergeStore({ prevItems = [], freshItems = [], sources, now, keepDays = 7, maxItems = 2500, defaultCap = 150, access = ACCESS }) {
   const byId = new Map(sources.map(s => [s.id, s]));
   const since = now - keepDays * 864e5;
+  // Each copy's class: its feed's, a part of the site its address shows, or the publisher's own mark on it.
+  const cls = x => access.classify({ briefing: 'science', id: x.source, url: x.url, mark: x.accessMark });
   // Items from feeds that left the catalogue go, and so do titles the drop rules now catch; the rest are re-classified
-  // so rule changes apply to the whole store.
-  const pool = [...prevItems, ...freshItems].filter(i => byId.has(i.source) && !isDroppedTitle(i.title)).map(i => {
+  // so rule changes apply to the whole store (and classed again for access, an item holding a free copy turned round).
+  const pool = A.carryMarks([...prevItems, ...freshItems]).filter(i => byId.has(i.source) && !isDroppedTitle(i.title)).map(i0 => {
+    const i = A.restamp(i0, cls, id => byId.has(id));
+    if (i.accessMark && cls({ ...i, accessMark: null }) === i.accessMark) delete i.accessMark; // a mark that says what its feed's class does
     const s = byId.get(i.source);
     const disciplines = new Set(classify(i, s.disciplines));
     for (const a of i.also || []) for (const d of byId.get(a)?.disciplines || []) disciplines.add(d);
-    return { ...i, kind: s.kind, tier: s.tier, disciplines: DISCIPLINE_IDS.filter(d => disciplines.has(d)) };
+    const st = standing(i, byId);
+    return { ...i, kind: st.kind, tier: st.tier, disciplines: DISCIPLINE_IDS.filter(d => disciplines.has(d)) };
   });
   const recent = pool.filter(i => (Date.parse(i.published) || 0) >= since);
   const unique = dedupe(recent, id => byId.get(id));

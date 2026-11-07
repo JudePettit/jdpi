@@ -406,7 +406,10 @@ const briefSpecs = (id, file, module, submodule, title, facetKey, refresh, sourc
   const itemKeys = new Set(d.items.flatMap(i => Object.keys(i)));
   const F = { id: 'Item id', title: 'Title', url: 'Link to the item at its publisher', source: `Source id; join to \`id\` in ${id}-sources`, kind: `Kind of source: ${Object.keys(d.kinds || {}).join(', ')}`, tier: `Source tier: ${Object.entries(d.tiers || {}).map(([k, v]) => `${k} ${v}`).join('; ')}`,
     [facetKey]: `${facetKey[0].toUpperCase() + facetKey.slice(1)} it is classed under (${facets})`, type: 'paper (research) or news', published: 'Publication time (ISO 8601, UTC)', summary: 'Short summary from the feed (the text remains the publisher\'s)', section: 'Publisher\'s section or journal heading',
-    doi: 'DOI, if any', authors: 'Authors, if given', also: 'Other outlets that carried the same item', undated: 'True when the feed gave no date (the time is when Vitruvian Manager first saw it)' };
+    doi: 'DOI, if any', authors: 'Authors, if given', also: 'Other outlets that carried the same item', undated: 'True when the feed gave no date (the time is when Vitruvian Manager first saw it)',
+    access: 'How the item can be read, where it is not free: signup (a free account), metered (a few free articles, then payment) or paid (design/prp-access.json)',
+    accessMark: "The publisher's own mark on this item (free or paid: an open licence, LWN's \"[$]\"), which overrides its source's class",
+    alt: 'The same item at the other outlets that carried it, each { source, url, title, access }' };
   spec({
     id: `${id}-stories`, title: `${title}: stories and papers`, module, submodule,
     description: `Every paper and story in the ${title} over the last ${d.keepDays || 7} days, classed by ${facetKey} (${facets}) and by type (papers or news). Join \`source\` to ${id}-sources.`,
@@ -418,7 +421,8 @@ const briefSpecs = (id, file, module, submodule, title, facetKey, refresh, sourc
     status: 'Feed status at the last refresh', count: 'Items in the feed at the last check', stored: 'Items kept from this feed', latest: 'Latest item time', checked: 'Last checked', lastOk: 'Last successful read', etag: 'HTTP ETag of the feed', lastModified: 'HTTP Last-Modified of the feed', error: 'Last error, if any',
     notModified: 'True when the feed answered "not modified" at the last check (its earlier items are kept)', strict: `True when items matching none of the briefing's ${facetKey} are dropped (feeds that also carry other subjects)`,
     badge: "Label shown on this source's items instead of its kind (e.g. Opinion)", byline: "True when the feed's author line is shown",
-    perDay: 'Preprint servers: at most this many new submissions kept from each daily announcement', matched: 'Items in the feed that matched the briefing before the daily cap' };
+    perDay: 'Preprint servers: at most this many new submissions kept from each daily announcement', matched: 'Items in the feed that matched the briefing before the daily cap',
+    access: 'How its articles can be read: free, signup, metered, paid or unknown (counts as free); design/prp-access.json holds the evidence' };
   spec({
     id: `${id}-sources`, title: `${title}: sources`, module, submodule,
     description: `The journals, preprint servers, institutions and news desks the ${title} reads, with their tier, default ${facetKey} and feed status.`,

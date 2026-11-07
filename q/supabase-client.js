@@ -83,7 +83,7 @@
       const terms = keywords.map(k => k.replace(/[^\p{L}\p{N} -]/gu, "")).filter(Boolean);
       if (!terms.length) return [];
       return request(tablePath("country_top_stories", {
-        select: "snapshot_date,country_code,outlet,title_original,title_en,url,published_at",
+        select: "snapshot_date,country_code,outlet,outlet_domain,title_original,title_en,url,published_at",
         snapshot_date: `gte.${sinceDate}`,
         lowbrow: "not.is.true",
         or: `(${terms.flatMap(t => [`title_en.ilike.*${t}*`, `title_original.ilike.*${t}*`]).join(",")})`,

@@ -6,6 +6,8 @@ import {
   dayLabel, timeLabel,
 } from './view.js';
 
+const { PRPAccess } = globalThis; // design/prp-access.js, loaded by view.js
+
 const $ = s => document.querySelector(s);
 const STORE_KEY = 'prp.science-briefing.discipline';
 const PAGE = 120, MORE = 200;
@@ -64,16 +66,33 @@ function renderChips() {
   }).join('');
 }
 
+/* Free sources lead (design/prp-access.js): a label inside a link to a source that is not free to read, with the same
+   story's free copy beside it where the briefing merged one; the other copies under "Also in", each with its link. */
+const T_ACCESS = PRPAccess.load('../../design/prp-access.json');
+const accessHtml = i => {
+  const free = PRPAccess.isFree(i.access) ? null : PRPAccess.firstFree(i.alt);
+  return (free ? PRPAccess.altLink({ url: free.url, outlet: SRC.get(free.source)?.outlet, title: free.title }) : '');
+};
+function alsoHtml(i, s) {
+  const seen = new Set([s?.outlet]), parts = [];
+  for (const a of i.alt || []) {
+    const o = SRC.get(a.source)?.outlet;
+    if (!o || seen.has(o) || !/^https?:\/\//i.test(a.url)) continue;
+    seen.add(o); parts.push(`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(o)}${PRPAccess.label(a.access)}</a>`);
+  }
+  for (const id of i.also || []) { const o = SRC.get(id)?.outlet; if (o && !seen.has(o)) { seen.add(o); parts.push(esc(o)); } }
+  return parts.length ? `<span class="also">Also in ${parts.join(', ')}</span>` : '';
+}
+
 function entryHtml(i) {
   const s = SRC.get(i.source), time = timeLabel(i.published);
-  const also = [...new Set((i.also || []).map(a => SRC.get(a)?.outlet).filter(o => o && o !== s.outlet))];
   const tags = i.disciplines.map(d => `<span class="tag" data-d="${d}">${esc(label(d))}</span>`).join('');
   const l3 = tags + (i.section ? `<span class="section">${esc(i.section)}</span>` : '') +
     (i.doi ? `<a class="doi" href="${esc(doiHref(i.doi))}" target="_blank" rel="noopener">doi:${esc(i.doi)}</a>` : '') +
-    (also.length ? `<span class="also">Also in ${esc(also.join(', '))}</span>` : '');
+    alsoHtml(i, s);
   return `<article class="entry">
     <div class="l1"><span class="badge ${i.type}">${i.type === 'paper' ? 'Paper' : 'News'}</span><span class="src">${esc(s?.outlet || i.source)}</span>${time ? `<time class="time" datetime="${esc(i.published)}">${time}</time>` : ''}</div>
-    <h4><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a></h4>
+    <h4><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}${PRPAccess.label(i.access)}</a>${accessHtml(i)}</h4>
     ${i.summary ? `<p class="sum">${esc(i.summary)}</p>` : ''}${l3 ? `<div class="l3">${l3}</div>` : ''}
   </article>`;
 }
@@ -228,8 +247,11 @@ function wire() {
 }
 
 /* ---------- boot ---------- */
-fetch('data/stories.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }).then(d => {
+Promise.all([fetch('data/stories.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }), T_ACCESS]).then(([d, T]) => {
   D = d; SRC = new Map(d.sources.map(s => [s.id, s]));
+  // Each item classed by the access table as it is now (the store holds the builder's classes from its last run).
+  const cls = x => T.classify({ briefing: 'science', id: x.source, url: x.url, mark: x.accessMark });
+  if (T.size) D.items = D.items.map(i => PRPAccess.restamp(i, cls, id => SRC.has(id)));
   // Windows count back from now, or from the last refresh if the data is more than half a day old.
   ref = Date.now() - Date.parse(d.generated) > 12 * 36e5 ? Date.parse(d.generated) : Date.now();
   readHash(); renderMeta(); renderSources(); wire(); render();

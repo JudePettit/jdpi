@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T06:08:33.766Z",
+  "generated": "2026-11-09T06:27:52.803Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -56,7 +56,7 @@
       "sources": [
         "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "static",
       "page": "q/headlines.html?view=current",
       "derivedFrom": [
@@ -69,7 +69,7 @@
       "title": "Geopolitical Volatility: latest scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-07), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-08), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
       "url": "integration/data/volatility-latest.json",
       "format": "json",
       "records": "records",
@@ -155,20 +155,20 @@
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 57719
+      "bytes": 57758
     },
     {
       "id": "volatility-daily",
       "title": "Geopolitical Volatility: daily scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 43 days, for trends and comparisons.",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 44 days, for trends and comparisons.",
       "urls": [
         "integration/data/volatility-daily/0.json",
         "integration/data/volatility-daily/1.json",
@@ -244,18 +244,18 @@
           "description": "Coverage level: high, medium or low"
         }
       ],
-      "rows": 9066,
+      "rows": 9265,
       "licence": "Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 1665142
+      "bytes": 1701482
     },
     {
       "id": "volatility-global",
@@ -288,18 +288,18 @@
           "description": "Quarter-hour GDELT files processed (96 is a full day)"
         }
       ],
-      "rows": 43,
+      "rows": 44,
       "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 3055
+      "bytes": 3121
     },
     {
       "id": "realtime-wars",
@@ -972,7 +972,7 @@
       "title": "Realtime Calendar: recent and upcoming events",
       "module": "rt",
       "submodule": "calendar",
-      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-08 to 2028-05-08 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-09 to 2028-05-09 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
       "url": "integration/data/upcoming-political-events.json",
       "format": "json",
       "records": "records",
@@ -1023,7 +1023,7 @@
           "description": "Name of that news outlet"
         }
       ],
-      "rows": 308,
+      "rows": 305,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1033,7 +1033,7 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "daily",
       "page": "q/calendar.html?period=contemporary",
       "derivedFrom": [
@@ -1043,7 +1043,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 153767
+      "bytes": 152558
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1086,16 +1086,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 7001,
+      "rows": 7034,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-07",
+      "updated": "2026-11-08",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 3055987
+      "bytes": 3073065
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1160,10 +1160,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-07",
+      "updated": "2026-11-08",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 3055987
+      "bytes": 3073065
     },
     {
       "id": "econ-briefing-stories",
@@ -1261,15 +1261,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 520,
+      "rows": 508,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 302033
+      "bytes": 295452
     },
     {
       "id": "econ-briefing-sources",
@@ -1372,11 +1372,6 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
-          "name": "error",
-          "type": "string",
-          "description": "Last error, if any"
-        },
-        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -1402,10 +1397,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 302033
+      "bytes": 295452
     },
     {
       "id": "science-briefing-stories",
@@ -1493,15 +1488,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1243,
+      "rows": 1207,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 719519
+      "bytes": 698134
     },
     {
       "id": "science-briefing-sources",
@@ -1624,10 +1619,10 @@
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 719519
+      "bytes": 698134
     },
     {
       "id": "digital-briefing-stories",
@@ -1725,15 +1720,15 @@
           "description": "The publisher's own mark on this item (free or paid: an open licence, LWN's \"[$]\"), which overrides its source's class"
         }
       ],
-      "rows": 1209,
+      "rows": 1156,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 729001
+      "bytes": 693504
     },
     {
       "id": "digital-briefing-sources",
@@ -1876,10 +1871,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 729001
+      "bytes": 693504
     },
     {
       "id": "political-calendar",
@@ -1943,7 +1938,7 @@
           "description": "Name of that news outlet"
         }
       ],
-      "rows": 5673,
+      "rows": 5674,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1953,10 +1948,10 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2612341
+      "bytes": 2613078
     },
     {
       "id": "encyclopaedia-entities",
@@ -3356,7 +3351,7 @@
       "sources": [
         "registry.json"
       ],
-      "updated": "2026-11-08",
+      "updated": "2026-11-09",
       "refresh": "on change",
       "page": "index.html",
       "derivedFrom": [

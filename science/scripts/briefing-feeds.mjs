@@ -153,11 +153,22 @@ export const urlKey = u => { try { const x = new URL(u); return (x.hostname.repl
 /** A stable 12-character id from the DOI (preferred) or the URL. */
 export const makeId = (doi, url) => createHash('sha1').update(doi ? 'doi:' + doi.toLowerCase() : 'url:' + urlKey(url)).digest('hex').slice(0, 12);
 
+// A live page's running headline names no story: the New York Times puts "Here’s the latest." over a post on each of
+// its live pages, and now and then over an article. Two such titles are two different stories, so the title never
+// merges items; and an item with nothing else to say (no summary) tells a reader nothing, so it is dropped. Shared by
+// the Economics and Digital Briefings' builders.
+const LIVE_STUB = /^(?:here[’']?s the latest|the latest|latest(?: news| updates?)?|live(?: updates?| blog| coverage| news)?|what we know(?: so far)?|what to know|catch up(?: here)?)[.!:…]?$/i;
+/** A title that is only a live page's running headline ("Here’s the latest.", "Live updates", "What we know"). */
+export const isLiveStub = title => LIVE_STUB.test(String(title ?? '').trim());
+/** An item that tells a reader nothing: a live page's running headline and no summary. */
+export const saysNothing = i => isLiveStub(i.title) && !String(i.summary ?? '').trim();
+
 /**
  * A parsed feed item → the stored shape, or null when it is dropped (corrections, errata, sponsored posts) or undated
  * beyond the fallback. `seen` stamps undated items; dates more than 36 hours ahead are treated as undated.
  */
 export function normalise(raw, source, seen) {
+  if (saysNothing(raw)) return null;
   const type = detectType(raw, source);
   if (!type) return null;
   const now = Date.parse(seen);
@@ -201,9 +212,12 @@ export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {})
   const kept = [], byDoi = new Map(), byUrl = new Map(), byTitle = new Map(), postings = new Map();
   const outlet = i => sourceOf(i.source)?.outlet || i.source;
   for (const it of sorted) {
-    const tk = titleKey(it.title), toks = tokens(it.title), t = Date.parse(it.published) || 0;
+    const tk = isLiveStub(it.title) ? '' : titleKey(it.title), toks = tokens(it.title), t = Date.parse(it.published) || 0;
     let hit = (it.doi && byDoi.get(it.doi.toLowerCase())) || byUrl.get(urlKey(it.url)) || null;
-    if (!hit && tk.length > 12) { const h = byTitle.get(tk); if (h && Math.abs((Date.parse(h.published) || 0) - t) <= 3 * 864e5) hit = h; }
+    // Every kept copy under a title is looked at, not only the first: when one title came back on items days apart
+    // (the New York Times' "Here’s the latest.", 6 and 10 November 2026), the third copy was compared with the first
+    // only, both of the later ones were kept side by side, the data test refused them and the refresh stopped.
+    if (!hit && tk.length > 12) hit = (byTitle.get(tk) || []).find(h => Math.abs((Date.parse(h.published) || 0) - t) <= 3 * 864e5) || null;
     if (!hit && toks.length >= 5) {
       const counts = new Map();
       for (const w of toks) for (const k of postings.get(w) || []) counts.set(k, (counts.get(k) || 0) + 1);
@@ -230,7 +244,7 @@ export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {})
     const k = kept.push({ ...it }) - 1, copy = kept[k];
     if (copy.doi) byDoi.set(copy.doi.toLowerCase(), copy);
     byUrl.set(urlKey(copy.url), copy);
-    if (tk.length > 12 && !byTitle.has(tk)) byTitle.set(tk, copy);
+    if (tk.length > 12) (byTitle.get(tk) || byTitle.set(tk, []).get(tk)).push(copy);
     for (const w of toks) (postings.get(w) || postings.set(w, []).get(w)).push(k);
   }
   return kept.map(i => A.promote(i, free));
@@ -253,7 +267,7 @@ export function mergeStore({ prevItems = [], freshItems = [], sources, now, keep
   const cls = x => access.classify({ briefing: 'science', id: x.source, url: x.url, mark: x.accessMark });
   // Items from feeds that left the catalogue go, and so do titles the drop rules now catch; the rest are re-classified
   // so rule changes apply to the whole store (and classed again for access, an item holding a free copy turned round).
-  const pool = A.carryMarks([...prevItems, ...freshItems]).filter(i => byId.has(i.source) && !isDroppedTitle(i.title)).map(i0 => {
+  const pool = A.carryMarks([...prevItems, ...freshItems]).filter(i => byId.has(i.source) && !isDroppedTitle(i.title) && !saysNothing(i)).map(i0 => {
     const i = A.restamp(i0, cls, id => byId.has(id));
     if (i.accessMark && cls({ ...i, accessMark: null }) === i.accessMark) delete i.accessMark; // a mark that says what its feed's class does
     const s = byId.get(i.source);

@@ -12,7 +12,7 @@ import { FIELDS, FIELD_IDS, classify, detectType, fieldId, isDroppedTitle } from
 import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from '../digital/scripts/briefing-sources.mjs';
 import {
   parseDigitalFeed, normalise, mergeStore, pickDaily, isSkipped, formatAuthors, authorCount, keepsByline, tidyTex, parseFeedDate,
-  urlKey, titleKey, SUMMARY_MAX, AUTHORS_MAX,
+  urlKey, titleKey, isLiveStub, SUMMARY_MAX, AUTHORS_MAX,
 } from '../digital/scripts/briefing-feeds.mjs';
 import { DEFAULTS, parseHash, toHash, filterItems, arrange, countByField, badgeOf, timeLabel, fieldColours } from '../digital/briefing/view.js';
 
@@ -249,6 +249,28 @@ test('store: duplicates merge, and stale, skipped, off-topic and retired items l
   assert.equal(capped[0].id, 'p0');
 });
 
+test('store: a title used again days apart merges with its nearest copy, and a live page’s running headline merges nothing', () => {
+  // The Economics Briefing's fault of 10–12 November 2026 (the New York Times' "Here’s the latest."): only the first copy
+  // under a title was compared, so two later copies of one story were kept side by side and the data test refused them.
+  const now = Date.parse('2026-11-12T12:00:00Z');
+  const title = 'OpenAI and Anthropic race to ship cheaper AI models for coding';
+  const at = (id, published, more = {}) => ({ source: 'ars-ai', kind: 'news', tier: SRC.get('ars-ai').tier, type: 'news', summary: '', fields: ['ai'], id, title, url: `https://example.org/2026/11/${id}.html`, published, ...more });
+  const stub = 'Here’s the latest.';
+  const store = mergeStore({
+    prevItems: [at('r1', '2026-11-06T14:00:00.000Z'), at('r2', '2026-11-10T14:09:42.000Z')],
+    freshItems: [
+      at('r3', '2026-11-10T16:14:17.000Z'),
+      at('s1', '2026-11-11T09:00:00.000Z', { title: stub }),
+      at('s2', '2026-11-11T10:00:00.000Z', { title: stub, summary: 'The first of two different stories under one running headline.' }),
+      at('s3', '2026-11-11T12:00:00.000Z', { title: stub, summary: 'The second of two different stories under one running headline.' }),
+    ],
+    sources: SOURCES, now,
+  });
+  // r3 is one story with r2 (two hours apart), not with r1 (four days); s1 says nothing and goes; s2 and s3 are two stories.
+  assert.deepEqual(store.map(i => i.id).sort(), ['r1', 'r2', 's2', 's3']);
+  assert.equal(normalise({ title: stub, summary: '', url: 'https://example.org/live/heres-the-latest', published: '2026-11-10T16:14:17.000Z', categories: [], genres: [] }, SRC.get('ars-ai'), '2026-11-12T12:00:00.000Z'), null);
+});
+
 // ---- View logic (digital/briefing/view.js) ---------------------------------------------------------------------------
 test('view: deep links (#f=<field>) and the URL hash', () => {
   const F = DATA.fields;
@@ -400,7 +422,7 @@ test('data: no duplicate items', () => {
   const byTitle = new Map();
   for (const i of DATA.items) {
     const k = titleKey(i.title);
-    if (k.length <= 12) continue;
+    if (k.length <= 12 || isLiveStub(i.title)) continue; // a live page's running headline names no story
     for (const t of byTitle.get(k) || []) assert.ok(Math.abs(t - Date.parse(i.published)) > 3 * DAY, `duplicate title: ${i.title}`);
     byTitle.set(k, [...(byTitle.get(k) || []), Date.parse(i.published)]);
   }

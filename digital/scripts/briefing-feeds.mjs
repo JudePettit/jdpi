@@ -7,13 +7,13 @@
 // follows the Economics Briefing (econ/scripts/briefing-feeds.mjs).
 import { decode, canonicalUrl, titleKey } from '../../briefing/scripts/rss.mjs';
 // Free sources lead: the access table and its helpers (design/prp-access.js) come from there too.
-import { plain, clip, summarise, extractDoi, parseDate, urlKey, makeId, titleSimilarity, SUMMARY_MAX, ACCESS } from '../../science/scripts/briefing-feeds.mjs';
+import { plain, clip, summarise, extractDoi, parseDate, urlKey, makeId, titleSimilarity, isLiveStub, saysNothing, SUMMARY_MAX, ACCESS } from '../../science/scripts/briefing-feeds.mjs';
 import { classify, detectType, isGenre, isDroppedTitle, FIELD_IDS } from './classify.mjs';
 
 const A = globalThis.PRPAccess;
 export { ACCESS };
 
-export { titleKey, urlKey, SUMMARY_MAX };
+export { titleKey, urlKey, isLiveStub, saysNothing, SUMMARY_MAX };
 export const AUTHORS_MAX = 120;
 
 // ---- Entities ----------------------------------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ export function isSkipped(raw, source) {
  * marked dateOnly stamp a date at noon or midnight: they are stored as dates.
  */
 export function normalise(raw, source, seen, fallback = seen) {
-  if (isSkipped(raw, source)) return null;
+  if (isSkipped(raw, source) || saysNothing(raw)) return null;
   const type = detectType(raw, source);
   if (!type) return null;
   const fieldsOf = classify(raw, source.fields);
@@ -301,9 +301,13 @@ export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {})
   const kept = [], byDoi = new Map(), byUrl = new Map(), byTitle = new Map(), postings = new Map();
   const outlet = i => sourceOf(i.source)?.outlet || i.source;
   for (const it of sorted) {
-    const tk = titleKey(it.title), toks = tokens(it.title), t = Date.parse(it.published) || 0;
+    // A live page's running headline ("Here’s the latest.") names no story, so it merges nothing by title.
+    const tk = isLiveStub(it.title) ? '' : titleKey(it.title), toks = tokens(it.title), t = Date.parse(it.published) || 0;
     let hit = (it.doi && byDoi.get(it.doi.toLowerCase())) || byUrl.get(urlKey(it.url)) || null;
-    if (!hit && tk.length > 12) { const h = byTitle.get(tk); if (h && Math.abs((Date.parse(h.published) || 0) - t) <= 3 * 864e5) hit = h; }
+    // Every kept copy under a title is looked at, not only the first: when one title came back on items days apart
+    // (the New York Times' "Here’s the latest.", 6 and 10 November 2026), the third copy was compared with the first
+    // only, both of the later ones were kept side by side, the data test refused them and the refresh stopped.
+    if (!hit && tk.length > 12) hit = (byTitle.get(tk) || []).find(h => Math.abs((Date.parse(h.published) || 0) - t) <= 3 * 864e5) || null;
     if (!hit && toks.length >= 5) {
       const counts = new Map();
       for (const w of toks) for (const k of postings.get(w) || []) counts.set(k, (counts.get(k) || 0) + 1);
@@ -330,7 +334,7 @@ export function dedupe(items, sourceOf, { free = i => A.isFree(i.access) } = {})
     const k = kept.push({ ...it }) - 1, copy = kept[k];
     if (copy.doi) byDoi.set(copy.doi.toLowerCase(), copy);
     byUrl.set(urlKey(copy.url), copy);
-    if (tk.length > 12 && !byTitle.has(tk)) byTitle.set(tk, copy);
+    if (tk.length > 12) (byTitle.get(tk) || byTitle.set(tk, []).get(tk)).push(copy);
     for (const w of toks) (postings.get(w) || postings.set(w, []).get(w)).push(k);
   }
   return kept.map(i => A.promote(i, free));
@@ -361,7 +365,7 @@ export function mergeStore({ prevItems = [], freshItems = [], sources, now, keep
     const i = A.restamp(i0, cls, id => byId.has(id));
     if (i.accessMark && cls({ ...i, accessMark: null }) === i.accessMark) delete i.accessMark; // a mark that says what its feed's class does
     const s = byId.get(i.source);
-    if (!s || isDroppedTitle(i.title) || (s.skip && s.skip.test(i.title)) || (s.skipUrl && s.skipUrl.test(i.url)) || (s.match && !s.match.test(`${i.title} ${i.summary || ''}`))) continue;
+    if (!s || isDroppedTitle(i.title) || saysNothing(i) || (s.skip && s.skip.test(i.title)) || (s.skipUrl && s.skipUrl.test(i.url)) || (s.match && !s.match.test(`${i.title} ${i.summary || ''}`))) continue;
     const set = new Set(classify(i, s.fields));
     for (const a of i.also || []) for (const f of byId.get(a)?.fields || []) set.add(f);
     const fieldsOf = FIELD_IDS.filter(f => set.has(f));

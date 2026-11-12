@@ -42,6 +42,8 @@ async function until(fn, what = 'condition', ms = 4000) {
   for (;;) { const v = await fn(); if (v) return v; if (Date.now() - t0 > ms) throw new Error(`Timed out waiting for ${what}`); await sleep(20); }
 }
 const freePort = () => new Promise(r => { const s = net.createServer().listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => r(port)); }); });
+// Two calls to freePort() in a row can be given the same port (it is closed before it is returned): a port that must differ is drawn again.
+const otherPort = async (...taken) => { for (;;) { const p = await freePort(); if (!taken.includes(p)) return p; } };
 const hx = s => Buffer.from(s).toString('hex');
 const u16 = n => n.toString(16).padStart(4, '0');
 
@@ -52,7 +54,7 @@ const u16 = n => n.toString(16).padStart(4, '0');
 async function bridge({ iot = {}, env = {}, lan = false, answer = () => true, realClock = false, statePath = newStatePath(), deps = {} } = {}) {
   const port = await freePort();
   const cfg = { interface: 'Loopback (tests)', ...iot };
-  if (lan && !cfg.lan) cfg.lan = { address: '127.0.0.1', port: await freePort() };
+  if (lan && !cfg.lan) cfg.lan = { address: '127.0.0.1', port: await otherPort(port, B.DEFAULT_PORT) };
   const o = { port, quiet: true, routes: { adsb: 'http://127.0.0.1:9/data/aircraft.json' }, origins: [...B.DEFAULT_ORIGINS], public: false, aisstreamKey: '',
     iot: B.normaliseIot(cfg, { iot: true, lan, state: statePath }, port, env) };
   const questions = [], logs = [], portMap = {}, resolver = {}, packets = [];
@@ -1511,7 +1513,7 @@ test('iot page: the phone remote keeps its pairing on reload when its clock is 4
 test('iot: --lan refuses 0.0.0.0, an address that is not the home interface’s, and a Public network', async () => {
   const mk = async (address, profile = 'Private', policy = 'home') => {
     const port = await freePort();
-    const o = { port, quiet: true, iot: B.normaliseIot({ interface: 'Wi-Fi', lan: { address, port: await freePort() } }, { iot: true, lan: true, state: newStatePath() }, port) };
+    const o = { port, quiet: true, iot: B.normaliseIot({ interface: 'Wi-Fi', lan: { address, port: await otherPort(port, B.DEFAULT_PORT) } }, { iot: true, lan: true, state: newStatePath() }, port) };
     const iot = B.createIot(o, { policy, interfaces: () => ({ 'Wi-Fi': [{ address: '192.168.1.20', netmask: '255.255.255.0', family: 'IPv4', internal: false, cidr: '192.168.1.20/24' }] }), profile: async () => profile, confirm: null });
     try { await iot.startLan(); return 'listening'; } catch (e) { return e.message; } finally { iot.stop(); }
   };

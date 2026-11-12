@@ -175,12 +175,13 @@ export function progress({ jdpiDir }) {
   return out;
 }
 
-/** Bibliotheca (Kino): each book's cast, bibliotheca/data/cast/<slug>.json, made by bibliotheca/scripts/cast.mjs: the
+/** Bibliotheca (the module; Kino's until November 2026): each book's cast, bibliotheca/data/cast/<slug>.json, made by bibliotheca/scripts/cast.mjs: the
  *  people, places, states, battles, wars, organisations and works a book's text names, resolved to Wikidata. Only the
  *  records decided 'auto' are fed in ('review' waits for a human to flip it in the cast file's overrides). One
  *  mention per book and entity, whichever names the book gives it, so an entity the lake has already (by Wikidata ID)
  *  gains the mention and the book's names rather than a second entry; its link opens Neo Classic at the first
- *  paragraph that names it, the term in use; its aliases are the book's own forms of the name, which build.mjs adds to
+ *  paragraph that names it, the term in use, and is filed under Neo Classic (registry id neo-classic, the
+ *  module's reader; "bibliotheca" until November 2026, now its alias); its aliases are the book's own forms of the name, which build.mjs adds to
  *  the entity's so the tagger (bibliotheca/scripts/tag-terms.mjs) finds them in the text. `source` records which
  *  book's cast gave the mention ("bibliotheca:<slug>"); the build reads the module and the url. */
 export function bibliotheca({ jdpiDir }) {
@@ -203,7 +204,7 @@ export function bibliotheca({ jdpiDir }) {
       byQid.set(r.qid, g);
     }
     for (const [qid, g] of byQid) out.push({
-      key: { qid }, label: g.label, module: 'bibliotheca', source: `bibliotheca:${cast.slug}`,
+      key: { qid }, label: g.label, module: 'neo-classic', source: `bibliotheca:${cast.slug}`,
       url: `${JDPI}bibliotheca/neo/index.html#book=${cast.slug}&ch=${g.first.ch}&p=${g.first.p}&t=${qid}`, date: String(cast.year),
       context: `Named in ${cast.title} (${cast.author}, ${cast.year < 0 ? `${-cast.year} BC` : cast.year}), ${g.mentions} time${g.mentions === 1 ? '' : 's'}, as ${[...g.names].join(', ')}`,
       aliases: [...g.fed],
@@ -305,7 +306,7 @@ export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, trade
 // (encyclopedia/index.html). An adapter reports under no other module.
 export const ADAPTER_MODULES = {
   retrospective: ['retrospective'], calendar: ['historical-calendar', 'calendar'], battlefield: ['battlefield-history', 'war-focus', 'battlefield'],
-  kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['bibliotheca'],
+  kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['neo-classic'],
   kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'],
 };
 // The tag groups only one adapter gives. A --only run of that adapter makes these groups again on every entity it

@@ -31,12 +31,13 @@ test('registry is well formed', () => {
   // The intro the Home page shows (and README.md and index.html open with): no ERP framing since November 2026.
   assert.equal(registry.platform.tagline, INTRO);
   // Home (home), the Home page's and the Dashboard's module, comes first, and Highbrowse (hb), the four briefings'
-  // module, after Realtime Geopolitics (both November 2026).
-  assert.deepEqual(registry.suites.map(s => s.id), ['home', 'rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino']);
+  // module, after Realtime Geopolitics (both November 2026); Bibliotheca, out of Kino into a module of its own, after Kino
+  // (November 2026).
+  assert.deepEqual(registry.suites.map(s => s.id), ['home', 'rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino', 'bibliotheca']);
   // A module's name is what the sidebar shows; its title is its overview page's heading, its box's on the Home page and
   // its pages' eyebrow.
-  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
-  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
   // Every module says what you can do with it, in a line or two, for the back of its box on the Home page.
   for (const s of registry.suites) assert.ok(typeof s.summary === 'string' && s.summary.length >= 30 && s.summary.length <= 115 && /^[A-Z].*\.$/.test(s.summary), `${s.id}: summary "${s.summary}"`);
   assert.equal(new Set(registry.suites.map(s => s.summary)).size, registry.suites.length, 'each module its own summary');
@@ -64,6 +65,12 @@ test('registry is well formed', () => {
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
   for (const id of ['data-analytics', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
+  // Bibliotheca was Kino's submodule until November 2026; it is a module now, its reader Neo Classic its one submodule
+  // (the old id its alias, so #/kino/bibliotheca still opens it), on the same page.
+  const bb = registry.suites.find(s => s.id === 'bibliotheca');
+  assert.equal(bb.code, 'BB');
+  assert.deepEqual(bb.modules.map(m => [m.id, m.name, m.url, m.aliases, m.views]), [['neo-classic', 'Neo Classic', 'bibliotheca/neo/index.html', ['bibliotheca'], undefined]]);
+  assert.ok(!registry.suites.find(s => s.id === 'kino').modules.some(m => m.id === 'bibliotheca' || m.id === 'neo-classic'), 'nothing of Bibliotheca left in Kino');
   // The four briefings moved into Highbrowse from Realtime Geopolitics, Natural Science, Money Management and Digital
   // Science (they were asserted there before); each keeps its id and its page. The Global Headline Tracker stays.
   const hb = registry.suites.find(s => s.id === 'hb');
@@ -363,7 +370,9 @@ test('old addresses redirect to the new structure', pageTest, async () => {
     ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
     ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus'],
     // The Workspace became the Dashboard (November 2026): its old name lands there; Home's overview is the Home page.
-    ['#/workspace', '#/home/dashboard'], ['#/home/workspace', '#/home/dashboard'], ['#/home', '#/']]) {
+    ['#/workspace', '#/home/dashboard'], ['#/home/workspace', '#/home/dashboard'], ['#/home', '#/'],
+    // Bibliotheca left Kino for a module of its own (November 2026): its old submodule and view land on Neo Classic.
+    ['#/kino/bibliotheca', '#/bibliotheca/neo-classic'], ['#/kino/bibliotheca/neo-classic', '#/bibliotheca/neo-classic'], ['#/bibliotheca/bibliotheca', '#/bibliotheca/neo-classic']]) {
     await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(t => location.hash === t, to, { timeout: 5000 }).catch(() => {});
     assert.equal(await page.evaluate(() => location.hash), to, `${from} → ${to}`);

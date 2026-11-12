@@ -64,7 +64,7 @@ const wbget = params => getJson('https://www.wikidata.org/w/api.php?' + new URLS
 // (its last 180 days) pass into the Historical Calendar as they age, so the two calendars are counted together.
 // Every module an adapter reports is listed (tests/master-index.test.mjs): the order of an entity's appearances on its
 // Master Index page, so a country's profile pages (National Analysis, Volatility) follow its Retrospective entry.
-const MODULE_ORDER = ['retrospective', 'pestle', 'volatility', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress', 'bibliotheca',
+const MODULE_ORDER = ['retrospective', 'pestle', 'volatility', 'historical-calendar', 'calendar', 'battlefield-history', 'war-focus', 'battlefield', 'kardashev', 'traders', 'learning', 'learning-politics', 'progress', 'neo-classic',
   'kino-political-events', 'kino-political-figures', 'kino-political-parties', 'kino-wars', 'kino-geopolitical-events', 'kino-great-thinkers'];
 // The new lake is written beside the old one and swapped in at the end (below). A build interrupted between the two
 // renames leaves the old data as lake/data.old: it is put back first, so this build compares against it rather than
@@ -226,7 +226,7 @@ if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries cou
 
 // ---- 5. Entity records and shards
 // The names "Appears in" shows; a Kino category's carries the suite's name, since "Wars" alone would be anyone's.
-const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', bibliotheca: 'Bibliotheca',
+const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', kardashev: 'Kardashev Tracker', traders: 'Auto Trader', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', 'neo-classic': 'Bibliotheca',
   'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers' };
 const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
 function tagsFor(e, type, ms) {

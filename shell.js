@@ -1,6 +1,6 @@
 /* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
    and storage keys): renders the modules (Home, Realtime Geopolitics, Highbrowse, Retrospective Geopolitics,
-   International Mystery Management, Money Management, Natural Science, Digital Science, Kino) and their submodules from
+   International Mystery Management, Money Management, Natural Science, Digital Science, Kino, Bibliotheca) and their submodules from
    registry.json, and hosts each submodule page in a persistent workspace frame. A module has a short name (registry
    "name", for the sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, its
    box on the Home page, the Dashboard's headings, page eyebrows and the tab title); they differ only where the full
@@ -16,7 +16,8 @@
    (In registry.json the modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
    that moved between modules (the four briefings into Highbrowse: #/rt/briefing, #/ns/science-briefing,
-   #/mm/econ-briefing, #/ds/digital-briefing), and old sub-entries that became views or their own submodule are
+   #/mm/econ-briefing, #/ds/digital-briefing; Kino's Bibliotheca, now Neo Classic in the Bibliotheca module, by its old id
+   as an alias: #/kino/bibliotheca and #/kino/bibliotheca/neo-classic land on #/bibliotheca/neo-classic), and old sub-entries that became views or their own submodule are
    redirected. A lone submodule id or alias opens its submodule, so the old Workspace's #/workspace (and
    #/home/workspace) lands on the Dashboard; #/home lands on the Home page.
    One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.

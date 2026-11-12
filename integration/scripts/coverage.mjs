@@ -723,7 +723,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   for (const f of readdirSync(join(root, 'fe/learning')).filter(f => f.endsWith('.md')).sort()) named(`learning:${f.replace(/\.md$/, '')}`, 'learning', `Learning · ${f.replace(/\.md$/, '')}`, [T(`fe/learning/${f}`)]);
   const books = J('bibliotheca/data/index.json').books;
   const bookText = books.map(b => { try { const d = J(`bibliotheca/data/books/${b.slug}.json`); return (d.chapters || []).flatMap(c => [c.title, ...(c.paragraphs || []).map(p => p.text)]).filter(Boolean).join('\n'); } catch { return ''; } });
-  named('bibliotheca', 'bibliotheca', 'Bibliotheca', bookText).notes.push(`${books.length} public-domain books; their place names are historical (Gibbon's "Egypt" counts as today's Egypt; "Prussia" or "Gaul" count as nothing), so this is the weakest evidence.`);
+  named('bibliotheca', 'neo-classic', 'Bibliotheca', bookText).notes.push(`${books.length} public-domain books; their place names are historical (Gibbon's "Egypt" counts as today's Egypt; "Prussia" or "Gaul" count as nothing), so this is the weakest evidence.`);
   log(`Text ${Date.now() - t0} ms`);
 
   // Tables

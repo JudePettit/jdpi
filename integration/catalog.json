@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T06:22:16.063Z",
+  "generated": "2026-11-12T21:08:54.978Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1087,16 +1087,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6870,
+      "rows": 6799,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-11",
+      "updated": "2026-11-12",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2995211
+      "bytes": 2966715
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1161,10 +1161,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-11",
+      "updated": "2026-11-12",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2995211
+      "bytes": 2966715
     },
     {
       "id": "econ-briefing-stories",
@@ -1262,15 +1262,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 515,
+      "rows": 479,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-10",
+      "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 300049
+      "bytes": 281756
     },
     {
       "id": "econ-briefing-sources",
@@ -1403,10 +1403,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-10",
+      "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 300049
+      "bytes": 281756
     },
     {
       "id": "science-briefing-stories",
@@ -1499,7 +1499,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1247,
+      "rows": 1187,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1507,7 +1507,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 723446
+      "bytes": 697288
     },
     {
       "id": "science-briefing-sources",
@@ -1633,7 +1633,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 723446
+      "bytes": 697288
     },
     {
       "id": "digital-briefing-stories",
@@ -1736,7 +1736,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1179,
+      "rows": 1192,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1744,7 +1744,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 710816
+      "bytes": 717035
     },
     {
       "id": "digital-briefing-sources",
@@ -1890,7 +1890,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 710816
+      "bytes": 717035
     },
     {
       "id": "political-calendar",
@@ -3299,7 +3299,7 @@
         {
           "name": "module",
           "type": "string",
-          "description": "Module id (rt, rs, oi, mm, ns, ds, kino)"
+          "description": "Module id (home, rt, hb, rs, oi, mm, ns, ds, kino, bibliotheca)"
         },
         {
           "name": "module_code",
@@ -3373,7 +3373,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 20850
+      "bytes": 20915
     },
     {
       "id": "kino-documentaries",
@@ -3477,10 +3477,9 @@
         "kino-political-parties",
         "kino-wars",
         "kino-geopolitical-events",
-        "bibliotheca",
         "kino-great-thinkers"
       ],
-      "bytes": 25715
+      "bytes": 27071
     }
   ]
 }

@@ -742,7 +742,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       inputSchema: S({ country: { type: 'string', description: 'Country name or ISO 3166 code, e.g. "France", "FRA", "FR".' } }, ['country']) },
     { name: 'list_submodules', title: 'List Vitruvian Manager submodules', fn: listSubmodules,
       description: 'The pages of Vitruvian Manager by module, with what each does and its address, so you can point a person to the right page.',
-      inputSchema: S({ module: { type: 'string', description: 'Only one module: home, rt, hb, rs, oi, mm, ns, ds or kino.' } }) }
+      inputSchema: S({ module: { type: 'string', description: 'Only one module: home, rt, hb, rs, oi, mm, ns, ds, kino or bibliotheca.' } }) }
   ];
   for (const t of tools) t.annotations = { title: t.title, ...RO };
   const byName = new Map(tools.map(t => [t.name, t]));

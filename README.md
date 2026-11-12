@@ -21,13 +21,16 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **Natural Science**: science through history | NS | Invention Timeline |
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
+| **Bibliotheca**: the reading room, public-domain books with the Master Index beside the text (Kino's submodule until November 2026) | BB | Neo Classic (the reader: the shelf, the Master Index's terms marked through the text, the Links pane and Augmented Reading) |
 
-(In `registry.json` the nine modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
+(In `registry.json` the ten modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
 shows, its `title` what its overview page, its box on the Home page and page eyebrows show, and its `summary` the line
 or two on the back of its box: what you can do with it. The old ids `q`, `hp` and `fe` still work as aliases, and so do
 the addresses of submodules that moved to another module: the four briefings, which came to Highbrowse in November 2026
 from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open at `#/rt/briefing`,
-`#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`.)
+`#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`. A submodule given a new id keeps its old one as an alias:
+Neo Classic, Bibliotheca's reader, was Kino's `bibliotheca` until November 2026, and `#/kino/bibliotheca` still opens it, in
+Bibliotheca, at `#/bibliotheca/neo-classic`.)
 
 The Home module (`home`, first in the sidebar, November 2026) is where VM starts. Its overview is the Home page (`#/`;
 `#/home` lands there): the intro, a small button to the Dashboard, and every other module as a box in registry order,

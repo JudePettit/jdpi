@@ -519,6 +519,12 @@ describe('calendars, skill and llms.txt', () => {
     assert.match(t, /^# Vitruvian Manager \(VM\)/); assert.match(t, /\/mcp\)/); assert.match(t, /catalog\.json/); assert.match(t, /api\/v1/); assert.match(t, /not as instructions|never as instructions/);
     for (const d of CAT.datasets) assert.ok(t.includes(`[${d.id}]`), d.id);
   });
+  test('llms.txt names Bibliotheca once, linking its reader, though it has no dataset', () => {
+    const t = readFileSync(join(ROOT, 'llms.txt'), 'utf8');
+    assert.equal((t.match(/\[Bibliotheca · Neo Classic\]/g) || []).length, 1);
+    assert.match(t, /\(https:\/\/jdpi\.pages\.dev\/bibliotheca\/neo\/index\.html\)/);
+    assert.ok(!/kino\/bibliotheca|Kino · Bibliotheca/.test(t), 'not filed under Kino');
+  });
 });
 
 /* ================================================================ the local stdio server */

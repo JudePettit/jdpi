@@ -73,7 +73,7 @@ export function relatedPlaces(scenes, i, { subjects = [], entities = new Map(), 
   const here = u => (shell !== LIVE && String(u).startsWith(LIVE) ? shell + String(u).slice(LIVE.length) : u);
   const out = [], seen = new Set();
   const add = (group, link, extra = {}) => {
-    // Other films are not screens (Kino's categories are kino-<category>; Bibliotheca, in Kino's suite, is one).
+    // Other films are not screens (Kino's categories are kino-<category>); a book in Bibliotheca's Neo Classic is one.
     if (!link || /^kino-/.test(link.module)) return false;
     const hit = findModule(registry, link.module);
     if (!hit || !hit.module.url || /^kino-/.test(hit.module.id)) return false;

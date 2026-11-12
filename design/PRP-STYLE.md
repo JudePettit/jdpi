@@ -41,8 +41,9 @@ and does not draw).
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
+| Kino's submodule Bibliotheca (until November 2026) | **Bibliotheca** (the reading room) | `bibliotheca` | BB |
 
-In the registry the nine are "suites" and their pages "modules"; in the interface we say **module** for the nine and
+In the registry the ten are "suites" and their pages "modules"; in the interface we say **module** for the ten and
 **submodule** for the pages. A module has a short `name` (the sidebar, the breadcrumb, search) and a full `title` (its
 overview page, its box on the Home page, the Dashboard's headings, page eyebrows, the tab title); they differ only for
 International Mystery Management, whose sidebar name is **Int-Myst Mngmnt**. It also has a `summary`: what you can do
@@ -78,6 +79,7 @@ wars, leaders and coming votes."
 | Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/`; the Hub's Agents tab lists Vitruvian Manager's agents (`integration/agents.json`, Hermes Messenger first) |
 | IoT Connect | DS (new, November 2026) | `digital/iot-connect/`: your own smart devices through the Vitruvian Manager bridge, with Hermes Messenger, a UNS (MQTT, Sparkplug B) and the phone as the remote; tabs Overview, Devices, Remote, Hermes, UNS and Law & safety. Its page runs under its own strict Content-Security-Policy (`_headers`): no inline script or style, no style attributes, device text only ever as text, and only the bridge on `localhost:8790` besides the site itself |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
+| Neo Classic (was Kino's Bibliotheca, with Neo Classic its one view) | BB (new, November 2026; moved from KN) | `bibliotheca/neo/`, the same page at the same address with every key (`book`, `ch`, `p`, `t`, `pane`, `show`, `era`, `ar`); registry id `neo-classic`, alias `bibliotheca`, so `#/kino/bibliotheca` opens it at `#/bibliotheca/neo-classic`; its eyebrow reads "Bibliotheca · Neo Classic" |
 
 **Sidebar order.** Home comes first, its Home page item (with ⌂) where every other module has its "Module overview".
 Within each module the strongest submodules come first, the calendar second-last and the course last.
@@ -92,7 +94,7 @@ the page**, never separate sidebar entries. Tabs use `.prp-tabs` with `role="tab
 ## 2. Hooking a page up
 
 ```html
-<html lang="en" data-suite="rt">              <!-- rt | hb | rs | oi | mm | ns | ds | kino -->
+<html lang="en" data-suite="rt">              <!-- rt | hb | rs | oi | mm | ns | ds | kino | bibliotheca -->
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
@@ -172,9 +174,10 @@ check's date, or when the check has not run for three days (`status/health.json`
   toolbars), `--prp-surface-3` (hover/selected), `--prp-line`, `--prp-line-soft`, `--prp-line-strong`, `--prp-scrim`.
 - Text: `--prp-text` (ink), `--prp-text-2`, `--prp-muted` (metadata), `--prp-faint` (hints only), `--prp-on-primary`.
 - Action: `--prp-primary`, `--prp-primary-hover`, `--prp-primary-soft`, `--prp-link`, `--prp-focus`.
-- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-hm|rt|hb|rs|oi|mm|ns|ds|kn` and
+- Module accent: `--prp-accent`, `--prp-accent-soft` (set by `data-suite`); also `--prp-hm|rt|hb|rs|oi|mm|ns|ds|kn|bb` and
   `-soft` (Home's `--prp-hm` is a neutral, the secondary ink `--prp-text-2` in each theme, since Home is VM itself;
-  Highbrowse's `--prp-hb` is Tyrian purple, the senator's stripe).
+  Highbrowse's `--prp-hb` is Tyrian purple, the senator's stripe; Bibliotheca's `--prp-bb` is rubric, the red of a
+  manuscript's headings).
 - Status (text-safe): `--prp-good|warn|bad|info` and `-soft`; gains/losses `--prp-up`, `--prp-down`.
 - Data: categorical `--prp-cat-1…8` (fixed order, never cycled; scatter/maps use ≤3 colours before folding to
   "Other"), sequential `--prp-seq-100…700` (one hue, light→dark), diverging `--prp-div-neg-3…1`, `--prp-div-mid`,

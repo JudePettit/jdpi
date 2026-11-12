@@ -46,7 +46,7 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
 | `traders` | `traders` | Members of Congress who trade (by Bioguide ID) and famous investors |
 | `learning` | `learning`, `learning-politics` | Thinkers and schools of thought taught in the Finance, Economics and Politics courses; the lesson |
 | `progress` | `progress` | Breakthroughs, their scientists and institutions (by Wikidata ID); the breakthrough on the timeline |
-| `bibliotheca` | `bibliotheca` | Each book's cast (by Wikidata ID, with the book's names); the first paragraph that names it |
+| `bibliotheca` | `neo-classic` (Bibliotheca's reader; `bibliotheca` until November 2026, when Bibliotheca left Kino for a module of its own) | Each book's cast (by Wikidata ID, with the book's names); the first paragraph that names it |
 | `kino` | `kino-<category>`, all six | What each documentary names by Wikidata ID: its subjects, each scene's Master Index link and portrait, and the War Focus wars, National Analysis and Political Atlas countries and Invention Timeline breakthroughs its scenes link to (not the items its Wikidata sources list, which are where its facts come from). One mention per film and entity, at the first scene that names it, or at the start for a subject |
 | `pestle` | `pestle` (National Analysis) | Every country with its Wikidata ID (the Channel Islands and Kosovo have none there yet); its profile, `q/national.html#country=<ISO3>` |
 | `volatility` | `volatility` | Every country scored on a day the index holds, with the Wikidata ID National Analysis gives it (Taiwan, Jersey and Vatican City have none); the country, `q/volatility.html#country=<ISO3>`, with its latest score |
@@ -67,7 +67,7 @@ A mention may carry `aliases`, the names the module's own text uses: the build a
 
 ## Bibliotheca
 
-Each book's cast (`bibliotheca/data/cast/<slug>.json`, made by `bibliotheca/scripts/cast.mjs <slug>` from Wikidata and reviewed in its header's overrides) feeds the lake through the `bibliotheca` adapter: one mention per book and entity, linked to the first paragraph that names it in Neo Classic. After a build, `bibliotheca/scripts/tag-terms.mjs <slug>` tags the book again; the monthly refresh does it for every book.
+Each book's cast (`bibliotheca/data/cast/<slug>.json`, made by `bibliotheca/scripts/cast.mjs <slug>` from Wikidata and reviewed in its header's overrides) feeds the lake through the `bibliotheca` adapter: one mention per book and entity, filed under Neo Classic (`neo-classic`, in the Bibliotheca module) and linked to the first paragraph that names it there. After a build, `bibliotheca/scripts/tag-terms.mjs <slug>` tags the book again; the monthly refresh does it for every book.
 
 A record's book-only names (`local`) feed its entity but not the name, since the name means someone else in other books (the Prince's "Cyrus", or "Naples", which there means the Kingdom). The book's shelf decision gives the name back to the entity. Every book is tagged against the one lake. So a cast record that is dropped, moved or made book-only changes the other books' terms at their next re-tag. After changing a cast, re-tag every book.
 

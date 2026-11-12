@@ -1,7 +1,8 @@
-/* Bibliotheca · Neo Classic (Kino): a reading page for public-domain classics with the Master Index's terms
+/* Bibliotheca · Neo Classic: a reading page for public-domain classics with the Master Index's terms
    highlighted, a popout bar of the terms on screen and a companion pane beside the text. Written against the tokens
    in design/prp.css only (no colour is set here that is not a token), so light and dark both follow the system or the
-   shell. The accent is Kino's (--prp-kn); a copy of prp.css without it falls back to Natural Science's, as kino.css does.
+   shell. The accent is Bibliotheca's own (--prp-bb); a copy of prp.css without it falls back to Natural Science's, as
+   kino.css does.
 
    Reading comfort: the text is the design system's serif (--prp-font-serif, Source Serif 4) at 18px on a 1.7 leading,
    and one column carries the reading width for everything in the book (front matter, the sticky chapter head, the
@@ -14,7 +15,7 @@
    (1150 − 48 − 606) / 2 = 248 px beside it holds the 14rem list and its 20 px gap, so the shell's frame at a 1440 px
    window (1168 px) has it too. As a strip it covers the line under the head, and the page counts what is in view from
    the strip's bottom (app.js: stripH; --nc-bar below, so a jump lands clear of it). */
-[data-suite="kino"] { --prp-accent: var(--prp-kn, var(--prp-ns)); --prp-accent-soft: var(--prp-kn-soft, var(--prp-ns-soft)); }
+[data-suite="bibliotheca"] { --prp-accent: var(--prp-bb, var(--prp-ns)); --prp-accent-soft: var(--prp-bb-soft, var(--prp-ns-soft)); }
 
 :root { --nc-size: 18px; --nc-sheet: 52dvh; }
 * { box-sizing: border-box; }

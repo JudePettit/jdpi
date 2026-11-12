@@ -790,7 +790,7 @@
       "code": "KN",
       "name": "Kino",
       "title": "Kino",
-      "summary": "Watch narrated documentaries on wars, leaders and turning points, read the classics and take short courses.",
+      "summary": "Watch narrated documentaries on wars, leaders and turning points, and take short courses on great thinkers.",
       "description": "Documentaries that play across Vitruvian Manager: wars, political events, figures, parties and geopolitical turning points, and courses on great thinkers, narrated with simple animated maps, timelines and portraits, each scene linked to the submodule it draws on.",
       "modules": [
         {
@@ -844,23 +844,6 @@
           "description": "Moments that reshaped the world order, starting with the Cuban Missile Crisis, the end of the Soviet Union and the end of empire in Africa."
         },
         {
-          "id": "bibliotheca",
-          "name": "Bibliotheca",
-          "kind": "learning",
-          "icon": "¶",
-          "status": "live",
-          "host": "Vitruvian Manager",
-          "url": "bibliotheca/neo/index.html",
-          "description": "Public-domain classics read on screen, starting with Machiavelli's The Prince in W. K. Marriott's 1908 translation: every term the Master Index knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Master Index entry or the other screens for the book's era.",
-          "views": [
-            {
-              "id": "neo-classic",
-              "name": "Neo Classic",
-              "url": "bibliotheca/neo/index.html"
-            }
-          ]
-        },
-        {
           "id": "kino-great-thinkers",
           "name": "Great Thinkers",
           "kind": "learning",
@@ -871,7 +854,30 @@
           "description": "Three-part courses with a short quiz on the great minds Vitruvian Manager draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
         }
       ]
+    },
+    {
+      "id": "bibliotheca",
+      "code": "BB",
+      "name": "Bibliotheca",
+      "title": "Bibliotheca",
+      "summary": "Read public-domain classics of history, politics and economics, with the Master Index beside the text.",
+      "description": "The reading room: public-domain books of history, war, politics, economics and natural science, read on screen with the Master Index's terms marked through the text and the rest of Vitruvian Manager beside it.",
+      "modules": [
+        {
+          "id": "neo-classic",
+          "aliases": [
+            "bibliotheca"
+          ],
+          "name": "Neo Classic",
+          "kind": "learning",
+          "icon": "¶",
+          "status": "live",
+          "host": "Vitruvian Manager",
+          "url": "bibliotheca/neo/index.html",
+          "description": "Public-domain books read on screen, from Thucydides and Machiavelli to Gibbon, Smith, Darwin, Clausewitz, Marx and the Austrian economists. Every term the Master Index knows is highlighted, a bar lists the terms on screen, a pane beside the text opens the Master Index entry or the other screens for the book's era, and Augmented Reading reads the book aloud."
+        }
+      ]
     }
   ],
-  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page. A module's \"summary\" is what you can do with it, in a line or two: the back of its box on the Home page. The Home module (home) is where VM starts: its overview is the Home page (#/), where every other module has a box, and its one submodule, the Dashboard (#/home/dashboard, the Today panel over every module and submodule), is drawn by the shell itself (\"shell\": \"dashboard\", in place of a url)."
+  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A submodule given a new id keeps its old one as an alias, so its old addresses still open it too: Neo Classic, which was Kino's Bibliotheca until November 2026, answers #/kino/bibliotheca in the Bibliotheca module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page. A module's \"summary\" is what you can do with it, in a line or two: the back of its box on the Home page. The Home module (home) is where VM starts: its overview is the Home page (#/), where every other module has a box, and its one submodule, the Dashboard (#/home/dashboard, the Today panel over every module and submodule), is drawn by the shell itself (\"shell\": \"dashboard\", in place of a url)."
 }

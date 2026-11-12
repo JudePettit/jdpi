@@ -11,14 +11,15 @@
   const script = document.currentScript;
   const SHELL = (script && script.dataset.shell) || 'https://jdpi.pages.dev/';
   const moduleId = (script && script.dataset.module) || '';
-  // Old suite ids, and submodules that moved to another module in PRP 2.0 (and the four briefings, into Highbrowse, in
-  // November 2026), whatever module an older copy of their page still names.
+  // Old suite ids, and submodules that moved to another module in PRP 2.0 (and the four briefings, into Highbrowse, and
+  // Bibliotheca's reader, Neo Classic, out of Kino into a module of its own, in November 2026), whatever module an older
+  // copy of their page still names.
   const CANON = { q: 'rt', hp: 'rs', fe: 'mm' };
   const MOVED = { atlas: 'rt', 'trade-desk': 'mm', markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', 'double-signal': 'mm', traders: 'mm', 'learning-politics': 'rs', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
-    briefing: 'hb', 'science-briefing': 'hb', 'econ-briefing': 'hb', 'digital-briefing': 'hb' };
+    briefing: 'hb', 'science-briefing': 'hb', 'econ-briefing': 'hb', 'digital-briefing': 'hb', bibliotheca: 'bibliotheca', 'neo-classic': 'bibliotheca' };
   // Module names as the sidebar shows them (registry "name"), and the full title where the name is abbreviated (registry
   // "title"), which the bar gives as a tooltip.
-  const NAMES = { rt: 'Realtime Geopolitics', hb: 'Highbrowse', rs: 'Retrospective Geopolitics', oi: 'Int-Myst Mngmnt', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' };
+  const NAMES = { rt: 'Realtime Geopolitics', hb: 'Highbrowse', rs: 'Retrospective Geopolitics', oi: 'Int-Myst Mngmnt', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino', bibliotheca: 'Bibliotheca' };
   const TITLES = { oi: 'International Mystery Management' };
   const given = (script && script.dataset.suite) || '';
   const suite = MOVED[moduleId] || CANON[given] || given;

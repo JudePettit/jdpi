@@ -32,6 +32,7 @@ export function llmsTxt(catalogue, { site = 'https://jdpi.pages.dev/' } = {}) {
   L.push(`- [Local MCP server](${site}integration/mcp/prp-mcp.mjs): one file, Node 18+, no dependencies; the same tools without the edge time budget (\`node prp-mcp.mjs --help\`)`);
   L.push(`- [Briefing feeds](${site}api/v1/briefings): RSS and JSON Feed for the intelligence, scientific, economics and digital briefings`);
   L.push(`- [Realtime Calendar as iCalendar](${site}integration/feeds/realtime-calendar.ics); filtered calendars at ${site}api/v1/calendar.ics?country=…&type=…`);
+  L.push(`- [Bibliotheca · Neo Classic](${site}bibliotheca/neo/index.html): a reading room of public-domain books with the Master Index's terms marked through the text. It has no dataset of its own; in encyclopaedia-entities its submodule id in appears_in is neo-classic`);
   L.push(`- [Vitruvian Manager submodules](${site}registry.json): every page of Vitruvian Manager with what it does`);
   return L.join('\n') + '\n';
 }

@@ -86,4 +86,5 @@ Ground rules for assistants:
 - [Local MCP server](https://jdpi.pages.dev/integration/mcp/prp-mcp.mjs): one file, Node 18+, no dependencies; the same tools without the edge time budget (`node prp-mcp.mjs --help`)
 - [Briefing feeds](https://jdpi.pages.dev/api/v1/briefings): RSS and JSON Feed for the intelligence, scientific, economics and digital briefings
 - [Realtime Calendar as iCalendar](https://jdpi.pages.dev/integration/feeds/realtime-calendar.ics); filtered calendars at https://jdpi.pages.dev/api/v1/calendar.ics?country=…&type=…
+- [Bibliotheca · Neo Classic](https://jdpi.pages.dev/bibliotheca/neo/index.html): a reading room of public-domain books with the Master Index's terms marked through the text. It has no dataset of its own; in encyclopaedia-entities its submodule id in appears_in is neo-classic
 - [Vitruvian Manager submodules](https://jdpi.pages.dev/registry.json): every page of Vitruvian Manager with what it does

@@ -308,7 +308,7 @@ test('adapter: one mention per book and entity for the auto records, linked to N
     const ms = bibliotheca({ jdpiDir: dir });
     assert.equal(ms.length, 1, 'one entity, its two records together; the review record is not fed');
     assert.deepEqual(ms[0], {
-      key: { qid: 'Q2' }, label: 'Cesare Borgia', module: 'bibliotheca', source: 'bibliotheca:t',
+      key: { qid: 'Q2' }, label: 'Cesare Borgia', module: 'neo-classic', source: 'bibliotheca:t',
       url: 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=t&ch=3&p=c03-p24&t=Q2', date: '1532',
       context: 'Named in T (A, 1532), 11 times, as Cesare Borgia, Duke Valentino, Cesare, Valentino', aliases: ['Cesare Borgia', 'Duke Valentino'],
     });
@@ -363,7 +363,7 @@ test('built: every auto record’s entity is in the lake, with the book’s name
   const shards = new Map();
   const record = q => { const i = +q.slice(1) % 512; if (!shards.has(i)) shards.set(i, read(new URL(`lake/data/e/${i}.json`, ROOT))); return shards.get(i)[q]; };
   const manifest = read(new URL('lake/data/manifest.json', ROOT));
-  assert.ok(manifest.modules.bibliotheca > 0, 'the lake counts the Bibliotheca mentions');
+  assert.ok(manifest.modules['neo-classic'] > 0, 'the lake counts the Bibliotheca mentions (filed under its reader, Neo Classic)');
   for (const cast of casts) {
     for (const r of cast.records.filter(x => x.decision === 'auto')) {
       const at = `${cast.slug} ${r.name} → ${r.qid}`;
@@ -373,7 +373,7 @@ test('built: every auto record’s entity is in the lake, with the book’s name
       for (const s of [r.name, ...r.aliases].filter(x => !r.local.includes(x))) assert.ok(strings.has(fold(s)), `${at}: the lake has the name "${s}"`);
       const first = firstYear(e.facts);
       assert.ok(first === null || first <= cast.bound.notes, `${at}: first dated ${first}, after ${cast.bound.notes}`);
-      const ms = record(r.qid).mentions.filter(m => m.m === 'bibliotheca' && m.u.includes(`#book=${cast.slug}&`));
+      const ms = record(r.qid).mentions.filter(m => m.m === 'neo-classic' && m.u.includes(`#book=${cast.slug}&`));
       assert.equal(ms.length, 1, `${at}: one mention of the book`);
       assert.match(ms[0].u, new RegExp(`^https://jdpi\\.pages\\.dev/bibliotheca/neo/index\\.html#book=${cast.slug}&ch=\\d+&p=[cnpv0-9-]+&t=${r.qid}$`), at);
     }
@@ -382,7 +382,7 @@ test('built: every auto record’s entity is in the lake, with the book’s name
     assert.deepEqual(new Set(bibliotheca({ jdpiDir: fileURLToPath(ROOT) }).filter(m => m.source === `bibliotheca:${cast.slug}`).map(m => m.key.qid)), fed);
     for (const r of cast.records.filter(x => x.decision === 'review' && !fed.has(x.qid))) {
       const lr = record(r.qid);
-      assert.ok(!lr || !lr.mentions.some(m => m.m === 'bibliotheca' && m.u.includes(`#book=${cast.slug}&`)), `${cast.slug} ${r.name}: a review record is not fed`);
+      assert.ok(!lr || !lr.mentions.some(m => m.m === 'neo-classic' && m.u.includes(`#book=${cast.slug}&`)), `${cast.slug} ${r.name}: a review record is not fed`);
     }
   }
 });

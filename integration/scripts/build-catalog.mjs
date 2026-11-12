@@ -524,7 +524,7 @@ spec({
   derive: () => REG.suites.flatMap(s => s.modules.map(m => ({ module: s.id, module_code: s.code, module_name: s.title || s.name, id: m.id, name: m.name, kind: m.kind, status: m.status, private: !!m.opensInNewTab || /Private\.?$/.test(m.description || ''),
     url: m.url ? (/^https?:/.test(m.url) ? m.url : BASE_URL + m.url) : null, planned_url: m.pendingUrl ? BASE_URL + m.pendingUrl : null, host: m.host || null, description: m.description || null, views: (m.views || []).map(v => v.name) }))),
   from: ['registry.json'], refresh: 'on change', updated: TODAY, page: 'index.html', licence: '© JDP-Iq.', sources: ['registry.json'],
-  fields: [['module', 'Module id (rt, rs, oi, mm, ns, ds, kino)'], ['module_code', 'Module code'], ['module_name', 'Module (its full title, as on its overview page)'], ['id', 'Submodule id'], ['name', 'Submodule'], ['kind', 'realtime, retrospective, reference, learning, operations or automation'], ['status', 'live, in-build or planned'],
+  fields: [['module', 'Module id (home, rt, hb, rs, oi, mm, ns, ds, kino, bibliotheca)'], ['module_code', 'Module code'], ['module_name', 'Module (its full title, as on its overview page)'], ['id', 'Submodule id'], ['name', 'Submodule'], ['kind', 'realtime, retrospective, reference, learning, operations or automation'], ['status', 'live, in-build or planned'],
     ['private', 'True for private submodules behind their own sign-in'], ['url', 'Address'], ['planned_url', 'Address once built (in-build submodules)'], ['host', 'Where it is hosted'], ['description', 'What it does'], ['views', 'Tabs inside the page']]
 });
 

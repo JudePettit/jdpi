@@ -1,4 +1,4 @@
-/* Bibliotheca · Neo Classic (Kino): public-domain classics read on screen, every term the Master Index knows
+/* Bibliotheca · Neo Classic (its own module since November 2026; it was Kino's): public-domain classics read on screen, every term the Master Index knows
    highlighted, a popout bar of the terms on screen, and a companion pane beside the text.
 
    Data, built by bibliotheca/scripts/build-book.mjs (its header holds the contract):

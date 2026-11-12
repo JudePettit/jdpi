@@ -250,7 +250,7 @@ test('committed lake: the new submodules’ mentions where their adapters put th
   // Kino names Cesare Borgia (a portrait in Machiavelli's course), whom the Prince names "Duke Valentino": a module
   // that gives no names leaves the record's as they were (build.mjs, onlyMerge), the book's among them.
   const borgia = entity('Q187998');
-  assert.ok(borgia.mentions.some(x => x.m === 'kino-great-thinkers') && borgia.mentions.some(x => x.m === 'bibliotheca'), 'Cesare Borgia in Kino and the Bibliotheca');
+  assert.ok(borgia.mentions.some(x => x.m === 'kino-great-thinkers') && borgia.mentions.some(x => x.m === 'neo-classic'), 'Cesare Borgia in Kino and the Bibliotheca (its reader, Neo Classic)');
   assert.ok(borgia.aliases.includes('Duke Valentino'), `the Prince's name for him: ${borgia.aliases.join(', ')}`);
 });
 
@@ -280,6 +280,8 @@ test('page: framed as in the shell, an entry opens its Kino, National Analysis a
   const borgia = await entry('Q187998');
   assert.deepEqual(borgia['Kino · Great Thinkers']?.map(a => a.href), [route('kino', 'kino-great-thinkers', 'kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli&s=cesare-borgia')], JSON.stringify(borgia));
   assert.ok(borgia.Bibliotheca?.length, 'and his Bibliotheca appearance beside it');
+  // Bibliotheca is a module of its own (November 2026): the book opens in its reader, Neo Classic, there.
+  for (const a of borgia.Bibliotheca) assert.ok(a.href.startsWith(`${BASE}/#/bibliotheca/neo-classic?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=`)}`), a.href);
   // And back: a Volatility country's Master Index button opens its entry (#Q117), not the Explorer.
   await page.goto(`${BASE}/q/volatility.html#country=GHA`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   const button = page.locator('#profile a', { hasText: 'Master Index' });

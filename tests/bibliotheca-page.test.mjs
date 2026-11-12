@@ -248,10 +248,10 @@ test('data: every term of every book on the shelf renders, and every paragraph c
 /* ---------- the page's own files ---------- */
 test('page files: the page contract (front matter, connector, design system, tokens only)', () => {
   const html = file('bibliotheca/neo/index.html');
-  assert.match(html, /<p class="prp-eyebrow" data-jdpi-standalone><span>Kino <span class="sep">·<\/span> Bibliotheca <span class="sep">·<\/span> Neo Classic<\/span><\/p>/);
-  assert.match(html, /<script src="\.\.\/\.\.\/design\/prp-bar\.js" data-suite="kino" data-module="bibliotheca" data-shell="\.\.\/\.\.\/" defer><\/script>/);
+  assert.match(html, /<p class="prp-eyebrow" data-jdpi-standalone><span>Bibliotheca <span class="sep">·<\/span> Neo Classic<\/span><\/p>/);
+  assert.match(html, /<script src="\.\.\/\.\.\/design\/prp-bar\.js" data-suite="bibliotheca" data-module="neo-classic" data-shell="\.\.\/\.\.\/" defer><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/\.\.\/design\/prp\.css">/);
-  assert.match(html, /<html lang="en" class="prp" data-suite="kino">/);
+  assert.match(html, /<html lang="en" class="prp" data-suite="bibliotheca">/);
   // The page contract as the rename to Vitruvian Manager left it (design/PRP-STYLE.md): "<Submodule> · VM", the VM icon.
   assert.match(html, /<title>Neo Classic · Bibliotheca · VM<\/title>/);
   assert.match(html, /<link rel="icon" href="\.\.\/\.\.\/design\/brand-vm-icon\.svg" type="image\/svg\+xml">/);
@@ -499,7 +499,7 @@ test('page: the real book opens at a deep link with the paragraph in place, and 
       const css = getComputedStyle(document.documentElement), probe = document.createElement('i');
       document.body.append(probe);
       const resolve = v => { probe.style.color = css.getPropertyValue(v).trim(); return getComputedStyle(probe).color; };
-      const out = { body: getComputedStyle(document.body).backgroundColor, canvas: resolve('--prp-canvas'), term: getComputedStyle(document.querySelector('#text a.term')).backgroundColor, soft: resolve('--prp-kn-soft') };
+      const out = { body: getComputedStyle(document.body).backgroundColor, canvas: resolve('--prp-canvas'), term: getComputedStyle(document.querySelector('#text a.term')).backgroundColor, soft: resolve('--prp-bb-soft') };
       probe.remove();
       return out;
     });
@@ -640,19 +640,15 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const errors = watch(page, /\/bibliotheca\//); // the shell's own panels fetch from other sites; this page's errors only
-    // The registry with Bibliotheca in Kino, as recommended (the coordinator adds it to registry.json).
-    await page.route('**/registry.json', async route => {
-      const reg = await (await route.fetch()).json();
-      const kino = reg.suites.find(s => s.id === 'kino');
-      kino.modules = kino.modules.filter(m => m.id !== 'bibliotheca');
-      const at = kino.modules.findIndex(m => m.id === 'kino-great-thinkers'); // the course comes last
-      kino.modules.splice(at < 0 ? kino.modules.length : at, 0, { id: 'bibliotheca', name: 'Bibliotheca', kind: 'learning', icon: '¶', status: 'live', host: 'Vitruvian Manager', url: 'bibliotheca/neo/index.html',
-        description: 'Public-domain classics read on screen.', views: [{ id: 'neo-classic', name: 'Neo Classic', url: 'bibliotheca/neo/index.html' }] });
-      await route.fulfill({ json: reg });
-    });
+    // Bibliotheca is a module of its own (November 2026), Neo Classic its reader: the address it had under Kino lands
+    // there, under its own name in the breadcrumb and the sidebar, in its own accent.
     await page.goto(`${BASE}/#/kino/bibliotheca`, { waitUntil: 'domcontentloaded' });
-    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="bibliotheca"]', { timeout: 20000 })).contentFrame();
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="neo-classic"]', { timeout: 20000 })).contentFrame();
     await frame.waitForSelector('#text p.para', { timeout: 20000 });
+    assert.equal(await page.evaluate(() => location.hash), '#/bibliotheca/neo-classic');
+    assert.equal((await page.textContent('#crumbs')).replace(/\s+/g, ''), 'VM/Bibliotheca/NeoClassic');
+    assert.equal(await page.getAttribute('#nav a[aria-current="page"]', 'href'), '#/bibliotheca/neo-classic');
+    assert.equal(await frame.evaluate(() => document.documentElement.dataset.suite), 'bibliotheca');
     assert.equal(await frame.evaluate(() => document.documentElement.classList.contains('prp-embedded')), true);
     // The shell's frame at a 1440 px window is 1168 px wide: wide enough for the bar's list in the margin, open by
     // default, beside the text and inside the frame (it needed 1240 px before).
@@ -667,11 +663,14 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
     // A deep link moves the page by its hash alone: same document, new chapter and paragraph. (Once the shell has seen
     // the frame load: until then shell.js compares with the address it asked for, bibliotheca/neo/index.html, which the
     // server has redirected to bibliotheca/neo/, and a hash written on the former reloads the page.)
-    await page.waitForFunction(() => !document.querySelector('#frames iframe[data-module="bibliotheca"]').hasAttribute('data-loading'), null, { timeout: 20000 });
+    await page.waitForFunction(() => !document.querySelector('#frames iframe[data-module="neo-classic"]').hasAttribute('data-loading'), null, { timeout: 20000 });
     await frame.evaluate(() => { window.stillHere = true; });
-    await page.evaluate(h => { location.hash = h; }, `#/kino/bibliotheca?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=12&p=c12-p06`)}`);
+    // (An old deep link, at Kino's address, moves the same frame, and the address becomes Bibliotheca's.)
+    const deep = encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=12&p=c12-p06`);
+    await page.evaluate(h => { location.hash = h; }, `#/kino/bibliotheca?at=${deep}`);
     await frame.waitForFunction(() => document.querySelector('#text p.current')?.id === 'c12-p06', null, { timeout: 15000 });
     assert.equal(await frame.evaluate(() => window.stillHere), true, 'no reload');
+    assert.equal(await page.evaluate(() => location.hash), `#/bibliotheca/neo-classic?at=${deep}`);
     // The pane's "open in Vitruvian Manager" moves the shell to that screen, at the book's period.
     await frame.click('#pane-toggle');
     await frame.waitForSelector('#era-rows li[data-key="kardashev"] a');
@@ -898,12 +897,12 @@ test('page: full screen is the whole page: the text and the pane side by side wi
     await page.keyboard.press('f');
     await page.waitForFunction(() => !document.fullscreenElement && !document.documentElement.hasAttribute('data-prp-fs'));
     // Inside the shell, the shell's full-screen element is Bibliotheca's frame.
-    await page.goto(`${BASE}/#/kino/bibliotheca`, { waitUntil: 'domcontentloaded' });
-    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="bibliotheca"]', { timeout: 20000 })).contentFrame();
+    await page.goto(`${BASE}/#/bibliotheca/neo-classic`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="neo-classic"]', { timeout: 20000 })).contentFrame();
     await frame.waitForSelector('#text p.para', { timeout: 20000 });
     await frame.locator('#chapter-title').click(); // focus into the frame (the head's fade lies over the text's first 12 px)
     await page.keyboard.press('f');
-    await page.waitForFunction(() => document.fullscreenElement?.matches?.('iframe[data-module="bibliotheca"]'), null, { timeout: 5000 });
+    await page.waitForFunction(() => document.fullscreenElement?.matches?.('iframe[data-module="neo-classic"]'), null, { timeout: 5000 });
     await page.keyboard.press('f');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
@@ -1080,8 +1079,8 @@ test('page: in the shell, moving the shell to another submodule pauses the narra
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const errors = watch(page, /\/bibliotheca\//);
     await page.addInitScript(FAKE_SPEECH, { ms: 300 });
-    await page.goto(`${BASE}/#/kino/bibliotheca?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&p=c03-p02`)}`, { waitUntil: 'domcontentloaded' });
-    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="bibliotheca"]', { timeout: 20000 })).contentFrame();
+    await page.goto(`${BASE}/#/bibliotheca/neo-classic?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&p=c03-p02`)}`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="neo-classic"]', { timeout: 20000 })).contentFrame();
     await frame.waitForSelector('#text p.para.current', { timeout: 20000 });
     await frame.click('#ar-toggle');
     await frame.click('#nar-play');

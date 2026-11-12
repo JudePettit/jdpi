@@ -1,18 +1,7 @@
 {
-  "generated": "2026-11-12T10:27:32.541Z",
-  "ok": false,
-  "problems": 2,
-  "failing": [
-    {
-      "name": "Economics Briefing",
-      "what": "econ/briefing/data/stories.json",
-      "detail": "44 h old, limit 15 h (briefings-refresh.yml)"
-    },
-    {
-      "name": "Scientific, Economics and Digital Briefings refresh",
-      "what": "briefings-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-12 08:42 UTC: https://github.com/JudePettit/jdpi/actions/runs/43185143777"
-    }
-  ],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/43200518977"
+  "generated": "2026-11-12T21:02:36.123Z",
+  "ok": true,
+  "problems": 0,
+  "failing": [],
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/43306224347"
 }

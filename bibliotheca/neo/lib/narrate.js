@@ -7,7 +7,8 @@
      - the spoken text is the paragraph's text without its footnote marks ("[12]"), white space collapsed (a verse's
        line breaks too); every character of it knows its place in the paragraph's own text (map), so a unit and a term
        can be compared directly;
-     - a sentence, as PRPVoice.sentences finds it, is one unit;
+     - a sentence, as PRPVoice.sentences finds it, is one unit (but a reference to a volume by its numeral, "(i. 23)",
+       which that rule takes for a sentence's end, is read on with the rest of its sentence);
      - short sentences that follow one another are one unit, as long as together they are at most 200 characters;
      - a sentence over 200 characters is cut at commas, semicolons and colons into the fewest pieces of at most 200
        characters, each piece filled as far as it goes; a piece with no such mark is cut at a space.
@@ -25,6 +26,9 @@ export const MAX_UNIT = 200;
 export const LECTURE = 0.92;
 export const SPEEDS = [0.8, 1, 1.15, 1.3, 1.5];
 const MARK = /\[\d{1,4}\]/g; // a footnote mark, as lib/text.js sets them small
+// a volume's numeral with its stop at the end of a piece, after a bracket or "vol." (and another numeral: "(iii. i."),
+// or a reference's own abbreviation ("(p.", "pp.", "chap.")
+const VOLUME = /(?:\(|\bvol\.\s)(?:[ivx]{1,4}\.\s)*[ivx]{1,4}\.$|\b(?:pp?|chap|cap|vol)\.$/;
 
 /** Whether the narrator reads a paragraph: running text and verse, not a note or a table of figures. */
 export const readable = p => !!p && (p.kind === 'para' || p.kind === 'verse' || !p.kind) && !isTable(p) && /\S/.test(p.text || '');
@@ -76,7 +80,12 @@ export function speakable(p) {
   for (const s of V.sentences(text)) {
     const i = text.indexOf(s, cursor);
     if (i < 0) continue; // cannot happen: sentences() returns slices of this very text
-    sents.push([i, i + s.length]); cursor = i + s.length;
+    // a reference to a volume by its numeral, "(i. 23)", "(iii. i. 374)", "vol. ii. 12", is no sentence's end: the piece
+    // that ends on the numeral's stop runs on into the page or the numeral after it
+    const last = sents.at(-1);
+    if (last && VOLUME.test(text.slice(last[0], last[1])) && /^(?:\d|[ivx]{1,4}\.(?:\s|$))/.test(s)) last[1] = i + s.length;
+    else sents.push([i, i + s.length]);
+    cursor = i + s.length;
   }
   let words = 0;
   const push = (s, e, say, part, asks) => {

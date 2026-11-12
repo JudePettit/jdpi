@@ -1416,3 +1416,31 @@ test('page: in Screens the new books show their pictures: the Marx film\'s scene
     }
   } finally { await browser.close(); }
 });
+
+// ---- The second shelf of 7 November 2026: three books read from scans alone, against a second scan.
+test('page: the scan-read books name their scans, their witnesses and, where a translator\'s death date was not found, say so', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    const errors = watch(page);
+    for (const [slug, id, witness, byline, rights] of [
+      ['origin-of-money', 'sim_economic-journal_march-december-1892_2_5-8', 'economicjournal00socigoog', /^Carl Menger \(1840–1921\), translated by Caroline A\. Foley \(edition of 1892\)$/, /Caroline Rhys Davids\), on 26 June 1942/],
+      ['karl-marx-and-the-close-of-his-system', 'karlmarxcloseofh0000euge', 'karlmarxandclos00macdgoog', /^Eugen von Böhm-Bawerk \(1851–1914\), translated by Alice M\. Macdonald \(edition of 1898\)$/, /death date of Alice M\. Macdonald not having been found after a reasonable search/],
+      ['natural-value', 'naturalvalue00wiesiala', 'naturalvalue00smargoog', /^Friedrich von Wieser \(1851–1926\), translated by Christian A\. Malloch \(edition of 1893\)$/, /death date of Christian A\. Malloch not having been found after a reasonable search/]]) {
+      await page.goto(`${BASE}/bibliotheca/neo/#book=${slug}&ch=1`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(s => document.querySelector('#shelf')?.value === s && document.querySelector('#text p.para'), slug, { timeout: 20000 });
+      const sources = await page.locator('#sources').innerText();
+      assert.match(sources, new RegExp(`Internet Archive ${id}`), `${slug}: the scan`);
+      assert.match(sources, new RegExp(`OCR of a second (?:copy|scan)[\\s\\S]*${witness}[\\s\\S]*No transcription is used`), `${slug}: the witness`);
+      assert.doesNotMatch(sources, /Econlib’s transcription/, `${slug}: no transcription`);
+      assert.match(sources, rights, `${slug}: the rights`);
+      assert.match(await page.locator('#byline').innerText(), byline, `${slug}: byline`);
+    }
+    assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK on a reasonable search/, 'the badge says what the finding rests on');
+    await page.goto(`${BASE}/bibliotheca/neo/#book=origin-of-money&ch=1`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelector('#shelf')?.value === 'origin-of-money' && document.querySelector('#text p.para'), null, { timeout: 20000 });
+    assert.match(await page.locator('#book-meta').innerText(), /9 sections/);
+    assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK(?! on)/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

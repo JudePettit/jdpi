@@ -13,7 +13,7 @@ import { stripBoilerplate, normalise, roman, sentenceCase, splitChapters } from 
 import { buildAliasIndex, tagText, tagBook, newStats, report, firstYear, fold, loadLake } from '../bibliotheca/scripts/tag-terms.mjs';
 import { SHELF, shelfEntry, checkRights, indexEntry, bookJson, BOOKS, INDEX, ROOT, MAX_BYTES, CACHE } from '../bibliotheca/scripts/shelf.mjs';
 import { bookRecord, splitWork, splitBook, titleCase, caseCounts, sourceFile, bookText } from '../bibliotheca/scripts/build-book.mjs';
-import { readEconlib, merge as mergeReadings, sourceOf, textWords, table as tableText } from '../bibliotheca/scripts/scan-text.mjs';
+import { readEconlib, merge as mergeReadings, sourceOf, textWords, table as tableText, renumber, straightQuotes, scribble, checkAgainst, witnessWords, shelfWords, joinBroken } from '../bibliotheca/scripts/scan-text.mjs';
 import { tidyAlias } from '../lake/scripts/aliases.mjs';
 import { wordCount } from '../kino/lib/text.js';
 
@@ -310,15 +310,24 @@ test('shelf: every book is public domain in the US and the UK by its dates, and 
     assert.match(e.slug, /^[a-z0-9-]+$/);
     const chapter = e.layout?.chapter instanceof RegExp ? e.layout.chapter : e.layout?.chapter?.heading;
     // Its source: a Project Gutenberg file, or (for a book Gutenberg lacks) an Internet Archive scan with the
-    // transcription its OCR is checked against, the scan's pages and the licence in words (scan-text.mjs).
+    // transcription its OCR is checked against, the scan's pages and the licence in words (scan-text.mjs); or, where
+    // no transcription is free to reuse, a scan read on its own against a second scan (`witness`, no `econlib`).
+    const reading = e.scan && (e.scan.econlib ? /^https:\/\/www\.econlib\.org\//.test(e.scan.econlib) && Number.isInteger(e.scan.files) : /^[\w.-]+$/.test(e.scan.witness || ''));
     const source = Number.isInteger(e.gutenberg) !== Boolean(e.scan)
-      && (!e.scan || (/^[\w.-]+$/.test(e.scan.id) && /^https:\/\/www\.econlib\.org\//.test(e.scan.econlib) && Number.isInteger(e.scan.files) && /^\d+-\d+(,\d+-\d+)*$/.test(e.scan.pages) && /public domain/.test(e.scan.licence)));
+      && (!e.scan || (/^[\w.-]+$/.test(e.scan.id) && reading && /^\d+-\d+(,\d+-\d+)*$/.test(e.scan.pages) && /public domain/.test(e.scan.licence)));
     assert.ok(e.title && e.author?.qid && source && chapter instanceof RegExp && Number.isInteger(e.work?.published) && e.era?.length === 2, `${e.slug} is complete`);
     // A reason for every person whose words the edition carries, and one for the publication; the finding in words
     // names each one's death and the edition's year, and the dates bear it out.
     const people = [e.author, e.translator, ...(e.editors || [])].filter(Boolean);
     assert.equal(checkRights(e).length, people.length + 1, `${e.slug}: a reason per term`);
-    for (const who of people) assert.ok(e.rights.basis.includes(who.died < 0 ? `${-who.died} BC` : String(who.died)), `${e.slug}: the basis gives ${who.name}’s death (${who.died})`);
+    // (a translator whose death date a reasonable search did not find: the basis names her and says so, and the record
+    // of the search is there: rights.unknown)
+    for (const who of people) {
+      if (who.died === null) {
+        assert.ok(e.rights.basis.includes(who.name) && /not found after a reasonable search/.test(e.rights.basis), `${e.slug}: the basis says ${who.name}’s death date was not found`);
+        assert.ok(e.rights.unknown.some(u => u.name === who.name && u.searched && u.checked === e.rights.checked && u.decision), `${e.slug}: the search for ${who.name} is recorded`);
+      } else assert.ok(e.rights.basis.includes(who.died < 0 ? `${-who.died} BC` : String(who.died)), `${e.slug}: the basis gives ${who.name}’s death (${who.died})`);
+    }
     assert.ok(e.rights.basis.includes(String(e.published)), `${e.slug}: the basis gives the edition’s year (${e.published})`);
     assert.match(e.rights.basis, /every work published before 1931 is in the public domain in the United States/, e.slug);
     assert.match(e.rights.checked, /^\d{4}-\d{2}-\d{2}$/);
@@ -377,6 +386,14 @@ const STATED = {
   // in notes, two of which go on after their table (a block "[n] …" again).
   'positive-theory-of-capital': { n: [0, 1, 2, ...range(101, 106), ...range(201, 206), ...range(301, 310), ...range(401, 407), ...range(501, 505), ...range(601, 610), ...range(701, 705), 800],
     books: 7, notes: 331, unmarked: 1, verse: 21, words: [167500, 169500] },
+  // The second shelf of 7 November 2026, read from scans alone. Menger's nine sections, Section VI's note on its title;
+  // Böhm-Bawerk's Preface and Introduction (0) and five chapters, Chapter III's two tables; Wieser's two prefaces and
+  // six books, Book III's nineteen chapters in three parts, Book V's last chapter with its note on its title, the
+  // tables of Book I, Chapter X and of Ricardo's rents (Book III, Chapters XIV and XV).
+  'origin-of-money': { n: range(1, 9), notes: 9, unmarked: 1, verse: 0, words: [6900, 7100] },
+  'karl-marx-and-the-close-of-his-system': { n: range(0, 5), notes: 54, verse: 2, words: [41300, 42300] },
+  'natural-value': { n: [0, 1, ...range(101, 111), ...range(201, 207), ...range(301, 319), ...range(401, 411), ...range(501, 513), ...range(601, 605)],
+    books: 6, notes: 69, unmarked: 1, verse: 7, words: [103400, 104500] },
 };
 
 test('built: the-prince.json follows the data contract', () => {
@@ -423,7 +440,8 @@ test('built: every book on the shelf follows the data contract, with the chapter
     assert.ok(checkRights(e).length > 1, at('the dates bear the finding out'));
     if (e.scan) {
       assert.deepEqual([book.edition.source, book.edition.id, book.edition.url], ['Internet Archive', e.scan.id, `https://archive.org/details/${e.scan.id}`], at('edition'));
-      assert.match(book.edition.licence, /OCR checked word by word against Econlib’s transcription.*public domain/, at('licence'));
+      if (e.scan.econlib) assert.match(book.edition.licence, /OCR checked word by word against Econlib’s transcription.*public domain/, at('licence'));
+      else assert.match(book.edition.licence, new RegExp(`OCR checked word by word against the OCR of a second (?:copy|scan).*archive\\.org/details/${e.scan.witness}.*No transcription is used.*public domain`), at('licence'));
     } else {
       assert.match(book.edition.licence, /header, footer and licence have been removed/, at('licence'));
       assert.equal(book.edition.url, `https://www.gutenberg.org/ebooks/${e.gutenberg}`, at('edition url'));
@@ -967,4 +985,161 @@ test('built: the reviews of the new books put right (rights records, slips, tabl
   for (const [form, qid] of [['Darwin', 'Q1035'], ['Herzen', 'Q201221'], ['Bakounine', 'Q27645']]) assert.ok(cm.some(t => t.form === form && t.qid === qid), `the Manifesto’s ${form}`);
   const grotius = (ci.match(/Grotius/g) || []).length;
   assert.equal(termsOf('capital-and-interest').filter(t => /Grotius/.test(t.form) && t.qid === 'Q154959').length, grotius, 'every Grotius is Hugo Grotius');
+});
+
+// ---- The second shelf of 7 November 2026: Menger's essay, Böhm-Bawerk's Karl Marx and the Close of His System and
+// Wieser's Natural Value, read from their scans alone (no transcription free to reuse), each against a second scan.
+test('shelf: a death date not found after a reasonable search passes only with the search recorded and said in the basis', () => {
+  const km = shelfEntry('karl-marx-and-the-close-of-his-system'), nv = shelfEntry('natural-value');
+  assert.deepEqual([km.translator, nv.translator], [{ name: 'Alice M. Macdonald', died: null }, { name: 'Christian A. Malloch', died: null }]);
+  assert.ok(checkRights(km, 2026).includes('Alice M. Macdonald: death date not found after a reasonable search (2026-11-07); treated as free by the decision of Vitruvian Manager’s editor of 7 November 2026 (“accept upon reasonable search”)'));
+  assert.throws(() => checkRights({ ...km, rights: { ...km.rights, unknown: [] } }), /Alice M\. Macdonald has no death year/);
+  assert.throws(() => checkRights({ ...km, rights: { ...km.rights, unknown: [{ ...km.rights.unknown[0], searched: '' }] } }), /needs what was searched, the day and the decision/);
+  assert.throws(() => checkRights({ ...nv, rights: { ...nv.rights, basis: nv.rights.basis.replace('not found after a reasonable search', 'unknown') } }), /must say that Christian A\. Malloch's death date was not found/);
+  // a death date not found is no licence for a later edition: the US test by the date still applies
+  assert.throws(() => checkRights({ ...km, published: 1950 }, 2026), /not before 1931/);
+  for (const e of [km, nv]) {
+    assert.match(e.rights.basis, /a judgement of risk, not a rule of law/);
+    assert.match(e.rights.basis, /Copyright and Related Rights Act 2000, s\.24/);
+    assert.match(e.rights.unknown[0].searched, /Library of Congress name authorities/);
+  }
+  assert.deepEqual(km.editors.map(x => [x.name, x.died]), [['James Bonar', 1941]]);
+  assert.deepEqual(nv.editors.map(x => [x.name, x.died]), [['William Smart', 1915]]);
+  assert.match(km.rights.basis, /18 January 1941/);
+  const om = shelfEntry('origin-of-money');
+  assert.deepEqual([om.author.died, om.translator.died, om.published], [1921, 1942, 1892]);
+  assert.match(om.rights.basis, /26 June 1942[\s\S]*31 December 2012/);
+});
+
+test('scan-text: notes numbered again after the fix list, straight quotation marks turned, scribbles and lost words', () => {
+  const opens = h => /^CHAPTER [IVX]+$/.test(h);
+  assert.equal(renumber(['CHAPTER I', 'A word.[3] Another.[*]', ' [3] The first.', ' [*] The second.', 'CHAPTER II', 'Text.[7]', ' [7] Its note.'].join('\n\n'), opens),
+    ['CHAPTER I', 'A word.[1] Another.[2]', ' [1] The first.', ' [2] The second.', 'CHAPTER II', 'Text.[1]', ' [1] Its note.'].join('\n\n'));
+  assert.equal(renumber(['CHAPTER I', ' [*] A note set before its paragraph.', 'Cited here.[*]'].join('\n\n'), opens), ['CHAPTER I', ' [1] A note set before its paragraph.', 'Cited here.[1]'].join('\n\n'),
+    'a note the fix list adds pairs with its mark wherever it stands');
+  assert.equal(straightQuotes('the " free gifts " of nature and the "satiation point" is reached'), 'the “free gifts” of nature and the “satiation point” is reached');
+  assert.equal(straightQuotes('the satiation scale " of every want'), 'the satiation scale “of every want', 'a lone mark opens when none is open');
+  assert.equal(straightQuotes('"cost." Thus'), '“cost.” Thus');
+  assert.ok(scribble('($,.. (X. (^-^QTvA-au-L^C <? tfV-aiyv^,.- *O-') && scribble('{ l^r^jCA L fc^r / c^^J- J -'));
+  assert.ok(!scribble('little valued, it is not because its ^usefulness is little, but because'), 'a line of the text with a sign misread');
+  assert.ok(!scribble('~7\\ to £400 ~ ~ 220 ,, ~ 440l'), 'a table’s row, its ditto marks read as tildes');
+  // the witness's words fill a hole inside a paragraph (with `fill`), never its running head
+  const tok = (s, blk = 0) => s.split(' ').map(t => ({ t, c: 96, p: 1, blk }));
+  const known = w => /^(?:the|law|applies|to|every|want|without|exception|and|it)\W*$/i.test(w);
+  const scan = tok('the law applies to exception');
+  checkAgainst(scan, witnessWords('the law applies to every want without\nexception'), known, [], { fill: true });
+  assert.equal(scan.map(x => x.t).join(' '), 'the law applies to every want without exception');
+  const head = tok('the law applies to exception');
+  checkAgainst(head, witnessWords('the law applies to 12 THE SCALES OF SATIATION exception'), known, [], { fill: true });
+  assert.equal(head.map(x => x.t).join(' '), 'the law applies to exception');
+  assert.deepEqual(witnessWords('one\n52 Karl Marx\ntwo', { drop: [/^\d+ Karl Marx$/] }).map(w => w.t), ['one', 'two']);
+});
+
+test('built: the second shelf carries its rights records and its chapters as the editions print them', () => {
+  const book = slug => shelfBooks.find(([e]) => e.slug === slug)[1];
+  const ch = (slug, n) => book(slug).chapters.find(c => c.n === n);
+  const all = slug => texts(book(slug)).map(p => p.text).join('\n');
+  for (const [slug, scan, witness] of [['origin-of-money', 'sim_economic-journal_march-december-1892_2_5-8', 'economicjournal00socigoog'],
+    ['karl-marx-and-the-close-of-his-system', 'karlmarxcloseofh0000euge', 'karlmarxandclos00macdgoog'], ['natural-value', 'naturalvalue00wiesiala', 'naturalvalue00smargoog']]) {
+    const b = book(slug);
+    assert.deepEqual([b.edition.source, b.edition.id, b.edition.url], ['Internet Archive', scan, `https://archive.org/details/${scan}`], slug);
+    assert.match(b.edition.licence, new RegExp(`archive\\.org/details/${witness}`), `${slug}: the witness named`);
+    assert.match(b.rights.basis, /every work published before 1931 is in the public domain in the United States/);
+    assert.match(b.rights.basis, /No transcription is used\.$/);
+    assert.equal(b.rights.checked, '2026-11-07');
+    assert.deepEqual(b.rights, shelfEntry(slug).rights);
+    // nothing of the OCR's or the printing's left: running heads, scribbles, misread signs
+    assert.ok(texts(b).every(p => !/[\^~{}\\|«»©¢$@]|THE ECONOMIC JOURNAL|ON THE ORIGIN OF MONEY \d|Error in the Marxian System \S|BOOK [ivx]+$|CHAP[.,] /.test(p.text)), `${slug}: no scanning rubbish`);
+    assert.ok(texts(b).every(p => !/(?<![\p{L}\p{N}])[£(]?[lI]\d|\d[lI]\d|\bseg\./u.test(p.text)), `${slug}: no figure misread`);
+  }
+  // Menger: nine sections, as printed; the Greek of notes 5 and 6.
+  assert.deepEqual(book('origin-of-money').chapters.map(c => c.title), ['Introduction', 'Attempts at solution hitherto', 'The problem of the genesis of a medium of exchange',
+    'Commodities as more or less saleable', 'Concerning the causes of the different degrees of saleableness in commodities', 'On the genesis of media of exchange',
+    'The process of differentiation between commodities which have become media of exchange and the rest', 'How the precious metals became money', 'Influence of the sovereign power']);
+  assert.match(ch('origin-of-money', 1).paragraphs[0].text, /^There is a phenomenon which has from of old and in a peculiar degree attracted the attention/);
+  assert.deepEqual(ch('origin-of-money', 9).paragraphs.slice(-2).map(p => p.text), ['KARL MENGER.', 'Translated by CAROLINE A. FOLEY, M.A.']);
+  assert.ok(all('origin-of-money').includes('the Greek ἀργύριον') && all('origin-of-money').includes('the Greek νόμισμα, &c.'));
+  assert.ok(all('origin-of-money').includes('my Grundsätze der Volkswirtschaftslehre, 1871, p. 255'));
+  assert.equal(ch('origin-of-money', 6).paragraphs[0].kind, 'note', 'Section VI’s note, on its title, opens it');
+  // Böhm-Bawerk: Bonar's preface and the introduction, five chapters, Chapter IV in sections; Chapter III's tables.
+  assert.deepEqual(book('karl-marx-and-the-close-of-his-system').chapters.map(c => c.title), ['Preface and introduction', 'The theory of value and surplus value',
+    'The theory of the average rate of profit and of the price of production', 'The question of the contradiction', 'The error in the Marxian system—Its origin and ramifications', 'Werner Sombart’s apology']);
+  const km0 = ch('karl-marx-and-the-close-of-his-system', 0).paragraphs.map(p => p.text);
+  assert.deepEqual([km0[0], km0.indexOf('Introduction') > 0, km0.includes('J. BONAR.'), km0.includes('January 13, 1898.')], ['Preface', true, true, true]);
+  assert.ok(km0.some(t => /^As an author Karl Marx was enviably fortunate\./.test(t)));
+  assert.match(ch('karl-marx-and-the-close-of-his-system', 5).paragraphs.at(-1).text, /a marvellous mental grasp, but—a house of cards\.$/);
+  assert.deepEqual(ch('karl-marx-and-the-close-of-his-system', 4).paragraphs.filter(p => /^SECTION /.test(p.text)).map(p => p.text), ['SECTION I', 'SECTION 2', 'SECTION 3']);
+  const tables = texts(book('karl-marx-and-the-close-of-his-system')).filter(p => p.kind === 'verse');
+  assert.deepEqual(tables.map(t => t.text.split('\n').at(-1).trim().split(/ {2,}/)), [['Total—', '30', '150s.', '1,500s.', '150s.', '300s.'], ['Total—', '30', '180s.', '1,500s.', '120s.', '300s.']]);
+  // Wieser: two prefaces, six books of 11, 7, 19, 11, 13 and 5 chapters, Book III's parts opening their first chapters.
+  const nv = book('natural-value');
+  assert.deepEqual(Object.values(Object.groupBy(nv.chapters.filter(c => c.part), c => c.part.n)).map(cs => cs.length), [11, 7, 19, 11, 13, 5]);
+  assert.deepEqual(nv.chapters.filter(c => c.part).map(c => c.part.title).filter((t, i, a) => a.indexOf(t) === i), ['The elementary theory of value', 'Exchange value and natural value',
+    'The natural imputation of the return from production', 'The natural value of land, capital, and labour', 'The natural cost value of products', 'Value in the economy of the state']);
+  assert.deepEqual([301, 314, 317].map(n => ch('natural-value', n).paragraphs[0].text), ['PART I. THE GENERAL PRINCIPLES OF IMPUTATION', 'PART II. NATURAL LAND RENT', 'PART III. THE NATURAL RETURN TO CAPITAL']);
+  assert.deepEqual([104, 306, 319, 513, 605].map(n => ch('natural-value', n).title), ['The scales of satiation', 'The principle of solution (continued). Contribution and co-operation',
+    'The imputation of gross return and of net return', 'The service of individual economic value in national economy', 'The fundamental law of collective valuation']);
+  assert.equal(ch('natural-value', 0).paragraphs.at(-1).text, 'GLASGOW, 1893.');
+  assert.equal(ch('natural-value', 1).paragraphs.at(-1).text, 'PRAG, September 1888.');
+  assert.match(ch('natural-value', 605).paragraphs.at(-1).text, /clearly outlined at every turn under its slight disguise\.$/);
+  // the words the pencilled pages of Book I, Chapter III lost, as the witness reads them; the R the OCR read as E
+  assert.ok(all('natural-value').includes('and also Walras, in an essay which appeared in the Journal des Economistes in 1885, have given somewhat detailed accounts of both book and author.'));
+  assert.ok(!/Eicardo|Kicardo|CHAPTEE|NATUEAL|Bbhm|Thiinen/.test(all('natural-value')));
+  assert.match(ch('natural-value', 110).paragraphs.find(p => p.kind === 'verse').text, /^When he has {4}1 {4}2 {4}3/);
+});
+
+// ---- The reviews of the second shelf (12 November 2026) put right: the witness rule, the OCR's slips, the quotation
+// marks, the tables, the titles and the rights wording.
+test('scan-text: a word the scan reads as a word stands against the witness with trustScan; the shelf’s forms are the shelf’s alone in one process', () => {
+  const tok = (s, c = 30) => s.split(' ').map(t => ({ t, c, p: 1, blk: 0 }));
+  const known = w => /^(?:in|so|far|fat|as|will|satisfy)\W*$/i.test(w);
+  const a = tok('in so far as will satisfy'), b = tok('in so far as will satisfy');
+  checkAgainst(a, witnessWords('in so fat as will satisfy'), known, []);
+  checkAgainst(b, witnessWords('in so fat as will satisfy'), known, [], { trustScan: true });
+  assert.equal(a.map(x => x.t).join(' '), 'in so fat as will satisfy', 'without it, a low-confidence word goes to the witness');
+  assert.equal(b.map(x => x.t).join(' '), 'in so far as will satisfy', 'with it, the scan’s word stands');
+  assert.equal(shelfEntry('natural-value').scan.trustScan, true);
+  // (Böhm-Bawerk's "ill-written" is his book's alone: read after another book, the shelf's words must not count it)
+  shelfWords('karl-marx-and-the-close-of-his-system');
+  const alone = joinBroken('ill-', 'written');
+  shelfWords('origin-of-money');
+  shelfWords('karl-marx-and-the-close-of-his-system');
+  assert.equal(joinBroken('ill-', 'written'), alone);
+  assert.equal(alone, 'illwritten');
+});
+
+test('built: the second shelf’s reviews put right (the witness rule, the OCR’s slips, quotation marks, tables, titles, rights wording)', () => {
+  const book = slug => shelfBooks.find(([e]) => e.slug === slug)[1];
+  const all = slug => texts(book(slug)).map(p => p.text).join('\n');
+  const nv = all('natural-value'), km = all('karl-marx-and-the-close-of-his-system'), om = all('origin-of-money');
+  // Natural Value: words the scan read right, which the witness's OCR had wrong, as printed
+  for (const s of ['in so far as will satisfy', 'stated drily that I intended to abstain', 'he cannot resist a gibe', 'comes not only off the last good', 'Book VI, on the place',
+    'possessions otherwise acquired', 'the art of division of return', 'A 3 % capital and a 6 % capital']) assert.ok(nv.includes(s), `natural-value: "${s}"`);
+  // and none of the OCR's per cent signs, stray stops, loose hyphens or misread abbreviations
+  for (const re of [/°\/[Qo]/, /(?<= )\.(?=\p{Ll})/u, /\p{L} - \p{Ll}|\p{L}- \p{Ll}/u, /\bchap, [xvil]/, /\b(?:u-nits|riot having|longas|rdle|versd|Stoat)\b/, /goods l\[/, /ol w national/])
+    assert.doesNotMatch(nv, re, `natural-value: ${re}`);
+  const title = (slug, n) => book(slug).chapters.find(c => c.n === n).title;
+  assert.equal(title('natural-value', 316), 'Criticism of Ricardo’s theory');
+  assert.equal(title('natural-value', 402), 'The value of capital and the interest on capital. I. Discounting');
+  assert.equal(titleCase("CRITICISM OF RICARDO'S THEORY", new Map([['ricardo’s', { upper: 4, lower: 0 }]])), 'Criticism of Ricardo\'s theory', 'a word looked up with either apostrophe');
+  // Karl Marx and the Close of His System: the slips both scans share, and the quotation marks paired
+  for (const re of [/\b(?:asa|isa|atime|ove|versd|ageregate|homceopathic|chonomischen|Okonomischen|aren)\b/, /\p{L}\/\p{L}|\/shis/u, /\.-\s/, /-’ /, /\(ie 2\)|\(iu\./, /Engl Transl|01893/,
+    /‘[^“”‘’\n]{1,200}”/, /“[^“”‘’\n]{1,200}’(?!\p{L})/u]) assert.doesNotMatch(km, re, `karl-marx: ${re}`);
+  for (const s of ['Marx as a thinker', 'in order “to come upon the track of value” (i. 23)', 'time and place.’” Exchange value', 'For any one combination of colours', 'the “General Sections” of a book',
+    'In order to “get on the track” of value', 'claims for this idea the name', 'genre ennuyeux.” I allow', 'Engl. Transl. 1893, pp. 60 seq.)']) assert.ok(km.includes(s), `karl-marx: "${s}"`);
+  // Chapter II's two tables of Marx's five capitals are not reproduced: a note in brackets stands in each one's place
+  const c2 = book('karl-marx-and-the-close-of-his-system').chapters.find(c => c.n === 2).paragraphs.map(p => p.text);
+  const at = re => c2.findIndex(t => re.test(t));
+  assert.equal(at(/^\[Table not reproduced: Marx’s table of the five capitals I\.–V\. \(iii\. 132\)/), at(/^We see that this table shows/) - 1);
+  assert.equal(at(/^\[Table not reproduced: Marx’s second table of the five capitals I\.–V\. \(iii\. 135\)/), at(/^“Taken together,” comments Marx/) - 1);
+  assert.match(book('karl-marx-and-the-close-of-his-system').edition.licence, /Chapter II’s two tables of Marx’s five capitals \(iii\. 132, 135\) are not reproduced/);
+  // Menger: the dash that closes "respects—personally …"
+  assert.ok(om.includes('quantitatively, spatially, and temporally—as the precious metals'));
+  // the rights wording: the sources line says no more than the rights line; everyone who helped with Macdonald's translation
+  for (const slug of ['karl-marx-and-the-close-of-his-system', 'natural-value']) {
+    assert.match(book(slug).edition.licence, /the edition is in the public domain in the United States and is treated as free in Ireland \(rights below\)\.$/, slug);
+    assert.doesNotMatch(book(slug).edition.licence, /and the edition is in the public domain\./, slug);
+  }
+  assert.match(book('origin-of-money').edition.licence, /the article is in the public domain\.$/);
+  assert.match(book('karl-marx-and-the-close-of-his-system').rights.basis, /names Alice M\. Macdonald alone as translator[\s\S]*Miss Louise Markup “for help in translation”[\s\S]*not treated as an author of the translation[\s\S]*Wieser died in 1926/);
 });

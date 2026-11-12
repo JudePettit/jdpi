@@ -16,13 +16,14 @@
 //   bibliotheca/data/books/<slug>.json = {
 //     slug, title,
 //     author: { name, qid, born, died },
-//     translator: { name, died } | null,
+//     translator: { name, died } | null,        died null: the death date was not found (rights.unknown says so)
 //     editors?: [ { name, died, role } ],      others whose words the edition carries (an editor's notes, a preface)
 //     set?: { slug, title, volume, volumes },  one volume of a work the shelf has in several (The Decline and Fall)
 //     work: { qid, written, published },      the work itself (published is the year the era rule uses)
 //     era: [from, to],                          the years the book is about, for the screens that take a period
 //     edition: { source, id, url, published, licence },
-//     rights: { us, uk, basis, checked },
+//     rights: { us, uk, basis, checked, unknown? },  unknown: [{ name, searched, checked, decision }], a person whose
+//                                               death date a reasonable search did not find (shelf.mjs, checkRights)
 //     generated,
 //     chapters: [ { n, heading, title, part?, words, paragraphs: [ { id, kind, note?, text, terms: [ { s, e, qid, label } ] } ] } ]
 //   }
@@ -184,7 +185,10 @@ export function titleCase(title, counts, { lower = [], proper = [] } = {}) {
   const t = String(title).replace(/\s+/g, ' ').trim();
   const caps = inCapitals(t);
   const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-  const seen = k => { const c = counts.get(k); return c && (c.upper || c.lower) ? c : null; };
+  // (a word with an apostrophe is looked up with either form of it: a title in capitals may have the straight one, the
+  // text the curled, "RICARDO'S" and "Ricardo’s")
+  const seen = k => { const c = counts.get(k) || (/['’]/.test(k) ? counts.get(k.replace(/'/g, '’')) || counts.get(k.replace(/’/g, "'")) : null); return c && (c.upper || c.lower) ? c : null; };
+  const apos = s => s.replace(/'/g, '’');
   let start = true;
   const out = []; // the words as set, with where they stand in the title, for the regnal rule
   return t.replace(/(\p{L}[\p{L}’'-]*)|(—)/gu, (m, w, dash, at) => {
@@ -192,12 +196,14 @@ export function titleCase(title, counts, { lower = [], proper = [] } = {}) {
     const word = set => { out.push({ w: set, at, end: at + w.length }); return set; };
     // In a title in capitals a full stop between two phrases begins the second ("The value of productive goods. Value
     // and costs").
-    const k = w.toLowerCase(), first = start || (caps && /\p{L}\. $/u.test(t.slice(Math.max(0, at - 3), at)));
-    // An item's numeral ("—II. Factions of the circus") leaves the item's first word to begin it.
-    const numeral = !caps && w === w.toUpperCase() && ROMAN.test(w);
+    // (after a bracket's close too: Wieser's "THE COST THEORIES (CONTINUED). LABOUR AS AN ELEMENT IN COST")
+    const k = w.toLowerCase(), first = start || (caps && /[\p{L})]\. $/u.test(t.slice(Math.max(0, at - 3), at)));
+    // An item's numeral ("—II. Factions of the circus") leaves the item's first word to begin it; in a title in
+    // capitals, one that opens a phrase and has its stop ("(CONTINUED). II. DEMAND", "(CONTINUED). IV.—CHANGE").
+    const numeral = (!caps || (first && t[at + w.length] === '.')) && w === w.toUpperCase() && ROMAN.test(w);
     start = first && numeral && t[at + w.length] === '.';
     if (numeral && (w.length > 1 || first)) return word(w); // "Valentinian II", "—I. The empress Theodora"
-    const pr = proper.find(p => p.toLowerCase() === k); // as given, a hyphened name too ("Say-Hermann")
+    const pr = proper.find(p => apos(p.toLowerCase()) === apos(k)); // as given, a hyphened name too ("Say-Hermann")
     if (pr) return word(pr);
     if (lower.includes(k)) return word(k);
     if (first && /^\p{Lu}/u.test(w)) return word(cap(w)); // not Darwin's "DISTRIBUTION—_continued_", lower case in italics

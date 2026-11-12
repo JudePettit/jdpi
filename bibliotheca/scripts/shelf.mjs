@@ -916,6 +916,552 @@ export const SHELF = [
     // Socialism" is).
     decisions: { ...untag('degree of capitalism', 'degrees of capitalism', 'joint capitalism', 'degrees of “Capitalism') },
   }),
+  /* Carl Menger's essay on the origin of money, written for The Economic Journal and published there in Caroline A.
+     Foley's translation (vol. 2, no. 6, June 1892, pp. 239–255), signed "Karl Menger". No transcription of it is free to
+     reuse (JSTOR's, the Mises Institute's and the Online Library of Liberty's carry their sites' terms), so the text is the
+     scan's own OCR (scan-text.mjs, `scan` with no `econlib`): the Internet Archive's microfilm of the journal's second
+     volume, its images 244–260 the article's seventeen pages, read against a second copy (Google's scan of the volume,
+     whose OCR of the article's first page is torn and of the rest good), which puts the scan's misreadings right and is
+     used for nothing else. The running heads ("240 THE ECONOMIC JOURNAL", "ON THE ORIGIN OF MONEY 241") and the issue's
+     signature line ("No. 6.—VOL. II.") go. */
+  {
+    slug: 'origin-of-money',
+    title: 'On the Origin of Money',
+    author: { name: 'Carl Menger', qid: 'Q84177', born: 1840, died: 1921 },
+    // Caroline Augusta Foley, later Rhys Davids (27 September 1857 – 26 June 1942: Wikidata Q622047, Who Was Who).
+    translator: { name: 'Caroline A. Foley', died: 1942 },
+    // The work: written for the journal and first printed there, in English. Its era runs from Menger's Grundsätze
+    // (1871), whose chapter on money the essay cites, to the essay.
+    work: { qid: null, written: 1892, published: 1892 },
+    era: [1871, 1892],
+    published: 1892,
+    edition: 'Caroline A. Foley’s translation, The Economic Journal, vol. 2, no. 6 (June 1892), pp. 239–255',
+    scan: {
+      id: 'sim_economic-journal_march-december-1892_2_5-8', pages: '244-260', witness: 'economicjournal00socigoog',
+      witnessFrom: 'OX  THE  Oiil-rl', witnessTo: 'Translated  by  Caroline  A.  Foley,  M.A.',
+      furniture: [/^(?:\d{3} )?THE ECONOMIC JOURNAL(?: \d{3})?$/, /^ON THE ORIGIN OF MONEY \S{2,3}$/, /^No\. 6\.—VO[LU]\. [IV1l]+/i],
+      // the OCR's readings of the sections' numerals ("[.—", "IT.—", "ILL.", "LV.")
+      restart: /^[[IVXLT]{1,5}\.(?:—| )/,
+      // Section VI's note is on its heading
+      marks: { 252: ['h:EXCHANGE:.\''] },
+      // The OCR's slips that the witness did not put right (the two misread a word differently, or the scan's reading is a
+      // word too), each read again in both scans: the sections' numerals and two headings' letters; the list items of
+      // Section V that the OCR took for headings (set in capitals); the Greek of notes 5 and 6, which the OCR read as
+      // Latin letters (both scans: "dapyvpiov", "iipyvpiov"; "véuioua", "vS/xiafia"); "i.e." and "e.g." read "¢.e."
+      // and "¢.¢."; and the German and French titles' accents.
+      fix: [['[.—INTRODUCTION.', 'I.—INTRODUCTION.'], ['IT.—ATRREMPRS AT SOLUTION', 'II.—ATTEMPTS AT SOLUTION'], ['ILL. THR PROBLEM', 'III. THE PROBLEM'],
+        ['LV. COMMODITIES', 'IV. COMMODITIES'], ['DEGREES OF”\n\nSALEABLENESS', 'DEGREES OF\nSALEABLENESS'], ['MEDIA OF EXCHANGE:.', 'MEDIA OF EXCHANGE.'],
+        ['VII. Tuer Process oF DIFFERENTIATION', 'VII. THE PROCESS OF DIFFERENTIATION'], ['THE PRECTIOUS METALS', 'THE PRECIOUS METALS'],
+        ['3. THE COST OF PRESERVING AND STORING THEM.', '3. The cost of preserving and storing them.'], ['4. The rate of interest.:', '4. The rate of interest.'],
+        ['5. THE PERIODICITY OF A MARKET FOR THE SAME.', '5. The periodicity of a market for the same.'], ['of timebargains', 'of time-bargains'],
+        ['togethe1 subsequently', 'together subsequently'], ['thinker lke Savigny', 'thinker like Savigny'], ['to what. still obtains', 'to what still obtains'],
+        ['much less-testifying', 'much less testifying'], ['my Grundsdtze der', 'my Grundsätze der'], ['Les Progrés de la', 'Les Progrès de la'],
+        ['at what hes first', 'at what lies first'], ['saleabieness (Absatzfihigkeit)', 'saleableness (Absatzfähigkeit)'], ['economic lfe—namely', 'economic life—namely'],
+        ['and im a given market', 'and in a given market'], ['does not le within', 'does not lie within'], ['of cloth ‘or silk-stuffs', 'of cloth or silk-stuffs'],
+        ['consulting the, greater', 'consulting the greater'], ['only finda sale', 'only find a sale'], ['depends. upon', 'depends upon'],
+        ['durability, ¢.e. their', 'durability, i.e. their'], ['markets, ¢.i.e. within', 'markets, i.e. within'], ['for, ¢.i.e. has already', 'for, i.e. has already'],
+        ['Consider, ¢.¢., the owner', 'Consider, e.g., the owner'], ['at any time, 7.¢. at any', 'at any time, i.e. at any'],
+        ['the Handwirterbuch der', 'the Handwörterbuch der'], ['the Greek dapyvpiov,', 'the Greek ἀργύριον,'], ['argent, &e.', 'argent, &c.'],
+        ['the Greek véuioua, Ke.', 'the Greek νόμισμα, &c.'], ['things of whreh he', 'things of which he'], ['my Grundsétze der', 'my Grundsätze der'],
+        ['practical life, Inasmuch', 'practical life, inasmuch'], ['to market,.the more', 'to market, the more'], ['wants at.a market', 'wants at a market'],
+        ['in return foi money', 'in return for money'], ['discernment cf the', 'discernment of the'], ['of traffic— goods', 'of traffic—goods'],
+        ['reason of them costliness', 'reason of their costliness'], ['must im the first', 'must in the first'], ['a state-Imstitution.', 'a state-institution.'],
+        ['at ecomomic prices', 'at economic prices'], ['CAROLINE A. Foury, M.A.', 'CAROLINE A. FOLEY, M.A.'],
+        // the dash that closes "respects—personally …", lost at a line's end in the scan, which the witness reads
+        // ("temporally — as the precious metals"). (Note 8's "the Polish pienondze" stands as the scan reads it; the
+        // witness reads "pieiumdzCy", and the printed form wants the page image.)
+        ['and temporally as the precious metals', 'and temporally—as the precious metals']],
+      licence: 'Internet Archive scan sim_economic-journal_march-december-1892_2_5-8, the Internet Archive’s microfilm of The Economic Journal, vol. 2 '
+        + '(London: Macmillan, 1892), pp. 239–255, its OCR checked word by word against the OCR of a second copy of the volume '
+        + '(archive.org/details/economicjournal00socigoog, scanned by Google). No transcription is used. The words are the journal’s, '
+        + 'and the article is in the public domain.',
+    },
+    rights: {
+      us: 'pd', uk: 'pd',
+      basis: 'Carl Menger died on 26 February 1921 and the translator, Caroline A. Foley (later Caroline Rhys Davids), on 26 June 1942 '
+        + '(Wikidata Q84177 and Q622047; Who Was Who), so the last term in Ireland and the UK (life plus 70 years: Copyright and Related '
+        + 'Rights Act 2000, s.24; CDPA s.12) ended on 31 December 2012. Her translation was published in The Economic Journal, vol. 2, '
+        + 'no. 6, in June 1892, and every work published before 1931 is in the public domain in the United States. The text is from the '
+        + 'Internet Archive’s microfilm of the journal’s second volume (archive.org/details/sim_economic-journal_march-december-1892_2_5-8), '
+        + 'read against a second copy (archive.org/details/economicjournal00socigoog, scanned by Google, whose front page asks for '
+        + 'non-commercial use and attribution: requests, not a licence; it is used only to check the OCR). No transcription is used.',
+      checked: '2026-11-07',
+    },
+    // Nine sections, numbered "I.—Introduction.", "II.—Attempts at Solution hitherto.", then "III. The Problem …" (the
+    // dash only in the first two, as printed), called sections; the signature and the translator's line close
+    // Section IX, as printed. The article's title goes (`start`).
+    layout: {
+      start: /^I\.—/,
+      chapter: { heading: /^([IVX]+)\.(?:—|\s)\s*(.+)$/, title: 'line', count: 9, label: 'Section' },
+      notes: 'bracket', verse: false, tables: 'rows',
+    },
+    // Tagging decisions (see the Prince's for the form).
+    decisions: {
+      ...untag(...LATER_STATES),
+      Menger: 'Q84177', Smith: 'Q9381',
+    },
+  },
+  /* Böhm-Bawerk's Zum Abschluss des Marxschen Systems (1896), his essay on the third volume of Marx's Capital, in Alice M.
+     Macdonald's translation (London: T. Fisher Unwin, 1898) with James Bonar's preface. The only transcriptions (the
+     Online Library of Liberty's, the Mises Institute's) carry their sites' own terms, so the text is the scan's own OCR
+     (scan-text.mjs, `scan` with no `econlib`): the Internet Archive's scan of a copy of the London edition, read against a
+     second copy (the University of Michigan's, scanned by Google), which puts the scan's misreadings right and is used for
+     nothing else. The 1949 and 1966 New York reprints, which add Paul Sweezy's introduction and Hilferding's reply, are
+     not used. The translator's death date was not found (rights below). */
+  {
+    slug: 'karl-marx-and-the-close-of-his-system',
+    title: 'Karl Marx and the Close of His System',
+    author: { name: 'Eugen von Böhm-Bawerk', qid: 'Q311535', born: 1851, died: 1914 },
+    // She signs as "Mrs. Murray Macdonald" in Bonar's preface; no death date was found (rights.unknown).
+    translator: { name: 'Alice M. Macdonald', died: null },
+    editors: [{ name: 'James Bonar', died: 1941, role: 'preface (13 January 1898)' }],
+    // The work: written for the essays in honour of Karl Knies (Staatswissenschaftliche Arbeiten: Festgaben für Karl
+    // Knies, Berlin, 1896). Its era runs from the first volume of Capital (1867) to the essay.
+    work: { qid: null, written: 1896, published: 1896 },
+    era: [1867, 1896],
+    published: 1898,
+    edition: 'Alice M. Macdonald’s translation, with a preface by James Bonar (London: T. Fisher Unwin, 1898)',
+    scan: {
+      // its notes are set close to the text's size: a line under 50 (the OCR's x_size) is a note's
+      id: 'karlmarxcloseofh0000euge', pages: '9-21,25-225', witness: 'karlmarxandclos00macdgoog', cut: 50,
+      witnessFrom: 'PREFACE', witnessTo: 'but no abiding future.',
+      // the witness's running heads and page numbers (its copy ends three pages short, at "no abiding future.")
+      witnessDrop: [/^[|\d\s.:a]*Kar[l!1]\]? Marx$/, /^[|_\s]*(?:Preface|Introduction|Theory of Value|Average Rate of Profit|The Question of the Contradiction|Error in the Marxian System|Werner Sombart.?s A ?pology)\s+\S{1,4}$/,
+        /^\d{1,3}\s+(?:Preface|Introduction)$/, /^[|\s]*\d{1,3}\s*[.|]*$/],
+      // the pages where the OCR lost a note's mark, or read a sign of the text as one ("alas!"): the tokens that carry the marks
+      marks: { 34: ['23)!', 'market.'], 41: ['2?!'], 169: ['them.!', '2'], 175: ['!', 'conditions.2'], 219: ['complementary?’’!)'] },
+      // The OCR's slips that the witness did not put right, each read again in both scans (the comments in the list say which)
+      fix: [
+        // the openings: a drop capital the OCR read as another letter, its line set apart; the chapters' titles a block of
+        // their own
+        ['“T*HE work here translated was one of a\n\nseries of', '“The work here translated was one of a series of'],
+        ['Fanuary 13, 1898.', 'January 13, 1898.'],
+        ['INTRODUCTION\n\njs an author Karl Marx was enviably fortu-\n\nnate. ', 'INTRODUCTION\n\nAs an author Karl Marx was enviably fortunate. '],
+        ['\n\n9\n\nCHAPTER I\n\nTHE THEORY OF VALUE AND SURPLUS\n\nVALUE\n\ni Siae pillars of the system of Marx are his\n\nconception', '\n\nCHAPTER I\nTHE THEORY OF VALUE AND SURPLUS VALUE\n\nThe pillars of the system of Marx are his conception'],
+        ['CHAPTER <I\n\nTHE THEORY OF THE AVERAGE RATE OF PROFIT AND OF THE PRICE OF PRO- DUCTION.\n\nHAT result is as follows. The “organic\n\ncomposition”',
+          'CHAPTER II\nTHE THEORY OF THE AVERAGE RATE OF PROFIT AND OF THE PRICE OF PRODUCTION.\n\nThat result is as follows. The “organic composition”'],
+        ['CHAPTER III\n\nTHE QUESTION OF THE CONTRADICTION ANY years ago, long before the above-\n\nmentioned', 'CHAPTER III\nTHE QUESTION OF THE CONTRADICTION\n\nMany years ago, long before the above-mentioned'],
+        ['CHAPTER LY.\n\nTHE ERROR IN THE MARXIAN SYSTEM—\n\nITS ORIGIN AND RAMIFICATIONS\nSECTION I\n\nHe evidence that an author has contra-\n\ndicted',
+          'CHAPTER IV\nTHE ERROR IN THE MARXIAN SYSTEM—ITS ORIGIN AND RAMIFICATIONS\n\nSECTION I\n\nThe evidence that an author has contradicted'],
+        ['WERNER SOMBART’S APOLOGY\n\nre apologist of Marx, as intelligent as he is\n\nardent,', 'WERNER SOMBART’S APOLOGY\n\nThe apologist of Marx, as intelligent as he is ardent,'],
+        ['SEECOND ARGUMENT.', 'SECOND ARGUMENT.'], ['FOURTTH ARGUMENT.', 'FOURTH ARGUMENT.'],
+        // a paragraph that opens a page with no indent, run into the one before
+        ['as such exchange for each other.[4] In many places', 'as such exchange for each other.[4]\n\nIn many places'],
+        // the OCR's quotation marks: a double one read as two or three ("‘“‘average”", "variable capital”’")
+        [/‘“‘/, '“', 13], [/“‘/, '“', 29], [/‘“/, '“', 12], [/’”’/, '”', 4], [/”’/, '”', 45],
+        // the references: "seq." read "seg.", the volumes' numerals read with figures and other strokes, "p." with a hyphen
+        ['seg.s Schmidt', 'seq.; Schmidt'], ['seg.5 finally', 'seq.; finally'], [/(?<=\s)seg(?=[.,;)\s-]|$)/, 'seq', 25],['seqg.3 English', 'seq.; English'],
+        [/\((?:111|iil|ili|ill|itl)\./, '(iii.', 17], [' ili. (1892)', ' iii. (1892)'], ['(1. ', '(i. ', 3], ['(Gi. 142):', '(i. 142).'], ['(it. 133-4)', '(iii. 133-4)'],
+        ['by ui. the first section', 'by iii. the first section'], [' p- ', ' p. ', 2], [' P- 590', ' p. 590'], [' pp- 211', ' pp. 211'],
+        // the Preface and the Introduction's notes
+        ['Wendell Holmes: “JT was just', 'Wendell Holmes: “I was just'], ['among illwritten manuscripts', 'among ill-written manuscripts'],
+        ['(compare Marx Mills. 374, and: 1. Ist 31,9, s2tit040 amas himself', '(compare Marx iii. i. 374, and i. 1st 313, 2nd 340). Marx himself'],
+        ['cf. 426, Ist ed. 376', 'cf. 426, 1st ed. 376'], ['i., ist edition', 'i., 1st edition'],
+        ['Nor-has the fact', 'Nor has the fact'], ['Lexis, Fahrbicher fir Nationalokonomie', 'Lexis, Jahrbücher für Nationalökonomie'],
+        ['Tébinger Zeitschrift', 'Tübinger Zeitschrift'], ['Loria in the Fahrbicher fur Nationalokonomie', 'Loria in the Jahrbücher für Nationalökonomie'],
+        ['Das Ratsel der', 'Das Rätsel der'], ['Fahrb. f. Nationalok., third', 'Jahrb. f. Nationalök., third', 1], ['Fahrb. f. Nationalck., third', 'Jahrb. f. Nationalök., third'],
+        ['Newe Zeit, 1892-3', 'Neue Zeit, 1892-3'], ['(Karl Marx’ Nationalokonomische Irrlehren', '(Karl Marx’ Nationalökonomische Irrlehren'],
+        ['Dopera postuma ai Carlo Marx, Nuova Antologia, February)1, 1895, pp.’ 20, 225,23:', 'L’opera postuma di Carlo Marx, Nuova Antologia, February 1, 1895, pp. 20, 22, 23.'],
+        ['a mvystification.”', 'a mystification.”'], ['(labdicazione pit esplicita', '(l’abdicazione più esplicita'],
+        // Chapter I
+        ['Kritik der Kapitalzinstheoricen', 'Kritik der Kapitalzinstheorieen'], ['as Marx calls it?![', 'as Marx calls it?['],
+        ['benefit (exp/oité),', 'benefit (exploité),'], ['benefit (explate) .i. 207 seq.). If, .for instance,~the | working', 'benefit (exploité) (i. 207 seq.). If, for instance, the working'],
+        ['“surplus value” | without', '“surplus value” without'], ['reckoned at 1OOF,:', 'reckoned at 100%.'],
+        ['with equimarents (sec 1,150,183). It is true that. in', 'with equivalents” (see i. 150, 183). It is true that in'], ['exchange of commoities’ (i. 142).', 'exchange of commodities” (i. 142).'],
+        ['Volkswirtschaft, Tubingen, 1887', 'Volkswirtschaft, Tübingen, 1887'],
+        // Chapter II: the figures of the text; Marx's two tables of the five capitals (iii. 132, 135) are printed with their
+        // headings set sideways, which neither OCR reads, and the rows of the second table are read only in part: they are left
+        // out, and a note in brackets (the shelf's, as Gutenberg's "[Illustration]") says so where each stands
+        [/\n\nEE\n\nCapitals\. Fo ea[^]*?(?=\n\nWe see that this table)/, '\n\n[Table not reproduced: Marx’s table of the five capitals I.–V. (iii. 132); its column headings are printed sideways, and neither scan’s OCR reads them.]'],
+        [/\n\n; 4 Ze\n\nA ONL[^]*?\| \+17(?=\n\n“Taken together)/, '\n\n[Table not reproduced: Marx’s second table of the five capitals I.–V. (iii. 135), with the cost price of each; its column headings are printed sideways, and neither scan’s OCR reads them or all its rows.]'],
+        ['produced = 1103 and', 'produced = 110; and'], ['produced=610.', 'produced = 610.'], ['of which J. to V. form', 'of which I. to V. form'], ['the cardingroom,', 'the carding-room,'],
+        ['would be 500=390 C+ 110 V, or 78% C+ 22% V.', 'would be 500 = 390 C + 110 V, or 78% C + 22% V.'], ['as being + of the aggregate', 'as being ⅕ of the aggregate'],
+        ['equal to V+ used-up C.', 'equal to V + used-up C.'], ['is= 500;', 'is = 500;'], ['and 8418 under', 'and 8 + 18 under'], ['2+7+17=26 over', '2 + 7 + 17 = 26 over'],
+        ['(iii. 1§1, 152)', '(iii. 151, 152)'], ['time—z.e., an', 'time—i.e., an'], [/(?<=[ ,])7\.e\.,/, 'i.e.,', 3],
+        // Chapter III
+        ['‘Tt is, however,', '“It is, however,'], ['1 |b. of gold', '1 lb. of gold'], ['of iron saken together', 'of iron taken together'],
+        ['price—4o,o01 |bs.—corresponds', 'price—40,001 lbs.—corresponds'], ['(iii. 136; 1515) Teg,eage, 176).', '(iii. 136, 151, 159, 175, 176).'],
+        ['but Aistorically prior', 'but historically prior'], ['contrary to all Pee tacten ol experience. It is true-that. as', 'contrary to all the facts of experience. It is true that as'],
+        [' JII. 175 seq.', ' III. 175 seq.'], [' TII. 169. See also above.', ' III. 169. See also above.'], ['Ido not think', 'I do not think'], ['145, 184, 191= Jeg, “197! seq. meas and often', '145, 184, 191 seq., 197 seq., and often'],
+        ['production was ro shillings', 'production was 10 shillings'],
+        ['particular pricedeterminant—which', 'particular price-determinant—which'],
+        // the two tables of A, B and C, as both scans read them (the OCR's 8 for the s of shillings put right), their
+        // headings of two lines each in one
+        ['illustrates this assumption: —-', 'illustrates this assumption:—'],
+        [/:    Expended\.    Capital \|Average pro-\| Production[^]*?Total— 30 1508\. 1,500s\. 150s, 30038\./,
+          'Commodity.    Expended Time.    Wages.    Capital Employed.    Average profit accruing.    Production price.\nA             10                50s.      500s.                50s.                        100s.\nB             6                 30s.      700s.                70s.                        100s.\nC             14                70s.      300s.                30s.                        100s.\nTotal—        30                150s.     1,500s.              150s.                       300s.'],
+        [/Expended\.    Capital Average pro-\} Production[^]*?Total— 30 180s\. 1,500s\. 120s\. 300s\./,
+          'Commodity.    Expended Time.    Wages.    Capital employed.    Average profit accruing.    Production price.\nA             10                60s.      500s.                40s.                        100s.\nB             6                 36s.      700s.                56s.                        92s.\nC             14                84s.      300s.                24s.                        108s.\nTotal—        30                180s.     1,500s.              120s.                       300s.'], ['in the Tubinger Zeitschrift', 'in the Tübinger Zeitschrift'],
+        // Chapter IV
+        ['in self-contra-diction', 'in self-contradiction'], ['let it be-noticed', 'let it be noticed'], ['(See Das Ge/d, Berlin', '(See Das Geld, Berlin'],
+        ['Kritik, Tiibingen, 1887', 'Kritik, Tübingen, 1887'], ['just as well:-have chosen?.an example', 'just as well have chosen an example'],
+        ['be disregarded”»—these', 'be disregarded”—these'], ['position of “competttion i in the system', 'position of “competition” in the system'],
+        ['given by tra- _ dition.”', 'given by tradition.”'], ['these pro- _ portions', 'these proportions'],
+        ['(iii. 155 in connection with il.) 17 5 Séq.):', '(iii. 155 in connection with iii. 175 seq.).'],
+        // Chapter V
+        ['refuge left—+the thought', 'refuge left—the thought'], ['For example, i.25; Equivalent', 'For example, i. 25; Equivalent'], ['equivalent for ro lbs.', 'equivalent for 10 lbs.'],
+        ['Pid.. Po S756 aT 52.', 'Ibid., p. 575.\n\n [*] I. 52.'], ['comes down over one’s head.” 2. Even', 'comes down over one’s head.”[*] Even'],
+        ['Zur Kritik der chkonomischen System von Karl Marx, P- 574-', 'Zur Kritik der ökonomischen System von Karl Marx, p. 574.'],
+        ['without any arritre pensée', 'without any arrière pensée'], ['of old oaktrees', 'of old oak-trees'], [' PR 7O%\n', ' P. 576.\n'],
+        ['Ibid., pp. §74, 582.', 'Ibid., pp. 574, 582.'], ['part 4, PP: §71 seq.', 'part 4, pp. 571 seq.'], ['Ibid., pp. $91 seq.', 'Ibid., pp. 591 seq.'],
+        ['Lbid., BD. 550:', 'Ibid., p. 556.'], ['standpoint of hisown method', 'standpoint of his own method'], ['complementary?”!)', 'complementary?”)'],
+        ['[bid., Pp. 593-', 'Ibid., p. 593.'], ['[bid., pp. 443 seq.', 'Ibid., pp. 443 seq.'], ['given (Jéid., p. 564)', 'given (Ibid., p. 564)'],
+        ['Of all sorts of scienee EOS d tific systems', 'Of all sorts of scientific systems'], ['“drop of social oil”? with', '“drop of social oil” with'],
+        ['ideas will result. from this', 'ideas will result from this'],
+        ['according to differences Error in the Marxian System My erg of quality', 'according to differences of quality'],
+        // the margin's specks read as strokes ("how- | ever", "as_ his"), and other letters the OCR misread throughout
+        ['withdraws itself, how- | ever,', 'withdraws itself, however,'], ['solely dy | the actual', 'solely by the actual'], [/ \| /, ' ', 6],
+        ['sufficiency as_ his wages', 'sufficiency as his wages'], ['which yields a_ higher profit', 'which yields a higher profit'], ['from the _production', 'from the production'],
+        ['supply? _ Or that', 'supply? Or that'], ['and pre-_ cisely then', 'and precisely then'], ['rather indefinite - statements', 'rather indefinite statements'],
+        ['(iii. 175—-6)', '(iii. 175–6)'], [/i\.¢\.,/, 'i.e.,', 2], ['appears as an © immense', 'appears as an “immense'], ['there is no » “unskilled', 'there is no “unskilled'],
+        ['value. « That I have toiled', 'value. “That I have toiled'], ['to the /oéa/ capital', 'to the total capital'], ['of {£50 is added', 'of £50 is added'],
+        ['proportions of g to 1,', 'proportions of 9 to 1,'], ['The /aw of value', 'The law of value'], ['could not be /adour.', 'could not be labour.'],
+        ['economic expression ” (p. 577)', 'economic expression” (p. 577)'], ['1 quarter wheat = I cwt. iron', '1 quarter wheat = 1 cwt. iron'],
+        // Knies's equations, their unknowns in italic (a, c), which the OCR read as signs ("@", "¢")
+        ['the equation, I quarter wheat=a cwts. wild grown wood = 4 acres of virgin soil = ¢ acres', 'the equation, 1 quarter wheat = a cwts. wild grown wood = 4 acres of virgin soil = c acres'],
+        ['the equation, I quarter wheat = @ cwts. of forest-grown', 'the equation, 1 quarter wheat = a cwts. of forest-grown'], ['determined @ priori by', 'determined a priori by'],
+        ['“* Let us examine now', '“Let us examine now'], ['labour “* counts', 'labour “counts'], ['capitals of /ower composition', 'capitals of lower composition'],
+        ['sequence, the /Jaw of value', 'sequence, the law of value'], ['labour (sic /), and', 'labour (sic!), and'], ['« What then, we ask', '“What then, we ask'],
+        ['“« The salient point', '“The salient point'], [':t «The cost price', '“The cost price'], ['“<The state of the case', '“The state of the case'],
+        ['internal connection —<is not apposite', 'internal connection—is not apposite'], ['(iii. 1$5, 156)', '(iii. 155, 156)'], ['“© What would Marx', '“What would Marx'],
+        ['the opinion, which |I have', 'the opinion, which I have'], [/B[bdéo]hm Bawerk/, 'Böhm Bawerk', 5],
+        // words both scans misread alike, or the scan alone where the witness's reading is the edition's (each read again
+        // in both): a word run into the next ("asa", "atime"), a broken word's hyphen kept, the italic "this" and "value"
+        // with a stroke for a letter, "one" read "ove", the references' volumes and stops, the umlauts of German titles
+        ['Engl Transl. 01893, pp.- 60 seq:)', 'Engl. Transl. 1893, pp. 60 seq.)'], ['the co-opera-tive', 'the co-operative', 2],
+        ['of new systems.- General', 'of new systems. General'], [/(?<= )asa(?= )/, 'as a', 4], ['It isa kind', 'It is a kind'],
+        ['price of production”? (ii. 136)', 'price of production” (iii. 136)'], ['are his- ‘torically the earlier', 'are historically the earlier'],
+        ['vice versd.', 'vice versâ.'], ['to an ageregate which', 'to an aggregate which'], ['a triple homceopathic dilution', 'a triple homœopathic dilution'],
+        ['Zur Kritik des ok. Systems', 'Zur Kritik des ök. Systems'], ['Zur Kritik des Okonomischen Systems', 'Zur Kritik des Ökonomischen Systems'],
+        ['Zur Kritik des chonomischen Systems', 'Zur Kritik des ökonomischen Systems'], ['in proper proportions” (ie 2)):', 'in proper proportions” (i. 12).'],
+        ['For any ove combination', 'For any one combination'], ['proportion”?; we therefore', 'proportion”; we therefore'], ["of his funda-' mental principle", 'of his fundamental principle'],
+        ['viz., unskilled - labour.', 'viz., unskilled labour.'], ['its va/ue makes', 'its value makes'], ['For atime he', 'For a time he'],
+        ['In order to “get “on the track aren value', 'In order to “get on the track” of value'], ['claims for /shis idea', 'claims for this idea'],
+        ['ennuyeux.’ 1 allow', 'ennuyeux.” I allow'], ['the last resort” (iu. 188)', 'the last resort” (iii. 188)'],
+        ['collection of commodities’?? And', 'collection of commodities”? And'],
+        // the closing double mark after Marx's inner quotation, which the witness reads (“… time and place.’” Exchange value)
+        ['time and place.’ Exchange value', 'time and place.’” Exchange value'], ['the “General Sections’” of', 'the “General Sections” of'],
+        // The quotation marks: the edition sets a quotation in double marks (275 pairs as the OCR reads them), a quotation
+        // inside one in single (11); where the OCR read an opening double mark as a single (‘…”) or a closing one as a single
+        // (“…’), with no other mark between them, the pair is double.
+        [/‘(?=[^“”‘’\n]{1,200}”)/, '“', 35], [/(?<=“[^“”‘’\n]{1,200})’(?![\p{L}])/u, '”', 29],
+      ],
+      // the half-title before Chapter I, and the running heads, their page numbers misread as often as not ("The Question
+      // of the Contradiction a7", "Error in the Marxian System rz")
+      furniture: [/^KARL MARX$/, /^(?:\S{1,4} )?(?:Preface|Prejace|Introduction|Karl\]? Marx|Kar! Marx)(?: \S{1,4})?$/,
+        /^[_|]?\s*(?:\S{1,4} )?(?:Theory of Value|Average Rate of Prof\w*|The Question of the Contradiction|Error in the Marxian System|Werner Sombart.?s A ?pology)(?: \S{1,4})?$/],
+      licence: 'Internet Archive scan karlmarxcloseofh0000euge, a copy of the London edition (T. Fisher Unwin, 1898), '
+        + 'its OCR checked word by word against the OCR of a second copy (archive.org/details/karlmarxandclos00macdgoog, the University '
+        + 'of Michigan’s, scanned by Google, which the Internet Archive’s record marks as not in copyright). No transcription is used. '
+        + 'Chapter II’s two tables of Marx’s five capitals (iii. 132, 135) are not reproduced: their column headings are printed '
+        + 'sideways, which neither scan’s OCR reads, and a note in the text marks where each stands. The words are the edition’s; '
+        + 'the edition is in the public domain in the United States and is treated as free in Ireland (rights below).',
+    },
+    rights: {
+      us: 'pd', uk: 'pd',
+      // A person whose death date was not found after a reasonable search: who, what was searched and when, and whose
+      // decision it is that the edition is treated as free on that basis (checkRights).
+      unknown: [{
+        name: 'Alice M. Macdonald',
+        searched: 'the book itself (Bonar’s preface: “Mrs. Murray Macdonald desires to express her obligations …”); the Library of Congress '
+          + 'name authorities; Wikidata; the Internet Archive’s records and the Online Books Page; HathiTrust record 001309786; the History '
+          + 'of Parliament and Debrett’s House of Commons (1922), on J. A. Murray Macdonald, MP, who married Alice Mary Noel in 1885; '
+          + 'web searches for her obituary and family. Not reached: the Online Library of Liberty and the National Library of Ireland '
+          + 'catalogue (HTTP 403); the UK probate calendar and FreeBMD (search forms needing a year of death, not submitted)',
+        checked: '2026-11-07',
+        decision: 'the decision of Vitruvian Manager’s editor of 7 November 2026 (“accept upon reasonable search”)',
+      }],
+      basis: 'Eugen von Böhm-Bawerk died on 27 August 1914 and James Bonar, who wrote the preface, on 18 January 1941, so their terms in '
+        + 'Ireland and the UK (life plus 70 years: Copyright and Related Rights Act 2000, s.24; CDPA s.12) ended on 31 December 1984 and '
+        + '31 December 2011. The translator’s death date was not found after a reasonable search on 7 November 2026: Alice M. Macdonald, '
+        + 'who signs as Mrs. Murray Macdonald (probably Alice Mary Macdonald, née Noel, who married J. A. Murray Macdonald in 1885), was '
+        + 'looked for in the book itself, the Library of Congress name authorities, Wikidata, the Internet Archive’s records, the Online '
+        + 'Books Page, HathiTrust, the History of Parliament and Debrett’s, and the newspaper and genealogy sources reachable on the web; '
+        + 'the Online Library of Liberty, the National Library of Ireland catalogue and the probate indexes could not be reached. On that '
+        + 'basis, by the decision of Vitruvian Manager’s editor of 7 November 2026, the translation is treated as free of copyright in '
+        + 'Ireland; this is a judgement of risk, not a rule of law. The title page names Alice M. Macdonald alone as translator; Bonar’s '
+        + 'preface thanks the author and Professor Wieser for revising her work in proof and Miss Louise Markup “for help in '
+        + 'translation”, help acknowledged, not credited, so she is not treated as an author of the translation. Her death date was not '
+        + 'found either (Wikidata and a web search for her name, 12 November 2026, found nothing); Friedrich von Wieser died in 1926. '
+        + 'The translation was published in London by T. Fisher Unwin in 1898, '
+        + 'and every work published before 1931 is in the public domain in the United States (HathiTrust classes the edition, record '
+        + '001309786, as public domain). The text is from the Internet Archive’s scan of a copy of the London edition '
+        + '(archive.org/details/karlmarxcloseofh0000euge), whose record gives no copyright status, read against a second copy '
+        + '(archive.org/details/karlmarxandclos00macdgoog), the University of Michigan’s, scanned by Google, which the Internet Archive’s '
+        + 'record marks as not in copyright. No transcription is used.',
+      checked: '2026-11-07',
+    },
+    // Bonar's preface and the author's introduction share chapter 0, each under its title; five chapters numbered once
+    // through, Chapter IV in three sections whose headings ("SECTION I", "SECTION 2", "SECTION 3", as both scans read
+    // them) stand in it as printed. The title page, the contents and the printer's imprint go (`pages`). Chapter III's
+    // two tables of the commodities A, B and C are set as tables; Chapter II's two tables of Marx's five capitals (from
+    // iii. 132 and 135) are not here: their column headings are printed sideways, which neither OCR reads, and the
+    // second's rows are read only in part (the text around them gives their sense and their totals); a note in brackets
+    // stands in the place of each, and the edition's licence line says so.
+    layout: {
+      front: {
+        title: 'Preface and introduction',
+        pieces: [{ heading: /^PREFACE$/, title: 'Preface' }, { heading: /^INTRODUCTION$/, title: 'Introduction' }],
+      },
+      chapter: { heading: /^CHAPTER ([IVX]+)$/, title: 'block', count: 5 },
+      notes: 'bracket', verse: false, tables: 'rows',
+    },
+    // Tagging decisions (see the Prince's for the form).
+    decisions: {
+      ...untag(...LATER_STATES),
+      // Bonar writes the author's name unhyphenated, "Professor Böhm Bawerk"
+      'Böhm-Bawerk': 'Q311535', 'Böhm Bawerk': 'Q311535', Marx: 'Q9061', Engels: 'Q34787', Smith: 'Q9381', Ricardo: 'Q160270', Hegel: 'Q9235',
+    },
+  },
+  /* Wieser's Der natürliche Werth (Vienna, 1889) in Christian A. Malloch's translation, edited by William Smart: Natural
+     Value (London and New York: Macmillan, 1893). Its transcriptions (Econlib's, the Online Library of Liberty's) carry
+     their sites' own terms, so the text is the scan's own OCR (scan-text.mjs, `scan` with no `econlib`): the Internet
+     Archive's scan of the University of California's copy, read against a second scan (Google's of a University of
+     California copy, naturalvalue00smargoog), which puts the scan's misreadings right and is used for nothing else. The 1956 New York reprint is not used. Smart's
+     "Analytical Table of Contents", the contents in detail, is a contents list and goes, as his "Analysis" of Capital and
+     Interest does. The translator's death date was not found (rights below). */
+  {
+    slug: 'natural-value',
+    title: 'Natural Value',
+    author: { name: 'Friedrich von Wieser', qid: 'Q84482', born: 1851, died: 1926 },
+    // "Mrs. Malloch", one of Smart's former students (his preface); no death date was found (rights.unknown).
+    translator: { name: 'Christian A. Malloch', died: null },
+    editors: [{ name: 'William Smart', died: 1915, role: 'editor; Editor’s preface, and the translation of the Author’s preface' }],
+    // The work: Der natürliche Werth (Vienna, 1889). Its era runs from Menger's Grundsätze (1871), where the theory of
+    // value it builds on begins, to the book.
+    work: { qid: null, written: 1889, published: 1889 },
+    era: [1871, 1889],
+    published: 1893,
+    edition: 'Christian A. Malloch’s translation, edited by William Smart (London and New York: Macmillan, 1893)',
+    scan: {
+      // the prefaces (10–41) and the text (52–294); not the title page, Smart's analytical table of contents (42–51) or
+      // the printer's imprint
+      // The witness is Google's scan of a University of California copy (naturalvalue00smargoog), whose OCR reads far
+      // better than that of the University of Toronto's copy (naturalvalue00wiesuoft), which has whole pages torn into
+      // letters; both are marked not in copyright.
+      id: 'naturalvalue00wiesiala', pages: '10-41,52-294', witness: 'naturalvalue00smargoog',
+      witnessDrop: [/^CHAP[.,]? \S+ .*\s\S{1,4}$/, /^\S{1,4} [A-Z][A-Z' ,.-]+ (?:book|BOOK|bouk) [ivxlhnIVX]+\.?$/, /^[xvil]+ (?:EDITOR|AUTHOR).?S PREFACE$/,
+        /^(?:EDITOR|AUTHOR).?S PREFACE [xvil]+$/, /^\d{1,3}$/],
+      // the running heads of the scan that stand below their place ("ORIGIN OF VALUE BOOK i", "132 THE IMPUTATION … BK. iii",
+      // "CHAP. v AS COMPARED WITH ORDINARY VALUATION 241"), and a reader's pencilled scribbles in the margins (scribbles)
+      furniture: [/^EDITOR.?S PREFACE$/, /^(?:\S{1,4} )?[A-Z][A-Z0-9' ,.:]+ (?:BOOK|BK\.|UK\.)[:.]? ?[ivxlhnIVXL1 ]{0,7}$/, /^CHAP[.,] \S{1,5}\b.*$/],
+      scribbles: true,
+      // words the scan lost inside a paragraph, under a scribble or a flaw, which the witness reads, go in (scan-text.mjs)
+      fill: true,
+      // the witness's OCR misreads more often than the scan's: a word the scan reads as a word stands, however low the
+      // OCR's confidence in it ("far", "I", "resist", which the witness reads "fat", "T", "resists")
+      trustScan: true,
+      // a chapter's number and its title stand two lines and more apart: one heading
+      headGap: 2.5,
+      // the pages where the OCR lost a note's mark, ran it into a figure ("50 x 5 1.1" for "50 x 51.¹") or read it as a
+      // letter ("goods l"); "h:l", the mark on a heading (Book V, Chapter XIII)
+      marks: { 85: ['1.1'], 98: ['l', 'demand.2'], 111: ['l'], 150: ['8.1'], 192: [':'], 261: ['h:l'] },
+      // The OCR's slips that the witness did not put right, each read again in both scans (the comments in the list say which)
+      fix: [
+        // The headings: the OCR reads this printing's capital R as E or K ("CHAPTEE", "KETUEN", "KICARDO'S"), a closing
+        // bracket as a brace, and it lost four headings over pencilled pages or a flaw (the Author's Preface, Book I
+        // Chapter IV, Book III Chapter XIX, Book V's title page; each as both the witness and the running heads give it), and
+        // three chapters' numbers (Book III Chapter VI, Book V Chapter XIII, Book VI Chapter V). A title of two lines set
+        // apart, and a chapter's first words run into its title, are put back where they stand.
+        [/CHAP ?TE[EK](?= [IVXL]+\n)/, 'CHAPTER', 42], ['EDITOB\'S PKEFACE', 'EDITOR\'S PREFACE'],
+        ['GLASGOW, 1893.\n\nIT has been said', 'GLASGOW, 1893.\n\nAUTHOR\'S PREFACE\n\nIt has been said'],
+        ['F. WIESEE.', 'F. WIESER.'], ['THE ELEMENTARY THEOEY OF VALUE', 'THE ELEMENTARY THEORY OF VALUE'], ['THE OEIGIN OF VALUE', 'THE ORIGIN OF VALUE'],
+        ['from hunger to love. IF we were to follow', 'from hunger to love.\n\nCHAPTER IV\nTHE SCALES OF SATIATION\n\nIf we were to follow'],
+        ['THE VALUATION OF GOODS IN STOCKS. THE LAW OF MAEGINAL\n\nUTILITY THE GENERAL LAW OF VALUE', 'THE VALUATION OF GOODS IN STOCKS. THE LAW OF MARGINAL\nUTILITY THE GENERAL LAW OF VALUE'],
+        [/(?<=CHAPTER [IVXL]+)\n\n(?=THE VALUATION OF GOODS IN STOCKS)/, '\n'],
+        ['EXCHANGE VALUE AND NATUEAL VALUE', 'EXCHANGE VALUE AND NATURAL VALUE'],
+        ['BOOK III\n\nTHE NATUEAL IMPUTATION OF THE KETUEN\n\nFEOM PEODUCTION\n\nPART I\nTHE GENEEAL PRINCIPLES OF IMPUTATION\n\nCHAPTER I\nEETUEN VALUE\n\nPkoduction goods',
+          'BOOK III\nTHE NATURAL IMPUTATION OF THE RETURN FROM PRODUCTION\n\nCHAPTER I\nRETURN VALUE\n\nPART I. THE GENERAL PRINCIPLES OF IMPUTATION\n\nProduction goods'],
+        ['CHAPTER III\n\nTHE SOCIALIST READING OF THE PROBLEM. THE CLAIM OF THE\n\nLABOURER TO THE ENTIRE RETURN', 'CHAPTER III\nTHE SOCIALIST READING OF THE PROBLEM. THE CLAIM OF THE\nLABOURER TO THE ENTIRE RETURN'],
+        ['PEEVIOUS ATTEMPTS AT SOLUTION', 'PREVIOUS ATTEMPTS AT SOLUTION'],
+        ['CHAPTER V\n\nTHE PRINCIPLE OF SOLUTION. THE PRODUCTIVE CONTRIBUTION SUPPOSE that a hunter', 'CHAPTER V\nTHE PRINCIPLE OF SOLUTION. THE PRODUCTIVE CONTRIBUTION\n\nSuppose that a hunter'],
+        ['\n\nTHE PRINCIPLE OF SOLUTION (CONTINUED}. CONTRIBUTION\nAND CO-OPERATION', '\n\nCHAPTER VI\nTHE PRINCIPLE OF SOLUTION (CONTINUED). CONTRIBUTION\nAND CO-OPERATION'],
+        ['THE INDIVIDUAL FACTOES OF IMPUTATION', 'THE INDIVIDUAL FACTORS OF IMPUTATION'], ['THE INDIVIDUAL FACTOKS OF IMPUTATION', 'THE INDIVIDUAL FACTORS OF IMPUTATION', 2],
+        ['IMPUTATION (CONTINUED).\n\nIV. THE IMPUTATION TO COST GOODS AND TO MONOPOLY GOODS WHAT has been said', 'IMPUTATION (CONTINUED).\nIV. THE IMPUTATION TO COST GOODS AND TO MONOPOLY GOODS\n\nWhat has been said'],
+        ['CHAPTER XIII\n\nTHE INDIVIDUAL FACTORS OF IMPUTATION (continued}. V.— THE IMPUTATION TO PRODUCTIVE FACTORS OF PREFERABLE\n\nQUALITY\n\nOF two production',
+          'CHAPTER XIII\nTHE INDIVIDUAL FACTORS OF IMPUTATION (CONTINUED). V.—THE IMPUTATION TO PRODUCTIVE FACTORS OF PREFERABLE QUALITY\n\nOf two production'],
+        ['PART II\nNATURAL LAND KENT\n\nCHAPTER XIV\nKICARDO\'S DIFFERENTIAL RENT: THE FIRST PART\n\nKicardo, in his famous', 'CHAPTER XIV\nRICARDO\'S DIFFERENTIAL RENT: THE FIRST PART\n\nPART II. NATURAL LAND RENT\n\nRicardo, in his famous'],
+        ['CRITICISM OF RICAEDO\'S THEORY', 'CRITICISM OF RICARDO\'S THEORY'],
+        ['PART III\nTHE NATURAL RETURN TO CAPITAL\n\nCHAPTER XVII\nTHE PRODUCTIVITY OF CAPITAL\n\n', 'CHAPTER XVII\nTHE PRODUCTIVITY OF CAPITAL\n\nPART III. THE NATURAL RETURN TO CAPITAL\n\n'],
+        ['CHAPTER XVIII\n\nTHE CALCULATION OF RETURN TO CAPITAL IN PRIMITIVE AND\n\nIN DEVELOPED ECONOMIES', 'CHAPTER XVIII\nTHE CALCULATION OF RETURN TO CAPITAL IN PRIMITIVE AND\nIN DEVELOPED ECONOMIES'],
+        ['developed modern capital?\n\nWE have said that capital', 'developed modern capital?\n\nCHAPTER XIX\nTHE IMPUTATION OF GROSS RETURN AND OF NET RETURN\n\nWe have said that capital'],
+        ['BOOK IV\n\nTHE NATURAL VALUE OF LAND, CAPITAL,\n\nAND LABOUR', 'BOOK IV\nTHE NATURAL VALUE OF LAND, CAPITAL,\nAND LABOUR'],
+        ['CAPITAL\n(CONTINUED}. II. — THE RATE OF INTEREST', 'CAPITAL\n(CONTINUED). II.—THE RATE OF INTEREST'],
+        ['CHAPTER IV\n\nTHE VALUE OF CAPITAL AND THE INTEREST ON CAPITAL (continued).      III. THE LAW OF THE UNIFORM CALCULATION\n\nOF THE INTEREST RATE',
+          'CHAPTER IV\nTHE VALUE OF CAPITAL AND THE INTEREST ON CAPITAL (CONTINUED). III.—THE LAW OF THE UNIFORM CALCULATION OF THE INTEREST RATE'],
+        ['CHAPTER V\n\nTHE VALUE OF CAPITAL AND THE INTEREST ON CAPITAL (con-\n\nTINUED).      IV. CHANGE IN THE RATE OF INTEREST',
+          'CHAPTER V\nTHE VALUE OF CAPITAL AND THE INTEREST ON CAPITAL (CONTINUED). IV.—CHANGE IN THE RATE OF INTEREST'],
+        ['(CONTINUED). V. — THE VALUATION OR FIXED CAPITAL', '(CONTINUED). V.—THE VALUATION OF FIXED CAPITAL'], ['(CONTINUED). VI. — CAPITALISATION', '(CONTINUED). VI.—CAPITALISATION'],
+        ['INTEREST ON THE CONSUMPTION LOAN. HOUSE EEXT', 'INTEREST ON THE CONSUMPTION LOAN. HOUSE RENT'],
+        ['\n\nCHAPTER I\nTHE LAW OF COSTS\n\n', '\n\nBOOK V\nTHE NATURAL COST VALUE OF PRODUCTS\n\nCHAPTER I\nTHE LAW OF COSTS\n\n'],
+        ['THE LAW OF COSTS AND THE GENEKAL LAW OF VALUE', 'THE LAW OF COSTS AND THE GENERAL LAW OF VALUE'], ['Whatevek economic', 'Whatever economic'],
+        [/\(CONTINUED\}/, '(CONTINUED)', 5],
+        ['THE SEKVICE OF INDIVIDUAL ECONOMIC VALUE IN\nNATIONAL ECONOMY L', 'THE SERVICE OF INDIVIDUAL ECONOMIC VALUE IN\nNATIONAL ECONOMY'],
+        ['VALUE IN THE NATUKAL ECONOMY OF THE STATE', 'VALUE IN THE NATURAL ECONOMY OF THE STATE'],
+        ['\n\nPRINTED BY R. & R. CLARK, EDINBURGH.\n', '\n'],
+        // a book's or a chapter's title set apart from its number, and a title's second line from its first
+        [/(?<=^(?:BOOK|CHAPTER) [IVXL]+)\n\n(?=[A-Z][^a-z\n]*$)/m, '\n', 5],
+        [/(?<=^(?:BOOK|CHAPTER) [IVXL]+\n[A-Z][^a-z\n]*(?: THE| AND| OF| IN|,))\n\n(?=[A-Z][^a-z\n]*$)/m, '\n', 1],
+        // The capital R read as E, K, B or P in the text too ("Eicardo", "Eobinson"), "w" read as "Av", and the shelf's
+        // spelling of the Austrians' names, which this OCR reads without the umlaut or with another letter for it
+        [/(?<![\p{L}])[EKBP](?=icardo)/u, 'R', 27], [/Pdcardo|Pueardo/, 'Ricardo', 2],
+        ['Eegeln', 'Regeln'], [/(?<![\p{L}])Eent(?![\p{L}])/u, 'Rent', 2], ['Eobinson', 'Robinson', 3], ['Eodbertus', 'Rodbertus', 2], ['Natural Ptights', 'Natural Rights'],
+        [/(?<![\p{L}])Av(?=ho|ill|ith|orn)(?=\p{Ll}+(?![\p{L}]))/u, 'w', 6],
+        [/Bb'hm-Bawerk/, 'Böhm-Bawerk', 2], [/(?<![\p{L}])B[bo]hm(?![\p{L}])/u, 'Böhm', 29], ['Böhm - Bawerk', 'Böhm-Bawerk', 4],
+        [/(?<![\p{L}])(?:Monger|Meuger)(?=[’',.]|\s)/u, 'Menger', 3],
+        [/Thtinen|Thiinen/, 'Thünen', 8], ['Isolirtcr', 'Isolirter'], [/Urspntng|Urspruny/, 'Ursprung', 2], [/Werthcs/, 'Werthes', 3],
+        ['Gnindsdtze', 'Grundsätze'], ['Grundsdtze der Volkswirthschaftslehre', 'Grundsätze der Volkswirthschaftslehre'],
+        ['oiir', 'our'], ['iised.', 'used.'], ['witli', 'with'], ['eacli', 'each'], [/(?<![\p{L}])rny(?![\p{L}])/u, 'my'], [/(?<![\p{L}])rne(?![\p{L}])/u, 'me', 1],
+        ['the whole worjd according', 'the whole world according'], ['oll\'enee', 'offence'], ['measured fret1 trade', 'measured free trade'],
+        ['costs of tinfactory\'s products', 'costs of the factory\'s products'], ['decide for them!I In the end', 'decide for them! In the end'],
+        ['no part of free goods receives value;J neither', 'no part of free goods receives value; neither'],
+        // the Author's Preface and its notes: two notes the OCR ran together, the mark of the second lost; the titles' letters
+        ['and Leon Walras Gossen\'s statement', 'and Leon Walras.[*] Gossen\'s statement'], ['Vienna, 1871. 5 fiUments d\'economie politique pure ou Theorie de', 'Vienna, 1871.\n\n [*] Éléments d\'économie politique pure ou Théorie de'],
+        ['Lausanne, 1874-77. — Thtorie mathtmatique de', 'Lausanne, 1874–77.—Théorie mathématique de'], ['Lausanne, 1883. — Thtorie de la Monnaie', 'Lausanne, 1883.—Théorie de la Monnaie'],
+        ['his “concrete Gcbrauchswerth”', 'his “concrete Gebrauchswerth”'], ['emolumentum qfferre suinmae bonorum', 'emolumentum afferre summae bonorum'],
+        ['des menschlichen Verlxhrs und dsr daraus fliessenden Regelnfur das', 'des menschlichen Verkehrs und der daraus fliessenden Regeln für das'],
+        ['Leerboek der staathuishaiuikunde', 'Leerboek der staathuishoudkunde'], ['Principes d\'iconomie politique', 'Principes d\'économie politique'],
+        ['Mathematische Begriindung dcr Volkswirthschaftslehrc', 'Mathematische Begründung der Volkswirthschaftslehre'], ['Grundziige der Theorie des wirthschaftlichen Giiterwerths. Conrad\'s Jahrbiicher', 'Grundzüge der Theorie des wirthschaftlichen Güterwerths. Conrad\'s Jahrbücher'],
+        ['His Untwicldung der Gesetze des menscklicken Verkehrs und der darausfiiessenden Regeln fur', 'His Entwicklung der Gesetze des menschlichen Verkehrs und der daraus fliessenden Regeln für'],
+        ['a Copernicau fame Any one', 'a Copernican fame. Any one'], ['Journal des Ewrwmutes', 'Journal des Economistes'],
+        ['de la Richesse et de I\'Origine de la Valeur', 'de la Richesse et de l\'Origine de la Valeur'], ['Dupuit\'s De I\'influence des Peages', 'Dupuit\'s De l\'influence des Péages'],
+        // Book I. Chapter III, pp. 8–9 of the edition: the scan's copy has a long pencilled note over these lines, which the
+        // OCR broke into pieces and in part lost; they are as the witness reads them, its slips put right
+        ['merit of having independently of each other', 'merit of having, independently of each other'],
+        ['was published in Brunswick in 854, but it almost entirely disappeared from sight in Germany although', 'was published in Brunswick in 1854, but it almost entirely disappeared from sight in Germany, although'],
+        ['as of its faults — both of which are great.', 'as of its faults, — both of which are great.'],
+        [/Jevons, in the introduction to the I edition[^]*?\n\nwants, which recur periodically, as, for instance, the /,
+          'Jevons, in the introduction to the second edition of his Theory of Political Economy, and also Walras, in an essay which appeared in the Journal des Economistes in 1885, have given somewhat detailed accounts of both book and author. Economics owes a great debt to Gossen, and it is with this feeling that I call the law of the satiation of want Gossen\'s Law, although my statement of it is not entirely in accordance with his.\n\nIt scarcely requires illustration. Gossen himself added to its clearness by the following addition. Alongside of the weakening effect which continued satisfaction has upon desire, we find also, in certain circumstances, the opposite tendency; that the desire grows by repetition and exercise, inasmuch as it is thus developed, gets to know itself, its own end and its own means, becomes purified and elevated. Thus, during the period of development, the law of diminishing desire meets with an opposite tendency, and the law applies unlimitedly only to wants which are entirely developed. Granting this, however, it applies to every want without exception.\n\nThere can be no doubt that it applies to those coarser material wants, which recur periodically, as, for instance, the '],
+        // Book III, Chapter IV: its third note run into the second, its mark read as a figure
+        ['return of 10. - The other attempts at solution', 'return of 10.\n\n [*] The other attempts at solution'], ['secured by its possession.2\n', 'secured by its possession.[*]\n'],
+        // Book III, Chapter XII: a short note set centred, which the OCR took for a heading
+        ['calculations of cost.1 They', 'calculations of cost.[*] They'], ['\n\n, * SEE BELOW, BOOK V.\n\n', '\n\n [*] See below, Book V.\n\n'],
+        // specks, stray signs and broken letters of the scan, each read again in the witness
+        ['spoken of as “want }>: the want as', 'spoken of as “want”: the want as'], ['because its ^usefulness is', 'because its usefulness is'],
+        ['the community has had, \\we may assume,', 'the community has had, we may assume,'],
+        ['\n\n,•*\n\n', '\n\n'], ['accurately describes ^^o\\ne trade', 'accurately describes one trade'], ['according to Menger*s definition', 'according to Menger\'s definition'],
+        [/(?<=the wounds of poverty\.\[\d+\]) «\./, ''], ['\n\n• No productive', '\n\nNo productive'], ['if lie did not know. Happily', 'if he did not know. Happily'],
+        ['calculating the contributions. «', 'calculating the contributions.'],
+        ['greater “rentability “• —to use', 'greater “rentability”—to use'], ['\n\n*/ t/\n\n', '\n\n'], ['to touch at* least upon', 'to touch at least upon'],
+        ['the interest is -£$g of the capital value', 'the interest is 1/20 of the capital value'], ['must first be made from* the gross', 'must first be made from the gross'],
+        ['The conflict which \\we may observe', 'The conflict which we may observe'], ['paves the way for\\ \\ politics', 'paves the way for politics'],
+        ['exemption from the * physical', 'exemption from the physical'],
+        ['Whence do things get their value-?', 'Whence do things get their value?'],
+        // figures the OCR read with spaces between their digits, and an x read as "a?"
+        ['the successful result at 1 0 0; all', 'the successful result at 100; all'], ['lies in the equation a?+y = 100.', 'lies in the equation x + y = 100.'],
+        ['residual value of 1 0 0 transformed', 'residual value of 100 transformed'], ['If a return of 1 0 5 can be', 'If a return of 105 can be'],
+        ['THE INTEREST ON CAPITAL\n\n(CONTINUED). V.—THE VALUATION OF FIXED CAPITAL', 'THE INTEREST ON CAPITAL\n(CONTINUED). V.—THE VALUATION OF FIXED CAPITAL'],
+        ['to indi- A\'idual factors', 'to individual factors'], ['originating;\n\nf JL \' O O from value', 'originating from value'], ['Die Positive TJicorie des', 'Die Positive Theorie des'],
+        ['according to tlu> measure', 'according to the measure'], ['Böhm-Bawerk\'s Wcrth, p. 510', 'Böhm-Bawerk\'s Werth, p. 510'], ['too\'great as regards', 'too great as regards'],
+        // Book I
+        ['viz. sixteen (S x 2 and 4 x 4)', 'viz. sixteen (8 x 2 and 4 x 4)'], ['“Werth des Ictztcn Atoms”', '“Werth des letzten Atoms”'], ['“<Final degree of utility,”', '“Final degree of utility,”'],
+        ['dernier bcsoin satis/ait (rarett)”', 'dernier besoin satisfait (rareté)”'], ['plays the r6le so readily', 'plays the rôle so readily'], ['own raison d\'etre', 'own raison d\'être'],
+        ['“value in use” (Gebrauchswcrth)', '“value in use” (Gebrauchswerth)'], ['Werththeorien und Jferthgesclz, in Conrad\'s Jahrbucfier', 'Werththeorien und Werthgesetz, in Conrad\'s Jahrbücher'],
+        ['common Productionsvei^wandt, which', 'common Productionsverwandt, which'], ['is paid 1 5s. a week', 'is paid 15s. a week'],
+        // Book I, Chapter X: the tables of a stock of eleven goods, as both scans read their figures (3 x 8, which both read
+        // "8x8", as the product 24 under it has it); the third table's label, set beside a brace, neither scan reads, and its
+        // two rows of figures stand without it
+        ['When he has 123456789 10 11\n\nthe value is 1x10 2x9 8x8 4x7 5x6 6x5 7x4 8x3 9x2 10x1 11x0 units of value.\n\n= 10 18 24 28 30 30 28 24 18 10 0',
+          'When he has    1    2    3    4    5    6    7    8    9    10    11    goods,\nthe value is    1 x 10    2 x 9    3 x 8    4 x 7    5 x 6    6 x 5    7 x 4    8 x 3    9 x 2    10 x 1    11 x 0    units of value.\n    =    10    18    24    28    30    30    28    24    18    10    0'],
+        ['With 123456789 10 11 goods, there will be 10 9876543210 units of value.', 'With    1    2    3    4    5    6    7    8    9    10    11    goods,\nthere will be    10    9    8    7    6    5    4    3    2    1    0    units of value.'],
+        [/With 12 34 5 67 89 10 11 goods, \* hne>talho 19 27 34 40 45 49 52 54 55 55 f ™j\* mentis \( \(10\+9\)\(19\+8\)\(27\+'7\)\(34\+6\)<40\+5\)\(45\+4\)\(49\+3\)\(52\+2\)\(54\+1\)\(55\+0\)1 vaiue /,
+          'With    1    2    3    4    5    6    7    8    9    10    11    goods,\n    10    19    27    34    40    45    49    52    54    55    55\n    (10 + 9)    (19 + 8)    (27 + 7)    (34 + 6)    (40 + 5)    (45 + 4)    (49 + 3)    (52 + 2)    (54 + 1)    (55 + 0)\n\n'],
+        ['With a stock of 1 23456789 10 H goods, the minus is 0 1 3 6 10 15 21 28 36 45 55 units of value.', 'With a stock of    1    2    3    4    5    6    7    8    9    10    11    goods,\nthe minus is    0    1    3    6    10    15    21    28    36    45    55    units of value.'],
+        ['123456789 10 11 GOODS.\n\nPositive ( +) 10 19 27 34 40 45 49 52 54 55 55 units of value. Negative (-) 0 1 3 6 10 15 21 28 36 45 55\n\nResidual ( +) 10 18 24 28 30 30 28 24 18 10 0',
+          '    1    2    3    4    5    6    7    8    9    10    11    goods.\nPositive (+)    10    19    27    34    40    45    49    52    54    55    55    units of value.\nNegative (−)    0    1    3    6    10    15    21    28    36    45    55\nResidual (+)    10    18    24    28    30    30    28    24    18    10    0'],
+        // Book III, Chapter V: the equations, which the OCR set in capitals as a heading; Chapters XIV and XV, Ricardo's
+        // returns, set in capitals the same way, the ditto marks as the witness reads them and the sign "∴" as the scan does
+        ['equation x + y = 100, the following:—\n\nX + Y = 100.\n2Z + 3Z = 290.\n4Y + 5Z = 590.', 'equation x + y = 100, the following:—\n\nx + y = 100.\n2x + 3z = 290.\n4y + 5z = 590.'],
+        ['equalition: — x + y=IQQ.', 'equalition: — x + y = 100.'],
+        // the low-confidence words where the witness's reading is the edition's ("for", "class", "account", "gives",
+        // "land", "off"), and the readings both scans have wrong ("Ursprung and", "Ib." for lb., "into Banks")
+        ['Wieser\'s Ursprung and Hauptgesetze', 'Wieser\'s Ursprung und Hauptgesetze'], ['the things far which they exchange', 'the things for which they exchange'],
+        ['Ib. of coal', 'lb. of coal', 2], ['confined to the c/a*.s of which', 'confined to the class of which'], ['as well on count of the peculiarities', 'as well on account of the peculiarities'],
+        ['into Ranks, and value', 'into ranks, and value'], ['he divides oft\' all those', 'he divides off all those'], ['and wives him at the same time', 'and gives him at the same time'],
+        ['The more fertile laud, the land', 'The more fertile land, the land'], ['in Book I. chapter XL\n', 'in Book I. chapter xi\n'],
+        ['OF THE 1ST QUALITY PRODUCE A RETURN OF 120 QRS. WITH A VALUE OF £240,\nOF THE 2ND „ „ „ 100 „ “ “200,\nOF THE 3RD „ „ “80 „ „ “160,',
+          'of the 1st quality produce a return of 120 qrs. with a value of £240,\nof the 2nd    „    „    „    100    „    „    „    200,\nof the 3rd    „    „    „    80    „    „    „    160,'],
+        ['TO A FIRST £200 OF EXPENSES THE RETURN IS 120 QRS., AND THE VALUE £240.\n\nto a second £200 “ “100 “    „    200.\n\n~7\\ TO £400 ~ ~ 220 “ ~ 440L\nTO A THIRD £200 „ 80 “ „ 160.\n. \'. TO £600 ~ ~ 300 “ ~ 600T',
+          'to a first £200 of expenses the return is 120 qrs., and the value £240.\nto a second £200    „    „    100    „    „    200.\n∴ to £400    „    „    220    „    „    440.\nto a third £200    „    „    80    „    „    160.\n∴ to £600    „    „    300    „    „    600.'],
+        ['combination 10a-|- 1 Ob + lOc possesses', 'combination 10a + 10b + 10c possesses'],
+        // the per cent sign, which the OCR reads "°/Q" or "°/o"; stops the OCR read in specks before a word or between two;
+        // compounds whose hyphen it set apart, and a dash it read as a hyphen; "chap." read "chap,"; and other letters
+        // both scans or the scan alone misread ("u-nits", "hy", "riot", "versd" for the italic â of "vice versâ")
+        [/°\/[Qo]/, '%', 12], ['the sensation .of. want', 'the sensation of want'], [/(?<= )\.(?=\p{Ll})/u, '', 6], [/(?<=\p{Ll}) \.(?= \p{Ll})/u, '', 2],
+        ['high - water', 'high-water'], ['would - be buyers', 'would-be buyers'], ['newly - acquired', 'newly-acquired'], ['over - congested', 'over-congested'],
+        ['re - employed', 're-employed'], ['far - reaching', 'far-reaching'], ['employing it productively - cannot', 'employing it productively — cannot'],
+        ['non- satisfaction', 'non-satisfaction'], ['inter- competition', 'inter-competition'], ['consumption- wealth', 'consumption-wealth'],
+        ['income- winning', 'income-winning'], ['high- water', 'high-water'], ['once- established', 'once established'], ['exceptional circumstances- that', 'exceptional circumstances that'],
+        ['10 u-nits', '10 units'], ['choice of obje\'cts', 'choice of objects'], ['their own\'utility', 'their own utility'], ['lOa+lOb+lOc', '10a + 10b + 10c', 2],
+        ['overwhelmingly large,- — as a rule, and in the] long run', 'overwhelmingly large, — as a rule, and in the long run'], ['possible return of £200.- From', 'possible return of £200. From'],
+        ['or hy calculating', 'or by calculating'], ['riot having', 'not having'], ['so longas', 'so long as'], ['its rdle', 'its rôle'],
+        ['vice, versd', 'vice versâ'], ['vice versd', 'vice versâ', 4], [/(?<=Book [IV]+\. )chap, (?=[xvil]+\b)/, 'chap. ', 10],
+        ['Principles of Economics, “2nd edit.', 'Principles of Economics, 2nd edit.'], ['Isolirter Stoat', 'Isolirter Staat'],
+        // Book IV, Chapter II's title of two lines, its item "I. DISCOUNTING" on the second: one title with its stop, as
+        // Book III, Chapter IX's "THE INDIVIDUAL FACTORS OF IMPUTATION. I. SUPPLY" is printed
+        ['THE INTEREST ON CAPITAL\nI. DISCOUNTING\n', 'THE INTEREST ON CAPITAL. I. DISCOUNTING\n'],
+        // Book II, Chapter II: a speck both scans read as "1" in the broken word, and the first note's mark, read "l",
+        // left against its word; a dash read as a hyphen, a compound broken at a line's end and set apart, and a
+        // pencilled stroke read as letters ("ol w"), each read again in the witness
+        ['possessions other- 1 wise', 'possessions otherwise'], ['other goods l[', 'other goods['], ['up grade,”- and', 'up grade,” — and'],
+        ['Böhm- Bawerk', 'Böhm-Bawerk', 2], ['influences ol w national', 'influences of national'],
+      ],
+      licence: 'Internet Archive scan naturalvalue00wiesiala, the University of California’s copy of the London edition (Macmillan, 1893), '
+        + 'its OCR checked word by word against the OCR of a second scan (archive.org/details/naturalvalue00smargoog, a University of '
+        + 'California copy scanned by Google); the Internet Archive’s records mark both as not in copyright. No transcription is used. The words are the edition’s; '
+        + 'the edition is in the public domain in the United States and is treated as free in Ireland (rights below).',
+    },
+    rights: {
+      us: 'pd', uk: 'pd',
+      unknown: [{
+        name: 'Christian A. Malloch',
+        searched: 'the book itself (Smart’s preface: the translation was put “into the hands of one of my former students”, and “the translation '
+          + 'is Mrs. Malloch’s”); the Library of Congress name authorities (nr94005253, “Malloch, Christian”, no dates; its sources Lyrics from '
+          + 'the French, 1919, and the British Library catalogue); the University of Pennsylvania’s catalogue; Wikidata; the Online Books Page; '
+          + 'HathiTrust records 006593883, 103385327 and 009077899; web searches for her with Glasgow, Queen Margaret College and Smart. Not '
+          + 'reached: the Archives Hub description of Smart’s papers (did not load); the UK probate calendar (a search form needing a year of '
+          + 'death, not submitted)',
+        checked: '2026-11-07',
+        decision: 'the decision of Vitruvian Manager’s editor of 7 November 2026 (“accept upon reasonable search”)',
+      }],
+      basis: 'Friedrich von Wieser died on 22 July 1926 and William Smart, who edited the translation, wrote its preface and translated the '
+        + 'author’s, on 19 March 1915, so their terms in Ireland and the UK (life plus 70 years: Copyright and Related Rights Act 2000, s.24; '
+        + 'CDPA s.12) ended on 31 December 1996 and 31 December 1985. The translator’s death date was not found after a reasonable search on '
+        + '7 November 2026: Christian A. Malloch (Mrs. Malloch, a former student of Smart’s, perhaps the Christian Malloch of Lyrics from the '
+        + 'French, 1919) was looked for in the book itself, the Library of Congress name authorities, the University of Pennsylvania’s '
+        + 'catalogue, Wikidata, the Online Books Page, HathiTrust, and the sources reachable on the web; the Archives Hub description of '
+        + 'Smart’s papers did not load and the probate indexes could not be searched. On that basis, by the decision of Vitruvian Manager’s '
+        + 'editor of 7 November 2026, the translation is treated as free of copyright in Ireland; this is a judgement of risk, not a rule of '
+        + 'law. The translation was published in London and New York by Macmillan in 1893, and every work published before 1931 is in the '
+        + 'public domain in the United States (HathiTrust classes the edition, records 006593883 and 103385327, as public domain). The text '
+        + 'is from the Internet Archive’s scan of the University of California’s copy (archive.org/details/naturalvalue00wiesiala), read '
+        + 'against a second scan (archive.org/details/naturalvalue00smargoog), a University of California copy scanned by Google; the '
+        + 'Internet Archive’s records mark both as not in copyright. No transcription is used.',
+      checked: '2026-11-07',
+    },
+    // Smart's preface (0, Glasgow, 1893) and the author's (1, translated by Smart); six books of chapters numbered within
+    // each (n = book × 100 + chapter), Book III's nineteen in three parts, each part's heading ("PART II", and its title)
+    // opening its first chapter, as printed.
+    layout: {
+      end: /^THE END$/,
+      sections: [
+        { heading: /^EDITOR.S PREFACE$/, n: 0, title: 'Editor’s preface' },
+        { heading: /^AUTHOR.S PREFACE$/, n: 1, title: 'Author’s preface' },
+      ],
+      part: { heading: /^BOOK ([IVX]+)$/, label: 'Book', title: 'block', count: 6 },
+      chapter: { heading: /^CHAPTER ([IVXL]+)$/, title: 'block', within: true, count: 66 },
+      // (the name keeps its capital in Book III, Chapter XVI's title, "CRITICISM OF RICARDO'S THEORY", though the text
+      // writes it with its curled apostrophe only: titleCase looks a word up with either form)
+      notes: 'bracket', verse: false, tables: 'rows',
+    },
+    // Tagging decisions (see the Prince's for the form).
+    decisions: {
+      ...untag(...LATER_STATES),
+      'Böhm-Bawerk': 'Q311535', Menger: 'Q84177', Smith: 'Q9381', Ricardo: 'Q160270', Marx: 'Q9061', Malthus: 'Q13526',
+      // Jevons's "paper before the British Association" is no material; Walras's Éléments are not Euclid's
+      ...untag('paper', 'Éléments', 'Elements'),
+    },
+  },
 ];
 
 export const shelfEntry = slug => {
@@ -926,7 +1472,13 @@ export const shelfEntry = slug => {
 
 /** Refuses a book that may not be redistributed: both rights findings must say "pd", and the death years and the
     publication year must agree with them by the term rules above (so a finding copied in error is caught). Returns the
-    reasons the book is clear; throws otherwise. */
+    reasons the book is clear; throws otherwise.
+    A person whose death date could not be found (`died: null`) passes only with a record of the search in
+    `rights.unknown` ({ name, searched, checked, decision }: what was searched, the day, and whose decision it is that the
+    edition is treated as free on that basis) and a basis that says in words that the date was "not found after a
+    reasonable search"; the edition must also be one the US test clears by its date. This is the editor's decision of
+    7 November 2026 for two translators of the 1890s (Alice M. Macdonald, Christian A. Malloch): a judgement of risk, not
+    a rule of law, and the record says so. */
 export function checkRights(entry, year = new Date().getUTCFullYear()) {
   const r = entry.rights || {};
   if (r.us !== 'pd' || r.uk !== 'pd') throw new Error(`${entry.slug}: rights are ${r.us || '?'} (US) / ${r.uk || '?'} (UK), not pd/pd; the book is not written`);
@@ -935,6 +1487,13 @@ export function checkRights(entry, year = new Date().getUTCFullYear()) {
   // A year BC is negative (Thucydides died in 395 BC: -395); the rule is the same, and says so in the right era.
   const y = n => (n < 0 ? `${-n} BC` : String(n));
   for (const who of [entry.author, entry.translator, ...(entry.editors || [])].filter(Boolean)) {
+    const unknown = who.died === null && (r.unknown || []).find(u => u.name === who.name);
+    if (unknown) {
+      if (!unknown.searched || !/^\d{4}-\d{2}-\d{2}$/.test(unknown.checked || '') || !unknown.decision) throw new Error(`${entry.slug}: the search for ${who.name}'s death date needs what was searched, the day and the decision`);
+      if (!r.basis.includes(who.name) || !/not found after a reasonable search/.test(r.basis)) throw new Error(`${entry.slug}: the basis must say that ${who.name}'s death date was not found after a reasonable search`);
+      reasons.push(`${who.name}: death date not found after a reasonable search (${unknown.checked}); treated as free by ${unknown.decision}`);
+      continue;
+    }
     if (!Number.isFinite(who.died)) throw new Error(`${entry.slug}: ${who.name} has no death year, so the UK term cannot be checked`);
     if (who.died + 70 >= year) throw new Error(`${entry.slug}: ${who.name} died in ${who.died}, so the UK term runs to 31 December ${who.died + 70}; the finding "uk: pd" is wrong`);
     reasons.push(`${who.name} died ${y(who.died)}: UK term ended 31 December ${y(who.died + 70)}`);

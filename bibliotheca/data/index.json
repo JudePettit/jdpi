@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-07T11:16:10.355Z",
+ "generated": "2026-11-12T19:41:21.535Z",
  "books": [
   {
    "slug": "the-prince",
@@ -288,6 +288,54 @@
    "paragraphs": 1146,
    "terms": 112,
    "generated": "2026-11-07T11:16:05.946Z"
+  },
+  {
+   "slug": "origin-of-money",
+   "title": "On the Origin of Money",
+   "author": "Carl Menger",
+   "translator": "Caroline A. Foley",
+   "year": 1892,
+   "era": [
+    1871,
+    1892
+   ],
+   "words": 6990,
+   "chapters": 9,
+   "paragraphs": 67,
+   "terms": 7,
+   "generated": "2026-11-12T19:41:19.798Z"
+  },
+  {
+   "slug": "karl-marx-and-the-close-of-his-system",
+   "title": "Karl Marx and the Close of His System",
+   "author": "Eugen von Böhm-Bawerk",
+   "translator": "Alice M. Macdonald",
+   "year": 1896,
+   "era": [
+    1867,
+    1896
+   ],
+   "words": 41883,
+   "chapters": 6,
+   "paragraphs": 325,
+   "terms": 369,
+   "generated": "2026-11-12T19:41:06.263Z"
+  },
+  {
+   "slug": "natural-value",
+   "title": "Natural Value",
+   "author": "Friedrich von Wieser",
+   "translator": "Christian A. Malloch",
+   "year": 1889,
+   "era": [
+    1871,
+    1889
+   ],
+   "words": 103935,
+   "chapters": 68,
+   "paragraphs": 670,
+   "terms": 157,
+   "generated": "2026-11-12T19:40:53.615Z"
   }
  ]
 }

@@ -54,7 +54,12 @@ describe('narrate: the units', () => {
       // Every sentence the voice layer finds starts a unit or lies inside one cut sentence's pieces.
       const starts = new Set(sp.units.map(u => u.s));
       let at = 0;
-      for (const s of V.sentences(sp.text)) { const i = sp.text.indexOf(s, at); at = i + s.length; assert.ok(sp.units.some(u => u.s <= i && u.e >= Math.min(at, u.s + MAX_UNIT)) || starts.has(i), `${b.slug} ${p.id}: "${s.slice(0, 40)}"`); }
+      // (or, after a reference to a volume by its numeral, "(i. 23)", lies inside the sentence it is part of)
+      for (const s of V.sentences(sp.text)) {
+        const i = sp.text.indexOf(s, at); at = i + s.length;
+        const onward = /(?:\(|\bvol\.\s)(?:[ivx]{1,4}\.\s)*[ivx]{1,4}\.$|\b(?:pp?|chap|cap|vol)\.$/.test(sp.text.slice(0, i).trimEnd()) && sp.units.some(u => u.s < i && u.e > i);
+        assert.ok(sp.units.some(u => u.s <= i && u.e >= Math.min(at, u.s + MAX_UNIT)) || starts.has(i) || onward, `${b.slug} ${p.id}: "${s.slice(0, 40)}"`);
+      }
     }
     assert.ok(paragraphs > 9000 && units > 60000, `${paragraphs} paragraphs, ${units} units`);
   });
@@ -76,6 +81,19 @@ describe('narrate: the units', () => {
     assert.equal(spoken({ text: 'One line\nanother line' }).text, 'One line another line');
     assert.equal(readable({ kind: 'verse', text: 'Wheat  10s  6d' }), false);
     assert.equal(readable({ kind: 'note', text: '[1] A note.' }), false);
+  });
+
+  test('a reference to a volume by its numeral, "(i. 23)", is read on with its sentence, not taken for a sentence\'s end', () => {
+    const ref = speakable({ id: 'r', kind: 'para', text: 'He looks for “the track of value” (i. 23)[1] and he limits it. Then (iii. i. 374) he stops. See vol. ii. 12 there, and below, p. 25. Last.' });
+    assert.deepEqual(ref.units.map(u => u.text), ['He looks for “the track of value” (i. 23) and he limits it. Then (iii. i. 374) he stops. See vol. ii. 12 there, and below, p. 25. Last.']);
+    assert.deepEqual(ref.units[0].say, [0, ref.text.length + 3], 'one stretch: the [1] mark is in the paragraph, not the spoken text');
+    assert.equal(speakable({ id: 's', kind: 'para', text: 'It ends here (iii.). Next one.' }).units.length, 1);
+    // Böhm-Bawerk's Karl Marx cites Capital so in its running text: Chapter I's second paragraph, as the page reads it
+    const km = BOOKS.find(b => b.slug === 'karl-marx-and-the-close-of-his-system');
+    const p = km.chapters.flatMap(c => c.paragraphs).find(x => x.id === 'c01-p02');
+    const first = speakable(p).units[0].text;
+    assert.match(first, /^The field of research which Marx undertakes to explore in order “to come upon the track of value” \(i\. 23\) he limits from the beginning/);
+    assert.ok(!speakable(p).units.some(u => /^[\d–-]+\)/.test(u.text)), 'no unit begins on a reference\'s page number');
   });
 
   test('read at 1.5×, no minute of any chapter starts more than 20 units (Azure\'s free tier allows the site 20 requests a minute)', () => {

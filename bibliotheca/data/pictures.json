@@ -188,6 +188,41 @@
           ] } } }
       ]
     },
+    "origin-of-money": {
+      "pictures": [
+        { "scene": {
+          "id": "origin-of-money", "title": "Menger on money, from the Grundsätze to the Economic Journal, 1871 to 1892",
+          "visual": { "kind": "timeline", "from": "1871", "to": "1892", "events": [
+            { "at": "1871", "label": "Menger, Grundsätze der Volkswirthschaftslehre" }, { "at": "1890", "label": "Block, Les Progrès de la science économique" },
+            { "at": "1891", "label": "Menger’s article on money in the Handwörterbuch der Staatswissenschaften" },
+            { "at": "1892-06", "label": "On the Origin of Money, in Caroline A. Foley’s translation, The Economic Journal" }
+          ] } } }
+      ]
+    },
+    "karl-marx-and-the-close-of-his-system": {
+      "pictures": [
+        { "scene": {
+          "id": "close-of-his-system", "title": "Capital in three volumes, and Böhm-Bawerk’s answer, 1867 to 1898",
+          "visual": { "kind": "timeline", "from": "1867", "to": "1898", "events": [
+            { "at": "1867", "label": "Marx, Capital, volume I" }, { "at": "1883-03", "label": "Marx dies" },
+            { "at": "1885", "label": "Volume II, edited by Engels" }, { "at": "1894", "label": "Volume III, edited by Engels" },
+            { "at": "1896", "label": "Zum Abschluss des Marxschen Systems, in the essays in honour of Karl Knies" },
+            { "at": "1898-01", "label": "Bonar’s preface to the English translation" }
+          ] } } }
+      ]
+    },
+    "natural-value": {
+      "pictures": [
+        { "scene": {
+          "id": "natural-value", "title": "The theory of value the book builds on, 1854 to 1893",
+          "visual": { "kind": "timeline", "from": "1854", "to": "1893", "events": [
+            { "at": "1854", "label": "Gossen, Entwicklung der Gesetze des menschlichen Verkehrs" }, { "at": "1871", "label": "Jevons, The Theory of Political Economy" },
+            { "at": "1871", "label": "Menger, Grundsätze der Volkswirthschaftslehre" }, { "at": "1874", "label": "Walras, Éléments d’économie politique pure" },
+            { "at": "1884", "label": "Wieser, Ursprung und Hauptgesetze des wirthschaftlichen Werthes" }, { "at": "1887", "label": "Sax, Grundlegung der theoretischen Staatswirthschaft" },
+            { "at": "1889", "label": "Der natürliche Werth" }, { "at": "1893", "label": "Smart’s edition of the translation" }
+          ] } } }
+      ]
+    },
     "positive-theory-of-capital": {
       "pictures": [
         { "scene": {

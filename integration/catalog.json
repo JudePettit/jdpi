@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T21:08:54.978Z",
+  "generated": "2026-11-12T22:30:49.418Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1024,7 +1024,7 @@
           "description": "Name of that news outlet"
         }
       ],
-      "rows": 301,
+      "rows": 302,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1044,7 +1044,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 150376
+      "bytes": 150993
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1262,7 +1262,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 479,
+      "rows": 484,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1270,7 +1270,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 281756
+      "bytes": 284366
     },
     {
       "id": "econ-briefing-sources",
@@ -1373,11 +1373,6 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
-          "name": "error",
-          "type": "string",
-          "description": "Last error, if any"
-        },
-        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -1406,7 +1401,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 281756
+      "bytes": 284366
     },
     {
       "id": "science-briefing-stories",
@@ -1499,7 +1494,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1187,
+      "rows": 1262,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1507,7 +1502,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 697288
+      "bytes": 733818
     },
     {
       "id": "science-briefing-sources",
@@ -1633,7 +1628,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 697288
+      "bytes": 733818
     },
     {
       "id": "digital-briefing-stories",
@@ -1736,7 +1731,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1192,
+      "rows": 1205,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1744,7 +1739,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 717035
+      "bytes": 724011
     },
     {
       "id": "digital-briefing-sources",
@@ -1890,7 +1885,7 @@
       "updated": "2026-11-12",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 717035
+      "bytes": 724011
     },
     {
       "id": "political-calendar",
@@ -1954,7 +1949,7 @@
           "description": "Name of that news outlet"
         }
       ],
-      "rows": 5678,
+      "rows": 5679,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1967,7 +1962,7 @@
       "updated": "2026-11-12",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2615244
+      "bytes": 2615861
     },
     {
       "id": "encyclopaedia-entities",

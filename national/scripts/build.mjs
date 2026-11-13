@@ -9,7 +9,8 @@
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
 //   (Realtime Battlefield), calendar events since 1980, energy share (Kardashev Tracker), Master Index entry.
 // - Heads of state and government (Wikidata statements, with leader-corrections.json) and the current leader: the
-//   holder of the office Political Atlas names as the most powerful (--atlas, the political-atlas folder), or else of
+//   holder of the office Political Atlas names as the most powerful (--atlas, the political-atlas folder; a regent
+//   acting for the head of state, as in Liechtenstein, where a 'regent' correction names him), or else of
 //   the office the system of government gives (leader-offices.json where the data cannot decide). leaders.mjs has the
 //   rules. The build lists where the Atlas and these heads name different people for that office, for a person to look
 //   at; --report writes every country's leader, rule and those disagreements to a JSON file.
@@ -285,6 +286,7 @@ for (const c of wbCountries) {
     qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, gw: gw ?? null,
     government: [...(w.gov || [])].slice(0, 4), headOfState: h.headOfState?.name || null, headOfGovernment: h.headOfGovernment?.name || null,
     headOfStateQid: h.headOfState?.qid || null, headOfGovernmentQid: h.headOfGovernment?.qid || null,
+    ...(h.regent?.name ? { regent: h.regent.name, regentQid: h.regent.qid || null } : {}), // who exercises the head of state's powers for him (a 'regent' correction)
     ...(people.length ? { peopleInIndex: people } : {}), // those of these IDs with a Master Index entry: the page tags only them
     ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
     leader, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)

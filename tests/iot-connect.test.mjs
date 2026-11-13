@@ -1688,7 +1688,12 @@ test('iot page: hooked up as Digital Science · IoT Connect, no inline script or
   assert.ok(!/\son[a-z]+=/i.test(html), 'no inline handlers');
   const reg = JSON.parse(readFileSync(path.join(ROOT, 'registry.json'), 'utf8'));
   const ds = reg.suites.find(s => s.id === 'ds'), m = ds.modules.find(x => x.id === 'iot-connect');
-  assert.deepEqual([m.name, m.kind, m.icon, m.status, m.host, m.url], ['IoT Connect', 'operations', '⌂', 'live', 'Vitruvian Manager', 'digital/iot-connect/index.html']);
+  assert.deepEqual([m.name, m.kind, m.icon, m.status, m.host, m.url], ['IoT Connect', 'operations', '⊶', 'live', 'Vitruvian Manager', 'digital/iot-connect/index.html']);
+  // Its own icon (Jude, 12 November 2026): until then it shared Home's ⌂. No other entry uses ⊶, and none uses ⌂,
+  // which the sidebar keeps for the Home page item (shell.js).
+  const icons = reg.suites.flatMap(s => s.modules.map(x => [x.id, x.icon]));
+  assert.deepEqual(icons.filter(([id, icon]) => icon === '⊶').map(([id]) => id), ['iot-connect'], 'IoT Connect\'s icon is its own');
+  assert.deepEqual(icons.filter(([, icon]) => icon === '⌂'), [], 'no submodule shares the Home page\'s ⌂');
   assert.equal(ds.summary, 'Chart Vitruvian Manager\'s data, connect it to AI assistants, and run your own devices.');
   assert.deepEqual(m.views.map(v => v.id), ['overview', 'devices', 'remote', 'hermes', 'uns', 'law']);
   for (const v of m.views) { assert.equal(v.url, `digital/iot-connect/index.html#tab=${v.id}`); assert.match(html, new RegExp(`id="tab-${v.id}"[^>]*aria-controls="panel-${v.id}"`)); assert.match(html, new RegExp(`id="panel-${v.id}" role="tabpanel"`)); }

@@ -382,9 +382,11 @@ async function loadTopStories(code,name){
 const ROW_ACC=new WeakMap();
 const rowAccess=r=>{if(!ACC)return 'free';let c=ROW_ACC.get(r);if(!c){c=ACC.classify({host:r.outlet_domain||r.domain,name:r.outlet,url:r.url||r.article_url});ROW_ACC.set(r,c)}return c};
 const rowFree=r=>PRPAccess.isFree(rowAccess(r));
+// Every row here has its English title: a story still waiting for its translation is not loaded at all
+// (q/supabase-client.js, translated), so it is neither shown nor counted.
 function storyHtml(r,rank,extra){
   const en=r.title_en||r.title_original,orig=r.title_en&&r.title_en!==r.title_original?r.title_original:'';
-  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+PRPAccess.label(rowAccess(r))+'</a>'+(orig?'<div class="orig" lang="">'+escHtml(orig)+'</div>':(!r.title_en?'<div class="orig">translation pending</div>':''))+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
+  return '<div class="article"><span class="rank">'+String(rank).padStart(2,'0')+'</span><div><a class="headline" href="'+escHtml(r.url)+'" target="_blank" rel="noreferrer">'+escHtml(en)+PRPAccess.label(rowAccess(r))+'</a>'+(orig?'<div class="orig" lang="">'+escHtml(orig)+'</div>':'')+'<div class="source"><span>'+escHtml(r.outlet)+'</span><span>'+(extra||(r.published_at?new Date(r.published_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':escHtml(r.snapshot_date)))+'</span></div></div></div>';
 }
 function renderByOutlet(rows){
   const latest=rows[0].snapshot_date,day=rows.filter(r=>r.snapshot_date===latest),outlets=[...new Map(day.map(r=>[r.outlet_rank,r.outlet])).entries()].sort((a,b)=>a[0]-b[0]);

@@ -224,7 +224,37 @@ test('leaders: a correction applies while Wikidata gives the value it replaces, 
   // The committed file is well formed.
   const file = read('national/scripts/leader-corrections.json');
   assert.ok(Array.isArray(file.corrections));
-  for (const c of file.corrections) assert.ok(/^[A-Z]{3}$/.test(c.iso3) && ['headOfState', 'headOfGovernment'].includes(c.field) && c.name && /^https?:\/\//.test(c.source) && /^\d{4}-\d\d-\d\d$/.test(c.checked) && 'replaces' in c, JSON.stringify(c));
+  for (const c of file.corrections) assert.ok(/^[A-Z]{3}$/.test(c.iso3) && ['headOfState', 'headOfGovernment', 'regent'].includes(c.field) && c.name && /^https?:\/\//.test(c.source) && /^\d{4}-\d\d-\d\d$/.test(c.checked) && 'replaces' in c, JSON.stringify(c));
+  for (const c of file.corrections.filter(x => x.field === 'regent')) assert.ok(c.actsFor && c.replaces === null && /^\d{4}-\d\d-\d\d$/.test(c.since) && /^Q[1-9]\d*$/.test(c.qid), JSON.stringify(c));
+});
+
+// Liechtenstein (Jude, 12 November 2026): the current leader is Hereditary Prince Alois, who has exercised the
+// prince's powers as his father's deputy since 15 August 2004; Prince Hans-Adam II stays head of state.
+test('leaders: a regent is the current leader while Wikidata\'s head of state is the one he acts for, and lapses after', async () => {
+  const { applyCorrections, currentLeader, leaderOffice } = await import('../national/scripts/leaders.mjs');
+  const k = read('national/scripts/leader-corrections.json').corrections.find(c => c.iso3 === 'LIE');
+  assert.deepEqual([k.field, k.name, k.qid, k.since, k.actsFor], ['regent', 'Alois, Hereditary Prince of Liechtenstein', 'Q311308', '2004-08-15', 'Hans-Adam II, Prince of Liechtenstein']);
+  assert.match(k.source, /^https:\/\/fuerstenhaus\.li\//, 'checked on the Princely House\'s own site');
+  assert.match(k.note, /https:\/\/fuerstenhaus\.li\/en\/\?p=2018/, 'that Hans-Adam II still reigns is backed by his own page');
+  const hos = { name: 'Hans-Adam II, Prince of Liechtenstein', qid: 'Q57454', start: '1989-11-13' }, hog = { name: 'Brigitte Haas', qid: 'Q129676165', start: '2025-04-10' };
+  const logs = [], heads = new Map([['LIE', { headOfState: { ...hos }, headOfGovernment: { ...hog } }]]);
+  assert.equal(applyCorrections(heads, [k], m => logs.push(m)).applied.length, 1);
+  const h = heads.get('LIE');
+  assert.deepEqual([h.headOfState.name, h.headOfGovernment.name], [hos.name, hog.name], 'neither head changes');
+  // The Atlas names the regent; the office is the head of state's, and its powers are the regent's.
+  const choice = leaderOffice({ atlas: { executive: { leader: 'regent' } }, government: ['constitutional monarchy'], heads: h });
+  assert.deepEqual(choice, { office: 'headOfState', rule: 'atlas' });
+  assert.deepEqual(currentLeader(choice, h), { name: 'Alois, Hereditary Prince of Liechtenstein', qid: 'Q311308', office: 'regent', rule: 'atlas', since: '2004-08-15', party: null, url: 'https://www.wikidata.org/wiki/Q311308', source: 'correction' });
+  // Where the head of government's office is chosen, a regent changes nothing.
+  assert.equal(currentLeader({ office: 'headOfGovernment', rule: 'system' }, h).name, 'Brigitte Haas');
+  // Once Wikidata gives another head of state (the regent has succeeded), the correction lapses and the head of state leads.
+  const later = new Map([['LIE', { headOfState: { name: 'Alois, Hereditary Prince of Liechtenstein', qid: 'Q311308', start: '2030-01-01' }, headOfGovernment: { ...hog } }]]);
+  assert.equal(applyCorrections(later, [k], m => logs.push(m)).lapsed.length, 1);
+  assert.equal(later.get('LIE').regent, undefined);
+  assert.equal(currentLeader(choice, later.get('LIE')).office, 'headOfState');
+  assert.match(logs[0], /applied: LIE regent/); assert.match(logs[1], /lapsed: LIE regent/);
+  // A regent without the head he acts for is incomplete, and skipped.
+  assert.equal(applyCorrections(new Map([['LIE', { headOfState: { ...hos } }]]), [{ ...k, actsFor: '' }]).applied.length, 0);
 });
 
 test('data: every current leader is the holder of one office, by name from the heads, or "Vacant"', async () => {
@@ -234,9 +264,12 @@ test('data: every current leader is the holder of one office, by name from the h
     const l = c.leader;
     if (c.leadership) assert.deepEqual(c.leadership.current, l, `${c.iso3}: leadership.current is the leader`);
     if (!l) { assert.ok(!c.headOfState && !c.headOfGovernment, `${c.iso3}: heads but no leader`); continue; }
-    assert.ok(['headOfState', 'headOfGovernment'].includes(l.office) && RULES.includes(l.rule), `${c.iso3}: ${JSON.stringify(l)}`);
+    assert.ok(['headOfState', 'headOfGovernment', 'regent'].includes(l.office) && RULES.includes(l.rule), `${c.iso3}: ${JSON.stringify(l)}`);
     if (l.source === 'vacant') { assert.ok(l.name === 'Vacant' && c.vacant?.includes(l.office) && !c[l.office], `${c.iso3}: ${JSON.stringify(l)}`); continue; }
     assert.ok(['wikidata', 'correction'].includes(l.source), `${c.iso3}: source ${l.source}`);
+    // A regent (a 'regent' correction) leads for a head of state who stays named as head of state.
+    if (c.regent) assert.ok(l.office === 'regent' || l.office === 'headOfGovernment', `${c.iso3}: with a regent, the head of state does not lead`);
+    if (l.office === 'regent') assert.ok(c.regent && c.headOfState && l.source === 'correction', `${c.iso3}: a regent for a named head of state`);
     assert.equal(l.name, c[l.office], `${c.iso3}: the leader is the ${l.office}`);
     assert.equal(l.qid, c[l.office + 'Qid'], `${c.iso3}: the leader's Wikidata ID is the ${l.office}'s`);
     for (const o of ['headOfState', 'headOfGovernment']) assert.ok(c[o + 'Qid'] == null || /^Q[1-9]\d*$/.test(c[o + 'Qid']), `${c.iso3}: ${o}Qid`);
@@ -275,7 +308,9 @@ test('data: the current leader of the countries Jude named is the most powerful 
   is('GUY', 'headOfState', 'decision'); // the President, not the Prime Minister
   is('SLE', 'headOfState'); // the President, not the Chief Minister
   is('MCO', 'headOfState', 'atlas');
-  is('LIE', 'headOfState', 'atlas');
+  // Liechtenstein: the regent who exercises the head of state's powers (leader-corrections.json), or the head of state
+  // himself once that correction lapses.
+  is('LIE', by.LIE.regent ? 'regent' : 'headOfState', 'atlas');
   is('UKR', 'headOfState', 'atlas');
   is('GBR', 'headOfGovernment', 'atlas');
   const dir = new URL('../../political-atlas/', import.meta.url);
@@ -287,7 +322,9 @@ test('data: the current leader of the countries Jude named is the most powerful 
   // its office then (a decision, say) until the next refresh, and is right as long as the office is the Atlas's.
   for (const [iso, r] of atlas) if (by[iso]?.leader && r.executive?.leader) {
     const l = by[iso].leader;
-    assert.ok(l.rule === 'only-holder' ? !by[iso][r.executive.leader] : l.office === r.executive.leader, `${iso}: the Atlas names the ${r.executive.leader} (${JSON.stringify(l)})`);
+    // An Atlas regent leads in the head of state's office: the regent where a correction names him, else the head of state.
+    const offices = r.executive.leader === 'regent' ? ['regent', 'headOfState'] : [r.executive.leader];
+    assert.ok(l.rule === 'only-holder' ? !by[iso][r.executive.leader] : offices.includes(l.office), `${iso}: the Atlas names the ${r.executive.leader} (${JSON.stringify(l)})`);
   }
 });
 
@@ -376,6 +413,33 @@ test('page: the profile and the Compare table show the same current leader, tagg
   if (untagged) assert.deepEqual(profile[untagged].leader.qids, [], `${untagged}: a leader with no Master Index entry is not tagged`);
   for (const iso of isos) if (tags(by[iso], by[iso].headOfStateQid)) assert.ok(profile[iso].head.qids.some(([q]) => q === by[iso].headOfStateQid), `${iso}: the profile tags the head of state`);
   assert.ok(isos.some(iso => tags(by[iso], by[iso].leader?.qid)), 'at least one tagged leader is checked');
+  assert.deepEqual(errors, []);
+});
+
+// Liechtenstein's regent (Jude, 12 November 2026): "Current leader" is the regent, noted as acting for the head of
+// state, and "Head of state" is still the prince. Read from the data, so the test holds when the office changes hands.
+test('page: Liechtenstein\'s current leader is the regent who acts for the head of state', pageTest, async () => {
+  const lie = read('national/data/index.json').countries.find(c => c.iso3 === 'LIE');
+  const browser = await launch();
+  const errors = [];
+  try {
+    for (const width of [1400, 360]) {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      page.on('pageerror', e => errors.push(e.message));
+      await page.goto(`${BASE}/q/national#country=LIE`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#profile .stat', { timeout: 20000 });
+      const stat = label => page.$$eval('#profile .stat', (ss, l) => { const s = ss.find(x => x.querySelector('span')?.textContent === l); return s ? { value: s.querySelector('b').textContent.replace(/◈/g, '').trim(), note: s.querySelector('small')?.textContent.trim() || '' } : null; }, label);
+      const leader = await stat('Current leader'), head = await stat('Head of state');
+      assert.equal(leader.value, lie.leader.name, `${width}: the data's leader`);
+      assert.equal(head.value, lie.headOfState, `${width}: the head of state stays`);
+      if (lie.leader.office === 'regent') {
+        assert.notEqual(lie.leader.name, lie.headOfState);
+        assert.match(leader.note, /^Regent for the head of state · since 2004/, `${width}: ${leader.note}`);
+      }
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
   assert.deepEqual(errors, []);
 });
 

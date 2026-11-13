@@ -93,7 +93,12 @@
   grid-template-areas: "fit side" "cap side" "strip strip" "ctl ctl" "note note"; }
 .kn-theatre:fullscreen[data-side="on"][data-dir="column"] { grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto auto auto; grid-template-areas: "fit" "cap" "side" "strip" "ctl" "note"; }
 .kn-theatre:fullscreen[data-side="on"] > .kn-side { min-height: 0; height: auto; }
-/* Text on the stage keeps its share of the picture in full screen: each ceiling becomes its cqw value with its floor. */
+/* Page only (G): the pane fills the screen above the controls; the stage, the sentence box and the strip are kept out
+   of sight (the film plays on, so the pane follows it), and the divider has nothing to divide. */
+.kn-theatre:fullscreen[data-side="on"][data-page-only], .kn-theatre:fullscreen[data-side="on"][data-dir][data-page-only] {
+  grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; grid-template-areas: "side" "ctl" "note"; }
+.kn-theatre:fullscreen[data-page-only] > .kn-fit, .kn-theatre:fullscreen[data-page-only] > .kn-captions,
+.kn-theatre:fullscreen[data-page-only] > .kn-related, .kn-theatre:fullscreen[data-page-only] .prp-split-bar { display: none; }/* Text on the stage keeps its share of the picture in full screen: each ceiling becomes its cqw value with its floor. */
 .kn-theatre:fullscreen .kn-v-title h3 { font-size: max(22px, 5.6cqw); }
 .kn-theatre:fullscreen .kn-v-title .sub { font-size: max(14px, 2.4cqw); }
 .kn-theatre:fullscreen .kn-v-portrait .text h3 { font-size: max(20px, 4.4cqw); }

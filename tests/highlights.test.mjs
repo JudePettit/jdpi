@@ -162,7 +162,7 @@ test('logic: every address fetched is fixed, whatever the data says', async () =
 /* --- METRIC 1: volatility movers --------------------------------------------------------------------------------- */
 test('logic: volatility shows the page\'s own movers with medium or high coverage, biggest change first', async () => {
   const g = byId(await run(ALL_GOOD), 'volatility');
-  assert.equal(g.title, 'Biggest movers · 7 days', 'worded as the page\'s own panel');
+  assert.equal(g.title, 'Geopolitical change · 7 days', 'Jude\'s heading for the slot (the page\'s own panel keeps "Biggest movers")');
   assert.equal(g.source, 'GDELT');
   assert.equal(g.href, ROUTES.volatility);
   assert.equal(g.link, 'Geopolitical Volatility');
@@ -208,7 +208,7 @@ test('logic: volatility with no lists, or no file, is unavailable', async () => 
     assert.equal(byId(groups, 'volatility'), undefined, 'left out of the resolved groups');
     const slot = seen.find(g => g.id === 'volatility');
     assert.deepEqual(slot, unavailableGroup('volatility'), 'onGroup still gets the slot, as unavailable');
-    assert.equal(slot.title, 'Biggest movers · 7 days'); assert.deepEqual(slot.items, []); assert.equal(slot.note, 'Not available just now.');
+    assert.equal(slot.title, 'Geopolitical change · 7 days'); assert.deepEqual(slot.items, []); assert.equal(slot.note, 'Not available just now.');
   }
 });
 

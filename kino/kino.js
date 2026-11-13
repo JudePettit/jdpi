@@ -3,7 +3,8 @@
    data/<category>/<id>.json (see README.md); data/index.json, media.json and iso.json are built by scripts/build-index.mjs.
    Split view (V) shows each scene's place in Vitruvian Manager in a pane beside the film (design/prp-split.js), in place
    of the block of text, which gives way to the sentence being read; Related (T) is a strip of the screens related to
-   the scene, with a See more panel; full screen (F) fits the 16:9 stage to the screen, beside the pane when it is on. */
+   the scene, with a See more panel; full screen (F) fits the 16:9 stage to the screen, beside the pane when it is on;
+   Page only (G) fills the screen with the pane alone, which follows the film as it plays on. */
 import { CATEGORIES, categoryOf, flatScenes, shortCite } from './lib/format.js';
 import { tokens, sentences, sentenceRuns, estimateSeconds } from './lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute, readKinoView, kinoViewHash, linkPlace } from './lib/links.js';
@@ -34,6 +35,8 @@ const S = {
   // Split view, the pane held on a place, the Related strip (shown or not), the sentence runs of the scene on screen,
   // the sentence shown in the sentence box, and the scene's related places.
   split: false, hold: false, related: !inSide && store.get('prp.kino.related', false), runs: [], shown: 0, rel: [], relOwn: true,
+  // Page only (G): the pane alone, full screen, still following the film; and whether Split view was on before it.
+  pageOnly: false, splitBefore: false, fsBefore: false,
 };
 
 /* ---------- the registry: names, icons and codes for links ---------- */
@@ -461,11 +464,43 @@ function setSplit(on, { show = true, remember = true } = {}) {
     if (!was) { S.hold = false; pane.setHold(false); }
     if (show) showScenePlace();
   } else {
+    if (S.pageOnly) leavePageOnly({ restore: false }); // nothing left to show on its own
     pane?.drop(); // no frame stays behind: a page in a hidden frame keeps running
     S.hold = false; pane?.setHold(false);
   }
   markSentence(S.shown);
   writeAddress();
+}
+
+/* ---------- Page only: the scene's place in Vitruvian Manager alone, full screen (Jude, 12 November 2026) ----------
+   Full screen (F) shows the film, beside the pane with Split view on; Page only (G, its button beside full screen)
+   fills the screen with the pane alone, over the player's controls. The film plays on unseen, so the pane follows the
+   scene as it does in Split view (unless it is held). The same button or key, Escape, or F brings the player back as
+   it was: Split view on or off as before. It turns Split view on for its time if it was off. */
+function setPageOnly(on) {
+  on = !!on && !inSide && !!fs?.supported;
+  if (on === S.pageOnly) return;
+  if (!on) { leavePageOnly(); return; }
+  S.splitBefore = S.split; S.fsBefore = fs.on;
+  if (!S.split) setSplit(true, { remember: false });
+  S.pageOnly = true;
+  markPageOnly();
+  // A browser that refuses full screen (no click or key behind it) leaves the player as it was.
+  if (!fs.on) fs.toggle().then(() => { if (S.pageOnly && !fs.on) leavePageOnly(); });
+}
+function leavePageOnly({ restore = true } = {}) {
+  if (!S.pageOnly) return;
+  S.pageOnly = false;
+  markPageOnly();
+  // Back to the film's full screen if Page only began there; otherwise out of full screen.
+  if (fs?.on && !(restore && S.fsBefore)) fs.exit();
+  if (restore && !S.splitBefore && S.split) setSplit(false, { remember: false });
+}
+function markPageOnly() {
+  $('#theatre').toggleAttribute('data-page-only', S.pageOnly);
+  const b = $('#pageonly');
+  b.setAttribute('aria-pressed', String(S.pageOnly));
+  b.title = S.pageOnly ? 'Back to the film (G)' : 'Page only: this scene\'s page in Vitruvian Manager on its own, full screen, following the film (G)';
 }
 /** The scene's place button, O, the list under the player and a module card: as before, the shell moves there (or a
     new tab opens); with Split view on, or in full screen, the pane shows it instead. */
@@ -638,11 +673,16 @@ function wire() {
   fs = fullScreen($('#theatre'), { onChange: on => {
     const b = $('#fullscreen');
     b.setAttribute('aria-label', on ? 'Leave full screen' : 'Full screen'); b.title = on ? 'Leave full screen (F)' : 'Full screen (F)';
+    if (!on && S.pageOnly) { S.fsBefore = false; leavePageOnly(); } // Escape (or F) ends Page only too
     markSentence(S.shown);
     if (moreOpen()) requestAnimationFrame(placeMore);
   } });
   $('#fullscreen').hidden = !fs.supported;
-  $('#fullscreen').onclick = () => fs.toggle();
+  $('#fullscreen').onclick = () => { if (S.pageOnly) { S.fsBefore = false; leavePageOnly(); } else fs.toggle(); };
+  // Page only: not offered without full screen, nor in another page's pane (which has no pane of its own).
+  $('#pageonly').hidden = !fs.supported || inSide;
+  $('#pageonly').onclick = () => setPageOnly(!S.pageOnly);
+  markPageOnly();
   // Split view, Hold and Related: not offered in another page's pane.
   $('#theatre').classList.add('prp-split'); $('#theatre').dataset.side = 'off'; $('#side').hidden = true;
   if (inSide) for (const id of ['#split', '#related', '#follow']) $(id).hidden = true;
@@ -678,6 +718,7 @@ function wire() {
     const view = inSide ? {} : {
       v: () => setSplit(!S.split), V: () => setSplit(!S.split), t: () => setRelated(!S.related), T: () => setRelated(!S.related),
       h: () => S.split && setHold(!S.hold), H: () => S.split && setHold(!S.hold), p: () => setFollow(!S.follow), P: () => setFollow(!S.follow),
+      g: () => !$('#pageonly').hidden && setPageOnly(!S.pageOnly), G: () => !$('#pageonly').hidden && setPageOnly(!S.pageOnly),
     };
     const k = e.key, act = {
       ' ': toggle, k: toggle, K: toggle, ArrowLeft: () => go(S.i - 1), ArrowRight: () => go(S.i + 1), j: () => go(S.i - 1), l: () => go(S.i + 1), Home: () => go(0), End: () => go(S.scenes.length - 1),

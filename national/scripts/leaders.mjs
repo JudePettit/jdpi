@@ -119,6 +119,9 @@ const named = h => hasLetters(h?.name);
 export function leaderOffice({ atlas = null, decision = null, government = [], heads = {}, sameOffice = false, sharedHead = false, retro = null } = {}) {
   const hos = heads.headOfState || null, hog = heads.headOfGovernment || null;
   if (OFFICES.includes(atlas?.executive?.leader)) return { office: atlas.executive.leader, rule: 'atlas' };
+  // A regent exercises the head of state's powers (Liechtenstein): the office is the head of state's, and
+  // currentLeader names the regent where leader-corrections.json gives one.
+  if (atlas?.executive?.leader === 'regent') return { office: 'headOfState', rule: 'atlas' };
   if (OFFICES.includes(decision?.office)) return { office: decision.office, rule: 'decision' };
   if (named(hos) && named(hog) && ((hos.qid && hos.qid === hog.qid) || hos.name === hog.name)) return { office: 'headOfState', rule: 'same-person' };
   if (sameOffice) return { office: 'headOfState', rule: 'same-office' };
@@ -136,8 +139,15 @@ export function leaderOffice({ atlas = null, decision = null, government = [], h
 // be (vacant: the offices Wikidata or the Atlas give as having no holder now); with nothing known, the other office's
 // holder (San Marino: the Atlas names its Congress of State, which Wikidata does not give as head of government). Null
 // only where there is no head at all.
+// Where the head of state's powers are exercised by a regent on his behalf (heads.regent, from a 'regent' correction:
+// Liechtenstein, where Hereditary Prince Alois has acted for Prince Hans-Adam II since 15 August 2004; Jude, 12 November
+// 2026), the leader is the regent, office 'regent', and the head of state stays head of state.
 // { name, qid, office, rule, since, party, url, source: 'wikidata' | 'correction' | 'vacant' }
 export function currentLeader({ office, rule }, heads = {}, { retro = null, vacant = [] } = {}) {
+  if (office === 'headOfState' && named(heads.regent)) {
+    const r = heads.regent;
+    return { name: r.name, qid: r.qid || null, office: 'regent', rule, since: r.start || null, party: null, url: r.qid ? `https://www.wikidata.org/wiki/${r.qid}` : null, source: 'correction' };
+  }
   const h = heads[office];
   if (!named(h)) {
     if (vacant.includes(office)) return { name: 'Vacant', qid: null, office, rule, since: null, party: null, url: null, source: 'vacant' };
@@ -185,13 +195,28 @@ export function atlasDisagreement(atlas, office, heads, vacant = []) {
 
 // Corrections: [{ iso3, field: 'headOfState' | 'headOfGovernment', name, source, checked, replaces }]. One applies only
 // while Wikidata still gives the value it replaces, so it lapses by itself once Wikidata is put right.
+// A regent is a correction of its own kind: { iso3, field: 'regent', name, qid, since, actsFor, source, checked,
+// replaces: null }. It adds heads.regent and changes neither head, and applies only while Wikidata's head of state is
+// still the one it acts for (actsFor, as Wikidata writes the name), so it lapses by itself when the regent succeeds.
 // heads: Map iso3 -> { headOfState, headOfGovernment } (each { name, qid, start } or null), changed in place.
-export const FIELDS = ['headOfState', 'headOfGovernment'];
+export const FIELDS = ['headOfState', 'headOfGovernment', 'regent'];
 export function applyCorrections(heads, corrections = [], log = () => {}) {
   const applied = [], lapsed = [];
   for (const k of corrections) {
-    if (!k || !FIELDS.includes(k.field) || !hasLetters(k.name) || !k.iso3) { log(`correction skipped (incomplete): ${JSON.stringify(k)}`); continue; }
+    if (!k || !FIELDS.includes(k.field) || !hasLetters(k.name) || !k.iso3 || (k.field === 'regent' && !hasLetters(k.actsFor))) { log(`correction skipped (incomplete): ${JSON.stringify(k)}`); continue; }
     const h = heads.get(k.iso3);
+    if (k.field === 'regent') {
+      const head = h?.headOfState?.name ?? null;
+      if (h && head === k.actsFor) {
+        h.regent = { name: k.name, qid: /^Q[1-9]\d*$/.test(k.qid || '') ? k.qid : null, start: k.since || null, corrected: true };
+        applied.push(k);
+        log(`correction applied: ${k.iso3} regent "${k.name}" for the head of state "${head}" (${k.source}, checked ${k.checked})`);
+      } else {
+        lapsed.push(k);
+        log(`correction lapsed: ${k.iso3} regent: Wikidata's head of state is now "${head ?? '(none)'}", not "${k.actsFor}"; remove it from leader-corrections.json`);
+      }
+      continue;
+    }
     const now = h?.[k.field]?.name ?? null;
     if (h && now === (k.replaces ?? null)) {
       h[k.field] = { name: k.name, qid: null, start: null, corrected: true };

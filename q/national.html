@@ -343,7 +343,9 @@ const leaderHtml = c => (!c.leader ? '–' : c.leader.source === 'vacant' ? 'Vac
 const leaderNote = c => {
   const l = c.leader;
   if (!l) return '';
-  return [OFFICE[l.office] ? esc(OFFICE[l.office][0].toUpperCase() + OFFICE[l.office].slice(1)) : '', l.since ? 'since ' + esc(String(l.since).slice(0, 4)) : '', l.party ? esc(l.party) : ''].filter(Boolean).join(' · ');
+  // A regent exercises the head of state's powers for him, who stays head of state (Liechtenstein).
+  const office = l.office === 'regent' ? 'Regent for the head of state' : OFFICE[l.office] ? OFFICE[l.office][0].toUpperCase() + OFFICE[l.office].slice(1) : '';
+  return [esc(office), l.since ? 'since ' + esc(String(l.since).slice(0, 4)) : '', l.party ? esc(l.party) : ''].filter(Boolean).join(' · ');
 };
 // The head of government under the head of state, where it is someone else (or no one).
 const hogNote = c => (c.headOfGovernment ? (c.headOfGovernment !== c.headOfState ? 'Head of government: ' + headHtml(c, 'headOfGovernment') : '') : c.vacant?.includes('headOfGovernment') ? 'Head of government: Vacant' : '');

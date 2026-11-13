@@ -370,3 +370,50 @@ test('without a verdict (a refusal, or no API key) only the fixed rules filter, 
   assert.equal(upserts(keyless).length, 2, 'no backfill without Claude');
   assert.equal(keyless.response.translation, 'not configured');
 });
+
+// Jude, 25 October 2026: translate before loading. A stored story whose English title has not arrived (title_en null)
+// is hidden until it does, on every page that lists the stories (they all read them through q/supabase-client.js):
+// no "translation pending" row, and every count counts only what is shown. The archive is faked, so the rows are
+// known; the fake answers every query alike, so the page's own check is tested as well as the query's.
+test('a story with no English title yet is not shown or counted, on the Tracker, National Analysis and the Battlefield', pageTest, async t => {
+  const { launch } = await import('./tools/pages.mjs');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const day = new Date().toISOString().slice(0, 10);
+  const row = (outlet, host, r, k, en) => ({ snapshot_date: day, country_code: 'GB', outlet, outlet_domain: host, outlet_rank: r, story_rank: k, title_original: `${outlet} original ${k} Kyiv`, title_en: en, url: `https://${host}/news/${k}`, published_at: null, lowbrow: false });
+  const rows = [row('One Daily', 'one.example', 1, 1, 'One Daily story 1 Kyiv'), row('One Daily', 'one.example', 1, 2, null), row('One Daily', 'one.example', 1, 3, 'One Daily story 3 Kyiv'),
+    row('Two Post', 'two.example', 2, 1, null), row('Two Post', 'two.example', 2, 2, '  '), row('Three Times', 'three.example', 3, 1, 'Three Times story 1 Kyiv')];
+  const asked = [];
+  const open = async (path, width = 1360) => {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/rest/v1/country_top_stories*', r => { asked.push(r.request().url()); r.fulfill({ json: /select=snapshot_date&/.test(r.request().url()) ? [{ snapshot_date: day }] : rows }); });
+    await page.goto(`${BASE}/${path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    return { page, errors };
+  };
+  for (const width of [1360, 360]) {
+    const { page, errors } = await open('q/headlines.html?view=current', width);
+    await page.waitForFunction(() => typeof loadTopStories === 'function');
+    await page.evaluate(() => loadTopStories('GB', 'United Kingdom'));
+    await page.waitForSelector('.outlet-group .article', { timeout: 15000 });
+    const groups = await page.$$eval('.outlet-group', gs => gs.map(g => [g.querySelector('.outlet-name').textContent, ...[...g.querySelectorAll('a.headline')].map(a => a.textContent)]));
+    assert.deepEqual(groups.map(g => g.slice(0, 1).concat(g.slice(1).sort())), [['One Daily', 'One Daily story 1 Kyiv', 'One Daily story 3 Kyiv'], ['Three Times', 'Three Times story 1 Kyiv']], `${width}: only the translated stories, and no outlet with none`);
+    assert.doesNotMatch(await page.textContent('#articles'), /translation pending|original 2|Two Post/i, `${width}: no placeholder and no untranslated story`);
+    assert.equal(await page.textContent('#newsstate'), '3 stories from 2 outlets', `${width}: the count is what is shown`);
+    assert.match(await page.textContent('#status-news'), /Top stories · 3 saved/);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  const nat = await open('q/national#country=GBR');
+  await nat.page.waitForSelector('#stories .story a', { timeout: 30000 });
+  assert.deepEqual((await nat.page.$$eval('#stories .story a', as => as.map(a => a.textContent))).sort(), ['One Daily story 1 Kyiv', 'One Daily story 3 Kyiv', 'Three Times story 1 Kyiv'], 'National Analysis: only the translated');
+  assert.deepEqual(nat.errors, []);
+  await nat.page.close();
+  const war = await open('q/battlefield.html?view=live&war=russia-ukraine');
+  await war.page.waitForSelector('#stories .story a', { timeout: 30000 });
+  assert.deepEqual((await war.page.$$eval('#stories .story a', as => as.map(a => a.textContent))).sort(), ['One Daily story 1 Kyiv', 'One Daily story 3 Kyiv', 'Three Times story 1 Kyiv'], 'the Battlefield: only the translated');
+  await war.page.close();
+  // And the archive is asked for translated stories only, in every query of them.
+  assert.ok(asked.length >= 3 && asked.every(u => /[?&]title_en=not\.is\.null(&|$)/.test(u)), asked.join('\n'));
+});

@@ -13,7 +13,8 @@
 
    HONESTY (PRP-ANALYSIS.md item 3, and the two reviews of this panel): every group is labelled by what its data
    genuinely is, and says what the page it links to says.
-   - Volatility: the Geopolitical Volatility page's own "Biggest movers · 7 days" lists (integration/data/
+   - Volatility, headed "Geopolitical change · 7 days" (Jude's wording, 12 November 2026; the page's own panel keeps
+     its name): the Geopolitical Volatility page's own "Biggest movers · 7 days" lists (integration/data/
      volatility-movers.json, worked out exactly as q/volatility.html does it: the mean of the last 7 scored days minus the
      mean of the 7 before), narrowed to the countries with medium or high coverage, each line saying its coverage and
      the lines left out counted in a note. Every country shown is in the page's lists, with the page's numbers. A rise
@@ -67,7 +68,7 @@ export const BRIEFING_STALE_MS = 2 * 24 * 60 * 60 * 1000;
 
 // Each group's head: what its card says and where it links even when its data could not be read.
 const HEADS = {
-  volatility: { title: 'Biggest movers · 7 days', source: 'GDELT', href: ROUTES.volatility, link: 'Geopolitical Volatility' },
+  volatility: { title: 'Geopolitical change · 7 days', source: 'GDELT', href: ROUTES.volatility, link: 'Geopolitical Volatility' },
   briefings: { title: 'Briefing activity', source: 'Vitruvian Manager Briefings', href: ROUTES.scienceBriefing, link: 'Scientific Briefing' },
   calendar: { title: 'Upcoming', source: 'Political calendar', href: ROUTES.calendar, link: 'Realtime Calendar' },
   markets: { title: 'Market snapshot', source: 'trade-desk', href: ROUTES.markets, link: 'Market Briefing' },

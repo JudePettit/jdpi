@@ -1267,3 +1267,67 @@ test('page: the Follow button reads "Follow in VM", one word space apart, and th
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// Jude, 12 November 2026: a full screen of the Vitruvian Manager page alone. Page only (G, its button beside full
+// screen) fills the screen with the pane, which follows the film as it moves on; the same button or key brings the
+// player back as it was.
+test('page: Page only fills the screen with the scene\'s page, follows the film, and G brings the player back as it was', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const [width, height] of [[1400, 900], [390, 844]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      await openFilm(page, 'wars', '#doc=ww2-europe&s=poland');
+      const b = page.locator('#controls #pageonly');
+      assert.equal(await b.count(), 1, 'a control in the player\'s row, beside full screen');
+      assert.equal(await page.evaluate(() => document.querySelector('#fullscreen').nextElementSibling?.id), 'pageonly');
+      assert.equal(await page.getByRole('button', { name: 'Page only' }).count(), 1, 'named "Page only"');
+      assert.equal(await b.getAttribute('aria-pressed'), 'false');
+      assert.equal(await page.locator('#side').isHidden(), true, 'Split view is off');
+      // On: full screen, the pane alone with the scene's place, the film out of sight.
+      await b.click();
+      await page.waitForFunction(() => document.fullscreenElement?.id === 'theatre');
+      await sideFrame(page, 'war-focus');
+      assert.equal(await b.getAttribute('aria-pressed'), 'true');
+      const side = await rect(page, '#side'), stage = await rect(page, '#stage');
+      assert.ok(Math.abs(side.w - width) <= 2 && side.h >= height * 0.6, `${width}: the page fills the screen (${JSON.stringify(side)})`);
+      assert.equal(stage.w, 0, `${width}: the film is out of sight`);
+      assert.equal(await page.locator('#captions').isHidden(), true);
+      assert.equal(await page.locator('#controls').isVisible(), true, 'the controls stay, to play, pause and come back');
+      // The film moves on, and the page follows it.
+      await page.keyboard.press('ArrowRight');
+      await page.waitForFunction(() => document.querySelector('#side iframe[data-module="war-focus"]').contentWindow.location.hash === '#war=ww2&m=1940-05');
+      // G again: back as it was, out of full screen and with Split view off again.
+      await page.keyboard.press('g');
+      await page.waitForFunction(() => !document.fullscreenElement);
+      assert.equal(await b.getAttribute('aria-pressed'), 'false');
+      assert.equal(await page.locator('#split').getAttribute('aria-pressed'), 'false', 'Split view off, as before');
+      assert.equal(await page.locator('#side').isHidden(), true);
+      assert.ok((await rect(page, '#stage')).w > 0, 'the film is back');
+      assert.doesNotMatch(await page.evaluate(() => location.hash), /split=1/);
+      // From the film's own full screen with Split view on, G and G again come back to that full screen, pane beside.
+      await page.keyboard.press('v');
+      await sideFrame(page, 'war-focus');
+      await page.click('#fullscreen');
+      await page.waitForFunction(() => document.fullscreenElement?.id === 'theatre');
+      await page.keyboard.press('g');
+      await page.waitForFunction(() => document.querySelector('#theatre').hasAttribute('data-page-only'));
+      assert.equal((await rect(page, '#stage')).w, 0);
+      await page.keyboard.press('G');
+      await page.waitForFunction(() => !document.querySelector('#theatre').hasAttribute('data-page-only'));
+      assert.equal(await page.evaluate(() => document.fullscreenElement?.id), 'theatre', 'still the film\'s full screen');
+      assert.ok((await rect(page, '#stage')).w > 0);
+      assert.equal(await page.locator('#split').getAttribute('aria-pressed'), 'true', 'Split view on, as before');
+      // Escape (here F, as the browser keeps Escape) leaves Page only and full screen at once.
+      await page.keyboard.press('g');
+      await page.waitForFunction(() => document.querySelector('#theatre').hasAttribute('data-page-only'));
+      await page.keyboard.press('f');
+      await page.waitForFunction(() => !document.fullscreenElement);
+      assert.equal(await b.getAttribute('aria-pressed'), 'false');
+      assert.equal(await page.evaluate(() => document.querySelector('#theatre').hasAttribute('data-page-only')), false);
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+});

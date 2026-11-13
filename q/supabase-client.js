@@ -23,6 +23,14 @@
     return body;
   }
 
+  // Jude, 25 October 2026: translate before loading. A stored story whose English title has not arrived yet (title_en is
+  // null until the Edge Function translates it) is not shown at all, never as "translation pending": every query of the
+  // stories asks only for translated ones, and their rows are checked again here, so every list and count on a page
+  // (the Global Headline Tracker, National Analysis's latest headlines, Realtime Battlefield's stories) counts only what
+  // it shows. English-language outlets' stories carry their own title as title_en.
+  const TRANSLATED = "not.is.null";
+  const translated = rows => (Array.isArray(rows) ? rows.filter(r => r && typeof r.title_en === "string" && r.title_en.trim()) : rows);
+
   function tablePath(table, params) {
     return `/rest/v1/${table}?${new URLSearchParams(params).toString()}`;
   }
@@ -59,19 +67,20 @@
     // lowbrow filter hid (lowbrow = true, headlines/refresh-top-stories/lowbrow.js) are left out of every query here;
     // lowbrow is null while a story waits for its verdict.
     async topStories(countryCode, startDate, endDate) {
-      return request(tablePath("country_top_stories", {
+      return translated(await request(tablePath("country_top_stories", {
         select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at,lowbrow",
         country_code: `eq.${countryCode}`,
         lowbrow: "not.is.true",
+        title_en: TRANSLATED,
         and: `(snapshot_date.gte.${startDate},snapshot_date.lte.${endDate})`,
         order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
         limit: "2000"
-      }));
+      })));
     },
 
     async latestTopStories(countryCode) {
       const latest = await request(tablePath("country_top_stories", {
-        select: "snapshot_date", country_code: `eq.${countryCode}`, lowbrow: "not.is.true", order: "snapshot_date.desc", limit: "1"
+        select: "snapshot_date", country_code: `eq.${countryCode}`, lowbrow: "not.is.true", title_en: TRANSLATED, order: "snapshot_date.desc", limit: "1"
       }));
       if (!latest?.length) return [];
       const d = latest[0].snapshot_date;
@@ -82,14 +91,15 @@
     async storiesMatching(keywords, sinceDate, limit = 30) {
       const terms = keywords.map(k => k.replace(/[^\p{L}\p{N} -]/gu, "")).filter(Boolean);
       if (!terms.length) return [];
-      return request(tablePath("country_top_stories", {
+      return translated(await request(tablePath("country_top_stories", {
         select: "snapshot_date,country_code,outlet,outlet_domain,title_original,title_en,url,published_at",
         snapshot_date: `gte.${sinceDate}`,
         lowbrow: "not.is.true",
+        title_en: TRANSLATED,
         or: `(${terms.flatMap(t => [`title_en.ilike.*${t}*`, `title_original.ilike.*${t}*`]).join(",")})`,
         order: "snapshot_date.desc,outlet_rank.asc,story_rank.asc",
         limit: String(limit)
-      }));
+      })));
     },
 
     async latestHeadlineStatus(countryCode) {

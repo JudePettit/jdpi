@@ -1,5 +1,5 @@
 {
-  "about": "Corrections to Wikidata's heads of state and government, applied by build.mjs after Wikidata (leaders.mjs, applyCorrections). Each: iso3 (World Bank code), field (headOfState or headOfGovernment), name (the right name), source (the address it was checked at), checked (YYYY-MM-DD), replaces (the Wikidata value it replaces, or null for none), note (why, optional). A correction applies only while Wikidata still gives the value it replaces, so it lapses by itself once Wikidata is put right; the build logs each one applied and each one lapsed.",
+  "about": "Corrections to Wikidata's heads of state and government, applied by build.mjs after Wikidata (leaders.mjs, applyCorrections). Each: iso3 (World Bank code), field (headOfState or headOfGovernment), name (the right name), source (the address it was checked at), checked (YYYY-MM-DD), replaces (the Wikidata value it replaces, or null for none), note (why, optional). A correction applies only while Wikidata still gives the value it replaces, so it lapses by itself once Wikidata is put right; the build logs each one applied and each one lapsed. A regent (field regent) is a correction of its own kind: the person who exercises the head of state's powers on his behalf, with qid, since and actsFor (the head of state he acts for, as Wikidata names him) and replaces null; it changes neither head, makes the regent the current leader where the head of state's office holds the power, and applies only while Wikidata's head of state is still actsFor.",
   "corrections": [
     {
       "iso3": "GUY",
@@ -180,6 +180,18 @@
       "checked": "2026-11-06",
       "replaces": "John Rankin",
       "note": "Governor since January 2025 (the King's representative); Wikidata still gives the governor who left in 2020."
+    },
+    {
+      "iso3": "LIE",
+      "field": "regent",
+      "name": "Alois, Hereditary Prince of Liechtenstein",
+      "qid": "Q311308",
+      "since": "2004-08-15",
+      "actsFor": "Hans-Adam II, Prince of Liechtenstein",
+      "source": "https://fuerstenhaus.li/en/?p=2071",
+      "checked": "2026-11-13",
+      "replaces": null,
+      "note": "Prince Hans-Adam II appointed Hereditary Prince Alois his deputy under Article 13bis of the Constitution on 15 August 2004, and Alois has carried out the duties of head of state since then; Hans-Adam II remains the reigning prince and so head of state (https://fuerstenhaus.li/en/?p=2018). National Analysis names Alois as the current leader (Jude, 12 November 2026)."
     }
   ]
 }

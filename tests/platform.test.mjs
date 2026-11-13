@@ -775,7 +775,14 @@ test('the app: with the worker, the shell and IoT Connect open with no connectio
     await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
     // The shell does not register the worker in a browser a test drives (so routed requests stay visible): register it here.
     await p.evaluate(async () => { await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; });
-    await p.waitForFunction(async () => (await (await caches.open('vm-shell-1')).keys()).length >= 25, null, { timeout: 20000 });
+    // The wait runs here and not in waitForFunction, which does not wait for an async function's answer: it took the
+    // first look, whatever that look said, so the page went offline before the worker had stored the shell's files.
+    let cached = 0;
+    for (const end = Date.now() + 20000; cached < 25 && Date.now() < end;) {
+      cached = await p.evaluate(async () => (await (await caches.open('vm-shell-1')).keys()).length);
+      if (cached < 25) await p.waitForTimeout(200);
+    }
+    assert.ok(cached >= 25, `the worker stored ${cached} of the shell's files within 20 seconds`);
     await ctx.setOffline(true);
     await p.reload({ waitUntil: 'domcontentloaded' });
     await p.waitForSelector('#nav details.suite', { state: 'attached' }); // in the phone drawer, closed

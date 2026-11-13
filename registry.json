@@ -745,7 +745,7 @@
           "id": "iot-connect",
           "name": "IoT Connect",
           "kind": "operations",
-          "icon": "⌂",
+          "icon": "⊶",
           "status": "live",
           "host": "Vitruvian Manager",
           "url": "digital/iot-connect/index.html",

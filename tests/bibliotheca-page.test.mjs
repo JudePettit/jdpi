@@ -1443,3 +1443,42 @@ test('page: the scan-read books name their scans, their witnesses and, where a t
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// Jude, 12 November 2026: on a phone the Augmented Reading button no longer shortens the chapter's title. It has a row
+// of its own under the title, in words, with the same name and key; the title shows in full. Wider, nothing changes.
+test('page: at 360 wide the Augmented Reading button has its own row under the title, in words, and the title is whole; at 1366 it stays in the title\'s row', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const head = page => page.evaluate(() => {
+      const box = s => { const r = document.querySelector(s).getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right) }; };
+      const t = document.querySelector('#chapter-name'), ar = document.querySelector('#ar-toggle');
+      const others = [...document.querySelectorAll('.nc-chapter-row > *')].filter(e => e !== ar && e.offsetParent).map(e => e.getBoundingClientRect());
+      const a = ar.getBoundingClientRect();
+      return { title: box('#chapter-title'), ar: box('#ar-toggle'), whole: t.scrollWidth <= t.clientWidth + 1,
+        shares: others.some(r => r.top < a.bottom - 1 && r.bottom > a.top + 1), words: ar.querySelector('.lbl').getBoundingClientRect().width > 0 ? ar.querySelector('.lbl').textContent : '',
+        sw: document.documentElement.scrollWidth };
+    });
+    // Chapter XVIII's title is the longest in The Prince: it shortened to "Concer…" at 360 before.
+    const phone = await reading(browser, '#book=the-prince&ch=18', { viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, ar: false });
+    const p = await head(phone.page);
+    assert.ok(p.whole, `the title is whole: ${JSON.stringify(p)}`);
+    assert.ok(p.ar.top >= p.title.bottom, `the button is under the title: ${JSON.stringify(p)}`);
+    assert.equal(p.shares, false, 'nothing else shares its row');
+    assert.equal(p.words, 'Augmented Reading', 'its label in words');
+    assert.ok(p.ar.left >= 16 && p.ar.right <= 344, `inside the column: ${JSON.stringify(p.ar)}`);
+    assert.equal(p.sw, 360, 'no sideways scroll');
+    assert.equal(await phone.page.getByRole('button', { name: 'Augmented Reading' }).count(), 1, 'its accessible name');
+    await phone.page.keyboard.press('a');
+    await phone.page.waitForSelector('#nar:not([hidden])');
+    assert.equal(await phone.page.getAttribute('#ar-toggle', 'aria-pressed'), 'true', 'A still turns it on');
+    const on = await head(phone.page);
+    assert.ok(on.whole && on.ar.top >= on.title.bottom && on.sw === 360, `on, the head still holds: ${JSON.stringify(on)}`);
+    assert.deepEqual(phone.errors, []);
+    await phone.ctx.close();
+    const desk = await reading(browser, '#book=the-prince&ch=18', { ar: false });
+    const d = await head(desk.page);
+    assert.ok(d.ar.top < d.title.bottom && d.ar.bottom > d.title.top, `1366: in the title's row, as before: ${JSON.stringify(d)}`);
+    assert.deepEqual(desk.errors, []);
+    await desk.ctx.close();
+  } finally { await browser.close(); }
+});

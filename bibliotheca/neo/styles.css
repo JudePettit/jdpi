@@ -201,6 +201,16 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 /* The mode's button drops its words wherever they would leave the chapter's title under 200 px (the head is one
    reading column wide at every screen size). */
 @container nc-head (max-width: 660px) { #ar-toggle .lbl { display: none; } }
+/* On a phone (Jude, 12 November 2026) the button has a row of its own under the chapter's title, in words, and the
+   title shows in full, beside the contents button, on a second line where it needs one; the chapter arrows, the terms
+   and Links follow on the next row, and the mode's button on its own row under them. */
+@media (max-width: 640px) {
+  .nc-chapter-row { flex-wrap: wrap; height: auto; min-height: 36px; row-gap: 6px; }
+  .nc-chapter-title { flex: 1 1 calc(100% - 40px); white-space: normal; align-self: center; }
+  .nc-chapter-title .t { overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+  .nc-chapter-row #ar-toggle { order: 1; flex: 1 0 100%; justify-content: center; }
+  .nc-chapter-row #ar-toggle .lbl { display: inline; }
+}
 .nc-chapter-row .lbl { margin-left: 5px; }
 .nc-nar { display: flex; align-items: center; gap: 6px; height: 30px; margin-top: 6px; }
 .nc-nar .prp-btn { flex: none; }

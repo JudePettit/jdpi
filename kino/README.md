@@ -218,10 +218,10 @@ The chapter list shows the parts; the quiz appears under the player when the cou
   the same timing silently and never asks the proxy.
 - **Music**: the reader's public-domain and CC0 Commons recordings, quiet and ducked under the voice; off by default.
 - **Controls**: play/pause, previous/next scene, scene bar, chapters, speed (0.8× to 1.5×), voice or captions only,
-  music, follow along, Split view, Related, full screen. The two newest buttons show their sign alone unless the row of
-  controls is at least 1,050 px wide (their names are in their tooltips). **Keys**: Space or K play/pause · ← → or J L
-  scene · Home End · < > speed · C captions only · M music · P follow along · O open this scene's place · V Split view ·
-  T Related · H hold the pane or let go · F full screen · ? shortcuts. On the pane's divider: ← → Home End Enter. A key
+  music, follow along, Split view, Related, full screen, Page only. The three newest buttons show their sign alone unless
+  the row of controls is at least 1,050 px wide (their names are in their tooltips). **Keys**: Space or K play/pause ·
+  ← → or J L scene · Home End · < > speed · C captions only · M music · P follow along · O open this scene's place ·
+  V Split view · T Related · H hold the pane or let go · F full screen · G Page only · ? shortcuts. On the pane's divider: ← → Home End Enter. A key
   something else has handled (the divider's) is left alone.
 - Inside the shell, leaving Kino (its frame hidden) pauses the film unless it is following along: the theatre's box
   becomes 0 × 0 (the frame's window keeps its size in Edge), seen by an IntersectionObserver and as each sentence starts.
@@ -277,6 +277,16 @@ column running the full height above the strip and the controls (one column unde
 held sideways) the box is two lines and the controls one row of signs.
 F, the button and Escape leave it; so do a course's end (its quiz is under the player), "Sources" on the end card, Open
 in the pane, and any move of the shell (`shell.js` leaves full screen when it changes the frame in view).
+
+### Page only (G)
+
+Full screen of the page alone (Jude, 12 November 2026): **Page only**, the button beside full screen (▣, with its name
+where the row has room), or G, fills the screen with the pane, above the player's controls; the stage, the sentence box
+and the strip are out of sight. The film plays on unseen, so the pane follows each scene as it does in Split view
+(unless it is held), and the controls still play, pause and move between scenes. It turns Split view on for its time
+if it was off. The button or G again, Escape, F, or Split view off bring the player back as it was: Split view on or
+off as before, and the film's full screen if Page only began there. It is not offered where full screen is not, nor in
+another page's pane.
 
 ## Now playing (inside the shell)
 

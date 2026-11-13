@@ -523,9 +523,16 @@ test('page: tabs, hash, documents and the GNSS sample in Edge', { skip: !process
     await page.goto(`${base}/sigint/index.html#tab=cookbook&s=satdump`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#cb-doc section.md-sec');
     assert.ok(await page.locator('#cb-doc section.md-sec').count() >= 28);
-    await page.fill('#cb-q', 'zadig');
-    await page.waitForTimeout(400);
-    const visible = await page.locator('#cb-doc section.md-sec:not([hidden])').count();
+    // Wait until the search has narrowed the list, for up to ten seconds, typing again each second: on a busy runner
+    // a fixed 400 ms was too short, or the first typing landed before the box was wired, and all 30 recipes were
+    // still showing (13 November 2026: this stopped a deploy).
+    let visible = 0;
+    for (let i = 0; i < 50; i++) {
+      if (i % 5 === 0) { await page.fill('#cb-q', ''); await page.fill('#cb-q', 'zadig'); }
+      await page.waitForTimeout(200);
+      visible = await page.locator('#cb-doc section.md-sec:not([hidden])').count();
+      if (visible >= 3 && visible < 15) break;
+    }
     assert.ok(visible >= 3 && visible < 15, `search narrows the recipes (${visible})`);
     await page.click('#tab-gnss');
     assert.match(page.url(), /#tab=gnss$/);

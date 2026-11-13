@@ -1272,6 +1272,10 @@ function wire() {
   // Anything that reflows the page (the web fonts arriving, the pane narrowing the column) holds a pinned paragraph.
   const reflow = new ResizeObserver(() => { holdPin(); schedule(); });
   reflow.observe($('#text')); reflow.observe($('.nc-page'));
+  // The head's height follows the chapter's title, which takes a second line where it is long (at every width since
+  // 13 November 2026), and can change after the chapter is drawn (the web fonts arriving): measure it again then, so a
+  // jump still lands below the head.
+  new ResizeObserver(() => { if (chapter() && $('#head').offsetHeight !== S.headH) observe(); }).observe($('#head'));
   document.fonts?.ready.then(() => { holdPin(); schedule(); });
   for (const ev of ['wheel', 'touchstart', 'pointerdown']) window.addEventListener(ev, e => { if (!e.target.closest?.('.nc-pane, .nc-popout, .nc-toc')) S.pin = null; }, { passive: true });
   let resizeTimer = 0;

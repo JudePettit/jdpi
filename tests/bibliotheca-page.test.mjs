@@ -1482,3 +1482,59 @@ test('page: at 360 wide the Augmented Reading button has its own row under the t
     await desk.ctx.close();
   } finally { await browser.close(); }
 });
+
+// Jude, 13 November 2026: every chapter title shows in full at every width. Wider than a phone the head used to cut the
+// longest short (The Prince, chapter XVIII, at 1366: a box of about 282 px for a title of about 415); the title now takes
+// a second line there, the buttons stay in its row, centred beside it, and a title that fits keeps the 36 px row. The
+// phone layout of 12 November does not change.
+test('page: every chapter title is whole: chapter XVIII wraps at 1024, 1366 and 1920 with the buttons beside it; a short title keeps its row; the phone layout holds', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const head = page => page.evaluate(() => {
+      const box = e => { const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, mid: (r.top + r.bottom) / 2 }; };
+      const t = document.querySelector('#chapter-name'), title = box(document.querySelector('#chapter-title'));
+      const row = document.querySelector('.nc-chapter-row');
+      const buttons = [...row.children].filter(e => e.id !== 'chapter-title' && e.offsetParent).map(e => ({ id: e.id, ...box(e) }));
+      const lh = parseFloat(getComputedStyle(t).lineHeight);
+      return { whole: t.scrollWidth <= t.clientWidth + 1 && t.scrollHeight <= t.clientHeight + 1, lines: Math.round(t.getBoundingClientRect().height / lh), title, buttons,
+        row: row.getBoundingClientRect().height, headVar: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nc-head')),
+        headH: document.querySelector('#head').offsetHeight, sw: document.documentElement.scrollWidth, w: innerWidth };
+    });
+    for (const width of [1024, 1366, 1920]) {
+      const { ctx, page, errors } = await reading(browser, '#book=the-prince&ch=18', { viewport: { width, height: 768 }, ar: false });
+      const h = await head(page);
+      const at = `${width} wide: ${JSON.stringify(h)}`;
+      assert.ok(h.whole, `the title is whole, ${at}`);
+      assert.ok(h.lines >= 2, `on more than one line, ${at}`);
+      // Every button is in the title's row, centred beside it, after it (the contents button before it), and in view.
+      for (const b of h.buttons) {
+        assert.ok(Math.abs(b.mid - h.title.mid) <= 1, `${b.id} is centred on the title, ${at}`);
+        assert.ok(b.id === 'toc-toggle' ? b.right <= h.title.left : b.left >= h.title.right, `${b.id} is beside the title, not over it, ${at}`);
+        assert.ok(b.left >= 0 && b.right <= h.w, `${b.id} is on screen, ${at}`);
+      }
+      assert.equal(h.sw, width, `no sideways scroll, ${at}`);
+      assert.equal(h.headVar, h.headH, `the page knows the head's height, so a jump lands below it, ${at}`);
+      assert.equal(await page.getByRole('button', { name: 'Augmented Reading' }).count(), 1, 'the mode\'s button keeps its name');
+      assert.deepEqual(errors, []);
+      await ctx.close();
+    }
+    // A short title is one line in a 36 px row, as before.
+    const short = await reading(browser, '#book=the-prince&ch=3', { ar: false });
+    const s = await head(short.page);
+    assert.ok(s.whole && s.lines === 1 && s.row === 36, `chapter III: ${JSON.stringify(s)}`);
+    assert.deepEqual(short.errors, []);
+    await short.ctx.close();
+    // The phone layout of 12 November: the title whole beside the contents button, the arrows, the terms and Links on
+    // the next row, and the mode's button on its own row under them.
+    const phone = await reading(browser, '#book=the-prince&ch=18', { viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, ar: false });
+    const p = await head(phone.page);
+    const by = id => p.buttons.find(b => b.id === id);
+    assert.ok(p.whole, `the title is whole: ${JSON.stringify(p)}`);
+    assert.ok(Math.abs(by('toc-toggle').mid - p.title.mid) <= 1, 'the contents button beside the title');
+    for (const id of ['prev', 'next', 'bar-toggle', 'pane-toggle']) assert.ok(by(id).top >= p.title.bottom && by(id).bottom <= by('ar-toggle').top, `${id} on the row under the title`);
+    assert.ok(by('ar-toggle').left >= 16 && by('ar-toggle').right <= 344, 'the mode\'s button on its own row, inside the column');
+    assert.equal(p.sw, 360, 'no sideways scroll');
+    assert.deepEqual(phone.errors, []);
+    await phone.ctx.close();
+  } finally { await browser.close(); }
+});

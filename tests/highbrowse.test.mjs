@@ -397,12 +397,12 @@ test('module: Highbrowse holds its landing page and the four briefings; the page
   assert.deepEqual(css.match(/#[0-9a-fA-F]{3,8}\b/g), null);
 });
 
-test('figure: the Highbrowse figure and its icon, well formed, in the design system\'s colours', () => {
+test('figure: the Omni News module\'s figure and its icon (Highbrowse until 14 November 2026), well formed, in the design system\'s colours', () => {
   const tokens = new Set(read('design/prp.css').match(/#[0-9a-f]{6}\b/gi).map(c => c.toLowerCase()));
   for (const [file, box] of [['design/brand-hb.svg', '0 0 256 256'], ['design/brand-hb-icon.svg', '0 0 32 32']]) {
     const svg = read(file);
     assert.match(svg, new RegExp(`^<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}" role="img" aria-labelledby="[\\w-]+ [\\w-]+">`), file);
-    assert.match(svg, /<title id="[\w-]+">Highbrowse<\/title>/, file);
+    assert.match(svg, /<title id="[\w-]+">Omni News<\/title>/, file);
     for (const [, body] of svg.matchAll(/<!--([\s\S]*?)-->/g)) assert.ok(!body.includes('--'), `${file}: "--" inside a comment is not XML`);
     // Every colour is one of the design system's (the dark tile is its ink, the paper the dark theme's ink, …).
     for (const c of svg.match(/#[0-9a-f]{6}\b/gi)) assert.ok(tokens.has(c.toLowerCase()), `${file}: ${c} is not a design-system colour`);

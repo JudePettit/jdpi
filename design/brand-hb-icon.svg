@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="hbi-title hbi-desc">
-  <title id="hbi-title">Highbrowse</title>
-  <desc id="hbi-desc">The Highbrowse icon: the hard-hatted Vitruvian figure, a monocle in one eye, peering over a newspaper, in Leonardo's circle.</desc>
+  <title id="hbi-title">Omni News</title>
+  <desc id="hbi-desc">The Omni News icon: the hard-hatted Vitruvian figure, a monocle in one eye, peering over a newspaper, in Leonardo's circle.</desc>
   <!-- The reduction of design/brand-hb.svg for 16 to 40 px (the sidebar draws it at 20), on design/brand-vm-icon.svg's
        grid: its circle, its raised arms and its legs, with the newspaper held across the body by the hands at its edges.
        The type becomes what reads at that size, a black nameplate over two lines of columns; the face keeps two eyes

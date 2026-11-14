@@ -452,7 +452,7 @@ test('source: every deep link names its submodule\'s own page, as the shell requ
     assert.equal(want.origin, own.origin, `${href}: same origin as ${m.url}`);
     assert.equal(strip(want.pathname), strip(own.pathname), `${href}: the page of ${m.id}`);
   }
-  assert.equal(new URL(decodeURIComponent(LINKS.symbol('^GSPC').split('?at=')[1])).hash, '#t=%5EGSPC', 'the Market Briefing reads #t= (decodeURIComponent there)');
+  assert.equal(new URL(decodeURIComponent(LINKS.symbol('^GSPC').split('?at=')[1])).hash, '#t=%5EGSPC', 'the Market Monitor reads #t= (decodeURIComponent there)');
   assert.deepEqual(BRIEFINGS.map(b => b.trends), ['science/briefing/data/trends.json', 'econ/briefing/data/trends.json', 'digital/briefing/data/trends.json', 'briefing/data/trends.json']);
 });
 
@@ -717,7 +717,7 @@ test('page: rows and links show their focus ring; the four links have their own 
     await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
     await filled(page);
     const names = await page.$$eval('#today .today-head .more', a => a.map(x => x.getAttribute('aria-label')));
-    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Highbrowse trends', 'View Realtime Calendar', 'View Market Briefing']);
+    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Highbrowse trends', 'View Realtime Calendar', 'View Market Monitor']);
     // Keyboard through the panel from the heading above it: every link shows a 2px ring drawn inside the card.
     await page.evaluate(() => { const h = document.querySelector('#view h1'); h.tabIndex = -1; h.focus(); });
     const links = await page.$$eval('#today a', a => a.length);
@@ -782,7 +782,7 @@ test('page: each kind of line opens its own thing: a country, a topic, an event,
     await f.waitForSelector('#modal:not([hidden])', { timeout: 20000 });
     assert.equal(await f.textContent('#modal-title'), event.title);
 
-    // A ticker: its page on the Market Briefing.
+    // A ticker: its page on the Market Monitor.
     await open('markets', 'S&P 500');
     assert.equal(await page.$eval('#frames iframe.active', el => el.dataset.url), 'https://trade-desk.judep92.workers.dev/markets/#t=%5EGSPC');
     f = await active();

@@ -41,7 +41,7 @@
    - Calendar: event-dated, today onward (calendar/data/upcoming.json); each line opens its event in the Realtime
      Calendar.
    - Markets: each quote carries its own time, and the window says when the quotes were fetched, never "live". Each line
-     opens its ticker on the Market Briefing.
+     opens its ticker on the Market Monitor.
    National Analysis (PESTLE) is monthly and stores no prior-period value, so there is no honest day-to-day change to
    show from it and it is left out entirely.
 
@@ -132,7 +132,7 @@ const HEADS = {
   volatility: { title: 'Geopolitical change · 7 days', source: 'GDELT', href: ROUTES.volatility, link: 'Geopolitical Volatility' },
   briefings: { title: 'Headline trends · 7 days', source: 'Vitruvian Manager Briefings', href: LINKS.trends(), link: 'Highbrowse trends' },
   calendar: { title: 'Upcoming', source: 'Political calendar', href: ROUTES.calendar, link: 'Realtime Calendar' },
-  markets: { title: 'Market snapshot', source: 'trade-desk', href: ROUTES.markets, link: 'Market Briefing' },
+  markets: { title: 'Market snapshot', source: 'trade-desk', href: ROUTES.markets, link: 'Market Monitor' },
 };
 // The group a slot shows when its source failed, timed out or held nothing worth a line.
 export function unavailableGroup(id) {
@@ -376,11 +376,11 @@ async function buildCalendar(ctx) {
   };
 }
 
-/* --- METRIC 4: a market snapshot — a few indices and the top hype movers (MM · Market Briefing) -------------------
+/* --- METRIC 4: a market snapshot — a few indices and the top hype movers (MM · Market Monitor) -------------------
    Each index line shows its price and its own quote time (`time`, epoch seconds), which can be the last session's
    close, hours before the fetch: "7,720.39 · 28 Oct 20:32 UTC". The window says when the Worker assembled the quotes
    (`at`, epoch ms). The hype tickers carry no time of their own and stand under that fetch time. Each line opens its
-   ticker on the Market Briefing (#t=<symbol>, which the money site's page reads). */
+   ticker on the Market Monitor (#t=<symbol>, which the money site's page reads). */
 const HEADLINES = ['^GSPC', '^FTSE', '^N225', 'GC=F', 'BTC-USD'];
 async function buildMarkets(ctx) {
   // Both endpoints are on the trade-desk Worker (CORS-open, ~20 KB each). Read each once, concurrently.

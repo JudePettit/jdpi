@@ -24,7 +24,7 @@ system's colours, on the mark's dark tile so that it reads in both themes. The r
 `"figure"` (the full drawing, for 72 px and up) and `"mark"` (its reduction, for 16 to 40 px). The shell shows the mark
 beside the module's code in the sidebar, in its box on the Home page and on the Dashboard, and the figure at the head of
 the module's overview; the module's landing page shows the figure in its header, as its `<img>` with alt text. So far
-there is one: **Highbrowse**, `design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA
+there is one: **Omni News**, `design/brand-hb.svg` (the figure peering over a broadsheet he holds open, headed ACTA
 DIURNA over NOVA VERITATIS, one eyebrow raised and a monocle in that eye) and `design/brand-hb-icon.svg`. Keep a
 figure's type in `<text>` held by `textLength`, and no double hyphen inside its comments (an SVG with one is not XML,
 and does not draw).
@@ -34,10 +34,10 @@ and does not draw).
 | JDP-I, then PRP (platform) | **Vitruvian Manager** (**VM**), by **JDP-Iq** | | |
 | (new, November 2026) | **Home** (the Home page and the Dashboard) | `home` | HM |
 | Q · Geopolitical Intelligence | **Realtime Geopolitics** | `rt` (alias `q`) | RT |
-| (new, November 2026) | **Highbrowse** (the four briefings) | `hb` | HB |
+| (new, November 2026; Highbrowse until 14 November 2026) | **Omni News** (the four briefings) | `hb` | ON |
 | H&P · History & Politics | **Retrospective Geopolitics** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
-| (new) | **International Mystery Management** (sidebar: **Int-Myst Mngmnt**) | `oi` | OI |
+| (new) | **International Mystery Management** (sidebar: **Int-Myst Mngmnt**) | `oi` | IM (OI until 14 November 2026, from Offensive Intelligence) |
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
@@ -59,15 +59,15 @@ wars, leaders and coming votes."
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`), the name the Highbrowse module shares |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
-| OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | OI (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
-| Intel Training (was OSINT Training) | OI | `fe/learning.html?course=osint|sigint|geoint`: three courses as tabs |
+| OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | IM (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
+| Intel Training (was OSINT Training) | IM | `fe/learning.html?course=osint|sigint|geoint`: three courses as tabs |
 | Master Index | RS | |
 | Political Retrospective (was H&P Retrospective) | RS | external site hp-retrospective.pages.dev |
 | Historical Calendar, Kardashev Tracker | RS | |
 | Retrospective Battlefield | RS | world map 1926–2025 (`battlefield/history/`) |
 | War Focus | RS | now its own submodule (`battlefield/focus/`) |
 | Learning · Politics | RS | `fe/learning.html?course=politics` |
-| Market Briefing (was TD Markets) | MM | trade-desk `/markets/` |
+| Market Monitor (was TD Markets, then Market Briefing until 14 November 2026) | MM | trade-desk `/markets/` |
 | Economics Briefing | HB (moved from MM) | `econ/briefing/` |
 | Tally Stick | MM | trade-desk `/tally/` (private) |
 | Algo Trader (was Double Signal) | MM | trade-desk `/tally/algo/` (private); Double Signal's logic is the **Double Agent** ruleset |
@@ -199,7 +199,7 @@ beside it (`integration/scripts/heads.mjs`): never a copy made at another time, 
 page it links to (`tests/heads.test.mjs`). Each line opens the one thing it names, through the shell's deep link
 (`#/<module>/<submodule>?at=<that page's own address>`): a country (`q/volatility.html#country=IRL`), a topic
 (`highbrowse/index.html#tab=trends&t=economics.monetary`, in Highbrowse's existing frame), an event
-(`q/calendar.html?period=contemporary&event=<key>`) or a ticker (the Market Briefing's `#t=`). A link is built only from a
+(`q/calendar.html?period=contemporary&event=<key>`) or a ticker (the Market Monitor's `#t=`). A link is built only from a
 key that passed its pattern (`KEYS` in `design/prp-highlights.js`); anything else opens the submodule's front page. A
 page opened on a thing that has gone opens as usual, with a plain `.prp-note.warn` saying so. The "Headline trends"
 card and Highbrowse's Trends tab read the same `trends.json`, worked out by `design/prp-trends.js`, so they never
@@ -237,7 +237,7 @@ defined for both themes.
 
 ## 4. Page anatomy (publication front matter + ERP object page)
 
-1. **Header**: `.prp-eyebrow` "Highbrowse · Political Briefing", always with the module's full title
+1. **Header**: `.prp-eyebrow` "Omni News · Political Briefing", always with the module's full title
    ("International Mystery Management · OSINT Dashboard", never the sidebar's "Int-Myst Mngmnt"); mark the eyebrow and
    any standalone brand with `data-jdpi-standalone` only if it duplicates the shell. Then `.prp-title` (serif h1),
    `.prp-dek` (one or two plain sentences: what this is and what you can do), `.prp-meta` line (Updated … · Source … ·

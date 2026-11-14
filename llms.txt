@@ -36,7 +36,7 @@ Ground rules for assistants:
 - [national-key-series](https://jdpi.pages.dev/api/v1/datasets/national-key-series): National Analysis: key indicator time series. Yearly values since 1980 for every country of eight headline indicators (NY.GDP.MKTP.KD.ZG: GDP growth, % a year.
 - [upcoming-political-events](https://jdpi.pages.dev/api/v1/datasets/upcoming-political-events): Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-14 to 2028-05-14 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-### Highbrowse
+### Omni News
 
 - [intelligence-briefing-stories](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-stories): Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right).
 - [intelligence-briefing-sources](https://jdpi.pages.dev/api/v1/datasets/intelligence-briefing-sources): Political Briefing: publishers. The Political Briefing's publishers with their political position (far left, left, centre, right, far right), country, reliability caution and feed status at the last refresh.

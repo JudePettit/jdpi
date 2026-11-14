@@ -341,7 +341,7 @@ describe('the count of modules and where hosting is said', () => {
     const about = id => hostingAbout(registry.suites.find(s => s.id === id));
     assert.match(about('rt'), /Political Atlas is on political-atlas\.pages\.dev \(Cloudflare Pages\)/);
     assert.match(about('rs'), /Political Retrospective is on hp-retrospective\.pages\.dev \(Cloudflare Pages\)/);
-    assert.match(about('mm'), /Market Briefing, Algo Trader and Tally Stick are on trade-desk\.judep92\.workers\.dev \(Cloudflare Workers\); Algo Trader and Tally Stick are private/);
+    assert.match(about('mm'), /Market Monitor, Algo Trader and Tally Stick are on trade-desk\.judep92\.workers\.dev \(Cloudflare Workers\); Algo Trader and Tally Stick are private/);
     assert.match(about('hb'), /^Every submodule here is a page of this site, jdpi\.pages\.dev, deployed from GitHub to Cloudflare Pages/);
     for (const m of modules) assert.ok(m.host, `${m.id}: the registry keeps its host`);
   });

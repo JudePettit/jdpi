@@ -36,8 +36,8 @@ test('registry is well formed', () => {
   assert.deepEqual(registry.suites.map(s => s.id), ['home', 'rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino', 'bibliotheca']);
   // A module's name is what the sidebar shows; its title is its overview page's heading, its box's on the Home page and
   // its pages' eyebrow.
-  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
-  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Highbrowse', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
   // Every module says what you can do with it, in a line or two, for the back of its box on the Home page.
   for (const s of registry.suites) assert.ok(typeof s.summary === 'string' && s.summary.length >= 30 && s.summary.length <= 115 && /^[A-Z].*\.$/.test(s.summary), `${s.id}: summary "${s.summary}"`);
   assert.equal(new Set(registry.suites.map(s => s.summary)).size, registry.suites.length, 'each module its own summary');
@@ -387,7 +387,7 @@ test('old addresses redirect to the new structure', pageTest, async () => {
   assert.equal(await page.evaluate(() => location.hash), `#/hb/science-briefing?at=${at}`);
   const sci = await (await page.waitForSelector('#frames iframe.active[data-module="science-briefing"]', { timeout: 15000 })).contentFrame();
   await sci.waitForFunction(() => document.querySelector('#chips [data-v="physics"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 30000 });
-  assert.match(await page.textContent('#crumbs'), /Highbrowse.*Scientific Briefing/);
+  assert.match(await page.textContent('#crumbs'), /Omni News.*Scientific Briefing/);
 });
 
 test('a module with its own figure shows it in the sidebar, on the Home page, on the Dashboard and on its overview', pageTest, async () => {
@@ -399,7 +399,7 @@ test('a module with its own figure shows it in the sidebar, on the Home page, on
     // Highbrowse's mark beside its code (decorative: the name is beside it), and no other module's.
     assert.deepEqual(await p.$$eval('#nav details > summary img.suite-mark', imgs => imgs.map(i => [i.closest('details').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
       [['hb', 'design/brand-hb-icon.svg', '', true]]);
-    assert.match(await p.textContent('#nav details[data-suite="hb"] > summary'), /^HBHighbrowse/);
+    assert.match(await p.textContent('#nav details[data-suite="hb"] > summary'), /^ONOmni News/);
     // In its box on the Home page, and no other box has one; and beside its heading on the Dashboard.
     assert.deepEqual(await p.$$eval('#view .mod img.suite-mark', imgs => imgs.map(i => [i.closest('.mod').dataset.suite, i.getAttribute('src'), i.alt, i.naturalWidth > 0])),
       [['hb', 'design/brand-hb-icon.svg', '', true]]);
@@ -407,7 +407,7 @@ test('a module with its own figure shows it in the sidebar, on the Home page, on
     assert.equal(await p.getAttribute('.group[data-suite="hb"] .group-head img.suite-mark', 'src'), 'design/brand-hb-icon.svg');
     await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });
     assert.deepEqual(await p.$eval('#view .head img.suite-figure', i => [i.getAttribute('src'), i.naturalWidth > 0]), ['design/brand-hb.svg', true]);
-    assert.equal(await p.textContent('#view h1'), 'Highbrowse');
+    assert.equal(await p.textContent('#view h1'), 'Omni News');
     await p.goto(`${BASE}/#/rs`, { waitUntil: 'networkidle' });
     assert.equal(await p.locator('#view .head img').count(), 0, 'a module without one shows none');
     assert.deepEqual(errors, []);

@@ -14,10 +14,10 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 |---|---|---|
 | **Home**: where VM starts; its overview is the Home page, every other module as a box that turns over to what you can do with it | HM | Dashboard (what changed today: volatility's biggest movers, the topics rising and falling in the briefings' headlines, the next votes and summits, the markets, each line opening the one thing it names; then every module and submodule) |
 | **Realtime Geopolitics**: what is happening now | RT | Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
-| **Highbrowse**: the news worth reading, in four briefings | HB | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
+| **Omni News**: the news worth reading, in four briefings | ON | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
-| **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | OI | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
-| **Money Management**: your money end to end | MM | Market Briefing · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
+| **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | IM | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
+| **Money Management**: your money end to end | MM | Market Monitor · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
 | **Natural Science**: science through history | NS | Invention Timeline |
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
@@ -26,7 +26,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 (In `registry.json` the ten modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
 shows, its `title` what its overview page, its box on the Home page and page eyebrows show, and its `summary` the line
 or two on the back of its box: what you can do with it. The old ids `q`, `hp` and `fe` still work as aliases, and so do
-the addresses of submodules that moved to another module: the four briefings, which came to Highbrowse in November 2026
+the addresses of submodules that moved to another module: the four briefings, which came to the module now called Omni News in November 2026
 from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open at `#/rt/briefing`,
 `#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`. A submodule given a new id keeps its old one as an alias:
 Neo Classic, Bibliotheca's reader, was Kino's `bibliotheca` until November 2026, and `#/kino/bibliotheca` still opens it, in
@@ -42,7 +42,7 @@ the Today panel (`design/prp-highlights.js`) over every module and submodule. Th
 
 The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait and other lowbrow stories is called
 **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`. The
-Highbrowse module shares the name: its landing page (`highbrowse/`) analyses the four briefings' own stores in the
+Omni News module (called Highbrowse until 14 November 2026) has a landing page of that name, Highbrowse (`highbrowse/`), which analyses the four briefings' own stores in the
 browser, with no timed job of its own (its Trends tab reads each briefing's `trends.json`, which the briefing's own
 build writes with its store), and its figure is the first module variant of the Vitruvian figure
 (`design/brand-hb.svg`, and `design/brand-hb-icon.svg` for the sidebar).
@@ -65,7 +65,7 @@ its stories a day by topic in `data/history.json` (rebuilt once, on 13 November 
         ├── the Vitruvian Manager bridge on the user's own computer (sigint/bridge/prp-bridge.mjs): SIGINT's relays, and with --iot IoT Connect and Hermes Messenger
         ├── the installable app: manifest.json, sw.js (offline worker for the shell and IoT Connect), design/icons/
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
-        └── trade-desk Worker (Market Briefing, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
+        └── trade-desk Worker (Market Monitor, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
   lake/ (the Master Index's entity layer, keyed by Wikidata IDs) links every page to every other
 ```

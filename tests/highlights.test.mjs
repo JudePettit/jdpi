@@ -849,6 +849,10 @@ test('page: the session cache: a fresh entry fetches nothing; a stale one shows 
     assert.ok(entry.at <= Date.now() && entry.until > Date.now() && entry.until - entry.at <= 45 * 60e3, 'written now, fresh for at most 45 minutes');
     assert.deepEqual(entry.groups.map(g => g.id), GROUP_IDS);
     assert.equal(seen.length, N_SOURCES, 'one request a source for the first fill');
+    // The freshness lines are read once the panel has filled (they take its answers for the two files both read) and
+    // are kept for the session only when the last of them is in. A reload before that reads those two files again:
+    // on a slow machine that failed the next check with 2 requests, not 0. So wait until the lines are kept.
+    await page.waitForFunction(() => sessionStorage.getItem('prp.fresh.v1') !== null, null, { timeout: 20000 });
 
     // Fresh: the reload shows the stored panel and asks for nothing.
     seen.length = 0;

@@ -442,6 +442,14 @@ test('chart: columns are named in words from the catalogue, with their units, ne
   assert.equal(describeChart({ type: 'scatter', x: 'political', y: 'conflict' }, V), 'scatter plot of component: conflict & security, 0–100 against political/diplomatic escalation, 0–100');
   assert.equal(describeChart({ type: 'bar', x: 'name', y: 'score', fn: 'max' }, V), 'bar chart of maximum of Geopolitical Volatility Index, 0–100 by country (name)');
   assert.equal(describeChart({ type: 'map', x: 'iso3', y: 'score', fn: 'max' }, V), 'world map of maximum of Geopolitical Volatility Index, 0–100 by country');
+  // The Codex review of U (X1): a derive step that rewrites a column (world_watts / 1e12, terawatts) must not keep the
+  // catalogue's description and its unit; the column keeps its own name, and so does an aggregate of it.
+  const W = [{ name: 'world_watts', description: "Humanity's energy capture, watts" }, { name: 'year', description: 'Year' }];
+  assert.equal(labelsFor(W)('world_watts'), "Humanity's energy capture, watts");
+  const D = labelsFor(W, ['world_watts']);
+  assert.equal(D('world_watts'), humanName('world_watts'));
+  assert.ok(!/energy capture/.test(D('mean_world_watts')), D('mean_world_watts'));
+  assert.equal(D('year'), 'Year');
 });
 
 test('countries: codes, common names and the spellings PRP uses', () => {

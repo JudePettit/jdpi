@@ -478,7 +478,7 @@ function renderResult() {
   const from = S.page * S.pageSize, rows = t.rows.slice(from, from + S.pageSize);
   // Each column in words (its catalogue description: lib/chartdata.js labelsFor), with its field name, the one the steps
   // use, under it beside its type.
-  const L = labelsFor(S.data?.ds?.fields);
+  const L = labelsFor(S.data?.ds?.fields, derivedCols());
   table.innerHTML = `<thead><tr>${t.columns.map(c => { const l = L(c.name); return `<th scope="col"${c.type === 'number' ? ' class="num"' : ''}>${esc(l)}<span class="type">${l !== c.name ? `${esc(c.name)} · ` : ''}${esc(c.type)}</span></th>`; }).join('')}</tr></thead>` +
     `<tbody>${rows.map(r => `<tr>${t.columns.map(c => cell(r[c.name], c)).join('')}</tr>`).join('')}</tbody>`;
   pager.innerHTML = `<span class="status">Rows ${num(from + 1)}–${num(from + rows.length)} of ${num(n)}</span><div class="row">` +
@@ -486,6 +486,9 @@ function renderResult() {
     `<button type="button" class="prp-btn sm" data-p="next"${S.page < pages - 1 ? '' : ' disabled'}>Next ›</button>` +
     `<label class="row status">Rows per page <select class="prp-select" id="page-size">${[25, 50, 100, 250].map(k => `<option${k === S.pageSize ? ' selected' : ''}>${k}</option>`).join('')}</select></label></div>`;
 }
+
+// The columns the steps' derive steps write: labelsFor gives them their own name, not the catalogue's description.
+const derivedCols = () => (S.spec?.steps || []).filter(s => s.op === 'derive' && s.as).map(s => s.as);
 
 /* ---------- chart ---------- */
 const QUANT = c => c.type === 'number' || c.type === 'date';
@@ -538,7 +541,7 @@ function countryColumn(cols) {
 }
 function figureCaption(prep) {
   const ds = S.data.ds, [, modName] = moduleInfo(ds.module), sub = subName(ds.submodule);
-  const what = cap(describeChart(S.spec.chart, labelsFor(ds.fields)));
+  const what = cap(describeChart(S.spec.chart, labelsFor(ds.fields, derivedCols())));
   const steps = isSql() ? [] : S.spec.steps.filter((s, i) => !S.run?.trace[i]?.error).map(describeStep);
   const how = isSql() ? ' From an SQL query over the dataset.' : steps.length ? ` Steps: ${steps.length > 3 ? steps.slice(0, 3).join('; ') + `; and ${steps.length - 3} more` : steps.join('; ')}.` : '';
   const src = ds.sources || [];
@@ -562,7 +565,7 @@ async function drawFigure() {
     try { S.geo = await (await R()).ensureMap(); S.match = countryMatcher(S.geo.countries); } catch (e) { if (seq === S.drawSeq) clear(e.message); return; }
     if (seq !== S.drawSeq) return;
   }
-  const prep = prepareChart(t, c, { ordered: endsInSort(), country: S.match, label: labelsFor(S.data?.ds?.fields) });
+  const prep = prepareChart(t, c, { ordered: endsInSort(), country: S.match, label: labelsFor(S.data?.ds?.fields, derivedCols()) });
   if (!prep.ok) { clear(prep.error); return; }
   let Plot, lib;
   if (!window.Plot) host.innerHTML = '<p class="prp-empty">Loading the chart library…</p>';

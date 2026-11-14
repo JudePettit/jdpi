@@ -248,14 +248,19 @@ const shiftDay = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).to
 const windowOf = i => DAYS.filter(d => d >= shiftDay(DAYS[i], -(BASELINE - 1)) && d <= DAYS[i]);
 // Below MIN_BASELINE stored days (gvi.mjs) no country is scored: every country's reason is "Baseline has n/7 days".
 const MIN_BASELINE = 7;
+// The index keeps 365 days (gvi.mjs, cutoff). Once it is cut there, a day whose 90 reach back before the first day kept
+// was ranked against days the page no longer holds, so its count cannot be told from the index (the Codex review of U, X2).
+const KEPT = 365;
+const unknownWindow = i => DAYS.length > 0 && DAYS[0] <= shiftDay(DAYS[DAYS.length - 1], -(KEPT - 1)) && shiftDay(DAYS[i], -(BASELINE - 1)) < DAYS[0];
 function baselineWords(i) {
   const w = windowOf(i), n = w.length, day = dayText(DAYS[i]), days = n === 1 ? '1 day' : `${n} days`;
+  if (unknownWindow(i)) return `The baseline for ${day} reaches back before the ${KEPT} days kept here, so how many of its ${BASELINE} days were stored is not shown.`;
   if (n >= BASELINE) return `The baseline for ${day} holds all ${BASELINE} days.`;
   if (n < MIN_BASELINE) return `History so far: ${days} of the ${BASELINE} for ${day}, from ${dayText(w[0])}. The baseline needs ${MIN_BASELINE} days, so no country is scored on ${day}.`;
   return `History so far: ${n} of the ${BASELINE} days for ${day}, from ${dayText(w[0])}. Until ${BASELINE} days are stored, a day is ranked against the days stored up to it, so on ${day} a component at 100 is the most intense country-day of those ${n} days, not of ${BASELINE}.`;
 }
 // "the trailing 90 days", saying how many of them are stored while it is fewer.
-const trailing = i => { const n = windowOf(i).length; return n >= BASELINE ? `the trailing ${BASELINE} days` : `the trailing ${BASELINE} days (${n} of them stored by ${dayText(DAYS[i])})`; };
+const trailing = i => { const n = windowOf(i).length; return n >= BASELINE || unknownWindow(i) ? `the trailing ${BASELINE} days` : `the trailing ${BASELINE} days (${n} of them stored by ${dayText(DAYS[i])})`; };
 const onWhen = () => (per() ? `over ${when()}` : `on ${DAYS[dayIdx]}`);
 const rank = (key, getter) => { const l = C.filter(c => getter(c) != null).sort((a, b) => getter(b) - getter(a)); l.forEach((c, k) => { c.cur[key] = k + 1; }); };
 // The measures behind the map, the ranking, the movers, a country's page and the comparison: of one day (a === b) or
@@ -551,7 +556,7 @@ function renderProfile() {
       <figure class="prp-figure chartfig"><div class="chart" id="pf-comp"></div><div class="key">${comps.map((m, j) => `<span>${sw(COMP_COLOUR(j))}${esc(m.label)}</span>`).join('')}</div><figcaption><b>Figure 4.</b> The five components of ${esc(c.name)}’s GVI, each a percentile against the trailing 90 days.</figcaption>
         <details class="datatable"><summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">GVI</th>${comps.map(m => `<th class="num">${esc(CAT_LABEL[m.key] || m.label)}</th>`).join('')}<th class="num">Events</th></tr></thead>
           <tbody>${days.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1] == null ? '–' : r[1].toFixed(1)}</td>${comps.map((m, j) => `<td class="num">${r[2]?.[j] == null ? '–' : r[2][j].toFixed(0)}</td>`).join('')}<td class="num">${(r[3] || 0).toLocaleString('en-GB')}</td></tr>`).join('')}</tbody></table></div></details></figure></div>
-    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs ${windowOf(dayIdx).length >= BASELINE ? `${BASELINE} days` : `${windowOf(dayIdx).length} day${windowOf(dayIdx).length === 1 ? '' : 's'} stored`}</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in ${esc(trailing(dayIdx))} (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
+    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs ${windowOf(dayIdx).length >= BASELINE || unknownWindow(dayIdx) ? `${BASELINE} days` : `${windowOf(dayIdx).length} day${windowOf(dayIdx).length === 1 ? '' : 's'} stored`}</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in ${esc(trailing(dayIdx))} (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
       <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events${per() ? ' · latest day' : ''}</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
   $('#pf-gvi').replaceChildren(lineChart([{ name: 'GVI', colour: 'var(--prp-text)', points: pts(c) }], { w: width('#pf-gvi') }));
   $('#pf-comp').replaceChildren(lineChart(comps.map((m, j) => ({ name: m.label, colour: COMP_COLOUR(j), width: 1.5, dots: false, points: pts(c, j) })), { w: width('#pf-comp'), h: 180, bands: false }));

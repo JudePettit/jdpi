@@ -59,9 +59,12 @@ const inBrackets = name => { const h = humanName(name); return /^[A-Z0-9]{2,}\b/
  * The label of every column of a dataset (its catalogue fields); a column the steps made is named from its parts ("Mean
  * of Kardashev rating"). Two fields the catalogue describes alike ("Country" for iso3 and name) add their name in words,
  * so no two columns share a heading: "Country (ISO3)", "Country (name)"; a field named as its label ("country") keeps it.
+ * `derived` names the columns a derive step writes: their values are no longer the catalogue field's (a derive may
+ * change the unit, world_watts / 1e12), so they keep their own name and not the field's description.
  */
-export function labelsFor(fields = []) {
-  const list = (Array.isArray(fields) ? fields : []).filter(f => f && typeof f.name === 'string').map(f => [f.name, fieldLabel(f.name, f.description)]);
+export function labelsFor(fields = [], derived = []) {
+  const made = new Set(derived);
+  const list = (Array.isArray(fields) ? fields : []).filter(f => f && typeof f.name === 'string' && !made.has(f.name)).map(f => [f.name, fieldLabel(f.name, f.description)]);
   const seen = new Map();
   for (const [, l] of list) seen.set(l.toLowerCase(), (seen.get(l.toLowerCase()) || 0) + 1);
   // The field whose own name is the shared label ("country" described as "Country") keeps it as it is.

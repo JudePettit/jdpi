@@ -533,6 +533,15 @@ test('page: beside the 90-day baseline, how many days of history the day shown h
     assert.match(await note(cut(47), `#day=${real.global[5][0]}`), /^History so far: 6 days of the 90 for .*The baseline needs 7 days, so no country is scored on /);
     assert.match(await note(cut(47), `#day=${real.global[6][0]}`), /^History so far: 7 of the 90 days for .* a component at 100 is the most intense country-day of those 7 days, not of 90\.$/);
     assert.equal(await note(grown), `The baseline for ${words(real.global.at(-1)[0])} holds all 90 days.`);
+    // The Codex review of U (X2): once the index is cut at 365 days (gvi.mjs), its first days were ranked against days
+    // it no longer holds, so the note gives no count for them; a day whose 90 lie inside the kept days still has one.
+    const kept = 365, start = real.global[0][0], last365 = addDays(start, kept - 1);
+    const year = { ...real, latest: last365, global: Array.from({ length: kept }, (_, k) => [addDays(start, k), ...real.global[0].slice(1)]),
+      countries: Object.fromEntries(Object.entries(real.countries).map(([k, c]) => [k, { ...c, days: c.days.filter(r => r[0] <= last365) }])) };
+    // A hash alone does not reload the page, so the year's index is loaded first (its latest day holds all 90).
+    assert.equal(await note(year), `The baseline for ${words(last365)} holds all 90 days.`);
+    assert.equal(await note(year, `#day=${start}`), `The baseline for ${first} reaches back before the 365 days kept here, so how many of its 90 days were stored is not shown.`);
+    assert.equal(await note(year, `#day=${addDays(start, 89)}`), `The baseline for ${words(addDays(start, 89))} holds all 90 days.`);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

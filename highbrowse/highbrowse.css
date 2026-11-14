@@ -198,6 +198,35 @@ button, input, select { font: inherit; }
 
 .prp-sources p { margin: 0 0 5px; max-width: 120ch; }
 
+/* ---- Each briefing's own data time, and the return check's notice ---- */
+.b-data { margin-left: auto; margin-right: 10px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.front .prp-meta .newer { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.front .prp-meta .newer .prp-btn { color: var(--prp-text); }
+
+/* ---- Headline trends ---- */
+.trends { display: grid; gap: 12px; }
+.trend .t-week { margin: 0 0 8px; color: var(--prp-text-2); font-size: 13px; }
+.trend .prp-note { margin: 0 0 10px; }
+.trend tbody th[scope="row"] { position: static; background: none; border-bottom: 1px solid var(--prp-line-soft); color: var(--prp-text);
+  font: 600 13px/1.4 var(--prp-font-ui); letter-spacing: normal; text-transform: none; white-space: nowrap; }
+.ttable td.pct small, .trend td small { display: block; color: var(--prp-muted); font: 10.5px/1.3 var(--prp-font-mono); }
+.ttable tr.sel { background: var(--prp-primary-soft); outline: 2px solid var(--prp-primary); outline-offset: -2px; }
+.ttable tr.sel:focus { outline: 2px solid var(--prp-focus, var(--prp-primary)); }
+.ttable .tr-rising, .ttable .tr-falling { font-weight: 600; color: var(--prp-text); white-space: nowrap; }
+.ttable .tr-new { color: var(--prp-muted); }
+.tspark { width: auto; max-width: 180px; height: 26px; }
+.t-method { margin-top: 14px; }
+
+@media (max-width: 600px) { .b-data { margin-left: 0; } .brief .prp-panel-head { flex-wrap: wrap; } }
+/* On a phone the Trends table's headings and topics wrap, so its first five columns (the topic, this week's stories and
+   share, its trend and its percentile) are in view without scrolling sideways; the baseline and the bars follow. */
+@media (max-width: 600px) {
+  .ttable thead th { white-space: normal; padding: 6px 4px; vertical-align: bottom; }
+  .ttable td, .trend .ttable tbody th[scope="row"] { padding: 6px 4px; }
+  .trend .ttable tbody th[scope="row"] { white-space: normal; min-width: 7.5em; font-size: 12.5px; }
+  .ttable .tr-rising, .ttable .tr-falling { white-space: normal; }
+}
+
 @media (max-width: 1100px) { .shared, .positions { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) { .stories, .briefs { grid-template-columns: minmax(0, 1fr); } .topics { columns: 1; } }
 @media (max-width: 600px) {

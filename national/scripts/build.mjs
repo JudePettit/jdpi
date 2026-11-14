@@ -25,6 +25,7 @@ import { writeBrief } from './brief.mjs';
 import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas, atlasDisagreement, peopleInIndex, OFFICES } from './leaders.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -301,13 +302,30 @@ for (const c of wbCountries) {
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'series'), { recursive: true });
 for (const [file, text] of seriesFiles) writeFileSync(file, text);
+// Each source's own date, so the page can put a statistic's age and source beside it rather than only the build's date
+// (13 November 2026): when Wikidata was read (this build), the day Political Atlas's records were last reviewed (its
+// manifest's lastUpdated), when the Political Retrospective's data was built, the calendars' and Realtime Battlefield's
+// own times, and the years the conflict and energy figures run to. World Bank values carry their own year already.
+const BUILT = new Date().toISOString();
+const atlasManifest = atlasDir && existsSync(join(atlasDir, 'data/manifest.json')) ? json(join(atlasDir, 'data/manifest.json')) : null;
+const calendarStamp = existsSync(join(jdpi, 'calendar/data/2020s.json')) ? json(join(jdpi, 'calendar/data/2020s.json')).generated || null : null;
+const sources = {
+  wikidataRead: BUILT,
+  atlasReviewed: typeof atlasManifest?.lastUpdated === 'string' ? atlasManifest.lastUpdated : null,
+  retrospectiveBuilt: typeof retro.built === 'string' ? retro.built : null,
+  calendarBuilt: calendarStamp,
+  battlefieldThrough: realtime.latest || null, battlefieldRelease: realtime.version || null,
+  conflictYears: [1946, 2025],
+  energyYear: energy.steps.at(-1)?.year ?? null,
+};
 const index = {
-  generated: new Date().toISOString(), years: [FIRST, LAST],
+  generated: BUILT, years: [FIRST, LAST], sources,
   indicators: INDICATORS.map(({ code, dimension, label, unit, better, threshold, core, source }) => ({ code, dimension, label, unit, better, threshold, core, source })),
   countries,
 };
 writeFileSync(join(OUT, 'index.json'), JSON.stringify(index));
 writeBrief(index); // the small file Geopolitical Volatility reads (brief.mjs)
+writeHeads(join(OUT, 'index.json'), { root: jdpi }); // index.head.json in step with it (integration/scripts/heads.mjs)
 console.log(`wrote ${countries.length} countries; with leadership data ${countries.filter(c => c.leadership).length}`);
 const byRule = {};
 for (const l of leaderLog) byRule[l.rule] = (byRule[l.rule] || 0) + 1;

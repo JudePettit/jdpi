@@ -493,3 +493,18 @@ test('page: field deep link, papers/news toggle, theme redraw, hash changes and 
     await browser.close();
   }
 });
+
+/* ---- its summaries (integration/scripts/heads.mjs): stories.head.json, trends.json and history.json, written by the build with
+   the store and committed with it; checked here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+import { readFileSync as readSummary } from 'node:fs';
+test('its head, trends.json and history.json are in step with the store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('digital/briefing/data/stories.json'), [], 'run node integration/scripts/heads.mjs digital/briefing/data/stories.json');
+  const J = f => JSON.parse(readSummary(new URL('../' + f, import.meta.url), 'utf8'));
+  const store = J('digital/briefing/data/stories.json'), head = J('digital/briefing/data/stories.head.json'), t = J('digital/briefing/data/trends.json'), h = J('digital/briefing/data/history.json');
+  assert.equal(head.generated, store.generated); assert.equal(head.stories, store.items.length);
+  assert.equal(t.generated, store.generated); assert.ok(['ok', 'short', 'week'].includes(t.status), t.status);
+  assert.deepEqual(t.topics.map(x => x.id), store.fields.map(x => x.id));
+  for (const x of t.topics) if (t.status !== 'ok') assert.equal(x.trend, null, 'no trend without enough history');
+  for (const [d, v] of Object.entries(h.history.days)) assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isInteger(v.n) && typeof v.ok === 'boolean', d);
+});

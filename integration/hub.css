@@ -68,6 +68,7 @@ pre code { background: none; border: 0; padding: 0; }
 .cat .sub { display: block; margin-top: 3px; color: var(--prp-muted); font-size: var(--prp-fs-xs); white-space: nowrap; }
 .cat .lic { max-width: 30ch; color: var(--prp-text-2); }
 .cat .when { font: 11.5px var(--prp-font-mono); white-space: nowrap; }
+.cat .when small.newer { display: block; max-width: 22ch; white-space: normal; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui); }
 .cat .links { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: var(--prp-fs-sm); white-space: nowrap; }
 .cat tr.detail > td { background: var(--prp-surface-2); padding: 14px 16px 16px; }
 .cat tbody tr.detail:hover td { background: var(--prp-surface-2); }

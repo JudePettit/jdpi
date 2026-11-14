@@ -25,7 +25,7 @@ jobs:
         run: node --test tests/battlefield.test.mjs
       - uses: ./.github/actions/commit-data
         with:
-          paths: battlefield/data/realtime.json
+          paths: battlefield/data/realtime.json battlefield/data/realtime.head.json
           message: 'Battlefield: refresh UCDP candidate events'
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:

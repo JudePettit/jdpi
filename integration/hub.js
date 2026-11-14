@@ -2,6 +2,7 @@
 // and links can open any view; the page re-renders on hashchange. Everything from data is escaped or set as text.
 // The tool list and the "Try a tool" console use the MCP server's own code (mcp/prp-mcp.mjs) on this site's files.
 import { createPRP, EVENT_TYPES } from './mcp/prp-mcp.mjs';
+import { countWords, headsOf, datasetStores, copyFacts, newerWords, dayTime } from '../design/prp-freshness.js'; // the one count of modules, worded as everywhere else; the catalogue's copies against their stores
 
 const SITE = 'https://jdpi.pages.dev/';
 const ROOT = new URL('../', import.meta.url).href; // the site root this page is served from
@@ -54,7 +55,7 @@ document.addEventListener('click', async e => {
 });
 
 /* ------------------------------------------------------------------ data */
-let CAT = null, REG = null;
+let CAT = null, REG = null, STORE_TIMES = {};
 const subName = id => { for (const s of REG?.suites || []) for (const m of s.modules) if (m.id === id) return m.name; return id; };
 const files = d => d.urls || [d.url];
 const rel = u => ROOT + u; // a site path → a link on this site
@@ -64,12 +65,25 @@ async function load() {
   CAT = cat; REG = reg;
   const rows = cat.datasets.reduce((a, d) => a + d.rows, 0);
   const mods = new Set(cat.datasets.map(d => d.module));
-  $('#meta').innerHTML = [`<span>Catalogue built <b>${esc(fmtDate(cat.generated))}</b></span>`, `<span><b>${cat.datasets.length}</b> datasets</span>`, `<span><b>${nf.format(rows)}</b> rows</span>`,
+  $('#meta').innerHTML = [`<span>Catalogue built <b>${esc(cat.generated ? dayTime(Date.parse(cat.generated)) : '–')}</b>, remade ${esc(copyFacts({}, cat).rhythm)}; its rows and dates are as of then</span>`, `<span><b>${cat.datasets.length}</b> datasets</span>`, `<span><b>${nf.format(rows)}</b> rows</span>`,
     `<span>Modules <b>${mods.size}</b></span>`, '<span>Access <b>read-only · no keys</b></span>'].join('');
-  $('#kpis').innerHTML = [['Datasets', cat.datasets.length, 'described in one catalogue'], ['Rows', nf.format(rows), 'across every dataset'], ['MCP tools', prp.tools.length, 'read-only'], ['Modules covered', mods.size, REG?.suites?.length ? `of Vitruvian Manager’s ${REG.suites.length}` : 'with datasets'], ['Keys needed', 0, 'all public']]
+  $('#kpis').innerHTML = [['Datasets', cat.datasets.length, 'described in one catalogue'], ['Rows', nf.format(rows), 'across every dataset'], ['MCP tools', prp.tools.length, 'read-only'], ['Modules covered', mods.size, REG?.suites?.length ? `of Vitruvian Manager’s ${countWords(REG).modules}${countWords(REG).home ? ', Home included' : ''}` : 'with datasets'], ['Keys needed', 0, 'all public']]
     .map(([l, v, s]) => `<div class="prp-kpi"><span>${esc(l)}</span><b>${esc(v)}</b><small>${esc(s)}</small></div>`).join('');
   buildChips(); renderFeeds(); renderIcs(); render();
+  loadStoreTimes().then(() => { if (Object.keys(STORE_TIMES).length && state.tab === 'catalogue') renderCatalogue(); });
 }
+// The catalogue is remade once a day (design/prp-freshness.js copyFacts): its dates and rows are labelled as the
+// catalogue's, and each store with a summary (a head, written with the store) is read for its own time, so a dataset
+// whose store is newer than the catalogue says so. A head that cannot be read changes nothing: the label still holds.
+async function loadStoreTimes() {
+  const heads = headsOf(REG), stores = [...new Set(CAT.datasets.flatMap(datasetStores))].filter(p => heads[p]);
+  const list = [...new Set(stores.map(p => heads[p]))];
+  const times = await Promise.all(list.map(h => fetch(ROOT + h, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).then(j => Date.parse(j?.generated)).catch(() => NaN)));
+  const byHead = Object.fromEntries(list.map((h, k) => [h, times[k]]));
+  for (const p of stores) if (Number.isFinite(byHead[heads[p]])) STORE_TIMES[p] = byHead[heads[p]];
+}
+// Each submodule whose store is newer is named, the dataset's own first (prp-freshness.js newerWords).
+const newerNote = (d, f) => newerWords(d, f, REG, subName);
 
 /* ------------------------------------------------------------------ catalogue */
 function buildChips() {
@@ -94,28 +108,29 @@ function renderCatalogue() {
   $('#cat-rows').innerHTML = list.map(d => {
     const [code, mod] = MODULES[d.module] || [d.module, d.module];
     const open = state.ds === d.id;
+    const newer = newerNote(d, copyFacts(d, CAT, STORE_TIMES));
     const f = files(d);
     const lic = d.licence.length > 70 ? d.licence.slice(0, 68).replace(/\s+\S*$/, '') + '…' : d.licence;
     const row = `<tr>
       <td><button type="button" class="ds-name" data-ds="${esc(d.id)}" aria-expanded="${open}" aria-controls="det-${esc(d.id)}">${esc(d.title)}</button><div class="id">${esc(d.id)}</div></td>
       <td><span class="mod"><span class="prp-code" data-suite="${esc(d.module)}" title="${esc(mod)}">${esc(code)}</span></span><span class="sub">${esc(subName(d.submodule))}</span></td>
       <td class="num">${nf.format(d.rows)}</td><td class="num">${d.fields.length}</td>
-      <td class="when">${esc(fmtDate(d.updated))}</td><td>${esc(d.refresh)}</td><td class="lic" title="${esc(d.licence)}">${esc(lic)}</td>
+      <td class="when">${esc(fmtDate(d.updated))}${newer ? `<small class="newer">${esc(newer)}</small>` : ''}</td><td>${esc(d.refresh)}</td><td class="lic" title="${esc(d.licence)}">${esc(lic)}</td>
       <td><span class="links"><a href="${esc(rel(f[0]))}">JSON${f.length > 1 ? ` <span class="prp-muted">×${f.length}</span>` : ''}</a><a href="${esc(SITE)}api/v1/datasets/${esc(d.id)}/rows?limit=5">API</a>${d.page ? `<a href="${esc(/^https?:/.test(d.page) ? d.page : rel(d.page))}">Page</a>` : ''}</span></td></tr>`;
     return row + (open ? detail(d) : '');
   }).join('');
 }
 function detail(d) {
-  const f = files(d);
+  const f = files(d), cf = copyFacts(d, CAT, STORE_TIMES), newer = newerNote(d, cf);
   return `<tr class="detail" id="det-${esc(d.id)}"><td colspan="8"><div class="detail-grid">
     <div><p>${esc(d.description)}</p>
       <table class="fields"><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Meaning</th></tr></thead><tbody>
       ${d.fields.map(x => `<tr><td>${esc(x.name)}</td><td class="type">${esc(x.type)}</td><td>${esc(x.description)}</td></tr>`).join('')}</tbody></table></div>
     <div><dl>
-      <dt>Rows</dt><dd>${nf.format(d.rows)}</dd><dt>Records</dt><dd><code>${esc(d.records || '(the file is the array)')}</code></dd>
+      <dt>Rows ${esc(cf.label)}</dt><dd>${nf.format(d.rows)}</dd><dt>Records</dt><dd><code>${esc(d.records || '(the file is the array)')}</code></dd>
       <dt>Files</dt><dd>${f.slice(0, 6).map(u => `<a href="${esc(rel(u))}">${esc(u)}</a>`).join('<br>')}${f.length > 6 ? `<br><span class="prp-muted">and ${f.length - 6} more shards</span>` : ''}</dd>
       <dt>Size</dt><dd>${d.bytes ? esc((d.bytes / 1048576).toFixed(d.bytes > 1048576 ? 1 : 2) + ' MB') : '–'}</dd>
-      <dt>Updated</dt><dd>${esc(fmtDate(d.updated))} · ${esc(d.refresh)}</dd><dt>Licence</dt><dd>${esc(d.licence)}</dd>
+      <dt>Updated ${esc(cf.label)}</dt><dd>${esc(fmtDate(d.updated))} · ${esc(d.refresh)}${newer ? `<br><span class="prp-muted">${esc(newer)}; the catalogue's copy is remade ${esc(cf.rhythm)}.</span>` : ''}</dd><dt>Licence</dt><dd>${esc(d.licence)}</dd>
       ${d.derivedFrom ? `<dt>Built from</dt><dd>${d.derivedFrom.map(x => `<code>${esc(x)}</code>`).join(' ')}</dd>` : ''}
       <dt>API</dt><dd><a href="${esc(SITE)}api/v1/datasets/${esc(d.id)}">/api/v1/datasets/${esc(d.id)}</a></dd>
     </dl><p style="margin-top:12px"><b>Sources</b></p><ul>${d.sources.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>

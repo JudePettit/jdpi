@@ -33,6 +33,7 @@ import { currentEvents } from './current-events.mjs';
 import { listEvents } from './wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from './outlook.mjs';
 import { lostEvents, refuseIfLost } from './guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const args = process.argv.slice(2);
 const option = name => args.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -343,6 +344,7 @@ mkdirSync(DATA, { recursive: true });
 const decades = new Map();
 for (const e of all) { const d = e.date.slice(0, 3) + '0s'; (decades.get(d) || decades.set(d, []).get(d)).push(e); }
 for (const [d, list] of decades) writeFileSync(new URL(`${d}.json`, DATA), JSON.stringify({ generated: new Date().toISOString(), decade: d, events: list }));
+writeHeads('Realtime and Historical Calendars', { quiet: true }); // calendar/data/upcoming.json in step (enrich-summaries.mjs writes it again)
 
 const TYPES = ['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'];
 const count = list => TYPES.map(t => `${t} ${list.filter(e => e.type === t).length}`).join(', ');

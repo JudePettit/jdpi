@@ -26,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { SEED } from './progress-seed.mjs';
 import { DISCIPLINES, BASIS, ANCHOR_KM, parseRef, nameMatches, choosePlace, eventInstitutions, looksInstitutional, seedProblems, distanceKm } from './progress-lib.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, '../..');
@@ -394,5 +395,6 @@ refuseIfLost([
 ]);
 mkdirSync(dirname(OUT_FILE), { recursive: true });
 writeFileSync(OUT_FILE, text);
+writeHeads(OUT_FILE); // events.head.json in step with it (integration/scripts/heads.mjs)
 saveCache();
 console.log(`\nWrote ${OUT_FILE}.`);

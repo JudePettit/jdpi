@@ -21,6 +21,7 @@ import * as SCI from '../science/briefing/view.js';
 import * as ECON from '../econ/briefing/view.js';
 import * as DIG from '../digital/briefing/view.js';
 import '../design/prp-access.js'; // the access table the page reads (free sources lead)
+import { dayTime } from '../design/prp-freshness.js';
 
 const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const json = p => JSON.parse(read(p));
@@ -523,5 +524,103 @@ test('page: the analysis renders, the search finds a known story, and its links 
   await phone.waitForSelector('html[data-ready="1"]', { timeout: 30000 });
   await phone.waitForSelector('#panel-week .story');
   assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), 'no horizontal scroll at 360 px');
+  assert.deepEqual(errors, []);
+});
+
+/* ---------------------------------------------------------------- headline trends, each briefing's data time (13 November 2026) */
+// Jude, 12 November 2026: "Changes in headline trends as a percentile comparison should also be viewable in module".
+// The Trends tab reads each briefing's trends.json (integration/scripts/heads.mjs, design/prp-trends.js), the files
+// the Dashboard's "Headline trends" card reads too; the second review: "expose each briefing's actual data version".
+test('address: #tab=trends keeps the topic it names (t), and leaving it is a plain tab', () => {
+  const s = parseHash('#tab=trends&t=economics.monetary');
+  assert.equal(s.tab, 'trends'); assert.equal(s.t, 'economics.monetary');
+  assert.equal(toHash(s), '#tab=trends&t=economics.monetary');
+  assert.equal(parseHash('#tab=trends').tab, 'trends');
+  assert.equal(parseHash('#tab=trends&t=../../x').t, '', 'a topic that fails the pattern is dropped');
+});
+// Times as the shell's freshness lines write them (design/prp-freshness.js dayTime): "13 Nov 18:52 UTC", no comma.
+const utcTime = iso => dayTime(Date.parse(iso));
+test('source: a share neither rising nor falling is "Within its usual range", never "Steady" (which reads as no change)', () => {
+  const src = read('highbrowse/app.js');
+  assert.match(src, /steady: 'Within its usual range'/);
+  assert.doesNotMatch(src, /'Steady'/);
+  assert.doesNotMatch(src, /toLocaleString\('en-GB', \{ day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' \}\)/, 'UTC times written as the shell writes them, without a comma');
+});
+test('page: the Trends tab shows every briefing\'s topics, each briefing\'s data time and the method; a linked topic is picked; a gone one gets a note', pageTest, async t => {
+  const res = await fetch(`${BASE}/highbrowse/`).catch(() => null);
+  if (!res?.ok) { t.skip(`Highbrowse is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  const trends = await Promise.all(BRIEFINGS.map(b => fetch(`${BASE}/${b.data.replace(/[^/]+$/, 'trends.json')}`).then(r => r.json())));
+  const browser = await launch();
+  t.after(() => browser.close());
+  for (const [width, dark] of [[1360, false], [390, true]]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 }, colorScheme: dark ? 'dark' : 'light' });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message)); page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+    const pick = `${trends[1].briefing}.${trends[1].topics[0].id}`, rowId = `tr-${trends[1].briefing}-${trends[1].topics[0].id}`;
+    await page.goto(`${BASE}/highbrowse/#tab=trends&t=${pick}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#panel-trends .trend', { timeout: 30000 });
+    assert.equal(await page.getAttribute('#tab-trends', 'aria-selected'), 'true');
+    assert.deepEqual(await page.$$eval('#panel-trends .trend', s => s.map(x => x.dataset.b)), BRIEFINGS.map(b => b.key));
+    for (const [k, tr] of trends.entries()) {
+      const sec = page.locator(`#panel-trends .trend[data-b="${BRIEFINGS[k].key}"]`);
+      assert.equal(await sec.locator('table.ttable > tbody > tr').count(), tr.topics.length, `${tr.briefing}: a row a topic`);
+      assert.equal(await sec.locator('table.ttable > tbody > tr').first().locator('th').textContent(), tr.topics[0].label);
+      // Trend and Percentile straight after this week's share (on a phone they are in view), and each table named.
+      assert.deepEqual((await sec.locator('table.ttable thead th').allTextContents()).slice(1, 5), ['Stories this week', 'Share', 'Trend', 'Percentile']);
+      assert.equal(await sec.locator('table.ttable').getAttribute('aria-label'), `${BRIEFINGS[k].name}: headline trends this week`);
+      const inView = await sec.locator('table.ttable').evaluate(t => { const box = t.closest('.scroll').getBoundingClientRect(); return [...t.querySelectorAll('thead th')].slice(0, 5).every(th => th.getBoundingClientRect().right <= box.right + 1); });
+      assert.ok(inView, `${width}: ${tr.briefing}: the topic, its stories, share, trend and percentile in view without scrolling sideways`);
+      if (tr.status === 'week' && tr.weeks[0].missing) assert.match(await sec.locator('.prp-note').first().innerText(), /^This week cannot be compared yet: .+ (is|are) not held in full in the store's history\./, 'the missing days named');
+      assert.equal(await sec.locator('.b-data').innerText(), `Data ${utcTime(tr.generated)}`, `${tr.briefing}: its own data time`);
+      if (tr.status !== 'ok') {
+        assert.match(await sec.locator('.prp-note').first().innerText(), /^(Not enough history yet|This week cannot be compared yet)/, 'too little history: it says so');
+        assert.equal(await sec.locator('.tr-rising, .tr-falling').count(), 0, 'and shows no trend');
+      }
+    }
+    assert.equal(await page.locator(`#${rowId}`).getAttribute('aria-current'), 'true', 'the linked topic is picked');
+    assert.equal(await page.evaluate(() => document.activeElement?.id), rowId);
+    const method = await page.locator('#panel-trends .t-method').innerText();
+    assert.match(method, /not how important or how true/);
+    assert.match(method, /75th percentile/);
+    assert.equal(await page.locator('#panel-trends [role="status"]').count(), 0, 'no note for a topic that is there');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), `${width}: no horizontal scroll`);
+    // A topic the briefing no longer lists: every topic, and a plain note.
+    await page.goto(`${BASE}/highbrowse/#tab=trends&t=economics.a-field-that-went`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#panel-trends [role="status"]', { timeout: 30000 });
+    assert.equal(await page.locator('#panel-trends [role="status"]').innerText(), 'That topic is no longer in the briefing\'s list.');
+    assert.equal(await page.locator('#panel-trends .trend').count(), 4);
+    // Leaving for Today lets the topic go: the address does not turn into a search.
+    await page.click('#tab-today');
+    assert.equal(await page.evaluate(() => location.hash), '');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+test('page: each briefing\'s panel gives its own data time, and a store refreshed since the page read it is offered as a reload', pageTest, async t => {
+  const res = await fetch(`${BASE}/highbrowse/`).catch(() => null);
+  if (!res?.ok) { t.skip(`Highbrowse is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  const browser = await launch();
+  t.after(() => browser.close());
+  const context = await browser.newContext({ viewport: { width: 1360, height: 900 } });
+  // The page looks again every 15 minutes: the test moves its clock on instead of waiting.
+  await context.addInitScript(() => { const real = Date.now.bind(Date); let skew = 0; Date.now = () => real() + skew; window.__skew = ms => { skew += ms; }; });
+  let newer = false;
+  await context.route('**/econ/briefing/data/stories.head.json', async route => {
+    const r = await route.fetch(), j = await r.json();
+    if (newer) j.generated = new Date(Date.parse(j.generated) + 6 * 36e5).toISOString();
+    await route.fulfill({ json: j });
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/highbrowse/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('html[data-ready="1"]', { timeout: 30000 });
+  const stores = await Promise.all(BRIEFINGS.map(b => fetch(`${BASE}/${b.data}`).then(r => r.json())));
+  for (const [k, b] of BRIEFINGS.entries()) assert.equal(await page.locator(`#panel-today .brief[data-b="${b.key}"] .b-data`).innerText(), `Data ${utcTime(stores[k].generated)}`, `${b.key}: its store's own time`);
+  assert.equal(await page.locator('#meta [data-reload]').count(), 0, 'nothing newer yet');
+  newer = true;
+  await page.evaluate(() => { window.__skew(16 * 60e3); document.dispatchEvent(new Event('visibilitychange')); });
+  await page.waitForSelector('#meta [data-reload]', { timeout: 10000 });
+  assert.match(await page.locator('#meta .newer').innerText(), /^Refreshed since this page read it: the Economics Briefing at \d+ \w{3} \d\d:\d\d UTC/);
   assert.deepEqual(errors, []);
 });

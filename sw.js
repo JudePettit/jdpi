@@ -1,14 +1,14 @@
 /* Vitruvian Manager's offline worker, for the installable app (manifest.json). Network first: online, every request
    goes to the network as before and the copy kept here is refreshed; offline, the shell (its page, script, styles,
-   registry and marks) and IoT Connect's own page still open from that copy. It keeps nothing else: never another
+   registry, marks and the freshness lines' module) and IoT Connect's own page still open from that copy. It keeps nothing else: never another
    origin (fonts, maps, feeds), never the site's data, /api/ or /mcp, and never the bridge on this computer. Every
    other request is left alone, exactly as if there were no worker. The shell registers it (shell.js); bump VERSION
    when the list changes. */
-const VERSION = 'vm-shell-1';
+const VERSION = 'vm-shell-2';
 const IOT = 'digital/iot-connect/';
 const FILES = [
   '', 'shell.js', 'shell.css', 'registry.json', 'manifest.json',
-  'design/prp.css', 'design/prp-bar.js', 'design/prp-voice.js', 'design/jdpi-documentary.js', 'design/jdpi-narrator.js', 'design/jdpi-entities.js',
+  'design/prp.css', 'design/prp-bar.js', 'design/prp-freshness.js', 'design/prp-voice.js', 'design/jdpi-documentary.js', 'design/jdpi-narrator.js', 'design/jdpi-entities.js',
   'design/brand-vm.svg', 'design/brand-vm-icon.svg', 'design/vm-loading.svg',
   'design/icons/vm-192.png', 'design/icons/vm-512.png', 'design/icons/vm-maskable-512.png', 'apple-touch-icon.png',
   IOT, `${IOT}iot.css`, `${IOT}app.js`,

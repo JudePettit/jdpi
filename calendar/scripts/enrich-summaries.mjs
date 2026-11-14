@@ -4,6 +4,7 @@
 // the page fetches the full introduction on demand for "See more". Summaries are cached in
 // summary-cache.json so rebuilds only fetch new articles.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const DATA = new URL('../data/', import.meta.url);
 const CACHE = new URL('./summary-cache.json', import.meta.url);
@@ -63,3 +64,5 @@ for (const [f, d] of decades) {
   writeFileSync(new URL(f, DATA), JSON.stringify(d));
 }
 console.log(`${withSummary} of ${total} events have a summary`);
+// calendar/data/upcoming.json (the Dashboard's next events, with their keys) in step with the decades it reads.
+writeHeads('Realtime and Historical Calendars');

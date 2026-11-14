@@ -32,9 +32,13 @@
           "kind": "realtime",
           "icon": "⊞",
           "status": "live",
+          "data": {
+            "class": "combined",
+            "note": "each card dated"
+          },
           "host": "Vitruvian Manager",
           "shell": "dashboard",
-          "description": "What changed today across Vitruvian Manager: volatility's biggest movers, the briefings' week, the next votes and summits, and the markets, over every module and submodule."
+          "description": "What changed today across Vitruvian Manager: volatility's biggest movers, the topics rising and falling in the briefings' headlines, the next votes and summits, and the markets, each line opening the one thing it names, over every module and submodule."
         }
       ]
     },
@@ -55,6 +59,10 @@
           "kind": "realtime",
           "icon": "◎",
           "status": "live",
+          "data": {
+            "class": "rhythm",
+            "note": "collected daily, country by country"
+          },
           "host": "Vitruvian Manager",
           "url": "q/headlines.html?view=current",
           "description": "Any country's last 24 hours of news on a map, with daily, weekly, monthly and yearly archives of its top stories in the same view.",
@@ -92,6 +100,18 @@
           "kind": "realtime",
           "icon": "⌁",
           "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "volatility-refresh.yml",
+            "parts": [
+              {
+                "read": "volatility/data/index.head.json",
+                "store": "volatility/data/index.json",
+                "time": "latest",
+                "label": "Scored to"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/volatility.html",
           "description": "A daily 0–100 index of conflict, political escalation, unrest, economic disruption and cross-border spread for every country, from GDELT, for one day or a period of days. Compare up to four countries."
@@ -102,13 +122,28 @@
           "kind": "realtime",
           "icon": "✕",
           "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "battlefield-refresh.yml",
+            "expected": "monthly",
+            "by": "UCDP",
+            "parts": [
+              {
+                "read": "battlefield/data/realtime.head.json",
+                "store": "battlefield/data/realtime.json",
+                "time": "latest",
+                "late": "generated",
+                "label": "Figures to"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/battlefield.html?view=live",
           "description": "Every armed conflict this year, grouped into wars, with plain-English briefings, a monthly archive (one month or a period of months) and related coverage. UCDP data, refreshed monthly.",
           "views": [
             {
               "id": "live",
-              "name": "Live map · last 3 months",
+              "name": "Map · latest 3 months",
               "url": "q/battlefield.html?view=live"
             },
             {
@@ -124,6 +159,16 @@
           "kind": "realtime",
           "icon": "◉",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "national-refresh.yml",
+            "parts": [
+              {
+                "read": "national/data/index.head.json",
+                "store": "national/data/index.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/national.html",
           "description": "Every country's PESTLE pressures, plus how it is governed, how often its leaders change and how much conflict it has seen. 41 indicators; compare up to four countries.",
@@ -146,6 +191,16 @@
           "kind": "realtime",
           "icon": "◍",
           "status": "live",
+          "data": {
+            "class": "reviewed",
+            "workflow": "political-atlas/monthly-update.yml",
+            "parts": [
+              {
+                "read": "https://political-atlas.pages.dev/data/manifest.json",
+                "time": "lastUpdated"
+              }
+            ]
+          },
           "host": "Cloudflare Pages",
           "url": "https://political-atlas.pages.dev",
           "description": "Who holds power across 78 countries now: executives, legislatures, courts, elections, policies and challenges. Refreshed monthly."
@@ -156,6 +211,16 @@
           "kind": "realtime",
           "icon": "▦",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "calendar-refresh.yml",
+            "parts": [
+              {
+                "read": "calendar/data/upcoming.json",
+                "store": "calendar/data/2020s.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/calendar.html?period=contemporary",
           "description": "Upcoming elections, referendums and summits, plus the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests and strikes, parliamentary votes, court rulings, sanctions and party contests. Month or year view, any country or just the ones you highlight."
@@ -178,9 +243,39 @@
           "kind": "realtime",
           "icon": "❦",
           "status": "live",
+          "data": {
+            "class": "combined",
+            "note": "reads the four briefings",
+            "parts": [
+              {
+                "read": "briefing/data/latest.head.json",
+                "store": "briefing/data/latest.json",
+                "name": "Political",
+                "workflow": "briefing-refresh.yml"
+              },
+              {
+                "read": "science/briefing/data/stories.head.json",
+                "store": "science/briefing/data/stories.json",
+                "name": "Scientific",
+                "workflow": "briefings-refresh.yml"
+              },
+              {
+                "read": "econ/briefing/data/stories.head.json",
+                "store": "econ/briefing/data/stories.json",
+                "name": "Economics",
+                "workflow": "briefings-refresh.yml"
+              },
+              {
+                "read": "digital/briefing/data/stories.head.json",
+                "store": "digital/briefing/data/stories.json",
+                "name": "Digital",
+                "workflow": "briefings-refresh.yml"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "highbrowse/index.html",
-          "description": "The day's and the week's news across the four briefings: the biggest stories and topics, what each briefing covers most, the stories they share and how the political press spreads across five positions, with one search across all four by words, briefing, date and topic.",
+          "description": "The day's and the week's news across the four briefings: the biggest stories and topics, what each briefing covers most, the stories they share and how the political press spreads across five positions, with one search across all four by words, briefing, date and topic, and each topic's share of the stories this week against the weeks before.",
           "views": [
             {
               "id": "today",
@@ -196,6 +291,11 @@
               "id": "search",
               "name": "Search",
               "url": "highbrowse/index.html#tab=search"
+            },
+            {
+              "id": "trends",
+              "name": "Trends",
+              "url": "highbrowse/index.html#tab=trends"
             }
           ]
         },
@@ -205,6 +305,16 @@
           "kind": "realtime",
           "icon": "↗",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "briefing-refresh.yml",
+            "parts": [
+              {
+                "read": "briefing/data/latest.head.json",
+                "store": "briefing/data/latest.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/briefing.html",
           "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
@@ -215,6 +325,16 @@
           "kind": "realtime",
           "icon": "◬",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "briefings-refresh.yml",
+            "parts": [
+              {
+                "read": "science/briefing/data/stories.head.json",
+                "store": "science/briefing/data/stories.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "science/briefing/index.html",
           "description": "New papers and news from the major journals and science desks (Nature, Science, Cell, PNAS, PRL and more), with a toggle for physics, chemistry, biology, earth & environment, and astronomy & space."
@@ -225,6 +345,16 @@
           "kind": "realtime",
           "icon": "⊿",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "briefings-refresh.yml",
+            "parts": [
+              {
+                "read": "econ/briefing/data/stories.head.json",
+                "store": "econ/briefing/data/stories.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "econ/briefing/index.html",
           "description": "Economics news and scholarly articles from 50 feeds: NBER and CEPR working papers, the top journals, the BIS, ECB, Fed and Bank of England, VoxEU, Brookings and other think tanks, and the FT, Economist and Bloomberg, with a toggle by field (macro, monetary policy, trade, labour, development, finance, public finance, energy)."
@@ -235,6 +365,16 @@
           "kind": "realtime",
           "icon": "⌬",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "briefings-refresh.yml",
+            "parts": [
+              {
+                "read": "digital/briefing/data/stories.head.json",
+                "store": "digital/briefing/data/stories.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "digital/briefing/index.html",
           "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
@@ -258,6 +398,16 @@
           "kind": "reference",
           "icon": "◈",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "lake-refresh.yml",
+            "parts": [
+              {
+                "read": "lake/data/manifest.json",
+                "store": "lake/data/manifest.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "encyclopedia/index.html",
           "description": "Every person, place, war, party, idea, scientist and discovery in Vitruvian Manager. Filter with Boolean tag queries (e.g. Realist + American + \"Political science\") and jump to everywhere each one appears across the suite."
@@ -268,6 +418,9 @@
           "kind": "retrospective",
           "icon": "◷",
           "status": "live",
+          "data": {
+            "class": "reference"
+          },
           "host": "Cloudflare Pages",
           "url": "https://hp-retrospective.pages.dev",
           "description": "Move through the years from 1926 to today, or set a period of years with the timeline's two handles: historical borders, who was in charge of each country, and the key political events of every year, with Wikipedia links."
@@ -278,6 +431,15 @@
           "kind": "retrospective",
           "icon": "⚔",
           "status": "live",
+          "data": {
+            "class": "reference",
+            "parts": [
+              {
+                "read": "battlefield/history/data/wars.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "battlefield/history/index.html",
           "description": "Move through the years from 1926 to 2025, or set a period of years with the timeline's two handles, to see every war and armed conflict on a historical map, with sides, intensity and Wikipedia links.",
@@ -291,6 +453,20 @@
           "kind": "retrospective",
           "icon": "⌖",
           "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "warfocus-refresh.yml",
+            "checks": true,
+            "parts": [
+              {
+                "read": "battlefield/focus/data/index.json",
+                "store": "battlefield/focus/data/index.json",
+                "time": "gedThrough",
+                "late": "generated",
+                "label": "Figures to"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "battlefield/focus/index.html",
           "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a timeline of months (one month, or a period with its two handles), battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
@@ -301,6 +477,15 @@
           "kind": "retrospective",
           "icon": "☼",
           "status": "live",
+          "data": {
+            "class": "reference",
+            "parts": [
+              {
+                "read": "kardashev/data/energy.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kardashev/index.html",
           "description": "Which empires and countries controlled what share of humanity's energy capture from 2000 BC to today, after Ian Morris, with humanity's Kardashev rating century by century, or the two ends of a period compared."
@@ -311,6 +496,16 @@
           "kind": "retrospective",
           "icon": "▤",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "calendar-refresh.yml",
+            "parts": [
+              {
+                "read": "calendar/data/upcoming.json",
+                "store": "calendar/data/2020s.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "q/calendar.html?period=history",
           "description": "Political history from 1980 to today in one calendar: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account."
@@ -321,6 +516,9 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
+          "data": {
+            "class": "course"
+          },
           "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=politics",
           "description": "The political spectrum through its leaders and thinkers: far left, left, centre, right (conservatism and market liberalism) and far right, and Mearsheimer and the Realists, a school of its own outside the left-to-right line, with quizzes."
@@ -341,6 +539,10 @@
           "kind": "realtime",
           "icon": "⌕",
           "status": "live",
+          "data": {
+            "class": "on-demand",
+            "note": "asks its sources when you use it"
+          },
           "host": "Vitruvian Manager",
           "url": "osint/index.html",
           "description": "An investigator's workbench for open sources: search across engines and archives, domains, company and sanctions records, event monitoring and image checks, with a case notebook that grades every source. Plus a Software Cookbook and a Kit Guide.",
@@ -408,6 +610,10 @@
           "kind": "realtime",
           "icon": "⌇",
           "status": "live",
+          "data": {
+            "class": "on-demand",
+            "note": "asks its sources when you use it"
+          },
           "host": "Vitruvian Manager",
           "url": "sigint/index.html",
           "description": "Receive-only signals monitoring: aircraft (ADS-B), ships (AIS), satellites, LoRa mesh, GNSS interference and space weather from public feeds or your own receivers, plus a Software Cookbook and a Hardware Guide for hobbyists.",
@@ -475,6 +681,10 @@
           "kind": "realtime",
           "icon": "◫",
           "status": "live",
+          "data": {
+            "class": "on-demand",
+            "note": "asks its sources when you use it"
+          },
           "host": "Vitruvian Manager",
           "url": "geoint/index.html",
           "description": "Geospatial and imagery intelligence: daily satellite imagery and night lights with before/after comparison, active fires, terrain, OpenStreetMap features, measuring and sun/shadow tools for geolocation and chronolocation. Plus a Software Cookbook and a Hardware Guide.",
@@ -527,6 +737,9 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
+          "data": {
+            "class": "course"
+          },
           "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=osint",
           "description": "Courses in intelligence tradecraft, each with quizzes and capstone exercises: OSINT (the intelligence cycle, sources, search, verification, records, analysis and the law), SIGINT (radio fundamentals and lawful, receive-only monitoring of aircraft, ships, satellites and the spectrum) and GEOINT & IMINT (satellite imagery, geolocation, chronolocation and measurement), and how to use Vitruvian Manager’s dashboards for each.",
@@ -573,6 +786,10 @@
           "kind": "realtime",
           "icon": "↯",
           "status": "live",
+          "data": {
+            "class": "available",
+            "note": "prices delayed"
+          },
           "host": "Cloudflare Workers",
           "url": "https://trade-desk.judep92.workers.dev/markets/",
           "description": "Markets now: indices, rates, FX, commodities and crypto, movers, news, ticker pages and the Hype Tracker of tickers suddenly talked about or traded far more than usual."
@@ -586,6 +803,27 @@
           "kind": "realtime",
           "icon": "⇄",
           "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "traders-refresh.yml",
+            "checks": true,
+            "parts": [
+              {
+                "read": "traders/data/congress.head.json",
+                "store": "traders/data/congress.json",
+                "time": "latestFiled",
+                "late": "generated",
+                "label": "Trades filed to"
+              },
+              {
+                "read": "traders/data/investors.head.json",
+                "store": "traders/data/investors.json",
+                "time": "latestPeriod",
+                "late": "generated",
+                "label": "13F holdings to"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "fe/traders.html",
           "description": "What members of Congress (including Nancy Pelosi) and famous investors such as Buffett, Burry and Ackman are buying and selling, from STOCK Act and SEC 13F filings, and an agent that mirrors any of them or trades in their style.",
@@ -611,6 +849,10 @@
           "kind": "automation",
           "icon": "⚙",
           "status": "live",
+          "data": {
+            "class": "private",
+            "note": "runs every minute"
+          },
           "host": "Cloudflare Workers",
           "url": "https://trade-desk.judep92.workers.dev/tally/algo/",
           "opensInNewTab": true,
@@ -622,6 +864,10 @@
           "kind": "operations",
           "icon": "▥",
           "status": "live",
+          "data": {
+            "class": "private",
+            "note": "runs every minute"
+          },
           "host": "Cloudflare Workers",
           "url": "https://trade-desk.judep92.workers.dev/tally/",
           "opensInNewTab": true,
@@ -633,6 +879,9 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
+          "data": {
+            "class": "course"
+          },
           "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=finance",
           "description": "Two courses: Finance, a university-style introduction with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
@@ -665,6 +914,16 @@
           "kind": "retrospective",
           "icon": "⟡",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "progress-refresh.yml",
+            "parts": [
+              {
+                "read": "science/progress/data/events.head.json",
+                "store": "science/progress/data/events.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "science/progress/index.html",
           "description": "Move through history, or set a period with the timeline's two handles, to see key scientific breakthroughs appear where they happened, tagged by discipline, discoverer and institution, and linked to the Master Index."
@@ -685,6 +944,17 @@
           "kind": "operations",
           "icon": "▤",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "calendar-refresh.yml",
+            "parts": [
+              {
+                "read": "integration/catalog.head.json",
+                "store": "integration/catalog.json",
+                "label": "Catalogue built"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "analytics/index.html",
           "description": "Explore and chart Vitruvian Manager’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in Vitruvian Manager’s style, export them, and hand the analysis to an AI assistant."
@@ -695,6 +965,17 @@
           "kind": "reference",
           "icon": "⇄",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "calendar-refresh.yml",
+            "parts": [
+              {
+                "read": "integration/catalog.head.json",
+                "store": "integration/catalog.json",
+                "label": "Catalogue built"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "integration/index.html",
           "description": "Connect AI assistants and plugins to Vitruvian Manager: a catalogue of every dataset, a read-only MCP server, a JSON API, feeds and calendars, and setup guides for Claude and other tools.",
@@ -747,6 +1028,10 @@
           "kind": "operations",
           "icon": "⊶",
           "status": "live",
+          "data": {
+            "class": "on-demand",
+            "note": "your own devices, through the bridge"
+          },
           "host": "Vitruvian Manager",
           "url": "digital/iot-connect/index.html",
           "description": "Command your own smart bulbs, speakers, TVs and the EZCast receiver from one page through the Vitruvian Manager bridge, with Hermes Messenger to identify devices and walk through their pairing, an MQTT and Sparkplug link to a unified namespace, and your phone as the remote.",
@@ -799,6 +1084,17 @@
           "kind": "retrospective",
           "icon": "◉",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-events",
           "description": "Documentaries on political turning points, starting with the Russian Revolutions of 1917, the Partition of India and the Revolutions of 1989."
@@ -809,6 +1105,17 @@
           "kind": "retrospective",
           "icon": "☺",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-figures",
           "description": "Lives in power, told with maps, timelines, portraits and their own words: Winston Churchill, Franklin D. Roosevelt and Deng Xiaoping to begin with."
@@ -819,6 +1126,17 @@
           "kind": "retrospective",
           "icon": "◧",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=political-parties",
           "description": "How parties rise, rule and adapt, starting with the Chinese Communist Party, Mexico's Institutional Revolutionary Party and Japan's Liberal Democratic Party."
@@ -829,6 +1147,17 @@
           "kind": "retrospective",
           "icon": "⚔",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=wars",
           "description": "Wars from their causes to their aftermath, starting with the Second World War in Europe, the Korean War and the Vietnam War, with maps that follow War Focus month by month."
@@ -839,6 +1168,17 @@
           "kind": "retrospective",
           "icon": "⊕",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=geopolitical-events",
           "description": "Moments that reshaped the world order, starting with the Cuban Missile Crisis, the end of the Soviet Union and the end of empire in Africa."
@@ -849,6 +1189,17 @@
           "kind": "learning",
           "icon": "✎",
           "status": "live",
+          "data": {
+            "class": "checked",
+            "workflow": "kino-refresh.yml",
+            "parts": [
+              {
+                "read": "kino/scripts/cache.json",
+                "store": "kino/scripts/cache.json",
+                "heavy": true
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=great-thinkers",
           "description": "Three-part courses with a short quiz on the great minds Vitruvian Manager draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
@@ -872,6 +1223,16 @@
           "kind": "learning",
           "icon": "¶",
           "status": "live",
+          "data": {
+            "class": "updated",
+            "workflow": "lake-refresh.yml",
+            "parts": [
+              {
+                "read": "bibliotheca/data/index.json",
+                "store": "bibliotheca/data/index.json"
+              }
+            ]
+          },
           "host": "Vitruvian Manager",
           "url": "bibliotheca/neo/index.html",
           "description": "Public-domain books read on screen, from Thucydides and Machiavelli to Gibbon, Smith, Darwin, Clausewitz, Marx and the Austrian economists. Every term the Master Index knows is highlighted, a bar lists the terms on screen, a pane beside the text opens the Master Index entry or the other screens for the book's era, and Augmented Reading reads the book aloud."
@@ -879,5 +1240,5 @@
       ]
     }
   ],
-  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A submodule given a new id keeps its old one as an alias, so its old addresses still open it too: Neo Classic, which was Kino's Bibliotheca until November 2026, answers #/kino/bibliotheca in the Bibliotheca module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page. A module's \"summary\" is what you can do with it, in a line or two: the back of its box on the Home page. The Home module (home) is where VM starts: its overview is the Home page (#/), where every other module has a box, and its one submodule, the Dashboard (#/home/dashboard, the Today panel over every module and submodule), is drawn by the shell itself (\"shell\": \"dashboard\", in place of a url)."
+  "notes": "Each module is one page. A page's own views (tabs) are listed under views: the sidebar does not show them, but #/<suite>/<module>/<view> links open them. A submodule that moves to another module keeps its id, so its old address (#/rt/briefing, #/ns/science-briefing, …) still opens it, in its new module. A submodule given a new id keeps its old one as an alias, so its old addresses still open it too: Neo Classic, which was Kino's Bibliotheca until November 2026, answers #/kino/bibliotheca in the Bibliotheca module. A module may have a mark, its variant of the Vitruvian figure: \"mark\" for the sidebar and \"figure\" for its overview page. A module's \"summary\" is what you can do with it, in a line or two: the back of its box on the Home page. The Home module (home) is where VM starts: its overview is the Home page (#/), where every other module has a box, and its one submodule, the Dashboard (#/home/dashboard, the Today panel over every module and submodule), is drawn by the shell itself (\"shell\": \"dashboard\", in place of a url). A submodule's \"status\" says only whether it is published: \"live\" means published and open to readers (never shown, and never a claim about fresh data); \"in-build\" and \"planned\" are flagged. Its \"kind\" (Realtime, Retrospective, …) is for search, the catalogue and the MCP server, and is not shown as a badge. Its \"data\" says how its freshness line is worked out (design/prp-freshness.js): the line's class, the refresh workflow whose cron gives the rhythm, and the files whose own times it shows; the line is never written by hand. Its \"host\" is said in its module's \"About this module\", not in a column."
 }

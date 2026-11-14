@@ -837,3 +837,47 @@ describe('page under hostile data', () => {
     }
   });
 });
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('catalog.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('integration/catalog.json'), [], 'run node integration/scripts/heads.mjs integration/catalog.json');
+});
+
+/* ---- the catalogue's copies against their stores (the review of 13 November 2026, part A): the catalogue is remade only
+   by the daily calendar refresh, so the Hub labels its dates and rows as the catalogue's, and a dataset whose store is
+   newer (read from the store's own summary) says when the store's data is of. */
+test('page: a dataset whose store is newer than the catalogue says so, with the store\'s own time; the catalogue\'s facts are labelled as its', pageTest, async t => {
+  const BASE = (process.env.JDPI_URL || 'http://localhost:8787').replace(/\/$/, '');
+  if (!(await fetch(BASE + '/integration/').then(r => r.ok).catch(() => false))) { t.skip(`the Hub is not served at ${BASE}`); return; }
+  const { dayTime } = await import('../design/prp-freshness.js');
+  const cat = JSON.parse(readFileSync(new URL('../integration/catalog.json', import.meta.url), 'utf8'));
+  const later = new Date(Date.parse(cat.generated) + 17 * 3600e3).toISOString();
+  // The dataset is built from the volatility index too: another submodule's store, refreshed every night some hours
+  // before the catalogue is remade. Its summary is set here as well, so the words do not depend on the hour of the
+  // run, and the Hub must name that submodule for it and not National Analysis.
+  const latest = new Date(Date.parse(cat.generated) + 20 * 3600e3).toISOString();
+  const browser = await launch();
+  try {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await context.route('**/national/data/index.head.json*', r => r.fulfill({ json: { generated: later, summaryOf: {} } }));
+    await context.route('**/volatility/data/index.head.json*', r => r.fulfill({ json: { generated: latest, summaryOf: {} } }));
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/integration/#tab=catalogue&ds=national-countries`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /has newer data/.test(document.querySelector('#cat-rows tr.detail')?.textContent || ''), null, { timeout: 20000 });
+    const detail = await page.textContent('#cat-rows tr.detail');
+    assert.ok(detail.includes(`National Analysis has newer data, of ${dayTime(Date.parse(later))}, and Geopolitical Volatility of ${dayTime(Date.parse(latest))}; the catalogue's copy is remade daily.`), detail);
+    assert.ok(detail.includes(`Updated in the catalogue of ${dayTime(Date.parse(cat.generated))}`), 'its date, labelled');
+    assert.ok(detail.includes(`Rows in the catalogue of ${dayTime(Date.parse(cat.generated))}`), 'its rows, labelled');
+    assert.match(await page.textContent('#meta'), /Catalogue built .+ UTC, remade daily; its rows and dates are as of then/);
+    assert.ok((await page.textContent('table:has(#cat-rows) thead')).includes('Updated, in the catalogue'), 'the table\'s column, labelled');
+    const national = await page.$$eval('#cat-rows tr:not(.detail)', rows => rows.filter(r => /^national-/.test(r.querySelector('.id')?.textContent || '')).map(r => !!r.querySelector('small.newer')));
+    assert.deepEqual(national, [true, true, true, true], 'the four datasets made from National Analysis\'s index, each in its row');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

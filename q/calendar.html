@@ -169,6 +169,7 @@ button,input{font:inherit}button{cursor:pointer}
     <button type="button" role="tab" class="viewbtn active" id="tab-month" data-view="month" aria-controls="calpanel" aria-selected="true">Month</button>
     <button type="button" role="tab" class="viewbtn" id="tab-year" data-view="year" aria-controls="calpanel" aria-selected="false" tabindex="-1">Year</button>
   </div>
+  <p class="prp-note warn" id="event-gone" role="status" style="margin:0 0 12px" hidden></p>
   <div class="toolrow">
     <span class="subnav" hidden></span><!-- research-workspace.js adds the saved-research tools after this -->
   </div>
@@ -240,6 +241,14 @@ let events = [], dataGenerated = '';
 // The event types picked in the chips (none = every type); ?types=referendum,summit opens with them picked.
 let activeTypes = new Set((params.get('types') || '').split(',').filter(t => TYPES[t])), calView = params.get('view') === 'year' ? 'year' : 'month';
 let highlighted = (params.get('countries') || '').split(',').map(s => s.trim()).filter(Boolean);
+// ?event=<key> opens one event (the Dashboard's "Upcoming" lines link here, and the address can be shared). The key is
+// made by integration/scripts/heads.mjs eventKey, and this is an exact copy of it (tests/calendar.test.mjs holds the two
+// equal): the date, the country and the title, folded to lower-case letters and digits with hyphens between.
+function eventKey(e) {
+  const slug = s => String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, '');
+  return `${String(e.date || '')}~${slug(e.country)}~${slug(e.title)}`;
+}
+let linkedEvent = /^\d{4}-\d{2}-\d{2}~[a-z0-9-]*~[a-z0-9-]*$/.test(params.get('event') || '') ? params.get('event') : '';
 let view = new Date(); view.setDate(1); view.setHours(0, 0, 0, 0);
 const fmt = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' });
 const dateFmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -409,7 +418,8 @@ async function openEvent(e) {
       : paras.slice(0, 6).map(p => '<p>' + esc(p) + '</p>').join('') + '<p class="credit">Text: Wikipedia, CC BY-SA.</p>' + src;
   } catch {}
 }
-function closeModal() { document.getElementById('modal').hidden = true; }
+// Closing the event an address opened is moving on: the address drops it, so a reload shows the calendar as it is now.
+function closeModal() { document.getElementById('modal').hidden = true; if (linkedEvent) { linkedEvent = ''; writeUrl(); } }
 document.getElementById('modal-close').onclick = closeModal;
 document.getElementById('modal').addEventListener('click', ev => { if (ev.target.id === 'modal') closeModal(); });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeModal(); });
@@ -455,6 +465,7 @@ function writeUrl() {
   if (calView === 'year') p.set('view', 'year'); else p.delete('view');
   if (highlighted.length) p.set('countries', highlighted.join(',')); else p.delete('countries');
   if (activeTypes.size) p.set('types', TYPE_ORDER.filter(t => activeTypes.has(t)).join(',')); else p.delete('types');
+  if (linkedEvent) p.set('event', linkedEvent); else p.delete('event');
   window.history.replaceState(null, '', '?' + p);
 }
 
@@ -506,6 +517,21 @@ async function init() {
   const requested = params.get('month');
   if (requested && /^\d{4}-\d{2}$/.test(requested)) view = new Date(requested + '-01T00:00:00');
   else if (/^\d{4}s$/.test(requestedPeriod)) view = new Date(Number(requestedPeriod.slice(0, 4)), 0, 1);
+  if (linkedEvent) openLinked(); else render();
+}
+// The event ?event= names: its month, then the event itself. One renamed since the link was made is found by its date
+// and country when exactly one event has both; one that is gone leaves the calendar on its month with a plain note.
+function openLinked() {
+  const [date, country] = linkedEvent.split('~');
+  let e = allEvents().find(x => eventKey(x) === linkedEvent);
+  if (!e) { const same = allEvents().filter(x => x.date === date && eventKey({ date, country: x.country, title: '' }) === `${date}~${country}~`); if (same.length === 1) e = same[0]; }
+  const day = e?.date || date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { view = new Date(day.slice(0, 7) + '-01T00:00:00'); calView = 'month'; }
+  const gone = document.getElementById('event-gone');
+  if (e) { gone.hidden = true; linkedEvent = eventKey(e); render(); openEvent(e); return; }
+  linkedEvent = '';
+  gone.textContent = 'That event is no longer in the calendar: it may have been renamed or moved.';
+  gone.hidden = false;
   render();
 }
 function showUpdated() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; }

@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -228,6 +228,12 @@ test('logic: ingest.mjs leaves out a short or thin day, fails only when that lef
     mkdirSync(scripts, { recursive: true });
     const src = fileURLToPath(new URL('../volatility/scripts/', import.meta.url));
     for (const f of readdirSync(src)) copyFileSync(join(src, f), join(scripts, f));
+    // ingest.mjs writes index.head.json with the index (integration/scripts/heads.mjs), so the copy needs heads.mjs and
+    // what it imports.
+    for (const f of ['integration/scripts/heads.mjs', 'design/prp-trends.js', 'design/prp-access.js', 'highbrowse/analysis.js']) {
+      mkdirSync(dirname(join(dir, f)), { recursive: true });
+      copyFileSync(fileURLToPath(new URL('../' + f, import.meta.url)), join(dir, f));
+    }
     writeFileSync(join(dir, 'stub.mjs'), String.raw`
       import { deflateRawSync } from 'node:zlib';
       const NOW = Date.parse(process.env.GVI_NOW), RealDate = Date;
@@ -455,6 +461,36 @@ test('page: dragging the start handle with the pointer opens a period and leaves
     assert.ok(starts.every((d, k) => d <= (k ? starts[k - 1] : day)), `the start only moves back: ${starts.join(' ')}`);
     assert.ok(starts.at(-1) < day, `a period opened: ${starts.at(-1)}`);
     assert.equal(hash, `#day=${day}&from=${starts.at(-1)}`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('index.head.json (the Dashboard\'s movers) is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('volatility/data/index.json'), [], 'run node integration/scripts/heads.mjs volatility/data/index.json');
+});
+
+/* ---- one country by its address: the Dashboard's "Geopolitical change" lines open #country=<ISO3> (13 November 2026) */
+test('page: #country= opens that country\'s profile; a code the index does not hold shows the map and a plain note', pageTest, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    const head = JSON.parse(readFileSync(new URL('../volatility/data/index.head.json', import.meta.url), 'utf8'));
+    const iso3 = head.movers.records[0].iso3;
+    await page.goto(`${BASE}/q/volatility#country=${iso3}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    assert.equal(await page.locator('#tabbtn-profile').getAttribute('aria-selected'), 'true');
+    assert.equal(await page.locator('#gone').isHidden(), true);
+    await page.goto(`${BASE}/q/volatility#country=XXA`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#gone:not([hidden])', { timeout: 20000 });
+    assert.equal(await page.locator('#gone').innerText(), 'No scores for XXA in the index, so the map is shown instead.');
+    assert.equal(await page.locator('#tabbtn-map').getAttribute('aria-selected'), 'true');
+    await page.click('#tabbtn-method');
+    assert.equal(await page.locator('#gone').isHidden(), true, 'moving on hides the note');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

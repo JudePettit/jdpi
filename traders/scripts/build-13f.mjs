@@ -12,6 +12,7 @@
 // --allow-drop writes anyway.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const UA = { 'User-Agent': 'PRP Auto Trader (https://jdpi.pages.dev)' };
 const OUT = new URL('../data/investors.json', import.meta.url);
@@ -212,4 +213,5 @@ if (!tickersOnly) {
 await addTickers(data);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data));
+writeHeads('traders/data/investors.json'); // investors.head.json in step with it (integration/scripts/heads.mjs)
 console.log(`investors.json: ${data.investors.length} investors, ${data.tickers.mapped} of ${data.tickers.of} holdings with a ticker`);

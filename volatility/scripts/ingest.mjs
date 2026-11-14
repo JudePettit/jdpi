@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlink
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLOTS, MIN_SLOTS, BASELINE_DAYS, MIN_BASELINE, ymd, addDays, unzipFirst, slotUrl, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay, buildIndex, pruneBefore } from './gvi.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const ROOT = fileURLToPath(new URL('../data/', import.meta.url));
 const DAYS_DIR = join(ROOT, 'days'), INDEX = join(ROOT, 'index.json');
@@ -102,6 +103,7 @@ async function main() {
   }
   const index = buildIndex(prev, stored, loadDay, new Date().toISOString());
   writeFileSync(INDEX, JSON.stringify(index));
+  writeHeads(INDEX); // index.head.json (the Dashboard's movers) in step with it (integration/scripts/heads.mjs)
   for (const d of stored) if (d < pruneBefore(index.latest)) unlinkSync(join(DAYS_DIR, d + '.json'));
   console.log(`index: ${index.days} days, ${Object.keys(index.countries).length} countries, latest ${index.latest}`);
   thinStop();

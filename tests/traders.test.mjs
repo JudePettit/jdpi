@@ -53,3 +53,13 @@ test('Congress trades filter by member and ticker; investors show 13F holdings',
   assert.match(detail, /APPLE|Apple|AMERICAN EXPRESS|American Express/);
   assert.deepEqual(errors, []);
 });
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('congress.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('traders/data/congress.json'), [], 'run node integration/scripts/heads.mjs traders/data/congress.json');
+});
+test('investors.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('traders/data/investors.json'), [], 'run node integration/scripts/heads.mjs traders/data/investors.json');
+});

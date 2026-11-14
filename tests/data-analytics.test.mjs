@@ -894,3 +894,37 @@ test('page: hostile catalogue text, data and addresses are shown as text, never 
     await browser.close();
   }
 });
+
+// The catalogue's copies against their stores (the review of 13 November 2026, part A): the catalogue is remade only by
+// the daily calendar refresh, so Data Analytics labels its dates and rows as the catalogue's, and a dataset whose store
+// is newer (read from the store's own summary) says when the store's data is of.
+test('page: a dataset whose store is newer than the catalogue says so, with the store\'s own time; the catalogue\'s facts are labelled as its', pageTest, async t => {
+  if (!(await served('/analytics/'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
+  const { dayTime } = await import('../design/prp-freshness.js');
+  const cat = await fetch(`${BASE}/${CAT_FILE}`).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  if (!cat?.datasets?.some(d => d.id === 'national-countries')) { t.skip('no national-countries in the catalogue'); return; }
+  const later = new Date(Date.parse(cat.generated) + 17 * 3600e3).toISOString();
+  // The dataset is built from the volatility index too: another submodule's store, refreshed every night some hours
+  // before the catalogue is remade. Its summary is set here as well, so the words do not depend on the hour of the
+  // run, and the page must name that submodule for it and not National Analysis.
+  const latest = new Date(Date.parse(cat.generated) + 20 * 3600e3).toISOString();
+  const browser = await launch();
+  try {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await context.route('**/national/data/index.head.json*', r => r.fulfill({ json: { generated: later, summaryOf: {} } }));
+    await context.route('**/volatility/data/index.head.json*', r => r.fulfill({ json: { generated: latest, summaryOf: {} } }));
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/analytics/#d=national-countries`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /has newer data/.test(document.querySelector('#ds-panel .facts')?.textContent || ''), null, { timeout: 20000 });
+    const facts = await page.textContent('#ds-panel .facts');
+    const label = `in the catalogue of ${dayTime(Date.parse(cat.generated))}`;
+    assert.ok(facts.includes(`Rows ${label}`) && facts.includes(`Updated ${label}`), facts);
+    assert.ok(facts.includes(`National Analysis has newer data, of ${dayTime(Date.parse(later))}, and Geopolitical Volatility of ${dayTime(Date.parse(latest))}; the catalogue's copy is remade daily.`), facts);
+    assert.match(await page.textContent('#meta'), /Rows and dates as the catalogue of .+ UTC records them; it is remade daily/);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

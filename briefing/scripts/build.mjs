@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { POSITIONS, PER_POSITION, MIN_WORKING_SHARE, MIN_ACTIVE, SOURCES } from './sources.mjs';
 import { parseFeed, titleKey } from './rss.mjs';
 import { categorize } from './categorize.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const OUT = fileURLToPath(new URL('../data/latest.json', import.meta.url));
 mkdirSync(fileURLToPath(new URL('../data/', import.meta.url)), { recursive: true });
@@ -78,4 +79,6 @@ const items = [...seen.values()]
   .map(({ c: _c, ...i }) => { const c = categorize(i.t, i.u); return c === 'news' ? i : { ...i, c: c[0] }; });
 
 writeFileSync(OUT, JSON.stringify({ generated: stamp, keepDays: KEEP_DAYS, perPosition: PER_POSITION, positions: POSITIONS, sources, items }));
+// Its summaries (head, history, trends) in step with it, whoever runs this build (integration/scripts/heads.mjs).
+writeHeads(OUT);
 console.log(`${items.length} stories from ${new Set(items.map(i => i.s)).size} sources (${activeIds.size} active this run); ${items.filter(i => i.c === 's').length} sport, ${items.filter(i => i.c === 'e').length} entertainment, ${items.filter(i => i.c === 'l').length} lifestyle`);

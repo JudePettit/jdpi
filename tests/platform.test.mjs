@@ -77,7 +77,7 @@ test('registry is well formed', () => {
   assert.deepEqual(hb.modules.map(m => [m.id, m.name, m.url]), [['highbrowse', 'Highbrowse', 'highbrowse/index.html'], ['briefing', 'Political Briefing', 'q/briefing.html'],
     ['science-briefing', 'Scientific Briefing', 'science/briefing/index.html'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/index.html'], ['digital-briefing', 'Digital Briefing', 'digital/briefing/index.html']]);
   assert.equal(where('headlines'), 'rt');
-  assert.deepEqual(modules.find(x => x.m.id === 'highbrowse').m.views.map(v => [v.id, v.url]), [['today', 'highbrowse/index.html'], ['week', 'highbrowse/index.html#tab=week'], ['search', 'highbrowse/index.html#tab=search']]);
+  assert.deepEqual(modules.find(x => x.m.id === 'highbrowse').m.views.map(v => [v.id, v.url]), [['today', 'highbrowse/index.html'], ['week', 'highbrowse/index.html#tab=week'], ['search', 'highbrowse/index.html#tab=search'], ['trends', 'highbrowse/index.html#tab=trends']]);
 });
 
 test('every live submodule URL responds', pageTest, async () => {
@@ -136,7 +136,8 @@ test('the Home page shows every module as a box, in registry order, under the ne
   const { nodes } = await cdp.send('Accessibility.getFullAXTree');
   await cdp.detach();
   const links = nodes.filter(n => n.role?.value === 'link' && !n.ignored).map(n => [n.name?.value, n.description?.value]);
-  for (const s of boxed) assert.ok(links.some(([name, description]) => name === s.title && description === s.summary), `${s.id}: a link named "${s.title}" and described by its summary`);
+  // Described by its summary, then its freshest line (the back of the box, 13 November 2026).
+  for (const s of boxed) assert.ok(links.some(([name, description]) => name === s.title && (description === s.summary || description?.startsWith(s.summary + ' '))), `${s.id}: a link named "${s.title}" and described by its summary`);
   assert.ok(nodes.some(n => n.role?.value === 'list' && n.name?.value === 'Modules' && !n.ignored), 'the boxes are a list named Modules');
   assert.deepEqual(errors, []);
 });
@@ -236,7 +237,8 @@ test('the Home page works in light and dark, and at 360 px wide', pageTest, asyn
             const front = li.querySelector('.mod-front'), back = li.querySelector('.mod-back');
             return { id: li.dataset.suite, front: css(front, 'backgroundColor') === token(li, '--prp-surface'), back: css(back, 'backgroundColor') === token(li, '--prp-accent-soft'),
               name: ratio(css(li.querySelector('.mod-name'), 'color'), css(front, 'backgroundColor')), icons: ratio(css(li.querySelector('.mod-subs'), 'color'), css(front, 'backgroundColor')),
-              does: ratio(css(li.querySelector('.mod-does'), 'color'), css(back, 'backgroundColor')), go: ratio(css(li.querySelector('.mod-go'), 'color'), css(back, 'backgroundColor')) };
+              does: ratio(css(li.querySelector('.mod-does'), 'color'), css(back, 'backgroundColor')), go: ratio(css(li.querySelector('.mod-go'), 'color'), css(back, 'backgroundColor')),
+              fresh: ratio(css(li.querySelector('.mod-fresh'), 'color'), css(back, 'backgroundColor')) };
           }),
           dark: css(document.querySelector('.mod-front'), 'backgroundColor') === 'rgb(22, 27, 34)',
         };
@@ -248,7 +250,7 @@ test('the Home page works in light and dark, and at 360 px wide', pageTest, asyn
       if (width === 360) assert.equal(seen.lefts, 1, `${at}: one column`);
       for (const b of seen.boxes) {
         assert.ok(b.front && b.back, `${at}, ${b.id}: the front on the surface, the back on its module's soft tint`);
-        for (const k of ['name', 'icons', 'does', 'go']) assert.ok(b[k] >= 4.5, `${at}, ${b.id}: ${k} contrast ${b[k].toFixed(2)}`);
+        for (const k of ['name', 'icons', 'does', 'go', 'fresh']) assert.ok(b[k] >= 4.5, `${at}, ${b.id}: ${k} contrast ${b[k].toFixed(2)}`);
       }
     } finally { await ctx.close(); }
   }
@@ -769,6 +771,7 @@ test('the app: the offline worker keeps the shell and IoT Connect’s own files,
 });
 
 test('the app: with the worker, the shell and IoT Connect open with no connection', pageTest, async () => {
+  const VERSION = readFileSync(fileOf('sw.js'), 'utf8').match(/const VERSION = '([\w-]+)'/)[1]; // its cache's name
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   try {
     const p = await ctx.newPage();
@@ -779,7 +782,7 @@ test('the app: with the worker, the shell and IoT Connect open with no connectio
     // first look, whatever that look said, so the page went offline before the worker had stored the shell's files.
     let cached = 0;
     for (const end = Date.now() + 20000; cached < 25 && Date.now() < end;) {
-      cached = await p.evaluate(async () => (await (await caches.open('vm-shell-1')).keys()).length);
+      cached = await p.evaluate(async v => (await (await caches.open(v)).keys()).length, VERSION);
       if (cached < 25) await p.waitForTimeout(200);
     }
     assert.ok(cached >= 25, `the worker stored ${cached} of the shell's files within 20 seconds`);
@@ -793,4 +796,176 @@ test('the app: with the worker, the shell and IoT Connect open with no connectio
     await ctx.setOffline(false);
     await p.evaluate(async () => { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); });
   } finally { await ctx.close(); }
+});
+
+/* ---------------------------------------------------------------------------------------------- freshness lines */
+// 13 November 2026: whether a page is available is one thing, how fresh its data is another. Where "Realtime" and
+// "Live" stood (the top bar, the Dashboard's tiles and counts, the module overviews, the sidebar) each submodule now
+// shows its freshness line, worked out from its store's own time and its refresh's schedule (design/prp-freshness.js,
+// tests/freshness-labels.test.mjs); hosting is in each overview's "About this module"; the count says Home is counted.
+// The lines here are compared with what the module works out from the committed files the page reads.
+const ATLAS_MANIFEST = 'https://political-atlas.pages.dev/data/manifest.json';
+// Faked as reviewed a week ago, so its line never turns Late merely because the calendar has moved on (a late line here
+// would fail the suite, and with it every deploy).
+const ATLAS_DAY = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+async function expectedLines() {
+  const F = await import('../design/prp-freshness.js');
+  const reads = {};
+  for (const [p, fields] of F.wantedFields(registry)) {
+    if (p === ATLAS_MANIFEST) reads[p] = { lastUpdated: ATLAS_DAY };
+    else if (existsSync(new URL('../' + p, import.meta.url))) reads[p] = F.pick(JSON.parse(readFileSync(new URL('../' + p, import.meta.url), 'utf8')), fields);
+  }
+  const health = JSON.parse(readFileSync(new URL('../status/health.json', import.meta.url), 'utf8'));
+  // As a page reads them where a line is not shown in full (the sidebar, the Home page's boxes): the light files only.
+  const lightSet = new Set(F.readsOf(modules.map(x => x.m))), lightReads = Object.fromEntries(Object.entries(reads).filter(([p]) => lightSet.has(p)));
+  return { F, line: id => F.freshnessLine(modules.find(x => x.m.id === id).m, reads, { health }), lightLine: id => F.freshnessLine(modules.find(x => x.m.id === id).m, lightReads, { health }) };
+}
+const openShell = async (route, { width = 1440, height = 900, theme = 'light', mobile = false, routes = {} } = {}) => {
+  const ctx = await browser.newContext({ viewport: { width, height }, colorScheme: theme, isMobile: mobile, hasTouch: mobile });
+  const p = await ctx.newPage();
+  const errors = [];
+  p.on('pageerror', e => errors.push(e.message));
+  p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
+  await p.route(ATLAS_MANIFEST, r => r.fulfill({ json: { lastUpdated: ATLAS_DAY, files: [] }, headers: { 'Access-Control-Allow-Origin': '*' } }));
+  for (const [pattern, body] of Object.entries(routes)) await p.route(pattern, r => r.fulfill({ json: body }));
+  await p.goto(`${BASE}/${route}`, { waitUntil: 'networkidle' });
+  // The lines' files are read at idle time after the first paint.
+  await p.waitForFunction(() => [...document.querySelectorAll('[data-fresh]')].every(el => el.title), null, { timeout: 15000 });
+  return { ctx, p, errors };
+};
+
+test('freshness lines: the top bar and the sidebar give each submodule\'s line, worked out from its data, and no "Live" or kind badge', pageTest, async () => {
+  const { line, lightLine } = await expectedLines();
+  const { ctx, p, errors } = await openShell('#/hb/econ-briefing');
+  try {
+    const econ = line('econ-briefing');
+    assert.match(econ.text, /^(Late: u|U)pdated \d{1,2} [A-Z][a-z]{2}( \d{4})? \d\d:\d\d UTC · every six hours$/);
+    assert.equal(await p.textContent('#top-actions .prp-fresh .fresh-full'), econ.text, 'the top bar: the store\'s own time and its workflow\'s rhythm');
+    assert.equal(await p.getAttribute('#top-actions .prp-fresh', 'title'), econ.text);
+    assert.equal(await p.locator('#top-actions .prp-kind, #top-actions [data-status="live"]').count(), 0, 'no kind badge, no "Live"');
+    assert.doesNotMatch(await p.textContent('#top-actions'), /\bLive\b|Realtime/);
+    // The sidebar: each item's line is its title; no item says Live.
+    // (The Political Atlas's line reads its own site, only where that line is shown in full: below.)
+    for (const id of ['econ-briefing', 'battlefield', 'markets', 'osint', 'traders']) {
+      const { suite } = modules.find(x => x.m.id === id);
+      assert.equal(await p.getAttribute(`#nav a[data-route="${suite.id}/${id}"]`, 'title'), line(id).text, `${id}: its line in the sidebar`);
+    }
+    assert.doesNotMatch(await p.textContent('#nav'), /\bLive\b/);
+    assert.equal(await p.locator('#nav .flag.late').count(), modules.filter(x => lightLine(x.m.id).late).length, 'a Late flag on each late one, and only those');
+    // The one count, Home counted.
+    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 39 submodules');
+    // The other site's line: the Political Atlas's own manifest (faked here as it serves it).
+    await p.goto(`${BASE}/#/rt/atlas`, { waitUntil: 'domcontentloaded' });
+    const atlasText = line('atlas').text;
+    assert.match(atlasText, /^Reviewed \d{1,2} [A-Z][a-z]{2}( \d{4})? · monthly review$/);
+    await p.waitForFunction(t => document.querySelector('#top-actions .fresh-full')?.textContent === t, atlasText, { timeout: 15000 });
+    assert.equal(await p.textContent('#top-actions .fresh-full'), atlasText);
+    assert.equal(await p.getAttribute('#nav a[data-route="rt/atlas"]', 'title'), atlasText, 'and the sidebar, once read');
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('freshness lines: the module overview has Last update (no Kind, Status or Host), and About this module says where it is hosted', pageTest, async () => {
+  const { F, line } = await expectedLines();
+  for (const id of ['rt', 'mm', 'rs']) {
+    const { ctx, p, errors } = await openShell(`#/${id}`);
+    try {
+      const s = registry.suites.find(x => x.id === id);
+      assert.deepEqual(await p.$$eval('#view .list thead th', ths => ths.map(t => t.textContent.trim())), ['Submodule', 'Last update', 'Open']);
+      // Retrospective Battlefield's and the Kardashev Tracker's build dates come from their larger files, read for this view.
+      await p.waitForFunction(() => /built/.test(document.querySelector('#view [data-fresh="kardashev"]')?.textContent || 'built'), null, { timeout: 15000 });
+      const reads = (await import('../design/prp-freshness.js'));
+      const heavy = Object.fromEntries(['battlefield/history/data/wars.json', 'kardashev/data/energy.json'].map(f => [f, reads.pick(JSON.parse(readFileSync(new URL('../' + f, import.meta.url), 'utf8')), ['generated'])]));
+      const want = s.modules.map(m => (m.data.parts?.some(x => x.heavy) ? F.freshnessLine(m, heavy).text : line(m.id).text));
+      assert.deepEqual(await p.$$eval('#view .list tbody td.fresh-cell .prp-fresh', els => els.map(e => e.textContent)), want, `${id}: each row's line`);
+      const view = await p.textContent('#view');
+      assert.doesNotMatch(view.replace(/About this module[\s\S]*$/, ''), /\bLive\b|Cloudflare|\bHost\b/, `${id}: no Live, no Host column`);
+      assert.equal(await p.locator('#view .prp-kind').count(), 0);
+      assert.equal((await p.textContent('#view .about .prp-h3')).trim(), 'About this module');
+      assert.ok((await p.textContent('#view .about')).includes(F.hostingAbout(s)), `${id}: hosting in About`);
+      assert.deepEqual(errors, []);
+    } finally { await ctx.close(); }
+  }
+});
+
+test('freshness lines: the Dashboard\'s tiles and counts, and the back of each Home box', pageTest, async () => {
+  const { F, line } = await expectedLines();
+  const { ctx, p, errors } = await openShell('#/home/dashboard');
+  try {
+    assert.deepEqual(await p.$$eval('#view .today-kpis .prp-kpi', ks => ks.map(k => [k.querySelector('span').textContent, k.querySelector('small').textContent])),
+      [['Modules', 'Home included'], ['Submodules', 'in all'], ['Updated in the last 24 hours', 'submodules'], ['Late', 'submodules']]);
+    assert.equal(await p.textContent('#view .prp-kpi[data-kpi="modules"] b'), '10');
+    assert.equal(await p.textContent('#view .prp-kpi[data-kpi="late"] b'), String(modules.filter(x => line(x.m.id).late).length));
+    assert.doesNotMatch(await p.textContent('#view .head'), /Realtime modules|Retrospective modules/);
+    // Every tile's foot: its line (no host, no "Live", no kind badge). The heavy files are read here too.
+    await p.waitForFunction(() => /built/.test(document.querySelector('#view .tile [data-fresh="kardashev"]')?.textContent || ''), null, { timeout: 15000 });
+    const feet = await p.$$eval('#view .tile .foot', fs => fs.map(f => f.querySelector('.prp-fresh')?.textContent));
+    assert.deepEqual(feet.filter((f, i) => !modules[i].m.data.parts?.some(x => x.heavy)), modules.filter(x => !x.m.data.parts?.some(y => y.heavy)).map(x => line(x.m.id).text));
+    assert.doesNotMatch(await p.$$eval('#view .tile', ts => ts.map(t => t.textContent).join(' ')), /\bLive\b|Cloudflare Workers|Cloudflare Pages/);
+    assert.equal(await p.locator('#view .tile .prp-kind').count(), 0);
+    // The Home page: each box's back has its module's freshest line.
+    await p.goto(`${BASE}/#/`, { waitUntil: 'networkidle' });
+    await p.waitForFunction(() => document.querySelector('.mod[data-suite="hb"] .mod-fresh')?.textContent, null, { timeout: 15000 });
+    for (const s of boxed) {
+      const x = F.suiteLine(s, m => line(m.id)); // the Dashboard, just shown, read every file, and the session keeps them
+      assert.equal(await p.textContent(`.mod[data-suite="${s.id}"] .mod-fresh`), x.text + (x.late ? ` · ${x.late} late` : ''), s.id);
+    }
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('freshness lines: a file that cannot be read is in neither of the Dashboard\'s counts, and the counts say so', pageTest, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  try {
+    const p = await ctx.newPage();
+    const errors = [];
+    p.on('pageerror', e => errors.push(e.message));
+    await p.route(ATLAS_MANIFEST, r => r.fulfill({ json: { lastUpdated: ATLAS_DAY, files: [] }, headers: { 'Access-Control-Allow-Origin': '*' } }));
+    await p.route('**/volatility/data/index.head.json', r => r.fulfill({ status: 404, body: 'not here' }));
+    await p.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'networkidle' });
+    await p.waitForFunction(() => /not read just now/.test(document.querySelector('#view .prp-kpi[data-kpi="recent"] small')?.textContent || ''), null, { timeout: 20000 });
+    assert.equal(await p.textContent('#view .prp-kpi[data-kpi="recent"] small'), 'submodules · 1 not read just now', 'Geopolitical Volatility\'s file, named as a count');
+    assert.equal(await p.textContent('#view .prp-kpi[data-kpi="late"] small'), 'submodules · 1 not read just now');
+    const { freshnessLine } = await import('../design/prp-freshness.js');
+    assert.equal(await p.textContent('#view .tile [data-fresh="volatility"]'), freshnessLine(modules.find(x => x.m.id === 'volatility').m, {}).text, 'its line: the rhythm alone, which is always true');
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('freshness lines: a store late by its age, or failing in the daily check, says Late in the top bar, the sidebar and the overview', pageTest, async () => {
+  const old = new Date(Date.now() - 20 * 3600e3).toISOString(); // 20 hours: past the six-hour rhythm's 15
+  const { ctx, p, errors } = await openShell('#/hb/econ-briefing', { routes: {
+    '**/econ/briefing/data/stories.head.json': { generated: old },
+    '**/status/health.json': { generated: new Date().toISOString(), ok: false, failing: [{ name: 'Digital Briefing', what: 'digital/briefing/data/stories.json' }, { name: 'refresh', what: 'briefing-refresh.yml' }] },
+  } });
+  try {
+    await p.waitForFunction(() => document.querySelector('#top-actions .prp-fresh')?.classList.contains('late'), null, { timeout: 15000 });
+    assert.match(await p.textContent('#top-actions .fresh-full'), /^Late: updated \d{1,2} [A-Z][a-z]{2} \d\d:\d\d UTC · every six hours$/);
+    assert.deepEqual(await p.$$eval('#nav .flag.late', fs => fs.map(f => f.closest('a').dataset.route).sort()), ['hb/digital-briefing', 'hb/econ-briefing', 'hb/highbrowse'],
+      'late by age (Economics), failing in the check (Digital, not rebuilt since), and Highbrowse, which reads them; a failing workflow row marks nothing');
+    await p.goto(`${BASE}/#/hb`, { waitUntil: 'networkidle' });
+    await p.waitForFunction(() => !document.querySelector('[data-fresh-late="hb"]')?.hidden, null, { timeout: 15000 });
+    assert.equal((await p.textContent('[data-fresh-late="hb"]')).trim(), '3 late');
+    assert.match(await p.textContent('#view [data-fresh="highbrowse"]'), /^Reads the four briefings · late: Economics \(updated .+ UTC\), Digital \(updated .+ UTC\)$/);
+    assert.deepEqual(errors, []);
+  } finally { await ctx.close(); }
+});
+
+test('freshness lines: light and dark, desktop and phone: no sideways scroll, the top bar\'s short form on a phone', pageTest, async () => {
+  const { line } = await expectedLines();
+  for (const [width, height, mobile] of [[1440, 900, false], [390, 844, true]]) for (const theme of ['light', 'dark']) {
+    for (const route of ['#/', '#/home/dashboard', '#/rt', '#/mm/traders']) {
+      const { ctx, p, errors } = await openShell(route, { width, height, theme, mobile });
+      try {
+        const over = await p.evaluate(() => Math.max(document.documentElement.scrollWidth - innerWidth, document.getElementById('view').scrollWidth - document.getElementById('view').clientWidth));
+        assert.ok(over <= 0, `${route} ${width} ${theme}: no sideways scroll (${over})`);
+        if (route === '#/mm/traders') {
+          const shown = await p.$eval('#top-actions .prp-fresh', el => [...el.children].filter(c => getComputedStyle(c).display !== 'none' && c.getBoundingClientRect().width > 2).map(c => c.className));
+          assert.deepEqual(shown, [mobile ? 'fresh-short' : 'fresh-full'], `${width}: the ${mobile ? 'short' : 'whole'} line`);
+          if (mobile) assert.equal(await p.textContent('#top-actions .fresh-short'), line('traders').short);
+        }
+        assert.deepEqual(errors, [], `${route} ${width} ${theme}`);
+      } finally { await ctx.close(); }
+    }
+  }
 });

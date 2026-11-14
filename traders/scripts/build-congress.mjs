@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const UA = { 'User-Agent': 'JDP-I Trader Tracker (https://jdpi.pages.dev)' };
 const CACHE = new URL('./ptr-cache.json', import.meta.url);
@@ -189,4 +190,5 @@ writeFileSync(OUT, JSON.stringify({
   source: 'Clerk of the US House of Representatives — Periodic Transaction Reports (STOCK Act)',
   members: [...members.values()].sort((a, b) => b.trades - a.trades), trades,
 }));
+writeHeads('traders/data/congress.json'); // congress.head.json in step with it (integration/scripts/heads.mjs)
 console.log(`${trades.length} trades from ${members.size} members`);

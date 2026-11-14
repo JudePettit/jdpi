@@ -46,14 +46,53 @@ November 2026; before, a refresh deployed main without the suite). Every build a
 and the new file would lose too much (usually more than half of a count, for some a tenth), nothing is written and the
 run fails, so the page keeps its last good data and simply ages.
 
+**Summaries in step with their stores** (since 13 November 2026). Where a page reads a small summary in place of a
+large store (the Dashboard's Today panel, Highbrowse's Trends tab), the summary is written beside the store by the same
+build, as its last act (`writeHeads()` in `integration/scripts/heads.mjs`), and committed with it by the same
+`commit-data` step: each briefing's `stories.head.json` (the Political Briefing's `latest.head.json`), `trends.json` and
+`history.json`; `volatility/data/index.head.json`; `calendar/data/upcoming.json`; and a head beside the Realtime
+Battlefield, Auto Trader, Invention Timeline and National Analysis stores and the Integration Hub's catalogue. Each
+names its store's own time and a hash of its content (`summaryOf`). The module's own tests check its summaries before
+the commit, and `tests/heads.test.mjs`, in the whole suite, fails on any commit where one is out of step, so it cannot
+deploy. A store built by hand writes its summaries too (the builders do it, whoever runs them); after a hand edit or a
+merge, run `node integration/scripts/heads.mjs --all` and commit what it writes (`--check` lists what is out of step).
+Never edit a summary by hand. `integration/data/briefing-activity.json` and `volatility-movers.json` stay at their
+addresses as the Integration Hub's daily copy; no page reads them.
+
+**Freshness lines** (since 13 November 2026). Every submodule shows, in the top bar, the sidebar, the Dashboard's tiles,
+its module's overview and the back of its module's box on the Home page, one line saying how fresh its data is, worked
+out by `design/prp-freshness.js` and never written by hand: its store's own time (from the small file named in its
+registry entry's `data`, usually the head above) and its refresh's rhythm, from the workflow's cron (copied in
+`SCHEDULES` there; `tests/freshness-labels.test.mjs` fails when a copy and its workflow disagree, or when the rhythm a
+store is expected at disagrees with the hours in `.github/scripts/freshness.mjs`). A line says **Late** by the alarm's own
+rule below (older than twice the rhythm plus three hours), or while `status/health.json` names its store as failing and
+the store has not been rebuilt since that check; a failing workflow row marks no line late. "Live" no longer appears:
+a submodule's `status: live` means only that it is published. Changing a schedule therefore means changing its copy in
+`SCHEDULES` too (the test says so).
+Three lines are not checked against a schedule here. The Global Headline Tracker's "Collected daily, country by country"
+(and Realtime Battlefield's news line, "collected daily") is the registry's own note: the collection runs on Supabase's
+`pg_cron`, outside this repository, so no test holds the word "daily" to it; the tracker's own page shows each archive's
+collection time beside its stories. The Political Retrospective's line gives no build date: the only dated public file of
+hp-retrospective.pages.dev is its 1.4 MB country file, too large to read for one date. Kino's time is read from its
+Wikidata cache (about 47 KB), so only where its line is shown in full; the sidebar and the Home page say "Checked monthly".
+The Dashboard's two counts ("Updated in the last 24 hours", "Late") leave out a submodule whose file could not be read,
+and say how many those are.
+
+**The catalogue's copies** (Data Analytics, the Integration Hub). `integration/catalog.json` and the copies under
+`integration/data` are remade only by the daily calendar refresh, so after any other refresh a dataset's date and rows
+there can be a day older than its store. Both pages label them as the catalogue's ("Updated, in the catalogue"; "Rows in
+the catalogue of" its time, in UTC), read each store's own small file (the one its freshness line reads) and, when the
+store is newer than the catalogue, say so with the store's own time. Rebuilding the catalogue in every refresh would
+rewrite a hundred generated files and make refreshes collide; this is the smaller step.
+
 | Job (workflow) | When: UTC (London in summer) | What it does | What it writes | How you know it broke |
 |---|---|---|---|---|
-| **Scientific, Economics and Digital Briefings** (`briefings-refresh.yml`) | Every six hours: 01:45, 07:45, 13:45, 19:45 (02:45, 08:45, 14:45, 20:45) | Fetches every feed of the three briefings and rolls their seven-day stores forward. Each briefing is built and tested on its own. Guard: a briefing with fewer than 75% of its feeds working is not written. | `science/briefing/data`, `econ/briefing/data`, `digital/briefing/data`, in one commit | Red run naming the briefing that failed: it is put back as it was, the other two are still committed. Freshness: its `stories.json` older than 15 hours. |
-| **Political Briefing** (`briefing-refresh.yml`) | Daily 06:05 and 18:05 (07:05, 19:05) | Fetches its 64 publisher feeds and rolls the seven-day story store forward. Guard: not written if fewer than 75% of feeds work, or a political position (far left to far right) has fewer than 8 working publishers. | `briefing/data/latest.json` | Red run; the page says "Data is N hours old". Freshness: older than 27 hours. |
+| **Scientific, Economics and Digital Briefings** (`briefings-refresh.yml`) | Every six hours: 01:45, 07:45, 13:45, 19:45 (02:45, 08:45, 14:45, 20:45) | Fetches every feed of the three briefings and rolls their seven-day stores forward. Each briefing is built and tested on its own. Guard: a briefing with fewer than 75% of its feeds working is not written. | `science/briefing/data`, `econ/briefing/data`, `digital/briefing/data` (each store with its head, `trends.json` and `history.json`), in one commit | Red run naming the briefing that failed: it is put back as it was, the other two are still committed. Freshness: its `stories.json` older than 15 hours. |
+| **Political Briefing** (`briefing-refresh.yml`) | Daily 06:05 and 18:05 (07:05, 19:05) | Fetches its 64 publisher feeds and rolls the seven-day story store forward. Guard: not written if fewer than 75% of feeds work, or a political position (far left to far right) has fewer than 8 working publishers. | `briefing/data` (`latest.json` with its head, `trends.json` and `history.json`) | Red run; the page says "Data is N hours old". Freshness: older than 27 hours. |
 | **Geopolitical Volatility** (`volatility-refresh.yml`) | Daily 01:25 (02:25) | Scores the latest complete day of GDELT's event files, looking back 7 days. Guard: a day with fewer than 72 of its 96 quarter-hour files, or too few located events, is not written; it is tried again the next night. | `volatility/data` (a file per day, and `index.json`) | Red run when two nights in a row could not complete their day. Freshness: the newest complete day older than 51 hours, or the site serving an older copy. |
 | **Realtime and Historical Calendars, and the Integration Hub** (`calendar-refresh.yml`) | Daily 05:23 (06:23) | Rebuilds the calendars from Wikipedia (the Current events portal, its lists and electoral calendars), Wikidata and the Political Atlas, adds Wikipedia summaries, and tests them. Then rebuilds the Integration Hub (data catalogue, iCalendar files, country profiles, `openapi.json`, `llms.txt`) and tests that. Guard: stops if a type of event would lose more than half its records; the Hub stops if a dataset would lose more than half its rows. | `calendar/data`, `calendar/scripts/summary-cache.json`, `integration/` (catalogue, data, feeds, skill, `openapi.json`), `llms.txt` | Red run. If only the Hub failed, its files are thrown away, the calendars are still committed, and the run ends red. Freshness: `calendar/data/2020s.json` or `integration/catalog.json` older than 51 hours. |
-| **Realtime Battlefield** (`battlefield-refresh.yml`) | Mondays 06:17 (07:17) | Looks for UCDP's monthly release of candidate events and rebuilds when there is a new one; most weeks nothing changes. Guard: refuses an older release, or a file with fewer months, or a tenth fewer events or deaths. | `battlefield/data/realtime.json` | Red run. Freshness counts it as monthly: older than about 62 days. |
-| **Auto Trader** (`traders-refresh.yml`) | Tuesdays 03:41 (04:41) | US House members' trade reports, then large investors' 13F holdings (tickers from OpenFIGI), each tested and committed on its own. Guard: trades not written if a year loses a tenth of its trades or half its members or parties; holdings not written if a listed investor goes missing or has a tenth fewer positions. | `traders/data/congress.json` and `traders/scripts/ptr-cache.json`; `traders/data/investors.json` and `traders/scripts/figi-cache.json` | Red run if either half failed (the other is still committed). Freshness: either file older than about 14 days. |
+| **Realtime Battlefield** (`battlefield-refresh.yml`) | Mondays 06:17 (07:17) | Looks for UCDP's monthly release of candidate events and rebuilds when there is a new one; most weeks nothing changes. Guard: refuses an older release, or a file with fewer months, or a tenth fewer events or deaths. | `battlefield/data/realtime.json` and its head | Red run. Freshness counts it as monthly: older than about 62 days. |
+| **Auto Trader** (`traders-refresh.yml`) | Tuesdays 03:41 (04:41) | US House members' trade reports, then large investors' 13F holdings (tickers from OpenFIGI), each tested and committed on its own. Guard: trades not written if a year loses a tenth of its trades or half its members or parties; holdings not written if a listed investor goes missing or has a tenth fewer positions. | `traders/data/congress.json`, its head and `traders/scripts/ptr-cache.json`; `traders/data/investors.json`, its head and `traders/scripts/figi-cache.json` | Red run if either half failed (the other is still committed). Freshness: either file older than about 14 days. |
 | **War Focus** (`warfocus-refresh.yml`) | 2nd of the month, 02:53 (03:53) | Re-scores the ongoing wars from UCDP's events and picks up new battles from Wikidata. Guard: not written if a war loses its Wikidata item, half its battles or a tenth of its UCDP events. | `battlefield/focus/data` | Red run. Freshness: older than about 62 days. |
 | **Invention Timeline** (`progress-refresh.yml`) | 2nd of the month, 04:37 (05:37) | Re-reads the facts behind the breakthroughs from Wikidata (entries older than 25 days). Guard: not written if a curated event cannot be placed, people or institutions fall by a tenth, or the file would pass 1.5 MB. | `science/progress/data`, `science/scripts/progress-cache.json` | Red run. Freshness: older than about 62 days. |
 | **Master Index, and the Bibliotheca tags** (`lake-refresh.yml`) | 3rd of the month, 03:31 (04:31) | Rebuilds the entity layer (mentions from every module, Wikidata facts, Wikipedia summaries), then tags every Bibliotheca book again against it. The books' mentions are filed under Neo Classic (`neo-classic`, Bibliotheca's reader; `bibliotheca` until 12 November 2026, when Bibliotheca left Kino for a module of its own and the committed lake was renamed to match). Guard: stops if a module's adapter fails, its mentions halve, or the entities fall by a tenth. | `lake/data`, `lake/scripts/summary-cache.json`, `bibliotheca/data/books`, `bibliotheca/data/index.json` | Red run. Freshness: `lake/data/manifest.json` older than about 62 days. |
@@ -233,6 +272,9 @@ Look in this order:
      changed. The next run usually fixes it; if it keeps failing, the source has changed and the script needs work. The
      page keeps its last good data meanwhile.
    - A failed test step: the new data broke a test, so it was not committed.
+   - A failed `tests/heads.test.mjs` in the `deploy / test` job ("Out of step (run node integration/scripts/heads.mjs
+     --all)"): a store was committed without its summaries, usually after a hand edit or a merge. Run that command on
+     main and commit what it writes; the next deploy then passes.
    - "Someone else changed the same files …" or "Could not push the commit after 5 attempts": run it again (Run
      workflow).
    - A failed `deploy / test` job: the whole suite failed on main after the commit, so nothing was deployed. Open
@@ -264,7 +306,10 @@ Change this file in the same commit as any change to a timed job, and:
   1. **A guard in the build:** before writing, compare the new data with the last good copy and stop, writing
      nothing, when a source failed and a count would fall too far (usually by more than half, for some by a tenth).
      The run then fails and the page keeps its last good data.
-  2. **A `generated` stamp** in the main data file, with the time it was made.
+  2. **A `generated` stamp** in the main data file, with the time it was made. If a page is to read a summary of the
+     store rather than the store itself, add it to `HEADS` in `integration/scripts/heads.mjs`, call `writeHeads()` at the
+     end of the build, put the summary's path in the workflow's `commit-data` paths, and check it in the module's test
+     (`checkHeads`); `tests/heads.test.mjs` holds all four in place.
   3. **A data test** in `tests/` that checks the committed files (their shape and the counts the guard protects) and
      passes with `PRP_PAGES=0`, so the refresh can run it with no browser.
   4. **A workflow** copied from an existing one: a schedule staggered from the others (in data order), a time limit
@@ -278,6 +323,9 @@ Change this file in the same commit as any change to a timed job, and:
      not notice the job stopping.
   6. **A row in section 1 of this file.** If the data names people, places, wars or parties, also add an adapter in
      `lake/scripts/adapters.mjs` so the Master Index links to it.
+  7. **Its freshness line:** the workflow's cron in `SCHEDULES` (`design/prp-freshness.js`), and in the submodule's
+     registry entry a `data` block naming the line's class, the workflow and the small file whose time it shows
+     (`tests/freshness-labels.test.mjs` checks all three against the workflow and the freshness entry).
 - **A Worker timer:** trade-desk's are `triggers.crons` in `wrangler.jsonc` with the matching branch of `scheduled()` in
   `src/index.js`; Double Signal's is in `vite.config.ts`.
 - **A Supabase job:** its schedule and SQL exist only in the database, so write them down here.

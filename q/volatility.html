@@ -20,6 +20,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .prp-tabs{margin-bottom:16px}
 .prp-tabs .count{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:6px;padding:0 5px;border-radius:99px;background:var(--prp-accent);color:var(--prp-on-primary);font:600 10.5px/1 var(--prp-font-mono)}
 .stack{display:grid;gap:16px;min-width:0}
+#gone{margin:0 0 16px}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px}
 .field{display:inline-flex;align-items:center;gap:8px;min-width:0}
 .field .prp-select{max-width:100%}
@@ -126,6 +127,7 @@ button,input,select{font:inherit}button{cursor:pointer}
     <button type="button" role="tab" id="tabbtn-compare" data-tab="compare" aria-controls="tab-compare" aria-selected="false" tabindex="-1">Compare<span class="count" id="ccount" hidden>0</span></button>
     <button type="button" role="tab" id="tabbtn-method" data-tab="method" aria-controls="tab-method" aria-selected="false" tabindex="-1">Method</button>
   </nav>
+  <p class="prp-note warn" id="gone" role="status" hidden></p>
 
   <section id="tab-map" class="stack" role="tabpanel" aria-labelledby="tabbtn-map">
     <div class="toolbar" role="group" aria-label="Map settings">
@@ -609,6 +611,7 @@ function writeHash() {
   if (DAYS.length && dayIdx !== DAYS.length - 1) p.set('day', DAYS[dayIdx]);
   const f = PRPPeriod.rules.startParam(period.get()); if (f) p.set('from', f);
   history.replaceState(null, '', '#' + p.toString());
+  $('#gone').hidden = true;
 }
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
@@ -617,7 +620,12 @@ function readHash() {
   // A day the data does not have is the latest; a from at or after it, or unreadable, is that one day.
   const to = DAYS.includes(p.get('day')) ? p.get('day') : DAYS.at(-1), q = period.set(PRPPeriod.rules.readStart(DAYS, p.get('from'), to, 'end'), to, { silent: true });
   if (q.fromIndex !== fromIdx || q.toIndex !== dayIdx) { fromIdx = q.fromIndex; dayIdx = q.toIndex; derive(fromIdx, dayIdx); showDay(); renderMovers(); }
-  if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); }
+  // An address naming a country the index does not hold (a link kept from another day, say) opens the page as usual,
+  // with a plain note that says so; the note goes once the reader moves on (writeHash).
+  const want = p.get('country');
+  $('#gone').hidden = !want || byIso.has(want);
+  if (want && !byIso.has(want)) $('#gone').textContent = `No scores for ${/^[A-Z]{3}$/.test(want) ? want : 'that country'} in the index, so the map is shown instead.`;
+  if (want && byIso.has(want)) { selected = want; setTab('profile'); }
   else setTab(p.get('tab') || 'map');
   colourMap(); renderTable();
 }

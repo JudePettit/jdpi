@@ -417,3 +417,67 @@ test('a story with no English title yet is not shown or counted, on the Tracker,
   // And the archive is asked for translated stories only, in every query of them.
   assert.ok(asked.length >= 3 && asked.every(u => /[?&]title_en=not\.is\.null(&|$)/.test(u)), asked.join('\n'));
 });
+
+// The archive date and the collection time, beside the results (13 November 2026; the second review: "Put archive
+// date and collection time prominently beside results"): the UTC day or days whose front pages are shown, and when
+// they were collected (each story's captured_at); when today's are not collected yet, the day shown instead says so.
+// The archive is faked, so its days and times are known. The meta line has no ticking clock any more.
+test('the results carry their archive date and collection time, today, while today\'s are pending, and in the archives', pageTest, async t => {
+  const { launch } = await import('./tools/pages.mjs');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const iso = n => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  const today = iso(0), yday = iso(1);
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const name = d => { const [y, m, n] = d.split('-').map(Number); return `${n} ${MON[m - 1]} ${y}`; };
+  const row = (day, k, hhmm) => ({ snapshot_date: day, country_code: 'GB', outlet: `Outlet ${k}`, outlet_domain: `o${k}.example`, outlet_rank: k, story_rank: 1, title_original: `Story ${k} of ${day}`,
+    title_en: `Story ${k} of ${day}`, url: `https://o${k}.example/${day}`, published_at: null, lowbrow: false, captured_at: `${day}T${hhmm}:10.000Z` });
+  const open = async (path, handler, width = 1360) => {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/rest/v1/country_top_stories*', r => r.fulfill({ json: handler(decodeURIComponent(r.request().url())) }));
+    await page.goto(`${BASE}/${path}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => typeof loadTopStories === 'function');
+    return { page, errors };
+  };
+  // Today's front pages, collected this morning: their day and time.
+  {
+    const { page, errors } = await open('q/headlines.html?view=current', () => [row(today, 1, '00:40'), row(today, 2, '00:41')]);
+    assert.doesNotMatch(await page.textContent('.prp-meta'), /\bNow\b/, 'no ticking clock');
+    assert.match(await page.textContent('.prp-meta'), /Collected once a UTC day, country by country/);
+    await page.evaluate(() => loadTopStories('GB', 'United Kingdom'));
+    await page.waitForSelector('.outlet-group .article');
+    assert.equal(await page.textContent('#dated'), `Front pages of ${name(today)} (UTC day) · collected 00:41 UTC`);
+    assert.equal(await page.getAttribute('#dated', 'role'), 'status', 'a new archive date is announced with its stories');
+    assert.equal(await page.evaluate(() => document.getElementById('dated').compareDocumentPosition(document.getElementById('articles')) & Node.DOCUMENT_POSITION_FOLLOWING), 4, 'beside the results, just above them');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  // Today's not collected yet: yesterday's, and the line says which day it is.
+  {
+    const { page, errors } = await open('q/headlines.html?view=current', u => (/select=snapshot_date&/.test(u) ? [{ snapshot_date: yday }] : u.includes(`snapshot_date.gte.${today}`) ? [] : [row(yday, 1, '00:39')]), 390);
+    await page.evaluate(() => loadTopStories('GB', 'United Kingdom'));
+    await page.waitForSelector('.outlet-group .article');
+    assert.equal(await page.textContent('#dated'), `Today’s front pages are not collected yet · showing those of ${name(yday)} (UTC day) · collected 00:39 UTC`);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '390 px: no sideways scroll');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  // A week's archive: the week's days, how many were collected and the latest's time, each story with its days.
+  {
+    const days = [iso(2), iso(1)];
+    const { page, errors } = await open('q/headlines.html?view=archive&period=week', () => days.map(d => row(d, 1, '00:45')).concat([row(days[1], 2, '00:46')]).map(r => ({ ...r, url: `https://${r.outlet_domain}/same` })));
+    await page.evaluate(() => loadTopStories('GB', 'United Kingdom'));
+    await page.waitForSelector('#articles .article');
+    const dated = await page.textContent('#dated');
+    assert.match(dated, new RegExp(`^Front pages of \\d{1,2} [A-Z][a-z]{2} \\d{4} to \\d{1,2} [A-Z][a-z]{2} \\d{4} \\(UTC days\\) · 2 days collected, the latest ${name(days[1])}, collected 00:46 UTC · each story with its days on the front page$`));
+    assert.match(await page.textContent('#articles .article .source'), new RegExp(`on the front page \\d days?, the last ${name(days[1])}`));
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('the archive is asked for each story\'s collection time', () => {
+  assert.match(readFileSync(new URL('../q/supabase-client.js', import.meta.url), 'utf8'), /select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at,lowbrow,captured_at"/);
+});

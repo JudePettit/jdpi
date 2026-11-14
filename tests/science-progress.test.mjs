@@ -196,3 +196,10 @@ test('page: deep link, slider, discipline filter and tabs', BASE ? pageTest : { 
   assert.match(page.url(), /v=scientists/);
   assert.deepEqual(errors, []);
 });
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('events.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('science/progress/data/events.json'), [], 'run node integration/scripts/heads.mjs science/progress/data/events.json');
+});

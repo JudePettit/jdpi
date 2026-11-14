@@ -54,7 +54,7 @@ wars, leaders and coming votes."
 | Submodule | Module | Notes |
 |---|---|---|
 | Dashboard (was the Workspace, the home page) | HM (new, November 2026) | drawn by the shell itself (`"shell": "dashboard"`, no `url`): the Today panel over every module and submodule, at `#/home/dashboard`; `#/workspace` lands there |
-| Highbrowse (the module's landing page) | HB (new) | `highbrowse/`: the day's and the week's news across the four briefings (the biggest stories and topics, each briefing's coverage, the stories they share, the political spread) and one search across them; Today, This week and Search are tabs; it reads the briefings' own stores and has no data of its own |
+| Highbrowse (the module's landing page) | HB (new) | `highbrowse/`: the day's and the week's news across the four briefings (the biggest stories and topics, each briefing's coverage, the stories they share, the political spread) and one search across them; Today, This week, Search and Trends are tabs; it reads the briefings' own stores, and for Trends each briefing's `trends.json`, written with its store |
 | Political Briefing (was Intelligence Briefing, before that Briefing) | HB (moved from RT) | `q/briefing.html`; reads `#q=` and `#w=` as the other briefings do, and `soft=1` to show sport, entertainment and lifestyle on one visit; a move by hash also puts back All stories, every publisher and all five positions |
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`), the name the Highbrowse module shares |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
@@ -168,6 +168,47 @@ the shell draws it in its view, with no frame. `#/workspace` lands on it, and `#
 mark (`.prp-status`, a dot with words) appears only when the daily data check failed, naming what failed and the
 check's date, or when the check has not run for three days (`status/health.json`, OPERATIONS.md "The alarm").
 
+**Freshness lines** (13 November 2026). Whether a page is available is one thing; how fresh its data is, another. Each
+submodule has one line saying how fresh its data is, worked out by `design/prp-freshness.js` from its registry `data`
+(never typed): the time is its store's own, the rhythm its refresh workflow's cron. The shell shows it in the top bar
+(below 1200 px its short form, the whole line still read out), each sidebar item's title (with a "Late" flag like "In
+build"), each Dashboard tile's foot, each module overview's "Last update" column and, a module's freshest, on the back of
+its box on the Home page. The vocabulary, and nothing else:
+
+| Class | Reads | For |
+|---|---|---|
+| Updated | "Updated 13 Nov 20:37 UTC · every six hours" (the time for a rhythm of a day or less, the date for weekly or monthly) | a store a VM workflow rebuilds |
+| Data to | "Scored to 12 Nov · daily"; "Figures to Sep 2026 · UCDP monthly, checked weekly"; "Trades filed to 6 Nov · 13F holdings to 30 Jun 2026 · checked weekly" | data whose own period ends before its build |
+| Reviewed, Checked | "Reviewed 6 Nov · monthly review" (Political Atlas); "Checked 4 Nov · monthly" (Kino) | a review of records; a re-read of sources |
+| Combined | "Reads the four briefings · all updated since 13 Nov 18:52 UTC", or naming the late one; "Each card dated" | Highbrowse; the Dashboard |
+| No time | "Available · prices delayed"; "On demand · asks its sources when you use it"; "Private · runs every minute"; "Reference · built 26 Oct · no schedule"; "Course · no schedule"; "Collected daily, country by country" | pages whose data has no store time here |
+
+**Late** ("Late: updated …", after a warning dot) is the daily data check's own rule: older than twice the rhythm plus
+three hours, or a store `status/health.json` names as failing and that has not been rebuilt since. Until a line's file
+is read, or if it cannot be, the line gives its rhythm alone ("Updated every six hours"), which is always true. Never
+write "Live" or a kind badge (Realtime, Retrospective…) where a reader could take it for freshness: `status: live` means
+only "published". Times are UTC and say so. Pages carry the same idea inside: Realtime Battlefield dates its conflict
+figures over the map and its news under each war; National Analysis puts each figure's year or date and source under
+it; the Global Headline Tracker puts the archive day and the collection time above its results.
+
+**The count** is worded one way wherever it shows: "10 modules, Home included · 39 submodules" (`countWords`).
+Where each module's submodules are hosted is said in its overview's **About this module**, not in a column.
+
+**The Today panel's rules** (13 November 2026). Each card reads only the small summaries each store's own build writes
+beside it (`integration/scripts/heads.mjs`): never a copy made at another time, so a card can never be older than the
+page it links to (`tests/heads.test.mjs`). Each line opens the one thing it names, through the shell's deep link
+(`#/<module>/<submodule>?at=<that page's own address>`): a country (`q/volatility.html#country=IRL`), a topic
+(`highbrowse/index.html#tab=trends&t=economics.monetary`, in Highbrowse's existing frame), an event
+(`q/calendar.html?period=contemporary&event=<key>`) or a ticker (the Market Briefing's `#t=`). A link is built only from a
+key that passed its pattern (`KEYS` in `design/prp-highlights.js`); anything else opens the submodule's front page. A
+page opened on a thing that has gone opens as usual, with a plain `.prp-note.warn` saying so. The "Headline trends"
+card and Highbrowse's Trends tab read the same `trends.json`, worked out by `design/prp-trends.js`, so they never
+disagree; their wording stays modest: counts of the stories VM collected, never a claim about importance or truth.
+With too little history they say so and show no number; until then the card gives each briefing's stories this week,
+exactly the tab's "This week" (a week not held in full names its missing days). A share neither rising nor falling is
+"Within its usual range", never "Steady". A trend line puts its percentile first, so a narrow card never cuts it, and
+the card marks a briefing "Late" by the same rule as every freshness line, naming one it could not read.
+
 ## 3. Tokens (write CSS against these; no raw hex in page CSS)
 
 - Surfaces: `--prp-canvas` (page background), `--prp-surface` (panels, inputs), `--prp-surface-2` (table heads,
@@ -213,8 +254,9 @@ radii, almost no shadows. Never a horizontal page scroll at 360px wide.
 ## 5. Components (classes in prp.css)
 
 `.prp-panel`, `.prp-panel-head`, `.prp-panel-body`, `.prp-btn` (`.primary`, `.ghost`, `.danger`, `.sm`), `.prp-input`,
-`.prp-select`, `.prp-tabs`, `.prp-chip` (`.on`), `.prp-code` (module code chip), `.prp-kind` (Realtime/Retrospective
-badge), `.prp-status` (`data-status="live|in-build"` or `.good|.warn|.bad`), `.prp-table` (`.num` cells),
+`.prp-select`, `.prp-tabs`, `.prp-chip` (`.on`), `.prp-code` (module code chip), `.prp-kind` (a small badge; the shell
+no longer uses it for Realtime/Retrospective, which read as freshness), `.prp-status` (`data-status="in-build"` or
+`.good|.warn|.bad`; the shell no longer shows "live"), `.prp-fresh` (shell.css: a freshness line, `.late` with its dot), `.prp-table` (`.num` cells),
 `.prp-kpis`/`.prp-kpi`, `.prp-figure`/`.prp-caption`, `.prp-note` (`.warn`, `.bad`), `.prp-sources`, `.prp-empty`,
 `.prp-label`, `.prp-meta`, `.prp-prose` (serif reading text), `.prp-num`, `.prp-up`/`.prp-down`.
 Legacy `.jdpi-*` classes still work and look new.

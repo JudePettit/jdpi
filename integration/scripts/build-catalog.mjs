@@ -5,8 +5,9 @@
 //   integration/data/query-index.json     what the MCP server and the API may read: every part, its size, cost and ranges, a sample
 //   integration/data/names/…              a compact name index for the Master Index (token prefixes → Wikidata ids)
 //   integration/data/countries/…          one small profile per country, joining National Analysis, Volatility, Battlefield and the calendars
-//   integration/data/volatility-movers.json  the Volatility page's "Biggest movers · 7 days" lists  } for the Dashboard "Today"
-//   integration/data/briefing-activity.json  each briefing's 7-day story count and top topic        } panel (shell.js)
+//   integration/data/volatility-movers.json  the Volatility page's "Biggest movers · 7 days" lists  } daily copies of what the
+//   integration/data/briefing-activity.json  each briefing's 7-day story count and top topic        } stores' heads say
+//   integration/catalog.head.json         the catalogue's time and size, in step with it (heads.mjs), for the freshness lines
 //   integration/feeds/*.ics               the Realtime Calendar and the Historical Calendar (one file per decade) as iCalendar
 //   integration/skill/prp-data.zip        the downloadable Claude skill (SKILL.md plus a generated dataset reference)
 //
@@ -24,6 +25,7 @@ import { toICS, foldText, tokenize, jsonCost, BASE_URL } from '../mcp/prp-mcp.mj
 import { openapi } from './openapi.mjs';
 import { llmsTxt } from './llms.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -722,38 +724,22 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   putJson('integration/data/countries/index.json', { generated: STAMP, countries: index });
 }
 
-/* ------------------------------------------------------------------ Dashboard "Today" panel */
-// Two small files for the shell's Today panel (design/prp-highlights.js), so the Dashboard reads about 3 KB where it read 1.35 MB
-// of briefing stores and a 258 KB Volatility day file. They are not catalogue datasets (the MCP server and the API do not
-// serve them): each restates what one page or store says, so the Dashboard and the page it links to agree.
+/* ------------------------------------------------------------------ the Hub's daily copies of two summaries */
+// Two small files the Dashboard's Today panel read until 13 November 2026. It now reads the summaries each store's own
+// build writes beside it (integration/scripts/heads.mjs: volatility/data/index.head.json and each briefing's head and
+// trends.json), which are in step with their stores; these stay at their addresses as the Hub's daily copy, worked out by
+// the same functions, and no page reads them (tests/heads.test.mjs). They carry no summaryOf: a copy taken at 05:23 is
+// not in step with a store refreshed at 07:45, and says so by its own `generated` and its `about`.
 {
-  // volatility-movers.json: the Geopolitical Volatility page's "Biggest movers · 7 days" panel, worked out exactly as
-  // q/volatility.html does it on its latest day (derive, then renderMovers). A country's 7-day change is the mean of its
-  // scored days among the last 7 days of the series minus the mean of its scored days among the 7 before, the days being
-  // those of the global series (VOL.global), as the page counts them; a country needs a score in both weeks. The page lists
-  // the six biggest rises (Rising) and the six biggest falls (Easing) among all such countries, whatever their coverage.
-  // This file holds just those countries (twelve, or fewer when fewer moved; one in both lists once), in the page's order
-  // (change descending, compared at full precision as the page does, so ties fall the same way), with avg7 and change7
-  // rounded to the one decimal the page shows. coverage is the latest day's level, as the page's country profile gives
-  // it (null when the country has no row that day). The panel keeps the medium and high ones.
-  const DAYS = VOL.global.map(g => g[0]);
-  const i = DAYS.length - 1, d = DAYS[i], d7 = DAYS[Math.max(0, i - 7)], d14 = DAYS[Math.max(0, i - 14)];
-  const mean = a => a.reduce((s, x) => s + x, 0) / a.length;
-  const LEVEL = { h: 'high', m: 'medium', l: 'low', i: 'insufficient' };
-  const moved = Object.entries(VOL.countries).map(([iso3, c]) => {
-    const rows = (c.days || []).filter(r => r[0] <= d), row = rows.at(-1)?.[0] === d ? rows.at(-1) : null;
-    const scored = rows.filter(r => r[1] != null);
-    const last7 = scored.filter(r => r[0] > d7).map(r => r[1]), prev7 = scored.filter(r => r[0] <= d7 && r[0] > d14).map(r => r[1]);
-    return { iso3, name: c.name, score: row?.[1] ?? null, avg7: last7.length ? mean(last7) : null, change7: last7.length && prev7.length ? mean(last7) - mean(prev7) : null, coverage: LEVEL[row?.[5]] || null };
-  }).filter(c => c.change7 != null).sort((a, b) => b.change7 - a.change7);
-  const one = v => +v.toFixed(1);
+  // volatility-movers.json: the Geopolitical Volatility page's "Biggest movers · 7 days" lists (heads.mjs volatilityMovers).
+  const { date: d, countries, records } = volatilityMovers(VOL);
   const vp = 'integration/data/volatility-movers.json';
   putJson(vp, {
     dataset: 'volatility-movers', generated: STAMP, derivedFrom: ['volatility/data/index.json'],
     licence: 'Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.',
-    about: 'The "Biggest movers · 7 days" lists of q/volatility.html on its latest day (the six biggest rises and the six biggest falls of the 7-day average GVI, all coverage levels), for the Dashboard\'s Today panel.',
-    page: 'q/volatility.html', date: d, countries: moved.length,
-    records: moved.filter((c, k) => k < 6 || k >= moved.length - 6).map(c => ({ iso3: c.iso3, name: c.name, score: c.score, avg7: one(c.avg7), change7: one(c.change7), coverage: c.coverage, date: d }))
+    about: 'The "Biggest movers · 7 days" lists of q/volatility.html on its latest day (the six biggest rises and the six biggest falls of the 7-day average GVI, all coverage levels): the Integration Hub\'s daily copy. The Dashboard reads volatility/data/index.head.json, written with the index.',
+    page: 'q/volatility.html', date: d, countries,
+    records,
   });
   derivedFiles.add(vp);
 
@@ -764,25 +750,13 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   // was built, so the panel can date the window and leave out a briefing that has stopped refreshing.
   const BRIEFINGS = [['science-briefing', 'Scientific Briefing', 'science/briefing/data/stories.json'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/data/stories.json'],
     ['digital-briefing', 'Digital Briefing', 'digital/briefing/data/stories.json'], ['briefing', 'Political Briefing', 'briefing/data/latest.json']].filter(([, , f]) => has(f));
-  const top = (tally, defs, key) => { let best = null; for (const def of defs || []) if (Number(tally?.[def[key]]) > 0 && (!best || tally[def[key]] > tally[best[key]])) best = def; return best?.label || null; };
   const ap = 'integration/data/briefing-activity.json';
   putJson(ap, {
     dataset: 'briefing-activity', generated: STAMP, derivedFrom: BRIEFINGS.map(b => b[2]), licence: 'Counts and labels © JDP-Iq; the stories belong to their publishers.',
-    about: 'Each briefing\'s rolling store in three facts (stories held, most-covered topic, when it was generated), for the Dashboard\'s Today panel.',
+    about: 'Each briefing\'s rolling store in three facts (stories held, most-covered topic, when it was generated): the Integration Hub\'s daily copy. The Dashboard reads each briefing\'s own head and trends.json, written with its store.',
     records: BRIEFINGS.map(([id, name, file]) => {
-      const s = file === 'briefing/data/latest.json' && BRIEF ? BRIEF : J(file);
-      const items = Array.isArray(s.items) ? s.items : [];
-      let facet = ['disciplines', 'fields', 'topics', 'areas'].find(k => Array.isArray(s[k])), topic = null;
-      if (facet) {
-        // The briefing build's own tally (counts.<facet>), or the items' when a store has none.
-        const tally = s.counts?.[facet] || items.reduce((t, it) => { for (const f of it[facet] || []) t[f] = (t[f] || 0) + 1; return t; }, {});
-        topic = top(tally, s[facet], 'id');
-      } else if (Array.isArray(s.positions)) {
-        facet = 'positions';
-        const pos = new Map((s.sources || []).map(x => [x.id, x.position]));
-        topic = top(items.reduce((t, it) => { const p = pos.get(it.s); if (p) t[p] = (t[p] || 0) + 1; return t; }, {}), s.positions, 'key');
-      }
-      return { id, name, items: items.length, days: s.keepDays ?? null, topic, facet: facet || null, generated: s.generated || null };
+      const { items, days, topic, facet, generated } = briefingFacts(file === 'briefing/data/latest.json' && BRIEF ? BRIEF : J(file));
+      return { id, name, items, days, topic, facet, generated };
     })
   });
   derivedFiles.add(ap);
@@ -881,6 +855,7 @@ const walk = d => (existsSync(abs(d)) ? readdirSync(abs(d)).flatMap(f => { const
 for (const d of OWNED_DIRS) for (const p of walk(d)) if (!out.has(p)) { rmSync(abs(p)); removed++; }
 for (const d of OWNED_DIRS) for (const sub of walk(d).map(p => dirname(p))) void sub;
 log(`\n${catalogue.length} datasets · ${out.size} files: ${written} written, ${kept} unchanged, ${removed} removed`);
+writeHeads('integration/catalog.json', { root: ROOT, quiet: QUIET }); // integration/catalog.head.json in step with it
 
 if (args.includes('--calibrate')) {
   // Prints measured JSON.parse time against the cost model, to keep jsonCost honest.

@@ -68,7 +68,7 @@
     // lowbrow is null while a story waits for its verdict.
     async topStories(countryCode, startDate, endDate) {
       return translated(await request(tablePath("country_top_stories", {
-        select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at,lowbrow",
+        select: "snapshot_date,outlet,outlet_domain,outlet_rank,story_rank,title_original,title_en,url,published_at,lowbrow,captured_at",
         country_code: `eq.${countryCode}`,
         lowbrow: "not.is.true",
         title_en: TRANSLATED,

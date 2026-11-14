@@ -65,6 +65,10 @@ a.prp-chip{text-decoration:none}a.prp-chip:hover{border-color:var(--prp-primary)
 .stat>span{display:block;color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.3 var(--prp-font-mono);letter-spacing:.05em;text-transform:uppercase}
 .stat b{display:block;margin-top:4px;color:var(--prp-text);font:600 17px/1.25 var(--prp-font-ui);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .stat small{display:block;margin-top:3px;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.4}
+/* Each figure's source and its own date, under it; a value's year beside it (13 November 2026). */
+.stat small.src{margin-top:6px;padding-top:4px;border-top:1px solid var(--prp-line-soft);font-family:var(--prp-font-ui)}
+small.yr,.stat b small.yr{display:inline;margin:0 0 0 5px;color:var(--prp-muted);font:500 10.5px var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.cmp .grp .gsrc{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.4 var(--prp-font-ui);letter-spacing:0;text-transform:none}
 .wars{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px}
 .dims{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr));gap:12px;padding:14px}
 .dim{min-width:0;padding:12px 14px 6px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius)}
@@ -146,7 +150,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
   <footer class="prp-sources">
     <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
     <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored. The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
-    <p><b>Refresh.</b> Rebuilt monthly from the sources above.</p>
+    <p><b>Dates.</b> Rebuilt <span id="rhythm">on its schedule</span> from the sources above. Each figure carries its own date beside it: a World Bank value its year (a country's latest value is of the latest year it reported), Wikidata the day it was read, Political Atlas the day its records were last reviewed, the Political Retrospective the day its data was built, and the conflict and energy figures the years they run to.</p>
   </footer>
 </main>
 <div class="tip" id="tip" role="tooltip" hidden></div>
@@ -191,6 +195,30 @@ function fmtVal(v, unit) {
 }
 const pct = v => (v == null ? '–' : Math.round(v * 100) + '%');
 
+/* ---------- each statistic's own age and source (13 November 2026) ----------
+   Beside every figure its year or date and its source, not only the page's build date: the World Bank values carry
+   their own year (latest[code][0]); the other sources' dates are recorded by the build in index.json's "sources"
+   (national/scripts/build.mjs): when Wikidata was read, the day Political Atlas last reviewed its records, when the
+   Political Retrospective's data was built, the calendars' own time, and what the conflict and energy figures run to. */
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dateOf = v => { const t = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? v + 'T12:00:00Z' : v); if (!Number.isFinite(t)) return null; const d = new Date(t); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+const monthOf = v => (/^\d{4}-\d{2}$/.test(String(v || '')) ? `${MON[+v.slice(5, 7) - 1]} ${v.slice(0, 4)}` : null);
+const S = () => D?.sources || {};
+const SRC = {
+  worldBank: 'World Bank (WDI and WGI)',
+  wikidata: () => (S().wikidataRead ? `Wikidata, read ${dateOf(S().wikidataRead)}` : 'Wikidata'),
+  atlas: () => (S().atlasReviewed ? `Political Atlas, reviewed ${dateOf(S().atlasReviewed)}` : 'Political Atlas'),
+  retro: () => (S().retrospectiveBuilt ? `Political Retrospective (Archigos and Wikidata), built ${dateOf(S().retrospectiveBuilt)}` : 'Political Retrospective (Archigos and Wikidata)'),
+  ucdp: () => `UCDP/PRIO Armed Conflict Dataset, ${(S().conflictYears || [1946, 2025]).join('–')}`,
+  battlefield: () => (monthOf(S().battlefieldThrough) ? `Realtime Battlefield, figures to ${monthOf(S().battlefieldThrough)}` : 'Realtime Battlefield'),
+  calendar: () => (S().calendarBuilt ? `Historical and Realtime Calendars, as built ${dateOf(S().calendarBuilt)}` : 'Historical and Realtime Calendars'),
+  energy: () => `Kardashev Tracker, ${S().energyYear ?? 2025}`,
+};
+// The years of a country's latest World Bank values ("2022–2025", or one year).
+const yearsOf = c => { const ys = Object.values(c.latest || {}).map(v => v?.[0]).filter(Number.isFinite); if (!ys.length) return ''; const a = Math.min(...ys), b = Math.max(...ys); return a === b ? String(a) : `${a}–${b}`; };
+// The current leader's source: the office the Atlas names (when it decides it), and the holder from Wikidata.
+const leaderSrc = c => (!c.leader ? '' : `${c.leader.rule === 'atlas' ? `Office named by ${SRC.atlas()}; holder from ` : ''}${SRC.wikidata()}${c.leader.source === 'correction' ? ', with VM’s correction' : ''}`);
+
 /* ---------- metrics (map colouring, ranking, comparison) ---------- */
 function metrics() {
   const m = [
@@ -209,13 +237,16 @@ function metrics() {
     { id: 'active', label: 'Wars or warzones active this year', get: c => c.conflict?.active2026?.length, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
     { id: 'energy', label: 'Share of world energy (2025)', get: c => c.energyShare, fmt: pct, better: null, group: 'Energy' },
   ];
-  for (const ind of D.indicators) m.push({ id: 'i_' + ind.code, label: ind.label, unit: ind.unit, get: c => c.latest[ind.code]?.[1], fmt: v => fmtVal(v, ind.unit), better: ind.better, group: DIMS.find(d => d[0] === ind.dimension)[1] + ' indicators', ind });
+  // An indicator's value is the country's latest, of its own year (year).
+  for (const ind of D.indicators) m.push({ id: 'i_' + ind.code, label: ind.label, unit: ind.unit, get: c => c.latest[ind.code]?.[1], year: c => c.latest[ind.code]?.[0] ?? null, fmt: v => fmtVal(v, ind.unit), better: ind.better, group: DIMS.find(d => d[0] === ind.dimension)[1] + ' indicators', ind });
   return m;
 }
 let METRICS = [];
 const pdata = c => { const p = $('#period').value; return p === 'latest' ? c : c.decades[p] || {}; };
-const SOURCE = { PESTLE: 'World Bank (WDI and WGI), scored as in Country PESTLE', Leadership: 'Political Retrospective (Archigos and Wikidata)', Conflict: 'UCDP/PRIO Armed Conflict Dataset and UCDP Candidate Events', Energy: 'Kardashev Tracker' };
-const sourceOf = m => SOURCE[m.group] || 'World Bank (WDI and WGI)';
+// Each group's source, with its own date (the comparison's group rows and the map's caption).
+const SOURCE = { PESTLE: () => `${SRC.worldBank}, scored as in Country PESTLE`, Leadership: () => SRC.retro(), Conflict: () => `${SRC.ucdp()}; ${SRC.battlefield()}`, Energy: () => SRC.energy() };
+const sourceOf = m => (SOURCE[m.group] ? SOURCE[m.group]() : `${SRC.worldBank}; each country's latest value, of its own year`);
+const yearTag = (m, c) => { const y = m.year?.(c); return y ? ` <small class="yr">${esc(y)}</small>` : ''; };
 
 /* ---------- map ---------- */
 let mapG, mapPath, mapProj, numToIso = new Map(), focusView = null, focusReset = null, places = null;
@@ -240,7 +271,7 @@ function drawMap(world) {
   const feats = topojson.feature(world, world.objects.countries).features;
   mapG = layer.append('g');
   mapG.selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', mapPath)
-    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); showTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}` : esc(f.properties.name)); })
+    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); const y = c && m.get(c) != null ? m.year?.(c) : null; showTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${y ? ` (${esc(y)})` : ''}` : esc(f.properties.name)); })
     .on('mouseleave', hideTip)
     .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso) openProfile(iso); });
 }
@@ -303,7 +334,7 @@ function renderTable() {
   $('#ctitle').textContent = `Countries · ${list.length}`;
   $('#rows').innerHTML = list.map(c => `<tr><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
     <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>
-    <td class="num">${m.fmt(m.get(c))}</td><td class="num"><span class="bar" data-p="${pdata(c).overall ?? ''}" style="width:${(pdata(c).overall || 0) * 60}px;background:${pressColour(pdata(c).overall)}"></span>${pct(pdata(c).overall)}</td><td class="num">${pct(pdata(c).coverage)}</td></tr>`).join('');
+    <td class="num">${m.fmt(m.get(c))}${m.get(c) != null ? yearTag(m, c) : ''}</td><td class="num"><span class="bar" data-p="${pdata(c).overall ?? ''}" style="width:${(pdata(c).overall || 0) * 60}px;background:${pressColour(pdata(c).overall)}"></span>${pct(pdata(c).overall)}</td><td class="num">${pct(pdata(c).coverage)}</td></tr>`).join('');
   $('#thead').querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'name' || k === 'region' ? 1 : -1); sortKey = k; renderTable(); $(`#thead [data-sort="${k}"]`).focus(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
 }
@@ -354,7 +385,9 @@ async function renderProfile() {
   if (!c) return;
   $('#pname').textContent = ' · ' + c.name;
   const s = await series(c.iso3), L = c.leadership, K = c.conflict, period = $('#period').value, P = pdata(c);
-  const stat = (label, value, small = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}</div>`;
+  // A figure, a note under it, and its source with its own date (src, plain text).
+  const stat = (label, value, small = '', src = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}${src ? `<small class="src">${esc(src)}</small>` : ''}</div>`;
+  const pop = c.latest['SP.POP.TOTL'], gdp = c.latest['NY.GDP.MKTP.CD'];
   const links = [
     c.encyclopedia && link('rs', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Master Index'),
     c.gw != null && link('rs', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.gw}`, 'Political Retrospective'),
@@ -381,26 +414,26 @@ async function renderProfile() {
     <div class="ptitle"><div><div class="prp-label">${esc(c.region)} · ${esc(c.income)}</div><h2>${esc(c.name)}</h2>
       <div class="sub">${esc(c.government.join(', ') || 'System of government not recorded')}${c.capital ? ' · capital ' + esc(c.capital) : ''}</div></div>
       <div class="pact"><div class="links">${links}</div><button type="button" class="prp-btn sm${inCmp ? '' : ' primary'}" id="addcmp" aria-pressed="${inCmp}">${inCmp ? '✓ In comparison' : '+ Add to comparison'}</button></div></div>
-    <div class="prp-panel-head"><b>Overview</b><span class="hint">Heads: Wikidata · Current leader: the office Political Atlas names, or the system of government · Leadership: Political Retrospective (Archigos + Wikidata) · Conflict: UCDP/PRIO 1946–2025</span></div>
+    <div class="prp-panel-head"><b>Overview</b><span class="hint">Each figure's source and its own date are under it</span></div>
     <div class="grid">
-      ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')))}
-      ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c))}
-      ${stat('Current leader', leaderHtml(c), leaderNote(c))}
-      ${L ? stat('Leaders in the last 100 years', L.leaders100) : ''}
-      ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs') : ''}
-      ${L?.longest ? stat('Longest-serving leader', esc(L.longest.name), `${L.longest.years} years (${L.longest.from}–${L.longest.to})`) : ''}
-      ${L ? stat('Irregular seizures of power', L.irregular, 'coups and foreign impositions since 1926') : ''}
-      ${L ? stat('Elections and referendums', L.elections, 'since 1926') : ''}
-      ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${K.conflictYears} conflict-years)`) : ''}
-      ${K ? stat('Years at war', K.yearsAtWar, `of ${K.yearsWithConflict} years with any armed conflict`) : ''}
-      ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`) : ''}
-      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${K.cowWars1926_45} wars 1926–45 (COW)`) : ''}
-      ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '2025 · Kardashev Tracker') : ''}
-      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${CAL_TYPES[t] || t}`).join(' · ')) : ''}
-      ${stat('PESTLE pressure', pct(P.overall), `${period === 'latest' ? 'latest' : period + 's'} · coverage ${pct(P.coverage)}`)}
-      ${stat('Population', fmtVal(c.latest['SP.POP.TOTL']?.[1], 'people'), c.latest['NY.GDP.MKTP.CD'] ? 'GDP ' + fmtVal(c.latest['NY.GDP.MKTP.CD'][1], 'US$') : '')}
+      ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')), SRC.wikidata())}
+      ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c), SRC.wikidata())}
+      ${stat('Current leader', leaderHtml(c), leaderNote(c), leaderSrc(c))}
+      ${L ? stat('Leaders in the last 100 years', L.leaders100, '', SRC.retro()) : ''}
+      ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs', SRC.retro()) : ''}
+      ${L?.longest ? stat('Longest-serving leader', esc(L.longest.name), `${L.longest.years} years (${L.longest.from}–${L.longest.to})`, SRC.retro()) : ''}
+      ${L ? stat('Irregular seizures of power', L.irregular, 'coups and foreign impositions since 1926', SRC.retro()) : ''}
+      ${L ? stat('Elections and referendums', L.elections, 'since 1926', SRC.retro()) : ''}
+      ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${K.conflictYears} conflict-years)`, SRC.ucdp()) : ''}
+      ${K ? stat('Years at war', K.yearsAtWar, `of ${K.yearsWithConflict} years with any armed conflict`, SRC.ucdp()) : ''}
+      ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`, SRC.ucdp()) : ''}
+      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${K.cowWars1926_45} wars 1926–45`, `${SRC.ucdp()}; Correlates of War`) : ''}
+      ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '', SRC.energy()) : ''}
+      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${CAL_TYPES[t] || t}`).join(' · '), SRC.calendar()) : ''}
+      ${stat('PESTLE pressure', pct(P.overall), `${period === 'latest' ? 'latest' : period + 's'} · coverage ${pct(P.coverage)}`, period === 'latest' ? `${SRC.worldBank}, values of ${yearsOf(c) || 'no year'}` : `${SRC.worldBank}, the ${period}s`)}
+      ${stat('Population', `${fmtVal(pop?.[1], 'people')}${pop ? ` <small class="yr">${esc(pop[0])}</small>` : ''}`, gdp ? `GDP ${fmtVal(gdp[1], 'US$')} (${esc(gdp[0])})` : '', SRC.worldBank)}
     </div>
-    ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">Realtime Battlefield</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
+    ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">${esc(SRC.battlefield())}</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
     <div class="prp-panel-head"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="hint">Improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
@@ -411,7 +444,7 @@ async function renderProfile() {
     // Free sources lead (design/prp-access.js): the first headline is from an outlet anyone can read wherever one of the
     // country's outlets is free (the rest keep the tracker's order); a link to one that is not free carries a label.
     const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
-    $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
+    $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · front page of ${esc(dateOf(r.snapshot_date) || r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
   } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
 }
 
@@ -469,7 +502,7 @@ async function renderCompare(focus) {
     const nums = vals.filter(v => v != null);
     const best = m.better && nums.length > 1 ? (m.better === 'up' ? Math.max(...nums) : Math.min(...nums)) : null;
     const worst = m.better && nums.length > 1 ? (m.better === 'up' ? Math.min(...nums) : Math.max(...nums)) : null;
-    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map(v => { const k = v != null && v === best ? 'best' : v != null && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${m.fmt(v)}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
+    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map((v, i) => { const k = v != null && v === best ? 'best' : v != null && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${m.fmt(v)}${v != null ? yearTag(m, cs[i]) : ''}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
   };
   const chartable = D.indicators;
   $('#compare').innerHTML = `<div class="prp-panel">
@@ -480,8 +513,8 @@ async function renderCompare(focus) {
       <figcaption><b>Figure 2.</b> <span id="cmpcap"></span></figcaption>
       <details class="dt" id="cmpdt"><summary>Show the chart's data as a table</summary><div id="cmpdata"></div></details></figure>
     <div class="tbl" style="max-height:none"><table class="prp-table cmp"><thead><tr><th scope="col">Metric</th>${cs.map(c => `<th scope="col" class="num"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
-    <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}</td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
-    <tr class="grp"><td colspan="${cs.length + 1}">Profile</td></tr>
+    <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}<span class="gsrc">${esc(sourceOf(METRICS.find(m => m.group === g)))}</span></td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
+    <tr class="grp"><td colspan="${cs.length + 1}">Profile<span class="gsrc">${esc(`${SRC.wikidata()}; the current leader's office: ${SRC.atlas()}, or the system of government`)}</span></td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
     <tr><td>Current leader</td>${cs.map(c => `<td class="num" data-leader="${c.iso3}">${leaderHtml(c)}</td>`).join('')}</tr>
     <tr><td>Head of state</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfState')}</td>`).join('')}</tr>
@@ -593,8 +626,14 @@ Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('ht
   METRICS = metrics();
   $('#metric').innerHTML = [...new Set(METRICS.map(m => m.group))].map(g => `<optgroup label="${esc(g)}">${METRICS.filter(m => m.group === g).map(m => `<option value="${m.id}">${esc(m.label)}</option>`).join('')}</optgroup>`).join('');
   $('#region').innerHTML += [...new Set(d.countries.map(c => c.region))].sort().map(r => `<option>${esc(r)}</option>`).join('');
-  const updated = new Date(d.generated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-  $('#meta').innerHTML = `<span>Updated <b>${updated}</b></span><span>Coverage <b>${d.countries.length} countries · ${d.years[0]}–${d.years[1]}</b></span><span>Indicators <b>${d.indicators.length}</b> (${d.indicators.filter(i => i.core).length} PESTLE core)</span><span>Sources <b>World Bank · Wikidata · UCDP</b></span><span>Refreshed <b>monthly</b></span>`;
+  // The page's own build date and its refresh's schedule (the workflow's cron, design/prp-freshness.js); each figure's
+  // own year or date and source are beside it.
+  $('#meta').innerHTML = `<span>Updated <b>${esc(dateOf(d.generated) || '–')}</b></span><span>Coverage <b>${d.countries.length} countries · ${d.years[0]}–${d.years[1]}</b></span><span>Indicators <b>${d.indicators.length}</b> (${d.indicators.filter(i => i.core).length} PESTLE core)</span><span>Sources <b>World Bank · Wikidata · UCDP</b></span><span id="rebuilt"></span><span>Each figure's year or date, and its source, beside it</span>`;
+  import('../design/prp-freshness.js').then(F => {
+    const r = F.rhythmFromCron(F.SCHEDULES['national-refresh.yml']).phrase;
+    $('#rebuilt').innerHTML = `Rebuilt <b>${esc(r)}</b>`;
+    $('#rhythm').textContent = r;
+  }).catch(() => {});
   drawMap(world); colourMap(); renderTable();
   const rerender = () => { colourMap(); renderTable(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
   $('#metric').onchange = rerender; $('#period').onchange = rerender; $('#search').oninput = renderTable; $('#region').onchange = renderTable;

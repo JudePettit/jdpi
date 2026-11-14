@@ -26,7 +26,13 @@
 const state = { registry: null, frames: new Map(), route: null, theme: 'system', np: null, kinoMove: null };
 const $ = sel => document.querySelector(sel);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const STATUS = { 'live': 'Live', 'in-build': 'In build', 'planned': 'Planned' };
+// A submodule's status says only whether it is published: "live" means published and open to readers, and is never
+// shown (it once read as a claim about fresh data). Only "In build" and "Planned" are flagged. How fresh a submodule's
+// data is, is its freshness line (design/prp-freshness.js, "Freshness lines" below).
+const STATUS = { 'in-build': 'In build', 'planned': 'Planned' };
+const statusFlag = m => (STATUS[m.status] ? `<span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status])}</span>` : '');
+// The kind (Realtime, Retrospective, …) stays in the registry for search, the catalogue and the MCP server; it is no
+// longer shown as a badge, where it read as a claim about freshness.
 const kindLabel = k => state.registry.kinds?.[k] || '';
 
 function allModules() { return state.registry.suites.flatMap(s => s.modules.map(m => ({ suite: s, module: m }))); }
@@ -111,12 +117,16 @@ function setupTheme() {
 }
 
 /* --- Navigation ------------------------------------------------------------ */
+// Each item: its name, a flag while it is in build or planned, and a "Late" flag while its data is late; its freshness
+// line is its title (paintFreshness keeps both up to date as the lines are read).
 function navItem(suite, m) {
-  const flag = m.status === 'live' ? '' : `<span class="flag">${esc(STATUS[m.status] || m.status)}</span>`;
+  const flag = STATUS[m.status] ? `<span class="flag">${esc(STATUS[m.status])}</span>` : '';
+  const l = lineOf(m);
   const search = [m.name, suite.name, suite.title, suite.code, kindLabel(m.kind), ...(m.aliases || [])].join(' ').toLowerCase();
-  return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}">
-    <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}</a>`;
+  return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}"${l ? ` title="${esc(l.text)}"` : ''}>
+    <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}${l?.late ? LATE_FLAG : ''}</a>`;
 }
+const LATE_FLAG = '<span class="flag late">Late</span>';
 // A module's own figure, small, beside its code (decorative: the module's name is beside it).
 const suiteMark = (suite, size) => (suite.mark ? `<img class="suite-mark" src="${esc(suite.mark)}" alt="" width="${size}" height="${size}">` : '');
 // Each module's link to its overview. The Home module's is the Home page, an item of its own with the ⌂ the sidebar
@@ -134,8 +144,14 @@ function renderNav() {
         ${suite.modules.map(m => navItem(suite, m)).join('')}
       </details>`).join('') +
     `<div class="search-results" id="search-results" hidden></div>`;
-  const mods = allModules();
-  $('#legal').innerHTML = `<b>${esc(P.name)} ${esc(P.version)}</b> · ${state.registry.suites.length} modules · ${mods.length} submodules<br>© ${new Date().getFullYear()} ${esc(P.company)}`;
+  $('#legal').innerHTML = `<b>${esc(P.name)} ${esc(P.version)}</b> · <span id="count">${esc(countText())}</span><br>© ${new Date().getFullYear()} ${esc(P.company)}`;
+}
+// The one count of modules, worded the same wherever it shows (design/prp-freshness.js countWords): Home is a module
+// and the count says so.
+function countText() {
+  if (fresh.mod) return fresh.mod.countWords(state.registry).text;
+  const subs = allModules().length, home = state.registry.suites.some(s => s.id === HOME);
+  return `${state.registry.suites.length} modules${home ? ', Home included' : ''} · ${subs} submodules`;
 }
 function highlightNav(r) {
   const key = [r.suite?.id, r.module?.id].filter(Boolean).join('/');
@@ -150,9 +166,9 @@ function renderTop(r, frame) {
   if (r.view) parts.push(`<b>${esc(r.view.name)}</b>`);
   $('#crumbs').innerHTML = parts.join('<span class="sep" aria-hidden="true">/</span>');
   const m = r.module;
+  // The submodule's freshness line (where its "Realtime" badge and "Live" once stood), and a flag while it is in build.
   $('#top-actions').innerHTML = m ? `
-    ${m.kind ? `<span class="prp-kind">${esc(kindLabel(m.kind))}</span>` : ''}
-    <span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status] || m.status)}</span>
+    ${statusFlag(m)}${freshHtml(m, 'chip')}
     ${frame ? `<button class="prp-btn sm" type="button" id="reload" title="Reload this page">⟳<span class="btn-label">Reload</span></button>
     <a class="prp-btn sm" id="newtab" href="${esc(frameAddress(frame))}" target="_blank" rel="noopener" title="Open this page, as it is now, in a new tab">↗<span class="btn-label">New tab</span></a>` : ''}` : '';
   if (!frame) return;
@@ -164,11 +180,132 @@ function renderTop(r, frame) {
   for (const ev of ['pointerenter', 'pointerdown', 'focus', 'contextmenu', 'click']) tab.addEventListener(ev, fresh);
 }
 
+/* --- Freshness lines ------------------------------------------------------------------------------------------------
+   Every submodule says how fresh its data is, in one line worked out from data (design/prp-freshness.js): the time is
+   its store's own (read from the small file its registry "data" names), the rhythm its refresh workflow's schedule, and
+   "Late" the daily data check's rule (twice the rhythm plus three hours, or a failing store in status/health.json). The
+   line stands in the top bar, the sidebar (each item's title, with a "Late" flag), each Dashboard tile, each module
+   overview's "Last update" column and, a module at a time, on the back of its box on the Home page.
+   The files are small (a store's head, written with it: integration/scripts/heads.mjs) and are read after the first
+   paint, each at most once in FRESH_MS; the larger ones ("heavy": the Kardashev Tracker's and the Retrospective
+   Battlefield's data, for their build dates, and Kino's Wikidata cache, for its time) and the one on another site (the Political Atlas's manifest) only where
+   their own line is shown in full (its top bar, its module's overview, the Dashboard). Only the fields a line needs
+   are kept, in this session's storage, so a return visit draws its lines at once. Until a file is read, or if it
+   cannot be, a line gives its rhythm alone, which is always true. Every string from a file is escaped, and only short
+   strings are kept (pick). */
+const FRESH_KEY = 'prp.fresh.v1';     // { v: 1, at, reads, health } in sessionStorage
+const FRESH_MS = 15 * 60e3;           // a file is read again after this, and the lines redrawn (lateness moves with time)
+const fresh = { mod: null, reads: {}, at: {}, failed: new Set(), health: null, healthAt: 0, pending: new Set(), timer: 0 };
+const lineOf = m => (fresh.mod && m ? fresh.mod.freshnessLine(m, fresh.reads, { health: fresh.health }) : null);
+// A line as the top bar shows it (form "chip": the whole line, and on a narrow screen its short form, the whole line
+// still read out) or as everywhere else does (form "line").
+const freshInner = (l, form) => (!l ? '' : form === 'chip' ? `<span class="fresh-full">${esc(l.text)}</span><span class="fresh-short" aria-hidden="true">${esc(l.short)}</span>` : esc(l.text));
+const freshHtml = (m, form) => {
+  const l = lineOf(m);
+  return `<span class="prp-fresh${l?.late ? ' late' : ''}" data-fresh="${esc(m.id)}" data-form="${form}"${l ? ` title="${esc(l.text)}"` : ' hidden'}>${freshInner(l, form)}</span>`;
+};
+// The Dashboard's two counts from the lines: submodules whose data was made in the last 24 hours (and is not late), and
+// those that are late. A dash until anything has been read. A submodule whose file could not be read just now is in
+// neither count, and the counts say how many those are (unread), so a failed read never passes for "not updated".
+function freshCounts() {
+  if (!fresh.mod || !Object.keys(fresh.reads).length) return { recent: '–', late: '–', unread: 0 };
+  const mods = allModules().map(x => x.module);
+  const unread = mods.filter(m => (m?.data?.parts || []).some(p => fresh.failed.has(p.read) && !fresh.reads[p.read])).length;
+  const lines = mods.map(lineOf);
+  return { recent: String(lines.filter(l => l.made != null && !l.late && Date.now() - l.made <= 24 * 3600e3).length), late: String(lines.filter(l => l.late).length), unread };
+}
+const kpiSmall = unread => (unread ? `submodules · ${unread} not read just now` : 'submodules');
+function readFreshCache() {
+  try {
+    const e = JSON.parse(sessionStorage.getItem(FRESH_KEY) || 'null');
+    if (!e || e.v !== 1 || !Number.isFinite(e.at) || Date.now() - e.at > FRESH_MS || typeof e.reads !== 'object' || !e.reads) return;
+    for (const [p, j] of Object.entries(e.reads)) if (j && typeof j === 'object') { fresh.reads[p] = j; fresh.at[p] = e.at; }
+    if (e.health && typeof e.health === 'object') { fresh.health = e.health; fresh.healthAt = e.at; }
+  } catch { /* private mode or a bad entry: read afresh */ }
+}
+function writeFreshCache() {
+  try { sessionStorage.setItem(FRESH_KEY, JSON.stringify({ v: 1, at: Date.now(), reads: fresh.reads, health: fresh.health })); } catch { /* skip the cache */ }
+}
+// The modules whose lines this view shows in full (so their heavy files are read too): the submodule shown, a module's
+// overview, or every one on the Dashboard.
+function shownModules(r) {
+  if (r?.module?.shell === 'dashboard') return allModules().map(x => x.module);
+  if (r?.module) return [r.module];
+  if (r?.suite) return r.suite.modules;
+  return [];
+}
+// Read what the lines need and is not fresh: every light file (the sidebar's lines and flags), the heavy ones this view
+// shows, and the daily check's result. Never throws.
+// On the Dashboard they are read after the Today panel has filled (loadToday calls this with afterToday), taking the
+// panel's own answers for the files both read (todayAnswers), so no file is asked for twice.
+const todayAnswers = new Map(); // absolute url → { at, json: Promise of the parsed body or null }
+async function loadFreshness(r = state.route, { afterToday = false } = {}) {
+  if (!fresh.mod || !state.registry) return;
+  if (!afterToday && TODAY_PANEL && onDashboard()) return;
+  const want = fresh.mod.wantedFields(state.registry), now = Date.now();
+  const paths = [...new Set([...fresh.mod.readsOf(allModules().map(x => x.module)), ...fresh.mod.readsOf(shownModules(r), { heavy: true })])];
+  const due = paths.filter(p => !(fresh.at[p] > now - FRESH_MS) && !fresh.pending.has(p));
+  const health = !(fresh.healthAt > now - FRESH_MS) && !fresh.pending.has('status/health.json');
+  if (!due.length && !health) return;
+  const get = async (p, keep) => {
+    fresh.pending.add(p);
+    try {
+      const shared = todayAnswers.get(new URL(p, document.baseURI).href);
+      if (shared && Date.now() - shared.at < 60e3) { const j = await shared.json; if (j) { keep(j); fresh.failed.delete(p); return; } }
+      const res = await fetch(p, { cache: 'no-cache', signal: abortAfter(TODAY_FETCH_MS) });
+      if (!res.ok) throw new Error(String(res.status));
+      keep(await res.json());
+      fresh.failed.delete(p);
+    } catch { fresh.failed.add(p); /* offline or unreadable: the line keeps what it had, or its rhythm */ }
+    finally { fresh.pending.delete(p); }
+  };
+  await Promise.all([
+    ...due.map(p => get(p, j => { fresh.reads[p] = fresh.mod.pick(j, want.get(p) || ['generated']); }).then(() => { fresh.at[p] = Date.now(); })),
+    ...(health ? [readHealth().then(h => {
+      if (h) fresh.health = { generated: typeof h?.generated === 'string' ? h.generated : null, ok: h?.ok === true ? true : h?.ok === false ? false : null,
+        failing: (Array.isArray(h?.failing) ? h.failing : []).map(f => ({ what: typeof f?.what === 'string' ? f.what : '' })) };
+      fresh.healthAt = Date.now();
+    })] : []),
+  ]);
+  writeFreshCache();
+  paintFreshness();
+}
+// Redraw every line on the page from what has been read: the sidebar, the top bar, the tiles, the tables, the boxes and
+// the Dashboard's counts. Only text and titles change, never the layout around them.
+function paintFreshness() {
+  if (!fresh.mod || !state.registry) return;
+  document.querySelectorAll('[data-fresh]').forEach(el => {
+    const l = lineOf(findModule(el.dataset.fresh)?.module);
+    el.hidden = !l;
+    if (!l) return;
+    el.classList.toggle('late', l.late);
+    el.title = l.text;
+    el.innerHTML = freshInner(l, el.dataset.form);
+  });
+  document.querySelectorAll('[data-fresh-suite]').forEach(el => { const s = findSuite(el.dataset.freshSuite); if (s) el.textContent = suiteFresh(s); });
+  document.querySelectorAll('[data-fresh-late]').forEach(el => { const s = findSuite(el.dataset.freshLate), n = s ? lateIn(s) : 0; el.hidden = !n; el.innerHTML = `<b>${n}</b> late`; });
+  document.querySelectorAll('#nav a.nav-item[data-route]').forEach(a => {
+    const m = findModule(a.dataset.route.split('/')[1])?.module, l = lineOf(m);
+    if (!l) return;
+    a.title = l.text;
+    const flag = a.querySelector('.flag.late');
+    if (l.late && !flag) a.insertAdjacentHTML('beforeend', LATE_FLAG); else if (!l.late && flag) flag.remove();
+  });
+  const k = freshCounts();
+  for (const id of ['recent', 'late']) {
+    const b = $(`#view .prp-kpi[data-kpi="${id}"] b`), small = $(`#view .prp-kpi[data-kpi="${id}"] small`);
+    if (b) b.textContent = k[id];
+    if (small) small.textContent = kpiSmall(k.unread);
+  }
+}
+
 /* --- Views ----------------------------------------------------------------- */
+// A Dashboard tile: its foot says how fresh its data is (and whether it is in build, or opens in its own tab); where it
+// is hosted is in its module's "About this module".
 const tile = (suite, m) => `<a class="tile" href="${href(suite, m)}" data-suite="${suite.id}">
-    <div class="row"><span class="icon" aria-hidden="true">${esc(m.icon)}</span>${m.kind ? `<span class="prp-kind">${esc(kindLabel(m.kind))}</span>` : ''}</div>
+    <div class="row"><span class="icon" aria-hidden="true">${esc(m.icon)}</span></div>
     <h3>${esc(m.name)}</h3><p>${esc(m.description)}</p>
-    <div class="foot"><span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status] || m.status)}</span><span>${esc(m.host)}</span>${m.opensInNewTab ? '<span>Opens in a new tab</span>' : ''}</div>
+    <div class="foot">${statusFlag(m)}${freshHtml(m, 'line')}${m.opensInNewTab ? '<span>Opens in a new tab</span>' : ''}</div>
   </a>`;
 
 /* --- Home page (#/) --------------------------------------------------------------------------------------------------
@@ -184,14 +321,20 @@ const tile = (suite, m) => `<a class="tile" href="${href(suite, m)}" data-suite=
 const modBox = s => {
   const id = `mod-${esc(s.id)}`;
   return `<li class="mod" data-suite="${esc(s.id)}">
-    <a class="mod-card" href="${href(s)}" aria-labelledby="${id}-name" aria-describedby="${id}-does">
+    <a class="mod-card" href="${href(s)}" aria-labelledby="${id}-name" aria-describedby="${id}-does ${id}-fresh">
       <span class="mod-turn">
         <span class="mod-face mod-front"><span class="mod-id"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 40)}</span><span class="mod-name" id="${id}-name">${esc(s.title || s.name)}</span><span class="mod-subs" aria-hidden="true">${s.modules.map(m => `<span>${esc(m.icon)}</span>`).join('')}</span></span>
-        <span class="mod-face mod-back"><span class="mod-does" id="${id}-does">${esc(s.summary || s.description)}</span><span class="mod-go" aria-hidden="true">Module overview →</span></span>
+        <span class="mod-face mod-back"><span class="mod-does" id="${id}-does">${esc(s.summary || s.description)}</span><span class="mod-fresh" id="${id}-fresh" data-fresh-suite="${esc(s.id)}">${esc(suiteFresh(s))}</span><span class="mod-go" aria-hidden="true">Module overview →</span></span>
       </span>
     </a>
   </li>`;
 };
+// The back of a box: the module's freshest line (a submodule's own), and how many of its submodules are late.
+function suiteFresh(s) {
+  if (!fresh.mod) return '';
+  const x = fresh.mod.suiteLine(s, lineOf);
+  return x.text + (x.late ? ` · ${x.late} late` : '');
+}
 function renderHome() {
   const P = state.registry.platform, home = findSuite(HOME), dash = home?.modules.find(m => m.shell === 'dashboard');
   $('#view').innerHTML = `<div class="page home" data-suite="${HOME}">
@@ -229,7 +372,6 @@ function setupHome() {
    the home page, the Workspace, until November 2026; its catalogue still lists every module, Home's included. */
 function renderDashboard(suite, module) {
   const P = state.registry.platform, mods = allModules();
-  const kinds = mods.reduce((a, x) => ((a[x.module.kind] = (a[x.module.kind] || 0) + 1), a), {});
   // The Today panel (PRP-ANALYSIS.md item 3): above the catalogue, the few lines that actually change. Its data loads
   // lazily after this paint (loadToday), so the cards are never held up; a cached session result, fresh or stale, is
   // dropped in here synchronously so a return visit shows it with no flash and no jump (a stale one is then refreshed
@@ -239,15 +381,15 @@ function renderDashboard(suite, module) {
     <header class="head">
       <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(module.name)}</div>
       <h1 class="prp-title">${esc(module.name)}</h1>
-      <p class="prp-dek">${esc(module.description)} Realtime modules show what is happening now; Retrospective modules show what happened before and why.</p>
+      <p class="prp-dek">${esc(module.description)} Every tile says how fresh its data is, worked out from the data's own time and its refresh's schedule.</p>
       <p id="health" class="prp-status dash-health" hidden></p>
     </header>
     ${TODAY_PANEL ? `<section id="today" class="today" aria-label="Today on your Dashboard" aria-live="off"${today ? '' : ' aria-busy="true"'}>${todayInnerHtml(today?.groups)}</section>` : ''}
     <div class="prp-kpis today-kpis">
-      <div class="prp-kpi"><span>Modules</span><b>${state.registry.suites.length}</b></div>
-      <div class="prp-kpi"><span>Submodules</span><b>${mods.length}</b></div>
-      <div class="prp-kpi"><span>Realtime</span><b>${kinds.realtime || 0}</b></div>
-      <div class="prp-kpi"><span>Retrospective</span><b>${kinds.retrospective || 0}</b></div>
+      <div class="prp-kpi" data-kpi="modules"><span>Modules</span><b>${state.registry.suites.length}</b><small>Home included</small></div>
+      <div class="prp-kpi" data-kpi="submodules"><span>Submodules</span><b>${mods.length}</b><small>in all</small></div>
+      <div class="prp-kpi" data-kpi="recent"><span>Updated in the last 24 hours</span><b>${esc(freshCounts().recent)}</b><small>${esc(kpiSmall(freshCounts().unread))}</small></div>
+      <div class="prp-kpi" data-kpi="late"><span>Late</span><b>${esc(freshCounts().late)}</b><small>${esc(kpiSmall(freshCounts().unread))}</small></div>
     </div>
     ${state.registry.suites.map((s, i) => `<section class="group" data-suite="${s.id}">
       <div class="group-head"><span class="prp-code">${esc(s.code)}</span>${suiteMark(s, 22)}<h2 class="prp-h2"><span class="prp-section-no">${i + 1}.</span>${esc(s.title || s.name)}</h2><a class="more" href="${href(s)}">${overviewName(s)} →</a></div>
@@ -272,12 +414,21 @@ const HEALTH_STALE_MS = 3 * 24 * 3600e3;
 const HEALTH_NAMES = 4; // the most names the line lists before "and N more"
 const shortDay = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const onDashboardHealth = () => (state.route?.suite?.id === HOME && state.route?.module?.shell === 'dashboard' ? $('#health') : null);
+// status/health.json, read once in FRESH_MS for both the health mark and the freshness lines (null when it cannot be).
+let healthRead = null;
+function readHealth() {
+  if (healthRead && Date.now() - healthRead.at < FRESH_MS) return healthRead.json;
+  const json = fetch('status/health.json', { cache: 'no-cache', signal: abortAfter(TODAY_FETCH_MS) }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  healthRead = { at: Date.now(), json };
+  json.then(h => { if (h === null && healthRead?.json === json) healthRead = null; }); // a failed read is tried again next time
+  return json;
+}
 async function loadHealth() {
   if (!onDashboardHealth()) return;
   try {
-    const res = await fetch('status/health.json', { cache: 'no-cache', signal: abortAfter(TODAY_FETCH_MS) });
-    if (!res.ok) return;
-    const h = await res.json(), at = Date.parse(h?.generated), el = onDashboardHealth();
+    const h = await readHealth();
+    if (!h) return;
+    const at = Date.parse(h?.generated), el = onDashboardHealth();
     if (!el || !Number.isFinite(at)) return;
     let tone, text;
     if (Date.now() - at > HEALTH_STALE_MS) [tone, text] = ['warn', `The data check has not run since ${shortDay(at)}.`];
@@ -296,8 +447,9 @@ async function loadHealth() {
 // The submodules the shell draws itself, by their registry "shell" value.
 const SHELL_PAGES = new Map([['dashboard', renderDashboard]]);
 
+// A module's overview: its submodules, each with its freshness line (where the Kind, Status and Host columns were), and
+// "About this module" at its foot, which says where they are hosted.
 function renderSuite(suite) {
-  const live = suite.modules.filter(m => m.status === 'live').length;
   // A module with its own figure shows it at the head of its overview, as its landing page does; here it is decorative
   // (no alt text), since the module's name is the heading beside it.
   const figure = suite.figure ? `<img class="suite-figure" src="${esc(suite.figure)}" alt="" width="104" height="104">` : '';
@@ -305,23 +457,29 @@ function renderSuite(suite) {
     <header class="head${figure ? ' has-figure' : ''}">${figure}<div>
       <div class="prp-eyebrow">${esc(state.registry.platform.name)} <span class="sep">/</span> Module ${esc(suite.code)}</div>
       <h1 class="prp-title">${esc(suite.title || suite.name)}</h1><p class="prp-dek">${esc(suite.description)}</p>
-      <div class="prp-meta"><span><b>${suite.modules.length}</b> submodules</span><span><b>${live}</b> live</span></div>
+      <div class="prp-meta"><span><b>${suite.modules.length}</b> submodules</span><span data-fresh-late="${esc(suite.id)}"${lateIn(suite) ? '' : ' hidden'}><b>${lateIn(suite)}</b> late</span></div>
     </div></header>
     <div class="list prp-panel"><table class="prp-table">
-      <thead><tr><th>Submodule</th><th>Kind</th><th>Status</th><th>Host</th><th></th></tr></thead>
+      <thead><tr><th scope="col">Submodule</th><th scope="col">Last update</th><th scope="col"><span class="sr-only">Open</span></th></tr></thead>
       <tbody>${suite.modules.map(m => `<tr>
-        <td><a class="name" href="${href(suite, m)}">${esc(m.icon)}&nbsp; ${esc(m.name)}</a><p>${esc(m.description)}</p></td>
-        <td><span class="prp-kind">${esc(kindLabel(m.kind))}</span></td>
-        <td><span class="prp-status" data-status="${esc(m.status)}">${esc(STATUS[m.status] || m.status)}</span></td>
-        <td class="prp-muted">${esc(m.host)}</td>
+        <td><a class="name" href="${href(suite, m)}">${esc(m.icon)}&nbsp; ${esc(m.name)}</a>${statusFlag(m) ? ` ${statusFlag(m)}` : ''}<p>${esc(m.description)}</p></td>
+        <td class="fresh-cell">${freshHtml(m, 'line')}</td>
         <td><a class="prp-btn sm" href="${href(suite, m)}">Open</a></td></tr>`).join('')}</tbody></table></div>
+    <section class="prp-panel about" aria-labelledby="about-${esc(suite.id)}">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="about-${esc(suite.id)}">About this module</h2></div>
+      <div class="prp-panel-body">
+        <p><b>Hosting.</b> ${esc(fresh.mod ? fresh.mod.hostingAbout(suite) : '')}</p>
+        <p><b>Last update.</b> Each line is worked out from the data's own time and its refresh's schedule, never written by hand; times are UTC. A line says Late when its data is older than twice its schedule plus three hours, or when the daily data check found its store failing. A page with no timed data says what it is instead: on demand, a course, reference data, or private.</p>
+      </div>
+    </section>
   </div>`;
 }
+const lateIn = suite => (fresh.mod ? suite.modules.filter(m => lineOf(m)?.late).length : 0);
 
 function renderNotice(suite, m, body) {
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}"><div class="prp-panel launch">
-    <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(kindLabel(m.kind))}</div>
-    <h1 class="prp-title">${esc(m.name)}</h1><p class="prp-dek">${esc(m.description)}</p>${body}</div></div>`;
+    <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(m.name)}</div>
+    <h1 class="prp-title">${esc(m.name)}</h1><p class="prp-dek">${esc(m.description)}</p><div class="prp-meta">${freshHtml(m, 'line')}</div>${body}</div></div>`;
 }
 // Submodules behind their own sign-in (Cloudflare Access) can't sign in inside another site's frame: browsers block
 // the third-party cookie. Registry flag: "opensInNewTab": true.
@@ -333,10 +491,12 @@ function renderLaunch(suite, m, url) {
 
 /* --- Dashboard "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
    The Dashboard's cards never change, so above them we show the few things that do — the biggest 7-day volatility
-   movers, how busy the briefings have been this week, the next votes and summits, and a market snapshot — each line a
-   link into the submodule it came from. (It was the Workspace home's, at #/, until the Home page took that address in
+   movers, the topics rising and falling in the briefings' headlines, the next votes and summits, and a market snapshot
+   — each line opening the one thing it names (a country, a topic, an event, a ticker) in the submodule it came from,
+   through the shell's deep link (?at=). (It was the Workspace home's, at #/, until the Home page took that address in
    November 2026; it is only ever on the Dashboard, #/home/dashboard, now.) The data is design/prp-highlights.js over
-   about 3 KB of files the Integration Hub derives for it, the Realtime Calendar's window and the trade-desk public API.
+   the small summaries each store's own build writes beside it (integration/scripts/heads.mjs, in step with the store,
+   read with no-cache so a refresh shows at once) and the trade-desk public API.
    To honour the analysis's performance mandate it is NEVER on the first-paint path: renderDashboard() paints the cards,
    then schedules loadToday() for idle time. The panel has four fixed slots (TODAY_SLOTS); each shows a loading card
    until its group settles, then the group, as soon as its own sources have answered (the slowest is never waited on:
@@ -353,7 +513,7 @@ function renderLaunch(suite, m, url) {
    exactly as tile()/navItem() do, and a link is only ever a shell route. The honest time-window label the module
    computes for each group is shown verbatim, never sharpened. */
 const TODAY_PANEL = true;
-const TODAY_KEY = 'prp.today.v2';   // the session cache, { v: 2, at, until, groups }; bump the version if its shape changes
+const TODAY_KEY = 'prp.today.v3';   // the session cache, { v: 3, at, until, groups }; bump the version if its shape changes
 const TODAY_SLOTS = ['volatility', 'briefings', 'calendar', 'markets']; // the module's GROUP_IDS, in order (tests compare)
 const TODAY_LINES = 5;              // the module's MAX_LINES: the most lines a card shows, and the room it reserves for
 const TODAY_FETCH_MS = 8000;        // no source is waited on longer than this
@@ -370,11 +530,11 @@ const abortAfter = ms => (typeof AbortSignal !== 'undefined' && typeof AbortSign
 function readTodayCache() {
   try {
     const e = JSON.parse(sessionStorage.getItem(TODAY_KEY) || 'null');
-    return e && e.v === 2 && Number.isFinite(e.at) && Number.isFinite(e.until) && Array.isArray(e.groups) && e.groups.length ? e : null;
+    return e && e.v === 3 && Number.isFinite(e.at) && Number.isFinite(e.until) && Array.isArray(e.groups) && e.groups.length ? e : null;
   } catch { return null; }
 }
 function writeTodayCache(entry) {
-  try { sessionStorage.setItem(TODAY_KEY, JSON.stringify(entry)); sessionStorage.removeItem('prp.today.v1'); } catch { /* private mode or quota: just skip the cache */ }
+  try { sessionStorage.setItem(TODAY_KEY, JSON.stringify(entry)); sessionStorage.removeItem('prp.today.v1'); sessionStorage.removeItem('prp.today.v2'); } catch { /* private mode or quota: just skip the cache */ }
 }
 const todayFresh = e => !!e && Date.now() >= e.at && Date.now() < e.until;
 
@@ -432,7 +592,7 @@ async function loadToday() {
   if (!onDashboard()) return; // only on the Dashboard (#/home/dashboard), only while shown
   const again = e => { todayTimer = setTimeout(loadToday, Math.max(0, e.until - Date.now()) + 1000); };
   const cached = readTodayCache();
-  if (todayFresh(cached)) { again(cached); return; }
+  if (todayFresh(cached)) { again(cached); loadFreshness(state.route, { afterToday: true }); return; }
   if (todayPending) return;
   todayPending = true;
   const load = ++todayLoads, settled = {};
@@ -442,8 +602,15 @@ async function loadToday() {
     await buildTodayHighlights({
       // base '' (the default) → same-origin data paths resolve like the shell's own fetch('registry.json'). Every request
       // carries AbortSignal.timeout(TODAY_FETCH_MS), and the module stops waiting for it then too, so no slow source can
-      // hold its slot (or any other) beyond that.
-      fetch: url => fetch(url, { signal: abortAfter(TODAY_FETCH_MS) }),
+      // hold its slot (or any other) beyond that. This site's summaries are asked for afresh (no-cache), as Highbrowse
+      // asks for the stores, so the panel never shows an older copy than the page it links to.
+      // Each answer from this site is kept for a minute, so the freshness lines read after the panel take it rather
+      // than asking again (the clone is made before the module reads the body).
+      fetch: url => {
+        const res = fetch(url, { signal: abortAfter(TODAY_FETCH_MS), ...(/^https?:/i.test(String(url)) ? {} : { cache: 'no-cache' }) });
+        if (!/^https?:/i.test(String(url))) todayAnswers.set(new URL(url, document.baseURI).href, { at: Date.now(), json: res.then(r => (r.ok ? r.clone().json() : null)).catch(() => null) });
+        return res;
+      },
       timeoutMs: TODAY_FETCH_MS,
       onGroup: g => { if (!TODAY_SLOTS.includes(g?.id)) return; settled[g.id] = g; if (onDashboard()) renderTodaySlot(g, load); },
     });
@@ -456,7 +623,7 @@ async function loadToday() {
       if (!any) $('#today').hidden = true; // nothing could be read at all (offline): no box of four apologies
     }
   } catch { if (onDashboard()) $('#today').hidden = true; } // the module itself could not be loaded: hide the panel, never break the shell
-  finally { todayPending = false; $('#today')?.removeAttribute('aria-busy'); }
+  finally { todayPending = false; $('#today')?.removeAttribute('aria-busy'); loadFreshness(state.route, { afterToday: true }); }
 }
 
 /* --- Frames: one persistent iframe per submodule and view, so each keeps its state ---------------------------------
@@ -811,11 +978,22 @@ function setupApp() {
   setupMenu();
   setupCollapse();
   setupHome();
+  // The freshness lines' module is fetched beside the registry (never after it), so the first paint already has every
+  // line the session has read before; without it (offline, an old browser) the shell simply shows no lines.
+  const freshMod = import(new URL('design/prp-freshness.js', document.baseURI).href).catch(() => null);
   try { state.registry = await fetch('registry.json', { cache: 'no-cache' }).then(r => r.json()); }
   catch (err) { $('#view').innerHTML = '<div class="page"><div class="prp-note">Could not load the module registry. Serve this folder over HTTP.</div></div>'; console.error(err); return; }
+  fresh.mod = await freshMod;
+  if (fresh.mod) readFreshCache();
   renderNav();
   setupFind();
   setupNowPlaying();
   window.addEventListener('hashchange', () => { route(); pauseFilmOnManualMove(); });
   route();
+  // The lines' files are read after the first paint, again whenever a view needs one that is not fresh, and the lines
+  // redrawn every FRESH_MS while the shell stays open.
+  const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 0));
+  idle(() => loadFreshness());
+  window.addEventListener('hashchange', () => idle(() => loadFreshness()));
+  fresh.timer = setInterval(() => { paintFreshness(); loadFreshness(); }, FRESH_MS);
 })();

@@ -6,6 +6,8 @@ import {
   BRIEFINGS, BRIEFING, POSITIONS, POSITION_LABELS, TOPICS_KEY, WINDOW_LABELS, DEFAULTS, esc, fold, buildModel, digest, search, parseHash, toHash,
   briefingPage, itemPage, findWord, localDay, freeAlt,
 } from './analysis.js';
+import { METHOD } from '../design/prp-trends.js';
+import { SCHEDULES, rhythmFromCron, lateAfterHours, dayTime } from '../design/prp-freshness.js';
 
 const { PRPAccess } = globalThis; // design/prp-access.js, loaded by analysis.js: free sources lead
 
@@ -16,11 +18,24 @@ const embedded = (() => { try { return window.self !== window.top; } catch { ret
 const PAGE = 50, MORE = 100, H = 36e5;
 let M = null, state = parseHash(location.hash), shown = PAGE, failed = [], topicLabel = new Map();
 const digests = {};
+// When a briefing's store is late: the daily data check's own rule (design/prp-freshness.js), older than twice its
+// refresh's rhythm plus three hours, the rhythm from that workflow's schedule (the Political Briefing twice a day, the
+// other three every six hours), never hours written here.
+const WORKFLOW = { political: 'briefing-refresh.yml', scientific: 'briefings-refresh.yml', economics: 'briefings-refresh.yml', digital: 'briefings-refresh.yml' };
+const lateHours = key => lateAfterHours(rhythmFromCron(SCHEDULES[WORKFLOW[key]]).hours);
+// Each briefing's summaries, written with its store (integration/scripts/heads.mjs): its head (time, stories, top topic),
+// read again while the page stays open to see whether a store has been refreshed since this page read it, and its
+// trends.json (the Trends tab, drawn from these alone, without waiting for the stores).
+const headOf = b => b.data.replace(/\.json$/, '.head.json');
+const trendsOf = b => b.data.replace(/[^/]+$/, 'trends.json');
+let TR = null; // { <briefing key>: trends.json or null } once read
+let newer = []; // briefings refreshed since the page read them: [{ b, generated }]
 
 const num = n => Number(n || 0).toLocaleString('en-GB');
 const plural = (n, one, many = one + 's') => `${num(n)} ${n === 1 ? one : many}`;
 const posLabel = p => M?.briefings[0]?.positions?.find(x => x.key === p)?.label || POSITION_LABELS[p] || p;
-const utc = ms => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+// A time as the shell's freshness lines write it: "13 Nov 18:52 UTC" (with the year in another year).
+const utc = ms => dayTime(ms);
 const when = (ms, dateOnly) => new Date(ms).toLocaleString('en-GB', dateOnly ? { day: 'numeric', month: 'short', timeZone: 'UTC' } : { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const ago = ms => { const m = (Date.now() - ms) / 6e4; return m < 60 ? `${Math.max(1, Math.round(m))} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 const timeOf = i => (i.dateOnly ? when(i.at, true) : `${when(i.at)} · ${ago(i.at)}`);
@@ -135,9 +150,12 @@ function secTopics(d) {
 
 function briefPanel(c, d) {
   const b = BRIEFING[c.key];
-  const head = `<div class="prp-panel-head"><h3 class="prp-h3" id="bh-${c.key}-${d.w}"><span class="dot" aria-hidden="true"></span>${esc(b.name)}</h3><a class="open" ${goAttrs(b.key, briefingPage(b.key, { w: d.w === '24h' ? '24h' : '7d' }))}>Open the ${esc(b.short)} Briefing ›</a></div>`;
+  // Each briefing's own data time: when its store was made, as the store says (the second review: "expose each
+  // briefing's actual data version").
+  const dataTime = c.generated ? `<span class="b-data">Data ${esc(utc(Date.parse(c.generated)))}</span>` : '';
+  const head = `<div class="prp-panel-head"><h3 class="prp-h3" id="bh-${c.key}-${d.w}"><span class="dot" aria-hidden="true"></span>${esc(b.name)}</h3>${dataTime}<a class="open" ${goAttrs(b.key, briefingPage(b.key, { w: d.w === '24h' ? '24h' : '7d' }))}>Open the ${esc(b.short)} Briefing ›</a></div>`;
   if (c.missing) return `<section class="prp-panel brief" data-b="${c.key}" aria-labelledby="bh-${c.key}-${d.w}">${head}<div class="prp-panel-body"><p class="prp-note warn">Its stories could not be loaded just now.</p></div></section>`;
-  const age = c.generated ? (Date.now() - Date.parse(c.generated)) / H : 0, stale = age > (c.key === 'political' ? 27 : 15);
+  const age = c.generated ? (Date.now() - Date.parse(c.generated)) / H : 0, stale = age > lateHours(c.key);
   const extra = c.key === 'political' ? (d.counts.soft ? ` <span class="prp-muted">· ${num(d.counts.soft)} on sport, entertainment and lifestyle left out</span>` : '') : ` <span class="prp-muted">· ${num(c.papers)} papers, ${num(c.news)} news</span>`;
   const facets = c.facets.filter(f => f.count).slice(0, c.key === 'political' ? 6 : 8), max = Math.max(1, ...facets.map(f => f.count));
   const link = f => (b.hashTopic ? goAttrs(b.key, briefingPage(b.key, { topic: f.id, w: d.w === '24h' ? '24h' : '7d' })) : `href="${esc(searchHref({ t: `${b.key}.${f.id}`, w: d.w }))}"`);
@@ -206,6 +224,83 @@ function renderAnalysis(w) {
   panel.dataset.ready = '1';
 }
 
+/* ---------- headline trends (each briefing's trends.json, worked out by design/prp-trends.js) ---------- */
+// Jude, 12 November 2026: "Changes in headline trends as a percentile comparison should also be viewable in module".
+// One table per briefing: each topic's stories and share this week, its shares in the four weeks before, rising or
+// falling, its percentile against every earlier week that counts; and, under it, every counted week topic by topic, so
+// the percentile can be counted by hand. The Dashboard's "Headline trends" card reads the same files.
+const share = s => (Number.isFinite(s) ? `${(s * 100).toFixed(1)}%` : '–');
+const ordinal = n => { const t = n % 100, u = n % 10; return n + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th'); };
+const dm = key => (/^\d{4}-\d{2}-\d{2}$/.test(String(key)) ? new Date(key + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '');
+const span2 = w => `${dm(w.from)}–${dm(w.to)}`;
+// 'steady' is the method's own term for a share within its usual range: neither rising nor falling by the rule.
+const TREND = { rising: '▲ Rising', falling: '▼ Falling', steady: 'Within its usual range', new: 'New topic: no comparison yet' };
+function trendBars(x, t) {
+  // The topic's share each counted week, oldest first, this week last (darker).
+  const pts = [...x.history].reverse().map(w => w.s).concat(Number.isFinite(x.s0) ? [x.s0] : []);
+  if (pts.length < 2) return '';
+  const max = Math.max(0.0001, ...pts), w = 7, gap = 2, W = pts.length * (w + gap);
+  const bars = pts.map((s, k) => { const h = Math.max(1, (s / max) * 22); return `<rect class="${k === pts.length - 1 && Number.isFinite(x.s0) ? 'in' : ''}" x="${k * (w + gap)}" y="${(24 - h).toFixed(1)}" width="${w}" height="${h.toFixed(1)}" rx="1"/>`; }).join('');
+  return `<svg class="spark tspark" viewBox="0 0 ${W} 26" width="${W}" height="26" role="img" aria-label="${esc(x.label)}: share of stories each counted week, oldest first: ${pts.map(share).join(', ')}"><line x1="0" x2="${W}" y1="24.5" y2="24.5"/>${bars}</svg>`;
+}
+function trendSection(b, t, sel) {
+  const head = `<div class="prp-panel-head"><h3 class="prp-h3" id="th-${b.key}"><span class="dot" aria-hidden="true"></span>${esc(b.name)}</h3>${t?.generated ? `<span class="b-data">Data ${esc(utc(Date.parse(t.generated)))}</span>` : ''}<a class="open" ${goAttrs(b.key, briefingPage(b.key, {}))}>Open the ${esc(b.short)} Briefing ›</a></div>`;
+  if (!t) return `<section class="prp-panel brief trend" data-b="${b.key}" aria-labelledby="th-${b.key}">${head}<div class="prp-panel-body"><p class="prp-note warn">Its trends could not be loaded just now.</p></div></section>`;
+  const topicWord = b.key === 'political' ? 'topic' : b.key === 'scientific' ? 'discipline' : 'field';
+  const w0 = t.weeks.find(w => w.k === 0);
+  const lines = [`<p class="t-week">This week: ${esc(span2(t.week))} (UTC days), ${w0 ? plural(w0.stories, 'story', 'stories') : 'no stories'}${t.status === 'ok' ? `, against ${esc(t.baseline.map(k => t.weeks.find(w => w.k === k)).filter(Boolean).map(span2).join(', ') || 'the four weeks before')}` : ''}.</p>`];
+  if (t.status !== 'ok') {
+    const when = [t.startsAbout ? `rising and falling from about ${dm(t.startsAbout)}` : '', t.percentilesAbout ? `percentiles from about ${dm(t.percentilesAbout)}` : ''].filter(Boolean).join('; ');
+    lines.push(`<p class="prp-note">${esc(t.reason || 'Not enough history yet.')}${when ? ` If every day from now is held in full: ${esc(when)}.` : ''}</p>`);
+  } else if (t.percentilesAbout) lines.push(`<p class="prp-note">Percentiles from about ${esc(dm(t.percentilesAbout))}, once VM holds 8 earlier weeks in full.</p>`);
+  const rows = t.topics.map(x => {
+    const id = `tr-${b.key}-${x.id}`, on = sel === `${b.key}.${x.id}`;
+    const pct = x.rank ? `${ordinal(x.percentile)}<small>${x.rank.lower} lower${x.rank.equal ? `, ${x.rank.equal} equal` : ''}, of ${x.rank.of}</small>` : '–';
+    const trend = x.trend ? `<span class="tr-${x.trend}">${esc(TREND[x.trend])}</span>` : '–';
+    // Trend and Percentile straight after this week's share, so a phone shows them without scrolling sideways.
+    return `<tr id="${esc(id)}"${on ? ' class="sel" tabindex="-1" aria-current="true"' : ''}><th scope="row">${esc(x.label)}</th><td class="num">${x.n0 == null ? '–' : num(x.n0)}</td><td class="num">${share(x.s0)}</td><td>${trend}</td><td class="num pct">${pct}</td>` +
+      `<td class="num">${x.base.length ? esc(x.base.map(y => share(y.s)).join(' · ')) : '–'}</td><td class="num">${share(x.b)}</td><td>${trendBars(x, t)}</td></tr>`;
+  }).join('');
+  const table = `<div class="scroll"><table class="prp-table ttable" aria-label="${esc(b.name)}: headline trends this week"><thead><tr><th scope="col">${esc(topicWord[0].toUpperCase() + topicWord.slice(1))}</th><th scope="col" class="num">Stories this week</th><th scope="col" class="num">Share</th><th scope="col">Trend</th><th scope="col" class="num">Percentile</th><th scope="col" class="num">Share in the 4 weeks before</th><th scope="col" class="num">Their average</th><th scope="col">Each week</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  // Every week counted, topic by topic: the stories, the week's total and the share, so a percentile can be counted.
+  const counted = t.weeks.filter(w => w.counts);
+  const cell = (x, w) => {
+    if (w.k === 0) return x.n0 == null ? '<td class="num">–</td>' : `<td class="num">${num(x.n0)} of ${num(w.stories)}<small>${share(x.s0)}</small></td>`;
+    const h = x.history.find(y => y.k === w.k);
+    return h ? `<td class="num">${num(h.n)} of ${num(h.stories)}<small>${share(h.s)}</small></td>` : '<td class="num">–</td>';
+  };
+  const off = t.weeks.filter(w => !w.counts && w.stories);
+  const weeks = counted.length ? `<details class="as-table"><summary>Every week counted, ${topicWord} by ${topicWord} (${plural(counted.length, 'week')})</summary><div class="scroll"><table class="prp-table" aria-label="${esc(b.name)}: every week counted"><thead><tr><th scope="col">${esc(topicWord[0].toUpperCase() + topicWord.slice(1))}</th>${counted.map(w => `<th scope="col" class="num">${esc(span2(w))}${w.k === 0 ? ' (this week)' : ''}</th>`).join('')}</tr></thead><tbody>` +
+    t.topics.map(x => `<tr><th scope="row">${esc(x.label)}</th>${counted.map(w => cell(x, w)).join('')}</tr>`).join('') + `</tbody></table></div>${off.length ? `<p class="prp-caption">Not counted: ${esc(off.map(w => `${span2(w)} (${w.why})`).join('; '))}.</p>` : ''}</details>` : '';
+  return `<section class="prp-panel brief trend" data-b="${b.key}" aria-labelledby="th-${b.key}">${head}<div class="prp-panel-body">${lines.join('')}${table}${weeks}</div></section>`;
+}
+function renderTrends() {
+  const panel = $('#panel-trends');
+  if (!TR) { if (panel.dataset.ready !== 'wait') { panel.innerHTML = '<p class="prp-empty">Loading the trends…</p>'; panel.dataset.ready = 'wait'; } return; }
+  const sel = state.t, [sk, sid] = sel.split('.');
+  // A topic the address names that its briefing no longer lists (a briefing whose trends could not be read says nothing).
+  const gone = !!sel && (!(sk in TR) || (!!TR[sk] && !TR[sk].topics.some(x => x.id === sid)));
+  const key = `${sel}|${JSON.stringify(Object.values(TR).map(t => t?.generated || null))}`;
+  if (panel.dataset.ready === key) return;
+  const notes = TR ? Object.values(TR).filter(Boolean) : [];
+  const rebuilt = notes.filter(t => t.history?.rebuilt).map(t => `${t.short}: rebuilt on ${dm(t.history.rebuilt.at)} from the ${num(t.history.rebuilt.versions)} versions of its store committed since ${dm(String(t.history.rebuilt.from).slice(0, 10))}`);
+  const fromDays = notes.filter(t => t.history?.from).map(t => `${t.short} from ${dm(t.history.from)}`);
+  panel.innerHTML = `<section class="sec" aria-labelledby="h-trends"><div class="sec-head"><h2 class="prp-h2" id="h-trends">Headline trends</h2>
+    <p class="sec-note">How often each topic came up in the stories Vitruvian Manager collected this week, as a share of each briefing's stories, against the weeks before: what is rising and what is falling, and where this week stands among every earlier week. A count of stories collected says how often a topic came up, not how important or true the stories are.</p></div>
+    ${gone ? '<p class="prp-note warn" role="status">That topic is no longer in the briefing\'s list.</p>' : ''}
+    <div class="trends">${BRIEFINGS.map(b => trendSection(b, TR[b.key], sel)).join('')}</div>
+    <div class="prp-sources t-method"><p><b>How it is worked out.</b></p>${METHOD.map(p => `<p>${esc(p)}</p>`).join('')}
+    ${fromDays.length ? `<p>Days held in full: ${esc(fromDays.join('; '))}. ${rebuilt.length ? `The earlier days were rebuilt from the stores Vitruvian Manager committed (${esc(rebuilt.join('; '))}). ` : ''}${esc(notes.find(t => t.history?.rebuilt?.note)?.history.rebuilt.note || '')}</p>` : ''}</div></section>`;
+  panel.dataset.ready = key;
+  const row = sel && !gone ? document.getElementById(`tr-${sk}-${sid}`) : null;
+  if (row) { row.scrollIntoView({ block: 'center' }); row.focus({ preventScroll: true }); }
+}
+async function loadTrends() {
+  const files = await Promise.all(BRIEFINGS.map(b => fetch(new URL(trendsOf(b), SHELL), { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).then(j => (j && Array.isArray(j.topics) && Array.isArray(j.weeks) ? j : null)).catch(() => null)));
+  TR = Object.fromEntries(BRIEFINGS.map((b, k) => [b.key, files[k]]));
+  if (state.tab === 'trends') render();
+}
+
 /* ---------- the search ---------- */
 function renderControls(r) {
   if (document.activeElement !== $('#q')) $('#q').value = state.q;
@@ -267,18 +362,19 @@ function renderSearch() {
 
 /* ---------- state ---------- */
 function render() {
-  for (const tab of ['today', 'week', 'search']) {
+  for (const tab of ['today', 'week', 'search', 'trends']) {
     const on = state.tab === tab, b = $(`#tab-${tab}`);
     b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; $(`#panel-${tab}`).hidden = !on;
   }
   document.querySelectorAll('[data-search-only]').forEach(el => { el.hidden = state.tab !== 'search'; });
+  if (state.tab === 'trends') { renderTrends(); return; } // drawn from the trends files alone, before the stores arrive
   if (!M) return;
   if (state.tab === 'search') renderSearch(); else { if (document.activeElement !== $('#q')) $('#q').value = state.q; renderAnalysis(state.tab === 'week' ? '7d' : '24h'); }
 }
 function setState(patch) {
   const before = toHash(state);
   state = { ...state, ...patch };
-  if (!topicLabel.has(state.t)) state.t = '';
+  if (M && state.tab !== 'trends' && !topicLabel.has(state.t)) state.t = '';
   const h = toHash(state);
   if (h !== before) shown = PAGE;
   if (h !== location.hash) history.replaceState(history.state, '', h || location.pathname + location.search);
@@ -289,13 +385,14 @@ function renderMeta() {
   const edition = new Date(M.ref).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   $('#edition').textContent = edition;
   const fresh = M.briefings.filter(b => b.generated).map(b => `${BRIEFING[b.key].short} ${utc(Date.parse(b.generated))}`);
-  const stale = M.briefings.filter(b => b.generated && (Date.now() - Date.parse(b.generated)) / H > (b.key === 'political' ? 27 : 15));
+  const stale = M.briefings.filter(b => b.generated && (Date.now() - Date.parse(b.generated)) / H > lateHours(b.key));
   // The week's hard news, as the This week tab counts it (the stores also hold the sport, entertainment and lifestyle
   // the analysis leaves out, and stories a little over seven days old, kept since their own refresh).
-  $('#meta').innerHTML = `<span><b>${num(M.week.length)}</b> stories in the four briefings' last 7 days</span><span>Refreshed ${esc(fresh.join(', '))}</span>` +
+  $('#meta').innerHTML = `<span><b>${num(M.week.length)}</b> stories in the four briefings' last 7 days</span><span>Refreshed ${esc(fresh.join(' · '))}</span>` +
     (M.ref < M.now - 60e3 ? `<span class="stale">Windows count back from the newest refresh, ${esc(utc(M.ref))}</span>` : '') +
     stale.map(b => `<span class="stale">The ${esc(BRIEFING[b.key].name)} is ${Math.round((Date.now() - Date.parse(b.generated)) / H)} hours old</span>`).join('') +
-    failed.map(b => `<span class="stale">The ${esc(b.name)} could not be loaded</span>`).join('');
+    failed.map(b => `<span class="stale">The ${esc(b.name)} could not be loaded</span>`).join('') +
+    (newer.length ? `<span class="stale newer">Refreshed since this page read it: ${esc(newer.map(x => `the ${x.b.name} at ${utc(Date.parse(x.generated))}`).join(', '))} <button type="button" class="prp-btn sm" data-reload>Reload</button></span>` : '');
   $('#refreshed').textContent = `Read ${utc(M.now)}; ${M.briefings.filter(b => b.generated).map(b => `the ${BRIEFING[b.key].name} was refreshed ${utc(Date.parse(b.generated))}`).join(', ')}.`;
 }
 
@@ -319,20 +416,39 @@ function wire() {
   });
   const tabs = [...document.querySelectorAll('[role="tab"]')];
   tabs.forEach((b, k) => {
-    b.addEventListener('click', () => setState({ tab: b.id.slice(4) }));
+    // Leaving Trends lets go of the topic it picked, which would otherwise read as a search filter.
+    b.addEventListener('click', () => { const tab = b.id.slice(4); setState({ tab, ...(state.tab === 'trends' && tab !== 'trends' ? { t: '' } : {}) }); });
     b.addEventListener('keydown', e => {
       const next = { ArrowRight: k + 1, ArrowLeft: k - 1, Home: 0, End: tabs.length - 1 }[e.key];
       if (next === undefined) return;
       e.preventDefault(); const to = tabs[(next + tabs.length) % tabs.length]; to.focus(); to.click();
     });
   });
-  window.addEventListener('hashchange', () => { state = parseHash(location.hash); if (!topicLabel.has(state.t)) state.t = ''; shown = PAGE; render(); });
+  window.addEventListener('hashchange', () => { state = parseHash(location.hash); if (M && state.tab !== 'trends' && !topicLabel.has(state.t)) state.t = ''; shown = PAGE; render(); });
+  $('#meta').addEventListener('click', e => { if (e.target.closest('[data-reload]')) location.reload(); });
 }
 
 /* ---------- boot ---------- */
 const ACCESS = PRPAccess.load(new URL('design/prp-access.json', SHELL)); // the sources' access classes (free when it cannot be read)
+// The return check: the shell keeps this page in its frame, so a page read hours ago can be shown again. Every 15 minutes
+// while it is open (and when its tab comes back into view), it reads the four heads and, when a store is newer than the
+// one this page read, says so in its meta line with a Reload button; the trends are read again then too.
+const RECHECK_MS = 15 * 60e3;
+let lastCheck = Date.now();
+async function recheck() {
+  if (!M || Date.now() - lastCheck < RECHECK_MS) return;
+  lastCheck = Date.now();
+  const heads = await Promise.all(BRIEFINGS.map(b => fetch(new URL(headOf(b), SHELL), { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null)));
+  const found = BRIEFINGS.map((b, k) => ({ b, generated: heads[k]?.generated, had: M.briefings.find(x => x.key === b.key)?.generated }))
+    .filter(x => typeof x.generated === 'string' && Number.isFinite(Date.parse(x.generated)) && (!x.had || Date.parse(x.generated) > Date.parse(x.had)));
+  if (found.map(x => x.generated).join() !== newer.map(x => x.generated).join()) { newer = found; renderMeta(); loadTrends(); }
+}
 async function boot() {
+  wire();
   render();
+  loadTrends(); // the Trends tab needs only these, so it does not wait for the stores
+  setInterval(recheck, RECHECK_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) recheck(); });
   const stores = await Promise.all(BRIEFINGS.map(b => fetch(new URL(b.data, SHELL), { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
     .catch(() => { failed.push(b); return null; })));
@@ -347,8 +463,9 @@ async function boot() {
   try { saved = JSON.parse(localStorage.getItem(TOPICS_KEY) || 'null'); } catch { /* storage blocked or not JSON: the defaults */ }
   M = buildModel(stores, { savedTopics: saved, access: await ACCESS });
   topicLabel = new Map(M.briefings.flatMap(x => x.topics.map(t => [`${x.key}.${t.id}`, t.short || t.label])));
-  if (!topicLabel.has(state.t)) state.t = '';
-  renderMeta(); wire(); render();
+  if (state.tab !== 'trends' && !topicLabel.has(state.t)) state.t = '';
+  lastCheck = Date.now();
+  renderMeta(); render();
   document.documentElement.dataset.ready = '1'; // for the tests: the analysis is on the page
   // The other window, while the browser is idle, so switching tabs is instant.
   idle(() => { for (const w of ['24h', '7d']) digests[w] ||= digest(M, w); });

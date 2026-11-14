@@ -60,7 +60,7 @@ jobs:
         with:
           paths: >-
             calendar/data calendar/scripts/summary-cache.json
-            integration/catalog.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
+            integration/catalog.json integration/catalog.head.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
           message: 'Calendars: daily event refresh'
       - name: Fail the run if the Integration Hub was not committed
         if: steps.hub.outcome == 'failure' || steps.hubtest.outcome == 'failure'

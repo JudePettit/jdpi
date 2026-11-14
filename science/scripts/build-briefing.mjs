@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { SOURCES, TIERS, KINDS, DEFAULT_CAP, MIN_WORKING_SHARE, outletId } from './briefing-sources.mjs';
 import { DISCIPLINES } from './classify.mjs';
 import { parseScienceFeed, normalise, mergeStore, ACCESS } from './briefing-feeds.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const OUT_DIR = fileURLToPath(new URL('../briefing/data/', import.meta.url));
 const OUT = OUT_DIR + 'stories.json';
@@ -109,6 +110,8 @@ writeFileSync(OUT, JSON.stringify({
   generated: stamp, keepDays: KEEP_DAYS, maxItems: MAX_ITEMS, accessChecked: ACCESS.checked,
   disciplines: DISCIPLINES.map(({ id, label, qid, aliases }) => ({ id, label, qid, aliases })), tiers: TIERS, kinds: KINDS, counts, sources, items,
 }));
+// Its summaries (head, history, trends) in step with it, whoever runs this build (integration/scripts/heads.mjs).
+writeHeads(OUT);
 
 for (const s of sources) console.log(`${s.status === 'ok' ? 'ok ' : 'ERR'} ${s.id.padEnd(22)} ${String(s.count).padStart(4)} parsed  ${String(s.stored).padStart(4)} stored  ${s.latest ? s.latest.slice(0, 16) : '-'}${s.notModified ? '  (not modified)' : ''}${s.error ? '  ' + s.error : ''}`);
 console.log(`${items.length} items (${counts.papers} papers, ${counts.news} news) from ${counts.sources} feeds; ${working}/${SOURCES.length} feeds working; ${items.filter(i => !prevIds.has(i.id)).length} new this run`);

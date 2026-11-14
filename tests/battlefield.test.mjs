@@ -286,3 +286,49 @@ test('Retrospective: on a phone, opening a period keeps the timeline where it wa
   assert.equal(rest.sideways, 0);
   assert.deepEqual(errors, []);
 });
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('realtime.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('battlefield/data/realtime.json'), [], 'run node integration/scripts/heads.mjs battlefield/data/realtime.json');
+});
+
+// Two kinds of date, each beside what it dates (13 November 2026; the second review: "statistics stop in September.
+// Visually separate news freshness from conflict-data freshness"). Over the map: the conflict figures' months, UCDP's
+// release, the store's rebuild and the refresh's schedule (its cron, design/prp-freshness.js), with no ticking clock.
+// Under a war's "In the news": the front pages searched and the newest found, from the stories' own days. The news
+// archive is faked, so its days are known.
+test('Realtime: the conflict figures and the news each carry their own dates, beside what they date', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const F = await import('../design/prp-freshness.js');
+  const day = n => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  const war = REALTIME.wars.find(w => w.keywords.length && w.status === 'active') || REALTIME.wars.find(w => w.keywords.length);
+  const rows = [3, 1].map((n, k) => ({ snapshot_date: day(n), country_code: 'GB', outlet: `Outlet ${k}`, outlet_domain: `o${k}.example`, title_original: `${war.keywords[0]} story ${k}`, title_en: `${war.keywords[0]} story ${k}`, url: `https://o${k}.example/${k}`, published_at: null }));
+  for (const width of [1400, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/rest/v1/country_top_stories*', r => r.fulfill({ json: rows }));
+    await page.goto(`${BASE}/q/battlefield.html?view=live&war=${war.id}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => /Checked for a new release/.test(document.getElementById('checked')?.textContent || ''), null, { timeout: 20000 });
+    const meta = (await page.textContent('#figures-dated')).replace(/\s+/g, ' ');
+    const month = new Date(REALTIME.latest + '-01T00:00:00Z').toLocaleString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+    assert.ok(meta.includes(`Conflict figures: events to ${month}`), meta);
+    assert.ok(meta.includes(`UCDP Candidate Events, release ${REALTIME.version}, rebuilt ${F.day(Date.parse(REALTIME.generated))}`), meta);
+    assert.ok(meta.includes(`Checked for a new release ${F.rhythmFromCron(F.SCHEDULES['battlefield-refresh.yml']).phrase}`), meta);
+    assert.doesNotMatch(meta, /Now|Refreshed monthly|\d\d:\d\d UTC/, 'no clock and no rhythm written by hand');
+    assert.equal(await page.locator('#clock').count(), 0);
+    assert.equal(await page.textContent('#tab-live'), 'Map · latest 3 months', 'no "Live" for figures that end in ' + month);
+    // The news, under its own heading, with its own dates.
+    await page.waitForSelector('#stories .story a', { timeout: 20000 });
+    assert.equal(await page.textContent('.detail h3:has(+ #news-dated)'), 'In the news, last 30 days');
+    assert.equal(await page.textContent('#news-dated'), `Front pages from ${F.period(day(30))} to ${F.period(day(1))} (UTC days) · Global Headline Tracker, collected daily`);
+    assert.deepEqual(await page.$$eval('#stories .story small', s => s.map(x => x.textContent.split(' · ').at(-1)).sort()), [`front page of ${F.period(day(1))}`, `front page of ${F.period(day(3))}`].sort());
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    assert.ok(over <= 0, `${width}: no sideways scroll (${over})`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});

@@ -31,6 +31,7 @@ button { font: inherit; }
 .nav-item .icon { width: 18px; flex: none; text-align: center; color: var(--prp-muted); font-size: 13px; }
 .nav-item .grow { flex: 1; min-width: 0; }
 .nav-item .flag { color: var(--prp-warn); font: 500 10px var(--prp-font-mono); text-transform: uppercase; letter-spacing: .04em; }
+.nav-item .flag + .flag { margin-left: 4px; }
 
 .suite { margin-top: 10px; }
 .suite > summary { display: flex; align-items: center; gap: 8px; padding: 6px 9px; cursor: pointer; list-style: none; border-radius: var(--prp-radius-sm);
@@ -76,8 +77,23 @@ button { font: inherit; }
 .crumbs a:hover { color: var(--prp-text); text-decoration: underline; }
 .crumbs b { color: var(--prp-text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
 .crumbs .sep { color: var(--prp-faint); }
-.top-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; }
+.top-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex: none; max-width: 62%; min-width: 0; }
 .top-actions .meta { color: var(--prp-muted); font: 12px var(--prp-font-ui); }
+
+/* --- Freshness lines (shell.js "Freshness lines", design/prp-freshness.js) ------------------------------------------
+   How fresh a submodule's data is, in words, in the muted ink; a late one in the secondary ink after a warning dot (the
+   word "Late" always says it too). In the top bar the whole line, and below 1200 px its short form, the whole line still
+   read out by a screen reader and in the title. */
+.prp-fresh { min-width: 0; color: var(--prp-muted); font: var(--prp-fs-xs)/1.45 var(--prp-font-ui); }
+.prp-fresh.late { color: var(--prp-text-2); }
+.prp-fresh.late::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--prp-status-warning); vertical-align: 1px; }
+.top-actions .prp-fresh { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.prp-fresh .fresh-short { display: none; }
+@media (max-width: 1200px) {
+  .top-actions .prp-fresh .fresh-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .top-actions .prp-fresh .fresh-short { display: inline; }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .view { flex: 1; min-height: 0; overflow-y: auto; }
 .frames { flex: 1; min-height: 0; position: relative; background: var(--prp-canvas); }
@@ -170,6 +186,8 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .mod-subs { display: flex; flex-wrap: wrap; gap: 2px 9px; margin-top: -4px; color: var(--prp-muted); font: 13px/1.4 var(--prp-font-ui); }
 .mod-back { transform: rotateY(180deg); border-color: var(--prp-accent); background: var(--prp-accent-soft); }
 .mod-does { color: var(--prp-text); font: 14px/1.5 var(--prp-font-ui); }
+/* The module's freshest line, under its summary: two lines' room kept, so the box does not grow when it is read. */
+.mod-fresh { min-height: calc(2 * 12px * 1.45); color: var(--prp-text-2); font: 12px/1.45 var(--prp-font-ui); }
 .mod-go { margin-top: auto; color: var(--prp-link); font: 500 12.5px var(--prp-font-ui); }
 .mod-card:focus-visible .mod-turn, .mod-card.flipped .mod-turn { transform: rotateY(180deg); }
 @media (hover: hover) { .mod-card:hover .mod-turn { transform: rotateY(180deg); } }
@@ -195,11 +213,18 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .tile:hover { border-color: var(--prp-accent); box-shadow: var(--prp-shadow-2); }
 .tile .row { display: flex; align-items: center; gap: 8px; }
 .tile .icon { width: 28px; height: 28px; display: grid; place-items: center; flex: none; border-radius: var(--prp-radius-sm); background: var(--prp-accent-soft); color: var(--prp-accent); font-size: 14px; }
-.tile .row .prp-kind { margin-left: auto; }
 .tile h3 { margin: 2px 0 0; font: 600 15px/1.3 var(--prp-font-ui); }
 .tile p { margin: 0; color: var(--prp-muted); font-size: 12.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.tile .foot { margin-top: auto; display: flex; gap: 10px; align-items: center; color: var(--prp-faint); font: 11px var(--prp-font-ui); }
+.tile .foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; color: var(--prp-muted); font: 11px var(--prp-font-ui); }
+.tile .foot .prp-fresh { font-size: 11px; }
 .list { margin-top: 20px; overflow-x: auto; }
+.list td.fresh-cell { min-width: 150px; max-width: 260px; }
+.list td .prp-status { margin-left: 6px; }
+/* "About this module", at the foot of a module's overview: where its submodules are hosted, and how its lines are
+   worked out. */
+.about { margin-top: 16px; }
+.about p { margin: 0 0 8px; max-width: var(--prp-measure); color: var(--prp-text-2); font-size: 13.5px; line-height: 1.55; }
+.about p:last-child { margin-bottom: 0; }
 .list td .name { font-weight: 600; color: var(--prp-text); text-decoration: none; }
 .list td .name:hover { text-decoration: underline; }
 .list td p { margin: 2px 0 0; color: var(--prp-muted); max-width: 70ch; }
@@ -217,7 +242,10 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
    no more than one line's room). Every text is clamped to those lines and the reserve is a hair more than they can take,
    so a card is exactly as tall loading, full, half full, empty or "not available", and the panel is the same height
    before and after it fills, and after a refresh, at every width. A card 280px wide or more has room for every label but
-   an event's on one line, so then all but the calendar's keep to one and reserve that much less.
+   an event's on one line, so then all but the calendar's keep to one and reserve that much less. A headline trend's
+   detail (its percentile, its baseline, and a briefing's own time when it differs) takes two lines, never cut short:
+   the briefings' card gives each line one label line and two detail lines (--today-detail-lines), about what the
+   calendar's two-line labels take, so the four cards stay the height they were.
    Focus: the card clips its corners (overflow: hidden), so every focus ring in it is drawn inset, where it shows. */
 .today { container: today / inline-size; margin-top: 22px;
   --today-lh-title: calc(var(--prp-fs) * 1.35);       /* .prp-h3: 14px / 1.35 */
@@ -230,7 +258,7 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .today-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: stretch; }
 @container today (width >= 492px) { .today-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @container today (width >= 996px) { .today-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.today-card { --today-label-lines: 2; --today-note-lines: 3; container-type: inline-size;
+.today-card { --today-label-lines: 2; --today-detail-lines: 1; --today-note-lines: 3; container-type: inline-size;
   display: flex; flex-direction: column; overflow: hidden; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }
 .today-card :focus-visible { outline-offset: -2px; }
 /* The head: padding, border, the title line, a 1px gap and two window lines, plus 2px to spare. */
@@ -244,7 +272,7 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
 /* The lines: five of them at their tallest (two label lines, a detail, padding and a divider), plus 2px to spare. */
 .today-list { display: flex; flex-direction: column;
-  min-height: calc(5 * (2 * var(--today-row-pad) + var(--today-label-lines) * var(--today-lh-label) + 1px + var(--today-lh-small) + 1px) + 2px); }
+  min-height: calc(5 * (2 * var(--today-row-pad) + var(--today-label-lines) * var(--today-lh-label) + 1px + var(--today-detail-lines) * var(--today-lh-small) + 1px) + 2px); }
 .today-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 1px; padding: var(--today-row-pad) 13px; text-decoration: none; color: var(--prp-text); }
 .today-row + .today-row, .today-row + .today-note { border-top: 1px solid var(--prp-line-soft); }
 .today-row:hover { background: var(--prp-surface-3); }
@@ -258,6 +286,8 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
 .today-val.worse { color: var(--prp-bad); }
 .today-val.better { color: var(--prp-good); }
 .today-detail { grid-column: 1 / -1; grid-row: 2; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui); }
+.today-card[data-group="briefings"] > .today-list { --today-label-lines: 1; --today-detail-lines: 2; }
+.today-card[data-group="briefings"] .today-detail { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
 .today-note { margin: 0; padding: 8px 13px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--today-note-lines);
   color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-ui); }
 .today-card[data-state="unavailable"] .today-note { padding-top: 12px; }
@@ -292,7 +322,7 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   .side-close:hover { background: var(--prp-surface-3); }
   .menu { display: inline-grid; place-items: center; }
   .collapse { display: none; }
-  .top-actions .meta, .top-actions .prp-kind, .top-actions .btn-label { display: none; }
+  .top-actions .meta, .top-actions .btn-label { display: none; }
   .page { padding: 18px 16px 32px; }
 }
 @media (max-width: 560px) {

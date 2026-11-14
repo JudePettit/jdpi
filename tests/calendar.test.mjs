@@ -436,3 +436,50 @@ test('Realtime Calendar: upcoming elections come from the daily build, with no h
     assert.equal(await page.locator('#snapshot-date').count(), 0);
   });
 });
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('upcoming.json (the Dashboard\'s next events) is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('calendar/data/2020s.json'), [], 'run node integration/scripts/heads.mjs calendar/data/2020s.json');
+});
+
+/* ---- one event by its address (?event=<key>): the Dashboard's "Upcoming" lines open their event (13 November 2026) */
+import { eventKey as headsEventKey } from '../integration/scripts/heads.mjs';
+test('the page\'s eventKey is an exact copy of heads.mjs\'s, and gives every event a key of its own', () => {
+  const src = readFileSync(new URL('../q/calendar.html', import.meta.url), 'utf8');
+  const copy = /function eventKey\(e\) \{[\s\S]*?\n\}/.exec(src)?.[0];
+  assert.ok(copy, 'q/calendar.html has eventKey');
+  const pageKey = new Function(`${copy}; return eventKey;`)();
+  const all = ['2020s', '2010s'].flatMap(d => JSON.parse(readFileSync(new URL(`../calendar/data/${d}.json`, import.meta.url), 'utf8')).events);
+  for (const e of all) assert.equal(pageKey(e), headsEventKey(e), e.title);
+  const upcoming = JSON.parse(readFileSync(new URL('../calendar/data/upcoming.json', import.meta.url), 'utf8'));
+  assert.equal(new Set(upcoming.events.map(e => e.key)).size, upcoming.events.length, 'upcoming keys are unique');
+  for (const e of upcoming.events) assert.deepEqual(Object.keys(e), ['key', 'date', 'country', 'title', 'type', 'status']);
+});
+test('Realtime Calendar: ?event= opens that event on its month; a gone one leaves a plain note; closing drops it from the address', pageTest, async () => {
+  const upcoming = JSON.parse(readFileSync(new URL('../calendar/data/upcoming.json', import.meta.url), 'utf8'));
+  const e = upcoming.events.find(x => x.date >= new Date().toISOString().slice(0, 10) && x.type === 'election') || upcoming.events.at(-1);
+  await withPage(async page => {
+    await page.goto(`${BASE}/q/calendar.html?period=contemporary&event=${e.key}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#modal:not([hidden])', { timeout: 20000 });
+    assert.equal(await page.locator('#modal-title').innerText(), e.title);
+    assert.equal(await page.locator('#monthpick').inputValue(), e.date.slice(0, 7), 'on the event\'s month');
+    assert.equal(await page.evaluate(() => new URLSearchParams(location.search).get('event')), e.key, 'the address keeps it while it is open');
+    await page.click('#modal-close');
+    assert.equal(await page.evaluate(() => new URLSearchParams(location.search).get('event')), null, 'closed: the address lets it go');
+    assert.equal(await page.locator('#event-gone').isHidden(), true);
+    // A renamed event: the same date and country, another title, is still found when only one event has both.
+    const same = upcoming.events.filter(x => x.date === e.date && x.country === e.country);
+    if (same.length === 1) {
+      await page.goto(`${BASE}/q/calendar.html?period=contemporary&event=${e.key.replace(/~[^~]*$/, '~an-old-title')}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#modal:not([hidden])', { timeout: 20000 });
+      assert.equal(await page.locator('#modal-title').innerText(), e.title);
+    }
+    await page.goto(`${BASE}/q/calendar.html?period=contemporary&event=2027-03-09~narnia~a-vote-that-never-was`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#event-gone:not([hidden])', { timeout: 20000 });
+    assert.equal(await page.locator('#event-gone').innerText(), 'That event is no longer in the calendar: it may have been renamed or moved.');
+    assert.equal(await page.locator('#modal').isHidden(), true);
+    assert.equal(await page.locator('#monthpick').inputValue(), '2027-03', 'the month it was on');
+  });
+});

@@ -738,7 +738,8 @@ export function search(model, { q = '', b = [], w = '7d', t = '', soft = false, 
 // #tab=week · #q=binance&b=political,digital&w=24h&t=digital.ai&soft=1&sort=newest (any search setting opens the
 // Search tab). Unknown values fall back to the defaults.
 export const DEFAULTS = Object.freeze({ tab: 'today', q: '', b: [], w: '7d', t: '', soft: false, sort: '' });
-const TABS = ['today', 'week', 'search'];
+// Trends (#tab=trends&t=<briefing>.<topic>) is drawn from each briefing's trends.json alone (app.js); its t picks a row.
+const TABS = ['today', 'week', 'search', 'trends'];
 export function parseHash(hash) {
   const p = new URLSearchParams(String(hash || '').replace(/^#\/?/, ''));
   const s = { ...DEFAULTS, b: [] };

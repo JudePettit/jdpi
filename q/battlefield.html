@@ -64,6 +64,8 @@ button,select{font:inherit}button{cursor:pointer}
 .story{padding:8px 0;border-bottom:1px solid var(--prp-line-soft);font-size:13px}
 .story a{color:var(--prp-text);text-decoration:none}.story a:hover{color:var(--prp-link);text-decoration:underline}
 .story small{display:block;margin-top:3px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+/* The news' own dates, beside the news (the figures' are over the map). */
+.detail p.dated{margin:2px 0 6px;color:var(--prp-muted);font:12px/1.5 var(--prp-font-ui)}.detail p.dated:empty{display:none}
 /* monthly insights */
 .arow{padding:12px 16px;border-top:1px solid var(--prp-line-soft)}.arow:first-child{border-top:0}
 .arow h4{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 4px;font-size:14px}
@@ -83,10 +85,12 @@ button,select{font:inherit}button{cursor:pointer}
     <div class="prp-eyebrow">Realtime Geopolitics <span class="sep">·</span> Realtime Battlefield</div>
     <h1 class="prp-title">Realtime Battlefield</h1>
     <p class="prp-dek">Every armed conflict recorded this year, grouped into wars and warzones, with a plain-English account of each and the latest coverage from the outlets tracked by the Global Headline Tracker. Click a war on the map or in the list to open its briefing.</p>
-    <div class="prp-meta"><span>Data through <b id="through">Loading…</b></span><span id="totals"></span><span>Source <b>UCDP Candidate Events</b></span><span>Refreshed <b>monthly</b></span><span>Now <b id="clock"></b></span></div>
+    <!-- Two kinds of date on this page, each beside what it dates (13 November 2026): the conflict figures' here, over
+         the map and the totals; the news' under each war's "In the news" (#news-dated). Both are worked out from data. -->
+    <div class="prp-meta" id="figures-dated"><span>Conflict figures: events to <b id="through">…</b></span><span id="totals"></span><span id="release">UCDP Candidate Events</span><span id="checked"></span></div>
   </header>
   <div class="prp-tabs" role="tablist" aria-label="Realtime Battlefield views">
-    <a role="tab" id="tab-live" data-view="live" href="battlefield.html?view=live" aria-controls="views">Live map · last 3 months</a>
+    <a role="tab" id="tab-live" data-view="live" href="battlefield.html?view=live" aria-controls="views">Map · latest 3 months</a>
     <a role="tab" id="tab-archive" data-view="archive" href="battlefield.html?view=archive" aria-controls="views">Year-to-date archive</a>
   </div>
   <div class="layout" id="views" role="tabpanel">
@@ -147,8 +151,18 @@ document.querySelector('.prp-tabs').addEventListener('keydown', e => {
 });
 showTabs();
 
-const tick = () => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'; };
-tick(); setInterval(tick, 60000);
+// The dates beside the figures and beside the news, from the data's own times and the refresh's own schedule
+// (design/prp-freshness.js). No clock: the figures are UCDP's monthly release, not live.
+const FRESH = import('../design/prp-freshness.js').catch(() => null);
+// Over the map: the months the figures run to, UCDP's release and when this page's store was rebuilt from it, and how
+// often the refresh looks for a new release (its workflow's schedule).
+async function renderFiguresDated() {
+  const F = await FRESH, built = Date.parse(data.generated);
+  document.getElementById('through').textContent = monthName(data.latest);
+  document.getElementById('release').innerHTML = `UCDP Candidate Events${data.version ? `, release <b>${esc(data.version)}</b>` : ''}${F && Number.isFinite(built) ? `, rebuilt <b>${esc(F.day(built))}</b>` : ''}`;
+  const rhythm = F?.SCHEDULES['battlefield-refresh.yml'] ? F.rhythmFromCron(F.SCHEDULES['battlefield-refresh.yml']).phrase : '';
+  document.getElementById('checked').innerHTML = rhythm ? `Checked for a new release <b>${esc(rhythm)}</b>` : '';
+}
 
 /* ---------- map: the basemap and circle colours follow the PRP theme ---------- */
 const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -295,7 +309,7 @@ function warDetail(w) {
     <h3>Conflicts in this war (UCDP)</h3>
     ${w.conflicts.slice(0, 12).map(c => `<div class="conf"><span>${esc(c.name)} <span class="small">· ${esc(c.type)}</span></span><span>${fmt(c.deaths)} deaths</span></div>`).join('')}
     ${w.conflicts.length > 12 ? `<div class="small" style="margin-top:6px">+ ${w.conflicts.length - 12} smaller conflicts</div>` : ''}
-    <h3>In the news this month</h3><div id="stories"><div class="small">${w.keywords.length ? 'Searching tracked outlets…' : 'No news search for this group.'}</div></div>
+    <h3>In the news, last 30 days</h3><p class="small dated" id="news-dated"></p><div id="stories"><div class="small">${w.keywords.length ? 'Searching tracked outlets…' : 'No news search for this group.'}</div></div>
   </div>`;
 }
 
@@ -311,7 +325,13 @@ async function loadStories(w) {
     const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
     const seen = new Set(), list = PRPAccess.leadFree(rows.filter(r => !seen.has(r.url) && seen.add(r.url)), r => PRPAccess.isFree(cls(r))).slice(0, 12);
     if (selectedWar !== w.id) return;
-    box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · ${esc(r.snapshot_date)}</small></div>`).join('')
+    // Beside the news, its own dates: the front pages it was searched in, and the newest it found (UTC days), apart
+    // from the conflict figures' dates over the map.
+    const F = await FRESH, when = d => (F ? F.period(d) : d), newest = list.reduce((a, r) => (String(r.snapshot_date) > a ? String(r.snapshot_date) : a), '');
+    if (selectedWar !== w.id) return;
+    const dated = document.getElementById('news-dated');
+    if (dated) dated.textContent = list.length ? `Front pages from ${when(since)} to ${when(newest)} (UTC days) · Global Headline Tracker, collected daily` : `Front pages since ${when(since)} (UTC days) · Global Headline Tracker, collected daily`;
+    box.innerHTML = list.length ? list.map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · ${esc(r.country_code)} · front page of ${esc(when(String(r.snapshot_date)))}</small></div>`).join('')
       + '<div class="small" style="margin-top:6px">Free sources lead: a story from an outlet behind a paywall or a sign-up never comes first.</div>'
       : '<div class="small">No front-page stories about this war in the tracked outlets in the last 30 days.</div>';
   } catch (e) { box.innerHTML = `<div class="small">News archive unavailable: ${esc(e.message)}</div>`; }
@@ -377,6 +397,7 @@ const period = PRPPeriod.mount(document.getElementById('monthctl'), {
 function render() {
   paint();
   document.getElementById('through').textContent = monthName(data.latest);
+  renderFiguresDated();
   document.getElementById('totals').innerHTML = `<b>${fmt(data.totals.deaths)}</b>&nbsp;deaths · <b>${fmt(data.totals.events)}</b>&nbsp;events in ${data.year}`;
   document.getElementById('ver').textContent = data.version ? `, version ${data.version}` : '';
   if (!data.months.includes(month)) month = data.latest;

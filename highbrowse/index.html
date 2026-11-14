@@ -29,6 +29,7 @@
     <button type="button" role="tab" id="tab-today" aria-controls="panel-today" aria-selected="true">Today</button>
     <button type="button" role="tab" id="tab-week" aria-controls="panel-week" aria-selected="false" tabindex="-1">This week</button>
     <button type="button" role="tab" id="tab-search" aria-controls="panel-search" aria-selected="false" tabindex="-1">Search</button>
+    <button type="button" role="tab" id="tab-trends" aria-controls="panel-trends" aria-selected="false" tabindex="-1">Trends</button>
   </div>
 
   <form class="toolbar prp-panel" id="find" role="search" aria-label="Search the four briefings">
@@ -52,12 +53,14 @@
       <div class="more" id="r-more" hidden></div>
     </div>
   </section>
+  <section id="panel-trends" role="tabpanel" aria-labelledby="tab-trends" hidden><p class="prp-empty">Loading the trends…</p></section>
 
   <footer class="prp-sources">
     <p><b>Sources.</b> The four briefings' own stores, read when this page opens: the Political Briefing (<code>briefing/data/latest.json</code>, refreshed twice a day from fifty publishers, ten for each political position), and the Scientific, Economics and Digital Briefings (their <code>data/stories.json</code>, refreshed every six hours from journals, preprint servers, institutions and news desks). Each keeps seven days. Headlines, links and short summaries belong to their publishers; every story links to its article and to its briefing.</p>
     <p><b>Method.</b> Hard news only: the Political Briefing's sport, entertainment and lifestyle stories are left out of the analysis, as its own Hard news only filter does, and out of the search unless you include them. A story is a group of headlines that share enough of their words, the rarer words counting for more; stories are ranked by the outlets that covered them, and an outlet in two briefings counts once. Free sources lead: a story's first headline is from an outlet anyone can read wherever one covered it, and a story that only outlets behind a paywall or a sign-up covered never takes the top place of a list (it keeps its place lower down); their headlines are labelled “Paywall” or “Sign-up”, with the same story's free headline beside them where there is one (each source's class, with the evidence and the day it was checked, is in <code>design/prp-access.json</code>; a source that could not be checked counts as free). Topics are the names headlines capitalise (people, places, organisations, AI), ranked by the outlets that used them; other words count in full only as far as they come from stories three outlets or more covered. Political positions are the Political Briefing's (AllSides Media Bias Ratings where available, otherwise Media Bias/Fact Check, adjusted to five steps): they describe a publisher's editorial slant, not its accuracy, and each position has ten active publishers. The Political Briefing's topics are its default topics, or yours if you have changed them there. Today is the last 24 hours and this week the last 7 days, counted back from now, or from the newest refresh when the briefings are more than a day old; days are in your time zone.</p>
     <p><b>Search.</b> Every word must be in the headline or the summary, at the start of a word; a word of three letters or fewer must be a whole word, and a plural finds its singular (“companies” finds “company”, and the other way round). Initials find their other spellings: US finds U.S., USA and United States, AI finds A.I. Put several words in quotes to find them together. A headline match counts four times a summary match. The same article in two briefings is one result. Free sources lead here too: in either order, and with any briefing, window or topic picked, the first result from an outlet anyone can read takes the top place, and the rest keep their order.</p>
-    <p><b>Refresh.</b> Nothing of its own: the page reads the briefings' latest stores each time it opens. <span id="refreshed"></span></p>
+    <p><b>Trends.</b> The Trends tab reads each briefing's <code>data/trends.json</code>, worked out with its store at every refresh from the stories a day the store has held (<code>data/history.json</code>); its own method is under its tables.</p>
+    <p><b>Refresh.</b> Nothing of its own: the page reads the briefings' latest stores each time it opens, and while it stays open it looks every 15 minutes for a newer refresh and offers to reload. <span id="refreshed"></span></p>
   </footer>
 </div>
 </body>

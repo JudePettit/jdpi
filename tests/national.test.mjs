@@ -305,7 +305,10 @@ test('data: the current leader of the countries Jude named is the most powerful 
   };
   is('BLR', 'headOfState', 'atlas'); // the President, not the Prime Minister
   is('PRT', 'headOfGovernment', 'atlas'); // the Prime Minister, not the President
-  is('GUY', 'headOfState', 'decision'); // the President, not the Prime Minister
+  // The President, not the Prime Minister: decided by leader-offices.json until the Atlas covered Guyana (November 2026),
+  // by the Atlas since; the office is what is checked, whichever decides it.
+  is('GUY', 'headOfState');
+  assert.ok(['atlas', 'decision'].includes(by.GUY.leader.rule), `GUY: decided by ${by.GUY.leader.rule}`);
   is('SLE', 'headOfState'); // the President, not the Chief Minister
   is('MCO', 'headOfState', 'atlas');
   // Liechtenstein: the regent who exercises the head of state's powers (leader-corrections.json), or the head of state
@@ -489,4 +492,75 @@ test('compare: countries are added and removed on the Compare page itself', page
   assert.deepEqual(await page.$$eval('#rows [data-cmp]:checked', bs => bs.map(b => b.dataset.cmp).sort()), ['FRA', 'JPN', 'NER']);
   await browser.close();
   assert.deepEqual(errors, []);
+});
+
+/* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
+   here too, so a refresh never commits one out of step. */
+import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
+test('index.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
+  assert.deepEqual(checkSummaries('national/data/index.json'), [], 'run node integration/scripts/heads.mjs national/data/index.json');
+});
+
+// Each statistic's own age and source, beside it (13 November 2026; the second review: "Show a clear age indicator for
+// each underlying statistic, rather than relying on the page update date"). The build records each source's own date
+// in index.json's "sources"; the page puts a World Bank value's year beside it, and under every Overview figure its
+// source with its date; the comparison's rows give each value's year and each group its source.
+test('data: the index records each source\'s own date', () => {
+  const n = read('national/data/index.json'), s = n.sources;
+  assert.ok(s, 'index.json has "sources" (rebuild with node national/scripts/build.mjs)');
+  assert.equal(s.wikidataRead, n.generated, 'Wikidata is read by the build');
+  assert.match(s.atlasReviewed, /^\d{4}-\d{2}-\d{2}$/, 'the day Political Atlas last reviewed its records (its manifest\'s lastUpdated)');
+  assert.match(s.retrospectiveBuilt, /^\d{4}-\d{2}-\d{2}/);
+  assert.match(s.calendarBuilt, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(s.battlefieldThrough, read('battlefield/data/realtime.json').latest);
+  assert.deepEqual(s.conflictYears, [1946, 2025]);
+  assert.equal(s.energyYear, read('kardashev/data/energy.json').steps.at(-1).year);
+  assert.match(readFileSync(new URL('../national/scripts/build.mjs', import.meta.url), 'utf8'), /atlasReviewed: typeof atlasManifest\?\.lastUpdated === 'string'/);
+});
+
+test('page: each figure carries its own year or date and its source, in the profile, the comparison and the ranking', pageTest, async t => {
+  const n = read('national/data/index.json'), s = n.sources, irl = n.countries.find(c => c.iso3 === 'IRL');
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const date = v => { const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(v) ? v + 'T12:00:00Z' : v); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  for (const width of [1400, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/national#country=IRL`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    const stat = label => page.$$eval('#profile .stat', (ss, l) => { const x = ss.find(e => e.querySelector('span')?.textContent === l); return x ? { value: x.querySelector('b').textContent, src: x.querySelector('small.src')?.textContent || null } : null; }, label);
+    const wikidata = `Wikidata, read ${date(s.wikidataRead)}`;
+    assert.equal((await stat('Head of state')).src, wikidata);
+    assert.equal((await stat('System of government')).src, wikidata);
+    assert.equal((await stat('Current leader')).src, irl.leader.rule === 'atlas' ? `Office named by Political Atlas, reviewed ${date(s.atlasReviewed)}; holder from ${wikidata}` : wikidata);
+    assert.equal((await stat('Leaders in the last 100 years')).src, `Political Retrospective (Archigos and Wikidata), built ${date(s.retrospectiveBuilt)}`);
+    assert.equal((await stat('Armed conflicts per year')).src, 'UCDP/PRIO Armed Conflict Dataset, 1946–2025');
+    assert.equal((await stat('Calendar events since 1980')).src, `Historical and Realtime Calendars, as built ${date(s.calendarBuilt)}`);
+    const pop = await stat('Population');
+    assert.ok(pop.value.endsWith(String(irl.latest['SP.POP.TOTL'][0])), `the population's own year: ${pop.value}`);
+    assert.equal(pop.src, 'World Bank (WDI and WGI)');
+    assert.match((await stat('PESTLE pressure')).src, /^World Bank \(WDI and WGI\), values of \d{4}(–\d{4})?$/);
+    assert.equal(await page.locator('#profile .stat').count(), await page.locator('#profile .stat small.src').count(), 'every figure has its source');
+    assert.match(await page.textContent('#meta'), /Rebuilt monthly.*Each figure's year or date, and its source, beside it/);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  // The comparison: an indicator's value with its year; each group with its source.
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  await page.goto(`${BASE}/q/national#compare=IRL,GBR`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#compare .cmp tbody tr', { timeout: 20000 });
+  const gdp = n.indicators.find(i => i.code === 'NY.GDP.PCAP.KD') || n.indicators[0];
+  const cells = await page.$$eval('#compare .cmp tbody tr', (rs, l) => [...(rs.find(r => r.firstElementChild?.textContent.startsWith(l))?.querySelectorAll('td') || [])].slice(1).map(td => td.querySelector('small.yr')?.textContent || null), gdp.label);
+  assert.deepEqual(cells, ['IRL', 'GBR'].map(iso => String(n.countries.find(c => c.iso3 === iso).latest[gdp.code]?.[0] ?? null)));
+  const groups = await page.$$eval('#compare .cmp tr.grp .gsrc', gs => gs.map(g => g.textContent));
+  assert.ok(groups.some(g => g.startsWith('Political Retrospective')) && groups.some(g => g.includes('Realtime Battlefield, figures to')) && groups.some(g => /^Wikidata, read/.test(g)), groups.join(' | '));
+  // The ranking: an indicator's value with each country's year.
+  await page.goto(`${BASE}/q/national#map`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#rows tr', { timeout: 20000 });
+  await page.selectOption('#metric', 'i_' + gdp.code);
+  assert.ok(await page.locator('#rows td.num small.yr').count() > 100, 'each value with its year');
+  await page.close();
 });

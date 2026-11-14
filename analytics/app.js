@@ -9,6 +9,7 @@ import { prepareChart, suggestChart, chartProblem, countryMatcher, countryShare 
 import { loadDataset, datasetUrls, declaredBytes, mb } from './lib/load.js';
 import { buildPrompt, analysisLink } from './lib/ai.js';
 import { availableExamples } from './lib/examples.js';
+import { headsOf, datasetStores, copyFacts, newerWords, dayTime } from '../design/prp-freshness.js';
 // The chart renderer and the exporter load when first needed, so a first visit carries only the workbench.
 let renderMod = null, exportMod = null;
 const R = () => (renderMod ||= import('./lib/render.js').catch(e => { renderMod = null; throw e; }));
@@ -28,7 +29,7 @@ let embedded = false;
 try { embedded = window.self !== window.top; } catch { embedded = true; }
 
 const S = {
-  cat: null, catUrl: null, sub: dict({}), subUrl: dict({}),
+  cat: null, catUrl: null, reg: null, sub: dict({}), subUrl: dict({}), heads: dict({}), storeTimes: dict({}),
   spec: emptySpec(), chartAuto: true, savedSteps: null,
   data: null, loadingId: null, abort: null, loadState: null,
   run: null, result: null, sql: null,
@@ -63,8 +64,23 @@ async function loadRegistry() {
   try {
     const reg = await fetch(new URL('registry.json', SITE)).then(r => (r.ok ? r.json() : null));
     for (const s of reg?.suites || []) { MODULES[s.id] = [s.code || MODULES[s.id]?.[0] || s.id.toUpperCase(), s.name || s.title]; for (const m of s.modules || []) { S.sub[m.id] = m.name; S.subUrl[m.id] = m.url || m.pendingUrl || null; } }
+    Object.assign(S.heads, headsOf(reg)); S.reg = reg;
   } catch { /* names fall back to ids */ }
 }
+// The catalogue is remade once a day (design/prp-freshness.js copyFacts): its dates and rows are labelled as the
+// catalogue's, and each store that has a summary (a head, written with the store) is read for its own time, so a dataset
+// whose store is newer than the catalogue says so. A head that cannot be read changes nothing: the label still holds.
+async function loadStoreTimes() {
+  // Only the small *.head.json summaries: a store read whole (War Focus) or the calendars' 18 KB list would make the first load heavy.
+  const stores = [...new Set(S.cat.datasets.flatMap(datasetStores))].filter(p => /\.head\.json$/.test(S.heads[p] || ''));
+  const heads = [...new Set(stores.map(p => S.heads[p]))];
+  const times = await Promise.all(heads.map(h => fetch(new URL(h, SITE), { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).then(j => Date.parse(j?.generated)).catch(() => NaN)));
+  const byHead = Object.fromEntries(heads.map((h, k) => [h, times[k]]));
+  for (const p of stores) if (Number.isFinite(byHead[S.heads[p]])) S.storeTimes[p] = byHead[S.heads[p]];
+}
+const factsOf = d => copyFacts(d, S.cat, S.storeTimes);
+// Each submodule whose store is newer is named, the dataset's own first (prp-freshness.js newerWords).
+const newerNote = (d, f = factsOf(d)) => newerWords(d, f, S.reg, subName);
 const hay = d => (d._hay ||= [d.id, d.title, d.description, moduleInfo(d.module)[1], subName(d.submodule), ...(d.fields || []).map(f => `${f.name} ${f.description || ''}`)].join(' ').toLowerCase());
 function shownDatasets() {
   const words = $('#ds-q').value.trim().toLowerCase().split(/\s+/).filter(Boolean), mod = $('#ds-module').value;
@@ -91,8 +107,8 @@ function renderModuleFilter() {
 function renderMeta() {
   const c = S.cat, mods = new Set(c.datasets.map(d => d.module)).size, rows = c.datasets.reduce((a, d) => a + (+d.rows || 0), 0);
   $('#meta').innerHTML = `<span><b>${num(c.datasets.length)}</b> datasets from <b>${num(mods)}</b> modules · <b>${num(rows)}</b> rows in all</span>` +
-    `<span>Catalogue of ${esc(day(c.generated))}</span><span>Source: the Integration Hub</span>`;
-  $('#cat-generated').textContent = c.generated ? `updated ${day(c.generated)}` : '';
+    `<span>Rows and dates as the catalogue of ${esc(c.generated ? dayTime(Date.parse(c.generated)) : '–')} records them; it is remade ${esc(factsOf({}).rhythm)}</span><span>Source: the Integration Hub</span>`;
+  $('#cat-generated').textContent = c.generated ? `catalogue of ${dayTime(Date.parse(c.generated))}` : '';
 }
 function renderCatalogue() {
   if (!S.cat) return;
@@ -103,7 +119,7 @@ function renderCatalogue() {
     return `<tr><td><button type="button" class="linkish" data-open="${esc(d.id)}">${esc(d.title || d.id)}</button><small>${esc(d.description || '')}</small></td>` +
       `<td class="nowrap"><span class="prp-code" data-suite="${esc(d.module)}" title="${esc(name)}">${esc(code)}</span> ${esc(subName(d.submodule) || d.submodule || '')}</td>` +
       `<td class="num">${num(d.rows)}</td><td class="num nowrap">${bytes ? mb(bytes) : '–'}${files > 1 ? `<small>${files} files</small>` : ''}</td><td class="num">${num(d.fields?.length || 0)}</td>` +
-      `<td>${esc(d.refresh || '')}</td><td class="nowrap">${esc(day(d.updated))}</td><td><small>${esc(d.licence || '')}</small></td></tr>`;
+      `<td>${esc(d.refresh || '')}</td><td class="nowrap">${esc(day(d.updated))}${newerNote(d) ? `<small class="newer">${esc(newerNote(d))}</small>` : ''}</td><td><small>${esc(d.licence || '')}</small></td></tr>`;
   }).join('');
 }
 
@@ -126,12 +142,12 @@ function renderDataset() {
   }
   const [code, modName] = moduleInfo(ds.module), sub = subName(ds.submodule), bytes = declaredBytes(ds), files = datasetUrls(ds).length;
   const page = ds.page ? prpLink(ds.page, ds.submodule, ds.module) : null;
-  const fields = ds.fields || [];
+  const fields = ds.fields || [], cf = factsOf(ds), newer = newerNote(ds, cf);
   panel.innerHTML = `<div class="prp-panel-head ds-head"><span class="prp-code" data-suite="${esc(ds.module)}">${esc(code)}</span><span class="where grow">${esc(modName)}${sub ? ' · ' + esc(sub) : ''}</span>` +
     (page ? `<a class="prp-btn sm ghost" href="${esc(page.href)}"${page.target ? ` target="${page.target}"` : ''}>Open ${esc(sub || 'its page')} ↗</a>` : '') + '</div>' +
     `<div class="prp-panel-body"><h2 class="prp-h2" id="ds-title">${esc(ds.title || ds.id)}</h2><p class="desc">${esc(ds.description || '')}</p>` +
-    `<dl class="facts"><div><dt>Rows</dt><dd>${num(ds.rows)}</dd></div><div><dt>Size</dt><dd>${bytes ? mb(bytes) : '–'}${files > 1 ? ` in ${files} files` : ''}</dd></div>` +
-    `<div><dt>Updated</dt><dd>${esc(day(ds.updated) || '–')}${ds.refresh ? ' · ' + esc(ds.refresh) : ''}</dd></div><div><dt>Licence</dt><dd>${esc(ds.licence || '–')}</dd></div>` +
+    `<dl class="facts"><div><dt>Rows ${esc(cf.label)}</dt><dd>${num(ds.rows)}</dd></div><div><dt>Size</dt><dd>${bytes ? mb(bytes) : '–'}${files > 1 ? ` in ${files} files` : ''}</dd></div>` +
+    `<div><dt>Updated ${esc(cf.label)}</dt><dd>${esc(day(ds.updated) || '–')}${ds.refresh ? ' · ' + esc(ds.refresh) : ''}${newer ? `<small class="newer">${esc(newer)}; the catalogue's copy is remade ${esc(cf.rhythm)}.</small>` : ''}</dd></div><div><dt>Licence</dt><dd>${esc(ds.licence || '–')}</dd></div>` +
     `<div><dt>Sources</dt><dd>${esc((ds.sources || []).join('; ') || '–')}</dd></div><div><dt>Id</dt><dd><code>${esc(ds.id)}</code></dd></div></dl>` +
     (fields.length ? `<details class="fields"><summary>${plural(fields.length, 'field')}</summary><div class="scroll"><table class="prp-table"><thead><tr><th scope="col">Field</th><th scope="col">Type</th><th scope="col">Description</th></tr></thead><tbody>` +
       fields.map(f => `<tr><td><code>${esc(f.name)}</code></td><td><span class="type">${esc(f.type || '')}</span></td><td>${esc(f.description || '')}</td></tr>`).join('') + '</tbody></table></div></details>' : '') +
@@ -779,6 +795,8 @@ async function init() {
   await reg;
   renderMeta(); renderModuleFilter(); renderPicker(); renderExamples();
   if (S.spec.tab === 'catalogue') renderCatalogue();
+  // The stores' own times, after the first paint: then the table and an open dataset say which stores are newer.
+  loadStoreTimes().then(() => { if (!Object.keys(S.storeTimes).length) return; if (S.spec.tab === 'catalogue') renderCatalogue(); if (S.spec.d && currentDs()) renderDataset(); });
   if (problems.length) $('#meta').insertAdjacentHTML('beforeend', `<span class="status bad">${esc(problems.join('; '))}</span>`);
   if (S.spec.d) openDataset(S.spec.d);
 }

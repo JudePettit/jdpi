@@ -12,7 +12,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 
 | Module | Code | Submodules |
 |---|---|---|
-| **Home**: where VM starts; its overview is the Home page, every other module as a box that turns over to what you can do with it | HM | Dashboard (what changed today: volatility's biggest movers, the briefings' week, the next votes and summits, the markets; then every module and submodule) |
+| **Home**: where VM starts; its overview is the Home page, every other module as a box that turns over to what you can do with it | HM | Dashboard (what changed today: volatility's biggest movers, the topics rising and falling in the briefings' headlines, the next votes and summits, the markets, each line opening the one thing it names; then every module and submodule) |
 | **Realtime Geopolitics**: what is happening now | RT | Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
 | **Highbrowse**: the news worth reading, in four briefings | HB | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
@@ -43,8 +43,17 @@ the Today panel (`design/prp-highlights.js`) over every module and submodule. Th
 The Global Headline Tracker's filter of celebrity gossip, horoscopes, clickbait and other lowbrow stories is called
 **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`); the code and the database still call it `lowbrow`. The
 Highbrowse module shares the name: its landing page (`highbrowse/`) analyses the four briefings' own stores in the
-browser, with no data or timed job of its own, and its figure is the first module variant of the Vitruvian figure
+browser, with no timed job of its own (its Trends tab reads each briefing's `trends.json`, which the briefing's own
+build writes with its store), and its figure is the first module variant of the Vitruvian figure
 (`design/brand-hb.svg`, and `design/brand-hb-icon.svg` for the sidebar).
+
+**Summaries in step with their stores.** A page that reads a small summary in place of a large store (the Dashboard,
+Highbrowse's Trends tab) reads one written by the same build, in the same commit, as the store: each builder calls
+`writeHeads()` from `integration/scripts/heads.mjs` as its last act, and every summary names its store's own time and
+content (`summaryOf`). `tests/heads.test.mjs`, in the whole suite, fails when one is out of step; `node
+integration/scripts/heads.mjs --all` mends it. The headline-trend rule is `design/prp-trends.js`; each briefing keeps
+its stories a day by topic in `data/history.json` (rebuilt once, on 13 November 2026, from the committed stores by
+`integration/scripts/backfill-history.mjs`).
 
 ## Architecture
 
@@ -63,7 +72,8 @@ browser, with no data or timed job of its own, and its figure is the first modul
 
 | Piece | File | Role |
 |---|---|---|
-| Registry | `registry.json` | Modules (each with its `summary`, the back of its box on the Home page), submodules, URLs (the Dashboard has `"shell": "dashboard"` instead: the shell draws it), kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation), status, and each page's `views` (in-page tabs that can be deep-linked). |
+| Registry | `registry.json` | Modules (each with its `summary`, the back of its box on the Home page), submodules, URLs (the Dashboard has `"shell": "dashboard"` instead: the shell draws it), kinds (Realtime, Retrospective, Reference, Learning, Operations, Automation: for search, the catalogue and the MCP server, no longer shown as badges), status (`live` means published, and is never shown; only "In build" and "Planned" are flagged), `host` (said in each module overview's "About this module"), `data` (how the submodule's freshness line is worked out: `design/prp-freshness.js`) and each page's `views` (in-page tabs that can be deep-linked). |
+| Freshness lines | `design/prp-freshness.js` | One line per submodule saying how fresh its data is ("Updated 13 Nov 20:37 UTC · every six hours", "Figures to Sep 2026 · UCDP monthly, checked weekly", "Reviewed 6 Nov · monthly review", "Available · prices delayed", "Reference · no schedule"), worked out from its store's own time and its refresh workflow's cron, and "Late" by the daily data check's rule. The shell shows it in the top bar, the sidebar, the Dashboard's tiles, each overview's "Last update" column and on the Home page's boxes; `tests/freshness-labels.test.mjs` holds each rhythm to its workflow. |
 | Shell | `index.html`, `shell.js`, `shell.css` | Navigation, routing (`#/<module>/<submodule>[/<view>][?at=<url>]`), redirects for old addresses, search (press `/`), theme switch, persistent frames; the Home page (every module as a box that turns over to its `summary`) and the Dashboard (the Today panel over every module and submodule). |
 | Design system | `design/prp.css`, guide in `design/PRP-STYLE.md` | Tokens (light and dark), type (Source Serif 4, IBM Plex Sans and Mono), components, validated data-viz palettes. `design/jdpi.css` imports it for older links. |
 | Connector | `design/prp-bar.js` (`design/jdpi-bar.js`, its old name, now just loads it) | Runs on every page: theme, module accent, Master Index links, documentary mode inside the shell, and a slim "VM / Module / Submodule" bar when a page is opened on its own. |
@@ -84,8 +94,8 @@ page**, listed under `views` in the registry, never extra sidebar entries.
 ### Adding a submodule
 
 1. Add an entry under the right module in `registry.json` with `id`, `name`, `kind`, `icon`, `status` (`live`,
-   `in-build` or `planned`), `host`, `url` and `description`. Add `opensInNewTab: true` for private pages behind their own
-   sign-in.
+   `in-build` or `planned`), `host`, `url`, `description` and `data` (its freshness line: see `design/prp-freshness.js`).
+   Add `opensInNewTab: true` for private pages behind their own sign-in.
 2. Hook the page up to the design system (see `design/PRP-STYLE.md` §2) and follow its anatomy and checklist.
 3. If the page mentions people, places, wars, parties or ideas, add an adapter in `lake/scripts/adapters.mjs` so the
    Master Index links to it.

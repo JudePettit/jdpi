@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { parseCsv } from './csv.mjs';
 import { WARS, cleanName } from './wars.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const [csvPath, version = ''] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const rows = parseCsv(readFileSync(csvPath, 'utf8'));
@@ -115,4 +116,5 @@ if (prev?.year === data.year) refuseIfLost([
 ]);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data));
+writeHeads('battlefield/data/realtime.json'); // realtime.head.json in step with it (integration/scripts/heads.mjs)
 console.log(`${out.length} wars/warzones, ${events.length} events, months ${months[0]}..${latest}`);

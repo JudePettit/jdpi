@@ -32,11 +32,11 @@ jobs:
         run: node --test tests/traders.test.mjs
       - uses: ./.github/actions/commit-data
         with:
-          paths: traders/data/congress.json traders/scripts/ptr-cache.json
+          paths: traders/data/congress.json traders/data/congress.head.json traders/scripts/ptr-cache.json
           message: 'Auto Trader: weekly House trades refresh'
       - name: Put back the committed House trades
         if: ${{ !cancelled() && steps.congresstest.outcome != 'success' }}
-        run: git checkout -- traders/data/congress.json traders/scripts/ptr-cache.json
+        run: git checkout -- traders/data/congress.json traders/data/congress.head.json traders/scripts/ptr-cache.json
       - name: Build the 13F holdings
         id: holdings
         if: ${{ !cancelled() }}
@@ -52,7 +52,7 @@ jobs:
       - if: ${{ !cancelled() && steps.holdingstest.outcome == 'success' }}
         uses: ./.github/actions/commit-data
         with:
-          paths: traders/data/investors.json traders/scripts/figi-cache.json
+          paths: traders/data/investors.json traders/data/investors.head.json traders/scripts/figi-cache.json
           message: 'Auto Trader: weekly 13F holdings refresh'
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:

@@ -1,7 +1,13 @@
 {
-  "generated": "2026-11-13T10:26:32.225Z",
-  "ok": true,
-  "problems": 0,
-  "failing": [],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/43409053725"
+  "generated": "2026-11-14T10:12:17.707Z",
+  "ok": false,
+  "problems": 1,
+  "failing": [
+    {
+      "name": "Political Briefing refresh",
+      "what": "briefing-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-14 06:57 UTC: https://github.com/JudePettit/jdpi/actions/runs/43568768330"
+    }
+  ],
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/43584119844"
 }

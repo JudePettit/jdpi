@@ -512,9 +512,15 @@ test('data: the index records each source\'s own date', () => {
   assert.match(s.atlasReviewed, /^\d{4}-\d{2}-\d{2}$/, 'the day Political Atlas last reviewed its records (its manifest\'s lastUpdated)');
   assert.match(s.retrospectiveBuilt, /^\d{4}-\d{2}-\d{2}/);
   assert.match(s.calendarBuilt, /^\d{4}-\d{2}-\d{2}T/);
-  assert.equal(s.battlefieldThrough, read('battlefield/data/realtime.json').latest);
+  // National Analysis holds its own copy of these two, as they stood when it was built. The Battlefield store is
+  // checked weekly and gains a month with each UCDP release, and Kardashev's gains a year, while National Analysis is
+  // rebuilt monthly: its copy may be older than the store, never newer. (Held equal, the first Battlefield refresh
+  // with a new release would have failed this test, and with it every deploy, until National Analysis was rebuilt.)
+  const through = read('battlefield/data/realtime.json').latest, lastYear = read('kardashev/data/energy.json').steps.at(-1).year;
+  assert.match(s.battlefieldThrough, /^\d{4}-\d{2}$/);
+  assert.ok(s.battlefieldThrough <= through, `its Battlefield figures run to ${s.battlefieldThrough}, the store's to ${through}`);
   assert.deepEqual(s.conflictYears, [1946, 2025]);
-  assert.equal(s.energyYear, read('kardashev/data/energy.json').steps.at(-1).year);
+  assert.ok(Number.isInteger(s.energyYear) && s.energyYear <= lastYear, `its energy share is of ${s.energyYear}, the store's last year is ${lastYear}`);
   assert.match(readFileSync(new URL('../national/scripts/build.mjs', import.meta.url), 'utf8'), /atlasReviewed: typeof atlasManifest\?\.lastUpdated === 'string'/);
 });
 

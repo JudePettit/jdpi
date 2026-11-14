@@ -513,7 +513,7 @@ test('page: the analysis renders, the search finds a known story, and its links 
     await shell.waitForFunction(id => location.hash.startsWith(`#/hb/${id}?at=`), b.id, { timeout: 10000 });
     const inner = await (await shell.waitForSelector(`#frames iframe.active[data-module="${b.id}"]`, { timeout: 20000 })).contentFrame();
     await inner.waitForSelector(lead.b === 'political' ? `#out .story a.t[href="${lead.u}"]` : `#list .entry h4 a[href="${lead.u}"]`, { timeout: 30000 });
-    assert.match(await shell.textContent('#crumbs'), new RegExp(`Highbrowse.*${b.name}`));
+    assert.match(await shell.textContent('#crumbs'), new RegExp(`Omni News.*${b.name}`));
   }
 
   // Dark: the page follows the theme; at phone width nothing scrolls sideways.

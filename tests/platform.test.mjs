@@ -127,7 +127,7 @@ test('the Home page shows every module as a box, in registry order, under the ne
   // International Mystery Management: its short name in the sidebar (the full title on hover), the full title in its
   // box.
   const oi = page.locator('#nav details[data-suite="oi"] > summary');
-  assert.match(await oi.textContent(), /^OIInt-Myst Mngmnt/);
+  assert.match(await oi.textContent(), /^IMInt-Myst Mngmnt/);
   assert.equal(await oi.getAttribute('title'), 'International Mystery Management');
   assert.equal(await page.textContent('.mod[data-suite="oi"] .mod-name'), 'International Mystery Management');
   // A screen reader gets each box as a link named by the module's title and described by its summary, whichever face is

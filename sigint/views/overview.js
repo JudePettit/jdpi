@@ -1,13 +1,13 @@
 // SIGINT Dashboard · Overview: status tiles for every feed and connector, the public-feed checks, and the bridge setup.
-import { esc, ago, fetchJSON, explainError } from '../lib/util.js';
+import { esc, ago, fetchJSON, explainError, PUBLIC_FEEDS } from '../lib/util.js';
 import { fetchAdsbPublic, loadGp, bridgeHealth, SWPC, wsprUrl } from '../lib/sources.js';
 import { normaliseAircraft, normaliseScales } from '../lib/feeds.js';
 
 const TILES = [
-  { id: 'adsb', name: 'Aircraft · adsb.lol', kind: 'Public feed', tab: 'aircraft', idle: 'Checked when the page opens.' },
-  { id: 'celestrak', name: 'Orbits · CelesTrak', kind: 'Public feed', tab: 'satellites', idle: 'Orbital elements for pass predictions.' },
-  { id: 'swpc', name: 'Space weather · NOAA SWPC', kind: 'Public feed', tab: 'spaceweather', idle: 'Kp, X-rays, solar wind, alerts.' },
-  { id: 'wspr', name: 'HF propagation · wspr.live', kind: 'Public feed', tab: 'spaceweather', idle: 'WSPR spots heard near you.' },
+  { id: 'adsb', name: PUBLIC_FEEDS.adsb, kind: 'Public feed', tab: 'aircraft', idle: 'Checked when the page opens.' },
+  { id: 'celestrak', name: PUBLIC_FEEDS.celestrak, kind: 'Public feed', tab: 'satellites', idle: 'Orbital elements for pass predictions.' },
+  { id: 'swpc', name: PUBLIC_FEEDS.swpc, kind: 'Public feed', tab: 'spaceweather', idle: 'Kp, X-rays, solar wind, alerts.' },
+  { id: 'wspr', name: PUBLIC_FEEDS.wspr, kind: 'Public feed', tab: 'spaceweather', idle: 'WSPR spots heard near you.' },
   { id: 'gpsjam', name: 'GNSS interference · GPSJam', kind: 'Link only', tab: 'gnss' },
   { id: 'aisstream', name: 'Ships · aisstream.io', kind: 'Public · key + bridge', tab: 'ships' },
   { id: 'rx-adsb', name: 'My ADS-B receiver', kind: 'Your receiver', tab: 'aircraft', idle: 'readsb, dump1090-fa or tar1090 aircraft.json.' },

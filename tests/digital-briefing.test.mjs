@@ -14,7 +14,7 @@ import {
   parseDigitalFeed, normalise, mergeStore, pickDaily, isSkipped, formatAuthors, authorCount, keepsByline, tidyTex, parseFeedDate,
   urlKey, titleKey, isLiveStub, SUMMARY_MAX, AUTHORS_MAX,
 } from '../digital/scripts/briefing-feeds.mjs';
-import { DEFAULTS, parseHash, toHash, filterItems, arrange, countByField, badgeOf, timeLabel, fieldColours } from '../digital/briefing/view.js';
+import { DEFAULTS, parseHash, toHash, filterItems, arrange, countByField, badgeOf, badgeMeaning, PAPER_MEANING, timeLabel, fieldColours } from '../digital/briefing/view.js';
 
 const DATA = JSON.parse(readFileSync(new URL('../digital/briefing/data/stories.json', import.meta.url), 'utf8'));
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
@@ -319,10 +319,22 @@ test('view: filters, badges and "Major sources first" ordering', () => {
   assert.deepEqual(day27.items.map(i => i.id), ['o', 'r', 'p', 'n'], 'agencies, then preprints and institutes (newest first), then journalism');
   assert.deepEqual(arrange(inWindow, 'newest').find(g => g.key === '2026-10-27').items.map(i => i.id), ['r', 'n', 'o', 'p']);
   assert.deepEqual(countByField(inWindow, FIELDS), { all: 5, ai: 2, software: 0, security: 4, hardware: 0, networks: 0, quantum: 0, privacy: 1, policy: 0 });
-  assert.deepEqual(items.map(i => badgeOf(i, SRC.get(i.source))), ['News', 'Advisory', 'Preprint', 'Article', 'Research', 'News']);
+  // Research is marked apart by where it comes from (the review of 12 November 2026): a journal, arXiv, a lab's blog or
+  // an institute. No mark says peer-reviewed, which the feeds cannot tell item by item.
+  assert.deepEqual(items.map(i => badgeOf(i, SRC.get(i.source))), ['News', 'Advisory', 'Preprint', 'Journal', 'Institute', 'News']);
+  assert.deepEqual(items.map(i => (badgeMeaning(i, SRC.get(i.source)) ? i.kind : '')), ['', '', 'preprint', 'journal', 'research', ''], 'a meaning for research, none for news');
+  assert.match(badgeMeaning(items[3], SRC.get('natmachintell')), /peer-reviewed journal’s own feed\. The feed does not say whether this piece is refereed/);
+  assert.match(badgeMeaning(items[2], SRC.get('arxiv-cr')), /arXiv, which does not peer-review/);
+  for (const [kind, means] of Object.entries(PAPER_MEANING)) {
+    assert.ok(SOURCES.some(s => s.kind === kind), `${kind}: a kind the catalogue has`);
+    if (kind !== 'journal') assert.doesNotMatch(means, /\bpeer-reviewed\b/, `${kind}: never called peer-reviewed`);
+  }
+  // Every preprint source is an arXiv feed, so "posted to arXiv" holds for every item the Preprint mark is on.
+  assert.ok(SOURCES.filter(s => s.kind === 'preprint').every(s => /^arxiv-/.test(s.id) && /^arXiv/.test(s.outlet)));
+  assert.equal(new Set(['journal', 'preprint', 'lab', 'research'].map(kind => badgeOf({ type: 'paper', kind }))).size, 4, 'four marks, each its own');
   assert.equal(badgeOf({ type: 'news', kind: 'news' }, SRC.get('eff')), 'Advocacy');
   assert.equal(badgeOf({ type: 'news', kind: 'news' }, SRC.get('schneier')), 'Commentary');
-  assert.equal(badgeOf({ type: 'paper', kind: 'lab' }, SRC.get('deepmind')), 'Lab');
+  assert.equal(badgeOf({ type: 'paper', kind: 'lab' }, SRC.get('deepmind')), 'Lab write-up');
   assert.equal(badgeOf({ type: 'news', kind: 'lab' }, SRC.get('openai')), 'Announcement');
   assert.equal(badgeOf({ type: 'news', kind: 'journal' }, SRC.get('natmachintell')), 'Comment');
 });
@@ -507,4 +519,37 @@ test('its head, trends.json and history.json are in step with the store (integra
   assert.deepEqual(t.topics.map(x => x.id), store.fields.map(x => x.id));
   for (const x of t.topics) if (t.status !== 'ok') assert.equal(x.trend, null, 'no trend without enough history');
   for (const [d, v] of Object.entries(h.history.days)) assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isInteger(v.n) && typeof v.ok === 'boolean', d);
+});
+
+// Journal papers, preprints and labs' write-ups marked apart (the review of 12 November 2026), from what the data says
+// about each item, its source's kind: each mark its own word and look, its meaning in its title and in the key above
+// the list, and none of them "peer-reviewed", which the feeds cannot tell item by item.
+test('page: research is marked by its kind, journal, preprint, lab write-up or institute, with a key', pageTest, async t => {
+  const live = await fetch(`${BASE}/digital/briefing/data/stories.json`).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  if (!live?.items) { t.skip(`Digital Briefing is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/digital/briefing/#type=paper&w=7d`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#list .entry', { timeout: 20000 });
+    const key = await page.$$eval('#badge-key .k', ks => ks.map(k => [k.querySelector('.badge').dataset.kind, k.querySelector('.badge').textContent, k.textContent]));
+    assert.deepEqual(key.map(k => k.slice(0, 2)), [['journal', 'Journal'], ['preprint', 'Preprint'], ['lab', 'Lab write-up'], ['research', 'Institute']]);
+    assert.ok(key.every(([kind, , text]) => text.includes(PAPER_MEANING[kind])), 'each with its meaning');
+    const marks = await page.$$eval('#list .entry .badge', bs => bs.map(b => [b.dataset.kind, b.textContent, b.title]));
+    const shown = new Set(marks.map(m => m[0]));
+    for (const kind of ['journal', 'preprint', 'lab', 'research']) if (live.items.some(i => i.type === 'paper' && i.kind === kind && !SRC.get(i.source)?.badge)) assert.ok(shown.has(kind) || marks.length >= 40, `${kind} items in the store are shown`);
+    for (const [kind, word, title] of marks) {
+      assert.equal(word, badgeOf({ type: 'paper', kind }), kind);
+      assert.equal(title, PAPER_MEANING[kind], `${kind}: its meaning as its title`);
+    }
+    assert.doesNotMatch(marks.map(m => m[1]).join(' '), /peer/i, 'no item is marked peer-reviewed');
+    // Each mark looks its own: a preprint's border is dashed, a journal's solid.
+    const style = await page.evaluate(() => Object.fromEntries(['journal', 'preprint'].map(k => { const b = document.querySelector(`#badge-key .badge[data-kind="${k}"]`); return [k, getComputedStyle(b).borderStyle]; })));
+    assert.deepEqual(style, { journal: 'solid', preprint: 'dashed' });
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
 });

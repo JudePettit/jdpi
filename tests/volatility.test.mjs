@@ -230,7 +230,7 @@ test('logic: ingest.mjs leaves out a short or thin day, fails only when that lef
     for (const f of readdirSync(src)) copyFileSync(join(src, f), join(scripts, f));
     // ingest.mjs writes index.head.json with the index (integration/scripts/heads.mjs), so the copy needs heads.mjs and
     // what it imports.
-    for (const f of ['integration/scripts/heads.mjs', 'design/prp-trends.js', 'design/prp-access.js', 'highbrowse/analysis.js']) {
+    for (const f of ['integration/scripts/heads.mjs', 'design/prp-trends.js', 'design/prp-access.js', 'design/prp-tex.js', 'highbrowse/analysis.js']) {
       mkdirSync(dirname(join(dir, f)), { recursive: true });
       copyFileSync(fileURLToPath(new URL('../' + f, import.meta.url)), join(dir, f));
     }
@@ -491,6 +491,48 @@ test('page: #country= opens that country\'s profile; a code the index does not h
     assert.equal(await page.locator('#tabbtn-map').getAttribute('aria-selected'), 'true');
     await page.click('#tabbtn-method');
     assert.equal(await page.locator('#gone').isHidden(), true, 'moving on hides the note');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review of 12 November 2026: the page stated a 90-day baseline while its history was 47 days. Beside the baseline it
+// now says how many of the 90 days are stored for the day shown, from the index's own days. The index here is the
+// committed one cut to its first 47 days, and grown to 100 (its first day's row copied to earlier dates), so the test
+// depends on neither the clock nor the store's real times.
+test('page: beside the 90-day baseline, how many days of history the day shown has, and what that means', pageTest, async () => {
+  const real = read('index.json'), MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const words = d => { const [y, m, dd] = d.split('-'); return `${+dd} ${MON[m - 1]} ${y}`; }, extra = Math.max(0, 100 - real.global.length);
+  const cut = n => { const g = real.global.slice(0, n), last = g.at(-1)[0];
+    return { ...real, latest: last, global: g, countries: Object.fromEntries(Object.entries(real.countries).map(([k, c]) => [k, { ...c, days: c.days.filter(r => r[0] <= last) }])) }; };
+  const grown = { ...real, global: [...Array.from({ length: extra }, (_, k) => [addDays(real.global[0][0], k - extra), ...real.global[0].slice(1)]), ...real.global] };
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    let index = null;
+    await page.route('**/volatility/data/index.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(index) }));
+    const note = async (data, hash = '') => {
+      index = data;
+      await page.goto(`${BASE}/q/volatility${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#baseline-note:not([hidden])', { timeout: 20000 });
+      return page.locator('#baseline-note').innerText();
+    };
+    const short = await note(cut(47));
+    assert.ok(short.startsWith(`History so far: 47 of the 90 days for ${words(real.global[46][0])}, from ${words(real.global[0][0])}.`), short);
+    assert.match(short, /a component at 100 is the most intense country-day of those 47 days, not of 90/);
+    await page.click('#tabbtn-method');
+    assert.match(await page.locator('#methodtext').innerText(), /History so far: 47 of the 90 days/);
+    const earlier = await note(cut(47), `#day=${real.global[19][0]}`);
+    assert.match(earlier, /^History so far: 20 of the 90 days/, 'the day shown, not the latest');
+    // The second reader (14 November 2026): on the first days the note was "of those 1 days", though no country is
+    // scored until the baseline has 7 days (gvi.mjs MIN_BASELINE; in November 2026 the index's first six days had no
+    // global mean). The note counts the days stored in the cut index, so it holds after old days are pruned too.
+    const first = words(real.global[0][0]);
+    assert.equal(await note(cut(47), `#day=${real.global[0][0]}`), `History so far: 1 day of the 90 for ${first}, from ${first}. The baseline needs 7 days, so no country is scored on ${first}.`);
+    assert.match(await note(cut(47), `#day=${real.global[5][0]}`), /^History so far: 6 days of the 90 for .*The baseline needs 7 days, so no country is scored on /);
+    assert.match(await note(cut(47), `#day=${real.global[6][0]}`), /^History so far: 7 of the 90 days for .* a component at 100 is the most intense country-day of those 7 days, not of 90\.$/);
+    assert.equal(await note(grown), `The baseline for ${words(real.global.at(-1)[0])} holds all 90 days.`);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

@@ -348,3 +348,56 @@ test('its head, trends.json and history.json are in step with the store (integra
   for (const x of t.topics) if (t.status !== 'ok') assert.equal(x.trend, null, 'no trend without enough history');
   for (const [d, v] of Object.entries(h.history.days)) assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isInteger(v.n) && typeof v.ok === 'boolean', d);
 });
+
+/* ---- Readable notation (design/prp-tex.js; the review of 12 November 2026: "one displayed headline exposes raw LaTeX").
+   Journals and arXiv send mathematics as TeX; every briefing shows it in plain characters, and leaves a dollar amount
+   alone. The cases are headlines and summaries the briefings' stores have carried. */
+import '../design/prp-tex.js';
+test('notation: TeX in a headline or a summary is shown in plain characters, and prices are left alone', () => {
+  const { plain } = globalThis.PRPTex;
+  const cases = [
+    ['Lower Limit on the Double-Alpha Decay of $^{224}\\mathrm{Ra}$', 'Lower Limit on the Double-Alpha Decay of ²²⁴Ra'],
+    ['Theory for the Power Threshold of the $L\\text{−}H$ Transition in Tokamaks', 'Theory for the Power Threshold of the L−H Transition in Tokamaks'],
+    ['Is the Large Uncertainty of ${δ}_{CP}$ Fundamentally Encoded in the Neutrino Quantum State?', 'Is the Large Uncertainty of δCP Fundamentally Encoded in the Neutrino Quantum State?'],
+    ['Spin Relaxation of ${\\mathrm{Er}}^{3+}:{\\mathrm{CaWO}}_{4}$ at MilliKelvin Temperatures', 'Spin Relaxation of Er³⁺:CaWO₄ at MilliKelvin Temperatures'],
+    ['intensities $(>300\\text{ }\\text{ }\\mathrm{GW}/{\\mathrm{cm}}^{2})$ in cavities', 'intensities (>300 GW/cm²) in cavities'],
+    ['a spin-$1/2$ $J\\text{−}{Q}_{3}$ chain', 'a spin-1/2 J−Q₃ chain'],
+    ['the effective mass ${m}^{*}$ of the gas', 'the effective mass m* of the gas'],
+    ['double-$α$ decay, the $k$-means method and $\\frac{1}{2}\\hbar\\omega$', 'double-α decay, the k-means method and 1/2ħω'],
+    // Wiley sends the plain form, then the same in TeX: the copy goes. A span cut short by the summary's ellipsis goes too.
+    ['LiMn2O4${\\rm LiMn}_2{\\rm O}_4$ is of interest. Its Mn3+${\\rm Mn}^{3+}$/Mn4+${\\text{Mn}}^{4+}$ structure', 'LiMn2O4 is of interest. Its Mn3+/Mn4+ structure'],
+    ['noble‐metal‐surface‐mediated Csp3${\\rm…', 'noble‐metal‐surface‐mediated Csp3…'],
+  ];
+  for (const [raw, want] of cases) assert.equal(plain(raw), want, raw);
+  for (const price of ['Modified $450 3D printer builds living materials', 'Humain raises $667m for AI buildout, and $40bn more', 'Oil falls below $90 as Trump pulls back', 'costs $5 to $6 each', 'US$5 and US$6', 'No dollar at all', ''])
+    assert.equal(plain(price), price, price);
+  assert.equal(plain(null), '');
+  // Whatever a store holds today, nothing a reader must decode is left: no command, no ^{ or _{, no $…$ around TeX.
+  const left = /\\[A-Za-z]+|[\^_]\{|\$[^$\s]{1,40}\$/;
+  for (const f of ['science/briefing/data/stories.json', 'digital/briefing/data/stories.json', 'econ/briefing/data/stories.json'])
+    for (const i of JSON.parse(readFileSync(new URL('../' + f, import.meta.url), 'utf8')).items)
+      for (const k of ['title', 'summary']) if (i[k] && /\$[^$]*[\\^_{]/.test(i[k])) assert.doesNotMatch(plain(i[k]), left, `${f} ${i.id} ${k}`);
+});
+
+test('page: a headline and a summary sent in TeX read in plain characters (the store served with one)', pageTest, async t => {
+  const live = await fetch(`${BASE}/science/briefing/data/stories.json`).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  if (!live?.items?.length) { t.skip(`Scientific Briefing is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  // The newest paper, given a title and a summary in TeX, served in place of the store.
+  const pick = live.items.filter(i => i.type === 'paper').sort((a, b) => b.published.localeCompare(a.published))[0];
+  Object.assign(pick, { title: 'Lower Limit on the Double-Alpha Decay of $^{224}\\mathrm{Ra}$', summary: 'The daughter nucleus is $^{216}\\mathrm{Po}$, in ${\\mathrm{Er}}^{3+}:{\\mathrm{CaWO}}_{4}$, costing $450.' });
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/science/briefing/data/stories.json*', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(live) }));
+    await page.goto(`${BASE}/science/briefing/#type=paper&w=7d&sort=newest`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const entry = page.locator('#list .entry', { has: page.locator(`h4 a[href="${pick.url}"]`) });
+    await entry.waitFor({ timeout: 20000 });
+    assert.equal((await entry.locator('h4 a').first().textContent()).replace(/(Paywall|Sign-up)$/, '').trim(), 'Lower Limit on the Double-Alpha Decay of ²²⁴Ra');
+    assert.equal(await entry.locator('.sum').textContent(), 'The daughter nucleus is ²¹⁶Po, in Er³⁺:CaWO₄, costing $450.');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

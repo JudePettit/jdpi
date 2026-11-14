@@ -469,7 +469,7 @@
           },
           "host": "Vitruvian Manager",
           "url": "battlefield/focus/index.html",
-          "description": "The major wars of the last hundred years month by month: fronts and territory on a map with a timeline of months (one month, or a period with its two handles), battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
+          "description": "The major wars of the last hundred years month by month: the states on each side and those wholly occupied, on a map with a timeline of months (one month, or a period with its two handles), battles, casualties and key facts, in the style of Ollie Bye's history-by-day videos."
         },
         {
           "id": "kardashev",
@@ -884,7 +884,7 @@
           },
           "host": "Vitruvian Manager",
           "url": "fe/learning.html?course=finance",
-          "description": "Two courses: Finance, a university-style introduction with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
+          "description": "Two introductory courses: Finance, with worked examples and quizzes, and Economics, taught through Smith, Marx, Keynes, Mises, Friedman and Werner.",
           "views": [
             {
               "id": "finance",
@@ -1202,7 +1202,7 @@
           },
           "host": "Vitruvian Manager",
           "url": "kino/index.html?cat=great-thinkers",
-          "description": "Three-part courses with a short quiz on the great minds Vitruvian Manager draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx."
+          "description": "Short introductions, in three parts with a short quiz, to the great minds Vitruvian Manager draws on, starting with Niccolò Machiavelli, Adam Smith and Karl Marx, each linking to the thinker's own book where Bibliotheca's shelf holds one."
         }
       ]
     },

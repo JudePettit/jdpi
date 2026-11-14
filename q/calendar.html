@@ -162,7 +162,7 @@ button,input{font:inherit}button{cursor:pointer}
     <div class="prp-eyebrow" id="hero-eyebrow">Realtime Geopolitics <span class="sep">·</span> Realtime Calendar</div>
     <h1 class="prp-title" id="hero-title">Realtime Calendar</h1>
     <p class="prp-dek" id="hero-text">Upcoming elections, referendums and summits, and the last six months of political events: new leaders, inaugurations and resignations, coups, wars and ceasefires, protests, parliamentary votes, court rulings, sanctions and more. See a month or a whole year, for every country or just the ones you highlight.</p>
-    <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span>Events updated <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Status of the daily data build"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Daily build · checking</span></span><span class="source-health-note" id="calendar-source-note"></span></span><span class="rt-only">Now <b id="clock"></b></span></div>
+    <div class="prp-meta" id="hero-meta"><span>Coverage <b id="coverage-range">last 6 months + 18-month outlook</b></span><span>Records rebuilt <b id="data-updated">…</b></span><span class="source-health rt-only" role="status" aria-live="polite" aria-label="Status of the daily data build"><span class="source-chip" id="status-calendar" data-state="loading"><i class="source-dot"></i><span class="source-label">Daily build · checking</span></span><span class="source-health-note" id="calendar-source-note"></span></span><span class="rt-only">Now <b id="clock"></b></span></div>
   </header>
   <script>(function(){if(document.documentElement.dataset.period!=='history')return;var g=function(id){return document.getElementById(id)};g('hero-eyebrow').innerHTML='Retrospective Geopolitics <span class="sep">·</span> Historical Calendar';g('hero-title').textContent='Historical Calendar';g('hero-text').textContent='Political history from 1980 to today: elections and referendums, new leaders and resignations, coups, wars and ceasefires, summits, protests, court rulings and more, each with a plain-English account. Jump to any month or year.';g('coverage-range').textContent='1980 – today'})();</script>
   <div class="prp-tabs" role="tablist" aria-label="Calendar views">
@@ -238,6 +238,8 @@ const HISTORY_FROM = '1980-01-01', DECADES = ['1980s', '1990s', '2000s', '2010s'
 const decadeOf = d => d.slice(0, 3) + '0s';
 const decadeCache = new Map();
 let events = [], dataGenerated = '';
+// When each decade's file was built (its own "generated"): an event's record was last rebuilt from its sources then.
+const builtAt = new Map();
 // The event types picked in the chips (none = every type); ?types=referendum,summit opens with them picked.
 let activeTypes = new Set((params.get('types') || '').split(',').filter(t => TYPES[t])), calView = params.get('view') === 'year' ? 'year' : 'month';
 let highlighted = (params.get('countries') || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -255,6 +257,10 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const dateKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const monthKey = d => dateKey(d).slice(0, 7);
+// A month or a day that exists on the calendar (an address can carry ?month=2026-99 or an event dated 2026-02-30).
+const realDay = s => { if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return false; const [y, m, d] = s.split('-').map(Number), t = new Date(Date.UTC(y, m - 1, d)); return t.getUTCFullYear() === y && t.getUTCMonth() === m - 1 && t.getUTCDate() === d; };
+const realMonth = s => /^\d{4}-\d{2}$/.test(s || '') && realDay(s + '-01');
+const longDay = s => new Date(s + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 function contemporaryRange() {
   const a = new Date(); a.setMonth(a.getMonth() - 6);
@@ -266,7 +272,7 @@ function periodIncludes(e) {
   return e.date >= HISTORY_FROM && e.date <= dateKey(new Date());
 }
 async function loadDecade(d) {
-  if (!decadeCache.has(d)) decadeCache.set(d, fetch(`../calendar/data/${d}.json`).then(r => r.ok ? r.json() : { events: [] }).then(x => { if (x.generated > dataGenerated) dataGenerated = x.generated; return x.events; }).catch(() => []));
+  if (!decadeCache.has(d)) decadeCache.set(d, fetch(`../calendar/data/${d}.json`).then(r => r.ok ? r.json() : { events: [] }).then(x => { if (x.generated > dataGenerated) dataGenerated = x.generated; if (x.generated) builtAt.set(d, x.generated); return x.events; }).catch(() => []));
   return decadeCache.get(d);
 }
 async function loadHistory() {
@@ -388,10 +394,13 @@ const introCache = new Map();
 async function openEvent(e) {
   if (!e) return;
   const d = new Date(e.date + 'T00:00:00');
-  document.getElementById('modal-meta').textContent = typeName(e) + (e.status === 'tentative' ? ' (expected)' : '') + ' · ' + e.country + ' · ' + dateFmt.format(d);
+  document.getElementById('modal-meta').textContent = typeName(e) + (e.status === 'tentative' ? ' (expected)' : '') + ' · ' + e.country + ' · Event date ' + dateFmt.format(d);
   document.getElementById('modal-title').textContent = e.title;
   const body = document.getElementById('modal-body');
-  const src = e.source ? '<p><a href="' + esc(e.source) + '" target="_blank" rel="noreferrer">' + (/wikipedia\.org/.test(e.source) ? 'Read the full Wikipedia article ↗' : 'Open source ↗') + '</a></p>' : '';
+  // The two dates, each named for what it is: the event's own, and when its record was last rebuilt from its sources.
+  const built = builtAt.get(decadeOf(e.date));
+  const dates = `<p class="credit record-dates">Event date: ${esc(longDay(e.date))}${e.status === 'tentative' ? ' (expected)' : ''}. Record last rebuilt from its sources: ${built ? esc(longDay(built.slice(0, 10))) : 'unknown'}, in the calendar's daily build.</p>`;
+  const src = (e.source ? '<p><a href="' + esc(e.source) + '" target="_blank" rel="noreferrer">' + (/wikipedia\.org/.test(e.source) ? 'Read the full Wikipedia article ↗' : 'Open source ↗') + '</a></p>' : '') + dates;
   // A news item (from Wikipedia's Current events portal) keeps the report it cites.
   const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return 'source'; } };
   const report = e.ref ? `<p class="credit">Reported by <a href="${esc(e.ref)}" target="_blank" rel="noreferrer">${esc(e.refName || host(e.ref))} ↗</a> · Wikipedia's Current events portal, CC BY-SA.</p>` : '';
@@ -515,7 +524,8 @@ async function init() {
   // Open on the period's first month with events (archives) or the current month (contemporary).
   await loadHistory();
   const requested = params.get('month');
-  if (requested && /^\d{4}-\d{2}$/.test(requested)) view = new Date(requested + '-01T00:00:00');
+  if (realMonth(requested)) view = new Date(requested + '-01T00:00:00');
+  else if (requested && !linkedEvent) { const gone = document.getElementById('event-gone'); gone.textContent = /^\d{4}-\d{2}$/.test(requested) ? `There is no month ${requested}, so the calendar opens on the current month.` : 'That month could not be read, so the calendar opens on the current month.'; gone.hidden = false; }
   else if (/^\d{4}s$/.test(requestedPeriod)) view = new Date(Number(requestedPeriod.slice(0, 4)), 0, 1);
   if (linkedEvent) openLinked(); else render();
 }
@@ -526,7 +536,8 @@ function openLinked() {
   let e = allEvents().find(x => eventKey(x) === linkedEvent);
   if (!e) { const same = allEvents().filter(x => x.date === date && eventKey({ date, country: x.country, title: '' }) === `${date}~${country}~`); if (same.length === 1) e = same[0]; }
   const day = e?.date || date;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(day)) { view = new Date(day.slice(0, 7) + '-01T00:00:00'); calView = 'month'; }
+  // An impossible date (2026-99-01) leaves the calendar on the month it opened on (the current month, or ?month=).
+  if (realDay(day)) { view = new Date(day.slice(0, 7) + '-01T00:00:00'); calView = 'month'; }
   const gone = document.getElementById('event-gone');
   if (e) { gone.hidden = true; linkedEvent = eventKey(e); render(); openEvent(e); return; }
   linkedEvent = '';

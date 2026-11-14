@@ -33,10 +33,21 @@
 .kn-card p { margin: 0; color: var(--prp-text-2); font-size: var(--prp-fs-sm); line-height: 1.5; }
 .kn-card .subjects { display: flex; flex-wrap: wrap; gap: 5px; }
 .kn-empty { padding: 22px; border: 1px dashed var(--prp-line-strong); border-radius: var(--prp-radius); color: var(--prp-text-2); background: var(--prp-surface); }
-.kn-planned { margin-top: 22px; }
-.kn-planned h2 { margin: 0 0 8px; }
+/* What can be watched, under "Ready to watch", and what cannot yet, under "In preparation": dashed, with no play mark. */
+.kn-catnote { max-width: var(--prp-measure); margin: 6px 0 2px; }
+.kn-ready { margin: 0 0 10px; }
+.kn-cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.kn-cell > .kn-card { flex: 1; }
+.kn-book { display: block; padding: 2px 2px 0; color: var(--prp-link); font: 500 var(--prp-fs-sm)/1.4 var(--prp-font-ui); }
+.kn-book cite { font-style: italic; }
+.kn-books { display: grid; gap: 4px; margin: 0 0 10px; }
+.kn-books .kn-book { padding: 0; }
+.kn-cutoff { margin: 0 0 10px; }
+.kn-planned { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--prp-line); }
+.kn-planned h2 { margin: 0 0 4px; }
+.kn-planned-note { margin: 0 0 10px; color: var(--prp-text-2); font-size: var(--prp-fs-sm); }
 .kn-planned ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
-.kn-planned li { padding: 10px 12px; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); }
+.kn-planned li { padding: 10px 12px; background: transparent; border: 1px dashed var(--prp-line-strong); border-radius: var(--prp-radius-sm); }
 .kn-planned li b { display: block; font: 600 14px/1.35 var(--prp-font-serif); color: var(--prp-text); }
 .kn-planned li span { color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); }
 

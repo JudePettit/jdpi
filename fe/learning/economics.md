@@ -1,5 +1,5 @@
 title: Economics
-intro: Economics through its great thinkers and rival schools: Adam Smith and classical capitalism, Karl Marx and the socialists, Keynes and the Keynesians, Mises and the Austrian School, Milton Friedman and the Chicago School, and Richard Werner's credit creation theory. Each school is presented in its own terms, followed by its main criticisms.
+intro: An introductory course in economics, through its great thinkers and rival schools: Adam Smith and classical capitalism, Karl Marx and the socialists, Keynes and the Keynesians, Mises and the Austrian School, Milton Friedman and the Chicago School, and Richard Werner's credit creation theory. Each school is presented in its own terms, followed by its main criticisms.
 
 # Introduction · How to study the schools
 

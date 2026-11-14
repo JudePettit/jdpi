@@ -73,6 +73,19 @@ test('util: formatting and the local-network rules', () => {
   assert.match(explainError(new TypeError('Failed to fetch')), /CORS/);
 });
 
+// Review of 12 November 2026: the header said "3 of 4 public working" and not which one was not. It names it now.
+test('util: the feeds line names each public feed that is not working', async () => {
+  const { feedsLine, PUBLIC_FEEDS } = await import('../sigint/lib/util.js');
+  const st = o => new Map(Object.entries(o).map(([k, state]) => [k, { state }]));
+  assert.equal(feedsLine(st({})), '');
+  assert.equal(feedsLine(st({ adsb: 'ok', celestrak: 'ok', swpc: 'ok', wspr: 'ok' })), '4 of 4 public working');
+  assert.equal(feedsLine(st({ adsb: 'bad', celestrak: 'ok', swpc: 'ok', wspr: 'ok' })), '3 of 4 public working; Aircraft (adsb.lol) not reachable');
+  assert.equal(feedsLine(st({ adsb: 'ok', celestrak: 'warn', swpc: 'checking', wspr: 'bad' }), 2),
+    '1 of 4 public working; Orbits (CelesTrak) needs attention; Space weather (NOAA SWPC) still being checked; HF propagation (wspr.live) not reachable · 2 of yours connected');
+  assert.equal(feedsLine(st({ adsb: 'ok', 'rx-adsb': 'bad' })), '1 of 1 public working', 'only the public feeds are counted');
+  assert.deepEqual(Object.keys(PUBLIC_FEEDS), ['adsb', 'celestrak', 'swpc', 'wspr']);
+});
+
 /* ---- NMEA ----------------------------------------------------------------------------------------------------------- */
 test('nmea: checksums, coordinates and sentence types', () => {
   assert.ok(checksumOk('$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47'));
@@ -512,6 +525,28 @@ test('live: public feeds answer, and which allow browsers (CORS)', { skip: !proc
 });
 
 /* ---- Page (opt-in: JDPI_URL=http://localhost:8787) ----------------------------------------------------------------------------- */
+test('page: the header names a public feed that is failing', { skip: !process.env.JDPI_URL && 'set JDPI_URL to run the page test' }, async () => {
+  const { chromium } = await import('playwright-core');
+  const base = process.env.JDPI_URL.replace(/\/$/, '');
+  const browser = await chromium.launch({ channel: 'msedge' });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    // NOAA's space weather refused, the other three answered by whatever the network gives: the line must name SWPC.
+    await page.route('**/products/noaa-scales.json', r => r.abort());
+    await page.goto(`${base}/sigint/index.html#tab=overview`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /^Checked/.test(document.querySelector('#feeds-checked')?.textContent || ''), null, { timeout: 30000 });
+    const line = await page.locator('#meta-feeds').innerText();
+    assert.match(line, /Space weather \(NOAA SWPC\) not reachable/, line);
+    assert.match(line, /^Feeds \d of 4 public working; /, line);
+    // Every state set to working: no feed is named.
+    await page.evaluate(() => ['adsb', 'celestrak', 'swpc', 'wspr'].forEach(id => window.prpSigint.setStatus(id, 'ok', '')));
+    assert.equal(await page.locator('#meta-feeds').innerText(), 'Feeds 4 of 4 public working');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 test('page: tabs, hash, documents and the GNSS sample in Edge', { skip: !process.env.JDPI_URL && 'set JDPI_URL to run the page test' }, async () => {
   const { chromium } = await import('playwright-core');
   const base = process.env.JDPI_URL.replace(/\/$/, '');

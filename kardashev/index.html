@@ -90,14 +90,14 @@
           <div id="tooltip" class="tooltip" hidden></div>
         </div>
         <div class="chart-wrap" aria-label="Share of world energy over time">
-          <div class="chart-head"><span class="prp-label">Share of world energy capture · click to jump</span><ul class="reg" id="regions" aria-label="Regions"></ul></div>
+          <div class="chart-head"><span class="prp-label">Share of world energy capture (~ before 1800: within about ±30–50%) · click to jump</span><ul class="reg" id="regions" aria-label="Regions"></ul></div>
           <svg id="chart"></svg>
         </div>
         <figcaption><b>Figure 1.</b> <span id="caption">(a) Each power's capital, its circle sized by its estimated share of world energy capture and coloured by region. (b) The shares of the sixteen largest powers over time, stacked, with everyone else in grey.</span> Click a circle or a band to select a power, or the chart to jump to a date.</figcaption>
       </figure>
       <section class="view" id="view-table" role="tabpanel" aria-labelledby="tab-table" hidden>
         <div class="prp-panel tablepanel">
-          <div class="prp-panel-head"><b id="table-title">Powers</b><span>Select a row for its record</span></div>
+          <div class="prp-panel-head"><b id="table-title">Powers</b><span id="table-note">Select a row for its record</span></div>
           <div class="tablescroll">
             <table class="prp-table">
               <thead id="table-head"><tr><th class="num">#</th><th>Empire or country</th><th>Region</th><th class="num">Share</th><th class="num">People</th><th class="num">kcal per person a day</th><th class="num">Power</th><th class="num">Rating</th></tr></thead>
@@ -133,6 +133,11 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const yearLabel = y => y < 0 ? `${-y} BC` : y === 1 ? 'AD 1' : String(y);
   const pct = x => x >= 0.1 ? (x * 100).toFixed(0) + '%' : (x * 100).toFixed(1) + '%';
+  // Before 1800 a share is accurate only to within about ±30–50% (the method's own margin, in METHOD and the Sources
+  // below): such a share is written with ~ beside it, and ROUGH, the key that says what the mark means, stands with it.
+  const ROUGH_BEFORE = 1800, rough = y => y < ROUGH_BEFORE;
+  const share = (x, y) => (rough(y) ? '~' : '') + pct(x);
+  const ROUGH = `~ Before ${ROUGH_BEFORE} a share is an estimate, accurate only to within about ±30–50%.`;
   const watts = w => w >= 1e12 ? (w / 1e12).toFixed(1) + ' TW' : (w / 1e9).toFixed(0) + ' GW';
   const people = n => n >= 1e9 ? (n / 1e9).toFixed(2) + ' bn' : (n / 1e6).toFixed(n < 1e7 ? 1 : 0) + ' m';
   // A change of share in percentage points ("+4.1 pts", "−12 pts"), and the same as a chip in the gains/losses colours.
@@ -221,8 +226,9 @@
       .attr('fill', d => regionColor(d.meta.region)).classed('sel', d => d.id === selected).classed('prp-focus-hit', d => focusIds.has(d.id))
       .on('mousemove', (ev, d) => {
         const box = $('.map-wrap').getBoundingClientRect(), was = then(d.id);
-        tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>${pct(d.share)} of world energy${ranged ? ` in ${yearLabel(s.year)}` : ''} · ${people(d.pop)} people`
-          + (ranged ? `<br>${was == null ? `Not among the powers in ${yearLabel(a.year)}` : `${pct(was)} in ${yearLabel(a.year)} · ${points(d.share - was)}`}` : '');
+        tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>${share(d.share, s.year)} of world energy${ranged ? ` in ${yearLabel(s.year)}` : ''} · ${people(d.pop)} people`
+          + (ranged ? `<br>${was == null ? `Not among the powers in ${yearLabel(a.year)}` : `${share(was, a.year)} in ${yearLabel(a.year)} · ${points(d.share - was)}`}` : '')
+          + (rough(a.year) ? `<span class="tip-when">${esc(ROUGH)}</span>` : '');
         tip.hidden = false; tip.style.left = `${Math.max(4, Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8))}px`; tip.style.top = `${Math.min(ev.clientY - box.top + 14, box.height - tip.offsetHeight - 8)}px`;
       }).on('mouseleave', () => { tip.hidden = true; }).on('click', (ev, d) => select(d.id));
     marks.select('.rings').selectAll('circle.ring-a').data(rings, d => d.id).join('circle').attr('class', 'ring-a').attr('cx', sx).attr('cy', sy).attr('r', rad);
@@ -265,7 +271,7 @@
   }
 
   // A power's row: its share at the step shown and, over a period, the change since the period's first step (d).
-  const rankRow = (p, top, d) => `<div class="rank" data-id="${p.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[p.id].region)}"></i><div>${esc(byId[p.id].name)}<small>${people(p.pop)} people · ${Math.round(p.kcal / 1000)}k kcal/person/day</small><div class="sharebar"><i style="width:${Math.min(100, p.share * 100 / Math.max(top || 1, 0.01))}%;background:${regionColor(byId[p.id].region)}"></i></div></div>${d == null ? `<b>${pct(p.share)}</b>` : `<div class="rv"><b>${pct(p.share)}</b>${chg(d)}</div>`}</div>`;
+  const rankRow = (p, top, d, y) => `<div class="rank" data-id="${p.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[p.id].region)}"></i><div>${esc(byId[p.id].name)}<small>${people(p.pop)} people · ${Math.round(p.kcal / 1000)}k kcal/person/day</small><div class="sharebar"><i style="width:${Math.min(100, p.share * 100 / Math.max(top || 1, 0.01))}%;background:${regionColor(byId[p.id].region)}"></i></div></div>${d == null ? `<b>${share(p.share, y)}</b>` : `<div class="rv"><b>${share(p.share, y)}</b>${chg(d)}</div>`}</div>`;
   function wireRanks(root, onPick) {
     root.querySelectorAll('.rank[data-id]').forEach(el => {
       el.onclick = () => onPick(el.dataset.id);
@@ -286,13 +292,14 @@
       const series = data.steps.filter(x => x.polities.some(y => y.id === selected)).map(x => ({ year: x.year, share: x.polities.find(y => y.id === selected).share }));
       const peak = series.reduce((a, b) => (b.share > a.share ? b : a), series[0]);
       // Over a period: its share at both ends and the change between them.
-      const ends = !ranged ? '' : `<h3>${esc(A)} to ${esc(B)}</h3><p>${there && here ? `${pct(there.share)} of humanity's energy capture in ${esc(A)}, ${pct(here.share)} in ${esc(B)}: ${here.share >= there.share ? 'up' : 'down'} ${points(here.share - there.share).replace(/^[+−±]/, '').replace(' pts', '')} percentage points.`
-        : here ? `Not among the powers in ${esc(A)}; ${pct(here.share)} of humanity's energy capture in ${esc(B)}.` : there ? `${pct(there.share)} of humanity's energy capture in ${esc(A)}; gone by ${esc(B)}.` : `Not among the powers in either year.`}</p>`;
+      const ends = !ranged ? '' : `<h3>${esc(A)} to ${esc(B)}</h3><p>${there && here ? `${share(there.share, a.year)} of humanity's energy capture in ${esc(A)}, ${share(here.share, s.year)} in ${esc(B)}: ${here.share >= there.share ? 'up' : 'down'} ${points(here.share - there.share).replace(/^[+−±]/, '').replace(' pts', '')} percentage points.`
+        : here ? `Not among the powers in ${esc(A)}; ${share(here.share, s.year)} of humanity's energy capture in ${esc(B)}.` : there ? `${share(there.share, a.year)} of humanity's energy capture in ${esc(A)}; gone by ${esc(B)}.` : `Not among the powers in either year.`}</p>`;
       panel.innerHTML = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(p.name)}</h2><p class="sub">${esc(p.region)} · ${yearLabel(p.from)} – ${p.to >= 2025 ? 'today' : yearLabel(p.to)}</p>
         ${ends}
-        ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${pct(here.share)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">Did not exist in ${yearLabel(s.year)}.</p>`}
-        <h3>Over time</h3><p>Its largest estimated share was <b>${pct(peak.share)}</b> in ${yearLabel(peak.year)}.</p>
-        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${pct(x.share)}`).join(' · ')}</p>
+        ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${share(here.share, s.year)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">Did not exist in ${yearLabel(s.year)}.</p>`}
+        <h3>Over time</h3><p>Its largest estimated share was <b>${share(peak.share, peak.year)}</b> in ${yearLabel(peak.year)}.</p>
+        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>
+        ${series.some(x => rough(x.year)) ? `<p class="note">${esc(ROUGH)}</p>` : ''}
         <a class="btn" href="https://en.wikipedia.org/wiki/${encodeURIComponent(p.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>`;
       $('#close').onclick = () => select(null);
       // A year in its record: that one step.
@@ -302,10 +309,10 @@
     const top = s.polities.slice(0, 10), was = new Map(a.polities.map(x => [x.id, x.share])), d = p => (!ranged ? null : was.has(p.id) ? p.share - was.get(p.id) : NaN);
     if (!ranged) {
       panel.innerHTML = `<h2>${yearLabel(s.year)}</h2><p class="sub">Humanity: ${people(s.worldPop)} people · ${watts(s.worldWatts)} · Kardashev ${s.K.toFixed(3)}</p>
-        <h3>Largest shares of world energy</h3>${top.map(p => rankRow(p, top[0]?.share)).join('')}
+        <h3>Largest shares of world energy</h3>${top.map(p => rankRow(p, top[0]?.share, null, s.year)).join('')}
         ${s.polities.length > 10 ? `<button class="more" id="see-more">See more (${s.polities.length - 10} more)</button>` : ''}
-        <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(s.rest.pop)} people in smaller states, villages and foraging bands${s.year >= 1950 ? ', or other countries' : ''}</small></div><b>${pct(s.rest.share)}</b></div>
-        <button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
+        <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(s.rest.pop)} people in smaller states, villages and foraging bands${s.year >= 1950 ? ', or other countries' : ''}</small></div><b>${share(s.rest.share, s.year)}</b></div>
+        ${rough(a.year) ? `<p class="note">${esc(ROUGH)}</p>` : ''}<button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
     } else {
       // The period's two ends: the largest shares at its last step with their change, the biggest risers and fallers
       // among the powers at both ends, the powers new and gone (a successor state is new, its forerunner gone), and the
@@ -313,24 +320,24 @@
       const inA = new Set(a.polities.map(x => x.id)), inB = new Set(s.polities.map(x => x.id));
       const moves = s.polities.filter(x => inA.has(x.id)).map(x => ({ id: x.id, d: x.share - shareIn(a, x.id) }));
       const risers = moves.filter(m => m.d >= 0.0005).sort((x, y) => y.d - x.d).slice(0, 5), fallers = moves.filter(m => m.d <= -0.0005).sort((x, y) => x.d - y.d).slice(0, 5);
-      const moveRow = m => `<div class="rank" data-id="${m.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[m.id].region)}"></i><div>${esc(byId[m.id].name)}<small>${pct(shareIn(a, m.id))} in ${esc(A)} → ${pct(shareIn(s, m.id))} in ${esc(B)}</small></div><b class="${m.d > 0 ? 'prp-up' : 'prp-down'}">${points(m.d)}</b></div>`;
+      const moveRow = m => `<div class="rank" data-id="${m.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[m.id].region)}"></i><div>${esc(byId[m.id].name)}<small>${share(shareIn(a, m.id), a.year)} in ${esc(A)} → ${share(shareIn(s, m.id), s.year)} in ${esc(B)}</small></div><b class="${m.d > 0 ? 'prp-up' : 'prp-down'}">${points(m.d)}</b></div>`;
       const names = (list, n = 12) => (list.length ? `<p class="plist">${list.slice(0, n).map(x => esc(byId[x.id].name)).join(', ')}${list.length > n ? `, and ${list.length - n} more` : ''}.</p>` : '<p class="empty">None.</p>');
       const fresh = s.polities.filter(x => !inA.has(x.id)), gone = a.polities.filter(x => !inB.has(x.id));
       const ra = byRegion(a), rb = byRegion(s), regions = REGIONS.filter(r => ra.has(r) || rb.has(r)).sort((x, y) => (rb.get(y) || 0) - (rb.get(x) || 0));
       panel.innerHTML = `<h2>${esc(A)} to ${esc(B)}</h2><p class="sub">Humanity: ${people(a.worldPop)} → ${people(s.worldPop)} people · ${watts(a.worldWatts)} → ${watts(s.worldWatts)} · Kardashev ${a.K.toFixed(3)} → ${s.K.toFixed(3)}</p>
-        <h3>Largest shares in ${esc(B)} <span class="count">change since ${esc(A)}</span></h3>${top.map(p => rankRow(p, top[0]?.share, d(p))).join('')}
+        <h3>Largest shares in ${esc(B)} <span class="count">change since ${esc(A)}</span></h3>${top.map(p => rankRow(p, top[0]?.share, d(p), s.year)).join('')}
         ${s.polities.length > 10 ? `<button class="more" id="see-more">See more (${s.polities.length - 10} more)</button>` : ''}
-        <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(a.rest.pop)} → ${people(s.rest.pop)} people outside the powers listed</small></div><div class="rv"><b>${pct(s.rest.share)}</b>${chg(s.rest.share - a.rest.share)}</div></div>
+        <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(a.rest.pop)} → ${people(s.rest.pop)} people outside the powers listed</small></div><div class="rv"><b>${share(s.rest.share, s.year)}</b>${chg(s.rest.share - a.rest.share)}</div></div>
         ${risers.length ? `<h3>Risers <span class="count">${esc(A)} → ${esc(B)}</span></h3>${risers.map(moveRow).join('')}` : ''}
         ${fallers.length ? `<h3>Fallers <span class="count">${esc(A)} → ${esc(B)}</span></h3>${fallers.map(moveRow).join('')}` : ''}
         <h3>New since ${esc(A)} <span class="count">${fresh.length}</span></h3>${names(fresh)}
         <h3>Gone since ${esc(A)} <span class="count">${gone.length}</span></h3>${names(gone)}
-        <h3>By region <span class="count">${esc(A)} → ${esc(B)}</span></h3>${regions.map(r => `<div class="regrow"><i style="background:${regionColor(r)}"></i><span>${esc(r)}</span><b>${pct(ra.get(r) || 0)} → ${pct(rb.get(r) || 0)} ${chg((rb.get(r) || 0) - (ra.get(r) || 0))}</b></div>`).join('')}
+        <h3>By region <span class="count">${esc(A)} → ${esc(B)}</span></h3>${regions.map(r => `<div class="regrow"><i style="background:${regionColor(r)}"></i><span>${esc(r)}</span><b>${share(ra.get(r) || 0, a.year)} → ${share(rb.get(r) || 0, s.year)} ${chg((rb.get(r) || 0) - (ra.get(r) || 0))}</b></div>`).join('')}
         <p class="note">Regions hold up better than single powers, whose borders and names changed in between. Bring the hollow start handle back onto the end for a single step.</p>
-        <button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
+        ${rough(a.year) ? `<p class="note">${esc(ROUGH)}</p>` : ''}<button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
     }
     wireRanks(panel, select);
-    $('#see-more')?.addEventListener('click', () => openModal(`All powers in ${yearLabel(s.year)}${ranged ? ` · change since ${A}` : ''}`, s.polities.map(p => rankRow(p, top[0]?.share, d(p))).join('')));
+    $('#see-more')?.addEventListener('click', () => openModal(`All powers in ${yearLabel(s.year)}${ranged ? ` · change since ${A}` : ''}`, s.polities.map(p => rankRow(p, top[0]?.share, d(p), s.year)).join('')));
     $('#method').onclick = () => openModal('How these estimates are made', METHOD);
   }
 
@@ -340,10 +347,11 @@
     if (view !== 'table' || !data) return;
     const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), A = yearLabel(a.year), B = yearLabel(s.year);
     const gone = ranged ? a.polities.filter(x => !s.polities.some(y => y.id === x.id)) : [];
+    $('#table-note').textContent = rough(a.year) ? `${ROUGH} Select a row for its record.` : 'Select a row for its record';
     $('#table-title').textContent = ranged ? `Powers, ${A} to ${B} · ${s.polities.length + gone.length}` : `Powers in ${B} · ${s.polities.length}`;
     $('#table-head').innerHTML = `<tr><th class="num">#</th><th>Empire or country</th><th>Region</th>${ranged ? `<th class="num">Share ${esc(A)}</th><th class="num">Share ${esc(B)}</th><th class="num">Change</th>` : '<th class="num">Share</th>'}<th class="num">People</th><th class="num">kcal per person a day</th><th class="num">Power</th><th class="num">Rating</th></tr>`;
     const was = id => (a.polities.find(x => x.id === id)?.share ?? null);
-    const ends = (sa, sb) => (ranged ? `<td class="num">${sa == null ? '–' : pct(sa)}</td><td class="num">${sb == null ? '–' : pct(sb)}</td><td class="num">${sb == null ? '<span class="chg">gone</span>' : chg(sa == null ? NaN : sb - sa)}</td>` : `<td class="num">${pct(sb)}</td>`);
+    const ends = (sa, sb) => (ranged ? `<td class="num">${sa == null ? '–' : share(sa, a.year)}</td><td class="num">${sb == null ? '–' : share(sb, s.year)}</td><td class="num">${sb == null ? '<span class="chg">gone</span>' : chg(sa == null ? NaN : sb - sa)}</td>` : `<td class="num">${share(sb, s.year)}</td>`);
     const cells = p => `<td><button type="button" class="rowbtn">${esc(byId[p.id].name)}</button></td><td><span class="dot" style="background:${regionColor(byId[p.id].region)}"></span>${esc(byId[p.id].region)}</td>`;
     $('#table-rows').innerHTML = s.polities.map((p, i) => `<tr data-id="${p.id}"${p.id === selected ? ' class="sel"' : ''}><td class="num">${i + 1}</td>${cells(p)}${ends(was(p.id), p.share)}<td class="num">${people(p.pop)}</td>
         <td class="num">${Math.round(p.kcal).toLocaleString('en-GB')}</td><td class="num">${watts(p.watts)}</td><td class="num">K ${p.K.toFixed(2)}</td></tr>`).join('') +

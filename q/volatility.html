@@ -119,6 +119,7 @@ button,input,select{font:inherit}button{cursor:pointer}
     <h1 class="prp-title">Geopolitical Volatility</h1>
     <p class="prp-dek">A daily 0–100 index of how unusually turbulent each country’s news is (conflict, political escalation, civil unrest, economic disruption and cross-border spread), measured against the past 90 days of every country. Map it, rank it, and compare up to four countries.</p>
     <div class="prp-meta" id="meta" aria-live="polite">Loading…</div>
+    <p class="prp-note" id="baseline-note" aria-live="polite" hidden></p>
   </header>
 
   <nav class="prp-tabs" role="tablist" aria-label="Geopolitical Volatility views">
@@ -240,6 +241,21 @@ function spanText(a, b) {
   return ma !== mb ? `${+da} ${MONTHS[ma - 1]} – ${dayText(b)}` : `${+da}–${dayText(b)}`;
 }
 const when = () => (per() ? spanText(DAYS[fromIdx], DAYS[dayIdx]) : DAYS[dayIdx]);
+// The baseline a day is ranked against (volatility/scripts/gvi.mjs, BASELINE_DAYS; ingest.mjs): the stored days among the
+// 90 that end on it. Worked out from the index's own days, so what the page says of it is true on any day it shows.
+const BASELINE = 90;
+const shiftDay = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+const windowOf = i => DAYS.filter(d => d >= shiftDay(DAYS[i], -(BASELINE - 1)) && d <= DAYS[i]);
+// Below MIN_BASELINE stored days (gvi.mjs) no country is scored: every country's reason is "Baseline has n/7 days".
+const MIN_BASELINE = 7;
+function baselineWords(i) {
+  const w = windowOf(i), n = w.length, day = dayText(DAYS[i]), days = n === 1 ? '1 day' : `${n} days`;
+  if (n >= BASELINE) return `The baseline for ${day} holds all ${BASELINE} days.`;
+  if (n < MIN_BASELINE) return `History so far: ${days} of the ${BASELINE} for ${day}, from ${dayText(w[0])}. The baseline needs ${MIN_BASELINE} days, so no country is scored on ${day}.`;
+  return `History so far: ${n} of the ${BASELINE} days for ${day}, from ${dayText(w[0])}. Until ${BASELINE} days are stored, a day is ranked against the days stored up to it, so on ${day} a component at 100 is the most intense country-day of those ${n} days, not of ${BASELINE}.`;
+}
+// "the trailing 90 days", saying how many of them are stored while it is fewer.
+const trailing = i => { const n = windowOf(i).length; return n >= BASELINE ? `the trailing ${BASELINE} days` : `the trailing ${BASELINE} days (${n} of them stored by ${dayText(DAYS[i])})`; };
 const onWhen = () => (per() ? `over ${when()}` : `on ${DAYS[dayIdx]}`);
 const rank = (key, getter) => { const l = C.filter(c => getter(c) != null).sort((a, b) => getter(b) - getter(a)); l.forEach((c, k) => { c.cur[key] = k + 1; }); };
 // The measures behind the map, the ranking, the movers, a country's page and the comparison: of one day (a === b) or
@@ -535,7 +551,7 @@ function renderProfile() {
       <figure class="prp-figure chartfig"><div class="chart" id="pf-comp"></div><div class="key">${comps.map((m, j) => `<span>${sw(COMP_COLOUR(j))}${esc(m.label)}</span>`).join('')}</div><figcaption><b>Figure 4.</b> The five components of ${esc(c.name)}’s GVI, each a percentile against the trailing 90 days.</figcaption>
         <details class="datatable"><summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">GVI</th>${comps.map(m => `<th class="num">${esc(CAT_LABEL[m.key] || m.label)}</th>`).join('')}<th class="num">Events</th></tr></thead>
           <tbody>${days.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1] == null ? '–' : r[1].toFixed(1)}</td>${comps.map((m, j) => `<td class="num">${r[2]?.[j] == null ? '–' : r[2][j].toFixed(0)}</td>`).join('')}<td class="num">${(r[3] || 0).toLocaleString('en-GB')}</td></tr>`).join('')}</tbody></table></div></details></figure></div>
-    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs 90 days</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in the trailing 90 days (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
+    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs ${windowOf(dayIdx).length >= BASELINE ? `${BASELINE} days` : `${windowOf(dayIdx).length} day${windowOf(dayIdx).length === 1 ? '' : 's'} stored`}</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in ${esc(trailing(dayIdx))} (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
       <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events${per() ? ' · latest day' : ''}</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
   $('#pf-gvi').replaceChildren(lineChart([{ name: 'GVI', colour: 'var(--prp-text)', points: pts(c) }], { w: width('#pf-gvi') }));
   $('#pf-comp').replaceChildren(lineChart(comps.map((m, j) => ({ name: m.label, colour: COMP_COLOUR(j), width: 1.5, dots: false, points: pts(c, j) })), { w: width('#pf-comp'), h: 180, bands: false }));
@@ -562,7 +578,7 @@ function renderCompare() {
     <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>Side by side · ${esc(per() ? `over ${when()}` : DAYS[dayIdx])}</b></div><div class="tbl full"><table class="prp-table"><thead><tr><th>Metric</th>${cs.map(c => `<th class="num">${sw(cc(c.iso3))}<a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
       <tbody>${groups.map(g => `<tr><td colspan="${cs.length + 1}" class="grp">${esc(g)}</td></tr>` + rows.filter(r => r.m.group === g).map(r => `<tr><td>${esc(r.m.label)}</td>${cs.map((_, j) => cell(r, j)).join('')}</tr>`).join('')).join('')}</tbody></table></div>
       <p class="note"><span class="best">✓</span> marks the calmer or more stable value, <span class="worst">▲</span> the more volatile.</p></div>
-    <div class="prp-panel"><div class="prp-panel-head"><b>Components</b></div><figure class="prp-figure chartfig"><div class="chart" id="cmp-comp"></div><figcaption><b>Figure 7.</b> Component percentiles ${per() ? `averaged over ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`} (100 = the most intense country-day in the trailing 90 days).</figcaption></figure></div></div>`;
+    <div class="prp-panel"><div class="prp-panel-head"><b>Components</b></div><figure class="prp-figure chartfig"><div class="chart" id="cmp-comp"></div><figcaption><b>Figure 7.</b> Component percentiles ${per() ? `averaged over ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`} (100 = the most intense country-day in ${esc(trailing(dayIdx))}).</figcaption></figure></div></div>`;
   $('#cmp-gvi').replaceChildren(lineChart(cs.map(c => ({ name: c.name, colour: cc(c.iso3), points: pts(c) })), { w: width('#cmp-gvi') }));
   $('#cmp-comp').replaceChildren(componentBars(cs, width('#cmp-comp')));
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => toggleCompare(b.dataset.rm, false));
@@ -589,7 +605,7 @@ function renderMethod() {
   $('#methodtext').innerHTML = `<p><b>Source.</b> Every quarter-hour event export from GDELT 2.0 (96 a day), which codes news reports worldwide into who-did-what-to-whom events (CAMEO codes) with a location and a Goldstein score from −10 (most hostile) to +10 (most cooperative). Events are assigned to the country where they happened; each news URL is counted once per country per day.</p>
     <p><b>Components.</b> ${V.components.map(c => `${esc(c.label)} (${Math.round(c.weight * 100)}%)`).join(' · ')}. Conflict is CAMEO 17–20 (coerce, assault, fight, mass violence); political is 10–13, 15 and 16 (demands, disapproval, rejection, threats, force posture, reduced relations); unrest is 14 (protest); economic is 162–163 (sanctions, embargoes); cross-border spread counts conflict and political events between actors from different countries.</p>
     <p><b>Intensity.</b> Each event weighs 0.1 + max(0, −Goldstein)/10, so hostile events count up to eleven times a neutral one. A component’s intensity is its weighted events divided by all of the country’s events that day, so large and small countries are comparable.</p>
-    <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. It is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
+    <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. ${esc(baselineWords(DAYS.length - 1))} It is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
     <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in Vitruvian Manager from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
     <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. Use the evidence links to check.</p>`;
 }
@@ -637,7 +653,7 @@ const period = PRPPeriod.mount($('#days'), {
   names: { from: 'First day of the period', to: 'Day shown, or the last of the period' },
   onChange: p => { fromIdx = p.fromIndex; dayIdx = p.toIndex; refresh(); writeHash(); },
 });
-function showDay() { $('#day-lbl').textContent = per() ? 'Period' : 'Day'; $('#daylabel').textContent = when(); relabel(); }
+function showDay() { $('#day-lbl').textContent = per() ? 'Period' : 'Day'; $('#daylabel').textContent = when(); relabel(); const b = $('#baseline-note'); b.textContent = baselineWords(dayIdx); b.hidden = false; }
 function refresh() { derive(fromIdx, dayIdx); showDay(); colourMap(); renderTable(); renderMovers(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); }
 tabs.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
 $('.prp-tabs').addEventListener('keydown', e => {

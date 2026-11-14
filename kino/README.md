@@ -54,6 +54,9 @@ One JSON file per documentary, `kino/data/<category>/<id>.json`; the file name i
   "category": "wars",                       // one of the six; = the folder
   "subjects": [{ "qid": "Q362", "label": "World War II" }],   // Wikidata items; labels are checked at build time
   "era": [1939, 1945],                      // whole years; BC as negative numbers
+  "cutoff": "February 2026",                // a party's film (required there): where its story stops, a year or a month
+                                            // and year, no earlier than the last year the narration names; the card
+                                            // and the player then read "From 1955 · told to February 2026"
   "summary": "One to three sentences for the catalogue card.",
   "minutes": 7,                             // running time; the validator warns if the narration disagrees
   "preview": { "scene": "barbarossa" },     // optional: the scene the catalogue card animates

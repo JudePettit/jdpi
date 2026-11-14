@@ -1331,3 +1331,126 @@ test('page: Page only fills the screen with the scene\'s page, follows the film,
     }
   } finally { await browser.close(); }
 });
+
+
+/* ---- What the catalogues claim (the review of 12 November 2026): the Wars maps are illustrative; a party's film says
+   where its story stops; what can be watched stands apart from what is in preparation; Geopolitical Events says how it
+   differs from Political Events, with a film of each; Great Thinkers' courses are short introductions, each linked to
+   the thinker's own book where Bibliotheca's shelf holds one. */
+import { CATEGORIES, categoryOf, spanLabel, courseWords, cutoffYear, narratedYears } from '../kino/lib/format.js';
+
+test('catalogue: the Wars maps are said to be illustrative, which is what every war film\'s maps are', () => {
+  const note = categoryOf('wars').note;
+  assert.match(note, /^The maps are illustrative\./);
+  assert.match(note, /present-day borders/);
+  assert.match(note, /they are not historical boundary or front-line data\.$/);
+  // True of the films: every war film draws its maps (present-day borders, world-atlas), and its fronts are sketches.
+  const wars = docs.filter(d => d.category === 'wars');
+  assert.ok(wars.length && wars.every(d => flatScenes(d).some(s => s.visual.kind === 'map')));
+  assert.match(readFileSync(join(ROOT, 'kino/README.md'), 'utf8'), /Maps use present-day borders for orientation/);
+  assert.equal(read('kino/data/index.json').categories.find(c => c.id === 'wars').note, note, 'the built catalogue carries it');
+  for (const c of CATEGORIES.filter(c => c.id !== 'wars')) assert.equal(c.note, undefined, `${c.id}: no note of its own`);
+});
+
+test('catalogue: Geopolitical Events says how it differs from Political Events, with a film of each by its title', () => {
+  const geo = categoryOf('geopolitical-events');
+  assert.match(geo.dek, /Political Events follows how a country is governed, as in .+; Geopolitical Events follows how states stand towards one another, as in .+\.$/);
+  for (const [cat, id] of Object.entries(geo.examples)) {
+    const d = ctx.docs.get(id);
+    assert.equal(d?.category, cat, `${id} is a ${cat} film`);
+    assert.ok(geo.dek.toLowerCase().includes(d.title.replace(/, \d{4}(–\d{4})?$/, '').toLowerCase()), `the dek names ${d.title}`);
+  }
+  assert.doesNotMatch(geo.dek, /partitions/, 'the Partition of India is a Political Events film');
+});
+
+test('scripts: a party\'s film says where its story stops, no earlier than the last year it names', () => {
+  const parties = docs.filter(d => d.category === 'political-parties');
+  assert.ok(parties.length >= 3);
+  for (const d of parties) {
+    const y = cutoffYear(d.cutoff);
+    assert.ok(Number.isInteger(y), `${d.id}: cutoff ${d.cutoff}`);
+    assert.equal(y, Math.max(...narratedYears(d)), `${d.id}: the cutoff is the last year its narration names`);
+    assert.equal(spanLabel(d), `From ${d.era[0]} · told to ${d.cutoff}`);
+  }
+  assert.deepEqual(Object.fromEntries(parties.map(d => [d.id, d.cutoff])), { 'chinese-communist-party': '2022', 'institutional-revolutionary-party': '2024', 'liberal-democratic-party-japan': 'February 2026' });
+  // The second reader (14 November 2026): the CCP card reads "told to 2022" while its summary gives the membership the
+  // party reported in 2025 (the opening scene's source, cpc-2025), so the summary dates that figure.
+  const ccp = parties.find(d => d.id === 'chinese-communist-party');
+  assert.ok(ccp.scenes.find(s => s.id === 'opening').cites.includes('cpc-2025') && ccp.sources.find(s => s.id === 'cpc-2025').year === 2025);
+  assert.match(ccp.summary, /more than 100 million members by its own count in 2025\./);
+  assert.equal(read('kino/data/index.json').docs.find(e => e.id === 'chinese-communist-party').summary, ccp.summary, 'the built catalogue carries it');
+  // The validator holds every party film to it.
+  const pri = clone(ctx.docs.get('institutional-revolutionary-party'));
+  delete pri.cutoff;
+  assert.ok(validateScript(pri, ctx).errors.some(e => /^cutoff: a party documentary says where its story stops/.test(e)));
+  assert.ok(validateScript({ ...pri, cutoff: '2018' }, ctx).errors.some(e => /2018 is earlier than 2024, which the narration names/.test(e)));
+  assert.ok(validateScript({ ...pri, cutoff: 'Spring 2024' }, ctx).errors.some(e => /^cutoff: a year, or a month and year/.test(e)));
+  assert.deepEqual(validateScript({ ...pri, cutoff: 'June 2024' }, ctx).errors, []);
+  assert.equal(spanLabel({ era: [1939, 1945] }), '1939–1945');
+  assert.equal(spanLabel({ era: [1962, 1962] }), '1962');
+  // The built catalogue carries each cutoff, for the cards.
+  for (const e of read('kino/data/index.json').docs) assert.equal(e.cutoff, ctx.docs.get(e.id).cutoff, e.id);
+});
+
+test('catalogue: Great Thinkers\' courses are short introductions, linked to the thinker\'s own books on the shelf', () => {
+  const index = read('kino/data/index.json'), courses = index.docs.filter(d => d.category === 'great-thinkers');
+  assert.match(categoryOf('great-thinkers').dek, /^Short introductions to the great minds/);
+  const words = courseWords(courses), mins = [...new Set(courses.map(d => d.minutes))];
+  assert.equal(words, `Each runs ${mins.length === 1 ? `about ${mins[0]} minutes` : `${Math.min(...mins)} to ${Math.max(...mins)} minutes`}, in parts, with a short quiz at the end, and links to the thinker’s own book where Bibliotheca’s shelf holds one.`);
+  // Each course's books are the shelf's books by its subject, by the author's Wikidata ID in each book's own file.
+  const shelf = read('bibliotheca/data/index.json').books.map(b => ({ slug: b.slug, title: b.title, author: read(`bibliotheca/data/books/${b.slug}.json`).author.qid }));
+  for (const d of courses) {
+    const want = shelf.filter(b => d.subjects.some(s => s.qid === b.author)).map(({ slug, title }) => ({ slug, title }));
+    assert.deepEqual(d.books || [], want, d.id);
+  }
+  assert.deepEqual(Object.fromEntries(courses.map(d => [d.id, (d.books || []).map(b => b.slug)])), { 'niccolo-machiavelli': ['the-prince'], 'adam-smith': ['wealth-of-nations-1', 'wealth-of-nations-2'], 'karl-marx': ['communist-manifesto'] });
+  assert.ok(index.docs.filter(d => d.category !== 'great-thinkers').every(d => !d.books), 'only courses link to books');
+  assert.doesNotMatch(courseWords([{ minutes: 6 }]), /book/, 'no promise of a book where the shelf has none');
+  const reg = JSON.parse(readFileSync(join(ROOT, 'registry.json'), 'utf8')).suites.find(s => s.id === 'kino').modules.find(m => m.id === 'kino-great-thinkers');
+  assert.match(reg.description, /^Short introductions/);
+});
+
+test('page: what each catalogue says: illustrative maps, cutoffs, ready apart from in preparation, books for courses', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    const open = async cat => { await page.goto(`${BASE}/kino/index.html?cat=${cat}`, { waitUntil: 'domcontentloaded' }); await page.waitForSelector('.kn-card', { timeout: 20000 }); };
+    await open('wars');
+    assert.equal(await page.textContent('#cat-note'), categoryOf('wars').note);
+    await open('political-events');
+    assert.equal(await page.isVisible('#cat-note'), false, 'the note is the Wars catalogue\'s');
+    await open('political-parties');
+    const meta = await page.$$eval('.kn-card', cs => Object.fromEntries(cs.map(c => [c.dataset.doc, c.querySelector('.meta').textContent])));
+    assert.match(meta['institutional-revolutionary-party'], /^From 1929 · told to 2024 · /);
+    assert.match(meta['liberal-democratic-party-japan'], /^From 1955 · told to February 2026 · /);
+    await page.goto(`${BASE}/kino/index.html?cat=political-parties#doc=chinese-communist-party`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#player:not([hidden]) #doc-cutoff:not([hidden])', { timeout: 20000 });
+    assert.equal(await page.textContent('#doc-cutoff'), 'This film tells the story to 2022: what happened after that is not in it.');
+    assert.match(await page.textContent('#doc-meta'), /^From 1921 · told to 2022 · /);
+    await open('political-figures');
+    assert.equal(await page.textContent('#ready-h'), 'Ready to watch');
+    assert.ok(await page.isVisible('#planned'));
+    assert.equal(await page.textContent('#planned-note'), 'Not made yet: these titles are in preparation and cannot be watched.');
+    // Nothing in preparation is a link or plays: the films to watch are cards, under their own heading, above.
+    assert.equal(await page.locator('#planned a, #planned .play').count(), 0);
+    assert.ok(await page.evaluate(() => document.querySelector('#ready-h').compareDocumentPosition(document.querySelector('#planned')) & Node.DOCUMENT_POSITION_FOLLOWING));
+    await open('great-thinkers');
+    assert.match(await page.textContent('#cat-dek'), /^Short introductions to the great minds .* Each runs about 6 minutes, in parts, with a short quiz at the end, and links to the thinker’s own book/);
+    const books = await page.$$eval('.kn-cell', cells => cells.map(c => [c.querySelector('.kn-card').dataset.doc, [...c.querySelectorAll('.kn-book')].map(a => [a.textContent, a.getAttribute('href'), a.target])]));
+    const smith = Object.fromEntries(books)['adam-smith'];
+    assert.deepEqual(smith.map(b => b[0]), ['Read the full book: The Wealth of Nations, Volume I, in Bibliotheca →', 'Read the full book: The Wealth of Nations, Volume II, in Bibliotheca →']);
+    assert.equal(smith[0][1], `${BASE}/bibliotheca/neo/index.html#book=wealth-of-nations-1`);
+    assert.equal(smith[0][2], '_blank', 'on its own, a new tab');
+    assert.match(await page.$eval('.kn-card[data-doc="adam-smith"] .meta', m => m.textContent), /^Short introduction · 1723–1790 · 6 min · 3 parts/);
+    // Inside the shell the book opens in Bibliotheca's reader, Neo Classic, through the shell.
+    await page.setContent(`<iframe title="Kino" src="${BASE}/kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli" style="width:1250px;height:850px;border:0"></iframe>`);
+    const frame = await (await page.waitForSelector('iframe')).contentFrame();
+    await frame.waitForSelector('#doc-books:not([hidden]) .kn-book', { timeout: 20000 });
+    const a = frame.locator('#doc-books .kn-book');
+    assert.equal(await a.getAttribute('href'), `${BASE}/#/bibliotheca/neo-classic?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=the-prince`)}`);
+    assert.equal(await a.getAttribute('target'), '_top');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

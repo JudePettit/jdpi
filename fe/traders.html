@@ -10,6 +10,7 @@
 <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="mm" data-module="traders" data-shell="../" defer></script>
+<script src="filing-age.js"></script>
 <style>
 :root{--party-d:var(--prp-cat-1);--party-r:var(--prp-cat-8);--party-x:var(--prp-faint)}
 *{box-sizing:border-box}[hidden]{display:none!important}
@@ -62,6 +63,8 @@ button,input,select{font:inherit}button{cursor:pointer}
 .agent{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--prp-line-soft);background:var(--prp-accent-soft)}
 .agent p{flex:1 1 420px;margin:0;color:var(--prp-text-2);font-size:var(--prp-fs-sm)}.agent p b{color:var(--prp-text)}
 .agent .acts{display:flex;flex-wrap:wrap;gap:8px}
+.mirror{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.age{flex:1 1 220px;max-width:60ch;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.4}.age.stale{color:var(--prp-warn)}
 .detail-body{padding:14px;border-bottom:1px solid var(--prp-line-soft)}
 .detail-body .prp-kpi b{font-size:20px}
 .moves{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}.moves .prp-label{margin-right:4px}
@@ -153,6 +156,11 @@ const TABS = ['congress', 'investors'];
 const ALGO = 'https://trade-desk.judep92.workers.dev/tally/algo/';
 const agentUrl = o => ALGO + '#' + Object.entries(o).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
 const agentLink = (url, label, cls, title) => `<a class="prp-btn ${cls}" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(title)}">${esc(label)} <span aria-hidden="true">↗</span></a>`;
+// The age of the filing a Mirror agent copies, beside its button (fe/filing-age.js: whole UTC days, from this page's data).
+const ageLine = (p, id) => {
+  const f = VMFilingAge.filingOf(p, { investors: investors.investors, congress }, Date.now());
+  return `<span class="age${f && f.stale ? ' stale' : ''}" id="${id}">${esc(VMFilingAge.filingAge(f, Date.now()))}</span>`;
+};
 const params = new URLSearchParams(location.search);
 let congress, investors, members = new Map(), mirrorable = new Set(), selMember = params.get('member'), selInvestor = params.get('investor');
 
@@ -193,7 +201,7 @@ function renderMemberActions(m) {
   const box = $('#member-acts');
   if (!m) { box.innerHTML = '<span class="hint">Choose a member to mirror their trades.</span>'; return; }
   box.innerHTML = (mirrorable.has(m.id)
-    ? agentLink(agentUrl({ new: 'mirror', source: 'congress', member: m.id, name: m.name }), 'Mirror trades', 'primary sm', `Create an Algo Trader agent that copies the stock trades ${m.name} discloses (opens in a new tab)`)
+    ? `<span class="mirror">${agentLink(agentUrl({ new: 'mirror', source: 'congress', member: m.id, name: m.name }), 'Mirror trades', 'primary sm', `Create an Algo Trader agent that copies the stock trades ${m.name} discloses (opens in a new tab)`)}${ageLine({ source: 'congress', member: m.id }, 'age-member')}</span>`
     : '<span class="hint">No listed-stock trades to mirror</span>')
     + '<button type="button" class="prp-btn sm" id="clear-member">✕ All members</button>';
   $('#clear-member').onclick = () => { selMember = null; renderMembers(); renderTrades(); };
@@ -264,7 +272,7 @@ function renderInvestors() {
       <a class="prp-btn ghost sm" href="${esc(inv.filingUrl)}" target="_blank" rel="noreferrer">SEC filings ↗</a></div>
     <div class="agent">
       <p><b>Mirror portfolio</b> creates an agent that holds this 13F portfolio in the same weights${covered ? ` (${(covered * 100).toFixed(covered > .995 ? 0 : 1)}% of its value has a US ticker)` : ''}${old ? '; this filing is old, so the holdings may be long gone' : ''}. <b>Trade in their style</b> creates an agent that follows their approach (${esc(inv.style.charAt(0).toLowerCase() + inv.style.slice(1))}) rather than their exact holdings.</p>
-      <div class="acts">${agentLink(agentUrl({ new: 'mirror', source: '13f', cik: inv.cik, name: inv.person }), 'Mirror portfolio', 'primary', `Create an Algo Trader agent that mirrors ${inv.person}'s 13F portfolio (opens in a new tab)`)}${agentLink(agentUrl({ new: 'persona', cik: inv.cik, name: inv.person }), 'Trade in their style', '', `Create an Algo Trader agent that trades in ${inv.person}'s style (opens in a new tab)`)}</div>
+      <div class="acts"><span class="mirror">${agentLink(agentUrl({ new: 'mirror', source: '13f', cik: inv.cik, name: inv.person }), 'Mirror portfolio', 'primary', `Create an Algo Trader agent that mirrors ${inv.person}'s 13F portfolio (opens in a new tab)`)}${ageLine({ cik: inv.cik }, 'age-investor')}</span>${agentLink(agentUrl({ new: 'persona', cik: inv.cik, name: inv.person }), 'Trade in their style', '', `Create an Algo Trader agent that trades in ${inv.person}'s style (opens in a new tab)`)}</div>
     </div>
     <div class="detail-body">
       <div class="prp-kpis"><div class="prp-kpi"><span>Positions</span><b>${int(inv.positions.length)}</b></div><div class="prp-kpi"><span>Reported value</span><b>${money(inv.total)}</b></div>

@@ -6,7 +6,8 @@ import {
   dayLabel, timeLabel,
 } from './view.js';
 
-const { PRPAccess } = globalThis; // design/prp-access.js, loaded by view.js
+const { PRPAccess, PRPTex } = globalThis; // design/prp-access.js and design/prp-tex.js, loaded by view.js
+const readable = s => PRPTex.plain(s); // a feed's TeX ("$^{224}\mathrm{Ra}$") in plain characters ("²²⁴Ra")
 
 const $ = s => document.querySelector(s);
 const STORE_KEY = 'prp.econ-briefing.field';
@@ -96,8 +97,8 @@ function entryHtml(i) {
     alsoHtml(i, s);
   return `<article class="entry" data-type="${i.type}">
     <div class="l1"><span class="badge ${i.type}">${esc(badgeOf(i, s))}</span><span class="src">${esc(s?.outlet || i.source)}</span>${time ? `<time class="time" datetime="${esc(i.published)}">${time}</time>` : ''}</div>
-    <h4><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}${PRPAccess.label(i.access)}</a>${accessHtml(i)}</h4>
-    ${i.authors ? `<p class="by">${esc(i.authors)}</p>` : ''}${i.summary ? `<p class="sum">${esc(i.summary)}</p>` : ''}${l3 ? `<div class="l3">${l3}</div>` : ''}
+    <h4><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(readable(i.title))}${PRPAccess.label(i.access)}</a>${accessHtml(i)}</h4>
+    ${i.authors ? `<p class="by">${esc(i.authors)}</p>` : ''}${i.summary ? `<p class="sum">${esc(readable(i.summary))}</p>` : ''}${l3 ? `<div class="l3">${l3}</div>` : ''}
   </article>`;
 }
 

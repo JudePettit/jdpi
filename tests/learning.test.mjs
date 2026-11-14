@@ -130,3 +130,33 @@ test('each course renders its lessons and quiz, in the right suite', pageTest, a
   assert.match(progress, /^1 of/);
   assert.deepEqual(errors, []);
 });
+
+// The review of 12 November 2026: the Finance & Economics material is short (the page counts its own reading time), so
+// it is called introductory wherever it is described, never a university course.
+test('finance and economics: the courses are called introductory, on the page, in its fallback and in the registry', () => {
+  const intro = f => readFileSync(new URL(`../fe/learning/${f}.md`, import.meta.url), 'utf8').replace(/\r/g, '').split('\n').find(l => l.startsWith('intro: '));
+  assert.match(intro('finance'), /^intro: An introductory course in finance/);
+  assert.match(intro('finance'), /a short introduction, not a full university course/);
+  assert.doesNotMatch(intro('finance'), /first-year university|university-style/);
+  assert.match(intro('economics'), /^intro: An introductory course in economics/);
+  const page = readFileSync(new URL('../fe/learning.html', import.meta.url), 'utf8');
+  assert.match(page, /intro: 'Two introductory courses: Finance, with worked examples, and Economics/);
+  const reg = JSON.parse(readFileSync(new URL('../registry.json', import.meta.url), 'utf8'));
+  const desc = reg.suites.flatMap(s => s.modules).find(m => m.id === 'learning').description;
+  assert.match(desc, /^Two introductory courses: /);
+  assert.doesNotMatch(desc, /university/);
+});
+
+test('page: Finance and Economics open with their introductory intros', pageTest, async () => {
+  const browser = await chromium.launch({ channel: 'msedge' });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    for (const [course, want] of [['finance', /^An introductory course in finance.*not a full university course/], ['economics', /^An introductory course in economics/]]) {
+      await page.goto(`${BASE}/fe/learning?course=${course}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#toc button', { timeout: 20000 });
+      assert.match(await page.textContent('#intro'), want, course);
+    }
+  } finally {
+    await browser.close();
+  }
+});

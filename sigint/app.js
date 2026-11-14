@@ -1,6 +1,6 @@
 // SIGINT Dashboard (International Mystery Management). Entry module: in-page tabs kept in the URL (#tab=…), the location setting,
 // shared settings, feed status, and views loaded when their tab first opens. Views poll only while visible.
-import { store, esc } from './lib/util.js';
+import { store, esc, feedsLine } from './lib/util.js';
 import { maidenhead, fromMaidenhead, parseCoord, fmtLatLon } from './lib/geo.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -77,9 +77,10 @@ export function locLabel(l = ctx.loc) {
 /* ---- Header meta line ---------------------------------------------------------------------------------------------- */
 function renderMeta() {
   $('#meta-loc').textContent = `${locLabel()} · ${fmtLatLon(ctx.loc.lat, ctx.loc.lon, 2)} · ${maidenhead(ctx.loc.lat, ctx.loc.lon, 6)}`;
-  const pub = ['adsb', 'celestrak', 'swpc', 'wspr'].map(id => ctx.status.get(id)).filter(Boolean);
+  // How many public feeds work, naming each one that does not (lib/util.js feedsLine).
   const own = [...ctx.status.entries()].filter(([id, s]) => /^rx-|^bridge$/.test(id) && s.state === 'ok').length;
-  if (pub.length) $('#meta-feeds').innerHTML = `<b>Feeds</b> ${pub.filter(s => s.state === 'ok').length} of ${pub.length} public working${own ? ` · ${own} of yours connected` : ''}`;
+  const line = feedsLine(ctx.status, own);
+  if (line) $('#meta-feeds').innerHTML = `<b>Feeds</b> ${esc(line)}`;
 }
 
 /* ---- Tabs --------------------------------------------------------------------------------------------------------- */

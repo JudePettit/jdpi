@@ -115,8 +115,11 @@ export function rampSVG(ramp, T, width = 320) {
  */
 export function renderChart(Plot, prep, { width = 720, T = readTokens(), geo = null, countryOf = null } = {}) {
   const series = prep.series || [];
+  // The columns in words (chartdata.js labelsFor) on the axes, the legend, the tooltips and the description; the field
+  // names (prep.x, prep.y) still choose the number formats.
+  const XL = prep.xLabel || prep.x, YL = prep.yLabel || prep.y, CL = prep.colorLabel || prep.color;
   const colours = seriesColours(series, T);
-  const colour = series.length ? { domain: series, range: colours, label: prep.color } : undefined;
+  const colour = series.length ? { domain: series, range: colours, label: CL } : undefined;
   const fill = series.length ? 's' : T.cat[0];
   const style = { background: 'transparent', color: T.text2, fontFamily: T.fontUi, fontSize: '12px', overflow: 'visible' };
   const grid = axis => (axis === 'x' ? Plot.gridX({ stroke: T.grid, strokeOpacity: 1 }) : Plot.gridY({ stroke: T.grid, strokeOpacity: 1 }));
@@ -146,24 +149,24 @@ export function renderChart(Plot, prep, { width = 720, T = readTokens(), geo = n
         labels ? Plot.text(prep.data.filter(d => d.y < 0), { x: 'y', y: d => String(d.x), text: d => yFmt(d.y), textAnchor: 'end', dx: -4, fill: T.text2, fontSize: 11 }) : null,
       ].filter(Boolean),
     });
-    alt = `Bar chart of ${prep.valueLabel.toLowerCase()} by ${prep.x}: ` + prep.data.slice(0, 12).map(d => `${d.x}${d.s ? ' (' + d.s + ')' : ''} ${yFmt(d.y)}`).join(', ') + (prep.data.length > 12 ? ', …' : '');
+    alt = `Bar chart of ${prep.valueLabel.toLowerCase()} by ${XL}: ` + prep.data.slice(0, 12).map(d => `${d.x}${d.s ? ' (' + d.s + ')' : ''} ${yFmt(d.y)}`).join(', ') + (prep.data.length > 12 ? ', …' : '');
   } else if (prep.type === 'bar') {
     const cats = prep.categories.map(String), every = Math.max(1, Math.ceil(cats.length / Math.max(4, Math.floor(width / 64))));
     plot = Plot.plot({
       ...base, height: Math.round(Math.min(420, Math.max(240, width * 0.48))), marginBottom: 36, marginLeft: valueMargin(series.length ? stackTotals(prep.data) : prep.data.map(d => d.y), yFmt),
-      x: { type: 'band', domain: cats, label: prep.x, ticks: cats.filter((c, i) => i % every === 0), tickFormat: c => trunc(c, 12), padding: 0.15 },
+      x: { type: 'band', domain: cats, label: XL, ticks: cats.filter((c, i) => i % every === 0), tickFormat: c => trunc(c, 12), padding: 0.15 },
       y: { label: prep.valueLabel, nice: true, tickFormat: yFmt },
       marks: [grid('y'), Plot.barY(prep.data, { x: d => String(d.x), y: 'y', fill, order, tip: { format: { x: true, y: yFmt, fill: !!series.length } } }), Plot.ruleY([0], { stroke: T.axis })],
     });
-    alt = `Column chart of ${prep.valueLabel.toLowerCase()} by ${prep.x}, ${cats.length} values from ${cats[0]} to ${cats[cats.length - 1]}`;
+    alt = `Column chart of ${prep.valueLabel.toLowerCase()} by ${XL}, ${cats.length} values from ${cats[0]} to ${cats[cats.length - 1]}`;
   } else if (prep.type === 'line' || prep.type === 'area') {
     const zero = (prep.fn === 'count' || prep.fn === 'sum') && prep.data.every(d => d.y >= 0);
     const direct = prep.type === 'line' && series.length >= 2 && series.length <= 4;
     const marginRight = direct ? Math.min(150, Math.round(Math.max(...series.map(s => approxWidth(trunc(s, 20), 11)))) + 14) : 20;
     const marginLeft = valueMargin(prep.type === 'area' && series.length ? stackTotals(prep.data) : prep.data.map(d => d.y), yFmt);
-    const xOpt = { type: xIsDate ? 'utc' : 'linear', label: prep.x, tickFormat: xIsDate ? undefined : xFmt };
+    const xOpt = { type: xIsDate ? 'utc' : 'linear', label: XL, tickFormat: xIsDate ? undefined : xFmt };
     const opts = { x: 'x', y: 'y', z: series.length ? 's' : null };
-    const tipText = d => `${prep.x}: ${xIsDate ? fmtDate(d.x) : xFmt(d.x)}\n${d.s ? prep.color + ': ' + d.s + '\n' : ''}${prep.valueLabel}: ${yFmt(d.y)}`;
+    const tipText = d => `${XL}: ${xIsDate ? fmtDate(d.x) : xFmt(d.x)}\n${d.s ? CL + ': ' + d.s + '\n' : ''}${prep.valueLabel}: ${yFmt(d.y)}`;
     const marks = [grid('y'), zero ? Plot.ruleY([0], { stroke: T.axis }) : null];
     if (prep.type === 'line') {
       marks.push(Plot.lineY(prep.data, { ...opts, stroke: fill, strokeWidth: 1.75 }));
@@ -175,26 +178,26 @@ export function renderChart(Plot, prep, { width = 720, T = readTokens(), geo = n
       marks.push(Plot.tip(prep.data, Plot.pointerX(Plot.stackY2({ ...opts, order, title: tipText }))));
     }
     plot = Plot.plot({ ...base, height: Math.round(Math.min(420, Math.max(240, width * 0.5))), marginLeft, marginRight, x: xOpt, y: { label: prep.valueLabel, nice: true, zero, tickFormat: yFmt }, marks: marks.filter(Boolean) });
-    alt = `${prep.type === 'line' ? 'Line' : 'Stacked area'} chart of ${prep.valueLabel.toLowerCase()} over ${prep.x}${series.length ? ', by ' + prep.color + ' (' + series.join(', ') + ')' : ''}`;
+    alt = `${prep.type === 'line' ? 'Line' : 'Stacked area'} chart of ${prep.valueLabel.toLowerCase()} over ${XL}${series.length ? ', by ' + CL + ' (' + series.join(', ') + ')' : ''}`;
   } else if (prep.type === 'scatter') {
     const yIsDate = prep.yType === 'date', yAxisFmt = formatFor(prep.y);
     const channels = prep.labelName ? { [prep.labelName]: 'label' } : {};
     plot = Plot.plot({
       ...base, height: Math.round(Math.min(460, Math.max(260, width * 0.55))), grid: false, marginLeft: valueMargin(prep.data.map(d => d.y), yAxisFmt, yIsDate),
-      x: { type: xIsDate ? 'utc' : 'linear', label: prep.x, nice: true, tickFormat: xIsDate ? undefined : xFmt }, y: { type: yIsDate ? 'utc' : 'linear', label: prep.y, nice: true, tickFormat: yIsDate ? undefined : yAxisFmt },
+      x: { type: xIsDate ? 'utc' : 'linear', label: XL, nice: true, tickFormat: xIsDate ? undefined : xFmt }, y: { type: yIsDate ? 'utc' : 'linear', label: YL, nice: true, tickFormat: yIsDate ? undefined : yAxisFmt },
       marks: [grid('x'), grid('y'), Plot.dot(prep.data, { x: 'x', y: 'y', fill, r: 3.2, fillOpacity: 0.78, stroke: T.surface, strokeWidth: 0.5, channels, tip: { format: { x: xIsDate ? d => fmtDate(d) : xFmt, y: yIsDate ? d => fmtDate(d) : yAxisFmt, fill: !!series.length } } })],
     });
-    alt = `Scatter plot of ${prep.y} against ${prep.x}, ${prep.data.length} points`;
+    alt = `Scatter plot of ${YL} against ${XL}, ${prep.data.length} points`;
   } else if (prep.type === 'hist') {
     plot = Plot.plot({
       ...base, height: Math.round(Math.min(400, Math.max(230, width * 0.45))), marginLeft: valueMargin(stackTotals(prep.data.map(d => ({ x: +d.x0, y: d.y }))), yFmt),
-      x: { type: xIsDate ? 'utc' : 'linear', label: prep.x, tickFormat: xIsDate ? undefined : xFmt }, y: { label: 'Rows', nice: true, tickFormat: yFmt },
+      x: { type: xIsDate ? 'utc' : 'linear', label: XL, tickFormat: xIsDate ? undefined : xFmt }, y: { label: 'Rows', nice: true, tickFormat: yFmt },
       marks: [grid('y'), Plot.rectY(prep.data, { x1: 'x0', x2: 'x1', y: 'y', fill, insetLeft: 0.5, insetRight: 0.5, order }),
         Plot.ruleY([0], { stroke: T.axis }),
         Plot.tip(prep.data, Plot.pointerX(Plot.stackY2({ x1: 'x0', x2: 'x1', y: 'y', z: series.length ? 's' : null, order,
-          title: d => `${xIsDate ? fmtDate(d.x0, prep.unit) : `${xFmt(d.x0)} to under ${xFmt(d.x1)}`}\n${d.s ? prep.color + ': ' + d.s + '\n' : ''}Rows: ${yFmt(d.y)}` })))],
+          title: d => `${xIsDate ? fmtDate(d.x0, prep.unit) : `${xFmt(d.x0)} to under ${xFmt(d.x1)}`}\n${d.s ? CL + ': ' + d.s + '\n' : ''}Rows: ${yFmt(d.y)}` })))],
     });
-    alt = `Histogram of ${prep.x}: ${prep.data.reduce((a, d) => a + d.y, 0)} rows in ${new Set(prep.data.map(d => +d.x0)).size} bins`;
+    alt = `Histogram of ${XL}: ${prep.data.reduce((a, d) => a + d.y, 0)} rows in ${new Set(prep.data.map(d => +d.x0)).size} bins`;
   } else if (prep.type === 'map') {
     if (!geo) throw new Error('The world map has not loaded');
     const byIso = new Map(prep.data.map(d => [d.iso3, d]));

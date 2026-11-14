@@ -13,11 +13,13 @@
 
 /* Header figures and toolbar. The figures that change with a period keep the width of their widest text at rest too:
    the month or period ("May 1943 – May 1944", 9.33em; "September 1943" is 7.2em), the deaths of a period
-   ("~16,634,908", World War II from end to end, 6em) and the label of its battles ("Battles in the period", 13.9em).
-   Grown, they would narrow the dek beside them into another line, or wrap under it, and drop the timeline and the
-   map as the start handle moved. */
+   ("~17,000,000", World War II from end to end, rounded as an estimate, 6em) and the label of its battles ("Battles in
+   the period", 13.9em). Grown, they would narrow the dek beside them into another line, or wrap under it, and drop the
+   timeline and the map as the start handle moved. Under the deaths, whose figure it is (an estimate and its source, or
+   UCDP's count), in at most two short lines of the figure's width, the same at rest and in a period. */
 .counters .date dd { min-width: 9.4em; }
 #c-month { min-width: 6em; }
+#c-month-note { max-width: 15em; min-height: 2.8em; white-space: normal; }
 #c-battles-label { min-width: 13.9em; }
 #c-total { color: var(--prp-bad); }
 #war { min-width: 0; max-width: 340px; }

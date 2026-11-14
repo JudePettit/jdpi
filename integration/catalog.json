@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-14T06:07:50.733Z",
+  "generated": "2026-11-14T17:05:26.325Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1087,16 +1087,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6742,
+      "rows": 6695,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-14",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2950703
+      "bytes": 2934837
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1161,10 +1161,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-14",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2950703
+      "bytes": 2934837
     },
     {
       "id": "econ-briefing-stories",
@@ -1270,7 +1270,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285010
+      "bytes": 285450
     },
     {
       "id": "econ-briefing-sources",
@@ -1401,7 +1401,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 285010
+      "bytes": 285450
     },
     {
       "id": "science-briefing-stories",
@@ -1494,7 +1494,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1243,
+      "rows": 1271,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1502,7 +1502,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 725354
+      "bytes": 742345
     },
     {
       "id": "science-briefing-sources",
@@ -1628,7 +1628,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 725354
+      "bytes": 742345
     },
     {
       "id": "digital-briefing-stories",
@@ -1731,7 +1731,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1214,
+      "rows": 1211,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1739,7 +1739,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 726089
+      "bytes": 723470
     },
     {
       "id": "digital-briefing-sources",
@@ -1885,7 +1885,7 @@
       "updated": "2026-11-14",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 726089
+      "bytes": 723470
     },
     {
       "id": "political-calendar",
@@ -3368,7 +3368,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 21075
+      "bytes": 21180
     },
     {
       "id": "kino-documentaries",
@@ -3401,9 +3401,19 @@
           "description": "[first year, last year]"
         },
         {
+          "name": "cutoff",
+          "type": "string",
+          "description": "Where the story stops, for a subject that carries on after it (a party): a year, or a month and year"
+        },
+        {
           "name": "minutes",
           "type": "number",
           "description": "Approximate running time, minutes"
+        },
+        {
+          "name": "books",
+          "type": "array",
+          "description": "Courses: the thinker’s own books on Bibliotheca’s shelf, each {slug, title}"
         },
         {
           "name": "summary",
@@ -3463,7 +3473,7 @@
         "Wikidata (CC0)",
         "Wikimedia Commons"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-11-14",
       "refresh": "monthly",
       "page": "kino/index.html",
       "submodules": [
@@ -3474,7 +3484,7 @@
         "kino-geopolitical-events",
         "kino-great-thinkers"
       ],
-      "bytes": 25715
+      "bytes": 26781
     }
   ]
 }

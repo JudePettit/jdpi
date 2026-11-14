@@ -4,6 +4,7 @@
   "category": "political-parties",
   "subjects": [{ "qid": "Q682969", "label": "Institutional Revolutionary Party" }],
   "era": [1929, 2026],
+  "cutoff": "2024",
   "summary": "For seventy-one years one party, under three names, won every presidential election in Mexico. Twelve scenes on how the PRI was built out of a revolution, how it held power, and how it lost it.",
   "minutes": 7,
   "preview": { "scene": "crisis-1994" },

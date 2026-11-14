@@ -380,6 +380,17 @@ const leaderNote = c => {
 };
 // The head of government under the head of state, where it is someone else (or no one).
 const hogNote = c => (c.headOfGovernment ? (c.headOfGovernment !== c.headOfState ? 'Head of government: ' + headHtml(c, 'headOfGovernment') : '') : c.vacant?.includes('headOfGovernment') ? 'Head of government: Vacant' : '');
+// A head named without a Wikidata ID was put right by national/scripts/leader-corrections.json: the build gives every
+// head it reads from Wikidata that item's ID, and a correction none (national/scripts/leaders.mjs, applyCorrections;
+// tests/national.test.mjs holds the two in step). The source beside such a name names the correction.
+const corrected = (c, o) => !!c[o] && !c[o + 'Qid'];
+const headSrc = c => {
+  const shown = ['headOfState', ...(c.headOfGovernment && c.headOfGovernment !== c.headOfState ? ['headOfGovernment'] : [])].filter(o => c[o]);
+  const fixed = shown.filter(o => corrected(c, o));
+  if (!fixed.length) return SRC.wikidata();
+  if (fixed.length === shown.length) return `VM’s correction of ${SRC.wikidata()}`;
+  return `${SRC.wikidata()}; the ${fixed.map(o => OFFICE[o]).join(' and the ')}: VM’s correction`;
+};
 async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
@@ -417,7 +428,7 @@ async function renderProfile() {
     <div class="prp-panel-head"><b>Overview</b><span class="hint">Each figure's source and its own date are under it</span></div>
     <div class="grid">
       ${stat('System of government', esc(c.government[0] || '–'), esc(c.government.slice(1).join(', ')), SRC.wikidata())}
-      ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c), SRC.wikidata())}
+      ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c), headSrc(c))}
       ${stat('Current leader', leaderHtml(c), leaderNote(c), leaderSrc(c))}
       ${L ? stat('Leaders in the last 100 years', L.leaders100, '', SRC.retro()) : ''}
       ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs', SRC.retro()) : ''}
@@ -514,7 +525,7 @@ async function renderCompare(focus) {
       <details class="dt" id="cmpdt"><summary>Show the chart's data as a table</summary><div id="cmpdata"></div></details></figure>
     <div class="tbl" style="max-height:none"><table class="prp-table cmp"><thead><tr><th scope="col">Metric</th>${cs.map(c => `<th scope="col" class="num"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
     <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}<span class="gsrc">${esc(sourceOf(METRICS.find(m => m.group === g)))}</span></td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
-    <tr class="grp"><td colspan="${cs.length + 1}">Profile<span class="gsrc">${esc(`${SRC.wikidata()}; the current leader's office: ${SRC.atlas()}, or the system of government`)}</span></td></tr>
+    <tr class="grp"><td colspan="${cs.length + 1}">Profile<span class="gsrc">${esc(`${SRC.wikidata()}${cs.some(c => corrected(c, 'headOfState') || corrected(c, 'headOfGovernment')) ? `, with VM’s correction of the heads of ${cs.filter(c => corrected(c, 'headOfState') || corrected(c, 'headOfGovernment')).map(c => c.name).join(', ')}` : ''}; the current leader's office: ${SRC.atlas()}, or the system of government`)}</span></td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
     <tr><td>Current leader</td>${cs.map(c => `<td class="num" data-leader="${c.iso3}">${leaderHtml(c)}</td>`).join('')}</tr>
     <tr><td>Head of state</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfState')}</td>`).join('')}</tr>

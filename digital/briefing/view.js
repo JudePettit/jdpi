@@ -2,6 +2,7 @@
 // badges), shared by the page (app.js) and the tests (tests/digital-briefing.test.mjs).
 
 import '../../design/prp-access.js'; // globalThis.PRPAccess: the free-sources-lead rule
+import '../../design/prp-tex.js'; // globalThis.PRPTex: notation in titles and summaries in plain characters
 const { PRPAccess } = globalThis;
 
 export const WINDOWS = { '24h': 24, '3d': 72, '7d': 168 };
@@ -54,9 +55,21 @@ export function toHash(state) {
 }
 
 // ---- Badges ----------------------------------------------------------------------------------------------------------
-const PAPER_BADGE = { journal: 'Article', preprint: 'Preprint', lab: 'Lab', research: 'Research' };
+// Research is marked by where it comes from, which is what the data knows of each item: a journal's own feed, arXiv,
+// a lab's or company's blog, or a research institute. "Journal" names the venue, not the review: the feeds do not say
+// which pieces are refereed research and which are commentary (News & Views, editorials), so no item is marked
+// peer-reviewed. Each mark has its own look on the page (data-kind) and its meaning in its title and in the key.
+const PAPER_BADGE = { journal: 'Journal', preprint: 'Preprint', lab: 'Lab write-up', research: 'Institute' };
+export const PAPER_MEANING = {
+  journal: 'From a peer-reviewed journal’s own feed. The feed does not say whether this piece is refereed research or commentary.',
+  preprint: 'A preprint posted to arXiv, which does not peer-review what it posts.',
+  lab: 'A write-up on a lab’s or a company’s own research or engineering blog: its own account, not a journal’s.',
+  research: 'From a research institute’s or a measurement lab’s own publications.',
+};
 const NEWS_BADGE = { journal: 'Comment', lab: 'Announcement', research: 'Research', official: 'Official', news: 'News' };
-/** The label on an item: what kind of research or news it is ("Preprint", "Lab", "Advisory", "Advocacy", …). */
+/** What a research mark means (its title on the page), or '' for news and for a source's own badge. */
+export const badgeMeaning = (item, source = {}) => (item.type === 'paper' && !source.badge && PAPER_MEANING[item.kind]) || '';
+/** The label on an item: what kind of research or news it is ("Preprint", "Lab write-up", "Advisory", "Advocacy", …). */
 export function badgeOf(item, source = {}) {
   if (source.badge) return source.badge;
   return (item.type === 'paper' ? PAPER_BADGE[item.kind] : NEWS_BADGE[item.kind]) || (item.type === 'paper' ? 'Paper' : 'News');

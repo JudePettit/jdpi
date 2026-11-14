@@ -20,6 +20,22 @@ export function fmt(v, dp = 0) {
 }
 export const plural = (n, one, many = one + 's') => `${fmt(n)} ${n === 1 ? one : many}`;
 
+/** The four public feeds the Overview checks, by id, under the names its tiles show. */
+export const PUBLIC_FEEDS = { adsb: 'Aircraft · adsb.lol', celestrak: 'Orbits · CelesTrak', swpc: 'Space weather · NOAA SWPC', wspr: 'HF propagation · wspr.live' };
+const FEED_STATE = { bad: 'not reachable', warn: 'needs attention', checking: 'still being checked' };
+/**
+ * The header's line on the public feeds (plain text): how many work, then each one that does not, by name and state,
+ * so the status names the failing feed rather than only counting it. `status` maps an id to { state }; feeds not yet
+ * checked are left out; `own` is how many of the user's receivers are connected.
+ */
+export function feedsLine(status, own = 0) {
+  const pub = Object.keys(PUBLIC_FEEDS).filter(id => status.get(id)).map(id => [id, status.get(id).state]);
+  if (!pub.length) return '';
+  const name = id => { const [what, who] = PUBLIC_FEEDS[id].split(' · '); return `${what} (${who})`; };
+  const off = pub.filter(([, s]) => s !== 'ok').map(([id, s]) => `${name(id)} ${FEED_STATE[s] || 'not working'}`);
+  return `${pub.length - off.length} of ${pub.length} public working${off.length ? `; ${off.join('; ')}` : ''}${own ? ` · ${own} of yours connected` : ''}`;
+}
+
 /** "now", "12 s ago", "4 min ago", "3 h ago", "2 d ago" for a millisecond age. */
 export function ago(ms) {
   if (!isNum(ms)) return '–';

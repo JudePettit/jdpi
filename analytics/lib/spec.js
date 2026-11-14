@@ -141,17 +141,27 @@ export function describeStep(s) {
     default: return s.op;
   }
 }
-export function describeChart(c) {
+/**
+ * The chart in a phrase. `label` names a column in words (chartdata.js labelsFor), as the figure's caption does; without
+ * it the phrase keeps the field names, as the AI prompt does. A label sits inside the sentence in lower case unless it
+ * starts with a name or an acronym ("Geopolitical Volatility Index, 0–100", "ISO3").
+ */
+export function describeChart(c, label) {
   if (!c?.type) return '';
-  const what = !c.y || c.fn === 'count' ? 'count of rows' : `${c.fn && c.fn !== 'sum' ? (CHART_FNS[c.fn] || c.fn).toLowerCase() + ' of ' : ''}${c.y}`;
-  const by = c.color ? `, coloured by ${c.color}` : '';
+  const w = n => {
+    const l = typeof label === 'function' ? label(n) : n;
+    if (l === n || /^[A-Z0-9]{2,}\b/.test(l) || /^\S+\s+[A-Z]/.test(l)) return l;
+    return l[0].toLowerCase() + l.slice(1);
+  };
+  const what = !c.y || c.fn === 'count' ? 'count of rows' : `${c.fn && c.fn !== 'sum' ? (CHART_FNS[c.fn] || c.fn).toLowerCase() + ' of ' : ''}${w(c.y)}`;
+  const by = c.color ? `, coloured by ${w(c.color)}` : '';
   switch (c.type) {
-    case 'bar': return `bar chart of ${what} by ${c.x}${by}`;
-    case 'line': return `line chart of ${what} over ${c.x}${c.color ? `, one line per ${c.color}` : ''}`;
-    case 'area': return `stacked area chart of ${what} over ${c.x}${c.color ? `, one band per ${c.color}` : ''}`;
-    case 'scatter': return `scatter plot of ${c.y} against ${c.x}${by}`;
-    case 'hist': return `histogram of ${c.x}${c.bins ? ` in about ${c.bins} bins` : ''}${by}`;
-    case 'map': return `world map of ${what} by country${/countr/i.test(c.x) ? '' : ` (${c.x})`}`;
+    case 'bar': return `bar chart of ${what} by ${w(c.x)}${by}`;
+    case 'line': return `line chart of ${what} over ${w(c.x)}${c.color ? `, one line per ${w(c.color)}` : ''}`;
+    case 'area': return `stacked area chart of ${what} over ${w(c.x)}${c.color ? `, one band per ${w(c.color)}` : ''}`;
+    case 'scatter': return `scatter plot of ${w(c.y)} against ${w(c.x)}${by}`;
+    case 'hist': return `histogram of ${w(c.x)}${c.bins ? ` in about ${c.bins} bins` : ''}${by}`;
+    case 'map': return `world map of ${what} by country${/countr/i.test(c.x) || /^countr/i.test(w(c.x)) ? '' : ` (${w(c.x)})`}`;
     default: return c.type;
   }
 }

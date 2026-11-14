@@ -208,3 +208,34 @@ test('War Focus zooms to the states and battles in focus, and back', pageTest, a
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// 14 November 2026: the Realtime Calendar showed the Documentary button, against VM's rule that no Realtime page has
+// one (its page tells a story because it is also the Historical Calendar's). The Historical Calendar and the other
+// Retrospective pages keep it.
+test('the Documentary button: none on a Realtime page, kept on the Historical Calendar and a Retrospective page', pageTest, async () => {
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    const fab = page.locator('.doc-fab');
+    // The page in the active frame has loaded its narrator (which announces whether it tells a story), and a moment more.
+    const settled = async part => {
+      await page.waitForFunction(p => { const f = document.querySelector('#frames iframe.active'); try { return f && f.src.includes(p) && f.contentDocument?.readyState === 'complete' && !!f.contentWindow.jdpiNarrator; } catch { return false; } }, part, { timeout: 30000 });
+      await page.waitForTimeout(1500);
+    };
+    await page.goto(`${BASE}/#/rs/historical-calendar`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await settled('period=history');
+    assert.equal(await fab.isVisible(), true, 'the Historical Calendar keeps its button');
+    await page.evaluate(() => { location.hash = '#/rt/calendar'; });
+    await settled('period=contemporary');
+    assert.equal(await page.evaluate(() => !!document.querySelector('#frames iframe.active').contentWindow.jdpiDocumentary?.story), true, 'the page tells a story');
+    assert.equal(await fab.isVisible(), false, 'yet the Realtime Calendar shows no Documentary button');
+    await page.evaluate(() => { location.hash = '#/rt/volatility'; });
+    await page.waitForTimeout(1500);
+    assert.equal(await fab.isVisible(), false, 'nor does another Realtime page');
+    await page.evaluate(() => { location.hash = '#/rs/war-focus'; });
+    await fab.waitFor({ state: 'visible', timeout: 20000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

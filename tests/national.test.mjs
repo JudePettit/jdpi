@@ -446,6 +446,43 @@ test('page: Liechtenstein\'s current leader is the regent who acts for the head 
   assert.deepEqual(errors, []);
 });
 
+// 14 November 2026: a corrected head of state (San Marino's Captains Regent) was credited to Wikidata alone. The page
+// knows a corrected head by its missing Wikidata ID; this holds the rule to the data: every head named without an ID is
+// the name a correction in leader-corrections.json gives for that country and office.
+test('data: a head named without a Wikidata ID is one leader-corrections.json supplied', () => {
+  const fixes = read('national/scripts/leader-corrections.json').corrections;
+  const countries = read('national/data/index.json').countries;
+  let n = 0;
+  for (const c of countries) for (const o of ['headOfState', 'headOfGovernment']) {
+    if (!c[o] || c[o + 'Qid']) continue;
+    n++;
+    assert.ok(fixes.some(k => k.iso3 === c.iso3 && k.field === o && k.name === c[o]), `${c.iso3} ${o} "${c[o]}" has no Wikidata ID and no correction`);
+  }
+  assert.ok(n > 0, 'the committed data has corrected heads (San Marino among them)');
+});
+
+test('page: a corrected head of state\'s source names the correction; a head from Wikidata alone is credited to it', pageTest, async () => {
+  const countries = read('national/data/index.json').countries;
+  const fixed = countries.find(c => c.iso3 === 'SMR' && c.headOfState && !c.headOfStateQid) || countries.find(c => c.headOfState && !c.headOfStateQid);
+  const plain = countries.find(c => c.iso3 === 'FRA');
+  const browser = await launch();
+  const errors = [];
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    page.on('pageerror', e => errors.push(e.message));
+    const src = async iso3 => {
+      await page.goto(`${BASE}/q/national#country=${iso3}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForFunction(n => document.querySelector('#profile h2')?.textContent === n && [...document.querySelectorAll('#profile .stat span')].some(s => s.textContent === 'Head of state'), countries.find(c => c.iso3 === iso3).name, { timeout: 20000 });
+      return page.$$eval('#profile .stat', ss => ss.find(x => x.querySelector('span')?.textContent === 'Head of state').querySelector('small.src').textContent);
+    };
+    if (fixed) assert.match(await src(fixed.iso3), /^VM’s correction of Wikidata/, `${fixed.iso3}: ${fixed.headOfState}`);
+    const fra = await src(plain.iso3);
+    assert.match(fra, /^Wikidata/);
+    assert.doesNotMatch(fra, /correction/);
+  } finally { await browser.close(); }
+  assert.deepEqual(errors, []);
+});
+
 test('compare: countries are added and removed on the Compare page itself', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

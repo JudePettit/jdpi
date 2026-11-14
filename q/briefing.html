@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="hb" data-module="briefing" data-shell="../" defer></script>
 <script src="../design/prp-access.js"></script>
+<script src="../design/prp-tex.js"></script>
 <style>
 /* Political positions: the page's own diverging scale (red · grey · blue). The far positions carry the most contrast
    against the page in both themes; every mark sits next to its label, so colour is never the only cue. */
@@ -134,7 +135,7 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
         <figure class="prp-figure coverage">
           <div class="meter" id="meter" role="img" aria-label="Share of stories by political position"></div>
           <div class="meterkey" id="meterkey"></div>
-          <figcaption><b>Figure 1.</b> Coverage of the selected topic by political position: each position’s share of the stories shown.</figcaption>
+          <figcaption><b>Figure 1.</b> Coverage of the selected topic by political position: each position’s share of the stories shown. The positions are balanced by their numbers of publishers, not of stories, and neither is a balance of facts.</figcaption>
         </figure>
         <div id="out"></div>
       </main>
@@ -144,6 +145,7 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
   <section id="tab-publishers" role="tabpanel" aria-labelledby="tabbtn-publishers" hidden>
     <div class="prp-panel">
       <div class="prp-panel-head"><b>Publisher catalogue</b><span class="srcmeta" id="srcmeta"></span></div>
+      <p class="prp-note pub-note" id="balance"></p>
       <div class="tablewrap"><table class="prp-table"><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
       <p class="prp-note pub-note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. <span class="caution" aria-hidden="true">⚠</span> marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage.</p>
     </div>
@@ -250,8 +252,10 @@ const accOf = i => i._acc || (i._acc = ACC ? ACC.classify({ briefing: 'political
 const freeFirst = list => PRPAccess.leadFree(list, i => PRPAccess.isFree(accOf(i)));
 function storyHtml(i, showTag) {
   const s = SRC.get(i.s);
-  return `<div class="story">${showTag ? `<div>${posTag(s.position)}</div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.t)}${PRPAccess.label(accOf(i))}</a>
-    <small>${esc(s.name)}${s.caution ? caution : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(i.d.slice(0, 180))}${i.d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
+  // A headline's or summary's TeX notation, should a feed send any, in plain characters (design/prp-tex.js).
+  const t = PRPTex.plain(i.t), d = PRPTex.plain(i.d || '');
+  return `<div class="story">${showTag ? `<div>${posTag(s.position)}</div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(t)}${PRPAccess.label(accOf(i))}</a>
+    <small>${esc(s.name)}${s.caution ? caution : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(d.slice(0, 180))}${d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
 }
 function filtered() {
   const q = $('#q').value.trim().toLowerCase(), pub = $('#publisher').value, t = topics.find(x => x.id === current);
@@ -285,6 +289,17 @@ function renderSources() {
     <td>${posTag(s.position)}</td><td>${esc(s.country)}</td>
     <td>${s.active ? '<span class="prp-status good">Active</span>' : s.reserve ? '<span class="prp-status">Reserve</span>' : `<span class="prp-status bad">Unavailable (${esc(s.status)})</span>`}</td><td class="num">${num(counts.get(s.id) || 0)}</td></tr>`).join('');
   $('#srcmeta').textContent = 'Active · ' + D.positions.map(p => `${p.label} ${D.sources.filter(s => s.position === p.key && s.active).length}`).join(' · ');
+  $('#balance').textContent = balanceNote(D);
+}
+// Beside the publisher counts: equal numbers of publishers are neither equal numbers of stories (the store's own
+// counts by position, over the days it keeps) nor a balance of facts.
+function balanceNote(d) {
+  const pos = new Map(d.sources.map(s => [s.id, s.position])), n = new Map(d.positions.map(p => [p.key, 0]));
+  for (const i of d.items) if (n.has(pos.get(i.s))) n.set(pos.get(i.s), n.get(pos.get(i.s)) + 1);
+  const by = d.positions.map(p => ({ label: p.label.toLowerCase(), n: n.get(p.key) })).sort((a, b) => a.n - b.n), lo = by[0], hi = by.at(-1);
+  const spread = lo.n === hi.n ? `in the last ${d.keepDays} days the briefing collected ${num(lo.n)} stories from each position`
+    : `in the last ${d.keepDays} days the briefing collected ${num(lo.n)} stories from the ${lo.label} and ${num(hi.n)} from the ${hi.label}, the fewest and the most`;
+  return `Equal numbers of publishers are not equal numbers of stories: ${spread}. Nor are they a balance of facts: the briefing counts and sorts headlines by their publishers' slant, and does not check what any story says.`;
 }
 
 /* ---------- deep links: #q=…&w=…&soft=1 (the window's hash names are the other briefings': 24h, 3d, 7d) ----------

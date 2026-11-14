@@ -483,3 +483,44 @@ test('Realtime Calendar: ?event= opens that event on its month; a gone one leave
     assert.equal(await page.locator('#monthpick').inputValue(), '2027-03', 'the month it was on');
   });
 });
+
+// 14 November 2026: an address with an impossible date (?month=2026-99, or an event key dated 2026-99-01) left an empty
+// calendar. It opens on the current month (the browser's own, as the page's is) with a plain note.
+test('Calendars: an impossible month or event date opens the current month with a plain note', pageTest, async () => {
+  await withPage(async page => {
+    const current = () => page.evaluate(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; });
+    for (const [query, note] of [
+      ['period=history&month=2026-99', 'There is no month 2026-99, so the calendar opens on the current month.'],
+      ['period=contemporary&month=2026-00', 'There is no month 2026-00, so the calendar opens on the current month.'],
+      ['period=history&event=2026-99-01~x~y', 'That event is no longer in the calendar: it may have been renamed or moved.'],
+      ['period=contemporary&event=2026-02-30~x~y', 'That event is no longer in the calendar: it may have been renamed or moved.'],
+    ]) {
+      await page.goto(`${BASE}/q/calendar.html?${query}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#event-gone:not([hidden])', { timeout: 20000 });
+      assert.equal(await page.locator('#event-gone').innerText(), note, query);
+      assert.equal(await page.locator('#monthpick').inputValue(), await current(), `${query}: the current month`);
+      assert.doesNotMatch(await page.locator('#monthlabel').innerText(), /Invalid/, query);
+      assert.equal(await page.locator('#days .day .num').count(), 42, `${query}: a calendar, not an empty grid`);
+    }
+    // A month that exists opens as before, with no note.
+    await page.goto(`${BASE}/q/calendar.html?period=history&month=1999-07`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelector('#monthpick')?.value === '1999-07', null, { timeout: 20000 });
+    assert.equal(await page.locator('#event-gone').isHidden(), true);
+  });
+});
+
+// Review of 12 November 2026: an event's own date and the date of its record were not told apart. The pop-out names
+// both: the event's date, and when its record was last rebuilt from its sources (its decade file's own build time).
+test('Historical Calendar: an event names its own date and, apart, when its record was rebuilt', pageTest, async () => {
+  const d = JSON.parse(readFileSync(new URL('../calendar/data/1990s.json', import.meta.url), 'utf8'));
+  const e = d.events.find(x => x.status !== 'tentative' && x.summary), long = s => new Date(s + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  await withPage(async page => {
+    await page.route('**/calendar/data/1990s.json', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ ...d, generated: '2026-01-02T05:23:00.000Z' }) }));
+    const key = (await import('../integration/scripts/heads.mjs')).eventKey(e);
+    await page.goto(`${BASE}/q/calendar.html?period=history&event=${key}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#modal:not([hidden]) .record-dates', { timeout: 20000 });
+    assert.match(await page.locator('#modal-meta').innerText(), /Event date/i);
+    assert.equal(await page.locator('#modal .record-dates').innerText(), `Event date: ${long(e.date)}. Record last rebuilt from its sources: 2 January 2026, in the calendar's daily build.`);
+    assert.match(await page.locator('#hero-meta').innerText(), /Records rebuilt/i);
+  });
+});

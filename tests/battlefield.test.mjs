@@ -202,6 +202,20 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', p
   assert.deepEqual(errors, []);
 });
 
+// Review of 12 November 2026: the inclusion rules differ before UCDP's first year and after, and only the Method said
+// so. The two thresholds now stand under the timeline, with the years from the data.
+test('Retrospective: the two datasets\' thresholds stand under the timeline, with their years', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=1939');
+  await page.waitForFunction(() => document.querySelector('#thresholds')?.textContent, null, { timeout: 20000 });
+  const line = await page.locator('#thresholds').innerText();
+  const below = await page.evaluate(() => document.querySelector('#thresholds').getBoundingClientRect().top >= document.querySelector('#timeline').getBoundingClientRect().bottom - 1);
+  await browser.close();
+  const { firstYear: a, ucdpFrom: u, lastYear: b } = HISTORY;
+  assert.equal(line, `What is counted: ${a}–${u - 1}, wars of 1,000+ battle deaths (Correlates of War); ${u}–${b}, armed conflicts of 25+ battle deaths in a year (UCDP/PRIO). Smaller conflicts before ${u} are missing.`);
+  assert.ok(below, 'right under the timeline');
+  assert.deepEqual(errors, []);
+});
+
 test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad; 1942 shows the war in North Africa and the Pacific', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=2003');
   await page.waitForSelector('#panel .war', { timeout: 20000 });

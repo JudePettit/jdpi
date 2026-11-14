@@ -5,7 +5,7 @@
    of the block of text, which gives way to the sentence being read; Related (T) is a strip of the screens related to
    the scene, with a See more panel; full screen (F) fits the 16:9 stage to the screen, beside the pane when it is on;
    Page only (G) fills the screen with the pane alone, which follows the film as it plays on. */
-import { CATEGORIES, categoryOf, flatScenes, shortCite } from './lib/format.js';
+import { CATEGORIES, categoryOf, flatScenes, shortCite, spanLabel, courseWords } from './lib/format.js';
 import { tokens, sentences, sentenceRuns, estimateSeconds } from './lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute, readKinoView, kinoViewHash, linkPlace } from './lib/links.js';
 import { relatedPlaces, sceneEntities, tagTables, shardOf, CHIPS } from './lib/related.js';
@@ -56,12 +56,23 @@ function catLink(id) {
   return { href: `index.html?cat=${id}`, target: '_self' };
 }
 
+// The thinker's own books on Bibliotheca's shelf (index.json's "books", matched by build-index.mjs on the books'
+// authors' Wikidata IDs): opened in its reader, Neo Classic, through the shell, or on their own page in a new tab.
+function bookLinks(books, cls) {
+  return (books || []).map(b => {
+    const link = { suite: 'bibliotheca', module: 'neo-classic', at: `bibliotheca/neo/index.html#book=${encodeURIComponent(b.slug)}` };
+    const top = embedded && !inSide, href = top ? shellUrl(link, SHELL) : new URL(link.at, SHELL).href;
+    return `<a class="${cls}" href="${esc(href)}" target="${top ? '_top' : '_blank'}" rel="noopener">Read the full book: <cite>${esc(b.title)}</cite>, in Bibliotheca →</a>`;
+  }).join('');
+}
+
 /* ---------- header and catalogue ---------- */
 function renderHeader() {
   $('#eyebrow-cat').textContent = CATINFO.name;
   $('#cat-title').textContent = CATINFO.name;
-  $('#cat-dek').textContent = `${CATINFO.dek} ${CATINFO.courses ? 'Each course plays in parts, with a short quiz at the end.' : 'Each documentary is narrated over maps, timelines and portraits, and every scene can open its place in Vitruvian Manager, or show it beside the film.'}`;
   const docs = S.index.docs.filter(d => d.category === CAT), mins = docs.reduce((a, d) => a + d.minutes, 0);
+  $('#cat-dek').textContent = `${CATINFO.dek} ${CATINFO.courses ? courseWords(docs) : 'Each documentary is narrated over maps, timelines and portraits, and every scene can open its place in Vitruvian Manager, or show it beside the film.'}`;
+  $('#cat-note').hidden = !CATINFO.note; $('#cat-note').textContent = CATINFO.note || '';
   $('#cat-meta').innerHTML = [`<span><b>${docs.length}</b> ${CATINFO.courses ? 'course' : 'documentar'}${docs.length === 1 ? (CATINFO.courses ? '' : 'y') : (CATINFO.courses ? 's' : 'ies')}</span>`,
     docs.length ? `<span><b>${mins}</b> minutes</span>` : '', `<span><b>${S.index.docs.length}</b> in Kino</span>`, '<span>Sources <b>scholarly works · Wikidata · Wikimedia Commons</b></span>',
     `<span>Updated <b>${esc(new Date(S.index.generated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}</b></span>`].filter(Boolean).join('');
@@ -77,12 +88,16 @@ function renderCatalogue() {
   if (q) docs = docs.filter(d => [d.title, d.summary, ...d.subjects.map(s => s.label)].join(' ').toLowerCase().includes(q));
   docs.sort(sort === 'title' ? (a, b) => a.title.localeCompare(b.title) : sort === 'short' ? (a, b) => a.minutes - b.minutes : (a, b) => a.era[0] - b.era[0]);
   $('#count').textContent = `${docs.length} shown`;
-  $('#cards').innerHTML = docs.length ? docs.map(d => `<a class="kn-card" href="${kinoHash(d.id)}" data-doc="${esc(d.id)}">
+  $('#ready-h').hidden = !S.index.docs.some(d => d.category === CAT);
+  // A course whose thinker's own book is on Bibliotheca's shelf links to it beside its card (a link cannot sit inside
+  // the card, which is a link itself).
+  const cell = (d, card) => (d.books?.length ? `<div class="kn-cell">${card}${bookLinks(d.books, 'kn-book')}</div>` : card);
+  $('#cards').innerHTML = docs.length ? docs.map(d => cell(d, `<a class="kn-card" href="${kinoHash(d.id)}" data-doc="${esc(d.id)}">
       <div class="thumb" data-preview="${esc(d.id)}"><span class="play">${d.parts ? 'Start course' : 'Watch'}</span></div>
       <div class="body"><h2>${esc(d.title)}</h2>
-        <div class="meta">${esc(era(d.era))} · ${d.minutes} min · ${d.parts ? `${d.parts} parts · ` : ''}${d.scenes} scenes · ${d.sources} sources</div>
+        <div class="meta">${d.parts ? 'Short introduction · ' : ''}${esc(spanLabel(d))} · ${d.minutes} min · ${d.parts ? `${d.parts} parts · ` : ''}${d.scenes} scenes · ${d.sources} sources</div>
         <p>${esc(d.summary)}</p>
-        <div class="subjects">${d.subjects.map(s => `<span class="prp-chip">${esc(s.label)}</span>`).join('')}</div></div></a>`).join('')
+        <div class="subjects">${d.subjects.map(s => `<span class="prp-chip">${esc(s.label)}</span>`).join('')}</div></div></a>`)).join('')
     : `<div class="kn-empty">${q ? 'No documentary here matches that search.' : `No ${CATINFO.courses ? 'courses' : 'documentaries'} in ${esc(CATINFO.name)} yet. The first ones are in preparation, below.`}</div>`;
   for (const d of docs) {
     const thumb = $(`.thumb[data-preview="${CSS.escape(d.id)}"]`);
@@ -121,7 +136,7 @@ async function openDoc(id, sceneRef) {
   document.title = `${doc.title} · Kino · VM`;
   $('#doc-title').textContent = doc.title;
   $('#back-label').textContent = `All ${CATINFO.name.toLowerCase()} ${CATINFO.courses ? 'courses' : 'documentaries'}`;
-  $('#doc-meta').textContent = `${era(doc.era)} · ${doc.minutes} min · ${S.scenes.length} scenes · ${doc.sources.length} sources${doc.category !== CAT ? ` · ${categoryOf(doc.category)?.name}` : ''}`;
+  $('#doc-meta').textContent = `${doc.parts ? 'Short introduction · ' : ''}${spanLabel(doc)} · ${doc.minutes} min · ${S.scenes.length} scenes · ${doc.sources.length} sources${doc.category !== CAT ? ` · ${categoryOf(doc.category)?.name}` : ''}`;
   renderChapters(); renderProgress(); renderAbout(); renderSources(); renderQuiz();
   note('');
   window.scrollTo({ top: 0 });
@@ -321,6 +336,11 @@ function updateProgress(frac) {
 function renderAbout() {
   const d = S.doc;
   $('#doc-summary').textContent = d.summary;
+  // Where the story stops, for a subject that carries on after it (a party still in being).
+  $('#doc-cutoff').hidden = !d.cutoff;
+  $('#doc-cutoff').textContent = d.cutoff ? `This film tells the story to ${d.cutoff}: what happened after that is not in it.` : '';
+  const books = S.index.docs.find(x => x.id === d.id)?.books || [];
+  $('#doc-books').hidden = !books.length; $('#doc-books').innerHTML = bookLinks(books, 'kn-book');
   $('#doc-subjects').innerHTML = d.subjects.map(s => `<span class="prp-chip" data-qid="${esc(s.qid)}">${esc(s.label)}</span>`).join('');
   const seen = new Set(), links = [];
   S.scenes.forEach((sc, i) => { if (sc.link && !seen.has(sc.link.at)) { seen.add(sc.link.at); links.push([sc.link, i]); } });

@@ -1,5 +1,5 @@
 title: Finance
-intro: A first-year university finance course in twelve units: time value of money, bonds, shares, financial statements, risk, the cost of capital, investment decisions, derivatives, markets and banks. Each lesson ends with questions to check your understanding.
+intro: An introductory course in finance: the time value of money, bonds, shares, financial statements, risk, the cost of capital, investment decisions, derivatives, markets and banks, each at the level of its first ideas, with worked examples. It is a short introduction, not a full university course. Each lesson ends with questions to check your understanding.
 
 # Unit 1 · The time value of money
 

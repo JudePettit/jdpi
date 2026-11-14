@@ -32,6 +32,49 @@ test('every war in the index has its file, and the two agree', async () => {
   }
 });
 
+// Review of 12 November 2026: estimated months were shown to the nearest person. They are shares of a yearly or war
+// total, so they are rounded (two significant figures, totals three) and marked ~; a recorded count stays exact.
+test('figures: an estimate is rounded and marked, a recorded count is not', async () => {
+  const { sig, deaths, estimateOf } = await import('../battlefield/focus/figures.mjs');
+  assert.deepEqual([sig(123456, 2), sig(123456, 3), sig(98, 2), sig(37, 2), sig(0, 2), sig(999999, 3)], [120000, 123000, 98, 37, 0, 1000000]);
+  assert.equal(deaths(123456, true), '~120,000');
+  assert.equal(deaths(16634910, true, { total: true }), '~16,600,000');
+  assert.equal(deaths(999999, true, { total: true }), '~1,000,000', 'a spread total back to the round figure it was spread from');
+  assert.equal(deaths(4321, false), '4,321', 'a recorded count is exact');
+  assert.equal(estimateOf('Correlates of War war total, spread across months by recorded battles'), 'Correlates of War’s war total');
+  assert.equal(estimateOf('PRIO Battle Deaths annual totals, spread across months by UCDP events; UCDP GED recorded deaths (state-based violence)'), 'PRIO’s yearly totals');
+  assert.equal(estimateOf('UCDP GED recorded deaths (state-based violence)'), '');
+});
+
+test('the page claims only what it draws: sides and whole-country occupation, not who held what', () => {
+  const html = readFileSync(new URL('../battlefield/focus/index.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /who held what/i, 'front lines are not drawn, so the page does not promise who held what');
+  assert.match(html, /Front lines are not drawn/);
+  const reg = JSON.parse(readFileSync(new URL('../registry.json', import.meta.url), 'utf8'));
+  const wf = reg.suites.flatMap(s => s.modules).find(m => m.id === 'war-focus');
+  assert.doesNotMatch(wf.description, /fronts|territory/i, 'nor does its registry description');
+});
+
+test('the page says whose its estimated deaths are, rounded; UCDP\'s counts stay exact', pageTest, async t => {
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json'), k = ww2.months.indexOf('1942-01');
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1942-01`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'January 1942', null, { timeout: 20000 });
+  const month = await page.locator('#c-month').innerText(), note = await page.locator('#c-month-note').innerText();
+  const digits = month.replace(/[~,]/g, '').replace(/0+$/, '').length;
+  assert.match(month, /^~[\d,]+$/);
+  assert.ok(digits <= 2, `an estimated month to two significant figures: ${month} (the data says ${ww2.deaths[k]})`);
+  assert.match(note, /^Estimate from Correlates of War/);
+  assert.match(await page.locator('#c-total').innerText(), /^~/);
+  await page.goto(`${BASE}/battlefield/focus/#war=russia-ukraine&m=2023-03`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'March 2023', null, { timeout: 20000 });
+  const ru = await dataFile('battlefield/focus/data/wars/russia-ukraine.json');
+  assert.equal((await page.locator('#c-month').innerText()).replace(/,/g, ''), String(ru.deaths[ru.months.indexOf('2023-03')]), 'UCDP\'s count, exactly');
+  assert.equal(await page.locator('#c-month-note').innerText(), 'As recorded by UCDP');
+});
+
 test('WWII plays month by month with sides, occupation and battles', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });

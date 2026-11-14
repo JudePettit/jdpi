@@ -61,6 +61,31 @@ test('a period compares its two ends: 1500 to 1900, rings for the start, a chang
   assert.deepEqual(errors, []);
 });
 
+// Review of 12 November 2026: the uncertainty stood only in the method. A share before 1800 now carries ~ beside it,
+// with its meaning (the method's own ±30–50%) in the panel, the table and the tooltip; a later share carries none.
+test('before 1800 every share is marked as rough beside its value, with what the mark means; after, none is', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const look = async y => {
+    await page.goto(`${BASE}/kardashev/#y=${y}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(w => document.querySelector('#year-big')?.textContent === w && document.querySelector('.rank[data-id] b'), y < 0 ? `${-y} BC` : String(y), { timeout: 20000 });
+    return { shares: await page.locator('#panel .rank b').allInnerTexts(), note: await page.locator('#panel .note').allInnerTexts() };
+  };
+  const early = await look(1500), late = await look(1900);
+  assert.ok(early.shares.length > 5 && early.shares.every(s => /^~\d/.test(s)), early.shares.join(' '));
+  assert.ok(early.note.some(n => /Before 1800 a share is an estimate, accurate only to within about ±30–50%/.test(n)), early.note.join(' | '));
+  assert.ok(late.shares.length > 5 && late.shares.every(s => /^\d/.test(s)), late.shares.join(' '));
+  assert.ok(!late.note.some(n => /±30–50%/.test(n)));
+  await page.goto(`${BASE}/kardashev/#y=1500&v=table`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#table-rows tr[data-id]', { timeout: 20000 });
+  assert.match(await page.locator('#table-note').innerText(), /±30–50%/);
+  assert.match(await page.locator('#table-rows tr[data-id] td.num').nth(1).innerText(), /^~/);
+  assert.deepEqual(errors, []);
+});
+
 // On a phone the year and the rating stack, at rest and in a period alike: side by side, a period's longer figures
 // pushed the page sideways, and its longer line under the rating dropped the timeline and the map mid-drag.
 test('a period on a phone: nothing scrolls sideways and the timeline stays where it was', pageTest, async t => {

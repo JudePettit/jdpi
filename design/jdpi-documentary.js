@@ -158,7 +158,10 @@
   const tellsStory = new WeakSet(); // frames whose page has its own story (window.jdpiDocumentary)
   const activeFrame = () => { const f = $('#frames'); return f && !f.hidden ? f.querySelector('iframe.active') : null; };
   const onRetrospective = () => /^#\/(rs|hp)(\/|$)/.test(location.hash);
-  const available = () => onRetrospective() || tellsStory.has(activeFrame());
+  // No Realtime page offers the button (VM's rule): not the Realtime Calendar either, whose page tells a story because it
+  // is also the Historical Calendar's. Kino's own zoom on Realtime pages (prp:focus) does not go through it.
+  const onRealtime = () => /^#\/(rt|q)(\/|$)/.test(location.hash);
+  const available = () => !onRealtime() && (onRetrospective() || tellsStory.has(activeFrame()));
   const syncFab = () => { fab.hidden = !available() || S.open; };
   // The shell switches frames on the same hashchange, so look once it has.
   window.addEventListener('hashchange', () => setTimeout(() => { syncFab(); routeChanged(); }, 0));

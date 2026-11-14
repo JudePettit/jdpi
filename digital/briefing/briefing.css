@@ -62,6 +62,17 @@ button, input, select { font: inherit; }
 .badge { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid var(--prp-line-strong); border-radius: 3px; color: var(--prp-text-2);
   font: 600 9.5px var(--prp-font-mono); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
 .badge.paper { border-color: var(--prp-accent); background: var(--prp-accent-soft); color: var(--prp-text); }
+/* The research marks apart, each by its look as well as its word: a journal's solid, a preprint's dashed, a lab's
+   write-up and an institute's plain (no fill). */
+.badge.paper[data-kind="journal"] { border-width: 1.5px; }
+.badge.paper[data-kind="preprint"] { border-style: dashed; background: transparent; }
+.badge.paper[data-kind="lab"], .badge.paper[data-kind="research"] { border-color: var(--prp-line-strong); background: transparent; color: var(--prp-text-2); }
+.badge-key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 9px 16px; border-bottom: 1px solid var(--prp-line-soft); background: var(--prp-surface-2);
+  color: var(--prp-text-2); font: 12px/1.45 var(--prp-font-ui); }
+.badge-key:empty { display: none; }
+.badge-key .prp-label { flex-basis: 100%; margin: 0; }
+.badge-key .k { flex: 1 1 260px; min-width: 0; }
+.badge-key .badge { margin-right: 4px; vertical-align: 1px; }
 .entry h4 { margin: 0; max-width: 80ch; font: 600 16.5px/1.35 var(--prp-font-serif); color: var(--prp-text); overflow-wrap: anywhere; }
 .entry h4 a { color: inherit; text-decoration: none; }
 .entry h4 a:hover { color: var(--prp-link); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }

@@ -289,3 +289,35 @@ test('page: framed as in the shell, an entry opens its Kino, National Analysis a
   assert.equal(await button.getAttribute('href'), `${BASE}/encyclopedia/index.html#Q117`);
   assert.deepEqual(errors, []);
 });
+
+// The review of 12 November 2026: a search for Machiavelli left facets with nothing in them on the page, and "PRP" in
+// its text. A facet with no values under the other filters is left out (one with a value selected stays, to be
+// cleared), and what a person reads says Vitruvian Manager or VM; file names, ids, classes and keys keep "prp".
+test('page: facets with nothing in them are hidden, and the page says VM, never PRP', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/encyclopedia/index.html#explore`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#facets .facet', { timeout: 30000 });
+  const facets = () => page.$$eval('#facets .facet > button', bs => bs.map(b => [b.dataset.toggle, b.querySelector('.n').textContent]));
+  const all = await facets();
+  await page.fill('#name', 'Machiavelli');
+  await page.waitForFunction(() => /^[1-9]\d* entr/.test(document.querySelector('#count').textContent) && document.querySelectorAll('#rows tr').length < 20, null, { timeout: 10000 });
+  const some = await facets();
+  assert.ok(some.length && some.length < all.length, `fewer facets (${some.length} of ${all.length}) once the search narrows the entries`);
+  for (const [f, n] of some) assert.ok(/^[1-9]/.test(n) || /selected/.test(n), `${f} is shown with ${n} values`);
+  // Each facet left out has no value among the entries that match: the page's own rows and tags say so.
+  const hidden = all.map(([f]) => f).filter(f => !some.some(([g]) => g === f));
+  const empty = await page.evaluate(names => names.filter(f => rows.filter(r => matches(r)).every(r => r[6].every(t => tagFacet[t] !== f))), hidden);
+  assert.deepEqual(empty, hidden);
+  // What a person reads: the title, the description, the text and the sort's options.
+  const text = await page.evaluate(() => [document.title, document.querySelector('meta[name=description]').content, document.body.innerText, [...document.querySelectorAll('option')].map(o => o.textContent).join(' ')].join(' '));
+  assert.doesNotMatch(text, /\bPRP\b/);
+  assert.match(text, /Most appearances in VM/);
+  await page.goto(`${BASE}/encyclopedia/index.html#Q1399`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#entity .ehead h2', { timeout: 30000 });
+  assert.match(await page.title(), / · Master Index · VM$/);
+  assert.deepEqual(errors, []);
+});

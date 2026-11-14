@@ -396,6 +396,54 @@ test('chart: a sensible first chart for a table', () => {
   assert.equal(suggestChart(toTable([])), null);
 });
 
+// Review of 12 November 2026: charts and tables showed field names. They show each field in words, from the
+// catalogue's description (its unit where the catalogue gives one), and keep the name where steps need it.
+test('chart: columns are named in words from the catalogue, with their units, never invented', async () => {
+  const { humanName, fieldLabel, labelsFor } = await import('../analytics/lib/chartdata.js');
+  assert.deepEqual(['kcal_per_person_day', 'notModified', 'place.lon', 'iso3', 'war_id', 'count', 'Rows', 'to (not included)', '__proto__'].map(humanName),
+    ['Kcal per person day', 'Not modified', 'Place lon', 'ISO3', 'War ID', 'Count', 'Rows', 'to (not included)', 'Proto']);
+  assert.equal(fieldLabel('world_watts', "Humanity's energy capture, watts"), "Humanity's energy capture, watts");
+  assert.equal(fieldLabel('share', 'Share of world energy capture, 0–1'), 'Share of world energy capture, 0–1');
+  assert.equal(fieldLabel('year', 'Year (negative = BC)'), 'Year');
+  assert.equal(fieldLabel('score', 'Geopolitical Volatility Index, 0–100 (null when too few events or sources)'), 'Geopolitical Volatility Index, 0–100');
+  assert.equal(fieldLabel('tier', 'Source tier: 1 Flagship journal; 2 Major journal, lab or agency; 3 Preprint, institute, engineering blog or advocacy'), 'Source tier');
+  assert.equal(fieldLabel('type', 'election, referendum, party, leader or court'), 'Type', 'a list of values is no label');
+  assert.equal(fieldLabel('estimated', 'True when spread from an annual or war total'), 'Estimated');
+  assert.equal(fieldLabel('kcal_per_person_day', ''), 'Kcal per person day', 'no description: the name in words, no unit added');
+  const L = labelsFor([{ name: 'kardashev', description: 'Kardashev rating' }, { name: 'year', description: 'Year (negative = BC)' }]);
+  assert.deepEqual(['kardashev', 'mean_kardashev', 'count', 'year', 'other_field'].map(L), ['Kardashev rating', 'Mean of Kardashev rating', 'Count', 'Year', 'Other field']);
+  // The chart's axes, legend and table view take the words; the rows and the field names stay as they were.
+  const t = toTable([{ year: 1800, kardashev: 0.55, region: 'A' }, { year: 1900, kardashev: 0.6, region: 'B' }]);
+  const prep = prepareChart(t, { type: 'line', x: 'year', y: 'kardashev', fn: 'mean', color: 'region' }, { label: L });
+  assert.deepEqual([prep.x, prep.y, prep.xLabel, prep.yLabel, prep.colorLabel, prep.valueLabel], ['year', 'kardashev', 'Year', 'Kardashev rating', 'Region', 'Mean of Kardashev rating']);
+  assert.deepEqual(prep.table.columns.map(c => [c.name, c.label]), [['year', 'Year'], ['region', 'Region'], ['Mean of Kardashev rating', 'Mean of Kardashev rating']]);
+  assert.equal(prepareChart(t, { type: 'line', x: 'year', y: 'kardashev', fn: 'mean' }).valueLabel, 'Mean of kardashev', 'without labels, as before');
+  // The second reader (14 November 2026): a single word before the colon is a kind, not the field's name; a shortened
+  // label keeps the unit its description closes on; two fields described alike never share a heading.
+  assert.equal(fieldLabel('political', 'Component: political/diplomatic escalation, 0–100'), 'Political/diplomatic escalation, 0–100');
+  assert.equal(fieldLabel('conflict', 'Component: conflict & security, 0–100'), 'Component: conflict & security, 0–100', 'short enough to stand whole');
+  assert.equal(fieldLabel('pestle_political', 'Political pressure: share of scored indicators worsening, 0–1'), 'Political pressure, 0–1');
+  assert.equal(fieldLabel('pestle_overall', 'Overall PESTLE pressure, 0–1: mean of the six dimensions'), 'Overall PESTLE pressure, 0–1');
+  assert.equal(fieldLabel('kind', 'Kind of source: journal, preprint, lab, research, official, news'), 'Kind of source', 'a list of values is no unit');
+  const C = labelsFor([{ name: 'iso3', description: 'Country (ISO 3166-1 alpha-3)' }, { name: 'name', description: 'Country' }, { name: 'iso2', description: 'Country (ISO 3166-1 alpha-2)' }]);
+  assert.deepEqual(['iso3', 'name', 'iso2'].map(C), ['Country (ISO3)', 'Country (name)', 'Country (ISO2)']);
+  const K = labelsFor([{ name: 'iso3', description: 'Country (ISO 3166-1 alpha-3)' }, { name: 'country', description: 'Country' }]);
+  assert.deepEqual(['iso3', 'country'].map(K), ['Country (ISO3)', 'Country']);
+  // Every dataset in the catalogue: no two of its columns share a heading, and no label is a bare kind such as "Component".
+  const catalog = json('integration/catalog.json');
+  for (const d of catalog.datasets) {
+    const LL = labelsFor(d.fields), ls = (d.fields || []).map(f => LL(f.name));
+    assert.equal(new Set(ls.map(l => l.toLowerCase())).size, ls.length, `${d.id}: ${ls.join(' | ')}`);
+    assert.ok(!ls.includes('Component'), `${d.id}: ${ls.join(' | ')}`);
+  }
+  // The figure's caption names the columns in the same words, inside its sentence.
+  const V = labelsFor([{ name: 'political', description: 'Component: political/diplomatic escalation, 0–100' }, { name: 'conflict', description: 'Component: conflict & security, 0–100' },
+    { name: 'score', description: 'Geopolitical Volatility Index, 0–100 (null when too few events or sources)' }, { name: 'iso3', description: 'Country (ISO 3166-1 alpha-3)' }, { name: 'name', description: 'Country' }]);
+  assert.equal(describeChart({ type: 'scatter', x: 'political', y: 'conflict' }, V), 'scatter plot of component: conflict & security, 0–100 against political/diplomatic escalation, 0–100');
+  assert.equal(describeChart({ type: 'bar', x: 'name', y: 'score', fn: 'max' }, V), 'bar chart of maximum of Geopolitical Volatility Index, 0–100 by country (name)');
+  assert.equal(describeChart({ type: 'map', x: 'iso3', y: 'score', fn: 'max' }, V), 'world map of maximum of Geopolitical Volatility Index, 0–100 by country');
+});
+
 test('countries: codes, common names and the spellings PRP uses', () => {
   const m = countryMatcher(COUNTRIES);
   const cases = [['FRA', 'FRA'], ['fr', 'FRA'], ['250', 'FRA'], ['France', 'FRA'], ['United States', 'USA'], ['United States of America', 'USA'], ['Korea, Rep.', 'KOR'],
@@ -693,7 +741,11 @@ test('page: pick a dataset, group it, chart it, and reopen the analysis from its
     await page.waitForFunction(() => /chart=bar/.test(location.hash) && document.querySelector('#chart svg g[aria-label="bar"] rect'));
     const bars = Math.min(expected.rows.length, LIMITS.bars);
     assert.equal(await page.$$eval('#chart svg g[aria-label="bar"] rect', r => r.length), bars);
-    assert.ok((await page.textContent('#caption')).startsWith(`Figure 1. Bar chart of count by ${by}. Steps: group by ${by}: count of rows. Source: ${ds.title} (Vitruvian Manager, `));
+    // The caption names the chart's columns in words (the catalogue's), and the steps by the field names they use.
+    const { labelsFor } = await import('../analytics/lib/chartdata.js');
+    const said = describeChart({ type: 'bar', x: by, y: 'count' }, labelsFor(ds.fields));
+    const caption = await page.textContent('#caption');
+    assert.ok(caption.startsWith(`Figure 1. ${said[0].toUpperCase()}${said.slice(1)}. Steps: group by ${by}: count of rows. Source: ${ds.title} (Vitruvian Manager, `), caption);
     assert.equal(await page.$$eval('#chart-table tbody tr', r => r.length), bars);
     const total = await page.$$eval('#chart-table tbody tr td:last-child', tds => tds.reduce((a, td) => a + Number(td.textContent.replace(/,/g, '')), 0));
     assert.equal(total, expected.rows.sort((a, b) => b.count - a.count).slice(0, bars).reduce((a, r) => a + r.count, 0));
@@ -927,4 +979,31 @@ test('page: a dataset whose store is newer than the catalogue says so, with the 
   } finally {
     await browser.close();
   }
+});
+
+test('page: the table and the chart name each column in words from the catalogue, the field name kept under it', pageTest, async t => {
+  if (!(await served('/analytics/'))) { t.skip(`Data Analytics is not served at ${BASE}`); return; }
+  const cat = await fetch(`${BASE}/${CAT_FILE}`).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const ds = cat?.datasets.find(d => d.id === 'kardashev-world');
+  if (!ds) { t.skip('no kardashev-world in the catalogue'); return; }
+  const desc = n => ds.fields.find(f => f.name === n).description;
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/analytics/#d=kardashev-world&chart=line&x=year&y=world_watts&fn=mean`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#chart svg g[aria-label="line"] path', { timeout: 30000 });
+    // textContent: the CSS upper-cases the headings
+    const heads = await page.$$eval('#result-table thead th', ths => ths.map(th => [th.firstChild.textContent, th.querySelector('.type').textContent]));
+    assert.deepEqual(heads.find(h => /world_watts/.test(h[1])), [desc('world_watts'), 'world_watts · number']);
+    assert.deepEqual(heads[0], ['Year', 'year · number']);
+    const svg = await page.locator('#chart svg').textContent();
+    assert.match(svg, new RegExp(`Mean of ${desc('world_watts')}`), 'the value axis in words, with its unit');
+    assert.match(svg, /Year/);
+    assert.doesNotMatch(svg, /world_watts/, 'no field name on the chart');
+    const chartHeads = await page.$$eval('#chart-table thead th', ths => ths.map(th => th.textContent));
+    assert.deepEqual(chartHeads, ['Year', `Mean of ${desc('world_watts')}`]);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
 });

@@ -129,10 +129,23 @@ const credited = f => { const c = cache.files[f]; return !!(c && c.licence && (c
     if (pick?.visual?.kind === 'map') return { kind: 'map', countries: [...new Set([...(pick.focus.countries || []), ...(pick.visual.groups || []).flatMap(g => g.countries)])], tones: Object.fromEntries((pick.visual.groups || []).flatMap(g => g.countries.map(c => [c, g.tone]))), bbox: pick.focus.bbox || null, arrows: (pick.visual.arrows || []).slice(0, 4).map(a => ({ from: a.from, to: a.to, via: a.via, tone: a.tone })) };
     return { kind: 'title' };
   };
+  // A course on a thinker links to the thinker's own books on Bibliotheca's shelf: the books whose author (by Wikidata
+  // ID, from each book's own file) is one of the course's subjects, in the shelf's order.
+  const SHELF = join(ROOT, 'bibliotheca/data');
+  const shelf = existsSync(join(SHELF, 'index.json')) ? JSON.parse(readFileSync(join(SHELF, 'index.json'), 'utf8')).books.map(b => {
+    const f = join(SHELF, 'books', `${b.slug}.json`);
+    return { slug: b.slug, title: b.title, author: existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')).author?.qid || null : null };
+  }) : [];
+  const booksOf = d => {
+    if (!CATEGORIES.find(c => c.id === d.category)?.courses) return [];
+    const qids = new Set(d.subjects.map(s => s.qid));
+    return shelf.filter(b => b.author && qids.has(b.author)).map(({ slug, title }) => ({ slug, title }));
+  };
   const entry = d => {
-    const scenes = flatScenes(d), file = files.find(f => f.id === d.id);
+    const scenes = flatScenes(d), file = files.find(f => f.id === d.id), books = booksOf(d);
     return {
-      id: d.id, title: d.title, category: d.category, era: d.era, minutes: d.minutes, summary: d.summary,
+      id: d.id, title: d.title, category: d.category, era: d.era, ...(d.cutoff ? { cutoff: d.cutoff } : {}), minutes: d.minutes, summary: d.summary,
+      ...(books.length ? { books } : {}),
       subjects: d.subjects.map(s => ({ qid: s.qid, label: labelOf(s.qid, s.label) })),
       scenes: scenes.length, parts: d.parts?.length || 0, quiz: d.quiz?.length || 0,
       sources: d.sources.length, scholarly: d.sources.filter(s => s.kind === 'book' || s.kind === 'article').length,

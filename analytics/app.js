@@ -5,7 +5,7 @@
 import { toTable, runPipeline, columnsOf, STEP_TYPES, CMPS, AGGS, profile, toCSV, formatValue, aggName } from './lib/engine.js';
 import { FUNCTIONS } from './lib/expr.js';
 import { parseHash, toHash, emptySpec, emptyChart, describeStep, describeChart, CHART_TYPES, CHART_FNS } from './lib/spec.js';
-import { prepareChart, suggestChart, chartProblem, countryMatcher, countryShare } from './lib/chartdata.js';
+import { prepareChart, suggestChart, chartProblem, countryMatcher, countryShare, labelsFor } from './lib/chartdata.js';
 import { loadDataset, datasetUrls, declaredBytes, mb } from './lib/load.js';
 import { buildPrompt, analysisLink } from './lib/ai.js';
 import { availableExamples } from './lib/examples.js';
@@ -476,7 +476,10 @@ function renderResult() {
   $('#result-count').textContent = `${plural(n, 'row')} × ${plural(t.columns.length, 'column')}${n !== base && !isSql() ? ` · from ${num(base)}` : ''}`;
   if (!n) { table.innerHTML = '<tbody><tr><td class="prp-empty">No rows. Loosen a filter or remove a step.</td></tr></tbody>'; pager.innerHTML = ''; return; }
   const from = S.page * S.pageSize, rows = t.rows.slice(from, from + S.pageSize);
-  table.innerHTML = `<thead><tr>${t.columns.map(c => `<th scope="col"${c.type === 'number' ? ' class="num"' : ''}>${esc(c.name)}<span class="type">${esc(c.type)}</span></th>`).join('')}</tr></thead>` +
+  // Each column in words (its catalogue description: lib/chartdata.js labelsFor), with its field name, the one the steps
+  // use, under it beside its type.
+  const L = labelsFor(S.data?.ds?.fields);
+  table.innerHTML = `<thead><tr>${t.columns.map(c => { const l = L(c.name); return `<th scope="col"${c.type === 'number' ? ' class="num"' : ''}>${esc(l)}<span class="type">${l !== c.name ? `${esc(c.name)} · ` : ''}${esc(c.type)}</span></th>`; }).join('')}</tr></thead>` +
     `<tbody>${rows.map(r => `<tr>${t.columns.map(c => cell(r[c.name], c)).join('')}</tr>`).join('')}</tbody>`;
   pager.innerHTML = `<span class="status">Rows ${num(from + 1)}–${num(from + rows.length)} of ${num(n)}</span><div class="row">` +
     `<button type="button" class="prp-btn sm" data-p="prev"${S.page ? '' : ' disabled'}>‹ Previous</button><span class="status">Page ${num(S.page + 1)} of ${num(pages)}</span>` +
@@ -535,7 +538,7 @@ function countryColumn(cols) {
 }
 function figureCaption(prep) {
   const ds = S.data.ds, [, modName] = moduleInfo(ds.module), sub = subName(ds.submodule);
-  const what = cap(describeChart(S.spec.chart));
+  const what = cap(describeChart(S.spec.chart, labelsFor(ds.fields)));
   const steps = isSql() ? [] : S.spec.steps.filter((s, i) => !S.run?.trace[i]?.error).map(describeStep);
   const how = isSql() ? ' From an SQL query over the dataset.' : steps.length ? ` Steps: ${steps.length > 3 ? steps.slice(0, 3).join('; ') + `; and ${steps.length - 3} more` : steps.join('; ')}.` : '';
   const src = ds.sources || [];
@@ -559,7 +562,7 @@ async function drawFigure() {
     try { S.geo = await (await R()).ensureMap(); S.match = countryMatcher(S.geo.countries); } catch (e) { if (seq === S.drawSeq) clear(e.message); return; }
     if (seq !== S.drawSeq) return;
   }
-  const prep = prepareChart(t, c, { ordered: endsInSort(), country: S.match });
+  const prep = prepareChart(t, c, { ordered: endsInSort(), country: S.match, label: labelsFor(S.data?.ds?.fields) });
   if (!prep.ok) { clear(prep.error); return; }
   let Plot, lib;
   if (!window.Plot) host.innerHTML = '<p class="prp-empty">Loading the chart library…</p>';
@@ -578,7 +581,7 @@ async function drawFigure() {
   const tt = prep.table;
   $('#chart-table-box').hidden = false;
   $('#chart-table-note').hidden = !prep.tableNote; $('#chart-table-note').textContent = prep.tableNote || '';
-  $('#chart-table').innerHTML = `<table class="prp-table chart-table"><caption class="prp-caption">${esc(capt.title)}</caption><thead><tr>${tt.columns.map(k => `<th scope="col"${k.type === 'number' ? ' class="num"' : ''}>${esc(k.name)}</th>`).join('')}</tr></thead><tbody>` +
+  $('#chart-table').innerHTML = `<table class="prp-table chart-table"><caption class="prp-caption">${esc(capt.title)}</caption><thead><tr>${tt.columns.map(k => `<th scope="col"${k.type === 'number' ? ' class="num"' : ''}>${esc(k.label || k.name)}</th>`).join('')}</tr></thead><tbody>` +
     tt.rows.map(r => `<tr>${tt.columns.map(k => { const v = r[k.name]; return v == null || v === '' ? '<td><span class="nil">–</span></td>' : typeof v === 'number' ? `<td class="num">${esc(formatValue(v, 'number', k.name))}</td>` : `<td>${esc(formatValue(v, k.type, k.name))}</td>`; }).join('')}</tr>`).join('') + '</tbody></table>';
   for (const b of ['#png', '#svg', '#chart-csv']) $(b).disabled = false;
   S.chart = { prep, drawn, T, cap: capt, width };

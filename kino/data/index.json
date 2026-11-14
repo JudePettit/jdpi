@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-28",
+ "generated": "2026-11-14",
  "categories": [
   {
    "id": "political-events",
@@ -23,18 +23,23 @@
    "id": "wars",
    "name": "Wars",
    "dek": "Wars from their causes to their aftermath, with the maps and figures that explain them.",
+   "note": "The maps are illustrative. They are drawn on present-day borders for orientation, with movements and fronts sketched from the sources and marked approximate where they are simplified: they are not historical boundary or front-line data.",
    "count": 3
   },
   {
    "id": "geopolitical-events",
    "name": "Geopolitical Events",
-   "dek": "Shifts in the balance between powers: alliances, partitions, blockades and the end of empires.",
+   "dek": "Shifts in the balance between powers: alliances, blockades, crises between states and the end of empires. Political Events follows how a country is governed, as in the Russian Revolutions of 1917; Geopolitical Events follows how states stand towards one another, as in the Cuban Missile Crisis.",
+   "examples": {
+    "political-events": "russian-revolutions-1917",
+    "geopolitical-events": "cuban-missile-crisis"
+   },
    "count": 3
   },
   {
    "id": "great-thinkers",
    "name": "Great Thinkers",
-   "dek": "Multi-part courses on the great minds met across Vitruvian Manager: economists, philosophers, political theorists and scientists.",
+   "dek": "Short introductions to the great minds met across Vitruvian Manager: economists, philosophers, political theorists and scientists.",
    "courses": true,
    "count": 3
   }
@@ -50,6 +55,12 @@
    ],
    "minutes": 6,
    "summary": "A course in three parts on the Florentine diplomat whose short book on princes made his name a byword: his career, The Prince and the Discourses, and five centuries of argument over what he meant. Eleven scenes and a short quiz.",
+   "books": [
+    {
+     "slug": "the-prince",
+     "title": "The Prince"
+    }
+   ],
    "subjects": [
     {
      "qid": "Q1399",
@@ -83,6 +94,16 @@
    ],
    "minutes": 6,
    "summary": "A course in three parts on the Scottish philosopher often called the founder of modern economics: his life, The Wealth of Nations, and the very different uses made of him since. Eleven scenes and a short quiz.",
+   "books": [
+    {
+     "slug": "wealth-of-nations-1",
+     "title": "The Wealth of Nations, Volume I"
+    },
+    {
+     "slug": "wealth-of-nations-2",
+     "title": "The Wealth of Nations, Volume II"
+    }
+   ],
    "subjects": [
     {
      "qid": "Q9381",
@@ -117,6 +138,12 @@
    ],
    "minutes": 6,
    "summary": "A course in three parts on the German philosopher and revolutionary: a life in exile, the ideas of the Manifesto and Capital, and what was later done in his name. Twelve scenes and a short quiz.",
+   "books": [
+    {
+     "slug": "communist-manifesto",
+     "title": "Manifesto of the Communist Party"
+    }
+   ],
    "subjects": [
     {
      "qid": "Q9061",
@@ -368,8 +395,9 @@
     1921,
     2026
    ],
+   "cutoff": "2022",
    "minutes": 7,
-   "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
+   "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count in 2025. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
    "subjects": [
     {
      "qid": "Q17427",
@@ -461,6 +489,7 @@
     1929,
     2026
    ],
+   "cutoff": "2024",
    "minutes": 7,
    "summary": "For seventy-one years one party, under three names, won every presidential election in Mexico. Twelve scenes on how the PRI was built out of a revolution, how it held power, and how it lost it.",
    "subjects": [
@@ -866,6 +895,7 @@
     1955,
     2026
    ],
+   "cutoff": "February 2026",
    "minutes": 8,
    "summary": "Formed in 1955 from two conservative parties, the LDP has been in government for all but about four years since. Thirteen scenes on how it won, how it lost power twice, and how it came back each time, to a record victory in 2026.",
    "subjects": [

@@ -4,7 +4,8 @@
   "category": "political-parties",
   "subjects": [{ "qid": "Q17427", "label": "Chinese Communist Party" }],
   "era": [1921, 2026],
-  "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
+  "cutoff": "2022",
+  "summary": "From thirteen delegates meeting in Shanghai in 1921 to the ruling party of the world's second-largest economy, with more than 100 million members by its own count in 2025. Thirteen scenes on how it won power, how it has governed, and the costs and achievements historians weigh.",
   "minutes": 7,
   "preview": { "scene": "long-march" },
   "sources": [

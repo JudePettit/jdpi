@@ -6,6 +6,7 @@
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
 import { displayName } from '../history/names.mjs';
+import { deaths as shown, estimateOf } from './figures.mjs';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -202,17 +203,20 @@ window.PRPFocus?.listen({
 });
 
 /* ---------------------------------------------------------------- counters, sparkline, legend */
-let cumulative = [];
+// The running total to each month, and whether an estimated month is in it by then (the total is then an estimate too).
+let cumulative = [], estimatedTo = [];
 // The war so far to the month shown, as before; over a period, the period's deaths and battles beside the running total.
 function renderCounters() {
   const w = state.war, i = state.m, m = w.months[i], p = isPeriod(), a = w.months[state.f];
   $('#date-label').textContent = p ? 'Period' : 'Month';
   $('.counters').classList.toggle('is-period', p);
   $('#date').textContent = periodLabel();
-  $('#c-total').textContent = num(cumulative[i]);
-  const pd = periodDeaths();
+  $('#c-total').textContent = shown(cumulative[i], estimatedTo[i], { total: i > 0 });
+  const pd = periodDeaths(), est = p ? pd.est : !!w.estimated[i], n = p ? pd.deaths : w.deaths[i];
   $('#c-month-label').textContent = p ? 'In the period' : 'This month';
-  $('#c-month').textContent = p ? `${pd.est ? '~' : ''}${num(pd.deaths)}` : (w.estimated[i] ? '~' : '') + num(w.deaths[i]);
+  $('#c-month').textContent = shown(n, est);
+  // Beside the figure, whose it is: an estimate and its source, or UCDP's own count.
+  $('#c-month-note').textContent = est ? `Estimate from ${estimateOf(w.deathsSource)}` : n ? 'As recorded by UCDP' : 'None recorded';
   // Over a period, the battles under way in it: the panel's count, so the two figures on screen agree.
   $('#c-battles-label').textContent = p ? 'Battles in the period' : 'Battles so far';
   $('#c-battles').textContent = num(p ? w.battles.filter(b => underWay(b, a, m)).length : w.battles.filter(b => b.s.slice(0, 7) <= m).length);
@@ -293,10 +297,10 @@ function renderPanel() {
     <p class="sub">${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'} · ${years ? `${years} yr${years > 1 ? 's' : ''} ` : ''}${months % 12 ? `${months % 12} mo` : ''}</p>
     <div class="sides" style="margin-top:10px">${sides}</div>
     <div class="stat-row">
-      <div class="stat"><span>Deaths, whole war</span><b>${num(w.totalDeaths)}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}</small></div>
+      <div class="stat"><span>Deaths, whole war</span><b>${shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}</small></div>
       <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped</small></div>
-      ${p ? `<div class="stat"><span>Deaths in the period</span><b>${pd.est ? '~' : ''}${num(pd.deaths)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${num(cumulative[i])} by ${esc(monthLabel(m))}</small></div>`
-        : `<div class="stat"><span>Deaths so far</span><b>${num(cumulative[i])}</b><small>${Math.round(cumulative[i] / Math.max(1, w.totalDeaths) * 100)}% of the war's total</small></div>`}
+      ${p ? `<div class="stat"><span>Deaths in the period</span><b>${shown(pd.deaths, pd.est)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${shown(cumulative[i], estimatedTo[i], { total: i > 0 })} by ${esc(monthLabel(m))}</small></div>`
+        : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${Math.round(cumulative[i] / Math.max(1, w.totalDeaths) * 100)}% of the war's total</small></div>`}
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
     </div>
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
@@ -306,7 +310,7 @@ function renderPanel() {
     ${top.length ? `<h3>Deadliest clashes ${p ? 'in the period' : 'this month'} <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
     ${deadliest.length ? `<h3>Deadliest battles of the war</h3>${seeMoreList(deadliest.map(battleItem), 6, `${w.name} · battles by deaths`)}` : ''}
     <h3>All battles &amp; operations <span class="count">${w.battles.length}</span></h3>${w.battles.length ? seeMoreList(w.battles.map(battleItem), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
-    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ' Months marked ~ are estimates; the yearly or war totals are as published.' : ''}
+    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
       <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates and deaths as recorded there.
       <b>Territory:</b> CShapes borders as they stood that month${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded as a whole' : ''}. Front lines are not drawn: no open data records them month by month.</p>`;
   $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(w.battles.find(x => x.q === b.dataset.b)));
@@ -358,11 +362,12 @@ function renderTables() {
     const begun = new Map();
     for (const b of w.battles) if (b.p !== 'y') begun.set(b.s.slice(0, 7), (begun.get(b.s.slice(0, 7)) || 0) + 1);
     $('#months-title').textContent = `${w.name} · battle deaths by month${p ? ` · ${periodLabel()} highlighted` : ''}`;
+    $('#months-note').textContent = `Select a month to go to it · ${w.estimated.some(Boolean) ? `~ estimated from ${estimateOf(w.deathsSource)}, rounded` : 'as recorded by UCDP'}`;
     // The month shown is highlighted, or every month of the period; the list keeps the month shown in view.
     $('#months-rows').innerHTML = w.months.map((mm, k) => {
       const clashes = (w.cells[k] || []).reduce((s, c) => s + (c[3] || 0), 0), cls = k === i ? 'sel end' : p && k >= state.f && k < i ? 'sel' : '';
-      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${w.estimated[k] ? '~' : ''}${num(w.deaths[k])}</td>
-        <td class="num">${num(cumulative[k])}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
+      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${shown(w.deaths[k], w.estimated[k])}</td>
+        <td class="num">${shown(cumulative[k], estimatedTo[k], { total: k > 0 })}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
     }).join('');
     // A month goes to it, keeping the period's start; one before the start widens the period to begin there, as a
     // battle's "Go to" does (moving the end there would pull the start along, to a one-month period).
@@ -540,6 +545,7 @@ async function loadWar(id, month, from = null) {
   period.stop();
   const w = await fetch(`data/wars/${id}.json`).then(r => r.json());
   state.war = w; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
+  estimatedTo = []; w.estimated.reduce((e, v, k) => (estimatedTo[k] = e || !!v), false);
   $('#war').value = id;
   // Ticks every few months or years, by the war's length; a month the war does not have opens at its first.
   const step = w.months.length > 150 ? 60 : w.months.length > 60 ? 24 : w.months.length > 24 ? 12 : w.months.length > 8 ? 3 : 1;

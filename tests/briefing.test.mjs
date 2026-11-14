@@ -210,3 +210,34 @@ test('its head, trends.json and history.json are in step with the store (integra
   for (const x of t.topics) if (t.status !== 'ok') assert.equal(x.trend, null, 'no trend without enough history');
   for (const [d, v] of Object.entries(h.history.days)) assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isInteger(v.n) && typeof v.ok === 'boolean', d);
 });
+
+// Beside the publisher counts (the review of 12 November 2026): equal numbers of publishers are neither equal numbers of
+// stories nor a balance of facts. The note gives the store's own fewest and most stories by position, so it is true of
+// whatever store the page reads; Figure 1's caption says the same beside the shares. A headline sent in TeX reads in
+// plain characters here too (design/prp-tex.js).
+test('page: the publisher counts say they are not equal stories or a balance of facts, from the store\'s own counts', pageTest, async () => {
+  const d = await (await fetch(`${BASE}/briefing/data/latest.json`)).json();
+  const pos = new Map(d.sources.map(s => [s.id, s.position])), n = new Map(d.positions.map(p => [p.key, 0]));
+  for (const i of d.items) n.set(pos.get(i.s), n.get(pos.get(i.s)) + 1);
+  const by = d.positions.map(p => [p.label.toLowerCase(), n.get(p.key)]).sort((a, b) => a[1] - b[1]);
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/briefing?tab=publishers`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelector('#balance')?.textContent.length > 0, null, { timeout: 20000 });
+    const note = await page.textContent('#balance');
+    assert.match(note, /^Equal numbers of publishers are not equal numbers of stories: /);
+    assert.ok(note.includes(`${by[0][1].toLocaleString('en-GB')} stories from the ${by[0][0]}`) && note.includes(`${by.at(-1)[1].toLocaleString('en-GB')} from the ${by.at(-1)[0]}`), note);
+    assert.match(note, /Nor are they a balance of facts: the briefing counts and sorts headlines by their publishers' slant, and does not check what any story says\.$/);
+    assert.ok(await page.isVisible('#balance'), 'shown');
+    assert.ok(await page.evaluate(() => { const b = document.querySelector('#balance'); return b.previousElementSibling.querySelector('#srcmeta') && b.nextElementSibling.classList.contains('tablewrap'); }), 'beside the counts: under the catalogue\'s head, above its table');
+    assert.match(await page.textContent('.coverage figcaption'), /balanced by their numbers of publishers, not of stories, and neither is a balance of facts/);
+    const story = await page.evaluate(() => storyHtml({ ...D.items[0], t: 'Decay of $^{224}\\mathrm{Ra}$ for $5', d: '' }, false));
+    assert.match(story, /Decay of ²²⁴Ra for \$5/);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

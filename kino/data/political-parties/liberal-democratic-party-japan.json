@@ -4,6 +4,7 @@
   "category": "political-parties",
   "subjects": [{ "qid": "Q232595", "label": "Liberal Democratic Party" }],
   "era": [1955, 2026],
+  "cutoff": "February 2026",
   "summary": "Formed in 1955 from two conservative parties, the LDP has been in government for all but about four years since. Thirteen scenes on how it won, how it lost power twice, and how it came back each time, to a record victory in 2026.",
   "minutes": 8,
   "preview": { "scene": "growth" },

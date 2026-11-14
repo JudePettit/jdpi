@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <title>Master Index · VM</title>
-<meta name="description" content="Every person, place, war, party and idea in PRP, with Boolean tag filters and links to everywhere each one appears.">
+<meta name="description" content="Every person, place, war, party and idea in Vitruvian Manager, with Boolean tag filters and links to everywhere each one appears.">
 <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="rs" data-module="encyclopedia" data-shell="../" defer></script>
@@ -95,7 +95,7 @@ main{min-width:0}
     <div class="front">
       <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Master Index</span></p>
       <h1 class="prp-title">Master Index</h1>
-      <p class="prp-dek">Every person, place, war, party and idea that appears in PRP, and everywhere it appears. Filter with a Boolean tag query or the facets, or go straight to an entry.</p>
+      <p class="prp-dek">Every person, place, war, party and idea that appears in Vitruvian Manager, and everywhere it appears. Filter with a Boolean tag query or the facets, or go straight to an entry.</p>
       <p class="prp-meta" id="meta">Loading…</p>
     </div>
     <div class="jump"><label class="prp-label" for="jump">Go to an entry</label><input class="prp-input" type="search" id="jump" placeholder="A person, place, war or idea…" list="jumplist" autocomplete="off"><datalist id="jumplist"></datalist></div>
@@ -121,7 +121,7 @@ main{min-width:0}
       </aside>
       <main>
         <div class="prp-panel results">
-          <div class="prp-panel-head"><b id="count">–</b><label class="sortby">Sort <select class="prp-select" id="sort" aria-label="Sort by"><option value="mentions">Most appearances in PRP</option><option value="name">Name</option><option value="type">Type</option></select></label></div>
+          <div class="prp-panel-head"><b id="count">–</b><label class="sortby">Sort <select class="prp-select" id="sort" aria-label="Sort by"><option value="mentions">Most appearances in VM</option><option value="name">Name</option><option value="type">Type</option></select></label></div>
           <div class="active" id="active" hidden></div>
           <div class="tbl"><table class="prp-table"><thead><tr><th>Name</th><th>Type</th><th>Tags</th><th>Appears in Vitruvian Manager</th></tr></thead><tbody id="rows"></tbody></table></div>
           <div class="pager" id="pager"></div>
@@ -133,7 +133,7 @@ main{min-width:0}
   <section id="entity" role="tabpanel" aria-labelledby="tab-entry" hidden></section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0; the text stays under that licence). Tags combine Wikidata facts with PRP's own tags, such as schools of thought.</p>
+    <p><b>Sources.</b> Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0; the text stays under that licence). Tags combine Wikidata facts with Vitruvian Manager's own tags, such as schools of thought.</p>
     <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. Refreshed monthly.</p>
   </footer>
 </div>
@@ -279,6 +279,8 @@ function renderFacets() {
     const counts = new Map();
     for (const r of rows) if (matches(r, f)) for (const t of r[6]) if (tagFacet[t] === f) counts.set(t, (counts.get(t) || 0) + 1);
     const chosen = sel.get(f) || new Set();
+    // A facet with no values under the other filters is left out (one with a value selected stays, to be cleared).
+    if (!counts.size && !chosen.size) return '';
     const open = openFacets.has(f) || chosen.size;
     const search = (document.querySelector(`[data-fsearch="${CSS.escape(f)}"]`)?.value || '').toLowerCase();
     let opts = [...counts].filter(([t]) => !search || tagValue[t].toLowerCase().includes(search)).sort((a, b) => chosen.has(b[0]) - chosen.has(a[0]) || b[1] - a[1]);
@@ -344,7 +346,7 @@ async function renderEntity(q) {
   box.innerHTML = '<div class="empty">Loading…</div>';
   const e = await entity(q).catch(() => null);
   if (!e) { box.innerHTML = `<div class="prp-panel empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; setEntryTab(q, q); return; }
-  document.title = `${e.label} · Master Index · PRP`;
+  document.title = `${e.label} · Master Index · VM`;
   setEntryTab(q, e.label);
   const tagIdOf = new Map(idx.tags.map((t, i) => [t, i]));
   const factRows = [['Born', e.facts.born], ['Died', e.facts.died], ['Founded', e.facts.founded], ['Dissolved', e.facts.dissolved], ['Began', e.facts.start], ['Ended', e.facts.end], ['Date', e.facts.date]].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(fmtDate(v))}</dd>`);
@@ -399,7 +401,7 @@ document.querySelector('[role="tablist"]').addEventListener('keydown', e => {
 function route() {
   const h = location.hash.slice(1);
   if (/^Q\d+$/.test(h)) { show('entity'); renderEntity(h); window.scrollTo(0, 0); return; }
-  show('explore'); document.title = 'Master Index · PRP';
+  show('explore'); document.title = 'Master Index · VM';
   const q = new URLSearchParams(h.split('?')[1] || '').get('q');
   if (q !== null && q !== $('#query').value) $('#query').value = q;
   update();

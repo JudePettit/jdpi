@@ -75,6 +75,8 @@ function warQuery(w) {
   return `${w.name.split(':')[0]} ${b || 'war'} ${w.years[0][0]}`;
 }
 const span = w => w.src === 'cow' ? w.span : `${w.years[0][0]}–${w.years.at(-1)[0] >= state.data.lastYear ? 'ongoing' : w.years.at(-1)[0]}`;
+// The two datasets' thresholds for a conflict, in battle deaths: a war (both), and an armed conflict (UCDP/PRIO only).
+const WAR_DEATHS = 1000, CONFLICT_DEATHS = 25;
 const levelLabel = l => l === 2 ? 'War · 1,000+ deaths this year' : 'Minor conflict · 25–999 deaths this year';
 const LEVEL_WORD = ['', 'Minor', 'War'];
 
@@ -345,6 +347,11 @@ function setupTimeline() {
   // Above the track: how many conflicts were under way each year.
   const counts = years.map(y => state.data.wars.filter(w => levelIn(w, y)).length);
   period.update({ stops: years, ticks, strip: counts, from: null, to: b });
+  // Under the timeline, what each dataset counts, so the jump in the strip at UCDP's first year reads for what it is: the
+  // Correlates of War lists only wars of 1,000 or more battle deaths, UCDP/PRIO every armed conflict of 25 or more in a
+  // year (the Method below; the levels are levelLabel's). The years are the data's own.
+  const u = state.data.ucdpFrom;
+  $('#thresholds').textContent = `What is counted: ${a}–${u - 1}, wars of ${num(WAR_DEATHS)}+ battle deaths (Correlates of War); ${u}–${b}, armed conflicts of ${num(CONFLICT_DEATHS)}+ battle deaths in a year (UCDP/PRIO). Smaller conflicts before ${u} are missing.`;
 }
 function select(gw) { state.selected = gw; state.war = null; renderMap(); renderPanel(); renderTable(); writeHash(); }
 function selectWar(id) {

@@ -21,6 +21,7 @@
       <p class="prp-eyebrow" data-jdpi-standalone><span>Kino <span class="sep">·</span> <span id="eyebrow-cat">Wars</span></span></p>
       <h1 class="prp-title" id="cat-title">Wars</h1>
       <p class="prp-dek" id="cat-dek">Documentaries narrated with maps, timelines and portraits; every scene can open its place in Vitruvian Manager.</p>
+      <p class="prp-note kn-catnote" id="cat-note" hidden></p>
       <p class="prp-meta" id="cat-meta"><span>Loading…</span></p>
       <nav class="kn-cats" id="cats" aria-label="Kino categories"></nav>
     </header>
@@ -34,9 +35,11 @@
           <select id="sort" class="prp-select"><option value="era">By period</option><option value="title">By title</option><option value="short">Shortest first</option></select>
           <span class="count" id="count"></span>
         </div>
-        <div class="kn-cards" id="cards" aria-live="polite"></div>
+        <h2 class="prp-h2 kn-ready" id="ready-h">Ready to watch</h2>
+        <div class="kn-cards" id="cards" aria-live="polite" aria-labelledby="ready-h"></div>
         <section class="kn-planned" id="planned" hidden aria-labelledby="planned-h">
           <h2 class="prp-h2" id="planned-h">In preparation</h2>
+          <p class="kn-planned-note" id="planned-note">Not made yet: these titles are in preparation and cannot be watched.</p>
           <ul id="planned-list"></ul>
         </section>
       </section>
@@ -127,6 +130,8 @@
             <div class="prp-panel-head"><b id="about-h">About this documentary</b></div>
             <div class="prp-panel-body">
               <p class="prp-prose" id="doc-summary"></p>
+              <p class="prp-note kn-cutoff" id="doc-cutoff" hidden></p>
+              <p class="kn-books" id="doc-books" hidden></p>
               <div class="prp-label">Subjects</div>
               <div class="kn-subjects" id="doc-subjects"></div>
             </div>

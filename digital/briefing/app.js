@@ -3,10 +3,11 @@
 // Master Index can deep-link; the chosen field is also remembered in this browser (localStorage, best effort).
 import {
   WINDOW_LABELS, KIND_ORDER, esc, parseHash, toHash, filterItems, countByField, arrange, dailySeries, topOutlets, badgeOf,
-  dayLabel, timeLabel, fieldColours,
+  badgeMeaning, PAPER_MEANING, dayLabel, timeLabel, fieldColours,
 } from './view.js';
 
-const { PRPAccess } = globalThis; // design/prp-access.js, loaded by view.js
+const { PRPAccess, PRPTex } = globalThis; // design/prp-access.js and design/prp-tex.js, loaded by view.js
+const readable = s => PRPTex.plain(s); // a feed's TeX ("$^{224}\mathrm{Ra}$") in plain characters ("²²⁴Ra")
 
 const $ = s => document.querySelector(s);
 const STORE_KEY = 'prp.digital-briefing.field';
@@ -97,10 +98,16 @@ function entryHtml(i) {
     (i.doi ? `<a class="doi" href="${esc(doiHref(i.doi))}" target="_blank" rel="noopener">doi:${esc(i.doi)}</a>` : '') +
     alsoHtml(i, s);
   return `<article class="entry" data-type="${esc(i.type)}">
-    <div class="l1"><span class="badge ${esc(i.type)}">${esc(badgeOf(i, s))}</span><span class="src">${esc(s?.outlet || i.source)}</span>${time ? `<time class="time" datetime="${esc(i.published)}">${esc(time)}</time>` : ''}</div>
-    <h4><a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(i.title)}${PRPAccess.label(i.access)}</a>${accessHtml(i)}</h4>
-    ${i.authors ? `<p class="by">${esc(i.authors)}</p>` : ''}${i.summary ? `<p class="sum">${esc(i.summary)}</p>` : ''}${l3 ? `<div class="l3">${l3}</div>` : ''}
+    <div class="l1"><span class="badge ${esc(i.type)}" data-kind="${esc(i.kind)}"${badgeMeaning(i, s) ? ` title="${esc(badgeMeaning(i, s))}"` : ''}>${esc(badgeOf(i, s))}</span><span class="src">${esc(s?.outlet || i.source)}</span>${time ? `<time class="time" datetime="${esc(i.published)}">${esc(time)}</time>` : ''}</div>
+    <h4><a href="${esc(safeUrl(i.url))}" target="_blank" rel="noopener">${esc(readable(i.title))}${PRPAccess.label(i.access)}</a>${accessHtml(i)}</h4>
+    ${i.authors ? `<p class="by">${esc(i.authors)}</p>` : ''}${i.summary ? `<p class="sum">${esc(readable(i.summary))}</p>` : ''}${l3 ? `<div class="l3">${l3}</div>` : ''}
   </article>`;
+}
+
+// The key to the research marks, beside the list: each mark as it looks on an item, with what it means.
+function renderKey() {
+  $('#badge-key').innerHTML = '<span class="prp-label">Research marks</span>' + Object.entries(PAPER_MEANING).map(([kind, means]) =>
+    `<span class="k"><span class="badge paper" data-kind="${esc(kind)}">${esc(badgeOf({ type: 'paper', kind }))}</span> ${esc(means)}</span>`).join('');
 }
 
 function renderList() {
@@ -265,7 +272,7 @@ Promise.all([fetch('data/stories.json', { cache: 'no-cache' }).then(r => { if (!
   if (T.size) D.items = D.items.map(i => PRPAccess.restamp(i, cls, id => SRC.has(id)));
   // Windows count back from now, or from the last refresh if the data is more than half a day old.
   ref = Date.now() - Date.parse(d.generated) > 12 * 36e5 ? Date.parse(d.generated) : Date.now();
-  readHash(); renderMeta(); renderSources(); wire(); render();
+  readHash(); renderMeta(); renderSources(); renderKey(); wire(); render();
 }).catch(e => {
   $('#meta').innerHTML = `<span>The stories could not be loaded (${esc(e.message)}).</span>`;
   $('#list').innerHTML = '<p class="prp-empty">The stories could not be loaded. Try again in a moment.</p>';

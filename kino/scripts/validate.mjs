@@ -6,7 +6,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, basename, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CATEGORY_IDS, VISUAL_KINDS, SOURCE_KINDS, flatScenes } from '../lib/format.js';
+import { CATEGORY_IDS, VISUAL_KINDS, SOURCE_KINDS, flatScenes, cutoffYear, narratedYears } from '../lib/format.js';
 import { countSentences, speechWarnings, wordCount, estimateSeconds } from '../lib/text.js';
 import { TARGETS, onOwnPage, readAt } from '../lib/links.js';
 
@@ -171,6 +171,15 @@ export function validateScript(doc, ctx, file) {
   if (!doc.title?.trim()) err('title', 'required');
   if (!doc.summary?.trim()) err('summary', 'required'); else if (countSentences(doc.summary) > 3) warn('summary', 'keep it to three sentences or fewer');
   if (!Array.isArray(doc.era) || doc.era.length !== 2 || !doc.era.every(Number.isInteger) || doc.era[0] > doc.era[1]) err('era', '[from, to] as whole years, from ≤ to');
+  // A party's film says where its story stops (its cutoff), since the party may carry on after it: a year, or a month
+  // and year, within the era and no earlier than the last year its narration names.
+  if (doc.category === 'political-parties' && doc.cutoff === undefined) err('cutoff', 'a party documentary says where its story stops: "2024" or "February 2026"');
+  if (doc.cutoff !== undefined) {
+    const y = cutoffYear(doc.cutoff), named = narratedYears(doc), last = named.length ? Math.max(...named) : null;
+    if (y === null) err('cutoff', 'a year, or a month and year ("February 2026")');
+    else if (Array.isArray(doc.era) && (y < doc.era[0] || y > doc.era[1])) err('cutoff', `${doc.cutoff} is outside the era ${doc.era.join('–')}`);
+    else if (last !== null && y < last) err('cutoff', `${doc.cutoff} is earlier than ${last}, which the narration names`);
+  }
   if (!(doc.minutes > 0 && doc.minutes <= 180)) err('minutes', 'a running time in minutes');
   if (!Array.isArray(doc.subjects) || !doc.subjects.length) err('subjects', 'at least one { qid, label }');
   else doc.subjects.forEach((s, i) => { if (!/^Q\d+$/.test(s?.qid || '')) err(`subjects[${i}]`, 'qid like Q8016'); if (!s?.label) err(`subjects[${i}]`, 'label'); });

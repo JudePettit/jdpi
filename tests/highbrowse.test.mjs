@@ -624,3 +624,15 @@ test('page: each briefing\'s panel gives its own data time, and a store refreshe
   assert.match(await page.locator('#meta .newer').innerText(), /^Refreshed since this page read it: the Economics Briefing at \d+ \w{3} \d\d:\d\d UTC/);
   assert.deepEqual(errors, []);
 });
+
+// Readable notation (design/prp-tex.js, the review of 12 November 2026): Highbrowse shows the briefings' headlines and
+// summaries, so it reads a feed's TeX in plain characters too, in every briefing it reads, and leaves prices alone.
+test('notation: the briefings\' headlines and summaries reach Highbrowse in plain characters', () => {
+  const at = '2026-11-14T08:00:00.000Z';
+  const sci = normalise('scientific', { generated: at, items: [{ id: 'a', title: 'Lower Limit on the Double-Alpha Decay of $^{224}\\mathrm{Ra}$', summary: 'Spin relaxation in ${\\mathrm{Er}}^{3+}:{\\mathrm{CaWO}}_{4}$.', url: 'https://example.org/a', source: 'prl', published: at, type: 'paper' }] }).items[0];
+  assert.deepEqual([sci.t, sci.d], ['Lower Limit on the Double-Alpha Decay of ²²⁴Ra', 'Spin relaxation in Er³⁺:CaWO₄.']);
+  const dig = normalise('digital', { generated: at, items: [{ id: 'b', title: 'Faster $k$-means for $\\ell_1$ norms', url: 'https://example.org/b', source: 'arxiv-lg', published: at, type: 'paper' }] }).items[0];
+  assert.equal(dig.t, 'Faster k-means for ℓ₁ norms');
+  const pol = normalise('political', { generated: at, sources: [{ id: 's', name: 'S', position: 'centre' }], items: [{ s: 's', t: 'Fund raises $667m and $40bn more', d: 'A $^{14}\\mathrm{C}$ date', u: 'https://example.org/c', p: at }] }).items[0];
+  assert.deepEqual([pol.t, pol.d], ['Fund raises $667m and $40bn more', 'A ¹⁴C date']);
+});

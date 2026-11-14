@@ -11,6 +11,8 @@
 // or sign-up sources carry never takes the top place of a list (it keeps its place lower down).
 
 import '../design/prp-access.js'; // globalThis.PRPAccess
+import '../design/prp-tex.js'; // globalThis.PRPTex: a feed's TeX notation in plain characters, for every title and summary shown
+const readable = s => globalThis.PRPTex.plain(String(s));
 const { PRPAccess } = globalThis;
 /** Whether an item is free to read: its source's class, as normalise gave it (no class counts as free). */
 export const isFree = i => PRPAccess.isFree(i?.acc);
@@ -229,7 +231,7 @@ export function normalise(key, data, { topics = topicsFrom(null), access = null 
     const src = new Map((data.sources || []).map(s => [s.id, s]));
     const items = data.items.filter(i => i && i.t && i.u).map((i, n) => {
       const s = src.get(i.s) || {}, text = `${i.t} ${i.d || ''}`, words = wordsOf(text);
-      return { b: key, id: `p${n}`, t: String(i.t), d: i.d && i.d !== i.t ? String(i.d) : '', u: String(i.u), at: Date.parse(i.p) || 0, day: dayKey(i.p), src: s.name || String(i.s), sid: String(i.s),
+      return { b: key, id: `p${n}`, t: readable(i.t), d: i.d && i.d !== i.t ? readable(i.d) : '', u: String(i.u), at: Date.parse(i.p) || 0, day: dayKey(i.p), src: s.name || String(i.s), sid: String(i.s),
         tp: topics.filter(t => t.test(text, words)).map(t => t.id), type: null, pos: POSITIONS.includes(s.position) ? s.position : null, soft: !!i.c, tier: null, caution: !!s.caution,
         acc: cls(String(i.s), String(i.u), null, null) };
     });
@@ -241,7 +243,7 @@ export function normalise(key, data, { topics = topicsFrom(null), access = null 
   const src = new Map((data.sources || []).map(s => [s.id, s]));
   const items = data.items.filter(i => i && i.title && i.url).map(i => {
     const s = src.get(i.source) || {};
-    return { b: key, id: String(i.id), t: String(i.title), d: i.summary ? String(i.summary) : '', u: String(i.url), at: effectiveTime(i.published), day: dayKey(i.published),
+    return { b: key, id: String(i.id), t: readable(i.title), d: i.summary ? readable(i.summary) : '', u: String(i.url), at: effectiveTime(i.published), day: dayKey(i.published),
       dateOnly: isDateOnly(i.published) || !!i.undated, src: s.outlet || s.name || String(i.source), sid: String(s.outletId || i.source), tp: Array.isArray(i[fk]) ? i[fk].map(String) : [],
       type: i.type === 'paper' ? 'paper' : 'news', pos: null, soft: false, tier: Number.isFinite(i.tier) ? i.tier : null, caution: false,
       acc: cls(String(i.source), String(i.url), i.access, i.accessMark) };

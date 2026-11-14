@@ -2,13 +2,77 @@
 // those rows. Pure (no DOM, no Plot), so tests check what the charts show. Rules from PRP-STYLE §6: categorical colours
 // in fixed order and never cycled (more series fold into "Other"; scatter and maps keep at most three colours), and
 // every chart has a table view.
-import { aggregate, keyOf, toNum, isEmpty, comparator, formatValue } from './engine.js';
+import { aggregate, keyOf, toNum, isEmpty, comparator, formatValue, AGGS } from './engine.js';
 import { dateParts } from './expr.js';
 import { CHART_TYPES, CHART_FNS } from './spec.js';
 
 export const LIMITS = { bars: 40, ordinalBars: 60, series: 8, scatterColours: 3, points: 10000, tableRows: 1000 };
 export const OTHER = 'Other';
 const NEEDS_XY = new Set(['scatter']);
+
+/* ---------- readable names for columns ---------- */
+// Charts and tables name a column in words, not by its field name (review of 12 November 2026). The words come from
+// the catalogue's own description of the field, which names it and, where the catalogue gives one, its unit
+// ("Humanity's energy capture, watts", "Share of world energy capture, 0–1"); nothing is added that the catalogue does
+// not say. The field name stays in the steps, the address, the CSV and the field list.
+const ACRONYMS = { id: 'ID', qid: 'QID', iso2: 'ISO2', iso3: 'ISO3', url: 'URL', gdp: 'GDP', gw: 'GW', ucdp: 'UCDP', ai: 'AI', api: 'API', mcp: 'MCP', gvi: 'GVI' };
+/** A field name in words: "kcal_per_person_day" is "Kcal per person day", "notModified" "Not modified", "place.lon" "Place lon". */
+export function humanName(name) {
+  const s = String(name ?? '');
+  if (!s || /\s/.test(s)) return s;
+  const words = s.replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[_.-]+/).filter(Boolean).map(w => w.toLowerCase()).map(w => (Object.hasOwn(ACRONYMS, w) ? ACRONYMS[w] : w));
+  if (!words.length) return s;
+  return [words[0][0].toUpperCase() + words[0].slice(1), ...words.slice(1)].join(' ');
+}
+// A unit the catalogue closes a description with (", 0–1", ", 0–100", ", watts"): kept when the label is shortened.
+const UNIT_WORDS = /^(watts|kcal|USD|US dollars|dollars|euros|per cent|percent|%|km|people|tonnes|years|days|hours|minutes|seconds)$/i;
+function closingUnit(d) {
+  const m = /,\s*([^,:;]{1,14})$/.exec(d);
+  return m && (/^[\d.]+\s*[–-]\s*[\d.]+$/.test(m[1].trim()) || UNIT_WORDS.test(m[1].trim())) ? m[1].trim() : '';
+}
+/**
+ * A field's label: the lead of its description, without a closing note in brackets ("Year (negative = BC)" is "Year"),
+ * and, when that is too long for a heading, its part before a colon or semicolon ("Source tier: 1 Flagship journal; …"
+ * is "Source tier"), with the unit the description closes on ("Political pressure: share of scored indicators
+ * worsening, 0–1" is "Political pressure, 0–1"). A single word before the colon is a kind, not a name ("Component:
+ * political/diplomatic escalation, 0–100"), so the part after it names the field. A description that lists values
+ * ("election, referendum, …"), says "True when …" or is still too long gives way to the name in words.
+ */
+export function fieldLabel(name, description) {
+  let d = String(description || '').trim();
+  if (d && /^[A-Z0-9]/.test(d) && !/^True (when|for)\b/.test(d)) {
+    d = d.replace(/\s*\([^()]*\)\s*$/, '').trim();
+    if (d.length > 48) {
+      const parts = d.split(/\s*[:;]\s*/);
+      let head = parts[0];
+      if (!/\s/.test(head) && parts[1]) head = parts[1][0].toUpperCase() + parts[1].slice(1);
+      const unit = closingUnit(d);
+      d = unit && !head.endsWith(unit) ? `${head}, ${unit}` : head;
+    }
+    if (d && d.length <= 48) return d;
+  }
+  return humanName(name);
+}
+// A field's name in words inside brackets: lower case unless it is an acronym ("name", "ISO3").
+const inBrackets = name => { const h = humanName(name); return /^[A-Z0-9]{2,}\b/.test(h) ? h : h[0].toLowerCase() + h.slice(1); };
+/**
+ * The label of every column of a dataset (its catalogue fields); a column the steps made is named from its parts ("Mean
+ * of Kardashev rating"). Two fields the catalogue describes alike ("Country" for iso3 and name) add their name in words,
+ * so no two columns share a heading: "Country (ISO3)", "Country (name)"; a field named as its label ("country") keeps it.
+ */
+export function labelsFor(fields = []) {
+  const list = (Array.isArray(fields) ? fields : []).filter(f => f && typeof f.name === 'string').map(f => [f.name, fieldLabel(f.name, f.description)]);
+  const seen = new Map();
+  for (const [, l] of list) seen.set(l.toLowerCase(), (seen.get(l.toLowerCase()) || 0) + 1);
+  // The field whose own name is the shared label ("country" described as "Country") keeps it as it is.
+  const known = new Map(list.map(([n, l]) => [n, seen.get(l.toLowerCase()) > 1 && humanName(n).toLowerCase() !== l.toLowerCase() ? `${l} (${inBrackets(n)})` : l]));
+  return name => {
+    if (known.has(name)) return known.get(name);
+    const m = /^(sum|mean|median|min|max|distinct)_(.+)$/.exec(name);
+    if (m && known.has(m[2])) return `${AGGS[m[1]]} of ${known.get(m[2])}`;
+    return humanName(name);
+  };
+}
 
 /* ---------- dates as chart positions ---------- */
 export function toDate(v) {
@@ -137,18 +201,28 @@ export function countryMatcher(countries) {
 /**
  * @param table   { columns, rows } after the steps
  * @param c       chart choice { type, x, y, fn, color, bins }
- * @param opts    { ordered: true when the steps end in a sort (keep that order for bars), country: matcher for maps }
+ * @param opts    { ordered: true when the steps end in a sort (keep that order for bars), country: matcher for maps,
+ *                  label: a column's name in words (labelsFor), for the axes, the legend and the table view's headings }
  */
 export function prepareChart(table, c, opts = {}) {
+  const out = prepareRows(table, c, opts);
+  if (!out.ok) return out;
+  const L = typeof opts.label === 'function' ? opts.label : n => n;
+  out.table.columns = out.table.columns.map(k => ({ ...k, label: k.name === out.valueLabel ? k.name : L(k.name) }));
+  return out;
+}
+function prepareRows(table, c, opts) {
+  const L = typeof opts.label === 'function' ? opts.label : n => n;
   const problem = chartProblem(table, c);
   if (problem) return { ok: false, error: problem };
   if (!table.rows.length) return { ok: false, error: 'No rows to chart: the steps leave nothing' };
   const col = n => table.columns.find(x => x.name === n);
   const X = col(c.x), Y = c.y ? col(c.y) : null, S = c.color ? col(c.color) : null;
   const fn = !Y || c.fn === 'count' ? 'count' : c.fn || 'sum';
-  const valueLabel = fn === 'count' ? 'Rows' : fn === 'sum' ? Y.name : `${CHART_FNS[fn]} of ${Y.name}`;
+  const valueLabel = fn === 'count' ? 'Rows' : fn === 'sum' ? L(Y.name) : `${CHART_FNS[fn]} of ${L(Y.name)}`;
   const notes = [];
-  const out = { ok: true, type: c.type, x: X.name, y: Y?.name || '', fn, color: S?.name || '', valueLabel, notes };
+  const out = { ok: true, type: c.type, x: X.name, y: Y?.name || '', fn, color: S?.name || '', valueLabel, notes,
+    xLabel: L(X.name), yLabel: Y ? L(Y.name) : '', colorLabel: S ? L(S.name) : '' };
   const getS = S ? r => label(r[S.name]) : () => '';
 
   if (c.type === 'scatter') {
@@ -163,7 +237,7 @@ export function prepareChart(table, c, opts = {}) {
     if (dropped) notes.push(`${dropped.toLocaleString('en-GB')} rows without both values are left out.`);
     if (pts.length > LIMITS.points) { notes.push(`Showing the first ${LIMITS.points.toLocaleString('en-GB')} of ${pts.length.toLocaleString('en-GB')} points; add a filter or a limit to choose.`); pts = pts.slice(0, LIMITS.points); }
     const f = S ? foldSeries(pts, p => p.s, () => 1, LIMITS.scatterColours, LIMITS.scatterColours) : null;
-    if (f) { for (const p of pts) p.s = f.map(p.s); if (f.other) notes.push(`Colours for the ${LIMITS.scatterColours} most common values of ${S.name}; the other ${(f.total - LIMITS.scatterColours).toLocaleString('en-GB')} are grouped as “Other”.`); }
+    if (f) { for (const p of pts) p.s = f.map(p.s); if (f.other) notes.push(`Colours for the ${LIMITS.scatterColours} most common values of ${L(S.name)}; the other ${(f.total - LIMITS.scatterColours).toLocaleString('en-GB')} are grouped as “Other”.`); }
     Object.assign(out, { xType: X.type, yType: Y.type, data: pts, series: f ? f.series : [], labelName: lab?.name || '' });
     out.table = { columns: [lab && { name: lab.name, type: 'string' }, { name: X.name, type: X.type }, { name: Y.name, type: Y.type }, S && { name: S.name, type: 'string' }].filter(Boolean),
       rows: pts.slice(0, LIMITS.tableRows).map(p => ({ ...(lab ? { [lab.name]: p.label } : {}), [X.name]: p.raw[X.name], [Y.name]: p.raw[Y.name], ...(S ? { [S.name]: p.s } : {}) })) };
@@ -192,7 +266,7 @@ export function prepareChart(table, c, opts = {}) {
       if (e) e.y++; else cells.set(k, { x0: b.x0, x1: b.x1, s, y: 1 });
     }
     const data = [...cells.values()].sort((a, b) => +a.x0 - +b.x0 || (f ? f.series.indexOf(a.s) - f.series.indexOf(b.s) : 0));
-    if (f?.other) notes.push(`The ${LIMITS.series - 1} most common values of ${S.name} have their own colour; the other ${(f.total - LIMITS.series + 1).toLocaleString('en-GB')} are grouped as “Other”.`);
+    if (f?.other) notes.push(`The ${LIMITS.series - 1} most common values of ${L(S.name)} have their own colour; the other ${(f.total - LIMITS.series + 1).toLocaleString('en-GB')} are grouped as “Other”.`);
     if (unit) notes.push(`Each bar is ${/^\d/.test(unit) ? unit : unit === 'week' ? 'a week (Monday to Sunday)' : 'a ' + unit}.`);
     Object.assign(out, { xType: X.type, data, series: f ? f.series : [], unit, valueLabel: 'Rows' });
     const fmtEdge = v => (v instanceof Date ? v.toISOString().slice(0, 10) : formatValue(v, 'number'));
@@ -223,7 +297,7 @@ export function prepareChart(table, c, opts = {}) {
     }
   }
   const f = S && c.type !== 'map' ? foldSeries(rows, getS, () => 1, LIMITS.series, LIMITS.series - 1) : null;
-  if (f?.other) notes.push(`The ${LIMITS.series - 1} most common values of ${S.name} have their own colour; the other ${(f.total - LIMITS.series + 1).toLocaleString('en-GB')} are grouped as “Other”.`);
+  if (f?.other) notes.push(`The ${LIMITS.series - 1} most common values of ${L(S.name)} have their own colour; the other ${(f.total - LIMITS.series + 1).toLocaleString('en-GB')} are grouped as “Other”.`);
   const cells = new Map(), order = [];
   for (const r of rows) {
     const xv = keyX(r), s = f ? f.map(getS(r)) : '';
@@ -245,8 +319,8 @@ export function prepareChart(table, c, opts = {}) {
     else if (!opts.ordered) cats.sort((a, b) => totals.get(b) - totals.get(a));
     const cap = ordinal ? LIMITS.ordinalBars : LIMITS.bars;
     if (cats.length > cap) {
-      notes.push(ordinal ? `Showing the first ${cap} of ${cats.length.toLocaleString('en-GB')} values of ${X.name}; a line chart or a histogram shows them all.`
-        : `Showing ${opts.ordered ? 'the first' : 'the largest'} ${cap} of ${cats.length.toLocaleString('en-GB')} values of ${X.name}${opts.ordered ? ' in your sort order' : ''}.`);
+      notes.push(ordinal ? `Showing the first ${cap} of ${cats.length.toLocaleString('en-GB')} values of ${L(X.name)}; a line chart or a histogram shows them all.`
+        : `Showing ${opts.ordered ? 'the first' : 'the largest'} ${cap} of ${cats.length.toLocaleString('en-GB')} values of ${L(X.name)}${opts.ordered ? ' in your sort order' : ''}.`);
       cats = cats.slice(0, cap);
     }
     const rank = new Map(cats.map((k, i) => [k, i]));

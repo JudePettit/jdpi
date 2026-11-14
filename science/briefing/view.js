@@ -2,6 +2,7 @@
 // shared by the page (app.js) and the tests (tests/science-briefing.test.mjs).
 
 import '../../design/prp-access.js'; // globalThis.PRPAccess: the free-sources-lead rule
+import '../../design/prp-tex.js'; // globalThis.PRPTex: notation in titles and summaries in plain characters
 const { PRPAccess } = globalThis;
 
 export const WINDOWS = { '24h': 24, '3d': 72, '7d': 168 };

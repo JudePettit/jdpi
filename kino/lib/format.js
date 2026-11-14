@@ -5,11 +5,38 @@ export const CATEGORIES = [
   { id: 'political-events', name: 'Political Events', dek: 'Revolutions, elections, treaties and crises that changed how countries are governed.' },
   { id: 'political-figures', name: 'Political Figures', dek: 'The lives of leaders, reformers and revolutionaries, told from their sources.' },
   { id: 'political-parties', name: 'Political Parties', dek: 'How parties formed, what they stood for, and how they won and lost power.' },
-  { id: 'wars', name: 'Wars', dek: 'Wars from their causes to their aftermath, with the maps and figures that explain them.' },
-  { id: 'geopolitical-events', name: 'Geopolitical Events', dek: 'Shifts in the balance between powers: alliances, partitions, blockades and the end of empires.' },
-  { id: 'great-thinkers', name: 'Great Thinkers', dek: 'Multi-part courses on the great minds met across Vitruvian Manager: economists, philosophers, political theorists and scientists.', courses: true },
+  { id: 'wars', name: 'Wars', dek: 'Wars from their causes to their aftermath, with the maps and figures that explain them.',
+    note: 'The maps are illustrative. They are drawn on present-day borders for orientation, with movements and fronts sketched from the sources and marked approximate where they are simplified: they are not historical boundary or front-line data.' },
+  // The examples are films in the two categories (tests/kino.test.mjs holds them to the catalogue).
+  { id: 'geopolitical-events', name: 'Geopolitical Events', dek: 'Shifts in the balance between powers: alliances, blockades, crises between states and the end of empires. Political Events follows how a country is governed, as in the Russian Revolutions of 1917; Geopolitical Events follows how states stand towards one another, as in the Cuban Missile Crisis.',
+    examples: { 'political-events': 'russian-revolutions-1917', 'geopolitical-events': 'cuban-missile-crisis' } },
+  { id: 'great-thinkers', name: 'Great Thinkers', dek: 'Short introductions to the great minds met across Vitruvian Manager: economists, philosophers, political theorists and scientists.', courses: true },
 ];
 export const CATEGORY_IDS = CATEGORIES.map(c => c.id);
+
+/* A film about a subject that carries on after it (a party still in being) says where its story stops: its "cutoff",
+   a year or a month and year ("2024", "February 2026"), no earlier than the last year its narration names
+   (scripts/validate.mjs). Its catalogue card and its player then read "From 1929 · told to 2024" in place of the era. */
+export const CUTOFF = /^(?:(January|February|March|April|May|June|July|August|September|October|November|December) )?(\d{4})$/;
+export const cutoffYear = s => { const m = CUTOFF.exec(String(s ?? '')); return m ? +m[2] : null; };
+const year = y => (y < 0 ? `${-y} BC` : String(y));
+/** The period a card and the player show: "1939–1945", "1962", or "From 1921 · told to 2022" for a film with a cutoff. */
+export function spanLabel(doc) {
+  const [a, b] = doc.era;
+  if (doc.cutoff) return `From ${year(a)} · told to ${doc.cutoff}`;
+  return a === b ? year(a) : `${year(a)}–${year(b)}`;
+}
+/** The years a script's narration names (four-digit years from 1500 to 2099), for the cutoff check. */
+export function narratedYears(doc) {
+  return flatScenes(doc).flatMap(s => [...`${s.title || ''} ${s.narration || ''}`.matchAll(/\b(1[5-9]\d\d|20\d\d)\b/g)].map(m => +m[1]));
+}
+/** Great Thinkers' line on its courses (after its dek, "Short introductions to …"), from their own lengths. */
+export function courseWords(docs) {
+  const m = docs.map(d => d.minutes).filter(Number.isFinite), lo = Math.min(...m), hi = Math.max(...m);
+  const len = !m.length ? '' : lo === hi ? ` about ${lo} minutes` : ` ${lo} to ${hi} minutes`;
+  const books = docs.some(d => d.books?.length) ? ', and links to the thinker’s own book where Bibliotheca’s shelf holds one' : '';
+  return `Each runs${len}, in parts, with a short quiz at the end${books}.`;
+}
 export const categoryOf = id => CATEGORIES.find(c => c.id === id) || null;
 
 export const VISUAL_KINDS = ['title', 'map', 'timeline', 'portrait', 'quote', 'chart', 'module'];

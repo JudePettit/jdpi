@@ -521,7 +521,7 @@ describe('calendars, skill and llms.txt', () => {
   });
   test('llms.txt names Bibliotheca once, linking its reader, though it has no dataset', () => {
     const t = readFileSync(join(ROOT, 'llms.txt'), 'utf8');
-    assert.equal((t.match(/\[Bibliotheca · Neo Classic\]/g) || []).length, 1);
+    assert.equal((t.match(/\[Bibliotheca · Neo Book\]/g) || []).length, 1);
     assert.match(t, /\(https:\/\/jdpi\.pages\.dev\/bibliotheca\/neo\/index\.html\)/);
     assert.ok(!/kino\/bibliotheca|Kino · Bibliotheca/.test(t), 'not filed under Kino');
   });

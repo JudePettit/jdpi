@@ -224,7 +224,7 @@ const PAGE_RELATIONS = new Set(['Party', 'Ideology', 'Movement', 'Country', 'Cit
 export function lakeWithoutCast(slug, previous = null, dir = LAKE) {
   const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8'));
   const own = new Set((previous?.records || []).flatMap(r => [r.name, ...(r.aliases || [])]).map(nameKey));
-  // The lake files a book's mentions under Neo Classic, the reader (registry id neo-classic; "bibliotheca" until November 2026).
+  // The lake files a book's mentions under Neo Book, the reader (registry id neo-classic; "bibliotheca" until November 2026).
   const mine = m => m.m === 'neo-classic' && String(m.u).includes(`#book=${slug}&`);
   const all = new Map();
   for (let i = 0; i < manifest.shards.entities; i++) for (const [q, r] of Object.entries(JSON.parse(readFileSync(join(dir, `e/${i}.json`), 'utf8')))) all.set(q, r);

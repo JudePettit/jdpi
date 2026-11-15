@@ -1,4 +1,4 @@
-/* Bibliotheca · Neo Classic (its own module since November 2026; it was Kino's): public-domain classics read on screen, every term the Master Index knows
+/* Bibliotheca · Neo Book (its own module since November 2026; it was Kino's): public-domain classics read on screen, every term the Master Index knows
    highlighted, and a companion pane beside the text (AR Mode) with the terms on screen, a term's entry and the era's screens.
 
    Data, built by bibliotheca/scripts/build-book.mjs (its header holds the contract):
@@ -188,7 +188,7 @@ function contentsLine(chapters) {
 const coauthors = b => (b.editors || []).filter(e => /^co-author/.test(e.role || '')).map(e => e.name);
 function renderBookFront() {
   const b = S.book, a = b.author || {}, t = b.translator;
-  document.title = `${b.title} · Neo Classic · Bibliotheca · ${SHORT}`;
+  document.title = `${b.title} · Neo Book · Bibliotheca · ${SHORT}`;
   $('#book-title').textContent = b.title;
   const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Master Index">${esc(a.name)}</a>` : esc(a.name || '');
   const life = Number.isFinite(a.born) && Number.isFinite(a.died) ? ` (${esc(fmtEra([a.born, a.died]))})` : '';
@@ -229,7 +229,7 @@ function renderChapter(ci) {
   $('#chapter-no').textContent = l.no.replace(/^chapter\s+/i, ''); // the head is narrow: "XII" says it
   $('#chapter-name').textContent = l.title;
   $('#chapter-title').title = [l.no, l.title].filter(Boolean).join(': ');
-  document.title = `${S.book.title}${l.no ? `, ${l.no}` : `: ${l.title}`} · Neo Classic · Bibliotheca · ${SHORT}`;
+  document.title = `${S.book.title}${l.no ? `, ${l.no}` : `: ${l.title}`} · Neo Book · Bibliotheca · ${SHORT}`;
   unmark(); // the marks are on ranges of the old text, which is about to go
   S.say = null;
   drawSubs(); // nothing of the new chapter is said yet

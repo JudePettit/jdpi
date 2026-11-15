@@ -57,7 +57,7 @@ function catLink(id) {
 }
 
 // The thinker's own books on Bibliotheca's shelf (index.json's "books", matched by build-index.mjs on the books'
-// authors' Wikidata IDs): opened in its reader, Neo Classic, through the shell, or on their own page in a new tab.
+// authors' Wikidata IDs): opened in its reader, Neo Book, through the shell, or on their own page in a new tab.
 function bookLinks(books, cls) {
   return (books || []).map(b => {
     const link = { suite: 'bibliotheca', module: 'neo-classic', at: `bibliotheca/neo/index.html#book=${encodeURIComponent(b.slug)}` };

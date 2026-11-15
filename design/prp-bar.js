@@ -12,7 +12,7 @@
   const SHELL = (script && script.dataset.shell) || 'https://jdpi.pages.dev/';
   const moduleId = (script && script.dataset.module) || '';
   // Old suite ids, and submodules that moved to another module in PRP 2.0 (and the four briefings, into Highbrowse, and
-  // Bibliotheca's reader, Neo Classic, out of Kino into a module of its own, in November 2026), whatever module an older
+  // Bibliotheca's reader, Neo Book, out of Kino into a module of its own, in November 2026), whatever module an older
   // copy of their page still names.
   const CANON = { q: 'rt', hp: 'rs', fe: 'mm' };
   const MOVED = { atlas: 'rt', 'trade-desk': 'mm', markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', 'double-signal': 'mm', traders: 'mm', 'learning-politics': 'rs', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',

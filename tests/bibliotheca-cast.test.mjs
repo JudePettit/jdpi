@@ -294,7 +294,7 @@ test('the file: the head a field a line, every override, record and name on a li
   assert.equal(order({ ch: 7, p: 'c07-n12' }), 7012);
 });
 
-test('adapter: one mention per book and entity for the auto records, linked to Neo Classic, with the book’s names but not its own', () => {
+test('adapter: one mention per book and entity for the auto records, linked to Neo Book, with the book’s names but not its own', () => {
   const dir = mkdtempSync(join(tmpdir(), 'cast-'));
   try {
     mkdirSync(join(dir, 'bibliotheca/data/cast'), { recursive: true });
@@ -394,12 +394,12 @@ test('built: every cast file follows its contract, written by castJson, under 2 
   }
 });
 
-test('built: every auto record’s entity is in the lake, with the book’s names, the Neo Classic link and the book’s era', () => {
+test('built: every auto record’s entity is in the lake, with the book’s names, the Neo Book link and the book’s era', () => {
   const lake = loadLake();
   const shards = new Map();
   const record = q => { const i = +q.slice(1) % 512; if (!shards.has(i)) shards.set(i, read(new URL(`lake/data/e/${i}.json`, ROOT))); return shards.get(i)[q]; };
   const manifest = read(new URL('lake/data/manifest.json', ROOT));
-  assert.ok(manifest.modules['neo-classic'] > 0, 'the lake counts the Bibliotheca mentions (filed under its reader, Neo Classic)');
+  assert.ok(manifest.modules['neo-classic'] > 0, 'the lake counts the Bibliotheca mentions (filed under its reader, Neo Book)');
   for (const cast of casts) {
     const book = readBook(cast.slug);
     for (const r of cast.records.filter(x => x.decision === 'auto')) {

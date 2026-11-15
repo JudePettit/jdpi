@@ -1,4 +1,4 @@
-/* Bibliotheca · Neo Classic: a reading page for public-domain classics with the Master Index's terms
+/* Bibliotheca · Neo Book: a reading page for public-domain classics with the Master Index's terms
    highlighted and a companion pane beside the text (AR Mode), whose first tab lists the terms on screen. Written against the tokens
    in design/prp.css only (no colour is set here that is not a token), so light and dark both follow the system or the
    shell. The accent is Bibliotheca's own (--prp-bb); a copy of prp.css without it falls back to Natural Science's, as

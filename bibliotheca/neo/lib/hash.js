@@ -1,4 +1,4 @@
-/* The Neo Classic reader's address:
+/* The Neo Book reader's address:
      #book=<slug>&ch=<chapter number>&p=<paragraph id>&t=<QID of the term in use>&pane=<terms|ency|vm>&show=<screen>&era=term
    Pure (no DOM), so the tests read and write it in Node. Every key is optional:
      book  the shelf's slug (bibliotheca/data/books/<slug>.json); none means the first book on the shelf;

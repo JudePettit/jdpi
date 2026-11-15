@@ -16,7 +16,7 @@
    (In registry.json the modules are "suites" and their submodules "modules", as before.)
    Old links keep working: suite and submodule aliases (q → rt, hp → rs, fe → mm, trade-desk → markets, …), submodules
    that moved between modules (the four briefings into Highbrowse: #/rt/briefing, #/ns/science-briefing,
-   #/mm/econ-briefing, #/ds/digital-briefing; Kino's Bibliotheca, now Neo Classic in the Bibliotheca module, by its old id
+   #/mm/econ-briefing, #/ds/digital-briefing; Kino's Bibliotheca, now Neo Book in the Bibliotheca module, by its old id
    as an alias: #/kino/bibliotheca and #/kino/bibliotheca/neo-classic land on #/bibliotheca/neo-classic), and old sub-entries that became views or their own submodule are
    redirected. A lone submodule id or alias opens its submodule, so the old Workspace's #/workspace (and
    #/home/workspace) lands on the Dashboard; #/home lands on the Home page.

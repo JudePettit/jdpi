@@ -65,11 +65,11 @@ test('registry is well formed', () => {
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
   for (const id of ['data-analytics', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
-  // Bibliotheca was Kino's submodule until November 2026; it is a module now, its reader Neo Classic its one submodule
+  // Bibliotheca was Kino's submodule until November 2026; it is a module now, its reader Neo Book its one submodule
   // (the old id its alias, so #/kino/bibliotheca still opens it), on the same page.
   const bb = registry.suites.find(s => s.id === 'bibliotheca');
   assert.equal(bb.code, 'BB');
-  assert.deepEqual(bb.modules.map(m => [m.id, m.name, m.url, m.aliases, m.views]), [['neo-classic', 'Neo Classic', 'bibliotheca/neo/index.html', ['bibliotheca'], undefined]]);
+  assert.deepEqual(bb.modules.map(m => [m.id, m.name, m.url, m.aliases, m.views]), [['neo-classic', 'Neo Book', 'bibliotheca/neo/index.html', ['bibliotheca'], undefined]]);
   assert.ok(!registry.suites.find(s => s.id === 'kino').modules.some(m => m.id === 'bibliotheca' || m.id === 'neo-classic'), 'nothing of Bibliotheca left in Kino');
   // The four briefings moved into Highbrowse from Realtime Geopolitics, Natural Science, Money Management and Digital
   // Science (they were asserted there before); each keeps its id and its page. The Global Headline Tracker stays.
@@ -373,7 +373,7 @@ test('old addresses redirect to the new structure', pageTest, async () => {
     ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus'],
     // The Workspace became the Dashboard (November 2026): its old name lands there; Home's overview is the Home page.
     ['#/workspace', '#/home/dashboard'], ['#/home/workspace', '#/home/dashboard'], ['#/home', '#/'],
-    // Bibliotheca left Kino for a module of its own (November 2026): its old submodule and view land on Neo Classic.
+    // Bibliotheca left Kino for a module of its own (November 2026): its old submodule and view land on Neo Book.
     ['#/kino/bibliotheca', '#/bibliotheca/neo-classic'], ['#/kino/bibliotheca/neo-classic', '#/bibliotheca/neo-classic'], ['#/bibliotheca/bibliotheca', '#/bibliotheca/neo-classic']]) {
     await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(t => location.hash === t, to, { timeout: 5000 }).catch(() => {});

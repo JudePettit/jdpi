@@ -177,7 +177,7 @@ export function progress({ jdpiDir }) {
 
 /** Bibliotheca (the module; Kino's until November 2026): every entity a book's reader tags, and each book's cast.
  *  The tags are the book's own (bibliotheca/data/books/<slug>.json, each paragraph's `terms`, made by
- *  bibliotheca/scripts/tag-terms.mjs against the whole lake): every entity Neo Classic marks in the text counts there,
+ *  bibliotheca/scripts/tag-terms.mjs against the whole lake): every entity Neo Book marks in the text counts there,
  *  as many times as it is marked, whether the lake knew it from another module (the Prince's "Milan", the Duchy of
  *  Milan, a related entry of the Retrospective's) or from this book's cast; until November 2026 only the cast was read,
  *  so an entity the reader marks showed "Appears in Vitruvian Manager · 0". The cast, bibliotheca/data/cast/<slug>.json
@@ -186,8 +186,8 @@ export function progress({ jdpiDir }) {
  *  waits for a human to flip it in the cast file's overrides); a record the book is not tagged with yet (the tagger
  *  runs after the build) counts by the cast's own count. One mention per book and entity, whichever names the book
  *  gives it, so an entity the lake has already (by Wikidata ID) gains the mention rather than a second entry; its link
- *  opens Neo Classic at the first paragraph the reader marks it in (or the cast's first), the term in use, and is filed
- *  under Neo Classic (registry id neo-classic, the module's reader; "bibliotheca" until November 2026, now its alias).
+ *  opens Neo Book at the first paragraph the reader marks it in (or the cast's first), the term in use, and is filed
+ *  under Neo Book (registry id neo-classic, the module's reader; "bibliotheca" until November 2026, now its alias).
  *  Its context gives the times the reader marks it and the names it marks; its aliases are only the cast's names (the
  *  tags' names are the lake's already), which build.mjs adds to the entity's so the tagger finds them in the text.
  *  `source` records which book gave the mention ("bibliotheca:<slug>"); the build reads the module and the url. */

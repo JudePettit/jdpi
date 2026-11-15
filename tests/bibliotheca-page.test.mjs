@@ -1,4 +1,4 @@
-// Bibliotheca · Neo Classic, the reading page (bibliotheca/neo/): its pure parts in Node (the address, a paragraph's
+// Bibliotheca · Neo Book, the reading page (bibliotheca/neo/): its pure parts in Node (the address, a paragraph's
 // HTML and its terms, the screens for an era, how a pane frame moves) and the page's own files against the page
 // contract; then, when JDPI_URL is set (e.g. JDPI_URL=http://localhost:8787), the page in a browser: on the test
 // fixture (three excerpts of The Prince with their terms, bibliotheca/neo/fixture.json, served in place of the shelf),
@@ -249,12 +249,12 @@ test('data: every term of every book on the shelf renders, and every paragraph c
 /* ---------- the page's own files ---------- */
 test('page files: the page contract (front matter, connector, design system, tokens only)', () => {
   const html = file('bibliotheca/neo/index.html');
-  assert.match(html, /<p class="prp-eyebrow" data-jdpi-standalone><span>Bibliotheca <span class="sep">·<\/span> Neo Classic<\/span><\/p>/);
+  assert.match(html, /<p class="prp-eyebrow" data-jdpi-standalone><span>Bibliotheca <span class="sep">·<\/span> Neo Book<\/span><\/p>/);
   assert.match(html, /<script src="\.\.\/\.\.\/design\/prp-bar\.js" data-suite="bibliotheca" data-module="neo-classic" data-shell="\.\.\/\.\.\/" defer><\/script>/);
   assert.match(html, /<link rel="stylesheet" href="\.\.\/\.\.\/design\/prp\.css">/);
   assert.match(html, /<html lang="en" class="prp" data-suite="bibliotheca">/);
   // The page contract as the rename to Vitruvian Manager left it (design/PRP-STYLE.md): "<Submodule> · VM", the VM icon.
-  assert.match(html, /<title>Neo Classic · Bibliotheca · VM<\/title>/);
+  assert.match(html, /<title>Neo Book · Bibliotheca · VM<\/title>/);
   assert.match(html, /<link rel="icon" href="\.\.\/\.\.\/design\/brand-vm-icon\.svg" type="image\/svg\+xml">/);
   assert.match(html, /class="prp-title"/); assert.match(html, /class="prp-dek"/); assert.match(html, /class="prp-meta"/); assert.match(html, /class="prp-sources"/);
   assert.match(html, /role="tablist"/);
@@ -494,7 +494,7 @@ test('page: the real book opens at a deep link with the paragraph in place, and 
     assert.equal(await page.locator('#chapter-no').innerText(), 'XII');
     assert.equal(await page.locator('#shelf').inputValue(), 'the-prince');
     assert.equal(await page.evaluate(() => location.hash), '#book=the-prince&ch=12&p=c12-p08');
-    assert.equal(await page.title(), 'The Prince, Chapter XII · Neo Classic · Bibliotheca · VM', 'page titles end "· VM"');
+    assert.equal(await page.title(), 'The Prince, Chapter XII · Neo Book · Bibliotheca · VM', 'page titles end "· VM"');
     assert.match(await page.locator('#sources').innerText(), /Project Gutenberg pg1232[\s\S]*header, footer and licence have been removed/);
     assert.match(await page.locator('#sources').innerText(), /every work published before 1931 is in the public domain in the United States/);
     // Light and dark: the page and its terms take the design system's tokens for the theme in force.
@@ -605,13 +605,13 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const errors = watch(page, /\/bibliotheca\//); // the shell's own panels fetch from other sites; this page's errors only
-    // Bibliotheca is a module of its own (November 2026), Neo Classic its reader: the address it had under Kino lands
+    // Bibliotheca is a module of its own (November 2026), Neo Book its reader: the address it had under Kino lands
     // there, under its own name in the breadcrumb and the sidebar, in its own accent.
     await page.goto(`${BASE}/#/kino/bibliotheca`, { waitUntil: 'domcontentloaded' });
     const frame = await (await page.waitForSelector('#frames iframe.active[data-module="neo-classic"]', { timeout: 20000 })).contentFrame();
     await frame.waitForSelector('#text p.para', { timeout: 20000 });
     assert.equal(await page.evaluate(() => location.hash), '#/bibliotheca/neo-classic');
-    assert.equal((await page.textContent('#crumbs')).replace(/\s+/g, ''), 'VM/Bibliotheca/NeoClassic');
+    assert.equal((await page.textContent('#crumbs')).replace(/\s+/g, ''), 'VM/Bibliotheca/NeoBook');
     assert.equal(await page.getAttribute('#nav a[aria-current="page"]', 'href'), '#/bibliotheca/neo-classic');
     assert.equal(await frame.evaluate(() => document.documentElement.dataset.suite), 'bibliotheca');
     assert.equal(await frame.evaluate(() => document.documentElement.classList.contains('prp-embedded')), true);

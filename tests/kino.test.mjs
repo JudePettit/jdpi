@@ -563,15 +563,15 @@ test('related: the scene\'s place, then what the Master Index records for what i
   const none = relatedPlaces(scenes, 4, { entities: new Map([['Q9', null]]), subjects: [{ qid: 'Q9' }], registry, shell: LOCAL });
   assert.deepEqual(none.map(x => [x.group, x.scene]), [['scene', 5], ['film', 6], ['film', 1]]);
   assert.deepEqual(relatedPlaces(scenes, 9, { registry }), [], 'no such scene');
-  // Bibliotheca's reader, Neo Classic (a module of its own since November 2026, and never a film): a book the Master
+  // Bibliotheca's reader, Neo Book (a module of its own since November 2026, and never a film): a book the Master
   // Index records is a related screen, in Bibliotheca.
   const book = relatedPlaces([{ link: L('encyclopedia', 'encyclopedia/index.html#Q1399', 'Master Index · Machiavelli') }], 0, {
     entities: new Map([['Q1399', { label: 'Niccolò Machiavelli', mentions: [m('neo-classic', 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=the-prince&ch=7&p=c07-n05&t=Q1399', 'Named in The Prince'), m('kino-great-thinkers', 'https://jdpi.pages.dev/kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli', 'the film')] }]]),
     registry, shell: LOCAL,
   });
-  assert.deepEqual(book.map(x => [x.group, x.link.suite, x.link.module, x.name || null, x.place || null]), [['scene', 'rs', 'encyclopedia', null, null], ['tagged', 'bibliotheca', 'neo-classic', 'Neo Classic', 'Named in The Prince']]);
+  assert.deepEqual(book.map(x => [x.group, x.link.suite, x.link.module, x.name || null, x.place || null]), [['scene', 'rs', 'encyclopedia', null, null], ['tagged', 'bibliotheca', 'neo-classic', 'Neo Book', 'Named in The Prince']]);
   assert.equal(book[1].link.at, `${LOCAL}bibliotheca/neo/index.html#book=the-prince&ch=7&p=c07-n05&t=Q1399`, 'pointed at this copy of the site');
-  // A mention filed under the reader's old id (bibliotheca, Kino's until November 2026, now Neo Classic's alias) finds it too.
+  // A mention filed under the reader's old id (bibliotheca, Kino's until November 2026, now Neo Book's alias) finds it too.
   const old = relatedPlaces([{}], 0, { entities: new Map([['Q1399', { label: 'Niccolò Machiavelli', mentions: [m('bibliotheca', 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=the-prince&ch=7&p=c07-n05&t=Q1399', 'Named in The Prince')] }]]), subjects: [{ qid: 'Q1399' }], registry, shell: LOCAL });
   assert.deepEqual(old.map(x => [x.link.suite, x.link.module]), [['bibliotheca', 'neo-classic']]);
   // A submodule whose name has a " · " of its own keeps it whole.
@@ -1449,7 +1449,7 @@ test('page: what each catalogue says: illustrative maps, cutoffs, ready apart fr
     assert.equal(smith[0][1], `${BASE}/bibliotheca/neo/index.html#book=wealth-of-nations-1`);
     assert.equal(smith[0][2], '_blank', 'on its own, a new tab');
     assert.match(await page.$eval('.kn-card[data-doc="adam-smith"] .meta', m => m.textContent), /^Short introduction · 1723–1790 · 6 min · 3 parts/);
-    // Inside the shell the book opens in Bibliotheca's reader, Neo Classic, through the shell.
+    // Inside the shell the book opens in Bibliotheca's reader, Neo Book, through the shell.
     await page.setContent(`<iframe title="Kino" src="${BASE}/kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli" style="width:1250px;height:850px;border:0"></iframe>`);
     const frame = await (await page.waitForSelector('iframe')).contentFrame();
     await frame.waitForSelector('#doc-books:not([hidden]) .kn-book', { timeout: 20000 });

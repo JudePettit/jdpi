@@ -22,7 +22,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { INDICATORS, DIMENSIONS } from './indicators.mjs';
 import { writeBrief } from './brief.mjs';
-import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas, atlasDisagreement, peopleInIndex, OFFICES } from './leaders.mjs';
+import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas, atlasDisagreement, peopleInIndex, plainName, OFFICES } from './leaders.mjs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
@@ -273,6 +273,7 @@ for (const c of wbCountries) {
   for (const o of OFFICES) if (!h[o]?.name && /^\s*vacant\b/i.test(ar?.executive?.[o]?.name || '') && !vacant.includes(o)) vacant.push(o);
   const choice = leaderOffice({ atlas: ar, decision: decisions.get(c.id), government: [...(w.gov || [])], heads: h, sameOffice, sharedHead: (hosCount.get(h.headOfState?.qid) || 0) > 1, retro: rc?.leaders });
   const leader = currentLeader(choice, h, { retro: rc?.leaders, vacant });
+  const shown = leader && { ...leader, name: plainName(leader.name) }; // NA-03: the name without its realm
   const differ = ar ? atlasDisagreement(ar, choice.office, h, vacant) : null;
   if (differ) disagreements.push({ iso3: c.id, country: c.name, ...differ });
   if (ar && decisions.has(c.id)) console.log(`leader-offices.json: ${c.id} is decided by the Atlas (${ar.executive?.leader}); its decision (${decisions.get(c.id).office}) is not needed`);
@@ -285,14 +286,14 @@ for (const c of wbCountries) {
   countries.push({
     iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: w.capital || c.capitalCity || null,
     qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, gw: gw ?? null,
-    government: [...(w.gov || [])].slice(0, 4), headOfState: h.headOfState?.name || null, headOfGovernment: h.headOfGovernment?.name || null,
+    government: [...(w.gov || [])].slice(0, 4), headOfState: plainName(h.headOfState?.name) || null, headOfGovernment: plainName(h.headOfGovernment?.name) || null, // NA-03: shown without the realm
     headOfStateQid: h.headOfState?.qid || null, headOfGovernmentQid: h.headOfGovernment?.qid || null,
-    ...(h.regent?.name ? { regent: h.regent.name, regentQid: h.regent.qid || null } : {}), // who exercises the head of state's powers for him (a 'regent' correction)
+    ...(h.regent?.name ? { regent: plainName(h.regent.name), regentQid: h.regent.qid || null } : {}), // who exercises the head of state's powers for him (a 'regent' correction)
     ...(people.length ? { peopleInIndex: people } : {}), // those of these IDs with a Master Index entry: the page tags only them
     ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
-    leader, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
+    leader: shown, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
-    leadership: rc ? leadership(gw, leader) : null,
+    leadership: rc ? leadership(gw, shown) : null,
     conflict: gw != null ? conflict(gw) : null,
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,

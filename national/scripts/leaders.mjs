@@ -84,6 +84,19 @@ export function openRetroEntry(leaders, head) {
   return families.some(f => sameFamily(f, head.name)) || samePerson(display, head.name) ? last : null;
 }
 
+// The name to show for a Wikidata label that carries its holder's realm (NA-03, 15 Nov 2026): "Mohammed VI of
+// Morocco" is shown as "Mohammed VI", "Albert II, Prince of Monaco" as "Albert II", "William Alexander of the
+// Netherlands" as "William Alexander". Only a title after a comma ("Prince of", "Grand Duke of", "Crown Prince of" and
+// the like) or a final " of " and a capitalised place is taken off, so a note in brackets is kept; a label that would
+// be left with no letters is kept whole. The page and its data show this name; matching still uses the label.
+const REALM_TITLE = /,\s+(?:(?:Hereditary|Crown|Grand|Sovereign)\s+)?(?:Prince|Princess|Duke|Duchess|King|Queen|Emir|Sultan|Emperor|Empress)\s+of\s+.+$/;
+const REALM_PLACE = /\s+of\s+(?:the\s+)?\p{Lu}[\p{L}'’-]*(?:\s+(?:and\s+)?\p{Lu}[\p{L}'’-]*)*$/u;
+export function plainName(s) {
+  if (typeof s !== 'string') return s;
+  const t = s.replace(REALM_TITLE, '').replace(REALM_PLACE, '').trim();
+  return /\p{L}/u.test(t) ? t : s;
+}
+
 // True when two names are one person as the Atlas and Wikidata write them: the family names agree (or differ by one
 // letter in a longer name: Lukashenko and Lukashenka), and so do the first initials where both give a first name
 // (Mohammed bin Salman is not Salman bin Abdulaziz). What follows a comma, a bracket or " of " is a title or a note

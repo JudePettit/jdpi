@@ -233,7 +233,7 @@ test('leaders: a correction applies while Wikidata gives the value it replaces, 
 test('leaders: a regent is the current leader while Wikidata\'s head of state is the one he acts for, and lapses after', async () => {
   const { applyCorrections, currentLeader, leaderOffice } = await import('../national/scripts/leaders.mjs');
   const k = read('national/scripts/leader-corrections.json').corrections.find(c => c.iso3 === 'LIE');
-  assert.deepEqual([k.field, k.name, k.qid, k.since, k.actsFor], ['regent', 'Alois, Hereditary Prince of Liechtenstein', 'Q311308', '2004-08-15', 'Hans-Adam II, Prince of Liechtenstein']);
+  assert.deepEqual([k.field, k.name, k.qid, k.since, k.actsFor], ['regent', 'Hereditary Prince Alois', 'Q311308', '2004-08-15', 'Hans-Adam II, Prince of Liechtenstein']);
   assert.match(k.source, /^https:\/\/fuerstenhaus\.li\//, 'checked on the Princely House\'s own site');
   assert.match(k.note, /https:\/\/fuerstenhaus\.li\/en\/\?p=2018/, 'that Hans-Adam II still reigns is backed by his own page');
   const hos = { name: 'Hans-Adam II, Prince of Liechtenstein', qid: 'Q57454', start: '1989-11-13' }, hog = { name: 'Brigitte Haas', qid: 'Q129676165', start: '2025-04-10' };
@@ -244,7 +244,7 @@ test('leaders: a regent is the current leader while Wikidata\'s head of state is
   // The Atlas names the regent; the office is the head of state's, and its powers are the regent's.
   const choice = leaderOffice({ atlas: { executive: { leader: 'regent' } }, government: ['constitutional monarchy'], heads: h });
   assert.deepEqual(choice, { office: 'headOfState', rule: 'atlas' });
-  assert.deepEqual(currentLeader(choice, h), { name: 'Alois, Hereditary Prince of Liechtenstein', qid: 'Q311308', office: 'regent', rule: 'atlas', since: '2004-08-15', party: null, url: 'https://www.wikidata.org/wiki/Q311308', source: 'correction' });
+  assert.deepEqual(currentLeader(choice, h), { name: 'Hereditary Prince Alois', qid: 'Q311308', office: 'regent', rule: 'atlas', since: '2004-08-15', party: null, url: 'https://www.wikidata.org/wiki/Q311308', source: 'correction' });
   // Where the head of government's office is chosen, a regent changes nothing.
   assert.equal(currentLeader({ office: 'headOfGovernment', rule: 'system' }, h).name, 'Brigitte Haas');
   // Once Wikidata gives another head of state (the regent has succeeded), the correction lapses and the head of state leads.
@@ -606,4 +606,20 @@ test('page: each figure carries its own year or date and its source, in the prof
   await page.selectOption('#metric', 'i_' + gdp.code);
   assert.ok(await page.locator('#rows td.num small.yr').count() > 100, 'each value with its year');
   await page.close();
+});
+
+// NA-03 (15 Nov 2026): a Wikidata label that carries its holder's realm is shown as the name alone, in the build and
+// in the data the page reads; a note in brackets, a party and a plain name are left as they are.
+test('leaders: a name is shown without its realm ("Mohammed VI of Morocco" is "Mohammed VI"), in the data too', async () => {
+  const { plainName } = await import('../national/scripts/leaders.mjs');
+  const cases = [['Mohammed VI of Morocco', 'Mohammed VI'], ['Albert II, Prince of Monaco', 'Albert II'],
+    ['William Alexander of the Netherlands', 'William Alexander'], ['Guillaume V, Grand Duke of Luxembourg', 'Guillaume V'],
+    ['Salman bin Hamad, Crown Prince of Bahrain', 'Salman bin Hamad'], ['Carl XVI Gustaf of Sweden', 'Carl XVI Gustaf'],
+    ['Charles III (represented by Governor General Mary Simon)', 'Charles III (represented by Governor General Mary Simon)'],
+    ['Hereditary Prince Alois', 'Hereditary Prince Alois'], ['Emmanuel Macron', 'Emmanuel Macron'], [null, null]];
+  for (const [a, b] of cases) assert.equal(plainName(a), b, String(a));
+  const data = JSON.parse(readFileSync(new URL('../national/data/index.json', import.meta.url), 'utf8'));
+  for (const c of data.countries) for (const n of [c.headOfState, c.headOfGovernment, c.regent, c.leader?.name].filter(Boolean)) {
+    assert.equal(plainName(n), n, `${c.iso3}: "${n}" still carries its realm`);
+  }
 });

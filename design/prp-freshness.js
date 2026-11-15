@@ -321,7 +321,9 @@ export function countWords(registry) {
  *  "host"; the overview tables no longer have a Host column). */
 export function hostingAbout(suite) {
   const own = [], away = new Map();
-  for (const m of suite.modules) {
+  // A view hosted elsewhere (Auto Trader's Omni Trade and Algo Trader, on trade-desk) is named with that host's pages.
+  const elsewhere = m => (m.views || []).filter(v => v.host && /^https?:/.test(v.url || ''));
+  for (const m of suite.modules.flatMap(x => [x, ...elsewhere(x)])) {
     if (m.shell || m.host === 'Vitruvian Manager' || !m.url || !/^https?:/.test(m.url)) { own.push(m); continue; }
     let host = '';
     try { host = new URL(m.url).hostname; } catch { /* a bad address: name it by its host alone */ }

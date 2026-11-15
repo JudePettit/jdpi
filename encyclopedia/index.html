@@ -148,7 +148,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const LAKE = '../lake/data/', SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 // Every submodule's module in Vitruvian Manager (registry.json): rt Realtime Geopolitics, hb Highbrowse (the four
-// briefings), rs Retrospective Geopolitics, oi Intelligence Collection, mm Money Management, ns Natural Science, kino Kino,
+// briefings), rs Retrospective Geopolitics, oi Intelligence Collection, mm Wealth Automation, ns Natural Science, kino Kino,
 // bibliotheca Bibliotheca (its reader, Neo Book, was Kino's "bibliotheca" until November 2026). Old ids (q, hp, fe)
 // are not used here any more. Every module a lake adapter reports must be here
 // (tests/master-index.test.mjs), or its links open outside the shell.
@@ -156,7 +156,7 @@ const MODULE_SUITE = {
   headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
   highbrowse: 'hb', briefing: 'hb', 'science-briefing': 'hb', 'econ-briefing': 'hb', 'digital-briefing': 'hb',
   encyclopedia: 'rs', retrospective: 'rs', 'historical-calendar': 'rs', 'battlefield-history': 'rs', 'war-focus': 'rs', kardashev: 'rs', 'learning-politics': 'rs',
-  markets: 'mm', 'tally-stick': 'mm', 'algo-trader': 'mm', traders: 'mm', learning: 'mm',
+  markets: 'mm', traders: 'mm', learning: 'mm', // Tally Stick and Algo Trader are Auto Trader's (traders') private views since 15 November 2026
   progress: 'ns',
   'neo-classic': 'bibliotheca', 'kino-political-events': 'kino', 'kino-political-figures': 'kino', 'kino-political-parties': 'kino', 'kino-wars': 'kino', 'kino-geopolitical-events': 'kino', 'kino-great-thinkers': 'kino',
 };
@@ -164,7 +164,7 @@ const MODULE_SUITE = {
 const MODULE_NAME = {
   briefing: 'Political Briefing', headlines: 'Global Headline Tracker', volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', atlas: 'Political Atlas', calendar: 'Realtime Calendar', 'osint-training': 'Intel Training',
   encyclopedia: 'Master Index', retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
-  markets: 'TD Markets', 'tally-stick': 'Tally Stick', 'algo-trader': 'Algo Trader', traders: 'Auto Trader', learning: 'Learning · Finance & Economics',
+  markets: 'TD Markets', traders: 'Investor Impersonator', learning: 'Learning · Finance & Economics',
   'science-briefing': 'Scientific Briefing', progress: 'Invention Timeline',
   'neo-classic': 'Bibliotheca', 'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties',
   'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers',

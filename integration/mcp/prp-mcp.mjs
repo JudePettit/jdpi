@@ -692,9 +692,11 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     const reg = await getJson('registry.json');
     const m = a.module ? foldText(a.module).trim() : null;
     const list = reg.suites.filter(s => !m || s.id === m || (s.aliases || []).includes(m) || foldText(s.name) === m || foldText(s.title || '') === m).flatMap(s => s.modules.map(x => ({ module: s.id, module_name: s.title || s.name, id: x.id, name: x.name, kind: x.kind, status: x.status,
-      private: !!x.opensInNewTab, url: x.url ? (/^https?:/.test(x.url) ? x.url : site + x.url) : null, description: x.description })));
+      private: !!x.opensInNewTab, url: x.url ? (/^https?:/.test(x.url) ? x.url : site + x.url) : null, description: x.description,
+      // A submodule's parts (Auto Trader's Omni Trade, Investor Impersonator and Algo Trader), each saying if it is private.
+      ...(x.views?.some(v => v.opensInNewTab) ? { parts: x.views.map(v => ({ id: v.id, name: v.name, private: !!v.opensInNewTab, url: /^https?:/.test(v.url) ? v.url : site + v.url })) } : {}) })));
     return { platform: `${reg.platform.fullName} (${reg.platform.name}), by ${reg.platform.company}`, count: list.length, submodules: list,
-      note: 'Private submodules (Tally Stick, Algo Trader) sit behind their own sign-in; this server has no access to them.' };
+      note: 'Private parts (Auto Trader\'s Omni Trade and Algo Trader) sit behind their own sign-in; this server has no access to them.' };
   }
 
   /* ---------------------------------------------------------------- tool definitions */
@@ -704,7 +706,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
   const tools = [
     { name: 'list_datasets', title: 'List Vitruvian Manager datasets', fn: listDatasets,
       description: 'List the public datasets in Vitruvian Manager (VM, by JDP-Iq): world politics and conflict, history, markets and disclosures, science and technology. Returns each dataset\'s id, title, module, row count, refresh cadence, licence and field names. Start here.',
-      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt (Realtime Geopolitics), rs (Retrospective Geopolitics), mm (Money Management), ns (Natural Science), ds (Digital Science), kino; or a submodule id.' }, query: { type: 'string', description: 'Words that must appear in the id, title, description or field names.' } }) },
+      inputSchema: S({ module: { type: 'string', description: 'Only one module: rt (Realtime Geopolitics), rs (Retrospective Geopolitics), mm (Wealth Automation), ns (Natural Science), ds (Digital Science), kino; or a submodule id.' }, query: { type: 'string', description: 'Words that must appear in the id, title, description or field names.' } }) },
     { name: 'describe_dataset', title: 'Describe a dataset', fn: describeDataset,
       description: 'Everything about one dataset: what it is, every field with its type and meaning, row count, licence, sources, refresh, file URLs, how it is sharded, and two sample rows.',
       inputSchema: S({ id: { type: 'string', description: 'Dataset id from list_datasets, e.g. "political-calendar".' } }, ['id']) },

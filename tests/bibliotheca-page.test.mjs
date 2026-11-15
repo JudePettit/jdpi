@@ -1574,8 +1574,8 @@ test('page: "In Vitruvian Manager" frames only what the shell would: a private p
     const errors = watch(page);
     const asked = [];
     page.on('request', r => { if (/trade-desk|cloudflareaccess/.test(r.url())) asked.push(r.url()); });
-    const reg = read('registry.json'), tally = reg.suites.flatMap(s => s.modules).find(m => m.id === 'tally-stick');
-    // Machiavelli's entry (shard 375) with two more mentions: Tally Stick (private) and an Invention Timeline page that is missing.
+    const reg = read('registry.json'), tally = reg.suites.flatMap(s => s.modules.flatMap(m => m.views || [])).find(v => v.id === 'omni-trade');
+    // Machiavelli's entry (shard 375) with two more mentions: Tally Stick (private: Auto Trader's Omni Trade since 15 November 2026, still under its old id) and an Invention Timeline page that is missing.
     await page.route('**/lake/data/e/375.json', async route => {
       const json = await (await route.fetch()).json();
       json.Q1399 = { ...json.Q1399, mentions: [{ m: 'tally-stick', u: tally.url, c: 'A private page' }, { m: 'progress', u: 'https://jdpi.pages.dev/science/progress/index.html#y=1513&f=1494', c: 'A missing page' }, ...json.Q1399.mentions] };
@@ -1584,7 +1584,7 @@ test('page: "In Vitruvian Manager" frames only what the shell would: a private p
     await page.route(url => /^\/science\/progress\/(index\.html)?$/.test(url.pathname), route => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Not here</title><p>Not here.</p>' }));
     await page.goto(`${BASE}/bibliotheca/neo/#book=the-prince&ch=7&p=c07-p01&t=Q1399&pane=vm&show=m0`, { waitUntil: 'domcontentloaded' });
     const card = await page.waitForSelector('#panel-vm .prp-side-card[data-why="private"]', { timeout: 20000 });
-    assert.match(await card.textContent(), /Tally Stick is private/);
+    assert.match(await card.textContent(), /Omni Trade is private/);
     assert.equal(await card.$eval('a', a => [a.href, a.target].join(' ')), `${tally.url} _blank`, 'its link instead');
     assert.equal(await page.locator('#vm-frame').isHidden(), true);
     assert.notEqual(await page.getAttribute('#vm-frame', 'data-url'), tally.url, 'never framed');

@@ -29,6 +29,19 @@ test('data: House trades and 13F holdings are complete enough to show', () => {
   assert.ok(inv.tickers.mapped >= inv.tickers.of * 0.8, `${inv.tickers.mapped} of ${inv.tickers.of} holdings with a ticker`);
 });
 
+// Since 15 November 2026 this page is Investor Impersonator, the public one of Auto Trader's three parts (Wealth
+// Automation): its head says so, and a bar names the other two, on the money site, each in a new tab.
+test('page: Investor Impersonator, part of Wealth Automation\'s Auto Trader, with a bar naming the three parts', () => {
+  const html = readFileSync(new URL('../fe/traders.html', import.meta.url), 'utf8');
+  assert.match(html, /<title>Investor Impersonator · Auto Trader · VM<\/title>/);
+  assert.match(html, /class="prp-eyebrow" data-jdpi-standalone>Wealth Automation <span class="sep">·<\/span> Auto Trader<\/div>/);
+  assert.match(html, /<h1 class="prp-title">Investor Impersonator<\/h1>/);
+  const bar = html.match(/<nav class="parts"[\s\S]*?<\/nav>/)?.[0] || '';
+  const parts = [...bar.matchAll(/<(a|span) class="prp-chip[^"]*"([^>]*)>([^<]+)</g)].map(([, tag, attrs, name]) => [name.trim(), tag === 'a' ? /href="([^"]+)"/.exec(attrs)[1] : null, /target="_blank"/.test(attrs), /aria-current="page"/.test(attrs)]);
+  assert.deepEqual(parts, [['Omni Trade ↗', 'https://trade-desk.judep92.workers.dev/tally/', true, false], ['Investor Impersonator', null, false, true], ['Algo Trader ↗', 'https://trade-desk.judep92.workers.dev/tally/algo/', true, false]]);
+  assert.doesNotMatch(html, /Money Management|Tally Stick/);
+});
+
 test('Congress trades filter by member and ticker; investors show 13F holdings', pageTest, async () => {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -102,7 +115,7 @@ test('filing age: an investor\'s 13F in the money site\'s words, and a stale one
     'Copies the 13F for the quarter to 30 Jun 2026 (137 days ago), filed 14 Aug 2026 (92 days ago).');
   assert.equal(filingAge(filingOf({ cik: '222' }, data, NOW), NOW),
     'Its latest filing is the 13F for the quarter to 30 Jun 2025 (502 days ago), filed 1 Aug 2025 (470 days ago), and it is out of date: The fund closed in 2025 and files no more. Mirror copies nothing from it.');
-  assert.equal(filingAge(filingOf({ cik: 999 }, data, NOW), NOW), 'Filing not found in Auto Trader’s data.');
+  assert.equal(filingAge(filingOf({ cik: 999 }, data, NOW), NOW), 'Filing not found in Investor Impersonator’s data.');
 });
 
 test('filing age: a member\'s trades are that member\'s, with a ticker, of the last 730 days, shares or calls', () => {

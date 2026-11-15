@@ -38,8 +38,8 @@ const STORES = [
   { file: 'calendar/data/2020s.json', name: 'Realtime Calendar', workflow: 'calendar-refresh.yml', every: 24, live: true },
   { file: 'integration/catalog.json', name: 'Integration Hub catalogue', workflow: 'calendar-refresh.yml', every: 24 },
   { file: 'volatility/data/index.json', name: 'Geopolitical Volatility', workflow: 'volatility-refresh.yml', every: 24, live: true, when: j => j.latest },
-  { file: 'traders/data/congress.json', name: 'Auto Trader House trades', workflow: 'traders-refresh.yml', every: 7 * 24 },
-  { file: 'traders/data/investors.json', name: 'Auto Trader 13F holdings', workflow: 'traders-refresh.yml', every: 7 * 24 },
+  { file: 'traders/data/congress.json', name: 'Investor Impersonator House trades', workflow: 'traders-refresh.yml', every: 7 * 24 },
+  { file: 'traders/data/investors.json', name: 'Investor Impersonator 13F holdings', workflow: 'traders-refresh.yml', every: 7 * 24 },
   { file: 'battlefield/data/realtime.json', name: 'Realtime Battlefield', workflow: 'battlefield-refresh.yml', every: 31 * 24 },
   { file: 'battlefield/focus/data/index.json', name: 'War Focus', workflow: 'warfocus-refresh.yml', every: 31 * 24 },
   { file: 'science/progress/data/events.json', name: 'Invention Timeline', workflow: 'progress-refresh.yml', every: 31 * 24 },
@@ -53,7 +53,7 @@ const STORES = [
 const WORKFLOWS = {
   'briefings-refresh.yml': 'Scientific, Economics and Digital Briefings refresh', 'briefing-refresh.yml': 'Political Briefing refresh',
   'calendar-refresh.yml': 'Calendars and Integration Hub refresh', 'volatility-refresh.yml': 'Geopolitical Volatility refresh',
-  'traders-refresh.yml': 'Auto Trader refresh', 'battlefield-refresh.yml': 'Realtime Battlefield refresh', 'warfocus-refresh.yml': 'War Focus refresh',
+  'traders-refresh.yml': 'Investor Impersonator refresh', 'battlefield-refresh.yml': 'Realtime Battlefield refresh', 'warfocus-refresh.yml': 'War Focus refresh',
   'progress-refresh.yml': 'Invention Timeline refresh', 'lake-refresh.yml': 'Master Index refresh', 'national-refresh.yml': 'National Analysis refresh',
   'kino-refresh.yml': 'Kino refresh',
 };

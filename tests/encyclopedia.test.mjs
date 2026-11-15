@@ -26,7 +26,7 @@ test('data: the entity layer is complete, consistent, and every entity is in its
   for (const r of index.rows) assert.ok(entities.has(r[0]), `index row ${r[0]}`);
   for (let i = 0; i < m.shards.titles; i++) for (const [t, q] of Object.entries(read(`lake/data/t/${i}.json`))) assert.ok(entities.has(q), `${t} → ${q}`);
   for (const [k, q] of Object.entries(keys)) assert.ok(entities.has(q), `${k} → ${q}`);
-  // Auto Trader's members of Congress have entries (129 now): they need the Bioguide IDs in traders/data.
+  // Investor Impersonator's members of Congress have entries (129 now): they need the Bioguide IDs in traders/data.
   assert.ok(Object.keys(keys).filter(k => k.startsWith('congress:')).length >= 50, 'members of Congress');
   // 98% of the entities with an article have its summary; a failed fetch is tried again by the next build.
   const withArticle = [...entities.values()].filter(r => r.wiki);

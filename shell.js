@@ -1,6 +1,6 @@
 /* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
    and storage keys): renders the modules (Home, Realtime Geopolitics, Highbrowse, Retrospective Geopolitics,
-   Intelligence Collection, Money Management, Natural Science, Digital Science, Kino, Bibliotheca) and their submodules from
+   Intelligence Collection, Wealth Automation, Natural Science, Digital Science, Kino, Bibliotheca) and their submodules from
    registry.json, and hosts each submodule page in a persistent workspace frame. A module has a short name (registry
    "name", for the sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, its
    box on the Home page, the Dashboard's headings, page eyebrows and the tab title); they differ only where the full
@@ -20,6 +20,15 @@
    as an alias: #/kino/bibliotheca and #/kino/bibliotheca/neo-classic land on #/bibliotheca/neo-classic), and old sub-entries that became views or their own submodule are
    redirected. A lone submodule id or alias opens its submodule, so the old Workspace's #/workspace (and
    #/home/workspace) lands on the Dashboard; #/home lands on the Home page.
+   Submodules merged into one as its views keep their addresses (15 November 2026: Tally Stick, the old Auto Trader page
+   and Algo Trader became Wealth Automation's Auto Trader, with the views Omni Trade, Investor Impersonator and Algo
+   Trader). A view is found by its id or one of its own "aliases"; an old submodule id is an alias of both the merged
+   submodule and its view, and lands on that view: #/mm/tally-stick and #/fe/tally-stick → #/mm/traders/omni-trade,
+   #/mm/algo-trader and #/mm/double-signal → #/mm/traders/algo-trader, #/mm/investor-impersonator →
+   #/mm/traders/investor-impersonator. A view alias that was a tab of the old page (Auto Trader's old views congress and
+   investors) names its address in the view's "aliasUrls", and opens the view there as a deep link:
+   #/mm/traders/congress → #/mm/traders/investor-impersonator?at=fe%2Ftraders.html%3Ftab%3Dcongress. A view marked
+   "opensInNewTab" gets the launch page, and a view with its own "data" (the private parts) its own freshness line.
    One frame per submodule (and view): a deep link moves that frame, a plain visit shows it as it was left.
    While Kino follows along with its frame hidden, the now-playing bar shows its captions and controls. */
 
@@ -38,6 +47,8 @@ const kindLabel = k => state.registry.kinds?.[k] || '';
 function allModules() { return state.registry.suites.flatMap(s => s.modules.map(m => ({ suite: s, module: m }))); }
 const findSuite = id => state.registry.suites.find(s => s.id === id || s.aliases?.includes(id)) || null;
 const findModule = id => allModules().find(x => x.module.id === id || x.module.aliases?.includes(id)) || null;
+// A submodule's view by its id or one of its own aliases (an old id it answers to).
+const findView = (m, id) => m?.views?.find(v => v.id === id || v.aliases?.includes(id)) || null;
 // The Home module: its overview is the Home page (#/), and its submodule the Dashboard, which the shell draws itself.
 const HOME = 'home';
 
@@ -49,22 +60,32 @@ function href(suite, module, view) {
 }
 
 function parseRoute() {
-  const [path, query = ''] = location.hash.replace(/^#\/?/, '').split('?');
-  const [suiteId, moduleId, viewId] = path.split('/').filter(Boolean).map(decodeURIComponent);
-  const at = new URLSearchParams(query).get('at');
+  const [path, query0 = ''] = location.hash.replace(/^#\/?/, '').split('?');
+  const [suiteId, moduleId, viewId0] = path.split('/').filter(Boolean).map(decodeURIComponent);
+  let query = query0, viewId = viewId0, at = new URLSearchParams(query).get('at');
   let suite = suiteId ? findSuite(suiteId) : null, module = null, view = null;
   // A lone submodule id or alias, where a module's would be, opens that submodule: #/workspace, the old Workspace, is
   // the Dashboard's alias.
-  if (suiteId && !suite && !moduleId) { const own = findModule(suiteId); if (own) ({ suite, module } = own); }
+  let reached = null; // the id or alias the submodule was reached by
+  if (suiteId && !suite && !moduleId) { const own = findModule(suiteId); if (own) { ({ suite, module } = own); reached = suiteId; } }
   if (moduleId) {
     const hit = (suite && suite.modules.find(m => m.id === moduleId || m.aliases?.includes(moduleId))) || findModule(moduleId)?.module || null;
-    if (hit) { module = hit; suite = state.registry.suites.find(s => s.modules.includes(hit)); }
+    if (hit) { module = hit; suite = state.registry.suites.find(s => s.modules.includes(hit)); reached = moduleId; }
   }
   if (module && viewId) {
-    view = module.views?.find(v => v.id === viewId) || null;
+    view = findView(module, viewId);
     // An old sub-entry that is now its own submodule (e.g. War Focus under Retrospective Battlefield).
     if (!view) { const own = findModule(viewId); if (own) { module = own.module; suite = own.suite; } }
+  } else if (module && reached && reached !== module.id) {
+    // A submodule merged into another as one of its views keeps its address: its old id is an alias of both, and
+    // lands on that view (#/mm/tally-stick → #/mm/traders/omni-trade).
+    view = findView(module, reached);
+    viewId = view ? reached : null;
   }
+  // An old view that is now a tab of another view (Auto Trader's old Members of Congress and Famous investors, now tabs
+  // of Investor Impersonator) opens that view at the tab's address, as a deep link, unless the address gave its own.
+  const tab = view && viewId !== view.id ? view.aliasUrls?.[viewId] : null;
+  if (tab && !at) { at = tab; query = `at=${encodeURIComponent(tab)}`; }
   // The Home module's overview is the Home page: #/home shows it, and route() moves the address to #/.
   const home = suite?.id === HOME && !module;
   if (home) suite = null;
@@ -122,7 +143,8 @@ function setupTheme() {
 function navItem(suite, m) {
   const flag = STATUS[m.status] ? `<span class="flag">${esc(STATUS[m.status])}</span>` : '';
   const l = lineOf(m);
-  const search = [m.name, suite.name, suite.title, suite.code, kindLabel(m.kind), ...(m.aliases || [])].join(' ').toLowerCase();
+  // Its views' names too, so a merged submodule is found by its parts' (Omni Trade, Investor Impersonator: Auto Trader).
+  const search = [m.name, suite.name, suite.title, suite.code, kindLabel(m.kind), ...(m.aliases || []), ...views(m).map(v => v.name)].join(' ').toLowerCase();
   return `<a class="nav-item" href="${href(suite, m)}" data-route="${suite.id}/${m.id}" data-search="${esc(search)}" data-suite="${suite.id}"${l ? ` title="${esc(l.text)}"` : ''}>
     <span class="icon" aria-hidden="true">${esc(m.icon)}</span><span class="grow">${esc(m.name)}</span>${flag}${l?.late ? LATE_FLAG : ''}</a>`;
 }
@@ -168,7 +190,7 @@ function renderTop(r, frame) {
   const m = r.module;
   // The submodule's freshness line (where its "Realtime" badge and "Live" once stood), and a flag while it is in build.
   $('#top-actions').innerHTML = m ? `
-    ${statusFlag(m)}${freshHtml(m, 'chip')}
+    ${statusFlag(m)}${freshHtml(m, 'chip', r.view)}
     ${frame ? `<button class="prp-btn sm" type="button" id="reload" title="Reload this page">⟳<span class="btn-label">Reload</span></button>
     <a class="prp-btn sm" id="newtab" href="${esc(frameAddress(frame))}" target="_blank" rel="noopener" title="Open this page, as it is now, in a new tab">↗<span class="btn-label">New tab</span></a>` : ''}` : '';
   if (!frame) return;
@@ -200,9 +222,12 @@ const lineOf = m => (fresh.mod && m ? fresh.mod.freshnessLine(m, fresh.reads, { 
 // A line as the top bar shows it (form "chip": the whole line, and on a narrow screen its short form, the whole line
 // still read out) or as everywhere else does (form "line").
 const freshInner = (l, form) => (!l ? '' : form === 'chip' ? `<span class="fresh-full">${esc(l.text)}</span><span class="fresh-short" aria-hidden="true">${esc(l.short)}</span>` : esc(l.text));
-const freshHtml = (m, form) => {
-  const l = lineOf(m);
-  return `<span class="prp-fresh${l?.late ? ' late' : ''}" data-fresh="${esc(m.id)}" data-form="${form}"${l ? ` title="${esc(l.text)}"` : ' hidden'}>${freshInner(l, form)}</span>`;
+// A view with its own "data" (Auto Trader's private Omni Trade and Algo Trader) has its own line wherever that view is
+// shown (the top bar, its launch page); every other view shows its submodule's.
+const ownLine = (m, v) => (v?.data ? v : m);
+const freshHtml = (m, form, v = null) => {
+  const l = lineOf(ownLine(m, v)), part = v?.data ? ` data-fresh-view="${esc(v.id)}"` : '';
+  return `<span class="prp-fresh${l?.late ? ' late' : ''}" data-fresh="${esc(m.id)}"${part} data-form="${form}"${l ? ` title="${esc(l.text)}"` : ' hidden'}>${freshInner(l, form)}</span>`;
 };
 // The Dashboard's two counts from the lines: submodules whose data was made in the last 24 hours (and is not late), and
 // those that are late. A dash until anything has been read. A submodule whose file could not be read just now is in
@@ -275,7 +300,7 @@ async function loadFreshness(r = state.route, { afterToday = false } = {}) {
 function paintFreshness() {
   if (!fresh.mod || !state.registry) return;
   document.querySelectorAll('[data-fresh]').forEach(el => {
-    const l = lineOf(findModule(el.dataset.fresh)?.module);
+    const m = findModule(el.dataset.fresh)?.module, l = lineOf(ownLine(m, el.dataset.freshView ? findView(m, el.dataset.freshView) : null));
     el.hidden = !l;
     if (!l) return;
     el.classList.toggle('late', l.late);
@@ -476,17 +501,20 @@ function renderSuite(suite) {
 }
 const lateIn = suite => (fresh.mod ? suite.modules.filter(m => lineOf(m)?.late).length : 0);
 
-function renderNotice(suite, m, body) {
+// A view with a page of its own (one of Auto Trader's three parts) is named under its submodule, with its own words and
+// its own freshness line where it has one.
+function renderNotice(suite, m, body, v = null) {
+  const own = v || m;
   $('#view').innerHTML = `<div class="page" data-suite="${suite.id}"><div class="prp-panel launch">
-    <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(m.name)}</div>
-    <h1 class="prp-title">${esc(m.name)}</h1><p class="prp-dek">${esc(m.description)}</p><div class="prp-meta">${freshHtml(m, 'line')}</div>${body}</div></div>`;
+    <div class="prp-eyebrow">${esc(suite.title || suite.name)} <span class="sep">·</span> ${esc(m.name)}${v ? ` <span class="sep">·</span> ${esc(v.name)}` : ''}</div>
+    <h1 class="prp-title">${esc(own.name)}</h1><p class="prp-dek">${esc(own.description || m.description)}</p><div class="prp-meta">${freshHtml(m, 'line', v)}</div>${body}</div></div>`;
 }
-// Submodules behind their own sign-in (Cloudflare Access) can't sign in inside another site's frame: browsers block
-// the third-party cookie. Registry flag: "opensInNewTab": true.
-function renderLaunch(suite, m, url) {
-  const abs = new URL(url, location.href).href;
-  renderNotice(suite, m, `<div class="prp-note" style="margin-top:18px"><b>Opens in its own tab.</b> ${esc(m.name)} is private and asks you to sign in, which browsers don't allow inside another site's frame.</div>
-    <div class="actions"><a class="prp-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(m.name)} ↗</a></div>`);
+// Submodules (and views) behind their own sign-in (Cloudflare Access) can't sign in inside another site's frame:
+// browsers block the third-party cookie. Registry flag: "opensInNewTab": true.
+function renderLaunch(suite, m, url, v = null) {
+  const abs = new URL(url, location.href).href, name = (v || m).name;
+  renderNotice(suite, m, `<div class="prp-note" style="margin-top:18px"><b>Opens in its own tab.</b> ${esc(name)} is private and asks you to sign in, which browsers don't allow inside another site's frame.</div>
+    <div class="actions"><a class="prp-btn primary" href="${esc(abs)}" target="_blank" rel="noopener">Open ${esc(name)} ↗</a></div>`, v);
 }
 
 /* --- Dashboard "Today" panel (PRP-ANALYSIS.md item 3: "Make the Workspace a workspace, not a catalogue") ------------
@@ -849,7 +877,7 @@ function route() {
   let frame = null;
   // A deep link to the page's own address (e.g. "open Volatility") is a plain visit: the frame shows as it was left.
   if (framed) frame = showFrame(r, url, !!at && new URL(at).href !== new URL(base, location.href).href);
-  else if (url) renderLaunch(r.suite, r.module, url);
+  else if (url) renderLaunch(r.suite, r.module, url, r.view);
   else if (SHELL_PAGES.has(r.module?.shell)) SHELL_PAGES.get(r.module.shell)(r.suite, r.module); // the Dashboard
   else if (r.module) renderNotice(r.suite, r.module, `<div class="prp-note" style="margin-top:18px"><b>Not published yet.</b> It will open here once it has a live address.</div>`);
   else if (r.suite) renderSuite(r.suite);

@@ -403,7 +403,7 @@ spec({
   fields: [['year', 'Year (negative = BC)'], ['world_population', 'World population'], ['world_watts', 'Humanity\'s energy capture, watts'], ['kardashev', 'Kardashev rating']]
 });
 
-// ---- Money Management -----------------------------------------------------------------------------------------
+// ---- Wealth Automation ----------------------------------------------------------------------------------------
 const briefSpecs = (id, file, module, submodule, title, facetKey, refresh, sourcesNote) => {
   if (!has(file)) return;
   const d = J(file);
@@ -443,14 +443,14 @@ const AMT = s => { const m = String(s || '').match(/\$([\d,]+(?:\.\d+)?)(?:\s*-\
 const OWNER = { self: 'self', JT: 'joint', SP: 'spouse', DC: 'dependent child' };
 const congLicence = 'Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.';
 spec({
-  id: 'congress-members', title: 'Auto Trader: members of Congress who trade', module: 'mm', submodule: 'traders',
+  id: 'congress-members', title: 'Investor Impersonator: members of Congress who trade', module: 'mm', submodule: 'traders',
   description: `Members of the US House of Representatives with Periodic Transaction Reports in ${CONG.years.join(' and ')}, with party, district and how many trades Vitruvian Manager read from their filings.`,
   derive: () => CONG.members.map(m => ({ id: m.id, name: m.name, party: m.party, district: m.district, state: (m.district || '').slice(0, 2) || null, bioguide: m.bioguide || null, filings: m.filings ?? 0, trades: m.trades ?? 0, unreadable_filings: m.unreadable ?? 0 })).sort((a, b) => b.trades - a.trades),
   from: ['traders/data/congress.json'], refresh: 'weekly', resets: 'yearly', updatedFrom: 'traders/data/congress.json', page: 'fe/traders.html?tab=congress', licence: congLicence, sources: [CONG.source],
   fields: [['id', 'Member id (join to member in congress-trades)'], ['name', 'Member'], ['party', 'Party'], ['district', 'State and district, e.g. CA31'], ['state', 'State (USPS code)'], ['bioguide', 'Congressional Bioguide id'], ['filings', 'Filings read'], ['trades', 'Trades read from them'], ['unreadable_filings', 'Scanned paper filings linked but not read']]
 });
 spec({
-  id: 'congress-trades', title: 'Auto Trader: trades by members of Congress', module: 'mm', submodule: 'traders',
+  id: 'congress-trades', title: 'Investor Impersonator: trades by members of Congress', module: 'mm', submodule: 'traders',
   description: `Every stock, bond and option trade reported by members of the House in ${CONG.years.join(' and ')} (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.`,
   derive: () => CONG.trades.map(t => { const m = MEMBERS.get(t.member) || {}; const [lo, hi] = AMT(t.amount); return { filed: t.filed, date: t.date || null, member: t.member, name: m.name || null, party: m.party || null, district: m.district || null, owner: OWNER[t.owner] || t.owner || null,
     type: t.type, ticker: t.ticker || null, asset: t.asset || null, asset_type: t.assetType || null, amount: t.amount || null, amount_min: lo, amount_max: hi, account: t.account || null, filing: t.url || null }; }).sort((a, b) => (a.filed < b.filed ? 1 : a.filed > b.filed ? -1 : 0)),
@@ -463,15 +463,15 @@ const INV = J('traders/data/investors.json');
 const invLicence = 'Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.';
 const invSources = ['SEC EDGAR Form 13F-HR (the latest two filings per manager)', `${INV.tickers?.source || 'OpenFIGI'}: CUSIP to US listing`];
 spec({
-  id: 'investors', title: 'Auto Trader: famous investors', module: 'mm', submodule: 'traders',
-  description: 'The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.',
+  id: 'investors', title: 'Investor Impersonator: famous investors', module: 'mm', submodule: 'traders',
+  description: 'The famous investors Investor Impersonator follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.',
   derive: () => INV.investors.map(i => ({ cik: i.cik, person: i.person, fund: i.fund, style: i.style || null, registered_name: i.registeredName || null, period: i.period || null, filed: i.filed || null, previous_period: i.previousPeriod || null, total_value: i.total ?? null, positions: (i.positions || []).length, sold_out: (i.sold || []).length, filing: i.filingUrl || null })),
   from: ['traders/data/investors.json'], refresh: 'weekly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', licence: invLicence, sources: invSources,
   fields: [['cik', 'SEC CIK'], ['person', 'Investor'], ['fund', 'Fund'], ['style', 'Investment style (Vitruvian Manager)'], ['registered_name', 'Name on the filing'], ['period', 'Quarter end of the latest 13F'], ['filed', 'Filing date'], ['previous_period', 'Quarter end of the filing compared against'],
     ['total_value', 'Reported value of positions, US$'], ['positions', 'Positions held'], ['sold_out', 'Positions sold out since the previous filing'], ['filing', 'Filing index on EDGAR']]
 });
 spec({
-  id: 'investor-holdings', title: 'Auto Trader: famous investors\' holdings', module: 'mm', submodule: 'traders',
+  id: 'investor-holdings', title: 'Investor Impersonator: famous investors\' holdings', module: 'mm', submodule: 'traders',
   description: 'Every position in the latest 13F filing of each famous investor, with value, shares, weight in the portfolio and the change since the previous filing (new, added, reduced, unchanged).',
   derive: () => INV.investors.flatMap(i => (i.positions || []).map(p => ({ person: i.person, fund: i.fund, period: i.period, name: p.name, ticker: p.ticker || null, class: p.cls || null, cusip: p.cusip || null, put_call: p.putCall || null, value: p.value ?? null, shares: p.shares ?? null, weight: round(p.weight, 5), change: p.change || null, shares_change: p.sharesChange ?? null }))),
   from: ['traders/data/investors.json'], refresh: 'weekly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', indexFields: ['person', 'ticker'], licence: invLicence, sources: invSources,
@@ -479,7 +479,7 @@ spec({
     ['weight', 'Share of the portfolio by value, 0–1'], ['change', 'Change since the previous filing: new, added, reduced or unchanged'], ['shares_change', 'Change in shares since the previous filing']]
 });
 spec({
-  id: 'investor-sales', title: 'Auto Trader: famous investors\' exits', module: 'mm', submodule: 'traders',
+  id: 'investor-sales', title: 'Investor Impersonator: famous investors\' exits', module: 'mm', submodule: 'traders',
   description: 'Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.',
   derive: () => INV.investors.flatMap(i => (i.sold || []).map(p => ({ person: i.person, fund: i.fund, period: i.period, previous_period: i.previousPeriod || null, name: p.name, ticker: p.ticker || null, class: p.cls || null, cusip: p.cusip || null, put_call: p.putCall || null, previous_value: p.value ?? null, previous_shares: p.shares ?? null }))),
   from: ['traders/data/investors.json'], refresh: 'weekly', resets: 'quarterly', updatedFrom: 'traders/data/investors.json', page: 'fe/traders.html?tab=investors', licence: invLicence, sources: invSources,
@@ -784,7 +784,7 @@ putJson('integration/data/query-index.json', {
   const lines = ['# Vitruvian Manager datasets', '', `Generated ${TODAY} from ${BASE_URL}integration/catalog.json. Read the live catalogue for current row counts.`, ''];
   for (const m of MODULE_ORDER) {
     const list = catalogue.filter(d => d.module === m); if (!list.length) continue;
-    lines.push(`## ${{ rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
+    lines.push(`## ${{ rt: 'Realtime Geopolitics', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino' }[m]}`, '');
     for (const d of list) {
       lines.push(`### ${d.id}`, '', `${d.title}. ${d.description}`, '', `- Rows: ${d.rows.toLocaleString('en-GB')} · refresh: ${d.refresh} · licence: ${d.licence}`, `- File${d.urls ? 's' : ''}: ${(d.urls || [d.url]).slice(0, 3).map(u => BASE_URL + u).join(', ')}${(d.urls || []).length > 3 ? ` (+${d.urls.length - 3} more)` : ''} (records at \`${d.records || '(root)'}\`)`,
         `- Fields: ${d.fields.map(f => `\`${f.name}\` (${f.type})`).join(', ')}`, '');

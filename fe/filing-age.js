@@ -1,5 +1,5 @@
-/* Auto Trader: the age of the filing a Mirror agent copies, to stand beside each "Mirror trades" and "Mirror portfolio"
-   button on fe/traders.html. Worked out from the page's own data (traders/data/investors.json and congress.json) in whole
+/* Investor Impersonator (Auto Trader's public part): the age of the filing a Mirror agent copies, to stand beside each
+   "Mirror trades" and "Mirror portfolio" button on fe/traders.html. Worked out from the page's own data (traders/data/investors.json and congress.json) in whole
    UTC days, and selected as Algo Trader's Mirror reads it: an investor's latest 13F (its quarter, its filing date, and
    whether it is marked stale), or a member of Congress's disclosed trades of the last two years (that member, with a
    ticker, made in the last 730 days, in shares or call options), the newest made and the newest filed. The words are the
@@ -40,7 +40,7 @@
   }
 
   function filingAge(f, now) {
-    if (!f) return 'Filing not found in Auto Trader’s data.';
+    if (!f) return 'Filing not found in Investor Impersonator’s data.';
     if (f.kind === 'congress') {
       if (f.none) return 'No disclosed stock trades in the last two years to copy.';
       return `Builds its portfolio from ${f.trades} disclosed trade${f.trades === 1 ? '' : 's'} of the last two years: the latest made ${date(f.date)} (${daysAgo(f.date, now)})${f.filed ? `, the latest filed ${date(f.filed)} (${daysAgo(f.filed, now)})` : ''}.`;

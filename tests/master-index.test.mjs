@@ -47,8 +47,8 @@ const EXEMPT = {
   'data-analytics': 'a tool over the other submodules’ datasets, with no entities of its own',
   'integration-hub': 'a catalogue and API of the other submodules’ datasets (the Master Index’s among them), with no entities of its own',
   'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
-  'tally-stick': 'private: a trading ledger, which has no place in a public index',
-  'algo-trader': 'private: trading agents and their rules, which have no place in a public index',
+  // Tally Stick and Algo Trader were exempt here (private) until 15 November 2026, when they became views of Auto
+  // Trader (Omni Trade and Algo Trader); the traders adapter reports Auto Trader's public part, Investor Impersonator.
 };
 
 // A constant as a file writes it (`const NAME = {…}` or `[…]`), read without running the file: build.mjs builds the

@@ -1,5 +1,5 @@
-name: Refresh Auto Trader data
-# House trade reports and 13F filings arrive continuously; a weekly refresh keeps Auto Trader within days.
+name: Refresh Investor Impersonator data
+# House trade reports and 13F filings arrive continuously; a weekly refresh keeps Investor Impersonator (Auto Trader's public part) within days.
 # 13F holdings get US tickers from OpenFIGI (cached in figi-cache.json); an optional OPENFIGI_API_KEY secret speeds that up.
 on:
   schedule:
@@ -33,7 +33,7 @@ jobs:
       - uses: ./.github/actions/commit-data
         with:
           paths: traders/data/congress.json traders/data/congress.head.json traders/scripts/ptr-cache.json
-          message: 'Auto Trader: weekly House trades refresh'
+          message: 'Investor Impersonator: weekly House trades refresh'
       - name: Put back the committed House trades
         if: ${{ !cancelled() && steps.congresstest.outcome != 'success' }}
         run: git checkout -- traders/data/congress.json traders/data/congress.head.json traders/scripts/ptr-cache.json
@@ -53,7 +53,7 @@ jobs:
         uses: ./.github/actions/commit-data
         with:
           paths: traders/data/investors.json traders/data/investors.head.json traders/scripts/figi-cache.json
-          message: 'Auto Trader: weekly 13F holdings refresh'
+          message: 'Investor Impersonator: weekly 13F holdings refresh'
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh

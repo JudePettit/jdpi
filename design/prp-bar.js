@@ -19,7 +19,7 @@
     briefing: 'hb', 'science-briefing': 'hb', 'econ-briefing': 'hb', 'digital-briefing': 'hb', bibliotheca: 'bibliotheca', 'neo-classic': 'bibliotheca' };
   // Module names as the sidebar shows them (registry "name"), and the full title where the name is abbreviated (registry
   // "title"), which the bar gives as a tooltip.
-  const NAMES = { rt: 'Realtime Geopolitics', hb: 'Omni News', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Money Management', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino', bibliotheca: 'Bibliotheca' };
+  const NAMES = { rt: 'Realtime Geopolitics', hb: 'Omni News', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', ds: 'Digital Science', kino: 'Kino', bibliotheca: 'Bibliotheca' };
   const TITLES = { oi: 'Intelligence Collection' };
   const given = (script && script.dataset.suite) || '';
   const suite = MOVED[moduleId] || CANON[given] || given;

@@ -5,8 +5,8 @@
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
-<title>Auto Trader · VM</title>
-<meta name="description" content="What members of Congress and famous investors have been buying and selling, from STOCK Act and SEC 13F filings, and trading agents that mirror them in Algo Trader.">
+<title>Investor Impersonator · Auto Trader · VM</title>
+<meta name="description" content="Investor Impersonator, part of Auto Trader: what members of Congress and famous investors have been buying and selling, from STOCK Act and SEC 13F filings, and trading agents that mirror them in Algo Trader.">
 <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="mm" data-module="traders" data-shell="../" defer></script>
@@ -18,6 +18,9 @@ button,input,select{font:inherit}button{cursor:pointer}
 .page{max-width:1440px;margin:0 auto;padding:24px 24px 40px}
 .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:16px 40px;align-items:end;padding-bottom:18px}
 .head .prp-title{margin-top:10px}
+/* Auto Trader's three parts: Omni Trade and Algo Trader are on the money site (private, a new tab), this page the third */
+.parts{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:0 0 16px}.parts .prp-label{margin-right:4px}
+.parts .prp-chip{text-decoration:none}.parts a.prp-chip:hover{border-color:var(--prp-line-strong);color:var(--prp-text)}
 .agents{margin:0;font-size:var(--prp-fs-sm)}.agents p{margin:0}.agents p+p{margin-top:6px}.agents b{color:var(--prp-text)}
 .prp-tabs{margin-bottom:16px}
 .prp-panel{overflow:hidden}
@@ -87,8 +90,8 @@ button,input,select{font:inherit}button{cursor:pointer}
 <main class="page">
   <header class="head">
     <div>
-      <div class="prp-eyebrow" data-jdpi-standalone>Money Management <span class="sep">·</span> Auto Trader</div>
-      <h1 class="prp-title">Auto Trader</h1>
+      <div class="prp-eyebrow" data-jdpi-standalone>Wealth Automation <span class="sep">·</span> Auto Trader</div>
+      <h1 class="prp-title">Investor Impersonator</h1>
       <p class="prp-dek">What members of Congress and famous investors have been buying and selling, from their legally required public disclosures. Turn any of them into a trading agent that mirrors them, or trades in their style.</p>
       <div class="prp-meta" id="meta">Loading…</div>
     </div>
@@ -97,6 +100,13 @@ button,input,select{font:inherit}button{cursor:pointer}
       <p><b>Filings are delayed.</b> A 13F arrives up to 45 days after the quarter ends, and a STOCK Act disclosure up to 45 days after the trade. Mirroring copies what they held or traded, not what they hold today.</p>
     </aside>
   </header>
+
+  <nav class="parts" aria-label="Auto Trader's parts">
+    <span class="prp-label">Auto Trader</span>
+    <a class="prp-chip" href="https://trade-desk.judep92.workers.dev/tally/" target="_blank" rel="noopener" aria-label="Omni Trade (private, opens in a new tab)" title="Omni Trade: every brokerage account in one ledger (private, opens in a new tab)">Omni Trade ↗</a>
+    <span class="prp-chip on" aria-current="page">Investor Impersonator</span>
+    <a class="prp-chip" href="https://trade-desk.judep92.workers.dev/tally/algo/" target="_blank" rel="noopener" aria-label="Algo Trader (private, opens in a new tab)" title="Algo Trader: trading agents that follow a ruleset (private, opens in a new tab)">Algo Trader ↗</a>
+  </nav>
 
   <div class="prp-tabs tabs" role="tablist" aria-label="Views">
     <button type="button" role="tab" id="tab-btn-congress" data-tab="congress" aria-controls="tab-congress" aria-selected="true">Members of Congress</button>

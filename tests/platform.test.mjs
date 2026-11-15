@@ -36,8 +36,8 @@ test('registry is well formed', () => {
   assert.deepEqual(registry.suites.map(s => s.id), ['home', 'rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino', 'bibliotheca']);
   // A module's name is what the sidebar shows; its title is its overview page's heading, its box's on the Home page and
   // its pages' eyebrow.
-  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
-  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Wealth Automation', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Wealth Automation', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
   // Every module says what you can do with it, in a line or two, for the back of its box on the Home page.
   for (const s of registry.suites) assert.ok(typeof s.summary === 'string' && s.summary.length >= 30 && s.summary.length <= 115 && /^[A-Z].*\.$/.test(s.summary), `${s.id}: summary "${s.summary}"`);
   assert.equal(new Set(registry.suites.map(s => s.summary)).size, registry.suites.length, 'each module its own summary');
@@ -60,7 +60,16 @@ test('registry is well formed', () => {
   }
   const where = id => modules.find(x => x.m.id === id).suite.id;
   assert.equal(where('atlas'), 'rt'); assert.equal(where('war-focus'), 'rs'); assert.equal(where('traders'), 'mm');
-  assert.equal(where('markets'), 'mm'); assert.equal(where('tally-stick'), 'mm'); assert.equal(where('algo-trader'), 'mm');
+  assert.equal(where('markets'), 'mm');
+  // Wealth Automation's Auto Trader is three parts in one (15 November 2026): Tally Stick, the old Auto Trader page and
+  // Algo Trader became its views, and every old id is an alias of it and of its view.
+  const autoTrader = modules.find(x => x.m.id === 'traders').m;
+  assert.deepEqual([registry.suites.find(s => s.id === 'mm').code, autoTrader.name, autoTrader.url], ['WA', 'Auto Trader', 'fe/traders.html']);
+  assert.deepEqual(autoTrader.views.map(v => [v.id, v.name, !!v.opensInNewTab]), [['omni-trade', 'Omni Trade', true], ['investor-impersonator', 'Investor Impersonator', false], ['algo-trader', 'Algo Trader', true]]);
+  for (const id of ['auto-trader', 'tally-stick', 'algo-trader', 'double-signal', 'omni-trade', 'investor-impersonator']) assert.ok(autoTrader.aliases.includes(id), `traders answers to ${id}`);
+  assert.deepEqual(autoTrader.views.map(v => v.aliases), [['tally-stick'], ['congress', 'investors'], ['double-signal']]);
+  for (const v of autoTrader.views.filter(x => x.opensInNewTab)) assert.deepEqual(v.data, { class: 'private', note: 'runs every minute' }, `${v.id}: a private part says so`);
+  assert.deepEqual(registry.suites.find(s => s.id === 'mm').modules.map(m => m.id), ['markets', 'traders', 'learning']);
   assert.equal(where('progress'), 'ns');
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
   for (const id of ['data-analytics', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
@@ -370,7 +379,7 @@ test('old addresses redirect to the new structure', pageTest, async () => {
   for (const [from, to] of [['#/q/briefing', '#/hb/briefing'], ['#/rt/briefing', '#/hb/briefing'], ['#/ns/science-briefing', '#/hb/science-briefing'],
     ['#/mm/econ-briefing', '#/hb/econ-briefing'], ['#/fe/econ-briefing', '#/hb/econ-briefing'], ['#/ds/digital-briefing', '#/hb/digital-briefing'],
     ['#/hp/atlas', '#/rt/atlas'], ['#/fe/traders', '#/mm/traders'],
-    ['#/fe/double-signal', '#/mm/algo-trader'], ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus'],
+    ['#/fe/trade-desk', '#/mm/markets'], ['#/rt/osint', '#/oi/osint'], ['#/rt/osint-training', '#/oi/osint-training'], ['#/hp/battlefield-history/war-focus', '#/rs/war-focus'],
     // The Workspace became the Dashboard (November 2026): its old name lands there; Home's overview is the Home page.
     ['#/workspace', '#/home/dashboard'], ['#/home/workspace', '#/home/dashboard'], ['#/home', '#/'],
     // Bibliotheca left Kino for a module of its own (November 2026): its old submodule and view land on Neo Book.
@@ -388,6 +397,54 @@ test('old addresses redirect to the new structure', pageTest, async () => {
   const sci = await (await page.waitForSelector('#frames iframe.active[data-module="science-briefing"]', { timeout: 15000 })).contentFrame();
   await sci.waitForFunction(() => document.querySelector('#chips [data-v="physics"]')?.getAttribute('aria-pressed') === 'true', null, { timeout: 30000 });
   assert.match(await page.textContent('#crumbs'), /Omni News.*Scientific Briefing/);
+});
+
+// Tally Stick, the old Auto Trader page and Algo Trader became Wealth Automation's Auto Trader (15 November 2026), its
+// three views: every old address lands on the matching part.
+test('old addresses of Auto Trader\'s three parts land on the matching part', pageTest, async () => {
+  const TD = 'https://trade-desk.judep92.workers.dev';
+  const tab = t => `#/mm/traders/investor-impersonator?at=${encodeURIComponent(`fe/traders.html?tab=${t}`)}`;
+  const cases = [
+    ['#/mm/tally-stick', '#/mm/traders/omni-trade'], ['#/fe/tally-stick', '#/mm/traders/omni-trade'], ['#/tally-stick', '#/mm/traders/omni-trade'],
+    ['#/mm/omni-trade', '#/mm/traders/omni-trade'], ['#/mm/traders/tally-stick', '#/mm/traders/omni-trade'],
+    ['#/mm/algo-trader', '#/mm/traders/algo-trader'], ['#/mm/double-signal', '#/mm/traders/algo-trader'], ['#/fe/double-signal', '#/mm/traders/algo-trader'],
+    ['#/fe/algo-trader', '#/mm/traders/algo-trader'],
+    ['#/mm/investor-impersonator', '#/mm/traders/investor-impersonator'], ['#/mm/auto-trader', '#/mm/traders'], ['#/fe/traders', '#/mm/traders'],
+    ['#/mm/traders/congress', tab('congress')], ['#/mm/traders/investors', tab('investors')], ['#/fe/traders/investors', tab('investors')],
+  ];
+  for (const [from, to] of cases) {
+    await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(t => location.hash === t, to, { timeout: 5000 }).catch(() => {});
+    assert.equal(await page.evaluate(() => location.hash), to, `${from} → ${to}`);
+  }
+  // The private parts get their launch page, named as the part, with its own freshness line (not Investor
+  // Impersonator's filing dates), and a link to its own page in a new tab.
+  for (const [from, name, url] of [['#/mm/tally-stick', 'Omni Trade', `${TD}/tally/`], ['#/mm/double-signal', 'Algo Trader', `${TD}/tally/algo/`]]) {
+    await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#view .launch');
+    assert.equal(await page.textContent('#view h1'), name);
+    assert.match(await page.textContent('#view .prp-eyebrow'), /Wealth Automation\s*·\s*Auto Trader\s*·\s*/);
+    assert.equal(await page.locator('#view a.prp-btn.primary[target=_blank]').getAttribute('href'), url);
+    assert.match(await page.textContent('#crumbs'), new RegExp(`Wealth Automation.*Auto Trader.*${name}`));
+    await page.waitForFunction(() => !document.querySelector('#top-actions .prp-fresh')?.hidden, null, { timeout: 10000 });
+    assert.equal((await page.textContent('#top-actions .prp-fresh .fresh-full')).trim(), 'Private · runs every minute');
+    assert.equal((await page.textContent('#view .prp-meta .prp-fresh')).trim(), 'Private · runs every minute');
+    assert.equal(await page.title(), `${name} · Auto Trader · VM`);
+  }
+  // The old views open Investor Impersonator at their tab, in Auto Trader's one frame.
+  for (const [from, t] of [['#/mm/traders/congress', 'congress'], ['#/mm/traders/investors', 'investors']]) {
+    await page.goto(`${BASE}/${from}`, { waitUntil: 'domcontentloaded' });
+    const frame = await (await page.waitForSelector('#frames iframe.active[data-module="traders"]', { timeout: 15000 })).contentFrame();
+    await frame.waitForFunction(id => document.querySelector(`[data-tab="${id}"]`)?.getAttribute('aria-selected') === 'true', t, { timeout: 15000 });
+    assert.equal(await frame.textContent('h1'), 'Investor Impersonator');
+    assert.match(await page.textContent('#crumbs'), /Wealth Automation.*Auto Trader.*Investor Impersonator/);
+  }
+  // A plain visit to Auto Trader is its public part, Investor Impersonator, with its parts named in its bar.
+  await page.goto(`${BASE}/#/mm/traders`, { waitUntil: 'domcontentloaded' });
+  const fr = await (await page.waitForSelector('#frames iframe.active[data-module="traders"]', { timeout: 15000 })).contentFrame();
+  await fr.waitForSelector('nav.parts');
+  assert.deepEqual(await fr.$$eval('nav.parts .prp-chip', els => els.map(a => [a.textContent.trim(), a.getAttribute('href'), a.getAttribute('target'), a.getAttribute('aria-current')])),
+    [['Omni Trade ↗', `${TD}/tally/`, '_blank', null], ['Investor Impersonator', null, null, 'page'], ['Algo Trader ↗', `${TD}/tally/algo/`, '_blank', null]]);
 });
 
 test('a module with its own figure shows it in the sidebar, on the Home page, on the Dashboard and on its overview', pageTest, async () => {
@@ -853,7 +910,7 @@ test('freshness lines: the top bar and the sidebar give each submodule\'s line, 
     assert.doesNotMatch(await p.textContent('#nav'), /\bLive\b/);
     assert.equal(await p.locator('#nav .flag.late').count(), modules.filter(x => lightLine(x.m.id).late).length, 'a Late flag on each late one, and only those');
     // The one count, Home counted.
-    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 39 submodules');
+    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 37 submodules');
     // The other site's line: the Political Atlas's own manifest (faked here as it serves it).
     await p.goto(`${BASE}/#/rt/atlas`, { waitUntil: 'domcontentloaded' });
     const atlasText = line('atlas').text;

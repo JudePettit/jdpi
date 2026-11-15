@@ -27,6 +27,8 @@ const read = p => readFileSync(join(ROOT, p), 'utf8');
 const registry = JSON.parse(read('registry.json'));
 const modules = registry.suites.flatMap(s => s.modules);
 const byId = id => modules.find(m => m.id === id);
+// A submodule's view by its id: Auto Trader's private parts, Omni Trade and Algo Trader, carry their own "data".
+const viewOf = id => modules.flatMap(m => m.views || []).find(v => v.id === id);
 const H = 3600e3;
 const NOW = Date.UTC(2026, 10, 13, 21, 0, 0); // 13 Nov 2026, 21:00 UTC
 
@@ -196,7 +198,7 @@ describe('every entry\'s line today, worked out from the committed files', () =>
     assert.equal(text('atlas'), `Reviewed ${period(atlasReviewed, now)} · monthly review`);
     assert.equal(text('markets'), 'Available · prices delayed');
     assert.equal(text('osint'), 'On demand · asks its sources when you use it');
-    assert.equal(text('tally-stick'), 'Private · runs every minute');
+    assert.equal(freshnessLine(viewOf('omni-trade'), {}, { now: NOW }).text, 'Private · runs every minute', 'Auto Trader\'s Omni Trade (was Tally Stick)');
     assert.equal(text('learning'), 'Course · no schedule');
     assert.equal(text('retrospective'), 'Reference · no schedule');
     assert.equal(text('dashboard'), 'Each card dated');
@@ -266,7 +268,7 @@ describe('each class of line, and Late', () => {
     assert.equal(freshnessLine(vol, { [vol.data.parts[0].read]: { generated: at(19), latest: '2026-11-12' } }, { now: NOW }).text, 'Scored to 12 Nov · daily');
     assert.equal(freshnessLine(vol, { [vol.data.parts[0].read]: { generated: at(1), latest: '2026-11-10' } }, { now: NOW }).late, true, 'its newest day is what is late (as the check reads it)');
   });
-  test('Auto Trader and War Focus: their figures\' own ends, not their build', () => {
+  test('Auto Trader (its public part, Investor Impersonator) and War Focus: their figures\' own ends, not their build', () => {
     const tr = byId('traders'), [c, i] = tr.data.parts.map(x => x.read);
     assert.equal(freshnessLine(tr, { [c]: { generated: at(80), latestFiled: '2026-11-06' }, [i]: { generated: at(80), latestPeriod: '2026-06-30' } }, { now: NOW }).text,
       'Trades filed to 6 Nov · 13F holdings to 30 Jun 2026 · checked weekly');
@@ -296,7 +298,11 @@ describe('each class of line, and Late', () => {
     assert.equal(freshnessLine(byId('battlefield-history'), { 'battlefield/history/data/wars.json': { generated: '2026-10-28T13:14:21Z' } }, { now: NOW }).text, 'Reference · built 28 Oct · no schedule');
     assert.equal(freshnessLine(byId('osint-training'), {}, { now: NOW }).text, 'Course · no schedule');
     assert.equal(freshnessLine(byId('iot-connect'), {}, { now: NOW }).text, 'On demand · your own devices, through the bridge');
-    assert.equal(freshnessLine(byId('algo-trader'), {}, { now: NOW }).text, 'Private · runs every minute');
+    assert.equal(freshnessLine(viewOf('algo-trader'), {}, { now: NOW }).text, 'Private · runs every minute');
+    // Auto Trader's line is its public part's filing dates; its private parts have their own line and no timed data, and
+    // the only views with a line of their own are those two.
+    assert.deepEqual(modules.flatMap(m => (m.views || []).filter(v => v.data).map(v => [m.id, v.id, v.opensInNewTab === true, v.data.class])), [['traders', 'omni-trade', true, 'private'], ['traders', 'algo-trader', true, 'private']]);
+    assert.equal(viewOf('investor-impersonator').data, undefined, 'Investor Impersonator shows Auto Trader\'s own line');
     for (const id of ['markets', 'osint', 'learning', 'retrospective']) assert.equal(freshnessLine(byId(id), {}, { now: NOW }).late, false, id);
   });
   test('times are UTC and say so; a date in another year carries its year', () => {
@@ -329,7 +335,7 @@ describe('each class of line, and Late', () => {
 
 describe('the count of modules and where hosting is said', () => {
   test('one count, saying Home is counted: the sidebar, the Dashboard and the Integration Hub use it', () => {
-    assert.deepEqual(countWords(registry), { modules: 10, submodules: 39, home: true, text: '10 modules, Home included · 39 submodules' });
+    assert.deepEqual(countWords(registry), { modules: 10, submodules: 37, home: true, text: '10 modules, Home included · 37 submodules' });
     assert.match(read('shell.js'), /fresh\.mod\.countWords\(state\.registry\)\.text/);
     assert.match(read('shell.js'), /modules\$\{home \? ', Home included' : ''\} · \$\{subs\} submodules/, 'the shell\'s fallback words it the same');
     assert.match(read('integration/hub.js'), /import \{ countWords[^}]*\} from '\.\.\/design\/prp-freshness\.js'/);
@@ -341,7 +347,8 @@ describe('the count of modules and where hosting is said', () => {
     const about = id => hostingAbout(registry.suites.find(s => s.id === id));
     assert.match(about('rt'), /Political Atlas is on political-atlas\.pages\.dev \(Cloudflare Pages\)/);
     assert.match(about('rs'), /Political Retrospective is on hp-retrospective\.pages\.dev \(Cloudflare Pages\)/);
-    assert.match(about('mm'), /Market Monitor, Algo Trader and Tally Stick are on trade-desk\.judep92\.workers\.dev \(Cloudflare Workers\); Algo Trader and Tally Stick are private/);
+    assert.match(about('mm'), /Market Monitor, Omni Trade and Algo Trader are on trade-desk\.judep92\.workers\.dev \(Cloudflare Workers\); Omni Trade and Algo Trader are private/);
+    assert.match(about('mm'), /^Auto Trader and Learning · Finance & Economics are pages of this site/);
     assert.match(about('hb'), /^Every submodule here is a page of this site, jdpi\.pages\.dev, deployed from GitHub to Cloudflare Pages/);
     for (const m of modules) assert.ok(m.host, `${m.id}: the registry keeps its host`);
   });

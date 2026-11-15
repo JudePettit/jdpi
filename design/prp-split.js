@@ -77,9 +77,14 @@ export function canFrame(place, registry, base = 'http://localhost/') {
   const hit = findModule(registry, place?.module);
   if (!hit || !hit.module.url) return { ok: false, why: 'unlisted' };
   if (hit.module.opensInNewTab) return { ok: false, why: 'private' };
+  // A view with a page of its own (Auto Trader's Omni Trade and Algo Trader, once submodules of their own): named by
+  // its id or an alias (the old submodule id), or found by its page. A private one is private, as its submodule was.
+  const onPage = (url, want) => { const own = new URL(url, base); return want.origin === own.origin && stripPage(want.pathname) === stripPage(own.pathname); };
   try {
-    const want = new URL(place.page, base), own = new URL(hit.module.url, base);
-    if (want.origin !== own.origin || stripPage(want.pathname) !== stripPage(own.pathname)) return { ok: false, why: 'elsewhere' };
+    const want = new URL(place.page, base), views = hit.module.views || [];
+    const view = views.find(v => v.id === place.module || v.aliases?.includes(place.module)) || views.find(v => v.url && onPage(v.url, want));
+    if (view?.opensInNewTab) return { ok: false, why: 'private' };
+    if (!onPage(view?.url || hit.module.url, want)) return { ok: false, why: 'elsewhere' };
   } catch { return { ok: false, why: 'elsewhere' }; }
   return { ok: true };
 }

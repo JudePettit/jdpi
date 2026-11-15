@@ -41,9 +41,16 @@ test('canFrame: the shell\'s own rule decides what a pane may frame', () => {
   assert.deepEqual(canFrame(place('pestle', 'q/national.html#country=GBR'), registry, BASE), { ok: true });
   assert.deepEqual(canFrame(place('historical-calendar', 'q/calendar.html?period=history&month=1989-11'), registry, BASE), { ok: true }, 'a query on the page is still the page');
   // A private page asks to sign in, which browsers do not allow inside another page.
-  assert.ok(findModule(registry, 'tally-stick').module.opensInNewTab);
+  // Tally Stick and Algo Trader are Auto Trader's private views since 15 November 2026 (Omni Trade, Algo Trader): their
+  // old ids find Auto Trader, and the view each names (or whose page it is) is private.
+  assert.equal(findModule(registry, 'tally-stick').module.id, 'traders');
   assert.deepEqual(canFrame(place('tally-stick', 'https://trade-desk.judep92.workers.dev/tally/'), registry, BASE), { ok: false, why: 'private' });
   assert.deepEqual(canFrame(place('algo-trader', 'https://trade-desk.judep92.workers.dev/tally/algo/'), registry, BASE), { ok: false, why: 'private' });
+  assert.deepEqual(canFrame(place('omni-trade', 'https://trade-desk.judep92.workers.dev/tally/'), registry, BASE), { ok: false, why: 'private' });
+  assert.deepEqual(canFrame(place('traders', 'https://trade-desk.judep92.workers.dev/tally/algo/#new=mirror'), registry, BASE), { ok: false, why: 'private' }, 'found by its page');
+  // Its public part, Investor Impersonator, is Auto Trader's own page, and framed by any of its names.
+  for (const id of ['traders', 'auto-trader', 'investor-impersonator']) assert.deepEqual(canFrame(place(id, 'fe/traders.html?tab=investors'), registry, BASE), { ok: true }, id);
+  assert.deepEqual(canFrame(place('tally-stick', 'fe/traders.html'), registry, BASE), { ok: false, why: 'private' }, 'an old private id stays private');
   // An address off the submodule's own page, and a submodule the registry does not list.
   assert.deepEqual(canFrame(place('war-focus', 'q/national.html#country=GBR'), registry, BASE), { ok: false, why: 'elsewhere' });
   assert.deepEqual(canFrame(place('atlas', 'https://example.org/#GBR'), registry, BASE), { ok: false, why: 'elsewhere' });

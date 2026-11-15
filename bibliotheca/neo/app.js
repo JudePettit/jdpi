@@ -134,7 +134,13 @@ function entity(qid) {
   return S.entities.get(qid);
 }
 function moduleInfo(reg, id) {
-  for (const s of reg?.suites || []) { const m = s.modules.find(x => x.id === id || x.aliases?.includes(id)); if (m) return { suite: s.id, name: m.name, url: m.url }; }
+  for (const s of reg?.suites || []) {
+    const m = s.modules.find(x => x.id === id || x.aliases?.includes(id));
+    if (!m) continue;
+    // An old submodule id that is now one of a submodule's views (Tally Stick: Auto Trader's Omni Trade) is named as the view.
+    const v = id !== m.id ? m.views?.find(x => x.id === id || x.aliases?.includes(id)) : null;
+    return { suite: s.id, name: v?.name || m.name, url: v?.url || m.url };
+  }
   return null;
 }
 
@@ -532,7 +538,7 @@ async function renderVm() {
   const rows = eraRows(years, { wars, qid: q, ownEra: !!byTerm, polity: ent ? kardashevPolity(ent.wiki, energy?.polities, step) : null, steps, countries });
   const name = r => moduleInfo(reg, r.module)?.name || r.name;
   // The places the Master Index records for the term (its "Appears in"), when it has any. Each place is shown in the
-  // pane only where the shell's own rule allows (canFrame): a private page (Tally Stick, Algo Trader), a page off its
+  // pane only where the shell's own rule allows (canFrame): a private page (Omni Trade, Algo Trader), a page off its
   // submodule's own page or a submodule the registry does not list gets a card with its link instead.
   // Since the Master Index counts every book's tags (MI-08, 15 November 2026) an entry names each book of the shelf
   // that names it: the other modules' places come first, then the other books, and the book open here (it is this

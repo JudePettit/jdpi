@@ -500,7 +500,7 @@ The **[Berkeley Protocol on Digital Open Source Investigations](https://humanrig
 # Unit 11 · Using Vitruvian Manager as an intelligence tool
 
 ## Vitruvian Manager as a source: news and framing
-Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Master Index in Retrospective Geopolitics, financial tools in Money Management and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
+Vitruvian Manager brings many open sources into one workspace: live views in Realtime Geopolitics, history and the Master Index in Retrospective Geopolitics, financial tools in Wealth Automation and science views in Natural Science. Treat it as you would any compilation, a **tertiary source** for orientation, base rates and leads. Before relying on a view, read its **Sources** block (where the data come from, how often they refresh and how they are processed), note when it was last updated, and trace any claim you will publish back to its primary source.
 
 ### Workflow: Political Briefing (framing across the spectrum)
 1. Add a **topic** with the keywords people actually use, including names, places and alternative spellings. Topics are saved in your browser only.
@@ -605,7 +605,7 @@ Indices, interest rates, currencies, commodities and crypto react to political r
 2. Time-stamp sharp moves against your event timeline. Markets often move on news before it is widely reported, and sometimes on rumours that prove false.
 3. Treat a Hype Tracker surge as a lead (a leak, a contract, a disaster) that may also be coordinated hype.
 
-### Workflow: Auto Trader (disclosures as OSINT)
+### Workflow: Investor Impersonator (disclosures as OSINT)
 Trades reported by members of the US House of Representatives under the STOCK Act (within 30 days of learning of a trade, and no later than 45 days after it), and large investors' holdings from their quarterly SEC Form 13F filings (due within 45 days of each quarter's end, covering long positions in US-listed securities only).
 1. Read them as **late, partial records**: they give value ranges rather than exact amounts, and 13F filings omit short positions and most non-US holdings.
 2. Treat patterns, such as trades in a sector shortly before a committee acts on it, as leads: check the committee's records and the filing itself, and describe exactly what the record shows. Nothing here is investment advice.

@@ -2602,7 +2602,7 @@
     },
     {
       "id": "congress-members",
-      "title": "Auto Trader: members of Congress who trade",
+      "title": "Investor Impersonator: members of Congress who trade",
       "module": "mm",
       "submodule": "traders",
       "description": "Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.",
@@ -2671,7 +2671,7 @@
     },
     {
       "id": "congress-trades",
-      "title": "Auto Trader: trades by members of Congress",
+      "title": "Investor Impersonator: trades by members of Congress",
       "module": "mm",
       "submodule": "traders",
       "description": "Every stock, bond and option trade reported by members of the House in 2025 and 2026 (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.",
@@ -2793,10 +2793,10 @@
     },
     {
       "id": "investors",
-      "title": "Auto Trader: famous investors",
+      "title": "Investor Impersonator: famous investors",
       "module": "mm",
       "submodule": "traders",
-      "description": "The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.",
+      "description": "The famous investors Investor Impersonator follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.",
       "url": "integration/data/investors.json",
       "format": "json",
       "records": "records",
@@ -2878,7 +2878,7 @@
     },
     {
       "id": "investor-holdings",
-      "title": "Auto Trader: famous investors' holdings",
+      "title": "Investor Impersonator: famous investors' holdings",
       "module": "mm",
       "submodule": "traders",
       "description": "Every position in the latest 13F filing of each famous investor, with value, shares, weight in the portfolio and the change since the previous filing (new, added, reduced, unchanged).",
@@ -2971,7 +2971,7 @@
     },
     {
       "id": "investor-sales",
-      "title": "Auto Trader: famous investors' exits",
+      "title": "Investor Impersonator: famous investors' exits",
       "module": "mm",
       "submodule": "traders",
       "description": "Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.",
@@ -3358,7 +3358,7 @@
           "description": "Tabs inside the page"
         }
       ],
-      "rows": 39,
+      "rows": 37,
       "licence": "© JDP-Iq.",
       "sources": [
         "registry.json"
@@ -3369,7 +3369,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 21174
+      "bytes": 20630
     },
     {
       "id": "kino-documentaries",

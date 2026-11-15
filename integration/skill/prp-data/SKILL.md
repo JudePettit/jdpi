@@ -64,8 +64,9 @@ compilations are © JDP-Iq. Credit "Vitruvian Manager (jdpi.pages.dev)" when you
 
 ## 6. What Vitruvian Manager does not expose
 
-Tally Stick and Algo Trader (Vitruvian Manager's private trading tools) are not part of this data. There are no balances,
-positions, orders, brokers or keys here, and the separate private Tally Stick MCP connection is not reachable through this
-server.
+Omni Trade and Algo Trader (Vitruvian Manager's private trading tools, two parts of Auto Trader) are not part of this data.
+There are no balances, positions, orders, brokers or keys here, and the separate private Omni Trade MCP connection is not
+reachable through this server. Auto Trader's public part, Investor Impersonator, is: the `congress-*` and `investor*`
+datasets.
 
 See `reference/datasets.md` for every dataset with its fields.

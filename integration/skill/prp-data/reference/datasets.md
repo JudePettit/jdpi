@@ -240,11 +240,11 @@ Kardashev Tracker: humanity. World population, total energy capture and humanity
 - File: https://jdpi.pages.dev/integration/data/kardashev-world.json (records at `records`)
 - Fields: `year` (number), `world_population` (number), `world_watts` (number), `kardashev` (number)
 
-## Money Management
+## Wealth Automation
 
 ### congress-members
 
-Auto Trader: members of Congress who trade. Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.
+Investor Impersonator: members of Congress who trade. Members of the US House of Representatives with Periodic Transaction Reports in 2025 and 2026, with party, district and how many trades Vitruvian Manager read from their filings.
 
 - Rows: 144 · refresh: weekly · licence: Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.
 - File: https://jdpi.pages.dev/integration/data/congress-members.json (records at `records`)
@@ -252,7 +252,7 @@ Auto Trader: members of Congress who trade. Members of the US House of Represent
 
 ### congress-trades
 
-Auto Trader: trades by members of Congress. Every stock, bond and option trade reported by members of the House in 2025 and 2026 (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.
+Investor Impersonator: trades by members of Congress. Every stock, bond and option trade reported by members of the House in 2025 and 2026 (STOCK Act), newest filing first, sharded by filing date. Amounts are the ranges filed, with their bounds as numbers.
 
 - Rows: 11,339 · refresh: weekly · licence: Public records: Periodic Transaction Reports filed with the Clerk of the US House of Representatives (STOCK Act); compilation © JDP-Iq. Not investment advice.
 - Files: https://jdpi.pages.dev/integration/data/congress-trades/0.json, https://jdpi.pages.dev/integration/data/congress-trades/1.json, https://jdpi.pages.dev/integration/data/congress-trades/2.json (+14 more) (records at `records`)
@@ -260,7 +260,7 @@ Auto Trader: trades by members of Congress. Every stock, bond and option trade r
 
 ### investors
 
-Auto Trader: famous investors. The famous investors Auto Trader follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.
+Investor Impersonator: famous investors. The famous investors Investor Impersonator follows, with their fund, style, latest 13F period and filing, and the reported value of their US long positions.
 
 - Rows: 10 · refresh: weekly · licence: Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.
 - File: https://jdpi.pages.dev/integration/data/investors.json (records at `records`)
@@ -268,7 +268,7 @@ Auto Trader: famous investors. The famous investors Auto Trader follows, with th
 
 ### investor-holdings
 
-Auto Trader: famous investors' holdings. Every position in the latest 13F filing of each famous investor, with value, shares, weight in the portfolio and the change since the previous filing (new, added, reduced, unchanged).
+Investor Impersonator: famous investors' holdings. Every position in the latest 13F filing of each famous investor, with value, shares, weight in the portfolio and the change since the previous filing (new, added, reduced, unchanged).
 
 - Rows: 1,537 · refresh: weekly · licence: Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.
 - Files: https://jdpi.pages.dev/integration/data/investor-holdings/0.json, https://jdpi.pages.dev/integration/data/investor-holdings/1.json (records at `records`)
@@ -276,7 +276,7 @@ Auto Trader: famous investors' holdings. Every position in the latest 13F filing
 
 ### investor-sales
 
-Auto Trader: famous investors' exits. Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.
+Investor Impersonator: famous investors' exits. Positions each famous investor held at the previous quarter end and no longer reports in the latest 13F.
 
 - Rows: 370 · refresh: weekly · licence: Public records: SEC EDGAR Form 13F-HR filings; tickers mapped with OpenFIGI; compilation © JDP-Iq. Not investment advice.
 - File: https://jdpi.pages.dev/integration/data/investor-sales.json (records at `records`)
@@ -314,7 +314,7 @@ Invention Timeline: institutions. Universities, laboratories, companies and acad
 
 Vitruvian Manager: modules and submodules. Every Vitruvian Manager submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.
 
-- Rows: 39 · refresh: on change · licence: © JDP-Iq.
+- Rows: 37 · refresh: on change · licence: © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/prp-submodules.json (records at `records`)
 - Fields: `module` (string), `module_code` (string), `module_name` (string), `id` (string), `name` (string), `kind` (string), `status` (string), `private` (boolean), `url` (string), `planned_url` (string), `host` (string), `description` (string), `views` (array)
 

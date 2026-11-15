@@ -17,7 +17,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **Omni News**: the news worth reading, in four briefings | ON | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
 | **Intelligence Collection** (International Mystery Management until 15 November 2026): intelligence tradecraft within the law | IC | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
-| **Money Management**: your money end to end | MM | Market Monitor · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
+| **Wealth Automation** (Money Management until 15 November 2026): your money end to end | WA | Market Monitor · Auto Trader (three parts: Omni Trade, the private ledger of every account; Investor Impersonator, Congress's and famous investors' trades; Algo Trader, the private trading agents) · Learning · Finance & Economics |
 | **Natural Science**: science through history | NS | Invention Timeline |
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
@@ -27,10 +27,14 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 shows, its `title` what its overview page, its box on the Home page and page eyebrows show, and its `summary` the line
 or two on the back of its box: what you can do with it. The old ids `q`, `hp` and `fe` still work as aliases, and so do
 the addresses of submodules that moved to another module: the four briefings, which came to the module now called Omni News in November 2026
-from Realtime Geopolitics, Natural Science, Money Management and Digital Science, still open at `#/rt/briefing`,
+from Realtime Geopolitics, Natural Science, Money Management (now Wealth Automation) and Digital Science, still open at `#/rt/briefing`,
 `#/ns/science-briefing`, `#/mm/econ-briefing` and `#/ds/digital-briefing`. A submodule given a new id keeps its old one as an alias:
 Neo Book, Bibliotheca's reader, was Kino's `bibliotheca` until November 2026, and `#/kino/bibliotheca` still opens it, in
-Bibliotheca, at `#/bibliotheca/neo-classic` (its id from when it was named Neo Classic, until 15 November 2026).)
+Bibliotheca, at `#/bibliotheca/neo-classic` (its id from when it was named Neo Classic, until 15 November 2026). Submodules
+merged into one keep their addresses as its views: Tally Stick, the old Auto Trader page and Algo Trader became Auto
+Trader's three parts on 15 November 2026, and `#/mm/tally-stick` opens Omni Trade (`#/mm/traders/omni-trade`),
+`#/mm/algo-trader` and `#/mm/double-signal` open Algo Trader, and `#/mm/traders/congress` and `#/mm/traders/investors`
+open Investor Impersonator at its Members of Congress and Famous investors tabs.)
 
 The Home module (`home`, first in the sidebar, November 2026) is where VM starts. Its overview is the Home page (`#/`;
 `#/home` lands there): the intro, a small button to the Dashboard, and every other module as a box in registry order,
@@ -65,7 +69,7 @@ its stories a day by topic in `data/history.json` (rebuilt once, on 13 November 
         ├── the Vitruvian Manager bridge on the user's own computer (sigint/bridge/prp-bridge.mjs): SIGINT's relays, and with --iot IoT Connect and Hermes Messenger
         ├── the installable app: manifest.json, sw.js (offline worker for the shell and IoT Connect), design/icons/
         ├── political-atlas.pages.dev and hp-retrospective.pages.dev (own repos, Cloudflare Pages)
-        └── trade-desk Worker (Market Monitor, Tally Stick, Algo Trader) and the double-signal Worker (private, Cloudflare Access)
+        └── trade-desk Worker (Market Monitor, and Auto Trader's Omni Trade and Algo Trader) and the double-signal Worker (private, Cloudflare Access)
   design/prp.css + design/prp-bar.js are loaded by every page, here and elsewhere
   lake/ (the Master Index's entity layer, keyed by Wikidata IDs) links every page to every other
 ```

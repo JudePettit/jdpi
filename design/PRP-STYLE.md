@@ -36,7 +36,7 @@ and does not draw).
 | Q · Geopolitical Intelligence | **Realtime Geopolitics** | `rt` (alias `q`) | RT |
 | (new, November 2026; Highbrowse until 14 November 2026) | **Omni News** (the four briefings) | `hb` | ON |
 | H&P · History & Politics | **Retrospective Geopolitics** | `rs` (alias `hp`) | RS |
-| F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
+| F&E · Finance & Economics | **Wealth Automation** (Money Management until 15 November 2026) | `mm` (aliases `fe`, `wealth-automation`) | WA (MM until 15 November 2026) |
 | (new) | **Intelligence Collection** (International Mystery Management until 15 November 2026) | `oi` | IC (OI until 14 November 2026, from Offensive Intelligence; IM until 15 November, from International Mystery Management) |
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
@@ -67,12 +67,13 @@ wars, leaders and coming votes."
 | Retrospective Battlefield | RS | world map 1926–2025 (`battlefield/history/`) |
 | War Focus | RS | now its own submodule (`battlefield/focus/`) |
 | Learning · Politics | RS | `fe/learning.html?course=politics` |
-| Market Monitor (was TD Markets, then Market Briefing until 14 November 2026) | MM | trade-desk `/markets/` |
+| Market Monitor (was TD Markets, then Market Briefing until 14 November 2026) | WA | trade-desk `/markets/` |
 | Economics Briefing | HB (moved from MM) | `econ/briefing/` |
-| Tally Stick | MM | trade-desk `/tally/` (private) |
-| Algo Trader (was Double Signal) | MM | trade-desk `/tally/algo/` (private); Double Signal's logic is the **Double Agent** ruleset |
-| Auto Trader (was Trader Tracker) | MM | `fe/traders.html` |
-| Learning · Finance & Economics | MM | `fe/learning.html?course=finance` |
+| Auto Trader (since 15 November 2026 one submodule of three parts, each a view: Tally Stick, the old Auto Trader and Algo Trader were three submodules) | WA | registry id `traders`, page `fe/traders.html`; its aliases keep every old id (`auto-trader`, `tally-stick`, `algo-trader`, `double-signal`) and add `omni-trade` and `investor-impersonator`, each landing on its view |
+| · Omni Trade (was Tally Stick) | WA, a view of Auto Trader | trade-desk `/tally/` (private, opens in a new tab); view id `omni-trade`, alias `tally-stick` |
+| · Investor Impersonator (was Auto Trader, before that Trader Tracker) | WA, a view of Auto Trader | `fe/traders.html`, with the tabs Members of Congress and Famous investors (the old views `congress` and `investors`, now its aliases, open their tab); view id `investor-impersonator` |
+| · Algo Trader (was Double Signal) | WA, a view of Auto Trader | trade-desk `/tally/algo/` (private, opens in a new tab); view id `algo-trader`, alias `double-signal`; Double Signal's logic is the **Double Agent** ruleset |
+| Learning · Finance & Economics | WA | `fe/learning.html?course=finance` |
 | Scientific Briefing | HB (moved from NS) | `science/briefing/` |
 | Invention Timeline | NS (new) | `science/progress/` |
 | Digital Briefing | HB (moved from DS) | `digital/briefing/` |
@@ -129,7 +130,7 @@ parts, `frameMove`, `clampShare` and `canFrame`, are tested in Node in `tests/pr
 container `.prp-split` (`data-side="on|off"`) and the pane `.prp-side`, and lays out the narrow case in its own CSS.
 
 - **What may be framed** is the shell's own rule (`canFrame`): a submodule in the registry, not `opensInNewTab`, at an
-  address on its own page. A private page (Tally Stick, Algo Trader) is offered as a link in a new tab; a page on another
+  address on its own page. A private page (Auto Trader's Omni Trade and Algo Trader: a view marked `opensInNewTab`, found by its id, an alias or its page) is offered as a link in a new tab; a page on another
   site that is its submodule's own page (Political Atlas, the Political Retrospective) is framed, as the shell frames it.
   A page that loads without the connector (`design/prp-bar.js`) is a missing page, on the live site and locally: its
   frame goes and a card says so, so the shell never runs inside a pane.
@@ -191,7 +192,7 @@ only "published". Times are UTC and say so. Pages carry the same idea inside: Re
 figures over the map and its news under each war; National Analysis puts each figure's year or date and source under
 it; the Global Headline Tracker puts the archive day and the collection time above its results.
 
-**The count** is worded one way wherever it shows: "10 modules, Home included · 39 submodules" (`countWords`).
+**The count** is worded one way wherever it shows: "10 modules, Home included · 37 submodules" (`countWords`).
 Where each module's submodules are hosted is said in its overview's **About this module**, not in a column.
 
 **The Today panel's rules** (13 November 2026). Each card reads only the small summaries each store's own build writes

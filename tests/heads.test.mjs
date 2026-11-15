@@ -136,7 +136,7 @@ describe('every build writes its store\'s summaries, and every refresh commits t
       }
     }
   });
-  test('the Auto Trader refresh puts back the House trades\' summary with them when their test fails', () => {
+  test('the Investor Impersonator refresh puts back the House trades\' summary with them when their test fails', () => {
     const steps = Object.values(workflows['traders-refresh.yml'].jobs).flatMap(j => j.steps);
     const back = steps.find(s => /^Put back the committed House trades/.test(s.name || ''));
     assert.match(back.run, /traders\/data\/congress\.json traders\/data\/congress\.head\.json/);

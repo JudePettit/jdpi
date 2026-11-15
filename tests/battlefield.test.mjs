@@ -79,6 +79,32 @@ test('Retrospective data: war names list each side once, without "Government of"
   for (const w of HISTORY.wars) for (const s of [...w.sideA, ...w.sideB]) assert.equal((s.match(/\(/g) || []).length, (s.match(/\)/g) || []).length, `${w.name}: ${s}`);
 });
 
+// Review of 15 November 2026: Romania, Bulgaria, Italy and France stood undated on both sides of World War II. A state
+// Correlates of War puts on both sides of a war is listed on each with its dates there; Vichy France is told apart.
+test('Retrospective data: a state on both sides of a war is dated on each, and Vichy France is named', () => {
+  const ww2 = war('c139'), on = (list, n) => list.filter(s => s === n || s.startsWith(n + ' ('));
+  assert.deepEqual(on(ww2.sideA, 'Italy'), ['Italy (18 Oct 1943 – 7 May 1945)']);
+  assert.deepEqual(on(ww2.sideB, 'Italy'), ['Italy (10 Jun 1940 – 2 Sep 1943)']);
+  assert.deepEqual(on(ww2.sideA, 'Romania'), ['Romania (9 Sep 1944 – 7 May 1945)']);
+  assert.deepEqual(on(ww2.sideB, 'Romania'), ['Romania (22 Jun 1941 – 23 Aug 1944)']);
+  assert.deepEqual(on(ww2.sideA, 'Bulgaria'), ['Bulgaria (9 Sep 1944 – 7 May 1945)']);
+  assert.deepEqual(on(ww2.sideB, 'Bulgaria'), ['Bulgaria (13 Dec 1941 – 8 Sep 1944)']);
+  assert.deepEqual(on(ww2.sideA, 'France'), ['France (3 Sep 1939 – 22 Jun 1940; 23 Oct 1944 – 14 Aug 1945)']);
+  assert.deepEqual(on(ww2.sideB, 'Vichy France'), ['Vichy France (7 Jul 1940 – 14 Jul 1941)']);
+  assert.match(ww2.sideNote, /Vichy regime/);
+  assert.match(ww2.sideNote, /Free France/);
+  // COW's side-B dates end at the Syria–Lebanon armistice, but Vichy forces fought the Allies again in 1942: the note
+  // says so rather than reading as if the fighting ended in July 1941 (second reader, 15 Nov 2026).
+  assert.match(ww2.sideNote, /Madagascar/);
+  assert.match(ww2.sideNote, /North Africa \(November 1942\)/);
+  // No Correlates of War interstate war (whose states COW dates) names a state undated on both sides.
+  for (const w of HISTORY.wars.filter(w => w.src === 'cow' && w.type === 'Interstate war')) {
+    const bare = s => s.replace(/ \(.*\)$/, '');
+    const both = w.sideA.filter(s => w.sideB.some(t => bare(t) === bare(s)));
+    for (const s of both) assert.match(s, /\(\d/, `${w.name}: ${s} on both sides without dates`);
+  }
+});
+
 test('Realtime data: the year so far month by month, with enough wars and conflict cells to map', () => {
   const r = REALTIME, sum = f => r.wars.reduce((s, w) => s + (f(w) || 0), 0);
   assert.equal(r.generated, new Date(Date.parse(r.generated)).toISOString());

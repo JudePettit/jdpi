@@ -46,6 +46,172 @@ test('figures: an estimate is rounded and marked, a recorded count is not', asyn
   assert.equal(estimateOf('UCDP GED recorded deaths (state-based violence)'), '');
 });
 
+// Review of 15 November 2026 (historian, professor, strategist): the build rules in scripts/rules.mjs.
+test('rules: a battle is part of a war only through items within the war\'s dates (the Iraq War is not the War in Afghanistan)', async () => {
+  const { partsWithin } = await import('../battlefield/focus/scripts/rules.mjs');
+  // Wikidata, November 2026: Kunduz airstrike → War in Afghanistan → war against the Islamic State → Iraqi insurgency →
+  // Iraq War, and the Iraq War → Iraqi conflict → Operation Inherent Resolve → war against the Islamic State.
+  const edges = [['Q1848486', 'Q182865'], ['Q182865', 'Q17507684'], ['Q17507684', 'Q926905'], ['Q926905', 'Q545449'], ['Q545449', 'Q47015896'],
+    ['Q47015896', 'Q18357664'], ['Q18357664', 'Q17507684'], ['Q1330136', 'Q926905'], ['Q1804983', 'Q545449']].map(([c, parent]) => ({ c, parent }));
+  const dates = new Map([['Q182865', { s: '2001-10-07', e: '2021-08-30' }], ['Q17507684', { s: '2014-06-13', e: null }], ['Q18357664', { s: '2014-06-15', e: null }],
+    ['Q926905', { s: '2003-05-01', e: '2011-12-18' }], ['Q47015896', { s: '2003-03-20', e: null }], ['Q1330136', { s: '2004-11-07', e: '2004-12-23' }]]);
+  const within = partsWithin(edges, dates, 'Q545449', { start: '2003-03-20', end: '2011-12-18' });
+  assert.ok(within.has('Q1330136'), 'Second Battle of Fallujah, through the Iraqi insurgency');
+  assert.ok(within.has('Q1804983'), 'Battle of Baghdad, directly');
+  assert.ok(!within.has('Q1848486'), 'not the Kunduz airstrike, through the war against the Islamic State (2014 on)');
+  assert.ok(!within.has('Q17507684') && !within.has('Q545449'), 'neither the later war nor the Iraq War itself');
+});
+
+// Second reader, 15 November 2026 (finding E): below a wider operation, a part fought elsewhere is not the war's.
+test('rules: below an item also part of something outside the war, only the parts within the war\'s theatre', async () => {
+  const { partsWithin, stateBoxes } = await import('../battlefield/focus/scripts/rules.mjs');
+  // Wikidata, November 2026: Operation Enduring Freedom (Q326668) is part of the War in Afghanistan (Q182865) and of
+  // the War on Terror (Q185729); its parts include Operation Anaconda in Afghanistan, OEF – Philippines (Q2631285), OEF
+  // – Horn of Africa (Q1195810) and the capture of the So San (Q5655209) in the Arabian Sea; Battle of Tora Bora directly.
+  const edges = [['Q326668', 'Q182865'], ['Q326668', 'Q185729'], ['Q1046346', 'Q326668'], ['Q2631285', 'Q326668'], ['Q1195810', 'Q326668'],
+    ['Q5655209', 'Q326668'], ['Q30304278', 'Q182865']].map(([c, parent]) => ({ c, parent }));
+  const places = new Map([['Q326668', [66, 33]], ['Q1046346', [69.4, 33.2]], ['Q2631285', [125, 7.5]], ['Q1195810', [48, 9.5]], ['Q5655209', [48, 12]], ['Q30304278', [70.28, 34.09]]]);
+  const points = [[69.2, 34.5], [65.7, 31.6], [62.2, 34.3], [68.9, 36.7], [71.2, 35], [64.1, 31.5]]; // UCDP events in Afghanistan
+  const topo = JSON.parse(readFileSync(new URL('../battlefield/history/data/borders.topo.json', import.meta.url), 'utf8'));
+  const boxes = stateBoxes(topo, '2001-10-07', '2021-08-30');
+  const states = [2, 200, 700].flatMap(gw => boxes.get(gw) || []);
+  assert.ok(boxes.get(700)?.length && boxes.get(2)?.length > 1, 'Afghanistan, and the United States in parts (Alaska and Hawaii apart)');
+  const span = { start: '2001-10-07', end: '2021-08-30' };
+  const before = partsWithin(edges, new Map(), 'Q182865', span);
+  assert.ok(before.has('Q2631285') && before.has('Q5655209'), 'by dates alone the other theatres came in');
+  const within = partsWithin(edges, new Map(), 'Q182865', span, { places, points, states });
+  assert.deepEqual([...within].sort(), ['Q1046346', 'Q30304278', 'Q326668'], 'Operation Anaconda, Tora Bora and OEF itself, nothing elsewhere');
+  // A side's territory that reaches into the fighting's area counts: the Bangladesh Liberation War's western front of
+  // December 1971 (Battle of Longewala, in India) stays below the Indo-Pakistani war of 1971, shared with the Indo-Pakistani wars.
+  const bd = [['Q2', 'Q1'], ['Q2', 'Q9'], ['Q3', 'Q2'], ['Q4', 'Q1'], ['Q5', 'Q1'], ['Q6', 'Q1'], ['Q7', 'Q1'], ['Q8', 'Q1']].map(([c, parent]) => ({ c, parent }));
+  const bdPlaces = new Map([['Q3', [70.16, 27.52]], ['Q4', [90.4, 23.7]], ['Q5', [91.8, 22.3]], ['Q6', [89.5, 22.8]], ['Q7', [90.4, 24.7]], ['Q8', [91.9, 24.9]]]);
+  const b71 = stateBoxes(topo, '1971-03-26', '1971-12-16');
+  assert.ok(partsWithin(bd, new Map(), 'Q1', { start: '1971-03-26', end: '1971-12-16' }, { places: bdPlaces, states: [750, 770].flatMap(gw => b71.get(gw) || []) }).has('Q3'));
+  assert.ok(!partsWithin(bd, new Map(), 'Q1', { start: '1971-03-26', end: '1971-12-16' }, { places: bdPlaces }).has('Q3'), 'without its states, it would not');
+});
+
+test('rules: a battle\'s end checked against its Wikipedia article', async () => {
+  const { infoboxEnd, endAgainstArticle } = await import('../battlefield/focus/scripts/rules.mjs');
+  // Battle of Bakhmut, English Wikipedia, November 2026 (the infobox's date field, shortened).
+  const bakhmut = "{{Short description|Battle}}\n{{Use dmy dates|date=July 2026}}\n{{Infobox military conflict\n| conflict = Battle of Bakhmut\n| partof = [[Eastern Ukraine campaign]]\n| date = July 2022<ref name=\":30\"/>{{efn|The start date is not well defined. Attacks on the distant approaches took place in early July 2022.<ref name=\":31\"/>}} – 20 May 2023{{efn|There is no clear consensus on the end date.}}\n| place = [[Bakhmut]]\n}}";
+  assert.deepEqual(infoboxEnd(bakhmut), { d: '2023-05-20', p: null });
+  // A date field over several lines, with a reference holding other dates (Battle of Stalingrad).
+  assert.deepEqual(infoboxEnd("{{Infobox military conflict\n| date = 17 July 1942<ref group=\"Note\">The start is debated, 23 August 1942. {{bulleted list|\n|a}}</ref> – 2 February 1943<br />({{Age in years, months, weeks and days|month1=07|day1=17|year1=1942|month2=02|day2=02|year2=1943}})\n| place = Stalingrad\n}}"), { d: '1943-02-02', p: null });
+  assert.deepEqual(infoboxEnd('{{Infobox military conflict\n| date = 22–24 November and 10–11 December 1971\n| place = Hilli\n}}'), { d: '1971-12-11', p: null });
+  assert.deepEqual(infoboxEnd('{{Infobox military conflict\n| date = March – September 1968\n}}'), { d: '1968-09-30', p: 'm' });
+  assert.equal(infoboxEnd('{{Infobox military conflict\n| date = 24 February 2022 – present\n}}'), null, 'ongoing');
+  assert.equal(infoboxEnd('{{Infobox military conflict\n| date = 1941–1944\n}}'), null, 'a year alone');
+  assert.equal(infoboxEnd('No infobox | date = 1 May 1945'), null);
+  // Wikidata: 9 August 2022 – 7 January 2024. Drawn to 20 May 2023, marked uncertain with both ends.
+  const wd = { s: '2022-08-09', e: '2024-01-07', p: null, pe: null, u: null, eW: null };
+  assert.deepEqual(endAgainstArticle(wd, { d: '2023-05-20', p: null }), { s: '2022-08-09', e: '2023-05-20', p: null, pe: null, u: 'conflict', eW: '2024-01-07', eA: '2023-05-20' });
+  assert.equal(endAgainstArticle(wd, { d: '2023-12-20', p: null }), wd, 'within a month: as Wikidata has it');
+  assert.equal(endAgainstArticle(wd, { d: '2022-07-31', p: 'm' }), wd, 'an article end before the start is no check');
+  // Battle of Hilli: Wikidata ends it 18 December 1971, after the war (16 December); the article, 11 December.
+  const hilli = { s: '1971-11-22', e: null, p: null, pe: null, u: 'after', eW: '1971-12-18' };
+  assert.equal(endAgainstArticle(hilli, { d: '1971-12-11', p: null }, '1971-12-16'), hilli, 'not over a month apart');
+  assert.equal(endAgainstArticle({ ...hilli, eW: '1972-03-01' }, { d: '1971-12-11', p: null }, '1971-12-16').e, '1971-12-11');
+  assert.equal(endAgainstArticle({ ...hilli, eW: '1972-03-01' }, { d: '1972-01-11', p: null }, '1971-12-16').e, null, 'nor to an article end after the war');
+});
+
+test('rules: Wikidata dates at their precision; a decade is no date; no end, an end before the start or after the war is no span', async () => {
+  const { battleDates, wdDate } = await import('../battlefield/focus/scripts/rules.mjs');
+  const t = (v, p = 11) => ({ v: v + 'T00:00:00Z', p });
+  assert.equal(wdDate('2020-01-01T00:00:00Z', 8, true), null, '"the 2020s" is not 31 December 2020');
+  assert.equal(wdDate('2024-01-01T00:00:00Z', 9, true), '2024-12-31');
+  assert.equal(wdDate('2023-10-01T00:00:00Z', 10, true), '2023-10-31');
+  // 2022 Kherson counteroffensive: start 29 Aug 2022 and a point in time "2020s" (it was shown ending 31 Dec 2020).
+  assert.deepEqual(battleDates({ start: [t('2022-08-29')], point: [t('2020-01-01', 8)], name: '2022 Kherson counteroffensive' }), { s: '2022-08-29', e: null, p: null, pe: null, u: 'end', eW: null });
+  // Battle of Kharkiv: a start and no end is not a one-day battle.
+  assert.equal(battleDates({ start: [t('2022-02-24')], name: 'Battle of Kharkiv' }).u, 'end');
+  // Snake Island campaign: a point in time alone, for a campaign, is its start.
+  assert.equal(battleDates({ point: [t('2022-02-24')], name: 'Snake Island campaign' }).u, 'end');
+  // An airstrike's point in time is its day.
+  assert.deepEqual(battleDates({ point: [t('2009-09-04')], name: 'Kunduz airstrike' }), { s: '2009-09-04', e: '2009-09-04', p: null, pe: null, u: null, eW: null });
+  // Operation Iron Hammer: Wikidata ends it (3 Jan 2006) before its start (30 Nov 2006).
+  assert.deepEqual(battleDates({ start: [t('2006-11-30')], end: [t('2006-01-03')], name: 'Operation Iron Hammer' }), { s: '2006-11-30', e: null, p: null, pe: null, u: 'order', eW: '2006-01-03' });
+  // Ending after the war's own end is not drawn running past it; a year-precision end in the war's last year is.
+  assert.equal(battleDates({ start: [t('1942-12-06')], end: [t('1969-04-14')], name: 'Operation Oyster', warEnd: '1945-09-02' }).u, 'after');
+  assert.deepEqual(battleDates({ start: [t('1945-03-01', 10)], end: [t('1945-01-01', 9)], name: 'X', warEnd: '1945-09-02' }), { s: '1945-03-01', e: '1945-12-31', p: 'm', pe: 'y', u: null, eW: null });
+  // A decade alone (Siege of Tigray, "the 2020s"): listed as undated, not dropped (second reader, finding A); no date
+  // at all, or a century, is no battle.
+  assert.deepEqual(battleDates({ point: [t('2020-01-01', 8)], name: 'Siege of Tigray' }), { s: null, e: null, p: null, pe: null, u: 'undated', eW: null, dec: 2020 });
+  assert.equal(battleDates({ point: [t('1900-01-01', 7)], name: 'Y' }), null, 'a century is no date');
+  assert.equal(battleDates({ name: 'Y' }), null, 'no date, no battle');
+  const { decadeFits } = await import('../battlefield/focus/scripts/rules.mjs');
+  assert.ok(decadeFits(2020, '2020-11-03', '2022-11-02') && decadeFits(1930, '1939-09-01', '1945-09-02') && !decadeFits(1950, '1939-09-01', '1945-09-02'));
+});
+
+test('rules: a UCDP period estimate is shared out over its days; a spread total adds up to its source; COW only over its own years', async () => {
+  const { eventMonths, apportion, cowMonths } = await import('../battlefield/focus/scripts/rules.mjs');
+  // UCDP 13243, 7,986 deaths near Pokrovsk dated 21 Aug – 20 Oct 2025 (date_prec 5): 11, 30 and 20 of its 61 days.
+  assert.deepEqual(eventMonths('2025-08-21', '2025-10-20', 7986, '2022-02-24', '2026-09-30'), [['2025-08', 1440], ['2025-09', 3928], ['2025-10', 2618]]);
+  assert.deepEqual(eventMonths('2025-08-03', '2025-08-09', 40, '2022-02-24', '2026-09-30'), [['2025-08', 40]], 'a week in one month stays in it');
+  // Gulf War: 17 Jan – 1 Mar 1991, the war ending 28 Feb: only its days in the war.
+  assert.deepEqual(eventMonths('1991-01-17', '1991-03-01', 9505, '1990-08-02', '1991-02-28').map(([m]) => m), ['1991-01', '1991-02']);
+  assert.equal(eventMonths('1991-01-17', '1991-03-01', 9505, '1990-08-02', '1991-02-28').reduce((s, [, n]) => s + n, 0), 9505);
+  assert.deepEqual(apportion(1000000, [3, 3, 3]), [333334, 333333, 333333]);
+  assert.equal(apportion(999999.6, [1, 2, 3, 4, 5, 6, 7]).reduce((s, v) => s + v, 0), 1000000);
+  const months = ['1937-07', '1937-12', '1941-12', '1942-01', '1945-09'];
+  assert.deepEqual(cowMonths(months, [[1937, 2], [1938, 2], [1939, 2], [1940, 2], [1941, 2]]), [0, 1, 2]);
+});
+
+test('data: each battle under its own war, with no impossible dates', async () => {
+  const d = await dataFile('battlefield/focus/data/index.json');
+  for (const x of d.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    for (const b of w.battles) {
+      if (!b.s) { assert.ok(b.u === 'undated' && Number.isInteger(b.dec) && !b.e, `${x.id}: ${b.n} has no start and is not dated to a decade`); continue; }
+      assert.ok(!b.e || b.e >= b.s, `${x.id}: ${b.n} ends ${b.e}, before its start ${b.s}`);
+      const earliest = b.e && ({ y: b.e.slice(0, 4) + '-01-01', m: b.e.slice(0, 7) + '-01' }[b.pe || b.p] || b.e);
+      if (b.e && w.end) assert.ok(earliest <= w.end, `${x.id}: ${b.n} ends ${b.e}, after the war`);
+      if (!b.e) assert.match(b.u || '', /^(end|order|after)$/, `${x.id}: ${b.n} has no end and no reason`);
+      if (b.u === 'conflict') assert.ok(b.eW > b.e && b.eA === b.e, `${x.id}: ${b.n} is drawn to the earlier end`);
+    }
+  }
+  // Second reader, 15 November 2026. A battle Wikidata dates only to the decade is kept, undated (finding A).
+  const tg = await dataFile('battlefield/focus/data/wars/tigray.json'), sot = tg.battles.find(b => b.q === 'Q121090645');
+  assert.ok(sot && sot.u === 'undated' && sot.dec === 2020, 'the Siege of Tigray stays in the Tigray war, undated');
+  const ww2b = (await dataFile('battlefield/focus/data/wars/ww2.json')).battles;
+  assert.ok(ww2b.some(b => b.q === 'Q19845675') && ww2b.some(b => b.q === 'Q4940724'), 'nor do the bombardments of Venlo and the Bombing of South-East Asia leave WWII');
+  // Battle of Bakhmut ended with the city's fall on 20 May 2023 (Wikipedia), not on Wikidata's 7 January 2024 (finding B).
+  const bk = (await dataFile('battlefield/focus/data/wars/russia-ukraine.json')).battles.find(b => b.q === 'Q112114958');
+  assert.ok(bk && bk.e <= '2023-05-31' && bk.u === 'conflict' && bk.eW === '2024-01-07', `Bakhmut drawn to ${bk?.e}`);
+  // The War in Afghanistan holds no Operation Enduring Freedom part fought elsewhere (finding E).
+  const af = await dataFile('battlefield/focus/data/wars/afghanistan-2001.json');
+  assert.deepEqual(af.battles.filter(b => ['Q2631285', 'Q1195810', 'Q5655209'].includes(b.q)).map(b => b.n), []);
+  assert.deepEqual(af.battles.filter(b => b.lat != null && (b.lon < 55 || b.lon > 80 || b.lat < 24 || b.lat > 42)).map(b => b.n), []);
+  // The Iraq War's battles are in Iraq (and its borders): before, 29 of its 61 mapped battles were in Afghanistan.
+  const iq = await dataFile('battlefield/focus/data/wars/iraq-war.json');
+  const away = iq.battles.filter(b => b.lat != null && (b.lon < 38 || b.lon > 49 || b.lat < 29 || b.lat > 38));
+  assert.deepEqual(away.map(b => b.n), []);
+  assert.ok(!iq.battles.some(b => /Kunduz|Sangin|Musa Qala|Kamdesh|Operation Medusa/.test(b.n)));
+  const ru = await dataFile('battlefield/focus/data/wars/russia-ukraine.json'), k = b => ru.battles.find(x => x.n === b);
+  assert.equal(k('2022 Kherson counteroffensive').u, 'end', 'its "2020s" point in time is not an end of 31 Dec 2020');
+  assert.ok(k('Battle of Kharkiv').e !== k('Battle of Kharkiv').s, 'a start with no end is not one day');
+});
+
+test('data: UCDP period estimates are spread over their months; COW totals stay whole and within COW\'s years', async () => {
+  const ru = await dataFile('battlefield/focus/data/wars/russia-ukraine.json'), at = (w, m) => w.deaths[w.months.indexOf(m)];
+  // Before: August 2025 20,891 then September 1,693, from period estimates put on 1 and 21 August.
+  assert.ok(at(ru, '2025-08') < 2 * at(ru, '2025-09') && at(ru, '2025-09') < 2 * at(ru, '2025-08'), `Aug ${at(ru, '2025-08')}, Sep ${at(ru, '2025-09')}`);
+  assert.ok(ru.shared[ru.months.indexOf('2025-09')] > 0, 'September carries a share of the period events');
+  assert.match(ru.deathsSource, /shared out over the days of that period/);
+  // Gulf War: before, January 1991 25,969 and February 2,276 (the air campaign's period estimates on 17 January).
+  const g = await dataFile('battlefield/focus/data/wars/gulf-war.json');
+  assert.ok(at(g, '1991-02') > at(g, '1991-01') / 2, `Jan ${at(g, '1991-01')}, Feb ${at(g, '1991-02')}`);
+  // Second Sino-Japanese War: COW's war 130 is 1,000,000 battle deaths, 1937–41 (no missing-value code), not 999,999
+  // spread over 1937–45.
+  const sj = await dataFile('battlefield/focus/data/wars/second-sino-japanese.json');
+  assert.equal(sj.totalDeaths, 1000000);
+  assert.deepEqual(sj.covered, ['1937-07', '1941-12']);
+  assert.ok(sj.months.every((m, i) => m <= '1941-12' || (sj.deaths[i] === 0 && !sj.estimated[i])), 'no share after 1941');
+  assert.match(sj.deathsSource, /World War II/);
+  const d = await dataFile('battlefield/focus/data/index.json');
+  const cow = new Map(JSON.parse(readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8')).wars.map(w => [w.id, w.deaths]));
+  for (const x of d.wars.filter(x => /^Correlates of War/.test(x.deathsSource))) assert.equal(x.totalDeaths, cow.get(x.bf), `${x.id}: the spread total adds up to COW's`);
+});
+
 test('the page claims only what it draws: sides and whole-country occupation, not who held what', () => {
   const html = readFileSync(new URL('../battlefield/focus/index.html', import.meta.url), 'utf8');
   assert.doesNotMatch(html, /who held what/i, 'front lines are not drawn, so the page does not promise who held what');
@@ -72,7 +238,16 @@ test('the page says whose its estimated deaths are, rounded; UCDP\'s counts stay
   await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'March 2023', null, { timeout: 20000 });
   const ru = await dataFile('battlefield/focus/data/wars/russia-ukraine.json');
   assert.equal((await page.locator('#c-month').innerText()).replace(/,/g, ''), String(ru.deaths[ru.months.indexOf('2023-03')]), 'UCDP\'s count, exactly');
-  assert.equal(await page.locator('#c-month-note').innerText(), 'As recorded by UCDP');
+  // March 2023 carries a share of events UCDP dates only to a longer period (review of 15 November 2026), and says so.
+  assert.equal(await page.locator('#c-month-note').innerText(), `UCDP, ${ru.shared[ru.months.indexOf('2023-03')].toLocaleString('en-GB')} spread from periods`);
+  // A COW war's month outside COW's own years has no figure, not "none recorded".
+  await page.goto(`${BASE}/battlefield/focus/#war=second-sino-japanese&m=1943-05`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'May 1943', null, { timeout: 20000 });
+  assert.equal(await page.locator('#c-month-note').innerText(), 'No figure in the source');
+  assert.equal(await page.locator('#c-month').innerText(), '–');
+  // Nor does the running total read as all of the war's deaths, as if no one died after 1941 (second reader, 15 Nov).
+  const soFar = await page.locator('#panel .stat', { hasText: 'Deaths so far' }).locator('small').innerText();
+  assert.equal(soFar, 'to December 1941; no figure after');
 });
 
 test('WWII plays month by month with sides, occupation and battles', pageTest, async () => {

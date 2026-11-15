@@ -62,7 +62,7 @@ const yearsOf = r => {
 const cow = f => parseCsv(readFileSync(join(cowDir, f), 'latin1').replace(/^﻿/, '').replace(/EndDay2 ,/, 'EndDay2,'));
 const cowWars = new Map();
 function addCow(num, name, type, years, part) {
-  const w = cowWars.get(num) || cowWars.set(num, { id: 'c' + num, src: 'cow', name, type, years: new Set(), sideA: new Set(), sideB: new Set(), states: new Set(), loc: new Set(), deaths: 0 }).get(num);
+  const w = cowWars.get(num) || cowWars.set(num, { id: 'c' + num, src: 'cow', name, type, years: new Set(), sideA: new Set(), sideB: new Set(), states: new Set(), loc: new Set(), deaths: 0, periods: [] }).get(num);
   years.forEach(y => w.years.add(y));
   part(w);
 }
@@ -70,8 +70,14 @@ function addCow(num, name, type, years, part) {
 // A participant counts as fighting on its own territory only if its region is one the war was fought in.
 const FOUGHT = { 1: [1], 2: [2], 4: [4], 6: [6], 7: [7], 9: [9], 11: [2, 6], 12: [2, 7], 13: [1, 7], 14: [2, 4, 6], 15: [2, 4, 6, 7], 16: [4, 6, 7, 9], 17: [7, 9], 18: [4, 6], 19: [2, 4, 6, 7, 9] };
 const regionOf = c => c < 200 ? 1 : c < 400 ? 2 : c < 630 ? 4 : c < 700 ? 6 : c < 900 ? 7 : 9;
+// A participant's dates in a COW inter-state war, as written: its one or two periods ("22 Jun 1941 – 23 Aug 1944").
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const cowDay = (m, d, y) => (+y > 0 ? [+d > 0 && +m > 0 ? +d : null, +m > 0 ? MON[+m - 1] : null, +y].filter(Boolean).join(' ') : null);
+const periodsOf = r => [[r.StartMonth1, r.StartDay1, r.StartYear1, r.EndMonth1, r.EndDay1, r.EndYear1], [r.StartMonth2, r.StartDay2, r.StartYear2, r.EndMonth2, r.EndDay2, r.EndYear2]]
+  .map(([m, d, y, m2, d2, y2]) => [cowDay(m, d, y), cowDay(m2, d2, y2)]).filter(([a]) => a).map(([a, z]) => (z && z !== a ? `${a} – ${z}` : a));
 for (const r of cow('Inter-StateWarData_v4.0.csv')) addCow(r.WarNum, r.WarName, 'Interstate war', yearsOf(r), w => {
   (r.Side === '1' ? w.sideA : w.sideB).add(r.StateName); w.states.add(+r.ccode);
+  w.periods.push({ side: r.Side === '1' ? 'A' : 'B', name: r.StateName, when: periodsOf(r) });
   if ((FOUGHT[+r.WhereFought] || []).includes(regionOf(+r.ccode))) w.loc.add(+r.ccode);
   if (+r.BatDeath > 0) w.deaths += +r.BatDeath;
 });
@@ -85,13 +91,29 @@ for (const r of cow('Extra-StateWarData_v4.0.csv')) addCow(r.WarNum, r.WarName, 
   if (+r.ccode1 > 0) { w.states.add(+r.ccode1); w.loc.add(+r.ccode1); }
   w.deaths += Math.max(0, +r.BatDeath) + Math.max(0, +r.NonStateDeaths);
 });
+// A state COW puts on both sides of a war (it changed sides: Italy in 1943, Romania and Bulgaria in 1944) is named on
+// each with its dates there, so neither list reads as if it fought on that side throughout.
+const dated = (w, side, names) => names.map(n => {
+  if (!(w.sideA.has(n) && w.sideB.has(n))) return n;
+  const when = w.periods.filter(p => p.side === side && p.name === n).flatMap(p => p.when), label = SIDE_NAMES[w.id.slice(1)]?.[side]?.[n] || n;
+  return when.length ? `${label} (${when.join('; ')})` : label;
+});
+// A state COW names once that was two regimes on the two sides (see SIDE_NOTES).
+const SIDE_NAMES = { 139: { B: { France: 'Vichy France' } } };
+// Beside the sides where COW's states do not say enough. France: COW has one France, on side A to the fall of France
+// and again from the Allies' recognition of the Provisional Government, and on side B in between.
+const SIDE_NOTES = {
+  139: 'France: COW\'s France on side B (7 Jul 1940 – 14 Jul 1941) is the Vichy regime: COW dates its side-B participation to the armistice in Syria and Lebanon (14 July 1941), though Vichy forces fought the Allies again in Madagascar (May–November 1942) and French North Africa (November 1942), which COW does not count; on side A it is the Third Republic to 22 June 1940 and the Provisional Government from 23 October 1944, when the Allies recognised it. Free France fought with the Allies from June 1940 but was not a state and is not a COW participant (Wikipedia: Vichy France; Free France; Madagascar campaign; Operation Torch).',
+};
 for (const w of cowWars.values()) {
   const years = [...w.years].filter(y => y >= FIRST && y < UCDP_FROM).sort((a, b) => a - b);
   if (!years.length) continue;
   const all = [...w.years].sort((a, b) => a - b);
+  const sideA = dated(w, 'A', [...w.sideA].filter(s => s !== '-8')), sideB = dated(w, 'B', [...w.sideB].filter(s => s !== '-8'));
   wars.push({
     id: w.id, src: 'cow', name: w.name, type: w.type, years: years.map(y => [y, 2]),
-    span: `${all[0]}–${all.at(-1)}`, ...place(w.id, [...w.loc], years, () => [...w.loc]), states: [...w.states], sideA: [...w.sideA].filter(s => s !== '-8'), sideB: [...w.sideB].filter(s => s !== '-8'),
+    span: `${all[0]}–${all.at(-1)}`, ...place(w.id, [...w.loc], years, () => [...w.loc]), states: [...w.states], sideA, sideB,
+    ...(SIDE_NOTES[w.id.slice(1)] ? { sideNote: SIDE_NOTES[w.id.slice(1)] } : {}),
     deaths: w.deaths || null, wiki: COW_WIKI[w.id.slice(1)] || null,
   });
 }

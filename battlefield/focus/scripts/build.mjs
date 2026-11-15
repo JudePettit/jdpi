@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
+import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle } from './rules.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
@@ -76,41 +77,103 @@ async function qidOf(title) {
   return Object.values(r.query.pages)[0]?.pageprops?.wikibase_item || null;
 }
 const BATTLE_TYPES = 'wd:Q178561 wd:Q188055 wd:Q645883 wd:Q1261499 wd:Q2001676 wd:Q3199915 wd:Q124757';
-async function battlesOf(qid) {
+const DATES = `OPTIONAL { ?b p:P585/psv:P585 [ wikibase:timeValue ?pt ; wikibase:timePrecision ?ptp ] }
+    OPTIONAL { ?b p:P580/psv:P580 [ wikibase:timeValue ?st ; wikibase:timePrecision ?stp ] }
+    OPTIONAL { ?b p:P582/psv:P582 [ wikibase:timeValue ?en ; wikibase:timePrecision ?enp ] }`;
+const addTime = (list, v, p) => { if (v && !list.some(x => x.v === v.value && x.p === p?.value)) list.push({ v: v.value, p: p?.value ?? 11 }); };
+// The items within a war: every item that is part of it (P361+), with the item it is part of and its dates, walked
+// down from the war by partsWithin (scripts/rules.mjs) so that no wider or later campaign brings in another war's battles.
+// And not from a wider operation that is also part of something outside the war down to a part of it fought outside
+// the war's theatre (partsWithin, with each item's place: its coordinates, or its location's).
+async function partsOf(qid, span, theatre) {
+  const rows = await sparql(`SELECT ?b ?parent ?pt ?ptp ?st ?stp ?en ?enp WHERE { ?b wdt:P361+ wd:${qid} . ?b wdt:P361 ?parent . ${DATES} }`);
+  const placeRows = await sparql(`SELECT ?b (SAMPLE(?co) AS ?c) (SAMPLE(?lco) AS ?lc) WHERE { ?b wdt:P361+ wd:${qid} . OPTIONAL { ?b wdt:P625 ?co } OPTIONAL { ?b wdt:P276/wdt:P625 ?lco } } GROUP BY ?b`);
+  const places = new Map();
+  for (const r of placeRows) {
+    const m = (r.c || r.lc)?.value.match(/Point\(([-\d.]+) ([-\d.]+)\)/);
+    if (m) places.set(r.b.value.split('/').pop(), [+m[1], +m[2]]);
+  }
+  const edges = [], times = new Map();
+  for (const r of rows) {
+    const c = r.b.value.split('/').pop(), parent = r.parent.value.split('/').pop();
+    edges.push({ c, parent });
+    const t = times.get(c) || times.set(c, { start: [], end: [], point: [] }).get(c);
+    addTime(t.start, r.st, r.stp); addTime(t.end, r.en, r.enp); addTime(t.point, r.pt, r.ptp);
+  }
+  // An item with parts of its own is dated by its start and end only: a point in time given for a campaign is often
+  // its last day (Operation Deny Flight, 1993–95, has only 20 December 1995). A battle with no parts also by its point.
+  const dates = new Map(), parents = new Set(edges.map(x => x.parent));
+  for (const [q, t] of times) {
+    const point = parents.has(q) ? [] : t.point;
+    const s = [...t.start, ...point].map(x => wdDate(x.v, x.p)).filter(Boolean).sort()[0] || null;
+    const e = (t.end.length ? t.end : t.start.length ? [] : point).map(x => wdDate(x.v, x.p, true)).filter(Boolean).sort().at(-1) || null;
+    dates.set(q, { s, e });
+  }
+  return partsWithin(edges, dates, qid, span, { places, ...theatre });
+}
+// English Wikipedia's lead sections (wikitext), 50 articles a request: Map title → wikitext, through redirects.
+async function leads(titles) {
+  const out = new Map();
+  for (let i = 0; i < titles.length; i += 50) {
+    const batch = titles.slice(i, i + 50);
+    const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvslots=main&rvsection=0&format=json&formatversion=2&redirects=1&titles=${encodeURIComponent(batch.join('|'))}`;
+    let r = null;
+    for (let k = 0; k < 4 && !r; k++) { const res = await fetch(url, { headers: UA }); if (res.ok) r = await res.json(); else await new Promise(z => setTimeout(z, 5000 * (k + 1))); }
+    if (!r) throw new Error('Wikipedia lead sections failed');
+    const to = new Map([...(r.query?.normalized || []), ...(r.query?.redirects || [])].map(x => [x.from, x.to]));
+    const text = new Map((r.query?.pages || []).map(p => [p.title, p.revisions?.[0]?.slots?.main?.content || '']));
+    for (const t of batch) { let k = t; for (let n = 0; n < 3 && to.has(k); n++) k = to.get(k); if (text.has(k)) out.set(t, text.get(k)); }
+  }
+  return out;
+}
+async function battlesOf(qid, span, theatre) {
+  const within = await partsOf(qid, span, theatre);
   const rows = await sparql(`SELECT ?b ?bLabel ?bDescription ?coord ?pt ?ptp ?st ?stp ?en ?enp ?deaths ?cas ?article WHERE {
     ?b wdt:P361+ wd:${qid} .
     ?b wdt:P31/wdt:P279* ?type . VALUES ?type { ${BATTLE_TYPES} }
     OPTIONAL { ?b wdt:P625 ?coord }
-    OPTIONAL { ?b p:P585/psv:P585 [ wikibase:timeValue ?pt ; wikibase:timePrecision ?ptp ] }
-    OPTIONAL { ?b p:P580/psv:P580 [ wikibase:timeValue ?st ; wikibase:timePrecision ?stp ] }
-    OPTIONAL { ?b p:P582/psv:P582 [ wikibase:timeValue ?en ; wikibase:timePrecision ?enp ] }
+    ${DATES}
     OPTIONAL { ?b wdt:P1120 ?deaths } OPTIONAL { ?b wdt:P1590 ?cas }
     OPTIONAL { ?article schema:about ?b ; schema:isPartOf <https://en.wikipedia.org/> }
     SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }`);
   const by = new Map();
   for (const r of rows) {
     const q = r.b.value.split('/').pop();
-    const b = by.get(q) || { q, n: r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: 0 };
+    if (!within.has(q)) continue; // reached only through a campaign outside the war (partsWithin)
+    const b = by.get(q) || { q, n: r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: 0, t: { start: [], end: [], point: [] } };
     if (b.n === q) continue; // no English label
     const m = r.coord?.value.match(/Point\(([-\d.]+) ([-\d.]+)\)/);
     if (m && b.lon == null) { b.lon = +(+m[1]).toFixed(3); b.lat = +(+m[2]).toFixed(3); }
-    // Wikidata precision: 11 day, 10 month, 9 year. A month-only date spans its month, a year-only date its year.
-    const d = (v, p, atEnd) => {
-      const s = v?.value?.slice(0, 10); if (!s) return null; const pr = +(p?.value || 11);
-      if (pr >= 11) return s;
-      if (pr === 10) return atEnd ? new Date(Date.UTC(+s.slice(0, 4), +s.slice(5, 7), 0)).toISOString().slice(0, 10) : s.slice(0, 7) + '-01';
-      return atEnd ? s.slice(0, 4) + '-12-31' : s.slice(0, 4) + '-01-01';
-    };
-    const sp = +((r.st ? r.stp : r.ptp)?.value || 11);
-    if (!b.s) { b.s = d(r.st, r.stp) || d(r.pt, r.ptp); b.e = d(r.en, r.enp, true) || d(r.pt, r.ptp, true) || d(r.st, r.stp, true); if (sp < 11) b.p = sp === 10 ? 'm' : 'y'; }
+    addTime(b.t.start, r.st, r.stp); addTime(b.t.end, r.en, r.enp); addTime(b.t.point, r.pt, r.ptp);
     b.deaths = Math.max(b.deaths, +(r.deaths?.value || 0)); b.cas = Math.max(b.cas, +(r.cas?.value || 0));
     if (r.article) b.w = decodeURIComponent(r.article.value.split('/wiki/')[1]).replace(/_/g, ' ');
     by.set(q, b);
   }
-  // Drop plans that were never carried out.
+  // Dates by battleDates (scripts/rules.mjs): Wikidata's precision kept, a decade alone no date (the battle is listed
+  // as undated), an end before the start or after the war's end not drawn as a span. Then drop plans that were never
+  // carried out.
   const planned = /\b(proposed|planned|plan|cancelled|canceled|aborted)\b/i;
-  return [...by.values()].filter(b => b.s && /^\d{4}-\d{2}-\d{2}$/.test(b.s) && !b.s.startsWith('-') && !planned.test(b.n) && !/\b(planned|proposed|never (carried out|executed|implemented)|cancelled|canceled)\b/i.test(b.desc));
+  const out = [];
+  for (const b of by.values()) {
+    const d = battleDates({ start: b.t.start, end: b.t.end, point: b.t.point, name: b.n, warEnd: span.warEnd });
+    if (!d) continue;
+    delete b.t; Object.assign(b, d);
+    out.push(b);
+  }
+  const kept = out.filter(b => (b.u === 'undated' ? b.dec != null : /^\d{4}-\d{2}-\d{2}$/.test(b.s) && !b.s.startsWith('-')) && !planned.test(b.n) && !/\b(planned|proposed|never (carried out|executed|implemented)|cancelled|canceled)\b/i.test(b.desc));
+  // An end checked against the battle's English Wikipedia article (endAgainstArticle, scripts/rules.mjs): only where
+  // Wikidata's runs more than a month, as it must to end over a month after the article's.
+  const long = kept.filter(b => b.w && b.s && (b.e || b.u === 'after') && dayNo(b.e || b.eW) - dayNo(b.s) > 31 && (b.u === 'after' || (b.pe === 'd' ? null : b.pe || b.p) !== 'y'));
+  const text = long.length ? await leads([...new Set(long.map(b => b.w))]) : new Map();
+  let conflicts = 0;
+  for (const b of long) {
+    const d = endAgainstArticle(b, infoboxEnd(text.get(b.w)), span.warEnd);
+    if (d !== b) { Object.assign(b, d); conflicts++; }
+  }
+  if (long.length) console.log(`  ${long.length} ends checked against Wikipedia, ${conflicts} drawn to the article's earlier end`);
+  return kept;
 }
+const dayNo = d => Date.parse(d + 'T00:00:00Z') / 864e5;
 
 // ---- Load sources
 const X = require('xlsx');
@@ -118,6 +181,8 @@ const prioRows = X.utils.sheet_to_json(X.readFile(await download('https://cdn.cl
 const prio = new Map(); // id -> year -> best
 for (const r of prioRows) { const v = r.bdeadbes > 0 ? r.bdeadbes : r.bdeadlow > 0 ? r.bdeadlow : 0; const m = prio.get(r.id) || new Map(); m.set(r.year, (m.get(r.year) || 0) + v); prio.set(r.id, m); }
 const cow = new Map(JSON.parse(readFileSync(join(ROOT, '../history/data/wars.json'), 'utf8')).wars.filter(w => w.src === 'cow').map(w => [+w.id.slice(1), w]));
+// CShapes 2.0 borders (Retrospective Battlefield's), for each war's theatre (stateBoxes, scripts/rules.mjs).
+const BORDERS = JSON.parse(readFileSync(join(ROOT, '../history/data/borders.topo.json'), 'utf8'));
 const gedDir = unzip(await download('https://ucdp.uu.se/downloads/ged/ged261-csv.zip', 'ged261.zip'), 'ged');
 // The candidate files for every year GED v26.1 does not cover yet: 2026's latest now, and 2026's last plus 2027's
 // latest once UCDP's first 2027 file is out (until a GED release covering 2026 replaces ged261 above and GED_THROUGH).
@@ -140,7 +205,7 @@ for (const path of [join(gedDir, 'GEDEvent_v26_1.csv'), ...gedCands]) {
     const ws = gedIds.get(e.conflict_new_id); if (!ws) continue;
     const d = e.date_start?.slice(0, 10); if (!d) continue;
     if (d > maxGed) maxGed = d;
-    for (const w of ws) if (d >= w.start && d <= (w.end || today)) events.get(w.id).push({ d, lat: +e.latitude, lon: +e.longitude, best: +e.best || 0, dyad: e.dyad_name, where: e.where_description, prec: +e.where_prec, a: +e.deaths_a || 0, b: +e.deaths_b || 0, civ: +e.deaths_civilians || 0 });
+    for (const w of ws) if (d >= w.start && d <= (w.end || today)) events.get(w.id).push({ d, de: e.date_end?.slice(0, 10) || d, lat: +e.latitude, lon: +e.longitude, best: +e.best || 0, dyad: e.dyad_name, where: e.where_description, prec: +e.where_prec, a: +e.deaths_a || 0, b: +e.deaths_b || 0, civ: +e.deaths_civilians || 0 });
   }
 }
 console.log('GED loaded through', maxGed);
@@ -152,23 +217,42 @@ for (const w of wars) {
   const end = w.end || maxGed;
   const months = monthsBetween(ym(w.start), ym(end));
   const mi = new Map(months.map((m, i) => [m, i]));
-  const battles = qid ? (await battlesOf(qid)).filter(b => b.s >= w.start.slice(0, 4) && b.s <= end) : [];
-  battles.sort((a, b) => (a.s < b.s ? -1 : 1));
   const ev = events.get(w.id) || [];
+  // The war's theatre for partsWithin: its UCDP events, and the territory of its sides' and contested states then.
+  const boxes = stateBoxes(BORDERS, w.start, w.end || today);
+  const gws = [...new Set([...w.sides.a.gw || [], ...w.sides.b.gw || [], ...w.theatre || []].map(x => (Array.isArray(x) ? x[0] : x)))];
+  const theatre = { points: ev.filter(e => isFinite(e.lat) && isFinite(e.lon)).map(e => [e.lon, e.lat]), states: gws.flatMap(gw => boxes.get(gw) || []) };
+  // A battle dated only to its decade (u 'undated') is kept when the decade overlaps the war's years, and listed last.
+  const battles = qid ? (await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre))
+    .filter(b => (b.u === 'undated' ? decadeFits(b.dec, w.start, end) : b.s >= w.start.slice(0, 4) && b.s <= end)) : [];
+  battles.sort((a, b) => (!a.s || !b.s ? !a.s - !b.s : a.s < b.s ? -1 : 1));
+  const dated = battles.filter(b => b.s);
+  // Each event's deaths by month: an event UCDP dates only to a period (date_prec above 1, a week, a month, a year) is
+  // shared out over the days of its period that fall in the war (eventMonths, scripts/rules.mjs), not put on its first day.
+  for (const e of ev) e.m = eventMonths(e.d, e.de, e.best, w.start, end).filter(([m]) => mi.has(m));
   // Monthly deaths. Per year: PRIO's annual total where it has one (scaled to the war's share of the year when the
   // PRIO conflict also runs outside the war), spread over the months by UCDP event deaths, or by battle counts when
   // there are no events; otherwise UCDP event deaths as recorded; COW wars spread their single total the same way.
   const deaths = months.map(() => 0), estimated = months.map(() => false);
-  const gedDeaths = months.map(() => 0);
-  for (const e of ev) { const i = mi.get(ym(e.d)); if (i != null) gedDeaths[i] += e.best; }
-  const weight = months.map(m => 1 + battles.filter(b => ym(b.s) <= m && ym(b.e) >= m).length);
+  const gedDeaths = months.map(() => 0), shared = months.map(() => 0);
+  for (const e of ev) for (const [m, n] of e.m) { const i = mi.get(m); gedDeaths[i] += n; if (e.m.length > 1) shared[i] += n; }
+  const weight = months.map(m => 1 + dated.filter(b => ym(b.s) <= m && ym(b.e || b.s) >= m).length);
+  // A total shared out in whole deaths that add up to it (apportion): COW's 1,000,000 stays 1,000,000, not 999,999.
   const spread = (total, idxs) => {
     const useGed = idxs.some(i => gedDeaths[i] > 0), wt = i => (useGed ? gedDeaths[i] + 1 : weight[i]);
-    const ws = idxs.reduce((s, i) => s + wt(i), 0); for (const i of idxs) { deaths[i] += Math.round(total * wt(i) / ws); estimated[i] = true; }
+    apportion(total, idxs.map(wt)).forEach((n, k) => { deaths[idxs[k]] += n; estimated[idxs[k]] = true; });
   };
   const allIdx = months.map((_, i) => i);
   const parts = [];
-  if (w.deaths.cow) { spread(cow.get(w.deaths.cow).deaths, allIdx); parts.push('Correlates of War war total, spread across months by recorded battles'); }
+  let covered = null;
+  if (w.deaths.cow) {
+    // Only over the months in COW's own years for the war (cowMonths): a month outside them has no figure.
+    const c = cow.get(w.deaths.cow), idxs = cowMonths(months, c.years);
+    spread(c.deaths, idxs);
+    if (idxs.length < months.length) covered = [months[idxs[0]], months[idxs.at(-1)]];
+    parts.push(covered ? `Correlates of War war total for ${c.span}, spread across those years' months by recorded battles` : 'Correlates of War war total, spread across months by recorded battles');
+    if (w.deathsNote) parts.push(w.deathsNote);
+  }
   else {
     const byYear = new Map();
     for (const id of w.deaths.prio || []) for (const [y, v] of prio.get(id) || []) if (v > 0) byYear.set(y, (byYear.get(y) || 0) + v);
@@ -183,19 +267,21 @@ for (const w of wars) {
       else for (const i of idxs) if (gedDeaths[i]) { deaths[i] = gedDeaths[i]; usedGed = true; }
     }
     if (usedPrio) parts.push('PRIO Battle Deaths annual totals, spread across months by ' + (ev.length ? 'UCDP events' : 'recorded battles'));
-    if (usedGed) parts.push('UCDP GED recorded deaths (state-based violence)');
+    if (usedGed) parts.push('UCDP GED recorded deaths (state-based violence)' + (shared.some(Boolean) ? ', an event UCDP dates only to a period shared out over the days of that period' : ''));
   }
   const source = parts.join('; ');
   // Events: per month, 0.2° cells with deaths and counts, and the five deadliest events.
   const cells = months.map(() => new Map()), top = months.map(() => []);
-  for (const e of ev) {
-    const i = mi.get(ym(e.d)); if (i == null || !isFinite(e.lat)) continue;
+  // An event over a period counts in each of its months with that month's share of its deaths.
+  for (const e of ev) for (const [m, n] of e.m) {
+    const i = mi.get(m); if (!isFinite(e.lat)) continue;
     const k = `${(Math.round(e.lat * 5) / 5).toFixed(1)},${(Math.round(e.lon * 5) / 5).toFixed(1)}`;
-    const c = cells[i].get(k) || [+k.split(',')[0], +k.split(',')[1], 0, 0]; c[2] += e.best; c[3]++; cells[i].set(k, c);
-    top[i].push(e);
+    const c = cells[i].get(k) || [+k.split(',')[0], +k.split(',')[1], 0, 0]; c[2] += n; c[3]++; cells[i].set(k, c);
+    top[i].push({ e, n });
   }
   const cellsOut = cells.map(m => [...m.values()]);
-  const topOut = top.map(l => l.sort((a, b) => b.best - a.best).slice(0, 5).map(e => [e.d, e.best, e.where, e.dyad]));
+  // [date, deaths this month, place, dyad] and, for an event over a period, [..., its last day, its whole count].
+  const topOut = top.map(l => l.sort((a, b) => b.n - a.n).slice(0, 5).map(({ e, n }) => (e.m.length > 1 ? [e.d, n, e.where, e.dyad, e.de, e.best] : [e.d, n, e.where, e.dyad])));
   // Theatre bounds from battles and events (5th–95th percentile to drop strays), falling back to the sides' states.
   const pts = [...battles.filter(b => b.lat != null).map(b => [b.lon, b.lat]), ...ev.filter(e => isFinite(e.lat)).map(e => [e.lon, e.lat])];
   let bbox = null;
@@ -209,10 +295,10 @@ for (const w of wars) {
   const bf = w.bf || (w.deaths.cow ? 'c' + w.deaths.cow : w.ged ? 'u' + w.ged[0] : null);
   const data = {
     id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, dataThrough: w.end ? null : maxGed,
-    months, deaths, estimated, deathsSource: source, totalDeaths: total,
+    months, deaths, estimated, deathsSource: source, totalDeaths: total, covered, shared: shared.some(Boolean) ? shared : null,
     sides: { a: { label: w.sides.a.label, states: norm(w.sides.a) }, b: { label: w.sides.b.label, states: norm(w.sides.b) } },
     theatre: w.theatre || [], control: (w.control || []).map(([gw, side, from, to]) => ({ gw, side, from, to })),
-    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, deaths, cas, w: art }) => ({ q, n, desc, lat, lon, s, e, p: p || null, deaths: deaths || null, cas: cas || null, w: art || null })),
+    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, w: art }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null, w: art || null })),
     cells: cellsOut, top: topOut, events: ev.length,
   };
   pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);

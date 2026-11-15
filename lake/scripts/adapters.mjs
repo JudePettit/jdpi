@@ -86,8 +86,9 @@ export function battlefield({ jdpiDir }) {
     if (f.qid) out.push({ key: { qid: f.qid }, label: f.name, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}`,
       date: f.start, context: `Month by month, ${f.start.slice(0, 4)}–${f.end ? f.end.slice(0, 4) : 'now'}: ${f.battles} battles and operations, ${f.totalDeaths.toLocaleString('en-GB')} battle deaths` });
     const d = json(join(jdpiDir, `battlefield/focus/data/wars/${f.id}.json`));
-    for (const b of d.battles) if (b.w) out.push({ key: { qid: b.q }, label: b.n, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}&m=${b.s.slice(0, 7)}`,
-      date: b.s, context: `Part of ${f.name}${b.deaths ? `; ${b.deaths.toLocaleString('en-GB')} deaths` : ''}` });
+    // A battle Wikidata dates only to its decade (s null, War Focus lists it undated) opens the war, not a month.
+    for (const b of d.battles) if (b.w) out.push({ key: { qid: b.q }, label: b.n, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}${b.s ? `&m=${b.s.slice(0, 7)}` : ''}`,
+      date: b.s || null, context: `Part of ${f.name}${b.deaths ? `; ${b.deaths.toLocaleString('en-GB')} deaths` : ''}` });
   }
   const live = json(join(jdpiDir, 'battlefield/data/realtime.json'));
   for (const w of live.wars) {

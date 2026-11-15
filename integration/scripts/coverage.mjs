@@ -352,7 +352,8 @@ export function warFocusWar(w, R) {
 export function warFocusMoment(war, m) {
   const w = war.raw, a = `${m}-01`, b = monthEnd(m);
   const places = [];
-  for (const bt of w.battles || []) if (bt.lat != null && bt.lon != null && overlaps(bt.s, bt.e || bt.s, a, b)) places.push({ lon: bt.lon, lat: bt.lat, label: bt.n });
+  // A battle War Focus lists undated (s null: Wikidata gives only its decade) falls in no month.
+  for (const bt of w.battles || []) if (bt.s && bt.lat != null && bt.lon != null && overlaps(bt.s, bt.e || bt.s, a, b)) places.push({ lon: bt.lon, lat: bt.lat, label: bt.n });
   const i = (w.months || []).indexOf(m);
   const cells = Array.isArray(w.cells) ? w.cells : Object.values(w.cells || {});
   if (i >= 0) for (const c of cells[i] || []) places.push({ lon: c[1], lat: c[0], label: 'UCDP events' });

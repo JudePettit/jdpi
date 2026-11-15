@@ -231,6 +231,7 @@ function warDetail(w) {
     <p>${intro}</p>
     ${shown}
     <div class="sides"><b>Side A</b>${seeMoreText(w.sideA, 8, `${w.name} · side A`)}<b>Side B</b>${seeMoreText(w.sideB, 8, `${w.name} · side B`)}</div>
+    ${w.sideNote ? `<p class="note side-note">${esc(w.sideNote)}</p>` : ''}
     <a class="btn" href="${wikiUrl(w)}" target="_blank" rel="noreferrer">${w.wiki ? 'Wikipedia article ↗' : 'Search Wikipedia ↗'}</a>
     ${focusLink(w)}
     ${w.src === 'ucdp' ? `<h3>Year by year <span class="count">bold red = war level${a === y ? '' : `; underlined = ${a}–${y}`}</span></h3><p class="years">${seeMore(w.years.map(([yy, x]) => `<span class="l${x}${a !== y && inP(yy) ? ' in' : ''}">${yy}</span> `), 24, `${w.name} · active years`)}</p>` : ''}`;

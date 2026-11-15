@@ -17,8 +17,22 @@ const monthLabel = m => `${MONTHS[+m.slice(5, 7) - 1]} ${m.slice(0, 4)}`;
 // list formats thousands of dates (seconds of a slow machine's time, with the shell and Kino waiting on the same thread).
 const DAY = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const fmtDate = d => { if (!d) return ''; const t = new Date(d + 'T00:00:00Z'); return Number.isNaN(+t) ? 'Invalid Date' : DAY.format(t); };
-// A battle's dates at the precision Wikidata records (p: 'm' month, 'y' year).
-const bDates = b => { const f = d => (b.p === 'y' ? d.slice(0, 4) : b.p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d)); const a = f(b.s), z = b.e ? f(b.e) : a; return a === z ? a : `${a} – ${z}`; };
+// A battle's dates at the precision Wikidata records (p: 'm' month, 'y' year; pe the end's when it differs, 'd' a day).
+// With no end to show (u, scripts/rules.mjs), its start and why: none recorded, or Wikidata's end (eW) before its
+// start or after the war's end, which is not drawn as a span.
+const END_NOTE = { end: 'end not recorded', order: 'dates uncertain: Wikidata ends it before its start', after: 'Wikidata ends it after the war' };
+// A battle Wikidata dates only to its decade (s null) has no date to show; one whose Wikidata end is over a month after
+// its Wikipedia article's (u 'conflict', scripts/rules.mjs endAgainstArticle) is drawn to the article's, and says so.
+const bDates = b => {
+  const f = (d, p) => (p === 'y' ? d.slice(0, 4) : p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d));
+  if (!b.s) return `date not recorded${b.dec != null ? ` (Wikidata gives only the decade, the ${b.dec}s)` : ''}`;
+  const a = f(b.s, b.p);
+  if (!b.e) return b.u ? `${a} · ${END_NOTE[b.u] || 'end uncertain'}${b.eW ? ` (${fmtDate(b.eW)})` : ''}` : a;
+  const z = f(b.e, b.pe === 'd' ? null : b.pe || b.p);
+  const span = a === z ? a : `${a} – ${z}`;
+  return b.u === 'conflict' && b.eW ? `${span} · end uncertain: Wikidata ends it ${fmtDate(b.eW)}, its Wikipedia article ${z}` : span;
+};
+const battleOf = q => state.war.battles.find(x => x.q === q) || state.war.undated.find(x => x.q === q);
 const wikiUrl = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const SHELL = new URL('../../', location.href).href;
@@ -214,9 +228,12 @@ function renderCounters() {
   $('#c-total').textContent = shown(cumulative[i], estimatedTo[i], { total: i > 0 });
   const pd = periodDeaths(), est = p ? pd.est : !!w.estimated[i], n = p ? pd.deaths : w.deaths[i];
   $('#c-month-label').textContent = p ? 'In the period' : 'This month';
-  $('#c-month').textContent = shown(n, est);
-  // Beside the figure, whose it is: an estimate and its source, or UCDP's own count.
-  $('#c-month-note').textContent = est ? `Estimate from ${estimateOf(w.deathsSource)}` : n ? 'As recorded by UCDP' : 'None recorded';
+  // Beside the figure, whose it is: an estimate and its source, or UCDP's own count (with the share of events UCDP
+  // dates only to a longer period, scripts/rules.mjs eventMonths); a month outside its source's years has no figure.
+  const shared = w.shared ? w.shared.slice(p ? state.f : i, i + 1).reduce((s, v) => s + v, 0) : 0;
+  const covered = !w.covered || (m >= w.covered[0] && (p ? a : m) <= w.covered[1]);
+  $('#c-month').textContent = covered ? shown(n, est) : '–';
+  $('#c-month-note').textContent = est ? `Estimate from ${estimateOf(w.deathsSource)}` : !covered ? 'No figure in the source' : n ? (shared ? `UCDP, ${num(shared)} spread from periods` : 'As recorded by UCDP') : 'None recorded';
   // Over a period, the battles under way in it: the panel's count, so the two figures on screen agree.
   $('#c-battles-label').textContent = p ? 'Battles in the period' : 'Battles so far';
   $('#c-battles').textContent = num(p ? w.battles.filter(b => underWay(b, a, m)).length : w.battles.filter(b => b.s.slice(0, 7) <= m).length);
@@ -264,7 +281,7 @@ function seeMoreList(items, limit, title) {
 function battleItem(b) {
   // The Wikidata ID sits on the name, so the Master Index linker puts its ◈ beside it (and not again by the Wikipedia link).
   return `<li><button class="bname" data-b="${esc(b.q)}" data-qid="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl jdpi-no-ency" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
-    <small>${esc(bDates(b))}${b.deaths ? ` · ${num(b.deaths)} deaths` : b.cas ? ` · ${num(b.cas)} casualties` : ''}${b.lat == null ? ' · not mapped' : ''}</small></li>`;
+    <small>${esc(bDates(b))}${b.deaths ? ` · ${num(b.deaths)} deaths` : b.cas ? ` · ${num(b.cas)} casualties` : ''}${b.lat == null ? ' · not mapped' : !b.s ? ' · not on the map' : ''}</small></li>`;
 }
 // The states on a side that month, largest first, so the major powers lead the list.
 function statesOn(side, date) {
@@ -287,8 +304,15 @@ function renderPanel() {
     return `<div class="side-chip"><i style="background:var(--side-${s})"></i><b>${esc(w.sides[s].label)}</b></div>${on.length ? `<div class="side-list">${list}</div>` : ''}`;
   }).join('');
   // The deadliest UCDP clashes of the month, or of all the period's months.
-  const clashes = p ? w.top.slice(state.f, i + 1).flat().sort((x, y) => y[1] - x[1]).slice(0, 8) : (w.top[i] || []);
-  const top = clashes.map(([d, deaths, where, dyad]) => `<li><b>${num(deaths)} deaths</b> · ${esc(where)}<small>${esc(fmtDate(d))} · ${esc(dyad)}</small></li>`);
+  // An event UCDP dates only to a period (it carries its last day and whole count) is one entry with its share of
+  // the month, or of the period's months together.
+  const merged = new Map();
+  for (const c of (p ? w.top.slice(state.f, i + 1).flat() : (w.top[i] || []))) {
+    const k = c[4] ? c.filter((_, j) => j !== 1).join('|') : Symbol(); const o = merged.get(k);
+    if (o) o[1] += c[1]; else merged.set(k, [...c]);
+  }
+  const clashes = [...merged.values()].sort((x, y) => y[1] - x[1]).slice(0, p ? 8 : 5);
+  const top = clashes.map(([d, deaths, where, dyad, de, all]) => `<li><b>${num(deaths)} deaths</b> · ${esc(where || 'no place given')}<small>${de ? `${esc(fmtDate(d))} – ${esc(fmtDate(de))}, a share of ${num(all)}` : esc(fmtDate(d))} · ${esc(dyad)}</small></li>`);
   // Retrospective Battlefield shows the year, or the period's years as a period.
   const bfYear = Math.min(2025, +m.slice(0, 4)), bfFrom = Math.min(2025, +a.slice(0, 4)), bfPeriod = p && bfFrom < bfYear;
   const pd = periodDeaths();
@@ -297,10 +321,10 @@ function renderPanel() {
     <p class="sub">${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'} · ${years ? `${years} yr${years > 1 ? 's' : ''} ` : ''}${months % 12 ? `${months % 12} mo` : ''}</p>
     <div class="sides" style="margin-top:10px">${sides}</div>
     <div class="stat-row">
-      <div class="stat"><span>Deaths, whole war</span><b>${shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}</small></div>
-      <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped</small></div>
+      <div class="stat"><span>Deaths, whole war</span><b>${shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}${w.covered ? `, ${esc(monthLabel(w.covered[0]))} – ${esc(monthLabel(w.covered[1]))} only` : ''}</small></div>
+      <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length + w.undated.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped${w.undated.length ? ` · ${num(w.undated.length)} undated` : ''}</small></div>
       ${p ? `<div class="stat"><span>Deaths in the period</span><b>${shown(pd.deaths, pd.est)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${shown(cumulative[i], estimatedTo[i], { total: i > 0 })} by ${esc(monthLabel(m))}</small></div>`
-        : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${Math.round(cumulative[i] / Math.max(1, w.totalDeaths) * 100)}% of the war's total</small></div>`}
+        : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${soFarNote(w, m, cumulative[i])}</small></div>`}
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
     </div>
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
@@ -309,20 +333,27 @@ function renderPanel() {
     ${now.length ? seeMoreList(now.map(battleItem), 8, `${w.name} · ${periodLabel()}`) : `<p class="empty">No battles or operations recorded as under way ${p ? 'in the period' : 'this month'}.</p>`}
     ${top.length ? `<h3>Deadliest clashes ${p ? 'in the period' : 'this month'} <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
     ${deadliest.length ? `<h3>Deadliest battles of the war</h3>${seeMoreList(deadliest.map(battleItem), 6, `${w.name} · battles by deaths`)}` : ''}
-    <h3>All battles &amp; operations <span class="count">${w.battles.length}</span></h3>${w.battles.length ? seeMoreList(w.battles.map(battleItem), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
+    <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(battleItem), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
     <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
-      <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates and deaths as recorded there.
+      <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates and deaths as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
       <b>Territory:</b> CShapes borders as they stood that month${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded as a whole' : ''}. Front lines are not drawn: no open data records them month by month.</p>`;
-  $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(w.battles.find(x => x.q === b.dataset.b)));
+  $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
   $('#panel').querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openPop(popouts.get(b.dataset.pop)));
+}
+// Beside the running total, its share of the war's; outside the months the source covers (w.covered: Correlates of
+// War's own years, as the Second Sino-Japanese War's 1937–41), how far the figure goes, not a share as if no one died.
+function soFarNote(w, m, n) {
+  if (w.covered && m > w.covered[1]) return `to ${esc(monthLabel(w.covered[1]))}; no figure after`;
+  if (w.covered && m < w.covered[0]) return `no figure before ${esc(monthLabel(w.covered[0]))}`;
+  return `${Math.round(n / Math.max(1, w.totalDeaths) * 100)}% of the war's total`;
 }
 function openPop(p) {
   $('#modal-title').textContent = p.title; $('#modal-body').innerHTML = p.html; $('#modal').hidden = false;
-  $('#modal-body').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(state.war.battles.find(x => x.q === b.dataset.b)));
+  $('#modal-body').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
 }
 function openBattle(b) {
   if (!b) return;
-  const w = state.war, mi = w.months.indexOf(b.s.slice(0, 7));
+  const w = state.war, mi = b.s ? w.months.indexOf(b.s.slice(0, 7)) : -1;
   $('#modal-title').innerHTML = `<span data-qid="${esc(b.q)}">${esc(b.n)}</span>`;
   $('#modal-body').innerHTML = `<p class="sub">${esc(bDates(b))} · part of ${esc(w.name)}</p>
     ${b.desc ? `<p>${esc(b.desc.replace(/^./, c => c.toUpperCase()))}.</p>` : ''}
@@ -330,7 +361,7 @@ function openBattle(b) {
     ${b.w ? `<a class="btn" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <a class="btn" href="https://www.wikidata.org/wiki/${esc(b.q)}" target="_blank" rel="noreferrer">Wikidata ↗</a>
     ${mi >= 0 && mi !== state.m ? `<button class="btn" id="jump">Go to ${esc(monthLabel(w.months[mi]))}</button>` : ''}
-    ${b.lat != null ? '' : '<p class="empty">No coordinates recorded, so it is not on the map.</p>'}`;
+    ${b.lat == null ? '<p class="empty">No coordinates recorded, so it is not on the map.</p>' : !b.s ? '<p class="empty">With no date recorded, it is not on the map.</p>' : ''}`;
   $('#modal').hidden = false;
   // Its first month: the month shown moves there; one before a period's start widens the period to begin there.
   const j = $('#jump'); if (j) j.onclick = () => { closeModal(); if (isPeriod() && mi < state.f) setPeriod(w.months[mi], w.months[state.m]); else setMonth(mi); };
@@ -348,16 +379,16 @@ function renderTables() {
   const i = state.m, m = w.months[i], p = isPeriod(), a = p ? w.months[state.f] : m;
   if (state.view === 'battles') {
     // Status against the month shown, or against the period.
-    const status = b => (b.s.slice(0, 7) > m ? ['later', 'Not yet'] : underWay(b, a, m) ? ['now', p ? 'In the period' : 'Under way'] : ['', 'Earlier']);
-    const list = [...w.battles].sort((a, b) => a.s.localeCompare(b.s) || a.n.localeCompare(b.n));
+    const status = b => (!b.s ? ['', 'Date not recorded'] : b.s.slice(0, 7) > m ? ['later', 'Not yet'] : underWay(b, a, m) ? ['now', p ? 'In the period' : 'Under way'] : ['', 'Earlier']);
+    const list = [...[...w.battles].sort((a, b) => a.s.localeCompare(b.s) || a.n.localeCompare(b.n)), ...w.undated];
     $('#battles-title').textContent = `${w.name} · ${num(list.length)} battles and operations`;
     $('#th-status').textContent = periodLabel();
     $('#battles-rows').innerHTML = list.map(b => {
       const [cls, word] = status(b);
       return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button></td><td class="mono">${esc(bDates(b))}</td>
-        <td><span class="st ${cls}">${word}</span></td><td class="num">${b.deaths ? num(b.deaths) : '–'}</td><td class="num">${b.cas ? num(b.cas) : '–'}</td><td class="mono">${b.lat == null ? 'Not mapped' : 'Mapped'}</td></tr>`;
+        <td><span class="st ${cls}">${word}</span></td><td class="num">${b.deaths ? num(b.deaths) : '–'}</td><td class="num">${b.cas ? num(b.cas) : '–'}</td><td class="mono">${b.lat == null ? 'Not mapped' : !b.s ? 'Not on the map (no date)' : 'Mapped'}</td></tr>`;
     }).join('') || '<tr><td colspan="6" class="empty">No battles or operations recorded in Wikidata.</td></tr>';
-    $('#battles-rows').querySelectorAll('[data-b]').forEach(el => el.onclick = () => openBattle(w.battles.find(x => x.q === el.dataset.b)));
+    $('#battles-rows').querySelectorAll('[data-b]').forEach(el => el.onclick = () => openBattle(battleOf(el.dataset.b)));
   } else if (state.view === 'months') {
     const begun = new Map();
     for (const b of w.battles) if (b.p !== 'y') begun.set(b.s.slice(0, 7), (begun.get(b.s.slice(0, 7)) || 0) + 1);
@@ -366,7 +397,7 @@ function renderTables() {
     // The month shown is highlighted, or every month of the period; the list keeps the month shown in view.
     $('#months-rows').innerHTML = w.months.map((mm, k) => {
       const clashes = (w.cells[k] || []).reduce((s, c) => s + (c[3] || 0), 0), cls = k === i ? 'sel end' : p && k >= state.f && k < i ? 'sel' : '';
-      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${shown(w.deaths[k], w.estimated[k])}</td>
+      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${w.covered && (mm < w.covered[0] || mm > w.covered[1]) ? '–' : shown(w.deaths[k], w.estimated[k])}</td>
         <td class="num">${shown(cumulative[k], estimatedTo[k], { total: k > 0 })}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
     }).join('');
     // A month goes to it, keeping the period's start; one before the start widens the period to begin there, as a
@@ -544,6 +575,9 @@ function writeHash() {
 async function loadWar(id, month, from = null) {
   period.stop();
   const w = await fetch(`data/wars/${id}.json`).then(r => r.json());
+  // A battle Wikidata dates only to its decade (s null, u 'undated') is listed with the war's battles but has no month:
+  // it is kept apart, so the map, the months and the counts of battles under way leave it out.
+  w.undated = w.battles.filter(b => !b.s); w.battles = w.battles.filter(b => b.s);
   state.war = w; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
   estimatedTo = []; w.estimated.reduce((e, v, k) => (estimatedTo[k] = e || !!v), false);
   $('#war').value = id;

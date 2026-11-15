@@ -8,6 +8,7 @@
 //          ([gw, from, to]); civil wars list the contested state under `theatre` instead.
 //   control: country-level occupation by date (WWII only), as [gw, side, from, to].
 //   bf: the war's id in Retrospective Battlefield when it isn't c<COW id> or u<first GED conflict id>.
+//   deathsNote: what the deaths source says about the war that its figures alone do not (shown with the source).
 // Dates are ISO; `end: null` means ongoing.
 const ALLIES = 'Allies', AXIS = 'Axis';
 export const WARS = [
@@ -21,7 +22,10 @@ export const WARS = [
     sides: { a: { label: 'Bolivia', gw: [145] }, b: { label: 'Paraguay', gw: [150] } } },
   { id: 'spanish-civil-war', name: 'Spanish Civil War', wiki: 'Spanish Civil War', start: '1936-07-17', end: '1939-04-01', deaths: { cow: 718 },
     sides: { a: { label: 'Republicans', gw: [] }, b: { label: 'Nationalists', gw: [] } }, theatre: [230, 602] },
+  // COW's war 130 ("Third Sino-Japanese") runs 7 July 1937 – 6 December 1941: China 750,000 and Japan 250,000 battle
+  // deaths. From 7 December 1941 COW counts the war in China within World War II (war 139), not separately.
   { id: 'second-sino-japanese', name: 'Second Sino-Japanese War', wiki: 'Second Sino-Japanese War', start: '1937-07-07', end: '1945-09-02', deaths: { cow: 130 },
+    deathsNote: 'COW ends its war 130 on 6 December 1941 and counts the fighting after it within World War II (war 139: China 1,350,000 battle deaths, 7 December 1941 – 14 August 1945; Japan\'s are not split by front), so the months from 1942 have no separate figure',
     sides: { a: { label: 'China', gw: [710] }, b: { label: 'Japan', gw: [740, 730, 713] } } },
   { id: 'khalkhin-gol', name: 'Battles of Khalkhin Gol', wiki: 'Battles of Khalkhin Gol', start: '1939-05-11', end: '1939-09-16', deaths: { cow: 136 },
     sides: { a: { label: 'Soviet Union & Mongolia', gw: [365, 712] }, b: { label: 'Japan & Manchukuo', gw: [740] } } },

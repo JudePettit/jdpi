@@ -118,8 +118,8 @@ test('era: The Prince\'s period (1494–1527) opens the Invention Timeline and K
   const by = Object.fromEntries(rows.map(r => [r.id, r]));
   assert.equal(by.progress.at, 'science/progress/index.html#y=1527&f=1494');
   assert.equal(by.kardashev.at, 'kardashev/index.html#y=1500');
-  assert.equal(by.pestle.at, 'q/national.html');
-  assert.equal(by.pestle.today, true, 'National Analysis is countries today, and says so');
+  // National Analysis opens one country as it is today, and The Prince names none of today's countries: no row.
+  assert.ok(!rows.some(r => r.module === 'pestle'), 'no National Analysis row without a country');
   for (const [id, why] of [['retrospective', /1926/], ['battlefield-history', /1926/], ['war-focus', /1926/], ['historical-calendar', /1980/]]) {
     assert.equal(by[id].available, false, id);
     assert.match(by[id].reason, why, id);
@@ -157,6 +157,36 @@ test('era: the twentieth century opens every screen, War Focus at each war\'s fi
   }
   assert.equal(Object.fromEntries(eraRows([1989, 1991], { today: TODAY }).map(r => [r.id, r]))['historical-calendar'].at, 'q/calendar.html?period=history&month=1989-01');
   assert.equal(eraRows([2031, 2040], { today: TODAY }).find(r => r.id === 'historical-calendar').at, 'q/calendar.html?period=history&month=2026-01');
+});
+
+// The professor's review of 15 November 2026: the National Analysis row opened National Analysis with no country, even
+// with Switzerland (Q39) chosen in the Manifesto. It now opens the country the row is about: the term's, when the term
+// is one of today's countries or a place in one (the Master Index's Country relation: Ferrara is in Italy); else those
+// the book names most, three at most; and where there is none, the row is left out.
+test('era: the National Analysis row opens the country it is about, or is left out', async () => {
+  const { todayCountries } = await import('../bibliotheca/neo/lib/era.js');
+  const brief = read('national/data/brief.json'), byQid = new Map(brief.countries.filter(c => c.qid).map(c => [c.qid, c.iso3]));
+  const lake = q => read(`lake/data/e/${+q.slice(1) % 512}.json`)[q];
+  const termsOf = slug => read(`bibliotheca/data/books/${slug}.json`).chapters.flatMap(c => c.paragraphs.flatMap(p => p.terms || []));
+  const manifesto = termsOf('communist-manifesto'), prince = termsOf('the-prince'), onWar = termsOf('on-war');
+  const pestle = cs => eraRows([1847, 1848], { countries: cs, today: TODAY }).filter(r => r.module === 'pestle').map(r => [r.id, r.at, r.today, r.place]);
+  // A term that is a country: that country.
+  const swiss = todayCountries({ qid: 'Q39', entity: lake('Q39'), terms: manifesto, byQid });
+  assert.deepEqual(swiss.map(c => [c.iso3, c.name, c.from]), [['CHE', 'Switzerland', 'term']]);
+  assert.deepEqual(pestle(swiss), [['pestle:che', 'q/national.html#country=CHE', true, 'Switzerland today, not then']]);
+  // A place in one: Ferrara is in Italy (and the Papal States, which is no country today).
+  assert.deepEqual(todayCountries({ qid: 'Q13362', entity: lake('Q13362'), terms: prince, byQid }).map(c => c.iso3), ['ITA']);
+  // No term, or one in no country of today (the Kingdom of France is its own Country): the book's, most named first.
+  const war = todayCountries({ terms: onWar, byQid });
+  assert.deepEqual(war.map(c => [c.iso3, c.from]), [['ESP', 'book'], ['POL', 'book'], ['CHE', 'book']]);
+  assert.match(pestle(war)[0][3], /^Spain today, named \d+ times in this book$/);
+  assert.deepEqual(todayCountries({ qid: 'Q70972', entity: lake('Q70972'), terms: manifesto, byQid }).map(c => c.iso3), ['CHE', 'BEL', 'ESP']);
+  // None at all: The Prince names none of today's countries, so with the Kingdom of France there is no row.
+  assert.deepEqual(todayCountries({ qid: 'Q70972', entity: lake('Q70972'), terms: prince, byQid }), []);
+  assert.deepEqual(pestle([]), []);
+  // The address keeps the row shown: show=pestle:che, and the old show=pestle still reads.
+  assert.equal(readHash('#pane=vm&show=pestle:CHE').show, 'pestle:che');
+  assert.equal(readHash('#pane=vm&show=pestle').show, 'pestle');
 });
 
 test('era: with a term\'s own dates, War Focus lists only the war that is the term', () => {
@@ -416,7 +446,9 @@ test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the term
     const progress = page.locator('#era-rows li[data-key="progress"]');
     assert.equal(decodeURIComponent(await progress.locator('a').getAttribute('data-shell-hash')), `#/ns/progress?at=${BASE}/science/progress/index.html#y=1527&f=1494`);
     assert.match(await page.locator('#era-rows li.off[data-key="war-focus"]').innerText(), /its wars begin in 1926/);
-    assert.equal(await page.locator('#era-rows li[data-key="pestle"] .prp-kind').innerText(), 'TODAY');
+    // National Analysis opens one country as it is today: the Kingdom of France is none of today's, and The Prince
+    // names none of them, so its row is left out (the professor's review of 15 November 2026).
+    assert.equal(await page.locator('#era-rows li[data-key^="pestle"]').count(), 0);
     await progress.locator('[data-show]').click();
     const vm = await frameOf(page, '#vm-frame');
     await vm.waitForFunction(() => /\/science\/progress\/(index\.html)?$/.test(location.pathname) && location.hash === '#y=1527&f=1494', null, { timeout: 20000 });
@@ -903,11 +935,68 @@ test('page: Screens only lays the pane over the text under the head (1366 and 36
 // foot of the window (an empty subtitles strip), in a frame the list of screens left two fifths of the pane, its map cut
 // off, with four scroll bars. The pane, and the screen in it, run from under the head to the foot of the window; on a
 // desktop the screen is given the window's height and scaled to its frame, on a phone it keeps its own layout.
+// The professor's review of 15 November 2026: On War's byline linked to encyclopedia/index.html#Q76430, an address with
+// no entry. Q76430 is Clausewitz's Wikidata ID, but the Master Index has no record of him (nothing on the site tags or
+// casts him yet; the Master Index's gaps are queued), nor of Gibbon or Wieser. A byline now links its author only to an
+// entry the Master Index has, and names him plainly otherwise; here over every book of the shelf as the page draws it.
+test('page: every book\'s byline links its author only to an entry the Master Index has (1440 × 900)', PAGE, async () => {
+  const has = q => !!read(`lake/data/e/${+q.slice(1) % 512}.json`)[q];
+  const browser = await launch();
+  try {
+    const { page, errors, ctx } = await reading(browser, `#book=${SHELF.books[0].slug}`, { viewport: { width: 1440, height: 900 }, ar: false });
+    const seen = [];
+    for (const row of SHELF.books) {
+      const b = read(`bibliotheca/data/books/${row.slug}.json`), q = b.author?.qid;
+      await page.goto(`${BASE}/bibliotheca/neo/#book=${row.slug}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(([t, name]) => document.querySelector('#book-title')?.textContent === t && document.querySelector('#byline')?.textContent.startsWith(name), [b.title, b.author.name], { timeout: 20000 });
+      // An entry is looked up before the name is linked: wait for the link where there is an entry.
+      if (q && has(q)) await page.waitForSelector(`#byline a[data-qid="${q}"]`, { timeout: 10000 });
+      const links = await page.locator('#byline a').evaluateAll(as => as.map(a => [a.dataset.qid, a.getAttribute('href')]));
+      for (const [qid, href] of links) {
+        assert.ok(qid && has(qid), `${row.slug}: the byline links ${qid}, which has no entry`);
+        assert.ok(href.endsWith(`encyclopedia/index.html#${qid}`), `${row.slug}: ${href}`);
+      }
+      assert.deepEqual(links.map(l => l[0]), q && has(q) ? [q] : [], `${row.slug}: the author is linked exactly when there is an entry`);
+      seen.push([row.slug, links.length]);
+    }
+    assert.deepEqual(seen.find(s => s[0] === 'on-war'), ['on-war', 0], 'On War: Clausewitz, with no entry yet, stands unlinked');
+    assert.deepEqual(seen.find(s => s[0] === 'the-prince'), ['the-prince', 1], 'The Prince: Machiavelli is linked to his entry');
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally { await browser.close(); }
+});
+
+// The professor's review of 15 November 2026: the row opened National Analysis with no country. In the Manifesto with
+// Switzerland chosen it opens Switzerland; in On War with no term, the country the book names most, Spain.
+test('page: the National Analysis row opens the term\'s country, or the book\'s (1440 × 900)', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors, ctx } = await reading(browser, '#book=communist-manifesto&ch=0&p=c00-p06&t=Q39&pane=vm', { viewport: { width: 1440, height: 900 }, ar: false });
+    const row = page.locator('#era-rows li[data-key^="pestle"]');
+    await row.first().waitFor({ timeout: 20000 });
+    assert.deepEqual(await row.evaluateAll(ls => ls.map(l => l.dataset.key)), ['pestle:che']);
+    assert.match(await row.innerText(), /Switzerland today, not then/);
+    assert.equal(decodeURIComponent(await row.locator('a').getAttribute('data-shell-hash')), `#/rt/pestle?at=${BASE}/q/national.html#country=CHE`);
+    await row.locator('[data-show]').click();
+    const vm = await frameOf(page, '#vm-frame');
+    await vm.waitForFunction(() => location.hash === '#country=CHE' && /Switzerland/.test(document.body.innerText), null, { timeout: 20000 });
+    await page.waitForFunction(() => /&t=Q39&pane=vm&show=pestle:che$/.test(location.hash), null, { timeout: 5000 });
+    // On War, no term: Spain, named most often, then Poland and Switzerland.
+    await page.goto(`${BASE}/bibliotheca/neo/#book=on-war&pane=vm`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelectorAll('#era-rows li[data-key^="pestle"]').length === 3, null, { timeout: 20000 });
+    assert.deepEqual(await row.evaluateAll(ls => ls.map(l => l.dataset.key)), ['pestle:esp', 'pestle:pol', 'pestle:che']);
+    assert.match(await row.first().innerText(), /Spain today, named \d+ times in this book/);
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally { await browser.close(); }
+});
+
 test('page: in Screens only a screen fills the pane to the foot of the window and is scaled to its frame (1530 × 770, 390 × 844)', PAGE, async () => {
   const browser = await launch();
   try {
     for (const [viewport, context] of [[{ width: 1530, height: 770 }, {}], [{ width: 390, height: 844 }, { isMobile: true, hasTouch: true }]]) {
-      const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=4&p=c04-p02&pane=vm&show=pestle&ar=1', { viewport, context, speech: { ms: 120 }, ar: false });
+      // show=pestle, an address from before 15 November 2026, means the first country's row: On War's Spain.
+      const { page, errors, ctx } = await reading(browser, '#book=on-war&ch=1&p=c01-p02&pane=vm&show=pestle&ar=1', { viewport, context, speech: { ms: 120 }, ar: false });
       await page.waitForSelector('#nar:not([hidden])', { timeout: 20000 }); // ar=1 in the address: the pane stays on its screen
       const vm = await frameOf(page, '#vm-frame');
       await vm.waitForSelector('.prp-meta', { state: 'attached', timeout: 20000 });
@@ -936,7 +1025,7 @@ test('page: in Screens only a screen fills the pane to the foot of the window an
       assert.ok(Math.abs(m.inner * m.zoom - m.frame[2]) <= 2, `the screen is not taller than its frame: ${why}`);
       if (viewport.width >= 1000) assert.ok(m.zoom < 1 && m.zoom >= 0.6 && Math.abs(m.inner - Math.min(m.ih, m.frame[2] / 0.6)) <= 2, `a desktop screen is given the window's height, scaled: ${why}`);
       else assert.equal(m.zoom, 1, `${at}: a phone's screen keeps its own layout`);
-      assert.deepEqual(m.rows, ['pestle'], `${at}: the list is the shown screen's row alone`);
+      assert.deepEqual(m.rows, ['pestle:esp'], `${at}: the list is the shown screen's row alone`);
       assert.equal(m.listScrolls, false, `${at}: the list does not scroll`);
       assert.equal(m.tabsScroll, 'hidden', `${at}: the tabs have no scroll bar`);
       assert.equal(m.pageBar, 'none', `${at}: the page's own scroll bar goes`);

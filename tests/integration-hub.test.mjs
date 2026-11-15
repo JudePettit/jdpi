@@ -123,6 +123,14 @@ describe('catalogue (integration/catalog.json)', () => {
   test('derived files carry provenance', () => {
     for (const d of CAT.datasets.filter(x => x.derivedFrom)) for (const u of d.urls || [d.url]) { const f = J(u); assert.equal(f.dataset, d.id); assert.ok(f.generated && f.licence && Array.isArray(f.derivedFrom)); }
   });
+  // The review of 15 November 2026: the catalogue's licence named "method gvi-1.1", written into build-catalog.mjs, so the
+  // Hub's copies kept that name after the index moved to gvi-1.2. A licence that names a method names the index's own.
+  test('the Hub\'s volatility copies name the method of the index they were built from', () => {
+    const method = J('volatility/data/index.json').method, files = [J('integration/data/volatility-movers.json')];
+    for (const d of CAT.datasets.filter(x => x.id.startsWith('volatility'))) { files.push(d); for (const u of d.urls || [d.url]) files.push(J(u)); }
+    for (const f of files) if (/method/.test(f.licence)) assert.match(f.licence, new RegExp(`\\(method ${method.replace(/\./g, '\\.')}\\)`), `${f.dataset || f.id}: ${f.licence}`);
+    assert.doesNotMatch(readFileSync(join(ROOT, 'integration/scripts/build-catalog.mjs'), 'utf8'), /method gvi-\d/, 'the method is read from the index');
+  });
 });
 
 /* ================================================================ the Dashboard "Today" panel's files */

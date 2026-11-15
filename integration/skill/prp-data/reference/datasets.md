@@ -16,7 +16,7 @@ Global Headline Tracker: outlets. The most-read news outlets of each covered cou
 
 Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-14), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.
 
-- Rows: 236 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.
+- Rows: 236 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - File: https://jdpi.pages.dev/integration/data/volatility-latest.json (records at `records`)
 - Fields: `iso3` (string), `name` (string), `date` (date), `score` (number), `conflict` (number), `political` (number), `unrest` (number), `economic` (number), `spread` (number), `events` (number), `articles` (number), `sources` (number), `tone` (number), `coverage` (string), `reason` (string)
 
@@ -24,7 +24,7 @@ Geopolitical Volatility: latest scores. The Geopolitical Volatility Index (0–1
 
 Geopolitical Volatility: daily scores. Daily Geopolitical Volatility Index scores and components for every country over the last 50 days, for trends and comparisons.
 
-- Rows: 10,556 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.
+- Rows: 10,556 · refresh: daily · licence: Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.
 - Files: https://jdpi.pages.dev/integration/data/volatility-daily/0.json, https://jdpi.pages.dev/integration/data/volatility-daily/1.json, https://jdpi.pages.dev/integration/data/volatility-daily/2.json (+8 more) (records at `records`)
 - Fields: `date` (date), `iso3` (string), `name` (string), `score` (number), `conflict` (number), `political` (number), `unrest` (number), `economic` (number), `spread` (number), `events` (number), `tone` (number), `coverage` (string)
 

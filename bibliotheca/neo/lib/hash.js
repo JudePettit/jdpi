@@ -9,7 +9,8 @@
      pane  which tab of the companion pane is open (terms: the terms on screen, ency: the Master Index, vm: the screens of Vitruvian
            Manager); none means the pane is closed, so a term can stay highlighted with the pane shut;
      show  the screen shown in the pane's "In Vitruvian Manager" tab, by its row's key there: a screen for the era
-           (progress, kardashev, retrospective, battlefield-history, historical-calendar, pestle, or one War Focus war,
+           (progress, kardashev, retrospective, battlefield-history, historical-calendar, one country of National
+           Analysis, pestle:<iso3>, the old pestle meaning its first, or one War Focus war,
            war-focus:<war id>) or one of the places the term appears (m0 to m9, in the Master Index's order); kept
            only with pane=vm, since it means nothing on the other tab or with the pane shut;
      era   'term' when that tab shows the screens for the term's own dates rather than the book's; none means the
@@ -24,7 +25,7 @@ const SLUG = /^[a-z0-9][a-z0-9-]{0,80}$/;   // a book file is ../data/books/<slu
 const PID = /^[A-Za-z0-9][\w-]{0,40}$/;      // the corpus writes c12-p03; anything an element id can safely be
 // The pane's row keys (lib/era.js's row ids, and app.js's m<i> for the places the term appears, i being the place's
 // index in the Master Index entry, 0 to 99).
-const SHOW = /^(progress|kardashev|retrospective|battlefield-history|historical-calendar|pestle|war-focus:[a-z0-9-]{1,60}|m\d{1,2})$/;
+const SHOW = /^(progress|kardashev|retrospective|battlefield-history|historical-calendar|pestle(?::[a-z]{3})?|war-focus:[a-z0-9-]{1,60}|m\d{1,2})$/;
 export const PANES = ['terms', 'ency', 'vm']; // terms: AR Mode's "On screen" tab (BI-23)
 
 /** { book, ch, p, t, pane, show, era } from a hash (with or without its #); absent or malformed parts are null. */

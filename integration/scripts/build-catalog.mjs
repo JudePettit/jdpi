@@ -57,6 +57,8 @@ for (const s of REG.suites) for (const m of s.modules) SUBMODULE_URL[m.id] = m.u
 
 const NAT = J('national/data/index.json');
 const VOL = J('volatility/data/index.json');
+// The index's own method id, so the Hub's copies name the method that scored them (it was written in here as gvi-1.1).
+const VOL_LICENCE = `Index © JDP-Iq (method ${VOL.method}); GDELT data free to use with attribution to the GDELT Project.`;
 const BF = J('battlefield/data/realtime.json');
 const DECADE_FILES = readdirSync(abs('calendar/data')).filter(f => /^\d{4}s\.json$/.test(f)).sort();
 const CAL = DECADE_FILES.map(f => ({ file: `calendar/data/${f}`, decade: f.slice(0, 5), data: J(`calendar/data/${f}`) }));
@@ -159,7 +161,7 @@ spec({
   description: `The Geopolitical Volatility Index (0–100) for every country on the latest day (${VOL.latest}), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.`,
   derive: () => Object.entries(VOL.countries).map(([iso3, c]) => { const l = c.latest || {}; return { iso3, name: c.name, date: VOL.latest, score: l.score ?? null, ...Object.fromEntries(VCOMP.map(k => [k, l.components?.[k] ?? null])), events: l.events ?? null, articles: l.articles ?? null, sources: l.sources ?? null, tone: l.tone ?? null, coverage: l.coverage ?? null, reason: l.reason ?? null }; }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1)),
   from: ['volatility/data/index.json'], refresh: 'daily', updatedFrom: 'volatility/data/index.json', page: 'q/volatility.html',
-  licence: 'Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.', sources: ['GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)'],
+  licence: VOL_LICENCE, sources: ['GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)'],
   fields: [['iso3', 'Country (ISO 3166-1 alpha-3)'], ['name', 'Country'], ['date', 'Day scored'], ['score', 'Geopolitical Volatility Index, 0–100 (null when too few events or sources)'],
     ['conflict', 'Component: conflict & security, 0–100'], ['political', 'Component: political/diplomatic escalation, 0–100'], ['unrest', 'Component: civil unrest, 0–100'], ['economic', 'Component: economic disruption, 0–100'], ['spread', 'Component: cross-border spread, 0–100'],
     ['events', 'GDELT events located in the country that day'], ['articles', 'News articles behind those events'], ['sources', 'Distinct news sources'], ['tone', 'Mean GDELT tone of the coverage (negative is hostile)'], ['coverage', 'Coverage level: high, medium or low'], ['reason', 'Why no score was given, if none']]
@@ -170,7 +172,7 @@ spec({
   description: `Daily Geopolitical Volatility Index scores and components for every country over the last ${VOL.days} days, for trends and comparisons.`,
   derive: () => Object.entries(VOL.countries).flatMap(([iso3, c]) => (c.days || []).map(([date, score, comps, events, tone, cov]) => ({ date, iso3, name: c.name, score: score ?? null, ...Object.fromEntries(VCOMP.map((k, i) => [k, comps?.[i] ?? null])), events: events ?? null, tone: tone ?? null, coverage: COV[cov] || cov || null }))).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.iso3 < b.iso3 ? -1 : 1)),
   from: ['volatility/data/index.json'], refresh: 'daily', updatedFrom: 'volatility/data/index.json', page: 'q/volatility.html', rangeFields: ['date'],
-  licence: 'Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.', sources: ['GDELT 2.0 event exports (the GDELT Project)'],
+  licence: VOL_LICENCE, sources: ['GDELT 2.0 event exports (the GDELT Project)'],
   fields: [['date', 'Day'], ['iso3', 'Country (ISO 3166-1 alpha-3)'], ['name', 'Country'], ['score', 'Geopolitical Volatility Index, 0–100'], ['conflict', 'Component: conflict & security'], ['political', 'Component: political/diplomatic escalation'],
     ['unrest', 'Component: civil unrest'], ['economic', 'Component: economic disruption'], ['spread', 'Component: cross-border spread'], ['events', 'GDELT events that day'], ['tone', 'Mean tone of the coverage'], ['coverage', 'Coverage level: high, medium or low']]
 });
@@ -736,7 +738,7 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   const vp = 'integration/data/volatility-movers.json';
   putJson(vp, {
     dataset: 'volatility-movers', generated: STAMP, derivedFrom: ['volatility/data/index.json'],
-    licence: 'Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.',
+    licence: VOL_LICENCE,
     about: 'The "Biggest movers · 7 days" lists of q/volatility.html on its latest day (the six biggest rises and the six biggest falls of the 7-day average GVI, all coverage levels): the Integration Hub\'s daily copy. The Dashboard reads volatility/data/index.head.json, written with the index.',
     page: 'q/volatility.html', date: d, countries,
     records,

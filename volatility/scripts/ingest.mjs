@@ -8,7 +8,8 @@
 //   different countries).
 // Intensity = Σ(0.1 + max(0, −Goldstein)/10) over a component's events ÷ all the country's events that day. Each
 // component is ranked (mid-rank percentile) against all sufficiently covered country-days in the trailing 90 stored
-// days; the score is the weighted sum, shrunk toward the day's evidence-weighted global mean by events/(events+75).
+// days, and the percentile shrunk toward 50 by events/(events+75) (gvi-1.2, 15 November 2026: a few reports cannot make
+// an extreme component); the score is the weighted sum, shrunk toward the day's evidence-weighted global mean by the same.
 // Coverage: insufficient <25 events or <5 sources; low; medium ≥75 & 12; high ≥300 & 40. The baseline needs ≥7 days.
 // A day with fewer than 72 of its 96 slices, or with its slices but too few located events or countries (GDELT published
 // near-empty files, or its format or the FIPS table changed), is not written: it is a warning, and the day is tried again
@@ -17,11 +18,12 @@
 // first night while one bad day holds up nothing after it. While fewer than 7 complete days are stored, the window is
 // at least 14 days, so a fresh store can fill its baseline. Writes volatility/data/days/<day>.json and, only when a day
 // file changed (or with --reindex), volatility/data/index.json, so a run that finds nothing new changes nothing. The
-// method's code is in gvi.mjs.
+// method's code is in gvi.mjs. With --rescore, every stored day file is scored again, oldest first, from what it keeps of
+// each country (no download), and the index rebuilt: for a change of method.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SLOTS, MIN_SLOTS, BASELINE_DAYS, MIN_BASELINE, ymd, addDays, unzipFirst, slotUrl, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay, buildIndex, pruneBefore } from './gvi.mjs';
+import { SLOTS, MIN_SLOTS, BASELINE_DAYS, MIN_BASELINE, ymd, addDays, unzipFirst, slotUrl, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay, rescoreDay, buildIndex, pruneBefore } from './gvi.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const ROOT = fileURLToPath(new URL('../data/', import.meta.url));
@@ -29,7 +31,7 @@ const DAYS_DIR = join(ROOT, 'days'), INDEX = join(ROOT, 'index.json');
 const UA = { 'User-Agent': 'JDP-I Geopolitical Volatility (https://jdpi.pages.dev)' };
 const argDays = process.argv.indexOf('--days');
 const LOOKBACK = argDays > 0 ? +process.argv[argDays + 1] : 14;
-const REINDEX = process.argv.includes('--reindex');
+const RESCORE = process.argv.includes('--rescore'), REINDEX = RESCORE || process.argv.includes('--reindex');
 const stop = message => Object.assign(new Error(message), { stop: true }); // a failure that explains itself (no stack)
 
 // A slice's text, null when GDELT has not published it (404), or undefined when 3 tries of up to 60 s each failed.
@@ -76,9 +78,21 @@ async function ingestDay(day) {
   return true;
 }
 
+// Every stored day file scored again with this method, oldest first, each against the days before it as rescored.
+function rescoreAll() {
+  const done = new Map(), stored = storedDays().filter(complete);
+  for (const d of stored) {
+    const from = addDays(d, -(BASELINE_DAYS - 1)), x = rescoreDay(loadDay(d), stored.filter(p => p >= from && p < d).map(p => done.get(p)));
+    done.set(d, x);
+    writeFileSync(join(DAYS_DIR, d + '.json'), JSON.stringify(x));
+  }
+  console.log(`rescored ${stored.length} stored days with ${done.size ? [...done.values()][0].method : '-'}`);
+}
+
 async function main() {
   if (!(Number.isInteger(LOOKBACK) && LOOKBACK >= 1)) throw stop(`--days must be a positive integer (got ${process.argv[argDays + 1]})`);
   mkdirSync(DAYS_DIR, { recursive: true });
+  if (RESCORE) rescoreAll();
   // ---- Days of the look-back window without a complete stored file, oldest first (the baseline must be built in order).
   // A day counts as over 45 minutes after midnight UTC, once GDELT has published its last slice.
   const yesterday = addDays(ymd(new Date(Date.now() - 45 * 60e3)), -1);

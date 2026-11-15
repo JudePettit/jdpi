@@ -4,7 +4,9 @@
 import { readFileSync } from 'node:fs';
 import { inflateRawSync } from 'node:zlib';
 
-export const METHOD = 'gvi-1.1-q96'; // gvi-1.1 scored on all 96 quarter-hour GDELT slices rather than the 24 on the hour
+// gvi-1.1 scored on all 96 quarter-hour GDELT slices rather than the 24 on the hour (q96); 1.2 (15 November 2026) shrinks
+// each component's percentile toward 50 by the country's evidence before it is weighted (shrinkComponent).
+export const METHOD = 'gvi-1.2-q96';
 export const COMPONENTS = [
   { key: 'conflict', label: 'Conflict & security', weight: 0.35 },
   { key: 'political', label: 'Political / diplomatic escalation', weight: 0.2 },
@@ -137,45 +139,74 @@ export function daysToIngest(yesterday, lookback, complete) {
   return days;
 }
 
+// A component's share (raw: its weighted events ÷ all the country's events that day) from a few reports can be extreme:
+// on 14 October 2026 Croatia had 10 of its 28 reports coded as fighting (a sabotage trial and a television drama) and its
+// conflict component read 95.8, above Ukraine's. So each component's percentile is shrunk toward 50, the middle of the
+// baseline, by events/(events+PRIOR): a country with 28 reports keeps 27% of its distance from the middle, one with 400
+// keeps 84%. The middle, not the world's rate: that rate is weighted by events, so the most reported countries set it,
+// and it sat above most countries' shares (54–65% of the adequately covered ones on a day), which lifted a quiet country
+// with few reports above the median (the review of 15 November 2026: Malawi's conflict component went from 4 to 41).
+export const shrinkComponent = (percentile, events) => 50 + (events / (events + PRIOR)) * (percentile - 50);
+const tooFew = (events, sources) => `Too few events or sources: ${events} event${events === 1 ? '' : 's'} from ${sources} source${sources === 1 ? '' : 's'}, and a score needs 25 from 5`;
+
+// Score the day's countries (each with raw, events, sources and coverage) against the stored days of its baseline window
+// (`prior`, each with its countries' raw, events and coverage, read once). Sets each one's score, components
+// and reason, and returns the baseline's length and the day's mean.
+function scoreCountries(countries, prior) {
+  const list = Object.values(countries);
+  // Trailing baseline from stored days (no look-ahead), plus today: the shares of every adequately covered country-day.
+  const pool = Object.fromEntries(KEYS.map(k => [k, []]));
+  let baselineDays = 0;
+  const add = cs => { for (const c of cs) if (c.coverage !== 'insufficient') for (const k of KEYS) pool[k].push(c.raw[k]); };
+  for (const p of prior) { baselineDays++; add(Object.values(p.countries)); }
+  if (list.some(c => c.coverage !== 'insufficient')) { baselineDays++; add(list); }
+  for (const k of KEYS) pool[k].sort((a, b) => a - b);
+  for (const c of list) {
+    c.score = null; c.components = null; c.reason = null;
+    if (c.coverage === 'insufficient') c.reason = tooFew(c.events, c.sources);
+    else if (baselineDays < MIN_BASELINE) c.reason = `Baseline has ${baselineDays}/${MIN_BASELINE} days`;
+    else {
+      c.components = {}; let s = 0;
+      for (const m of COMPONENTS) { const p = shrinkComponent(midrank(pool[m.key], c.raw[m.key]), c.events); c.components[m.key] = Math.round(p * 10) / 10; s += m.weight * p; }
+      c.score = Math.round(s * 10) / 10;
+    }
+  }
+  // The score too is shrunk toward the evidence-weighted global mean, as in gvi-1.1. A day with no country scored (the
+  // first week, while the baseline fills) has no mean.
+  const scored = list.filter(c => c.score != null);
+  const vol = scored.reduce((n, c) => n + c.events, 0);
+  const mean = vol ? scored.reduce((n, c) => n + c.score * c.events, 0) / vol : 0;
+  for (const c of scored) { const w = c.events / (c.events + PRIOR); c.score = Math.round((mean + w * (c.score - mean)) * 10) / 10; }
+  return { baselineDays, globalMean: scored.length ? Math.round(mean * 10) / 10 : null };
+}
+
 // Score a day: `merged` maps FIPS codes to aggregate()s, the third argument is fetchDay's slice counts, and `prior` the
 // stored days of the baseline window before it (any iterable of day objects, read once). Returns the day file's contents.
 export function scoreDay(day, merged, { ok, missing = 0, failed = 0 }, prior, table = FIPS) {
   const totalEvents = Object.values(merged).reduce((t, m) => t + m.n, 0);
-  const today = {};
-  for (const [f, m] of Object.entries(merged)) today[f] = { raw: Object.fromEntries(KEYS.map(k => [k, m.n ? m.w[k] / m.n : 0])), cov: coverageOf(m.n, m.src.size) };
-  // Trailing baseline from stored days (no look-ahead), plus today.
-  const pool = Object.fromEntries(KEYS.map(k => [k, []]));
-  let baselineDays = 0;
-  for (const p of prior) { baselineDays++; for (const c of Object.values(p.countries)) if (c.coverage !== 'insufficient') for (const k of KEYS) pool[k].push(c.raw[k]); }
-  if (Object.values(today).some(t => t.cov !== 'insufficient')) { baselineDays++; for (const t of Object.values(today)) if (t.cov !== 'insufficient') for (const k of KEYS) pool[k].push(t.raw[k]); }
-  for (const k of KEYS) pool[k].sort((a, b) => a - b);
-
   const countries = {};
   for (const [fips, m] of Object.entries(merged)) {
-    const t = today[fips], meta = table.get(fips);
-    let score = null, components = null, reason = null;
-    if (t.cov === 'insufficient') reason = 'Too few events or sources';
-    else if (baselineDays < MIN_BASELINE) reason = `Baseline has ${baselineDays}/${MIN_BASELINE} days`;
-    else {
-      components = {}; let s = 0;
-      for (const c of COMPONENTS) { const p = midrank(pool[c.key], t.raw[c.key]); components[c.key] = Math.round(p * 10) / 10; s += c.weight * p; }
-      score = Math.round(s * 10) / 10;
-    }
-    const seen = new Set();
+    const meta = table.get(fips), seen = new Set();
     countries[meta.iso3] = {
-      fips, name: meta.name, score, components, reason, raw: t.raw, counts: m.k,
+      fips, name: meta.name, score: null, components: null, reason: null, raw: Object.fromEntries(KEYS.map(k => [k, m.n ? m.w[k] / m.n : 0])), counts: m.k,
       events: m.n, articles: m.art, sources: m.src.size, tone: m.n ? Math.round(m.tone / m.n * 100) / 100 : null,
-      share: totalEvents ? m.n / totalEvents : 0, coverage: t.cov,
+      share: totalEvents ? m.n / totalEvents : 0, coverage: coverageOf(m.n, m.src.size),
       evidence: m.ev.filter(e => !seen.has(e.url) && seen.add(e.url)).slice(0, EVIDENCE).map(e => ({ code: e.code, cat: e.cat, g: e.g, a: e.a, a1: e.a1, a2: e.a2, loc: e.loc, url: e.url })),
     };
   }
-  // Shrink toward the evidence-weighted global mean so thinly covered countries don't swing to extremes. A day with no
-  // country scored (the first week, while the baseline fills) has no mean.
-  const scored = Object.values(countries).filter(c => c.score != null);
-  const vol = scored.reduce((n, c) => n + c.events, 0);
-  const mean = vol ? scored.reduce((n, c) => n + c.score * c.events, 0) / vol : 0;
-  for (const c of scored) { const w = c.events / (c.events + PRIOR); c.score = Math.round((mean + w * (c.score - mean)) * 10) / 10; }
-  return { day, method: METHOD, slots: ok, missing, failed, totalEvents, baselineDays, globalMean: scored.length ? Math.round(mean * 10) / 10 : null, countries };
+  const { baselineDays, globalMean } = scoreCountries(countries, prior);
+  return { day, method: METHOD, slots: ok, missing, failed, totalEvents, baselineDays, globalMean, countries };
+}
+
+// Score a stored day file again with this method, from what it keeps of each country (its shares, events, sources and
+// coverage), against the stored days before it, rescored first (ingest.mjs --rescore). Everything else is kept.
+export function rescoreDay(x, prior) {
+  const countries = Object.fromEntries(Object.entries(x.countries).map(([iso, c]) => [iso, { ...c }]));
+  const { baselineDays, globalMean } = scoreCountries(countries, prior);
+  // Keys in the order scoreDay writes them, less the shrunk shares and world rates an earlier draft of gvi-1.2 wrote.
+  for (const [iso, c] of Object.entries(countries)) { const { fips, name, score, components, reason, raw, adjusted, ...rest } = c; countries[iso] = { fips, name, score, components, reason, raw, ...rest }; }
+  const { rates, ...day } = x;
+  return { ...day, method: METHOD, baselineDays, globalMean, countries };
 }
 
 // index.json: per-country daily rows [day, score, [5 components] or null, events, tone, coverage initial] and global rows

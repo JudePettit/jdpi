@@ -151,7 +151,7 @@
         }
       ],
       "rows": 236,
-      "licence": "Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.",
+      "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
@@ -161,7 +161,7 @@
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 57648
+      "bytes": 64887
     },
     {
       "id": "volatility-daily",
@@ -247,7 +247,7 @@
         }
       ],
       "rows": 10556,
-      "licence": "Index © JDP-Iq (method gvi-1.1); GDELT data free to use with attribution to the GDELT Project.",
+      "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
@@ -257,7 +257,7 @@
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 1938260
+      "bytes": 1939578
     },
     {
       "id": "volatility-global",
@@ -301,7 +301,7 @@
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 3515
+      "bytes": 3509
     },
     {
       "id": "realtime-wars",

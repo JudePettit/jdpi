@@ -8,7 +8,8 @@
      battlefield/focus/app.js    #war=<id>&m=<yyyy-mm>, the major wars since 1926, month by month
      q/calendar.html             ?period=history&month=<yyyy-mm>, 1980 to today (a query, so the frame reloads)
      Political Retrospective     https://hp-retrospective.pages.dev/#y=<year>&c=<GW code>, 1926 to today
-   National Analysis (q/national.html) has no year in its address, so it can only honestly show "this country today".
+   National Analysis (q/national.html#country=<ISO3>) has no year in its address, so it can only honestly show "this
+   country today", and only for a country: the term's own, or the book's (todayCountries).
    Paths are relative to the site root (the page resolves them against its data-shell); suite and module ids are the
    registry's, for the shell route #/<suite>/<module>?at=<url>. Every screen here can be framed: the pages on this site
    send no X-Frame-Options or frame-ancestors header (_headers), and neither does hp-retrospective.pages.dev. */
@@ -98,8 +99,9 @@ const warYears = (w, thisYear) => {
                 today would list the Greek, Chinese and Indochina wars); its own places come from the lake's mentions
       polity    a Kardashev polity id to select (kardashevPolity above), added to the tracker's address
       steps     the tracker's steps, when loaded (else KARDASHEV_STEPS)
+      countries the countries of today National Analysis opens, one row each (todayCountries); none, no row
       today     the date "today" is (tests pass one) */
-export function eraRows(era, { wars = [], qid = null, ownEra = false, polity = null, steps = KARDASHEV_STEPS, today = new Date() } = {}) {
+export function eraRows(era, { wars = [], qid = null, ownEra = false, polity = null, steps = KARDASHEV_STEPS, countries = [], today = new Date() } = {}) {
   const [a, b] = era;
   const thisYear = today.getUTCFullYear(), thisMonth = month(thisYear, today.getUTCMonth() + 1);
   const rows = [];
@@ -138,7 +140,30 @@ export function eraRows(era, { wars = [], qid = null, ownEra = false, polity = n
     rows.push({ id: 'historical-calendar', suite: 'rs', module: 'historical-calendar', name: 'Historical Calendar', available: true, at: `q/calendar.html?period=history&month=${m}`, place: `the month ${m}` });
   } else rows.push(off('historical-calendar', 'rs', 'Historical Calendar', `covers ${CALENDAR_FIRST} to today`));
 
-  // National Analysis: countries as they are today, and said so.
-  rows.push({ id: 'pestle', suite: 'rt', module: 'pestle', name: 'National Analysis', available: true, today: true, at: 'q/national.html', place: 'countries today, not then' });
+  // National Analysis: a country as it is today, and said so; one row for each of `countries` (todayCountries below),
+  // and none when there is no country (the professor's review of 15 November 2026: the row opened no country).
+  for (const c of countries) {
+    rows.push({ id: `pestle:${c.iso3.toLowerCase()}`, suite: 'rt', module: 'pestle', name: 'National Analysis', available: true, today: true,
+      at: `q/national.html#country=${c.iso3}`, place: c.from === 'book' ? `${c.name} today, named ${c.n} time${c.n === 1 ? '' : 's'} in this book` : `${c.name} today, not then` });
+  }
   return rows;
+}
+
+/** The countries of today a National Analysis row is about (it opens q/national.html#country=<ISO3>), three at most:
+    the term's, when the term is one of them (its QID is one National Analysis lists) or a place in one (the Master
+    Index's Country relation: Ferrara is in Italy); else those the book names most (its tags), the first named first
+    on a tie. Options: qid and entity (the term in use and its Master Index record), terms (the book's tags, { qid,
+    label }), byQid (National Analysis's QID → ISO3). Each is { iso3, qid, name, from: 'term' | 'book', n }. None, []. */
+export function todayCountries({ qid = null, entity = null, terms = [], byQid = new Map(), max = 3 } = {}) {
+  const out = new Map();
+  const add = (q, name, from, n = 0) => { const iso3 = byQid.get(q); if (iso3 && !out.has(iso3) && out.size < max) out.set(iso3, { iso3, qid: q, name, from, n }); };
+  if (qid) {
+    add(qid, entity?.label || qid, 'term');
+    for (const [q, name] of entity?.rel?.Country || []) add(q, name, 'term');
+    if (out.size) return [...out.values()];
+  }
+  const named = new Map();
+  terms.forEach((t, i) => { if (byQid.has(t.qid)) { const e = named.get(t.qid) || named.set(t.qid, { q: t.qid, name: t.label, n: 0, i }).get(t.qid); e.n++; } });
+  for (const e of [...named.values()].sort((a, b) => b.n - a.n || a.i - b.i)) add(e.q, e.name, 'book', e.n);
+  return [...out.values()];
 }

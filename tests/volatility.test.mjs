@@ -15,7 +15,7 @@ import { deflateRawSync } from 'node:zlib';
 import { pageTest, launch } from './tools/pages.mjs';
 import {
   METHOD, COMPONENTS, KEYS, SLOTS, MIN_SLOTS, MIN_EVENTS, BASELINE_DAYS, FIPS, FIPS_TABLE, fipsMap, addDays, categorize,
-  midrank, coverageOf, unzipFirst, slotUrl, parseSlot, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay,
+  midrank, coverageOf, unzipFirst, slotUrl, parseSlot, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay, rescoreDay,
   buildIndex, pruneBefore,
 } from '../volatility/scripts/gvi.mjs';
 
@@ -59,6 +59,7 @@ test('data: index.json matches the stored day files, and every stored day is com
     const x = read(`days/${f}`), d = f.slice(0, 10);
     last = x;
     assert.equal(x.day, d, f);
+    assert.equal(x.method, METHOD, `${f}: scored with this method (node volatility/scripts/ingest.mjs --rescore)`);
     assert.equal(dayProblem(x), null, f); // at least 72 slices, 5000 located events and 120 countries
     const row = rows.get(d);
     assert.deepEqual(row?.slice(0, 3), [d, x.totalEvents, x.slots], `${d}: global row`);
@@ -70,6 +71,47 @@ test('data: index.json matches the stored day files, and every stored day is com
     }
   }
   for (const [iso, c] of Object.entries(index.countries)) assert.deepEqual(c.latest, last.countries[iso] ?? null, `${iso}: latest record`);
+});
+
+// A change of method reaches the stored data: each stored day, scored again with this method against the stored days
+// before it, comes out as it is stored (node volatility/scripts/ingest.mjs --rescore after a change to gvi.mjs).
+test('data: every stored day is scored as this method scores it', () => {
+  const files = dayFiles().map(f => f.slice(0, 10)), days = new Map(files.map(d => [d, read(`days/${d}.json`)]));
+  for (const d of files) {
+    const prior = files.filter(p => p >= addDays(d, -(BASELINE_DAYS - 1)) && p < d).map(p => days.get(p)), x = days.get(d);
+    const again = rescoreDay(x, prior);
+    assert.equal(again.globalMean, x.globalMean, `${d}: global mean`);
+    for (const [iso, c] of Object.entries(x.countries)) assert.deepEqual([c.score, c.components], [again.countries[iso].score, again.countries[iso].components], `${d} ${iso}`);
+  }
+});
+
+// The reviews of 15 November 2026, on the stored data rather than made-up inputs: on 14 October Croatia's (95.8) and
+// Mauritius's (92.7) conflict components read above Ukraine's, and on 14 November, after a first fix, Ukraine's (46.7)
+// still read below Denmark's, Japan's and four other peaceful countries'. On the days the reviewers named, a country at
+// war now reads above the peaceful ones they named, on conflict and on the score. (Conflict is a share of the news: on a
+// day its news is of peace talks a country at war can still read below a peaceful one, as Ukraine does on 14 November below
+// Japan, Sweden, Belgium and Greece, and its page says so: see the page test of the war note.) The index keeps a year of rows; once a named
+// day has gone from it, its pairs are skipped.
+test('data: on the days the reviewers named, a country at war reads above the peaceful countries they named', t => {
+  const index = read('index.json'), row = (iso, d) => index.countries[iso]?.days.find(r => r[0] === d);
+  const pairs = [['2026-10-14', 'UKR', 'HRV'], ['2026-10-14', 'UKR', 'MUS'], ['2026-10-14', 'ISR', 'HRV'], ['2026-11-14', 'UKR', 'DNK'], ['2026-11-14', 'UKR', 'PRT']];
+  let checked = 0;
+  for (const [d, war, peace] of pairs) {
+    const w = row(war, d), p = row(peace, d);
+    if (!w || !p) continue;
+    checked++;
+    assert.ok(w[2] && p[2], `${d}: ${war} and ${peace} are scored`);
+    assert.ok(w[2][0] > p[2][0], `${d} conflict: ${war} ${w[2][0]}, ${peace} ${p[2][0]}`);
+    assert.ok(w[1] > p[1], `${d} score: ${war} ${w[1]}, ${peace} ${p[1]}`);
+  }
+  if (!checked) t.skip('the named days are no longer in the index');
+  // DR Congo on 22 October read 11.8 on conflict, as low as a country with lots of news of peace: on its 32 reports that
+  // day it now stands at most 15 from 50.
+  const cod = row('COD', '2026-10-22');
+  if (cod?.[2]) assert.ok(cod[2][0] >= 50 - 50 * 32 / 107 - 0.05, `DR Congo conflict ${cod[2][0]}`);
+  // No component of a stored day of this method stands further from 50 than its evidence allows: 50 × events/(events+75).
+  const first = dayFiles()[0].slice(0, 10);
+  for (const c of Object.values(index.countries)) for (const r of c.days) if (r[2] && r[0] >= first) assert.ok(r[2].every(v => Math.abs(v - 50) <= 50 * r[3] / (r[3] + 75) + 0.05), `${c.name} ${r[0]}: ${r[2]} on ${r[3]} events`);
 });
 
 test('data: the latest day scores enough countries, within range', () => {
@@ -181,21 +223,77 @@ test('logic: a day is scored against the stored days before it and shrunk toward
   for (let i = 0; i < 30; i++) lines.push(gdeltLine({ id: 100 + i, geo: 'IS', code: '141', g: -5, a1: 'ISR', a2: 'ISR', url: `https://t${i % 5}.example/${i}` }));
   for (let i = 0; i < 3; i++) lines.push(gdeltLine({ id: 200 + i, geo: 'KV', code: '042', g: 2, url: `https://k.example/${i}` }));
   const merged = mergeDay(parseSlot(lines.join('\n'), {}));
-  const quiet = { coverage: 'low', raw: Object.fromEntries(KEYS.map(k => [k, 0])) };
-  const prior = Array.from({ length: 7 }, (_, i) => ({ day: `2026-10-${20 + i}`, countries: { XXX: quiet, YYY: { ...quiet, coverage: 'insufficient', raw: { ...quiet.raw, conflict: 9 } } } }));
+  const quiet = { coverage: 'low', events: 30, raw: Object.fromEntries(KEYS.map(k => [k, 0])) };
+  const prior = Array.from({ length: 7 }, (_, i) => ({ day: `2026-10-${20 + i}`, countries: { XXX: quiet, YYY: { ...quiet, coverage: 'insufficient', events: 10, raw: { ...quiet.raw, conflict: 1.1 } } } }));
   // Six baseline days (five stored and this one) are too few: nothing is scored, and the day has no mean.
   const early = scoreDay('2026-10-27', merged, { ok: 96 }, prior.slice(0, 5));
   assert.equal(early.globalMean, null);
   assert.deepEqual(Object.values(early.countries).map(c => [c.score, c.reason, c.coverage]), [
-    [null, 'Baseline has 6/7 days', 'medium'], [null, 'Baseline has 6/7 days', 'low'], [null, 'Too few events or sources', 'insufficient']]);
-  // With seven stored days, Ukraine's conflict and spread rank 94.4 (8.5 of 9 in the pool), Israel's unrest the same.
+    [null, 'Baseline has 6/7 days', 'medium'], [null, 'Baseline has 6/7 days', 'low'], [null, 'Too few events or sources: 3 events from 1 source, and a score needs 25 from 5', 'insufficient']]);
+  // With seven stored days, Ukraine's conflict and spread rank 94.4 (8.5 of 9 in the pool: the stored days' quiet
+  // country, then Ukraine and Israel; the insufficient one is left out), Israel's unrest the same. Each percentile is then
+  // shrunk toward 50 by events/(events+75): Ukraine's 94.4 by 100/175 to 75.4, its unrest's 44.4 to 46.8, and Israel's
+  // 94.4 by 30/105 to 62.7.
   const x = scoreDay('2026-10-27', merged, { ok: 90, missing: 4, failed: 2 }, prior);
-  assert.deepEqual([x.day, x.method, x.slots, x.missing, x.failed, x.totalEvents, x.baselineDays, x.globalMean], ['2026-10-27', METHOD, 90, 4, 2, 133, 8, 67.6]);
+  assert.deepEqual([x.day, x.method, x.slots, x.missing, x.failed, x.totalEvents, x.baselineDays, x.globalMean], ['2026-10-27', METHOD, 90, 4, 2, 133, 8, 59.7]);
   assert.deepEqual(Object.keys(x.countries), ['UKR', 'ISR', 'XKX']);
-  assert.deepEqual(x.countries.UKR.components, { conflict: 94.4, political: 50, unrest: 44.4, economic: 50, spread: 94.4 });
-  // 71.1 and 56.1 before shrinking toward the event-weighted mean 67.6 by 100/175 and 30/105.
+  assert.deepEqual(x.countries.UKR.components, { conflict: 75.4, political: 50, unrest: 46.8, economic: 50, spread: 75.4 });
+  assert.deepEqual(x.countries.ISR.components, { conflict: 48.4, political: 50, unrest: 62.7, economic: 50, spread: 48.4 });
+  // 62.1 and 51.7 before the score is shrunk toward the event-weighted mean 59.7 by 100/175 and 30/105.
   assert.deepEqual(Object.values(x.countries).map(c => [c.fips, c.name, c.score, c.events, c.sources, c.evidence.length]), [
-    ['UP', 'Ukraine', 69.6, 100, 12, 6], ['IS', 'Israel', 64.3, 30, 5, 6], ['KV', 'Kosovo', null, 3, 1, 0]]);
+    ['UP', 'Ukraine', 61.1, 100, 12, 6], ['IS', 'Israel', 57.4, 30, 5, 6], ['KV', 'Kosovo', null, 3, 1, 0]]);
+  assert.ok(Object.values(x.countries).every(c => !('adjusted' in c)) && !('rates' in x));
+});
+
+// The strategist's review of 15 November 2026: on 14 October Croatia's conflict component read 95.8 (10 of its 28 reports
+// coded as fighting: a sabotage trial and a television drama) and Mauritius's 92.7 (7 of 30), above Ukraine's, because a
+// component was the share of a country's own reports ranked as it stood, so a handful of reports could make an extreme
+// share. Each component's percentile is now shrunk toward 50 by events/(events+75) (the second reading of the same day: at
+// first each share was shrunk toward the world's rate, which lifted quiet countries with few reports above the median).
+// The same inputs for both: one day, one baseline, the same kinds of report.
+function warAndPeace() {
+  const lines = [], fill = FIPS_TABLE.rows.map(r => r[0]).filter(f => FIPS.has(f) && !['UP', 'HR', 'BM', 'WE', 'KV', 'OD'].includes(f)).slice(0, 20);
+  let id = 0;
+  // At war: 400 reports from 40 sources, 60 of them (15%) of fighting with another country, the rest statements.
+  for (let i = 0; i < 400; i++) lines.push(gdeltLine({ id: id++, geo: 'UP', code: i < 60 ? '190' : '042', g: i < 60 ? -10 : 1, a1: 'UKR', a2: i < 60 ? 'RUS' : 'UKR', url: `https://w${i % 40}.example/${i}` }));
+  // At peace: 28 reports from 26 sources, 6 of them (21%) coded as fighting.
+  for (let i = 0; i < 28; i++) lines.push(gdeltLine({ id: id++, geo: 'HR', code: i < 6 ? '190' : '042', g: i < 6 ? -10 : 1, a1: 'HRV', a2: 'HRV', url: `https://p${i % 26}.example/${i}` }));
+  // Too few to score: 3 reports from 3 sources, one of fighting (Myanmar on 14 November had 3 from 3).
+  for (let i = 0; i < 3; i++) lines.push(gdeltLine({ id: id++, geo: 'BM', code: i < 1 ? '190' : '042', g: i < 1 ? -10 : 1, a1: 'MMR', a2: 'MMR', url: `https://m${i}.example/${i}` }));
+  // The rest of the world: 20 countries of 100 reports from 20 sources, 0 to 11 of them of fighting.
+  fill.forEach((geo, k) => { for (let i = 0; i < 100; i++) lines.push(gdeltLine({ id: id++, geo, code: i < k % 12 ? '190' : '042', g: i < k % 12 ? -10 : 1, a1: 'AAA', a2: 'AAA', url: `https://f${k}-${i % 20}.example/${i}` })); });
+  const merged = mergeDay(parseSlot(lines.join('\n'), {}));
+  const stored = scoreDay('2026-10-06', merged, { ok: 96 }, []); // the stored days of the baseline: this day's reports, a week running
+  const prior = Array.from({ length: 7 }, (_, i) => ({ ...stored, day: `2026-10-0${i + 1}` }));
+  return Object.assign(scoreDay('2026-10-08', merged, { ok: 96 }, prior), { prior });
+}
+test('logic: a country at war scores above a country at peace on the same inputs, however few reports the peaceful one has', () => {
+  const { prior, ...x } = warAndPeace(), war = x.countries.UKR, peace = x.countries.HRV;
+  assert.ok(war.components.conflict > peace.components.conflict, `conflict: at war ${war.components.conflict}, at peace ${peace.components.conflict}`);
+  assert.ok(war.score > peace.score, `score: at war ${war.score}, at peace ${peace.score}`);
+  // The shares themselves are kept as they were (raw). The peaceful country's share is the highest scored that day, but on 28
+  // reports its percentile keeps only 28/103 of its distance from 50.
+  assert.equal(Math.round(peace.raw.conflict * 1000) / 1000, 0.236); // 6 × 1.1 / 28
+  assert.ok(Object.values(x.countries).every(c => c.score == null || c.raw.conflict <= peace.raw.conflict));
+  assert.ok(peace.components.conflict < 50 + 28 / 103 * 50 + 0.05, `${peace.components.conflict}`);
+  // A stored day scored again (ingest.mjs --rescore) from what its file keeps comes out as it was scored.
+  const copy = o => JSON.parse(JSON.stringify(o));
+  assert.deepEqual(copy(rescoreDay(copy(x), copy(prior))), copy(x));
+  // A day file of the old method (gvi-1.1-q96: the old reason) is brought to this one, and so is one of the first draft
+  // of gvi-1.2 (shrunk shares and world rates, which this method does not keep).
+  const old = copy(x);
+  old.method = 'gvi-1.1-q96';
+  for (const c of Object.values(old.countries)) { c.score = 1; if (c.reason?.startsWith('Too few')) c.reason = 'Too few events or sources'; }
+  assert.deepEqual(copy(rescoreDay(old, copy(prior))), copy(x));
+  const draft = copy(x);
+  draft.rates = { conflict: 0.1 };
+  for (const c of Object.values(draft.countries)) { c.adjusted = { conflict: 0.1 }; c.score = 1; }
+  assert.deepEqual(copy(rescoreDay(draft, copy(prior))), copy(x));
+});
+test('logic: every country with conflict events is scored, or says plainly why not, with its counts', () => {
+  const x = warAndPeace();
+  for (const [iso, c] of Object.entries(x.countries)) if (c.counts.conflict > 0) assert.ok(c.score != null || c.reason, iso);
+  assert.deepEqual([x.countries.MMR.score, x.countries.MMR.reason], [null, 'Too few events or sources: 3 events from 3 sources, and a score needs 25 from 5']);
 });
 
 test('logic: the index takes each day from its file, keeps pruned days and leaves no row for a day that is gone', () => {
@@ -507,6 +605,63 @@ test('page: opened with no day, the handles stand one day apart and the page sho
     await page.waitForSelector('#profile .stat', { timeout: 20000 });
     assert.match(await page.locator('#profile .ptitle .sub').innerText(), /^Over /);
     assert.match(await page.locator('#profile').innerText(), /mean gvi/i);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// The strategist's review of 15 November 2026: Myanmar, at war, was never scored (GDELT locates 3 to 23 reports a day
+// there, under the 25 a score needs), and the page did not say so beside its figures. A country not scored on the day
+// shown now says plainly why, with its counts and how many days it was scored; the Method tab says how each share is
+// shrunk before it is ranked; and the countries National Analysis does not list (Taiwan, Kosovo, Western Sahara, the
+// Falklands) are drawn with their data rather than as "no data".
+test('page: a country not scored says plainly why, the method names the shrinkage, and every country with data is on the map', pageTest, async () => {
+  const v = read('index.json'), never = Object.entries(v.countries).find(([, c]) => c.latest?.coverage === 'insufficient' && c.latest.counts.conflict > 0 && c.days.every(r => r[1] == null));
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/volatility#country=${never[0]}&day=${v.latest}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    const note = await page.locator('#pf-unscored').innerText();
+    assert.match(note, new RegExp(`^Not scored on ${v.latest}\\. Too few events or sources: \\d+ events? from \\d+ sources?, and a score needs 25 from 5\\. `));
+    assert.match(note, new RegExp(`scored on 0 of the ${never[1].days.length} days`));
+    await page.click('#tabbtn-method');
+    assert.match(await page.locator('#methodtext').innerText(), /each percentile is then shrunk toward 50, the middle, by events\/\(events\+75\)/);
+    assert.match(await page.locator('#methodtext').innerText(), /fixed thresholds on a scale where the average country-day scores about 50 \(\d+\.\d on \d{4}-\d\d-\d\d\)/);
+    // Taiwan has scores, and its shape (ISO 3166 numeric 158) is coloured, not left as "no data".
+    const fills = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#map path.land')].map(p => [p.__data__.id ?? p.__data__.properties.name, p.style.fill])));
+    assert.notEqual(fills['158'], 'var(--prp-map-nodata)', 'Taiwan');
+    assert.notEqual(fills.Kosovo, 'var(--prp-map-nodata)', 'Kosovo');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// The second review of 15 November 2026: on 14 November Ukraine's conflict component read below those of peaceful
+// countries (its news that day was mostly of peace talks), and the page did not say that a country at war can read so.
+// A country in which UCDP records fighting, as part of a war of 1,000 battle deaths or more, says so beside a conflict
+// component that is not high; a country with none says nothing of it.
+test('page: a country at war whose conflict component is not high says plainly that it is at war', pageTest, async () => {
+  const v = read('index.json'), brief = JSON.parse(readFileSync(new URL('../national/data/brief.json', import.meta.url), 'utf8'));
+  const wars = new Map(brief.countries.map(c => [c.iso3, (c.wars || []).filter(w => w.deaths >= 1000 && !w.id.startsWith('other-') && !/worldwide/i.test(w.name))]));
+  const day = v.latest, conflict = iso => v.countries[iso]?.days.find(r => r[0] === day)?.[2]?.[0];
+  // A country at war with a conflict component under 70 on the latest day (Ukraine on 14 November), and one at peace.
+  const war = ['UKR', ...Object.keys(v.countries)].find(iso => wars.get(iso)?.length && conflict(iso) != null && conflict(iso) < 70);
+  const peace = ['DNK', ...Object.keys(v.countries)].find(iso => wars.has(iso) && !wars.get(iso).length && conflict(iso) != null);
+  assert.ok(war && peace, `a country at war (${war}) and one at peace (${peace}) on ${day}`);
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/volatility#country=${war}&day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    const note = await page.locator('#pf-war').innerText();
+    assert.match(note, new RegExp(`^Conflict & security reads ${Math.round(conflict(war))}, but it measures the share of .+ news coverage that reports fighting, not the fighting itself\\. UCDP records fighting in`));
+    for (const w of wars.get(war)) assert.ok(note.includes(w.name) && note.includes(w.deaths.toLocaleString('en-GB')), w.name);
+    await page.goto(`${BASE}/q/volatility#country=${peace}&day=${day}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(name => document.querySelector('#profile h2')?.textContent === name, v.countries[peace].name, { timeout: 20000 });
+    assert.equal(await page.locator('#pf-war').count(), 0, peace);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

@@ -46,7 +46,7 @@
 import { readHash, writeHash } from './lib/hash.js';
 import { readMode, writeMode } from './lib/mode.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
-import { eraRows, eraFromFacts, bookEra, fmtEra, fmtYear, kardashevStep, kardashevPolity, KARDASHEV_STEPS } from './lib/era.js';
+import { eraRows, eraFromFacts, bookEra, fmtEra, fmtYear, kardashevStep, kardashevPolity, todayCountries, KARDASHEV_STEPS } from './lib/era.js';
 import { inSidePane, sideFrame, splitter, fullScreen, skipFrontMatter as skipMatter, watchEntry, shellGo, SHELL_ROUTE, canFrame, card } from '../../design/prp-split.js';
 import { shellHash, shellUrl } from '../../kino/lib/links.js';
 import { SPEEDS } from './lib/narrate.js';
@@ -125,6 +125,9 @@ const once = f => { let p = null; return () => (p ||= f().catch(e => { p = null;
 const loadRegistry = once(() => getJson(new URL('registry.json', SHELL)));
 const loadWars = once(() => getJson(new URL('battlefield/focus/data/index.json', SHELL)).then(d => d.wars || []));
 const loadEnergy = once(() => getJson(new URL('kardashev/data/energy.json', SHELL)));
+// National Analysis's countries by Wikidata ID (its brief, the small file Geopolitical Volatility reads): QID → ISO3,
+// for the row that opens one country as it is today (lib/era.js, todayCountries).
+const loadNational = once(() => getJson(new URL('national/data/brief.json', SHELL)).then(d => new Map((d.countries || []).filter(c => c.qid && c.iso3).map(c => [c.qid, c.iso3]))));
 // A Master Index entity from the lake's shards (lake/data/e/<qid mod 512>.json, as encyclopedia/index.html reads them).
 function entity(qid) {
   if (!S.entities.has(qid)) S.entities.set(qid, getJson(`${LAKE}e/${+qid.slice(1) % 512}.json`).then(s => s[qid] || null).catch(() => null));
@@ -190,7 +193,14 @@ function renderBookFront() {
   const b = S.book, a = b.author || {}, t = b.translator;
   document.title = `${b.title} · Neo Book · Bibliotheca · ${SHORT}`;
   $('#book-title').textContent = b.title;
-  const who = a.qid ? `<a class="term" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Master Index">${esc(a.name)}</a>` : esc(a.name || '');
+  // The author's name links to his Master Index entry only once the entry is found: a shelf author the Master Index has
+  // no record of (Clausewitz, Gibbon and Wieser in November 2026) is named plainly, not linked to an empty address.
+  const who = `<span id="byline-author">${esc(a.name || '')}</span>`;
+  if (a.qid) entity(a.qid).then(e => {
+    const el = $('#byline-author');
+    if (!e || S.book !== b || !el) return;
+    el.outerHTML = `<a class="term" id="byline-author" data-qid="${esc(a.qid)}" data-jdpi-ency="${esc(a.qid)}" href="${esc(termHref(a.qid))}" title="${esc(a.name)} · Master Index">${esc(a.name)}</a>`;
+  });
   const life = Number.isFinite(a.born) && Number.isFinite(a.died) ? ` (${esc(fmtEra([a.born, a.died]))})` : '';
   const co = coauthors(b).map(n => ` and ${esc(n)}`).join('');
   // The year after the translator is the edition's (Graham's On War of 1873 is read in Maude's revision of 1908).
@@ -216,7 +226,7 @@ function renderSources() {
     <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${coauthors(b).map(n => ` and ${esc(n)}`).join('')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
     <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? (unknownDeaths(r) ? `treated as public domain in Ireland and the United Kingdom, the death date of ${esc(unknownDeaths(r))} not having been found after a reasonable search` : 'public domain in the United Kingdom') : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
     <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. AR Mode's "On screen" tab lists those in the text on screen.</p>
-    <p><b>In ${PRODUCT}.</b> AR Mode (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>
+    <p><b>In ${PRODUCT}.</b> AR Mode (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows a country as it is today: the term’s, when the term is one of today’s countries or a place in one, or else those the book names most; with none, it is not offered.</p>
     <p><b>AR Reader.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>
     <p><b>Voice.</b> This device's own voice reads the book, and nothing leaves the browser. An online voice (Microsoft Azure, through ${PRODUCT}'s own proxy) reads only when you choose it, after it says what it will cost: each sentence it reads is then sent to Microsoft Azure to be spoken, and counts against the site's allowance of characters. It is never remembered from one visit to the next.</p>
     <p><b>Keys.</b> ← → chapters · J K paragraphs · P AR Mode · T its terms on screen · A AR Reader · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
@@ -496,9 +506,11 @@ async function renderVm() {
   // A term's own era is offered only when the term existed by the end of the book's period: a present-day state the
   // tagger let through (or an address that names one) would otherwise offer 1946 to today beside a text of 1513.
   const termOk = termEra && (!own || termEra[0] <= own.years[1]);
-  const [reg, wars, energy] = await Promise.all([loadRegistry().catch(() => null), loadWars().catch(() => []), loadEnergy().catch(() => null)]);
+  const [reg, wars, energy, national] = await Promise.all([loadRegistry().catch(() => null), loadWars().catch(() => []), loadEnergy().catch(() => null), loadNational().catch(() => new Map())]);
   if (seq !== S.vmSeq) return;
   const label = ent?.label || S.labels.get(q) || q;
+  // The countries of today the National Analysis row opens: the term's, else the book's most named; none, no row.
+  const countries = todayCountries({ qid: q, entity: ent, terms: (S.book?.chapters || []).flatMap(c => c.paragraphs.flatMap(p => p.terms || [])), byQid: national });
   const byTerm = S.eraOf === 'term' && termOk;
   const years = byTerm ? termEra : own?.years;
   // Whose era: the book's (or the chapter's), or the term's own dates when the Master Index has them.
@@ -517,7 +529,7 @@ async function renderVm() {
   const steps = energy?.steps?.map(s => s.year) || KARDASHEV_STEPS;
   const step = kardashevStep(Math.round((years[0] + years[1]) / 2), steps);
   // With the term's own era, War Focus lists only the war that is the term (the wars of its centuries are not its own).
-  const rows = eraRows(years, { wars, qid: q, ownEra: !!byTerm, polity: ent ? kardashevPolity(ent.wiki, energy?.polities, step) : null, steps });
+  const rows = eraRows(years, { wars, qid: q, ownEra: !!byTerm, polity: ent ? kardashevPolity(ent.wiki, energy?.polities, step) : null, steps, countries });
   const name = r => moduleInfo(reg, r.module)?.name || r.name;
   // The places the Master Index records for the term (its "Appears in"), when it has any. Each place is shown in the
   // pane only where the shell's own rule allows (canFrame): a private page (Tally Stick, Algo Trader), a page off its
@@ -558,8 +570,9 @@ async function renderVm() {
   setPaneHead(`In ${PRODUCT}`, shown ? `${shown.name} · ${shown.place}` : fmtEra(years), shown || null);
   // The screen the address names (show=, on a reload or an edited link) once its row exists; one this era does not
   // offer is dropped from the address.
+  // An old address's show=pestle (before 15 November 2026 the row had no country) means the first country's row.
   if (S.pendingShow) {
-    const k = S.pendingShow;
+    const k = S.pendingShow === 'pestle' ? [...places.keys()].find(x => x.startsWith('pestle:')) || 'pestle' : S.pendingShow;
     S.pendingShow = null;
     if (places.has(k)) showVm(k); else writeState();
   }

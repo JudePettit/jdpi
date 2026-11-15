@@ -79,6 +79,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .ptitle{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 16px;flex-wrap:wrap;padding:16px 16px 2px}
 .ptitle h2{margin:4px 0 2px;font:600 26px/1.2 var(--prp-font-serif);letter-spacing:-.01em}
 .ptitle .sub{color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+.unscored{margin:12px 16px 0}
 .links{display:flex;flex-wrap:wrap;gap:6px}
 .kpis{grid-template-columns:repeat(auto-fill,minmax(196px,1fr));padding:14px 16px 16px}
 .kpis .prp-kpi{background:var(--prp-surface-2)}.prp-kpi .band{display:inline-block;margin-right:2px}
@@ -313,6 +314,8 @@ function deriveDay(i) {
   for (const c of C) c.cur.rankChange = c.cur.rank && c.cur.rankPrev ? c.cur.rankPrev - c.cur.rank : null;
 }
 const nat = c => N.get(c.iso3) || {};
+// A map shape's country: by its ISO 3166 numeric code (the id world-atlas gives it), or by name for a shape with no code.
+const isoOf = f => numToIso.get(f.id ?? 'name:' + f.properties?.name);
 const pv = c => nat(c).pv ?? null;
 const warDeaths = c => (nat(c).wars || []).reduce((s, w) => s + (w.deaths || 0), 0);
 const isLatest = () => dayIdx === DAYS.length - 1;
@@ -371,20 +374,20 @@ function drawMap(world) {
   mapG = layer.append('g');
   mapG.selectAll('path').data(topojson.feature(world, world.objects.countries).features).join('path').attr('class', 'land').attr('d', path)
     .on('mouseenter', function () { d3.select(this).raise(); })
-    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)), m = cur(); placeTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${m.id !== 'score' ? `<br><span class="sub">GVI: ${c.cur.score == null ? '–' : c.cur.score.toFixed(1)}</span>` : ''}` : `<b>${esc(f.properties.name)}</b><br><span class="sub">No data</span>`); })
+    .on('mousemove', (ev, f) => { const c = byIso.get(isoOf(f)), m = cur(); placeTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${m.id !== 'score' ? `<br><span class="sub">GVI: ${c.cur.score == null ? '–' : c.cur.score.toFixed(1)}</span>` : ''}` : `<b>${esc(f.properties.name)}</b><br><span class="sub">No data</span>`); })
     .on('mouseleave', () => { hideTip(); mapG.selectAll('.land.sel').raise(); mapG.selectAll('.land.prp-focus-hit').raise(); })
-    .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso && byIso.has(iso)) { hideTip(); openProfile(iso); } });
+    .on('click', (ev, f) => { const iso = isoOf(f); if (iso && byIso.has(iso)) { hideTip(); openProfile(iso); } });
 }
 // Documentary focus (design/prp-focus.js): the countries being discussed are outlined in the module accent and the map
 // eases to fit them all; "Reset view" or the end of the reading brings back the whole world.
-function paintFocus() { if (!mapG) return; mapG.selectAll('path.land').classed('prp-focus-hit', f => focusIsos.has(numToIso.get(f.id))); mapG.selectAll('.land.prp-focus-hit').raise(); }
+function paintFocus() { if (!mapG) return; mapG.selectAll('path.land').classed('prp-focus-hit', f => focusIsos.has(isoOf(f))); mapG.selectAll('.land.prp-focus-hit').raise(); }
 function clearFocus() { focusIsos.clear(); paintFocus(); focusReset?.hide(); }
 window.PRPFocus?.listen({
   focus(t) {
     if (!mapG || !focusView) return;
     const isos = new Set(), feats = mapG.selectAll('path.land').data();
     const r = PRPFocus.resolve(t, { country: id => {
-      const iso = /^gw:\d+$/.test(id) ? PRPFocus.iso3OfGw(id.slice(3)) : id, fs = feats.filter(f => numToIso.get(f.id) === iso);
+      const iso = /^gw:\d+$/.test(id) ? PRPFocus.iso3OfGw(id.slice(3)) : id, fs = feats.filter(f => isoOf(f) === iso);
       if (fs.length) isos.add(iso);
       return fs.length ? fs : null;
     } });
@@ -407,8 +410,8 @@ window.PRPFocus?.listen({
 const cur = () => METRICS.find(x => x.id === $('#metric').value);
 function colourMap() {
   const m = cur(), vals = C.map(m.get).filter(v => v != null), { s, lo, hi, mid, log } = scaleFor(m, vals);
-  mapG.selectAll('path.land').style('fill', f => { const c = byIso.get(numToIso.get(f.id)); if (!c) return 'var(--prp-map-nodata)'; const v = m.get(c); return v == null ? 'url(#nodata)' : s(v); })
-    .classed('sel', f => compare.includes(numToIso.get(f.id)));
+  mapG.selectAll('path.land').style('fill', f => { const c = byIso.get(isoOf(f)); if (!c) return 'var(--prp-map-nodata)'; const v = m.get(c); return v == null ? 'url(#nodata)' : s(v); })
+    .classed('sel', f => compare.includes(isoOf(f)));
   mapG.selectAll('.land.sel').raise();
   mapG.selectAll('.land.prp-focus-hit').raise();
   $('#maptitle').textContent = `${m.label} · ${when()}`;
@@ -547,16 +550,33 @@ function renderProfile() {
   // since National Analysis lists them all there (lake/scripts/adapters.mjs, pestle).
   if (n.qid) links.push(link('rs', 'encyclopedia', `encyclopedia/index.html#${n.qid}`, 'Master Index ↗'));
   const inCmp = compare.includes(c.iso3);
+  // Not scored on the day shown, or on any day of the period: why, plainly, with its counts (review of 15 November 2026).
+  const row = c.days.find(r => r[0] === DAYS[dayIdx]), daysScored = c.days.filter(r => r[1] != null).length;
+  const why = per() ? `Not scored on any day of ${when()}.`
+    : !row ? `Not scored on ${DAYS[dayIdx]}: GDELT located no events in ${c.name} that day.`
+    : L?.reason ? `Not scored on ${DAYS[dayIdx]}. ${L.reason}.`
+    : row[5] === 'i' ? `Not scored on ${DAYS[dayIdx]}. Too few events or sources: ${row[3]} event${row[3] === 1 ? '' : 's'}, and a score needs 25 from 5 sources.`
+    : `Not scored on ${DAYS[dayIdx]}: the baseline had too few days.`;
+  const unscored = k.score == null ? `<p class="prp-note warn unscored" id="pf-unscored">${esc(why)} ${esc(c.name)} was scored on ${daysScored} of the ${c.days.length} days it has events here; its events, tone and evidence are still shown.</p>` : '';
+  // Fighting the news does not show (the second review of 15 November 2026: on 14 November Ukraine's conflict component
+  // read below Japan's, Sweden's and Denmark's, as most of its news that day was of peace talks). Where UCDP records
+  // fighting in the country this year, as part of a war of 1,000 battle deaths or more (UCDP's threshold for a war; the
+  // worldwide and 'other armed violence' groups are left out), and the component is not high, the page says so plainly.
+  const wars = (n.wars || []).filter(w => w.deaths >= 1000 && !String(w.id).startsWith('other-') && !/worldwide/i.test(w.name)), cv = k.comps?.[0];
+  const ucdp = `UCDP records fighting in ${esc(c.name)} this year (${wars.map(w => `${esc(w.name)}: ${w.deaths.toLocaleString('en-GB')} battle deaths in 2026 across the war`).join('; ')}).`;
+  const atWar = !wars.length || cv >= 70 ? '' : `<p class="prp-note warn unscored" id="pf-war">${cv == null
+    ? `${esc(c.name)} is not scored here, and the GVI measures news coverage, not fighting. ${ucdp}`
+    : `Conflict &amp; security reads ${cv.toFixed(0)}, but it measures the share of ${esc(c.name)}’s news coverage that reports fighting, not the fighting itself. ${ucdp} On a day when its news is mostly of talks or politics, this component can read below a country at peace.`}</p>`;
   const days = [...c.days].reverse();
   $('#profile').innerHTML = `<div class="prp-panel"><div class="ptitle"><div><div class="prp-label">${esc(n.region || 'Country')}</div><h2>${esc(c.name)}</h2><div class="sub">${esc(per() ? `Over ${when()}` : DAYS[dayIdx])}${n.government ? ' · ' + esc(n.government) : ''}</div></div>
       <div class="links">${links.join('')}<button type="button" class="prp-btn sm ${inCmp ? '' : 'primary'}" id="addcmp">${inCmp ? '✓ In comparison' : '+ Compare'}</button></div></div>
-      <div class="prp-kpis kpis">${stats.map(([a, b, s]) => `<div class="stat prp-kpi"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('')}</div></div>
+      ${unscored}${atWar}<div class="prp-kpis kpis">${stats.map(([a, b, s]) => `<div class="stat prp-kpi"><span>${a}</span><b>${b}</b><small>${s}</small></div>`).join('')}</div></div>
     <div class="cols"><div class="prp-panel"><div class="prp-panel-head"><b>GVI over time</b></div>
       <figure class="prp-figure chartfig"><div class="chart" id="pf-gvi"></div><figcaption><b>Figure 3.</b> Daily GVI for ${esc(c.name)}; the elevated (40–70) and high (70+) bands are shaded and ${per() ? 'the dashed lines mark the first and last days of the period' : 'the dashed line marks the selected day'}. Source: GDELT 2.0.</figcaption></figure>
       <figure class="prp-figure chartfig"><div class="chart" id="pf-comp"></div><div class="key">${comps.map((m, j) => `<span>${sw(COMP_COLOUR(j))}${esc(m.label)}</span>`).join('')}</div><figcaption><b>Figure 4.</b> The five components of ${esc(c.name)}’s GVI, each a percentile against the trailing 90 days.</figcaption>
         <details class="datatable"><summary>Data table</summary><div class="tbl"><table class="prp-table"><thead><tr><th>Day</th><th class="num">GVI</th>${comps.map(m => `<th class="num">${esc(CAT_LABEL[m.key] || m.label)}</th>`).join('')}<th class="num">Events</th></tr></thead>
           <tbody>${days.map(r => `<tr><td>${esc(r[0])}</td><td class="num">${r[1] == null ? '–' : r[1].toFixed(1)}</td>${comps.map((m, j) => `<td class="num">${r[2]?.[j] == null ? '–' : r[2][j].toFixed(0)}</td>`).join('')}<td class="num">${(r[3] || 0).toLocaleString('en-GB')}</td></tr>`).join('')}</tbody></table></div></details></figure></div>
-    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs ${windowOf(dayIdx).length >= BASELINE || unknownWindow(dayIdx) ? `${BASELINE} days` : `${windowOf(dayIdx).length} day${windowOf(dayIdx).length === 1 ? '' : 's'} stored`}</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in ${esc(trailing(dayIdx))} (100 = the most intense seen), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
+    <div class="stack"><div class="prp-panel"><div class="prp-panel-head"><b>Components · percentile vs ${windowOf(dayIdx).length >= BASELINE || unknownWindow(dayIdx) ? `${BASELINE} days` : `${windowOf(dayIdx).length} day${windowOf(dayIdx).length === 1 ? '' : 's'} stored`}</b></div><figure class="prp-figure compfig">${compRows}<figcaption><b>Figure 5.</b> Each component ranked against every adequately covered country-day in ${esc(trailing(dayIdx))} (100 = the most intense seen; each percentile shrunk toward 50 by the country’s evidence), ${per() ? `averaged over the days scored, ${esc(when())}` : `on ${esc(DAYS[dayIdx])}`}.</figcaption></figure></div>
       <div class="prp-panel"><div class="prp-panel-head"><b>Evidence · strongest events${per() ? ' · latest day' : ''}</b></div>${ev || `<div class="prp-empty">${isLatest() ? 'No events recorded.' : 'Evidence is kept for the latest day only.'}</div>`}</div></div></div>`;
   $('#pf-gvi').replaceChildren(lineChart([{ name: 'GVI', colour: 'var(--prp-text)', points: pts(c) }], { w: width('#pf-gvi') }));
   $('#pf-comp').replaceChildren(lineChart(comps.map((m, j) => ({ name: m.label, colour: COMP_COLOUR(j), width: 1.5, dots: false, points: pts(c, j) })), { w: width('#pf-comp'), h: 180, bands: false }));
@@ -606,13 +626,15 @@ function componentBars(cs, w) {
 }
 
 /* ---------- method ---------- */
+// The latest day's evidence-weighted mean score, for the bands' sentence.
+const meanWords = () => { const g = V.global.at(-1); return g?.[3] == null ? '' : ` (${g[3].toFixed(1)} on ${g[0]})`; };
 function renderMethod() {
   $('#methodtext').innerHTML = `<p><b>Source.</b> Every quarter-hour event export from GDELT 2.0 (96 a day), which codes news reports worldwide into who-did-what-to-whom events (CAMEO codes) with a location and a Goldstein score from −10 (most hostile) to +10 (most cooperative). Events are assigned to the country where they happened; each news URL is counted once per country per day.</p>
     <p><b>Components.</b> ${V.components.map(c => `${esc(c.label)} (${Math.round(c.weight * 100)}%)`).join(' · ')}. Conflict is CAMEO 17–20 (coerce, assault, fight, mass violence); political is 10–13, 15 and 16 (demands, disapproval, rejection, threats, force posture, reduced relations); unrest is 14 (protest); economic is 162–163 (sanctions, embargoes); cross-border spread counts conflict and political events between actors from different countries.</p>
     <p><b>Intensity.</b> Each event weighs 0.1 + max(0, −Goldstein)/10, so hostile events count up to eleven times a neutral one. A component’s intensity is its weighted events divided by all of the country’s events that day, so large and small countries are comparable.</p>
-    <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead), and the score is their weighted sum. ${esc(baselineWords(DAYS.length - 1))} It is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>.</p>
-    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40); a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in Vitruvian Manager from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
-    <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. Use the evidence links to check.</p>`;
+    <p><b>Score.</b> Each component’s intensity is turned into a percentile against every adequately covered country-day in the trailing 90 days (no look-ahead). A share from a few reports can be extreme (a trial and a television drama once made 10 of a quiet country’s 28 reports read as fighting), so each percentile is then shrunk toward 50, the middle, by events/(events+75): a country with 28 reports keeps 27% of its distance from the middle, one with 400 keeps 84%, and one with little news sits near 50. The score is the components’ weighted sum. ${esc(baselineWords(DAYS.length - 1))} The score too is then shrunk toward the day’s global mean by events/(events+75), so a country with few reports cannot swing to an extreme. 70+ is <span class="band high">high</span>, 40–70 <span class="band elevated">elevated</span>: fixed thresholds on a scale where the average country-day scores about 50${meanWords()}, so most countries are in the elevated band on most days, and only a high score stands out.</p>
+    <p><b>Coverage.</b> A country needs at least 25 events from 5 distinct sources to be scored (medium from 75 and 12, high from 300 and 40), and one with fewer says so on its page, with its counts; a day needs 72 of 96 slices; the baseline needs 7 days. Rebuilt in Vitruvian Manager from the original Lovable app’s gvi-1.1 method (which sampled 24 hourly slices); this version uses all 96, and since 15 November 2026 (gvi-1.2) shrinks each component’s percentile toward 50 by the country’s evidence. Method id: <code>${esc(V.method)}</code>. Data from ${esc(DAYS[0])} to ${esc(V.latest)}.</p>
+    <p><b>Caveats.</b> GDELT measures news coverage, not events on the ground: heavily reported countries are scored more reliably, coding errors occur, and a spike can reflect a media cycle. A country at war can read lower on conflict than a country at peace on a day its news is of talks; its page then says so, with UCDP’s battle deaths (via Realtime Battlefield). Use the evidence links to check.</p>`;
 }
 
 /* ---------- tabs & routing (#country=ISO3, #tab=compare|method, &compare=A,B, &day=…, &from=…) ---------- */
@@ -678,6 +700,9 @@ window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer
 Promise.all([fetch('../volatility/data/index.json').then(r => r.json()), fetch('../national/data/brief.json').then(r => r.json()).catch(() => ({ countries: [] })), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json())]).then(([v, n, world]) => {
   V = v; N = new Map(n.countries.map(c => [c.iso3, c]));
   for (const c of n.countries) if (c.num) numToIso.set(String(c.num).padStart(3, '0'), c.iso3);
+  // The shapes of countries the index scores but National Analysis does not list (review of 15 November 2026: they were
+  // drawn as no data): Taiwan, Western Sahara and the Falklands by their ISO 3166 numeric codes, Kosovo, which has none, by name.
+  for (const [k, iso] of [['158', 'TWN'], ['732', 'ESH'], ['238', 'FLK'], ['name:Kosovo', 'XKX']]) if (!numToIso.has(k)) numToIso.set(k, iso);
   DAYS = v.global.map(g => g[0]);
   C = Object.entries(v.countries).map(([iso3, c]) => ({ iso3, ...c }));
   byIso = new Map(C.map(c => [c.iso3, c]));

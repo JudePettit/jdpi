@@ -1,6 +1,6 @@
 /* PRP shell (the product is Vitruvian Manager, short VM, by JDP-Iq; "prp" stays the internal name of files, tokens, ids
    and storage keys): renders the modules (Home, Realtime Geopolitics, Highbrowse, Retrospective Geopolitics,
-   International Mystery Management, Money Management, Natural Science, Digital Science, Kino, Bibliotheca) and their submodules from
+   Intelligence Collection, Money Management, Natural Science, Digital Science, Kino, Bibliotheca) and their submodules from
    registry.json, and hosts each submodule page in a persistent workspace frame. A module has a short name (registry
    "name", for the sidebar, the breadcrumb and search) and a full title (registry "title", for its overview page, its
    box on the Home page, the Dashboard's headings, page eyebrows and the tab title); they differ only where the full

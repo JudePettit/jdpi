@@ -37,7 +37,7 @@ and does not draw).
 | (new, November 2026; Highbrowse until 14 November 2026) | **Omni News** (the four briefings) | `hb` | ON |
 | H&P · History & Politics | **Retrospective Geopolitics** | `rs` (alias `hp`) | RS |
 | F&E · Finance & Economics | **Money Management** | `mm` (alias `fe`) | MM |
-| (new) | **International Mystery Management** (sidebar: **Int-Myst Mngmnt**) | `oi` | IM (OI until 14 November 2026, from Offensive Intelligence) |
+| (new) | **Intelligence Collection** (International Mystery Management until 15 November 2026) | `oi` | IC (OI until 14 November 2026, from Offensive Intelligence; IM until 15 November, from International Mystery Management) |
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
@@ -45,8 +45,8 @@ and does not draw).
 
 In the registry the ten are "suites" and their pages "modules"; in the interface we say **module** for the ten and
 **submodule** for the pages. A module has a short `name` (the sidebar, the breadcrumb, search) and a full `title` (its
-overview page, its box on the Home page, the Dashboard's headings, page eyebrows, the tab title); they differ only for
-International Mystery Management, whose sidebar name is **Int-Myst Mngmnt**. It also has a `summary`: what you can do
+overview page, its box on the Home page, the Dashboard's headings, page eyebrows, the tab title); today they are the same for
+every module (International Mystery Management's sidebar name was Int-Myst Mngmnt until 15 November 2026). It also has a `summary`: what you can do
 with it, in a line or two (about 110 characters at most), for the back of its box on the Home page. Write it from what
 its submodules do, beginning with a verb: "Follow today's politics, conflicts and country risk: headlines, volatility,
 wars, leaders and coming votes."
@@ -238,7 +238,7 @@ defined for both themes.
 ## 4. Page anatomy (publication front matter + ERP object page)
 
 1. **Header**: `.prp-eyebrow` "Omni News · Political Briefing", always with the module's full title
-   ("International Mystery Management · OSINT Dashboard", never the sidebar's "Int-Myst Mngmnt"); mark the eyebrow and
+   ("Intelligence Collection · OSINT Dashboard", never a shortened sidebar name); mark the eyebrow and
    any standalone brand with `data-jdpi-standalone` only if it duplicates the shell. Then `.prp-title` (serif h1),
    `.prp-dek` (one or two plain sentences: what this is and what you can do), `.prp-meta` line (Updated … · Source … ·
    Coverage …).

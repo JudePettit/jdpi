@@ -16,7 +16,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **Realtime Geopolitics**: what is happening now | RT | Global Headline Tracker (with its Highbrowse filter) · Geopolitical Volatility · Realtime Battlefield · National Analysis · Political Atlas · Realtime Calendar |
 | **Omni News**: the news worth reading, in four briefings | ON | Highbrowse (the day's and the week's news across the four, and one search) · Political Briefing · Scientific Briefing · Economics Briefing · Digital Briefing |
 | **Retrospective Geopolitics**: what happened and why | RS | Master Index · Political Retrospective · Retrospective Battlefield · War Focus · Kardashev Tracker · Historical Calendar · Learning · Politics |
-| **International Mystery Management** (Int-Myst Mngmnt in the sidebar): intelligence tradecraft within the law | IM | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
+| **Intelligence Collection** (International Mystery Management until 15 November 2026): intelligence tradecraft within the law | IC | OSINT Dashboard · SIGINT Dashboard · GEOINT & IMINT Dashboard · Intel Training |
 | **Money Management**: your money end to end | MM | Market Monitor · Auto Trader · Algo Trader · Tally Stick · Learning · Finance & Economics |
 | **Natural Science**: science through history | NS | Invention Timeline |
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |

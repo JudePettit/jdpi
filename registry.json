@@ -527,9 +527,9 @@
     },
     {
       "id": "oi",
-      "code": "IM",
-      "name": "Int-Myst Mngmnt",
-      "title": "International Mystery Management",
+      "code": "IC",
+      "name": "Intelligence Collection",
+      "title": "Intelligence Collection",
       "summary": "Learn lawful intelligence tradecraft: open-source research, receive-only signals and satellite imagery.",
       "description": "Hands-on intelligence tradecraft with public sources and your own receivers: an OSINT workbench, receive-only signals monitoring, satellite imagery and geolocation tools, and courses that teach each discipline, all within the law.",
       "modules": [

@@ -36,8 +36,8 @@ test('registry is well formed', () => {
   assert.deepEqual(registry.suites.map(s => s.id), ['home', 'rt', 'hb', 'rs', 'oi', 'mm', 'ns', 'ds', 'kino', 'bibliotheca']);
   // A module's name is what the sidebar shows; its title is its overview page's heading, its box's on the Home page and
   // its pages' eyebrow.
-  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Int-Myst Mngmnt', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
-  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'International Mystery Management', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.name), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
+  assert.deepEqual(registry.suites.map(s => s.title), ['Home', 'Realtime Geopolitics', 'Omni News', 'Retrospective Geopolitics', 'Intelligence Collection', 'Money Management', 'Natural Science', 'Digital Science', 'Kino', 'Bibliotheca']);
   // Every module says what you can do with it, in a line or two, for the back of its box on the Home page.
   for (const s of registry.suites) assert.ok(typeof s.summary === 'string' && s.summary.length >= 30 && s.summary.length <= 115 && /^[A-Z].*\.$/.test(s.summary), `${s.id}: summary "${s.summary}"`);
   assert.equal(new Set(registry.suites.map(s => s.summary)).size, registry.suites.length, 'each module its own summary');
@@ -124,12 +124,12 @@ test('the Home page shows every module as a box, in registry order, under the ne
     [['#/', '⌂Home page', 'page'], ['#/home/dashboard', '⊞Dashboard', null]]);
   const nav = await page.textContent('#nav');
   for (const { m } of modules) assert.ok(nav.includes(m.name), `${m.name} in sidebar`);
-  // International Mystery Management: its short name in the sidebar (the full title on hover), the full title in its
+  // Intelligence Collection: its name in the sidebar (the title on hover), the title in its
   // box.
   const oi = page.locator('#nav details[data-suite="oi"] > summary');
-  assert.match(await oi.textContent(), /^IMInt-Myst Mngmnt/);
-  assert.equal(await oi.getAttribute('title'), 'International Mystery Management');
-  assert.equal(await page.textContent('.mod[data-suite="oi"] .mod-name'), 'International Mystery Management');
+  assert.match(await oi.textContent(), /^ICIntelligence Collection/);
+  assert.equal(await oi.getAttribute('title'), null);   // name and title are one since 15 Nov 2026 (IN-04)
+  assert.equal(await page.textContent('.mod[data-suite="oi"] .mod-name'), 'Intelligence Collection');
   // A screen reader gets each box as a link named by the module's title and described by its summary, whichever face is
   // up, in a list named Modules (the accessibility tree as the browser computes it).
   const cdp = await page.context().newCDPSession(page);
@@ -286,7 +286,7 @@ test('the Dashboard: the old Workspace at #/home/dashboard (VM / Home / Dashboar
     assert.equal(await p.locator('#view .group').count(), registry.suites.length);
     assert.equal(await p.locator('#view .tile').count(), modules.length);
     assert.equal(await p.getAttribute('.group[data-suite="home"] .group-head a.more', 'href'), '#/', 'Home\'s overview is the Home page');
-    assert.match(await p.textContent('.group[data-suite="oi"] h2'), /International Mystery Management$/);
+    assert.match(await p.textContent('.group[data-suite="oi"] h2'), /Intelligence Collection$/);
     assert.deepEqual(errors, []);
   } finally { await p.close(); }
 });

@@ -316,6 +316,42 @@ test('adapter: one mention per book and entity for the auto records, linked to N
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('adapter: every entity the reader tags in a book counts there, as often as it is tagged, cast or not (the Prince’s Milan)', () => {
+  // Until November 2026 the adapter read the casts alone, so "Milan", tagged twenty times in the Prince as the Duchy of
+  // Milan (an entry the lake had from another module), showed "Appears in Vitruvian Manager · 0".
+  const dir = mkdtempSync(join(tmpdir(), 'cast-'));
+  try {
+    mkdirSync(join(dir, 'bibliotheca/data/cast'), { recursive: true });
+    mkdirSync(join(dir, 'bibliotheca/data/books'), { recursive: true });
+    const records = [
+      { name: 'Cesare Borgia', aliases: ['Duke Valentino'], local: [], qid: 'Q2', label: 'Cesare Borgia', mentions: 9, first: { ch: 7, p: 'c07-p04' }, decision: 'auto' },
+      { name: 'Hannibal', aliases: [], local: [], qid: 'Q3', label: 'Hannibal', mentions: 3, first: { ch: 17, p: 'c17-p05' }, decision: 'auto' },
+    ];
+    writeFileSync(join(dir, 'bibliotheca/data/cast/t.json'), castJson({ slug: 't', title: 'T', author: 'A', year: 1532, threshold: 0.75, overrides: [], records, skipped: [], unresolved: [] }));
+    const tag = (text, s, qid, label) => ({ s: text.indexOf(s), e: text.indexOf(s) + s.length, qid, label });
+    const p1 = 'The Duke Valentino took Milan.', p2 = 'The Milanese and Milan; Cesare Borgia again.';
+    const book = (slug, title, author, published) => ({ slug, title, author: { name: author }, work: { published }, chapters: [
+      { n: 1, paragraphs: [{ id: 'c01-p01', kind: 'para', text: 'Nothing here.', terms: [] }, { id: 'c01-p02', kind: 'para', text: p1, terms: [tag(p1, 'Duke Valentino', 'Q2', 'Cesare Borgia'), tag(p1, 'Milan', 'Q153529', 'Duchy of Milan')] }] },
+      { n: 3, paragraphs: [{ id: 'c03-p01', kind: 'para', text: p2, terms: [tag(p2, 'Milanese', 'Q153529', 'Duchy of Milan'), { ...tag(p2, 'Milan;', 'Q153529', 'Duchy of Milan'), e: p2.indexOf('Milan;') + 5 }, tag(p2, 'Cesare Borgia', 'Q2', 'Cesare Borgia')] }] },
+    ] });
+    writeFileSync(join(dir, 'bibliotheca/data/books/t.json'), JSON.stringify(book('t', 'T', 'A', 1532)));
+    writeFileSync(join(dir, 'bibliotheca/data/books/u.json'), JSON.stringify(book('u', 'U', 'Thucydides', -400)));
+    const ms = bibliotheca({ jdpiDir: dir }), at = (slug, q) => ms.filter(m => m.source === `bibliotheca:${slug}` && m.key.qid === q);
+    assert.equal(ms.length, 5, 'the cast’s two and Milan in t, Borgia and Milan in u (no cast): one mention per book and entity');
+    assert.deepEqual(at('t', 'Q153529'), [{ key: { qid: 'Q153529' }, label: 'Duchy of Milan', module: 'neo-classic', source: 'bibliotheca:t',
+      url: 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=t&ch=1&p=c01-p02&t=Q153529', date: '1532',
+      context: 'Named in T (A, 1532), 3 times, as Milan, Milanese', aliases: [] }], 'a tag the lake knew from elsewhere counts, at its first tag');
+    const borgia = at('t', 'Q2');
+    assert.equal(borgia.length, 1);
+    assert.equal(borgia[0].context, 'Named in T (A, 1532), 2 times, as Duke Valentino, Cesare Borgia', 'a cast entity the book is tagged with counts its tags');
+    assert.equal(borgia[0].url, 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=t&ch=1&p=c01-p02&t=Q2', 'and opens at its first tag');
+    assert.deepEqual(borgia[0].aliases, ['Cesare Borgia', 'Duke Valentino'], 'the cast’s names still fed');
+    assert.equal(at('t', 'Q3')[0].context, 'Named in T (A, 1532), 3 times, as Hannibal', 'a cast record not tagged yet counts by the cast');
+    assert.equal(at('u', 'Q153529')[0].context, 'Named in U (Thucydides, 400 BC), 3 times, as Milan, Milanese', 'a book with no cast');
+    assert.deepEqual(at('u', 'Q2')[0].aliases, [], 'no cast, no names fed');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 // ---- The cast files, the lake and the books.
 const casts = existsSync(CAST) ? readdirSync(CAST).filter(f => f.endsWith('.json')).map(f => read(join(CAST, f))) : [];
 
@@ -365,6 +401,7 @@ test('built: every auto record’s entity is in the lake, with the book’s name
   const manifest = read(new URL('lake/data/manifest.json', ROOT));
   assert.ok(manifest.modules['neo-classic'] > 0, 'the lake counts the Bibliotheca mentions (filed under its reader, Neo Classic)');
   for (const cast of casts) {
+    const book = readBook(cast.slug);
     for (const r of cast.records.filter(x => x.decision === 'auto')) {
       const at = `${cast.slug} ${r.name} → ${r.qid}`;
       const e = lake.get(r.qid);
@@ -377,8 +414,10 @@ test('built: every auto record’s entity is in the lake, with the book’s name
       assert.equal(ms.length, 1, `${at}: one mention of the book`);
       assert.match(ms[0].u, new RegExp(`^https://jdpi\\.pages\\.dev/bibliotheca/neo/index\\.html#book=${cast.slug}&ch=\\d+&p=[cnpv0-9-]+&t=${r.qid}$`), at);
     }
-    // The adapter feeds exactly the auto records' entities, and the lake has no other mention of the book.
-    const fed = new Set(cast.records.filter(x => x.decision === 'auto').map(x => x.qid));
+    // The adapter feeds exactly the auto records' entities and the entities the book is tagged with, and the lake has
+    // no other mention of the book: a review record's entity only where the reader tags it by another name the lake has.
+    const tagged = new Set(book.chapters.flatMap(c => c.paragraphs.flatMap(p => (p.terms || []).map(t => t.qid))));
+    const fed = new Set([...cast.records.filter(x => x.decision === 'auto').map(x => x.qid), ...tagged]);
     assert.deepEqual(new Set(bibliotheca({ jdpiDir: fileURLToPath(ROOT) }).filter(m => m.source === `bibliotheca:${cast.slug}`).map(m => m.key.qid)), fed);
     for (const r of cast.records.filter(x => x.decision === 'review' && !fed.has(x.qid))) {
       const lr = record(r.qid);

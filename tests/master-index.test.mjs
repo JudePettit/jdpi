@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { ADAPTERS, ADAPTER_MODULES, JDPI, kino, pestle, volatility } from '../lake/scripts/adapters.mjs';
+import { wikidataDate, datedFacts, formatDate } from '../lake/scripts/dates.mjs';
 import { CATEGORY_IDS, flatScenes } from '../kino/lib/format.js';
 import { readAt, onOwnPage } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
@@ -254,6 +255,75 @@ test('committed lake: the new submodules’ mentions where their adapters put th
   assert.ok(borgia.aliases.includes('Duke Valentino'), `the Prince's name for him: ${borgia.aliases.join(', ')}`);
 });
 
+// ---- Dates (ledger MI-08). Wikidata's times are signed years with a precision; until November 2026 the build cut a
+// date BC to ten characters ("-0356-07-20" to "-0356-07-2") and the page read it through a JS Date, so Alexander the
+// Great was "Born 7 August 1929"; a century or a decade was shown as a year.
+const wd = (time, precision, circa) => ({ mainsnak: { datavalue: { value: { time, precision } } }, ...(circa ? { qualifiers: { P1480: [{ datavalue: { value: { id: 'Q5727902' } } }] } } : {}) });
+// The page's own fmtDate, read out of encyclopedia/index.html, so the page and dates.mjs are held to the same answers.
+function pageFmtDate() {
+  const src = text('encyclopedia/index.html'), at = src.indexOf('const fmtDate = ');
+  assert.ok(at >= 0, 'encyclopedia/index.html defines fmtDate');
+  const end = src.slice(at).search(/\r?\n\};/);
+  return vm.runInNewContext(`(${src.slice(at + 'const fmtDate = '.length, at + end).trim()}\n})`);
+}
+test('dates: a Wikidata time kept and shown at its precision: a date BC, a year, a century, a full date', () => {
+  assert.deepEqual(wikidataDate(wd('-0356-07-20T00:00:00Z', 11)), { v: '-0356-07-20', p: 11, c: false }, 'a day BC, whole');
+  assert.deepEqual(wikidataDate(wd('-0323-00-00T00:00:00Z', 9)), { v: '-0323', p: 9, c: false }, 'a year BC');
+  assert.deepEqual(wikidataDate(wd('+1513-12-10T00:00:00Z', 11)), { v: '1513-12-10', p: 11, c: false }, 'a full date');
+  assert.deepEqual(wikidataDate(wd('+1500-00-00T00:00:00Z', 7, true)), { v: '1500', p: 7, c: true }, 'a century, circa');
+  assert.deepEqual(wikidataDate(wd('+0476-09-04T00:00:00Z', 10)), { v: '0476-09', p: 10, c: false }, 'a month');
+  assert.equal(wikidataDate({ mainsnak: { snaktype: 'somevalue' } }), null, 'an unknown value');
+  assert.deepEqual(datedFacts({ P569: [wd('+1500-00-00T00:00:00Z', 7, true)], P570: [wd('-0323-06-10T00:00:00Z', 11)] }, { P569: 'born', P570: 'died' }),
+    { facts: { born: '1500', died: '-0323-06-10' }, fp: { born: 7 }, fc: ['born'] });
+  const page = pageFmtDate();
+  for (const [args, want] of [
+    [['-0356-07-20'], '20 July 356 BC'], [['-0323'], '323 BC'], [['-0356-07'], 'July 356 BC'], [['1513-12-10'], '10 December 1513'], [['1513-12'], 'December 1513'],
+    [['1532'], '1532'], [['0476'], '476'], [['0050-03-15'], '15 March 50'], [['1500', 7], '15th century'], [['1501', 7], '16th century'], [['-0500', 7], '5th century BC'],
+    [['1560', 8], '1560s'], [['1500', 9, true], 'c. 1500'], [['1000', 6], '1st millennium'], [['-13798000000', 3], 'c. 13,798,000,000 BC'], [['2024-03-05'], '5 March 2024'],
+  ]) {
+    assert.equal(formatDate(...args), want, `dates.mjs ${JSON.stringify(args)}`);
+    assert.equal(page(...args), want, `the page ${JSON.stringify(args)}`);
+  }
+});
+test('committed lake: Alexander the Great was born in 356 BC and died in 323 BC; no date is cut short', () => {
+  const alexander = read(`lake/data/e/${8409 % 512}.json`).Q8409;
+  assert.deepEqual([alexander.facts.born, alexander.facts.died], ['-0356-07-20', '-0323-06-10']);
+  assert.deepEqual([formatDate(alexander.facts.born), formatDate(alexander.facts.died)], ['20 July 356 BC', '10 June 323 BC']);
+  const cut = [];
+  for (let i = 0; i < 512; i++) for (const r of Object.values(read(`lake/data/e/${i}.json`))) {
+    for (const [k, v] of Object.entries(r.facts)) if (!/^-?\d{4,}(-\d\d(-\d\d)?)?$/.test(v)) cut.push(`${r.q} ${k} ${v}`);
+    for (const [k, p] of Object.entries(r.fp || {})) if (!(k in r.facts) || !(p < 9)) cut.push(`${r.q} fp ${k} ${p}`);
+    for (const k of r.fc || []) if (!(k in r.facts)) cut.push(`${r.q} fc ${k}`);
+  }
+  assert.deepEqual(cut, [], 'every date a whole year, month or day, its precision and circa only for its dates');
+});
+
+// ---- A tag visible in a book is an appearance (ledger BI-19). Until November 2026 the Bibliotheca adapter read only
+// the books' casts, so an entity the reader tags that the lake knew from elsewhere (the Prince's "Milan", the Duchy of
+// Milan) showed "Appears in Vitruvian Manager · 0 — Not mentioned directly" beside the tag.
+test('committed lake: every entity a book is tagged with appears in that book, as often as it is tagged (the Prince’s Milan never 0)', () => {
+  const shards = new Map(), entity = q => { const i = +q.slice(1) % 512; if (!shards.has(i)) shards.set(i, read(`lake/data/e/${i}.json`)); return shards.get(i)[q]; };
+  const missing = [];
+  for (const f of readdirSync(join(ROOT, 'bibliotheca/data/books')).filter(x => x.endsWith('.json'))) {
+    const book = read(`bibliotheca/data/books/${f}`), counts = new Map();
+    for (const c of book.chapters) for (const p of c.paragraphs) for (const t of p.terms || []) counts.set(t.qid, (counts.get(t.qid) || 0) + 1);
+    for (const [q, n] of counts) {
+      const r = entity(q);
+      if (!r || !r.total) { missing.push(`${book.slug} ${q}: ${r ? 'total 0' : 'not in the lake'}`); continue; }
+      const m = r.mentions.find(x => x.m === 'neo-classic' && x.u.includes(`#book=${book.slug}&`));
+      // A record keeps its first 300 places, in module order (build.mjs), so a country the Retrospective names
+      // hundreds of times may hold its book mention only in its total.
+      if (!m) { if (r.mentions.length < 300) missing.push(`${book.slug} ${q} ${r.label}: no mention of the book`); continue; }
+      if (!m.c.includes(`, ${n} time${n === 1 ? '' : 's'}, as `)) missing.push(`${book.slug} ${q} ${r.label}: tagged ${n} times, the lake says "${m.c}"`);
+    }
+  }
+  assert.deepEqual(missing, []);
+  const milan = entity('Q153529'), inPrince = milan.mentions.filter(x => x.m === 'neo-classic' && x.u.includes('#book=the-prince&'));
+  assert.equal(inPrince.length, 1, 'the Duchy of Milan in The Prince');
+  assert.match(inPrince[0].c, /^Named in The Prince \(Niccolò Machiavelli, 1532\), \d+ times, as Milan/);
+  assert.ok(milan.total > 0 && milan.tags.includes('Appears in:Bibliotheca'), 'counted, and filed under Bibliotheca');
+});
+
 /* ---------------------------------------------------------------- the page */
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
 test('page: framed as in the shell, an entry opens its Kino, National Analysis and Volatility appearances there, and Volatility opens the entry', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
@@ -319,5 +389,26 @@ test('page: facets with nothing in them are hidden, and the page says VM, never 
   await page.goto(`${BASE}/encyclopedia/index.html#Q1399`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForSelector('#entity .ehead h2', { timeout: 30000 });
   assert.match(await page.title(), / · Master Index · VM$/);
+  assert.deepEqual(errors, []);
+});
+
+test('page: Alexander the Great’s facts read 356 BC and 323 BC, and the Duchy of Milan appears in The Prince', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const facts = async q => {
+    await page.goto(`${BASE}/encyclopedia/index.html#${q}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#entity .ehead h2', { timeout: 30000 });
+    return page.$$eval('#entity .facts dt', dts => Object.fromEntries(dts.map(dt => [dt.textContent, dt.nextElementSibling.textContent])));
+  };
+  const alexander = await facts('Q8409');
+  assert.equal(alexander.Born, '20 July 356 BC');
+  assert.equal(alexander.Died, '10 June 323 BC');
+  await facts('Q153529');
+  const card = await page.$eval('#entity .card:has(.group, .note) h3', h => h.closest('.card').innerText);
+  assert.doesNotMatch(card, /· 0\b|Not mentioned directly/, card);
+  assert.match(card, /Bibliotheca[\s\S]*Named in The Prince \(Niccolò Machiavelli, 1532\), \d+ times, as Milan/, card);
   assert.deepEqual(errors, []);
 });

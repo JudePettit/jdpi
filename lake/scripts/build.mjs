@@ -18,6 +18,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
+import { wikidataDate, datedFacts } from './dates.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -161,7 +162,9 @@ function typeOf(e) {
   if (e.claims?.P585 || e.claims?.P580) return 'event';
   return 'topic';
 }
-const time = c => { const v = c?.mainsnak?.datavalue?.value; if (!v?.time) return null; const p = v.precision; const t = v.time.replace(/^\+/, ''); return p >= 11 ? t.slice(0, 10) : p === 10 ? t.slice(0, 7) : t.replace(/^(-?\d+).*/, '$1'); };
+// A date at its precision, the year first and signed: "-0356-07-20" is 20 July 356 BC (dates.mjs). Cut to ten
+// characters, as it was until November 2026, a date BC lost its last digit ("-0356-07-2"), which the page read as 1929.
+const time = c => wikidataDate(c)?.v ?? null;
 const refIds = (e, p) => (e.claims?.[p] || []).filter(c => c.rank !== 'deprecated').map(c => c.mainsnak.datavalue?.value?.id).filter(Boolean);
 
 const raw = new Map();
@@ -240,8 +243,9 @@ function tagsFor(e, type, ms) {
 }
 function record(q) {
   const e = raw.get(q), title = e.sitelinks?.enwiki?.title || null;
-  const facts = {};
-  for (const [p, name] of Object.entries(PROPS)) { const v = time(e.claims?.[p]?.[0]); if (v) facts[name] = v; }
+  // Each date at its precision; `fp` keeps the precisions coarser than a year (a decade, a century) and `fc` the dates
+  // the source marks circa, so the page shows "15th century" or "c. 1500", not a year Wikidata does not give (dates.mjs).
+  const { facts, fp, fc } = datedFacts(e.claims, PROPS);
   const rel = {};
   for (const [p, name] of Object.entries(REL)) { const ids = [...new Set(refIds(e, p))].slice(0, 12); if (ids.length) rel[name] = ids.map(x => [x, labels.get(x) || x]); }
   const img = e.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
@@ -258,7 +262,7 @@ function record(q) {
   return {
     q, label, desc: e.descriptions?.en?.value || '', type: typeOf(e),
     aliases: recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), wiki: title, img: img || null,
-    summary: title ? cache[normTitle(title)] || '' : '', facts, rel, mentions: mentionsOut, total: ms.length,
+    summary: title ? cache[normTitle(title)] || '' : '', facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length,
     tags: tagsFor(e, typeOf(e), ms),
   };
 }

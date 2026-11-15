@@ -22,7 +22,7 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
 - **Adapters** (`scripts/adapters.mjs`): each module reports what it mentions as `{ key, label, module, url, date, context, tags }`. The key is a Wikipedia title, a Wikidata ID, or a module ID that Wikidata can resolve, such as a Congress Bioguide ID; a Wikidata ID wherever the module's data has one. `module` is the submodule's id in `registry.json`, and `url` the exact place in JDP-I, written as that page reads its own address. `ADAPTER_MODULES` lists the submodules each adapter files its mentions under.
 - **Build** (`scripts/build.mjs`):
   - Resolves every key to a Wikidata ID.
-  - Fetches facts, plus one level of related entities (parties, ideologies, movements, countries, conflicts), so those get pages too.
+  - Fetches facts, plus one level of related entities (parties, ideologies, movements, countries, conflicts), so those get pages too. Dates are kept at Wikidata's precision, the year first and signed (`-0356-07-20` is 20 July 356 BC), with `fp` for a precision coarser than a year (8 a decade, 7 a century) and `fc` for a date the source marks circa; the page shows them as "20 July 356 BC", "15th century", "c. 1500" (`scripts/dates.mjs`).
   - Turns facts into tags: nationality, occupation, field, movement, ideology, party, position, conflict and century. It adds module tags and curated school-of-thought tags (`scripts/thinkers.mjs`).
   - Keeps each entity's first six English aliases from Wikidata, tidied by `scripts/aliases.mjs`, then the names a module's own text uses. A trailing comma goes, and so does the full stop after a regnal number ("Alexander VI."). An abbreviation keeps its stop ("With.", "Oxon."), or the Bibliotheca tagger would read it as a word at every sentence it opens. The Bibliotheca cast reads aliases by the same rule.
   - Attaches Wikipedia summaries (cached).
@@ -46,7 +46,7 @@ module data ──► adapters.mjs ──► build.mjs ──► lake/data/ ─�
 | `traders` | `traders` | Members of Congress who trade (by Bioguide ID) and famous investors |
 | `learning` | `learning`, `learning-politics` | Thinkers and schools of thought taught in the Finance, Economics and Politics courses; the lesson |
 | `progress` | `progress` | Breakthroughs, their scientists and institutions (by Wikidata ID); the breakthrough on the timeline |
-| `bibliotheca` | `neo-classic` (Bibliotheca's reader; `bibliotheca` until November 2026, when Bibliotheca left Kino for a module of its own) | Each book's cast (by Wikidata ID, with the book's names); the first paragraph that names it |
+| `bibliotheca` | `neo-classic` (Bibliotheca's reader; `bibliotheca` until November 2026, when Bibliotheca left Kino for a module of its own) | Every entity the reader tags in each book (the book's own `terms`), as often as it is tagged, and each book's cast (by Wikidata ID, with the book's names); the first paragraph that tags or names it |
 | `kino` | `kino-<category>`, all six | What each documentary names by Wikidata ID: its subjects, each scene's Master Index link and portrait, and the War Focus wars, National Analysis and Political Atlas countries and Invention Timeline breakthroughs its scenes link to (not the items its Wikidata sources list, which are where its facts come from). One mention per film and entity, at the first scene that names it, or at the start for a subject |
 | `pestle` | `pestle` (National Analysis) | Every country with its Wikidata ID (the Channel Islands and Kosovo have none there yet); its profile, `q/national.html#country=<ISO3>` |
 | `volatility` | `volatility` | Every country scored on a day the index holds, with the Wikidata ID National Analysis gives it (Taiwan, Jersey and Vatican City have none); the country, `q/volatility.html#country=<ISO3>`, with its latest score |
@@ -67,13 +67,13 @@ A mention may carry `aliases`, the names the module's own text uses: the build a
 
 ## Bibliotheca
 
-Each book's cast (`bibliotheca/data/cast/<slug>.json`, made by `bibliotheca/scripts/cast.mjs <slug>` from Wikidata and reviewed in its header's overrides) feeds the lake through the `bibliotheca` adapter: one mention per book and entity, filed under Neo Classic (`neo-classic`, in the Bibliotheca module) and linked to the first paragraph that names it there. After a build, `bibliotheca/scripts/tag-terms.mjs <slug>` tags the book again; the monthly refresh does it for every book.
+Each book's cast (`bibliotheca/data/cast/<slug>.json`, made by `bibliotheca/scripts/cast.mjs <slug>` from Wikidata and reviewed in its header's overrides) feeds the lake through the `bibliotheca` adapter: one mention per book and entity, filed under Neo Classic (`neo-classic`, in the Bibliotheca module) and linked to the first paragraph that names it there. After a build, `bibliotheca/scripts/tag-terms.mjs <slug>` tags the book again; the monthly refresh does it for every book. The tags themselves feed the lake too: every entity a book is tagged with (each paragraph's `terms`, `bibliotheca/data/books/<slug>.json`) has that book's mention, counted as often as the reader tags it and linked to its first tag, whether it came from the book's cast or from another module (the Prince's "Milan" is the Duchy of Milan); a cast record not tagged yet counts by the cast. Only the cast gives names. A build therefore reads the tags the last re-tag made: run it after re-tagging, as the monthly refresh does, for the counts to match the books.
 
 A record's book-only names (`local`) feed its entity but not the name, since the name means someone else in other books (the Prince's "Cyrus", or "Naples", which there means the Kingdom). The book's shelf decision gives the name back to the entity. Every book is tagged against the one lake. So a cast record that is dropped, moved or made book-only changes the other books' terms at their next re-tag. After changing a cast, re-tag every book.
 
 ## Refresh
 
-`.github/workflows/lake-refresh.yml` rebuilds monthly (on the 3rd) and commits `data/`. Summaries are cached in `scripts/summary-cache.json`, so a refresh only fetches new articles.
+`.github/workflows/lake-refresh.yml` rebuilds monthly (on the 3rd), tags every book again, counts the new tags (`--only bibliotheca`) and commits `data/`. Summaries are cached in `scripts/summary-cache.json`, so a refresh only fetches new articles.
 
 ## Licences
 

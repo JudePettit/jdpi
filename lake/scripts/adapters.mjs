@@ -175,40 +175,59 @@ export function progress({ jdpiDir }) {
   return out;
 }
 
-/** Bibliotheca (the module; Kino's until November 2026): each book's cast, bibliotheca/data/cast/<slug>.json, made by bibliotheca/scripts/cast.mjs: the
- *  people, places, states, battles, wars, organisations and works a book's text names, resolved to Wikidata. Only the
- *  records decided 'auto' are fed in ('review' waits for a human to flip it in the cast file's overrides). One
- *  mention per book and entity, whichever names the book gives it, so an entity the lake has already (by Wikidata ID)
- *  gains the mention and the book's names rather than a second entry; its link opens Neo Classic at the first
- *  paragraph that names it, the term in use, and is filed under Neo Classic (registry id neo-classic, the
- *  module's reader; "bibliotheca" until November 2026, now its alias); its aliases are the book's own forms of the name, which build.mjs adds to
- *  the entity's so the tagger (bibliotheca/scripts/tag-terms.mjs) finds them in the text. `source` records which
- *  book's cast gave the mention ("bibliotheca:<slug>"); the build reads the module and the url. */
+/** Bibliotheca (the module; Kino's until November 2026): every entity a book's reader tags, and each book's cast.
+ *  The tags are the book's own (bibliotheca/data/books/<slug>.json, each paragraph's `terms`, made by
+ *  bibliotheca/scripts/tag-terms.mjs against the whole lake): every entity Neo Classic marks in the text counts there,
+ *  as many times as it is marked, whether the lake knew it from another module (the Prince's "Milan", the Duchy of
+ *  Milan, a related entry of the Retrospective's) or from this book's cast; until November 2026 only the cast was read,
+ *  so an entity the reader marks showed "Appears in Vitruvian Manager · 0". The cast, bibliotheca/data/cast/<slug>.json
+ *  made by bibliotheca/scripts/cast.mjs, is the people, places, states, battles, wars, organisations and works a book's
+ *  text names that the lake did not know, resolved to Wikidata. Only its records decided 'auto' are fed in ('review'
+ *  waits for a human to flip it in the cast file's overrides); a record the book is not tagged with yet (the tagger
+ *  runs after the build) counts by the cast's own count. One mention per book and entity, whichever names the book
+ *  gives it, so an entity the lake has already (by Wikidata ID) gains the mention rather than a second entry; its link
+ *  opens Neo Classic at the first paragraph the reader marks it in (or the cast's first), the term in use, and is filed
+ *  under Neo Classic (registry id neo-classic, the module's reader; "bibliotheca" until November 2026, now its alias).
+ *  Its context gives the times the reader marks it and the names it marks; its aliases are only the cast's names (the
+ *  tags' names are the lake's already), which build.mjs adds to the entity's so the tagger finds them in the text.
+ *  `source` records which book gave the mention ("bibliotheca:<slug>"); the build reads the module and the url. */
 export function bibliotheca({ jdpiDir }) {
-  const dir = join(jdpiDir, 'bibliotheca/data/cast');
-  if (!existsSync(dir)) return [];
+  const castDir = join(jdpiDir, 'bibliotheca/data/cast'), booksDir = join(jdpiDir, 'bibliotheca/data/books');
   // A paragraph's place in book order (one counter per chapter runs through c07-p01, c07-n02 …).
   const order = f => f.ch * 1000 + +String(f.p).split('-')[1].slice(1);
+  const files = dir => (existsSync(dir) ? readdirSync(dir).filter(f => f.endsWith('.json')).sort() : []);
+  const casts = new Map(files(castDir).map(f => { const c = json(join(castDir, f)); return [c.slug, c]; }));
+  const slugs = [...new Set([...casts.keys(), ...files(booksDir).map(f => f.slice(0, -5))])].sort();
   const out = [];
-  for (const file of readdirSync(dir).filter(f => f.endsWith('.json')).sort()) {
-    const cast = json(join(dir, file));
-    const byQid = new Map();
-    for (const r of cast.records || []) {
+  for (const slug of slugs) {
+    const cast = casts.get(slug), path = join(booksDir, `${slug}.json`), book = existsSync(path) ? json(path) : null;
+    const byQid = new Map(), group = (qid, label) => byQid.get(qid) || byQid.set(qid, { label, names: new Set(), fed: new Set(), mentions: 0, first: null, marked: 0, marks: new Set(), at: null }).get(qid);
+    for (const r of cast?.records || []) {
       if (r.decision !== 'auto' || !/^Q\d+$/.test(r.qid || '')) continue;
-      const g = byQid.get(r.qid) || { label: r.label, names: new Set(), fed: new Set(), mentions: 0, first: r.first };
+      const g = group(r.qid, r.label);
       // A record's `local` names (given names, alone or after a regnal title: "Julian", "Pope Alexander") stay the
       // book's, since they would tag the man in every book; a shelf decision gives them to him in this one.
       for (const n of [r.name, ...(r.aliases || [])]) { g.names.add(n); if (!(r.local || []).includes(n)) g.fed.add(n); }
       g.mentions += r.mentions;
-      if (order(r.first) < order(g.first)) g.first = r.first;
-      byQid.set(r.qid, g);
+      if (!g.first || order(r.first) < order(g.first)) g.first = r.first;
     }
-    for (const [qid, g] of byQid) out.push({
-      key: { qid }, label: g.label, module: 'neo-classic', source: `bibliotheca:${cast.slug}`,
-      url: `${JDPI}bibliotheca/neo/index.html#book=${cast.slug}&ch=${g.first.ch}&p=${g.first.p}&t=${qid}`, date: String(cast.year),
-      context: `Named in ${cast.title} (${cast.author}, ${cast.year < 0 ? `${-cast.year} BC` : cast.year}), ${g.mentions} time${g.mentions === 1 ? '' : 's'}, as ${[...g.names].join(', ')}`,
-      aliases: [...g.fed],
-    });
+    for (const ch of book?.chapters || []) for (const p of ch.paragraphs || []) for (const t of p.terms || []) {
+      if (!/^Q\d+$/.test(t.qid || '')) continue;
+      const g = group(t.qid, t.label);
+      g.marked++;
+      g.marks.add(String(p.text || '').slice(t.s, t.e) || t.label);
+      g.at ||= { ch: ch.n, p: p.id };
+    }
+    const title = cast?.title ?? book.title, author = cast?.author ?? book.author?.name ?? book.author, year = cast?.year ?? book.work?.published;
+    for (const [qid, g] of byQid) {
+      const times = g.marked || g.mentions, names = g.marked ? g.marks : g.names, first = g.at || g.first;
+      out.push({
+        key: { qid }, label: g.label, module: 'neo-classic', source: `bibliotheca:${slug}`,
+        url: `${JDPI}bibliotheca/neo/index.html#book=${slug}&ch=${first.ch}&p=${first.p}&t=${qid}`, date: String(year),
+        context: `Named in ${title} (${author}, ${year < 0 ? `${-year} BC` : year}), ${times} time${times === 1 ? '' : 's'}, as ${[...names].join(', ')}`,
+        aliases: [...g.fed],
+      });
+    }
   }
   return out;
 }

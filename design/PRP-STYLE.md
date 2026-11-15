@@ -322,7 +322,7 @@ of the text: "3.5" is read "3 point 5", "jdpi.pages.dev" "jdpi dot pages dot dev
 ### Narration: one voice layer
 
 Every page that reads aloud speaks through `design/prp-voice.js` (`PRPVoice.reader`), never `speechSynthesis` directly:
-the Documentary reader, Kino and Bibliotheca's narrator (Augmented Reading) today, Auteur and Personal Genius when they speak. The reader tries its
+the Documentary reader, Kino and Bibliotheca's narrator (the AR Reader) today, Auteur and Personal Genius when they speak. The reader tries its
 backends in order for each passage (`'prerendered'`, not built yet; `'stream'`, an online voice through the site's proxy
 `/api/voice/v1/`; `'webspeech'`, this device's voice) and falls back silently, from the sentence where one stopped, telling
 the page once (`onBackend`) so it can say so in a status line. Voice lists group this device's voices ("This device") and

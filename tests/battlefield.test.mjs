@@ -416,3 +416,29 @@ test('Realtime: the conflict figures and the news each carry their own dates, be
     await page.close();
   }
 });
+
+// MP-03 (15 Nov 2026, Jude's "Use your judgement" on the sliders on a phone): at 390 px the hundred-year track puts one
+// year about 3 px apart, so the opening is as many years apart as gives at least about 24 px between the handles, the
+// latest year still at the right one; at desktop width the opening is still one year apart (the test above).
+test('Retrospective on a phone (390 px): opened with no year, the handles stand at least 24 px apart, the latest year at the right', pageTest, async () => {
+  const { lastYear } = HISTORY;
+  const browser = await launch();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  try {
+    await page.goto(`${BASE}/battlefield/history/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#panel .war', { timeout: 20000 });
+    const h = await page.evaluate(() => {
+      const el = document.querySelector('#timeline'), t = parseFloat(getComputedStyle(el).getPropertyValue('--prp-period-thumb')) || 16;
+      const at = i => { const b = i.getBoundingClientRect(); return b.left + t / 2 + ((+i.value - +i.min) / Math.max(1, +i.max - +i.min)) * (b.width - t); };
+      const f = el.querySelector('input.from'), to = el.querySelector('input.to');
+      return { from: +f.dataset.value, to: +to.dataset.value, px: at(to) - at(f) };
+    });
+    assert.equal(h.to, lastYear);
+    assert.ok(h.px >= 23, `handles ${h.px.toFixed(1)} px apart`);
+    assert.ok(lastYear - h.from > 1 && lastYear - h.from < 20, `opens ${lastYear - h.from} years apart`);
+    assert.equal(await page.locator('#year-big').textContent(), `${h.from}–${lastYear}`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

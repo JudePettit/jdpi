@@ -547,10 +547,12 @@ async function loadWar(id, month, from = null) {
   state.war = w; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
   estimatedTo = []; w.estimated.reduce((e, v, k) => (estimatedTo[k] = e || !!v), false);
   $('#war').value = id;
-  // Ticks every few months or years, by the war's length; a month the war does not have opens at its first.
+  // Ticks every few months or years, by the war's length; a month the war does not have opens at its second (below).
   const step = w.months.length > 150 ? 60 : w.months.length > 60 ? 24 : w.months.length > 24 ? 12 : w.months.length > 8 ? 3 : 1;
   const ticks = w.months.filter((m, k) => k % step === 0).map((m, k) => ({ at: m, text: step >= 12 ? m.slice(0, 4) : m.slice(2).replace('-', '/'), kind: k % 2 ? 'minor' : 'key' })); // every other one drops out on narrow screens
-  const to = w.months.includes(month) ? month : w.months[0];
+  // A war opens on its second month (MP-03, 15 Nov 2026): the start resting on the first, so both handles show, one
+  // month apart, and the map shows the first two months; a war of one month opens on it.
+  const to = w.months.includes(month) ? month : w.months[Math.min(1, w.months.length - 1)];
   fromPeriod(period.update({ stops: w.months, ticks, from: PRPPeriod.rules.readStart(w.months, from, to, 'first'), to }));
   $('#status').innerHTML = `<span><b>${esc(w.sides.a.label)}</b> v <b>${esc(w.sides.b.label)}</b></span><span>${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'}</span>${w.ongoing && w.dataThrough ? `<span>Data through <b>${esc(fmtDate(w.dataThrough))}</b></span>` : ''}<span><b>${state.index.wars.length}</b> major wars since 1926</span>`;
   hits.gws.clear(); hits.qids.clear(); focusFit = null;

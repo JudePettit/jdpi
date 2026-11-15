@@ -267,3 +267,20 @@ test('page: a mounted control travels, opens a period, follows the track, the ke
   assert.deepEqual(await page.evaluate(() => { const p = window.upto.set('2023-04', '2023-02', { silent: true }); return [p.from, p.to, p.atRest]; }), ['2023-02', '2023-02', false]);
   assert.deepEqual(errors, []);
 });
+
+// MP-03 (15 Nov 2026): on a phone the opening is as many stops apart as gives at least about 24 px at the drawn width.
+test('opening on a phone: openSteps spaces the handles at least 24 px apart; the opening of that many steps still plays as one', () => {
+  const years = Array.from({ length: 100 }, (_, k) => 1926 + k);
+  assert.equal(R.openSteps(100, 300), 8);          // 99 gaps over 300 px: 3 px a step, 8 steps for 24 px
+  assert.equal(R.openSteps(100, 1200), 2);
+  assert.equal(R.openSteps(3, 300), 1);            // a short track: one step is wide already
+  assert.equal(R.openSteps(100, 0), 1);            // no width known: one step
+  assert.equal(R.openSteps(5, 10), 4);             // never more than the track holds
+  assert.equal(R.openStart(years, 2025, 8), 2017);
+  assert.equal(R.openStart(years, 1930, 8), 1926); // not before the first stop
+  assert.equal(R.readStart(years, null, 2025, 'end', true, 8), 2017);
+  const s = { i: 91, j: 99, n: 100, rest: 'end' };
+  assert.equal(R.playMode(s, 8), 'travel');
+  assert.equal(R.playMode(s), 'grow');             // a period the reader made is not the opening
+  assert.equal(R.playMode({ ...s, i: 98 }), 'travel');
+});

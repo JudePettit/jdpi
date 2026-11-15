@@ -330,7 +330,7 @@ function render() { renderMap(); renderPanel(); renderKpis(); renderTable(); }
 const period = PRPPeriod.mount($('#timeline'), {
   rest: 'end', ids: { from: 'from', to: 'year', prev: 'prev', play: 'play', next: 'next' },
   names: { from: 'First year of the period', to: 'Year shown, or the last of the period', prev: 'Previous year', next: 'Next year' },
-  play: { interval: 900, label: 'Play through the years' },
+  play: { interval: 900, label: 'Play through the years' }, open: () => openSteps(),
   onChange: p => { fromPeriod(p); render(); writeHash(); },
 });
 // The period from code (the address, a war, the search, Documentary mode): a start after the end becomes the end, and
@@ -365,11 +365,18 @@ function writeHash() {
   const h = `#y=${state.year}${f != null ? `&f=${f}` : ''}${state.selected ? `&c=${state.selected}` : ''}${state.war ? `&w=${state.war.id}` : ''}${state.view === 'table' ? '&v=table' : ''}`;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
+// MP-03 (15 Nov 2026): on a phone the opening's two handles sit at least about 24 px apart at the track's drawn
+// width, the latest year still at the right handle; on wider screens they open one year apart, as before.
+function openSteps() {
+  if (!matchMedia('(max-width: 767px)').matches) return 1;
+  const w = document.getElementById('year')?.getBoundingClientRect().width || $('#timeline').getBoundingClientRect().width;
+  return PRPPeriod.rules.openSteps(period.get().stops.length, w);
+}
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1)), y = +p.get('y') || state.data.lastYear;
   const years = period.get().stops;
   // An f at or after the year, or unreadable, is a single year; an address with no year at all opens on the last two.
-  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f')), c: +p.get('c') || null, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
+  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f'), openSteps()), c: +p.get('c') || null, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
 }
 
 function setupSearch() {

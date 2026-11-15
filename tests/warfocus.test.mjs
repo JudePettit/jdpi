@@ -200,3 +200,22 @@ test('opening a period keeps the timeline where it was, on a desktop and on a ph
     await page.close();
   }
 });
+
+// MP-03 (15 Nov 2026): a war opened with no month shows its first two months, the handles one month apart, so both
+// are visible; an address that names a month keeps it.
+test('a war opens on its first two months, with both handles visible one month apart', pageTest, async () => {
+  const ww2 = JSON.parse(readFileSync(new URL('../battlefield/focus/data/wars/ww2.json', import.meta.url), 'utf8'));
+  const browser = await launch();
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  try {
+    await page.goto(`${BASE}/battlefield/focus/#war=ww2`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(m => document.querySelector('#month')?.dataset.value === m, ww2.months[1], { timeout: 20000 });
+    assert.equal(await page.evaluate(() => document.querySelector('#month-from').dataset.value), ww2.months[0]);
+    assert.match(page.url(), new RegExp(`#war=ww2&m=${ww2.months[1]}$`));
+    await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1942-01`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelector('#month')?.dataset.value === '1942-01', null, { timeout: 20000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});

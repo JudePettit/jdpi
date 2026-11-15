@@ -274,6 +274,11 @@ test('logic: headline trends: up to three rising and two falling topics, each op
   // A briefing made on another day compares another week, and says which.
   const other = byId(await run({ ...ALL_GOOD, ...OK, 'briefing/data/trends': { ...OK['briefing/data/trends'], week: { from: '2026-10-21', to: '2026-10-27' } } }), 'briefings');
   assert.equal(other.items[1].detail, '82nd percentile · 6.0% in the 4 weeks before · week to 27 Oct · data 28 Oct 18:05 UTC');
+  // Last week's percentile beside this week's once last week has one (decided 14 November); without one, this week's alone (above).
+  const withPrev = async prev => byId(await run({ ...ALL_GOOD, ...OK, 'briefing/data/trends': { ...OK['briefing/data/trends'], topics: OK['briefing/data/trends'].topics.map(x => (x.id === 'china' ? { ...x, prevPercentile: prev, prevRank: { lower: 5, equal: 0, of: 10 } } : x)) } }), 'briefings').items[1].detail;
+  assert.equal(await withPrev(61), '82nd percentile, up from 61st · 6.0% in the 4 weeks before · data 28 Oct 18:05 UTC');
+  assert.equal(await withPrev(93), '82nd percentile, down from 93rd · 6.0% in the 4 weeks before · data 28 Oct 18:05 UTC');
+  assert.equal(await withPrev(82), '82nd percentile, same as last week · 6.0% in the 4 weeks before · data 28 Oct 18:05 UTC');
   assert.equal(g.note, 'Left out, not refreshed for two days: Digital Briefing (data 26 Oct 19:45 UTC).', 'a stale briefing is named, with its time');
 });
 
@@ -667,12 +672,13 @@ async function tabThroughPanel(page, links, label = '') {
 test('page: headline trends: five lines, each with its percentile, nothing cut short, at 1440 and 390 px in light and dark', pageTest, async t => {
   if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
   // Five movers with percentiles, one from a briefing made two hours before the window's (its own time, the longest
-  // detail a line can have), and a briefing whose file could not be read (a note).
-  const now = Date.now(), pct = (id, label, extra) => topic(id, label, { percentile: 100, rank: { lower: 11, equal: 0, of: 11 }, ...extra });
+  // detail a line can have), and a briefing whose file could not be read (a note). Each with last week's percentile
+  // beside it (decided 14 November), the longest wording ("same as last week") on a line that gives its own time.
+  const now = Date.now(), pct = (id, label, extra) => topic(id, label, { percentile: 100, rank: { lower: 11, equal: 0, of: 11 }, prevPercentile: 61, prevRank: { lower: 6, equal: 1, of: 10 }, ...extra });
   const override = {
     'briefing/data/trends': { ...OK['briefing/data/trends'], generated: iso(now - 3 * H), topics: [
-      pct('china', 'China', { n0: 600, s0: 0.038, b: 0.016, ratio: 2.4, trend: 'rising' }), pct('ai', 'AI & tech', { n0: 300, s0: 0.075, b: 0.033, ratio: 2.3, trend: 'rising' }),
-      pct('immigration', 'Immigration', { n0: 200, s0: 0.049, b: 0.03, ratio: 1.6, trend: 'rising' }), pct('middle-east', 'Middle East', { n0: 90, s0: 0.02, b: 0.05, ratio: 0.4, trend: 'falling', percentile: 0, rank: { lower: 0, equal: 0, of: 11 } }),
+      pct('china', 'China', { n0: 600, s0: 0.038, b: 0.016, ratio: 2.4, trend: 'rising', prevPercentile: 100 }), pct('ai', 'AI & tech', { n0: 300, s0: 0.075, b: 0.033, ratio: 2.3, trend: 'rising' }),
+      pct('immigration', 'Immigration', { n0: 200, s0: 0.049, b: 0.03, ratio: 1.6, trend: 'rising' }), pct('middle-east', 'Middle East', { n0: 90, s0: 0.02, b: 0.05, ratio: 0.4, trend: 'falling', percentile: 0, rank: { lower: 0, equal: 0, of: 11 }, prevPercentile: 12 }),
       pct('us-politics', 'US politics', { n0: 1500, s0: 0.299, b: 0.372, ratio: 0.804, trend: 'falling', percentile: 0, rank: { lower: 0, equal: 0, of: 11 } })] },
     'econ/briefing/data/trends': { ...OK['econ/briefing/data/trends'], generated: iso(now - H), topics: [pct('monetary', 'Monetary policy', { n0: 91, s0: 0.182, b: 0.06, ratio: 3, trend: 'rising' })] },
     'science/briefing/data/trends': { ...SHORT['science/briefing/data/trends'], generated: iso(now - H) },
@@ -696,9 +702,10 @@ test('page: headline trends: five lines, each with its percentile, nothing cut s
       assert.equal(card.details.length, MAX_LINES - 1, `${width}: four lines and the note`);
       for (const d of card.details) {
         assert.equal(d.cut, false, `${width} ${theme}: "${d.text}" is shown whole`);
-        assert.match(d.text, /^(100th|0th) percentile · /, 'the percentile first');
+        assert.match(d.text, /^(100th|0th) percentile, (up from \d+(st|nd|rd|th)|down from \d+(st|nd|rd|th)|same as last week) · /, 'the percentile first, last week\'s beside it');
       }
       assert.deepEqual(card.labels, ['Monetary policy · Economics', 'China · Political', 'AI & tech · Political', 'Middle East · Political']);
+      assert.deepEqual(card.details.map(d => d.text.split(' · ')[0]), ['100th percentile, up from 61st', '100th percentile, same as last week', '100th percentile, up from 61st', '0th percentile, down from 12th']);
       assert.match(card.details[1].text, /· data (\d{1,2} [A-Z][a-z]{2} )?\d\d:\d\d UTC$/, 'the Political Briefing, made two hours before the window\'s, says its own time');
       assert.equal(card.note, 'Digital Briefing could not be read just now.');
       assert.deepEqual(errors, []);

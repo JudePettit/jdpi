@@ -209,6 +209,7 @@ button, input, select { font: inherit; }
 .trend .prp-note { margin: 0 0 10px; }
 .trend tbody th[scope="row"] { position: static; background: none; border-bottom: 1px solid var(--prp-line-soft); color: var(--prp-text);
   font: 600 13px/1.4 var(--prp-font-ui); letter-spacing: normal; text-transform: none; white-space: nowrap; }
+.ttable td.pct .nw { white-space: nowrap; } /* "92nd," stays whole; "up from 61st" may wrap under it on a phone */
 .ttable td.pct small, .trend td small { display: block; color: var(--prp-muted); font: 10.5px/1.3 var(--prp-font-mono); }
 .ttable tr.sel { background: var(--prp-primary-soft); outline: 2px solid var(--prp-primary); outline-offset: -2px; }
 .ttable tr.sel:focus { outline: 2px solid var(--prp-focus, var(--prp-primary)); }

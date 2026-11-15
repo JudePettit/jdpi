@@ -7,7 +7,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  accrue, trends, week, weekDays, emptyHistory, percentile, firstDay, movers, METHOD, LATE_HOURS, DAY, HOUR,
+  accrue, trends, week, weekDays, emptyHistory, percentile, firstDay, movers, METHOD, LATE_HOURS, DAY, HOUR, lastWeekPercentile, sinceLastWeek,
   WEEK_MIN_STORIES, BASE_WEEKS, PCT_MIN, RISE_RATIO, FALL_RATIO, MIN_STORIES, addDays, utcDay, dayList,
 } from '../design/prp-trends.js';
 
@@ -169,6 +169,66 @@ describe('the percentile', () => {
     const t = trends(made([[100, { a: 30 }], ...[10, 20, 30, 40, 50, 60, 70].map(n => [100, { a: n }])]), { generated: GENERATED, topics: TOPICS });
     assert.equal(row(t, 'a').percentile, null); assert.equal(row(t, 'a').rank, null);
     assert.equal(t.weeksCounted, 7);
+  });
+});
+
+// Decided 14 November 2026: the percentile stays as built, and the page also shows last week's beside it ("92nd, up from
+// 61st"), last week ranked by the same rule against the weeks before it only.
+describe('last week\'s percentile beside this week\'s', () => {
+  const earlier = [10, 20, 30, 30, 40, 50, 60, 70].map(n => [100, { a: n }]);
+  test('history long enough for both weeks: up', () => {
+    // This week 30 % against 20, 10, 20, 30, 30, 40, 50, 60, 70: 3 lower, 2 equal, of 9: 100 x 4 / 9 = 44.4, the 44th.
+    // Last week 20 % against 10, 20, 30, 30, 40, 50, 60, 70: 1 lower, 1 equal, of 8: 100 x 1.5 / 8 = 18.75, the 19th.
+    const a = row(trends(made([[100, { a: 30 }], [100, { a: 20 }], ...earlier]), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.deepEqual(a.rank, { lower: 3, equal: 2, of: 9 }); assert.equal(a.percentile, 44);
+    assert.deepEqual(a.prevRank, { lower: 1, equal: 1, of: 8 }); assert.equal(a.prevPercentile, 19);
+    assert.equal(sinceLastWeek(a), 'up from 19th');
+  });
+  test('down, and never against a later week', () => {
+    // This week 5 %: below all nine, the 0th. Last week 60 % against weeks 2 to 9 only: 6 lower, 1 equal, of 8: 81.25,
+    // the 81st (with this week's 5 % among them it would be 7.5 of 9, the 83rd).
+    const a = row(trends(made([[100, { a: 5 }], [100, { a: 60 }], ...earlier]), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(a.percentile, 0);
+    assert.deepEqual(a.prevRank, { lower: 6, equal: 1, of: 8 }); assert.equal(a.prevPercentile, 81);
+    assert.equal(sinceLastWeek(a), 'down from 81st');
+  });
+  test('equal: the same percentile both weeks', () => {
+    // Earlier 10, 10, 10, 10, 30, 30, 30, 30 %. Last week 20 %: 4 lower of 8, the 50th. This week 20 %: 4 lower and 1
+    // equal (last week) of 9: 50.
+    const same = [10, 10, 10, 10, 30, 30, 30, 30].map(n => [100, { a: n }]);
+    const a = row(trends(made([[100, { a: 20 }], [100, { a: 20 }], ...same]), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(a.percentile, 50); assert.equal(a.prevPercentile, 50);
+    assert.equal(sinceLastWeek(a), 'same as last week');
+  });
+  test('history long enough for this week only: this week\'s alone', () => {
+    // Eight earlier weeks for this week, seven for last week.
+    const a = row(trends(made([[100, { a: 30 }], [100, { a: 20 }], ...earlier.slice(1)]), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(a.rank.of, 8); assert.ok(Number.isFinite(a.percentile));
+    assert.equal(a.prevPercentile, null); assert.equal(a.prevRank, null);
+    assert.equal(sinceLastWeek(a), '', 'nothing beside this week\'s');
+  });
+  test('last week not held in full, or no percentile this week: none for last week', () => {
+    const h = made([[100, { a: 30 }], [100, { a: 20 }], ...earlier], { notOk: [weekDays(TODAY, 1)[2]] });
+    const a = row(trends(h, { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(a.rank.of, 8, 'this week: weeks 2 to 9'); assert.equal(a.prevPercentile, null);
+    const short = row(trends(made([[100, { a: 30 }], [100, { a: 20 }], ...earlier.slice(2)]), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(short.percentile, null); assert.equal(short.prevPercentile, null);
+    assert.equal(lastWeekPercentile({ counts: false, topics: {} }, [], 'a'), null);
+  });
+  test('last week reaches one week further back than this week, up to 52 weeks', () => {
+    // Week 53 alone at 50 %: only last week's figure may reach it (51 equal of 52, 49.04, the 49th); this week's stops
+    // at week 52 (52 equal of 52, the 50th).
+    const a = row(trends(made(Array.from({ length: 54 }, (_, k) => [100, { a: k === 53 ? 50 : 10 }])), { generated: GENERATED, topics: TOPICS }), 'a');
+    assert.equal(a.rank.of, 52, 'this week: weeks 1 to 52'); assert.equal(a.prevRank.of, 52, 'last week: weeks 2 to 53');
+    assert.deepEqual(a.prevRank, { lower: 0, equal: 51, of: 52 }, 'week 53 is among last week\'s');
+    assert.equal(a.percentile, 50); assert.equal(a.prevPercentile, 49);
+  });
+  test('METHOD says how last week\'s figure is worked out, and that it uses the counts held now', () => {
+    const m = METHOD.join(' ');
+    assert.match(m, /Beside it is last week's percentile, worked out the same way: last week's share against the weeks that count before it, up to 52, with no later week used/);
+    // A later store keeps adding stories to a day it holds whole (accrue), so the figure is not promised to be the one shown a week ago.
+    assert.match(m, /worked out from the counts held now, so a story collected since can make it differ slightly from the figure shown a week ago/);
+    assert.doesNotMatch(m, /as it stood a week ago/);
   });
 });
 

@@ -23,6 +23,8 @@
 //   fewer than e. A topic not in the briefing's list in all four weeks is a new topic: no comparison yet.
 // - Percentile: P = round(100 x (earlier weeks with a lower share + half those with an equal share) / N), over the N
 //   earlier weeks that count, up to 52; shown once N is at least 8.
+// - Last week's percentile: the same rule for last week (week 1), against the weeks that count before it (weeks 2 to
+//   53, up to 52 of them, at least 8), never a later week; shown beside this week's ("92nd, up from 61st").
 
 export const DAY = 864e5;
 export const HOUR = 36e5;
@@ -129,13 +131,18 @@ const share = (w, id) => (w.stories ? (w.topics[id] || 0) / w.stories : 0);
    { week: { from, to }, status: 'ok' | 'short' | 'week', reason, have, need, startsAbout, percentilesAbout,
      weeks: [{ k, from, to, stories, counts, why, missing? }] (this week first, then every earlier week back to 52;
        missing: this week's days not held in full, when there are any),
-     baseline: [k…], topics: [{ id, label, short, n0, s0, base: [{ k, n, s }], b, e, ratio, trend, percentile, rank }] }
-   trend is 'rising' | 'falling' | 'steady' | 'new' | null (null: no comparison, status not 'ok'). */
+     baseline: [k…], topics: [{ id, label, short, n0, s0, base: [{ k, n, s }], b, e, ratio, trend, percentile, rank,
+       prevPercentile, prevRank }] }
+   trend is 'rising' | 'falling' | 'steady' | 'new' | null (null: no comparison, status not 'ok').
+   prevPercentile / prevRank: last week's percentile against only the weeks before it (lastWeekPercentile), from the
+   counts held now; given only beside this week's; null when last week has none. */
 export function trends(history, { generated, topics = [] }) {
   const G = Date.parse(generated), today = utcDay(G);
   const weeks = Array.from({ length: PCT_MAX + 1 }, (_, k) => week(history, today, k));
   const w0 = weeks[0];
   const counted = weeks.slice(1).filter(w => w.counts);
+  // Last week's own earlier weeks: from the week before it back, one week further than this week's reach.
+  const prevWeeks = [...weeks.slice(2), week(history, today, PCT_MAX + 1)].filter(w => w.counts).slice(0, PCT_MAX);
   const baseline = weeks.slice(1, BASE_WITHIN + 1).filter(w => w.counts).slice(0, BASE_WEEKS);
   const status = !w0.counts ? 'week' : baseline.length < BASE_WEEKS ? 'short' : 'ok';
   const pctWeeks = counted.slice(0, PCT_MAX);
@@ -156,7 +163,7 @@ export function trends(history, { generated, topics = [] }) {
   };
   for (const tp of topics) {
     const id = String(tp.id);
-    const row = { id, label: String(tp.label || id), short: String(tp.short || tp.label || id), n0: null, s0: null, base: [], b: null, e: null, ratio: null, trend: null, percentile: null, rank: null, history: [] };
+    const row = { id, label: String(tp.label || id), short: String(tp.short || tp.label || id), n0: null, s0: null, base: [], b: null, e: null, ratio: null, trend: null, percentile: null, rank: null, prevPercentile: null, prevRank: null, history: [] };
     if (w0.counts && id in w0.topics) {
       row.n0 = w0.topics[id]; row.s0 = share(w0, id);
       // Every earlier week that counts, with its stories and share, so a reader can count the percentile by hand.
@@ -177,6 +184,8 @@ export function trends(history, { generated, topics = [] }) {
         const lower = earlier.filter(w => w.s < row.s0).length, equal = earlier.filter(w => w.s === row.s0).length;
         row.percentile = percentile(lower, equal, earlier.length);
         row.rank = { lower, equal, of: earlier.length };
+        const prev = lastWeekPercentile(weeks[1], prevWeeks, id);
+        if (prev) { row.prevPercentile = prev.percentile; row.prevRank = prev.rank; }
       }
     }
     out.topics.push(row);
@@ -185,6 +194,27 @@ export function trends(history, { generated, topics = [] }) {
 }
 
 export const percentile = (lower, equal, of) => Math.round((100 * (lower + equal / 2)) / of);
+
+// Last week's percentile by this week's rule: last week's share against the weeks that count before it (`earlier`,
+// most recent first, up to 52), at least 8 of them; null when last week does not count, the topic was not in its list,
+// or there are too few. Only weeks before last week are used; the counts are those held now, so a story a later store
+// added to one of those days (accrue keeps recounting a day while the store holds it whole) can move it slightly from
+// the figure the page showed a week ago.
+export function lastWeekPercentile(w1, earlier, id) {
+  if (!w1?.counts || !(id in w1.topics)) return null;
+  const s1 = share(w1, id), ws = earlier.filter(w => id in w.topics);
+  if (ws.length < PCT_MIN) return null;
+  const lower = ws.filter(w => share(w, id) < s1).length, equal = ws.filter(w => share(w, id) === s1).length;
+  return { percentile: percentile(lower, equal, ws.length), rank: { lower, equal, of: ws.length } };
+}
+
+// This week's percentile beside last week's, as the pages say it: "up from 61st", "down from 61st", "same as last week"
+// ('' when last week has none).
+const ord = n => { const t = n % 100, u = n % 10; return n + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th'); };
+export function sinceLastWeek(x) {
+  if (!Number.isFinite(x?.percentile) || !Number.isFinite(x?.prevPercentile)) return '';
+  return x.percentile > x.prevPercentile ? `up from ${ord(x.prevPercentile)}` : x.percentile < x.prevPercentile ? `down from ${ord(x.prevPercentile)}` : 'same as last week';
+}
 
 // The first day, from `today` on, when `need` earlier weeks that count (within `within` weeks) and a whole week of its
 // own could be held, if every day from today counts and every week holds enough stories: the "about" date the page
@@ -232,6 +262,6 @@ export const METHOD = [
   'Stories are counted by the UTC day they were published, every story collected for that day while the briefing\'s store held the whole day; a story the store later dropped still counts for its day. A day is held in full when the store was already running when the day began and a store made no later than 15 hours after the day ended (the Political Briefing: 27 hours) held all of it. A week counts when all seven of its days are held in full and the briefing held at least 50 stories in it.',
   'This week is the seven whole UTC days before the day the store was made. A topic\'s share of a week is its stories that week divided by all the briefing\'s stories that week.',
   'The baseline is the four most recent earlier weeks that count, within the twelve weeks before. A topic is rising when its share this week is above its share in each of those four weeks, at least 1.25 times their average, with at least 20 stories, and at least twice the square root of the expected count above it (the expected count is this week\'s stories times the average share). It is falling when its share is below each of the four, at most 0.8 times their average, the expected count is at least 20, and the count is at least twice the square root of the expected count below it. A topic that was not in the briefing\'s list in all four weeks is new: there is no comparison yet.',
-  'The percentile ranks this week\'s share against the topic\'s share in every earlier week that counts, up to 52: the weeks with a lower share, plus half the weeks with an equal share, as a part of all those weeks. Higher than in 9 of 12 earlier weeks is the 75th percentile. It is shown once there are at least 8 earlier weeks.',
+  'The percentile ranks this week\'s share against the topic\'s share in every earlier week that counts, up to 52: the weeks with a lower share, plus half the weeks with an equal share, as a part of all those weeks. Higher than in 9 of 12 earlier weeks is the 75th percentile. It is shown once there are at least 8 earlier weeks. Beside it is last week\'s percentile, worked out the same way: last week\'s share against the weeks that count before it, up to 52, with no later week used, and left out while last week had fewer than 8 of them. It is worked out from the counts held now, so a story collected since can make it differ slightly from the figure shown a week ago.',
   'With too little history the page says so and shows no number.',
 ];

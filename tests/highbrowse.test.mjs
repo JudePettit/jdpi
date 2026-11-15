@@ -22,6 +22,7 @@ import * as ECON from '../econ/briefing/view.js';
 import * as DIG from '../digital/briefing/view.js';
 import '../design/prp-access.js'; // the access table the page reads (free sources lead)
 import { dayTime } from '../design/prp-freshness.js';
+import { trends as trendsOfHistory, emptyHistory, weekDays, utcDay, sinceLastWeek } from '../design/prp-trends.js';
 
 const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const json = p => JSON.parse(read(p));
@@ -594,6 +595,58 @@ test('page: the Trends tab shows every briefing\'s topics, each briefing\'s data
     assert.equal(await page.evaluate(() => location.hash), '');
     assert.deepEqual(errors, []);
     await page.close();
+  }
+});
+// Decided 14 November 2026: once there is history, the Trends tab shows last week's percentile beside this week's
+// ("92nd, up from 61st"). No briefing has the history yet (percentiles from about 29 December), so each briefing's
+// trends.json is served as design/prp-trends.js works it out from ten weeks made by hand, in the briefing's own topics:
+// its first topic up (44th, up from 19th), its second down (0th, down from 81st), its third the same (50th both weeks),
+// its fourth listed only from eight weeks back (this week's percentile alone, 38th: 2 lower and 2 equal of 8; last
+// week has 7 earlier weeks, not 8).
+function trendsWithHistory(real) {
+  const today = utcDay(Date.parse(real.generated)), h = emptyHistory();
+  const before = [[10, 20, 30, 30, 40, 50, 60, 70], [10, 20, 30, 30, 40, 50, 60, 70], [10, 10, 10, 10, 30, 30, 30, 30], [10, 20, 30, 30, 40, 50, 60, 70].slice(1)];
+  const now = [[30, 20], [5, 60], [20, 20], [30, 20]];
+  for (let k = 0; k < 10; k++) for (const d of weekDays(today, k)) {
+    const t = {};
+    real.topics.forEach((x, j) => {
+      if (j === 3 && k >= 9) return; // not yet in the list
+      t[x.id] = j > 3 ? 10 : k < 2 ? now[j][k] : before[j][k - 2] ?? 10;
+    });
+    h.days[d] = { n: 100, t, ok: true }; // each day 100 stories, so a topic's daily count is its share in per cent
+  }
+  return { ...real, ...trendsOfHistory(h, { generated: real.generated, topics: real.topics.map(({ id, label, short }) => ({ id, label, short })) }) };
+}
+test('page: with history enough, each percentile has last week\'s beside it, worded plainly, at 1360 and 390 px', pageTest, async t => {
+  const res = await fetch(`${BASE}/highbrowse/`).catch(() => null);
+  if (!res?.ok) { t.skip(`Highbrowse is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  const paths = BRIEFINGS.map(b => b.data.replace(/[^/]+$/, 'trends.json'));
+  const files = await Promise.all(paths.map(p => fetch(`${BASE}/${p}`).then(r => r.json()).then(trendsWithHistory)));
+  for (const f of files) assert.ok(f.topics.length >= 4, `${f.briefing}: four topics or more for the fixture`);
+  const browser = await launch();
+  t.after(() => browser.close());
+  for (const [width, dark] of [[1360, false], [390, true]]) {
+    const context = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: dark ? 'dark' : 'light' });
+    // By the whole path: "**/briefing/data/trends.json" would catch the other three briefings' files too.
+    const which = url => paths.indexOf(new URL(url).pathname.replace(/^\//, ''));
+    await context.route(url => which(url) >= 0, route => route.fulfill({ json: files[which(route.request().url())] }));
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message)); page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
+    await page.goto(`${BASE}/highbrowse/#tab=trends`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#panel-trends .trend td.pct small', { timeout: 30000 });
+    for (const [k, f] of files.entries()) {
+      const sec = page.locator(`#panel-trends .trend[data-b="${BRIEFINGS[k].key}"]`);
+      const cells = await sec.locator('table.ttable > tbody > tr > td.pct').evaluateAll(tds => tds.map(td => [...td.childNodes].filter(n => n.nodeName !== 'SMALL').map(n => n.textContent).join('')));
+      assert.deepEqual(cells.slice(0, 4), ['44th, up from 19th', '0th, down from 81st', '50th, same as last week', '38th'], `${f.briefing}: up, down, the same, and this week's alone`);
+      assert.deepEqual(f.topics.slice(0, 4).map(sinceLastWeek), ['up from 19th', 'down from 81st', 'same as last week', ''], 'the page words it as the shared module does');
+      const inView = await sec.locator('table.ttable').evaluate(tb => { const box = tb.closest('.scroll').getBoundingClientRect(); return [...tb.querySelectorAll('thead th')].slice(0, 5).every(th => th.getBoundingClientRect().right <= box.right + 1); });
+      assert.ok(inView, `${width}: ${f.briefing}: the percentile column in view without scrolling sideways`);
+    }
+    assert.match(await page.locator('#panel-trends .t-method').innerText(), /Beside it is last week's percentile, worked out the same way: last week's share against the weeks that count before it/);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), `${width}: no horizontal scroll`);
+    assert.deepEqual(errors, []);
+    await context.close();
   }
 });
 test('page: each briefing\'s panel gives its own data time, and a store refreshed since the page read it is offered as a reload', pageTest, async t => {

@@ -6,7 +6,7 @@ import {
   BRIEFINGS, BRIEFING, POSITIONS, POSITION_LABELS, TOPICS_KEY, WINDOW_LABELS, DEFAULTS, esc, fold, buildModel, digest, search, parseHash, toHash,
   briefingPage, itemPage, findWord, localDay, freeAlt,
 } from './analysis.js';
-import { METHOD } from '../design/prp-trends.js';
+import { METHOD, sinceLastWeek } from '../design/prp-trends.js';
 import { SCHEDULES, rhythmFromCron, lateAfterHours, dayTime } from '../design/prp-freshness.js';
 
 const { PRPAccess } = globalThis; // design/prp-access.js, loaded by analysis.js: free sources lead
@@ -227,7 +227,8 @@ function renderAnalysis(w) {
 /* ---------- headline trends (each briefing's trends.json, worked out by design/prp-trends.js) ---------- */
 // Jude, 12 November 2026: "Changes in headline trends as a percentile comparison should also be viewable in module".
 // One table per briefing: each topic's stories and share this week, its shares in the four weeks before, rising or
-// falling, its percentile against every earlier week that counts; and, under it, every counted week topic by topic, so
+// falling, its percentile against every earlier week that counts (with last week's beside it, by the same rule, once
+// last week has one: decided 14 November); and, under it, every counted week topic by topic, so
 // the percentile can be counted by hand. The Dashboard's "Headline trends" card reads the same files.
 const share = s => (Number.isFinite(s) ? `${(s * 100).toFixed(1)}%` : '–');
 const ordinal = n => { const t = n % 100, u = n % 10; return n + (t >= 11 && t <= 13 ? 'th' : u === 1 ? 'st' : u === 2 ? 'nd' : u === 3 ? 'rd' : 'th'); };
@@ -255,7 +256,9 @@ function trendSection(b, t, sel) {
   } else if (t.percentilesAbout) lines.push(`<p class="prp-note">Percentiles from about ${esc(dm(t.percentilesAbout))}, once VM holds 8 earlier weeks in full.</p>`);
   const rows = t.topics.map(x => {
     const id = `tr-${b.key}-${x.id}`, on = sel === `${b.key}.${x.id}`;
-    const pct = x.rank ? `${ordinal(x.percentile)}<small>${x.rank.lower} lower${x.rank.equal ? `, ${x.rank.equal} equal` : ''}, of ${x.rank.of}</small>` : '–';
+    // Beside it, last week's percentile by the same rule ("92nd, up from 61st"), once last week has one.
+    const was = sinceLastWeek(x);
+    const pct = x.rank ? `<span class="nw">${ordinal(x.percentile)}${was ? ',' : ''}</span>${was ? ` <span class="was">${esc(was)}</span>` : ''}<small>${x.rank.lower} lower${x.rank.equal ? `, ${x.rank.equal} equal` : ''}, of ${x.rank.of}</small>` : '–';
     const trend = x.trend ? `<span class="tr-${x.trend}">${esc(TREND[x.trend])}</span>` : '–';
     // Trend and Percentile straight after this week's share, so a phone shows them without scrolling sideways.
     return `<tr id="${esc(id)}"${on ? ' class="sel" tabindex="-1" aria-current="true"' : ''}><th scope="row">${esc(x.label)}</th><td class="num">${x.n0 == null ? '–' : num(x.n0)}</td><td class="num">${share(x.s0)}</td><td>${trend}</td><td class="num pct">${pct}</td>` +

@@ -64,7 +64,7 @@
    fetched from a dataset or the API are treated strictly as data — read, formatted and compared, never executed: every
    address fetched is a fixed path, and every link is one of ROUTES, or one of them with an address built from a key
    that first passed a strict pattern (KEYS) and is then encoded. */
-import { movers, dayList } from './prp-trends.js';
+import { movers, dayList, sinceLastWeek } from './prp-trends.js';
 import { SCHEDULES, rhythmFromCron, lateAfterHours } from './prp-freshness.js';
 
 // Shell hash routes into each submodule (shell.js parses '#/<suite>/<submodule>'). Hard-coded, never from fetched data.
@@ -247,7 +247,7 @@ async function buildVolatility(ctx) {
 /* --- METRIC 2: headline trends over the last 7 days ---------------------------------------------------------------
    Each briefing's trends.json (written with its store, integration/scripts/heads.mjs, by design/prp-trends.js):
    `generated` (the store's own time), `status` ('ok' when there is history enough), `week` ({ from, to }), `topics`
-   (each with this week's share s0, the four weeks' average b, `trend` and `percentile`), `startsAbout` (when trends can
+   (each with this week's share s0, the four weeks' average b, `trend`, `percentile` and last week's `prevPercentile`), `startsAbout` (when trends can
    start), and the store's three facts: `stories` held, its top `topic` (the Political Briefing's most-represented
    political position, `facet: 'positions'`) and the `name`.
    Rising and falling topics come from movers() (design/prp-trends.js), as Highbrowse's Trends tab lists them. */
@@ -297,7 +297,8 @@ async function buildBriefings(ctx) {
     // The percentile first, so a narrow card never cuts it; then the baseline; then what differs from the window.
     const own = byKey[x.briefing], bits = [];
     if (own.late) bits.push(lateTime(own));
-    if (Number.isFinite(x.percentile)) bits.push(`${ordinal(x.percentile)} percentile`);
+    // Last week's percentile beside it, by the same rule, once last week has one ("92nd percentile, up from 61st").
+    if (Number.isFinite(x.percentile)) { const was = sinceLastWeek(x); bits.push(`${ordinal(x.percentile)} percentile${was ? `, ${was}` : ''}`); }
     bits.push(`${fmtShare(x.b)} in the 4 weeks before`);
     if (own.t.week?.to !== wk.to) bits.push(`week to ${fmtDay(own.t.week?.to)}`);
     if (!own.late) { const t = ownTime(own, newest); if (t) bits.push(t); }

@@ -38,6 +38,11 @@ const ORIGIN = 'https://jdpi.pages.dev';
 const hexFixture = name => Buffer.from(fixture(name).split(/\r?\n/).filter(l => l && !l.startsWith('#')).join(''), 'hex');
 const ssdp = name => Buffer.from(fixture(name));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+// Every request a test makes to a bridge is on a connection of its own (Connection: close), so no idle keep-alive
+// connection outlives its answer for a bridge's close to cut. Node 22's fetch (undici 6) can fire such a connection's
+// idle timer after its parser has been collected, and throws outside any test: "Cannot destructure property 'socket' of
+// 'parser.deref(...)' as it is undefined" (Linux CI, 15 November 2026). Inside page.evaluate, fetch is the browser's.
+const fetch = (url, init = {}) => globalThis.fetch(url, { ...init, headers: { Connection: 'close', ...init.headers } });
 async function until(fn, what = 'condition', ms = 4000) {
   const t0 = Date.now();
   for (;;) { const v = await fn(); if (v) return v; if (Date.now() - t0 > ms) throw new Error(`Timed out waiting for ${what}`); await sleep(20); }
@@ -2211,6 +2216,25 @@ test('first run, finding 8: the ceiling holds after a play starts, and where it 
     assert.equal(r.ok, true, JSON.stringify(r));
     assert.equal(r.note, 'VM cannot read Bedroom Roku’s volume, so it cannot hold the ceiling of 80 if the device raises its own volume when it plays.');
   } finally { await g.close(); roku.close(); }
+});
+
+test('first run, finding 8: a bridge that stops ends a hold under way, and sends the player nothing more', async () => {
+  // The player loads for 1.5 s, then raises its own volume: the hold reads it every 0.1 s meanwhile.
+  const onPlay = { startMs: 1500, raiseTo: 100 };
+  const dev = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, onPlay });
+  const e = await bridge({ deps: { holdPollMs: 100, holdMs: 4000, recheckMs: 400, watchMs: 2000 } });
+  try {
+    const d = await addedPlayer(e, dev);
+    const play = e.cmd(d.id, 'play');
+    await until(() => dev.calls.filter(x => x.action === 'GetTransportInfo').length >= 2, 'the hold under way');
+    await e.iot.stop(); // as Ctrl-C does
+    const r = await play;
+    assert.equal(r.ok, true, JSON.stringify(r));
+    const sent = dev.calls.length;
+    await sleep(2500); // past the start, the raise and the hold's own end
+    assert.equal(dev.calls.length, sent, 'nothing sent once the bridge has stopped');
+    assert.equal(dev.st.volume, 100, 'and the raise after the stop is not claimed to be held');
+  } finally { await e.close(); dev.close(); }
 });
 
 test('first run, finding 9: every line typed in the bridge window gets an answer; one question at a time', async () => {

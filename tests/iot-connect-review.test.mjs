@@ -20,6 +20,10 @@ const TMP = mkdtempSync(path.join(os.tmpdir(), 'vm-iot-review-'));
 after(() => { try { rmSync(TMP, { recursive: true, force: true }); } catch { /* Windows may hold a file a moment */ } });
 let stateN = 0;
 const ORIGIN = 'https://jdpi.pages.dev';
+// A connection of its own for every request, as in tests/iot-connect.test.mjs: no idle keep-alive connection is left for
+// a bridge's close to cut (Node 22's fetch can then throw outside any test, "Cannot destructure property 'socket' of
+// 'parser.deref(...)'").
+const fetch = (url, init = {}) => globalThis.fetch(url, { ...init, headers: { Connection: 'close', ...init.headers } });
 const freePort = () => new Promise(r => { const s = net.createServer().listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => r(port)); }); });
 
 /** The same bridge as tests/iot-connect.test.mjs builds: IoT on, loopback policy, a fake clock unless realClock. */

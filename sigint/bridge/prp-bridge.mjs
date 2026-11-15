@@ -2171,10 +2171,14 @@ export function createIot(o, deps = {}) {
   // for the page's next read. A rise after the watch is not caught, and the play's answer says so. A device whose
   // volume VM cannot read or set is said to be so, rather than the ceiling claimed to hold.
   const PLAY_STARTS = new Set(['play-url', 'play']);
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  // The hold's waits, ended at once by stop() (so a hold under way sends nothing once the bridge has stopped).
+  const sleeps = new Set();
+  const sleep = ms => new Promise(r => { const z = { r, t: setTimeout(() => { sleeps.delete(z); r(); }, ms) }; sleeps.add(z); });
+  let stopped = false;
   const ceilingOf = d => d.volumeCeiling ?? 80;
-  // Still added (the owner's tick) and not answered by a different device: the checks after a play send nothing else.
-  const stillOwned = d => S.devices.includes(d) && d.status !== 'moved';
+  // Still added (the owner's tick), not answered by a different device, and the bridge not stopped: the checks after a
+  // play send nothing else.
+  const stillOwned = d => !stopped && S.devices.includes(d) && d.status !== 'moved';
   async function lowerTo(d, ceiling) {
     let s = null;
     if (!stillOwned(d)) return null;
@@ -2691,7 +2695,16 @@ export function createIot(o, deps = {}) {
   return {
     handle, inject, discover, command, uns, state: S, net: netx, publicDevice, startLan, lanHandler,
     async start() { if (cfg.lan.enabled) await startLan(); if (cfg.broker) uns.start(); },
-    stop() { const done = uns.stop(); if (lanServer) { lanServer.close(); lanServer.closeAllConnections?.(); lanState.listening = false; } for (const t of throttles.values()) clearTimeout(t.timer); for (const w of watches.values()) clearTimeout(w.timer); watches.clear(); return done; },
+    // Ends everything a play or a command started: the rate limit's held changes, the volume watches, and any hold
+    // under way (its wait ends now and it sends nothing more), so nothing the bridge started runs after it has stopped.
+    stop() {
+      const done = uns.stop(); stopped = true;
+      if (lanServer) { lanServer.close(); lanServer.closeAllConnections?.(); lanState.listening = false; }
+      for (const t of throttles.values()) clearTimeout(t.timer);
+      for (const w of watches.values()) clearTimeout(w.timer); watches.clear();
+      for (const z of sleeps) { clearTimeout(z.t); z.r(); } sleeps.clear();
+      return done;
+    },
     lanAddress: () => (lanServer ? lanServer.address() : null),
   };
 }

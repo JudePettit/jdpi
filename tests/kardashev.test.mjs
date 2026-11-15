@@ -88,6 +88,59 @@ test('before 1800 every share is marked as rough beside its value, with what the
 
 // On a phone the year and the rating stack, at rest and in a period alike: side by side, a period's longer figures
 // pushed the page sideways, and its longer line under the rating dropped the timeline and the map mid-drag.
+// Jude, 14 November 2026: the handles opened on top of each other. With no year in its address the tracker opens one
+// step apart, on the last two steps, shown as any period is; an address that names one step keeps it.
+test('opened with no year, the handles stand one step apart and the tracker shows the last two steps as a period', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const steps = (await (await fetch(`${BASE}/kardashev/data/energy.json`)).json()).steps.map(s => s.year), [a, b] = steps.slice(-2);
+  const label = y => (y < 0 ? `${-y} BC` : y === 1 ? 'AD 1' : String(y));
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/kardashev/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('.rank[data-id]', { timeout: 20000 });
+  const handles = () => page.evaluate(() => {
+    const el = document.querySelector('#timeline'), t = parseFloat(getComputedStyle(el).getPropertyValue('--prp-period-thumb')) || 16;
+    const at = i => { const b = i.getBoundingClientRect(); return b.left + t / 2 + ((+i.value - +i.min) / Math.max(1, +i.max - +i.min)) * (b.width - t); };
+    const f = el.querySelector('input.from'), to = el.querySelector('input.to');
+    return { from: f.dataset.value, to: to.dataset.value, apart: at(to) - at(f) > 0, joined: el.querySelector('.prp-period-range').classList.contains('joined') };
+  });
+  assert.deepEqual(await handles(), { from: String(a), to: String(b), apart: true, joined: false });
+  assert.equal(await page.locator('#year-big').innerText(), `${label(a)}–${label(b)}`);
+  assert.equal((await page.locator('#year-label').textContent()).trim(), 'Period');
+  assert.equal(await page.locator('#panel h2').innerText(), `${label(a)} to ${label(b)}`);
+  assert.match(await page.locator('#kval').innerText(), /^K 0\.\d\d → 0\.\d\d$/);
+  assert.ok(await page.locator('circle.ring-a').count() >= 4, 'rings for the start of the period');
+  assert.equal(await page.evaluate(() => location.hash), `#y=${b}&f=${a}`);
+  // An address that names one step keeps it.
+  await page.goto(`${BASE}/kardashev/#y=${b}`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(y => document.querySelector('#year-big')?.textContent === y, label(b), { timeout: 20000 });
+  assert.deepEqual(await handles(), { from: String(b), to: String(b), apart: false, joined: true });
+  assert.deepEqual(errors, []);
+});
+
+// Play from that opening runs through the centuries from the first step, as play from the single last step did.
+test('play from the opening travels through the steps from the first, one step at a time', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const steps = (await (await fetch(`${BASE}/kardashev/data/energy.json`)).json()).steps.map(s => s.year);
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/kardashev/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('.rank[data-id]', { timeout: 20000 });
+  await page.locator('#play').click();
+  assert.equal(await page.locator('#play').getAttribute('aria-label'), 'Pause');
+  // The end runs on past the first step, the start with it (one step, travelling).
+  await page.waitForFunction(first => { const f = document.querySelector('#step-from'), s = document.querySelector('#step'); return +s.dataset.value > first && f.dataset.value === s.dataset.value; }, steps[0], { timeout: 8000 });
+  await page.locator('#play').click();
+  const at = await page.evaluate(() => [document.querySelector('#step-from').dataset.value, document.querySelector('#step').dataset.value].map(Number));
+  assert.ok(at[0] === at[1] && at[1] > steps[0] && at[1] < steps.at(-2), JSON.stringify(at));
+  assert.equal(await page.locator('#play').getAttribute('aria-label'), 'Play through the centuries');
+  assert.deepEqual(errors, []);
+});
+
 test('a period on a phone: nothing scrolls sideways and the timeline stays where it was', pageTest, async t => {
   const browser = await launch();
   t.after(() => browser.close());

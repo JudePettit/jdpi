@@ -101,6 +101,21 @@ test('play runs from the start of the period and stops at the last stop', () => 
   assert.deepEqual(ij(R.playTick(st(2, 2, 10, 'end'), 'grow')), [2, 3]);
 });
 
+test('play from a snapshot page\'s opening period travels through every stop, as from the single last time', () => {
+  // The opening (the last two stops) plays as one time from the first stop, not one step of growth and a stop.
+  let s = st(8, 9, 10, 'end'), mode = R.playMode(s);
+  assert.equal(mode, 'travel');
+  assert.deepEqual(ij(s = R.playStart(s, mode)), [0, 0]);
+  assert.deepEqual(ij(s = R.playTick(s, mode)), [1, 1]);
+  for (let k = 2; k < 10; k++) assert.deepEqual(ij(s = R.playTick(s, mode)), [k, k]);
+  assert.equal(R.playTick(s, mode), null);
+  assert.equal(R.playMode(st(0, 1, 2, 'end')), 'travel');   // two stops: the opening is the whole track
+  // Any other period still grows: one ending earlier, a longer one, and the same stops on an up-to page.
+  assert.equal(R.playMode(st(7, 8, 10, 'end')), 'grow');
+  assert.equal(R.playMode(st(7, 9, 10, 'end')), 'grow');
+  assert.equal(R.playMode(st(8, 9, 10)), 'grow');
+});
+
 test('layering, fill, ticks and bars', () => {
   // The handle in front is the one that can move off: the start, once it meets the end away from the first stop.
   assert.deepEqual(R.layering(st(5, 5, 10)), { topFrom: true, joined: true });
@@ -135,6 +150,33 @@ test('the address: the start is written only away from rest, and reads back to t
   assert.equal(R.readStart(months, '2022-01', '2023-07'), null);
   assert.equal(R.readStart(months, '2023-07', '2023-05'), '2023-07');
   for (const p of [{ atRest: false, from: 1939 }, { atRest: true, from: 1945 }]) assert.equal(R.readStart(years, R.startParam(p) == null ? null : String(R.startParam(p)), 1945, 'end'), p.atRest ? null : p.from);
+});
+
+// Jude, 14 November 2026: the handles opened on top of each other on the snapshot maps. An address that names no time
+// at all (bare) now opens with the start one stop before the end, a two-step period; one that names a time keeps it.
+test('opening: a bare snapshot address opens one stop apart; an up-to page, one stop and named times are unchanged', () => {
+  const years = Array.from({ length: 100 }, (_, k) => 1926 + k), months = ['2026-01', '2026-02', '2026-03'], steps = [-2000, -1000, 1, 1000, 2025];
+  assert.equal(R.openStart(years, 2025), 2024);
+  assert.equal(R.openStart(years, null), 2024);   // no end given: the last stop's
+  assert.equal(R.openStart(steps, 2025), 1000);   // the stop before, however far back it lies
+  assert.equal(R.openStart(months, '2026-03'), '2026-02');
+  assert.equal(R.openStart(years, 1926), null);   // the end on the first stop: one time
+  assert.equal(R.openStart([2026], 2026), null);  // one stop: one handle position
+  assert.equal(R.openStart([], null), null);
+  assert.equal(R.readStart(years, null, 2025, 'end', true), 2024);
+  assert.equal(R.readStart(months, null, '2026-03', 'end', true), '2026-02');
+  assert.equal(R.readStart([2026], null, 2026, 'end', true), null);
+  assert.equal(R.readStart([], null, null, 'end', true), null);
+  // Up-to pages already open apart (the start on the first stop): bare changes nothing there.
+  assert.equal(R.readStart(months, null, '2026-03', 'first', true), null);
+  // An address that names a time is not bare, and reads as before: one year, or its period.
+  assert.equal(R.readStart(years, null, 1950, 'end'), null);
+  assert.equal(R.readStart(years, '1939', 1945, 'end'), 1939);
+  // The opening period, written and read back, is the same period (it is away from rest, so its start is written).
+  const p = { atRest: false, from: R.openStart(years, 2025) };
+  assert.equal(R.readStart(years, String(R.startParam(p)), 2025, 'end'), 2024);
+  assert.equal(R.atRest({ i: 98, j: 99, n: 100, rest: 'end' }), false);
+  assert.deepEqual(R.layering({ i: 98, j: 99, n: 100, rest: 'end' }), { topFrom: false, joined: false });
 });
 
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');

@@ -301,6 +301,76 @@ test('Retrospective: on a phone, opening a period keeps the timeline where it wa
   assert.deepEqual(errors, []);
 });
 
+// Jude, 14 November 2026: "The sliders on the maps currently start off as overlayed on one another. They should start
+// off one apart so both are visible when you first open the map." An address with no time opens one stop apart, on a
+// two-stop period shown as any period is; an address that names one time keeps it, and one that names a period too.
+const handles = (page, sel) => page.evaluate(sel => {
+  const el = document.querySelector(sel), t = parseFloat(getComputedStyle(el).getPropertyValue('--prp-period-thumb')) || 16;
+  const at = i => { const b = i.getBoundingClientRect(); return b.left + t / 2 + ((+i.value - +i.min) / Math.max(1, +i.max - +i.min)) * (b.width - t); };
+  const f = el.querySelector('input.from'), to = el.querySelector('input.to');
+  return { from: f.dataset.value, to: to.dataset.value, apart: at(to) - at(f) > 0, joined: el.querySelector('.prp-period-range').classList.contains('joined') };
+}, sel);
+test('Retrospective: opened with no year, the handles stand one year apart and the map shows the last two years', pageTest, async () => {
+  const { firstYear, lastYear } = HISTORY, prev = lastYear - 1;
+  const { browser, page, errors } = await open('battlefield/history/');
+  try {
+    await page.waitForSelector('#panel .war', { timeout: 20000 });
+    assert.deepEqual(await handles(page, '#timeline'), { from: String(prev), to: String(lastYear), apart: true, joined: false });
+    assert.equal(await page.locator('#year-big').textContent(), `${prev}–${lastYear}`);
+    assert.equal((await page.locator('#year-label').textContent()).trim(), 'Period');
+    assert.match(await page.locator('#panel .sub').innerText(), /^\d+ armed conflicts, \d+ at war level at some point$/);
+    assert.equal(page.url(), `${BASE}/battlefield/history/`, 'opening writes nothing to the address');
+    // The next thing written to the address (the table chosen) keeps the period.
+    await page.locator('[role="tab"][data-view="table"]').click();
+    assert.match(page.url(), new RegExp(`#y=${lastYear}&f=${prev}&v=table$`));
+    // An address that names one year keeps it: the handles together, as before.
+    await page.goto(`${BASE}/battlefield/history/#y=${lastYear}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(y => document.querySelector('#year-big')?.textContent === y, String(lastYear), { timeout: 20000 });
+    assert.deepEqual(await handles(page, '#timeline'), { from: String(lastYear), to: String(lastYear), apart: false, joined: true });
+    assert.ok(firstYear < prev);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+// Play from that opening runs through the years from the first, as play from the single last year did, not one step.
+test('Retrospective: play from the opening travels through the years from the first, one year at a time', pageTest, async () => {
+  const { firstYear, lastYear } = HISTORY;
+  const { browser, page, errors } = await open('battlefield/history/');
+  try {
+    await page.waitForSelector('#panel .war', { timeout: 20000 });
+    await page.locator('#play').click();
+    assert.equal(await page.locator('#play').getAttribute('aria-label'), 'Pause');
+    // The end runs on past the first year, the start with it (one year, travelling).
+    await page.waitForFunction(first => { const f = document.querySelector('#from'), t = document.querySelector('#year'); return +t.dataset.value > first && f.dataset.value === t.dataset.value; }, firstYear, { timeout: 8000 });
+    await page.locator('#play').click();
+    const at = await page.evaluate(() => [document.querySelector('#from').dataset.value, document.querySelector('#year').dataset.value].map(Number));
+    assert.ok(at[0] === at[1] && at[1] > firstYear && at[1] < lastYear - 1, JSON.stringify(at));
+    assert.equal(await page.locator('#play').getAttribute('aria-label'), 'Play through the years');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+test('Realtime: the archive opened with no month stands its handles one month apart, on the last two months', pageTest, async () => {
+  const months = REALTIME.months, [a, b] = months.slice(-2), year = b.slice(0, 4);
+  const name = m => new Date(`${m}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+  const { browser, page, errors } = await open('q/battlefield?view=archive');
+  try {
+    await page.waitForSelector('.arow', { timeout: 20000 });
+    assert.deepEqual(await handles(page, '#monthctl'), { from: a, to: b, apart: true, joined: false });
+    assert.equal(await page.locator('#archtitle').innerText(), `${name(a)}–${name(b)} ${year}`);
+    assert.equal(await page.locator('#sidetitle').innerText(), `Wars in ${name(a)}–${name(b)} ${year}`);
+    assert.ok(await page.locator('.permonth').count() > 0, 'each war month by month over the period');
+    assert.match(page.url(), /\?view=archive$/);
+    // The start moved onto the end gives one month, written to the address, which then opens that one month.
+    await page.locator('#month-from').focus();
+    await page.keyboard.press('End');
+    assert.equal(await page.locator('#archtitle').innerText(), `${name(b)} ${year}`);
+    assert.match(page.url(), new RegExp(`\\?view=archive&month=${b}$`));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.arow', { timeout: 20000 });
+    assert.deepEqual(await handles(page, '#monthctl'), { from: b, to: b, apart: false, joined: true });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
 /* ---- its summary (integration/scripts/heads.mjs), written by the build with the store and committed with it; checked
    here too, so a refresh never commits one out of step. */
 import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';

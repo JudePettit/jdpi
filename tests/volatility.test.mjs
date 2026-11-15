@@ -361,6 +361,7 @@ test('site: the deployed index is recent and scores countries', pageTest, async 
 });
 
 test('page: map, country page and comparison work', pageTest, async () => {
+  const v = await (await fetch(`${BASE}/volatility/data/index.json`)).json(), latest = v.global.at(-1)[0];
   const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -370,7 +371,8 @@ test('page: map, country page and comparison work', pageTest, async () => {
     await page.waitForSelector('#rows tr', { timeout: 20000 });
     const rows = await page.locator('#rows tr').count();
     const options = await page.locator('#metric option').count();
-    await page.goto(`${BASE}/q/volatility#country=UKR`, { waitUntil: 'domcontentloaded' });
+    // One day's profile (an address with no day opens on the last two: the test below).
+    await page.goto(`${BASE}/q/volatility#country=UKR&day=${latest}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#profile .stat', { timeout: 20000 });
     const profile = await page.locator('#profile').innerText();
     await page.goto(`${BASE}/q/volatility#tab=compare&compare=UKR,ISR,USA`, { waitUntil: 'domcontentloaded' });
@@ -461,6 +463,50 @@ test('page: dragging the start handle with the pointer opens a period and leaves
     assert.ok(starts.every((d, k) => d <= (k ? starts[k - 1] : day)), `the start only moves back: ${starts.join(' ')}`);
     assert.ok(starts.at(-1) < day, `a period opened: ${starts.at(-1)}`);
     assert.equal(hash, `#day=${day}&from=${starts.at(-1)}`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Jude, 14 November 2026: the handles opened on top of each other. An address with no day opens one day apart, on the
+// last two days, shown as any period is; an address that names one day keeps it, and the latest day shown alone is
+// written to the address by name, so it opens alone again.
+test('page: opened with no day, the handles stand one day apart and the page shows the last two days as a period', pageTest, async () => {
+  const v = await (await fetch(`${BASE}/volatility/data/index.json`)).json(), [a, b] = v.global.map(g => g[0]).slice(-2);
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    const handles = () => page.evaluate(() => {
+      const el = document.querySelector('#days'), t = parseFloat(getComputedStyle(el).getPropertyValue('--prp-period-thumb')) || 16;
+      const at = i => { const r = i.getBoundingClientRect(); return r.left + t / 2 + ((+i.value - +i.min) / Math.max(1, +i.max - +i.min)) * (r.width - t); };
+      const f = el.querySelector('input.from'), to = el.querySelector('input.to');
+      return { from: f.dataset.value, to: to.dataset.value, apart: at(to) - at(f) > 0, joined: el.querySelector('.prp-period-range').classList.contains('joined') };
+    });
+    await page.goto(`${BASE}/q/volatility`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows tr', { timeout: 20000 });
+    assert.deepEqual(await handles(), { from: a, to: b, apart: true, joined: false });
+    assert.equal((await page.locator('#day-lbl').textContent()).trim(), 'Period');
+    assert.match(await page.locator('#daylabel').innerText(), /^\d+(?: \w+(?: \d{4})?)? ?– ?\d+ \w+ \d{4}$/);
+    assert.match(await page.locator('#maptitle').innerText(), /^Mean GVI · \d+(?: \w+(?: \d{4})?)? ?– ?\d+ \w+ \d{4}$/);
+    assert.equal(await page.evaluate(() => location.hash), '');
+    // The start moved onto the end: the latest day alone, named in the address, which opens it alone again.
+    await page.locator('#day-from').focus();
+    await page.keyboard.press('End');
+    assert.equal((await page.locator('#day-lbl').textContent()).trim(), 'Day');
+    assert.equal(await page.evaluate(() => location.hash), `#day=${b}`);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#rows tr', { timeout: 20000 });
+    assert.deepEqual(await handles(), { from: b, to: b, apart: false, joined: true });
+    // Back to two days: the start written as from=, the latest day left out, as before.
+    await page.locator('#day-from').focus();
+    await page.keyboard.press('ArrowLeft');
+    assert.equal(await page.evaluate(() => location.hash), `#from=${a}`);
+    // A country's page opened with no day shows the period too.
+    await page.goto(`${BASE}/q/volatility#country=UKR`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#profile .stat', { timeout: 20000 });
+    assert.match(await page.locator('#profile .ptitle .sub').innerText(), /^Over /);
+    assert.match(await page.locator('#profile').innerText(), /mean gvi/i);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

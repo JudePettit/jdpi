@@ -134,6 +134,8 @@ const params = new URLSearchParams(location.search);
 let view = params.get('view') === 'archive' ? 'archive' : 'live';
 // month: the archive's month shown (the end of the period); from: a period's first month (null for one month).
 let data, selectedWar = params.get('war'), month = params.get('month'), from = params.get('from');
+// An address with no month opens the archive, the first time it is shown, on the last two months (design/prp-period.js).
+let opening = !month && !from;
 const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
 
 /* ---------- views: in-page tabs, linked by ?view= ---------- */
@@ -405,8 +407,8 @@ function render() {
   if (view === 'archive') {
     document.getElementById('maptitle').textContent = 'Conflict map by month';
     // The year's months, each tick its initial; a from at or after the month shown, or not in the data, is one month.
-    const p = period.update({ stops: data.months, ticks: data.months.map(m => ({ at: m, text: monthName(m, { month: 'narrow' }), kind: 'key' })), from: PRPPeriod.rules.readStart(data.months, data.months.includes(from) ? from : null, month, 'end'), to: month });
-    month = p.to; from = p.atRest ? null : p.from;
+    const p = period.update({ stops: data.months, ticks: data.months.map(m => ({ at: m, text: monthName(m, { month: 'narrow' }), kind: 'key' })), from: PRPPeriod.rules.readStart(data.months, data.months.includes(from) ? from : null, month, 'end', opening), to: month });
+    month = p.to; from = p.atRest ? null : p.from; opening = false;
   } else {
     document.getElementById('maptitle').textContent = `Conflict map · ${monthName(data.months.at(-3) || data.latest, { month: 'short' })}–${monthName(data.latest)}`;
   }

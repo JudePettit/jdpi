@@ -489,11 +489,12 @@
   };
 
   const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  // The address: #y= is a step year (exactly, else the step shown stays); an f at or after it, or unreadable, is one step.
+  // The address: #y= is a step year (exactly, else the step shown stays); an f at or after it, or unreadable, is one step;
+  // an address with no year at all opens on the step before the one shown and that one.
   function readHash() {
     const h = new URLSearchParams(location.hash.slice(1)), k = data.steps.findIndex(s => s.year === +h.get('y'));
     const to = data.steps[k >= 0 ? k : idx].year;
-    return { to, from: PRPPeriod.rules.readStart(period.get().stops, h.get('f'), to, 'end'), p: byId[h.get('p')] ? h.get('p') : null, v: h.get('v') === 'table' ? 'table' : 'map' };
+    return { to, from: PRPPeriod.rules.readStart(period.get().stops, h.get('f'), to, 'end', !h.get('y') && !h.get('f')), p: byId[h.get('p')] ? h.get('p') : null, v: h.get('v') === 'table' ? 'table' : 'map' };
   }
   Promise.all([
     fetch('data/energy.json').then(r => r.json()),

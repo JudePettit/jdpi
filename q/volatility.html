@@ -624,12 +624,13 @@ function setTab(t) {
   hideTip();
   if (t === 'compare') renderCompare(); if (t === 'profile') renderProfile(); if (t === 'map' && V) renderGlobal();
 }
-// The days shown go after the view: day= the day shown (left out for the latest), from= a period's first day.
+// The days shown go after the view: day= the day shown (left out for the latest, unless the latest is shown alone, as
+// an address with no day opens on the last two), from= a period's first day.
 function writeHash() {
   const t = document.querySelector('.prp-tabs [role=tab].active').dataset.tab, p = new URLSearchParams();
   if (t === 'profile' && selected) p.set('country', selected); else if (t !== 'map') p.set('tab', t);
   if (compare.length) p.set('compare', compare.join(','));
-  if (DAYS.length && dayIdx !== DAYS.length - 1) p.set('day', DAYS[dayIdx]);
+  if (DAYS.length && (dayIdx !== DAYS.length - 1 || fromIdx === dayIdx)) p.set('day', DAYS[dayIdx]);
   const f = PRPPeriod.rules.startParam(period.get()); if (f) p.set('from', f);
   history.replaceState(null, '', '#' + p.toString());
   $('#gone').hidden = true;
@@ -638,8 +639,9 @@ function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   compare = (p.get('compare') || '').split(',').filter(i => byIso.has(i)).slice(0, 4); slots.clear(); compare.forEach(slotOf);
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
-  // A day the data does not have is the latest; a from at or after it, or unreadable, is that one day.
-  const to = DAYS.includes(p.get('day')) ? p.get('day') : DAYS.at(-1), q = period.set(PRPPeriod.rules.readStart(DAYS, p.get('from'), to, 'end'), to, { silent: true });
+  // A day the data does not have is the latest; a from at or after it, or unreadable, is that one day; an address with
+  // no day at all opens on the last two days.
+  const to = DAYS.includes(p.get('day')) ? p.get('day') : DAYS.at(-1), q = period.set(PRPPeriod.rules.readStart(DAYS, p.get('from'), to, 'end', !p.get('day') && !p.get('from')), to, { silent: true });
   if (q.fromIndex !== fromIdx || q.toIndex !== dayIdx) { fromIdx = q.fromIndex; dayIdx = q.toIndex; derive(fromIdx, dayIdx); showDay(); renderMovers(); }
   // An address naming a country the index does not hold (a link kept from another day, say) opens the page as usual,
   // with a plain note that says so; the note goes once the reader moves on (writeHash).

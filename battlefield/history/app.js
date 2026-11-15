@@ -368,8 +368,8 @@ function writeHash() {
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1)), y = +p.get('y') || state.data.lastYear;
   const years = period.get().stops;
-  // An f at or after the year, or unreadable, is a single year.
-  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end'), c: +p.get('c') || null, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
+  // An f at or after the year, or unreadable, is a single year; an address with no year at all opens on the last two.
+  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f')), c: +p.get('c') || null, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
 }
 
 function setupSearch() {

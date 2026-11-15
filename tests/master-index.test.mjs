@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { ADAPTERS, ADAPTER_MODULES, JDPI, kino, pestle, volatility } from '../lake/scripts/adapters.mjs';
 import { wikidataDate, datedFacts, formatDate } from '../lake/scripts/dates.mjs';
+import { shortCounts, countOf, recount } from '../lake/scripts/counts.mjs';
 import { CATEGORY_IDS, flatScenes } from '../kino/lib/format.js';
 import { readAt, onOwnPage } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
@@ -322,6 +323,50 @@ test('committed lake: every entity a book is tagged with appears in that book, a
   assert.equal(inPrince.length, 1, 'the Duchy of Milan in The Prince');
   assert.match(inPrince[0].c, /^Named in The Prince \(Niccolò Machiavelli, 1532\), \d+ times, as Milan/);
   assert.ok(milan.total > 0 && milan.tags.includes('Appears in:Bibliotheca'), 'counted, and filed under Bibliotheca');
+});
+
+// ---- The recount (--only, after the monthly refresh re-tags the books) gives the total the full build gives. Until
+// November 2026 it took out only the book share the kept list showed, and a record keeps 300 places: with 300 earlier
+// appearances and one in a book, the full build said 301 and the recount 302.
+test('recount: --only gives the full build’s total whatever the 300-place cap, or a place named twice', () => {
+  const at = (module, i) => ({ module, url: `${JDPI}${module}#${i}`, context: '', date: null });
+  // The full build's record (build.mjs, record): each place once, the first 300 in module order, `n` for the short ones.
+  const full = all => {
+    const seen = new Set(), mentions = [];
+    for (const x of all) { if (seen.has(x.module + x.url)) continue; seen.add(x.module + x.url); mentions.push({ m: x.module, u: x.url, c: x.context, d: x.date }); if (mentions.length >= 300) break; }
+    const n = shortCounts(all, mentions);
+    return { mentions, total: all.length, ...(Object.keys(n).length ? { n } : {}) };
+  };
+  const own = new Set(['neo-classic']), merge = (old, mine) => {
+    const kept = [...old.mentions.filter(x => !own.has(x.m)), ...full(mine).mentions].slice(0, 300);
+    return { ...recount(old, own, mine, kept), kept };
+  };
+  const retro = Array.from({ length: 300 }, (_, i) => at('retrospective', i)), book = [at('neo-classic', 'the-prince')];
+  const old = full([...retro, ...book]);
+  assert.equal(old.total, 301);
+  assert.equal(old.mentions.length, 300, 'the book mention past the cap');
+  assert.deepEqual(old.n, { 'neo-classic': 1 }, 'the book share kept beside the list');
+  const same = merge(old, book);
+  assert.equal(same.total, 301, 'the same tags recounted: the full build’s 301, not 302');
+  assert.deepEqual(same.n, { 'neo-classic': 1 });
+  const two = [...book, at('neo-classic', 'the-discourses')], more = merge(old, two);
+  assert.equal(more.total, full([...retro, ...two]).total, 'a second book: 302, as the full build');
+  assert.deepEqual(more.n, { 'neo-classic': 2 });
+  assert.equal(merge(old, []).total, 300, 'the book untagged: the Retrospective’s 300');
+  // 299 earlier places: the book mention is the 300th, shown, and no `n`; a second book goes past the cap.
+  const under = full([...retro.slice(0, 299), ...book]);
+  assert.equal(under.n, undefined);
+  const past = merge(under, two);
+  assert.deepEqual([past.total, past.n], [301, { 'neo-classic': 2 }], 'the second book past the cap, counted');
+  assert.equal(merge(full([...retro.slice(0, 299), ...two]), book).total, 300, 'and recounted back to one');
+  // A place named twice by another module (the Retrospective names a country many times on one page) stays counted.
+  const twice = full([at('retrospective', 0), at('retrospective', 0), ...book]);
+  assert.deepEqual([twice.total, twice.n], [3, { retrospective: 2 }]);
+  assert.deepEqual(merge(twice, book), { total: 3, n: { retrospective: 2 }, kept: twice.mentions });
+  // A record committed before `n` (the list in full, each place once) is recounted as before.
+  const plain = { mentions: [{ m: 'retrospective', u: 'a' }, { m: 'neo-classic', u: 'b' }], total: 2 };
+  assert.equal(recount(plain, own, [...book, ...book.map(x => ({ ...x, url: 'c' }))], []).total, 3);
+  assert.equal(countOf(old, 'retrospective'), 300);
 });
 
 /* ---------------------------------------------------------------- the page */

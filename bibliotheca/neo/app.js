@@ -533,8 +533,10 @@ async function renderVm() {
     const l = info ? placeLink(info.suite, m.m, m.u) : { href: pageUrl(m.u), hash: '', page: pageUrl(m.u), target: '_blank' };
     return { key: `m${i}`, ...l, module: m.m, name: info?.name || m.m, place: m.c || '', fit: canFrame({ module: m.m, page: l.page }, reg, SHELL) };
   });
-  // Every place resolves (an address may name one past the eighth); the eight first, and one shown past them, are listed.
-  const listed = ments.filter((m, n) => n < 8 || m.key === (S.vmShown || S.pendingShow));
+  // Every place resolves (an address may name one past the eighth); eight are listed, the first eight, or, when the
+  // place shown is past them, the first seven and that one in the eighth row (keeping its own key).
+  const listed = ments.slice(0, 8), wanted = S.vmShown || S.pendingShow, past = ments.findIndex((m, n) => n >= 8 && m.key === wanted);
+  if (past >= 0) listed[listed.length - 1] = ments[past];
   const places = new Map([
     ...rows.filter(r => r.available).map(r => { const l = placeLink(r.suite, r.module, r.at); return [r.id, { ...l, module: r.module, name: name(r), place: r.place, fit: canFrame({ module: r.module, page: l.page }, reg, SHELL) }]; }),
     ...ments.map(m => [m.key, m]),
@@ -1167,6 +1169,9 @@ function wire() {
     const b = e.target.closest('.nc-chip');
     if (!b) return;
     if (b.getAttribute('aria-pressed') === 'true') clearTerm(); else useTerm(b.dataset.term);
+    // A term chosen here opens its entry on the Master Index tab and hides this one: focus goes to that tab, not to a
+    // chip in the hidden panel (Tab, Enter on a chip left no focus to be seen).
+    if (S.pane && S.pane !== 'terms') $(`#tab-${S.pane}`).focus({ preventScroll: true });
   });
 
   // Contents: a list hanging from the head; a click outside it, Escape or a choice closes it.

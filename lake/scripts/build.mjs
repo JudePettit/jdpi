@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
 import { wikidataDate, datedFacts } from './dates.mjs';
+import { shortCounts, recount } from './counts.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -259,10 +260,12 @@ function record(q) {
   // stop, or William Withering's "With." would be "With", a term at every sentence that opens with the word in every
   // book the monthly refresh re-tags.
   const label = e.labels?.en?.value || title || q;
+  // `n`: the modules the kept list shows short (a place named twice, or past the 300th), so --only can recount (counts.mjs).
+  const n = shortCounts(ms, mentionsOut);
   return {
     q, label, desc: e.descriptions?.en?.value || '', type: typeOf(e),
     aliases: recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), wiki: title, img: img || null,
-    summary: title ? cache[normTitle(title)] || '' : '', facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length,
+    summary: title ? cache[normTitle(title)] || '' : '', facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length, ...(Object.keys(n).length ? { n } : {}),
     tags: tagsFor(e, typeOf(e), ms),
   };
 }
@@ -289,7 +292,9 @@ function onlyMerge() {
     const appears = new Set([...MODS].map(m => `Appears in:${MODULE_NAMES[m] || m}`));
     const add = mine(q).flatMap(m => [`Appears in:${MODULE_NAMES[m.module] || m.module}`, ...(m.tags || []).filter(([, v]) => v).map(([f, v]) => `${f}:${v}`)]);
     const next = new Set([...old.tags.filter(t => !appears.has(t) && !ownGroups.has(t.split(':')[0])), ...add]);
-    out.set(q, { ...old, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total: old.total - (old.mentions.length - others.length) + mine(q).length,
+    // The total less these modules' old share, counted from `n` where the list showed it short, plus their new one.
+    const { total, n } = recount(old, MODS, mine(q), ms), { n: _, ...kept } = old;
+    out.set(q, { ...kept, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total, ...(Object.keys(n).length ? { n } : {}),
       tags: [...old.tags.filter(t => next.has(t)), ...[...next].filter(t => !old.tags.includes(t))] });
   }
   const pageRel = new Set(PAGE_RELATIONS.map(p => REL[p]));

@@ -1064,6 +1064,52 @@ test('page: "Where … appears" lists the other modules before the books, leaves
   } finally { await browser.close(); }
 });
 
+// Eight rows, whatever the address shows: a place past the eighth takes the eighth row, keeping its own key (until
+// 15 November 2026 it was a ninth row). Aristotle in the first volume of Gibbon: the Invention Timeline, then eleven
+// other books; show=m11 is the twelfth.
+test('page: "Where … appears" lists eight places; one show= names past them takes the eighth row, as its own key', PAGE, async () => {
+  const mentions = read(`lake/data/e/${868 % 512}.json`).Q868.mentions;
+  const order = mentions.map((m, i) => ({ m, i })).filter(x => !x.m.u.includes('#book=decline-and-fall-1&'));
+  const keys = [...order.filter(x => x.m.m !== 'neo-classic'), ...order.filter(x => x.m.m === 'neo-classic')].map(x => `m${x.i}`);
+  const past = keys[keys.length - 1];
+  assert.ok(keys.length > 8 && keys.indexOf(past) >= 8, `a place past the eighth: ${keys}`);
+  const browser = await launch();
+  try {
+    for (const [show, want] of [[past, [...keys.slice(0, 7), past]], [keys[2], keys.slice(0, 8)]]) {
+      const { page, errors, ctx } = await reading(browser, `#book=decline-and-fall-1&ch=2&p=c02-p156&t=Q868&pane=vm&show=${show}`, { ar: false });
+      await page.waitForSelector(`#mention-rows li[data-key="${show}"][aria-current="true"]`, { timeout: 20000 });
+      assert.deepEqual(await page.locator('#mention-rows li').evaluateAll(ls => ls.map(l => l.dataset.key)), want, `show=${show}`);
+      assert.ok(new RegExp(`&show=${show}$`).test(await page.evaluate(() => location.hash)), 'the address keeps the place');
+      assert.deepEqual(errors, []);
+      await ctx.close();
+    }
+  } finally { await browser.close(); }
+});
+
+// A term chosen from the "On screen" tab by keyboard opens its entry on the Master Index tab, which hides the chips:
+// focus goes to that tab (until 15 November 2026 it stayed on the chip, in the hidden panel, where nothing showed it).
+test('page: Enter on an "On screen" chip leaves the focus on the Master Index tab, seen, in the pane', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=7&p=c07-p01&pane=terms', { ar: false });
+    await page.evaluate(() => document.querySelector('#text a.term').scrollIntoView({ block: 'center' }));
+    await page.waitForSelector('#panel-terms:not([hidden]) #chips .nc-chip');
+    const qid = await page.getAttribute('#chips .nc-chip', 'data-term');
+    await page.focus(`#chips .nc-chip[data-term="${qid}"]`);
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('#panel-ency:not([hidden])');
+    await page.waitForFunction(q => new RegExp(`&t=${q}&pane=ency$`).test(location.hash), qid);
+    const focus = await page.evaluate(() => {
+      const a = document.activeElement, r = a.getBoundingClientRect();
+      return { id: a.id, inPane: !!a.closest('#pane'), seen: a.checkVisibility() && r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight };
+    });
+    assert.deepEqual(focus, { id: 'tab-ency', inPane: true, seen: true });
+    assert.equal(await page.getAttribute('#tab-ency', 'aria-selected'), 'true');
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally { await browser.close(); }
+});
+
 test('page: subtitles in Screens only show the unit being read; S hides and shows them, and the choice is kept; in a 360 px pane each word of a long unit is in the strip when it is said', PAGE, async () => {
   const browser = await launch();
   try {

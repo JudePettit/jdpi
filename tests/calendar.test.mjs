@@ -50,6 +50,9 @@ test('news classifier: each new type, and the near-misses it must not take', () 
   assert.equal(typeOf('The Council of the European Union approves the 22nd package of sanctions against Russia.', 'International relations'), 'sanctions');
   assert.equal(typeOf('Hotel operator Archipelago International ends management agreements for six hotels in Cuba, citing compliance with United States sanctions.', 'Business and economy'), null);
   assert.notEqual(typeOf('Mexican president Claudia Sheinbaum sanctions a constitutional amendment on dual citizenship.', 'Law and crime'), 'sanctions');
+  // A sentence whose offence is sanctions is not a sanctions event (ChatGPT's review, ledger RV-05).
+  assert.notEqual(typeOf('The Hong Kong High Court sentences pro-democracy activist Joshua Wong to an additional 10 years in prison under the national security law for conspiring with foreign entities to impose sanctions against China and Hong Kong.', 'Law and crime'), 'sanctions');
+  assert.equal(typeOf('The United States imposes sanctions on three Hong Kong officials.', 'International relations'), 'sanctions');
   assert.equal(typeOf('Former South Korean prime minister Kim Min-seok is elected as the new leader of the Democratic Party.'), 'party');
   assert.notEqual(typeOf('The Brazilian National Congress overrides a veto by president Luiz Inácio Lula da Silva.'), 'party');
   assert.equal(typeOf('The 8th European Political Community Summit is held in Yerevan, Armenia.', 'International relations'), 'summit');

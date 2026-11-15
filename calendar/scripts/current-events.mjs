@@ -204,7 +204,10 @@ export function classify(item) {
 
   // Sanctions
   if (inCats(item, 'relations', 'business', 'conflict', 'politics', 'law') && /\bsanction|\beconomic war\b/i.test(main) && (h = hit(SANCTION_ACT, main)) && !SANCTION_NOT.test(t)
-    && !/\b(?:says|said|warns|threatens|reports|reportedly|claims|considers|plans|proposes|calls for|urges)\b/i.test(main.slice(0, h.at)))
+    && !/\b(?:says|said|warns|threatens|reports|reportedly|claims|considers|plans|proposes|calls for|urges)\b/i.test(main.slice(0, h.at))
+    // A sentence or charge whose offence is sanctions is a court story, not sanctions ("sentences … for conspiring
+    // with foreign entities to impose sanctions": Joshua Wong, 5 Nov 2026; ChatGPT's review, ledger RV-05).
+    && !/\b(?:sentenc\w*|convict\w*|jail\w*|imprison\w*|charg\w*|indict\w*|prosecut\w*|arrest\w*|accus\w*|conspir\w*)\b/i.test(main.slice(0, h.at)))
     return { type: 'sanctions', score: /\bpackage\b|European Union|Council of the European Union/i.test(t) ? 3 : 2, ...h };
 
   // Ceasefires & peace talks

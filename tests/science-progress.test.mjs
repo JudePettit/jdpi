@@ -7,7 +7,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SEED } from '../science/scripts/progress-seed.mjs';
-import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, distanceKm, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
+import { DISCIPLINE_IDS, BASIS, parseRef, nameMatches, yearOf, yearLabel, parsePoint, span, covers, EDUCATION_YEARS, distanceKm, choosePlace, eventInstitutions, seedProblems } from '../science/scripts/progress-lib.mjs';
 import { progress, ADAPTERS } from '../lake/scripts/adapters.mjs';
 import { pageTest, launch } from './tools/pages.mjs';
 
@@ -116,6 +116,14 @@ test('lib: choosePlace tries the rules in order, anchored by the hand-set place'
   assert.deepEqual(got(choosePlace({ year: 1994, fb: 'Qbell' }, [shor], place)), ['Qbell', 'fallback']);
   assert.equal(choosePlace({ year: 1994 }, [shor], place).basis, 'birthplace');
   assert.equal(choosePlace({ year: 1994 }, [], place), null);
+  // A school with only a start year is not "the institution at the time" twenty years on (Hawking: St Albans School
+  // from 1952, Hawking radiation in 1974; ChatGPT's review, ledger RV-05): his university is.
+  P.Qsch = { lat: 51.75, lon: -0.34, label: 'St Albans School', inst: true };
+  const hawking = { qid: 'Qh', born: 1942, died: 2018, educated: [{ q: 'Qsch', s: 1952 }], employer: [{ q: 'Qcam', e: 2018 }] };
+  assert.deepEqual(got(choosePlace({ year: 1974 }, [hawking], place)), ['Qcam', 'institution']);
+  assert.ok(!covers({ s: 1952 }, 1974, { born: 1942 }, EDUCATION_YEARS) && covers({ s: 1952 }, 1958, { born: 1942 }, EDUCATION_YEARS));
+  // A doctoral student at the time still counts there.
+  assert.deepEqual(got(choosePlace({ year: 1965 }, [{ ...hawking, educated: [{ q: 'Qcam', s: 1962 }], employer: [] }], place)), ['Qcam', 'institution-at-time']);
 });
 
 test('lake adapter: breakthroughs, scientists and institutions with deep links', () => {

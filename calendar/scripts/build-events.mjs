@@ -316,19 +316,43 @@ for (const e of events) (e.via === 'news' ? news : structured).push(e);
 const byKey = new Map();
 const note = (k, e) => (byKey.get(k) || byKey.set(k, []).get(k)).push(e);
 // Within one source only the same day counts (two leaders can share an article-less year page, a summit can recur).
+// A renamed article reaches the lists under both titles ("Visits by Pope Leo XIV to Algeria, …" and "Visit by Pope Leo
+// XIV to Algeria%2C …"): the same title once decoded, case, punctuation and "Visits"/"Visit" are set aside is the same
+// event within a month. And a summit with the same host within a day and the same summary is the same visit under
+// another title ("Pope Leo XIV's 2026 visit to Uruguay" and "Visit by Pope Leo XIV to Uruguay, Argentina, and Peru").
+// (ChatGPT's review, ledger RV-05.)
+const articleKey = s => {
+  if (!isArticle(s)) return null;
+  let t = String(s).split('/wiki/')[1] || '';
+  try { t = decodeURIComponent(t); } catch { /* keep it encoded */ }
+  return t.replace(/_/g, ' ').toLowerCase().replace(/\bvisits\b/g, 'visit').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+};
+const sameSummary = (a, b) => !!a.summary && !!b.summary && a.summary.slice(0, 160) === b.summary.slice(0, 160);
 const dupOf = (e, window) => (byKey.get(`${e.type}|${e.source}`) || []).some(x => x.date === e.date || (x.via !== e.via && days(x.date, e.date) <= window))
-  || (e.type === 'summit' && (byKey.get(`summit|${e.country}`) || []).some(x => x.via !== e.via && days(x.date, e.date) <= 1));
+  || (e.type === 'summit' && (byKey.get(`summit|${e.country}`) || []).some(x => (x.via !== e.via || sameSummary(x, e)) && days(x.date, e.date) <= 1));
+const renamed = e => (byKey.get(`${e.type}|title|${articleKey(e.source)}`) || []).find(x => x.source !== e.source && days(x.date, e.date) <= 31);
 const kept = [];
 for (const e of structured) {
   if (isArticle(e.source) && dupOf(e, 3)) continue;
+  const was = isArticle(e.source) && renamed(e);
+  if (was) { if (e.date < was.date) Object.assign(was, e); continue; } // keep the trip's first day
   kept.push(e);
-  if (isArticle(e.source)) note(`${e.type}|${e.source}`, e);
+  if (isArticle(e.source)) { note(`${e.type}|${e.source}`, e); note(`${e.type}|title|${articleKey(e.source)}`, e); }
   if (e.type === 'summit') note(`summit|${e.country}`, e);
 }
 // A news item is also the same event as a structured record of the same type, country and day (an inauguration
 // recorded on Wikidata, a resignation from a position held), except for kinds that come several a day.
 const sameDay = new Set(kept.map(e => `${e.type}|${e.country}|${e.date}`));
-for (const e of news) if (!dupOf(e, 10) && !(!/^(?:court|sanctions|protest)$/.test(e.type) && sameDay.has(`${e.type}|${e.country}|${e.date}`))) kept.push(e);
+// News items are noted as they are kept, so that two news items about one visit (a renamed article, or the same summary
+// under two titles) count once; a news item never overwrites a structured record.
+for (const e of news) {
+  if (dupOf(e, 10) || (!/^(?:court|sanctions|protest)$/.test(e.type) && sameDay.has(`${e.type}|${e.country}|${e.date}`))) continue;
+  const was = isArticle(e.source) && renamed(e);
+  if (was) { if (was.via === e.via && e.date < was.date) Object.assign(was, e); continue; }
+  kept.push(e);
+  if (isArticle(e.source)) { note(`${e.type}|${e.source}`, e); note(`${e.type}|title|${articleKey(e.source)}`, e); }
+  if (e.type === 'summit') note(`summit|${e.country}`, e);
+}
 const unique = new Map();
 for (const { via, precision, ...e } of kept) if (!unique.has(`${e.date}|${e.title}`)) unique.set(`${e.date}|${e.title}`, e);
 

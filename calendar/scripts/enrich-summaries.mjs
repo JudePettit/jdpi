@@ -49,8 +49,21 @@ await Promise.all(Array.from({ length: 8 }, async () => {
 }));
 writeFileSync(CACHE, JSON.stringify(cache));
 
-let withSummary = 0, total = 0;
+let withSummary = 0, total = 0, merged = 0;
 for (const [f, d] of decades) {
+  // Two titles that open one article (a redirect: "Pope Leo XIV's 2026 visit to Uruguay" and "Visit by Pope Leo XIV to
+  // Uruguay, Argentina, and Peru") bring the same lead: a summit or visit with the same host within a day is then one
+  // event (not other kinds: a battle or an election can redirect to its campaign or to another vote held that day), and
+  // the first record stays (ChatGPT's review, ledger RV-05).
+  const lead = e => { const t = titleOf(e.source); return t && cache[t] && cache[t].length > 80 ? cache[t] : null; };
+  const seen = [];
+  d.events = d.events.filter(e => {
+    const l = lead(e);
+    if (l && e.type === 'summit' && seen.some(x => x.type === e.type && x.country === e.country && titleOf(x.source) !== titleOf(e.source) && lead(x) === l
+      && Math.abs(Date.parse(x.date) - Date.parse(e.date)) <= 864e5)) { merged++; return false; }
+    seen.push(e);
+    return true;
+  });
   for (const e of d.events) {
     total++;
     const t = titleOf(e.source);
@@ -63,6 +76,6 @@ for (const [f, d] of decades) {
   }
   writeFileSync(new URL(f, DATA), JSON.stringify(d));
 }
-console.log(`${withSummary} of ${total} events have a summary`);
+console.log(`${withSummary} of ${total} events have a summary; ${merged} merged as one article under two titles`);
 // calendar/data/upcoming.json (the Dashboard's next events, with their keys) in step with the decades it reads.
 writeHeads('Realtime and Historical Calendars');

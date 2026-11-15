@@ -101,15 +101,19 @@ export function distanceKm([lat1, lon1], [lat2, lon2]) {
  * The years a dated statement covers, given the person's life. A missing end runs to death (at most 40 years);
  * a missing start begins 40 years before the end (not before age 15). Undated statements return null.
  */
-export function span(st, life = {}) {
+// A statement with one end open is assumed to run `open` years from the other: 40 for a post, EDUCATION_YEARS for a
+// school or university, so that a pupil's "educated at" with only a start year (Hawking at St Albans School from 1952)
+// is not read as covering his work twenty years later.
+export const EDUCATION_YEARS = 8;
+export function span(st, life = {}, open = 40) {
   const s = st.s ?? null, e = st.e ?? null;
   if (s == null && e == null) return null;
   const born = life.born ?? null, died = life.died ?? null;
-  const start = s ?? Math.max(e - 40, born != null ? born + 15 : -Infinity);
-  const end = e ?? Math.min(died ?? s + 40, s + 40);
+  const start = s ?? Math.max(e - open, born != null ? born + 15 : -Infinity);
+  const end = e ?? Math.min(died ?? s + open, s + open);
   return [start, Math.max(start, end)];
 }
-export const covers = (st, year, life) => { const r = span(st, life); return !!r && r[0] <= year + 1 && year - 1 <= r[1]; };
+export const covers = (st, year, life, open) => { const r = span(st, life, open); return !!r && r[0] <= year + 1 && year - 1 <= r[1]; };
 
 const ACADEMIC = /universit|college|institut|laborator|observator|academ|école|ecole|school|hospital|polytechn|research|society|station|museum|centre|center|faculty|abbey|monastery|librar|bell labs|cern|nasa|agency|company|corporation/i;
 /** Does a Wikidata description or label read like an institution rather than a town or a house? */
@@ -156,7 +160,7 @@ export function choosePlace(event, people, place, weight = () => 0, maxKm = ANCH
   // 1. Institution at the time: employer > affiliation > education, narrowest span first.
   for (const p of people) {
     const dated = [['employer', 0], ['affiliation', 1], ['educated', 2]]
-      .flatMap(([k, rank]) => (p[k] || []).filter(st => covers(st, y, life(p))).map(st => ({ st, rank })))
+      .flatMap(([k, rank]) => (p[k] || []).filter(st => covers(st, y, life(p), k === 'educated' ? EDUCATION_YEARS : undefined)).map(st => ({ st, rank })))
       .filter(({ st }) => fits(st.q))
       .sort((a, b) => a.rank - b.rank || width(a.st, p) - width(b.st, p) || !!b.st.preferred - !!a.st.preferred);
     if (dated.length) return out(dated[0].st.q, 'institution-at-time', at(dated[0].st.q), p.qid);

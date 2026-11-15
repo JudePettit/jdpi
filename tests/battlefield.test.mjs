@@ -442,3 +442,12 @@ test('Retrospective on a phone (390 px): opened with no year, the handles stand 
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// ChatGPT's review (ledger RV-05): the freshness line says "checked weekly" (the refresh's rhythm) and the Method said
+// "every six hours" (the open page's reload): the Method now names both, so the two do not read as a contradiction.
+test('page file: the Method names the weekly check for UCDP data and the six-hour reload apart', () => {
+  const html = readFileSync(new URL('../q/battlefield.html', import.meta.url), 'utf8');
+  assert.match(html, /VM checks for a new UCDP release weekly, and an open page reloads its data every six hours\./);
+  assert.doesNotMatch(html, /The page checks for new data every six hours/);
+  assert.match(readFileSync(new URL('../.github/workflows/battlefield-refresh.yml', import.meta.url), 'utf8'), /cron: '\d+ \d+ \* \* \d'/, 'the refresh runs once a week');
+});

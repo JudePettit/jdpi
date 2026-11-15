@@ -1,30 +1,27 @@
 /* Bibliotheca · Neo Classic (its own module since November 2026; it was Kino's): public-domain classics read on screen, every term the Master Index knows
-   highlighted, a popout bar of the terms on screen, and a companion pane beside the text.
+   highlighted, and a companion pane beside the text (AR Mode) with the terms on screen, a term's entry and the era's screens.
 
    Data, built by bibliotheca/scripts/build-book.mjs (its header holds the contract):
      ../data/index.json            the shelf: { generated, books: [{ slug, title, author, translator, year, era, words, … }] }
      ../data/books/<slug>.json     one book: { …, chapters: [{ n, heading, title, words, paragraphs: [{ id, kind, text,
                                    terms: [{ s, e, qid, label }] }] }] }, s/e being string offsets into text
-   Address (lib/hash.js): #book=<slug>&ch=<n>&p=<paragraph id>&t=<QID>&pane=<ency|vm>&show=<screen>&era=term (show:
+   Address (lib/hash.js): #book=<slug>&ch=<n>&p=<paragraph id>&t=<QID>&pane=<terms|ency|vm>&show=<screen>&era=term (show:
    the screen shown in the pane, with pane=vm; era=term: the term's own era chosen there). The page writes it with
    history.replaceState as the reader moves, so the shell's Back and Forward stay the shell's own, and re-reads it on
    hashchange (the shell moves a frame by changing only its hash; people edit links).
 
    One chapter is on the page at a time. An IntersectionObserver over its paragraphs (the document as root, less the
-   sticky head and the terms strip above and the pane's sheet below on narrow screens) keeps the set on screen: the
-   popout bar lists the distinct terms whose links are in view within them, and the paragraph under the reading line
+   sticky head above and the pane's sheet below on narrow screens) keeps the set on screen: the pane's "On screen" tab
+   lists the distinct terms whose links are in view within them, and the paragraph under the reading line
    (30% down the free height) is the current one, outlined, put in the address and counted in the head's position and
    progress bar. A jump (a link, J/K, the contents) pins its paragraph until the reader scrolls by hand, so a short
    paragraph scrolled to the top is the one shown, and it stays put while the layout settles.
 
-   The terms bar is a list in the margin beside the column from 1150 px with the pane shut, covering nothing, and a
-   strip under the head over the text otherwise. The strip's depth below the head (stripH) is part of the reading
-   region everywhere the page asks what is in view (region(), the observer's root margin, --nc-bar in the paragraphs'
-   scroll margin), so a jump lands below it, the bar leaves out the terms it covers, and a term clicked under it is
-   scrolled clear; opening or collapsing it still moves nothing. Until the reader opens or collapses the bar it is open
-   only where it is the margin list.
+   AR Mode (BI-23, Jude, 15 November 2026: one button where the terms bar's ◈ and Links were; P, or T for its terms):
+   the pane, whose first tab, "On screen", lists the terms in the text in view with their counts. It replaces the
+   floating bar, which lay over the text (BI-22); choosing a term opens its Master Index entry on the next tab.
 
-   A term is "used" by clicking it, in the text or in the bar: all its occurrences are ringed and the pane opens on its
+   A term is "used" by clicking it, in the text or on the "On screen" tab: all its occurrences are ringed and the pane opens on its
    Master Index entry. The pane holds two same-origin frames moved the way the shell moves its own (lib/frame.js): the
    Master Index page for the entry (encyclopedia/index.html#<QID>; nothing on this site sends X-Frame-Options, and if
    the page cannot be shown a link replaces it), and "In Vitruvian Manager": the screens that take a year or period in
@@ -37,7 +34,7 @@
    (book | pane), with a divider the reader can drag (design/prp-split.js, splitter); below, the pane is a sheet docked
    under the text. The frames are the shared pane's (sideFrame), and full screen is the whole page's (fullScreen).
 
-   Augmented Reading (A; &ar=1 in the address, lib/mode.js): a narrator (lib/narrator.js, on design/prp-voice.js)
+   AR Reader (A; &ar=1 in the address, lib/mode.js; called Augmented Reading until 15 November 2026): a narrator (lib/narrator.js, on design/prp-voice.js)
    reads the chapter aloud from the paragraph under the reading line; the unit being read is marked with the CSS
    Custom Highlight API (nc-say, and nc-say-part for a piece of a long sentence) and kept in view; the pane's Master
    Index tab follows the term nearest it (lib/follow.js) unless it is held (the reader has a term of their own, t=, or
@@ -69,8 +66,6 @@ const LAKE = new URL('lake/data/', SHELL).href;
 const LIVE = 'https://jdpi.pages.dev/';
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
 // styles.css: with the pane shut the bar is a list in the margin. 1150 px leaves (1150 − 48 − 606) / 2 = 248 px beside
-// the 66ch column for the 14rem list and its 20 px gap, so the shell's frame at a 1440 px window (1168 px) has it too.
-const MARGIN_BAR = matchMedia('(min-width: 1150px)');
 const SPLIT = matchMedia('(min-width: 1000px)');                    // styles.css: book | pane side by side (the shell's frame at 1366 too)
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fmt = n => Number(n || 0).toLocaleString('en-GB');
@@ -87,8 +82,6 @@ const S = {
   shelf: [], generated: null, row: null, book: null, chapters: [], ci: -1, labels: new Map(),
   visible: new Set(), current: null, pin: null, p: null, chipsKey: '',
   term: null, pane: null, eraOf: 'book', vmShown: null, pendingShow: null, vmSeq: 0, bookSeq: 0,
-  // popout: the reader's own choice, open or collapsed (null until made: popoutOpen below gives the default).
-  bar: store.get('prp.bibliotheca.bar', true), popout: store.get('prp.bibliotheca.popout', null),
   entities: new Map(), observer: null, headH: 56,
   // Augmented Reading: the mode; the term the narrator has reached (near), and the follow rule's state (fs) over the
   // chapter's terms (terms); the unit being read (say); whether the next unit is to be kept in view whatever (look);
@@ -222,11 +215,11 @@ function renderSources() {
   $('#sources').innerHTML = `
     <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${coauthors(b).map(n => ` and ${esc(n)}`).join('')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
     <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? (unknownDeaths(r) ? `treated as public domain in Ireland and the United Kingdom, the death date of ${esc(unknownDeaths(r))} not having been found after a reasonable search` : 'public domain in the United Kingdom') : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
-    <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. The bar lists those in the text on screen.</p>
-    <p><b>In ${PRODUCT}.</b> Links (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>
-    <p><b>Augmented Reading.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>
+    <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. AR Mode's "On screen" tab lists those in the text on screen.</p>
+    <p><b>In ${PRODUCT}.</b> AR Mode (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows countries as they are today.</p>
+    <p><b>AR Reader.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>
     <p><b>Voice.</b> This device's own voice reads the book, and nothing leaves the browser. An online voice (Microsoft Azure, through ${PRODUCT}'s own proxy) reads only when you choose it, after it says what it will cost: each sentence it reads is then sent to Microsoft Azure to be spoken, and counts against the site's allowance of characters. It is never remembered from one visit to the next.</p>
-    <p><b>Keys.</b> ← → chapters · J K paragraphs · T the terms bar · P Links · A Augmented Reading · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
+    <p><b>Keys.</b> ← → chapters · J K paragraphs · P AR Mode · T its terms on screen · A AR Reader · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
 }
 
 /* ---------- the chapter ---------- */
@@ -239,6 +232,7 @@ function renderChapter(ci) {
   document.title = `${S.book.title}${l.no ? `, ${l.no}` : `: ${l.title}`} · Neo Classic · Bibliotheca · ${SHORT}`;
   unmark(); // the marks are on ranges of the old text, which is about to go
   S.say = null;
+  drawSubs(); // nothing of the new chapter is said yet
   $('#text').innerHTML = c.paragraphs.map(p => paragraphHtml(p, { href: termHref })).join('') || '<p class="prp-empty">This chapter has no text.</p>';
   S.terms = chapterTerms(c);
   if (S.tour) endTour(); // a screen of the last chapter's era
@@ -260,33 +254,22 @@ function renderChapter(ci) {
   if (S.pane === 'vm') renderVm(); // a chapter may carry its own period
 }
 
-/* How far the terms bar reaches below the head when it is a strip over the text: 0 when it is collapsed or hidden, or
-   when it is the list in the margin beside the column (it covers no text; told by where it is, not by the breakpoint,
-   so the two cannot disagree). The strip hangs from the head (top: 100% − 6px), so this is its height less 6 px. */
-function stripH() {
-  const pop = $('#popout');
-  if (pop.hidden) return 0;
-  const p = pop.getBoundingClientRect(), t = $('#text').getBoundingClientRect();
-  if (p.right <= t.left || p.left >= t.right) return 0;
-  return Math.max(0, Math.ceil(p.bottom - $('#head').getBoundingClientRect().bottom));
-}
 // The reading region in viewport coordinates: under the sticky head and the terms strip, above the pane's sheet
 // (narrow screens). Text the strip covers is not in view: its terms stay out of the bar, and reveal() scrolls a term
 // out from under it.
 function region() {
-  const top = $('#head').getBoundingClientRect().bottom + stripH();
+  const top = $('#head').getBoundingClientRect().bottom;
   return { top: Math.max(0, top), bottom: window.innerHeight - sheetH() };
 }
 // The pane's sheet over the foot of the screen (narrow screens); none while the pane fills the page (Screens only),
 // which the reading region ignores: the text is still laid out, and read, beneath it.
 const sheetH = () => (S.pane && !S.fill && !SPLIT.matches ? Math.round($('#pane').getBoundingClientRect().height) : 0);
 /* (Re)builds the observer for the layout as it is now: called when a chapter is drawn, the pane opens, closes or grows,
-   the window resizes, and the bar opens or collapses (syncBar). The strip's depth goes into the root margin and into
-   --nc-bar, which the paragraphs' scroll-margin-top adds, so a jump (scrollIntoView) lands below the strip. */
+   and the window resizes. (--nc-bar, the depth of the terms strip that lay over the text until BI-23, is 0.) */
 function observe() {
   S.observer?.disconnect();
   S.headH = $('#head').offsetHeight;
-  const strip = stripH();
+  const strip = 0; // (no strip over the text since BI-23: the terms are a tab of the pane)
   document.documentElement.style.setProperty('--nc-head', `${S.headH}px`);
   document.documentElement.style.setProperty('--nc-bar', `${strip}px`);
   const sheet = sheetH();
@@ -349,7 +332,7 @@ function updateProgress() {
   $('#pos').textContent = `¶ ${i < 0 ? '–' : i + 1} of ${c.paragraphs.length} · ${Math.round(f * 100)}%`;
 }
 
-/* ---------- the popout bar: the terms on screen ---------- */
+/* ---------- the terms on screen: AR Mode's "On screen" tab ---------- */
 // The observer says which paragraphs are on screen; within them, the term links actually in view (a long paragraph
 // half off screen keeps the terms of its hidden half out of the bar), in reading order.
 function termsInView() {
@@ -365,8 +348,9 @@ function renderChips(force = false) {
   const key = `${terms.map(t => `${t.qid}:${t.n}`).join(',')}|${S.term}`;
   if (key === S.chipsKey && !force) return;
   S.chipsKey = key;
-  $('#bar-count').textContent = terms.length;
-  $('#bar-toggle').setAttribute('aria-label', `${terms.length} term${terms.length === 1 ? '' : 's'} on screen`);
+  $('#terms-count').textContent = terms.length;
+  $('#tab-terms').setAttribute('aria-label', `On screen: ${terms.length} term${terms.length === 1 ? '' : 's'}`);
+  if (S.pane === 'terms') setPaneHead('AR Mode · On screen', `${terms.length} term${terms.length === 1 ? '' : 's'} in view`, null);
   // data-term, not data-qid: the entity linker (design/jdpi-entities.js) badges every [data-qid] with a ◈ link.
   const focused = document.activeElement?.closest?.('.nc-chip')?.dataset.term;
   $('#chips').innerHTML = terms.length
@@ -374,25 +358,6 @@ function renderChips(force = false) {
     : '<p class="none">No terms in view.</p>';
   if (focused) $(`#chips .nc-chip[data-term="${focused}"]`)?.focus({ preventScroll: true });
 }
-/* The bar is hidden altogether (the switch: S.bar), or shown as the ◈ button in the head with its list open or
-   collapsed. Open or collapsed is the reader's choice once made (T, the ◈ button, the ×), and remembered; until then it
-   is open where it is the list in the margin (wide, pane shut), which covers nothing, and collapsed where it would be
-   a strip over the text (narrow, or the pane open), so opening the pane does not lay a strip over the text the reader
-   never asked for. */
-const marginBar = () => MARGIN_BAR.matches && !S.pane;
-const popoutOpen = () => S.bar && (S.popout ?? marginBar());
-// The bar's DOM state alone (inside keepPlace, which re-observes after it).
-function drawBar() {
-  const open = popoutOpen() && !S.fill; // put away while the pane fills the page
-  $('#bar-switch').setAttribute('aria-pressed', String(S.bar));
-  $('#bar-toggle').hidden = !S.bar;
-  $('#popout').hidden = !open;
-  $('#bar-toggle').setAttribute('aria-expanded', String(open));
-}
-// The bar as it should be, and the reading region with it: a strip opening or closing changes what is in view.
-function syncBar() { drawBar(); if (chapter()) observe(); }
-function setBar(on) { S.bar = on; store.set('prp.bibliotheca.bar', on); if (on && !popoutOpen()) S.popout = true; syncBar(); }
-function setPopout(open) { S.popout = open; store.set('prp.bibliotheca.popout', open); syncBar(); if (open) renderChips(true); }
 
 /* ---------- using a term ---------- */
 function highlight() {
@@ -434,14 +399,11 @@ function reveal(a) {
   if (!a?.isConnected) return;
   const r = a.getBoundingClientRect(), { top, bottom } = region();
   if (r.top >= top && r.bottom <= bottom) return;
-  const under = r.top < top && r.bottom > top - stripH() - 8;
-  window.scrollBy(0, r.top - (under ? top + 12 : top + (bottom - top) / 3));
+  window.scrollBy(0, r.top - (top + (bottom - top) / 3));
   S.pin = null;
 }
-// The bar's default depends on the pane (popoutOpen), so opening and closing it redraw the bar before keepPlace
-// re-observes.
 function openPane(tab) {
-  if (!S.pane) keepPlace(() => { S.pane = tab; $('#pane').hidden = false; $('#layout').classList.add('split'); drawBar(); });
+  if (!S.pane) keepPlace(() => { S.pane = tab; $('#pane').hidden = false; $('#layout').classList.add('split'); });
   S.pane = tab;
   if (tab !== 'ency' && S.tour) endTour();
   $('#pane-toggle').setAttribute('aria-pressed', 'true');
@@ -452,18 +414,22 @@ function openPane(tab) {
 function closePane() {
   if (!S.pane) return;
   if (S.fill) setFill(false);
-  keepPlace(() => { S.pane = null; $('#pane').hidden = true; $('#layout').classList.remove('split'); drawBar(); });
+  keepPlace(() => { S.pane = null; $('#pane').hidden = true; $('#layout').classList.remove('split'); });
   $('#pane-toggle').setAttribute('aria-pressed', 'false');
   writeState();
 }
 function selectTab(tab) {
-  for (const t of ['ency', 'vm']) {
+  for (const t of TABS) {
     const on = t === tab, b = $(`#tab-${t}`);
     b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
     $(`#panel-${t}`).hidden = !on;
   }
 }
-function renderPane() { if (S.pane === 'ency') renderMasterIndex(); else if (S.pane === 'vm') renderVm(); }
+function renderPane() { if (S.pane === 'ency') renderMasterIndex(); else if (S.pane === 'vm') renderVm(); else if (S.pane === 'terms') renderChips(true); }
+// The pane's tabs, in order. AR Mode opens it on the entry (a term in use, or the AR Reader on), else on the terms.
+const TABS = ['terms', 'ency', 'vm'];
+const paneTab = () => (S.term || S.ar ? 'ency' : 'terms');
+function toggleArMode() { if (S.pane) closePane(); else openPane(paneTab()); }
 function setPaneHead(kicker, title, link) {
   $('#pane-kicker').textContent = kicker;
   $('#pane-title').textContent = title;
@@ -488,17 +454,17 @@ function renderMasterIndex() {
     if (t.picture) {
       const tf = $('#tour-frame');
       if (tf.getAttribute('src') && tf.dataset.url !== 'about:blank') frames.tour.go('about:blank'); // the last screen's page goes
-      setPaneHead('Augmented Reading · A picture for the book', t.name, t.film?.link || null);
+      setPaneHead('AR Reader · A picture for the book', t.name, t.film?.link || null);
       drawPicture(t);
       return;
     }
     $('#tour-frame').title = `${t.name} · ${t.place}`;
     $('#tour-frame').dataset.key = t.key;
-    setPaneHead(`Augmented Reading · ${PRODUCT}`, `${t.name} · ${t.place}`, t);
+    setPaneHead(`AR Reader · ${PRODUCT}`, `${t.name} · ${t.place}`, t);
     frames.tour.go(t.page);
     return;
   }
-  const kicker = S.ar ? 'Augmented Reading · Master Index' : 'Master Index';
+  const kicker = S.ar ? 'AR Reader · Master Index' : 'Master Index';
   $('#ency-empty').hidden = !!q;
   $('#ency-empty').innerHTML = S.ar ? 'This chapter names nothing the Master Index knows.' : EMPTY_ENCY;
   if (!q) { f.hidden = true; $('#ency-fallback').hidden = true; setPaneHead(kicker, S.ar ? 'Nothing to show' : 'No term chosen', null); return; }
@@ -556,11 +522,19 @@ async function renderVm() {
   // The places the Master Index records for the term (its "Appears in"), when it has any. Each place is shown in the
   // pane only where the shell's own rule allows (canFrame): a private page (Tally Stick, Algo Trader), a page off its
   // submodule's own page or a submodule the registry does not list gets a card with its link instead.
-  const ments = (ent?.mentions || []).slice(0, 8).map((m, i) => {
+  // Since the Master Index counts every book's tags (MI-08, 15 November 2026) an entry names each book of the shelf
+  // that names it: the other modules' places come first, then the other books, and the book open here (it is this
+  // page) is left out; eight are listed. A place's key is its index in the entry (m<i>), not its row, so an address's
+  // show= names the same place whatever the order (lib/hash.js reads m0 to m99).
+  const here = m => { try { return m.m === 'neo-classic' && readHash(new URL(m.u, location.href).hash).book === S.book?.slug; } catch { return false; } };
+  const all = (ent?.mentions || []).map((m, i) => ({ m, i })).filter(x => !here(x.m)).slice(0, 100);
+  const ments = [...all.filter(x => x.m.m !== 'neo-classic'), ...all.filter(x => x.m.m === 'neo-classic')].map(({ m, i }) => {
     const info = moduleInfo(reg, m.m);
     const l = info ? placeLink(info.suite, m.m, m.u) : { href: pageUrl(m.u), hash: '', page: pageUrl(m.u), target: '_blank' };
     return { key: `m${i}`, ...l, module: m.m, name: info?.name || m.m, place: m.c || '', fit: canFrame({ module: m.m, page: l.page }, reg, SHELL) };
   });
+  // Every place resolves (an address may name one past the eighth); the eight first, and one shown past them, are listed.
+  const listed = ments.filter((m, n) => n < 8 || m.key === (S.vmShown || S.pendingShow));
   const places = new Map([
     ...rows.filter(r => r.available).map(r => { const l = placeLink(r.suite, r.module, r.at); return [r.id, { ...l, module: r.module, name: name(r), place: r.place, fit: canFrame({ module: r.module, page: l.page }, reg, SHELL) }]; }),
     ...ments.map(m => [m.key, m]),
@@ -574,9 +548,9 @@ async function renderVm() {
   $('#era-rows').innerHTML = rows.map(r => (!r.available
     ? `<li class="off" data-key="${esc(r.id)}"><div class="what"><b>${esc(name(r))}</b><span>${esc(r.reason)}</span></div></li>`
     : `<li data-key="${esc(r.id)}"${cur(r.id)}><div class="what"><b>${esc(name(r))}${r.today ? '<span class="prp-kind">Today</span>' : ''}</b><span>${esc(r.place)}</span></div>${acts(r.id, places.get(r.id), name(r))}</li>`)).join('');
-  $('#mentions').hidden = !ments.length;
+  $('#mentions').hidden = !listed.length;
   $('#mentions-label').textContent = `Where ${label} appears`;
-  $('#mention-rows').innerHTML = ments.map(m => `<li data-key="${m.key}"${cur(m.key)}><div class="what"><b>${esc(m.name)}</b><span>${esc(m.place)}</span></div>${acts(m.key, m, m.name)}</li>`).join('');
+  $('#mention-rows').innerHTML = listed.map(m => `<li data-key="${m.key}"${cur(m.key)}><div class="what"><b>${esc(m.name)}</b><span>${esc(m.place)}</span></div>${acts(m.key, m, m.name)}</li>`).join('');
   const shown = S.vmShown && places.get(S.vmShown);
   if (shown) vmShow(shown);
   setPaneHead(`In ${PRODUCT}`, shown ? `${shown.name} · ${shown.place}` : fmtEra(years), shown || null);
@@ -616,7 +590,7 @@ function vmLoaded({ ok, frame }) {
   if (frame.dataset.url === 'about:blank') return;
   const r = S.vmShown && S.vmRows?.get(S.vmShown);
   if (!ok) { if (r) vmCard(r, 'missing'); else { frame.hidden = true; frames.vm.go('about:blank'); } return; }
-  if (!SPLIT.matches) skipMatter(frame);
+  if (!SPLIT.matches || S.fill) skipMatter(frame); // a sheet, or Screens only: the screen itself, not its front matter
 }
 function showVm(key) {
   const r = S.vmRows?.get(key);
@@ -647,6 +621,8 @@ function makeFrames() {
     if (!ok) { const i = S.tourList?.list.findIndex(p => p.key === frame.dataset.key) ?? -1; if (i >= 0) S.tourList.list.splice(i, 1); endTour(); return; }
     skipMatter(frame);
   } });
+  // Screens only scales a screen to its frame (fitScreens): again whenever a frame's box changes.
+  if (typeof ResizeObserver === 'function') { const ro = new ResizeObserver(() => fitScreens()); ro.observe($('#vm-frame')); ro.observe($('#tour-frame')); }
 }
 // A line hanging from the head (a new tab the browser refused): one at a time, closed by its × or Escape.
 function notice(html) {
@@ -869,10 +845,29 @@ function setFill(on) {
   if (on === S.fill) return;
   S.fill = on;
   $('#layout').classList.toggle('fill', on);
+  document.documentElement.classList.toggle('nc-filled', on); // the page's own scroll bar goes (styles.css)
   $('#pane-fill').setAttribute('aria-pressed', String(on));
   if (on) loadTour(); else endTour();
-  fillTop(); drawBar(); drawSubs();
+  // A screen already shown on the other tab is moved past its front matter, as one shown in Screens only is (vmLoaded).
+  if (on && S.vmShown && !$('#vm-frame').hidden && $('#vm-frame').dataset.url !== 'about:blank') skipMatter($('#vm-frame'));
+  fillTop(); drawSubs();
   if (chapter()) observe();
+  fitScreens();
+}
+/* Screens only, side by side or wider (BI-20, 15 November 2026): a screen of Vitruvian Manager is drawn for a window,
+   and the pane is a little over half one; framed at the pane's own size its map or timeline was cut off at the foot.
+   So the screen is given the window's height, at most, and scaled down to the pane (CSS zoom on the frame: the frame
+   keeps its box, its page lays out in a viewport 1/zoom as large), never below 0.6, where its words would be too small
+   to read. On a phone the screen keeps its own phone layout, unscaled. Called when a frame's box changes (the pane
+   filling the page, the subtitles coming and going, the window) and when the mode changes. */
+const SCREEN_ZOOM_MIN = 0.6;
+function fitScreens() {
+  for (const f of [$('#vm-frame'), $('#tour-frame')]) {
+    const h = f.getBoundingClientRect().height;
+    const z = S.fill && SPLIT.matches && !f.hidden && h > 0 ? Math.max(SCREEN_ZOOM_MIN, Math.min(1, h / window.innerHeight)) : 1;
+    const want = z < 0.995 ? z.toFixed(3) : '';
+    if (f.style.zoom !== want) f.style.zoom = want;
+  }
 }
 
 /* Screens only: the era's screens take their turn with the entries (lib/follow.js, tour), so the documentary shows
@@ -946,14 +941,16 @@ function endTour() {
 }
 function setSubs(on) { S.subs = !!on; store.set(KEYS.subs, S.subs); drawSubs(); }
 // The strip at the foot of the pane, in Screens only: the unit being read, three lines, scrolled by whole lines to
-// the word being said. Hidden from screen readers: the same words are spoken, and marked in the text.
+// the word being said. Hidden from screen readers: the same words are spoken, and marked in the text. With nothing
+// said yet (before Play, or a new chapter) the strip is not there at all, so the screen runs to the foot of the pane
+// rather than over an empty band (BI-20, 15 November 2026).
 function drawSubs() {
-  const on = S.fill && S.subs;
+  const u = S.say?.unit, on = S.fill && S.subs;
   $('#nar-subs').hidden = !S.fill;
   $('#nar-subs').setAttribute('aria-pressed', String(S.subs));
-  $('#subs').hidden = !on;
+  $('#subs').hidden = !on || !u;
   if (!on) return;
-  const u = S.say?.unit, box = $('#subs-box');
+  const box = $('#subs-box');
   const key = u ? `${S.say.pid}:${u.s}` : '';
   if (box.dataset.key === key) return;
   box.dataset.key = key;
@@ -1171,9 +1168,6 @@ function wire() {
     if (!b) return;
     if (b.getAttribute('aria-pressed') === 'true') clearTerm(); else useTerm(b.dataset.term);
   });
-  $('#bar-toggle').addEventListener('click', () => setPopout(!popoutOpen()));
-  $('#popout-close').addEventListener('click', () => { setPopout(false); $('#bar-toggle').focus(); });
-  $('#bar-switch').addEventListener('click', () => setBar(!S.bar));
 
   // Contents: a list hanging from the head; a click outside it, Escape or a choice closes it.
   const toc = open => { $('#toc').hidden = !open; $('#toc-toggle').setAttribute('aria-expanded', String(open)); if (open) $('#toc-list a[aria-current]')?.focus({ preventScroll: true }); };
@@ -1197,14 +1191,14 @@ function wire() {
   });
 
   // The pane.
-  $('#pane-toggle').addEventListener('click', () => (S.pane ? closePane() : openPane(S.term || S.ar ? 'ency' : 'vm')));
+  $('#pane-toggle').addEventListener('click', toggleArMode);
   $('#pane-close').addEventListener('click', () => { closePane(); $('#pane-toggle').focus({ preventScroll: true }); });
   const setTall = tall => {
     $('#pane').classList.toggle('tall', tall); $('#pane-tall').setAttribute('aria-pressed', String(tall));
     observe();
   };
   $('#pane-tall').addEventListener('click', () => setTall(!$('#pane').classList.contains('tall')));
-  const tabs = ['ency', 'vm'];
+  const tabs = TABS;
   for (const t of tabs) $(`#tab-${t}`).addEventListener('click', () => openPane(t));
   $('[role="tablist"]').addEventListener('keydown', e => {
     const k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
@@ -1277,14 +1271,14 @@ function wire() {
   // jump still lands below the head.
   new ResizeObserver(() => { if (chapter() && $('#head').offsetHeight !== S.headH) observe(); }).observe($('#head'));
   document.fonts?.ready.then(() => { holdPin(); schedule(); });
-  for (const ev of ['wheel', 'touchstart', 'pointerdown']) window.addEventListener(ev, e => { if (!e.target.closest?.('.nc-pane, .nc-popout, .nc-toc')) S.pin = null; }, { passive: true });
+  for (const ev of ['wheel', 'touchstart', 'pointerdown']) window.addEventListener(ev, e => { if (!e.target.closest?.('.nc-pane, .nc-toc')) S.pin = null; }, { passive: true });
   let resizeTimer = 0;
-  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (chapter()) observe(); }, 150); });
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (chapter()) observe(); fitScreens(); }, 150); });
   // Crossing a breakpoint reflows the text and may turn the margin list into a strip (or collapse it, by default).
-  for (const m of [SPLIT, MARGIN_BAR]) m.addEventListener?.('change', () => { if (chapter()) keepPlace(drawBar); else drawBar(); });
+  SPLIT.addEventListener?.('change', () => { if (chapter()) keepPlace(() => {}); });
   window.addEventListener('hashchange', () => applyHash());
 
-  // Keys: ← → chapters, J K paragraphs, T the terms bar, P the pane, Escape closes the innermost open thing.
+  // Keys: ← → chapters, J K paragraphs, P AR Mode (the pane), T its terms on screen, Escape closes the innermost open thing.
   document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
     const typing = /^(input|select|textarea)$/i.test(e.target.tagName) || e.target.isContentEditable;
@@ -1294,7 +1288,6 @@ function wire() {
       else if (!$('#notice').hidden) notice('');
       else if (S.fill) setFill(false); // Screens only gives the text back before the pane closes
       else if (S.pane) { closePane(); $('#pane-toggle').focus({ preventScroll: true }); }
-      else if (popoutOpen() && !marginBar()) setPopout(false); // the strip collapses; the margin list stays
       return;
     }
     if (typing || !chapter()) return;
@@ -1303,7 +1296,7 @@ function wire() {
     const act = {
       ArrowLeft: () => goChapter(S.ci - 1), ArrowRight: () => goChapter(S.ci + 1),
       j: () => paras[i + 1] && jumpTo(paras[i + 1].id, { smooth: true }), k: () => i > 0 && jumpTo(paras[i - 1].id, { smooth: true }),
-      t: () => (S.bar ? setPopout(!popoutOpen()) : setBar(true)), p: () => (S.pane ? closePane() : openPane(S.term || S.ar ? 'ency' : 'vm')),
+      t: () => (S.pane === 'terms' ? closePane() : openPane('terms')), p: toggleArMode,
       f: toggleFull,
       ...(inSide ? {} : { a: () => setAr(!S.ar, { byHand: true }) }),
       // The narrator's keys, while the mode is on.
@@ -1325,7 +1318,7 @@ function stepSpeed(d) {
 
 async function init() {
   EMPTY_ENCY = $('#ency-empty').innerHTML;
-  wire(); syncBar();
+  wire();
   try {
     const idx = await getJson(`${DATA}index.json`);
     S.shelf = (idx.books || []).filter(b => b && /^[a-z0-9][a-z0-9-]*$/.test(b.slug || ''));

@@ -1,5 +1,5 @@
 /* Bibliotheca · Neo Classic: a reading page for public-domain classics with the Master Index's terms
-   highlighted, a popout bar of the terms on screen and a companion pane beside the text. Written against the tokens
+   highlighted and a companion pane beside the text (AR Mode), whose first tab lists the terms on screen. Written against the tokens
    in design/prp.css only (no colour is set here that is not a token), so light and dark both follow the system or the
    shell. The accent is Bibliotheca's own (--prp-bb); a copy of prp.css without it falls back to Natural Science's, as
    kino.css does.
@@ -10,11 +10,9 @@
    written on an element in the interface font would be a different width. 66ch of Source Serif 4 at 18px (606px)
    holds 70 to 73 characters of running text on a full line (measured over chapter III of The Prince), inside the
    65–75 a comfortable measure allows; the design system's --prp-measure, 72ch, would give about 80 in this face. The
-   popout bar and the contents list hang from the sticky head over the text, so opening them moves nothing; the head's
-   height never changes. From 1150 px with the pane shut the bar is a list in the margin beside the column instead:
-   (1150 − 48 − 606) / 2 = 248 px beside it holds the 14rem list and its 20 px gap, so the shell's frame at a 1440 px
-   window (1168 px) has it too. As a strip it covers the line under the head, and the page counts what is in view from
-   the strip's bottom (app.js: stripH; --nc-bar below, so a jump lands clear of it). */
+   contents list hangs from the sticky head over the text, so opening it moves nothing; the head's height never
+   changes. The terms on screen are a tab of the pane (BI-23); until 15 November 2026 they were a bar hanging over the
+   text, or a list in the margin. */
 [data-suite="bibliotheca"] { --prp-accent: var(--prp-bb, var(--prp-ns)); --prp-accent-soft: var(--prp-bb-soft, var(--prp-ns-soft)); }
 
 :root { --nc-size: 18px; --nc-sheet: 52dvh; }
@@ -46,6 +44,15 @@ button { cursor: pointer; }
 .nc-layout.split { grid-template-columns: minmax(0, 1fr) minmax(380px, var(--prp-split-share, 44%)); }
 .nc-book { min-width: 0; }
 .nc-col { max-width: 66ch; margin: 0 auto; font: var(--nc-size)/1.7 var(--prp-font-serif); color: var(--prp-text); }
+/* With nothing beside it (BI-21, Jude, 15 November 2026: "The text should take up a wide space as opposed to a narrow
+   strip"): with the pane (AR Mode) shut, the column takes the page's width up to 110ch, and
+   from 1,000 px the type steps up with the window, 18 px at 1,200 to 20 px from 1,600: 1,022 px in the shell's frame
+   at a 1,530 px window, 1,085 px on its own at 1,530, 1,100 px (the cap, 20 px type) at 1,920. A line is then about
+   115 characters; an outright full width (1,390 px at 1,920) would be past 140, too long for the eye to find the next
+   line, so 110ch is the cap. With the pane open, in full screen and on a phone it is the 66ch column above. Screens only
+   lays the pane over it, unchanged. */
+:root:not([data-prp-fs]) .nc-layout:not(.split) .nc-col { max-width: min(100%, 110ch); }
+@media (min-width: 1000px) { :root:not([data-prp-fs]) .nc-layout:not(.split) .nc-col { --nc-size: clamp(18px, calc(12px + .5vw), 20px); } }
 
 /* The book's own front matter (scrolls away). */
 .nc-book-front { padding: 2px 0 14px; margin-bottom: 4px; border-bottom: 1px solid var(--prp-line-soft); }
@@ -70,7 +77,6 @@ button { cursor: pointer; }
 .nc-chapter-title .t { min-width: 0; overflow-wrap: anywhere; }
 .nc-chapter-row .icon { width: 28px; padding: 0; font-size: 15px; }
 .nc-chapter-row .nav[aria-disabled="true"] { opacity: .35; pointer-events: none; }
-.nc-bar-toggle .n { display: inline-block; min-width: 1.4em; text-align: center; font: 600 var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
 /* The reading position: how far through the chapter, and which paragraph of how many. */
 .nc-progress-row { display: flex; align-items: center; gap: 10px; height: 16px; margin-top: 4px; }
 .nc-progress { position: relative; flex: 1 1 auto; height: 3px; background: var(--prp-line-soft); border-radius: 2px; overflow: hidden; }
@@ -78,8 +84,8 @@ button { cursor: pointer; }
 .nc-progress-row .pos { flex: none; min-width: 9.5em; text-align: right; color: var(--prp-muted); font: var(--prp-fs-xs)/1 var(--prp-font-mono); font-variant-numeric: tabular-nums; }
 .nc-head::after { content: ""; display: block; height: 12px; background: linear-gradient(var(--prp-canvas), transparent); margin-bottom: -12px; position: relative; pointer-events: none; }
 
-/* The contents list and the popout bar hang from the head, over the text. */
-.nc-toc, .nc-popout { position: absolute; top: calc(100% - 6px); z-index: 7; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); }
+/* The contents list hangs from the head, over the text. */
+.nc-toc { position: absolute; top: calc(100% - 6px); z-index: 7; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-2); }
 .nc-toc { left: 0; width: min(100%, 36rem); max-height: min(65vh, 560px); overflow: auto; padding: 6px 0; }
 .nc-toc ol { list-style: none; margin: 0; padding: 0; }
 .nc-toc a { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 6px 14px; color: var(--prp-text); text-decoration: none; font: var(--prp-fs-sm)/1.45 var(--prp-font-ui); }
@@ -88,32 +94,21 @@ button { cursor: pointer; }
 .nc-toc .no { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .04em; text-transform: uppercase; }
 .nc-toc .w { color: var(--prp-muted); font: var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
-/* The bar: one row of chips under the head, scrolling sideways, so it covers a line of text at most. The row is a
-   chip's height (28px and its 1px padding) whether or not any chip is in view, so the strip's depth, which the page
-   takes out of the reading region, does not change as the reader scrolls. */
-.nc-popout { left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding: 6px 4px 6px 12px; }
-.nc-popout-label { flex: none; color: var(--prp-muted); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); }
-.nc-chips { flex: 1 1 auto; min-width: 0; min-height: 30px; display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding: 1px; }
-.nc-popout .icon { flex: none; width: 26px; padding: 0; }
+/* AR Mode's "On screen" tab (BI-23): the terms in the text in view, in reading order, each with its count, wrapped in
+   rows; one chosen opens its entry on the Master Index tab, and is ringed while it is the reader's term. */
+.nc-terms { overflow: auto; padding: 10px 14px 14px; }
+.nc-terms-label { margin: 0 0 10px; color: var(--prp-text-2); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); }
+.nc-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .nc-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--prp-line-strong); border-radius: 99px; background: var(--prp-surface); color: var(--prp-text); font: 500 var(--prp-fs-sm) var(--prp-font-ui); white-space: nowrap; }
 .nc-chip:hover { background: var(--prp-surface-3); }
 .nc-chip[aria-pressed="true"] { border-color: var(--prp-primary); background: var(--prp-primary-soft); }
 .nc-chip .n { color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
-.nc-popout .none { margin: 0; color: var(--prp-muted); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); white-space: nowrap; }
-/* Wide, with the pane shut: the bar is a list in the margin beside the text, covering nothing (app.js MARGIN_BAR
-   matches this width). */
-@media (min-width: 1150px) {
-  .nc-layout:not(.split) .nc-popout { display: block; left: calc(100% + 20px); right: auto; top: 8px; width: 14rem; padding: 10px 12px 12px; max-height: calc(100dvh - 40px); overflow: auto; box-shadow: var(--prp-shadow-1); }
-  .nc-layout:not(.split) .nc-popout-label { display: block; margin: 0 28px 10px 0; }
-  .nc-layout:not(.split) .nc-chips { flex-wrap: wrap; overflow: visible; }
-  .nc-layout:not(.split) .nc-popout .none { white-space: normal; }
-  .nc-layout:not(.split) #popout-close { position: absolute; top: 6px; right: 6px; }
-}
+.nc-terms .none { margin: 0; color: var(--prp-muted); font: var(--prp-fs-sm)/1.5 var(--prp-font-ui); }
 
 /* --- The text ------------------------------------------------------------------------------------------------------- */
 .nc-text { padding-top: 6px; }
 /* A jump lands a paragraph 12px under the head, and under the terms strip when it is open (--nc-bar, its depth below
-   the head, set by app.js; 0 when the bar is collapsed or in the margin). */
+   the head, set by app.js; 0 since BI-23, when the strip went). */
 .nc-text p.para { position: relative; margin: 0 0 1em; scroll-margin-top: calc(var(--nc-head, 56px) + var(--nc-bar, 0px) + 12px); hyphens: auto; -webkit-hyphens: auto; }
 .nc-text p.para::before { content: ""; position: absolute; left: -16px; top: .3em; bottom: .3em; width: 3px; border-radius: 2px; background: transparent; transition: background .2s; }
 .nc-text p.para.current::before { background: var(--prp-accent); }
@@ -144,7 +139,8 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 .nc-pane-head { display: flex; align-items: center; gap: 6px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--prp-line-soft); background: var(--prp-surface-2); }
 .nc-pane-titles { flex: 1 1 auto; min-width: 0; display: grid; }
 .nc-pane-titles b { font: 600 var(--prp-fs)/1.35 var(--prp-font-ui); color: var(--prp-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nc-pane .prp-tabs { padding: 0 8px; flex: none; }
+/* (The tabs scroll sideways only: the tab's -1px margin otherwise gives the row a scroll bar of its own.) */
+.nc-pane .prp-tabs { padding: 0 8px; flex: none; overflow-y: hidden; }
 .nc-pane-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .nc-pane-body [role="tabpanel"] { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .nc-pane iframe { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; background: var(--prp-canvas); }
@@ -191,6 +187,7 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
   .nc-toolbar .keys { display: none; }
   .nc-chapter-row { gap: 4px; }
   .nc-chapter-row .lbl { display: none; }
+  .nc-chapter-row #pane-toggle .lbl { display: inline; } /* AR Mode keeps its words on a phone (BI-23) */
   #nar-play { min-width: 0; }
   #nar-play .lbl { display: none; }
   #nar-play .ico { margin-right: 0; }
@@ -201,9 +198,8 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 }
 /* --- Augmented Reading (app.js): the narrator's row and its message line in the head, the offer hanging from it,
    the marks on the sentence being read, Screens only, the subtitles, full screen ------------------------------------ */
-/* The mode's button drops its words wherever they would leave the chapter's title under 200 px (the head is one
-   reading column wide at every screen size). */
-@container nc-head (max-width: 660px) { #ar-toggle .lbl { display: none; } }
+/* The AR Reader button keeps its words at every width (BI-03, 15 November 2026: a labelled button, not the ▷ alone),
+   as AR Mode does: the two words are short enough to leave the chapter's title its room. */
 /* On a phone (Jude, 12 November 2026) the button has a row of its own under the chapter's title, in words, and the
    title shows in full, beside the contents button, on a second line where it needs one; the chapter arrows, the terms
    and Links follow on the next row, and the mode's button on its own row under them. */
@@ -254,6 +250,14 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
   border-width: 1px 0 0; border-radius: 0; box-shadow: var(--prp-shadow-2); }
 .nc-layout.fill .nc-pane .prp-split-bar { display: none; }
 .nc-layout.fill .nc-pane .nc-tall { display: none; }
+/* The screen has the pane's height (BI-20, 15 November 2026): with a screen shown, the list of the era's screens is
+   the shown one's row alone (its name, and its link; the others come back with the text), so it neither takes two
+   fifths of the pane nor scrolls; and the page's own scroll bar, for a text the pane covers, goes. The screen's page
+   keeps its scroll bar, the only one. */
+.nc-layout.fill .nc-vm-list.with-frame { max-height: none; overflow: visible; }
+.nc-layout.fill .nc-vm-list.with-frame :is(.nc-era-title, .nc-era-pick, .nc-rows-label, .nc-rows li:not([aria-current="true"])) { display: none; }
+.nc-layout.fill .nc-vm-list.with-frame .nc-rows { padding-bottom: 0; }
+:root.nc-filled { scrollbar-width: none; }
 /* A picture for the book (Screens only): Kino's 16:9 stage, as large as the pane's room allows, with its caption. */
 .nc-picture { flex: 1 1 auto; min-height: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; background: var(--prp-canvas); }
 .nc-picture[hidden] { display: none; }
@@ -286,7 +290,7 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
   .nc-progress i, .nc-text p.para::before { transition: none; }
 }
 @media print {
-  .nc-toolbar, .nc-chapter-row .prp-btn, .nc-progress, .nc-popout, .nc-toc, .nc-pane, .nc-chapter-nav, .nc-nar, .nc-nar-msg, .nc-offer, .nc-notice { display: none !important; }
+  .nc-toolbar, .nc-chapter-row .prp-btn, .nc-progress, .nc-toc, .nc-pane, .nc-chapter-nav, .nc-nar, .nc-nar-msg, .nc-offer, .nc-notice { display: none !important; }
   .nc-head { position: static; }
   a.term { background: none; box-shadow: none; }
 }

@@ -39,11 +39,12 @@ test('address: reads every key, and anything malformed as absent', () => {
   assert.equal(readHash('#t=q70972').t, 'Q70972', 'a QID typed in lower case');
   assert.equal(readHash('#t=Q0').t, null);
   assert.equal(readHash('#pane=VM').pane, 'vm');
+  assert.equal(readHash('#pane=terms').pane, 'terms', 'AR Mode\'s "On screen" tab (BI-23)');
   // The screen shown in the pane: a row key of the "In Vitruvian Manager" tab, and only with that tab open.
   assert.deepEqual(readHash('#book=the-prince&t=Q70972&pane=vm&show=kardashev&era=term'), { ...NONE, book: 'the-prince', t: 'Q70972', pane: 'vm', show: 'kardashev', era: 'term' });
-  for (const k of ['progress', 'retrospective', 'battlefield-history', 'historical-calendar', 'pestle', 'war-focus:korean-war', 'm0', 'm7']) assert.equal(readHash(`#pane=vm&show=${k}`).show, k, k);
+  for (const k of ['progress', 'retrospective', 'battlefield-history', 'historical-calendar', 'pestle', 'war-focus:korean-war', 'm0', 'm7', 'm12', 'm99']) assert.equal(readHash(`#pane=vm&show=${k}`).show, k, k);
   assert.equal(readHash('#pane=vm&show=War-Focus:Korean-War').show, 'war-focus:korean-war', 'typed in capitals');
-  for (const k of ['kardashev2', 'war-focus:', 'war-focus:<b>', 'm10', 'mx', 'encyclopedia', '']) assert.equal(readHash(`#pane=vm&show=${encodeURIComponent(k)}`).show, null, `"${k}"`);
+  for (const k of ['kardashev2', 'war-focus:', 'war-focus:<b>', 'm100', 'mx', 'encyclopedia', '']) assert.equal(readHash(`#pane=vm&show=${encodeURIComponent(k)}`).show, null, `"${k}"`);
   assert.equal(readHash('#pane=ency&show=kardashev').show, null, 'a screen means nothing on the Master Index tab');
   assert.equal(readHash('#show=kardashev').show, null, 'nor with the pane shut');
   // Whose era: the term's, or (absent) the book's.
@@ -291,16 +292,12 @@ function watch(page, only = null) {
   });
   return errors;
 }
-// Wait until the bar lists exactly the distinct terms whose links are in view (under the sticky head, and under the
-// bar itself where it is a strip over the text, not the list in the margin; above the pane's sheet on a phone), in
-// reading order, worked out from the page as a reader sees it, not from the page's own idea of the reading region;
-// return them.
+// Wait until AR Mode's "On screen" tab (BI-23; the floating bar until then) lists exactly the distinct terms whose
+// links are in view (under the sticky head, above the pane's sheet on a phone), in reading order, worked out from the
+// page as a reader sees it, not from the page's own idea of the reading region; return them.
 async function barShows(page) {
   const h = await page.waitForFunction(() => {
-    const head = document.querySelector('#head').getBoundingClientRect().bottom, pane = document.querySelector('#pane');
-    const pop = document.querySelector('#popout'), text = document.querySelector('#text').getBoundingClientRect();
-    const strip = pop.hidden ? null : pop.getBoundingClientRect();
-    const top = strip && strip.left < text.right && strip.right > text.left ? Math.max(head, strip.bottom) : head;
+    const top = document.querySelector('#head').getBoundingClientRect().bottom, pane = document.querySelector('#pane');
     const bottom = innerHeight - (!pane.hidden && getComputedStyle(pane).position === 'fixed' ? pane.getBoundingClientRect().height : 0);
     const want = [];
     for (const a of document.querySelectorAll('#text a.term')) { const r = a.getBoundingClientRect(); if (r.bottom > top && r.top < bottom && !want.includes(a.dataset.qid)) want.push(a.dataset.qid); }
@@ -311,7 +308,7 @@ async function barShows(page) {
 }
 const frameOf = (page, sel) => page.locator(sel).elementHandle().then(h => h.contentFrame());
 
-test('page: the fixture: terms as links, the bar follows the terms in view, a term opens the pane, the address follows', PAGE, async () => {
+test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the terms in view, a term opens its entry, the address follows', PAGE, async () => {
   const browser = await launch();
   try {
     // 1120 px: wide enough to split, narrow enough that the pane narrows the text (so closing it reflows the text).
@@ -330,9 +327,9 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     assert.deepEqual(links.map(({ qid, text }) => ({ qid, text })), ch3.paragraphs.flatMap(p => p.terms.map(t => ({ qid: t.qid, text: p.text.slice(t.s, t.e) }))));
     for (const l of links) assert.equal(l.href, `${BASE}/encyclopedia/index.html#${l.qid}`);
 
-    // The bar opens over the text: nothing moves (the paragraph being read stays where it is, to the pixel).
-    assert.equal(await page.getAttribute('#bar-toggle', 'aria-expanded'), 'false', 'collapsed by default where it would cover text');
-    const place = () => page.evaluate(() => document.querySelector('#text p.current')?.getBoundingClientRect().top);
+    // AR Mode, one button (BI-23): no bar lies over the text; the terms on screen are the pane's first tab.
+    assert.equal(await page.locator('#popout, #bar-toggle, #bar-switch').count(), 0, 'no floating bar, no terms button of its own');
+    assert.equal(await page.getAttribute('#pane-toggle', 'aria-label'), 'AR Mode');
     await page.waitForSelector('#text p.current');
     await page.evaluate(() => document.fonts.ready);
     // Opened at a chapter, the chapter's head is at the top and stays there while the fonts arrive.
@@ -341,35 +338,38 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     // on the CI runner; what matters is that the head is at the top, not a page further down.)
     const headTop = await page.evaluate(() => document.querySelector('#head').getBoundingClientRect().top);
     assert.ok(Math.abs(headTop) < 2, `the chapter head is at the top (${headTop})`);
-    const still = await place();
-    await page.click('#bar-toggle');
-    await page.waitForSelector('#popout:not([hidden])');
-    const opened = await place();
-    assert.ok(Math.abs(opened - still) < 0.5, `no layout shift when the bar opens (${still} -> ${opened})`);
-    // The bar lists the terms in view; scrolled on, others; the address follows the current paragraph.
+    await page.click('#pane-toggle');
+    await page.waitForSelector('#pane:not([hidden])');
+    assert.equal(await page.getAttribute('#pane-toggle', 'aria-pressed'), 'true');
+    assert.equal(await page.getAttribute('#tab-terms', 'aria-selected'), 'true', 'AR Mode opens on the terms on screen');
+    await page.waitForFunction(() => /&pane=terms$/.test(location.hash));
+    // The tab lists the terms in view; scrolled on, others; the address follows the current paragraph.
     const top = await barShows(page);
-    assert.equal(await page.locator('#bar-count').innerText(), String(top.length));
+    assert.equal(await page.locator('#terms-count').innerText(), String(top.length));
+    assert.equal(await page.textContent('#pane-title'), `${top.length} term${top.length === 1 ? '' : 's'} in view`);
     await page.evaluate(() => document.getElementById('c03-p07').scrollIntoView({ block: 'center' }));
     const end = await barShows(page);
     assert.ok(end.includes('Q12560'), `the Turk at the end of the excerpt: ${end}`);
-    assert.notDeepEqual(end, top, 'the bar changed as the reader scrolled');
+    assert.notDeepEqual(end, top, 'the list changed as the reader scrolled');
     await page.waitForFunction(() => /&p=c03-p0[67]\b/.test(location.hash));
     assert.equal(readHash(await page.evaluate(() => location.hash)).p, await page.evaluate(() => document.querySelector('#text p.current').id));
     assert.match(await page.locator('#pos').innerText(), /^¶ [67] of 7 · \d+%$/);
     assert.equal(await page.evaluate(() => document.querySelector('#head').getBoundingClientRect().top), 0, 'the chapter head stays at the top');
     assert.equal((await page.locator('#chapter-title').innerText()).replace(/\s+/g, ' '), 'III Concerning mixed principalities');
-    // The bar can be hidden altogether (the switch, or T to bring it back), and collapsed (T, or its ×).
-    await page.click('#bar-switch');
-    assert.equal(await page.locator('#bar-toggle').isHidden(), true);
-    assert.equal(await page.locator('#popout').isHidden(), true);
+    // P closes AR Mode and opens it again; T opens it on the terms on screen, and closes it from there.
+    await page.keyboard.press('p');
+    await page.waitForSelector('#pane', { state: 'hidden' });
+    assert.equal(await page.getAttribute('#pane-toggle', 'aria-pressed'), 'false');
+    await page.keyboard.press('p');
+    await page.waitForSelector('#panel-terms:not([hidden])');
+    await page.click('#tab-vm');
     await page.keyboard.press('t');
-    await page.waitForSelector('#popout:not([hidden])');
-    assert.equal(await page.getAttribute('#bar-switch', 'aria-pressed'), 'true');
-    await page.click('#popout-close');
-    assert.equal(await page.locator('#popout').isHidden(), true);
+    await page.waitForSelector('#panel-terms:not([hidden])');
     await page.keyboard.press('t');
-    await page.waitForSelector('#popout:not([hidden])');
-    // At the very end of the page the sources fill the screen: no term in view, and the bar says so.
+    await page.waitForSelector('#pane', { state: 'hidden' });
+    await page.keyboard.press('t');
+    await page.waitForSelector('#panel-terms:not([hidden])');
+    // At the very end of the page the sources fill the screen: no term in view, and the tab says so.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     if (!(await barShows(page)).length) assert.equal(await page.locator('#chips').innerText(), 'No terms in view.');
     await page.evaluate(() => document.getElementById('c03-p07').scrollIntoView({ block: 'center' }));
@@ -388,11 +388,14 @@ test('page: the fixture: terms as links, the bar follows the terms in view, a te
     const ency = await frameOf(page, '#ency-frame');
     await ency.waitForFunction(() => location.hash === '#Q12560' && document.querySelector('#entity h2')?.textContent === 'Ottoman Empire', null, { timeout: 30000 });
     assert.equal(await page.locator('#ency-fallback').isHidden(), true);
-    // Another term, from the bar: the same frame moves by hash, without reloading.
+    // Another term, from the "On screen" tab: the entry opens on the Master Index tab, the same frame moved by hash,
+    // without reloading.
     await ency.evaluate(() => { window.stillHere = true; });
     await page.evaluate(() => document.querySelector('#text a.term[data-qid="Q70972"]').scrollIntoView({ block: 'center' }));
     assert.ok((await barShows(page)).includes('Q70972'));
+    await page.click('#tab-terms');
     await page.click('#chips .nc-chip[data-term="Q70972"]');
+    await page.waitForSelector('#panel-ency:not([hidden])');
     await ency.waitForFunction(() => location.hash === '#Q70972' && document.querySelector('#entity h2')?.textContent === 'Kingdom of France', null, { timeout: 15000 });
     assert.equal(await ency.evaluate(() => window.stillHere), true, 'no reload');
     assert.equal(await page.getAttribute('#pane-open', 'href'), `${BASE}/#/rs/encyclopedia?at=${encodeURIComponent(`${BASE}/encyclopedia/index.html#Q70972`)}`);
@@ -521,81 +524,43 @@ test('page: the real book opens at a deep link with the paragraph in place, and 
   } finally { await browser.close(); }
 });
 
-test('page: the terms strip hides nothing the page counts as in view: a deep link lands below it, a term it covers is moved clear', PAGE, async () => {
+// Until BI-23 the terms were a strip over the text, and this test kept what it covered out of what the page counted as
+// in view. Now they are AR Mode's "On screen" tab: nothing lies over the text, a deep link lands just under the head,
+// and the tab lists what the head and the sheet leave in view.
+test('page: AR Mode on its terms: a deep link lands under the head, the list is what is in view through the chapter, a term clicked stays in view', PAGE, async () => {
   const browser = await launch();
-  // The bar as the reader sees it: a strip over the text (not the list in the margin), its bottom, open or not.
-  const bar = page => page.evaluate(() => {
-    const p = document.querySelector('#popout'), r = p.getBoundingClientRect(), t = document.querySelector('#text').getBoundingClientRect();
-    return { strip: !p.hidden && r.left < t.right && r.right > t.left, bottom: r.bottom, open: document.querySelector('#bar-toggle').getAttribute('aria-expanded') };
-  });
-  // A reader who has opened the bar (it is remembered).
-  const opened = async width => {
+  const open = async (width, hash) => {
     const ctx = await browser.newContext({ viewport: { width, height: 800 } });
-    await ctx.addInitScript(() => { try { localStorage.setItem('prp.bibliotheca.popout', 'true'); } catch { /* no storage */ } });
-    return ctx;
-  };
-  const open = async (ctx, hash) => {
     const page = await ctx.newPage(), errors = watch(page);
     await page.goto(`${BASE}/bibliotheca/neo/${hash}`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#text p.para.current', { timeout: 20000 });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(500);
-    return { page, errors };
+    return { ctx, page, errors };
   };
   try {
-    // 1120 px, the bar open: a strip under the head. The review measured a deep link to c03-p16 landing with the
-    // paragraph's first line 26 px under it (strip bottom 114, paragraph top 88).
-    const narrow = await opened(1120);
-    const { page, errors } = await open(narrow, '#book=the-prince&ch=3&p=c03-p16');
-    const s = await bar(page);
-    const p = await page.evaluate(() => ({ id: document.querySelector('#text p.current').id, top: document.getElementById('c03-p16').getBoundingClientRect().top }));
-    assert.ok(s.strip, 'the bar is a strip over the text');
+    // 1120 px, AR Mode open on its terms (pane=terms in the address): the paragraph sits just under the head.
+    const { ctx, page, errors } = await open(1120, '#book=the-prince&ch=3&p=c03-p16&pane=terms');
+    assert.equal(await page.getAttribute('#tab-terms', 'aria-selected'), 'true');
+    const p = await page.evaluate(() => ({ id: document.querySelector('#text p.current').id, top: document.getElementById('c03-p16').getBoundingClientRect().top, head: document.querySelector('#head').getBoundingClientRect().bottom }));
     assert.equal(p.id, 'c03-p16');
-    assert.ok(p.top >= s.bottom && p.top <= s.bottom + 30, `the paragraph sits below the strip: top ${p.top}, strip bottom ${s.bottom}`);
+    assert.ok(p.top >= p.head && p.top <= p.head + 30, `the paragraph sits under the head: ${JSON.stringify(p)}`);
     await barShows(page);
-    // Through the chapter, the bar lists only the terms the strip leaves in view (it listed covered ones at 12 of 29
-    // positions).
     for (const f of [0.3, 0.42, 0.54, 0.66, 0.78]) { await page.evaluate(f => window.scrollTo(0, f * document.documentElement.scrollHeight), f); await barShows(page); }
-    // Collapsing and opening the strip moves nothing.
-    const place = () => page.evaluate(() => { const c = document.querySelector('#text p.current'); return { id: c.id, top: c.getBoundingClientRect().top }; });
-    const before = await place();
-    await page.click('#popout-close');
-    await page.click('#bar-toggle');
-    await page.waitForSelector('#popout:not([hidden])');
-    assert.deepEqual(await place(), before);
-    await barShows(page);
     assert.deepEqual(errors, []);
-    await narrow.close();
+    await ctx.close();
 
-    // 1280 px, the bar open: the list in the margin until the pane opens, then a strip. The review's case: "France" in
-    // the first line of c03-p13, clicked, ended up under it. Now it moves just clear, and its paragraph stays the one read.
-    const wide = await opened(1280);
-    const w = await open(wide, '#book=the-prince&ch=3&p=c03-p13');
-    assert.equal((await bar(w.page)).strip, false, 'with the pane shut the bar is the list in the margin');
+    // 1280 px, AR Mode shut: "France" in the first line of c03-p13, clicked, opens its entry and stays in view.
+    const w = await open(1280, '#book=the-prince&ch=3&p=c03-p13');
     const france = w.page.locator('#c03-p13 a.term[data-qid="Q70972"]').first();
     await france.click();
     await w.page.waitForSelector('#pane:not([hidden])');
-    const s2 = await bar(w.page), box = await france.boundingBox();
-    assert.ok(s2.strip, 'with the pane open the list is a strip');
-    assert.ok(box.y >= s2.bottom, `the term clicked is clear of the strip: ${box.y} (strip bottom ${s2.bottom})`);
+    const box = await france.boundingBox(), head = await w.page.evaluate(() => document.querySelector('#head').getBoundingClientRect().bottom);
+    assert.ok(box.y >= head && box.y + box.height <= 800, `the term clicked is in view: ${box.y} (head ${head})`);
     await w.page.waitForFunction(() => /&p=c03-p13&t=Q70972&pane=ency$/.test(location.hash));
-    await barShows(w.page);
+    assert.equal(await w.page.getAttribute('#chips .nc-chip[data-term="Q70972"]', 'aria-pressed'), 'true', 'its chip on the terms tab is pressed');
     assert.deepEqual(w.errors, []);
-    await wide.close();
-
-    // A reader who has never opened or collapsed the bar: open as the margin list, collapsed while the pane is open
-    // (rather than a strip they did not ask for), back when it shuts.
-    const fresh = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-    const d = await open(fresh, '#book=the-prince&ch=3&p=c03-p13');
-    assert.deepEqual(await bar(d.page).then(b => [b.strip, b.open]), [false, 'true']);
-    await d.page.locator('#c03-p13 a.term[data-qid="Q70972"]').first().click();
-    await d.page.waitForSelector('#pane:not([hidden])');
-    assert.equal(await d.page.getAttribute('#bar-toggle', 'aria-expanded'), 'false');
-    assert.equal(await d.page.locator('#popout').isHidden(), true);
-    await d.page.click('#pane-close');
-    assert.deepEqual(await bar(d.page).then(b => [b.strip, b.open]), [false, 'true']);
-    assert.deepEqual(d.errors, []);
-    await fresh.close();
+    await w.ctx.close();
   } finally { await browser.close(); }
 });
 
@@ -617,8 +582,8 @@ test('page: at phone width the pane is a sheet under the text, and nothing scrol
     assert.ok(sheet.top > 250 && Math.round(sheet.bottom) === 780 && Math.round(sheet.width) === 360, JSON.stringify(sheet));
     const t = await term.boundingBox();
     assert.ok(t.y + t.height <= sheet.top, 'the term clicked stays above the sheet');
-    if (await page.getAttribute('#bar-toggle', 'aria-expanded') !== 'true') await page.click('#bar-toggle');
-    await barShows(page); // the bar counts only what the strip and the sheet leave in view
+    await page.click('#tab-terms');
+    await barShows(page); // AR Mode's terms count only what the sheet leaves in view
     assert.equal(await wide(), 360);
     // "Show here" on a phone: the sheet opens taller for the screen, which is scrolled past its own front matter (title,
     // description, readings) to what it shows for the era.
@@ -650,14 +615,11 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
     assert.equal(await page.getAttribute('#nav a[aria-current="page"]', 'href'), '#/bibliotheca/neo-classic');
     assert.equal(await frame.evaluate(() => document.documentElement.dataset.suite), 'bibliotheca');
     assert.equal(await frame.evaluate(() => document.documentElement.classList.contains('prp-embedded')), true);
-    // The shell's frame at a 1440 px window is 1168 px wide: wide enough for the bar's list in the margin, open by
-    // default, beside the text and inside the frame (it needed 1240 px before).
-    const list = await frame.evaluate(() => {
-      const p = document.querySelector('#popout'), r = p.getBoundingClientRect(), t = document.querySelector('#text').getBoundingClientRect();
-      return { width: innerWidth, open: !p.hidden, beside: r.left >= t.right, inside: r.right <= document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth <= innerWidth };
-    });
-    assert.deepEqual(list, { width: list.width, open: true, beside: true, inside: true, scroll: true }, JSON.stringify(list));
+    // The shell's frame at a 1440 px window is 1168 px wide; with AR Mode shut the text takes most of it (BI-21), and
+    // nothing lies beside or over it.
+    const list = await frame.evaluate(() => ({ width: innerWidth, text: document.querySelector('#text').getBoundingClientRect().width, scroll: document.documentElement.scrollWidth <= innerWidth }));
     assert.ok(list.width >= 1150 && list.width < 1240, `the frame is ${list.width} px`);
+    assert.ok(list.text >= 0.8 * list.width && list.scroll, JSON.stringify(list));
     // Inside the shell a term's own link is the shell's route to its entry.
     assert.match(await frame.locator('#byline a.term').getAttribute('href'), new RegExp(`^${BASE}/#/rs/encyclopedia\\?at=`));
     // A deep link moves the page by its hash alone: same document, new chapter and paragraph. (Once the shell has seen
@@ -673,6 +635,7 @@ test('page: inside the shell, a hash move keeps the page loaded and the pane\'s 
     assert.equal(await page.evaluate(() => location.hash), `#/bibliotheca/neo-classic?at=${deep}`);
     // The pane's "open in Vitruvian Manager" moves the shell to that screen, at the book's period.
     await frame.click('#pane-toggle');
+    await frame.click('#tab-vm');
     await frame.waitForSelector('#era-rows li[data-key="kardashev"] a');
     await frame.click('#era-rows li[data-key="kardashev"] a');
     await page.waitForFunction(() => location.hash.startsWith('#/rs/kardashev?at='), null, { timeout: 10000 });
@@ -718,14 +681,15 @@ const marked = page => page.evaluate(() => {
 });
 const unitOf = (chapterData, pid, k) => speakable(chapterData.paragraphs.find(p => p.id === pid)).units[k];
 
-test('page: Augmented Reading: the button and the kicker say so, the pane shows the nearest term before Play, the narrator reads and marks the unit, keeps it in view, and R pauses and resumes it', PAGE, async () => {
+test('page: AR Reader (Augmented Reading until 15 November 2026): the button and the kicker say so, the pane shows the nearest term before Play, the narrator reads and marks the unit, keeps it in view, and R pauses and resumes it', PAGE, async () => {
   const browser = await launch();
   try {
     const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p03', { speech: { ms: 250 } });
-    assert.match(await page.textContent('#ar-toggle'), /Augmented Reading/);
+    assert.match(await page.textContent('#ar-toggle'), /AR Reader/);
+    assert.equal(await page.getAttribute('#ar-toggle', 'aria-label'), 'AR Reader');
     assert.equal(await page.getAttribute('#ar-toggle', 'aria-pressed'), 'true');
     await page.waitForFunction(() => /&pane=ency&ar=1$/.test(location.hash));
-    assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · Master Index');
+    assert.equal(await page.textContent('#pane-kicker'), 'AR Reader · Master Index');
     // Before Play, the term nearest the reader's paragraph.
     const { terms, base } = chapterTerms(CH3), p3 = CH3.paragraphs.find(p => p.id === 'c03-p03');
     const near = nearestTerm(terms, base.get('c03-p03'), base.get('c03-p03') + p3.text.length);
@@ -918,7 +882,7 @@ test('page: Screens only lays the pane over the text under the head (1366 and 36
       const box = await page.evaluate(() => { const p = document.querySelector('#pane').getBoundingClientRect(), h = document.querySelector('#head').getBoundingClientRect(); return { top: p.top, left: p.left, right: p.right, bottom: p.bottom, head: h.bottom, w: innerWidth, h: innerHeight, sw: document.documentElement.scrollWidth }; });
       assert.ok(Math.abs(box.top - box.head) <= 1 && box.left === 0 && Math.round(box.right) === box.w && Math.round(box.bottom) === box.h, `over the text, under the head: ${JSON.stringify(box)}`);
       assert.equal(box.sw, box.w, 'nothing scrolls sideways');
-      assert.equal(await page.locator('#popout').isHidden(), true, 'the terms strip is put away');
+      assert.equal(await page.locator('#popout').count(), 0, 'no terms strip over anything');
       // The head's buttons still work, and the reading goes on beneath, the current paragraph and the address with it.
       await page.click('#nar-play');
       await page.waitForFunction(() => window.__spoken.length >= 2);
@@ -935,15 +899,184 @@ test('page: Screens only lays the pane over the text under the head (1366 and 36
   } finally { await browser.close(); }
 });
 
+// BI-20 (Jude, 15 November 2026): in Screens only a screen of "In Vitruvian Manager" ran out about 100 px above the
+// foot of the window (an empty subtitles strip), in a frame the list of screens left two fifths of the pane, its map cut
+// off, with four scroll bars. The pane, and the screen in it, run from under the head to the foot of the window; on a
+// desktop the screen is given the window's height and scaled to its frame, on a phone it keeps its own layout.
+test('page: in Screens only a screen fills the pane to the foot of the window and is scaled to its frame (1530 × 770, 390 × 844)', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [viewport, context] of [[{ width: 1530, height: 770 }, {}], [{ width: 390, height: 844 }, { isMobile: true, hasTouch: true }]]) {
+      const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=4&p=c04-p02&pane=vm&show=pestle&ar=1', { viewport, context, speech: { ms: 120 }, ar: false });
+      await page.waitForSelector('#nar:not([hidden])', { timeout: 20000 }); // ar=1 in the address: the pane stays on its screen
+      const vm = await frameOf(page, '#vm-frame');
+      await vm.waitForSelector('.prp-meta', { state: 'attached', timeout: 20000 });
+      await page.keyboard.press('d');
+      await page.waitForSelector('#layout.fill');
+      const at = `${viewport.width} × ${viewport.height}`;
+      const fits = () => page.waitForFunction(() => {
+        const f = document.querySelector('#vm-frame'), z = Number(f.style.zoom || 1), b = f.getBoundingClientRect();
+        return Math.abs(f.contentWindow.innerHeight * z - b.height) <= 2;
+      }, null, { timeout: 5000 }).catch(() => {});
+      await fits();
+      const m = await page.evaluate(() => {
+        const f = document.querySelector('#vm-frame'), b = f.getBoundingClientRect(), p = document.querySelector('#pane').getBoundingClientRect();
+        const list = document.querySelector('#vm-list'), tabs = document.querySelector('#pane .prp-tabs');
+        return { ih: innerHeight, head: document.querySelector('#head').getBoundingClientRect().bottom, pane: [p.top, p.bottom], frame: [b.top, b.bottom, b.height],
+          zoom: Number(f.style.zoom || 1), inner: f.contentWindow.innerHeight, subs: document.querySelector('#subs').hidden,
+          listScrolls: list.scrollHeight > list.clientHeight + 1, rows: [...list.querySelectorAll('li')].filter(li => li.offsetParent).map(li => li.dataset.key),
+          tabsScroll: getComputedStyle(tabs).overflowY, pageBar: getComputedStyle(document.documentElement).scrollbarWidth };
+      });
+      const why = `${at}: ${JSON.stringify(m)}`;
+      assert.equal(m.subs, true, `${at}: no subtitles strip before anything is said`);
+      assert.ok(Math.abs(m.pane[0] - m.head) <= 1 && m.ih - m.pane[1] <= 2, `the pane from under the head to the foot: ${why}`);
+      assert.ok(m.ih - m.frame[1] <= 2 && m.ih - m.frame[1] >= -1, `the screen runs to the foot of the window: ${why}`);
+      assert.ok(m.frame[0] >= m.pane[0] && m.frame[1] <= m.pane[1] + 1, `the screen inside the pane: ${why}`);
+      // The screen's own viewport, scaled, is exactly its frame: none of it hangs below, cut off.
+      assert.ok(Math.abs(m.inner * m.zoom - m.frame[2]) <= 2, `the screen is not taller than its frame: ${why}`);
+      if (viewport.width >= 1000) assert.ok(m.zoom < 1 && m.zoom >= 0.6 && Math.abs(m.inner - Math.min(m.ih, m.frame[2] / 0.6)) <= 2, `a desktop screen is given the window's height, scaled: ${why}`);
+      else assert.equal(m.zoom, 1, `${at}: a phone's screen keeps its own layout`);
+      assert.deepEqual(m.rows, ['pestle'], `${at}: the list is the shown screen's row alone`);
+      assert.equal(m.listScrolls, false, `${at}: the list does not scroll`);
+      assert.equal(m.tabsScroll, 'hidden', `${at}: the tabs have no scroll bar`);
+      assert.equal(m.pageBar, 'none', `${at}: the page's own scroll bar goes`);
+      // Reading: the subtitles take the foot, the screen ends where they begin and is scaled again.
+      await page.click('#nar-play');
+      await page.waitForSelector('#subs:not([hidden])');
+      await page.click('#nar-play');
+      await fits();
+      const r = await page.evaluate(() => {
+        const f = document.querySelector('#vm-frame'), b = f.getBoundingClientRect(), s = document.querySelector('#subs').getBoundingClientRect();
+        return { ih: innerHeight, frame: b.bottom, h: b.height, subs: [s.top, s.bottom], zoom: Number(f.style.zoom || 1), inner: f.contentWindow.innerHeight };
+      });
+      assert.ok(Math.abs(r.frame - r.subs[0]) <= 1 && r.ih - r.subs[1] <= 2 && Math.abs(r.inner * r.zoom - r.h) <= 2, `${at}, reading: ${JSON.stringify(r)}`);
+      // Escape gives the text back: the screen at its own size, the whole list again.
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.querySelector('#layout.fill'));
+      await page.waitForFunction(() => !document.querySelector('#vm-frame').style.zoom, null, { timeout: 5000 });
+      assert.ok(await page.locator('#era-rows li').count() > 1 && await page.locator('#era-title').isVisible(), `${at}: the list is whole again`);
+      assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarWidth), 'auto');
+      assert.deepEqual(errors, []);
+      await ctx.close();
+    }
+  } finally { await browser.close(); }
+});
+
+// BI-21 (Jude, 15 November 2026): with nothing open the text sat in a 606 px column in the middle of a 1,530 px window.
+test('page: with nothing beside it the text takes most of the window (1530 × 770, 1920 × 1080); AR Mode\'s pane still fits beside it', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const viewport of [{ width: 1530, height: 770 }, { width: 1920, height: 1080 }]) {
+      const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=4&p=c04-p01', { viewport, ar: false });
+      const at = `${viewport.width} × ${viewport.height}`;
+      const box = () => page.evaluate(() => {
+        const r = s => { const e = document.querySelector(s); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return { l: b.left, r: b.right, w: b.width }; };
+        const z = document.createElement('span'); z.textContent = '0'; document.querySelector('.nc-col').append(z); const ch = z.getBoundingClientRect().width; z.remove();
+        return { vw: innerWidth, sw: document.documentElement.scrollWidth, text: r('#text'), pane: r('#pane'), ch };
+      });
+      // Nothing beside it: at least 70% of the window, or the 110ch cap.
+      const none = await box();
+      assert.ok(none.text.w >= Math.min(0.7 * none.vw, 110 * none.ch) - 2 && none.text.w <= 110 * none.ch + 2, `${at}, nothing open: ${JSON.stringify(none)}`);
+      assert.equal(none.sw, none.vw, `${at}: nothing scrolls sideways`);
+      // The pane open: the 66ch column beside it, as before, no overlap.
+      await page.click('#pane-toggle');
+      await page.waitForSelector('#pane:not([hidden])');
+      await page.waitForFunction(() => document.querySelector('#text').getBoundingClientRect().right <= document.querySelector('#pane').getBoundingClientRect().left);
+      const pane = await box();
+      assert.ok(pane.text.r <= pane.pane.l && Math.abs(pane.text.w - 66 * pane.ch) <= 2 && pane.sw === pane.vw, `${at}, the pane open: ${JSON.stringify(pane)}`);
+      assert.deepEqual(errors, []);
+      await ctx.close();
+    }
+  } finally { await browser.close(); }
+});
+
+// BI-22 (Jude, 15 November 2026): with Links open, the terms bar was a strip hanging from the head over the first
+// lines of the text. Since BI-23 the terms on screen are AR Mode's first tab, in the pane: nothing of them lies over
+// the book (on a phone the pane is the sheet docked under the text, as before, and the first line is above it).
+// The lines of the text on screen below the head (each clipped to its part below the head) that the bar's box covers.
+const barCovers = page => page.evaluate(() => {
+  const head = document.querySelector('#head').getBoundingClientRect(), pop = document.querySelector('#chips');
+  if (!pop.offsetParent) return { open: false, over: [] };
+  const b = pop.getBoundingClientRect(), range = document.createRange(), over = [];
+  let first = null;
+  for (const p of document.querySelectorAll('#text p.para')) {
+    range.selectNodeContents(p);
+    for (const r of range.getClientRects()) {
+      if (!r.width || r.bottom <= head.bottom + 1 || r.top >= innerHeight) continue;
+      const line = { l: r.left, r: r.right, t: Math.max(r.top, head.bottom), b: r.bottom };
+      first ||= line;
+      if (line.l < b.right && line.r > b.left && line.t < b.bottom - 0.5 && line.b > b.top + 0.5) over.push(line);
+    }
+  }
+  return { open: true, bar: { l: b.left, r: b.right, t: b.top, b: b.bottom }, head: head.bottom, first, over };
+});
+test('page: the terms on screen cover no line of the text: AR Mode open on them, at 1530 × 770 and 390 × 844', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [viewport, context] of [[{ width: 1530, height: 770 }, {}], [{ width: 390, height: 844 }, { isMobile: true, hasTouch: true }]]) {
+      const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=4&p=c04-p03', { viewport, context, ar: false });
+      const at = `${viewport.width} × ${viewport.height}`;
+      assert.equal(await page.locator('#popout').count(), 0, `${at}: no floating bar`);
+      // AR Mode: one button, the pane on its first tab, the terms on screen.
+      await page.click('#pane-toggle');
+      await page.waitForSelector('#panel-terms:not([hidden])');
+      await page.waitForTimeout(300);
+      const both = await barCovers(page);
+      assert.ok(both.open && both.first, `${at}: the terms are listed, and text is on screen: ${JSON.stringify(both)}`);
+      const f = both.first, b = both.bar;
+      assert.ok(!(f.l < b.r && f.r > b.l && f.t < b.b && f.b > b.t), `${at}: the first line on screen is clear of the terms: ${JSON.stringify(both)}`);
+      if (viewport.width >= 1000) assert.deepEqual(both.over, [], `${at}: beside the text, over none of it`);
+      // Scrolled on, the same (the head is stuck at the top of the window).
+      await page.mouse.wheel(0, 600);
+      await page.waitForTimeout(400);
+      const on = await barCovers(page);
+      assert.ok(on.first && !(on.first.l < on.bar.r && on.first.r > on.bar.l && on.first.t < on.bar.b && on.first.b > on.bar.t), `${at}, scrolled: ${JSON.stringify(on)}`);
+      if (viewport.width >= 1000) assert.deepEqual(on.over, [], `${at}, scrolled`);
+      assert.deepEqual(errors, []);
+      await ctx.close();
+    }
+  } finally { await browser.close(); }
+});
+
+// The Master Index now names every book that names an entry (MI-08): for Machiavelli seven books besides his Kino film
+// and his lesson. "Where … appears" lists the other modules first and leaves out the book open (this page); a place's
+// key is its index in the entry, so show= keeps naming it.
+test('page: "Where … appears" lists the other modules before the books, leaves out the book open, and keys a place by its index in the entry', PAGE, async () => {
+  const mentions = read(`lake/data/e/${1399 % 512}.json`).Q1399.mentions;
+  const film = mentions.findIndex(m => m.m === 'kino-great-thinkers');
+  const browser = await launch();
+  try {
+    const { page, errors, ctx } = await reading(browser, `#book=the-prince&ch=7&p=c07-p01&t=Q1399&pane=vm&show=m${film}`, { ar: false });
+    await page.waitForSelector('#mention-rows li');
+    const rows = await page.locator('#mention-rows li').evaluateAll(ls => ls.map(l => ({ key: l.dataset.key, name: l.querySelector('b').textContent, place: l.querySelector('span').textContent })));
+    const at = JSON.stringify(rows);
+    const other = rows.findIndex(r => /^Named in/.test(r.place));
+    assert.ok(rows.length <= 8 && rows.length > 0, at);
+    assert.ok(other < 0 || rows.slice(other).every(r => /^Named in/.test(r.place)), `the books after the other modules: ${at}`);
+    assert.ok(rows.some(r => r.key === `m${film}`), `the Kino film is listed, as m${film}: ${at}`);
+    assert.ok(!rows.some(r => /^Named in The Prince \(/.test(r.place)), `the book open is not listed: ${at}`);
+    for (const r of rows) assert.equal(mentions[+r.key.slice(1)].c || '', r.place, `${r.key} is the entry's place of that index`);
+    assert.equal(await page.getAttribute(`#mention-rows li[data-key="m${film}"]`, 'aria-current'), 'true', 'show= names the film');
+    await page.waitForSelector('#vm-frame:not([hidden])');
+    assert.match(await page.getAttribute('#vm-frame', 'data-url') || '', /\/kino\//);
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally { await browser.close(); }
+});
+
 test('page: subtitles in Screens only show the unit being read; S hides and shows them, and the choice is kept; in a 360 px pane each word of a long unit is in the strip when it is said', PAGE, async () => {
   const browser = await launch();
   try {
     const { page, errors, ctx } = await reading(browser, '#book=the-prince&ch=3&p=c03-p06', { speech: { ms: 120 } });
     assert.equal(await page.locator('#nar-subs').isHidden(), true, 'not offered while the text is in view');
     await page.keyboard.press('d');
+    await page.waitForSelector('#layout.fill');
+    // With nothing said yet the strip is not there: the screen runs to the foot (BI-20).
+    assert.equal(await page.locator('#subs').isHidden(), true, 'no empty strip before Play');
+    assert.equal(await page.locator('#nar-subs').isVisible(), true);
+    await page.keyboard.press('r');
     await page.waitForSelector('#subs:not([hidden])');
     assert.equal(await page.getAttribute('#subs', 'aria-hidden'), 'true');
-    await page.keyboard.press('r');
     await page.waitForFunction(() => window.__spoken.length >= 2);
     await page.keyboard.press('r');
     const at = await narAt(page);
@@ -967,7 +1100,7 @@ test('page: subtitles in Screens only show the unit being read; S hides and show
     const long = CH3.paragraphs.flatMap(p => speakable(p).units.map((u, k) => ({ p, u, k }))).find(x => x.u.text.length >= 175);
     const phone = await reading(browser, `#book=the-prince&ch=3&p=${long.p.id}`, { viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, speech: { ms: 3000 } });
     await phone.page.keyboard.press('d');
-    await phone.page.waitForSelector('#subs:not([hidden])');
+    await phone.page.waitForSelector('#layout.fill');
     await phone.page.evaluate(() => {
       const box = document.querySelector('#subs-box');
       window.__subs = { seen: 0, out: [] };
@@ -1222,7 +1355,7 @@ test('page: with no voice on the device Play is off and says why, and no request
   } finally { await browser.close(); }
 });
 
-test('page: Bibliotheca shown in another page\'s pane (a frame named prp-side) offers no Augmented Reading', PAGE, async () => {
+test('page: Bibliotheca shown in another page\'s pane (a frame named prp-side) offers no AR Reader', PAGE, async () => {
   const browser = await launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -1346,7 +1479,7 @@ test('page: in Screens only the book\'s picture and the screens for its era take
     await page.waitForSelector('#picture:not([hidden])', { timeout: 30000 });
     assert.equal(await page.getAttribute('#picture-stage', 'data-key'), 'picture:0');
     assert.match(await page.textContent('#picture-cap'), /^The wars of 1792 to 1815 · a picture made for On War$/);
-    assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · A picture for the book');
+    assert.equal(await page.textContent('#pane-kicker'), 'AR Reader · A picture for the book');
     assert.equal(await page.locator('#picture-stage .kn-layer').count(), 1);
     assert.equal(await page.locator('#nar-hold').isDisabled(), true, 'a picture passes by itself');
     // Then a screen for the book's era, in its own frame on the Master Index tab: not held, not in the address.
@@ -1354,7 +1487,7 @@ test('page: in Screens only the book\'s picture and the screens for its era take
     const screen = await page.evaluate(() => ({ url: document.querySelector('#tour-frame').dataset.url, key: document.querySelector('#tour-frame').dataset.key, picture: document.querySelector('#picture').hidden, kicker: document.querySelector('#pane-kicker').textContent, hash: location.hash }));
     assert.match(screen.url, /\/(science\/progress|kardashev)\/index\.html#y=/);
     assert.equal(screen.picture, true);
-    assert.equal(screen.kicker, 'Augmented Reading · Vitruvian Manager');
+    assert.equal(screen.kicker, 'AR Reader · Vitruvian Manager');
     assert.doesNotMatch(screen.hash, /pane=vm|show=/);
     assert.match(screen.hash, /pane=ency/);
     // Hold keeps it: the other tab, with the screen named in the address.
@@ -1408,7 +1541,7 @@ test('page: in Screens the new books show their pictures: the Marx film\'s scene
       await page.waitForSelector('#picture:not([hidden])', { timeout: 60000 });
       assert.match(await page.getAttribute('#picture-stage', 'data-key'), /^picture:\d+$/, hash);
       assert.match(await page.textContent('#picture-cap'), cap, hash);
-      assert.equal(await page.textContent('#pane-kicker'), 'Augmented Reading · A picture for the book');
+      assert.equal(await page.textContent('#pane-kicker'), 'AR Reader · A picture for the book');
       await page.keyboard.press('Escape');
       assert.deepEqual(errors, [], hash);
       await ctx.close();
@@ -1444,9 +1577,9 @@ test('page: the scan-read books name their scans, their witnesses and, where a t
   } finally { await browser.close(); }
 });
 
-// Jude, 12 November 2026: on a phone the Augmented Reading button no longer shortens the chapter's title. It has a row
+// Jude, 12 November 2026: on a phone the AR Reader button (Augmented Reading until 15 November) no longer shortens the chapter's title. It has a row
 // of its own under the title, in words, with the same name and key; the title shows in full. Wider, nothing changes.
-test('page: at 360 wide the Augmented Reading button has its own row under the title, in words, and the title is whole; at 1366 it stays in the title\'s row', PAGE, async () => {
+test('page: at 360 wide the AR Reader button has its own row under the title, in words, and the title is whole; at 1366 it stays in the title\'s row', PAGE, async () => {
   const browser = await launch();
   try {
     const head = page => page.evaluate(() => {
@@ -1464,10 +1597,10 @@ test('page: at 360 wide the Augmented Reading button has its own row under the t
     assert.ok(p.whole, `the title is whole: ${JSON.stringify(p)}`);
     assert.ok(p.ar.top >= p.title.bottom, `the button is under the title: ${JSON.stringify(p)}`);
     assert.equal(p.shares, false, 'nothing else shares its row');
-    assert.equal(p.words, 'Augmented Reading', 'its label in words');
+    assert.equal(p.words, 'AR Reader', 'its label in words');
     assert.ok(p.ar.left >= 16 && p.ar.right <= 344, `inside the column: ${JSON.stringify(p.ar)}`);
     assert.equal(p.sw, 360, 'no sideways scroll');
-    assert.equal(await phone.page.getByRole('button', { name: 'Augmented Reading' }).count(), 1, 'its accessible name');
+    assert.equal(await phone.page.getByRole('button', { name: 'AR Reader', exact: true }).count(), 1, 'its accessible name');
     await phone.page.keyboard.press('a');
     await phone.page.waitForSelector('#nar:not([hidden])');
     assert.equal(await phone.page.getAttribute('#ar-toggle', 'aria-pressed'), 'true', 'A still turns it on');
@@ -1500,8 +1633,10 @@ test('page: every chapter title is whole: chapter XVIII wraps at 1024, 1366 and 
         row: row.getBoundingClientRect().height, headVar: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nc-head')),
         headH: document.querySelector('#head').offsetHeight, sw: document.documentElement.scrollWidth, w: innerWidth };
     });
+    // Since BI-21 the column is wide with AR Mode shut, where the title may fit one line; with AR Mode open (the pane
+    // beside the text) the column is the 66ch one, and the longest title wraps.
     for (const width of [1024, 1366, 1920]) {
-      const { ctx, page, errors } = await reading(browser, '#book=the-prince&ch=18', { viewport: { width, height: 768 }, ar: false });
+      const { ctx, page, errors } = await reading(browser, '#book=the-prince&ch=18&pane=terms', { viewport: { width, height: 768 }, ar: false });
       const h = await head(page);
       const at = `${width} wide: ${JSON.stringify(h)}`;
       assert.ok(h.whole, `the title is whole, ${at}`);
@@ -1514,7 +1649,7 @@ test('page: every chapter title is whole: chapter XVIII wraps at 1024, 1366 and 
       }
       assert.equal(h.sw, width, `no sideways scroll, ${at}`);
       assert.equal(h.headVar, h.headH, `the page knows the head's height, so a jump lands below it, ${at}`);
-      assert.equal(await page.getByRole('button', { name: 'Augmented Reading' }).count(), 1, 'the mode\'s button keeps its name');
+      assert.equal(await page.getByRole('button', { name: 'AR Reader', exact: true }).count(), 1, 'the mode\'s button keeps its name');
       assert.deepEqual(errors, []);
       await ctx.close();
     }
@@ -1524,14 +1659,14 @@ test('page: every chapter title is whole: chapter XVIII wraps at 1024, 1366 and 
     assert.ok(s.whole && s.lines === 1 && s.row === 36, `chapter III: ${JSON.stringify(s)}`);
     assert.deepEqual(short.errors, []);
     await short.ctx.close();
-    // The phone layout of 12 November: the title whole beside the contents button, the arrows, the terms and Links on
-    // the next row, and the mode's button on its own row under them.
+    // The phone layout of 12 November: the title whole beside the contents button, the arrows and AR Mode (the terms
+    // and Links until 15 November) on the next row, and the AR Reader button on its own row under them.
     const phone = await reading(browser, '#book=the-prince&ch=18', { viewport: { width: 360, height: 780 }, context: { isMobile: true, hasTouch: true }, ar: false });
     const p = await head(phone.page);
     const by = id => p.buttons.find(b => b.id === id);
     assert.ok(p.whole, `the title is whole: ${JSON.stringify(p)}`);
     assert.ok(Math.abs(by('toc-toggle').mid - p.title.mid) <= 1, 'the contents button beside the title');
-    for (const id of ['prev', 'next', 'bar-toggle', 'pane-toggle']) assert.ok(by(id).top >= p.title.bottom && by(id).bottom <= by('ar-toggle').top, `${id} on the row under the title`);
+    for (const id of ['prev', 'next', 'pane-toggle']) assert.ok(by(id).top >= p.title.bottom && by(id).bottom <= by('ar-toggle').top, `${id} on the row under the title`);
     assert.ok(by('ar-toggle').left >= 16 && by('ar-toggle').right <= 344, 'the mode\'s button on its own row, inside the column');
     assert.equal(p.sw, 360, 'no sideways scroll');
     assert.deepEqual(phone.errors, []);

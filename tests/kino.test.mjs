@@ -1204,8 +1204,13 @@ test('page: a page in a pane offers no pane of its own, and its requests to move
   try {
     const context = await browser.newContext({ viewport: { width: 1400, height: 900 } });
     const page = await context.newPage();
-    // Bibliotheca on its own, with a Kino film in its pane (a place the Master Index records for Machiavelli).
-    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=7&p=c07-p01&t=Q1399&pane=vm&show=m2`, { waitUntil: 'domcontentloaded' });
+    // Bibliotheca on its own, with a Kino film in its pane (a place the Master Index records for Machiavelli). The
+    // reader keys a place by its index in the entry (m<i>), and the entry gains a row for each book that names him,
+    // so the key is looked up in the lake's data rather than fixed.
+    const mentions = JSON.parse(readFileSync(join(ROOT, `lake/data/e/${1399 % 512}.json`), 'utf8')).Q1399.mentions;
+    const filmKey = mentions.findIndex(m => m.m === 'kino-great-thinkers');
+    assert.ok(filmKey >= 0 && filmKey < 100, 'the Master Index records the Kino film for Machiavelli');
+    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=7&p=c07-p01&t=Q1399&pane=vm&show=m${filmKey}`, { waitUntil: 'domcontentloaded' });
     const film = await (await page.waitForSelector('#vm-frame:not([hidden])', { timeout: 30000 })).contentFrame();
     await film.waitForSelector('#cap-text .w', { timeout: 30000 });
     assert.equal(await film.evaluate(() => window.name), 'prp-side');

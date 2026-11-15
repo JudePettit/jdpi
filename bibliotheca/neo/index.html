@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
   <title>Neo Classic · Bibliotheca · VM</title>
-  <meta name="description" content="Public-domain classics read on screen: every term the Master Index knows is highlighted, a bar lists the terms on screen, and a pane beside the text opens the Master Index entry or the other screens of Vitruvian Manager for that era. Augmented Reading reads the book aloud, with the pane following the nearest term beside it.">
+  <meta name="description" content="Public-domain classics read on screen: every term the Master Index knows is highlighted, and AR Mode opens a pane beside the text with the terms on screen, a term's Master Index entry and the other screens of Vitruvian Manager for that era. AR Reader reads the book aloud, with the pane following the nearest term beside it.">
   <link rel="icon" href="../../design/brand-vm-icon.svg" type="image/svg+xml">
   <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="stylesheet" href="../../design/prp.css">
@@ -32,8 +32,7 @@
         <label class="prp-label" for="shelf">Book</label>
         <select id="shelf" class="prp-select"></select>
         <span class="spacer"></span>
-        <span class="keys" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>J</kbd> <kbd>K</kbd> paragraphs · <kbd>T</kbd> terms · <kbd>P</kbd> pane · <kbd>A</kbd> Augmented Reading · <kbd>R</kbd> read · <kbd>F</kbd> full screen</span>
-        <button type="button" class="prp-btn" id="bar-switch" aria-pressed="true" title="Show or hide the bar of the terms on screen">Terms bar</button>
+        <span class="keys" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>J</kbd> <kbd>K</kbd> paragraphs · <kbd>P</kbd> AR Mode · <kbd>T</kbd> terms on screen · <kbd>A</kbd> AR Reader · <kbd>R</kbd> read · <kbd>F</kbd> full screen</span>
       </div>
 
       <div class="nc-layout prp-split" id="layout">
@@ -52,15 +51,14 @@
                   <h3 class="nc-chapter-title" id="chapter-title"><span class="no" id="chapter-no"></span><span class="t" id="chapter-name">…</span></h3>
                   <a class="prp-btn sm ghost icon nav" id="prev" href="#" aria-label="Previous chapter" title="Previous chapter (←)">‹</a>
                   <a class="prp-btn sm ghost icon nav" id="next" href="#" aria-label="Next chapter" title="Next chapter (→)">›</a>
-                  <button type="button" class="prp-btn sm nc-bar-toggle" id="bar-toggle" aria-expanded="false" aria-controls="popout" title="The terms on screen (T)">◈ <span class="n" id="bar-count">0</span></button>
-                  <button type="button" class="prp-btn sm" id="ar-toggle" aria-pressed="false" title="Augmented Reading: the book read aloud, with Vitruvian Manager following beside it (A)"><span aria-hidden="true">▷</span><span class="lbl">Augmented Reading</span></button>
-                  <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" title="Links: a term's Master Index entry and the screens for the era, beside the text (P)">▥<span class="lbl">Links</span></button>
+                  <button type="button" class="prp-btn sm" id="ar-toggle" aria-pressed="false" aria-label="AR Reader" title="AR Reader: the book read aloud, with Vitruvian Manager following beside it (A)"><span aria-hidden="true">▷</span><span class="lbl">AR Reader</span></button>
+                  <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" aria-label="AR Mode" title="AR Mode: the terms on screen, a term's Master Index entry and the screens for the era, in a pane beside the text (P; T opens it on the terms on screen)">▥<span class="lbl">AR Mode</span></button>
                 </div>
                 <div class="nc-progress-row">
                   <div class="nc-progress" id="progress" role="progressbar" aria-label="Position in the chapter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
                   <span class="pos" id="pos"></span>
                 </div>
-                <!-- Augmented Reading: the narrator's row and its message line (one line, whether or not it has anything to say). -->
+                <!-- AR Reader: the narrator's row and its message line (one line, whether or not it has anything to say). -->
                 <div class="nc-nar" id="nar" role="group" aria-label="The narrator" hidden>
                   <button type="button" class="prp-btn sm" id="nar-play" aria-pressed="false" aria-label="Read aloud" title="Read aloud (R)"><span class="ico" aria-hidden="true">▶</span><span class="lbl">Read</span></button>
                   <label class="sr-only" for="nar-speed">Speed</label>
@@ -77,11 +75,6 @@
                 </div>
                 <div class="nc-notice" id="notice" role="status" hidden><span id="notice-text"></span><button type="button" class="prp-btn sm ghost icon" id="notice-close" aria-label="Close" title="Close (Esc)">×</button></div>
                 <nav class="nc-toc" id="toc" hidden aria-label="Contents"><ol id="toc-list"></ol></nav>
-                <div class="nc-popout" id="popout" hidden role="region" aria-label="Terms on screen">
-                  <span class="nc-popout-label">On screen</span>
-                  <div class="nc-chips" id="chips"></div>
-                  <button type="button" class="prp-btn sm ghost icon" id="popout-close" aria-label="Collapse the terms bar" title="Collapse (T)">×</button>
-                </div>
               </div>
               <div class="nc-text" id="text" lang="en"></div>
               <nav class="nc-chapter-nav" aria-label="Chapters"><a class="prp-btn" id="prev2" href="#">‹ Previous chapter</a><a class="prp-btn" id="next2" href="#">Next chapter ›</a></nav>
@@ -93,20 +86,26 @@
 
         <aside class="nc-pane prp-side" id="pane" hidden aria-labelledby="pane-title">
           <div class="nc-pane-head">
-            <div class="nc-pane-titles"><span class="prp-label" id="pane-kicker">Links</span><b id="pane-title">…</b></div>
+            <div class="nc-pane-titles"><span class="prp-label" id="pane-kicker">AR Mode</span><b id="pane-title">…</b></div>
             <button type="button" class="prp-btn sm ghost" id="pane-fill" aria-pressed="false" hidden aria-label="Screens only" title="Screens only: the pane over the text, the book heard and Vitruvian Manager seen (D)"><span class="sign" aria-hidden="true">▣</span><span class="lbl">Screens only</span></button>
             <button type="button" class="prp-btn sm ghost" id="nar-subs" aria-pressed="true" hidden aria-label="Subtitles" title="Subtitles: the words being read, under the pane (S)"><span class="sign" aria-hidden="true">CC</span><span class="lbl">Subtitles</span></button>
             <a class="prp-btn sm ghost" id="pane-open" href="#" hidden>Open ↗</a>
             <button type="button" class="prp-btn sm ghost nc-tall" id="pane-tall" aria-pressed="false">Taller</button>
-            <button type="button" class="prp-btn sm ghost" id="pane-close" aria-label="Close Links" title="Close (Esc)">×</button>
+            <button type="button" class="prp-btn sm ghost" id="pane-close" aria-label="Close AR Mode" title="Close (Esc)">×</button>
           </div>
-          <div class="prp-tabs" role="tablist" aria-label="Links">
+          <div class="prp-tabs" role="tablist" aria-label="AR Mode">
+            <button type="button" role="tab" id="tab-terms" aria-selected="false" aria-controls="panel-terms" tabindex="-1">On screen · <span class="n" id="terms-count">0</span></button>
             <button type="button" role="tab" id="tab-ency" aria-selected="true" aria-controls="panel-ency">Master Index</button>
             <button type="button" role="tab" id="tab-vm" aria-selected="false" aria-controls="panel-vm" tabindex="-1">In Vitruvian Manager</button>
           </div>
           <div class="nc-pane-body">
+            <!-- The terms on screen (BI-23): the terms in the text in view, in reading order, with their counts. -->
+            <div id="panel-terms" class="nc-terms" role="tabpanel" aria-labelledby="tab-terms" hidden>
+              <p class="nc-terms-label">The terms in the text on screen, in reading order: choose one for its Master Index entry.</p>
+              <div class="nc-chips" id="chips"></div>
+            </div>
             <div id="panel-ency" role="tabpanel" aria-labelledby="tab-ency">
-              <p class="nc-pane-empty" id="ency-empty">Choose a highlighted term in the text, or one from the <b>terms</b> bar, to read its Master Index entry here.</p>
+              <p class="nc-pane-empty" id="ency-empty">Choose a highlighted term in the text, or one from <b>On screen</b>, to read its Master Index entry here.</p>
               <p class="nc-pane-empty" id="ency-fallback" hidden>This entry cannot be shown inside the page. <a id="ency-link" href="#">Open it in the Master Index ↗</a></p>
               <iframe id="ency-frame" name="prp-side" title="Master Index entry" hidden referrerpolicy="strict-origin-when-cross-origin"></iframe>
               <!-- Screens only: the screens for the book's era, taking their turn with the entries (app.js, tour). -->

@@ -6,10 +6,11 @@
 // the bridge runs under netPolicy "loopback" (sockets only to 127.0.0.0/8 or ::1, names only from a fixture map), the
 // real SSDP and mDNS listeners are fed fixture packets instead of opening sockets, and the tripwire below fails any
 // socket, listen, bind or datagram that is not loopback (and any multicast or broadcast setting).
-import { test, after } from 'node:test';
+import { test, after, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { createServer } from 'node:http';
+import { PassThrough } from 'node:stream';
 import { createHash, createHmac, randomBytes } from 'node:crypto';
 import net from 'node:net';
 import os from 'node:os';
@@ -360,7 +361,7 @@ test('iot: origins, methods, Content-Type, size, Host, and the SIGINT routes lef
     assert.equal(st.status, 200); assert.equal(st.json.enabled, true); assert.deepEqual(st.json.features, ['iot-1']); assert.equal(st.json.policy, 'loopback');
     assert.equal(st.headers.get('access-control-allow-origin'), ORIGIN);
     const h = await e.get('/health');
-    assert.deepEqual(h.json.features, ['iot-1']); assert.equal(h.json.iot.enabled, true); assert.equal(h.json.version, '2.0.0');
+    assert.deepEqual(h.json.features, ['iot-1']); assert.equal(h.json.iot.enabled, true); assert.equal(h.json.version, '2.1.0');
     assert.equal((await e.call('GET', '/iot/status', undefined, { Origin: 'https://example.org' })).status, 200, 'an origin named in the config file');
     for (const bad of ['https://evil.example', 'http://localhost:8787', 'http://127.0.0.1:3000', 'null', 'https://jdpi.pages.dev.evil.example']) {
       const r = await e.call('GET', '/iot/status', undefined, { Origin: bad });
@@ -1065,6 +1066,10 @@ test('iot: the JSON tree over WebSocket, and broker commands only when acceptCom
     broker.publish(`vm/flat/hall/${b.uns.name}/set`, 'not json');
     await until(() => e.logs.filter(l => /Broker command refused: The broker may send simple commands only\./.test(l)).length === 2, 'two refusals');
     assert.ok(!player.calls.some(x => x.action === 'SetAVTransportURI'), 'never play-url from the broker');
+    // The request log (first run, finding 3): the broker's commands, done and refused, with no topic (it holds the room).
+    const fromBroker = (await e.get('/iot/log')).json.entries.filter(x => x.from === 'broker').map(x => [x.request, x.device, x.action, x.result]);
+    const key = x => x.join(' ');
+    assert.deepEqual(fromBroker.sort((x, y) => key(x).localeCompare(key(y))), [['MQTT …/set', b.id, 'ha', 'refused'], ['MQTT …/set', p.id, 'play-url', 'refused'], ['MQTT …/set', b.id, 'power', 'ok']].sort((x, y) => key(x).localeCompare(key(y))));
   } finally { e.iot.stop(); await e.close(); broker.close(); bulb.close(); player.close(); }
 });
 
@@ -1090,6 +1095,7 @@ test('iot: Sparkplug B: NDEATH as will, NBIRTH with bdSeq and Rebirth=false, DBI
     assert.equal(db.topic, 'spBv1.0/VM/DBIRTH/hermes/hall-hall-light'); assert.equal(db.seq, 1);
     assert.deepEqual(db.metrics.map(m => m.name), ['Online', 'Power', 'Brightness', 'Volume', 'Playback', 'Kind']);
     assert.equal(db.metrics.find(m => m.name === 'Kind').value, 'light');
+    assert.equal(db.metrics.find(m => m.name === 'Online').value, null, 'not read since the bridge started: not known, not online (first run, observation 13)');
     // A device added later gets its DBIRTH then; commands report DDATA with a rising seq.
     const t = await e.add((await e.post('/iot/identify', { kind: 'tasmota', address: '127.0.0.52' })).json.candidate, { room: 'Hall', name: 'Hall light' });
     await until(() => sp('DBIRTH').length === 2, 'the second DBIRTH');
@@ -1099,7 +1105,7 @@ test('iot: Sparkplug B: NDEATH as will, NBIRTH with bdSeq and Rebirth=false, DBI
     await e.cmd(t.id, 'power', { on: true });
     await until(() => sp('DDATA').length === 3, 'three DDATA');
     const dd = sp('DDATA');
-    assert.deepEqual(dd[0].metrics.map(m => [m.name, m.value]), [['Power', true], ['Brightness', 50]], 'only the metrics that changed');
+    assert.deepEqual(dd[0].metrics.map(m => [m.name, m.value]), [['Online', true], ['Power', true], ['Brightness', 50]], 'only the metrics that changed (Online was not known before this first read)');
     assert.deepEqual(dd[1].metrics.map(m => [m.name, m.value]), [['Brightness', 60]]);
     const seqs = broker.st.published.filter(m => /^spBv1\.0\/VM\/(NBIRTH|DBIRTH|DDATA|NDATA|DDEATH)\//.test(m.topic)).map(m => B.spDecode(m.payload).seq);
     assert.deepEqual(seqs, seqs.map((_, i) => i), `seq rises 0, 1, 2, … (${seqs.join(',')})`);
@@ -1272,6 +1278,13 @@ test('iot: a phone paired with a code and Y drives a device; bad, expired and si
     assert.ok(!JSON.stringify(list.json).includes('127.0.0.53'), 'the phone does not see addresses');
     const on = await signed('POST', '/remote/api/command', { v: 1, id: 'p-1', device: d.id, action: 'power', args: { on: true } });
     assert.equal(on.status, 200, on.text); assert.equal(on.json.state.power, true); assert.equal(bulb.st.state, true, 'the phone drove the bulb');
+    // The request log (first run, finding 3): the phone's command, with no phone id, user agent or address.
+    const logged = (await e.get('/iot/log')).json.entries;
+    assert.deepEqual([logged[0].from, logged[0].request, logged[0].device, logged[0].action, logged[0].result], ['phone', 'POST /remote/api/command', d.id, 'power', 'ok']);
+    assert.ok(logged.some(x => x.from === 'phone' && x.request === 'POST /remote/api/pair'), 'its pairing too');
+    assert.ok(!logged.some(x => /\/remote$|app\.js/.test(x.request)), 'not the remote’s own page and script');
+    for (const t of [phone.id, 'Android', 'Mozilla', '127.0.0']) assert.ok(!JSON.stringify(logged).includes(t), `no "${t}" in the log`);
+    assert.ok(e.logs.includes(`Command from the phone remote: power to ${d.id}: ok`));
     e.clock.advance(1000);
     const dim = await signed('POST', '/remote/api/command', { v: 1, id: 'p-2', device: d.id, action: 'brightness', args: { level: 40 } });
     assert.equal(dim.json.ok, true);
@@ -1720,12 +1733,12 @@ test('iot page: hooked up as Digital Science · IoT Connect, no inline script or
 });
 
 /** One bridge (the real one, loopback policy) with fake devices, the site from 127.0.0.1, and Edge. */
-async function pageRig() {
+async function pageRig({ answer } = {}) {
   const ez = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt') }), hostile = await fakeUpnp({ description: fixture('desc-hostile-renderer.txt') }), wiz = await fakeWiz();
   let bport = 0;
   const site = await siteServer({ rewrite: (k, v) => (k === 'Content-Security-Policy' ? v.replaceAll(':8790', `:${bport}`) : v) });
   const shown = [];
-  const e = await bridge({ iot: { origins: [site.base] }, lan: true, realClock: true, deps: { showCode: c => shown.push(c) } });
+  const e = await bridge({ iot: { origins: [site.base] }, lan: true, realClock: true, ...(answer ? { answer } : {}), deps: { showCode: c => shown.push(c) } });
   bport = e.port;
   Object.assign(e.portMap, { '127.0.0.44:49152': ez.port, '127.0.0.45:49153': hostile.port, '127.0.0.53:38899': wiz.port });
   const lan = await e.iot.startLan();
@@ -1771,7 +1784,7 @@ test('iot page: finds the bridge, lists what answered, refuses an unticked devic
       assert.equal(await page.textContent('#bridge-state'), 'Off');
       await page.click('#bridge-check');
       await page.waitForSelector('#bridge-state.good');
-      assert.equal(await page.textContent('#bridge-state'), 'Running · v2.0.0');
+      assert.equal(await page.textContent('#bridge-state'), 'Running · v2.1.0');
       assert.match(await page.textContent('#kpis'), /Setup steps ask in its window/);
       assert.ok(toBridge.every(r => r.startsWith('GET ')), `only reads so far: ${toBridge}`);
     });
@@ -1819,12 +1832,32 @@ test('iot page: finds the bridge, lists what answered, refuses an unticked devic
       const dev = page.locator('#rooms .dev', { hasText: 'EZCast U02' });
       await dev.locator('input[type="url"]').fill('http://127.0.0.10:8200/film.mp4');
       await dev.locator('button', { hasText: 'Play address' }).click();
-      await page.waitForFunction(() => document.querySelector('#rooms .dev [data-answer]')?.textContent === 'Done.');
+      // First run, finding 8: the answer says how long VM watches the volume, and that a later rise is not caught.
+      await page.waitForFunction(() => /^Done\. VM reads EZCast U02’s volume again for 30 seconds and turns it back down if it rises; a rise after that is not caught\.$/.test(document.querySelector('#rooms .dev [data-answer]')?.textContent || ''));
       assert.match(await dev.locator('.state').textContent(), /Playing$/);
       assert.deepEqual(rig.ez.calls.filter(c => c.action !== 'GET').map(c => c.action).slice(0, 2), ['SetAVTransportURI', 'Play']);
+      // The player raises its own volume after the play answered: Read state in the watch brings it down and says so.
+      rig.ez.st.volume = 100;
+      await dev.locator('button', { hasText: 'Read state' }).click();
+      await page.waitForFunction(() => /^Read\. EZCast U02 raised its own volume to 100 after it started playing; VM set it back to 80, its ceiling\.$/.test(document.querySelector('#rooms .dev [data-answer]')?.textContent || ''));
+      assert.equal(rig.ez.st.volume, 80);
+      assert.match(await dev.locator('.state').textContent(), /Volume 80/);
+      // And the device's card carries it the next time the page reads the devices.
+      await page.evaluate(() => window.prpIot.read('devices'));
+      await page.waitForFunction(() => /raised its own volume to 100 after it started playing/.test(document.querySelector('#rooms .dev [data-ceiling]')?.textContent || ''));
       await dev.locator('button[data-action="pause"]').click();
       await page.waitForFunction(() => /Paused|Done/.test(document.querySelector('#rooms .dev [data-answer]')?.textContent || '') && document.querySelector('#rooms .dev [data-answer]').dataset.tone === 'good');
       assert.ok(rig.ez.calls.some(c => c.action === 'Pause'));
+      // Seek (first run, finding 11): a position that is not one is refused on the page; a good one is the player's own Seek.
+      await dev.locator('input.seek-at').fill('1:75');
+      await dev.locator('button[data-action="seek"]').click();
+      await page.waitForFunction(() => /^Type the position to go to/.test(document.querySelector('#rooms .dev [data-answer]')?.textContent || ''));
+      assert.ok(!rig.ez.calls.some(c => c.action === 'Seek'), 'nothing sent');
+      await dev.locator('input.seek-at').fill('1:02:05');
+      await dev.locator('button[data-action="seek"]').click();
+      await until(() => rig.ez.calls.some(c => c.action === 'Seek'), 'the Seek');
+      assert.match(rig.ez.calls.find(c => c.action === 'Seek').body, /<Unit>REL_TIME<\/Unit><Target>01:02:05<\/Target>/);
+      await page.waitForFunction(() => document.querySelector('#rooms .dev [data-answer]')?.textContent === 'Done.');
       // The WiZ light too: switched on from the page.
       const wiz = page.locator('#candidates .cand', { hasText: 'WiZ' });
       await wiz.locator('input.owned').check();
@@ -1883,6 +1916,21 @@ test('iot page: finds the bridge, lists what answered, refuses an unticked devic
       await page.click('#tab-uns');
       await page.waitForFunction(() => /None set/.test(document.querySelector('#uns-kpis').textContent));
     });
+    await t.test('the Overview shows the bridge’s request log, with device names from this page, and clears it (first run, finding 3)', async () => {
+      await page.click('#tab-overview');
+      assert.equal(await page.textContent('#log-words'), W.REQUEST_LOG);
+      await page.click('#log-read');
+      await page.waitForSelector('#log-table:not([hidden])');
+      const rows = await page.$$eval('#log-rows tr', trs => trs.map(tr => [...tr.cells].map(c => c.textContent)));
+      assert.ok(rows.length > 10, `${rows.length} rows`);
+      assert.ok(rows.some(r => r[1] === 'This page' && r[2] === 'POST /iot/command' && r[3] === 'EZCast U02' && r[4] === 'seek' && r[5] === 'Done'), JSON.stringify(rows.slice(0, 8)));
+      assert.ok(rows.some(r => r[1] === 'Phone remote' && r[4] === 'switch on and off'), 'the phone’s commands too');
+      assert.ok(rows.every(r => r.length === 6 && r.every(c => c && !/undefined|null|NaN/.test(c))));
+      await page.click('#log-clear');
+      await page.waitForFunction(() => /^Cleared: \d+ entries removed/.test(document.querySelector('#log-say').textContent));
+      assert.equal(await page.locator('#log-table').isHidden(), true);
+      assert.deepEqual((await rig.e.get('/iot/log')).json.entries, []);
+    });
     await t.test('no address, hash or odd parameter makes the page send a change', async () => {
       const before = toBridge.filter(r => r.startsWith('POST')).length;
       for (const h of ['#tab=devices&discover=1', '#tab=remote&pair=1', '#pair=123456', '#tab=../iot/add', '#tab=devices&device=upnp-1&action=power', '#remote']) {
@@ -1905,6 +1953,12 @@ test('iot page: finds the bridge, lists what answered, refuses an unticked devic
       assert.deepEqual(await page.evaluate(() => window.__csp), []);
       assert.deepEqual(problems, []);
       assert.deepEqual(elsewhere, [], 'no other host was asked for anything');
+    });
+    await t.test('the page links VM’s manifest, which loads, so the browser can offer the install here (first run, finding 14)', async () => {
+      const m = await page.evaluate(async () => { const l = document.querySelector('link[rel="manifest"]'); const r = await fetch(l.href); return { href: l.href, ok: r.ok, json: await r.json() }; });
+      assert.equal(m.href, `${rig.site.base}/manifest.json`); assert.equal(m.ok, true);
+      assert.deepEqual([m.json.name, m.json.scope], ['Vitruvian Manager', '/']);
+      assert.deepEqual(problems, []);
     });
     await ctx.close();
   } finally { await rig.close(); }
@@ -1942,6 +1996,482 @@ test('iot page: inside the shell, at desktop and phone widths, with the shell’
     assert.deepEqual(problems, []); assert.deepEqual(elsewhere, []);
     await ctx.close();
   } finally { await rig.close(); }
+});
+
+/* =====================================================================================================================
+ * The first run on a real home network (14 November 2026): the repairs of its findings 1, 7, 8, 9, 12 and 13. Each
+ * test failed before its repair. Every player here is a fake built from UPnP AV's published forms (AVTransport:1,
+ * RenderingControl:1); none is a recording of a real device.
+ * ===================================================================================================================== */
+const EZ = () => fakeUpnp({ description: fixture('desc-ezcast-u02.txt') });
+async function addedPlayer(e, dev) {
+  e.portMap['127.0.0.44:49152'] = dev.port;
+  return e.add(await e.inject('ssdp', ssdp('ssdp-ezcast-u02.txt'), { address: '127.0.0.44', port: 1900 }));
+}
+/** A bridge window to type at: a PassThrough pair standing for the terminal (`tty`: a real terminal's raw keys). */
+function windowIO({ tty = false } = {}) {
+  const input = new PassThrough(), output = new PassThrough();
+  input.isTTY = true;
+  if (tty) { input.setRawMode = () => input; output.isTTY = true; output.columns = 120; output.rows = 30; }
+  let shown = '';
+  output.on('data', c => { shown += c.toString(); });
+  return { input, output, shown: () => shown, clear: () => { shown = ''; } };
+}
+const settle = () => new Promise(r => setImmediate(r));
+
+test('first run, finding 1: the bridge says how long it waits, the page waits as long, and a timeout is not "did not answer"', async () => {
+  const e = await bridge();
+  try {
+    const { waits } = (await e.get('/iot/status')).json;
+    assert.deepEqual(waits, { confirm: 60, pair: 60, command: 70, ai: 20 });
+    assert.deepEqual(BR.WAITS, waits, 'the page’s own defaults are the bridge’s numbers');
+  } finally { await e.close(); }
+  const plain = BR.createClient('http://localhost:8790', { fetchFn: async () => ({ ok: true, status: 200, json: async () => ({ ok: true }) }) });
+  assert.deepEqual([plain.limit('confirm'), plain.limit('pair'), plain.limit('command'), plain.limit('ai'), plain.limit(null)], [70000, 130000, 80000, 30000, 12000],
+    'a Y step waits the bridge’s 60 seconds and a margin (pairing: and the TV’s own accept); a plain read 12');
+  plain.setWaits({ confirm: 90, command: 'x' });
+  assert.deepEqual([plain.limit('confirm'), plain.limit('command')], [100000, 80000], 'it takes the bridge’s numbers, and ignores what is not one');
+  // Scaled down: reads give up after 0.05 s, a Y step after 0.2 + 0.05 s.
+  const slow = ms => async (url, init) => new Promise((resolve, reject) => {
+    const t = setTimeout(() => resolve({ ok: true, status: 200, json: async () => ({ ok: true }) }), ms);
+    init.signal?.addEventListener('abort', () => { clearTimeout(t); reject(init.signal.reason); });
+  });
+  const cl = BR.createClient('http://localhost:8790', { fetchFn: slow(150), timeout: 50, waits: { confirm: 0.2 }, margin: 0.05 });
+  assert.equal((await cl.post('/iot/add', { candidate: 'x' }, { wait: 'confirm' })).ok, true, 'a Y that comes after the read limit still lands');
+  await assert.rejects(cl.get('/iot/status'), err => err.code === 'timeout' && /^The bridge took more than \d+ seconds to reply\.$/.test(err.message));
+  const late = BR.createClient('http://localhost:8790', { fetchFn: slow(2000), timeout: 50, waits: { confirm: 0.1 }, margin: 0.05 });
+  await assert.rejects(late.post('/iot/network', { ownHome: true }, { wait: 'confirm' }),
+    err => err.code === 'timeout' && /while it waited for Y in its window\. Look at the bridge window/.test(err.message) && !/did not answer at/.test(err.message), 'the bridge is running: it is not called unreachable');
+  // The bridge's own answers say why nothing happened.
+  for (const [answer, words] of [['timeout', /^No answer in the bridge window within 60 seconds, so nothing was changed\. Try again/], [false, /^Not confirmed in the bridge window: the answer there was No/], ['busy', /^The bridge window is already asking another question/]]) {
+    const b = await bridge({ answer: () => answer });
+    try {
+      const r = await b.post('/iot/network', { ownHome: true });
+      assert.equal(r.status, 403); assert.equal(r.json.code, 'refused'); assert.match(r.json.error, words, String(answer));
+      assert.notEqual(b.iot.state.network.ownHome, true);
+    } finally { await b.close(); }
+  }
+});
+
+test('first run, finding 1 (page): Add waits for a Y that comes after 12 seconds, says what it waits for with the seconds left, and shows the bridge’s reason when it stops', pageTest, async () => {
+  const rig = await pageRig({ answer: q => (/EZCast/.test(q) ? new Promise(r => setTimeout(() => r(true), 13000)) : 'timeout') });
+  try {
+    const { page, ctx, problems, elsewhere } = await rig.open(`${rig.site.base}/digital/iot-connect/`);
+    await page.click('#bridge-check');
+    await page.waitForSelector('#bridge-state.good');
+    await page.click('#tab-devices');
+    rig.packets();
+    await page.click('#discover');
+    await page.waitForFunction(() => document.querySelectorAll('#candidates .cand').length === 3);
+    const card = page.locator('#candidates .cand', { hasText: 'EZCast U02' });
+    await card.locator('input.owned').check();
+    await card.locator('button.add').click();
+    const line = card.locator('p.say');
+    await page.waitForFunction(() => /^Waiting for your answer in the bridge window: type Y there and press Enter\. \d+ seconds left\.$/.test(document.querySelector('#candidates .cand p.say')?.textContent || ''));
+    const first = Number(/(\d+) seconds left/.exec(await line.textContent())[1]);
+    assert.ok(first >= 58 && first <= 60, `the bridge’s 60 seconds (${first})`);
+    await page.waitForTimeout(1300);
+    assert.ok(Number(/(\d+) seconds left/.exec(await line.textContent())[1]) < first, 'it counts down');
+    await page.waitForSelector('#rooms .dev', { timeout: 20000 });
+    assert.deepEqual(rig.e.questions, ['Add EZCast U02, 127.0.0.44, DLNA player?']);
+    assert.equal(rig.e.iot.state.devices.length, 1);
+    // A question that runs out in the bridge window: the page shows the bridge’s words, not "did not answer".
+    const wiz = page.locator('#candidates .cand', { hasText: 'WiZ' });
+    await wiz.locator('input.owned').check();
+    await wiz.locator('button.add').click();
+    await page.waitForFunction(() => /No answer in the bridge window within 60 seconds/.test([...document.querySelectorAll('#candidates .cand p.say')].map(p => p.textContent).join(' ')));
+    assert.doesNotMatch(await page.textContent('#candidates'), /did not answer at/);
+    assert.equal(await page.textContent('#bridge-state'), 'Running · v2.1.0', 'still connected');
+    await page.waitForTimeout(200);
+    const own = problems.findIndex(p => /status of 403/.test(p)); // the refused Add, logged by the browser
+    if (own >= 0) problems.splice(own, 1);
+    assert.deepEqual(problems, []); assert.deepEqual(elsewhere, []);
+    await ctx.close();
+  } finally { await rig.close(); }
+});
+
+test('first run, finding 7: a player that answers Play late is waited for; "no answer in time", "refused" and "failed" read differently', async () => {
+  const delays = {}, faults = {};
+  const dev = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), delays, faults });
+  const e = await bridge({ deps: { upnpActionMs: 4000 } }); // other reads here give up after 2.5 s
+  try {
+    const d = await addedPlayer(e, dev);
+    // It fetches the film before it answers Play: 3 seconds, past the limit other reads get.
+    delays.Play = 3000;
+    const ok = await e.cmd(d.id, 'play-url', { url: 'http://127.0.0.10:8200/film.mp4' });
+    assert.equal(ok.ok, true, JSON.stringify(ok)); assert.equal(ok.state.playback, 'playing');
+    // Past the UPnP limit: no answer in time. It took the connection, so it is not marked offline.
+    delays.Play = 4600;
+    const late = await e.cmd(d.id, 'play');
+    assert.deepEqual([late.ok, late.code, late.reason], [false, 'no-answer', 'timeout']);
+    assert.equal(late.error, 'That device did not answer within 4 seconds. It may still have done it: read its state to see.');
+    assert.equal(e.iot.state.devices[0].status, 'ok');
+    delays.Play = 0;
+    // A SOAP fault: the player answered No.
+    faults.Play = 701;
+    const no = await e.cmd(d.id, 'play');
+    assert.deepEqual([no.ok, no.code, no.error], [false, 'refused', 'The player refused that command (UPnP error 701).']);
+    assert.equal(e.iot.state.devices[0].status, 'ok');
+    delete faults.Play;
+    // Nothing there any more: failed, and marked offline.
+    dev.close();
+    await sleep(50);
+    const gone = await e.cmd(d.id, 'play');
+    assert.deepEqual([gone.ok, gone.code, gone.error, gone.reason], [false, 'no-answer', 'No answer from that device.', undefined]);
+    assert.equal(e.iot.state.devices[0].status, 'offline');
+  } finally { await e.close(); dev.close(); }
+  // The real limit is UPnP's own: a device has 30 seconds to answer an action (UPnP Device Architecture 1.1, §3.2.1).
+  assert.equal(B.WAITS.upnpAction, 30e3);
+});
+
+test('first run, finding 8: the ceiling holds after a play starts, and where it cannot be held the page is told so', async () => {
+  const onPlay = { raiseTo: 100 }, faults = {};
+  const dev = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, onPlay, faults });
+  // Read every 0.4 s for 2 s after the play has answered (the real bridge: every 10 s for 30 s).
+  const e = await bridge({ deps: { holdPollMs: 100, recheckMs: 400, watchMs: 2000 } });
+  const WATCH = 'VM reads EZCast U02’s volume again for 2 seconds and turns it back down if it rises; a rise after that is not caught.';
+  try {
+    const d = await addedPlayer(e, dev);
+    // At once, as a projector did (50 before, 100 once the film began).
+    let r = await e.cmd(d.id, 'play-url', { url: 'http://127.0.0.10:8200/film.mp4' });
+    assert.equal(r.ok, true, JSON.stringify(r));
+    assert.equal(r.note, `EZCast U02 raised its own volume to 100 when it started playing; VM set it back to 80, its ceiling. ${WATCH}`);
+    assert.equal(r.state.volume, 80); assert.equal(dev.st.volume, 80);
+    assert.match(dev.calls.find(x => x.action === 'SetVolume').body, /<DesiredVolume>80<\/DesiredVolume>/);
+    // After it has been loading a while (TRANSITIONING, then PLAYING and the raise): the bridge reads until it plays.
+    dev.st.volume = 50; Object.assign(onPlay, { startMs: 350, raiseTo: 95 });
+    r = await e.cmd(d.id, 'play');
+    assert.equal(r.state.playback, 'playing'); assert.equal(dev.st.volume, 80);
+    assert.match(r.note, /raised its own volume to 95 when it started playing; VM set it back to 80/);
+    // Later still, after the command has answered: the check a little later brings it down, and the window says so.
+    dev.st.volume = 50; Object.assign(onPlay, { startMs: 0, raiseTo: 90, raiseAfterMs: 150 });
+    r = await e.cmd(d.id, 'play');
+    assert.equal(r.ok, true); assert.equal(r.note, WATCH, 'nothing to report yet, and the watch’s limit said plainly');
+    await until(() => dev.st.volume === 80, 'the later check');
+    const later = 'EZCast U02 raised its own volume to 90 after it started playing; VM set it back to 80, its ceiling.';
+    await until(() => e.logs.includes(later), 'the line in the bridge window');
+    await until(async () => (await e.get('/iot/devices')).json.devices[0].state?.volume === 80, 'the state the page reads');
+    assert.equal((await e.get('/iot/devices')).json.devices[0].ceilingNote, later, 'the page is told of the later correction');
+    // Later than the first check (the reader's probe: 3 s after Play at the real waits), still inside the watch: caught.
+    dev.st.volume = 50; Object.assign(onPlay, { raiseTo: 92, raiseAfterMs: 1000 });
+    r = await e.cmd(d.id, 'play');
+    assert.equal(r.note, WATCH);
+    assert.equal((await e.get('/iot/devices')).json.devices[0].ceilingNote, undefined, 'a new play clears the last one’s note');
+    await until(async () => (await e.get('/iot/devices')).json.devices[0].ceilingNote, 'a check later in the watch');
+    assert.equal(dev.st.volume, 80);
+    assert.match((await e.get('/iot/devices')).json.devices[0].ceilingNote, /raised its own volume to 92 after it started playing; VM set it back to 80/);
+    // After the watch: not caught, as the play's answer said, and nothing claims it was.
+    dev.st.volume = 50; Object.assign(onPlay, { raiseTo: 97, raiseAfterMs: 2900 });
+    r = await e.cmd(d.id, 'play');
+    assert.equal(r.note, WATCH);
+    await sleep(3400);
+    assert.equal(dev.st.volume, 97, 'a rise after the watch is not caught');
+    assert.ok(!e.logs.some(l => /raised its own volume to 97/.test(l)), 'and nothing claims it was');
+    assert.equal((await e.get('/iot/devices')).json.devices[0].ceilingNote, undefined);
+    // Stop ends the watch: no film is starting.
+    dev.st.volume = 50; Object.assign(onPlay, { raiseTo: 99, raiseAfterMs: 600 });
+    r = await e.cmd(d.id, 'play');
+    assert.equal((await e.cmd(d.id, 'stop')).ok, true);
+    await sleep(1400);
+    assert.equal(dev.st.volume, 99, 'no reads after Stop');
+    assert.ok(!e.logs.some(l => /raised its own volume to 99/.test(l)));
+    // A player that does not take a lower volume: said plainly, not claimed to hold.
+    dev.st.volume = 50; Object.assign(onPlay, { raiseTo: 100, raiseAfterMs: 0 }); faults.SetVolume = 501;
+    r = await e.cmd(d.id, 'play');
+    assert.equal(r.note, 'EZCast U02 raised its own volume to 100 when it started playing and did not take a lower one: VM cannot hold its ceiling of 80 on this device. Turn it down with its own remote.');
+    delete faults.SetVolume;
+  } finally { await e.close(); dev.close(); }
+  // Read state during the watch checks the ceiling too, and its answer carries the note.
+  const onPlay2 = { raiseTo: 100, raiseAfterMs: 200 };
+  const dev2 = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, onPlay: onPlay2 });
+  const f = await bridge({ deps: { holdPollMs: 100, recheckMs: 60e3, watchMs: 120e3 } });
+  try {
+    const d = await addedPlayer(f, dev2);
+    assert.equal((await f.cmd(d.id, 'play')).ok, true);
+    await sleep(400);
+    const read = await f.post('/iot/state', { device: d.id });
+    assert.equal(read.json.state.volume, 80); assert.equal(dev2.st.volume, 80);
+    assert.equal(read.json.note, 'EZCast U02 raised its own volume to 100 after it started playing; VM set it back to 80, its ceiling.');
+  } finally { await f.close(); dev2.close(); }
+  // The words where the claim is made: the Nebula rule and the README say how long VM watches, and that a later rise is not caught.
+  const neb = B.HERMES_RULES.find(x => x.id === 'anker-nebula');
+  assert.ok(neb.limits.some(l => /for 30 seconds after.*a rise after that is not caught/.test(l)), 'the Nebula’s limit');
+  assert.ok(!neb.limits.some(l => /VM brings it back to the ceiling and says so\.$/.test(l)), 'no unconditional claim');
+  assert.equal(B.WAITS.watch, 30e3);
+  const readme = readFileSync(path.join(ROOT, 'sigint/bridge/README.md'), 'utf8').replace(/\s+/g, ' ');
+  assert.match(readme, /reads it again every 10 seconds for 30 seconds .*A rise after those 30 seconds is not caught/);
+  // A Roku, whose volume VM cannot read: Play says the ceiling cannot be held.
+  const roku = await fakeRoku();
+  const g = await bridge();
+  g.portMap['127.0.0.47:8060'] = roku.port;
+  try {
+    const d = await g.add(await g.inject('ssdp', ssdp('ssdp-roku.txt'), { address: '127.0.0.47', port: 1900 }));
+    await g.post('/iot/policy', { roku: true });
+    const r = await g.cmd(d.id, 'play');
+    assert.equal(r.ok, true, JSON.stringify(r));
+    assert.equal(r.note, 'VM cannot read Bedroom Roku’s volume, so it cannot hold the ceiling of 80 if the device raises its own volume when it plays.');
+  } finally { await g.close(); roku.close(); }
+});
+
+test('first run, finding 9: every line typed in the bridge window gets an answer; one question at a time', async () => {
+  mock.timers.enable({ apis: ['setTimeout'] });
+  const io = windowIO();
+  const ask = B.consoleConfirm(io.input, io.output);
+  try {
+    // A Y typed just before the question appears.
+    io.input.write('y\n'); await settle();
+    assert.match(io.shown(), /\(No question is open, so that answer was not used\. Wait for a question that ends in Y\/N, then answer it\.\)/);
+    io.clear();
+    const first = ask('Add Nebula-1A2B3C, 192.168.1.80, DLNA player?');
+    await settle();
+    assert.match(io.shown(), /Add Nebula-1A2B3C, 192\.168\.1\.80, DLNA player\? Y\/N \(60 seconds\) $/, 'the question says how long it waits');
+    assert.equal(await ask('Mark this network as your own home network?'), 'busy', 'a second question while one is open is refused at once');
+    mock.timers.tick(60e3);
+    assert.equal(await first, 'timeout');
+    assert.match(io.shown(), /\(No answer in 60 seconds: No\. Nothing was changed\.\)/);
+    // A Y typed after its minute.
+    io.clear(); io.input.write('y\n'); await settle();
+    assert.match(io.shown(), /That answer came after the 60 seconds for “Add Nebula-1A2B3C, 192\.168\.1\.80, DLNA player\?”, so nothing was changed\. Press the button on the page again/);
+    // Answers to an open question are acknowledged, and only Y or yes is Yes.
+    for (const [typed, value, words] of [['y', true, /\(Yes\.\)/], ['N', false, /\(No: nothing was changed\.\)/], ['maybe', false, /\(That is not Y, so it counts as No: nothing was changed\.\)/]]) {
+      io.clear();
+      const q = ask('Pair Living-room TV, 192.168.1.31, LG webOS?');
+      await settle();
+      io.input.write(`${typed}\n`); await settle();
+      assert.equal(await q, value, typed); assert.match(io.shown(), words, typed);
+    }
+    io.clear(); io.input.write('\n'); await settle();
+    assert.equal(io.shown(), '', 'a bare Enter is only spacing');
+  } finally { ask.close(); mock.timers.reset(); }
+});
+
+test('first run, finding 12: one Ctrl-C stops the bridge, closing its servers and its broker link, and says it has stopped', async () => {
+  // Ctrl-C in the window, with a question open: readline used to take the key, close itself and leave the bridge running.
+  const io = windowIO({ tty: true });
+  let interrupts = 0;
+  const ask = B.consoleConfirm(io.input, io.output, { onInterrupt: () => { interrupts++; } });
+  try {
+    const q = ask('Add EZCast U02, 192.168.1.44, DLNA player?');
+    await settle();
+    io.input.write('\x03'); await settle();
+    assert.equal(await q, 'cancelled'); assert.equal(interrupts, 1, 'the first Ctrl-C stops the bridge');
+    assert.match(io.shown(), /\(Stopped: No\.\)/);
+  } finally { ask.close(); }
+  // The stop itself: both servers closed, the broker left cleanly (DISCONNECT), a line saying so, exit 0.
+  const broker = await fakeBroker(), wiz = await fakeWiz();
+  const e = await bridge({ iot: { broker: { url: `mqtt://127.0.0.1:${broker.port}` } } });
+  const second = net.createServer();
+  await new Promise(r => second.listen(0, '127.0.0.1', r));
+  try {
+    await e.iot.start(); await waitConnected(e);
+    const said = [], exits = [];
+    const stop = B.makeStop({ servers: [e.server, second], iot: e.iot, say: t => said.push(t), exit: c => exits.push(c) });
+    await stop();
+    assert.deepEqual([e.server.listening, second.listening], [false, false]);
+    assert.ok(broker.st.raw.some(p => p[0] === 0xe0), 'an MQTT DISCONNECT reached the broker');
+    assert.equal(broker.st.retained.get('vm/home/hermes/status')?.toString(), 'offline');
+    assert.deepEqual(said, ['\nStopping the bridge…', 'The bridge has stopped.']); assert.deepEqual(exits, [0]);
+    await stop();
+    assert.deepEqual(exits, [0, 130], 'a second Ctrl-C while stopping exits at once');
+  } finally { e.iot.stop(); second.close(); broker.close(); wiz.close(); }
+});
+
+test('first run, finding 13: a device is published as "not known", not online, until it has been read', async () => {
+  const broker = await fakeBroker(), dev = await EZ();
+  const e = await bridge({ iot: { broker: { url: `mqtt://127.0.0.1:${broker.port}` } } });
+  try {
+    const d = await addedPlayer(e, dev);
+    await e.iot.start(); await waitConnected(e);
+    const tree = () => JSON.parse(broker.st.retained.get('vm/home/house/ezcast-u02/state').toString());
+    await until(() => broker.st.retained.has('vm/home/house/ezcast-u02/state'), 'the device’s state');
+    assert.deepEqual([tree().online, tree().volume, tree().playback], [null, null, null], 'not read yet: not known');
+    await e.post('/iot/state', { device: d.id });
+    await until(() => tree().online === true, 'the read');
+    assert.deepEqual([tree().online, tree().volume, tree().playback], [true, 20, 'stopped']);
+  } finally { e.iot.stop(); await e.close(); broker.close(); dev.close(); }
+});
+
+test('first run, finding 13: Read state on a Samsung TV, which VM cannot ask how it is, publishes "not known", not online', async () => {
+  const ca = makeCA(), leaf = makeLeaf(ca);
+  const broker = await fakeBroker();
+  const desc = await fakeUpnp({ description: fixture('desc-samsung.txt') });
+  const tv = await fakeSamsung({ leaf, allowAfterMs: 50 });
+  const e = await bridge({ iot: { broker: { url: `mqtt://127.0.0.1:${broker.port}` } } });
+  Object.assign(e.portMap, { '127.0.0.49:9197': desc.port, '127.0.0.49:8001': tv.httpPort, '127.0.0.49:8002': tv.wsPort });
+  try {
+    const d = await e.add(await e.inject('ssdp', ssdp('ssdp-samsung.txt'), { address: '127.0.0.49', port: 1900 }));
+    assert.equal((await e.post('/iot/pair', { device: d.id })).json.device.paired, true);
+    await e.iot.start(); await waitConnected(e);
+    const topic = () => [...broker.st.retained.keys()].find(k => k.startsWith('vm/home/') && k.endsWith('/state') && JSON.parse(broker.st.retained.get(k).toString() || '{}').kind === 'tv');
+    await until(() => topic(), 'the TV’s state');
+    const tree = () => JSON.parse(broker.st.retained.get(topic()).toString());
+    assert.equal(tree().online, null, 'not read yet: not known');
+    // The TV is switched off: Read state must not say it is online.
+    tv.close(); desc.close(); await sleep(50);
+    const before = tv.st.connects.length;
+    const r = await e.post('/iot/state', { device: d.id });
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json.state.online, null);
+    await sleep(200);
+    assert.equal(tree().online, null, 'the tree still says not known');
+    assert.equal(tv.st.connects.length, before, 'the TV was not contacted');
+  } finally { e.iot.stop(); await e.close(); broker.close(); tv.close(); desc.close(); }
+});
+
+/* =====================================================================================================================
+ * The first run's second group of repairs: findings 3 (a request log), 5 (the EZCast words), 6 (a Hermes rule for the
+ * Anker Nebula), 11 (Seek on the page) and 14 (the manifest on IoT Connect's own page). The players here are fakes built
+ * from UPnP's published device description and AVTransport forms; the Nebula's fixture carries only the maker and model
+ * strings the note records (OCEANWING, OCEANWINGPlayer) and a made-up name, address and UDN, not a recorded answer.
+ * ===================================================================================================================== */
+test('first run, finding 5: the EZCast words are the Ultra U2’s: leave Peer to Peer Mirroring, join the Wi-Fi in EZCast’s app; DLNA needs no switching on', () => {
+  const id = facts => B.hermesIdentify(facts)?.id ?? null;
+  // The Ultra U2 announces a MediaRenderer with no maker, named and modelled "EZCastU2-…": the rule still knows it.
+  assert.equal(id({ friendlyName: 'EZCastU2-00000000', model: 'EZCastU2-00000000', deviceType: 'urn:schemas-upnp-org:device:MediaRenderer:1' }), 'ezcast-dlna');
+  const ez = B.HERMES_RULES.find(r => r.id === 'ezcast-dlna');
+  assert.deepEqual(ez.pairing.steps, B.EZCAST_STEPS);
+  assert.match(ez.pairing.steps[0], /“Peer to Peer Mirroring”.*one quick press.*“Cast from App”.*held down, the button pairs or resets it instead/);
+  assert.match(ez.pairing.steps[1], /dongle’s own Wi-Fi name and password.*EZCast’s app.*Devices list.*Settings > Internet/);
+  assert.match(ez.pairing.steps[2], /home Wi-Fi.*password.*Look for devices.*Forget/);
+  assert.match(ez.pairing.steps[3], /^DLNA needs no switching on in the Ultra U2\./);
+  assert.ok(!/^If VM cannot see it, switch on DLNA/.test(ez.pairing.steps[0]), 'no longer the first thing it says');
+  // The page's words: the Overview's list and the limits name the Ultra U2, not the "U02" the design guessed.
+  const limit = W.LIMITS.find(([t]) => /EZCast/.test(t))[1];
+  assert.match(limit, /EZCast receiver such as the Ultra U2 is driven by DLNA only, once it is on your home Wi-Fi in its “Cast from App” mode/);
+  const html = readFileSync(path.join(ROOT, 'digital/iot-connect/index.html'), 'utf8');
+  assert.match(html, /<b>Players:<\/b> EZCast receivers such as the Ultra U2, Anker Nebula projectors and other DLNA players/);
+  for (const text of [html, JSON.stringify(W.LIMITS), JSON.stringify(ez)]) assert.ok(!/U02/.test(text), 'no "U02" left in the words');
+});
+
+test('first run, finding 6: Hermes has a rule for an Anker Nebula projector, as a DLNA player with the actions every player has', async () => {
+  const id = facts => B.hermesIdentify(facts)?.id ?? null;
+  const MR = 'urn:schemas-upnp-org:device:MediaRenderer:1';
+  assert.equal(id({ manufacturer: 'OCEANWING', model: 'OCEANWINGPlayer', friendlyName: 'Nebula-000000', deviceType: MR }), 'anker-nebula');
+  assert.equal(id({ friendlyName: 'Nebula-000000', deviceType: MR }), 'anker-nebula', 'by its name alone');
+  assert.equal(id({ manufacturer: 'OCEANWING', deviceType: 'urn:schemas-upnp-org:device:InternetGatewayDevice:1' }), null, 'only as a DLNA player');
+  assert.equal(id({ mdnsType: '_airplay._tcp' }), 'airplay', 'its AirPlay answer is still AirPlay');
+  assert.equal(id({ manufacturer: 'Nobody Ltd', deviceType: MR }), 'dlna-generic', 'other players are still generic');
+  const r = B.HERMES_RULES.find(x => x.id === 'anker-nebula');
+  assert.deepEqual([r.kind, r.protocol, r.routes, !!r.generic, !!r.cannot, r.pairing.method, r.pairing.consentOnDevice], ['media-renderer', 'upnp-av', ['upnp-av'], false, false, 'none', false]);
+  assert.ok(B.HERMES_RULES.indexOf(r) < B.HERMES_RULES.findIndex(x => x.id === 'dlna-generic'), 'before the generic rule');
+  assert.ok(r.limits.some(l => /Miracast/.test(l)) && r.limits.some(l => /Google Cast, planned for the second version/.test(l)));
+  // Found, named, added after the tick and Y, and driven by the same DLNA table as any player.
+  const dev = await fakeUpnp({ description: fixture('desc-nebula-projector.txt') });
+  const e = await bridge();
+  e.portMap['127.0.0.46:49152'] = dev.port;
+  try {
+    const c = (await e.inject('ssdp', ssdp('ssdp-nebula-projector.txt'), { address: '127.0.0.46', port: 1900 }));
+    const pub = (await e.get('/iot/candidates')).json.candidates.find(x => x.id === c.id);
+    assert.deepEqual([pub.finding.source, pub.canAdd, pub.generic, pub.label], ['rule:anker-nebula', true, false, 'Found on this network, not yet known to be yours']);
+    assert.match(pub.finding.says, /^Anker Nebula projector \(its maker name is Oceanwing\)\. VM drives it as a DLNA player/);
+    assert.equal((await e.post('/iot/add', { candidate: c.id })).status, 403, 'not without the ownership tick');
+    const d = await e.add(c);
+    assert.deepEqual(e.questions, ['Add Nebula-000000, 127.0.0.46, DLNA player?']);
+    assert.deepEqual([d.hermesRule, d.protocol, d.actions], ['anker-nebula', 'upnp-av', ['play-url', 'play', 'pause', 'stop', 'seek', 'volume', 'mute']]);
+    assert.equal((await e.cmd(d.id, 'pause')).ok, true);
+    assert.ok(dev.calls.some(x => x.action === 'Pause'));
+  } finally { await e.close(); dev.close(); }
+});
+
+test('first run, finding 11: Seek on the page is the bridge’s own seek, a position typed as seconds, m:ss or h:mm:ss', () => {
+  assert.deepEqual(['90', '1:30', '01:02:05', ' 0 ', '24:00:00'].map(M.seekSeconds), [90, 90, 3725, 0, 86400]);
+  for (const bad of ['', '1:75', '1:2:3:4', '-5', '1.5', 'abc', '24:00:01', '1::30', null]) assert.equal(M.seekSeconds(bad), null, String(bad));
+  assert.deepEqual(M.commandBody({ id: 'upnp-1' }, 'seek', { seconds: 3725 }).args, { seconds: 3725 });
+  const view = readFileSync(path.join(ROOT, 'digital/iot-connect/views/devices.js'), 'utf8');
+  assert.match(view, /if \(A\.has\('seek'\)\)/, 'shown only for a device that lists seek');
+  assert.match(view, /await send\(d, 'seek', \{ seconds \}\)/, 'sent by the same path as Play and Pause');
+  assert.ok(!B.PHONE_ACTIONS.has('seek') && !B.BROKER_ACTIONS.has('seek'), 'nothing new for the phone or the broker');
+});
+
+test('first run, finding 14: IoT Connect’s own page links VM’s manifest, so the browser offers the install there too', () => {
+  const html = readFileSync(path.join(ROOT, 'digital/iot-connect/index.html'), 'utf8');
+  const href = /<link rel="manifest" href="([^"]+)">/.exec(html)?.[1];
+  assert.equal(href, '../../manifest.json');
+  const at = new URL(href, 'https://jdpi.pages.dev/digital/iot-connect/index.html');
+  assert.equal(at.href, 'https://jdpi.pages.dev/manifest.json', 'the one manifest at the root, as the home page links it');
+  const m = JSON.parse(readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
+  assert.ok('/digital/iot-connect/'.startsWith(m.scope), 'the page is inside the app’s scope');
+  assert.match(html, /<link rel="apple-touch-icon" href="\.\.\/\.\.\/apple-touch-icon\.png">/);
+  assert.ok(existsSync(path.join(ROOT, 'apple-touch-icon.png')));
+  const csp = readFileSync(path.join(ROOT, '_headers'), 'utf8').split(/\r?\n/).find(l => /^\s+Content-Security-Policy/.test(l) && /localhost:8790/.test(l));
+  assert.match(csp, /default-src 'self'/, 'the manifest is same-origin, which the page’s policy allows');
+});
+
+test('first run, finding 3: the bridge keeps a short request log in memory, with no personal details, readable and cleared from the page', async () => {
+  const dev = await EZ();
+  const e = await bridge();
+  try {
+    const d = await addedPlayer(e, dev);
+    await e.post('/iot/device', { device: d.id, room: 'Alex’s room' });
+    assert.equal((await e.cmd(d.id, 'play-url', { url: 'http://127.0.0.10:8200/private-film.mp4?token=abc' })).ok, true);
+    assert.equal((await e.cmd(d.id, 'pause')).ok, true);
+    assert.equal((await e.cmd(d.id, 'power', { on: true })).code, 'unsupported');
+    await e.get('/iot/status?secret=xyz');
+    await e.call('GET', '/iot/devices', undefined, { Origin: 'https://evil.example' });
+    const log = (await e.get('/iot/log')).json;
+    assert.equal(log.ok, true); assert.equal(log.max, B.REQUEST_LOG_MAX); assert.equal(B.REQUEST_LOG_MAX, 200);
+    const E = log.entries;
+    assert.deepEqual(Object.keys(E[0]), ['at', 'from', 'request', 'device', 'action', 'result']);
+    assert.deepEqual(E.slice(0, 5).map(x => [x.from, x.request, x.device, x.action, x.result]), [
+      ['other-site', 'GET /iot/devices', null, null, 'bad-origin'],
+      ['page', 'GET /iot/status', null, null, 'ok'],
+      ['page', 'POST /iot/command', d.id, 'power', 'unsupported'],
+      ['page', 'POST /iot/command', d.id, 'pause', 'ok'],
+      ['page', 'POST /iot/command', d.id, 'play-url', 'ok'],
+    ], 'newest first: time, where from, the request, the device, the action, the result');
+    assert.ok(E.some(x => x.request === 'POST /iot/add' && x.device === d.id && x.result === 'ok'), 'the add, with the device it made');
+    assert.ok(E.every(x => /^2026-11-07T12:\d\d:\d\dZ$/.test(x.at)));
+    assert.ok(!E.some(x => /\/iot\/log/.test(x.request)), 'reading the log is not logged');
+    const text = JSON.stringify(log);
+    for (const s of ['127.0.0', 'EZCast U02', 'Alex', 'private-film', 'token', 'secret', 'xyz', 'evil.example', 'http']) assert.ok(!text.includes(s), `no "${s}" in the log`);
+    // The bridge window: one line per command, with no address and no name.
+    assert.ok(e.logs.includes(`Command from the page: pause to ${d.id}: ok`), e.logs.join('\n'));
+    assert.ok(!e.logs.filter(l => l.startsWith('Command from')).some(l => /127\.0\.0|EZCast U02|private-film/.test(l)));
+    // "No answer in time" is told apart from a refusal.
+    const slow = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), delays: { Pause: 800 } });
+    const e2 = await bridge({ deps: { upnpActionMs: 300 } });
+    try {
+      const d2 = await addedPlayer(e2, slow);
+      assert.equal((await e2.cmd(d2.id, 'pause')).reason, 'timeout');
+      assert.equal((await e2.get('/iot/log')).json.entries[0].result, 'timeout');
+    } finally { await e2.close(); slow.close(); }
+    // Short: the newest 200 only. Cleared from the page, and then empty.
+    for (let i = 0; i < 205; i++) await e.get('/iot/status');
+    assert.equal((await e.get('/iot/log')).json.entries.length, 200);
+    const cleared = await e.post('/iot/log/clear', {});
+    assert.deepEqual([cleared.status, cleared.json.cleared], [200, 200]);
+    assert.deepEqual((await e.get('/iot/log')).json.entries, []);
+    assert.equal((await e.call('GET', '/iot/log', undefined, { Origin: 'https://evil.example' })).status, 403, 'only VM’s own page reads it');
+    assert.equal((await e.call('POST', '/iot/log/clear', '{}', { Origin: 'https://evil.example', 'Content-Type': 'application/json' })).status, 403);
+  } finally { await e.close(); dev.close(); }
+  // The page's words for each entry.
+  const row = M.logRow({ at: '2026-11-14T12:00:00Z', from: 'phone', request: 'POST /remote/api/command', device: 'upnp-1', action: 'play-url', result: 'timeout' }, [{ id: 'upnp-1', name: 'Projector' }]);
+  assert.deepEqual([row.from, row.device, row.action, row.result, row.tone], ['Phone remote', 'Projector', 'play an address', 'No answer in time', 'warn']);
+  assert.deepEqual([M.logRow({ result: 'ok' }).result, M.logRow({ result: 'refused' }).tone, M.logRow({}).device], ['Done', 'bad', '–']);
+  assert.match(W.REQUEST_LOG, /last 200 requests.*memory only.*No addresses, names, rooms or passwords\. It is gone when the bridge stops, or when you clear it here\./);
+});
+
+test('first run, finding 3: a Home Assistant device is logged by a short hash, not by its entity id, and the page still shows its name', async () => {
+  const ha = await fakeHa();
+  const e = await bridge({ iot: { homeAssistant: { url: 'http://127.0.0.60:8123' } } });
+  e.portMap['127.0.0.60:8123'] = ha.port;
+  try {
+    assert.equal((await e.post('/iot/ha/token', { token: ha.token })).status, 200);
+    const light = (await e.post('/iot/ha/tick', { entity: 'light.kitchen', on: true })).json.device;
+    assert.equal(light.id, 'ha-light-kitchen', 'its id is unchanged, so every address that worked still works');
+    assert.match(light.logId, /^ha-[0-9a-f]{6}$/);
+    assert.equal((await e.cmd(light.id, 'toggle')).ok, true);
+    const entries = (await e.get('/iot/log')).json.entries;
+    const cmd = entries.find(x => x.request === 'POST /iot/command');
+    assert.deepEqual([cmd.device, cmd.action, cmd.result], [light.logId, 'toggle', 'ok']);
+    assert.ok(!JSON.stringify(entries).includes('kitchen'), 'no entity id or name in the log');
+    assert.ok(e.logs.includes(`Command from the page: toggle to ${light.logId}: ok`), e.logs.join('\n'));
+    assert.ok(!e.logs.filter(l => l.startsWith('Command from')).some(l => /kitchen/i.test(l)));
+    const devices = (await e.get('/iot/devices')).json.devices;
+    assert.equal(devices.find(x => x.id === light.id).logId, light.logId);
+    assert.equal(M.logRow(cmd, devices).device, 'Kitchen light', 'the page maps the hash back to the name it already knows');
+  } finally { await e.close(); ha.close(); }
+  assert.match(readFileSync(path.join(ROOT, 'sigint/bridge/README.md'), 'utf8').replace(/\s+/g, ' '), /for a Home Assistant entity, a short hash of it/);
 });
 
 /* =====================================================================================================================

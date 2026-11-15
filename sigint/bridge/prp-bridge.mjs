@@ -39,7 +39,7 @@ import os from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
 
-export const VERSION = '2.0.0';
+export const VERSION = '2.1.0';
 export const DEFAULT_PORT = 8790;
 export const DEFAULT_LAN_PORT = 8791;
 export const DEFAULT_ORIGINS = ['https://jdpi.pages.dev', 'http://localhost:*', 'http://127.0.0.1:*'];
@@ -343,6 +343,24 @@ export class IotError extends Error {
   constructor(code, message, status) { super(message); this.code = code; this.status = status || ({ unsupported: 400, 'bad-request': 400, 'unknown-device': 404, 'not-paired': 409, moved: 409, refused: 403, 'rate-limited': 429, 'no-answer': 502 }[code] || 400); }
 }
 const NO_ANSWER = 'No answer from that device.';
+/** How long the bridge waits, in one place, so the page (which reads them from /iot/status) waits as long:
+ *  confirm: the Y/N question in the bridge window; upnpAction: one UPnP control action, which UPnP Device Architecture
+ *  1.1 §3.2.1 lets a device take up to 30 seconds to answer (a projector fetching a film before it answers Play takes
+ *  longer than the 4 seconds other reads get); pair: a TV's own "accept" step after the Y; hold: how long after a play
+ *  starts the bridge keeps checking that the player has not raised its own volume past the ceiling (it reads the volume
+ *  until the player reports Playing); watch: how long after that it reads the volume again, once every "hold", and
+ *  turns it back down (a rise after that is not caught, and the words say so); ai: Hermes's optional AI question. */
+export const WAITS = { confirm: 60e3, upnpAction: 30e3, pair: 60e3, hold: 10e3, watch: 30e3, ai: 20e3 };
+const secs = ms => Math.round(ms / 1000);
+/** The request log keeps this many entries, newest first, in memory only. */
+export const REQUEST_LOG_MAX = 200;
+/** One request's result in the request log: "ok", "timeout" (the device took it and had not answered in time), or the
+ *  refusal's code ("refused", "no-answer", "bad-origin" and the others in the README). */
+export const logResult = (status, body) => (status < 300 && body?.ok !== false ? 'ok' : body?.reason === 'timeout' ? 'timeout' : typeof body?.code === 'string' ? body.code : `http-${status}`);
+/** A request's path as the log keeps it: one of the bridge's own fixed paths, never a query string or other text. */
+const logPath = p => (/^\/(iot|remote)(\/[a-z-]{1,24}){0,3}$/.test(p) ? p : p.startsWith('/remote') ? '/remote/…' : '/iot/…');
+/** A device that took the connection but did not answer within `ms`: not the same as no device there, or a refusal. */
+const lateAnswer = ms => Object.assign(new IotError('no-answer', `That device did not answer within ${secs(ms)} second${secs(ms) === 1 ? '' : 's'}. It may still have done it: read its state to see.`), { reason: 'timeout' });
 export const iotOriginList = cfg => [IOT_ORIGIN, ...((cfg && cfg.origins) || [])];
 
 /* ---- Addresses ------------------------------------------------------------------------------------------------------ */
@@ -490,10 +508,12 @@ export function makeNet({ policy = 'home', resolver = {}, portMap = {}, interfac
     });
   }
   /** HTTP(S) request through tcp(): no global fetch, no agent, the Host header set from the URL. */
-  async function request({ method = 'GET', url, headers = {}, body = null, purpose = 'device', tls: t, timeout: ms = timeout, maxBytes = 1 << 20 }) {
+  /** `timeout` bounds the connection and the wait for the reply; `connectTimeout` (if given) the connection alone,
+   *  so a long wait for a reply does not make a device that is not there take as long to fail. */
+  async function request({ method = 'GET', url, headers = {}, body = null, purpose = 'device', tls: t, timeout: ms = timeout, connectTimeout = ms, maxBytes = 1 << 20 }) {
     const u = new URL(url), secure = u.protocol === 'https:';
     const port = Number(u.port) || (secure ? 443 : 80);
-    const conn = await tcp(u.hostname, port, { purpose, tls: secure ? (t || { mode: 'system' }) : null, timeout: ms });
+    const conn = await tcp(u.hostname, port, { purpose, tls: secure ? (t || { mode: 'system' }) : null, timeout: Math.min(ms, connectTimeout) });
     return new Promise((resolveP, reject) => {
       const data = body == null ? null : Buffer.isBuffer(body) ? body : Buffer.from(String(body));
       const req = httpRequest({ createConnection: () => conn.socket, method, path: u.pathname + u.search,
@@ -503,7 +523,7 @@ export function makeNet({ policy = 'home', resolver = {}, portMap = {}, interfac
         res.on('end', () => resolveP({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks), fingerprint: conn.fingerprint, cert: conn.cert }));
         res.on('error', () => reject(new IotError('no-answer', NO_ANSWER)));
       });
-      req.setTimeout(ms, () => { req.destroy(); reject(new IotError('no-answer', NO_ANSWER)); });
+      req.setTimeout(ms, () => { req.destroy(); reject(lateAnswer(ms)); });
       req.on('error', () => reject(new IotError('no-answer', NO_ANSWER)));
       req.end(data || undefined);
     });
@@ -798,15 +818,30 @@ export function hexToHsv(hex) {
 
 /* ---- Hermes Messenger's rules -------------------------------------------------------------------------------------------- */
 const MIRACAST = 'Mirroring is Miracast, which no web page or Node program can start: press Windows key + K on the computer.';
+/** How an EZCast receiver gets on the home Wi-Fi, from the Ultra U2 (14 November 2026). */
+export const EZCAST_STEPS = [
+  'If its screen says “Peer to Peer Mirroring”, it is not on your Wi-Fi: give the button in the small hole on the dongle one quick press to change to “Cast from App” (held down, the button pairs or resets it instead).',
+  'The screen then shows the dongle’s own Wi-Fi name and password. Join that Wi-Fi with your phone, open EZCast’s app, tap the dongle in its Devices list and choose Settings > Internet.',
+  'Pick your home Wi-Fi and type its password. The dongle drops your phone and joins your router; then press “Look for devices” again. If it cannot join, tap Forget on your home Wi-Fi and pick it again to type the password afresh.',
+  'DLNA needs no switching on in the Ultra U2. Only if VM still cannot see an older model, switch on DLNA (“DMR”) in EZCast’s app.',
+];
 /** Each rule: { id, match: [alternatives, each { fact: RegExp }], kind, protocol, says, pairing: { method, steps,
  *  consentOnDevice }, routes, limits, typed (port for a typed address), cannot (VM cannot drive it) }. */
 export const HERMES_RULES = [
   { id: 'ezcast-dlna', match: [{ manufacturer: /ezcast|actions.?micro/i }, { friendlyName: /^ezcast/i }, { model: /^ez-?u0?2|ezcast/i }],
-    kind: 'media-renderer', protocol: 'upnp-av', says: 'EZCast receiver. VM can play an address, pause, stop and set volume.',
-    pairing: { method: 'none', steps: ['If VM cannot see it, switch on DLNA in EZCast’s app (older models call it "DMR").'], consentOnDevice: false },
+    kind: 'media-renderer', protocol: 'upnp-av', says: 'EZCast receiver. VM can play an address, pause, stop, seek and set volume.',
+    // The steps are the EZCast Ultra U2's, as it joined a home router on 14 November 2026 (it answers DLNA with no
+    // switch to turn on); older models may still need DLNA ("DMR") switched on in EZCast's app.
+    pairing: { method: 'none', steps: EZCAST_STEPS, consentOnDevice: false },
     routes: ['upnp-av'], limits: [MIRACAST, 'VM drives it by DLNA only: it plays an address it can fetch and does not mirror. EZCast’s own app, EZAir and AirPlay are not used.', 'Its settings change in EZCast’s own app; VM never opens its admin pages.'] },
+  // Anker's Nebula projectors (the Capsule II) announce themselves as a DLNA player made by "OCEANWING", model
+  // "OCEANWINGPlayer", named "Nebula-…". VM drives them by the same DLNA actions as any player; nothing new.
+  { id: 'anker-nebula', match: [{ manufacturer: /^oceanwing/i, deviceType: /MediaRenderer:1/ }, { model: /^oceanwing/i, deviceType: /MediaRenderer:1/ }, { friendlyName: /^nebula\b/i, deviceType: /MediaRenderer:1/ }],
+    kind: 'media-renderer', protocol: 'upnp-av', says: 'Anker Nebula projector (its maker name is Oceanwing). VM drives it as a DLNA player: it can play an address, pause, stop, seek and set volume.',
+    pairing: { method: 'none', steps: ['It answers as a DLNA player once it is switched on and on your home Wi-Fi: nothing to switch on.'], consentOnDevice: false },
+    routes: ['upnp-av'], limits: [MIRACAST, 'VM drives it by DLNA only: it plays an address it can fetch and does not mirror. Its Chromecast built-in is Google Cast, planned for the second version; its AirPlay is not used.', 'A Nebula may raise its own volume when a film starts. VM reads the volume until the film is playing and for 30 seconds after, brings it back to the ceiling and says so; a rise after that is not caught: turn it down with its own remote.'] },
   { id: 'sonos', match: [{ st: /ZonePlayer:1/ }, { server: /sonos/i }, { manufacturer: /^sonos/i }],
-    kind: 'speaker', protocol: 'upnp-av', says: 'Sonos speaker. VM can play an address, pause, stop and set volume.',
+    kind: 'speaker', protocol: 'upnp-av', says: 'Sonos speaker. VM can play an address, pause, stop, seek and set volume.',
     pairing: { method: 'none', steps: [], consentOnDevice: false }, routes: ['upnp-av'], limits: ['Sonos’s local control is community-documented, not published by Sonos, and may change.'], typed: { port: 1400, path: '/xml/device_description.xml' } },
   { id: 'roku', match: [{ st: /^roku:ecp/i }, { manufacturer: /^roku/i }, { server: /roku/i }],
     kind: 'tv', protocol: 'roku-ecp', says: 'Roku TV or player. VM can press its remote’s keys, switch it on and off and open a channel by number.',
@@ -1087,17 +1122,46 @@ export function phoneSignature(remoteKey, method, p, body, ts, nonce) {
 }
 
 /* ---- The bridge window: setup steps wait for Y here ----------------------------------------------------------------- */
-export function consoleConfirm(input = process.stdin, output = process.stdout) {
+/**
+ * The Y/N question in the bridge window. ask(question) resolves true (Y), false (N or anything else), "timeout" (no
+ * answer within WAITS.confirm), "busy" (another question is open: one at a time, so a step never waits behind another
+ * and the page's wait always covers it) or "cancelled" (Ctrl-C). Every line typed gets an answer: one typed when no
+ * question is open, or after a question ran out, is told so rather than dropped. Ctrl-C calls onInterrupt (the bridge
+ * stops); readline would otherwise take the key, close itself and leave the bridge running without a window.
+ */
+export function consoleConfirm(input = process.stdin, output = process.stdout, { onInterrupt = () => process.exit(130), waitMs = WAITS.confirm } = {}) {
   if (!input.isTTY) return null;
   const rl = readline.createInterface({ input, output });
-  let chain = Promise.resolve();
-  // Each question has its own AbortController: on the 60-second timeout readline drops it, so the next step is
-  // printed fresh under its own words and the Y typed for it counts for it, not for the question that timed out.
-  const ask = question => (chain = chain.then(() => new Promise(resolve => {
+  const seconds = secs(waitMs);
+  const say = t => output.write(`(${t})\n`);
+  let open = null, lapsed = null;
+  rl.on('line', line => {
+    if (!String(line).trim()) return;
+    if (lapsed) say(`That answer came after the ${seconds} seconds for “${lapsed}”, so nothing was changed. Press the button on the page again, then answer here within ${seconds} seconds.`);
+    else say('No question is open, so that answer was not used. Wait for a question that ends in Y/N, then answer it.');
+  });
+  rl.on('SIGINT', () => { if (open) open.finish('cancelled', '\n(Stopped: No.)'); onInterrupt(); });
+  // Each question has its own AbortController: on the timeout readline drops it, so the next step is printed fresh
+  // under its own words and the Y typed for it counts for it, not for the question that timed out.
+  const ask = question => new Promise(resolve => {
+    if (open) { resolve('busy'); return; }
+    lapsed = null;
     const ac = new AbortController();
-    const timer = setTimeout(() => { ac.abort(); output.write('\n(no answer in 60 seconds: No)\n'); resolve(false); }, 60e3);
-    rl.question(`\n${question} Y/N `, { signal: ac.signal }, a => { clearTimeout(timer); resolve(/^\s*y(es)?\s*$/i.test(a)); });
-  })));
+    const finish = (value, words) => {
+      if (open !== q) return;
+      open = null; clearTimeout(timer); ac.abort();
+      if (words) output.write(`${words}\n`);
+      resolve(value);
+    };
+    const q = { question, finish };
+    open = q;
+    const timer = setTimeout(() => { lapsed = question; finish('timeout', `\n(No answer in ${seconds} seconds: No. Nothing was changed.)`); }, waitMs);
+    rl.question(`\n${question} Y/N (${seconds} seconds) `, { signal: ac.signal }, a => {
+      const t = String(a).trim();
+      if (/^y(es)?$/i.test(t)) finish(true, '(Yes.)');
+      else finish(false, /^n(o)?$/i.test(t) ? '(No: nothing was changed.)' : '(That is not Y, so it counts as No: nothing was changed.)');
+    });
+  });
   ask.close = () => rl.close();
   return ask;
 }
@@ -1167,15 +1231,43 @@ export function createIot(o, deps = {}) {
   const nonces = new Map();
   let lastProfile = 'unknown';
 
+  /* -- The request log (first run, finding 3) ------------------------------------------------------------------------- */
+  // The last REQUEST_LOG_MAX requests the bridge took on /iot/* (from the page) and /remote/api/* (from a paired
+  // phone), and the commands it ran for the broker, newest first, in memory only: it is gone when the bridge stops, and
+  // POST /iot/log/clear empties it. Each entry is the time, where it came from (page, phone, broker, or another site,
+  // refused), the request (its method and fixed path), the device's id and the action where there is one, and the
+  // result. Never a body, an address, a name, a room, a query string, a phone's id or a secret. Each command also
+  // prints one line in the bridge window (unless --quiet).
+  const requestLog = [];
+  const knownDevice = x => (typeof x === 'string' && S.devices.some(d => d.id === x) ? x : null);
+  const knownAction = x => (typeof x === 'string' && Object.hasOwn(ACTION_ARGS, x) ? x : null);
+  const FROM_WORDS = { page: 'the page', phone: 'the phone remote', broker: 'the broker', 'other-site': 'another site' };
+  // A Home Assistant device's id carries its entity id, which may name a room or a person, so the log and the bridge
+  // window carry a short hash of it instead, as every other protocol's ids already are. The page maps it back to the
+  // device's name by its logId.
+  function logIdOf(id) { return typeof id === 'string' && id.startsWith('ha-') ? `ha-${shortHash(id)}` : id; }
+  function logRequest({ from, request, device = null, action = null, result }) {
+    device = logIdOf(device);
+    requestLog.unshift({ at: iso(), from, request, device, action, result });
+    if (requestLog.length > REQUEST_LOG_MAX) requestLog.length = REQUEST_LOG_MAX;
+    if (action) log(`Command from ${FROM_WORDS[from]}: ${action} to ${device || 'an unknown device'}: ${result}`);
+  }
+
   /* -- Ask in the bridge window ------------------------------------------------------------------------------------- */
   async function ask(question) {
     if (!confirm) throw new IotError('refused', 'Setup steps need Y in the bridge window, and this bridge has no window to ask in. Start it from a terminal.');
     const yes = await confirm(question);
-    if (!yes) throw new IotError('refused', 'Not confirmed in the bridge window.');
+    if (yes === true) return;
+    // The page shows these words, so each says why nothing happened.
+    throw new IotError('refused', {
+      timeout: `No answer in the bridge window within ${secs(WAITS.confirm)} seconds, so nothing was changed. Try again, and type Y in the bridge window when it asks.`,
+      busy: 'The bridge window is already asking another question: answer that one first, then try again.',
+      cancelled: 'The bridge is stopping, so nothing was changed.',
+    }[yes] || 'Not confirmed in the bridge window: the answer there was No, so nothing was changed.');
   }
 
   /* -- Public views (never a secret) ----------------------------------------------------------------------------------- */
-  const publicDevice = d => { const { secret, ...rest } = d; return { ...rest, paired: !!(secret && Object.keys(secret).some(k => k !== 'pin' && secret[k])), state: states.get(d.id) || null }; };
+  const publicDevice = d => { const { secret, ...rest } = d; return { ...rest, paired: !!(secret && Object.keys(secret).some(k => k !== 'pin' && secret[k])), state: states.get(d.id) || null, ...(d.protocol === 'home-assistant' ? { logId: logIdOf(d.id) } : {}), ...(ceilingNotes.has(d.id) ? { ceilingNote: ceilingNotes.get(d.id) } : {}) }; };
   const publicCandidate = c => ({ id: c.id, via: c.via, kind: c.kind, protocol: c.protocol, name: c.name, maker: c.maker, model: c.model, address: c.address,
     known: c.deviceId ? 'yours' : 'not-yet-yours', label: c.deviceId ? 'Already one of your devices' : 'Found on this network, not yet known to be yours',
     deviceId: c.deviceId || null, canAdd: !c.rule?.cannot, generic: !!c.rule?.generic, announcement: c.announcement, finding: findings.get(c.id) || null, seenAt: c.seenAt });
@@ -1562,14 +1654,21 @@ export function createIot(o, deps = {}) {
   }
 
   /* -- Drivers: one per protocol, each a fixed table ------------------------------------------------------------------ */
-  // UPnP AV (DLNA players, the EZCast U02, Sonos): AVTransport:1 and RenderingControl:1 only.
+  // UPnP AV (DLNA players, the EZCast Ultra U2, Anker's Nebula projectors, Sonos): AVTransport:1 and RenderingControl:1 only.
   async function soap(d, which, action, args) {
     const url = d.control?.[which];
     if (!url) throw new IotError('unsupported', 'This player does not offer that.');
     const service = `urn:schemas-upnp-org:service:${which === 'av' ? 'AVTransport' : 'RenderingControl'}:1`;
     const body = `<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:${action} xmlns:u="${service}">${Object.entries(args).map(([k, v]) => `<${k}>${xmlEscape(v)}</${k}>`).join('')}</u:${action}></s:Body></s:Envelope>`;
-    const r = await netx.request({ method: 'POST', url, headers: { 'Content-Type': 'text/xml; charset="utf-8"', SOAPACTION: `"${service}#${action}"` }, body });
-    if (r.status !== 200) throw new IotError(r.status === 500 && /<errorCode>401</.test(r.body.toString()) ? 'unsupported' : 'no-answer', r.status === 500 ? 'The player refused that command.' : NO_ANSWER);
+    const r = await netx.request({ method: 'POST', url, headers: { 'Content-Type': 'text/xml; charset="utf-8"', SOAPACTION: `"${service}#${action}"` }, body, timeout: deps.upnpActionMs ?? WAITS.upnpAction, connectTimeout: deps.timeout || 4000 });
+    // A SOAP fault (HTTP 500 with a UPnP errorCode) is the player answering No: refused, not "no answer". 401 is
+    // UPnP's "Invalid Action" (it does not have that action). Any other status is a reply VM cannot use.
+    if (r.status === 500) {
+      const code = (/<errorCode>\s*(\d+)\s*</.exec(r.body.toString()) || [])[1];
+      if (code === '401') throw new IotError('unsupported', 'The player refused that command.');
+      throw new IotError('refused', `The player refused that command${code ? ` (UPnP error ${code})` : ''}.`);
+    }
+    if (r.status !== 200) throw new IotError('no-answer', `The player answered HTTP ${r.status}, not a reply VM can use.`);
     return r.body.toString('utf8');
   }
   const hms = s => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, '0')).join(':');
@@ -1866,7 +1965,7 @@ export function createIot(o, deps = {}) {
     ws.on('close', () => { registered.rej(new IotError('no-answer', NO_ANSWER)); for (const w of waiting.values()) w.rej(new IotError('no-answer', NO_ANSWER)); waiting.clear(); });
     ws.send(JSON.stringify({ type: 'register', id: 'register_0', payload: { forcePairing: false, pairingType: 'PROMPT', ...(sec.clientKey ? { 'client-key': sec.clientKey } : {}),
       manifest: { manifestVersion: 1, appVersion: '2.0', permissions: LG_PERMISSIONS } } }));
-    const timer = setTimeout(() => registered.rej(new IotError(pairing ? 'not-paired' : 'no-answer', pairing ? 'The TV was not accepted in time: click Pair again and accept on the TV screen.' : NO_ANSWER)), pairing ? (deps.pairWaitMs || 60e3) : 5000);
+    const timer = setTimeout(() => registered.rej(new IotError(pairing ? 'not-paired' : 'no-answer', pairing ? 'The TV was not accepted in time: click Pair again and accept on the TV screen.' : NO_ANSWER)), pairing ? (deps.pairWaitMs || WAITS.pair) : 5000);
     try {
       const key = await reg;
       if (pairing) { d.secret = { clientKey: key, pin: ws.fingerprint }; save(); }
@@ -1932,7 +2031,9 @@ export function createIot(o, deps = {}) {
       } finally { s.close(); }
       return { online: true, power: action === 'power' ? null : true, brightness: null, volume: null, playback: { play: 'playing', pause: 'paused', stop: 'stopped' }[action] || null };
     },
-    async read() { return { online: true, power: null, brightness: null, volume: null, playback: null }; },
+    // VM's Samsung route sends remote keys only and has no way to ask the TV how it is, so a read does not claim to
+    // know: Read state publishes "not known" (null), never online without the TV having answered (first run, finding 13).
+    async read() { return { online: null, power: null, brightness: null, volume: null, playback: null }; },
   };
   // Home Assistant REST: only the listed services, only ticked entities, a non-administrator user's token.
   const haToken = () => cfg.haToken || S.ha.token;
@@ -2004,7 +2105,13 @@ export function createIot(o, deps = {}) {
   }
 
   const DRIVERS = { 'upnp-av': upnp, 'roku-ecp': roku, 'hue-clip2': hue, 'hue-light': hue, 'shelly-rpc': shelly, 'tasmota-http': tasmota, 'wiz-udp': wiz, 'yeelight-lan': yeelight, 'lifx-lan': lifx, 'lg-webos': lg, 'samsung-tizen': samsung, 'home-assistant': ha };
-  async function readState(d) { const st = await DRIVERS[d.protocol].read(d); states.set(d.id, st); return st; }
+  // A read is the device's real state, so it goes to the UNS link too (until a read, the tree says "not known").
+  // While VM is watching a player's volume after a play (see watchCeiling), a read checks the ceiling too.
+  async function readState(d) {
+    let st = await DRIVERS[d.protocol].read(d);
+    if (watches.has(d.id)) { const r = await laterCheck(d, st); st = r.state; if (!r.held) stopWatch(d.id); }
+    states.set(d.id, st); uns.update(d, st); return st;
+  }
 
   /* -- Rate limits: 2 power or colour changes a second and 60 a minute per device; extras collapse into the latest ------ */
   const throttles = new Map();
@@ -2039,6 +2146,79 @@ export function createIot(o, deps = {}) {
     if ((d.protocol === 'roku-ecp' || d.protocol === 'samsung-tizen') && ceiling < 100)
       throw new IotError('refused', `VM cannot read this TV’s volume, so it does not press Volume up: the ceiling of ${ceiling} could not be kept. Use the TV’s own remote to make it louder.`);
   }
+  // The ceiling after a play starts. The ceiling limits what VM sends, but a player may raise its own volume when a
+  // film begins (on 14 November 2026 a Nebula Capsule II went from 50 to 100 and an EZCast Ultra U2 from 50 to 77). So
+  // after play-url or play VM reads the volume back until the player reports Playing (at most WAITS.hold), brings it
+  // down to the ceiling where the device takes a volume, then reads it again every WAITS.hold for WAITS.watch (and at
+  // any Read state in that time), and says what it did: in the play's answer, in the bridge window, and on the device
+  // for the page's next read. A rise after the watch is not caught, and the play's answer says so. A device whose
+  // volume VM cannot read or set is said to be so, rather than the ceiling claimed to hold.
+  const PLAY_STARTS = new Set(['play-url', 'play']);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const ceilingOf = d => d.volumeCeiling ?? 80;
+  async function lowerTo(d, ceiling) {
+    let s = null;
+    try { s = await DRIVERS[d.protocol].command(d, 'volume', { level: ceiling }); } catch { return null; }
+    if (!Number.isFinite(s?.volume)) { try { s = await DRIVERS[d.protocol].read(d); } catch { return null; } }
+    return s;
+  }
+  async function holdCeiling(d, state) {
+    stopWatch(d.id); ceilingNotes.delete(d.id); // this play's own checks replace an earlier play's
+    const ceiling = ceilingOf(d);
+    const cannot = { state, note: `VM cannot read ${d.name}’s volume, so it cannot hold the ceiling of ${ceiling} if the device raises its own volume when it plays.`, watch: false };
+    if (!d.actions.includes('volume') || !Number.isFinite(state?.volume)) return cannot;
+    const pollMs = deps.holdPollMs ?? 1000, polls = Math.max(1, Math.ceil((deps.holdMs ?? WAITS.hold) / pollMs));
+    let s = state, raisedTo = null;
+    for (let i = 0; ; i++) {
+      if (Number.isFinite(s?.volume) && s.volume > ceiling) {
+        raisedTo = Math.max(raisedTo ?? 0, s.volume);
+        const after = await lowerTo(d, ceiling);
+        if (!(Number.isFinite(after?.volume) && after.volume <= ceiling)) {
+          return { state: after || s, watch: false, note: `${d.name} raised its own volume to ${raisedTo} when it started playing and did not take a lower one: VM cannot hold its ceiling of ${ceiling} on this device. Turn it down with its own remote.` };
+        }
+        s = after;
+      }
+      // Stop once the player says it is playing (the volume has then been read since it started), when it does not
+      // report playback at all, or after the hold time.
+      if (s?.playback === 'playing' || s?.playback == null || i + 1 >= polls) break;
+      await sleep(pollMs);
+      try { s = await DRIVERS[d.protocol].read(d); } catch { break; }
+    }
+    return { state: s, watch: true, note: raisedTo != null ? `${d.name} raised its own volume to ${raisedTo} when it started playing; VM set it back to ${ceiling}, its ceiling.` : null };
+  }
+  // The watch after the play has answered. Its corrections go to the bridge window, the UNS link and the device's
+  // ceilingNote, which the page shows the next time it reads the devices (or presses Read state).
+  const watches = new Map(), ceilingNotes = new Map();
+  const watchMs = () => deps.watchMs ?? WAITS.watch, everyMs = () => deps.recheckMs ?? WAITS.hold;
+  const watchWords = d => `VM reads ${d.name}’s volume again for ${secs(watchMs())} seconds and turns it back down if it rises; a rise after that is not caught.`;
+  function stopWatch(id) { const w = watches.get(id); if (w) clearTimeout(w.timer); watches.delete(id); }
+  async function laterCheck(d, s) {
+    const ceiling = ceilingOf(d);
+    if (!(Number.isFinite(s?.volume) && s.volume > ceiling)) return { state: s, held: true };
+    const raisedTo = s.volume, after = await lowerTo(d, ceiling);
+    const held = Number.isFinite(after?.volume) && after.volume <= ceiling;
+    const note = held ? `${d.name} raised its own volume to ${raisedTo} after it started playing; VM set it back to ${ceiling}, its ceiling.`
+      : `${d.name} raised its own volume to ${raisedTo} after it started playing and did not take a lower one: VM cannot hold its ceiling of ${ceiling} on this device. Turn it down with its own remote.`;
+    log(note); ceilingNotes.set(d.id, note);
+    return { state: after || s, held };
+  }
+  function watchCeiling(d) {
+    stopWatch(d.id);
+    const w = { left: Math.max(1, Math.ceil(watchMs() / everyMs())), timer: null };
+    const tick = async () => {
+      if (watches.get(d.id) !== w) return;
+      if (!S.devices.includes(d)) { watches.delete(d.id); return; }
+      w.left--;
+      let s; try { s = await DRIVERS[d.protocol].read(d); } catch { if (watches.get(d.id) === w) watches.delete(d.id); return; }
+      if (watches.get(d.id) !== w) return; // a newer play, a Stop or a Read state took over
+      const r = await laterCheck(d, s);
+      if (watches.get(d.id) !== w) return;
+      states.set(d.id, r.state); uns.update(d, r.state);
+      if (r.held && w.left > 0) { w.timer = setTimeout(tick, everyMs()); w.timer.unref?.(); } else watches.delete(d.id);
+    };
+    w.timer = setTimeout(tick, everyMs()); w.timer.unref?.();
+    watches.set(d.id, w);
+  }
   async function command(body, { from = 'page' } = {}) {
     const id = typeof body?.id === 'string' ? cleanText(body.id, 40) : null;
     try {
@@ -2062,13 +2242,20 @@ export function createIot(o, deps = {}) {
       if (result?.collapsed) throw new IotError('rate-limited', 'A newer change to this device replaced this one.');
       if (result?.error) throw result.error;
       if (d.status === 'offline') { d.status = 'ok'; save(); uns.birth(d); }
-      states.set(d.id, result);
-      uns.update(d, result);
-      return { ok: true, id, state: result, ...(action === 'volume' && body.args?.level > args.level ? { note: `Volume stops at ${args.level}, this device’s ceiling.` } : {}) };
+      const held = PLAY_STARTS.has(action) ? await holdCeiling(d, result) : { state: result, note: null };
+      states.set(d.id, held.state);
+      uns.update(d, held.state);
+      if (PLAY_STARTS.has(action) && held.watch) watchCeiling(d);
+      if (action === 'stop' || action === 'pause') stopWatch(d.id); // no film is starting, so nothing to watch for
+      const note = action === 'volume' && body.args?.level > args.level ? `Volume stops at ${args.level}, this device’s ceiling.`
+        : held.watch ? [held.note, watchWords(d)].filter(Boolean).join(' ') : held.note;
+      return { ok: true, id, state: held.state, ...(note ? { note } : {}) };
     } catch (e) {
       const err = e instanceof IotError ? e : new IotError('no-answer', NO_ANSWER);
-      if (err.code === 'no-answer' && body?.device) { const d = S.devices.find(x => x.id === body.device); if (d && d.status === 'ok') { d.status = 'offline'; save(); uns.death(d); } }
-      return { ok: false, id, code: err.code, error: scrub(err.message, secretValues()), status: err.status };
+      // Only a device that could not be reached is marked offline: one that took the connection and answered late,
+      // or answered No, is still there.
+      if (err.code === 'no-answer' && err.reason !== 'timeout' && body?.device) { const d = S.devices.find(x => x.id === body.device); if (d && d.status === 'ok') { d.status = 'offline'; save(); uns.death(d); } }
+      return { ok: false, id, code: err.code, error: scrub(err.message, secretValues()), status: err.status, ...(err.reason === 'timeout' ? { reason: 'timeout' } : {}) };
     }
   }
 
@@ -2090,7 +2277,7 @@ export function createIot(o, deps = {}) {
     aiPending.delete(String(token));
     if (!p || p.candidate !== c.id || now() - p.at > 5 * 60e3) throw new IotError('refused', 'Confirm the exact text again before it is sent.');
     const r = await netx.request({ method: 'POST', url: cfg.aiUrl, purpose: 'ai', tls: { mode: 'system', ca: deps.aiCa }, headers: { Authorization: `Bearer ${cfg.aiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: cfg.aiModel || undefined, messages: [{ role: 'user', content: p.text }], max_tokens: 200 }), timeout: 20000 });
+      body: JSON.stringify({ model: cfg.aiModel || undefined, messages: [{ role: 'user', content: p.text }], max_tokens: 200 }), timeout: WAITS.ai });
     if (r.status !== 200) throw new IotError('no-answer', 'The AI service did not answer.');
     const j = JSON.parse(r.body.toString('utf8'));
     const answer = cleanText(j.choices?.[0]?.message?.content ?? j.content?.[0]?.text ?? '', 600);
@@ -2117,13 +2304,17 @@ export function createIot(o, deps = {}) {
       st.recent.unshift({ topic, at: iso(), retain, bytes: Buffer.byteLength(payload) }); st.recent.length = Math.min(st.recent.length, 20);
     };
     const visible = d => d.protocol !== 'hue-clip2';
+    // Online is what a read said. Until the bridge has read a device since it started it is not known (null, as for
+    // the other values), not "online"; a device marked offline or moved is false.
+    // A read that could not say (a Samsung TV) leaves it not known; a device VM marked offline is false.
+    const onlineOf = (d, s) => (typeof s?.online === 'boolean' ? s.online : d.status === 'ok' ? null : false);
     const metrics = (d, s) => {
       const t = now();
-      return [{ name: 'Online', datatype: SP_TYPES.Boolean, value: s ? s.online !== false : d.status === 'ok', timestamp: t }, { name: 'Power', datatype: SP_TYPES.Boolean, value: s?.power ?? null, timestamp: t },
+      return [{ name: 'Online', datatype: SP_TYPES.Boolean, value: onlineOf(d, s), timestamp: t }, { name: 'Power', datatype: SP_TYPES.Boolean, value: s?.power ?? null, timestamp: t },
         { name: 'Brightness', datatype: SP_TYPES.Int32, value: s?.brightness ?? null, timestamp: t }, { name: 'Volume', datatype: SP_TYPES.Int32, value: s?.volume ?? null, timestamp: t },
         { name: 'Playback', datatype: SP_TYPES.String, value: s?.playback ?? null, timestamp: t }, { name: 'Kind', datatype: SP_TYPES.String, value: d.kind, timestamp: t }];
     };
-    const jsonState = (d, s) => JSON.stringify({ online: s ? s.online !== false : d.status === 'ok', power: s?.power ?? null, brightness: s?.brightness ?? null, volume: s?.volume ?? null, playback: s?.playback ?? null, kind: d.kind, name: d.name, at: iso() });
+    const jsonState = (d, s) => JSON.stringify({ online: onlineOf(d, s), power: s?.power ?? null, brightness: s?.brightness ?? null, volume: s?.volume ?? null, playback: s?.playback ?? null, kind: d.kind, name: d.name, at: iso() });
     const last = new Map();
     function nbirth() {
       st.seq = 0; st.lastBirth = now();
@@ -2173,7 +2364,10 @@ export function createIot(o, deps = {}) {
         else if (x?.name === 'Brightness') cmd = { action: 'brightness', args: { level: Number(x.value) } };
         else if (x?.name === 'Volume') cmd = { action: 'volume', args: { level: Number(x.value) } };
       }
-      if (dev && cmd) command({ v: 1, id: 'broker', device: dev.id, action: cmd.action, args: cmd.args }, { from: 'broker' }).then(r => { if (!r.ok) log(`Broker command refused: ${r.error}`); });
+      if (dev && cmd) command({ v: 1, id: 'broker', device: dev.id, action: cmd.action, args: cmd.args }, { from: 'broker' }).then(r => {
+        logRequest({ from: 'broker', request: jsonOn() && topic.endsWith('/set') ? 'MQTT …/set' : 'Sparkplug DCMD', device: dev.id, action: knownAction(cmd.action), result: logResult(r.ok ? 200 : r.status || 400, r) });
+        if (!r.ok) log(`Broker command refused: ${r.error}`);
+      });
     }
     /** One MQTT connection to the configured broker (TCP or WebSocket, pinned TLS on wss:// and mqtts://). */
     async function openTransport(onPkt, onClose) {
@@ -2235,22 +2429,27 @@ export function createIot(o, deps = {}) {
       // Without the main connection the bridge is not publishing, so the status link drops too and its will fires.
       closeStatusLink(false);
       st.connected = false; clearInterval(st.ping); st.transport = null;
-      if (st.stopped) return;
+      if (st.stopped) { st.onClosed?.(); return; }
       const wait = Math.min(60e3, 2000 * 2 ** st.retry++);
       st.timer = setTimeout(connect, deps.brokerRetryMs ?? wait); st.timer.unref?.();
     }
     return {
       start: connect,
+      /** Leave the broker cleanly (NDEATH, hermes/status offline, DISCONNECT). The promise settles when the connection
+       *  has closed, or after a second at most, so a bridge stopping with Ctrl-C does not cut its last messages off. */
       stop() {
+        if (st.stopped) return st.stopping || Promise.resolve();
         st.stopped = true; clearTimeout(st.timer); clearInterval(st.ping);
+        st.stopping = new Promise(r => { if (!st.transport) return r(); st.onClosed = r; const t = setTimeout(r, 1000); t.unref?.(); });
         if (st.transport && st.connected) {
           try {
             if (spOn()) pub(spTopic('NDEATH'), spEncode({ timestamp: now(), metrics: [{ name: 'bdSeq', datatype: SP_TYPES.Int64, value: S.broker.bdSeq, timestamp: now() }] }), { qos: 1 });
             if (jsonOn()) pub(`${T0}/hermes/status`, 'offline', { qos: 1, retain: true });
             st.transport.send(mqtt.disconnect()); st.transport.end();
           } catch { /* closing */ }
-        }
+        } else st.transport?.destroy();
         closeStatusLink(true);
+        return st.stopping;
       },
       kill() { st.transport?.destroy(); st.statusLink?.t?.destroy(); },
       birth(d) {
@@ -2354,10 +2553,23 @@ export function createIot(o, deps = {}) {
     lan: { enabled: cfg.lan.enabled, listening: lanState.listening, address: cfg.lan.enabled ? cfg.lan.address : null, port: cfg.lan.port, problem: lanState.problem },
     homeAssistant: { configured: !!cfg.homeAssistant.url, url: cfg.homeAssistant.url ? redact(cfg.homeAssistant.url) : null, tokenSet: !!haToken(), ticked: S.ha.entities.length },
     broker: uns.status(), ai: { enabled: aiOn(), host: aiOn() ? new URL(cfg.aiUrl).host : null }, network: sharedNetwork(), policies: { roku: S.policy.roku },
-    devices: S.devices.length, phones: S.phones.length, now: iso() });
+    devices: S.devices.length, phones: S.phones.length, now: iso(),
+    // How long this bridge waits, in seconds, so the page waits as long: a Y in the bridge window, a TV's own accept
+    // after it, and a command (two UPnP actions for play-url, then the volume check after a play starts).
+    waits: { confirm: secs(WAITS.confirm), pair: secs(deps.pairWaitMs || WAITS.pair), command: secs(2 * (deps.upnpActionMs ?? WAITS.upnpAction) + (deps.holdMs ?? WAITS.hold)), ai: secs(WAITS.ai) } });
 
-  async function handle(req, res, send) {
+  async function handle(req, res, sendOn) {
     const origin = req.headers.origin;
+    // Every answer goes into the request log (first run, finding 3), except reading or clearing the log itself.
+    const path0 = String(req.url || '/').replace(/\?.*$/, '');
+    const seen = { device: null, action: null };
+    const send = (code, body, headers) => {
+      if (path0 !== '/iot/log' && path0 !== '/iot/log/clear') {
+        logRequest({ from: body?.code === 'bad-origin' ? 'other-site' : 'page', request: `${cleanText(req.method, 8)} ${logPath(path0)}`,
+          device: seen.device || knownDevice(body?.device?.id ?? body?.device), action: seen.action, result: logResult(code, body) });
+      }
+      return sendOn(code, body, headers);
+    };
     if (!origin || origin === 'null' || !iotOriginList(cfg).includes(origin)) return send(403, { ok: false, code: 'bad-origin', error: 'IoT Connect answers only Vitruvian Manager’s own page and origins named in the bridge’s config file.' });
     const cors = { ...corsHeaders(origin), 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
     if (req.method === 'OPTIONS') { res.writeHead(204, cors); res.end(); return; }
@@ -2372,10 +2584,13 @@ export function createIot(o, deps = {}) {
         if (p === '/iot/phone') return send(200, { ok: true, phones: publicPhones(), lan: { listening: lanState.listening, address: cfg.lan.enabled ? cfg.lan.address : null } }, cors);
         if (p === '/iot/ha/entities') return send(200, { ok: true, entities: await haEntities() }, cors);
         if (p === '/iot/phone/pair') return send(405, { ok: false, code: 'refused', error: 'A pairing code is made only by a click on the Remote tab (POST).' }, cors);
+        if (p === '/iot/log') return send(200, { ok: true, max: REQUEST_LOG_MAX, kept: 'in memory, until the bridge stops or the log is cleared', entries: requestLog }, cors);
         return send(404, { ok: false, code: 'not-found', error: 'No such IoT Connect address.' }, cors);
       }
       if (req.method !== 'POST') return send(405, { ok: false, code: 'refused', error: 'IoT Connect reads with GET and changes with POST.' }, cors);
       const { j } = await jsonBody(req);
+      seen.device = knownDevice(j.device);
+      if (p === '/iot/command') seen.action = knownAction(j.action);
       const ok = (body, code = 200) => send(code, { ok: true, ...body }, cors);
       switch (p) {
         case '/iot/discover': return ok({ candidates: await discover(), network: sharedNetwork() });
@@ -2385,7 +2600,7 @@ export function createIot(o, deps = {}) {
         case '/iot/device': return ok({ device: publicDevice(await updateDevice(j)) });
         case '/iot/pair': return ok(await pair(j));
         case '/iot/command': { const r = await command(j); const { status: code = 200, ...rest } = r; return send(r.ok ? 200 : code, rest, cors); }
-        case '/iot/state': { const d = deviceById(j.device); return ok({ device: d.id, state: await readState(d) }); }
+        case '/iot/state': { const d = deviceById(j.device); const state = await readState(d); return ok({ device: d.id, state, ...(ceilingNotes.has(d.id) ? { note: ceilingNotes.get(d.id) } : {}) }); }
         case '/iot/network': if (j.ownHome === true) { await ask('Mark this network as your own home network?'); S.network = { ownHome: true, at: iso() }; } else if (j.ownHome === false) S.network = { ownHome: false, at: iso() }; else throw new IotError('unsupported', '"ownHome" must be true or false.'); save(); return ok({ network: sharedNetwork() });
         case '/iot/policy': if (j.roku === true) { await ask('Confirm you have read Roku’s policy on ECP commands from third-party platforms?'); S.policy.roku = iso(); } else if (j.roku === false) S.policy.roku = null; else throw new IotError('unsupported', '"roku" must be true or false.'); save(); return ok({ policies: S.policy });
         case '/iot/ha/token': return ok(await haTokenSet(j));
@@ -2393,6 +2608,7 @@ export function createIot(o, deps = {}) {
         case '/iot/hermes/ask': return ok(await hermesAsk(j));
         case '/iot/phone/pair': return ok(phonePairStart());
         case '/iot/phone/revoke': return ok(revoke(j));
+        case '/iot/log/clear': { const cleared = requestLog.length; requestLog.length = 0; return ok({ cleared }); }
         default: return send(404, { ok: false, code: 'not-found', error: 'No such IoT Connect address.' }, cors);
       }
     } catch (e) { return fail(send, e, cors); }
@@ -2402,10 +2618,17 @@ export function createIot(o, deps = {}) {
   let lanServer = null;
   function lanHandler(req, res) {
     const sec = { 'Content-Security-Policy': "default-src 'self'; frame-ancestors 'none'", 'X-Frame-Options': 'DENY', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' };
-    const send = (status, body, type = 'application/json; charset=utf-8') => { res.writeHead(status, { 'Content-Type': type, ...sec }); res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body)); };
+    // A paired phone's requests to /remote/api/* go into the request log (first run, finding 3); the remote's own page,
+    // script and style do not.
+    const seen = { api: false, device: null, action: null };
+    const send = (status, body, type = 'application/json; charset=utf-8') => {
+      if (seen.api) logRequest({ from: 'phone', request: `${cleanText(req.method, 8)} ${logPath(String(req.url || '').replace(/\?.*$/, ''))}`, device: seen.device, action: seen.action, result: logResult(status, body) });
+      res.writeHead(status, { 'Content-Type': type, ...sec }); res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
+    };
     const host = `${cfg.lan.address}:${cfg.lan.port}`;
     if (String(req.headers.host || '') !== host) return send(421, { ok: false, code: 'refused', error: 'Wrong address.' });
     const url = new URL(req.url, `http://${host}`), p = url.pathname;
+    seen.api = p.startsWith('/remote/api/');
     if (!(p === '/remote' || p.startsWith('/remote/'))) return send(404, { ok: false, code: 'not-found', error: 'Not found.' });
     (async () => {
       if (req.method === 'GET' && (p === '/remote' || p === '/remote/')) return send(200, REMOTE_HTML, 'text/html; charset=utf-8');
@@ -2417,6 +2640,8 @@ export function createIot(o, deps = {}) {
       if (req.method === 'POST') { if (String(req.headers['content-type'] || '') !== 'application/json') throw new IotError('wrong-type', 'Send JSON.', 415); raw = await readBody(req); }
       let j = {};
       if (raw) { try { j = JSON.parse(raw); } catch { throw new IotError('bad-request', 'The body is not JSON.', 400); } }
+      seen.device = knownDevice(j?.device);
+      if (p === '/remote/api/command') seen.action = knownAction(j?.action);
       if (req.method === 'POST' && p === '/remote/api/pair') return send(200, { ok: true, ...(await phonePair(j, req)) });
       checkSignature(req, raw, url.pathname + url.search);
       if (req.method === 'GET' && p === '/remote/api/devices') {
@@ -2439,7 +2664,7 @@ export function createIot(o, deps = {}) {
   return {
     handle, inject, discover, command, uns, state: S, net: netx, publicDevice, startLan, lanHandler,
     async start() { if (cfg.lan.enabled) await startLan(); if (cfg.broker) uns.start(); },
-    stop() { uns.stop(); if (lanServer) { lanServer.close(); lanState.listening = false; } for (const t of throttles.values()) clearTimeout(t.timer); },
+    stop() { const done = uns.stop(); if (lanServer) { lanServer.close(); lanServer.closeAllConnections?.(); lanState.listening = false; } for (const t of throttles.values()) clearTimeout(t.timer); for (const w of watches.values()) clearTimeout(w.timer); watches.clear(); return done; },
     lanAddress: () => (lanServer ? lanServer.address() : null),
   };
 }
@@ -2516,6 +2741,27 @@ function remoteApp() {
 export const REMOTE_KEYS = PHONE_KEYS;
 export const remoteScript = () => `"use strict";\nconst KEYMAP_NAMES = ${JSON.stringify(PHONE_KEYS)};\n${sha256.toString()}\n${hmacSha256.toString()}\n(${remoteApp.toString()})();\n`;
 
+/**
+ * One way to stop the bridge, cleanly and once: Ctrl-C (in the bridge window's Y/N prompt or not) closes the page's
+ * servers on both loopback addresses, the phone remote and the broker link (NDEATH, hermes/status offline,
+ * DISCONNECT), says so, and exits. A second Ctrl-C while that is under way exits at once.
+ */
+export function makeStop({ servers = [], iot = null, confirm = null, say = t => console.log(t), exit = c => process.exit(c), graceMs = 3000 } = {}) {
+  let stopping = false;
+  return async () => {
+    if (stopping) return exit(130);
+    stopping = true;
+    say('\nStopping the bridge…');
+    try { confirm?.close?.(); } catch { /* already closed */ }
+    const closing = servers.map(s => new Promise(r => { if (!s.listening) return r(); s.close(() => r()); s.closeAllConnections?.(); }));
+    let timer;
+    await Promise.race([Promise.all([...closing, iot ? iot.stop() : null]), new Promise(r => { timer = setTimeout(r, graceMs); })]);
+    clearTimeout(timer);
+    say('The bridge has stopped.');
+    exit(0);
+  };
+}
+
 const HELP = `Vitruvian Manager bridge ${VERSION}: local relay for the Vitruvian Manager SIGINT Dashboard, and IoT Connect.
 Usage: node prp-bridge.mjs [--port ${DEFAULT_PORT}] [--route name=URL ...] [--origin URL ...] [--config bridge.json] [--no-public] [--quiet]
                            [--iot] [--iot-origin URL ...] [--state FILE] [--lan]
@@ -2533,14 +2779,19 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   try { o = parseArgs(process.argv.slice(2), process.env); } catch (e) { console.error(e.message); process.exit(2); }
   if (o.help) { console.log(HELP); process.exit(0); }
   const deps = {};
-  if (o.iot.enabled) deps.confirm = consoleConfirm();
+  let stop = () => process.exit(130);
+  if (o.iot.enabled) deps.confirm = consoleConfirm(process.stdin, process.stdout, { onInterrupt: () => stop() });
   let server;
   try { server = createBridge(o, deps); } catch (e) { console.error(`IoT Connect: ${e.message}`); process.exit(2); }
   server.on('error', e => { console.error(e.code === 'EADDRINUSE' ? `Port ${o.port} is in use: is another bridge running? For SIGINT alone, try --port ${o.port + 1 === DEFAULT_LAN_PORT ? o.port + 2 : o.port + 1}; IoT Connect needs ${DEFAULT_PORT}, the only port its page may call.` : e.message); process.exit(1); });
   // Also answer on IPv6 loopback, where "localhost" may resolve first; skip quietly if the machine has no ::1.
-  const v6 = createBridge({ ...o, quiet: true }, { ...deps, iot: server.iot });
+  // It logs its requests in this window as the IPv4 one does: browsers often reach "localhost" here first, and on
+  // 14 November 2026 a quiet copy left the window silent for every request the page made (first run, finding 3).
+  const v6 = createBridge(o, { ...deps, iot: server.iot });
   v6.on('error', () => {});
   v6.listen(o.port, '::1');
+  stop = makeStop({ servers: [server, v6], iot: server.iot || null, confirm: deps.confirm });
+  process.on('SIGINT', () => stop());
   server.listen(o.port, '127.0.0.1', async () => {
     console.log(`Vitruvian Manager bridge ${VERSION} on http://localhost:${o.port} (loopback only)`);
     for (const [k, v] of Object.entries(o.routes)) console.log(`  /local/${k.padEnd(6)} → ${redact(v)}`);

@@ -1,12 +1,12 @@
 // IoT Connect · Devices: look for devices or type one address, Hermes's finding for each answer, Add behind the
 // ownership tick, your devices by room with their controls, Roku's policy and Home Assistant. Device text is shown as
 // text only. Every change is a POST sent by a click, and setup steps wait for Y in the bridge window.
-import { h, fill, say, busy } from './dom.js';
-import { TYPED_KINDS, kindLabel, protocolLabel, statusWord, typedAddress, byRoom, canList, commandBody, stateLine } from '../lib/model.js';
+import { h, fill, say, busy, waiting } from './dom.js';
+import { TYPED_KINDS, kindLabel, protocolLabel, statusWord, typedAddress, byRoom, canList, commandBody, stateLine, seekSeconds } from '../lib/model.js';
 import { TICK_OWNED, TICK_HOME, SHARED, SHORT } from '../lib/words.js';
 
 const NEEDS_PAIRING = new Set(['hue-clip2', 'lg-webos', 'samsung-tizen']);
-const WAIT = 'Waiting for Y in the bridge window…';
+const WAIT = 'Waiting for your answer in the bridge window: type Y there and press Enter.';
 
 export function create(ctx, panel) {
   const $ = s => panel.querySelector(s);
@@ -15,6 +15,14 @@ export function create(ctx, panel) {
   fill($('#typed-kind'), TYPED_KINDS.map(([v, l]) => h('option', { value: v }, l)));
   $('#own-home-words').textContent = TICK_HOME;
   $('#ha-warn').textContent = SHORT.haSwitch;
+
+  /** A step that waits for Y in the bridge window: it says so, counting down the bridge's own seconds, until the
+      bridge answers. The page waits as long as the bridge does (its /iot/status `waits`), so the answer shown is the
+      bridge's: done, answered No, or no answer in time. */
+  async function withY(line, job, then = '') {
+    const stop = waiting(line, then ? `${WAIT} ${then}` : WAIT, ctx.client.waits.confirm);
+    try { return await job(); } finally { stop(); }
+  }
 
   /* ---- Look for devices, or one typed address ---- */
   const findSay = $('#find-say');
@@ -43,8 +51,7 @@ export function create(ctx, panel) {
   const ownHome = $('#own-home'), ownSave = $('#own-home-save');
   ownHome.addEventListener('change', () => { ownSave.disabled = !ownHome.checked; });
   ownSave.addEventListener('click', busy(ownSave, async () => {
-    say(findSay, WAIT);
-    try { const j = await ctx.client.post('/iot/network', { ownHome: true }); ctx.network = j.network; ctx.emit('candidates'); say(findSay, 'Marked as your own home network.', 'good'); }
+    try { const j = await withY(findSay, () => ctx.client.post('/iot/network', { ownHome: true }, { wait: 'confirm' })); ctx.network = j.network; ctx.emit('candidates'); say(findSay, 'Marked as your own home network.', 'good'); }
     catch (e) { say(findSay, e.message, 'bad'); }
   }));
 
@@ -52,8 +59,7 @@ export function create(ctx, panel) {
   const rokuTick = $('#roku-tick'), rokuSave = $('#roku-save');
   rokuTick.addEventListener('change', () => { rokuSave.disabled = !rokuTick.checked; });
   rokuSave.addEventListener('click', busy(rokuSave, async () => {
-    say($('#roku-say'), WAIT);
-    try { await ctx.client.post('/iot/policy', { roku: true }); await ctx.read('status'); say($('#roku-say'), 'The Roku route is on.', 'good'); }
+    try { await withY($('#roku-say'), () => ctx.client.post('/iot/policy', { roku: true }, { wait: 'confirm' })); await ctx.read('status'); say($('#roku-say'), 'The Roku route is on.', 'good'); }
     catch (e) { say($('#roku-say'), e.message, 'bad'); }
   }));
 
@@ -86,9 +92,8 @@ export function create(ctx, panel) {
     tick.addEventListener('change', () => { add.disabled = !tick.checked || locked; });
     add.addEventListener('click', busy(add, async () => {
       if (!tick.checked) return;
-      say(line, WAIT);
       try {
-        await ctx.client.post('/iot/add', { candidate: c.id, owned: true, name: name.value.trim() || undefined, room: room.value.trim() || undefined });
+        await withY(line, () => ctx.client.post('/iot/add', { candidate: c.id, owned: true, name: name.value.trim() || undefined, room: room.value.trim() || undefined }, { wait: 'confirm' }));
         await ctx.read('devices', 'candidates', 'status');
       } catch (e) { say(line, e.message, 'bad'); tick.checked = false; add.disabled = true; }
     }));
@@ -120,7 +125,7 @@ export function create(ctx, panel) {
     const line = $(`[data-answer="${CSS.escape(d.id)}"]`);
     say(line, 'Sending…');
     try {
-      const j = await ctx.client.post('/iot/command', commandBody(d, action, args));
+      const j = await ctx.client.post('/iot/command', commandBody(d, action, args), { wait: 'command' });
       const dev = ctx.devices.find(x => x.id === d.id);
       if (dev) dev.state = j.state || dev.state;
       const st = $(`[data-state="${CSS.escape(d.id)}"]`); if (st) st.textContent = stateLine(j.state);
@@ -135,6 +140,8 @@ export function create(ctx, panel) {
       h('p', { class: 'card-meta mono' }, [kindLabel(d.kind), protocolLabel(d.protocol), d.address].filter(Boolean).join(' · ')),
       h('p', { class: 'state', dataset: { state: d.id } }, stateLine(d.state)));
     for (const n of d.notes || []) li.append(h('p', { class: 'hint' }, n));
+    // What the bridge did about the volume after the last play had answered (first run, finding 8).
+    if (d.ceilingNote) li.append(h('p', { class: 'hint', dataset: { ceiling: d.id } }, d.ceilingNote));
     const rows = [];
     if (A.has('power')) rows.push([control(d, 'On', 'power', { on: true }), control(d, 'Off', 'power', { on: false })]);
     if (A.has('toggle')) rows.push([control(d, 'Toggle', 'toggle')]);
@@ -146,6 +153,17 @@ export function create(ctx, panel) {
     if (A.has('play-url')) { const u = h('input', { class: 'prp-input mono', type: 'url', placeholder: 'http://192.168.1.10:8200/film.mp4', maxlength: 2048, 'aria-label': `Address for ${d.name} to play` }); rows.push([u, control(d, 'Play address', 'play-url', () => ({ url: u.value.trim() }))]); }
     const play = ['play', 'pause', 'stop'].filter(a => A.has(a));
     if (play.length) rows.push(play.map(a => control(d, a[0].toUpperCase() + a.slice(1), a)));
+    if (A.has('seek')) {
+      // Seek goes the way Play and Pause go: one of the device's own fixed actions, to a device that was added.
+      const at = h('input', { class: 'prp-input mono seek-at', inputmode: 'numeric', placeholder: '1:30', maxlength: 8, 'aria-label': `Position for ${d.name} to go to: minutes:seconds, or hours:minutes:seconds` });
+      const b = h('button', { type: 'button', class: 'prp-btn sm', dataset: { action: 'seek' } }, 'Seek');
+      b.addEventListener('click', busy(b, async () => {
+        const seconds = seekSeconds(at.value);
+        if (seconds == null) { say($(`[data-answer="${CSS.escape(d.id)}"]`), 'Type the position to go to, such as 1:30 (minutes and seconds) or 1:02:05.', 'bad'); return; }
+        await send(d, 'seek', { seconds });
+      }));
+      rows.push([at, b, h('span', { class: 'hint inline' }, 'From the start of what is playing')]);
+    }
     if (A.has('launch')) { const l = h('input', { class: 'prp-input mono', maxlength: 64, placeholder: d.protocol === 'roku-ecp' ? 'Channel number, e.g. 12' : 'App id, e.g. netflix', 'aria-label': `Channel or app for ${d.name}` }); rows.push([l, control(d, 'Open', 'launch', () => ({ app: l.value.trim() }))]); }
     if (A.has('key')) rows.push([h('button', { type: 'button', class: 'linkish', dataset: { goto: 'remote' } }, 'Open the Remote tab for its arrow keys')]);
     if (d.protocol === 'home-assistant' && String(d.entity || '').startsWith('remote.')) rows.push((d.commands || []).map(cmd => control(d, cmd, 'ha', { domain: 'remote', service: 'send_command', entity: d.entity, command: cmd })));
@@ -157,9 +175,8 @@ export function create(ctx, panel) {
       const b = h('button', { type: 'button', class: 'prp-btn sm primary', dataset: { action: 'pair' } }, d.protocol === 'hue-clip2' ? 'Continue' : 'Pair');
       b.addEventListener('click', busy(b, async () => {
         const line = $(`[data-answer="${CSS.escape(d.id)}"]`);
-        say(line, `${WAIT} ${d.protocol === 'lg-webos' || d.protocol === 'samsung-tizen' ? 'Then accept on the TV screen.' : ''}`);
         try {
-          const j = await ctx.client.post('/iot/pair', { device: d.id, ...(pw ? { password: pw.value } : {}) });
+          const j = await withY(line, () => ctx.client.post('/iot/pair', { device: d.id, ...(pw ? { password: pw.value } : {}) }, { wait: 'pair' }), d.protocol === 'lg-webos' || d.protocol === 'samsung-tizen' ? 'Then accept on the TV screen.' : '');
           if (pw) pw.value = '';
           await ctx.read('devices');
           say($(`[data-answer="${CSS.escape(d.id)}"]`), j.lights ? `Paired: ${j.lights.length} lights added.` : 'Paired.', 'good');
@@ -171,7 +188,7 @@ export function create(ctx, panel) {
     const readBtn = h('button', { type: 'button', class: 'prp-btn sm ghost' }, 'Read state');
     readBtn.addEventListener('click', busy(readBtn, async () => {
       const line = $(`[data-answer="${CSS.escape(d.id)}"]`);
-      try { const j = await ctx.client.post('/iot/state', { device: d.id }); $(`[data-state="${CSS.escape(d.id)}"]`).textContent = stateLine(j.state); say(line, 'Read.', 'good'); }
+      try { const j = await ctx.client.post('/iot/state', { device: d.id }, { wait: 'command' }); $(`[data-state="${CSS.escape(d.id)}"]`).textContent = stateLine(j.state); say(line, j.note ? `Read. ${j.note}` : 'Read.', 'good'); }
       catch (e) { say(line, e.message, 'bad'); }
     }));
     const rm = h('button', { type: 'button', class: 'prp-btn sm ghost danger' }, 'Remove');
@@ -197,8 +214,7 @@ export function create(ctx, panel) {
     e.preventDefault();
     const input = $('#ha-token'), token = input.value.trim();
     if (!token) { say($('#ha-say'), 'Paste the long-lived token first.', 'bad'); return; }
-    say($('#ha-say'), WAIT);
-    try { await ctx.client.post('/iot/ha/token', { token }); say($('#ha-say'), 'The bridge has the token and checked it once.', 'good'); await ctx.read('status', 'ha'); }
+    try { await withY($('#ha-say'), () => ctx.client.post('/iot/ha/token', { token }, { wait: 'confirm' })); say($('#ha-say'), 'The bridge has the token and checked it once.', 'good'); await ctx.read('status', 'ha'); }
     catch (err) { say($('#ha-say'), err.message, 'bad'); }
     finally { input.value = ''; }
   }));
@@ -214,8 +230,9 @@ export function create(ctx, panel) {
       const cmds = e.domain === 'remote' ? h('input', { class: 'prp-input mono', placeholder: 'tv_power, tv_volume_up', 'aria-label': `Commands for ${e.name}, separated by commas` }) : null;
       const line = h('span', { class: 'say' });
       tick.addEventListener('change', async () => {
-        say(line, tick.checked ? WAIT : '');
-        try { await ctx.client.post('/iot/ha/tick', { entity: e.entity, on: tick.checked, ...(cmds ? { commands: cmds.value.split(',').map(x => x.trim()).filter(Boolean) } : {}) }); say(line, tick.checked ? 'Ticked.' : 'Off.', 'good'); await ctx.read('devices', 'status'); }
+        say(line, '');
+        const post = () => ctx.client.post('/iot/ha/tick', { entity: e.entity, on: tick.checked, ...(cmds ? { commands: cmds.value.split(',').map(x => x.trim()).filter(Boolean) } : {}) }, { wait: 'confirm' });
+        try { await (tick.checked ? withY(line, post) : post()); say(line, tick.checked ? 'Ticked.' : 'Off.', 'good'); await ctx.read('devices', 'status'); }
         catch (err) { tick.checked = !tick.checked; say(line, err.message, 'bad'); }
       });
       return h('tr', {}, h('td', { class: 'mono' }, e.entity), h('td', {}, e.name), h('td', {}, h('label', { class: 'check' }, tick, h('span', {}, 'Ticked')), line), h('td', {}, cmds || '–'));

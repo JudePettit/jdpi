@@ -17,7 +17,7 @@ export function create(ctx, panel) {
     const d = current();
     if (!d) { say(line, 'Choose a device first.', 'bad'); return; }
     say(line, 'Sending…');
-    try { const j = await ctx.client.post('/iot/command', commandBody(d, action, args)); say(line, j.note ? `Done. ${j.note}` : 'Done.', 'good'); }
+    try { const j = await ctx.client.post('/iot/command', commandBody(d, action, args), { wait: 'command' }); say(line, j.note ? `Done. ${j.note}` : 'Done.', 'good'); }
     catch (e) { say(line, e.message, e.code === 'rate-limited' ? 'warn' : 'bad'); }
   }
   // Vol + and Vol − set a level where the device takes one, so its ceiling holds; other keys go as keys where the

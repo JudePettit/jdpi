@@ -27,6 +27,18 @@ export function say(el, text, tone = '') {
   el.dataset.tone = tone;
 }
 
+/** Say what the page is waiting for, with the seconds left, until the returned function is called. */
+export function waiting(el, words, seconds) {
+  const t0 = Date.now();
+  const tick = () => {
+    const left = Math.max(0, Math.ceil(seconds - (Date.now() - t0) / 1000));
+    say(el, `${words} ${left} second${left === 1 ? '' : 's'} left.`);
+  };
+  tick();
+  const id = setInterval(tick, 1000);
+  return () => clearInterval(id);
+}
+
 /** An SVG element (for the QR code). */
 export function svg(tag, attrs = {}) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);

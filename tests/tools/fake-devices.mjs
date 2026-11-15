@@ -72,7 +72,11 @@ function wsServe(server, pathTest, onOpen) {
 }
 
 /* ---- UPnP AV renderer (the EZCast U02, a hostile generic renderer, Sonos) ------------------------------------------------ */
-export async function fakeUpnp({ description, pause = true, volume = 20 } = {}) {
+/** A DLNA player. Built from UPnP AV's published forms (AVTransport:1, RenderingControl:1), never from a recording of a
+ *  real device. `delays` holds an action's reply back (ms), as a player that fetches a film before answering Play does;
+ *  `faults` answers an action with a SOAP fault and that UPnP errorCode; `onPlay` makes Play report TRANSITIONING for
+ *  `startMs` before PLAYING, and then raise the player's own volume to `raiseTo` `raiseAfterMs` later. */
+export async function fakeUpnp({ description, pause = true, volume = 20, delays = {}, faults = {}, onPlay = null } = {}) {
   const calls = [], st = { transport: 'STOPPED', volume, mute: false, uri: null, meta: null };
   const scpd = `<?xml version="1.0"?><scpd xmlns="urn:schemas-upnp-org:service-1-0"><actionList>${['SetAVTransportURI', 'Play', 'Stop', 'Seek', 'GetTransportInfo', ...(pause ? ['Pause'] : [])].map(a => `<action><name>${a}</name></action>`).join('')}</actionList></scpd>`;
   const server = createServer(async (req, res) => {
@@ -83,10 +87,16 @@ export async function fakeUpnp({ description, pause = true, volume = 20 } = {}) 
       const action = /#(\w+)"?$/.exec(req.headers.soapaction || '')?.[1];
       const arg = n => (new RegExp(`<${n}>([\\s\\S]*?)</${n}>`).exec(body) || [])[1];
       calls.push({ action, body, soapaction: req.headers.soapaction, path: req.url });
+      if (delays[action]) await new Promise(r => setTimeout(r, delays[action]));
+      if (faults[action]) { res.writeHead(500, { 'Content-Type': 'text/xml; charset="utf-8"' }); return res.end(`<?xml version="1.0"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><s:Fault><faultcode>s:Client</faultcode><faultstring>UPnPError</faultstring><detail><UPnPError xmlns="urn:schemas-upnp-org:control-1-0"><errorCode>${faults[action]}</errorCode><errorDescription>Action failed</errorDescription></UPnPError></detail></s:Fault></s:Body></s:Envelope>`); }
       let out = '';
       if (action === 'Pause' && !pause) { res.writeHead(500, { 'Content-Type': 'text/xml' }); return res.end('<s:Envelope><s:Body><s:Fault><detail><UPnPError><errorCode>401</errorCode></UPnPError></detail></s:Fault></s:Body></s:Envelope>'); }
       if (action === 'SetAVTransportURI') { st.uri = arg('CurrentURI'); st.meta = arg('CurrentURIMetaData'); }
-      else if (action === 'Play') st.transport = 'PLAYING';
+      else if (action === 'Play') {
+        const { startMs = 0, raiseTo = null, raiseAfterMs = 0 } = onPlay || {};
+        const playing = () => { st.transport = 'PLAYING'; if (raiseTo != null) { if (raiseAfterMs) setTimeout(() => { st.volume = raiseTo; }, raiseAfterMs); else st.volume = raiseTo; } };
+        if (startMs) { st.transport = 'TRANSITIONING'; setTimeout(playing, startMs); } else playing();
+      }
       else if (action === 'Pause') st.transport = 'PAUSED_PLAYBACK';
       else if (action === 'Stop') st.transport = 'STOPPED';
       else if (action === 'SetVolume') st.volume = Number(arg('DesiredVolume'));

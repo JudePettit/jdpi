@@ -135,7 +135,7 @@ test('review: after a question times out, the bridge window names the next step 
     const first = ask('Add Desk lamp, 192.168.1.40, WiZ?');
     await new Promise(r => setImmediate(r));
     mock.timers.tick(60e3);
-    assert.equal(await first, false, 'no answer in 60 seconds is No');
+    assert.equal(await first, 'timeout', 'no answer in 60 seconds is No, and says it ran out');
     shown = '';
     const second = ask('Pair Living-room TV, 192.168.1.31, LG webOS?');
     await new Promise(r => setImmediate(r));

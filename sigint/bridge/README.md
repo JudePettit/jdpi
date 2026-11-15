@@ -46,7 +46,7 @@ and tick **Through the bridge** in each tab that should use it.
 | `--origin URL` | Allow another web origin (defaults: `https://jdpi.pages.dev`, `http://localhost:*`, `http://127.0.0.1:*`). |
 | `--config file.json` | `{ "port": 8790, "routes": { "adsb": "…" }, "origins": [], "public": true }` |
 | `--no-public` | Turn off the public relays (adsb.lol, OpenSky). |
-| `--quiet` | No request log. |
+| `--quiet` | No request lines in this window. IoT Connect's request log (below) is still kept in memory for the page. |
 | `AISSTREAM_API_KEY` | Environment variable with your aisstream.io key (or let the Ships tab send it). |
 | `--iot` | Switch on IoT Connect (below). Setup steps then ask **Y** in this window, so start it from a terminal. |
 | `--iot-origin URL` | Allow another page origin for `/iot/*`: an exact origin, no wildcard, no path. The default is `https://jdpi.pages.dev` only. |
@@ -124,6 +124,12 @@ Written by you; the bridge only reads it, and the page can change none of it.
 - **Ownership.** A device is added only with the tick "This device is mine, or I have its owner's permission to control
   it" and **Y** here. More than 3 TVs, 10 players or 25 devices, or a Public Windows profile, means "This looks like a
   shared network": kinds that need no pairing then wait for "This is my own home network".
+- **The Y/N question** waits 60 seconds and says so ("… Y/N (60 seconds)"); the page waits as long, counting down,
+  and then shows the bridge's own answer: done, answered No, or no answer in time. One question at a time: a step that
+  comes while one is open is refused at once with "The bridge window is already asking another question". Every line
+  typed here gets an answer: a Y typed before a question appears, or after its 60 seconds, is told that it was not
+  used, and nothing changes. **Ctrl-C stops the bridge** (once, even while it asks): it closes its servers, the phone
+  remote and the broker link, and prints "The bridge has stopped."
 - **Hermes Messenger** names each answer from fixed rules: what it is, how its maker says to connect it, which route VM
   uses and what VM cannot do (Miracast, AirPlay, Google Cast, infrared, Bluetooth). Unknown DLNA players can be added
   as generic ones.
@@ -133,6 +139,16 @@ Written by you; the bridge only reads it, and the page can change none of it.
   (`turn_on`/`turn_off`/`toggle` for lights and switches; play, pause, stop, volume, mute and power for media players;
   `remote.send_command` with the commands you listed). At most 2 power or colour changes a second and 60 a minute per
   device (extras collapse into the latest), Home Assistant lights and switches included; volume stops at the ceiling.
+  A player may raise its own volume when a film starts, so after **Play address** or **Play** VM reads the volume back
+  until the player says it is playing (at most 10 seconds), brings it down to the ceiling, then reads it again every
+  10 seconds for 30 seconds (and at any **Read state** in that time; **Stop** or **Pause** ends it), and says so: in the
+  play's answer, in this window, and on the device's card the next time the page reads the devices. A rise after those
+  30 seconds is not caught, and the play's answer says so. Where it cannot read or set a device's volume (a Roku, a
+  Samsung TV), it says the ceiling cannot be held rather than claiming it. A UPnP action may take up to 30 seconds to answer (UPnP Device Architecture 1.1,
+  §3.2.1), and a player that fetches a film before it answers Play needs that; other devices get 4 seconds. The answers
+  differ: "No answer from that device." (nothing took the connection: it is marked offline), "That device did not
+  answer within 30 seconds. It may still have done it" (`reason: "timeout"`, not marked offline), and "The player
+  refused that command" (it answered No).
   A Shelly with a password answers HTTP 401 with a `WWW-Authenticate: Digest` challenge, which VM answers with an
   `Authorization: Digest` header (SHA-256, `POST:/rpc`), as Shelly documents. A Tasmota's password travels in the
   address of each request, so before each one VM checks the network card address this computer's neighbour table
@@ -140,11 +156,21 @@ Written by you; the bridge only reads it, and the page can change none of it.
 - **The UNS link**: one connection to your broker. The JSON tree is retained JSON at `vm/<site>/<area>/<device>/state`
   and `vm/<site>/hermes/status` (`online`, or `offline` by the will; with Sparkplug also on, the status has its own
   small connection, client id ending `-s`, because MQTT allows one will per connection and the main one's is NDEATH).
-  Two devices with the same name in one room get `-2`, `-3` on their topic. Sparkplug B: Hermes is edge node
+  Each device's `online` (and Sparkplug's `Online`) is what a read said: `null` (not known) until the bridge has
+  read the device since it started, never `true` before. Two devices with the same name in one room get `-2`, `-3` on their topic. Sparkplug B: Hermes is edge node
   `spBv1.0/<group>/…/<edgeNode>`; NDEATH is the will (QoS 1) with `bdSeq`, NBIRTH repeats it with
   `Node Control/Rebirth = false`, each device has a DBIRTH, DDATA and DDEATH (metrics `Online`, `Power`, `Brightness`,
   `Volume`, `Playback`, `Kind`), `seq` runs 0–255, and a Rebirth is honoured at most every 10 seconds.
 - **The phone remote** (`--lan`): see below.
+- **The request log.** The bridge keeps its last 200 requests on `/iot/*` (from the page) and `/remote/api/*` (from a
+  paired phone), and the commands it ran for the broker, newest first, **in its own memory only**: nothing is written to
+  a file, and it is gone when the bridge stops. Each entry is the time, where it came from (`page`, `phone`, `broker`,
+  or `other-site` for a refused origin), the request (method and fixed path), the device's id (for a Home Assistant
+  entity, a short hash of it, since an entity's id may name a room or a person) and the action where there is one, and the result (`ok`, `timeout`, or the refusal's code). It never holds a body, an address, a name, a room, a
+  query string, a phone's id or a secret. Read it on IoT Connect's Overview tab (**Show the log**) or at `GET /iot/log`;
+  clear it with **Clear the log** there, `POST /iot/log/clear`, or by stopping the bridge. Each command also prints one
+  line in this window ("Command from the page: pause to upnp-…: ok"), and every request its method, path, status and
+  time, on both loopback addresses, unless the bridge was started with `--quiet`.
 
 ### Endpoints (`/iot/*`, on `localhost:8790`)
 
@@ -154,13 +180,14 @@ Every answer is JSON with `ok`; a refusal is `{ "ok": false, "code": "…", "err
 
 | Method and path | Body | Answer |
 |---|---|---|
-| `GET /iot/status` | | `enabled`, `version`, `features`, `interface`, `policy`, `console` (whether this window can ask Y), `lan`, `homeAssistant` (`configured`, `url`, `tokenSet`, `ticked`), `broker`, `ai`, `network` (`shared`, `reasons`, `ownHome`, `words`), `policies.roku`, `devices`, `phones`, `now` |
+| `GET /iot/status` | | `enabled`, `version`, `features`, `interface`, `policy`, `console` (whether this window can ask Y), `lan`, `homeAssistant` (`configured`, `url`, `tokenSet`, `ticked`), `broker`, `ai`, `network` (`shared`, `reasons`, `ownHome`, `words`), `policies.roku`, `devices`, `phones`, `now`, `waits` (seconds the bridge waits: `confirm`, `pair`, `command`, `ai`) |
 | `GET /iot/devices` | | `devices`: device records without their secrets, with `paired` and the last `state` |
 | `GET /iot/candidates` | | `candidates` (each with `known`, `label`, `canAdd`, `generic`, `announcement` and Hermes's `finding`), `network` |
 | `GET /iot/hermes` | | `agent: "Hermes Messenger"`, `rules`, `findings` (Hub messages), `ai` |
 | `GET /iot/uns` | | the broker link: `configured`, `connected`, `url` (no password, no query), `json`, `sparkplug`, `acceptCommands`, `site`, `group`, `edgeNode`, `bdSeq`, `seq`, `root`, `error`, `recent` (last 20 topics), `limits` |
 | `GET /iot/phone` | | `phones` (id, name, address, created, expires, expired), `lan` |
 | `GET /iot/ha/entities` | | Home Assistant's lights, switches, media players and remotes, each with `ticked` |
+| `GET /iot/log` | | `entries` (newest first: `at`, `from`, `request`, `device`, `action`, `result`), `max` (200), `kept` |
 | `POST /iot/discover` | `{}` | `candidates`, `network` |
 | `POST /iot/identify` | `{ "kind": "roku", "address": "192.168.1.31" }` | `candidate` |
 | `POST /iot/add` | `{ "candidate", "owned": true, "name"?, "room"? }` | `device` (after Y) |
@@ -176,6 +203,7 @@ Every answer is JSON with `ok`; a refusal is `{ "ok": false, "code": "…", "err
 | `POST /iot/hermes/ask` | `{ "candidate" }`, then `{ "candidate", "confirm" }` | first `preview` (`host`, the exact `text`) and `confirm`; then `finding` (source `ai`) |
 | `POST /iot/phone/pair` | `{}` | `code` (6 digits, 2 minutes, 5 tries), `expiresAt`, `url` for the QR code. A GET is refused. |
 | `POST /iot/phone/revoke` | `{ "phone" }` or `{ "all": true }` | `revoked` |
+| `POST /iot/log/clear` | `{}` | `cleared` (how many entries were removed) |
 
 Actions and their arguments: `power {on}`, `toggle`, `brightness {level 0–100}`, `colour {hex "#rrggbb"}`,
 `colour-temp {kelvin 2000–6500}`, `volume {level 0–ceiling}`, `mute {on}`, `play-url {url: http(s), at most 2 KB}`,
@@ -259,6 +287,8 @@ confirm the exact text.
 - **aisstream.io "closed the connection straight after the subscription":** the key is wrong or revoked.
 
 ## Keep it running (optional)
+
+Stop it with **Ctrl-C** in its window (once); it says "The bridge has stopped." when its servers and broker link are closed.
 
 Linux (systemd user service, `~/.config/systemd/user/prp-bridge.service`):
 

@@ -42,7 +42,7 @@ export function create(ctx, panel) {
           const p = await ctx.client.post('/iot/hermes/ask', { candidate: c.id });
           const send = h('button', { type: 'button', class: 'prp-btn sm primary' }, `Send this to ${p.preview.host}`);
           send.addEventListener('click', busy(send, async () => {
-            try { const r = await ctx.client.post('/iot/hermes/ask', { candidate: c.id, confirm: p.confirm }); fill(out, finding(r.finding)); }
+            try { const r = await ctx.client.post('/iot/hermes/ask', { candidate: c.id, confirm: p.confirm }, { wait: 'ai' }); fill(out, finding(r.finding)); }
             catch (e) { say($('#ai-say'), e.message, 'bad'); }
           }));
           fill(out, h('p', { class: 'prp-label' }, `To ${p.preview.host}, exactly:`), h('pre', { class: 'code' }, p.preview.text), send);

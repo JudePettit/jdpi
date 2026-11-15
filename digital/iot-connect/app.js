@@ -45,6 +45,7 @@ const ctx = {
       if (!(ctx.health.features || []).includes('iot-1')) throw new BridgeError('old', `This bridge is version ${ctx.health.version || 'unknown'}, which has no IoT Connect: download version 2.0.0 or later.`);
       if (!ctx.health.iot?.enabled) throw new BridgeError('iot-off', 'The bridge is running, but IoT Connect is off in it. Start it with --iot.');
       ctx.status = await ctx.client.get('/iot/status');
+      ctx.client.setWaits(ctx.status.waits); // wait as long as this bridge does
       ctx.connected = true;
     } catch (e) {
       ctx.connected = false; ctx.status = null;
@@ -57,7 +58,7 @@ const ctx = {
   async read(...what) {
     if (!ctx.connected) return;
     const jobs = {
-      status: async () => { ctx.status = await ctx.client.get('/iot/status'); },
+      status: async () => { ctx.status = await ctx.client.get('/iot/status'); ctx.client.setWaits(ctx.status.waits); },
       devices: async () => { ctx.devices = (await ctx.client.get('/iot/devices')).devices || []; },
       candidates: async () => { const j = await ctx.client.get('/iot/candidates'); ctx.candidates = j.candidates || []; ctx.network = j.network || null; },
       phones: async () => { const j = await ctx.client.get('/iot/phone'); ctx.phones = j.phones || []; ctx.lan = j.lan || null; },

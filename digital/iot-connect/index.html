@@ -8,6 +8,10 @@
 <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../../design/brand-vm-icon.svg" type="image/svg+xml">
+<!-- The installable app, as on the home page: so the browser offers to install VM from IoT Connect too -->
+<link rel="manifest" href="../../manifest.json">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="VM">
 <link rel="stylesheet" href="../../design/prp.css">
 <link rel="stylesheet" href="iot.css">
 <script src="../../design/prp-bar.js" data-suite="ds" data-module="iot-connect" data-shell="../../" defer></script>
@@ -66,12 +70,23 @@
         </details>
       </div>
     </section>
+    <section class="prp-panel" aria-labelledby="h-log" id="log-panel">
+      <div class="prp-panel-head"><h2 class="prp-h3" id="h-log">The bridge's request log</h2><span class="prp-label" id="log-count"></span></div>
+      <div class="prp-panel-body">
+        <p class="hint" id="log-words"></p>
+        <p class="log-buttons"><button type="button" class="prp-btn sm" id="log-read" disabled>Show the log</button> <button type="button" class="prp-btn sm ghost" id="log-clear" disabled>Clear the log</button> <span class="say" id="log-say" role="status" aria-live="polite"></span></p>
+        <div class="scroll log-scroll"><table class="prp-table" id="log-table" hidden>
+          <thead><tr><th scope="col">Time</th><th scope="col">From</th><th scope="col">Request</th><th scope="col">Device</th><th scope="col">Action</th><th scope="col">Result</th></tr></thead>
+          <tbody id="log-rows"></tbody>
+        </table></div>
+      </div>
+    </section>
     <div class="two">
       <section class="prp-panel" aria-labelledby="h-does">
         <div class="prp-panel-head"><h2 class="prp-h3" id="h-does">What it drives</h2></div>
         <div class="prp-panel-body">
           <ul class="ticks">
-            <li><b>Players:</b> the EZCast U02 and other DLNA players, and Sonos: play an address, pause, stop, set volume.</li>
+            <li><b>Players:</b> EZCast receivers such as the Ultra U2, Anker Nebula projectors and other DLNA players, and Sonos: play an address, pause, stop, seek, set volume.</li>
             <li><b>Lights:</b> Philips Hue, LIFX, WiZ and Yeelight: switch, dim and colour.</li>
             <li><b>Switches:</b> Shelly (second generation and later) and Tasmota.</li>
             <li><b>TVs:</b> Roku, LG webOS and Samsung Tizen: the remote's keys, volume and power.</li>

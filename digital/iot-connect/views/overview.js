@@ -1,6 +1,7 @@
 // IoT Connect · Overview: the bridge switch and its check, the figures that say where things stand, and the limits.
-import { h, fill } from './dom.js';
-import { LIMITS, WHY_BRIDGE } from '../lib/words.js';
+import { h, fill, say, busy } from './dom.js';
+import { LIMITS, WHY_BRIDGE, REQUEST_LOG } from '../lib/words.js';
+import { logRow } from '../lib/model.js';
 
 export function create(ctx, panel) {
   const $ = s => panel.querySelector(s);
@@ -37,7 +38,32 @@ export function create(ctx, panel) {
       kpi('Home Assistant', !s.homeAssistant?.configured ? 'None set' : s.homeAssistant.tokenSet ? `${s.homeAssistant.ticked} ticked` : 'Needs a token', s.homeAssistant?.configured ? 'Only ticked entities reach VM' : 'Set iot.homeAssistant.url'),
       kpi('Phone remote', s.lan?.listening ? `${s.phones} paired` : 'Off', s.lan?.listening ? `On ${s.lan.address}:${s.lan.port}` : s.lan?.problem || 'Start the bridge with --lan', s.lan?.listening ? 'good' : ''));
   }
-  ctx.on(w => { if (['status', 'devices'].includes(w)) render(); });
+  /* ---- The bridge's request log (first run, finding 3): read with GET on a click, cleared with POST on a click ---- */
+  $('#log-words').textContent = REQUEST_LOG;
+  const logRead = $('#log-read'), logClear = $('#log-clear'), logSay = $('#log-say');
+  function showLog(entries) {
+    const rows = (entries || []).map(e => logRow(e, ctx.devices));
+    $('#log-table').hidden = !rows.length;
+    $('#log-count').textContent = `${rows.length} kept`;
+    fill($('#log-rows'), rows.map(r => h('tr', {}, h('td', { class: 'mono' }, r.time), h('td', {}, r.from), h('td', { class: 'mono' }, r.request), h('td', {}, r.device), h('td', {}, r.action),
+      h('td', {}, h('span', { class: `prp-status ${r.tone}` }, r.result)))));
+    say(logSay, rows.length ? '' : 'The log is empty: nothing has reached the bridge since it started or was cleared.');
+  }
+  logRead.addEventListener('click', busy(logRead, async () => {
+    try { showLog((await ctx.client.get('/iot/log')).entries); } catch (e) { say(logSay, e.message, 'bad'); }
+  }));
+  logClear.addEventListener('click', busy(logClear, async () => {
+    try { const j = await ctx.client.post('/iot/log/clear', {}); showLog([]); say(logSay, `Cleared: ${j.cleared} ${j.cleared === 1 ? 'entry' : 'entries'} removed from the bridge’s memory.`, 'good'); }
+    catch (e) { say(logSay, e.message, 'bad'); }
+  }));
+  function renderLog() {
+    logRead.disabled = logClear.disabled = !ctx.connected;
+    if (!ctx.connected) { $('#log-table').hidden = true; $('#log-count').textContent = ''; say(logSay, 'Turn on the bridge above to read its log.'); }
+    else if (logSay.textContent === 'Turn on the bridge above to read its log.') say(logSay, '');
+  }
+
+  ctx.on(w => { if (['status', 'devices'].includes(w)) { render(); renderLog(); } });
+  renderLog();
   render();
   return { show() { render(); } };
 }

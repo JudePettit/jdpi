@@ -86,6 +86,9 @@ code { font-family: var(--prp-font-mono); font-size: .92em; overflow-wrap: anywh
 .ctl-row input[type="range"] { flex: 1 1 140px; min-width: 0; accent-color: var(--prp-primary); }
 .ctl-row input[type="color"] { width: 44px; height: 30px; padding: 0; border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); background: var(--prp-surface); }
 .ctl-row .prp-input { flex: 1 1 160px; min-width: 0; }
+.ctl-row .prp-input.seek-at { flex: 0 1 96px; }
+/* The request log (up to 200 rows) scrolls in its own box rather than lengthening the Overview. */
+.log-scroll { max-height: 420px; overflow: auto; }
 .pair-row { margin-top: 8px; }
 .card-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--prp-line-soft); }
 .ha-token { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin: 8px 0; }

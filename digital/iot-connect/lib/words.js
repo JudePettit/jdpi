@@ -26,7 +26,7 @@ export const SHORT = {
 export const LIMITS = [
   ['Infrared', 'A phone browser has no infrared. A Broadlink blaster through Home Assistant can send the codes you list.'],
   ['Miracast (screen mirroring)', 'No web page or Node program can start it: press Windows key + K on the computer.'],
-  ['The EZCast app, EZAir and AirPlay', 'Undocumented, Apple-only or closed. The EZCast U02 is driven by DLNA only: it plays an address it can fetch, pauses if it supports Pause, and does not mirror.'],
+  ['The EZCast app, EZAir and AirPlay', 'Undocumented, Apple-only or closed. An EZCast receiver such as the Ultra U2 is driven by DLNA only, once it is on your home Wi-Fi in its “Cast from App” mode: it plays an address it can fetch, pauses if it supports Pause, and does not mirror.'],
   ['Bluetooth speakers', 'VM cannot see them: pair them in Windows.'],
   ['Google Cast and Android TV', 'Planned for the second version.'],
   ['Tuya', 'Needs a cloud key, so use Home Assistant.'],
@@ -46,6 +46,9 @@ export const HUB_SECURITY = 'The Hub holds no keys. Hermes Messenger runs in the
 
 /** Where secrets live (design §4.3), for the Law & safety tab. */
 export const STORED = 'Device keys and tokens, the Home Assistant token, the broker password, certificate fingerprints and phone key hashes live only in the bridge’s state file, %APPDATA%\\VM\\bridge\\iot-state.json (or the path given with --state), or in environment variables (VM_HA_TOKEN, VM_MQTT_PASSWORD, VM_AI_KEY). On Windows your user folder’s own permissions protect it, not anything VM sets. Never in this page, the site, its storage or the logs; a phone keeps only its own revocable remote key.';
+
+/** The bridge's request log, as the Overview tab describes it (first run, finding 3). */
+export const REQUEST_LOG = 'The bridge keeps its last 200 requests and the commands it ran, in its own memory only: the time, where each came from (this page, a paired phone or your broker), the request, the device and action, and the result. No addresses, names, rooms or passwords. It is gone when the bridge stops, or when you clear it here.';
 
 /** Why the bridge is needed at all. */
 export const WHY_BRIDGE = 'A website may not reach into your home network, so this page talks to the Vitruvian Manager bridge, the small program you already run for the SIGINT Dashboard. It listens on this computer only (localhost), and IoT Connect is off in it unless you start it with --iot.';

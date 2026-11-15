@@ -62,6 +62,17 @@ export function commandBody(device, action, args) {
   return { v: 1, id: `c-${Date.now().toString(36)}-${(++seq).toString(36)}`, device: device.id, action, ...(a ? { args: a } : {}) };
 }
 
+/** A position to seek to, typed as seconds ("90"), minutes and seconds ("1:30") or hours, minutes and seconds
+    ("1:02:05"), in whole seconds; null if it is none of these or past the bridge's limit of 24 hours. */
+export function seekSeconds(s) {
+  const v = String(s ?? '').trim();
+  if (!/^\d{1,5}(:\d{1,2}){0,2}$/.test(v)) return null;
+  const parts = v.split(':').map(Number);
+  if (parts.slice(1).some(n => n > 59)) return null;
+  const total = parts.reduce((t, n) => t * 60 + n, 0);
+  return total <= 86400 ? total : null;
+}
+
 /** The state a device last reported, as one plain line: "On · 60% · Volume 20 · Playing". */
 export function stateLine(state) {
   if (!state) return 'No state read yet';
@@ -72,6 +83,28 @@ export function stateLine(state) {
   if (Number.isFinite(state.volume)) parts.push(`Volume ${Math.round(state.volume)}`);
   if (state.playback) parts.push(String(state.playback).replace(/^./, c => c.toUpperCase()));
   return parts.length ? parts.join(' · ') : 'No state read yet';
+}
+
+/** One entry of the bridge's request log as the page shows it: the time (this computer's clock), where it came from,
+    the request, the device by the name this page knows it by (else its id), the action and the result, in words. */
+export const LOG_FROM = { page: 'This page', phone: 'Phone remote', broker: 'Broker', 'other-site': 'Another site' };
+export const LOG_RESULT = {
+  ok: 'Done', timeout: 'No answer in time', refused: 'Refused', 'no-answer': 'No answer', unsupported: 'Not taken', 'unknown-device': 'Unknown device',
+  'not-paired': 'Not paired', moved: 'Moved', 'rate-limited': 'Held back (too fast)', 'bad-origin': 'Refused (not this page)', 'not-found': 'No such address',
+  'wrong-type': 'Refused (not JSON)', 'too-large': 'Refused (too large)', 'bad-request': 'Not understood',
+};
+export function logRow(entry, devices = []) {
+  const e = entry || {}, t = Date.parse(e.at);
+  const dev = e.device ? (devices.find(d => d.id === e.device || (d.logId && d.logId === e.device))?.name || e.device) : '–';
+  return {
+    time: Number.isFinite(t) ? new Date(t).toLocaleTimeString('en-GB') : '–',
+    from: LOG_FROM[e.from] || String(e.from || '–'),
+    request: String(e.request || '–'),
+    device: String(dev),
+    action: e.action ? (ACTION_LABEL[e.action] || String(e.action)) : '–',
+    result: LOG_RESULT[e.result] || String(e.result || '–'),
+    tone: e.result === 'ok' ? 'good' : e.result === 'timeout' ? 'warn' : 'bad',
+  };
 }
 
 /** Which actions a remote pad can send to a device: keys, volume, playback. */

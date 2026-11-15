@@ -352,13 +352,29 @@ const NO_ANSWER = 'No answer from that device.';
  *  turns it back down (a rise after that is not caught, and the words say so); ai: Hermes's optional AI question. */
 export const WAITS = { confirm: 60e3, upnpAction: 30e3, pair: 60e3, hold: 10e3, watch: 30e3, ai: 20e3 };
 const secs = ms => Math.round(ms / 1000);
+/** A UPnP action's connection may take this long before its WAITS.upnpAction for the reply begins. */
+export const UPNP_CONNECT_MS = 4000;
+/** The longest command as built, in device calls made one after another, so the page's wait covers it: "Play address"
+ *  to a UPnP player is SetAVTransportURI, Play and a read (GetTransportInfo, GetVolume): `play`, 4. Then the volume
+ *  hold after the play, which ends WAITS.hold after it starts by the real clock, but may by then have begun one more
+ *  read (`read`, 2) and one correction (SetVolume and a read, `lower`, 3). Every other command takes less: fewer
+ *  calls, or calls with shorter limits (a light's change held back by the rate limit waits at most a minute). */
+export const COMMAND_CALLS = { play: 4, read: 2, lower: 3 };
+/** The most a command can take, in milliseconds: each call its connection and its reply, and the hold. */
+export const commandWaitMs = ({ upnpActionMs = WAITS.upnpAction, connectMs = UPNP_CONNECT_MS, holdMs = WAITS.hold } = {}) =>
+  (COMMAND_CALLS.play + COMMAND_CALLS.read + COMMAND_CALLS.lower) * (connectMs + upnpActionMs) + holdMs;
 /** The request log keeps this many entries, newest first, in memory only. */
 export const REQUEST_LOG_MAX = 200;
 /** One request's result in the request log: "ok", "timeout" (the device took it and had not answered in time), or the
  *  refusal's code ("refused", "no-answer", "bad-origin" and the others in the README). */
 export const logResult = (status, body) => (status < 300 && body?.ok !== false ? 'ok' : body?.reason === 'timeout' ? 'timeout' : typeof body?.code === 'string' ? body.code : `http-${status}`);
-/** A request's path as the log keeps it: one of the bridge's own fixed paths, never a query string or other text. */
-const logPath = p => (/^\/(iot|remote)(\/[a-z-]{1,24}){0,3}$/.test(p) ? p : p.startsWith('/remote') ? '/remote/…' : '/iot/…');
+/** The bridge's own endpoints: the only paths the request log ever holds. Any other path (which may be typed text, a
+ *  name, a room or a password) is logged as the fixed words "unknown path", never its text. */
+export const LOG_PATHS = new Set(['/iot/status', '/iot/devices', '/iot/candidates', '/iot/hermes', '/iot/uns', '/iot/phone', '/iot/ha/entities',
+  '/iot/phone/pair', '/iot/discover', '/iot/identify', '/iot/add', '/iot/remove', '/iot/device', '/iot/pair', '/iot/command', '/iot/state',
+  '/iot/network', '/iot/policy', '/iot/ha/token', '/iot/ha/tick', '/iot/hermes/ask', '/iot/phone/revoke', '/iot/log', '/iot/log/clear',
+  '/remote/api/pair', '/remote/api/devices', '/remote/api/command']);
+export const logPath = p => (LOG_PATHS.has(p) ? p : 'unknown path');
 /** A device that took the connection but did not answer within `ms`: not the same as no device there, or a refusal. */
 const lateAnswer = ms => Object.assign(new IotError('no-answer', `That device did not answer within ${secs(ms)} second${secs(ms) === 1 ? '' : 's'}. It may still have done it: read its state to see.`), { reason: 'timeout' });
 export const iotOriginList = cfg => [IOT_ORIGIN, ...((cfg && cfg.origins) || [])];
@@ -1557,7 +1573,8 @@ export function createIot(o, deps = {}) {
   function removeDevice({ device }) {
     const d = deviceById(device);
     const ids = [d.id, ...S.devices.filter(x => x.parent === d.id).map(x => x.id)];
-    for (const id of ids) { const x = S.devices.find(y => y.id === id); if (x) uns.death(x, true); states.delete(id); }
+    // Its volume watch ends too: nothing is read from or sent to a device that is no longer added.
+    for (const id of ids) { const x = S.devices.find(y => y.id === id); if (x) uns.death(x, true); states.delete(id); stopWatch(id); ceilingNotes.delete(id); }
     S.devices = S.devices.filter(x => !ids.includes(x.id));
     if (d.protocol === 'home-assistant') S.ha.entities = S.ha.entities.filter(e => e.entity !== d.entity);
     for (const c of candidates.values()) if (ids.includes(c.deviceId)) { c.deviceId = null; findings.set(c.id, hermesFinding(c, c.rule, iso())); }
@@ -1660,7 +1677,7 @@ export function createIot(o, deps = {}) {
     if (!url) throw new IotError('unsupported', 'This player does not offer that.');
     const service = `urn:schemas-upnp-org:service:${which === 'av' ? 'AVTransport' : 'RenderingControl'}:1`;
     const body = `<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:${action} xmlns:u="${service}">${Object.entries(args).map(([k, v]) => `<${k}>${xmlEscape(v)}</${k}>`).join('')}</u:${action}></s:Body></s:Envelope>`;
-    const r = await netx.request({ method: 'POST', url, headers: { 'Content-Type': 'text/xml; charset="utf-8"', SOAPACTION: `"${service}#${action}"` }, body, timeout: deps.upnpActionMs ?? WAITS.upnpAction, connectTimeout: deps.timeout || 4000 });
+    const r = await netx.request({ method: 'POST', url, headers: { 'Content-Type': 'text/xml; charset="utf-8"', SOAPACTION: `"${service}#${action}"` }, body, timeout: deps.upnpActionMs ?? WAITS.upnpAction, connectTimeout: deps.timeout || UPNP_CONNECT_MS });
     // A SOAP fault (HTTP 500 with a UPnP errorCode) is the player answering No: refused, not "no answer". 401 is
     // UPnP's "Invalid Action" (it does not have that action). Any other status is a reply VM cannot use.
     if (r.status === 500) {
@@ -2156,8 +2173,11 @@ export function createIot(o, deps = {}) {
   const PLAY_STARTS = new Set(['play-url', 'play']);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const ceilingOf = d => d.volumeCeiling ?? 80;
+  // Still added (the owner's tick) and not answered by a different device: the checks after a play send nothing else.
+  const stillOwned = d => S.devices.includes(d) && d.status !== 'moved';
   async function lowerTo(d, ceiling) {
     let s = null;
+    if (!stillOwned(d)) return null;
     try { s = await DRIVERS[d.protocol].command(d, 'volume', { level: ceiling }); } catch { return null; }
     if (!Number.isFinite(s?.volume)) { try { s = await DRIVERS[d.protocol].read(d); } catch { return null; } }
     return s;
@@ -2167,9 +2187,12 @@ export function createIot(o, deps = {}) {
     const ceiling = ceilingOf(d);
     const cannot = { state, note: `VM cannot read ${d.name}’s volume, so it cannot hold the ceiling of ${ceiling} if the device raises its own volume when it plays.`, watch: false };
     if (!d.actions.includes('volume') || !Number.isFinite(state?.volume)) return cannot;
-    const pollMs = deps.holdPollMs ?? 1000, polls = Math.max(1, Math.ceil((deps.holdMs ?? WAITS.hold) / pollMs));
+    // The hold ends WAITS.hold after it starts by the real clock, however slowly the device answers, so the command's
+    // longest path is the one COMMAND_CALLS counts and the page's wait covers.
+    const pollMs = deps.holdPollMs ?? 1000, until = performance.now() + (deps.holdMs ?? WAITS.hold);
     let s = state, raisedTo = null;
-    for (let i = 0; ; i++) {
+    for (;;) {
+      if (!stillOwned(d)) return { state: s, watch: false, note: null }; // removed while the play ran: nothing more is sent
       if (Number.isFinite(s?.volume) && s.volume > ceiling) {
         raisedTo = Math.max(raisedTo ?? 0, s.volume);
         const after = await lowerTo(d, ceiling);
@@ -2180,8 +2203,9 @@ export function createIot(o, deps = {}) {
       }
       // Stop once the player says it is playing (the volume has then been read since it started), when it does not
       // report playback at all, or after the hold time.
-      if (s?.playback === 'playing' || s?.playback == null || i + 1 >= polls) break;
-      await sleep(pollMs);
+      if (s?.playback === 'playing' || s?.playback == null || performance.now() >= until) break;
+      await sleep(Math.max(0, Math.min(pollMs, until - performance.now())));
+      if (!stillOwned(d)) return { state: s, watch: false, note: null };
       try { s = await DRIVERS[d.protocol].read(d); } catch { break; }
     }
     return { state: s, watch: true, note: raisedTo != null ? `${d.name} raised its own volume to ${raisedTo} when it started playing; VM set it back to ${ceiling}, its ceiling.` : null };
@@ -2195,6 +2219,7 @@ export function createIot(o, deps = {}) {
   async function laterCheck(d, s) {
     const ceiling = ceilingOf(d);
     if (!(Number.isFinite(s?.volume) && s.volume > ceiling)) return { state: s, held: true };
+    if (!stillOwned(d)) return { state: s, held: false }; // removed while its volume was being read: nothing is sent
     const raisedTo = s.volume, after = await lowerTo(d, ceiling);
     const held = Number.isFinite(after?.volume) && after.volume <= ceiling;
     const note = held ? `${d.name} raised its own volume to ${raisedTo} after it started playing; VM set it back to ${ceiling}, its ceiling.`
@@ -2207,10 +2232,11 @@ export function createIot(o, deps = {}) {
     const w = { left: Math.max(1, Math.ceil(watchMs() / everyMs())), timer: null };
     const tick = async () => {
       if (watches.get(d.id) !== w) return;
-      if (!S.devices.includes(d)) { watches.delete(d.id); return; }
+      if (!stillOwned(d)) { watches.delete(d.id); return; }
       w.left--;
       let s; try { s = await DRIVERS[d.protocol].read(d); } catch { if (watches.get(d.id) === w) watches.delete(d.id); return; }
-      if (watches.get(d.id) !== w) return; // a newer play, a Stop or a Read state took over
+      if (watches.get(d.id) !== w) return; // a newer play, a Stop, a Read state or the device's removal took over
+      if (!stillOwned(d)) { watches.delete(d.id); return; }
       const r = await laterCheck(d, s);
       if (watches.get(d.id) !== w) return;
       states.set(d.id, r.state); uns.update(d, r.state);
@@ -2235,7 +2261,8 @@ export function createIot(o, deps = {}) {
       if (!d.actions.includes(action)) throw new IotError('unsupported', d.protocol === 'hue-clip2' && !secretOf(d).appKey ? 'Press the round button on the Hue bridge, then Continue.' : `${d.name} does not take "${action}".${action === 'pause' && d.protocol === 'upnp-av' ? ' This player has no Pause: use Stop, which goes back to the start.' : ''}`);
       if (d.status === 'moved') throw new IotError('moved', 'A different device answered at this address last time, so VM sends it nothing. Remove and re-add it.');
       const args = checkArgs(action, body.args, { ceiling: d.volumeCeiling ?? 80, protocol: d.protocol });
-      const run = () => DRIVERS[d.protocol].command(d, action, args);
+      // Checked again when it runs: a change the rate limit held back is not sent to a device removed meanwhile.
+      const run = () => (stillOwned(d) ? DRIVERS[d.protocol].command(d, action, args) : Promise.reject(new IotError('unknown-device', 'That device has been removed, so VM sent it nothing.')));
       if (action === 'key' && args.name === 'VolumeUp') volumeUpCheck(d);
       const limited = LIMITED.has(action) || (action === 'ha' && (['light', 'switch'].includes(args.domain) || ['turn_on', 'turn_off', 'toggle'].includes(args.service)));
       const result = limited ? await throttle(d, run) : await run();
@@ -2243,8 +2270,7 @@ export function createIot(o, deps = {}) {
       if (result?.error) throw result.error;
       if (d.status === 'offline') { d.status = 'ok'; save(); uns.birth(d); }
       const held = PLAY_STARTS.has(action) ? await holdCeiling(d, result) : { state: result, note: null };
-      states.set(d.id, held.state);
-      uns.update(d, held.state);
+      if (S.devices.includes(d)) { states.set(d.id, held.state); uns.update(d, held.state); } // not for one removed meanwhile
       if (PLAY_STARTS.has(action) && held.watch) watchCeiling(d);
       if (action === 'stop' || action === 'pause') stopWatch(d.id); // no film is starting, so nothing to watch for
       const note = action === 'volume' && body.args?.level > args.level ? `Volume stops at ${args.level}, this device’s ceiling.`
@@ -2555,8 +2581,9 @@ export function createIot(o, deps = {}) {
     broker: uns.status(), ai: { enabled: aiOn(), host: aiOn() ? new URL(cfg.aiUrl).host : null }, network: sharedNetwork(), policies: { roku: S.policy.roku },
     devices: S.devices.length, phones: S.phones.length, now: iso(),
     // How long this bridge waits, in seconds, so the page waits as long: a Y in the bridge window, a TV's own accept
-    // after it, and a command (two UPnP actions for play-url, then the volume check after a play starts).
-    waits: { confirm: secs(WAITS.confirm), pair: secs(deps.pairWaitMs || WAITS.pair), command: secs(2 * (deps.upnpActionMs ?? WAITS.upnpAction) + (deps.holdMs ?? WAITS.hold)), ai: secs(WAITS.ai) } });
+    // after it, and a command (the longest one as built: see COMMAND_CALLS), rounded up so the page never waits less.
+    waits: { confirm: secs(WAITS.confirm), pair: secs(deps.pairWaitMs || WAITS.pair),
+      command: Math.ceil(commandWaitMs({ upnpActionMs: deps.upnpActionMs ?? WAITS.upnpAction, connectMs: deps.timeout || UPNP_CONNECT_MS, holdMs: deps.holdMs ?? WAITS.hold }) / 1000), ai: secs(WAITS.ai) } });
 
   async function handle(req, res, sendOn) {
     const origin = req.headers.origin;

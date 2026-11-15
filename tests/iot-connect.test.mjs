@@ -2020,17 +2020,17 @@ function windowIO({ tty = false } = {}) {
 const settle = () => new Promise(r => setImmediate(r));
 
 test('first run, finding 1: the bridge says how long it waits, the page waits as long, and a timeout is not "did not answer"', async () => {
-  const e = await bridge();
+  const e = await bridge({ deps: { timeout: B.UPNP_CONNECT_MS } }); // the real bridge's limits (other tests' devices get 2.5 s)
   try {
     const { waits } = (await e.get('/iot/status')).json;
-    assert.deepEqual(waits, { confirm: 60, pair: 60, command: 70, ai: 20 });
+    assert.deepEqual(waits, { confirm: 60, pair: 60, command: 316, ai: 20 });
     assert.deepEqual(BR.WAITS, waits, 'the page’s own defaults are the bridge’s numbers');
   } finally { await e.close(); }
   const plain = BR.createClient('http://localhost:8790', { fetchFn: async () => ({ ok: true, status: 200, json: async () => ({ ok: true }) }) });
-  assert.deepEqual([plain.limit('confirm'), plain.limit('pair'), plain.limit('command'), plain.limit('ai'), plain.limit(null)], [70000, 130000, 80000, 30000, 12000],
+  assert.deepEqual([plain.limit('confirm'), plain.limit('pair'), plain.limit('command'), plain.limit('ai'), plain.limit(null)], [70000, 130000, 326000, 30000, 12000],
     'a Y step waits the bridge’s 60 seconds and a margin (pairing: and the TV’s own accept); a plain read 12');
   plain.setWaits({ confirm: 90, command: 'x' });
-  assert.deepEqual([plain.limit('confirm'), plain.limit('command')], [100000, 80000], 'it takes the bridge’s numbers, and ignores what is not one');
+  assert.deepEqual([plain.limit('confirm'), plain.limit('command')], [100000, 326000], 'it takes the bridge’s numbers, and ignores what is not one');
   // Scaled down: reads give up after 0.05 s, a Y step after 0.2 + 0.05 s.
   const slow = ms => async (url, init) => new Promise((resolve, reject) => {
     const t = setTimeout(() => resolve({ ok: true, status: 200, json: async () => ({ ok: true }) }), ms);
@@ -2472,6 +2472,149 @@ test('first run, finding 3: a Home Assistant device is logged by a short hash, n
     assert.equal(M.logRow(cmd, devices).device, 'Kitchen light', 'the page maps the hash back to the name it already knows');
   } finally { await e.close(); ha.close(); }
   assert.match(readFileSync(path.join(ROOT, 'sigint/bridge/README.md'), 'utf8').replace(/\s+/g, ' '), /for a Home Assistant entity, a short hash of it/);
+});
+
+/* =====================================================================================================================
+ * The review of the first-run repairs (X1 to X3)
+ * ===================================================================================================================== */
+const FILM = 'http://127.0.0.10:8200/film.mp4';
+test('review X1: removing a player ends its volume watch, and nothing more is sent to it, even after a read already under way', async () => {
+  const delays = {};
+  const dev = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, delays });
+  const e = await bridge({ deps: { holdPollMs: 50, recheckMs: 150, watchMs: 5000 } });
+  try {
+    const d = await addedPlayer(e, dev);
+    const r = await e.cmd(d.id, 'play-url', { url: FILM });
+    assert.equal(r.ok, true, JSON.stringify(r)); assert.match(r.note, /reads EZCast U02’s volume again/, 'the watch is on');
+    // The watch's next read is slow; while it is under way the player is removed, and the read then says 100.
+    const n = dev.calls.length;
+    delays.GetVolume = 400;
+    await until(() => dev.calls.slice(n).some(x => x.action === 'GetVolume'), 'the watch’s read', 2000);
+    dev.st.volume = 100;
+    assert.equal((await e.post('/iot/remove', { device: d.id })).status, 200);
+    const m = dev.calls.length;
+    await sleep(1200);
+    assert.deepEqual(dev.calls.slice(m).map(x => x.action), [], 'nothing reached the player after its removal');
+    assert.ok(!dev.calls.some(x => x.action === 'SetVolume'), 'no SetVolume to a device that is no longer the owner’s');
+    assert.equal(dev.st.volume, 100);
+    assert.ok(!e.logs.some(l => /raised its own volume/.test(l)), 'and nothing claims a correction');
+  } finally { await e.close(); dev.close(); }
+  // Removed during the play's own volume check (the player still loading, then raising its volume): nothing more either.
+  const dev2 = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, onPlay: { startMs: 400, raiseTo: 100 } });
+  const f = await bridge({ deps: { holdPollMs: 50, recheckMs: 150, watchMs: 5000 } });
+  try {
+    const d = await addedPlayer(f, dev2);
+    const n = dev2.calls.length;
+    const pending = f.cmd(d.id, 'play');
+    await until(() => dev2.calls.slice(n).filter(x => x.action === 'GetTransportInfo').length >= 2, 'the check after Play', 2000);
+    assert.equal((await f.post('/iot/remove', { device: d.id })).status, 200);
+    const m = dev2.calls.length;
+    const r = await pending;
+    await sleep(900);
+    assert.ok(dev2.calls.slice(m).length <= 2, `at most the read already under way (${dev2.calls.slice(m).map(x => x.action)})`);
+    assert.ok(!dev2.calls.some(x => x.action === 'SetVolume'));
+    assert.equal(r.ok, true); assert.equal(r.note, undefined, 'no watch is claimed for a removed device');
+    assert.equal((await f.get('/iot/devices')).json.devices.length, 0);
+  } finally { await f.close(); dev2.close(); }
+  // A change the rate limit held back is not sent to a light removed while it waited.
+  const bulb = await fakeWiz();
+  const g = await bridge({ realClock: true });
+  g.portMap['127.0.0.53:38899'] = bulb.port;
+  try {
+    const d = await g.add(await g.inject('wiz', Buffer.from(fixture('wiz-registration.txt')), { address: '127.0.0.53', port: 38899 }));
+    const send = hex => g.post('/iot/command', { v: 1, id: hex, device: d.id, action: 'colour', args: { hex } });
+    assert.equal((await send('#ff0000')).json.ok, true);
+    assert.equal((await send('#00ff00')).json.ok, true);
+    const held = send('#0000ff'); // the third in a second: held back
+    await sleep(150);
+    assert.equal(bulb.got.filter(x => x.method === 'setPilot').length, 2, 'held, not yet sent');
+    assert.equal((await g.post('/iot/remove', { device: d.id })).status, 200);
+    const third = await held;
+    assert.deepEqual([third.json.ok, third.json.code], [false, 'unknown-device']);
+    assert.equal(bulb.got.filter(x => x.method === 'setPilot').length, 2, 'the held change never reached the light');
+  } finally { await g.close(); bulb.close(); }
+});
+
+test('review X2: the command wait the bridge gives the page covers the longest command as built, counted call by call', async () => {
+  // The review's case, scaled down: each reply in 0.8 of the time a UPnP action may take (here 1 s) is waited for by
+  // the page, though four of them are longer than the old wait (two actions and the hold, 3 s).
+  const delays = {};
+  const slow = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, delays });
+  const deps = { upnpActionMs: 1000, timeout: 200, holdMs: 1000, holdPollMs: 100, recheckMs: 60e3, watchMs: 60e3 };
+  const f = await bridge({ deps });
+  let waitsSeen = null;
+  try {
+    const d = await addedPlayer(f, slow);
+    const { waits } = (await f.get('/iot/status')).json;
+    waitsSeen = waits.command;
+    const page = BR.createClient(f.base, { fetchFn: (u, init) => fetch(u, { ...init, headers: { ...init.headers, Origin: ORIGIN } }), waits, margin: 0.1 });
+    for (const a of ['SetAVTransportURI', 'Play', 'GetTransportInfo', 'GetVolume', 'SetVolume']) delays[a] = 800;
+    let t0 = Date.now();
+    const r = await page.post('/iot/command', { v: 1, id: 'slow', device: d.id, action: 'play-url', args: { url: FILM } }, { wait: 'command' });
+    assert.equal(r.ok, true, 'the page waited for every reply');
+    assert.ok(Date.now() - t0 >= 3200, 'four replies of 0.8 s');
+    // A player that never says it is playing: the hold ends on time however slowly it answers.
+    const loading = setInterval(() => { slow.st.transport = 'TRANSITIONING'; }, 5);
+    try {
+      t0 = Date.now();
+      const r2 = await page.post('/iot/command', { v: 1, id: 'loading', device: d.id, action: 'play' }, { wait: 'command' });
+      const took = Date.now() - t0;
+      assert.equal(r2.ok, true); assert.equal(r2.state.playback, 'loading');
+      assert.ok(took <= waits.command * 1000, `within the wait it gave the page (${took} ms)`);
+      assert.ok(took <= 3 * 800 + 1000 + 2 * 800 + 500, `the hold stopped about 1 s after it began (${took} ms)`);
+    } finally { clearInterval(loading); }
+  } finally { await f.close(); slow.close(); }
+  // The count, from what a player is asked: Play address (4 calls), a correction (3), and a read while it loads (2).
+  const onPlay = { raiseTo: 100 };
+  const dev = await fakeUpnp({ description: fixture('desc-ezcast-u02.txt'), volume: 50, onPlay });
+  const e = await bridge({ deps: { holdPollMs: 50, recheckMs: 60e3, watchMs: 60e3 } });
+  try {
+    const d = await addedPlayer(e, dev);
+    let n = dev.calls.length;
+    assert.equal((await e.cmd(d.id, 'play-url', { url: FILM })).ok, true);
+    const asked = dev.calls.slice(n).map(x => x.action);
+    assert.deepEqual(asked, ['SetAVTransportURI', 'Play', 'GetTransportInfo', 'GetVolume', 'SetVolume', 'GetTransportInfo', 'GetVolume']);
+    assert.equal(asked.indexOf('SetVolume'), B.COMMAND_CALLS.play, 'Play address, before any correction');
+    assert.equal(asked.length - asked.indexOf('SetVolume'), B.COMMAND_CALLS.lower, 'a correction');
+    dev.st.volume = 50; Object.assign(onPlay, { raiseTo: null, startMs: 120 });
+    n = dev.calls.length;
+    assert.equal((await e.cmd(d.id, 'play')).ok, true);
+    const reads = dev.calls.slice(n + 3).map(x => x.action); // after Play and its own read
+    assert.ok(reads.length >= 2 && reads.length % B.COMMAND_CALLS.read === 0, String(reads));
+    assert.deepEqual(reads.slice(0, B.COMMAND_CALLS.read), ['GetTransportInfo', 'GetVolume'], 'a read while it loads');
+  } finally { await e.close(); dev.close(); }
+  assert.equal(B.commandWaitMs(), (4 + 2 + 3) * (B.UPNP_CONNECT_MS + B.WAITS.upnpAction) + B.WAITS.hold);
+  assert.equal(B.commandWaitMs(), 316e3);
+  assert.equal(BR.WAITS.command, 316, 'the page’s own default is the bridge’s');
+  assert.equal(waitsSeen, Math.ceil(B.commandWaitMs({ upnpActionMs: 1000, connectMs: 200, holdMs: 1000 }) / 1000), 'the wait the bridge gave that page');
+});
+
+test('review X3: the request log holds only the bridge’s own endpoint names; any other path is "unknown path", never its text', async () => {
+  const e = await bridge({ lan: true });
+  try {
+    const addr = await e.iot.startLan();
+    const lan = `http://127.0.0.1:${addr.port}`;
+    await e.get('/iot/alice-bedroom');
+    await e.get('/iot/password/secretword');
+    await e.post('/iot/alice-room', {});
+    await e.call('GET', '/iot/kitchen-door', undefined, { Origin: 'https://evil.example' });
+    await e.get('/iot/status');
+    await fetch(`${lan}/remote/api/alice-phone`, { headers: { Origin: lan } });
+    const E = (await e.get('/iot/log')).json.entries;
+    assert.deepEqual(E.map(x => [x.from, x.request]), [
+      ['phone', 'GET unknown path'], ['page', 'GET /iot/status'], ['other-site', 'GET unknown path'], ['page', 'POST unknown path'],
+      ['page', 'GET unknown path'], ['page', 'GET unknown path'],
+    ]);
+    const text = JSON.stringify(E);
+    for (const s of ['alice', 'bedroom', 'password', 'secretword', 'room', 'kitchen', 'phone/']) assert.ok(!text.includes(s), `no "${s}" in the log`);
+  } finally { await e.iot.stop(); await e.close(); }
+  for (const p of B.LOG_PATHS) assert.equal(B.logPath(p), p);
+  for (const p of ['/iot/alice-bedroom', '/iot/password/secretword', '/iot', '/iot/', '/remote/api/x', '/IOT/STATUS', '/iot/status/x']) assert.equal(B.logPath(p), 'unknown path', p);
+  // Every path the bridge answers is one the log keeps by name.
+  const src = readFileSync(path.join(ROOT, 'sigint/bridge/prp-bridge.mjs'), 'utf8');
+  const answered = new Set([...src.matchAll(/(?:p === |case )'(\/(?:iot|remote\/api)\/[a-z/-]+)'/g)].map(m => m[1]));
+  assert.ok(answered.size >= 25, String(answered.size));
+  assert.deepEqual([...answered].filter(p => !B.LOG_PATHS.has(p)), []);
 });
 
 /* =====================================================================================================================

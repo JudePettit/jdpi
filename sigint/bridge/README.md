@@ -165,7 +165,8 @@ Written by you; the bridge only reads it, and the page can change none of it.
 - **The request log.** The bridge keeps its last 200 requests on `/iot/*` (from the page) and `/remote/api/*` (from a
   paired phone), and the commands it ran for the broker, newest first, **in its own memory only**: nothing is written to
   a file, and it is gone when the bridge stops. Each entry is the time, where it came from (`page`, `phone`, `broker`,
-  or `other-site` for a refused origin), the request (method and fixed path), the device's id (for a Home Assistant
+  or `other-site` for a refused origin), the request (method and one of the bridge's own fixed paths; any other path is
+  kept as the words "unknown path", never its text), the device's id (for a Home Assistant
   entity, a short hash of it, since an entity's id may name a room or a person) and the action where there is one, and the result (`ok`, `timeout`, or the refusal's code). It never holds a body, an address, a name, a room, a
   query string, a phone's id or a secret. Read it on IoT Connect's Overview tab (**Show the log**) or at `GET /iot/log`;
   clear it with **Clear the log** there, `POST /iot/log/clear`, or by stopping the bridge. Each command also prints one
@@ -180,7 +181,7 @@ Every answer is JSON with `ok`; a refusal is `{ "ok": false, "code": "…", "err
 
 | Method and path | Body | Answer |
 |---|---|---|
-| `GET /iot/status` | | `enabled`, `version`, `features`, `interface`, `policy`, `console` (whether this window can ask Y), `lan`, `homeAssistant` (`configured`, `url`, `tokenSet`, `ticked`), `broker`, `ai`, `network` (`shared`, `reasons`, `ownHome`, `words`), `policies.roku`, `devices`, `phones`, `now`, `waits` (seconds the bridge waits: `confirm`, `pair`, `command`, `ai`) |
+| `GET /iot/status` | | `enabled`, `version`, `features`, `interface`, `policy`, `console` (whether this window can ask Y), `lan`, `homeAssistant` (`configured`, `url`, `tokenSet`, `ticked`), `broker`, `ai`, `network` (`shared`, `reasons`, `ownHome`, `words`), `policies.roku`, `devices`, `phones`, `now`, `waits` (seconds the bridge waits: `confirm`, `pair`, `command`, `ai`; `command` is the longest command as built, "Play address" to a UPnP player: 9 device calls one after another, each 4 seconds to connect and 30 to reply, and the 10-second volume hold, 316 seconds) |
 | `GET /iot/devices` | | `devices`: device records without their secrets, with `paired` and the last `state` |
 | `GET /iot/candidates` | | `candidates` (each with `known`, `label`, `canAdd`, `generic`, `announcement` and Hermes's `finding`), `network` |
 | `GET /iot/hermes` | | `agent: "Hermes Messenger"`, `rules`, `findings` (Hub messages), `ai` |

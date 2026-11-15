@@ -26,9 +26,10 @@ export function unreachable(base) {
 
 /** How long the bridge itself waits, in seconds (its /iot/status `waits` replaces these, so the page waits exactly as
     long as the bridge it talks to, plus a margin for the reply to arrive): for Y in the bridge window, for a TV's own
-    accept after the Y, for a command to a device (two UPnP actions of up to 30 seconds each for "Play address", then
-    the volume check after a play starts), and for Hermes's optional AI question. Plain reads wait READ_SECONDS. */
-export const WAITS = { confirm: 60, pair: 60, command: 70, ai: 20 };
+    accept after the Y, for a command to a device (the longest, "Play address" to a UPnP player: up to 9 device calls
+    one after another, each 4 seconds to connect and the 30 seconds UPnP allows for its reply, and the 10-second volume
+    check after a play starts), and for Hermes's optional AI question. Plain reads wait READ_SECONDS. */
+export const WAITS = { confirm: 60, pair: 60, command: 316, ai: 20 };
 export const READ_SECONDS = 12;
 const MARGIN = 10;
 

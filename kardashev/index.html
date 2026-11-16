@@ -15,7 +15,12 @@
 :root{--k-other:var(--prp-surface-3);--map-ratio:1000 / 520}
 .kpi.kbox{min-width:170px}
 .land{fill:var(--prp-map-land);stroke:var(--prp-map-border);stroke-width:.5;vector-effect:non-scaling-stroke}
-.bubble{stroke:var(--prp-surface);stroke-width:.8;fill-opacity:.86;cursor:pointer;vector-effect:non-scaling-stroke}.bubble:hover,.bubble.sel{stroke:var(--prp-text);stroke-width:1.6}
+.bubble{stroke:var(--prp-surface);stroke-width:.8;fill-opacity:.86;cursor:pointer;vector-effect:non-scaling-stroke}
+/* A period: a power not among the powers at its last step is drawn nearly hollow, with a broken outline, and beneath
+   every power still there (renderMap), so a stack of them on one capital stays light. A chosen or hovered one takes
+   the solid ring every selection has (.gone.sel outranks the broken outline). */
+.bubble.gone{fill-opacity:.1}.bubble.gone:not(.prp-focus-hit){stroke:var(--prp-muted);stroke-dasharray:2 1.5}
+.bubble:hover,.bubble.sel,.bubble.gone:hover,.bubble.gone.sel{stroke:var(--prp-text);stroke-width:1.6;stroke-dasharray:none}
 .blabel{font:600 10px var(--prp-font-ui);fill:var(--prp-map-label);pointer-events:none;paint-order:stroke;stroke:var(--prp-map-halo);stroke-width:3px;stroke-linejoin:round}
 .chart-wrap{flex:none;display:flex;flex-direction:column;height:178px;margin-top:10px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius)}
 .chart-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 14px;padding:7px 12px 0}
@@ -26,11 +31,17 @@
 .axis text{fill:var(--prp-muted);font:10px var(--prp-font-mono)}.axis path,.axis line{stroke:var(--prp-axis)}
 .grid line{stroke:var(--prp-grid)}.grid path{display:none}
 .yearline{stroke:var(--prp-text);stroke-width:1.2;stroke-dasharray:3 3}
-/* A period: each power's share at its first step as a dashed ring round the disc of its last; the chart marks both. */
-.ring-a{fill:none;stroke:var(--prp-text);stroke-width:1.2;stroke-dasharray:3 2.5;pointer-events:none;opacity:.75}
+/* A period: the chart shades it between its first step (dotted) and its last (dashed); the key names the map's marks. */
 .fromline{stroke:var(--prp-text-2);stroke-width:1.2;stroke-dasharray:1 3}
-.legend .ring{border-radius:50%;background:transparent;box-shadow:none;border:1.5px dashed var(--prp-text)}
+.periodband{fill:var(--prp-text);fill-opacity:.09;pointer-events:none}
+.prp-table td.nowrap{white-space:nowrap}
 .legend .disc{border-radius:50%;background:var(--prp-cat-1);box-shadow:none}
+.legend .faded{border-radius:50%;background:color-mix(in srgb,var(--prp-cat-1) 14%,transparent);box-shadow:none;border:1px dashed var(--prp-muted)}
+/* Over a period the table's headings may wrap, so its columns fit the panel at 1440 px; a figure never wraps. */
+.prp-table.period th{white-space:normal;vertical-align:bottom}.prp-table.period td.num{white-space:nowrap}
+/* A short window (under about 800 px high): the screen grows past it, so the map keeps a usable height over a period,
+   whose caption is longer, and the page scrolls instead. */
+@media (min-width:901px){.screen,.jdpi-returnbar + .screen{height:auto;min-height:max(100vh,680px)}.jdpi-returnbar + .screen{min-height:max(calc(100vh - 36px),644px)}.work{min-height:520px}}
 .chg{color:var(--prp-muted);font:500 11px var(--prp-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .chg.up{color:var(--prp-up)}.chg.down{color:var(--prp-down)}
 .rank .rv{text-align:right}.rank .chg{display:block;text-align:right}
@@ -61,7 +72,7 @@
       <div class="front">
         <p class="prp-eyebrow" data-jdpi-standalone><span>Retrospective Geopolitics <span class="sep">·</span> Kardashev Tracker</span></p>
         <h1 class="prp-title">Kardashev Tracker</h1>
-        <p class="prp-dek">Which empires and countries commanded what share of humanity's energy capture, century by century from 2000 BC to today, and how far humanity has climbed the Kardashev scale. Set a period with the timeline's two handles to compare its two ends. After the historian Ian Morris.</p>
+        <p class="prp-dek">Which empires and countries commanded what share of humanity's energy capture, century by century from 2000 BC to today, and how far humanity has climbed the Kardashev scale. Set a period with the timeline's two handles to see every step in it. After the historian Ian Morris.</p>
         <p class="prp-meta" id="status">Loading…</p>
       </div>
       <dl class="kpis" aria-live="polite">
@@ -77,7 +88,7 @@
 
     <div class="toolbar">
       <!-- The steps shown (design/prp-period.js): ‹ ▶ › and two handles on one track. The start (hollow; #step-from)
-           rests on the end (filled; #step), so one step is shown; drag the start back to compare a period's two ends. -->
+           rests on the end (filled; #step), so one step is shown; drag the start back for a period, every step in it. -->
       <div class="timeline" id="timeline" role="group" aria-label="Century or period"></div>
     </div>
 
@@ -113,7 +124,7 @@
   <footer class="sources">
     <div class="prp-sources">
       <p><b>Sources.</b> Energy capture per person: Ian Morris, <i>Why the West Rules — For Now</i> (2010) and <i>The Measure of Civilization</i> (2013), following the shape of his Western and Eastern core series. Populations: McEvedy &amp; Jones, Maddison and standard estimates. From 1900: primary-energy statistics (Energy Institute / Our World in Data), with food and traditional biomass added. Rating: Carl Sagan's K = (log₁₀ P − 6) ÷ 10, with P in watts.</p>
-      <p><b>Method.</b> A power's share is its population × energy per person, divided by the world total. Before 1800, treat shares as accurate to within ±30–50%; some entries combine several states. Steps are a century apart until 1800, then 1850, 1900, 1950, 2000 and 2025. A period compares its two ends: each power's share at both, the change in percentage points, and regional totals, which hold up better than single powers whose borders and names changed in between. Built by kardashev/scripts/build.mjs.</p>
+      <p><b>Method.</b> A power's share is its population × energy per person, divided by the world total. Before 1800, treat shares as accurate to within ±30–50%; some entries combine several states. Steps are a century apart until 1800, then 1850, 1900, 1950, 2000 and 2025. A period is every step from its first to its last, both included: the map shows each power that was among the powers at any of them, sized by its largest share at any one step (named with its year), and nothing is added up or averaged across steps. Its two ends are compared too: each power's share at the first and last steps, the change in percentage points, and regional totals, which hold up better than single powers whose borders and names changed in between. Built by kardashev/scripts/build.mjs.</p>
     </div>
   </footer>
 
@@ -126,8 +137,10 @@
   // Kardashev Tracker (PRP · Retrospective Geopolitics): estimated share of humanity's energy capture held by each empire
   // or country, in century steps (2000 BC – 1800, then 1850, 1900, 1950, 2000, 2025). Built by kardashev/scripts/build.mjs.
   // Views (tabs): map and chart, and a table. Both follow the timeline (design/prp-period.js): its start rests on the
-  // end, so one step is shown, as before; pulled back, it opens a period, and the page compares the period's two ends:
-  // each power's share at both and the change in percentage points, the regions, and humanity's rating, power and people.
+  // end, so one step is shown, as before; pulled back, it opens a period: every step between the handles, both ends
+  // included (periodPowers). The map, the panel, the table and the summary show every power among the powers at any
+  // of those steps, each at its largest share there (named with its year), and also compare the period's two ends: each
+  // power's share at both and the change in percentage points, the regions, and humanity's rating, power and people.
   // URL: #y=<step year: the step shown, or the period's last>[&f=<the period's first step year>]&p=<polity>&v=table
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -155,9 +168,37 @@
   const focusIds = new Set(); // powers Documentary mode is discussing
   const isPeriod = () => fromIdx !== idx;
   const periodText = (sep = '–') => (isPeriod() ? `${yearLabel(data.steps[fromIdx].year)}${sep}${yearLabel(data.steps[idx].year)}` : yearLabel(data.steps[idx].year));
-  // A power's share at a step (0 when it was not among the powers then), and each region's share there (its powers', summed).
-  const shareIn = (s, id) => s.polities.find(p => p.id === id)?.share || 0;
+  // Each region's share at a step (its powers', summed at that one step).
   const byRegion = s => { const m = new Map(); for (const p of s.polities) { const r = byId[p.id].region; m.set(r, (m.get(r) || 0) + p.share); } return m; };
+  // The period shown: every step from fromIdx to idx, both included (one step while the start rests). For each power
+  // among the powers at any of them: `at`, its entry at each such step (with the step's year); `peak`, the one with its
+  // largest share (the earliest on a tie); `first` and `last` within the period; and `start` and `end`, its entries at
+  // the period's first and last steps (null where it was not among the powers there). Largest share first. Nothing is
+  // added up or averaged across steps. The map, the panel, the table and the summary all read this.
+  let periodMemo = null;
+  function periodPowers() {
+    const k = `${fromIdx}:${idx}`;
+    if (periodMemo?.k === k) return periodMemo;
+    const steps = data.steps.slice(fromIdx, idx + 1), A = steps[0].year, B = steps.at(-1).year, m = new Map();
+    for (const s of steps) for (const p of s.polities) { if (!m.has(p.id)) m.set(p.id, []); m.get(p.id).push({ year: s.year, ...p }); }
+    const powers = [...m].map(([id, at]) => ({ id, at, peak: at.reduce((x, y) => (y.share > x.share ? y : x)), first: at[0], last: at.at(-1),
+      start: at[0].year === A ? at[0] : null, end: at.at(-1).year === B ? at.at(-1) : null }));
+    powers.sort((x, y) => y.peak.share - x.peak.share);
+    return (periodMemo = { k, steps, n: steps.length, powers, of: new Map(powers.map(e => [e.id, e])) });
+  }
+  // How a power stood within the period, in words: at how many of its steps, from when to when; and at its two ends.
+  const amongWords = (e, n) => `Among the powers at ${e.at.length} of the period's ${n} steps, ${e.at.length === 1 ? `in ${yearLabel(e.first.year)}` : `from ${yearLabel(e.first.year)} to ${yearLabel(e.last.year)}`}.`;
+  const endsWords = (e, A, B) => (e.start && e.end
+    ? `Between the ends: ${share(e.start.share, e.start.year)} in ${A}, ${share(e.end.share, e.end.year)} in ${B}: ${e.end.share >= e.start.share ? 'up' : 'down'} ${points(e.end.share - e.start.share).replace(/^[+−±]/, '').replace(' pts', '')} percentage points.`
+    : e.end ? `Not among the powers in ${A}, at the period's start.` : e.start ? `No longer among the powers in ${B}, at the period's end.` : 'Among the powers at neither end of the period.');
+  // A name two powers share ("Japan", "Indian kingdoms (combined)"), where it stands in a list by name alone, carries
+  // the power's years: "Japan (600–1867)", "Indian kingdoms (combined, 551–1205)".
+  let sharedNames = null;
+  const nameOf = id => {
+    sharedNames ??= data.polities.reduce((m, p) => m.set(p.name, (m.get(p.name) || 0) + 1), new Map());
+    const p = byId[id], y = `${yearLabel(p.from)}–${p.to >= 2025 ? 'today' : yearLabel(p.to)}`;
+    return sharedNames.get(p.name) < 2 ? p.name : p.name.endsWith(')') ? `${p.name.slice(0, -1)}, ${y})` : `${p.name} (${y})`;
+  };
 
   // Documentary focus (design/prp-focus.js): the powers being discussed are ringed in the module accent and the map
   // eases to fit their capitals; ⟲ or the end of the reading brings back the whole map. A country (ISO3) is found by
@@ -168,7 +209,7 @@
   window.PRPFocus?.listen({
     focus(t) {
       if (!data || !focusView) return;
-      const here = new Set(data.steps[idx].polities.map(p => p.id)), ids = new Set();
+      const here = new Set(periodPowers().powers.map(e => e.id)), ids = new Set(); // the powers on the map
       const r = PRPFocus.resolve(t, { country: iso => { (MODERN[iso] || []).filter(id => here.has(id)).forEach(id => ids.add(id)); return null; }, minSpan: 20 });
       for (const [lon, lat] of r.points) for (const id of here) if (byId[id].lon === lon && byId[id].lat === lat) ids.add(id);
       if (!r.box) return;
@@ -188,7 +229,6 @@
     g.append('path').attr('class', 'land');
     marks = svg.append('g');
     marks.append('g').attr('class', 'bubbles');
-    marks.append('g').attr('class', 'rings'); // a period's first step, over the discs of its last
     marks.append('g').attr('class', 'labels');
     zoom = d3.zoom().scaleExtent([1, 12]).on('zoom', ev => { zt = ev.transform; g.attr('transform', zt); placeMarks(); }).on('end', () => { if (data) renderMap(); });
     svg.call(zoom);
@@ -212,49 +252,58 @@
   }
 
   function renderMap() {
-    const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), tip = $('#tooltip');
+    const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), tip = $('#tooltip'), P = periodPowers(), A = yearLabel(a.year), B = yearLabel(s.year);
     const r = d3.scaleSqrt().domain([0, 0.6]).range([0, rMax]), at = id => projection([byId[id].lon, byId[id].lat]);
-    const nodes = s.polities.map(p => ({ ...p, meta: byId[p.id], xy: at(p.id), r: Math.max(2.5, r(p.share)) }));
-    // Over a period, a dashed ring for each power's share at its first step, round the disc of its last (a ring alone
-    // for a power gone by then), on the same scale.
-    const rings = ranged ? a.polities.map(p => ({ id: p.id, share: p.share, xy: at(p.id), r: Math.max(2.5, r(p.share)) })) : [];
-    const then = id => a.polities.find(p => p.id === id)?.share ?? null;
+    // One step: each power's share there. A period: every power among the powers at any of its steps, its disc sized
+    // by its largest share at any one of them; one no longer among them at the period's last step is drawn faded.
+    const nodes = P.powers.map(e => ({ ...e.peak, e, meta: byId[e.id], xy: at(e.id), r: Math.max(2.5, r(e.peak.share)), gone: ranged && !e.end }));
     const rad = d => d.r, sx = d => zt.applyX(d.xy[0]), sy = d => zt.applyY(d.xy[1]);
-    // Larger powers first, so smaller circles sit on top of them.
-    marks.select('.bubbles').selectAll('circle.bubble').data(nodes, d => d.id).join('circle').attr('class', 'bubble').sort((a, b) => b.share - a.share)
-      .attr('cx', sx).attr('cy', sy).attr('r', rad)
-      .attr('fill', d => regionColor(d.meta.region)).classed('sel', d => d.id === selected).classed('prp-focus-hit', d => focusIds.has(d.id))
+    // Over a period the faded powers first, beneath every power still there; then, within each, larger powers first, so
+    // smaller circles sit on top of them.
+    const order = (a, b) => b.gone - a.gone || b.share - a.share;
+    marks.select('.bubbles').selectAll('circle.bubble').data(nodes, d => d.id).join('circle').attr('class', 'bubble').sort(order)
+      .attr('cx', sx).attr('cy', sy).attr('r', rad).attr('data-id', d => d.id)
+      .attr('fill', d => regionColor(d.meta.region)).classed('gone', d => d.gone).classed('sel', d => d.id === selected).classed('prp-focus-hit', d => focusIds.has(d.id))
       .on('mousemove', (ev, d) => {
-        const box = $('.map-wrap').getBoundingClientRect(), was = then(d.id);
-        tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>${share(d.share, s.year)} of world energy${ranged ? ` in ${yearLabel(s.year)}` : ''} · ${people(d.pop)} people`
-          + (ranged ? `<br>${was == null ? `Not among the powers in ${yearLabel(a.year)}` : `${share(was, a.year)} in ${yearLabel(a.year)} · ${points(d.share - was)}`}` : '')
+        const box = $('.map-wrap').getBoundingClientRect();
+        tip.innerHTML = `<strong>${esc(d.meta.name)}</strong>`
+          + (!ranged ? `${share(d.share, s.year)} of world energy · ${people(d.pop)} people`
+            : `Largest share within the period: ${share(d.share, d.year)} of world energy, in ${yearLabel(d.year)} · ${people(d.pop)} people then<br>${amongWords(d.e, P.n)}<br>${endsWords(d.e, A, B)}`)
           + (rough(a.year) ? `<span class="tip-when">${esc(ROUGH)}</span>` : '');
         tip.hidden = false; tip.style.left = `${Math.max(4, Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8))}px`; tip.style.top = `${Math.min(ev.clientY - box.top + 14, box.height - tip.offsetHeight - 8)}px`;
       }).on('mouseleave', () => { tip.hidden = true; }).on('click', (ev, d) => select(d.id));
-    marks.select('.rings').selectAll('circle.ring-a').data(rings, d => d.id).join('circle').attr('class', 'ring-a').attr('cx', sx).attr('cy', sy).attr('r', rad);
-    // Names of powers with 4%+ above all the circles; a name that would collide with a larger power's moves under its
-    // circle, or is left out (the panel and the table list every power).
+    // Names of powers with 4%+ above all the circles, placed in turn (over a period the powers still there at its end
+    // first, then the faded ones, each by size); a name that would collide with one already placed moves under its
+    // circle, unless it would land there on another capital's disc and read as that one's name; else it is left out
+    // (the panel and the table list every power).
     const short = n => { n = n.replace(/ \(.*\)$/, '').replace(/ dynasty| Empire$/, ''); return n.includes(' / ') ? n.split(' / ').pop() : n; };
     const named = nodes.filter(d => d.share >= 0.04);
     const placed = [], hit = b => placed.some(p => b.x < p.x + p.width && p.x < b.x + b.width && b.y < p.y + p.height && p.y < b.y + b.height);
-    marks.select('.labels').selectAll('text.blabel').data(named, d => d.id).join('text').attr('class', 'blabel').attr('text-anchor', 'middle').sort((a, b) => b.share - a.share)
+    const onOther = (b, d) => { const x = b.x + b.width / 2, y = b.y + b.height / 2; return nodes.some(o => o !== d && (o.xy[0] !== d.xy[0] || o.xy[1] !== d.xy[1]) && Math.hypot(sx(o) - x, sy(o) - y) < rad(o)); };
+    marks.select('.labels').selectAll('text.blabel').data(named, d => d.id).join('text').attr('class', 'blabel').attr('text-anchor', 'middle').sort((a, b) => a.gone - b.gone || b.share - a.share)
       .text(d => short(d.meta.name)).attr('x', sx).attr('y', d => sy(d) - rad(d) - 4).attr('visibility', null)
       .each(function (d) {
         d.below = false;
         let b = this.getBBox(); if (!b.width) return;
         if (hit(b)) { d.below = true; this.setAttribute('y', sy(d) + rad(d) + 11); b = this.getBBox(); }
-        if (hit(b)) this.setAttribute('visibility', 'hidden'); else placed.push(b);
+        if (hit(b) || (d.below && onOther(b, d))) this.setAttribute('visibility', 'hidden'); else placed.push(b);
       });
-    // The key to the rings, while a period is shown.
+    // The key to the marks, while a period is shown; the map's name for a screen reader says the same.
     const key = $('#ringkey');
+    // Faded: every power not among the powers at the last step, which are the ones gone by then (there at the first
+    // step) and the ones that rose and fell inside the period (at neither end), counted as the summary counts them.
     key.hidden = !ranged;
-    if (ranged) key.innerHTML = `<h4>${esc(periodText(' to '))}</h4><ul><li><span class="swatch ring"></span>Ring: share in ${esc(yearLabel(a.year))}</li><li><span class="swatch disc"></span>Disc: share in ${esc(yearLabel(s.year))}</li></ul>`;
+    const faded = nodes.filter(d => d.gone).length, goneBy = P.powers.filter(e => e.start && !e.end).length, between = faded - goneBy;
+    const fadedWords = `not among the powers in ${B} (${[goneBy ? `${goneBy} gone by then` : '', between ? `${between} rose and fell` : ''].filter(Boolean).join(', ')})`;
+    if (ranged) key.innerHTML = `<h4>${esc(periodText(' to '))} · ${P.n} steps</h4><ul><li><span class="swatch disc"></span>Disc: its largest share within the period</li>${faded ? `<li><span class="swatch faded"></span>Faded: ${esc(fadedWords)}</li>` : ''}</ul>`;
+    $('#map').setAttribute('aria-label', !ranged ? MAP_NAME : `Circles on the capitals of the ${nodes.length} empires and countries among the powers at any of the ${P.n} steps from ${A} to ${B}, each sized by its largest share of world energy capture within the period${faded ? `; faded, the ${faded} ${fadedWords}` : ''}`);
   }
+  const MAP_NAME = document.querySelector('#map').getAttribute('aria-label');
 
   // Circles and names follow the zoom without growing; names are placed again (collisions change) when it ends.
   function placeMarks() {
     if (!marks) return;
-    marks.selectAll('circle.bubble, circle.ring-a').attr('cx', d => zt.applyX(d.xy[0])).attr('cy', d => zt.applyY(d.xy[1]));
+    marks.selectAll('circle.bubble').attr('cx', d => zt.applyX(d.xy[0])).attr('cy', d => zt.applyY(d.xy[1]));
     marks.select('.labels').selectAll('text.blabel').attr('x', d => zt.applyX(d.xy[0])).attr('y', d => zt.applyY(d.xy[1]) + (d.below ? d.r + 11 : -d.r - 4));
   }
 
@@ -272,6 +321,9 @@
 
   // A power's row: its share at the step shown and, over a period, the change since the period's first step (d).
   const rankRow = (p, top, d, y) => `<div class="rank" data-id="${p.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[p.id].region)}"></i><div>${esc(byId[p.id].name)}<small>${people(p.pop)} people · ${Math.round(p.kcal / 1000)}k kcal/person/day</small><div class="sharebar"><i style="width:${Math.min(100, p.share * 100 / Math.max(top || 1, 0.01))}%;background:${regionColor(byId[p.id].region)}"></i></div></div>${d == null ? `<b>${share(p.share, y)}</b>` : `<div class="rv"><b>${share(p.share, y)}</b>${chg(d)}</div>`}</div>`;
+  // Over a period, a power's row: its largest share within the period, the step of it, and at how many of the steps it
+  // was among the powers (from periodPowers).
+  const periodRow = (e, top) => { const P = periodPowers(), c = regionColor(byId[e.id].region); return `<div class="rank" data-id="${e.id}" role="button" tabindex="0"><i style="background:${c}"></i><div>${esc(byId[e.id].name)}<small>At ${e.at.length} of ${P.n} steps, ${e.at.length === 1 ? yearLabel(e.first.year) : `${yearLabel(e.first.year)} to ${yearLabel(e.last.year)}`}${e.end ? '' : ` · not among them in ${yearLabel(P.steps.at(-1).year)}`}</small><div class="sharebar"><i style="width:${Math.min(100, e.peak.share * 100 / Math.max(top || 1, 0.01))}%;background:${c}"></i></div></div><div class="rv"><b>${share(e.peak.share, e.peak.year)}</b><span class="chg">in ${yearLabel(e.peak.year)}</span></div></div>`; };
   function wireRanks(root, onPick) {
     root.querySelectorAll('.rank[data-id]').forEach(el => {
       el.onclick = () => onPick(el.dataset.id);
@@ -283,22 +335,31 @@
       <p><b>Each power's share</b> = its population × energy per person, divided by the world total. Populations follow McEvedy and Jones, Maddison and standard estimates; energy per person follows the shape of Morris's Western and Eastern core series, set lower for the less developed parts of large empires. From 1900, primary-energy statistics (Energy Institute / Our World in Data) are used, with food and traditional biomass added.</p>
       <p><b>Kardashev rating</b> uses Carl Sagan's formula K = (log₁₀ P − 6) ÷ 10, where P is power in watts. A Type I civilisation (K = 1) would use about 10¹⁶ W, roughly all the sunlight reaching Earth's surface. Humanity today is about K 0.73.</p>
       <p><b>Uncertainty</b>: before 1800, treat shares as accurate to within ±30–50%. Some entries combine several states ("North Indian kingdoms"). Because food and biomass count, very populous agrarian empires such as Qing China score highly even when others had more coal or oil.</p>
-      <p><b>A period</b> compares its two ends: each power's share at both and the change in percentage points, and the regions' totals, which hold up better than single powers whose borders and names changed in between.</p>
+      <p><b>A period</b> is every step from its first to its last, both included. The map, the table and the list of largest shares show each power that was among the powers at any of those steps, at its largest share at any one of them, with that step's year; a power not among them at the last step is drawn faded, nearly hollow and beneath the rest. The summary sorts every power not at both ends three ways: new by the last step (not there at the first), gone by it (there at the first) and, over more than two steps, rose and fell within the period (at neither end); the faded ones are the last two together. Nothing is added up or averaged across steps. Risers and fallers compare each power's first and last share within the period, each with its year. The period's two ends are compared as well: each power's share at both and the change in percentage points, and the regions' totals, which hold up better than single powers whose borders and names changed in between.</p>
       <p>Steps are a century apart until 1800, then 1850, 1900, 1950, 2000 and 2025, which keeps the data small enough to load instantly.</p>`;
   function renderPanel() {
-    const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), A = yearLabel(a.year), B = yearLabel(s.year), panel = $('#panel');
+    const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), A = yearLabel(a.year), B = yearLabel(s.year), panel = $('#panel'), P = periodPowers();
     if (selected) {
-      const p = byId[selected], here = s.polities.find(x => x.id === selected), there = ranged ? a.polities.find(x => x.id === selected) : null;
+      const p = byId[selected], here = s.polities.find(x => x.id === selected), e = P.of.get(selected);
       const series = data.steps.filter(x => x.polities.some(y => y.id === selected)).map(x => ({ year: x.year, share: x.polities.find(y => y.id === selected).share }));
+      // Five powers are listed at no step (their years fall between two: the Mongol Empire, 1206 to 1270), so their
+      // record is empty: the panel says so in place of "Over time".
       const peak = series.reduce((a, b) => (b.share > a.share ? b : a), series[0]);
-      // Over a period: its share at both ends and the change between them.
-      const ends = !ranged ? '' : `<h3>${esc(A)} to ${esc(B)}</h3><p>${there && here ? `${share(there.share, a.year)} of humanity's energy capture in ${esc(A)}, ${share(here.share, s.year)} in ${esc(B)}: ${here.share >= there.share ? 'up' : 'down'} ${points(here.share - there.share).replace(/^[+−±]/, '').replace(' pts', '')} percentage points.`
-        : here ? `Not among the powers in ${esc(A)}; ${share(here.share, s.year)} of humanity's energy capture in ${esc(B)}.` : there ? `${share(there.share, a.year)} of humanity's energy capture in ${esc(A)}; gone by ${esc(B)}.` : `Not among the powers in either year.`}</p>`;
+      // Over a period: its shares at the steps of the period where it was among the powers (how many, its largest and
+      // when, its first and last within it) and, at the period's two ends, its shares and the change between them.
+      const within = !e ? '<p>Not among the powers during this time period.</p>'
+        : `<p>${esc(amongWords(e, P.n))} Largest share within the period: <b>${share(e.peak.share, e.peak.year)}</b> in ${yearLabel(e.peak.year)}.${e.at.length > 1 && !(e.start && e.end) ? ` First within it: ${share(e.first.share, e.first.year)} in ${yearLabel(e.first.year)}; last: ${share(e.last.share, e.last.year)} in ${yearLabel(e.last.year)}.` : ''}</p>
+          <p>${esc(endsWords(e, A, B))}</p>
+          <p class="meta">${e.at.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>`;
+      const ends = !ranged ? '' : `<h3>${esc(A)} to ${esc(B)} <span class="count">${P.n} steps</span></h3>${within}`;
+      // The line under it is about the period's last step, or, for a power whose years lie outside the period, the period.
+      const absent = ranged && !(p.from <= s.year && p.to >= a.year) ? 'Did not exist during this time period.' : `Did not exist in ${yearLabel(s.year)}.`;
       panel.innerHTML = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(p.name)}</h2><p class="sub">${esc(p.region)} · ${yearLabel(p.from)} – ${p.to >= 2025 ? 'today' : yearLabel(p.to)}</p>
         ${ends}
-        ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${share(here.share, s.year)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">Did not exist in ${yearLabel(s.year)}.</p>`}
-        <h3>Over time</h3><p>Its largest estimated share was <b>${share(peak.share, peak.year)}</b> in ${yearLabel(peak.year)}.</p>
-        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>
+        ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${share(here.share, s.year)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">${absent}</p>`}
+        ${!series.length ? `<p>Its years, ${yearLabel(p.from)} to ${yearLabel(p.to)}, fall between the tracker's steps, so it has no share here.</p>`
+        : `<h3>Over time</h3><p>Its largest estimated share was <b>${share(peak.share, peak.year)}</b> in ${yearLabel(peak.year)}.</p>
+        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>`}
         ${series.some(x => rough(x.year)) ? `<p class="note">${esc(ROUGH)}</p>` : ''}
         <a class="btn" href="https://en.wikipedia.org/wiki/${encodeURIComponent(p.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>`;
       $('#close').onclick = () => select(null);
@@ -314,49 +375,69 @@
         <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(s.rest.pop)} people in smaller states, villages and foraging bands${s.year >= 1950 ? ', or other countries' : ''}</small></div><b>${share(s.rest.share, s.year)}</b></div>
         ${rough(a.year) ? `<p class="note">${esc(ROUGH)}</p>` : ''}<button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
     } else {
-      // The period's two ends: the largest shares at its last step with their change, the biggest risers and fallers
-      // among the powers at both ends, the powers new and gone (a successor state is new, its forerunner gone), and the
-      // regions, which carry on through such changes.
-      const inA = new Set(a.polities.map(x => x.id)), inB = new Set(s.polities.map(x => x.id));
-      const moves = s.polities.filter(x => inA.has(x.id)).map(x => ({ id: x.id, d: x.share - shareIn(a, x.id) }));
+      // The period as a whole: every power among the powers at any of its steps, each at its largest share there, with
+      // its year; the biggest risers and fallers from each power's first share within the period to its last; the
+      // powers new by its end (not there at its first step, there at its last), gone by its end (there at the first,
+      // not the last) and, over more than two steps, those that rose and fell inside it (at neither end), the three
+      // making up every power of the period but those at both ends (a successor state is new, its forerunner gone);
+      // the faded discs are the last two together; and, at its two ends, the regions, which carry on through such
+      // changes, and everyone else.
+      const moves = P.powers.filter(e => e.at.length > 1).map(e => ({ e, d: e.last.share - e.first.share }));
       const risers = moves.filter(m => m.d >= 0.0005).sort((x, y) => y.d - x.d).slice(0, 5), fallers = moves.filter(m => m.d <= -0.0005).sort((x, y) => x.d - y.d).slice(0, 5);
-      const moveRow = m => `<div class="rank" data-id="${m.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[m.id].region)}"></i><div>${esc(byId[m.id].name)}<small>${share(shareIn(a, m.id), a.year)} in ${esc(A)} → ${share(shareIn(s, m.id), s.year)} in ${esc(B)}</small></div><b class="${m.d > 0 ? 'prp-up' : 'prp-down'}">${points(m.d)}</b></div>`;
-      const names = (list, n = 12) => (list.length ? `<p class="plist">${list.slice(0, n).map(x => esc(byId[x.id].name)).join(', ')}${list.length > n ? `, and ${list.length - n} more` : ''}.</p>` : '<p class="empty">None.</p>');
-      const fresh = s.polities.filter(x => !inA.has(x.id)), gone = a.polities.filter(x => !inB.has(x.id));
+      const moveRow = ({ e, d: m }) => `<div class="rank" data-id="${e.id}" role="button" tabindex="0"><i style="background:${regionColor(byId[e.id].region)}"></i><div>${esc(byId[e.id].name)}<small>${share(e.first.share, e.first.year)} in ${yearLabel(e.first.year)} → ${share(e.last.share, e.last.year)} in ${yearLabel(e.last.year)}</small></div><b class="${m > 0 ? 'prp-up' : 'prp-down'}">${points(m)}</b></div>`;
+      const names = (list, n = 12) => (list.length ? `<p class="plist">${list.slice(0, n).map(x => esc(nameOf(x.id))).join(', ')}${list.length > n ? `, and ${list.length - n} more` : ''}.</p>` : '<p class="empty">None.</p>');
+      const fresh = P.powers.filter(e => !e.start && e.end), gone = P.powers.filter(e => e.start && !e.end), passing = P.powers.filter(e => !e.start && !e.end);
       const ra = byRegion(a), rb = byRegion(s), regions = REGIONS.filter(r => ra.has(r) || rb.has(r)).sort((x, y) => (rb.get(y) || 0) - (rb.get(x) || 0));
-      panel.innerHTML = `<h2>${esc(A)} to ${esc(B)}</h2><p class="sub">Humanity: ${people(a.worldPop)} → ${people(s.worldPop)} people · ${watts(a.worldWatts)} → ${watts(s.worldWatts)} · Kardashev ${a.K.toFixed(3)} → ${s.K.toFixed(3)}</p>
-        <h3>Largest shares in ${esc(B)} <span class="count">change since ${esc(A)}</span></h3>${top.map(p => rankRow(p, top[0]?.share, d(p), s.year)).join('')}
-        ${s.polities.length > 10 ? `<button class="more" id="see-more">See more (${s.polities.length - 10} more)</button>` : ''}
-        <div class="rank static"><i class="other-dot"></i><div>Everyone else<small>${people(a.rest.pop)} → ${people(s.rest.pop)} people outside the powers listed</small></div><div class="rv"><b>${share(s.rest.share, s.year)}</b>${chg(s.rest.share - a.rest.share)}</div></div>
-        ${risers.length ? `<h3>Risers <span class="count">${esc(A)} → ${esc(B)}</span></h3>${risers.map(moveRow).join('')}` : ''}
-        ${fallers.length ? `<h3>Fallers <span class="count">${esc(A)} → ${esc(B)}</span></h3>${fallers.map(moveRow).join('')}` : ''}
-        <h3>New since ${esc(A)} <span class="count">${fresh.length}</span></h3>${names(fresh)}
-        <h3>Gone since ${esc(A)} <span class="count">${gone.length}</span></h3>${names(gone)}
-        <h3>By region <span class="count">${esc(A)} → ${esc(B)}</span></h3>${regions.map(r => `<div class="regrow"><i style="background:${regionColor(r)}"></i><span>${esc(r)}</span><b>${share(ra.get(r) || 0, a.year)} → ${share(rb.get(r) || 0, s.year)} ${chg((rb.get(r) || 0) - (ra.get(r) || 0))}</b></div>`).join('')}
+      const ptop = P.powers.slice(0, 10);
+      panel.innerHTML = `<h2>${esc(A)} to ${esc(B)}</h2><p class="sub">${P.n} steps · ${P.powers.length} powers · Humanity: ${people(a.worldPop)} → ${people(s.worldPop)} people · ${watts(a.worldWatts)} → ${watts(s.worldWatts)} · Kardashev ${a.K.toFixed(3)} → ${s.K.toFixed(3)}</p>
+        <h3>Largest shares within the period <span class="count">each at its largest</span></h3>${ptop.map(e => periodRow(e, ptop[0].peak.share)).join('')}
+        ${P.powers.length > 10 ? `<button class="more" id="see-more">See more (${P.powers.length - 10} more)</button>` : ''}
+        ${risers.length ? `<h3>Risers <span class="count">first share within the period → last</span></h3>${risers.map(moveRow).join('')}` : ''}
+        ${fallers.length ? `<h3>Fallers <span class="count">first share within the period → last</span></h3>${fallers.map(moveRow).join('')}` : ''}
+        <h3>New by ${esc(B)} <span class="count">${fresh.length} · not among the powers in ${esc(A)}</span></h3>${names(fresh)}
+        <h3>Gone by ${esc(B)} <span class="count">${gone.length} · among the powers in ${esc(A)}</span></h3>${names(gone)}
+        ${P.n > 2 ? `<h3>Rose and fell within the period <span class="count">${passing.length} · at neither end</span></h3>${names(passing)}` : ''}
+        <h3>By region <span class="count">at the ends, ${esc(A)} → ${esc(B)}</span></h3>${regions.map(r => `<div class="regrow"><i style="background:${regionColor(r)}"></i><span>${esc(r)}</span><b>${share(ra.get(r) || 0, a.year)} → ${share(rb.get(r) || 0, s.year)} ${chg((rb.get(r) || 0) - (ra.get(r) || 0))}</b></div>`).join('')}
+        <div class="regrow"><i class="other-dot"></i><span>Everyone else</span><b>${share(a.rest.share, a.year)} → ${share(s.rest.share, s.year)} ${chg(s.rest.share - a.rest.share)}</b></div>
         <p class="note">Regions hold up better than single powers, whose borders and names changed in between. Bring the hollow start handle back onto the end for a single step.</p>
         ${rough(a.year) ? `<p class="note">${esc(ROUGH)}</p>` : ''}<button class="more" id="method" style="margin-top:12px">How these estimates are made</button>`;
     }
     wireRanks(panel, select);
-    $('#see-more')?.addEventListener('click', () => openModal(`All powers in ${yearLabel(s.year)}${ranged ? ` · change since ${A}` : ''}`, s.polities.map(p => rankRow(p, top[0]?.share, d(p), s.year)).join('')));
+    $('#see-more')?.addEventListener('click', () => (ranged
+      ? openModal(`All powers, ${A} to ${B} · each at its largest share within the period`, P.powers.map(e => periodRow(e, P.powers[0].peak.share)).join(''))
+      : openModal(`All powers in ${yearLabel(s.year)}`, s.polities.map(p => rankRow(p, top[0]?.share, d(p), s.year)).join(''))));
     $('#method').onclick = () => openModal('How these estimates are made', METHOD);
   }
 
-  // The table: the list view of what the map and chart show; over a period, both ends' shares and the change, then the
-  // powers gone by its last step.
+  // The table: the list view of what the map and chart show. Over a period, every power among the powers at any of its
+  // steps, by its largest share within it: that share, its step and at how many steps it was there; its shares at the
+  // period's two ends and the change; and its people, energy per person, power and rating at the step of its largest.
   function renderTable() {
     if (view !== 'table' || !data) return;
     const s = data.steps[idx], a = data.steps[fromIdx], ranged = isPeriod(), A = yearLabel(a.year), B = yearLabel(s.year);
-    const gone = ranged ? a.polities.filter(x => !s.polities.some(y => y.id === x.id)) : [];
-    $('#table-note').textContent = rough(a.year) ? `${ROUGH} Select a row for its record.` : 'Select a row for its record';
-    $('#table-title').textContent = ranged ? `Powers, ${A} to ${B} · ${s.polities.length + gone.length}` : `Powers in ${B} · ${s.polities.length}`;
-    $('#table-head').innerHTML = `<tr><th class="num">#</th><th>Empire or country</th><th>Region</th>${ranged ? `<th class="num">Share ${esc(A)}</th><th class="num">Share ${esc(B)}</th><th class="num">Change</th>` : '<th class="num">Share</th>'}<th class="num">People</th><th class="num">kcal per person a day</th><th class="num">Power</th><th class="num">Rating</th></tr>`;
-    const was = id => (a.polities.find(x => x.id === id)?.share ?? null);
-    const ends = (sa, sb) => (ranged ? `<td class="num">${sa == null ? '–' : share(sa, a.year)}</td><td class="num">${sb == null ? '–' : share(sb, s.year)}</td><td class="num">${sb == null ? '<span class="chg">gone</span>' : chg(sa == null ? NaN : sb - sa)}</td>` : `<td class="num">${share(sb, s.year)}</td>`);
     const cells = p => `<td><button type="button" class="rowbtn">${esc(byId[p.id].name)}</button></td><td><span class="dot" style="background:${regionColor(byId[p.id].region)}"></span>${esc(byId[p.id].region)}</td>`;
-    $('#table-rows').innerHTML = s.polities.map((p, i) => `<tr data-id="${p.id}"${p.id === selected ? ' class="sel"' : ''}><td class="num">${i + 1}</td>${cells(p)}${ends(was(p.id), p.share)}<td class="num">${people(p.pop)}</td>
-        <td class="num">${Math.round(p.kcal).toLocaleString('en-GB')}</td><td class="num">${watts(p.watts)}</td><td class="num">K ${p.K.toFixed(2)}</td></tr>`).join('') +
-      gone.map(p => `<tr data-id="${p.id}"${p.id === selected ? ' class="sel"' : ''}><td class="num"></td>${cells(p)}${ends(p.share, null)}<td class="num" colspan="4">gone by ${esc(B)}</td></tr>`).join('') +
-      `<tr><td></td><td class="name">Everyone else</td><td>—</td>${ends(ranged ? a.rest.share : null, s.rest.share)}<td class="num">${people(s.rest.pop)}</td><td class="num">–</td><td class="num">${watts(s.rest.watts)}</td><td class="num">–</td></tr>`;
+    const facts = p => `<td class="num">${people(p.pop)}</td>
+        <td class="num">${Math.round(p.kcal).toLocaleString('en-GB')}</td><td class="num">${watts(p.watts)}</td><td class="num">K ${p.K.toFixed(2)}</td>`;
+    if (ranged) {
+      const P = periodPowers();
+      $('#table-note').textContent = `${rough(a.year) ? `${ROUGH} ` : ''}People, energy, power and rating are each power's at the step of its largest share. Select a row for its record.`;
+      $('#table-title').textContent = `Powers, ${A} to ${B} · ${P.powers.length}`;
+      // Twelve columns, the largest share and its year in one cell, and headings that may wrap: so the table fits its
+      // panel at 1440 px (thirteen, on one line each, ran past it).
+      $('#table-rows').closest('table').classList.add('period');
+      $('#table-head').innerHTML = `<tr><th colspan="3"></th><th class="num" colspan="2">Within the period, ${P.n} steps</th><th class="num" colspan="3">At its ends</th><th class="num" colspan="4">At its largest share</th></tr>`
+        + `<tr><th class="num">#</th><th>Empire or country</th><th>Region</th><th class="num">Largest share</th><th class="num">Steps</th><th class="num">Share ${esc(A)}</th><th class="num">Share ${esc(B)}</th><th class="num">Change</th><th class="num">People</th><th class="num">kcal per person a day</th><th class="num">Power</th><th class="num">Rating</th></tr>`;
+      const ends = e => `<td class="num">${e.start ? share(e.start.share, a.year) : '–'}</td><td class="num">${e.end ? share(e.end.share, s.year) : '–'}</td><td class="num">${e.start && e.end ? chg(e.end.share - e.start.share) : `<span class="chg">${e.end ? 'new' : e.start ? 'gone' : 'rose and fell'}</span>`}</td>`;
+      $('#table-rows').innerHTML = P.powers.map((e, i) => `<tr data-id="${e.id}"${e.id === selected ? ' class="sel"' : ''}><td class="num">${i + 1}</td>${cells(e)}<td class="num">${share(e.peak.share, e.peak.year)} in ${yearLabel(e.peak.year)}</td><td class="num nowrap">${e.at.length} of ${P.n}</td>${ends(e)}${facts(e.peak)}</tr>`).join('') +
+        `<tr><td></td><td class="name">Everyone else</td><td>—</td><td class="num">–</td><td class="num">–</td><td class="num">${share(a.rest.share, a.year)}</td><td class="num">${share(s.rest.share, s.year)}</td><td class="num">${chg(s.rest.share - a.rest.share)}</td><td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">–</td></tr>`;
+    } else {
+      $('#table-rows').closest('table').classList.remove('period');
+      $('#table-note').textContent = rough(a.year) ? `${ROUGH} Select a row for its record.` : 'Select a row for its record';
+      $('#table-title').textContent = `Powers in ${B} · ${s.polities.length}`;
+      $('#table-head').innerHTML = '<tr><th class="num">#</th><th>Empire or country</th><th>Region</th><th class="num">Share</th><th class="num">People</th><th class="num">kcal per person a day</th><th class="num">Power</th><th class="num">Rating</th></tr>';
+      $('#table-rows').innerHTML = s.polities.map((p, i) => `<tr data-id="${p.id}"${p.id === selected ? ' class="sel"' : ''}><td class="num">${i + 1}</td>${cells(p)}<td class="num">${share(p.share, s.year)}</td>${facts(p)}</tr>`).join('') +
+        `<tr><td></td><td class="name">Everyone else</td><td>—</td><td class="num">${share(s.rest.share, s.year)}</td><td class="num">${people(s.rest.pop)}</td><td class="num">–</td><td class="num">${watts(s.rest.watts)}</td><td class="num">–</td></tr>`;
+    }
     $('#table-rows').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => select(tr.dataset.id));
   }
 
@@ -381,7 +462,8 @@
     const ticks = data.steps.map((s, i) => i).filter(i => tickYears.includes(data.steps[i].year));
     svgC.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickValues(ticks).tickFormat(i => yearLabel(data.steps[i].year)).tickSizeOuter(0));
     svgC.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(2).tickFormat(d3.format('.0%')).tickSizeOuter(0));
-    // The step shown (dashed), and a period's first step (dotted).
+    // The step shown (dashed), and a period's first step (dotted), with the period shaded between them.
+    svgC.append('rect').attr('class', 'periodband').attr('id', 'periodband').attr('y', m.t).attr('height', h - m.b - m.t);
     svgC.append('line').attr('class', 'fromline').attr('id', 'fromline').attr('y1', m.t).attr('y2', h - m.b);
     svgC.append('line').attr('class', 'yearline').attr('id', 'yearline').attr('y1', m.t).attr('y2', h - m.b);
     // A click on the chart moves the timeline there: one step travels; over a period, the nearer handle moves.
@@ -399,6 +481,7 @@
     const x = drawChart.x; if (!x) return;
     d3.select('#yearline').attr('x1', x(idx)).attr('x2', x(idx));
     d3.select('#fromline').attr('x1', x(fromIdx)).attr('x2', x(fromIdx)).attr('visibility', isPeriod() ? null : 'hidden');
+    d3.select('#periodband').attr('x', x(fromIdx)).attr('width', Math.max(0, x(idx) - x(fromIdx))).attr('visibility', isPeriod() ? null : 'hidden');
   }
   function renderRegions() {
     const used = new Set(data.polities.map(p => p.region));
@@ -406,7 +489,9 @@
   }
   const CAPTION = $('#caption').innerHTML;
   function renderCaption() {
-    $('#caption').innerHTML = !isPeriod() ? CAPTION : `(a) Each power's capital, its disc sized by its estimated share of world energy capture in ${esc(yearLabel(data.steps[idx].year))} and its dashed ring by its share in ${esc(yearLabel(data.steps[fromIdx].year))}, coloured by region. (b) The shares of the sixteen largest powers over time, stacked, with everyone else in grey; the dotted line marks ${esc(yearLabel(data.steps[fromIdx].year))} and the dashed line ${esc(yearLabel(data.steps[idx].year))}.`;
+    if (!isPeriod()) { $('#caption').innerHTML = CAPTION; return; }
+    const P = periodPowers(), A = esc(yearLabel(data.steps[fromIdx].year)), B = esc(yearLabel(data.steps[idx].year));
+    $('#caption').innerHTML = `(a) Every power among the powers at any of the ${P.n} steps from ${A} to ${B}, at its capital, sized by its largest estimated share of world energy capture at any one step and coloured by region; faded, those not among them in ${B}. (b) The sixteen largest powers' shares over time, stacked, with everyone else in grey; the period shaded.`;
   }
 
   function writeHash() {
@@ -489,10 +574,13 @@
   };
 
   const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  // The address: #y= is a step year (exactly, else the step shown stays); an f at or after it, or unreadable, is one step;
-  // an address with no year at all opens on the step before the one shown and that one.
+  // The address: #y= is a year, shown at its step or, between steps, the nearest (a tie goes to the earlier, as Neo
+  // Book's kardashevStep does: the Master Index's #y=1206 opens 1200); an unreadable one leaves the step shown; an f at
+  // or after it, or unreadable, is one step; an address with no year at all opens on the step before the one shown and
+  // that one.
   function readHash() {
-    const h = new URLSearchParams(location.hash.slice(1)), k = data.steps.findIndex(s => s.year === +h.get('y'));
+    const h = new URLSearchParams(location.hash.slice(1)), y = h.get('y') ? +h.get('y') : NaN;
+    const k = Number.isFinite(y) ? data.steps.reduce((b, s, i) => (Math.abs(s.year - y) < Math.abs(data.steps[b].year - y) ? i : b), 0) : -1;
     const to = data.steps[k >= 0 ? k : idx].year;
     return { to, from: PRPPeriod.rules.readStart(period.get().stops, h.get('f'), to, 'end', !h.get('y') && !h.get('f')), p: byId[h.get('p')] ? h.get('p') : null, v: h.get('v') === 'table' ? 'table' : 'map' };
   }

@@ -1127,6 +1127,104 @@ test('page NA-05 review: years shown honestly, movers like for like, failures sa
   assert.deepEqual(errors, []);
 });
 
+// The NA-05 second review (16 Nov 2026): three faults a second reviewer found, each shown failing first. Every expected
+// figure is again worked out from the committed data with the shared rule.
+async function naPage(t) {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const drawn = () => page.waitForFunction(() => window.__naDrawn && window.__naDrawn.view === document.querySelector('#yrlabel').textContent, null, { timeout: 20000 });
+  const open = async hash => { await page.goto('about:blank'); await page.goto(`${BASE}/q/national${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 }); await page.waitForSelector('#rows tr', { state: 'attached', timeout: 20000 }); await drawn(); };
+  return { page, errors, open };
+}
+
+// X1. Sorting a period by Change ranks only the like-for-like changes, as Rose most and Fell most do: a change that is
+// not like for like (or rests on a score under the floor) sorts with the no-values, after every ranked change, by name,
+// in both directions, and its cell keeps its figure and its "not ranked" mark.
+test('page NA-05 second review: sorting a period by Change ranks like-for-like changes only, as the movers do', pageTest, async t => {
+  const PL = await import('../national/lib/pestle.js');
+  const n = read('national/data/index.json');
+  const P = read(YEARS + 'pressure.json'), cellAt = (iso, y) => PL.pressureOf(P.values[P.countries.indexOf(iso)]?.[y - P.from]);
+  const { page, errors, open } = await naPage(t);
+  const want = dir => PL.rank(n.countries, c => { const a = cellAt(c.iso3, 1981), b = cellAt(c.iso3, 1982), d = PL.changeOf(a?.overall, b?.overall); return d != null && PL.comparable(a, b) ? d : null; }, dir).map(c => c.iso3);
+  const order = () => page.$$eval('#rows tr', rs => rs.map(r => r.dataset.iso));
+  await open('#map&from=1981&year=1982');
+  assert.equal(await page.$eval('#thead [data-sort="change"]', b => b.closest('th').getAttribute('aria-sort')), 'descending', 'a period opens sorted by Change');
+  const down = await order();
+  assert.notEqual(down[0], 'CHI', 'the Channel Islands (one dimension at each end) does not head the ranking');
+  assert.deepEqual(down, want(-1), 'highest ranked change first, then the rest by name');
+  const chi = await page.$$eval('#rows tr[data-iso="CHI"] td', tds => tds.map(td => td.textContent.trim()));
+  assert.match(chi[5], /^\+100 pts\s*not ranked$/, `the Channel Islands' change keeps its figure and mark: ${chi[5]}`);
+  assert.match(chi[3], /too few/); assert.match(chi[4], /too few/);
+  await page.click('#thead [data-sort="change"]');
+  await page.waitForFunction(() => document.querySelector('#thead [data-sort="change"]').closest('th').getAttribute('aria-sort') === 'ascending');
+  assert.deepEqual(await order(), want(1), 'lowest ranked change first, then the rest by name');
+  assert.deepEqual(errors, []);
+});
+
+// X2. A country's series that fails to load is never drawn as "no value": the profile and Compare say it could not load,
+// as the map does, and the next move asks for it again.
+test('page NA-05 second review: a country\'s series that fails to load is not drawn as "no value", in the profile or Compare', pageTest, async t => {
+  const n = read('national/data/index.json'), LE = 'SP.DYN.LE00.IN', leLabel = n.indicators.find(i => i.code === LE).label;
+  const ie = read('national/data/series/IRL.json')[LE], at = y => ie.find(p => p[0] === y)?.[1];
+  const { page, errors, open } = await naPage(t);
+  let fail = true, asked = 0;
+  await page.route('**/national/data/series/IRL.json', r => { asked++; return fail ? r.fulfill({ status: 503, body: 'unavailable' }) : r.continue(); });
+  const leRow = () => page.$eval(`#profile .ind[data-code="${LE}"]`, el => el.textContent);
+  await open('#country=IRL&year=2010');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Ireland' && /could not load/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 });
+  assert.doesNotMatch(await page.textContent('#profile'), /No value for 2010/, 'a failed load is not "no value"');
+  assert.match(await leRow(), /could not load/i, `life expectancy (${at(2010)} in 2010): ${await leRow()}`);
+  // The next move asks again, and draws what the data says.
+  fail = false;
+  const before = asked;
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(code => /\b2011\b/.test(document.querySelector(`#profile .ind[data-code="${code}"]`)?.textContent || ''), LE, { timeout: 20000 });
+  assert.ok(asked > before, 'the series was asked for again');
+  assert.equal(await page.$eval(`#profile .ind[data-code="${LE}"] .v`, el => el.textContent), at(2011).toFixed(1));
+  assert.doesNotMatch(await page.textContent('#tnote'), /could not load/);
+
+  // Compare: the same, beside a country whose series loads.
+  fail = true;
+  await open('#compare=IRL,FRA&year=2010');
+  await page.waitForFunction(() => [...document.querySelectorAll('#compare .cmp tbody tr')].length > 5 && /could not load/.test(document.querySelector('#tnote').textContent), null, { timeout: 20000 });
+  const cells = await page.$$eval('#compare .cmp tbody tr', (rs, l) => { const r = rs.find(x => x.firstElementChild?.textContent === l); return [...r.querySelectorAll('td.num')].map(td => td.textContent); }, leLabel);
+  assert.match(cells[0], /could not load/i, `Ireland's life expectancy: ${cells[0]}`);
+  assert.doesNotMatch(cells[0], /no value/i);
+  assert.ok(cells[1] && !/could not load|no value/i.test(cells[1]), `France's life expectancy: ${cells[1]}`);
+  await page.waitForFunction(() => /could not load/i.test(document.querySelector('#cmpcap')?.textContent || ''));
+  assert.deepEqual(errors, []);
+});
+
+// X3. Whichever render finishes last and draws leaves the map neither busy nor dimmed; a render that a later move has
+// replaced leaves nothing set.
+test('page NA-05 second review: a render that replaces one still loading leaves the map neither busy nor dimmed', pageTest, async t => {
+  const LE = 'SP.DYN.LE00.IN';
+  const { page, errors, open } = await naPage(t);
+  await open(`#map&measure=wb:${LE}`);
+  let finished;
+  const oldDone = new Promise(res => { finished = res; });
+  await page.route('**/national/data/years/**', async r => { await new Promise(res => setTimeout(res, 1500)); await r.continue(); finished(); });
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true');
+  const t0 = await page.evaluate(() => window.__naDrawn.at);
+  await page.click('#yr-latest');
+  await page.waitForFunction(a => window.__naDrawn.at > a && window.__naDrawn.view === 'Latest', t0);
+  assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false', 'Latest is drawn, so the map is not busy');
+  await oldDone;
+  await page.waitForTimeout(600);
+  assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false', 'still not busy once the old request has finished');
+  assert.equal(await page.$eval('#map', el => getComputedStyle(el).opacity), '1', 'not dimmed');
+  assert.equal(await page.textContent('#yrlabel'), 'Latest');
+  assert.doesNotMatch(await page.textContent('#maptitle'), /loading/);
+  await page.unroute('**/national/data/years/**');
+  assert.deepEqual(errors, []);
+});
+
 // NA-03 (15 Nov 2026): a Wikidata label that carries its holder's realm is shown as the name alone, in the build and
 // in the data the page reads; a note in brackets, a party and a plain name are left as they are.
 test('leaders: a name is shown without its realm ("Mohammed VI of Morocco" is "Mohammed VI"), in the data too', async () => {

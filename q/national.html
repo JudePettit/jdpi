@@ -228,8 +228,9 @@ let PL = null, PR = null, dataVer = 0;
 const isoIdx = new Map(); // ISO3 → its row in every layer file (index.json's order, which the manifest repeats)
 const seriesCache = new Map(), seriesData = new Map(), layerCache = new Map(), layerData = new Map();
 const got = () => { dataVer++; };
-// (A series that fails to load is not kept: the next draw asks for it again.)
-const series = iso => { if (!seriesCache.has(iso)) seriesCache.set(iso, fetch(`../national/data/series/${iso}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(s => { seriesData.set(iso, s); got(); return s; }, () => { seriesCache.delete(iso); return {}; })); return seriesCache.get(iso); };
+// (A series that fails to load rejects and is not kept: the next draw asks for it again. It is never drawn as "no
+// value": the profile and Compare keep what was showing, or say the figures could not load, and the note says so.)
+const series = iso => { if (!seriesCache.has(iso)) seriesCache.set(iso, fetch(`../national/data/series/${iso}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(s => { seriesData.set(iso, s); got(); return s; }, e => { seriesCache.delete(iso); throw e; })); return seriesCache.get(iso); };
 const YEARS = '../national/data/years/';
 let pressureP = null;
 // A file that fails to load rejects and is forgotten, so the next move asks for it again; a failure is never drawn as
@@ -578,9 +579,11 @@ function renderTable() {
   // figure instead of falling back to the names.
   const key = P && sortKey === 'change' && !D.countries.some(c => chg(m, c) != null) ? 'period' : sortKey;
   $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'name' || k === 'region' ? '' : 'num'}${k === 'metric' || k === 'start' ? ' wrap' : ''}" aria-sort="${key === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${key === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
-  // Ranked as shown: a score below the floor is ranked with no value.
+  // Ranked as shown: a score below the floor is ranked with no value; a change that is not like for like (likeForLike,
+  // as in Rose most and Fell most) is ranked with no value too, though its cell keeps its figure and its mark.
+  const rankedChg = c => { const d = chg(m, c); return d != null && likeForLike(m, c).ok ? d : null; };
   const val = (c, k) => k === 'name' ? c.name : k === 'region' ? c.region : k === 'metric' ? m.show(c) : k === 'overall' ? OVERALL().show(c) : k === 'coverage' ? fr(c).coverage
-    : k === 'start' ? m.show(c, 'start') : k === 'end' ? m.show(c, 'end') : k === 'change' ? chg(m, c) : pm.show(c);
+    : k === 'start' ? m.show(c, 'start') : k === 'end' ? m.show(c, 'end') : k === 'change' ? rankedChg(c) : pm.show(c);
   const list = PL.rank(D.countries.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || c.region === reg)), c => val(c, key), sortDir);
   $('#ctitle').textContent = `Countries · ${list.length}`;
   const bar = v => `<span class="bar" data-p="${v ?? ''}" style="width:${(v || 0) * 60}px;background:${pressColour(v)}"></span>`;
@@ -688,9 +691,16 @@ async function renderProfile() {
   if (!c) return;
   $('#pname').textContent = ' · ' + c.name;
   const tok = ++profileTok;
-  const s = await series(c.iso3);
+  const s = await series(c.iso3).catch(() => null);
   try { await ensureData(); } catch { return; } // (rerender() says the figures could not load, and goes back)
   if (tok !== profileTok || selected !== c.iso3) return;
+  // The country's series could not load: the note says so, and the profile that was showing stays (only its button
+  // follows the comparison); a first open draws what index.json and the years' files give, and "could not load" in
+  // place of each figure that needed the series.
+  if (!s) {
+    seriesNote(c.name);
+    if (profileShown === c.iso3) { const b = $('#addcmp'), on = compare.includes(c.iso3); if (b) { b.setAttribute('aria-pressed', String(on)); b.classList.toggle('primary', !on); b.textContent = on ? '✓ In comparison' : '+ Add to comparison'; } return; }
+  } else seriesOk();
   const L = c.leadership, K = c.conflict, md = mode(), P = fr(c), Y = view.to;
   // A figure, a note under it, and its source with its own date (src, plain text).
   const stat = (label, value, small = '', src = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}${src ? `<small class="src">${esc(src)}</small>` : ''}</div>`;
@@ -709,10 +719,11 @@ async function renderProfile() {
       ${inds.map(i => {
         // The frame's value: at Latest the newest (against the previous within five years), in a year that year's or
         // one up to two years older, in a period the last against the first inside it.
-        const all = s[i.code] || [], it = P.item(i.code);
+        // (it undefined: its values are in the series that could not load, not "no value".)
+        const all = s?.[i.code] || [], it = P.item(i.code);
         const last = it ? [it[0], it[1]] : null, first = it && it[2] != null ? all.find(p => p[0] === it[2]) || null : null;
         const ch = it && it[3] != null ? it[3] : null, mv = it ? it[4] : null;
-        const when = !it ? (md === 'latest' ? '' : md === 'year' ? ` · No value for ${Y}${(e => (e ? ` (latest earlier ${e})` : ''))(PL.earlierYear(all, Y - PL.MAX_AGE))}` : ` · No value in ${whenText()}`)
+        const when = it === undefined ? ' · could not load' : !it ? (md === 'latest' ? '' : md === 'year' ? ` · No value for ${Y}${(e => (e ? ` (latest earlier ${e})` : ''))(PL.earlierYear(all, Y - PL.MAX_AGE))}` : ` · No value in ${whenText()}`)
           : md === 'period' ? ` · ${first ? `${first[0]}: ${fmtVal(first[1], i.unit)} → ` : ''}${last[0]}` : ` · ${last[0]}${md === 'year' && last[0] < Y ? ' (earlier value)' : ''}`;
         const mark = md === 'latest' ? null : md === 'year' ? [Y] : [view.from, isLatest(Y) ? LAST : Y];
         return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a></small></div>
@@ -757,6 +768,7 @@ async function renderProfile() {
     <div class="dims">${dimHtml}</div>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
+  profileShown = c.iso3;
   $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
   fillMonthly(c);
   try {
@@ -834,13 +846,19 @@ async function renderCompare(focus) {
   if (!compare.length) {
     $('#compare').innerHTML = `<div class="prp-panel"><div class="prp-panel-head"><b>Compare countries</b></div>${cmpPicker()}<div class="prp-empty">Add up to four countries above. You can also tick them in the list, or use “Add to comparison” on a profile.</div></div>`;
     wireCmpPicker(focus);
+    compareShown = null;
     return;
   }
   const tok = ++compareTok;
-  await Promise.all(compare.map(series)); // each country's series: its figures for any year or period
+  // Each country's series: its figures for any year or period. One that could not load is said, as on the profile:
+  // the comparison that was showing stays, or a first draw says "could not load" in place of the figures it needed.
+  const lost = (await Promise.all(compare.map(i => series(i).then(() => null, () => i)))).filter(Boolean);
   try { await ensureData(); } catch { return; }
   if (tok !== compareTok) return;
+  if (lost.length) { seriesNote(lost.map(i => byIso.get(i)?.name || i).join(', ')); if (compareShown === compare.join(',')) return; }
+  else seriesOk();
   const cs = compare.map(i => byIso.get(i)).filter(Boolean), md = mode();
+  const lostAt = (m, c) => !!m.code && (md === 'period' ? [fr(c, 'start'), fr(c, 'end')] : [fr(c)]).some(F => F.item(m.code) === undefined);
   const groups = [...new Set(METRICS.map(m => m.group))];
   // A period: each row is the change from its first year to its last (the PESTLE rows: the pressure over the period).
   // A PESTLE score says "partial: n of 6" where it rests on fewer than six dimensions, and "too few" below the floor;
@@ -854,7 +872,7 @@ async function renderCompare(focus) {
     const nums = vals.filter(eligible);
     const best = m.better && nums.length > 1 ? (m.better === 'up' ? Math.max(...nums) : Math.min(...nums)) : null;
     const worst = m.better && nums.length > 1 ? (m.better === 'up' ? Math.min(...nums) : Math.max(...nums)) : null;
-    const hint = (v, i) => { const raw = m.press ? m.get(cs[i]) : null; return v == null && raw != null ? `too few (${m.fmt(raw)}, ${Fs[i].dims} of 6)` : v != null || m.timeless || md === 'latest' ? '' : noVal; };
+    const hint = (v, i) => { if (lostAt(m, cs[i])) return '<span class="nv">could not load</span>'; const raw = m.press ? m.get(cs[i]) : null; return v == null && raw != null ? `too few (${m.fmt(raw)}, ${Fs[i].dims} of 6)` : v != null || m.timeless || md === 'latest' ? '' : noVal; };
     const part = (v, i) => (m.press && v != null && Fs[i].dims < 6 ? `<span class="rk">partial: ${Fs[i].dims} of 6</span>` : '');
     return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map((v, i) => { const ok = eligible(v, i), k = ok && v === best ? 'best' : ok && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${hint(v, i) || fmt(v)}${v != null && md !== 'period' ? yearTag(m, cs[i]) : ''}${part(v, i)}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
   };
@@ -880,23 +898,25 @@ async function renderCompare(focus) {
   wireCmpPicker(focus);
   $('#cmpind').onchange = () => { cmpCode = $('#cmpind').value; drawCmpChart(); };
   $('#cmpdt').ontoggle = drawCmpTable;
+  compareShown = compare.join(',');
   drawCmpChart();
 }
-let cmpData = null;
+let cmpData = null, compareShown = null;
 async function drawCmpChart() {
   const code = $('#cmpind').value, ind = indBy.get(code), svg = d3.select('#cmpsvg'); svg.selectAll('*').remove();
-  const data = await Promise.all(compare.map(async (iso, i) => ({ c: byIso.get(iso), i, pts: (await series(iso))[code] || [] })));
+  // (A series that could not load is drawn as no line, and the caption says so: not as "no data".)
+  const data = await Promise.all(compare.map(async (iso, i) => { const s = await series(iso).catch(() => null); return { c: byIso.get(iso), i, pts: s?.[code] || [], lost: !s }; }));
   if ($('#cmpind')?.value !== code) return;
-  const all = data.flatMap(d => d.pts);
+  const all = data.flatMap(d => d.pts), lost = data.filter(d => d.lost).map(d => d.c.name);
   cmpData = { ind, data, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
   const marked = mode() === 'year' ? ` The rule marks ${view.to}.` : mode() === 'period' ? ` The band marks ${whenText()}.` : '';
-  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked} Source: World Bank.`;
+  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : lost.length ? 'not loaded' : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked}${lost.length ? ` The figures for ${lost.join(', ')} could not load.` : ''} Source: World Bank.`;
   drawCmpTable();
   // Drawn at the figure's real width, so text stays at its set size; redrawn when the window resizes.
   const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = W < 560 ? 240 : 300;
   const M = { l: 58, r: Math.min(150, Math.round(W * 0.27)), t: 12, b: 28 };
   svg.attr('viewBox', `0 0 ${W} ${H}`);
-  if (!all.length) { svg.append('text').attr('class', 'empty').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text('No data for these countries'); return; }
+  if (!all.length) { svg.append('text').attr('class', 'empty').attr('x', W / 2).attr('y', H / 2).attr('text-anchor', 'middle').text(lost.length ? 'The figures could not load' : 'No data for these countries'); return; }
   const x = d3.scaleLinear().domain(d3.extent(all, p => p[0])).range([M.l, W - M.r]), y = d3.scaleLinear().domain(d3.extent(all, p => p[1])).nice().range([H - M.b, M.t]);
   svg.append('g').attr('class', 'gridlines').selectAll('line').data(y.ticks(5)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', v => y(v)).attr('y2', v => y(v));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - M.b})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(Math.max(3, Math.min(8, Math.floor((W - M.l - M.r) / 70)))).tickSizeOuter(0));
@@ -935,7 +955,7 @@ function drawCmpTable() {
   if (!box) return;
   if (!$('#cmpdt').open || !cmpData) { box.innerHTML = ''; return; }
   const { ind, data, years } = cmpData;
-  box.innerHTML = years.length ? `<div class="tbl"><table class="prp-table"><thead><tr><th scope="col">Year</th>${data.map(d => `<th scope="col" class="num">${esc(d.c.name)}</th>`).join('')}</tr></thead><tbody>${[...years].reverse().map(yr => `<tr><td class="prp-num">${yr}</td>${data.map(d => { const p = d.pts.find(q => q[0] === yr); return `<td class="num">${p ? fmtVal(p[1], ind.unit) : '–'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : '<p class="muted">No data for these countries.</p>';
+  box.innerHTML = years.length ? `<div class="tbl"><table class="prp-table"><thead><tr><th scope="col">Year</th>${data.map(d => `<th scope="col" class="num">${esc(d.c.name)}${d.lost ? ' (could not load)' : ''}</th>`).join('')}</tr></thead><tbody>${[...years].reverse().map(yr => `<tr><td class="prp-num">${yr}</td>${data.map(d => { const p = d.pts.find(q => q[0] === yr); return `<td class="num">${p ? fmtVal(p[1], ind.unit) : d.lost ? '' : '–'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>` : `<p class="muted">${data.some(d => d.lost) ? 'The figures could not load.' : 'No data for these countries.'}</p>`;
 }
 
 /* ---------- tabs and URL ---------- */
@@ -1068,10 +1088,11 @@ async function rerender() {
       writeHash();
       return;
     }
-    if (tok !== drawTok) return;
-    busy(false);
-    $('#yrlabel').textContent = whenText();
+    if (tok !== drawTok) return; // (a later move has taken over: it clears the busy state when it draws)
   }
+  // Whichever render draws clears the busy state, also one set by an earlier render this one replaced.
+  busy(false);
+  $('#yrlabel').textContent = whenText();
   const t0 = performance.now();
   colourMap(); renderTable(); renderMovers(); paintStrip();
   lastDrawn = { from: view.from, to: view.to, metric: $('#metric').value };
@@ -1095,6 +1116,11 @@ function showNote() { const text = msg || autoNote(); $('#tnote').textContent = 
 // A measure that is not by year shows today's figures: choosing one returns the slider to Latest, and moving the
 // slider off Latest with one chosen colours the map by overall pressure instead, with a note saying so.
 function note(text) { msg = text || ''; showNote(); }
+// A country's series that could not load (the profile and Compare): the note says so, as for the map's files, and goes
+// once a draw has the series (only that note: one the map wrote stays).
+let seriesMsg = '', profileShown = null;
+function seriesNote(names) { seriesMsg = `The figures for ${names}, ${whenText()}, could not load. Move the slider again to retry.`; note(seriesMsg); }
+function seriesOk() { if (seriesMsg && msg === seriesMsg) note(''); seriesMsg = ''; }
 const period = PRPPeriod.mount($('#years'), {
   rest: 'end', labels: y => yname(y),
   ids: { from: 'yr-from', to: 'yr', prev: 'yr-prev', play: 'yr-play', next: 'yr-next' },

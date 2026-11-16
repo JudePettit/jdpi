@@ -3,7 +3,9 @@
 // - PESTLE pressure, exactly as Country PESTLE scored it: for each of its 22 World Bank indicators, the latest value is
 //   compared with the previous one; past the indicator's threshold it is "improving" or "worsening". A dimension's
 //   pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the dimensions.
-//   Decade view: first vs last value within each decade.
+//   Decade view: first vs last value within each decade (kept in index.json; the page has moved to the yearly layer).
+//   The rule is national/lib/pestle.js. The yearly layer, national/data/years/ (years.mjs), holds every indicator by
+//   year and each year's pressure (that year's values, or ones up to two years older), for the time slider (NA-05).
 // - Extra World Bank metrics (debt, military spending, trade, homicide, poverty, patents…), shown and compared.
 // - Country overview from JDP-I data: system of government (Wikidata), leaders since 1926 and average tenure
 //   (H&P Retrospective), armed conflict 1946–2025 (UCDP/PRIO, as in Retrospective Battlefield), wars this year
@@ -26,6 +28,8 @@ import { headsFromRows, applyCorrections, currentLeader, leaderOffice, readAtlas
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
+import { scorePeriod as scoreWith, latestPick, decadePick } from '../lib/pestle.js';
+import { yearsFiles, writeYears } from './years.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -147,31 +151,9 @@ for (const ind of INDICATORS) {
   await sleep(250);
 }
 
-// ---- PESTLE scoring (Country PESTLE's method)
-function movement(ind, from, to) {
-  if (!from || !to || ind.better == null) return null;
-  const change = to[1] - from[1];
-  if (Math.abs(change) <= ind.threshold) return 'stable';
-  return (change > 0) === (ind.better === 'up') ? 'improving' : 'worsening';
-}
-function scorePeriod(s, pick) {
-  const items = {}, dims = {};
-  for (const ind of INDICATORS) {
-    const pts = s[ind.code] || [];
-    const [from, to] = pick(pts);
-    const mv = movement(ind, from, to);
-    if (to) items[ind.code] = [to[0], to[1], from ? from[0] : null, from ? round(to[1] - from[1], 4) : null, mv];
-    if (!ind.core || !mv) continue;
-    const d = (dims[ind.dimension] ||= { worsening: 0, scored: 0 });
-    d.scored++; if (mv === 'worsening') d.worsening++;
-  }
-  const pressure = Object.fromEntries(DIMENSIONS.map(k => [k, dims[k]?.scored ? round(dims[k].worsening / dims[k].scored, 3) : null]));
-  const vals = Object.values(pressure).filter(v => v != null);
-  const core = INDICATORS.filter(i => i.core);
-  return { items, pressure, overall: vals.length ? round(vals.reduce((a, b) => a + b, 0) / vals.length, 3) : null, coverage: round(core.filter(i => items[i.code]).length / core.length, 3) };
-}
-const latestPick = pts => { const to = pts.at(-1); if (!to) return [null, null]; const from = [...pts].reverse().find(p => p[0] < to[0] && p[0] >= to[0] - 5); return [from || null, to]; };
-const decadePick = d => pts => { const inD = pts.filter(p => p[0] >= d && p[0] < d + 10); return inD.length >= 2 ? [inD[0], inD.at(-1)] : [null, inD[0] || null]; };
+// ---- PESTLE scoring (Country PESTLE's method): national/lib/pestle.js, the one rule the page and the yearly layer use too
+// (latestPick for Latest, decadePick for the decades kept in index.json until nothing reads them, yearPick for a year).
+const scorePeriod = (s, pick) => scoreWith(s, pick, INDICATORS, DIMENSIONS);
 
 // ---- JDP-I data for the overview
 const { COUNTRIES: RETRO_COUNTRIES } = existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : { COUNTRIES: {} };
@@ -324,6 +306,9 @@ const index = {
   indicators: INDICATORS.map(({ code, dimension, label, unit, better, threshold, core, source }) => ({ code, dimension, label, unit, better, threshold, core, source })),
   countries,
 };
+// The yearly layer (national/data/years/, years.mjs): every country's indicators and PESTLE pressure by year, for the
+// page's time slider and the Omni-Map.
+writeYears(OUT, yearsFiles(index, new Map(wbCountries.map(c => [c.id, series.get(c.id)])), INDICATORS));
 writeFileSync(join(OUT, 'index.json'), JSON.stringify(index));
 writeBrief(index); // the small file Geopolitical Volatility reads (brief.mjs)
 writeHeads(join(OUT, 'index.json'), { root: jdpi }); // index.head.json in step with it (integration/scripts/heads.mjs)

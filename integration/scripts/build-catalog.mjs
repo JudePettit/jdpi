@@ -56,6 +56,8 @@ const SUBMODULE_URL = {};
 for (const s of REG.suites) for (const m of s.modules) SUBMODULE_URL[m.id] = m.url || m.pendingUrl || null;
 
 const NAT = J('national/data/index.json');
+// National Analysis's yearly layers (national/scripts/years.mjs, NA-05): the Omni-Map's wb:<code> fills.
+const NAT_LAYERS = new Map((has('national/data/years/manifest.json') ? J('national/data/years/manifest.json').layers : []).map(l => [l.id, l]));
 const VOL = J('volatility/data/index.json');
 // The index's own method id, so the Hub's copies name the method that scored them (it was written in here as gvi-1.1).
 const VOL_LICENCE = `Index © JDP-Iq (method ${VOL.method}); GDELT data free to use with attribution to the GDELT Project.`;
@@ -246,11 +248,13 @@ spec({
 });
 spec({
   id: 'national-indicators', title: 'National Analysis: indicator definitions', module: 'rt', submodule: 'pestle',
-  description: 'The 41 indicators behind National Analysis: PESTLE dimension, unit, which direction is better and the change that counts as improving or worsening.',
-  derive: () => NAT.indicators.map(i => ({ code: i.code, label: i.label, dimension: i.dimension, unit: i.unit, better: i.better, threshold: i.threshold ?? null, scored: !!i.core })),
-  from: ['national/data/index.json'], refresh: 'monthly', updatedFrom: 'national/data/index.json', page: 'q/national.html',
+  description: 'The 41 indicators behind National Analysis: PESTLE dimension, unit, which direction is better and the change that counts as improving or worsening, and each one\'s yearly map layer (every country, every year, in national/data/years/, described by its manifest.json: the layers the time slider and the Omni-Map read).',
+  derive: () => NAT.indicators.map(i => { const l = NAT_LAYERS.get('wb:' + i.code); return { code: i.code, label: i.label, dimension: i.dimension, unit: i.unit, better: i.better, threshold: i.threshold ?? null, scored: !!i.core,
+    layer: l ? l.id : null, layer_file: l?.data || null, first_year: l?.time?.from ?? null, last_year: l?.time?.to ?? null }; }),
+  from: ['national/data/index.json', 'national/data/years/manifest.json'], refresh: 'monthly', updatedFrom: 'national/data/index.json', page: 'q/national.html',
   licence: 'World Bank CC BY 4.0; definitions © JDP-Iq.', sources: ['World Bank World Development Indicators and Worldwide Governance Indicators'],
-  fields: [['code', 'World Bank indicator code'], ['label', 'Indicator'], ['dimension', 'PESTLE dimension'], ['unit', 'Unit'], ['better', 'up or down: which direction is an improvement'], ['threshold', 'Change between the last two values that counts as improving or worsening'], ['scored', 'True when the indicator counts towards the PESTLE pressure scores']]
+  fields: [['code', 'World Bank indicator code'], ['label', 'Indicator'], ['dimension', 'PESTLE dimension'], ['unit', 'Unit'], ['better', 'up or down: which direction is an improvement'], ['threshold', 'Change between the last two values that counts as improving or worsening'], ['scored', 'True when the indicator counts towards the PESTLE pressure scores'],
+    ['layer', 'Its yearly map layer\'s id (wb:<code>) in national/data/years/manifest.json, or null when the World Bank serves no values'], ['layer_file', 'The layer\'s file: every country (ISO3, in the manifest\'s order) by year, null where there is no value'], ['first_year', 'First year with a value in the layer'], ['last_year', 'Last year with a value in the layer']]
 });
 spec({
   id: 'national-indicator-latest', title: 'National Analysis: latest indicator values', module: 'rt', submodule: 'pestle',

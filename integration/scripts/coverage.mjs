@@ -807,7 +807,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   // scope-text
   const textFiles = [];
   const SKIP = new Set(['node_modules', '.git', 'raw', 'build']);
-  const SKIP_PATHS = ['lake/data/e', 'lake/data/t', 'bibliotheca/data/books', 'national/data/series', 'volatility/data/days', 'integration/data/countries', 'calendar/data', 'battlefield/focus/data/wars'];
+  const SKIP_PATHS = ['lake/data/e', 'lake/data/t', 'bibliotheca/data/books', 'national/data/series', 'national/data/years', 'volatility/data/days', 'integration/data/countries', 'calendar/data', 'battlefield/focus/data/wars'];
   const walk = (base, dir, label) => {
     for (const f of readdirSync(dir, { withFileTypes: true })) {
       const full = join(dir, f.name), rel = relative(base, full).split(sep).join('/');

@@ -109,6 +109,42 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 .cmp tbody tr.grp:hover td{background:none}
 .cmp td.best{color:var(--prp-good);font-weight:600}.cmp td.worst{color:var(--prp-bad)}
 .cmp .rk{margin-left:5px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase}
+/* The years shown (design/prp-period.js), laid out as Volatility's: the label, the year or period it names and the
+   ‹ ▶ › Latest buttons on one line, and the track on a full-width row of its own under them, so the track keeps its
+   place and width whatever the label says ("Year" becomes "Period" mid-drag) and a phone gets the whole width. */
+.fld.years{flex:1 1 100%;flex-wrap:wrap;gap:6px 10px}
+#yr-lbl{min-width:5.4em}
+.yrlabel{min-width:14ch;color:var(--prp-text);font:500 12.5px var(--prp-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.yrbtns{display:inline-flex;align-items:center;gap:6px}
+#yr-latest{height:32px}
+#years{order:3;flex:1 1 100%;min-width:140px}
+.yrhint{order:4;flex:1 1 100%;margin:-4px 0 0;color:var(--prp-muted);font-size:var(--prp-fs-xs);line-height:1.5}
+.tnote{margin:0;flex:1 1 300px;color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
+/* No value: Volatility's hatched no-data pattern (url(#nodata)), so one habit serves both pages. A partial score or
+   an earlier year's value: a stipple of dots over its colour, a second channel of its own. */
+#map .stipple path{fill:url(#nastip);pointer-events:none;stroke:none}
+#nastip circle{fill:var(--prp-text);opacity:.55}
+.mapbox[aria-busy=true] #map{opacity:.55;transition:opacity .2s}
+.legend .sw{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:-1px;box-shadow:inset 0 0 0 1px var(--prp-line)}
+.legend .sw.hatch{background:repeating-linear-gradient(135deg,var(--prp-map-border) 0 1px,var(--prp-map-nodata) 1px 4px)}
+.legend .sw.dots{background:radial-gradient(circle,color-mix(in srgb,var(--prp-text) 60%,transparent) 1px,transparent 1.4px) 0 0/4px 4px,var(--prp-seq-300)}
+.legend .sw.nodata{background:var(--prp-map-nodata)}
+.legend .nd i{vertical-align:-1px}
+#rows td.num{white-space:nowrap} /* a bar, its figure and its "partial" tag stay on one line */
+.st{margin-left:5px;color:var(--prp-muted);font:500 10px var(--prp-font-mono);letter-spacing:.03em;text-transform:uppercase}
+td .nv{color:var(--prp-muted);font-size:12px}
+/* a period: the ranking with the movers beside it (above it on a narrow screen) */
+.rankwrap{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.rankwrap.per{grid-template-columns:minmax(0,1fr) 320px}
+.rankwrap .movers{order:2;align-self:start}
+.mvcols{display:grid;grid-template-columns:1fr;gap:4px 16px;padding:8px 14px 12px}
+.mvcols h3{margin:6px 0 4px;color:var(--prp-muted);font:500 var(--prp-fs-xs)/1.4 var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.mvcols ol{margin:0;padding:0 0 0 20px;font-size:13px;line-height:1.55}
+.mvcols li{font-variant-numeric:tabular-nums}.mvcols li small{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+#cmpsvg .yrband{fill:var(--prp-accent-soft)}#cmpsvg .yrrule{stroke:var(--prp-accent);stroke-width:1.5}
+.spark .yrrule{stroke:var(--prp-accent);stroke-width:1}.spark .yrband{fill:var(--prp-accent-soft)}
+@media(max-width:1180px){.rankwrap.per{grid-template-columns:minmax(0,1fr)}.rankwrap .movers{order:-1}.mvcols{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.fld.years .prp-period{--prp-period-thumb:22px}.yrlabel{min-width:0}#yr-lbl{min-width:0}}
 @media(max-width:700px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px}.stat b{font-size:15px}.ind{grid-template-columns:minmax(0,1fr) 64px 76px}.ind .spark{display:none}.links{justify-content:flex-start}.pact{justify-items:start}.prp-panel-head .filters,.prp-panel-head .filters .prp-input{width:100%}.prp-panel-head .filters .prp-input{flex:1 1 140px}}
 </style>
 </head>
@@ -128,23 +164,34 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
   </div>
   <div class="toolbar" role="group" aria-label="Data settings">
     <label class="fld" id="metricfld"><span class="prp-label">Colour by</span><select class="prp-select" id="metric" aria-label="Metric to colour the map by"></select></label>
-    <label class="fld"><span class="prp-label">PESTLE period</span><select class="prp-select" id="period" aria-label="PESTLE period"><option value="latest">Latest</option><option value="1980">1980s</option><option value="1990">1990s</option><option value="2000">2000s</option><option value="2010">2010s</option><option value="2020">2020s (to date)</option></select></label>
+    <p class="tnote" id="tnote" role="status" hidden></p>
+    <!-- The years shown (design/prp-period.js, NA-05): two handles on one track, 1980 to the newest year, then Latest.
+         The start (hollow; #yr-from) rests on the end (filled; #yr), so one year is shown; drag it back for a period. -->
+    <div class="fld years"><span class="prp-label" id="yr-lbl">Year</span><output class="yrlabel" id="yrlabel" for="yr-from yr" aria-live="polite">Latest</output><span class="yrbtns" id="yrbtns" role="group" aria-label="Step through the years"></span><div id="years" aria-labelledby="yr-lbl"></div><p class="yrhint" id="yrhint"></p></div>
   </div>
 
   <section id="tab-map" class="stack" role="tabpanel" aria-labelledby="tab-btn-map">
     <figure class="prp-figure">
       <div class="prp-panel">
         <div class="prp-panel-head"><b id="maptitle">Overall PESTLE pressure</b><span class="hint">Hover for values · click a country for its profile</span></div>
-        <div class="mapbox" id="mapbox"><svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg></div>
+        <div class="mapbox" id="mapbox" aria-busy="false"><svg id="map" viewBox="0 0 960 470" role="img" aria-label="World map coloured by the selected metric"></svg></div>
         <div class="legend" id="legend"></div>
       </div>
       <figcaption><b>Figure 1.</b> <span id="mapcap">Overall PESTLE pressure by country.</span></figcaption>
     </figure>
+    <div class="rankwrap" id="rankwrap">
     <section class="prp-panel" aria-labelledby="ctitle">
       <div class="prp-panel-head"><b id="ctitle">Countries</b><span class="filters"><input type="search" class="prp-input" id="search" placeholder="Search countries…" aria-label="Search countries"><select class="prp-select" id="region" aria-label="Region"><option value="">All regions</option></select></span></div>
       <div class="tbl"><table class="prp-table"><thead><tr id="thead"></tr></thead><tbody id="rows"></tbody></table></div>
-      <p class="panel-note">Tick up to four countries to compare them. Pressure is the share of a dimension's indicators that are worsening (Country PESTLE's method). Coverage is the share of the 22 core indicators with data.</p>
+      <p class="panel-note">Tick up to four countries to compare them. Pressure is the share of a dimension's indicators that are worsening (Country PESTLE's method): VM's own composite, not a forecast or a ranking of worth. Coverage is the share of the 22 core indicators with data. “Partial” marks a score with fewer than six dimensions; “no value” a year with none.</p>
     </section>
+    <!-- A period: the countries whose figure rose and fell most between its first and last years. -->
+    <section class="prp-panel movers" id="movers" aria-labelledby="mvtitle" hidden>
+      <div class="prp-panel-head"><b id="mvtitle">Rose most · Fell most</b><span class="hint" id="mvhint"></span></div>
+      <div class="mvcols"><div><h3>Rose most</h3><ol id="rose"></ol></div><div><h3>Fell most</h3><ol id="fell"></ol></div></div>
+      <p class="panel-note" id="mvnote" hidden></p>
+    </section>
+    </div>
   </section>
 
   <section id="tab-profile" role="tabpanel" aria-labelledby="tab-btn-profile" hidden><div id="profile"><div class="prp-panel"><div class="prp-empty">Choose a country on the map or in the list.</div></div></div></section>
@@ -152,7 +199,9 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 
   <footer class="prp-sources">
     <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
-    <p><b>Method.</b> PESTLE pressure follows Country PESTLE: each indicator's latest value is compared with the previous one, and a change past the indicator's threshold counts as improving or worsening. A dimension's pressure is the share of its scored indicators that are worsening; overall pressure is the mean of the six dimensions. The decade view compares the first and last values within each decade. Indicators marked "added" are shown and compared but not scored. The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
+    <p id="method"><b>How this is worked out.</b> PESTLE pressure is VM's own composite, after Country PESTLE. It is not a forecast, and not a ranking of how well a country is run. For each of the 22 core World Bank indicators, a value is compared with the country's previous value no more than five years before it; a change past the indicator's threshold is improving or worsening. A dimension's pressure is the share of its scored indicators worsening; overall pressure is the mean of the dimensions scored; coverage is the share of the 22 with a value. <b>Latest</b> uses each indicator's newest value, its year beside it. <b>A year</b> uses that year's value, or one from up to two years earlier, marked with its year; anything older counts as no value, and nothing is carried forward. <b>A period</b> compares the first and last values inside it (1990–1999 is the old “1990s”), beside its first year's and its last year's own scores. A score with fewer than six dimensions is marked partial (dotted on the map). A score from fewer than three dimensions is too few values to colour or rank: there is no other minimum, so a score of three dimensions may still rest on a handful of indicators (its coverage is beside it). A period's change, and Rose most and Fell most, compare its first and last years only where both scores rest on the same dimensions, three or more, and, for a period to Latest, where Latest's score uses no value from before the period began; the other changes are shown, marked, but not ranked. Every score before 1998 is partial, because the governance indicators begin in 1996 (every two years until 2002) and a change needs two values; 1980, the first year held, has a coverage but no score. The years offered, <span id="yrspan">1980 to the newest</span>, are VM's request window: its build asks the World Bank for 1980 (where Country PESTLE began) to last year, though most series go back to 1960, so for a value from before 1985 the five-year look-back stops at 1980 and the early 1980s are scored more thinly than the full series would allow. The World Bank's values are for present-day countries: a year before a state existed, or before its borders took today's shape (South Sudan, Russia, Ukraine and Germany in the 1980s), is its reconstruction for the present territory, not a figure of the time. Indicators marked "added" are shown and compared but not scored. Recompute any figure from <code>national/data/years/</code> with <code>national/lib/pestle.js</code>.</p>
+    <p><b>The yearly layer.</b> <code>national/data/years/manifest.json</code> lists one layer for each indicator (<code>wb:&lt;code&gt;</code>: every country by ISO3, every year, its unit, source, licence and method; no value is <code>null</code>) and the PESTLE pressure of each year (<code>national-pestle</code>, which stays on this page as VM's composite: each field's unit and scale, and the floor of three dimensions, are in the manifest). Its country key is the World Bank's three-letter code, ISO 3166-1 alpha-3 save Kosovo (XKX) and the Channel Islands (CHI); the values are for present-day countries. The Omni-Map reads the same files; the Integration Hub's <code>national-indicators</code> dataset names each indicator's layer.</p>
+    <p><b>Headlines.</b> The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
     <p><b>Dates.</b> Rebuilt <span id="rhythm">on its schedule</span> from the sources above. Each figure carries its own date beside it: a World Bank value its year (a country's latest value is of the latest year it reported), Wikidata the day it was read, Political Atlas the day its records were last reviewed, the Political Retrospective the day its data was built, and the conflict and energy figures the years they run to.</p>
   </footer>
 </main>
@@ -160,6 +209,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="../design/prp-focus.js"></script>
+<script src="../design/prp-period.js"></script>
 <script>
 // National Analysis (formerly Country PESTLE). Data: ../national/data/index.json and series/<ISO3>.json, built monthly
 // by national/scripts/build.mjs from World Bank indicators, Wikidata and PRP's own submodules.
@@ -171,8 +221,80 @@ const embedded = (() => { try { return window.self !== window.top; } catch { ret
 const go = (suite, module, url) => embedded ? { href: `${SHELL}#/${suite}/${module}?at=${encodeURIComponent(new URL(url, SHELL).href)}`, target: '_top' } : { href: new URL(url, SHELL).href, target: '_blank' };
 const link = (suite, module, url, text) => { const g = go(suite, module, url); return `<a class="prp-chip" href="${esc(g.href)}" target="${g.target}" rel="noopener">${text}</a>`; };
 let D, byIso = new Map(), indBy = new Map(), selected = null, compare = [], sortKey = 'metric', sortDir = -1;
-const seriesCache = new Map();
-const series = iso => { if (!seriesCache.has(iso)) seriesCache.set(iso, fetch(`../national/data/series/${iso}.json`).then(r => r.json()).catch(() => ({}))); return seriesCache.get(iso); };
+// The rule (national/lib/pestle.js, the build's own) and the yearly layer (national/data/years/, NA-05): pressure.json
+// for a year's PESTLE scores, wb/<code>.json for one indicator's every country and year. Latest is index.json alone,
+// as before; the rest loads when it is first needed (a period of pressure needs the 22 core indicators' files).
+let PL = null, PR = null, dataVer = 0;
+const isoIdx = new Map(); // ISO3 → its row in every layer file (index.json's order, which the manifest repeats)
+const seriesCache = new Map(), seriesData = new Map(), layerCache = new Map(), layerData = new Map();
+const got = () => { dataVer++; };
+// (A series that fails to load is not kept: the next draw asks for it again.)
+const series = iso => { if (!seriesCache.has(iso)) seriesCache.set(iso, fetch(`../national/data/series/${iso}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(s => { seriesData.set(iso, s); got(); return s; }, () => { seriesCache.delete(iso); return {}; })); return seriesCache.get(iso); };
+const YEARS = '../national/data/years/';
+let pressureP = null;
+// A file that fails to load rejects and is forgotten, so the next move asks for it again; a failure is never drawn as
+// "no value" (rerender() keeps the view that was showing and says so).
+const getJson = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); });
+const loadPressure = () => (pressureP ||= getJson(YEARS + 'pressure.json').then(p => { PR = p; got(); return p; }, e => { pressureP = null; throw e; }));
+// An indicator the World Bank serves no values for (none at Latest either: the manifest lists it with data null) has
+// no file, so none is asked for: an empty layer.
+const noValues = code => !D.countries.some(c => c.latest[code]);
+const EMPTY = { from: 0, to: -1, values: [] };
+const loadLayer = code => {
+  if (noValues(code)) { if (!layerData.has(code)) { layerData.set(code, EMPTY); got(); } return Promise.resolve(EMPTY); }
+  if (!layerCache.has(code)) layerCache.set(code, getJson(`${YEARS}wb/${code}.json`).then(L => { layerData.set(code, L); got(); return L; }, e => { layerCache.delete(code); throw e; }));
+  return layerCache.get(code);
+};
+
+/* ---------- the years shown (NA-05) ----------
+   Stops: every year the data holds (index.json's years, 1980 to the newest), then Latest, a stop of its own because it
+   is not one year (each indicator's newest value, of its own year). view.to is the year shown or the end of a period;
+   view.from is null for one year (or Latest), else the period's first year. */
+let LAST = 0, LATEST = 1, STOPS = [];
+const view = { from: null, to: null };
+const isLatest = y => y === LATEST;
+const per = () => view.from != null && view.from !== view.to;
+const mode = () => (per() ? 'period' : isLatest(view.to) ? 'latest' : 'year');
+const yname = y => (isLatest(y) ? 'Latest' : String(y));
+const whenText = () => (per() ? `${yname(view.from)}–${yname(view.to)}` : yname(view.to));
+
+/* ---------- a country's figures for the years shown: a "frame" ----------
+   { overall, pressure, coverage, dims, item(code) } for Latest (index.json), a year (pressure.json, and each
+   indicator's value by pestle.js's yearPick from its layer or the country's series) or a period (scorePeriod on the
+   first and last values inside it). item(code) is [year, value, previous year, change, movement], null for no value,
+   undefined while its data has not loaded. */
+function itemOf(ind, pick, pts) { const [f, t] = pick(pts); if (!t) return null; return [t[0], t[1], f ? f[0] : null, f ? PL.round(t[1] - f[1], 4) : null, PL.movement(ind, f, t)]; }
+function ptsFor(c, code) {
+  const s = seriesData.get(c.iso3);
+  if (s) return s[code] || [];
+  const L = layerData.get(code);
+  return L ? PL.ptsOf(L, isoIdx.get(c.iso3)) : undefined;
+}
+function latestFrame(c) { return { kind: 'latest', overall: c.overall, pressure: c.pressure || {}, coverage: c.coverage, dims: Object.values(c.pressure || {}).filter(v => v != null).length, item: code => c.latest[code] || null }; }
+function yearFrame(c, Y) {
+  if (isLatest(Y)) return latestFrame(c);
+  const row = PR?.values?.[isoIdx.get(c.iso3)], cell = PR && Y >= PR.from ? (row ? row[Y - PR.from] : null) : undefined;
+  // cell null: no value at all that year (coverage 0); undefined: a year before the first score (1980).
+  const x = PL.pressureOf(cell) || { overall: null, pressure: {}, coverage: cell === null ? 0 : null, dims: 0 };
+  return { kind: 'year', year: Y, ...x, item: code => { const pts = ptsFor(c, code); return pts === undefined ? undefined : itemOf(indBy.get(code), PL.yearPick(Y), pts); } };
+}
+function periodFrame(c, A, B) {
+  const src = {};
+  for (const i of D.indicators) { const pts = ptsFor(c, i.code); if (pts !== undefined) src[i.code] = pts; }
+  const x = PL.scorePeriod(src, PL.periodPick(A, isLatest(B) ? Infinity : B), D.indicators);
+  return { kind: 'period', ...x, item: code => (code in src ? x.items[code] || null : undefined) };
+}
+const frames = new Map();
+let framesKey = '';
+// at: 'start' or 'end' for a period's first or last year alone; left out, the years shown.
+function fr(c, at) {
+  const key = `${view.from}|${view.to}|${dataVer}`;
+  if (key !== framesKey) { frames.clear(); framesKey = key; }
+  const id = (at || 'v') + c.iso3;
+  let F = frames.get(id);
+  if (!F) { F = at === 'start' ? yearFrame(c, view.from ?? view.to) : at === 'end' ? yearFrame(c, view.to) : per() ? periodFrame(c, view.from, view.to) : yearFrame(c, view.to); frames.set(id, F); }
+  return F;
+}
 
 /* ---------- colours: read from the PRP tokens at draw time, again on prp:themechange ---------- */
 const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -223,36 +345,100 @@ const yearsOf = c => { const ys = Object.values(c.latest || {}).map(v => v?.[0])
 const leaderSrc = c => (!c.leader ? '' : `${c.leader.rule === 'atlas' ? `Office named by ${SRC.atlas()}; holder from ` : ''}${SRC.wikidata()}${c.leader.source === 'correction' ? ', with VM’s correction' : ''}`);
 
 /* ---------- metrics (map colouring, ranking, comparison) ---------- */
+// at(F, c): the metric in a frame. PESTLE and the indicators follow the years shown; the Leadership, Conflict and Energy
+// figures are not by year (timeless): they are today's, and the slider returns to Latest when one is chosen.
 function metrics() {
   const m = [
-    { id: 'overall', label: 'Overall PESTLE pressure', get: c => pdata(c).overall, fmt: pct, better: 'down', group: 'PESTLE' },
-    ...DIMS.map(([k, l]) => ({ id: 'p_' + k, label: `${l} pressure`, get: c => pdata(c).pressure?.[k], fmt: pct, better: 'down', group: 'PESTLE' })),
-    { id: 'coverage', label: 'PESTLE coverage', get: c => pdata(c).coverage, fmt: pct, better: 'up', group: 'PESTLE' },
-    { id: 'leaders100', label: 'Leaders in the last 100 years', get: c => c.leadership?.leaders100, fmt: v => v ?? '–', better: null, group: 'Leadership' },
-    { id: 'avgTenure', label: 'Average leader tenure (years)', get: c => c.leadership?.avgTenure, fmt: v => v ?? '–', better: null, group: 'Leadership' },
-    { id: 'irregular', label: 'Irregular seizures of power since 1926', get: c => c.leadership?.irregular, fmt: v => v ?? '–', better: 'down', group: 'Leadership' },
-    { id: 'elections', label: 'Elections and referendums since 1926', get: c => c.leadership?.elections, fmt: v => v ?? '–', better: null, group: 'Leadership' },
-    { id: 'avgConflicts', label: 'Armed conflicts per year on its territory (1946–2025)', get: c => c.conflict?.avgConflictsPerYear, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
-    { id: 'yearsAtWar', label: 'Years with a war on its territory (1946–2025)', get: c => c.conflict?.yearsAtWar, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
-    { id: 'onsets', label: 'New armed conflicts per decade', get: c => c.conflict?.onsetsPerDecade, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
-    { id: 'newWars', label: 'New wars per decade (1,000+ deaths a year)', get: c => c.conflict?.newWarsPerDecade, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
-    { id: 'abroad', label: 'Conflicts fought abroad since 1946', get: c => c.conflict?.conflictsAbroad, fmt: v => v ?? '–', better: null, group: 'Conflict' },
-    { id: 'active', label: 'Wars or warzones active this year', get: c => c.conflict?.active2026?.length, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
-    { id: 'energy', label: 'Share of world energy (2025)', get: c => c.energyShare, fmt: pct, better: null, group: 'Energy' },
+    { id: 'overall', label: 'Overall PESTLE pressure', at: F => F.overall, fmt: pct, better: 'down', group: 'PESTLE', press: true },
+    ...DIMS.map(([k, l]) => ({ id: 'p_' + k, label: `${l} pressure`, at: F => F.pressure?.[k], fmt: pct, better: 'down', group: 'PESTLE', press: true })),
+    { id: 'coverage', label: 'PESTLE coverage', at: F => F.coverage, fmt: pct, better: 'up', group: 'PESTLE' },
+    { id: 'leaders100', label: 'Leaders in the last 100 years', at: (F, c) => c.leadership?.leaders100, fmt: v => v ?? '–', better: null, group: 'Leadership' },
+    { id: 'avgTenure', label: 'Average leader tenure (years)', at: (F, c) => c.leadership?.avgTenure, fmt: v => v ?? '–', better: null, group: 'Leadership' },
+    { id: 'irregular', label: 'Irregular seizures of power since 1926', at: (F, c) => c.leadership?.irregular, fmt: v => v ?? '–', better: 'down', group: 'Leadership' },
+    { id: 'elections', label: 'Elections and referendums since 1926', at: (F, c) => c.leadership?.elections, fmt: v => v ?? '–', better: null, group: 'Leadership' },
+    { id: 'avgConflicts', label: 'Armed conflicts per year on its territory (1946–2025)', at: (F, c) => c.conflict?.avgConflictsPerYear, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
+    { id: 'yearsAtWar', label: 'Years with a war on its territory (1946–2025)', at: (F, c) => c.conflict?.yearsAtWar, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
+    { id: 'onsets', label: 'New armed conflicts per decade', at: (F, c) => c.conflict?.onsetsPerDecade, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
+    { id: 'newWars', label: 'New wars per decade (1,000+ deaths a year)', at: (F, c) => c.conflict?.newWarsPerDecade, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
+    { id: 'abroad', label: 'Conflicts fought abroad since 1946', at: (F, c) => c.conflict?.conflictsAbroad, fmt: v => v ?? '–', better: null, group: 'Conflict' },
+    { id: 'active', label: 'Wars or warzones active this year', at: (F, c) => c.conflict?.active2026?.length, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
+    { id: 'energy', label: 'Share of world energy (2025)', at: (F, c) => c.energyShare, fmt: pct, better: null, group: 'Energy' },
   ];
-  // An indicator's value is the country's latest, of its own year (year).
-  for (const ind of D.indicators) m.push({ id: 'i_' + ind.code, label: ind.label, unit: ind.unit, get: c => c.latest[ind.code]?.[1], year: c => c.latest[ind.code]?.[0] ?? null, fmt: v => fmtVal(v, ind.unit), better: ind.better, group: DIMS.find(d => d[0] === ind.dimension)[1] + ' indicators', ind });
+  for (const x of m) x.timeless = !['PESTLE'].includes(x.group);
+  // An indicator's value is the frame's: at Latest the country's latest, of its own year; in a year, that year's or one
+  // up to two years older (yearAt gives its year).
+  for (const ind of D.indicators) m.push({ id: 'i_' + ind.code, label: ind.label, unit: ind.unit, code: ind.code, at: F => F.item(ind.code)?.[1], yearAt: F => F.item(ind.code)?.[0] ?? null, fmt: v => fmtVal(v, ind.unit), better: ind.better, group: DIMS.find(d => d[0] === ind.dimension)[1] + ' indicators', ind });
+  for (const x of m) { x.get = (c, at) => x.at(fr(c, at), c); x.show = (c, at) => shownAt(x, fr(c, at), c); x.year = (c, at) => x.yearAt?.(fr(c, at)) ?? null; }
+  if (D.indicators.some(i => noValues(i.code))) for (const x of m) if (x.code && noValues(x.code)) x.label += ' (no values held)';
   return m;
 }
+// The floor (pestle.js FLOOR): an overall score from fewer than three of the six dimensions is too few values to colour
+// or rank. It is still shown, in words, beside its figure.
+const fewIn = F => !!F && F.overall != null && F.dims < PL.FLOOR;
+const shownAt = (m, F, c) => (m.id === 'overall' && fewIn(F) ? null : m.at(F, c));
+const fewWords = (m, raw, F) => `${m.fmt(raw)} from ${F.dims} of 6 dimensions: too few values to colour or rank (fewer than ${PL.FLOOR})`;
 let METRICS = [];
-const pdata = c => { const p = $('#period').value; return p === 'latest' ? c : c.decades[p] || {}; };
+const metricNow = () => METRICS.find(x => x.id === $('#metric').value) || METRICS[0];
+// The address names a measure by word: overall, political…, coverage, wb:<code>, or a metric's own id.
+const measureId = m => (m.id === 'overall' ? null : m.id.startsWith('p_') ? m.id.slice(2) : m.code ? 'wb:' + m.code : m.id);
+const metricOf = w => (!w ? null : METRICS.find(m => measureId(m) === w || m.id === w) || null);
+// A period's change of a metric: its value in the last year less its value in the first, rounded as the values are
+// stored (pestle.js changeOf), so equal changes are equal and a tie is settled by name.
+const chg = (m, c) => PL.changeOf(m.get(c, 'start'), m.get(c, 'end'), m.fmt === pct ? 3 : 4);
+// Whether a period's two ends can be compared like for like, and if not, why (the change is shown, marked, but not
+// ranked in Rose most / Fell most). Overall pressure: both ends on the same dimensions, three or more. A pressure to
+// Latest: Latest's score uses no value from before the period began (its years are mixed).
+function likeForLike(m, c) {
+  if (!m.press) return { ok: true };
+  const a = fr(c, 'start'), b = fr(c, 'end');
+  if (m.id === 'overall' && !PL.comparable(a, b)) return { ok: false, why: fewIn(a) || fewIn(b) ? 'too few values at one end' : a.dims !== b.dims ? `partial at one end: ${a.dims} of 6 dimensions in ${yname(view.from)}, ${b.dims} in ${yname(view.to)}` : 'not the same dimensions at each end' };
+  if (isLatest(view.to)) {
+    const dims = m.id === 'overall' ? null : m.id.slice(2);
+    const back = D.indicators.some(i => i.core && (!dims || i.dimension === dims) && (it => it && it[4] && it[2] != null && it[2] < view.from)(c.latest[i.code]));
+    if (back) return { ok: false, why: `Latest's score uses values from before ${view.from}` };
+  }
+  return { ok: true };
+}
+const fmtChg = (m, d) => (d == null ? '–' : m.fmt === pct ? `${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(Math.round(d * 100))} pts` : `${d > 0 ? '+' : d < 0 ? '−' : '±'}${fmtVal(Math.abs(d), m.unit)}`);
+// One country's figure for the years shown, with what the reader must be told about it: hatched (a partial score, or a
+// value of an earlier year), and the plain words for the tooltip and the table.
+function cellOf(m, c) {
+  const md = mode();
+  if (md === 'period' && !m.timeless) {
+    if (m.code) {
+      const a = fr(c, 'start').item(m.code), b = fr(c, 'end').item(m.code), v = chg(m, c);
+      if (v == null) return { v: null, words: `No value for ${!a ? yname(view.from) : yname(view.to)}` };
+      const old = [[a, view.from], [b, view.to]].filter(([it, y]) => !isLatest(y) && it[0] < y).map(([it]) => it[0]);
+      return { v, hatch: old.length > 0, words: '' }; // (the tooltip gives each end with its own year: endsText)
+    }
+    const F = fr(c), raw = m.at(F, c), v = shownAt(m, F, c);
+    if (raw == null) return { v: null, words: `No value for ${whenText()}` };
+    if (v == null) return { v: null, raw, few: true, words: fewWords(m, raw, F) };
+    return { v, hatch: m.press && F.dims < 6, words: m.press && F.dims < 6 ? `partial: ${F.dims} of 6 dimensions` : '' };
+  }
+  const F = fr(c), raw = m.at(F, c), v = shownAt(m, F, c);
+  if (m.code) {
+    const it = F.item(m.code);
+    if (!it) {
+      if (md === 'latest') return { v: null, words: 'No value' };
+      const e = PL.earlierYear(ptsFor(c, m.code), view.to - PL.MAX_AGE);
+      return { v: null, words: `No value for ${view.to}${e ? ` (latest earlier value ${e})` : ''}` };
+    }
+    return { v, year: it[0], hatch: md === 'year' && it[0] < view.to, words: md === 'year' && it[0] < view.to ? `value of ${it[0]}, the latest within two years` : '' };
+  }
+  if (raw == null) return { v: null, words: md === 'latest' || m.timeless ? 'No value' : `No value for ${view.to}` };
+  if (v == null) return { v: null, raw, few: true, words: fewWords(m, raw, F) };
+  const part = m.press && F.dims < 6;
+  return { v, hatch: part, words: part ? `partial: ${F.dims} of 6 dimensions` : '' };
+}
 // Each group's source, with its own date (the comparison's group rows and the map's caption).
 const SOURCE = { PESTLE: () => `${SRC.worldBank}, scored as in Country PESTLE`, Leadership: () => SRC.retro(), Conflict: () => `${SRC.ucdp()}; ${SRC.battlefield()}`, Energy: () => SRC.energy() };
-const sourceOf = m => (SOURCE[m.group] ? SOURCE[m.group]() : `${SRC.worldBank}; each country's latest value, of its own year`);
-const yearTag = (m, c) => { const y = m.year?.(c); return y ? ` <small class="yr">${esc(y)}</small>` : ''; };
+const indSource = () => ({ latest: `${SRC.worldBank}; each country's latest value, of its own year`, year: `${SRC.worldBank}; each country's value of ${view.to}, or of up to two years earlier (marked)`, period: `${SRC.worldBank}; each country's values of ${yname(view.from)} and ${yname(view.to)}` }[mode()]);
+const sourceOf = m => (SOURCE[m.group] ? SOURCE[m.group]() : indSource());
+const yearTag = (m, c, at) => { const y = m.year?.(c, at); return y ? ` <small class="yr">${esc(y)}</small>` : ''; };
 
 /* ---------- map ---------- */
-let mapG, mapPath, mapProj, numToIso = new Map(), focusView = null, focusReset = null, places = null;
+let mapG, hatchG, mapPath, mapProj, numToIso = new Map(), focusView = null, focusReset = null, places = null;
 const focusIsos = new Set(); // countries Documentary mode is discussing
 function showTip(ev, html) {
   const t = $('#tip'); t.innerHTML = html; t.hidden = false;
@@ -272,11 +458,42 @@ function drawMap(world) {
   layer.append('path').attr('class', 'sphere').attr('d', mapPath({ type: 'Sphere' }));
   layer.append('path').attr('class', 'graticule').attr('d', mapPath(d3.geoGraticule10()));
   const feats = topojson.feature(world, world.objects.countries).features;
+  // No value: Volatility's hatched no-data pattern (q/volatility.html), the same habit on both pages. A partial score or
+  // an earlier year's value: a stipple of dots over its colour (drawn in the text colour, so both themes).
+  svg.insert('defs', ':first-child').html('<pattern id="nodata" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)"><rect width="5" height="5" style="fill:var(--prp-map-nodata)"/><line y2="5" stroke-width="1.4" style="stroke:var(--prp-map-border)"/></pattern>'
+    + '<pattern id="nastip" patternUnits="userSpaceOnUse" width="4.5" height="4.5"><circle cx="1.2" cy="1.2" r=".85"/><circle cx="3.45" cy="3.45" r=".85"/></pattern>');
   mapG = layer.append('g');
-  mapG.selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', mapPath)
-    .on('mousemove', (ev, f) => { const c = byIso.get(numToIso.get(f.id)); const m = METRICS.find(x => x.id === $('#metric').value); const y = c && m.get(c) != null ? m.year?.(c) : null; showTip(ev, c ? `<b>${esc(c.name)}</b><br>${esc(m.label)}: ${m.fmt(m.get(c))}${y ? ` (${esc(y)})` : ''}` : esc(f.properties.name)); })
+  mapG.selectAll('path').data(feats).join('path').attr('class', 'land').attr('d', mapPath).attr('data-iso', f => numToIso.get(f.id) || null)
+    .on('mousemove', (ev, f) => showTip(ev, tipHtml(f)))
     .on('mouseleave', hideTip)
     .on('click', (ev, f) => { const iso = numToIso.get(f.id); if (iso) openProfile(iso); });
+  hatchG = layer.append('g').attr('class', 'stipple').attr('aria-hidden', 'true');
+  hatchG.selectAll('path').data(feats).join('path').attr('d', mapPath).attr('display', 'none');
+}
+// A period's two ends in words: "1999: 38.7 → 2010: 43.7" (an indicator, each value's own year), or the first and last
+// years' own scores ("2000: 21% → 2010: 14%").
+function endsText(m, c) {
+  if (m.code) {
+    const a = fr(c, 'start').item(m.code), b = fr(c, 'end').item(m.code);
+    return `${a ? `${a[0]}: ${m.fmt(a[1])}` : `${yname(view.from)}: no value`} → ${b ? `${b[0]}: ${m.fmt(b[1])}` : `${yname(view.to)}: no value`}`;
+  }
+  const one = (at, y) => { const F = fr(c, at), v = m.get(c, at); return `${yname(y)}: ${v == null ? 'no value' : m.fmt(v)}${v != null && m.press && F.dims < 6 ? ` (${fewIn(F) && m.id === 'overall' ? 'too few' : 'partial'}, ${F.dims} of 6)` : ''}`; };
+  return `${one('start', view.from)} → ${one('end', view.to)}`;
+}
+// The tooltip: the country, the measure for the years shown, and what the reader must know (partial, earlier, none).
+function tipHtml(f) {
+  const c = byIso.get(numToIso.get(f.id));
+  if (!c) return esc(f.properties.name);
+  const m = metricNow(), x = cellOf(m, c), md = mode();
+  const val = md === 'period' && m.code ? fmtChg(m, x.v) : m.fmt(x.v);
+  const head = `${esc(m.label)}${m.timeless ? '' : `, ${esc(whenText())}`}${md === 'period' && m.code ? ' (change)' : md === 'period' && !m.timeless ? ' (over the period)' : ''}`;
+  // A period: each end as its own year gives it (an indicator's value may be of up to two years before), and whether the
+  // two can be compared like for like.
+  const ends = md === 'period' && !m.timeless ? endsText(m, c) : '';
+  const lf = md === 'period' && !m.timeless && x.v != null ? likeForLike(m, c) : { ok: true };
+  const extra = ends ? `<br>${esc(ends)}${lf.ok ? '' : `<br><span class="muted">Change not ranked: ${esc(lf.why)}</span>`}` : '';
+  const cov = !m.timeless && m.group === 'PESTLE' && m.id !== 'coverage' && x.v != null ? `<br>coverage ${pct(fr(c).coverage)}` : '';
+  return `<b>${esc(c.name)}</b><br>${head}: ${x.v == null ? esc(x.words) : `${val}${x.year && md === 'latest' ? ` (${esc(x.year)})` : x.year && md === 'year' && !x.hatch ? ` (${esc(x.year)})` : ''}`}${x.v != null && x.words ? `<br><span class="muted">${esc(x.words)}</span>` : ''}${extra}${cov}`;
 }
 // Documentary focus (design/prp-focus.js): the countries being discussed are outlined in the module accent and the map
 // eases to fit them all; "Reset view" or the end of the reading brings back the whole world.
@@ -308,38 +525,107 @@ window.PRPFocus?.listen({
   },
 });
 function colourMap() {
-  const m = METRICS.find(x => x.id === $('#metric').value);
-  const vals = D.countries.map(c => m.get(c)).filter(v => v != null);
+  const m = metricNow(), md = mode();
+  const cells = new Map(D.countries.map(c => [c.iso3, cellOf(m, c)]));
+  const vals = [...cells.values()].map(x => x.v).filter(v => v != null);
   const isPress = m.fmt === pct && m.better === 'down';
+  const isChange = md === 'period' && !!m.code;
   const [lo, hi] = d3.extent(vals);
-  const scale = isPress ? pressColour : v => (v == null ? NODATA : ramp(hi > lo ? (v - lo) / (hi - lo) : 0.5));
-  mapG.selectAll('path.land').attr('fill', f => { const c = byIso.get(numToIso.get(f.id)); return c ? scale(m.get(c)) : NODATA; }).classed('sel', f => compare.includes(numToIso.get(f.id)));
+  // A period of an indicator: its change, on the diverging ramp, blue where it moved the better way (or up, for a
+  // context measure), red the worse; the scale is symmetric, to the 95th percentile of the changes.
+  const DIV = ['neg-3', 'neg-2', 'neg-1', 'mid', 'pos-1', 'pos-2', 'pos-3'].map(k => token('--prp-div-' + k));
+  const span = isChange ? (d3.quantile(vals.map(Math.abs).sort(d3.ascending), 0.95) || 1) : 1;
+  const sign = m.better === 'down' ? -1 : 1, divRamp = d3.piecewise(d3.interpolateLab, DIV);
+  const scale = isPress ? pressColour : isChange ? v => (v == null ? NODATA : divRamp(0.5 + Math.max(-1, Math.min(1, (sign * v) / span)) / 2)) : v => (v == null ? NODATA : ramp(hi > lo ? (v - lo) / (hi - lo) : 0.5));
+  // A country in the data with no value (or too few) has the hatched no-data pattern; a shape the World Bank does not
+  // cover is plain grey.
+  mapG.selectAll('path.land').attr('fill', f => { const x = cells.get(numToIso.get(f.id)); return !x ? NODATA : x.v == null ? 'url(#nodata)' : scale(x.v); })
+    .attr('data-v', f => { const v = cells.get(numToIso.get(f.id))?.v; return v == null ? null : String(v); })
+    .classed('sel', f => compare.includes(numToIso.get(f.id)));
+  hatchG?.selectAll('path').attr('display', f => (cells.get(numToIso.get(f.id))?.hatch ? null : 'none'));
   mapG.selectAll('.land.prp-focus-hit').raise();
-  $('#maptitle').textContent = m.label;
+  $('#maptitle').textContent = m.timeless ? m.label : `${m.label}${isChange ? ', change' : ''} · ${whenText()}`;
   const grad = `linear-gradient(90deg,${SEQ.join(',')})`, better = m.better ? `<span class="note">${m.better === 'down' ? 'lower is better' : 'higher is better'}</span>` : '';
+  const hatchKey = !m.timeless && (m.press || (m.code && md !== 'latest')) ? `<span class="nd"><i class="sw dots"></i>${m.code ? 'Value of an earlier year (up to two)' : 'Partial: fewer than six dimensions'}</span>` : '';
+  const noWord = `${md === 'latest' || m.timeless ? 'No value' : `No value for ${whenText()}`}${m.id === 'overall' ? `, or too few (under ${PL.FLOOR} of 6 dimensions)` : ''}`;
   $('#legend').innerHTML = (isPress ? `<span>0%</span><i class="ramp" style="background:${grad}"></i><span>${PRESS_MAX * 100}%+</span><span class="note">of the indicators worsening</span>`
-    : `<span>${m.fmt(lo)}</span><i class="ramp" style="background:${grad}"></i><span>${m.fmt(hi)}</span>${better}`) + '<span class="nd"><i></i>No data</span>';
+    : isChange ? `<span>${m.better ? 'worse' : 'down'} ${fmtVal(span, m.unit)}</span><i class="ramp" style="background:linear-gradient(90deg,${DIV.join(',')})"></i><span>${m.better ? 'better' : 'up'} ${fmtVal(span, m.unit)}</span><span class="note">change ${esc(whenText())}</span>`
+    : `<span>${m.fmt(lo)}</span><i class="ramp" style="background:${grad}"></i><span>${m.fmt(hi)}</span>${better}`) + hatchKey + `<span class="nd"><i class="sw hatch"></i>${esc(noWord)}</span><span class="nd"><i class="sw nodata"></i>Not covered by the World Bank</span>`;
   // The ramp runs light to dark on the light theme and dark to bright on the dark theme.
-  const period = $('#period'), when = m.group === 'PESTLE' ? (period.value === 'latest' ? ', latest change' : ', ' + period.selectedOptions[0].text) : '';
+  const when = m.timeless ? '' : md === 'latest' ? (m.group === 'PESTLE' ? ', latest change' : ', latest values') : md === 'year' ? `, ${view.to}` : `, ${whenText()}`;
   const strong = isDark() ? 'Brighter' : 'Darker', strongest = isDark() ? 'brightest' : 'darkest';
-  $('#mapcap').textContent = `${m.label}${when}, by country. ${strong} blue means ${isPress ? `more of a dimension's indicators are worsening (${PRESS_MAX * 100}% or more is ${strongest})` : `a higher value${m.better ? ` (${m.better === 'down' ? 'lower' : 'higher'} is better)` : ''}`}; countries without data have the “No data” colour. Source: ${sourceOf(m)}.`;
+  const what = isPress ? `${strong} blue means more of a dimension's indicators are worsening (${PRESS_MAX * 100}% or more is ${strongest})${md === 'period' ? ', between the first and last values inside the period' : ''}`
+    : isChange ? `Blue means it moved ${m.better ? 'the better way' : 'up'} between ${yname(view.from)} and ${yname(view.to)}, red ${m.better ? 'the worse way' : 'down'}`
+    : `${strong} blue means a higher value${m.better ? ` (${m.better === 'down' ? 'lower' : 'higher'} is better)` : ''}`;
+  const honest = m.group === 'PESTLE' ? ' PESTLE pressure is VM’s own composite, not a forecast or a ranking of worth.' : '';
+  const hatched = hatchKey ? (m.code ? ' Dotted: the value is of an earlier year, at most two years before (its year is in the tooltip).' : ' Dotted: a partial score, from fewer than six dimensions.') : '';
+  $('#mapcap').textContent = `${m.label}${when}, by country. ${what}. ${noWord}: hatched grey; plain grey, not covered by the World Bank.${hatched}${honest} Source: ${sourceOf(m)}.`;
 }
 function recolour() { document.querySelectorAll('[data-p]').forEach(el => { el.style.background = pressColour(el.dataset.p); }); }
 
 /* ---------- ranking table ---------- */
+// A year: the measure (with its year), Pressure and Coverage, "partial" and "no value" in words. A period: the measure
+// in its first and last years, the change, and the pressure over the period (the first against the last values).
+const OVERALL = () => METRICS[0];
+const noVal = '<span class="nv">no value</span>';
 function renderTable() {
-  const m = METRICS.find(x => x.id === $('#metric').value), q = $('#search').value.toLowerCase(), reg = $('#region').value;
-  const cols = [['name', 'Country'], ['region', 'Region'], ['metric', m.label], ['overall', 'Pressure'], ['coverage', 'Coverage']];
-  $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'metric' || k === 'overall' || k === 'coverage' ? 'num' : ''}${k === 'metric' ? ' wrap' : ''}" aria-sort="${sortKey === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${sortKey === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
-  const val = (c, k) => k === 'name' ? c.name : k === 'region' ? c.region : k === 'metric' ? m.get(c) : k === 'overall' ? pdata(c).overall : pdata(c).coverage;
-  const list = D.countries.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || c.region === reg))
-    .sort((a, b) => { const x = val(a, sortKey), y = val(b, sortKey); if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y) : x - y) * sortDir; });
+  const m = metricNow(), q = $('#search').value.toLowerCase(), reg = $('#region').value, md = mode(), P = md === 'period' && !m.timeless;
+  const pm = m.group === 'PESTLE' ? m : OVERALL(); // the period column: the PESTLE measure itself, else overall pressure
+  const cols = P ? [['name', 'Country'], ['region', 'Region'], ['start', `${m.label}, ${yname(view.from)}`], ['end', yname(view.to)], ['change', 'Change'], ['period', pm === m ? `Over ${whenText()}` : 'Period pressure']]
+    : [['name', 'Country'], ['region', 'Region'], ['metric', m.timeless || md === 'latest' ? m.label : `${m.label}, ${view.to}`], ['overall', 'Pressure'], ['coverage', 'Coverage']];
+  if (!cols.some(([k]) => k === sortKey)) { sortKey = P ? 'change' : 'metric'; sortDir = -1; }
+  // A period with no change for any country (one starting in 1980, which has no score) is ranked by the period's own
+  // figure instead of falling back to the names.
+  const key = P && sortKey === 'change' && !D.countries.some(c => chg(m, c) != null) ? 'period' : sortKey;
+  $('#thead').innerHTML = '<th scope="col">Compare</th>' + cols.map(([k, l]) => `<th scope="col" class="${k === 'name' || k === 'region' ? '' : 'num'}${k === 'metric' || k === 'start' ? ' wrap' : ''}" aria-sort="${key === k ? (sortDir > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="sort" data-sort="${k}">${esc(l)}<span aria-hidden="true">${key === k ? (sortDir > 0 ? '↑' : '↓') : ''}</span></button></th>`).join('');
+  // Ranked as shown: a score below the floor is ranked with no value.
+  const val = (c, k) => k === 'name' ? c.name : k === 'region' ? c.region : k === 'metric' ? m.show(c) : k === 'overall' ? OVERALL().show(c) : k === 'coverage' ? fr(c).coverage
+    : k === 'start' ? m.show(c, 'start') : k === 'end' ? m.show(c, 'end') : k === 'change' ? chg(m, c) : pm.show(c);
+  const list = PL.rank(D.countries.filter(c => (!q || c.name.toLowerCase().includes(q)) && (!reg || c.region === reg)), c => val(c, key), sortDir);
   $('#ctitle').textContent = `Countries · ${list.length}`;
-  $('#rows').innerHTML = list.map(c => `<tr><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
-    <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>
-    <td class="num">${m.fmt(m.get(c))}${m.get(c) != null ? yearTag(m, c) : ''}</td><td class="num"><span class="bar" data-p="${pdata(c).overall ?? ''}" style="width:${(pdata(c).overall || 0) * 60}px;background:${pressColour(pdata(c).overall)}"></span>${pct(pdata(c).overall)}</td><td class="num">${pct(pdata(c).coverage)}</td></tr>`).join('');
+  const bar = v => `<span class="bar" data-p="${v ?? ''}" style="width:${(v || 0) * 60}px;background:${pressColour(v)}"></span>`;
+  const tooFew = (fmt, v) => `<span class="nv" title="From fewer than ${PL.FLOOR} of the six dimensions: too few values to colour or rank">too few (${fmt(v)})</span>`;
+  const partTag = F => (F.dims < 6 ? `<span class="st" title="${F.dims} of 6 dimensions scored">partial</span>` : '');
+  const pressCell = F => (F.overall == null ? noVal : fewIn(F) ? tooFew(pct, F.overall) : `${bar(F.overall)}${pct(F.overall)}${partTag(F)}`);
+  // A figure for one end of a period, or the period itself: the figure with its year, "partial" where its score rests on
+  // fewer than six dimensions, "too few" below the floor.
+  const endCell = (mm, F, at) => { const raw = mm.at(F, null), v = shownAt(mm, F, null); return raw == null ? noVal : v == null ? tooFew(mm.fmt, raw) : `${mm.press && !at ? bar(v) : ''}${mm.fmt(v)}${mm.press ? partTag(F) : ''}`; };
+  const cells = c => {
+    if (P) {
+      const d = chg(m, c), lf = d == null ? { ok: true } : likeForLike(m, c);
+      const sa = m.code ? (m.get(c, 'start') == null ? noVal : m.fmt(m.get(c, 'start')) + yearTag(m, c, 'start')) : endCell(m, fr(c, 'start'), 'start');
+      const sb = m.code ? (m.get(c, 'end') == null ? noVal : m.fmt(m.get(c, 'end')) + yearTag(m, c, 'end')) : endCell(m, fr(c, 'end'), 'end');
+      return `<td class="num">${sa}</td><td class="num">${sb}</td><td class="num">${fmtChg(m, d)}${lf.ok ? '' : `<span class="st" title="Not ranked, as not like for like: ${esc(lf.why)}">not ranked</span>`}</td><td class="num">${endCell(pm, fr(c))}</td>`;
+    }
+    const x = cellOf(m, c), F = fr(c);
+    return `<td class="num">${x.v == null ? (x.few ? tooFew(m.fmt, x.raw) : md === 'latest' || m.timeless ? m.fmt(null) : noVal) : m.fmt(x.v) + yearTag(m, c) + (x.hatch && m.code ? '<span class="st">earlier</span>' : '')}</td><td class="num">${md === 'latest' && F.overall == null ? '–' : pressCell(F)}</td><td class="num">${pct(F.coverage)}</td>`;
+  };
+  $('#rows').innerHTML = list.map(c => `<tr data-iso="${c.iso3}"><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
+    <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>${cells(c)}</tr>`).join('');
   $('#thead').querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'name' || k === 'region' ? 1 : -1); sortKey = k; renderTable(); $(`#thead [data-sort="${k}"]`).focus(); });
   $('#rows').querySelectorAll('[data-cmp]').forEach(cb => cb.onchange = () => toggleCompare(cb.dataset.cmp, cb.checked));
+}
+// The first year in which most countries (over 150) score all six dimensions (1998 on the data of 16 Nov 2026).
+let fullYear = null;
+const fullFrom = () => (fullYear ??= (() => { for (let y = PR.from; y <= PR.to; y++) if (PR.values.filter(r => r?.[y - PR.from]?.[8] === 6).length > 150) return y; return PR.to; })());
+// Rose most · Fell most: in a period, the six countries whose measure rose and fell most from its first year to its last.
+function renderMovers() {
+  const m = metricNow(), on = mode() === 'period' && !m.timeless;
+  $('#movers').hidden = !on; $('#rankwrap').classList.toggle('per', on);
+  if (!on) return;
+  // Like for like only (likeForLike), the ties settled by name (pestle.js movers); each end with its own year.
+  const rows = D.countries.map(c => { const d = chg(m, c); return { c, name: c.name, d, ok: d != null && likeForLike(m, c).ok }; });
+  const mv = PL.movers(rows);
+  const li = r => `<li><a class="cname" href="#country=${r.c.iso3}">${esc(r.c.name)}</a> ${fmtChg(m, r.d)} <small>${esc(endsText(m, r.c))}</small></li>`;
+  const more = x => (x.more ? `<li class="muted">and ${x.more} more at ${esc(fmtChg(m, x.at))}</li>` : '');
+  const any = rows.some(r => r.d != null);
+  const empty = any ? '<li class="muted">None</li>'
+    : `<li class="muted">${D.countries.some(c => m.get(c, 'start') != null) ? `No score for ${esc(yname(view.to))}` : `No score for ${esc(yname(view.from))}${view.from === STOPS[0] ? ' (the first year held: a score needs an earlier value)' : ''}`}, so no change to rank.</li>`;
+  $('#rose').innerHTML = mv.rose.top.map(li).join('') + more(mv.rose) || empty;
+  $('#fell').innerHTML = mv.fell.top.map(li).join('') + more(mv.fell) || empty;
+  $('#mvnote').textContent = mv.apart ? `${mv.apart} more ${mv.apart === 1 ? 'change is' : 'changes are'} not ranked, as not like for like: ${m.id === 'overall' ? 'the two ends rest on different dimensions, or fewer than three' : ''}${m.id === 'overall' && isLatest(view.to) ? ', or ' : ''}${isLatest(view.to) ? `Latest's score uses values from before ${view.from}` : ''}. They are marked in the table.${m.id === 'overall' && PR && view.from < fullFrom() ? ` Before ${fullFrom()} hardly any score has its political and legal dimensions (the governance indicators begin in 1996, and a change needs two values), so a period starting earlier compares few countries like for like.` : ''}` : '';
+  $('#mvnote').hidden = !mv.apart;
+  $('#mvhint').textContent = `${m.label}, ${yname(view.from)} to ${yname(view.to)}`;
 }
 function toggleCompare(iso, on) {
   compare = compare.filter(x => x !== iso);
@@ -349,17 +635,20 @@ function toggleCompare(iso, on) {
 }
 
 /* ---------- sparkline ---------- */
-function spark(pts, better) {
+// mark: the years shown, [year] or [first, last] (a rule or a band), drawn where they fall in the series' own years.
+function spark(pts, better, mark = null) {
   if (!pts || pts.length < 2) return '<span class="spark" aria-hidden="true"></span>';
   const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const x = d3.scaleLinear().domain(d3.extent(xs)).range([1, 69]), y = d3.scaleLinear().domain(d3.extent(ys)).range([20, 2]);
   const last = pts.at(-1), prev = pts.at(-2), up = last[1] >= prev[1];
   const col = better == null ? 'var(--prp-muted)' : (up === (better === 'up')) ? 'var(--prp-good)' : 'var(--prp-bad)';
-  return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true"><path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(pts)}" fill="none" style="stroke:${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" style="fill:${col}"/></svg>`;
+  const [lo, hi] = d3.extent(xs), cl = v => Math.max(1, Math.min(69, x(Math.max(lo, Math.min(hi, v)))));
+  const mk = !mark ? '' : mark.length > 1 ? `<rect class="yrband" x="${cl(mark[0])}" y="0" width="${Math.max(1, cl(mark[1]) - cl(mark[0]))}" height="22"/>` : mark[0] >= lo && mark[0] <= hi ? `<line class="yrrule" x1="${x(mark[0])}" x2="${x(mark[0])}" y1="0" y2="22"/>` : '';
+  return `<svg class="spark" viewBox="0 0 70 22" aria-hidden="true">${mk}<path d="${d3.line().x(p => x(p[0])).y(p => y(p[1]))(pts)}" fill="none" style="stroke:${col}" stroke-width="1.4"/><circle cx="${x(last[0])}" cy="${y(last[1])}" r="2" style="fill:${col}"/></svg>`;
 }
 
 /* ---------- profile ---------- */
-async function openProfile(iso) { selected = iso; setTab('profile'); await renderProfile(); writeHash(); }
+async function openProfile(iso) { selected = iso; setTab('profile'); writeHash(); await renderProfile(); }
 // Calendar event types, as the Realtime and Historical Calendars name them.
 const CAL_TYPES = { election: 'elections', referendum: 'referendums', party: 'party contests', leader: 'new leaders', inauguration: 'inaugurations',
   resignation: 'resignations', coup: 'coups', conflict: 'conflicts', ceasefire: 'ceasefires', assassination: 'assassinations', crisis: 'crises',
@@ -398,7 +687,11 @@ async function renderProfile() {
   const c = byIso.get(selected);
   if (!c) return;
   $('#pname').textContent = ' · ' + c.name;
-  const s = await series(c.iso3), L = c.leadership, K = c.conflict, period = $('#period').value, P = pdata(c);
+  const tok = ++profileTok;
+  const s = await series(c.iso3);
+  try { await ensureData(); } catch { return; } // (rerender() says the figures could not load, and goes back)
+  if (tok !== profileTok || selected !== c.iso3) return;
+  const L = c.leadership, K = c.conflict, md = mode(), P = fr(c), Y = view.to;
   // A figure, a note under it, and its source with its own date (src, plain text).
   const stat = (label, value, small = '', src = '') => `<div class="stat"><span>${esc(label)}</span><b>${value}</b>${small ? `<small>${small}</small>` : ''}${src ? `<small class="src">${esc(src)}</small>` : ''}</div>`;
   const pop = c.latest['SP.POP.TOTL'], gdp = c.latest['NY.GDP.MKTP.CD'];
@@ -414,15 +707,26 @@ async function renderProfile() {
     const pr = P.pressure?.[k];
     return `<div class="dim"><h3>${l}<span class="press">${pr == null ? '<i class="nd"></i>no data' : `<i data-p="${pr}" style="background:${pressColour(pr)}"></i>${pct(pr)} worsening`}</span></h3>
       ${inds.map(i => {
-        const pts = (s[i.code] || []).filter(p => period === 'latest' || (p[0] >= +period && p[0] < +period + 10));
-        const lv = period === 'latest' ? c.latest[i.code] : null;
-        const last = pts.at(-1), first = period === 'latest' ? (lv && lv[2] != null ? pts.find(p => p[0] === lv[2]) : pts.at(-2)) : pts[0];
-        const ch = last && first && last !== first ? last[1] - first[1] : null;
-        const mv = i.better == null || ch == null ? null : Math.abs(ch) <= i.threshold ? 'stable' : (ch > 0) === (i.better === 'up') ? 'improving' : 'worsening';
-        return `<div class="ind"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${last ? ' · ' + last[0] : ''} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a></small></div>
-          ${spark((s[i.code] || []).slice(-25), i.better)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
+        // The frame's value: at Latest the newest (against the previous within five years), in a year that year's or
+        // one up to two years older, in a period the last against the first inside it.
+        const all = s[i.code] || [], it = P.item(i.code);
+        const last = it ? [it[0], it[1]] : null, first = it && it[2] != null ? all.find(p => p[0] === it[2]) || null : null;
+        const ch = it && it[3] != null ? it[3] : null, mv = it ? it[4] : null;
+        const when = !it ? (md === 'latest' ? '' : md === 'year' ? ` · No value for ${Y}${(e => (e ? ` (latest earlier ${e})` : ''))(PL.earlierYear(all, Y - PL.MAX_AGE))}` : ` · No value in ${whenText()}`)
+          : md === 'period' ? ` · ${first ? `${first[0]}: ${fmtVal(first[1], i.unit)} → ` : ''}${last[0]}` : ` · ${last[0]}${md === 'year' && last[0] < Y ? ' (earlier value)' : ''}`;
+        const mark = md === 'latest' ? null : md === 'year' ? [Y] : [view.from, isLatest(Y) ? LAST : Y];
+        return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a></small></div>
+          ${spark(md === 'latest' ? all.slice(-25) : all, i.better, mark)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
       }).join('')}</div>`;
   }).join('');
+  // The years of the core values a year's or a period's score used ("values of 2009–2010").
+  // In a period, the years of the first values and of the last ("first values of 2000–2003, last of 2005–2010").
+  const span = ys => (!ys.length ? '' : Math.min(...ys) === Math.max(...ys) ? String(ys[0]) : `${Math.min(...ys)}–${Math.max(...ys)}`);
+  const coreIt = D.indicators.filter(i => i.core).map(i => P.item(i.code)).filter(Boolean);
+  const ys = coreIt.map(it => it[0]).filter(Number.isFinite), firsts = coreIt.map(it => it[2] ?? it[0]).filter(Number.isFinite);
+  const valuesOf = md === 'latest' ? yearsOf(c) : md === 'period' ? (ys.length ? `first values of ${span(firsts)}, last of ${span(ys)}` : '') : span(ys);
+  const pestleNote = `${md === 'latest' ? 'latest' : whenText()} · coverage ${pct(P.coverage)}${md === 'latest' ? '' : valuesOf ? ` · ${md === 'period' ? '' : 'values of '}${valuesOf}` : ''}${fewIn(P) ? ` · too few values to rank: ${P.dims} of 6 dimensions` : P.overall != null && P.dims < 6 ? ` · partial: ${P.dims} of 6 dimensions` : ''}`;
+  const pestleSrc = md === 'latest' ? `${SRC.worldBank}, values of ${yearsOf(c) || 'no year'}` : md === 'year' ? `${SRC.worldBank}, values of ${valuesOf || 'no year'} (up to two years before ${Y})` : `${SRC.worldBank}, first and last values inside ${whenText()}`;
   const inCmp = compare.includes(c.iso3);
   $('#profile').innerHTML = `<div class="prp-panel">
     <div class="ptitle"><div><div class="prp-label">${esc(c.region)} · ${esc(c.income)}</div><h2>${esc(c.name)}</h2>
@@ -444,12 +748,12 @@ async function renderProfile() {
       ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${K.cowWars1926_45} wars 1926–45`, `${SRC.ucdp()}; Correlates of War`) : ''}
       ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '', SRC.energy()) : ''}
       ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${CAL_TYPES[t] || t}`).join(' · '), SRC.calendar()) : ''}
-      ${stat('PESTLE pressure', pct(P.overall), `${period === 'latest' ? 'latest' : period + 's'} · coverage ${pct(P.coverage)}`, period === 'latest' ? `${SRC.worldBank}, values of ${yearsOf(c) || 'no year'}` : `${SRC.worldBank}, the ${period}s`)}
+      ${stat('PESTLE pressure', P.overall == null && md !== 'latest' ? 'No value' : pct(P.overall), esc(pestleNote), pestleSrc)}
       ${stat('Population', `${fmtVal(pop?.[1], 'people')}${pop ? ` <small class="yr">${esc(pop[0])}</small>` : ''}`, gdp ? `GDP ${fmtVal(gdp[1], 'US$')} (${esc(gdp[0])})` : '', SRC.worldBank)}
     </div>
     ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">${esc(SRC.battlefield())}</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
     <div class="prp-panel-head"><b>Month by Month</b><span class="hint">VM's own marks, month against the three before · UCDP and GDELT</span></div><div id="monthly" class="monthly" aria-live="polite"><div class="muted">Loading…</div></div>
-    <div class="prp-panel-head"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="hint">Improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
+    <div class="prp-panel-head"><b>PESTLE · ${md === 'latest' ? 'latest change' : md === 'year' ? `${Y}, against the previous value within five years` : `${whenText()} (first against last value inside it)`}</b><span class="hint">VM's own composite, not a forecast or a ranking of worth · improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
@@ -532,34 +836,49 @@ async function renderCompare(focus) {
     wireCmpPicker(focus);
     return;
   }
-  const cs = compare.map(i => byIso.get(i)).filter(Boolean);
+  const tok = ++compareTok;
+  await Promise.all(compare.map(series)); // each country's series: its figures for any year or period
+  try { await ensureData(); } catch { return; }
+  if (tok !== compareTok) return;
+  const cs = compare.map(i => byIso.get(i)).filter(Boolean), md = mode();
   const groups = [...new Set(METRICS.map(m => m.group))];
+  // A period: each row is the change from its first year to its last (the PESTLE rows: the pressure over the period).
+  // A PESTLE score says "partial: n of 6" where it rests on fewer than six dimensions, and "too few" below the floor;
+  // best and worst of a PESTLE pressure go only to the countries scored on the most dimensions (three or more) among those compared, so a score from
+  // one indicator never wins "best" over one from six dimensions.
   const row = m => {
-    const vals = cs.map(c => m.get(c));
-    const nums = vals.filter(v => v != null);
+    const vals = cs.map(c => (md === 'period' && m.code ? chg(m, c) : m.show(c)));
+    const fmt = md === 'period' && m.code ? v => fmtChg(m, v) : m.fmt;
+    const Fs = cs.map(c => fr(c)), top = Math.max(0, ...vals.map((v, i) => (v != null && Fs[i].dims >= PL.FLOOR ? Fs[i].dims : 0)));
+    const eligible = (v, i) => v != null && (!m.press || (Fs[i].dims >= PL.FLOOR && Fs[i].dims === top));
+    const nums = vals.filter(eligible);
     const best = m.better && nums.length > 1 ? (m.better === 'up' ? Math.max(...nums) : Math.min(...nums)) : null;
     const worst = m.better && nums.length > 1 ? (m.better === 'up' ? Math.min(...nums) : Math.max(...nums)) : null;
-    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map((v, i) => { const k = v != null && v === best ? 'best' : v != null && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${m.fmt(v)}${v != null ? yearTag(m, cs[i]) : ''}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
+    const hint = (v, i) => { const raw = m.press ? m.get(cs[i]) : null; return v == null && raw != null ? `too few (${m.fmt(raw)}, ${Fs[i].dims} of 6)` : v != null || m.timeless || md === 'latest' ? '' : noVal; };
+    const part = (v, i) => (m.press && v != null && Fs[i].dims < 6 ? `<span class="rk">partial: ${Fs[i].dims} of 6</span>` : '');
+    return `<tr><td>${esc(m.label)}${m.ind && !m.ind.core ? '<span class="added">added</span>' : ''}</td>${vals.map((v, i) => { const ok = eligible(v, i), k = ok && v === best ? 'best' : ok && v === worst && best !== worst ? 'worst' : ''; return `<td class="num ${k}">${hint(v, i) || fmt(v)}${v != null && md !== 'period' ? yearTag(m, cs[i]) : ''}${part(v, i)}${k ? `<span class="rk">${k}</span>` : ''}</td>`; }).join('')}</tr>`;
   };
-  const chartable = D.indicators;
+  // Each group's source; off Latest, the groups that are not by year say so (their figures are today's).
+  const gsrc = g => `${sourceOf(METRICS.find(m => m.group === g))}${g !== 'PESTLE' && METRICS.find(m => m.group === g).timeless && md !== 'latest' ? ' · not by year: today’s figures' : g === 'PESTLE' ? ` · ${whenText()}${md === 'period' ? ', over the period' : ''}` : md === 'period' ? ` · change ${whenText()}` : ''}`;
+  const chartable = D.indicators, code = cmpCode && indBy.has(cmpCode) ? cmpCode : chartable[0].code;
   $('#compare').innerHTML = `<div class="prp-panel">
     <div class="prp-panel-head"><b>Comparing ${cs.length} ${cs.length === 1 ? 'country' : 'countries'}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
     ${cmpPicker()}
-    <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}">${esc(i.label)}</option>`).join('')}</select></label>
+    <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}"${i.code === code ? ' selected' : ''}>${esc(i.label)}</option>`).join('')}</select></label>
       <svg id="cmpsvg" viewBox="0 0 900 280" role="img" aria-label="Indicator over time for the compared countries"></svg>
       <figcaption><b>Figure 2.</b> <span id="cmpcap"></span></figcaption>
       <details class="dt" id="cmpdt"><summary>Show the chart's data as a table</summary><div id="cmpdata"></div></details></figure>
     <div class="tbl" style="max-height:none"><table class="prp-table cmp"><thead><tr><th scope="col">Metric</th>${cs.map(c => `<th scope="col" class="num"><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></th>`).join('')}</tr></thead>
-    <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}<span class="gsrc">${esc(sourceOf(METRICS.find(m => m.group === g)))}</span></td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
+    <tbody>${groups.map(g => `<tr class="grp"><td colspan="${cs.length + 1}">${esc(g)}<span class="gsrc">${esc(gsrc(g))}</span></td></tr>` + METRICS.filter(m => m.group === g).map(row).join('')).join('')}
     <tr class="grp"><td colspan="${cs.length + 1}">Profile<span class="gsrc">${esc(`${SRC.wikidata()}${cs.some(c => corrected(c, 'headOfState') || corrected(c, 'headOfGovernment')) ? `, with VM’s correction of the heads of ${cs.filter(c => corrected(c, 'headOfState') || corrected(c, 'headOfGovernment')).map(c => c.name).join(', ')}` : ''}; the current leader's office: ${SRC.atlas()}, or the system of government`)}</span></td></tr>
     <tr><td>System of government</td>${cs.map(c => `<td class="num">${esc(c.government.join(', ') || '–')}</td>`).join('')}</tr>
     <tr><td>Current leader</td>${cs.map(c => `<td class="num" data-leader="${c.iso3}">${leaderHtml(c)}</td>`).join('')}</tr>
     <tr><td>Head of state</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfState')}</td>`).join('')}</tr>
     <tr><td>Head of government</td>${cs.map(c => `<td class="num">${headHtml(c, 'headOfGovernment')}</td>`).join('')}</tr>
-    </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction. Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
+    </tbody></table></div><p class="panel-note">Green and “best” mark the best value in a row, red and “worst” the worst, where “better” has a clear direction; for the PESTLE pressures, only among the countries scored on the most dimensions, three or more (“partial: 4 of 6” marks a score on fewer than six, and one from fewer than three is too few to rank). Indicators marked “added” were not part of Country PESTLE's score.</p></div>`;
   $('#compare').querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { toggleCompare(b.dataset.rm, false); renderCompare(); });
   wireCmpPicker(focus);
-  $('#cmpind').onchange = drawCmpChart;
+  $('#cmpind').onchange = () => { cmpCode = $('#cmpind').value; drawCmpChart(); };
   $('#cmpdt').ontoggle = drawCmpTable;
   drawCmpChart();
 }
@@ -570,7 +889,8 @@ async function drawCmpChart() {
   if ($('#cmpind')?.value !== code) return;
   const all = data.flatMap(d => d.pts);
   cmpData = { ind, data, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
-  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}Source: World Bank.`;
+  const marked = mode() === 'year' ? ` The rule marks ${view.to}.` : mode() === 'period' ? ` The band marks ${whenText()}.` : '';
+  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked} Source: World Bank.`;
   drawCmpTable();
   // Drawn at the figure's real width, so text stays at its set size; redrawn when the window resizes.
   const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = W < 560 ? 240 : 300;
@@ -581,6 +901,10 @@ async function drawCmpChart() {
   svg.append('g').attr('class', 'gridlines').selectAll('line').data(y.ticks(5)).join('line').attr('x1', M.l).attr('x2', W - M.r).attr('y1', v => y(v)).attr('y2', v => y(v));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(0,${H - M.b})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(Math.max(3, Math.min(8, Math.floor((W - M.l - M.r) / 70)))).tickSizeOuter(0));
   svg.append('g').attr('class', 'axis').attr('transform', `translate(${M.l},0)`).call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(8).tickFormat(v => fmtVal(v, ind.unit))).call(g => g.select('.domain').remove());
+  // The years shown on the slider: a rule at the year, a band over the period (none at Latest).
+  const [x0, x1] = x.domain(), cx = v => x(Math.max(x0, Math.min(x1, v))), md = mode();
+  if (md === 'year' && view.to >= x0 && view.to <= x1) svg.insert('line', '.axis').attr('class', 'yrrule').attr('x1', x(view.to)).attr('x2', x(view.to)).attr('y1', M.t).attr('y2', H - M.b);
+  if (md === 'period') svg.insert('rect', '.gridlines').attr('class', 'yrband').attr('x', cx(view.from)).attr('width', Math.max(2, cx(isLatest(view.to) ? x1 : view.to) - cx(view.from))).attr('y', M.t).attr('height', H - M.t - M.b);
   const labels = [];
   data.forEach(d => {
     if (d.pts.length < 1) return;
@@ -616,6 +940,7 @@ function drawCmpTable() {
 
 /* ---------- tabs and URL ---------- */
 const TABS = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+let profileTok = 0, compareTok = 0, cmpCode = null;
 function setTab(t) {
   TABS.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   for (const x of ['map', 'profile', 'compare']) $('#tab-' + x).hidden = x !== t;
@@ -623,21 +948,57 @@ function setTab(t) {
   hideTip();
   if (t === 'compare') renderCompare();
 }
+// The address: the view as before (#map, #country=ISO3, #compare=A,B, with &compare= on the other tabs), then the years
+// shown (NA-05): year= the year shown or the period's last (left out at Latest), from= the period's first year (from=
+// alone: from then to Latest), and measure= what colours the map (left out for overall pressure).
+function timeKeys() {
+  const q = [];
+  if (!isLatest(view.to)) q.push(`year=${view.to}`);
+  if (per()) q.push(`from=${view.from}`);
+  const w = measureId(metricNow());
+  if (w) q.push(`measure=${encodeURIComponent(w)}`);
+  return q;
+}
 function writeHash() {
+  if (!D) return;
   const t = TABS.find(b => b.getAttribute('aria-selected') === 'true').dataset.tab;
   const h = t === 'profile' && selected ? `#country=${selected}` : t === 'compare' ? `#compare=${compare.join(',')}` : '#map';
-  if (location.hash !== h) history.replaceState(null, '', h + (compare.length && t !== 'compare' ? `&compare=${compare.join(',')}` : ''));
+  const full = [h, ...(compare.length && t !== 'compare' ? [`compare=${compare.join(',')}`] : []), ...timeKeys()].join('&');
+  if (location.hash !== full) history.replaceState(null, '', full);
 }
-function readHash() {
+// The years an address names. An old address with period= (the decade select, before 16 November 2026) opens that
+// decade as a period, 1990–1999 (2020: 2020 to Latest), and is rewritten as from= and year=.
+function readTime(p) {
+  const asYear = v => (v === 'latest' ? LATEST : /^\d{4}$/.test(v || '') && +v >= STOPS[0] && +v <= LATEST ? +v : null);
+  let to = asYear(p.get('year')) ?? LATEST, from = asYear(p.get('from')), old = false;
+  const dec = p.get('period');
+  if (dec && /^(19|20)\d0$/.test(dec) && +dec >= STOPS[0] && +dec <= LAST && !p.get('year') && !p.get('from')) { from = +dec; to = +dec + 9 > LAST ? LATEST : +dec + 9; old = true; }
+  return { from: PRPPeriod.rules.readStart(STOPS, from, to, 'end', false), to, old };
+}
+// moved: a hash moved in place (a Master Index tag, Kino, a deep link) rather than the page's first load. A moved hash
+// that names no years and no measure keeps the reader's (and the address gets them back); only a first load reads a
+// bare address as Latest and overall pressure.
+function readHash(moved = false) {
   const p = new URLSearchParams(location.hash.slice(1).replace(/^map&?/, ''));
   if (p.get('compare')) compare = p.get('compare').split(',').filter(i => byIso.has(i)).slice(0, 4);
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
-  colourMap(); renderTable();
-  if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); renderProfile(); }
+  const keep = moved && !['year', 'from', 'period', 'measure'].some(k => p.has(k));
+  let t = { old: false }, switched = null;
+  if (!keep) {
+    $('#metric').value = (metricOf(p.get('measure')) || METRICS[0]).id; // no measure= is overall pressure
+    t = readTime(p);
+    setView(period.set(t.from, t.to, { silent: true }));
+    // A measure that is not by year, named with a year: the map shows overall pressure, and says so.
+    if (metricNow().timeless && mode() !== 'latest') { switched = metricNow(); $('#metric').value = 'overall'; }
+    note(switched ? `${switched.label} is not by year (its figures are today's), so the map shows Overall PESTLE pressure for ${whenText()}.` : '');
+  }
+  if (p.get('country') && byIso.has(p.get('country'))) { selected = p.get('country'); setTab('profile'); }
   else if (location.hash.startsWith('#compare')) setTab('compare');
   else setTab('map');
+  rerender();
+  if (keep || switched || t.old || p.has('period')) writeHash();
 }
-TABS.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); });
+TABS.forEach(b => b.onclick = () => { setTab(b.dataset.tab); writeHash(); if (b.dataset.tab === 'profile' && selected) renderProfile(); });
 $('.prp-tabs').addEventListener('keydown', e => {
   const i = TABS.indexOf(document.activeElement), k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
   if (i < 0 || (!k && e.key !== 'Home' && e.key !== 'End')) return;
@@ -645,19 +1006,140 @@ $('.prp-tabs').addEventListener('keydown', e => {
   const b = TABS[e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : (i + k + TABS.length) % TABS.length];
   b.focus(); b.click();
 });
-window.addEventListener('hashchange', () => { if (D) readHash(); });
-$('#rows').addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
-$('#compare').addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
+window.addEventListener('hashchange', () => { if (D) readHash(true); });
+for (const sel of ['#rows', '#compare', '#movers']) $(sel).addEventListener('click', e => { const a = e.target.closest('a.cname'); if (a) { e.preventDefault(); openProfile(a.getAttribute('href').split('=')[1]); } });
 // A #map link would otherwise scroll the page down to the map (the <svg id="map">), past the header and tabs.
 window.addEventListener('load', () => { if (/^#map/.test(location.hash)) scrollTo(0, 0); }, { once: true });
 window.addEventListener('prp:themechange', () => { if (!D) return; readTokens(); colourMap(); recolour(); });
 let resizing;
 window.addEventListener('resize', () => { clearTimeout(resizing); resizing = setTimeout(() => { if (D && !$('#tab-compare').hidden && $('#cmpind')) drawCmpChart(); }, 200); });
 
+/* ---------- the slider (design/prp-period.js) ---------- */
+// What the years shown need before they are drawn: a year's scores (pressure.json) and, for an indicator, its layer;
+// a period, the 22 core indicators' layers too (its pressure is worked out here, by pestle.js, from their values).
+function needed(v = view, m = metricNow()) {
+  const md = v.from != null && v.from !== v.to ? 'period' : isLatest(v.to) ? 'latest' : 'year';
+  if (md === 'latest') return { pressure: false, codes: [] };
+  const codes = new Set(m.code ? [m.code] : []);
+  if (md === 'period') for (const i of D.indicators) if (i.core) codes.add(i.code);
+  return { pressure: true, codes: [...codes] };
+}
+const ready = (n = needed()) => (!n.pressure || PR) && n.codes.every(c => layerData.has(c));
+function ensureData(n = needed()) { return ready(n) ? Promise.resolve() : Promise.all([n.pressure ? loadPressure() : null, ...n.codes.map(loadLayer)]); }
+// What the years shown are, in a line under the slider (and the handles' description for a screen reader): Latest is
+// not the newest year, so a reader stepping from Latest to 2025 is told why the figures change.
+const HINT = {
+  latest: 'Latest is each country’s newest value of each indicator, each of its own year (shown beside it), so it is not one year. A year shows that year’s values, or values up to two years earlier.',
+  year: 'A year: each country’s value of that year, or of up to two years earlier (marked); older counts as no value.',
+  period: 'A period: its first and last years’ own scores and the change between them, and the pressure over it (the first against the last values inside it).',
+};
+function setView(p) {
+  view.to = p.to; view.from = p.single || p.from == null || p.atRest ? null : p.from;
+  $('#yr-lbl').textContent = per() ? 'Period' : 'Year';
+  $('#yrlabel').textContent = whenText();
+  $('#yrhint').textContent = HINT[mode()];
+  const lb = $('#yr-latest'); if (lb) lb.disabled = mode() === 'latest';
+  // Off Latest, the measures that are not by year say so in the picker.
+  for (const m of METRICS.filter(x => x.timeless)) { const o = $(`#metric option[value="${m.id}"]`); if (o) o.textContent = isLatest(view.to) && !per() ? m.label : `${m.label} (not by year)`; }
+}
+let drawTok = 0, lastDrawn = null;
+// While the years' files load, the map says so (dimmed, aria-busy, "loading…" in its title), so the read-out and the
+// map never disagree unannounced.
+function busy(on) {
+  $('#mapbox').setAttribute('aria-busy', String(on));
+  const t = $('#maptitle'), base = t.textContent.replace(/ · loading…$/, '');
+  t.textContent = on ? `${base} · loading…` : base;
+}
+// Draw the years shown once their data is there; a later move drops an earlier one still loading. A file that fails to
+// load is not drawn as "no value": the view that was showing comes back, and the note says to move again to retry.
+async function rerender() {
+  const tok = ++drawTok;
+  if (!ready()) {
+    $('#yrlabel').textContent = `${whenText()} …`; busy(true);
+    try { await ensureData(); }
+    catch {
+      if (tok !== drawTok) return;
+      busy(false);
+      const want = whenText();
+      period.stop();
+      if (lastDrawn) { setView(period.set(lastDrawn.from, lastDrawn.to, { silent: true })); $('#metric').value = lastDrawn.metric; }
+      else $('#yrlabel').textContent = whenText();
+      note(`The figures for ${want} could not load. Move the slider again to retry.`);
+      writeHash();
+      return;
+    }
+    if (tok !== drawTok) return;
+    busy(false);
+    $('#yrlabel').textContent = whenText();
+  }
+  const t0 = performance.now();
+  colourMap(); renderTable(); renderMovers(); paintStrip();
+  lastDrawn = { from: view.from, to: view.to, metric: $('#metric').value };
+  if (/could not load/.test(msg)) msg = '';
+  showNote();
+  window.__naDrawn = { view: whenText(), ms: Math.round(performance.now() - t0), at: performance.now() };
+  if (!$('#tab-profile').hidden) renderProfile();
+  if (!$('#tab-compare').hidden) renderCompare();
+}
+// The note beside the measure: what the reader's last action changed (a measure not by year, a file that failed), else
+// what the reader must know of the years shown (1980 has no score; an indicator with no values).
+let msg = '';
+function autoNote() {
+  const m = metricNow();
+  if (m.code && noValues(m.code)) return `The World Bank holds no values for ${m.label.replace(/ \(no values held\)$/, '')}: it serves this series only from its archive, which VM's build cannot reach.`;
+  const first = PR?.firstScore ?? STOPS[0] + 1;
+  if (!m.code && m.press && mode() === 'year' && view.to < first) return `No PESTLE score for ${view.to}: it is the first year held, and a score needs an earlier value to compare with. Its coverage shows under PESTLE coverage; choose an indicator to see ${view.to}'s values.`;
+  return '';
+}
+function showNote() { const text = msg || autoNote(); $('#tnote').textContent = text; $('#tnote').hidden = !text; }
+// A measure that is not by year shows today's figures: choosing one returns the slider to Latest, and moving the
+// slider off Latest with one chosen colours the map by overall pressure instead, with a note saying so.
+function note(text) { msg = text || ''; showNote(); }
+const period = PRPPeriod.mount($('#years'), {
+  rest: 'end', labels: y => yname(y),
+  ids: { from: 'yr-from', to: 'yr', prev: 'yr-prev', play: 'yr-play', next: 'yr-next' },
+  names: { group: 'Years shown', from: 'First year of the period', to: 'Year shown, or the last of the period', prev: 'Previous year', next: 'Next year' },
+  play: { interval: 900, label: 'Play through the years' },
+  onPlay: on => { if (on) ensureData(needed(per() ? view : { from: null, to: STOPS[0] })).catch(() => {}); },
+  onChange: async p => {
+    setView(p);
+    const m = metricNow();
+    if (m.timeless && mode() !== 'latest') { $('#metric').value = 'overall'; note(`${m.label} is not by year (its figures are today's), so the map shows Overall PESTLE pressure for ${whenText()}.`); }
+    else note('');
+    // Play waits for its data: a year whose files have not arrived holds the run until they have (rerender() says so if
+    // they fail).
+    if (p.source === 'play' && !ready()) { period.stop(); try { await ensureData(); } catch { writeHash(); rerender(); return; } if (view.to === p.to && !isLatest(view.to)) period.play(); }
+    writeHash(); rerender();
+  },
+});
+// The step buttons share the label's line (as Volatility's day and period read-out does), so the track has a row of
+// its own at its full width; then a Latest button, one click back to the opening view from any year or period.
+$('#yrbtns').append(...['#yr-prev', '#yr-play', '#yr-next'].map(s => $(s)).filter(Boolean));
+$('#yrbtns').insertAdjacentHTML('beforeend', '<button type="button" class="prp-btn sm" id="yr-latest" title="Back to Latest: each country’s newest values" disabled>Latest</button>');
+$('#yr-latest').onclick = () => { period.stop(); period.set(null, LATEST); };
+for (const inp of Object.values(period.inputs)) inp.setAttribute('aria-describedby', 'yrhint');
+// Above the track: how many countries have a full six-dimension score (or, for an indicator, a value) in each year.
+let stripKey = '';
+function paintStrip() {
+  const m = metricNow(), key = `${m.code || 'p'}|${dataVer}`;
+  if (key === stripKey || !STOPS.length) return;
+  const L = m.code ? layerData.get(m.code) : null;
+  if (m.code ? !L : !PR) return;
+  stripKey = key;
+  const counts = STOPS.map(y => {
+    if (isLatest(y)) return m.code ? D.countries.filter(c => c.latest[m.code]).length : D.countries.filter(c => latestFrame(c).dims === 6).length;
+    if (m.code) return L.values.filter(r => r && y >= L.from && y <= L.to && r[y - L.from] != null).length;
+    return y < PR.from ? 0 : PR.values.filter(r => r && r[y - PR.from]?.[8] === 6).length;
+  });
+  period.strip(counts);
+  $('#years').title = m.code ? `Bars: countries with a value for ${m.label} in each year` : 'Bars: countries with a full six-dimension score in each year';
+}
+
 // Draw once the page (and the PRP connector, which applies the saved theme) has finished loading.
 const domReady = new Promise(r => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
-Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json()), domReady]).then(([d, world]) => {
-  D = d; byIso = new Map(d.countries.map(c => [c.iso3, c])); indBy = new Map(d.indicators.map(i => [i.code, i]));
+Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r => r.json()), import('../national/lib/pestle.js'), domReady]).then(([d, world, pl]) => {
+  D = d; PL = pl; byIso = new Map(d.countries.map(c => [c.iso3, c])); indBy = new Map(d.indicators.map(i => [i.code, i]));
+  d.countries.forEach((c, k) => isoIdx.set(c.iso3, k));
   for (const c of d.countries) if (c.num) numToIso.set(String(c.num).padStart(3, '0'), c.iso3);
   readTokens();
   METRICS = metrics();
@@ -671,10 +1153,27 @@ Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('ht
     $('#rebuilt').innerHTML = `Rebuilt <b>${esc(r)}</b>`;
     $('#rhythm').textContent = r;
   }).catch(() => {});
-  drawMap(world); colourMap(); renderTable();
-  const rerender = () => { colourMap(); renderTable(); if (!$('#tab-profile').hidden) renderProfile(); if (!$('#tab-compare').hidden) renderCompare(); };
-  $('#metric').onchange = rerender; $('#period').onchange = rerender; $('#search').oninput = renderTable; $('#region').onchange = renderTable;
+  // The stops: every year the data holds, then Latest; decade ticks (every five years minor), and Latest at the end.
+  LAST = d.years[1]; LATEST = LAST + 1;
+  STOPS = Array.from({ length: LATEST - d.years[0] + 1 }, (_, k) => d.years[0] + k);
+  $('#yrspan').textContent = `${d.years[0]} to ${LAST}, then Latest`;
+  // Key ticks (kept on a phone) at the first year, 2000 and Latest, so none crowd; the other decades and every fifth
+  // year are minor (shown on a wide screen).
+  const ticks = STOPS.filter(y => y % 5 === 0 && y <= LAST - 3).map(y => ({ at: y, text: String(y), kind: y === STOPS[0] || y % 20 === 0 && y - STOPS[0] >= 15 && LAST - y >= 15 ? 'key' : 'minor' })).concat([{ at: LATEST, text: 'Latest', kind: 'key' }]);
+  period.update({ stops: STOPS, ticks, from: null, to: LATEST });
+  view.to = LATEST;
+  drawMap(world);
+  $('#metric').onchange = () => {
+    const m = metricNow();
+    stripKey = '';
+    if (m.timeless && (!isLatest(view.to) || per())) { setView(period.set(null, LATEST, { silent: true })); note(`${m.label} is not by year: its figures are today's, so the slider is back at Latest.`); }
+    else note('');
+    writeHash(); rerender();
+  };
+  $('#search').oninput = renderTable; $('#region').onchange = renderTable;
   readHash();
+  // When the page is idle: a year's scores, so the first move of the slider draws at once.
+  (window.requestIdleCallback || (f => setTimeout(f, 1500)))(() => loadPressure().then(() => paintStrip(), () => {}));
 }).catch(e => { $('#meta').textContent = 'Data could not load: ' + e.message; });
 </script>
 </body>

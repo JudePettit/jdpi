@@ -608,6 +608,525 @@ test('page: each figure carries its own year or date and its source, in the prof
   await page.close();
 });
 
+/* ---- NA-05 (Jude, 15 November 2026): the map moves through time on the shared slider, and the yearly figures are a
+   layer the Omni-Map can read (national/lib/pestle.js, national/scripts/years.mjs, national/data/years/). The rule's
+   expected scores and ordering are worked by hand here, on three made-up countries, with indicators.mjs' thresholds. */
+const NA5 = {
+  AAA: { 'GOV_WGI_PV.EST': [[2008, 0.5], [2010, 0.2]], 'NY.GDP.MKTP.KD.ZG': [[2009, 2], [2010, 4]], 'FP.CPI.TOTL.ZG': [[2009, 3], [2010, 6]], 'SP.DYN.LE00.IN': [[2009, 70], [2010, 70.1]] },
+  BBB: { 'GOV_WGI_PV.EST': [[2008, 0.1], [2010, 0.3]], 'NY.GDP.MKTP.KD.ZG': [[2007, 1], [2008, 3]], 'SP.DYN.LE00.IN': [[2004, 60], [2010, 59]], 'SI.POV.GINI': [[2006, 40]] },
+  CCC: { 'NY.GDP.MKTP.KD.ZG': [[2005, 1], [2007, 2]] },
+};
+test('NA-05 rule: a year is scored from its own values (or up to two years older), worked by hand', async () => {
+  const { scoreYear, rank } = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  const a = scoreYear(NA5.AAA, 2010, INDICATORS), b = scoreYear(NA5.BBB, 2010, INDICATORS), c = scoreYear(NA5.CCC, 2010, INDICATORS);
+  // AAA: political stability 0.5 (2008) → 0.2 worsens; GDP growth 2 → 4 improves; inflation 3 → 6 worsens; life
+  // expectancy 70 → 70.1 is within its 0.3 threshold, stable.
+  assert.deepEqual(a.items['GOV_WGI_PV.EST'], [2010, 0.2, 2008, -0.3, 'worsening']);
+  assert.equal(a.items['SP.DYN.LE00.IN'][4], 'stable');
+  assert.deepEqual([a.overall, a.pressure.political, a.pressure.economic, a.pressure.social, a.coverage, a.dims], [0.5, 1, 0.5, 0, 0.182, 3]);
+  // BBB: political stability 0.1 → 0.3 improves; GDP growth 1 (2007) → 3 (2008) is used, as 2008 is within two years of
+  // 2010; life expectancy 60 (2004) → 59 is not scored, its earlier value being more than five years back (but it has a
+  // value, so it counts for coverage); the Gini of 2006 is too old for 2010 and counts as no value.
+  assert.deepEqual(b.items['NY.GDP.MKTP.KD.ZG'], [2008, 3, 2007, 2, 'improving']);
+  assert.deepEqual(b.items['SP.DYN.LE00.IN'], [2010, 59, null, null, null]);
+  assert.equal(b.items['SI.POV.GINI'], undefined, 'a value older than two years is missing, not carried forward');
+  assert.deepEqual([b.overall, b.coverage, b.dims, b.pressure.social], [0, 0.136, 2, null]);
+  // CCC: GDP growth only in 2005 and 2007, both too old for 2010: no score at all.
+  assert.deepEqual([c.overall, c.coverage, c.dims], [null, 0, 0]);
+  // The ranking: highest pressure first, no score last.
+  const rows = [{ name: 'CCC', s: c }, { name: 'BBB', s: b }, { name: 'AAA', s: a }];
+  assert.deepEqual(rank(rows, r => r.s.overall, -1).map(r => r.name), ['AAA', 'BBB', 'CCC']);
+  assert.deepEqual(rank(rows, r => r.s.overall, 1).map(r => r.name), ['BBB', 'AAA', 'CCC'], 'no score stays last either way');
+});
+
+test('NA-05 rule: a period compares the first and last values inside it', async () => {
+  const { scorePeriod, periodPick } = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  // BBB 2004→2010: political stability improves, GDP growth improves, life expectancy 60 → 59 worsens (social 1 of 1);
+  // the Gini has one value inside the period, so it counts for coverage but is not scored.
+  const p = scorePeriod(NA5.BBB, periodPick(2004, 2010), INDICATORS);
+  assert.deepEqual([p.overall, p.pressure.social, p.coverage, p.dims], [0.333, 1, 0.182, 3]);
+});
+
+test('NA-05 data: Latest and the decades are the shared rule\'s, number for number', async () => {
+  const { scorePeriod, latestPick, yearPick, periodPick } = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  const n = read('national/data/index.json'), [, LAST] = n.years;
+  let decades = 0;
+  for (const c of n.countries) {
+    const s = read(`national/data/series/${c.iso3}.json`);
+    for (const pick of [latestPick, yearPick(LAST, Infinity)]) {
+      const x = scorePeriod(s, pick, INDICATORS);
+      assert.deepEqual([x.items, x.pressure, x.overall, x.coverage], [c.latest, c.pressure, c.overall, c.coverage], `${c.iso3}: Latest`);
+    }
+    for (const d of Object.keys(c.decades)) {
+      const x = scorePeriod(s, periodPick(+d, +d + 9), INDICATORS);
+      assert.deepEqual({ pressure: x.pressure, overall: x.overall, coverage: x.coverage }, c.decades[d], `${c.iso3}: the ${d}s`);
+      decades++;
+    }
+  }
+  assert.equal(decades, n.countries.length * 5);
+  assert.match(readFileSync(new URL('../national/scripts/build.mjs', import.meta.url), 'utf8'), /from '\.\.\/lib\/pestle\.js'/, 'the build scores with the shared rule');
+});
+
+const YEARS = 'national/data/years/';
+test('NA-05 data: pressure.json is the shared rule recomputed from the series', async () => {
+  const { scoreYear, pressureRow } = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  const n = read('national/data/index.json'), p = read(YEARS + 'pressure.json');
+  assert.deepEqual(p.countries, n.countries.map(c => c.iso3));
+  assert.deepEqual([p.to, p.maxAge, p.fields.length], [n.years[1], 2, 9]);
+  // From the first year held (its coverage), with the first score in firstScore (a change needs an earlier value).
+  assert.ok(p.values.some(r => r?.[0] != null), 'time.from is the first year with a value');
+  assert.ok(p.values.some(r => r?.[p.firstScore - p.from]?.[0] != null), 'firstScore is the first year with a score');
+  assert.ok(p.values.every(r => !r || r.length === p.to - p.from + 1));
+  for (const [k, c] of n.countries.entries()) {
+    const s = read(`national/data/series/${c.iso3}.json`);
+    const want = Array.from({ length: p.to - p.from + 1 }, (_, i) => pressureRow(scoreYear(s, p.from + i, INDICATORS)));
+    assert.deepEqual(p.values[k] || want.map(() => null), want, c.iso3);
+  }
+  // Not a fixed country's score (a World Bank revision would turn the refresh red): from 1998, when the governance
+  // indicators first give a change, most countries score all six dimensions (195 to 204 in 1998–2025, 16 Nov 2026).
+  for (let y = 1998; y <= p.to; y++) assert.ok(p.values.filter(r => r?.[y - p.from]?.[8] === 6).length > 150, `${y}: six dimensions`);
+});
+
+test('NA-05 data: the manifest lists every indicator, each file matches it, and a missing year is null', async () => {
+  const { createHash } = await import('node:crypto');
+  const n = read('national/data/index.json'), m = read(YEARS + 'manifest.json');
+  assert.deepEqual([m.key, m.missing, m.countries], ['iso3', null, n.countries.map(c => c.iso3)]);
+  assert.deepEqual(m.layers.filter(l => l.id.startsWith('wb:')).map(l => l.id), n.indicators.map(i => 'wb:' + i.code), 'every indicator, in order');
+  const series = new Map(n.countries.map(c => [c.iso3, read(`national/data/series/${c.iso3}.json`)]));
+  for (const l of m.layers) {
+    for (const k of ['id', 'module', 'title', 'geometry', 'measure', 'unit', 'status', 'method', ...(l.data ? ['open'] : [])]) assert.ok(typeof l[k] === 'string' && l[k], `${l.id}.${k}`);
+    assert.ok(l.source?.licence && /^https:\/\//.test(l.source.url) && l.source.citation, `${l.id}: a source with a licence and an address`);
+    assert.equal(l.pinnable, false); assert.ok(l.pinNote, `${l.id}: says why it cannot be pinned`);
+    if (!l.data) { assert.ok(ARCHIVED.has(l.id.slice(3)) && l.note, `${l.id}: only an archived series has no file`); continue; }
+    const text = readFileSync(new URL(`../${l.data}`, import.meta.url), 'utf8'), f = JSON.parse(text);
+    assert.equal(createHash('sha256').update(text).digest('hex'), l.sha256, `${l.id}: sha256`);
+    assert.deepEqual([f.from, f.to], [l.time.from, l.time.to], `${l.id}: years`);
+    assert.equal(f.countries.length, m.countries.length);
+    assert.ok(f.values.every(r => r === null || r.length === f.to - f.from + 1), `${l.id}: one row per country of to−from+1 values`);
+    if (l.id === 'national-pestle') { assert.equal(l.omni, false); assert.match(l.omniNote, /composite/); continue; }
+    const code = l.id.slice(3);
+    // time.from is the first year with a value (USP 4.2), and every cell is the series' own value or null: a year the
+    // World Bank has no value for is never filled from another.
+    assert.ok(f.values.some(r => r?.[0] != null) && f.values.some(r => r?.[f.to - f.from] != null), `${code}: from and to are years with values`);
+    for (const [k, iso] of m.countries.entries()) {
+      const pts = new Map((series.get(iso)[code] || []).map(p => [p[0], p[1]]));
+      const row = f.values[k];
+      if (!pts.size) { assert.equal(row, null, `${code} ${iso}: no values, a null row`); continue; }
+      for (let y = f.from; y <= f.to; y++) assert.equal(row[y - f.from], pts.has(y) ? pts.get(y) : null, `${code} ${iso} ${y}`);
+    }
+    assert.equal(l.by, code.startsWith('GOV_WGI_') ? 'scholarly-estimate' : 'official');
+  }
+});
+
+test('NA-05 data: the layer files are small enough for a phone', async () => {
+  const { gzipSync } = await import('node:zlib');
+  const m = read(YEARS + 'manifest.json'), buf = p => readFileSync(new URL(`../${p}`, import.meta.url)), size = p => buf(p).length;
+  // The files gain a column of years each January (about 3.5 KB for the largest, NY.GDP.MKTP.CD), so the caps are per
+  // country-year, not fixed sizes that a refresh would outgrow in a few years and so drop the whole monthly commit; the
+  // phone's budget is what is sent over the wire, gzipped. 16 Nov 2026: NY.GDP.MKTP.CD 15.3 bytes a country-year
+  // (149 KB, 70 KB gzipped), pressure.json 30, the 22 core files 412 KB gzipped.
+  const perCell = (p, f) => size(p) / (f.countries.length * (f.to - f.from + 1));
+  let core = 0;
+  for (const l of m.layers.filter(x => x.data && x.id.startsWith('wb:'))) {
+    const f = read(l.data), gz = gzipSync(buf(l.data)).length;
+    assert.ok(perCell(l.data, f) < 20, `${l.data}: ${perCell(l.data, f).toFixed(1)} bytes a country-year`);
+    assert.ok(gz < 120 * 1024, `${l.data}: ${gz} bytes gzipped`);
+    if (l.core) core += gz;
+  }
+  assert.ok(core < 600 * 1024, `a period of pressure loads the 22 core files: ${core} bytes gzipped`);
+  const p = read(YEARS + 'pressure.json');
+  assert.ok(perCell(YEARS + 'pressure.json', p) < 40, `pressure.json: ${perCell(YEARS + 'pressure.json', p).toFixed(1)} bytes a country-year`);
+  assert.ok(size(YEARS + 'manifest.json') < 64 * 1024, `manifest.json: ${size(YEARS + 'manifest.json')} bytes`); // 49 KB, 7 KB gzipped (16 Nov 2026)
+});
+
+/* ---- NA-05 review (16 November 2026): a period's change is ranked only where its two ends can be compared, ties are
+   settled by name rather than by floating-point noise, and a score below the floor is not coloured or ranked. Worked by
+   hand on made-up rows. */
+test('NA-05 movers: like for like only, ties by name, and the tie at the cut is counted', async () => {
+  const { movers, changeOf, comparable, FLOOR, scoreYear } = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  // As the page works them: from pressure.json's thousandths, 0.347 − 0.097 is 0.25 exactly, not 0.24999999999999997.
+  assert.equal(changeOf(0.097, 0.347), 0.25); assert.equal(changeOf(0.042, 0.292), 0.25); assert.equal(changeOf(0.083, 0.333), 0.25);
+  assert.equal(changeOf(0.4, 0.122), -0.278); assert.equal(changeOf(null, 0.5), null);
+  const rows = [
+    { name: 'Alpha', d: changeOf(0, 0.33), ok: false }, // a one-dimension start: changed most, but not like for like
+    { name: 'Malta', d: changeOf(0.042, 0.292), ok: true }, { name: 'Bolivia', d: changeOf(0.083, 0.333), ok: true }, { name: 'Bahamas', d: changeOf(0.097, 0.347), ok: true },
+    { name: 'Chad', d: changeOf(0.2, 0.3), ok: true }, { name: 'Fiji', d: changeOf(0.4, 0.122), ok: true }, { name: 'Comoros', d: changeOf(0.5, 0.222), ok: true },
+    { name: 'Peru', d: changeOf(0.3, 0.25), ok: true }, { name: 'Zed', d: 0, ok: true }, { name: 'None', d: null, ok: true }, { name: 'Omega', d: changeOf(0.5, 0.1), ok: false },
+  ];
+  const m = movers(rows, 2);
+  assert.deepEqual(m.rose.top.map(r => r.name), ['Bahamas', 'Bolivia'], 'the ties at +25 pts in name order; Alpha is not ranked');
+  assert.deepEqual([m.rose.more, m.rose.at], [1, 0.25], 'one more (Malta) at the same change as the last shown');
+  assert.deepEqual(m.fell.top.map(r => r.name), ['Comoros', 'Fiji']);
+  assert.deepEqual([m.fell.more, m.apart], [0, 2], 'two changes are not like for like');
+  assert.deepEqual(movers(rows.map(r => ({ ...r, d: null }))).rose.top, []);
+  // Two ends can be compared when both score the same dimensions, at least FLOOR of them.
+  assert.equal(FLOOR, 3);
+  const a = scoreYear(NA5.AAA, 2010, INDICATORS), b = scoreYear(NA5.BBB, 2010, INDICATORS); // 3 and 2 dimensions
+  assert.equal(comparable(a, a), true);
+  assert.equal(comparable(a, b), false, 'different dimensions at each end');
+  assert.equal(comparable(b, b), false, 'two dimensions are below the floor');
+  assert.equal(comparable(a, { ...a, pressure: { ...a.pressure, social: null, legal: 0 } }), false, 'the same number, but not the same dimensions');
+  assert.equal(comparable(null, a), false);
+});
+
+test('NA-05 layer contract: units for each field, statuses in the USP vocabulary, territory, citations and templates', () => {
+  const m = read(YEARS + 'manifest.json'), p = read(YEARS + 'pressure.json'), n = read('national/data/index.json');
+  // USP 5.3: status is Fact, Estimate or Disputed; origin is source or vm (what rec=1 hides).
+  for (const l of m.layers) {
+    assert.ok(['fact', 'estimate', 'disputed'].includes(l.status), `${l.id}: status ${l.status}`);
+    assert.ok(['source', 'vm'].includes(l.origin), `${l.id}: origin ${l.origin}`);
+    // USP 5.1's source shape: a short form and its terms ("host": VM may hold the values).
+    for (const k of ['id', 'citation', 'short', 'licence', 'url', 'accessed', 'terms']) assert.ok(l.source[k], `${l.id}: source.${k}`);
+    assert.ok(['host', 'cite-only'].includes(l.source.terms));
+    // The page opens a frame ({at}) or a window ({from}, {to}); a layer with no values opens nothing.
+    if (l.data) { assert.match(l.open, /\{at\}/); assert.match(l.openPeriod, /\{from\}.*\{to\}/); } else { assert.equal(l.open, null); assert.equal(l.openPeriod, null); }
+  }
+  assert.match(m.note, /\{at\}/); assert.match(m.note, /\{from\}/);
+  const pestle = m.layers.find(l => l.id === 'national-pestle');
+  assert.deepEqual([pestle.status, pestle.origin], ['estimate', 'vm']);
+  assert.match(pestle.method, /composite/);
+  // Each field its own unit and scale: dims is a count, not thousandths.
+  assert.deepEqual(Object.keys(pestle.fieldUnits), p.fields);
+  for (const f of p.fields) assert.ok(pestle.fieldUnits[f].unit && Number.isFinite(pestle.fieldUnits[f].scale), f);
+  assert.equal(pestle.fieldUnits.dims.scale, 1); assert.equal(pestle.fieldUnits.coverage.scale, 1000);
+  assert.deepEqual(p.scales, p.fields.map(f => pestle.fieldUnits[f].scale));
+  // The floor below which the page neither colours nor ranks a score is stated where a reader of the layer finds it.
+  assert.equal(pestle.floor?.dims, 3); assert.ok(pestle.floor.note);
+  for (const l of m.layers.filter(x => x.id.startsWith('wb:'))) {
+    // The World Bank's figures are for today's countries, earlier years reconstructed for the present territory.
+    assert.equal(l.borderPrecision, 'present-day', l.id);
+    assert.match(l.method, /present territory/, l.id);
+    // A governance layer cites the series its values come from (source 3), not the archived WDI code.
+    if (l.id.startsWith('wb:GOV_WGI_')) { assert.match(l.source.citation, /GOV_WGI_/); assert.match(l.source.url, /indicator\/GOV_WGI_[A-Z]{2}\.EST\?source=3/); }
+  }
+  // The key: World Bank codes, ISO 3166 alpha-3 save two, and where the numeric and Gleditsch–Ward codes are.
+  assert.match(m.keyNote, /XKX/); assert.match(m.keyNote, /CHI/); assert.match(m.keyNote, /index\.json/);
+  // 1980 has no score (a change needs an earlier value) but has a coverage, which the layer carries.
+  assert.equal(p.from, n.years[0]); assert.equal(pestle.time.from, p.from);
+  assert.ok(p.firstScore > p.from && p.values.some(r => r?.[p.firstScore - p.from]?.[0] != null), 'firstScore is the first year with a score');
+  assert.ok(p.values.every(r => !r || r.slice(0, p.firstScore - p.from).every(x => !x || x[0] == null)), 'no score before firstScore');
+  const us = p.values[p.countries.indexOf('USA')][0];
+  assert.ok(us && us[0] == null && us[7] > 0 && us[8] === 0, `USA 1980: no score, a coverage (${JSON.stringify(us)})`);
+});
+
+// The page on the slider (NA-05). Every expected figure is read from the committed data and worked out with the shared
+// rule here, never fixed, so a monthly refresh passes as long as the page shows what the data says.
+test('page NA-05: the slider replaces the decades, Latest stays the opening view, and years, periods and old addresses open as the data says', pageTest, async t => {
+  const PL = await import('../national/lib/pestle.js');
+  const { INDICATORS } = await import('../national/scripts/indicators.mjs');
+  const n = read('national/data/index.json'), by = Object.fromEntries(n.countries.map(c => [c.iso3, c])), LAST = n.years[1];
+  const P = read(YEARS + 'pressure.json'), cellAt = (iso, y) => PL.pressureOf(P.values[P.countries.indexOf(iso)]?.[y - P.from]);
+  const pct = v => (v == null ? '–' : Math.round(v * 100) + '%');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const open = async hash => {
+    await page.goto(`${BASE}/q/national${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#rows tr', { state: 'attached', timeout: 20000 });
+    // (A new hash on the same page is a hashchange, not a load: wait for the view it names to be drawn.)
+    await page.waitForFunction(() => window.__naDrawn && window.__naDrawn.view === document.querySelector('#yrlabel').textContent, null, { timeout: 20000 });
+  };
+  const row = async iso => page.$$eval(`#rows tr[data-iso="${iso}"] td`, tds => tds.map(td => td.textContent.trim()));
+  const head = () => page.$$eval('#thead th', ths => ths.map(th => th.textContent.trim()));
+
+  // 8 and 9. A bare address: no decade select, the slider at Latest, and Latest's numbers (index.json) on the map, in
+  // the first ten rows of the ranking and in France's profile.
+  await open('#map');
+  assert.equal(await page.locator('#period').count(), 0, 'the decade select is gone');
+  assert.equal(await page.textContent('#yrlabel'), 'Latest');
+  assert.equal(await page.getAttribute('#yr', 'aria-valuetext'), 'Latest');
+  assert.equal(await page.evaluate(() => location.hash), '#map', 'Latest writes no year');
+  assert.equal(await page.getAttribute('#map path.land[data-iso="FRA"]', 'data-v'), String(by.FRA.overall));
+  const top = PL.rank(n.countries, c => c.overall, -1).slice(0, 10);
+  const shown = await page.$$eval('#rows tr', rs => rs.slice(0, 10).map(r => [r.dataset.iso, r.children[4].textContent.trim()]));
+  assert.deepEqual(shown.map(r => r[0]), top.map(c => c.iso3), 'the ranking\'s order');
+  for (const [k, c] of top.entries()) assert.ok(shown[k][1].startsWith(pct(c.overall)), `${c.iso3}: ${shown[k][1]}`);
+  const pestleStat = () => page.$$eval('#profile .stat', ss => { const s = ss.find(x => x.querySelector('span')?.textContent === 'PESTLE pressure'); return s ? [s.querySelector('b').textContent, s.querySelector('small')?.textContent] : null; });
+  await page.goto(`${BASE}/q/national#country=FRA`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#profile .stat', { timeout: 20000 });
+  assert.equal((await pestleStat())[0], pct(by.FRA.overall));
+  assert.equal(await page.evaluate(() => location.hash), '#country=FRA', '#country= opens unchanged');
+
+  // 17 and 10. The keys on the end handle (the native ones): ArrowLeft steps a year back from Latest, Home goes to the
+  // first year; the address and aria-valuetext follow. Back to 2010, France reads its 2010 score from pressure.json in
+  // the tooltip, the ranking and the profile.
+  await open('#map');
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(y => document.querySelector('#yrlabel').textContent === String(y), LAST);
+  assert.equal(await page.getAttribute('#yr', 'aria-valuetext'), String(LAST));
+  assert.equal(await page.evaluate(() => location.hash), `#map&year=${LAST}`);
+  await page.keyboard.press('Home');
+  await page.waitForFunction(y => document.querySelector('#yrlabel').textContent === y, String(n.years[0]));
+  assert.equal(await page.evaluate(() => location.hash), `#map&year=${n.years[0]}`);
+  for (let y = n.years[0]; y < 2010; y++) await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => window.__naDrawn?.view === '2010');
+  const fra10 = cellAt('FRA', 2010);
+  assert.ok((await row('FRA'))[4].startsWith(pct(fra10.overall)), 'the ranking');
+  // (France's shape takes in French Guiana, so the middle of its box is at sea: the pointer event is sent to it.)
+  await page.locator('#map path.land[data-iso="FRA"]').dispatchEvent('mousemove', { clientX: 600, clientY: 500 });
+  await page.waitForSelector('#tip:not([hidden])');
+  assert.match(await page.textContent('#tip'), new RegExp(`France.*Overall PESTLE pressure, 2010: ${pct(fra10.overall)}`, 's'));
+  await page.click('#rows tr[data-iso="FRA"] a.cname');
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France');
+  await page.waitForFunction(() => [...document.querySelectorAll('#profile .stat')].some(s => s.querySelector('span')?.textContent === 'PESTLE pressure' && /^2010/.test(s.querySelector('small')?.textContent || '')));
+  const [v10, note10] = await pestleStat();
+  assert.equal(v10, pct(fra10.overall)); assert.match(note10, new RegExp(`^2010 · coverage ${pct(fra10.coverage)} · values of \\d{4}(–\\d{4})?${fra10.dims < 6 ? ' · partial' : '$'}`));
+  assert.equal(await page.evaluate(() => location.hash), '#country=FRA&year=2010');
+
+  // 11. An indicator by year: life expectancy at 2010 shows Japan's 2010 value from the layer.
+  const le = read(YEARS + 'wb/SP.DYN.LE00.IN.json'), jpn = le.values[le.countries.indexOf('JPN')][2010 - le.from];
+  await open('#map&year=2010&measure=wb:SP.DYN.LE00.IN');
+  assert.equal(await page.inputValue('#metric'), 'i_SP.DYN.LE00.IN');
+  assert.equal(await page.getAttribute('#map path.land[data-iso="JPN"]', 'data-v'), String(jpn));
+  assert.ok((await row('JPN'))[3].startsWith(jpn.toFixed(1) + ' 2010'), (await row('JPN'))[3]);
+
+  // 12. A period, 2000 to 2010: Start, End, Change and the period's pressure, with Rose most and Fell most; France's
+  // period pressure is scorePeriod's.
+  await open('#map&year=2010&from=2000');
+  assert.equal(await page.textContent('#yrlabel'), '2000–2010');
+  assert.deepEqual((await head()).slice(3), ['Overall PESTLE pressure, 2000', '2010', 'Change↓', 'Over 2000–2010']);
+  assert.equal(await page.locator('#movers li a.cname').count(), 12, 'six each way (a tie at the sixth adds a line "and N more")');
+  const sFra = read('national/data/series/FRA.json'), pFra = PL.scorePeriod(sFra, PL.periodPick(2000, 2010), INDICATORS);
+  const r12 = await row('FRA');
+  assert.equal(r12[3], pct(cellAt('FRA', 2000).overall)); assert.equal(r12[4], pct(fra10.overall));
+  assert.ok(r12[6].startsWith(pct(pFra.overall)), r12[6]);
+
+  // 14. An old address naming a decade opens it as a period, with the decade's figures, and is rewritten.
+  await open('#period=1990');
+  assert.equal(await page.evaluate(() => location.hash), '#map&year=1999&from=1990');
+  assert.ok((await row('FRA'))[6].startsWith(pct(by.FRA.decades[1990].overall)));
+
+  // 15. 1985: every score is partial (no governance indicators yet), so every country coloured by one is marked partial
+  // (the stipple; a score below the floor is not coloured at all); a country with no Gini value within two years of
+  // 1985 reads "No value for 1985".
+  await open('#map&year=1985');
+  const [land, hatched] = await page.evaluate(() => [document.querySelectorAll('#map path.land[data-v]').length, [...document.querySelectorAll('#map .stipple path')].filter(p => !p.hasAttribute('display')).length]);
+  assert.ok(land > 150 && hatched === land, `${hatched} of ${land} hatched`);
+  assert.ok(P.values.every(r => !r || !r[1985 - P.from] || r[1985 - P.from][8] < 6));
+  const gini = read(YEARS + 'wb/SI.POV.GINI.json');
+  const none = ['RUS', 'CAN', 'AUS', 'CHN', 'DZA', 'SAU', 'KAZ', 'MNG'].find(iso => { const r = gini.values[gini.countries.indexOf(iso)]; return !r || [1983, 1984, 1985].every(y => y < gini.from || r[y - gini.from] == null); });
+  await page.selectOption('#metric', 'i_SI.POV.GINI');
+  await page.waitForFunction(() => /Gini/.test(document.querySelector('#maptitle').textContent) && window.__naDrawn);
+  assert.match((await row(none)).join(' '), /no value/);
+  await page.locator(`#map path.land[data-iso="${none}"]`).dispatchEvent('mousemove', { clientX: 600, clientY: 500 });
+  await page.waitForSelector('#tip:not([hidden])');
+  assert.match(await page.textContent('#tip'), new RegExp(`No value for 1985`), `${none}'s tooltip`);
+
+  // 13. Play from 2020 runs to Latest and stops there.
+  await open('#map&year=2020');
+  await page.click('#yr-play');
+  await page.waitForFunction(() => document.querySelector('#yrlabel').textContent === 'Latest' && document.querySelector('#yr-play').getAttribute('aria-label') !== 'Pause', null, { timeout: 15000 });
+  assert.equal(await page.evaluate(() => location.hash), '#map');
+
+  // A real pointer: the start handle dragged back from Latest opens a period ending at Latest.
+  const track = await page.locator('#years .prp-period-track').boundingBox();
+  await page.mouse.move(track.x + track.width - 1, track.y + track.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(track.x + track.width * 0.6, track.y + track.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForFunction(() => /^\d{4}–Latest$/.test(document.querySelector('#yrlabel').textContent));
+  assert.match(await page.evaluate(() => location.hash), /^#map&from=\d{4}$/);
+
+  // 18. A comparison opens as before, and follows the slider. (Opened afresh: a hash moved in place keeps the period
+  // the reader had, as the old page kept its decade; the review test checks that.)
+  await page.goto('about:blank');
+  await page.goto(`${BASE}/q/national#compare=USA,CHN,RUS,IND`, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('#compare .cmp tbody tr', { timeout: 20000 });
+  assert.equal(await page.locator('#compare thead th').count(), 5);
+  assert.equal(await page.evaluate(() => location.hash), '#compare=USA,CHN,RUS,IND');
+
+  // 16. A phone: the slider shows, and nothing scrolls sideways, at a year and over a period.
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  phone.on('pageerror', e => errors.push(e.message));
+  for (const h of ['#map', '#map&year=2010&from=2000']) {
+    await phone.goto(`${BASE}/q/national${h}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await phone.waitForFunction(() => window.__naDrawn, null, { timeout: 20000 });
+    assert.ok(await phone.isVisible('#years .prp-period-track'), `${h}: the slider is visible`);
+    assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${h}: no sideways scroll`);
+  }
+  assert.deepEqual(errors, []);
+});
+
+// The NA-05 review (16 Nov 2026): what the reader sees of the years is honest and the slider behaves as Volatility's.
+// Each figure is again worked out here from the committed data with the shared rule.
+test('page NA-05 review: years shown honestly, movers like for like, failures said, and the slider laid out as Volatility\'s', pageTest, async t => {
+  const PL = await import('../national/lib/pestle.js');
+  const n = read('national/data/index.json'), by = Object.fromEntries(n.countries.map(c => [c.iso3, c])), LAST = n.years[1];
+  const P = read(YEARS + 'pressure.json'), cellAt = (iso, y) => PL.pressureOf(P.values[P.countries.indexOf(iso)]?.[y - P.from]);
+  const pct = v => (v == null ? '–' : Math.round(v * 100) + '%');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const drawn = () => page.waitForFunction(() => window.__naDrawn && window.__naDrawn.view === document.querySelector('#yrlabel').textContent, null, { timeout: 20000 });
+  // (Each address opened afresh, as a reader's link is: a hash moved in place keeps the years shown.)
+  const open = async hash => { await page.goto('about:blank'); await page.goto(`${BASE}/q/national${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 }); await page.waitForSelector('#rows tr', { state: 'attached', timeout: 20000 }); await drawn(); };
+  const tip = async iso => { await page.locator(`#map path.land[data-iso="${iso}"]`).dispatchEvent('mousemove', { clientX: 600, clientY: 500 }); await page.waitForSelector('#tip:not([hidden])'); return page.textContent('#tip'); };
+  const movers = () => page.$$eval('#rose li, #fell li', ls => ls.map(l => ({ list: l.parentElement.id, iso: l.querySelector('a')?.getAttribute('href')?.split('=')[1] || null, text: l.textContent.trim() })));
+
+  // R1. No value is Volatility's hatched no-data pattern; a partial score or an earlier year's value is a stipple of its
+  // own, named in the legend, and the caption uses the legend's words.
+  // (A large country, so its shape is on the 110m map.)
+  const gini = read(YEARS + 'wb/SI.POV.GINI.json');
+  const none15 = ['IND', 'DZA', 'LBY', 'SAU', 'COD', 'AFG', 'NGA', 'VEN'].find(iso => !PL.yearPick(2015)(PL.ptsOf(gini, gini.countries.indexOf(iso)))[1]);
+  await open('#map&measure=wb:SI.POV.GINI&year=2015');
+  assert.equal(await page.getAttribute(`#map path.land[data-iso="${none15}"]`, 'fill'), 'url(#nodata)', `${none15}: no Gini value within two years of 2015`);
+  assert.equal(await page.locator('#map pattern#nodata').count(), 1);
+  assert.ok(await page.locator('#map .stipple').count() === 1 && await page.locator('#map .hatch').count() === 0, 'the partial mark is not a hatch');
+  assert.match(await page.textContent('#legend'), /No value for 2015/);
+  assert.match(await page.textContent('#mapcap'), /No value for 2015/);
+  assert.doesNotMatch(await page.textContent('#mapcap'), /No data” colour/);
+
+  // F1. A period of an indicator: each end with its own year, in the tooltip and in Rose most / Fell most (China's
+  // 2000 value is of 1999).
+  await open('#map&year=2010&from=2000&measure=wb:SI.POV.GINI');
+  const chn = PL.ptsOf(gini, gini.countries.indexOf('CHN')), [, ca] = PL.yearPick(2000)(chn), [, cb] = PL.yearPick(2010)(chn);
+  const tChn = await tip('CHN');
+  assert.ok(tChn.includes(`${ca[0]}: ${ca[1].toFixed(1)}`) && tChn.includes(`${cb[0]}: ${cb[1].toFixed(1)}`), tChn);
+  if (ca[0] !== 2000) assert.ok(!tChn.includes(`2000: ${ca[1].toFixed(1)}`), `a ${ca[0]} value is not shown as 2000's: ${tChn}`);
+  for (const mv of await movers()) assert.match(mv.text, /\d{4}: .* → \d{4}: /, mv.text);
+
+  // F2, F4, F6. A period of pressure: only like-for-like ends are ranked (the same dimensions, at least FLOOR, at both
+  // ends), in order of change with ties by name; a partial end is tagged in the table.
+  await open('#map&year=2013&from=1981');
+  const ms = await movers();
+  for (const mv of ms.filter(x => x.iso)) {
+    const a = cellAt(mv.iso, 1981), b = cellAt(mv.iso, 2013);
+    assert.ok(PL.comparable(a, b), `${mv.iso}: ${a?.dims} dimensions in 1981, ${b?.dims} in 2013, listed`);
+  }
+  const want = PL.movers(n.countries.map(c => ({ name: c.name, iso: c.iso3, d: PL.changeOf(cellAt(c.iso3, 1981)?.overall, cellAt(c.iso3, 2013)?.overall), ok: PL.comparable(cellAt(c.iso3, 1981), cellAt(c.iso3, 2013)) })));
+  assert.deepEqual(ms.filter(x => x.list === 'rose' && x.iso).map(x => x.iso), want.rose.top.map(r => r.iso), 'Rose most');
+  assert.deepEqual(ms.filter(x => x.list === 'fell' && x.iso).map(x => x.iso), want.fell.top.map(r => r.iso), 'Fell most');
+  if (want.apart) assert.match(await page.textContent('#movers'), new RegExp(`${want.apart} (more )?change`), 'the changes left out are counted');
+  const ssd = await page.$$eval('#rows tr[data-iso="SSD"] td', tds => tds.map(td => td.textContent.trim()));
+  if (cellAt('SSD', 1981)?.dims < 6) assert.match(ssd[3], /partial|too few/i, `South Sudan's 1981 start: ${ssd[3]}`);
+  // F4. Below the floor a score is not coloured: no fill from the ramp, and words in the tooltip.
+  await open('#map&year=1981');
+  const drawnIsos = new Set(await page.$$eval('#map path.land[data-iso]', ps => ps.map(p => p.dataset.iso)));
+  const few = n.countries.find(c => drawnIsos.has(c.iso3) && cellAt(c.iso3, 1981)?.overall != null && cellAt(c.iso3, 1981).dims < PL.FLOOR);
+  if (few) {
+    assert.equal(await page.getAttribute(`#map path.land[data-iso="${few.iso3}"]`, 'fill'), 'url(#nodata)');
+    assert.match(await tip(few.iso3), /too few/i);
+    assert.match((await page.$$eval(`#rows tr[data-iso="${few.iso3}"] td`, tds => tds.map(td => td.textContent))).join(' '), /too few/i);
+  }
+
+  // F5. A period to Latest: a country whose Latest score reaches back before the period began is not ranked.
+  await open('#map&from=2020');
+  for (const mv of (await movers()).filter(x => x.iso)) {
+    const back = Object.entries(by[mv.iso].latest).some(([code, it]) => n.indicators.find(i => i.code === code)?.core && it[4] && it[2] < 2020);
+    assert.ok(!back, `${mv.iso}: its Latest score uses values from before 2020`);
+  }
+
+  // F7 and R6. A period from 1980 (an old 1980s address) is ranked by the period's pressure, and the movers say why
+  // there is no change; at 1980 alone the note says there is no score, and 1980's coverage shows (F9).
+  await open('#period=1980');
+  assert.match(await page.textContent('#movers'), /No score for 1980/);
+  const [top1980] = await page.$$eval('#rows tr', rs => rs.slice(0, 1).map(r => r.dataset.iso));
+  const dimsOf = x => Object.values(x?.pressure || {}).filter(v => v != null).length;
+  const best80 = PL.rank(n.countries, c => { const x = c.decades['1980']; return x && x.overall != null && dimsOf(x) >= PL.FLOOR ? x.overall : null; }, -1)[0];
+  assert.ok(by[top1980].decades['1980'].overall === best80.decades['1980'].overall, `ranked by the period: ${top1980} first`);
+  await open('#map&year=1980');
+  assert.match(await page.textContent('#tnote'), /No PESTLE score for 1980/);
+  await page.selectOption('#metric', 'coverage');
+  await drawn();
+  assert.match(await tip('USA'), new RegExp(`PESTLE coverage, 1980: ${pct(cellAt('USA', 1980).coverage)}`));
+
+  // R3 and R5. The track keeps its place when a drag opens a period; a Latest button brings the slider back at one
+  // click, and is off at Latest. R7: a line under the slider says what Latest and a year are.
+  await open('#map');
+  assert.equal(await page.isDisabled('#yr-latest'), true);
+  assert.match(await page.textContent('#yrhint'), /newest value/);
+  const before = await page.locator('#years .prp-period-track').boundingBox();
+  await page.mouse.move(before.x + before.width - 1, before.y + before.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(before.x + before.width * 0.6, before.y + before.height / 2, { steps: 8 });
+  const during = await page.locator('#years .prp-period-track').boundingBox();
+  await page.mouse.up();
+  assert.equal(during.x, before.x, 'the track does not move under the pointer');
+  await page.waitForFunction(() => /–Latest$/.test(document.querySelector('#yrlabel').textContent));
+  assert.equal(await page.isDisabled('#yr-latest'), false);
+  await page.click('#yr-latest');
+  await page.waitForFunction(() => document.querySelector('#yrlabel').textContent === 'Latest');
+  assert.equal(await page.evaluate(() => location.hash), '#map');
+
+  // R3-3. A hash moved in place (a Master Index tag, Kino) keeps the years and the measure the reader chose.
+  await open('#map&year=1995&measure=wb:SP.DYN.LE00.IN');
+  await page.evaluate(() => { location.hash = '#country=GHA'; });
+  await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'Ghana');
+  assert.deepEqual([await page.textContent('#yrlabel'), await page.inputValue('#metric')], ['1995', 'i_SP.DYN.LE00.IN']);
+  await page.waitForFunction(() => decodeURIComponent(location.hash) === '#country=GHA&year=1995&measure=wb:SP.DYN.LE00.IN');
+
+  // F8 and R11. A profile over a period names the years of its first values and of its last.
+  await open('#country=USA&year=2010&from=2000');
+  await page.waitForFunction(() => [...document.querySelectorAll('#profile .stat')].some(s => s.querySelector('span')?.textContent === 'PESTLE pressure' && /first values of/.test(s.textContent)));
+
+  // F3. Compare: a score below the floor or on fewer dimensions wins neither best nor worst, and says partial.
+  const tri = ['USA', 'XKX', 'SSD'];
+  await page.goto('about:blank');
+  await page.goto(`${BASE}/q/national#compare=${tri.join(',')}&year=1981`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => [...document.querySelectorAll('#compare .cmp tbody tr')].some(r => /Overall PESTLE pressure/.test(r.textContent)), null, { timeout: 20000 });
+  const ov = await page.$$eval('#compare .cmp tbody tr', rs => { const r = rs.find(x => x.firstElementChild?.textContent === 'Overall PESTLE pressure'); return [...r.querySelectorAll('td.num')].map(td => [td.className, td.textContent]); });
+  const dims = tri.map(i => cellAt(i, 1981)?.dims ?? 0), top = Math.max(...dims);
+  ov.forEach(([cls, text], k) => {
+    if (dims[k] < top || dims[k] < PL.FLOOR) assert.ok(!/best|worst/.test(cls), `${tri[k]} (${dims[k]} dimensions) ranked: ${text}`);
+    if (cellAt(tri[k], 1981)?.overall != null && dims[k] < 6) assert.match(text, /partial|too few/i, `${tri[k]}: ${text}`);
+  });
+
+  // R9 and R10. An indicator with no values says so in the picker and fetches nothing; an address with a measure
+  // that is not by year and a year says what it shows instead, and the address follows.
+  const asked = [];
+  page.on('request', r => { if (/years\/wb\/SM\.POP\.REFG\.OR/.test(r.url())) asked.push(r.url()); });
+  await open('#map&year=2010');
+  assert.match(await page.textContent('#metric option[value="i_SM.POP.REFG.OR"]'), /no values/i);
+  await page.selectOption('#metric', 'i_SM.POP.REFG.OR');
+  await page.waitForFunction(() => !document.querySelector('#tnote').hidden && /no values/i.test(document.querySelector('#tnote').textContent));
+  assert.deepEqual(asked, []);
+  await open('#map&measure=leaders100&year=2010');
+  assert.equal(await page.isHidden('#tnote'), false);
+  assert.equal(await page.evaluate(() => location.hash), '#map&year=2010');
+
+  // R2 and R8. While a year's files load the map says so (aria-busy, "loading"); a file that fails to load leaves the
+  // view that was showing, says so, and is asked for again on the next move.
+  // (Life expectancy: a year of it needs its own file, which the page has not yet asked for.)
+  const LE = 'SP.DYN.LE00.IN', leL = read(YEARS + `wb/${LE}.json`), leFra = PL.yearPick(LAST)(PL.ptsOf(leL, leL.countries.indexOf('FRA')))[1];
+  let fail = true;
+  await page.route('**/national/data/years/**', async r => { if (fail) return r.abort(); await new Promise(res => setTimeout(res, 600)); return r.continue(); });
+  await open(`#map&measure=wb:${LE}`);
+  await page.focus('#yr');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => /could not load/.test(document.querySelector('#tnote').textContent));
+  assert.equal(await page.textContent('#yrlabel'), 'Latest', 'the view that was showing stays');
+  assert.equal(await page.getAttribute('#map path.land[data-iso="FRA"]', 'data-v'), String(by.FRA.latest[LE][1]));
+  fail = false;
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(() => document.querySelector('#mapbox').getAttribute('aria-busy') === 'true' && /loading/.test(document.querySelector('#maptitle').textContent));
+  await page.waitForFunction(y => window.__naDrawn?.view === String(y), LAST);
+  assert.equal(await page.getAttribute('#mapbox', 'aria-busy'), 'false');
+  assert.equal(await page.getAttribute('#map path.land[data-iso="FRA"]', 'data-v'), leFra ? String(leFra[1]) : null);
+  assert.equal(await page.isHidden('#tnote'), true, 'the failure note goes once the figures have loaded');
+  await page.unroute('**/national/data/years/**');
+
+  // R4. On a phone the track has the full width, the buttons sit on the label's line.
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  phone.on('pageerror', e => errors.push(e.message));
+  await phone.goto(`${BASE}/q/national#map`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await phone.waitForFunction(() => window.__naDrawn, null, { timeout: 20000 });
+  const pt = await phone.locator('#years .prp-period-track').boundingBox(), lb = await phone.locator('#yr-lbl').boundingBox(), pb = await phone.locator('#yr-play').boundingBox();
+  assert.ok(pt.width > 320, `the phone's track: ${pt.width} px`);
+  assert.ok(Math.abs((pb.y + pb.height / 2) - (lb.y + lb.height / 2)) < 20, 'Play on the label\'s line');
+  assert.ok(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  assert.deepEqual(errors, []);
+});
+
 // NA-03 (15 Nov 2026): a Wikidata label that carries its holder's realm is shown as the name alone, in the build and
 // in the data the page reads; a note in brackets, a party and a plain name are left as they are.
 test('leaders: a name is shown without its realm ("Mohammed VI of Morocco" is "Mohammed VI"), in the data too', async () => {

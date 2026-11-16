@@ -7,6 +7,7 @@
 <title>National Analysis · VM</title>
 <script src="supabase-config.js"></script><script src="supabase-client.js"></script>
 <script src="../design/prp-access.js"></script>
+<script src="../design/prp-mark.js" data-shell="../"></script>
 <link rel="stylesheet" href="../design/prp.css">
 <script src="../design/prp-bar.js" data-suite="rt" data-module="pestle" data-shell="../" defer></script>
 <style>
@@ -82,6 +83,8 @@ small.yr,.stat b small.yr{display:inline;margin:0 0 0 5px;color:var(--prp-muted)
 .spark{display:block;width:70px;height:22px}
 .added{margin-left:5px;padding:0 4px;border:1px solid var(--prp-line);border-radius:3px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px}
 .stories{padding:2px 14px 12px}
+.monthly{padding:4px 14px 12px;min-width:0}
+.monthly .mwar{margin:4px 0 6px;font-size:13px;line-height:1.5}
 .story{padding:8px 0;border-top:1px solid var(--prp-line-soft);font-size:13px}.story:first-child{border-top:0}
 .story a{color:var(--prp-text);text-decoration:none}.story a:hover{color:var(--prp-link);text-decoration:underline}
 .story small{display:block;margin-top:2px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
@@ -445,11 +448,13 @@ async function renderProfile() {
       ${stat('Population', `${fmtVal(pop?.[1], 'people')}${pop ? ` <small class="yr">${esc(pop[0])}</small>` : ''}`, gdp ? `GDP ${fmtVal(gdp[1], 'US$')} (${esc(gdp[0])})` : '', SRC.worldBank)}
     </div>
     ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">${esc(SRC.battlefield())}</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
+    <div class="prp-panel-head"><b>Month by Month</b><span class="hint">VM's own marks, month against the three before · UCDP and GDELT</span></div><div id="monthly" class="monthly" aria-live="polite"><div class="muted">Loading…</div></div>
     <div class="prp-panel-head"><b>PESTLE · ${period === 'latest' ? 'latest change' : `${period}s (start vs end of decade)`}</b><span class="hint">Improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
     <div class="prp-panel-head"><b>Latest headlines</b><span class="hint">Global Headline Tracker · free sources lead, paywalls labelled</span></div><div id="stories" class="stories" aria-live="polite"><div class="muted">Loading…</div></div>
   </div>`;
   $('#addcmp').onclick = () => { toggleCompare(c.iso3, !compare.includes(c.iso3)); renderProfile(); };
+  fillMonthly(c);
   try {
     const [rows, acc] = await Promise.all([globalThis.GTTSDB ? globalThis.GTTSDB.latestTopStories(c.iso2) : [], PRPAccess.load('../design/prp-access.json')]);
     // Free sources lead (design/prp-access.js): the first headline is from an outlet anyone can read wherever one of the
@@ -457,6 +462,27 @@ async function renderProfile() {
     const cls = r => (acc.size ? acc.classify({ host: r.outlet_domain, name: r.outlet, url: r.url }) : 'free');
     $('#stories').innerHTML = rows.length ? PRPAccess.leadFree(rows, r => PRPAccess.isFree(cls(r))).slice(0, 8).map(r => `<div class="story"><a href="${esc(r.url)}" target="_blank" rel="noreferrer">${esc(r.title_en || r.title_original)}${PRPAccess.label(cls(r))}</a><small>${esc(r.outlet)} · front page of ${esc(dateOf(r.snapshot_date) || r.snapshot_date)}</small></div>`).join('') : '<div class="muted">No outlets tracked for this country yet.</div>';
   } catch { $('#stories').innerHTML = '<div class="muted">Headlines unavailable.</div>'; }
+}
+
+// Month by Month (monthly/data, design/prp-mark.js): the country's latest marks, fighting and volatility apart, each with
+// its explanation, and its year strip. Where VM holds no figures for the country, the box says why instead of a mark.
+async function fillMonthly(c) {
+  // A strip is written for every country with a unit, so it is asked for only then (no request that must fail).
+  const marks = await PRPMark.load(), has = !!PRPMark.unitOf(marks, 'country:' + c.iso3);
+  const strip = has ? await PRPMark.loadStrip(c.iso3) : null;
+  const box = $('#monthly');
+  if (!box || selected !== c.iso3) return;
+  if (!marks) { box.innerHTML = '<div class="muted">Month by Month’s marks could not be read.</div>'; return; }
+  const u = PRPMark.unitOf(marks, 'country:' + c.iso3), note = (marks.notes || []).find(n => n.iso3 === c.iso3)?.text;
+  const strand = (marks.strands || []).find(x => x.id === 'countries');
+  const why = note || (strand?.state !== 'in' ? strand?.text : `UCDP recorded no events in ${c.name} in the months VM holds, so there is no mark. No UCDP events is not peace: UCDP leaves out conflicts below 25 battle deaths a year.`);
+  // Without a country mark, the wars Month by Month marks in this country (each counted once, by its primary unit),
+  // compact, each with its page.
+  const wars = u ? [] : (marks.units || []).filter(x => x.kind !== 'country' && x.primary && (x.countries || []).some(k => k?.iso3 === c.iso3));
+  const warLines = wars.map(x => { const g = PRPMark.go(x.page); return `<div class="mwar">${PRPMark.name(x, { strong: true })}: ${PRPMark.chip(x.fighting)}${g ? ` <a href="${esc(g.href)}" target="${g.target}">${esc(x.page.label)}</a>` : ''}</div>`; }).join('');
+  box.innerHTML = u ? `${PRPMark.full(u.fighting, u, { heading: 'Fighting' })}${u.volatility ? PRPMark.full(u.volatility, u, { heading: 'Volatility' }) : ''}${PRPMark.strip(strip)}`
+    : `${warLines ? `<p class="muted">The wars Month by Month marks here, ${esc(PRPMark.monthName(marks.month))}:</p>${warLines}` : ''}<p class="muted">${esc(why || '')}</p>${strip ? PRPMark.strip(strip) : ''}`;
+  PRPMark.wire(box);
 }
 
 /* ---------- compare ---------- */

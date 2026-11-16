@@ -42,6 +42,8 @@
      Calendar.
    - Markets: each quote carries its own time, and the window says when the quotes were fetched, never "live". Each line
      opens its ticker on the Market Monitor.
+   - What changed (Month by Month, 15 November 2026): the latest month's bulletin, its five largest changes in deaths among
+     the wars, each with its mark in words, its confidence and both figures; never a tone, since deaths are people.
    National Analysis (PESTLE) is monthly and stores no prior-period value, so there is no honest day-to-day change to
    show from it and it is left out entirely.
 
@@ -78,6 +80,7 @@ export const ROUTES = {
   intelligenceBriefing: '#/hb/briefing',
   calendar: '#/rt/calendar',
   markets: '#/mm/markets',
+  monthly: '#/rt/monthly',
 };
 // Each submodule's own page, as registry.json gives it: a deep link must name that page (shell.js deepLink).
 const PAGES = {
@@ -85,6 +88,7 @@ const PAGES = {
   highbrowse: 'highbrowse/index.html',
   calendar: 'q/calendar.html?period=contemporary',
   markets: 'https://trade-desk.judep92.workers.dev/markets/',
+  monthly: 'q/monthly.html',
 };
 // The only keys a link is ever built from; anything else gets the submodule's front page.
 export const KEYS = {
@@ -93,6 +97,7 @@ export const KEYS = {
   topic: /^[a-z0-9]+(-[a-z0-9]+)*$/,
   event: /^\d{4}-\d{2}-\d{2}~[a-z0-9-]*~[a-z0-9-]*$/,    // integration/scripts/heads.mjs eventKey
   symbol: /^[A-Z0-9^=.-]{1,15}$/,
+  unit: /^(war|focus|country):[A-Za-z0-9-]{1,60}$/,     // a Month by Month unit (monthly/data/marks.json)
 };
 // A shell route that opens `page` (its own address, with the thing in its hash or query) in the submodule's frame.
 const deep = (route, page) => `${route}?at=${encodeURIComponent(page)}`;
@@ -102,10 +107,11 @@ export const LINKS = {
   trends: () => deep(ROUTES.highbrowse, `${PAGES.highbrowse}#tab=trends`),
   event: key => (KEYS.event.test(String(key)) ? deep(ROUTES.calendar, `${PAGES.calendar}&event=${key}`) : ROUTES.calendar),
   symbol: sym => (KEYS.symbol.test(String(sym)) ? deep(ROUTES.markets, `${PAGES.markets}#t=${encodeURIComponent(sym)}`) : ROUTES.markets),
+  unit: id => (KEYS.unit.test(String(id)) ? deep(ROUTES.monthly, `${PAGES.monthly}#tab=marks&unit=${id}`) : ROUTES.monthly),
 };
 
 // The groups, in the order the panel shows them (shell.js TODAY_SLOTS lists the same ids, for its loading cards).
-export const GROUP_IDS = ['volatility', 'briefings', 'calendar', 'markets'];
+export const GROUP_IDS = ['volatility', 'briefings', 'calendar', 'markets', 'monthly'];
 // At most this many lines in a group; the shell reserves the room for exactly this many, so the panel never jumps.
 export const MAX_LINES = 5;
 // No source is waited on longer than this; a source that has not answered by then counts as failed.
@@ -133,6 +139,7 @@ const HEADS = {
   briefings: { title: 'Headline trends · 7 days', source: 'Vitruvian Manager Briefings', href: LINKS.trends(), link: 'Highbrowse trends' },
   calendar: { title: 'Upcoming', source: 'Political calendar', href: ROUTES.calendar, link: 'Realtime Calendar' },
   markets: { title: 'Market snapshot', source: 'trade-desk', href: ROUTES.markets, link: 'Market Monitor' },
+  monthly: { title: 'What changed this month', source: 'UCDP, by VM\'s rule', href: ROUTES.monthly, link: 'Month by Month' },
 };
 // The group a slot shows when its source failed, timed out or held nothing worth a line.
 export function unavailableGroup(id) {
@@ -429,6 +436,31 @@ async function buildMarkets(ctx) {
   return { id: 'markets', ...HEADS.markets, window: at != null ? `quotes fetched ${fmtClock(at)}` : 'quotes, fetch time not given', items };
 }
 
+/* --- METRIC 5: what changed in the latest month UCDP has published (RT · Month by Month) ----------------------------
+   monthly/data/marks.head.json (written with marks.json, integration/scripts/heads.mjs): the month's bulletin, its
+   counts and its five largest changes in deaths among the wars (each war once, by its primary unit). Each line says the
+   mark in words, its confidence and both figures, and opens that war's mark on the Month by Month page. Deaths are
+   people: no line has a tone, so no colour makes a month good or bad. A month with fewer than five changes says how the
+   other wars were marked in its note. */
+async function buildMonthly(ctx) {
+  const h = await ctx.get('monthly/data/marks.head.json');
+  const b = h?.bulletin;
+  if (!b || typeof b.month !== 'string' || !/^\d{4}-\d{2}$/.test(b.month)) return null;
+  const month = `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][+b.month.slice(5, 7) - 1]} ${b.month.slice(0, 4)}`;
+  const c = b.counts?.wars || {};
+  const sum = `Of ${fmtInt((c.worse || 0) + (c.better || 0) + (c.same || 0) + (c.none || 0))} wars: ${fmtInt(c.worse || 0)} more deaths recorded, ${fmtInt(c.better || 0)} fewer, ${fmtInt(c.same || 0)} no large change, ${fmtInt(c.none || 0)} no mark.`;
+  const items = (Array.isArray(b.top) ? b.top : []).filter(t => t && Number.isFinite(t.change)).slice(0, MAX_LINES).map(t => ({
+    label: text(t.name),
+    value: `${t.change > 0 ? '+' : MINUS}${fmtInt(Math.abs(t.change))}`,
+    detail: [text(t.words), t.confidence ? `${text(t.confidence)} confidence` : null, `${fmtInt(t.deaths)} deaths against a median of ${fmtInt(t.median)}`].filter(Boolean).join(' · '),
+    href: LINKS.unit(t.unit),
+  }));
+  const group = { id: 'monthly', ...HEADS.monthly, title: `What changed in ${month.split(' ')[0]}`, window: `${month} · VM's marks from UCDP's provisional figures${b.provisional ? ' · provisional issue' : ''}`, items };
+  if (!items.length) group.items = [{ label: 'No war marked more or fewer deaths recorded', value: '', detail: sum, href: ROUTES.monthly }];
+  else if (items.length < MAX_LINES) group.note = sum;
+  return group;
+}
+
 /* --- the session cache's lifetime ------------------------------------------------------------------------------------
    cacheEntry(groups, now) -> { v: 3, at, until, groups }: what the shell keeps in sessionStorage. `at` is when it was
    written; `until` is when it stops being fresh: 45 minutes on, or the next UTC midnight if that comes first, since
@@ -469,7 +501,7 @@ export async function buildTodayHighlights(options = {}) {
     now,
     marketsBase: String(marketsBase).replace(/\/+$/, ''),
   };
-  const BUILDERS = { volatility: buildVolatility, briefings: buildBriefings, calendar: buildCalendar, markets: buildMarkets };
+  const BUILDERS = { volatility: buildVolatility, briefings: buildBriefings, calendar: buildCalendar, markets: buildMarkets, monthly: buildMonthly };
   // Build every group concurrently and hand each over as it settles. Each builder is already failure-proof, but guard
   // once more so that a bug in one can never reject the whole set — a broken group becomes unavailable, the rest show.
   const groups = await Promise.all(GROUP_IDS.map(async id => {

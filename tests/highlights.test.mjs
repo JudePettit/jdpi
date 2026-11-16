@@ -146,8 +146,18 @@ const HYPE = {
     { symbol: 'NVDA', name: 'NVIDIA', score: 90, changePct: 3.5, why: ['record highs'] },
   ],
 };
+// monthly/data/marks.head.json: September's bulletin, its counts and its largest changes among the wars.
+const MONTHLY_HEAD = {
+  summaryOf: {}, generated: '2026-10-29T05:30:00Z', month: '2026-09', released: '2026-10-26T03:39:55Z', rule: 'vm-direction-1', provisional: false, page: 'q/monthly.html',
+  bulletin: { month: '2026-09', provisional: false, counts: { wars: { worse: 1, better: 1, same: 9, none: 7 }, countries: { worse: 0, better: 0, same: 0, none: 0 } },
+    top: [
+      { unit: 'focus:yemen', name: 'Yemeni civil war', direction: 'worse', words: 'More deaths recorded', confidence: 'medium', deaths: 3170, median: 200, change: 2970, pct: 1485 },
+      { unit: 'war:islamic-state', name: 'Islamic State attacks on civilians (worldwide)', direction: 'better', words: 'Fewer deaths recorded', confidence: 'low', deaths: 67, median: 126, change: -59, pct: -47 },
+    ] },
+};
 // A table that routes every source to a good fixture.
 const ALL_GOOD = {
+  'monthly/data/marks.head': MONTHLY_HEAD,
   'volatility/data/index.head': VOL_HEAD,
   ...SHORT,
   'calendar/data/upcoming': CALENDAR,
@@ -155,16 +165,16 @@ const ALL_GOOD = {
   'api/public/hype': HYPE,
 };
 const SOURCES = ['/api/public/hype', '/api/public/overview', 'briefing/data/trends.json', 'calendar/data/upcoming.json', 'digital/briefing/data/trends.json',
-  'econ/briefing/data/trends.json', 'science/briefing/data/trends.json', 'volatility/data/index.head.json'];
+  'econ/briefing/data/trends.json', 'monthly/data/marks.head.json', 'science/briefing/data/trends.json', 'volatility/data/index.head.json'];
 const run = (table, opts = {}) => buildTodayHighlights({ fetch: stubFetch(table, opts.calls), base: '', marketsBase: '', now: NOW, ...opts });
 const byId = (groups, id) => groups.find(g => g.id === id);
 
 /* --- shape, routes and fetch-once -------------------------------------------------------------------------------- */
-test('logic: all four groups build, with the documented shape and shell-route links, reading eight small summaries once', async () => {
+test('logic: all five groups build, with the documented shape and shell-route links, reading nine small summaries once', async () => {
   const calls = [];
   const groups = await run(ALL_GOOD, { calls });
-  assert.deepEqual(groups.map(g => g.id), GROUP_IDS, 'the four groups, in order');
-  assert.deepEqual(GROUP_IDS, ['volatility', 'briefings', 'calendar', 'markets']);
+  assert.deepEqual(groups.map(g => g.id), GROUP_IDS, 'the five groups, in order');
+  assert.deepEqual(GROUP_IDS, ['volatility', 'briefings', 'calendar', 'markets', 'monthly']);
 
   for (const g of groups) {
     for (const f of ['id', 'title', 'source', 'window', 'href', 'link']) {
@@ -182,7 +192,7 @@ test('logic: all four groups build, with the documented shape and shell-route li
       if (it.tone !== undefined) assert.ok(['up', 'down', 'worse', 'better'].includes(it.tone), `${g.id} tone is up/down/worse/better`);
     }
   }
-  // Eight sources, each read exactly once: the summaries written with each store, and the Worker's two feeds.
+  // Nine sources, each read exactly once: the summaries written with each store, and the Worker's two feeds.
   assert.deepEqual(calls.slice().sort(), SOURCES);
 });
 
@@ -485,9 +495,26 @@ test('logic: onGroup gets each group as soon as its own sources answer', async (
   const order = [];
   await buildTodayHighlights({ fetch: slow(ALL_GOOD, 60), marketsBase: '', now: NOW, onGroup: g => order.push(g.id) });
   assert.equal(order.at(-1), 'volatility', 'the slow file\'s group last');
-  assert.deepEqual(order.slice(0, 3).sort(), ['briefings', 'calendar', 'markets'], 'the others at once, without waiting for it');
+  assert.deepEqual(order.slice(0, 4).sort(), ['briefings', 'calendar', 'markets', 'monthly'], 'the others at once, without waiting for it');
   // A throwing renderer is not the data's failure: the build still resolves every group.
-  assert.equal((await run(ALL_GOOD, { onGroup: () => { throw new Error('renderer'); } })).length, 4);
+  assert.equal((await run(ALL_GOOD, { onGroup: () => { throw new Error('renderer'); } })).length, 5);
+});
+
+test('logic: What changed (Month by Month): the five largest changes, each with its words, confidence and both figures, never a tone', async () => {
+  const g = byId(await run(ALL_GOOD), 'monthly');
+  assert.equal(g.title, 'What changed in September');
+  assert.equal(g.window, "September 2026 · VM's marks from UCDP's provisional figures");
+  assert.deepEqual(g.items.map(i => [i.label, i.value, i.detail]), [
+    ['Yemeni civil war', '+2,970', 'More deaths recorded · medium confidence · 3,170 deaths against a median of 200'],
+    ['Islamic State attacks on civilians (worldwide)', `${M}59`, 'Fewer deaths recorded · low confidence · 67 deaths against a median of 126'],
+  ]);
+  assert.ok(g.items.every(i => i.tone === undefined), 'deaths are people: no colour makes a month good or bad');
+  assert.equal(g.items[0].href, at('#/rt/monthly', 'q/monthly.html#tab=marks&unit=focus:yemen'));
+  assert.equal(g.note, 'Of 18 wars: 1 more deaths recorded, 1 fewer, 9 no large change, 7 no mark.');
+  const none = byId(await run({ ...ALL_GOOD, 'monthly/data/marks.head': { ...MONTHLY_HEAD, bulletin: { ...MONTHLY_HEAD.bulletin, top: [] } } }), 'monthly');
+  assert.equal(none.items.length, 1); assert.equal(none.items[0].href, '#/rt/monthly');
+  const hostile = byId(await run({ ...ALL_GOOD, 'monthly/data/marks.head': { ...MONTHLY_HEAD, bulletin: { ...MONTHLY_HEAD.bulletin, top: [{ ...MONTHLY_HEAD.bulletin.top[0], unit: '../../x' }] } } }), 'monthly');
+  assert.equal(hostile.items[0].href, '#/rt/monthly', 'a unit that fails its pattern opens the front page');
 });
 
 /* --- the session cache's lifetime -------------------------------------------------------------------------------- */
@@ -587,12 +614,13 @@ function pageFixtures() {
     'volatility/data/index.head': vol,
     ...trends,
     'calendar/data/upcoming': JSON.parse(read('calendar/data/upcoming.json')),
+    'monthly/data/marks.head': MONTHLY_HEAD,
     overview: { ...OVERVIEW, at: now - 60e3 },
     hype: HYPE,
     real,
   };
 }
-const SUMMARY = /\/(volatility\/data\/index\.head|(?:science\/|econ\/|digital\/)?briefing\/data\/trends|calendar\/data\/upcoming)\.json(\?|$)/;
+const SUMMARY = /\/(volatility\/data\/index\.head|(?:science\/|econ\/|digital\/)?briefing\/data\/trends|calendar\/data\/upcoming|monthly\/data\/marks\.head)\.json(\?|$)/;
 // Serve every source of the panel from the fixtures, each held until `gate` resolves (if given) and the hype feed after
 // `hypeDelay` ms; `seen` collects the requests. The Dashboard's health mark reads status/health.json, which the daily
 // data check commits: these tests serve their own (`health`, by default none, so no mark), never the repository's, so a
@@ -616,8 +644,8 @@ async function servePanel(context, { gate = null, hypeDelay = 0, seen = [], heal
 }
 const panelBox = page => page.evaluate(() => ({ panel: document.querySelector('#today').getBoundingClientRect().height, kpis: document.querySelector('.today-kpis').getBoundingClientRect().top,
   cards: [...document.querySelectorAll('#today .today-card')].map(c => c.getBoundingClientRect().height) }));
-const filled = page => page.waitForFunction(() => document.querySelectorAll('#today .today-card').length === 4 && !document.querySelector('#today .today-card[data-state="loading"], #today[aria-busy]'), null, { timeout: 15000 });
-const N_SOURCES = 8;
+const filled = page => page.waitForFunction(() => document.querySelectorAll('#today .today-card').length === 5 && !document.querySelector('#today .today-card[data-state="loading"], #today[aria-busy]'), null, { timeout: 15000 });
+const N_SOURCES = 9;
 
 test('page: the panel is the same height loading and filled, at 1440 and 390 px; nothing below it moves', pageTest, async t => {
   if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
@@ -714,7 +742,7 @@ test('page: headline trends: five lines, each with its percentile, nothing cut s
   } finally { await browser.close(); }
 });
 
-test('page: rows and links show their focus ring; the four links have their own names; tones use their tokens', pageTest, async t => {
+test('page: rows and links show their focus ring; the five links have their own names; tones use their tokens', pageTest, async t => {
   if (!(await served())) { t.skip(`the shell is not served at ${BASE}`); return; }
   const browser = await launch();
   try {
@@ -724,7 +752,7 @@ test('page: rows and links show their focus ring; the four links have their own 
     await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
     await filled(page);
     const names = await page.$$eval('#today .today-head .more', a => a.map(x => x.getAttribute('aria-label')));
-    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Highbrowse trends', 'View Realtime Calendar', 'View Market Monitor']);
+    assert.deepEqual(names, ['View Geopolitical Volatility', 'View Highbrowse trends', 'View Realtime Calendar', 'View Market Monitor', 'View Month by Month']);
     // Keyboard through the panel from the heading above it: every link shows a 2px ring drawn inside the card.
     await page.evaluate(() => { const h = document.querySelector('#view h1'); h.tabIndex = -1; h.focus(); });
     const links = await page.$$eval('#today a', a => a.length);
@@ -901,7 +929,7 @@ test('page: a source that stalls is given up on after 8 s; the other groups show
     await servePanel(context, { hypeDelay: 30000 });
     const page = await context.newPage();
     await page.goto(`${BASE}/#/home/dashboard`, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => ['volatility', 'briefings', 'calendar'].every(id => document.querySelector(`#today [data-group="${id}"]`)?.dataset.state === 'ready'), null, { timeout: 6000 });
+    await page.waitForFunction(() => ['volatility', 'briefings', 'calendar', 'monthly'].every(id => document.querySelector(`#today [data-group="${id}"]`)?.dataset.state === 'ready'), null, { timeout: 6000 });
     assert.equal(await page.getAttribute('#today [data-group="markets"]', 'data-state'), 'loading', 'the markets slot alone still waits');
     const t0 = Date.now();
     await page.waitForFunction(() => document.querySelector('#today [data-group="markets"]')?.dataset.state !== 'loading', null, { timeout: 12000 });

@@ -46,6 +46,10 @@ const EXEMPT = {
   'osint-training': 'courses in tradecraft, which name few entities; the Learning adapter reads only the Finance, Economics and Politics courses',
   'data-analytics': 'a tool over the other submodules’ datasets, with no entities of its own',
   'integration-hub': 'a catalogue and API of the other submodules’ datasets (the Master Index’s among them), with no entities of its own',
+  // Month by Month (15 November 2026): its wars and countries are Realtime Battlefield's, War Focus's and National
+  // Analysis's, already in the Master Index through their adapters, and each of its names carries that link (data-qid or
+  // its Wikipedia link). An adapter of its own needs a lake build with the network (lake-refresh.yml, the 3rd).
+  monthly: 'marks on the wars and countries of Realtime Battlefield, War Focus and National Analysis, whose adapters already put them in the Master Index; its names link there',
   'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
   // Tally Stick and Algo Trader were exempt here (private) until 15 November 2026, when they became views of Auto
   // Trader (Omni Trade and Algo Trader); the traders adapter reports Auto Trader's public part, Investor Impersonator.

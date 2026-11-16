@@ -81,6 +81,7 @@
       <section class="view" id="view-months" role="tabpanel" aria-labelledby="tab-months" hidden>
         <div class="prp-panel tablepanel">
           <div class="prp-panel-head"><b id="months-title">Battle deaths by month</b><span id="months-note">Select a month to go to it</span></div>
+          <div id="months-strip" class="months-strip" aria-live="polite"></div>
           <div class="tablescroll">
             <table class="prp-table">
               <thead><tr><th>Month</th><th class="num">Battle deaths</th><th class="num">Running total</th><th class="num">Battles begun</th><th class="num">Clashes recorded</th></tr></thead>
@@ -109,6 +110,7 @@
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="../../design/prp-focus.js"></script>
   <script src="../../design/prp-period.js"></script>
+  <script src="../../design/prp-mark.js" data-shell="../../"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

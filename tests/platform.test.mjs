@@ -289,7 +289,7 @@ test('the Dashboard: the old Workspace at #/home/dashboard (VM / Home / Dashboar
     assert.equal(await p.getAttribute('#nav a[data-route="home/dashboard"]', 'aria-current'), 'page');
     // The Today panel at its head (its four slots, filled or not: tests/highlights.test.mjs serves their data), then
     // the Workspace's counts and catalogue: every module and submodule, Home's included.
-    assert.deepEqual(await p.$$eval('#today .today-card', c => c.map(x => x.dataset.group)), ['volatility', 'briefings', 'calendar', 'markets']);
+    assert.deepEqual(await p.$$eval('#today .today-card', c => c.map(x => x.dataset.group)), ['volatility', 'briefings', 'calendar', 'markets', 'monthly']);
     assert.equal(await p.getAttribute('#today', 'aria-label'), 'Today on your Dashboard');
     assert.equal(await p.locator('#view .prp-kpis.today-kpis .prp-kpi').count(), 4);
     assert.equal(await p.locator('#view .group').count(), registry.suites.length);
@@ -910,7 +910,7 @@ test('freshness lines: the top bar and the sidebar give each submodule\'s line, 
     assert.doesNotMatch(await p.textContent('#nav'), /\bLive\b/);
     assert.equal(await p.locator('#nav .flag.late').count(), modules.filter(x => lightLine(x.m.id).late).length, 'a Late flag on each late one, and only those');
     // The one count, Home counted.
-    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 37 submodules');
+    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 38 submodules');
     // The other site's line: the Political Atlas's own manifest (faked here as it serves it).
     await p.goto(`${BASE}/#/rt/atlas`, { waitUntil: 'domcontentloaded' });
     const atlasText = line('atlas').text;

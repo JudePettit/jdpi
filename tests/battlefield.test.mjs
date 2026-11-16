@@ -26,6 +26,25 @@ test('UCDP candidate files: the latest of each year after the GED release, so a 
   assert.deepEqual(candidateFiles('no files here', 2025), []);
 });
 
+// Month by Month reads each war's and each country's `series` (since 15 November 2026; a file built before has none): an
+// event dated only to a span shared over its days, never a death lost or added, and every month of the file.
+test('Realtime data: the series Month by Month reads add up to the war’s deaths, and cover every month', () => {
+  const src = readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8');
+  assert.ok(src.includes("import { seriesFromEvents } from '../../monthly/scripts/series.mjs';"), 'the builder writes them by the shared rule');
+  assert.match(src, /series deaths/, 'and its guard refuses a series that does not add up');
+  const sum = a => a.reduce((t, x) => t + x, 0);
+  for (const w of REALTIME.wars.filter(x => x.series)) {
+    assert.equal(w.series.from, REALTIME.months[0], w.id);
+    assert.equal(w.series.deaths.length, REALTIME.months.length, w.id);
+    assert.equal(sum(w.series.deaths), w.deaths, `${w.id}: the series add up`);
+    assert.ok(w.series.events.every((n, i) => n >= (w.monthly[i]?.events || 0)), `${w.id}: an event counts in its first month and in each month its span touches`);
+  }
+  for (const [gw, c] of Object.entries(REALTIME.countries || {})) {
+    assert.match(gw, /^[0-9]+$/); assert.equal(c.series.deaths.length, REALTIME.months.length, gw);
+    assert.ok(Array.isArray(c.conflicts), `${gw} lists its conflicts`);
+  }
+});
+
 test('UCDP names: each actor once, without "Government of", by the name that fits the date', () => {
   assert.deepEqual(actors('Government of Australia, Government of United Kingdom, Government of United States of America', '156, 28, 3'),
     ['Government of Australia', 'Government of United Kingdom', 'Government of United States of America']);

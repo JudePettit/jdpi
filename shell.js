@@ -526,7 +526,7 @@ function renderLaunch(suite, m, url, v = null) {
    the small summaries each store's own build writes beside it (integration/scripts/heads.mjs, in step with the store,
    read with no-cache so a refresh shows at once) and the trade-desk public API.
    To honour the analysis's performance mandate it is NEVER on the first-paint path: renderDashboard() paints the cards,
-   then schedules loadToday() for idle time. The panel has four fixed slots (TODAY_SLOTS); each shows a loading card
+   then schedules loadToday() for idle time. The panel has five fixed slots (TODAY_SLOTS); each shows a loading card
    until its group settles, then the group, as soon as its own sources have answered (the slowest is never waited on:
    every request gives up after TODAY_FETCH_MS). Every card reserves the height of its fullest content (shell.css), so
    neither the fill nor a refresh moves anything below it. A group whose source failed shows a quiet "not available" in
@@ -542,7 +542,7 @@ function renderLaunch(suite, m, url, v = null) {
    computes for each group is shown verbatim, never sharpened. */
 const TODAY_PANEL = true;
 const TODAY_KEY = 'prp.today.v3';   // the session cache, { v: 3, at, until, groups }; bump the version if its shape changes
-const TODAY_SLOTS = ['volatility', 'briefings', 'calendar', 'markets']; // the module's GROUP_IDS, in order (tests compare)
+const TODAY_SLOTS = ['volatility', 'briefings', 'calendar', 'markets', 'monthly']; // the module's GROUP_IDS, in order (tests compare)
 const TODAY_LINES = 5;              // the module's MAX_LINES: the most lines a card shows, and the room it reserves for
 const TODAY_FETCH_MS = 8000;        // no source is waited on longer than this
 let todayPending = false;           // one load at a time

@@ -18,7 +18,8 @@
 //   volatility/data/index.head.json  the newest scored day and the Volatility page's "Biggest movers · 7 days" lists
 //   calendar/data/upcoming.json      the calendars' events from a week back onward, each with its key (eventKey)
 //   battlefield/data/realtime.head.json, traders/data/congress.head.json, traders/data/investors.head.json,
-//   science/progress/data/events.head.json, national/data/index.head.json, integration/catalog.head.json
+//   science/progress/data/events.head.json, national/data/index.head.json, integration/catalog.head.json,
+//   monthly/data/marks.head.json
 //                                  each store's own time and what its data runs to, for the freshness lines
 //
 //   node integration/scripts/heads.mjs --all                 write every summary that is out of step
@@ -211,6 +212,10 @@ export const HEADS = [
     make: simpleHead('science/progress/data/events.json', j => ({ events: Array.isArray(j.events) ? j.events.length : null })) },
   { name: 'National Analysis', stores: () => ['national/data/index.json'], heads: ['national/data/index.head.json'],
     make: simpleHead('national/data/index.json', j => ({ countries: Array.isArray(j.countries) ? j.countries.length : null, years: j.years || null })) },
+  // Month by Month: the month marked, when its UCDP figures were taken in, and the bulletin's counts and five largest
+  // changes (the Dashboard's "What changed" card).
+  { name: 'Month by Month', stores: () => ['monthly/data/marks.json'], heads: ['monthly/data/marks.head.json'],
+    make: simpleHead('monthly/data/marks.json', j => ({ month: j.month || null, released: j.sources?.realtime?.built || null, rule: j.rule || null, provisional: !!j.provisional, page: 'q/monthly.html', bulletin: j.bulletin || null })) },
   { name: 'Integration Hub catalogue', stores: () => ['integration/catalog.json'], heads: ['integration/catalog.head.json'],
     make: simpleHead('integration/catalog.json', j => ({ datasets: Array.isArray(j.datasets) ? j.datasets.length : null })) },
 ];

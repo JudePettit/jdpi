@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en" class="prp" data-suite="rt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<title>Month by Month · VM</title>
+<meta name="description" content="Each month, for every war Vitruvian Manager follows (and every country once UCDP's per-country figures are taken in): did UCDP record more deaths, fewer, or no large change against the three months before? VM's own calculation, each mark with its figures, period, evidence and confidence.">
+<script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="../design/prp.css">
+<script src="../design/prp-bar.js" data-suite="rt" data-module="monthly" data-shell="../" defer></script>
+<style>
+*{box-sizing:border-box}[hidden]{display:none!important}
+button,select{font:inherit}button{cursor:pointer}
+body{margin:0;background:var(--prp-canvas)}
+.page{max-width:1180px;margin:0 auto;padding:24px 24px 40px}
+.prp-tabs{margin:20px 0 16px;overflow-x:auto}
+.prp-panel{margin:0 0 16px;min-width:0}
+.prp-panel-body{padding:12px 16px}
+.prp-panel-head .hint{color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+h2.sec{margin:0 0 6px;color:var(--prp-text);font:600 24px/1.25 var(--prp-font-serif)}
+h3.sub{margin:18px 0 6px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.08em;text-transform:uppercase}
+.strands{display:grid;gap:4px;margin:8px 0 12px;padding:0;list-style:none}
+.strands li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;font-size:13px;color:var(--prp-text-2)}
+.strands b{color:var(--prp-text);font-weight:600}
+.strands .st{font:var(--prp-fs-xs)/1.7 var(--prp-font-mono);text-transform:uppercase;letter-spacing:.04em}
+.prp-kpis{margin:6px 0 4px}
+.unit{padding:12px 0;border-top:1px solid var(--prp-line-soft)}
+.unit:first-child{border-top:0}
+.unit h4{margin:0 0 2px;color:var(--prp-text);font:600 16px/1.35 var(--prp-font-serif)}
+.unit .meta{color:var(--prp-muted);font-size:12px}
+.empty{color:var(--prp-text-2);font-size:13.5px}
+.watch{margin:0;padding:0;list-style:none}
+.watch li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid var(--prp-line-soft);font-size:13.5px}
+.watch li:first-child{border-top:0}
+.watch .d{color:var(--prp-muted);font:12px/1.6 var(--prp-font-mono)}
+.watch small{display:block;color:var(--prp-muted);font-size:12px}
+.prose{max-width:var(--prp-measure);color:var(--prp-text);font:15px/1.65 var(--prp-font-serif)}
+.prose h3{margin:18px 0 4px;font:600 15px var(--prp-font-ui)}
+.archive{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}
+.line{padding:8px 0;border-top:1px solid var(--prp-line-soft);font-size:13.5px}
+.line:first-child{border-top:0}
+.credit{color:var(--prp-text-2);font-size:13px}
+@media(max-width:600px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.strands li,.watch li{grid-template-columns:minmax(0,1fr);gap:2px}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="prp-eyebrow">Realtime Geopolitics <span class="sep">·</span> Month by Month</div>
+    <h1 class="prp-title">Month by Month</h1>
+    <p class="prp-dek">Each month, for every war VM follows, and every country once UCDP's per-country figures are taken in: did UCDP record more deaths, fewer, or no large change against the three months before? Every mark is Vitruvian Manager's own calculation from figures it publishes, with what changed, the period, the evidence and its confidence beside it. Where the figures are too thin to say, there is no mark, and the page says why.</p>
+    <div class="prp-meta" id="meta">Loading…</div>
+  </header>
+  <div class="prp-tabs" role="tablist" aria-label="Month by Month views">
+    <button type="button" role="tab" id="tab-btn-changed" data-tab="changed" aria-controls="tab-changed" aria-selected="true" class="active">What changed</button>
+    <button type="button" role="tab" id="tab-btn-watch" data-tab="watch" aria-controls="tab-watch" aria-selected="false" tabindex="-1">Watch list</button>
+    <button type="button" role="tab" id="tab-btn-marks" data-tab="marks" aria-controls="tab-marks" aria-selected="false" tabindex="-1">All marks</button>
+    <button type="button" role="tab" id="tab-btn-how" data-tab="how" aria-controls="tab-how" aria-selected="false" tabindex="-1">How this is worked out</button>
+  </div>
+  <section id="tab-changed" role="tabpanel" aria-labelledby="tab-btn-changed"><div class="prp-empty">Loading the marks…</div></section>
+  <section id="tab-watch" role="tabpanel" aria-labelledby="tab-btn-watch" hidden></section>
+  <section id="tab-marks" role="tabpanel" aria-labelledby="tab-btn-marks" hidden></section>
+  <section id="tab-how" role="tabpanel" aria-labelledby="tab-btn-how" hidden>
+    <div class="prp-panel"><div class="prp-panel-body prose" id="how">
+      <h2 class="sec">How this is worked out</h2>
+      <p>Every mark here is Vitruvian Manager's own calculation from figures it publishes. It is not an analyst's judgement, and nothing here is a forecast.</p>
+      <h3>Fighting</h3>
+      <p>For each war and each country, VM takes UCDP's recorded deaths (its best estimate) and its number of events in one month, and compares them with the three months before. When UCDP dates an event only to a span of days, its deaths are shared out over those days and it counts as an event in each month it touches. A month is marked "More deaths recorded" when its deaths are at least one and a half times the median of the three months before (the middle one of the three), at least 25 more, and above each of the three; "Fewer deaths recorded" when they are at most two thirds of it, at least 25 fewer, and below each of the three; otherwise "No large change by this rule". Events are compared with their median the same way (at least 5 more or fewer), as a check. A "No large change" mark names the condition the month did not meet. Because the rule uses proportions, a change of hundreds of deaths in a large war can fall below it. The rule does not adjust for fighting seasons: each mark shows the same month a year earlier where VM holds it.</p>
+      <h3>What is counted</h3>
+      <p>Realtime Battlefield's wars and the countries count all organised violence UCDP records (fighting between states and armed groups, between armed groups, and against civilians); War Focus's wars count fighting involving a state only. Until Realtime Battlefield's file is rebuilt with VM's shared count, its wars count each event in the month it starts, as its page does. A war both cover is listed once in the bulletin, by War Focus.</p>
+      <h3>No mark</h3>
+      <p>There is none when UCDP has not yet published the month (it does so three to four weeks after the month ends); when a war has ended before the month; when a month of the four is not a whole month in the figures (War Focus counts a war only from the day it starts and to the day it ends, so a first or last month can hold a few days); when a month of the four is an estimate or comes from another UCDP dataset; when there are fewer than 10 events in the month or an average under 10 a month before it, or under 25 deaths in the four months; when one event decides it (the mark would not hold with the month's largest event taken out; for fewer, nor with each of the four months' own largest event taken out of it, nor with the largest event of the three months before taken out of its month, a test left out when every one of the four months is led by one event or report holding more than half its deaths, since only the like-for-like test then compares like with like). Some of UCDP's "events" are reports covering a whole month, such as a monthly tally of losses: a mark calls them reports and gives the days they cover; when, for fewer, the months before hold reports covering several months and none yet covers this one; for a country, when the four months span two years and a UCDP conflict is counted in only one (UCDP counts a conflict only in a year with 25 or more battle deaths), or begin before its independence or unification (or, for Russia and Serbia, before the Soviet Union and Yugoslavia split, since UCDP counts the whole state under their codes until then); and when three of the checks below apply. The page says which.</p>
+      <h3>Confidence</h3>
+      <p>A mark starts at high and drops one step for each of these: fewer than 25 events in the month, or an average under 25 before it; one event holds more than half the month's deaths; more than a quarter of any of the four months' deaths come from events UCDP dates only to a span running across months (or the figures cannot tell); deaths and events point opposite ways; a month of the four comes from UCDP's candidate events, which are provisional (UCDP revises them, and its final figures come the next year). One step down is medium, two is low, three or more means no mark. Every mark and square from candidate events also says "provisional".</p>
+      <h3>Volatility</h3>
+      <p>For each country, the average of its daily volatility scores in a month is compared with the average over the three months before: 4 points or more higher is "More volatile", 4 or more lower "Less volatile". There is no volatility mark before April 2027 (every day of the four months must have been scored against a full 90 days, by one method) or while most days had little news coverage, since a rise in coverage alone can move a score. The 4 points are a starting value, to be checked against the data in April 2027. Volatility is never added to deaths and never changes a deaths mark: it is drawn from news reports.</p>
+      <p>Calendar events are shown beside a month but never change its mark. The watch list is a list of dated events from VM's calendars, and of countries whose volatility rose over the last week: dated things to watch, not predictions.</p>
+      <h3>Sources</h3>
+      <p id="how-sources">UCDP Candidate Events Dataset (version and date above) and UCDP Georeferenced Event Dataset 26.1, CC BY 4.0; GDELT 2.0, through VM's Geopolitical Volatility (method above); VM's Realtime and Historical Calendars. The figures behind every mark: <a href="../monthly/data/marks.json">monthly/data/marks.json</a>.</p>
+      <p class="credit">The idea of a monthly direction mark follows conflict trackers such as Crisis Group's <a href="https://www.crisisgroup.org/crisiswatch" target="_blank" rel="noreferrer">CrisisWatch</a>.</p>
+    </div></div>
+  </section>
+  <footer class="prp-sources">
+    <p><b>Sources.</b> <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a> and UCDP Georeferenced Event Dataset 26.1 (Uppsala Conflict Data Program), CC BY 4.0, through VM's Realtime Battlefield and War Focus; GDELT 2.0 through VM's Geopolitical Volatility; VM's Realtime and Historical Calendars. Rebuilt every morning with the calendars; a new UCDP month arrives the morning after Realtime Battlefield takes it in, and War Focus's on the 2nd of the next month.</p>
+    <p><b>Method.</b> One rule for every war and every country, set out under "How this is worked out", with every figure behind it in <a href="../monthly/data/marks.json">marks.json</a>, so any mark can be checked by hand.</p>
+  </footer>
+</main>
+<script src="../design/prp-mark.js" data-shell="../"></script>
+<script>
+// Month by Month: the bulletin (What changed), the watch list, every mark, and the rule. Reads monthly/data (written by
+// monthly/scripts/build.mjs with the calendars' daily refresh). URL: #tab=changed|watch|marks|how[&month=yyyy-mm][&unit=<id>]
+const K = window.PRPMark, esc = K.esc, fmt = K.fmt, monthName = K.monthName;
+const $ = s => document.querySelector(s);
+const TABS = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+const longDay = d => new Date(String(d).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const shortDay = d => new Date(String(d).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const getJson = p => fetch('../monthly/data/' + p, { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+let M = null, W = null, BI = null;
+const hash = () => new URLSearchParams(location.hash.slice(1));
+
+function setTab(t, push = true) {
+  if (!TABS.some(b => b.dataset.tab === t)) t = 'changed';
+  for (const b of TABS) { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.classList.toggle('active', on); b.tabIndex = on ? 0 : -1; $('#tab-' + b.dataset.tab).hidden = !on; }
+  if (push) { const p = hash(); p.set('tab', t); if (t !== 'changed') p.delete('month'); history.replaceState(null, '', '#' + p.toString()); }
+}
+TABS.forEach(b => b.onclick = () => setTab(b.dataset.tab));
+document.querySelector('.prp-tabs').addEventListener('keydown', e => {
+  const i = TABS.indexOf(document.activeElement), k = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+  if (i < 0 || (!k && e.key !== 'Home' && e.key !== 'End')) return;
+  e.preventDefault();
+  const b = TABS[e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : (i + k + TABS.length) % TABS.length];
+  b.focus(); b.click();
+});
+
+const pageLink = (page, text) => { const g = K.go(page); return g ? `<a href="${esc(g.href)}" target="${g.target}">${text}</a>` : text; };
+const unitHead = u => `<h4>${K.name(u)}</h4><div class="meta">${esc(u.kind === 'focus' ? 'War Focus' : u.kind === 'war' ? 'Realtime Battlefield' : 'Country')} · ${esc(u.counts)}${u.countries?.length && u.kind !== 'country' ? ' · ' + u.countries.filter(Boolean).slice(0, 6).map(c => K.name(c)).join(', ') : ''} · ${pageLink(u.page, esc(u.page.label))}</div>`;
+const unitBlock = u => `<div class="unit" id="u-${esc(u.id.replace(/[^a-z0-9-]/gi, '-'))}">${unitHead(u)}${K.full(u.fighting, u)}${u.volatility ? K.full(u.volatility, u, { heading: 'Volatility' }) : ''}</div>`;
+const kpis = (c, words) => `<div class="prp-kpis">${[['worse', 'More deaths recorded'], ['better', 'Fewer deaths recorded'], ['same', 'No large change by this rule'], ['none', 'No mark']].map(([k, l]) => `<div class="prp-kpi"><span>${l}</span><b>${fmt(c[k])}</b><small>${words}</small></div>`).join('')}</div>`;
+
+/* ---------- What changed in <month> ---------- */
+function renderChanged() {
+  const want = hash().get('month');
+  if (want && want !== M.month && BI?.months.some(x => x.month === want)) return renderKept(want);
+  const primary = M.units.filter(u => u.kind !== 'country' && u.primary);
+  const wars = primary.filter(u => ['worse', 'better'].includes(u.fighting.direction)).sort((a, b) => Math.abs(b.fighting.figures.change) - Math.abs(a.fighting.figures.change));
+  const countries = M.units.filter(u => u.kind === 'country');
+  const moved = countries.filter(u => ['worse', 'better'].includes(u.fighting.direction)).sort((a, b) => Math.abs(b.fighting.figures.change) - Math.abs(a.fighting.figures.change));
+  const newly = M.units.filter(u => (u.primary || u.kind === 'country') && u.fighting.figures?.eventBaseline?.every(x => x === 0) && u.fighting.figures.events > 0);
+  const stState = { in: 'In', awaited: 'Awaited', 'not-yet': 'Not yet possible' };
+  const archive = BI?.months?.length > 1 ? `<div class="archive"><label class="prp-label" for="pick">Bulletins kept as issued</label><select class="prp-select" id="pick">${BI.months.map(x => `<option value="${esc(x.month)}"${x.month === M.month ? ' selected' : ''}>${esc(monthName(x.month))}${x.provisional ? ' (provisional)' : ''}</option>`).join('')}</select></div>` : '';
+  $('#tab-changed').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
+    ${archive}
+    <h2 class="sec">What changed in ${esc(monthName(M.month))}</h2>
+    <p class="empty">${M.provisional ? 'A provisional issue: a strand it waits for is not yet in, and it will be issued again once it is. ' : ''}VM's own marks from UCDP's figures: the month against the three before it, by one rule. Not an analyst's judgement, and not a forecast. ${pageLink({ suite: 'rt', module: 'monthly', url: 'q/monthly.html#tab=how' }, 'How this is worked out')}.</p>
+    <ul class="strands">${M.strands.map(s => `<li><span><b>${esc(s.name)}</b> <span class="st">${esc(stState[s.state] || s.state)}</span></span><span>${esc(s.text)}</span></li>`).join('')}</ul>
+    <h3 class="sub">Wars · ${fmt(primary.length)}, each counted once</h3>
+    ${kpis(M.bulletin.counts.wars, 'wars')}
+    ${wars.length ? wars.map(unitBlock).join('') : '<p class="empty">No war was marked more or fewer deaths recorded this month.</p>'}
+    <h3 class="sub">Countries${countries.length ? ` · ${fmt(countries.length)}` : ''}</h3>
+    ${countries.length ? kpis(M.bulletin.counts.countries, 'countries') + (moved.length ? moved.map(unitBlock).join('') : '<p class="empty">No country was marked more or fewer deaths recorded this month.</p>') : `<p class="empty">${esc(M.strands.find(s => s.id === 'countries')?.text || 'Not yet possible.')}</p>`}
+    <p class="empty">Wars and countries are counted apart and never added together: a country's figures hold its wars'.</p>
+    <h3 class="sub">Newly recorded</h3>
+    ${newly.length ? newly.map(u => `<div class="line">${K.name(u, { strong: true })}: ${fmt(u.fighting.figures.events)} events and ${fmt(u.fighting.figures.deaths)} deaths recorded in ${esc(monthName(M.month))}, none in the three months before.</div>`).join('') : '<p class="empty">None: every war and country with events this month had events in the three months before.</p>'}
+    <h3 class="sub">Marks revised since issue</h3>
+    ${M.revisions?.length ? M.revisions.map(r => `<div class="line">${K.name(r, { strong: true })}, ${esc(monthName(r.month))}: issued as ${esc(r.issued.words)} (${fmt(r.issued.deaths)} deaths), now ${esc(r.now.words)} (${fmt(r.now.deaths)} deaths) after UCDP's release ${esc(r.release)}.</div>`).join('') : '<p class="empty">None: no later UCDP release has moved a mark already issued.</p>'}
+    <h3 class="sub">Every other war</h3>
+    ${primary.filter(u => !wars.includes(u)).map(u => `<div class="line">${K.name(u, { strong: true })} · ${K.chip(u.fighting)}<div class="meta empty">${esc(u.fighting.why?.text || u.fighting.what)}</div></div>`).join('')}
+    <p class="empty">Each war's whole explanation is under All marks.</p>
+  </div></div>`;
+  $('#pick')?.addEventListener('change', e => { const p = hash(); p.set('tab', 'changed'); if (e.target.value === M.month) p.delete('month'); else p.set('month', e.target.value); location.hash = p.toString(); });
+}
+async function renderKept(month) {
+  const b = await getJson(`bulletins/${month}.json`);
+  if (!b) { $('#tab-changed').innerHTML = `<div class="prp-note warn">The bulletin for ${esc(monthName(month))} could not be read.</div>`; return; }
+  const line = l => `<div class="line">${K.name(l, { strong: true })} · <b>${esc(l.words)}</b>${l.confidence ? `, ${esc(l.confidence)} confidence` : ''}<div class="meta empty">${esc(l.what)}</div></div>`;
+  $('#tab-changed').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
+    <div class="archive"><label class="prp-label" for="pick">Bulletins kept as issued</label><select class="prp-select" id="pick">${BI.months.map(x => `<option value="${esc(x.month)}"${x.month === month ? ' selected' : ''}>${esc(monthName(x.month))}${x.provisional ? ' (provisional)' : ''}</option>`).join('')}</select></div>
+    <h2 class="sec">What changed in ${esc(monthName(month))}</h2>
+    <p class="empty">As issued on ${esc(longDay(b.issued))}${b.provisional ? ', a provisional issue' : ''}. Later UCDP releases can revise these figures; the current marks are under All marks.</p>
+    <h3 class="sub">Wars</h3>${kpis(b.counts.wars, 'wars')}${b.wars.map(line).join('') || '<p class="empty">No war was marked more or fewer.</p>'}
+    <h3 class="sub">Countries</h3>${b.countries.length ? b.countries.map(line).join('') : '<p class="empty">None marked more or fewer, or not yet possible that month.</p>'}
+  </div></div>`;
+  $('#pick').addEventListener('change', e => { const p = hash(); p.set('tab', 'changed'); if (e.target.value === M.month) p.delete('month'); else p.set('month', e.target.value); location.hash = p.toString(); });
+}
+
+/* ---------- Watch list: the next 30 days ---------- */
+function renderWatch() {
+  if (!W) { $('#tab-watch').innerHTML = '<div class="prp-note warn">The watch list could not be read.</div>'; return; }
+  const cal = e => pageLink({ suite: 'rt', module: 'calendar', url: `q/calendar.html?period=contemporary&event=${encodeURIComponent(e.key)}` }, esc(e.title));
+  const item = e => `<li><span class="d">${esc(shortDay(e.date))}</span><span>${cal(e)} · ${K.name(e.country)}<small>${esc(e.type[0].toUpperCase() + e.type.slice(1))}${e.status === 'tentative' ? ' · date not confirmed' : ''} · ${esc(e.source)}</small></span></li>`;
+  const vol = v => `<li><span class="d">to ${esc(shortDay(v.to))}</span><span>${K.name(v.country, { strong: true })}: an average score of ${esc(v.last.toFixed(1))} over ${v.days} days, against ${esc(v.before.toFixed(1))} over the ${v.beforeDays} days before (${esc(v.change.toFixed(1))} points higher) · ${pageLink({ suite: 'rt', module: 'volatility', url: `q/volatility.html#country=${v.country.iso3}` }, 'Geopolitical Volatility')}<small>News reports a day: ${fmt(v.reportsPerDay)} against ${fmt(v.beforeReportsPerDay)}. Scores are ranks of news coverage and tone (GDELT), not counts of deaths.</small></span></li>`;
+  $('#tab-watch').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
+    <h2 class="sec">Watch list: ${esc(longDay(W.from))} to ${esc(longDay(W.to))}</h2>
+    <p class="empty">Dated events from VM's calendars and measured changes in VM's volatility scores: things to watch over the next 30 days, not predictions. Rebuilt every morning; the first list of each month is kept as issued.</p>
+    <h3 class="sub">Votes due · ${W.votes.length}</h3>${W.votes.length ? `<ul class="watch">${W.votes.map(item).join('')}</ul>` : '<p class="empty">No elections or referendums in the calendars for these 30 days.</p>'}
+    <h3 class="sub">Summits and meetings due · ${W.summits.length}</h3>${W.summits.length ? `<ul class="watch">${W.summits.map(item).join('')}</ul>` : '<p class="empty">No summits in the calendars for these 30 days.</p>'}
+    <h3 class="sub">Volatility up this week · ${W.volatility.length}</h3>
+    <p class="empty">Countries whose last 7 scored days average 4 points or more above the 28 days before (at least 5 and 20 scored days, most of them with medium or high news coverage). Method ${esc(W.method || '–')}, scored to ${esc(W.volatilityLatest ? longDay(W.volatilityLatest) : '–')}.</p>
+    ${W.volatility.length ? `<ul class="watch">${W.volatility.map(vol).join('')}</ul>` : '<p class="empty">No country rose that much this week.</p>'}
+    <div class="prp-note">${esc(W.fixed)}</div>
+  </div></div>`;
+}
+
+/* ---------- All marks ---------- */
+function renderMarks() {
+  const groups = [
+    ['Wars, by War Focus (state-based fighting only)', M.units.filter(u => u.kind === 'focus' && u.primary && u.fighting.month === M.month)],
+    ['Wars and warzones, by Realtime Battlefield (all organised violence)', M.units.filter(u => u.kind === 'war')],
+    ['Countries (all organised violence)', M.units.filter(u => u.kind === 'country')],
+  ].filter(([, l]) => l.length);
+  $('#tab-marks').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
+    <h2 class="sec">Every mark for ${esc(monthName(M.month))}</h2>
+    <p class="empty">Each with its figures, period, evidence and confidence, or why there is none. War Focus's ongoing wars only: its ended wars have no current month, and their year strips are on War Focus.</p>
+    ${groups.map(([t, l]) => `<h3 class="sub">${esc(t)} · ${l.length}</h3>${l.map(unitBlock).join('')}`).join('')}
+    ${M.units.some(u => u.kind === 'country') ? '' : `<h3 class="sub">Countries</h3><p class="empty">${esc(M.strands.find(s => s.id === 'countries')?.text || '')}</p>`}
+    ${(M.notes || []).map(n => `<p class="empty">${esc(n.text)}</p>`).join('')}
+  </div></div>`;
+}
+
+function route() {
+  const p = hash();
+  setTab(p.get('tab') || 'changed', false);
+  if (!M) return;
+  renderChanged();
+  const u = p.get('unit');
+  if (u) { setTab('marks', false); const el = document.getElementById('u-' + u.replace(/[^a-z0-9-]/gi, '-')); if (el) el.scrollIntoView({ block: 'start' }); }
+}
+window.addEventListener('hashchange', route);
+
+Promise.all([getJson('marks.json'), getJson('watch.json'), getJson('bulletins/index.json')]).then(([marks, watch, bi]) => {
+  M = marks; W = watch; BI = bi;
+  if (!M) { $('#tab-changed').innerHTML = '<div class="prp-note warn">The marks could not be read.</div>'; $('#meta').textContent = 'Marks unavailable'; return; }
+  const s = M.sources;
+  $('#meta').innerHTML = `<span>Marks to <b>${esc(monthName(M.month))}</b></span><span>UCDP candidate events ${esc(s.realtime.version)}, taken in ${esc(longDay(s.realtime.built))}</span><span>War Focus built ${esc(longDay(s.warFocus.built))}</span><span>Rule ${esc(M.rule)} · rebuilt ${esc(longDay(M.generated))}</span>`;
+  $('#how-sources').insertAdjacentHTML('beforeend', ` Today: UCDP candidate events ${esc(s.realtime.version)} (taken in ${esc(longDay(s.realtime.built))}); War Focus built ${esc(longDay(s.warFocus.built))}${s.gedCountries ? `; GED ${esc(s.gedCountries.version)} by country, built ${esc(longDay(s.gedCountries.built))}` : ''}; volatility method ${esc(s.volatility?.method || '–')}, scored to ${esc(s.volatility?.latest ? longDay(s.volatility.latest) : '–')}; calendars built ${esc(s.calendars ? longDay(s.calendars) : '–')}.`);
+  renderWatch(); renderMarks(); route();
+  K.wire(document.body);
+});
+</script>
+</body>
+</html>

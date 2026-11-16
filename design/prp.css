@@ -388,6 +388,54 @@ a .prp-access { text-decoration: none; }
 @media (max-width: 600px) { .jdpi-returnbar .suite, .jdpi-returnbar .suite + .sep { display: none; } }
 .jdpi-returnbar .theme { flex: none; margin-left: auto; border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); background: none; color: var(--prp-text-2); height: 24px; padding: 0 8px; cursor: pointer; font: 11px var(--prp-font-ui); }
 
+/* --- Month by Month's marks (design/prp-mark.js) -------------------------------------------------------------
+   One neutral hue, the sequential blues: the sign (+ − =) carries the direction and the fill's depth the confidence
+   (high deep, medium middle, low pale); no mark is a hollow dashed square. Never the diverging reds and blues, which
+   would turn "more" and "fewer" deaths into bad and good. */
+.prp-mark { --mk: var(--prp-seq-300); --mk-ink: var(--prp-text); }
+.prp-mark[data-conf="high"], .prp-strip-sq[data-conf="high"] { --mk: var(--prp-seq-500); --mk-ink: var(--prp-canvas); }
+.prp-mark[data-conf="medium"], .prp-strip-sq[data-conf="medium"] { --mk: var(--prp-seq-300); --mk-ink: var(--prp-text); }
+.prp-mark[data-conf="low"], .prp-strip-sq[data-conf="low"] { --mk: var(--prp-seq-100); --mk-ink: var(--prp-text); }
+section.prp-mark { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); background: var(--prp-surface); min-width: 0; }
+.prp-mark-title { margin: 0 0 6px; color: var(--prp-muted); font: 500 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.prp-mark-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; color: var(--prp-text); font: 14px/1.4 var(--prp-font-ui); }
+.prp-mark-box, .prp-strip-sq { display: inline-grid; place-items: center; flex: none; width: 12px; height: 12px; border: 1px solid var(--prp-line-strong); border-radius: 2px;
+  background: var(--mk, var(--prp-surface)); color: var(--mk-ink, var(--prp-text)); font: 700 10px/1 var(--prp-font-mono); box-sizing: border-box; }
+.prp-mark[data-dir="same"] .prp-mark-box, .prp-strip-sq[data-dir="same"] { background: var(--prp-surface); color: var(--prp-text); }
+.prp-mark[data-dir="none"] .prp-mark-box, .prp-strip-sq[data-dir="none"] { background: transparent; border-style: dashed; }
+.prp-strip-sq[data-dir="out"] { background: transparent; border-color: transparent; }
+.prp-mark-words { font-weight: 600; }
+.prp-mark-conf, .prp-mark-figs { color: var(--prp-text-2); font-size: var(--prp-fs-sm); }
+.prp-mark-prov { padding: 0 6px; border: 1px solid var(--prp-line); border-radius: 999px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.6 var(--prp-font-mono); }
+.prp-mark-by { margin: 4px 0 8px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-ui); }
+.prp-mark-why { display: grid; gap: 6px; margin: 0; }
+.prp-mark-why > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; }
+.prp-mark-why dt { color: var(--prp-muted); font: 500 var(--prp-fs-xs)/1.7 var(--prp-font-mono); letter-spacing: .04em; text-transform: uppercase; }
+.prp-mark-why dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--prp-text); font: 13.5px/1.55 var(--prp-font-ui); }
+.prp-mark-why ul { margin: 4px 0 0; padding-left: 18px; }
+.prp-mark-note { display: block; margin-top: 3px; color: var(--prp-text-2); font-size: var(--prp-fs-sm); }
+.prp-mark-how { margin: 8px 0 0; font-size: var(--prp-fs-sm); }
+.prp-mark.sm { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; max-width: 100%; color: var(--prp-text-2); font: 11.5px/1.4 var(--prp-font-ui); }
+.prp-mark.sm .prp-mark-words { color: var(--prp-text); font-weight: 500; }
+.prp-strip { margin: 10px 0; min-width: 0; }
+.prp-strip-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin-bottom: 8px; font: 13px var(--prp-font-ui); }
+.prp-strip-btns { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.prp-strip-years { display: grid; gap: 3px; }
+.prp-strip-year { display: flex; align-items: center; gap: 8px; }
+.prp-strip-year[hidden] { display: none; }
+.prp-strip-y { width: 36px; color: var(--prp-muted); font: var(--prp-fs-xs) var(--prp-font-mono); font-variant-numeric: tabular-nums; }
+.prp-strip-row { display: flex; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.prp-strip-row .prp-strip-sq { position: relative; width: 14px; height: 14px; }
+.prp-strip-dot { position: absolute; left: 50%; bottom: -5px; width: 3px; height: 3px; margin-left: -1.5px; border-radius: 50%; background: var(--prp-text-2); }
+.prp-strip-dot.static { position: static; display: inline-block; margin: 0 2px 1px 0; vertical-align: middle; }
+.prp-strip-year { padding-bottom: 3px; }
+.prp-strip-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; color: var(--prp-text-2); font-size: var(--prp-fs-xs); }
+.prp-strip-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.prp-strip-scroll { max-width: 100%; overflow-x: auto; }
+.prp-strip-table[hidden], .prp-strip-years[hidden] { display: none; }
+.prp-strip figcaption { margin-top: 6px; color: var(--prp-muted); font: var(--prp-fs-xs)/1.5 var(--prp-font-ui); }
+@media (max-width: 600px) { .prp-mark-why > div { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+
 @media print {
   .jdpi-returnbar, .doc-fab, .doc { display: none !important; }
   :root { --prp-canvas: #fff; }

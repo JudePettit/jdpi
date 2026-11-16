@@ -58,6 +58,7 @@ wars, leaders and coming votes."
 | Political Briefing (was Intelligence Briefing, before that Briefing) | HB (moved from RT) | `q/briefing.html`; reads `#q=` and `#w=` as the other briefings do, and `soft=1` to show sport, entertainment and lifestyle on one visit; a move by hash also puts back All stories, every publisher and all five positions |
 | Global Headline Tracker | RT | one submodule: 24-hour map and day/week/month/year archives are tabs inside the page; its filter of lowbrow stories is **Highbrowse** (wordmark `design/highbrowse-wordmark.svg`; the code and the database still say `lowbrow`), the name the Highbrowse module shares |
 | Geopolitical Volatility, National Analysis, Realtime Battlefield, Realtime Calendar | RT | |
+| Month by Month (new, 15 November 2026) | RT | `q/monthly.html` (data `monthly/`): VM's monthly direction marks, drawn anywhere by `design/prp-mark.js` (`.prp-mark`, `.prp-strip`): the words "More deaths recorded", "Fewer deaths recorded", "No large change by this rule" or "No mark", never better or worse; one neutral hue, the sign for the direction and the fill for the confidence; every mark with what changed, its period, its evidence and its confidence (or why there is none) beside it |
 | Political Atlas | RT (moved from H&P) | external site political-atlas.pages.dev |
 | OSINT Dashboard, SIGINT Dashboard, GEOINT & IMINT Dashboard | IM (new; moved from RT) | `osint/`, `sigint/`, `geoint/`; tabs include a Software Cookbook, a Kit or Hardware Guide and Law & ethics |
 | Intel Training (was OSINT Training) | IM | `fe/learning.html?course=osint|sigint|geoint`: three courses as tabs |
@@ -192,7 +193,7 @@ only "published". Times are UTC and say so. Pages carry the same idea inside: Re
 figures over the map and its news under each war; National Analysis puts each figure's year or date and source under
 it; the Global Headline Tracker puts the archive day and the collection time above its results.
 
-**The count** is worded one way wherever it shows: "10 modules, Home included · 37 submodules" (`countWords`).
+**The count** is worded one way wherever it shows: "10 modules, Home included · 38 submodules" (`countWords`).
 Where each module's submodules are hosted is said in its overview's **About this module**, not in a column.
 
 **The Today panel's rules** (13 November 2026). Each card reads only the small summaries each store's own build writes

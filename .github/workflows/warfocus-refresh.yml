@@ -24,10 +24,33 @@ jobs:
         env:
           PRP_PAGES: '0'
         run: node --test tests/warfocus.test.mjs tests/kino.test.mjs
+      # Month by Month: each country's months from the GED file War Focus has just read (monthly/data/ged-countries.json),
+      # and the marks again with War Focus's new month. Thrown away if it fails its tests; War Focus is committed anyway.
+      - name: Rebuild Month by Month's country months from GED
+        id: monthly
+        continue-on-error: true
+        run: node monthly/scripts/build.mjs --ged /tmp/warfocus-src
+      - name: Test the new marks
+        id: monthlytest
+        if: steps.monthly.outcome == 'success'
+        continue-on-error: true
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/monthly.test.mjs
+      - name: Throw away Month by Month's changes
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          git checkout -- monthly/data
+          git clean -fdq -- monthly/data
       - uses: ./.github/actions/commit-data
         with:
-          paths: battlefield/focus/data
+          paths: battlefield/focus/data monthly/data
           message: 'War Focus: refresh UCDP events and battles'
+      - name: Fail the run if Month by Month was not committed
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          echo "::error::The Month by Month rebuild or its tests failed (see those steps); War Focus was committed without it."
+          exit 1
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh

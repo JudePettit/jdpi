@@ -106,6 +106,7 @@ describe('every build writes its store\'s summaries, and every refresh commits t
     'science/progress/data/events.json': ['science/scripts/build-progress.mjs'],
     'national/data/index.json': ['national/scripts/build.mjs'],
     'integration/catalog.json': ['integration/scripts/build-catalog.mjs'],
+    'monthly/data/marks.json': ['monthly/scripts/build.mjs'],
   };
   test('each builder calls writeHeads after it writes its store', () => {
     for (const h of HEADS) {
@@ -149,6 +150,7 @@ describe('every build writes its store\'s summaries, and every refresh commits t
       'battlefield/data/realtime.json': 'tests/battlefield.test.mjs', 'traders/data/congress.json': 'tests/traders.test.mjs',
       'traders/data/investors.json': 'tests/traders.test.mjs', 'science/progress/data/events.json': 'tests/science-progress.test.mjs',
       'national/data/index.json': 'tests/national.test.mjs', 'integration/catalog.json': 'tests/integration-hub.test.mjs',
+      'monthly/data/marks.json': 'tests/monthly.test.mjs',
     };
     for (const h of HEADS) {
       const store = h.stores(ROOT)[0], t = TESTS[store];

@@ -107,3 +107,7 @@
   .war-field { flex: 1 1 100%; }
   .war-field select { flex: 1; max-width: none; }
 }
+
+/* Month by Month's year strip above the Deaths by month table (design/prp-mark.js). */
+.months-strip { padding: 4px 14px 0; min-width: 0; }
+.months-strip:empty { display: none; }

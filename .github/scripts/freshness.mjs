@@ -37,6 +37,11 @@ const STORES = [
   { file: 'briefing/data/latest.json', name: 'Political Briefing', workflow: 'briefing-refresh.yml', every: 12 },
   { file: 'calendar/data/2020s.json', name: 'Realtime Calendar', workflow: 'calendar-refresh.yml', every: 24, live: true },
   { file: 'integration/catalog.json', name: 'Integration Hub catalogue', workflow: 'calendar-refresh.yml', every: 24 },
+  // Month by Month is rebuilt every morning, so its own time says only that the calendars' run works; its second line
+  // reads when its UCDP figures were taken in (the head's `released`, Realtime Battlefield's build), late after about 40 days,
+  // so marks that stopped moving with UCDP's monthly releases are not passed as fresh.
+  { file: 'monthly/data/marks.json', name: 'Month by Month', workflow: 'calendar-refresh.yml', every: 24, live: true },
+  { file: 'monthly/data/marks.head.json', name: 'Month by Month: UCDP figures taken in', workflow: 'battlefield-refresh.yml', every: 20 * 24, when: j => j.released },
   { file: 'volatility/data/index.json', name: 'Geopolitical Volatility', workflow: 'volatility-refresh.yml', every: 24, live: true, when: j => j.latest },
   { file: 'traders/data/congress.json', name: 'Investor Impersonator House trades', workflow: 'traders-refresh.yml', every: 7 * 24 },
   { file: 'traders/data/investors.json', name: 'Investor Impersonator 13F holdings', workflow: 'traders-refresh.yml', every: 7 * 24 },

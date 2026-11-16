@@ -46,6 +46,8 @@ button,select{font:inherit}button{cursor:pointer}
 .warrow:first-child{border-top:0}.warrow:hover{background:var(--prp-surface-2)}.warrow.sel{background:var(--prp-primary-soft)}
 .warname{color:var(--prp-text);font-size:13px;font-weight:600}
 .warmeta{margin-top:2px;color:var(--prp-muted);font-size:11.5px}
+.warrow .prp-mark.sm{margin-top:3px}
+.detail .prp-mark p.prp-mark-line{font:14px/1.4 var(--prp-font-ui)}.detail .prp-mark p.prp-mark-by,.detail .prp-mark p.prp-mark-how{margin:4px 0 8px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-ui)}
 .deaths{text-align:right;color:var(--prp-text);font:500 12px var(--prp-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .deaths small{display:block;color:var(--prp-muted);font:10.5px var(--prp-font-ui)}
 .detail{max-height:860px;overflow:auto;padding:12px 18px 18px}
@@ -119,6 +121,7 @@ button,select{font:inherit}button{cursor:pointer}
 <script src="../design/prp-focus.js"></script>
 <script src="../design/prp-period.js"></script>
 <script src="../design/prp-access.js"></script>
+<script src="../design/prp-mark.js" data-shell="../"></script>
 <script>
 // Realtime Battlefield: UCDP candidate events (refreshed monthly by UCDP) grouped into wars by
 // battlefield/scripts/build-realtime.mjs, plus matching stories from the Global Headline Tracker's Supabase archive.
@@ -277,9 +280,22 @@ function renderCaption() {
 }
 
 // A war in the list: its deaths in the months given (the archive's month or period), or in the last three months (Live).
+// Month by Month's mark for each war (monthly/data/marks.json, design/prp-mark.js): the latest month's, in the list
+// (compact) and in the briefing (with its whole explanation). A mark is VM's calculation, never a judgement.
+let MARKS = null;
+const markOf = w => (MARKS && MARKS.month === data?.latest ? PRPMark.unitOf(MARKS, 'war:' + w.id) : null);
+PRPMark.load().then(m => { MARKS = m; if (data) renderSide(); });
+// This page counts each event in the month it starts; once Month by Month's figures share out deaths UCDP dates only
+// to a span, the two can differ for the same month, and the briefing says so beside the mark.
+function countingNote(w, u) {
+  const f = u?.fighting?.figures, mm = w.monthly.find(x => x.month === u?.fighting?.month);
+  if (!f || !mm || u.seriesRule !== 'shared' || (f.deaths === mm.deaths && f.events === mm.events)) return '';
+  return `<p class="small">This page counts each event in the month it starts: ${fmt(mm.deaths)} deaths in ${fmt(mm.events)} events in ${monthName(mm.month)}. The mark shares out the deaths of events UCDP dates only to a span over their days, and counts such an event in each month it touches: ${fmt(f.deaths)} in ${fmt(f.events)}.</p>`;
+}
+
 function warRow(w, months) {
   const deaths = (months ? w.monthly.filter(x => months.includes(x.month)) : w.monthly.slice(-3)).reduce((s, x) => s + x.deaths, 0);
-  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div></div><div class="deaths">${fmt(deaths)}<small>${months ? 'deaths' : '3-month deaths'}</small></div></button>`;
+  return `<button class="warrow${selectedWar === w.id ? ' sel' : ''}" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i><div><div class="warname">${esc(w.name)}</div><div class="warmeta">${esc(w.countries.slice(0, 4).join(', '))}${w.countries.length > 4 ? ' +' + (w.countries.length - 4) : ''}</div>${!months && markOf(w) ? PRPMark.chip(markOf(w).fighting) : ''}</div><div class="deaths">${fmt(deaths)}<small>${months ? 'deaths' : '3-month deaths'}</small></div></button>`;
 }
 
 // Deaths month by month, the month shown (or every month of the archive's period) highlighted.
@@ -304,6 +320,7 @@ function warDetail(w) {
     <button class="prp-btn sm" id="back">‹ All wars</button>
     <h2>${esc(w.name)}</h2><div class="small">${esc(w.zone)} · ${esc(w.countries.join(', '))}</div>
     <p>${esc(w.summary)}</p>
+    ${markOf(w) ? `<h3>Month by Month · ${monthName(markOf(w).fighting.month)}</h3>${PRPMark.full(markOf(w).fighting, markOf(w))}${countingNote(w, markOf(w))}${markOf(w).primary ? '' : '<p class="small">War Focus also follows this war, counting fighting involving a state only; Month by Month’s bulletin lists the war once, by War Focus.</p>'}` : ''}
     ${bars(w)}
     ${shown}
     ${w.background ? `<h3>Background</h3><p>${esc(w.background)}</p>` : ''}

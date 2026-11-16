@@ -253,10 +253,11 @@ html.np-on .frames { margin-bottom: calc(var(--np-h, 54px) + 12px); }
   --today-lh-small: calc(var(--prp-fs-xs) * 1.4);    /* the window, a detail, a note */
   --today-row-pad: 7px; }
 .today-title { margin: 0 0 10px; color: var(--prp-muted); font: 500 var(--prp-fs-xs)/1.4 var(--prp-font-mono); letter-spacing: .08em; text-transform: uppercase; }
-/* Four cards in one row, two rows of two, or one column: 240px at least each, never three and an orphan. Cards in a row
-   share its height (each card's own height is fixed, so the row's is too). */
+/* The first four cards in one row, two rows of two, or one column: 240px at least each, never three and an orphan.
+   The fifth (What changed, Month by Month) sits across the whole row below them. Cards in a row share its height
+   (each card's own height is fixed, so the row's is too). */
 .today-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: stretch; }
-@container today (width >= 492px) { .today-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container today (width >= 492px) { .today-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .today-grid > :nth-child(5) { grid-column: 1 / -1; } }
 @container today (width >= 996px) { .today-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .today-card { --today-label-lines: 2; --today-detail-lines: 1; --today-note-lines: 3; container-type: inline-size;
   display: flex; flex-direction: column; overflow: hidden; background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius); box-shadow: var(--prp-shadow-1); }

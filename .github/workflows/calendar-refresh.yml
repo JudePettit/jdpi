@@ -35,6 +35,25 @@ jobs:
         env:
           PRP_PAGES: '0'
         run: node --test tests/calendar.test.mjs
+      # Month by Month: the monthly marks, the bulletin, the watch list and the year strips, rebuilt from the day's public
+      # JSON (Realtime Battlefield, War Focus, Volatility, these calendars, National Analysis) and tested. A failed build,
+      # or one that fails its tests, never blocks the calendars: its files are thrown away and the run then ends red.
+      - name: Rebuild Month by Month
+        id: monthly
+        continue-on-error: true
+        run: node monthly/scripts/build.mjs
+      - name: Test the new marks
+        id: monthlytest
+        if: steps.monthly.outcome == 'success'
+        continue-on-error: true
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/monthly.test.mjs
+      - name: Throw away Month by Month's changes
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          git checkout -- monthly/data
+          git clean -fdq -- monthly/data
       # Integration Hub: the calendars as iCalendar files, plus the data catalogue, its shards, the Master Index name index,
       # the country profiles, openapi.json and llms.txt, rebuilt from today's data and tested. A failed rebuild, or one that
       # fails its tests, never blocks the calendars: its files are thrown away, the calendars are committed, and the run
@@ -59,13 +78,18 @@ jobs:
       - uses: ./.github/actions/commit-data
         with:
           paths: >-
-            calendar/data calendar/scripts/summary-cache.json
+            calendar/data calendar/scripts/summary-cache.json monthly/data
             integration/catalog.json integration/catalog.head.json integration/openapi.json integration/data integration/feeds integration/skill llms.txt
           message: 'Calendars: daily event refresh'
       - name: Fail the run if the Integration Hub was not committed
         if: steps.hub.outcome == 'failure' || steps.hubtest.outcome == 'failure'
         run: |
           echo "::error::The Integration Hub rebuild or its tests failed (see those steps); the calendars were committed without it."
+          exit 1
+      - name: Fail the run if Month by Month was not committed
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          echo "::error::The Month by Month rebuild or its tests failed (see those steps); the calendars were committed without it."
           exit 1
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:

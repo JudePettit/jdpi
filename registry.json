@@ -38,7 +38,7 @@
           },
           "host": "Vitruvian Manager",
           "shell": "dashboard",
-          "description": "What changed today across Vitruvian Manager: volatility's biggest movers, the topics rising and falling in the briefings' headlines, the next votes and summits, and the markets, each line opening the one thing it names, over every module and submodule."
+          "description": "What changed today across Vitruvian Manager: volatility's biggest movers, the topics rising and falling in the briefings' headlines, the next votes and summits, the markets, and what changed in the latest month of fighting UCDP has published, each line opening the one thing it names, over every module and submodule."
         }
       ]
     },
@@ -182,6 +182,52 @@
               "id": "compare",
               "name": "Compare countries",
               "url": "q/national.html#compare=USA,CHN,RUS,IND"
+            }
+          ]
+        },
+        {
+          "id": "monthly",
+          "name": "Month by Month",
+          "kind": "realtime",
+          "icon": "▥",
+          "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "calendar-refresh.yml",
+            "checks": true,
+            "parts": [
+              {
+                "read": "monthly/data/marks.head.json",
+                "store": "monthly/data/marks.json",
+                "time": "month",
+                "late": "generated",
+                "label": "Marks to"
+              }
+            ]
+          },
+          "host": "Vitruvian Manager",
+          "url": "q/monthly.html",
+          "description": "Each month, for every war VM follows (countries once UCDP's per-country figures are taken in): more deaths recorded, fewer, or no large change against the three months before, by one stated rule from UCDP's figures, each mark with its figures, period, evidence and confidence. With the month's bulletin, a watch list of the next 30 days' votes and summits, and a year strip for each War Focus war.",
+          "views": [
+            {
+              "id": "changed",
+              "name": "What changed",
+              "url": "q/monthly.html#tab=changed"
+            },
+            {
+              "id": "watch",
+              "name": "Watch list",
+              "url": "q/monthly.html#tab=watch"
+            },
+            {
+              "id": "marks",
+              "name": "All marks",
+              "url": "q/monthly.html#tab=marks"
+            },
+            {
+              "id": "how",
+              "name": "How this is worked out",
+              "url": "q/monthly.html#tab=how"
             }
           ]
         },

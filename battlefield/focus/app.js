@@ -290,6 +290,26 @@ function statesOn(side, date) {
     .sort((a, b) => d3.geoArea(b) - d3.geoArea(a));
   return [...new Set(found.map(f => displayName(f.properties.gw, f.properties.name, date)))];
 }
+// Month by Month (monthly/data, design/prp-mark.js): the latest month's mark for an ongoing war, with its explanation,
+// in the panel when that month is shown; and every war's year strip above the Deaths by month table. VM's own
+// calculation from the figures this page shows, never a judgement.
+let MARKS = null;
+const strips = new Map();
+window.PRPMark?.load().then(m => { MARKS = m; if (state.war) { renderPanel(); if (state.view === 'months') renderMonthsStrip(); } });
+const stripOf = id => strips.get(id) || strips.set(id, window.PRPMark ? PRPMark.loadStrip('focus-' + id) : Promise.resolve(null)).get(id);
+const markHtml = (w, m) => {
+  const u = MARKS && window.PRPMark ? PRPMark.unitOf(MARKS, 'focus:' + w.id) : null;
+  return u && u.fighting.month === m ? `<h3>Month by Month · ${esc(PRPMark.monthName(m))}</h3>${PRPMark.full(u.fighting, u)}` : '';
+};
+async function renderMonthsStrip() {
+  const box = $('#months-strip'), w = state.war;
+  if (!box || !w || !window.PRPMark) return;
+  const s = await stripOf(w.id);
+  if (state.war !== w) return;
+  box.innerHTML = s ? PRPMark.strip(s) : '';
+  PRPMark.wire(box);
+}
+
 function renderPanel() {
   popouts.clear();
   const w = state.war, i = state.m, m = w.months[i], date = dateOf(i), p = isPeriod(), a = p ? w.months[state.f] : m;
@@ -327,6 +347,7 @@ function renderPanel() {
         : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${soFarNote(w, m, cumulative[i])}</small></div>`}
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
     </div>
+    ${p ? '' : markHtml(w, m)}
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
     ${w.bf ? `<a class="btn go" href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${bfYear}${bfPeriod ? `&f=${bfFrom}` : ''}&w=${w.bf}`))}" target="${embedded ? '_top' : '_self'}">Open in Retrospective Battlefield: ${bfPeriod ? `${bfFrom}–${bfYear}` : bfYear} →</a>` : ''}
     <h3>${esc(periodLabel())} <span class="count">${now.length} battle${now.length === 1 ? '' : 's'} or operation${now.length === 1 ? '' : 's'} under way</span></h3>
@@ -407,6 +428,7 @@ function renderTables() {
       if (isPeriod() && k < state.f) setPeriod(state.war.months[k], state.war.months[state.m]); else setMonth(k);
     });
     $('#months-rows tr.end')?.scrollIntoView({ block: 'nearest' });
+    renderMonthsStrip();
   }
 }
 const VIEWS = ['map', 'battles', 'months'];

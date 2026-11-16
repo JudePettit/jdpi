@@ -12,18 +12,39 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # The battles' figures (BF-08) read every battle's Wikipedia article and Wikidata's statements, a second apart; the
+    # articles are kept between runs (below), so a run reads again only the revisions that changed.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci --ignore-scripts
+      - name: Keep the Wikipedia articles read, by revision, between runs
+        uses: actions/cache@v4
+        with:
+          path: /tmp/warfocus-src/wikipedia
+          key: warfocus-wikipedia-${{ github.run_id }}
+          restore-keys: warfocus-wikipedia-
       - run: node battlefield/focus/scripts/build.mjs --cache /tmp/warfocus-src
       - name: Test the new data
         env:
           PRP_PAGES: '0'
         run: node --test tests/warfocus.test.mjs tests/kino.test.mjs
+      # The Master Index states each battle's figure as War Focus shows it (lake/scripts/adapters.mjs), so its War Focus
+      # lines are rebuilt from the new files here, not left stale until the lake refresh. Thrown away if it fails.
+      - name: Rebuild the Master Index's War Focus lines
+        id: lake
+        continue-on-error: true
+        run: node lake/scripts/build.mjs --only battlefield && node --test tests/master-index.test.mjs
+        env:
+          PRP_PAGES: '0'
+      - name: Throw away the Master Index's changes
+        if: steps.lake.outcome == 'failure'
+        run: |
+          git checkout -- lake/data
+          git clean -fdq -- lake/data
       # Month by Month: each country's months from the GED file War Focus has just read (monthly/data/ged-countries.json),
       # and the marks again with War Focus's new month. Thrown away if it fails its tests; War Focus is committed anyway.
       - name: Rebuild Month by Month's country months from GED
@@ -51,12 +72,17 @@ jobs:
         run: node --test tests/monthly.test.mjs
       - uses: ./.github/actions/commit-data
         with:
-          paths: battlefield/focus/data monthly/data
+          paths: battlefield/focus/data monthly/data lake/data
           message: 'War Focus: refresh UCDP events and battles'
       - name: Fail the run if Month by Month was not committed
         if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
         run: |
           echo "::error::The Month by Month rebuild or its tests failed (see those steps); War Focus was committed without it."
+          exit 1
+      - name: Fail the run if the Master Index was not rebuilt
+        if: steps.lake.outcome == 'failure'
+        run: |
+          echo "::error::The Master Index's War Focus lines could not be rebuilt or failed their tests; War Focus was committed without them."
           exit 1
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:

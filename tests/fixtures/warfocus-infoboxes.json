@@ -1,0 +1,3673 @@
+{
+ "about": "Real casualty fields of English Wikipedia infoboxes (CC BY-SA 4.0, each at the revision named), read by hand on 16 November 2026 before the reader (battlefield/focus/scripts/infobox.mjs) was written. d and c: deaths and casualties as [low, high, status], \"+\" for at least; null where no figure of that measure is given. The review of 16 November 2026 added 17 more (its findings F1–F11), each worked by hand.",
+ "cases": [
+  {
+   "battle": "Battle of Wawon",
+   "article": "Battle of Wawon",
+   "revid": 1370276763,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "218 killed<br /> 455 wounded<br /> 94 missing<ref>{{cite web|url=http://www.muharipgaziler.org.tr/files/kore.doc |title=Korean War (Kore Savaşi) |publisher=Turkish War Veterans Association |access-date=2009-11-28 |language=tr |url-status=dead |archive-url=https://web.archive.org/web/20120523174605/http://www.muharipgaziler.org.tr/files/kore.doc |archive-date=2012-05-23 }}</ref><br />      '''Chinese estimation''': ~1,000<ref name=cmsa102_104>{{harvnb|Chinese Military Science Academy|2000|pp=102, 104}}.</ref>",
+    "casualties2": "3,000~ killed and wounded<ref>{{Cite web | url=https://ttu-ir.tdl.org/bitstream/handle/2346/60890/31295007673865.pdf?sequence=1 | title=Turkish Military in the Korean War| first=Anne Katherine | last=Fanning | archive-url=https://web.archive.org/web/20211125201016/https://ttu-ir.tdl.org/bitstream/handle/2346/60890/31295007673865.pdf?sequence=1 | archive-date=2021-11-25 | url-status=live | date=August 1993}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     218,
+     218,
+     "fact",
+     "+"
+    ],
+    "c": [
+     3767,
+     4000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       218,
+       218
+      ],
+      "c": [
+       767,
+       1000
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       3000,
+       3000
+      ]
+     }
+    ],
+    "why": "Turkey: 218 killed, 455 wounded, 94 missing (767, recorded), and a Chinese estimate of ~1,000 of no stated kind: two readings 1.3 times apart, an estimate. China: ~3,000 killed and wounded together, no deaths apart. Deaths: one side only."
+   }
+  },
+  {
+   "battle": "Fourth Encirclement Campaign against Jiangxi Soviet",
+   "article": "Fourth encirclement campaign against the Jiangxi Soviet",
+   "revid": 1370620065,
+   "infobox": "Infobox Military Conflict",
+   "fields": {
+    "casualties1": "30,000",
+    "casualties2": "?"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     30000,
+     30000,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "c": [
+       30000,
+       30000
+      ]
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "A bare number is casualties of no stated kind; \"?\" is words."
+   }
+  },
+  {
+   "battle": "Fourth Encirclement Campaign against Hubei-Henan-Anhui Soviet",
+   "article": "Fourth encirclement campaign against the Eyuwan Soviet",
+   "revid": 1370620064,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "10,000+",
+    "casualties2": "Several thousand"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     10000,
+     10000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "c": [
+       10000,
+       10000
+      ]
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "\"10,000+\" is at least 10,000; \"Several thousand\" is words."
+   }
+  },
+  {
+   "battle": "Second Battle of Nanawa",
+   "article": "Second Battle of Nanawa",
+   "revid": 1370736470,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "1,600<br />1 tank destroyed<br />2 tankettes",
+    "casualties2": "500<br />3 aircraft damaged"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     2100,
+     2100,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       1600,
+       1600
+      ]
+     },
+     {
+      "c": [
+       500,
+       500
+      ]
+     }
+    ],
+    "why": "Bare numbers; a tank, tankettes and aircraft set aside. VM adds the sides: an estimate."
+   }
+  },
+  {
+   "battle": "Battle of Boquerón",
+   "article": "Battle of Boquerón (1932)",
+   "revid": 1377081540,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2,200 killed, wounded, sick or captured",
+    "casualties2": "500 dead<br/>1,500 wounded<br/>1,000 sick"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     500,
+     500,
+     "fact",
+     "+"
+    ],
+    "c": [
+     2000,
+     2000,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       500,
+       500
+      ],
+      "c": [
+       2000,
+       2000
+      ]
+     }
+    ],
+    "why": "Bolivia: killed, wounded, sick or captured in one figure (the sick are no casualties here): refused. Paraguay: 500 dead and 1,500 wounded; 1,000 sick set aside."
+   }
+  },
+  {
+   "battle": "Battle of Brunete",
+   "article": "Battle of Brunete",
+   "revid": 1370435332,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "10,000<ref>Thomas, Hugh. ''The Spanish Civil War.'' Penguin books. London. 2006. p. 694</ref>–25,000 dead or wounded<ref>Beevor, Antony. ''The Battle for Spain; the Spanish Civil War: 1936–1939.'' Penguin Books. London. 2006. p. 284</ref><br>60–100 aircraft",
+    "casualties2": "7,000 dead or wounded<ref>Beevor, Antony. ''The Battle for Spain; the Spanish Civil War: 1936–1939.'' Penguin Books. London. 2006. p. 284</ref><br>23 aircraft"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     17000,
+     32000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       10000,
+       25000
+      ]
+     },
+     {
+      "c": [
+       7000,
+       7000
+      ]
+     }
+    ],
+    "why": "Dead or wounded together; aircraft set aside."
+   }
+  },
+  {
+   "battle": "Bombing of Granollers",
+   "article": "Bombing of Granollers",
+   "revid": 1370605434,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "100–224 civilians killed",
+    "casualties2": "None"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     100,
+     224,
+     "estimate"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       100,
+       224
+      ],
+      "c": null
+     },
+     {
+      "zero": true
+     }
+    ],
+    "why": "A range of civilians killed; the attackers record none, so the range is the whole."
+   }
+  },
+  {
+   "battle": "Canton Operation",
+   "article": "Canton Operation",
+   "revid": 1383135214,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Official Japanese war records claim:<ref name=\"SenshiSosho89_1\"/>\n* 173 killed\n* 493 wounded\n* 1,264 sick\nTotal casualties: 1,930\n----\n1,069 horses killed, wounded or sick<ref name=\"SenshiSosho89_1\"/>\n5 aircraft<ref name=\"Macri_92\">{{harvnb|Macri|2015|p=92}}</ref>",
+    "casualties2": "Chinese claim:<ref>{{cite book |date=1999 |title=广东省志 |publisher=广东人民出版社 |page=493}}</ref><ref name=\"抗日戰史\">{{cite book |title=抗日戰史: 閩粤邊區作戰(一) |date=1981 |publisher=國防部史政編譯局 | pages=46-47}}</ref>{{efn|\n*The statistics of casualties for the 453rd brigade of the 151st division, 457th brigade of the 153rd division, 943rd regiment of the 158th division, and 627th regiment of the 9th independent brigade in guerilla actions are not included.\n*The losses of security and police personnels and local militias are not included.}}\n* 2,954 killed\n* 5,645 wounded\n* 2,643 missing\nTotal casualties: 11,242<br><br>\nOfficial Japanese war records claim 1,340 captured.<ref name=\"SenshiSosho89_2\">{{harvnb|NIDS SS89|1976|p=250}}</ref> Another official Japanese military source claimed 5,203 Chinese troops killed.<ref>{{cite archive |item=附表第１～第３　彼我損害一覧表他 |item-url=https://www.jacar.archives.go.jp/das/image/C11110811600 |item-id=C11110811600 |collection=支那事変関係小冊子集　昭和１３年３月～昭和１４年１０月 |access-date=01 November 2026 |institution=Japan Center for Historical Records}}</ref>\n----\nOfficial Japanese war records claim:<ref name=\"SenshiSosho89_2\"/>\n* 2,371 rifles\n* 214 heavy and light machineguns\n* 134 artillery pieces\n* 53 coastal artillery pieces\n* 21 tanks and light armored vehicles\n* 151 vehicles",
+    "notes": "{{notelist}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     173,
+     173,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     666,
+     666,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       173,
+       173
+      ],
+      "c": [
+       666,
+       666
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Japan, a claim: 173 killed, 493 wounded; the stated total 1,930 adds 1,264 sick, so the casualties are 666. China: a sentence of prose among the figures refuses the side."
+   }
+  },
+  {
+   "battle": "Battle of Alsace",
+   "article": "Battle of Alsace",
+   "revid": 1375391003,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{ubl|France: ~3,000/4,000 killed, several thousands injured.|United States: Thousands killed and injured.}}",
+    "casualties2": "{{ubl|Germany: approximately 23,000 killed or injured; 23,000 prisoners.<ref>{{Cite book |last=Dufour |first=Pierre |title=La campagne d'Alsace: automne 1944-hiver 1945 |date=2014 |publisher=Grancher |isbn=978-2-7339-1278-2 |location=Paris}}</ref>}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     3000,
+     4000,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     46000,
+     46000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       3000,
+       4000
+      ],
+      "c": null
+     },
+     {
+      "d": null,
+      "c": [
+       46000,
+       46000
+      ]
+     }
+    ],
+    "why": "France ~3,000/4,000 killed (the US in words, the wounded in words): no casualties figure. Germany: about 23,000 killed or injured and 23,000 prisoners."
+   }
+  },
+  {
+   "battle": "Battle of Bryansk",
+   "article": "Battle of Bryansk",
+   "revid": 1370435358,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "48,000 killed or wounded",
+    "casualties2": "100,000 killed or missing<br/>600,000 captured"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     748000,
+     748000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       48000,
+       48000
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       700000,
+       700000
+      ]
+     }
+    ],
+    "why": "Killed or wounded; killed or missing plus captured: no deaths apart."
+   }
+  },
+  {
+   "battle": "Battle of the Denmark Strait",
+   "article": "Battle of the Denmark Strait",
+   "revid": 1382443978,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{ubl|5 wounded}}",
+    "casualties2": "{{ubl|''HMS Hood'' sunk|''Prince of Wales'' damaged|1,428 dead|9 wounded}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1428,
+     1428,
+     "fact",
+     "+"
+    ],
+    "c": [
+     1442,
+     1442,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       5,
+       5
+      ]
+     },
+     {
+      "d": [
+       1428,
+       1428
+      ],
+      "c": [
+       1437,
+       1437
+      ]
+     }
+    ],
+    "why": "\"5 wounded\" is no zero for deaths. Ships sunk and damaged set aside."
+   }
+  },
+  {
+   "battle": "Battle of Kollaa",
+   "article": "Battle of Kollaa",
+   "revid": 1379800469,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "1,500 dead or wounded (estimate)",
+    "casualties2": "8,000 dead or wounded"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     9500,
+     9500,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       1500,
+       1500
+      ]
+     },
+     {
+      "c": [
+       8000,
+       8000
+      ]
+     }
+    ],
+    "why": "\"(estimate)\" marks the first side approximate."
+   }
+  },
+  {
+   "battle": "Battle of Florina",
+   "article": "Battle of Florina (1949)",
+   "revid": 1370110340,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "799 killed <br> 1,500 wounded <br> 350 captured/surrendered",
+    "casualties2": "44 killed <br> 220 wounded <br> 35 missing in action"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     843,
+     843,
+     "estimate"
+    ],
+    "c": [
+     2948,
+     2948,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       799,
+       799
+      ],
+      "c": [
+       2649,
+       2649
+      ]
+     },
+     {
+      "d": [
+       44,
+       44
+      ],
+      "c": [
+       299,
+       299
+      ]
+     }
+    ],
+    "why": "Each side recorded; VM adds them."
+   }
+  },
+  {
+   "battle": "Battle of Tashan",
+   "article": "Battle of Tashan",
+   "revid": 1370590638,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "9,549 killed",
+    "casualties2": "23,774 (7,878 killed)"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     17427,
+     17427,
+     "estimate"
+    ],
+    "c": [
+     23774,
+     23774,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       9549,
+       9549
+      ],
+      "c": null
+     },
+     {
+      "d": [
+       7878,
+       7878
+      ],
+      "c": [
+       23774,
+       23774
+      ]
+     }
+    ],
+    "why": "North Korea gives killed only, so no casualties figure of its own; the UN side 23,774 of which 7,878 killed."
+   }
+  },
+  {
+   "battle": "Battle of Na San",
+   "article": "Battle of Nà Sản",
+   "revid": 1381535554,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2nd December only: 6 killed and 20 wounded{{sfn|Windrow|2018|p=73}}<br>'''Total:''' 300 killed and 640 wounded<ref>{{cite web | title='Deluge of Fire': The Battle of Na San, 1952 | date=2 September 2020 | url=https://www.historynet.com/deluge-of-fire-the-battle-of-na-san-1952/ }}</ref>",
+    "casualties2": "'''Western estimate''': 1,000{{sfn|Clodfelter|2008|p=654}}–1,544{{sfn|Logevall|2012|p=329}} killed<br />1,932 captured{{sfn|Logevall|2012|p=329}}<br />6,000 wounded{{sfn|Clodfelter|2008|p=654}} <br>'''John Walker claim:''' 5,000 killed/missing/captured and 2,000 wounded<ref>{{cite web | title='Deluge of Fire': The Battle of Na San, 1952 | date=2 September 2020 | url=https://www.historynet.com/deluge-of-fire-the-battle-of-na-san-1952/ }}</ref><br /> '''Việt Minh’s report:''' ~1,400 killed/missing/captured, 2,553 wounded<ref>{{cite web | url=http://ckt.gov.vn/ckt/bao-dam-hau-can-ky-thuat-chien-dich-tay-bac-1952-post869.html | title=Cổng thông tin điện tử Ngành kinh tế quân đội }}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1300,
+     1844,
+     "estimate"
+    ],
+    "c": [
+     4893,
+     10416,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       300,
+       300
+      ],
+      "c": [
+       940,
+       940
+      ]
+     },
+     {
+      "d": [
+       1000,
+       1544
+      ],
+      "c": [
+       3953,
+       9476
+      ]
+     }
+    ],
+    "why": "France: the 2nd December line is for one day only and the total is given: 300 killed and 640 wounded. Viet Minh: the Western estimate (1,000–1,544 killed, 1,932 captured, 6,000 wounded), John Walker's claim (7,000) and the Viet Minh report (~3,953) differ over twice: disputed."
+   }
+  },
+  {
+   "battle": "First Battle of Seoul",
+   "article": "First Battle of Seoul",
+   "revid": 1382571036,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "44,000 dead or missing{{Citation needed|date=October 2026}}",
+    "casualties2": "1,112 dead{{Citation needed|date=October 2026}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1112,
+     1112,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     44000,
+     44000,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       44000,
+       44000
+      ]
+     },
+     {
+      "d": [
+       1112,
+       1112
+      ],
+      "c": null
+     }
+    ],
+    "why": "Both lines marked \"citation needed\"."
+   }
+  },
+  {
+   "battle": "Battle of Bloody Ridge",
+   "article": "Battle of Bloody Ridge",
+   "revid": 1377665056,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2,700<ref name=\"Alexander\">{{cite book | title=''Korea: The First War We Lost''| url=https://archive.org/details/koreafirstwarwel00alex| url-access=registration| author=Bevin Alexander| year=1986|pages=[https://archive.org/details/koreafirstwarwel00alex/page/440 440-42]|isbn=978-0870521355}}</ref>",
+    "casualties2": "'''US Claim''': 8,000 dead<br>7,000 wounded<ref name=\"Alexander\"/>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     8000,
+     8000,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     17700,
+     17700,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "c": [
+       2700,
+       2700
+      ]
+     },
+     {
+      "d": [
+       8000,
+       8000
+      ],
+      "c": [
+       15000,
+       15000
+      ]
+     }
+    ],
+    "why": "The second side's figures are a US claim."
+   }
+  },
+  {
+   "battle": "First Battle of El Djorf",
+   "article": "First Battle of El Djorf",
+   "revid": 1379780530,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Few<br><small>(French claim)</small><br>400–800 killed<br>1,500 wounded<br><small>(Algerian claim)</small>",
+    "casualties2": "45 killed<br>40 wounded and captured<br><small>(French claim)</small><br>60–70 killed<br>60–90 wounded<br><small>(Algerian claim)</small>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     445,
+     870,
+     "disputed"
+    ],
+    "c": [
+     1985,
+     2460,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       400,
+       800
+      ],
+      "c": [
+       1900,
+       2300
+      ]
+     },
+     {
+      "d": [
+       45,
+       70
+      ],
+      "c": [
+       85,
+       160
+      ]
+     }
+    ],
+    "why": "A bracketed claim after its lines labels the lines above it: the French claim (\"Few\"; 45 killed, 40 wounded and captured) and the Algerian claim (400–800 killed, 1,500 wounded; 60–70 killed, 60–90 wounded)."
+   }
+  },
+  {
+   "battle": "Battle of Boyra",
+   "article": "Battle of Boyra",
+   "revid": 1370435107,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "None",
+    "casualties2": "2 [[Canadair Sabre|Sabre]] shot down<br />1 Sabre damaged<br />[[Parvaiz Mehdi Qureshi|2 PAF pilots]] [[prisoners-of-war|captured]].<ref name=\"garibpur\">{{cite web |url=https://theprint.in/opinion/boyra-boys-under-3-minute-air-battle-with-pakistan-drew-first-blood-for-india-in-1971/324696/ |title=Boyra Boys & under-3 minute air battle with Pakistan drew first blood for India in 1971 |first1=Anshuman |last1=Mainkar |work=The Print (India) | date= 22 November 2019 |url-status=live |archive-url=https://web.archive.org/web/20191123145642/https://theprint.in/opinion/boyra-boys-under-3-minute-air-battle-with-pakistan-drew-first-blood-for-india-in-1971/324696/ |archive-date=23 November 2019 }}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     2,
+     2,
+     "fact"
+    ],
+    "sides": [
+     {
+      "zero": true
+     },
+     {
+      "d": null,
+      "c": [
+       2,
+       2
+      ]
+     }
+    ],
+    "why": "India records none; Pakistan two pilots captured (aircraft set aside). A zero beside a side with no deaths figure is no deaths figure."
+   }
+  },
+  {
+   "battle": "Battle of Zahleh",
+   "article": "Battle of Zahleh",
+   "revid": 1370596212,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Est. 200 killed <br> 200 wounded <br/> '''Total: 400 casualties'''<ref>{{cite book|last=Menargues|first=Alain|title=Les secrets de la guerre au Liban: du Coup d'Etat de Bachir Gémayel aux Massacres des Camps Palestiniens|year=2004|publisher=Albin Michel|pages=171}}</ref>",
+    "casualties2": "Est. 300 killed <br>400 wounded <br/> 32 tanks and Armored personnel carriers<br/> '''Total: 700 casualties'''<ref name=\"auto2\">{{cite book |last=Choueifaty |first=Clovis |title=The Battles of Syria In Lebanon Vol 2 |year=2010 |publisher=self-published |pages=166}}</ref>",
+    "casualties3": "{{center|200 civilians killed and 2,000 wounded<ref>{{Cite web | url=https://www.ictj.org/sites/default/files/ICTJ-Report-Lebanon-Mapping-2013-EN_0.pdf | title=Lebanon's Legacy of Political  Violence | website=www.ictj.org | date=September 2023}}</ref>}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     700,
+     700,
+     "estimate"
+    ],
+    "c": [
+     3300,
+     3300,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       200,
+       200
+      ],
+      "c": [
+       400,
+       400
+      ]
+     },
+     {
+      "d": [
+       300,
+       300
+      ],
+      "c": [
+       700,
+       700
+      ]
+     },
+     {
+      "d": [
+       200,
+       200
+      ],
+      "c": [
+       2200,
+       2200
+      ]
+     }
+    ],
+    "why": "\"Est.\" marks the killed approximate; the stated totals are used."
+   }
+  },
+  {
+   "battle": "Tajbeg Palace assault",
+   "article": "Operation Storm-333",
+   "revid": 1375961777,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "Disputed\n\n{{plainlist|\n*40 casualties<ref name=Tomsen174>{{cite book|author=Peter Tomsen|title=Wars of Afghanistan|date=9 June 2011|publisher=PublicAffairs|isbn=978-1586487638|edition=1st |page=174}}</ref>\n----\n*Over 100 casualties according to [[Vasili Mitrokhin]] ([[KGB]] defector)}}<ref name=Tomsen>{{cite book |author=Peter Tomsen |title=The Wars of Afghanistan: Messianic Terrorism, Tribal Conflicts, and the Failures of Great Powers |date=9 June 2011 |publisher=PublicAffairs |isbn=978-1586487638 |page=99 |url=https://books.google.com/books?id=86w4DgAAQBAJ&dq=tajbeg+palace+100+killed&pg=PT99}}</ref><ref>{{cite book |last1=Saikal |first1=Amin |title=Modern Afghanistan: A History of Struggle and Survival |year=2004 |publisher=I.B. Tauris |page=184 |isbn=978-1850434375 |url=https://books.google.com/books?id=akYlDwAAQBAJ&dq=Hafizullah+Amin+industrialisation&pg=PA184}}</ref>",
+    "casualties2": "2,203 casualties<ref name=\"global1\">{{cite web|url=https://www.globalsecurity.org/military/library/report/2002/MOUTGrau.htm|title=The Take-Down of Kabul: An Effective Coup de Main|work=Global Security|author=Lester W. Grau|access-date=7 December 2018}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     2243,
+     2303,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "c": [
+       40,
+       100
+      ]
+     },
+     {
+      "c": [
+       2203,
+       2203
+      ]
+     }
+    ],
+    "why": "\"Disputed\", 40 casualties, and over 100 according to Mitrokhin."
+   }
+  },
+  {
+   "battle": "Operation Mersad",
+   "article": "Operation Mersad",
+   "revid": 1382176976,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "1,500 to 2,506 KIA (Iranian claim)<ref name=\"ni\"/><br/>1,263 KIA, WIA, MIA, POW (MEK claim)<ref name=\"MEKclaims\">[https://www.mojahedin.org/pages/printNews.aspx?newsid=127346 بخشهایی از گزارش نهایی ستاد فرماندهی ارتش آزادیبخش ملی ایران درباره عملیات بزرگ فروغ جاویدان ـ ۸ شهریور ۱۳۶۷] {{Webarchive|url=https://web.archive.org/web/20161202173058/https://www.mojahedin.org/pages/printNews.aspx?newsid=127346|date=December 2, 2016}}</ref><br />2,000 [[Killed in action|KIA]] (independent estimate)<ref>[http://www.nytimes.com/2003/07/13/magazine/the-cult-of-rajavi.html \"The Cult of Rajavi\"] by Elizabeth Rubin. ''[[New York Times]]'', 13 July 2003 {{Webarchive|url=https://web.archive.org/web/20090801130900/http://www.nytimes.com/2003/07/13/magazine/the-cult-of-rajavi.html|date=August 1, 2009}}</ref><br />several thousand hanged for treason<ref>{{cite web|last=Lamb|first= Christina\n |url=https://www.telegraph.co.uk/news/main.jhtml?xml=/news/2001/02/04/wiran04.xml\n |title=Khomeini fatwa 'led to killing of 30,000 in Iran'\n |work=The Daily Telegraph |date=19 June 2001\n |access-date=10 October 2014\n |url-status=dead\n |archive-url=https://web.archive.org/web/20080329051448/http://www.telegraph.co.uk/news/main.jhtml?xml=%2Fnews%2F2001%2F02%2F04%2Fwiran04.xml\n |archive-date=29 March 2008\n}}</ref>\n200 Tanks destroyed (Iranian claim<ref name=reference3/>) <br /> 400 APCs <br /> 90 pieces of 80mm mortar <br /> 150 pieces of 60mm mortar <br /> 30 pieces of 106mm recoilless rifles{{citation needed|date=July 2019}}",
+    "casualties2": "480 [[Killed in action|KIA]] (Iranian claim)<ref>{{Cite web|url=https://www.youtube.com/watch?v=ZmXKTRkZV2Y|title = روایت حاج سعید از عملیات مرصاد|website = [[YouTube]]|url-status=dead|date=July 28, 2020|archiveurl=https://web.archive.org/web/20220115014928/https://www.youtube.com/watch?v=ZmXKTRkZV2Y|archive-date=January 15, 2022}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1980,
+     2986,
+     "disputed"
+    ],
+    "c": [
+     1263,
+     1263,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       1500,
+       2506
+      ],
+      "c": [
+       1263,
+       1263
+      ]
+     },
+     {
+      "d": [
+       480,
+       480
+      ],
+      "c": null
+     }
+    ],
+    "why": "Iranian claim 1,500–2,506 killed, an independent estimate of 2,000, the MEK's 1,263 KIA, WIA, MIA and POW; the hanged are words; tanks, APCs and mortars set aside."
+   }
+  },
+  {
+   "battle": "Battle of Pooneryn",
+   "article": "Battle of Pooneryn",
+   "revid": 1385063246,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "241 killed, 500 wounded, 400 missing (SL Government claims)<ref name=\"MoD1\">{{cite book |title=Humanitarian Operation Factual Analysis July 2006 – May 2009 |publisher=Ministry Of Defence Democratic Socialist Republic Of Sri Lanka |url=http://slembassyusa.org/wp-content/uploads/2011/08/Sri-Lankan-Humanitarian-Operation-Factual-Analysis.pdf |access-date=9 September 2021 |archive-date=5 April 2023 |archive-url=https://web.archive.org/web/20230405083423/http://slembassyusa.org/wp-content/uploads/2011/08/Sri-Lankan-Humanitarian-Operation-Factual-Analysis.pdf |url-status=dead }}</ref><br> A Pucara and 2 helicopters was damaged <ref>[https://www.defence.lk/Publication/viewpdffile/1583 Wings of Sri Lanka Air Force] defence.lk</ref><ref>{{cite web | title=The Sunday Times Situation Report | url=http://www.sundaytimes.lk/961013/sitrep.html }}</ref>",
+    "casualties2": "~500 killed (SL Government claims)<br> 460 killed (LTTE claims)<ref name=\"ST01\">{{Cite web|url=https://www.sundaytimes.lk/020616/columns/sitrep1.html|title=Inside story of female Tigers|website=www.sundaytimes.lk}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     701,
+     741,
+     "disputed"
+    ],
+    "c": [
+     1141,
+     1141,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       241,
+       241
+      ],
+      "c": [
+       1141,
+       1141
+      ]
+     },
+     {
+      "d": [
+       460,
+       500
+      ],
+      "c": null
+     }
+    ],
+    "why": "Government and LTTE claims."
+   }
+  },
+  {
+   "battle": "Battle of the Bridges",
+   "article": "Battle of the Bridges",
+   "revid": 1381314108,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "No casualties (Iraqi claim)<ref>{{cite AV media |people= |date= 7 September 2009|title=الفريق رعد الحمداني.. إحتلال الكويت و حرب الخليج |trans-title=Brig. Gen. Ra'ad al-Hamdani – Occupation of Kuwait and the Gulf War |medium=[[YouTube]] |language=ar |url=https://www.youtube.com/watch?v=GHnqIkKl3T4 |access-date=28 September 2019 |publisher=RT Arabic }}</ref><br>30 tanks destroyed (Kuwaiti claim)<br>1 self-propelled gun destroyed",
+    "casualties2": "All of Kuwaiti 35th Brigade elements destroyed or captured<ref name=\"idains\" />"
+   },
+   "expect": {
+    "state": "words",
+    "d": null,
+    "c": null,
+    "sides": [
+     {
+      "zero": true
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "A claimed zero (Iraqi claim) and words; 35th is an ordinal."
+   }
+  },
+  {
+   "battle": "Battle of Grozny (August 1996)",
+   "article": "Battle of Grozny (August 1996)",
+   "revid": 1376938214,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Russian military data:'''<br/> 687 soldiers killed<ref name=\"Edwards\" /><br/> 1,407 wounded{{sfn|Evangelista|2002|p=44}}{{sfn|Evangelista|2002|p=44}}<ref name=\"Edwards\" /><br/>18 tanks destroyed<ref name=Anthony>[https://books.google.com/books?id=LPDb89mJXUYC&dq=worst+russian+military+defeats&pg=PA148 \"Urban Guerrilla Warfare\"], Anthony Jones, April 20, 2007, p. 148</ref><br/>69 [[IFV]]s/[[Armoured personnel carrier|APCs]] destroyed<ref name=\"Anthony\" /><br/>4 helicopters destroyed<ref name=\"Gall\" />",
+    "casualties2": "Unknown",
+    "casualties3": "{{Estimated|2,000}}+ civilians killed{{sfn|Evangelista|2002|p=44}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2687,
+     2687,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     2094,
+     2094,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       687,
+       687
+      ],
+      "c": [
+       2094,
+       2094
+      ]
+     },
+     {
+      "words": true
+     },
+     {
+      "d": [
+       2000,
+       2000
+      ],
+      "c": null
+     }
+    ],
+    "why": "Russian military data; the separatists unknown; an estimated 2,000+ civilians killed."
+   }
+  },
+  {
+   "battle": "Battle of Komsomolskoye",
+   "article": "Battle of Komsomolskoye",
+   "revid": 1382693708,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Per Russia:'''<br />50+ killed<ref name=lenta/><br />300+ wounded<ref name=lenta>{{in lang|ru}} [http://www.lenta.ru/vojna/2000/03/20/gelaev/stat.htm Кавказ: В Комсомольском за время боев погибло 50 военных и уничтожено 500 боевиков] {{webarchive|url=https://web.archive.org/web/20110127175756/http://www.lenta.ru/vojna/2000/03/20/gelaev/stat.htm |date=27 January 2011 }}, Lenta.ru</ref><hr>'''Per Chechens:'''<br />400 killed<ref name=\"USAIS\">[http://www.thefreelibrary.com/Fighting+in+a+Fortified+Village.-a066707582 Fighting in a Fortified Village] by the United States Army Infantry School</ref><br />37+ AFVs destroyed<ref name=\"USAIS\"/>",
+    "casualties2": "'''Per Russia:'''<br />519–800 killed<ref name=\"USAIS\" /><ref>{{in lang|ru}} [http://www.memo.ru/hr/hotpoints/N-Caucas/ch99/021105/021105k_5.htm Крупнейшие операции российских войск в Чечне] {{Webarchive|url=https://web.archive.org/web/20071105050636/http://www.memo.ru/hr/hotpoints/N-Caucas/ch99/021105/021105k_5.htm |date=5 November 2007 }}, ''[[Kommersant]]'', 5 March 2002</ref><br />88 captured ([[Komsomolskoye massacre|~70 executed]])<ref name=\"USAIS\"/>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     569,
+     1200,
+     "disputed"
+    ],
+    "c": [
+     957,
+     1238,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       50,
+       400
+      ],
+      "c": [
+       350,
+       350
+      ]
+     },
+     {
+      "d": [
+       519,
+       800
+      ],
+      "c": [
+       607,
+       888
+      ]
+     }
+    ],
+    "why": "Russia's 50+ killed against the Chechens' 400: disputed. The Chechens per Russia 519–800 killed and 88 captured (of whom ~70 executed: not added)."
+   }
+  },
+  {
+   "battle": "Quneitra offensive (September 2016)",
+   "article": "Quneitra offensive (September 2016)",
+   "revid": 1373589010,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "28 killed (per the [[Syrian Observatory for Human Rights|SOHR]])<ref>{{Cite web|url=http://www.syriahr.com/en/?p=50601|title=23 rebels killed during clashes against regime forces in Quneitra|work=[[SOHR]]|date=13 September 2016|access-date=6 September 2025}}</ref><ref>{{Cite web|url=http://www.syriahr.com/en/?p=50677|title=Violations escalated dramatically in the third day of ceasefire in Syria|work=[[SOHR]]|date=15 September 2016|access-date=6 September 2025}}</ref><br />54 killed (per The Inside Source)<ref name=\"inside\">{{cite web|url=https://twitter.com/TheInsideSourc/status/775933690715119616|title=The Inside Source on Twitter|access-date=29 September 2016}}</ref><br />70+ killed (per the Army)<ref name=\"failed Golan\" />",
+    "casualties2": "9 killed (per the [[Syrian Observatory for Human Rights|SOHR]])<ref>{{cite web|url=https://www.facebook.com/syriahroe/posts/942209152554090|title=Syrian Observatory for Human Rights - Timeline - Facebook|website=[[Facebook]] |access-date=29 September 2016}}</ref><br />Dozens killed (per The Inside Source)<ref name=\"inside\"/>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     37,
+     79,
+     "disputed"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       28,
+       70
+      ],
+      "c": null
+     },
+     {
+      "d": [
+       9,
+       9
+      ],
+      "c": null
+     }
+    ],
+    "why": "SOHR 28, The Inside Source 54, the Army 70+; SOHR 9 against \"dozens\"."
+   }
+  },
+  {
+   "battle": "Battle of al-Bab",
+   "article": "Battle of al-Bab",
+   "revid": 1370597251,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|Turkey}} 59 killed<ref>71 soldiers reported killed since the start of the intervention {{Cite web |title=El Bab'da 2 asker şehit oldu - POLİTİKA haberleri |url=https://www.dha.com.tr/el-babda-2-asker-sehit-oldu_1463735.html |language=Turkish |trans-title=2 soldiers killed in El-Bab |access-date=2021-12-15 |website=www.dha.com.tr |archive-date=2021-12-15 |archive-url=https://web.archive.org/web/20211215202925/https://www.dha.com.tr/el-babda-2-asker-sehit-oldu_1463735.html |url-status=dead }}<br /> of which 12 died up until the Battle of al-Bab,[https://www.dailystar.com.lb/News/Middle-East/2016/Nov-04/379791-turkish-soldier-killed-in-is-rocket-attack-in-syria-army.ashx] {{Webarchive|url=https://web.archive.org/web/20170607154614/http://www.dha.com.tr/el-babda-2-asker-sehit-oldu_1463735.html |date=2017-06-07 }} leaving 59 to have died during the battle</ref><br />8-10 [[Leopard 2]] tanks destroyed, at least 2 captured<ref>{{cite web|url=https://nationalinterest.org/blog/buzz/turkeys-leopard-2-tanks-are-getting-crushed-syria-95396?amp|title=Turkey's Leopard 2 Tanks Are Getting Crushed in Syria|work=The National Interest|date=9 November 2019}}</ref><br />{{flagicon|Syrian opposition}} 500+ killed<ref>[https://www.almasdarnews.com/article/free-syrian-army-leader-says-will-fight-syrian-army-kurdish-ypg-rural-aleppo/ Free Syrian Army leader says they will fight Syrian Army, Kurdish YPG in rural Aleppo] {{Webarchive|url=https://web.archive.org/web/20190617101833/https://www.almasdarnews.com/article/free-syrian-army-leader-says-will-fight-syrian-army-kurdish-ypg-rural-aleppo/ |date=2019-06-17 }}, [[Al-Masdar News]]</ref>",
+    "casualties2": "{{flagicon|Islamic State}} 1,348+ killed <small>(Turkish and SAA claims)</small><ref>{{Cite web|title=El Bab'da 'temizlik' son aşamada|url=https://www.aa.com.tr/tr/dunya/el-babda-temizlik-son-asamada/715728|access-date=2021-12-15|website=www.aa.com.tr}}</ref>",
+    "casualties3": "{{flagicon image|Flag of Syrian Democratic Forces.svg}} 46 killed<ref>26 killed (against rebels & Turkey; 13 Nov.–28 Dec.),{{Cite web|title=El Bab'da 'temizlik' son aşamada|url=https://www.aa.com.tr/tr/dunya/el-babda-temizlik-son-asamada/715728|access-date=2021-12-15|website=www.aa.com.tr}} 19 killed (against ISIL; 21–29 Nov.),[http://www.syriahr.com/en/?p=55353]{{cite web |url=http://www.syriahr.com/en/?p=55427 |title=A large number of injuries in the continued \"Turkish Shelling\" on the control areas of Manbij Military Council {{pipe}} Syrian Observatory for Human Rights |access-date=2016-11-30 |url-status=dead |archive-url=https://web.archive.org/web/20161202210405/http://www.syriahr.com/en/?p=55427 |archive-date=2016-12-02 }}{{cite web |url=http://www.syriahr.com/en/?p=55945 |title=In 48 hours... the Syria Democratic Forces held funerals for 20 of their fighters who were killed in fronts of Raqqah and Aleppo {{pipe}} Syrian Observatory for Human Rights |access-date=2017-02-13 |url-status=dead |archive-url=https://web.archive.org/web/20161220215040/http://www.syriahr.com/en/?p=55945 |archive-date=2016-12-20 }} total of 45 reported killed</ref>\n----\n{{flagicon image|Flag of the Syrian Arab Armed Forces (1980–2024).svg}} 13+ killed<ref>{{cite tweet|user=InsideSourceInt|author=The Inside Source|number=828714812066500608|date=6 February 2017|title=#Syria // #Aleppo // 13 SAA confirmed KIA in clashes near Al-Bab in past 48 hours.|access-date=24 February 2017}}</ref>",
+    "casualties4": "444 civilians killed<ref>{{Cite web|date=2017-02-24|title=Turkey ends the Federal in Syria after 6 months of entering the Syrian lands and leaving 3700 casualties between civilians • The Syrian Observatory For Human Rights|url=https://www.syriahr.com/en/61502/|access-date=2021-12-15|website=The Syrian Observatory For Human Rights|language=en-US}}</ref><br /> 30,000+ civilians fled{{citation needed|date=November 2020}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2410,
+     2410,
+     "disputed",
+     "+"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       559,
+       559
+      ]
+     },
+     {
+      "d": [
+       1348,
+       1348
+      ]
+     },
+     {
+      "d": [
+       59,
+       59
+      ]
+     },
+     {
+      "d": [
+       444,
+       444
+      ]
+     }
+    ],
+    "why": "Each flag a group of its side. \"At least 2 captured\" after the tanks is tanks. The 30,000 who fled are no casualties."
+   }
+  },
+  {
+   "battle": "Mekelle shelling",
+   "article": "2020 Mekelle airstrikes",
+   "revid": 1383061443,
+   "infobox": "Infobox civilian attack",
+   "fields": {
+    "deaths": "27<ref name=\"Doctors\"/> or 28 civilians<ref name=\"atlas\"/>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     27,
+     28,
+     "estimate"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       27,
+       28
+      ]
+     }
+    ],
+    "why": "An attack's deaths field: \"27 or 28\" is a range."
+   }
+  },
+  {
+   "battle": "Battle of Antonov Airport",
+   "article": "Battle of Antonov Airport",
+   "revid": 1385137759,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Per Russia:'''<br>None (second assault wave)<ref name=\"eliminated\"/> <br>'''Per Ukraine:'''<br>300–500 paratroopers killed<ref name=\"NYT_20221216\">{{Cite news |last1=Schwirtz |first1=Michael |last2=Troianovski |first2=Anton |last3=Al-Hlou |first3=Yousur |last4=Froliak |first4=Masha |last5=Entous |first5=Adam |last6=Gibbons-Neff |first6=Thomas |date=16 December 2022 |title=Putin's War |work=[[The New York Times]] |url=https://www.nytimes.com/interactive/2022/12/16/world/europe/russia-putin-war-failures-ukraine.html |access-date=14 May 2023 }}</ref><ref>[https://www.kyivpost.com/post/38604 HUR’s Top 5 Most Audacious Special Operations]</ref><br>Several helicopters shot down<ref>{{Cite news|last=Eydoux|first=Thomas|date=24 February 2022|title=Images show Russian army 27 km from centre of Kyiv|language=en-US|work=France24|url=https://observers.france24.com/en/europe/20220224-images-show-russian-army-24km-outside-kyiv|access-date=25 February 2022|archive-date=25 February 2022|archive-url=https://web.archive.org/web/20220225041637/https://observers.france24.com/en/europe/20220224-images-show-russian-army-24km-outside-kyiv|url-status=live}}</ref><ref name=\"Geek\">{{Cite news |last=Cooper |first=Tom |date=25 February 2022 |title=Russian Heliborne Assault on Antonov / Hostomel Airport seems to have Failed |work=The Aviation Geek Club |url=https://theaviationgeekclub.com/russian-heliborne-assault-on-antonov-hostomel-airport-seems-to-have-failed/ |access-date=28 February 2022 |archive-date=25 February 2022 |archive-url=https://web.archive.org/web/20220225170849/https://theaviationgeekclub.com/russian-heliborne-assault-on-antonov-hostomel-airport-seems-to-have-failed/ |url-status=live }}</ref>",
+    "casualties2": "'''Per Russia:'''<br>200 killed<ref name=\"eliminated\"/><br>'''Per Ukraine:'''<br>Several Ukrainian National Guardsmen captured<ref name=\"wp\" /><br>[[Antonov An-225 Mriya]] destroyed<ref>{{cite web | url=https://www.wionews.com/videos/gravitas-destroyed-in-the-ukraine-war-the-worlds-largest-aeroplane-an-225-mriya-580247 | title=Gravitas &#124; Destroyed in the Ukraine war: The World's largest aeroplane &#124; AN-225 Mriya | date=7 April 2023 }}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     500,
+     700,
+     "disputed"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       300,
+       500
+      ]
+     },
+     {
+      "d": [
+       200,
+       200
+      ]
+     }
+    ],
+    "why": "Russia's none is for the second wave only; Ukraine's 300–500. The helicopters and the An-225 set aside."
+   }
+  },
+  {
+   "battle": "October 2024 Sudan airstrikes",
+   "article": "October 2024 Sudan airstrikes",
+   "revid": 1384638214,
+   "infobox": "Infobox civilian attack",
+   "fields": {
+    "deaths": ">523 civilians",
+    "injuries": "~340 civilians"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     523,
+     523,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     863,
+     863,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       523,
+       523
+      ],
+      "c": [
+       863,
+       863
+      ]
+     }
+    ],
+    "why": "\">523\" killed and ~340 injured."
+   }
+  },
+  {
+   "battle": "Battle of Haman",
+   "article": "Battle of Haman",
+   "revid": 1377178014,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "~150 killed<br>~400 wounded",
+    "casualties2": "~8,000 killed, captured and deserted{{#tag:ref|North Korean casualties can only be given for the whole battle of Masan, of which the battle of Haman is part. It is nearly impossible to estimate casualties for just the battle of Haman.|group=\"nb\"}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     150,
+     150,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     550,
+     550,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       150,
+       150
+      ],
+      "c": [
+       550,
+       550
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "North Korea: killed, captured and deserted together, and for the whole Masan battle: refused."
+   }
+  },
+  {
+   "battle": "Battle of the Twin Tunnels",
+   "article": "Battle of the Twin Tunnels",
+   "revid": 1377805924,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|French Fourth Republic}}：32 killed and 100 wounded<ref>{{Cite web |url=http://www.memoiredeshommes.sga.defense.gouv.fr/fr/article.php?laref=40&titre=batailles-de-twin-tunnels-et-de-chipyong-ni |title=Batailles de Twin-tunnels et de Chipyong-Ni |date=2013 |language=fr |access-date=2022-02-18 |archive-date=2021-01-17 |archive-url=https://web.archive.org/web/20210117102518/https://www.memoiredeshommes.sga.defense.gouv.fr/fr/article.php?laref=40&titre=batailles-de-twin-tunnels-et-de-chipyong-ni  }}</ref><br>\n{{Flagdeco|United States|1912}}：13 killed",
+    "casualties2": "1,300 killed (counted)<br>3,600 killed (estimated)"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     45,
+     45,
+     "fact",
+     "+"
+    ],
+    "c": [
+     145,
+     145,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       45,
+       45
+      ],
+      "c": [
+       145,
+       145
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "France 32 killed and 100 wounded, the US 13 killed (a group with killed only makes the casualties at least). China: 1,300 killed counted and 3,600 estimated, two figures of one measure with nothing to tell them apart: refused."
+   }
+  },
+  {
+   "battle": "Battle of Jarama",
+   "article": "Battle of Jarama",
+   "revid": 1370444095,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "10,000<ref name=\"lowcasualties\">Coverdale, ''The Battle of Guadalajara, 8–22 March 1937'', p. 54</ref>–20,000<ref name=\"highcasualties\">Thomas, p. 492</ref> dead, wounded, or captured",
+    "casualties2": "6,000<ref name=\"lowcasualties\"/>–20,000<ref name=\"highcasualties\"/> dead, wounded, or captured"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     16000,
+     40000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       10000,
+       20000
+      ]
+     },
+     {
+      "c": [
+       6000,
+       20000
+      ]
+     }
+    ],
+    "why": "Dead, wounded or captured together, with references inside the range."
+   }
+  },
+  {
+   "battle": "Battle of Wuyuan",
+   "article": "Battle of Wuyuan",
+   "revid": 1370602849,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Contemporary report:<br>1,211 killed<br>1,288 wounded<br>233 missing<br><br>1962 book:<ref name=\"抗日戰史\"/><br>1,943 killed or wounded<br>278 missing",
+    "casualties2": "Heavy<ref name=\"study\"/>\n*More than 100 of the 300 Japanese police officers killed or missing<ref>{{cite book |title=日本とモンゴル |trans-title=Japan and Mongolia |date=1985 |volume=20-24 |publisher=Japan and Mongolia Association|page=46}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1211,
+     1211,
+     "fact",
+     "+"
+    ],
+    "c": [
+     2221,
+     2732,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       1211,
+       1211
+      ],
+      "c": [
+       2221,
+       2732
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "A contemporary report (1,211 killed, 1,288 wounded, 233 missing) and a 1962 book (1,943 killed or wounded, 278 missing). Japan: \"more than 100 of the 300 ... police officers\" does not fit: refused."
+   }
+  },
+  {
+   "battle": "Battle of Phước Long",
+   "article": "Battle of Phước Long",
+   "revid": 1384631317,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''U.S. estimate:''' 2,000–2,300 killed or wounded<ref name=\"Herring\">George Herring, 1998, p.340</ref><br>'''Vietnamese figure:''' ~500 killed, 1,224 wounded<ref name=\"hc.qdnd.vn\">{{cite web | url=http://hc.qdnd.vn/lich-su-hau-can/bao-dam-hau-can-chien-dich-duong-14-phuoc-long-481965 | title=Bảo đảm hậu cần chiến dịch Đường 14-Phước Long }}</ref>",
+    "casualties2": "1,160 killed, 2,000+ wounded<br/>2,444 captured<ref name=\"thach200\">Pham Ngoc Thach & Ho Khang, 2008, p.200</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1660,
+     1660,
+     "estimate"
+    ],
+    "c": [
+     7328,
+     7904,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       500,
+       500
+      ],
+      "c": [
+       1724,
+       2300
+      ]
+     },
+     {
+      "d": [
+       1160,
+       1160
+      ],
+      "c": [
+       5604,
+       5604
+      ]
+     }
+    ],
+    "why": "A US estimate of 2,000–2,300 killed or wounded beside the Vietnamese ~500 killed and 1,224 wounded; South Vietnam 1,160 killed, 2,000+ wounded, 2,444 captured."
+   }
+  },
+  {
+   "battle": "Battle of Voronezh (1942)",
+   "article": "Battle of Voronezh (1942)",
+   "revid": 1370592705,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "94,500 casualties including 19,000 KIA and MIA<ref name=\"lib.ru\">{{cite web|url=http://militera.lib.ru/research/beshanov_vv/16.html|title=ВОЕННАЯ ЛИТЕРАТУРА --[ Исследования ]-- Бешанов В.В. Год 1942 - \"учебный\"|language=ru}}</ref>",
+    "casualties2": "'''568,347'''<br/>370,522 killed or missing<br/>197,825 wounded<ref>David M. Glantz & Jonathan M. House, ''When Titans Clashed. How the Red Army Stopped Hitler'', Revised and Expanded Edition, 2015 by University Press of Kansas. Table Q, p. 394.</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     662847,
+     662847,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       94500,
+       94500
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       568347,
+       568347
+      ]
+     }
+    ],
+    "why": "\"Including 19,000 KIA and MIA\" is killed and missing together: no deaths. The Soviet total 568,347 is its parts' sum."
+   }
+  },
+  {
+   "battle": "Battle of Medenine",
+   "article": "Battle of Medenine",
+   "revid": 1370269280,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{ubl|130|6 tanks|49 vehicles|32 guns, anti-tank guns}}",
+    "casualties2": "{{ubl|635|41–52 tanks}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     765,
+     765,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       130,
+       130
+      ]
+     },
+     {
+      "c": [
+       635,
+       635
+      ]
+     }
+    ],
+    "why": "Bare numbers; tanks, vehicles and guns set aside."
+   }
+  },
+  {
+   "battle": "Battle of Sept-Îles",
+   "article": "Battle of Sept-Îles",
+   "revid": 1378031816,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "508 killed, drowned or died of wounds<ref name=\"O'Hara\">O'Hara pp. 275–76</ref><ref name=RNCas194310/><ref name=Wensleydale>{{cite web |url=http://www.hmswensleydale.co.uk/charybdis.htm |title=23rd OF OCTOBER 1943: THE SINKING OF HMS CHARYBDIS AND HMS LIMBOURNE |publisher=www.hmswensleydale.co.uk |archive-url=https://web.archive.org/web/20160304055452/http://www.hmswensleydale.co.uk/charybdis.htm |access-date=31 July 2026 |archive-date=4 March 2016 }}</ref><br />1 light cruiser sunk<br />1 destroyer scuttled",
+    "casualties2": "none"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     508,
+     508,
+     "fact"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       508,
+       508
+      ],
+      "c": null
+     },
+     {
+      "zero": true
+     }
+    ],
+    "why": "\"Killed, drowned or died of wounds\" are all deaths; the Germans record none."
+   }
+  },
+  {
+   "battle": "Battle of Kolwezi",
+   "article": "Battle of Kolwezi",
+   "revid": 1381718788,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|Zaire}}~120 killed<br>{{flagicon|France}} 5 killed, 6 missing<br>{{flagicon|Belgium}} 1 killed",
+    "casualties2": "{{ubl|~250–400 killed|160 captured}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     376,
+     526,
+     "estimate"
+    ],
+    "c": [
+     542,
+     692,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       126,
+       126
+      ],
+      "c": [
+       132,
+       132
+      ]
+     },
+     {
+      "d": [
+       250,
+       400
+      ],
+      "c": [
+       410,
+       560
+      ]
+     }
+    ],
+    "why": "Zaire ~120 killed, France 5 killed and 6 missing, Belgium 1 killed (groups by their flags)."
+   }
+  },
+  {
+   "battle": "Battle of Khafji",
+   "article": "Battle of Khafji",
+   "revid": 1370445110,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{Plainlist|\n* '''''Coalition estimate''''':\n*  45 killed (11 from friendly fire)\n* 60 wounded\n* 2 captured<ref name=\"Westermeyer132\" /><ref name=\"Stanton10\" />\n* 9–12 armoured vehicles lost\n* 1 [[AC-130]] shot down\n}}",
+    "casualties2": "{{Plainlist|\n* '''''Iraqi claims''''':\n* 71 killed\n* 148 wounded\n* 702 missing\n* 186 armoured vehicles destroyed\n* '''''Saudi Arabian estimate''''':\n* 60–300 killed\n* 400 captured\n* 90 armoured vehicles destroyed<ref name=\"Westermeyer132\" /><ref name=\"Stanton10\" />\n}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     105,
+     345,
+     "disputed"
+    ],
+    "c": [
+     567,
+     1028,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       45,
+       45
+      ],
+      "c": [
+       107,
+       107
+      ]
+     },
+     {
+      "d": [
+       60,
+       300
+      ],
+      "c": [
+       460,
+       921
+      ]
+     }
+    ],
+    "why": "A coalition estimate; Iraqi claims against a Saudi estimate. \"(11 from friendly fire)\" is a breakdown, not added."
+   }
+  },
+  {
+   "battle": "Battle of Darzab (2017)",
+   "article": "Battle of Darzab (2017)",
+   "revid": 1370438355,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "15 killed, 22 wounded",
+    "casualties2": "93 killed, 58 wounded, and 63 captured (including drug dealers)",
+    "casualties3": "4 killed",
+    "casualties4": "1 civilian killed"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     113,
+     113,
+     "estimate"
+    ],
+    "c": [
+     251,
+     251,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       15,
+       15
+      ],
+      "c": [
+       37,
+       37
+      ]
+     },
+     {
+      "d": [
+       93,
+       93
+      ],
+      "c": [
+       214,
+       214
+      ]
+     },
+     {
+      "d": [
+       4,
+       4
+      ],
+      "c": null
+     },
+     {
+      "d": [
+       1,
+       1
+      ],
+      "c": null
+     }
+    ],
+    "why": "Four fields, each read."
+   }
+  },
+  {
+   "battle": "Operation Gauntlet",
+   "article": "Operation Gauntlet",
+   "revid": 1368285772,
+   "infobox": "Infobox military operation",
+   "fields": {
+    "casualties": "None"
+   },
+   "expect": {
+    "state": "zero",
+    "d": [
+     0,
+     0,
+     "fact"
+    ],
+    "c": [
+     0,
+     0,
+     "fact"
+    ],
+    "sides": [
+     {
+      "zero": true
+     }
+    ],
+    "why": "The operation's one casualties field: \"None\"."
+   }
+  },
+  {
+   "battle": "Second Guangxi campaign",
+   "article": "Second Guangxi campaign",
+   "revid": 1375524565,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Chinese Claim :<ref name=\"抗日戰史\"/>{{rp|p=12-13}}<br>129 officers and 2,834 soldiers killed<br>280 officers and 4,582 soldiers wounded<br>10 officers and 402 soldiers missing.",
+    "casualties2": "Chinese Claim :<ref name=\"抗日戰史\"/>{{rp|p=12-13}}<br>5,651 killed<br>7,891 wounded<br>70 captured"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     8614,
+     8614,
+     "disputed"
+    ],
+    "c": [
+     21849,
+     21849,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       2963,
+       2963
+      ],
+      "c": [
+       8237,
+       8237
+      ]
+     },
+     {
+      "d": [
+       5651,
+       5651
+      ],
+      "c": [
+       13612,
+       13612
+      ]
+     }
+    ],
+    "why": "Officers and soldiers added; both sides a Chinese claim."
+   }
+  },
+  {
+   "battle": "Battle of Aachen",
+   "article": "Battle of Aachen",
+   "revid": 1381329453,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "7,000+ casualties<ref name=\"Ambrose 1997, p. 151\">Ambrose (1997), p. 151</ref><br>including 2,000 killed<ref>{{cite web |last1=Lindale |first1=Paul |title=The WWII 300th Combat Engineers |url=http://www.300thcombatengineersinwwii.com/germanyH.html |website=300thcombatengineersinwwii.com |access-date=21 October 2018 |language=en |archive-date=29 December 2017 |archive-url=https://web.archive.org/web/20171229185955/http://www.300thcombatengineersinwwii.com/germanyH.html |url-status=usurped }}</ref>",
+    "casualties2": "5,000 casualties (estimate),<br>5,600 captured<ref name=\"Ambrose 1997, p. 151\"/>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2000,
+     2000,
+     "fact",
+     "+"
+    ],
+    "c": [
+     7000,
+     7000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       2000,
+       2000
+      ],
+      "c": [
+       7000,
+       7000
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "The US 7,000+ casualties including 2,000 killed. Germany: 5,000 casualties and 5,600 captured, the part larger than the whole: refused."
+   }
+  },
+  {
+   "battle": "Battle of Mindoro",
+   "article": "Battle of Mindoro",
+   "revid": 1370449855,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "151 killed<br/>{{small|(18 Army, 133 Navy)}}<br/>271 wounded<br/>{{small|(81 Army, 190 Navy)}}",
+    "casualties2": "~200 dead<br>15 captured<br>375 wounded"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     351,
+     351,
+     "estimate"
+    ],
+    "c": [
+     1012,
+     1012,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       151,
+       151
+      ],
+      "c": [
+       422,
+       422
+      ]
+     },
+     {
+      "d": [
+       200,
+       200
+      ],
+      "c": [
+       590,
+       590
+      ]
+     }
+    ],
+    "why": "The bracketed Army and Navy breakdowns are not added."
+   }
+  },
+  {
+   "battle": "Battle of Jinan",
+   "article": "Battle of Jinan",
+   "revid": 1381593231,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "22,423 dead{{citation needed|date=May 2019}}{{third-party inline|date=May 2019}} , 61,873 captured{{citation needed|date=May 2019}}{{third-party inline|date=May 2019}} , 20,000 defected{{citation needed|date=May 2019}}{{third-party inline|date=May 2019}}",
+    "casualties2": "26,000 (dead and wounded){{citation needed|date=May 2019}}{{third-party inline|date=May 2019}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     22423,
+     22423,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     110296,
+     110296,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       22423,
+       22423
+      ],
+      "c": [
+       84296,
+       84296
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       26000,
+       26000
+      ]
+     }
+    ],
+    "why": "Every figure marked \"citation needed\"; the 20,000 who defected are no casualties; \"(dead and wounded)\" is the second side's kind."
+   }
+  },
+  {
+   "battle": "Operation Eagle Pull",
+   "article": "Operation Eagle Pull",
+   "revid": 1374303897,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2 helicopters damaged",
+    "casualties2": "None known"
+   },
+   "expect": {
+    "state": "words",
+    "d": null,
+    "c": null,
+    "sides": [
+     {},
+     {
+      "words": true
+     }
+    ],
+    "why": "Helicopters only; \"None known\" is no zero."
+   }
+  },
+  {
+   "battle": "Operation Curtain",
+   "article": "Operation Curtain",
+   "revid": 1380943204,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "Special forces only:<ref>Алфавитный список погибших военнослужащих частей специального назначения 40-й Армии Архивировано</ref>\n*570 killed\n*11 missing",
+    "casualties2": "17,000+ killed"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     17570,
+     17570,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     581,
+     581,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       570,
+       570
+      ],
+      "c": [
+       581,
+       581
+      ]
+     },
+     {
+      "d": [
+       17000,
+       17000
+      ],
+      "c": null
+     }
+    ],
+    "why": "\"Special forces only\": part of a side, kept as at least."
+   }
+  },
+  {
+   "battle": "Iraqi invasion of Kuwait",
+   "article": "Iraqi invasion of Kuwait",
+   "revid": 1383243347,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{Tree list}}\n* 295 killed\n* 361 wounded (unconfirmed Kuwaiti claims)\n** 120 tanks and AFVs destroyed\n** 4 ships sunk (unconfirmed Kuwaiti claims)\n{{Tree list/end}}",
+    "casualties2": "{{Tree list}}\n* 420 killed\n* 12,000 captured<ref>{{cite web |title=Kuwaiti casualties |url=http://kkamcm.org/public/Content.aspx?PageID=3 |website=kkackm |access-date=27 June 2018 |archive-date=18 March 2022 |archive-url=https://web.archive.org/web/20220318154002/https://www.kkamcm.org/public/Content.aspx?PageID=3 |url-status=dead }}</ref>\n** c. 250 tanks destroyed/captured\n** 850+ AFVs destroyed/captured<ref>''Jane's Armour and Artillery 2003–2004''</ref><ref>Gordon L. Rottman (1993), ''Armies of the Gulf War'', pp. 48–49</ref><ref>Aleksei Brusilov, Leonid Karyakin (August 2003), {{lang|ru|Танки в операции «Шок и трепет»}} [''Tanks in Operation Shock and Awe''], Tankomaster {{in lang|ru}}</ref>\n** 57 aircraft destroyed<ref>{{cite BAILII |juris=auto |courtname=auto |court=UKHL |year=2002 |num=19 |litigants=Kuwait Airways Corporation v Iraqi Airways Company and others |parallelcite=[2002] 3 All ER 209, [2002] 2 WLR 1353, [2003] 1 CLC 183, [2002] 2 AC 883, [2002] 1 All ER (Comm) 843}}</ref>\n** 8+ [[Dassault Mirage F1|Mirage F1s]] captured\n** 17 ships sunk\n** 6 ships captured<ref>{{cite web |title=Kuwaiti Casualties |url=http://kkamcm.org/public/Content.aspx?PageID=3 |website=kkamkm |access-date=27 June 2018 |archive-date=18 March 2022 |archive-url=https://web.archive.org/web/20220318154002/https://www.kkamcm.org/public/Content.aspx?PageID=3 |url-status=dead }}</ref><ref>{{cite web|url=http://www.gulflink.osd.mil/declassdocs/dia/19981113/0000001.html|title=Iraq: Naval Threat to US Forces|access-date=19 December 2014|archive-date=25 December 2018|archive-url=https://web.archive.org/web/20181225161815/https://gulflink.health.mil/declassdocs/dia/19981113/0000001.html}}</ref><ref>المبحث الرابع, إعادة بناء القوات المسلحة لكل من دول مجلس التعاون الخليجي، بعد الحرب, Al Moquatel</ref>\n** 24 [[MIM-23 Hawk|I-Hawk SAMs]] destroyed/captured\n** 36 [[M109 howitzer|M109 155mm]] destroyed/captured\n** 20–80 [[Mk F3 155 mm|AMX-F3 155mm SPHs]] destroyed/captured<ref>{{Cite book |url=https://www.csis.org/programs/emeritus-chair-strategy/us-strategic-and-defense-efforts/lessons-war/gulf-war |first1=Anthony H. |last1=Cordesman |first2=Abraham R. |last2=Wagner |title=The Lessons of Modern War |volume=IV: The Gulf War |chapter=Chapter Three: The Forces Engaged – Opposing Military Cultures and The Human Element |publisher=Routledge |chapter-url=https://csis-website-prod.s3.amazonaws.com/s3fs-public/160628_GW-3_Forces_Engaged_10-1-94.pdf |date=October 15, 1994 |access-date=1 October 2018 |url-status=live |archive-url=https://web.archive.org/web/20170813214646/https://csis-prod.s3.amazonaws.com/s3fs-public/legacy_files/files/media/csis/pubs/941015lessonsgulfiv-chap03.pdf |archive-date=13 August 2017  }}</ref><ref>\"Kuwait had loaned a battery of French 155mm Mk F3 SP guns to Iraq during the Iran–Iraq War and a further 80 fell into Iraqi hands after the invasion.\" Gordon L. Rottman, Ronald Volstad (1993). ''Armies of the Gulf War''. Osprey. p. 49</ref>\n{{Tree list/end}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     715,
+     715,
+     "estimate"
+    ],
+    "c": [
+     13076,
+     13076,
+     "disputed"
+    ],
+    "sides": [
+     {
+      "d": [
+       295,
+       295
+      ],
+      "c": [
+       656,
+       656
+      ]
+     },
+     {
+      "d": [
+       420,
+       420
+      ],
+      "c": [
+       12420,
+       12420
+      ]
+     }
+    ],
+    "why": "Iraq 295 killed and 361 wounded, the wounded an unconfirmed Kuwaiti claim; Kuwait 420 killed and 12,000 captured. Tanks, ships and aircraft set aside."
+   }
+  },
+  {
+   "battle": "Operation München",
+   "article": "Operation München",
+   "revid": 1379436778,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Total: 17,893'''<br/>8,519 killed/missing<br/>9,374 wounded<br/>255 aircraft<ref>Axworthy (1995), p. 286</ref><br>2 river monitors damaged<br>7 armored motor gunboats sunk<ref name=\"Preston\">{{cite book|first=Antony |last=Preston|title=Warship 2001&ndash;2002|publisher= [[Conway Publishing|Conway Maritime Press]]|location=London, UK| year=2001|page=72|isbn=9780851779010|oclc=930862705}}</ref>",
+    "casualties2": "{{flagicon|Kingdom of Romania}} '''Total: 21,738'''<br/>4,112 killed, 12,120 wounded, 5,506 missing<ref>Axworthy (1995), p. 47.</ref><br/>58 aircraft<ref>Axworthy (1995), p. 286</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     4112,
+     4112,
+     "fact",
+     "+"
+    ],
+    "c": [
+     39631,
+     39631,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       17893,
+       17893
+      ]
+     },
+     {
+      "d": [
+       4112,
+       4112
+      ],
+      "c": [
+       21738,
+       21738
+      ]
+     }
+    ],
+    "why": "Each side's stated total; the Soviet killed are counted with the missing."
+   }
+  },
+  {
+   "battle": "Operation Little Saturn",
+   "article": "Operation Little Saturn",
+   "revid": 1380855136,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "Unknown",
+    "casualties2": "Unknown"
+   },
+   "expect": {
+    "state": "words",
+    "d": null,
+    "c": null,
+    "sides": [
+     {
+      "words": true
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "Unknown on both sides."
+   }
+  },
+  {
+   "battle": "Charge at Krojanty",
+   "article": "Charge at Krojanty",
+   "revid": 1382949141,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{ubl|11 killed|9 wounded}}",
+    "casualties2": "{{ubl|19–25 killed|40–50 wounded}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     30,
+     36,
+     "estimate"
+    ],
+    "c": [
+     79,
+     95,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       11,
+       11
+      ],
+      "c": [
+       20,
+       20
+      ]
+     },
+     {
+      "d": [
+       19,
+       25
+      ],
+      "c": [
+       59,
+       75
+      ]
+     }
+    ],
+    "why": "Plain counts and ranges."
+   }
+  },
+  {
+   "battle": "Battle of Dutch Harbor",
+   "article": "Battle of Dutch Harbor",
+   "revid": 1375586305,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "43 killed <br> 50 wounded <br> 14 aircraft destroyed <br> 1 barracks ship destroyed",
+    "casualties2": "10 killed <br> 5 captured <br> 8 aircraft destroyed <br> [[Akutan Zero|1 aircraft captured]]<ref name=\"books.google.com.pe\">{{cite book|author=Fern Chandonnet|title=Alaska at War, 1941–1945: The Forgotten War Remembered|url=https://books.google.com/books?id=p01bFVagOJYC&pg=PA8|year=2007|publisher=University of Alaska Press|isbn=978-1-60223-135-1|page=394}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     53,
+     53,
+     "estimate"
+    ],
+    "c": [
+     108,
+     108,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       43,
+       43
+      ],
+      "c": [
+       93,
+       93
+      ]
+     },
+     {
+      "d": [
+       10,
+       10
+      ],
+      "c": [
+       15,
+       15
+      ]
+     }
+    ],
+    "why": "\"1 aircraft captured\" is an aircraft."
+   }
+  },
+  {
+   "battle": "Operation Aquatint",
+   "article": "Operation Aquatint",
+   "revid": 1378546675,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "3 killed in action<br />1 killed in captivity<br />2 fate unknown<br />8 captured and 5 survived",
+    "casualties2": "Unknown"
+   },
+   "expect": {
+    "state": "unread",
+    "d": null,
+    "c": null,
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "\"Killed in captivity\" beside \"killed in action\", \"fate unknown\", \"survived\": refused."
+   }
+  },
+  {
+   "battle": "Segovia Offensive",
+   "article": "Segovia Offensive",
+   "revid": 1370737627,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "3,000 casualties",
+    "casualties2": "?"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     3000,
+     3000,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "c": [
+       3000,
+       3000
+      ]
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "One side's casualties."
+   }
+  },
+  {
+   "battle": "Second Phase Offensive",
+   "article": "Second Phase Offensive",
+   "revid": 1378940219,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flag|US}}:<br>24,000 casualties (including 4,538 killed)<ref>Ecker, Richard E. (2005). ''Korean Battle Chronology: Unit-by-unit United States Casualty Figures and Medal of Honor Citations''. McFarland & Company. p. 62 {{ISBN|978-0786419807}}.</ref><br>{{flag|First Republic of Korea|1948|name=ROK}}:<br>12,000 (Chinese estimate)<ref name=Li/>{{rp|52–53}}<ref name=\"Xue 1990 59–60\">{{cite book|last=Xue|first=Yan (徐焰)|trans-title=First Confrontation: Reviews and Reflections on the History of War to Resist America and Aid Korea |title=第一次较量：抗美援朝战争的历史回顾与反思|language=zh-cn|publisher=Chinese Radio and Television Publishing House|year=1990|pages=59–60}}</ref>\nTotal: 36,000 casualties",
+    "casualties2": "30,000 battle casualties (including 9,549 killed)<br>50,000 non-battle casualties.{{efn|Among the [[People's Volunteer Army|CPVF]] casualties in the Second Phase Campaign were 50,000 non-combat deaths.<ref>{{cite book |last1=Li |first1=Xiaobing |title=China's War in Korea: Strategic Culture and Geopolitics |date=2019 |publisher=Palgrave Macmillan |location=Singapore |isbn=978-981-32-9674-9 |page=139}}</ref>}}\nTotal: 80,000 casualties"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     14087,
+     14087,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     66000,
+     66000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       4538,
+       4538
+      ],
+      "c": [
+       36000,
+       36000
+      ]
+     },
+     {
+      "d": [
+       9549,
+       9549
+      ],
+      "c": [
+       30000,
+       30000
+      ]
+     }
+    ],
+    "why": "The UN side's \"Total: 36,000\" stands for its groups (the US 24,000 including 4,538 killed; South Korea 12,000, a Chinese estimate of that group only, not another reading of the side); South Korea's killed not given, so its deaths are at least. China: 30,000 battle casualties including 9,549 killed; the 50,000 non-battle casualties are set aside, and its total of 80,000 adds them."
+   }
+  },
+  {
+   "battle": "Battle of Sangju",
+   "article": "Battle of Sangju (1950)",
+   "revid": 1370588495,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|United States|1912}} 27 killed, 293 wounded, 3 missing<br>{{flagicon|First Republic of Korea|1949|size=23px}} ~2,500 killed, wounded and missing",
+    "casualties2": "~2,500 casualties<br>17 [[T-34]] tanks"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     27,
+     27,
+     "fact",
+     "+"
+    ],
+    "c": [
+     5323,
+     5323,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       27,
+       27
+      ],
+      "c": [
+       2823,
+       2823
+      ]
+     },
+     {
+      "c": [
+       2500,
+       2500
+      ]
+     }
+    ],
+    "why": "The US 27 killed, 293 wounded, 3 missing; South Korea ~2,500 killed, wounded and missing together, so the side's deaths are at least 27."
+   }
+  },
+  {
+   "battle": "Operation Crazy Horse",
+   "article": "Operation Crazy Horse",
+   "revid": 1370631672,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|United States}} 79 killed<br>1 missing<ref name=war /><br>{{flagicon|South Vietnam}} 8 killed<ref name=Carland/>{{rp|227–8}} <br>{{flagicon|South Korea}} 14 killed<ref name=Carland/>{{rp|227–8}}",
+    "casualties2": "'''Per US''': <br> 478 killed<ref name=war>Warfare and Armed Conflicts: A Statistical Encyclopedia of Casualty and Other Figures, 1492-2015, 4th ed. Micheal Clodfelter. Micheal Clodfelter. {{ISBN|978-0-7864-7470-7}}. P. 676</ref><br>'''Per PAVN''' <br>152 killed<ref>{{Cite web |url=http://www.nguoiduado.vn/don-vi/su-doan-3-10051/ |title=List of 3rd Division's KIA during the war |access-date=2022-10-08 |archive-date=2022-10-07 |archive-url=https://web.archive.org/web/20221007171959/http://www.nguoiduado.vn/don-vi/su-doan-3-10051/ |url-status=dead }}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     253,
+     579,
+     "disputed"
+    ],
+    "c": [
+     102,
+     102,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       101,
+       101
+      ],
+      "c": [
+       102,
+       102
+      ]
+     },
+     {
+      "d": [
+       152,
+       478
+      ]
+     }
+    ],
+    "why": "\"Per PAVN\" without a colon is whose figure follows, not a group: per the US 478 killed, per the PAVN 152, alternatives."
+   }
+  },
+  {
+   "battle": "Operation Lam Son 719",
+   "article": "Operation Lam Son 719",
+   "revid": 1379279071,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|South Vietnam}} '''Per South Vietnam'''<br />1,146<ref name=Hinh>{{cite book|last=Nguyen|first=Duy Hinh|title=Indochina Monographs Operation Lam Sơn 719|publisher=United States Army Center of Military History|year=1979|url=https://apps.dtic.mil/sti/pdfs/ADA324683.pdf|archive-url=https://web.archive.org/web/20220125063826/https://apps.dtic.mil/sti/pdfs/ADA324683.pdf|url-status=live|archive-date=January 25, 2022|isbn=978-1984054463}}{{PD-notice}}</ref>{{rp|131}}–8,843<ref name=Nolan>{{cite book|last=Nolan|first=Keith|title=Into Laos|publisher=Presidio Press|year=1986|isbn=9780440200444|page=358}}</ref> killed<br />4,236<ref name=Hinh/>{{rp|131}}–12,420<ref name=Nolan/> wounded<br />1,767 missing/captured<ref name=Hinh/>{{rp|131}}<br />\n{{flagicon|USA}} '''Per US'''<br />215 killed<br />1,149 wounded<br />38 missing<ref>{{cite web|url=http://www.history.army.mil/books/AMH-V2/AMH%20V2/chapter11.htm|title=Chapter 11: American Military History, Volume II|work=army.mil|access-date=15 October 2016|archive-date=19 October 2016|archive-url=https://web.archive.org/web/20161019151236/http://www.history.army.mil/books/AMH-V2/AMH%20V2/chapter11.htm|url-status=dead}}</ref><br />''Materiel''\n (US/ARVN): 32+ artillery pieces destroyed, 82 captured<ref>Steel and Blood: South Vietnamese Armor and the War for Southeast Asia (2008). Mai Việt Hà. Naval Institute Press. P. 93</ref><ref name=Nalty>{{cite book|last=Nalty|first=Bernard|title=The War Against Trucks: Aerial Interdiction in Southern Laos 1968–1972|publisher=Air Force History and Museums Program|year=2005|isbn=9781477550076|url=https://media.defense.gov/2010/Oct/06/2001329752/-1/-1/0/AFD-101006-027.pdf|access-date=2018-10-30|archive-date=2018-06-12|archive-url=https://web.archive.org/web/20180612113237/https://media.defense.gov/2010/Oct/06/2001329752/-1/-1/0/AFD-101006-027.pdf|url-status=live}}{{PD-notice}}</ref>{{rp|271}}<br />7 aircraft lost<ref>Walk Tall: With the 2nd Battalion 1st ARVN Regiment. John (Jack) Peel, Xlibris Corporation, 2014. P. 166</ref><br />108 helicopters destroyed and 618 damaged (20% badly damaged beyond repair)<ref name=\"auto\">{{Cite web|url=https://www.historynet.com/south-vietnam-invades-laos-1971.htm|title=Lam Son 719 South Vietnam Invades Laos, 1971|first=James H. Willbanks|last=May 2014|date=April 13, 2017|website=HistoryNet|access-date=March 24, 2021|archive-date=May 11, 2021|archive-url=https://web.archive.org/web/20210511123050/https://www.historynet.com/south-vietnam-invades-laos-1971.htm|url-status=live}}</ref><ref name=autogenerated1>{{Cite web|url=https://www.comanchero.org/LamSon719.html|title=Lam Son 719|access-date=2021-03-24|archive-date=2021-07-27|archive-url=https://web.archive.org/web/20210727041225/https://www.comanchero.org/LamSon719.html|url-status=live}}</ref><br />71 tanks, 163 armoured combat vehicles, 37 half-trucks, 278 trucks destroyed<ref>{{Cite book|url=https://books.google.com/books?id=VrBvCwAAQBAJ&q=LAM+SON+719.+By+Major+General+Nguyen+Duy+Hinh|title=Lam Son 719 [Illustrated Edition]|first=Major-General Nguyen Duy|last=Hinh|date=November 6, 2015|publisher=Pickle Partners Publishing|isbn=9781786251367|via=Google Books}}</ref>",
+    "casualties2": "{{flagicon|North Vietnam}} '''Per North Vietnam''' 2,163 killed and 6,176 wounded<ref>Viện Sử học, Lịch sử Việt Nam 1965–1975, NXB Khoa học xã hội, Hà Nội – 2002.</ref><br>23 tanks destroyed<ref>Lịch sử kỹ thuật bộ đội tăng thiết giáp. Phụ lục VI - Tình hình xe huỷ, hỏng trong một số giai đoạn của các chiến dịch (1968-1975). Trang 236</ref><br />'''South Vietnam claimed'''<br /> 19,360 killed<ref name=Hinh/>{{rp|131}}<br />670 anti-aircraft guns destroyed<ref name=Hastings>{{cite book|last=Hastings|first=Max|title=Vietnam: An Epic Tragedy, 1945–1975|publisher=Harper|year=2018|isbn=9780062405661|page=581}}</ref><br />422<ref name=Hinh/>{{rp|132}}–600<ref name=Hastings/> trucks destroyed <br />88<ref name=Hastings/>–106<ref name=Hinh/>{{rp|132}} tanks destroyed"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     1361,
+     9058,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     8551,
+     24432,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       1361,
+       9058
+      ],
+      "c": [
+       8551,
+       24432
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Each flag with \"Per …\" gives that group's own source (South Vietnam per South Vietnam, the US per the US): groups, not rival readings. Materiel set aside. The North Vietnamese line runs a label and figures together: refused."
+   }
+  },
+  {
+   "battle": "Battle of Guadalajara",
+   "article": "Battle of Guadalajara",
+   "revid": 1374502590,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Republicans:'''<ref name=\"Thomas, Hugh 2001. p.585\">Thomas, Hugh.The Spanish Civil War. Penguin Books. London. 2001. p.585</ref><br>2,000 dead<br>4,000 wounded<br>258 captured<ref name =\"John F. Coverdale, The Battle of Guadalajara, 8–22 March 1937\">Coverdale, J. F. (1974). The Battle of Guadalajara, 8–22 March 1937. Journal of Contemporary History, 9(1), 53–75. http://www.jstor.org/stable/260268</ref><br>'''Total:'''<br>6,258",
+    "casualties2": "'''Italians:'''<ref name=\"Thomas, Hugh 2001. p.585\"/><ref name=Knighton2016/><br>600<ref>Rochat, Italian wars 1935-1943, Einaudi, p.111</ref> or 3,000 dead<br>2,000–4,000 wounded<br>800 missing<br>300-800 captured<br>'''Nationalists:'''<ref name=\"Thomas, Hugh 2001. p.585\"/><br>4,000 dead<br>4,000 wounded<br>800 captured<br>{{clist|title={{nowrap|Materiel lost:<ref name=\"John F. Coverdale, 1975\"/>}}\n|65 artillery pieces\n|500 machine guns\n|13 mortars\n|67 trucks\n|10 tanks captured\n|{{nowrap|Plenty ammunition}}}}\n'''Total:'''<br>17,400"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2000,
+     2000,
+     "fact",
+     "+"
+    ],
+    "c": [
+     6258,
+     6258,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       2000,
+       2000
+      ],
+      "c": [
+       6258,
+       6258
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "\"Total:\" on a line of its own, its figure on the next."
+   }
+  },
+  {
+   "battle": "Operation Avalanche",
+   "article": "Operation Avalanche",
+   "revid": 1370630777,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flag|United Kingdom}}<ref name=\"Konstam p. 157\" /><br />982 killed<br />4,060 wounded<br />2,230 missing<br />'''Royal Navy''':<br />83 killed<br />42 wounded\n\n{{flag|United States}}<ref name=\"Konstam p. 157\" /><br />'''5th Army''':<br />788 killed<br />2,841 wounded<br />1,318 missing<br />'''US Navy''':<br />296 killed<br />422 wounded<br />551 missing\n\n'''Total:'''<br />2,149 killed<br />7,365 wounded<br />4,099 missing",
+    "casualties2": "{{flagicon|Nazi Germany}} [[Nazi Germany|Germany]]<ref name=\"Konstam p. 157\" /><br />840 killed<br />2,002 wounded<br />603 missing"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2989,
+     2989,
+     "estimate"
+    ],
+    "c": [
+     17058,
+     17058,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       2149,
+       2149
+      ],
+      "c": [
+       13613,
+       13613
+      ]
+     },
+     {
+      "d": [
+       840,
+       840
+      ],
+      "c": [
+       3445,
+       3445
+      ]
+     }
+    ],
+    "why": "The Allied side's groups (British Army, Royal Navy, US 5th Army, US Navy) and then \"Total:\" with three lines under it: the total stands for the groups, which add up to it."
+   }
+  },
+  {
+   "battle": "Demyansk Pocket",
+   "article": "Demyansk Pocket",
+   "revid": 1370615479,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "9,000<ref>Nigel Askey,  Volume IIA, 2013, p. 539</ref> KIA and MIA<br>46,000<ref>Nigel Askey,  Volume IIA, 2013, p. 539</ref> WIA<br>265 aircraft destroyed<br><br>'''Total''':<br>55,000",
+    "casualties2": "88,908 killed & missing<br>156,603 wounded<br><br>'''Total''':<br>245,500<ref name=\"http://lib.ru/MEMUARY/1939-1945/KRIWOSHEEW/poteri.txt\">{{cite web|url=http://lib.ru/MEMUARY/1939-1945/KRIWOSHEEW/poteri.txt |title=Г.Ф.Кривошеев (под редакцией). Россия и СССР в войнах XX века: Потери вооруженных сил|website=Lib.ru |access-date=2017-06-23}}</ref>",
+    "casualties3": "'''Soviet civilians''': Unknown, between 20.000 (official number) and more than 100.000<ref>{{cite web|last1=Dornblüth|first1=Gesine |last2=Franke |first2=Thomas |url=https://www.deutschlandfunk.de/wir-wurden-gebrandmarkt.922.de.html?dram:article_id=128440 |title=Wir wurden gebrandmarkt (en: We were stigmatized) |website=[[Deutschlandfunk|deutschlandfunk.de]] |date=2005-05-07 |access-date=2025-09-07 |language=de}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     300500,
+     300500,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       55000,
+       55000
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       245500,
+       245500
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Killed counted with the missing on both sides: no deaths. The Soviet parts add up to 245,511 against the stated 245,500, a rounding: the total stands. The civilians' line is prose."
+   }
+  },
+  {
+   "battle": "Battle for Cebu City",
+   "article": "Battle for Cebu City",
+   "revid": 1380993218,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''American troops'''{{efn|[[Americal Division]] only{{sfn|Lofgren|1996|p=21}}}}<br>410 killed <br>1,700 wounded <br>8,000 sick{{sfn|Lofgren|1996|p=21}}<br>'''Filipino troops'''<br>3,600 killed<br>6,200 wounded",
+    "casualties2": "'''Japanese troops'''<br>9,000 killed{{efn|Of which around 5,550 were killed during the fighting.{{sfn|Lofgren|1996|p=21}}}}<br> Est. 2,000 committed suicide <br> Est. 2,000 captured{{sfn|Lofgren|1996|p=21}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     4010,
+     4010,
+     "fact",
+     "+"
+    ],
+    "c": [
+     11910,
+     11910,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       4010,
+       4010
+      ],
+      "c": [
+       11910,
+       11910
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "\"American troops\", \"Filipino troops\": groups; the 8,000 sick set aside. \"Committed suicide\" is no kind the reader counts: refused."
+   }
+  },
+  {
+   "battle": "Japan Campaign",
+   "article": "Japan campaign",
+   "revid": 1375734109,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "approximately 19,000 to 20,000",
+    "casualties2": "193,300 soldiers dead (all causes)<ref>{{cite web |title=Figures were compiled by the Relief Bureau of the Ministry of Health and Welfare in March 1964. |url=http://ajrp.awm.gov.au/ajrp/AJRP2.nsf/530e35f7e2ae7707ca2571e3001a112d/e7daa03b9084ad56ca257209000a85f7?OpenDocument |website=Australia-Japan Research Project |access-date=2016-03-10 |archive-url=https://web.archive.org/web/20160311073745/http://ajrp.awm.gov.au/ajrp/AJRP2.nsf/530e35f7e2ae7707ca2571e3001a112d/e7daa03b9084ad56ca257209000a85f7?OpenDocument |archive-date=11 March 2016 |url-status=live }}. Combined death tolls of \"Japan proper\" (103,900) and Okinawa (89,400).</ref><br>'''Surrendered and captured following blockade and bombings:'''<br>4,335,000 soldiers<ref>[http://www.geocities.co.jp/WallStreet/2687/siryo/siryo16.html Ministry of Health and Welfare, 1964.] {{Webarchive|url=https://web.archive.org/web/20160105112919/http://www.geocities.co.jp/WallStreet/2687/siryo/siryo16.html |date=2016-01-05 }}</ref><br>9,435 artillery pieces<br>5,286 tanks<br>731 other AFVs<br>12,682 aircraft (mostly kamikazes)<REf>{{Citation |url=http://cgsc.cdmhost.com/cdm/ref/collection/p4013coll8/id/351|title=Final report: progress of demobilization of the Japanese Armed Forces, 30 December 1946 Part 2 |publisher=Supreme Command of the Allied Powers |access-date=26 December 2015|page=49|archive-url=https://web.archive.org/web/20160304052040/http://cgsc.cdmhost.com/cdm/ref/collection/p4013coll8/id/351 |archive-date=4 March 2016 }}. Artillery is defined as being at least over 80 mm in caliber.</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     19000,
+     20000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "c": [
+       19000,
+       20000
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Dead \"(all causes)\" is no battle figure, and the four million who surrendered at the end are no casualties of the campaign: refused."
+   }
+  },
+  {
+   "battle": "Operation Collar",
+   "article": "Operation Collar (commando raid)",
+   "revid": 1385123066,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "One wounded",
+    "casualties2": "Two dead"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2,
+     2,
+     "fact",
+     "+"
+    ],
+    "c": [
+     1,
+     1,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       1,
+       1
+      ]
+     },
+     {
+      "d": [
+       2,
+       2
+      ],
+      "c": null
+     }
+    ],
+    "why": "Counts in words: \"One wounded\", \"Two dead\"."
+   }
+  },
+  {
+   "battle": "Battle of Hanko",
+   "article": "Battle of Hanko (1941)",
+   "revid": 1376049825,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "297 killed<br>604 wounded<br>78 missing<br>'''Total''':<br>961{{sfn|Söderlund|2011}}",
+    "casualties2": "797 killed <br>1,476 wounded<br>Estimated 3,000–5,000 killed during the evacuation from Hanko '''Total''':<br>5,273–7,273{{sfn|Söderlund|2011}}"
+   },
+   "expect": {
+    "state": "unread",
+    "d": null,
+    "c": null,
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "The Finnish parts add up to 979 against a stated total of 961: the source contradicts itself, so it is not read."
+   }
+  },
+  {
+   "battle": "Battle of Boz Qandahari",
+   "article": "Battle of Boz Qandahari",
+   "revid": 1370435110,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{flagicon|Islamic Republic of Afghanistan}} 3 killed, 11 wounded<ref name=\":0\">{{Cite web|url=https://www.npr.org/sections/thetwo-way/2017/01/12/509477080/u-s-forces-acted-in-self-defense-in-battle-that-killed-33-civilians-in-afghanist|title=U.S. Forces 'Acted in Self-Defense' in Battle That Killed 33 Civilians in Afghanistan|website=[[NPR]] }}</ref><br>{{flagicon|United States}} 2 killed, 4 wounded<ref name=\":0\"/>",
+    "casualties2": "27 insurgents killed including 3 commanders (per U.S.),<ref name=\":1\"/> 10 injured<ref name=\"cnn1\" />",
+    "casualties3": "33 civilians killed, 27 injured<ref>{{Cite web|url=https://www.latimes.com/world/la-fg-afghanistan-civilians-20170112-story.html|title = U.S. Military inquiry finds civilians were killed in battle in northern Afghanistan| website=[[Los Angeles Times]] |date = 12 January 2017}}</ref><ref name=\"nyt\" /><ref name=\"RW\" /><br><br>'''Total dead''': 65+"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     65,
+     65,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     80,
+     80,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       5,
+       5
+      ],
+      "c": [
+       20,
+       20
+      ]
+     },
+     {
+      "refused": true
+     },
+     {}
+    ],
+    "why": "The third field (civilians) ends with \"Total dead: 65+\", more than its own 33: the whole battle’s total, not another side to add. No total of casualties, so they are the sides’ sum, at least (the insurgents’ line is not read)."
+   }
+  },
+  {
+   "battle": "2004 Nazran raid",
+   "article": "2004 Nazran raid",
+   "revid": 1385934730,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "88–120 killed<ref name=\"after\">[https://www.rferl.org/a/Five_Years_After_Nazran_Ingushetia_Still_Plagued_By_Militant_Violence/1758428.html Five Years After Nazran, Ingushetia Still Plagued By Militant Violence], [[RFE/RL]], 19.06.2009</ref><br/>6 wounded<ref name=\"rwb\">[http://www.reliefweb.int/rw/rwb.nsf/AllDocsByUNID/016072497ea6fcb8c1256ec1004a25fb Death toll from Ingushetia rebel attacks revised down to 88], [[Agence France-Presse]], 28 Jun 2004</ref>",
+    "casualties2": "At least 6 killed",
+    "casualties3": "~25<ref name=\"after\" />–27<ref name=\"rwb\"/> civilians killed\n----\n'''Total casualties''':<ref name=\"rwb\" /><br/>92–98 killed<br/>106 wounded"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     92,
+     98,
+     "estimate"
+    ],
+    "c": [
+     198,
+     204,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       88,
+       120
+      ],
+      "c": [
+       94,
+       126
+      ]
+     },
+     {
+      "d": [
+       6,
+       6
+      ]
+     },
+     {}
+    ],
+    "why": "\"Total casualties: 92–98 killed, 106 wounded\" under the civilians, beyond their own ~25–27: the battle’s total."
+   }
+  },
+  {
+   "battle": "Battle of South Guangxi",
+   "article": "Battle of South Guangxi",
+   "revid": 1380787036,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''From 15 November 1939 until 26 February 1940 :'''<ref name=\"桂南會戰(一)\">{{cite book |author=History and Political Compilation Department |title=抗日戰史: 桂南會戰(一) |trans-title=History of the Anti-Japanese War: Battle of South Guangxi (part 1) |date=1966 |publisher=[[Ministry of National Defense (Republic of China)]] |pages=20-21}}</ref>{{efn|Based on incomplete statistics. See [[#Chinese casualties]]}}<br>576 officers and 23,582 soldiers killed<br>932 officers and 29,630 soldiers wounded <br>203 officers and 9,366 soldiers missing\n{{hr}}\n45 billion yuan worth of private & public property damage{{citation needed|date=October 2020}}",
+    "casualties2": "'''Chinese Claim :'''<ref name=\"附錄\">[https://ahonline.drnh.gov.tw/index.php?act=Display/image/12130014wpgDHDG 國史館檔案史料文物查詢系統, 第四戰區桂南戰史旅行暨戰地調查紀事第六冊：附錄, 典藏號: 008-010701-00044-013]</ref>{{rp|p=15-18}}<br>Japanese Army :<br>23,349 killed or wounded<br>16 captured<br>Collaborationist Army : 4 officers and 9 soldiers captured<br><br>'''Japanese Claims :'''<br>Until January 1940 :<ref>{{cite archive |item=戦時月報（後方関係）送付の件（４）|item-url=https://www.jacar.archives.go.jp/das/image/C04122012300 |item-id=C04122012300 |collection=陸支密大日記　第１４号　３／４　昭和１５年 |access-date=13 August 2026 |page=35 |institution=Japan Center for Historical Records}}</ref>\n*5th Division : 1,282 killed, 2,800 wounded.\n*Taiwan Mixed Brigade : 157 killed , 125 wounded.\n*18th Division : 10 killed, 52 wounded.\n*Guards Mixed Brigade : 29 killed, 147 wounded.\n<br>In the battle of Binyang (January 27 to February 6, 1940) :<ref name=\"戦史叢書\">{{cite book |title=戦史叢書第090巻: 支那事変陸軍作戦（3）昭和十六年十二月まで |trans-title=Senshi Sōsho Volume 90: Army Operations in China Incident (part 3) Until December 1941 |date=1975 |publisher=Asagumo Shimbunsha | page=87}}</ref> 295 killed, 1,307 wounded.<br><br>Guards Mixed Brigade after the battle of Binyang :\n*In the mopping-up operation at the west side of the Qinning road (February 21 to March 1, 1940) :<ref>{{cite archive |item=附表第１　人馬戦死傷一覧表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031874800 |item-id=C13031874800 |collection=欽寧道西側地区掃蕩戦戦闘詳報　自昭和１５年２月２１日至昭和１５年３月１日 |access-date=12 October 2026 |institution=Japan Center for Historical Records}}</ref> 1 killed, 6 wounded\n*In the Jiangnan Operation (March 1 to April 7, 1940) :<ref>{{cite archive |item=附表第２　人馬戦死傷一覧表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031870600 |item-id=C13031870600 |collection=江南作戦戦闘詳報　自昭和１５年３月１日至昭和１５年４月７日 |access-date=04 October 2026 |institution=Japan Center for Historical Records}}</ref> 21 killed, 44 wounded\n*In the second operation on the west road (May 27 to June 17, 1940) :<ref>{{cite archive |item=附表第１　人馬戦死傷一覧表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031877100 |item-id=C13031877100 |collection=第二次西路作戦戦闘詳報　自昭和１５年５月２７日至昭和１５年６月１７日 |access-date=12 October 2026 |institution=Japan Center for Historical Records}}</ref> 22 killed, 41 wounded\n*In the battle at the border of French Indochina (June 17 to July 22, 1940) :<ref>{{cite archive |item=附表第１　人馬戦死傷一覧表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031880300 |item-id=C13031880300 |collection=仏印国境作戦戦闘詳報　自昭和１５年６月１７日至昭和１５年７月２２日 |access-date=12 October 2026 |institution=Japan Center for Historical Records}}</ref> 5 killed, 6 wounded\n*Evacuation of Qinning (September 30 to October 27, 1940) :<ref name=\"欽寧撤去作戦\">{{cite archive |item=附表第４　自９月３０日至１０月２７日転進準備間近衛師団戦果一覧表（鹵獲主要兵器一覧表を含む） |item-url=https://www.jacar.archives.go.jp/das/image/C13031895900 |item-id=C13031895900 |collection=欽寧撤去作戦戦闘詳報　森川史料 |access-date=17 October 2026 |institution=Japan Center for Historical Records}}</ref> 37 killed, 139 wounded\n<br>5th Division after the battle of Binyang :\n*42nd Infantry Regiment in the battles near Wutang and Qitang (February 11 to March 27, 1940) :<ref>{{cite archive |item=附表第１～４　歩兵第４２連隊職員表、死傷表、鹵獲表、兵器損耗表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031782900 |item-id=C13031782900 |collection=歩兵第４２連隊　五塘、七塘附近戦闘詳報　昭和１５年２月１１日～３月２７日 |access-date=12 October 2026 |institution=Japan Center for Historical Records}}</ref> 8 killed, 31 wounded\n*9th Infantry Brigade in the battle near Lingshan (March 13 to March 26, 1940) :<ref name=\"霊山\">{{cite archive |item=霊山附近勦滅戦戦闘詳報　戦詳第３２号　自昭和１５年３月１３日至昭和１５年３月２６日　歩兵第９旅団　（４）　附表其１～３、職員表 |item-url=https://www.jacar.archives.go.jp/das/image/C13031779200 |item-id=C13031779200 |collection=歩兵第９旅団　（及川支隊）　陣中日誌　昭和１５年３月１日～３月２６日 |access-date=12 October 2026 |institution=Japan Center for Historical Records}}</ref> 26 killed, 108 wounded<br>",
+    "casualties3": "11,147 civilians killed<br>2,161 civilians wounded{{citation needed|date=October 2020}}<br>3,986 civilians missing{{citation needed|date=October 2020}}<br>'''Total''':<br>17,294 civilians"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     11147,
+     11147,
+     "fact",
+     "+"
+    ],
+    "c": [
+     17294,
+     17294,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       11147,
+       11147
+      ],
+      "c": [
+       17294,
+       17294
+      ]
+     }
+    ],
+    "why": "The civilians’ own \"Total: 17,294 civilians\" is their side’s total (it names them), not the battle’s; their wounded and missing are marked \"citation needed\"."
+   }
+  },
+  {
+   "battle": "Battle of Northern and Eastern Henan",
+   "article": "Battle of Northern and Eastern Henan",
+   "revid": 1370451889,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "Chinese claim :<ref name=\"抗日戰史\"/><br>979 officers and 24,275 soldiers killed<br>1,453 officers and 24,284 soldiers wounded<br>451 officers and 10,785 soldiers missing",
+    "casualties2": "Chinese claim : 51 captured<ref name=\"抗日戰史\"/><br><br>Japanese record :<br>14th division : 6,400 killed or wounded<ref>{{cite book |title=野州兵団奮戦記 |trans-title=Battle Record of the Yashū Corps |author= Fumio Takahashi |date=1983 |publisher=Central News Agency |page=351}}</ref><br>Other units : unknown"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     25254,
+     25254,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     68678,
+     68678,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       25254,
+       25254
+      ],
+      "c": [
+       62227,
+       62227
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       6451,
+       6451
+      ]
+     }
+    ],
+    "why": "Officers and soldiers added. Japan: the Chinese claim of 51 captured and the Japanese record of 6,400 killed or wounded for the 14th Division count different kinds, so one listing; \"Other units: unknown\" leaves it at least."
+   }
+  },
+  {
+   "battle": "2003 invasion of Iraq",
+   "article": "2003 invasion of Iraq",
+   "revid": 1385655916,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{blist\n|196+ killed\n|551+ wounded}}<hr>{{blist\n|'''Coalition:'''{{blist\n|172 killed<ref>[http://www.icasualties.org/Iraq/ByMonth.aspx \"Iraq Coalition Casualties: Fatalities by Year and Month\"]. ''iCasualties.org''. {{webarchive|url= https://web.archive.org/web/20160206184540/http://icasualties.org/Iraq/ByMonth.aspx |date= 6 February 2016 }}. {{Retrieved |access-date=1 November 2009}}</ref>{{blist|\n{{flagicon|United States}} 139\n|{{flagicon|United Kingdom}} 33}}\n|{{flagicon|United States}} 551 wounded<ref>[http://icasualties.org/Iraq/USCasualtiesByState.aspx \"Iraq Coalition Casualties: U.S. Wounded Totals\"]. ''iCasualties.org''. {{webarchive|url= https://web.archive.org/web/20111224184502/http://icasualties.org/Iraq/USCasualtiesByState.aspx |date= 24 December 2011 }}</ref>}}\n|'''Peshmerga:'''<br />24+ killed<ref name=\"fsu\">Michael G. Lortz. [http://etd.lib.fsu.edu/theses/available/etd-11142005-144616/unrestricted/003Manuscript.pdf \"Willing to face Death: A History of Kurdish Military Forces – the Peshmerga – from the Ottoman Empire to Present-Day Iraq\"]. {{webarchive |url= https://web.archive.org/web/20131029191132/http://etd.lib.fsu.edu/theses/available/etd-11142005-144616/unrestricted/003Manuscript.pdf |date= 29 October 2013 }}. p. 67.</ref>}}",
+    "casualties2": "{{blist\n|11,000–45,000 killed\n|Unknown wounded}}<hr>\n*11,000 (4,895–6,370 observed and reported) (Project on Defense Alternatives study)<ref name=\"pda\">{{cite web|url= http://www.comw.org/pda/0310rm8.html |title= The Wages of War: Iraqi Combatant and Noncombatant Fatalities in the 2003 Conflict |publisher= Commonwealth Institute of Cambridge |access-date= 13 September 2009|archive-url= https://web.archive.org/web/20090902070831/http://www.comw.org/pda/0310rm8.html|archive-date= 2 September 2009 |url-status= live}}</ref><ref>{{cite web|url= https://www.comw.org/pda/0310rm8ap1.html#10.%20Karbala,%20Karbala%20gap,%20and%20north%20to%20Baghdad |title= Wages of War – Appendix 1. Survey of reported Iraqi combatant fatalities in the 2003 war |publisher= Commonwealth Institute of Cambridge |access-date= 13 September 2009|archive-url= https://web.archive.org/web/20090902092036/http://www.comw.org/pda/0310rm8ap1.html|archive-date= 2 September 2009 |url-status=live}}</ref>\n*13,500–45,000 (extrapolated from fatality rates of units serving around Baghdad)<ref>[[Jonathan Steele (journalist)|Steele, Jonathan]] (28 May 2003). [https://www.theguardian.com/usa/story/0,12271,965235,00.html \"Body counts\"] {{Webarchive|url=https://web.archive.org/web/20230306081240/https://www.theguardian.com/usa/story/0,12271,965235,00.html |date=6 March 2023 }}. ''[[The Guardian]]''.</ref>",
+    "casualties3": "Estimated [[Casualties of the Iraq War#Iraqi invasion casualties|Iraqi civilian fatalities]]:{{ubl\n|7,400 (''Iraq Body Count'')<ref name=\"IBC\">{{cite web |url=http://www.iraqbodycount.org/analysis/numbers/year-four/ |title=Year Four: Simply the worst |website=Iraq Body Count |date=18 March 2007 |access-date=23 April 2025 |url-status=live |archive-url=https://web.archive.org/web/20250305042732/http://www.iraqbodycount.org/analysis/numbers/year-four/ |archive-date=2025-03-05}}</ref>\n|3,200–4,300 (Project on Defense Alternatives study)<ref name=\"pda\" />}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     3200,
+     7400,
+     "disputed",
+     "+"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       3200,
+       7400
+      ],
+      "c": null
+     }
+    ],
+    "why": "Under \"Estimated Iraqi civilian fatalities:\" bare figures are deaths: Iraq Body Count’s 7,400 against the Project on Defense Alternatives’ 3,200–4,300, near twice: disputed."
+   }
+  },
+  {
+   "battle": "Operation Thayer",
+   "article": "Operation Thayer",
+   "revid": 1370700200,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "''Operation Thayer:''<br>{{flagicon|United States}} 35 killed and missing<br>''Operation Irving:''<br> 52 killed <ref name=\"Willbanks 2013 1966\">{{Cite book|last=Willbanks|first=James|title=Vietnam War Almanac: An In-Depth Guide to the Most Controversial Conflict in American History|publisher=Skyhorse Publishing, Inc.|year=2013|url=https://books.google.com/books?id=GVN4BwAAQBAJ|isbn=9781626365285|page=1966}}</ref><br>''Operation Thayer II:''<br>{{flagicon|United States}} 242 killed<br>947 wounded<br>{{flag|South Vietnam}} unknown<br>{{flag|South Korea}} unknown<br>'''Per PAVN claim:'''<br> 1,800+ killed or wounded<ref name=\"YellowStar_3rdDivision_Memoir\">{{cite web |title=History of the Yellow Star Division |url=https://kilopad.com/Tieu-su-Hoi-ky-c12/lich-su-su-doan-sao-vang-b3580/trang-1-thong-tin |website=kilopad.com/Tieu-su-Hoi-ky-c12 |access-date=22 November 2021}}</ref><sup>:chapter 4</sup>",
+    "casualties2": "2,669 killed<br>''Operation Thayer:''<br>231 killed<br>''Operation Irving:''<br> 681 killed and 1,409 captured<br>''Operation Thayer II:''<br> 1,757 killed",
+    "casualties3": "Estimated 129,202 civilians displaced, one-third of province"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2669,
+     2669,
+     "fact",
+     "+"
+    ],
+    "c": [
+     4078,
+     4078,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       2669,
+       2669
+      ],
+      "c": [
+       4078,
+       4078
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "North Vietnam: \"2,669 killed\" heads the three operations below it, whose killed add up to it (231, 681 and 1,757): counted once, with the 1,409 captured. The US side’s claim line runs a citation into it: refused."
+   }
+  },
+  {
+   "battle": "Helmand province campaign",
+   "article": "Helmand province campaign",
+   "revid": 1371086242,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "[[File:Seal of the International Security Assistance Force.svg|25px]] '''ISAF'''<br /> 1,178 killed<ref name=\"icasualties\">{{cite web|url=http://www.icasualties.org/OEF/Fatalities.aspx |title=Fatalities |access-date=December 3, 2011 |work=Operation Enduring Freedom |publisher=[[iCasualties.org]] |url-status=dead |archive-url=https://web.archive.org/web/20111203121759/http://icasualties.org/OEF/Fatalities.aspx |archive-date=December 3, 2011 }}</ref><br />{{collapsible list | [[United States]]: 685 killed<ref name=\"icasualties\"/> | [[United Kingdom]]: 415 killed<ref name=\"icasualties\"/> | [[Denmark]]: 36 killed<ref name=\"icasualties\"/> | [[Georgia (country)|Georgia]]: 26 killed<ref name=\"icasualties\"/> | [[Estonia]]: 8 killed<ref name=\"icasualties\"/> | [[Canada]]: 3 killed<ref name=\"icasualties\"/> | [[France]]: 2 killed<ref name=\"icasualties\"/> | [[Netherlands]]: 1 killed<ref name=\"icasualties\"/> | [[Poland]]: 1 killed<ref name=\"icasualties\"/> | [[Czech Republic]]: 1 killed<ref name=\"icasualties\"/>}}<br />{{flagicon|Islamic Republic of Afghanistan}} '''Islamic Republic of Afghanistan'''<br />4,000 killed",
+    "casualties2": "'''Per US/Coalition Forces'''<br />{{flagicon|Afghanistan|Taliban}} '''[[Taliban]]'''<br />7,000 killed (2006-2008), 25,000 killed (2009-2014)<ref>{{cite news |first= Michael |last=Smith |author-link=Michael Smith (newspaper reporter) |title= Army has killed 7,000 Taleban|url=http://www.timesonline.co.uk/tol/news/uk/article3735981.ece |work=[[The Times]] |date=April 13, 2008 |access-date=2008-12-08 | location=London |archive-url=https://web.archive.org/web/20080727015424/http://www.timesonline.co.uk/tol/news/uk/article3735981.ece |archive-date=2008-07-27}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     5178,
+     5178,
+     "fact",
+     "+"
+    ],
+    "c": null,
+    "sides": [
+     {
+      "d": [
+       5178,
+       5178
+      ],
+      "c": null
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "ISAF’s 1,178 killed heads the nations listed under it, which add up to it: counted once, with Afghanistan’s 4,000. The Taliban’s two periods are two figures of the killed: refused."
+   }
+  },
+  {
+   "battle": "Battle of Belchite",
+   "article": "Battle of Belchite (1937)",
+   "revid": 1370433886,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2,800 killed<br>6,000 wounded (in the town of Belchite)",
+    "casualties2": "2,000 killed<br>600 wounded<br>2,411 taken prisoner, including civilians (in the town of Belchite)"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2800,
+     2800,
+     "fact",
+     "+"
+    ],
+    "c": [
+     8800,
+     8800,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       2800,
+       2800
+      ],
+      "c": [
+       8800,
+       8800
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "\"6,000 wounded (in the town of Belchite)\" counts part of the battle: at least, and approximate. The Nationalist prisoners \"including civilians\" cannot be told apart: refused."
+   }
+  },
+  {
+   "battle": "Jassy–Kishinev Offensive",
+   "article": "Second Jassy–Kishinev offensive",
+   "revid": 1384618725,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Soviet Union''':<br>13,197 irrecoverable losses <br/>53,933 wounded or sick <ref name=\"krivosheev\"/><br>\n'''Romania''':<br>8,586 killed or wounded<ref name=\"RIRA696\"/>",
+    "casualties2": "'''Romania''':<br><ref>{{in lang|de}} Siebenbürgische Zeitung: [http://www.siebenbuerger.de/sbz/sbz/news/1093160289,50778,.html \"Ein schwarzer Tag für die Deutschen\"], 22 August 2004</ref><br>25 aircraft<ref name=\"krivosheev/ name=worldwar2.ro\">Worldwar2.ro: [http://www.worldwar2.ro/arr/?article=430 \"The home defense campaign – 1944\"]</ref>{{sps|date=January 2021}}<br>'''Germany''':<br>150,000 killed,<br>wounded or captured{{sfn|Frieser|2007|p=812}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     150000,
+     150000,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": null,
+      "c": [
+       150000,
+       150000
+      ]
+     }
+    ],
+    "why": "Review F1: Germany's \"150,000 killed,<br>wounded or captured\" is one phrase broken by a line break: 150,000 casualties, not deaths. The Soviet side's \"13,197 irrecoverable losses\" is words VM cannot place: refused."
+   }
+  },
+  {
+   "battle": "Easter Offensive",
+   "article": "Easter Offensive",
+   "revid": 1385203592,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''U.S estimate:''' ~10,000 killed, 33,000 wounded,<ref>Leepson and Hannaford, p. 115.</ref> 3,500 missing{{sfn|Sorley|1999|p=339}}<br>'''U.S. casualties:''' 300 killed,{{sfn|Andrade|1995|p=531}} ~1,500 wounded<br><br>'''Modern estimate:''' 30,000 killed, 78,000 wounded and 14,000 missing<ref>{{cite chapter | url=https://books.google.com/books?id=jhaHEAAAQBAJ&dq=easter+offensive+78%2C000+wounded&pg=PT34 | title=Between War and the State: Civil Society in South Vietnam, 1954–1975 | ISBN=978-1-5017-7060-9 | last1=Nguyen-Marshall | first1=Van | date=15 July 2023 | publisher=Cornell University Press }}</ref><br><br>'''[[People's Army of Vietnam|PAVN]] estimate:''' 213,307 killed and wounded, 13,000 captured<br />More than 1,000 tanks and APCs destroyed<ref>Bách khoa tri thức quốc phòng toàn dân. NXB Chính trị quốc gia. Hà Nội.2003. các trang 280–284 và 1734–1745.</ref>",
+    "casualties2": "'''[[People's Army of Vietnam|PAVN]] estimate:''' 100,000+ casualties (~40,000 killed)<ref>{{cite web|url=https://www.historynet.com/north-vietnamese-armys-1972-eastertide-offensive.htm |title= North Vietnamese Army's 1972 Eastertide Offensive|author=web site|year=1997|publisher=web site|access-date=1 February 2010}}</ref><ref>{{Citation |last=Sorley|first=Lewis|year=1999|title=Courage and Blood: South Vietnam's Repulse of the 1972 Easter Invasion|publisher=[[United States Army War College]]|publication-place= |page= |url=https://press.armywarcollege.edu/cgi/viewcontent.cgi?article=1933&context=parameters|access-date=|ref=none}}</ref><br><br>'''U.S. estimate:'''&nbsp;100,000 killed{{sfn|Andrade|1995|p=531}}<br />250{{sfn|Andrade|1995|p=536}}–700<ref>{{cite web|url=https://www.historynet.com/north-vietnamese-armys-1972-eastertide-offensive.htm |title= North Vietnamese Army's 1972 Eastertide Offensive|author=web site|year=1997|publisher=web site|access-date=1 February 2010}}</ref> tanks and APCs destroyed",
+    "casualties3": "'''Civilians:''' 25,000+ killed and 1 million refugees{{sfn|Andrade|1995|p=529}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     65000,
+     125000,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     100000,
+     100000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       40000,
+       100000
+      ],
+      "c": [
+       100000,
+       100000
+      ]
+     },
+     {
+      "d": [
+       25000,
+       25000
+      ],
+      "c": null
+     }
+    ],
+    "why": "Review F4 and F6: the PAVN's \"100,000+ casualties (~40,000 killed)\" gives 40,000 deaths (an estimate) against the U.S. estimate of 100,000: 40,000–100,000, disputed. Side 1 sets \"U.S. casualties\" (the Americans' own, a part of the side) beside the U.S. and modern estimates of the side: parts or rival counts, refused. Civilians: 25,000+ killed. Deaths 40,000+25,000 to 100,000+25,000, at least (side 1 not read)."
+   }
+  },
+  {
+   "battle": "Battle of Al Mukalla (2016)",
+   "article": "Battle of Mukalla (2016)",
+   "revid": 1370450760,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "91 killed<br>30 wounded <small>(''by airstrikes'')</small><br>100–800 killed <small>(''ground offensive, Saudi coalition claims'')</small><ref>{{cite web|url=http://news.kuwaittimes.net/website/arab-coalition-kills-800-qaeda-fighters-yemen-government-forces-make-gains/|title=Arab coalition kills 800 Qaeda fighters - Yemen government forces make gains - Kuwait Times|work=Kuwait Times|date=25 April 2016 |access-date=30 April 2016}}</ref><ref>{{cite web|url=http://www.longwarjournal.org/archives/2016/04/arab-coalition-enters-aqap-stronghold-in-port-city-of-mukalla-yemen.php|title=Arab coalition enters AQAP stronghold in port city of Mukalla, Yemen|work=The Long War Journal|access-date=30 April 2016}}</ref><br>8–250 captured<br>10 killed <small>(''AQAP claims during ground offensive'')</small><ref name=\"alarabiya.net1\">{{cite web|title=Yemen govt forces seize Qaeda-held military camp|url=http://english.alarabiya.net/en/News/middle-east/2016/04/30/Yemen-govt-forces-seize-Qaeda-held-camp.html|publisher=Al Arabiya|date=30 April 2016}}</ref><br>'''Total losses''':<br>137–1,171",
+    "casualties2": "27 killed<br>60 wounded<ref>{{cite web|url=http://indianexpress.com/article/world/world-news/yemen-27-soldiers-killed-60-wounded-in-mukalla-offensive-against-al-qaeda-militants-2773174/|title=Yemen: 27 soldiers killed, 60 wounded in Mukalla offensive against Al-Qaeda militants|date=27 April 2016|work=The Indian Express|access-date=30 April 2016}}</ref><ref>{{Cite web|url=https://english.alarabiya.net/en/2016/04/27/27-Yemeni-troops-killed-in-Mukalla-offensive.html|title=27 Yemeni troops killed in Mukalla offensive|date=April 27, 2016|website=Al Arabiya English}}</ref><br>'''Total losses''':<br>87",
+    "casualties3": "2 Saudi citizens executed by AQAP<br>4 civilians killed by [[drone strike]]<br>8 civilians killed by air strike <small>(''AQAP claim'')</small><br>'''Total''':<br>14 civilians killed"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     27,
+     27,
+     "fact",
+     "+"
+    ],
+    "c": [
+     87,
+     87,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       27,
+       27
+      ],
+      "c": [
+       87,
+       87
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Review F5: AQAP's killed \"by airstrikes\", \"(ground offensive, Saudi coalition claims)\" and \"(AQAP claims during ground offensive)\" are phases and claims together: VM cannot tell parts from rival counts, so side 1 is refused. The coalition: 27 killed, total 87. Side 3 \"2 Saudi citizens executed by AQAP\" is words VM cannot place."
+   }
+  },
+  {
+   "battle": "Al-Otaiba ambush",
+   "article": "Al-Otaiba ambush",
+   "revid": 1375185309,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "[[US Army]]: 100+ killed<ref name=\"j\"/><br>[[Syrian Observatory for Human Rights]]: 152 killed, 7 captured<ref name=175rebels/><br>Syrian government:175<ref name=175rebels>{{cite web|url=http://www.lse.co.uk/AllNews.asp?code=08kqrc0q&headline=175_rebels_killed_near_Damascus_Syrian_government_says |title=175 rebels killed near Damascus, Syrian government says - Finance News - London South East |publisher=Lse.co.uk |access-date=27 February 2014}}</ref>–192<ref name=Massive>{{Cite web |url=http://electronicresistance.net/featured-news/syrian-army-conducts-a-massive-operation-near-the-jordanian-border/ |title=Syrian Army Conducts A Massive Operation Near The Jordanian Border |access-date=28 February 2014 |archive-url=https://web.archive.org/web/20140228033234/http://electronicresistance.net/featured-news/syrian-army-conducts-a-massive-operation-near-the-jordanian-border/ |archive-date=28 February 2014 |url-status=live |df=dmy-all }}</ref> killed, 58<ref name=Massive/> wounded/captured",
+    "casualties2": "None (claim)<ref name=Massive/>",
+    "casualties3": "100 civilians killed"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     200,
+     292,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     159,
+     250,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       100,
+       192
+      ],
+      "c": [
+       159,
+       250
+      ]
+     },
+     {
+      "d": null,
+      "c": null
+     },
+     {
+      "d": [
+       100,
+       100
+      ],
+      "c": null
+     }
+    ],
+    "why": "Review F6: \"US Army: 100+\", \"Syrian Observatory for Human Rights: 152\" and \"Syrian government: 175–192\" killed are three claimants' counts of the same dead: 100–192, disputed, never added (it was 327–344). Casualties: SOHR 152+7 captured = 159; the government 175–192 + 58 = 233–250. Side 2 \"None (claim)\" is a claimed zero, no figure. Civilians: 100 killed."
+   }
+  },
+  {
+   "battle": "Mogilev Offensive",
+   "article": "Mogilev offensive",
+   "revid": 1370628364,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "33,000 killed<br>3,250 POW (Soviet est)<ref name=glantzp97>Glantz, ''Belorussia 1944'', p.97</ref>",
+    "casualties2": "Unknown"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     33000,
+     33000,
+     "fact",
+     "+"
+    ],
+    "c": [
+     36250,
+     36250,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       33000,
+       33000
+      ],
+      "c": [
+       36250,
+       36250
+      ]
+     },
+     {
+      "words": true
+     }
+    ],
+    "why": "Review F8: \"3,250 POW (Soviet est)\": \"est\" without a full stop marks an estimate, so the casualties (33,000 killed + 3,250 captured) are an estimate. The other side: Unknown."
+   }
+  },
+  {
+   "battle": "Sinyavino Offensive",
+   "article": "Sinyavino offensive (1942)",
+   "revid": 1370747235,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''Total''' 26,000<ref name=\"Glantz p. 226\">Glantz p. 226</ref><ref>Isayev p. 142, only between 28 August and 30 September</ref>{{efn|Only between 28 August and 30 September}}<br>5,893 dead",
+    "casualties2": "'''Total''' 113,674<ref>Glantz (1995), p. 295</ref><br>28,085 dead and missing<br>12,000 captured<br>73,589 wounded and sick"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     5893,
+     5893,
+     "fact",
+     "+"
+    ],
+    "c": [
+     26000,
+     26000,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       5893,
+       5893
+      ],
+      "c": [
+       26000,
+       26000
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "Review F8: \"Total 26,000{{efn|Only between 28 August and 30 September}}\": the note says the total covers part of the battle, so it is an estimate, at least. 5,893 dead, recorded. The Soviet \"73,589 wounded and sick\" joins the sick: refused."
+   }
+  },
+  {
+   "battle": "Battle of Ortona",
+   "article": "Battle of Ortona",
+   "revid": 1371166725,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "1,375 killed (including Moro River battles) <br /> 964 wounded{{#tag:ref|Mainly Canadian. Includes losses to the Loyal Edmonton Regiment of 172 casualties, of which 63 killed; the Seaforth Highlanders 103, of which 41 killed.<ref>{{Cite web |author=Landry, Pierre |editor=Beauregard, Marc |url=http://www.junobeach.org/e/2/can-eve-rod-ita-ort-e.htm |title=Juno Beach Center: The Capture of Ortona |year=2003 |access-date=2007-09-27 |archive-url=https://web.archive.org/web/20070927215107/http://www.junobeach.org/e/2/can-eve-rod-ita-ort-e.htm |archive-date=27 September 2007 |url-status=live}}</ref> Sources are often confused between figures for the eight days of fighting at Ortona and those for the whole of the December campaign. Zuehlke gives Canadian losses for this period of 1375 dead and 964 wounded<ref name=\"Zuehlke 1999\"/>{{rp|373–375}} while the Canadiansoldiers.com website says casualties for Canadian 1st Infantry Division in December (including 1st Brigade's crossing of the Moro, 2nd Brigade's fighting in the town and 3rd Brigade's attempted outflanking attack) totaled 4,206 including 695 killed.<ref>{{Cite web |url=http://www.canadiansoldiers.com/mediawiki-1.5.5/index.php?title=Ortona |title=Canadiansoldiers.com: Ortona |access-date=2007-09-27 |archive-url=https://web.archive.org/web/20070926225422/http://www.canadiansoldiers.com/mediawiki-1.5.5/index.php?title=Ortona |archive-date=2007-09-26}}</ref>|group=nb}}",
+    "casualties2": "867 killed, wounded or captured.<ref>{{Cite web |author=Fabio Toncelli |editor=Sd Cinematografica |url=http://www.casaberardi.it/images/stories/file/PDF/natale-di-sangue-Ortona1943-SdCinematografica.pdf |title=ORTONA 1943: UN NATALE DI SANGUE, Page 10. |access-date=2015-08-31 |archive-url=https://web.archive.org/web/20150923200702/http://www.casaberardi.it/images/stories/file/PDF/natale-di-sangue-Ortona1943-SdCinematografica.pdf |archive-date=23 September 2015 |url-status=dead |df=dmy-all}}</ref>",
+    "casualties3": "1,314 civilians dead<ref name= \"Zuehlke 1999\"/>{{rp|375}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     2689,
+     2689,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     3206,
+     3206,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       1375,
+       1375
+      ],
+      "c": [
+       2339,
+       2339
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       867,
+       867
+      ]
+     },
+     {
+      "d": [
+       1314,
+       1314
+      ],
+      "c": null
+     }
+    ],
+    "why": "Review F8: \"1,375 killed (including Moro River battles)\" counts another battle in: an estimate. Canada 1,375 + 964 wounded = 2,339; Germany 867 killed, wounded or captured (no deaths apart); civilians 1,314 dead. Deaths 1,375 + 1,314, at least (Germany's not given); casualties 2,339 + 867, at least (the civilians give only deaths)."
+   }
+  },
+  {
+   "battle": "Barcelona May Days",
+   "article": "May Days",
+   "revid": 1380954731,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties3": "500–1,000 dead<ref name=\"Thomas713\">Hugh Thomas, p. 713</ref><br />1,500 wounded<ref name=\"Thomas713\" />"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     500,
+     1000,
+     "estimate"
+    ],
+    "c": [
+     2000,
+     2500,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": [
+       500,
+       1000
+      ],
+      "c": [
+       2000,
+       2500
+      ]
+     }
+    ],
+    "why": "Review F2: the box gives only its third field, for the whole event: 500–1,000 dead and 1,500 wounded. No side is missing, so neither \"at least\" nor \"one side\"."
+   }
+  },
+  {
+   "battle": "2020 Riyadh drone and missile attack",
+   "article": "2020 Riyadh drone and missile attack",
+   "revid": 1381376581,
+   "infobox": "Infobox military operation",
+   "fields": {
+    "fatalities": "None reported"
+   },
+   "expect": {
+    "state": "words",
+    "d": null,
+    "c": null,
+    "why": "Review F11: fatalities \"None reported\" is words, not a recorded zero; the injuries field is blank, so nothing is said of casualties."
+   }
+  },
+  {
+   "battle": "Tet Offensive",
+   "article": "Tet Offensive",
+   "revid": 1385986787,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "'''In Phase One:'''<br>{{flagicon|South Vietnam}} '''South Vietnam:'''<br>4,954 killed<br>15,917 wounded<br>926 missing<br>{{flagicon|US|1960}}{{flagicon|Third Republic of Korea}}{{flagicon|Australia}}{{flagicon|New Zealand}}{{flagicon|Thailand}}<br>'''Others:'''<br>4,124 killed<br>19,295 wounded<br>604 missing<br>'''Total casualties in Phase One''':<br>45,820 casualties:\n* 9,078 killed\n* 35,212 wounded\n* 1,530 missing<ref>Tổng công kích, Tổng nổi dậy Tết mậu thân 1968 (Tet offensive 1968) – ARVN's Đại Nam publishing in 1969, p. 35</ref><ref>Does not include ARVN or U.S. casualties incurred during the \"Border Battles\"; ARVN killed, wounded, or missing from Phase III; U.S. wounded from Phase III; or U.S. missing during Phases II and III.</ref><br>123 aircraft destroyed, 214 heavily damaged and 215 medium damaged<ref>Steel and Blood: South Vietnamese Armor and the War for Southeast Asia. Naval Institute Press, 2008. P 33</ref>\n'''In Phase Two:'''<br>{{flagicon|US}} 2,169 killed, unknown wounded<br>{{flagicon|South Vietnam}} 2,054 killed, unknown wounded<ref>{{Cite news|url=https://www.washingtonpost.com/news/retropolis/wp/2018/05/25/the-men-killed-on-a-single-day-in-the-vietnam-war-and-the-haunting-wall-that-memorializes-them/|title=The men killed on a single, bloody day in Vietnam, and the haunting wall that memorializes them|date=May 25, 2018|newspaper=[[The Washington Post]]}}</ref>\n'''Total for 3 phases:''' Unknown",
+    "casualties2": "'''In Phase One:'''<br>RVN/U.S. claimed:\n* 45,000+ killed\n* 5,800 captured<ref>\"These figures are for the period January 31 to February 29.\"</ref><ref name=Moise>{{cite book|last=Moise|first=Edwin|title=The Myths of Tet The most misunderstood event of the Vietnam War|publisher=University Press of Kansas|year=2017|isbn=978-0700625024}}</ref>{{rp|162}}\nOne PAVN source (Saigon only):\n* 5,000+ killed\n* 10,000 wounded\n* 7,000 captured<ref>[https://www.washingtonpost.com/archive/politics/1994/05/16/communist-leaders-stoutly-defend-tet-losses/44a7d0c0-a3d4-40d1-bcdc-99e109b51b65/ Communist Leaders Stoutly Defend Tet Losses – The Washington Post<!-- Bot generated title -->]</ref>\n'''Phase One, Phase [[May Offensive|Two]] and Phase [[Phase III Offensive|Three]]:'''<br>''PAVN source (total for 3 phases):''<br>111,179 casualties:\n* 45,267 killed\n* 61,267 wounded\n* 5,070 missing<ref>PAVN's Department of warfare,  124th/TGi, document 1.103 (11-2-1969)</ref><ref>{{cite web|url=http://www.nhandan.com.vn/chinhtri/item/7976502-.html|title=Tết Mậu Thân 1968 qua những số liệu – Báo Nhân Dân điện tử|website=Tết Mậu Thân 1968 qua những số liệu – Báo Nhân Dân điện tử|date=January 25, 2008 |access-date=March 3, 2019}}</ref>",
+    "casualties3": "'''Civilian:''' 14,300 killed, 24,000 wounded, and 630,000 refugees<ref name=\"DouganWeiss\" />{{rp|116}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     14300,
+     14300,
+     "fact",
+     "+"
+    ],
+    "c": [
+     38300,
+     38300,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       14300,
+       14300
+      ],
+      "c": [
+       38300,
+       38300
+      ]
+     }
+    ],
+    "why": "Review F2: the combatants' fields are refused; the third field is the civilians' (14,300 killed, 24,000 wounded; the 630,000 refugees are no casualties). The battle's figure is the civilians' only, at least, and is said as such."
+   }
+  },
+  {
+   "battle": "Battle of Taejon",
+   "article": "Battle of Taejon",
+   "revid": 1370312872,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{Plain list|\n* 354 killed\n* 185 missing (POW/KIA)\n* (in and around Kum River, 14–16 July)\n* 465 killed\n* 295 missing (POW/KIA)\n* (in and around Daejeon, 16–20 July)\n}}",
+    "casualties2": "Unknown",
+    "casualties3": "4-7,000 civilians killed (by ROK forces)<ref>{{cite news |url=https://asiasociety.org/education/massacre-nogun-ri |title=Massacre at Nogun-ri |work=Asia Society }}</ref><ref>{{cite book |last1=Cummings |first1=Andrew |title=The Korean War |page=173}}</ref>"
+   },
+   "expect": {
+    "state": "unread",
+    "d": null,
+    "c": null,
+    "why": "\"4-7,000 civilians killed\": 4,000–7,000 written short, or 4 to 7,000? Ends a hundred times apart are not read. Side 1 has a bracketed line with figures; side 2 \"Unknown\"."
+   }
+  },
+  {
+   "battle": "Shanghai Campaign",
+   "article": "Shanghai Campaign",
+   "revid": 1370738069,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "153,000 (included those who surrendered and defected)",
+    "casualties2": "34,000 (8,000 killed; 24,122 wounded; 1,951 missing)"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     8000,
+     8000,
+     "fact",
+     "+"
+    ],
+    "c": [
+     34000,
+     34000,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       8000,
+       8000
+      ],
+      "c": [
+       34000,
+       34000
+      ]
+     }
+    ],
+    "why": "\"153,000 (included those who surrendered and defected)\": a count with defectors in it is no casualties figure: refused. \"34,000 (8,000 killed; 24,122 wounded; 1,951 missing)\": 34,000 casualties, of them 8,000 killed."
+   }
+  },
+  {
+   "battle": "Tikhvin offensive",
+   "article": "Tikhvin Offensive",
+   "revid": 1370750875,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "45,000 casualties<ref name=\":5\" />",
+    "casualties2": "190,000 casualties (of which 80,000 are dead, imprisoned or missing)<ref name=\":5\" />"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     235000,
+     235000,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "c": [
+       45000,
+       45000
+      ]
+     },
+     {
+      "d": null,
+      "c": [
+       190000,
+       190000
+      ]
+     }
+    ],
+    "why": "\"190,000 casualties (of which 80,000 are dead, imprisoned or missing)\": the bracket joins the dead with others, so it gives no deaths; the casualties stand. VM adds the sides: 235,000, an estimate."
+   }
+  },
+  {
+   "battle": "Operation Nordwind",
+   "article": "Operation Northwind (1944)",
+   "revid": 1376837722,
+   "infobox": "infobox military conflict",
+   "fields": {
+    "casualties1": "{{flag|United States|1912}}:<br>11,609<ref>[https://web.archive.org/web/20071213063206/http://www.history.army.mil/brochures/ardennes/aral.htm Cirillo 2003], Retrieved 16 August 2018</ref><ref name=\"Riviera\"/><br> killed and wounded, captured or missing<ref>Smith, Clark: Riviera To The Rhine. P. 527</ref><br>{{flagcountry|Provisional Government of the French Republic|23px}}:<br>7,000<ref>Grandes Unités Françaises, Vol. V-III, p. 801</ref><br> killed and wounded",
+    "casualties2": "23,000 killed, wounded, or captured<ref>{{cite book |last=Clarke|first=Jeffrey|date=1993|title=U.S. Army in World War II European Theater of Operations: Riviera to the Rhine|location=Washington, D.C.|publisher=United States Army Center of Military History|page=527}}</ref>"
+   },
+   "expect": {
+    "state": "figure",
+    "d": null,
+    "c": [
+     41609,
+     41609,
+     "estimate"
+    ],
+    "sides": [
+     {
+      "d": null,
+      "c": [
+       18609,
+       18609
+      ]
+     },
+     {
+      "c": [
+       23000,
+       23000
+      ]
+     }
+    ],
+    "why": "\"11,609<br>killed and wounded, captured or missing\": a bare figure with its kinds on the next line is one phrase (casualties). France 7,000 killed and wounded the same way."
+   }
+  },
+  {
+   "battle": "Battle of Garibpur",
+   "article": "Battle of Garibpur",
+   "revid": 1370441309,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "2 tanks destroyed, according to Brig. B.S Mehta<ref name=\"Mehta\" /><br />4 tanks destroyed, according to Col. V.Y. Gidh<ref name=\"Gidh\">{{cite web |url=https://usiofindia.org/publication/usi-journal/the-unique-battle-of-garibpur/ |title=The Unique Battle of Garibpur}}</ref><br />70 casualties (28 KIA, 42 [[Wounded in action|WIA]])<ref name=\"Gidh\" />",
+    "casualties2": "6 tanks destroyed<br />4 tanks damaged<br />3 tanks captured<ref name=\"Mehta\" /><br />300 infantry killed/wounded<ref name=\"Gidh\" />"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     28,
+     28,
+     "fact",
+     "+"
+    ],
+    "c": [
+     70,
+     70,
+     "fact",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       28,
+       28
+      ],
+      "c": [
+       70,
+       70
+      ]
+     },
+     {
+      "refused": true
+     }
+    ],
+    "why": "\"70 casualties (28 KIA, 42 WIA)\": the bracket gives the killed: 28 deaths of 70 casualties. The tanks are materiel. Pakistan's \"300 infantry killed/wounded\" is words VM cannot place."
+   }
+  },
+  {
+   "battle": "Battle of Khasham",
+   "article": "Battle of Khasham",
+   "revid": 1370445200,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "{{ubl|{{flagicon|United States}} None|{{flagicon image|Flag of Syrian Democratic Forces.svg}} 1 SDF fighter wounded<ref name=\"Starr Browne 2018\">{{cite news |last1=Starr |first1=Barbara |last2=Browne |first2=Ryan |title=US-led coalition strikes kill pro-regime forces in Syria |publisher=CNN |date=7 February 2018 |url=https://www.cnn.com/2018/02/07/politics/us-strikes-pro-regime-forces-syria/index.html |access-date=9 February 2018 |archive-date=11 April 2019 |archive-url=https://web.archive.org/web/20190411211158/https://www.cnn.com/2018/02/07/politics/us-strikes-pro-regime-forces-syria/index.html |url-status=live }}</ref>}}",
+    "casualties2": "{{ubl|'''Syrian claim:''' 55 killed<ref name=\"Syrianclaim\">\n* Illingworth, Andrew (8 February 2018). [https://web.archive.org/web/20180208124128/https://www.almasdarnews.com/article/confirmed-dozens-syrian-troops-killed-us-defensive-airstrikes-deir-ezzor/ \"Confirmed: Dozens of Syrian troops killed by US 'defensive' airstrikes in Deir Ezzor\"]. ''Al-Masdar News''.\n* Aboufadel, Leith (11 February 2018).[https://web.archive.org/web/20180212013702/https://www.almasdarnews.com/article/pro-govt-isis-hunters-release-official-statement-us-airstrikes-deir-ezzor/ \"Pro-gov't ISIS Hunters release official statement after US airstrikes in Deir Ezzor\"]. ''Al-Masdar News''.\n* Aboufadel, Leith (13 February 2018). [https://web.archive.org/web/20180213200039/https://www.almasdarnews.com/article/us-attack-pro-govt-forces-deir-ezzor-killed-10-russians-photos/ \"US attack on pro-gov't forces in Deir Ezzor killed more than 10 Russians (photos)\"]. ''Al-Masdar News''.</ref>|'''U.S. claim:''' Approximately 100–200 killed<ref name=\"Starr Browne 2018\"/><ref>{{cite news|url=https://www.france24.com/en/20180412-pompeo-says-couple-hundred-russians-killed-syria-clash|title=Pompeo says 'couple of hundred' Russians killed in Syria clash|date=12 April 2018|publisher=[[Agence France-Presse]]|via=[[France 24]]|access-date=12 March 2024}}</ref>|'''SOHR claim:''' 68 killed<ref name=\"warehouse\"/>|'''Unofficial Russian claims:''' 80–100 killed, 200 wounded<ref name=\"auto\">{{Cite news|url=https://www.reuters.com/article/us-mideast-crisis-syria-russia-casualtie-idUSKCN1FZ2DZ|title=Russian toll in Syria battle was 300 killed and wounded: sources|work=Reuters|date=16 February 2018|access-date=21 May 2020|archive-date=15 June 2020|archive-url=https://web.archive.org/web/20200615093701/https://www.reuters.com/article/us-mideast-crisis-syria-russia-casualtie-idUSKCN1FZ2DZ|url-status=live}}</ref>\n|'''[[University of Southern Denmark]]''': 65–200 Russians killed<ref name=Rendboe>{{cite web|url= https://thesis.sdu.dk/download?id=743|title= Connecting the dots of PMC Wagner: Strategic actor or mere business opportunity?|first= Niklas M.|last=Rendboe|date=1 June 2019|publisher=[[University of Southern Denmark]]}}</ref>{{rp|51–53}}\n|'''[[BBC News Russian]]''': 80 Russians killed<ref>{{cite web | url=https://www.bbc.com/russian/articles/cn081pl1pl4o | title=Сколько российских военных погибло в Сирии? | date=9 December 2024 }}</ref>}}"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     55,
+     200,
+     "disputed",
+     "+"
+    ],
+    "c": [
+     280,
+     300,
+     "disputed",
+     "+"
+    ],
+    "sides": [
+     {
+      "refused": true
+     },
+     {
+      "d": [
+       55,
+       200
+      ],
+      "c": [
+       280,
+       300
+      ]
+     }
+    ],
+    "why": "Review F6: six claimants' counts of the same dead (Syrian 55, U.S. 100–200, SOHR 68, Russian 80–100, a university 65–200, BBC News Russian 80): 55–200, disputed, never added together. Only the Russian claim gives wounded: 280–300 casualties."
+   }
+  },
+  {
+   "battle": "Battle of Hillah",
+   "article": "Battle of Hillah (2003)",
+   "revid": 1370443005,
+   "infobox": "Infobox military conflict",
+   "fields": {
+    "casualties1": "1 killed<br />wounded unknown<br />8 attack helicopters damaged",
+    "casualties2": "1,200+ killed & wounded<br />2 field artillery batteries destroyed<br />1 AA battery destroyed<br />1 armoured company destroyed<br />1 infantry battalion destroyed",
+    "casualties3": "551 Iraqi civilian casualties ''(19 killed, 515 wounded, 17 unspecified)''"
+   },
+   "expect": {
+    "state": "figure",
+    "d": [
+     20,
+     20,
+     "estimate",
+     "+"
+    ],
+    "c": [
+     1751,
+     1751,
+     "estimate",
+     "+"
+    ],
+    "sides": [
+     {
+      "d": [
+       1,
+       1
+      ],
+      "c": null
+     },
+     {
+      "d": null,
+      "c": [
+       1200,
+       1200
+      ]
+     },
+     {
+      "d": [
+       19,
+       19
+      ],
+      "c": [
+       551,
+       551
+      ]
+     }
+    ],
+    "why": "Review F1 checked: \"1 killed<br>wounded unknown\" is a figure and words, read so. Iraq: 1,200+ killed and wounded. Civilians: 551 casualties \"(19 killed, 515 wounded, 17 unspecified)\": the bracket read item by item gives 19 killed."
+   }
+  }
+ ]
+}

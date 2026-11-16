@@ -46,6 +46,304 @@ test('figures: an estimate is rounded and marked, a recorded count is not', asyn
   assert.equal(estimateOf('UCDP GED recorded deaths (state-based violence)'), '');
 });
 
+// BF-08 (16 November 2026): a battle's figures from its English Wikipedia infobox, read by scripts/infobox.mjs. The
+// expected readings were worked out by hand on real fields before the reader was written: a wrong number is worse than
+// "No figure found", so a field the reader cannot read surely is refused, never guessed.
+const INFOBOXES = JSON.parse(readFileSync(new URL('./fixtures/warfocus-infoboxes.json', import.meta.url), 'utf8'));
+const asFig = f => (f ? [f.low, f.high, f.status, ...(f.atLeast ? ['+'] : [])] : null);
+test('infobox: real casualty fields read as worked by hand, the refused refused', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  assert.ok(INFOBOXES.cases.length >= 40, `${INFOBOXES.cases.length} fields`);
+  const wrong = [];
+  for (const x of INFOBOXES.cases) {
+    const r = readCasualties(x.fields, { infobox: x.infobox }), e = x.expect;
+    const got = { state: r.state, d: asFig(r.deaths), c: asFig(r.cas) };
+    if (JSON.stringify(got) !== JSON.stringify({ state: e.state, d: e.d, c: e.c })) wrong.push(`${x.battle}: got ${JSON.stringify(got)}, expected ${JSON.stringify({ state: e.state, d: e.d, c: e.c })}`);
+    (e.sides || []).forEach((es, k) => {
+      const s = r.sides[k] || {}, pair = f => (f ? [f.low, f.high] : null);
+      if ('d' in es && JSON.stringify(pair(s.deaths)) !== JSON.stringify(es.d)) wrong.push(`${x.battle} side ${k + 1} deaths: ${JSON.stringify(pair(s.deaths))}, expected ${JSON.stringify(es.d)}`);
+      if ('c' in es && JSON.stringify(pair(s.cas)) !== JSON.stringify(es.c)) wrong.push(`${x.battle} side ${k + 1} casualties: ${JSON.stringify(pair(s.cas))}, expected ${JSON.stringify(es.c)}`);
+      if (es.refused && !s.refused) wrong.push(`${x.battle} side ${k + 1} should be refused`);
+      if (!es.refused && s.refused) wrong.push(`${x.battle} side ${k + 1} refused (${s.refused.why}: ${s.refused.text})`);
+      if (es.zero && !s.zero) wrong.push(`${x.battle} side ${k + 1} should read as a zero`);
+      if (es.words && !s.words?.length) wrong.push(`${x.battle} side ${k + 1} should keep its words`);
+    });
+  }
+  assert.deepEqual(wrong, []);
+});
+
+test('infobox: ranges, "+", "3,000/4,000" and "27 or 28" give a low and a high; ordinals, years and upper bounds are no figures', async () => {
+  const { readCasualties, readLine } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const d = t => asFig(readCasualties({ deaths: t }).deaths);
+  assert.deepEqual(d('1,000–2,000 killed'), [1000, 2000, 'estimate']);
+  assert.deepEqual(d('1,000 to 2,000 killed'), [1000, 2000, 'estimate']);
+  assert.deepEqual(d('~3,000/4,000 killed'), [3000, 4000, 'estimate']);
+  assert.deepEqual(d('27 or 28 civilians'), [27, 28, 'estimate']);
+  assert.deepEqual(d('10,000+ killed'), [10000, 10000, 'estimate', '+']);
+  assert.deepEqual(d('over 300 killed'), [300, 300, 'estimate', '+']);
+  assert.deepEqual(d('c. 1,200 killed'), [1200, 1200, 'estimate']);
+  assert.deepEqual(d('1,428 killed'), [1428, 1428, 'fact']);
+  for (const t of ['up to 300 killed', '35th Brigade destroyed 4', '1944 killed in the spring', '1.500 killed', '1,428–9 killed']) assert.notEqual(readLine(t).kind, 'items', t);
+  assert.equal(readCasualties({ casualties1: 'Heavy', casualties2: 'Unknown' }).state, 'words', 'words are shown as words');
+});
+
+test('infobox: materiel, the sick, deserters and those who fled never add to deaths or casualties', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const r = readCasualties({ casualties1: '120 killed<br>410 wounded<br>6 aircraft<br>3 tanks destroyed<br>2 ships sunk<br>40 horses', casualties2: '500 dead<br>1,000 sick<br>300 deserted<br>30,000+ civilians fled' });
+  // The second side gives its killed only, so the casualties are the first side's, at least.
+  assert.deepEqual([asFig(r.deaths), asFig(r.cas)], [[620, 620, 'estimate'], [530, 530, 'fact', '+']]);
+  assert.ok(readCasualties({ casualties1: '2,200 killed, wounded, sick or captured' }).sides[0].refused, 'the sick joined with the counted kinds refuse the side');
+  assert.equal(readCasualties({ casualties1: '8-10 Leopard 2 tanks destroyed, at least 2 captured' }).state, 'none', 'a figure after the tanks is tanks');
+});
+
+test('infobox: "killed and wounded" is never deaths; killed alone gives no casualties figure', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const kw = readCasualties({ casualties1: '3,000 killed and wounded', casualties2: '200 killed' });
+  assert.equal(kw.sides[0].deaths, null);
+  assert.deepEqual(asFig(kw.sides[0].cas), [3000, 3000, 'fact']);
+  assert.equal(kw.sides[1].cas, null, 'killed only: no casualties of its own');
+  assert.ok(kw.sides[0].joined && kw.sides[1].killedOnly, 'each says why');
+  assert.deepEqual(asFig(kw.deaths), [200, 200, 'fact', '+']);
+});
+
+test('infobox: a claim label governs the lines below it; a bracketed one after its lines, those above', async () => {
+  const { readSide } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const below = readSide('Chinese claim:<br>2,954 killed<br>5,645 wounded<br>----<br>Japanese estimate:<br>5,203 killed');
+  assert.deepEqual(below.readings.map(r => [r.by, r.deaths?.low]), [['Chinese claim', 2954], ['Japanese estimate', 5203]]);
+  assert.equal(below.deaths.status, 'disputed');
+  const above = readSide('45 killed<br>40 wounded<br><small>(French claim)</small><br>60–70 killed<br><small>(Algerian claim)</small>');
+  assert.deepEqual(above.readings.map(r => [r.by, r.deaths?.low, r.deaths?.high]), [['French claim', 45, 45], ['Algerian claim', 60, 70]]);
+  const each = readSide('28 killed (per the SOHR)<br>54 killed (per The Inside Source)');
+  assert.deepEqual(each.readings.map(r => r.by), ['SOHR', 'The Inside Source']);
+});
+
+test('infobox: recorded, estimate, disputed; a VM sum of the sides is an estimate; a zero only where every side records none', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  assert.deepEqual(asFig(readCasualties({ casualties1: '799 killed' }).deaths), [799, 799, 'fact', '+'], 'one side, recorded');
+  assert.deepEqual(asFig(readCasualties({ casualties1: '799 killed', casualties2: '44 killed' }).deaths), [843, 843, 'estimate'], 'VM adds the sides');
+  assert.deepEqual(asFig(readCasualties({ casualties1: '799 killed', casualties2: 'None' }).deaths), [799, 799, 'fact'], 'the other side records none');
+  assert.equal(readCasualties({ casualties1: '1,112 dead{{Citation needed|date=October 2026}}' }).deaths.status, 'disputed');
+  assert.equal(readCasualties({ casualties1: "'''US Claim''': 8,000 dead" }).deaths.status, 'disputed');
+  assert.equal(readCasualties({ casualties1: 'None', casualties2: 'None' }).state, 'zero');
+  assert.deepEqual(asFig(readCasualties({ casualties: 'None' }).deaths), [0, 0, 'fact']);
+  for (const [why, f] of [['one side\'s silence', { casualties1: 'None', casualties2: 'Unknown' }], ['"None known"', { casualties1: 'None known', casualties2: 'None known' }],
+    ['a claimed zero', { casualties1: 'No casualties (Iraqi claim)', casualties2: 'None' }], ['a zero for part of it', { casualties1: 'None (second assault wave)', casualties2: 'None' }], ['"5 wounded"', { casualties1: '5 wounded', casualties2: 'None' }]])
+    assert.notEqual(readCasualties(f).state, 'zero', why);
+});
+
+test('infobox: a reference becomes a short citation; a named reference used again cites the first', async () => {
+  const { citationOf, namedRefs, readSide } = await import('../battlefield/focus/scripts/infobox.mjs');
+  assert.equal(citationOf('{{cite book |last=Alexander |first=Bevin |year=1986 |title=Korea |pages=440–42}}'), 'Alexander 1986, pp. 440–42');
+  assert.equal(citationOf('{{harvnb|Chinese Military Science Academy|2000|pp=102, 104}}.'), 'Chinese Military Science Academy 2000, pp. 102, 104');
+  assert.equal(citationOf('{{cite web|url=http://www.muharipgaziler.org.tr/files/kore.doc |title=Korean War (Kore Savaşi) |publisher=Turkish War Veterans Association}}'), 'Turkish War Veterans Association');
+  const named = namedRefs('x<ref name="Herring">George Herring, 1998, p.340</ref>');
+  assert.deepEqual(readSide('2,000 killed<ref name="Herring"/>', { named }).readings[0].refs, ['George Herring, 1998, p.340']);
+});
+
+test('figures: Wikidata leads, the infobox beside it (disputed by half again); a Wikidata 0 is a recorded zero; UCDP only where nothing else', async () => {
+  const { battleFigures, wdStatements } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const entity = { claims: { P1120: [
+    { rank: 'normal', mainsnak: { snaktype: 'value', datavalue: { value: { amount: '+0' } } }, references: [{ snaks: { P143: [{}] } }] },
+  ] } };
+  const st = wdStatements(entity);
+  assert.deepEqual(st, [{ p: 'P1120', rank: 'normal', v: 0, ref: 'wikipedia' }]);
+  const zero = battleFigures({ wd: st, article: null });
+  assert.deepEqual([zero.fd.v, zero.fd.status, zero.fd.src, zero.fwp], [0, 'fact', 'wikidata', undefined], 'Operation Red Dawn: Wikidata records none');
+  const art = { title: 'Battle of X', rev: 1, ts: '2026-11-16T00:00:00Z', state: 'figure', deaths: { low: 3000, high: 3000, status: 'fact' }, cas: null, sides: [{ deaths: { low: 3000, high: 3000, status: 'fact', refs: ['A 2000'] } }] };
+  const led = battleFigures({ deaths: 1000, wd: [{ p: 'P1120', v: 1000, rank: 'normal', ref: 'url' }], article: art });
+  assert.deepEqual([led.fd.v, led.fd.status, led.fd.src, led.fd.alt.v], [1000, 'disputed', 'wikidata', 3000], 'Wikidata\'s 1,000 against the infobox\'s 3,000');
+  assert.equal(battleFigures({ deaths: 2500, wd: [{ p: 'P1120', v: 2500, rank: 'normal', ref: 'stated' }], article: art }).fd, undefined, 'they agree: Wikidata\'s plain count, as before');
+  const wp = battleFigures({ article: art });
+  assert.deepEqual([wp.fd.v, wp.fd.status, wp.fd.src, wp.fd.uv], [3000, 'fact', 'wikipedia', undefined]);
+  const ucdp = { v: 63, low: 60, high: 70, n: 12, km: 25 };
+  assert.deepEqual(battleFigures({ article: { why: 'nobox' }, ucdp }), { fu: ucdp, fwp: 'nobox' });
+  assert.equal(battleFigures({ article: art, ucdp }).fu, undefined, 'UCDP only where no source gives a figure');
+  assert.deepEqual(battleFigures({ article: { ...art, state: 'unread', deaths: null, sides: [{ refused: { why: 'prose' } }] } }).fs, 'unread');
+});
+
+test('figures: a further source\'s figure is the battle\'s own, grouped and counted once, with its kind; the deadliest rank by deaths only, by the lowest figure', async () => {
+  const { groupBattles, figureText, figureLine, deadliest, deadliestNote, completeness, completenessText, stateOf, searched } = await import('../battlefield/focus/figures.mjs');
+  const list = [
+    { q: 'Q1', n: 'Campaign', deaths: null, parts: ['Q2', 'Q3'], w: 'Campaign', fs: 'none', fwp: 'nofield' },
+    { q: 'Q2', n: 'Battle A', deaths: null, up: 'Q1', fd: { low: 569, high: 1200, status: 'disputed', origin: 'vm', src: 'wikipedia' } },
+    { q: 'Q3', n: 'Battle B', deaths: 400, up: 'Q1' },
+    { q: 'Q4', n: 'Battle C', deaths: null, fd: { v: 218, status: 'fact', origin: 'source', src: 'wikipedia', atLeast: true, one: true } },
+    { q: 'Q5', n: 'Battle D', deaths: null, fc: { v: 3000, status: 'estimate', origin: 'source', src: 'wikipedia' } },
+    { q: 'Q6', n: 'Battle E', deaths: null, fd: { v: 0, status: 'fact', origin: 'source', src: 'wikidata' } },
+    { q: 'Q7', n: 'Battle F', deaths: null, fs: 'unread', w: 'Battle F' },
+    { q: 'Q8', n: 'Third Phase Offensive', deaths: null, fs: 'none', fwp: 'noart', s: '1950-12-31', p: 'd' },
+  ];
+  const g = groupBattles(list), one = g.byQ.get('Q1');
+  assert.deepEqual([one.fig, one.from, one.kind], [969, 'parts', 'disputed'], 'the sum of its parts, by the lowest figure, no surer than its least sure part');
+  // The sum with its range (review P1: the card and the lists give the same figure, the lowest first).
+  assert.equal(figureText(one), '969–1,600 deaths, the sum of its parts\' figures');
+  assert.equal(figureLine(g.byQ.get('Q2')), '569–1,200 deaths · Disputed or unreliable');
+  assert.equal(figureLine(g.byQ.get('Q4')), 'at least 218 deaths · Recorded, one side');
+  assert.equal(figureLine(g.byQ.get('Q5')), '3,000 casualties · Estimate');
+  assert.equal(figureLine(g.byQ.get('Q6')), '0 deaths · Recorded');
+  assert.equal(figureLine(g.byQ.get('Q7')), 'Figures not read');
+  assert.equal(figureLine(g.byQ.get('Q8')), 'No figure found');
+  const d = deadliest(g);
+  assert.deepEqual(d.ranked.map(n => n.b.q), ['Q1', 'Q4'], 'deaths only: the campaign by its parts\' lowest figures, then 218');
+  assert.deepEqual([d.estimates, d.disputed, d.casOnly, d.none], [0, 1, 1, 3]);
+  // Of how many it ranks (review P9): the battles not counted under a larger one.
+  assert.equal(deadliestNote(d), 'Of the 6 battles not counted under a larger one, ranked by deaths: 2 (1 disputed or unreliable), each by the lowest figure given. Not ranked: 1 with casualties only, 3 with no figure. Not added into the war\'s deaths by month.');
+  assert.deepEqual(list.map(b => stateOf(b, g.byQ.get(b.q))), ['parts', 'figure', 'figure', 'figure', 'figure', 'zero', 'unread', 'none'], 'each battle in exactly one of five states');
+  const c = completeness(list, g);
+  assert.deepEqual([c.figure, c.recorded, c.estimate, c.disputed, c.zero, c.parts, c.unread, c.none, c.noArticle], [4, 2, 1, 1, 1, 1, 1, 1, 1]);
+  assert.equal(completenessText(c), 'Figures for 4 of 8 battles: 2 recorded, 1 estimate, 1 disputed or unreliable; a recorded zero for 1; counted through their parts for 1; not read for 1; none found for 1 (1 without an article).');
+  // In plain words (review P7): no English article is one Wikidata links to; a box VM could not read sends the reader to it.
+  assert.equal(searched(list[7]), 'Searched: Wikidata (nothing recorded); English Wikipedia (no English article linked from Wikidata); UCDP (does not cover 1950).');
+  assert.equal(searched(list[6]), 'Searched: Wikidata (nothing recorded); English Wikipedia (its casualties box has figures VM could not interpret surely: see the article); UCDP (does not cover its date).');
+  assert.doesNotMatch(searched(list[6]) + figureLine(g.byQ.get('Q4')), /the reader/);
+  // An infobox's figure for a whole gives way to its parts' sum where that is larger (the air raids on Japan's infobox
+  // gives the US airmen's 2,691, at least; its parts hold over 500,000); Wikidata's own count for a whole still ranks it.
+  const raids = groupBattles([
+    { q: 'Q590545', n: 'air raids on Japan', deaths: null, parts: ['Q703203'], fd: { v: 2691, status: 'fact', src: 'wikipedia', atLeast: true, one: true } },
+    { q: 'Q703203', n: 'atomic bombing of Hiroshima', deaths: 286818, up: 'Q590545' },
+  ]).byQ.get('Q590545');
+  assert.deepEqual([raids.fig, raids.from], [286818, 'parts']);
+  const own = groupBattles([{ q: 'Q1', n: 'Whole', deaths: 20000, parts: ['Q2'] }, { q: 'Q2', n: 'Part', deaths: null, up: 'Q1', fd: { v: 22900, status: 'fact', src: 'wikipedia' } }]).byQ.get('Q1');
+  assert.deepEqual([own.fig, own.from], [20000, 'own'], 'Wikidata\'s count for the whole, as before (WF2-03)');
+});
+
+// The review of 16 November 2026 (findings F1–F11): the patterns behind each misread, on the shapes the real fields take
+// (the real fields themselves are cases in the fixture).
+test('infobox (review F1, F4, F8, F11, P6, P12): split phrases, bracketed killed, partial and wider counts, "None reported", reference keys, materiel words', async () => {
+  const { readSide, readCasualties, readLine, plainLines } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const fig = f => (f ? [f.low, f.high, f.status, ...(f.atLeast ? ['+'] : [])] : null);
+  // F1: a phrase of kinds broken by a line break is one phrase; a bare figure takes the kinds on the next line; a kind
+  // alone after a figure that already has one may be that figure's, so the side is not read.
+  const split = readSide("'''Germany''':<br>150,000 killed,<br>wounded or captured");
+  assert.deepEqual([fig(split.deaths), fig(split.cas)], [null, [150000, 150000, 'fact']]);
+  assert.deepEqual(fig(readSide('11,609<br> killed and wounded, captured or missing').cas), [11609, 11609, 'fact']);
+  assert.ok(readSide('1 killed<br />wounded').refused);
+  assert.deepEqual(fig(readSide('1 killed<br />wounded unknown').deaths), [1, 1, 'fact'], 'words after a figure stay words');
+  // F4: "(~40,000 killed)" under a total is its deaths, an estimate; the killed in brackets not read surely refuse the line.
+  assert.deepEqual(fig(readSide('100,000+ casualties (~40,000 killed)').deaths), [40000, 40000, 'estimate']);
+  assert.ok(readSide('2,000 casualties (1,000 killed in air raids, at least 1,000 lost at sea)').refused);
+  assert.deepEqual(fig(readSide('551 civilian casualties (19 killed, 515 wounded, 17 unspecified)').deaths), [19, 19, 'fact'], 'read item by item');
+  // F8: "est" without a full stop; a note that the figure covers part of the battle; a count that takes in another battle.
+  assert.equal(readSide('3,250 POW (Soviet est)').cas.status, 'estimate');
+  assert.deepEqual(fig(readSide("'''Total''' 26,000{{efn|Only between 28 August and 30 September}}").cas), [26000, 26000, 'estimate', '+']);
+  assert.equal(readSide('1,375 killed (including Moro River battles)').deaths.status, 'estimate');
+  assert.equal(readSide('3 militants killed (including Yahya Sinwar)').deaths.status, 'fact', 'a person named is no wider count');
+  // F11: "None reported" is words; a deaths field's zero says nothing of casualties; every side's "None" says both.
+  assert.equal(readCasualties({ fatalities: 'None reported' }).state, 'words');
+  const dz = readCasualties({ deaths: 'None' });
+  assert.deepEqual([fig(dz.deaths), dz.cas], [[0, 0, 'fact'], null]);
+  assert.deepEqual(fig(readCasualties({ casualties1: 'None', casualties2: 'None' }).cas), [0, 0, 'fact']);
+  // P6: a reference defined outside the lead is named as a reference, never by its key; an author and year is kept.
+  assert.deepEqual(plainLines('2,000 killed<ref name=":0"/>')[0].refs, ['a named reference in the article']);
+  assert.deepEqual(plainLines('2,000 killed<ref name="Smith 1990"/>')[0].refs, ['Smith 1990']);
+  // P12: materiel in words is no reading of people.
+  assert.equal(readLine('Several Stryker armoured fighting vehicles').kind, 'materiel');
+  // "4-7,000": ends a hundred times apart are not read.
+  assert.notEqual(readLine('4-7,000 civilians killed').kind, 'items');
+});
+
+test('infobox (review F2, F3, P2): a civilians field alone is said as the civilians\', a box of one later field is the whole battle\'s; an article of other dates is not read; every side is named', async () => {
+  const { readCasualties, readArticle, battleFigures } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const fig = f => (f ? [f.low, f.high, f.status, ...(f.atLeast ? ['+'] : []), ...(f.one ? ['one'] : []), ...(f.civ ? ['civ'] : [])] : null);
+  const tet = readCasualties({ casualties1: '12 Martians somewhere', casualties2: '45 Martians elsewhere', casualties3: "'''Civilian:''' 14,300 killed, 24,000 wounded, and 630,000 refugees" });
+  assert.deepEqual(fig(tet.deaths), [14300, 14300, 'fact', '+', 'civ'], 'the civilians\' only, never "one side"');
+  assert.equal(tet.sides[2].role, 'civ');
+  const may = readCasualties({ casualties3: '500–1,000 dead<br />1,500 wounded' });
+  assert.deepEqual([fig(may.deaths), fig(may.cas)], [[500, 1000, 'estimate'], [2000, 2500, 'estimate']], 'the whole event: no side missing');
+  const box = '{{Infobox military conflict|conflict=Bara massacre|date=February 1992|deaths=35 killed}}';
+  assert.equal(readArticle(box, { s: '2026-05-28', e: '2026-05-29' }).why, 'mismatch', 'Wikidata linked the 2026 massacre to the 1992 one');
+  assert.equal(readArticle(box, { s: '1992-02-12', e: '1992-02-13' }).state, 'figure');
+  const fx = battleFigures({ article: { ...readArticle(box, { s: '2026-05-28' }), title: 'Bara massacre (India)', rev: 1383066120, ts: '2026-11-01T00:00:00Z' } });
+  assert.deepEqual([fx.fd, fx.fwp, fx.detail?.mismatch?.dy], [undefined, 'mismatch', [1992, 1992]]);
+  const ongjin = readArticle('{{Infobox military conflict|date=25–26 June 1950|combatant1={{DPRK}}|combatant2={{ROK}}|casualties1=581 dead|casualties2=113 dead|casualties3=40 civilians killed}}', { s: '1950-06-25' });
+  assert.deepEqual(ongjin.labels, { 1: 'North Korea', 2: 'South Korea' });
+  const det = battleFigures({ article: { ...ongjin, title: 'Battle of Ongjin Peninsula', rev: 1, ts: '2026-11-01T00:00:00Z' } }).detail;
+  assert.deepEqual(det.sides.map(s => s.label), ['North Korea', 'South Korea', 'Civilians']);
+});
+
+test('figures (review F9): Wikidata\'s qualifiers read in full: at least, a minimum and a maximum, presumably, an unknown value\'s limits', async () => {
+  const { wdStatements, battleFigures } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const { ownFigure, rangeText } = await import('../battlefield/focus/figures.mjs');
+  const st = (amount, rank, qual, extra = {}) => ({ rank, mainsnak: amount == null ? { snaktype: 'somevalue' } : { snaktype: 'value', datavalue: { value: { amount: `+${amount}` } } }, qualifiers: { ...(qual ? { P1480: [{ datavalue: { value: { id: qual } } }] } : {}), ...extra }, references: [{ snaks: { P143: [{}] } }] });
+  const lim = (k, v) => ({ [k]: [{ datavalue: { value: { amount: `+${v}` } } }] });
+  // The Sumpul River massacre: 300, the minimum (preferred), and 600, the maximum.
+  const sumpul = wdStatements({ claims: { P1120: [st(300, 'preferred', 'Q10585806'), st(600, 'normal', 'Q10578722')] } });
+  assert.deepEqual(sumpul.map(s => [s.v, s.bound, s.q]), [[300, 'min', ['the minimum']], [600, 'max', ['the maximum']]]);
+  const b1 = { deaths: 300, ...battleFigures({ deaths: 300, wd: sumpul }) };
+  assert.deepEqual([b1.fd.low, b1.fd.high, b1.fd.status, b1.fd.uv], [300, 600, 'estimate', 'w']);
+  assert.equal(rangeText(ownFigure(b1, 'd')), '300–600');
+  // The Nanjing Massacre: 300,000, "greater than or equal to".
+  const nanjing = { deaths: 300000, ...battleFigures({ deaths: 300000, wd: wdStatements({ claims: { P1120: [st(300000, 'normal', 'Q55935291')] } }) }) };
+  assert.equal(rangeText(ownFigure(nanjing, 'd')), 'at least 300,000');
+  assert.equal(ownFigure(nanjing, 'd').status, 'estimate');
+  // "Presumably": disputed or unreliable.
+  assert.equal(battleFigures({ deaths: 50, wd: wdStatements({ claims: { P1120: [st(50, 'normal', 'Q18122778')] } }) }).fd.status, 'disputed');
+  // Sabra and Shatila: an unknown value with a lower limit of 460 and an upper of 3,500.
+  const sabra = { deaths: null, ...battleFigures({ wd: wdStatements({ claims: { P1120: [st(null, 'normal', null, { ...lim('P5447', 460), ...lim('P5448', 3500) })] } }) }) };
+  assert.deepEqual([sabra.fd.low, sabra.fd.high, sabra.fd.status, sabra.fd.src], [460, 3500, 'estimate', 'wikidata']);
+  assert.equal(rangeText(ownFigure(sabra, 'd')), '460–3,500');
+});
+
+test('figures (review F7, F10, P1, P3, P4, P8, P12): one figure for card and lists, casualties below the deaths said so, "recorded" only of a recorded count, whose figure it is', async () => {
+  const { groupBattles, figureText, figureLine, shownFigure, ownFigure, deadliest, deadliestNote } = await import('../battlefield/focus/figures.mjs');
+  // F7: casualties below the deaths beside them are no figure for the whole.
+  assert.equal(ownFigure({ deaths: 1018, fc: { v: 68, status: 'fact', src: 'wikipedia' } }, 'c').below, true);
+  // F10: Wikidata's 550 beside the infobox's 35–50: both readings, ranked by the lower.
+  const dachau = { q: 'Q1', n: 'Dachau liberation reprisals', deaths: 550, fd: { v: 550, status: 'disputed', src: 'wikidata', alt: { low: 35, high: 50, status: 'fact', src: 'wikipedia' } } };
+  assert.deepEqual([ownFigure(dachau, 'd').low, ownFigure(dachau, 'd').high], [35, 550]);
+  const list = [dachau,
+    { q: 'Q2', n: 'Whole', deaths: null, parts: ['Q3', 'Q4', 'Q5'], fd: { v: 282, status: 'fact', src: 'wikipedia', atLeast: true, one: true } },
+    { q: 'Q3', n: 'Part A', deaths: 1000, up: 'Q2', cas: 300 },
+    { q: 'Q4', n: 'Part B', deaths: null, up: 'Q2', fd: { v: 284, status: 'estimate', src: 'wikipedia' }, fc: { v: 400, status: 'estimate', src: 'wikipedia' } },
+    { q: 'Q5', n: 'Part C', deaths: null, up: 'Q2' },
+    { q: 'Q6', n: 'Battle of Somewhere', deaths: null, fd: { v: 14300, status: 'fact', src: 'wikipedia', atLeast: true, civ: true } },
+    { q: 'Q7', n: 'First Battle of Sirte', deaths: null, fd: { v: 1, status: 'fact', src: 'wikipedia', uv: 1 } },
+    { q: 'Q8', n: 'Battle of Berlin', deaths: 200000, fd: { v: 200000, status: 'estimate', src: 'wikidata', uv: 1 } },
+  ];
+  const g = groupBattles(list), whole = g.byQ.get('Q2');
+  // P1: the whole is counted through its parts (1,284 against the article's 282): its card and its line say the same.
+  assert.deepEqual([shownFigure(whole, 'd').low, shownFigure(whole, 'd').from, shownFigure(whole, 'd').status], [1284, 'parts', 'estimate']);
+  assert.equal(figureLine(whole), '1,284 deaths, the sum of its parts\' figures · Estimate');
+  // P3: the parts' casualties (700 of two parts, one part giving none) are "at least", and below the deaths: no figure
+  // for the whole.
+  const cw = shownFigure(whole, 'c');
+  assert.deepEqual([cw.low, cw.atLeast, cw.below, cw.status], [700, true, true, 'estimate']);
+  // P8, R3-01: "recorded" only of a recorded count; P12: one death.
+  assert.equal(figureText(g.byQ.get('Q7')), '1 death');
+  assert.equal(figureText({ ...whole, shown: [g.byQ.get('Q3')], fig: 282, from: 'own', ownFig: ownFigure(list[1], 'd'), kind: 'fact', wdOnly: false, sum: 1284 }), 'at least 282 deaths given for the whole; its parts\' figures add up to 1,284');
+  // P4: whose figure, in words of its own, apart from the kind; F2: the civilians' only.
+  assert.equal(figureLine(g.byQ.get('Q7')), '1 death · Recorded · the article cites nothing for it');
+  assert.equal(figureLine(g.byQ.get('Q8')), '200,000 deaths · Estimate · Wikidata, no reference');
+  assert.equal(figureLine(g.byQ.get('Q6')), 'at least 14,300 deaths · Recorded, civilians only');
+  const d = deadliest(g);
+  assert.deepEqual(d.ranked.map(n => n.b.q), ['Q8', 'Q2', 'Q1', 'Q7'], 'Dachau by its lower reading, 35; the civilians-only battle not ranked');
+  assert.match(deadliestNote(d), /^Of the 5 battles not counted under a larger one, ranked by deaths: 4 .*Not ranked: 1 with civilian deaths only\./);
+});
+
+// 16 November 2026: over a period the side layer read only the period's two ends, so France, at war on the Allied side
+// in September 1939 and again in May 1945, read as unchanged across its occupation, and a state on a side only between
+// the ends was not shown. Every month between the handles is read now (as the Kardashev Tracker's periodPowers, 7bfe77d).
+test('sides: over a period every month between the handles is read: a side held at any step, and a change at any step', async () => {
+  const { sideOf, periodSides } = await import('../battlefield/focus/sides.mjs');
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  const at = m => { const d = m + '-15'; return { m, d: d < ww2.start ? ww2.start : d }; };
+  const months = ww2.months.slice(ww2.months.indexOf('1939-09'), ww2.months.indexOf('1945-05') + 1).map(at);
+  assert.equal(sideOf(ww2, 220, '1942-03-15'), 'occ-b', 'France held by the Axis in 1942');
+  const ps = periodSides(ww2, [220, 325, 255, 2], months);
+  const runs = gw => ps.get(gw).runs.map(r => [r.side, r.from, r.to]);
+  assert.deepEqual(runs(325), [['side-b', '1940-06', '1943-08'], ['side-a', '1943-10', '1945-05']], 'Italy: Axis from June 1940 to the armistice, then co-belligerent');
+  assert.deepEqual(runs(220), [['side-a', '1939-09', '1940-06'], ['occ-b', '1940-07', '1944-08'], ['side-a', '1944-09', '1945-05']], 'France: at war, occupied, at war');
+  assert.equal(ps.get(220).changed, true, 'France changed, though both ends are Allied');
+  assert.deepEqual([ps.get(255).changed, ps.get(255).last, ps.get(255).held], [false, 'side-b', 'side-b']);
+  assert.deepEqual([ps.get(2).runs, ps.get(2).changed], [[{ side: 'side-a', from: '1941-12', to: '1945-05' }], true], 'the United States from December 1941');
+  // Ending in September 1943, Italy is on no side in the last month, and is shown in the side it last held, faded.
+  const to43 = periodSides(ww2, [325], ww2.months.slice(0, ww2.months.indexOf('1943-09') + 1).map(at)).get(325);
+  assert.deepEqual([to43.last, to43.held, to43.earlier], ['', 'side-b', true]);
+  // The handles together: one month, nothing changed.
+  const one = periodSides(ww2, [220], [at('1942-03')]).get(220);
+  assert.deepEqual([one.last, one.changed, one.earlier], ['occ-b', false, false]);
+});
+
 // Review of 15 November 2026 (historian, professor, strategist): the build rules in scripts/rules.mjs.
 test('rules: a battle is part of a war only through items within the war\'s dates (the Iraq War is not the War in Afghanistan)', async () => {
   const { partsWithin } = await import('../battlefield/focus/scripts/rules.mjs');
@@ -328,6 +626,86 @@ test('the Hub\'s War Focus battles give the figure counted once, where it is fro
   for (const f of ['deaths_counted_once', 'figure_from', 'also_part_of']) assert.match(spec, new RegExp(`\\['${f}', `), `${f} described`);
   assert.match(spec, /add deaths_counted_once over the rows with no part_of/);
   assert.doesNotMatch(spec, /which already includes its parts/);
+});
+
+// BF-08: every battle in one of five states; every figure with its kind and source; every detail named by its revision
+// or statement; the completeness counts the data's; nothing that is no figure written as one.
+test('data: every battle has a figure with its kind and source, a recorded zero, or a reason; its detail names the revision or statement read', async () => {
+  const { groupBattles, stateOf, completeness, ownFigure } = await import('../battlefield/focus/figures.mjs');
+  const d = await dataFile('battlefield/focus/data/index.json');
+  assert.match(d.sources.wikipedia, /CC BY-SA 4\.0/);
+  const states = { figure: 0, zero: 0, parts: 0, unread: 0, none: 0 }, bad = [];
+  let all = 0, fu = 0;
+  for (const x of d.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`), det = (await dataFile(`battlefield/focus/data/figures/${x.id}.json`)).battles, g = groupBattles(w.battles);
+    for (const b of w.battles) {
+      all++;
+      const s = stateOf(b, g.byQ.get(b.q));
+      states[s]++;
+      for (const f of [b.fd, b.fc].filter(Boolean)) {
+        if (!['fact', 'estimate', 'disputed'].includes(f.status) || !['wikidata', 'wikipedia'].includes(f.src)) bad.push(`${x.id} ${b.q}: ${JSON.stringify(f)}`);
+        const lo = f.low ?? f.v, hi = f.high ?? f.v;
+        if (!(Number.isInteger(lo) && Number.isInteger(hi) && lo >= 0 && hi >= lo)) bad.push(`${x.id} ${b.q}: no sure range ${JSON.stringify(f)}`);
+        if (f.src === 'wikipedia' && !det[b.q]?.wp?.rev) bad.push(`${x.id} ${b.q}: a Wikipedia figure without the revision read`);
+      }
+      if (b.fs && (ownFigure(b, 'd') || ownFigure(b, 'c'))) bad.push(`${x.id} ${b.q}: a state of no figure beside a figure`);
+      if (!['figure', 'zero', 'parts'].includes(s) && b.fs != null && !['words', 'unread'].includes(b.fs)) bad.push(`${x.id} ${b.q}: no figure and an unknown reason (${b.fs})`);
+      if (s === 'none' && b.w && !b.fwp && b.fs !== 'words') bad.push(`${x.id} ${b.q}: an article but no word on why it gave no figure`);
+      if (b.fu) { fu++; if (!(b.s >= '1989-01-01' && b.fu.n > 0 && b.fu.km === 25 && b.fu.v >= 0)) bad.push(`${x.id} ${b.q}: UCDP nearby ${JSON.stringify(b.fu)}`); if (s === 'figure') bad.push(`${x.id} ${b.q}: UCDP nearby beside a figure`); }
+      for (const st of det[b.q]?.wd || []) if (!/^P(1120|1590|1339|1446)$/.test(st.p) || !['preferred', 'normal'].includes(st.rank)) bad.push(`${x.id} ${b.q}: statement ${JSON.stringify(st)}`);
+      if (det[b.q]?.wp && !(det[b.q].wp.rev > 0 && /^\d{4}-\d\d-\d\dT/.test(det[b.q].wp.ts) && det[b.q].wp.t)) bad.push(`${x.id} ${b.q}: revision ${JSON.stringify(det[b.q].wp)}`);
+    }
+    // The completeness counts are the data's: each battle in exactly one state.
+    const c = completeness(w.battles, g);
+    assert.equal(c.figure + c.zero + c.parts + c.unread + c.none, w.battles.length, `${x.id}: five states`);
+    assert.equal(c.recorded + c.estimate + c.disputed, c.figure, `${x.id}: kinds`);
+  }
+  assert.deepEqual(bad.slice(0, 20), []);
+  assert.equal(Object.values(states).reduce((a, v) => a + v, 0), all);
+  // Most battles have a figure now (BF-08 found 495 with deaths and 18 with casualties of 4,242 on 16 November 2026).
+  assert.ok(states.figure > all / 2, `${states.figure} of ${all} battles with a figure`);
+});
+
+// The review of 16 November 2026 (R3-03, R3-04): the scheduled refresh keeps the articles it read between runs, has the
+// time to read them, gives up on a source that is down instead of running out of time, and rebuilds the Master Index's
+// War Focus lines in its own commit, so the lake never states last month's figures.
+test('workflow: the refresh caches the articles, has an hour, stops asking a source that is down, and rebuilds the Master Index lines it commits', () => {
+  const yml = readFileSync(new URL('../.github/workflows/warfocus-refresh.yml', import.meta.url), 'utf8');
+  const build = readFileSync(new URL('../battlefield/focus/scripts/build.mjs', import.meta.url), 'utf8');
+  assert.match(yml, /timeout-minutes: 60/);
+  assert.match(yml, /uses: actions\/cache@v4\s+with:\s+path: \/tmp\/warfocus-src\/wikipedia/);
+  assert.match(yml, /node lake\/scripts\/build\.mjs --only battlefield && node --test tests\/master-index\.test\.mjs/);
+  assert.match(yml, /git checkout -- lake\/data/);
+  assert.match(yml, /paths: battlefield\/focus\/data monthly\/data lake\/data/);
+  assert.match(build, /signal: AbortSignal\.timeout\(TIMEOUT\)[\s\S]*signal: AbortSignal\.timeout\(TIMEOUT\)/, 'both sources give up a hung request');
+  assert.match(build, /if \(breaker\.wikipedia >= DOWN\) return null/);
+  assert.match(build, /breaker\.wikidata < DOWN/);
+});
+
+// The review of 16 November 2026: an article of other dates gives no figure (F3); every side is named (P2); casualties
+// shown as a battle's are never fewer than its deaths (F7, P3); the civilians' figure alone is never ranked (F2).
+test('data: every Wikipedia figure is from an article of the battle\'s own years; every side named; casualties never shown below the deaths', async () => {
+  const { groupBattles, shownFigure, deadliest } = await import('../battlefield/focus/figures.mjs');
+  const { fitsYears } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const d = await dataFile('battlefield/focus/data/index.json'), bad = [];
+  let read = 0;
+  for (const x of d.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`), det = (await dataFile(`battlefield/focus/data/figures/${x.id}.json`)).battles, g = groupBattles(w.battles);
+    for (const b of w.battles) {
+      const wp = det[b.q]?.wp;
+      if (wp) { read++; if (wp.dy && !fitsYears(wp.dy, b.s, b.e)) bad.push(`${x.id} ${b.q} ${b.n}: its article's box is dated ${wp.dy.join('–')}`); }
+      if (b.fwp === 'mismatch' && (b.fd?.src === 'wikipedia' || b.fc?.src === 'wikipedia')) bad.push(`${x.id} ${b.q}: a figure from an article of other dates`);
+      for (const s of det[b.q]?.sides || []) if ((s.d || s.c) && (!s.label || /^Side \d/.test(s.label))) bad.push(`${x.id} ${b.q} ${b.n}: a side with a figure and no name (${s.n})`);
+      const n = g.byQ.get(b.q), df = shownFigure(n, 'd'), cf = shownFigure(n, 'c');
+      if (df && cf && cf.high < df.low && !cf.below) bad.push(`${x.id} ${b.q} ${b.n}: casualties ${cf.high} shown below deaths ${df.low}`);
+    }
+    for (const n of deadliest(g).ranked) if (n.from === 'own' && n.ownFig.civ) bad.push(`${x.id} ${n.b.q}: ranked on the civilians' deaths alone`);
+  }
+  assert.ok(read > 2000, `${read} articles read`);
+  assert.deepEqual(bad.slice(0, 20), []);
+  // The Barah massacre of 2026 is not given the Bara massacre of 1992's 35 dead.
+  const sudan = await dataFile('battlefield/focus/data/wars/sudan-2023.json'), barah = sudan.battles.find(b => b.q === 'Q140245459');
+  if (barah?.w === 'Bara massacre (India)') assert.equal(barah.fwp, 'mismatch');
 });
 
 test('data: every whole and part in a war\'s list carries the link both ways; the atomic bombings head Hiroshima and Nagasaki', async () => {
@@ -638,4 +1016,100 @@ test('a war opens on its first two months, with both handles visible one month a
     await page.waitForFunction(() => document.querySelector('#month')?.dataset.value === '1942-01', null, { timeout: 20000 });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
+});
+
+// BF-08 (16 November 2026): every battle shows a figure with its kind and source, a recorded zero, "Figures not read" or
+// "No figure found" with what was searched; never a bare dash, in the window, the lists, the table or the tooltips.
+test('page: no battle shows a bare dash; the Battle of Wawon gives each side\'s losses with the source and revision read', pageTest, async t => {
+  // Every expectation is worked out from the committed data by figures.mjs, never written in (review R3-02): an edit to
+  // an article's box or a new Wikidata link changes the data at the next refresh, and must not stop the deploy gate.
+  const kw = await dataFile('battlefield/focus/data/wars/korean-war.json'), det = await dataFile('battlefield/focus/data/figures/korean-war.json');
+  const { groupBattles, completeness, completenessText, shownFigure, rangeText, kindWords, searched, stateOf, figureLine } = await import('../battlefield/focus/figures.mjs');
+  const g = groupBattles([...kw.battles, ...(kw.undated || [])]);
+  const by = n => kw.battles.find(b => b.w === n || b.n === n);
+  // Wawon (the battle of Jude's screenshot), or failing it any battle with figures from both sides of its article.
+  const wawon = (det.battles[by('Battle of Wawon')?.q]?.wp && by('Battle of Wawon')) || kw.battles.find(b => det.battles[b.q]?.sides?.filter(s => s.d || s.c).length >= 2);
+  const haman = kw.battles.find(b => shownFigure(g.byQ.get(b.q), 'd')?.status === 'estimate');
+  const third = kw.battles.find(b => stateOf(b, g.byQ.get(b.q)) === 'none' && b.s);
+  // The card and the list say the same of every battle (review P1): a few of each kind, wholes counted through parts too.
+  const sample = [...new Set([...kw.battles.filter(b => g.byQ.get(b.q).from === 'parts').slice(0, 3), ...kw.battles.filter(b => shownFigure(g.byQ.get(b.q), 'c')?.below).slice(0, 2), ...kw.battles.filter(b => stateOf(b, g.byQ.get(b.q)) === 'figure').slice(0, 3)])];
+  const browser = await launch();
+  t.after(() => browser.close());
+  for (const width of [1440, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/battlefield/focus/#war=korean-war&m=1953-07`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#fig-complete', { timeout: 20000 });
+    // The completeness line is the data's.
+    const c = completeness(kw.battles, groupBattles(kw.battles));
+    assert.equal(await page.locator('#fig-complete').innerText(), completenessText(c), `${width}px: the completeness line`);
+    assert.match(await page.locator('#deadliest-note').innerText(), /^Of the [\d,]+ battles not counted under a larger one, ranked by deaths: [\d,]+.*Not added into the war's deaths by month\.$/);
+    // No bare dash in the panel's lists of battles.
+    const bare = await page.evaluate(() => [...document.querySelectorAll('#panel .blist li small')].filter(s => /(^|·)\s*[–-]\s*($|·)/.test(s.textContent)).length);
+    assert.equal(bare, 0, `${width}px: a bare dash in the battle lists`);
+    // The Battles tab: each figure with its kind; none spans both cells and says what was searched.
+    await page.evaluate(() => document.querySelector('#tab-battles').click());
+    await page.waitForSelector('#battles-rows tr', { timeout: 10000 });
+    const cells = await page.evaluate(() => [...document.querySelectorAll('#battles-rows td.num, #battles-rows td.nofig-cell')].map(td => td.textContent.trim()));
+    assert.ok(cells.length >= kw.battles.length, `${width}px: ${cells.length} figure cells`);
+    assert.ok(!cells.some(x => /^[–-]?$/.test(x)), `${width}px: an empty or dashed figure cell in the Battles tab`);
+    assert.equal(await page.locator('#battles-note').innerText(), completenessText(c));
+    const sideways = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    assert.equal(sideways, 0, `${width}px scrolls sideways`);
+    // Wawon's window: each side's figure with its kind, as the data has them, and the revision read.
+    const open = async q => {
+      await page.evaluate(() => document.querySelector('#modal-close').click());
+      await page.evaluate(x => document.querySelector(`#battles-rows [data-b="${x}"]`).click(), q);
+      await page.waitForFunction(() => document.querySelector('#fig-detail')?.getAttribute('aria-busy') === 'false', null, { timeout: 10000 });
+      return page.evaluate(() => ({ boxes: [...document.querySelectorAll('#modal-body .stat.fig')].map(s => s.innerText), detail: document.querySelector('#fig-detail').innerText, focus: !!document.activeElement?.closest('#modal') }));
+    };
+    const card = await open(wawon.q), wd = shownFigure(g.byQ.get(wawon.q), 'd');
+    assert.ok(card.focus, 'the keyboard is in the window (review P11)');
+    if (wd) { assert.ok(card.boxes[0].includes(rangeText(wd)), `${card.boxes[0]} has ${rangeText(wd)}`); assert.match(card.boxes[0], new RegExp(kindWords(wd.status), 'i')); }
+    for (const s of det.battles[wawon.q].sides.filter(s => s.d)) assert.ok(card.detail.includes(`${rangeText(s.d)} killed`), `${s.label}: ${rangeText(s.d)} killed`);
+    for (const s of det.battles[wawon.q].sides) assert.ok(s.label && !/^Side \d/.test(s.label) && card.detail.includes(s.label), `every side named: ${s.label}`);
+    assert.match(card.detail, new RegExp(`revision ${det.battles[wawon.q].wp.rev}`));
+    assert.match(card.detail, /CC BY-SA 4\.0/);
+    assert.ok(!card.boxes.some(x => /^\s*(Deaths|Casualties)\s*[–-]\s*$/m.test(x)), 'no dash in the boxes');
+    // An estimate says so in words; a battle with nothing says what was searched.
+    assert.match((await open(haman.q)).boxes[0], /Estimate/i);
+    assert.match((await open(third.q)).boxes[0], /No figure found/);
+    assert.equal(await page.locator('#modal-body .searched').innerText(), searched(third));
+    // The card's figure and kind are the list's, for wholes counted through their parts as for any battle (review P1).
+    for (const b of sample) {
+      const n = g.byQ.get(b.q), line = figureLine(n), boxes = (await open(b.q)).boxes;
+      for (const [k, m] of [[0, 'd'], [1, 'c']]) {
+        const f = shownFigure(n, m);
+        if (!f) continue;
+        if (f.below) { assert.match(boxes[k], /Not given for the whole/, `${b.n}: casualties below the deaths`); continue; }
+        assert.ok(boxes[k].includes(rangeText(f)) && new RegExp(kindWords(f.status), 'i').test(boxes[k]), `${b.n} ${m}: ${boxes[k]} against ${rangeText(f)} ${kindWords(f.status)}`);
+        if (k === 0) assert.ok(line.startsWith(rangeText(f)) && line.includes(kindWords(f.status)), `${b.n}: the list says ${line}`);
+      }
+    }
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0, `${width}px: the window scrolls sideways`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('page: over a period the side layer reads every month: Italy, Axis until its armistice, is shown faded in September 1943', pageTest, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  // From October 1939 (a start on the war's first month rests there: the war so far, not a period).
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1943-09&f=1939-10`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelectorAll('path.state').length > 10 && /Oct 1939/.test(document.querySelector('#date')?.textContent || ''), null, { timeout: 20000 });
+  const cls = gw => page.evaluate(g => d3.selectAll('path.state').filter(f => f.properties.gw === g).attr('class'), gw);
+  assert.match(await cls(325), /\bside-b earlier\b/, 'Italy in the side it last held, faded');
+  assert.match(await cls(220), /\bocc-b\b.*\bchanged\b/, 'France held by the Axis, and changed in the period');
+  assert.match(await page.locator('#legend').innerText(), /On a side earlier in the period/);
+  assert.match(await page.locator('#caption').innerText(), /faded with a broken outline in the side they last held/);
+  // The handles together: as before, nothing faded or outlined.
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1943-09'; });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'September 1943', null, { timeout: 10000 });
+  assert.equal(await page.evaluate(() => document.querySelectorAll('path.state.earlier').length), 0);
+  assert.deepEqual(errors, []);
 });

@@ -6,7 +6,8 @@
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
 import { displayName } from '../history/names.mjs';
-import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE } from './figures.mjs';
+import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched } from './figures.mjs';
+import { sideOf as sideAt, periodSides, inRange, runText } from './sides.mjs';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -46,14 +47,10 @@ let svg, g, gStates, gLabels, gCells, gBattles, path, projection, zoom, features
 const hits = { gws: new Set(), qids: new Set() }; // what Documentary mode is discussing: states (GW codes) and battles (QIDs)
 
 /* ---------------------------------------------------------------- side logic */
-const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
-function sideOf(gw, date) {
-  const w = state.war;
-  for (const c of w.control) if (c.gw === gw && inRange(date, c.from, c.to)) return 'occ-' + c.side;
-  for (const s of ['a', 'b']) if (w.sides[s].states.some(x => x.gw === gw && inRange(date, x.from, x.to))) return 'side-' + s;
-  if (w.theatre.includes(gw)) return 'theatre';
-  return '';
-}
+// sides.mjs: a state's side at a date, and over a period every month between the handles (16 November 2026).
+const sideOf = (gw, date) => sideAt(state.war, gw, date);
+// The months of the period shown, each with the date read for it (dateOf).
+const periodDates = () => { const out = []; for (let k = state.f; k <= state.m; k++) out.push({ m: state.war.months[k], d: dateOf(k) }); return out; };
 const dateOf = i => { const w = state.war, d = w.months[i] + '-15'; return d < w.start ? w.start : w.end && d > w.end ? w.end : d; };
 
 /* ---------------------------------------------------------------- map */
@@ -132,11 +129,22 @@ function draw(full) {
   // its first month.
   const live = features.filter(f => f.properties.s <= date && f.properties.e >= date);
   const prevDate = i ? dateOf(i - 1) : null;
-  state.changed = p ? live.filter(f => sideOf(f.properties.gw, date) !== sideOf(f.properties.gw, startDate)).length : 0; // for the legend
+  // Over a period, every month between the handles (sides.mjs periodSides): a state is coloured by its side in the last
+  // month; one on a side only earlier in the period is drawn faded with a broken outline in the side it last held; a
+  // change of side or occupation at any month is outlined. Borders are the last month's.
+  const ps = p ? periodSides(w, [...new Set(live.map(f => f.properties.gw))], periodDates()) : null;
+  const look = gw => { const s = sideOf(gw, date), x = ps?.get(gw); return { s, cls: s || (x?.earlier ? `${x.held} earlier` : ''), changed: !!x?.changed, runs: x?.runs || [] }; };
+  state.changed = p ? live.filter(f => look(f.properties.gw).changed).length : 0; // for the legend
+  state.earlier = p ? live.filter(f => ps.get(f.properties.gw)?.earlier).length : 0;
   gStates.selectAll('path').data(live, f => f.properties.gw + f.properties.s).join('path')
     .attr('d', path)
-    .attr('class', f => { const gw = f.properties.gw, s = sideOf(gw, date); const was = prevDate ? sideOf(gw, prevDate) : s; return `state ${s}${!full && s !== was ? ' joined' : ''}${p && s !== sideOf(gw, startDate) ? ' changed' : ''}${hits.gws.has(gw) ? ' prp-focus-hit' : ''}`; })
-    .on('mousemove', (e, f) => { const gw = f.properties.gw, s = sideOf(gw, date), then = p ? sideOf(gw, startDate) : s; tip(e, `<strong>${esc(displayName(gw, f.properties.name, date))}</strong>${sideText(s)}${then !== s ? `<span class="tip-when">${esc(monthLabel(a))}: ${esc(sideWord(then))}</span>` : ''}`); })
+    .attr('class', f => { const gw = f.properties.gw, l = look(gw); const was = prevDate ? sideOf(gw, prevDate) : l.s; return `state ${l.cls}${!full && l.s !== was ? ' joined' : ''}${l.changed ? ' changed' : ''}${hits.gws.has(gw) ? ' prp-focus-hit' : ''}`; })
+    .on('mousemove', (e, f) => {
+      const gw = f.properties.gw, l = look(gw);
+      // Over a period, each side it held and when, month by month (a state on none of them in the last month says so).
+      const when = p && (l.changed || !l.s) && l.runs.length ? `<span class="tip-when">${l.runs.map(r => `${esc(cap(sideWord(r.side)))}: ${esc(runText(r))}`).join('<br>')}</span>` : '';
+      tip(e, `<strong>${esc(displayName(gw, f.properties.name, date))}</strong>${l.s ? sideText(l.s) : l.runs.length ? `<br>Not at war in ${esc(monthLabel(m))}` : ''}${when}`);
+    })
     .on('mouseleave', hideTip);
   // Labels for the states taking part.
   const named = live.filter(f => sideOf(f.properties.gw, date) && path.area(f) > 900);
@@ -262,7 +270,8 @@ function renderLegend() {
   if (w.sides.b.states.length) items.push(`<li><span class="swatch" style="background:var(--side-b)"></span>${esc(w.sides.b.label)}</li>`);
   if (w.control.length) items.push('<li><span class="swatch hatch"></span>Occupied (whole country)</li>');
   if (w.theatre.length) items.push('<li><span class="swatch" style="background:var(--contested)"></span>Contested (civil war)</li>');
-  if (p && state.changed) items.push(`<li><span class="swatch changed"></span>Side or occupation changed since ${esc(monthLabel(w.months[state.f]))}</li>`);
+  if (p && state.earlier) items.push('<li><span class="swatch earlier"></span>On a side earlier in the period, not in its last month</li>');
+  if (p && state.changed) items.push('<li><span class="swatch changed"></span>Side or occupation changed during the period</li>');
   if (w.battles.some(b => b.lat != null)) items.push(p
     ? `<li><span class="swatch dot b-now"></span>Battle under way in ${esc(m)}</li><li><span class="swatch dot b-in"></span>Battle in the period</li><li><span class="swatch dot b-past"></span>Earlier battle</li>`
     : '<li><span class="swatch dot b-now"></span>Battle this month</li><li><span class="swatch dot b-past"></span>Earlier battle</li>');
@@ -272,7 +281,7 @@ function renderLegend() {
 function renderCaption() {
   const w = state.war, m = monthLabel(w.months[state.m]);
   if (!isPeriod()) { $('#caption').textContent = `${w.name}, ${m}: the states at war coloured by side (${w.sides.a.label} blue, ${w.sides.b.label} red) on the borders of the day${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}; battles under way are ringed${w.events ? ', UCDP clashes in red' : ''}.`; return; }
-  $('#caption').textContent = `${w.name}, ${periodLabel()}: the states at war coloured by their side in ${m} (${w.sides.a.label} blue, ${w.sides.b.label} red) on its borders${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}${state.changed ? `, and outlined where their side or occupation changed since ${monthLabel(w.months[state.f])}` : ''}; battles under way in the period are drawn full and those under way in ${m} ringed${w.events ? '; UCDP clashes of the period are grouped by place, in red, sized by deaths a month and faded where none fell in its last month' : ''}.`;
+  $('#caption').textContent = `${w.name}, ${periodLabel()}: the states at war coloured by their side in ${m} (${w.sides.a.label} blue, ${w.sides.b.label} red) on its borders${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}${state.earlier ? ', those on a side only earlier in the period faded with a broken outline in the side they last held' : ''}${state.changed ? ', and outlined where their side or occupation changed in any month of the period' : ''}; battles under way in the period are drawn full and those under way in ${m} ringed${w.events ? '; UCDP clashes of the period are grouped by place, in red, sized by deaths a month and faded where none fell in its last month' : ''}.`;
 }
 
 /* ---------------------------------------------------------------- panel */
@@ -287,12 +296,13 @@ function seeMoreList(items, limit, title, cls = '', full = null) {
 // A whole and its parts (figures.mjs groupBattles, built in loadWar): each battle's node, its figure in words, and
 // what it is part of or has as parts in this war's list.
 const nodeOf = b => state.war?.groups?.byQ.get(b.q);
-const figureOf = b => { const n = nodeOf(b); return n ? figureText(n) : b.deaths ? `${num(b.deaths)} deaths` : b.cas ? `${num(b.cas)} casualties` : ''; };
+// Every battle shows a figure with its kind, a recorded zero, "Figures not read" or "No figure found" (BF-08): never nothing.
+const figureOf = b => { const n = nodeOf(b); return n ? figureLine(n) : b.deaths ? `${num(b.deaths)} deaths` : b.cas ? `${num(b.cas)} casualties` : 'No figure found'; };
 function relation(b, { under = false } = {}) {
   const n = nodeOf(b); if (!n) return '';
   const out = [];
   if (n.up && !under) out.push(`part of ${n.up.b.n}`);
-  if (n.parts.length) out.push(`${n.parts.length} part${n.parts.length === 1 ? '' : 's'} listed${n.shown.length && n.shown.length < n.parts.length ? `, ${n.shown.length} with recorded figures` : ''}`);
+  if (n.parts.length) out.push(`${n.parts.length} part${n.parts.length === 1 ? '' : 's'} listed${n.shown.length && n.shown.length < n.parts.length ? `, ${n.shown.length} with figures` : ''}`);
   return out.join(' · ');
 }
 // One line of a list; `inner`, a whole's parts under it (the deadliest battles), `under` when it stands under its whole.
@@ -306,7 +316,7 @@ function battleItem(b, { inner = '', under = false } = {}) {
 // first; in the panel (`few`) three parts a heading, the rest counted and in the window's full list.
 function rankedItem(n, { under = false, few = 0 } = {}) {
   const parts = few ? n.shown.slice(0, few) : n.shown, more = n.shown.length - parts.length;
-  const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more part${more === 1 ? '' : 's'} with recorded figures (See all)</li>` : ''}</ul>` : '';
+  const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more part${more === 1 ? '' : 's'} with figures (See all)</li>` : ''}</ul>` : '';
   return battleItem(n.b, { under, inner });
 }
 // The states on a side that month, largest first, so the major powers lead the list.
@@ -344,7 +354,10 @@ function renderPanel() {
   const span = b => Date.parse(b.e || b.s) - Date.parse(b.s), begins = b => b.s.slice(0, 7) >= a && b.s.slice(0, 7) <= m;
   const now = w.battles.filter(b => underWay(b, a, m)).sort((x, y) => begins(y) - begins(x) || span(x) - span(y));
   // Each death once (figures.mjs groupBattles): wholes and lone battles, a whole's parts under it, never beside it.
-  const deadliest = w.groups.ranked.filter(n => n.b.s);
+  // Ranked by deaths only, by the lowest figure given (figures.mjs deadliest); a battle dated only to its decade is in no
+  // month, so it is counted, not ranked, as before.
+  const dl = rankDeadliest(w.groups), deadliest = dl.ranked.filter(n => n.b.s), undatedRanked = dl.ranked.length - deadliest.length;
+  const dlShown = { ...dl, ranked: deadliest, estimates: deadliest.filter(n => n.kind === 'estimate').length, disputed: deadliest.filter(n => n.kind === 'disputed').length, none: dl.none + undatedRanked };
   const months = w.months.length, years = Math.floor(months / 12);
   const sides = ['a', 'b'].map(s => {
     const on = statesOn(s, date), list = on.length > 14 ? `${on.slice(0, 14).join(', ')} <button class="more" data-pop="${addPop(`${w.sides[s].label}, ${monthLabel(m)}`, `<p>${esc(on.join(', '))}</p>`)}">+${on.length - 14} more</button>` : esc(on.join(', '));
@@ -369,7 +382,7 @@ function renderPanel() {
     <div class="sides" style="margin-top:10px">${sides}</div>
     <div class="stat-row">
       <div class="stat"><span>Deaths, whole war</span><b>${shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}${w.covered ? `, ${esc(monthLabel(w.covered[0]))} – ${esc(monthLabel(w.covered[1]))} only` : ''}</small></div>
-      <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length + w.undated.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped${w.undated.length ? ` · ${num(w.undated.length)} undated` : ''}</small></div>
+      <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length + w.undated.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped${w.undated.length ? ` · ${num(w.undated.length)} undated` : ''} · <button type="button" class="fig-jump">figures for ${num(w.fig.figure)}</button></small></div>
       ${p ? `<div class="stat"><span>Deaths in the period</span><b>${shown(pd.deaths, pd.est)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${shown(cumulative[i], estimatedTo[i], { total: i > 0 })} by ${esc(monthLabel(m))}</small></div>`
         : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${soFarNote(w, m, cumulative[i])}</small></div>`}
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
@@ -380,14 +393,18 @@ function renderPanel() {
     <h3>${esc(periodLabel())} <span class="count">${now.length} battle${now.length === 1 ? '' : 's'} or operation${now.length === 1 ? '' : 's'} under way</span></h3>
     ${now.length ? seeMoreList(now.map(b => battleItem(b)), 8, `${w.name} · ${periodLabel()}`) : `<p class="empty">No battles or operations recorded as under way ${p ? 'in the period' : 'this month'}.</p>`}
     ${top.length ? `<h3>Deadliest clashes ${p ? 'in the period' : 'this month'} <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
-    ${deadliest.length ? `<h3>Deadliest battles of the war</h3>${seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null)}` : ''}
-    <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(b => battleItem(b)), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
+    <h3>Deadliest battles of the war</h3>${deadliest.length ? seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null) : '<p class="empty">No battle of this war has a deaths figure.</p>'}
+    <p class="fig-note" id="deadliest-note">${esc(deadliestNote(dlShown))}</p>
+    <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3><p class="fig-note" id="fig-complete">${esc(completenessText(w.fig))}</p>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(b => battleItem(b)), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
     <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
-      <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates and deaths as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
+      <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
+      <b>Battle figures:</b> ${esc(FIGURE_METHOD)}
       <b>Wholes and their parts:</b> where Wikidata records an operation and its own parts and both are listed here (one part of the other, or the other among its parts), each death is counted once: the whole is shown as a heading over its parts, never ranked beside them, ranked by the figure recorded for the whole where there is one, else by the sum of its parts' recorded figures, and says which it is (where its parts' figures add up to more than the whole's own, that is said beside it); a figure Wikidata gives the whole that is one of its parts' own is left to that part, and a part of two wholes is counted under one of them, which its window names. A figure counted long after the event (the atomic bombings' registers of the dead, counted to 2013) gives the year it was counted, beside the share counted then: such a count can include people who died of their injuries in later years. On the map a whole is drawn only by what its figure has beyond its parts' marks. The count of battles and operations counts the whole and each part, as Wikidata lists them.
       <b>Territory:</b> CShapes borders as they stood that month${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded as a whole' : ''}. Front lines are not drawn: no open data records them month by month.</p>`;
   $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
   $('#panel').querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openPop(popouts.get(b.dataset.pop)));
+  // Beside the count of battles, how many have figures; the full line sits over the list of all battles (review P9).
+  const jump = $('#panel .fig-jump'); if (jump) jump.onclick = () => $('#fig-complete')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 // Beside the running total, its share of the war's; outside the months the source covers (w.covered: Correlates of
 // War's own years, as the Second Sino-Japanese War's 1937–41), how far the figure goes, not a share as if no one died.
@@ -397,7 +414,7 @@ function soFarNote(w, m, n) {
   return `${Math.round(n / Math.max(1, w.totalDeaths) * 100)}% of the war's total`;
 }
 function openPop(p) {
-  $('#modal-title').textContent = p.title; $('#modal-body').innerHTML = p.html; $('#modal').hidden = false;
+  $('#modal-title').textContent = p.title; $('#modal-body').innerHTML = p.html; showModal();
   $('#modal-body').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
 }
 function openBattle(b) {
@@ -406,16 +423,108 @@ function openBattle(b) {
   $('#modal-title').innerHTML = `<span data-qid="${esc(b.q)}">${esc(b.n)}</span>`;
   $('#modal-body').innerHTML = `<p class="sub">${esc(bDates(b))} · part of ${esc(w.name)}</p>
     ${b.desc ? `<p>${esc(b.desc.replace(/^./, c => c.toUpperCase()))}.</p>` : ''}
-    <div class="stat-row"><div class="stat"><span>Deaths</span><b>${b.deaths ? num(b.deaths) : '–'}</b>${b.dAt ? `<small>counted in ${esc(b.dAt.slice(0, 4))}: ${esc(LATE)}</small>` : ''}</div><div class="stat"><span>Casualties</span><b>${b.cas ? num(b.cas) : '–'}</b></div></div>
+    <div class="stat-row figs">${figBox(b, 'd')}${figBox(b, 'c')}</div>
+    ${figNone(b)}
+    <div id="fig-detail" class="fig-detail" data-q="${esc(b.q)}" aria-live="polite" aria-busy="true"><p class="fig-note">Reading the sources…</p></div>
     ${wholeHtml(b)}
     ${b.w ? `<a class="btn" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <a class="btn" href="https://www.wikidata.org/wiki/${esc(b.q)}" target="_blank" rel="noreferrer">Wikidata ↗</a>
     ${mi >= 0 && mi !== state.m ? `<button class="btn" id="jump">Go to ${esc(monthLabel(w.months[mi]))}</button>` : ''}
     ${b.lat == null ? '<p class="empty">No coordinates recorded, so it is not on the map.</p>' : !b.s ? '<p class="empty">With no date recorded, it is not on the map.</p>' : ''}`;
-  $('#modal').hidden = false;
+  showModal();
   $('#modal-body').querySelectorAll('[data-b]').forEach(x => x.onclick = () => openBattle(battleOf(x.dataset.b)));
   // Its first month: the month shown moves there; one before a period's start widens the period to begin there.
   const j = $('#jump'); if (j) j.onclick = () => { closeModal(); if (isPeriod() && mi < state.f) setPeriod(w.months[mi], w.months[state.m]); else setMonth(mi); };
+  // Each side's figures, the readings and the sources read (data/figures/<war>.json, loaded when a window first opens).
+  detailOf(w.id).then(d => { const box = $('#fig-detail'); if (box && box.dataset.q === b.q && state.war === w) { box.innerHTML = detailHtml(b, d?.battles?.[b.q], d); box.setAttribute('aria-busy', 'false'); } });
+}
+// The window takes the keyboard while open (review P11): focus moves into it, Tab stays inside it, and on closing goes
+// back to what opened it.
+let opener = null;
+function showModal() {
+  if ($('#modal').hidden) opener = document.activeElement;
+  $('#modal').hidden = false;
+  $('#modal-close').focus();
+}
+$('#modal').addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return;
+  const items = [...$('#modal').querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(x => x.offsetParent !== null);
+  if (!items.length) return;
+  const first = items[0], last = items.at(-1);
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+/* ---------------------------------------------------------------- a battle's figures (BF-08) */
+// How this is worked out, as the panel's method note and the page's Method say it.
+const FIGURE_METHOD = 'Deaths and casualties come from Wikidata, then the casualties box of the battle\'s English Wikipedia article (the revision read is named in its window); since 1989, where neither gives one, UCDP\'s recorded clashes within 25 km in the battle\'s dates are shown apart and never ranked. Deaths are the killed; casualties add the wounded, missing and captured; neither stands in for the other, and casualties fewer than the deaths beside them are said not to be given for the whole. Recorded: one source\'s count; where the other side gives none it stays Recorded, marked "at least" and "one side". Estimate: approximate, a range, or VM adding the sides. Disputed or unreliable: a claim, a figure marked doubtful, or sources differing by half again (both are shown, Wikidata\'s and the article\'s). A figure that is the civilians\' alone says so and is not ranked. A box VM cannot read surely is left as "Figures not read", never guessed. The deadliest are ranked by deaths, by the lowest figure given (the lower of two sources that differ). Battle figures are never added into the war\'s deaths by month.';
+const details = new Map();
+const detailOf = id => details.get(id) || details.set(id, fetch(`data/figures/${id}.json`).then(r => (r.ok ? r.json() : null)).catch(() => null)).get(id);
+const FIG_SRC = { wikidata: 'Wikidata', wikipedia: 'the Wikipedia infobox' };
+// One of the window's two boxes: a figure with its kind and source, a recorded zero, the sum of its parts, or why none.
+// The same figure, kind and scope as the battle's line in every list and tooltip (figures.mjs shownFigure, review P1).
+function figBox(b, m) {
+  const label = m === 'd' ? 'Deaths' : 'Casualties', n = nodeOf(b), raw = m === 'd' ? b.fd : b.fc;
+  const f = n ? shownFigure(n, m) : ownFigure(b, m), own = ownFigure(b, m);
+  // Casualties below the deaths beside them are no figure for the whole (the killed are casualties): said so, with what
+  // the figures given add up to (review F7, P3).
+  if (f?.below) return `<div class="stat fig none"><span>${label}</span><b class="nofig">Not given for the whole</b><small>${esc(f.from === 'parts' ? `its parts with a figure add up to ${rangeText(f)}, fewer than the deaths` : `the figures given add up to ${rangeText(f)}, fewer than the deaths: not every side gives its casualties`)}</small></div>`;
+  if (f) {
+    const kind = `${kindWords(f.status)}${f.civ ? ', civilians only' : f.one ? ', one side only' : ''}`;
+    const note = f.from === 'parts'
+      ? ['the sum of its listed parts\' figures', own ? `the article gives ${rangeText(own)} for the whole${own.one ? ', one side only' : ''}` : ''].filter(Boolean).join(' · ')
+      : [`from ${FIG_SRC[f.src] || f.src}`, f.origin === 'vm' ? 'VM adds the sides' : '', sourceNote(f), raw?.alt ? `${raw.alt.src === 'wikidata' ? 'Wikidata' : 'the Wikipedia infobox'} gives ${rangeText(raw.alt)}${f.src === 'wikidata' ? `, Wikidata ${num(m === 'd' ? b.deaths : b.cas)}` : ''}` : ''].filter(Boolean).join(' · ');
+    return `<div class="stat fig k-${f.status}"><span>${label}</span><b>${esc(rangeText(f))}</b><small class="kind">${esc(kind)}</small><small>${esc(note)}</small>${m === 'd' && b.dAt && f.from !== 'parts' ? `<small>counted in ${esc(b.dAt.slice(0, 4))}: ${esc(LATE)}</small>` : ''}</div>`;
+  }
+  if (raw && (raw.v === 0 || (raw.low === 0 && raw.high === 0))) return `<div class="stat fig k-fact"><span>${label}</span><b>0</b><small class="kind">${esc(kindWords(raw.status))}</small><small>${raw.src === 'wikidata' ? 'Wikidata records none' : 'every side records none'}</small></div>`;
+  // A figure of the other measure, or a recorded zero: this one is not given (one word for it, in the table too: P12).
+  const other = n ? shownFigure(n, m === 'd' ? 'c' : 'd') : ownFigure(b, m === 'd' ? 'c' : 'd');
+  if (other || stateOf(b, n) === 'zero') return `<div class="stat fig none"><span>${label}</span><b class="nofig">Not given</b><small>${m === 'd' ? 'no deaths figure apart from the other losses' : stateOf(b, n) === 'zero' ? 'no casualties figure beside the deaths' : 'only deaths are given'}</small></div>`;
+  return `<div class="stat fig none"><span>${label}</span><b class="nofig">${b.fs === 'unread' ? 'Figures not read' : 'No figure found'}</b></div>`;
+}
+// Under the boxes, for a battle with no figure: what was searched, and UCDP's clashes nearby, apart.
+function figNone(b) {
+  const s = stateOf(b, nodeOf(b));
+  if (s === 'figure' || s === 'zero' || s === 'parts') return '';
+  const u = b.fu ? `<p class="ucdp-near"><b>UCDP, nearby:</b> ${num(b.fu.v)} deaths${b.fu.low !== b.fu.high ? ` (${num(b.fu.low)}–${num(b.fu.high)})` : ''} in ${num(b.fu.n)} recorded clash${b.fu.n === 1 ? '' : 'es'} within ${b.fu.km} km in its dates · Estimate. A separate measure: not this battle's own count, and never ranked.</p>` : '';
+  return `<p class="searched">${esc(searched(b))}</p>${u}`;
+}
+const fmtTs = ts => (ts ? fmtDate(ts.slice(0, 10)) : '');
+const WD_WORD = { P1120: 'deaths', P1590: 'casualties', P1339: 'injured', P1446: 'missing' };
+const wdRef = s => (s.ref === 'stated' ? `stated in <a href="https://www.wikidata.org/wiki/${esc(s.in)}" target="_blank" rel="noreferrer">${esc(s.in)}</a>` : s.ref === 'url' ? `from <a href="${esc(s.in)}" target="_blank" rel="noreferrer">${esc(String(s.in).replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</a>` : s.ref === 'wikipedia' ? 'imported from Wikipedia, no other reference' : 'no reference');
+// The window's detail: each side's figures with their kind and whose they are, the readings where sources differ, and
+// the sources read, each with its revision or statement.
+function detailHtml(b, d, file) {
+  const out = [];
+  // Each figure with its own kind: "218 killed, recorded · 767–1,000 casualties, estimate".
+  const sideFig = s => [s.d && `${rangeText(s.d)} killed, ${kindWords(s.d.status).toLowerCase()}`, s.c && `${rangeText(s.c)} casualties, ${kindWords(s.c.status).toLowerCase()}`].filter(Boolean).join(' · ');
+  if (d?.sides?.length) {
+    const whole = d.sides.length === 1 && !/^casualties\d$/.test(d.sides[0].n);
+    out.push(`<h4>${whole ? 'As the infobox gives it' : 'By side'}</h4><ul class="side-figs">`);
+    for (const s of d.sides) {
+      // Every side named (review P2): its combatant in the box, or what its own words say it is (the build names it).
+      const who = whole ? 'The whole battle' : s.label || `Combatant ${s.n.slice(-1)}, not named in the article's box`;
+      const fig = sideFig(s) || (s.z === 'yes' ? 'none' : s.z === 'claimed' ? 'none, a claim' : s.ref ? 'not taken from the article' : s.w?.length ? s.w.map(x => `"${x}"`).join('; ') : 'nothing given');
+      // Why a field was not read, in plain words (review P7): what VM did, never "the reader".
+      const why = s.ref ? `VM's reading of this field stopped here: ${String(s.ref).replace(/the reader/g, 'VM')}; see the article` : '';
+      const notes = [s.d?.by || s.c?.by ? `by ${s.d?.by || s.c?.by}` : '', s.ko ? 'only deaths given' : '', s.kw ? 'deaths not given apart from the wounded' : '', why,
+        s.refs?.length ? `the article cites ${s.refs.join('; ')}` : (sideFig(s) ? 'the article cites nothing here' : '')].filter(Boolean);
+      const rd = (s.rd || []).length > 1 ? `<small class="readings">Readings: ${s.rd.map(r => `${esc(r.by || 'as listed')}: ${esc([r.d && `${rangeText(r.d)} killed`, r.c && `${rangeText(r.c)} casualties`, r.z && 'none', r.w?.length && r.w.map(x => `"${x}"`).join('; ')].filter(Boolean).join(', ') || 'nothing given')}${r.d || r.c ? ` (${esc(kindWords((r.d || r.c).status))})` : ''}`).join(' · ')}</small>` : '';
+      out.push(`<li><b>${esc(who)}:</b> ${esc(fig)}${notes.length ? `<small>${esc(notes.join(' · '))}</small>` : ''}${rd}</li>`);
+    }
+    out.push('</ul>');
+  }
+  const src = [];
+  if (d?.wp) src.push(`Wikipedia, <a href="https://en.wikipedia.org/w/index.php?oldid=${esc(d.wp.rev)}" target="_blank" rel="noreferrer">‘${esc(d.wp.t)}’, revision ${esc(d.wp.rev)}</a> (${esc(fmtTs(d.wp.ts))}), CC BY-SA 4.0`);
+  else if (d?.mismatch) src.push(`Wikipedia: <a href="https://en.wikipedia.org/w/index.php?oldid=${esc(d.mismatch.rev)}" target="_blank" rel="noreferrer">‘${esc(d.mismatch.t)}’, revision ${esc(d.mismatch.rev)}</a> is about another event (its box dates it ${esc(d.mismatch.dy[0] === d.mismatch.dy[1] ? d.mismatch.dy[0] : d.mismatch.dy.join('–'))}), so its figures are not taken`);
+  else if (b.w) src.push(`Wikipedia: ${esc({ redirect: 'the article is a redirect to another page, so not read', nobox: 'the article has no infobox', nofield: 'its infobox has no casualties', failed: 'not read this time', blank: 'its casualties are left blank', noart: 'the linked article does not exist', mismatch: 'the linked article is about another event, by its dates, so not read' }[b.fwp] || 'not read')}`);
+  else src.push('Wikipedia: no English article linked from Wikidata');
+  const wd = (d?.wd || []).filter(s => WD_WORD[s.p]);
+  // Each statement with its qualifiers in words (review F9): "at least", "the minimum", "presumably".
+  src.push(wd.length ? `Wikidata: ${wd.map(s => `${WD_WORD[s.p]} ${s.unknown ? 'unknown value' : num(s.v)}${s.low != null ? ` (${s.atLeast && s.low === s.high ? `at least ${num(s.low)}` : `${num(s.low)}–${num(s.high)}`})` : ''}${s.q?.length ? `, ${esc(s.q.join(', '))}` : ''}${s.at ? `, counted ${esc(fmtDate(s.at))}` : ''}${s.rank === 'preferred' ? ', preferred' : ''}, ${wdRef(s)}`).join('; ')}` : 'Wikidata gives none');
+  if (!d && !file) return `<p class="fig-note">${src.join('. ')}.</p>`;
+  out.push(`<p class="fig-note fig-sources"><b>Sources read:</b> ${src.join('. ')}. Battle figures are not added into the war's deaths by month.</p>`);
+  return out.join('');
 }
 // In a battle's window: the whole it is part of, and a whole's parts with its figure counted once (figures.mjs), and
 // where Wikidata gives the whole a figure that is one of its parts' own, that it is left to the part.
@@ -432,7 +541,12 @@ function wholeHtml(b) {
   if (left.length) out.push(`<p class="empty">Wikidata also gives it ${left.map(x => num(x.v)).join(' and ')}, ${left.length > 1 ? 'figures' : 'a figure'} of its parts' own, counted with ${left.map(x => `${name(x.part)}${x.part.up && x.part.up !== b.q && battleOf(x.part.up) ? `, under ${name(battleOf(x.part.up))}` : ''}`).join(' and ')}.</p>`);
   return out.join('');
 }
-function closeModal() { $('#modal').hidden = true; }
+function closeModal() {
+  if ($('#modal').hidden) return;
+  $('#modal').hidden = true;
+  if (opener?.isConnected) opener.focus();
+  opener = null;
+}
 $('#modal-close').onclick = closeModal;
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 // ← → step the month shown (the period's end), as ‹ › do; not while typing, choosing or in the tabs.
@@ -448,12 +562,24 @@ function renderTables() {
     const status = b => (!b.s ? ['', 'Date not recorded'] : b.s.slice(0, 7) > m ? ['later', 'Not yet'] : underWay(b, a, m) ? ['now', p ? 'In the period' : 'Under way'] : ['', 'Earlier']);
     const list = [...[...w.battles].sort((a, b) => a.s.localeCompare(b.s) || a.n.localeCompare(b.n)), ...w.undated];
     $('#battles-title').textContent = `${w.name} · ${num(list.length)} battles and operations`;
+    $('#battles-note').textContent = completenessText(w.fig);
     $('#th-status').textContent = periodLabel();
+    // Each figure with its kind under it; a battle with none says so across both cells, with what was searched (BF-08).
+    // The figure the window and the lists give (review P1), a whole's by its parts where they hold more.
+    const cell = (b, m) => {
+      const n = nodeOf(b), f = n ? shownFigure(n, m) : ownFigure(b, m), raw = m === 'd' ? b.fd : b.fc;
+      if (f?.below) return `<span class="nofig">Not given for the whole</span><small class="kind">${esc(`${f.from === 'parts' ? 'its parts' : 'the sides'} with a figure: ${rangeText(f)}`)}</small>`;
+      if (f) return `${esc(rangeText(f))}<small class="kind">${esc(kindWords(f.status))}${f.civ ? ', civilians only' : f.one ? ', one side' : ''}${f.from === 'parts' ? ', its parts' : ''}</small>`;
+      if (raw && raw.v === 0) return `0<small class="kind">${esc(kindWords(raw.status))}</small>`;
+      return '<span class="nofig">Not given</span>';
+    };
     $('#battles-rows').innerHTML = list.map(b => {
       const [cls, word] = status(b);
-      const rel = relation(b);
-      return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button>${rel ? `<small class="rel">${esc(rel)}</small>` : ''}</td><td class="mono">${esc(bDates(b))}</td>
-        <td><span class="st ${cls}">${word}</span></td><td class="num">${b.deaths ? num(b.deaths) : '–'}</td><td class="num">${b.cas ? num(b.cas) : '–'}</td><td class="mono">${b.lat == null ? 'Not mapped' : !b.s ? 'Not on the map (no date)' : 'Mapped'}</td></tr>`;
+      const rel = relation(b), n = nodeOf(b), st = stateOf(b, n);
+      const figs = st === 'figure' || st === 'zero' ? `<td class="num">${cell(b, 'd')}</td><td class="num">${cell(b, 'c')}</td>`
+        : `<td colspan="2" class="nofig-cell">${esc(st === 'parts' ? figureLine(n) : figureOf(b))}${st === 'parts' ? '' : `<small>${esc(searched(b))}</small>`}</td>`;
+      return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button>${rel ? `<small class="rel">${esc(rel)}</small>` : ''}<small class="fig-m">${esc(figureOf(b))}</small></td><td class="mono">${esc(bDates(b))}</td>
+        <td><span class="st ${cls}">${word}</span></td>${figs}<td class="mono">${b.lat == null ? 'Not mapped' : !b.s ? 'Not on the map (no date)' : 'Mapped'}</td></tr>`;
     }).join('') || '<tr><td colspan="6" class="empty">No battles or operations recorded in Wikidata.</td></tr>';
     $('#battles-rows').querySelectorAll('[data-b]').forEach(el => el.onclick = () => openBattle(battleOf(el.dataset.b)));
   } else if (state.view === 'months') {
@@ -654,6 +780,7 @@ async function loadWar(id, month, from = null) {
   // Wholes and their parts, once for the war (figures.mjs): every list, the ranking, the marks and the narrator read it.
   // `drawn`: the deaths a mapped item's own mark stands for, its figure less what its parts' marks below it show.
   w.groups = groupBattles([...w.battles, ...w.undated]);
+  w.fig = completeness([...w.battles, ...w.undated], w.groups); // how complete its battle figures are (BF-08)
   const onMap = (n, d = 0) => (d > 40 ? 0 : n.b.lat != null && n.b.s ? n.fig : n.parts.reduce((s, p) => s + onMap(p, d + 1), 0));
   for (const n of w.groups.byQ.values()) n.drawn = Math.max(0, n.fig - n.parts.reduce((s, p) => s + onMap(p, 1), 0));
   state.war = w; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);

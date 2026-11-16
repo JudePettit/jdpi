@@ -14,7 +14,7 @@ import { pathToFileURL } from 'node:url';
 import { THINKERS, spectrumTag } from './thinkers.mjs';
 import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
-import { groupBattles, figureText } from '../../battlefield/focus/figures.mjs';
+import { groupBattles, figureLine } from '../../battlefield/focus/figures.mjs';
 import { leaderText } from './resolve.mjs';
 
 export const JDPI = 'https://jdpi.pages.dev/';
@@ -95,9 +95,11 @@ export function battlefield({ jdpiDir }) {
     // Each death once, as War Focus counts it (figures.mjs, RV-05 A1): an event listed with its own parts (the atomic
     // bombings of Hiroshima and Nagasaki) gives the figure War Focus shows over its parts ("448,901 deaths, the sum of
     // its parts' recorded figures"), never a part's figure as its own; a figure counted long after the battle gives its
-    // year beside the share counted then (the second reader, WF2-01). Deaths only, as before: no casualties line.
+    // year beside the share counted then (the second reader, WF2-01). Deaths only, as before: no casualties line. The
+    // line as War Focus shows it (figureLine), with its kind and whose figure it is: an estimate from an article's box is
+    // never stated bare, as if recorded (review R3-01, 16 November 2026).
     const nodes = groupBattles(d.battles).byQ;
-    const figure = b => { const n = nodes.get(b.q); return n?.fig ? `; ${figureText(n)}` : ''; };
+    const figure = b => { const n = nodes.get(b.q); return n?.fig ? `; ${figureLine(n)}` : ''; };
     // A battle Wikidata dates only to its decade (s null, War Focus lists it undated) opens the war, not a month.
     for (const b of d.battles) if (b.w) out.push({ key: { qid: b.q }, label: b.n, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}${b.s ? `&m=${b.s.slice(0, 7)}` : ''}`,
       date: b.s || null, context: `Part of ${f.name}${figure(b)}` });

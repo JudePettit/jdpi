@@ -23,7 +23,7 @@ import { tmpdir } from 'node:os';
 import { CATEGORY_IDS, flatScenes } from '../kino/lib/format.js';
 import { readAt, onOwnPage } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
-import { groupBattles, figureText } from '../battlefield/focus/figures.mjs';
+import { groupBattles, figureLine } from '../battlefield/focus/figures.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const text = p => readFileSync(join(ROOT, p), 'utf8');
@@ -730,12 +730,13 @@ test('committed lake: War Focus’s atomic bombings read as War Focus counts the
   // The lines expected, from War Focus's data by its own rule (figures.mjs), not written in (the second reader, WF2-08
   // and F4: an edit on Wikidata would otherwise stop the refresh), with a late count's year on its share alone (WF2-01).
   const ww2 = read('battlefield/focus/data/wars/ww2.json'), g = groupBattles(ww2.battles).byQ;
-  for (const q of ['Q488', 'Q703203', 'Q4382340']) assert.equal(at(q, 'ww2'), `Part of World War II; ${figureText(g.get(q))}`, q);
-  assert.match(at('Q488', 'ww2'), /the sum of its parts' recorded figures, counted in \d{4} \(a late count, which can include later deaths\)$/);
+  // The line as War Focus shows it, with its kind (figureLine: review R3-01, never an estimate stated bare).
+  for (const q of ['Q488', 'Q703203', 'Q4382340']) assert.equal(at(q, 'ww2'), `Part of World War II; ${figureLine(g.get(q))}`, q);
+  assert.match(at('Q488', 'ww2'), /the sum of its parts' recorded figures, counted in \d{4} \(a late count, which can include later deaths\) · Recorded$/);
   // The Japan Campaign: the year goes with the share counted in it, never with the whole sum (Okinawa's is no 2013 count).
   const japan = g.get('Q709352');
   if (japan?.fig && japan.late.length && japan.late.reduce((s, [, v]) => s + v, 0) < japan.fig) {
-    assert.equal(at('Q709352', 'ww2'), `Part of World War II; ${figureText(japan)}`);
+    assert.equal(at('Q709352', 'ww2'), `Part of World War II; ${figureLine(japan)}`);
     assert.match(at('Q709352', 'ww2'), /; [\d,]+ of them counted in \d{4} \(a late count/);
   }
 });

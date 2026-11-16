@@ -15,17 +15,20 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
 import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
-import { linkParts, ownDeaths, groupBattles } from '../figures.mjs';
+import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
+import { readArticle, battleFigures, wdStatements } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
-const OUT = join(ROOT, 'data'), WAR_DIR = join(OUT, 'wars');
+const OUT = join(ROOT, 'data'), WAR_DIR = join(OUT, 'wars'), FIG_DIR = join(OUT, 'figures');
 mkdirSync(WAR_DIR, { recursive: true });
+mkdirSync(FIG_DIR, { recursive: true });
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 const CACHE = arg('--cache') || join(tmpdir(), 'warfocus-src');
 const ONLY = arg('--only')?.split(',');
@@ -118,20 +121,105 @@ async function partsOf(qid, span, theatre) {
   }
   return { within: partsWithin(edges, dates, qid, span, { places, ...theatre }), edges };
 }
-// English Wikipedia's lead sections (wikitext), 50 articles a request: Map title → wikitext, through redirects.
-async function leads(titles) {
+// ---- English Wikipedia (CC BY-SA 4.0): each battle's lead section (its infobox), at a named revision (BF-08).
+// Politely: 50 titles a request, one request at a time, a second apart, maxlag=5, four tries (after Retry-After, or 5,
+// 10, 15 s). First the revision each title is at (a small answer), then the text of the revisions not already in the
+// cache (<cache>/wikipedia/<revid>.json). A batch that fails four times is left out and counted (`wpFailed`): its
+// battles keep their last committed figures. Never round a refusal: on a 429 or 403 the build waits as told, and stops.
+const WP_DIR = join(CACHE, 'wikipedia');
+mkdirSync(WP_DIR, { recursive: true });
+const wpFailed = new Set();
+// A source that fails three batches running is down for this run (review R3-04): its other batches are not tried, so
+// the run ends in minutes with the last committed figures kept, not killed at the time limit. A request that hangs is
+// given up after a minute.
+const breaker = { wikipedia: 0, wikidata: 0 }, DOWN = 3, TIMEOUT = 60000;
+async function wpApi(params) {
+  if (breaker.wikipedia >= DOWN) return null;
+  const url = `https://en.wikipedia.org/w/api.php?format=json&formatversion=2&maxlag=5&${params}`;
+  for (let k = 0; k < 4; k++) {
+    await pause(1000);
+    let res = null;
+    try { res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(TIMEOUT) }); } catch (e) { console.log(`  Wikipedia: ${e.message}; waiting ${5 * (k + 1)} s`); await pause(5000 * (k + 1)); continue; }
+    const wait = (+res.headers.get('retry-after') || 5 * (k + 1)) * 1000;
+    if (res.status === 403) throw new Error('Wikipedia refused the request (403): stopping, not working round it');
+    if (!res.ok) { console.log(`  Wikipedia ${res.status}: waiting ${wait / 1000} s`); await pause(wait); continue; }
+    const j = await res.json().catch(() => null);
+    if (j?.error) { console.log(`  Wikipedia ${j.error.code}: waiting ${wait / 1000} s`); await pause(wait); continue; }
+    if (j) { breaker.wikipedia = 0; return j; }
+  }
+  if (++breaker.wikipedia >= DOWN) console.log(`  Wikipedia: ${DOWN} batches failed in a row; not asked again this run`);
+  return null;
+}
+/** Map title → { text, rev, ts, page, redirected } for each title the API answers (through normalisation and redirects). */
+async function fetchLeads(titles) {
   const out = new Map();
   for (let i = 0; i < titles.length; i += 50) {
     const batch = titles.slice(i, i + 50);
-    const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&rvslots=main&rvsection=0&format=json&formatversion=2&redirects=1&titles=${encodeURIComponent(batch.join('|'))}`;
-    let r = null;
-    for (let k = 0; k < 4 && !r; k++) { const res = await fetch(url, { headers: UA }); if (res.ok) r = await res.json(); else await new Promise(z => setTimeout(z, 5000 * (k + 1))); }
-    if (!r) throw new Error('Wikipedia lead sections failed');
-    const to = new Map([...(r.query?.normalized || []), ...(r.query?.redirects || [])].map(x => [x.from, x.to]));
-    const text = new Map((r.query?.pages || []).map(p => [p.title, p.revisions?.[0]?.slots?.main?.content || '']));
-    for (const t of batch) { let k = t; for (let n = 0; n < 3 && to.has(k); n++) k = to.get(k); if (text.has(k)) out.set(t, text.get(k)); }
+    const ids = await wpApi(`action=query&prop=revisions&rvprop=ids|timestamp&redirects=1&titles=${encodeURIComponent(batch.join('|'))}`);
+    if (!ids) { batch.forEach(t => wpFailed.add(t)); console.log(`  Wikipedia: ${batch.length} titles not read this time`); continue; }
+    const norm = new Map((ids.query?.normalized || []).map(x => [x.from, x.to])), redir = new Map((ids.query?.redirects || []).map(x => [x.from, x]));
+    const pages = new Map((ids.query?.pages || []).filter(p => p.revisions?.length).map(p => [p.title, { rev: p.revisions[0].revid, ts: p.revisions[0].timestamp }]));
+    const want = [...pages.values()].filter(p => !existsSync(join(WP_DIR, `${p.rev}.json`))).map(p => p.rev);
+    if (want.length) {
+      const txt = await wpApi(`action=query&prop=revisions&rvprop=content|ids|timestamp&rvslots=main&rvsection=0&revids=${want.join('|')}`);
+      if (!txt) { batch.forEach(t => wpFailed.add(t)); console.log(`  Wikipedia: ${batch.length} articles not read this time`); continue; }
+      for (const p of txt.query?.pages || []) for (const r of p.revisions || []) writeFileSync(join(WP_DIR, `${r.revid}.json`), JSON.stringify({ title: p.title, rev: r.revid, ts: r.timestamp, text: r.slots?.main?.content || '' }));
+    }
+    for (const t of batch) {
+      let k = norm.get(t) || t, redirected = false;
+      for (let n = 0; n < 3 && redir.has(k); n++) { const x = redir.get(k); redirected = true; k = x.to; }
+      const p = pages.get(k), file = p && join(WP_DIR, `${p.rev}.json`);
+      if (file && existsSync(file)) out.set(t, { ...JSON.parse(readFileSync(file, 'utf8')), page: k, redirected });
+    }
   }
   return out;
+}
+
+// ---- Wikidata's statements of deaths, casualties, injured and missing, read in full from its JSON (wbgetentities):
+// every value with its rank, qualifiers and references (infobox.mjs wdStatements). 50 items a request, a second apart,
+// four tries; cached for the day (<cache>/wikidata/<date>/). A batch that fails is counted (`wdFailed`): its battles
+// keep their last committed figures.
+const wdFailed = new Set();
+async function wdEntities(qids) {
+  const dir = join(CACHE, 'wikidata', new Date().toISOString().slice(0, 10));
+  mkdirSync(dir, { recursive: true });
+  const out = new Map();
+  for (let i = 0; i < qids.length; i += 50) {
+    const ids = qids.slice(i, i + 50), file = join(dir, createHash('sha1').update(ids.join('|')).digest('hex').slice(0, 16) + '.json');
+    let j = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+    for (let k = 0; k < 4 && !j && breaker.wikidata < DOWN; k++) {
+      await pause(1000);
+      try {
+        const res = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&props=claims&maxlag=5&ids=${ids.join('|')}`, { headers: UA, signal: AbortSignal.timeout(TIMEOUT) });
+        const wait = (+res.headers.get('retry-after') || 5 * (k + 1)) * 1000;
+        if (res.status === 403) throw new Error('Wikidata refused the request (403): stopping, not working round it');
+        const body = res.ok ? await res.json().catch(() => null) : null;
+        if (body?.entities) { j = { entities: Object.fromEntries(Object.entries(body.entities).map(([q, e]) => [q, { claims: Object.fromEntries(['P1120', 'P1590', 'P1339', 'P1446'].filter(p => e.claims?.[p]).map(p => [p, e.claims[p]])) }])) }; writeFileSync(file, JSON.stringify(j)); }
+        else { console.log(`  Wikidata ${res.status}${body?.error ? ' ' + body.error.code : ''}: waiting ${wait / 1000} s`); await pause(wait); }
+      } catch (e) { if (/refused/.test(e.message)) throw e; console.log(`  Wikidata: ${e.message}`); await pause(5000 * (k + 1)); }
+    }
+    if (!j) { ids.forEach(q => wdFailed.add(q)); if (breaker.wikidata < DOWN && ++breaker.wikidata >= DOWN) console.log(`  Wikidata: ${DOWN} batches failed in a row; not asked again this run`); console.log(`  Wikidata: ${ids.length} items not read this time`); continue; }
+    breaker.wikidata = 0;
+    for (const q of ids) out.set(q, wdStatements(j.entities[q]));
+  }
+  return out;
+}
+
+// ---- UCDP's clashes near a battle (BF-08): for a battle since 1989 placed and dated to the day, the war's recorded
+// events (state-based) dated to the day inside its dates and placed to a town or nearer (where_prec 1–2) within 25 km.
+// A separate measure, shown apart and never ranked: { v (best), low, high, n (events), km }.
+const KM = 25;
+const distKm = (a, b, c, d) => { const r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+// The reader never stops the build: a field it trips on is a field not read.
+function readSafely(text, b) { try { return readArticle(text, { s: b.s, e: b.e || b.eW }); } catch (e) { console.log(`  ${b.q} ${b.n}: the reader failed (${e.message}); not read`); return { state: 'unread', sides: [] }; } }
+function ucdpNear(b, ev) {
+  // A day-precise date has no `p` (scripts/rules.mjs); an end at another precision has `pe`.
+  if (!b.s || b.s < '1989-01-01' || b.lat == null || b.p != null || (b.pe && b.pe !== 'd') || b.u) return null;
+  const e1 = b.e || b.s;
+  const hit = ev.filter(e => e.dp === 1 && e.prec <= 2 && e.d >= b.s && e.de <= e1 && isFinite(e.lat) && distKm(b.lat, b.lon, e.lat, e.lon) <= KM);
+  if (!hit.length) return null;
+  const sum = k => hit.reduce((s, e) => s + (e[k] || 0), 0);
+  return { v: sum('best'), low: sum('low'), high: sum('high'), n: hit.length, km: KM };
 }
 // Each item's recorded deaths (P1120) as statements, with the date a figure was counted (its P585), at the rank the
 // truthy value has (preferred where there is one, else normal, never deprecated); and its "has part(s)" (P527), so a
@@ -198,14 +286,16 @@ async function battlesOf(qid, span, theatre) {
   // An end checked against the battle's English Wikipedia article (endAgainstArticle, scripts/rules.mjs): only where
   // Wikidata's runs more than a month, as it must to end over a month after the article's.
   const long = kept.filter(b => b.w && b.s && (b.e || b.u === 'after') && dayNo(b.e || b.eW) - dayNo(b.s) > 31 && (b.u === 'after' || (b.pe === 'd' ? null : b.pe || b.p) !== 'y'));
-  const text = long.length ? await leads([...new Set(long.map(b => b.w))]) : new Map();
+  // Every battle's article is read once (BF-08: its infobox's casualties too, scripts/infobox.mjs), at the revision named.
+  const articles = await fetchLeads([...new Set(kept.filter(b => b.w).map(b => b.w))]);
+  if (long.some(b => wpFailed.has(b.w))) throw new Error('Wikipedia lead sections failed (an end could not be checked against its article)');
   let conflicts = 0;
   for (const b of long) {
-    const d = endAgainstArticle(b, infoboxEnd(text.get(b.w)), span.warEnd);
+    const d = endAgainstArticle(b, infoboxEnd(articles.get(b.w)?.text), span.warEnd);
     if (d !== b) { Object.assign(b, d); conflicts++; }
   }
   if (long.length) console.log(`  ${long.length} ends checked against Wikipedia, ${conflicts} drawn to the article's earlier end`);
-  return { battles: kept, edges: [...edges, ...has] };
+  return { battles: kept, edges: [...edges, ...has], articles };
 }
 // A whole and its parts (figures.mjs, RV-05 A1): the links between the war's own battles both ways (`up` on a part,
 // `upAlso` where it has another whole in the list, `parts` on the whole), and each item's own death figure: a figure
@@ -267,13 +357,17 @@ for (const path of [join(gedDir, 'GEDEvent_v26_1.csv'), ...gedCands]) {
     const ws = gedIds.get(e.conflict_new_id); if (!ws) continue;
     const d = e.date_start?.slice(0, 10); if (!d) continue;
     if (d > maxGed) maxGed = d;
-    for (const w of ws) if (d >= w.start && d <= (w.end || today)) events.get(w.id).push({ d, de: e.date_end?.slice(0, 10) || d, lat: +e.latitude, lon: +e.longitude, best: +e.best || 0, dyad: e.dyad_name, where: e.where_description, prec: +e.where_prec, a: +e.deaths_a || 0, b: +e.deaths_b || 0, civ: +e.deaths_civilians || 0 });
+    for (const w of ws) if (d >= w.start && d <= (w.end || today)) events.get(w.id).push({ d, de: e.date_end?.slice(0, 10) || d, lat: +e.latitude, lon: +e.longitude, best: +e.best || 0, dyad: e.dyad_name, where: e.where_description, prec: +e.where_prec, a: +e.deaths_a || 0, b: +e.deaths_b || 0, civ: +e.deaths_civilians || 0, low: +e.low || 0, high: +e.high || 0, dp: +e.date_prec || 0 });
   }
 }
 console.log('GED loaded through', maxGed);
 
 // ---- Per war (the files are kept in memory and written only once the whole build has passed the guard)
-const index = [], pending = [];
+const index = [], pending = [], figLost = [];
+const FIG_KEYS = ['fd', 'fc', 'fs', 'fw', 'fwp', 'fu'];
+const FIG_SOURCES = { wikidata: 'Wikidata (CC0): deaths (P1120), casualties (P1590), injured (P1339) and missing (P1446), each statement with its rank, qualifiers and references',
+  wikipedia: 'English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own',
+  ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (CC BY 4.0): recorded clashes within 25 km of a battle in its dates, since 1989, shown apart' };
 for (const w of wars) {
   const qid = await qidOf(w.wiki);
   const end = w.end || maxGed;
@@ -356,19 +450,49 @@ for (const w of wars) {
   const total = deaths.reduce((s, v) => s + v, 0);
   const norm = side => (side.gw || []).map(x => (Array.isArray(x) ? { gw: x[0], from: x[1] || null, to: x[2] || null } : { gw: x, from: null, to: null }));
   const bf = w.bf || (w.deaths.cow ? 'c' + w.deaths.cow : w.ged ? 'u' + w.ged[0] : null);
+  // ---- Each battle's figures from every source (BF-08, scripts/infobox.mjs battleFigures): Wikidata's statements read
+  // in full, the article's infobox at the revision read, and since 1989 UCDP's clashes nearby where nothing else gives
+  // one. The detail for the battle's window goes to data/figures/<id>.json, loaded on demand. A battle whose source
+  // could not be read this time keeps its last committed figures (and their detail).
+  const prevWar = (() => { try { return JSON.parse(readFileSync(join(WAR_DIR, w.id + '.json'), 'utf8')); } catch { return null; } })();
+  const prevDetail = (() => { try { return JSON.parse(readFileSync(join(FIG_DIR, w.id + '.json'), 'utf8')).battles || {}; } catch { return {}; } })();
+  const prevBy = new Map((prevWar?.battles || []).map(b => [b.q, b]));
+  const stmts = await wdEntities(battles.map(b => b.q));
+  const detail = {}, tally = { kept: 0, wp: 0, zero: 0, ucdp: 0, unread: 0 };
+  for (const b of battles) {
+    const failed = wdFailed.has(b.q) || (b.w && wpFailed.has(b.w)), old = prevBy.get(b.q);
+    if (failed && old) { for (const k of FIG_KEYS) if (old[k] !== undefined) b[k] = old[k]; if (prevDetail[b.q]) detail[b.q] = prevDetail[b.q]; tally.kept++; continue; }
+    const a = b.w ? found.articles?.get(b.w) : null;
+    const article = !b.w ? null : !a ? { why: failed ? 'failed' : 'noart' } : a.redirected ? { why: 'redirect' } : { ...readSafely(a.text, b), title: a.title, rev: a.rev, ts: a.ts };
+    const fx = battleFigures({ deaths: b.deaths, cas: b.cas, wd: stmts.get(b.q) || [], article, ucdp: ucdpNear(b, ev) });
+    if (fx.detail) detail[b.q] = fx.detail;
+    delete fx.detail;
+    Object.assign(b, fx);
+    if (!b.deaths && !b.cas && (ownFigure(b, 'd') || ownFigure(b, 'c'))) tally.wp++;
+    if (b.fd && b.fd.v === 0) tally.zero++;
+    if (b.fu) tally.ucdp++;
+    if (b.fs === 'unread') tally.unread++;
+  }
+  // The guard for figures: a tenth of the battles that had a figure losing it is a source that failed, not an edit.
+  const hadFig = x => x.deaths || x.cas || ownFigure(x, 'd') || ownFigure(x, 'c');
+  const had = (prevWar?.battles || []).filter(hadFig), now = new Map(battles.map(x => [x.q, x]));
+  const lostFig = had.filter(x => now.has(x.q) && !hadFig(now.get(x.q))).length;
+  if (lostFig > Math.max(3, had.length / 10)) figLost.push(`${w.id}: ${lostFig} of ${had.length} battles with figures would lose them`);
+  pending.push([join(FIG_DIR, w.id + '.json'), JSON.stringify({ id: w.id, sources: FIG_SOURCES, battles: detail })]);
   const data = {
     id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, dataThrough: w.end ? null : maxGed,
     months, deaths, estimated, deathsSource: source, totalDeaths: total, covered, shared: shared.some(Boolean) ? shared : null,
     sides: { a: { label: w.sides.a.label, states: norm(w.sides.a) }, b: { label: w.sides.b.label, states: norm(w.sides.b) } },
     theatre: w.theatre || [], control: (w.control || []).map(([gw, side, from, to]) => ({ gw, side, from, to })),
-    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
-      ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}) })),
+    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts, fd, fc, fs, fw, fwp, fu }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
+      ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}),
+      ...(fd ? { fd } : {}), ...(fc ? { fc } : {}), ...(fs ? { fs } : {}), ...(fw ? { fw } : {}), ...(fwp ? { fwp } : {}), ...(fu ? { fu } : {}) })),
     cells: cellsOut, top: topOut, events: ev.length,
   };
   pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);
   index.push({ id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, totalDeaths: total, deathsSource: source,
     battles: battles.length, mappedBattles: battles.filter(b => b.lat != null).length, events: ev.length, sides: [w.sides.a.label, w.sides.b.label], bbox });
-  console.log(`${w.id}: ${qid} ${months.length} months, ${battles.length} battles (${battles.filter(b => b.lat != null).length} mapped), ${ev.length} events, ${total.toLocaleString('en-GB')} deaths`);
+  console.log(`${w.id}: ${qid} ${months.length} months, ${battles.length} battles (${battles.filter(b => b.lat != null).length} mapped), ${ev.length} events, ${total.toLocaleString('en-GB')} deaths; figures: ${tally.wp} from Wikipedia, ${tally.zero} zero, ${tally.unread} not read, ${tally.ucdp} UCDP nearby${tally.kept ? `, ${tally.kept} kept from the last build` : ''}`);
 }
 const IDX = join(OUT, 'index.json');
 const old = existsSync(IDX) ? JSON.parse(readFileSync(IDX, 'utf8')) : { wars: [] };
@@ -384,6 +508,8 @@ for (const o of old.wars) {
   if (o.events > 100 && x.events < o.events * 0.9) lost.push(`${o.id} UCDP events ${o.events} → ${x.events}`);
 }
 if (!ONLY && old.gedThrough > maxGed) lost.push(`UCDP events through ${old.gedThrough} → ${maxGed}`);
+lost.push(...figLost);
+if (wpFailed.size || wdFailed.size) console.log(`Not read this time (last figures kept): ${wpFailed.size} Wikipedia articles, ${wdFailed.size} Wikidata items`);
 refuseIfLost(lost);
 for (const [file, text] of pending) writeFileSync(file, text);
 const others = ONLY ? old.wars.filter(x => !ONLY.includes(x.id)) : [];
@@ -393,6 +519,7 @@ const gedThrough = ONLY && old.gedThrough > maxGed ? old.gedThrough : maxGed;
 writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThrough,
   sources: { ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0',
     prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)', cow: 'Correlates of War Project war data (Sarkees & Wayman 2010)',
-    wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)' },
+    wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)',
+    wikipedia: FIG_SOURCES.wikipedia },
   wars: all }));
 console.log(`index: ${all.length} wars`);

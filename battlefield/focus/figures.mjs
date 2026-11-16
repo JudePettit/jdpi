@@ -103,7 +103,7 @@ export function ownDeaths(values, partValues) {
  * sum over the ranking, each death once.
  */
 export function groupBattles(battles) {
-  const byQ = new Map(battles.map(b => [b.q, { b, up: null, parts: [], shown: [], own: b.deaths || 0, ownCas: b.cas || 0, sum: 0, fig: 0, cfig: 0, from: null, key: 0, late: [] }]));
+  const byQ = new Map(battles.map(b => { const d = ownFigure(b, 'd'), c = ownFigure(b, 'c'); return [b.q, { b, up: null, parts: [], shown: [], own: d?.low || 0, ownCas: c?.low || 0, ownFig: d, ownCasFig: c, sum: 0, fig: 0, cfig: 0, from: null, key: 0, late: [], kind: null, wdOnly: true }]; }));
   for (const n of byQ.values()) { const u = n.b.up && byQ.get(n.b.up); if (u && u !== n) { n.up = u; u.parts.push(n); } }
   const order = new Map(battles.map((b, k) => [b.q, k]));
   const done = new Set(), busy = new Set();
@@ -113,8 +113,26 @@ export function groupBattles(battles) {
     n.parts.forEach(visit);
     n.sum = n.parts.reduce((s, p) => s + p.fig, 0);
     const csum = n.parts.reduce((s, p) => s + p.cfig, 0);
+    // An infobox's figure for a whole (BF-08) gives way to its parts' sum where that is larger: an infobox often gives
+    // one side, or "at least" (the air raids on Japan's 2,691 against its parts' 554,301). Wikidata's own count for a
+    // whole still ranks it, as before (WF2-03).
+    const infoboxOwn = n.ownFig && n.ownFig.src !== 'wikidata';
+    if (infoboxOwn && n.sum > n.own) { n.own = 0; n.ownFig = null; }
+    if (n.ownCasFig && n.ownCasFig.src !== 'wikidata' && csum > n.ownCas) { n.ownCas = 0; n.ownCasFig = null; }
     n.fig = n.own || n.sum; n.cfig = n.ownCas || csum;
     n.from = !n.fig ? null : n.own ? 'own' : 'parts';
+    // Its kind (BF-08): its own figure's, or the weakest of its parts' (a sum is no surer than its least sure part); and
+    // whether every death in it is one Wikidata records (the narrator speaks only those).
+    const counted = n.from === 'parts' ? n.parts.filter(p => p.fig) : [];
+    n.kind = n.from === 'own' ? n.ownFig.status : n.from === 'parts' ? counted.reduce((k, p) => (KIND_ORDER[p.kind] > KIND_ORDER[k] ? p.kind : k), 'fact') : null;
+    n.wdOnly = n.from === 'own' ? n.ownFig.src === 'wikidata' : n.from === 'parts' ? counted.every(p => p.wdOnly) : true;
+    n.atLeast = n.from === 'own' ? !!n.ownFig.atLeast : n.from === 'parts' ? counted.some(p => p.atLeast) : false;
+    n.high = n.from === 'own' ? n.ownFig.high : n.from === 'parts' ? counted.reduce((s, p) => s + p.high, 0) : 0;
+    // Its casualties the same way (review P1, P3): their kind, their top, and "at least" where a listed part gives none.
+    const ccounted = n.ownCas ? [] : n.parts.filter(p => p.cfig);
+    n.ckind = n.ownCas ? n.ownCasFig.status : ccounted.length ? ccounted.reduce((k, p) => (KIND_ORDER[p.ckind] > KIND_ORDER[k] ? p.ckind : k), 'fact') : null;
+    n.chigh = n.ownCas ? n.ownCasFig.high : ccounted.reduce((s, p) => s + p.chigh, 0);
+    n.catLeast = n.ownCas ? !!n.ownCasFig.atLeast : ccounted.length > 0 && (ccounted.some(p => p.catLeast) || n.parts.some(p => !p.cfig));
     n.key = n.fig || n.cfig;
     // The share counted long after the battle (`dAt`), by year: the whole's own figure, or its parts' shares.
     const late = new Map();
@@ -149,13 +167,171 @@ export function lateText(n, num = whole, { spoken = false } = {}) {
  * of a late count beside the share counted in it. */
 export function figureText(n) {
   const shownParts = n.shown.length > 0;
-  if (n.fig) {
-    const how = !shownParts ? '' : n.from === 'own' ? ' recorded for the whole' : ', the sum of its parts\' recorded figures';
-    const more = n.from === 'own' && n.sum > n.fig ? `; its parts' figures add up to ${whole(n.sum)}` : '';
-    return `${whole(n.fig)} deaths${how}${lateText(n)}${more}`;
+  // "Recorded" is a kind (BF-08): the words say "recorded" only of Wikidata's plain counts; any other figure is "given"
+  // (the review's F10, P8, R3-01). A figure as its source gives it: a range, or "at least" where a side gives none.
+  const rec = (kind, wd) => wd && kind === 'fact';
+  const word = (f, one, many) => (f.low === 1 && f.high === 1 && !f.atLeast ? one : many);
+  const f = shownFigure(n, 'd');
+  if (f) {
+    const how = !shownParts ? '' : f.from === 'own' ? (rec(n.kind, n.wdOnly) ? ' recorded for the whole' : ' given for the whole') : `, the sum of its parts' ${rec(n.kind, n.wdOnly) ? 'recorded figures' : 'figures'}`;
+    const more = f.from === 'own' && n.sum > n.fig ? `; its parts' figures add up to ${whole(n.sum)}` : '';
+    return `${rangeText(f)} ${word(f, 'death', 'deaths')}${how}${lateText(n)}${more}`;
   }
-  if (n.cfig) return `${whole(n.cfig)} casualties${!shownParts ? '' : n.ownCas ? ' recorded for the whole' : ', the sum of its parts\' recorded figures'}`;
+  const c = shownFigure(n, 'c');
+  if (c) {
+    const wd = c.from === 'own' && c.src === 'wikidata';
+    return `${rangeText(c)} ${word(c, 'casualty', 'casualties')}${!shownParts ? '' : c.from === 'own' ? (rec(c.status, wd) ? ' recorded for the whole' : ' given for the whole') : `, the sum of its parts' ${rec(c.status, wd) ? 'recorded figures' : 'figures'}`}`;
+  }
   return '';
+}
+
+// ---- A figure, or a reason, for every battle (BF-08, 16 November 2026). A battle's deaths and casualties come from
+// Wikidata (`deaths`, `cas`), else from its English Wikipedia article's infobox (`fd`, `fc`, written by
+// scripts/build.mjs through scripts/infobox.mjs): { v } or { low, high }, its kind (`status`: fact, estimate or
+// disputed), whose (`src`: wikidata or wikipedia), `origin` (source, or vm where VM added the sides), `atLeast` (a
+// side gives none), `one` (one side only), `uv` (no reference beyond Wikipedia). A battle with neither has `fs`: words,
+// unread (figures the reader refused), none; `fwp` says why Wikipedia gave nothing; `fu` UCDP's clashes nearby.
+
+export const KIND_ORDER = { fact: 0, estimate: 1, disputed: 2 };
+/** The kind of a figure in words, as the page shows it. */
+export const kindWords = status => ({ fact: 'Recorded', estimate: 'Estimate', disputed: 'Disputed or unreliable' })[status] || '';
+/** A figure object's amount in words: "843", "100–224", "at least 218", "569–1,200 or more". */
+export function rangeText(f) {
+  const lo = f.low ?? f.v, hi = f.high ?? f.v;
+  const base = lo === hi ? whole(lo) : `${whole(lo)}–${whole(hi)}`;
+  return f.atLeast ? (lo === hi ? `at least ${base}` : `${base} or more`) : base;
+}
+/**
+ * A battle's own figure of a measure ('d' deaths, 'c' casualties) from whichever source gives it: Wikidata's count
+ * (`deaths`, `cas`, with its kind from `fd`/`fc` where the build marked it) or the infobox's (`fd`, `fc`). { low,
+ * high, status, src, atLeast, one, origin, uv } or null; a recorded zero is { low: 0, high: 0 } (no figure to count).
+ */
+export function ownFigure(b, m = 'd') {
+  const wd = m === 'd' ? b.deaths : b.cas, f = m === 'd' ? b.fd : b.fc;
+  let out = null;
+  if (wd > 0) {
+    // Wikidata's count, with the range its qualifiers give (a minimum and a maximum, or limits), and where the infobox
+    // disputes it, both readings: ranked by the lower (the review's F9 and F10).
+    const own = f?.src === 'wikidata' ? f : null;
+    let low = own?.low ?? wd, high = own?.high ?? wd;
+    if (own?.alt?.src === 'wikipedia') { low = Math.min(low, own.alt.low ?? own.alt.v); high = Math.max(high, own.alt.high ?? own.alt.v); }
+    out = { low, high, status: own ? own.status : 'fact', src: 'wikidata', origin: 'source', ...(own?.atLeast ? { atLeast: true } : {}), ...(own?.uv ? { uv: own.uv } : {}) };
+  } else if (f) {
+    const low = f.low ?? f.v, high = f.high ?? f.v;
+    if (low > 0 || high > 0) out = { low, high, status: f.status, src: f.src, origin: f.origin || 'source', ...(f.atLeast ? { atLeast: true } : {}), ...(f.one ? { one: true } : {}), ...(f.civ ? { civ: true } : {}), ...(f.uv ? { uv: f.uv } : {}) };
+  }
+  // Casualties below the deaths beside them are no figure for the whole (the killed are casualties): a partial count,
+  // said so (review F7).
+  if (out && m === 'c') { const d = ownFigure(b, 'd'); if (d && out.high < d.low) out.below = true; }
+  return out;
+}
+/** A node's figure of a measure as every list, tooltip and the window show it (review P1): its own, or the sum of its
+ *  parts' (`from`), with the kind; a casualties figure below the deaths shown is `below`, no figure for the whole. */
+export function shownFigure(n, m = 'd') {
+  if (m === 'd') {
+    if (!n.fig) return null;
+    return n.from === 'own' ? { ...n.ownFig, from: 'own' } : { low: n.fig, high: n.high, status: n.kind, src: 'parts', from: 'parts', ...(n.atLeast ? { atLeast: true } : {}) };
+  }
+  if (!n.cfig) return null;
+  const f = n.ownCas ? { ...n.ownCasFig, from: 'own' } : { low: n.cfig, high: n.chigh, status: n.ckind, src: 'parts', from: 'parts', ...(n.catLeast ? { atLeast: true } : {}) };
+  delete f.below;
+  const d = shownFigure(n, 'd');
+  if (d && f.high < d.low) f.below = true;
+  return f;
+}
+/** A node's figure in words with its kind: "at least 1,428 deaths · Recorded, one side", "0 deaths · Recorded". */
+export function figureLine(n) {
+  const text = figureText(n);
+  if (text) {
+    const f = shownFigure(n, 'd') || shownFigure(n, 'c');
+    const note = sourceNote(f);
+    return `${text} · ${kindWords(f.status || 'fact')}${scopeWords(f)}${note ? ` · ${note}` : ''}`;
+  }
+  return noFigureText(n.b, n);
+}
+/** Whose figures a figure covers, after its kind: ", one side", ", civilians only". */
+export const scopeWords = f => (f?.civ ? ', civilians only' : f?.one ? ', one side' : '');
+/** What stands behind a figure where it has no reference of its own (Scholar 5.1), one note for each case (review P4):
+ *  Wikidata's statement citing nothing, or only imported from Wikipedia; the infobox citing nothing. */
+export function sourceNote(f) {
+  if (!f?.uv) return '';
+  if (f.src === 'wikidata') return f.uv === 'w' ? 'Wikidata, imported from Wikipedia, no other reference' : 'Wikidata, no reference';
+  return 'the article cites nothing for it';
+}
+/** What a battle with no figure of its own shows: a recorded zero, figures not read, or none found. */
+export function noFigureText(b, n = null) {
+  const zero = f => f && (f.v === 0 || (f.low === 0 && f.high === 0));
+  if (zero(b.fd)) return `0 deaths · ${kindWords(b.fd.status)}`;
+  if (n && !n.fig && !n.cfig && n.parts.length) return 'No figure for the whole or its listed parts';
+  if (b.fs === 'unread') return 'Figures not read';
+  return 'No figure found';
+}
+/** The state a battle is in, one of five: 'figure', 'zero', 'parts' (counted through its parts), 'unread', 'none'. */
+export function stateOf(b, n = null) {
+  if (ownFigure(b, 'd') || ownFigure(b, 'c')) return 'figure';
+  if (b.fd && (b.fd.v === 0 || (b.fd.low === 0 && b.fd.high === 0))) return 'zero';
+  if (n && (n.fig || n.cfig)) return 'parts';
+  return b.fs === 'unread' ? 'unread' : 'none';
+}
+/**
+ * How complete a war's battle figures are: { battles, figure, recorded, estimate, disputed, zero, parts, unread, none,
+ * noArticle, ucdp, deaths, casOnly } over its battles (each in one state, stateOf). A figure's kind is its deaths
+ * figure's where it has one, else its casualties'.
+ */
+export function completeness(battles, groups = groupBattles(battles)) {
+  const c = { battles: battles.length, figure: 0, recorded: 0, estimate: 0, disputed: 0, zero: 0, parts: 0, unread: 0, none: 0, noArticle: 0, ucdp: 0, deaths: 0, casOnly: 0 };
+  for (const b of battles) {
+    const s = stateOf(b, groups.byQ.get(b.q));
+    c[s]++;
+    if (s === 'figure') {
+      const f = ownFigure(b, 'd') || ownFigure(b, 'c');
+      c[{ fact: 'recorded', estimate: 'estimate', disputed: 'disputed' }[f.status]]++;
+      if (ownFigure(b, 'd')) c.deaths++; else c.casOnly++;
+    }
+    if (s === 'none' && !b.w) c.noArticle++;
+    if (s === 'none' && b.fu) c.ucdp++;
+  }
+  return c;
+}
+/** The completeness line, as the panel and the Battles tab show it. */
+export function completenessText(c) {
+  const n = v => v.toLocaleString('en-GB');
+  const kinds = [c.recorded && `${n(c.recorded)} recorded`, c.estimate && `${n(c.estimate)} ${c.estimate === 1 ? 'estimate' : 'estimates'}`, c.disputed && `${n(c.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
+  const rest = [c.zero && `a recorded zero for ${n(c.zero)}`, c.parts && `counted through their parts for ${n(c.parts)}`, c.unread && `not read for ${n(c.unread)}`, c.none && `none found for ${n(c.none)}${c.noArticle ? ` (${n(c.noArticle)} without an article)` : ''}`].filter(Boolean).join('; ');
+  return `Figures for ${n(c.figure)} of ${n(c.battles)} battles${kinds ? `: ${kinds}` : ''}${rest ? `; ${rest}` : ''}.`;
+}
+/**
+ * The deadliest battles (BF-08): ranked by deaths only, each by the lowest figure given (a range's low end, an "at
+ * least"'s known part; Wikidata's own count where it gives one, as before), one measure, all sides. The entries with no
+ * whole above them; the rest counted, not ranked. { ranked, estimates, disputed, casOnly, none }.
+ */
+export function deadliest(groups) {
+  const top = [...groups.byQ.values()].filter(n => !n.up);
+  // A battle whose only deaths figure is its civilians' (the combatants' not read or not given) is counted, not ranked
+  // among the battles' deaths (review F2).
+  const civOnly = n => n.from === 'own' && n.ownFig?.civ;
+  const ranked = top.filter(n => n.fig > 0 && !civOnly(n)).sort((x, y) => y.fig - x.fig || (x.b.n < y.b.n ? -1 : 1));
+  return { ranked, top: top.length, estimates: ranked.filter(n => n.kind === 'estimate').length, disputed: ranked.filter(n => n.kind === 'disputed').length,
+    civ: top.filter(civOnly).length, casOnly: top.filter(n => !n.fig && n.cfig).length, none: top.filter(n => !n.fig && !n.cfig).length };
+}
+/** The line under the deadliest battles: what is ranked, of what kinds, and what is not, of how many. */
+export function deadliestNote(d) {
+  const n = v => v.toLocaleString('en-GB');
+  const kinds = [d.estimates && `${n(d.estimates)} ${d.estimates === 1 ? 'estimate' : 'estimates'}`, d.disputed && `${n(d.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
+  const not = [d.civ && `${n(d.civ)} with civilian deaths only`, d.casOnly && `${n(d.casOnly)} with casualties only`, d.none && `${n(d.none)} with no figure`].filter(Boolean).join(', ');
+  const of = d.top != null ? ` Of the ${n(d.top)} ${d.top === 1 ? 'battle' : 'battles'} not counted under a larger one,` : '';
+  return `${of ? `${of.trim()} ranked` : 'Ranked'} by deaths: ${n(d.ranked.length)}${kinds ? ` (${kinds})` : ''}, each by the lowest figure given.${not ? ` Not ranked: ${not}.` : ''} Not added into the war's deaths by month.`;
+}
+const UCDP_FROM = '1989-01-01';
+/** What was searched for a battle with no figure, in words: "Searched: Wikidata (nothing recorded); English Wikipedia
+ *  (no article); UCDP (does not cover 1950)." */
+export function searched(b) {
+  // In plain words (review P7): what VM did, never what "the reader" did.
+  const wp = !b.w ? 'no English article linked from Wikidata' : { noart: 'the linked article does not exist', redirect: 'the article is a redirect to another page', nobox: 'no infobox', nofield: 'no casualties in its infobox', failed: 'could not be read this time', blank: 'its casualties left blank', mismatch: 'the linked article is about another event, by its dates, so not read' }[b.fwp]
+    || (b.fs === 'unread' ? 'its casualties box has figures VM could not interpret surely: see the article' : b.fs === 'words' ? `no figure, only words${b.fw?.length ? `: ${b.fw.map(w => `"${w}"`).join(', ')}` : ''}` : 'no figure');
+  const year = (b.s || '').slice(0, 4) || (b.dec != null ? `the ${b.dec}s` : '');
+  const ucdp = (b.s || '') < UCDP_FROM ? `does not cover ${year || 'its date'}` : b.fu ? `${whole(b.fu.v)} deaths in ${b.fu.n} recorded clash${b.fu.n === 1 ? '' : 'es'} within ${b.fu.km} km, shown apart` : b.lat == null ? 'not mapped, so not matched' : b.p != null || (b.pe && b.pe !== 'd') ? 'dates not to the day, so not matched' : `no clashes recorded within 25 km in its dates`;
+  return `Searched: Wikidata (nothing recorded); English Wikipedia (${wp}); UCDP (${ucdp}).`;
 }
 
 /** Whether a battle's name is said as a plural ("The air raids on Japan end", "The Arctic convoys begin"). */
@@ -166,8 +342,9 @@ export const plural = name => /\bconvoys\b|s of\b|\b(?:raids|bombings|attacks|st
  *  under ten thousand. `spoken` writes a number to be read aloud. */
 export function endLine(b, n, spoken) {
   const name = b.n.replace(/^the /i, ''), many = plural(name), verb = many ? 'end' : 'ends';
-  if (n?.own ?? b.deaths) { const v = n?.own ?? b.deaths; return v >= 10000 ? `The ${name} ${verb}, at a cost of some ${spoken(v)} lives${n ? lateText(n, spoken, { spoken: true }) : ''}.` : ''; }
-  if (!n || n.from !== 'parts' || n.fig < 10000) return '';
+  // Wikidata's own counts only (BF-08): an estimate from an article's infobox is shown with its kind, not spoken as a toll.
+  if (b.deaths) { const v = b.deaths; return v >= 10000 ? `The ${name} ${verb}, at a cost of some ${spoken(v)} lives${n ? lateText(n, spoken, { spoken: true }) : ''}.` : ''; }
+  if (!n || n.from !== 'parts' || n.fig < 10000 || !n.wdOnly) return '';
   return `The ${name} ${verb}, with some ${spoken(n.fig)} deaths recorded in ${many ? 'their' : 'its'} parts${lateText(n, spoken, { spoken: true })}.`;
 }
 
@@ -185,5 +362,5 @@ export function markValue(n) {
   if (n.fig) return n.drawn ?? n.fig;
   if (n.shown.length) return 0;
   for (let u = n.up, k = 0; u && k < 40; u = u.up, k++) if (u.fig) return 0;
-  return n.b.cas || 0;
+  return n.ownCas || 0;
 }

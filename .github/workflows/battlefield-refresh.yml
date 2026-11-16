@@ -12,7 +12,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,10 +23,45 @@ jobs:
         env:
           PRP_PAGES: '0'
         run: node --test tests/battlefield.test.mjs
+      - name: Was a new release taken in?
+        id: release
+        run: |
+          if git diff --quiet -- battlefield/data/realtime.json; then echo "new=no" >> "$GITHUB_OUTPUT"; else echo "new=yes" >> "$GITHUB_OUTPUT"; fi
+      # Month by Month marks the month this file holds: with a new release it is rebuilt and tested here, and committed
+      # in the same commit, so the marks never fall behind the release they name. A failed rebuild, or one that fails its
+      # tests, is thrown away; the marks kept are then tested with the new release, and if they fail too nothing is
+      # committed (the deploy gate tests the whole suite on what a refresh leaves).
+      - name: Rebuild Month by Month
+        id: monthly
+        if: steps.release.outputs.new == 'yes'
+        continue-on-error: true
+        run: node monthly/scripts/build.mjs
+      - name: Test the new marks
+        id: monthlytest
+        if: steps.monthly.outcome == 'success'
+        continue-on-error: true
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/monthly.test.mjs
+      - name: Throw away Month by Month's changes
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          git checkout -- monthly/data
+          git clean -fdq -- monthly/data
+      - name: Test the marks kept with the new release
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/monthly.test.mjs
       - uses: ./.github/actions/commit-data
         with:
-          paths: battlefield/data/realtime.json battlefield/data/realtime.head.json
+          paths: battlefield/data/realtime.json battlefield/data/realtime.head.json monthly/data
           message: 'Battlefield: refresh UCDP candidate events'
+      - name: Fail the run if Month by Month was not rebuilt
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        run: |
+          echo "::error::The Month by Month rebuild or its tests failed (see those steps); Realtime Battlefield was committed with the marks kept."
+          exit 1
   # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
   deploy:
     needs: refresh

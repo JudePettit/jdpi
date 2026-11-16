@@ -23,7 +23,8 @@
 // hold with M's largest event taken out; for fewer, nor with each of the four months' own largest event taken out,
 // nor with the baseline's largest taken out of its month, a test skipped when every one of the four months is led by
 // one event or report holding more than half its deaths, since that compares like with like only in the first test);
-// for fewer, the months before hold reports covering several months that no report yet covers in M; three or more of
+// for fewer, more than a quarter of the three months' deaths come from events whose dates run across more than one
+// month and a quarter or less of M's do (later releases may yet add such deaths to M; design F3); three or more of
 // the confidence steps below; or a stated reason from the unit (before a state's independence or unification; a UCDP
 // conflict counted in only one of the two years the months span).
 // Confidence starts high and drops one step for each of: fewer than 25 events in M or an average under 25 before it;
@@ -209,13 +210,14 @@ export function fightingMark(series, M, ctx = {}, r = RULE) {
       if (d2 !== 'better') return none(withFigs, 'one-event', `One ${noun(bs[k].top)} in the months before decides it (${ev(bs[k].top)}, in ${monthName(months[k])}). Without it the median is ${fmt(median3(bd2))}: no large change by this rule.`);
     }
   }
-  // Reports covering several months: when the months before hold them and M has none yet, later releases may add deaths
-  // to M, so a fall is not marked.
+  // Reports covering several months: when more than a quarter of the three months' deaths come from them and a quarter
+  // or less of M's do, later releases may add such deaths to M, so a fall is not marked. A share, not presence: a few
+  // deaths from one such report in a baseline month do not stop a fall (the design, F3: "more than a quarter").
   const shareOf = x => (x.d > 0 && x.sh != null ? x.sh / x.d : 0);
   if (dir === 'better' && figures.shared) {
     const bsh = bs.reduce((s, x) => s + x.sh, 0), btot = bd.reduce((s, x) => s + x, 0);
     if (btot > 0 && bsh / btot > r.spanShare && shareOf(row) <= r.spanShare)
-      return none(withFigs, 'period-gap', `The three months before hold reports covering several months (${fmt(bsh)} of their ${fmt(btot)} deaths), and no such report yet covers ${monthName(M)}: a later UCDP release may add deaths to it.`);
+      return none(withFigs, 'period-gap', `More than a quarter of the deaths in the three months before come from events UCDP dates only to a span running across months (${fmt(bsh)} of ${fmt(btot)}), against ${row.sh ? `${fmt(row.sh)} of ${monthName(M)}'s ${fmt(D)}` : `none of ${monthName(M)}'s ${fmt(D)}`}: a later UCDP release may add such deaths to ${monthName(M)}.`);
   }
 
   const steps = [];

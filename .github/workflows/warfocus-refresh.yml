@@ -42,6 +42,13 @@ jobs:
         run: |
           git checkout -- monthly/data
           git clean -fdq -- monthly/data
+      # The marks kept must still pass their tests with War Focus's new files (they read them), or nothing is committed:
+      # the deploy gate tests the whole suite on what a refresh leaves.
+      - name: Test the marks kept with War Focus's new files
+        if: steps.monthly.outcome == 'failure' || steps.monthlytest.outcome == 'failure'
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/monthly.test.mjs
       - uses: ./.github/actions/commit-data
         with:
           paths: battlefield/focus/data monthly/data

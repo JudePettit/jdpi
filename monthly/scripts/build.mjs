@@ -369,7 +369,7 @@ for (const u of units.filter(x => x.kind !== 'war')) writeIfChanged(`monthly/dat
 if (writeBulletin) write(`monthly/data/bulletins/${M}.json`, bulletin);
 const allB = [...new Set([...kept.keys(), M])].sort().reverse();
 writeIfChanged('monthly/data/bulletins/index.json', { generated: NOW, months: allB.map(m => ({ month: m, provisional: m === M ? (writeBulletin ? bulletin.provisional : keptM.provisional) : !!kept.get(m)?.provisional })) });
-write('monthly/data/watch.json', watch);
+writeIfChanged('monthly/data/watch.json', watch);
 if (writeWatchIssue) write(`monthly/data/watch/${watchMonth}.json`, { ...watch, issued: NOW });
 const OUT_FILE = join(OUT, 'marks.json');
 writeFileSync(OUT_FILE, JSON.stringify(marks));

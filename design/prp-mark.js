@@ -14,6 +14,8 @@
    PRPMark.strip(strip)      the year strip of a unit (monthly/data/strips/…), with its table view (HTML)
    PRPMark.wire(root)        the strips' buttons (all years, table view), once per container
    PRPMark.name(x)           a war's or country's name with its Master Index link (data-qid or its Wikipedia link)
+   PRPMark.sinceIssue(b, marks)  where today's marks for a month differ from its kept bulletin
+   PRPMark.go(page)          a page's link ({ href, target }), or null when its address is not on the site nor http(s)
    Every string is data and is escaped here. */
 (function () {
   const script = document.currentScript;
@@ -30,10 +32,14 @@
   const SIGN = { worse: '+', better: '−', same: '=', none: '' };
   const STEP_WORDS = ['none of the rule\'s five checks applies', 'one of the rule\'s five checks applies', 'two of the rule\'s five checks apply'];
 
-  /** A link into VM: the shell's deep link inside the shell, the page itself on its own. */
+  /** A link into VM: the shell's deep link inside the shell, the page itself on its own. Only an address on the site
+      (relative to it) or an http(s) link is a link: any other (javascript:, data:, …) is null, and is drawn as text. */
   function go(page) {
     if (!page || !page.url) return null;
-    const abs = new URL(page.url, SHELL).href;
+    let u;
+    try { u = new URL(String(page.url), SHELL); } catch { return null; }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+    const abs = u.href;
     return embedded && page.suite && page.module ? { href: `${SHELL}#/${page.suite}/${page.module}?at=${encodeURIComponent(abs)}`, target: '_top' } : { href: abs, target: '_self' };
   }
   const a = (page, text, cls = '') => { const g = go(page); return g ? `<a${cls ? ` class="${cls}"` : ''} href="${esc(g.href)}" target="${g.target}">${text}</a>` : text; };
@@ -139,6 +145,25 @@
     });
   }
 
+  /** A month's kept bulletin against today's marks for the same month (marks.json): each war or country whose direction,
+      confidence or deaths now differ from the issue (UCDP revised its figures after it), or that the issue did not hold
+      and is now marked. [] when today's marks are those of the issue, or when marks.json is on another month. The issue
+      itself is never rewritten; the page shows these beside it. */
+  function sinceIssue(b, marks) {
+    if (!b || !marks || b.month !== marks.month) return [];
+    const WORDS = { worse: 'More deaths recorded', better: 'Fewer deaths recorded', same: 'No large change by this rule', none: 'No mark' };
+    const out = [];
+    for (const u of marks.units || []) {
+      if (!(u.primary || u.kind === 'war') || !u.fighting || u.fighting.month !== b.month) continue;
+      const was = (b.marks || {})[u.id] || null;
+      const now = { direction: u.fighting.direction, words: u.fighting.words, confidence: u.fighting.confidence || null, deaths: u.fighting.figures?.deaths ?? null };
+      if (was ? was.direction === now.direction && (was.confidence || null) === now.confidence && (was.deaths ?? null) === now.deaths : now.direction === 'none') continue;
+      out.push({ unit: u.id, kind: u.kind, name: u.name, qid: u.qid || null, wiki: u.wiki || null, iso3: u.iso3 || null,
+        issued: was ? { direction: was.direction, words: WORDS[was.direction] || was.direction, confidence: was.confidence || null, deaths: was.deaths ?? null } : null, now });
+    }
+    return out;
+  }
+
   const loadStrip = file => fetch(new URL(`monthly/data/strips/${file}.json`, SHELL).href).then(r => (r.ok ? r.json() : null)).catch(() => null);
-  window.PRPMark = { load, unitOf, full, chip, strip, wire, name, sentence, go, loadStrip, monthName, spanName, fmt, esc, SHELL };
+  window.PRPMark = { load, unitOf, full, chip, strip, wire, name, sentence, go, sinceIssue, loadStrip, monthName, spanName, fmt, esc, SHELL };
 })();

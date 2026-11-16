@@ -1,11 +1,15 @@
 // Month by Month (Realtime Geopolitics): the rule behind every monthly direction mark (monthly/scripts/rules.mjs), the
-// series it reads (series.mjs), the committed data (monthly/data, which calendar-refresh and warfocus-refresh test before
-// committing) and the pages that draw marks. The data tests read the repository's files and pass with PRP_PAGES=0; the
-// page tests run against JDPI_URL (default the live site) in Microsoft Edge, muted.
+// series it reads (series.mjs), the committed data (monthly/data, which calendar-refresh, battlefield-refresh and
+// warfocus-refresh test before committing) and the pages that draw marks. The data tests read the repository's files and
+// pass with PRP_PAGES=0; the page tests run against JDPI_URL (default the live site) in Microsoft Edge, muted.
+// The data tests assert only what holds whichever refresh ran last: two files that different refreshes write on their
+// own schedules are never held equal (each refresh is tested alone on what it leaves, then the deploy gate tests all).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import vm from 'node:vm';
 import { pageTest } from './tools/pages.mjs';
+import { parseYaml } from './tools/yaml.mjs';
 import { RULE, WORDS, fightingMark, volatilityMark, volatilityRise, markProblems, deathsDirection, eventsDirection, addMonths, sameReason, reportSpan } from '../monthly/scripts/rules.mjs';
 import { seriesFromEvents, focusRows, rowsFromSeries, gwTable, mergeRows, countryRows, INDEPENDENCE } from '../monthly/scripts/series.mjs';
 import { checkHeads } from '../integration/scripts/heads.mjs';
@@ -14,6 +18,15 @@ const BASE = (process.env.JDPI_URL || process.env.PRP_URL || 'https://jdpi.pages
 const read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const json = p => JSON.parse(read(p));
 const launch = async () => (await import('playwright-core')).chromium.launch({ channel: process.env.PRP_BROWSER || 'msedge', args: ['--mute-audio'] });
+// design/prp-mark.js (a classic script) in a sandbox, as a standalone page at `href` (or inside the shell) loads it.
+const loadMark = ({ href = 'https://jdpi.pages.dev/q/monthly.html', embedded = false } = {}) => {
+  const box = { document: { currentScript: { dataset: { shell: '../' } } }, location: { href }, URL, fetch: () => Promise.reject(new Error('no network')) };
+  box.window = box; box.self = box; box.top = embedded ? {} : box;
+  vm.runInNewContext(read('design/prp-mark.js'), box);
+  return box.PRPMark;
+};
+// A plain copy of what the sandbox returns (its arrays and objects are of another realm).
+const plain = x => JSON.parse(JSON.stringify(x));
 
 // A month: deaths, events, and optionally its largest event, span deaths, dataset, estimate and provisional flags.
 const row = (m, d, e, x = {}) => ({ m, d, e, sh: 'sh' in x ? x.sh : 0, top: x.top === undefined ? { date: `${m}-10`, n: Math.min(d, Math.max(1, Math.round(d / 10))), place: 'somewhere', end: null, whole: Math.min(d, Math.max(1, Math.round(d / 10))), headline: '', office: '' } : x.top, src: x.src || 'UCDP GED 26.1', est: !!x.est, prov: !!x.prov, ...(x.part ? { part: x.part } : {}) });
@@ -133,6 +146,19 @@ test('rule: provisional figures lower the confidence a step', () => {
 test('rule: reports covering several months, a dataset seam and an estimate give no mark', () => {
   const gap = four([1000, 1000, 1000, 500], [100, 100, 100, 100], k => ({ sh: k < 3 ? 400 : 0 }));
   assert.equal(fightingMark(gap, '2026-09').why.code, 'period-gap');
+  // The test is a share, as the design (F3) and "How this is worked out" say: more than a quarter of the three months'
+  // deaths from events over a span, and a quarter or less of the month's. Yemen, June to September 2016 (War Focus):
+  // 42 of June's 359 deaths over a span, none after: 4% of the three months, so September's fall is marked.
+  const yem = fightingMark(four([359, 310, 381, 225], [40, 40, 40, 20], k => ({ sh: k === 0 ? 42 : 0 })), '2026-09');
+  assert.equal(yem.direction, 'better');
+  // The month holding some such deaths, but a quarter or less: still no mark, and the reason gives both shares, never
+  // "no such report covers" a month that holds one.
+  const some = fightingMark(four([1000, 1000, 1000, 500], [100, 100, 100, 100], k => ({ sh: k < 3 ? 400 : 100 })), '2026-09');
+  assert.equal(some.why.code, 'period-gap');
+  assert.equal(some.why.text, "More than a quarter of the deaths in the three months before come from events UCDP dates only to a span running across months (1,200 of 3,000), against 100 of September 2026's 500: a later UCDP release may add such deaths to September 2026.");
+  assert.match(fightingMark(gap, '2026-09').why.text, /\(1,200 of 3,000\), against none of September 2026's 500:/);
+  assert.match(read('q/monthly.html'), /when, for fewer, more than a quarter of the deaths in the three months before come from events UCDP dates only to a span running across months and a quarter or less of this month's do/, 'the page states the share');
+  assert.ok(!/none yet covers this one|no such report yet covers/.test(read('q/monthly.html') + read('monthly/scripts/rules.mjs')), 'nor presence and absence');
   const seam = four([300, 300, 300, 900], [50, 50, 50, 90], k => ({ src: k === 0 ? 'UCDP GED 26.1' : 'UCDP Candidate Events 2026' }));
   assert.equal(fightingMark(seam, '2026-09').why.code, 'datasets');
   const est = four([300, 300, 300, 900], [50, 50, 50, 90], k => ({ est: k === 1 }));
@@ -197,10 +223,14 @@ test('series: an event over a span is shared over its days and counted in each m
 });
 
 /* ------------------------------------------------------------------------------------------- the September examples */
-test('September 2026, recomputed from War Focus\'s committed files', () => {
+test('September 2026, recomputed from War Focus\'s committed files', t => {
+  // These are War Focus's figures through 30 September 2026. Its next monthly run reads UCDP's next candidate file,
+  // which can revise September, so the figures below are checked only while War Focus holds that run's (each later run
+  // has its marks recomputed by the data tests below).
+  const through = json('battlefield/focus/data/index.json').gedThrough;
+  if (through !== '2026-09-30') return t.skip(`War Focus now holds figures through ${through}`);
   const mk = id => fightingMark(focusRows(json(`battlefield/focus/data/wars/${id}.json`)), '2026-09');
   const y = mk('yemen');
-  if (y.direction === 'none' && y.why.code === 'unpublished') return; // War Focus has moved on to another release
   assert.equal(y.figures.deaths, 3170); assert.equal(y.direction, 'worse'); assert.equal(y.confidence, 'low', 'events over a span, and provisional');
   assert.deepEqual(y.steps.map(s => s.code), ['span', 'provisional']);
   const r = mk('russia-ukraine');
@@ -280,10 +310,11 @@ test('data: calendar events beside a mark name the country they were matched by;
   }
   const ru = units.find(u => u.id === 'focus:russia-ukraine');
   assert.deepEqual(ru.countries.map(c => c.iso3).sort(), ['RUS', 'UKR'], 'a war with no theatre takes its countries from its sides');
-  // A War Focus war's largest event is named only from its own Realtime Battlefield war's sources.
+  // A War Focus war's largest event is named only from its own Realtime Battlefield war's sources: checked against the
+  // release the marks were built from (a later release, until the marks are rebuilt, may list other sources).
   const rt = json('battlefield/data/realtime.json');
   const PAIRS = { 'russia-ukraine': 'russia-ukraine', yemen: 'yemen', sudan: 'sudan-2023' };
-  for (const u of units.filter(x => x.kind === 'focus')) {
+  if (marks.sources.realtime.version === rt.version) for (const u of units.filter(x => x.kind === 'focus')) {
     const own = rt.wars.find(w => PAIRS[w.id] === u.id.slice(6));
     const heads = new Set((own?.monthly || []).flatMap(x => (x.sources || []).map(s => s.headline)));
     for (const r of u.fighting.inputs?.rows || []) if (r.top?.headline) assert.ok(heads.has(r.top.headline), `${u.id} ${r.m}: "${r.top.headline}" is from its own war`);
@@ -292,14 +323,51 @@ test('data: calendar events beside a mark name the country they were matched by;
   for (const it of [...w.votes, ...w.summits]) assert.notEqual(it.country.name, 'Soviet Union', it.title);
 });
 
-test('data: the month marked is Realtime Battlefield\'s latest, and the summary is in step', () => {
+// What must hold between the marks and Realtime Battlefield's file, whichever refresh ran last: battlefield-refresh
+// rebuilds the marks in the commit that takes in a release, and when that rebuild fails it is thrown away, so the marks
+// can be on the release before (never further behind); and the marks name the release they use.
+const releaseProblems = (mk, rt) => {
+  const p = [], src = mk.sources?.realtime || {};
+  if (src.latest !== mk.month) p.push(`the marks are for ${mk.month} but name a release to ${src.latest}`);
+  if (![rt.latest, addMonths(rt.latest, -1)].includes(mk.month)) p.push(`marks for ${mk.month} (${src.version}); Realtime Battlefield holds ${rt.latest} (${rt.version}): more than one release behind`);
+  if (src.version === rt.version && mk.month !== rt.latest) p.push(`release ${rt.version} is for ${rt.latest}, not ${mk.month}`);
+  if (!mk.strands?.find(s => s.id === 'realtime')?.text.includes(`release ${src.version}`)) p.push('the bulletin does not name the release its marks use');
+  return p;
+};
+test('data: the marks use Realtime Battlefield\'s release or the one before it, and say which; the summary is in step', () => {
   const rt = json('battlefield/data/realtime.json');
-  assert.equal(marks.month, rt.latest);
-  assert.equal(marks.sources.realtime.version, rt.version);
+  assert.deepEqual(releaseProblems(marks, rt), []);
+  // Realtime Battlefield's next release, before the marks are rebuilt (the case that once failed every deploy), passes;
+  // a second one does not.
+  const next = { ...rt, latest: addMonths(marks.month, 1), version: '26.01.26.10' };
+  assert.deepEqual(releaseProblems(marks, next), []);
+  assert.equal(releaseProblems(marks, { ...rt, latest: addMonths(marks.month, 2), version: '26.01.26.11' }).length, 1);
+  // The page shows the release beside the marks.
+  assert.match(read('q/monthly.html'), /<span>UCDP candidate events \$\{esc\(s\.realtime\.version\)\}, taken in /);
   assert.deepEqual(checkHeads(['monthly/data/marks.json']), []);
   const fresh = read('.github/scripts/freshness.mjs');
   assert.match(fresh, /file: 'monthly\/data\/marks\.json', name: 'Month by Month', workflow: 'calendar-refresh\.yml', every: 24/);
   assert.match(fresh, /file: 'monthly\/data\/marks\.head\.json'[^\n]*when: j => j\.released/);
+});
+
+test('workflows: each refresh whose files the marks read rebuilds them in its own commit, and never commits marks failing their tests', () => {
+  const stepsOf = f => parseYaml(read(`.github/workflows/${f}`)).jobs.refresh.steps;
+  for (const f of ['calendar-refresh.yml', 'battlefield-refresh.yml', 'warfocus-refresh.yml']) {
+    const steps = stepsOf(f), at = steps.findIndex(s => s.uses === './.github/actions/commit-data'), before = steps.slice(0, at);
+    assert.ok(at > 0 && String(steps[at].with.paths).split(/\s+/).includes('monthly/data'), `${f} commits monthly/data with its own files`);
+    const build = before.findIndex(s => /node monthly\/scripts\/build\.mjs/.test(s.run || ''));
+    assert.ok(build >= 0, `${f} rebuilds Month by Month before it commits`);
+    assert.ok(before.slice(build).some(s => s.id === 'monthlytest' && /node --test tests\/monthly\.test\.mjs/.test(s.run) && s.env?.PRP_PAGES === '0'), `${f} tests the new marks`);
+    const drop = before.findIndex(s => /git checkout -- monthly\/data/.test(s.run || ''));
+    assert.ok(drop > build, `${f} throws away a rebuild that failed`);
+    // Realtime Battlefield's and War Focus's files are read by the marks' tests: the marks kept are tested with them.
+    if (f !== 'calendar-refresh.yml') assert.ok(before.slice(drop + 1).some(s => /node --test tests\/monthly\.test\.mjs/.test(s.run || '') && !s['continue-on-error']), `${f} tests the marks kept with its new files before committing`);
+  }
+  // battlefield-refresh rebuilds only when it took in a new release (most weeks it does not), and says so when it could not.
+  const bf = stepsOf('battlefield-refresh.yml');
+  assert.match(bf.find(s => s.id === 'monthly').if, /steps\.release\.outputs\.new == 'yes'/);
+  assert.match(bf.find(s => s.id === 'release').run, /git diff --quiet -- battlefield\/data\/realtime\.json/);
+  assert.ok(bf.some(s => /exit 1/.test(s.run || '') && /monthly/.test(s.if || '')), 'a red run when the marks were not rebuilt');
 });
 
 test('data: every bulletin line matches a mark; wars and countries apart, each war once', () => {
@@ -314,9 +382,63 @@ test('data: every bulletin line matches a mark; wars and countries apart, each w
   assert.ok(b.wars.every(l => l.kind !== 'country') && b.countries.every(l => l.kind === 'country'));
   assert.equal(new Set(b.wars.map(l => l.unit)).size, b.wars.length);
   assert.ok(!b.wars.some(l => by.get(l.unit)?.primary === false), 'a war both groupings cover is listed by its primary unit only');
-  for (const t of marks.bulletin.top) assert.ok(b.wars.some(l => l.unit === t.unit), `${t.unit} on the Dashboard is a bulletin line`);
+  // A final bulletin is a record of what VM said then, so today's marks can differ from it (UCDP revises its figures).
+  // Each of today's marks on the Dashboard is a line of the issue, or the page lists it beside the issue as differing.
+  const since = loadMark().sinceIssue(b, marks);
+  for (const t of marks.bulletin.top) assert.ok(b.wars.some(l => l.unit === t.unit) || since.some(d => d.unit === t.unit), `${t.unit} on the Dashboard is a bulletin line, or shown as revised since it`);
+  if (b.issued === marks.generated) assert.deepEqual(plain(since), [], 'an issue written with these marks differs from none');
   const kept = readdirSync(new URL('../monthly/data/bulletins/', import.meta.url)).filter(f => /^\d{4}-\d{2}\.json$/.test(f));
   assert.deepEqual(json('monthly/data/bulletins/index.json').months.map(x => x.month + '.json').sort(), kept.sort());
+});
+
+test('a revision after a final issue: the issue stands, and today\'s mark is listed beside it', () => {
+  const b = json('monthly/data/bulletins/2026-09.json');
+  assert.equal(b.provisional, false);
+  // September 2026, Pakistan and Afghanistan (Realtime Battlefield): issued as "No large change" with 769 deaths against
+  // 437, 631 and 549. Were UCDP to revise September to 900, the rule gives "More deaths recorded", while the issue,
+  // never rewritten, lists Yemen only.
+  const u = structuredClone(units.find(x => x.id === 'war:pakistan-afghanistan'));
+  if (u.fighting.month !== '2026-09' || b.marks[u.id]?.deaths !== 769) return; // the committed marks have moved on
+  const rows = u.fighting.inputs.rows.map(r => (r.m === '2026-09' ? { ...r, d: 900 } : r));
+  u.fighting = { ...fightingMark(rows, '2026-09', u.fighting.inputs), evidence: u.fighting.evidence };
+  assert.equal(u.fighting.direction, 'worse');
+  const revised = { ...marks, month: '2026-09', units: marks.units.map(x => (x.id === u.id ? u : x)) };
+  const top = [{ unit: u.id }, ...marks.bulletin.top];
+  assert.ok(!b.wars.some(l => l.unit === u.id), 'not a line of the issue');
+  const since = loadMark().sinceIssue(b, revised);
+  assert.deepEqual(plain(since.map(d => [d.unit, d.issued.direction, d.issued.deaths, d.now.direction, d.now.deaths])), [[u.id, 'same', 769, 'worse', 900]]);
+  for (const t of top) assert.ok(b.wars.some(l => l.unit === t.unit) || since.some(d => d.unit === t.unit), t.unit);
+  // Deaths revised without a new direction are listed too (Yemen 3,170 to 3,200), and a mark the same as issued is not.
+  const y = structuredClone(revised.units.find(x => x.id === 'focus:yemen'));
+  y.fighting.figures.deaths = 3200;
+  const both = loadMark().sinceIssue(b, { ...revised, units: revised.units.map(x => (x.id === y.id ? y : x)) });
+  assert.deepEqual(plain(both.map(d => d.unit).sort()), [u.id, 'focus:yemen'].sort());
+  assert.deepEqual(plain(loadMark().sinceIssue(b, { ...marks, month: '2026-10' })), [], 'marks on another month compare with nothing');
+});
+
+test('links in a mark: only addresses on the site and http(s) links; any other address is drawn as text', () => {
+  for (const embedded of [false, true]) {
+    const K = loadMark({ embedded });
+    assert.equal(K.go({ url: 'javascript:alert(document.domain)' }), null, 'javascript:');
+    assert.equal(K.go({ suite: 'rt', module: 'battlefield', url: ' JavaScript:alert(1)' }), null, 'in any case, with a space before');
+    assert.equal(K.go({ url: 'data:text/html,<script>alert(1)</script>' }), null, 'data:');
+    assert.equal(K.go({ url: 'vbscript:msgbox(1)' }), null);
+    assert.ok(K.go({ suite: 'rt', module: 'battlefield', url: 'q/battlefield.html?view=live&war=yemen' }).href.startsWith('https://jdpi.pages.dev/'), 'a page on the site');
+    assert.ok(K.go({ url: 'https://ucdp.uu.se/downloads/' }), 'an https link');
+  }
+  const K = loadMark();
+  assert.equal(K.go({ url: 'q/battlefield.html?view=live' }).href, 'https://jdpi.pages.dev/q/battlefield.html?view=live');
+  const m = { ...units.find(x => x.id === 'focus:yemen').fighting };
+  m.evidence = [{ ...m.evidence[0], page: { url: 'javascript:alert(document.domain)', label: 'A page' } }];
+  const html = K.full(m);
+  assert.ok(!/javascript:/i.test(html), 'no javascript: address in the mark');
+  assert.match(html, /\. A page<br>/, 'the label drawn as text');
+});
+
+test('the builder writes each file only when its content changed, the watch list too', () => {
+  const src = read('monthly/scripts/build.mjs');
+  assert.match(src, /writeIfChanged\('monthly\/data\/watch\.json', watch\)/);
+  assert.ok(!/\bwrite\('monthly\/data\/watch\.json'/.test(src));
 });
 
 test('data: watch items are dated inside the window, each with its source; never a forecast', () => {
@@ -416,6 +538,40 @@ test('page: Month by Month, its marks with their explanations, in light and dark
       assert.deepEqual(errors, [], `${width} ${scheme}: console errors`);
       await page.close();
     }
+  } finally { await browser.close(); }
+});
+
+test('page: the latest month\'s final bulletin is shown as issued, with a revised mark beside it, chosen or not', pageTest, async t => {
+  const b = json(`monthly/data/bulletins/${marks.month}.json`);
+  if (b.provisional || !b.wars.length) return t.skip('the latest bulletin is provisional, or lists no war');
+  const l = b.wars[0], fmtN = n => n.toLocaleString('en-GB');
+  // Today's marks as they would be after UCDP revised the month: the war's deaths 30 higher.
+  const revised = structuredClone(marks);
+  const u = revised.units.find(x => x.id === l.unit);
+  u.fighting.figures.deaths = l.deaths + 30;
+  u.fighting.what = u.fighting.what.replace(fmtN(l.deaths), fmtN(l.deaths + 30));
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/monthly/data/marks.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(revised) }));
+    for (const at of ['#tab=changed', `#tab=changed&month=${marks.month}`]) {
+      await page.goto(`${BASE}/q/monthly.html${at}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForFunction(() => /As issued on/.test(document.querySelector('#tab-changed')?.innerText || ''), null, { timeout: 20000 });
+      const text = await page.locator('#tab-changed').innerText();
+      assert.ok(text.includes(l.what), `${at}: the issue's own words (${fmtN(l.deaths)} deaths)`);
+      assert.ok(!text.includes(u.fighting.what), `${at}: not today's revised words in the issue`);
+      assert.match(text, /Today's marks against this issue/i);
+      assert.ok(text.includes(`issued as ${l.words}, ${l.confidence} confidence (${fmtN(l.deaths)} deaths); today ${u.fighting.words}, ${u.fighting.confidence} confidence (${fmtN(l.deaths + 30)} deaths)`), `${at}: today's mark beside the issue`);
+      assert.equal(await page.locator('#pick').inputValue(), marks.month, `${at}: the month chosen`);
+    }
+    // Without a revision, the issue says none differ.
+    await page.unroute('**/monthly/data/marks.json');
+    await page.goto(`${BASE}/q/monthly.html#tab=changed`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => /As issued on/.test(document.querySelector('#tab-changed')?.innerText || ''), null, { timeout: 20000 });
+    assert.match(await page.locator('#tab-changed').innerText(), /None differ: today's marks for [A-Z][a-z]+ \d{4} are those of this issue\./);
+    assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
 

@@ -71,7 +71,7 @@ h3.sub{margin:18px 0 6px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--
       <h3>What is counted</h3>
       <p>Realtime Battlefield's wars and the countries count all organised violence UCDP records (fighting between states and armed groups, between armed groups, and against civilians); War Focus's wars count fighting involving a state only. Until Realtime Battlefield's file is rebuilt with VM's shared count, its wars count each event in the month it starts, as its page does. A war both cover is listed once in the bulletin, by War Focus.</p>
       <h3>No mark</h3>
-      <p>There is none when UCDP has not yet published the month (it does so three to four weeks after the month ends); when a war has ended before the month; when a month of the four is not a whole month in the figures (War Focus counts a war only from the day it starts and to the day it ends, so a first or last month can hold a few days); when a month of the four is an estimate or comes from another UCDP dataset; when there are fewer than 10 events in the month or an average under 10 a month before it, or under 25 deaths in the four months; when one event decides it (the mark would not hold with the month's largest event taken out; for fewer, nor with each of the four months' own largest event taken out of it, nor with the largest event of the three months before taken out of its month, a test left out when every one of the four months is led by one event or report holding more than half its deaths, since only the like-for-like test then compares like with like). Some of UCDP's "events" are reports covering a whole month, such as a monthly tally of losses: a mark calls them reports and gives the days they cover; when, for fewer, the months before hold reports covering several months and none yet covers this one; for a country, when the four months span two years and a UCDP conflict is counted in only one (UCDP counts a conflict only in a year with 25 or more battle deaths), or begin before its independence or unification (or, for Russia and Serbia, before the Soviet Union and Yugoslavia split, since UCDP counts the whole state under their codes until then); and when three of the checks below apply. The page says which.</p>
+      <p>There is none when UCDP has not yet published the month (it does so three to four weeks after the month ends); when a war has ended before the month; when a month of the four is not a whole month in the figures (War Focus counts a war only from the day it starts and to the day it ends, so a first or last month can hold a few days); when a month of the four is an estimate or comes from another UCDP dataset; when there are fewer than 10 events in the month or an average under 10 a month before it, or under 25 deaths in the four months; when one event decides it (the mark would not hold with the month's largest event taken out; for fewer, nor with each of the four months' own largest event taken out of it, nor with the largest event of the three months before taken out of its month, a test left out when every one of the four months is led by one event or report holding more than half its deaths, since only the like-for-like test then compares like with like). Some of UCDP's "events" are reports covering a whole month, such as a monthly tally of losses: a mark calls them reports and gives the days they cover; when, for fewer, more than a quarter of the deaths in the three months before come from events UCDP dates only to a span running across months and a quarter or less of this month's do, since a later release may yet add such deaths to it; for a country, when the four months span two years and a UCDP conflict is counted in only one (UCDP counts a conflict only in a year with 25 or more battle deaths), or begin before its independence or unification (or, for Russia and Serbia, before the Soviet Union and Yugoslavia split, since UCDP counts the whole state under their codes until then); and when three of the checks below apply. The page says which.</p>
       <h3>Confidence</h3>
       <p>A mark starts at high and drops one step for each of these: fewer than 25 events in the month, or an average under 25 before it; one event holds more than half the month's deaths; more than a quarter of any of the four months' deaths come from events UCDP dates only to a span running across months (or the figures cannot tell); deaths and events point opposite ways; a month of the four comes from UCDP's candidate events, which are provisional (UCDP revises them, and its final figures come the next year). One step down is medium, two is low, three or more means no mark. Every mark and square from candidate events also says "provisional".</p>
       <h3>Volatility</h3>
@@ -83,7 +83,7 @@ h3.sub{margin:18px 0 6px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--
     </div></div>
   </section>
   <footer class="prp-sources">
-    <p><b>Sources.</b> <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a> and UCDP Georeferenced Event Dataset 26.1 (Uppsala Conflict Data Program), CC BY 4.0, through VM's Realtime Battlefield and War Focus; GDELT 2.0 through VM's Geopolitical Volatility; VM's Realtime and Historical Calendars. Rebuilt every morning with the calendars; a new UCDP month arrives the morning after Realtime Battlefield takes it in, and War Focus's on the 2nd of the next month.</p>
+    <p><b>Sources.</b> <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a> and UCDP Georeferenced Event Dataset 26.1 (Uppsala Conflict Data Program), CC BY 4.0, through VM's Realtime Battlefield and War Focus; GDELT 2.0 through VM's Geopolitical Volatility; VM's Realtime and Historical Calendars. Rebuilt every morning with the calendars; a new UCDP month arrives when Realtime Battlefield takes it in, and War Focus's on the 2nd of the next month.</p>
     <p><b>Method.</b> One rule for every war and every country, set out under "How this is worked out", with every figure behind it in <a href="../monthly/data/marks.json">marks.json</a>, so any mark can be checked by hand.</p>
   </footer>
 </main>
@@ -120,9 +120,16 @@ const unitBlock = u => `<div class="unit" id="u-${esc(u.id.replace(/[^a-z0-9-]/g
 const kpis = (c, words) => `<div class="prp-kpis">${[['worse', 'More deaths recorded'], ['better', 'Fewer deaths recorded'], ['same', 'No large change by this rule'], ['none', 'No mark']].map(([k, l]) => `<div class="prp-kpi"><span>${l}</span><b>${fmt(c[k])}</b><small>${words}</small></div>`).join('')}</div>`;
 
 /* ---------- What changed in <month> ---------- */
+// A month whose bulletin is final is shown as issued, the latest month too: the issue is a record of what VM said then,
+// and where today's marks differ from it (UCDP revised its figures since), they are shown beside it. The latest month
+// is drawn from today's marks only while its bulletin is provisional (rewritten with every rebuild until final).
 function renderChanged() {
-  const want = hash().get('month');
-  if (want && want !== M.month && BI?.months.some(x => x.month === want)) return renderKept(want);
+  const want = hash().get('month') || M.month;
+  const issue = BI?.months?.find(x => x.month === want);
+  if (issue && (want !== M.month || !issue.provisional)) return renderKept(want);
+  return renderCurrent();
+}
+function renderCurrent() {
   const primary = M.units.filter(u => u.kind !== 'country' && u.primary);
   const wars = primary.filter(u => ['worse', 'better'].includes(u.fighting.direction)).sort((a, b) => Math.abs(b.fighting.figures.change) - Math.abs(a.fighting.figures.change));
   const countries = M.units.filter(u => u.kind === 'country');
@@ -154,13 +161,26 @@ function renderChanged() {
 async function renderKept(month) {
   const b = await getJson(`bulletins/${month}.json`);
   if (!b) { $('#tab-changed').innerHTML = `<div class="prp-note warn">The bulletin for ${esc(monthName(month))} could not be read.</div>`; return; }
-  const line = l => `<div class="line">${K.name(l, { strong: true })} · <b>${esc(l.words)}</b>${l.confidence ? `, ${esc(l.confidence)} confidence` : ''}<div class="meta empty">${esc(l.what)}</div></div>`;
+  const latest = month === M.month;
+  const conf = c => (c ? `, ${esc(c)} confidence` : '');
+  const line = l => `<div class="line">${K.name(l, { strong: true })} · <b>${esc(l.words)}</b>${conf(l.confidence)}<div class="meta empty">${esc(l.what)}</div></div>`;
+  const stState = { in: 'In', awaited: 'Awaited', 'not-yet': 'Not yet possible' };
+  // Today's marks for this month, where they differ from the issue (the latest month only: marks.json holds no other).
+  const since = latest ? K.sinceIssue(b, M) : [];
+  const sinceLine = d => `<div class="line">${K.name(d, { strong: true })}: ${d.issued ? `issued as ${esc(d.issued.words)}${conf(d.issued.confidence)} (${fmt(d.issued.deaths)} deaths)` : 'not in this issue'}; today ${esc(d.now.words)}${conf(d.now.confidence)} (${fmt(d.now.deaths)} deaths).</div>`;
+  const revised = (M.revisions || []).filter(r => (latest ? r.month < month : r.month === month));
   $('#tab-changed').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
     <div class="archive"><label class="prp-label" for="pick">Bulletins kept as issued</label><select class="prp-select" id="pick">${BI.months.map(x => `<option value="${esc(x.month)}"${x.month === month ? ' selected' : ''}>${esc(monthName(x.month))}${x.provisional ? ' (provisional)' : ''}</option>`).join('')}</select></div>
     <h2 class="sec">What changed in ${esc(monthName(month))}</h2>
-    <p class="empty">As issued on ${esc(longDay(b.issued))}${b.provisional ? ', a provisional issue' : ''}. Later UCDP releases can revise these figures; the current marks are under All marks.</p>
+    <p class="empty">As issued on ${esc(longDay(b.issued))}${b.provisional ? ', a provisional issue' : ', and kept as issued: a record of what VM said then, never rewritten'}. VM's own marks from UCDP's figures: the month against the three before it, by one rule. Not an analyst's judgement, and not a forecast. ${pageLink({ suite: 'rt', module: 'monthly', url: 'q/monthly.html#tab=how' }, 'How this is worked out')}.</p>
+    ${(b.strands || []).length ? `<ul class="strands">${b.strands.map(s => `<li><span><b>${esc(s.name)}</b> <span class="st">${esc(stState[s.state] || s.state)}</span></span><span>${esc(s.text)}</span></li>`).join('')}</ul>` : ''}
     <h3 class="sub">Wars</h3>${kpis(b.counts.wars, 'wars')}${b.wars.map(line).join('') || '<p class="empty">No war was marked more or fewer.</p>'}
     <h3 class="sub">Countries</h3>${b.countries.length ? b.countries.map(line).join('') : '<p class="empty">None marked more or fewer, or not yet possible that month.</p>'}
+    ${(b.newlyRecorded || []).length ? `<h3 class="sub">Newly recorded</h3>${b.newlyRecorded.map(u => `<div class="line">${K.name(u, { strong: true })}: ${fmt(u.events)} events and ${fmt(u.deaths)} deaths recorded in ${esc(monthName(month))}, none in the three months before.</div>`).join('')}` : ''}
+    ${latest ? `<h3 class="sub">Today's marks against this issue</h3>${since.length ? `<p class="empty">UCDP has revised its figures for ${esc(monthName(month))} since this issue, and today's marks differ from it here. The issue above is kept as it was.</p>${since.map(sinceLine).join('')}` : `<p class="empty">None differ: today's marks for ${esc(monthName(month))} are those of this issue.</p>`}` : ''}
+    <h3 class="sub">${latest ? 'Earlier months: marks revised since issue' : 'Marks revised since this issue'}</h3>
+    ${revised.length ? revised.map(r => `<div class="line">${K.name(r, { strong: true })}${latest ? `, ${esc(monthName(r.month))}` : ''}: issued as ${esc(r.issued.words)} (${fmt(r.issued.deaths)} deaths), now ${esc(r.now.words)} (${fmt(r.now.deaths)} deaths) after UCDP's release ${esc(r.release)}.</div>`).join('') : `<p class="empty">None: no later UCDP release has moved a mark ${latest ? 'of an earlier issue' : `of ${esc(monthName(month))}`}.</p>`}
+    <p class="empty">${latest ? 'Each war\'s whole explanation, with today\'s figures, is under All marks.' : 'Later UCDP releases can revise these figures; the current marks are under All marks.'}</p>
   </div></div>`;
   $('#pick').addEventListener('change', e => { const p = hash(); p.set('tab', 'changed'); if (e.target.value === M.month) p.delete('month'); else p.set('month', e.target.value); location.hash = p.toString(); });
 }

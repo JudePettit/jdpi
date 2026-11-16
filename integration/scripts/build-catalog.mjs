@@ -26,6 +26,7 @@ import { openapi } from './openapi.mjs';
 import { llmsTxt } from './llms.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
+import { groupBattles } from '../../battlefield/focus/figures.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -365,12 +366,18 @@ const focusWars = () => FOCUS.wars.map(w => (has(`battlefield/focus/data/wars/${
 const PREC = { m: 'month', y: 'year' };
 spec({
   id: 'war-focus-battles', title: 'War Focus: battles, sieges and operations', module: 'rs', submodule: 'war-focus',
-  description: 'Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped.',
-  derive: () => focusWars().flatMap(w => (w.battles || []).map(b => ({ war_id: w.id, war: w.name, qid: b.q, name: b.n, description: b.desc || null, start: b.s || null, end: b.e || null, precision: PREC[b.p] || 'day', deaths: b.deaths ?? null, casualties: b.cas ?? null, lat: b.lat ?? null, lon: b.lon ?? null, wikipedia: wiki(b.w) }))),
+  description: 'Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped. Where a whole and its parts are both listed (the atomic bombings of Hiroshima and Nagasaki, and each bombing), part_of and parts link them, and deaths_counted_once gives the figure War Focus shows for each, each death once: the figure recorded for the item itself where there is one, else the sum of its parts\' (figure_from says which). To total a war without counting a death twice, add deaths_counted_once over the rows with no part_of; adding deaths over every row counts a whole and its parts both. A part of two wholes is counted under part_of; also_part_of names the others.',
+  derive: () => focusWars().flatMap(w => {
+    const g = groupBattles(w.battles || []).byQ;
+    return (w.battles || []).map(b => ({ war_id: w.id, war: w.name, qid: b.q, name: b.n, description: b.desc || null, start: b.s || null, end: b.e || null, precision: PREC[b.p] || 'day', deaths: b.deaths ?? null, casualties: b.cas ?? null, lat: b.lat ?? null, lon: b.lon ?? null, wikipedia: wiki(b.w),
+      part_of: b.up || null, also_part_of: b.upAlso || [], parts: b.parts || [], deaths_counted_once: g.get(b.q)?.fig || null, figure_from: g.get(b.q)?.from || null }));
+  }),
   from: ['battlefield/focus/data/wars/*.json'], refresh: 'monthly', updatedFrom: 'battlefield/focus/data/index.json', page: 'battlefield/focus/index.html', indexFields: ['war_id', 'war'],
   licence: 'Wikidata CC0.', sources: ['Wikidata (CC0): battles, sieges and operations that are part of each war'],
   fields: [['war_id', 'War id (war-focus-wars)'], ['war', 'War'], ['qid', 'Wikidata id of the battle'], ['name', 'Battle, siege or operation'], ['description', 'Wikidata description'], ['start', 'Start date'], ['end', 'End date'],
-    ['precision', 'Precision of the dates: day, month or year'], ['deaths', 'Deaths (Wikidata), if recorded'], ['casualties', 'Casualties (Wikidata), if recorded'], ['lat', 'Latitude, if mapped'], ['lon', 'Longitude, if mapped'], ['wikipedia', 'Wikipedia article']]
+    ['precision', 'Precision of the dates: day, month or year'], ['deaths', 'Deaths recorded for this item itself (Wikidata), if any'], ['casualties', 'Casualties (Wikidata), if recorded'], ['lat', 'Latitude, if mapped'], ['lon', 'Longitude, if mapped'], ['wikipedia', 'Wikipedia article'],
+    ['part_of', 'Wikidata id of the whole it is counted under in the same war, if any'], ['also_part_of', 'Wikidata ids of the other wholes in the same war it is part of'], ['parts', 'Wikidata ids of its parts counted under it in the same war'],
+    ['deaths_counted_once', 'The figure War Focus shows for it: its own recorded deaths, else the sum of its parts\' figures; add it over the rows with no part_of for a war\'s total'], ['figure_from', 'own (recorded for the item itself) or parts (the sum of its parts\' figures)']]
 });
 spec({
   id: 'war-focus-monthly-deaths', title: 'War Focus: deaths by month', module: 'rs', submodule: 'war-focus',

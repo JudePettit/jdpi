@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-12T19:41:21.535Z",
+ "generated": "2026-11-16T09:39:05.565Z",
  "books": [
   {
    "slug": "the-prince",
@@ -14,8 +14,8 @@
    "words": 32453,
    "chapters": 27,
    "paragraphs": 254,
-   "terms": 550,
-   "generated": "2026-11-03T04:39:02.431Z"
+   "terms": 570,
+   "generated": "2026-11-16T09:39:05.227Z"
   },
   {
    "slug": "peloponnesian-war",

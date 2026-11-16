@@ -226,6 +226,16 @@ test('era: Kardashev steps and polities, an entity\'s dates, a book\'s period', 
   assert.deepEqual(eraFromFacts({ founded: '-0735' }, 2026), [-735, 2026], 'a beginning alone runs to today');
   assert.deepEqual(eraFromFacts({ start: '1950-06-25', end: '1953-07-27', date: '1950' }), [1950, 1953], 'a date beside a pair adds nothing');
   assert.equal(yearOf('1527-06-21'), 1527);
+  // The Master Index sweep (MI-10, 1c and 1d): a person born long ago whose death Wikidata does not record ran to
+  // today (Euclid "333 BC to 2026"), and a year of five digits or more was no year (the Chicxulub crater's -66000000).
+  assert.deepEqual(eraFromFacts({ born: '-0333' }, 2026), [-333, -333], 'Euclid: born 333 BC, no death recorded: that year alone');
+  assert.deepEqual(eraFromFacts({ born: '1400' }, 2026), [1400, 1400], 'Chang Yŏngsil, born 1400');
+  assert.deepEqual(eraFromFacts({ born: '1968-05-26' }, 2026), [1968, 2026], 'a person who may be living still runs to today');
+  assert.deepEqual(eraFromFacts({ born: '1900' }, 2026), [1900, 1900], 'past a lifetime, no open end');
+  assert.equal(yearOf('-66000000'), -66000000);
+  assert.equal(yearOf('-4540000000'), -4540000000);
+  assert.deepEqual(eraFromFacts({ founded: '-66000000' }, 2026), [-66000000, 2026], 'a thing still there (the crater) runs to today, as a standing state does');
+  assert.deepEqual(eraFromFacts({ born: '-3200000', died: '-3200000' }), [-3200000, -3200000], 'Lucy');
   assert.equal(fmtEra([-500, 1]), '500 BC–1');
   assert.deepEqual(bookEra(PRINCE, SHELF.books[0]), { years: [1494, 1527], label: 'the book’s period' });
   assert.deepEqual(bookEra(PRINCE, null, { era: [1500, 1503] }).years, [1500, 1503], 'a chapter\'s own period wins');

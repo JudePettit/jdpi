@@ -18,9 +18,32 @@ export function shortCounts(all, kept) {
 // A module's count on a record: from `n` when the list shows it short, else from the list.
 export const countOf = (r, m) => r.n?.[m] ?? (r.mentions || []).filter(x => x.m === m).length;
 
+// A record committed without `n` whose total exceeds the places it lists (1,139 of them in the build of 15 November
+// 2026, made before `n` existed) cannot say which module gave the extra mentions. --only may still recount it when its
+// own modules gave each place once (then the list shows their share in full), and must not otherwise: it would take out
+// only the share the list shows and count the rest twice. The adapters that name one entity more than once at one place
+// (the sweep's offline run of every adapter, 16 November 2026: Retrospective 1,386 times, the calendars 32, the
+// Invention Timeline 2; Learning and Kino can resolve two titles to one ID at one place) are never taken to.
+export const REPEATING = new Set(['retrospective', 'calendar', 'progress', 'learning', 'kino']);
+/** Whether --only of `adapters` (names in ADAPTERS) can recount `old` from its list: it lists every place it was given
+ *  (`n`, or a total no greater than its places), or the run's own mentions of it (`mine`, with `module` and `url`) name
+ *  each place once, no adapter of the run is REPEATING, and the list is not at the 300-place cap. */
+export function canRecount(old, adapters, mine = []) {
+  if (old.n || !(old.total > (old.mentions || []).length)) return true;
+  if ([...adapters].some(a => REPEATING.has(a)) || (old.mentions || []).length >= 300) return false;
+  const seen = new Set();
+  for (const x of mine) { const k = x.module + x.url; if (seen.has(k)) return false; seen.add(k); }
+  return true;
+}
+
 // --only's total and `n` for a record other modules mention too: `old` the committed record, `own` the modules this
 // run speaks for, `mine` this run's mentions of the entity (`module`), `merged` the kept places of the new record.
-export function recount(old, own, mine, merged) {
+// `adapters`, when given, are the run's adapters: a record canRecount refuses throws, naming it (build.mjs collects
+// every one and stops, as its other guards do, unless --allow-drop).
+export function recount(old, own, mine, merged, { adapters = null } = {}) {
+  if (adapters && !canRecount(old, adapters, mine)) {
+    throw Object.assign(new Error(`${old.q || 'a record'} ${old.label || ''}: total ${old.total} over ${old.mentions.length} places and no n; --only ${[...adapters].join(',')} cannot say which module gave the rest (wait for the full build)`.replace(/\s+:/, ':')), { record: old.q });
+  }
   const was = [...own].reduce((s, m) => s + countOf(old, m), 0);
   const given = {}, shown = {}, n = {};
   for (const x of mine) given[x.module] = (given[x.module] || 0) + 1;

@@ -18,8 +18,9 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
-import { wikidataDate, datedFacts } from './dates.mjs';
+import { wikidataDate, datedFacts, bestClaim, centuryTag } from './dates.mjs';
 import { shortCounts, recount } from './counts.mjs';
+import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -27,16 +28,21 @@ const jdpiDir = resolve(here, '../..');
 const retroArg = process.argv.indexOf('--retro');
 const retroDir = resolve(retroArg > 0 ? process.argv[retroArg + 1] : join(jdpiDir, '../hp-retrospective'));
 const OUT = join(jdpiDir, 'lake/data');
-const UA = { 'User-Agent': 'JDP-I Master Index (https://jdpi.pages.dev)' };
+// VM_UA: a run by hand names itself (a check run: "VM build check (https://jdpi.pages.dev)").
+const UA = { 'User-Agent': process.env.VM_UA || 'JDP-I Master Index (https://jdpi.pages.dev)' };
 const E_SHARDS = 512, T_SHARDS = 256;
 // --only <adapter,…>: the named adapters' mentions added to the committed lake/data, so a module's new entities (a
 // Bibliotheca book's cast) reach the Master Index before the monthly build, which makes the same records from scratch.
 // Only their entities, and the related entities the lake lacks, are fetched, a request a second at most. An entity
 // only these modules mention is made again, or goes with its last mention unless an entity with mentions relates to it;
 // an entity other modules mention too keeps its record, with these modules' mentions, names and "Appears in" tags
-// replaced; every other record, title and key stays as committed. Wikipedia summaries wait for the full build (an
-// entity new to the lake shows its summary only if the cache has it). The modules a run speaks for are its adapters'
-// own (ADAPTER_MODULES in adapters.mjs: --only kino is Kino's six submodules), and any module they report.
+// replaced; every other record, title and key stays as committed. Wikipedia summaries: --only fetches those of the
+// entities it fetches whose titles the cache lacks (until November 2026 it fetched none, so 91 entities it brought in
+// had no summary until the next full build); a record other modules mention too keeps its own. The modules a run
+// speaks for are its adapters' own (ADAPTER_MODULES in adapters.mjs: --only kino is Kino's six submodules), and any
+// module they report. A record made before `n` (counts.mjs) whose total exceeds its places is not recounted by a run
+// that cannot tell whose the extra mentions are (counts.mjs canRecount): the run stops, naming them, unless --allow-drop
+// (then they stay as committed).
 const onlyAt = process.argv.indexOf('--only');
 const ONLY = onlyAt > 0 ? new Set(String(process.argv[onlyAt + 1] || '').split(',').filter(Boolean)) : null;
 if (ONLY) for (const n of ONLY) if (!ADAPTERS[n]) { console.error(`--only ${n}: adapters.mjs has no such adapter (${Object.keys(ADAPTERS).join(', ')})`); process.exit(2); }
@@ -76,6 +82,11 @@ const NEW = `${OUT}.new`, OLD = `${OUT}.old`;
 if (!existsSync(OUT) && existsSync(OLD)) renameSync(OLD, OUT);
 if (!existsSync(join(OUT, 'manifest.json'))) refuseIfLost(['the previous lake/data/manifest.json (nothing to compare this build with)']);
 const prevManifest = existsSync(join(OUT, 'manifest.json')) ? JSON.parse(readFileSync(join(OUT, 'manifest.json'), 'utf8')) : {};
+// The labels the last build gave (its index), which a name falls back to before it is ever shown as a bare QID
+// (resolve.mjs nameOf; the sweep of 15 November 2026 found Donald Trump shown as "Q22686" where a label batch failed).
+// (The index's second column is the shown name, which is what a related name shows as too.)
+const committedLabel = new Map();
+try { for (const r of JSON.parse(readFileSync(join(OUT, 'index.json'), 'utf8')).rows || []) if (r[1] && !isQid(r[1])) committedLabel.set(r[0], r[1]); } catch {}
 const mentions = [], failed = [];
 for (const [name, adapter] of Object.entries(ADAPTERS)) {
   if (ONLY && !ONLY.has(name)) continue;
@@ -168,28 +179,44 @@ function typeOf(e) {
 const time = c => wikidataDate(c)?.v ?? null;
 const refIds = (e, p) => (e.claims?.[p] || []).filter(c => c.rank !== 'deprecated').map(c => c.mainsnak.datavalue?.value?.id).filter(Boolean);
 
-const raw = new Map();
+// Every wbgetentities of IDs goes through getBatched (resolve.mjs): a batch Wikidata answers with an error (one ID it
+// refuses fails all fifty) is split and asked again, so one bad ID no longer leaves fifty names unread.
+const wbgetIds = (ids, params, pause) => getBatched(ids, async batch => { const r = await wbget({ ids: batch.join('|'), ...params }); await sleep(pause); return r; });
+const raw = new Map(), disambiguation = new Set();
+// A Wikimedia disambiguation page is no entity (resolve.mjs isDisambiguation): a related item that is one gets no
+// page (its name stays text where it is named), and a module key that resolves to one is left out below.
 async function fetchEntities(ids) {
-  for (const batch of chunks(ids.filter(q => !raw.has(q)), 50)) {
-    const r = await wbget({ ids: batch.join('|'), props: 'labels|descriptions|aliases|claims|sitelinks', languages: 'en', sitefilter: 'enwiki' });
-    for (const [q, e] of Object.entries(r?.entities || {})) if (!e.missing) raw.set(q, e);
-    await sleep(200);
-  }
+  // Labels in English and the multilingual "mul" (an item Wikidata labels once for every language), for entityLabel.
+  const got = await wbgetIds(ids.filter(q => !raw.has(q)), { props: 'labels|descriptions|aliases|claims|sitelinks', languages: 'en|mul', sitefilter: 'enwiki' }, 200);
+  for (const [q, e] of Object.entries(got)) { if (e.missing) continue; if (isDisambiguation(e)) { disambiguation.add(q); continue; } raw.set(q, e); }
 }
 await fetchEntities([...byQid.keys(), ...before]);
+// The module keys that resolve to a disambiguation page ("David Einhorn", the Retrospective's "Juan Bosch" until it
+// linked the politician's article): left out, with a warning naming the module and key, so the module can link the
+// right article; until then the entity has no entry rather than one about a list of namesakes.
+for (const q of [...byQid.keys()].filter(x => disambiguation.has(x))) {
+  for (const m of byQid.get(q)) console.warn(`${m.module} ${JSON.stringify(m.key)} → ${q} is a Wikimedia disambiguation page; left out`);
+  unmatched += byQid.get(q).length;
+  byQid.delete(q);
+  for (const [k, v] of Object.entries(keys)) if (v === q) delete keys[k];
+}
 // One level of related entities with their own pages (parties, ideologies, countries, conflicts, influences).
 const related = new Set();
 for (const q of byQid.keys()) { const e = raw.get(q); if (e) for (const p of PAGE_RELATIONS) refIds(e, p).forEach(x => related.add(x)); }
 await fetchEntities([...related].filter(q => !committed.has(q)));
+for (const q of disambiguation) related.delete(q);
 // Labels for everything referenced in facts (positions held etc.), so facts read as names.
 const labelOnly = new Set();
 for (const e of raw.values()) for (const p of Object.keys(REL)) refIds(e, p).forEach(x => { if (!raw.has(x)) labelOnly.add(x); });
-const labels = new Map([...raw].map(([q, e]) => [q, e.labels?.en?.value || q]));
-for (const batch of chunks([...labelOnly], 50)) {
-  const r = await wbget({ ids: batch.join('|'), props: 'labels', languages: 'en' });
-  for (const [q, e] of Object.entries(r?.entities || {})) labels.set(q, e.labels?.en?.value || q);
-  await sleep(150);
-}
+const fetchedLabel = new Map();
+for (const [q, e] of Object.entries(await wbgetIds([...labelOnly], { props: 'labels', languages: 'en|mul' }, 150))) { const l = e.labels?.en?.value || e.labels?.mul?.value; if (l) fetchedLabel.set(q, l); }
+// An item with neither an English nor a multilingual label (the Retrospective's parties named by their QID): its label
+// in another language (resolve.mjs otherLabel), asked for those few alone, so its name is never a bare QID.
+const foreign = new Map();
+const unnamed = [...[...raw].filter(([, e]) => !e.labels?.en && !e.labels?.mul).map(([q]) => q), ...[...labelOnly].filter(q => !fetchedLabel.has(q) && !committedLabel.has(q))];
+for (const [q, e] of Object.entries(await wbgetIds(unnamed, { props: 'labels' }, 150))) { const l = otherLabel(e.labels); if (l) foreign.set(q, l); }
+const labels = new Map([...raw].map(([q, e]) => [q, entityLabel(e, { title: e.sitelinks?.enwiki?.title, committed: committedLabel.get(q), other: foreign.get(q), q })]));
+for (const q of labelOnly) { const n = nameOf(q, { fetched: fetchedLabel, committed: committedLabel }); labels.set(q, n !== q ? n : foreign.get(q) || q); }
 // Nationality tags read better as demonyms ("American" rather than "United States of America").
 const demonym = new Map();
 const citizenships = [...new Set([...raw.values()].flatMap(e => refIds(e, 'P27')))];
@@ -213,19 +240,31 @@ const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, 'utf8')
 const calCache = join(jdpiDir, 'calendar/scripts/summary-cache.json');
 if (existsSync(calCache)) for (const [k, v] of Object.entries(JSON.parse(readFileSync(calCache, 'utf8')))) if (!(normTitle(k) in cache)) cache[normTitle(k)] = v;
 const shorten = t => { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= 600) return t; const c = t.slice(0, 600), e = c.lastIndexOf('. '); return e > 200 ? c.slice(0, e + 1) : c + '…'; };
-const needSummary = ONLY ? [] : [...raw.values()].map(e => e.sitelinks?.enwiki?.title).filter(t => t && !(normTitle(t) in cache));
+// Every entity fetched whose title the cache lacks, in a full build and in --only alike (fix 6 of the sweep: --only
+// fetched none, so the entities it brought in waited a month for theirs). A title whose sitelink Wikidata marks as a
+// redirect is not asked for: its summary would be another article's (resolve.mjs summaryFor).
+const needSummary = [...new Set([...raw.values()].filter(e => e.sitelinks?.enwiki?.title && !(e.sitelinks.enwiki.badges || []).some(b => REDIRECT_BADGES.has(b))).map(e => e.sitelinks.enwiki.title))].filter(t => !(normTitle(t) in cache));
+const fetchedNow = new Set();
 let done = 0, unfetched = 0;
 const queue = [...needSummary];
-await Promise.all(Array.from({ length: 8 }, async () => {
+await Promise.all(Array.from({ length: ONLY ? 2 : 8 }, async () => {
   for (let t; (t = queue.shift());) {
     // A missing article (404, null) is cached as no summary; a request that failed is left out of the cache, so the
-    // next build asks again rather than keeping '' for good.
-    const r = await getJson(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, '_'))}?redirect=true`).catch(() => undefined);
-    if (r === undefined) unfetched++; else cache[normTitle(t)] = shorten(r?.extract);
-    if (++done % 500 === 0) { console.log(`summaries ${done}/${needSummary.length}`); writeFileSync(cachePath, JSON.stringify(cache)); }
+    // next build asks again rather than keeping '' for good. No redirect is followed to another article: an answer
+    // whose title is not the one asked for (a redirect's target), or a disambiguation page, is cached as no summary
+    // (resolve.mjs restSummary). Until November 2026 the request asked for ?redirect=true, and First Phase Offensive's
+    // summary was the Korean War's.
+    const r = await getJson(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g, '_'))}`).catch(() => undefined);
+    if (r === undefined) unfetched++; else { cache[normTitle(t)] = shorten(restSummary(r, t)); fetchedNow.add(normTitle(t)); }
+    if (++done % 500 === 0 && !ONLY) { console.log(`summaries ${done}/${needSummary.length}`); writeFileSync(cachePath, JSON.stringify(cache)); }
+    if (ONLY) await sleep(500);
   }
 }));
+if (needSummary.length) console.log(`summaries: ${done} asked for, ${fetchedNow.size} answered`);
+// A full build writes the cache it used (the calendar's entries in it); --only adds only what it fetched to the lake's
+// own file, so a small run leaves the rest of the file as it was.
 if (!ONLY) writeFileSync(cachePath, JSON.stringify(cache));
+else if (fetchedNow.size) { const own = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, 'utf8')) : {}; for (const t of fetchedNow) own[t] = cache[t]; writeFileSync(cachePath, JSON.stringify(own)); }
 if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries could not be fetched; the next build tries them again`);
 
 // ---- 5. Entity records and shards
@@ -237,8 +276,10 @@ function tagsFor(e, type, ms) {
   const tags = new Set([`Type:${TYPE_NAMES[type]}`]);
   for (const q of refIds(e, 'P27')) tags.add(`Nationality:${demonym.get(q) || labels.get(q) || q}`);
   for (const [p, facet] of Object.entries(TAG_FACETS)) for (const q of refIds(e, p).slice(0, 15)) { const l = labels.get(q); if (l && !/^Q\d+$/.test(l)) tags.add(`${facet}:${l.replace(/^./, c => c.toUpperCase())}`); }
-  const when = time(e.claims?.P569?.[0]) || time(e.claims?.P585?.[0]) || time(e.claims?.P580?.[0]) || time(e.claims?.P571?.[0]);
-  if (when) { const y = parseInt(when, 10); if (Number.isFinite(y)) { const c = Math.floor((Math.abs(y) - 1) / 100) + 1; tags.add(`Century:${c}${[, 'st', 'nd', 'rd'][c % 100 > 10 && c % 100 < 14 ? 0 : c % 10] || 'th'} century${y < 0 ? ' BC' : ''}`); } }
+  // The first of birth, date, start and inception that Wikidata gives, by its best statement; none from a date coarser
+  // than a century (dates.mjs centuryTag: Moses's 2nd millennium BC is no "20th century BC").
+  const century = centuryTag([e.claims?.P569, e.claims?.P585, e.claims?.P580, e.claims?.P571].map(bestClaim).find(c => wikidataDate(c)));
+  if (century) tags.add(century);
   for (const m of ms) { tags.add(`Appears in:${MODULE_NAMES[m.module] || m.module}`); for (const [f, v] of m.tags || []) if (v) tags.add(`${f}:${v}`); }
   return [...tags];
 }
@@ -248,25 +289,40 @@ function record(q) {
   // the source marks circa, so the page shows "15th century" or "c. 1500", not a year Wikidata does not give (dates.mjs).
   const { facts, fp, fc } = datedFacts(e.claims, PROPS);
   const rel = {};
-  for (const [p, name] of Object.entries(REL)) { const ids = [...new Set(refIds(e, p))].slice(0, 12); if (ids.length) rel[name] = ids.map(x => [x, labels.get(x) || x]); }
+  for (const [p, name] of Object.entries(REL)) { const ids = [...new Set(refIds(e, p))].slice(0, 12); if (ids.length) rel[name] = ids.map(x => [x, nameOf(x, { fetched: labels, committed: committedLabel })]); }
   const img = e.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
   const ms = (byQid.get(q) || []).sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module) || String(a.date || '').localeCompare(String(b.date || '')));
-  // Keep each place once (some modules mention the same entity many times on one page).
+  // Keep each place once (some modules mention the same entity many times on one page). A book's mention keeps where in
+  // the book the name occurs (`w`: [chapter number, its first tagged paragraph, times, chapter heading], adapters.mjs
+  // bibliotheca), which the page lists under the book's line.
   const seen = new Set(), mentionsOut = [];
-  for (const m of ms) { const k = m.module + m.url; if (seen.has(k)) continue; seen.add(k); mentionsOut.push({ m: m.module, u: m.url, c: m.context, d: m.date || null }); if (mentionsOut.length >= 300) break; }
+  for (const m of ms) { const k = m.module + m.url; if (seen.has(k)) continue; seen.add(k); mentionsOut.push({ m: m.module, u: m.url, c: m.context, d: m.date || null, ...(m.where?.length ? { w: m.where } : {}) }); if (mentionsOut.length >= 300) break; }
+  // The places it appears in: what the page's header "Appears in Vitruvian Manager · N" counts, a book being one place
+  // however often it names the entity (Jude, 15 November 2026, BI-19 and MI-10). The list holds them all up to 300;
+  // `places` is kept only beyond that, where the list stops short.
+  const places = new Set(ms.map(m => m.module + m.url)).size;
   // Wikidata's first six aliases, tidied, then the names a module's own text uses (a mention's `aliases`: a book's
   // "Duke Valentino" for Cesare Borgia), so Bibliotheca's tagger finds the entity in the book (aliases.mjs). Only a
   // trailing comma or space, or the full stop after a regnal number ("Alexander VI."), goes: an abbreviation keeps its
   // stop, or William Withering's "With." would be "With", a term at every sentence that opens with the word in every
   // book the monthly refresh re-tags.
-  const label = e.labels?.en?.value || title || q;
+  // The label: English, else the multilingual label, the article's title, a module's own name for it, the last build's,
+  // another language's; a bare QID only with none of them (resolve.mjs entityLabel; eight entries were "Q4887122" and
+  // the like until November 2026). `name`, only where it differs, is what the page shows: a person's label without the
+  // realm after a regnal number or a comma title ("Frederik X", label "Frederik X of Denmark", resolve.mjs shownName).
+  const label = entityLabel(e, { title, names: ms.map(m => m.label), committed: committedLabel.get(q), other: foreign.get(q), q });
+  // Short only where Wikipedia's title is the short name, or with no article (the second reader's F1; uniqueNames below
+  // takes back one that another entry would show too); Wikipedia's title kept among a person's aliases (titleAlias).
+  const type = typeOf(e), name = shownName(label, type, { title });
+  // The summary only where it is the article's own; else `ns` says why there is none (resolve.mjs summaryFor).
+  const { summary, ns } = summaryFor(e.sitelinks?.enwiki, title ? cache[normTitle(title)] : undefined);
   // `n`: the modules the kept list shows short (a place named twice, or past the 300th), so --only can recount (counts.mjs).
   const n = shortCounts(ms, mentionsOut);
   return {
-    q, label, desc: e.descriptions?.en?.value || '', type: typeOf(e),
-    aliases: recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), wiki: title, img: img || null,
-    summary: title ? cache[normTitle(title)] || '' : '', facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length, ...(Object.keys(n).length ? { n } : {}),
-    tags: tagsFor(e, typeOf(e), ms),
+    q, label, ...(name !== label ? { name } : {}), desc: e.descriptions?.en?.value || '', type,
+    aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), { label, name, title, type }), wiki: title, img: img || null,
+    summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
+    tags: tagsFor(e, type, ms),
   };
 }
 // --only: the committed records with these modules' entities made again (ONLY, at the top). An entity only they
@@ -284,17 +340,27 @@ function onlyMerge() {
   const ownGroups = new Set([...ONLY].flatMap(n => ADAPTER_TAG_GROUPS[n] || []));
   const touched = new Set([...byQid.keys(), ...before]);
   for (const q of touched) {
-    if (!raw.has(q)) { console.warn(`--only: Wikidata did not return ${q}; its record stays as committed`); continue; }
     const old = committed.get(q), others = (old?.mentions || []).filter(m => !own(m));
+    // A disambiguation page these modules mentioned (resolve.mjs): it goes with their mentions, or, where other modules
+    // mention it too, stays as committed until the full build leaves it out.
+    if (disambiguation.has(q)) { if (!others.length) gone.add(q); else console.warn(`--only: ${q} is a disambiguation page that other modules mention; it stays as committed until the full build`); continue; }
+    if (!raw.has(q)) { console.warn(`--only: Wikidata did not return ${q}; its record stays as committed`); continue; }
     if (!others.length) { out.set(q, record(q)); continue; }
     const fresh = record(q);
     const ms = [...others, ...fresh.mentions].sort((a, b) => MODULE_ORDER.indexOf(a.m) - MODULE_ORDER.indexOf(b.m) || String(a.d || '').localeCompare(String(b.d || ''))).slice(0, 300);
     const appears = new Set([...MODS].map(m => `Appears in:${MODULE_NAMES[m] || m}`));
     const add = mine(q).flatMap(m => [`Appears in:${MODULE_NAMES[m.module] || m.module}`, ...(m.tags || []).filter(([, v]) => v).map(([f, v]) => `${f}:${v}`)]);
     const next = new Set([...old.tags.filter(t => !appears.has(t) && !ownGroups.has(t.split(':')[0])), ...add]);
-    // The total less these modules' old share, counted from `n` where the list showed it short, plus their new one.
-    const { total, n } = recount(old, MODS, mine(q), ms), { n: _, ...kept } = old;
-    out.set(q, { ...kept, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total, ...(Object.keys(n).length ? { n } : {}),
+    // The total less these modules' old share, counted from `n` where the list showed it short, plus their new one; a
+    // record whose list cannot show that share (counts.mjs canRecount) is refused, and stays as committed.
+    let counted;
+    try { counted = recount(old, MODS, mine(q), ms, { adapters: ONLY }); } catch (e) { if (!e.record) throw e; refused.push(e.message); continue; }
+    const { total, n } = counted, { n: _, name: __, places: ___, ...kept } = old;
+    // The places: those of the other modules (all of them when the list was not cut at 300) and these modules' anew.
+    const placesNow = (old.places ?? old.mentions.length) - old.mentions.filter(own).length + (fresh.places ?? fresh.mentions.length);
+    const shown = shownName(kept.label, kept.type, { title: kept.wiki });
+    out.set(q, { q: kept.q, label: kept.label, ...(shown !== kept.label ? { name: shown } : {}), ...kept, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total,
+      ...(placesNow !== ms.length ? { places: placesNow } : {}), ...(Object.keys(n).length ? { n } : {}),
       tags: [...old.tags.filter(t => next.has(t)), ...[...next].filter(t => !old.tags.includes(t))] });
   }
   const pageRel = new Set(PAGE_RELATIONS.map(p => REL[p]));
@@ -310,8 +376,15 @@ function onlyMerge() {
   for (const q of related) if (raw.has(q) && !out.has(q)) out.set(q, record(q));
   return { out, gone, touched };
 }
+const refused = [];
 const only = ONLY ? onlyMerge() : null;
+// counts.mjs canRecount: the records this run could not recount, named; the build stops unless --allow-drop.
+refuseIfLost(refused.length ? [`${refused.length} records this --only run cannot recount (${refused.slice(0, 5).join('; ')}${refused.length > 5 ? '; …' : ''})`] : []);
 const records = only ? only.out : new Map([...raw.keys()].map(q => [q, record(q)]));
+// No two entries shown by one name (the second reader's F1: Albert II of Monaco and Albert II of Belgium were both
+// "Albert II"): a short name another entry also shows, or has as its label, is taken back, on every record written.
+const namesBack = uniqueNames(records);
+if (namesBack.length) console.log(`${namesBack.length} short names kept as labels, another entry being shown by them (${namesBack.slice(0, 8).join(', ')}${namesBack.length > 8 ? ', …' : ''})`);
 const readOut = f => JSON.parse(readFileSync(join(OUT, f), 'utf8'));
 // Everything is written into lake/data.new; only when all of it is there does it replace lake/data.
 rmSync(NEW, { recursive: true, force: true });
@@ -330,7 +403,9 @@ for (const [q, r] of records) {
   // Per module: [module, first place it appears, number of places] — lets search results link straight in.
   const perModule = new Map();
   for (const m of r.mentions) { const x = perModule.get(m.m); if (x) x[2]++; else perModule.set(m.m, [m.m, m.u, 1]); }
-  index.push([q, r.label, r.type, r.desc.slice(0, 80), r.total, r.aliases.slice(0, 3), r.tags.map(t => tagIds.get(t)), [...perModule.values()]]);
+  // The row shows the record's shown name; where that differs from the label, the label leads its aliases, so a search
+  // for "Frederik X of Denmark" still finds "Frederik X".
+  index.push([q, r.name || r.label, r.type, r.desc.slice(0, 80), r.total, (r.name ? [r.label, ...r.aliases] : r.aliases).slice(0, 3), r.tags.map(t => tagIds.get(t)), [...perModule.values()]]);
   typeCounts[r.type] = (typeCounts[r.type] || 0) + 1;
 }
 // Requested titles that were redirects also map to their entity.
@@ -346,8 +421,12 @@ writeFileSync(join(NEW, 'keys.json'), JSON.stringify(only ? { ...Object.fromEntr
 // --only counts the mentions as committed less these modules' then, plus theirs now (their keys are Wikidata IDs, all
 // resolved), and the entities with mentions anew.
 const priorOwn = [...(MODS || [])].reduce((n, m) => n + (prevManifest.modules?.[m] || 0), 0);
+// `fullBuild`: when the last full build ran (a full build writes it, --only keeps it), since `generated` is any run's
+// time. The tests that hold the data to rules only a full build can bring in (every record made again, with `n`)
+// bind from it (tests/master-index.test.mjs).
+const stamp = new Date().toISOString();
 writeFileSync(join(NEW, 'manifest.json'), JSON.stringify({
-  generated: new Date().toISOString(), entities: records.size,
+  generated: stamp, ...(ONLY ? (prevManifest.fullBuild ? { fullBuild: prevManifest.fullBuild } : {}) : { fullBuild: stamp }), entities: records.size,
   withMentions: only ? [...records.values()].filter(r => r.mentions.length).length : byQid.size,
   mentions: only ? (prevManifest.mentions || 0) - priorOwn + mentions.length - unmatched : mentions.length - unmatched,
   types: typeCounts, shards: { entities: E_SHARDS, titles: T_SHARDS },

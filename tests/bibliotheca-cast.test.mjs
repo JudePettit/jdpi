@@ -331,7 +331,7 @@ test('adapter: every entity the reader tags in a book counts there, as often as 
     const tag = (text, s, qid, label) => ({ s: text.indexOf(s), e: text.indexOf(s) + s.length, qid, label });
     const p1 = 'The Duke Valentino took Milan.', p2 = 'The Milanese and Milan; Cesare Borgia again.';
     const book = (slug, title, author, published) => ({ slug, title, author: { name: author }, work: { published }, chapters: [
-      { n: 1, paragraphs: [{ id: 'c01-p01', kind: 'para', text: 'Nothing here.', terms: [] }, { id: 'c01-p02', kind: 'para', text: p1, terms: [tag(p1, 'Duke Valentino', 'Q2', 'Cesare Borgia'), tag(p1, 'Milan', 'Q153529', 'Duchy of Milan')] }] },
+      { n: 1, heading: 'Chapter I', paragraphs: [{ id: 'c01-p01', kind: 'para', text: 'Nothing here.', terms: [] }, { id: 'c01-p02', kind: 'para', text: p1, terms: [tag(p1, 'Duke Valentino', 'Q2', 'Cesare Borgia'), tag(p1, 'Milan', 'Q153529', 'Duchy of Milan')] }] },
       { n: 3, paragraphs: [{ id: 'c03-p01', kind: 'para', text: p2, terms: [tag(p2, 'Milanese', 'Q153529', 'Duchy of Milan'), { ...tag(p2, 'Milan;', 'Q153529', 'Duchy of Milan'), e: p2.indexOf('Milan;') + 5 }, tag(p2, 'Cesare Borgia', 'Q2', 'Cesare Borgia')] }] },
     ] });
     writeFileSync(join(dir, 'bibliotheca/data/books/t.json'), JSON.stringify(book('t', 'T', 'A', 1532)));
@@ -340,13 +340,17 @@ test('adapter: every entity the reader tags in a book counts there, as often as 
     assert.equal(ms.length, 5, 'the cast’s two and Milan in t, Borgia and Milan in u (no cast): one mention per book and entity');
     assert.deepEqual(at('t', 'Q153529'), [{ key: { qid: 'Q153529' }, label: 'Duchy of Milan', module: 'neo-classic', source: 'bibliotheca:t',
       url: 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=t&ch=1&p=c01-p02&t=Q153529', date: '1532',
-      context: 'Named in T (A, 1532), 3 times, as Milan, Milanese', aliases: [] }], 'a tag the lake knew from elsewhere counts, at its first tag');
+      context: 'Named in T (A, 1532), 3 times, as Milan, Milanese', aliases: [],
+      // Where in the book (MI-10, BI-19): each chapter it is tagged in, its first paragraph there, the times, the heading.
+      where: [[1, 'c01-p02', 1, 'Chapter I'], [3, 'c03-p01', 2, null]] }], 'a tag the lake knew from elsewhere counts, at its first tag, with where in the book');
     const borgia = at('t', 'Q2');
     assert.equal(borgia.length, 1);
     assert.equal(borgia[0].context, 'Named in T (A, 1532), 2 times, as Duke Valentino, Cesare Borgia', 'a cast entity the book is tagged with counts its tags');
     assert.equal(borgia[0].url, 'https://jdpi.pages.dev/bibliotheca/neo/index.html#book=t&ch=1&p=c01-p02&t=Q2', 'and opens at its first tag');
     assert.deepEqual(borgia[0].aliases, ['Cesare Borgia', 'Duke Valentino'], 'the cast’s names still fed');
     assert.equal(at('t', 'Q3')[0].context, 'Named in T (A, 1532), 3 times, as Hannibal', 'a cast record not tagged yet counts by the cast');
+    assert.equal(at('t', 'Q3')[0].where, undefined, 'and has no chapters to give');
+    assert.deepEqual(borgia[0].where, [[1, 'c01-p02', 1, 'Chapter I'], [3, 'c03-p01', 1, null]]);
     assert.equal(at('u', 'Q153529')[0].context, 'Named in U (Thucydides, 400 BC), 3 times, as Milan, Milanese', 'a book with no cast');
     assert.deepEqual(at('u', 'Q2')[0].aliases, [], 'no cast, no names fed');
   } finally { rmSync(dir, { recursive: true, force: true }); }

@@ -89,6 +89,12 @@
 .blist li button.bname:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
 .blist li small { display: block; color: var(--prp-muted); font: 11.5px/1.5 var(--prp-font-mono); }
 .blist li .wl { margin-left: 6px; font-size: 12px; }
+/* A whole's parts under it in the deadliest battles (figures.mjs groupBattles): indented under its heading by a rule. */
+.blist ul.parts { margin: 6px 0 0 2px; padding-left: 10px; border-left: 2px solid var(--prp-line); }
+.blist ul.parts li { padding: 5px 0; }
+.blist ul.parts > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.blist li.more-parts { color: var(--prp-muted); font-size: 12px; }
+.prp-table small.rel { display: block; color: var(--prp-muted); font: 11px/1.4 var(--prp-font-mono); }
 .est-note { color: var(--prp-muted); font-size: 11.5px; }
 
 /* Table views */

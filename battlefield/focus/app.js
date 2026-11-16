@@ -6,7 +6,7 @@
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
 import { displayName } from '../history/names.mjs';
-import { deaths as shown, estimateOf } from './figures.mjs';
+import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE } from './figures.mjs';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -90,7 +90,11 @@ function fitProjection() {
   draw(true);
   if (focusFit) focusView?.fit(...focusFit); // a refit (the frame resized) keeps what Documentary mode is showing
 }
-const R = b => Math.min(16, 3.2 + Math.sqrt(b.deaths || b.cas || 0) / 22);
+// A mark's size from the deaths it alone stands for (nodeOf(b).drawn, loadWar): a whole whose parts are on the map
+// with their own figures is drawn by what its figure has beyond theirs, so the same deaths are not drawn twice (the
+// atomic bombings of Hiroshima and Nagasaki, a small mark over its two parts'); casualties only where no deaths are
+// recorded in it at all, and never for a part under a whole whose deaths hold the same people (figures.mjs markValue).
+const R = b => { const n = nodeOf(b); return Math.min(16, 3.2 + Math.sqrt(n ? markValue(n) : b.deaths || b.cas || 0) / 22); };
 function sizeMarks() {
   const k = state.zoomK;
   gBattles.selectAll('circle.battle').attr('r', d => R(d) / Math.sqrt(k));
@@ -162,7 +166,7 @@ function draw(full) {
   gBattles.selectAll('circle.battle').data(shown, b => b.q).join('circle')
     .attr('class', b => `battle ${isNow(b) ? 'now' : inP(b) ? 'in' : 'past'}${hits.qids.has(b.q) ? ' prp-focus-hit' : ''}`)
     .attr('cx', b => projection([b.lon, b.lat])[0]).attr('cy', b => projection([b.lon, b.lat])[1])
-    .on('mousemove', (e, b) => tip(e, `<strong>${esc(b.n)}</strong>${esc(bDates(b))}${b.deaths ? `<br>${num(b.deaths)} deaths` : b.cas ? `<br>${num(b.cas)} casualties` : ''}`))
+    .on('mousemove', (e, b) => tip(e, `<strong>${esc(b.n)}</strong>${esc(bDates(b))}${figureOf(b) ? `<br>${esc(figureOf(b))}` : ''}${relation(b) ? `<br>${esc(relation(b))}` : ''}`))
     .on('mouseleave', hideTip).on('click', (e, b) => openBattle(b));
   if (p) gBattles.selectAll('circle.battle').filter(inP).raise();
   gBattles.selectAll('circle.battle').filter(isNow).raise();
@@ -274,14 +278,36 @@ function renderCaption() {
 /* ---------------------------------------------------------------- panel */
 const popouts = new Map();
 const addPop = (title, html) => { const id = 'p' + popouts.size; popouts.set(id, { title, html }); return id; };
-function seeMoreList(items, limit, title) {
-  if (items.length <= limit) return `<ul class="blist">${items.join('')}</ul>`;
-  return `<ul class="blist">${items.slice(0, limit).join('')}</ul><button class="more" data-pop="${addPop(title, `<ul class="blist">${items.join('')}</ul>`)}">See all ${items.length} ›</button>`;
+// `full`, where the window's list is longer than the panel's lines (a whole's parts cut to a few in the panel).
+function seeMoreList(items, limit, title, cls = '', full = null) {
+  const ul = cls ? `<ul class="blist ${cls}">` : '<ul class="blist">';
+  if (items.length <= limit && !full) return `${ul}${items.join('')}</ul>`;
+  return `${ul}${items.slice(0, limit).join('')}</ul><button class="more" data-pop="${addPop(title, `${ul}${(full || items).join('')}</ul>`)}">See all ${items.length} ›</button>`;
 }
-function battleItem(b) {
+// A whole and its parts (figures.mjs groupBattles, built in loadWar): each battle's node, its figure in words, and
+// what it is part of or has as parts in this war's list.
+const nodeOf = b => state.war?.groups?.byQ.get(b.q);
+const figureOf = b => { const n = nodeOf(b); return n ? figureText(n) : b.deaths ? `${num(b.deaths)} deaths` : b.cas ? `${num(b.cas)} casualties` : ''; };
+function relation(b, { under = false } = {}) {
+  const n = nodeOf(b); if (!n) return '';
+  const out = [];
+  if (n.up && !under) out.push(`part of ${n.up.b.n}`);
+  if (n.parts.length) out.push(`${n.parts.length} part${n.parts.length === 1 ? '' : 's'} listed${n.shown.length && n.shown.length < n.parts.length ? `, ${n.shown.length} with recorded figures` : ''}`);
+  return out.join(' · ');
+}
+// One line of a list; `inner`, a whole's parts under it (the deadliest battles), `under` when it stands under its whole.
+function battleItem(b, { inner = '', under = false } = {}) {
   // The Wikidata ID sits on the name, so the Master Index linker puts its ◈ beside it (and not again by the Wikipedia link).
-  return `<li><button class="bname" data-b="${esc(b.q)}" data-qid="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl jdpi-no-ency" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
-    <small>${esc(bDates(b))}${b.deaths ? ` · ${num(b.deaths)} deaths` : b.cas ? ` · ${num(b.cas)} casualties` : ''}${b.lat == null ? ' · not mapped' : !b.s ? ' · not on the map' : ''}</small></li>`;
+  const fig = figureOf(b), rel = relation(b, { under });
+  return `<li data-q="${esc(b.q)}"${inner ? ' class="whole"' : ''}><button class="bname" data-b="${esc(b.q)}" data-qid="${esc(b.q)}">${esc(b.n)}</button>${b.w ? `<a class="wl jdpi-no-ency" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
+    <small>${esc(bDates(b))}${fig ? ` · ${esc(fig)}` : ''}${rel ? ` · ${esc(rel)}` : ''}${b.lat == null ? ' · not mapped' : !b.s ? ' · not on the map' : ''}</small>${inner}</li>`;
+}
+// The deadliest battles: each entry with no whole above it, a whole as a heading over its parts with figures, largest
+// first; in the panel (`few`) three parts a heading, the rest counted and in the window's full list.
+function rankedItem(n, { under = false, few = 0 } = {}) {
+  const parts = few ? n.shown.slice(0, few) : n.shown, more = n.shown.length - parts.length;
+  const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more part${more === 1 ? '' : 's'} with recorded figures (See all)</li>` : ''}</ul>` : '';
+  return battleItem(n.b, { under, inner });
 }
 // The states on a side that month, largest first, so the major powers lead the list.
 function statesOn(side, date) {
@@ -317,7 +343,8 @@ function renderPanel() {
   // campaigns sink.
   const span = b => Date.parse(b.e || b.s) - Date.parse(b.s), begins = b => b.s.slice(0, 7) >= a && b.s.slice(0, 7) <= m;
   const now = w.battles.filter(b => underWay(b, a, m)).sort((x, y) => begins(y) - begins(x) || span(x) - span(y));
-  const deadliest = [...w.battles].filter(b => b.deaths || b.cas).sort((a, b) => (b.deaths || b.cas) - (a.deaths || a.cas));
+  // Each death once (figures.mjs groupBattles): wholes and lone battles, a whole's parts under it, never beside it.
+  const deadliest = w.groups.ranked.filter(n => n.b.s);
   const months = w.months.length, years = Math.floor(months / 12);
   const sides = ['a', 'b'].map(s => {
     const on = statesOn(s, date), list = on.length > 14 ? `${on.slice(0, 14).join(', ')} <button class="more" data-pop="${addPop(`${w.sides[s].label}, ${monthLabel(m)}`, `<p>${esc(on.join(', '))}</p>`)}">+${on.length - 14} more</button>` : esc(on.join(', '));
@@ -351,12 +378,13 @@ function renderPanel() {
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
     ${w.bf ? `<a class="btn go" href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${bfYear}${bfPeriod ? `&f=${bfFrom}` : ''}&w=${w.bf}`))}" target="${embedded ? '_top' : '_self'}">Open in Retrospective Battlefield: ${bfPeriod ? `${bfFrom}–${bfYear}` : bfYear} →</a>` : ''}
     <h3>${esc(periodLabel())} <span class="count">${now.length} battle${now.length === 1 ? '' : 's'} or operation${now.length === 1 ? '' : 's'} under way</span></h3>
-    ${now.length ? seeMoreList(now.map(battleItem), 8, `${w.name} · ${periodLabel()}`) : `<p class="empty">No battles or operations recorded as under way ${p ? 'in the period' : 'this month'}.</p>`}
+    ${now.length ? seeMoreList(now.map(b => battleItem(b)), 8, `${w.name} · ${periodLabel()}`) : `<p class="empty">No battles or operations recorded as under way ${p ? 'in the period' : 'this month'}.</p>`}
     ${top.length ? `<h3>Deadliest clashes ${p ? 'in the period' : 'this month'} <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
-    ${deadliest.length ? `<h3>Deadliest battles of the war</h3>${seeMoreList(deadliest.map(battleItem), 6, `${w.name} · battles by deaths`)}` : ''}
-    <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(battleItem), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
+    ${deadliest.length ? `<h3>Deadliest battles of the war</h3>${seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null)}` : ''}
+    <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(b => battleItem(b)), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
     <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
       <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates and deaths as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
+      <b>Wholes and their parts:</b> where Wikidata records an operation and its own parts and both are listed here (one part of the other, or the other among its parts), each death is counted once: the whole is shown as a heading over its parts, never ranked beside them, ranked by the figure recorded for the whole where there is one, else by the sum of its parts' recorded figures, and says which it is (where its parts' figures add up to more than the whole's own, that is said beside it); a figure Wikidata gives the whole that is one of its parts' own is left to that part, and a part of two wholes is counted under one of them, which its window names. A figure counted long after the event (the atomic bombings' registers of the dead, counted to 2013) gives the year it was counted, beside the share counted then: such a count can include people who died of their injuries in later years. On the map a whole is drawn only by what its figure has beyond its parts' marks. The count of battles and operations counts the whole and each part, as Wikidata lists them.
       <b>Territory:</b> CShapes borders as they stood that month${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded as a whole' : ''}. Front lines are not drawn: no open data records them month by month.</p>`;
   $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
   $('#panel').querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openPop(popouts.get(b.dataset.pop)));
@@ -378,14 +406,31 @@ function openBattle(b) {
   $('#modal-title').innerHTML = `<span data-qid="${esc(b.q)}">${esc(b.n)}</span>`;
   $('#modal-body').innerHTML = `<p class="sub">${esc(bDates(b))} · part of ${esc(w.name)}</p>
     ${b.desc ? `<p>${esc(b.desc.replace(/^./, c => c.toUpperCase()))}.</p>` : ''}
-    <div class="stat-row"><div class="stat"><span>Deaths</span><b>${b.deaths ? num(b.deaths) : '–'}</b></div><div class="stat"><span>Casualties</span><b>${b.cas ? num(b.cas) : '–'}</b></div></div>
+    <div class="stat-row"><div class="stat"><span>Deaths</span><b>${b.deaths ? num(b.deaths) : '–'}</b>${b.dAt ? `<small>counted in ${esc(b.dAt.slice(0, 4))}: ${esc(LATE)}</small>` : ''}</div><div class="stat"><span>Casualties</span><b>${b.cas ? num(b.cas) : '–'}</b></div></div>
+    ${wholeHtml(b)}
     ${b.w ? `<a class="btn" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <a class="btn" href="https://www.wikidata.org/wiki/${esc(b.q)}" target="_blank" rel="noreferrer">Wikidata ↗</a>
     ${mi >= 0 && mi !== state.m ? `<button class="btn" id="jump">Go to ${esc(monthLabel(w.months[mi]))}</button>` : ''}
     ${b.lat == null ? '<p class="empty">No coordinates recorded, so it is not on the map.</p>' : !b.s ? '<p class="empty">With no date recorded, it is not on the map.</p>' : ''}`;
   $('#modal').hidden = false;
+  $('#modal-body').querySelectorAll('[data-b]').forEach(x => x.onclick = () => openBattle(battleOf(x.dataset.b)));
   // Its first month: the month shown moves there; one before a period's start widens the period to begin there.
   const j = $('#jump'); if (j) j.onclick = () => { closeModal(); if (isPeriod() && mi < state.f) setPeriod(w.months[mi], w.months[state.m]); else setMonth(mi); };
+}
+// In a battle's window: the whole it is part of, and a whole's parts with its figure counted once (figures.mjs), and
+// where Wikidata gives the whole a figure that is one of its parts' own, that it is left to the part.
+function wholeHtml(b) {
+  const n = nodeOf(b); if (!n) return '';
+  const name = x => `<button class="bname" data-b="${esc(x.q)}" data-qid="${esc(x.q)}">${esc(x.n)}</button>`;
+  const out = [];
+  if (n.up) out.push(`<p>Part of ${name(n.up.b)}${(b.upAlso || []).map(battleOf).filter(Boolean).map(x => `, and also of ${name(x)}`).join('')}.</p>`);
+  if (n.parts.length) {
+    out.push(`<p>Its parts listed here: ${n.parts.map(p => name(p.b)).join(', ')}.${n.fig ? ` Counted once, the whole: ${esc(figureText(n))}.` : ''}</p>`);
+  }
+  // A figure Wikidata gives it that is a part's own, counted with that part, under whichever whole the part is (WF2-04).
+  const left = leftToParts(b, [...state.war.battles, ...state.war.undated]);
+  if (left.length) out.push(`<p class="empty">Wikidata also gives it ${left.map(x => num(x.v)).join(' and ')}, ${left.length > 1 ? 'figures' : 'a figure'} of its parts' own, counted with ${left.map(x => `${name(x.part)}${x.part.up && x.part.up !== b.q && battleOf(x.part.up) ? `, under ${name(battleOf(x.part.up))}` : ''}`).join(' and ')}.</p>`);
+  return out.join('');
 }
 function closeModal() { $('#modal').hidden = true; }
 $('#modal-close').onclick = closeModal;
@@ -406,7 +451,8 @@ function renderTables() {
     $('#th-status').textContent = periodLabel();
     $('#battles-rows').innerHTML = list.map(b => {
       const [cls, word] = status(b);
-      return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button></td><td class="mono">${esc(bDates(b))}</td>
+      const rel = relation(b);
+      return `<tr${cls === 'later' ? ' class="later"' : cls === 'now' ? ' class="sel"' : ''}><td><button type="button" class="rowbtn" data-b="${esc(b.q)}">${esc(b.n)}</button>${rel ? `<small class="rel">${esc(rel)}</small>` : ''}</td><td class="mono">${esc(bDates(b))}</td>
         <td><span class="st ${cls}">${word}</span></td><td class="num">${b.deaths ? num(b.deaths) : '–'}</td><td class="num">${b.cas ? num(b.cas) : '–'}</td><td class="mono">${b.lat == null ? 'Not mapped' : !b.s ? 'Not on the map (no date)' : 'Mapped'}</td></tr>`;
     }).join('') || '<tr><td colspan="6" class="empty">No battles or operations recorded in Wikidata.</td></tr>';
     $('#battles-rows').querySelectorAll('[data-b]').forEach(el => el.onclick = () => openBattle(battleOf(el.dataset.b)));
@@ -503,7 +549,7 @@ function battleLine(b) {
   const n = b.n.replace(/^the /i, '');
   const common = /^(battle|siege|offensive|invasion|campaign|capture|liberation|occupation|bombing|landing|evacuation)\b/i.test(n) || /\b(pogrom|massacre|attack|raid|uprising|campaign|offensive|convoys?|front|participation|bombing|landing)\b/.test(n);
   const subject = /^Operation\b/.test(n) ? n : common ? `The ${n}` : cap(n);
-  return `${subject} ${b.s === b.e ? 'takes place' : /\bconvoys\b|s of\b/.test(n) ? 'begin' : 'begins'}.`;
+  return `${subject} ${b.s === b.e ? (plural(n) ? 'take place' : 'takes place') : plural(n) ? 'begin' : 'begins'}.`;
 }
 function changes(i) {
   const w = state.war, d = dateOf(i), p = i ? dateOf(i - 1) : null;
@@ -544,10 +590,15 @@ function monthStory(i) {
     if (a.length || b.length) parts.push(`On one side, ${a.length ? listNames(a.slice(0, 5)) : w.sides.a.label}; on the other, ${b.length ? listNames(b.slice(0, 5)) : w.sides.b.label}.`);
   }
   for (const c of changes(i).slice(0, 4)) { parts.push(c.text); gws.push(...c.gws); }
-  const begun = w.battles.filter(b => b.p !== 'y' && b.s.slice(0, 7) === m).sort((x, y) => (y.deaths || 0) - (x.deaths || 0) || !!y.w - !!x.w).slice(0, 3);
+  // A whole and its parts that begin (or end) in the same month are told once, as the whole; a toll is the whole's,
+  // each death counted once (figures.mjs).
+  const once = list => { const q = new Set(list.map(b => b.q)); return list.filter(b => { for (let u = nodeOf(b)?.up, k = 0; u && k < 40; u = u.up, k++) if (q.has(u.b.q)) return false; return true; }); };
+  const fig = b => nodeOf(b)?.fig ?? (b.deaths || 0);
+  const begun = once(w.battles.filter(b => b.p !== 'y' && b.s.slice(0, 7) === m)).sort((x, y) => fig(y) - fig(x) || !!y.w - !!x.w).slice(0, 3);
   for (const b of begun) parts.push(battleLine(b));
-  const ended = w.battles.filter(b => b.p !== 'y' && b.e && b.e !== b.s && b.e.slice(0, 7) === m && (b.deaths || 0) >= 10000).slice(0, 2);
-  for (const b of ended) parts.push(`The ${b.n.replace(/^the /i, '')} ends, at a cost of some ${spokenNumber(b.deaths)} lives.`);
+  const ended = once(w.battles.filter(b => b.p !== 'y' && b.e && b.e !== b.s && b.e.slice(0, 7) === m)).filter(b => fig(b) >= 10000).slice(0, 2);
+  // Its own toll only; a whole with none, its parts' recorded figures said as theirs (figures.mjs endLine, WF2-02).
+  for (const b of ended) { const line = endLine(b, nodeOf(b), spokenNumber); if (line) parts.push(line); }
   qids.push(...[...begun, ...ended].filter(b => b.lat != null).map(b => b.q));
   if (w.deaths[i] > 0) parts.push(`${w.estimated[i] ? 'An estimated' : 'Some'} ${spokenNumber(w.deaths[i])} die in battle this month, bringing the toll to about ${spokenNumber(cumulative[i])}.`);
   const top = w.top[i]?.[0];
@@ -600,6 +651,11 @@ async function loadWar(id, month, from = null) {
   // A battle Wikidata dates only to its decade (s null, u 'undated') is listed with the war's battles but has no month:
   // it is kept apart, so the map, the months and the counts of battles under way leave it out.
   w.undated = w.battles.filter(b => !b.s); w.battles = w.battles.filter(b => b.s);
+  // Wholes and their parts, once for the war (figures.mjs): every list, the ranking, the marks and the narrator read it.
+  // `drawn`: the deaths a mapped item's own mark stands for, its figure less what its parts' marks below it show.
+  w.groups = groupBattles([...w.battles, ...w.undated]);
+  const onMap = (n, d = 0) => (d > 40 ? 0 : n.b.lat != null && n.b.s ? n.fig : n.parts.reduce((s, p) => s + onMap(p, d + 1), 0));
+  for (const n of w.groups.byQ.values()) n.drawn = Math.max(0, n.fig - n.parts.reduce((s, p) => s + onMap(p, 1), 0));
   state.war = w; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
   estimatedTo = []; w.estimated.reduce((e, v, k) => (estimatedTo[k] = e || !!v), false);
   $('#war').value = id;

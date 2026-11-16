@@ -25,7 +25,9 @@ export const KARDASHEV_STEPS = (() => { const s = []; for (let y = -2000; y <= 1
 export function yearOf(d) {
   if (d === null || d === undefined || d === '') return null;
   if (typeof d === 'number') return Number.isFinite(d) ? Math.trunc(d) : null;
-  const m = String(d).trim().match(/^(-?\d{1,4})(?:-|$)/);
+  // Any number of digits: the lake keeps a year of an age at its length ("-66000000", the Chicxulub crater), which
+  // until November 2026 was read as no year at all.
+  const m = String(d).trim().match(/^(-?\d+)(?:-|$)/);
   return m ? +m[1] : null;
 }
 
@@ -52,16 +54,20 @@ export function kardashevPolity(wiki, polities = [], step = null) {
 /** An entity's years from the facts the lake records: a person's born/died, a state's founded/dissolved, an event's
     start/end, or a single date. The record may mix the pairs (the lake has the Roman Empire as dissolved 476, start
     27 BC, end 395), so the era runs from the earliest beginning it records to the latest end: [-27, 476], not the
-    476 alone that the first pair with any value would give. A beginning with no end: a living person or a standing
-    state runs to this year; an end with no beginning is that year alone. A date alone is that year. Null when the
-    record has no dates at all. */
+    476 alone that the first pair with any value would give. A beginning with no end: a standing state runs to this
+    year, and so does a person born within a lifetime (LIFETIME years) of it, who may be living; a person born longer
+    ago whose death Wikidata does not record is that year alone (until November 2026 Euclid, born 333 BC, ran "333 BC
+    to 2026"). An end with no beginning is that year alone. A date alone is that year. Null when the record has no
+    dates at all. */
+export const LIFETIME = 120;
 export function eraFromFacts(facts, thisYear = new Date().getUTCFullYear()) {
   if (!facts) return null;
   const ys = ks => ks.map(k => yearOf(facts[k])).filter(y => y !== null);
   const first = ys(['born', 'founded', 'start']), last = ys(['died', 'dissolved', 'end']);
   if (!first.length && !last.length) { const d = yearOf(facts.date); return d === null ? null : [d, d]; }
   const a = first.length ? Math.min(...first) : Math.min(...last);
-  const b = last.length ? Math.max(...last) : Math.max(a, thisYear);
+  const person = yearOf(facts.born) !== null && !ys(['founded', 'start']).length;
+  const b = last.length ? Math.max(...last) : person && thisYear - a > LIFETIME ? a : Math.max(a, thisYear);
   return [Math.min(a, b), Math.max(a, b)];
 }
 

@@ -237,3 +237,29 @@ export function endAgainstArticle(d, wp, warEnd = null) {
   if (dayNo(wd) - dayNo(wp.d) <= 31) return d;
   return { ...d, e: wp.d, pe: (wp.p || null) === d.p ? null : wp.p || 'd', u: 'conflict', eW: wd, eA: wp.d };
 }
+
+// ---- The second reader of the whole-and-parts rule (16 November 2026), WF2-06 and WF2-09.
+
+/** An item's casualties from its P1590 statements ([{ v, rank, about }], `about` its P805 qualifier, "statement is
+ *  subject of"): the preferred statements, else the normal ones, never a deprecated one, and never one about something
+ *  else (the atomic bombings' 201,779, P805 hibakusha, counts living survivors, not casualties); the largest, or null. */
+export function casualtiesOf(statements = []) {
+  const ok = statements.filter(s => s.rank !== 'deprecated' && s.v > 0);
+  const best = ok.some(s => s.rank === 'preferred') ? ok.filter(s => s.rank === 'preferred') : ok;
+  const own = best.filter(s => !s.about);
+  return own.length ? Math.max(...own.map(s => s.v)) : null;
+}
+
+/** The order of a war's battles: by start, the undated last, and battles that start together by QID number, so a
+ *  rebuild gives the same order whatever order Wikidata answered in. */
+export const byStart = (a, b) => (!a.s !== !b.s ? !a.s - !b.s : a.s && a.s !== b.s ? (a.s < b.s ? -1 : 1) : +a.q.slice(1) - +b.q.slice(1));
+
+/** One place for an item Wikidata gives several ([lat, lon] each, its best-ranked coordinates): the one nearest its
+ *  first part's place where it has parts with places (the atomic bombings at Hiroshima), else the southern-most, then
+ *  western-most, the same on every run; null with none. */
+export function pickCoord(coords = [], partCoords = []) {
+  if (!coords.length) return null;
+  if (coords.length === 1) return coords[0];
+  const p = partCoords[0], d = c => (c[0] - p[0]) ** 2 + (c[1] - p[1]) ** 2;
+  return [...coords].sort((x, y) => (p ? d(x) - d(y) : 0) || x[0] - y[0] || x[1] - y[1])[0];
+}

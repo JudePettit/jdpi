@@ -22,12 +22,34 @@ export function wikidataDate(claim) {
   return { v, p, c };
 }
 
-/** The facts of an entity (Wikidata's first statement of each property, as before) with their precisions and circa
- *  marks: { facts, fp, fc }, fp and fc only for the facts that need them. */
+/** The statement Wikidata itself gives for a property: the first of preferred rank, else the first of normal rank,
+ *  never a deprecated one (refIds in build.mjs drops those too). Until November 2026 the first statement was read
+ *  whatever its rank, so the 2026 South Sudanese general election, whose first P585 is a deprecated 2018-07, showed
+ *  July 2018 (sweep MI-10, 1b). */
+export function bestClaim(list) {
+  const ok = (list || []).filter(c => c && c.rank !== 'deprecated');
+  return ok.find(c => c.rank === 'preferred') || ok[0] || null;
+}
+
+/** The Explorer's Century tag from a claim (the best statement of the date it is drawn from: build.mjs tagsFor):
+ *  "Century:15th century", "Century:4th century BC"; null for a date coarser than a century (precision below 7), since
+ *  its year names a century Wikidata does not give (Moses, born in the 2nd millennium BC, was "20th century BC", and
+ *  the Chicxulub crater "660000th century BC", until the second reader's F2, 16 November 2026). */
+export function centuryTag(claim) {
+  const d = wikidataDate(claim);
+  if (!d || d.p < 7) return null;
+  const y = parseInt(d.v, 10);
+  if (!Number.isFinite(y) || y === 0) return null;
+  const c = Math.floor((Math.abs(y) - 1) / 100) + 1;
+  return `Century:${c}${[, 'st', 'nd', 'rd'][c % 100 > 10 && c % 100 < 14 ? 0 : c % 10] || 'th'} century${y < 0 ? ' BC' : ''}`;
+}
+
+/** The facts of an entity (each property's best statement, bestClaim) with their precisions and circa marks:
+ *  { facts, fp, fc }, fp and fc only for the facts that need them. */
 export function datedFacts(claims, props) {
   const facts = {}, fp = {}, fc = [];
   for (const [p, name] of Object.entries(props)) {
-    const d = wikidataDate(claims?.[p]?.[0]);
+    const d = wikidataDate(bestClaim(claims?.[p]));
     if (!d) continue;
     facts[name] = d.v;
     if (d.p < 9) fp[name] = d.p;

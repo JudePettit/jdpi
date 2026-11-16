@@ -14,10 +14,14 @@ import { pathToFileURL } from 'node:url';
 import { THINKERS, spectrumTag } from './thinkers.mjs';
 import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
+import { groupBattles, figureText } from '../../battlefield/focus/figures.mjs';
+import { leaderText } from './resolve.mjs';
 
 export const JDPI = 'https://jdpi.pages.dev/';
 const RETRO = 'https://hp-retrospective.pages.dev/';
 const titleOf = url => (/en\.wikipedia\.org\/wiki\//.test(url || '') ? decodeURIComponent(url.split('/wiki/')[1].split('#')[0]).replace(/_/g, ' ') : null);
+// A Wikidata item's page (the Retrospective links a party there when it has no English article): its ID, or null.
+const wikidataOf = url => (String(url || '').match(/^https?:\/\/(?:www\.)?wikidata\.org\/wiki\/(Q[1-9]\d*)$/) || [])[1] || null;
 const year = d => (d ? +String(d).slice(0, 4) : null);
 const json = p => JSON.parse(readFileSync(p, 'utf8'));
 
@@ -33,9 +37,11 @@ export async function retrospective({ retroDir }) {
       const title = titleOf(l.url);
       const span = `${year(l.start)}–${l.end ? year(l.end) : 'present'}`;
       if (title) out.push({ key: { title }, label: l.full || l.name, module: 'retrospective', url: at(year(l.start), gw), date: l.start, context: `Led ${c.name}, ${span}`, tags: [['Role', 'National leader'], ['Led', c.name], ...(l.entry === 'Irregular' ? [['Role', 'Took power irregularly']] : [])] });
+      // A party the Retrospective links to Wikidata rather than Wikipedia (no English article; some named by their QID,
+      // as Wikidata had no English label) is keyed by that ID, so it has its mention and the build its name (resolve.mjs).
       for (const p of l.parties || []) {
-        const pt = titleOf(p.url);
-        if (pt) out.push({ key: { title: pt }, label: p.name, module: 'retrospective', url: at(year(l.start), gw), date: l.start, context: `Party of ${l.full || l.name} (${c.name}, ${span})`, tags: [['Role', 'Party in power'], ['In power in', c.name]] });
+        const pt = titleOf(p.url), pq = pt ? null : wikidataOf(p.url);
+        if (pt || pq) out.push({ key: pt ? { title: pt } : { qid: pq }, label: p.name, module: 'retrospective', url: at(year(l.start), gw), date: l.start, context: `Party of ${l.full || l.name} (${c.name}, ${span})`, tags: [['Role', 'Party in power'], ['In power in', c.name]] });
       }
     }
     for (const o of c.offices || []) {
@@ -43,8 +49,8 @@ export async function retrospective({ retroDir }) {
       if (title) out.push({ key: { title }, label: o.full, module: 'retrospective', url: at(year(o.start), gw), date: o.start, context: `${o.office === 'hos' ? 'Head of state' : 'Head of government'} of ${c.name}, ${year(o.start)}–${o.end ? year(o.end) : 'present'}`, tags: [['Role', o.office === 'hos' ? 'Head of state' : 'Head of government'], ['Led', c.name]] });
     }
     for (const e of c.events) {
-      const title = titleOf(e.url);
-      if (title) out.push({ key: { title }, label: e.text, module: 'retrospective', url: at(year(e.date), gw), date: e.date, context: `${c.name}: ${e.text}` });
+      const title = titleOf(e.url), text = leaderText(e.text, c.leaders, e.date); // "Q20055561 takes power": Rishi Sunak
+      if (title) out.push({ key: { title }, label: text, module: 'retrospective', url: at(year(e.date), gw), date: e.date, context: `${c.name}: ${text}` });
     }
   }
   return out;
@@ -86,9 +92,15 @@ export function battlefield({ jdpiDir }) {
     if (f.qid) out.push({ key: { qid: f.qid }, label: f.name, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}`,
       date: f.start, context: `Month by month, ${f.start.slice(0, 4)}–${f.end ? f.end.slice(0, 4) : 'now'}: ${f.battles} battles and operations, ${f.totalDeaths.toLocaleString('en-GB')} battle deaths` });
     const d = json(join(jdpiDir, `battlefield/focus/data/wars/${f.id}.json`));
+    // Each death once, as War Focus counts it (figures.mjs, RV-05 A1): an event listed with its own parts (the atomic
+    // bombings of Hiroshima and Nagasaki) gives the figure War Focus shows over its parts ("448,901 deaths, the sum of
+    // its parts' recorded figures"), never a part's figure as its own; a figure counted long after the battle gives its
+    // year beside the share counted then (the second reader, WF2-01). Deaths only, as before: no casualties line.
+    const nodes = groupBattles(d.battles).byQ;
+    const figure = b => { const n = nodes.get(b.q); return n?.fig ? `; ${figureText(n)}` : ''; };
     // A battle Wikidata dates only to its decade (s null, War Focus lists it undated) opens the war, not a month.
     for (const b of d.battles) if (b.w) out.push({ key: { qid: b.q }, label: b.n, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}${b.s ? `&m=${b.s.slice(0, 7)}` : ''}`,
-      date: b.s || null, context: `Part of ${f.name}${b.deaths ? `; ${b.deaths.toLocaleString('en-GB')} deaths` : ''}` });
+      date: b.s || null, context: `Part of ${f.name}${figure(b)}` });
   }
   const live = json(join(jdpiDir, 'battlefield/data/realtime.json'));
   for (const w of live.wars) {
@@ -117,7 +129,8 @@ export function traders({ jdpiDir }) {
   for (const m of c.members) if (m.bioguide && m.trades) out.push({ key: { bioguide: m.bioguide }, label: m.name, module: 'traders', entityKey: `congress:${m.bioguide}`,
     url: `${JDPI}fe/traders.html?tab=congress&member=${m.id}`, context: `${m.trades.toLocaleString('en-GB')} disclosed stock trades (${m.party || 'party unknown'}, ${m.district})`, tags: [['Role', 'Member of Congress'], ['Role', 'Discloses stock trades']] });
   const i = json(join(jdpiDir, 'traders/data/investors.json'));
-  for (const v of i.investors) out.push({ key: { title: v.person }, label: v.person, module: 'traders', entityKey: `investor:${v.cik}`,
+  // Keyed by the investor's own article: `wiki` where the name alone is a disambiguation page ("David Einhorn").
+  for (const v of i.investors) out.push({ key: { title: v.wiki || v.person }, label: v.person, module: 'traders', entityKey: `investor:${v.cik}`,
     url: `${JDPI}fe/traders.html?tab=investors&investor=${v.cik}`, context: `${v.fund}: 13F holdings for the quarter to ${v.period}`, tags: [['Role', 'Investor'], ['Investment style', v.style]] });
   return out;
 }
@@ -202,7 +215,7 @@ export function bibliotheca({ jdpiDir }) {
   const out = [];
   for (const slug of slugs) {
     const cast = casts.get(slug), path = join(booksDir, `${slug}.json`), book = existsSync(path) ? json(path) : null;
-    const byQid = new Map(), group = (qid, label) => byQid.get(qid) || byQid.set(qid, { label, names: new Set(), fed: new Set(), mentions: 0, first: null, marked: 0, marks: new Set(), at: null }).get(qid);
+    const byQid = new Map(), group = (qid, label) => byQid.get(qid) || byQid.set(qid, { label, names: new Set(), fed: new Set(), mentions: 0, first: null, marked: 0, marks: new Set(), at: null, where: new Map() }).get(qid);
     for (const r of cast?.records || []) {
       if (r.decision !== 'auto' || !/^Q\d+$/.test(r.qid || '')) continue;
       const g = group(r.qid, r.label);
@@ -218,6 +231,8 @@ export function bibliotheca({ jdpiDir }) {
       g.marked++;
       g.marks.add(String(p.text || '').slice(t.s, t.e) || t.label);
       g.at ||= { ch: ch.n, p: p.id };
+      const w = g.where.get(ch.n) || g.where.set(ch.n, [ch.n, p.id, 0, ch.heading || null]).get(ch.n);
+      w[2]++;
     }
     const title = cast?.title ?? book.title, author = cast?.author ?? book.author?.name ?? book.author, year = cast?.year ?? book.work?.published;
     for (const [qid, g] of byQid) {
@@ -227,6 +242,10 @@ export function bibliotheca({ jdpiDir }) {
         url: `${JDPI}bibliotheca/neo/index.html#book=${slug}&ch=${first.ch}&p=${first.p}&t=${qid}`, date: String(year),
         context: `Named in ${title} (${author}, ${year < 0 ? `${-year} BC` : year}), ${times} time${times === 1 ? '' : 's'}, as ${[...names].join(', ')}`,
         aliases: [...g.fed],
+        // Where in the book the reader marks it (BI-19, MI-10): each chapter in book order, as [chapter number, the first
+        // paragraph marked in it, the times it is marked there, the chapter's heading]; the times add up to the
+        // context's. Only for what the reader marks: a cast record not tagged yet has no places in the text to give.
+        ...(g.where.size ? { where: [...g.where.values()] } : {}),
       });
     }
   }

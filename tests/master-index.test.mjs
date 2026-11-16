@@ -13,11 +13,17 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { ADAPTERS, ADAPTER_MODULES, JDPI, kino, pestle, volatility } from '../lake/scripts/adapters.mjs';
-import { wikidataDate, datedFacts, formatDate } from '../lake/scripts/dates.mjs';
-import { shortCounts, countOf, recount } from '../lake/scripts/counts.mjs';
+import { wikidataDate, datedFacts, formatDate, centuryTag } from '../lake/scripts/dates.mjs';
+import { shortCounts, countOf, recount, canRecount } from '../lake/scripts/counts.mjs';
+import { bestClaim } from '../lake/scripts/dates.mjs';
+import * as resolveRules from '../lake/scripts/resolve.mjs';
+import { traders, retrospective } from '../lake/scripts/adapters.mjs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { CATEGORY_IDS, flatScenes } from '../kino/lib/format.js';
 import { readAt, onOwnPage } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
+import { groupBattles, figureText } from '../battlefield/focus/figures.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const text = p => readFileSync(join(ROOT, p), 'utf8');
@@ -373,6 +379,367 @@ test('recount: --only gives the full build’s total whatever the 300-place cap,
   assert.equal(countOf(old, 'retrospective'), 300);
 });
 
+/* ---------------------------------------------------------------- the sweep's ten fixes (MI-10) */
+// The Master Index sweep of 15 November 2026 (PRP-MASTER-INDEX-SWEEP.md) read all 14,064 records and named ten fixes,
+// each made at its builder (lake/scripts/resolve.mjs, dates.mjs, counts.mjs, build.mjs, adapters.mjs; Bibliotheca's era
+// and shelf; the Master Index page). Each test below holds the builder's rule now, as a unit case. Where the data can
+// only be brought in line by a full build (every record made again: the disambiguation pages left out, dates by rank,
+// `n` on every short record, the summaries checked), its data check binds from the manifest's `fullBuild` stamp, which
+// only a full build by the corrected builder writes (the lake refresh of 3 December 2026); LAKE_RULES=all runs those
+// checks on any data, as a check of a scratch full build. The rest bind on the data as committed.
+const resolveFns = resolveRules;
+const lakeManifest = read('lake/data/manifest.json');
+const FULL = Boolean(lakeManifest.fullBuild) || process.env.LAKE_RULES === 'all';
+const afterFullBuild = t => { if (!FULL) t.diagnostic('the data check binds from the first full build by the corrected builder (lake-refresh, 3 December 2026; manifest.fullBuild)'); return FULL; };
+let allRecords = null;
+const lakeRecords = () => {
+  if (!allRecords) { allRecords = new Map(); for (let i = 0; i < 512; i++) for (const [q, r] of Object.entries(read(`lake/data/e/${i}.json`))) allRecords.set(q, r); }
+  return allRecords;
+};
+const yearIn = d => (d ? parseInt(String(d), 10) : null);
+
+// ---- Fix 1. A Wikimedia disambiguation page is no entity (sweep 4b): eight were entries, five of them human name
+// disambiguation pages (Q22808320), which a test on Q4167410 alone misses.
+test('resolve: an item that is a Wikimedia disambiguation page, of any kind, is no entity', () => {
+  const p31 = (...ids) => ({ claims: { P31: ids.map(id => ({ rank: 'normal', mainsnak: { datavalue: { value: { id } } } })) } });
+  for (const q of ['Q4167410', 'Q22808320', 'Q66480449', 'Q141143653']) assert.equal(resolveFns.isDisambiguation(p31(q)), true, q);
+  assert.equal(resolveFns.isDisambiguation(p31('Q5')), false, 'a human');
+  assert.equal(resolveFns.isDisambiguation({ claims: { P31: [{ rank: 'deprecated', mainsnak: { datavalue: { value: { id: 'Q4167410' } } } }, { mainsnak: { datavalue: { value: { id: 'Q5' } } } }] } }), false, 'a deprecated class is not its class');
+  // The build leaves such a key out with a warning naming the module and key, and gives such a related item no page.
+  const src = text('lake/scripts/build.mjs');
+  assert.match(src, /isDisambiguation\(e\)\) \{ disambiguation\.add\(q\); continue; \}/, 'fetchEntities keeps no disambiguation page');
+  assert.match(src, /console\.warn\(`\$\{m\.module\} \$\{JSON\.stringify\(m\.key\)\} → \$\{q\} is a Wikimedia disambiguation page; left out`\)/, 'and says which module and key');
+});
+test('traders adapter: an investor is keyed by his own article where his name is a disambiguation page (David Einhorn)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'mi10-'));
+  try {
+    mkdirSync(join(dir, 'traders/data'), { recursive: true });
+    writeFileSync(join(dir, 'traders/data/congress.json'), JSON.stringify({ members: [] }));
+    writeFileSync(join(dir, 'traders/data/investors.json'), JSON.stringify({ investors: [
+      { cik: 1489933, person: 'David Einhorn', wiki: 'David Einhorn (hedge fund manager)', fund: 'Greenlight Capital', style: 'Value', period: '2026-06-30' },
+      { cik: 1067983, person: 'Warren Buffett', fund: 'Berkshire Hathaway', style: 'Value', period: '2026-06-30' }] }));
+    const ms = traders({ jdpiDir: dir });
+    assert.deepEqual(ms.map(m => [m.key.title, m.label]), [['David Einhorn (hedge fund manager)', 'David Einhorn'], ['Warren Buffett', 'Warren Buffett']]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  // The Auto Trader's builder gives him that article (traders/scripts/build-13f.mjs), so its refresh writes it.
+  assert.match(text('traders/scripts/build-13f.mjs'), /\{ cik: 1489933, person: 'David Einhorn', wiki: 'David Einhorn \(hedge fund manager\)'/);
+});
+test('committed lake: no entry with mentions is a disambiguation page, and no "Led" term starts before 16 or after death', t => {
+  if (!afterFullBuild(t)) return;
+  const bad = [];
+  for (const r of lakeRecords().values()) {
+    if (r.mentions.length && (/disambiguation page/i.test(r.desc) || resolveFns.DISAMBIGUATION_TEXT.test(r.summary || ''))) bad.push(`${r.q} ${r.label}: a disambiguation page`);
+    const born = yearIn(r.facts.born), died = yearIn(r.facts.died);
+    for (const m of r.mentions) {
+      const led = m.m === 'retrospective' && String(m.c).match(/^Led .+, (\d{4})–/);
+      if (!led) continue;
+      const y = +led[1];
+      if ((born !== null && y < born + 16) || (died !== null && y > died)) bad.push(`${r.q} ${r.label} (${r.facts.born || '?'}–${r.facts.died || ''}): "${m.c}"`);
+    }
+  }
+  assert.deepEqual(bad, []);
+});
+
+// ---- Fix 2. Each date from Wikidata's best statement (sweep 1b): the 2026 South Sudanese general election showed its
+// first P585, a deprecated 2018-07.
+test('dates: the preferred statement, else the first normal one, never a deprecated one', () => {
+  const at = (rank, time, precision = 11) => ({ rank, ...wd(time, precision) });
+  assert.deepEqual(datedFacts({ P585: [at('deprecated', '+2018-07-00T00:00:00Z', 10), at('normal', '+2027-02-11T00:00:00Z')] }, { P585: 'date' }).facts, { date: '2027-02-11' }, 'the South Sudanese election');
+  assert.deepEqual(datedFacts({ P569: [at('normal', '+1900-01-01T00:00:00Z'), at('preferred', '+1901-05-02T00:00:00Z')] }, { P569: 'born' }).facts, { born: '1901-05-02' }, 'a preferred after a normal wins');
+  assert.deepEqual(datedFacts({ P570: [at('deprecated', '+1950-00-00T00:00:00Z', 9)] }, { P570: 'died' }).facts, {}, 'only a deprecated statement: no fact');
+  assert.equal(bestClaim([]), null);
+  assert.equal(bestClaim(undefined), null);
+  // The Century tag reads the same statement (build.mjs tagsFor, dates.mjs centuryTag).
+  assert.match(text('lake/scripts/build.mjs'), /centuryTag\(\[e\.claims\?\.P569, e\.claims\?\.P585, e\.claims\?\.P580, e\.claims\?\.P571\]\.map\(bestClaim\)\.find\(c => wikidataDate\(c\)\)\)/);
+});
+// The second reader (F2, 16 November 2026): Moses's preferred birth date is -2000 at millennium precision (6), and the
+// tag read its year as "20th century BC", a century Wikidata does not give; 13 records had tags such as "660000th
+// century BC" (the Chicxulub crater, Lucy). A date coarser than a century gives no Century tag.
+test('dates: a Century tag only from a date at least as precise as a century', () => {
+  const claim = (time, precision) => ({ rank: 'preferred', ...wd(time, precision) });
+  assert.equal(centuryTag(claim('-2000-00-00T00:00:00Z', 6)), null, 'Moses: the 2nd millennium BC is no century');
+  assert.equal(centuryTag(claim('-66000000-00-00T00:00:00Z', 3)), null, 'the Chicxulub crater');
+  assert.equal(centuryTag(claim('+1500-00-00T00:00:00Z', 7)), 'Century:15th century');
+  assert.equal(centuryTag(claim('-0356-07-20T00:00:00Z', 11)), 'Century:4th century BC');
+  assert.equal(centuryTag(claim('+1901-05-02T00:00:00Z', 11)), 'Century:20th century');
+  assert.equal(centuryTag(null), null);
+});
+test('committed lake: no Century tag comes from a date coarser than a century', t => {
+  const fromCoarse = r => { const k = ['born', 'date', 'start', 'founded'].find(f => r.facts[f]); return k && (r.fp?.[k] ?? 9) < 7 && r.tags.some(x => x.startsWith('Century:')); };
+  // Moses, made again by the Bibliotheca run of 16 November, binds now; every record from the next full build.
+  assert.equal(fromCoarse(lakeRecords().get('Q9077')), false, 'Moses');
+  if (!afterFullBuild(t)) return;
+  assert.deepEqual([...lakeRecords().values()].filter(fromCoarse).map(r => `${r.q} ${r.label}`), []);
+});
+// Elections whose label year is more than a year from Wikidata's own date for them, each checked on Wikidata (16
+// November 2026); they stay listed until Wikidata is corrected.
+const ELECTION_DATES_WIKIDATA_HAS = {
+  Q139761779: 'the 2026 Slovak referendum: Wikidata’s only P585 is the year 0202 (a typo)',
+  Q15984054: 'the 1911 Croatian parliamentary election: Wikidata’s only P585 is 2015-12-17',
+  Q17087354: 'the 1935 Salvadoran presidential election: Wikidata’s only P585 is 1939-01-15',
+  Q16949505: 'the October 2013 Australian Labor Party leadership election: Wikidata’s only P585 is 2010-10-13',
+  Q116998636: 'the Berlin 2030 climate referendum: its label names the target year; the vote was on 2023-03-26',
+};
+test('committed lake: an election’s label year is within a year of its date', t => {
+  for (const why of Object.values(ELECTION_DATES_WIKIDATA_HAS)) assert.ok(why.length > 20);
+  if (!afterFullBuild(t)) return;
+  const bad = [];
+  for (const r of lakeRecords().values()) {
+    if (r.type !== 'election' || r.q in ELECTION_DATES_WIKIDATA_HAS || !r.facts.date || (r.fp?.date ?? 9) < 9) continue;
+    const years = (r.label.match(/\b(1[89]\d\d|20\d\d)\b/g) || []).map(Number), y = yearIn(r.facts.date);
+    if (years.length && !years.some(x => Math.abs(x - y) <= 1)) bad.push(`${r.q} ${r.label}: ${r.facts.date}`);
+  }
+  assert.deepEqual(bad, []);
+});
+
+// ---- Fix 3. No related name is a bare QID (sweep 3a): Donald Trump was "Q22686" in 54 Participants lists, where a
+// label batch had come back with an error.
+test('resolve: a batch that comes back with an error is split and asked again; a name falls back to the last build’s label', async () => {
+  const asked = [], warned = [];
+  const ids = Array.from({ length: 120 }, (_, i) => `Q${i + 1}`);
+  ids.splice(77, 0, 'Q0');
+  const got = await resolveFns.getBatched(ids, async batch => { asked.push(batch.length); return batch.includes('Q0') ? { error: { code: 'no-such-entity' } } : { entities: Object.fromEntries(batch.map(q => [q, { id: q, labels: { en: { value: `name of ${q}` } } }])) }; }, { warn: m => warned.push(m) });
+  assert.deepEqual(Object.keys(got).sort(), ids.filter(q => q !== 'Q0').sort(), 'every other ID answered');
+  assert.equal(warned.length, 1, 'the bad ID alone left out, with a warning');
+  assert.match(warned[0], /Q0 \(no-such-entity\)/);
+  assert.ok(Math.max(...asked) === 50, 'batches of fifty');
+  await assert.rejects(resolveFns.getBatched(['Q1'], async () => { throw new Error('HTTP failure'); }), /HTTP failure/, 'a network failure is no bad ID: the build stops');
+  assert.equal(resolveFns.nameOf('Q22686', { fetched: new Map(), committed: new Map([['Q22686', 'Donald Trump']]) }), 'Donald Trump');
+  assert.equal(resolveFns.nameOf('Q22686', { fetched: new Map([['Q22686', 'Donald Trump']]) }), 'Donald Trump');
+  assert.equal(resolveFns.nameOf('Q9', { fetched: new Map([['Q9', 'Q9']]) }), 'Q9', 'nothing else to say');
+});
+test('committed lake: no related name is a bare QID where that QID has a labelled entry', t => {
+  if (!afterFullBuild(t)) return;
+  const all = lakeRecords(), bad = [];
+  for (const r of all.values()) for (const [rel, list] of Object.entries(r.rel || {})) for (const [q, l] of list) if (resolveFns.isQid(l) && all.get(q)?.label && !resolveFns.isQid(all.get(q).label)) bad.push(`${r.q} ${rel}: ${q}`);
+  assert.deepEqual(bad.slice(0, 20), [], `${bad.length} bare QIDs`);
+});
+
+// ---- Fix 4. A summary is the article's own (sweep 4c, 5b): 88 were another article's (a redirect's target), 11 a
+// disambiguation page's.
+test('resolve: a summary is the article’s own: not a redirect’s target, not a disambiguation page', () => {
+  assert.deepEqual(resolveFns.summaryFor({ title: 'First Phase Offensive', badges: ['Q70893996'] }, 'The Korean War was an armed conflict …'), { summary: '', ns: 'redirect' });
+  assert.deepEqual(resolveFns.summaryFor({ title: 'Battle of Livno', badges: [] }, 'Battle of Livno is the name of several battles fought near Livno'), { summary: '', ns: 'disambiguation' });
+  assert.deepEqual(resolveFns.summaryFor({ title: 'Ivar Lykke' }, 'Ivar Lykke may refer to:'), { summary: '', ns: 'disambiguation' });
+  assert.deepEqual(resolveFns.summaryFor({ title: 'Hegel' }, 'Georg Wilhelm Friedrich Hegel was a German philosopher.'), { summary: 'Georg Wilhelm Friedrich Hegel was a German philosopher.' });
+  const celsius = 'The degree Celsius is the unit of temperature on the Celsius scale. The degree Celsius can refer to a specific point on the scale.';
+  assert.deepEqual(resolveFns.summaryFor({ title: 'Degree Celsius' }, celsius), { summary: celsius }, 'an article whose lead says a term “can refer to” one of its senses keeps its summary');
+  assert.deepEqual(resolveFns.summaryFor({ title: 'X' }, undefined), { summary: '', ns: 'unfetched' });
+  assert.deepEqual(resolveFns.summaryFor({ title: 'X' }, ''), { summary: '', ns: 'empty' });
+  assert.deepEqual(resolveFns.summaryFor(undefined, 'text'), { summary: '' }, 'no article, no summary, nothing to explain');
+  // Wikipedia's REST answer: another article's title (a redirect followed) or a disambiguation page is cached as none.
+  assert.equal(resolveFns.restSummary({ type: 'standard', titles: { canonical: 'Korean_War', normalized: 'Korean War' }, extract: 'The Korean War …' }, 'First Phase Offensive'), '');
+  assert.equal(resolveFns.restSummary({ type: 'disambiguation', titles: { canonical: 'David_Einhorn' }, extract: 'David Einhorn may refer to' }, 'David Einhorn'), '');
+  assert.equal(resolveFns.restSummary({ type: 'standard', titles: { canonical: 'Pyrrhus_of_Epirus', normalized: 'Pyrrhus of Epirus' }, extract: 'Pyrrhus was …' }, 'Pyrrhus of Epirus'), 'Pyrrhus was …');
+  assert.doesNotMatch(text('lake/scripts/build.mjs'), /\}\?redirect=true`/, 'no summary request follows a redirect to another article');
+  // The second reader (F3): an "intentional sitelink to redirect" (Q70894304) often leads to an article on the same
+  // subject (Sicily (island), the Persian Empire), so the page's note says only what is so: no article of its own.
+  const note = constant('encyclopedia/index.html', 'NO_SUMMARY').redirect;
+  assert.match(note, /no article of its own under this title/);
+  assert.doesNotMatch(note, /would not be this entry/);
+});
+test('committed lake: no summary lists namesakes, and First Phase Offensive has none of the Korean War’s', t => {
+  if (!afterFullBuild(t)) return;
+  const all = lakeRecords();
+  const bad = [...all.values()].filter(r => resolveFns.DISAMBIGUATION_TEXT.test(r.summary || '')).map(r => `${r.q} ${r.label}`);
+  assert.deepEqual(bad, []);
+  for (const q of ['Q15932430', 'Q906313', 'Q112034457', 'Q703203']) if (all.has(q)) assert.ok(!all.get(q).summary || all.get(q).ns !== 'redirect', q);
+  assert.equal(all.get('Q15932430')?.summary || '', '', 'First Phase Offensive');
+});
+
+// ---- Fix 5. --only recounts only what its list can show (sweep 2b): 1,139 records made before `n` have a total over
+// their places; a run of an adapter that names a place twice would have counted the rest twice.
+test('recount: a record made without n whose total exceeds its places is refused by a run that cannot tell whose they are', () => {
+  const old = { q: 'Q183297', label: 'İsmet İnönü', mentions: [{ m: 'retrospective', u: 'a' }, { m: 'neo-classic', u: 'b' }], total: 5 };
+  const own = new Set(['retrospective']), mine = [{ module: 'retrospective', url: 'a' }, { module: 'retrospective', url: 'a' }];
+  assert.throws(() => recount(old, own, mine, old.mentions, { adapters: new Set(['retrospective']) }), e => e.record === 'Q183297' && /İsmet İnönü: total 5 over 2 places and no n/.test(e.message));
+  assert.equal(canRecount(old, new Set(['retrospective']), mine), false);
+  // A run whose adapter gives each place once (Bibliotheca) can: the list shows its share in full.
+  const book = [{ module: 'neo-classic', url: 'b' }];
+  assert.equal(canRecount(old, new Set(['bibliotheca']), book), true);
+  assert.equal(recount(old, new Set(['neo-classic']), book, old.mentions, { adapters: new Set(['bibliotheca']) }).total, 5);
+  assert.equal(canRecount(old, new Set(['bibliotheca']), [...book, ...book]), false, 'unless it names a place twice itself');
+  assert.equal(canRecount({ ...old, mentions: Array.from({ length: 300 }, (_, i) => ({ m: 'x', u: i })), total: 301 }, new Set(['bibliotheca']), book), false, 'nor at the 300-place cap');
+  assert.equal(canRecount({ ...old, n: { retrospective: 4 } }, new Set(['retrospective']), mine), true, 'with n it can');
+  assert.equal(canRecount({ ...old, total: 2 }, new Set(['retrospective']), mine), true, 'nor is a record without a shortfall refused');
+  // The build passes its adapters, and collects the refusals before stopping (build.mjs onlyMerge).
+  assert.match(text('lake/scripts/build.mjs'), /recount\(old, MODS, mine\(q\), ms, \{ adapters: ONLY \}\)/);
+});
+test('committed lake: every record whose total exceeds its places carries n', t => {
+  if (!afterFullBuild(t)) return;
+  const bad = [...lakeRecords().values()].filter(r => r.total > r.mentions.length && !r.n).map(r => `${r.q} ${r.label} ${r.total}/${r.mentions.length}`);
+  assert.deepEqual(bad.slice(0, 20), [], `${bad.length} records`);
+});
+
+// ---- Fix 6. Every entity with an article has its summary, or says why not (sweep 5a): 91 had none, brought in by
+// --only runs that fetched no summaries. --only now fetches them; the full build of 3 December fills the rest.
+const WAR_FOCUS_WITHOUT_SUMMARY = ['Q116385387', 'Q24255637', 'Q23641762', 'Q25303279', 'Q24291590', 'Q25242026', 'Q24083372', 'Q25242046'];
+test('committed lake: the War Focus battles brought in by --only have their summaries, or say why not', () => {
+  assert.doesNotMatch(text('lake/scripts/build.mjs'), /const needSummary = ONLY \? \[\]/, '--only fetches the summaries it lacks');
+  const all = lakeRecords(), bad = [];
+  for (const q of WAR_FOCUS_WITHOUT_SUMMARY) { const r = all.get(q); if (r && r.wiki && !r.summary && !r.ns) bad.push(`${q} ${r.label}`); }
+  assert.deepEqual(bad, []);
+});
+test('committed lake: every record with an article has its summary, or says why not (ns)', t => {
+  if (!afterFullBuild(t)) return;
+  const withArticle = [...lakeRecords().values()].filter(r => r.wiki), none = withArticle.filter(r => !r.summary);
+  assert.deepEqual(none.filter(r => !['redirect', 'disambiguation', 'empty', 'unfetched'].includes(r.ns)).map(r => r.q).slice(0, 20), []);
+  assert.ok(none.filter(r => r.ns === 'unfetched').length <= withArticle.length / 100, 'at most one in a hundred left for the next build to ask again');
+});
+
+// ---- Fix 7. Every Neo Book link opens a paragraph that marks the name (sweep 2a): four cast names the reader did not
+// mark (the Prince's Caesar, Scipio, Maximinus, Julian) linked to paragraphs with no tag.
+test('committed lake: every Neo Book link’s term is marked in the paragraph it opens', () => {
+  const books = new Map(), bad = [];
+  for (const r of lakeRecords().values()) for (const m of r.mentions) {
+    if (m.m !== 'neo-classic') continue;
+    const h = new URLSearchParams(new URL(m.u).hash.slice(1)), slug = h.get('book');
+    if (!books.has(slug)) books.set(slug, read(`bibliotheca/data/books/${slug}.json`));
+    const p = books.get(slug).chapters.find(c => c.n === +h.get('ch'))?.paragraphs.find(x => x.id === h.get('p'));
+    if (!p?.terms?.some(t => t.qid === h.get('t'))) bad.push(`${r.q} ${r.label}: ${slug} ${h.get('p')}`);
+  }
+  assert.deepEqual(bad, []);
+});
+
+// ---- Fix 9. Names (sweep 3b to 3e).
+test('names: a person’s shown name drops the realm after a regnal number or a comma title; the label stays for matching', () => {
+  const shown = resolveFns.shownName;
+  for (const [label, want] of [['Frederik X of Denmark', 'Frederik X'], ['Albert II, Prince of Monaco', 'Albert II'], ['Louis XII of France', 'Louis XII'],
+    ['Guillaume V, Grand Duke of Luxembourg', 'Guillaume V'], ['Baudouin I of Belgium', 'Baudouin I'], ['Alexander I of Yugoslavia', 'Alexander I'],
+    ['Catherine of Aragon', 'Catherine of Aragon'], ['John of Gaunt', 'John of Gaunt'], ['William Thomson, 1st Baron Kelvin', 'William Thomson, 1st Baron Kelvin'],
+    ['Pope Alexander VI', 'Pope Alexander VI'], ['Ptolemy I Soter', 'Ptolemy I Soter']]) assert.equal(shown(label, 'person'), want, label);
+  assert.equal(shown('Louis XII of France', 'place'), 'Louis XII of France', 'persons only');
+  assert.equal(shown('Kingdom of France', 'place'), 'Kingdom of France');
+});
+// The second reader (F1, 16 November 2026): the short name made two entries one ("Albert II" for Q3910, Albert II,
+// Prince of Monaco, and Q3911, Albert II of Belgium) and gave some eighteen kings a name Wikipedia keeps with its realm
+// because it is ambiguous (Ferdinand II of Aragon, Charles VIII of France). The short name is shown only where it is the
+// entry's Wikipedia title (Wikipedia has judged it plain: "Frederik X", "Louis XII"), or, with no article, where no
+// other entry would be shown by it; the Wikipedia title stays among the names a search finds.
+test('names: the short name only where it is Wikipedia’s own title, or no other entry’s; never two entries one name', () => {
+  const shown = resolveFns.shownName;
+  assert.equal(shown('Frederik X of Denmark', 'person', { title: 'Frederik X' }), 'Frederik X', 'Wikipedia’s title');
+  assert.equal(shown('Louis XII of France', 'person', { title: 'Louis XII' }), 'Louis XII');
+  assert.equal(shown('Ferdinand II of Aragon', 'person', { title: 'Ferdinand II of Aragon' }), 'Ferdinand II of Aragon', 'Wikipedia keeps the realm');
+  assert.equal(shown('Albert II, Prince of Monaco', 'person', { title: 'Albert II, Prince of Monaco' }), 'Albert II, Prince of Monaco');
+  assert.equal(shown('Rainier III, Prince of Monaco', 'person', { title: 'Rainier III of Monaco' }), 'Rainier III, Prince of Monaco');
+  // No article: the short name, unless another entry would show the same (uniqueNames, after every record is made).
+  const recs = new Map([
+    ['Q3910', { q: 'Q3910', label: 'Albert II, Prince of Monaco', name: 'Albert II', type: 'person' }],
+    ['Q3911', { q: 'Q3911', label: 'Albert II of Belgium', name: 'Albert II', type: 'person' }],
+    ['Q7', { q: 'Q7', label: 'Zog I of Albania', name: 'Zog I', type: 'person' }],
+    ['Q8', { q: 'Q8', label: 'Haakon VII of Norway', name: 'Haakon VII', type: 'person' }],
+    ['Q9', { q: 'Q9', label: 'Haakon VII', type: 'ship' }],
+  ]);
+  assert.deepEqual(resolveFns.uniqueNames(recs).sort(), ['Q3910', 'Q3911', 'Q8']);
+  assert.deepEqual([...recs.values()].map(r => r.name || r.label), ['Albert II, Prince of Monaco', 'Albert II of Belgium', 'Zog I', 'Haakon VII of Norway', 'Haakon VII']);
+  // Wikipedia's title is kept as a name a search finds where it is neither the label nor the shown name.
+  assert.deepEqual(resolveFns.titleAlias(['Rainier Louis Henri Maxence Bertrand Grimaldi'], { label: 'Rainier III, Prince of Monaco', title: 'Rainier III of Monaco', type: 'person' }), ['Rainier Louis Henri Maxence Bertrand Grimaldi', 'Rainier III of Monaco']);
+  assert.deepEqual(resolveFns.titleAlias(['Frederik X of Denmark'], { label: 'Frederik X of Denmark', name: 'Frederik X', title: 'Frederik X', type: 'person' }), ['Frederik X of Denmark']);
+  assert.deepEqual(resolveFns.titleAlias([], { label: 'Kingdom of France', title: 'Kingdom of France (987–1792)', type: 'place' }), [], 'persons only');
+  assert.deepEqual(resolveFns.titleAlias(['R.Br.'], { label: 'Robert Brown', title: 'Robert Brown (botanist, born 1773)', type: 'person' }), ['R.Br.'], 'no bracketed title');
+  assert.deepEqual(resolveFns.titleAlias([], { label: 'Nabis', title: 'Nabis of Sparta', type: 'person' }), ['Nabis of Sparta']);
+  // The build applies both (build.mjs), and the page's "Also" line leaves out a name the heading already shows.
+  assert.match(text('lake/scripts/build.mjs'), /uniqueNames\(records\)/);
+  assert.match(text('encyclopedia/index.html'), /\.filter\(a => a !== shownAs\)/);
+});
+// Binds on the data as committed: every build, --only included, applies uniqueNames to all the records it writes.
+test('committed lake: no two entries share a shown name the rule made', () => {
+  const by = new Map();
+  for (const r of lakeRecords().values()) for (const n of new Set([r.name || r.label])) (by.get(n) || by.set(n, []).get(n)).push(r);
+  const bad = [...by.entries()].filter(([, rs]) => rs.length > 1 && rs.some(r => r.name)).map(([n, rs]) => `${n}: ${rs.map(r => r.q).join(', ')}`);
+  assert.deepEqual(bad, []);
+});
+test('names: no English label falls back to the article’s title, the multilingual label, a module’s name, the last build’s, another language; never a QID while there is a name', () => {
+  const label = resolveFns.entityLabel;
+  assert.equal(label({ id: 'Q1', labels: { en: { value: 'English' }, mul: { value: 'Mul' } } }, { title: 'Title' }), 'English');
+  assert.equal(label({ id: 'Q1', labels: { mul: { value: 'Frisinnade folkpartiet' } } }, { title: 'Liberal Party (Sweden)' }), 'Liberal Party (Sweden)', 'the article’s title before the multilingual label, as before');
+  assert.equal(label({ id: 'Q4887122', labels: { mul: { value: 'Frisinnade folkpartiet' } } }), 'Frisinnade folkpartiet');
+  assert.equal(label({ id: 'Q1', labels: {} }, { names: ['Q1', 'Party of the Nation'] }), 'Party of the Nation', 'a module’s name, never its QID');
+  assert.equal(label({ id: 'Q12876078', labels: {} }, { names: ['Q12876078'], other: 'Κόμμα' }), 'Κόμμα');
+  assert.equal(label({ id: 'Q9', labels: {} }), 'Q9');
+  assert.equal(resolveFns.otherLabel({ el: { value: 'Κόμμα' }, de: { value: 'Partei' } }), 'Partei', 'a Latin-script language first');
+});
+test('names: a Retrospective event that opens with a QID names the leader, in the lake and the calendar alike', () => {
+  const leaders = [{ name: 'Sunak', full: 'Rishi Sunak', start: '2022-10-25' }, { name: 'Truss', full: 'Liz Truss', start: '2022-09-06' }];
+  assert.equal(resolveFns.leaderText('Q20055561 takes power', leaders, '2022-10-25'), 'Rishi Sunak takes power');
+  assert.equal(resolveFns.leaderText('Q20055561 takes power', leaders, '1999-01-01'), 'Q20055561 takes power', 'no leader that day: as it was');
+  assert.equal(resolveFns.leaderText('Sunak takes power', leaders, '2022-10-25'), 'Sunak takes power');
+  assert.match(text('calendar/scripts/build-events.mjs'), /const text = leaderText\(e\.text, c\.leaders, e\.date\);/, 'the calendar builds its titles from it');
+  // The Retrospective adapter, on the Retrospective's own data where it is checked out beside this repository.
+  const retroDir = join(ROOT, '../hp-retrospective');
+  if (!existsSync(join(retroDir, 'data/countries.json'))) return;
+  return retrospective({ retroDir }).then(ms => {
+    assert.deepEqual(ms.filter(m => /(^|: )Q[1-9]\d* /.test(m.context)).map(m => m.context), [], 'no context names a QID');
+    // A party the Retrospective links to Wikidata (no English article) is keyed by that ID, so it has its mention.
+    assert.ok(ms.some(m => m.key.qid === 'Q12876078' && /^Party of /.test(m.context)), 'the Greek party named Q12876078 there');
+  });
+});
+test('committed lake: no label or shown name is a bare QID, and no shown person name ends in its realm', t => {
+  if (!afterFullBuild(t)) return;
+  const bad = [], names = new Set([...lakeRecords().values()].flatMap(r => [r.label, r.name].filter(Boolean)));
+  for (const r of lakeRecords().values()) {
+    if (resolveFns.isQid(r.name || r.label)) bad.push(`${r.q}: named ${r.name || r.label}`);
+    // A realm stays where Wikipedia's own title keeps it, or the short name would be another entry's (F1 above).
+    const short = resolveFns.shownName(r.label, r.type, { title: r.wiki });
+    if (r.type === 'person' && !r.name && short !== r.label && !names.has(short)) bad.push(`${r.q}: shown as ${r.label}`);
+    for (const m of r.mentions) if (/(^|: )Q[1-9]\d* /.test(m.c)) bad.push(`${r.q}: "${m.c}"`);
+  }
+  assert.deepEqual(bad, []);
+});
+
+// ---- Fix 10. What "Appears in Vitruvian Manager · N" counts (sweep 2c; Jude, 15 November 2026, BI-19 and MI-10): the
+// places the entry appears in, a book being one; each line follows module, submodule, then the submodule's place, and
+// a book's line says how many times and where the name occurs.
+test('page: the header counts the places the card lists, under registry.json’s module and submodule names', () => {
+  const src = text('encyclopedia/index.html');
+  assert.match(src, /const places = e\.places \?\? e\.mentions\.length;/);
+  assert.match(src, /<h3>Appears in Vitruvian Manager · \$\{places\.toLocaleString\('en-GB'\)\}<\/h3>/);
+  const SUITE = constant('encyclopedia/index.html', 'MODULE_SUITE'), SUITE_NAME = constant('encyclopedia/index.html', 'SUITE_NAME'), PLACE = constant('encyclopedia/index.html', 'PLACE_NAME');
+  const suites = new Map(registry.suites.map(s => [s.id, s.name])), problems = [];
+  for (const [m] of declared) {
+    if (PLACE[m] !== SUBMODULE.get(m)?.name) problems.push(`${m}: PLACE_NAME "${PLACE[m]}", registry.json "${SUBMODULE.get(m)?.name}"`);
+    if (SUITE_NAME[SUITE[m]] !== suites.get(SUITE[m])) problems.push(`${m}: its module ${SUITE[m]} is "${SUITE_NAME[SUITE[m]]}", registry.json "${suites.get(SUITE[m])}"`);
+  }
+  assert.deepEqual(problems, []);
+  // On the committed data: İsmet İnönü's total counts five mentions given at two places; his header says 2.
+  const inonu = lakeRecords().get('Q183297');
+  assert.equal(inonu.places ?? inonu.mentions.length, new Set(inonu.mentions.map(m => m.m + m.u)).size);
+  // Kept beyond the 300-place cap only (build.mjs), and right where it is kept.
+  for (const r of lakeRecords().values()) if (r.places !== undefined) assert.ok(r.mentions.length >= 300 && r.places > r.mentions.length, r.q);
+});
+test('committed lake: every book line says where in the book, its chapters’ times adding up to the line’s', () => {
+  const bad = [];
+  let lines = 0;
+  for (const r of lakeRecords().values()) for (const m of r.mentions) {
+    if (m.m !== 'neo-classic') continue;
+    lines++;
+    const times = +(m.c.match(/, (\d+) times?, as /) || [])[1];
+    const sum = (m.w || []).reduce((s, w) => s + w[2], 0);
+    if (!m.w?.length || sum !== times || !m.w.every(([ch, p, n]) => Number.isInteger(ch) && /^c\d{2,}-[a-z]\d+/.test(p) && n > 0)) bad.push(`${r.q} ${r.label}: "${m.c}" ${JSON.stringify(m.w)}`);
+  }
+  assert.ok(lines > 500, `${lines} book lines`);
+  assert.deepEqual(bad.slice(0, 10), [], `${bad.length} lines`);
+  // The Duchy of Milan: one place, The Prince, its chapters.
+  const milan = lakeRecords().get('Q153529'), inPrince = milan.mentions.find(x => x.m === 'neo-classic' && x.u.includes('#book=the-prince&'));
+  assert.ok(inPrince.w.length > 1 && inPrince.w.every(([ch, p]) => p.startsWith(`c${String(ch).padStart(2, '0')}-`)), JSON.stringify(inPrince.w));
+});
+// The War Focus rule in the lake (RV-05 A1): an event listed with its parts gives the figure War Focus shows for it.
+test('committed lake: War Focus’s atomic bombings read as War Focus counts them, each death once', () => {
+  const all = lakeRecords(), at = (q, war) => all.get(q).mentions.find(m => m.m === 'war-focus' && m.u.includes(`#war=${war}`))?.c;
+  // The lines expected, from War Focus's data by its own rule (figures.mjs), not written in (the second reader, WF2-08
+  // and F4: an edit on Wikidata would otherwise stop the refresh), with a late count's year on its share alone (WF2-01).
+  const ww2 = read('battlefield/focus/data/wars/ww2.json'), g = groupBattles(ww2.battles).byQ;
+  for (const q of ['Q488', 'Q703203', 'Q4382340']) assert.equal(at(q, 'ww2'), `Part of World War II; ${figureText(g.get(q))}`, q);
+  assert.match(at('Q488', 'ww2'), /the sum of its parts' recorded figures, counted in \d{4} \(a late count, which can include later deaths\)$/);
+  // The Japan Campaign: the year goes with the share counted in it, never with the whole sum (Okinawa's is no 2013 count).
+  const japan = g.get('Q709352');
+  if (japan?.fig && japan.late.length && japan.late.reduce((s, [, v]) => s + v, 0) < japan.fig) {
+    assert.equal(at('Q709352', 'ww2'), `Part of World War II; ${figureText(japan)}`);
+    assert.match(at('Q709352', 'ww2'), /; [\d,]+ of them counted in \d{4} \(a late count/);
+  }
+});
+
 /* ---------------------------------------------------------------- the page */
 const BASE = (process.env.JDPI_URL || '').replace(/\/$/, '');
 test('page: framed as in the shell, an entry opens its Kino, National Analysis and Volatility appearances there, and Volatility opens the entry', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
@@ -394,13 +761,15 @@ test('page: framed as in the shell, an entry opens its Kino, National Analysis a
   const ghana = await entry('Q117');
   assert.deepEqual(ghana['National Analysis']?.map(a => [a.href, a.target]), [[route('rt', 'pestle', 'q/national.html#country=GHA'), '_top']], JSON.stringify(ghana));
   assert.deepEqual(ghana['Geopolitical Volatility']?.map(a => a.href), [route('rt', 'volatility', 'q/volatility.html#country=GHA')]);
-  assert.deepEqual(ghana['Kino · Geopolitical Events']?.map(a => [a.href, a.text]),
+  // Each submodule under its module, by registry.json's names (MI-10): Kino's "Geopolitical Events" under "Kino".
+  assert.deepEqual(ghana['Geopolitical Events']?.map(a => [a.href, a.text]),
     [[route('kino', 'kino-geopolitical-events', 'kino/index.html?cat=geopolitical-events#doc=end-of-empire-in-africa&s=legacy'), 'The End of Empire in Africa, 1951–1980']]);
   const borgia = await entry('Q187998');
-  assert.deepEqual(borgia['Kino · Great Thinkers']?.map(a => a.href), [route('kino', 'kino-great-thinkers', 'kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli&s=cesare-borgia')], JSON.stringify(borgia));
-  assert.ok(borgia.Bibliotheca?.length, 'and his Bibliotheca appearance beside it');
-  // Bibliotheca is a module of its own (November 2026): the book opens in its reader, Neo Book, there.
-  for (const a of borgia.Bibliotheca) assert.ok(a.href.startsWith(`${BASE}/#/bibliotheca/neo-classic?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=`)}`), a.href);
+  assert.deepEqual(borgia['Great Thinkers']?.map(a => a.href), [route('kino', 'kino-great-thinkers', 'kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli&s=cesare-borgia')], JSON.stringify(borgia));
+  assert.ok(borgia['Neo Book']?.length, 'and his Bibliotheca appearance (its reader, Neo Book) beside it');
+  // Bibliotheca is a module of its own (November 2026): the book opens in its reader, Neo Book, there; so does each of
+  // the chapters its line lists.
+  for (const a of borgia['Neo Book']) assert.ok(a.href.startsWith(`${BASE}/#/bibliotheca/neo-classic?at=${encodeURIComponent(`${BASE}/bibliotheca/neo/index.html#book=`)}`), a.href);
   // And back: a Volatility country's Master Index button opens its entry (#Q117), not the Explorer.
   await page.goto(`${BASE}/q/volatility.html#country=GHA`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   const button = page.locator('#profile a', { hasText: 'Master Index' });
@@ -458,6 +827,41 @@ test('page: Alexander the Great’s facts read 356 BC and 323 BC, and the Duchy 
   await facts('Q153529');
   const card = await page.$eval('#entity .card:has(.group, .note) h3', h => h.closest('.card').innerText);
   assert.doesNotMatch(card, /· 0\b|Not mentioned directly/, card);
-  assert.match(card, /Bibliotheca[\s\S]*Named in The Prince \(Niccolò Machiavelli, 1532\), \d+ times, as Milan/, card);
+  // Under its module (shown in capitals) and submodule, Neo Book (MI-10).
+  assert.match(card, /BIBLIOTHECA\s+Neo Book[\s\S]*Named in The Prince \(Niccolò Machiavelli, 1532\), \d+ times, as Milan/, card);
+  assert.deepEqual(errors, []);
+});
+
+// MI-10's fix 10 on the page: the header counts places (a book is one), each line reads module, submodule, then the
+// submodule's place, and a book's line lists the chapters the name occurs in, each opening the book there.
+test('page: the Duchy of Milan appears in one place, Bibliotheca · Neo Book · The Prince, with the chapters it is named in', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
+  const browser = await launch();
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const card = async q => {
+    await page.goto(`${BASE}/encyclopedia/index.html#${q}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#entity .ehead h2', { timeout: 30000 });
+    return page.$eval('#entity .card:has(.group, .note) h3', h => {
+      const c = h.closest('.card');
+      return { head: h.textContent, suites: [...c.querySelectorAll('.suite')].map(s => [s.querySelector('.sname')?.textContent, [...s.querySelectorAll('.group h4')].map(x => x.firstChild.textContent)]),
+        chapters: [...c.querySelectorAll('.inbook a')].map(a => [a.textContent, new URL(a.href).hash]) };
+    });
+  };
+  const milan = await card('Q153529'), lake = read(`lake/data/e/${153529 % 512}.json`).Q153529;
+  assert.equal(milan.head, `Appears in Vitruvian Manager · ${lake.mentions.length}`);
+  assert.deepEqual(milan.suites.find(([s]) => s === 'Bibliotheca'), ['Bibliotheca', ['Neo Book']], JSON.stringify(milan.suites));
+  const w = lake.mentions.find(m => m.m === 'neo-classic').w;
+  assert.equal(milan.chapters.length, w.length, 'a link for each chapter it is named in');
+  for (const [[label, hash], [ch, p, n, heading]] of milan.chapters.map((c, i) => [c, w[i]])) {
+    assert.equal(label, `${heading || `Chapter ${ch}`}${n > 1 ? ` (${n})` : ''}`);
+    assert.match(hash, new RegExp(`#book=the-prince&ch=${ch}&p=${p}&t=Q153529$`));
+  }
+  // İsmet İnönü: five mentions given at two places; the header counts the places.
+  const inonu = await card('Q183297'), r = read(`lake/data/e/${183297 % 512}.json`).Q183297;
+  assert.equal(inonu.head, `Appears in Vitruvian Manager · ${r.mentions.length}`);
+  assert.ok(r.total > r.mentions.length, 'more mentions than places');
+  assert.ok(inonu.suites.every(([s, subs]) => s && subs.length), JSON.stringify(inonu.suites));
   assert.deepEqual(errors, []);
 });

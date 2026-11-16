@@ -26,7 +26,9 @@ const INVESTORS = [
   { cik: 1656456, person: 'David Tepper', fund: 'Appaloosa Management', style: 'Distressed debt and opportunistic equities' },
   { cik: 1029160, person: 'George Soros', fund: 'Soros Fund Management', style: 'Global macro' },
   { cik: 1040273, person: 'Dan Loeb', fund: 'Third Point', style: 'Event-driven and activist' },
-  { cik: 1489933, person: 'David Einhorn', fund: 'Greenlight Capital (files as DME Capital Management)', style: 'Value and short selling' },
+  // `wiki`: the English Wikipedia article where the name alone is a disambiguation page (the Master Index keys the
+  // investor by it, lake/scripts/adapters.mjs, traders).
+  { cik: 1489933, person: 'David Einhorn', wiki: 'David Einhorn (hedge fund manager)', fund: 'Greenlight Capital (files as DME Capital Management)', style: 'Value and short selling' },
   { cik: 921669, person: 'Carl Icahn', fund: 'Icahn Capital', style: 'Activist investing' },
 ];
 

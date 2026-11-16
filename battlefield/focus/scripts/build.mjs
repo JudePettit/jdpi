@@ -17,7 +17,8 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
-import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle } from './rules.mjs';
+import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
+import { linkParts, ownDeaths, groupBattles } from '../figures.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
@@ -29,7 +30,8 @@ const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.arg
 const CACHE = arg('--cache') || join(tmpdir(), 'warfocus-src');
 const ONLY = arg('--only')?.split(',');
 mkdirSync(CACHE, { recursive: true });
-const UA = { 'User-Agent': 'JDP-I War Focus (https://jdpi.pages.dev; research use)' };
+const UA = { 'User-Agent': process.env.VM_UA || 'JDP-I War Focus (https://jdpi.pages.dev; research use)' };
+const pause = ms => new Promise(res => setTimeout(res, ms));
 
 async function download(url, file) {
   const path = join(CACHE, file);
@@ -64,11 +66,16 @@ async function* csvRows(path) {
 }
 
 // ---- Wikidata
+// A second before each query, so a war's queries do not arrive at once.
 async function sparql(query) {
   for (let i = 0; i < 4; i++) {
+    await pause(1000);
     const r = await fetch('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(query), { headers: { ...UA, Accept: 'application/sparql-results+json' } });
-    if (r.ok) return (await r.json()).results.bindings;
-    await new Promise(res => setTimeout(res, 5000 * (i + 1)));
+    // A query that runs out of time after its answer has begun comes back 200 with the error text inside the JSON (16
+    // November 2026, the Second World War's battles): asked again, after the same wait as a refusal.
+    if (r.ok) { try { return JSON.parse(await r.text()).results.bindings; } catch { console.log(`  SPARQL answer cut short: waiting ${5 * (i + 1)} s`); await pause(5000 * (i + 1)); continue; } }
+    console.log(`  SPARQL ${r.status}: waiting ${5 * (i + 1)} s`);
+    await pause(5000 * (i + 1));
   }
   throw new Error('SPARQL failed');
 }
@@ -109,7 +116,7 @@ async function partsOf(qid, span, theatre) {
     const e = (t.end.length ? t.end : t.start.length ? [] : point).map(x => wdDate(x.v, x.p, true)).filter(Boolean).sort().at(-1) || null;
     dates.set(q, { s, e });
   }
-  return partsWithin(edges, dates, qid, span, { places, ...theatre });
+  return { within: partsWithin(edges, dates, qid, span, { places, ...theatre }), edges };
 }
 // English Wikipedia's lead sections (wikitext), 50 articles a request: Map title → wikitext, through redirects.
 async function leads(titles) {
@@ -126,29 +133,56 @@ async function leads(titles) {
   }
   return out;
 }
+// Each item's recorded deaths (P1120) as statements, with the date a figure was counted (its P585), at the rank the
+// truthy value has (preferred where there is one, else normal, never deprecated); and its "has part(s)" (P527), so a
+// whole and its parts are linked when only the whole names them. Asked of the war's battles by their ids, 250 at a
+// time: asked through the war's P361 tree, as the other queries are, Wikidata's query service times out on it.
+// Casualties (P1590) as statements too, with their "statement is subject of" (P805), since a figure about something
+// else is no casualty count (rules.mjs casualtiesOf: the atomic bombings' 201,779 hibakusha are living survivors).
+// Its places (P625, best rank) here too: asked with the battles through the P361 tree, the Second World War's answer
+// ran past the query service's minute (16 November 2026), as each extra place multiplies an item's rows.
+async function deathsAndParts(qids) {
+  const rows = [];
+  for (let i = 0; i < qids.length; i += 250) rows.push(...await sparql(`SELECT ?b ?k ?d ?rank ?at ?c ?crank ?about ?coord WHERE { VALUES ?b { ${qids.slice(i, i + 250).map(q => 'wd:' + q).join(' ')} }
+    { ?b wdt:P527 ?k } UNION { ?b p:P1120 ?s . ?s ps:P1120 ?d ; wikibase:rank ?rank . OPTIONAL { ?s pq:P585 ?at } }
+    UNION { ?b p:P1590 ?cs . ?cs ps:P1590 ?c ; wikibase:rank ?crank . OPTIONAL { ?cs pq:P805 ?about } } UNION { ?b wdt:P625 ?coord } }`));
+  const has = [], stmts = new Map(), casStmts = new Map(), coords = new Map();
+  const rank = v => (/Preferred/.test(v) ? 'preferred' : /Deprecated/.test(v) ? 'deprecated' : 'normal');
+  for (const r of rows) {
+    const b = r.b.value.split('/').pop();
+    if (r.k) has.push({ c: r.k.value.split('/').pop(), parent: b });
+    if (r.d && !/Deprecated/.test(r.rank.value)) (stmts.get(b) || stmts.set(b, []).get(b)).push({ v: +r.d.value, pref: /Preferred/.test(r.rank.value), at: r.at?.value.slice(0, 10) || null });
+    const m = r.coord?.value.match(/Point\(([-\d.]+) ([-\d.]+)\)/);
+    if (m) { const c = [+(+m[2]).toFixed(3), +(+m[1]).toFixed(3)], l = coords.get(b) || coords.set(b, []).get(b); if (!l.some(x => x[0] === c[0] && x[1] === c[1])) l.push(c); }
+    if (r.c) (casStmts.get(b) || casStmts.set(b, []).get(b)).push({ v: +r.c.value, rank: rank(r.crank.value), about: r.about?.value.split('/').pop() || null });
+  }
+  const deaths = new Map(), cas = new Map();
+  for (const [b, list] of stmts) { const best = list.some(s => s.pref) ? list.filter(s => s.pref) : list; deaths.set(b, best.filter(s => s.v > 0)); }
+  for (const [b, list] of casStmts) cas.set(b, casualtiesOf(list));
+  return { has, deaths, cas, coords };
+}
 async function battlesOf(qid, span, theatre) {
-  const within = await partsOf(qid, span, theatre);
-  const rows = await sparql(`SELECT ?b ?bLabel ?bDescription ?coord ?pt ?ptp ?st ?stp ?en ?enp ?deaths ?cas ?article WHERE {
+  const { within, edges } = await partsOf(qid, span, theatre);
+  const rows = await sparql(`SELECT ?b ?bLabel ?bDescription ?pt ?ptp ?st ?stp ?en ?enp ?article WHERE {
     ?b wdt:P361+ wd:${qid} .
     ?b wdt:P31/wdt:P279* ?type . VALUES ?type { ${BATTLE_TYPES} }
-    OPTIONAL { ?b wdt:P625 ?coord }
     ${DATES}
-    OPTIONAL { ?b wdt:P1120 ?deaths } OPTIONAL { ?b wdt:P1590 ?cas }
     OPTIONAL { ?article schema:about ?b ; schema:isPartOf <https://en.wikipedia.org/> }
     SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }`);
+  const { has, deaths, cas, coords } = await deathsAndParts([...new Set(rows.map(r => r.b.value.split('/').pop()))].filter(q => within.has(q)));
   const by = new Map();
   for (const r of rows) {
     const q = r.b.value.split('/').pop();
     if (!within.has(q)) continue; // reached only through a campaign outside the war (partsWithin)
-    const b = by.get(q) || { q, n: r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: 0, t: { start: [], end: [], point: [] } };
+    const b = by.get(q) || { q, n: r.bLabel?.value, desc: r.bDescription?.value || '', deaths: 0, cas: cas.get(q) || 0, t: { start: [], end: [], point: [] }, dvals: deaths.get(q) || [], coords: coords.get(q) || [] };
     if (b.n === q) continue; // no English label
-    const m = r.coord?.value.match(/Point\(([-\d.]+) ([-\d.]+)\)/);
-    if (m && b.lon == null) { b.lon = +(+m[1]).toFixed(3); b.lat = +(+m[2]).toFixed(3); }
     addTime(b.t.start, r.st, r.stp); addTime(b.t.end, r.en, r.enp); addTime(b.t.point, r.pt, r.ptp);
-    b.deaths = Math.max(b.deaths, +(r.deaths?.value || 0)); b.cas = Math.max(b.cas, +(r.cas?.value || 0));
     if (r.article) b.w = decodeURIComponent(r.article.value.split('/wiki/')[1]).replace(/_/g, ' ');
     by.set(q, b);
   }
+  // Every place it has (its best-ranked P625s): one picked the same whatever order Wikidata answers in (the first
+  // row's, as until November 2026, moved between runs), and a whole's again once its parts are known (wholesAndParts).
+  for (const b of by.values()) { const c = pickCoord(b.coords); if (c) { b.lat = c[0]; b.lon = c[1]; } }
   // Dates by battleDates (scripts/rules.mjs): Wikidata's precision kept, a decade alone no date (the battle is listed
   // as undated), an end before the start or after the war's end not drawn as a span. Then drop plans that were never
   // carried out.
@@ -171,7 +205,35 @@ async function battlesOf(qid, span, theatre) {
     if (d !== b) { Object.assign(b, d); conflicts++; }
   }
   if (long.length) console.log(`  ${long.length} ends checked against Wikipedia, ${conflicts} drawn to the article's earlier end`);
-  return kept;
+  return { battles: kept, edges: [...edges, ...has] };
+}
+// A whole and its parts (figures.mjs, RV-05 A1): the links between the war's own battles both ways (`up` on a part,
+// `upAlso` where it has another whole in the list, `parts` on the whole), and each item's own death figure: a figure
+// Wikidata gives a whole that is one of its parts' own is left to that part (`dv` keeps every figure recorded). A
+// figure counted over a year after the battle (the cities' registers of the atomic bombings' dead, counted to 2013)
+// keeps its date (`dAt`), so the page can say so.
+// A part with two wholes goes under the one whose recorded figure holds it, then whose dates hold it (linkParts, the
+// second reader's WF2-04). An item Wikidata places in several places is put at its first part's (pickCoord).
+function wholesAndParts(battles, edges, warId = '') {
+  const facts = new Map(battles.map(b => [b.q, { v: Math.max(0, ...b.dvals.map(s => s.v)), s: b.s || null, e: b.e || null }]));
+  const links = linkParts(battles.map(b => b.q), edges, facts), by = new Map(battles.map(b => [b.q, b]));
+  for (const b of battles) {
+    const parts = links.get(b.q).parts.map(q => by.get(q)).filter(p => p.lat != null && p.s).sort(byStart);
+    if (b.coords?.length > 1 && parts.length) { const c = pickCoord(b.coords, parts.map(p => [p.lat, p.lon])); b.lat = c[0]; b.lon = c[1]; }
+  }
+  for (const b of battles) {
+    const l = links.get(b.q), kids = [...edges.filter(x => x.parent === b.q && x.c !== b.q && by.has(x.c)).map(x => x.c)];
+    const partValues = new Set(kids.flatMap(k => by.get(k).dvals.map(s => s.v)));
+    const { deaths, dv } = ownDeaths(b.dvals.map(s => s.v), partValues);
+    b.deaths = deaths; b.dv = dv;
+    const at = deaths && b.dvals.filter(s => s.v === deaths).map(s => s.at).filter(Boolean).sort()[0];
+    const over = b.e || b.s || (b.dec != null ? `${b.dec + 9}-12-31` : null);
+    b.dAt = at && over && dayNo(at) - dayNo(over) > 366 ? at : null;
+    b.up = l.up; b.upAlso = l.upAlso; b.parts = l.parts;
+  }
+  // For review (WF2-03): a whole ranked by its own figure where its parts' add up to more, which says a part's figure
+  // is wrong or covers more than the whole does.
+  for (const n of groupBattles(battles).byQ.values()) if (n.from === 'own' && n.sum > n.fig) console.log(`  review ${warId}: ${n.b.q} ${n.b.n}: its own ${n.fig}, its parts' ${n.sum} (ranked by its own)`);
 }
 const dayNo = d => Date.parse(d + 'T00:00:00Z') / 864e5;
 
@@ -223,9 +285,10 @@ for (const w of wars) {
   const gws = [...new Set([...w.sides.a.gw || [], ...w.sides.b.gw || [], ...w.theatre || []].map(x => (Array.isArray(x) ? x[0] : x)))];
   const theatre = { points: ev.filter(e => isFinite(e.lat) && isFinite(e.lon)).map(e => [e.lon, e.lat]), states: gws.flatMap(gw => boxes.get(gw) || []) };
   // A battle dated only to its decade (u 'undated') is kept when the decade overlaps the war's years, and listed last.
-  const battles = qid ? (await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre))
-    .filter(b => (b.u === 'undated' ? decadeFits(b.dec, w.start, end) : b.s >= w.start.slice(0, 4) && b.s <= end)) : [];
-  battles.sort((a, b) => (!a.s || !b.s ? !a.s - !b.s : a.s < b.s ? -1 : 1));
+  const found = qid ? await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre) : { battles: [], edges: [] };
+  const battles = found.battles.filter(b => (b.u === 'undated' ? decadeFits(b.dec, w.start, end) : b.s >= w.start.slice(0, 4) && b.s <= end));
+  battles.sort(byStart);
+  wholesAndParts(battles, found.edges, w.id);
   const dated = battles.filter(b => b.s);
   // Each event's deaths by month: an event UCDP dates only to a period (date_prec above 1, a week, a month, a year) is
   // shared out over the days of its period that fall in the war (eventMonths, scripts/rules.mjs), not put on its first day.
@@ -298,7 +361,8 @@ for (const w of wars) {
     months, deaths, estimated, deathsSource: source, totalDeaths: total, covered, shared: shared.some(Boolean) ? shared : null,
     sides: { a: { label: w.sides.a.label, states: norm(w.sides.a) }, b: { label: w.sides.b.label, states: norm(w.sides.b) } },
     theatre: w.theatre || [], control: (w.control || []).map(([gw, side, from, to]) => ({ gw, side, from, to })),
-    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, w: art }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null, w: art || null })),
+    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
+      ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}) })),
     cells: cellsOut, top: topOut, events: ev.length,
   };
   pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);

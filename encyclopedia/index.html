@@ -76,7 +76,13 @@ main{min-width:0}
 .group h4{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 2px;color:var(--prp-text);font:600 13.5px var(--prp-font-ui)}.group h4 span{color:var(--prp-muted);font:500 11px var(--prp-font-mono)}
 .ment{padding:7px 0;border-top:1px solid var(--prp-line-soft);font-size:13px}.ment a{color:var(--prp-text);text-decoration:none}.ment a:hover{color:var(--prp-link);text-decoration:underline}
 .ment small{display:block;color:var(--prp-muted);font:11px var(--prp-font-mono)}
-.note{color:var(--prp-muted);font-size:12.5px}
+/* Appearances: the module, its submodule, then the submodule's own place (the book, the war, the country) */
+.suite{margin-bottom:18px}.suite:last-child{margin-bottom:0}
+.suite>.sname{margin:0 0 6px;color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono);letter-spacing:.06em;text-transform:uppercase}
+.suite .group{margin-left:10px;padding-left:10px;border-left:2px solid var(--prp-line-soft)}
+.inbook{margin-top:4px;color:var(--prp-text-2);font-size:12.5px;line-height:1.6;overflow-wrap:anywhere}.inbook a{color:var(--prp-link)!important}
+.inbook details{display:inline}.inbook summary{display:inline;cursor:pointer;color:var(--prp-link)}
+.note,.nosum{color:var(--prp-muted);font-size:12.5px}.nosum{margin:0}
 /* Pop-out */
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:var(--prp-scrim)}
 .mbox{position:relative;width:min(720px,100%);max-height:85vh;overflow:auto;padding:20px 22px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-lg);box-shadow:var(--prp-shadow-2);color:var(--prp-text-2)}
@@ -134,7 +140,7 @@ main{min-width:0}
 
   <footer class="prp-sources">
     <p><b>Sources.</b> Facts from <a href="https://www.wikidata.org" target="_blank" rel="noreferrer">Wikidata</a> (CC0). Summaries from <a href="https://en.wikipedia.org" target="_blank" rel="noreferrer">Wikipedia</a> (CC BY-SA 4.0; the text stays under that licence). Tags combine Wikidata facts with Vitruvian Manager's own tags, such as schools of thought.</p>
-    <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. Refreshed monthly.</p>
+    <p><b>Method.</b> Every submodule reports the people, places, wars, parties and ideas it mentions; each is matched to its Wikidata ID, given tags from its facts, and linked back to the exact place it appears. An entry’s “Appears in Vitruvian Manager” counts those places, by module and submodule; a book is one place, and its line says how many times and in which chapters the book names the entry. A person’s name is shown without the realm Wikidata adds after a regnal number (“Frederik X”, not “Frederik X of Denmark”); the full label is kept among the other names. Refreshed monthly.</p>
   </footer>
 </div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mbox"><button class="mclose" id="mclose" type="button" aria-label="Close">×</button><h2 id="mtitle"></h2><div id="mbody"></div></div></div>
@@ -170,6 +176,21 @@ const MODULE_NAME = {
   'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers',
 };
 const modName = m => MODULE_NAME[m] || idx?.modules?.[m] || m;
+// An entry's appearances read module, submodule, then the submodule's own place (Jude, 15 November 2026, BI-19 and
+// MI-10): "Bibliotheca", "Neo Book", then the book and where in it. The module and submodule names are registry.json's
+// (tests/master-index.test.mjs holds them to it); MODULE_NAME above stays the name the stored "Appears in" tags carry.
+const SUITE_NAME = { rt: 'Realtime Geopolitics', hb: 'Omni News', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', kino: 'Kino', bibliotheca: 'Bibliotheca' };
+const PLACE_NAME = {
+  volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', calendar: 'Realtime Calendar',
+  retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
+  traders: 'Auto Trader', learning: 'Learning · Finance & Economics', progress: 'Invention Timeline', 'neo-classic': 'Neo Book',
+  'kino-political-events': 'Political Events', 'kino-political-figures': 'Political Figures', 'kino-political-parties': 'Political Parties', 'kino-wars': 'Wars', 'kino-geopolitical-events': 'Geopolitical Events', 'kino-great-thinkers': 'Great Thinkers',
+};
+const placeName = m => PLACE_NAME[m] || modName(m);
+// Why an entry with a Wikipedia article shows no summary (lake/scripts/resolve.mjs summaryFor).
+// A redirect's target is often on the same subject ("intentional sitelink to redirect": Sicily (island)), so the note
+// says only what is so (the second reader, F3).
+const NO_SUMMARY = { redirect: 'No summary: Wikipedia has no article of its own under this title; it leads to another article.', disambiguation: 'No summary: Wikipedia’s page for this title lists several namesakes.', empty: 'No summary: Wikipedia gave no text for this article.', unfetched: 'No summary yet: Wikipedia could not be reached at the last build; the next one asks again.' };
 const FACET_ORDER = ['Type', 'Nationality', 'Role', 'School or tag', 'Political spectrum', 'Occupation', 'Field', 'Movement', 'Ideology', 'Party', 'Position held', 'Led', 'In power in', 'Conflict', 'Event type', 'Member of', 'Investment style', 'Century', 'Appears in'];
 const PAGE = 100;
 let idx, rows, tagFacet = [], tagValue = [], tagShown = [], byQid = new Map(), shown = PAGE, lastEntry = null;
@@ -368,29 +389,48 @@ async function renderEntity(q) {
   box.innerHTML = '<div class="empty">Loading…</div>';
   const e = await entity(q).catch(() => null);
   if (!e) { box.innerHTML = `<div class="prp-panel empty">No entry for ${esc(q)}. <a href="#explore">Back to the Explorer</a></div>`; setEntryTab(q, q); return; }
-  document.title = `${e.label} · Master Index · VM`;
-  setEntryTab(q, e.label);
+  // The shown name (a person's without the realm, lake/scripts/resolve.mjs shownName); the label stays among its names.
+  const name = e.name || e.label;
+  document.title = `${name} · Master Index · VM`;
+  setEntryTab(q, name);
   const tagIdOf = new Map(idx.tags.map((t, i) => [t, i]));
   const factRows = [['Born', 'born'], ['Died', 'died'], ['Founded', 'founded'], ['Dissolved', 'dissolved'], ['Began', 'start'], ['Ended', 'end'], ['Date', 'date']].filter(([, f]) => e.facts[f])
     .map(([k, f]) => `<dt>${k}</dt><dd>${esc(fmtDate(e.facts[f], e.fp?.[f], e.fc?.includes(f)))}</dd>`);
   const relRows = Object.entries(e.rel).map(([k, list]) => `<dt>${esc(k)}</dt><dd>${list.map(([rq, l]) => byQid.has(rq) ? `<a href="#${rq}">${esc(l)}</a>` : esc(l)).join(', ')}</dd>`);
-  // Group appearances by submodule; long lists open in a pop-out.
+  // Appearances by module, then submodule (registry.json's names), then each place the submodule gives: the book, the
+  // war, the country, the film, the lesson. Long lists open in a pop-out.
   const groups = new Map();
   for (const m of e.mentions) (groups.get(m.m) || groups.set(m.m, []).get(m.m)).push(m);
-  const ment = m => `<div class="ment">${linkHtml(m.m, m.u, esc(m.c))}<small>${m.d ? esc(fmtDate(m.d)) : ''}</small></div>`;
+  // A book's line says where in the book the reader marks the name: each chapter (its heading), with the times when
+  // more than once, linked to the first paragraph marked there (the lake's `w`, lake/scripts/adapters.mjs bibliotheca).
+  const inBook = m => {
+    if (!m.w?.length) return '';
+    const at = ([ch, p, n, heading]) => linkHtml(m.m, m.u.replace(/&ch=[^&]*&p=[^&]*/, `&ch=${ch}&p=${encodeURIComponent(p)}`), `${esc(heading || `Chapter ${ch}`)}${n > 1 ? ` (${n})` : ''}`);
+    const first = m.w.slice(0, 12).map(at).join(' · '), rest = m.w.slice(12);
+    return `<div class="inbook">Where in the book: ${first}${rest.length ? ` · <details><summary>${rest.length} more chapter${rest.length === 1 ? '' : 's'}</summary> ${rest.map(at).join(' · ')}</details>` : ''}</div>`;
+  };
+  const ment = m => `<div class="ment">${linkHtml(m.m, m.u, esc(m.c))}${inBook(m)}<small>${m.d ? esc(fmtDate(m.d)) : ''}</small></div>`;
   const popouts = [];
-  const groupHtml = [...groups].map(([mod, list]) => {
+  const groupOf = (mod, list) => {
     let more = '';
-    if (list.length > 6) { popouts.push({ title: `${e.label} in ${modName(mod)}`, html: list.map(ment).join('') }); more = `<button type="button" class="more" data-pop="${esc(popouts.length - 1)}">See more (${list.length - 6} more)</button>`; }
-    return `<div class="group"><h4>${esc(modName(mod))}<span>${list.length}</span></h4>${list.slice(0, 6).map(ment).join('')}${more}</div>`;
-  }).join('');
+    if (list.length > 6) { popouts.push({ title: `${name} in ${placeName(mod)}`, html: list.map(ment).join('') }); more = `<button type="button" class="more" data-pop="${esc(popouts.length - 1)}">See more (${list.length - 6} more)</button>`; }
+    return `<div class="group" data-module="${esc(mod)}"><h4>${esc(placeName(mod))}<span>${list.length}</span></h4>${list.slice(0, 6).map(ment).join('')}${more}</div>`;
+  };
+  const suites = new Map();
+  for (const [mod, list] of groups) { const s = MODULE_SUITE[mod] || ''; (suites.get(s) || suites.set(s, []).get(s)).push(groupOf(mod, list)); }
+  const groupHtml = [...suites].map(([s, html]) => `<div class="suite">${s ? `<p class="sname">${esc(SUITE_NAME[s] || s)}</p>` : ''}${html.join('')}</div>`).join('');
+  // The header counts places: a book is one place however often it names the entry (its line says how often and where).
+  const places = e.places ?? e.mentions.length;
+  // "Also" never repeats the name the heading shows (Ferdinand II of Aragon's alias "Ferdinand II", the second reader).
+  const shownAs = e.name || e.label;
+  const aliases = [...new Set(e.name && e.name !== e.label ? [e.label, ...e.aliases] : e.aliases)].filter(a => a !== shownAs);
   const img = e.img ? `<img src="https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(e.img)}?width=240" alt="" loading="lazy">` : '';
   box.innerHTML = `<div class="entity"><div>
-      <div class="ehead">${img}<div><p class="prp-label">${esc(tagValueOf(e.tags, 'Type') || e.type)}</p><h2>${esc(e.label)}</h2><div class="d">${esc(e.desc)}</div>
-        ${e.aliases.length ? `<div class="also">Also: ${esc(e.aliases.join(' · '))}</div>` : ''}</div></div>
-      <div class="card"><h3>Summary</h3><p class="summary">${esc(e.summary || 'No summary available.')}</p>
-        ${e.wiki ? `<p class="links"><button type="button" class="more" id="fullintro">See more</button><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a><a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
-      <div class="card"><h3>Appears in Vitruvian Manager · ${e.total.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
+      <div class="ehead">${img}<div><p class="prp-label">${esc(tagValueOf(e.tags, 'Type') || e.type)}</p><h2>${esc(name)}</h2><div class="d">${esc(e.desc)}</div>
+        ${aliases.length ? `<div class="also">Also: ${esc(aliases.join(' · '))}</div>` : ''}</div></div>
+      <div class="card"><h3>Summary</h3>${e.summary ? `<p class="summary">${esc(e.summary)}</p>` : `<p class="nosum">${esc(NO_SUMMARY[e.ns] || 'No summary available.')}</p>`}
+        ${e.wiki ? `<p class="links">${e.ns === 'redirect' || e.ns === 'disambiguation' ? '' : '<button type="button" class="more" id="fullintro">See more</button>'}<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(e.wiki.replace(/ /g, '_'))}" target="_blank" rel="noreferrer">Wikipedia ↗</a><a href="https://www.wikidata.org/wiki/${e.q}" target="_blank" rel="noreferrer">Wikidata ↗</a></p>` : ''}</div>
+      <div class="card"><h3>Appears in Vitruvian Manager · ${places.toLocaleString('en-GB')}</h3>${groupHtml || '<p class="note">Not mentioned directly; linked from related entries.</p>'}</div>
     </div><div>
       ${factRows.length || relRows.length ? `<div class="card"><h3>Facts</h3><dl class="facts">${factRows.join('')}${relRows.join('')}</dl></div>` : ''}
       <div class="card"><h3>Tags · select to filter</h3><div class="tags">${e.tags.filter(t => !t.startsWith('Appears in:')).map(t => tagIdOf.has(t) ? `<button type="button" class="chip" data-add="${esc(tagIdOf.get(t))}" title="${esc(t)}">${esc(t.split(':').slice(1).join(':'))}</button>` : '').join('')}</div></div>

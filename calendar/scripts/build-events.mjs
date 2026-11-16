@@ -28,6 +28,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { FOUGHT_IN } from '../../battlefield/scripts/history-fought.mjs';
 import { interstateName, parties, stateName } from '../../battlefield/scripts/ucdp.mjs';
+import { leaderText } from '../../lake/scripts/resolve.mjs';
 import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from './countries.mjs';
 import { currentEvents } from './current-events.mjs';
 import { listEvents } from './wiki-lists.mjs';
@@ -70,7 +71,10 @@ for (const c of Object.values(retro.countries)) {
     if ((type === 'election' || type === 'referendum') && e.date.endsWith('-01-01')) continue;
     // A new leader links to their own article and is named in full, not "Koller takes power".
     const leader = type === 'leader' || type === 'coup' ? (c.leaders.find(l => l.start === e.date && l.url && e.text.startsWith(l.name + ' ')) || c.leaders.find(l => l.start === e.date && l.url)) : null;
-    const title = repair(leader?.name && leader.full && e.text.startsWith(leader.name + ' ') ? leader.full + e.text.slice(leader.name.length) : e.text);
+    // A text that opens with a QID ("Q20055561 takes power": Wikidata had no label for the leader when the Retrospective
+    // was built) names the leader who took office that day (lake/scripts/resolve.mjs, as the Master Index does).
+    const text = leaderText(e.text, c.leaders, e.date);
+    const title = repair(leader?.name && leader.full && text.startsWith(leader.name + ' ') ? leader.full + text.slice(leader.name.length) : text);
     add({ date: e.date, country: c.name, title, type, status: 'declared', source: leader?.url || e.url || (c.yearPage ? wiki(`${e.date.slice(0, 4)} in ${c.yearPage}`) : null) }, 'retro');
   }
 }

@@ -412,6 +412,16 @@ export const SHELF = [
       Antiochus: 'Q3365',
       Braccio: 'Q896536',
       Naples: 'Q173065',
+      // Four the cast feeds by its count while the reader marked none of them, so their Master Index lines opened a
+      // paragraph with nothing marked (sweep MI-10, 2a): given names the cast keeps the book's ("local"), since they
+      // mean other men elsewhere. Scipio Africanus (chapters XIV and XVII), Maximinus Thrax and Didius Julianus (chapter
+      // XIX), and Julius Caesar (chapters XIV and XVI); chapter XIX's "title of Caesar" is the title his name became,
+      // left whole so that "Caesar" there is no term.
+      Scipio: 'Q2253',
+      Maximinus: 'Q1777',
+      Julian: 'Q1440',
+      Caesar: 'Q1048',
+      'title of Caesar': null,
     },
   },
   {

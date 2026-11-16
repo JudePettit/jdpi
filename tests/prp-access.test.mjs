@@ -487,7 +487,7 @@ test('page: the Political Briefing starts each column and the stream with a free
     sources: S, items: [it('nyt', 'Centre paid newest', 2), it('atlantic', 'Centre metered', 3), it('guardian', 'Left free older', 6), it('vox', 'Left paid newest', 2.5), it('intercept', 'Far left sign-up only', 4),
       it('telegraph', 'Right paid newest', 1.5), it('foxnews', 'Right free older', 5), it('unchecked', 'Far right unchecked', 7), it('nyt', 'Centre paid oldest', 9)].sort((x, y) => (x.p < y.p ? 1 : -1)) }; // newest first, as the store is
   for (const [width, dark] of [[1400, false], [1400, true], [360, false]]) {
-    const { page, errors } = await openWith(browser, 'q/briefing.html', { '**/briefing/data/latest.json': D }, { width, dark });
+    const { page, errors } = await openWith(browser, 'q/briefing.html#v=latest', { '**/briefing/data/latest.json': D }, { width, dark });
     await page.waitForSelector('.cols5 .col .story', { timeout: 20000 });
     const tops = await page.$$eval('.cols5 .col', cols => cols.map(c => [c.querySelector('h3 span').textContent, c.querySelector('.story a.t')?.textContent || '']));
     assert.deepEqual(tops, [['Far left', 'Far left sign-up only, Sign-up'], ['Left', 'Left free older'], ['Centre', 'Centre paid newest, Paywall'], ['Right', 'Right free older'], ['Far right', 'Far right unchecked']]);

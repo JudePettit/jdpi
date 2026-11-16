@@ -363,7 +363,7 @@
           },
           "host": "Vitruvian Manager",
           "url": "q/briefing.html",
-          "description": "Follow your topics across fifty publishers, ten each from the far left, left, centre, right and far right, side by side. Hard news only by default."
+          "description": "The top stories across fifty publishers, ten each from the far left, left, centre, right and far right, and each position's own top stories; then follow your topics side by side. Hard news only by default."
         },
         {
           "id": "science-briefing",

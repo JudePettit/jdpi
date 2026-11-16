@@ -290,9 +290,10 @@ export function inWindow(items, w, ref) {
  * the cost stays close to linear, and joined pairwise (union-find). A headline that joined a story through one other
  * and shares little with the rest of it is taken out again, so one headline about two stories does not join them.
  * Every item ends up in exactly one group (most are alone). Each group: { items, toks: [[keys]], tf, key: its main
- * terms, df/idf of the whole set }.
+ * terms, df/idf of the whole set }. With `attach` (buildModel's default), a second pass joins the smaller groups that
+ * word a story differently to it (attachSmall).
  */
-export function cluster(items, { threshold = 0.5, minShared = 2, keys = items.map(i => [...new Set(terms(i.t).map(w => w.k))]) } = {}) {
+export function cluster(items, { threshold = 0.5, minShared = 2, attach = false, keys = items.map(i => [...new Set(terms(i.t).map(w => w.k))]) } = {}) {
   const N = items.length;
   // Terms as numbers, each headline's sorted, so two headlines' shared terms are one merge of two short lists.
   const vocab = new Map(), names = [];
@@ -352,11 +353,61 @@ export function cluster(items, { threshold = 0.5, minShared = 2, keys = items.ma
     groups.push(make(keep));
     for (const n of out) groups.push(make([n]));
   }
+  const keyOf = g => [...g.tf].filter(([, c]) => g.items.length === 1 || c >= Math.max(2, g.items.length * 0.34))
+    .sort((a, b) => b[1] * idf(b[0]) - a[1] * idf(a[0]) || (a[0] < b[0] ? -1 : 1)).slice(0, 4).map(([k]) => k);
+  for (const g of groups) g.key = keyOf(g);
+  return { groups: attach ? attachSmall(groups, { df: k => df[vocab.get(k)] || 0, idf, make, keyOf }) : groups, idf, N };
+}
+
+/**
+ * The second pass (cluster's `attach`): headlines that word one story differently (as comment and the wires often do)
+ * share too few words to pass the first, and stand alone or in a smaller group beside it. A group (none of its
+ * headlines a research paper, whose title is not worded as news) joins a story of four headlines or more, and bigger
+ * than itself, when every one of its headlines carries that story's first main term and another of its main terms, one
+ * of the two the story's own (a third or more of the week's headlines with that term are in it: "Van Hollen" this week,
+ * not "Trump"), and is within a day of the story's first or last headline; never where a second story fits it nearly as
+ * well. Only whole groups join, and only into a bigger one, so this pass never joins two stories through one headline.
+ * The groups keep their order. Measured on a real week (8,941 headlines): about 400 groups join, and the build is no
+ * slower, as fewer groups follow.
+ */
+function attachSmall(groups, { df, idf, make, keyOf }) {
+  const SPAN = 24 * H;
+  const big = groups.filter(g => g.items.length >= 4);
+  for (const g of big) { const at = g.items.map(i => i.at).filter(Number.isFinite); g.lo = Math.min(...at); g.hi = Math.max(...at); }
+  const byTerm = new Map();
+  for (const g of big) for (const k of g.key) (byTerm.get(k) || byTerm.set(k, []).get(k)).push(g);
+  const into = new Map();
   for (const g of groups) {
-    g.key = [...g.tf].filter(([, c]) => g.items.length === 1 || c >= Math.max(2, g.items.length * 0.34))
-      .sort((a, b) => b[1] * idf(b[0]) - a[1] * idf(a[0]) || (a[0] < b[0] ? -1 : 1)).slice(0, 4).map(([k]) => k);
+    if (g.items.some(i => i.type === 'paper')) continue;
+    const cands = new Set();
+    for (const ks of g.toks) for (const k of ks) for (const t of byTerm.get(k) || []) if (t !== g && t.items.length > g.items.length) cands.add(t);
+    let best = null, first = 0, second = 0;
+    for (const t of cands) {
+      let score = 0;
+      for (let m = 0; m < g.items.length && score >= 0; m++) {
+        const ks = new Set(g.toks[m]), shared = t.key.filter(k => ks.has(k)), at = g.items[m].at;
+        const near = !Number.isFinite(at) || !Number.isFinite(t.lo) || (at >= t.lo - SPAN && at <= t.hi + SPAN);
+        score = shared.length >= 2 && ks.has(t.key[0]) && shared.some(k => (t.tf.get(k) || 0) * 3 >= df(k)) && near ? score + shared.reduce((a, k) => a + idf(k) ** 2, 0) : -1;
+      }
+      if (score <= 0) continue;
+      if (score > first) { second = first; first = score; best = t; } else if (score > second) second = score;
+    }
+    if (best && second < first * 0.75) into.set(g, best);
   }
-  return { groups, idf, N };
+  if (!into.size) return groups;
+  const root = g => { while (into.has(g)) g = into.get(g); return g; };
+  const joined = new Map();
+  for (const g of into.keys()) { const r = root(g); (joined.get(r) || joined.set(r, []).get(r)).push(g); }
+  const out = [];
+  for (const g of groups) {
+    if (into.has(g)) continue;
+    const more = joined.get(g);
+    if (!more) { out.push(g); continue; }
+    const m = make([g, ...more].flatMap(x => x.members));
+    m.key = keyOf(m);
+    out.push(m);
+  }
+  return out;
 }
 
 /* ---------------------------------------------------------------- how a term is written */
@@ -385,7 +436,7 @@ function formsTable() {
  * once, over the last seven days' hard news (the Political Briefing's sport, entertainment and lifestyle left out, as
  * its "Hard news only" does by default); each window then ranks them by its own headlines.
  */
-export function buildModel(stores, { now = Date.now(), savedTopics = null, access = null } = {}) {
+export function buildModel(stores, { now = Date.now(), savedTopics = null, access = null, attach = true } = {}) {
   const topics = topicsFrom(savedTopics);
   const briefings = BRIEFINGS.map((b, k) => normalise(b.key, stores[k], { topics, access }));
   const items = briefings.flatMap(x => x.items);
@@ -394,7 +445,7 @@ export function buildModel(stores, { now = Date.now(), savedTopics = null, acces
   const week = inWindow(items, '7d', ref).filter(i => !i.soft);
   const forms = formsTable();
   for (const i of week) { i.tm = terms(i.t); for (const w of i.tm) forms.add(w.k, w.f); }
-  const { groups, idf } = cluster(week, { keys: week.map(i => [...new Set(i.tm.map(w => w.k))]) });
+  const { groups, idf } = cluster(week, { attach, keys: week.map(i => [...new Set(i.tm.map(w => w.k))]) });
   groups.forEach((g, n) => { g.id = 's' + n; });
   const groupOf = new Map(groups.flatMap(g => g.items.map(i => [i.n, g])));
   return { ref, now, briefings, items, week, groups, groupOf, idf, forms, topics, days: weekDays(ref) };
@@ -424,7 +475,7 @@ function storyOf(model, g, win) {
   for (const i of ranked) {
     const had = byUrl.get(urlKey(i.u));
     if (had) { if (had.item.b !== i.b && !had.also.some(a => a.b === i.b)) had.also.push(i); continue; }
-    const e = { item: i, also: [] };
+    const e = { item: i, also: [], rank: entries.length }; // rank: its place by how typical it is of the story (0 the most)
     byUrl.set(urlKey(i.u), e); entries.push(e);
   }
   // Free sources lead: the most typical headline anyone can read, where one of the story's outlets is free.
@@ -624,6 +675,63 @@ function spread(model, items, stories) {
     left: leadFree(sided.filter(x => x.lean <= -0.5).sort((a, b) => a.lean - b.lean || b.s.publishers - a.s.publishers), free).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
     right: leadFree(sided.filter(x => x.lean >= 0.5).sort((a, b) => b.lean - a.lean || b.s.publishers - a.s.publishers), free).slice(0, 3).map(x => ({ ...x.s, lean: x.lean })),
   };
+}
+
+/* ---------------------------------------------------------------- the Political Briefing's top stories */
+/**
+ * The Political Briefing's top stories in a window ('24h', '3d' or '7d'; q/briefing.html, "Top stories", by way of
+ * tops-worker.js): this page's own stories (the same groups, from the same four stores, so the same headlines make the
+ * same story on both pages) that two or more of the Political Briefing's publishers ran in the window, each with its
+ * political headlines alone:
+ *   { id, order: the group's place (the last tie-break), publishers, positions: publishers per position (as the spread
+ *     table counts them), headlines: political headlines, first, last: its oldest and newest, key: its main terms, query:
+ *     what the Briefing's search box needs to show it, entries: [{ item, rank, alt }] }
+ * entries are the most typical first (rank, storyOf's order over the whole story), each not free to read with a free
+ * headline of the same story from another outlet, in any briefing, beside it (alt, freeAlt: never a guess). In the
+ * groups' order: rankTops ranks them.
+ */
+export function politicalTops(model, w = '3d') {
+  const win = new Set(inWindow(model.items, w, model.ref).filter(i => !i.soft).map(i => i.n));
+  const out = [];
+  model.groups.forEach((g, order) => {
+    if (g.items.length < 2) return;
+    const sids = new Set();
+    for (const i of g.items) if (i.b === 'political' && i.pos && win.has(i.n)) sids.add(i.sid);
+    if (sids.size < 2) return; // most groups: no need to build the story
+    const s = storyOf(model, g, win);
+    // An article two briefings carry is one entry: the Political Briefing's copy of it stands here.
+    const entries = s.entries.map(e => ({ item: [e.item, ...e.also].find(i => i.b === 'political'), rank: e.rank })).filter(e => e.item).sort((a, b) => a.rank - b.rank);
+    for (const e of entries) e.alt = freeAlt(model, e.item, s);
+    const at = entries.map(e => e.item.at);
+    out.push({ id: s.id, order, publishers: s.publishers, positions: s.positions, headlines: entries.length, first: Math.min(...at), last: Math.max(...at), key: s.key, query: s.query, entries });
+  });
+  return out;
+}
+
+/**
+ * Top stories ranked (politicalTops' stories, or the same shape from the worker), overall or for one position:
+ *   overall     two publishers or more; the most publishers first, then the most headlines, the newest headline, the
+ *               groups' order; led by the most typical headline anyone can read (the most typical, when none is free)
+ *   `position`  two or more of that position's publishers; the most of them first, then as above; led by that
+ *               position's own most typical free headline (its most typical, when none of its own is free)
+ * `keep(story)` keeps only some (the page's topic, publisher and search); the counts stay whole. Free sources lead: the
+ * first story with a free lead takes the top place. Each story comes back with { position, count: the publishers it is
+ * ranked by, lead, alt: a free headline beside a lead that is not free, free, others: the other headlines, one per
+ * other publisher newest first, then the rest newest first }.
+ */
+export function rankTops(stories, { position = null, keep = null } = {}) {
+  const p = POSITIONS.includes(position) ? position : null;
+  const own = s => (p ? s.positions[p] || 0 : s.publishers);
+  const list = stories.filter(s => own(s) >= 2 && (!keep || keep(s)))
+    .sort((a, b) => own(b) - own(a) || b.publishers - a.publishers || b.headlines - a.headlines || b.last - a.last || a.order - b.order);
+  const newest = (x, y) => y.item.at - x.item.at || x.rank - y.rank;
+  return leadFree(list.map(s => {
+    const mine = p ? s.entries.filter(e => e.item.pos === p) : s.entries;
+    const lead = mine.find(e => isFree(e.item)) || mine[0];
+    const seen = new Set([lead.item.sid]), rest = [], dupes = [];
+    for (const e of s.entries) if (e !== lead) (seen.has(e.item.sid) ? dupes : (seen.add(e.item.sid), rest)).push(e);
+    return { ...s, position: p, count: own(s), lead: lead.item, alt: lead.alt || null, free: isFree(lead.item), others: [...rest.sort(newest), ...dupes.sort(newest)] };
+  }), s => s.free);
 }
 
 /* ---------------------------------------------------------------- search */

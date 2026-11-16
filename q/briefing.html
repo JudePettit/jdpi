@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
 <title>Political Briefing · VM</title>
-<meta name="description" content="Follow your topics across fifty publishers, ten from each political position, side by side.">
+<meta name="description" content="The stories the most of fifty publishers ran, ten from each political position, overall and position by position, and your topics side by side.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>/* Apply the saved theme before first paint */try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="../design/prp.css">
@@ -32,9 +32,13 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .check input{width:15px;height:15px;margin:0;accent-color:var(--prp-primary)}
 .check small{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
 .layout{display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;align-items:start}
+.views{min-width:0}
+.linkbtn{padding:0;border:0;background:none;color:var(--prp-link);font:inherit;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:hover{text-decoration-thickness:2px}
 
 /* Topics */
 .topics-panel .prp-panel-head b{font-size:13.5px}
+.topicfold{display:none}
 .topic{display:flex;align-items:center;gap:6px;padding:7px 8px 7px 14px;border-bottom:1px solid var(--prp-line-soft);cursor:pointer}
 .topic:hover{background:var(--prp-surface-2)}
 .topic.on{background:var(--prp-accent-soft);box-shadow:inset 3px 0 var(--prp-accent)}
@@ -51,7 +55,69 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
 .form .actions{display:flex;gap:6px;margin-top:4px}.form .actions .danger{margin-left:auto}
 .hint{margin:0;padding:11px 14px 13px;color:var(--prp-muted);font-size:var(--prp-fs-sm);line-height:1.55}
 
-/* Stories */
+/* Top stories: the biggest political stories across the fifty publishers, then each position's own */
+.top-panel,.pos-panel{margin-bottom:16px}
+.top-panel .prp-panel-head,.pos-panel .prp-panel-head{padding:11px 14px;flex-wrap:wrap;gap:4px 12px}
+.top-panel .prp-panel-head h2,.pos-panel .prp-panel-head h2{margin:0;color:var(--prp-text);font:600 15px/1.3 var(--prp-font-ui)}
+.prp-panel-head .count{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.top-sub{margin:0;padding:10px 14px 12px;border-bottom:1px solid var(--prp-line-soft);color:var(--prp-text-2);font-size:13px;line-height:1.5}
+.tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.tcard{min-width:0;padding:13px 14px 14px;border-bottom:1px solid var(--prp-line-soft);border-right:1px solid var(--prp-line-soft)}
+.tgrid .tcard:nth-child(3n+1):not(.lead){border-right:0}
+.tcard.lead{grid-column:1/-1;border-right:0}
+.tc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.tc-meta .rank{color:var(--prp-text-2);font-weight:500}
+.tc-meta .own{display:inline-flex;align-items:center;gap:6px;color:var(--prp-text);font-weight:500}
+.tc-meta .own i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.tcard h3,.pcard h4{margin:6px 0 0;font:600 16px/1.33 var(--prp-font-serif)}
+.tcard.lead h3{font-size:22px;line-height:1.26}
+.pcard h4{font-size:14.5px;line-height:1.35}
+.tcard h3 a,.pcard h4 a,.tc-list a.h{color:var(--prp-text);text-decoration:none}
+.tcard h3 a:hover,.pcard h4 a:hover,.tc-list a.h:hover{color:var(--prp-link);text-decoration:underline;text-underline-offset:2px}
+.tc-src{margin:4px 0 0;color:var(--prp-muted);font:var(--prp-fs-xs)/1.45 var(--prp-font-mono)}
+.tc-pos{display:flex;flex-wrap:wrap;gap:3px 12px;margin:8px 0 0;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.tc-pos i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:2px;background:var(--c)}
+.tc-pos b{color:var(--prp-text);font-weight:500}
+.tc-pos .z,.tc-pos .z b{color:var(--prp-muted);font-weight:400}
+.tc-pos .z i{background:none;box-shadow:inset 0 0 0 1.5px var(--c)}
+.tc-pos .what{color:var(--prp-muted)}
+.tc-terms,.tc-all,.tc-none{margin:6px 0 0;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.5 var(--prp-font-mono)}
+.tc-none{font-family:var(--prp-font-ui);font-size:12.5px}
+.tc-list{margin:9px 0 0;padding:0;list-style:none;border-top:1px solid var(--prp-line-soft)}
+.tc-list li{padding:6px 0;border-bottom:1px solid var(--prp-line-soft);font-size:13px;line-height:1.45}
+.tc-list li:last-child{border-bottom:0}
+.tc-list .o{color:var(--prp-text-2);font-weight:600}
+.tc-list .pl{display:inline-flex;align-items:center;gap:4px;margin:0 6px 0 4px;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
+.tc-list .pl i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.tcard.lead .tc-list{columns:2;column-gap:24px}
+.tcard.lead .tc-list li{break-inside:avoid}
+.tcard details,.pcard details{margin-top:2px}
+.tcard summary{cursor:pointer;padding:6px 0 0;color:var(--prp-link);font-size:12.5px}
+.cmp{display:inline-block;margin-top:8px;color:var(--prp-link);font:500 12.5px var(--prp-font-ui)}
+.caution{margin-left:4px;color:var(--prp-warn)}
+.tmore{padding:12px 14px}
+.posswitch{display:none;margin:0;padding:10px 14px 4px;border:0;border-bottom:1px solid var(--prp-line-soft)}
+.posswitch legend{float:left;margin:0 10px 6px 0;padding:5px 0 0}
+.posswitch .opts{display:flex;flex-wrap:wrap;gap:6px}
+.posswitch label{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--prp-line);border-radius:99px;background:var(--prp-surface);color:var(--prp-text-2);font:500 12.5px var(--prp-font-ui);cursor:pointer}
+.posswitch label:has(input:checked){border-color:var(--prp-line-strong);background:var(--prp-surface-2);color:var(--prp-text)}
+.posswitch label:has(input:focus-visible){outline:2px solid var(--prp-focus);outline-offset:1px}
+.posswitch input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.posswitch i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.posswitch .n{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono);font-variant-numeric:tabular-nums}
+.poscols{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.poscol{min-width:0;border-right:1px solid var(--prp-line-soft)}.poscol:last-child{border-right:0}
+.poscol h3{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0;padding:9px 12px 7px;background:var(--prp-surface-2);border-bottom:2px solid var(--c);color:var(--prp-text);font:600 12.5px var(--prp-font-ui)}
+.poscol h3 span+span{color:var(--prp-muted);font:500 var(--prp-fs-xs) var(--prp-font-mono)}
+.poscol.marked h3{box-shadow:inset 0 3px var(--c)}
+.pcard{padding:10px 12px 11px;border-bottom:1px solid var(--prp-line-soft)}
+.pnote{margin:0;padding:10px 12px 12px;color:var(--prp-text-2);font-size:12.5px;line-height:1.5}
+.how{margin-bottom:16px}
+.how summary{padding:11px 14px;cursor:pointer;color:var(--prp-text);font:600 13.5px var(--prp-font-ui)}
+.how .prp-panel-body p{margin:0 0 8px;max-width:110ch;color:var(--prp-text-2);font-size:13px;line-height:1.55}
+.top-wait{padding:18px 14px;color:var(--prp-muted);font-size:13px}
+
+/* Latest */
 .stories-panel .prp-panel-head{padding:11px 14px}
 .stories-panel .prp-panel-head .count{color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}
 .posbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:12px 14px 0}
@@ -77,7 +143,6 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
 .story a.t:hover{color:var(--prp-link);text-decoration:underline;text-underline-offset:2px}
 .story small{display:block;margin-top:4px;color:var(--prp-muted);font:var(--prp-fs-xs)/1.45 var(--prp-font-mono)}
 .story p{margin:5px 0 0;color:var(--prp-text-2);font-size:12.5px;line-height:1.5}
-.caution{margin-left:4px;color:var(--prp-warn)}
 .ptag{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border:1px solid var(--prp-line);border-radius:99px;background:var(--prp-surface);color:var(--prp-text-2);font:500 11px var(--prp-font-ui);white-space:nowrap}
 .ptag i{width:7px;height:7px;border-radius:50%;background:var(--c)}
 .stream .story{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px}
@@ -91,56 +156,86 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
 .pub-note{margin:14px}
 .prp-sources p{margin:0 0 5px;max-width:110ch}
 
-@media(max-width:1200px){.cols5{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}.col{border-bottom:1px solid var(--prp-line)}}
-@media(max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}#topics{max-height:300px;overflow-y:auto}.stream .story{grid-template-columns:minmax(0,1fr);gap:6px}}
-@media(max-width:600px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}.toolbar .prp-select,.toolbar .prp-input[type=search]{flex:1 1 140px;width:auto;min-width:0}}
+@media(max-width:1200px){.cols5{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}.col{border-bottom:1px solid var(--prp-line)}
+  .tgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.tgrid .tcard:not(.lead){border-right:1px solid var(--prp-line-soft)}.tgrid .tcard:nth-child(2n+1):not(.lead){border-right:0}.tcard.lead .tc-list{columns:1}
+  .posswitch{display:block}.poscols{display:block}.poscol{border-right:0;border-bottom:0}.poscol:not(.chosen){display:none}}
+@media(max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}#topics{max-height:300px;overflow-y:auto}.stream .story{grid-template-columns:minmax(0,1fr);gap:6px}
+  .topicfold{display:flex;align-items:center;gap:6px;width:100%;padding:10px 14px;border:0;background:none;color:var(--prp-text);font:500 13px var(--prp-font-ui);text-align:left}
+  .topicfold b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.topicfold .chev{margin-left:auto;color:var(--prp-muted)}
+  .topics-panel.open .topicfold{border-bottom:1px solid var(--prp-line-soft)}.topics-panel:not(.open) .topicbody{display:none}}
+@media(max-width:600px){.wrap{padding:16px 16px 32px}.front .prp-meta span+span::before{display:none}.prp-title{font-size:26px}.toolbar .prp-select,.toolbar .prp-input[type=search]{flex:1 1 140px;width:auto;min-width:0}
+  .tgrid{grid-template-columns:minmax(0,1fr)}.tgrid .tcard:not(.lead){border-right:0}.tcard.lead h3{font-size:19px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="front">
-    <div class="prp-eyebrow">Highbrowse <span class="sep">·</span> Political Briefing</div>
+    <div class="prp-eyebrow">Omni News <span class="sep">·</span> Political Briefing</div>
     <h1 class="prp-title">Political Briefing</h1>
-    <p class="prp-dek">Follow your topics across fifty publishers, ten from each political position: far left, left, centre, right and far right. The balanced view lines the positions up side by side, so you can see how each covers the same story.</p>
+    <p class="prp-dek">Fifty publishers, ten from each political position: far left, left, centre, right and far right. Top stories ranks the stories the most of them ran, overall and position by position; Latest lines up each position’s newest headlines side by side; Publishers lists the catalogue.</p>
     <div class="prp-meta" id="meta" aria-live="polite">Loading stories…</div>
   </header>
 
   <nav class="prp-tabs" role="tablist" aria-label="Political Briefing views">
-    <button type="button" role="tab" id="tabbtn-stories" data-tab="stories" aria-controls="tab-stories" aria-selected="true" class="active">Stories</button>
+    <button type="button" role="tab" id="tabbtn-top" data-tab="top" aria-controls="tab-top" aria-selected="true" class="active">Top stories</button>
+    <button type="button" role="tab" id="tabbtn-stories" data-tab="latest" aria-controls="tab-stories" aria-selected="false" tabindex="-1">Latest</button>
     <button type="button" role="tab" id="tabbtn-publishers" data-tab="publishers" aria-controls="tab-publishers" aria-selected="false" tabindex="-1">Publishers</button>
   </nav>
 
-  <section id="tab-stories" role="tabpanel" aria-labelledby="tabbtn-stories">
+  <div id="storyviews">
     <div class="toolbar" role="group" aria-label="Story filters">
-      <select class="prp-select" id="view" aria-label="Layout"><option value="balanced">Balanced columns</option><option value="stream">Stream</option></select>
+      <select class="prp-select" id="view" aria-label="Layout" data-latest-only><option value="balanced">Balanced columns</option><option value="stream">Stream</option></select>
       <select class="prp-select" id="window" aria-label="Time window"><option value="24">Last 24 hours</option><option value="72" selected>Last 3 days</option><option value="168">Last 7 days</option></select>
       <select class="prp-select" id="publisher" aria-label="Publisher"><option value="">All publishers</option></select>
       <input class="prp-input" type="search" id="q" placeholder="Search headlines…" aria-label="Search headlines">
-      <label class="check" title="Hides sports results, celebrity and entertainment coverage, and lifestyle sections (advice, puzzles, food, fashion, travel, property, shopping). Stories about politics, laws, courts, business or money in those fields are kept."><input type="checkbox" id="hardnews" checked> Hard news only <small id="hiddencount"></small></label>
+      <label class="check" data-latest-only title="Hides sports results, celebrity and entertainment coverage, and lifestyle sections (advice, puzzles, food, fashion, travel, property, shopping). Stories about politics, laws, courts, business or money in those fields are kept."><input type="checkbox" id="hardnews" checked> Hard news only <small id="hiddencount"></small></label>
     </div>
     <div class="layout">
       <aside class="prp-panel topics-panel" aria-label="Topics">
-        <div class="prp-panel-head"><b>Topics</b><button type="button" class="prp-btn sm" id="addtopic">+ Topic</button></div>
-        <div class="form" id="topicform" hidden>
-          <label class="prp-label" for="tname">Name</label><input class="prp-input" type="text" id="tname" maxlength="60">
-          <label class="prp-label" for="tkeys">Keywords, comma-separated</label><textarea class="prp-input" id="tkeys" placeholder="Ukraine, Zelensky, Kyiv"></textarea>
-          <div class="actions"><button type="button" class="prp-btn sm primary" id="tsave">Save</button><button type="button" class="prp-btn sm ghost" id="tcancel">Cancel</button><button type="button" class="prp-btn sm danger" id="tdelete">Delete</button></div>
+        <button type="button" class="topicfold" id="topicfold" aria-expanded="false" aria-controls="topicbody">Topic: <b id="topicname">All stories</b><span class="chev" aria-hidden="true">▾</span></button>
+        <div class="topicbody" id="topicbody">
+          <div class="prp-panel-head"><b>Topics</b><button type="button" class="prp-btn sm" id="addtopic">+ Topic</button></div>
+          <div class="form" id="topicform" hidden>
+            <label class="prp-label" for="tname">Name</label><input class="prp-input" type="text" id="tname" maxlength="60">
+            <label class="prp-label" for="tkeys">Keywords, comma-separated</label><textarea class="prp-input" id="tkeys" placeholder="Ukraine, Zelensky, Kyiv"></textarea>
+            <div class="actions"><button type="button" class="prp-btn sm primary" id="tsave">Save</button><button type="button" class="prp-btn sm ghost" id="tcancel">Cancel</button><button type="button" class="prp-btn sm danger" id="tdelete">Delete</button></div>
+          </div>
+          <div id="topics"></div>
+          <p class="hint">Topics are stored in this browser only. Keywords match whole words; short capitalised ones such as “UN” or “AI” match case-sensitively.</p>
         </div>
-        <div id="topics"></div>
-        <p class="hint">Topics are stored in this browser only. Keywords match whole words; short capitalised ones such as “UN” or “AI” match case-sensitively.</p>
       </aside>
-      <main class="prp-panel stories-panel">
-        <div class="prp-panel-head"><b id="viewtitle">All stories</b><span class="count" id="viewcount" aria-live="polite"></span></div>
-        <div class="posbtns" id="posbtns" role="group" aria-label="Political positions shown"></div>
-        <figure class="prp-figure coverage">
-          <div class="meter" id="meter" role="img" aria-label="Share of stories by political position"></div>
-          <div class="meterkey" id="meterkey"></div>
-          <figcaption><b>Figure 1.</b> Coverage of the selected topic by political position: each position’s share of the stories shown. The positions are balanced by their numbers of publishers, not of stories, and neither is a balance of facts.</figcaption>
-        </figure>
-        <div id="out"></div>
+      <main class="views">
+        <section id="tab-top" role="tabpanel" aria-labelledby="tabbtn-top" aria-busy="true">
+          <section class="prp-panel top-panel" aria-labelledby="toptitle">
+            <div class="prp-panel-head"><h2 id="toptitle">Top stories · Last 3 days</h2><span class="count" id="topcount" aria-live="polite"></span></div>
+            <p class="top-sub">Ranked by how many publishers ran headlines Vitruvian Manager grouped as one story: a count, not a judgement of how important it is. Headlines that word a story differently may not be grouped, so a count can be lower than the coverage. <button type="button" class="linkbtn" data-how>How this is worked out ›</button> <button type="button" class="linkbtn" data-topos>Each position’s top stories ›</button></p>
+            <p class="top-sub top-lost" id="toplost" hidden></p>
+            <p class="top-wait" id="topstatus" role="status">Grouping this week’s headlines…</p>
+            <div id="topout"></div>
+          </section>
+          <section class="prp-panel pos-panel" aria-labelledby="h-pos" hidden>
+            <div class="prp-panel-head"><h2 id="h-pos" tabindex="-1">Each position’s top stories</h2><span class="count">ranked by that position’s own publishers</span></div>
+            <fieldset class="posswitch" id="posswitch"><legend class="prp-label">Position</legend><div class="opts" id="posopts"></div></fieldset>
+            <div class="poscols" id="poscols"></div>
+          </section>
+          <details class="prp-panel how" id="how" hidden><summary>How this is worked out</summary><div class="prp-panel-body" id="hownote"></div></details>
+        </section>
+        <section id="tab-stories" role="tabpanel" aria-labelledby="tabbtn-stories" hidden>
+          <div class="prp-panel stories-panel">
+            <div class="prp-panel-head"><b id="viewtitle" tabindex="-1">All stories</b><span class="count" id="viewcount" aria-live="polite"></span></div>
+            <p class="top-sub" id="storynote" hidden></p>
+            <div class="posbtns" id="posbtns" role="group" aria-label="Political positions shown"></div>
+            <figure class="prp-figure coverage">
+              <div class="meter" id="meter" role="img" aria-label="Share of stories by political position"></div>
+              <div class="meterkey" id="meterkey"></div>
+              <figcaption><b>Figure 1.</b> Coverage of the selected topic by political position: each position’s share of the stories shown. The positions are balanced by their numbers of publishers, not of stories, and neither is a balance of facts.</figcaption>
+            </figure>
+            <div id="out"></div>
+          </div>
+        </section>
       </main>
     </div>
-  </section>
+  </div>
 
   <section id="tab-publishers" role="tabpanel" aria-labelledby="tabbtn-publishers" hidden>
     <div class="prp-panel">
@@ -153,19 +248,23 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
 
   <footer class="prp-sources">
     <p><b>Sources.</b> RSS and Atom feeds from a catalogue of publishers balanced across five political positions, ten active per position with reserves; headlines link to the original articles.</p>
-    <p><b>Free sources lead.</b> Stories are newest first, except that the first story in the stream and in each position's column is from a publisher anyone can read wherever the list has one: a story only publishers behind a paywall or a sign-up carry never comes first, and keeps its place lower down. Links to those publishers are labelled “Paywall” or “Sign-up”. Each publisher's class, with the evidence and the day it was checked, is in <code>design/prp-access.json</code>; one that could not be checked counts as free. For the same story from a free publisher, open it in Highbrowse, which groups the briefings' headlines by story.</p>
+    <p><b>Top stories.</b> Headlines grouped as one story by Highbrowse’s own code, in your browser, from the four Omni News briefings’ stores, and counted by the Political Briefing’s publishers that ran them. A count of publishers, not a judgement of importance: the rule is under “How this is worked out”.</p>
+    <p><b>Free sources lead.</b> In Top stories, a story’s first headline is from a publisher anyone can read wherever one ran it, a story only publishers behind a paywall or a sign-up ran never comes first, and a labelled headline has the same story’s free headline beside it (“Free at …”) where the grouping found one. In Latest, stories are newest first, except that the first story in the stream and in each position’s column is from a free publisher wherever the list has one; a story only publishers behind a paywall or a sign-up carry never comes first, and keeps its place lower down. Links to those publishers are labelled “Paywall” or “Sign-up”. Each publisher’s class, with the evidence and the day it was checked, is in <code>design/prp-access.json</code>; one that could not be checked counts as free.</p>
     <p><b>Positions.</b> AllSides Media Bias Ratings where available, otherwise Media Bias/Fact Check, adjusted to five steps. They describe editorial slant, not accuracy; ⚠ marks outlets that Media Bias/Fact Check rates mixed or low for factual reliability.</p>
     <p><b>Refresh.</b> Twice a day; stories are kept for seven days. <b>Hard news only</b> hides sport results, celebrity and entertainment coverage and lifestyle sections, but keeps stories about politics, law, courts, business or money in those fields.</p>
-    <p><b>Privacy.</b> Your topics and filter choice are stored in this browser only.</p>
+    <p><b>Privacy.</b> Your topics, your filter choice and the position you last picked are stored in this browser only.</p>
   </footer>
 </div>
 <script>
 // Political Briefing (rebuilt from the Lovable app). Stories: ../briefing/data/latest.json, refreshed twice a day by
 // briefing/scripts/build.mjs from a catalogue balanced across five political positions. Topics live in localStorage.
-// The search box and the time window are in the address (#q=<words in a headline>&w=24h|3d|7d, and soft=1 to show sport,
-// entertainment and lifestyle on one visit), as on the other three briefings, so Highbrowse can open a story here: the
-// shell moves the frame by hash, and the page follows (see "deep links" below).
-const $ = s => document.querySelector(s);
+// Three views: Top stories (the stories the most publishers ran, grouped by Highbrowse's code: ../highbrowse/tops-worker.js
+// runs analysis.js's buildModel and politicalTops away from the main thread, and rankTops ranks them here), Latest (the
+// balanced columns and the stream) and Publishers. The search box, the time window and the view are in the address
+// (#q=<words in a headline>&w=24h|3d|7d&v=top|latest&p=<position>, and soft=1 to show sport, entertainment and lifestyle
+// on one visit), as on the other three briefings, so Highbrowse can open a story here: the shell moves the frame by hash,
+// and the page follows (see "deep links" below).
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const KEY = 'jdpi.briefing.topics.v1';
 const DEFAULT_TOPICS = [
@@ -185,6 +284,7 @@ let D, SRC = new Map(), topics = load(), current = null, editing = null, posOn =
 function load() { try { const t = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(t)) return t; } catch {} return DEFAULT_TOPICS; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(topics)); } catch {} }
 const num = n => n.toLocaleString('en-GB');
+const plural = (n, one, many = one + 's') => `${num(n)} ${n === 1 ? one : many}`;
 const posVar = k => `--c:var(--pos-${String(k).replace(/[^\w-]/g, '')})`; // the position's page token, for the mark only
 
 /* ---------- matching (whole words; short all-caps keywords are case-sensitive) ---------- */
@@ -215,17 +315,22 @@ function windowed() {
   return kept;
 }
 function renderTopics() {
-  const items = windowed();
-  $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><button type="button" class="n" aria-pressed="${current === null}"><b>All stories</b><small>Every story from all fifty publishers</small></button><span class="c">${num(items.length)}</span></div>` +
+  const items = windowed(), t = topics.find(x => x.id === current);
+  $('#topicname').textContent = t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
+  $('#topics').innerHTML = `<div class="topic ${current === null ? 'on' : ''}" data-id=""><button type="button" class="n" aria-pressed="${current === null}"><b>All stories</b><small>Every headline from all fifty publishers; the numbers count headlines</small></button><span class="c" title="Headlines in the window">${num(items.length)}<span class="prp-vh"> headlines</span></span></div>` +
     topics.map(t => `<div class="topic ${current === t.id ? 'on' : ''} ${t.paused ? 'paused' : ''}" data-id="${esc(t.id)}"><button type="button" class="n" aria-pressed="${current === t.id}"><b>${esc(t.name)}</b><small>${esc(t.keywords.join(', '))}</small></button>
-      <span class="c">${t.paused ? 'paused' : num(items.filter(i => matches(t, i)).length)}</span>
+      <span class="c" title="Headlines in the window">${t.paused ? 'paused' : num(items.filter(i => matches(t, i)).length) + '<span class="prp-vh"> headlines</span>'}</span>
       <button type="button" class="ib" data-pause="${esc(t.id)}" title="${t.paused ? 'Resume' : 'Pause'}" aria-label="${t.paused ? 'Resume' : 'Pause'} ${esc(t.name)}">${t.paused ? '▶' : '❚❚'}</button><button type="button" class="ib" data-edit="${esc(t.id)}" title="Edit" aria-label="Edit ${esc(t.name)}">✎</button></div>`).join('');
 }
 $('#topics').addEventListener('click', e => {
   const p = e.target.closest('[data-pause]'), ed = e.target.closest('[data-edit]'), row = e.target.closest('.topic');
-  if (p) { const t = topics.find(x => x.id === p.dataset.pause); t.paused = !t.paused; save(); renderTopics(); render(); return; }
+  if (p) { const t = topics.find(x => x.id === p.dataset.pause); t.paused = !t.paused; save(); renderTopics(); update(); return; }
   if (ed) { openForm(topics.find(x => x.id === ed.dataset.edit)); return; }
-  if (row) { current = row.dataset.id || null; renderTopics(); render(); }
+  if (row) {
+    current = row.dataset.id || null; STORY = null; renderTopics(); update();
+    // On a phone the fold closes on a pick, so the stories it keeps are in view, and the fold names the topic.
+    if ($('.topics-panel').classList.contains('open') && matchMedia('(max-width: 860px)').matches) { $('.topics-panel').classList.remove('open'); $('#topicfold').setAttribute('aria-expanded', 'false'); $('#topicfold').focus(); }
+  }
 });
 function openForm(t) { editing = t || null; $('#topicform').hidden = false; $('#tname').value = t?.name || ''; $('#tkeys').value = t?.keywords.join(', ') || ''; $('#tdelete').hidden = !t; $('#tname').focus(); }
 $('#addtopic').onclick = () => openForm(null);
@@ -234,19 +339,21 @@ $('#tsave').onclick = () => {
   const name = $('#tname').value.trim(), keywords = $('#tkeys').value.split(',').map(s => s.trim()).filter(Boolean);
   if (!name || !keywords.length) { $('#tkeys').focus(); return; }
   if (editing) Object.assign(editing, { name, keywords }); else { const t = { id: 'u' + Date.now().toString(36), name, keywords, paused: false }; topics.push(t); current = t.id; }
-  save(); $('#topicform').hidden = true; renderTopics(); render();
+  save(); $('#topicform').hidden = true; renderTopics(); update();
 };
-$('#tdelete').onclick = () => { if (!editing) return; topics = topics.filter(t => t !== editing); if (current === editing.id) current = null; save(); $('#topicform').hidden = true; renderTopics(); render(); };
+$('#tdelete').onclick = () => { if (!editing) return; topics = topics.filter(t => t !== editing); if (current === editing.id) current = null; save(); $('#topicform').hidden = true; renderTopics(); update(); };
+// On a phone the topics fold into one button ("Topic: All stories ▾"), so the stories come first.
+$('#topicfold').onclick = () => { const open = !$('.topics-panel').classList.contains('open'); $('.topics-panel').classList.toggle('open', open); $('#topicfold').setAttribute('aria-expanded', open); };
 
-/* ---------- stories ---------- */
+/* ---------- Latest: the balanced columns and the stream ---------- */
 const ago = iso => { const m = (Date.now() - Date.parse(iso)) / 6e4; return m < 60 ? Math.max(1, Math.round(m)) + 'm ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
 const posLabel = k => D.positions.find(p => p.key === k)?.label || k;
 const posTag = k => `<span class="ptag" style="${posVar(k)}"><i aria-hidden="true"></i>${esc(posLabel(k))}</span>`;
 const caution = '<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>';
 // Free sources lead (design/prp-access.js): each publisher's access class from design/prp-access.json; a link to one
 // that is not free to read carries a label, and the top of the stream and of each position's column is a story anyone
-// can read wherever the list has one (the rest keep their order, newest first). Stories stand alone here (the briefing
-// does not group one story across publishers), so no free copy is offered beside them; Highbrowse groups them.
+// can read wherever the list has one (the rest keep their order, newest first). Latest's stories stand alone (it does not
+// group one story across publishers), so no free copy is offered beside them there; Top stories groups them, and does.
 let ACC = null;
 const accOf = i => i._acc || (i._acc = ACC ? ACC.classify({ briefing: 'political', id: i.s, url: i.u }) : 'free');
 const freeFirst = list => PRPAccess.leadFree(list, i => PRPAccess.isFree(accOf(i)));
@@ -257,14 +364,25 @@ function storyHtml(i, showTag) {
   return `<div class="story">${showTag ? `<div>${posTag(s.position)}</div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(t)}${PRPAccess.label(accOf(i))}</a>
     <small>${esc(s.name)}${s.caution ? caution : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(d.slice(0, 180))}${d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
 }
-function filtered() {
+// The toolbar's publisher and search and the topic picked: whether one headline passes them (Latest shows those that
+// do; Top stories keeps the stories with one that does).
+function passes(i) {
   const q = $('#q').value.trim().toLowerCase(), pub = $('#publisher').value, t = topics.find(x => x.id === current);
-  return windowed().filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && (!pub || i.s === pub) && (!q || i.t.toLowerCase().includes(q)) && (!t || (!t.paused && matches(t, i))); });
+  return (!pub || i.s === pub) && (!q || i.t.toLowerCase().includes(q)) && (!t || (!t.paused && matches(t, i)));
+}
+// "Compare the positions": Latest on exactly one Top story's headlines (STORY: { id, urls, title, w }), not on whatever
+// its search words happen to find; the address keeps the search (#q), so a reload or a shared link still finds the story.
+let STORY = null, pendingStory = null;
+function filtered() {
+  if (STORY) return D.items.filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && STORY.urls.has(String(i.u)); });
+  return windowed().filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && passes(i); });
 }
 function render() {
   const list = filtered(), t = topics.find(x => x.id === current);
-  $('#viewtitle').textContent = t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
-  $('#viewcount').textContent = `${num(list.length)} ${list.length === 1 ? 'story' : 'stories'}`;
+  $('#viewtitle').textContent = STORY ? 'One story: ' + STORY.title : t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
+  $('#viewcount').textContent = `${num(list.length)} ${list.length === 1 ? 'headline' : 'headlines'}`;
+  $('#storynote').hidden = !STORY;
+  $('#storynote').innerHTML = STORY ? `The ${plural(STORY.urls.size, 'headline')} VM grouped as this story in ${esc(W_PHRASE[STORY.w])}, by the position of the publisher that ran each. <button type="button" class="linkbtn" data-allstories>Show all headlines ›</button>` : '';
   const by = Object.fromEntries(D.positions.map(p => [p.key, list.filter(i => SRC.get(i.s).position === p.key)]));
   const total = list.length || 1, pct = k => Math.round(by[k].length / total * 100);
   $('#meter').innerHTML = D.positions.filter(p => by[p.key].length).map(p => `<span style="width:${by[p.key].length / total * 100}%;${posVar(p.key)}" title="${esc(p.label)}: ${by[p.key].length}"></span>`).join('');
@@ -280,6 +398,201 @@ function render() {
   }
 }
 $('#out').addEventListener('click', e => { const m = e.target.closest('[data-more]'); if (m) { expanded.add(m.dataset.more); render(); } });
+$('#storynote').addEventListener('click', e => {
+  if (!e.target.closest('[data-allstories]')) return;
+  STORY = null; $('#q').value = ''; writeHash(); renderTopics(); update(); $('#viewtitle').focus();
+});
+
+/* ---------- Top stories ----------
+   Jude, 15 November 2026 (HL-08): "top stories" like Omni News, and the top stories of each of the five positions.
+   Highbrowse's own grouping, on the same four stores, so the same headlines make the same story on both pages: the
+   worker (../highbrowse/tops-worker.js) posts each window's stories with their political headlines, and rankTops
+   (../highbrowse/analysis.js, imported below) ranks them, overall and for each position, after the topic, publisher and
+   search have kept the stories with a headline that passes them. A count of publishers, never a judgement of importance:
+   the page says so beside the list and gives the rule in "How this is worked out". */
+const W_KEY = { 24: '24h', 72: '3d', 168: '7d' };
+const W_PHRASE = { '24h': 'the last 24 hours', '3d': 'the last 3 days', '7d': 'the last 7 days' };
+const W_TITLE = { '24h': 'Last 24 hours', '3d': 'Last 3 days', '7d': 'Last 7 days' };
+const wKey = () => W_KEY[$('#window').value] || '3d';
+// The stores the grouping reads beside this one, in Highbrowse's order (analysis.js, BRIEFINGS: political first).
+const OTHER_STORES = ['../science/briefing/data/stories.json', '../econ/briefing/data/stories.json', '../digital/briefing/data/stories.json'];
+const STORE_NAMES = { scientific: 'Scientific Briefing', economics: 'Economics Briefing', digital: 'Digital Briefing', political: 'Political Briefing' };
+const POS_KEY = 'jdpi.briefing.position';
+let TOPS = {}, RANK = null, TOPERR = '', TOPINFO = { now: null, ref: null, ms: {}, failed: [] }, BYURL = new Map();
+let topShown = 10, posMore = new Set(), chosen = null, addrPos = null, scrollToPos = false;
+const WORDS = ['no', 'one', 'two', 'three', 'four', 'five'];
+const adj = label => label.toLowerCase().replace(/\s+/g, '-'); // "Far left" → "far-left" (publishers)
+const http = u => /^https?:\/\//i.test(String(u || ''));
+const agoMs = ms => ago(new Date(ms).toISOString());
+// A headline at its publisher, in a new tab, with its access label inside the link; beside it, where one was grouped
+// with it, the same story's free headline ("Free at …").
+const headLink = (i, cls = '') => `<a${cls ? ` class="${cls}"` : ''} ${http(i.u) ? `href="${esc(i.u)}" target="_blank" rel="noopener"` : ''}>${esc(i.t)}${PRPAccess.label(i.acc)}</a>`;
+const altLink = a => (a ? ' ' + PRPAccess.altLink({ url: a.u, outlet: a.src, title: a.t }) : '');
+const srcLine = i => `<p class="tc-src">${esc(i.src)}${i.caution ? caution : ''} · ${esc(agoMs(i.at))}</p>`;
+// Each position's publishers that ran it, every position named beside its mark (none left out but `skip`).
+const posKey = (s, skip, what = 'Publishers by position:') => `<p class="tc-pos"><span class="what">${esc(what)}</span>${D.positions.filter(p => p.key !== skip).map(p => { const n = s.positions[p.key] || 0; return `<span class="${n ? '' : 'z'}" style="${posVar(p.key)}" data-pos="${esc(p.key)}"><i aria-hidden="true"></i>${esc(p.label)} <b>${num(n)}</b></span>`; }).join('')}</p>`;
+// "Compare the positions ›": Latest's balanced columns on the story (Highbrowse's link, #w=…&q=…). A hash link, so the
+// page follows it as it follows Highbrowse's, and Back returns here.
+// On this page it shows exactly the story's headlines (STORY); the address's search, for a reload or a link, is one its
+// lead contains, or the lead itself.
+const compareHref = s => '#' + new URLSearchParams({ w: wKey(), q: String(s.query && s.lead.t.toLowerCase().includes(s.query.toLowerCase()) ? s.query : s.lead.t).slice(0, 120) });
+const utc = ms => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
+let focusCmp = null; // the story whose "Compare" link takes the focus again on the way back
+const compare = s => `<a class="cmp" href="${esc(compareHref(s))}">Compare the positions<span class="prp-vh"> on this story</span> ›</a>`;
+const entryLi = e => `<li><span class="o">${esc(e.item.src)}</span>${e.item.caution ? caution : ''}<span class="pl" style="${posVar(e.item.pos)}"><i aria-hidden="true"></i>${esc(posLabel(e.item.pos))}</span>${headLink(e.item, 'h')}${altLink(e.alt)}</li>`;
+
+function topCard(s, k) {
+  const cut = k === 0 ? 5 : 3, shown = s.others.slice(0, cut), rest = s.others.slice(cut, 80);
+  return `<article class="tcard${k === 0 ? ' lead' : ''}" data-story="${esc(s.id)}">
+    <div class="tc-meta"><span class="rank">${k + 1}</span><span class="pubs">${plural(s.publishers, 'publisher')} · ${plural(s.headlines, 'headline')}</span></div>
+    <h3>${headLink(s.lead, 't')}${altLink(s.alt)}</h3>${srcLine(s.lead)}${posKey(s)}
+    ${s.key?.length ? `<p class="tc-terms"><span class="prp-vh">Its main terms: </span>${s.key.map(esc).join(' · ')}</p>` : ''}
+    ${shown.length ? `<ul class="tc-list">${shown.map(entryLi).join('')}</ul>` : ''}
+    ${rest.length ? `<details><summary>${plural(rest.length, 'more headline')}</summary><ul class="tc-list">${rest.map(entryLi).join('')}</ul></details>` : ''}
+    ${compare(s)}</article>`;
+}
+function posCard(s, k, p) {
+  // "None" is about the grouping, never about what the other publishers ran: a headline worded differently may sit apart.
+  const none = D.positions.every(x => x.key === p.key || !s.positions[x.key]);
+  return `<article class="pcard" data-story="${esc(s.id)}">
+    <div class="tc-meta"><span class="rank">${k + 1}</span><span class="own" style="${posVar(p.key)}"><i aria-hidden="true"></i>${esc(p.label)} · ${plural(s.count, 'publisher')}</span></div>
+    <h4>${headLink(s.lead, 't')}${altLink(s.alt)}</h4>${srcLine(s.lead)}
+    ${none ? '<p class="tc-none">No other position’s headlines were grouped with it.</p>' : posKey(s, p.key, 'Other positions’ publishers:')}
+    <p class="tc-all">${plural(s.publishers, 'publisher')} in all · ${plural(s.headlines, 'headline')}</p>${compare(s)}</article>`;
+}
+function posCol(p, list, filtering) {
+  const lim = posMore.has(p.key) ? list.length : 5, who = `two or more ${adj(p.label)} publishers`, when = W_PHRASE[wKey()];
+  const n = list.length, words = WORDS[n] || num(n);
+  // What VM grouped, not what the publishers ran: comment, which words a story its own way, may stand apart.
+  const note = !n
+    ? `<p class="pnote">VM grouped no story that ${who} ran in ${when}. Headlines worded differently, as comment often is, may not be grouped: <button type="button" class="linkbtn" data-latest-pos="${esc(p.key)}">its headlines are in Latest ›</button></p>`
+    : n < 5 ? `<p class="pnote">${filtering ? `Of the stories VM grouped that ${who} ran in ${when}, only ${words} ${n === 1 ? 'matches' : 'match'}.` : `VM grouped only ${words} ${n === 1 ? 'story' : 'stories'} that ${who} ran in ${when}.`}</p>` : '';
+  return `<section class="poscol${chosen === p.key ? ' chosen' : ''}${addrPos === p.key ? ' marked' : ''}" data-pos="${esc(p.key)}" aria-labelledby="ph-${esc(p.key)}">
+    <h3 id="ph-${esc(p.key)}" style="${posVar(p.key)}"><span>${esc(p.label)}</span><span>${plural(list.length, 'story', 'stories')}</span></h3>
+    ${list.slice(0, lim).map((s, k) => posCard(s, k, p)).join('')}${note}${list.length > lim ? `<button type="button" class="more" data-posmore="${esc(p.key)}">Show ${num(list.length - lim)} more</button>` : ''}</section>`;
+}
+// The note, with the window shown: the rule in plain words, which a reader can check against the public JSON.
+function howNote() {
+  const w = wKey(), lost = TOPINFO.failed.filter(k => k !== 'political').map(k => `the ${STORE_NAMES[k]}`);
+  const stale = TOPINFO.ref && TOPINFO.now && TOPINFO.now - TOPINFO.ref > 60e3;
+  return [
+    'Top stories are Vitruvian Manager’s count of the publishers whose headlines it grouped as one story, not a judgement of how important the story is.',
+    `Headlines are one story when they share enough words, rarer words counting for more; a smaller group of headlines that words the story differently joins it when each of its headlines has the story’s first main term and another of its main terms, one of them a term most used in that story, within a day of it. Headlines that word a story differently still may not be grouped, so a count can be lower than the coverage. The headlines of the last seven days in all four Omni News briefings are grouped once, by Highbrowse’s rule and code, run in your browser; the window you pick (now ${W_PHRASE[w]}) decides which of a story’s Political Briefing headlines are counted.${lost.length ? ` Just now ${lost.join(' and ')} could not be read, so the grouping is from the stores that could be, and a story may be grouped a little differently from Highbrowse’s until you reload.` : ''}`,
+    'Only the Political Briefing’s publishers are counted, and every publisher whose headline is in the window counts: a reserve that stepped in, or a publisher since dropped, for the headlines it ran. A story needs at least two publishers. Most publishers first; a tie goes to more headlines, then to the newer headline, then to the order VM found the stories in.',
+    'A position’s list counts only its own publishers, needs at least two of them, ranks by that number, then as above, and leads with one of its own headlines; a short list says so and is not filled. The five lists are worked out alike, in the order the data gives.',
+    'Sport, entertainment and lifestyle are left out, as the briefing’s own tagger sorts them, as Hard news only leaves them out. A topic, a publisher or a search keeps the stories with a headline that matches it; their counts stay whole.',
+    'Free sources lead: a story’s first headline is one anyone can read wherever one exists, a story only paywalled or sign-up publishers ran never comes first, and their headlines are labelled, with a free headline of the same story beside them where one was grouped with it.',
+    `Positions describe editorial slant, not accuracy. The headlines are in <code>briefing/data/latest.json</code> and the three other briefings’ <code>data/stories.json</code>, and the grouping can be checked against Highbrowse, which uses the same code${TOPINFO.now ? `; this list counts back from ${esc(utc(TOPINFO.ref || TOPINFO.now))} UTC, when it was worked out${stale ? ', the newest refresh, as the data is more than a day old' : ''}` : ''}.`,
+  ].map(p => `<p>${p}</p>`).join('');
+}
+// The wait, or why there is nothing: one short live line beside the list (never the cards themselves, which a screen
+// reader would read out whole on every keystroke); the positions and the note appear with the first list, below it, so
+// nothing the reader is looking at moves.
+function topStatus(msg, warn = false) {
+  const s = $('#topstatus');
+  s.hidden = !msg; s.textContent = msg || ''; s.className = warn ? 'prp-note warn top-warn' : 'top-wait';
+}
+const STORY_SHOWN = 'VM grouped'; // the counts say what was grouped, not what was published
+function renderTop() {
+  const w = D ? wKey() : '3d', list = TOPS[w];
+  $('#toptitle').textContent = `Top stories · ${W_TITLE[w]}`;
+  const ready = !!(D && list && RANK);
+  $('.pos-panel').hidden = !ready; $('#how').hidden = !ready;
+  if (!ready) {
+    $('#tab-top').setAttribute('aria-busy', TOPERR ? 'false' : 'true');
+    topStatus(TOPERR || 'Grouping this week’s headlines…', !!TOPERR);
+    $('#topout').innerHTML = ''; $('#poscols').innerHTML = ''; $('#topcount').textContent = '';
+    return;
+  }
+  $('#tab-top').setAttribute('aria-busy', 'false');
+  $('#hownote').innerHTML = howNote();
+  const lost = TOPINFO.failed.filter(k => k !== 'political').map(k => `the ${STORE_NAMES[k]}`);
+  $('#toplost').hidden = !lost.length;
+  $('#toplost').textContent = lost.length ? `Just now ${lost.join(' and ')} could not be read, so these groups may differ a little from Highbrowse’s.` : '';
+  const t = topics.find(x => x.id === current), q = $('#q').value.trim(), pub = $('#publisher').value;
+  const filtering = !!(t || q || pub);
+  const keep = filtering ? s => s.entries.some(e => { const i = BYURL.get(e.item.u); return !!i && passes(i); }) : null;
+  const all = RANK(list), shown = filtering ? RANK(list, { keep }) : all;
+  topStatus('');
+  $('#topcount').textContent = `${STORY_SHOWN} ${plural(all.length, 'story', 'stories')} that two publishers or more ran${filtering ? `; ${num(shown.length)} ${shown.length === 1 ? 'matches' : 'match'}` : ''}`;
+  const none = t?.paused ? 'This topic is paused.' : filtering ? `None of the stories VM grouped that two publishers or more ran in ${W_PHRASE[w]} matches.` : `VM grouped no story that two publishers or more ran in ${W_PHRASE[w]}.`;
+  $('#topout').innerHTML = shown.length
+    ? `<div class="tgrid">${shown.slice(0, topShown).map(topCard).join('')}</div>${shown.length > topShown ? `<div class="tmore"><button type="button" class="prp-btn sm" data-topmore>Show ${num(Math.min(10, shown.length - topShown))} more <span class="prp-muted">(${num(shown.length - topShown)} left)</span></button></div>` : ''}`
+    : `<p class="prp-empty">${none}</p>`;
+  const cols = D.positions.map(p => [p, RANK(list, { position: p.key, keep })]);
+  // A filter that leaves nothing at all: one sentence for the five, not five of the same.
+  $('#poscols').innerHTML = filtering && !shown.length ? `<p class="pnote">${none}</p>` : cols.map(([p, l]) => posCol(p, l, filtering)).join('');
+  renderSwitch(Object.fromEntries(cols.map(([p, l]) => [p.key, l.length])));
+  document.documentElement.dataset.tops = w; // for the tests: this window's top stories are on the page
+  if (scrollToPos && addrPos && !matchMedia(ONE_POS).matches) { scrollToPos = false; document.querySelector(`.poscol[data-pos="${addrPos}"]`)?.scrollIntoView({ block: 'nearest' }); }
+  if (focusCmp) { const a = document.querySelector(`#topout .tcard[data-story="${focusCmp}"] a.cmp`); focusCmp = null; if (a) a.focus({ preventScroll: true }); }
+}
+// Below this width the five positions are one at a time, with the switch (a 3 + 2 wrap would put three ahead of two).
+const ONE_POS = '(max-width: 1200px)';
+// The position switch: five native radio buttons, in the data's order, each with its number of stories; the address's
+// position, or the one last picked here, or the first.
+function renderSwitch(counts = {}) {
+  const had = document.activeElement?.name === 'topos' ? document.activeElement.value : null;
+  $('#posopts').innerHTML = D.positions.map(p => `<label style="${posVar(p.key)}"><input type="radio" name="topos" value="${esc(p.key)}"${chosen === p.key ? ' checked' : ''}><i aria-hidden="true"></i>${esc(p.label)}${p.key in counts ? ` <span class="n">${num(counts[p.key])}<span class="prp-vh"> ${counts[p.key] === 1 ? 'story' : 'stories'}</span></span>` : ''}</label>`).join('');
+  if (had) $(`#posopts input[value="${had}"]`)?.focus();
+}
+function choose(p, write) {
+  chosen = p;
+  $$('#posopts input').forEach(r => { r.checked = r.value === p; });
+  $$('#poscols .poscol').forEach(c => c.classList.toggle('chosen', c.dataset.pos === p));
+  if (write) { addrPos = p; $$('#poscols .poscol').forEach(c => c.classList.toggle('marked', c.dataset.pos === p)); try { localStorage.setItem(POS_KEY, p); } catch {} writeHash(); }
+}
+$('#posopts').addEventListener('change', e => { if (e.target.name === 'topos') choose(e.target.value, true); });
+$('#tab-top').addEventListener('click', e => {
+  const cmp = e.target.closest('a.cmp');
+  if (cmp && !(e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button)) { // the link goes on to its hash; first, what Back should put back, and the story Latest should show
+    const id = cmp.closest('[data-story]')?.dataset.story, s = (TOPS[wKey()] || []).find(x => x.id === id);
+    if (s && RANK) {
+      const lead = RANK([s])[0]?.lead || s.entries[0].item;
+      pendingStory = { id, urls: new Set(s.entries.map(x => String(x.item.u))), title: lead.t, w: wKey() };
+    }
+    try { history.replaceState({ ...(history.state || {}), back: { current, pub: $('#publisher').value, q: $('#q').value, posOn: [...posOn], y: scrollY, topShown, story: id } }, '', location.href); } catch {}
+    return;
+  }
+  if (e.target.closest('[data-topmore]')) { topShown += 10; renderTop(); $$('#topout .tcard')[topShown - 10]?.querySelector('h3 a')?.focus(); return; }
+  const m = e.target.closest('[data-posmore]');
+  if (m) { posMore.add(m.dataset.posmore); renderTop(); return; }
+  const l = e.target.closest('[data-latest-pos]');
+  if (l) { // that position's headlines, newest first, in Latest
+    posOn = new Set([l.dataset.latestPos]); STORY = null;
+    $$('#posbtns [data-pos]').forEach(b => { const on = posOn.has(b.dataset.pos); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    setTab('latest', true); render(); $('#tabbtn-stories').focus();
+    return;
+  }
+  if (e.target.closest('[data-topos]')) { $('.pos-panel').scrollIntoView({ block: 'start' }); ($('#posopts input:checked') && matchMedia(ONE_POS).matches ? $('#posopts input:checked') : $('#h-pos')).focus({ preventScroll: true }); return; }
+  if (e.target.closest('[data-how]')) { const d = $('#how'); d.open = true; d.scrollIntoView({ block: 'start' }); d.querySelector('summary').focus({ preventScroll: true }); }
+});
+// The grouping: the four stores' text and the access table go to the worker; each window comes back as it is done (the
+// one shown first). Without a module worker, the same code runs here, after the first paint. It starts when Top stories
+// is first shown, or a few seconds after a page opened on Latest or Publishers (a Highbrowse story link) has settled, so
+// a view the reader did not open never holds up the one they did.
+let TOPSRC = null, topsStarted = false;
+const startTopsNow = () => { if (TOPSRC && !topsStarted) { topsStarted = true; startTops(...TOPSRC); } };
+function startTops(polText, accDoc) {
+  import('../highbrowse/analysis.js').then(m => { RANK = m.rankTops; renderTop(); }, e => { TOPERR = 'Top stories could not be worked out just now: ' + e.message; renderTop(); });
+  Promise.all(OTHER_STORES.map(u => fetch(u).then(r => (r.ok ? r.text() : null)).catch(() => null))).then(texts => {
+    const msg = { stores: [polText, ...texts], access: accDoc, now: Date.now(), first: wKey() };
+    TOPINFO.now = msg.now;
+    let got = 0;
+    const take = m => {
+      if (m.error) { if (!got) { TOPERR = 'Top stories could not be worked out just now: ' + m.error; renderTop(); } return; }
+      got++; TOPS[m.w] = m.tops; TOPINFO.ref = m.ref; TOPINFO.failed = m.failed; TOPINFO.ms[m.w] = m.ms;
+      if (m.w === wKey()) renderTop();
+    };
+    const here = () => setTimeout(() => import('../highbrowse/tops-worker.js').then(x => x.topsOf(msg, take)).catch(e => take({ error: e.message })), 30);
+    let worker = null;
+    try { worker = new Worker('../highbrowse/tops-worker.js', { type: 'module' }); } catch { worker = null; }
+    if (!worker) { here(); return; }
+    worker.onmessage = e => { take(e.data); if (got === 3 || e.data.error) worker.terminate(); };
+    worker.onerror = e => { e.preventDefault?.(); worker.terminate(); if (!got) here(); };
+    worker.postMessage(msg);
+  });
+}
 
 /* ---------- publishers tab ---------- */
 function renderSources() {
@@ -302,40 +615,66 @@ function balanceNote(d) {
   return `Equal numbers of publishers are not equal numbers of stories: ${spread}. Nor are they a balance of facts: the briefing counts and sorts headlines by their publishers' slant, and does not check what any story says.`;
 }
 
-/* ---------- deep links: #q=…&w=…&soft=1 (the window's hash names are the other briefings': 24h, 3d, 7d) ----------
+/* ---------- deep links: #q=…&w=…&soft=1&v=…&p=… (the window's hash names are the other briefings': 24h, 3d, 7d) ----------
    The address says what the page shows, as on the other three briefings: the search (#q, within a headline), the
-   window (#w; three days when it is left out) and soft=1, which shows sport, entertainment and lifestyle on this visit
-   (the saved Hard news only choice is the default, and is not changed). A move by hash (the shell's, for a Highbrowse
-   link) opens on exactly that: it also puts back All stories, every publisher and all five positions, so a topic or a
-   filter picked here before cannot hide the story it names, and a link without a search clears the old one. */
+   window (#w; three days when it is left out), soft=1, which shows sport, entertainment and lifestyle on this visit
+   (the saved Hard news only choice is the default, and is not changed), the view (#v=top or latest: without it, an
+   address with a search opens Latest, as Highbrowse's story links expect, and any other Top stories; it is written only
+   when it is not that default) and the position (#p: the one the phone's switch shows, marked on a wide screen). A move
+   by hash (the shell's, for a Highbrowse link, or "Compare the positions") opens on exactly that: it also puts back All
+   stories, every publisher and all five positions, so a topic or a filter picked here before cannot hide the story it
+   names, a link without a search clears the old one, and it leaves the Publishers tab for the view it names. */
 const W_HASH = { '24h': '24', '3d': '72', '7d': '168' };
 const savedHard = () => { try { return localStorage.getItem(SOFT_KEY) !== '0'; } catch { return true; } };
+let storyView = 'top';
+const hashParams = () => new URLSearchParams(location.hash.replace(/^#\/?/, ''));
+function viewOf(p) { const v = (p.get('v') || '').toLowerCase(); return v === 'top' ? 'top' : v === 'latest' || v === 'stories' ? 'latest' : p.get('q') ? 'latest' : 'top'; }
 function readHash(moved) {
-  const p = new URLSearchParams(location.hash.replace(/^#\/?/, ''));
+  const p = hashParams();
   $('#q').value = (p.get('q') || '').slice(0, 120);
   $('#window').value = W_HASH[(p.get('w') || '').toLowerCase()] || '72';
   $('#hardnews').checked = /^(1|true|yes)$/i.test(p.get('soft') || '') ? false : savedHard();
+  storyView = viewOf(p);
+  const pos = (p.get('p') || '').toLowerCase();
+  addrPos = D.positions.some(x => x.key === pos) ? pos : null;
+  if (addrPos) { chosen = addrPos; scrollToPos = true; }
   if (!moved) return;
   current = null; $('#publisher').value = ''; posOn = new Set(D.positions.map(x => x.key));
   $('#posbtns').querySelectorAll('[data-pos]').forEach(b => { b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); });
+  topShown = 10;
 }
 function writeHash() {
   const p = new URLSearchParams(), q = $('#q').value.trim(), w = Object.keys(W_HASH).find(k => W_HASH[k] === $('#window').value);
+  if (storyView !== (q ? 'latest' : 'top')) p.set('v', storyView);
   if (w && w !== '3d') p.set('w', w);
   if (q) p.set('q', q);
   if (!$('#hardnews').checked && savedHard()) p.set('soft', '1'); // shown on this visit only, so the address says so
+  if (addrPos) p.set('p', addrPos);
   const h = p.toString() ? '#' + p.toString() : '';
   if (h !== location.hash) history.replaceState(history.state, '', h || location.pathname + location.search);
 }
 
-/* ---------- tabs (?tab=publishers links to the catalogue) ---------- */
+/* ---------- tabs: Top stories, Latest, Publishers (?tab=publishers, or ?tab=sources, links to the catalogue) ---------- */
 const tabs = [...document.querySelectorAll('.prp-tabs [role=tab]')];
+let tab = 'top';
 function setTab(t, write) {
   if (t === 'sources') t = 'publishers';
-  if (!tabs.some(b => b.dataset.tab === t)) t = 'stories';
+  if (t === 'stories') t = 'latest';
+  if (!tabs.some(b => b.dataset.tab === t)) t = storyView;
+  tab = t;
+  if (t !== 'publishers') storyView = t;
   tabs.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
-  $('#tab-stories').hidden = t !== 'stories'; $('#tab-publishers').hidden = t !== 'publishers';
-  if (write) { const u = new URL(location.href); if (t === 'stories') u.searchParams.delete('tab'); else u.searchParams.set('tab', t); history.replaceState(history.state, '', u); }
+  $('#storyviews').hidden = t === 'publishers'; $('#tab-publishers').hidden = t !== 'publishers';
+  $('#tab-top').hidden = t !== 'top'; $('#tab-stories').hidden = t !== 'latest';
+  // The layout and Hard news only are Latest's (Top stories are always hard news, and show all five positions).
+  $$('[data-latest-only]').forEach(el => { el.hidden = t !== 'latest'; });
+  if (t === 'top') startTopsNow();
+  if (write) {
+    const u = new URL(location.href);
+    if (t === 'publishers') u.searchParams.set('tab', t); else u.searchParams.delete('tab');
+    history.replaceState(history.state, '', u);
+    if (t !== 'publishers' && D) writeHash();
+  }
 }
 tabs.forEach(b => b.onclick = () => setTab(b.dataset.tab, true));
 $('.prp-tabs').addEventListener('keydown', e => {
@@ -343,27 +682,67 @@ $('.prp-tabs').addEventListener('keydown', e => {
   if (i < 0 || j == null) return;
   e.preventDefault(); const b = tabs[(j + tabs.length) % tabs.length]; b.focus(); setTab(b.dataset.tab, true);
 });
-setTab(new URLSearchParams(location.search).get('tab'), false);
+storyView = viewOf(hashParams());
+setTab(new URLSearchParams(location.search).get('tab') || storyView, false);
+
+function update() { render(); renderTop(); }
 
 /* ---------- boot ---------- */
-Promise.all([fetch('../briefing/data/latest.json').then(r => r.json()), PRPAccess.load('../design/prp-access.json')]).then(([d, acc]) => {
+const accessDoc = fetch('../design/prp-access.json').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }).catch(() => ({ sources: [], failed: true }));
+Promise.all([fetch('../briefing/data/latest.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }), accessDoc]).then(([text, doc]) => {
+  const d = JSON.parse(text), acc = PRPAccess.table(doc);
   D = d; ACC = acc.size ? acc : null; SRC = new Map(d.sources.map(s => [s.id, s])); posOn = new Set(d.positions.map(p => p.key));
+  BYURL = new Map(d.items.map(i => [String(i.u), i]));
   $('#posbtns').innerHTML = '<span class="prp-label">Positions</span>' + d.positions.map(p => `<button type="button" class="pos on" data-pos="${esc(p.key)}" aria-pressed="true" style="${posVar(p.key)}"><i aria-hidden="true"></i>${esc(p.label)}</button>`).join('');
   $('#posbtns').onclick = e => { const b = e.target.closest('[data-pos]'); if (!b) return; const k = b.dataset.pos; posOn.has(k) ? posOn.delete(k) : posOn.add(k); b.classList.toggle('on', posOn.has(k)); b.setAttribute('aria-pressed', posOn.has(k)); render(); };
   const groups = d.positions.map(p => `<optgroup label="${esc(p.label)}">${d.sources.filter(s => s.position === p.key && d.items.some(i => i.s === s.id)).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
   $('#publisher').innerHTML += groups;
   const active = d.sources.filter(s => s.active).length;
-  $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> stories from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>` +
+  $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> headlines from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>` +
     (ageHours() > STALE_H ? `<span>Data is ${Math.round(ageHours())} hours old</span>` : '');
-  for (const id of ['#view', '#publisher']) $(id).onchange = render;
-  $('#window').onchange = () => { renderTopics(); render(); writeHash(); };
+  $('#view').onchange = render;
+  $('#publisher').onchange = () => { STORY = null; update(); };
+  $('#window').onchange = () => { topShown = 10; STORY = null; renderTopics(); update(); writeHash(); };
   // Hard news only: the saved choice (readHash applies it, or a link's soft=1 for one visit); a change is saved.
   $('#hardnews').onchange = () => { try { localStorage.setItem(SOFT_KEY, $('#hardnews').checked ? '1' : '0'); } catch {} renderTopics(); render(); writeHash(); };
-  $('#q').oninput = () => { render(); writeHash(); };
-  window.addEventListener('hashchange', () => { readHash(true); renderTopics(); render(); });
+  $('#q').oninput = () => { topShown = 10; STORY = null; update(); writeHash(); };
+  window.addEventListener('hashchange', () => {
+    // Back from "Compare the positions": the reader's own view as they left it (their topic, publisher, positions, how
+    // many stories were open, where they were, and the link they followed), not a fresh one.
+    const back = history.state?.back, story = pendingStory;
+    pendingStory = null;
+    readHash(true);
+    STORY = story && storyView === 'latest' ? story : null;
+    if (back) {
+      current = topics.some(t => t.id === back.current) ? back.current : null;
+      if ([...$('#publisher').options].some(o => o.value === back.pub)) $('#publisher').value = back.pub;
+      posOn = new Set((back.posOn || []).filter(k => D.positions.some(p => p.key === k)));
+      if (!posOn.size) posOn = new Set(D.positions.map(x => x.key));
+      $$('#posbtns [data-pos]').forEach(b => { const on = posOn.has(b.dataset.pos); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+      topShown = Math.max(10, back.topShown || 10); focusCmp = back.story || null;
+    }
+    setTab(storyView, false); renderTopics(); update();
+    if (new URLSearchParams(location.search).has('tab')) { const u = new URL(location.href); u.searchParams.delete('tab'); history.replaceState(history.state, '', u); }
+    if (back) { if (typeof back.y === 'number') scrollTo(0, back.y); return; }
+    const top = $('.prp-tabs').getBoundingClientRect().top;
+    if (top < 0) $('.prp-tabs').scrollIntoView({ block: 'start' }); // a link from lower down: show the view it opened from its top
+    if (STORY) $('#viewtitle').focus({ preventScroll: true }); // the keyboard lands on the story it opened, not the page top
+  });
+  let saved = null; try { saved = localStorage.getItem(POS_KEY); } catch {}
+  chosen = d.positions.some(p => p.key === saved) ? saved : d.positions[0].key;
   readHash();
-  renderTopics(); render(); renderSources();
-}).catch(e => { $('#meta').textContent = 'Stories could not load: ' + e.message; });
+  setTab(new URLSearchParams(location.search).get('tab') || storyView, false);
+  renderSwitch();
+  renderTopics(); update(); renderSources();
+  TOPSRC = [text, doc];
+  if (tab === 'top') startTopsNow();
+  else setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(startTopsNow, { timeout: 4000 }) : startTopsNow()), 4000);
+}).catch(() => {
+  // The stories could not be read: one plain sentence wherever the stories would be, and nothing left waiting.
+  const msg = 'The stories could not be loaded just now. Try again in a few minutes.';
+  $('#meta').textContent = msg; TOPERR = msg; renderTop();
+  $('#out').innerHTML = `<div class="prp-empty">${msg}</div>`;
+});
 </script>
 </body>
 </html>

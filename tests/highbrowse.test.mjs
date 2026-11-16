@@ -15,7 +15,7 @@ import vm from 'node:vm';
 import { pageTest, launch } from './tools/pages.mjs';
 import {
   BRIEFINGS, BRIEFING, POSITIONS, POSITION_LABELS, POLITICAL_TOPICS, TOPICS_KEY, terms, cluster, buildModel, digest, search, parseQuery, parseHash, toHash,
-  briefingPage, itemPage, referenceTime, topicsFrom, normalise, localDay, findWord, fold, inWindow, DEFAULTS,
+  briefingPage, itemPage, referenceTime, topicsFrom, normalise, localDay, findWord, fold, inWindow, DEFAULTS, politicalTops, rankTops,
 } from '../highbrowse/analysis.js';
 import * as SCI from '../science/briefing/view.js';
 import * as ECON from '../econ/briefing/view.js';
@@ -208,6 +208,22 @@ test('analysis: the week, and the Political Briefing\'s spread across positions'
   assert.deepEqual(sp.stories.map(s => s.publishers), [5, 4, 4]);
 });
 
+// The Political Briefing's Top stories are these same stories (politicalTops, on the same model): every story the spread
+// table lists has the same publishers and positions there, and every top story with three publishers or more is in it.
+test('analysis: the Political Briefing\'s top stories count exactly what the spread table counts', () => {
+  for (const w of ['24h', '3d', '7d']) {
+    const sp = digest(model, w).spread, tops = politicalTops(model, w);
+    for (const s of sp.stories) {
+      const t = tops.find(x => x.id === s.id);
+      assert.ok(t, `${w}: ${s.lead.t}`);
+      assert.deepEqual([t.publishers, t.positions], [s.publishers, s.positions], `${w}: ${s.lead.t}`);
+    }
+    assert.deepEqual(tops.filter(t => t.publishers >= 3).map(t => t.id).sort(), sp.stories.map(s => s.id).sort(), w);
+    for (const t of tops) assert.ok(t.publishers >= 2 && t.entries.every(e => e.item.b === 'political'), `${w}: political headlines only`);
+  }
+  assert.deepEqual(rankTops(politicalTops(model, '7d')).map(s => s.lead.t.match(/Binance|Murkowski|Huerta/)[0]), ['Binance', 'Murkowski', 'Huerta']);
+});
+
 test('analysis: windows count back from now, or from the newest refresh when every briefing is a day old', () => {
   const stale = fixtureStores().map(s => ({ ...s, generated: ago(80) }));
   assert.equal(referenceTime(stale, NOW), NOW - 80 * H);
@@ -391,7 +407,10 @@ test('module: Highbrowse holds its landing page and the four briefings; the page
     const p = read(page);
     assert.match(p, /<html lang="en" (class="prp" )?data-suite="hb"/, page);
     assert.match(p, new RegExp(`data-suite="hb" data-module="${id}"`), page);
-    assert.match(p, /<div class="prp-eyebrow">Highbrowse <span class="sep">·<\/span>/, page);
+    // The module is Omni News since 14 November 2026 (Highbrowse keeps its name as a submodule); the Political Briefing
+    // says so since its Top stories (16 November).
+    if (page === 'q/briefing.html') assert.match(p, /<div class="prp-eyebrow">Omni News <span class="sep">·<\/span> Political Briefing<\/div>/, page);
+    else assert.match(p, /<div class="prp-eyebrow">Highbrowse <span class="sep">·<\/span>/, page);
   }
   // Only tokens in the page's own CSS, but for the Political Briefing's position colours, defined for both themes.
   const css = read('highbrowse/highbrowse.css').replace(/--pos-[\w]+: #[0-9a-f]{6}/g, '');

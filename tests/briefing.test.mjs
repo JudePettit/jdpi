@@ -275,6 +275,23 @@ test('top stories: free sources lead, and a story only paywalled publishers ran 
   for (const p of [null, ...HB_POSITIONS]) { const l = rankTops(tops, { position: p }); if (l.some(s => s.free)) assert.ok(l[0].free, `${p || 'all'}: a free story first`); }
 });
 
+// An article two briefings carry, worded differently in each (review X1, 16 November 2026: the BBC's Microsoft outage
+// headline led on the rank of its Digital Briefing copy's wording): the Political Briefing's own headline is the one
+// shown, so it is ranked by how typical that headline is, not by the other copy's.
+test('top stories: an article in two briefings is ranked by the political headline the page shows, not the other briefing\'s wording', () => {
+  const week = topsWeek(), r1 = week.items.find(i => i.s === 'r1' && /Hallworth/.test(i.t));
+  const digital = { generated: tAgo(1), keepDays: 7, fields: [], sources: [{ id: 'r1d', outlet: 'R1 News' }],
+    items: [{ id: 'd1', title: 'Senate passes Hallworth shutdown deal', url: r1.u, published: tAgo(10), source: 'r1d', fields: [] }] };
+  const M = buildModel([week, null, null, digital], { now: TNOW, access: globalThis.PRPAccess.table(TACCESS) });
+  const tops = politicalTops(M, '3d'), hall = tops.find(s => s.entries.some(e => /Hallworth/.test(e.item.t)));
+  assert.ok(hall.entries.every(e => e.item.b === 'political'), 'its political headlines alone');
+  assert.equal(hall.entries.find(e => e.item.sid === 'r1').item.t, 'Hallworth shutdown deal through Senate', 'r1\'s own headline is the one shown');
+  assert.equal(hall.entries[0].item.sid, 'c1', 'the most typical political headline is still c1\'s, not r1\'s, whose digital copy words it as c1 does');
+  assert.deepEqual(hall.entries.map(e => e.rank), hall.entries.map((e, k) => k));
+  assert.equal(rankTops(tops)[0].lead.sid, 'l1', 'the most typical free political headline leads (l1 words it as c1 does, and is older than fl1)');
+  assert.equal(rankTops(tops, { position: 'right' }).find(s => s.id === hall.id).lead.sid, 'r2', 'and on the right r2\'s, as typical as r1\'s own wording and older');
+});
+
 // On the committed stores: Top stories is quick enough to run in the browser, and counts exactly what Highbrowse's
 // spread table counts (the same groups from the same four stores).
 test('top stories: on the committed stores, quick, and the same publishers and positions as Highbrowse\'s spread table', () => {
@@ -540,6 +557,116 @@ test('page: "Compare the positions" opens Latest\'s columns on the story, and Ba
     await page.waitForFunction(() => document.querySelector('#tabbtn-top').getAttribute('aria-selected') === 'true', null, { timeout: 10000 });
     assert.deepEqual([await page.textContent('#topicname'), await page.textContent('#topcount')], ['US politics', before]);
     assert.equal(await page.evaluate(() => document.activeElement.closest('.tcard')?.dataset.story), story.id, 'the focus is back on the link it left from');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+// Review X3 (16 November 2026): Compare once opened the story in whatever layout Latest was left in, so a reader who had
+// picked Stream got a stream, not the positions side by side. It opens the balanced columns, and the reader's own layout
+// comes back when they leave the story.
+test('page: "Compare the positions" opens the balanced columns even after Stream was picked, and Stream comes back after', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const { page, errors } = await openTop(browser, 'q/briefing', { routes: fixtureRoutes() });
+    await topsReady(page);
+    await page.click('#tabbtn-stories');
+    await page.selectOption('#view', 'stream');
+    await page.waitForSelector('#out .stream');
+    await page.click('#tabbtn-top');
+    const id = await page.getAttribute('#topout .tcard.lead', 'data-story');
+    await page.click(`#topout .tcard[data-story="${id}"] a.cmp`);
+    await page.waitForFunction(() => /^One story: /.test(document.querySelector('#viewtitle').textContent), null, { timeout: 10000 });
+    assert.deepEqual([await tabSelected(page), await page.inputValue('#view'), await page.locator('#out .cols5 .col').count(), await page.locator('#out .stream').count()],
+      ['tabbtn-stories', 'balanced', 5, 0], 'the story in the balanced columns, and the layout choice says so');
+    // Back returns to Top stories; Latest is then as the reader left it, in Stream.
+    await page.goBack();
+    await page.waitForFunction(() => document.querySelector('#tabbtn-top').getAttribute('aria-selected') === 'true', null, { timeout: 10000 });
+    await page.click('#tabbtn-stories');
+    assert.deepEqual([await page.inputValue('#view'), await page.locator('#out .stream').count()], ['stream', 1]);
+    // Leaving the story by "Show all headlines" puts Stream back too; a layout the reader picks on the story stands.
+    await page.click('#tabbtn-top');
+    await page.click(`#topout .tcard[data-story="${id}"] a.cmp`);
+    await page.waitForSelector('#out .cols5', { timeout: 10000 });
+    await page.click('#storynote [data-allstories]');
+    assert.deepEqual([await page.inputValue('#view'), await page.locator('#out .stream').count()], ['stream', 1]);
+    await page.click('#tabbtn-top');
+    await page.click(`#topout .tcard[data-story="${id}"] a.cmp`);
+    await page.waitForSelector('#out .cols5', { timeout: 10000 });
+    await page.selectOption('#view', 'stream');
+    await page.waitForSelector('#out .stream');
+    await page.click('#storynote [data-allstories]');
+    assert.equal(await page.inputValue('#view'), 'stream');
+    await page.selectOption('#view', 'balanced');
+    await page.click('#tabbtn-top');
+    await page.click(`#topout .tcard[data-story="${id}"] a.cmp`);
+    await page.waitForSelector('#out .cols5', { timeout: 10000 });
+    await page.click('#storynote [data-allstories]');
+    assert.equal(await page.inputValue('#view'), 'balanced', 'a reader who left Latest in the columns keeps them');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+// Review X2 (16 November 2026): a card once listed at most 80 of its other headlines, so a story of 126 headlines showed
+// 81 with nothing to say so. Every headline the card counts can be reached.
+test('page: a Top stories card lists every headline it counts, however many', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const { page, errors } = await openTop(browser, 'q/briefing', { routes: fixtureRoutes() });
+    await topsReady(page);
+    const got = await page.evaluate(() => {
+      const s = RANK(TOPS[wKey()])[0], e = s.others[0];
+      const others = Array.from({ length: 140 }, (_, k) => ({ ...e, item: { ...e.item, u: `${e.item.u}-${k}`, t: `${e.item.t} ${k}` } }));
+      const big = { ...s, others, headlines: others.length + 1 };
+      const box = document.createElement('div');
+      return [0, 3].map(k => {
+        box.innerHTML = topCard(big, k);
+        const links = [...box.querySelectorAll('h3 a.t, .tc-list a.h')].map(a => a.getAttribute('href'));
+        return { links: links.length, distinct: new Set(links).size, said: box.querySelector('.pubs').textContent, more: box.querySelector('details summary')?.textContent };
+      });
+    });
+    for (const g of got) {
+      assert.deepEqual([g.links, g.distinct], [141, 141], 'the lead and all 140 others');
+      assert.match(g.said, / · 141 headlines$/);
+    }
+    assert.deepEqual(got.map(g => g.more), ['135 more headlines', '137 more headlines']);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+// The same in Latest: "Show N more" once stopped at 200 a column (400 in the stream) and then did nothing, however many
+// it said were left. Each press shows the next ones, and says how many.
+test('page: Latest\'s "Show more" reaches every headline, a step at a time, and says how many it adds', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const { page, errors } = await openTop(browser, 'q/briefing#v=latest&w=7d');
+    await page.waitForSelector('#out .cols5 .col');
+    // The biggest column (the columns are the positions in the data's order, all five on).
+    const { idx, pos, n } = await page.evaluate(() => {
+      const cols = [...document.querySelectorAll('#out .cols5 .col')].map((c, k) => ({ idx: k + 1, pos: D.positions[k].key, n: Number(c.querySelector('h3 span:last-child').textContent.replace(/,/g, '')) }));
+      return cols.sort((a, b) => b.n - a.n)[0];
+    });
+    assert.ok(n > 400, `a column of more than 400 headlines (${n})`);
+    const shown = () => page.locator(`#out .cols5 .col:nth-child(${idx}) .story`).count();
+    assert.equal(await shown(), 12);
+    for (const want of [200, 400]) {
+      const btn = page.locator(`#out button.more[data-more="${pos}"]`), before = await shown();
+      const said = Number((await btn.textContent()).match(/^Show ([\d,]+) more/)[1].replace(/,/g, ''));
+      await btn.click();
+      assert.deepEqual([await shown(), await shown() - before], [want, said], `the column shows ${want}, as many more as the button said`);
+    }
+    await page.selectOption('#view', 'stream');
+    const total = Number((await page.textContent('#viewcount')).replace(/[^\d]/g, ''));
+    assert.ok(total > 800, `a stream of more than 800 headlines (${total})`);
+    for (const want of [80, 400, 800]) {
+      assert.equal(await page.locator('#out .stream .story').count(), want);
+      await page.click('#out button.more[data-more="stream"]');
+    }
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();

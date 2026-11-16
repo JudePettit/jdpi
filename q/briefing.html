@@ -279,7 +279,7 @@ const DEFAULT_TOPICS = [
   ['AI & tech', 'AI, artificial intelligence, OpenAI, Anthropic, Google, Meta, Nvidia, chatbot, Silicon Valley'],
   ['Climate & energy', 'climate, emissions, net zero, renewable, oil, gas, OPEC, heatwave, wildfire, hurricane'],
 ].map(([name, keys], i) => ({ id: 't' + i, name, keywords: keys.split(',').map(s => s.trim()), paused: false }));
-let D, SRC = new Map(), topics = load(), current = null, editing = null, posOn = new Set(), expanded = new Set();
+let D, SRC = new Map(), topics = load(), current = null, editing = null, posOn = new Set(), expanded = new Map();
 
 function load() { try { const t = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(t)) return t; } catch {} return DEFAULT_TOPICS; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(topics)); } catch {} }
@@ -372,12 +372,15 @@ function passes(i) {
 }
 // "Compare the positions": Latest on exactly one Top story's headlines (STORY: { id, urls, title, w }), not on whatever
 // its search words happen to find; the address keeps the search (#q), so a reload or a shared link still finds the story.
-let STORY = null, pendingStory = null;
+// It shows the positions side by side, in the balanced columns, whatever layout Latest was left in; the reader's own
+// layout (keptLayout) comes back when they leave the story, unless they picked another while on it.
+let STORY = null, pendingStory = null, keptLayout = null;
 function filtered() {
   if (STORY) return D.items.filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && STORY.urls.has(String(i.u)); });
   return windowed().filter(i => { const s = SRC.get(i.s); return s && posOn.has(s.position) && passes(i); });
 }
 function render() {
+  if (!STORY && keptLayout) { $('#view').value = keptLayout; keptLayout = null; }
   const list = filtered(), t = topics.find(x => x.id === current);
   $('#viewtitle').textContent = STORY ? 'One story: ' + STORY.title : t ? t.name + (t.paused ? ' (paused)' : '') : 'All stories';
   $('#viewcount').textContent = `${num(list.length)} ${list.length === 1 ? 'headline' : 'headlines'}`;
@@ -390,14 +393,21 @@ function render() {
   $('#meterkey').innerHTML = D.positions.map(p => `<span><i style="${posVar(p.key)}" aria-hidden="true"></i>${esc(p.label)} <b>${num(by[p.key].length)}</b> (${pct(p.key)}%)</span>`).join('');
   if (!list.length) { $('#out').innerHTML = `<div class="prp-empty">${t?.paused ? 'This topic is paused.' : 'No stories match in this window.'}</div>`; return; }
   if ($('#view').value === 'stream') {
-    const lim = expanded.has('stream') ? 400 : 80;
-    $('#out').innerHTML = `<div class="stream">${freeFirst(list).slice(0, lim).map(i => storyHtml(i, true)).join('')}</div>${list.length > lim ? `<button type="button" class="more" data-more="stream">Show more (${num(list.length - lim)})</button>` : ''}`;
+    const lim = expanded.get('stream') || 80;
+    $('#out').innerHTML = `<div class="stream">${freeFirst(list).slice(0, lim).map(i => storyHtml(i, true)).join('')}</div>${moreBtn('stream', lim, list.length, 400)}`;
   } else {
-    $('#out').innerHTML = `<div class="cols5">${D.positions.filter(p => posOn.has(p.key)).map(p => { const l = freeFirst(by[p.key]), lim = expanded.has(p.key) ? 200 : 12;
-      return `<div class="col"><h3 style="${posVar(p.key)}"><span>${esc(p.label)}</span><span>${num(l.length)}</span></h3>${l.slice(0, lim).map(i => storyHtml(i, false)).join('') || '<div class="prp-empty">No stories.</div>'}${l.length > lim ? `<button type="button" class="more" data-more="${p.key}">Show ${num(l.length - lim)} more</button>` : ''}</div>`; }).join('')}</div>`;
+    $('#out').innerHTML = `<div class="cols5">${D.positions.filter(p => posOn.has(p.key)).map(p => { const l = freeFirst(by[p.key]), lim = expanded.get(p.key) || 12;
+      return `<div class="col"><h3 style="${posVar(p.key)}"><span>${esc(p.label)}</span><span>${num(l.length)}</span></h3>${l.slice(0, lim).map(i => storyHtml(i, false)).join('') || '<div class="prp-empty">No stories.</div>'}${moreBtn(p.key, lim, l.length, 200)}</div>`; }).join('')}</div>`;
   }
 }
-$('#out').addEventListener('click', e => { const m = e.target.closest('[data-more]'); if (m) { expanded.add(m.dataset.more); render(); } });
+// "Show N more": the next ones, up to the next multiple of `step` (so every headline can be reached), saying how many it
+// adds and, where that is not all of them, how many are left.
+function moreBtn(k, lim, total, step) {
+  if (total <= lim) return '';
+  const to = Math.ceil((lim + 1) / step) * step, n = Math.min(to, total) - lim;
+  return `<button type="button" class="more" data-more="${esc(k)}" data-to="${to}">Show ${num(n)} more${total - lim > n ? ` <span class="prp-muted">(${num(total - lim)} left)</span>` : ''}</button>`;
+}
+$('#out').addEventListener('click', e => { const m = e.target.closest('[data-more]'); if (m) { expanded.set(m.dataset.more, Number(m.dataset.to)); render(); } });
 $('#storynote').addEventListener('click', e => {
   if (!e.target.closest('[data-allstories]')) return;
   STORY = null; $('#q').value = ''; writeHash(); renderTopics(); update(); $('#viewtitle').focus();
@@ -442,7 +452,8 @@ const compare = s => `<a class="cmp" href="${esc(compareHref(s))}">Compare the p
 const entryLi = e => `<li><span class="o">${esc(e.item.src)}</span>${e.item.caution ? caution : ''}<span class="pl" style="${posVar(e.item.pos)}"><i aria-hidden="true"></i>${esc(posLabel(e.item.pos))}</span>${headLink(e.item, 'h')}${altLink(e.alt)}</li>`;
 
 function topCard(s, k) {
-  const cut = k === 0 ? 5 : 3, shown = s.others.slice(0, cut), rest = s.others.slice(cut, 80);
+  // Every headline the card counts can be reached: the first few, then all the rest under "N more headlines".
+  const cut = k === 0 ? 5 : 3, shown = s.others.slice(0, cut), rest = s.others.slice(cut);
   return `<article class="tcard${k === 0 ? ' lead' : ''}" data-story="${esc(s.id)}">
     <div class="tc-meta"><span class="rank">${k + 1}</span><span class="pubs">${plural(s.publishers, 'publisher')} · ${plural(s.headlines, 'headline')}</span></div>
     <h3>${headLink(s.lead, 't')}${altLink(s.alt)}</h3>${srcLine(s.lead)}${posKey(s)}
@@ -700,7 +711,7 @@ Promise.all([fetch('../briefing/data/latest.json').then(r => { if (!r.ok) throw 
   const active = d.sources.filter(s => s.active).length;
   $('#meta').innerHTML = `<span><b>${num(d.items.length)}</b> headlines from the last ${esc(d.keepDays)} days</span><span><b>${active}</b> active publishers, ${esc(d.perPosition)} per position</span><span>Refreshed <b>${esc(d.generated.slice(0, 16).replace('T', ' '))} UTC</b></span><span>Source: publisher RSS and Atom feeds</span>` +
     (ageHours() > STALE_H ? `<span>Data is ${Math.round(ageHours())} hours old</span>` : '');
-  $('#view').onchange = render;
+  $('#view').onchange = () => { keptLayout = null; render(); };
   $('#publisher').onchange = () => { STORY = null; update(); };
   $('#window').onchange = () => { topShown = 10; STORY = null; renderTopics(); update(); writeHash(); };
   // Hard news only: the saved choice (readHash applies it, or a link's soft=1 for one visit); a change is saved.
@@ -713,6 +724,7 @@ Promise.all([fetch('../briefing/data/latest.json').then(r => { if (!r.ok) throw 
     pendingStory = null;
     readHash(true);
     STORY = story && storyView === 'latest' ? story : null;
+    if (STORY && $('#view').value !== 'balanced') { keptLayout = keptLayout || $('#view').value; $('#view').value = 'balanced'; }
     if (back) {
       current = topics.some(t => t.id === back.current) ? back.current : null;
       if ([...$('#publisher').options].some(o => o.value === back.pub)) $('#publisher').value = back.pub;

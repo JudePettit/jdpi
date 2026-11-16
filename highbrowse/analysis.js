@@ -457,6 +457,14 @@ const outletKey = i => i.ok || (i.ok = fold(i.src).replace(/^the\s+/, ''));
 const countOutlets = items => new Set(items.map(outletKey)).size;
 export const urlKey = u => String(u).replace(/^https?:\/\/(www\.)?/i, '').replace(/[?#].*$/, '').replace(/\/+$/, '').toLowerCase();
 const byNewest = (a, b) => b.at - a.at || a.n - b.n;
+// How typical each of a group's headlines is of the story as a whole: for each of its terms, the term's share of the
+// group's headlines times its rarity, summed, over the square root of its number of terms. The most typical first, a tie
+// to the older headline (then the first read).
+function typicality(model, g) {
+  const size = g.items.length;
+  const score = new Map(g.items.map((i, m) => { const ts = g.toks[m]; return [i, ts.reduce((a, k) => a + ((g.tf.get(k) || 0) / size) * model.idf(k), 0) / Math.sqrt(ts.length || 1)]; }));
+  return { score, order: (a, b) => score.get(b) - score.get(a) || a.at - b.at || a.n - b.n };
+}
 
 /**
  * A story as the page shows it, from one group's headlines in the window: `lead` first, then one headline per other
@@ -467,10 +475,8 @@ const byNewest = (a, b) => b.at - a.at || a.n - b.n;
 function storyOf(model, g, win) {
   const inWin = g.items.filter(i => win.has(i.n));
   if (!inWin.length) return null;
-  const size = g.items.length;
   // The lead: the headline most like the story as a whole (its terms the story's most shared, weighted by rarity).
-  const score = new Map(g.items.map((i, m) => { const ts = g.toks[m]; return [i, ts.reduce((a, k) => a + ((g.tf.get(k) || 0) / size) * model.idf(k), 0) / Math.sqrt(ts.length || 1)]; }));
-  const ranked = [...inWin].sort((a, b) => score.get(b) - score.get(a) || a.at - b.at || a.n - b.n);
+  const ranked = [...inWin].sort(typicality(model, g).order);
   const byUrl = new Map(), entries = [];
   for (const i of ranked) {
     const had = byUrl.get(urlKey(i.u));
@@ -686,7 +692,8 @@ function spread(model, items, stories) {
  *   { id, order: the group's place (the last tie-break), publishers, positions: publishers per position (as the spread
  *     table counts them), headlines: political headlines, first, last: its oldest and newest, key: its main terms, query:
  *     what the Briefing's search box needs to show it, entries: [{ item, rank, alt }] }
- * entries are the most typical first (rank, storyOf's order over the whole story), each not free to read with a free
+ * entries are the most typical first (rank: typicality's order, scored on each political headline as the page shows it,
+ * though another briefing's copy of the article words it differently), each not free to read with a free
  * headline of the same story from another outlet, in any briefing, beside it (alt, freeAlt: never a guess). In the
  * groups' order: rankTops ranks them.
  */
@@ -699,8 +706,10 @@ export function politicalTops(model, w = '3d') {
     for (const i of g.items) if (i.b === 'political' && i.pos && win.has(i.n)) sids.add(i.sid);
     if (sids.size < 2) return; // most groups: no need to build the story
     const s = storyOf(model, g, win);
-    // An article two briefings carry is one entry: the Political Briefing's copy of it stands here.
-    const entries = s.entries.map(e => ({ item: [e.item, ...e.also].find(i => i.b === 'political'), rank: e.rank })).filter(e => e.item).sort((a, b) => a.rank - b.rank);
+    // An article two briefings carry is one entry: the Political Briefing's copy of it stands here, ranked by how typical
+    // its own headline is (another briefing's copy may word it differently, and the page shows this one).
+    const { order: typical } = typicality(model, g);
+    const entries = s.entries.map(e => [e.item, ...e.also].find(i => i.b === 'political')).filter(Boolean).sort(typical).map((item, rank) => ({ item, rank }));
     for (const e of entries) e.alt = freeAlt(model, e.item, s);
     const at = entries.map(e => e.item.at);
     out.push({ id: s.id, order, publishers: s.publishers, positions: s.positions, headlines: entries.length, first: Math.min(...at), last: Math.max(...at), key: s.key, query: s.query, entries });

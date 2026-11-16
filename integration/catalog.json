@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-15T06:12:30.091Z",
+  "generated": "2026-11-16T06:53:34.852Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -56,7 +56,7 @@
       "sources": [
         "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "static",
       "page": "q/headlines.html?view=current",
       "derivedFrom": [
@@ -69,7 +69,7 @@
       "title": "Geopolitical Volatility: latest scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-14), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
+      "description": "The Geopolitical Volatility Index (0–100) for every country on the latest day (2026-11-15), with its five components: conflict & security (35%), political/diplomatic escalation (20%), civil unrest (20%), economic disruption (10%) and cross-border spread (15%). It measures news coverage of events, not events on the ground.",
       "url": "integration/data/volatility-latest.json",
       "format": "json",
       "records": "records",
@@ -155,20 +155,20 @@
       "sources": [
         "GDELT 2.0 event exports, all 96 quarter-hour files a day (the GDELT Project)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 64887
+      "bytes": 65109
     },
     {
       "id": "volatility-daily",
       "title": "Geopolitical Volatility: daily scores",
       "module": "rt",
       "submodule": "volatility",
-      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 50 days, for trends and comparisons.",
+      "description": "Daily Geopolitical Volatility Index scores and components for every country over the last 51 days, for trends and comparisons.",
       "urls": [
         "integration/data/volatility-daily/0.json",
         "integration/data/volatility-daily/1.json",
@@ -246,18 +246,18 @@
           "description": "Coverage level: high, medium or low"
         }
       ],
-      "rows": 10556,
+      "rows": 10762,
       "licence": "Index © JDP-Iq (method gvi-1.2-q96); GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 1939578
+      "bytes": 1977262
     },
     {
       "id": "volatility-global",
@@ -290,18 +290,18 @@
           "description": "Quarter-hour GDELT files processed (96 is a full day)"
         }
       ],
-      "rows": 50,
+      "rows": 51,
       "licence": "Index © JDP-Iq; GDELT data free to use with attribution to the GDELT Project.",
       "sources": [
         "GDELT 2.0 event exports (the GDELT Project)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "daily",
       "page": "q/volatility.html",
       "derivedFrom": [
         "volatility/data/index.json"
       ],
-      "bytes": 3509
+      "bytes": 3575
     },
     {
       "id": "realtime-wars",
@@ -730,14 +730,14 @@
         "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and Correlates of War: conflict history",
         "Kardashev Tracker: energy share"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
         "national/data/index.json",
         "volatility/data/index.json"
       ],
-      "bytes": 185013
+      "bytes": 184750
     },
     {
       "id": "national-indicators",
@@ -790,7 +790,7 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
@@ -880,7 +880,7 @@
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "q/national.html",
       "derivedFrom": [
@@ -960,7 +960,7 @@
       "sources": [
         "World Bank World Development Indicators (CC BY 4.0)"
       ],
-      "updated": "2026-11-13",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "q/national.html#compare=USA,CHN,RUS,IND",
       "derivedFrom": [
@@ -974,7 +974,7 @@
       "title": "Realtime Calendar: recent and upcoming events",
       "module": "rt",
       "submodule": "calendar",
-      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-15 to 2028-05-15 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-16 to 2028-05-16 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
       "url": "integration/data/upcoming-political-events.json",
       "format": "json",
       "records": "records",
@@ -1035,7 +1035,7 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "daily",
       "page": "q/calendar.html?period=contemporary",
       "derivedFrom": [
@@ -1045,7 +1045,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 154333
+      "bytes": 153990
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1088,16 +1088,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6669,
+      "rows": 6614,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-14",
+      "updated": "2026-11-15",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2926052
+      "bytes": 2900833
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1162,10 +1162,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-14",
+      "updated": "2026-11-15",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2926052
+      "bytes": 2900833
     },
     {
       "id": "econ-briefing-stories",
@@ -1263,15 +1263,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 476,
+      "rows": 473,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 282487
+      "bytes": 280867
     },
     {
       "id": "econ-briefing-sources",
@@ -1399,10 +1399,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 282487
+      "bytes": 280867
     },
     {
       "id": "science-briefing-stories",
@@ -1495,15 +1495,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1276,
+      "rows": 1247,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 745439
+      "bytes": 728940
     },
     {
       "id": "science-briefing-sources",
@@ -1626,10 +1626,10 @@
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 745439
+      "bytes": 728940
     },
     {
       "id": "digital-briefing-stories",
@@ -1732,15 +1732,15 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1214,
+      "rows": 1166,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 724252
+      "bytes": 690953
     },
     {
       "id": "digital-briefing-sources",
@@ -1883,10 +1883,10 @@
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 724252
+      "bytes": 690953
     },
     {
       "id": "political-calendar",
@@ -1950,7 +1950,7 @@
           "description": "Name of that news outlet"
         }
       ],
-      "rows": 5779,
+      "rows": 5812,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1960,10 +1960,10 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2657323
+      "bytes": 2671729
     },
     {
       "id": "encyclopaedia-entities",
@@ -2044,20 +2044,20 @@
           "description": "English Wikipedia article"
         }
       ],
-      "rows": 14001,
+      "rows": 14064,
       "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
       "sources": [
         "Wikidata (CC0)",
         "Every Vitruvian Manager submodule that mentions the entity"
       ],
-      "updated": "2026-11-07",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "encyclopedia/index.html",
       "derivedFrom": [
         "lake/data/index.json",
         "lake/data/e/*.json"
       ],
-      "bytes": 4158131
+      "bytes": 4178105
     },
     {
       "id": "retrospective-wars",
@@ -2162,14 +2162,14 @@
         "Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees & Wayman 2010)",
         "CShapes 2.0 (Schvitz et al. 2022) for state names"
       ],
-      "updated": "2026-10-28",
+      "updated": "2026-11-15",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [
         "battlefield/history/data/wars.json",
         "battlefield/history/data/borders.topo.json"
       ],
-      "bytes": 170063
+      "bytes": 170329
     },
     {
       "id": "war-focus-wars",
@@ -2266,10 +2266,10 @@
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "CShapes 2.0 (Schvitz et al. 2022)"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
-      "bytes": 16359
+      "bytes": 17605
     },
     {
       "id": "war-focus-battles",
@@ -2353,18 +2353,18 @@
           "description": "Wikipedia article"
         }
       ],
-      "rows": 4384,
+      "rows": 4242,
       "licence": "Wikidata CC0.",
       "sources": [
         "Wikidata (CC0): battles, sieges and operations that are part of each war"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 1419964
+      "bytes": 1371429
     },
     {
       "id": "war-focus-monthly-deaths",
@@ -2417,13 +2417,13 @@
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
         "Correlates of War Project war data (Sarkees & Wayman 2010)"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 706390
+      "bytes": 869882
     },
     {
       "id": "kardashev-polities",
@@ -3146,13 +3146,13 @@
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager",
         "Natural Earth (public domain) for the map"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
         "science/progress/data/events.json"
       ],
-      "bytes": 299026
+      "bytes": 299080
     },
     {
       "id": "science-progress-people",
@@ -3220,7 +3220,7 @@
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -3274,7 +3274,7 @@
       "sources": [
         "Wikidata (CC0), via wbgetentities; selection, titles and notes by Vitruvian Manager"
       ],
-      "updated": "2026-11-02",
+      "updated": "2026-11-15",
       "refresh": "monthly",
       "page": "science/progress/index.html",
       "derivedFrom": [
@@ -3358,18 +3358,18 @@
           "description": "Tabs inside the page"
         }
       ],
-      "rows": 37,
+      "rows": 38,
       "licence": "© JDP-Iq.",
       "sources": [
         "registry.json"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "on change",
       "page": "index.html",
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 20630
+      "bytes": 21495
     },
     {
       "id": "kino-documentaries",

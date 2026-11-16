@@ -785,7 +785,9 @@ export function readCasualties(fields, { named = new Map(), infobox = '' } = {})
     let deaths = pick('deaths'), cas = pick('cas');
     // An attack's deaths and injuries fields: its casualties are their sum.
     const d = parts.find(p => /^(?:deaths|fatalities)$/.test(p.f.key))?.s.deaths, w = parts.find(p => /^(?:injuries|injured|non-fatal injuries)$/.test(p.f.key))?.s.cas;
-    if (d && w && !parts.some(p => p.f.key === 'casualties')) cas = { low: d.low + w.low, high: d.high + w.high, status: weakest([d.status, w.status]), origin: 'source', refs: [...(d.refs || []), ...(w.refs || [])], ...(d.atLeast || w.atLeast ? { atLeast: true } : {}) };
+    // Its missing too, where it gives them (the second review's X4).
+    const mi = parts.find(p => p.f.key === 'missing')?.s.cas, add = [d, w, mi].filter(Boolean);
+    if (d && w && !parts.some(p => p.f.key === 'casualties')) cas = { low: add.reduce((a, x) => a + x.low, 0), high: add.reduce((a, x) => a + x.high, 0), status: weakest(add.map(x => x.status)), origin: 'source', refs: add.flatMap(x => x.refs || []), ...(add.some(x => x.atLeast) ? { atLeast: true } : {}) };
     else if (d && !w && !parts.some(p => p.f.key === 'casualties')) cas = null;
     const zero = parts.every(p => p.s.zero === 'yes');
     sides = [{ key: fl.map(f => f.key).join('+'), n: 1, ...merged, deaths, cas, zero: zero ? 'yes' : null, words: parts.flatMap(p => p.s.words || []), flagged: parts.some(p => p.s.flagged) }];
@@ -796,10 +798,13 @@ export function readCasualties(fields, { named = new Map(), infobox = '' } = {})
   // What a third or later field is, from its own words (review F2, P2): the civilians' ("Civilian: 14,300 killed"), the
   // battle's total ("Total dead: …"), or, where the box gives no first or second side at all, the whole battle's.
   const present = new Set(sides.map(s => s.n)), onlyLater = !whole && !present.has(1) && !present.has(2);
+  // A first or second side, or an attack's fields, that count only civilians are the civilians' too (the second review's
+  // X3: the bombing of Granollers' "100–224 civilians killed" beside "None").
   for (const s of sides) {
-    if (whole || s.n < 3) continue;
-    const text = plainLines(fl.find(f => f.key === s.key)?.raw || '').map(l => l.text).join(' ');
-    s.role = s.tFig ? 'total' : /\bcivilians?\b|\bnon-?combatants?\b/i.test(text) && !/\b(?:soldiers?|troops|military|combatants|fighters|militants|police)\b/i.test(text) ? 'civ' : onlyLater ? 'whole' : null;
+    const text = (whole ? fl : fl.filter(f => f.key === s.key)).map(f => plainLines(f.raw || '').map(l => l.text).join(' ')).join(' ');
+    const civ = /\bcivilians?\b|\bnon-?combatants?\b/i.test(text) && !/\b(?:soldiers?|troops|military|combatants|fighters|militants|police)\b/i.test(text);
+    if (whole || s.n < 3) { if (civ) s.role = 'civ'; continue; }
+    s.role = s.tFig ? 'total' : civ ? 'civ' : onlyLater ? 'whole' : null;
   }
   // Sides with no field (the first or second side's box left empty) are unknown: the sum is at least; but a box whose
   // only field is a later one gives the whole battle there, and is no side alone.
@@ -952,7 +957,8 @@ export function battleFigures({ deaths = null, cas = null, wd = [], article = nu
     if (s.atLeast) f.atLeast = true;
     if (s.q) f.q = s.q;
     const lo = f.low ?? v, hi = f.high ?? v;
-    if (wp && wp.high > 0 && (hi < wp.low / DISAGREE || (!wp.atLeast && lo > wp.high * DISAGREE))) { f.status = UNKIND; f.alt = fig(wp, 'wikipedia'); }
+    // Wikidata's "at least" is open at the top as the infobox's is (the second review's X7).
+    if (wp && wp.high > 0 && ((!f.atLeast && hi < wp.low / DISAGREE) || (!wp.atLeast && lo > wp.high * DISAGREE))) { f.status = UNKIND; f.alt = fig(wp, 'wikipedia'); }
     return f;
   };
   // Wikidata's "unknown value" with a lower and an upper limit (Sabra and Shatila: 460 to 3,500): a range, an estimate.
@@ -960,7 +966,7 @@ export function battleFigures({ deaths = null, cas = null, wd = [], article = nu
   const refsOf = m => (read?.sides || []).filter(s => s[m]).flatMap(s => s[m].refs || []);
   const fromWp = (f, m) => fig(f, 'wikipedia', refsOf(m).length ? {} : { uv: 1 });
   const wdZero = stmts => stmts.length && stmts.every(x => x.v === 0);
-  const withAlt = (f, wp) => { if (wp && wp.high > 0 && (f.high < wp.low / DISAGREE || (!wp.atLeast && f.low > wp.high * DISAGREE))) { f.status = UNKIND; f.alt = fig(wp, 'wikipedia'); } return f; };
+  const withAlt = (f, wp) => { if (wp && wp.high > 0 && ((!f.atLeast && f.high < wp.low / DISAGREE) || (!wp.atLeast && f.low > wp.high * DISAGREE))) { f.status = UNKIND; f.alt = fig(wp, 'wikipedia'); } return f; };
   // Deaths
   if (deaths > 0) out.fd = lead(deaths, 'P1120', wpD);
   else if (limits('P1120')) out.fd = withAlt(limits('P1120'), wpD);
@@ -970,7 +976,9 @@ export function battleFigures({ deaths = null, cas = null, wd = [], article = nu
   // Casualties
   if (cas > 0) out.fc = lead(cas, 'P1590', wpC);
   else if (limits('P1590')) out.fc = withAlt(limits('P1590'), wpC);
-  else if (wpC && wpC.high > 0) out.fc = fromWp(wpC, 'cas');
+  // Wikidata's "no value" for casualties as for deaths (the second review's X8).
+  else if (wpC && wpC.high > 0) { out.fc = fromWp(wpC, 'cas'); if (wdZero(c)) { out.fc.status = UNKIND; out.fc.alt = { v: 0, src: 'wikidata' }; } }
+  else if (wdZero(c)) out.fc = { v: 0, status: 'fact', src: 'wikidata', ...wdUv(c, 0) };
   else if (wpC && wpC.high === 0) out.fc = { v: 0, status: 'fact', src: 'wikipedia' };
   // A Wikidata figure as Wikidata's (`deaths`) needs no copy unless it says more than a plain count.
   for (const k of ['fd', 'fc']) { const f = out[k]; if (f?.src === 'wikidata' && f.v > 0 && f.status === 'fact' && !f.uv && f.low == null) delete out[k]; }
@@ -1003,4 +1011,14 @@ export function battleFigures({ deaths = null, cas = null, wd = [], article = nu
   }
   if (Object.keys(detail).length) out.detail = detail;
   return out;
+}
+
+/** The fields battleFigures writes on a battle. */
+export const FIG_KEYS = ['fd', 'fc', 'fs', 'fw', 'fwp', 'fu'];
+/** A battle whose source failed this run keeps its last committed figures (`old`'s), but only where they were figured
+ *  from the same Wikidata counts (`deaths`, `cas`) as this run's: a figure kept beside a count that moved would mix the
+ *  two (the second review's X5). Returns the fields to keep, or null (then it is figured from what was read). */
+export function keptFigures(b, old) {
+  if (!old || (old.deaths || null) !== (b.deaths || null) || (old.cas || null) !== (b.cas || null)) return null;
+  return Object.fromEntries(FIG_KEYS.filter(k => old[k] !== undefined).map(k => [k, old[k]]));
 }

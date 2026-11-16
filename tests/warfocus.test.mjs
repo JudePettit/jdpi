@@ -320,6 +320,81 @@ test('figures (review F7, F10, P1, P3, P4, P8, P12): one figure for card and lis
   assert.match(deadliestNote(d), /^Of the 5 battles not counted under a larger one, ranked by deaths: 4 .*Not ranked: 1 with civilian deaths only\./);
 });
 
+// The second review of BF-08 (16 November 2026, X2–X8): each finding's case, as the reviewer gave it.
+test('figures (second review X2): the infobox\'s "at least" beside Wikidata\'s count keeps the range open at the top', async () => {
+  const { groupBattles, figureLine, ownFigure } = await import('../battlefield/focus/figures.mjs');
+  // The Good Friday Battle: Wikidata 9, the infobox at least 14 (9 and 5 or more): 14 is no upper limit.
+  const gf = { q: 'Q23787738', n: 'Good Friday Battle', deaths: 9, fd: { v: 9, status: 'disputed', src: 'wikidata', uv: 'w', alt: { v: 14, status: 'estimate', origin: 'vm', src: 'wikipedia', atLeast: true } } };
+  assert.deepEqual([ownFigure(gf, 'd').low, ownFigure(gf, 'd').high, ownFigure(gf, 'd').atLeast], [9, 14, true]);
+  assert.equal(figureLine(groupBattles([gf]).byQ.get('Q23787738')), '9–14 or more deaths · Disputed or unreliable · Wikidata, imported from Wikipedia, no other reference');
+  // An infobox reading below Wikidata's leaves Wikidata's top, closed.
+  const below = { q: 'Q1', n: 'X', deaths: 550, fd: { v: 550, status: 'disputed', src: 'wikidata', alt: { low: 35, high: 50, status: 'fact', src: 'wikipedia', atLeast: true } } };
+  assert.equal(ownFigure(below, 'd').atLeast, undefined);
+});
+
+test('infobox (second review X3): a first or second side, or an attack\'s field, that counts only civilians is the civilians\' figure, not ranked', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const { groupBattles, figureLine, deadliest } = await import('../battlefield/focus/figures.mjs');
+  // The bombing of Granollers: the Republic's side gives its civilians killed, the Nationalists' none.
+  const gr = readCasualties({ casualties1: '100–224 civilians killed', casualties2: 'None' });
+  assert.deepEqual([gr.deaths.low, gr.deaths.high, gr.deaths.civ, gr.deaths.one], [100, 224, true, undefined]);
+  assert.equal(readCasualties({ deaths: '27 or 28 civilians' }).deaths.civ, true, 'an attack on civilians (the Mekelle shelling)');
+  // A side's soldiers beside another's civilians, or a field that names soldiers too, is no civilians' figure.
+  assert.equal(readCasualties({ casualties1: '581 dead', casualties2: '40 civilians killed' }).deaths.civ, undefined);
+  assert.equal(readCasualties({ casualties1: '30 soldiers and 12 civilians killed', casualties2: 'None' }).deaths.civ, undefined);
+  const b = { q: 'Q3022501', n: 'Bombing of Granollers', deaths: null, fd: { low: 100, high: 224, status: 'estimate', src: 'wikipedia', civ: true } };
+  const g = groupBattles([b]);
+  assert.equal(figureLine(g.byQ.get('Q3022501')), '100–224 deaths · Estimate, civilians only');
+  assert.deepEqual([deadliest(g).ranked.length, deadliest(g).civ], [0, 1]);
+});
+
+test('infobox (second review X4): an attack\'s casualties are its deaths, injuries and missing together', async () => {
+  const { readCasualties } = await import('../battlefield/focus/scripts/infobox.mjs');
+  assert.deepEqual(asFig(readCasualties({ deaths: '10', injuries: '20', missing: '5' }).cas), [35, 35, 'fact']);
+  assert.deepEqual(asFig(readCasualties({ deaths: '10', injuries: '20' }).cas), [30, 30, 'fact'], 'as before without a missing field');
+});
+
+test('build (second review X5): a battle whose source failed keeps its last figures only where they were figured from the same Wikidata counts', async () => {
+  const { keptFigures } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const old = { q: 'Q23787738', deaths: 9, cas: null, fd: { v: 9, status: 'disputed', src: 'wikidata', alt: { v: 14, status: 'estimate', src: 'wikipedia', atLeast: true } }, fc: { v: 17, status: 'fact', src: 'wikipedia', atLeast: true, one: true } };
+  assert.deepEqual(keptFigures({ q: 'Q23787738', deaths: 9, cas: 0 }, old), { fd: old.fd, fc: old.fc });
+  // Wikidata's count moved to 30 while its statements could not be read: the old 9-against-14 no longer describes it.
+  assert.equal(keptFigures({ q: 'Q23787738', deaths: 30, cas: 0 }, old), null);
+  assert.equal(keptFigures({ q: 'Q1', deaths: 9 }, null), null);
+});
+
+test('figures (second review X7): Wikidata\'s "at least" is open at the top: an infobox reading above it is no disagreement', async () => {
+  const { battleFigures } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const art = v => ({ title: 'Battle of X', rev: 1, ts: '2026-11-16T00:00:00Z', state: 'figure', deaths: { low: v, high: v, status: 'fact' }, cas: null, sides: [] });
+  const atLeast100 = [{ p: 'P1120', v: 100, rank: 'normal', atLeast: true, q: ['at least'], ref: 'stated' }];
+  const up = battleFigures({ deaths: 100, wd: atLeast100, article: art(300) }).fd;
+  assert.deepEqual([up.status, up.atLeast, up.alt], ['estimate', true, undefined]);
+  assert.equal(battleFigures({ deaths: 100, wd: atLeast100, article: art(50) }).fd.status, 'disputed', 'below an "at least" by half again is still a disagreement');
+  // An unknown value with a lower limit only (at least 100), the same.
+  const lim = [{ p: 'P1120', unknown: true, low: 100, high: 100, atLeast: true, rank: 'normal', ref: 'stated' }];
+  const l = battleFigures({ wd: lim, article: art(300) }).fd;
+  assert.deepEqual([l.status, l.alt], ['estimate', undefined]);
+});
+
+test('figures (second review X8): Wikidata\'s "no value" for casualties is a recorded zero, as for deaths', async () => {
+  const { battleFigures, wdStatements } = await import('../battlefield/focus/scripts/infobox.mjs');
+  const { groupBattles, figureLine, stateOf, completeness } = await import('../battlefield/focus/figures.mjs');
+  const st = wdStatements({ claims: { P1590: [{ rank: 'normal', mainsnak: { snaktype: 'novalue' }, references: [{ snaks: { P248: [{ datavalue: { value: { id: 'Q1' } } }] } }] }] } });
+  assert.deepEqual(st, [{ p: 'P1590', rank: 'normal', v: 0, ref: 'stated', in: 'Q1' }]);
+  const fx = battleFigures({ wd: st, article: null });
+  assert.deepEqual(fx.fc, { v: 0, status: 'fact', src: 'wikidata' });
+  const b = { q: 'Q1', n: 'Battle of X', deaths: null, cas: null, ...fx };
+  delete b.detail;
+  const g = groupBattles([b]);
+  assert.equal(stateOf(b, g.byQ.get('Q1')), 'zero');
+  assert.equal(figureLine(g.byQ.get('Q1')), '0 casualties · Recorded');
+  assert.equal(completeness([b], g).zero, 1);
+  // The infobox's casualties beside Wikidata's "no value": both, disputed, as for deaths.
+  const art = { title: 'Battle of X', rev: 1, ts: '2026-11-16T00:00:00Z', state: 'figure', deaths: null, cas: { low: 50, high: 50, status: 'fact' }, sides: [{ cas: { low: 50, high: 50, status: 'fact', refs: ['A 2000'] } }] };
+  const both = battleFigures({ wd: st, article: art }).fc;
+  assert.deepEqual([both.v, both.status, both.src, both.alt], [50, 'disputed', 'wikipedia', { v: 0, src: 'wikidata' }]);
+});
+
 // 16 November 2026: over a period the side layer read only the period's two ends, so France, at war on the Allied side
 // in September 1939 and again in May 1945, read as unchanged across its occupation, and a state on a side only between
 // the ends was not shown. Every month between the handles is read now (as the Kardashev Tracker's periodPowers, 7bfe77d).

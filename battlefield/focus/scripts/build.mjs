@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
 import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
-import { readArticle, battleFigures, wdStatements } from './infobox.mjs';
+import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
 
@@ -364,7 +364,6 @@ console.log('GED loaded through', maxGed);
 
 // ---- Per war (the files are kept in memory and written only once the whole build has passed the guard)
 const index = [], pending = [], figLost = [];
-const FIG_KEYS = ['fd', 'fc', 'fs', 'fw', 'fwp', 'fu'];
 const FIG_SOURCES = { wikidata: 'Wikidata (CC0): deaths (P1120), casualties (P1590), injured (P1339) and missing (P1446), each statement with its rank, qualifiers and references',
   wikipedia: 'English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own',
   ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (CC BY 4.0): recorded clashes within 25 km of a battle in its dates, since 1989, shown apart' };
@@ -461,7 +460,8 @@ for (const w of wars) {
   const detail = {}, tally = { kept: 0, wp: 0, zero: 0, ucdp: 0, unread: 0 };
   for (const b of battles) {
     const failed = wdFailed.has(b.q) || (b.w && wpFailed.has(b.w)), old = prevBy.get(b.q);
-    if (failed && old) { for (const k of FIG_KEYS) if (old[k] !== undefined) b[k] = old[k]; if (prevDetail[b.q]) detail[b.q] = prevDetail[b.q]; tally.kept++; continue; }
+    const kept = failed ? keptFigures(b, old) : null;
+    if (kept) { Object.assign(b, kept); if (prevDetail[b.q]) detail[b.q] = prevDetail[b.q]; tally.kept++; continue; }
     const a = b.w ? found.articles?.get(b.w) : null;
     const article = !b.w ? null : !a ? { why: failed ? 'failed' : 'noart' } : a.redirected ? { why: 'redirect' } : { ...readSafely(a.text, b), title: a.title, rev: a.rev, ts: a.ts };
     const fx = battleFigures({ deaths: b.deaths, cas: b.cas, wd: stmts.get(b.q) || [], article, ucdp: ucdpNear(b, ev) });

@@ -213,9 +213,10 @@ export function ownFigure(b, m = 'd') {
     // Wikidata's count, with the range its qualifiers give (a minimum and a maximum, or limits), and where the infobox
     // disputes it, both readings: ranked by the lower (the review's F9 and F10).
     const own = f?.src === 'wikidata' ? f : null;
-    let low = own?.low ?? wd, high = own?.high ?? wd;
-    if (own?.alt?.src === 'wikipedia') { low = Math.min(low, own.alt.low ?? own.alt.v); high = Math.max(high, own.alt.high ?? own.alt.v); }
-    out = { low, high, status: own ? own.status : 'fact', src: 'wikidata', origin: 'source', ...(own?.atLeast ? { atLeast: true } : {}), ...(own?.uv ? { uv: own.uv } : {}) };
+    let low = own?.low ?? wd, high = own?.high ?? wd, atLeast = !!own?.atLeast;
+    // The range stays open at the top where the reading that gives its top is an "at least" (the second review's X2).
+    if (own?.alt?.src === 'wikipedia') { const aHigh = own.alt.high ?? own.alt.v; low = Math.min(low, own.alt.low ?? own.alt.v); atLeast = aHigh > high ? !!own.alt.atLeast : aHigh === high ? atLeast || !!own.alt.atLeast : atLeast; high = Math.max(high, aHigh); }
+    out = { low, high, status: own ? own.status : 'fact', src: 'wikidata', origin: 'source', ...(atLeast ? { atLeast: true } : {}), ...(own?.uv ? { uv: own.uv } : {}) };
   } else if (f) {
     const low = f.low ?? f.v, high = f.high ?? f.v;
     if (low > 0 || high > 0) out = { low, high, status: f.status, src: f.src, origin: f.origin || 'source', ...(f.atLeast ? { atLeast: true } : {}), ...(f.one ? { one: true } : {}), ...(f.civ ? { civ: true } : {}), ...(f.uv ? { uv: f.uv } : {}) };
@@ -258,10 +259,14 @@ export function sourceNote(f) {
   if (f.src === 'wikidata') return f.uv === 'w' ? 'Wikidata, imported from Wikipedia, no other reference' : 'Wikidata, no reference';
   return 'the article cites nothing for it';
 }
+/** Whether a battle's figure is a recorded zero: of deaths, or Wikidata's of casualties, which take in the killed (the
+ *  second review's X8). An infobox's injuries of none, beside deaths not given, are no zero of the whole. */
+const zeroOf = b => [b.fd, b.fc?.src === 'wikidata' ? b.fc : null].some(f => f && (f.v === 0 || (f.low === 0 && f.high === 0)));
 /** What a battle with no figure of its own shows: a recorded zero, figures not read, or none found. */
 export function noFigureText(b, n = null) {
   const zero = f => f && (f.v === 0 || (f.low === 0 && f.high === 0));
   if (zero(b.fd)) return `0 deaths · ${kindWords(b.fd.status)}`;
+  if (zeroOf(b)) return `0 casualties · ${kindWords(b.fc.status)}`;
   if (n && !n.fig && !n.cfig && n.parts.length) return 'No figure for the whole or its listed parts';
   if (b.fs === 'unread') return 'Figures not read';
   return 'No figure found';
@@ -269,7 +274,7 @@ export function noFigureText(b, n = null) {
 /** The state a battle is in, one of five: 'figure', 'zero', 'parts' (counted through its parts), 'unread', 'none'. */
 export function stateOf(b, n = null) {
   if (ownFigure(b, 'd') || ownFigure(b, 'c')) return 'figure';
-  if (b.fd && (b.fd.v === 0 || (b.fd.low === 0 && b.fd.high === 0))) return 'zero';
+  if (zeroOf(b)) return 'zero';
   if (n && (n.fig || n.cfig)) return 'parts';
   return b.fs === 'unread' ? 'unread' : 'none';
 }

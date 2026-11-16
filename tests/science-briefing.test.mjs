@@ -394,7 +394,8 @@ test('page: a headline and a summary sent in TeX read in plain characters (the s
     await page.goto(`${BASE}/science/briefing/#type=paper&w=7d&sort=newest`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     const entry = page.locator('#list .entry', { has: page.locator(`h4 a[href="${pick.url}"]`) });
     await entry.waitFor({ timeout: 20000 });
-    assert.equal((await entry.locator('h4 a').first().textContent()).replace(/(Paywall|Sign-up)$/, '').trim(), 'Lower Limit on the Double-Alpha Decay of ²²⁴Ra');
+    // The newest paper may be at a source that is not free: its link then ends with the unseen comma and the access label.
+    assert.equal((await entry.locator('h4 a').first().textContent()).replace(/(,\s*)?(Paywall|Sign-up)$/, '').trim(), 'Lower Limit on the Double-Alpha Decay of ²²⁴Ra');
     assert.equal(await entry.locator('.sum').textContent(), 'The daughter nucleus is ²¹⁶Po, in Er³⁺:CaWO₄, costing $450.');
     assert.deepEqual(errors, []);
   } finally {

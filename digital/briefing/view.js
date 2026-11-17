@@ -104,7 +104,8 @@ const norm = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-�
 export function matchesQuery(item, q, outletName = '') {
   const words = norm(q).split(/\s+/).filter(Boolean);
   if (!words.length) return true;
-  const hay = norm(`${item.title} ${item.summary} ${item.authors || ''} ${item.section || ''} ${item.doi || ''} ${outletName}`);
+  // The page shows a feed's TeX in plain characters ("$^{87}\mathrm{Sr}$" as "⁸⁷Sr"): a reader searches for what is shown.
+  const hay = norm(`${item.title} ${item.summary} ${globalThis.PRPTex.plain(item.title || '')} ${globalThis.PRPTex.plain(item.summary || '')} ${item.authors || ''} ${item.section || ''} ${item.doi || ''} ${outletName}`);
   return words.every(w => hay.includes(w));
 }
 

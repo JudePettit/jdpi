@@ -402,3 +402,18 @@ test('page: a headline and a summary sent in TeX read in plain characters (the s
     await browser.close();
   }
 });
+
+// A title's TeX is shown in plain characters, and a link from the search page carries the title as shown: the
+// briefing's own search must find the story by it (17 November 2026: a strontium-87 paper could not be opened by its link).
+test('search: a story whose title holds TeX is found by the title as the page shows it', async () => {
+  const views = [await import('../science/briefing/view.js'), await import('../econ/briefing/view.js'), await import('../digital/briefing/view.js')];
+  const item = { title: 'Spin-Resolved Microscopy of $^{87}\\mathrm{Sr}$ $\\mathrm{SU}(N)$ Fermi-Hubbard Systems', summary: 'A quantum gas microscope.' };
+  const shown = globalThis.PRPTex.plain(item.title);
+  assert.match(shown, /⁸⁷Sr SU\(N\)/);
+  for (const v of views) {
+    assert.ok(v.matchesQuery(item, shown), 'the title as shown');
+    assert.ok(v.matchesQuery(item, '87Sr microscopy'), 'plain digits');
+    assert.ok(v.matchesQuery(item, 'mathrm'), 'the raw text still matches');
+    assert.ok(!v.matchesQuery(item, '88Sr'), 'a different isotope does not');
+  }
+});

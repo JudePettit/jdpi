@@ -43,7 +43,7 @@
         ]
       },
       "focus": { "points": [[13.4, 52.52, "East Berlin"], [18.65, 54.35, "Gdańsk shipyard, 1980"]], "bbox": [-2, 40, 42, 62] },
-      "link": { "label": "Kino · The Second World War in Europe: a divided continent", "suite": "kino", "module": "kino-wars", "at": "kino/index.html?cat=wars#doc=ww2-europe&s=aftermath" },
+      "link": { "label": "Kino · The Second World War in Europe and Africa: a divided continent", "suite": "kino", "module": "kino-wars", "at": "kino/index.html?cat=wars#doc=ww2-europe&s=aftermath" },
       "cites": ["kenney-2002", "kotkin-gross-2009"]
     },
     {

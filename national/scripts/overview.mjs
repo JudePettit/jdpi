@@ -9,7 +9,7 @@
 // Until 17 November 2026 the build read Germany under 260 alone, so its leaders since 1926 began with Adenauer, and its
 // wars of 1926–45 were none: Retrospective Battlefield's Correlates of War wars file Germany's Second World War and
 // Spanish Civil War under 255. The GDR (265) is a state of its own, not counted in Germany's figures, as the
-// Retrospective keeps it (no ISO3).
+// Retrospective keeps it (no ISO3). Yemen, which had no code at all, is GW_PREDECESSOR's (below).
 
 export const SINCE = '1926-10-26'; // "the last 100 years", as the overview has counted them
 
@@ -19,13 +19,45 @@ const round = (x, d = 3) => (x == null ? null : Math.round(x * 10 ** d) / 10 ** 
 /** The Retrospective's codes for a country (ISO3), from its scripts/countries.mjs COUNTRIES: e.g. DEU → [255, 260]. */
 export const retroCodes = (COUNTRIES, iso3) => Object.entries(COUNTRIES).filter(([, c]) => c.iso3 === iso3).map(([gw]) => +gw).sort((a, b) => a - b);
 
+// A present-day state whose Gleditsch and Ward code the code list (countrycode) files under a predecessor's row, which
+// has no ISO3, so the state itself had none: Yemen (until 17 November 2026 National Analysis had no code for it, and so
+// no conflict figures, no wars this year and no links to the Battlefield or the Retrospective). The Gleditsch and Ward
+// list, as the UCDP/PRIO Armed Conflict Dataset's codebook (version 25.1, Appendix 1, "List of System Members Since
+// 1946") gives it, has "678 YEM Yemen (Arab Republic of Yemen)" from 1946 with no end, and "680 YPR Yemen, People's
+// Republic of" from 1967 to 1990: the list carries North Yemen's 678 on through the union of 22 May 1990, which has no
+// code of its own there (679, the union's code, is the Correlates of War's), and UCDP files the wars of Yemen since 1990
+// under 678. So Yemen is 678 for all its years; South Yemen (680) is a state of its own until 1990, not counted in
+// Yemen's figures, as the German Democratic Republic is not in Germany's. `row` is the code list's row that holds the
+// code: the build takes the code only while that row still gives it.
+export const GW_PREDECESSOR = { YEM: { gw: 678, row: 'Yemen Arab Republic' } };
+
+/**
+ * Every country's Gleditsch and Ward code: the Retrospective's (COUNTRIES, keyed by code), else the code list's
+ * (`gwn` of the row with its ISO3), else GW_PREDECESSOR's where the code list's own row gives that code. `codelist` is
+ * the parsed code list (rows with iso3c, gwn and country.name.en). Returns Map(ISO3 → code); `warn` hears of a
+ * predecessor row that no longer gives its code.
+ */
+export function gwCodes(COUNTRIES, codelist, warn = () => {}) {
+  const out = new Map(Object.entries(COUNTRIES).map(([gw, c]) => [c.iso3, +gw]));
+  for (const r of codelist) if (r.iso3c && r.gwn && !out.has(r.iso3c)) out.set(r.iso3c, +r.gwn);
+  for (const [iso3, p] of Object.entries(GW_PREDECESSOR)) {
+    if (out.has(iso3)) continue;
+    const row = codelist.find(r => r['country.name.en'] === p.row);
+    if (row && +row.gwn === p.gw && !row.iso3c) out.set(iso3, p.gw);
+    else warn(`GW_PREDECESSOR: the code list's row "${p.row}" no longer gives ${p.gw} without an ISO3; ${iso3} has no code`);
+  }
+  return out;
+}
+
 /**
  * Leaders in the last 100 years, their average and median time in office, the longest-serving, the irregular
  * seizures of power and the elections and referendums since 1926, over every one of the country's records (`records`:
  * the Retrospective's countries[code] for each of its codes). `current` is the country's leader, repeated for the
- * Integration Hub's catalog.
+ * Integration Hub's catalog. `term` is the fixed term of the office the current leader holds, from Wikidata (the
+ * office's "term length", P2097: { years, office }, officeTerm below), or null; it is kept only where the office is
+ * held together (`together.term`), where the page gives it in words in place of a longest-serving leader.
  */
-export function leadership(records, current, today = new Date().toISOString().slice(0, 10)) {
+export function leadership(records, current, today = new Date().toISOString().slice(0, 10), term = null) {
   const rs = records.filter(Boolean);
   if (!rs.length) return null;
   const leaders = rs.flatMap(c => c.leaders).sort((a, b) => String(a.start).localeCompare(String(b.start)));
@@ -58,12 +90,35 @@ export function leadership(records, current, today = new Date().toISOString().sl
     longest: longest ? { name: longest.full || longest.name, years: round(years(longest.start, longest.end, today), 1), from: longest.start.slice(0, 4), to: longest.end ? longest.end.slice(0, 4) : 'present' } : null,
     irregular: leaders.filter(l => l.start >= SINCE && l.entry && l.entry !== 'Regular').length,
     elections: events.filter(e => (e.type === 'election' || e.type === 'referendum') && e.date >= SINCE).length,
-    ...(shared.length > terms.size / 2 ? { together: { at: usual, ...(months ? { months } : {}) } } : {}),
+    // An office held together for a fixed term (San Marino's Captains Regent: Wikidata gives Q258045 a term length of
+    // 0.5 years) carries the term, `together.term`: the page then names no longest-serving leader (every holder serves
+    // one term at a time, so the "longest" is one of hundreds tied at 0.5 years) and gives the term's length in words.
+    ...(shared.length > terms.size / 2 ? { together: { at: usual, ...(months ? { months } : {}), ...(term ? { term } : {}) } } : {}),
     // The leaders come from the Retrospective's hand-built lists (its scripts/leader-lists.mjs: Montenegro and ten
     // microstates Archigos does not cover), not from Archigos and Wikidata: the page names those sources.
     ...(ls.some(l => l.source === 'leader-lists') ? { leaderLists: true } : {}),
     current,
   };
+}
+
+// Wikidata's units for a term length (P2097) in years: year (Q577), annum (Q1092296, which Germany's chancellor has) and
+// month (Q5151). Another unit is not read.
+const TERM_UNITS = { Q577: 1, Q1092296: 1, Q5151: 1 / 12 };
+
+/**
+ * The fixed term of the office the current leader holds, from Wikidata: `offices` is Map(office QID → [{ amount, unit }])
+ * of the country's offices of head of state or of government (the one `current.office` names), as the build's offices
+ * query reads them (P2097, with its unit). Returns { years, office } where exactly one such office has exactly one term
+ * length in years or months; otherwise null (no term, or more than one to choose from).
+ */
+export function officeTerm(offices) {
+  const found = [];
+  for (const [office, vals] of offices || []) {
+    const ys = [...new Set(vals.filter(v => TERM_UNITS[v.unit] != null && Number.isFinite(+v.amount)).map(v => round(+v.amount * TERM_UNITS[v.unit])))];
+    if (ys.length === 1 && ys[0] > 0) found.push({ years: ys[0], office });
+    else if (ys.length > 1) return null;
+  }
+  return found.length === 1 ? found[0] : null;
 }
 
 /**

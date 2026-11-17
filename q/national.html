@@ -132,6 +132,7 @@ details.dt .tbl{max-height:320px;margin-top:8px;border:1px solid var(--prp-line-
 .legend .nd i{vertical-align:-1px}
 #rows td.num{white-space:nowrap} /* a bar, its figure and its "partial" tag stay on one line */
 .st{margin-left:5px;color:var(--prp-muted);font:500 10px var(--prp-font-mono);letter-spacing:.03em;text-transform:uppercase}
+.st.together{display:block;margin:2px 0 0;white-space:normal} /* under the figure, so the column stays narrow on a phone */
 td .nv{color:var(--prp-muted);font-size:12px}
 /* a period: the ranking with the movers beside it (above it on a narrow screen) */
 .rankwrap{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
@@ -215,6 +216,11 @@ td .nv{color:var(--prp-muted);font-size:12px}
 // by national/scripts/build.mjs from World Bank indicators, Wikidata and PRP's own submodules.
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// The one plural for every count the page writes beside its noun: exactly 1 takes the singular, any other number (0,
+// 1.5, 2) the plural ("1 election", "3 elections"; Germany read "1 elections" until 17 November 2026). `many` where the
+// plural is not the singular and an s; `shown`, the number as it is written ("5,018"), where it is not the number.
+const plural = (n, one, many = one + 's') => (Number(n) === 1 ? one : many);
+const count = (n, one, many, shown = n) => `${shown} ${plural(n, one, many)}`;
 const DIMS = [['political', 'Political'], ['economic', 'Economic'], ['social', 'Social'], ['technological', 'Technological'], ['legal', 'Legal'], ['environmental', 'Environmental']];
 const SHELL = new URL('../', location.href).href;
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
@@ -348,7 +354,26 @@ const yearsOf = c => { const ys = Object.values(c.latest || {}).map(v => v?.[0])
 // Where two or more hold the office together (San Marino's Captains Regent, two a term), "Leaders in the last 100 years"
 // counts each person: the line under it says so, with how long a term runs (national/scripts/overview.mjs, `together`).
 // No count of terms: the list's start and end pairs are not its terms (the review of 17 November 2026, F2).
-const togetherNote = L => { const t = L.together; if (!t) return ''; const n = ['', 'One', 'Two', 'Three', 'Four'][t.at] || String(t.at), m = t.months; return `${n} hold the office together${m ? `, for ${m} month${m === 1 ? '' : 's'} at a time` : ''}; each person is counted`; };
+const togetherNote = L => { const t = L.together; if (!t) return ''; const n = ['', 'One', 'Two', 'Three', 'Four'][t.at] || String(t.at), m = t.months; return `${n} hold the office together${m ? `, for ${count(m, 'month')} at a time` : ''}; each person is counted`; };
+// An office held together for a fixed term (together.term, the office's term length on Wikidata: San Marino's Captains
+// Regent, six months) has no one longest-serving leader: every holder serves one term at a time, so the "longest" was
+// one of hundreds tied at "0.5 years". The figure is the term's length in words, while no one in the list held office
+// longer than one term at a time; otherwise the longest-serving, as for every other country.
+const NUMBER_WORDS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+const termWords = years => {
+  const m = Math.round(years * 12), y = m / 12, n = (v, one) => `${NUMBER_WORDS[v] || v} ${plural(v, one)}`;
+  const w = m % 12 === 0 ? n(y, 'year') : n(m, 'month');
+  return w[0].toUpperCase() + w.slice(1);
+};
+const longestStat = (c, L, stat) => {
+  const t = L.together?.term;
+  if (t && L.longest.years <= t.years) return stat('Longest-serving leader', esc(termWords(t.years)), `each term, held by ${(NUMBER_WORDS[L.together.at] || L.together.at)} together; no one held office longer than one term at a time, so no one is named`, `${SRC.leaders(c)}; the term: Wikidata, the office’s term length (${t.office})`);
+  return stat('Longest-serving leader', esc(L.longest.name), `${count(L.longest.years, 'year')} (${L.longest.from}–${L.longest.to})`, SRC.leaders(c));
+};
+// The Leadership figures the ranking (and the map's tooltip) gives for an office held together count each holder:
+// the ranking marks them, with the note the profile gives under the count.
+const TOGETHER_METRICS = new Set(['leaders100', 'avgTenure']);
+const togetherMark = (m, c) => (TOGETHER_METRICS.has(m.id) && c?.leadership?.together ? togetherNote(c.leadership) : '');
 // The current leader's source: the office the Atlas names (when it decides it), and the holder from Wikidata.
 const leaderSrc = c => (!c.leader ? '' : `${c.leader.rule === 'atlas' ? `Office named by ${SRC.atlas()}; holder from ` : ''}${SRC.wikidata()}${c.leader.source === 'correction' ? ', with VM’s correction' : ''}`);
 
@@ -407,7 +432,7 @@ function likeForLike(m, c) {
   }
   return { ok: true };
 }
-const fmtChg = (m, d) => (d == null ? '–' : m.fmt === pct ? `${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(Math.round(d * 100))} pts` : `${d > 0 ? '+' : d < 0 ? '−' : '±'}${fmtVal(Math.abs(d), m.unit)}`);
+const fmtChg = (m, d) => (d == null ? '–' : m.fmt === pct ? `${d > 0 ? '+' : d < 0 ? '−' : '±'}${count(Math.abs(Math.round(d * 100)), 'pt')}` : `${d > 0 ? '+' : d < 0 ? '−' : '±'}${fmtVal(Math.abs(d), m.unit)}`);
 // One country's figure for the years shown, with what the reader must be told about it: hatched (a partial score, or a
 // value of an earlier year), and the plain words for the tooltip and the table.
 function cellOf(m, c) {
@@ -436,8 +461,8 @@ function cellOf(m, c) {
   }
   if (raw == null) return { v: null, words: md === 'latest' || m.timeless ? 'No value' : `No value for ${view.to}` };
   if (v == null) return { v: null, raw, few: true, words: fewWords(m, raw, F) };
-  const part = m.press && F.dims < 6;
-  return { v, hatch: part, words: part ? `partial: ${F.dims} of 6 dimensions` : '' };
+  const part = m.press && F.dims < 6, shared = togetherMark(m, c);
+  return { v, hatch: part, ...(shared ? { together: shared } : {}), words: part ? `partial: ${F.dims} of 6 dimensions` : shared };
 }
 // Each group's source, with its own date (the comparison's group rows and the map's caption).
 const SOURCE = { PESTLE: () => `${SRC.worldBank}, scored as in Country PESTLE`, Leadership: () => SRC.retro(), Conflict: () => `${SRC.ucdp()}; ${SRC.battlefield()}`, Energy: () => SRC.energy() };
@@ -608,7 +633,7 @@ function renderTable() {
       return `<td class="num">${sa}</td><td class="num">${sb}</td><td class="num">${fmtChg(m, d)}${lf.ok ? '' : `<span class="st" title="Not ranked, as not like for like: ${esc(lf.why)}">not ranked</span>`}</td><td class="num">${endCell(pm, fr(c))}</td>`;
     }
     const x = cellOf(m, c), F = fr(c);
-    return `<td class="num">${x.v == null ? (x.few ? tooFew(m.fmt, x.raw) : md === 'latest' || m.timeless ? m.fmt(null) : noVal) : m.fmt(x.v) + yearTag(m, c) + (x.hatch && m.code ? '<span class="st">earlier</span>' : '')}</td><td class="num">${md === 'latest' && F.overall == null ? '–' : pressCell(F)}</td><td class="num">${pct(F.coverage)}</td>`;
+    return `<td class="num">${x.v == null ? (x.few ? tooFew(m.fmt, x.raw) : md === 'latest' || m.timeless ? m.fmt(null) : noVal) : m.fmt(x.v) + yearTag(m, c) + (x.hatch && m.code ? '<span class="st">earlier</span>' : '') + (x.together ? `<span class="st together" title="${esc(x.together)}">each holder counted</span>` : '')}</td><td class="num">${md === 'latest' && F.overall == null ? '–' : pressCell(F)}</td><td class="num">${pct(F.coverage)}</td>`;
   };
   $('#rows').innerHTML = list.map(c => `<tr data-iso="${c.iso3}"><td><input type="checkbox" data-cmp="${c.iso3}" ${compare.includes(c.iso3) ? 'checked' : ''} aria-label="Compare ${esc(c.name)}"></td>
     <td><a class="cname" href="#country=${c.iso3}">${esc(c.name)}</a></td><td class="muted">${esc(c.region)}</td>${cells(c)}</tr>`).join('');
@@ -633,7 +658,7 @@ function renderMovers() {
     : `<li class="muted">${D.countries.some(c => m.get(c, 'start') != null) ? `No score for ${esc(yname(view.to))}` : `No score for ${esc(yname(view.from))}${view.from === STOPS[0] ? ' (the first year held: a score needs an earlier value)' : ''}`}, so no change to rank.</li>`;
   $('#rose').innerHTML = mv.rose.top.map(li).join('') + more(mv.rose) || empty;
   $('#fell').innerHTML = mv.fell.top.map(li).join('') + more(mv.fell) || empty;
-  $('#mvnote').textContent = mv.apart ? `${mv.apart} more ${mv.apart === 1 ? 'change is' : 'changes are'} not ranked, as not like for like: ${m.id === 'overall' ? 'the two ends rest on different dimensions, or fewer than three' : ''}${m.id === 'overall' && isLatest(view.to) ? ', or ' : ''}${isLatest(view.to) ? `Latest's score uses values from before ${view.from}` : ''}. They are marked in the table.${m.id === 'overall' && PR && view.from < fullFrom() ? ` Before ${fullFrom()} hardly any score has its political and legal dimensions (the governance indicators begin in 1996, and a change needs two values), so a period starting earlier compares few countries like for like.` : ''}` : '';
+  $('#mvnote').textContent = mv.apart ? `${mv.apart} more ${plural(mv.apart, 'change is', 'changes are')} not ranked, as not like for like: ${m.id === 'overall' ? 'the two ends rest on different dimensions, or fewer than three' : ''}${m.id === 'overall' && isLatest(view.to) ? ', or ' : ''}${isLatest(view.to) ? `Latest's score uses values from before ${view.from}` : ''}. They are marked in the table.${m.id === 'overall' && PR && view.from < fullFrom() ? ` Before ${fullFrom()} hardly any score has its political and legal dimensions (the governance indicators begin in 1996, and a change needs two values), so a period starting earlier compares few countries like for like.` : ''}` : '';
   $('#mvnote').hidden = !mv.apart;
   $('#mvhint').textContent = `${m.label}, ${yname(view.from)} to ${yname(view.to)}`;
 }
@@ -659,10 +684,11 @@ function spark(pts, better, mark = null) {
 
 /* ---------- profile ---------- */
 async function openProfile(iso) { selected = iso; setTab('profile'); writeHash(); await renderProfile(); }
-// Calendar event types, as the Realtime and Historical Calendars name them.
-const CAL_TYPES = { election: 'elections', referendum: 'referendums', party: 'party contests', leader: 'new leaders', inauguration: 'inaugurations',
-  resignation: 'resignations', coup: 'coups', conflict: 'conflicts', ceasefire: 'ceasefires', assassination: 'assassinations', crisis: 'crises',
-  protest: 'protests', treaty: 'treaties', summit: 'summits', sanctions: 'sanctions', vote: 'parliamentary votes', court: 'court rulings' };
+// Calendar event types, as the Realtime and Historical Calendars name them: one of a type, and more than one.
+const CAL_TYPES = { election: ['election'], referendum: ['referendum'], party: ['party contest'], leader: ['new leader'], inauguration: ['inauguration'],
+  resignation: ['resignation'], coup: ['coup'], conflict: ['conflict'], ceasefire: ['ceasefire'], assassination: ['assassination'], crisis: ['crisis', 'crises'],
+  protest: ['protest'], treaty: ['treaty', 'treaties'], summit: ['summit'], sanctions: ['set of sanctions', 'sets of sanctions'], vote: ['parliamentary vote'], court: ['court ruling'] };
+const calCount = (t, n) => count(n, ...(CAL_TYPES[t] || [t, t]));
 // The current leader, the same field in the profile and the comparison: c.leader, the holder of the office with the
 // most power (the one Political Atlas names, or else the one the system of government gives), by name from the heads
 // of state and government (national/scripts/leaders.mjs). "since" only when the source gives a start date. An office
@@ -756,20 +782,20 @@ async function renderProfile() {
       ${stat('Head of state', headHtml(c, 'headOfState'), hogNote(c), headSrc(c))}
       ${stat('Current leader', leaderHtml(c), leaderNote(c), leaderSrc(c))}
       ${L ? stat('Leaders in the last 100 years', L.leaders100, togetherNote(L), SRC.leaders(c)) : ''}
-      ${L ? stat('Average time in office', (L.avgTenure ?? '–') + ' yrs', 'median ' + (L.medianTenure ?? '–') + ' yrs', SRC.leaders(c)) : ''}
-      ${L?.longest ? stat('Longest-serving leader', esc(L.longest.name), `${L.longest.years} years (${L.longest.from}–${L.longest.to})`, SRC.leaders(c)) : ''}
+      ${L ? stat('Average time in office', L.avgTenure == null ? '–' : count(L.avgTenure, 'yr'), 'median ' + (L.medianTenure == null ? '–' : count(L.medianTenure, 'yr')), SRC.leaders(c)) : ''}
+      ${L?.longest ? longestStat(c, L, stat) : ''}
       ${L ? stat('Irregular seizures of power', L.irregular, 'coups and foreign impositions since 1926', SRC.leaders(c)) : ''}
       ${L ? stat('Elections and referendums', L.elections, 'since 1926', SRC.retro()) : ''}
-      ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${K.conflictYears} conflict-years)`, SRC.ucdp()) : ''}
-      ${K ? stat('Years at war', K.yearsAtWar, `of ${K.yearsWithConflict} years with any armed conflict`, SRC.ucdp()) : ''}
+      ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${count(K.conflictYears, 'conflict-year')})`, SRC.ucdp()) : ''}
+      ${K ? stat('Years at war', K.yearsAtWar, `of ${count(K.yearsWithConflict, 'year')} with any armed conflict`, SRC.ucdp()) : ''}
       ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`, SRC.ucdp()) : ''}
-      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${K.cowWars1926_45} wars 1926–45`, `${SRC.ucdp()}; Correlates of War`) : ''}
+      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${count(K.cowWars1926_45, 'war')} 1926–45`, `${SRC.ucdp()}; Correlates of War`) : ''}
       ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '', SRC.energy()) : ''}
-      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => `${n} ${CAL_TYPES[t] || t}`).join(' · '), SRC.calendar()) : ''}
+      ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => calCount(t, n)).join(' · '), SRC.calendar()) : ''}
       ${stat('PESTLE pressure', P.overall == null && md !== 'latest' ? 'No value' : pct(P.overall), esc(pestleNote), pestleSrc)}
       ${stat('Population', `${fmtVal(pop?.[1], 'people')}${pop ? ` <small class="yr">${esc(pop[0])}</small>` : ''}`, gdp ? `GDP ${fmtVal(gdp[1], 'US$')} (${esc(gdp[0])})` : '', SRC.worldBank)}
     </div>
-    ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">${esc(SRC.battlefield())}</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${w.deaths.toLocaleString('en-GB')} deaths</small>`)).join('')}</div>` : ''}
+    ${K?.active2026?.length ? `<div class="prp-panel-head"><b>Wars and warzones active this year</b><span class="hint">${esc(SRC.battlefield())}</span></div><div class="wars">${K.active2026.map(w => link('rt', 'battlefield', `q/battlefield.html?view=live&war=${w.id}`, `${esc(w.name)} <small>${count(w.deaths, 'death', 'deaths', w.deaths.toLocaleString('en-GB'))}</small>`)).join('')}</div>` : ''}
     <div class="prp-panel-head"><b>Month by Month</b><span class="hint">VM's own marks, month against the three before · UCDP and GDELT</span></div><div id="monthly" class="monthly" aria-live="polite"><div class="muted">Loading…</div></div>
     <div class="prp-panel-head"><b>PESTLE · ${md === 'latest' ? 'latest change' : md === 'year' ? `${Y}, against the previous value within five years` : `${whenText()} (first against last value inside it)`}</b><span class="hint">VM's own composite, not a forecast or a ranking of worth · improving, worsening or stable against each indicator's threshold · blank: context only</span></div>
     <div class="dims">${dimHtml}</div>
@@ -887,7 +913,7 @@ async function renderCompare(focus) {
   const gsrc = g => `${sourceOf(METRICS.find(m => m.group === g))}${g !== 'PESTLE' && METRICS.find(m => m.group === g).timeless && md !== 'latest' ? ' · not by year: today’s figures' : g === 'PESTLE' ? ` · ${whenText()}${md === 'period' ? ', over the period' : ''}` : md === 'period' ? ` · change ${whenText()}` : ''}`;
   const chartable = D.indicators, code = cmpCode && indBy.has(cmpCode) ? cmpCode : chartable[0].code;
   $('#compare').innerHTML = `<div class="prp-panel">
-    <div class="prp-panel-head"><b>Comparing ${cs.length} ${cs.length === 1 ? 'country' : 'countries'}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
+    <div class="prp-panel-head"><b>Comparing ${count(cs.length, 'country', 'countries')}</b><span class="chips">${cs.map((c, i) => `<button type="button" class="prp-chip on" data-rm="${c.iso3}" aria-label="Remove ${esc(c.name)} from the comparison"><i class="sw" style="background:${seriesColour(i)}"></i>${esc(c.name)} <span aria-hidden="true">✕</span></button>`).join('')}</span></div>
     ${cmpPicker()}
     <figure class="prp-figure cmpfig"><label class="fld"><span class="prp-label">Chart over time</span><select class="prp-select" id="cmpind" aria-label="Indicator to chart">${chartable.map(i => `<option value="${i.code}"${i.code === code ? ' selected' : ''}>${esc(i.label)}</option>`).join('')}</select></label>
       <svg id="cmpsvg" viewBox="0 0 900 280" role="img" aria-label="Indicator over time for the compared countries"></svg>
@@ -1180,7 +1206,7 @@ Promise.all([fetch('../national/data/index.json').then(r => r.json()), fetch('ht
   $('#region').innerHTML += [...new Set(d.countries.map(c => c.region))].sort().map(r => `<option>${esc(r)}</option>`).join('');
   // The page's own build date and its refresh's schedule (the workflow's cron, design/prp-freshness.js); each figure's
   // own year or date and source are beside it.
-  $('#meta').innerHTML = `<span>Updated <b>${esc(dateOf(d.generated) || '–')}</b></span><span>Coverage <b>${d.countries.length} countries · ${d.years[0]}–${d.years[1]}</b></span><span>Indicators <b>${d.indicators.length}</b> (${d.indicators.filter(i => i.core).length} PESTLE core)</span><span>Sources <b>World Bank · Wikidata · UCDP</b></span><span id="rebuilt"></span><span>Each figure's year or date, and its source, beside it</span>`;
+  $('#meta').innerHTML = `<span>Updated <b>${esc(dateOf(d.generated) || '–')}</b></span><span>Coverage <b>${count(d.countries.length, 'country', 'countries')} · ${d.years[0]}–${d.years[1]}</b></span><span>Indicators <b>${d.indicators.length}</b> (${d.indicators.filter(i => i.core).length} PESTLE core)</span><span>Sources <b>World Bank · Wikidata · UCDP</b></span><span id="rebuilt"></span><span>Each figure's year or date, and its source, beside it</span>`;
   import('../design/prp-freshness.js').then(F => {
     const r = F.rhythmFromCron(F.SCHEDULES['national-refresh.yml']).phrase;
     $('#rebuilt').innerHTML = `Rebuilt <b>${esc(r)}</b>`;

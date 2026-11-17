@@ -39,7 +39,10 @@ export const CITE_ONLY = {
 // What VM hosts from a cite-only source. kind:
 //   'total'    a cited total (one per war), with the citation and link: allowed;
 //   'pending'  kept as it is until Jude chooses (the S0 report of 16 November 2026, the Correlates of War choice), with why,
-//              since when (`since`) and the choice it waits on (`awaits`), so that it cannot stand unseen.
+//              since when (`since`) and the choice it waits on (`awaits`), so that it cannot stand unseen;
+//   'pointer'  names the source and says where to read it, and carries none of its values: in every record that names the
+//              source, each field in `fields` holds the words `says`, never a number (pointerProblems below), and the
+//              download's notes give the source's citation and address.
 // Row-level data is never listed here: it is taken out of every download. `dataset` is a catalogue id; `file`, page data
 // that cites the source in its own `sources`; `dir`, every file in a folder (the Hub's country profiles, the lake's shards).
 const CHOICE = 'Jude\'s choice on the Correlates of War (the S0 report of 16 November 2026): ask the project for written permission, '
@@ -48,7 +51,8 @@ export const HOSTED = [
   { source: 'cow', dataset: 'war-focus-wars', kind: 'total', what: 'one cited Correlates of War total for each of the 9 War Focus wars it covers (totalDeaths, deathsSource)' },
   { source: 'cow', file: 'battlefield/focus/data/index.json', kind: 'total', what: 'the same totals: War Focus\'s own index, which the war-focus-wars download serves' },
   { source: 'cow', dir: 'lake/data/e', kind: 'total', what: 'the same totals in the Master Index\'s lines for those 9 wars ("… battle deaths, the Correlates of War total (Sarkees and Wayman 2010, …)"), each opening War Focus (lake/scripts/adapters.mjs)' },
-  { source: 'cow', dataset: 'war-focus-monthly-deaths', kind: 'pending', since: '2026-11-16', awaits: CHOICE, what: 'VM\'s spread of those 9 cited totals over their months, each month marked an estimate: whether the spread stays in the download is Jude\'s choice' },
+  // Jude's decision F1 of 17 November 2026 (VM-DECISIONS-17NOV.md): what VM offers as a download carries no COW value.
+  { source: 'cow', dataset: 'war-focus-monthly-deaths', kind: 'pointer', since: '2026-11-17', fields: ['deaths'], says: 'see the Correlates of War', what: 'no Correlates of War value: in every month of the 9 War Focus wars whose deaths come from a COW total, deaths says "see the Correlates of War" in place of VM\'s spread of that total, and the file\'s notes give COW\'s citation and address (War Focus\'s page keeps the cited totals on screen)' },
   { source: 'cow', dir: 'integration/data/countries', kind: 'pending', since: '2026-11-16', awaits: CHOICE, what: 'a count per country of Correlates of War wars 1926–1945 (conflict_history.wars_1926_1945) in the API\'s and MCP\'s country profiles, from National Analysis\'s cowWars1926_45 (national/data/index.json, shown on q/national.html as "N wars 1926–45"), derived from the Retrospective Battlefield\'s wars; follows Jude\'s choice for that page. The national-countries download does not carry it' },
   { source: 'cow', file: 'battlefield/history/data/wars.json', kind: 'pending', since: '2026-11-16', awaits: CHOICE, what: 'the Retrospective Battlefield\'s 40 wars of 1926–1945 (type, years, places, dated sides, battle deaths), page data and no longer a download: no allowed source replaces them (UCDP starts in 1946), so the page stays as it is until Jude chooses' },
 ];
@@ -69,6 +73,21 @@ export function namesSource(record, src) {
     return false;
   };
   return walk(record, false);
+}
+
+// What is wrong with a 'pointer' download's records (HOSTED above): each record that names the source and holds, in one of
+// the entry's fields, anything but its words. [] when it carries none of the source's values.
+// A figure written out in words of the record (1,350,000) counts too: a source's total quoted in a note is its value.
+export const FIGURE = /\d{1,3}(?:,\d{3})+/;
+export function pointerProblems(records, held, src) {
+  const out = [];
+  for (const r of records) {
+    if (!namesSource(r, src)) continue;
+    const at = `${r.war_id ?? r.id ?? '?'} ${r.month ?? ''}`.trim();
+    for (const f of held.fields || []) if (r?.[f] !== held.says) out.push(`${at}: ${f} is ${JSON.stringify(r?.[f])}, not "${held.says}"`);
+    for (const [k, v] of Object.entries(r || {})) if (typeof v === 'string' && FIGURE.test(v)) out.push(`${at}: ${k} gives a figure (${v.match(FIGURE)[0]})`);
+  }
+  return out;
 }
 
 // A licence or terms line that calls a cite-only source free to use, open or public domain: every clause naming it.

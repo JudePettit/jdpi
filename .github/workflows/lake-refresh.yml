@@ -23,7 +23,7 @@ jobs:
           path: hp-retrospective
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: node lake/scripts/build.mjs --retro hp-retrospective
       - name: Tag every Bibliotheca book again
         run: for slug in $(node -p "require('./bibliotheca/data/index.json').books.map(b => b.slug).join(' ')"); do node bibliotheca/scripts/tag-terms.mjs "$slug" > /dev/null; done

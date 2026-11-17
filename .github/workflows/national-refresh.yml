@@ -27,7 +27,7 @@ jobs:
           path: political-atlas
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: node national/scripts/build.mjs --retro hp-retrospective --atlas political-atlas
       - name: Test the new data
         env:

@@ -310,7 +310,10 @@ function visibleEvents() {
 // A filled mark is a confirmed event, a ring an expected (tentative) one; colour = the type's family, shape = the type.
 const mark = (type, tentative) => `<i class="eventdot${TYPES[type]?.shape ? ' ' + TYPES[type].shape : ''}${tentative ? ' tentative' : ''}" style="--c:${TYPES[type]?.colour || 'var(--prp-cat-1)'}" aria-hidden="true"></i>`;
 const dot = e => mark(e.type, e.status === 'tentative');
-const typeName = e => TYPES[e.type]?.tag || 'Event';
+// A lower court's ruling (in a political case with its own article) names the court's level: "Appeal court ruling",
+// "Trial court ruling", "Lower court ruling". A supreme, constitutional or international court's stays "Court ruling".
+const LEVELS = { 'appeal court': 'Appeal court ruling', 'trial court': 'Trial court ruling', 'lower court': 'Lower court ruling' };
+const typeName = e => (e.type === 'court' && LEVELS[e.level]) || TYPES[e.type]?.tag || 'Event';
 const tag = e => e.status === 'tentative' ? `<span class="tag tent">${dot(e)}${esc(typeName(e))} · expected</span>` : `<span class="tag">${dot(e)}${esc(typeName(e))}</span>`;
 
 function showDay(dt, list) {

@@ -52,7 +52,7 @@ One JSON file per documentary, `kino/data/<category>/<id>.json`; the file name i
 ```jsonc
 {
   "id": "ww2-europe",                       // lower-case words joined by hyphens = the file name
-  "title": "The Second World War in Europe, 1939–1945",
+  "title": "The Second World War in Europe and Africa, 1939–1945",
   "category": "wars",                       // one of the six; = the folder
   "subjects": [{ "qid": "Q362", "label": "World War II" }],   // Wikidata items; labels are checked at build time
   "era": [1939, 1945],                      // whole years; BC as negative numbers

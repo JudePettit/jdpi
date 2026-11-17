@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { WARS } from './wars.mjs';
+import { WARS, leftOutOf } from './wars.mjs';
 import { battleDates, partsWithin, apportion, eventMonths, cowMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
@@ -249,8 +249,12 @@ async function deathsAndParts(qids) {
   for (const [b, list] of casStmts) cas.set(b, casualtiesOf(list));
   return { has, deaths, cas, coords };
 }
-async function battlesOf(qid, span, theatre) {
+async function battlesOf(qid, span, theatre, warId) {
   const { within, edges } = await partsOf(qid, span, theatre);
+  // What War Focus leaves out of this war although Wikidata makes it part of it (wars.mjs LEFT_OUT, with its reason).
+  const left = leftOutOf(warId, edges);
+  const wasWithin = new Set([...left.keys()].filter(q => within.has(q)));
+  for (const q of left.keys()) within.delete(q);
   const rows = await sparql(`SELECT ?b ?bLabel ?bDescription ?pt ?ptp ?st ?stp ?en ?enp ?article WHERE {
     ?b wdt:P361+ wd:${qid} .
     ?b wdt:P31/wdt:P279* ?type . VALUES ?type { ${BATTLE_TYPES} }
@@ -295,7 +299,14 @@ async function battlesOf(qid, span, theatre) {
     if (d !== b) { Object.assign(b, d); conflicts++; }
   }
   if (long.length) console.log(`  ${long.length} ends checked against Wikipedia, ${conflicts} drawn to the article's earlier end`);
-  return { battles: kept, edges: [...edges, ...has], articles };
+  // Each row of LEFT_OUT that applied, with the battles and operations it took out: those within the war's span and
+  // theatre (partsWithin) that would otherwise have been read for the list, not every item Wikidata files under them.
+  const leftOut = [...new Set(left.values())].map(row => {
+    const items = [...new Set(rows.map(r => r.b.value.split('/').pop()).filter(q => wasWithin.has(q) && left.get(q) === row))];
+    if (items.length) console.log(`  left out: ${row.name} and its parts, ${items.length} items (wars.mjs LEFT_OUT)`);
+    return { q: row.qid, n: row.name, items: items.length, why: row.why, source: row.source, url: row.url };
+  }).filter(x => x.items);
+  return { battles: kept, edges: [...edges, ...has], articles, leftOut };
 }
 // A whole and its parts (figures.mjs, RV-05 A1): the links between the war's own battles both ways (`up` on a part,
 // `upAlso` where it has another whole in the list, `parts` on the whole), and each item's own death figure: a figure
@@ -378,7 +389,7 @@ for (const w of wars) {
   const gws = [...new Set([...w.sides.a.gw || [], ...w.sides.b.gw || [], ...w.theatre || []].map(x => (Array.isArray(x) ? x[0] : x)))];
   const theatre = { points: ev.filter(e => isFinite(e.lat) && isFinite(e.lon)).map(e => [e.lon, e.lat]), states: gws.flatMap(gw => boxes.get(gw) || []) };
   // A battle dated only to its decade (u 'undated') is kept when the decade overlaps the war's years, and listed last.
-  const found = qid ? await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre) : { battles: [], edges: [] };
+  const found = qid ? await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre, w.id) : { battles: [], edges: [] };
   const battles = found.battles.filter(b => (b.u === 'undated' ? decadeFits(b.dec, w.start, end) : b.s >= w.start.slice(0, 4) && b.s <= end));
   battles.sort(byStart);
   wholesAndParts(battles, found.edges, w.id);
@@ -489,6 +500,7 @@ for (const w of wars) {
       ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}),
       ...(fd ? { fd } : {}), ...(fc ? { fc } : {}), ...(fs ? { fs } : {}), ...(fw ? { fw } : {}), ...(fwp ? { fwp } : {}), ...(fu ? { fu } : {}) })),
     cells: cellsOut, top: topOut, events: ev.length,
+    ...(found.leftOut?.length ? { leftOut: found.leftOut } : {}),
   };
   pending.push([join(WAR_DIR, w.id + '.json'), JSON.stringify(data)]);
   index.push({ id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, totalDeaths: total, deathsSource: source,

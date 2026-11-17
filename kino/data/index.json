@@ -530,7 +530,7 @@
   },
   {
    "id": "ww2-europe",
-   "title": "The Second World War in Europe, 1939–1945",
+   "title": "The Second World War in Europe and Africa, 1939–1945",
    "category": "wars",
    "era": [
     1939,
@@ -555,7 +555,7 @@
    "scenes": 15,
    "parts": 0,
    "quiz": 0,
-   "sources": 37,
+   "sources": 40,
    "scholarly": 13,
    "links": [
     "rs/battlefield-history",
@@ -716,7 +716,7 @@
    "scenes": 13,
    "parts": 0,
    "quiz": 0,
-   "sources": 11,
+   "sources": 15,
    "scholarly": 6,
    "links": [
     "rs/battlefield-history",
@@ -729,18 +729,20 @@
     "countries": [
      "CHN",
      "PRK",
+     "RUS",
      "KOR"
     ],
     "tones": {
      "CHN": 3,
      "PRK": 2,
+     "RUS": 2,
      "KOR": 1
     },
     "bbox": [
-     121.5,
-     34.5,
-     132,
-     43
+     122,
+     33.5,
+     141,
+     45.5
     ],
     "arrows": [
      {

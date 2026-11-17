@@ -242,6 +242,28 @@ describe('the workflows: only a tested commit is deployed', () => {
     parseYaml(read('.github/actions/commit-data/action.yml'));
   });
 
+  // One Node version (Jude's decision B6, 17 November 2026): the workflows run the Node the suite is run on here (24),
+  // not 22; on 15 November the difference held every deployment for half an hour (Node 22's fetch threw where 24's did
+  // not). Every setup-node step names the same major version, and no package or version file names another.
+  test('one Node version: every workflow sets up Node 24', () => {
+    const NODE = 24;
+    const setups = Object.entries(workflows).flatMap(([f, w]) => Object.entries(w.jobs || {}).flatMap(([id, j]) => steps(j).filter(s => /^actions\/setup-node@/.test(s.uses || '')).map(s => ({ f, id, s }))));
+    assert.ok(setups.length >= 15, `${setups.length} setup-node steps`);
+    for (const { f, id, s } of setups) {
+      assert.equal(String(s.with?.['node-version']), String(NODE), `${f} ${id}: node-version ${s.with?.['node-version']}`);
+      assert.match(s.uses, /^actions\/setup-node@v[4-9]$/, `${f} ${id}: a setup-node that installs Node ${NODE}`);
+    }
+    // A job that runs node without setting it up would take the runner's own version.
+    for (const [f, w] of Object.entries(workflows)) for (const [id, j] of Object.entries(w.jobs || {})) {
+      if (j.uses) continue;
+      const commands = steps(j).map(s => s.run || '').join('\n').split('\n').filter(l => !/^\s*#/.test(l)).join('\n');
+      if (/\b(node|npm|npx)\s/.test(commands)) assert.ok(steps(j).some(s => /^actions\/setup-node@/.test(s.uses || '')), `${f} ${id} runs Node without setting up Node ${NODE}`);
+    }
+    for (const f of ['.nvmrc', '.node-version']) if (existsSync(join(ROOT, f))) assert.equal(read(f).trim().replace(/^v/, '').split('.')[0], String(NODE), f);
+    const engines = JSON.parse(read('package.json')).engines?.node;
+    if (engines) assert.match(engines, new RegExp(`\\b${NODE}\\b`), `package.json engines: ${engines}`);
+  });
+
   test('wrangler runs in one place only, pinned to one exact version', () => {
     // Commands only: a shell comment may name it.
     const commands = w => runs(w).split('\n').filter(l => !/^\s*#/.test(l)).join('\n');

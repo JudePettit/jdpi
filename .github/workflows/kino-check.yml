@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: node kino/scripts/validate.mjs
       - run: node kino/scripts/build-index.mjs --offline
       - name: Built files are up to date

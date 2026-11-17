@@ -372,6 +372,39 @@ test('build-battles: dates keep their calendar and precision; a value\'s source 
   for (const r of battles.rows) assert.ok(conflicts.has(r.q), `${r.label} (${r.q}) is a Master Index conflict of 1400–1600`);
 });
 
+// The decisions of 17 November 2026 (O2): build-battles.mjs stamped a new time on every run, so a rerun on the same
+// Wikidata answers changed battles.json, the layer's `built`, Wikidata's version in VM's sources and the battles@ pin of
+// every view saved since. The stamp now moves only with the rows. No network: the file is made by layerFile.
+test('build-battles: a run whose rows are byte for byte the same keeps its stamp; changed rows take the run\'s time (O2)', async () => {
+  const T = await import('../omni/scripts/build-battles.mjs');
+  assert.equal(typeof T.layerFile, 'function', 'build-battles.mjs makes its file with layerFile(rows, prev, now)');
+  const text = o => JSON.stringify(o, null, 2) + '\n';
+  // The committed file, its rows read again at a later time: the same bytes, stamp, years and words.
+  const committed = raw('omni/data/layers/battles.json').toString('utf8');
+  const prev = JSON.parse(committed);
+  const again = T.layerFile(JSON.parse(JSON.stringify(prev.rows)), prev, '2027-01-01T00:00:00Z');
+  assert.equal(again.built, prev.built, 'unchanged rows keep the stamp');
+  assert.equal(text(again), committed, 'and the file is written with the same bytes');
+  // One value changed (a point moved by Wikidata): the run's own time, in the stamp and in the words.
+  const moved = structuredClone(prev.rows); moved[0].pt = [moved[0].pt[0] + 0.01, moved[0].pt[1]];
+  const next = T.layerFile(moved, prev, '2027-01-01T00:00:00Z');
+  assert.equal(next.built, '2027-01-01T00:00:00Z');
+  assert.match(next.about, /read from Wikidata on 2027-01-01 by/);
+  // A row's keys in another order are not the same bytes: the stamp moves (byte for byte, never "about the same").
+  const reordered = prev.rows.map(r => Object.fromEntries(Object.entries(r).reverse()));
+  assert.equal(T.layerFile(reordered, prev, 'now').built, 'now');
+  // No file yet, or a stamp that is not text: the run's own time.
+  assert.equal(T.layerFile(prev.rows, null, '2027-01-01T00:00:00Z').built, '2027-01-01T00:00:00Z');
+  assert.equal(T.layerFile(prev.rows, { ...prev, built: 7 }, 'now').built, 'now');
+  // The years follow the rows.
+  assert.deepEqual([again.from, again.to], [prev.from, prev.to]);
+  // The builder writes through it, from the file as it stands, and passes the kept stamp on to the catalogue and sources.
+  const src = raw('omni/scripts/build-battles.mjs').toString('utf8');
+  assert.match(src, /const prev = readJson\(OUT\);\s+const file = layerFile\(rows, prev, stamp\(\)\)/);
+  assert.match(src, /updateLayer\(LAYERS, 'battles', \{ built: file\.built,/);
+  assert.doesNotMatch(src, /const built = stamp\(\)/);
+});
+
 const CPU_LIMIT_MS = Number(process.env.PRP_CPU_LIMIT_MS) || 40;
 test('CPU: one frame\'s work (the slice at 1494 and the flagship\'s extent) stays under the limit', () => {
   const topo = json(`omni/data/borders/${M.fileFor(index, 1494).file}`);

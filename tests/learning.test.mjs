@@ -2,13 +2,13 @@
 // quizzes respond, progress saves.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { pageTest } from './tools/pages.mjs';
 import { fileURLToPath } from 'node:url';
 import { THINKERS, SPECTRUM_SCHOOL, spectrumTag } from '../lake/scripts/thinkers.mjs';
 import { learning } from '../lake/scripts/adapters.mjs';
-import { findQuote, quotedRuns } from '../bibliotheca/scripts/quotes.mjs';
+import { findQuote, quotedRuns, pieces, shelfParagraphs } from '../bibliotheca/scripts/quotes.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
@@ -185,6 +185,97 @@ test('quotations: every quotation in the courses matches a book on the shelf; an
   // the shelf's quotations name their translator
   assert.match(md('economics').find(l => l.startsWith('> "The history of all')), /translated by Samuel Moore/);
   assert.match(md('politics').find(l => l.startsWith('> "… the strong do')), /translated by Richard Crawley/);
+});
+
+// The quotation rule's two named exceptions (Jude's decision F2, 17 November 2026). Outside the courses, words in
+// quotation marks that match no book on the shelf are allowed in two places only, and only on these terms:
+//  1. Omni News briefings (briefing/data/latest.json and the Science, Economics and Digital briefings' stories.json):
+//     a publisher's own words, inside an item that carries that publisher's name (its source, named in the file's
+//     sources) and the link to its story. The words are the publisher's headline or description, shown as its own and
+//     led back to it; VM does not quote anyone in its own voice there.
+//  2. Wikipedia extracts in the Master Index (lake/data/e, each entity's summary): Wikipedia's text, which may be
+//     reused under CC BY-SA 4.0 with its credit and link, so only where the store and the page credit Wikipedia and
+//     the entity carries its article's title (the page links "Wikipedia ↗" from it). On 16 November three extracts were
+//     seen quoting Nobel prize citations: Thomas Cech (Q135180), Eric Allin Cornell (Q205954) and Carl Wieman (Q206379).
+// A quoted run anywhere else in those files, or one in an item without its link or publisher, or an extract without
+// Wikipedia's credit or link, fails the test.
+// A run is on the shelf only when findQuote finds it; a piece found nowhere in the shelf's text settles it sooner.
+let shelfText = null;
+const seen = new Map();
+const onShelf = q => {
+  if (!seen.has(q)) seen.set(q, !!(shelfText ??= shelfParagraphs().map(p => p.text).join('\n')) && pieces(q).every(p => shelfText.includes(p)) && findQuote(q).length > 0);
+  return seen.get(q);
+};
+const unshelved = text => (typeof text === 'string' ? quotedRuns(text, 6) : []).filter(q => !onShelf(q));
+function briefingQuoteProblems(file, data) {
+  const named = new Map((data.sources || []).map(s => [s.id, s.name || s.outlet]));
+  const out = [];
+  for (const it of data.items || []) {
+    const runs = Object.values(it).flatMap(unshelved);
+    if (!runs.length) continue;
+    const link = it.u ?? it.url, src = it.s ?? it.source;
+    if (!/^https?:\/\/\S+$/.test(link || '')) out.push(`${file}: "${runs[0]}" is quoted in an item with no link to its story`);
+    if (!named.get(src)) out.push(`${file}: "${runs[0]}" is quoted in an item whose publisher is not named (source ${JSON.stringify(src)})`);
+  }
+  return out;
+}
+const WIKIPEDIA_CREDIT = 'Wikipedia summaries (CC BY-SA 4.0)';
+function extractQuoteProblems(file, entities, sources) {
+  const credited = (sources || []).includes(WIKIPEDIA_CREDIT), out = [];
+  for (const [q, e] of Object.entries(entities)) {
+    const runs = unshelved(e.summary);
+    if (!runs.length) continue;
+    if (!credited) out.push(`${file} ${q}: "${runs[0]}" is quoted in a Wikipedia extract but the store does not credit Wikipedia`);
+    if (!(typeof e.wiki === 'string' && e.wiki.trim())) out.push(`${file} ${q}: "${runs[0]}" is quoted in an extract with no Wikipedia article to link to`);
+  }
+  return out;
+}
+
+test('quotations: the two named exceptions, a publisher\'s words with its name and link, Wikipedia\'s with its credit and link', () => {
+  const read = p => JSON.parse(readFileSync(new URL(`../${p}`, import.meta.url), 'utf8'));
+  // Fixtures: each exception fails without its link, name or credit.
+  const run = 'He said “these six words are not on the shelf at all” today.';
+  const brief = { sources: [{ id: 'pub', name: 'A Publisher' }], items: [{ s: 'pub', t: 'A headline', u: 'https://example.org/story', d: run }] };
+  assert.deepEqual(briefingQuoteProblems('fixture', brief), [], 'a publisher\'s words with its name and link');
+  assert.equal(briefingQuoteProblems('fixture', { ...brief, items: [{ ...brief.items[0], u: '' }] }).length, 1, 'no link: fails');
+  assert.equal(briefingQuoteProblems('fixture', { ...brief, items: [{ ...brief.items[0], s: 'unknown' }] }).length, 1, 'no publisher\'s name: fails');
+  assert.equal(briefingQuoteProblems('fixture', { sources: [{ id: 'pub', outlet: 'An Outlet' }], items: [{ source: 'pub', title: run }] }).length, 1, 'the other briefings\' shape, with no url: fails');
+  const ent = { Q1: { label: 'X', wiki: 'X', summary: run } };
+  assert.deepEqual(extractQuoteProblems('fixture', ent, [WIKIPEDIA_CREDIT]), [], 'an extract with its credit and link');
+  assert.equal(extractQuoteProblems('fixture', ent, ['Wikidata (CC0)']).length, 1, 'no credit: fails');
+  assert.equal(extractQuoteProblems('fixture', { Q1: { ...ent.Q1, wiki: null } }, [WIKIPEDIA_CREDIT]).length, 1, 'no link: fails');
+  assert.deepEqual(extractQuoteProblems('fixture', { Q1: { summary: 'No quotation here.' } }, []), [], 'no quoted run, nothing to credit');
+
+  // The briefings as committed.
+  let runs = 0;
+  for (const f of ['briefing/data/latest.json', 'science/briefing/data/stories.json', 'econ/briefing/data/stories.json', 'digital/briefing/data/stories.json']) {
+    const data = read(f);
+    assert.deepEqual(briefingQuoteProblems(f, data), []);
+    runs += data.items.flatMap(it => Object.values(it).flatMap(unshelved)).length;
+    // the files' other parts (sources, counts) hold no quoted words
+    const strings = v => typeof v === 'string' ? [v] : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : [];
+    assert.deepEqual(strings(Object.entries(data).filter(([k]) => k !== 'items')).flatMap(unshelved), [], `${f}: quoted words outside the items`);
+  }
+  assert.ok(runs > 0, 'the briefings were read');
+  // The Master Index: the store and the page credit Wikipedia, and every quoted extract has its article.
+  const manifest = read('lake/data/manifest.json');
+  assert.ok(manifest.sources.includes(WIKIPEDIA_CREDIT), 'the store credits Wikipedia');
+  assert.match(readFileSync(new URL('../encyclopedia/index.html', import.meta.url), 'utf8'), /Summaries from <a href="https:\/\/en\.wikipedia\.org"[^>]*>Wikipedia<\/a> \(CC BY-SA 4\.0/, 'the page credits Wikipedia');
+  const dir = new URL('../lake/data/e/', import.meta.url);
+  const problems = [], named = new Map();
+  for (const f of readdirSync(dir).filter(f => f.endsWith('.json'))) {
+    const entities = JSON.parse(readFileSync(new URL(f, dir), 'utf8'));
+    problems.push(...extractQuoteProblems(`lake/data/e/${f}`, entities, manifest.sources));
+    for (const q of ['Q135180', 'Q205954', 'Q206379']) if (entities[q]) named.set(q, entities[q]);
+  }
+  assert.deepEqual(problems, []);
+  // the three extracts named on 16 November are still covered: each quotes a Nobel citation and has its article
+  for (const [q, label] of [['Q135180', 'Thomas Cech'], ['Q205954', 'Eric Allin Cornell'], ['Q206379', 'Carl Wieman']]) {
+    const e = named.get(q);
+    if (!e) continue; // an entity that has left the store needs no exception
+    assert.equal(e.label, label);
+    if (unshelved(e.summary).length) assert.ok(e.wiki, `${q} carries its Wikipedia article`);
+  }
 });
 
 test('page: Finance and Economics open with their introductory intros', pageTest, async () => {

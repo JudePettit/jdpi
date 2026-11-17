@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { pageTest, launch } from './tools/pages.mjs';
-import { classify, headline, parseDay, eventsFromItems } from '../calendar/scripts/current-events.mjs';
+import { classify, headline, parseDay, eventsFromItems, courtLevel, politicalCase } from '../calendar/scripts/current-events.mjs';
 import { countryOf, countryInText, normaliseCountry } from '../calendar/scripts/countries.mjs';
 import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar, infoboxDates, preferOwnDates, ownArticle } from '../calendar/scripts/wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from '../calendar/scripts/outlook.mjs';
@@ -94,6 +94,46 @@ test('Current events pages parse into items under their story; one story is thin
   assert.equal(protest.title, '2026 Bolivian protests');
   assert.equal(protest.ref, 'https://example.com/a');
   assert.equal(events.find(e => e.type === 'resignation')?.country, 'Latvia');
+});
+
+// Court rulings below the apex courts (Jude's decision of 17 November 2026, VM-DECISIONS-17NOV.md section G): kept in a
+// political case with its own Wikipedia article and labelled with the court's level. The items are Wikipedia's Current
+// events portal as it read on 21 January, 23 September and 5 November 2026 (links kept, reports cut).
+test('news classifier: a lower court counts in a political case with its own article, labelled with its level', () => {
+  const day = (date, heading, body) => parseDay(date, `'''Law and crime'''\n${heading ? `*[[${heading}]]\n**` : '*'}${body} [https://example.com/report (AP)]`);
+  // A lower court, a political case, the case's own article as the story: kept, labelled, linked to that article.
+  const yamagami = eventsFromItems(day('2026-01-21', 'Trial of Tetsuya Yamagami', 'A [[Judicial system of Japan|district court]] in [[Nara (city)|Nara]], [[Japan]], sentences [[Tetsuya Yamagami]] to [[Life imprisonment in Japan|life in prison]] for [[Assassination of Shinzo Abe|assassinating]] former [[Prime Minister of Japan|prime minister]] [[Shinzo Abe]] in 2022.'));
+  assert.deepEqual(yamagami.map(e => [e.type, e.level, e.country, e.source]), [['court', 'trial court', 'Japan', 'https://en.wikipedia.org/wiki/Trial_of_Tetsuya_Yamagami']]);
+  // The same court and a political case, but no article of its own (Joshua Wong, 5 November): left out, and not
+  // "Sanctions" either.
+  const wong = day('2026-11-05', null, 'The [[Hong Kong High Court]] sentences [[Pro-democracy camp (Hong Kong)|pro-democracy activist]] [[Joshua Wong]] to an additional 10 years in [[Prisons in Hong Kong|prison]] under the [[2020 Hong Kong national security law|national security law]] for conspiring with foreign entities to impose [[International sanctions|sanctions]] against [[China]] and [[Hong Kong]].');
+  assert.equal(classify(wong[0]), null);
+  assert.deepEqual(eventsFromItems(wong), []);
+  // Its own article but not a political case (Harvey Weinstein, 23 September): left out.
+  assert.equal(classify(day('2026-09-23', 'Harvey Weinstein sexual abuse cases', 'A [[Judiciary of New York|court]] in [[New York (state)|New York]], [[United States]], sentences former [[Cinema of the United States|film]] producer [[Harvey Weinstein]] to 15 years in [[Incarceration in the United States|prison]] for committing a [[Rape laws in the United States|criminal sexual act]].')[0]), null);
+  // Its own article and a word a company or a civil suit also uses ("president", "parties"): not a political case.
+  // A company president's fraud trial, and a civil suit whose item says "both parties", stay out (written for the
+  // second reading of 17 November 2026; the words of a real report are not needed for the rule).
+  assert.deepEqual(eventsFromItems(day('2026-03-02', 'Olympus scandal', 'The [[Tokyo District Court]] sentences the former president of [[Olympus Corporation]] to three years in prison for hiding investment losses.')), []);
+  assert.deepEqual(eventsFromItems(day('2026-03-02', 'Depp v. Heard', 'A [[Fairfax County, Virginia|court]] in [[Virginia]], [[United States]], orders both parties to pay costs in the defamation case between actors [[Johnny Depp]] and [[Amber Heard]].')), []);
+  // The office is read from what the item links ("Ministry of …", "Senator of …", a party): a former minister's
+  // corruption trial is kept although its words say only "minister".
+  assert.deepEqual(eventsFromItems(day('2026-09-24', 'Chromebook procurement scandal', 'A [[Judiciary of Indonesia|court]] in [[Jakarta]], [[Indonesia]], reduces former [[Ministry of Education and Culture (Indonesia)|education minister]] [[Nadiem Makarim]]\'s prison sentence from 10 to nine years for [[Corruption in Indonesia|corruption]].')).map(e => [e.type, e.level]), [['court', 'lower court']]);
+  assert.equal(politicalCase({ text: 'The former president of a company is sentenced.', links: [{ target: 'Olympus Corporation' }], topics: [] }), false);
+  assert.equal(politicalCase({ text: 'A court sentences a man.', links: [{ target: 'President of South Korea' }], topics: [] }), true);
+  assert.equal(politicalCase({ text: 'A court convicts two activists of sedition.', links: [], topics: [] }), true);
+  // A parliament sitting as an impeachment court is not a lower court.
+  assert.equal(classify(day('2026-09-23', 'Second impeachment of Sara Duterte', 'The [[Philippine Senate]], sitting as an [[Impeachment in the Philippines|impeachment court]], rules that only senator-judges able to participate count toward the conviction threshold in [[Vice President of the Philippines|vice president]] [[Sara Duterte]]\'s trial.')[0])?.type ?? null, null);
+  // A supreme court's ruling is unchanged: no level, the court's article as its source.
+  const japan = eventsFromItems(day('2026-06-22', null, 'The [[Supreme Court of Japan]] upholds the [[Tokyo High Court]]\'s order to dissolve the [[Unification Church]].'));
+  assert.deepEqual(japan.map(e => [e.type, e.level, e.source]), [['court', undefined, 'https://en.wikipedia.org/wiki/Supreme_Court_of_Japan']]);
+  // The level comes from the court's own name.
+  assert.equal(courtLevel('The Court of Appeal of Paris'), 'appeal court');
+  assert.equal(courtLevel('A United States appeals court'), 'appeal court');
+  assert.equal(courtLevel('The Seoul Central District Court'), 'trial court');
+  assert.equal(courtLevel('An Azerbaijani military court'), 'trial court');
+  assert.equal(courtLevel('The Seoul High Court'), 'lower court');
+  assert.equal(courtLevel('A Spanish court'), 'lower court');
 });
 
 test('Wikipedia lists: dates, summit tables and electoral calendars', () => {
@@ -449,7 +489,8 @@ test('Realtime Calendar: type chips count, filter (one or several), link and leg
     // Every chip pairs a coloured, shaped mark with the type's name and a count.
     assert.ok(chips.every(c => /\d$/.test(c.trim())), chips.join(' | '));
     assert.equal(await page.locator('#filters .filter:not([data-filter=all]) .eventdot').count(), TYPES.length);
-    const tags = async () => new Set((await page.locator('#eventrows .eventrow > .tag').allInnerTexts()).map(t => t.trim().toLowerCase()));
+    // A lower court's ruling is tagged with its level ("Trial court ruling"): one type with the apex courts' rulings.
+    const tags = async () => new Set((await page.locator('#eventrows .eventrow > .tag').allInnerTexts()).map(t => t.trim().toLowerCase().replace(/^(?:appeal|trial|lower) court ruling$/, 'court ruling')));
     await page.click('#filters .filter[data-filter=resignation]');
     assert.deepEqual([...await tags()], ['resignation']);
     assert.match(page.url(), /types=resignation/);
@@ -461,7 +502,7 @@ test('Realtime Calendar: type chips count, filter (one or several), link and leg
     assert.match(legend, /Resignations/);
     assert.match(legend, /Court rulings/);
     const tooltip = await page.locator('.day[role=button]').first().getAttribute('title');
-    assert.match(tooltip, /\((?:Resignation|Court ruling)\)/);
+    assert.match(tooltip, /\((?:Resignation|(?:Appeal court |Trial court |Lower court |Court )ruling)\)/i);
     await page.click('#filters .filter[data-filter=all]');
     assert.ok((await tags()).size > 2, 'All events shows every type again');
     assert.doesNotMatch(page.url(), /types=/);
@@ -480,12 +521,36 @@ test('Realtime Calendar: ?types= opens with those types; marks take the categori
   await withPage(async page => {
     await page.goto(`${BASE}/q/calendar.html?period=contemporary&month=${MONTH}&types=court`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForSelector('.eventrow', { timeout: 20000 });
-    assert.deepEqual([...new Set(await page.locator('#eventrows .eventrow > .tag').allInnerTexts())].map(t => t.trim().toLowerCase()), ['court ruling']);
+    assert.deepEqual([...new Set((await page.locator('#eventrows .eventrow > .tag').allInnerTexts()).map(t => t.trim().toLowerCase().replace(/^(?:appeal|trial|lower) court ruling$/, 'court ruling')))], ['court ruling']);
     light = await colour(page);
     await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
     dark = await colour(page);
   });
   assert.ok(light && dark && light !== dark, `court mark: light ${light}, dark ${dark}`);
+});
+
+// The data carries a lower court's level from the next daily refresh; the page is checked on the served data with one
+// court ruling given a level, as the build writes it.
+test('Realtime Calendar: a lower court\'s ruling is labelled with the court\'s level; an apex court\'s is not', pageTest, async () => {
+  const court = ALL.filter(e => e.type === 'court' && e.date.slice(0, 7) === MONTH);
+  assert.ok(court.length >= 2, `two court rulings in ${MONTH}`);
+  const lower = court.find(e => !e.level) || court[0];
+  await withPage(async page => {
+    await page.route(/\/calendar\/data\/2020s\.json/, async route => {
+      const body = await (await route.fetch()).json();
+      for (const e of body.events) if (e.type === 'court' && e.date === lower.date && e.title === lower.title) e.level = 'trial court';
+      await route.fulfill({ json: body });
+    });
+    await page.goto(`${BASE}/q/calendar.html?period=contemporary&month=${MONTH}&types=court`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('.eventrow', { timeout: 20000 });
+    const row = page.locator('#eventrows .eventrow', { hasText: lower.title.slice(0, 40) }).first();
+    assert.equal((await row.locator('.tag').innerText()).trim().toLowerCase(), 'trial court ruling');
+    const others = (await page.locator('#eventrows .eventrow > .tag').allInnerTexts()).map(t => t.trim().toLowerCase());
+    assert.ok(others.includes('court ruling'), others.join(' | '));
+    await row.locator('[data-more]').click();
+    await page.waitForSelector('#modal:not([hidden])');
+    assert.match(await page.locator('#modal-meta').innerText(), /^Trial court ruling · /i);
+  });
 });
 
 test('Realtime Calendar fits a phone: no horizontal scroll at 360px', pageTest, async () => {

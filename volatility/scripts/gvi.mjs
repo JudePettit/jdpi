@@ -210,16 +210,21 @@ export function rescoreDay(x, prior) {
 }
 
 // index.json: per-country daily rows [day, score, [5 components] or null, events, tone, coverage initial] and global rows
-// [day, located events, slices, mean score or null] for the last 365 days, and each country's latest-day record.
-// `stored` lists the day files oldest first and load(day) reads one. The day files are the only source for the days they
-// cover: rows are carried over from the previous index only for days older than the oldest file (pruned ones), so a day
-// that is skipped or deleted leaves no row behind.
+// [day, located events, slices, mean score or null, method, baseline days] for the last 365 days, and each country's
+// latest-day record. `stored` lists the day files oldest first and load(day) reads one. The day files are the only source
+// for the days they cover: rows are carried over from the previous index only for days older than the oldest file (pruned
+// ones), so a day that is skipped or deleted leaves no row behind.
+// The method and baseline days are the day file's own `method` and `baselineDays` (Jude's decision G, 17 November 2026:
+// Volatility records which method scored each day, so Month by Month's marks can compare like with like, and a day
+// rescored by --rescore carries the method that rescored it). A pruned day keeps what its row recorded; a row written
+// before 17 November 2026, or a file without them, has null: not recorded, never guessed.
+const recorded = v => (v === undefined ? null : v);
 export function buildIndex(prev, stored, load, generated) {
   if (!stored.length) throw new Error('No complete day is stored; nothing to index');
   const first = stored[0];
   // Pruned days live on through their rows, except a short or thin day that older code wrote: its rows would hold nulls.
   const kept = g => g[0] < first && g[2] >= MIN_SLOTS && g[1] >= MIN_EVENTS;
-  const global = new Map((prev?.global || []).filter(kept).map(g => [g[0], g]));
+  const global = new Map((prev?.global || []).filter(kept).map(g => [g[0], [...g.slice(0, 4), recorded(g[4]), recorded(g[5])]]));
   const series = {};
   for (const [iso, s] of Object.entries(prev?.countries || {})) series[iso] = { name: s.name, days: new Map(s.days.filter(r => global.has(r[0])).map(r => [r[0], r])) };
   let last;
@@ -227,7 +232,8 @@ export function buildIndex(prev, stored, load, generated) {
     const x = load(d);
     last = x;
     const anyScored = Object.values(x.countries).some(c => c.score != null);
-    global.set(d, [d, x.totalEvents, x.slots, anyScored ? x.globalMean : null]); // day files written before 2026-10-29 hold 0
+    // Day files written before 2026-10-29 hold a mean of 0 for a day with no score.
+    global.set(d, [d, x.totalEvents, x.slots, anyScored ? x.globalMean : null, typeof x.method === 'string' && x.method ? x.method : null, Number.isInteger(x.baselineDays) ? x.baselineDays : null]);
     for (const [iso, c] of Object.entries(x.countries)) {
       const s = (series[iso] ||= { name: c.name, days: new Map() });
       s.days.set(d, [d, c.score, c.components ? KEYS.map(k => c.components[k]) : null, c.events, c.tone, c.coverage[0]]);

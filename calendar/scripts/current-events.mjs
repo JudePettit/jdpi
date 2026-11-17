@@ -107,6 +107,64 @@ const US_STATE = /\b(?:Alabama|Alaska|Arizona|Arkansas|California|Colorado|Conne
 const COURT = /(?:Supreme(?: Federal| People's)? Court|Federal (?:Supreme|Constitutional) Court|Constitutional (?:Court|Council|Tribunal)|High Court of (?:Justice|Australia)|International Court of Justice|\bICJ\b|International Criminal Court|\bICC\b|European Court of Human Rights|\bECHR\b|(?:European )?Court of Justice(?: of the European Union)?|\bCJEU\b|Inter-American Court of Human Rights)(?: of (?:the )?[A-Z][\w-]+(?: [A-Z][\w-]+){0,3})?/;
 const RULING = /\b(?:rules?|ruled|upholds?|overturns?|strikes? down|annuls?|invalidates?|blocks?|orders?|dismisses?|rejects?|sentences?|convicts?|acquits?|suspends?|unseals?|issues? (?:an? )?(?:arrest )?warrants?|designates?|bans?|halts?|lifts?|quashes?|declares?|finds?|grants?|denies|confirms? (?:the )?charges|disqualifies|reinstates|hands down|delivers (?:its|a) (?:ruling|verdict|judgment|opinion)|drops? (?:the )?charges)\b/;
 
+// Lower courts (Jude's decision of 17 November 2026, VM-DECISIONS-17NOV.md section G): a ruling by a court below the
+// apex courts above counts only in a political case that has its own Wikipedia article, and is labelled with the
+// court's level. Everything is read from the Current events item itself:
+//   - a lower court: "court", "tribunal" or "judge" in the item, not inside an apex name above (so US state supreme
+//     courts stay out, as before), not a parliament sitting as an impeachment court, followed within the sentence by a
+//     ruling in the present tense ("sentences", "convicts", "orders" …);
+//   - its own article: the item or its story heading links an article whose title names the case: "X v. Y", "Trial of
+//     …", "Arrest of …", "Prosecution of …", or a title ending in case, trial, affair, scandal, lawsuit or litigation;
+//   - political: the item or its story links an article on a political office, a ministry, a cabinet, a party or a
+//     country's politics ("President of South Korea", "Prime Minister of Japan", "Senator of the Philippines",
+//     "Ministry of Home Affairs (Nepal)", "Democratic Unionist Party", "Politics of Greece"), or its words name an
+//     office no company or church holds (prime minister, senator, lawmaker, MP, first lady, politician), the
+//     pro-democracy camp, a dissident or a political charge (subversion, sedition, treason, a national security law, a
+//     coup, martial law, electoral fraud, lèse-majesté). Bare words a company, a church or a civil suit also use
+//     ("president", "minister", "governor", "parties", "political", "election") do not count on their own: a
+//     company president's fraud trial and a civil suit between two "parties" are not political cases.
+// The level: "appeal court" (Court of Appeal, appeals court, appellate, cassation), "trial court" (district,
+// magistrates', crown, county, regional, criminal, military, state security, first instance) or "lower court".
+const LOWER_COURT = /\b(?:court|tribunal|judge)\b/gi;
+const LOWER_RULING = /^[^.;]{0,70}?\b(?:rules|ruled|upholds|overturns|quashes|strikes down|annuls|sentences|convicts|acquits|finds [^.;]{0,60}?\b(?:guilty|not guilty|innocent)|disqualifies|reinstates|dismisses|orders|blocks|(?:reduces|increases|gives) [^.;]{0,90}?\bsentence|hands down|delivers (?:its|a) (?:ruling|verdict|judgment))\b/;
+const CASE_ARTICLE = / v\.? [A-Z]|^(?:(?:First|Second|Third) )?(?:Trials?|Prosecution|Indictments?|Arrests?|Imprisonment|Detention|Convictions?|Sentencing|Extradition|Impeachment) of (?:the )?[A-Z]|\b(?:[Cc]ases?|[Tt]rials?|[Aa]ffair|[Ss]candal|[Ss]cam|[Ll]awsuits?|[Ll]itigation)(?: in (?:the )?[A-Z][\w ]*)?(?: \(\d{4}\))?$/;
+const bare = s => String(s).replace(/[‎‏‪-‮]/g, '').trim(); // a heading link can carry a direction mark
+const POLITICAL_LINK = /^(?:(?:Deputy |Vice |First )?(?:President|Prime Minister|Premier|Chancellor|Ministers?|Ministry|Secretary|Senators?|Governor|Mayor|Speaker) (?:of|for)\b|Members? of (?:the )?[\w ]*?(?:Parliament|Congress|House of|Assembly|Senate|Legislat)|Cabinet of|Politics of|Political )|\bParty\b/;
+const POLITICAL_WORDS = /\b(?:prime minister|first lady|senators?|lawmakers?|legislators?|congress(?:man|woman)|members? of parliament|politicians?|pro-democracy|dissidents?|political prisoners?|opposition (?:leader|figure|politician|lawmaker|party)|subversion|sedition|treason|national security law|coup|martial law|electoral fraud|election fraud|vote[- ]rigging|lèse-majesté)\b/i;
+const POLITICAL_MP = /\bMPs?\b/; // an MP, in capitals only
+export function politicalCase(item) {
+  const topics = item.topics || [];
+  const links = [...topics.flatMap(x => x.links || []), ...item.links.map(l => l.target)].map(bare);
+  if (links.some(x => POLITICAL_LINK.test(x))) return true;
+  const words = [item.text, ...topics.map(x => x.text)].join(' | ');
+  return POLITICAL_WORDS.test(words) || POLITICAL_MP.test(words);
+}
+export function courtLevel(name) {
+  if (/\b(?:appeals?|appellate|cassation)\b/i.test(name)) return 'appeal court';
+  if (/\b(?:district|magistrates?'?|magistrate's|crown|county|regional|criminal|military|state security|anti-terrorism|first instance|trial)\b/i.test(name)) return 'trial court';
+  return 'lower court';
+}
+function lowerCourtRuling(item) {
+  const t = item.text, topics = item.topics || [];
+  const apex = [...t.matchAll(new RegExp(COURT.source, 'g'))].map(m => [m.index, m.index + m[0].length]);
+  for (const m of t.matchAll(LOWER_COURT)) {
+    if (apex.some(([a, b]) => m.index >= a && m.index < b)) continue;
+    // The court's name: back to the clause's start ("A district court in Nara", "The Seoul High Court").
+    const before = t.slice(Math.max(0, m.index - 60), m.index), start = Math.max(before.lastIndexOf(','), before.lastIndexOf('.'), before.lastIndexOf(';')) + 1;
+    const pre = before.slice(start);
+    if (/\bformer [\w ]*$|\bimpeachment $|\b(?:in|to|before|with|against|from|of) (?:the |a |an )?[\w ]{0,20}$/i.test(pre)) continue;
+    const after = t.slice(m.index + m[0].length);
+    const r = LOWER_RULING.exec(after);
+    if (!r || REPORTED.test(after.slice(0, r[0].length))) continue;
+    const own = [...topics.flatMap(x => x.links || []), ...item.links.map(l => l.target)].map(bare).find(x => CASE_ARTICLE.test(x));
+    if (!own) return null;
+    if (!politicalCase(item)) return null;
+    const name = (pre + m[0] + (/^ (?:of|in|for) [A-Z][^,.;]{0,40}/.exec(after)?.[0] || '')).trim();
+    return { type: 'court', score: 2, at: m.index, end: m.index + m[0].length + r[0].length, level: courtLevel(name), article: own };
+  }
+  return null;
+}
+
 const SANCTION_ACT = /\b(?:impos\w*|issu\w*|announc\w*|approv\w*|adopt\w*|lift\w*|remov\w*|extend\w*|expand\w*|levi\w*|introduc\w*|reimpos\w*|agree\w*|sign\w*|pass\w*|renew\w*|unveil\w*)\b[^.;]{0,70}\bsanctions?\b|\bpackage of sanctions\b|\bsanctions package\b|\bsanctions (?:on|against|targeting|upon)\b|\b(?:sanctions|sanctioned) (?:\d+|two|three|four|five|six|seven|eight|nine|ten|several|dozens|[A-Z])|\beconomic war against\b/;
 const SANCTION_NOT = /\bsanctioned (?:tanker|vessel|ship|oligarch|cargo|entity|entities|firm|company|bank|individual|Russian|Iranian)\b|\bahead of (?:new )?(?:U\.S\. |US |EU )?sanctions\b|\bsanctions (?:a|an|the) (?:constitutional|law|bill|amendment|decree|reform)\b|\b(?:risk|threat|fear|evad\w*|evasion|circumvent\w*|violat\w*|breach\w*|citing|compliance with|compl(?:y|ies|ying) with)\b[^.;]{0,40}\bsanctions\b|\bsporting sanctions\b|\bdespite (?:the )?sanctions\b|\bwaiver\b|\b(?:demand|call|ask|seek|want|push|press|urg|condition)\w*\b[^.;]{0,30}\b(?:lift|remov|eas)\w*\b[^.;]{0,30}\bsanctions\b|\bcalling (?:on|for)\b[^.;]{0,60}\bsanction|\b(?:in retaliation (?:to|for)|in response to)\b[^.;]{0,40}\bsanctions\b|\bwould (?:have )?\w+\b[^.;]{0,60}\bsanctions\b/i;
 
@@ -197,6 +255,8 @@ export function classify(item) {
       if (REPORTED.test(after.slice(0, r.index)) || /\b(?:withdraw|leave|member states|files? a (?:complaint|lawsuit))\b/i.test(t.slice(0, m.index + m[0].length + 60))) continue;
       return { type: 'court', score: /International (?:Court|Criminal)|ICJ|ICC/.test(m[0]) ? 3 : 2, at: m.index, end: m.index + m[0].length + r.index + r[0].length };
     }
+    // A lower court, in a political case with its own article (above).
+    if ((h = lowerCourtRuling(item))) return h;
   }
 
   // The sentence's main clause: sanctions, summits and visits must be what the item is about, not a side remark.
@@ -278,7 +338,9 @@ export function eventsFromItems(items) {
     const storyKey = c.story ? c.story.text : (item.topics.at(-1)?.text || '');
     cands.push({
       date: item.date, country, title, type: c.type, status: 'declared',
-      source: wiki(storyTarget || subjectLink(item, c.type, c.at)),
+      source: wiki(storyTarget || c.article || subjectLink(item, c.type, c.at)),
+      // A lower court's ruling carries its level ("appeal court", "trial court", "lower court"); an apex court's none.
+      level: c.level,
       summary: t, ref: ref?.url, refName: ref?.outlet || undefined,
       score: c.score, key: `${c.type}|${storyKey ? 'story:' + storyKey : 'item:' + country + ':' + title.slice(0, 60)}`,
     });

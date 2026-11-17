@@ -48,9 +48,13 @@ test('data: index.json matches the stored day files, and every stored day is com
   const dates = index.global.map(g => g[0]);
   assert.deepEqual(dates, [...new Set(dates)].sort(), 'one global row per day, in order');
   assert.ok(dates[0] >= addDays(index.latest, -364), `a year of rows at most: ${dates[0]}`);
-  for (const [d, events, slots, mean] of index.global) {
+  for (const [d, events, slots, mean, method, baselineDays, ...more] of index.global) {
     assert.ok(slots >= MIN_SLOTS && slots <= SLOTS && events >= MIN_EVENTS, `${d}: ${slots} slices, ${events} events`);
     assert.ok(mean === null || (mean >= 0 && mean <= 100), `${d}: mean ${mean}`);
+    // A day whose file was pruned before its method was recorded says so (null: not recorded); nothing is guessed.
+    assert.ok(method === null || /^gvi-\d/.test(method), `${d}: method ${method}`);
+    assert.ok(baselineDays === null || (Number.isInteger(baselineDays) && baselineDays >= 1 && baselineDays <= BASELINE_DAYS), `${d}: baseline ${baselineDays}`);
+    assert.deepEqual(more, [], `${d}: six columns`);
   }
   const rows = new Map(index.global.map(g => [g[0], g])), perDay = new Map();
   for (const c of Object.values(index.countries)) for (const r of c.days) perDay.set(r[0], (perDay.get(r[0]) || 0) + 1);
@@ -63,6 +67,9 @@ test('data: index.json matches the stored day files, and every stored day is com
     assert.equal(dayProblem(x), null, f); // at least 72 slices, 5000 located events and 120 countries
     const row = rows.get(d);
     assert.deepEqual(row?.slice(0, 3), [d, x.totalEvents, x.slots], `${d}: global row`);
+    // Jude's decision G (17 November 2026): the store records which method scored each day, and against how many days,
+    // as the day's own file says, so Month by Month's volatility marks can compare like with like.
+    assert.deepEqual(row.slice(4), [x.method, x.baselineDays], `${d}: the method that scored the day and its baseline, from its file`);
     // An unscored day (the first week, while the baseline filled) has no mean: null, or 0 in rows written before 2026-10-29.
     assert.ok(Object.values(x.countries).some(c => c.score != null) ? row[3] === x.globalMean : !row[3], `${d}: global mean ${row[3]}`);
     assert.equal(perDay.get(d), Object.keys(x.countries).length, `${d}: a country row for each country with events, and no others`);
@@ -299,18 +306,20 @@ test('logic: every country with conflict events is scored, or says plainly why n
 test('logic: the index takes each day from its file, keeps pruned days and leaves no row for a day that is gone', () => {
   const country = (score, events = 50) => ({ name: 'Ukraine', score, components: score == null ? null : { conflict: 1, political: 2, unrest: 3, economic: 4, spread: 5 }, events, tone: -1, coverage: 'medium' });
   const files = {
-    '2026-10-10': { day: '2026-10-10', totalEvents: 20000, slots: 96, globalMean: 0, countries: { UKR: country(null) } }, // written before 2026-10-29
-    '2026-10-12': { day: '2026-10-12', totalEvents: 21000, slots: 80, globalMean: 55.5, countries: { UKR: country(60), ISR: { ...country(40), name: 'Israel' } } },
+    '2026-10-10': { day: '2026-10-10', totalEvents: 20000, slots: 96, globalMean: 0, countries: { UKR: country(null) } }, // written before 2026-10-29, with no method
+    '2026-10-12': { day: '2026-10-12', method: 'gvi-1.2-q96', baselineDays: 9, totalEvents: 21000, slots: 80, globalMean: 55.5, countries: { UKR: country(60), ISR: { ...country(40), name: 'Israel' } } },
   };
   const prev = {
-    global: [['2025-10-01', 1, 96, 50], ['2026-10-05', 15000, 50, 40], ['2026-10-08', 19000, 96, 51], ['2026-10-10', 1, 96, 1], ['2026-10-11', 18000, 96, 52]],
+    global: [['2025-10-01', 1, 96, 50], ['2026-10-05', 15000, 50, 40], ['2026-10-07', 19500, 96, 50, 'gvi-1.1-q96', 90], ['2026-10-08', 19000, 96, 51], ['2026-10-10', 1, 96, 1], ['2026-10-11', 18000, 96, 52]],
     countries: { UKR: { name: 'Ukraine', days: [['2025-10-01', 1, null, 1, 0, 'l'], ['2026-10-05', null, null, 9, 0, 'm'], ['2026-10-08', 50, null, 9, 0, 'm'], ['2026-10-11', 70, null, 9, 0, 'm']], latest: null } },
   };
   const index = buildIndex(prev, Object.keys(files), d => files[d], 'now');
   // 2026-10-08 is older than the oldest file (pruned): kept. 2026-10-05 is older too, but short (50 slices, written by older
   // code): gone, with its country rows. 2026-10-11 has no file (skipped or deleted): gone. 2025-10-01 is over a year old.
-  assert.deepEqual(index.global, [['2026-10-08', 19000, 96, 51], ['2026-10-10', 20000, 96, null], ['2026-10-12', 21000, 80, 55.5]]);
-  assert.deepEqual([index.generated, index.method, index.latest, index.days], ['now', METHOD, '2026-10-12', 3]);
+  // Each row ends with the method that scored the day and its baseline's days, as its file says: a pruned day keeps what
+  // its row recorded (2026-10-07), and a day that recorded none, pruned or not, says null, not recorded (never a guess).
+  assert.deepEqual(index.global, [['2026-10-07', 19500, 96, 50, 'gvi-1.1-q96', 90], ['2026-10-08', 19000, 96, 51, null, null], ['2026-10-10', 20000, 96, null, null, null], ['2026-10-12', 21000, 80, 55.5, 'gvi-1.2-q96', 9]]);
+  assert.deepEqual([index.generated, index.method, index.latest, index.days], ['now', METHOD, '2026-10-12', 4]);
   assert.deepEqual(index.countries.UKR.days, [['2026-10-08', 50, null, 9, 0, 'm'], ['2026-10-10', null, null, 50, -1, 'm'], ['2026-10-12', 60, [1, 2, 3, 4, 5], 50, -1, 'm']]);
   assert.deepEqual([Object.keys(index.countries), index.countries.ISR.latest], [['UKR', 'ISR'], files['2026-10-12'].countries.ISR]);
   assert.throws(() => buildIndex(prev, [], d => files[d], 'now'), /No complete day is stored/);

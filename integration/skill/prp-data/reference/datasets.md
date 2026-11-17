@@ -98,7 +98,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 
 - Rows: 312 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
-- Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string)
+- Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string)
 
 ## undefined
 
@@ -106,7 +106,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 
 Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 6,664 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,649 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -122,7 +122,7 @@ Political Briefing: publishers. The Political Briefing's publishers with their p
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 495 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 519 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -132,13 +132,13 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 - Rows: 50 · refresh: 6-hourly · licence: Metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `sources`)
-- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `error` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `access` (string)
+- Fields: `id` (string), `outlet` (string), `outletId` (string), `name` (string), `url` (string), `feed` (string), `kind` (string), `tier` (number), `fields` (array), `qid` (string), `status` (string), `count` (number), `stored` (number), `latest` (date), `checked` (date), `lastOk` (date), `etag` (string), `lastModified` (string), `notModified` (boolean), `strict` (boolean), `badge` (string), `access` (string)
 
 ### science-briefing-stories
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,219 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,281 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -154,7 +154,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,178 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,240 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `accessMark` (string), `alt` (array)
 
@@ -204,17 +204,17 @@ War Focus: major wars. The major wars of the last hundred years that War Focus f
 
 War Focus: battles, sieges and operations. Every battle, siege and operation that Wikidata records as part of a War Focus war, with dates at the precision Wikidata gives, deaths or casualties where known, and coordinates where mapped. Where a whole and its parts are both listed (the atomic bombings of Hiroshima and Nagasaki, and each bombing), part_of and parts link them, and deaths_counted_once gives the figure War Focus shows for each, each death once: the figure recorded for the item itself where there is one, else the sum of its parts' (figure_from says which). To total a war's battles without counting a death twice, add deaths_counted_once over the rows with no part_of; adding deaths over every row counts a whole and its parts both. That total is of mixed kinds (recorded counts, estimates and disputed figures: see figure_deaths_kind) and is not the war's toll, which is its deaths by month (war-focus-monthly-deaths): War Focus never adds battle figures into it. A part of two wholes is counted under part_of; also_part_of names the others. Where Wikidata gives no figure, the figure_ columns give the one War Focus reads from the battle's English Wikipedia infobox (BF-08), with its kind (recorded, estimate or disputed), its range and whether it is a lower bound; deaths and casualties stay Wikidata's own. The revision of each article read, each side's figures and every Wikidata statement are in battlefield/focus/data/figures/<war_id>.json.
 
-- Rows: 4,242 · refresh: monthly · licence: Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).
+- Rows: 4,235 · refresh: monthly · licence: Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).
 - Files: https://jdpi.pages.dev/integration/data/war-focus-battles/0.json, https://jdpi.pages.dev/integration/data/war-focus-battles/1.json, https://jdpi.pages.dev/integration/data/war-focus-battles/2.json (+8 more) (records at `records`)
 - Fields: `war_id` (string), `war` (string), `qid` (string), `name` (string), `description` (string), `start` (date), `end` (date), `precision` (string), `deaths` (number), `casualties` (number), `lat` (number), `lon` (number), `wikipedia` (string), `part_of` (string), `also_part_of` (array), `parts` (array), `deaths_counted_once` (number), `figure_from` (string), `figure_deaths_low` (number), `figure_deaths_high` (number), `figure_deaths_kind` (string), `figure_deaths_source` (string), `figure_deaths_at_least` (boolean), `figure_casualties_low` (number), `figure_casualties_high` (number), `figure_casualties_kind` (string), `figure_casualties_source` (string), `figure_state` (string)
 
 ### war-focus-monthly-deaths
 
-War Focus: deaths by month. Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.
+War Focus: deaths by month. Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For the wars whose deaths come from the Correlates of War, every month says “see the Correlates of War” in place of a number: its terms do not let Vitruvian Manager pass on figures made from its totals (the notes give its citation and address).
 
-- Rows: 3,494 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, and VM's estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision), as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
+- Rows: 3,494 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; no Correlates of War figures, as its terms bar passing its data on without written permission: the months of the wars whose deaths come from its totals say “see the Correlates of War” (its citation and address are in the notes); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
 - Files: https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/0.json, https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/1.json (records at `records`)
-- Fields: `war_id` (string), `war` (string), `month` (date), `deaths` (number), `estimated` (boolean), `source` (string)
+- Fields: `war_id` (string), `war` (string), `month` (date), `deaths` (string), `estimated` (boolean), `source` (string)
 
 ### kardashev-polities
 
@@ -314,7 +314,7 @@ Invention Timeline: institutions. Universities, laboratories, companies and acad
 
 Vitruvian Manager: modules and submodules. Every Vitruvian Manager submodule: its module, kind, status, address and what it does. Private submodules (behind their own sign-in) are listed but none of their data is published here.
 
-- Rows: 38 · refresh: on change · licence: © JDP-Iq.
+- Rows: 39 · refresh: on change · licence: © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/prp-submodules.json (records at `records`)
 - Fields: `module` (string), `module_code` (string), `module_name` (string), `id` (string), `name` (string), `kind` (string), `status` (string), `private` (boolean), `url` (string), `planned_url` (string), `host` (string), `description` (string), `views` (array)
 

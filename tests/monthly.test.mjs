@@ -10,7 +10,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
 import { pageTest } from './tools/pages.mjs';
 import { parseYaml } from './tools/yaml.mjs';
-import { RULE, WORDS, fightingMark, volatilityMark, volatilityRise, markProblems, deathsDirection, eventsDirection, addMonths, sameReason, reportSpan } from '../monthly/scripts/rules.mjs';
+import { RULE, WORDS, fightingMark, volatilityMark, volatilityDays, volatilityRise, markProblems, deathsDirection, eventsDirection, addMonths, sameReason, reportSpan } from '../monthly/scripts/rules.mjs';
 import { seriesFromEvents, focusRows, rowsFromSeries, gwTable, mergeRows, countryRows, INDEPENDENCE } from '../monthly/scripts/series.mjs';
 import { checkHeads } from '../integration/scripts/heads.mjs';
 
@@ -187,6 +187,25 @@ test('rule: no volatility mark before April 2027, nor while the store gives no m
   assert.equal(m.direction, 'worse'); assert.equal(m.words, 'More volatile'); assert.match(m.what, /News reports a day: 900 against 500/);
   const low = volatilityMark(days.map(d => [...d.slice(0, 5), 'l']), '2027-04', { methodOf: () => 'gvi-x', fullBaseline: () => true });
   assert.equal(low.why.code, 'coverage', 'little coverage: a rise in news alone can move a score');
+});
+
+// Jude's decision G (17 November 2026): Volatility records which method scored each day, so its marks can start. The
+// store's global rows end [..., method, baseline days], each from the day's own file, null where it was not recorded.
+test('rule: the volatility store says which method scored each day, and the mark reads it', () => {
+  const days = Array.from({ length: 120 }, (_, i) => [new Date(Date.UTC(2027, 3, 30) - i * 864e5).toISOString().slice(0, 10), 50, [], 500, 0, 'h']).reverse();
+  const store = (method, base = 90) => ({ global: days.map(d => [d[0], 20000, 96, 50, typeof method === 'function' ? method(d[0]) : method, base]) });
+  const up = days.map(d => (d[0].startsWith('2027-04') ? [d[0], 60, [], 900, 0, 'h'] : d));
+  assert.equal(volatilityMark(up, '2027-04', volatilityDays(store('gvi-1.2-q96'))).direction, 'worse', 'one method, full baselines: a mark');
+  assert.equal(volatilityMark(up, '2027-04', volatilityDays(store(d => (d < '2027-02-01' ? 'gvi-1.2-q96' : 'gvi-1.3')))).why.code, 'methods');
+  assert.equal(volatilityMark(up, '2027-04', volatilityDays(store(d => (d === '2027-03-03' ? null : 'gvi-1.2-q96')))).why.code, 'method-unknown', 'a day not recorded');
+  assert.equal(volatilityMark(up, '2027-04', volatilityDays({ global: days.map(d => [d[0], 20000, 96, 50]) })).why.code, 'method-unknown', 'rows written before the method was recorded');
+  assert.equal(volatilityMark(up, '2027-04', volatilityDays(store('gvi-1.2-q96', 89))).why.code, 'baseline');
+  // The committed store: every row says its method or null, and the Volatility strand says no more than is true.
+  const vol = json('volatility/data/index.json'), facts = volatilityDays(vol);
+  for (const g of vol.global) assert.ok(facts.methodOf(g[0]) === null || /^gvi-/.test(facts.methodOf(g[0])), g[0]);
+  const strand = marks.strands.find(s => s.id === 'volatility');
+  if (vol.global.every(g => facts.methodOf(g[0]))) assert.doesNotMatch(strand.text, /must first say which method/, 'the store says it now');
+  assert.match(strand.text, /April 2027/);
 });
 
 test('rule: the watch list\'s volatility rise needs the days and the coverage', () => {

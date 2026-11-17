@@ -136,7 +136,7 @@ describe('catalogue (integration/catalog.json)', () => {
   // offered its 40 wars of 1926–1945 row by row. No download carries a cite-only source's rows; what still names one is
   // a cited total with the citation and link, or held for Jude's choice with the reason; no licence calls it free.
   test('no hosted value from a cite-only source: no download carries its rows, and no licence calls it free', async () => {
-    const { CITE_ONLY, HOSTED, namesSource, claimsFree } = await imp('integration/scripts/cite-only.mjs');
+    const { CITE_ONLY, HOSTED, namesSource, claimsFree, pointerProblems } = await imp('integration/scripts/cite-only.mjs');
     for (const [id, src] of Object.entries(CITE_ONLY)) {
       for (const k of ['name', 'citation', 'url', 'terms', 'read', 'words', 'allows']) assert.ok(src[k], `${id}.${k}`);
       assert.match(src.read, /^\d{4}-\d{2}-\d{2}$/);
@@ -146,8 +146,16 @@ describe('catalogue (integration/catalog.json)', () => {
         assert.ok(!claimsFree(d.licence, src), `${d.id}: the licence calls ${src.name} free to use: ${d.licence}`);
         if (!carries) continue;
         assert.ok(held, `${d.id} carries ${src.name} values and is not listed in cite-only.mjs HOSTED`);
-        assert.ok(['total', 'pending'].includes(held.kind) && held.what, `${d.id}: a kind and what it holds`);
-        if (held.kind === 'total') assert.ok(d.sources.some(s => s.includes(src.citation) && s.includes(src.url)), `${d.id}: cites ${src.name} as its terms ask, with the link`);
+        assert.ok(['total', 'pending', 'pointer'].includes(held.kind) && held.what, `${d.id}: a kind and what it holds`);
+        if (held.kind !== 'pending') assert.ok(d.sources.some(s => s.includes(src.citation) && s.includes(src.url)), `${d.id}: cites ${src.name} as its terms ask, with the link`);
+        // A pointer (Jude's decision F1, 17 November 2026: a download carries no COW value) holds the source's words in
+        // place of every value, and each of its files says in its notes where the figures are, with the citation.
+        if (held.kind === 'pointer') {
+          assert.deepEqual(pointerProblems(recordsOf(d.id), held, src).slice(0, 5), [], `${d.id}: a record that names ${src.name} holds a value`);
+          assert.ok(recordsOf(d.id).some(r => namesSource(r, src)), `${d.id}: the pointer names ${src.name} somewhere`);
+          for (const u of d.urls || [d.url]) { const notes = (J(u).notes || []).join(' '); assert.ok(notes.includes(src.citation) && notes.includes(src.url) && notes.includes(held.says), `${u}: its notes give ${src.name}'s citation and address`); }
+          assert.doesNotMatch(d.licence, /awaits a decision/, `${d.id}: no longer waits on a choice`);
+        }
       }
     }
     // The second reader (16 November 2026): VM's own data names COW by its id ("src": "cow" on the Retrospective
@@ -194,7 +202,24 @@ describe('catalogue (integration/catalog.json)', () => {
       assert.match(d.licence, /awaits a decision/, `${d.id}: its licence says the ${CITE_ONLY[h.source].name} values in it await a decision`);
       for (const u of d.urls || [d.url]) if (u.startsWith('integration/data/')) assert.equal(J(u).licence, d.licence, `${u}: the file's licence is the catalogue's`);
     }
-    assert.match(CAT.datasets.find(d => d.id === 'war-focus-monthly-deaths').licence, /estimated spread of those totals over months/);
+    // The monthly deaths: since Jude's decision F1 (17 November 2026), the nine COW wars' months say where to read the
+    // figures, not VM's spread of COW's totals. The check fails on a month that still holds a number (a fixture).
+    const monthly = HOSTED.find(h => h.dataset === 'war-focus-monthly-deaths');
+    assert.equal(monthly?.kind, 'pointer');
+    const cowRow = { war_id: 'chaco', war: 'Chaco War', month: '1932-09', deaths: 4119, estimated: true, source: 'Correlates of War war total, spread across months by recorded battles' };
+    assert.equal(pointerProblems([cowRow], monthly, CITE_ONLY.cow).length, 1, 'a COW month with a number is found');
+    assert.equal(pointerProblems([{ ...cowRow, deaths: monthly.says, source: 'Correlates of War war total; China 1,350,000 battle deaths' }], monthly, CITE_ONLY.cow).length, 1, 'and a COW figure written into its words');
+    assert.deepEqual(pointerProblems([{ ...cowRow, deaths: monthly.says }, { ...cowRow, war_id: 'iraq-war', deaths: 900, estimated: false, source: 'UCDP Georeferenced Event Dataset' }], monthly, CITE_ONLY.cow), [], 'its words, or another source\'s number, pass');
+    assert.doesNotMatch(CAT.datasets.find(d => d.id === 'war-focus-monthly-deaths').licence, /estimated spread of those totals over months/);
+    // Those months describe no spread the file does not carry (the second reader's F5, 17 November 2026): no estimate
+    // flag, and source words that say the total is not given here, not "spread across months by recorded battles".
+    const cowMonths = recordsOf('war-focus-monthly-deaths').filter(r => r.deaths === monthly.says);
+    assert.ok(cowMonths.length > 400, `${cowMonths.length} COW months`);
+    for (const r of cowMonths) {
+      assert.equal(r.estimated, null, `${r.war_id} ${r.month}: estimated`);
+      assert.ok(/not given here: see the notes/.test(r.source) && !/spread across/.test(r.source), `${r.war_id} ${r.month}: ${r.source}`);
+    }
+    assert.ok(!/source column names the total/.test(J('integration/data/war-focus-monthly-deaths/0.json').notes?.join(' ') ?? ''), 'the notes describe the source column as it is');
     // The 1926–1945 wars are out of the Retrospective Battlefield's download; its UCDP/PRIO conflicts stay.
     const rw = recordsOf('retrospective-wars');
     assert.ok(rw.length > 250 && rw.every(r => r.dataset === 'UCDP/PRIO' && /^u/.test(r.id)), 'retrospective-wars holds UCDP/PRIO rows only');

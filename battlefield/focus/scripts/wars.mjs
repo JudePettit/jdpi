@@ -121,3 +121,30 @@ export const WARS = [
   { id: 'gaza-war', name: 'Gaza war', wiki: 'Gaza war', start: '2023-10-07', end: '2025-10-10', deaths: { ucdp: true }, ged: [234, 426],
     sides: { a: { label: 'Israel', gw: [666] }, b: { label: 'Hamas & allies', gw: [] } } },
 ];
+
+// ---- What War Focus leaves out of a war although Wikidata makes it part of the war (Jude's decision of 17 November
+// 2026, VM-DECISIONS-17NOV.md section G, under the rule of section H5: an entry of its own needs an interstate war of
+// 1,000 or more battle deaths in a year, a civil war of 25,000 or more, or the Falklands War by name). Each row's item
+// is left out with everything Wikidata makes part of it, by any path, even where a part is also part of the war
+// directly (the United States' strikes in Yemen of March and April 2025 are part of both). `why` is the page's method
+// line; `source` and `url` name the figures it gives, as UCDP publishes them.
+export const LEFT_OUT = [
+  { war: 'gaza-war', qid: 'Q123285238', name: 'Red Sea crisis', ucdp: 16099,
+    why: 'the Red Sea crisis and every operation Wikidata makes part of it. UCDP records them as a conflict of their own, the United Kingdom and the United States against the government of Yemen over the Red Sea, the Bab al-Mandab and the Gulf of Aden (its conflict 16099), with 130 battle deaths in 2024 and 781 in 2025 (best estimates). That is below the 1,000 battle deaths in a year that War Focus asks of an interstate war for an entry of its own, so they are shown neither here nor as a war of their own',
+    source: 'UCDP Battle-Related Deaths Dataset v26.1, conflict level', url: 'https://ucdp.uu.se/downloads/brd/ucdp-brd-conf-261-csv.zip' },
+];
+
+/**
+ * The items left out of a war (LEFT_OUT): Map q → the row that leaves it out, for each row's item and everything below
+ * it in Wikidata's "part of" links (edges [{ c, parent }]), whatever other parent a part also has.
+ */
+export function leftOutOf(warId, edges, table = LEFT_OUT) {
+  const kids = new Map();
+  for (const { c, parent } of edges) (kids.get(parent) || kids.set(parent, []).get(parent)).push(c);
+  const out = new Map();
+  for (const row of table.filter(r => r.war === warId)) {
+    const queue = [row.qid];
+    while (queue.length) { const q = queue.shift(); if (out.has(q)) continue; out.set(q, row); queue.push(...(kids.get(q) || [])); }
+  }
+  return out;
+}

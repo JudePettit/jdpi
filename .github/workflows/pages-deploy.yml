@@ -43,7 +43,7 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Serve the site locally, like Pages
@@ -91,7 +91,7 @@ jobs:
           ref: ${{ needs.test.outputs.sha }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - name: Upload the tested commit to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

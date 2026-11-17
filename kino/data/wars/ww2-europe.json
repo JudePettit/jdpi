@@ -1,6 +1,6 @@
 {
   "id": "ww2-europe",
-  "title": "The Second World War in Europe, 1939–1945",
+  "title": "The Second World War in Europe and Africa, 1939–1945",
   "category": "wars",
   "subjects": [
     { "qid": "Q362", "label": "World War II" },
@@ -41,6 +41,9 @@
     { "id": "wp-madagascar", "kind": "web", "title": "Battle of Madagascar, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Battle of Madagascar", "url": "https://en.wikipedia.org/wiki/Battle_of_Madagascar" },
     { "id": "kcl-madagascar", "kind": "web", "author": "Tim Benbow", "title": "The British invasion of Madagascar, 1942: an unsung success that advanced amphibious warfare (Defence-in-Depth)", "year": 2025, "publisher": "King's College London", "url": "https://www.kcl.ac.uk/defence-in-depth-the-british-invasion-of-madagascar-1942" },
     { "id": "wp-postmaster", "kind": "web", "title": "Operation Postmaster, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Operation Postmaster", "url": "https://en.wikipedia.org/wiki/Operation_Postmaster" },
+    { "id": "wp-anglo-egyptian-sudan", "kind": "web", "title": "Anglo-Egyptian Sudan (a condominium of Britain and Egypt, 1899–1956, covering present-day Sudan and South Sudan), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Anglo-Egyptian Sudan", "url": "https://en.wikipedia.org/wiki/Anglo-Egyptian_Sudan" },
+    { "id": "wp-ubangi-shari", "kind": "web", "title": "Ubangi-Shari (today the Central African Republic; loyal to Vichy until it went over to Free France on 29 August 1940), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Ubangi-Shari", "url": "https://en.wikipedia.org/wiki/Ubangi-Shari" },
+    { "id": "wp-french-somaliland-ww2", "kind": "web", "title": "French Somaliland in World War II (loyal to Vichy from July 1940 until it went over to Free France in December 1942; a British blockade from September 1940, lifted in 1942; never invaded), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: French Somaliland in World War II", "url": "https://en.wikipedia.org/wiki/French_Somaliland_in_World_War_II" },
     { "id": "wd-1944-45", "kind": "wikidata", "title": "Raid on Drvar (Q931125), Jassy–Kishinev Offensive (Q311765), Battle of Groningen (Q2234138), Battle of Königsberg (Q671528)", "url": "https://www.wikidata.org/wiki/Q931125" },
     { "id": "nww2m-rome", "kind": "web", "title": "Rome Taken! The Liberation of Rome, 1944", "publisher": "The National WWII Museum", "cite": "National WWII Museum: Rome Taken!", "url": "https://www.nationalww2museum.org/war/articles/rome-taken-liberation-rome-1944" },
     { "id": "nww2m-jassy", "kind": "web", "title": "Forgotten Fights: The Second Jassy-Kishinev Offensive and the Destruction of German Sixth Army", "publisher": "The National WWII Museum", "cite": "National WWII Museum: Forgotten Fights", "url": "https://www.nationalww2museum.org/war/articles/forgotten-fights-second-jassy-kishinev-offensive-and-destruction-german-sixth-army" },
@@ -53,9 +56,9 @@
   "scenes": [
     {
       "id": "opening",
-      "title": "The Second World War in Europe",
-      "narration": "Between September 1939 and May 1945, war spread from the borders of Poland to the Atlantic, the Arctic, the Mediterranean and deep into Russia. It became the deadliest conflict in Europe's history, and most of those who died were civilians. This film follows the war in Europe from its causes to its aftermath, with the maps and figures that historians rely on.",
-      "visual": { "kind": "title", "kicker": "Kino · Wars", "heading": "The Second World War in Europe", "sub": "1939–1945" },
+      "title": "The Second World War in Europe and Africa",
+      "narration": "Between September 1939 and May 1945, war spread from the borders of Poland to the Atlantic, the Arctic, the Mediterranean and deep into Russia. It became the deadliest conflict in Europe's history, and most of those who died were civilians. This film follows the war in Europe and Africa from its causes to its aftermath, with the maps and figures that historians rely on.",
+      "visual": { "kind": "title", "kicker": "Kino · Wars", "heading": "The Second World War in Europe and Africa", "sub": "1939–1945" },
       "focus": { "bbox": [-12, 34, 48, 66] },
       "link": { "label": "Retrospective Battlefield · 1939", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1939&w=c139" },
       "cites": ["weinberg-1994", "kershaw-2015"]
@@ -221,7 +224,11 @@
         "kind": "map",
         "groups": [
           { "label": "Held by Italy or for Vichy France when the Allies attacked, 1940–1942", "tone": 2, "countries": ["ERI", "ETH", "SOM", "SEN", "GAB", "MDG"] },
-          { "label": "On the Allied side: British Empire and Commonwealth, Belgian and Free French territories", "tone": 1, "countries": ["SDN", "KEN", "TCD", "ZAF", "NAM", "BWA", "LSO", "SWZ", "ZWE", "ZMB", "MWI", "TZA", "UGA", "NGA", "GHA", "SLE", "GMB", "COD", "RWA", "BDI"] }
+          { "label": "Vichy until December 1942, blockaded: French Somaliland (Djibouti)", "tone": 2, "countries": ["DJI"] },
+          { "label": "Allied: the British Empire and Commonwealth, and Belgian territories", "tone": 1, "countries": ["KEN", "ZAF", "NAM", "BWA", "LSO", "SWZ", "ZWE", "ZMB", "MWI", "TZA", "UGA", "NGA", "GHA", "SLE", "GMB", "COD", "RWA", "BDI"] },
+          { "label": "Allied: Anglo-Egyptian Sudan (today Sudan and South Sudan)", "tone": 1, "countries": ["SDN", "SSD"] },
+          { "label": "Free French from August 1940: Chad, Cameroon and Congo-Brazzaville", "tone": 1, "countries": ["TCD", "CMR", "COG"] },
+          { "label": "Free French from August 1940: the Central African Republic", "tone": 1, "countries": ["CAF"] }
         ]
       },
       "focus": {
@@ -229,7 +236,7 @@
         "bbox": [-26, -36, 52, 24]
       },
       "link": { "label": "War Focus · May 1941", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1941-05" },
-      "cites": ["wp-east-africa", "bmh-east-africa", "ebsco-somaliland", "how-1941-05-05", "wp-haile-selassie", "wp-free-french-africa", "ego-eboue", "wp-dakar", "herodote-dakar", "wp-gabon", "wp-madagascar", "kcl-madagascar", "wp-postmaster", "wd-africa"]
+      "cites": ["wp-east-africa", "bmh-east-africa", "ebsco-somaliland", "how-1941-05-05", "wp-haile-selassie", "wp-free-french-africa", "ego-eboue", "wp-dakar", "herodote-dakar", "wp-gabon", "wp-madagascar", "kcl-madagascar", "wp-postmaster", "wd-africa", "wp-anglo-egyptian-sudan", "wp-ubangi-shari", "wp-french-somaliland-ww2"]
     },
     {
       "id": "science",

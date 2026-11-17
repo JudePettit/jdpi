@@ -127,14 +127,13 @@ test('registration: omni-map in Digital Science, its freshness line, llms.txt, t
   assert.match(skill, /Cliopatria v0\.2\.1 \(Bennett et al\. 2025\)/);
   assert.match(skill, /omni\/index\.html#vr=1/);
   // The submodules list (integration/data/prp-submodules.json) is derived from registry.json by the daily catalogue
-  // run (integration/scripts/build-catalog.mjs, with the catalogue's row counts and summaries in step), so omni-map
-  // enters it on that run: its derive reads every registry module, and the record it writes is checked here once there.
+  // run (integration/scripts/build-catalog.mjs, with the catalogue's row counts and summaries in step): its derive
+  // reads every registry module. omni-map entered it at the catalogue build of 17 November 2026, and must stay.
   assert.match(file('integration/scripts/build-catalog.mjs'), /derive: \(\) => REG\.suites\.flatMap\(s => s\.modules\.map\(m => \(\{ module: s\.id/);
   const row = read('integration/data/prp-submodules.json').records.find(r => r.id === 'omni-map');
-  if (row) {
-    assert.deepEqual([row.module, row.name, row.url, row.status, row.kind], ['ds', 'Omni-Map', 'https://jdpi.pages.dev/omni/index.html', 'live', 'reference']);
-    assert.equal(row.description, m.description);
-  }
+  assert.ok(row, 'omni-map is in the submodules list');
+  assert.deepEqual([row.module, row.name, row.url, row.status, row.kind], ['ds', 'Omni-Map', 'https://jdpi.pages.dev/omni/index.html', 'live', 'reference']);
+  assert.equal(row.description, m.description);
 });
 
 test('the page: the site\'s shell and contract; MapLibre GL JS at its exact version with SRI is its only outside code', () => {
@@ -426,7 +425,8 @@ test('page: the shell\'s route; keyboard, live region, light and dark, 1440×900
 });
 
 /* ================================================================ the review of 17 November 2026, in a browser */
-// Fornovo's view, as a click on "Il Taro" in The Prince XXVI (c26-p08) writes it (2.3's worked example).
+// Fornovo's view, as a click on "Il Taro" in The Prince XXVI (c26-p08) wrote it until 17 November 2026 (2.3's worked
+// example; a click now opens on 1495, the year it was fought: decision D4). The older address still opens as written.
 const FORNOVO = 'vr=1&t=1494..1496&at=1494&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q764793,Q58477&q=Q764793&from=neo:the-prince/26/c26-p08';
 const yearShown = p => p.evaluate(() => document.querySelector('#year').getAttribute('aria-valuetext'));
 const sha = p => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex');
@@ -510,6 +510,20 @@ test('page: the review\'s findings on the Omni-Map itself (S1, S3, S4, S5, S6, S
     f = await page.textContent('#focus-body');
     assert.match(f, /Battle of Fornovo[\s\S]*shown as a point/);
     assert.ok((await page.evaluate(() => window.omniState.features)).includes('Q764793'));
+
+    // Decision D4 of 17 November 2026: a click on a battle opens its own view on the year it was fought, so the battle
+    // is drawn when the map opens, and the page says why it opened there. The older address (at=1494) still says the
+    // older reason.
+    assert.match(await page.textContent('#frame-why'), /^$|^(?!.*the year it was fought)/, 'stepped away from the opening year: no reason shown, or not this one');
+    await page.goto(`${BASE}/omni/index.html#${FORNOVO.replace('at=1494', 'at=1495')}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1495);
+    assert.match(await page.textContent('#frame-why'), /^Opens on 1495, the year it was fought, as VM's click chose it: a battle's view opens on its own year\./);
+    assert.ok((await page.evaluate(() => window.omniState.features)).includes('Q764793'), 'Fornovo is drawn as the map opens');
+    await page.goto(`${BASE}/omni/index.html#${FORNOVO}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1494);
+    assert.match(await page.textContent('#frame-why'), /^Opens on 1494, as VM's click chose it: the passage's own year/);
 
     // S4: a decade step keeps the recipe's own year as a stop, and the slider says the year the map shows.
     const decades = 'vr=1&t=580..1910&at=1494&show=frame&step=10y&base=plain&fill=borders&l=battles&focus=Q4948&q=Q4948';

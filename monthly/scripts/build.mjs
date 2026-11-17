@@ -14,7 +14,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { RULE, VOL_RULE, WORDS, fightingMark, volatilityMark, volatilityRise, markProblems, addMonths, monthsFrom, monthName, fmt, short, spanName } from './rules.mjs';
+import { RULE, VOL_RULE, WORDS, fightingMark, volatilityMark, volatilityDays, volatilityRise, markProblems, addMonths, monthsFrom, monthName, fmt, short, spanName } from './rules.mjs';
 import { realtimeRows, focusRows, countryRows, mergeRows, gwTable, GW_NOTES, INDEPENDENCE, seriesFromEvents, gedSrc } from './series.mjs';
 import { eventKey, writeHeads } from '../../integration/scripts/heads.mjs';
 import { refuseIfLost } from '../../calendar/scripts/guard.mjs';
@@ -87,6 +87,8 @@ const rt = read('battlefield/data/realtime.json');
 const wfIndex = read('battlefield/focus/data/index.json');
 const wfWars = wfIndex.wars.map(w => read(`battlefield/focus/data/wars/${w.id}.json`));
 const vol = readIf('volatility/data/index.json');
+const volFacts = volatilityDays(vol); // each day's method and baseline, as the store records them (null: not recorded)
+const volRecordsMethods = !!vol?.global?.length && vol.global.every(g => volFacts.methodOf(g[0]));
 const nat = read('national/data/index.json');
 const ged = readIf('monthly/data/ged-countries.json');
 const stored = readIf('monthly/data/series.json');
@@ -242,9 +244,9 @@ for (const u of units) {
   u.fighting = mark;
   if (u.kind === 'country') {
     const days = vol?.countries?.[u.iso3]?.days || [];
-    // The store does not yet say which method scored each day (index.json has one method for all), so no volatility
-    // mark can be shown to compare like with like; and none before April 2027 in any case (rules.mjs VOL_RULE).
-    const vm = volatilityMark(days, M, { methodOf: () => null, fullBaseline: () => false });
+    // The store says which method scored each day and against how many days (Jude's decision G, 17 November 2026), so a
+    // mark compares like with like; none before April 2027 in any case (rules.mjs VOL_RULE).
+    const vm = volatilityMark(days, M, volFacts);
     vm.evidence = [{ dataset: 'GDELT 2.0, through VM\'s Geopolitical Volatility', version: vol?.method || 'none', released: (vol?.latest || '').slice(0, 10) || 'none', counts: `${days.filter(d => d[0].startsWith(M)).length} scored days in ${monthName(M)}`, page: pageOf('rt', 'volatility', `q/volatility.html#country=${u.iso3}`, `Geopolitical Volatility: ${u.name}`) }];
     u.volatility = vm;
   }
@@ -280,7 +282,7 @@ const strands = [
   { id: 'realtime', name: 'Realtime Battlefield', state: 'in', text: `UCDP's candidate events for ${monthName(M)} (release ${CANDIDATE}) are in.` },
   { id: 'warfocus', name: 'War Focus', state: wfHas ? 'in' : 'awaited', text: wfHas ? `War Focus holds ${monthName(M)} for its ${ongoing.length} ongoing wars.` : `War Focus has not yet taken in ${monthName(M)}: it does so on the 2nd of each month. This bulletin is a provisional issue until then.` },
   { id: 'countries', name: 'Countries', state: hasCountries ? 'in' : 'not-yet', text: hasCountries ? `Per-country figures for ${monthName(M)} are in.` : `Per-country figures are not yet possible: Realtime Battlefield's file gains them at its next rebuild from UCDP's next release, and the years since 1989 at War Focus's next monthly run.` },
-  { id: 'volatility', name: 'Volatility', state: 'not-yet', text: `Volatility marks are not yet possible: the first month that can have one is ${monthName(VOL_RULE.firstMonth)}, and the volatility store must first say which method scored each day.` },
+  { id: 'volatility', name: 'Volatility', state: 'not-yet', text: `Volatility marks are not yet possible: the first month that can have one is ${monthName(VOL_RULE.firstMonth)}${volRecordsMethods ? '' : ', and the volatility store must first say which method scored each day'}.` },
 ];
 const final = strands.filter(s => ['realtime', 'warfocus'].includes(s.id)).every(s => s.state === 'in');
 

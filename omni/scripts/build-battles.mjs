@@ -17,7 +17,8 @@
 //    lake/scripts/coords.mjs; what supports each value by lake/scripts/refs.mjs (a reference, "Wikipedia-sourced,
 //    unverified", or none), with a source line for the page.
 // 4. Writes omni/data/layers/battles.json, the battles layer's `built` and years in omni/data/layers.json, and the
-//    read's time as Wikidata's version and access date in integration/sources.json. Nothing else is written.
+//    read's time as Wikidata's version and access date in integration/sources.json. Nothing else is written. The stamp
+//    is the run's time only when the rows changed (layerFile): a rerun on the same answers writes the same bytes.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -86,6 +87,20 @@ export function battleRow(e, label) {
     src: { date: valueSource(q, dateP, dateClaim, label), pt: valueSource(q, 'P625', ptClaim, label) } };
 }
 
+const readJson = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
+
+/** Step 4's file: the layer as written, from its rows. Its `built` is the one the file already has (prev) when the rows
+    are byte for byte the same as its own, so a rerun on the same Wikidata answers writes the same bytes and the
+    battles@ pin of a saved view stays; otherwise `now`. The read's date in `about` follows the stamp. */
+export function layerFile(rows, prev, now) {
+  const same = !!prev && typeof prev.built === 'string' && JSON.stringify(prev.rows) === JSON.stringify(rows);
+  const built = same ? prev.built : now;
+  const from = Math.min(...rows.map(r => r.sortYear)), to = Math.max(...rows.map(r => r.sortYear));
+  return { layer: 'battles', format: 'vm-layer/1', source: 'wikidata', built, from, to,
+    about: `The battles the Master Index holds with a date in ${FROM}–${TO}, read from Wikidata on ${built.slice(0, 10)} by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.`,
+    rows };
+}
+
 async function wbget(params, cache, key) {
   if (cache && existsSync(join(cache, key))) return JSON.parse(readFileSync(join(cache, key), 'utf8'));
   const u = `https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&${new URLSearchParams(params)}`;
@@ -124,17 +139,18 @@ async function main() {
   }
   const rows = battles.map(e => battleRow(e, q => labels.get(q) || q)).filter(Boolean).sort((a, b) => a.sortYear - b.sortYear || a.q.localeCompare(b.q));
   for (const e of battles) if (!rows.some(r => r.q === e.id)) console.log(`${e.id}: Wikidata gives no date or no point, so it cannot be drawn: left out`);
-  const built = stamp(), from = Math.min(...rows.map(r => r.sortYear)), to = Math.max(...rows.map(r => r.sortYear));
+  // The stamp moves only with the rows (layerFile): unchanged rows keep the file, the catalogue and the sources as they are.
+  const prev = readJson(OUT);
+  const file = layerFile(rows, prev, stamp());
   mkdirSync(join(ROOT, 'omni/data/layers'), { recursive: true });
-  writeFileSync(OUT, JSON.stringify({ layer: 'battles', format: 'vm-layer/1', source: 'wikidata', built, from, to,
-    about: `The battles the Master Index holds with a date in ${FROM}–${TO}, read from Wikidata on ${built.slice(0, 10)} by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.`,
-    rows }, null, 2) + '\n');
+  writeFileSync(OUT, JSON.stringify(file, null, 2) + '\n');
   for (const r of rows) console.log(`${r.label}: ${JSON.stringify(r.date)} at ${r.pt.join(', ')}; date ${r.src.date.support}, point ${r.src.pt.support}`);
-  updateLayer(LAYERS, 'battles', { built, time: { from, to } });
+  console.log(file.built === prev?.built ? `The rows are unchanged: the stamp stays ${file.built}` : `The rows changed: stamped ${file.built}`);
+  updateLayer(LAYERS, 'battles', { built: file.built, time: { from: file.from, to: file.to } });
   // Wikidata's entry in VM's sources names the read this layer holds (its version is when VM read it).
   const S = join(ROOT, 'integration/sources.json'), sources = JSON.parse(readFileSync(S, 'utf8'));
   const wd = sources.sources.find(s => s.id === 'wikidata');
-  if (wd) { wd.version = built; wd.accessed = built.slice(0, 10); writeFileSync(S, JSON.stringify(sources, null, 2) + '\n'); }
+  if (wd) { wd.version = file.built; wd.accessed = file.built.slice(0, 10); writeFileSync(S, JSON.stringify(sources, null, 2) + '\n'); }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

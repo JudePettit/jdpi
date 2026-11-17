@@ -30,7 +30,7 @@ import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { scorePeriod as scoreWith, latestPick, decadePick } from '../lib/pestle.js';
 import { yearsFiles, writeYears } from './years.mjs';
-import { leadership as leadershipOf, conflict as conflictOf, retroCodes } from './overview.mjs';
+import { leadership as leadershipOf, conflict as conflictOf, retroCodes, gwCodes, officeTerm } from './overview.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -62,9 +62,12 @@ const sparql = `SELECT ?c ?iso3 ?iso2 ?num (GROUP_CONCAT(DISTINCT ?govL; separat
 } GROUP BY ?c ?iso3 ?iso2 ?num ?capL`;
 // The offices of head of state (P1906) and of government (P1313), a request of their own (in the query above they
 // would reorder its forms of government): one office for both is an executive presidency (leaders.mjs, leaderOffice).
-const officesQuery = `SELECT ?c ?hosO ?hogO WHERE {
+// With each office its term length (P2097, amount and unit), where Wikidata gives one: overview.mjs (officeTerm) keeps
+// it for an office held together for a fixed term (San Marino's Captains Regent, Q258045: 0.5 years).
+const officesQuery = `SELECT ?c ?hosO ?hogO ?termAmt ?termUnit WHERE {
   ?c wdt:P298 ?iso3. FILTER NOT EXISTS { ?c wdt:P576 ?end }
-  { ?c wdt:P1906 ?hosO } UNION { ?c wdt:P1313 ?hogO }
+  { ?c wdt:P1906 ?hosO OPTIONAL { ?hosO p:P2097/psv:P2097 [ wikibase:quantityAmount ?termAmt; wikibase:quantityUnit ?termUnit ] } }
+  UNION { ?c wdt:P1313 ?hogO OPTIONAL { ?hogO p:P2097/psv:P2097 [ wikibase:quantityAmount ?termAmt; wikibase:quantityUnit ?termUnit ] } }
 }`;
 // Wikidata's ISO code for Kosovo is XKS; the World Bank's is XKX (which is why Kosovo had no Wikidata item or heads).
 const WD_ISO3 = { XKS: 'XKX' };
@@ -82,6 +85,13 @@ for (const b of (await getJson('https://query.wikidata.org/sparql?format=json&qu
   const x = wdByQid.get(b.c.value.split('/').pop());
   if (b.hosO) x?.hosOffices.add(b.hosO.value);
   if (b.hogO) x?.hogOffices.add(b.hogO.value);
+  // The offices' term lengths, by office (its QID) and by which head it is: { headOfState: Map(QID → [{ amount, unit }]) }.
+  const o = b.hosO || b.hogO, which = b.hosO ? 'headOfState' : 'headOfGovernment';
+  if (x && o) {
+    const terms = (x.terms ||= { headOfState: new Map(), headOfGovernment: new Map() })[which], q = o.value.split('/').pop();
+    if (!terms.has(q)) terms.set(q, []);
+    if (b.termAmt && b.termUnit) terms.get(q).push({ amount: b.termAmt.value, unit: b.termUnit.value.split('/').pop() });
+  }
 }
 // Heads of state (P35) and government (P6), read as statements, not through the truthy wdt: shortcut (which returns
 // ended statements too), and the "position held" (P39) statements of the country's offices of head of state (P1906)
@@ -159,7 +169,6 @@ const scorePeriod = (s, pick) => scoreWith(s, pick, INDICATORS, DIMENSIONS);
 // ---- JDP-I data for the overview
 const { COUNTRIES: RETRO_COUNTRIES } = existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : { COUNTRIES: {} };
 const retro = existsSync(join(retroDir, 'data/countries.json')) ? json(join(retroDir, 'data/countries.json')) : { countries: {} };
-const gwByIso3 = new Map(Object.entries(RETRO_COUNTRIES).map(([gw, c]) => [c.iso3, +gw]));
 // Gleditsch–Ward codes for every state (the codes UCDP uses), from the countrycode project's code list. An error page
 // would parse to no rows and cost about a hundred countries their codes, conflict history and wars this year.
 // Read at a fixed commit, not the moving main branch, so an upstream change cannot alter the codes unseen. To update,
@@ -170,11 +179,11 @@ const codes = await fetch(`https://raw.githubusercontent.com/vincentarelbundock/
 if (!codes.ok) throw new Error(`countrycode code list: HTTP ${codes.status}`);
 const codelist = parseCsv(await codes.text());
 const nameKey = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').replace(/[^a-z]/g, '');
+// The Retrospective's codes first, then the code list's, then a predecessor's row where the code list files a present
+// state's code there (Yemen, 678: overview.mjs GW_PREDECESSOR).
+const gwByIso3 = gwCodes(RETRO_COUNTRIES, codelist, msg => console.warn(msg));
 const aliasToIso3 = new Map();
-for (const r of codelist) {
-  if (r.iso3c && r.gwn && !gwByIso3.has(r.iso3c)) gwByIso3.set(r.iso3c, +r.gwn);
-  if (r.iso3c) aliasToIso3.set(nameKey(r['country.name.en']), r.iso3c);
-}
+for (const r of codelist) if (r.iso3c) aliasToIso3.set(nameKey(r['country.name.en']), r.iso3c);
 // UCDP's own country names that differ from the code list's.
 for (const [n, iso] of Object.entries({ 'DR Congo': 'COD', Congo: 'COG', Russia: 'RUS', 'Ivory Coast': 'CIV', Myanmar: 'MMR', Yemen: 'YEM', Iran: 'IRN', Syria: 'SYR', Laos: 'LAO', 'South Korea': 'KOR', 'North Korea': 'PRK', 'United States of America': 'USA', 'Bosnia-Herzegovina': 'BIH', 'Kingdom of eSwatini': 'SWZ', Cambodia: 'KHM', Madagascar: 'MDG', Zimbabwe: 'ZWE', Serbia: 'SRB', Vietnam: 'VNM', Turkey: 'TUR', Egypt: 'EGY', Venezuela: 'VEN', Gambia: 'GMB', 'South Sudan': 'SSD', 'Central African Republic': 'CAF' })) aliasToIso3.set(nameKey(n), iso);
 const wars = json(join(jdpi, 'battlefield/history/data/wars.json')).wars;
@@ -187,7 +196,7 @@ const calendar = ['1980s', '1990s', '2000s', '2010s', '2020s'].flatMap(d => exis
 // Leadership and conflict (overview.mjs), under every code the Retrospective files the country under (Germany: 255 to
 // 1945 and 260 from 1949), or the code list's one code where the Retrospective has none.
 const codesOf = (iso3, gw) => { const cs = retroCodes(RETRO_COUNTRIES, iso3); return cs.length ? cs : gw != null ? [gw] : []; };
-const leadership = (iso3, gw, current) => leadershipOf(codesOf(iso3, gw).map(g => retro.countries[g]), current, TODAY);
+const leadership = (iso3, gw, current, term) => leadershipOf(codesOf(iso3, gw).map(g => retro.countries[g]), current, TODAY, term);
 const conflict = (iso3, gw) => conflictOf(codesOf(iso3, gw), wars, realtime.wars.filter(w => w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
 function nameOfGw(gw) { return (retro.countries[gw]?.name || '').replace(/ \/.*$/, ''); }
 
@@ -239,7 +248,7 @@ for (const c of wbCountries) {
     ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
     leader: shown, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
-    leadership: rc ? leadership(c.id, gw, shown) : null,
+    leadership: rc ? leadership(c.id, gw, shown, officeTerm(w.terms?.[shown?.office])) : null,
     conflict: gw != null ? conflict(c.id, gw) : null,
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,

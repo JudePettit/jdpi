@@ -240,6 +240,9 @@ function fromLink(from) {
 function frameWhy(year, win) {
   const at = yearOf(S.R.at);
   if (S.mode === 'saved' || at == null || at !== year) return '';
+  // A battle's own view opens on the year it was fought (decision D4 of 17 November 2026).
+  const b = battlesOn() ? battleRow(S.R.q) : null;
+  if (NEO.test(S.R.from || '') && b && b.sortYear === at) return `Opens on ${formatYear(at)}, the year it was fought, as VM's click chose it: a battle's view opens on its own year. The rules are under "Method" below.`;
   if (NEO.test(S.R.from || '')) return `Opens on ${formatYear(at)}, as VM's click chose it: the passage's own year where VM has dated the passage, until then the start of the book's era. The rules are under "Method" below.`;
   return at === win.from ? `Opens on ${formatYear(at)}, the first of these years.` : `Opens on ${formatYear(at)}, the year this view's recipe names.`;
 }

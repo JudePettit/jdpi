@@ -221,7 +221,10 @@ export function resolve(entry, from = {}, ctx = {}) {
       fill: 'borders', l: [{ id: 'battles' }], focus: focus.length ? focus.slice(0, 20) : undefined, q: QID.test(entry.q || '') ? entry.q : undefined, from: fromKey(from) });
   };
   const passagePlaces = rec?.places?.length && checked ? rec.places : ctx.passagePlaces || [];
-  const lifeRecipe = build(lifeWin, null, ctx.passagePlaces || []);
+  // A battle's own view opens on the year it was fought (decision D4 of 17 November 2026), so it is drawn when the map
+  // opens: Fornovo on 1495, not the start of the book's era, 1494. A checked periods record still sets the passage's view.
+  const foughtIn = own && kind === 'battle' ? yearOf(entry.facts?.date) : null;
+  const lifeRecipe = build(lifeWin, foughtIn, ctx.passagePlaces || []);
   const passageRecipe = pspan ? build({ from: pspan.from, to: pspan.to, p: pspan.p }, pspan.year, rec.places?.length ? rec.places : ctx.passagePlaces || []) : null;
   const recipe = checked ? passageRecipe : lifeRecipe;
   const win = checked ? pspan : lifeWin;
@@ -231,11 +234,11 @@ export function resolve(entry, from = {}, ctx = {}) {
   const lifeName = kind === 'person' ? 'Its whole life' : 'Its years';
   // Why each view opens on its frame (2.1 rule 2), said beside it, so a reader never takes the frame for the passage's
   // year when VM has not dated the passage.
-  const frameWhy = (r, passageYear) => {
+  const frameWhy = (r, passageYear, fought = null) => {
     const at = readRecipe(r)?.at;
     if (at == null) return '';
     const e = Array.isArray(ctx.era) ? [yearOf(ctx.era[0]), yearOf(ctx.era[1])] : null;
-    const why = passageYear != null ? 'the paragraph\'s first year' : e && e[0] === yearOf(at) ? `the start of the book's era (${formatSpan(e[0], e[1])})` : 'the first of these years';
+    const why = fought != null && yearOf(at) === fought ? 'the year it was fought' : passageYear != null ? 'the paragraph\'s first year' : e && e[0] === yearOf(at) ? `the start of the book's era (${formatSpan(e[0], e[1])})` : 'the first of these years';
     return `the map opens on ${formatYear(yearOf(at))}, ${why}`;
   };
   const undated = !from.passage ? '' : !pspan ? ': this paragraph has no periods record yet, so VM has not dated it' : !checked ? ': this paragraph\'s periods record is not yet checked by a second reader' : '';
@@ -243,10 +246,10 @@ export function resolve(entry, from = {}, ctx = {}) {
     ? { id: 'passage', name: 'This passage', at: omniAt(passageRecipe), recipe: passageRecipe, available: true,
         why: checked ? `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}; ${frameWhy(passageRecipe, pspan.year)}` : `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}, as its periods record gives them; not yet checked by a second reader; ${frameWhy(passageRecipe, pspan.year)}` }
     : { id: 'passage', name: 'This passage', at: '', available: false, why: 'The years this paragraph concerns', reason: 'This paragraph has no periods record yet' }) : null;
-  const lifeWhy = frameWhy(lifeRecipe, null);
+  const lifeWhy = frameWhy(lifeRecipe, null, foughtIn);
   const lifeOffer = lifeWin ? { id: 'life', name: lifeName, at: omniAt(lifeRecipe), recipe: lifeRecipe, available: true,
     why: (own ? `${label}'s own dates with a margin either side, ${formatSpan(own.from, own.to)}` : `${label} has no dates of its own in VM; the period of the book`)
-      + (lifeWhy ? `; ${lifeWhy}${undated}` : '') }
+      + (lifeWhy ? `; ${lifeWhy}${foughtIn != null ? '' : undated}` : '') }
     : { id: 'life', name: lifeName, at: '', available: false, why: `${label}'s own dates`, reason: `VM holds no dates for ${label}` };
   if (checked) offers.push(passageOffer, lifeOffer);
   else { if (passageOffer) offers.push(passageOffer); offers.push(lifeOffer); }

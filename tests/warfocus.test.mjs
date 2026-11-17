@@ -463,6 +463,55 @@ test('rules: below an item also part of something outside the war, only the part
   assert.ok(!partsWithin(bd, new Map(), 'Q1', { start: '1971-03-26', end: '1971-12-16' }, { places: bdPlaces }).has('Q3'), 'without its states, it would not');
 });
 
+// Jude's decision of 17 November 2026 (VM-DECISIONS-17NOV.md G, under H5's rule): the Red Sea crisis is not the Gaza war,
+// and UCDP's figures for it (conflict 16099: 130 battle deaths in 2024, 781 in 2025) do not give it an entry of its own.
+test('rules: the Red Sea crisis and all its parts are left out of the Gaza war, by any path; nothing else is', async () => {
+  const { partsWithin } = await import('../battlefield/focus/scripts/rules.mjs');
+  const { LEFT_OUT, leftOutOf, WARS } = await import('../battlefield/focus/scripts/wars.mjs');
+  // Wikidata's "part of" (P361), as it read on 17 November 2026: the Red Sea crisis (Q123285238) is part of the Houthi
+  // involvement in the Gaza war (Q124819767), itself part of the Gaza war (Q122962941); the seizures of the St Nikolas
+  // and of an Iranian dhow are part of the crisis; the United States' strikes in Yemen of March and April 2025
+  // (Q133287207) are part of the crisis and of the Gaza war directly, and hold the Ras Isa, Farwa and Saada strikes. The
+  // July 2024 Houthi–Israel attacks (Q127638355) and the Israeli attack on Doha (Q136190686) are not in the crisis.
+  const edges = [['Q124819767', 'Q122962941'], ['Q123285238', 'Q124819767'], ['Q124253753', 'Q123285238'], ['Q124301569', 'Q123285238'],
+    ['Q133287207', 'Q123285238'], ['Q133287207', 'Q122962941'], ['Q133894632', 'Q133287207'], ['Q134006902', 'Q133287207'], ['Q134437528', 'Q133287207'],
+    ['Q127638355', 'Q122962941'], ['Q127638355', 'Q124819767'], ['Q136190686', 'Q122962941']].map(([c, parent]) => ({ c, parent }));
+  const within = partsWithin(edges, new Map(), 'Q122962941', { start: '2023-10-07', end: '2025-10-10' });
+  assert.ok(within.has('Q133287207') && within.has('Q134437528'), 'by Wikidata alone the crisis and the strikes in Yemen are the Gaza war\'s');
+  const left = leftOutOf('gaza-war', edges);
+  assert.deepEqual([...left.keys()].sort(), ['Q123285238', 'Q124253753', 'Q124301569', 'Q133287207', 'Q133894632', 'Q134006902', 'Q134437528']);
+  assert.ok(!left.has('Q127638355') && !left.has('Q136190686') && !left.has('Q124819767'), 'the July 2024 attacks, Doha and the Houthi involvement stay');
+  assert.equal(leftOutOf('yemen', edges).size, 0, 'no other war loses anything');
+  // Every row names its war, its reason with UCDP's figures, and the source the figures are from.
+  for (const r of LEFT_OUT) {
+    assert.ok(WARS.some(w => w.id === r.war), r.war);
+    assert.match(r.qid, /^Q\d+$/);
+    assert.match(r.url, /^https:\/\/ucdp\.uu\.se\//);
+  }
+  const red = LEFT_OUT.find(r => r.qid === 'Q123285238');
+  assert.equal(red.ucdp, 16099);
+  assert.match(red.why, /130 battle deaths in 2024 and 781 in 2025/);
+  assert.match(red.why, /below the 1,000 battle deaths in a year that War Focus asks of an interstate war/);
+});
+
+test('data: the Gaza war lists none of the Red Sea crisis and says why in its file', async () => {
+  const w = await dataFile('battlefield/focus/data/wars/gaza-war.json');
+  const gone = ['Q123285238', 'Q124253753', 'Q124301569', 'Q133287207', 'Q133894632', 'Q134006902', 'Q134437528'];
+  assert.deepEqual(w.battles.filter(b => gone.includes(b.q)).map(b => b.n), []);
+  assert.ok(w.battles.some(b => b.q === 'Q127638355'), 'the July 2024 Houthi–Israel attacks stay');
+  assert.equal(w.leftOut?.length, 1);
+  assert.equal(w.leftOut[0].q, 'Q123285238');
+  assert.equal(w.leftOut[0].items, gone.length);
+  assert.match(w.leftOut[0].why, /781 in 2025/);
+  for (const b of w.battles) for (const k of ['up', 'upAlso', 'parts']) assert.ok(![b[k] || []].flat().some(q => gone.includes(q)), `${b.q} ${k}`);
+});
+
+test('the page gives the line for what is left out of a war, from its file', () => {
+  const app = readFileSync(new URL('../battlefield/focus/app.js', import.meta.url), 'utf8');
+  const note = app.slice(app.indexOf('class="src-note"'));
+  assert.match(note, /w\.leftOut \|\| \[\]\)\.map\(x => `<b>Left out of this war:<\/b> \$\{esc\(x\.why\)\}/);
+});
+
 test('rules: a battle\'s end checked against its Wikipedia article', async () => {
   const { infoboxEnd, endAgainstArticle } = await import('../battlefield/focus/scripts/rules.mjs');
   // Battle of Bakhmut, English Wikipedia, November 2026 (the infobox's date field, shortened).

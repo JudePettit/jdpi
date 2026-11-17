@@ -1642,12 +1642,12 @@ const UN_COMBAT = 'AUS BEL CAN COL ETH FRA GBR GRC LUX NLD NZL PHL THA TUR USA Z
 const VIETNAM_ALLIES = 'AUS KOR NZL PHL THA USA'.split(' ');
 const lit = s => new Set([...(s.focus?.countries || []), ...(s.visual.groups || []).flatMap(g => g.countries)]);
 
-test('coverage: the Korean War film shows the sixteen countries that sent combat forces; only the Soviet Union waits', async () => {
+test('coverage: the Korean War film shows the sixteen countries that sent combat forces, and the Soviet Union', async () => {
   const g = (await warGaps())('kino:wars/korean-war');
   assert.deepEqual(g.countries, [], 'countries of the war the film never shows');
   assert.deepEqual(g.scenes, [], 'scenes that leave a fighting country grey');
-  // The Soviet Union (UCDP/PRIO lists it on the North's side) is added only on Jude's choice 12.
-  assert.ok(g.states.every(s => s.name === 'the Soviet Union'), g.states.map(s => s.name).join(', '));
+  // The Soviet Union (UCDP/PRIO lists it on the North's side) is shown since Jude's choice 12 (17 November 2026).
+  assert.deepEqual(g.states.map(s => s.name), [], 'historical states of the war the film never shows');
   const scenes = flatScenes(ctx.docs.get('korean-war')), i = scenes.findIndex(s => s.id === 'united-nations');
   const next = scenes[i + 1];
   assert.equal(scenes[i].visual.kind, 'summary', 'resolution 83 is still summarised');
@@ -1751,10 +1751,9 @@ test('ww2-europe: two fronts shows Italy, Romania and Bosnia, and Berlin the Net
   assert.match(ww2Scene('berlin').narration, /Brno|Moravia|Czech/);
 });
 
-test('ww2-europe: the title and id are unchanged, and no Asia and Pacific scene is added', () => {
+test('ww2-europe: the id is unchanged, and no Asia and Pacific scene is added', () => {
   const d = ctx.docs.get('ww2-europe');
   assert.equal(d.id, 'ww2-europe');
-  assert.equal(d.title, 'The Second World War in Europe, 1939–1945');
   const ASIA = new Set(['JPN', 'CHN', 'IND', 'MMR', 'PHL', 'IDN', 'AUS', 'USA', 'KOR', 'PRK', 'VNM', 'THA', 'MYS', 'SGP', 'PNG']);
   for (const s of flatScenes(d)) {
     for (const c of lit(s)) assert.ok(!ASIA.has(c), `${s.id} lights ${c}`);
@@ -1803,11 +1802,13 @@ test('ww2-europe: no scene cites two sources by the same short form, and every s
 
 // K2 (17 November 2026): at 1280 × 720 and 1024 × 768 the stage is under 760 px wide, and the key, at its legible
 // minimum, wrapped over Algeria, Morocco and Namibia; there it moves under the stage, into the captions, as on phones.
-// At 1440 × 900 and 1920 × 1080 it stays on the map, as before, and covers no lit country.
+// At 1440 × 900 and 1920 × 1080 it stays on the map, as before, and covers no lit country; except Africa's at 1440,
+// which reached under the paused Play button and so goes under the stage (the second reader's F3, 17 November 2026).
 test('page: the map key of North Africa and of Africa\'s war covers no lit country at 1024, 1280, 1440 and 1920 px', PAGE, async () => {
   const browser = await launch({ args: ['--mute-audio'] });
   try {
-    for (const [width, height, onStage] of [[1024, 768, false], [1280, 720, false], [1440, 900, true], [1920, 1080, true]]) for (const id of ['mediterranean', 'africa']) {
+    for (const [width, height, wide] of [[1024, 768, false], [1280, 720, false], [1440, 900, true], [1920, 1080, true]]) for (const id of ['mediterranean', 'africa']) {
+      const onStage = wide && !(width === 1440 && id === 'africa');
       const page = await browser.newPage({ viewport: { width, height } });
       await page.goto(`${BASE}/kino/index.html?cat=wars#doc=ww2-europe&s=${id}`, { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('.kn-stage svg.kn-map path.c.t2', { timeout: 30000 });
@@ -1923,4 +1924,253 @@ test('scripts: no line of a script holds two entries', () => {
   for (const { path } of scriptFiles()) readFileSync(path, 'utf8').split(/\r?\n/).forEach((l, i) => {
     assert.ok((l.match(/\{\s*"id":/g) || []).length <= 1, `${path.replace(ROOT, '')}:${i + 1} holds more than one entry`);
   });
+});
+
+/* ---- Jude's decisions of 17 November 2026 (VM-DECISIONS-17NOV.md, H12 and the last point of H).
+   K1: the Second World War film tells Africa's war too (AC-10), so it is retitled "in Europe and Africa"; its id, file
+   name and address stay as they were. Every place that shows the title says the same: the film, its opening card, the
+   built catalogue, the README's example and the other films' links to it. */
+const WW2_TITLE = 'The Second World War in Europe and Africa';
+test('ww2-europe: retitled "in Europe and Africa" in the film, its opening card, the catalogue and every link to it; id and address unchanged', () => {
+  const d = ctx.docs.get('ww2-europe'), open = flatScenes(d)[0];
+  assert.equal(d.title, `${WW2_TITLE}, 1939–1945`);
+  assert.equal(d.id, 'ww2-europe');
+  assert.ok(existsSync(join(ROOT, 'kino/data/wars/ww2-europe.json')), 'the file name is unchanged');
+  assert.equal(open.title, WW2_TITLE);
+  assert.equal(open.visual.heading, WW2_TITLE);
+  assert.match(open.narration, /follows the war in Europe and Africa/);
+  assert.equal(read('kino/data/index.json').docs.find(e => e.id === 'ww2-europe').title, d.title, 'the built catalogue has the new title');
+  // Links from other films name it by its title.
+  const links = docs.flatMap(x => flatScenes(x).filter(s => /#doc=ww2-europe\b/.test(s.link?.at || '')).map(s => s.link.label));
+  assert.ok(links.length >= 1, 'a film links to it');
+  for (const l of links) assert.ok(l.startsWith(`Kino · ${WW2_TITLE}`), l);
+  // No script, built file or the README still names it by the old title.
+  const old = /Second World War in Europe(?! and Africa)(?=[,:"]|\s*\(|$)/m;
+  for (const { path } of scriptFiles()) assert.doesNotMatch(readFileSync(path, 'utf8'), old, path.replace(ROOT, ''));
+  for (const f of ['kino/data/index.json', 'kino/README.md']) assert.doesNotMatch(readFileSync(join(ROOT, f), 'utf8'), old, f);
+});
+
+test('page: the catalogue card, the player and the opening card show the film\'s new title, at 1440 and 390 px', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const [width, height] of [[1440, 900], [390, 844]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      await page.goto(`${BASE}/kino/index.html?cat=wars`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kn-card[data-doc="ww2-europe"]', { timeout: 20000 });
+      assert.equal(await page.locator('.kn-card[data-doc="ww2-europe"] h2').innerText(), `${WW2_TITLE}, 1939–1945`);
+      await openFilm(page, 'wars', '#doc=ww2-europe&s=opening');
+      assert.equal(await page.locator('#doc-title').innerText(), `${WW2_TITLE}, 1939–1945`);
+      await page.waitForSelector('.kn-layer.kn-v-title h3', { timeout: 30000 });
+      assert.equal(await page.locator('.kn-layer.kn-v-title h3').innerText(), WW2_TITLE);
+      // The longer heading stays inside the stage, and the page does not scroll sideways.
+      const fit = await page.evaluate(() => { const h = document.querySelector('.kn-layer.kn-v-title h3').getBoundingClientRect(), s = document.querySelector('.kn-stage').getBoundingClientRect(); return { inside: h.left >= s.left - 0.5 && h.right <= s.right + 0.5 && h.bottom <= s.bottom + 0.5, sideways: document.documentElement.scrollWidth > innerWidth }; });
+      assert.ok(fit.inside, `${width} px: the heading is inside the stage`);
+      assert.equal(fit.sideways, false, `${width} px: no sideways scroll`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+});
+
+/* K2 (H12): the Korean War film shows the Soviet Union, truly: it supplied North Korea and China and trained their
+   pilots, never openly entered the war, and from 1 November 1950 its own pilots flew in combat over north-western Korea,
+   in North Korean or Chinese markings, in secret (Wikipedia's MiG Alley and 64th Fighter Aviation Corps; Wikidata's
+   participants in the Korean War; UCDP/PRIO's parties to conflict 235). Russia's shape is lit for it, in the North's
+   tone, in the scene whose months hold 1 November 1950, and its key says it was the Soviet Union and not openly at war. */
+test('korean-war: the China scene lights the Soviet Union, drawn as Russia, keyed as never openly at war, with its sources', async () => {
+  const d = ctx.docs.get('korean-war'), scenes = flatScenes(d), s = scenes.find(x => x.id === 'china');
+  const g = s.visual.groups.find(x => x.countries.includes('RUS'));
+  assert.ok(g, 'Russia\'s shape is lit');
+  assert.deepEqual(g.countries, ['RUS'], 'a row of its own');
+  assert.equal(g.tone, 2, 'in the tone of the North\'s side');
+  assert.match(g.label, /Soviet Union/, 'the key says it was the Soviet Union');
+  assert.match(g.label, /never openly at war/, 'and not an open belligerent');
+  assert.match(g.label, /secret/);
+  assert.equal(s.visual.groups.find(x => x.countries.includes('CHN')).tone, 3, 'China keeps its own tone');
+  assert.match(s.narration, /The Soviet Union, which supplied North Korea and China and trained their pilots, never openly entered the war/);
+  assert.match(s.narration, /from 1 November 1950 its own pilots flew MiG-15 jets in combat over the north-west of Korea/);
+  assert.match(s.narration, /kept secret/);
+  assert.doesNotMatch(s.narration, /["“”]/, 'no quotation');
+  assert.ok(s.focus.points.some(p => /MiG Alley/.test(p[2]) && /1 November 1950/.test(p[2]) && p[0] > 124 && p[0] < 126 && p[1] > 39 && p[1] < 41), 'MiG Alley is marked in the north-west');
+  const [w, so, e, n] = s.focus.bbox;
+  assert.ok(w <= 124 && e >= 130 && so <= 37 && n >= 43, `the view takes in the north-west and the Soviet border: ${s.focus.bbox}`);
+  // The scene's sources are the film's, and name the Soviet part.
+  for (const id of ['wp-mig-alley', 'wp-64-iak', 'wd-soviet-air', 'ucdp-prio']) assert.ok(s.cites.includes(id), `cites ${id}`);
+  for (const id of s.cites) assert.ok(d.sources.some(x => x.id === id), `${id} is in the film's sources`);
+  const src = id => d.sources.find(x => x.id === id);
+  assert.equal(src('wp-mig-alley').url, 'https://en.wikipedia.org/wiki/MiG_Alley');
+  assert.equal(src('wp-64-iak').url, 'https://en.wikipedia.org/wiki/64th_Fighter_Aviation_Corps');
+  assert.equal(src('wd-soviet-air').kind, 'wikidata');
+  assert.match(src('wd-soviet-air').title, /Q8663.*Q15180/);
+  // Only that scene lights it: the sixteen nations are the United Nations' combatants, and the Soviet Union was not one.
+  for (const x of scenes) if (x.id !== 'china' && x.visual.kind === 'map') for (const c of ['RUS', 'SUN']) assert.ok(!lit(x).has(c), `${x.id} lights ${c}`);
+  assert.ok((await warGaps()).shown('kino:wars/korean-war', 'china').has('RUS'), 'the coverage script reads it as shown');
+});
+
+/* K3 (the last point of H): Africa's war also lights South Sudan (then part of Anglo-Egyptian Sudan, on the Allied
+   side), Cameroon, Congo-Brazzaville and the Central African Republic (Free French from August 1940, with Chad), and
+   Djibouti (French Somaliland, Vichy until December 1942, under Allied blockade). Each is on its side and in a key row
+   that names it. */
+test('ww2-europe: Africa\'s war lights South Sudan, Cameroon, Congo-Brazzaville, the Central African Republic, Chad and Djibouti, each on its side', () => {
+  const s = ww2Scene('africa'), row = c => s.visual.groups.find(g => g.countries.includes(c));
+  // Every key row is short enough to stay on one line, so the key stays clear of Namibia at 1440 and 1920 px (K4's
+  // page test measures it); the four Free French territories therefore take two rows.
+  for (const [c, n] of [['TCD', 'Chad'], ['CMR', 'Cameroon'], ['COG', 'Congo-Brazzaville'], ['CAF', 'Central African Republic']]) {
+    const ff = row(c);
+    assert.equal(ff.tone, 1, `${n}: the Allies' tone`);
+    assert.match(ff.label, /^Free French from August 1940: /, n);
+    assert.match(ff.label, new RegExp(n));
+  }
+  assert.deepEqual(row('TCD').countries, ['TCD', 'CMR', 'COG']);
+  assert.deepEqual(row('CAF').countries, ['CAF']);
+  const sud = row('SSD');
+  assert.equal(sud.tone, 1, 'South Sudan, with Sudan: Allied');
+  assert.deepEqual(sud.countries, ['SDN', 'SSD'], 'in one row with Sudan');
+  assert.match(sud.label, /Anglo-Egyptian Sudan \(today Sudan and South Sudan\)/);
+  const dji = row('DJI');
+  assert.equal(dji.tone, 2, 'French Somaliland: Vichy\'s tone');
+  assert.deepEqual(dji.countries, ['DJI'], 'a row of its own: it was never attacked, but blockaded');
+  assert.match(dji.label, /^Vichy until December 1942/);
+  assert.match(dji.label, /French Somaliland \(Djibouti\)/);
+  assert.match(dji.label, /blockaded/);
+  for (const g of s.visual.groups) assert.ok(g.label.length <= 70, `one line: ${g.label}`);
+  // Gabon joined Free France only when taken in November 1940: it stays with Vichy's territories the Allies attacked.
+  assert.equal(row('GAB').tone, 2);
+  const d = ctx.docs.get('ww2-europe');
+  for (const id of ['wp-free-french-africa', 'wp-anglo-egyptian-sudan', 'wp-french-somaliland-ww2']) {
+    assert.ok(s.cites.includes(id), `cites ${id}`);
+    assert.ok(d.sources.some(x => x.id === id), `${id} is in the film's sources`);
+  }
+  assert.equal(d.sources.find(x => x.id === 'wp-french-somaliland-ww2').url, 'https://en.wikipedia.org/wiki/French_Somaliland_in_World_War_II');
+  assert.equal(d.sources.find(x => x.id === 'wp-anglo-egyptian-sudan').url, 'https://en.wikipedia.org/wiki/Anglo-Egyptian_Sudan');
+  for (const g of s.visual.groups) assert.doesNotMatch(g.label, /["“”]/, 'no quotation');
+  assert.equal(d.sources.find(x => x.id === 'wp-ubangi-shari').url, 'https://en.wikipedia.org/wiki/Ubangi-Shari');
+  assert.ok(s.cites.includes('wp-ubangi-shari'), 'the Central African Republic\'s date has its own source');
+});
+
+/* K4: the rule that moves the key under the picture goes by the theatre's width alone (under 760 px, where the key
+   wraps). At 1440 × 900 and 1920 × 1080 the key does not wrap, but a scene's frame can still put a lit country in the
+   picture's bottom left-hand corner, under it: the Roosevelt film's arsenal scene (the eastern United States), and, so
+   measured, Poland's (Germany), the Korean War's China scene (China), the Partition's Radcliffe line (India) and
+   Barbarossa (slivers of Hungary and Romania). The stage now measures the key against the scene's lit countries at the
+   scene's frame, before the view glides there (the key is hidden until then, so it never jumps), and moves only a key
+   that lies over one: to the top left-hand corner, else the bottom right-hand one, else under the picture. A key that
+   is clear stays where it was. */
+const keyAt = page => page.evaluate(() => {
+  const st = document.querySelector('.kn-stage'), key = st.querySelector('.kn-legend'), below = document.querySelector('#cap-foot .legend-key');
+  const shown = el => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0;
+  const fill = {};
+  let corner = null;
+  if (shown(key)) {
+    const lb = key.getBoundingClientRect(), sb = st.getBoundingClientRect();
+    corner = `${lb.top - sb.top < sb.height / 2 ? 'top' : 'bottom'}-${lb.left - sb.left < sb.width / 2 ? 'left' : 'right'}`;
+    const lit = [...st.querySelectorAll('svg.kn-map path.c')].filter(p => /\bt[123]\b/.test(p.getAttribute('class')))
+      .filter(p => { const b = p.getBoundingClientRect(); return b.right > lb.left && b.left < lb.right && b.bottom > lb.top && b.top < lb.bottom; });
+    // Every 4 px of the key: a sliver of coast counts.
+    for (let x = lb.left + 2; x < lb.right; x += 4) for (let y = lb.top + 2; y < lb.bottom; y += 4)
+      for (const p of lit) if (p.isPointInFill(new DOMPoint(x, y).matrixTransform(p.getScreenCTM().inverse()))) { const k = p.dataset.iso || '?'; fill[k] = (fill[k] || 0) + 1; break; }
+  }
+  // The big Play button, shown while the film is paused (as it is when opened by its address): its box against the key's.
+  const bp = st.querySelector('.kn-bigplay'), bb = bp && shown(bp) ? bp.getBoundingClientRect() : null, kb = shown(key) ? key.getBoundingClientRect() : null;
+  const play = bb && kb ? Math.round(Math.max(0, Math.min(bb.right, kb.right) - Math.max(bb.left, kb.left)) * Math.max(0, Math.min(bb.bottom, kb.bottom) - Math.max(bb.top, kb.top))) : 0;
+  return { onStage: shown(key), visible: shown(key) && getComputedStyle(key).visibility !== 'hidden', corner, fill, play, playShown: !!bb, below: shown(below), cls: [...st.classList].filter(c => c.startsWith('kn-key-')).join(' ') };
+});
+// Opened by its address, a film shows its scene once its captions do; then the view glides to the scene's frame. With
+// watch, the film is first opened on the scene before, left to settle, and then moved on to this one (as when it plays),
+// and where the key is seen while the view glides is returned.
+const sceneSettled = page => page.waitForFunction(() => new Promise(r => { const w = () => document.querySelector('.kn-stage svg.kn-map g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w()), 600); }), null, { timeout: 20000, polling: 700 });
+async function openScene(page, cat, doc, s, watch) {
+  const scenes = flatScenes(ctx.docs.get(doc)), i = scenes.findIndex(x => x.id === s), title = scenes[i].title;
+  const at = id => `${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${id}`;
+  let seen = null;
+  if (watch) {
+    await page.goto(at(scenes[i - 1].id), { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(t => document.querySelector('#cap-title')?.textContent === t, scenes[i - 1].title, { timeout: 30000 });
+    await page.waitForTimeout(800);
+    await sceneSettled(page);
+    // Every 50 ms from the moment the scene is asked for: where the key is seen (hidden while it waits to be placed).
+    seen = page.evaluate(() => new Promise(r => { const out = [], t0 = performance.now(); const tick = () => {
+      const st = document.querySelector('.kn-stage'), key = st.querySelector('.kn-legend');
+      if (key.children.length && getComputedStyle(key).display !== 'none' && getComputedStyle(key).visibility !== 'hidden') { const lb = key.getBoundingClientRect(); out.push(`${Math.round(lb.left - st.getBoundingClientRect().left)},${Math.round(lb.top - st.getBoundingClientRect().top)}:${key.textContent.slice(0, 12)}`); }
+      if (performance.now() - t0 < 3500) setTimeout(tick, 50); else r(out); }; tick(); }));
+    await page.evaluate(id => { location.hash = location.hash.replace(/s=[\w-]+/, `s=${id}`); }, s);
+  } else await page.goto(at(s), { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(t => document.querySelector('#cap-title')?.textContent === t, title, { timeout: 30000 });
+  await page.waitForSelector('.kn-stage svg.kn-map:not(.off) path.c.t1, .kn-stage svg.kn-map:not(.off) path.c.t2, .kn-stage svg.kn-map:not(.off) path.c.t3', { timeout: 30000 });
+  await sceneSettled(page);
+  if (!seen) return null;
+  // Only the places where this scene's key was seen (the scene before had its own key).
+  const first = scenes[i].visual.groups?.[0]?.label.slice(0, 12) ?? '';
+  return [...new Set((await seen).filter(x => x.split(':')[1].startsWith(first)).map(x => x.split(':')[0]))];
+}
+
+test('page: the map key lies over no lit country at 1440 and 1920 px, and a clear key stays where it was', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const [width, height] of [[1440, 900], [1920, 1080]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      // Moved to the top left-hand corner: the arsenal scene (it covered the eastern United States) and Poland's.
+      for (const [cat, doc, s] of [['political-figures', 'franklin-roosevelt', 'arsenal'], ['wars', 'ww2-europe', 'poland']]) {
+        const seen = await openScene(page, cat, doc, s, true);
+        const at = await keyAt(page);
+        assert.deepEqual(at.fill, {}, `${doc}/${s} at ${width} px: lit land under the key`);
+        assert.equal(at.cls, 'kn-key-top', `${doc}/${s} at ${width} px`);
+        assert.equal(at.corner, 'top-left', `${doc}/${s} at ${width} px: the key is in the top left-hand corner`);
+        assert.equal(at.visible, true);
+        assert.equal(seen.length, 1, `${doc}/${s} at ${width} px: the key is seen in one place only, never where it was: ${seen.join(' ')}`);
+      }
+      // The Korean War's China scene: both left-hand corners lie over China, so at 1920 px the key goes to the bottom
+      // right-hand corner, over Japan's unlit islands and the sea (its frame takes in the Sea of Japan for this). At 1440
+      // px that corner lies under the paused Play button (the second reader's F3, 17 November 2026: 1,556 px² of the
+      // key, its South Korea and front-line rows), which counts as covered, so the key goes under the picture.
+      {
+        const seen = await openScene(page, 'wars', 'korean-war', 'china', true);
+        const at = await keyAt(page);
+        assert.deepEqual(at.fill, {}, `korean-war/china at ${width} px: lit land under the key`);
+        if (width === 1440) {
+          assert.equal(at.cls, 'kn-key-below');
+          assert.equal(at.below, true, 'the captions\' key shows instead');
+        } else {
+          assert.equal(at.cls, 'kn-key-right');
+          assert.equal(at.corner, 'bottom-right');
+          assert.equal(seen.length, 1, `korean-war/china at ${width} px: ${seen.join(' ')}`);
+        }
+      }
+      // India lies under every corner of the Radcliffe line's map at 1440 px: the key goes under the picture. Africa's
+      // key, clear of lit land in the bottom left-hand corner, reached under the paused Play button there (53 px² of
+      // their boxes), and both other corners lie over Africa: it goes under the picture too.
+      if (width === 1440) for (const [cat, doc, s] of [['political-events', 'partition-of-india', 'radcliffe'], ['wars', 'ww2-europe', 'africa']]) {
+        await openScene(page, cat, doc, s);
+        const at = await keyAt(page);
+        assert.equal(at.cls, 'kn-key-below', `${doc}/${s}`);
+        assert.equal(at.onStage, false);
+        assert.equal(at.below, true, 'the captions\' key shows instead');
+      }
+      // Clear where they are, of lit land and of the paused Play button: unchanged.
+      for (const [cat, doc, s] of [['wars', 'ww2-europe', 'mediterranean'], ...(width === 1440 ? [] : [['wars', 'ww2-europe', 'africa']]), ['geopolitical-events', 'cuban-missile-crisis', 'anadyr'], ['geopolitical-events', 'end-of-empire-in-africa', 'year-of-africa'], ['geopolitical-events', 'end-of-the-soviet-union', 'eastern-europe']]) {
+        await openScene(page, cat, doc, s);
+        const at = await keyAt(page);
+        assert.deepEqual(at.fill, {}, `${doc}/${s} at ${width} px: lit land under the key`);
+        assert.equal(at.corner, 'bottom-left', `${doc}/${s} at ${width} px: the key stays where it was`);
+        assert.equal(at.cls, '', `${doc}/${s} at ${width} px: not moved`);
+        assert.equal(at.visible, true);
+      }
+      // Opened by its address a film is paused, its Play button shown: no key on the picture reaches under it.
+      for (const [cat, doc, s] of [['wars', 'korean-war', 'china'], ['wars', 'ww2-europe', 'africa'], ['political-figures', 'franklin-roosevelt', 'arsenal'], ['wars', 'ww2-europe', 'poland']]) {
+        await openScene(page, cat, doc, s);
+        const at = await keyAt(page);
+        assert.equal(at.playShown, true, `${doc}/${s} at ${width} px: paused, the Play button shown`);
+        assert.equal(at.play, 0, `${doc}/${s} at ${width} px: the key under the Play button (${at.play} px²)`);
+      }
+      await page.close();
+    }
+    // At 1280 × 720 and 1024 × 768 the key goes under the picture by the theatre's width, as before.
+    for (const [width, height] of [[1280, 720], [1024, 768]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      await openScene(page, 'political-figures', 'franklin-roosevelt', 'arsenal');
+      const at = await keyAt(page);
+      assert.equal(at.onStage, false, `arsenal at ${width} px: no key on the picture`);
+      assert.equal(at.below, true, `arsenal at ${width} px: the key is under the picture`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
 });

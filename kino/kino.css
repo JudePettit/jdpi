@@ -427,6 +427,15 @@
   .kn-theatre:not(:fullscreen) .kn-legend { display: none; }
   .kn-theatre:not(:fullscreen) .kn-cap-foot .legend-key:not(:empty) { display: flex; }
 }
+/* On a larger stage the key stays on the picture unless it lies over a country the scene lights (the stage measures this
+   at the scene's frame, before the view glides there, and hides the key until then: placeLegend in lib/stage.js). Then
+   it goes to the top left-hand corner, or the bottom right-hand one, or, if both are covered too, under the stage, as on
+   a small stage. */
+.kn-stage.kn-key-wait .kn-legend { visibility: hidden; }
+.kn-stage.kn-key-top .kn-legend { top: 2.2cqw; bottom: auto; }
+.kn-stage.kn-key-right .kn-legend { left: auto; right: 2.2cqw; }
+.kn-theatre:not(:fullscreen):has(.kn-stage.kn-key-below) .kn-legend { display: none; }
+.kn-theatre:not(:fullscreen):has(.kn-stage.kn-key-below) .kn-cap-foot .legend-key:not(:empty) { display: flex; }
 /* A phone-sized stage: the chart keeps its title and bars; the unit, note and sources are in the captions below. */
 @container (max-width: 560px) {
   .kn-chart { gap: 6px; padding: 10px 12px 8px; }

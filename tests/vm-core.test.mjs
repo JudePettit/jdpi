@@ -253,6 +253,8 @@ test('resolve: a battle opens a year either side; a present-day Country is left 
   const r = resolve(fornovo, fromNeo('c26-p08', 26, 'Q764793'), ctxFor(para(26, 'c26-p08')));
   const v = readRecipe(r.recipe);
   assert.deepEqual(v.t, { from: 1494, to: 1496 });
+  assert.equal(v.at, 1495, 'a battle\'s own view opens on the year it was fought, not the start of the book\'s era');
+  assert.match(r.offers.find(o => o.id === 'life').why, /the map opens on 1495, the year it was fought$/, 'and the card says why, with no "not yet dated" tail');
   assert.equal(v.step, 'y', 'the borders fill steps by year, the coarsest of the three');
   assert.ok(!v.focus?.includes('Q38'), 'modern Italy is never drawn for 1495');
   assert.ok(v.focus.includes('Q764793'), 'the battle\'s own point');

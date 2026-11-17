@@ -315,7 +315,8 @@ test('data: Montenegro and the ten microstates have leadership figures from the 
   const t = by.SMR.leadership.together;
   // F2 (the review of 17 November 2026): no count of terms, which the list's start and end pairs do not give truly
   // (April to October 1930 is three pairs, one of them a regent's replacement), only how many at once and for how long.
-  assert.deepEqual(t, { at: 2, months: 6 }, `SMR: ${JSON.stringify(t)}`);
+  // (N1, 17 November 2026: with the office's fixed term from Wikidata, `term`.)
+  assert.deepEqual(t, { at: 2, months: 6, term: { years: 0.5, office: 'Q258045' } }, `SMR: ${JSON.stringify(t)}`);
   assert.equal(Object.values(by).filter(c => c.leadership?.together).map(c => c.iso3).join(), 'SMR', 'only San Marino\'s leaders hold office together');
 });
 
@@ -336,6 +337,38 @@ test('overview: office held together gives how many at once and a term\'s length
   assert.deepEqual(L.together, { at: 2, months: 6 });
   const one = leadership([{ events: [], leaders: [R('X', '1990-01-01', '2000-01-01'), R('Y', '2000-01-01', null)] }], null, '2026-11-17');
   assert.equal(one.together, undefined, 'one at a time: no note');
+});
+
+// San Marino (E2 of the decisions of 17 November 2026, N1): an office held together for a fixed short term. The flag is
+// the office's term length from Wikidata (Q258045, Captain Regent of San Marino: term length, P2097, 0.5 years), kept
+// only where the office is held together (together.term); the page then gives the term in words for "Longest-serving
+// leader" in place of "Giordano Giacomini, 0.5 years", and the ranking marks the Leadership figures that count each
+// holder. Switzerland (a President a year, one at a time), Bosnia (the list follows one chair a time) and Andorra (the
+// Syndic and the head of government, one at a time) are not the same case: no together, no term.
+test('overview: an office held together for a fixed term carries the term (San Marino), from Wikidata\'s term length', async () => {
+  const { leadership, officeTerm } = await import('../national/scripts/overview.mjs');
+  assert.equal(typeof officeTerm, 'function');
+  assert.deepEqual(officeTerm(new Map([['Q258045', [{ amount: '0.5', unit: 'Q577' }]]])), { years: 0.5, office: 'Q258045' });
+  assert.deepEqual(officeTerm(new Map([['Q1', [{ amount: '6', unit: 'Q5151' }]]])), { years: 0.5, office: 'Q1' }, 'six months');
+  assert.deepEqual(officeTerm(new Map([['Q4970706', [{ amount: '4', unit: 'Q1092296' }]]])), { years: 4, office: 'Q4970706' }, 'annum');
+  assert.equal(officeTerm(new Map([['Q1', []]])), null, 'no term length');
+  assert.equal(officeTerm(new Map([['Q1', [{ amount: '4', unit: 'Q577' }, { amount: '5', unit: 'Q577' }]]])), null, 'two lengths: none chosen');
+  assert.equal(officeTerm(new Map([['Q1', [{ amount: '4', unit: 'Q577' }]], ['Q2', [{ amount: '5', unit: 'Q577' }]]])), null, 'two offices: none chosen');
+  assert.equal(officeTerm(new Map([['Q1', [{ amount: '4', unit: 'Q11574' }]]])), null, 'a unit it does not read');
+  assert.equal(officeTerm(undefined), null);
+  const R = (name, start, end) => ({ name, full: name, start, end, entry: 'Regular' });
+  const pairs = { events: [], leaders: [R('A', '1990-04-01', '1990-10-01'), R('B', '1990-04-01', '1990-10-01'), R('C', '1990-10-01', '1991-04-01'), R('D', '1990-10-01', '1991-04-01')] };
+  const term = { years: 0.5, office: 'Q258045' };
+  assert.deepEqual(leadership([pairs], null, '2026-11-17', term).together, { at: 2, months: 6, term });
+  assert.equal(leadership([pairs], null, '2026-11-17').together.term, undefined, 'no term from Wikidata: none');
+  const single = { events: [], leaders: [R('X', '1990-01-01', '1991-01-01'), R('Y', '1991-01-01', '1992-01-01')] };
+  assert.equal(leadership([single], null, '2026-11-17', { years: 1, office: 'Q11811941' }).together, undefined, 'held by one at a time (Switzerland\'s President): no flag');
+  // On the committed data.
+  const by = Object.fromEntries(read('national/data/index.json').countries.map(c => [c.iso3, c]));
+  assert.deepEqual(by.SMR.leadership.together.term, term, 'SMR: the Captains Regent\'s term, from Wikidata');
+  assert.ok(by.SMR.leadership.longest.years <= term.years, 'no Captain Regent held office longer than one term at a time');
+  for (const iso of ['CHE', 'BIH', 'AND']) assert.equal(by[iso].leadership.together, undefined, `${iso}: not held together in the data`);
+  assert.deepEqual(Object.values(by).filter(c => c.leadership?.together?.term).map(c => c.iso3), ['SMR']);
 });
 
 // A country the Retrospective files under two state codes is read under both, each for its own years (overview.mjs):
@@ -371,6 +404,39 @@ test('overview: a country under two state codes is read under both, each for its
   assert.equal(de.conflict.cowWars1926_45, wars1926.length, 'every war Retrospective Battlefield files under 255');
 });
 
+// Yemen had no Gleditsch and Ward code (N3, 17 November 2026): the code list (countrycode) files GW 678 under "Yemen
+// Arab Republic", a row with no ISO3, and its "Yemen" row (YEM) has COW 679 and no GW code. So the page had no conflict
+// figures for Yemen, no wars this year (UCDP's "Yemen", 5,018 deaths) and no Battlefield or Retrospective links. The
+// UCDP/PRIO codebook (25.1, Appendix 1) lists 678 "Yemen (Arab Republic of Yemen)" from 1946 with no end, and 680
+// (South Yemen) for 1967–90 only: Yemen is 678.
+test('overview: Yemen has its Gleditsch and Ward code (678), from the code list\'s predecessor row, and its conflict figures', async () => {
+  const { gwCodes, GW_PREDECESSOR } = await import('../national/scripts/overview.mjs');
+  assert.equal(typeof gwCodes, 'function');
+  assert.deepEqual(GW_PREDECESSOR.YEM, { gw: 678, row: 'Yemen Arab Republic' });
+  const row = (name, iso3c, gwn) => ({ 'country.name.en': name, iso3c, gwn });
+  const list = [row('Yemen', 'YEM', ''), row('Yemen Arab Republic', '', '678'), row("Yemen People's Republic", '', '680'), row('Oman', 'OMN', '698'), row('Germany', 'DEU', '260')];
+  const warned = [];
+  const gw = gwCodes({ 255: { iso3: 'DEU' }, 260: { iso3: 'DEU' }, 265: { iso3: null } }, list, m => warned.push(m));
+  assert.equal(gw.get('YEM'), 678, 'Yemen: 678');
+  assert.equal(gw.get('OMN'), 698, 'the code list\'s own code where it has one');
+  assert.equal(gw.get('DEU'), 260, 'the Retrospective\'s code first (its later one, Germany today), as the build read it');
+  assert.ok(![...gw.values()].includes(680), 'South Yemen\'s 680 is no present state\'s code');
+  assert.deepEqual(warned, []);
+  // The code list's row stops giving 678 (or gives Yemen an ISO3): the build says so and takes no code from the table.
+  const moved = gwCodes({}, [row('Yemen', 'YEM', ''), row('Yemen Arab Republic', '', '')], m => warned.push(m));
+  assert.equal(moved.has('YEM'), false);
+  assert.equal(warned.length, 1, warned.join(' | '));
+  assert.equal(gwCodes({}, [row('Yemen', 'YEM', '679')]).get('YEM'), 679, 'the code list\'s own code for Yemen, should it give one, wins');
+  // On the committed data.
+  const ye = read('national/data/index.json').countries.find(c => c.iso3 === 'YEM');
+  assert.equal(ye.gw, 678);
+  assert.ok(ye.conflict, 'YEM: conflict figures');
+  const onSoil = read('battlefield/history/data/wars.json').wars.filter(w => w.src === 'ucdp' && w.loc.includes(678));
+  assert.equal(ye.conflict.conflictYears, onSoil.reduce((s, w) => s + w.years.length, 0), 'every UCDP conflict-year on its soil');
+  assert.ok(ye.conflict.active2026.some(w => w.id === 'yemen'), JSON.stringify(ye.conflict.active2026));
+  assert.equal(ye.leadership, null, 'the Retrospective does not cover Yemen: no leadership figures are made up');
+});
+
 // The small corrections (17 November 2026): the leaders of Montenegro and ten microstates are the Retrospective's own
 // hand-built lists, and the source under their figures said "Archigos and Wikidata"; San Marino's 407 leaders gave no
 // word that each of its two Captains Regent a term is counted; Germany's figures began in 1949.
@@ -384,7 +450,9 @@ test('page: the leaders\' source names the hand-built lists, San Marino\'s count
       page.on('pageerror', e => errors.push(e.message));
       const open = async iso => {
         await page.goto(`${BASE}/q/national#country=${iso}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForFunction(i => document.querySelector('#profile h2')?.textContent && document.querySelector('#profile .stat'), iso, { timeout: 20000 });
+        // The country's own profile, not the one before it: a new hash on the same page renders in place, and at phone
+        // width San Marino's count was once read where Germany's was expected ("Test and deploy" of 17 November 2026).
+        await page.waitForFunction(n => document.querySelector('#profile h2')?.textContent === n && document.querySelector('#profile .stat'), by[iso].name, { timeout: 20000 });
         return label => page.$$eval('#profile .stat', (ss, l) => { const s = ss.find(x => x.querySelector('span')?.textContent === l); return s ? { value: s.querySelector('b').textContent.trim(), notes: [...s.querySelectorAll('small')].map(x => x.textContent.trim()) } : null; }, label);
       };
       let stat = await open('SMR');
@@ -405,6 +473,67 @@ test('page: the leaders\' source names the hand-built lists, San Marino\'s count
       assert.deepEqual([de.value, de.notes.length], [String(by.DEU.leadership.leaders100), 1], `${width}: Germany's count, with its source only`);
       assert.match(de.notes[0], /^Political Retrospective \(Archigos and Wikidata\)/);
       assert.match((await stat('Conflicts fought abroad')).notes[0], new RegExp(`· ${by.DEU.conflict.cowWars1926_45} wars 1926–45$`));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+  assert.deepEqual(errors, []);
+});
+
+// N1, N2 and N3 (17 November 2026), on the page: San Marino's longest-serving is its term in words and the ranking marks
+// its counts; every count takes its noun's singular at one ("1 election", "1 war"), the plural at any other number;
+// Yemen shows its conflict figures and its wars this year.
+test('page: San Marino\'s term in words and the marked ranking, one plural for every count, Yemen\'s conflict figures', pageTest, async () => {
+  const by = Object.fromEntries(read('national/data/index.json').countries.map(c => [c.iso3, c]));
+  const browser = await launch({ args: ['--mute-audio'] });
+  const errors = [];
+  try {
+    for (const width of [1440, 390]) {
+      const page = await browser.newPage({ viewport: { width, height: width > 400 ? 900 : 844 } });
+      page.on('pageerror', e => errors.push(e.message));
+      const open = async iso => {
+        await page.goto(`${BASE}/q/national#country=${iso}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        // The country's own profile, not the one before it (a new hash on the same page renders in place).
+        await page.waitForFunction(n => document.querySelector('#profile h2')?.textContent === n && document.querySelector('#profile .stat'), by[iso].name, { timeout: 20000 });
+        return label => page.$$eval('#profile .stat', (ss, l) => { const s = ss.find(x => x.querySelector('span')?.textContent === l); return s ? { value: s.querySelector('b').textContent.trim(), notes: [...s.querySelectorAll('small')].map(x => x.textContent.trim()) } : null; }, label);
+      };
+      let stat = await open('SMR');
+      // The coverage line: the count of countries through the helper, then a spaced middle dot and the years (the space
+      // after the dot was lost once, "217 countries ·1980–2025").
+      const meta = await page.$eval('#meta', m => m.textContent);
+      assert.match(meta, /Coverage \d+ countries · \d{4}–\d{4}/, `${width}: ${meta}`);
+      // No count is pluralised by hand beside the helper (the "change is / changes are" note was the last).
+      assert.ok(!/=== 1 \? '[^']*' : '/.test(readFileSync(new URL('../q/national.html', import.meta.url), 'utf8')),'a hand-written plural is left outside plural()');
+      // The helper itself (the page's one plural), at one and at many.
+      assert.deepEqual(await page.evaluate(() => [count(1, 'election'), count(3, 'election'), count(0, 'war'), count(1.5, 'yr'), count(1, 'crisis', 'crises'), count(2, 'crisis', 'crises'), count(5018, 'death', 'deaths', '5,018'), calCount('treaty', 1), calCount('treaty', 2), calCount('sanctions', 1)]),
+        ['1 election', '3 elections', '0 wars', '1.5 yrs', '1 crisis', '2 crises', '5,018 deaths', '1 treaty', '2 treaties', '1 set of sanctions']);
+      const longest = await stat('Longest-serving leader');
+      assert.equal(longest.value, 'Six months', `${width}: the term, in words`);
+      assert.equal(longest.notes[0], 'each term, held by two together; no one held office longer than one term at a time, so no one is named');
+      assert.match(longest.notes.at(-1), /; the term: Wikidata, the office’s term length \(Q258045\)$/);
+      assert.ok(!/0\.5 years|Giacomini/.test(JSON.stringify(longest)), JSON.stringify(longest));
+      stat = await open('CHE'); // one at a time: the longest-serving is named, with "1 year", not "1 years"
+      const ch = await stat('Longest-serving leader'), cl = by.CHE.leadership.longest;
+      assert.equal(ch.value, cl.name);
+      assert.equal(ch.notes[0], `${cl.years} ${cl.years === 1 ? 'year' : 'years'} (${cl.from}–${cl.to})`, `${width}: ${ch.notes[0]}`);
+      stat = await open('DEU');
+      const cal = (await stat('Calendar events since 1980')).notes[0];
+      assert.equal(by.DEU.calendar.election, 1, 'Germany has one election in the calendar (the case reported)');
+      assert.ok(cal.split(' · ').includes('1 election') && !/\b1 (elections|coups|assassinations|protests|court rulings)\b/.test(cal), `${width}: ${cal}`);
+      stat = await open('YEM');
+      const ye = by.YEM.conflict;
+      assert.equal((await stat('Armed conflicts per year')).notes[0], `on its territory, 1946–2025 (${ye.conflictYears} conflict-years)`);
+      assert.equal((await stat('Conflicts fought abroad')).notes[0], `since 1946 · ${ye.cowWars1926_45 === 1 ? '1 war' : `${ye.cowWars1926_45} wars`} 1926–45`, `${width}: Yemen's one war of 1926–45 (Saudi-Yemeni, 1934)`);
+      const wars = await page.$$eval('#profile .wars a', as => as.map(a => a.textContent.trim()));
+      assert.ok(wars.some(w => w.startsWith('Yemen') && w.endsWith(`${ye.active2026.find(w => w.id === 'yemen').deaths.toLocaleString('en-GB')} deaths`)), `${width}: ${wars.join(' | ')}`);
+      assert.ok(await page.$('#profile a[href*="battlefield/history/index.html#y=2025&c=678"]'), `${width}: the Retrospective Battlefield link`);
+      // The ranking: San Marino's count of leaders, and its average tenure, are marked; no other country's are.
+      for (const measure of ['leaders100', 'avgTenure']) {
+        await page.goto(`${BASE}/q/national#map&measure=${measure}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForSelector('#rows tr', { timeout: 20000 });
+        const marked = await page.$$eval('#rows tr', rs => rs.filter(r => r.querySelector('.together')).map(r => [r.dataset.iso, r.querySelector('.together').textContent, r.querySelector('.together').title]));
+        assert.deepEqual(marked, [['SMR', 'each holder counted', 'Two hold the office together, for 6 months at a time; each person is counted']], `${width}: ${measure}`);
+      }
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
       await page.close();
     }

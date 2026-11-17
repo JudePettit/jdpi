@@ -19,7 +19,8 @@
 // at least 14 days, so a fresh store can fill its baseline. Writes volatility/data/days/<day>.json and, only when a day
 // file changed (or with --reindex), volatility/data/index.json, so a run that finds nothing new changes nothing. The
 // method's code is in gvi.mjs. With --rescore, every stored day file is scored again, oldest first, from what it keeps of
-// each country (no download), and the index rebuilt: for a change of method.
+// each country (no download), and the index rebuilt: for a change of method. Each day's row in the index records the
+// method that scored it and its baseline's days, as the day file says (buildIndex), so a change of method shows by day.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -133,9 +133,10 @@ rules:
   the span (at least one step) and rounded outward to whole steps; a lone date five years either way, a battle one; a
   living person ends today. Until a paragraph has a checked periods record, the years are therefore those of what was
   named, not the passage's own, and the reader's card says so ("This paragraph has no periods record yet").
-- **The year it opens on (the frame).** The passage's first year, where its record gives one; else
+- **The year it opens on (the frame).** The passage's first year, where its record gives one; else, for a battle, the
+  year it was fought (Fornovo opens on 1495, so it is drawn when the map opens); else
   the start of the book's era (for The Prince, 1494–1527), if that falls inside the window; else the window's first year. The card beside
-  the map says which of the three it is.
+  the map says which of these it is.
 - **The step.** The coarsest of: the precision of the span's ends, the fill's own step (borders change by the year), and
   the step the window's length calls for (a day or month under 5 years, a year under 300, a decade under 1,500, a
   century beyond).

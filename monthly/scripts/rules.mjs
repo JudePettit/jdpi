@@ -250,8 +250,8 @@ export function fightingMark(series, M, ctx = {}, r = RULE) {
 /**
  * The volatility mark of a country for month M, kept apart from deaths. days: [[day, score, components, events, tone,
  * coverage], ...] (volatility/data/index.json); methodOf(day): the method that scored the day, or null when the store
- * does not say (it does not yet: then there is no mark); fullBaseline(day): whether the day's score was ranked against
- * a full 90-day window.
+ * does not say (then there is no mark); fullBaseline(day): whether the day's score was ranked against a full 90-day
+ * window. volatilityDays(index) below reads both from the store.
  */
 export function volatilityMark(days, M, { methodOf = () => null, fullBaseline = () => false } = {}, r = VOL_RULE) {
   const months = [addMonths(M, -3), addMonths(M, -2), addMonths(M, -1)];
@@ -264,7 +264,7 @@ export function volatilityMark(days, M, { methodOf = () => null, fullBaseline = 
   const what = mRows.length ? `An average score of ${fmt1(avg(mRows))} over ${mRows.length} scored days in ${monthName(M)}${rows.slice(0, 3).every(x => x.length) ? `, against ${fmt1(avg(rows.slice(0, 3).flat()))} over ${spanName(months[0], months[2])}` : ''}.` : null;
   if (M < r.firstMonth) return nm('too-early', `No volatility mark before ${monthName(r.firstMonth)}: every scored day in the four months must have been ranked against a full 90 days, under one method, and VM's scores begin on 26 September 2026.`, what);
   const all = rows.flat();
-  if (all.some(x => !methodOf(x[0]))) return nm('method-unknown', 'The volatility store does not say which method scored each day, so the four months cannot be shown to be alike.', what);
+  if (all.some(x => !methodOf(x[0]))) return nm('method-unknown', 'The volatility store does not say which method scored some of these days, so the four months cannot be shown to be alike.', what);
   if (new Set(all.map(x => methodOf(x[0]))).size > 1) return nm('methods', 'The four months were scored by different methods, whose scores cannot be compared.', what);
   if (all.some(x => !fullBaseline(x[0]))) return nm('baseline', 'Some days in the four months were ranked against fewer than 90 days.', what);
   if (rows.some(x => x.length < r.minDays)) return nm('thin', `Fewer than ${r.minDays} scored days in a month of the four.`, what);
@@ -276,6 +276,17 @@ export function volatilityMark(days, M, { methodOf = () => null, fullBaseline = 
   const steps = [];
   if (mRows.length < r.fewDays) steps.push({ code: 'few-days', text: `Only ${mRows.length} scored days in ${monthName(M)}.` });
   return { ...base, figures, what: `${what} News reports a day: ${fmt(figures.reportsPerDay)} against ${fmt(figures.baselineReportsPerDay)}.`, steps, direction: dir, words: VOL_WORDS[dir], sign: SIGNS[dir], confidence: CONFIDENCE[steps.length], why: null };
+}
+
+/**
+ * What the volatility store says of each day, for volatilityMark: its global rows (volatility/data/index.json) end
+ * [..., method, baseline days], each from the day's own file (Jude's decision G, 17 November 2026). methodOf(day) is the
+ * method that scored it, or null where the store does not record one (a row written before that, or a missing day);
+ * fullBaseline(day) whether its scores were ranked against the full window of `full` stored days.
+ */
+export function volatilityDays(vol, full = 90) {
+  const at = new Map((vol?.global || []).map(g => [g[0], g]));
+  return { methodOf: d => (typeof at.get(d)?.[4] === 'string' && at.get(d)[4]) || null, fullBaseline: d => Number.isInteger(at.get(d)?.[5]) && at.get(d)[5] >= full };
 }
 
 /** The watch list's volatility line: countries whose last 7 scored days average watchPoints or more above the 28 days

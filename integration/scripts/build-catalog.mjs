@@ -27,6 +27,7 @@ import { llmsTxt } from './llms.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
 import { groupBattles, ownFigure, stateOf } from '../../battlefield/focus/figures.mjs';
+import { CITE_ONLY, HOSTED } from './cite-only.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -281,7 +282,7 @@ spec({
 const calLicence = 'Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.';
 const calSources = ['Wikipedia national electoral calendars and lists of summits', 'Political Atlas (Europe, North America and the major powers)', 'Political Retrospective (Archigos and Wikidata)', 'UCDP/PRIO Armed Conflict Dataset (CC BY 4.0)', 'Wikidata (CC0)', 'Wikipedia Current events portal (CC BY-SA), from January 2026'];
 const calFields = [['date', 'Date (YYYY-MM-DD)'], ['country', 'Country, or International'], ['title', 'Event'], ['type', 'election, referendum, party, leader, inauguration, resignation, coup, conflict, ceasefire, assassination, crisis, protest, treaty, summit, sanctions, vote or court'],
-  ['status', 'declared, or tentative when the date is not yet fixed'], ['source', 'Wikipedia (or other) page for the event'], ['summary', 'Plain-English account (Wikipedia, CC BY-SA)'], ['ref', 'News report cited for events since 2026, if any'], ['refName', 'Name of that news outlet']];
+  ['status', 'declared, or tentative when the date is not yet fixed'], ['source', 'Wikipedia (or other) page for the event'], ['summary', 'Plain-English account (Wikipedia, CC BY-SA)'], ['ref', 'News report cited for events since 2026, if any'], ['refName', 'Name of that news outlet'], ['level', 'For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court']];
 const addMonths = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); };
 const RT_FROM = addMonths(TODAY, -6), RT_TO = addMonths(TODAY, 18);
 spec({
@@ -359,11 +360,31 @@ const FOCUS = J('battlefield/focus/data/index.json');
 // The Correlates of War is cite-only (its terms, read 16 November 2026: integration/scripts/cite-only.mjs): War Focus shows
 // one cited total per war, and these files carry that total and VM's spread of it, never COW's rows.
 const focusLicence = 'UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).';
-// The monthly deaths hold more than the totals: VM's spread of each COW total over the war's months (the second reader,
-// F6, 16 November 2026), which waits on Jude's choice (cite-only.mjs HOSTED), and the licence says so.
-const focusMonthlyLicence = focusLicence.replace('Correlates of War war totals shown with its citation only,',
-  'Correlates of War war totals shown with its citation only, and VM\'s estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision),');
+// The monthly deaths held more than the totals: VM's spread of each COW total over the war's months (the second reader,
+// F6, 16 November 2026). Jude's decision F1 (17 November 2026): what VM offers as a download carries no COW value. So
+// every month of a war whose deaths War Focus takes from COW says COW_SEE in place of a number, and each file's notes give
+// COW's citation and address (cite-only.mjs HOSTED, kind 'pointer'); War Focus's page keeps its cited figures on screen.
+const COW = CITE_ONLY.cow, COW_SEE = HOSTED.find(h => h.dataset === 'war-focus-monthly-deaths' && h.kind === 'pointer')?.says;
+if (!COW_SEE) throw new Error('war-focus-monthly-deaths: cite-only.mjs HOSTED has no pointer entry for it');
+const fromCow = w => COW.match.test(w.deathsSource || '');
+// The source words of such a war, less any COW figure written into them in brackets (the Second Sino-Japanese War's
+// names COW's World War II total for China): the page keeps the words whole, with the citation. The file gives no
+// spread, so the words say which total the page cites and that it is not given here, in place of "spread across
+// months by recorded battles" (the second reader's F5, 17 November 2026).
+const COW_NOT_GIVEN = ' (not given here: see the notes)';
+const cowSourceWords = s => {
+  const words = String(s).replace(/\s*\([^()]*\d{1,3}(?:,\d{3})+[^()]*\)/g, '');
+  const said = words.replace(/,? spread across [^;]*?\bby recorded (?:battles|events)/, COW_NOT_GIVEN);
+  return said === words ? words + COW_NOT_GIVEN : said;
+};
+const focusMonthlyLicence = focusLicence.replace('Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse);',
+  `no Correlates of War figures, as its terms bar passing its data on without written permission: the months of the wars whose deaths come from its totals say “${COW_SEE}” (its citation and address are in the notes);`);
 if (focusMonthlyLicence === focusLicence) throw new Error('war-focus-monthly-deaths: the Correlates of War clause of its licence was not found');
+const focusMonthlyNotes = [
+  `The Correlates of War’s terms (${COW.terms}, read ${COW.read}) let Vitruvian Manager show a war’s total with its citation but not pass on its data, and spreading a total over months makes new figures from it. So in every month of the wars whose deaths War Focus takes from a Correlates of War total, deaths says “${COW_SEE}” in place of a number, estimated is empty (no figure is given to be an estimate), and the source column says which of its totals War Focus’s page cites and the years it covers, without the figure.`,
+  `Correlates of War: ${COW.citation}. ${COW.datasets}: ${COW.url}`,
+  'War Focus’s page shows each of those wars’ totals with this citation.',
+];
 const focusSources = Object.values(FOCUS.sources);
 spec({
   id: 'war-focus-wars', title: 'War Focus: major wars', module: 'rs', submodule: 'war-focus',
@@ -399,11 +420,11 @@ spec({
 });
 spec({
   id: 'war-focus-monthly-deaths', title: 'War Focus: deaths by month', module: 'rs', submodule: 'war-focus',
-  description: 'Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.',
-  derive: () => focusWars().flatMap(w => (w.months || []).map((m, i) => ({ war_id: w.id, war: w.name, month: m, deaths: w.deaths?.[i] ?? null, estimated: !!w.estimated?.[i], source: w.deathsSource || null }))),
+  description: `Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For the wars whose deaths come from the Correlates of War, every month says “${COW_SEE}” in place of a number: its terms do not let Vitruvian Manager pass on figures made from its totals (the notes give its citation and address).`,
+  derive: () => focusWars().flatMap(w => (w.months || []).map((m, i) => ({ war_id: w.id, war: w.name, month: m, deaths: fromCow(w) ? COW_SEE : w.deaths?.[i] ?? null, estimated: fromCow(w) ? null : !!w.estimated?.[i], source: (fromCow(w) ? cowSourceWords(w.deathsSource) : w.deathsSource) || null }))),
   from: ['battlefield/focus/data/wars/*.json'], refresh: 'monthly', updatedFrom: 'battlefield/focus/data/index.json', page: 'battlefield/focus/index.html', indexFields: ['war_id', 'war'],
-  licence: focusMonthlyLicence, sources: focusSources.slice(0, 3),
-  fields: [['war_id', 'War id (war-focus-wars)'], ['war', 'War'], ['month', 'Month (YYYY-MM)'], ['deaths', 'Deaths that month'], ['estimated', 'True when spread from an annual or war total'], ['source', 'Where the war\'s death figures come from']]
+  licence: focusMonthlyLicence, sources: focusSources.slice(0, 3), notes: focusMonthlyNotes,
+  fields: [['war_id', 'War id (war-focus-wars)'], ['war', 'War'], ['month', 'Month (YYYY-MM)'], ['deaths', `Deaths that month; “${COW_SEE}” for the wars whose figures come from it (see the notes)`], ['estimated', 'True when spread from an annual or war total; empty for the wars whose deaths come from the Correlates of War (no figure is given)'], ['source', 'Where the war\'s death figures come from (for the Correlates of War\'s wars, which total, not given here)']]
 });
 
 const KAR = J('kardashev/data/energy.json');
@@ -603,7 +624,7 @@ for (const s of SPECS) {
     const multi = groups.length > 1;
     groups.forEach((g, i) => {
       const url = multi ? `integration/data/${s.id}/${i}.json` : `integration/data/${s.id}.json`;
-      const body = { dataset: s.id, generated: STAMP, derivedFrom: s.from, licence: s.licence, ...(multi ? { part: i, parts: groups.length } : {}), records: g.rows };
+      const body = { dataset: s.id, generated: STAMP, derivedFrom: s.from, licence: s.licence, ...(s.notes ? { notes: s.notes } : {}), ...(multi ? { part: i, parts: groups.length } : {}), records: g.rows };
       const str = JSON.stringify(body) + '\n';
       put(url, str); derivedFiles.add(url); rowsOf.set(url, g.rows);
       parts.push({ url, records: 'records', rows: g.rows.length, bytes: Buffer.byteLength(str), cost: jsonCost(str), ...(g.values ? { values: g.values } : {}), ...(Object.keys(ranges(g.rows, s.rangeFields)).length ? { ranges: ranges(g.rows, s.rangeFields) } : {}) });
@@ -626,7 +647,7 @@ for (const s of SPECS) {
   const entry = {
     id: s.id, title: s.title, module: s.module, submodule: s.submodule, description: s.description,
     ...(urls.length === 1 ? { url: urls[0] } : { urls }), format: 'json', records: parts[0]?.records ?? '',
-    fields, rows: allRows.length, licence: s.licence, sources: s.sources, updated, refresh: s.refresh,
+    fields, rows: allRows.length, licence: s.licence, ...(s.notes ? { notes: s.notes } : {}), sources: s.sources, updated, refresh: s.refresh,
     ...(s.page ? { page: s.page } : SUBMODULE_URL[s.submodule] ? { page: SUBMODULE_URL[s.submodule] } : {}),
     ...(s.derive ? { derivedFrom: s.from } : {}), ...(s.submodules ? { submodules: s.submodules } : {}),
     bytes: parts.reduce((a, p) => a + p.bytes, 0)

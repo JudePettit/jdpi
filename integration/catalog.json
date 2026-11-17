@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-17T06:21:02.193Z",
+  "generated": "2026-11-17T17:17:16.415Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -737,7 +737,7 @@
         "national/data/index.json",
         "volatility/data/index.json"
       ],
-      "bytes": 184942
+      "bytes": 184938
     },
     {
       "id": "national-indicators",
@@ -1044,6 +1044,11 @@
           "name": "refName",
           "type": "string",
           "description": "Name of that news outlet"
+        },
+        {
+          "name": "level",
+          "type": "string",
+          "description": "For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court"
         }
       ],
       "rows": 312,
@@ -1109,16 +1114,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6664,
+      "rows": 6649,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-16",
+      "updated": "2026-11-17",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2922721
+      "bytes": 2916444
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1183,10 +1188,10 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-16",
+      "updated": "2026-11-17",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2922721
+      "bytes": 2916444
     },
     {
       "id": "econ-briefing-stories",
@@ -1284,7 +1289,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 495,
+      "rows": 519,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1292,7 +1297,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 291134
+      "bytes": 303014
     },
     {
       "id": "econ-briefing-sources",
@@ -1395,11 +1400,6 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
-          "name": "error",
-          "type": "string",
-          "description": "Last error, if any"
-        },
-        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -1428,7 +1428,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 291134
+      "bytes": 303014
     },
     {
       "id": "science-briefing-stories",
@@ -1521,7 +1521,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1219,
+      "rows": 1281,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1529,7 +1529,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 709485
+      "bytes": 745225
     },
     {
       "id": "science-briefing-sources",
@@ -1655,7 +1655,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 709485
+      "bytes": 745225
     },
     {
       "id": "digital-briefing-stories",
@@ -1758,7 +1758,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1178,
+      "rows": 1240,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1766,7 +1766,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 696462
+      "bytes": 732076
     },
     {
       "id": "digital-briefing-sources",
@@ -1912,7 +1912,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 696462
+      "bytes": 732076
     },
     {
       "id": "political-calendar",
@@ -2182,14 +2182,14 @@
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
         "CShapes 2.0 (Schvitz et al. 2022) for state names"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-17",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [
         "battlefield/history/data/wars.json",
         "battlefield/history/data/borders.topo.json"
       ],
-      "bytes": 146332
+      "bytes": 146354
     },
     {
       "id": "war-focus-wars",
@@ -2287,7 +2287,7 @@
         "CShapes 2.0 (Schvitz et al. 2022)",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-16",
+      "updated": "2026-11-17",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "bytes": 17915
@@ -2455,26 +2455,26 @@
           "description": "figure, zero (a source records none), parts (counted through its parts), unread (figures VM could not read surely from the article) or none"
         }
       ],
-      "rows": 4242,
+      "rows": 4235,
       "licence": "Wikidata CC0; the figure_ columns from English Wikipedia infoboxes, CC BY-SA 4.0 (the figures as facts, each article named at its revision in the figures files).",
       "sources": [
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle's infobox, at the revision named"
       ],
-      "updated": "2026-11-16",
+      "updated": "2026-11-17",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 3000344
+      "bytes": 2995202
     },
     {
       "id": "war-focus-monthly-deaths",
       "title": "War Focus: deaths by month",
       "module": "rs",
       "submodule": "war-focus",
-      "description": "Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.",
+      "description": "Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For the wars whose deaths come from the Correlates of War, every month says “see the Correlates of War” in place of a number: its terms do not let Vitruvian Manager pass on figures made from its totals (the notes give its citation and address).",
       "urls": [
         "integration/data/war-focus-monthly-deaths/0.json",
         "integration/data/war-focus-monthly-deaths/1.json"
@@ -2499,34 +2499,39 @@
         },
         {
           "name": "deaths",
-          "type": "number",
-          "description": "Deaths that month"
+          "type": "string",
+          "description": "Deaths that month; “see the Correlates of War” for the wars whose figures come from it (see the notes)"
         },
         {
           "name": "estimated",
           "type": "boolean",
-          "description": "True when spread from an annual or war total"
+          "description": "True when spread from an annual or war total; empty for the wars whose deaths come from the Correlates of War (no figure is given)"
         },
         {
           "name": "source",
           "type": "string",
-          "description": "Where the war's death figures come from"
+          "description": "Where the war's death figures come from (for the Correlates of War's wars, which total, not given here)"
         }
       ],
       "rows": 3494,
-      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, and VM's estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision), as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; no Correlates of War figures, as its terms bar passing its data on without written permission: the months of the wars whose deaths come from its totals say “see the Correlates of War” (its citation and address are in the notes); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "notes": [
+        "The Correlates of War’s terms (https://correlatesofwar.org/data-sets/, read 2026-11-16) let Vitruvian Manager show a war’s total with its citation but not pass on its data, and spreading a total over months makes new figures from it. So in every month of the wars whose deaths War Focus takes from a Correlates of War total, deaths says “see the Correlates of War” in place of a number, estimated is empty (no figure is given to be an estimate), and the source column says which of its totals War Focus’s page cites and the years it covers, without the figure.",
+        "Correlates of War: Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press. COW War Data: Inter-State v4.0, Intra-State v4.1 and Extra-State v4.0: https://correlatesofwar.org/data-sets/cow-war/",
+        "War Focus’s page shows each of those wars’ totals with this citation."
+      ],
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
         "Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)"
       ],
-      "updated": "2026-11-16",
+      "updated": "2026-11-17",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 870424
+      "bytes": 863859
     },
     {
       "id": "kardashev-polities",
@@ -3461,7 +3466,7 @@
           "description": "Tabs inside the page"
         }
       ],
-      "rows": 38,
+      "rows": 39,
       "licence": "© JDP-Iq.",
       "sources": [
         "registry.json"
@@ -3472,7 +3477,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 21495
+      "bytes": 22044
     },
     {
       "id": "kino-documentaries",
@@ -3588,7 +3593,7 @@
         "kino-geopolitical-events",
         "kino-great-thinkers"
       ],
-      "bytes": 26852
+      "bytes": 26903
     }
   ]
 }

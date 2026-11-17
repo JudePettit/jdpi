@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: npm ci --ignore-scripts
       # The House trades and the 13F holdings come from different places and are committed separately, so a problem with
       # one never holds back the other's refresh; either one failing still ends the run red.

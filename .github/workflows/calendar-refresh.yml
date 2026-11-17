@@ -28,7 +28,7 @@ jobs:
           path: political-atlas
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - run: node calendar/scripts/build-events.mjs hp-retrospective/data/countries.json --atlas=political-atlas
       - run: node calendar/scripts/enrich-summaries.mjs
       - name: Test the new calendars

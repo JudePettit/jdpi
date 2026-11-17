@@ -22,6 +22,10 @@
     { "id": "unsc-83", "kind": "web", "title": "Security Council resolution 83 (1950), adopted 27 June 1950", "publisher": "United Nations Digital Library", "url": "https://digitallibrary.un.org/record/112026" },
     { "id": "unsc-83-ws", "kind": "web", "title": "United Nations Security Council Resolution 83, the text of the resolution (the copy read on 16 November 2026, when the UN Digital Library did not load)", "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/United_Nations_Security_Council_Resolution_83" },
     { "id": "ucdp-prio", "kind": "web", "title": "UCDP/PRIO Armed Conflict Dataset, version 26.1 (CC BY 4.0): conflict 235, North Korea – South Korea, the states on each side", "publisher": "UCDP/PRIO (Uppsala Conflict Data Program and Peace Research Institute Oslo)", "url": "https://ucdp.uu.se/downloads/" },
+    { "id": "wp-mig-alley", "kind": "web", "title": "MiG Alley (the Soviet Union never officially entered the war; Soviet-piloted MiG-15s over north-western Korea from 1 November 1950, in North Korean or Chinese markings, kept secret for many years), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: MiG Alley", "url": "https://en.wikipedia.org/wiki/MiG_Alley" },
+    { "id": "wp-64-iak", "kind": "web", "title": "64th Fighter Aviation Corps (the Soviet air corps in the Korean War: patrols over the Yalu from 1 November 1950; it trained Chinese and North Korean pilots), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: 64th Fighter Aviation Corps", "url": "https://en.wikipedia.org/wiki/64th_Fighter_Aviation_Corps" },
+    { "id": "wp-korean-war", "kind": "web", "title": "Korean War (Soviet T-34 tanks, artillery and advisers for North Korea; Soviet air cover and aid for China), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Korean War", "url": "https://en.wikipedia.org/wiki/Korean_War" },
+    { "id": "wd-soviet-air", "kind": "wikidata", "title": "Korean War (Q8663), participant Soviet Union (Q15180); 64th Fighter Aviation Corps (Q4032068)", "url": "https://www.wikidata.org/wiki/Q4032068" },
     { "id": "armistice-1953", "kind": "web", "title": "Korean Armistice Agreement, Panmunjom, 27 July 1953 (full text)", "publisher": "The World and Japan Database", "url": "https://worldjpn.net/documents/texts/JPKR/19530727.O1E.html" }
   ],
   "scenes": [
@@ -140,12 +144,13 @@
     {
       "id": "china",
       "title": "China enters the war, October 1950 – January 1951",
-      "narration": "China's premier, Zhou Enlai, had warned through India's ambassador that China would intervene if American troops crossed the parallel, and Washington discounted the warning. Chinese People's Volunteers under Peng Dehuai began crossing the Yalu on 19 October, struck in late October and, at the end of November, launched a general offensive that sent the United Nations forces into a long retreat. Pyongyang was abandoned in early December, American marines fought their way out from the Chosin Reservoir, and on 4 January 1951 Seoul fell for the second time.",
+      "narration": "China's premier, Zhou Enlai, had warned through India's ambassador that China would intervene if American troops crossed the parallel, and Washington discounted the warning. Chinese People's Volunteers under Peng Dehuai began crossing the Yalu on 19 October, struck in late October and, at the end of November, launched a general offensive that sent the United Nations forces into a long retreat. Pyongyang was abandoned in early December, American marines fought their way out from the Chosin Reservoir, and on 4 January 1951 Seoul fell for the second time. The Soviet Union, which supplied North Korea and China and trained their pilots, never openly entered the war, but from 1 November 1950 its own pilots flew MiG-15 jets in combat over the north-west of Korea, in North Korean or Chinese markings, a part it kept secret for many years.",
       "visual": {
         "kind": "map",
         "groups": [
           { "label": "China", "tone": 3, "countries": ["CHN"] },
           { "label": "North Korea", "tone": 2, "countries": ["PRK"] },
+          { "label": "Soviet Union (drawn as Russia): never openly at war; its pilots fought in secret", "tone": 2, "countries": ["RUS"] },
           { "label": "South Korea", "tone": 1, "countries": ["KOR"] }
         ],
         "arrows": [
@@ -155,9 +160,9 @@
         ],
         "fronts": [{ "label": "Front line, late January 1951 (approximate)", "line": [[126.75, 36.95], [127.4, 37.05], [128.2, 37.25], [129.15, 37.45]] }]
       },
-      "focus": { "points": [[127.2, 40.45, "Chosin Reservoir"], [125.75, 39.03, "Pyongyang, abandoned 5 December"], [126.98, 37.57, "Seoul, lost 4 January"]], "bbox": [121.5, 34.5, 132, 43] },
+      "focus": { "points": [[127.2, 40.45, "Chosin Reservoir"], [125.75, 39.03, "Pyongyang, abandoned 5 December"], [126.98, 37.57, "Seoul, lost 4 January"], [124.9, 39.95, "MiG Alley: Soviet pilots in combat from 1 November 1950"]], "bbox": [122, 33.5, 141, 45.5] },
       "link": { "label": "War Focus · November 1950", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=korean-war&m=1950-11" },
-      "cites": ["shen-2012", "millett-2010"]
+      "cites": ["shen-2012", "millett-2010", "wp-mig-alley", "wp-64-iak", "wp-korean-war", "wd-soviet-air", "ucdp-prio"]
     },
     {
       "id": "limited-war",

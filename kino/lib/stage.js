@@ -13,6 +13,8 @@
 import { flatScenes, shortCite } from './format.js';
 
 export const W = 1600, H = 900;
+// Where a map key can be moved to when it lies over a lit country (kino.css; placeLegend below).
+const KEY_PLACES = ['kn-key-top', 'kn-key-right', 'kn-key-below'];
 const CDN = {
   d3: 'https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js',
   topojson: 'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js',
@@ -105,6 +107,12 @@ class MapView {
     this.overlay = el('g', { class: 'overlay' }, svg);
     this.apply(this.view);
   }
+  /** fn() with the world drawn at the frame the view is gliding to (or rests at), then back where it was. */
+  atTarget(fn) {
+    const now = this.view;
+    if (this.target && this.target !== now) this.apply(this.target);
+    try { return fn(); } finally { if (this.view !== now) this.apply(now); }
+  }
   apply(view) {
     this.view = view;
     const t = toTransform(view);
@@ -113,13 +121,16 @@ class MapView {
   project(lonlat) { const p = this.g.projection(lonlat); if (!p) return null; const t = toTransform(this.view); return [t.x + t.k * p[0], t.y + t.k * p[1]]; }
   unit() { return W / Math.max(200, this.svg.getBoundingClientRect().width || 800); }
 
-  async show(scene, { animate = true } = {}) {
+  /** place(): called once the scene's countries are lit and its frame is known (atTarget draws it), before the view
+      glides there, so what is laid over the picture (the map key) is placed for where the view will settle. */
+  async show(scene, { animate = true, place } = {}) {
     this.scene = scene;
     const tones = tonesOf(scene, this.g);
     for (const [iso, ps] of this.paths) for (const p of ps) { p.classList.remove('t1', 't2', 't3', 'tf'); const t = tones.get(iso); if (t) p.classList.add('t' + t); }
     this.svg.classList.toggle('still', !!scene.visual?.still);
     this.overlay.innerHTML = '';
-    const target = viewFor(scene, this.g), token = (this.token = (this.token || 0) + 1);
+    const target = (this.target = viewFor(scene, this.g)), token = (this.token = (this.token || 0) + 1);
+    place?.();
     if (!animate || reduced()) { this.apply(target); this.drawOverlay(); return; }
     const interp = this.g.d3.interpolateZoom(this.view, target);
     const ms = Math.max(900, Math.min(2600, interp.duration * 0.9));
@@ -221,8 +232,66 @@ export class Stage {
     this.ro.observe(root);
   }
   resize() {
-    if (this.map && !this.mapSvg.classList.contains('off')) this.map.drawOverlay();
+    if (this.map && !this.mapSvg.classList.contains('off')) { this.map.drawOverlay(); this.placeLegend(); }
     if (this.scene && this.redraw) this.redraw();
+  }
+
+  /* The map key's place. It sits in the picture's bottom left-hand corner; a small stage moves it under the picture by
+     the theatre's width alone (kino.css), because there it wraps. A key that does not wrap can still lie over a country
+     the scene lights, where the scene's frame puts one in that corner (the Roosevelt film's arsenal scene at 1440 px:
+     the eastern United States). So, measured at the scene's frame (and again whenever the stage is resized or the web font
+     loads), a key over a lit country is tried in the top left-hand corner, then the bottom right-hand one (a map scene
+     has no image credit there), and if each lies over one it moves under the picture, as on a small stage. A key clear
+     of lit land stays where it was. The big Play button counts as covered too, shown or not (a film opened from an
+     address starts paused, and the reader can pause at any moment, so the key must not wait under it): at 1440 px the
+     Korean War's China scene had put its key in the bottom right-hand corner, under the paused button. */
+  placeLegend() {
+    const st = this.root, key = this.legend, scene = this.scene;
+    st.classList.remove(...KEY_PLACES, 'kn-key-wait');
+    if (!this.map || this.mapSvg.classList.contains('off') || !key.children.length || getComputedStyle(key).display === 'none') return;
+    // The key's size depends on the web font: once it has loaded, the key is measured again.
+    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => { if (this.scene === scene) this.placeLegend(); });
+    const lit = [...this.mapSvg.querySelectorAll('path.c.t1, path.c.t2, path.c.t3')];
+    if (!lit.length) return;
+    let button = null;
+    // The Play button's box, or lit land anywhere under the key, sampled every 4 px (a sliver of coast is enough).
+    const covers = () => {
+      const r = key.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0)) return false;
+      if (button && button.right > r.left && button.left < r.right && button.bottom > r.top && button.top < r.bottom) return true;
+      const near = lit.filter(p => { const b = p.getBoundingClientRect(); return b.right > r.left && b.left < r.right && b.bottom > r.top && b.top < r.bottom; });
+      const inv = near.map(p => p.getScreenCTM()?.inverse());
+      for (let x = r.left + 2; x < r.right; x += 4) for (let y = r.top + 2; y < r.bottom; y += 4) {
+        const pt = new DOMPoint(x, y);
+        for (let k = 0; k < near.length; k++) if (inv[k] && near[k].isPointInFill(pt.matrixTransform(inv[k]))) return true;
+      }
+      return false;
+    };
+    this.map.atTarget(() => {
+      button = this.playBox();
+      if (!covers()) return;
+      for (const place of ['kn-key-top', 'kn-key-right']) {
+        st.classList.add(place);
+        if (!covers()) return;
+        st.classList.remove(place);
+      }
+      st.classList.add('kn-key-below');
+    });
+  }
+  /* The big Play button's box on the screen, as it is when shown (it is hidden while a film plays): measured with the
+     longer of its label and "Resume" (a paused film's), so a key placed beside "Play" is still clear of "Resume", with
+     a small margin. Shown and restored within one task, so nothing is painted in between. */
+  playBox() {
+    const b = this.root.querySelector('.kn-bigplay');
+    if (!b) return null;
+    const { hidden } = b, text = b.textContent, vis = b.style.visibility;
+    b.style.visibility = 'hidden'; b.hidden = false;
+    if (text.length < 'Resume'.length) b.textContent = 'Resume';
+    const r = b.getBoundingClientRect();
+    b.hidden = hidden; b.textContent = text; b.style.visibility = vis;
+    if (!(r.width > 0 && r.height > 0)) return null;
+    const m = 4;
+    return { left: r.left - m, right: r.right + m, top: r.top - m, bottom: r.bottom + m };
   }
   stopLoops() { for (const s of this.loops) s(); this.loops = []; }
   loop(fn) { let raf, t0 = performance.now(), on = true; const f = now => { if (!on) return; fn(now - t0); raf = requestAnimationFrame(f); }; raf = requestAnimationFrame(f); this.loops.push(() => { on = false; cancelAnimationFrame(raf); }); }
@@ -233,6 +302,7 @@ export class Stage {
     const v = scene.visual || { kind: 'title' };
     const usesMap = v.kind === 'map' || (v.kind === 'title' && scene.focus);
     this.legend.innerHTML = ''; this.credit.innerHTML = ''; this.opts.onLegend?.('');
+    this.root.classList.remove(...KEY_PLACES, 'kn-key-wait');
     this.layer.classList.add('fade');
     const swap = new Promise(r => setTimeout(r, reduced() ? 0 : 260));
     if (usesMap) {
@@ -242,14 +312,17 @@ export class Stage {
         if (!this.map) this.map = new MapView(this.mapSvg, g);
         this.mapSvg.classList.remove('off');
         this.renderLegend(scene);
+        this.root.classList.add('kn-key-wait'); // the key is hidden until it is placed for the scene's frame
         await swap; if (this.scene !== scene) return;
         this.layer.innerHTML = v.kind === 'title' ? this.titleHtml(v, doc) : '';
         this.layer.className = 'kn-layer fade' + (v.kind === 'title' ? ' kn-v-title' : '');
         requestAnimationFrame(() => requestAnimationFrame(() => this.layer.classList.remove('fade')));
-        await this.map.show(scene, { animate: true });
+        // The key is placed for the scene's frame before the view glides there, so it does not jump once it settles.
+        await this.map.show(scene, { animate: true, place: () => this.placeLegend() });
         return;
       } catch (e) {
         console.warn('Kino: the map could not load', e);
+        this.root.classList.remove('kn-key-wait');
         this.layer.innerHTML = `<div class="kn-v-title"><p class="sub">The map could not load (${esc(e.message)}). The narration continues.</p></div>`;
         this.layer.className = 'kn-layer'; return;
       }
@@ -269,7 +342,7 @@ export class Stage {
 
   end(doc, next) {
     this.scene = null; this.redraw = null; this.stopLoops(); this.mapSvg.classList.add('off');
-    this.legend.innerHTML = ''; this.credit.innerHTML = '';
+    this.legend.innerHTML = ''; this.credit.innerHTML = ''; this.root.classList.remove(...KEY_PLACES, 'kn-key-wait');
     this.layer.className = 'kn-layer kn-v-end';
     this.layer.innerHTML = `<h3>The end</h3><p>${esc(doc.title)}. ${doc.sources.length} sources are listed under the player; every scene's link opens its place in Vitruvian Manager.</p>
       <div class="row"><button type="button" class="prp-btn primary" data-act="again">Watch again</button>${next ? `<a class="prp-btn" href="#doc=${esc(next.id)}">Next: ${esc(next.title)}</a>` : ''}<button type="button" class="prp-btn" data-act="sources">Sources</button></div>`;

@@ -1,0 +1,5 @@
+{
+  "format": "vm-periods-index/1",
+  "about": "The books that have a periods file in this folder (contract item 5), so Neo Book asks only for those. Whoever adds a periods file adds its book here; tests/omni-data.test.mjs checks the two agree.",
+  "books": ["the-prince"]
+}

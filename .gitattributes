@@ -3,3 +3,6 @@
 # The Bibliotheca books and casts are written with LF by bookJson and castJson, and the tests compare the files with
 # what those functions make: keep LF on every checkout, so core.autocrlf=true cannot turn them CRLF.
 bibliotheca/data/** text eol=lf
+# The Omni-Map's data files are hashed byte for byte (omni/README.md, omni/data/base/README.md, a bundle's metadata):
+# store and check out their bytes as written, so core.autocrlf=true cannot turn an LF file CRLF.
+omni/data/** -text

@@ -1,8 +1,10 @@
 // Sources whose terms let Vitruvian Manager show a cited figure but not redistribute their data ("cite-only"), and
 // everything VM still hosts from them. The smallest form of the S0 test "no hosted value from a cite-only source"
-// (PRP-SCHOLAR-USP-DESIGN.md, stage S0): tests/integration-hub.test.mjs and tests/battlefield.test.mjs read it. Stage S1's
-// integration/sources.json takes these entries over (a source with terms: "cite-only", its citation, link and the words
-// of its terms; each hosted item with its kind), and the tests then read that file instead.
+// (PRP-SCHOLAR-USP-DESIGN.md, stage S0): tests/integration-hub.test.mjs and tests/battlefield.test.mjs read it. Stage S1
+// wrote integration/sources.json, VM's list of sources (5.1), whose cite-only entries carry the same citation, short
+// citation, link, terms address, words and date read as CITE_ONLY here: tests/omni-data.test.mjs fails unless the two
+// agree both ways, so a change here is a change there too. This module stays the one the tests import until stage S2a
+// moves them onto sources.json (with each hosted item and its kind).
 //
 // A careful record of the terms as read, not legal advice.
 

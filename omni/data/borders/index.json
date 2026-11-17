@@ -1,0 +1,33 @@
+{
+  "format": "vm-borders-index/1",
+  "source": "cliopatria",
+  "version": "v0.2.1",
+  "built": "2026-11-17T05:24:13Z",
+  "from": 1400,
+  "to": 1600,
+  "archive": {
+    "url": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.1/cliopatria.geojson.zip",
+    "sha256": "e10a4e429fca708788ff9e7572a95fce801fae55852d217cffabc1c59cd4eed4"
+  },
+  "quantisation": 100000,
+  "files": [
+    {
+      "from": 1400,
+      "to": 1499,
+      "file": "1400-1499.topo.json",
+      "rows": 1039,
+      "bytes": 758803,
+      "gzip": 179888,
+      "sha256": "fa1d8d1f28114521aef7b6cff2c481779deb4d99160f336e008c7e31b8a910a1"
+    },
+    {
+      "from": 1500,
+      "to": 1600,
+      "file": "1500-1600.topo.json",
+      "rows": 1005,
+      "bytes": 893937,
+      "gzip": 212613,
+      "sha256": "a5c40b6d05531c974b40fd7200a6f93c22ba19f93516b55512cdf777adc4fcff"
+    }
+  ]
+}

@@ -57,6 +57,9 @@ const EXEMPT = {
   // its Wikipedia link). An adapter of its own needs a lake build with the network (lake-refresh.yml, the 3rd).
   monthly: 'marks on the wars and countries of Realtime Battlefield, War Focus and National Analysis, whose adapters already put them in the Master Index; its names link there',
   'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
+  // The Omni-Map (S1, 17 November 2026): its outlines are Cliopatria's rows, named as the source names them, not Master Index
+  // entities; its battles are the Master Index's own (read from the lake), and its click comes from Neo Book, which reports.
+  'omni-map': 'a map of other sources’ dated borders and of battles the Master Index already holds, opened from Neo Book’s tagged names; names no entities of its own',
   // Tally Stick and Algo Trader were exempt here (private) until 15 November 2026, when they became views of Auto
   // Trader (Omni Trade and Algo Trader); the traders adapter reports Auto Trader's public part, Investor Impersonator.
 };

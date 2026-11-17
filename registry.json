@@ -988,7 +988,7 @@
       "name": "Digital Science",
       "title": "Digital Science",
       "summary": "Chart Vitruvian Manager's data, connect it to AI assistants, and run your own devices.",
-      "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, an Integration Hub that opens Vitruvian Manager to AI assistants and plugins, and IoT Connect for commanding your own smart devices through the Vitruvian Manager bridge. The week’s papers and technology news are in Omni News.",
+      "description": "Computing, AI and the digital world: a Data Analytics workbench for exploring and charting Vitruvian Manager’s own data, the Omni-Map, which draws dated borders and the battles VM holds for a name clicked in Neo Book, an Integration Hub that opens Vitruvian Manager to AI assistants and plugins, and IoT Connect for commanding your own smart devices through the Vitruvian Manager bridge. The week’s papers and technology news are in Omni News.",
       "modules": [
         {
           "id": "data-analytics",
@@ -1010,6 +1010,24 @@
           "host": "Vitruvian Manager",
           "url": "analytics/index.html",
           "description": "Explore and chart Vitruvian Manager’s own data: pick any dataset from the catalogue, filter, group and aggregate it, draw charts in Vitruvian Manager’s style, export them, and hand the analysis to an AI assistant."
+        },
+        {
+          "id": "omni-map",
+          "name": "Omni-Map",
+          "kind": "reference",
+          "icon": "⊛",
+          "status": "live",
+          "data": {
+            "class": "reference",
+            "parts": [
+              {
+                "read": "omni/data/layers.json"
+              }
+            ]
+          },
+          "host": "Vitruvian Manager",
+          "url": "omni/index.html",
+          "description": "Dated borders and the battles VM holds on one map, opened at the right place and years from a name in Neo Book, each value with its source and its date as recorded; a view saves as a citable bundle. Borders for 1400–1600 in this first version (Cliopatria v0.2.1)."
         },
         {
           "id": "integration-hub",

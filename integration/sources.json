@@ -1,0 +1,89 @@
+{
+  "format": "vm-sources/1",
+  "about": "Vitruvian Manager's sources, version 1 (PRP-SCHOLAR-USP-DESIGN.md 5.1, stage S1): each with its citation, a short name for legends, the version VM holds, its licence, its address, when VM read it, and its terms as read: 'host' (VM may host its values, with the credit it asks) or 'cite-only' (VM may cite a figure and link to it, but hosts none of its rows). termsUrl, termsQuote and termsRead record where the terms were read, the sentence that decides, and when; credit is the credit the source asks for, in its words. A careful record of the terms as read, not legal advice. The cite-only entries agree with integration/scripts/cite-only.mjs (a test checks it both ways); stage S2a moves the tests onto this file and adds a source per column and row.",
+  "sources": [
+    {
+      "id": "cliopatria",
+      "citation": "Ed Chalstrey and James Bennett, Cliopatria v0.2.1, Seshat Global History Databank, Zenodo, 3 October 2026, https://doi.org/10.5281/zenodo.23128623; described in J. S. Bennett et al., 'Cliopatria - A geospatial database of world-wide political entities from 3400BCE to 2024CE', Scientific Data 12, 247 (2025), https://doi.org/10.1038/s41597-025-04516-9",
+      "short": "Cliopatria",
+      "version": "v0.2.1",
+      "licence": "CC BY 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "url": "https://doi.org/10.5281/zenodo.23128623",
+      "release": "https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.1",
+      "accessed": "2026-11-17",
+      "terms": "host",
+      "termsUrl": "https://github.com/Seshat-Global-History-Databank/cliopatria/blob/v0.2.1/LICENSE.md",
+      "termsQuote": "This data is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and indicate if changes were made.",
+      "termsRead": "2026-11-17",
+      "credit": "Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager",
+      "changes": "The rows of 1400–1600 only, converted to TopoJSON quantised to 1/100,000 of each file's extent (points that then coincide are merged; no simplification), with a row id added (omni/scripts/build-borders.mjs)."
+    },
+    {
+      "id": "natural-earth",
+      "citation": "Natural Earth, 1:110m land, version 5.1.1 (13 May 2022), https://www.naturalearthdata.com/",
+      "short": "Natural Earth",
+      "version": "5.1.1",
+      "licence": "Public domain",
+      "url": "https://www.naturalearthdata.com/",
+      "file": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.1/geojson/ne_110m_land.geojson",
+      "accessed": "2026-11-17",
+      "terms": "host",
+      "termsUrl": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "termsQuote": "All versions of Natural Earth raster + vector map data found on this website are in the public domain. You may use the maps in any manner, including modifying the content and design, electronic dissemination, and offset printing.",
+      "termsRead": "2026-11-17",
+      "credit": "Made with Natural Earth."
+    },
+    {
+      "id": "wikidata",
+      "citation": "Wikidata, the free knowledge base of the Wikimedia Foundation, https://www.wikidata.org/ (each value cited by its item and property)",
+      "short": "Wikidata",
+      "version": "2026-11-17T05:22:14Z",
+      "licence": "CC0 1.0",
+      "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "url": "https://www.wikidata.org/",
+      "accessed": "2026-11-17",
+      "terms": "host",
+      "termsUrl": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+      "termsQuote": "All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.",
+      "termsRead": "2026-11-17",
+      "credit": "Wikidata (CC0), with each value's item and property"
+    },
+    {
+      "id": "maplibre",
+      "kind": "code",
+      "citation": "MapLibre GL JS 5.24.0, MapLibre contributors, https://github.com/maplibre/maplibre-gl-js (npm maplibre-gl@5.24.0, published 23 April 2026)",
+      "short": "MapLibre GL JS",
+      "version": "5.24.0",
+      "licence": "BSD 3-Clause",
+      "licenceUrl": "https://github.com/maplibre/maplibre-gl-js/blob/v5.24.0/LICENSE.txt",
+      "url": "https://maplibre.org/",
+      "file": "https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js",
+      "integrity": {
+        "js": "sha384-5+cfbwT0iiub6VsQAdn6yz16nr6sDiQoHx6tm4O8OVYXHYOxcffFmCJBL0dgdvGp",
+        "css": "sha384-uTttxo/aOKbdE5RlD/SPzSDoDmNvGlUYPjONi2MN/b7c9HPSvW07OIuyP7uL6jxK"
+      },
+      "servedFrom": "cdn.jsdelivr.net (loaded by omni/index.html at this exact version with its Subresource Integrity hashes; VM hosts no copy). No data comes from it: it draws the map.",
+      "accessed": "2026-11-17",
+      "terms": "host",
+      "termsUrl": "https://github.com/maplibre/maplibre-gl-js/blob/v5.24.0/LICENSE.txt",
+      "termsQuote": "Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:",
+      "termsRead": "2026-11-17",
+      "credit": "Map drawn with MapLibre GL JS 5.24.0 (BSD 3-Clause, © MapLibre contributors)"
+    },
+    {
+      "id": "cow",
+      "citation": "Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press",
+      "short": "Sarkees and Wayman 2010, Resort to War: 1816–2007",
+      "version": "COW War Data: Inter-State v4.0, Intra-State v4.1 and Extra-State v4.0",
+      "licence": "No open licence: its terms bar passing its data on",
+      "url": "https://correlatesofwar.org/data-sets/cow-war/",
+      "accessed": "2026-11-16",
+      "terms": "cite-only",
+      "termsUrl": "https://correlatesofwar.org/data-sets/",
+      "termsQuote": "Users agree to cite each of the datasets they use in the manner described on each specific dataset web page. Users agree not to distribute the dataset to any third party without written permission of the COW director and data host. Users agree to ask permission for any dissemination, posting, or other use of the data that is not covered by the above restrictions.",
+      "termsRead": "2026-11-16",
+      "credit": "Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press"
+    }
+  ]
+}

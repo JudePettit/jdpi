@@ -43,7 +43,10 @@
    timelines and portraits looping like GIFs, from the Kino film about the author or made for the book) and the
    screens for its era take their turn with the entries (lib/follow.js, tour; lib/pictures.js). The online voice is used only when the reader chooses it, after an offer that
    shows what it costs, and never for more than the offer allowed. */
-import { readHash, writeHash } from './lib/hash.js';
+import { readHash, writeHash, readMap } from './lib/hash.js';
+import { readRecipe, writeRecipe } from '../../design/vm-recipe.js';
+import { clickDetail, kindOf, readPeriods, resolve } from '../../design/vm-click.js';
+import { formatSpan } from '../../design/vm-dates.js';
 import { readMode, writeMode } from './lib/mode.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
 import { eraRows, eraFromFacts, bookEra, fmtEra, fmtYear, kardashevStep, kardashevPolity, todayCountries, KARDASHEV_STEPS } from './lib/era.js';
@@ -91,6 +94,10 @@ const S = {
   // Screens only: the era screen that has the pane now (tour), the next one's turn, and the chapter's screens.
   // (since: characters read since the last turn, from TOUR_EVERY at each chapter so its picture comes early.)
   tour: null, turn: 0, eraI: 0, since: TOUR_EVERY, tourList: null,
+  // The Map tab (PRP-SCHOLAR-USP-DESIGN.md S1, contract 4): the Omni-Map's recipe as the frame last posted it (map=
+  // in the address), the selection (sel=), which term and paragraph the view was made for (mapKey), the paragraph a
+  // click came from (mapPid), and the click's offers and related items for the card under the frame (mapRes).
+  map: null, sel: null, mapKey: null, mapPid: null, mapRes: null, mapSeq: 0,
 };
 const inSide = inSidePane();
 let narr = null; // the narrator, made when the mode is first turned on
@@ -410,12 +417,29 @@ function highlight() {
 // pane opens over the lower half of a phone's screen.
 function useTerm(qid, from = null) {
   const { top, bottom } = region();
+  const inText = !!from; // the tagged name itself, clicked in the text (a chip in the bar passes none)
   from ||= $$(`#text a.term[data-qid="${qid}"]`).find(a => { const r = a.getBoundingClientRect(); return r.bottom > top && r.top < bottom; }) || null;
   S.term = qid;
+  S.mapPid = from?.closest?.('p.para')?.id || S.current || S.p || null;
   highlight(); renderChips(true);
   if (S.tour) endTour();
-  openPane('ency');
+  // A click on a tagged name in the text opens its card (design S1 and 2.4: the view, its offers and what is related),
+  // the Map tab, with the Master Index entry one tab away (10.2's default). A chip in the "On screen" bar, and any click
+  // while the AR Reader is on (its pane follows the narrator on the Master Index), open the entry as before; while
+  // the Map tab is open, every click redraws the map.
+  openPane(S.pane === 'map' || (inText && !S.ar) ? 'map' : 'ency');
   reveal(from);
+  dispatchClick(qid, S.mapPid);
+}
+/* Contract 1: the click, as a vm:click event on window, with the detail design/vm-click.js validates. The Map tab
+   listens for it (here; in S4 any view beside the text may). */
+async function dispatchClick(qid, pid) {
+  const c = chapter(), ent = await entity(qid);
+  if (!c || S.term !== qid) return;
+  const detail = clickDetail({ subject: { qid, label: ent?.label || S.labels.get(qid) || qid, kind: kindOf(ent) || 'unknown' },
+    from: { module: 'neo-classic', at: `bibliotheca/neo/index.html${hashFor(c.n, { p: pid, t: qid })}`, ...(pid ? { passage: { book: S.book.slug, ch: c.n, p: pid } } : {}) },
+    gesture: 'term' });
+  if (detail) window.dispatchEvent(new CustomEvent('vm:click', { detail }));
 }
 function clearTerm() {
   S.term = null;
@@ -465,11 +489,20 @@ function selectTab(tab) {
     const on = t === tab, b = $(`#tab-${t}`);
     b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
     $(`#panel-${t}`).hidden = !on;
+    if (on) showTab(b);
   }
 }
-function renderPane() { if (S.pane === 'ency') renderMasterIndex(); else if (S.pane === 'vm') renderVm(); else if (S.pane === 'terms') renderChips(true); }
+// The selected tab is scrolled into its row when the row is narrower than its tabs (a phone), sideways only.
+function showTab(b) {
+  const row = b.closest('[role="tablist"]');
+  if (!row || row.scrollWidth <= row.clientWidth) return;
+  const r = row.getBoundingClientRect(), t = b.getBoundingClientRect();
+  if (t.right > r.right) row.scrollLeft += t.right - r.right + 8;
+  else if (t.left < r.left) row.scrollLeft -= r.left - t.left + 8;
+}
+function renderPane() { if (S.pane === 'ency') renderMasterIndex(); else if (S.pane === 'vm') renderVm(); else if (S.pane === 'terms') renderChips(true); else if (S.pane === 'map') renderMap(); }
 // The pane's tabs, in order. AR Mode opens it on the entry (a term in use, or the AR Reader on), else on the terms.
-const TABS = ['terms', 'ency', 'vm'];
+const TABS = ['terms', 'ency', 'vm', 'map'];
 const paneTab = () => (S.term || S.ar ? 'ency' : 'terms');
 function toggleArMode() { if (S.pane) closePane(); else openPane(paneTab()); }
 function setPaneHead(kicker, title, link) {
@@ -662,6 +695,12 @@ function makeFrames() {
   const common = { embedded, shell: SHELL, toShell: shellGo, onBlocked: url => notice(`The browser did not open a new tab for this page. <a href="${esc(url)}" target="_blank" rel="noopener">Open it</a>`) };
   frames.ency = sideFrame($('#ency-frame'), { ...common, onLoad: () => encyFrameLoaded() });
   frames.vm = sideFrame($('#vm-frame'), { ...common, onLoad: vmLoaded });
+  // The Map tab's frame: the Omni-Map (a page with the connector, so a page without it is not shown).
+  frames.map = sideFrame($('#map-frame'), { ...common, onLoad: ({ ok, frame }) => {
+    if (frame.dataset.url === 'about:blank' || ok) return;
+    frame.hidden = true; $('#map-empty').hidden = false; $('#map-empty').textContent = 'The Omni-Map could not be shown inside the page.';
+  } });
+  window.addEventListener('message', mapMessage);
   // Screens only's era screens: a page that loaded without the connector ends the screen's turn.
   frames.tour = sideFrame($('#tour-frame'), { ...common, onLoad: ({ ok, frame }) => {
     if (frame.dataset.url === 'about:blank') return;
@@ -676,6 +715,110 @@ function notice(html) {
   const n = $('#notice');
   $('#notice-text').innerHTML = html;
   n.hidden = !html;
+}
+
+/* ---------- the Map tab: the Omni-Map for the term in use (PRP-SCHOLAR-USP-DESIGN.md S1, 2.1, contract 1–5) ----------
+   A click on a term (or the tab opened with a term in use) is resolved by design/vm-click.js into a view recipe, the
+   offers beside it ("This passage", "Its whole life", the Master Index entry, the Wikipedia article) and what is
+   related; the frame (omni/index.html#<recipe>&host=neo) draws it and posts { type: 'vm:view', recipe, state } on
+   every change, which this page keeps in its address (&map=, written with replaceState: the address is the single source
+   of truth) and in window.omniState. An address that names map= opens on that view; one with pane=map and no map=
+   resolves the term (t=) in its paragraph (p=). */
+const loadOmniLayers = once(() => getJson(new URL('omni/data/layers.json', SHELL)));
+const loadBattles = once(() => getJson(new URL('omni/data/layers/battles.json', SHELL)).then(d => d.rows || []));
+const periodsOf = new Map();
+// The books with a periods file (periods/index.json): only those are asked for, so a book without one costs no 404.
+const loadPeriodsIndex = once(() => getJson(`${DATA}periods/index.json`).then(d => new Set(Array.isArray(d?.books) ? d.books : [])).catch(() => new Set()));
+function loadPeriods(slug) {
+  if (!periodsOf.has(slug)) periodsOf.set(slug, loadPeriodsIndex().then(have => (have.has(slug) ? getJson(`${DATA}periods/${encodeURIComponent(slug)}.json`) : null))
+    .then(readPeriods).catch(() => readPeriods(null)));
+  return periodsOf.get(slug);
+}
+const omniAt = recipe => pageUrl(`omni/index.html#${recipe}&host=neo`);
+/** The click's view for a term in a paragraph: { entry, res } (res is vm-click's { recipe, offers, related, thin }), or
+    null when the Master Index has no record of the term. */
+async function clickView(qid, pid) {
+  const c = chapter(), ent = await entity(qid);
+  if (!ent || !c) return null;
+  const para = c.paragraphs.find(p => p.id === pid) || null;
+  const passageQs = para ? [...new Set(validTerms(para).map(t => t.qid))] : [];
+  const relQs = ['Country', 'Participants', 'Member of'].flatMap(k => (ent.rel?.[k] || []).map(x => x[0]));
+  const recs = new Map();
+  await Promise.all([...new Set([...passageQs, ...relQs])].map(async q => { recs.set(q, await entity(q)); }));
+  const [periods, battles, layers, wars] = await Promise.all([loadPeriods(S.book.slug), loadBattles().catch(() => []), loadOmniLayers().catch(() => null), loadWars().catch(() => [])]);
+  const ctx = {
+    today: new Date().toISOString().slice(0, 10), era: bookEra(S.book, S.row, c)?.years, record: pid ? periods(pid) : null,
+    lookup: q => recs.get(q) || null, passagePlaces: passageQs.filter(q => recs.get(q)?.type === 'place'), battles, wars,
+    layers: { borders: { step: layers?.layers?.find(l => l.id === 'borders')?.time?.step || 'y' } },
+  };
+  const from = { module: 'neo-classic', at: `bibliotheca/neo/index.html${hashFor(c.n, { p: pid, t: qid })}`, ...(pid ? { passage: { book: S.book.slug, ch: c.n, p: pid } } : {}) };
+  return { entry: ent, res: resolve(ent, from, ctx) };
+}
+// The tab: the view for the term in use, made once per term and paragraph; the address's own view (map=) when it names one.
+async function renderMap() {
+  const q = S.term, pid = S.mapPid || S.current || S.p || null, key = `${q}|${pid}`;
+  const f = $('#map-frame');
+  if (!q) {
+    $('#map-empty').hidden = false; f.hidden = true; $('#map-card').hidden = true;
+    setPaneHead('Omni-Map', 'No term chosen', null);
+    return;
+  }
+  const seq = ++S.mapSeq;
+  const label = S.labels.get(q) || q;
+  if (S.mapKey !== key || !S.mapRes) {
+    setPaneHead('Omni-Map', label, null);
+    const v = await clickView(q, pid);
+    if (seq !== S.mapSeq) return;
+    S.mapRes = v; S.mapKey = key;
+    if (!v) { $('#map-empty').hidden = false; $('#map-empty').textContent = `The Master Index holds no record of ${label} yet, so VM cannot map it.`; f.hidden = true; $('#map-card').hidden = true; S.map = null; writeState(); return; }
+    if (!S.mapFromAddress) S.map = v.res.recipe;
+  }
+  S.mapFromAddress = false;
+  $('#map-empty').hidden = true;
+  f.hidden = false;
+  drawMapCard();
+  showMapRecipe(S.map || S.mapRes.res.recipe);
+}
+function showMapRecipe(recipe) {
+  S.map = recipe;
+  const r = readRecipe(recipe), win = r?.t ? formatSpan(r.t.from, r.t.to) : '';
+  const label = S.mapRes?.entry?.label || S.labels.get(S.term) || S.term;
+  setPaneHead('Omni-Map', win ? `${label} · ${win}` : label, placeLink('ds', 'omni-map', `omni/index.html#${recipe}`));
+  $('#map-frame').title = `Omni-Map: ${label}`;
+  frames.map.go(omniAt(recipe));
+  writeState();
+}
+// Two recipes are the same view whatever year the slider shows (an offer stays marked as the reader moves it).
+const sameView = (a, b) => { const x = readRecipe(a || ''), y = readRecipe(b || ''); if (!x || !y) return false; delete x.at; delete y.at; return writeRecipe(x) === writeRecipe(y); };
+// Under the frame: the click's offers (2.2), what is related, and 2.5's words when VM holds little.
+function drawMapCard() {
+  const v = S.mapRes, card = $('#map-card');
+  if (!v) { card.hidden = true; return; }
+  const { offers, related, thin } = v.res;
+  const off = o => {
+    if (!o.available) return `<li class="off"><b>${esc(o.name)}</b><span>${esc(o.reason || '')}</span></li>`;
+    if (o.recipe) return `<li><button type="button" class="prp-btn sm${sameView(o.recipe, S.map) ? ' on' : ''}" data-recipe="${esc(o.recipe)}" aria-pressed="${sameView(o.recipe, S.map)}">${esc(o.name)}</button><span>${esc(o.why)}</span></li>`;
+    const ext = /^https?:/.test(o.at);
+    const l = ext ? { href: o.at, target: '_blank' } : placeLink('rs', o.id === 'entry' ? 'encyclopedia' : 'war-focus', o.at);
+    return `<li><a class="prp-btn sm ghost" href="${esc(l.href)}" target="${esc(l.target)}" rel="noopener"${l.hash ? ` data-shell-hash="${esc(l.hash)}"` : ''}>${esc(o.name)} ↗</a><span>${esc(o.why)}</span></li>`;
+  };
+  card.innerHTML = (thin ? `<p class="nc-map-thin">${esc(thin.text)}</p>` : '')
+    + `<ul class="nc-map-offers" aria-label="Views offered">${offers.map(off).join('')}</ul>`
+    + related.map(g => `<p class="prp-label">${esc(g.group)}</p><ul class="nc-map-related">${g.items.map(i => { const l = placeLink('rs', 'encyclopedia', i.at); return `<li><a ${linkAttrs(l)}><bdi>${esc(i.label)}</bdi></a> <span>${esc(i.why)}</span></li>`; }).join('')}</ul>`).join('');
+  card.hidden = false;
+}
+// The frame's view, as it posts it: only from the Map tab's own frame, and only from this site.
+function mapMessage(e) {
+  const f = $('#map-frame');
+  const ours = !!f && e.source === f.contentWindow && e.origin === location.origin;
+  if (!ours) return;
+  if (!e.data || e.data.type !== 'vm:view' || typeof e.data.recipe !== 'string') return;
+  const r = readRecipe(e.data.recipe);
+  if (!r) return;
+  S.map = writeRecipe(r);
+  if (e.data.state && typeof e.data.state === 'object') window.omniState = e.data.state;
+  if (S.mapRes) $$('#map-card [data-recipe]').forEach(b => { const on = sameView(b.dataset.recipe, S.map); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  if (S.pane === 'map') writeState();
 }
 
 /* ---------- Augmented Reading ---------- */
@@ -1146,7 +1289,8 @@ function writeState() {
   // The screen shown in the pane, or the one the address named and the pane has not drawn yet (so a write in between
   // does not drop it); the era choice whenever it is the term's.
   const show = S.pane === 'vm' ? S.vmShown || S.pendingShow : null;
-  const hash = writeMode(writeHash({ book: S.book.slug, ch: chapter()?.n, p: S.p, t: S.term, pane: S.pane, show, era: S.eraOf === 'term' ? 'term' : null }), { ar: S.ar });
+  const hash = writeMode(writeHash({ book: S.book.slug, ch: chapter()?.n, p: S.p, t: S.term, pane: S.pane, show, era: S.eraOf === 'term' ? 'term' : null,
+    map: S.pane === 'map' ? S.map : null, sel: S.sel }), { ar: S.ar });
   if (hash !== location.hash) { try { history.replaceState(history.state, '', hash); } catch { /* rate-limited: the next move writes it */ } }
   if (S.ar) drawNar(); // Hold follows the reader's term and the tab
 }
@@ -1178,6 +1322,13 @@ function goChapter(i) {
 
 async function applyHash({ first = false } = {}) {
   const h = readHash(location.hash), mode = readMode(location.hash); // read before anything rewrites the address
+  // The Map tab's view and the selection: map= is the view to draw (the address is its single source of truth).
+  const mp = readMap(location.hash);
+  S.sel = mp.sel;
+  if (h.pane === 'map') {
+    S.mapPid = h.p || S.mapPid;
+    if (mp.map && mp.map !== S.map) { S.map = mp.map; S.mapFromAddress = true; }
+  }
   const slug = S.shelf.some(b => b.slug === h.book) ? h.book : S.shelf[0].slug;
   if (S.book?.slug !== slug) { if (S.vmShown) hideVm(); if (!(await loadBook(slug))) return; }
   let ci = h.ch === null ? 0 : S.chapters.findIndex(c => c.n === h.ch);
@@ -1258,6 +1409,12 @@ function wire() {
     openPane(next); $(`#tab-${next}`).focus();
   });
   $('#era-pick').addEventListener('change', e => { S.eraOf = e.target.value === 'term' ? 'term' : 'book'; renderVm(); writeState(); });
+  // The Map tab: an offer's view ("Its whole life", "This passage") in the frame; a click on a term redraws it.
+  $('#map-card').addEventListener('click', e => {
+    const b = e.target.closest('button[data-recipe]');
+    if (b && readRecipe(b.dataset.recipe)) showMapRecipe(writeRecipe(readRecipe(b.dataset.recipe)));
+  });
+  window.addEventListener('vm:click', e => { if (S.pane === 'map' && e.detail?.subject?.qid === S.term) renderMap(); });
   // "Show here": the screen in the pane; on a phone the sheet opens taller for it (Taller again gives the text back).
   $('#vm-list').addEventListener('click', e => {
     const b = e.target.closest('[data-show]');

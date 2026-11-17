@@ -72,7 +72,7 @@ test('registry is well formed', () => {
   assert.deepEqual(registry.suites.find(s => s.id === 'mm').modules.map(m => m.id), ['markets', 'traders', 'learning']);
   assert.equal(where('progress'), 'ns');
   for (const id of ['osint', 'sigint', 'geoint', 'osint-training']) assert.equal(where(id), 'oi');
-  for (const id of ['data-analytics', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
+  for (const id of ['data-analytics', 'omni-map', 'integration-hub', 'iot-connect']) assert.equal(where(id), 'ds');
   for (const cat of ['political-events', 'political-figures', 'political-parties', 'wars', 'geopolitical-events', 'great-thinkers']) assert.equal(where(`kino-${cat}`), 'kino');
   // Bibliotheca was Kino's submodule until November 2026; it is a module now, its reader Neo Book its one submodule
   // (the old id its alias, so #/kino/bibliotheca still opens it), on the same page.
@@ -910,7 +910,7 @@ test('freshness lines: the top bar and the sidebar give each submodule\'s line, 
     assert.doesNotMatch(await p.textContent('#nav'), /\bLive\b/);
     assert.equal(await p.locator('#nav .flag.late').count(), modules.filter(x => lightLine(x.m.id).late).length, 'a Late flag on each late one, and only those');
     // The one count, Home counted.
-    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 38 submodules');
+    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 39 submodules');
     // The other site's line: the Political Atlas's own manifest (faked here as it serves it).
     await p.goto(`${BASE}/#/rt/atlas`, { waitUntil: 'domcontentloaded' });
     const atlasText = line('atlas').text;

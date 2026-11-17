@@ -1,0 +1,649 @@
+{
+ "about": "A frozen copy, made 17 November 2026, of the Master Index records (lake/data/e) and the tagged paragraphs of The Prince (bibliotheca/data/books/the-prince.json) that tests/vm-core.test.mjs resolves, so the monthly lake refresh and the re-tagging cannot change what those tests assert. A test fixture only.",
+ "era": [
+  1494,
+  1527
+ ],
+ "paragraphs": {
+  "c03-p03": {
+   "ch": 3,
+   "terms": [
+    {
+     "qid": "Q70972"
+    },
+    {
+     "qid": "Q153529"
+    },
+    {
+     "qid": "Q70972"
+    },
+    {
+     "qid": "Q153529"
+    },
+    {
+     "qid": "Q236853"
+    }
+   ]
+  },
+  "c26-p08": {
+   "ch": 26,
+   "terms": [
+    {
+     "qid": "Q764793"
+    },
+    {
+     "qid": "Q58477"
+    },
+    {
+     "qid": "Q1449"
+    },
+    {
+     "qid": "Q1754732"
+    },
+    {
+     "qid": "Q1891"
+    }
+   ]
+  },
+  "c03-p17": {
+   "ch": 3,
+   "terms": [
+    {
+     "qid": "Q170174"
+    },
+    {
+     "qid": "Q4948"
+    },
+    {
+     "qid": "Q153529"
+    },
+    {
+     "qid": "Q244482"
+    },
+    {
+     "qid": "Q170174"
+    },
+    {
+     "qid": "Q1273"
+    }
+   ]
+  }
+ },
+ "records": {
+  "Q12548": {
+   "q": "Q12548",
+   "label": "Holy Roman Empire",
+   "type": "place",
+   "wiki": "Holy Roman Empire",
+   "facts": {
+    "founded": "0962-02-02",
+    "dissolved": "1806-08-06"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q12548",
+      "Holy Roman Empire"
+     ]
+    ]
+   }
+  },
+  "Q1273": {
+   "q": "Q1273",
+   "label": "Tuscany",
+   "type": "place",
+   "wiki": "Tuscany",
+   "facts": {},
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ]
+   }
+  },
+  "Q142": {
+   "q": "Q142",
+   "label": "France",
+   "type": "place",
+   "wiki": "France",
+   "facts": {
+    "founded": "1958-10-04"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q142",
+      "France"
+     ]
+    ],
+    "Member of": [
+     [
+      "Q458",
+      "European Union"
+     ],
+     [
+      "Q1065",
+      "United Nations"
+     ],
+     [
+      "Q134102",
+      "Organisation internationale de la Francophonie"
+     ],
+     [
+      "Q41550",
+      "Organization for Economic Cooperation and Development"
+     ],
+     [
+      "Q8908",
+      "Council of Europe"
+     ],
+     [
+      "Q37143",
+      "G8"
+     ],
+     [
+      "Q42262",
+      "European Space Agency"
+     ],
+     [
+      "Q7825",
+      "World Trade Organization"
+     ],
+     [
+      "Q141720",
+      "European Air Transport Command"
+     ],
+     [
+      "Q19771",
+      "G20"
+     ],
+     [
+      "Q7184",
+      "NATO"
+     ],
+     [
+      "Q37470",
+      "United Nations Security Council"
+     ]
+    ]
+   }
+  },
+  "Q1449": {
+   "q": "Q1449",
+   "label": "Genoa",
+   "type": "topic",
+   "wiki": "Genoa",
+   "facts": {},
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ],
+     [
+      "Q165154",
+      "Kingdom of Sardinia"
+     ],
+     [
+      "Q142",
+      "France"
+     ],
+     [
+      "Q659312",
+      "Ligurian Republic"
+     ],
+     [
+      "Q174306",
+      "Republic of Genoa"
+     ],
+     [
+      "Q5343710",
+      "Kingdom of Italy"
+     ]
+    ]
+   }
+  },
+  "Q153529": {
+   "q": "Q153529",
+   "label": "Duchy of Milan",
+   "type": "place",
+   "wiki": "Duchy of Milan",
+   "facts": {
+    "founded": "1395-05-11",
+    "dissolved": "1797-10-17"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q153529",
+      "Duchy of Milan"
+     ],
+     [
+      "Q12548",
+      "Holy Roman Empire"
+     ],
+     [
+      "Q80702",
+      "Spanish Empire"
+     ]
+    ]
+   }
+  },
+  "Q165154": {
+   "q": "Q165154",
+   "label": "Kingdom of Sardinia",
+   "type": "place",
+   "wiki": "Kingdom of Sardinia",
+   "facts": {
+    "founded": "1720",
+    "dissolved": "1861"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ]
+   }
+  },
+  "Q170174": {
+   "q": "Q170174",
+   "label": "Papal States",
+   "type": "place",
+   "wiki": "Papal States",
+   "facts": {
+    "founded": "0754",
+    "dissolved": "1870-09-20"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q170174",
+      "Papal States"
+     ]
+    ]
+   }
+  },
+  "Q174306": {
+   "q": "Q174306",
+   "label": "Republic of Genoa",
+   "type": "place",
+   "wiki": "Republic of Genoa",
+   "facts": {
+    "founded": "1005",
+    "dissolved": "1797-06-14"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ],
+     [
+      "Q142",
+      "France"
+     ]
+    ]
+   }
+  },
+  "Q1754732": {
+   "q": "Q1754732",
+   "label": "Battle of Agnadello",
+   "type": "conflict",
+   "wiki": "Battle of Agnadello",
+   "facts": {
+    "date": "1509-05-14"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ],
+    "Participants": [
+     [
+      "Q70972",
+      "Kingdom of France"
+     ],
+     [
+      "Q4948",
+      "Republic of Venice"
+     ]
+    ]
+   }
+  },
+  "Q1891": {
+   "q": "Q1891",
+   "label": "Bologna",
+   "type": "topic",
+   "wiki": "Bologna",
+   "facts": {},
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ],
+     [
+      "Q170174",
+      "Papal States"
+     ],
+     [
+      "Q12548",
+      "Holy Roman Empire"
+     ],
+     [
+      "Q2577303",
+      "Kingdom of Sardinia"
+     ]
+    ],
+    "Member of": [
+     [
+      "Q1139352",
+      "Creative Cities Network"
+     ]
+    ]
+   }
+  },
+  "Q236853": {
+   "q": "Q236853",
+   "label": "Ludovico Sforza",
+   "type": "person",
+   "wiki": "Ludovico Sforza",
+   "facts": {
+    "born": "1452-07-27",
+    "died": "1508-05-27"
+   },
+   "rel": {
+    "Positions held": [
+     [
+      "Q58796672",
+      "Duke of Milan"
+     ]
+    ]
+   }
+  },
+  "Q238": {
+   "q": "Q238",
+   "label": "San Marino",
+   "type": "place",
+   "wiki": "San Marino",
+   "facts": {
+    "founded": "0301-09-03"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q238",
+      "San Marino"
+     ]
+    ],
+    "Member of": [
+     [
+      "Q1065",
+      "United Nations"
+     ],
+     [
+      "Q8908",
+      "Council of Europe"
+     ],
+     [
+      "Q81299",
+      "Organization for Security and Co-operation in Europe"
+     ],
+     [
+      "Q191384",
+      "International Bank for Reconstruction and Development"
+     ],
+     [
+      "Q899770",
+      "International Centre for Settlement of Investment Disputes"
+     ],
+     [
+      "Q8475",
+      "Interpol"
+     ],
+     [
+      "Q842490",
+      "Organisation for the Prohibition of Chemical Weapons"
+     ],
+     [
+      "Q7809",
+      "UNESCO"
+     ],
+     [
+      "Q17495",
+      "Universal Postal Union"
+     ],
+     [
+      "Q376150",
+      "International Telecommunication Union"
+     ],
+     [
+      "Q45177",
+      "Visa Waiver Program"
+     ],
+     [
+      "Q7817",
+      "World Health Organization"
+     ]
+    ]
+   }
+  },
+  "Q244482": {
+   "q": "Q244482",
+   "label": "Romagna",
+   "type": "topic",
+   "wiki": "Romagna",
+   "facts": {},
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ],
+     [
+      "Q238",
+      "San Marino"
+     ]
+    ]
+   }
+  },
+  "Q2577303": {
+   "q": "Q2577303",
+   "label": "Kingdom of Sardinia",
+   "type": "place",
+   "wiki": "Kingdom of Sardinia (1720–1861)",
+   "facts": {
+    "founded": "1720-08-24",
+    "dissolved": "1861-03-17"
+   },
+   "rel": {}
+  },
+  "Q38": {
+   "q": "Q38",
+   "label": "Italy",
+   "type": "place",
+   "wiki": "Italy",
+   "facts": {
+    "founded": "1946-06-18"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ],
+    "Member of": [
+     [
+      "Q1065",
+      "United Nations"
+     ],
+     [
+      "Q8908",
+      "Council of Europe"
+     ],
+     [
+      "Q7184",
+      "NATO"
+     ],
+     [
+      "Q37143",
+      "G8"
+     ],
+     [
+      "Q19771",
+      "G20"
+     ],
+     [
+      "Q8475",
+      "Interpol"
+     ],
+     [
+      "Q340195",
+      "African Development Bank"
+     ],
+     [
+      "Q188822",
+      "Asian Development Bank"
+     ],
+     [
+      "Q42262",
+      "European Space Agency"
+     ],
+     [
+      "Q782942",
+      "Australia Group"
+     ],
+     [
+      "Q309195",
+      "Bank for International Settlements"
+     ],
+     [
+      "Q1374456",
+      "Euro-Atlantic Partnership Council"
+     ]
+    ]
+   }
+  },
+  "Q4948": {
+   "q": "Q4948",
+   "label": "Republic of Venice",
+   "type": "place",
+   "wiki": "Republic of Venice",
+   "facts": {
+    "founded": "0697",
+    "dissolved": "1797-05-12"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q4948",
+      "Republic of Venice"
+     ]
+    ]
+   }
+  },
+  "Q5343710": {
+   "q": "Q5343710",
+   "label": "Kingdom of Italy",
+   "type": "place",
+   "facts": {
+    "founded": "0774-06-05",
+    "dissolved": "0961-12-25"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q5343710",
+      "Kingdom of Italy"
+     ]
+    ]
+   }
+  },
+  "Q58477": {
+   "q": "Q58477",
+   "label": "Capua",
+   "type": "place",
+   "wiki": "Capua",
+   "facts": {},
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ]
+   }
+  },
+  "Q659312": {
+   "q": "Q659312",
+   "label": "Ligurian Republic",
+   "type": "place",
+   "wiki": "Ligurian Republic",
+   "facts": {
+    "founded": "1797-06-14",
+    "dissolved": "1805-06-04"
+   },
+   "rel": {}
+  },
+  "Q70972": {
+   "q": "Q70972",
+   "label": "Kingdom of France",
+   "type": "place",
+   "wiki": "Kingdom of France",
+   "facts": {
+    "founded": "0987",
+    "dissolved": "1791-09-04"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q70972",
+      "Kingdom of France"
+     ]
+    ]
+   }
+  },
+  "Q764793": {
+   "q": "Q764793",
+   "label": "Battle of Fornovo",
+   "type": "conflict",
+   "wiki": "Battle of Fornovo",
+   "facts": {
+    "date": "1495-07-06"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q38",
+      "Italy"
+     ]
+    ]
+   }
+  },
+  "Q80702": {
+   "q": "Q80702",
+   "label": "Spanish Empire",
+   "type": "place",
+   "wiki": "Spanish Empire",
+   "facts": {
+    "founded": "1492-10-12",
+    "dissolved": "1899-06-02"
+   },
+   "rel": {
+    "Country": [
+     [
+      "Q29",
+      "Spain"
+     ]
+    ]
+   }
+  }
+ }
+}

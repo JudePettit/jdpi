@@ -422,6 +422,10 @@ test('page: the fixture: terms as links, AR Mode\'s "On screen" follows the term
     assert.equal(await page.getAttribute('#chips .nc-chip[data-term="Q12560"]', 'aria-pressed'), 'true');
     const [book, pane] = await Promise.all(['#book .nc-col', '#pane'].map(s => page.locator(s).boundingBox()));
     assert.ok(pane.x >= book.x + book.width, 'book | pane, side by side above 1100 px');
+    // A click opens the term's map view, the card (design S1 and 2.4); its Master Index entry is one tab away.
+    await page.waitForFunction(() => /&t=Q12560&pane=map/.test(location.hash));
+    assert.equal(await page.getAttribute('#tab-map', 'aria-selected'), 'true');
+    await page.click('#tab-ency');
     await page.waitForFunction(() => /&t=Q12560&pane=ency$/.test(location.hash));
     assert.equal(await page.locator('#pane-title').innerText(), 'Ottoman Empire');
     // The Master Index page frames (same origin, no X-Frame-Options), on the entry.
@@ -599,7 +603,7 @@ test('page: AR Mode on its terms: a deep link lands under the head, the list is 
     await w.page.waitForSelector('#pane:not([hidden])');
     const box = await france.boundingBox(), head = await w.page.evaluate(() => document.querySelector('#head').getBoundingClientRect().bottom);
     assert.ok(box.y >= head && box.y + box.height <= 800, `the term clicked is in view: ${box.y} (head ${head})`);
-    await w.page.waitForFunction(() => /&p=c03-p13&t=Q70972&pane=ency$/.test(location.hash));
+    await w.page.waitForFunction(() => /&p=c03-p13&t=Q70972&pane=map/.test(location.hash)); // its map view (design S1)
     assert.equal(await w.page.getAttribute('#chips .nc-chip[data-term="Q70972"]', 'aria-pressed'), 'true', 'its chip on the terms tab is pressed');
     assert.deepEqual(w.errors, []);
     await w.ctx.close();

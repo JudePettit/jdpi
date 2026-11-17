@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omni-Map · VM</title>
+<meta name="description" content="In Neo Book, click a tagged name and VM opens a map on the places and years it can give that name, with borders as they stood: the passage's own years once VM holds a checked record of them, until then the dates of what was named. Each value shows its source and its date at the precision the source records, and 'Save this view' gives a bundle you can cite and download.">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<!-- MapLibre GL JS 5.24.0 (BSD 3-Clause), the page's one outside code: pinned to its exact version, with the
+     Subresource Integrity hashes of the files as published (jsDelivr, unpkg and the npm tarball agree byte for byte), so
+     a changed file is refused. Without it, or without WebGL, the page says so and lists what the map would show. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css" integrity="sha384-uTttxo/aOKbdE5RlD/SPzSDoDmNvGlUYPjONi2MN/b7c9HPSvW07OIuyP7uL6jxK" crossorigin="anonymous">
+<link rel="stylesheet" href="styles.css">
+<script src="../design/prp-bar.js" data-suite="ds" data-module="omni-map" data-shell="../" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js" integrity="sha384-5+cfbwT0iiub6VsQAdn6yz16nr6sDiQoHx6tm4O8OVYXHYOxcffFmCJBL0dgdvGp" crossorigin="anonymous" defer></script>
+<script src="../design/prp-focus.js"></script>
+<script src="../design/prp-period.js"></script>
+<script src="../design/prp-map.js"></script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="om">
+  <header class="front">
+    <div class="prp-eyebrow" data-jdpi-standalone>Digital Science <span class="sep">·</span> Omni-Map</div>
+    <h1 class="prp-title">Omni-Map</h1>
+    <p class="prp-dek">In Neo Book, click a tagged name and VM opens a map on the places and years it can give that name, with borders as they stood: the passage's own years once VM holds a checked record of them, until then the dates of what was named. Each value shows its source and its date at the precision the source records, and 'Save this view' gives a bundle you can cite and download.</p>
+    <p class="prp-meta" id="meta"><span>Loading the layers…</span></p>
+  </header>
+
+  <div class="om-layout">
+    <section class="om-stage" aria-labelledby="view-title">
+      <div class="om-head">
+        <h2 class="om-view" id="view-title"><span id="view-subject">The Omni-Map</span> <span class="om-frame" id="frame-year"></span></h2>
+        <p class="om-why" id="frame-why" hidden></p>
+        <div class="om-tools" role="group" aria-label="The map">
+          <button type="button" class="prp-btn sm ghost" id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+          <button type="button" class="prp-btn sm ghost" id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+          <button type="button" class="prp-btn sm ghost" id="fit" title="Back to the places of this view">Fit to the view</button>
+        </div>
+      </div>
+      <!-- The canvas is a picture of the lists beside it ("What the map shows"): hidden from screen readers, never
+           focused; every outline and battle on it is a button in the lists. -->
+      <div class="om-map" id="map" aria-hidden="true"></div>
+      <p class="om-msg" id="map-msg" role="note" hidden></p>
+      <p class="om-note" id="map-note" role="note" hidden></p>
+      <div class="om-time">
+        <p class="om-year" aria-hidden="true">Year shown: <b id="time-year"></b></p>
+        <div class="timeline" id="timeline" role="group" aria-label="Year shown"></div>
+      </div>
+      <p class="sr-only" id="say" role="status" aria-live="polite"></p>
+    </section>
+
+    <aside class="om-side" aria-label="What the map shows, its sources and this view">
+      <section class="prp-panel om-legend" id="legend" aria-labelledby="legend-title">
+        <div class="prp-panel-head"><b id="legend-title">Legend</b><button type="button" class="prp-btn sm ghost om-fold" id="legend-fold" aria-expanded="true" aria-controls="legend-body">Hide</button></div>
+        <p class="om-lg-sum" id="legend-summary" hidden></p>
+        <div class="prp-panel-body" id="legend-body"><p class="prp-empty">Loading…</p></div>
+      </section>
+
+      <section class="prp-panel" id="focus" aria-labelledby="focus-title">
+        <div class="prp-panel-head"><b id="focus-title">In focus</b></div>
+        <div class="prp-panel-body" id="focus-body"><p class="prp-empty">Loading…</p></div>
+      </section>
+
+      <section class="prp-panel" id="battles" aria-labelledby="battles-title">
+        <div class="prp-panel-head"><b id="battles-title">Battles</b></div>
+        <div class="prp-panel-body"><p class="om-held" id="battles-held"></p><ul class="om-list om-battles" id="battles-list"></ul></div>
+      </section>
+
+      <section class="prp-panel" id="shows" aria-labelledby="shows-title">
+        <div class="prp-panel-head"><b id="shows-title">What the map shows</b></div>
+        <div class="prp-panel-body">
+          <details class="om-details" id="shows-details"><summary id="shows-summary">Outlines</summary><ul class="om-list om-outlines" id="shows-list"></ul></details>
+        </div>
+      </section>
+
+      <section class="prp-panel" id="this-view" aria-labelledby="view-acts-title">
+        <div class="prp-panel-head"><b id="view-acts-title">This view</b></div>
+        <div class="prp-panel-body">
+          <div class="om-acts">
+            <button type="button" class="prp-btn sm primary" id="save">Save this view (bundle)</button>
+            <button type="button" class="prp-btn sm" id="cite">Cite this view (CSL-JSON)</button>
+            <button type="button" class="prp-btn sm" id="download">Download data</button>
+            <label class="prp-btn sm ghost om-open" for="open-file">Open a saved view</label>
+            <input type="file" id="open-file" class="sr-only" accept=".zip,application/zip">
+          </div>
+          <p class="om-apa" id="apa"></p>
+          <p class="om-live" id="live-view"></p>
+          <p class="om-saved" id="saved-note" role="status"></p>
+          <p class="om-pins" id="pins-note" role="note" hidden></p>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <footer class="prp-sources" id="sources">
+    <p><b>What this is.</b> A view is a recipe (VR/1): the years, the frame, the step, the layers and the places in focus, kept in this page's address, so a link draws it again. The address is a live view: it draws today's data. "Save this view (bundle)" freezes what was drawn: the recipe with its data versions, the rows, the features, the metadata and three citation files, with a pin anyone can check. VM is not a primary source; cite the bundle, and through it the sources below.</p>
+    <p><b>Borders.</b> <span id="credit-borders">Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager.</span> Ed Chalstrey and James Bennett, Cliopatria v0.2.1, Seshat Global History Databank, Zenodo, <a href="https://doi.org/10.5281/zenodo.23128623" target="_blank" rel="noreferrer">doi:10.5281/zenodo.23128623</a>; described in J. S. Bennett et al., 'Cliopatria - A geospatial database of world-wide political entities from 3400BCE to 2024CE', Scientific Data 12, 247 (2025), <a href="https://doi.org/10.1038/s41597-025-04516-9" target="_blank" rel="noreferrer">doi:10.1038/s41597-025-04516-9</a>. Licence: <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>. Changes by Vitruvian Manager: the rows of 1400–1600 only, converted to TopoJSON quantised to 1/100,000 of each file's extent (points that then coincide are merged; no simplification), with a row id added. VM holds borders for 1400–1600 only in this first version.</p>
+    <p><b>Base.</b> Made with Natural Earth. Natural Earth 1:110m land, version 5.1.1, public domain ("All versions of Natural Earth raster + vector map data found on this website are in the public domain", <a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">its terms</a>, read 17 November 2026). Land only: before 1886 the base is never today's political map.</p>
+    <p><b>Battles.</b> Wikidata (CC0), with each value's item and property: the battles the Master Index holds with a date in 1400–1600, their dates at the precision and in the calendar Wikidata records (never converted), their points as Wikidata gives them, and what supports each value ("Wikipedia-sourced, unverified" where a value was only imported from a Wikipedia; "no reference" where nothing supports it).</p>
+    <p><b>The map.</b> Map drawn with MapLibre GL JS 5.24.0 (BSD 3-Clause, © MapLibre contributors; "Redistribution and use in source and binary forms, with or without modification, are permitted", <a href="https://github.com/maplibre/maplibre-gl-js/blob/v5.24.0/LICENSE.txt" target="_blank" rel="noreferrer">its licence</a>, read 17 November 2026), loaded from cdn.jsdelivr.net at that exact version with its Subresource Integrity hash, so a changed file is refused. Without it, or without WebGL, the page says so and lists what the map would show.</p>
+    <p><b>Method.</b> <span id="method-text">The legend's ⓘ holds each layer's method note.</span> The click's rules (which years, which frame, which step, which places) are set out in <a href="../omni/README.md#how-a-click-sets-the-view" target="_blank" rel="noreferrer">omni/README.md, "How a click sets the view"</a>: the years are the passage's only where its periods record has been checked; otherwise they are the dates of what was named, widened by 10%, and the frame is the start of the book's era. A place whose dates do not hold the frame is left out, never drawn as a present-day state, and one VM cannot outline is named with the reason.</p>
+  </footer>
+</div>
+</body>
+</html>

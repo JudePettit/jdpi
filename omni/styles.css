@@ -1,0 +1,107 @@
+/* Digital Science · Omni-Map. Tokens only (design/prp.css), so light and dark follow by themselves; the map's own
+   colours are read from the same tokens by omni/app.js. Desktop: the map and its slider beside the lists; under
+   1000 px one column, the slider below the map; under 600 px (a phone) the legend folds to one line, opened on tap
+   (design 4.2). In the reader's Map tab (host=neo) the page is one compact column. */
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.om { max-width: 1480px; margin: 0 auto; padding: 18px 24px 32px; box-sizing: border-box; }
+.om .front { margin-bottom: 14px; }
+.om-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.om-stage { min-width: 0; }
+.om-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.om-view { flex: 1 1 auto; margin: 0; font: 600 16px/1.3 var(--prp-font-ui); color: var(--prp-text); }
+.om-frame { color: var(--prp-text-2); font-weight: 500; }
+.om-why { flex-basis: 100%; margin: 0; font: 12.5px/1.45 var(--prp-font-ui); color: var(--prp-text-2); }
+.om-why[hidden] { display: none; }
+.om-year { margin: 0 0 4px; font: 13px/1.4 var(--prp-font-ui); color: var(--prp-text-2); }
+.om-year b { color: var(--prp-text); }
+.om-tools { display: flex; gap: 6px; }
+.om-map { position: relative; width: 100%; height: 62vh; min-height: 380px; border: 1px solid var(--prp-line); border-radius: var(--prp-radius);
+  background: var(--prp-map-water); overflow: hidden; }
+.om-map[hidden] { display: none; }
+.om-msg { margin: 0 0 10px; padding: 14px 16px; border: 1px solid var(--prp-line-strong); border-radius: var(--prp-radius); background: var(--prp-surface-2);
+  color: var(--prp-text); font: 500 14px/1.5 var(--prp-font-ui); }
+.om-note { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--prp-warn); background: var(--prp-surface); color: var(--prp-text); font: 13px/1.5 var(--prp-font-ui); }
+.om-time { margin-top: 10px; }
+
+.om-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.om-side .prp-panel-body { padding: 10px 14px; font: 13px/1.5 var(--prp-font-ui); color: var(--prp-text); }
+.om-side .prp-panel-body > p { margin: 0 0 6px; }
+.om-list { list-style: none; margin: 0; padding: 0; }
+.om-list > li { padding: 7px 0; border-top: 1px solid var(--prp-line-soft); }
+.om-list > li:first-child { border-top: 0; }
+.om-list p { margin: 0 0 2px; }
+.om-focus li { display: flex; flex-wrap: wrap; gap: 2px 8px; }
+.om-focus li span { color: var(--prp-text-2); flex-basis: 100%; }
+.om-q { color: var(--prp-muted); font: 12px var(--prp-font-mono); }
+.om-held { font-weight: 600; }
+.om-notes { margin: 8px 0 0; padding-left: 18px; color: var(--prp-text-2); }
+.om-b-name a { font-weight: 600; }
+.om-b-date { color: var(--prp-text); }
+.om-src { color: var(--prp-text-2); font-size: 12px; }
+.om-b-state { color: var(--prp-text-2); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.om-details summary { cursor: pointer; font-weight: 600; padding: 2px 0; }
+.om-outlines { max-height: 340px; overflow: auto; margin-top: 6px; }
+.om-row { display: flex; width: 100%; justify-content: space-between; gap: 10px; padding: 3px 4px; border: 0; background: none; color: var(--prp-text);
+  font: 13px/1.4 var(--prp-font-ui); text-align: left; border-radius: var(--prp-radius-sm); }
+button.om-row { cursor: pointer; }
+button.om-row:hover { background: var(--prp-surface-2); }
+.om-row span { color: var(--prp-text-2); white-space: nowrap; }
+.om-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.om-open { cursor: pointer; }
+#open-file:focus-visible + .om-open, .om-open:focus-within { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.om-apa, .om-live, .om-saved, .om-pins { font-size: 12.5px; color: var(--prp-text-2); overflow-wrap: anywhere; }
+.om-apa:empty, .om-saved:empty { display: none; }
+.om-pins { padding: 6px 10px; border-left: 3px solid var(--prp-warn); }
+
+.om-legend .prp-panel-body { display: flex; flex-direction: column; gap: 10px; }
+/* Folded, the body goes (its display: flex would otherwise keep it on screen) and the one-line summary stands for it. */
+.om-legend .prp-panel-body[hidden], .om-lg-sum[hidden] { display: none; }
+.om-lg-sum { margin: 0; padding: 8px 14px; font: 12.5px/1.45 var(--prp-font-ui); color: var(--prp-text-2); }
+.om-key { list-style: none; margin: 0; padding: 0; color: var(--prp-text); }
+.om-key li { display: flex; align-items: baseline; gap: 8px; padding: 1px 0; }
+.om-key .om-swatch { flex: none; }
+.om-lg-title { display: flex; align-items: center; gap: 8px; font-weight: 600; margin: 0 0 2px; }
+.om-lg-lines { margin: 0; padding-left: 18px; color: var(--prp-text); }
+.om-lg-credit, .om-lg-map { margin: 2px 0 0; color: var(--prp-text-2); font-size: 12px; }
+.om-method summary { cursor: pointer; color: var(--prp-link); font-size: 12px; }
+.om-method p { margin: 4px 0 0; color: var(--prp-text-2); font-size: 12px; }
+.om-swatch { display: inline-block; width: 14px; height: 10px; border-radius: 2px; border: 1px solid var(--prp-map-border); }
+.om-swatch.borders { background: var(--prp-ds-soft); border-color: var(--prp-ds); }
+.om-swatch.battles { width: 10px; border-radius: 50%; background: var(--prp-bad); border-color: var(--prp-map-halo); }
+.om-swatch.base { background: var(--prp-map-land); }
+.om-swatch.focus { background: var(--prp-ds); border-color: var(--prp-map-border); }
+.om-swatch.relation { background: none; border: 0; border-top: 2px dashed var(--prp-ds); border-radius: 0; height: 0; }
+.om-swatch.point { width: 10px; border-radius: 50%; background: var(--prp-ds); border-color: var(--prp-map-halo); }
+
+/* The labels: HTML markers over the canvas, as the source writes each name. */
+.om-label { font: 600 11px/1.1 var(--prp-font-ui); color: var(--prp-map-label); pointer-events: none; white-space: nowrap;
+  text-shadow: 0 0 2px var(--prp-map-halo), 0 0 3px var(--prp-map-halo), 0 0 4px var(--prp-map-halo); }
+.om-label.strong { font-size: 12.5px; color: var(--prp-text); }
+
+/* No map (no WebGL, or no library): the message, the slider, then the lists, in one column. */
+.om-nomap .om-layout { grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 999px) {
+  .om-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 599px) {
+  .om { padding: 12px 16px 24px; }
+  .om-map { height: 52vh; min-height: 280px; }
+  .om .prp-dek { font-size: 14px; }
+}
+/* In the reader's Map tab: one column, the front matter left to the reader. */
+.om-host-neo .om { padding: 10px 12px 20px; }
+.om-host-neo .om .prp-title, .om-host-neo .om .prp-dek { display: none; }
+.om-host-neo .om-layout { grid-template-columns: minmax(0, 1fr); }
+.om-host-neo .om-map { height: 46vh; min-height: 260px; }
+.om-host-neo .prp-sources { font-size: 12px; }
+/* In the reader's pane on a phone (a bottom sheet): the map first, from the top of the frame; the front matter and
+   the frame's reason go (the card under the frame says why), and the year stands beside the slider. */
+@media (max-width: 599px) {
+  .om-host-neo .om { padding: 6px 8px 16px; }
+  .om-host-neo .om .front, .om-host-neo .om-why { display: none; }
+  .om-host-neo .om-head { margin-bottom: 4px; flex-wrap: nowrap; }
+  .om-host-neo .om-view { font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .om-host-neo .om-map { height: 58vh; min-height: 240px; }
+}

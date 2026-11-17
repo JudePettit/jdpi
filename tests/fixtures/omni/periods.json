@@ -1,0 +1,14 @@
+{
+  "book": "the-prince",
+  "built": "2026-11-17T00:00:00Z",
+  "checkedBy": "fixture",
+  "about": "A test fixture for tests/vm-core.test.mjs only (design 2.1's test: a record of 1499..1500 for c03-p03). It is not a periods file of the book: S1 commits none, and bibliotheca/data/periods/ is S4's. The paragraph states no year: 1499..1500 is inferred from the events it names (Louis XII takes and loses Milan, 1499 to 1500); its \"second time\" reaches the losses of 1512 to 1513.",
+  "paragraphs": {
+    "c03-p03": {
+      "places": ["Q70972", "Q153529"],
+      "periods": [{ "from": 1499, "to": 1500, "p": 9, "basis": "inferred", "orig": "1494 to 1500 (the translator's note c03-n04)" }],
+      "basis": "inferred",
+      "checkedBy": "fixture"
+    }
+  }
+}

@@ -1,0 +1,2479 @@
+{
+ "format": "vm-qids/1",
+ "version": "cliopatria@v0.2.1",
+ "built": "2026-11-17T05:24:13Z",
+ "wikidata": {
+  "read": "2026-11-17T05:24:16Z",
+  "ids": 267
+ },
+ "entries": {
+  "Q34": [
+   {
+    "name": "Kingdom of Sweden",
+    "from": 1375,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Sweden",
+    "from": 1502,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Sweden",
+    "from": 1526,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1152": [
+   {
+    "name": "County of Auvergne",
+    "from": 1385,
+    "to": 1406,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "County of Auvergne",
+    "from": 1440,
+    "to": 1501,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2288": [
+   {
+    "name": "Tver",
+    "from": 1395,
+    "to": 1486,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q3037": [
+   {
+    "name": "Kathmandu",
+    "from": 1202,
+    "to": 1743,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4712": [
+   {
+    "name": "Duchy of Burgundy",
+    "from": 1395,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4948": [
+   {
+    "name": "Republic of Venice",
+    "from": 1395,
+    "to": 1644,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q8959": [
+   {
+    "name": "Northern Yuan",
+    "from": 1375,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q9903": [
+   {
+    "name": "Ming Dynasty",
+    "from": 1385,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q11709": [
+   {
+    "name": "Lodi Dynasty",
+    "from": 1453,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q12544": [
+   {
+    "name": "Byzantine Empire",
+    "from": 1395,
+    "to": 1401,
+    "basis": "name"
+   },
+   {
+    "name": "Byzantine Empire",
+    "from": 1407,
+    "to": 1467,
+    "basis": "name"
+   }
+  ],
+  "Q12548": [
+   {
+    "name": "(Holy Roman Empire)",
+    "from": 1395,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Holy Roman Empire Minor States",
+    "from": 1395,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q12560": [
+   {
+    "name": "Ottoman Empire",
+    "from": 1395,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q13695": [
+   {
+    "name": "Tenochtitlan",
+    "from": 1326,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q27260": [
+   {
+    "name": "Sind-Samma Dynasty",
+    "from": 1352,
+    "to": 1525,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q27842": [
+   {
+    "name": "Kingdom of Singapura",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q28025": [
+   {
+    "name": "Ryukyu Kingdom",
+    "from": 1429,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q28179": [
+   {
+    "name": "Joseon",
+    "from": 1395,
+    "to": 1621,
+    "basis": "name"
+   }
+  ],
+  "Q28567": [
+   {
+    "name": "Later Mayan City-States",
+    "from": 1260,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q28573": [
+   {
+    "name": "Inca Empire",
+    "from": 1440,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q33296": [
+   {
+    "name": "Mughal Empire",
+    "from": 1529,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q33698": [
+   {
+    "name": "Livonian Conference",
+    "from": 1422,
+    "to": 1563,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q42585": [
+   {
+    "name": "(Kingdom of Bohemia)",
+    "from": 1385,
+    "to": 1452,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Bohemia",
+    "from": 1385,
+    "to": 1452,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "(Kingdom of Bohemia)",
+    "from": 1459,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Bohemia",
+    "from": 1459,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q43292": [
+   {
+    "name": "Sultanate of Bone",
+    "from": 1512,
+    "to": 1669,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q45670": [
+   {
+    "name": "Kingdom of Portugal",
+    "from": 1250,
+    "to": 1581,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q46652": [
+   {
+    "name": "Sultanate of Malacca",
+    "from": 1459,
+    "to": 1639,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q47261": [
+   {
+    "name": "Duchy of Bavaria",
+    "from": 1385,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q48189": [
+   {
+    "name": "Teutonic Order",
+    "from": 1352,
+    "to": 1525,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q49322": [
+   {
+    "name": "Demak Sultanate",
+    "from": 1475,
+    "to": 1551,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q49326": [
+   {
+    "name": "Majapahit",
+    "from": 1363,
+    "to": 1518,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q49683": [
+   {
+    "name": "Grand Duchy of Lithuania",
+    "from": 1395,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q55521": [
+   {
+    "name": "Chüzan",
+    "from": 1314,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q55522": [
+   {
+    "name": "Nanzan",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q55523": [
+   {
+    "name": "Hokuzan",
+    "from": 1314,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q58389": [
+   {
+    "name": "House of Bourbon",
+    "from": 1395,
+    "to": 1594,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q62623": [
+   {
+    "name": "(Kalmar Union)",
+    "from": 1402,
+    "to": 1525,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kalmar Union",
+    "from": 1402,
+    "to": 1525,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q62651": [
+   {
+    "name": "Denmark-Norway",
+    "from": 1526,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q65968": [
+   {
+    "name": "House of Habsburg",
+    "from": 1395,
+    "to": 1515,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q68518": [
+   {
+    "name": "Haudenosaunee",
+    "from": 1450,
+    "to": 1639,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q70972": [
+   {
+    "name": "Kingdom of France",
+    "from": 1395,
+    "to": 1601,
+    "basis": "name"
+   }
+  ],
+  "Q71747": [
+   {
+    "name": "Duchy of Brittany",
+    "from": 1363,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Duchy of Brittany",
+    "from": 1440,
+    "to": 1491,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q79965": [
+   {
+    "name": "Golden Horde",
+    "from": 1395,
+    "to": 1501,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q80702": [
+   {
+    "name": "(Spanish Empire)",
+    "from": 1516,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Spanish Empire",
+    "from": 1516,
+    "to": 1518,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Spanish Empire",
+    "from": 1521,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q83821": [
+   {
+    "name": "Bijapur Sultanate",
+    "from": 1492,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q122293": [
+   {
+    "name": "House of Luxembourg",
+    "from": 1395,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q148499": [
+   {
+    "name": "Margraviate of Brandenburg",
+    "from": 1395,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Electorate of Brandenburg",
+    "from": 1422,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q148540": [
+   {
+    "name": "Republic of Florence",
+    "from": 1279,
+    "to": 1708,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q149846": [
+   {
+    "name": "House of Tocco",
+    "from": 1375,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q151536": [
+   {
+    "name": "Novgorod Republic",
+    "from": 1375,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q153091": [
+   {
+    "name": "Duchy of Prussia",
+    "from": 1526,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q153529": [
+   {
+    "name": "Duchy of Milan",
+    "from": 1402,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Duchy of Milan",
+    "from": 1453,
+    "to": 1501,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Duchy of Milan",
+    "from": 1526,
+    "to": 1539,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q154667": [
+   {
+    "name": "Kingdom of Georgia",
+    "from": 1395,
+    "to": 1462,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q155019": [
+   {
+    "name": "Duchy of Lorraine",
+    "from": 1431,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Duchy of Lorraine",
+    "from": 1453,
+    "to": 1474,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Duchy of Lorraine",
+    "from": 1482,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q155594": [
+   {
+    "name": "House of Oldenburg",
+    "from": 1450,
+    "to": 1458,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q156199": [
+   {
+    "name": "Electorate of Saxony",
+    "from": 1385,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Electorate of Saxony",
+    "from": 1487,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q157727": [
+   {
+    "name": "Ifat Sultanate",
+    "from": 1333,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q160440": [
+   {
+    "name": "Crimean Khanate",
+    "from": 1450,
+    "to": 1647,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q161205": [
+   {
+    "name": "Safavid Dynasty",
+    "from": 1502,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q167134": [
+   {
+    "name": "Jaunpur Sultanate",
+    "from": 1395,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q167639": [
+   {
+    "name": "Vijayanagara Empire",
+    "from": 1375,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q168352": [
+   {
+    "name": "House of Ascania",
+    "from": 1363,
+    "to": 1486,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q170072": [
+   {
+    "name": "(Dutch Republic)",
+    "from": 1582,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Dutch Republic",
+    "from": 1582,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q170174": [
+   {
+    "name": "Papal States",
+    "from": 1314,
+    "to": 1652,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q170770": [
+   {
+    "name": "Grand Principality of Moscow",
+    "from": 1395,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q171150": [
+   {
+    "name": "Kingdom of Hungary",
+    "from": 1395,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Hungary",
+    "from": 1459,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q171393": [
+   {
+    "name": "Principality of Wallachia",
+    "from": 1395,
+    "to": 1599,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q172107": [
+   {
+    "name": "Polish-Lithuanian Commonwealth",
+    "from": 1572,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q173065": [
+   {
+    "name": "Kingdom of Naples",
+    "from": 1285,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Naples",
+    "from": 1459,
+    "to": 1501,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q174306": [
+   {
+    "name": "Republic of Genoa",
+    "from": 1395,
+    "to": 1631,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q178913": [
+   {
+    "name": "Empire of Trebizond",
+    "from": 1395,
+    "to": 1462,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q179876": [
+   {
+    "name": "(Kingdom of England)",
+    "from": 1395,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of England",
+    "from": 1395,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q184536": [
+   {
+    "name": "Mali Empire",
+    "from": 1241,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q186096": [
+   {
+    "name": "Tsardom of Russia",
+    "from": 1547,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q186537": [
+   {
+    "name": "Khanate of Kazan",
+    "from": 1440,
+    "to": 1551,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q187684": [
+   {
+    "name": "Despotate of Epirus",
+    "from": 1395,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q190513": [
+   {
+    "name": "Khanate of Sibir",
+    "from": 1429,
+    "to": 1587,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q194355": [
+   {
+    "name": "(Polish-Lithuania Kingdom)",
+    "from": 1395,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "House of Jagiellon",
+    "from": 1450,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q195972": [
+   {
+    "name": "Kingdom of Kartli",
+    "from": 1463,
+    "to": 1467,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q200229": [
+   {
+    "name": "House of Savoy",
+    "from": 1564,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q200262": [
+   {
+    "name": "Kingdom of Navarre",
+    "from": 1375,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q200464": [
+   {
+    "name": "(Portuguese Empire)",
+    "from": 1502,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Portuguese Empire",
+    "from": 1502,
+    "to": 1581,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Portuguese Colonies",
+    "from": 1564,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q201705": [
+   {
+    "name": "Khmer Empire",
+    "from": 1375,
+    "to": 1652,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q202687": [
+   {
+    "name": "Songhai Empire",
+    "from": 1463,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q204023": [
+   {
+    "name": "Warring States Japan",
+    "from": 1468,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q204920": [
+   {
+    "name": "Crown of Aragon",
+    "from": 1395,
+    "to": 1515,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q207521": [
+   {
+    "name": "Ethiopian Empire",
+    "from": 1333,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q208169": [
+   {
+    "name": "Republic of Ragusa",
+    "from": 1385,
+    "to": 1771,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q210163": [
+   {
+    "name": "Astrakhan Khanate",
+    "from": 1468,
+    "to": 1555,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q213638": [
+   {
+    "name": "Kingdom of Cyprus",
+    "from": 1363,
+    "to": 1491,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q216165": [
+   {
+    "name": "Union of Utrecht",
+    "from": 1579,
+    "to": 1581,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q216786": [
+   {
+    "name": "Chámpa",
+    "from": 1363,
+    "to": 1647,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q217196": [
+   {
+    "name": "Crown of Castile",
+    "from": 1395,
+    "to": 1515,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q229411": [
+   {
+    "name": "(Delhi Sultanate)",
+    "from": 1395,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q230791": [
+   {
+    "name": "Kingdom of Scotland",
+    "from": 1314,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q238445": [
+   {
+    "name": "Emirate of Granada",
+    "from": 1375,
+    "to": 1491,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q248572": [
+   {
+    "name": "Sultanate of Maguindanao",
+    "from": 1521,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q266923": [
+   {
+    "name": "Kingdom of Mysore",
+    "from": 1572,
+    "to": 1672,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q282428": [
+   {
+    "name": "Mamluk Sultanate",
+    "from": 1385,
+    "to": 1518,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q287996": [
+   {
+    "name": "Blambangan Kingdom",
+    "from": 1519,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q307697": [
+   {
+    "name": "Zayyanid dynasty",
+    "from": 1363,
+    "to": 1555,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q311341": [
+   {
+    "name": "Bahrani Dynasty",
+    "from": 1260,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q317078": [
+   {
+    "name": "Pskov Republic",
+    "from": 1285,
+    "to": 1511,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q324470": [
+   {
+    "name": "Qara Qoyunlu",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Qara Qoyunlu",
+    "from": 1407,
+    "to": 1467,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q332005": [
+   {
+    "name": "Principality of Achaea",
+    "from": 1395,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q373650": [
+   {
+    "name": "Sur Empire",
+    "from": 1540,
+    "to": 1594,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q373988": [
+   {
+    "name": "Beylik of Teke",
+    "from": 1375,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q374521": [
+   {
+    "name": "Bahmani Sultanate",
+    "from": 1375,
+    "to": 1491,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q377350": [
+   {
+    "name": "Iberian Union",
+    "from": 1582,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q400998": [
+   {
+    "name": "Ahmadnagar Sultanate",
+    "from": 1492,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q402145": [
+   {
+    "name": "Mataram Sultanate",
+    "from": 1588,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q422065": [
+   {
+    "name": "Sultanate of Sulu",
+    "from": 1459,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Sultanate of Sulu",
+    "from": 1529,
+    "to": 1672,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q449639": [
+   {
+    "name": "Alodia",
+    "from": 602,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q465960": [
+   {
+    "name": "Jesuit Reducciones",
+    "from": 1595,
+    "to": 1628,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q484195": [
+   {
+    "name": "Timurid Empire",
+    "from": 1395,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q487829": [
+   {
+    "name": "Chagatai Khanate",
+    "from": 1395,
+    "to": 1462,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q491106": [
+   {
+    "name": "Khanate of Khiva",
+    "from": 1512,
+    "to": 1717,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q521263": [
+   {
+    "name": "Tibet",
+    "from": 1385,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q555994": [
+   {
+    "name": "Aq Qoyunlu",
+    "from": 1407,
+    "to": 1511,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q577668": [
+   {
+    "name": "Khanate of Bukhara",
+    "from": 1516,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q580447": [
+   {
+    "name": "Duchy of Styria",
+    "from": 1272,
+    "to": 1501,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q581741": [
+   {
+    "name": "Chimu Empire",
+    "from": 1375,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q582861": [
+   {
+    "name": "Marinid Sultanate",
+    "from": 1363,
+    "to": 1467,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q584435": [
+   {
+    "name": "Patani Kingdom",
+    "from": 1572,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q606377": [
+   {
+    "name": "Itza Mayans",
+    "from": 1547,
+    "to": 1669,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q625380": [
+   {
+    "name": "Eastern Hungarian Kingdom",
+    "from": 1529,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q631210": [
+   {
+    "name": "Nogai Horde",
+    "from": 1450,
+    "to": 1563,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Small Horde",
+    "from": 1564,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q638064": [
+   {
+    "name": "Shirvan",
+    "from": 1415,
+    "to": 1539,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q644979": [
+   {
+    "name": "Blue Horde",
+    "from": 1375,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q655621": [
+   {
+    "name": "Principality of Transylvania",
+    "from": 1572,
+    "to": 1599,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q669317": [
+   {
+    "name": "Bidar Sultanate",
+    "from": 1492,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q676745": [
+   {
+    "name": "County of Armagnac",
+    "from": 1385,
+    "to": 1496,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q717112": [
+   {
+    "name": "Beylik of Aydin",
+    "from": 1326,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q732738": [
+   {
+    "name": "County of Maine",
+    "from": 1450,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q734867": [
+   {
+    "name": "Sultanate of Banten",
+    "from": 1529,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q746443": [
+   {
+    "name": "Ambrosian Republic",
+    "from": 1450,
+    "to": 1452,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q752662": [
+   {
+    "name": "Hafsid Dynasty",
+    "from": 1363,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q756617": [
+   {
+    "name": "(Kingdom of Denmark)",
+    "from": 1395,
+    "to": 1406,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Kingdom of Denmark",
+    "from": 1395,
+    "to": 1406,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q796583": [
+   {
+    "name": "Kingdom of Kongo",
+    "from": 1440,
+    "to": 1661,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q818666": [
+   {
+    "name": "Berar Sultanate",
+    "from": 1492,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q829356": [
+   {
+    "name": "Makuria",
+    "from": 1294,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Makuria Kingdom",
+    "from": 1415,
+    "to": 1518,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q836169": [
+   {
+    "name": "Qasim Khanate",
+    "from": 1453,
+    "to": 1551,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q836894": [
+   {
+    "name": "Patriarchate of Aquileia",
+    "from": 1385,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q840601": [
+   {
+    "name": "East Turkestan",
+    "from": 1463,
+    "to": 1474,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q841364": [
+   {
+    "name": "Ayutthaya Kingdom",
+    "from": 1395,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Ayutthaya Kingdom",
+    "from": 1588,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q853477": [
+   {
+    "name": "Lan Xang",
+    "from": 1385,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Lan Xang",
+    "from": 1588,
+    "to": 1647,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q856361": [
+   {
+    "name": "Shaybanids",
+    "from": 1497,
+    "to": 1511,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q863279": [
+   {
+    "name": "Sukhothai Kingdom",
+    "from": 1375,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q866716": [
+   {
+    "name": "Jalayirid Sultanate",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q874954": [
+   {
+    "name": "Principality of Theodoro",
+    "from": 1375,
+    "to": 1474,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q878319": [
+   {
+    "name": "Serbian Despots",
+    "from": 1395,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q887803": [
+   {
+    "name": "Sultanate of Brunei",
+    "from": 1363,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q927154": [
+   {
+    "name": "Despotate of Vidin",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q970799": [
+   {
+    "name": "Wattasid dynasty",
+    "from": 1468,
+    "to": 1555,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1057292": [
+   {
+    "name": "Don Cossacks",
+    "from": 1552,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1059707": [
+   {
+    "name": "Lan Na Kingdom",
+    "from": 1363,
+    "to": 1563,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Lan Na",
+    "from": 1600,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1061057": [
+   {
+    "name": "Sultanate of Aceh",
+    "from": 1516,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1069959": [
+   {
+    "name": "Kingdom of Imereti",
+    "from": 1468,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1122980": [
+   {
+    "name": "Comtat Venaissin",
+    "from": 1385,
+    "to": 1672,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1124402": [
+   {
+    "name": "Tughlaq Dynasty",
+    "from": 1395,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1136188": [
+   {
+    "name": "Saadi Sultanate",
+    "from": 1556,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1139762": [
+   {
+    "name": "Bornu Empire",
+    "from": 1385,
+    "to": 1635,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1148042": [
+   {
+    "name": "Golconda Sultanate",
+    "from": 1519,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1150344": [
+   {
+    "name": "Sultanate of Johor",
+    "from": 1529,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1154406": [
+   {
+    "name": "Ashikaga Shogunate",
+    "from": 1344,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1178043": [
+   {
+    "name": "Texcoco",
+    "from": 1326,
+    "to": 1428,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1191125": [
+   {
+    "name": "Moghulistan",
+    "from": 1463,
+    "to": 1518,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Eastern Chagatai Khanate",
+    "from": 1492,
+    "to": 1511,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Eastern Moghulistan",
+    "from": 1519,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Western Moghulistan",
+    "from": 1519,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1209822": [
+   {
+    "name": "Kingdom of Kakheti",
+    "from": 1468,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1232887": [
+   {
+    "name": "County of Savoy",
+    "from": 1395,
+    "to": 1539,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1241847": [
+   {
+    "name": "Giudicato of Arborea",
+    "from": 1375,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1264808": [
+   {
+    "name": "Beylik of Dulkadir",
+    "from": 1385,
+    "to": 1515,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1311219": [
+   {
+    "name": "Jaffna kingdom",
+    "from": 1352,
+    "to": 1594,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1317579": [
+   {
+    "name": "Sultanate of Kedah",
+    "from": 1375,
+    "to": 1690,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1317991": [
+   {
+    "name": "Đại Việt",
+    "from": 1529,
+    "to": 1652,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1324889": [
+   {
+    "name": "Germiyanids",
+    "from": 1375,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1331421": [
+   {
+    "name": "Sayyid Dynasty",
+    "from": 1415,
+    "to": 1452,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1353951": [
+   {
+    "name": "France Antarctique",
+    "from": 1556,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1365493": [
+   {
+    "name": "Republic of Pisa",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1400572": [
+   {
+    "name": "Beylik of Menteshe",
+    "from": 1305,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1408641": [
+   {
+    "name": "Sultanate of Gowa",
+    "from": 1512,
+    "to": 1661,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1433867": [
+   {
+    "name": "Kazakh Khanate",
+    "from": 1468,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1469100": [
+   {
+    "name": "Beylik of Karaman",
+    "from": 1385,
+    "to": 1467,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1469742": [
+   {
+    "name": "Sunda Kingdom",
+    "from": 1294,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1475713": [
+   {
+    "name": "Funj Sultanate",
+    "from": 1507,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1481436": [
+   {
+    "name": "County of Foix",
+    "from": 1385,
+    "to": 1555,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1483495": [
+   {
+    "name": "Principality of Smolensk",
+    "from": 1375,
+    "to": 1406,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1514510": [
+   {
+    "name": "County of Urgell",
+    "from": 1279,
+    "to": 1639,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1530838": [
+   {
+    "name": "Nayaks of Madurai",
+    "from": 1529,
+    "to": 1712,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1541699": [
+   {
+    "name": "County of Ampuria",
+    "from": 1402,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1572529": [
+   {
+    "name": "Hanthawaddy Kingdom",
+    "from": 1375,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1588434": [
+   {
+    "name": "Nayaks of Thanjavur",
+    "from": 1534,
+    "to": 1672,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1642472": [
+   {
+    "name": "Tondo",
+    "from": 1375,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1649871": [
+   {
+    "name": "Kingdom of Poland",
+    "from": 1395,
+    "to": 1449,
+    "basis": "name"
+   }
+  ],
+  "Q1660566": [
+   {
+    "name": "Sultanate of Banjar",
+    "from": 1526,
+    "to": 1858,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1709007": [
+   {
+    "name": "Portuguese Ceylon",
+    "from": 1507,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1716871": [
+   {
+    "name": "House of Valois-Anjou",
+    "from": 1395,
+    "to": 1486,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1760473": [
+   {
+    "name": "Principality of Abkhazia",
+    "from": 1468,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1794352": [
+   {
+    "name": "Electorate of Trier",
+    "from": 1363,
+    "to": 1611,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1884830": [
+   {
+    "name": "Mahdids",
+    "from": 1260,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1947408": [
+   {
+    "name": "County of Périgord",
+    "from": 1385,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "County of Périgord",
+    "from": 1440,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q1968654": [
+   {
+    "name": "Beylik of Saruhan",
+    "from": 1344,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2029317": [
+   {
+    "name": "Samtskhe-Saatabago",
+    "from": 1468,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2070440": [
+   {
+    "name": "County of Nevers",
+    "from": 1407,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2077648": [
+   {
+    "name": "Sultanate of Cirebon",
+    "from": 1482,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2096678": [
+   {
+    "name": "Beylik of Isfendiyar",
+    "from": 1385,
+    "to": 1462,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2132267": [
+   {
+    "name": "Rasulid Dynasty",
+    "from": 1236,
+    "to": 1458,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2195101": [
+   {
+    "name": "Principality of Guria",
+    "from": 1468,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2261321": [
+   {
+    "name": "Ramadanid Emirate",
+    "from": 1385,
+    "to": 1515,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2267508": [
+   {
+    "name": "Trịnh lords",
+    "from": 1572,
+    "to": 1644,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2281221": [
+   {
+    "name": "Principality of Orange",
+    "from": 1272,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2301908": [
+   {
+    "name": "Nguyễn lords",
+    "from": 1572,
+    "to": 1652,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2331954": [
+   {
+    "name": "Despotate of Arta",
+    "from": 1395,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2365048": [
+   {
+    "name": "Adal Sultanate",
+    "from": 1415,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Sultanate of Harar",
+    "from": 1547,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2500952": [
+   {
+    "name": "Ava Kingdom",
+    "from": 1375,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2560470": [
+   {
+    "name": "Nalyvaiko Uprising",
+    "from": 1595,
+    "to": 1599,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2608489": [
+   {
+    "name": "Aztec Triple Alliance",
+    "from": 1429,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2649311": [
+   {
+    "name": "Sultanate of Perak",
+    "from": 1529,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2658979": [
+   {
+    "name": "Albanian Principalities",
+    "from": 1395,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2670751": [
+   {
+    "name": "Margraviate of Moravia",
+    "from": 1385,
+    "to": 1414,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2719360": [
+   {
+    "name": "Duchy of Luxembourg",
+    "from": 1429,
+    "to": 1449,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2907860": [
+   {
+    "name": "Principality of Mingrelia",
+    "from": 1468,
+    "to": 1578,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2980623": [
+   {
+    "name": "Kingdom of Bosnia",
+    "from": 1395,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q2991012": [
+   {
+    "name": "Earldom of Desmond",
+    "from": 1395,
+    "to": 1458,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q3284315": [
+   {
+    "name": "Samudera Pasai Sultanate",
+    "from": 1363,
+    "to": 1520,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q3332217": [
+   {
+    "name": "Gorkha Kingdom",
+    "from": 1588,
+    "to": 1717,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q3402317": [
+   {
+    "name": "Tümed",
+    "from": 1547,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q3503555": [
+   {
+    "name": "Sultanate of Palembang",
+    "from": 1459,
+    "to": 1669,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4083686": [
+   {
+    "name": "Sultanate of Bengal",
+    "from": 1395,
+    "to": 1533,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4332415": [
+   {
+    "name": "Four Oirats",
+    "from": 1402,
+    "to": 1474,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4401026": [
+   {
+    "name": "Namayan",
+    "from": 1375,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4401071": [
+   {
+    "name": "Rajahnate of Cebu",
+    "from": 1497,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4401247": [
+   {
+    "name": "Maynila",
+    "from": 1521,
+    "to": 1599,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q4765854": [
+   {
+    "name": "Shan States",
+    "from": 1385,
+    "to": 1563,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q5519387": [
+   {
+    "name": "Galuh Kingdom",
+    "from": 1475,
+    "to": 1481,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q5949588": [
+   {
+    "name": "Hussain Shahi Dynasty",
+    "from": 1534,
+    "to": 1539,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q6000379": [
+   {
+    "name": "Hashemite Arab Federation",
+    "from": 1415,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q7245121": [
+   {
+    "name": "Principality of Valona and Kanina",
+    "from": 1395,
+    "to": 1421,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q7703611": [
+   {
+    "name": "Duchy of Aquitaine",
+    "from": 1375,
+    "to": 1439,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q10791211": [
+   {
+    "name": "Kingdom of Mrauk U",
+    "from": 1429,
+    "to": 1669,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q10800789": [
+   {
+    "name": "Lê Dynasty",
+    "from": 1429,
+    "to": 1528,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Lê Dynasty",
+    "from": 1534,
+    "to": 1571,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q10957559": [
+   {
+    "name": "Principality of Moldavia",
+    "from": 1385,
+    "to": 1601,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q12491027": [
+   {
+    "name": "Balinese Kingdom",
+    "from": 1519,
+    "to": 1608,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q13576027": [
+   {
+    "name": "Prome Kingdom",
+    "from": 1482,
+    "to": 1546,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q16879646": [
+   {
+    "name": "Portuguese Africa",
+    "from": 1507,
+    "to": 1581,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q19336869": [
+   {
+    "name": "County of Blôis",
+    "from": 1395,
+    "to": 1401,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q19927420": [
+   {
+    "name": "Mongol Khanate",
+    "from": 1468,
+    "to": 1625,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q23039102": [
+   {
+    "name": "First Toungoo Empire",
+    "from": 1502,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q28336424": [
+   {
+    "name": "Kapisa",
+    "from": 1475,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q66504140": [
+   {
+    "name": "(Habsburg Monarchy)",
+    "from": 1459,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Habsburg Monarchy",
+    "from": 1487,
+    "to": 1506,
+    "basis": "cliopatria-wikidata"
+   },
+   {
+    "name": "Habsburg Monarchy",
+    "from": 1516,
+    "to": 1618,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q106311455": [
+   {
+    "name": "Duchy of Saint Sava",
+    "from": 1453,
+    "to": 1474,
+    "basis": "cliopatria-wikidata"
+   }
+  ],
+  "Q123027565": [
+   {
+    "name": "Kashmiri Sultanate",
+    "from": 1375,
+    "to": 1587,
+    "basis": "cliopatria-wikidata"
+   }
+  ]
+ },
+ "rejected": [
+  {
+   "q": "Q1074947",
+   "name": "Kingdom of Pajana",
+   "wikidataLabel": "Lontara",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1601,
+    null
+   ]
+  },
+  {
+   "q": "Q10921634",
+   "name": "Khoshut Khanate",
+   "wikidataLabel": "Khoshut Khanate",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1650,
+    1724
+   ]
+  },
+  {
+   "q": "Q112039853",
+   "name": "Byzantine Empire",
+   "wikidataLabel": "Foreign relations of the Byzantine Empire",
+   "why": "Wikidata gives the item another name"
+  },
+  {
+   "q": "Q1406298",
+   "name": "Serbian Empire",
+   "wikidataLabel": "Serbian Empire",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1346,
+    1371
+   ]
+  },
+  {
+   "q": "Q202266",
+   "name": "Old Kingdom of Norway",
+   "wikidataLabel": "Margaret I of Denmark",
+   "why": "Wikidata gives the item another name"
+  },
+  {
+   "q": "Q205662",
+   "name": "Tokugawa Shogunate",
+   "wikidataLabel": "Tokugawa shogunate",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1603,
+    1867
+   ]
+  },
+  {
+   "q": "Q207162",
+   "name": "(Kingdom of France)",
+   "wikidataLabel": "Bourbon Restoration in France",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1815,
+    1830
+   ]
+  },
+  {
+   "q": "Q207162",
+   "name": "Kingdom of France",
+   "wikidataLabel": "Bourbon Restoration in France",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1815,
+    1830
+   ]
+  },
+  {
+   "q": "Q213763",
+   "name": "County of Béarn",
+   "wikidataLabel": "Béarn",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1620,
+    1790
+   ]
+  },
+  {
+   "q": "Q269109",
+   "name": "Ryazan",
+   "wikidataLabel": "Principality of Ryazan",
+   "why": "Wikidata gives the item another name"
+  },
+  {
+   "q": "Q28405",
+   "name": "Joseon",
+   "wikidataLabel": "Gojoseon",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    -2333,
+    -108
+   ]
+  },
+  {
+   "q": "Q29",
+   "name": "Kingdom of Spain",
+   "wikidataLabel": "Spain",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1715,
+    null
+   ]
+  },
+  {
+   "q": "Q373981",
+   "name": "Tahirid Sultanate",
+   "wikidataLabel": "Tahirid dynasty",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    821,
+    873
+   ]
+  },
+  {
+   "q": "Q39",
+   "name": "Swiss Confederation",
+   "wikidataLabel": "Switzerland",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1848,
+    null
+   ]
+  },
+  {
+   "q": "Q5582862",
+   "name": "Cuzco",
+   "wikidataLabel": "Cusco",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1534,
+    null
+   ]
+  },
+  {
+   "q": "Q577867",
+   "name": "(Kingdom of Poland)",
+   "wikidataLabel": "Kingdom of Poland",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1025,
+    1385
+   ]
+  },
+  {
+   "q": "Q577867",
+   "name": "Kingdom of Poland",
+   "wikidataLabel": "Kingdom of Poland",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1025,
+    1385
+   ]
+  },
+  {
+   "q": "Q605051",
+   "name": "County of Touraine",
+   "wikidataLabel": "Touraine",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1584,
+    1790
+   ]
+  },
+  {
+   "q": "Q703919",
+   "name": "Ngô Dynasty",
+   "wikidataLabel": "Ngô dynasty",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    939,
+    965
+   ]
+  },
+  {
+   "q": "Q751868",
+   "name": "County of Brabant",
+   "wikidataLabel": "Landgraviate of Brabant",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1085,
+    1183
+   ]
+  },
+  {
+   "q": "Q79861",
+   "name": "Michoacán",
+   "wikidataLabel": "Michoacán",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1823,
+    null
+   ]
+  },
+  {
+   "q": "Q83546",
+   "name": "Principality of Vladimir-Suzdal",
+   "wikidataLabel": "Grand Principality of Vladimir",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1125,
+    1389
+   ]
+  },
+  {
+   "q": "Q918153",
+   "name": "Ceylon",
+   "wikidataLabel": "British Ceylon",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1815,
+    1948
+   ]
+  },
+  {
+   "q": "Q9676",
+   "name": "Isle of Man",
+   "wikidataLabel": "Isle of Man",
+   "why": "Wikidata dates the item to other years",
+   "wikidataYears": [
+    1765,
+    null
+   ]
+  }
+ ]
+}

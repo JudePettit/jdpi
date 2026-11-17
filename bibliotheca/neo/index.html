@@ -97,6 +97,7 @@
             <button type="button" role="tab" id="tab-terms" aria-selected="false" aria-controls="panel-terms" tabindex="-1">On screen · <span class="n" id="terms-count">0</span></button>
             <button type="button" role="tab" id="tab-ency" aria-selected="true" aria-controls="panel-ency">Master Index</button>
             <button type="button" role="tab" id="tab-vm" aria-selected="false" aria-controls="panel-vm" tabindex="-1">In Vitruvian Manager</button>
+            <button type="button" role="tab" id="tab-map" aria-selected="false" aria-controls="panel-map" tabindex="-1">Map</button>
           </div>
           <div class="nc-pane-body">
             <!-- The terms on screen (BI-23): the terms in the text in view, in reading order, with their counts. -->
@@ -125,6 +126,13 @@
               </div>
               <p class="nc-pane-empty" id="vm-empty">Pick a screen to show it here, or open it in Vitruvian Manager.</p>
               <iframe id="vm-frame" name="prp-side" title="Vitruvian Manager" hidden referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <!-- The Omni-Map for the term in use (PRP-SCHOLAR-USP-DESIGN.md S1, contract 4): its places and years, with the
+                 borders as they stood; under it, the other views offered for the term and what is related to it. -->
+            <div id="panel-map" role="tabpanel" aria-labelledby="tab-map" hidden>
+              <p class="nc-pane-empty" id="map-empty">Choose a highlighted term in the text to see its places and years on the Omni-Map.</p>
+              <iframe id="map-frame" name="prp-side" title="Omni-Map" hidden referrerpolicy="strict-origin-when-cross-origin"></iframe>
+              <div class="nc-map-card" id="map-card" hidden></div>
             </div>
           </div>
           <div class="nc-subs" id="subs" aria-hidden="true" hidden><div class="nc-subs-box" id="subs-box"></div></div>

@@ -1,0 +1,32 @@
+{
+  "type": "Topology",
+  "transform": { "scale": [0.1, 0.1], "translate": [5, 40] },
+  "arcs": [
+    [[10, 0], [0, 10]],
+    [[10, 10], [-10, 0], [0, -10], [10, 0]],
+    [[10, 0], [10, 0], [0, 10], [-10, 0]],
+    [[30, 0], [10, 0], [0, 10], [-10, 0], [0, -10]],
+    [[33, 3], [0, 4], [4, 0], [0, -4], [-4, 0]],
+    [[50, 0], [2, 0], [0, 2], [-2, 0], [0, -2]]
+  ],
+  "objects": {
+    "borders": {
+      "type": "GeometryCollection",
+      "geometries": [
+        { "type": "Polygon", "arcs": [[0, 1]],
+          "properties": { "id": "cl-0000000001", "n": "Fixture West", "f": 1450, "t": 1499, "k": "POLITY", "q": null, "a": 1000, "w": null, "b": [5, 40, 6, 41] } },
+        { "type": "Polygon", "arcs": [[2, -1]],
+          "properties": { "id": "cl-0000000002", "n": "Fixture East", "f": 1494, "t": 1520, "k": "POLITY", "q": null, "a": 1000, "w": null, "b": [6, 40, 7, 41] } },
+        { "type": "MultiPolygon", "arcs": [[[3], [4]], [[5]]],
+          "properties": { "id": "cl-0000000003", "n": "مثال", "f": 1400, "t": 1499, "k": "POLITY", "q": null, "a": 900, "w": null, "b": [8, 40, 10.2, 41] } },
+        { "type": "Polygon", "arcs": [[1, 2]],
+          "properties": { "id": "cl-0000000004", "n": "Fixture League", "f": 1480, "t": 1499, "k": "RELATION", "q": null, "a": 2000, "w": null, "b": [5, 40, 7, 41] } },
+        { "type": "Polygon", "arcs": [[1, 2]],
+          "properties": { "id": "cl-0000000005", "n": "Fixture Realm", "f": 1490, "t": 1499, "k": "POLITY", "q": null, "a": 2000, "w": null, "b": [5, 40, 7, 41] } },
+        { "type": null,
+          "properties": { "id": "cl-0000000006", "n": "Fixture Null", "f": 1500, "t": 1510, "k": "POLITY", "q": null, "a": 0, "w": null, "b": null } }
+      ]
+    }
+  },
+  "vm": { "format": "vm-borders/1", "source": "fixture", "version": "test-1", "from": 1400, "to": 1499 }
+}

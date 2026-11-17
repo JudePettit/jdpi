@@ -335,7 +335,7 @@ describe('each class of line, and Late', () => {
 
 describe('the count of modules and where hosting is said', () => {
   test('one count, saying Home is counted: the sidebar, the Dashboard and the Integration Hub use it', () => {
-    assert.deepEqual(countWords(registry), { modules: 10, submodules: 38, home: true, text: '10 modules, Home included · 38 submodules' });
+    assert.deepEqual(countWords(registry), { modules: 10, submodules: 39, home: true, text: '10 modules, Home included · 39 submodules' });
     assert.match(read('shell.js'), /fresh\.mod\.countWords\(state\.registry\)\.text/);
     assert.match(read('shell.js'), /modules\$\{home \? ', Home included' : ''\} · \$\{subs\} submodules/, 'the shell\'s fallback words it the same');
     assert.match(read('integration/hub.js'), /import \{ countWords[^}]*\} from '\.\.\/design\/prp-freshness\.js'/);

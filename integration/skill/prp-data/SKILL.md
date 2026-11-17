@@ -28,6 +28,7 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 | New papers or news in science, economics or technology | `latest_briefing` with `scientific`, `economics` or `digital`, and a `topic` | `GET /api/v1/briefings/scientific?topic=physics` |
 | Who or what is X? Where does Vitruvian Manager mention it? | `search_encyclopaedia`, then `get_entity` | `GET /api/v1/search?q=…`, `GET /api/v1/entities/{qid}` |
 | Any table: wars, volatility, indicators, trades, holdings, breakthroughs… | `query_dataset` | `GET /api/v1/datasets/{id}/rows?f.<field>=<value>&sort=-date` |
+| Where and when, on a map (dated borders, battles) | none (a page) | `omni/index.html#vr=1&t=1446..1514&at=1494&fill=borders&l=battles&focus=Q153529` (VR/1; borders 1400–1600 only so far) |
 | Which Vitruvian Manager page shows this? | `list_submodules` | `GET /api/v1/submodules` |
 
 ## 3. Querying well
@@ -61,6 +62,7 @@ Each dataset has a `licence` and `sources`. In short: Wikidata facts are CC0; Wi
 summaries) is CC BY-SA 4.0, so credit Wikipedia and keep the licence if you reuse it; UCDP and World Bank data are CC BY 4.0
 (credit them); headlines and summaries belong to their publishers (quote briefly and link); Vitruvian Manager's own text and
 compilations are © JDP-Iq. Credit "Vitruvian Manager (jdpi.pages.dev)" when you use Vitruvian Manager's data.
+The Omni-Map's borders are Cliopatria's, CC BY 4.0: credit "Cliopatria v0.2.1 (Bennett et al. 2025)", link the licence and say they were processed by Vitruvian Manager.
 
 ## 6. What Vitruvian Manager does not expose
 

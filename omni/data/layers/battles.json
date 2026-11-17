@@ -1,0 +1,81 @@
+{
+  "layer": "battles",
+  "format": "vm-layer/1",
+  "source": "wikidata",
+  "built": "2026-11-17T05:22:14Z",
+  "from": 1495,
+  "to": 1509,
+  "about": "The battles the Master Index holds with a date in 1400–1600, read from Wikidata on 2026-11-17 by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.",
+  "rows": [
+    {
+      "id": "Q764793",
+      "q": "Q764793",
+      "label": "Battle of Fornovo",
+      "date": {
+        "from": "1495-07-06",
+        "p": 11,
+        "cal": "gregorian"
+      },
+      "sortYear": 1495,
+      "pt": [
+        10.1,
+        44.68333333
+      ],
+      "ptPrec": 0.016666666666667,
+      "partOf": "Q1355145",
+      "partOfLabel": "Italian War of 1494–1495",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q764793#P585",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q764793, point in time (P585): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q764793#P625",
+          "support": "wikipedia",
+          "via": "French Wikipedia",
+          "viaQ": "Q8447",
+          "line": "Wikidata Q764793, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
+        }
+      }
+    },
+    {
+      "id": "Q1754732",
+      "q": "Q1754732",
+      "label": "Battle of Agnadello",
+      "date": {
+        "from": "1509-05-14",
+        "p": 11,
+        "cal": "julian"
+      },
+      "sortYear": 1509,
+      "pt": [
+        9.56667,
+        45.45
+      ],
+      "ptPrec": 0.064025306003394,
+      "partOf": "Q636365",
+      "partOfLabel": "War of the League of Cambrai",
+      "src": {
+        "date": {
+          "id": "wikidata",
+          "loc": "Q1754732#P585",
+          "support": "none",
+          "line": "Wikidata Q1754732, point in time (P585): no reference"
+        },
+        "pt": {
+          "id": "wikidata",
+          "loc": "Q1754732#P625",
+          "support": "wikipedia",
+          "via": "Catalan Wikipedia",
+          "viaQ": "Q199693",
+          "line": "Wikidata Q1754732, coordinate location (P625): Wikipedia-sourced, unverified (imported from Catalan Wikipedia)"
+        }
+      }
+    }
+  ]
+}

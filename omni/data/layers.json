@@ -1,0 +1,65 @@
+{
+  "format": "vm-layers/1",
+  "generated": "2026-11-17T05:24:13Z",
+  "layers": [
+    {
+      "id": "borders",
+      "module": "omni-map",
+      "title": "Borders",
+      "geometry": "polygon",
+      "time": {
+        "field": "f..t",
+        "from": 1400,
+        "to": 1600,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/borders/index.json",
+      "measure": null,
+      "status": "reconstruction",
+      "borderPrecision": [
+        {
+          "to": 1499,
+          "p": "c"
+        },
+        {
+          "from": 1500,
+          "p": "y"
+        }
+      ],
+      "style": {
+        "POLITY": "fill",
+        "RELATION": "outline"
+      },
+      "legend": "Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager",
+      "source": "cliopatria",
+      "method": "The borders are Cliopatria's, release v0.2.1 (Ed Chalstrey and James Bennett, Seshat Global History Databank, Zenodo, https://doi.org/10.5281/zenodo.23128623), described in J. S. Bennett et al., 'Cliopatria - A geospatial database of world-wide political entities from 3400BCE to 2024CE', Scientific Data 12, 247 (2025), https://doi.org/10.1038/s41597-025-04516-9. Licence: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). How Cliopatria draws them, from its paper: a polity is drawn where one or more written sources attest to it and indicate its location and extent in particular years, so societies without written records are not drawn; with rare exceptions a polity occupies at least 5,000 km² and lasts at least 50 years. Its README says the maps reflect only one version of the territory held by past polities, and the paper that the dataset does not encode border uncertainty or territorial disputes. Its rows carry no field naming which atlas or regional source each outline came from (the paper lists its sources by region). Each row holds from its first year to its last, both included. RELATION rows (vassalages, alliances, unions) are drawn as outlines over the polities they join. A name in parentheses, such as \"(Kingdom of France)\", is a composite polity, an entity together with its dependencies: Cliopatria's paper says composite polities \"are denoted in the database by enclosing their name in parentheses\". VM draws a composite polity as a dashed outline, like a RELATION row, so its core is not filled twice; in a download each row keeps its own area, so a composite's area and its parts' areas must not be added together. Changes by Vitruvian Manager: the rows of 1400–1600 only, in two files (1400–1499 and 1500–1600; a row spanning both is in both), converted to TopoJSON with topojson-server 3.0.1, coordinates quantised to 1/100,000 of each file's extent (points that then coincide are merged; no simplification), with a row id added (cl- and ten hex digits of the sha256 of the row's name, years and type). Precision: VM counts a border before 1500 as known only to its century (VM's rule for Cliopatria before AD 1500, set out with the click's rules in omni/README.md, \"How a click sets the view\"); from 1500 to 1600 the years are Cliopatria's, which VM has not checked. A Q-id is drawn only where Wikidata's names for Cliopatria's id agree with the row's name, or where a Master Index place of that name and those years matches; elsewhere VM says it cannot outline the entity. VM holds borders for 1400–1600 only in this first version.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-17T05:24:13Z"
+    },
+    {
+      "id": "battles",
+      "module": "omni-map",
+      "title": "Battles",
+      "geometry": "point",
+      "time": {
+        "field": "date",
+        "from": 1495,
+        "to": 1509,
+        "step": "d",
+        "precision": "day"
+      },
+      "data": "omni/data/layers/battles.json",
+      "measure": null,
+      "status": "as Wikidata records them",
+      "style": null,
+      "legend": "Battles: Wikidata (CC0), each date and point with its Wikidata item and property",
+      "source": "wikidata",
+      "method": "The battles the Master Index holds with a date in 1400–1600 (two in this first version), each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM's rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads 'Wikipedia-sourced, unverified'; anything less reads 'no reference'. Wikidata's data is CC0. VM holds few battles for these years; each view says how many.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-17T05:22:14Z"
+    }
+  ]
+}

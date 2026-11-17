@@ -19,6 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
 import { wikidataDate, datedFacts, bestClaim, centuryTag } from './dates.mjs';
+import { wikidataPoint } from './coords.mjs';
 import { shortCounts, recount } from './counts.mjs';
 import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
@@ -274,6 +275,10 @@ function record(q) {
   const rel = {};
   for (const [p, name] of Object.entries(REL)) { const ids = [...new Set(refIds(e, p))].slice(0, 12); if (ids.length) rel[name] = ids.map(x => [x, nameOf(x, { fetched: labels, committed: committedLabel })]); }
   const img = e.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+  // Its point, from the best P625 statement (coords.mjs): [lon, lat] as Wikidata gives it, with its precision in degrees
+  // as `ptp`, so the Omni-Map can place it (PRP-SCHOLAR-USP-DESIGN.md 2.1 rule 5, stage S1; first written by the full
+  // build of 3 December 2026). A record with no coordinates on the Earth has neither.
+  const point = wikidataPoint(bestClaim(e.claims?.P625));
   const ms = (byQid.get(q) || []).sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module) || String(a.date || '').localeCompare(String(b.date || '')));
   // Keep each place once (some modules mention the same entity many times on one page). A book's mention keeps where in
   // the book the name occurs (`w`: [chapter number, its first tagged paragraph, times, chapter heading], adapters.mjs
@@ -304,7 +309,7 @@ function record(q) {
   return {
     q, label, ...(name !== label ? { name } : {}), desc: e.descriptions?.en?.value || '', type,
     aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), { label, name, title, type }), wiki: title, img: img || null,
-    summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), ...(fcal.length ? { fcal } : {}), ...(Object.keys(fd).length ? { fd } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
+    summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(point ? { pt: point.pt, ...(point.p ? { ptp: point.p } : {}) } : {}), ...(fc.length ? { fc } : {}), ...(fcal.length ? { fcal } : {}), ...(Object.keys(fd).length ? { fd } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
     tags: tagsFor(e, type, ms),
   };
 }

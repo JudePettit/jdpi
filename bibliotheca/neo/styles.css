@@ -151,6 +151,18 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
    Kino's pane needs for it: the head, the tabs and the frames run to the border. */
 .nc-layout.prp-split[data-dir="row"] > .nc-pane { padding-left: 0; }
 
+/* The Map tab (S1): the Omni-Map's frame, and under it the click's offers, what is related and VM's note when it holds
+   little. */
+.nc-map-card { flex: none; max-height: 34%; overflow: auto; padding: 8px 14px 10px; border-top: 1px solid var(--prp-line-soft); font: var(--prp-fs-sm)/1.45 var(--prp-font-ui); color: var(--prp-text); }
+.nc-map-card[hidden] { display: none; }
+.nc-map-thin { margin: 0 0 8px; color: var(--prp-text); }
+.nc-map-offers, .nc-map-related { list-style: none; margin: 0 0 6px; padding: 0; }
+.nc-map-offers li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 3px 0; }
+.nc-map-offers li span, .nc-map-related li span { color: var(--prp-text-2); font-size: var(--prp-fs-xs); }
+.nc-map-offers li.off b { color: var(--prp-text-2); font-weight: 500; }
+.nc-map-offers .prp-btn.on { border-color: var(--prp-accent); background: var(--prp-accent-soft); }
+.nc-map-related li { padding: 2px 0; }
+
 /* "In Vitruvian Manager": whose era, one row per screen, the places the term itself appears, then the frame. */
 .nc-vm-list { flex: none; max-height: 100%; overflow: auto; border-bottom: 1px solid var(--prp-line-soft); }
 .nc-vm-list.with-frame { max-height: 42%; }

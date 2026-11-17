@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs tests/traders.test.mjs tests/kardashev.test.mjs tests/encyclopedia.test.mjs tests/master-index.test.mjs tests/national.test.mjs tests/volatility.test.mjs tests/briefing.test.mjs tests/warfocus.test.mjs tests/science-briefing.test.mjs tests/science-progress.test.mjs tests/sigint.test.mjs tests/iot-connect.test.mjs tests/iot-connect-review.test.mjs tests/osint.test.mjs tests/geoint.test.mjs tests/documentary.test.mjs tests/prp-voice.test.mjs tests/voice-proxy.test.mjs tests/prp-period.test.mjs tests/econ-briefing.test.mjs tests/prp-split.test.mjs tests/kino.test.mjs tests/bibliotheca-data.test.mjs tests/bibliotheca-cast.test.mjs tests/bibliotheca-page.test.mjs tests/bibliotheca-narrator.test.mjs tests/digital-briefing.test.mjs tests/integration-hub.test.mjs tests/data-analytics.test.mjs tests/highlights.test.mjs tests/freshness.test.mjs tests/highbrowse.test.mjs tests/prp-access.test.mjs tests/coverage.test.mjs tests/heads.test.mjs tests/trends.test.mjs tests/freshness-labels.test.mjs tests/monthly.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/platform.test.mjs tests/headlines.test.mjs tests/battlefield.test.mjs tests/calendar.test.mjs tests/learning.test.mjs tests/traders.test.mjs tests/kardashev.test.mjs tests/encyclopedia.test.mjs tests/master-index.test.mjs tests/national.test.mjs tests/volatility.test.mjs tests/briefing.test.mjs tests/warfocus.test.mjs tests/science-briefing.test.mjs tests/science-progress.test.mjs tests/sigint.test.mjs tests/iot-connect.test.mjs tests/iot-connect-review.test.mjs tests/osint.test.mjs tests/geoint.test.mjs tests/documentary.test.mjs tests/prp-voice.test.mjs tests/voice-proxy.test.mjs tests/prp-period.test.mjs tests/econ-briefing.test.mjs tests/prp-split.test.mjs tests/kino.test.mjs tests/bibliotheca-data.test.mjs tests/bibliotheca-cast.test.mjs tests/bibliotheca-page.test.mjs tests/bibliotheca-narrator.test.mjs tests/vm-core.test.mjs tests/omni-data.test.mjs tests/omni.test.mjs tests/digital-briefing.test.mjs tests/integration-hub.test.mjs tests/data-analytics.test.mjs tests/highlights.test.mjs tests/freshness.test.mjs tests/highbrowse.test.mjs tests/prp-access.test.mjs tests/coverage.test.mjs tests/heads.test.mjs tests/trends.test.mjs tests/freshness-labels.test.mjs tests/monthly.test.mjs",
     "test:unit": "node tests/tools/run.mjs unit",
     "test:e2e": "node tests/tools/run.mjs e2e",
     "build:lake": "node lake/scripts/build.mjs",
@@ -12,6 +12,7 @@
   "devDependencies": {
     "pdfjs-dist": "^4.10.38",
     "playwright-core": "^1.56.1",
+    "topojson-server": "3.0.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

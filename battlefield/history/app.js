@@ -3,12 +3,16 @@
    Views (tabs): the map and a table of the conflicts; both follow the timeline (design/prp-period.js), one year or a
    period of years: the start handle rests on the end, so a plain year is that year; pulled back, it opens a period,
    and every conflict active in at least one of its years is shown, at its peak level then.
-   URL: #y=<year, the end of the period>[&f=<first year of a period>]&c=<gw>&w=<war>&v=table */
+   Every state of the year is drawn (design/PRP-STYLE.md §6): as its CShapes shape, or, for the 22 CShapes has no border
+   for, as the map kit's dot (design/prp-mapkit.js) from its first day as a state. A country with no conflict in the
+   year or period says so in one sentence naming the record: UCDP/PRIO from 1946, the Correlates of War before.
+   URL: #y=<year, the end of the period>[&f=<first year of a period>]&c=<gw, or the ISO3 of a dot with none>&w=<war>&v=table */
 import { displayName } from './names.mjs';
 
-const W = 1000, H = 600;
-// from/year: the first and last year shown (the same year unless a period is set).
-const state = { year: 2025, from: 2025, selected: null, war: null, data: null, features: [], focus: {}, view: 'map' };
+const W = 1000, H = 600, DOT_R = 3.2;
+// from/year: the first and last year shown (the same year unless a period is set). dots: the kit's dots for CShapes,
+// each with its Gleditsch–Ward number and first day from wars.json (`key`: the number, or the ISO3 where it has none).
+const state = { year: 2025, from: 2025, selected: null, war: null, data: null, features: [], dots: [], focus: {}, view: 'map' };
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = n => Number(n).toLocaleString('en-GB');
@@ -41,6 +45,16 @@ const warsInPeriod = (a, b) => state.data.wars.filter(w => peakIn(w, a, b))
   .sort((x, y) => peakIn(y, a, b) - peakIn(x, a, b) || yearsIn(y, a, b).length - yearsIn(x, a, b).length || x.name.localeCompare(y.name));
 const warsIn = y => warsInPeriod(y, y);
 const onSoil = (w, gw, a, b) => yearsIn(w, a, b).some(([y]) => locIn(w, y).includes(gw));
+// The states taking part in a year: a UCDP conflict's parties that year (Tonga in Iraq in 2004, 2007 and 2008 only),
+// a Correlates of War war's for all its years.
+const statesIn = (w, y) => (w.statesYears ? w.statesYears[y] || [] : w.states);
+const partyIn = (w, gw, a, b) => yearsIn(w, a, b).some(([y]) => statesIn(w, y).includes(gw));
+// A dot is drawn from its first day as a state (null: before the page's first year), on the map's day of the year.
+const dotOn = (d, date) => d.from == null || d.from <= date;
+const dotsOn = date => state.dots.filter(d => dotOn(d, date));
+// The first year whose 1 July it is drawn on.
+const firstDrawn = d => { if (d.from == null) return state.data.firstYear; const y = +d.from.slice(0, 4); return d.from <= dateFor(y) ? y : y + 1; };
+const dotOf = key => state.dots.find(d => d.key === key);
 const single = () => state.from === state.year;
 const periodText = () => (single() ? String(state.year) : `${state.from}–${state.year}`);
 // "1939–45 · 7 yrs": the years a war was active in the period.
@@ -52,10 +66,28 @@ function activeSpan(w, a, b) {
 }
 const nameOf = (gw, y) => {
   const f = activeOn(dateFor(y)).find(x => x.properties.gw === gw) || state.features.find(x => x.properties.gw === gw);
-  return f ? displayName(gw, f.properties.name, dateFor(y)) : `State ${gw}`;
+  return f ? displayName(gw, f.properties.name, dateFor(y)) : dotOf(gw)?.name || `State ${gw}`;
 };
+// What a war's place is called in year y: the war's own name for a shape that held another place that year
+// ("Georgia (then in the Soviet Union)"), else the shape's name as of `at`.
+const placeName = (w, gw, y, at = y) => w.placeNames?.[y]?.[gw] ?? nameOf(gw, at);
 // The places a war was fought in during the period, by name (`where` names places the map has no shape for).
-const placesIn = (w, a, b) => w.where || [...new Set(yearsIn(w, a, b).flatMap(([y]) => locIn(w, y)).map(gw => nameOf(gw, b)))];
+const placesIn = (w, a, b) => w.where || [...new Set(yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(gw => placeName(w, gw, y, b))))];
+// "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
+// from 1946 UCDP/PRIO's record, before it the Correlates of War's, and a period across 1946 names both.
+const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
+const NO_WAR = { what: 'war of 1,000 or more battle deaths', source: 'the Correlates of War' };
+const yearsText = (a, b) => (a === b ? `in ${a}` : `from ${a} to ${b}`);
+function noConflict(name, a, b) {
+  const u = state.data.ucdpFrom, reason = PRPMapkit.REASONS.NOTHING_RECORDED;
+  if (b < u) return PRPMapkit.sentence({ name, reason, ...NO_WAR, when: yearsText(a, b) });
+  if (a >= u) return PRPMapkit.sentence({ name, reason, ...NO_CONFLICT, when: yearsText(a, b) });
+  return PRPMapkit.sentence({ name, reason, ...NO_WAR, when: yearsText(a, u - 1), and: { ...NO_CONFLICT, when: yearsText(u, b) } });
+}
+const notYet = (name, y) => PRPMapkit.sentence({ name, reason: PRPMapkit.REASONS.NOT_INDEPENDENT, when: `in ${y}` });
+const NO_BORDER = 'Not drawn as a shape: CShapes 2.0 has no border for it.';
+const DOT_FROM = { retrospective: 'the Political Retrospective’s leader lists', wikidata: 'Wikidata' };
+const fmtFrom = s => (s.length === 4 ? s : new Date(`${s}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }));
 // Per-country status over the period: the most intense conflict on its territory in any of its years (war, then a
 // minor conflict), else fighting only abroad. For one year this is that year's status.
 function statusMap(a, b) {
@@ -63,7 +95,7 @@ function statusMap(a, b) {
   const put = (gw, v) => { if ((rank[m.get(gw)] || 0) < rank[v]) m.set(gw, v); };
   for (const w of warsInPeriod(a, b)) for (const [y, l] of yearsIn(w, a, b)) {
     for (const gw of locIn(w, y)) put(gw, l === 2 ? 'war' : 'minor');
-    for (const gw of w.states) put(gw, 'abroad');
+    for (const gw of statesIn(w, y)) put(gw, 'abroad');
   }
   return m;
 }
@@ -81,12 +113,26 @@ const levelLabel = l => l === 2 ? 'War · 1,000+ deaths this year' : 'Minor conf
 const LEVEL_WORD = ['', 'Minor', 'War'];
 
 /* ---------------------------------------------------------------- map */
+// A selected, outlined or focused dot is drawn larger, so its fill still shows inside the thicker ring.
+const DOT_RING = 1.6, STATUS_RANK = { abroad: 1, minor: 2, war: 3 };
+const ringed = el => el.classList.contains('selected') || el.classList.contains('involved') || el.classList.contains('prp-focus-hit');
+function sizeDots(k = d3.zoomTransform(svg.node()).k) {
+  g.selectAll('circle.dot').attr('r', function () { return (DOT_R + (ringed(this) ? DOT_RING : 0)) / k; });
+}
+function raiseDots() {
+  g.selectAll('circle.dot.involved, circle.dot.selected').raise();
+  g.selectAll('circle.dot.prp-focus-hit').raise();
+  sizeDots();
+}
 function drawMap() {
   svg = d3.select('#map').attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'xMidYMid meet');
-  projection = d3.geoNaturalEarth1().fitExtent([[10, 10], [W - 10, H - 10]], { type: 'FeatureCollection', features: activeOn('2020-01-01') });
+  // Fitted to the shapes and the dots, so Tonga and Samoa stay inside the frame on a phone, where the map has no margin.
+  const points = state.dots.map(d => ({ type: 'Feature', geometry: { type: 'Point', coordinates: d.lonlat } }));
+  projection = d3.geoNaturalEarth1().fitExtent([[10, 10], [W - 10, H - 10]], { type: 'FeatureCollection', features: [...activeOn('2020-01-01'), ...points] });
   path = d3.geoPath(projection);
   g = svg.append('g');
-  zoom = d3.zoom().scaleExtent([1, 40]).on('zoom', ev => g.attr('transform', ev.transform));
+  // A dot keeps its size on screen as the map zooms.
+  zoom = d3.zoom().scaleExtent([1, 40]).on('zoom', ev => { g.attr('transform', ev.transform); sizeDots(ev.transform.k); });
   svg.call(zoom);
   $('#zoom-in').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1.6);
   $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
@@ -97,10 +143,14 @@ function drawMap() {
 /* ---------------------------------------------------------------- documentary focus (design/prp-focus.js) */
 // When the reader talks about wars, the states they were fought in are outlined in the module accent and the map
 // eases to fit them all; ⟲ or the end of the reading brings back the whole world.
+// A shape's state, or a dot's (its key: the Gleditsch–Ward number, or the ISO3 where it has none).
+const keyOf = d => (d.properties ? d.properties.gw : d.key);
 function paintFocus() {
   if (!g) return;
-  g.selectAll('path.shape').classed('prp-focus-hit', d => focusHits.has(d.properties.gw));
+  g.selectAll('.shape').classed('prp-focus-hit', d => focusHits.has(keyOf(d)));
   g.selectAll('path.shape.prp-focus-hit').raise();
+  g.selectAll('circle.dot').raise();
+  raiseDots();
 }
 function clearFocus() { focusHits.clear(); paintFocus(); }
 window.PRPFocus?.listen({
@@ -110,8 +160,12 @@ window.PRPFocus?.listen({
     const r = PRPFocus.resolve(t, {
       country: id => {
         const gw = /^gw:\d+$/.test(id) ? +id.slice(3) : PRPFocus.gwOf(id), fs = live.filter(f => f.properties.gw === gw);
-        if (fs.length) gws.add(gw);
-        return fs.length ? fs : null;
+        if (fs.length) { gws.add(gw); return fs; }
+        // A state drawn as a dot: its point, found by its ISO3 as well as its number (PRPFocus's table has no number for
+        // eleven of them, and the Holy See has none).
+        const d = dotsOn(dateFor(state.year)).find(x => x.iso3 === id || (gw != null && x.gw === gw));
+        if (d) { gws.add(d.key); return [...d.lonlat]; }
+        return null;
       },
       minSpan: 4,
     });
@@ -125,27 +179,49 @@ window.PRPFocus?.listen({
 function renderMap() {
   const a = state.from, b = state.year, date = dateFor(b), status = statusMap(a, b), tip = $('#tooltip'), live = activeOn(date);
   // The selected war's places in the period's years (or as of the end year when it was not active then).
+  // The selected war's places and parties in the period's years (or, when it was not active then, in all its years).
   const wys = state.war ? yearsIn(state.war, a, b).map(([y]) => y) : [];
-  const involved = new Set(state.war ? [...(wys.length ? wys : [b]).flatMap(y => locIn(state.war, y)), ...state.war.states] : []);
+  const involved = new Set(state.war ? (wys.length ? wys.flatMap(y => [...locIn(state.war, y), ...statesIn(state.war, y)]) : [...locIn(state.war, b), ...state.war.states]) : []);
+  // Pointing at a state: the conflicts on its territory or with it as a party in the year or period, or one sentence.
+  const hover = (ev, key, name) => {
+    const box = $('.map-wrap').getBoundingClientRect();
+    const ws = warsInPeriod(a, b).filter(w => onSoil(w, key, a, b) || partyIn(w, key, a, b));
+    tip.classList.toggle('is-sentence', !ws.length);
+    tip.innerHTML = ws.length ? `<strong>${esc(name)}</strong>${a === b ? '' : `<span class="tip-when">${a}–${b}</span>`}${ws.slice(0, 3).map(w => esc(w.name)).join('<br>') + (ws.length > 3 ? `<br>+${ws.length - 3} more` : '')}`
+      : `<strong>${esc(noConflict(name, a, b))}</strong>`;
+    tip.hidden = false;
+    tip.style.left = `${Math.max(4, Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8))}px`;
+    tip.style.top = `${Math.min(ev.clientY - box.top + 14, box.height - tip.offsetHeight - 8)}px`;
+  };
+  const classOf = (key, extra = '') => `shape active${extra}${key === state.selected ? ' selected' : ''}${involved.has(key) ? ' involved' : ''}${focusHits.has(key) ? ' prp-focus-hit' : ''}`;
   g.selectAll('path.shape')
     .data(live, d => `${d.properties.gw}|${d.properties.s}`)
     .join('path')
     .attr('d', path)
-    .attr('class', d => `shape active${d.properties.gw === state.selected ? ' selected' : ''}${involved.has(d.properties.gw) ? ' involved' : ''}${focusHits.has(d.properties.gw) ? ' prp-focus-hit' : ''}`)
+    .attr('class', d => classOf(d.properties.gw))
     .attr('fill', d => FILL[status.get(d.properties.gw) || 'peace'])
-    .on('mousemove', (ev, d) => {
-      const box = $('.map-wrap').getBoundingClientRect(), gw = d.properties.gw;
-      const ws = warsInPeriod(a, b).filter(w => onSoil(w, gw, a, b) || w.states.includes(gw));
-      tip.innerHTML = `<strong>${esc(displayName(gw, d.properties.name, date))}</strong>${a === b ? '' : `<span class="tip-when">${a}–${b}</span>`}${ws.length ? ws.slice(0, 3).map(w => esc(w.name)).join('<br>') + (ws.length > 3 ? `<br>+${ws.length - 3} more` : '') : 'No recorded armed conflict'}`;
-      tip.hidden = false;
-      tip.style.left = `${Math.max(4, Math.min(ev.clientX - box.left + 14, box.width - tip.offsetWidth - 8))}px`;
-      tip.style.top = `${Math.min(ev.clientY - box.top + 14, box.height - tip.offsetHeight - 8)}px`;
-    })
+    .on('mousemove', (ev, d) => hover(ev, d.properties.gw, displayName(d.properties.gw, d.properties.name, date)))
     .on('mouseleave', () => { tip.hidden = true; })
     .on('click', (ev, d) => select(d.properties.gw));
   // The selected or involved countries draw last, so their outlines are not hidden under their neighbours'.
   g.selectAll('path.shape.involved, path.shape.selected').raise();
   g.selectAll('path.shape.prp-focus-hit').raise();
+  // The states CShapes has no border for, as dots over the shapes, from their first day as a state. Where island dots
+  // touch, a dot at war lies over one at peace, and the selected, outlined and focused ones over all.
+  g.selectAll('circle.dot')
+    .data(dotsOn(date), d => d.iso3)
+    .join('circle')
+    .attr('class', d => classOf(d.key, ' dot'))
+    .attr('data-iso3', d => d.iso3)
+    .attr('cx', d => projection(d.lonlat)[0])
+    .attr('cy', d => projection(d.lonlat)[1])
+    .attr('fill', d => FILL[status.get(d.key) || 'peace'])
+    .on('mousemove', (ev, d) => hover(ev, d.key, d.name))
+    .on('mouseleave', () => { tip.hidden = true; })
+    .on('click', (ev, d) => select(d.key))
+    .sort((p, q) => (STATUS_RANK[status.get(p.key)] || 0) - (STATUS_RANK[status.get(q.key)] || 0))
+    .raise();
+  raiseDots();
   const outlined = state.war ? `; countries in ${state.war.name} are outlined` : '';
   if (a === b) { $('#caption').textContent = `Countries on the borders of ${b}, shaded by the most intense armed conflict ${state.war ? 'on their territory' : 'fought on their territory'}${outlined}.`; return; }
   // A period is drawn on its last year's borders; states of the period that had gone by then are listed, not drawn.
@@ -217,6 +293,8 @@ function warDetail(w) {
   const a = state.from, y = state.year, l = peakIn(w, a, y), ys = yearsIn(w, a, y);
   const activeYears = w.years.length;
   const warYears = w.years.filter(([, x]) => x === 2).length;
+  // The war's own places (`loc`): a shape it borrowed for a year ("Georgia (then in the Soviet Union)") is left out, so
+  // no place is named twice.
   const places = w.where || [...new Set(w.loc.map(gw => nameOf(gw, y)))];
   const intro = w.src === 'cow'
     ? `${esc(w.name)} was ${/^[aeiou]/i.test(w.type) ? 'an' : 'a'} ${esc(w.type.toLowerCase())} fought ${w.span.replace('–', ' to ')}${w.deaths ? `, with about ${num(w.deaths)} battle deaths according to the Correlates of War project` : ''}.`
@@ -243,17 +321,26 @@ function renderPanel() {
   let html;
   if (state.war) html = warDetail(state.war);
   else if (state.selected) {
-    const gw = state.selected, list = warsInPeriod(a, y);
-    const here = list.filter(w => onSoil(w, gw, a, y)), abroad = list.filter(w => !onSoil(w, gw, a, y) && w.states.includes(gw));
-    // Every conflict this state took part in or hosted, across the whole century, oldest first.
-    const ever = state.data.wars.filter(w => w.loc.includes(gw) || w.states.includes(gw)).sort((p, q) => p.years[0][0] - q.years[0][0]);
-    const soil = ever.filter(w => w.loc.includes(gw)), away = ever.filter(w => !w.loc.includes(gw));
+    const gw = state.selected, list = warsInPeriod(a, y), dot = dotOf(gw);
+    const here = list.filter(w => onSoil(w, gw, a, y)), abroad = list.filter(w => !onSoil(w, gw, a, y) && partyIn(w, gw, a, y));
+    // Every conflict this state took part in or hosted, across the whole century, oldest first. On its territory, by
+    // the same rule as the year's list: a year the war was drawn on its shape.
+    const soilEver = w => onSoil(w, gw, state.data.firstYear, state.data.lastYear);
+    const ever = state.data.wars.filter(w => soilEver(w) || w.states.includes(gw)).sort((p, q) => p.years[0][0] - q.years[0][0]);
+    const soil = ever.filter(soilEver), away = ever.filter(w => !soilEver(w));
     const cards = l => l.map(w => warCard(w));
     const byDecade = l => [...new Set(l.map(w => Math.floor(w.years[0][0] / 10) * 10))]
       .map(d => `<h3>${d}s</h3>${l.filter(w => Math.floor(w.years[0][0] / 10) * 10 === d).map(w => warCard(w)).join('')}`).join('');
     const cname = nameOf(gw, y), heading = a === y ? ` in ${y}` : `, ${a}–${y}`;
+    // A state drawn on the map at the end of the year or period with no conflict there or abroad: the sentence naming
+    // the record (the tooltip's); a dot before its first day as a state: that it was not yet one.
+    const drawnNow = dot ? dotOn(dot, dateFor(y)) : activeOn(dateFor(y)).some(f => f.properties.gw === gw);
+    const sub = here.length ? `${here.length} conflict${here.length > 1 ? 's' : ''} on its territory in ${when}${abroad.length ? ` · fighting in ${abroad.length} abroad` : ''}`
+      : abroad.length ? `No conflict on its territory in ${when} · fighting in ${abroad.length} abroad`
+        : dot && !drawnNow ? notYet(cname, y) : drawnNow ? noConflict(cname, a, y) : `No conflict on its territory in ${when}`;
+    const dotNote = dot ? `<p class="note dot-note">${NO_BORDER} ${dot.from ? `A state from ${fmtFrom(dot.from)}` : `A state before ${state.data.firstYear}`} (${DOT_FROM[dot.src]}).</p>` : '';
     html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(cname)}</h2>
-      <p class="sub">${here.length ? `${here.length} conflict${here.length > 1 ? 's' : ''} on its territory in ${when}` : `No conflict on its territory in ${when}`}${abroad.length ? ` · fighting in ${abroad.length} abroad` : ''}</p>
+      <p class="sub">${esc(sub)}</p>${dotNote}
       ${here.length ? `<h3>On its territory${heading}</h3>${seeMore(cards(here), 6, `${cname} · conflicts on its territory in ${when}`)}` : ''}
       ${abroad.length ? `<h3>Fighting abroad${heading}</h3>${seeMore(cards(abroad), 6, `${cname} · fighting abroad in ${when}`)}` : ''}
       <h3>All conflicts ${state.data.firstYear}–${state.data.lastYear} <span class="count">${ever.length} · ${soil.length} on its territory · ${away.length} abroad</span></h3>
@@ -378,7 +465,9 @@ function readHash() {
   const p = new URLSearchParams(location.hash.slice(1)), y = +p.get('y') || state.data.lastYear;
   const years = period.get().stops;
   // An f at or after the year, or unreadable, is a single year; an address with no year at all opens on the last two.
-  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f'), openSteps()), c: +p.get('c') || null, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
+  // c: a Gleditsch–Ward number, or the ISO3 of a dot that has none (the Holy See).
+  const c = p.get('c') || '', key = /^\d+$/.test(c) ? +c || null : /^[A-Z]{3}$/.test(c) && dotOf(c) ? c : null;
+  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f'), openSteps()), c: key, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
 }
 
 function setupSearch() {
@@ -390,6 +479,10 @@ function setupSearch() {
     if (seenGw.has(k)) continue; seenGw.add(k);
     index.push({ label: f.properties.name, sub: `Country · ${f.properties.s.slice(0, 4)}–${f.properties.e.slice(0, 4)}`, key: f.properties.name.toLowerCase(), gw: f.properties.gw, year: Math.max(+f.properties.s.slice(0, 4), state.data.firstYear) });
   }
+  // The states drawn as dots, opening in the first year they are drawn when the year shown is earlier.
+  // VM's list of countries calls the Vatican the Holy See.
+  const ALSO = { VAT: 'Holy See' };
+  for (const d of state.dots) index.push({ label: d.name, sub: `Country · ${d.from ? `from ${d.from.slice(0, 4)}` : `before ${state.data.firstYear}`} · drawn as a dot`, key: `${d.name} ${d.iso3} ${ALSO[d.iso3] || ''}`.toLowerCase(), gw: d.key, year: firstDrawn(d) });
   let results = [];
   const choose = r => {
     input.value = ''; list.hidden = true;
@@ -456,6 +549,10 @@ const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric'
     state.data = data;
     for (const f of focus.wars) if (f.bf) (state.focus[f.bf] ||= []).push(f);
     state.features = topojson.feature(topo, topo.objects.borders).features;
+    // The kit's dots for the states CShapes 2.0 has no border for, with wars.json's number and first day for each.
+    state.dots = PRPMapkit.dots('cshapes').filter(d => data.dots?.[d.iso3]).map(d => ({ iso3: d.iso3, name: d.name, lonlat: [...d.lonlat], ...data.dots[d.iso3], key: data.dots[d.iso3].gw ?? d.iso3 }));
+    $('.legend ul').insertAdjacentHTML('beforeend', '<li><span class="swatch dot-swatch"></span>A state with no border in CShapes 2.0, as a dot</li>');
+    $('.map-wrap').classList.add('has-dots'); // styles.css: the key under the map, clear of the dots
     $('#status').innerHTML = `<span><b>${data.wars.length}</b> wars and armed conflicts</span><span>Coverage <b>${data.firstYear}–${data.lastYear}</b></span><span>Sources <b>UCDP/PRIO · Correlates of War · CShapes 2.0</b></span>${data.generated ? `<span>Built <b>${esc(fmtDay(data.generated))}</b></span>` : ''}`;
     drawMap(); setupTimeline(); setupSearch();
     const { y, f, c, w, v } = readHash();

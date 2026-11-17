@@ -4,7 +4,10 @@
 // infers one from the regions a war was fought in), and its colonial wars name only the colonial power.
 // Keys are war ids in wars.json. `loc`: the CShapes 2.0 (Gleditsch–Ward) codes of the states and colonies where the
 // fighting was; `where`: what the war's places are called when the map has no shape for them; `years`: places by
-// year, for a war that moved (World War II, a government fighting abroad); the years not listed keep the sources'.
+// year, for a war that moved (World War II, a government fighting abroad); the years not listed keep the sources';
+// `names`: { year: { code: name } }, what a place is called in a year when the shape that held it on 1 July was
+// another state's (Georgia in the Soviet Union's shape in 1991); such a shape is drawn that year but is not one of the
+// war's own places (`loc`).
 // From 1989 the UCDP entries follow the countries that the UCDP Georeferenced Event Dataset (GED v26.1) places each
 // conflict's events in; check-fought.mjs repeats that check and prints the entries.
 
@@ -14,7 +17,7 @@ export const CHECKED_THROUGH = 2025;
 // World War II: where it was fought on land, or bombed heavily, each year. The war at sea, and places the map has no
 // shape for (Hong Kong, Guam, the central Pacific islands), are not shown.
 const WW2 = [
-  [1939, 1945, [255]], // Germany
+  [1939, 1944, [255]], [1945, 1945, [260, 265]], // Germany; on 1 July 1945 CShapes draws it as two shapes (from 8 May 1945)
   [1939, 1939, [290]], [1941, 1945, [290]], // Poland: the invasion; Barbarossa, the Warsaw uprisings, the Vistula–Oder offensive
   [1940, 1945, [200, 210, 211, 220, 325]], // Britain (the Blitz, then V-weapons), the Netherlands, Belgium, France, Italy
   [1940, 1940, [212, 385, 390]], [1944, 1945, [212]], [1944, 1944, [385]], // Luxembourg, Norway, Denmark; the Ardennes; Finnmark
@@ -47,7 +50,7 @@ export const FOUGHT_IN = {
   u276: { loc: [851] },                    // Indonesia – Netherlands 1962: West New Guinea
   u323: { loc: [352] },                    // Cyprus – Turkey 1974
   u346: { loc: [], where: ['the Falkland Islands'] }, // Falklands 1982: islands the map has no shape for
-  u350: { loc: [55], where: ['Grenada'] }, // Grenada 1983 (too small for the map)
+  u350: { loc: [55], where: ['Grenada'] }, // Grenada 1983 (CShapes has no border for it: the page draws it as a dot)
   u368: { loc: [95] },                     // Panama 1989
   u405: { loc: [471] },                    // Cameroon – Nigeria 1996: the Bakassi peninsula
   u420: { loc: [645] },                    // Iraq 2003
@@ -78,14 +81,37 @@ export const FOUGHT_IN = {
   u11884: { loc: [750], where: ['Hyderabad'] },
   u286: { loc: [6801] },                   // Aden 1964–67: the Federation of South Arabia
 
-  // ---- Correlates of War, 1926–1945
-  c121: { loc: [710] },                    // Japan's invasion of Manchuria, 1931–33
+  // ---- Places by year where CShapes 2.0 changed a shape in the middle of a war (AC-13, 17 November 2026): the map
+  // draws the borders of 1 July, so a war-year place is the shape that held it on that day. The dates are CShapes's
+  // (battlefield/history/data/borders.topo.json): Vietnam (815, Annam, Cochin China and Tonkin) to 30 April 1954 and the
+  // Democratic Republic (816) from 1 May 1954, which takes in the Republic of Vietnam (817) from 1 May 1975; Taiwan (713)
+  // within China (710) from 15 August 1945 to 7 December 1949; Georgia (372) from 6 September 1991 and Azerbaijan (373)
+  // from 26 December 1991, within the Soviet Union (365) before; South Sudan (626) from 9 July 2011, within Sudan (625)
+  // before.
+  u216: { years: { 1946: [815], 1947: [815], 1948: [815], 1949: [815], 1950: [815], 1951: [815], 1952: [815], 1953: [815] }, where: ['Vietnam'] }, // First Indochina War
+  u232: { years: { 1949: [710] } },        // China – Taiwan 1949: Taiwan still within China's shape on 1 July
+  // The fall of Saigon, 30 April 1975: UCDP places 1975 in 816 and 817; on 1 July CShapes's 816 holds both, so the
+  // year is on that shape under its own name.
+  u293: { years: { 1975: [816] } },
+  u380: { years: { 1991: [365] }, names: { 1991: { 365: 'Georgia (then in the Soviet Union)' } } },
+  u388: { years: { 1991: [365] }, names: { 1991: { 365: 'Azerbaijan (then in the Soviet Union)' } } },
+  u11345: { years: { 2011: [625] }, names: { 2011: { 625: 'South Sudan (then in Sudan)' } } },
+
+  // ---- Correlates of War, 1926–1945. While the S0 hold stands (integration/scripts/cite-only.mjs: 'pending'),
+  // build-history.mjs writes the 40 rows back exactly as they are and applies none of these; they apply when the hold
+  // lifts and the COW files are read again. Three were added on 17 November 2026 (AC-13) and wait for that: c139's
+  // 1945 on the two shapes of occupied Germany (the held row has 255, which CShapes ends on 7 May 1945), c708 in Nejd
+  // (the held row has loc [670], Saudi Arabia, which CShapes starts on 23 September 1932) and c698 in China (the held
+  // row has no place).
+  c121: { loc: [710] },                  // Japan's invasion of Manchuria, 1931–33
   c130: { loc: [710] },                    // Second Sino-Japanese War, 1937–41
   c133: { loc: [365] },                    // Lake Khasan 1938: hills held by the Soviet Union
   c136: { loc: [712] },                    // Khalkhin Gol 1939: Mongolia
-  c139: { years: byYear(WW2) },            // World War II
+  c139: { years: byYear(WW2), names: { 1945: { 260: 'Germany', 265: 'Germany' } } }, // World War II
   c142: { loc: [375] },                    // Winter War 1939–40: Finland
   c145: { loc: [800, 811, 812] },          // Franco-Thai War 1940–41: Thailand, Cambodia and Laos
+  c708: { loc: [], where: ['Nejd'] },      // Ikhwan Revolt 1929–30: Nejd, which CShapes does not draw (Saudi Arabia from 23 September 1932)
+  c698: { loc: [710] },                    // Third Chinese Warlord War, 1926: fought in China
   c700: { loc: [710] },                    // Northern Expedition: Japan's troops fought at Jinan, in China
   c711: { loc: [710] },                    // Kumul Rebellion: the Soviet intervention in Xinjiang
   c718: { loc: [230] },                    // Spanish Civil War: Germany, Italy and Portugal fought in Spain

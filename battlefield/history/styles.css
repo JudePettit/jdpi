@@ -60,6 +60,21 @@ button, input, select { font: inherit; }
 .shape.active:hover { stroke: var(--prp-text-2); stroke-width: 1.2; }
 .shape.involved { stroke: var(--prp-primary); stroke-width: 1.6; }
 .shape.selected { stroke: var(--prp-text); stroke-width: 2.2; }
+/* Retrospective Battlefield: a state CShapes 2.0 has no border for, drawn as the map kit's dot (design/prp-mapkit.js). */
+/* A ringed dot is drawn larger (app.js) and its ring kept thin, so its conflict colour still shows. */
+.shape.dot { stroke: var(--prp-text-2); stroke-width: .8; }
+.shape.dot.involved { stroke: var(--prp-primary); stroke-width: 1.2; }
+.shape.dot.selected { stroke: var(--prp-text); stroke-width: 1.5; }
+.shape.dot.prp-focus-hit { stroke-width: 1.5px !important; } /* design/prp-focus.js marks a focus with 2.4px */
+/* Retrospective Battlefield (app.js adds .has-dots): the key sits under the map, not over it, so it hides none of the
+   island dots in the Caribbean and the Pacific. */
+.map-wrap.has-dots .legend ul { display: flex; flex-wrap: wrap; gap: 3px 16px; }
+@media (min-width: 901px) {
+  .map-wrap.has-dots { display: flex; flex-direction: column; }
+  .map-wrap.has-dots #map { position: relative; inset: auto; flex: 1 1 0; min-height: 0; height: auto; }
+  .map-wrap.has-dots .legend { position: static; flex: none; max-width: none; border: 0; border-top: 1px solid var(--prp-line); border-radius: 0; box-shadow: none; }
+}
+.swatch.dot-swatch { border-radius: 50%; background: var(--c-peace); box-shadow: inset 0 0 0 1px var(--prp-text-2); }
 
 .map-tools { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; }
 .map-tools button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; cursor: pointer; box-shadow: var(--prp-shadow-1);
@@ -75,6 +90,9 @@ button, input, select { font: inherit; }
   background: var(--prp-surface); border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); color: var(--prp-text-2); font-size: 12px; line-height: 1.45; }
 .tooltip strong { display: block; color: var(--prp-text); font-size: 13px; font-weight: 600; }
 .tooltip .tip-when { display: block; color: var(--prp-muted); font: 11px/1.5 var(--prp-font-mono); }
+/* One sentence (a country with no conflict recorded): wrapped, not one long line. */
+.tooltip.is-sentence { width: max-content; max-width: min(300px, calc(100% - 16px)); white-space: normal; }
+.tooltip.is-sentence strong { font-size: 12.5px; font-weight: 500; line-height: 1.45; }
 
 /* --- Table view ----------------------------------------------------------------------------------------------- */
 .tablepanel { display: flex; flex-direction: column; height: 100%; overflow: hidden; }

@@ -115,7 +115,7 @@
     const own = up(lookup(codes, 'name:' + name));
     if (own) return own;
     if (Object.hasOwn(UNCLAIMED, name)) return null;
-    return BY_NAME[name] || null;
+    return Object.hasOwn(BY_NAME, name) ? BY_NAME[name] : null;
   }
   // codes: the page's table, when it has one; a page that gives the shape a country of its own ('name:Somaliland')
   // has claimed it, and then it is not unclaimed.
@@ -232,7 +232,8 @@
   const plural = (unit, units) => units || (/s$/i.test(unit) ? unit : /[^aeiou]y$/i.test(unit) ? `${unit.slice(0, -1)}ies` : `${unit}s`);
   function counted(o) {
     if (o.count == null || o.count === '') return '';
-    const n = typeof o.count === 'number' ? o.count : Number(String(o.count).trim().replace(/,/g, ''));
+    const raw = typeof o.count === 'number' ? o.count : String(o.count).trim().replace(/,/g, '');
+    const n = raw === '' ? NaN : Number(raw); // a count of spaces is not a nought
     if (!Number.isFinite(n)) throw new Error(`PRPMapkit.sentence: count "${o.count}" is not a number`);
     const unit = clean(o.unit) || 'report';
     return ` (${n} ${n === 1 ? unit : plural(unit, clean(o.units))})`;

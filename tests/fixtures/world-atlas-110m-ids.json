@@ -1,8 +1,9 @@
 {
- "about": "The country shapes of world-atlas 2.0.2 at 1:110m (Natural Earth, public domain; world-atlas ISC): each shape’s ISO 3166 numeric id and its name, in the file’s order. Three shapes have no id: N. Cyprus, Somaliland and Kosovo. Used by tests/mapkit.test.mjs; the geometry is left out.",
+ "about": "The country shapes of world-atlas 2.0.2 at 1:110m (Natural Earth, public domain; world-atlas ISC): each shape’s ISO 3166 numeric id and its name, in the file’s order. Three shapes have no id: N. Cyprus, Somaliland and Kosovo. Used by tests/mapkit.test.mjs; the geometry is left out. shapesSha256 is the sha256 of JSON.stringify(shapes) as the list was read from that file on the date below: the test fails if the list is edited afterwards. It cannot prove, offline, that the list came from the file; to check that, fetch the source, compare its sha384 with the one below, and list each geometry’s id and properties.name in order.",
  "source": "https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json",
  "sha384": "sha384-yOCJ+8ShBm8UDqtAVtAvxTDDf4gXo5edxl/YG0FmVC5OTmqVLl7utuVGBDEeZWHf",
  "read": "2026-11-17",
+ "shapesSha256": "d759e31ae0407868d340e65cb3f18f6bd87cc176772e93a70d0e537ad89fcb55",
  "count": {
   "shapes": 177,
   "withId": 174,

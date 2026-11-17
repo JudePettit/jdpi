@@ -5,6 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { makeResolvers } from '../integration/scripts/coverage.mjs';
 
 const read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
@@ -31,7 +32,14 @@ test('mapkit: loads as one global, in Node as in a page', () => {
   assert.ok(Object.isFrozen(K.DOTS) && Object.isFrozen(K.REASONS));
 });
 
-test('mapkit: the fixture is the world-atlas 2.0.2 file the pages load', () => {
+// What this proves offline: the fixture names the file the pages load and pin, and its list of shapes is as it was
+// when it was read from that file (an edit to an id or a name changes the list's own hash). It cannot prove the list
+// came from those bytes: the fixture's note says how to check that by hand.
+test('mapkit: the fixture names the world-atlas 2.0.2 file the pages load, and its list of shapes is as it was read', () => {
+  assert.equal(createHash('sha256').update(JSON.stringify(atlas.shapes)).digest('hex'), atlas.shapesSha256, 'the list of shapes has changed since it was read from the file');
+  const swapped = JSON.parse(JSON.stringify(atlas.shapes)); const es = swapped.findIndex(s => s[1] === 'Spain'), pt = swapped.findIndex(s => s[1] === 'Portugal');
+  [swapped[es][0], swapped[pt][0]] = [swapped[pt][0], swapped[es][0]];
+  assert.notEqual(createHash('sha256').update(JSON.stringify(swapped)).digest('hex'), atlas.shapesSha256, 'two ids exchanged must not pass');
   assert.equal(atlas.source, 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json');
   for (const page of ['q/national.html', 'q/volatility.html', 'kino/lib/stage.js', 'analytics/lib/render.js']) assert.ok(read(page).includes(atlas.source), page);
   // Data Analytics pins the same file by its hash.
@@ -56,6 +64,8 @@ test('mapkit: shape to country, by ISO number and then by name', () => {
   const byName = n => SHAPES.find(s => s.properties.name === n);
   assert.equal(K.countryOf(byName('Kosovo'), CODES), 'XKX');
   assert.equal(K.countryOf(byName('N. Cyprus'), CODES), null);
+  // A name that is also a property every object inherits is an unknown name like any other.
+  for (const n of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) { const s = { properties: { name: n } }; assert.equal(K.countryOf(s, CODES), null, n); assert.equal(K.countryOf(s), null, n); assert.equal(K.unclaimed(s), null, n); }
   assert.equal(K.countryOf(byName('Somaliland'), CODES), null);
   assert.equal(K.unclaimed(byName('N. Cyprus')), 'Northern Cyprus');
   assert.equal(K.unclaimed(byName('Somaliland')), 'Somaliland');
@@ -284,4 +294,6 @@ test('mapkit: the sentence keeps a slot’s abbreviation, reads a bare year, and
   assert.ok(few({ count: 12, unit: 'story' }).includes('(12 stories)'));
   assert.ok(few({ count: 12, unit: 'person', units: 'people' }).includes('(12 people)'));
   assert.throws(() => few({ count: 'twelve', unit: 'event' }), /count/);
+  assert.throws(() => few({ count: ' ', unit: 'event' }), /count/, 'a count of spaces is not a nought');
+  assert.ok(!few({ count: '', unit: 'event' }).includes('('), 'no count given, none shown');
 });

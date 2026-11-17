@@ -21,7 +21,7 @@ registry ids and storage keys keep it, and only what people read says Vitruvian 
 | **Natural Science**: science through history | NS | Invention Timeline |
 | **Digital Science**: computing, AI and the digital world | DS | Data Analytics · Integration Hub (with its Agents tab) · IoT Connect (your own smart devices through the bridge, with Hermes Messenger, an MQTT and Sparkplug link and your phone as the remote) |
 | **Kino**: documentaries that play across the suite | KN | Political Events · Political Figures · Political Parties · Wars · Geopolitical Events · Great Thinkers |
-| **Bibliotheca**: the reading room, public-domain books with the Master Index beside the text (Kino's submodule until November 2026) | BB | Neo Book (the reader: the shelf, the Master Index's terms marked through the text, the Links pane and Augmented Reading) |
+| **Bibliotheca**: the reading room, public-domain books with the Master Index beside the text (Kino's submodule until November 2026) | BT | Neo Book (the reader: the shelf, the Master Index's terms marked through the text, the Links pane and Augmented Reading) |
 
 (In `registry.json` the ten modules are "suites" and their submodules "modules"; a suite's `name` is what the sidebar
 shows, its `title` what its overview page, its box on the Home page and page eyebrows show, and its `summary` the line

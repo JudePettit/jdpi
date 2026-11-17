@@ -77,7 +77,7 @@ test('registry is well formed', () => {
   // Bibliotheca was Kino's submodule until November 2026; it is a module now, its reader Neo Book its one submodule
   // (the old id its alias, so #/kino/bibliotheca still opens it), on the same page.
   const bb = registry.suites.find(s => s.id === 'bibliotheca');
-  assert.equal(bb.code, 'BB');
+  assert.equal(bb.code, 'BT'); // BT, not BB: the word is a compound, Biblio-Theca (17 November 2026)
   assert.deepEqual(bb.modules.map(m => [m.id, m.name, m.url, m.aliases, m.views]), [['neo-classic', 'Neo Book', 'bibliotheca/neo/index.html', ['bibliotheca'], undefined]]);
   assert.ok(!registry.suites.find(s => s.id === 'kino').modules.some(m => m.id === 'bibliotheca' || m.id === 'neo-classic'), 'nothing of Bibliotheca left in Kino');
   // The four briefings moved into Highbrowse from Realtime Geopolitics, Natural Science, Money Management and Digital

@@ -41,7 +41,7 @@ and does not draw).
 | (new) | **Natural Science** | `ns` | NS |
 | (new) | **Digital Science** | `ds` | DS |
 | (new) | **Kino** (documentaries) | `kino` | KN |
-| Kino's submodule Bibliotheca (until November 2026) | **Bibliotheca** (the reading room) | `bibliotheca` | BB |
+| Kino's submodule Bibliotheca (until November 2026) | **Bibliotheca** (the reading room) | `bibliotheca` | BT (the word is a compound, Biblio-Theca; BB until 17 November 2026) |
 
 In the registry the ten are "suites" and their pages "modules"; in the interface we say **module** for the ten and
 **submodule** for the pages. A module has a short `name` (the sidebar, the breadcrumb, search) and a full `title` (its
@@ -81,7 +81,7 @@ wars, leaders and coming votes."
 | Data Analytics, Integration Hub | DS (new) | `analytics/`, `integration/`; the Hub's Agents tab lists Vitruvian Manager's agents (`integration/agents.json`, Hermes Messenger first) |
 | IoT Connect | DS (new, November 2026) | icon ⊶ (two linked nodes; its own since 12 November 2026, when it stopped sharing the Home page's ⌂). `digital/iot-connect/`: your own smart devices through the Vitruvian Manager bridge, with Hermes Messenger, a UNS (MQTT, Sparkplug B) and the phone as the remote; tabs Overview, Devices, Remote, Hermes, UNS and Law & safety. Its page runs under its own strict Content-Security-Policy (`_headers`): no inline script or style, no style attributes, device text only ever as text, and only the bridge on `localhost:8790` besides the site itself |
 | Political Events, Political Figures, Political Parties, Wars, Geopolitical Events, Great Thinkers | KN (new) | `kino/index.html?cat=<id>` |
-| Neo Book (was Kino's Bibliotheca, with Neo Book its one view) | BB (new, November 2026; moved from KN) | `bibliotheca/neo/`, the same page at the same address with every key (`book`, `ch`, `p`, `t`, `pane`, `show`, `era`, `ar`); registry id `neo-classic`, alias `bibliotheca`, so `#/kino/bibliotheca` opens it at `#/bibliotheca/neo-classic`; its eyebrow reads "Bibliotheca · Neo Book" |
+| Neo Book (was Kino's Bibliotheca, with Neo Book its one view) | BT (new, November 2026; moved from KN) | `bibliotheca/neo/`, the same page at the same address with every key (`book`, `ch`, `p`, `t`, `pane`, `show`, `era`, `ar`); registry id `neo-classic`, alias `bibliotheca`, so `#/kino/bibliotheca` opens it at `#/bibliotheca/neo-classic`; its eyebrow reads "Bibliotheca · Neo Book" |
 
 **Sidebar order.** Home comes first, its Home page item (with ⌂) where every other module has its "Module overview".
 Within each module the strongest submodules come first, the calendar second-last and the course last.

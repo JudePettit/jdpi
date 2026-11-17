@@ -139,6 +139,22 @@ test('focus: the country table knows ISO3, Gleditsch–Ward codes and sensible b
   assert.equal(F.countryBox('XYZ'), null);
 });
 
+// Tuvalu and Vatican City have no shape in Natural Earth 1:50m, so the table had no box for them and Documentary mode
+// could not zoom there (plan AC-1). Each now has a point box, on the Political Atlas's dot.
+test('focus: Tuvalu and Vatican City have point boxes, and a step that names them zooms there', () => {
+  for (const [iso, lon, lat, name] of [['TUV', 179.2, -8.5, 'Tuvalu'], ['VAT', 12.45, 41.9, 'Vatican City']]) {
+    near(F.countryBox(iso), [lon, lat, lon, lat], 1e-9);
+    assert.equal(F.countryName(iso), name);
+    assert.equal(F.gwOf(iso), null);
+    const r = F.resolve({ countries: [iso] }, { minSpan: 4 });
+    near(r.box, [lon - 2, lat - 2, lon + 2, lat + 2], 1e-9);
+    assert.ok(F.contains(r.box, [lon, lat]));
+  }
+  // A page's own shape still comes first, and the narration finds the two by name.
+  near(F.resolve({ countries: ['VAT'] }, { country: () => [12.44, 41.9, 12.46, 41.91], minSpan: 0 }).box, [12.44, 41.9, 12.46, 41.91], 1e-9);
+  assert.deepEqual(F.matchPlaces('From Vatican City to Tuvalu.', F.countryPlaces()).countries, ['VAT', 'TUV']);
+});
+
 test('focus: resolve() puts a step\'s targets into one box, with the page\'s own shapes first', () => {
   const asked = [];
   const r = F.resolve({ countries: ['UKR', 'POL'], points: [[44.5, 48.7]] }, { country: id => { asked.push(id); return id === 'UKR' ? [22, 44, 41, 53] : null; }, minSpan: 4 });

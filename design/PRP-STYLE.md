@@ -309,6 +309,26 @@ More than eight categories (e.g. the calendars' seventeen event types): group re
 family one categorical colour in the fixed order and each type in it its own shape (● ■ ◆), and name every mark in
 chips that count and filter, a legend, the tooltip and the list. Never cycle the eight colours.
 
+### A country with no data: drawn, hatched and explained
+
+Every map that is about countries (Jude’s rule of 16 November 2026) draws all 197 of VM’s countries (the United Nations
+members, the Holy See, Palestine, Kosovo and Taiwan): as its shape, or as a dot where the border file has none. A country
+the page has nothing for is drawn in one quiet hatched grey, `--prp-map-nodata` crossed by `--prp-map-border`, the hatch
+National Analysis and Volatility already draw; never blank, never bare tiles. Pointing at it or tapping it gives one
+sentence, and its panel repeats it: "<Country>: no <what this page shows> <for when>. <Why, naming the source>.", as in
+"Taiwan: no figures. The World Bank, this page’s source, does not publish data for Taiwan." The why is one of six
+reasons: the source does not cover it; nothing recorded; too few reports to score; no row in this table; not on either
+side; not an independent state that year. A page loads `design/prp-mapkit.js` and takes all four from it:
+`PRPMapkit.countryOf` for which country a shape is (by its ISO number, then by name: the shape named Kosovo is XKX;
+Northern Cyprus and Somaliland are no country), `PRPMapkit.dots(layer)` for the dots a border file needs (`'110m'`,
+`'50m'`, `'cshapes'`), `PRPMapkit.NODATA` and `install()` for the fill (`.prp-nodata`, `.prp-nodata-swatch` in a
+legend), and `PRPMapkit.sentence` for the words, so each page writes only its own tooltip. Left out of the rule: Kino’s
+film maps, which illustrate a story (its validator makes sure every country a scene names can be drawn); the Kardashev
+Tracker and the Invention Timeline, which draw land without borders and say in one caption sentence what an empty place
+means; GEOINT, SIGINT and the OSINT media tab, which have no country subject. The Political Retrospective, its own
+repository, carries a copy of the kit, and a jdpi test must keep the two equal; the Political Atlas already draws all
+197 and keeps its own code. Tested in `tests/mapkit.test.mjs`.
+
 ### Documentary mode: zooming to what is read
 
 The narrator (`design/jdpi-narrator.js`) sends each step's places to the page as a window event `prp:focus`

@@ -154,6 +154,12 @@
     CPV: ['Cabo Verde'], TLS: ['Timor-Leste'], MKD: ['Macedonia'], NLD: ['Holland'], KOR: ['Republic of Korea'], PRK: ['DPRK'], ARE: ['UAE', 'Emirates'], VNM: ['Viet Nam'],
     ZWE: ['Rhodesia'], BIH: ['Bosnia'], KGZ: ['Kyrgyz Republic'], SVK: ['Slovak Republic'], BRN: ['Brunei Darussalam'], LAO: ['Lao PDR'], SYR: ['Syrian Arab Republic'],
     EGY: ['Arab Republic of Egypt'], TWN: ['Republic of China'], CHN: ["People's Republic of China", 'PRC'], DEU: ['West Germany', 'East Germany'] };
+  // Point boxes for the two of the 197 that COUNTRIES has no box for: Tuvalu, which Natural Earth 1:50m does not draw,
+  // and Vatican City, which it draws but the World Bank list (the rows focus-countries.mjs reads) leaves out. A step
+  // that names them still zooms there (resolve() widens a point to minSpan). Kept
+  // apart from COUNTRIES, which design/scripts/focus-countries.mjs rewrites. [lon, lat] from the Political Atlas's
+  // MARKERS (political-atlas/app.js), the dots of design/prp-mapkit.js, checked there against Wikidata's capitals.
+  const POINTS = { TUV: [179.2, -8.5, 'Tuvalu'], VAT: [12.45, 41.9, 'Vatican City'] };
   let table = null;
   const countries = () => {
     if (table) return table;
@@ -162,6 +168,7 @@
       const m = /^([A-Z]{3})(\d*):(-?\d+),(-?\d+),(-?\d+),(-?\d+):(.*)$/.exec(row);
       if (m) table.set(m[1], { gw: m[2] ? +m[2] : null, box: normBox([+m[3], +m[4], +m[5], +m[6]]), name: m[7] });
     }
+    for (const [iso, [lon, lat, name]] of Object.entries(POINTS)) if (!table.has(iso)) table.set(iso, { gw: null, box: pointBox([lon, lat]), name });
     return table;
   };
   const gwOf = iso3 => countries().get(iso3)?.gw ?? null;

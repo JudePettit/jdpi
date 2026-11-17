@@ -202,7 +202,7 @@ test('focus: the zoom that fits a pixel extent', () => {
 
 /* ---------- in a browser: War Focus answers 'prp:focus' ---------- */
 test('War Focus zooms to the states and battles in focus, and back', pageTest, async t => {
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
     const errors = [];
@@ -213,10 +213,21 @@ test('War Focus zooms to the states and battles in focus, and back', pageTest, a
     await page.waitForTimeout(1500); // let the layout settle (a late resize refits the map, and keeps the focus)
     const scale = () => page.evaluate(() => +(/scale\(([\d.]+)\)/.exec(document.querySelector('#map > g').getAttribute('transform')) || [0, 1])[1]);
     await page.evaluate(() => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { countries: ['gw:375'], points: [[30.5, 50.45]] } })));
-    await page.waitForTimeout(2200);
+    // The zoom is a transition: wait for it to end (the scale holds still above 2), not for a fixed time, which a
+    // slow machine overran. The same for the way back. A zoom that never comes still fails, on the assertions below.
+    const settles = async want => {
+      let last = -1;
+      for (let i = 0; i < 40; i++) { // up to 10 seconds
+        await page.waitForTimeout(250);
+        const k = await scale();
+        if (k === last && want(k)) return;
+        last = k;
+      }
+    };
+    await settles(k => k > 2);
     const zoomed = await scale(), outlined = await page.locator('path.state.prp-focus-hit').count();
     await page.evaluate(() => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { reset: true } })));
-    await page.waitForTimeout(1200);
+    await settles(k => k === 1);
     assert.ok(zoomed > 2, `zoomed in: ${zoomed}`);
     assert.equal(outlined, 1, 'Finland outlined');
     assert.equal(await scale(), 1, 'back to the theatre');

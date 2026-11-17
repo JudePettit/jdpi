@@ -289,6 +289,27 @@ test('data: every current leader is the holder of one office, by name from the h
     assert.ok(![by[iso].headOfState, by[iso].headOfGovernment, by[iso].leader?.name].includes(gone), `${iso}: ${gone} is not current`);
 });
 
+// RT-04 (16 November 2026): the Political Retrospective had no leader list for Montenegro and ten microstates, so their
+// leadership figures were empty (no leaders since 1926, no tenure). Its lists now run to the present, and each of these
+// states has the figures. No count is fixed beyond a floor: national-refresh runs this test on new data, and a list
+// that gains its next leader must pass.
+test('data: Montenegro and the ten microstates have leadership figures from the Retrospective\'s lists (RT-04)', () => {
+  const by = Object.fromEntries(read('national/data/index.json').countries.map(c => [c.iso3, c]));
+  const STATES = { MNE: 341, DMA: 54, GRD: 55, LCA: 56, VCT: 57, ATG: 58, KNA: 60, MCO: 221, LIE: 223, AND: 232, SMR: 331 };
+  for (const [iso, gw] of Object.entries(STATES)) {
+    const c = by[iso], l = c?.leadership;
+    assert.ok(c && c.gw === gw, `${iso}: in National Analysis with GW code ${gw}`);
+    assert.ok(l, `${iso}: has leadership data`);
+    assert.ok(l.leaders100 >= 2, `${iso}: ${l.leaders100} leaders since 1926`);
+    assert.ok(l.avgTenure > 0 && l.medianTenure > 0, `${iso}: average ${l.avgTenure} and median ${l.medianTenure} years in office`);
+    assert.ok(l.longest?.name && /^\d{4}$/.test(l.longest.from) && (l.longest.to === 'present' || l.longest.to >= l.longest.from) && l.longest.years > 0,
+      `${iso}: the longest in office, ${JSON.stringify(l.longest)}`);
+  }
+  // San Marino's two Captains Regent change every six months, and the Retrospective lists each of them: two entries a
+  // term, so some four hundred since 1926.
+  assert.ok(by.SMR.leadership.leaders100 >= 300, `SMR: ${by.SMR.leadership.leaders100} entries since 1926`);
+});
+
 // Jude's list (6 November 2026): the most powerful political figure, not the weaker office. Monaco and Liechtenstein go
 // as Political Atlas says; where ../political-atlas is here, every Atlas country's leader holds the office it names.
 // Only the office and the rule are fixed here, never a name: national-refresh runs this test on new data before

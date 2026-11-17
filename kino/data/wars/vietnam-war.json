@@ -8,7 +8,7 @@
     { "qid": "Q36014", "label": "Ho Chi Minh" }
   ],
   "era": [1955, 1975],
-  "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Thirteen scenes, with maps that follow War Focus.",
+  "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Fifteen scenes, with maps that follow War Focus.",
   "minutes": 7,
   "preview": { "scene": "escalation" },
   "sources": [
@@ -20,6 +20,7 @@
     { "id": "goscha-2016", "kind": "book", "author": "Christopher Goscha", "title": "Vietnam: A New History", "year": 2016, "publisher": "Basic Books" },
     { "id": "hirschman-1995", "kind": "article", "author": "Charles Hirschman, Samuel Preston and Vu Manh Loi", "title": "Vietnamese Casualties During the American War: A New Estimate", "year": 1995, "journal": "Population and Development Review 21 (4): 783–812" },
     { "id": "ho-1945", "kind": "web", "title": "Declaration of Independence of the Democratic Republic of Vietnam, 2 September 1945 (from Ho Chi Minh, Selected Works, volume 3, Hanoi, 1960–1962)", "publisher": "Marxists Internet Archive", "url": "https://www.marxists.org/reference/archive/ho-chi-minh/works/1945/declaration-independence.htm" },
+    { "id": "ucdp-prio", "kind": "web", "title": "UCDP/PRIO Armed Conflict Dataset, version 26.1 (CC BY 4.0): conflict 216, the French war in Vietnam, and conflict 293, South Vietnam – North Vietnam, the states on each side", "publisher": "UCDP/PRIO (Uppsala Conflict Data Program and Peace Research Institute Oslo)", "url": "https://ucdp.uu.se/downloads/" },
     { "id": "tonkin-1964", "kind": "web", "title": "Tonkin Gulf Resolution (1964), Public Law 88-408", "publisher": "US National Archives", "url": "https://www.archives.gov/milestone-documents/tonkin-gulf-resolution" },
     { "id": "nara-casualties", "kind": "web", "title": "Vietnam War US Military Fatal Casualty Statistics", "publisher": "US National Archives", "url": "https://www.archives.gov/research/military/vietnam-war/casualty-statistics" }
   ],
@@ -35,11 +36,23 @@
     },
     {
       "id": "independence",
-      "title": "Independence and the French war, 1945–1954",
-      "narration": "On 2 September 1945, as Japan's surrender left a vacuum, Ho Chi Minh declared Vietnam's independence in Hanoi, opening with words borrowed from the American Declaration of Independence. France returned to reclaim its colony, and from December 1946 the Communist-led Viet Minh fought a long war against French forces. As the Cold War hardened, China armed the Viet Minh, and the United States came to pay for much of France's war.",
+      "title": "Independence declared, September 1945",
+      "narration": "On 2 September 1945, as Japan's surrender left a vacuum, Ho Chi Minh declared Vietnam's independence in Hanoi. His declaration opened with words borrowed from the American Declaration of Independence. It said that Vietnam had won its independence from Japan, not France, and it broke off all colonial ties with France.",
       "visual": { "kind": "summary", "text": "Ho Chi Minh declared that Vietnam had won its independence from Japan, not France, and broke off all colonial ties with France: a people who had resisted French rule for more than eighty years and fought beside the Allies must be free.", "of": "Ho Chi Minh, Declaration of Independence of the Democratic Republic of Vietnam", "when": "Hanoi, 2 September 1945", "cite": "ho-1945" },
-      "link": { "label": "War Focus · First Indochina War, December 1946", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=first-indochina&m=1946-12" },
+      "link": { "label": "Master Index · Ho Chi Minh", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q36014" },
       "cites": ["ho-1945", "logevall-2012", "goscha-2016"]
+    },
+    {
+      "id": "french-war",
+      "title": "The French war, 1946–1954",
+      "narration": "France returned to reclaim its colony, and from December 1946 the Communist-led Viet Minh fought a long war against French forces. As the Cold War hardened, China armed the Viet Minh, and the United States came to pay for much of France's war.",
+      "visual": {
+        "kind": "map",
+        "groups": [{ "label": "France, the colonial power", "tone": 1, "countries": ["FRA"] }]
+      },
+      "focus": { "countries": ["VNM"], "points": [[105.85, 21.03, "Hanoi"], [106.7, 10.78, "Saigon"]], "bbox": [-6, 4, 112, 52] },
+      "link": { "label": "War Focus · First Indochina War, December 1946", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=first-indochina&m=1946-12" },
+      "cites": ["logevall-2012", "goscha-2016", "ucdp-prio"]
     },
     {
       "id": "geneva",
@@ -73,7 +86,7 @@
     {
       "id": "escalation",
       "title": "The American war, 1965–1967",
-      "narration": "In March 1965 the United States began a sustained bombing campaign against the North and landed marines at Da Nang, and by the end of 1967 nearly half a million American troops were in South Vietnam. General William Westmoreland fought a war of attrition, while North Vietnamese troops and supplies moved south along the Ho Chi Minh Trail through Laos and Cambodia. China and the Soviet Union supplied the North with weapons, and South Korea, Australia, New Zealand, Thailand and the Philippines sent forces to the South.",
+      "narration": "In March 1965 the United States began a sustained bombing campaign against the North and landed marines at Da Nang, and by the end of 1967 nearly half a million American troops were in South Vietnam. General William Westmoreland fought a war of attrition, while North Vietnamese troops and supplies moved south along the Ho Chi Minh Trail through Laos and Cambodia. China and the Soviet Union supplied the North with weapons.",
       "visual": {
         "kind": "map",
         "groups": [{ "label": "Laos and Cambodia, crossed by the trail", "tone": 3, "countries": ["LAO", "KHM"] }],
@@ -88,10 +101,25 @@
       "cites": ["logevall-1999", "goscha-2016", "nguyen-2012"]
     },
     {
+      "id": "allies",
+      "title": "Allies on both sides",
+      "narration": "The United States did not fight alone. South Korea, Australia, New Zealand, Thailand and the Philippines also sent forces to the South, while North Korea sent forces to support the North.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "The United States and the allies that sent forces to the South", "tone": 1, "countries": ["USA", "KOR", "AUS", "NZL", "THA", "PHL"] },
+          { "label": "North Korea, on the North's side", "tone": 2, "countries": ["PRK"] }
+        ]
+      },
+      "focus": { "countries": ["VNM"], "bbox": [-125, -47, 179, 55] },
+      "link": { "label": "Retrospective Battlefield · 1967", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1967&w=u293" },
+      "cites": ["ucdp-prio", "logevall-1999", "goscha-2016"]
+    },
+    {
       "id": "tet",
       "title": "The Tet Offensive, 1968",
       "narration": "At the lunar new year, at the end of January 1968, Communist forces attacked more than a hundred towns and cities across South Vietnam, including Saigon, where a squad briefly broke into the grounds of the American embassy. They were driven back with very heavy losses almost everywhere, except at Hue, where fighting lasted nearly a month and Communist troops executed thousands of civilians. Militarily Tet was a setback for Hanoi, but it shattered American confidence that the war was being won.",
-      "visual": { "kind": "map" },
+      "visual": { "kind": "map", "groups": [{ "label": "Laos, crossed by the trail", "tone": 3, "countries": ["LAO"] }] },
       "focus": { "countries": ["VNM"], "points": [[107.59, 16.46, "Hue, 31 January – 24 February"], [106.73, 16.62, "Khe Sanh, besieged January – April"], [108.22, 16.07, "Da Nang"], [106.7, 10.78, "Saigon, 31 January"]], "bbox": [102, 8.3, 112, 18.6] },
       "link": { "label": "War Focus · January 1968", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=vietnam-war&m=1968-01" },
       "cites": ["nguyen-2012", "goscha-2016"]

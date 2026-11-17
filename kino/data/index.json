@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16",
+ "generated": "2026-11-17",
  "categories": [
   {
    "id": "political-events",
@@ -188,7 +188,7 @@
    "scenes": 13,
    "parts": 0,
    "quiz": 0,
-   "sources": 16,
+   "sources": 17,
    "scholarly": 10,
    "links": [
     "rs/encyclopedia",
@@ -698,7 +698,7 @@
     1953
    ],
    "minutes": 7,
-   "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Twelve scenes, with maps that follow War Focus through the war's turning points.",
+   "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Thirteen scenes, with maps that follow War Focus through the war's turning points.",
    "subjects": [
     {
      "qid": "Q8663",
@@ -713,10 +713,10 @@
      "label": "South Korea"
     }
    ],
-   "scenes": 12,
+   "scenes": 13,
    "parts": 0,
    "quiz": 0,
-   "sources": 10,
+   "sources": 11,
    "scholarly": 6,
    "links": [
     "rs/battlefield-history",
@@ -960,7 +960,7 @@
     1975
    ],
    "minutes": 7,
-   "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Thirteen scenes, with maps that follow War Focus.",
+   "summary": "From Ho Chi Minh's declaration of independence and the French war to the American escalation, the Tet Offensive, the Paris accords and the fall of Saigon, told from Hanoi, Saigon and Washington. Fifteen scenes, with maps that follow War Focus.",
    "subjects": [
     {
      "qid": "Q8740",
@@ -975,15 +975,15 @@
      "label": "Ho Chi Minh"
     }
    ],
-   "scenes": 13,
+   "scenes": 15,
    "parts": 0,
    "quiz": 0,
-   "sources": 10,
+   "sources": 11,
    "scholarly": 6,
    "links": [
     "rs/battlefield-history",
-    "rs/war-focus",
     "rs/encyclopedia",
+    "rs/war-focus",
     "rt/pestle"
    ],
    "preview": {

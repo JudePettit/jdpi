@@ -450,7 +450,7 @@ test('page: following along in the shell, the now-playing bar shows the film and
     await page.waitForFunction(() => location.hash.startsWith('#/rs/battlefield-history?at='), null, { timeout: 10000 });
     await bar.waitFor({ state: 'visible', timeout: 5000 });
     assert.equal(await bar.getAttribute('aria-label'), 'Now playing in Kino');
-    assert.match((await page.locator('.np-head').innerText()).replace(/\s+/g, ' '), /^Kino · The Korean War, 1950–1953 · 1\/12$/);
+    assert.equal((await page.locator('.np-head').innerText()).replace(/\s+/g, ' '), `Kino · The Korean War, 1950–1953 · 1/${flatScenes(ctx.docs.get('korean-war')).length}`);
     assert.equal(await page.locator('#np-cap').getAttribute('aria-live'), 'polite');
     await page.click('#np-play');
     await kino.waitForFunction(() => document.querySelector('#play').getAttribute('aria-label') === 'Pause', null, { timeout: 5000 });
@@ -461,12 +461,12 @@ test('page: following along in the shell, the now-playing bar shows the film and
     // Next, three times: the shell follows each scene's place, one frame per submodule, the bar keeps count.
     for (const [n, where] of [[2, '#/rs/encyclopedia?at='], [3, '#/rs/encyclopedia?at='], [4, '#/rs/war-focus?at=']]) {
       await page.click('#np-next');
-      await page.waitForFunction(([n, where]) => location.hash.startsWith(where) && document.querySelector('#np-n').textContent === `${n}/12`, [n, where], { timeout: 10000 });
+      await page.waitForFunction(([n, where, count]) => location.hash.startsWith(where) && document.querySelector('#np-n').textContent === `${n}/${count}`, [n, where, flatScenes(ctx.docs.get('korean-war')).length], { timeout: 10000 });
     }
     assert.match(decodeURIComponent(await page.evaluate(() => location.hash)), /#war=korean-war&m=1950-06$/);
     const modules = await page.locator('#frames iframe').evaluateAll(fs => fs.map(f => f.dataset.module));
     assert.deepEqual([...modules].sort(), ['battlefield-history', 'encyclopedia', 'kino-wars', 'war-focus']);
-    assert.equal(await kino.evaluate(() => document.querySelector('#badge').textContent), '4 / 12');
+    assert.equal(await kino.evaluate(() => document.querySelector('#badge').textContent), `4 / ${flatScenes(ctx.docs.get('korean-war')).length}`);
 
     // Moving the shell yourself while the film follows along pauses it (it would otherwise drag the shell back); the
     // bar stays, and its Play resumes the film. Kino's own moves (Next above) never pause it.
@@ -627,7 +627,7 @@ test('page: Follow pressed while Kino\'s page is still loading keeps the now-pla
     release();
     await loaded; // the shell's own listener on the frame ran first: it was added when the frame was made
     assert.equal(await page.locator('#np').isVisible(), true, 'the bar stays: the page that loaded is the one following along');
-    assert.match((await page.locator('.np-head').innerText()).replace(/\s+/g, ' '), /^Kino · The Korean War, 1950–1953 · 1\/12$/);
+    assert.equal((await page.locator('.np-head').innerText()).replace(/\s+/g, ' '), `Kino · The Korean War, 1950–1953 · 1/${flatScenes(ctx.docs.get('korean-war')).length}`);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
@@ -1607,4 +1607,83 @@ test('page: what each catalogue says: illustrative maps, cutoffs, ready apart fr
     assert.equal(await a.getAttribute('target'), '_top');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
+});
+
+/* ---- AC-9 (Jude, October and 16 November 2026): the war films show every country that fought, where the sources allow.
+   The coverage script's war-film and war-scene gaps (integration/scripts/coverage.mjs), worked out for these three
+   films from this repository's data alone: War Focus, the Retrospective Battlefield (UCDP/PRIO's parties to each war)
+   and the films themselves. */
+let warGapsMemo;
+function warGaps() {
+  warGapsMemo ??= (async () => {
+    const { makeResolvers, warFocusWar, retroWar, kinoFilms, warFilmGaps } = await import('../integration/scripts/coverage.mjs');
+    const { COUNTRIES: names } = await import('../analytics/lib/countries.js');
+    await import('../design/prp-focus.js');
+    const cal = await import('../calendar/scripts/countries.mjs');
+    const { readAt } = await import('../kino/lib/links.js');
+    const R = makeResolvers({ national: read('national/data/index.json').countries, names, focus: globalThis.PRPFocus, normaliseCountry: cal.normaliseCountry,
+      historical: read('kino/data/iso.json').historical, boundaries: read('headlines/boundaries.json'), cshapes: read('battlefield/history/data/borders.topo.json') });
+    const wfList = read('battlefield/focus/data/index.json').wars.map(m => warFocusWar(read(`battlefield/focus/data/wars/${m.id}.json`), R));
+    const wf = new Map(wfList.map(w => [w.id, w]));
+    const rb = new Map(read('battlefield/history/data/wars.json').wars.map(w => retroWar(w, R)).map(w => [w.id, w]));
+    const films = ['korean-war', 'vietnam-war', 'winston-churchill'].map(id => ctx.docs.get(id)).map(doc => ({ meta: { id: doc.id, category: doc.category, title: doc.title }, doc }));
+    const k = kinoFilms(films, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: w.bf }])), rbWars: rb });
+    const gaps = warFilmGaps(k.films, new Map(k.pieces.map(p => [p.id, p])), { wf, rb }, R);
+    return id => gaps.find(g => g.piece === id) || { countries: [], states: [], scenes: [] };
+  })();
+  return warGapsMemo;
+}
+const UN_COMBAT = 'AUS BEL CAN COL ETH FRA GBR GRC LUX NLD NZL PHL THA TUR USA ZAF'.split(' ');
+const VIETNAM_ALLIES = 'AUS KOR NZL PHL THA USA'.split(' ');
+const lit = s => new Set([...(s.focus?.countries || []), ...(s.visual.groups || []).flatMap(g => g.countries)]);
+
+test('coverage: the Korean War film shows the sixteen countries that sent combat forces; only the Soviet Union waits', async () => {
+  const g = (await warGaps())('kino:wars/korean-war');
+  assert.deepEqual(g.countries, [], 'countries of the war the film never shows');
+  assert.deepEqual(g.scenes, [], 'scenes that leave a fighting country grey');
+  // The Soviet Union (UCDP/PRIO lists it on the North's side) is added only on Jude's choice 12.
+  assert.ok(g.states.every(s => s.name === 'the Soviet Union'), g.states.map(s => s.name).join(', '));
+  const scenes = flatScenes(ctx.docs.get('korean-war')), i = scenes.findIndex(s => s.id === 'united-nations');
+  const next = scenes[i + 1];
+  assert.equal(scenes[i].visual.kind, 'summary', 'resolution 83 is still summarised');
+  assert.equal(next.visual.kind, 'map', 'a map follows the Security Council');
+  for (const c of UN_COMBAT) assert.ok(lit(next).has(c), `${next.id}: ${c} is lit`);
+  for (const c of ['SUN', 'RUS', 'DNK', 'IND', 'ITA', 'NOR', 'SWE']) assert.ok(!lit(next).has(c), `${next.id}: ${c} is not one of the sixteen`);
+  assert.ok(next.cites.includes('ucdp-prio'), 'the parties come from UCDP/PRIO');
+});
+
+test('coverage: the Vietnam War film shows France, South Vietnam\'s allies and North Korea, and Laos at Tet', async () => {
+  const g = (await warGaps())('kino:wars/vietnam-war');
+  assert.deepEqual(g.countries, [], 'countries of the war the film never shows');
+  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing]), [], 'the Tet scene and every other leave no fighting country grey');
+  assert.deepEqual(g.states, []);
+  const scenes = flatScenes(ctx.docs.get('vietnam-war')), by = id => scenes.find(s => s.id === id);
+  const french = scenes.find(s => s.link?.at === 'battlefield/focus/index.html#war=first-indochina&m=1946-12');
+  assert.ok(french && french.visual.kind === 'map' && lit(french).has('FRA'), 'the First Indochina War scene lights France');
+  const allies = scenes.find(s => s.visual.kind === 'map' && VIETNAM_ALLIES.every(c => lit(s).has(c)));
+  assert.ok(allies, 'a map lights the United States and the five allies that sent forces');
+  assert.ok(lit(allies).has('PRK'), 'and North Korea, on the North\'s side');
+  assert.ok(lit(by('tet')).has('LAO'), 'Tet lights Laos');
+  assert.equal(by('independence').visual.kind, 'summary', 'the declaration is still summarised');
+});
+
+test('coverage: Churchill\'s Battle of Britain lights Norway, then occupied', async () => {
+  const g = (await warGaps())('kino:political-figures/winston-churchill');
+  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing]), []);
+  assert.ok(lit(flatScenes(ctx.docs.get('winston-churchill')).find(s => s.id === 'battle-of-britain')).has('NOR'));
+});
+
+test('sources: the war films name UCDP/PRIO\'s Armed Conflict Dataset for the parties to each war', () => {
+  for (const id of ['korean-war', 'vietnam-war']) {
+    const s = ctx.docs.get(id).sources.find(x => x.id === 'ucdp-prio');
+    assert.ok(s && s.kind === 'web' && s.url === 'https://ucdp.uu.se/downloads/', `${id}: the UCDP/PRIO source`);
+    assert.equal(shortCite(s), 'UCDP/PRIO');
+  }
+});
+
+// AC-9 review R1: a summary card stays up only while its narration plays, so the card never holds more words than the
+// narration under it (vietnam-war/independence spoke 30 words under a 42-word card when the French war moved out).
+test('summary cards: no card holds more words than the narration it is shown under', () => {
+  for (const d of ctx.docs.values()) for (const s of flatScenes(d)) if (s.visual.kind === 'summary')
+    assert.ok(wordCount(s.narration || '') >= wordCount(s.visual.text || ''), `${d.id}/${s.id}: ${wordCount(s.narration || '')} words spoken under a ${wordCount(s.visual.text || '')}-word card`);
 });

@@ -8,6 +8,7 @@
   "minutes": 7,
   "sources": [
     { "id": "wd", "kind": "wikidata", "title": "Winston Churchill (Q8016)", "url": "https://www.wikidata.org/wiki/Q8016" },
+    { "id": "wd-norway", "kind": "wikidata", "title": "German occupation of Norway (Q819274), 9 April 1940 to 8 May 1945", "url": "https://www.wikidata.org/wiki/Q819274" },
     { "id": "gilbert-1991", "kind": "book", "author": "Martin Gilbert", "title": "Churchill: A Life", "year": 1991, "publisher": "Heinemann" },
     { "id": "jenkins-2001", "kind": "book", "author": "Roy Jenkins", "title": "Churchill", "year": 2001, "publisher": "Macmillan" },
     { "id": "addison-2005", "kind": "book", "author": "Paul Addison", "title": "Churchill: The Unexpected Hero", "year": 2005, "publisher": "Oxford University Press" },
@@ -114,7 +115,8 @@
         "kind": "map",
         "groups": [
           { "label": "United Kingdom", "tone": 1, "countries": ["GBR"] },
-          { "label": "Germany", "tone": 2, "countries": ["DEU"] }
+          { "label": "Germany", "tone": 2, "countries": ["DEU"] },
+          { "label": "Norway, occupied by Germany", "tone": 2, "countries": ["NOR"] }
         ],
         "arrows": [
           { "from": [2.2, 50.2], "via": [1.0, 51.0], "to": [-0.1, 51.4], "tone": 2, "label": "Luftwaffe" },
@@ -123,7 +125,7 @@
       },
       "focus": { "countries": ["GBR"], "points": [[-0.13, 51.51, "London"], [-0.33, 51.62, "Fighter Command, Bentley Priory"]], "bbox": [-9, 48.5, 12, 60] },
       "link": { "label": "War Focus · August 1940", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1940-08" },
-      "cites": ["hansard-1940-aug", "roberts-2018"]
+      "cites": ["hansard-1940-aug", "roberts-2018", "wd-norway"]
     },
     {
       "id": "grand-alliance",

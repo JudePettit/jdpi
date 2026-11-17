@@ -8,7 +8,7 @@
     { "qid": "Q884", "label": "South Korea" }
   ],
   "era": [1950, 1953],
-  "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Twelve scenes, with maps that follow War Focus through the war's turning points.",
+  "summary": "How a divided Korea went to war, how the United Nations and then China were drawn in, why the front ended close to where it began, and what the war cost. Thirteen scenes, with maps that follow War Focus through the war's turning points.",
   "minutes": 7,
   "preview": { "scene": "china" },
   "sources": [
@@ -21,6 +21,7 @@
     { "id": "lacina-gleditsch-2005", "kind": "article", "author": "Bethany Lacina and Nils Petter Gleditsch", "title": "Monitoring Trends in Global Combat: A New Dataset of Battle Deaths", "year": 2005, "journal": "European Journal of Population 21 (2–3): 145–166 (PRIO Battle Deaths Dataset, version 3.1)", "url": "https://doi.org/10.1007/s10680-005-6851-6" },
     { "id": "unsc-83", "kind": "web", "title": "Security Council resolution 83 (1950), adopted 27 June 1950", "publisher": "United Nations Digital Library", "url": "https://digitallibrary.un.org/record/112026" },
     { "id": "unsc-83-ws", "kind": "web", "title": "United Nations Security Council Resolution 83, the text of the resolution (the copy read on 16 November 2026, when the UN Digital Library did not load)", "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/United_Nations_Security_Council_Resolution_83" },
+    { "id": "ucdp-prio", "kind": "web", "title": "UCDP/PRIO Armed Conflict Dataset, version 26.1 (CC BY 4.0): conflict 235, North Korea – South Korea, the states on each side", "publisher": "UCDP/PRIO (Uppsala Conflict Data Program and Peace Research Institute Oslo)", "url": "https://ucdp.uu.se/downloads/" },
     { "id": "armistice-1953", "kind": "web", "title": "Korean Armistice Agreement, Panmunjom, 27 July 1953 (full text)", "publisher": "The World and Japan Database", "url": "https://worldjpn.net/documents/texts/JPKR/19530727.O1E.html" }
   ],
   "scenes": [
@@ -98,6 +99,21 @@
       "visual": { "kind": "summary", "text": "Noting that North Korea had neither stopped fighting nor pulled back to the 38th parallel, the Council recommended that UN members give South Korea the help needed to repel the attack and restore peace in the region.", "of": "United Nations Security Council, resolution 83", "when": "27 June 1950", "cite": "unsc-83-ws" },
       "link": { "label": "Master Index · Harry S. Truman", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q11613" },
       "cites": ["unsc-83", "unsc-83-ws", "stueck-1995"]
+    },
+    {
+      "id": "sixteen-nations",
+      "title": "Sixteen nations under the United Nations flag, 1950–1953",
+      "narration": "Sixteen countries sent combat forces to fight beside South Korea, under the unified command that the Security Council had placed in American hands. They were the United States, Britain, Canada, Australia, New Zealand, South Africa, France, Belgium, Luxembourg, the Netherlands, Greece, Turkey, Ethiopia, Colombia, Thailand and the Philippines.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "South Korea and the sixteen countries that sent combat forces", "tone": 1, "countries": ["KOR", "USA", "GBR", "CAN", "AUS", "NZL", "ZAF", "FRA", "BEL", "LUX", "NLD", "GRC", "TUR", "ETH", "COL", "THA", "PHL"] },
+          { "label": "North Korea", "tone": 2, "countries": ["PRK"] }
+        ]
+      },
+      "focus": { "countries": ["KOR"], "bbox": [-125, -47, 179, 62] },
+      "link": { "label": "Retrospective Battlefield · 1951", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1951&w=u235" },
+      "cites": ["ucdp-prio", "stueck-1995"]
     },
     {
       "id": "inchon",

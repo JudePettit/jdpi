@@ -34,7 +34,8 @@
 .mapwrap{position:relative;height:500px;background:var(--prp-map-water);border-bottom:1px solid var(--prp-line-soft)}
 #map{height:100%;width:100%;background:var(--prp-map-water)}
 .maplegend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px 0;color:var(--prp-text-2);font-size:12px}
-.maplegend i{display:inline-block;width:12px;height:10px;margin-right:6px;border:1px solid var(--hl-covered-line);border-radius:2px;vertical-align:-1px;background:var(--hl-covered)}
+.maplegend i{display:inline-block;width:12px;height:10px;margin-right:6px;border:1px solid var(--hl-covered-line);border-radius:2px;vertical-align:-1px}
+.maplegend i:not(.prp-nodata-swatch){background:var(--hl-covered)}.maplegend i.prp-nodata-swatch{border-color:var(--prp-map-border)}
 .maplegend i.sel{border-color:var(--hl-selected);background:var(--hl-selected)}
 .maplegend i.dot{width:10px;border-radius:50%}
 .mapfig figcaption{margin:8px 14px 14px}
@@ -54,6 +55,12 @@
 .country:hover{fill:var(--hl-hover)}
 .country.selected,.country.selected:hover{fill:var(--hl-selected);stroke:var(--prp-surface)}
 .country-dot{stroke-width:1.5px}
+/* A country with no outlets: the map kit's hatch (design/prp-mapkit.js, PRPMapkit.install(); its plain no-data grey if the
+   kit is missing), the same on hover, and outlined in the accent when chosen. It says why in its tooltip and panel. */
+.country.prp-nodata,.country.prp-nodata:hover{fill:url(#prp-nodata) var(--prp-map-nodata);stroke:var(--prp-map-border)}
+.country.prp-nodata:hover,.country-dot.prp-nodata{stroke:var(--prp-muted)}
+.country.prp-nodata.selected,.country.prp-nodata.selected:hover{fill:url(#prp-nodata) var(--prp-map-nodata);stroke:var(--hl-selected);stroke-width:2px}
+.mapwrap .leaflet-tooltip.hl-nodata-tip{width:max-content;max-width:min(280px,70vw);white-space:normal;font-weight:400;line-height:1.45}
 .mapwrap .leaflet-bar{border:1px solid var(--prp-line-strong);border-radius:var(--prp-radius-sm);box-shadow:var(--prp-shadow-1);background-clip:border-box}
 .mapwrap .leaflet-bar a{width:30px;height:30px;border-bottom:1px solid var(--prp-line);background:var(--prp-surface);color:var(--prp-text);font:500 17px/29px var(--prp-font-ui)}
 .mapwrap .leaflet-bar a:first-child{border-radius:var(--prp-radius-sm) var(--prp-radius-sm) 0 0}.mapwrap .leaflet-bar a:last-child{border-bottom:0;border-radius:0 0 var(--prp-radius-sm) var(--prp-radius-sm)}
@@ -128,6 +135,7 @@
 </style>
 <script src="../design/prp-bar.js" data-suite="rt" data-module="headlines" data-shell="../" defer></script>
 <script src="../design/prp-access.js"></script>
+<script src="../design/prp-mapkit.js"></script>
 </head>
 <body><div class="wrap">
 <header class="front">
@@ -144,7 +152,7 @@
     <div class="countrybar"><label class="prp-label" for="countryPick">Country</label><select class="prp-select" id="countryPick" disabled><option value="">Loading countries…</option></select></div>
     <figure class="prp-figure mapfig">
       <div class="mapwrap"><div id="map"></div></div>
-      <div class="maplegend"><span><i aria-hidden="true"></i>Covered country</span><span><i class="dot" aria-hidden="true"></i>Small country</span><span><i class="sel" aria-hidden="true"></i>Selected</span></div>
+      <div class="maplegend"><span><i aria-hidden="true"></i>Covered country</span><span><i class="dot" aria-hidden="true"></i>Small country</span><span><i class="sel" aria-hidden="true"></i>Selected</span><span><i class="prp-nodata-swatch" aria-hidden="true"></i>No front page found</span></div>
       <figcaption><b>Figure 1.</b> The countries the tracker covers: Europe, North America, China, Israel, Russia, Japan and Saudi Arabia. Countries too small to click at this scale also have a round marker. Boundaries: Natural Earth via datasets/geo-countries, simplified; basemap © Esri.</figcaption>
     </figure>
     <details class="country-az"><summary>All <span id="countryCount">covered</span> countries, A–Z</summary><ul class="az-list" id="countryList"></ul></details>
@@ -176,20 +184,39 @@ const prpThemeNow=()=>document.documentElement.dataset.theme||(matchMedia('(pref
 const map=window.L?L.map('map',{zoomControl:true,scrollWheelZoom:false,minZoom:1,maxZoom:5,worldCopyJump:true,zoomSnap:.25}).fitBounds([[8,-128],[72,146]]):null;if(map){const baseTiles=L.tileLayer(tileUrl(),{attribution:'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors',maxZoom:16});let tileLoaded=0,tileFailed=0;baseTiles.on('tileload',()=>{tileLoaded++;setSourceStatus('status-tiles',tileFailed?'degraded':'ready',tileFailed?'Map tiles · partial coverage':'Map tiles · available')});baseTiles.on('tileerror',()=>{tileFailed++;setSourceStatus('status-tiles',tileLoaded?'degraded':'unavailable',tileLoaded?'Map tiles · partial coverage':'Map tiles · unavailable')});baseTiles.addTo(map);window.addEventListener('prp:themechange',()=>baseTiles.setUrl(tileUrl()))}else setSourceStatus('status-tiles','unavailable','Map library · unavailable');let geoLayer;
 // Each shape carries its ISO 3166-1 alpha-2 code and name (research-workspace.js reads them too).
 function countryIdentity(properties={}){const code=/^[A-Z]{2}$/.test(properties.code||'')?properties.code:null;return {code,name:properties.name||code||'Unknown country'}}
-const token=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();const countryStyle=f=>{const dot=f?.geometry?.type==='Point';return {className:dot?'country country-dot':'country',color:token('--hl-covered-line'),weight:dot?1.5:.6,fillColor:token('--hl-covered'),fillOpacity:.9}};
+const token=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+/* ---------- every country on the map (VM's 197 and Greenland, Jude's rule of 16 November 2026; design/PRP-STYLE.md §6) ----------
+   A country with no outlets (properties.covered false) takes the map kit's no-data hatch (design/prp-mapkit.js) and says
+   why, in its tooltip and in the panel, and nothing else of headlines. The kit's sentence builder writes "<Country>: no …",
+   not this page's sentence, so the words are kept here. */
+const NODATA_CLASS=(window.PRPMapkit?PRPMapkit.install():null)?.className||'prp-nodata';
+// The names that take "the" in running text ("No front page found for the Philippines").
+const WITH_THE=new Set(['AE','CD','CF','CG','GM','KM','MH','MV','PH','SB','SC']);
+const noFrontPage=(name,code)=>'No front page found for '+(WITH_THE.has(code)?'the ':'')+name+'. VM has not found a news feed from this country whose terms allow its headlines to be shown here.';
+// The two shapes the kit gives no country (Northern Cyprus, Somaliland: boundaries.json's `unclaimed` object) are drawn
+// hatched too, and say so in the kit's words.
+const UNCLAIMED_ALSO='It is not one of the 197 countries VM follows';
+const unclaimedSentence=name=>{try{return PRPMapkit.sentence({name,reason:'not-covered',unclaimed:true,what:'front page',also:UNCLAIMED_ALSO})}catch{return name+': this page has no front page for it. '+UNCLAIMED_ALSO+'.'}};
+const featureKey=p=>countryIdentity(p).code||(p?.unclaimed?'unclaimed:'+p.name:null);
+// The picker and the A–Z list offer only the countries with headlines (a country with none is on the map, which says so):
+// this one test decides what they list.
+const LISTED=c=>c.covered;
+const countryStyle=f=>{const dot=f?.geometry?.type==='Point',nodata=f?.properties?.covered===false;return {className:(dot?'country country-dot':'country')+(nodata?' '+NODATA_CLASS:''),color:token(nodata?'--prp-map-border':'--hl-covered-line'),weight:dot?1.5:.6,fillColor:token(nodata?'--prp-map-nodata':'--hl-covered'),fillOpacity:nodata?1:.9}};
 // The selected country is a class on its path (CSS paints it in the accent), so other code restyling the layer can't hide it.
 // Markers stay above every shape (Italy must not cover San Marino's), and the picker and the A–Z list follow the selection.
 function markSelected(code){
   syncCountryPicker(code);
   if(!geoLayer)return;
   const dots=[];
-  geoLayer.eachLayer(l=>{const on=!!code&&countryIdentity(l.feature?.properties).code===code;l.getElement?.()?.classList.toggle('selected',on);if(l.feature?.geometry?.type==='Point')dots.push([l,on]);else if(on)l.bringToFront()});
+  geoLayer.eachLayer(l=>{const on=!!code&&featureKey(l.feature?.properties)===code;l.getElement?.()?.classList.toggle('selected',on);if(l.feature?.geometry?.type==='Point')dots.push([l,on]);else if(on)l.bringToFront()});
   for(const [l] of dots)l.bringToFront();
   for(const [l,on] of dots)if(on)l.bringToFront();
 }
-/* ---------- covered countries: the keys of outlets.json (what is collected each day), named and drawn from boundaries.json ----------
-   The picker and the A–Z list work even without the map. ?country= (research-workspace.js) waits for countriesReady, then findCountry. */
+/* ---------- the countries: every one in boundaries.json, covered when outlets.json collects it (what is collected each day) ----------
+   The picker and the A–Z list (LISTED) work even without the map. ?country= (research-workspace.js) waits for countriesReady,
+   then findCountry, which finds a country with no outlets too (its panel then says so). */
 let countries=[];
+const listed=()=>countries.filter(LISTED);
 const regionName=(()=>{try{const names=new Intl.DisplayNames(['en-GB'],{type:'region'});return code=>names.of(code)||code}catch{return code=>code}})();
 const getJson=url=>fetch(url).then(r=>{if(!r.ok)throw new Error(url+' returned '+r.status);return r.json()});
 // TopoJSON (quantised, delta-encoded arcs) to GeoJSON features; a shape smaller than the grid (Vatican City) has no geometry, only its dot.
@@ -204,7 +231,7 @@ function topoFeatures(topo,name){
 const dotRadius=()=>{const z=map.getZoom();return z<3?3.5:z<4?5:6.5};
 function drawCountries(features){
   const dots=features.filter(f=>f.properties.dot).map(f=>({type:'Feature',properties:f.properties,geometry:{type:'Point',coordinates:f.properties.dot}}));
-  geoLayer=L.geoJSON({type:'FeatureCollection',features:[...features.filter(f=>f.geometry),...dots]},{style:countryStyle,pointToLayer:(f,latlng)=>L.circleMarker(latlng,{radius:dotRadius()}),onEachFeature:(f,l)=>{const {code,name}=countryIdentity(f.properties);l.bindTooltip(name,{sticky:true});l.on('click',()=>loadNews(code,name))}}).addTo(map);
+  geoLayer=L.geoJSON({type:'FeatureCollection',features:[...features.filter(f=>f.geometry),...dots]},{style:countryStyle,pointToLayer:(f,latlng)=>L.circleMarker(latlng,{radius:dotRadius()}),onEachFeature:(f,l)=>{const {code,name}=countryIdentity(f.properties);if(f.properties.unclaimed){const text=unclaimedSentence(name);l.bindTooltip(escHtml(text),{sticky:true,className:'hl-nodata-tip'});l.on('click',()=>showNoFrontPage(null,name,text));return}if(f.properties.covered===false)l.bindTooltip(escHtml(noFrontPage(name,code)),{sticky:true,className:'hl-nodata-tip'});else l.bindTooltip(escHtml(name),{sticky:true});l.on('click',()=>loadNews(code,name))}}).addTo(map);
   map.on('zoomend',()=>geoLayer.eachLayer(l=>l.setRadius?.(dotRadius())));
   markSelected(selected?.code);
 }
@@ -220,16 +247,17 @@ function findCountry(query){
 }
 function syncCountryPicker(code){
   const pick=document.getElementById('countryPick');
-  if(!pick.disabled)pick.value=countries.some(c=>c.code===code)?code:'';
+  if(!pick.disabled)pick.value=listed().some(c=>c.code===code)?code:'';
   document.querySelectorAll('#countryList .az-item').forEach(b=>{if(b.dataset.code===code)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current')});
 }
 function renderCountryPicker(){
   const pick=document.getElementById('countryPick');
-  if(!countries.length){pick.innerHTML='<option value="">Country list unavailable</option>';return}
-  pick.innerHTML='<option value="" disabled selected>Choose a country…</option>'+countries.map(c=>'<option value="'+escHtml(c.code)+'">'+escHtml(c.name)+'</option>').join('');
+  const list=listed();
+  if(!list.length){pick.innerHTML='<option value="">Country list unavailable</option>';return}
+  pick.innerHTML='<option value="" disabled selected>Choose a country…</option>'+list.map(c=>'<option value="'+escHtml(c.code)+'">'+escHtml(c.name)+'</option>').join('');
   pick.disabled=false;
-  document.getElementById('countryList').innerHTML=countries.map(c=>'<li><button type="button" class="az-item" data-code="'+escHtml(c.code)+'">'+escHtml(c.name)+'</button></li>').join('');
-  document.getElementById('countryCount').textContent=countries.length;
+  document.getElementById('countryList').innerHTML=list.map(c=>'<li><button type="button" class="az-item" data-code="'+escHtml(c.code)+'">'+escHtml(c.name)+'</button></li>').join('');
+  document.getElementById('countryCount').textContent=list.length;
   syncCountryPicker(selected?.code);
 }
 // Arrow keys change a select at once, so a choice loads after a short pause rather than for every country passed.
@@ -237,13 +265,17 @@ let pickTimer;document.getElementById('countryPick').addEventListener('change',e
 // On one column the headlines sit below the list, so a choice there brings them into view.
 document.getElementById('countryList').addEventListener('click',e=>{const b=e.target.closest('.az-item'),c=b&&countries.find(x=>x.code===b.dataset.code);if(!c)return;loadNews(c.code,c.name);if(matchMedia('(max-width:1100px)').matches)document.querySelector('.newspanel').scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})});
 const countriesReady=Promise.allSettled([getJson('../headlines/outlets.json'),getJson('../headlines/boundaries.json')]).then(([outlets,topo])=>{
-  let features=[];try{if(topo.status==='fulfilled')features=topoFeatures(topo.value,'countries')}catch{/* not TopoJSON: the list still works */}
+  let features=[],unclaimed=[];try{if(topo.status==='fulfilled'){features=topoFeatures(topo.value,'countries');if(topo.value.objects.unclaimed)unclaimed=topoFeatures(topo.value,'unclaimed').filter(f=>f.geometry).map(f=>({...f,properties:{...f.properties,covered:false}}))}}catch{/* not TopoJSON: the list still works */}
+  // Covered: collected by outlets.json; without it, as the boundary file was built.
+  const collected=outlets.status==='fulfilled'?new Set(Object.keys(outlets.value)):null;
+  features=features.filter(f=>/^[A-Z]{2}$/.test(f.properties.code||''));
+  for(const f of features)f.properties.covered=collected?collected.has(f.properties.code):f.properties.covered!==false;
   const shapes=new Map(features.map(f=>[f.properties.code,f.properties]));
-  const codes=(outlets.status==='fulfilled'?Object.keys(outlets.value):[...shapes.keys()]).filter(c=>/^[A-Z]{2}$/.test(c));
-  countries=codes.map(code=>{const p=shapes.get(code)||{};return {code,name:p.name||regionName(code),iso3:p.iso3||'',aliases:p.aliases||[]}}).sort((a,b)=>a.name.localeCompare(b.name,'en-GB'));
+  const codes=[...new Set([...(collected||[]),...shapes.keys()])].filter(c=>/^[A-Z]{2}$/.test(c));
+  countries=codes.map(code=>{const p=shapes.get(code)||{};return {code,name:p.name||regionName(code),iso3:p.iso3||'',aliases:p.aliases||[],covered:collected?collected.has(code):p.covered!==false}}).sort((a,b)=>a.name.localeCompare(b.name,'en-GB'));
   renderCountryPicker();
-  const drawn=features.filter(f=>codes.includes(f.properties.code));
-  if(map&&drawn.length){drawCountries(drawn);setSourceStatus('status-boundaries','ready','Boundaries · '+drawn.length+' covered countries')}
+  const drawnCovered=features.filter(f=>f.properties.covered).length;
+  if(map&&features.length){drawCountries([...features,...unclaimed]);setSourceStatus('status-boundaries','ready','Boundaries · '+drawnCovered+' covered countries')}
   else{setSourceStatus('status-boundaries','unavailable','Country boundaries · unavailable');document.querySelector('.maphint').textContent=countries.length?'The map is unavailable. Choose a country from the list.':'Country boundaries are unavailable. Try again later.';if(!countries.length)document.getElementById('newsstate').textContent='Map data unavailable'}
   return countries;
 });
@@ -271,6 +303,8 @@ async function loadNews(code,name,force=false){
     return;
   }
   syncCountryParam(name);
+  if(countries.find(c=>c.code===code)?.covered===false)return showNoFrontPage(code,name);
+  setHeadlineTools(true);
   if(!globalThis.GTTSDB)return loadNewsDirect(code,name,force);
   if(globalThis.GTTSDB.topStories)return loadTopStories(code,name);
   selected={code,name};
@@ -321,6 +355,27 @@ async function loadNews(code,name,force=false){
   if(refreshError){const limited=refreshError.status===429||refreshError.payload?.http_status===429;setSourceStatus('status-news',limited?'degraded':'unavailable',limited?'GDELT rate limited · retry after 15 minutes':'GDELT headlines · unavailable');document.getElementById('newsstate').textContent=limited?'Rate limited':'Unavailable';document.getElementById('articles').innerHTML='<div class="empty">No saved headlines are available for this period.<br>Source refresh failed; try again later.<br><span style="font-size:11px">'+String(refreshError.message||'').replace(/[<>]/g,'')+'</span></div>';return}
   if(refreshAttempted){const sourceReady=refreshResult?.ok&&Number(refreshResult.count)===0||latestStatus?.state==='ready';setSourceStatus('status-news',sourceReady?'ready':'stale',sourceReady?'GDELT available · no headlines returned':'No headlines returned · no saved snapshot');document.getElementById('newsstate').textContent=sourceReady?'No matching stories':'No saved stories';document.getElementById('articles').innerHTML='<div class="empty">No headlines were returned for this country today.<br>Try another country or check again later.</div>';return}
   setSourceStatus('status-news','stale','No saved snapshot for this period');setSourceStatus('status-archive','stale','Archive history · no saved snapshot for this period');document.getElementById('newsstate').textContent='No archived stories';document.getElementById('articles').innerHTML='<div class="empty">No historical snapshot is stored for this period yet.<br>The archive starts collecting when a country is refreshed.</div>';
+}
+// The view's caption and archive controls and the Refresh button belong to a country with headlines: hidden for one with
+// none, shown again when a covered country loads.
+function setHeadlineTools(on){document.querySelector('.viewbar').hidden=!on;document.getElementById('refresh').hidden=!on}
+// A country with no outlets: its name, its code and the sentence, and nothing else of headlines. A load still under way
+// for the country chosen before is dropped (loadSeq). code null: one of the two shapes given to no country (text: its
+// sentence); then nothing is selected for a later reload, and the address drops ?country=.
+function showNoFrontPage(code,name,text){
+  loadSeq++;
+  selected=code?{code,name}:null;
+  setDated('');
+  setHeadlineTools(false);
+  document.getElementById('countryname').textContent=name;
+  document.getElementById('countrycode').textContent=code||'No country code';
+  document.getElementById('newsstate').textContent='Not covered';
+  const note=document.createElement('div');note.className='empty';note.textContent=text||noFrontPage(name,code);
+  document.getElementById('articles').replaceChildren(note);
+  setSourceStatus('status-news','idle','Headlines · none for this '+(code?'country':'place'));
+  setSourceStatus('status-database','idle','Headline archive · none for this '+(code?'country':'place'));
+  if(!code)try{const u=new URL(location.href);u.searchParams.delete('country');history.replaceState(history.state,'',u)}catch{}
+  markSelected(code||'unclaimed:'+name);
 }
 function renderArticles(rows){document.getElementById('newsstate').textContent=rows.length+' stories';document.getElementById('articles').innerHTML=rows.length?PRPAccess.leadFree(rows,rowFree).map((a,i)=>{let title=a.title||a.socialimage||'Untitled story',url=a.url||a.article_url||'#',domain=a.domain||(url.startsWith('http')?new URL(url).hostname:'Unknown source');let published=a.seendate?new Date(a.seendate.slice(0,4)+'-'+a.seendate.slice(4,6)+'-'+a.seendate.slice(6,8)+'T'+a.seendate.slice(8,10)+':'+a.seendate.slice(10,12)+':00Z'):a.published_at?new Date(a.published_at):null;return '<div class="article"><span class="rank">'+String(i+1).padStart(2,'0')+'</span><div><a class="headline" href="'+url.replace(/"/g,'&quot;')+'" target="_blank" rel="noreferrer">'+title.replace(/[<>]/g,'')+PRPAccess.label(rowAccess(a))+'</a><div class="source"><span>'+domain.replace(/[<>]/g,'')+'</span><span>'+(published?published.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'UTC'})+' UTC':'Recent')+'</span></div></div></div>'}).join(''):'<div class="empty">No matching headlines found<br>for this country in this time window.</div>'}
 document.getElementById('refresh').onclick=()=>selected?loadNews(selected.code,selected.name,true):null;const historyDate=document.getElementById('historyDate');historyDate.max=new Date().toISOString().slice(0,10);historyDate.value=historyDate.max;historyDate.onchange=()=>selected?loadNews(selected.code,selected.name):null;

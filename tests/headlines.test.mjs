@@ -36,17 +36,78 @@ test('UK shows top stories grouped by outlet, linking to the original articles',
 const outlets = JSON.parse(readFileSync(new URL('../headlines/outlets.json', import.meta.url), 'utf8'));
 const topo = JSON.parse(readFileSync(new URL('../headlines/boundaries.json', import.meta.url), 'utf8'));
 const shapes = topo.objects.countries.geometries;
+// VM's 197 countries (the United Nations members, the Holy See, Palestine, Kosovo and Taiwan), as the coverage script
+// defines them from National Analysis's list, and Greenland beside them (Jude's rule of 16 November 2026: every map
+// about countries draws them all; PRP-ALL-COUNTRIES-PLAN.md, AC-2).
+const { TERRITORIES, EXTRA_TARGET, KEEP } = await import('../integration/scripts/coverage.mjs');
+await import('../design/prp-mapkit.js');
+const VM_COUNTRIES = [...new Set([...JSON.parse(readFileSync(new URL('../national/data/index.json', import.meta.url), 'utf8')).countries
+  .map(c => c.iso3).filter(i => !TERRITORIES.has(i)), ...EXTRA_TARGET])];
+const MAPPED = [...VM_COUNTRIES, ...KEEP];
+// What a country with no outlets says, on the map and in the panel (AC-2's sentence, word for word).
+const noFrontPage = name => `No front page found for ${name}. VM has not found a news feed from this country whose terms allow its headlines to be shown here.`;
+const BOUNDARIES_KB = 300;
 
-test('the boundary file has a shape or a marker for every collected country, and nothing else', () => {
-  const codes = Object.keys(outlets);
-  const usable = new Set(shapes.filter(g => g.type || g.properties.dot).map(g => g.properties.code));
-  assert.deepEqual(codes.filter(c => !usable.has(c)), [], 'collected but not on the map (rebuild: node headlines/scripts/build-boundaries.mjs)');
-  assert.deepEqual(shapes.map(g => g.properties.code).filter(c => !(c in outlets)), [], 'on the map but not collected');
-  for (const c of ['SV', 'XK']) assert.ok(usable.has(c), `${c} can be chosen`);
-  for (const c of ['VA', 'MC', 'SM', 'LI', 'AD', 'MT']) assert.ok(shapes.find(g => g.properties.code === c).properties.dot, `${c} has a marker`);
-  for (const g of shapes) assert.ok(g.properties.name && /^[A-Z]{2}$/.test(g.properties.code), JSON.stringify(g.properties));
+test('every one of VM\'s 197 countries, and Greenland, has a shape or a dot on the map, and nothing else does', () => {
+  assert.equal(VM_COUNTRIES.length, 197);
+  const usable = new Set(shapes.filter(g => g.type || g.properties.dot).map(g => g.properties.iso3));
+  assert.deepEqual(MAPPED.filter(c => !usable.has(c)), [], 'not on the map (rebuild: node headlines/scripts/build-boundaries.mjs)');
+  assert.deepEqual(shapes.map(g => g.properties.iso3).filter(c => !MAPPED.includes(c)), [], 'on the map but not one of the 197 or Greenland');
+  assert.equal(shapes.length, MAPPED.length, 'one entry for each country');
+  assert.deepEqual(['XKX', 'TWN', 'VAT', 'PSE', 'GRL'].map(c => shapes.find(g => g.properties.iso3 === c)?.properties.code), ['XK', 'TW', 'VA', 'PS', 'GL']);
+  for (const g of shapes) assert.ok(g.properties.name && /^[A-Z]{2}$/.test(g.properties.code) && /^[A-Z]{3}$/.test(g.properties.iso3), JSON.stringify(g.properties));
   const kb = readFileSync(new URL('../headlines/boundaries.json', import.meta.url)).length / 1024;
-  assert.ok(kb < 300, `boundaries.json is ${kb.toFixed(0)} KB`);
+  assert.ok(kb < BOUNDARIES_KB, `boundaries.json is ${kb.toFixed(0)} KB`);
+});
+
+test('every outlets.json key has a shape marked covered, and every other country is marked not covered', () => {
+  const codes = Object.keys(outlets);
+  const byCode = new Map(shapes.map(g => [g.properties.code, g]));
+  assert.deepEqual(codes.filter(c => !(byCode.get(c)?.type || byCode.get(c)?.properties.dot)), [], 'collected but not on the map');
+  assert.deepEqual(codes.filter(c => byCode.get(c)?.properties.covered !== true), [], 'collected but not marked covered');
+  assert.deepEqual(shapes.filter(g => g.properties.covered !== (g.properties.code in outlets)).map(g => g.properties.code), [], 'covered exactly when collected');
+  for (const c of ['SV', 'XK']) assert.equal(byCode.get(c).properties.covered, true, `${c} can be chosen`);
+  for (const c of ['NR', 'NG', 'TW', 'PS']) assert.equal(byCode.get(c).properties.covered, false, `${c} has no outlets`);
+});
+
+test('the small states the border file loses at this scale have dots, at the map kit\'s positions where it has them', () => {
+  for (const g of shapes.filter(g => !g.type)) assert.ok(g.properties.dot, `${g.properties.code}: no shape and no dot`);
+  for (const c of ['VA', 'MC', 'SM', 'LI', 'AD', 'MT', 'NR', 'TV']) assert.ok(shapes.find(g => g.properties.code === c).properties.dot, `${c} has a marker`);
+  // Every country the kit has a dot for has one here, at the kit's position (Vanuatu, whose islands are pale specks).
+  for (const d of globalThis.PRPMapkit.DOTS) {
+    const g = shapes.find(x => x.properties.iso3 === d.iso3);
+    assert.deepEqual(g.properties.dot, [...d.lonlat], `${d.iso3}: the kit's dot`);
+  }
+});
+
+// The map's land, decoded, in km² (for the island states the simplification thins).
+const [sx, sy] = topo.transform.scale, [tx, ty] = topo.transform.translate;
+const ARCS = topo.arcs.map(a => { let x = 0, y = 0; return a.map(([dx, dy]) => [(x += dx) * sx + tx, (y += dy) * sy + ty]); });
+const ringOf = ids => ids.flatMap((i, k) => { const a = i < 0 ? ARCS[~i].slice().reverse() : ARCS[i]; return k ? a.slice(1) : a; });
+const polygonsOf = g => (g.type === 'Polygon' ? [g.arcs] : g.type === 'MultiPolygon' ? g.arcs : []).map(p => p.map(ringOf));
+const ringKm2 = r => { let a = 0; for (let i = 0; i < r.length - 1; i++) a += (r[i + 1][0] - r[i][0]) * Math.PI / 180 * (2 + Math.sin(r[i][1] * Math.PI / 180) + Math.sin(r[i + 1][1] * Math.PI / 180)); return Math.abs(a * 6371.0088 ** 2 / 2); };
+const landKm2 = g => polygonsOf(g).reduce((s, p) => s + ringKm2(p[0]) - p.slice(1).reduce((h, r) => h + ringKm2(r), 0), 0);
+const byCode = c => shapes.find(g => g.properties.code === c);
+
+test('Northern Cyprus and Somaliland are drawn as shapes given to no country, so Cyprus and Somalia have no bare tiles beside them', () => {
+  const un = topo.objects.unclaimed?.geometries || [];
+  assert.deepEqual(un.map(g => g.properties.name).sort(), ['Northern Cyprus', 'Somaliland']);
+  for (const g of un) {
+    assert.ok(g.type === 'Polygon' || g.type === 'MultiPolygon', `${g.properties.name} has a shape`);
+    assert.deepEqual([g.properties.unclaimed, g.properties.covered, g.properties.code, g.properties.iso3], [true, false, undefined, undefined]);
+    assert.equal(globalThis.PRPMapkit.unclaimed({ properties: { name: g.properties.name } }), g.properties.name, 'the kit\'s name for it');
+  }
+  // Somaliland is 168,094 km² in the pinned source (measured as above): drawn, it is not a speck.
+  assert.ok(landKm2(un.find(g => g.properties.name === 'Somaliland')) > 0.9 * 168094);
+});
+
+test('the narrow and island states the tracker does not cover keep their land', () => {
+  // Simplified harder than the covered countries, but not into boxes or single islands. The floors are three quarters of
+  // each country's land in the pinned source (build-boundaries.mjs's file, measured the same way on 17 Nov 2026: the
+  // Gambia 10,541 km², Brunei 5,742, Vanuatu 12,339, the Solomon Islands 27,312, Fiji 18,992); at 0.15° the Gambia kept
+  // 5,499, Vanuatu 3,258 and the Solomon Islands 9,646.
+  for (const [c, km2] of [['GM', 10541], ['BN', 5742], ['VU', 12339], ['SB', 27312], ['FJ', 18992]]) assert.ok(landKm2(byCode(c)) > 0.75 * km2, `${c}: ${landKm2(byCode(c)).toFixed(0)} km² of ${km2}`);
+  assert.ok(byCode('VU').properties.dot, 'Vanuatu has a dot');
 });
 
 async function openTracker(query, { width = 1280 } = {}) {
@@ -144,6 +205,104 @@ test('the country list works at phone width without a horizontal scroll', pageTe
     await page.waitForFunction(() => { const r = document.getElementById('countryname').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }, null, { timeout: 5000 });
     const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
     assert.ok(scroll <= width + 1, `page is ${scroll}px wide on ${width}px`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// ---- Every country on the map: a country with no outlets is drawn hatched and says why (AC-2) ----
+
+test('the page loads the map kit as a plain script and installs its no-data fill', () => {
+  const html = readFileSync(new URL('../q/headlines.html', import.meta.url), 'utf8');
+  const kit = html.indexOf('<script src="../design/prp-mapkit.js"></script>'), page = html.search(/<script>\r?\n\/\/ The sources' access classes/);
+  assert.ok(kit > 0 && kit < page, 'design/prp-mapkit.js loads before the page\'s own script');
+  assert.match(html, /PRPMapkit\.install\(\)/);
+  assert.ok(html.includes('\'No front page found for \'+(WITH_THE.has(code)?\'the \':\'\')+name+\'. VM has not found a news feed from this country whose terms allow its headlines to be shown here.\''), 'the sentence is the page\'s, word for word');
+  // The names that take "the" in running text: VM's names (design/prp-focus.js) carry no article.
+  const the = html.match(/WITH_THE=new Set\(\[([^\]]*)\]\)/)?.[1].match(/[A-Z]{2}/g).sort();
+  assert.deepEqual(the, ['AE', 'CD', 'CF', 'CG', 'GM', 'KM', 'MH', 'MV', 'PH', 'SB', 'SC']);});
+
+// The point on screen of a place on the map.
+const onScreen = (page, lonlat) => page.evaluate(([lon, lat]) => { const p = map.latLngToContainerPoint([lat, lon]), r = map.getContainer().getBoundingClientRect(); return { x: r.left + p.x, y: r.top + p.y }; }, lonlat);
+const nauru = () => shapes.find(g => g.properties.code === 'NR').properties.dot;
+
+test('a country with no outlets is hatched, and tapping the Nauru dot gives the sentence in its tooltip and panel', pageTest, async () => {
+  const { browser, page, errors } = await openTracker('?view=current');
+  try {
+    const uncovered = shapes.filter(g => !g.properties.covered), unclaimed = topo.objects.unclaimed.geometries.length;
+    const drawn = await page.evaluate(() => ({ nodata: document.querySelectorAll('#map path.country.prp-nodata').length, all: document.querySelectorAll('#map path.country').length,
+      fill: getComputedStyle(document.querySelector('#map path.country.prp-nodata')).fill, coveredFill: getComputedStyle(document.querySelector('#map path.country:not(.prp-nodata)')).fill }));
+    assert.equal(drawn.nodata, uncovered.filter(g => g.type).length + uncovered.filter(g => g.properties.dot).length + unclaimed, 'every uncovered shape and dot, and Northern Cyprus and Somaliland, is hatched');
+    assert.equal(drawn.all, shapes.filter(g => g.type).length + shapes.filter(g => g.properties.dot).length + unclaimed, 'every country is drawn');
+    assert.match(drawn.fill, /url\("?#prp-nodata"?\)/);
+    assert.doesNotMatch(drawn.coveredFill, /url\(/, 'a covered country keeps its blue');
+    // Neither the picker nor the A–Z list offers a country with no headlines.
+    assert.equal(await page.locator('#countryPick option[value="NR"], #countryList .az-item[data-code="NR"]').count(), 0);
+    // The Nauru dot, pointed at and tapped.
+    await page.evaluate(([lon, lat]) => map.setView([lat, lon], 4, { animate: false }), nauru());
+    const at = await onScreen(page, nauru());
+    await page.mouse.move(at.x, at.y);
+    await page.waitForSelector('.leaflet-tooltip', { timeout: 5000 });
+    assert.equal(await page.textContent('.leaflet-tooltip'), noFrontPage('Nauru'));
+    await page.mouse.click(at.x, at.y);
+    await page.waitForFunction(() => document.getElementById('countryname').textContent === 'Nauru');
+    assert.equal((await page.textContent('#articles')).trim(), noFrontPage('Nauru'), 'the panel says the sentence and nothing else');
+    assert.equal(await page.locator('#articles .outlet-group, #articles .article').count(), 0);
+    assert.equal(await page.isHidden('#dated'), true, 'no archive date for a country with no archive');
+    assert.deepEqual(await page.evaluate(() => [document.querySelector('.viewbar').hidden, document.getElementById('refresh').hidden]), [true, true], 'no caption about outlets and no Refresh');
+    assert.equal(await page.evaluate(() => new URLSearchParams(location.search).get('country')), 'Nauru');
+    assert.equal(await page.locator('#map path.country-dot.prp-nodata.selected').count(), 1, 'its dot is marked as chosen');
+    // The hatch follows the theme.
+    const hatch = () => page.evaluate(() => getComputedStyle(document.querySelector('#prp-nodata rect')).fill);
+    const light = await hatch();
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+    assert.notEqual(await hatch(), light, 'the hatch takes the dark map colours');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('a link to a country with no outlets opens its sentence, and a tap on one works at phone width', pageTest, async () => {
+  {
+    const { browser, page, errors } = await openTracker('?view=current&country=Nauru');
+    try {
+      await page.waitForFunction(() => document.getElementById('countryname').textContent === 'Nauru', null, { timeout: 15000 });
+      assert.equal((await page.textContent('#articles')).trim(), noFrontPage('Nauru'));
+      assert.deepEqual(errors, []);
+    } finally { await browser.close(); }
+  }
+  const { browser, page, errors } = await openTracker('?view=current', { width: 390 });
+  try {
+    await page.evaluate(() => map.setView([9.5, 8.5], 4, { animate: false }));
+    const at = await onScreen(page, [8.5, 9.5]); // inside Nigeria
+    await page.mouse.click(at.x, at.y);
+    await page.waitForFunction(() => document.getElementById('countryname').textContent === 'Nigeria');
+    assert.equal((await page.textContent('#articles')).trim(), noFrontPage('Nigeria'));
+    // Back to a covered country: its headlines load as before.
+    await page.click('details.country-az summary');
+    await page.click('#countryList .az-item[data-code="FR"]');
+    await page.waitForFunction(() => document.getElementById('countryname').textContent === 'France');
+    assert.doesNotMatch(await page.textContent('#articles'), /No front page found/);
+    assert.deepEqual(await page.evaluate(() => [document.querySelector('.viewbar').hidden, document.getElementById('refresh').hidden]), [false, false], 'the caption and Refresh are back');
+    const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
+    assert.ok(scroll <= width + 1, `page is ${scroll}px wide on ${width}px`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('a name that takes "the" reads so, and Somaliland\'s shape says, in the kit\'s words, that it is no country', pageTest, async () => {
+  const { browser, page, errors } = await openTracker('?view=current&country=Philippines');
+  try {
+    await page.waitForFunction(() => document.getElementById('countryname').textContent === 'Philippines', null, { timeout: 15000 });
+    assert.equal((await page.textContent('#articles')).trim(), 'No front page found for the Philippines. VM has not found a news feed from this country whose terms allow its headlines to be shown here.');
+    const sentence = 'Somaliland: this page has no front page for it. It is not one of the 197 countries VM follows.';
+    const tip = await page.evaluate(() => { let t = null; geoLayer.eachLayer(l => { if (l.feature.properties.name === 'Somaliland') t = { tip: l.getTooltip()?.getContent(), cls: l.getElement().getAttribute('class') }; }); return t; });
+    assert.equal(tip.tip, sentence);
+    assert.match(tip.cls, /prp-nodata/);
+    await page.evaluate(() => geoLayer.eachLayer(l => { if (l.feature.properties.name === 'Somaliland') l.fire('click'); }));
+    await page.waitForFunction(() => document.getElementById('countryname').textContent === 'Somaliland');
+    assert.equal((await page.textContent('#articles')).trim(), sentence);
+    assert.equal(await page.evaluate(() => new URLSearchParams(location.search).get('country')), null, 'no ?country= for a place that is no country');
+    assert.equal(await page.locator('#map path.country.prp-nodata.selected').count(), 1, 'its shape is marked as chosen');
+    assert.equal(await page.isHidden('#refresh'), true);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

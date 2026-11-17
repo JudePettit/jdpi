@@ -211,15 +211,19 @@ a.term.lit { background: var(--prp-primary-soft); box-shadow: inset 0 0 0 1.5px 
 /* --- Augmented Reading (app.js): the narrator's row and its message line in the head, the offer hanging from it,
    the marks on the sentence being read, Screens only, the subtitles, full screen ------------------------------------ */
 /* The AR Reader button keeps its words at every width (BI-03, 15 November 2026: a labelled button, not the ▷ alone),
-   as AR Mode does: the two words are short enough to leave the chapter's title its room. */
+   as AR Mode does: the two words are short enough to leave the chapter's title its room. So does the Reader's. */
 /* On a phone (Jude, 12 November 2026) the button has a row of its own under the chapter's title, in words, and the
    title shows in full, beside the contents button, on a second line where it needs one; the chapter arrows, the terms
    and Links follow on the next row, and the mode's button on its own row under them. */
+/* The Reader (17 November 2026) shares that row, to the AR Reader's left, the two of equal width and in words. The
+   row's ::after is a line break (a full-width item of no height) before them, so they never join the arrows' row
+   wherever it has room; their -6px takes back the row gap the break's empty line adds. */
 @media (max-width: 640px) {
   .nc-chapter-row { flex-wrap: wrap; row-gap: 6px; }
   .nc-chapter-title { flex: 1 1 calc(100% - 40px); align-self: center; }
-  .nc-chapter-row #ar-toggle { order: 1; flex: 1 0 100%; justify-content: center; }
-  .nc-chapter-row #ar-toggle .lbl { display: inline; }
+  .nc-chapter-row:has(> #ar-toggle:not([hidden]))::after { content: ""; order: 1; flex: 0 0 100%; height: 0; } /* none in a prp-side frame */
+  .nc-chapter-row #reader-toggle, .nc-chapter-row #ar-toggle { order: 2; flex: 1 1 0; min-width: 0; justify-content: center; margin-top: -6px; }
+  .nc-chapter-row #reader-toggle .lbl, .nc-chapter-row #ar-toggle .lbl { display: inline; }
 }
 .nc-chapter-row .lbl { margin-left: 5px; }
 .nc-nar { display: flex; align-items: center; gap: 6px; height: 30px; margin-top: 6px; }

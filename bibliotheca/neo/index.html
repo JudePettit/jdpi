@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f1318" media="(prefers-color-scheme: dark)">
   <title>Neo Book · Bibliotheca · VM</title>
-  <meta name="description" content="Public-domain classics read on screen: every term the Master Index knows is highlighted, and AR Mode opens a pane beside the text with the terms on screen, a term's Master Index entry and the other screens of Vitruvian Manager for that era. AR Reader reads the book aloud, with the pane following the nearest term beside it.">
+  <meta name="description" content="Public-domain classics read on screen: every term the Master Index knows is highlighted, and AR Mode opens a pane beside the text with the terms on screen, a term's Master Index entry and the other screens of Vitruvian Manager for that era. Reader reads the book aloud with the text alone; AR Reader reads it aloud with the pane following the nearest term beside it.">
   <link rel="icon" href="../../design/brand-vm-icon.svg" type="image/svg+xml">
   <script>try{var t=localStorage.getItem('prp.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="stylesheet" href="../../design/prp.css">
@@ -32,7 +32,7 @@
         <label class="prp-label" for="shelf">Book</label>
         <select id="shelf" class="prp-select"></select>
         <span class="spacer"></span>
-        <span class="keys" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>J</kbd> <kbd>K</kbd> paragraphs · <kbd>P</kbd> AR Mode · <kbd>T</kbd> terms on screen · <kbd>A</kbd> AR Reader · <kbd>R</kbd> read · <kbd>F</kbd> full screen</span>
+        <span class="keys" aria-hidden="true"><kbd>←</kbd> <kbd>→</kbd> chapters · <kbd>J</kbd> <kbd>K</kbd> paragraphs · <kbd>P</kbd> AR Mode · <kbd>T</kbd> terms on screen · <kbd>N</kbd> Reader · <kbd>A</kbd> AR Reader · <kbd>R</kbd> read · <kbd>F</kbd> full screen</span>
       </div>
 
       <div class="nc-layout prp-split" id="layout">
@@ -51,6 +51,8 @@
                   <h3 class="nc-chapter-title" id="chapter-title"><span class="no" id="chapter-no"></span><span class="t" id="chapter-name">…</span></h3>
                   <a class="prp-btn sm ghost icon nav" id="prev" href="#" aria-label="Previous chapter" title="Previous chapter (←)">‹</a>
                   <a class="prp-btn sm ghost icon nav" id="next" href="#" aria-label="Next chapter" title="Next chapter (→)">›</a>
+                  <!-- The Reader (Jude, 17 November 2026): the AR Reader's narrator, without the pane. -->
+                  <button type="button" class="prp-btn sm" id="reader-toggle" aria-pressed="false" aria-label="Reader" title="Reader: the book read aloud, the sentence being read marked and kept in view, with no pane (N)"><span aria-hidden="true">▷</span><span class="lbl">Reader</span></button>
                   <button type="button" class="prp-btn sm" id="ar-toggle" aria-pressed="false" aria-label="AR Reader" title="AR Reader: the book read aloud, with Vitruvian Manager following beside it (A)"><span aria-hidden="true">▷</span><span class="lbl">AR Reader</span></button>
                   <button type="button" class="prp-btn sm" id="pane-toggle" aria-pressed="false" aria-controls="pane" aria-label="AR Mode" title="AR Mode: the terms on screen, a term's Master Index entry and the screens for the era, in a pane beside the text (P; T opens it on the terms on screen)">▥<span class="lbl">AR Mode</span></button>
                 </div>
@@ -58,7 +60,8 @@
                   <div class="nc-progress" id="progress" role="progressbar" aria-label="Position in the chapter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div>
                   <span class="pos" id="pos"></span>
                 </div>
-                <!-- AR Reader: the narrator's row and its message line (one line, whether or not it has anything to say). -->
+                <!-- The Reader and the AR Reader: the narrator's row and its message line (one line, whether or not it has
+                     anything to say). Hold is the AR Reader's alone: app.js hides it for the Reader, which has no pane. -->
                 <div class="nc-nar" id="nar" role="group" aria-label="The narrator" hidden>
                   <button type="button" class="prp-btn sm" id="nar-play" aria-pressed="false" aria-label="Read aloud" title="Read aloud (R)"><span class="ico" aria-hidden="true">▶</span><span class="lbl">Read</span></button>
                   <label class="sr-only" for="nar-speed">Speed</label>

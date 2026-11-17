@@ -1747,7 +1747,8 @@ test('page: at 360 wide the AR Reader button has its own row under the title, in
     const head = page => page.evaluate(() => {
       const box = s => { const r = document.querySelector(s).getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right) }; };
       const t = document.querySelector('#chapter-name'), ar = document.querySelector('#ar-toggle');
-      const others = [...document.querySelectorAll('.nc-chapter-row > *')].filter(e => e !== ar && e.offsetParent).map(e => e.getBoundingClientRect());
+      // (Since 17 November 2026 the Reader shares its row, to its left: test 'page: the Reader button …' below.)
+      const others = [...document.querySelectorAll('.nc-chapter-row > *')].filter(e => e !== ar && e.id !== 'reader-toggle' && e.offsetParent).map(e => e.getBoundingClientRect());
       const a = ar.getBoundingClientRect();
       return { title: box('#chapter-title'), ar: box('#ar-toggle'), whole: t.scrollWidth <= t.clientWidth + 1,
         shares: others.some(r => r.top < a.bottom - 1 && r.bottom > a.top + 1), words: ar.querySelector('.lbl').getBoundingClientRect().width > 0 ? ar.querySelector('.lbl').textContent : '',
@@ -1833,5 +1834,271 @@ test('page: every chapter title is whole: chapter XVIII wraps at 1024, 1366 and 
     assert.equal(p.sw, 360, 'no sideways scroll');
     assert.deepEqual(phone.errors, []);
     await phone.ctx.close();
+  } finally { await browser.close(); }
+});
+
+/* ---------- The Reader (Jude, 17 November 2026) ----------
+   "There should be a button in Bibliotheca which says "Reader" to the left of AR Reader which would start the reader
+   without bringing up the sidebar for AR." The same narrator as the AR Reader's, with reader=1 in the address, and no
+   pane: the pane is AR Mode's or the AR Reader's. N is its key. */
+const readerBtn = page => page.getByRole('button', { name: 'Reader', exact: true });
+const arBtn = page => page.getByRole('button', { name: 'AR Reader', exact: true });
+const pressed = page => page.evaluate(() => ({ reader: document.querySelector('#reader-toggle').getAttribute('aria-pressed'), ar: document.querySelector('#ar-toggle').getAttribute('aria-pressed') }));
+// Where the narrator is, as one number that only grows while it reads on: the paragraph's place, then the unit's.
+const readAt = page => page.evaluate(() => { const n = window.__narrator, ps = [...document.querySelectorAll('#text p.para')].map(p => p.id); return ps.indexOf(n.passage?.id) * 1000 + n.pos.k; });
+
+test('page: the Reader button sits left of AR Reader, named "Reader"; it shows the narrator\'s row and leaves the pane closed; Read marks the unit and keeps it in view; reader=1 in the address', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p03', { speech: { ms: 250 }, ar: false });
+    assert.equal(await readerBtn(page).count(), 1, 'its accessible name is "Reader", exactly');
+    assert.equal(await arBtn(page).count(), 1, 'and the AR Reader is still found by its own');
+    assert.match(await page.textContent('#reader-toggle'), /^\W*Reader$/, 'its words say Reader');
+    // Immediately to the left of the AR Reader, in the title's row (1366).
+    const place = await page.evaluate(() => {
+      const r = document.querySelector('#reader-toggle'), a = document.querySelector('#ar-toggle'), b = e => e.getBoundingClientRect();
+      return { next: r.nextElementSibling === a, gap: b(a).left - b(r).right, mid: Math.abs((b(a).top + b(a).bottom) / 2 - (b(r).top + b(r).bottom) / 2) };
+    });
+    assert.ok(place.next && place.gap >= 0 && place.gap <= 12 && place.mid <= 1, `left of AR Reader, beside it: ${JSON.stringify(place)}`);
+    assert.deepEqual(await pressed(page), { reader: 'false', ar: 'false' });
+    await readerBtn(page).click();
+    await page.waitForSelector('#nar:not([hidden])');
+    assert.deepEqual(await pressed(page), { reader: 'true', ar: 'false' });
+    assert.equal(await page.locator('#pane').isHidden(), true, 'the pane stays closed');
+    assert.equal(await page.evaluate(() => document.querySelector('#layout').classList.contains('split')), false);
+    await page.waitForFunction(() => /&p=c03-p03&reader=1$/.test(location.hash));
+    // The row: Read, speed, voice and full screen; Hold, Screens only and Subtitles belong to the pane.
+    assert.equal(await page.locator('#nar-hold').isHidden(), true, 'no Hold without the pane');
+    assert.equal(await page.locator('#nar-play').isVisible(), true);
+    assert.equal(await page.locator('#nar-speed').isVisible(), true);
+    assert.equal(await page.locator('#nar-voice').isVisible(), true);
+    assert.deepEqual(await page.evaluate(() => window.__spoken), [], 'nothing is read until Read, as with the AR Reader');
+    // Read: the first unit of the paragraph under the reading line, marked.
+    await page.click('#nar-play');
+    await page.waitForFunction(() => window.__spoken.length >= 1);
+    const p3 = CH3.paragraphs.find(p => p.id === 'c03-p03');
+    assert.equal((await page.evaluate(() => window.__spoken[0])).text, speakable(p3).units[0].text);
+    for (let i = 0; i < 3; i++) {
+      const m = await marked(page), u = unitOf(CH3, m.pid, m.k);
+      assert.equal(m.text, CH3.paragraphs.find(p => p.id === m.pid).text.slice(u.say[0], u.say[1]), `the mark is the unit being read (${m.pid}:${m.k})`);
+      await page.waitForTimeout(200);
+    }
+    await page.waitForFunction(() => window.__narrator.passage?.id === 'c03-p07', null, { timeout: 30000 });
+    await page.waitForTimeout(400);
+    const m = await marked(page);
+    assert.ok(m.top >= m.region[0] - 1 && m.bottom <= m.region[1] + 1, `the unit is kept in view: ${JSON.stringify(m)}`);
+    assert.equal(await page.locator('#pane').isHidden(), true, 'and the pane never opened');
+    // R pauses and resumes, < > change the speed, as with the AR Reader.
+    await page.keyboard.press('r');
+    assert.equal((await narAt(page)).playing, false);
+    const speed = await page.inputValue('#nar-speed');
+    await page.keyboard.press('>');
+    await page.waitForFunction(s => document.querySelector('#nar-speed').value !== s, speed, { timeout: 3000 });
+    // N turns it off, and on again.
+    await page.keyboard.press('n');
+    await page.waitForSelector('#nar', { state: 'hidden' });
+    assert.deepEqual(await pressed(page), { reader: 'false', ar: 'false' });
+    await page.waitForFunction(() => !/reader=|ar=/.test(location.hash));
+    assert.equal(await page.evaluate(() => CSS.highlights.get('nc-say')), undefined, 'the mark goes with it');
+    await page.keyboard.press('n');
+    await page.waitForSelector('#nar:not([hidden])');
+    assert.equal(await page.locator('#pane').isHidden(), true);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: Reader and AR Reader: moving between them carries on reading; AR Reader brings up the pane and Reader takes it away; the one that is on turns the narrator off; never both pressed', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p03', { speech: { ms: 200 }, ar: false });
+    await readerBtn(page).click();
+    await page.click('#nar-play');
+    await page.waitForFunction(() => window.__spoken.length >= 2);
+    // AR Reader while the Reader reads: the reading carries on, and the pane comes up on the Master Index tab.
+    let at = await readAt(page);
+    await arBtn(page).click();
+    await page.waitForSelector('#pane:not([hidden])');
+    assert.deepEqual(await pressed(page), { reader: 'false', ar: 'true' });
+    assert.equal(await page.getAttribute('#tab-ency', 'aria-selected'), 'true');
+    await page.waitForFunction(() => /&pane=ency&ar=1$/.test(location.hash));
+    assert.equal(await page.textContent('#pane-kicker'), 'AR Reader · Master Index');
+    assert.equal((await narAt(page)).playing, true, 'still reading');
+    assert.ok(await readAt(page) >= at, 'from where it was, not from the start');
+    let n = await spokenN(page);
+    await page.waitForFunction(n => window.__spoken.length >= n + 2, n, { timeout: 5000 });
+    assert.equal(await page.locator('#nar-hold').isVisible(), true, 'Hold is back with the pane');
+    // Reader while the AR Reader reads: the reading carries on, and the AR Reader's pane goes.
+    at = await readAt(page);
+    await readerBtn(page).click();
+    await page.waitForSelector('#pane', { state: 'hidden' });
+    assert.deepEqual(await pressed(page), { reader: 'true', ar: 'false' });
+    await page.waitForFunction(() => /&reader=1$/.test(location.hash) && !/pane=|ar=/.test(location.hash));
+    assert.equal((await narAt(page)).playing, true, 'still reading');
+    assert.ok(await readAt(page) >= at, 'from where it was');
+    n = await spokenN(page);
+    await page.waitForFunction(n => window.__spoken.length >= n + 2, n, { timeout: 5000 });
+    // The one that is on turns the narrator off.
+    await readerBtn(page).click();
+    await page.waitForSelector('#nar', { state: 'hidden' });
+    assert.deepEqual(await pressed(page), { reader: 'false', ar: 'false' });
+    assert.equal((await narAt(page)).playing, false, 'silent');
+    n = await spokenN(page);
+    await page.waitForTimeout(500);
+    assert.equal(await spokenN(page), n, 'nothing more is read');
+    await arBtn(page).click();
+    await page.waitForSelector('#nar:not([hidden])');
+    await arBtn(page).click();
+    await page.waitForSelector('#nar', { state: 'hidden' });
+    assert.deepEqual(await pressed(page), { reader: 'false', ar: 'false' });
+    assert.equal(await page.locator('#pane').isHidden(), false, 'the AR Reader turned off leaves the pane as it is, as before');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: with the pane open by AR Mode the Reader neither closes it nor moves it; leaving the AR Reader for the Reader keeps it too', PAGE, async () => {
+  const browser = await launch();
+  try {
+    // AR Mode open on the Master Index tab with no term chosen: the AR Reader would show the nearest term there.
+    const { page, errors } = await reading(browser, '#book=the-prince&ch=3&p=c03-p03&pane=ency', { speech: { ms: 150 }, ar: false });
+    const paneSays = () => page.evaluate(() => ({ kicker: document.querySelector('#pane-kicker').textContent, title: document.querySelector('#pane-title').textContent, frame: !document.querySelector('#ency-frame').hidden }));
+    const alone = { kicker: 'Master Index', title: 'No term chosen', frame: false };
+    assert.deepEqual(await paneSays(), alone);
+    await readerBtn(page).click();
+    await page.waitForSelector('#nar:not([hidden])');
+    assert.equal(await page.locator('#pane').isHidden(), false, 'the Reader leaves AR Mode\'s pane open');
+    assert.deepEqual(await paneSays(), alone, 'and it is AR Mode\'s, not the AR Reader\'s');
+    assert.equal(await page.locator('#nar-hold').isHidden(), true);
+    assert.equal(await page.locator('#pane-fill').isHidden(), true, 'no Screens only');
+    await page.click('#nar-play');
+    const n = await spokenN(page);
+    await page.waitForFunction(n => window.__spoken.length >= n + 10, n, { timeout: 15000 });
+    assert.deepEqual(await paneSays(), alone, 'the pane does not follow the narrator');
+    assert.match(page.url(), /&pane=ency&reader=1$/);
+    // The AR Reader, then the Reader: the pane was AR Mode's before the AR Reader came, so it stays.
+    await arBtn(page).click();
+    await page.waitForFunction(() => document.querySelector('#pane-kicker').textContent === 'AR Reader · Master Index');
+    await readerBtn(page).click();
+    await page.waitForFunction(() => document.querySelector('#pane-kicker').textContent === 'Master Index');
+    assert.equal(await page.locator('#pane').isHidden(), false, 'AR Mode\'s pane stays');
+    assert.deepEqual(await paneSays(), alone, 'as AR Mode alone has it');
+    assert.deepEqual(await pressed(page), { reader: 'true', ar: 'false' });
+    assert.equal((await narAt(page)).playing, true, 'still reading');
+    await page.keyboard.press('r');
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: an address before the Reader means what it did (ar=1 is the AR Reader, with its pane, which Reader takes away after a reload too); reader=1 opens the Reader with no pane, and a reload keeps it', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const old = await reading(browser, '#book=the-prince&ch=3&p=c03-p03&pane=ency&ar=1', { ar: false });
+    await old.page.waitForSelector('#nar:not([hidden])');
+    assert.deepEqual(await pressed(old.page), { reader: 'false', ar: 'true' });
+    assert.equal(await old.page.locator('#pane').isHidden(), false);
+    assert.equal(await old.page.textContent('#pane-kicker'), 'AR Reader · Master Index');
+    assert.match(old.page.url(), /&pane=ency&ar=1$/);
+    // That address is the one the AR Reader writes when it opens the pane itself: Reader takes the pane away, as it
+    // does before a reload, and no empty Master Index is left.
+    await readerBtn(old.page).click();
+    await old.page.waitForSelector('#pane', { state: 'hidden' });
+    assert.deepEqual(await pressed(old.page), { reader: 'true', ar: 'false' });
+    await old.page.waitForFunction(() => /&p=c03-p03&reader=1$/.test(location.hash) && !/pane=|ar=/.test(location.hash));
+    assert.deepEqual(old.errors, []);
+    await old.ctx.close();
+    const plain = await reading(browser, '#book=the-prince&ch=3&p=c03-p03&reader=1', { ar: false });
+    await plain.page.waitForSelector('#nar:not([hidden])');
+    assert.deepEqual(await pressed(plain.page), { reader: 'true', ar: 'false' });
+    assert.equal(await plain.page.locator('#pane').isHidden(), true);
+    await plain.page.reload({ waitUntil: 'domcontentloaded' });
+    await plain.page.waitForSelector('#nar:not([hidden])', { timeout: 20000 });
+    assert.deepEqual(await pressed(plain.page), { reader: 'true', ar: 'false' });
+    assert.equal(await plain.page.locator('#pane').isHidden(), true, 'after a reload, still no pane');
+    assert.match(plain.page.url(), /&p=c03-p03&reader=1$/);
+    // An address edited to the other mode moves the page (hashchange), as ar= always has.
+    await plain.page.evaluate(() => { location.hash = location.hash.replace('reader=1', 'ar=1'); });
+    await plain.page.waitForFunction(() => document.querySelector('#ar-toggle').getAttribute('aria-pressed') === 'true');
+    assert.deepEqual(await pressed(plain.page), { reader: 'false', ar: 'true' });
+    assert.deepEqual(plain.errors, []);
+    await plain.ctx.close();
+  } finally { await browser.close(); }
+});
+
+test('page: at 360 wide the Reader sits in the AR Reader\'s row, to its left, both in words, the title whole; at 1366 both stay in the title\'s row; nothing overlaps at 360, 390, 768, 1024 or 1440, light or dark', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const head = page => page.evaluate(() => {
+      const box = e => { const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; };
+      const t = document.querySelector('#chapter-name'), reader = document.querySelector('#reader-toggle'), ar = document.querySelector('#ar-toggle');
+      const items = [...document.querySelectorAll('.nc-chapter-row > *, #nar > *')].filter(e => e.offsetParent && e.getBoundingClientRect().width > 0 && !e.classList.contains('sr-only'));
+      const overlaps = [];
+      for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+        const a = items[i].getBoundingClientRect(), b = items[j].getBoundingClientRect();
+        if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1) overlaps.push(`${items[i].id || items[i].tagName} × ${items[j].id || items[j].tagName}`);
+      }
+      const outside = items.filter(e => { const r = e.getBoundingClientRect(); return r.left < 0 || r.right > innerWidth; }).map(e => e.id || e.tagName);
+      const words = b => (b.querySelector('.lbl').getBoundingClientRect().width > 0 ? b.querySelector('.lbl').textContent : '');
+      return { title: box(document.querySelector('#chapter-title')), reader: box(reader), ar: box(ar), whole: t.scrollWidth <= t.clientWidth + 1,
+        words: [words(reader), words(ar)], overlaps, outside, sw: document.documentElement.scrollWidth, w: innerWidth };
+    });
+    const phoneCtx = { isMobile: true, hasTouch: true };
+    // 360: chapter XVIII, the longest title in The Prince.
+    const phone = await reading(browser, '#book=the-prince&ch=18', { viewport: { width: 360, height: 780 }, context: phoneCtx, ar: false });
+    let p = await head(phone.page);
+    const at = JSON.stringify(p);
+    assert.ok(p.whole, `the title is whole: ${at}`);
+    assert.ok(p.reader.top >= p.title.bottom && p.ar.top >= p.title.bottom, `both under the title: ${at}`);
+    assert.ok(Math.abs(p.reader.top - p.ar.top) <= 1 && p.reader.right <= p.ar.left, `the Reader in the AR Reader's row, to its left: ${at}`);
+    assert.deepEqual(p.words, ['Reader', 'AR Reader'], 'both in words');
+    assert.ok(p.reader.left >= 16 && p.ar.right <= 344, `inside the column: ${at}`);
+    assert.deepEqual(p.overlaps, [], at);
+    assert.equal(p.sw, 360, 'no sideways scroll');
+    await readerBtn(phone.page).click();
+    await phone.page.waitForSelector('#nar:not([hidden])');
+    assert.equal(await phone.page.locator('#pane').isHidden(), true, 'no sheet comes up');
+    p = await head(phone.page);
+    assert.ok(p.whole && p.overlaps.length === 0 && p.outside.length === 0 && p.sw === 360, `on, the head still holds: ${JSON.stringify(p)}`);
+    assert.deepEqual(phone.errors, []);
+    await phone.ctx.close();
+    // 1366: both in the title's row.
+    const desk = await reading(browser, '#book=the-prince&ch=18', { ar: false });
+    const d = await head(desk.page);
+    for (const b of [d.reader, d.ar]) assert.ok(b.top < d.title.bottom && b.bottom > d.title.top, `1366: in the title's row: ${JSON.stringify(d)}`);
+    assert.ok(d.reader.right <= d.ar.left, 'the Reader to the left');
+    assert.deepEqual(d.words, ['Reader', 'AR Reader']);
+    assert.deepEqual(desk.errors, []);
+    await desk.ctx.close();
+    // Nothing overlaps or leaves the screen, with the narrator off and with the Reader on, light and dark.
+    for (const width of [360, 390, 768, 1024, 1440]) for (const colorScheme of ['light', 'dark']) {
+      const context = { colorScheme, ...(width < 768 ? phoneCtx : {}) };
+      const w = await reading(browser, '#book=the-prince&ch=18', { viewport: { width, height: 800 }, context, ar: false });
+      for (const state of ['off', 'on']) {
+        if (state === 'on') { await readerBtn(w.page).click(); await w.page.waitForSelector('#nar:not([hidden])'); }
+        const h = await head(w.page), where = `${width} ${colorScheme} ${state}: ${JSON.stringify(h)}`;
+        assert.deepEqual(h.overlaps, [], where);
+        assert.deepEqual(h.outside, [], where);
+        assert.ok(h.whole, `the title is whole, ${where}`);
+        assert.equal(h.sw, width, `no sideways scroll, ${where}`);
+      }
+      assert.deepEqual(w.errors, []);
+      await w.ctx.close();
+    }
+  } finally { await browser.close(); }
+});
+
+test('page: Bibliotheca shown in another page\'s pane (a frame named prp-side) offers no Reader either', PAGE, async () => {
+  const browser = await launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    await page.goto(`${BASE}/registry.json`);
+    await page.setContent(`<iframe name="prp-side" style="width:1200px;height:800px" src="${BASE}/bibliotheca/neo/#book=the-prince&ch=3&reader=1"></iframe>`);
+    const f = await (await page.waitForSelector('iframe')).contentFrame();
+    await f.waitForSelector('#text p.para', { timeout: 20000 });
+    assert.equal(await f.locator('#reader-toggle').isHidden(), true);
+    assert.equal(await f.locator('#nar').isHidden(), true, 'reader=1 does nothing there');
+    await f.locator('#chapter-title').click();
+    await page.keyboard.press('n');
+    await page.waitForTimeout(300);
+    assert.equal(await f.locator('#nar').isHidden(), true, 'N does nothing there');
+    assert.doesNotMatch(await f.evaluate(() => location.hash), /reader=1|ar=1/);
   } finally { await browser.close(); }
 });

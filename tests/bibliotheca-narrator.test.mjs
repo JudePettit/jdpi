@@ -192,11 +192,34 @@ test('mode: ar=1 is read and written after the seven keys, and readHash still gi
   assert.equal(writeMode(h, { ar: false }), h, 'with the mode off the address is exactly today\'s');
   assert.equal(writeMode(`${h}&ar=1`, { ar: true }), `${h}&ar=1`, 'one ar, at the end');
   assert.equal(writeMode('', { ar: true }), '', 'no book, no address');
-  assert.deepEqual(readMode(`${h}&ar=1`), { ar: true });
-  assert.deepEqual(readMode('#ar=0'), { ar: false });
-  assert.deepEqual(readMode(h), { ar: false });
-  assert.deepEqual(readMode('book=the-prince&ar=1'), { ar: true }, 'with or without the #');
+  assert.deepEqual(readMode(`${h}&ar=1`), { ar: true, reader: false });
+  assert.deepEqual(readMode('#ar=0'), { ar: false, reader: false });
+  assert.deepEqual(readMode(h), { ar: false, reader: false });
+  assert.deepEqual(readMode('book=the-prince&ar=1'), { ar: true, reader: false }, 'with or without the #');
   assert.deepEqual(readHash(`${h}&ar=1`), { book: 'the-prince', ch: 3, p: 'c03-p02', t: 'Q70972', pane: 'ency', show: null, era: null });
+});
+
+// Jude, 17 November 2026: a "Reader" button left of "AR Reader" starts the same narrator without the pane. It is
+// reader=1 at the end of the address; an address written before it (ar=1, or neither) means what it meant.
+test('mode: reader=1 is the plain Reader, written last; ar=1 still means the AR Reader, and the two are never both on', () => {
+  const h = writeHash({ book: 'the-prince', ch: 3, p: 'c03-p02' });
+  assert.equal(writeMode(h, { reader: true }), `${h}&reader=1`);
+  assert.equal(writeMode(h, { ar: false, reader: false }), h, 'both off: exactly today\'s address');
+  assert.equal(writeMode(`${h}&reader=1`, { reader: true }), `${h}&reader=1`, 'one reader, at the end');
+  assert.equal(writeMode(`${h}&reader=1`, { ar: true }), `${h}&ar=1`, 'the AR Reader replaces the Reader');
+  assert.equal(writeMode(`${h}&ar=1`, { reader: true }), `${h}&reader=1`, 'and the Reader the AR Reader');
+  assert.equal(writeMode(h, { ar: true, reader: true }), `${h}&ar=1`, 'asked for both, the AR Reader alone is written');
+  assert.equal(writeMode('', { reader: true }), '', 'no book, no address');
+  assert.equal(writeMode(`${h}&readers=2`, {}), `${h}&readers=2`, 'a key that only begins with "reader" is not dropped');
+  assert.deepEqual(readMode(`${h}&reader=1`), { ar: false, reader: true });
+  assert.deepEqual(readMode('book=the-prince&reader=yes'), { ar: false, reader: true }, 'with or without the #, as ar= reads');
+  assert.deepEqual(readMode(`${h}&reader=0`), { ar: false, reader: false });
+  assert.deepEqual(readMode(`${h}&ar=1&reader=1`), { ar: true, reader: false }, 'an address with both is the AR Reader');
+  assert.deepEqual(readMode(`${h}&reader=1&ar=1`), { ar: true, reader: false });
+  // An address written before 17 November reads as it did.
+  for (const old of [h, `${h}&ar=1`, `${h}&pane=ency&ar=1`, '#book=on-war&ch=1&p=c01-p02&pane=vm&show=pestle&ar=1'])
+    assert.equal(readMode(old).reader, false, old);
+  assert.deepEqual(readHash(`${h}&reader=1`), readHash(h), 'readHash ignores it');
 });
 
 /* ---------- the online voice's locks ---------- */

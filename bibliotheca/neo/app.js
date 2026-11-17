@@ -42,7 +42,14 @@
    words under it as subtitles (S); there the book's pictures (../data/pictures.json, drawn by Kino's stage: maps,
    timelines and portraits looping like GIFs, from the Kino film about the author or made for the book) and the
    screens for its era take their turn with the entries (lib/follow.js, tour; lib/pictures.js). The online voice is used only when the reader chooses it, after an offer that
-   shows what it costs, and never for more than the offer allowed. */
+   shows what it costs, and never for more than the offer allowed.
+
+   Reader (Jude, 17 November 2026: a button left of AR Reader; N; &reader=1 in the address, lib/mode.js): the same
+   narrator, row and marks, without the pane. It never opens the pane and never closes one AR Mode opened; with it on,
+   a pane AR Mode opened behaves as AR Mode alone does (it does not follow the narrator), and the row has no Hold
+   (Screens only and Subtitles are the AR Reader's too). Pressing the other button while one reads carries on
+   reading: AR Reader brings up its pane, Reader takes away a pane the AR Reader brought up. The one that is on turns
+   the narrator off. S.ar and S.reader are never both true. */
 import { readHash, writeHash, readMap } from './lib/hash.js';
 import { readRecipe, writeRecipe } from '../../design/vm-recipe.js';
 import { clickDetail, kindOf, readPeriods, resolve } from '../../design/vm-click.js';
@@ -89,6 +96,9 @@ const S = {
   // Augmented Reading: the mode; the term the narrator has reached (near), and the follow rule's state (fs) over the
   // chapter's terms (terms); the unit being read (say); whether the next unit is to be kept in view whatever (look);
   // the pane filling the page (fill) and the subtitles under it (subs); a message for the narrator's row (msg).
+  // The Reader (reader): the same narrator, no pane. Whether the AR Reader opened the pane itself (arPane), so that
+  // the Reader takes away that pane and no other.
+  reader: false, arPane: false,
   ar: false, near: null, fs: fresh(), terms: { terms: [], base: new Map() }, say: null, look: false,
   fill: false, subs: store.get(KEYS.subs, true), msg: null, offer: null,
   // Screens only: the era screen that has the pane now (tour), the next one's turn, and the chapter's screens.
@@ -102,6 +112,9 @@ const S = {
 const inSide = inSidePane();
 let narr = null; // the narrator, made when the mode is first turned on
 const chapter = () => S.chapters[S.ci] || null;
+// The narrator is on: the Reader or the AR Reader. (S.ar alone is the pane following it.)
+const narrating = () => S.ar || S.reader;
+const narMode = () => (S.ar ? 'ar' : S.reader ? 'reader' : null);
 
 /* ---------- addresses ---------- */
 // Links recorded for the live site (the lake's mentions) point at this copy when it is served elsewhere, as the
@@ -267,8 +280,9 @@ function renderSources() {
     <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. AR Mode's "On screen" tab lists those in the text on screen.</p>
     <p><b>In ${PRODUCT}.</b> AR Mode (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows a country as it is today: the term’s, when the term is one of today’s countries or a place in one, or else those the book names most; with none, it is not offered.</p>
     <p><b>AR Reader.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>
+    <p><b>Reader.</b> The book read aloud, the sentence being read marked and kept in view, with no pane: the text alone. AR Mode’s pane, if it is open, stays as it is.</p>
     <p><b>Voice.</b> This device's own voice reads the book, and nothing leaves the browser. An online voice (Microsoft Azure, through ${PRODUCT}'s own proxy) reads only when you choose it, after it says what it will cost: each sentence it reads is then sent to Microsoft Azure to be spoken, and counts against the site's allowance of characters. It is never remembered from one visit to the next.</p>
-    <p><b>Keys.</b> ← → chapters · J K paragraphs · P AR Mode · T its terms on screen · A AR Reader · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
+    <p><b>Keys.</b> ← → chapters · J K paragraphs · P AR Mode · T its terms on screen · N Reader · A AR Reader · R read or pause · &lt; &gt; slower, faster · H hold the pane · D Screens only · S subtitles · F full screen · Esc closes.</p>`;
 }
 
 /* ---------- the chapter ---------- */
@@ -286,7 +300,7 @@ function renderChapter(ci) {
   S.terms = chapterTerms(c);
   if (S.tour) endTour(); // a screen of the last chapter's era
   S.turn = 0; S.since = TOUR_EVERY; // each chapter's turns begin with its picture, early
-  if (S.ar) { narr?.load(c, chapterKey(), 0); S.look = true; nearHere(c.paragraphs[0]?.id); }
+  if (narrating()) { narr?.load(c, chapterKey(), 0); S.look = true; if (S.ar) nearHere(c.paragraphs[0]?.id); }
   for (const [a, b, d] of [['#prev', '#prev2', -1], ['#next', '#next2', 1]]) {
     const to = S.chapters[ci + d];
     for (const el of [$(a), $(b)]) {
@@ -481,6 +495,7 @@ function closePane() {
   if (!S.pane) return;
   if (S.fill) setFill(false);
   keepPlace(() => { S.pane = null; $('#pane').hidden = true; $('#layout').classList.remove('split'); });
+  S.arPane = false; // a pane opened again is AR Mode's
   $('#pane-toggle').setAttribute('aria-pressed', 'false');
   writeState();
 }
@@ -836,35 +851,58 @@ function mapMessage(e) {
 const chapterKey = () => `${S.book?.slug}#${chapter()?.n}`;
 const HL = typeof CSS !== 'undefined' && !!CSS.highlights && typeof Highlight === 'function';
 
-/* The mode. Turned on (the button, A, or ar=1 in the address): the narrator's row in the head, the pane on its Master
-   Index tab showing the term nearest the reader's paragraph (only when it was turned on by hand: an address says
-   itself whether the pane is open). Turned off: the narrator stops and the marks go; the pane stays as it is. */
-function setAr(on, { byHand = false } = {}) {
-  on = !!on && !inSide && !!chapter();
-  if (on === S.ar) return;
+/* The narrator: 'ar' (the AR Reader: the button, A, or ar=1 in the address), 'reader' (the Reader: its button, N, or
+   reader=1) or null (off). Turned on: the narrator's row in the head. The AR Reader also has the pane on its Master
+   Index tab showing the term nearest the narrator (only when it was turned on by hand: an address says itself
+   whether the pane is open). Turned off: the narrator stops and the marks go; the pane stays as it is. From one to the
+   other the narrator reads on where it is; the Reader takes away the pane only if the AR Reader opened it. */
+function setNarrator(want, { byHand = false } = {}) {
+  if (inSide || !chapter() || !['ar', 'reader'].includes(want)) want = null;
+  const was = narMode();
+  if (want === was) return;
   keepPlace(() => {
-    S.ar = on;
-    $('#nar').hidden = !on; $('#nar-msg').hidden = !on;
-    $('#ar-toggle').setAttribute('aria-pressed', String(on));
-    $('#pane-fill').hidden = !on;
+    S.ar = want === 'ar'; S.reader = want === 'reader';
+    $('#nar').hidden = !want; $('#nar-msg').hidden = !want;
+    $('#ar-toggle').setAttribute('aria-pressed', String(S.ar));
+    $('#reader-toggle').setAttribute('aria-pressed', String(S.reader));
+    $('#pane-fill').hidden = !S.ar;
+    $('#nar-hold').hidden = !S.ar; // Hold keeps the pane still: the Reader has none
   });
-  if (on) {
+  if (want && !was) {
     makeNarrator();
     narr.load(chapter(), chapterKey(), Math.max(0, chapter().paragraphs.findIndex(p => p.id === S.current)));
-    nearHere(S.current);
-    if (byHand && S.pane !== 'ency') openPane('ency');
-    else if (S.pane === 'ency') renderMasterIndex();
     // The proxy is asked whether it is set up (and which voices it has) when the mode is first turned on.
     if (!narr.online) narr.refresh().then(drawNar);
     deviceCheck();
-  } else {
+  } else if (!want) {
     narr?.pause();
-    unmark(); S.say = null; S.near = null; S.msg = null; closeOffer();
+    unmark(); S.say = null; S.msg = null; closeOffer();
+  }
+  if (S.ar) {
+    // The nearest term: to the unit being read, when the Reader was reading, else to the reader's paragraph.
+    if (S.say) nearSaid(); else nearHere(S.current);
+    const shut = !S.pane;
+    if (byHand && S.pane !== 'ency') openPane('ency');
+    else if (S.pane === 'ency') renderMasterIndex();
+    if (shut && S.pane) S.arPane = true;
+  } else {
+    S.near = null;
     if (S.fill) setFill(false);
+    if (want === 'reader' && S.arPane) closePane(); // the AR Reader's own pane goes; AR Mode's stays
+    S.arPane = false;
     if (S.pane === 'ency') renderMasterIndex();
   }
   drawNar();
   writeState();
+}
+// The buttons and keys: the one that is on turns the narrator off; the other moves to it, reading on.
+const pressAr = () => setNarrator(S.ar ? null : 'ar', { byHand: true });
+const pressReader = () => setNarrator(S.reader ? null : 'reader', { byHand: true });
+// The term nearest the unit being read, shown at once (the AR Reader taking over from the Reader as it reads).
+function nearSaid() {
+  const sp = span(S.terms.base, S.say.pid, S.say.unit);
+  S.near = nearestTerm(S.terms.terms, sp.from, sp.to);
+  S.fs = { showing: S.near, read: 0, fresh: false };
 }
 
 // The term nearest a paragraph (or the next one that is read, if it is a note or a table), shown at once.
@@ -939,15 +977,24 @@ function play() {
 }
 function toggleRead() { if (!narr) return; if (narr.playing) narr.pause(); else play(); }
 
-// Each unit as it starts: marked, kept in view, the pane's rule asked, the subtitles drawn.
+// Each unit as it starts: marked, kept in view, the pane's rule asked (the AR Reader's), the subtitles drawn.
 function onUnit({ pid, unit }) {
-  if (!S.ar) return;
+  if (!narrating()) return;
   const prev = S.say, followed = S.look || (prev && inRegion(rangeRect(prev)));
   S.say = { pid, unit };
   S.look = false;
   mark();
   if (followed) keepInView();
   if (S.pin && S.pin !== pid) S.pin = null; // the jump's paragraph is read: the current one follows the voice now
+  if (S.ar) followUnit(pid, unit);
+  S.since += unit.text.length;
+  drawSubs();
+  if (S.offer) drawOffer();
+  drawNar();
+  if (textHidden()) narr.pause();
+}
+// The AR Reader's pane, at each unit: the nearest term, or in Screens only a picture or a screen taking its turn.
+function followUnit(pid, unit) {
   const { state, show } = follow(S.fs, span(S.terms.base, pid, unit), S.terms.terms);
   S.fs = state;
   if (show) { S.near = show; if (S.tour) endTour(); if (!held() && S.pane === 'ency') renderMasterIndex(); }
@@ -963,17 +1010,12 @@ function onUnit({ pid, unit }) {
       renderMasterIndex();
     }
   }
-  S.since += unit.text.length;
-  drawSubs();
-  if (S.offer) drawOffer();
-  drawNar();
-  if (textHidden()) narr.pause();
 }
 function chapterEnd() {
   if (S.ci >= S.chapters.length - 1) { S.msg = { why: 'end' }; drawNar(); return; }
   const at = S.ci;
   // A moment between chapters, then the next one, read from its start (unless the reader has done something else).
-  setTimeout(() => { if (!S.ar || S.ci !== at || narr.playing) return; goChapter(at + 1); S.look = true; S.fs.fresh = true; narr.play(); }, 900);
+  setTimeout(() => { if (!narrating() || S.ci !== at || narr.playing) return; goChapter(at + 1); S.look = true; S.fs.fresh = true; narr.play(); }, 900);
 }
 // Inside the shell, leaving the page hides its frame: the text then has no box, and the narrator pauses. (The
 // frame's window keeps its size; an IntersectionObserver hears the moment it goes, and each unit looks again.)
@@ -1182,7 +1224,7 @@ function fillVoices() {
   sel.value = narr.permit ? narr.permit.voice : narr.deviceVoice ? deviceId(narr.deviceVoice) : '';
 }
 function drawNar() {
-  if (!narr || !S.ar) return;
+  if (!narr || !narrating()) return;
   fillVoices();
   const playing = narr.playing, b = $('#nar-play');
   b.setAttribute('aria-pressed', String(playing));
@@ -1301,7 +1343,7 @@ function writeState() {
   // does not drop it); the era choice whenever it is the term's.
   const show = S.pane === 'vm' ? S.vmShown || S.pendingShow : null;
   const hash = writeMode(writeHash({ book: S.book.slug, ch: chapter()?.n, p: S.p, t: S.term, pane: S.pane, show, era: S.eraOf === 'term' ? 'term' : null,
-    map: S.pane === 'map' ? S.map : null, sel: S.sel }), { ar: S.ar });
+    map: S.pane === 'map' ? S.map : null, sel: S.sel }), { ar: S.ar, reader: S.reader });
   if (hash !== location.hash) { try { history.replaceState(history.state, '', hash); } catch { /* rate-limited: the next move writes it */ } }
   if (S.ar) drawNar(); // Hold follows the reader's term and the tab
 }
@@ -1321,7 +1363,7 @@ function jumpTo(id, { smooth = false } = {}) {
   S.p = id;
   // In Augmented Reading the reading moves too: it carries on from the paragraph landed on (the term nearest it shown
   // at once while it is paused; the first sentence read there while it reads).
-  if (S.ar && narr) { narr.at(chapter().paragraphs.findIndex(p => p.id === id)); S.look = true; S.fs.fresh = true; if (!narr.playing) nearHere(id); }
+  if (narrating() && narr) { narr.at(chapter().paragraphs.findIndex(p => p.id === id)); S.look = true; S.fs.fresh = true; if (S.ar && !narr.playing) nearHere(id); }
   schedule(); writeState();
 }
 function goChapter(i) {
@@ -1355,8 +1397,16 @@ async function applyHash({ first = false } = {}) {
   if (h.pane && h.pane !== S.pane) openPane(h.pane);
   else if (!h.pane && S.pane) closePane();
   else if (S.pane) renderPane();
-  // ar=1 turns the mode on, and its absence turns it off, as the pane follows pane=.
-  if (mode.ar !== S.ar) setAr(mode.ar);
+  // ar=1 turns the AR Reader on and reader=1 the Reader, and their absence turns the narrator off, as the pane follows
+  // pane=.
+  const want = mode.ar ? 'ar' : mode.reader ? 'reader' : null;
+  if (want !== narMode()) {
+    const was = narMode();
+    setNarrator(want);
+    // An address with ar=1 on the Master Index tab and no term chosen is the one the AR Reader writes when it opens
+    // the pane itself: the pane is taken as its own, so that the Reader takes it away after a reload as it did before.
+    if (want === 'ar' && !was && S.pane === 'ency' && h.pane === 'ency' && !h.t) S.arPane = true;
+  }
   if (h.p && document.getElementById(h.p) && h.p !== S.current) jumpTo(h.p);
   else if (moved && !(first && h.ch === null)) scrollToReader();
   renderChips(true);
@@ -1455,8 +1505,11 @@ function wire() {
   $('#nar-full').addEventListener('click', toggleFull);
 
   // Augmented Reading.
-  if (inSide) $('#ar-toggle').hidden = true; // a page shown in another page's pane offers no pane, and no narrator, of its own
-  $('#ar-toggle').addEventListener('click', () => setAr(!S.ar, { byHand: true }));
+  // A page shown in another page's pane offers no pane, and no narrator, of its own: neither the AR Reader nor the
+  // Reader (the narrator is what they share).
+  if (inSide) { $('#ar-toggle').hidden = true; $('#reader-toggle').hidden = true; }
+  $('#ar-toggle').addEventListener('click', pressAr);
+  $('#reader-toggle').addEventListener('click', pressReader);
   $('#nar-play').addEventListener('click', toggleRead);
   $('#nar-speed').innerHTML = SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('');
   $('#nar-speed').addEventListener('change', e => { narr && (narr.speed = +e.target.value); });
@@ -1516,12 +1569,14 @@ function wire() {
       j: () => paras[i + 1] && jumpTo(paras[i + 1].id, { smooth: true }), k: () => i > 0 && jumpTo(paras[i - 1].id, { smooth: true }),
       t: () => (S.pane === 'terms' ? closePane() : openPane('terms')), p: toggleArMode,
       f: toggleFull,
-      ...(inSide ? {} : { a: () => setAr(!S.ar, { byHand: true }) }),
-      // The narrator's keys, while the mode is on.
-      ...(S.ar ? {
-        r: toggleRead, h: () => setHold(!held()), d: () => setFill(!S.fill), s: () => S.fill && setSubs(!S.subs),
+      ...(inSide ? {} : { a: pressAr, n: pressReader }),
+      // The narrator's keys, while the Reader or the AR Reader is on; the pane's (Hold, Screens only, Subtitles) only
+      // with the AR Reader.
+      ...(narrating() ? {
+        r: toggleRead,
         '<': () => stepSpeed(-1), ',': () => stepSpeed(-1), '>': () => stepSpeed(1), '.': () => stepSpeed(1),
       } : {}),
+      ...(S.ar ? { h: () => setHold(!held()), d: () => setFill(!S.fill), s: () => S.fill && setSubs(!S.subs) } : {}),
     }[e.key.length === 1 ? e.key.toLowerCase() : e.key];
     if (!act) return;
     e.preventDefault(); act();

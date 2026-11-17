@@ -488,12 +488,43 @@ test('dates: a Julian date says so, and a date with two best-rank values in Wiki
   assert.match(text('lake/scripts/build.mjs'), /const \{ facts, fp, fc, fcal = \[\], fd = \{\} \} = datedFacts\(e\.claims, PROPS\);/);
   assert.match(text('lake/scripts/build.mjs'), /\.\.\.\(fcal\.length \? \{ fcal \} : \{\}\), \.\.\.\(Object\.keys\(fd\)\.length \? \{ fd \} : \{\}\)/);
 });
+// The second reviewer (17 November 2026, X2): each other value keeps its own calendar. The October Revolution's 25
+// October 1917 (Julian) and 7 November 1917 (Gregorian) are one day, so no dispute; two values that are different
+// days in different calendars each say which calendar they are in, on the page as in dates.mjs.
+test('dates: a second value in the other calendar keeps its calendar, and the same day in both is no dispute', async () => {
+  const { factText } = await import('../lake/scripts/dates.mjs');
+  const JUL = 'http://www.wikidata.org/entity/Q1985786', GRE = 'http://www.wikidata.org/entity/Q1985727';
+  const c = (time, precision, calendarmodel = GRE, rank = 'normal') => ({ rank, mainsnak: { datavalue: { value: { time, precision, calendarmodel } } } });
+  const facts = claims => datedFacts(claims, { P585: 'date', P569: 'born' });
+  const src = text('encyclopedia/index.html'), at = src.indexOf('const factText = ');
+  const pageFact = vm.runInNewContext(`(${src.slice(at + 'const factText = '.length, at + src.slice(at).search(/\r?\n\};/)).trim()}\n})`, { fmtDate: pageFmtDate() });
+  const both = (rec, f, want) => { assert.equal(factText(rec, f), want); assert.equal(pageFact(rec, f), want, 'the page gives the same'); };
+  // The same day, in either order: one date, its own calendar named.
+  const oct = facts({ P585: [c('+1917-10-25T00:00:00Z', 11, JUL), c('+1917-11-07T00:00:00Z', 11, GRE)] });
+  assert.deepEqual(oct, { facts: { date: '1917-10-25' }, fp: {}, fc: [], fcal: ['date'] }, 'Julian first: the same day');
+  both(oct, 'date', '25 October 1917 (Julian calendar)');
+  const nov = facts({ P585: [c('+1917-11-07T00:00:00Z', 11, GRE), c('+1917-10-25T00:00:00Z', 11, JUL)] });
+  assert.deepEqual(nov, { facts: { date: '1917-11-07' }, fp: {}, fc: [] }, 'Gregorian first: the same day');
+  both(nov, 'date', '7 November 1917');
+  assert.equal(facts({ P585: [c('+1917-10-25T00:00:00Z', 11, JUL), c('+1917-11-00T00:00:00Z', 10, GRE)] }).fd, undefined, 'the month that day falls in, in the other calendar');
+  assert.equal(facts({ P569: [c('-0356-07-20T00:00:00Z', 11, JUL), c('-0356-07-15T00:00:00Z', 11, GRE)] }).fd, undefined, 'a day BC, the same in both (five days apart then)');
+  // Different days in different calendars: each value says its calendar.
+  const jg = facts({ P569: [c('+1452-04-15T00:00:00Z', 11, JUL), c('+1452-04-14T00:00:00Z', 11, GRE)] });
+  assert.deepEqual(jg.fd, { born: [['1452-04-14', 11, 'gregorian']] });
+  both(jg, 'born', '15 April 1452 (Julian calendar) or 14 April 1452 (Gregorian calendar); Wikidata gives both');
+  const gj = facts({ P569: [c('+1452-04-24T00:00:00Z', 11, GRE), c('+1452-04-15T00:00:00Z', 11, JUL), c('+1452-04-20T00:00:00Z', 11, JUL)] });
+  assert.deepEqual(gj.fd, { born: [['1452-04-20', 11, 'julian']] }, 'Julian 15 April 1452 is Gregorian 24 April: no dispute; Julian 20 April is');
+  both(gj, 'born', '24 April 1452 (Gregorian calendar) or 20 April 1452 (Julian calendar); Wikidata gives both');
+  assert.deepEqual(facts({ P569: [c('+1452-04-15T00:00:00Z', 11, JUL), c('+1452-04-15T00:00:00Z', 11, GRE)] }).fd, { born: [['1452-04-15', 11, 'gregorian']] }, 'one value written in both calendars is two days');
+  // In one calendar, as before: the calendar once for them all, and no third element.
+  both({ facts: { born: '1452-04-15' }, fcal: ['born'], fd: { born: [['1452-04-14', 11]] } }, 'born', '15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)');
+});
 test('committed lake, after the full build: Alexander the Great\'s birth is in the Julian calendar, and every disputed date differs', t => {
   if (!afterFullBuild(t)) return;
   assert.ok((lakeRecords().get('Q8409')?.fcal || []).includes('born'), 'Alexander the Great: born in the Julian calendar (Wikidata, read 16 November 2026)');
   for (const r of lakeRecords().values()) {
     for (const f of r.fcal || []) assert.ok(r.facts[f], `${r.q}: fcal ${f} is a fact`);
-    for (const [f, alts] of Object.entries(r.fd || {})) { assert.ok(r.facts[f] && alts.length, `${r.q}: fd ${f}`); for (const [v] of alts) assert.notEqual(v, r.facts[f], `${r.q} ${f}`); }
+    for (const [f, alts] of Object.entries(r.fd || {})) { assert.ok(r.facts[f] && alts.length, `${r.q}: fd ${f}`); for (const [v, , k] of alts) assert.ok(v !== r.facts[f] || k, `${r.q} ${f}: the same value, unless in the other calendar`); }
   }
 });
 
@@ -537,17 +568,28 @@ test('committed lake: no death precedes a birth, each date read at its precision
   assert.deepEqual(yearSpan('1400', 7), [1301, 1400]);
   assert.deepEqual(yearSpan('-0500', 7), [-500, -401]);
   assert.deepEqual(yearSpan('1560', 8), [1560, 1569]);
-  const bad = [], day = /^-?\d+-\d\d-\d\d$/;
+  // A date as the span of days it can mean, [first, last], each [year, month, day]: a month or a day fills in what the
+  // value gives (a year BC runs January to December too), so a death wholly before a birth is seen at a month's
+  // precision as at a day's (the second reviewer, 17 November 2026, X5: born 1900-12, died 1900-01 passed).
+  const daySpan = (v, p) => {
+    const ys = yearSpan(v, p);
+    if (!ys) return null;
+    const m = String(v).match(/^-?\d+(?:-(\d\d))?(?:-(\d\d))?$/), mo = ys[0] === ys[1] && m?.[1] ? +m[1] : 0, dd = mo && m?.[2] ? +m[2] : 0;
+    return [[ys[0], mo || 1, dd || 1], [ys[1], mo || 12, dd || 31]];
+  };
+  const before = (x, y) => x[0] !== y[0] ? x[0] < y[0] : x[1] !== y[1] ? x[1] < y[1] : x[2] < y[2];
+  const diesFirst = r => { const b = daySpan(r.facts.born, r.fp?.born), d = daySpan(r.facts.died, r.fp?.died); return !!(b && d && before(d[1], b[0])); };
+  const rec = (born, died, fp) => ({ facts: { born, died }, ...(fp ? { fp } : {}) });
+  assert.ok(diesFirst(rec('1900-12', '1900-01')), 'a month wholly before the month of birth');
+  assert.ok(diesFirst(rec('1900-12-05', '1900-12-04')) && diesFirst(rec('1901', '1900-12-31')) && diesFirst(rec('-0300-05', '-0300-04-30')));
+  assert.ok(!diesFirst(rec('1900-12', '1900-12-01')) && !diesFirst(rec('1900', '1900-01')) && !diesFirst(rec('1900-06-01', '1900-06')), 'the same month, or a year that holds it: no fault');
+  assert.ok(!diesFirst(rec('1400', '1382-01-01', { born: 7 })), 'Giorgio Scali: a century read at its precision');
+  const bad = [];
   let both = 0;
   for (const r of lakeRecords().values()) {
     if (!r.facts.born || !r.facts.died) continue;
     both++;
-    const b = yearSpan(r.facts.born, r.fp?.born), d = yearSpan(r.facts.died, r.fp?.died);
-    if (!b || !d) continue;
-    const said = `${r.q} ${r.label}: born ${r.facts.born}${r.fp?.born ? ` (p${r.fp.born})` : ''}, died ${r.facts.died}${r.fp?.died ? ` (p${r.fp.died})` : ''}`;
-    if (b[0] > d[1]) bad.push(said);
-    // In one year, two full dates in order (a year BC runs January to December too).
-    else if (b[1] === b[0] && d[1] === d[0] && b[0] === d[0] && day.test(r.facts.born) && day.test(r.facts.died) && r.facts.born.slice(-5) > r.facts.died.slice(-5)) bad.push(said);
+    if (diesFirst(r)) bad.push(`${r.q} ${r.label}: born ${r.facts.born}${r.fp?.born ? ` (p${r.fp.born})` : ''}, died ${r.facts.died}${r.fp?.died ? ` (p${r.fp.died})` : ''}`);
   }
   assert.ok(both > 1000, `records with both dates: ${both}`);
   assert.deepEqual(bad, []);

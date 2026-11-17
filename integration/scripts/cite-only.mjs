@@ -55,16 +55,18 @@ export const HOSTED = [
 export const PROVENANCE = /^(dataset|src|source|sources)$|Source$/;
 
 // True when a record's provenance names a cite-only source, by its name or its id, or the record holds one of the
-// source's own fields (any depth).
+// source's own fields (any depth). Everything inside a provenance key is provenance, however deep, so a map of sources
+// ({ sources: { cow: 'Correlates of War …' } }) names the source by its words and by its id as the key (the second
+// reviewer, 17 November 2026, X4).
 export function namesSource(record, src) {
   const ids = new Set(src.ids || []), fields = new Set(src.fields || []);
-  const walk = (v, key) => {
-    if (typeof v === 'string') return PROVENANCE.test(key) && (src.match.test(v) || ids.has(v));
-    if (Array.isArray(v)) return v.some(x => walk(x, key));
-    if (v && typeof v === 'object') return Object.entries(v).some(([k, x]) => fields.has(k) || walk(x, k));
+  const walk = (v, prov) => {
+    if (typeof v === 'string') return prov && (src.match.test(v) || ids.has(v));
+    if (Array.isArray(v)) return v.some(x => walk(x, prov));
+    if (v && typeof v === 'object') return Object.entries(v).some(([k, x]) => fields.has(k) || (prov && ids.has(k)) || walk(x, prov || PROVENANCE.test(k)));
     return false;
   };
-  return walk(record, '');
+  return walk(record, false);
 }
 
 // A licence or terms line that calls a cite-only source free to use, open or public domain: every clause naming it.

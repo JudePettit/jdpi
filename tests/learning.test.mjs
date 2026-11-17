@@ -162,13 +162,24 @@ test('quotations: every quotation in the courses matches a book on the shelf; an
   // imagery licences ask for, so they are left out as a whole (their definitions from US law are in VM's words).
   const COURSES = ['economics', 'politics', 'finance'];
   const md = f => readFileSync(new URL(`../fe/learning/${f}.md`, import.meta.url), 'utf8').replace(/\r/g, '').split('\n');
+  // The quoted runs of a course, each with the line it starts on. The file is read whole, not line by line, so a
+  // quotation that runs across a line break is seen too (the second reviewer, 17 November 2026, X3).
+  const runsOf = lines => {
+    const all = lines.join('\n'), starts = lines.map((_, i) => lines.slice(0, i).join('\n').length + (i ? 1 : 0));
+    const out = [];
+    let from = 0;
+    for (const q of quotedRuns(all, 6)) { const i = all.indexOf(q, from); from = i + q.length; out.push([q.replace(/\s+/g, ' '), starts.findLastIndex(s => s <= i) + 1]); }
+    return out;
+  };
+  assert.deepEqual(runsOf(['He wrote "these are six invented words', 'that span two lines" in 1900.']), [['these are six invented words that span two lines', 1]], 'a quotation across a line break is seen');
   let blocks = 0;
-  for (const f of COURSES) md(f).forEach((line, i) => {
-    const at = `${f}.md:${i + 1}`;
-    const block = /^> "(.+?)"\s+—\s+(.+)$/.exec(line);
-    if (block) { blocks++; assert.ok(findQuote(block[1]).length, `${at}: the quotation "${block[1]}" matches no paragraph of a book on the shelf that is public domain in the EU`); }
-    for (const q of quotedRuns(line, 6)) if (!NOT_WORDS.has(q)) assert.ok(findQuote(q).length, `${at}: "${q}" is quoted but matches no paragraph of a book on the shelf; say it in VM's words`);
-  });
+  for (const f of COURSES) {
+    md(f).forEach((line, i) => {
+      const block = /^> "(.+?)"\s+—\s+(.+)$/.exec(line);
+      if (block) { blocks++; assert.ok(findQuote(block[1]).length, `${f}.md:${i + 1}: the quotation "${block[1]}" matches no paragraph of a book on the shelf that is public domain in the EU`); }
+    });
+    for (const [q, line] of runsOf(md(f))) if (!NOT_WORDS.has(q)) assert.ok(findQuote(q).length, `${f}.md:${line}: "${q}" is quoted but matches no paragraph of a book on the shelf; say it in VM's words`);
+  }
   assert.ok(blocks >= 4, 'the quotations the shelf holds stay quotations');
   for (const f of ['osint', 'geoint']) assert.ok(!quotedRuns(md(f)[6], 6).length, `${f}.md: the definition from US law is in VM's words`);
   // the shelf's quotations name their translator

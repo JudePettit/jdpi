@@ -63,18 +63,44 @@ export function yearSpan(v, p) {
 }
 // Two values of one date agree when one is the other at a coarser precision ("1452" and "1452-04-15"), or a value
 // coarser than a year spans the other's year ("1500" at century precision and 1452).
-const agree = (a, b) => {
+const agreeAsWritten = (a, b) => {
   if (a.v.startsWith(b.v) || b.v.startsWith(a.v)) return true;
   if (a.p >= 9 && b.p >= 9) return false;
   const x = yearSpan(a.v, a.p), y = yearSpan(b.v, b.p);
   return !!(x && y && x[0] <= y[1] && y[0] <= x[1]);
 };
+// A value in one calendar and a value in the other are compared as Gregorian: a Julian day is moved to its Gregorian
+// day first, so the October Revolution's 25 October 1917 (Julian) agrees with 7 November 1917 (the second reviewer, X2,
+// 17 November 2026). A Julian value coarser than a day is compared as written.
+const calOf = d => (d.cal === 'julian' ? 'julian' : 'gregorian');
+const agree = (a, b) => {
+  if (calOf(a) === calOf(b)) return agreeAsWritten(a, b);
+  const g = d => { const v = d.cal === 'julian' && d.p >= 11 ? julianToGregorian(d.v) : null; return v ? { ...d, v } : d; };
+  return agreeAsWritten(g(a), g(b));
+};
+
+/** A Julian day as the lake keeps it ("1917-10-25", "-0356-07-20": a year BC signed, no year 0) moved to the same day
+ *  in the Gregorian calendar, written the same way; null for a value that is not a whole day, or older than 4713 BC. */
+export function julianToGregorian(v) {
+  const m = String(v ?? '').match(/^(-?)(\d+)-(\d\d)-(\d\d)$/);
+  if (!m) return null;
+  const year = m[1] === '-' ? 1 - +m[2] : +m[2], month = +m[3], day = +m[4]; // year: astronomical (1 BC is 0)
+  if (year < -4712 || month < 1 || month > 12 || day < 1) return null;
+  const a = Math.floor((14 - month) / 12), y = year + 4800 - a, mo = month + 12 * a - 3;
+  const jdn = day + Math.floor((153 * mo + 2) / 5) + 365 * y + Math.floor(y / 4) - 32083;
+  const A = jdn + 32044, B = Math.floor((4 * A + 3) / 146097), C = A - Math.floor(146097 * B / 4);
+  const D = Math.floor((4 * C + 3) / 1461), E = C - Math.floor(1461 * D / 4), M = Math.floor((5 * E + 2) / 153);
+  const gd = E - Math.floor((153 * M + 2) / 5) + 1, gm = M + 3 - 12 * Math.floor(M / 10), gy = 100 * B + D - 4800 + Math.floor(M / 10);
+  const two = n => String(n).padStart(2, '0');
+  return `${gy <= 0 ? '-' : ''}${String(gy <= 0 ? 1 - gy : gy).padStart(4, '0')}-${two(gm)}-${two(gd)}`;
+}
 
 /** The facts of an entity (each property's best statement, bestClaim) with their precisions and circa marks:
  *  { facts, fp, fc }, fp and fc only for the facts that need them; `fcal` the facts in the Julian calendar and `fd`
  *  the disputed ones, only when there are any. A fact is disputed when Wikidata's best rank (its preferred statements,
  *  else its normal ones) holds a value that does not agree with the first: fd: { born: [['1452-04-14', 11]] }, the
- *  other values with their precisions; the first stays the fact (S0, 16 November 2026). */
+ *  other values with their precisions (and the calendar of one that is not in the fact's calendar: [v, p, 'gregorian']);
+ *  the first stays the fact (S0, 16 November 2026). */
 export function datedFacts(claims, props) {
   const facts = {}, fp = {}, fc = [], fcal = [], fd = {};
   for (const [p, name] of Object.entries(props)) {
@@ -85,11 +111,14 @@ export function datedFacts(claims, props) {
     if (d.c) fc.push(name);
     if (d.cal === 'julian') fcal.push(name);
     const rank = best.rank === 'preferred' ? 'preferred' : 'normal';
+    // Each other value keeps its calendar, as a third element, when it is not the fact's: [v, p, 'gregorian' | 'julian'].
     const others = [];
     for (const c of claims[p]) {
       if (c === best || (c.rank || 'normal') !== rank) continue;
       const o = wikidataDate(c);
-      if (o && !agree(o, d) && !others.some(([v]) => v === o.v)) others.push([o.v, o.p]);
+      if (!o || agree(o, d)) continue;
+      const alt = calOf(o) === calOf(d) ? [o.v, o.p] : [o.v, o.p, calOf(o)];
+      if (!others.some(([v, , k]) => v === alt[0] && k === alt[2])) others.push(alt);
     }
     if (others.length) fd[name] = others;
   }
@@ -111,11 +140,17 @@ export function formatDate(d, p, c, cal) {
 
 /** A record's fact as the Master Index shows it (encyclopedia/index.html factText gives the same answers): its date
  *  at its precision, then any other value Wikidata gives it at the same rank, and the calendar once for them all:
- *  "15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)". */
+ *  "15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)". When the values are in different calendars
+ *  each says its own: "15 April 1452 (Julian calendar) or 14 April 1452 (Gregorian calendar); Wikidata gives both". */
 export function factText(e, f) {
   const julian = (e.fcal || []).includes(f), alts = e.fd?.[f] || [];
   const main = formatPlain(e.facts[f], e.fp?.[f], (e.fc || []).includes(f));
-  const notes = [julian ? 'Julian calendar' : '', alts.length ? `Wikidata gives ${alts.length === 1 ? 'both' : 'all of them'}` : ''].filter(Boolean);
+  const gives = `Wikidata gives ${alts.length === 1 ? 'both' : 'all of them'}`, own = julian ? 'julian' : 'gregorian';
+  if (alts.some(a => a[2] && a[2] !== own)) {
+    const cal = k => (k === 'julian' ? 'Julian calendar' : 'Gregorian calendar');
+    return `${[`${main} (${cal(own)})`, ...alts.map(([v, p, k]) => `${formatPlain(v, p < 9 ? p : undefined, false)} (${cal(k || own)})`)].join(' or ')}; ${gives}`;
+  }
+  const notes = [julian ? 'Julian calendar' : '', alts.length ? gives : ''].filter(Boolean);
   return `${[main, ...alts.map(([v, p]) => formatPlain(v, p < 9 ? p : undefined, false))].join(' or ')}${notes.length ? ` (${notes.join('; ')})` : ''}`;
 }
 function formatPlain(d, p, c) {

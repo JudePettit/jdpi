@@ -158,6 +158,12 @@ describe('catalogue (integration/catalog.json)', () => {
     assert.ok(wwii && namesSource(wwii, CITE_ONLY.cow), 'a row VM labels src: "cow" names the Correlates of War');
     assert.ok(namesSource({ conflict_history: { wars_1926_1945: 2 } }, CITE_ONLY.cow), 'a field that carries a COW count names it');
     assert.ok(!namesSource({ id: 'u1', src: 'ucdp', name: 'cow war' }, CITE_ONLY.cow));
+    // The second reviewer (17 November 2026, X4): a value inside a provenance key is provenance however deep it sits, so
+    // a page file's map of sources ({ sources: { cow: '…' } }) names the source, by its name or by its id as the key.
+    assert.ok(namesSource({ sources: { cow: 'Correlates of War' }, records: [{ deaths: 100 }] }, CITE_ONLY.cow), 'a map of sources, by name');
+    assert.ok(namesSource({ sources: { cow: { name: 'COW War Data', url: 'https://correlatesofwar.org/' } } }, CITE_ONLY.cow), 'a map of sources, by its id as the key');
+    assert.ok(namesSource({ meta: { source: { dataset: 'cow' } } }, CITE_ONLY.cow), 'provenance within provenance');
+    assert.ok(!namesSource({ sources: { ucdp: 'UCDP/PRIO' }, notes: { cow: 'Correlates of War' } }, CITE_ONLY.cow), 'outside provenance, a name is only words');
     const datasetOf = new Map(CAT.datasets.flatMap(d => (d.urls || [d.url]).map(u => [u, d.id])));
     const heldFile = (id, f) => HOSTED.some(h => h.source === id && ((h.dataset && h.dataset === datasetOf.get(f)) || (h.dir && f.startsWith(`${h.dir}/`)) || h.file === f));
     const files = [];

@@ -386,11 +386,17 @@ const fmtDate = (d, p, c, cal) => {
 };
 // A fact as shown: its date, then any other value Wikidata gives it at the same rank (the record's fd), and the calendar
 // once for them all (fcal): "15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)". The same answers
-// as lake/scripts/dates.mjs factText (S0, 16 November 2026).
+// as lake/scripts/dates.mjs factText (S0, 16 November 2026). Values in different calendars each say their own (an
+// other value's third element): "15 April 1452 (Julian calendar) or 14 April 1452 (Gregorian calendar); Wikidata gives both".
 const factText = (e, f) => {
   const julian = (e.fcal || []).includes(f), alts = (e.fd && e.fd[f]) || [];
   const main = fmtDate(e.facts[f], e.fp?.[f], (e.fc || []).includes(f));
-  const notes = [julian ? 'Julian calendar' : '', alts.length ? `Wikidata gives ${alts.length === 1 ? 'both' : 'all of them'}` : ''].filter(Boolean);
+  const gives = `Wikidata gives ${alts.length === 1 ? 'both' : 'all of them'}`, own = julian ? 'julian' : 'gregorian';
+  if (alts.some(a => a[2] && a[2] !== own)) {
+    const cal = k => (k === 'julian' ? 'Julian calendar' : 'Gregorian calendar');
+    return `${[`${main} (${cal(own)})`, ...alts.map(([v, p, k]) => `${fmtDate(v, p < 9 ? p : undefined, false)} (${cal(k || own)})`)].join(' or ')}; ${gives}`;
+  }
+  const notes = [julian ? 'Julian calendar' : '', alts.length ? gives : ''].filter(Boolean);
   return `${[main, ...alts.map(([v, p]) => fmtDate(v, p < 9 ? p : undefined, false))].join(' or ')}${notes.length ? ` (${notes.join('; ')})` : ''}`;
 };
 

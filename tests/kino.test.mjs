@@ -16,7 +16,7 @@ import { readKinoView, kinoViewHash, linkPlace, SHELL_URL } from '../kino/lib/li
 import { relatedPlaces, sceneEntities, tagTables, shardOf, CHIPS, PER_THING, MAP_COUNTRIES } from '../kino/lib/related.js';
 import { sentenceRuns } from '../kino/lib/text.js';
 import { existsSync, readdirSync } from 'node:fs';
-import { shelfParagraphs, findQuote, quotedRuns } from '../bibliotheca/scripts/quotes.mjs';
+import { shelfParagraphs, findQuote, quotedRuns, normalise } from '../bibliotheca/scripts/quotes.mjs';
 import { wordCount } from '../kino/lib/text.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -207,6 +207,15 @@ test('quotations: every quote scene matches a paragraph of a book on the shelf t
   assert.equal(findQuote('… it is necessary to be a fox … a lion to terrify the wolves.', paras)[0]?.slug, 'the-prince', 'an ellipsis leaves words out');
   assert.deepEqual(findQuote('… a lion to terrify the wolves … it is necessary to be a fox', paras), [], 'but keeps the order');
   assert.equal(findQuote('The history of all hitherto existing society is the history of class struggles.', paras)[0]?.slug, 'communist-manifesto', 'a note mark in the book is no difference');
+  // The second reviewer (17 November 2026, X1): the words must be whole words, so a piece may not begin or end inside
+  // one of the book's words ("t is necessary" in "it is necessary", "the wolve" in "the wolves").
+  assert.deepEqual(findQuote('t is necessary to be a fox to discover the snares and a lion to terrify the wolves.', paras), [], 'a piece that begins inside a word');
+  assert.deepEqual(findQuote('it is necessary to be a fox to discover the snares and a lion to terrify the wolve', paras), [], 'a piece that ends inside a word');
+  assert.deepEqual(findQuote('t is necessary to be a fox … terrify the wolve', paras), [], 'nor any piece split at an ellipsis');
+  assert.equal(findQuote('it is necessary to be a fox to discover the snares', paras)[0]?.slug, 'the-prince', 'whole words from inside a sentence still match');
+  // (X6) U+2010 and U+2011 are hyphens: they read as the book's plain hyphen, never as a dash.
+  assert.equal(normalise('self‐interest and non‑resistance'), 'self-interest and non-resistance');
+  assert.notEqual(normalise('£2000‐that'), normalise('£2000—that'), 'a hyphen is not a dash');
   // a book whose EU rights are unconfirmed is not quoted, however exact the words
   const nv = JSON.parse(readFileSync(join(ROOT, 'bibliotheca/data/books/natural-value.json'), 'utf8'));
   assert.equal(nv.rights.eu, 'unconfirmed');
@@ -233,6 +242,11 @@ test('quotations: a summary is VM\'s words, naming whose words or which document
   for (const d of docs) for (const s of flatScenes(d)) {
     for (const q of quotedRuns(s.narration, 6)) assert.ok(findQuote(q).length, `${d.id}/${s.id}: the narration quotes "${q}"`);
   }
+  // The second reviewer (17 November 2026, X3): a quotation that runs across a line break is still a quotation; a
+  // paragraph break ends any run, so an unclosed mark cannot pair with one in the next paragraph.
+  assert.deepEqual(quotedRuns('“These invented words have no source\nand should never be passed as a quotation.”'), ['These invented words have no source\nand should never be passed as a quotation.']);
+  assert.deepEqual(quotedRuns('He said "these six invented words are\r\nnot his" at the time.'), ['these six invented words are\r\nnot his']);
+  assert.deepEqual(quotedRuns('An open "mark with six words or more here\n\nand "a close" in the next paragraph.'), []);
   // The second reader (16 November 2026): a film whose quotations became VM's summaries must not promise the people's own
   // words in its description (the catalogue and "About this documentary"), and a summary scene's narration must not
   // lead into a sentence of the person's that the card no longer shows.

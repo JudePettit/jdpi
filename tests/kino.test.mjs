@@ -38,7 +38,8 @@ test('scripts: the exemplars, and every kind of visual in use', () => {
   const ww2 = ctx.docs.get('ww2-europe'), wc = ctx.docs.get('winston-churchill');
   assert.equal(ww2?.category, 'wars');
   assert.equal(wc?.category, 'political-figures');
-  for (const d of [ww2, wc]) { const n = flatScenes(d).length; assert.ok(n >= 10 && n <= 14, `${d.id}: ${n} scenes`); }
+  // The war exemplar has fifteen since AC-10 added Africa's war (17 November 2026).
+  for (const d of [ww2, wc]) { const n = flatScenes(d).length; assert.ok(n >= 10 && n <= (d === ww2 ? 15 : 14), `${d.id}: ${n} scenes`); }
   const kinds = new Set(docs.flatMap(d => flatScenes(d).map(s => s.visual.kind)));
   for (const k of VISUAL_KINDS) assert.ok(kinds.has(k), `no scene uses the ${k} visual`);
   for (const d of docs) assert.ok(CATEGORY_IDS.includes(d.category));
@@ -305,7 +306,7 @@ test('validator: refuses broken scripts and accepts a course with parts and a qu
   s.narration = 'One sentence only.';
   s.focus.countries.push('XYZ');
   s.link.at = 'battlefield/focus/index.html#war=ww2&m=1950-01';
-  doc.scenes[12].visual.data[0] = { label: 'Soviet Union, all deaths', value: 26 };
+  doc.scenes.find(x => x.id === 'the-cost').visual.data[0] = { label: 'Soviet Union, all deaths', value: 26 };
   doc.scenes[1].cites = ['nobody-1999'];
   const { errors } = validateScript(doc, ctx);
   for (const want of [/2 to 5/, /XYZ/, /no month "1950-01"/, /range/, /nobody-1999/]) assert.ok(errors.some(e => want.test(e)), `expected ${want}: ${errors.join(' | ')}`);
@@ -353,7 +354,7 @@ test('page: catalogue, deep link, map, captions-only playback with highlighted w
     await page.goto(`${BASE}/kino/index.html?cat=wars#doc=ww2-europe&s=poland`, { waitUntil: 'domcontentloaded' });
     // The stage's map, not a catalogue card's preview map (those use the same classes and stay in the page, hidden).
     await page.waitForSelector('.kn-stage svg.kn-map path.c.t1', { timeout: 30000 });
-    assert.equal(await page.locator('#badge').innerText(), '3 / 14');
+    assert.equal(await page.locator('#badge').innerText(), `3 / ${flatScenes(ctx.docs.get('ww2-europe')).length}`);
     const scene = flatScenes(ctx.docs.get('ww2-europe'))[2];
     assert.equal(await page.locator('#cap-text .w').count(), tokens(scene.narration).length);
     assert.equal(await page.locator('svg.kn-map path.c[data-iso="POL"].t1').count(), 1);
@@ -1626,10 +1627,14 @@ function warGaps() {
     const wfList = read('battlefield/focus/data/index.json').wars.map(m => warFocusWar(read(`battlefield/focus/data/wars/${m.id}.json`), R));
     const wf = new Map(wfList.map(w => [w.id, w]));
     const rb = new Map(read('battlefield/history/data/wars.json').wars.map(w => retroWar(w, R)).map(w => [w.id, w]));
-    const films = ['korean-war', 'vietnam-war', 'winston-churchill'].map(id => ctx.docs.get(id)).map(doc => ({ meta: { id: doc.id, category: doc.category, title: doc.title }, doc }));
+    const films = ['korean-war', 'vietnam-war', 'winston-churchill', 'ww2-europe'].map(id => ctx.docs.get(id)).map(doc => ({ meta: { id: doc.id, category: doc.category, title: doc.title }, doc }));
     const k = kinoFilms(films, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: w.bf }])), rbWars: rb });
     const gaps = warFilmGaps(k.films, new Map(k.pieces.map(p => [p.id, p])), { wf, rb }, R);
-    return id => gaps.find(g => g.piece === id) || { countries: [], states: [], scenes: [] };
+    const find = id => gaps.find(g => g.piece === id) || { countries: [], states: [], scenes: [] };
+    // What a scene shows, as the coverage script reads it: the countries it draws and the places it marks.
+    find.shown = (film, scene) => { const s = k.films.find(f => f.id === film).scenes.find(x => x.id === scene); return new Set([...s.map, ...s.point]); };
+    find.R = R;
+    return find;
   })();
   return warGapsMemo;
 }
@@ -1686,4 +1691,137 @@ test('sources: the war films name UCDP/PRIO\'s Armed Conflict Dataset for the pa
 test('summary cards: no card holds more words than the narration it is shown under', () => {
   for (const d of ctx.docs.values()) for (const s of flatScenes(d)) if (s.visual.kind === 'summary')
     assert.ok(wordCount(s.narration || '') >= wordCount(s.visual.text || ''), `${d.id}/${s.id}: ${wordCount(s.narration || '')} words spoken under a ${wordCount(s.visual.text || '')}-word card`);
+});
+
+/* ---- AC-10 (Jude, October and 16 November 2026): the Second World War film left Africa out. The North Africa and
+   Italy scene lights North Africa and Malta and draws the Balkans and France; a new scene maps Africa's war,
+   1940–1943; the two-fronts and Berlin scenes show the countries their War Focus months were fought in. The title
+   and id stay as they are (a new title waits for Jude's choice 12), and no Asia and Pacific scene is added. */
+const WW2_AFRICA = new Set([...read('national/data/index.json').countries.filter(c => c.region === 'Sub-Saharan Africa').map(c => c.iso3), 'DZA', 'EGY', 'LBY', 'MAR', 'TUN', 'DJI', 'ESH']);
+const ww2Scene = id => flatScenes(ctx.docs.get('ww2-europe')).find(s => s.id === id);
+
+test('coverage: the Second World War film leaves no African country of its war grey, and no scene leaves a fighting country grey', async () => {
+  const g = (await warGaps())('kino:wars/ww2-europe');
+  assert.deepEqual(g.countries.filter(c => WW2_AFRICA.has(c)), [], 'African countries of the war the film never shows');
+  assert.deepEqual(g.states.filter(s => s.successors.some(c => WW2_AFRICA.has(c))).map(s => s.name), [], 'African territories of the war (Ruanda-Urundi) the film never shows');
+  assert.deepEqual(g.scenes.map(s => [s.scene, s.missing, s.states.map(x => x.name)]), [], 'scenes that leave a fighting country grey');
+});
+
+test('ww2-europe: the North Africa and Italy scene lights North Africa and Malta, takes in Morocco, and draws the Balkans and France', async () => {
+  const s = ww2Scene('mediterranean'), shown = (await warGaps()).shown('kino:wars/ww2-europe', 'mediterranean');
+  for (const c of ['EGY', 'LBY', 'TUN', 'DZA', 'MAR', 'MLT']) assert.ok(lit(s).has(c), `${c} is lit`);
+  for (const c of ['ALB', 'GRC', 'FRA', 'ITA']) assert.ok(lit(s).has(c), `${c} is drawn`);
+  assert.ok(lit(s).has('YUG'), 'Yugoslavia is drawn as the state it was, by its present-day shapes');
+  for (const c of HISTORICAL.YUG) assert.ok(shown.has(c), `Yugoslavia's ${c} is drawn`);
+  assert.ok(s.focus.bbox[0] <= -13 && s.focus.bbox[1] <= 28, `the view takes in Morocco: ${s.focus.bbox}`);
+});
+
+test('ww2-europe: a map of Africa\'s war, 1940–1943, with each territory lit on the side it was on', async () => {
+  const scenes = flatScenes(ctx.docs.get('ww2-europe')), i = scenes.findIndex(s => s.id === 'africa');
+  assert.ok(i > 0, 'the scene is there');
+  const s = scenes[i];
+  assert.equal(scenes[i - 1].id, 'mediterranean', 'after North Africa and Italy');
+  assert.equal(s.title, 'Africa\'s war, 1940–1943');
+  assert.equal(s.visual.kind, 'map');
+  const tone = c => s.visual.groups.find(g => g.countries.includes(c))?.tone;
+  // Held by Italy (East Africa, with British Somaliland from August 1940) or for Vichy France (Dakar, Gabon, Madagascar)
+  // when the Allies attacked them: the Axis tone. The Allied territories, Free French Chad among them: the Allies' tone.
+  for (const c of ['ERI', 'ETH', 'SOM', 'SEN', 'GAB', 'MDG']) assert.equal(tone(c), 2, `${c}: held by Italy or for Vichy when attacked`);
+  for (const c of ['SDN', 'KEN', 'TCD', 'BWA', 'COD', 'GHA', 'GMB', 'LSO', 'MWI', 'NAM', 'NGA', 'SLE', 'SWZ', 'TZA', 'UGA', 'ZAF', 'ZMB', 'ZWE', 'RWA', 'BDI']) assert.equal(tone(c), 1, `${c}: on the Allied side`);
+  // Spanish Guinea belonged to neutral Spain: it is on neither side, so it is not lit (a marker shows the British raid
+  // there, which War Focus records).
+  assert.ok(!lit(s).has('GNQ'), 'Spanish Guinea, a neutral\'s colony, is not lit');
+  assert.ok(s.focus.points.some(p => /Fernando Po/.test(p[2]) && /neutral/.test(p[2])), 'the raid at Fernando Po is marked, and called neutral ground');
+  assert.match(s.link?.at || '', /^battlefield\/focus\/index\.html#war=ww2&m=194[0-3]-\d{2}$/, 'it links a War Focus month of the war in Africa');
+  assert.ok(s.cites.length >= 2 && s.cites.every(c => ctx.docs.get('ww2-europe').sources.some(x => x.id === c)), 'its sources are the film\'s');
+  const n = countSentences(s.narration);
+  assert.ok(n >= 2 && n <= 5, `${n} sentences`);
+  assert.doesNotMatch(s.narration, /["“”]/, 'no quotation');
+});
+
+test('ww2-europe: two fronts shows Italy, Romania and Bosnia, and Berlin the Netherlands and Czechia, each told in the narration', async () => {
+  const W = await warGaps();
+  const two = W.shown('kino:wars/ww2-europe', 'two-fronts'), berlin = W.shown('kino:wars/ww2-europe', 'berlin');
+  for (const c of ['BIH', 'ITA', 'ROU']) assert.ok(two.has(c), `two-fronts shows ${c}`);
+  for (const c of ['CZE', 'NLD']) assert.ok(berlin.has(c), `berlin shows ${c}`);
+  assert.match(ww2Scene('two-fronts').narration, /Rome/);
+  assert.match(ww2Scene('two-fronts').narration, /Romania/);
+  assert.match(ww2Scene('two-fronts').narration, /Bosnia/);
+  assert.match(ww2Scene('berlin').narration, /Netherlands/);
+  assert.match(ww2Scene('berlin').narration, /Brno|Moravia|Czech/);
+});
+
+test('ww2-europe: the title and id are unchanged, and no Asia and Pacific scene is added', () => {
+  const d = ctx.docs.get('ww2-europe');
+  assert.equal(d.id, 'ww2-europe');
+  assert.equal(d.title, 'The Second World War in Europe, 1939–1945');
+  const ASIA = new Set(['JPN', 'CHN', 'IND', 'MMR', 'PHL', 'IDN', 'AUS', 'USA', 'KOR', 'PRK', 'VNM', 'THA', 'MYS', 'SGP', 'PNG']);
+  for (const s of flatScenes(d)) {
+    for (const c of lit(s)) assert.ok(!ASIA.has(c), `${s.id} lights ${c}`);
+    if (s.focus?.bbox) assert.ok(s.focus.bbox[2] <= 60, `${s.id}: its view reaches east of 60°`);
+  }
+  assert.equal(flatScenes(d).length, 15);
+  assert.match(d.summary, /Fifteen scenes/);
+});
+
+/* ---- AC-10's review (17 November 2026): one colour rule for the territories the Allies attacked, scenes of the film's
+   own length, keys that say what they mean, citations a viewer can tell apart, and a key that leaves Morocco clear. */
+test('ww2-europe: North Africa and Africa\'s war colour the territories the Allies attacked by one rule: held by the Axis, Italy or for Vichy when attacked', () => {
+  const tone = (id, c) => ww2Scene(id).visual.groups.find(g => g.countries.includes(c));
+  // Vichy's North Africa (Torch), Axis Tunisia, Italian Libya and East Africa, and Vichy's Dakar, Gabon and Madagascar.
+  for (const [id, cs] of [['mediterranean', ['MAR', 'DZA', 'TUN', 'LBY']], ['africa', ['ERI', 'ETH', 'SOM', 'SEN', 'GAB', 'MDG']]])
+    for (const c of cs) {
+      const g = tone(id, c);
+      assert.equal(g?.tone, 2, `${id}: ${c} in the tone of the side that held it`);
+      assert.match(g.label, /when the Allies attacked/, `${id}: ${c}'s key says the colour is who held it when attacked`);
+    }
+  // No key colours a territory by the side it ended up on.
+  for (const id of ['mediterranean', 'africa']) for (const g of ww2Scene(id).visual.groups) assert.doesNotMatch(g.label, /taken by the Allies/, `${id}: ${g.label}`);
+});
+
+test('ww2-europe: every scene keeps the film\'s length (85 words at most), and two fronts tells 1944 in date order', () => {
+  for (const s of flatScenes(ctx.docs.get('ww2-europe'))) assert.ok(wordCount(s.narration) <= 85, `${s.id}: ${wordCount(s.narration)} words`);
+  const n = ww2Scene('two-fronts').narration, at = w => n.indexOf(w);
+  assert.ok(at('Drvar') >= 0 && at('Drvar') < at('Normandy') && at('Normandy') < at('Bagration') && at('Bagration') < at('Romania'), 'Drvar (May), Normandy (June), Bagration (June), Romania (August)');
+});
+
+test('ww2-europe: the keys say what they mean: Libya is not kept in the Axis to September 1943, and Britain\'s African colonies are the Empire\'s', () => {
+  for (const g of ww2Scene('mediterranean').visual.groups) if (g.countries.includes('LBY')) assert.doesNotMatch(g.label, /September 1943/, g.label);
+  const allied = ww2Scene('africa').visual.groups.find(g => g.countries.includes('KEN'));
+  assert.match(allied.label, /British Empire/);
+});
+
+test('ww2-europe: no scene cites two sources by the same short form, and every source is one a reader can open or find', () => {
+  const d = ctx.docs.get('ww2-europe');
+  for (const s of flatScenes(d)) {
+    const short = (s.cites || []).map(id => shortCite(d.sources.find(x => x.id === id)));
+    assert.deepEqual(short.filter((x, i) => short.indexOf(x) !== i), [], `${s.id}: ${short.join('; ')}`);
+  }
+  // countrystudies.us (a private copy of the Library of Congress's country studies) could not be reached to check it.
+  assert.ok(!d.sources.some(x => /countrystudies\.us/.test(x.url || '')), 'no source at countrystudies.us');
+});
+
+test('page: at 1440 and 1920 px, the map key of North Africa and of Africa\'s war covers no lit country', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const [width, height] of [[1440, 900], [1920, 1080]]) for (const id of ['mediterranean', 'africa']) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      await page.goto(`${BASE}/kino/index.html?cat=wars#doc=ww2-europe&s=${id}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kn-stage svg.kn-map path.c.t2', { timeout: 30000 });
+      // The view glides to the scene's frame: wait until it has stopped.
+      await page.waitForFunction(() => new Promise(r => { const w = () => document.querySelector('.kn-stage svg.kn-map g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w()), 600); }), null, { timeout: 20000, polling: 700 });
+      const under = await page.evaluate(() => {
+        const st = document.querySelector('.kn-stage'), lb = st.querySelector('.kn-legend').getBoundingClientRect(), out = [];
+        for (const p of st.querySelectorAll('svg.kn-map path.c[data-iso]')) {
+          if (!/\bt[123]\b/.test(p.getAttribute('class'))) continue;
+          const len = p.getTotalLength(), m = p.getScreenCTM(); let u = 0;
+          for (let i = 0; i < 300; i++) { const q = p.getPointAtLength(len * i / 300), x = m.a * q.x + m.c * q.y + m.e, y = m.b * q.x + m.d * q.y + m.f; if (x > lb.left && x < lb.right && y > lb.top && y < lb.bottom) u++; }
+          if (u) out.push(`${p.dataset.iso} ${Math.round(u / 3)}%`);
+        }
+        return out;
+      });
+      assert.deepEqual(under, [], `${id} at ${width} px: lit outline under the key`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
 });

@@ -536,8 +536,8 @@
     1939,
     1945
    ],
-   "minutes": 7,
-   "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga, what it cost, and how it divided the continent. Fourteen scenes, with maps that follow War Focus month by month.",
+   "minutes": 8,
+   "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga and in Africa, what it cost, and how it divided the continent. Fifteen scenes, with maps that follow War Focus month by month.",
    "subjects": [
     {
      "qid": "Q362",
@@ -552,10 +552,10 @@
      "label": "Soviet Union"
     }
    ],
-   "scenes": 14,
+   "scenes": 15,
    "parts": 0,
    "quiz": 0,
-   "sources": 15,
+   "sources": 37,
    "scholarly": 13,
    "links": [
     "rs/battlefield-history",

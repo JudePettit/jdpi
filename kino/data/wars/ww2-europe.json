@@ -8,8 +8,8 @@
     { "qid": "Q15180", "label": "Soviet Union" }
   ],
   "era": [1939, 1945],
-  "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga, what it cost, and how it divided the continent. Fourteen scenes, with maps that follow War Focus month by month.",
-  "minutes": 7,
+  "summary": "How the war in Europe began, how it was fought from the Atlantic to the Volga and in Africa, what it cost, and how it divided the continent. Fifteen scenes, with maps that follow War Focus month by month.",
+  "minutes": 8,
   "preview": { "scene": "barbarossa" },
   "sources": [
     { "id": "wd", "kind": "wikidata", "title": "World War II (Q362), Nazi Germany (Q7318), Soviet Union (Q15180)", "url": "https://www.wikidata.org/wiki/Q362" },
@@ -26,7 +26,28 @@
     { "id": "materski-szarota-2009", "kind": "book", "author": "Wojciech Materski and Tomasz Szarota (eds)", "title": "Polska 1939–1945: Straty osobowe i ofiary represji pod dwiema okupacjami", "year": 2009, "publisher": "Instytut Pamięci Narodowej" },
     { "id": "overmans-1999", "kind": "book", "author": "Rüdiger Overmans", "title": "Deutsche militärische Verluste im Zweiten Weltkrieg", "year": 1999, "publisher": "Oldenbourg" },
     { "id": "judt-2005", "kind": "book", "author": "Tony Judt", "title": "Postwar: A History of Europe Since 1945", "year": 2005, "publisher": "Heinemann" },
-    { "id": "yad-vashem", "kind": "web", "title": "Hall of Names: Historical Questions (estimates of the number of Jewish victims)", "publisher": "Yad Vashem", "url": "https://www.yadvashem.org/archive/hall-of-names/database/faq.html" }
+    { "id": "yad-vashem", "kind": "web", "title": "Hall of Names: Historical Questions (estimates of the number of Jewish victims)", "publisher": "Yad Vashem", "url": "https://www.yadvashem.org/archive/hall-of-names/database/faq.html" },
+    { "id": "wd-africa", "kind": "wikidata", "title": "Battle of Dakar (Q696829), Battle of Gabon (Q714684), Operation Postmaster (Q1775224), Battle of Madagascar (Q1052651), Second Battle of Amba Alagi (Q1410792), East African Campaign (Q1052120), East African campaigns of the Force Publique (Q2935430), Patriots' Victory Day, 5 May 1941 (Q111593121)", "url": "https://www.wikidata.org/wiki/Q714684" },
+    { "id": "wp-east-africa", "kind": "web", "title": "East African campaign (World War II), for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: East African campaign", "url": "https://en.wikipedia.org/wiki/East_African_campaign_(World_War_II)" },
+    { "id": "bmh-east-africa", "kind": "web", "title": "East, West and South Africa 1930–1947: East Africa, 1940–1947", "publisher": "British Military History", "url": "https://www.britishmilitaryhistory.co.uk/docs-e-w-s-africa-1930-1947-east-africa-east-africa-1940-1947" },
+    { "id": "ebsco-somaliland", "kind": "web", "author": "Glenn S. Hamilton", "title": "Italy Invades British Somaliland", "year": 2021, "publisher": "EBSCO Research Starters", "url": "https://www.ebsco.com/research-starters/history/italy-invades-british-somaliland" },
+    { "id": "how-1941-05-05", "kind": "web", "title": "5 May 1941 (Haile Selassie returns to Addis Ababa)", "publisher": "History of War", "url": "https://www.historyofwar.org/secondworldwar/date/1941_05_05.html" },    { "id": "wp-haile-selassie", "kind": "web", "title": "Haile Selassie, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Haile Selassie", "url": "https://en.wikipedia.org/wiki/Haile_Selassie" },
+    { "id": "wp-free-french-africa", "kind": "web", "title": "Free French Africa, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Free French Africa", "url": "https://en.wikipedia.org/wiki/Free_French_Africa" },
+    { "id": "ego-eboue", "kind": "web", "title": "Félix Adolphe Éboué (1885–1944) and Charles de Gaulle (1890–1970)", "publisher": "European History Online (Leibniz Institute of European History, Mainz)", "cite": "European History Online", "url": "https://ego-plone.uni-trier.de/en/mediainfo/felix-adolphe-eboue-188520131944-and-charles-de-gaulle-189020131970" },
+    { "id": "wp-dakar", "kind": "web", "title": "Battle of Dakar, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Battle of Dakar", "url": "https://en.wikipedia.org/wiki/Battle_of_Dakar" },
+    { "id": "herodote-dakar", "kind": "web", "title": "23 septembre 1940: De Gaulle échoue devant Dakar", "publisher": "Herodote.net", "url": "https://www.herodote.net/23_septembre_1940-evenement-19400923.php" },
+    { "id": "wp-gabon", "kind": "web", "title": "Battle of Gabon, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Battle of Gabon", "url": "https://en.wikipedia.org/wiki/Battle_of_Gabon" },
+    { "id": "wp-madagascar", "kind": "web", "title": "Battle of Madagascar, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Battle of Madagascar", "url": "https://en.wikipedia.org/wiki/Battle_of_Madagascar" },
+    { "id": "kcl-madagascar", "kind": "web", "author": "Tim Benbow", "title": "The British invasion of Madagascar, 1942: an unsung success that advanced amphibious warfare (Defence-in-Depth)", "year": 2025, "publisher": "King's College London", "url": "https://www.kcl.ac.uk/defence-in-depth-the-british-invasion-of-madagascar-1942" },
+    { "id": "wp-postmaster", "kind": "web", "title": "Operation Postmaster, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Operation Postmaster", "url": "https://en.wikipedia.org/wiki/Operation_Postmaster" },
+    { "id": "wd-1944-45", "kind": "wikidata", "title": "Raid on Drvar (Q931125), Jassy–Kishinev Offensive (Q311765), Battle of Groningen (Q2234138), Battle of Königsberg (Q671528)", "url": "https://www.wikidata.org/wiki/Q931125" },
+    { "id": "nww2m-rome", "kind": "web", "title": "Rome Taken! The Liberation of Rome, 1944", "publisher": "The National WWII Museum", "cite": "National WWII Museum: Rome Taken!", "url": "https://www.nationalww2museum.org/war/articles/rome-taken-liberation-rome-1944" },
+    { "id": "nww2m-jassy", "kind": "web", "title": "Forgotten Fights: The Second Jassy-Kishinev Offensive and the Destruction of German Sixth Army", "publisher": "The National WWII Museum", "cite": "National WWII Museum: Forgotten Fights", "url": "https://www.nationalww2museum.org/war/articles/forgotten-fights-second-jassy-kishinev-offensive-and-destruction-german-sixth-army" },
+    { "id": "wp-drvar", "kind": "web", "title": "Operation Rösselsprung (1944), the raid on Drvar, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Raid on Drvar", "url": "https://en.wikipedia.org/wiki/Operation_R%C3%B6sselsprung_(1944)" },
+    { "id": "wp-groningen", "kind": "web", "title": "Battle of Groningen, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Battle of Groningen", "url": "https://en.wikipedia.org/wiki/Battle_of_Groningen" },
+    { "id": "how-1945-04-09", "kind": "web", "title": "9 April 1945 (the surrender of Königsberg)", "publisher": "History of War", "url": "https://www.historyofwar.org/secondworldwar/date/1945_04_09.html" },
+    { "id": "wp-brno", "kind": "web", "title": "Bratislava–Brno offensive, for facts only", "publisher": "Wikipedia", "cite": "Wikipedia: Bratislava–Brno offensive", "url": "https://en.wikipedia.org/wiki/Bratislava%E2%80%93Brno_offensive" },
+    { "id": "tugendhat-brno", "kind": "web", "title": "The Liberation of Brno", "publisher": "Villa Tugendhat (Brno City Museum)", "url": "https://www.vilatugendhat.cz/en/udalost/the-liberation-of-brno" }
   ],
   "scenes": [
     {
@@ -177,16 +198,37 @@
       "narration": "Italy entered the war in June 1940, and the Mediterranean became a second front, fought across North Africa, the Balkans and the sea between them. British and Commonwealth forces defeated the German and Italian army at El Alamein in late 1942, while American and British troops landed in Morocco and Algeria. After the Axis surrender in Tunisia in May 1943 the Allies invaded Sicily and then mainland Italy, where Mussolini fell from power but German forces fought on until the last days of the war.",
       "visual": {
         "kind": "map",
-        "groups": [{ "label": "Italy (in the Axis until September 1943)", "tone": 2, "countries": ["ITA"] }],
+        "groups": [
+          { "label": "Held by the Axis or Vichy when the Allies attacked, 1940–1943", "tone": 2, "countries": ["ITA", "LBY", "ALB", "MAR", "DZA", "TUN"] },
+          { "label": "Invaded or besieged by the Axis, 1940–1942", "tone": 1, "countries": ["EGY", "MLT", "GRC", "YUG", "FRA"] }
+        ],
         "arrows": [
           { "from": [29.0, 30.9], "via": [20.0, 31.6], "to": [10.6, 34.4], "tone": 1, "label": "Eighth Army" },
           { "from": [3.0, 36.8], "via": [6.6, 36.5], "to": [9.6, 36.8], "tone": 1, "label": "Operation Torch" },
           { "from": [14.3, 37.2], "via": [15.8, 39.2], "to": [12.6, 41.8], "tone": 1 }
         ]
       },
-      "focus": { "points": [[28.95, 30.83, "El Alamein"], [3.06, 36.75, "Algiers"], [10.18, 36.81, "Tunis"], [14.25, 37.07, "Sicily, July 1943"], [12.5, 41.9, "Rome, June 1944"]], "bbox": [-6, 29, 33, 46.5] },
+      "focus": { "points": [[14.45, 35.88, "Malta, besieged 1940–1942"], [28.95, 30.83, "El Alamein"], [3.06, 36.75, "Algiers"], [10.18, 36.81, "Tunis"], [14.25, 37.07, "Sicily, July 1943"], [12.5, 41.9, "Rome, June 1944"]], "bbox": [-18, 15, 34, 47] },
       "link": { "label": "Retrospective Battlefield · 1942", "suite": "rs", "module": "battlefield-history", "at": "battlefield/history/index.html#y=1942&w=c139" },
       "cites": ["hastings-2011", "beevor-2012"]
+    },
+    {
+      "id": "africa",
+      "title": "Africa's war, 1940–1943",
+      "narration": "In August 1940 Italy overran British Somaliland, but in 1941 British, Commonwealth, Belgian Congolese and Ethiopian forces broke Italian rule in East Africa, and Haile Selassie re-entered Addis Ababa on 5 May. In French Africa, Chad rallied to de Gaulle on 26 August 1940, a British and Free French attempt on Vichy-held Dakar failed in September, and Free French troops took Gabon in November. In 1942 Britain seized Vichy-held Madagascar, while soldiers from Britain's and Belgium's African colonies and South Africa fought for the Allies.",
+      "visual": {
+        "kind": "map",
+        "groups": [
+          { "label": "Held by Italy or for Vichy France when the Allies attacked, 1940–1942", "tone": 2, "countries": ["ERI", "ETH", "SOM", "SEN", "GAB", "MDG"] },
+          { "label": "On the Allied side: British Empire and Commonwealth, Belgian and Free French territories", "tone": 1, "countries": ["SDN", "KEN", "TCD", "ZAF", "NAM", "BWA", "LSO", "SWZ", "ZWE", "ZMB", "MWI", "TZA", "UGA", "NGA", "GHA", "SLE", "GMB", "COD", "RWA", "BDI"] }
+        ]
+      },
+      "focus": {
+        "points": [[45.03, 10.44, "Berbera, August 1940"], [38.74, 9.03, "Addis Ababa, 5 May 1941"], [15.04, 12.11, "Fort-Lamy, 26 August 1940"], [-17.44, 14.69, "Dakar, September 1940"], [9.45, 0.39, "Libreville, November 1940"], [49.29, -12.28, "Diego Suarez, May 1942"], [8.78, 3.75, "Fernando Po (Spanish, neutral): British raid, January 1942"]],
+        "bbox": [-26, -36, 52, 24]
+      },
+      "link": { "label": "War Focus · May 1941", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1941-05" },
+      "cites": ["wp-east-africa", "bmh-east-africa", "ebsco-somaliland", "how-1941-05-05", "wp-haile-selassie", "wp-free-french-africa", "ego-eboue", "wp-dakar", "herodote-dakar", "wp-gabon", "wp-madagascar", "kcl-madagascar", "wp-postmaster", "wd-africa"]
     },
     {
       "id": "science",
@@ -199,7 +241,7 @@
     {
       "id": "two-fronts",
       "title": "Two fronts close in, 1944",
-      "narration": "On 6 June 1944 American, British, Canadian and other Allied forces landed in Normandy, the largest seaborne invasion ever attempted. Sixteen days later the Red Army opened Operation Bagration in Belarus, destroying most of the German Army Group Centre and advancing to the Vistula. Paris was liberated in August, but the Warsaw Uprising was crushed by German forces that autumn, and the Allied attempt to cross the Rhine at Arnhem failed in September.",
+      "narration": "In late May 1944 Tito escaped a German airborne raid on his Bosnian headquarters at Drvar. On 6 June, two days after Rome was liberated, Allied forces landed in Normandy, the largest seaborne invasion ever attempted, and sixteen days later the Red Army opened Operation Bagration, destroying most of Army Group Centre and advancing to the Vistula. In August Paris was freed and Romania changed sides, but the Allies failed to cross the Rhine at Arnhem in September, and German forces crushed the Warsaw Uprising.",
       "visual": {
         "kind": "map",
         "groups": [
@@ -213,14 +255,14 @@
           { "from": [30.0, 52.4], "via": [26.4, 52.3], "to": [21.8, 51.9], "tone": 3 }
         ]
       },
-      "focus": { "points": [[-0.6, 49.35, "Normandy"], [27.56, 53.9, "Minsk, 3 July"], [2.35, 48.86, "Paris, 25 August"], [21.01, 52.23, "Warsaw Uprising"]], "bbox": [-6, 44, 35, 58] },
+      "focus": { "points": [[-0.6, 49.35, "Normandy"], [27.56, 53.9, "Minsk, 3 July"], [2.35, 48.86, "Paris, 25 August"], [21.01, 52.23, "Warsaw Uprising"], [12.5, 41.9, "Rome, 4 June"], [16.39, 44.38, "Drvar, 25 May"], [26.1, 44.43, "Bucharest: Romania changes sides, 23 August"]], "bbox": [-6, 41, 35, 58] },
       "link": { "label": "War Focus · June 1944", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1944-06" },
-      "cites": ["beevor-2012", "glantz-house-1995", "hastings-2011"]
+      "cites": ["beevor-2012", "glantz-house-1995", "hastings-2011", "nww2m-rome", "wp-drvar", "nww2m-jassy", "wd-1944-45"]
     },
     {
       "id": "berlin",
       "title": "The fall of Berlin, 1945",
-      "narration": "Through the winter of 1944–45 the Allies fought their way into Germany from east and west, and the bombing of German cities reached its height. The Soviet assault on Berlin began on 16 April, American and Soviet troops met on the Elbe at Torgau on 25 April, and Hitler killed himself on 30 April. Germany's commanders signed an unconditional surrender at Reims on 7 May and again in Berlin the next day, and 8 May 1945 became Victory in Europe Day.",
+      "narration": "Through the winter of 1944–45 the Allies fought into Germany from east and west; in April Canadians took Groningen in the Netherlands while the Red Army took Königsberg and Brno in Moravia. The Soviet assault on Berlin began on 16 April, American and Soviet troops met at Torgau on the Elbe on 25 April, and Hitler killed himself on 30 April. Germany surrendered unconditionally at Reims on 7 May and again in Berlin the next day, and 8 May 1945 became Victory in Europe Day.",
       "visual": {
         "kind": "map",
         "groups": [{ "label": "Germany", "tone": 2, "countries": ["DEU"] }],
@@ -231,9 +273,9 @@
           { "from": [8.2, 50.1], "via": [10.6, 50.8], "to": [12.85, 51.5], "tone": 1 }
         ]
       },
-      "focus": { "countries": ["DEU"], "points": [[13.4, 52.52, "Berlin"], [13.0, 51.56, "Torgau, 25 April"], [4.03, 49.26, "Reims, 7 May"]], "bbox": [2, 47.5, 21, 56] },
+      "focus": { "countries": ["DEU"], "points": [[13.4, 52.52, "Berlin"], [13.0, 51.56, "Torgau, 25 April"], [4.03, 49.26, "Reims, 7 May"], [6.57, 53.22, "Groningen, mid-April"], [20.51, 54.71, "Königsberg, 9 April"], [16.61, 49.2, "Brno, 26 April"]], "bbox": [2, 47.5, 21.5, 56] },
       "link": { "label": "War Focus · April 1945", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1945-04" },
-      "cites": ["beevor-2012", "kershaw-2015"]
+      "cites": ["beevor-2012", "kershaw-2015", "wp-groningen", "how-1945-04-09", "wp-brno", "tugendhat-brno", "wd-1944-45"]
     },
     {
       "id": "the-cost",

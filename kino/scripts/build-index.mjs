@@ -8,7 +8,7 @@
 // Wikidata items are CC0; images keep their own Commons licences, which media.json records for the credit line.
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadContext, scriptFiles, validateAll, ROOT, DATA, HISTORICAL, EXTRA_ISO } from './validate.mjs';
+import { loadContext, scriptFiles, validateAll, ROOT, DATA, HISTORICAL, EXTRA_ISO, BY_NAME } from './validate.mjs';
 import { CATEGORIES, flatScenes } from '../lib/format.js';
 
 const CACHE_FILE = join(ROOT, 'kino/scripts/cache.json');
@@ -164,7 +164,7 @@ const credited = f => { const c = cache.files[f]; return !!(c && c.licence && (c
   // 5. iso.json: ISO3 → the ISO numeric id world-atlas uses, withdrawn codes → successors, and features with no id.
   const nat = JSON.parse(readFileSync(join(ROOT, 'national/data/index.json'), 'utf8'));
   const codes = Object.fromEntries([...nat.countries.filter(c => c.num).map(c => [c.iso3, String(c.num).padStart(3, '0')]), ...Object.entries(EXTRA_ISO)].sort());
-  const iso = { note: 'ISO 3166-1 alpha-3 → numeric (world-atlas@2 feature ids); historical → present-day successors; byName → features world-atlas draws without an id.', codes, historical: HISTORICAL, byName: { XKX: 'Kosovo' } };
+  const iso = { note: 'ISO 3166-1 alpha-3 → numeric (world-atlas@2 feature ids); historical → present-day successors; byName → features world-atlas draws without an id.', codes, historical: HISTORICAL, byName: BY_NAME };
 
   // Keep the old "generated" date when nothing else changed, so a rebuild without changes leaves the files untouched.
   const write = (name, obj) => {

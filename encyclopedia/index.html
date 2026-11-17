@@ -159,7 +159,7 @@ const embedded = (() => { try { return window.self !== window.top; } catch { ret
 // are not used here any more. Every module a lake adapter reports must be here
 // (tests/master-index.test.mjs), or its links open outside the shell.
 const MODULE_SUITE = {
-  headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
+  headlines: 'rt', volatility: 'rt', pestle: 'rt', battlefield: 'rt', monthly: 'rt', atlas: 'rt', calendar: 'rt', 'osint-training': 'oi', osint: 'oi', sigint: 'oi', geoint: 'oi',
   highbrowse: 'hb', briefing: 'hb', 'science-briefing': 'hb', 'econ-briefing': 'hb', 'digital-briefing': 'hb',
   encyclopedia: 'rs', retrospective: 'rs', 'historical-calendar': 'rs', 'battlefield-history': 'rs', 'war-focus': 'rs', kardashev: 'rs', 'learning-politics': 'rs',
   markets: 'mm', traders: 'mm', learning: 'mm', // Tally Stick and Algo Trader are Auto Trader's (traders') private views since 15 November 2026
@@ -181,7 +181,7 @@ const modName = m => MODULE_NAME[m] || idx?.modules?.[m] || m;
 // (tests/master-index.test.mjs holds them to it); MODULE_NAME above stays the name the stored "Appears in" tags carry.
 const SUITE_NAME = { rt: 'Realtime Geopolitics', hb: 'Omni News', rs: 'Retrospective Geopolitics', oi: 'Intelligence Collection', mm: 'Wealth Automation', ns: 'Natural Science', kino: 'Kino', bibliotheca: 'Bibliotheca' };
 const PLACE_NAME = {
-  volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', calendar: 'Realtime Calendar',
+  volatility: 'Geopolitical Volatility', pestle: 'National Analysis', battlefield: 'Realtime Battlefield', monthly: 'Month by Month', calendar: 'Realtime Calendar',
   retrospective: 'Political Retrospective', 'historical-calendar': 'Historical Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', kardashev: 'Kardashev Tracker', 'learning-politics': 'Learning · Politics',
   traders: 'Auto Trader', learning: 'Learning · Finance & Economics', progress: 'Invention Timeline', 'neo-classic': 'Neo Book',
   'kino-political-events': 'Political Events', 'kino-political-figures': 'Political Figures', 'kino-political-parties': 'Political Parties', 'kino-wars': 'Wars', 'kino-geopolitical-events': 'Geopolitical Events', 'kino-great-thinkers': 'Great Thinkers',

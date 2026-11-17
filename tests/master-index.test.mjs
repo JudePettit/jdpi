@@ -52,10 +52,8 @@ const EXEMPT = {
   'osint-training': 'courses in tradecraft, which name few entities; the Learning adapter reads only the Finance, Economics and Politics courses',
   'data-analytics': 'a tool over the other submodules’ datasets, with no entities of its own',
   'integration-hub': 'a catalogue and API of the other submodules’ datasets (the Master Index’s among them), with no entities of its own',
-  // Month by Month (15 November 2026): its wars and countries are Realtime Battlefield's, War Focus's and National
-  // Analysis's, already in the Master Index through their adapters, and each of its names carries that link (data-qid or
-  // its Wikipedia link). An adapter of its own needs a lake build with the network (lake-refresh.yml, the 3rd).
-  monthly: 'marks on the wars and countries of Realtime Battlefield, War Focus and National Analysis, whose adapters already put them in the Master Index; its names link there',
+  // Month by Month was exempt here from 15 November 2026 until its adapter (lake/scripts/adapters.mjs, monthly) came on
+  // 17 November; its mentions reach the lake with the next full build (AWAITING_BUILD below).
   'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
   // The Omni-Map (S1, 17 November 2026): its outlines are Cliopatria's rows, named as the source names them, not Master Index
   // entities; its battles are the Master Index's own (read from the lake), and its click comes from Neo Book, which reports.
@@ -83,6 +81,10 @@ function constant(file, name) {
 }
 
 const declared = new Map(Object.entries(ADAPTER_MODULES).flatMap(([adapter, mods]) => mods.map(m => [m, adapter])));
+// A submodule whose adapter is new and whose mentions wait for the lake's next full build (one with the network:
+// lake-refresh.yml, on the 3rd of each month), with the date that build is due (a note: the test does not read the
+// clock). Once the committed lake holds the submodule, the test below fails until its line here is taken out.
+const AWAITING_BUILD = { monthly: '2026-12-03' };
 
 test('registry: every live submodule reports to the Master Index through an adapter, or is exempt with its reason', () => {
   const missing = LIVE.filter(m => !declared.has(m.id) && !(m.id in EXEMPT)).map(m => `${m.suite}/${m.id} (${m.name})`);
@@ -136,7 +138,9 @@ test('build and page: every submodule an adapter reports is named, counted, open
     if (!ORDER.includes(m)) problems.push(`${m}: not in MODULE_ORDER (lake/scripts/build.mjs), so the build neither counts nor guards it`);
     if (SUITE[m] !== sub?.suite) problems.push(`${m}: MODULE_SUITE (encyclopedia/index.html) has ${SUITE[m]}, registry.json ${sub?.suite}`);
     if (SHOWN[m] && SHOWN[m] !== NAMES[m]) problems.push(`${m}: the Master Index page shows "${SHOWN[m]}", the build names it "${NAMES[m]}"`);
-    if (!(manifest.modules?.[m] > 0) || !index.modules?.[m]) problems.push(`${m}: not in the committed lake; run node lake/scripts/build.mjs --only ${adapter}`);
+    const inLake = manifest.modules?.[m] > 0 && index.modules?.[m];
+    if (m in AWAITING_BUILD) { if (inLake) problems.push(`${m}: in the committed lake now; take it out of AWAITING_BUILD`); }
+    else if (!inLake) problems.push(`${m}: not in the committed lake; run node lake/scripts/build.mjs --only ${adapter}`);
   }
   for (const m of ORDER) if (!declared.has(m)) problems.push(`MODULE_ORDER ${m}: no adapter reports it`);
   // The committed index names submodules only: --only <adapter> speaks for the adapter's submodules (ADAPTER_MODULES),
@@ -252,6 +256,42 @@ test('Volatility adapter: every country scored on a day the index holds, by Nati
     assert.equal(m[0].date, last[0], `${iso3}: dated by its latest score`);
     assert.ok(m[0].context.includes(last[1].toFixed(1)), `${iso3}: ${m[0].context}`);
   }
+});
+
+test('Month by Month adapter: each mark its Marks tab shows, by its Wikidata ID or its war’s article, linked to it there', () => {
+  // A fixture as monthly/scripts/build.mjs writes marks.json: a War Focus war with a mark, the Realtime Battlefield war
+  // marked for the same fighting (its primaryUnit is the War Focus one; the page shows both), a Realtime Battlefield war
+  // of its own (no Wikidata ID, its article), an ended War Focus war (no mark, not on the page), a country with an ID
+  // and no mark, and a unit with neither key.
+  const dir = mkdtempSync(join(tmpdir(), 'mi-monthly-'));
+  try {
+    mkdirSync(join(dir, 'monthly/data'), { recursive: true });
+    const unit = (id, extra) => ({ id, kind: id.split(':')[0], name: id, qid: null, wiki: null, iso3: null, primary: true, primaryUnit: id, countries: [], ...extra });
+    writeFileSync(join(dir, 'monthly/data/marks.json'), JSON.stringify({ month: '2026-09', units: [
+      unit('focus:yemen', { name: 'Yemeni civil war', qid: 'Q19686631', wiki: 'Yemeni civil war (2014–present)', fighting: { month: '2026-09', direction: 'worse', words: 'More deaths recorded', confidence: 'low' } }),
+      unit('war:yemen', { name: 'Yemen', wiki: 'Yemeni_civil_war_(2014–present)', primary: false, primaryUnit: 'focus:yemen', fighting: { direction: 'worse', words: 'More deaths recorded', confidence: 'low' } }),
+      unit('war:haiti', { name: 'Haiti: gangs and the state', wiki: 'Haitian_crisis_(2018–present)', fighting: { direction: 'same', words: 'No large change by this rule', confidence: 'medium' } }),
+      unit('focus:chaco', { name: 'Chaco War', qid: 'Q223126', primary: false, fighting: { month: '2026-09', direction: 'none', words: 'No mark', why: { code: 'ended', text: 'This war ended on 12 June 1935, so it has no mark for September 2026. Its months are in its year strip on War Focus.' } } }),
+      unit('country:SDN', { kind: 'country', name: 'Sudan', qid: 'Q1049', iso3: 'SDN', fighting: { direction: 'none', words: 'No mark', why: { code: 'uncertain', text: 'Too uncertain to mark: 3 of the rule\'s checks lower its confidence (listed below).' } } }),
+      unit('war:nameless', { fighting: { direction: 'same', words: 'No large change by this rule' } }),
+    ] }));
+    const at = id => `${JDPI}q/monthly.html#tab=marks&month=2026-09&unit=${encodeURIComponent(id)}`;
+    assert.deepEqual(ADAPTERS.monthly({ jdpiDir: dir }).map(m => [m.key, m.label, m.module, m.url, m.date, m.context]), [
+      [{ qid: 'Q19686631' }, 'Yemeni civil war', 'monthly', at('focus:yemen'), '2026-09', 'Monthly mark for September 2026: More deaths recorded (low confidence).'],
+      [{ title: 'Yemeni civil war (2014–present)' }, 'Yemen', 'monthly', at('war:yemen'), '2026-09', 'Monthly mark for September 2026: More deaths recorded (low confidence).'],
+      [{ title: 'Haitian crisis (2018–present)' }, 'Haiti: gangs and the state', 'monthly', at('war:haiti'), '2026-09', 'Monthly mark for September 2026: No large change by this rule (medium confidence).'],
+      [{ qid: 'Q1049' }, 'Sudan', 'monthly', at('country:SDN'), '2026-09', 'Monthly mark for September 2026: No mark. Too uncertain to mark: 3 of the rule\'s checks lower its confidence.'],
+    ]);
+    assert.deepEqual(ADAPTERS.monthly({ jdpiDir: join(dir, 'none') }), [], 'no marks file: no mentions');
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  // On the committed data: a mention for each unit block the Marks tab draws (q/monthly.html's three lists: Realtime
+  // Battlefield's wars, War Focus's wars marked this month, the countries), keyed, and no other.
+  const marks = read('monthly/data/marks.json');
+  const drawn = marks.units.filter(u => u.kind === 'war' || u.kind === 'country' || (u.kind === 'focus' && u.primary && u.fighting.month === marks.month));
+  assert.match(text('q/monthly.html'), /M\.units\.filter\(u => u\.kind === 'focus' && u\.primary && u\.fighting\.month === M\.month\)/, 'the page still lists War Focus’s wars by that rule');
+  const mentions = ADAPTERS.monthly({ jdpiDir: ROOT });
+  assert.ok(mentions.length >= 15 && mentions.every(m => m.module === 'monthly' && (QID.test(m.key.qid || '') || m.key.title)));
+  assert.deepEqual(mentions.map(m => decodeURIComponent(new URL(m.url).hash.match(/unit=([^&]+)/)[1])), drawn.filter(u => u.qid || u.wiki).map(u => u.id));
 });
 
 /* ---------------------------------------------------------------- the committed lake */
@@ -1041,5 +1081,28 @@ test('page: the Duchy of Milan appears in one place, Bibliotheca · Neo Book · 
   assert.equal(inonu.head, `Appears in Vitruvian Manager · ${r.mentions.length}`);
   assert.ok(r.total > r.mentions.length, 'more mentions than places');
   assert.ok(inonu.suites.every(([s, subs]) => s && subs.length), JSON.stringify(inonu.suites));
+  assert.deepEqual(errors, []);
+});
+
+// Month by Month's adapter (17 November 2026): every link it gives the Master Index opens the Marks tab at that mark.
+test('page: each Month by Month mention opens its mark at the top of the Marks tab, on a wide screen and a phone', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async () => {
+  const mentions = ADAPTERS.monthly({ jdpiDir: ROOT });
+  const browser = await launch({ args: ['--mute-audio'] });
+  const errors = [], bad = [];
+  try {
+    for (const [width, height] of [[1440, 900], [390, 844]]) {
+      const page = await browser.newPage({ viewport: { width, height } });
+      page.on('pageerror', e => errors.push(e.message));
+      for (const m of mentions) {
+        const id = 'u-' + decodeURIComponent(m.url.split('unit=')[1]).replace(/[^a-z0-9-]/gi, '-');
+        await page.goto('about:blank');
+        await page.goto(m.url.replace(JDPI, `${BASE}/`), { waitUntil: 'domcontentloaded', timeout: 30000 });
+        const top = await page.waitForSelector(`#${id}`, { timeout: 15000 }).then(() => page.waitForFunction(i => { const r = document.getElementById(i).getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight / 2 ? r.top : false; }, id, { timeout: 5000 })).then(h => h.jsonValue()).catch(() => null);
+        if (top == null) bad.push(`${width}: ${m.label} (${id})`);
+      }
+      await page.close();
+    }
+  } finally { await browser.close(); }
+  assert.deepEqual(bad, [], 'not opened at its mark');
   assert.deepEqual(errors, []);
 });

@@ -6,7 +6,7 @@
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
 import { displayName } from '../history/names.mjs';
-import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, COW_CITE, beforeWarNote, wikipediaIntro } from './figures.mjs';
+import { deaths as shown, noun, count, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, COW_CITE, beforeWarNote, wikipediaIntro } from './figures.mjs';
 import { sideOf as sideAt, periodSides, inRange, runText } from './sides.mjs';
 
 const $ = s => document.querySelector(s);
@@ -167,7 +167,7 @@ function draw(full) {
   }
   gCells.selectAll('circle').data(cells).join('circle').attr('class', d => (d[4] ? 'cell' : 'cell old'))
     .attr('cx', d => projection([d[1], d[0]])[0]).attr('cy', d => projection([d[1], d[0]])[1])
-    .on('mousemove', (e, d) => tip(e, `<strong>${num(d[2])} deaths</strong>${d[3]} recorded clash${d[3] > 1 ? 'es' : ''}${p ? `, ${esc(periodLabel())}${d[4] ? '' : ` (none in ${esc(monthLabel(m))})`}` : d[4] ? '' : ' (earlier month)'}`)).on('mouseleave', hideTip);
+    .on('mousemove', (e, d) => tip(e, `<strong>${count(d[2], 'death', 'deaths', num)}</strong>${count(d[3], 'recorded clash', 'recorded clashes', num)}${p ? `, ${esc(periodLabel())}${d[4] ? '' : ` (none in ${esc(monthLabel(m))})`}` : d[4] ? '' : ' (earlier month)'}`)).on('mouseleave', hideTip);
   // Battles: started by this month; those under way in it bright and ringed, those of the period bright, older ones faded.
   const shown = w.battles.filter(b => b.lat != null && b.s.slice(0, 7) <= m);
   const isNow = b => underWay(b, m, m), inP = b => p && underWay(b, a, m);
@@ -299,12 +299,12 @@ function seeMoreList(items, limit, title, cls = '', full = null) {
 // what it is part of or has as parts in this war's list.
 const nodeOf = b => state.war?.groups?.byQ.get(b.q);
 // Every battle shows a figure with its kind, a recorded zero, "Figures not read" or "No figure found" (BF-08): never nothing.
-const figureOf = b => { const n = nodeOf(b); return n ? figureLine(n) : b.deaths ? `${num(b.deaths)} deaths` : b.cas ? `${num(b.cas)} casualties` : 'No figure found'; };
+const figureOf = b => { const n = nodeOf(b); return n ? figureLine(n) : b.deaths ? count(b.deaths, 'death', 'deaths', num) : b.cas ? count(b.cas, 'casualty', 'casualties', num) : 'No figure found'; };
 function relation(b, { under = false } = {}) {
   const n = nodeOf(b); if (!n) return '';
   const out = [];
   if (n.up && !under) out.push(`part of ${n.up.b.n}`);
-  if (n.parts.length) out.push(`${n.parts.length} part${n.parts.length === 1 ? '' : 's'} listed${n.shown.length && n.shown.length < n.parts.length ? `, ${n.shown.length} with figures` : ''}`);
+  if (n.parts.length) out.push(`${count(n.parts.length, 'part')} listed${n.shown.length && n.shown.length < n.parts.length ? `, ${n.shown.length} with figures` : ''}`);
   return out.join(' · ');
 }
 // One line of a list; `inner`, a whole's parts under it (the deadliest battles), `under` when it stands under its whole.
@@ -318,7 +318,7 @@ function battleItem(b, { inner = '', under = false } = {}) {
 // first; in the panel (`few`) three parts a heading, the rest counted and in the window's full list.
 function rankedItem(n, { under = false, few = 0 } = {}) {
   const parts = few ? n.shown.slice(0, few) : n.shown, more = n.shown.length - parts.length;
-  const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more part${more === 1 ? '' : 's'} with figures (See all)</li>` : ''}</ul>` : '';
+  const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more ${noun(more, 'part')} with figures (See all)</li>` : ''}</ul>` : '';
   return battleItem(n.b, { under, inner });
 }
 // The states on a side that month, largest first, so the major powers lead the list.
@@ -374,7 +374,7 @@ function renderPanel() {
     if (o) o[1] += c[1]; else merged.set(k, [...c]);
   }
   const clashes = [...merged.values()].sort((x, y) => y[1] - x[1]).slice(0, p ? 8 : 5);
-  const top = clashes.map(([d, deaths, where, dyad, de, all]) => `<li><b>${num(deaths)} deaths</b> · ${esc(where || 'no place given')}<small>${de ? `${esc(fmtDate(d))} – ${esc(fmtDate(de))}, a share of ${num(all)}` : esc(fmtDate(d))} · ${esc(dyad)}</small></li>`);
+  const top = clashes.map(([d, deaths, where, dyad, de, all]) => `<li><b>${count(deaths, 'death', 'deaths', num)}</b> · ${esc(where || 'no place given')}<small>${de ? `${esc(fmtDate(d))} – ${esc(fmtDate(de))}, a share of ${num(all)}` : esc(fmtDate(d))} · ${esc(dyad)}</small></li>`);
   // Retrospective Battlefield shows the year, or the period's years as a period.
   const bfYear = Math.min(2025, +m.slice(0, 4)), bfFrom = Math.min(2025, +a.slice(0, 4)), bfPeriod = p && bfFrom < bfYear;
   const pd = periodDeaths();
@@ -392,7 +392,7 @@ function renderPanel() {
     ${p ? '' : markHtml(w, m)}
     <a class="btn" href="${wikiUrl(w.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>
     ${w.bf ? `<a class="btn go" href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${bfYear}${bfPeriod ? `&f=${bfFrom}` : ''}&w=${w.bf}`))}" target="${embedded ? '_top' : '_self'}">Open in Retrospective Battlefield: ${bfPeriod ? `${bfFrom}–${bfYear}` : bfYear} →</a>` : ''}
-    <h3>${esc(periodLabel())} <span class="count">${now.length} battle${now.length === 1 ? '' : 's'} or operation${now.length === 1 ? '' : 's'} under way</span></h3>
+    <h3>${esc(periodLabel())} <span class="count">${count(now.length, 'battle')} or ${noun(now.length, 'operation')} under way</span></h3>
     ${now.length ? seeMoreList(now.map(b => battleItem(b)), 8, `${w.name} · ${periodLabel()}`) : `<p class="empty">No battles or operations recorded as under way ${p ? 'in the period' : 'this month'}.</p>`}
     ${top.length ? `<h3>Deadliest clashes ${p ? 'in the period' : 'this month'} <span class="count">UCDP</span></h3><ul class="blist">${top.join('')}</ul>` : ''}
     <h3>Deadliest battles of the war</h3>${deadliest.length ? seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null) : '<p class="empty">No battle of this war has a deaths figure.</p>'}
@@ -423,16 +423,19 @@ function openBattle(b) {
   if (!b) return;
   const w = state.war, mi = b.s ? w.months.indexOf(b.s.slice(0, 7)) : -1;
   $('#modal-title').innerHTML = `<span data-qid="${esc(b.q)}">${esc(b.n)}</span>`;
+  // The detail its file fills in comes last (17 November 2026): above the links and "Go to <month>", its arrival pushed
+  // them down, and the window, centred, moved up by half its growth (70 to 150 px on a phone) as the reader went to
+  // choose the month. Now nothing above it moves, and the window keeps its top (focus.css).
   $('#modal-body').innerHTML = `<p class="sub">${esc(bDates(b))} · part of ${esc(w.name)}</p>
     ${b.desc ? `<p>${esc(b.desc.replace(/^./, c => c.toUpperCase()))}.</p>` : ''}
     <div class="stat-row figs">${figBox(b, 'd')}${figBox(b, 'c')}</div>
     ${figNone(b)}
-    <div id="fig-detail" class="fig-detail" data-q="${esc(b.q)}" aria-live="polite" aria-busy="true"><p class="fig-note">Reading the sources…</p></div>
     ${wholeHtml(b)}
     ${b.w ? `<a class="btn" href="${wikiUrl(b.w)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>` : ''}
     <a class="btn" href="https://www.wikidata.org/wiki/${esc(b.q)}" target="_blank" rel="noreferrer">Wikidata ↗</a>
     ${mi >= 0 && mi !== state.m ? `<button class="btn" id="jump">Go to ${esc(monthLabel(w.months[mi]))}</button>` : ''}
-    ${b.lat == null ? '<p class="empty">No coordinates recorded, so it is not on the map.</p>' : !b.s ? '<p class="empty">With no date recorded, it is not on the map.</p>' : ''}`;
+    ${b.lat == null ? '<p class="empty">No coordinates recorded, so it is not on the map.</p>' : !b.s ? '<p class="empty">With no date recorded, it is not on the map.</p>' : ''}
+    <div id="fig-detail" class="fig-detail" data-q="${esc(b.q)}" aria-live="polite" aria-busy="true"><p class="fig-note">Reading the sources…</p></div>`;
   showModal();
   $('#modal-body').querySelectorAll('[data-b]').forEach(x => x.onclick = () => openBattle(battleOf(x.dataset.b)));
   // Its first month: the month shown moves there; one before a period's start widens the period to begin there.
@@ -488,7 +491,7 @@ function figBox(b, m) {
 function figNone(b) {
   const s = stateOf(b, nodeOf(b));
   if (s === 'figure' || s === 'zero' || s === 'parts') return '';
-  const u = b.fu ? `<p class="ucdp-near"><b>UCDP, nearby:</b> ${num(b.fu.v)} deaths${b.fu.low !== b.fu.high ? ` (${num(b.fu.low)}–${num(b.fu.high)})` : ''} in ${num(b.fu.n)} recorded clash${b.fu.n === 1 ? '' : 'es'} within ${b.fu.km} km in its dates · Estimate. A separate measure: not this battle's own count, and never ranked.</p>` : '';
+  const u = b.fu ? `<p class="ucdp-near"><b>UCDP, nearby:</b> ${count(b.fu.v, 'death', 'deaths', num)}${b.fu.low !== b.fu.high ? ` (${num(b.fu.low)}–${num(b.fu.high)})` : ''} in ${count(b.fu.n, 'recorded clash', 'recorded clashes', num)} within ${b.fu.km} km in its dates · Estimate. A separate measure: not this battle's own count, and never ranked.</p>` : '';
   return `<p class="searched">${esc(searched(b))}</p>${u}`;
 }
 const fmtTs = ts => (ts ? fmtDate(ts.slice(0, 10)) : '');
@@ -563,7 +566,7 @@ function renderTables() {
     // Status against the month shown, or against the period.
     const status = b => (!b.s ? ['', 'Date not recorded'] : b.s.slice(0, 7) > m ? ['later', 'Not yet'] : underWay(b, a, m) ? ['now', p ? 'In the period' : 'Under way'] : ['', 'Earlier']);
     const list = [...[...w.battles].sort((a, b) => a.s.localeCompare(b.s) || a.n.localeCompare(b.n)), ...w.undated];
-    $('#battles-title').textContent = `${w.name} · ${num(list.length)} battles and operations`;
+    $('#battles-title').textContent = `${w.name} · ${count(list.length, 'battle', 'battles', num)} and ${noun(list.length, 'operation')}`;
     $('#battles-note').textContent = completenessText(w.fig);
     $('#th-status').textContent = periodLabel();
     // Each figure with its kind under it; a battle with none says so across both cells, with what was searched (BF-08).

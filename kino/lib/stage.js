@@ -43,7 +43,11 @@ export function loadGeo(base = 'data/') {
     const isoOfNum = new Map(Object.entries(iso.codes).map(([k, v]) => [+v, k]));
     const nameIso = new Map(Object.entries(iso.byName || {}).map(([k, v]) => [v, k]));
     for (const f of features) f.iso = f.id != null ? isoOfNum.get(+f.id) || null : nameIso.get(f.properties.name) || null;
-    const byIso = new Map(features.filter(f => f.iso).map(f => [f.iso, f]));
+    // A code may have more than one shape (SOM: Somalia and the Somaliland world-atlas draws apart): byIso keeps them
+    // all, as one collection, so the view frames the whole country.
+    const byIso = new Map();
+    for (const f of features) if (f.iso) byIso.set(f.iso, [...(byIso.get(f.iso) || []), f]);
+    for (const [k, fs] of byIso) byIso.set(k, fs.length === 1 ? fs[0] : { type: 'FeatureCollection', features: fs });
     const expand = code => (iso.historical[code] ? iso.historical[code] : [code]);
     const projection = window.d3.geoNaturalEarth1().fitExtent([[10, 10], [W - 10, H - 10]], { type: 'Sphere' });
     return { d3: window.d3, features, byIso, expand, projection, path: window.d3.geoPath(projection), graticule: window.d3.geoGraticule10() };
@@ -96,7 +100,7 @@ class MapView {
     this.world = el('g', { class: 'world' }, svg);
     el('path', { class: 'grat', d: g.path(g.graticule) }, this.world);
     this.paths = new Map();
-    for (const f of g.features) { const p = el('path', { class: 'c', d: g.path(f) }, this.world); if (f.iso) { p.dataset.iso = f.iso; this.paths.set(f.iso, p); } }
+    for (const f of g.features) { const p = el('path', { class: 'c', d: g.path(f) }, this.world); if (f.iso) { p.dataset.iso = f.iso; this.paths.set(f.iso, [...(this.paths.get(f.iso) || []), p]); } }
     el('path', { class: 'sphere', d: g.path({ type: 'Sphere' }) }, this.world);
     this.overlay = el('g', { class: 'overlay' }, svg);
     this.apply(this.view);
@@ -112,7 +116,7 @@ class MapView {
   async show(scene, { animate = true } = {}) {
     this.scene = scene;
     const tones = tonesOf(scene, this.g);
-    for (const [iso, p] of this.paths) { p.classList.remove('t1', 't2', 't3', 'tf'); const t = tones.get(iso); if (t) p.classList.add('t' + t); }
+    for (const [iso, ps] of this.paths) for (const p of ps) { p.classList.remove('t1', 't2', 't3', 'tf'); const t = tones.get(iso); if (t) p.classList.add('t' + t); }
     this.svg.classList.toggle('still', !!scene.visual?.still);
     this.overlay.innerHTML = '';
     const target = viewFor(scene, this.g), token = (this.token = (this.token || 0) + 1);

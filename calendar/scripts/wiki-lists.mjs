@@ -38,31 +38,43 @@ const placeCountry = s => { const last = String(s).split(',').at(-1).trim(); ret
 const strip = s => String(s).replace(/<ref[^>]*\/>/g, '').replace(/<ref[\s\S]*?(?:<\/ref>|$)/g, '').replace(/\{\{(?:TBA|TBD)[^}]*\}\}\}?/gi, 'TBA')
   .replace(/\{\{[^{}]*\}\}/g, '').replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1').replace(/\[https?:[^\s\]]+\s*([^\]]*)\]/g, '$1').replace(/'{2,}/g, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
+// Every dash a range is written with, as the en dash the patterns below read: the hyphen, the non-breaking hyphen
+// ("22‑23 November"), the figure dash ("27‒28 November 1999"), the em dash, the minus sign, &ndash; and {{ndash}}.
+// Without it a range written with one of the others was read from its last day ("27‒28 November" as the 28th).
+// The class holds the characters themselves: U+2010 to U+2015 (hyphen to horizontal bar) and U+2212 (minus sign).
+const DASH = /[‐-―−]|&[nm]dash;|\{\{\s*(?:ndash|snd|spaced ndash|mdash|spaced mdash)\s*\}\}/gi;
+export const dashes = s => String(s).replace(DASH, '–');
+
 /**
  * A date from table or infobox text: { date, precision: 'day' | 'month' } or null.
  * Understands "14–15 December 2026", "November 18 – 19, 2026", "7–8 July" (with the row's year), "April 2027",
- * {{start date|2026|11|9}} and {{start and end dates|2026|11|9|…}}.
+ * {{start date|2026|11|9}} and {{start and end dates|2026|11|9|…}}; a range's first day is the date.
  */
 export function parseDate(raw, year = null) {
-  const s = String(raw || '');
-  let m = /\{\{\s*(?:start(?: and end)? dates?|dts|date)\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2})/i.exec(s);
-  if (m) return { date: iso(m[1], m[2], m[3]), precision: 'day' };
+  const d = dateRange(raw, year);
+  return d && { date: d.date, precision: d.precision };
+}
+/** The same, with the range's last day as `end` (the first, when the text gives one day). */
+export function dateRange(raw, year = null) {
+  const s = dashes(String(raw || ''));
+  let m = /\{\{\s*(?:start(?: and end)? dates?|dts|date)\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2})(?:\s*\|\s*(\d{4})\s*\|\s*(\d{1,2})\s*\|\s*(\d{1,2}))?/i.exec(s);
+  if (m) return { date: iso(m[1], m[2], m[3]), precision: 'day', end: m[4] ? iso(m[4], m[5], m[6]) : iso(m[1], m[2], m[3]) };
   const t = strip(s);
-  const ok = (y, mo, d) => +d >= 1 && +d <= 31 ? { date: iso(y, mo, d), precision: 'day' } : null;
+  const ok = (y, mo, d, mo2 = mo, d2 = d) => +d >= 1 && +d <= 31 ? { date: iso(y, mo, d), precision: 'day', end: iso(y, mo2, +d2 >= 1 && +d2 <= 31 ? d2 : d) } : null;
   // "14–15 December 2026", "30 November – 1 December 2026"
-  m = new RegExp(`\\b(\\d{1,2})(?:\\s*[–-]\\s*\\d{1,2})?\\s+${M}(?:\\s*[–-]\\s*\\d{1,2}\\s+${M})?\\s+(\\d{4})\\b`).exec(t);
-  if (m) return ok(m[4], monthNo(m[2]), m[1]);
+  m = new RegExp(`\\b(\\d{1,2})(?:\\s*[–-]\\s*(\\d{1,2}))?\\s+${M}(?:\\s*[–-]\\s*(\\d{1,2})\\s+${M})?\\s+(\\d{4})\\b`).exec(t);
+  if (m) return m[4] ? ok(m[6], monthNo(m[3]), m[1], monthNo(m[5]), m[4]) : ok(m[6], monthNo(m[3]), m[1], monthNo(m[3]), m[2]);
   // "November 18 – 19, 2026", "January 3, 2027"
-  m = new RegExp(`\\b${M}\\s+(\\d{1,2})(?:\\s*[–-]\\s*(?:${M}\\s+)?\\d{1,2})?,?\\s+(\\d{4})\\b`).exec(t);
-  if (m) return ok(m[4], monthNo(m[1]), m[2]);
+  m = new RegExp(`\\b${M}\\s+(\\d{1,2})(?:\\s*[–-]\\s*(?:${M}\\s+)?(\\d{1,2}))?,?\\s+(\\d{4})\\b`).exec(t);
+  if (m) return ok(m[5], monthNo(m[1]), m[2], monthNo(m[3] || m[1]), m[4]);
   // "7–8 July" or "July 7" in a row whose year is known
-  m = new RegExp(`\\b(\\d{1,2})(?:\\s*[–-]\\s*\\d{1,2})?\\s+${M}\\b`).exec(t);
-  if (m && year) return ok(year, monthNo(m[2]), m[1]);
+  m = new RegExp(`\\b(\\d{1,2})(?:\\s*[–-]\\s*(\\d{1,2}))?\\s+${M}\\b`).exec(t);
+  if (m && year) return ok(year, monthNo(m[3]), m[1], monthNo(m[3]), m[2]);
   m = new RegExp(`\\b${M}\\s+(\\d{1,2})\\b(?!,?\\s*\\d{4})`).exec(t);
   if (m && year) return ok(year, monthNo(m[1]), m[2]);
   // "April 2027": the month only
   m = new RegExp(`\\b${M}\\s+(\\d{4})\\b`).exec(t);
-  if (m) return { date: iso(m[2], monthNo(m[1]), 1), precision: 'month' };
+  if (m) return { date: iso(m[2], monthNo(m[1]), 1), precision: 'month', end: iso(m[2], monthNo(m[1]), 1) };
   return null;
 }
 
@@ -105,7 +117,7 @@ export function eventsFromList(wikitext, { article, link, title, country, type =
     if (yc) year = +strip(yc).slice(0, 4);
     host = hostOf(raw) || (raw.match(/rowspan/) ? host : null) || host;
     const dateCell = cells.find(c => parseDate(c, y)?.date?.startsWith(String(y || '')) || (!y && parseDate(c)));
-    const d = dateCell ? parseDate(dateCell, y) : null;
+    const d = dateCell ? dateRange(dateCell, y) : null;
     if (!d || d.date < from) continue;
     if (y && !d.date.startsWith(String(y))) continue;
     const kind = cells.map(strip).find(c => /^(?:Informal|Scheduled|Extraordinary|Special|Formal|Euro summit|Emergency)\b/i.test(c));
@@ -114,8 +126,9 @@ export function eventsFromList(wikitext, { article, link, title, country, type =
     const city = own ? links.filter(l => l !== own).map(l => l.target).find(t => countryOfLink(t) && !/^(?:President|Prime Minister|King|Queen)/.test(t)) : null;
     const where = country || hostOf(raw) || (city && countryOfLink(city)) || (own && countryInText(own.target)) || host || 'International';
     const official = (/\[(https?:\/\/(?:www\.)?consilium\.europa\.eu[^\s\]]*)/.exec(raw) || [])[1];
+    // `end` (the row's last day) is for preferOwnDates; listEvents leaves it out of what it returns.
     out.push({
-      date: d.date, country: where,
+      date: d.date, end: d.end, country: where,
       title: name + (d.precision === 'month' ? ' (date to be confirmed)' : ''), precision: d.precision,
       type, status: d.precision === 'month' || (future && !official && !own) ? 'tentative' : 'declared',
       source: own ? wiki(own.target) : (official || wiki(article)),
@@ -139,6 +152,67 @@ export function eventFromInfobox(wikitext, { article, type = 'summit', title, fi
 }
 
 /**
+ * The dates of every infobox in an article: [{ date, precision, end }]. An article on a year's summits ("2026 ASEAN
+ * Summits") has one infobox for each, and may write one on a single line: "{{Infobox summit|…|date=November 15–17,
+ * 2026|…}}".
+ */
+export function infoboxDates(wikitext) {
+  const s = String(wikitext), out = [];
+  const START = /\{\{\s*Infobox/gi;
+  for (let m; (m = START.exec(s)); ) {
+    // The box runs to its own closing braces; its fields are split at the bars outside links and templates.
+    let depth = 0, i = m.index, field = '', fields = [];
+    for (; i < s.length; i++) {
+      const two = s.slice(i, i + 2);
+      if (two === '{{' || two === '[[') { depth++; field += two; i++; continue; }
+      if (two === '}}' || two === ']]') { depth--; if (depth === 0) break; field += two; i++; continue; }
+      if (s[i] === '|' && depth === 1) { fields.push(field); field = ''; continue; }
+      field += s[i];
+    }
+    fields.push(field);
+    START.lastIndex = Math.max(START.lastIndex, i);
+    const raw = fields.map(f => /^\s*(?:date|dates|start_date)\s*=\s*([\s\S]*)$/i.exec(f)?.[1]).find(v => v && v.trim());
+    const d = raw ? dateRange(raw) : null;
+    if (d) out.push(d);
+  }
+  return out;
+}
+
+/**
+ * The summit's own article for a list row, or null: the title its source links to on Wikipedia, unless that is the
+ * list article itself (a row with no link of its own takes the list as its source) or not Wikipedia (an official page).
+ * Only such an article is a second word on the row's date (the review of 17 November 2026, F3).
+ */
+export function ownArticle(e, listArticle) {
+  const m = /^https:\/\/en\.wikipedia\.org\/wiki\/(.+)$/.exec(e?.source || '');
+  const t = m ? decodeURIComponent(m[1]).replace(/_/g, ' ') : '';
+  return t && t !== listArticle ? t : null;
+}
+
+/**
+ * A list row's date checked against the summit's own article. When the article's infobox gives other days in the same
+ * month, the summit was moved and the list not yet updated: the "ASEAN Summit" list still gave the 49th summit's first
+ * schedule, 16–18 November 2026, when its own article (and the news) had it held on 15–17 November. Then the article's
+ * first day is the date, and the log says so. When the article's days hold the row's (the 2024 G20 summit's article
+ * gives 16–19 November 2024, its social summit included; the list gives the leaders' 18–19 November), the row names
+ * the meeting itself and its date stands. `own` gives each event's own article title, or nothing; a row known only to
+ * the month is not checked.
+ */
+export function preferOwnDates(events, own, texts, log = []) {
+  return events.map(e => {
+    const title = own(e), text = title && texts.get(title);
+    if (!text || e.precision !== 'day') return e;
+    const end = e.end || e.date;
+    const same = infoboxDates(text).filter(d => d.precision === 'day' && d.date.slice(0, 7) === e.date.slice(0, 7));
+    if (!same.length || same.some(d => d.date <= e.date && d.end >= end)) return e;
+    const gap = d => Math.abs(Date.parse(d.date) - Date.parse(e.date));
+    const best = same.sort((a, b) => gap(a) - gap(b))[0];
+    log.push(`${title}: ${best.date} from its own article, not the list's ${e.date}`);
+    return { ...e, date: best.date, end: best.end };
+  });
+}
+
+/**
  * Elections and referendums from a "<year> national electoral calendar" article: "* 9 December: [[Elections in
  * Fiji|Fiji]], [[2026 Fijian constitutional referendum|Constitutional referendum]]" (a date line may hold several
  * countries, one per sub-bullet). A vote known only to the month ("* March: …") is expected on the 1st and says so in
@@ -158,7 +232,7 @@ export function ballotsFromCalendar(wikitext, year) {
     const links = [...b[2].matchAll(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g)].map(m => ({ target: m[1].trim(), label: (m[2] || m[1]).trim(), at: m.index }));
     const ballots = links.filter(l => /referend|plebiscite|election/i.test(l.target) && !/^(?:Elections in|Politics of) /.test(l.target));
     if (undated) { for (const l of ballots) unknown.add(l.target); continue; }
-    const lead = /^(\d{1,2})(?:\s*[–-]\s*\d{1,2})?\s+[A-Z][a-z]+\s*:/.exec(b[2]);
+    const lead = /^(\d{1,2})(?:\s*[–-]\s*\d{1,2})?\s+[A-Z][a-z]+\s*:/.exec(dashes(b[2]));
     if (b[1].length === 1) date = lead ? iso(year, month, lead[1]) : (/^[A-Z][a-z]+\s*:/.test(b[2]) ? iso(year, month, 1) + '~' : null);
     if (!date || !ballots.length) continue;
     const first = links[0], monthOnly = date.endsWith('~');
@@ -250,11 +324,16 @@ export async function listEvents({ from = '1980-01-01', today = new Date().toISO
     events.push(...list);
     ballots?.unknown.forEach(t => unknown.add(t));
   }
+  // The rows of the last two years and those to come are checked against their summits' own articles (preferOwnDates).
+  const since = `${y - 2}${today.slice(4)}`, listed = [], ownOf = new Map();
   for (const l of LISTS) {
     const list = eventsFromList(texts.get(l.article) || '', { ...l, from, today });
     log.push(`${l.article}: ${list.length}`);
-    events.push(...list);
+    if (l.link) for (const e of list) { const t = e.date >= since && ownArticle(e, l.article); if (t) ownOf.set(e, t); }
+    listed.push(...list);
   }
+  const ownTexts = ownOf.size ? await wikitexts([...new Set(ownOf.values())]).catch(err => { log.push(`own articles: not checked (${err.message})`); return new Map(); }) : new Map();
+  events.push(...preferOwnDates(listed, e => ownOf.get(e), ownTexts, log).map(({ end, ...e }) => e));
   for (const a of ARTICLES) {
     const text = texts.get(a.article);
     const e = text ? eventFromInfobox(text, { ...a, today }) : null;

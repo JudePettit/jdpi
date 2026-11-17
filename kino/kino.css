@@ -402,9 +402,13 @@
   .kn-legend, .kn-badge { display: none; }
   .kn-cap-foot .legend-key:not(:empty) { display: flex; }
   .kn-bigplay { left: auto; right: 10px; bottom: 10px; transform: none; height: 34px; padding: 0 14px; font-size: 13px; }
-  /* the summary's last line, what it summarises, stops short of the Play button in the corner */
+  /* A summary card fills the stage to its foot: over it the button is the play sign alone, a 34 px circle (its words,
+     Play or Resume, stay its name), and the card's last lines, what it summarises, stop short of it. With its words it
+     covered the end of that line. */
   .kn-v-summary { padding: 4cqw 5cqw; }
-  .kn-v-summary .of { padding-right: 86px; }
+  .kn-v-summary .of { padding-right: 52px; }
+  .kn-stage:has(> .kn-layer.kn-v-summary) .kn-bigplay { width: 34px; padding: 0; gap: 0; justify-content: center; font-size: 0; }
+  .kn-stage:has(> .kn-layer.kn-v-summary) .kn-bigplay::before { font-size: 13px; margin-left: 3px; }
 }
 .kn-cap-foot .legend-key { display: none; flex-basis: 100%; flex-wrap: wrap; gap: 4px 12px; color: var(--prp-text-2); }
 .kn-cap-foot .legend-key i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; vertical-align: -1px; }
@@ -414,6 +418,15 @@
 .kn-cap-foot .legend-key i.t3 { background: color-mix(in srgb, var(--prp-cat-3) 55%, var(--prp-map-land)); }
 .kn-cap-foot .legend-key i.tf { background: color-mix(in srgb, var(--prp-accent) 32%, var(--prp-map-land)); }
 .kn-cap-foot .legend-key .note { color: var(--prp-muted); }
+/* A small stage (a theatre under 760 px wide: 1280 × 720 and 1024 × 768, and 1536 × 864 inside the shell): the key keeps
+   its legible minimum and its 46% cap, so it wraps over a quarter of the picture and the countries lit there. It moves
+   under the stage, into the captions, as on phones. From 760 px (1440 × 900, inside the shell too, and 1920 × 1080) it
+   stays on the map, and full screen keeps it there. */
+.kn-theatre { container: kn-theatre / inline-size; }
+@container kn-theatre (max-width: 759.98px) {
+  .kn-theatre:not(:fullscreen) .kn-legend { display: none; }
+  .kn-theatre:not(:fullscreen) .kn-cap-foot .legend-key:not(:empty) { display: flex; }
+}
 /* A phone-sized stage: the chart keeps its title and bars; the unit, note and sources are in the captions below. */
 @container (max-width: 560px) {
   .kn-chart { gap: 6px; padding: 10px 12px 8px; }

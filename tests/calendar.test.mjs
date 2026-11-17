@@ -13,7 +13,7 @@ import { spawnSync } from 'node:child_process';
 import { pageTest, launch } from './tools/pages.mjs';
 import { classify, headline, parseDay, eventsFromItems } from '../calendar/scripts/current-events.mjs';
 import { countryOf, countryInText, normaliseCountry } from '../calendar/scripts/countries.mjs';
-import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar } from '../calendar/scripts/wiki-lists.mjs';
+import { parseDate, eventsFromList, referendumsFromCalendar, ballotsFromCalendar, infoboxDates, preferOwnDates, ownArticle } from '../calendar/scripts/wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from '../calendar/scripts/outlook.mjs';
 import { lostTypes, lostCounts, lostEvents } from '../calendar/scripts/guard.mjs';
 
@@ -134,6 +134,81 @@ test('Wikipedia lists: dates, summit tables and electoral calendars', () => {
 * 9 December: [[Elections in Fiji|Fiji]], [[2026 Fijian constitutional referendum|Constitutional referendum]]
 * 13 December: [[Elections in Chile|Chile]], [[2026 Chilean election|President]]`;
   assert.deepEqual(referendumsFromCalendar(calendar, 2026).map(e => [e.date, e.country, e.title]), [['2026-12-09', 'Fiji', '2026 Fijian constitutional referendum']]);
+});
+
+test('Wikipedia lists: a range is dated from its first day whatever dash it is written with', () => {
+  // Rows as Wikipedia's "ASEAN Summit" and "List of European Council meetings" wrote them (17 Nov 2026): the figure dash
+  // and the non-breaking hyphen were read as no range at all, so the date was the range's last day.
+  assert.equal(parseDate('27‒28 November 1999').date, '1999-11-27', 'figure dash');
+  assert.equal(parseDate('14‒16 December 1997').date, '1997-12-14');
+  assert.equal(parseDate('22‑23 November', 2000).date, '2000-11-22', 'non-breaking hyphen, the year from the row');
+  assert.equal(parseDate('14{{ndash}}16 December 1997').date, '1997-12-14', '{{ndash}}');
+  assert.equal(parseDate('14&ndash;16 December 1997').date, '1997-12-14', '&ndash;');
+  assert.equal(parseDate('November 15—17, 2026').date, '2026-11-15', 'em dash, month first');
+  assert.equal(parseDate('31 October–4 November 2019').date, '2019-10-31', 'across two months');
+  assert.equal(parseDate('22 April–2 May 2027').date, '2027-04-22');
+  const asean = `{| class="wikitable"
+|-
+| 3rd || style="text-align:right;"| 27‒28 November 1999 || {{flagu|Philippines}} || [[Pasay]] || President [[Joseph Estrada]]
+|}`;
+  assert.deepEqual(eventsFromList(asean, { article: 'ASEAN Summit', title: 'Informal ASEAN Summit', today: '2026-11-17' }).map(e => e.date), ['1999-11-27']);
+  const { events } = ballotsFromCalendar('==December==\n* 1‒2 December: [[Elections in Fiji|Fiji]], [[2026 Fijian constitutional referendum|Referendum]]', 2026);
+  assert.deepEqual(events.map(e => e.date), ['2026-12-01'], 'an electoral calendar\'s day range');
+});
+
+test('Wikipedia lists: a summit\'s own article dates it when the list row gives another day of the same month', () => {
+  // The "ASEAN Summit" list (17 Nov 2026) still gave the 49th summit's first schedule; its own article, two infoboxes
+  // on one line each, gave the days it was held (as did the summit's own news: it opened on 15 November).
+  const list = `{| class="wikitable"
+|-
+| [[2026 ASEAN Summits|48th]] || 6–8 May 2026 || rowspan="2" |{{flagu|Philippines}} || [[Cebu City]] || rowspan="2" |President [[Bongbong Marcos]]
+|-
+| [[2026 ASEAN Summits|49th]] || 16–18 November 2026 || [[Manila]]
+|}`;
+  const article = `{{Use mdy dates|date=November 2026}}
+{{Infobox summit|summit_name=2026 ASEAN Summits|other_titles=48th ASEAN Summit|image=[[File:Plenary.webm|thumbtime=00:11|300px]]|date=May 6–8, 2026|country=[[Philippines]]}}
+== 49th ASEAN Summit ==
+{{Infobox summit|summit_name=2026 ASEAN Summits|other_titles=49th ASEAN Summit|date=November 15–17, 2026|venues=[[PICC]]<ref>{{cite news |title=x |date=November 16, 2026}}</ref>|country=[[Philippines]]}}`;
+  assert.deepEqual(infoboxDates(article).map(d => d.date), ['2026-05-06', '2026-11-15']);
+  const rows = eventsFromList(list, { article: 'ASEAN Summit', link: /ASEAN Summits?$/, today: '2026-11-17' });
+  assert.deepEqual(rows.map(e => e.date), ['2026-05-06', '2026-11-16'], 'the list alone');
+  const log = [];
+  const fixed = preferOwnDates(rows, () => '2026 ASEAN Summits', new Map([['2026 ASEAN Summits', article]]), log);
+  assert.deepEqual(fixed.map(e => [e.date, e.title, e.country]), [['2026-05-06', '2026 ASEAN Summits', 'Philippines'], ['2026-11-15', '2026 ASEAN Summits', 'Philippines']]);
+  assert.deepEqual(log, ['2026 ASEAN Summits: 2026-11-15 from its own article, not the list\'s 2026-11-16']);
+  // No article, a month only, or an infobox in another month: the list's date stands.
+  assert.deepEqual(preferOwnDates(rows, () => null, new Map()).map(e => e.date), ['2026-05-06', '2026-11-16']);
+  const other = '{{Infobox summit\n| date = 2–4 December 2026\n}}';
+  assert.deepEqual(preferOwnDates(rows, () => 'x', new Map([['x', other]])).map(e => e.date), ['2026-05-06', '2026-11-16']);
+  const month = { ...rows[1], date: '2026-11-01', precision: 'month' };
+  assert.equal(preferOwnDates([month], () => 'x', new Map([['x', article]]))[0].date, '2026-11-01');
+  // An article whose days hold the row's: the row names the meeting itself (the 2024 G20 summit's article counts the
+  // social summit before the leaders met on 18–19 November), and its date stands.
+  const g20 = eventsFromList(`{| class="wikitable"
+|-
+| 19th || 18–19 November 2024 || {{flagu|Brazil}} || [[Rio de Janeiro]] || [[2024 G20 Rio de Janeiro summit]]
+|}`, { article: 'List of G20 summits', link: /G20/, today: '2026-11-17' });
+  assert.deepEqual(g20.map(e => [e.date, e.end]), [['2024-11-18', '2024-11-19']]);
+  const g20Article = '{{Infobox summit meeting\n| name = 2024 G20 Rio de Janeiro summit\n| date = 16–19 November 2024<ref>{{Cite web |title=x}}</ref>\n}}';
+  assert.equal(preferOwnDates(g20, () => 'g', new Map([['g', g20Article]]))[0].date, '2024-11-18');
+  // F3 (the review of 17 November 2026): only a summit's own article is a second word on its date. A row whose only
+  // matching link is the list itself ("ASEAN Summit" matches /ASEAN Summits?$/), or a list with no links at all, takes
+  // the list as its source, and the list's own infobox (if it had a date) must not move it.
+  assert.equal(ownArticle(g20[0], 'List of G20 summits'), '2024 G20 Rio de Janeiro summit');
+  const back = eventsFromList(`{| class="wikitable"
+|-
+| 99th (a fixture) || 1–2 December 2026 || [[Manila]] || [[ASEAN Summit]]
+|}`, { article: 'ASEAN Summit', link: /ASEAN Summits?$/, today: '2026-11-17' });
+  assert.equal(back.length, 1);
+  assert.equal(ownArticle(back[0], 'ASEAN Summit'), null, `the list itself (${back[0].source}) is not the row's own article`);
+  const euco = eventsFromList(`{| class="wikitable"
+|-
+| 2026 || 1–2 December 2026 || Brussels
+|}`, { article: 'List of European Council meetings', title: 'European Council meeting', country: 'European Union', today: '2026-11-17' });
+  assert.equal(euco.length, 1);
+  assert.equal(ownArticle(euco[0], 'List of European Council meetings'), null, 'a row with no link of its own');
+  assert.equal(ownArticle({ source: 'https://www.g20.org/' }, 'List of G20 summits'), null, 'an official page is not an article');
+  assert.equal(ownArticle({ source: 'https://en.wikipedia.org/wiki/2026_ASEAN_Summits' }, 'ASEAN Summit'), '2026 ASEAN Summits');
 });
 
 test('electoral calendars: elections by day and round, month-only votes expected, dependencies left out, undated votes listed', () => {

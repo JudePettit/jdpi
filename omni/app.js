@@ -329,7 +329,8 @@ function render(inWin, ext, file, held) {
     return `<li data-q="${esc(r.q)}"><p class="om-b-name"><a href="${esc(entryUrl(r.q))}" target="_top"><bdi>${esc(r.label)}</bdi></a>${r.partOfLabel ? ` <span class="om-q">part of ${esc(r.partOfLabel)}</span>` : ''}</p>`
       + `<p class="om-b-date">${esc(when)}</p><p class="om-src">${srcLink(r.src?.date)}</p>`
       + `<p class="om-b-pt">Point: ${esc(pt)}</p><p class="om-src">${srcLink(r.src?.pt)}</p>`
-      + `<p class="om-b-state">${on ? `Drawn at ${esc(formatYear(year))}` : `Not drawn at ${esc(formatYear(year))}; fought in ${esc(formatYear(r.sortYear))}`}`
+      // Drawn, with when it was fought: an up-to view draws at its frame the battles of every year before it.
+      + `<p class="om-b-state">${on ? `Drawn at ${esc(formatYear(year))}${r.sortYear === year ? ', the year it was fought' : `; fought in ${esc(formatYear(r.sortYear))}`}` : `Not drawn at ${esc(formatYear(year))}; fought in ${esc(formatYear(r.sortYear))}`}`
       + `${!on && r.sortYear >= win.from && r.sortYear <= win.to ? ` <button type="button" class="prp-btn sm ghost" data-year="${r.sortYear}">Show ${esc(formatYear(r.sortYear))}</button>` : ''}</p></li>`;
   }).join('');
 

@@ -308,6 +308,108 @@ test('data: Montenegro and the ten microstates have leadership figures from the 
   // San Marino's two Captains Regent change every six months, and the Retrospective lists each of them: two entries a
   // term, so some four hundred since 1926.
   assert.ok(by.SMR.leadership.leaders100 >= 300, `SMR: ${by.SMR.leadership.leaders100} entries since 1926`);
+  // The small corrections (17 November 2026): the source under these figures names the hand-built lists, not "Archigos
+  // and Wikidata" (leaderLists), and San Marino's count says what it counts (together: its terms, nearly all held by two).
+  for (const iso of Object.keys(STATES)) assert.equal(by[iso].leadership.leaderLists, true, `${iso}: marked as from the Retrospective's own lists`);
+  assert.equal(read('national/data/index.json').countries.filter(c => c.leadership?.leaderLists).length, Object.keys(STATES).length, 'no other state is');
+  const t = by.SMR.leadership.together;
+  // F2 (the review of 17 November 2026): no count of terms, which the list's start and end pairs do not give truly
+  // (April to October 1930 is three pairs, one of them a regent's replacement), only how many at once and for how long.
+  assert.deepEqual(t, { at: 2, months: 6 }, `SMR: ${JSON.stringify(t)}`);
+  assert.equal(Object.values(by).filter(c => c.leadership?.together).map(c => c.iso3).join(), 'SMR', 'only San Marino\'s leaders hold office together');
+});
+
+// F2 (the review of 17 November 2026): leaders who hold office together say how many at once and for how long, and
+// never a count of terms, since a replaced regent splits a term into pairs that are not terms of their own.
+test('overview: office held together gives how many at once and a term\'s length, not a count of terms', async () => {
+  const { leadership } = await import('../national/scripts/overview.mjs');
+  const R = (full, start, end) => ({ full, name: full, start, end, entry: 'Regular' });
+  const smr = { events: [], leaders: [
+    R('A', '1930-04-01', '1930-10-01'), R('B', '1930-04-01', '1930-09-10'), R('C', '1930-09-16', '1930-10-01'),
+    R('D', '1930-10-01', '1931-04-01'), R('E', '1930-10-01', '1931-04-01'),
+    R('F', '1931-04-01', '1931-10-01'), R('G', '1931-04-01', '1931-10-01'),
+    R('H', '1931-10-01', '1932-04-01'), R('I', '1931-10-01', '1932-04-01'),
+    R('J', '1932-04-01', '1932-10-01'), R('K', '1932-04-01', '1932-10-01'),
+  ] };
+  const L = leadership([smr], null, '2026-11-17');
+  assert.equal(L.leaders100, 11, 'each person counted');
+  assert.deepEqual(L.together, { at: 2, months: 6 });
+  const one = leadership([{ events: [], leaders: [R('X', '1990-01-01', '2000-01-01'), R('Y', '2000-01-01', null)] }], null, '2026-11-17');
+  assert.equal(one.together, undefined, 'one at a time: no note');
+});
+
+// A country the Retrospective files under two state codes is read under both, each for its own years (overview.mjs):
+// Germany is 255 to 1945 (Correlates of War 255, "Germany", 1816 to 8 May 1945) and 260 from 1949 (COW 260, the German
+// Federal Republic, 1955 to 1990; Gleditsch and Ward's code for Germany since). Until 17 November 2026 the build read
+// Germany under 260 alone: its leaders since 1926 began with Adenauer (10), and it had fought no war in 1926–45.
+test('overview: a country under two state codes is read under both, each for its years (Germany 255 and 260)', async () => {
+  const { leadership, conflict, retroCodes } = await import('../national/scripts/overview.mjs');
+  assert.deepEqual(retroCodes({ 255: { iso3: 'DEU' }, 260: { iso3: 'DEU' }, 265: { iso3: null }, 200: { iso3: 'GBR' } }, 'DEU'), [255, 260]);
+  const L = (full, start, end, entry = 'Regular') => ({ full, name: full.split(' ').at(-1), start, end, entry });
+  const reich = { leaders: [L('Hans Luther', '1925-01-15', '1926-05-12'), L('Wilhelm Marx', '1926-05-16', '1928-06-12'), L('Adolf Hitler', '1933-01-30', '1945-04-30')], events: [{ type: 'election', date: '1928-05-20' }] };
+  const federal = { leaders: [L('Konrad Adenauer', '1949-09-16', '1963-10-16'), L('Friedrich Merz', '2025-05-06', null)], events: [{ type: 'election', date: '1949-08-14' }] };
+  const both = leadership([reich, federal], null, '2026-11-17');
+  assert.equal(both.leaders100, 4, 'Marx, Hitler, Adenauer and Merz (Luther left office before October 1926)');
+  assert.equal(both.elections, 2);
+  assert.equal(both.longest.name, 'Konrad Adenauer');
+  assert.equal(leadership([federal], null, '2026-11-17').leaders100, 2, 'the Federal Republic alone, as the build read it');
+  assert.equal(leadership([undefined], null), null, 'no record: no figures');
+  const wars = [
+    { src: 'cow', name: 'World War II', loc: [255, 290], states: [2, 255, 365], years: [[1939, 2]] },
+    { src: 'cow', name: 'Spanish Civil War', loc: [230], states: [230, 255, 325], years: [[1936, 2]] },
+    { src: 'ucdp', name: 'Afghanistan: government', loc: [700], states: [700, 260], years: [[2002, 1]] },
+  ];
+  assert.deepEqual([conflict([255, 260], wars).cowWars1926_45, conflict([255, 260], wars).conflictsAbroad], [2, 1]);
+  assert.deepEqual([conflict([260], wars).cowWars1926_45, conflict([260], wars).conflictsAbroad], [0, 1], 'under 260 alone: no war of 1926–45');
+  assert.equal(conflict([255, 260], wars).conflictYears, 0, 'World War II is on its soil but before 1946, which the UCDP figures start from');
+  // On the committed data.
+  const de = read('national/data/index.json').countries.find(c => c.iso3 === 'DEU');
+  assert.equal(de.gw, 260, 'its code on the page stays the Retrospective\'s for Germany today');
+  assert.ok(de.leadership.leaders100 >= 17, `DEU: ${de.leadership.leaders100} leaders since 1926 (Marx to Dönitz, then Adenauer on)`);
+  assert.ok(de.conflict.cowWars1926_45 >= 2, `DEU: ${de.conflict.cowWars1926_45} Correlates of War wars 1926–45 (the Second World War and the Spanish Civil War)`);
+  const wars1926 = read('battlefield/history/data/wars.json').wars.filter(w => w.src === 'cow' && (w.states.includes(255) || w.loc.includes(255)));
+  assert.equal(de.conflict.cowWars1926_45, wars1926.length, 'every war Retrospective Battlefield files under 255');
+});
+
+// The small corrections (17 November 2026): the leaders of Montenegro and ten microstates are the Retrospective's own
+// hand-built lists, and the source under their figures said "Archigos and Wikidata"; San Marino's 407 leaders gave no
+// word that each of its two Captains Regent a term is counted; Germany's figures began in 1949.
+test('page: the leaders\' source names the hand-built lists, San Marino\'s count says what it counts, Germany runs from 1926', pageTest, async () => {
+  const by = Object.fromEntries(read('national/data/index.json').countries.map(c => [c.iso3, c]));
+  const browser = await launch({ args: ['--mute-audio'] });
+  const errors = [];
+  try {
+    for (const width of [1440, 390]) {
+      const page = await browser.newPage({ viewport: { width, height: width > 400 ? 900 : 844 } });
+      page.on('pageerror', e => errors.push(e.message));
+      const open = async iso => {
+        await page.goto(`${BASE}/q/national#country=${iso}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForFunction(i => document.querySelector('#profile h2')?.textContent && document.querySelector('#profile .stat'), iso, { timeout: 20000 });
+        return label => page.$$eval('#profile .stat', (ss, l) => { const s = ss.find(x => x.querySelector('span')?.textContent === l); return s ? { value: s.querySelector('b').textContent.trim(), notes: [...s.querySelectorAll('small')].map(x => x.textContent.trim()) } : null; }, label);
+      };
+      let stat = await open('SMR');
+      const smr = await stat('Leaders in the last 100 years'), t = by.SMR.leadership.together;
+      assert.equal(smr.value, String(by.SMR.leadership.leaders100));
+      assert.equal(smr.notes[0], 'Two hold the office together, for 6 months at a time; each person is counted', `${width}: ${smr.notes.join(' | ')}`);
+      assert.ok(t.months === 6 && !/\bterms\b/.test(smr.notes[0]), `${width}: no count of terms`);
+      assert.match(smr.notes.at(-1), /^Political Retrospective: its own list of this state’s leaders, built by hand from at least two of Wikidata, Wikipedia’s lists of office holders and rulers\.org$/);
+      for (const label of ['Average time in office', 'Longest-serving leader', 'Irregular seizures of power']) assert.match((await stat(label)).notes.at(-1), /^Political Retrospective: its own list/, `${width}: ${label}`);
+      assert.match((await stat('Elections and referendums')).notes.at(-1), /^Political Retrospective \(Archigos and Wikidata\)/, 'the elections are not from the lists');
+      const sources = await page.textContent('.prp-sources p');
+      // Read from the data: on 17 November 2026, "the 11 states … (Andorra, Antigua and Barbuda, …, St. Lucia and St.
+      // Vincent and the Grenadines)".
+      const listed = Object.values(by).filter(c => c.leadership?.leaderLists).map(c => c.name).sort();
+      assert.ok(sources.includes(`for the leaders of the ${listed.length} states Archigos does not cover (${listed.slice(0, -1).join(', ')} and ${listed.at(-1)}), its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org;`), sources);
+      stat = await open('DEU');
+      const de = await stat('Leaders in the last 100 years');
+      assert.deepEqual([de.value, de.notes.length], [String(by.DEU.leadership.leaders100), 1], `${width}: Germany's count, with its source only`);
+      assert.match(de.notes[0], /^Political Retrospective \(Archigos and Wikidata\)/);
+      assert.match((await stat('Conflicts fought abroad')).notes[0], new RegExp(`· ${by.DEU.conflict.cowWars1926_45} wars 1926–45$`));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+  assert.deepEqual(errors, []);
 });
 
 // Jude's list (6 November 2026): the most powerful political figure, not the weaker office. Monaco and Liechtenstein go

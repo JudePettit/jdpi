@@ -1258,3 +1258,113 @@ test('page: over a period the side layer reads every month: Italy, Axis until it
   assert.equal(await page.evaluate(() => document.querySelectorAll('path.state.earlier').length), 0);
   assert.deepEqual(errors, []);
 });
+
+// 17 November 2026 (the verifier of BF-08, 16 November): a count of one was written with a plural noun: "1 deaths in 1
+// recorded clash" (UCDP nearby, Operation Bøllebank), "at least 1 deaths" (the Palestro Ambush), "at least 1
+// casualties", "Figures for 0 of 1 battles" (Khalkhin Gol). Every count now takes its noun from one helper
+// (figures.mjs noun and count). Every line War Focus writes from the committed data is read here for a count of one
+// with a plural noun, and the test also checks it found counts of one, so it cannot pass on no data.
+const ONE_PLURAL = /(^|[^\d,.~–-])1 (deaths|casualties|battles|operations|clashes|recorded clashes|months|parts|estimates|steps)\b/;
+test('every count of one takes the singular, through one helper, in every line War Focus writes from its data', async () => {
+  const F = await import('../battlefield/focus/figures.mjs');
+  assert.equal(F.count?.(1, 'death'), '1 death');
+  assert.equal(F.count(2500, 'death'), '2,500 deaths');
+  assert.equal(F.count(0, 'recorded clash', 'recorded clashes'), '0 recorded clashes');
+  assert.equal(F.count(1, 'casualty', 'casualties'), '1 casualty');
+  assert.equal(F.noun(1, 'battle'), 'battle');
+  assert.equal(F.noun(3, 'battle'), 'battles');
+  const index = await dataFile('battlefield/focus/data/index.json');
+  const bad = [], ones = new Set();
+  const read = (where, s) => {
+    if (!s) return;
+    if (ONE_PLURAL.test(s)) bad.push(`${where}: ${s}`);
+    const m = s.match(/(^|[^\d,.~–-])1 (death|casualty|battle|recorded clash)\b/);
+    if (m) ones.add(m[2]);
+  };
+  for (const x of index.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`), all = [...w.battles, ...(w.undated || [])], g = F.groupBattles(all);
+    for (const b of all) {
+      const n = g.byQ.get(b.q);
+      read(`${x.id} ${b.n}`, n && F.figureLine(n));
+      read(`${x.id} ${b.n}`, n && F.figureText(n));
+      read(`${x.id} ${b.n}`, F.searched(b));
+    }
+    read(x.id, F.completenessText(F.completeness(all, g)));
+    read(x.id, F.deadliestNote(F.deadliest(g)));
+  }
+  assert.deepEqual(bad, [], 'a count of one with a plural noun');
+  for (const one of ['death', 'recorded clash', 'battle']) assert.ok(ones.has(one), `the data has a count of one ${one} to check (found: ${[...ones].join(', ')})`);
+});
+
+// 17 November 2026 (the same verifier): on a phone a battle's window jumped while its detail loaded: centred, it moved
+// up by half of what the detail (each side's figures and the sources read, from data/figures/<war>.json) added, and the
+// links and "Go to <month>" below the detail moved down with it, as the reader went to choose the month. The window now
+// keeps its top and the detail comes last, so nothing above it moves. The detail's file is held here until the window
+// is measured, as on a slow connection. The page's own counts of one (the clashes' tooltip and the deadliest clashes,
+// UCDP's line in the window) take the singular too.
+test('page: a battle\'s window keeps its place while its detail loads, and a count of one is singular, at 390 and 1440 wide', pageTest, async t => {
+  const F = await import('../battlefield/focus/figures.mjs');
+  const w = await dataFile('battlefield/focus/data/wars/bosnian-war.json'), g = F.groupBattles([...w.battles, ...(w.undated || [])]);
+  // From the data: a battle with no figure whose UCDP line is one death in one clash; a month whose deadliest clashes
+  // include one of a single death; a month with a mark for one death in one clash.
+  const one = w.battles.find(b => b.s && b.fu?.v === 1 && b.fu?.n === 1 && ['none', 'unread'].includes(F.stateOf(b, g.byQ.get(b.q))));
+  const topMonth = w.months[w.top.findIndex(c => c.some(x => x[1] === 1))];
+  const cellMonth = w.months[w.cells.findIndex(c => c.some(x => x[2] === 1 && x[3] === 1))];
+  assert.ok(one && topMonth && cellMonth, 'the Bosnian War has a count of one of each kind');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  for (const [width, height] of [[390, 844], [1440, 900]]) {
+    const page = await browser.newPage({ viewport: { width, height } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    let release; const held = new Promise(r => { release = r; });
+    await page.route(/\/data\/figures\//, async r => { await held; await r.continue(); });
+    const go = async m => {
+      await page.goto(`${BASE}/battlefield/focus/#war=bosnian-war&m=${m}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForFunction(x => document.querySelector('#date')?.textContent && document.querySelector('#panel h2') && location.hash.includes(`m=${x}`), m, { timeout: 20000 });
+    };
+    // The deadliest clashes of a month with one of a single death.
+    await go(topMonth);
+    const panel = await page.locator('#panel').innerText();
+    assert.match(panel, /Deadliest clashes this month[\s\S]*\b1 death · \S/i, `${width}: the deadliest clashes`);
+    // F1 (the review of 17 November): the dot keeps a space on each side, so it never runs into the place's name.
+    assert.doesNotMatch(panel, /\bdeaths? ·\S/, `${width}: a space after the dot`);
+    assert.doesNotMatch(panel, ONE_PLURAL, `${width}: the panel`);
+    // A clash's mark of one death in one clash: its tooltip.
+    await page.goto('about:blank');
+    await go(cellMonth);
+    await page.waitForFunction(() => document.querySelectorAll('#map circle.cell').length, null, { timeout: 20000 });
+    const tip = await page.evaluate(() => {
+      const c = d3.selectAll('#map circle.cell').filter(d => d[2] === 1 && d[3] === 1).node(), b = c.getBoundingClientRect();
+      c.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 }));
+      return document.querySelector('#tooltip').innerText;
+    });
+    assert.match(tip, /^1 death\s*1 recorded clash\b/, `${width}: the tooltip reads ${tip}`);
+    // The battle's window, its detail held.
+    await page.evaluate(() => document.querySelector('#tab-battles').click());
+    await page.waitForSelector('#battles-rows tr', { timeout: 10000 });
+    await page.evaluate(q => document.querySelector(`#battles-rows [data-b="${q}"]`).click(), one.q);
+    await page.waitForSelector('#modal:not([hidden]) #fig-detail[aria-busy="true"]', { timeout: 10000 });
+    const at = () => page.evaluate(() => Object.fromEntries([['window', '.modal-box'], ['title', '#modal-title'], ['figures', '#modal-body .figs'], ['ucdp', '#modal-body .ucdp-near'],
+      ['wikidata', '#modal-body a[href*="wikidata.org"]'], ['go to', '#jump'], ['detail', '#fig-detail']].map(([k, s]) => [k, document.querySelector(s) && Math.round(document.querySelector(s).getBoundingClientRect().top)])));
+    const tall = () => page.evaluate(() => document.querySelector('.modal-box').getBoundingClientRect().height);
+    const before = await at(), height0 = await tall();
+    assert.ok(before['go to'] != null, `${width}: the window offers its month`);
+    release();
+    await page.waitForFunction(() => document.querySelector('#fig-detail')?.getAttribute('aria-busy') === 'false', null, { timeout: 20000 });
+    await page.waitForTimeout(100);
+    const after = await at(), height1 = await tall();
+    assert.ok(height1 > height0, `${width}: the detail came in (${height0} -> ${height1})`);
+    assert.deepEqual(after, before, `${width}: nothing in the window moved as its detail came in`);
+    assert.match(await page.locator('#modal-body .ucdp-near').innerText(), /UCDP, nearby: 1 death in 1 recorded clash within/);
+    assert.equal(await page.locator('#modal-body .searched').innerText(), F.searched(one));
+    assert.match(F.searched(one), /1 death in 1 recorded clash within/);
+    assert.doesNotMatch(await page.locator('#modal-body').innerText(), ONE_PLURAL, `${width}: the window`);
+    // The window stays on screen, and the page does not scroll sideways.
+    const box = await page.evaluate(() => { const b = document.querySelector('.modal-box').getBoundingClientRect(); return { top: b.top, bottom: b.bottom, sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
+    assert.ok(box.top >= 0 && box.bottom <= height, `${width}: the window on screen (${box.top}–${box.bottom})`);
+    assert.equal(box.sideways, 0);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});

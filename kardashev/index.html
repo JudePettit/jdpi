@@ -39,6 +39,12 @@
 .legend .faded{border-radius:50%;background:color-mix(in srgb,var(--prp-cat-1) 14%,transparent);box-shadow:none;border:1px dashed var(--prp-muted)}
 /* Over a period the table's headings may wrap, so its columns fit the panel at 1440 px; a figure never wraps. */
 .prp-table.period th{white-space:normal;vertical-align:bottom}.prp-table.period td.num{white-space:nowrap}
+/* Its two heading rows stick as one block (review of 16 November 2026): each cell sticking at the top on its own (the
+   shared table style) laid the second row over the first as the table scrolled. Borders kept apart, so the line under
+   the first row moves with it (collapsed, it stayed behind and let the rows beneath show through a thin gap). */
+.prp-table.period{border-collapse:separate;border-spacing:0}
+.prp-table.period thead{position:sticky;top:0;z-index:2;background:var(--prp-surface-2)}.prp-table.period thead th{position:static}
+.panel .meta b.inperiod{font-weight:600;color:var(--prp-text)}
 /* A short window (under about 800 px high): the screen grows past it, so the map keeps a usable height over a period,
    whose caption is longer, and the page scrolls instead. */
 @media (min-width:901px){.screen,.jdpi-returnbar + .screen{height:auto;min-height:max(100vh,680px)}.jdpi-returnbar + .screen{min-height:max(calc(100vh - 36px),644px)}.work{min-height:520px}}
@@ -346,11 +352,13 @@
       // record is empty: the panel says so in place of "Over time".
       const peak = series.reduce((a, b) => (b.share > a.share ? b : a), series[0]);
       // Over a period: its shares at the steps of the period where it was among the powers (how many, its largest and
-      // when, its first and last within it) and, at the period's two ends, its shares and the change between them.
+      // when, its first and last within it) and, at the period's two ends, its shares and the change between them. Its
+      // share at each step is listed once, under "Over time", the period's steps in bold (review of 16 November 2026:
+      // a second list here repeated them).
       const within = !e ? '<p>Not among the powers during this time period.</p>'
         : `<p>${esc(amongWords(e, P.n))} Largest share within the period: <b>${share(e.peak.share, e.peak.year)}</b> in ${yearLabel(e.peak.year)}.${e.at.length > 1 && !(e.start && e.end) ? ` First within it: ${share(e.first.share, e.first.year)} in ${yearLabel(e.first.year)}; last: ${share(e.last.share, e.last.year)} in ${yearLabel(e.last.year)}.` : ''}</p>
-          <p>${esc(endsWords(e, A, B))}</p>
-          <p class="meta">${e.at.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>`;
+          <p>${esc(endsWords(e, A, B))}</p>`;
+      const inPeriod = y => ranged && !!e && y >= a.year && y <= s.year;
       const ends = !ranged ? '' : `<h3>${esc(A)} to ${esc(B)} <span class="count">${P.n} steps</span></h3>${within}`;
       // The line under it is about the period's last step, or, for a power whose years lie outside the period, the period.
       const absent = ranged && !(p.from <= s.year && p.to >= a.year) ? 'Did not exist during this time period.' : `Did not exist in ${yearLabel(s.year)}.`;
@@ -358,8 +366,8 @@
         ${ends}
         ${here ? `<h3>In ${yearLabel(s.year)}</h3><p>${share(here.share, s.year)} of humanity's energy capture: about ${people(here.pop)} people using roughly ${Math.round(here.kcal).toLocaleString('en-GB')} kcal each per day (${watts(here.watts)}). On its own it would rate K ${here.K.toFixed(2)}.</p>` : `<p class="empty">${absent}</p>`}
         ${!series.length ? `<p>Its years, ${yearLabel(p.from)} to ${yearLabel(p.to)}, fall between the tracker's steps, so it has no share here.</p>`
-        : `<h3>Over time</h3><p>Its largest estimated share was <b>${share(peak.share, peak.year)}</b> in ${yearLabel(peak.year)}.</p>
-        <p class="meta">${series.map(x => `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`).join(' · ')}</p>`}
+        : `<h3>Over time${ranged && e ? ' <span class="count">in bold, within the period</span>' : ''}</h3><p>Its largest estimated share was <b>${share(peak.share, peak.year)}</b> in ${yearLabel(peak.year)}.</p>
+        <p class="meta">${series.map(x => { const t = `<a href="#" data-year="${x.year}">${yearLabel(x.year)}</a>: ${share(x.share, x.year)}`; return inPeriod(x.year) ? `<b class="inperiod">${t}</b>` : t; }).join(' · ')}</p>`}
         ${series.some(x => rough(x.year)) ? `<p class="note">${esc(ROUGH)}</p>` : ''}
         <a class="btn" href="https://en.wikipedia.org/wiki/${encodeURIComponent(p.wiki)}" target="_blank" rel="noreferrer">Wikipedia ↗</a>`;
       $('#close').onclick = () => select(null);
@@ -601,6 +609,11 @@
     drawChart();
     selected = h.p;
     setPeriod(h.from, h.to);
+    // The names on the map are placed by their measured widths, so they are placed again once the web font is in
+    // (review of 16 November 2026: placed with the fallback font, a name could sit on another until a redraw).
+    const replace = () => { if (data && view === 'map') renderMap(); };
+    document.fonts?.ready.then(replace);
+    document.fonts?.addEventListener?.('loadingdone', replace);
     window.addEventListener('resize', () => { drawChart(); render(); });
     window.addEventListener('hashchange', () => {
       const q = readHash();

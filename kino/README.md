@@ -1,8 +1,9 @@
 # Kino
 
-Kino is Vitruvian Manager's fifth module: preprogrammed documentaries on wars, political events, parties, people and thinkers,
-narrated over simple looping animations (maps, timelines, portraits, quotations, charts) and linked scene by scene to
-the exact place in Vitruvian Manager's other submodules that tells the same story.
+Kino is Vitruvian Manager's documentary module (ninth of its ten in the sidebar): preprogrammed documentaries on wars,
+political events, parties, people and thinkers, narrated over simple looping animations (maps, timelines, portraits,
+quotations, charts) and linked scene by scene to the exact place in Vitruvian Manager's other submodules that tells the
+same story.
 
 One page, six submodules. `kino/index.html?cat=<category>` is the catalogue and player for one category:
 
@@ -35,8 +36,9 @@ kino/
   data/plan.json     titles in preparation, listed under each catalogue
   data/index.json    built: the catalogue
   data/media.json    built: images resolved from Wikidata (P18) and Wikimedia Commons, with author and licence
-  data/iso.json      built: ISO 3166-1 alpha-3 → the numeric ids world-atlas uses, and withdrawn codes → successors
-  scripts/validate.mjs     checks every script and every link (exit code 1 on errors)
+  data/iso.json      built: ISO 3166-1 alpha-3 → the numeric ids world-atlas uses, withdrawn codes → successors, and
+                     shapes drawn with no id, by name (Kosovo; Somaliland, lit with Somalia: SOM lights both)
+  scripts/validate.mjs     checks every script and every link (exit code 1 on errors), and counts films, scenes and tags
   scripts/build-index.mjs  validates, resolves Wikidata and Commons (cached in scripts/cache.json), writes the built files
 tests/kino.test.mjs        schema, links, ISO codes, sources, built data, speech rules, the validator, the page
 .github/workflows/kino-check.yml    validate and test on every change to Kino
@@ -268,8 +270,10 @@ records (its "Appears in", from the lake's shards `lake/data/e/<n mod 512>.json`
 its link names, the person in its portrait, the war or the country its link names (War Focus, PESTLE, the Atlas) and up
 to four countries on its map, the last two through `battlefield/focus/data/index.json` and `national/data/brief.json`
 (`tagTables`); or else the film's subjects; up to four each, leaving out other films; then the film's other places,
-nearest scene first. That tags 155 of the 221 scenes by what they show (86 by the links and portraits alone), and
-leaves 31 with no tagged screen. A chosen screen shows in the pane, held, turning Split view on if it was off.
+nearest scene first. Today there are 18 films and 225 scenes. Of the scenes 159 are tagged by what they show (87 by
+the links and portraits alone), and 30 have no tagged screen (`node kino/scripts/validate.mjs` prints these counts,
+and `tests/kino.test.mjs` holds this sentence to them). A chosen screen shows in the pane, held, turning Split view on
+if it was off.
 
 ### Full screen (F)
 

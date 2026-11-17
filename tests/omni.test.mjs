@@ -652,6 +652,11 @@ test('page: the second review: names escaped (X1), what a saved view\'s pin cove
     let st = await page.evaluate(() => window.omniState);
     assert.ok(st.features.includes('Q764793') && st.features.includes('Q1754732'), `Fornovo (1495) and Agnadello (1509) at 1509 (${st.battles.drawn})`);
     assert.equal(st.recipe, upto, 'a start at its rest writes no since=');
+    // K6 (17 November 2026): a battle's row says when it was fought as well as that it is drawn ("Drawn at 1509" alone,
+    // for Fornovo, read as if it were fought in 1509).
+    const state = q => page.textContent(`#battles-list li[data-q="${q}"] .om-b-state`);
+    assert.equal((await state('Q764793')).trim(), 'Drawn at 1509; fought in 1495', 'Fornovo, drawn in an up-to view');
+    assert.equal((await state('Q1754732')).trim(), 'Drawn at 1509, the year it was fought', 'Agnadello, drawn in its own year');
     // A start chosen by hand is kept in the recipe (since=) and drawn again from it after a reload.
     await page.focus('#from');
     for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight');

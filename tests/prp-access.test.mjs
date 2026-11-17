@@ -33,6 +33,8 @@ const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const json = p => JSON.parse(read(p));
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 const H = 36e5;
+/** Noon today, local time (in milliseconds): a fixed hour for a page test whose fixture is laid out by the hour. */
+const scienceNoon = (today = new Date()) => new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12).getTime();
 
 /* --- a small table: real feed ids (so the pages' fixtures join), made-up hosts --------------------------------------- */
 const FIX = {
@@ -415,8 +417,11 @@ test('committed: the Global Headline Tracker and National Analysis, with the out
 
 /* ================================================================ 4. the pages */
 // Fixtures served in place of the data, with the small table above: the pages are tested on stories whose classes are known.
-async function openWith(browser, path, routes, { width = 1360, dark = false } = {}) {
+// `now` (milliseconds), when given, fixes the page's clock there, so a fixture laid out by the hour reads the same at any
+// hour the test runs.
+async function openWith(browser, path, routes, { width = 1360, dark = false, now } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, colorScheme: dark ? 'dark' : 'light' });
+  if (now !== undefined) await page.clock.setFixedTime(now);
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
@@ -518,7 +523,10 @@ test('page: the Scientific Briefing leads each day with a free item in both orde
   const browser = await launch();
   t.after(() => browser.close());
   const D = json('science/briefing/data/stories.json');
-  const now = new Date().toISOString(), at = h => new Date(Date.now() - h * H).toISOString();
+  // The page sorts items into the viewer's local days, so "today's" two items must fall on one local day whatever the
+  // hour: the clock (here and in the page) is fixed at noon, local time, today. Run between midnight and one o'clock,
+  // a live clock put the item an hour old on yesterday, and the test failed.
+  const NOW = scienceNoon(), now = new Date(NOW).toISOString(), at = h => new Date(NOW - h * H).toISOString();
   const S = new Map(D.sources.map(s => [s.id, s]));
   const item = (id, source, title, h, extra = {}) => ({ id, title, url: `https://${source}.example/${id}`, source, kind: S.get(source).kind, tier: S.get(source).tier, type: S.get(source).kind === 'journal' ? 'paper' : 'news', published: at(h), summary: '', disciplines: ['physics'], ...extra });
   // Today: a paid flagship paper (newest), and a free news story with the paid journal's copy merged into it.
@@ -526,7 +534,7 @@ test('page: the Scientific Briefing leads each day with a free item in both orde
     item('fx-free', 'physorg-physics', 'Physicists freeze light in a crystal', 1, { also: ['nature'], alt: [{ source: 'nature', url: 'https://nature.example/frozen', title: 'Frozen light in a crystal', access: 'paid' }] })];
   const fixture = { ...D, generated: now, items: [...items, ...D.items.map(i => ({ ...i, published: i.published < at(30) ? i.published : at(30) }))] };
   for (const [width, dark] of [[1360, false], [1360, true], [360, false]]) {
-    const { page, errors } = await openWith(browser, 'science/briefing/index.html#d=all&w=7d', { '**/science/briefing/data/stories.json': fixture }, { width, dark });
+    const { page, errors } = await openWith(browser, 'science/briefing/index.html#d=all&w=7d', { '**/science/briefing/data/stories.json': fixture }, { width, dark, now: NOW });
     await page.waitForSelector('#list .entry h4 a', { timeout: 20000 });
     for (const order of ['tier', 'newest']) {
       await page.selectOption('#order', order);

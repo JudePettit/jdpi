@@ -30,6 +30,7 @@ import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { scorePeriod as scoreWith, latestPick, decadePick } from '../lib/pestle.js';
 import { yearsFiles, writeYears } from './years.mjs';
+import { leadership as leadershipOf, conflict as conflictOf, retroCodes } from './overview.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -182,50 +183,13 @@ const energy = json(join(jdpi, 'kardashev/data/energy.json'));
 const KARDASHEV = { USA: 'usa', CHN: 'prc', IND: 'india', RUS: 'russia', JPN: 'japan', GBR: 'uk' };
 const lakeIdx = existsSync(join(jdpi, 'lake/data/index.json')) ? new Set(json(join(jdpi, 'lake/data/index.json')).rows.map(r => r[0])) : new Set();
 const calendar = ['1980s', '1990s', '2000s', '2010s', '2020s'].flatMap(d => existsSync(join(jdpi, `calendar/data/${d}.json`)) ? json(join(jdpi, `calendar/data/${d}.json`)).events : []);
-const years = (a, b) => Math.max(0, (Date.parse(b || TODAY) - Date.parse(a)) / (365.25 * 864e5));
 
-function leadership(gw, current) {
-  const c = retro.countries[gw];
-  if (!c) return null;
-  const since = '1926-10-26';
-  const ls = c.leaders.filter(l => (l.end || TODAY) >= since);
-  const full = ls.filter(l => l.start >= since);
-  const tenures = full.map(l => years(l.start, l.end)).filter(x => x > 0);
-  const longest = [...ls].sort((a, b) => years(b.start, b.end) - years(a.start, a.end))[0];
-  return {
-    leaders100: ls.length,
-    avgTenure: tenures.length ? round(tenures.reduce((a, b) => a + b, 0) / tenures.length, 1) : null,
-    medianTenure: tenures.length ? round([...tenures].sort((a, b) => a - b)[Math.floor(tenures.length / 2)], 1) : null,
-    longest: longest ? { name: longest.full || longest.name, years: round(years(longest.start, longest.end), 1), from: longest.start.slice(0, 4), to: longest.end ? longest.end.slice(0, 4) : 'present' } : null,
-    irregular: c.leaders.filter(l => l.start >= since && l.entry && l.entry !== 'Regular').length,
-    elections: c.events.filter(e => (e.type === 'election' || e.type === 'referendum') && e.date >= since).length,
-    current, // the country's `leader`, repeated here for the Integration Hub's catalog
-  };
-}
-function conflict(gw) {
-  const ucdp = wars.filter(w => w.src === 'ucdp' && (w.loc.includes(gw) || w.states.includes(gw)));
-  const onSoil = ucdp.filter(w => w.loc.includes(gw));
-  const byYear = new Map();
-  for (const w of onSoil) for (const [y, lvl] of w.years) { const x = byYear.get(y) || { n: 0, war: false }; x.n++; if (lvl === 2) x.war = true; byYear.set(y, x); }
-  let onsets = 0, newWars = 0;
-  for (const w of onSoil) {
-    const ys = new Map(w.years);
-    for (const [y, lvl] of w.years) { if (!ys.has(y - 1)) onsets++; if (lvl === 2 && ys.get(y - 1) !== 2) newWars++; }
-  }
-  const span = 2025 - 1946 + 1;
-  const cow = wars.filter(w => w.src === 'cow' && (w.loc.includes(gw) || w.states.includes(gw)));
-  const live = realtime.wars.filter(w => w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3Of.get(gw)));
-  return {
-    conflictYears: [...byYear.values()].reduce((s, x) => s + x.n, 0),
-    avgConflictsPerYear: round([...byYear.values()].reduce((s, x) => s + x.n, 0) / span, 2),
-    yearsWithConflict: byYear.size, yearsAtWar: [...byYear.values()].filter(x => x.war).length,
-    onsetsPerDecade: round(onsets / (span / 10), 2), newWarsPerDecade: round(newWars / (span / 10), 2), newWarsPerYear: round(newWars / span, 3),
-    conflictsAbroad: ucdp.filter(w => !w.loc.includes(gw)).length, cowWars1926_45: cow.length,
-    active2026: live.map(w => ({ name: w.name, deaths: w.deaths, id: w.id })),
-  };
-}
+// Leadership and conflict (overview.mjs), under every code the Retrospective files the country under (Germany: 255 to
+// 1945 and 260 from 1949), or the code list's one code where the Retrospective has none.
+const codesOf = (iso3, gw) => { const cs = retroCodes(RETRO_COUNTRIES, iso3); return cs.length ? cs : gw != null ? [gw] : []; };
+const leadership = (iso3, gw, current) => leadershipOf(codesOf(iso3, gw).map(g => retro.countries[g]), current, TODAY);
+const conflict = (iso3, gw) => conflictOf(codesOf(iso3, gw), wars, realtime.wars.filter(w => w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
 function nameOfGw(gw) { return (retro.countries[gw]?.name || '').replace(/ \/.*$/, ''); }
-const iso3Of = new Map([...gwByIso3].map(([iso, gw]) => [gw, iso]));
 
 // ---- The guard, against the committed index. An indicator's coverage is the countries with a latest value, which
 // they have exactly when their series has a point. World Bank revisions move a few countries, a failed or deprecated
@@ -275,8 +239,8 @@ for (const c of wbCountries) {
     ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
     leader: shown, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
-    leadership: rc ? leadership(gw, shown) : null,
-    conflict: gw != null ? conflict(gw) : null,
+    leadership: rc ? leadership(c.id, gw, shown) : null,
+    conflict: gw != null ? conflict(c.id, gw) : null,
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,
   });

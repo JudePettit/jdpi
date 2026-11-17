@@ -15,6 +15,13 @@ export function sig(n, digits) {
 
 const whole = n => Math.round(n).toLocaleString('en-GB');
 
+/** The noun for a count: singular for exactly one, plural for any other ("1 death", "0 clashes", "2 battles"). Every
+ *  count War Focus writes takes its noun from here (17 November 2026: "1 deaths in 1 recorded clash", "at least 1
+ *  casualties", "0 of 1 battles"). `many` defaults to the noun with an s. */
+export const noun = (n, one, many = `${one}s`) => (n === 1 ? one : many);
+/** A count with its noun: count(1, 'death') is "1 death", count(1200, 'death') "1,200 deaths". `num` writes the number. */
+export const count = (n, one, many = `${one}s`, num = whole) => `${num(n)} ${noun(n, one, many)}`;
+
 /** A figure as written: `est` marks one built on estimated months; `total` a running or whole-war total. */
 export function deaths(n, est, { total = false } = {}) {
   return est ? `~${whole(sig(n, total ? 3 : 2))}` : whole(n);
@@ -192,7 +199,8 @@ export function figureText(n) {
   // "Recorded" is a kind (BF-08): the words say "recorded" only of Wikidata's plain counts; any other figure is "given"
   // (the review's F10, P8, R3-01). A figure as its source gives it: a range, or "at least" where a side gives none.
   const rec = (kind, wd) => wd && kind === 'fact';
-  const word = (f, one, many) => (f.low === 1 && f.high === 1 && !f.atLeast ? one : many);
+  // A figure of one, "at least" one included, takes the singular ("at least 1 death"); a range the plural.
+  const word = (f, one, many) => { const lo = f.low ?? f.v, hi = f.high ?? f.v; return noun(lo === hi ? lo : NaN, one, many); };
   const f = shownFigure(n, 'd');
   if (f) {
     const how = !shownParts ? '' : f.from === 'own' ? (rec(n.kind, n.wdOnly) ? ' recorded for the whole' : ' given for the whole') : `, the sum of its parts' ${rec(n.kind, n.wdOnly) ? 'recorded figures' : 'figures'}`;
@@ -323,9 +331,9 @@ export function completeness(battles, groups = groupBattles(battles)) {
 /** The completeness line, as the panel and the Battles tab show it. */
 export function completenessText(c) {
   const n = v => v.toLocaleString('en-GB');
-  const kinds = [c.recorded && `${n(c.recorded)} recorded`, c.estimate && `${n(c.estimate)} ${c.estimate === 1 ? 'estimate' : 'estimates'}`, c.disputed && `${n(c.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
+  const kinds = [c.recorded && `${n(c.recorded)} recorded`, c.estimate && `${n(c.estimate)} ${noun(c.estimate, 'estimate')}`, c.disputed && `${n(c.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
   const rest = [c.zero && `a recorded zero for ${n(c.zero)}`, c.parts && `counted through their parts for ${n(c.parts)}`, c.unread && `not read for ${n(c.unread)}`, c.none && `none found for ${n(c.none)}${c.noArticle ? ` (${n(c.noArticle)} without an article)` : ''}`].filter(Boolean).join('; ');
-  return `Figures for ${n(c.figure)} of ${n(c.battles)} battles${kinds ? `: ${kinds}` : ''}${rest ? `; ${rest}` : ''}.`;
+  return `Figures for ${n(c.figure)} of ${n(c.battles)} ${noun(c.battles, 'battle')}${kinds ? `: ${kinds}` : ''}${rest ? `; ${rest}` : ''}.`;
 }
 /**
  * The deadliest battles (BF-08): ranked by deaths only, each by the lowest figure given (a range's low end, an "at
@@ -344,9 +352,9 @@ export function deadliest(groups) {
 /** The line under the deadliest battles: what is ranked, of what kinds, and what is not, of how many. */
 export function deadliestNote(d) {
   const n = v => v.toLocaleString('en-GB');
-  const kinds = [d.estimates && `${n(d.estimates)} ${d.estimates === 1 ? 'estimate' : 'estimates'}`, d.disputed && `${n(d.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
+  const kinds = [d.estimates && `${n(d.estimates)} ${noun(d.estimates, 'estimate')}`, d.disputed && `${n(d.disputed)} disputed or unreliable`].filter(Boolean).join(', ');
   const not = [d.civ && `${n(d.civ)} with civilian deaths only`, d.casOnly && `${n(d.casOnly)} with casualties only`, d.none && `${n(d.none)} with no figure`].filter(Boolean).join(', ');
-  const of = d.top != null ? ` Of the ${n(d.top)} ${d.top === 1 ? 'battle' : 'battles'} not counted under a larger one,` : '';
+  const of = d.top != null ? ` Of the ${n(d.top)} ${noun(d.top, 'battle')} not counted under a larger one,` : '';
   return `${of ? `${of.trim()} ranked` : 'Ranked'} by deaths: ${n(d.ranked.length)}${kinds ? ` (${kinds})` : ''}, each by the lowest figure given.${not ? ` Not ranked: ${not}.` : ''} Not added into the war's deaths by month.`;
 }
 const UCDP_FROM = '1989-01-01';
@@ -357,7 +365,7 @@ export function searched(b) {
   const wp = !b.w ? 'no English article linked from Wikidata' : { noart: 'the linked article does not exist', redirect: 'the article is a redirect to another page', nobox: 'no infobox', nofield: 'no casualties in its infobox', failed: 'could not be read this time', blank: 'its casualties left blank', mismatch: 'the linked article is about another event, by its dates, so not read' }[b.fwp]
     || (b.fs === 'unread' ? 'its casualties box has figures VM could not interpret surely: see the article' : b.fs === 'words' ? `no figure, only words${b.fw?.length ? `: ${b.fw.map(w => `"${w}"`).join(', ')}` : ''}` : 'no figure');
   const year = (b.s || '').slice(0, 4) || (b.dec != null ? `the ${b.dec}s` : '');
-  const ucdp = (b.s || '') < UCDP_FROM ? `does not cover ${year || 'its date'}` : b.fu ? `${whole(b.fu.v)} deaths in ${b.fu.n} recorded clash${b.fu.n === 1 ? '' : 'es'} within ${b.fu.km} km, shown apart` : b.lat == null ? 'not mapped, so not matched' : b.p != null || (b.pe && b.pe !== 'd') ? 'dates not to the day, so not matched' : `no clashes recorded within 25 km in its dates`;
+  const ucdp = (b.s || '') < UCDP_FROM ? `does not cover ${year || 'its date'}` : b.fu ? `${count(b.fu.v, 'death')} in ${count(b.fu.n, 'recorded clash', 'recorded clashes')} within ${b.fu.km} km, shown apart` : b.lat == null ? 'not mapped, so not matched' : b.p != null || (b.pe && b.pe !== 'd') ? 'dates not to the day, so not matched' : `no clashes recorded within 25 km in its dates`;
   return `Searched: Wikidata (nothing recorded); English Wikipedia (${wp}); UCDP (${ucdp}).`;
 }
 

@@ -345,7 +345,38 @@ export function volatility({ jdpiDir }) {
   return out;
 }
 
-export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca, kino, pestle, volatility };
+/** Month by Month (registry id monthly): every mark its Marks tab shows (monthly/data/marks.json, the page's own, read
+ *  as q/monthly.html lists it): each Realtime Battlefield war (all organised violence), each War Focus war still under
+ *  way (a primary unit marked for the month; an ended War Focus war has no mark and no place on the page, its months
+ *  being in its year strip on War Focus), and, once UCDP's per-country figures are taken in, each country. Keyed by
+ *  its Wikidata ID, or by the Wikipedia title of a Realtime Battlefield war, which has none there; a war marked both
+ *  ways (Russia–Ukraine) is two places, as on the page. Linked to the mark on the Marks tab
+ *  (q/monthly.html#tab=marks&month=<YYYY-MM>&unit=<id>, which scrolls to it); the context is the month's mark in the
+ *  page's words ("More deaths recorded"), with its confidence, or why there is none. */
+export function monthly({ jdpiDir }) {
+  const p = join(jdpiDir, 'monthly/data/marks.json');
+  if (!existsSync(p)) return [];
+  const d = json(p);
+  const when = new Date(`${d.month}-01T00:00:00Z`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const shown = u => u.kind === 'war' || u.kind === 'country' || (u.kind === 'focus' && u.primary && u.fighting?.month === d.month);
+  const out = [];
+  for (const u of d.units || []) {
+    if (!shown(u)) continue;
+    const key = /^Q[1-9]\d*$/.test(u.qid || '') ? { qid: u.qid } : u.wiki ? { title: String(u.wiki).replace(/_/g, ' ') } : null;
+    if (!key) continue;
+    const f = u.fighting || {};
+    // The reason's first sentence, without the page's pointer to what follows it there ("(listed below)").
+    const why = f.why?.text ? f.why.text.split(/(?<=\.)\s/)[0].replace(/\s*\((?:listed|see|shown) below\)/, '').replace(/\.?$/, '.') : '';
+    const mark = f.direction && f.direction !== 'none'
+      ? `${f.words}${f.confidence ? ` (${f.confidence} confidence)` : ''}.`
+      : `${f.words || 'No mark'}.${why ? ` ${why}` : ''}`;
+    out.push({ key, label: u.name, module: 'monthly', url: `${JDPI}q/monthly.html#tab=marks&month=${d.month}&unit=${encodeURIComponent(u.id)}`,
+      date: d.month, context: `Monthly mark for ${when}: ${mark}` });
+  }
+  return out;
+}
+
+export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, traders, learning, progress, bibliotheca, kino, pestle, volatility, monthly };
 
 // The submodules (registry.json ids) each adapter files its mentions under: the modules `--only <adapter>` speaks for
 // in build.mjs (it makes their entities again, and drops what they no longer mention), and what
@@ -354,7 +385,7 @@ export const ADAPTERS = { retrospective, calendar, battlefield, kardashev, trade
 export const ADAPTER_MODULES = {
   retrospective: ['retrospective'], calendar: ['historical-calendar', 'calendar'], battlefield: ['battlefield-history', 'war-focus', 'battlefield'],
   kardashev: ['kardashev'], traders: ['traders'], learning: ['learning', 'learning-politics'], progress: ['progress'], bibliotheca: ['neo-classic'],
-  kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'],
+  kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'], monthly: ['monthly'],
 };
 // The tag groups only one adapter gives. A --only run of that adapter makes these groups again on every entity it
 // mentions, so a curated tag it no longer gives (a thinker's school, a spectrum position) goes at once, not at the

@@ -1,13 +1,15 @@
 // Kardashev Tracker: century slider, map bubbles, ranking and chart (runs against JDPI_URL).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chromium } from 'playwright-core';
 import { pageTest, launch } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
-test('AD 1 is led by Rome and Han; 2025 by China, with K ≈ 0.73', async () => {
-  const browser = await chromium.launch({ channel: 'msedge' });
+// A page test (the review of 17 November 2026, F6): until then it had no pageTest guard and ran in "npm run test:unit"
+// against the live site, unmuted, and an unreachable site left its browser open; now muted and closed whatever happens.
+test('AD 1 is led by Rome and Han; 2025 by China, with K ≈ 0.73', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -21,7 +23,6 @@ test('AD 1 is led by Rome and Han; 2025 by China, with K ≈ 0.73', async () => 
   const k = await page.locator('#kval').innerText();
   await page.locator('.rank[data-id]').first().click();
   const detail = await page.locator('#panel').innerText();
-  await browser.close();
   assert.deepEqual(ad1.sort(), ['han', 'rome']);
   assert.ok(bubbles >= 4, `bubbles: ${bubbles}`);
   assert.ok(areas >= 10, `chart areas: ${areas}`);
@@ -416,6 +417,65 @@ test('over a period the table fits its panel at 1440 by 900 and the map keeps it
     assert.ok(look.map >= least, `${w}x${h} ${hash}: the map is ${look.map} px tall (at least ${least})`);
     assert.equal(look.sideways, 0);
     await page.close();
+  }
+  assert.deepEqual(errors, []);
+});
+
+// The leftovers of MP-07 (log, 16 November 2026, 07:08), corrected 17 November: (a) over a period a power's panel
+// listed its shares at the period's steps twice, once under the period and again under "Over time"; each share is now
+// listed once, under "Over time", the period's steps in bold. By hand from kardashev/data/energy.json: the Han are among
+// the powers at 200 BC, 100 BC, AD 1, 100 (~30%) and 200 (~20%), so over 100 to 1400 two of the five are within the period. (b) Over a
+// period the table's two heading rows each stuck at the top on their own, so scrolled, the second lay over the first;
+// they now stick as one block. (c) The map's names were placed by their widths in the fallback font when the data came
+// before the web font, and stayed so until a redraw (at 390 by 844, 500 BC: "Zhou and the Warring States"); they are
+// placed again once the font is in. The font is held here until the names are drawn, as on a slow connection.
+test('a period lists a power\'s shares once, the table\'s two heading rows stay apart when scrolled, and names are placed again with the web font', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const errors = [];
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  page.on('pageerror', e => errors.push(e.message));
+  for (const [hash, steps] of [['y=1400&f=100&p=song', ['1000: ~38%', '1100: ~50%', '1200: ~32%']], ['y=1400&f=100&p=han', ['100: ~30%', '200: ~20%']]]) {
+    await open(page, hash);
+    const text = await page.locator('#panel').innerText();
+    for (const s of steps) assert.equal(text.split(s).length - 1, 1, `${hash}: "${s}" is listed once\n${text}`);
+    assert.match(text, /Over time\s*in bold, within the period/i);
+  }
+  const bold = await page.locator('#panel .meta b.inperiod').allInnerTexts();
+  const plain = await page.locator('#panel .meta').innerText();
+  assert.deepEqual(bold.map(b => b.split(':')[0]), ['100', '200'], 'the Han: the two steps within 100 to 1400 in bold');
+  assert.match(plain, /200 BC: ~\d+%[^\n]*100 BC: ~\d+%[^\n]*AD 1: ~\d+%/, 'its steps before the period are still listed');
+  await open(page, 'y=1400&p=han'); // one step: no bold and no note
+  assert.equal(await page.locator('#panel .meta b.inperiod').count(), 0);
+  assert.doesNotMatch(await page.locator('#panel').innerText(), /in bold/i);
+  // (b) the table over a period, scrolled: the second heading row stays under the first.
+  for (const [w, h] of [[1440, 900], [390, 844]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await open(page, 'y=1400&f=100&v=table');
+    await page.waitForSelector('#table-rows tr[data-id]');
+    await page.evaluate(() => { document.querySelector('.tablescroll').scrollTop = 300; });
+    const rows = await page.evaluate(() => { const top = document.querySelector('.tablescroll').getBoundingClientRect().top; return [...document.querySelectorAll('#table-head tr')].map(tr => { const b = tr.cells[0].getBoundingClientRect(); return { top: Math.round(b.top - top), bottom: Math.round(b.bottom - top) }; }); });
+    assert.equal(rows.length, 2);
+    assert.ok(rows[0].top >= -1 && rows[0].top <= 1, `${w}: the first heading row at the top (${JSON.stringify(rows)})`);
+    assert.ok(Math.abs(rows[1].top - rows[0].bottom) <= 1, `${w}: the second heading row under the first, not over it (${JSON.stringify(rows)})`);
+  }
+  await page.close();
+  // (c) the web font held until the names are drawn.
+  for (const [w, h, hash] of [[390, 844, 'y=-500'], [1440, 900, 'y=1400&f=100']]) {
+    const slow = await browser.newPage({ viewport: { width: w, height: h } });
+    slow.on('pageerror', e => errors.push(e.message));
+    let release; const held = new Promise(r => { release = r; });
+    await slow.route(/fonts\.gstatic\.com/, async r => { await held; await r.continue(); });
+    await slow.goto(`${BASE}/kardashev/#${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await slow.waitForSelector('text.blabel', { timeout: 20000 });
+    release();
+    await slow.evaluate(() => document.fonts.ready);
+    await slow.waitForTimeout(300);
+    const names = () => slow.evaluate(() => [...document.querySelectorAll('text.blabel')].map(n => `${n.textContent} ${n.getAttribute('y')} ${n.getAttribute('visibility') || ''}`));
+    const shown = await names();
+    await slow.evaluate(() => renderMap()); // the same placing, run with the font in
+    assert.deepEqual(shown, await names(), `${w}x${h} ${hash}: the names as placed with the font in`);
+    await slow.close();
   }
   assert.deepEqual(errors, []);
 });

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadContext, validateAll, validateScript, checkLink, validCountry, HISTORICAL } from '../kino/scripts/validate.mjs';
+import { loadContext, validateAll, validateScript, checkLink, validCountry, HISTORICAL, BY_NAME, scriptFiles } from '../kino/scripts/validate.mjs';
 import { CATEGORY_IDS, VISUAL_KINDS, flatScenes, shortCite } from '../kino/lib/format.js';
 import { tokens, sentences, utterances, wordAt, spoken, speechRule, countSentences, speechWarnings } from '../kino/lib/text.js';
 import { shellHash, shellUrl, readKinoHash, kinoHash, filmRoute } from '../kino/lib/links.js';
@@ -1801,27 +1801,126 @@ test('ww2-europe: no scene cites two sources by the same short form, and every s
   assert.ok(!d.sources.some(x => /countrystudies\.us/.test(x.url || '')), 'no source at countrystudies.us');
 });
 
-test('page: at 1440 and 1920 px, the map key of North Africa and of Africa\'s war covers no lit country', PAGE, async () => {
-  const browser = await launch();
+// K2 (17 November 2026): at 1280 × 720 and 1024 × 768 the stage is under 760 px wide, and the key, at its legible
+// minimum, wrapped over Algeria, Morocco and Namibia; there it moves under the stage, into the captions, as on phones.
+// At 1440 × 900 and 1920 × 1080 it stays on the map, as before, and covers no lit country.
+test('page: the map key of North Africa and of Africa\'s war covers no lit country at 1024, 1280, 1440 and 1920 px', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
   try {
-    for (const [width, height] of [[1440, 900], [1920, 1080]]) for (const id of ['mediterranean', 'africa']) {
+    for (const [width, height, onStage] of [[1024, 768, false], [1280, 720, false], [1440, 900, true], [1920, 1080, true]]) for (const id of ['mediterranean', 'africa']) {
       const page = await browser.newPage({ viewport: { width, height } });
       await page.goto(`${BASE}/kino/index.html?cat=wars#doc=ww2-europe&s=${id}`, { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('.kn-stage svg.kn-map path.c.t2', { timeout: 30000 });
       // The view glides to the scene's frame: wait until it has stopped.
       await page.waitForFunction(() => new Promise(r => { const w = () => document.querySelector('.kn-stage svg.kn-map g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w()), 600); }), null, { timeout: 20000, polling: 700 });
-      const under = await page.evaluate(() => {
-        const st = document.querySelector('.kn-stage'), lb = st.querySelector('.kn-legend').getBoundingClientRect(), out = [];
-        for (const p of st.querySelectorAll('svg.kn-map path.c[data-iso]')) {
-          if (!/\bt[123]\b/.test(p.getAttribute('class'))) continue;
-          const len = p.getTotalLength(), m = p.getScreenCTM(); let u = 0;
-          for (let i = 0; i < 300; i++) { const q = p.getPointAtLength(len * i / 300), x = m.a * q.x + m.c * q.y + m.e, y = m.b * q.x + m.d * q.y + m.f; if (x > lb.left && x < lb.right && y > lb.top && y < lb.bottom) u++; }
-          if (u) out.push(`${p.dataset.iso} ${Math.round(u / 3)}%`);
+      const at = await page.evaluate(() => {
+        const st = document.querySelector('.kn-stage'), key = st.querySelector('.kn-legend'), below = document.querySelector('#cap-foot .legend-key');
+        const shown = el => !!el && getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0;
+        const out = [];
+        if (shown(key)) {
+          const lb = key.getBoundingClientRect();
+          for (const p of st.querySelectorAll('svg.kn-map path.c[data-iso]')) {
+            if (!/\bt[123]\b/.test(p.getAttribute('class'))) continue;
+            const len = p.getTotalLength(), m = p.getScreenCTM(); let u = 0;
+            for (let i = 0; i < 300; i++) { const q = p.getPointAtLength(len * i / 300), x = m.a * q.x + m.c * q.y + m.e, y = m.b * q.x + m.d * q.y + m.f; if (x > lb.left && x < lb.right && y > lb.top && y < lb.bottom) u++; }
+            if (u) out.push(`${p.dataset.iso} ${Math.round(u / 3)}%`);
+          }
         }
-        return out;
+        return { under: out, onStage: shown(key), below: shown(below), rows: key.children.length, belowRows: below?.children.length, belowTop: below && Math.round(below.getBoundingClientRect().top - st.getBoundingClientRect().bottom) };
       });
-      assert.deepEqual(under, [], `${id} at ${width} px: lit outline under the key`);
+      assert.deepEqual(at.under, [], `${id} at ${width} px: lit outline under the key`);
+      assert.equal(at.onStage, onStage, `${id} at ${width} px: the key is ${onStage ? 'on the map' : 'under the stage'}`);
+      assert.equal(at.below, !onStage, `${id} at ${width} px: the captions' key ${onStage ? 'is hidden' : 'shows'}`);
+      assert.equal(at.belowRows, at.rows, `${id}: the captions' key has every row of the map's`);
+      if (!onStage) assert.ok(at.belowTop >= 0, `${id} at ${width} px: the key is under the stage, not over it`);
       await page.close();
     }
   } finally { await browser.close(); }
+});
+
+/* ---- Small corrections (17 November 2026). K1: world-atlas's 1:110m map draws Somaliland as a shape of its own with no
+   ISO id. Somaliland is not one of VM's countries; internationally it is part of Somalia, and in the films' years it was
+   British Somaliland, so a film that lights SOM lights that shape too (Italy overran it in August 1940: the marker
+   "Berbera, August 1940" stands in it). */
+test('map: the shape world-atlas draws as Somaliland, with no ISO id, is given to SOM; Kosovo keeps its own code', () => {
+  const iso = read('kino/data/iso.json');
+  assert.equal(iso.byName.SOM, 'Somaliland', 'iso.json gives the Somaliland shape to SOM');
+  assert.equal(iso.byName.XKX, 'Kosovo');
+  assert.deepEqual(iso.byName, BY_NAME, 'iso.json is the builder\'s table');
+  // Every film that lights SOM reads truly with British Somaliland lit too.
+  const som = docs.flatMap(d => flatScenes(d).filter(s => lit(s).has('SOM')).map(s => `${d.id}/${s.id}`)).sort();
+  assert.deepEqual(som, ['end-of-empire-in-africa/empires', 'end-of-empire-in-africa/year-of-africa', 'ww2-europe/africa'],
+    'a new film that lights SOM: check it still reads truly with Somaliland lit, then add it here');
+});
+
+test('page: a film that lights Somalia lights the Somaliland shape with it, in the same tone', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const [cat, doc, s, tone] of [['wars', 'ww2-europe', 'africa', 2], ['geopolitical-events', 'end-of-empire-in-africa', 'empires', 1], ['geopolitical-events', 'end-of-empire-in-africa', 'year-of-africa', 1]]) {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await page.goto(`${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${s}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector(`.kn-stage svg.kn-map path.c.t${tone}`, { timeout: 30000 });
+      assert.equal(await page.locator(`.kn-stage svg.kn-map path.c[data-iso="SOM"].t${tone}`).count(), 2, `${doc}/${s}: Somalia and Somaliland both lit`);
+      assert.equal(await page.locator('.kn-stage svg.kn-map path.c:not([data-iso])').count(), 1, `${doc}/${s}: only Northern Cyprus has no code`);
+      await page.close();
+    }
+  } finally { await browser.close(); }
+});
+
+/* K3: on a phone the Play button sits in the stage's bottom right-hand corner, and a summary card fills the stage to its
+   foot. With its words ("Resume" after a pause, 99 px wide) it covered the end of the card's attribution line in most
+   summary scenes. Over a summary card it is the play sign alone (its words stay its name), and no text of the card is under it. */
+test('page: on a phone the Play button covers no words of any summary card, and keeps its name', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  const scenes = docs.flatMap(d => flatScenes(d).filter(s => s.visual.kind === 'summary').map(s => [d.category, d.id, s.id]));
+  assert.ok(scenes.length >= 20, `${scenes.length} summary scenes`);
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    for (const [cat, doc, id] of scenes) {
+      await page.goto(`${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${id}`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kn-layer.kn-v-summary .of', { timeout: 30000 });
+      await page.waitForTimeout(1500); // the card's lines rise into place
+      // The labels kino.js gives the button (setPlayUi): before the film starts, and after a pause.
+      for (const label of ['Play', 'Resume']) {
+        const r = await page.evaluate(label => {
+          const card = document.querySelector('.kn-layer.kn-v-summary'), big = document.querySelector('#bigplay');
+          big.textContent = label; big.hidden = false;
+          const b = big.getBoundingClientRect(), tw = document.createTreeWalker(card, NodeFilter.SHOW_TEXT), under = [];
+          for (let n; (n = tw.nextNode());) {
+            const rg = document.createRange(); rg.selectNodeContents(n);
+            if ([...rg.getClientRects()].some(t => t.width > 0 && t.left < b.right && t.right > b.left && t.top < b.bottom && t.bottom > b.top)) under.push(n.parentElement.className);
+          }
+          return { under, shown: b.width > 0 && b.height > 0 };
+        }, label);
+        assert.ok(r.shown, `${doc}/${id}: the button is there`);
+        assert.deepEqual(r.under, [], `${doc}/${id}: "${label}" covers words of the card`);
+        assert.equal(await page.getByRole('button', { name: label, exact: true }).and(page.locator('#bigplay')).count(), 1, `${doc}/${id}: the button is still named "${label}"`);
+      }
+      await page.goto('about:blank');
+    }
+    // At 1440 px the button keeps its words over a summary card.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${BASE}/kino/index.html?cat=political-figures#doc=winston-churchill&s=may-1940`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.kn-layer.kn-v-summary .of', { timeout: 30000 });
+    assert.ok(await page.locator('#bigplay').evaluate(b => b.getBoundingClientRect().width > 60 && parseFloat(getComputedStyle(b).fontSize) >= 14), 'the button has its words at 1440 px');
+  } finally { await browser.close(); }
+});
+
+/* K4: kino/README.md's counts of films, scenes and tagged scenes come from the data; the validator prints them, and
+   this holds the README to them. */
+test('README: the films, scenes and tagged scenes it counts are the data\'s, as the validator prints them', async () => {
+  const { sceneCounts } = await import('../kino/scripts/validate.mjs');
+  const c = sceneCounts(ctx), readme = readFileSync(join(ROOT, 'kino/README.md'), 'utf8').replace(/\s+/g, ' ');
+  assert.equal(c.films, docs.length);
+  assert.equal(c.scenes, docs.reduce((n, d) => n + flatScenes(d).length, 0));
+  const m = readme.match(/(\d+) films and (\d+) scenes\. Of the scenes (\d+) are tagged by what they show \((\d+) by the links and portraits alone\), and (\d+) have no tagged screen/);
+  assert.ok(m, 'the README says how many films and scenes there are, and how many are tagged');
+  assert.deepEqual(m.slice(1).map(Number), [c.films, c.scenes, c.own, c.bare, c.untagged], 'the README\'s counts are the data\'s (node kino/scripts/validate.mjs prints them)');
+});
+
+/* K5: a script keeps one source (or other entry with an id) to a line, so a change to one shows as a change to that line. */
+test('scripts: no line of a script holds two entries', () => {
+  for (const { path } of scriptFiles()) readFileSync(path, 'utf8').split(/\r?\n/).forEach((l, i) => {
+    assert.ok((l.match(/\{\s*"id":/g) || []).length <= 1, `${path.replace(ROOT, '')}:${i + 1} holds more than one entry`);
+  });
 });

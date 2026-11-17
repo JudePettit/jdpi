@@ -109,6 +109,12 @@
 .stat b.nofig, .nofig { color: var(--prp-muted); font: 500 14px/1.35 var(--prp-font-ui); }
 .searched, .ucdp-near, .fig-note { color: var(--prp-text-2); font-size: 12.5px; line-height: 1.5; margin: 6px 0; }
 .fig-note { color: var(--prp-muted); font-size: 11.5px; }
+/* A battle's window keeps its top while its detail loads (17 November 2026): centred, it moved up by half of what the
+   detail added, and the links and "Go to <month>" with it. It stands near the top and grows downward; the detail is
+   its last part (app.js openBattle), so nothing above it moves. */
+.modal { place-items: start center; }
+.modal-box { margin-top: min(6vh, 56px); } /* with its 85vh at most and the 16 px around it, it stays on screen */
+.fig-detail { display: flow-root; } /* its first line's margin stays inside it, so its own top does not move either */
 .fig-detail h4 { margin: 12px 0 4px; font: 600 var(--prp-fs-xs) var(--prp-font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--prp-muted); }
 .side-figs { margin: 0; padding: 0; list-style: none; }
 .side-figs li { padding: 6px 0; border-bottom: 1px solid var(--prp-line-soft); font-size: 13px; color: var(--prp-text); overflow-wrap: anywhere; }

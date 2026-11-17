@@ -8,7 +8,8 @@ import { join, basename, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATEGORY_IDS, VISUAL_KINDS, SOURCE_KINDS, flatScenes, cutoffYear, narratedYears } from '../lib/format.js';
 import { countSentences, speechWarnings, wordCount, estimateSeconds } from '../lib/text.js';
-import { TARGETS, onOwnPage, readAt } from '../lib/links.js';
+import { TARGETS, onOwnPage, readAt, SHELL_URL } from '../lib/links.js';
+import { tagTables, sceneEntities, relatedPlaces, shardOf } from '../lib/related.js';
 import { findQuote } from '../../bibliotheca/scripts/quotes.mjs';
 
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -29,6 +30,11 @@ export const HISTORICAL = {
 };
 // Countries world-atlas draws that the National Analysis list (World Bank) leaves out, with their ISO numeric codes.
 export const EXTRA_ISO = { ESH: '732', FLK: '238', ATF: '260', TWN: '158', ATA: '010' };
+// Shapes world-atlas's 1:110m map draws with no ISO id, by their name there, and the code a film lights them with.
+// Kosovo is its own code (XKX). Somaliland is drawn apart from Somalia; it is not one of VM's countries, and
+// internationally it is part of Somalia (in the films' years, British Somaliland), so a film that lights SOM lights it
+// too. Northern Cyprus ("N. Cyprus") stays unlit: no film lights Cyprus.
+export const BY_NAME = { XKX: 'Kosovo', SOM: 'Somaliland' };
 
 const read = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
@@ -338,6 +344,33 @@ export function validateAll(ctx = loadContext(), files = scriptFiles()) {
   return loaded.map(f => (f.error ? { path: f.path, id: f.id, errors: [`not valid JSON: ${f.error}`], warnings: [] } : { path: f.path, id: f.id, ...validateScript(f.doc, ctx, f.path) }));
 }
 
+/** The counts kino/README.md gives (tests/kino.test.mjs holds it to them): films, scenes, the scenes tagged by what they
+    show (own), those tagged by their links and portraits alone, without the wars and countries tables (bare), and those
+    whose Related list has no tagged screen (untagged; through the Master Index's shards, lake/data/e). Call it after
+    validateAll, which fills ctx.docs. */
+export function sceneCounts(ctx) {
+  const tables = tagTables(read('battlefield/focus/data/index.json'), read('national/data/brief.json')), shards = new Map();
+  const entity = q => {
+    const n = shardOf(q), file = join(ROOT, 'lake/data/e', `${n}.json`);
+    if (!shards.has(n)) { try { shards.set(n, existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null); } catch { shards.set(n, null); } }
+    return shards.get(n)?.[q] || null;
+  };
+  const c = { films: 0, scenes: 0, own: 0, bare: 0, untagged: 0 };
+  for (const d of ctx.docs.values()) {
+    c.films++;
+    const all = flatScenes(d);
+    all.forEach((s, i) => {
+      c.scenes++;
+      const things = sceneEntities(s, d.subjects, tables);
+      if (things.own) c.own++;
+      if (sceneEntities(s, d.subjects).own) c.bare++;
+      const r = relatedPlaces(all, i, { subjects: d.subjects, entities: new Map(things.qids.map(q => [q, entity(q)])), registry: ctx.registry, shell: SHELL_URL, tables });
+      if (!r.some(x => x.group === 'tagged')) c.untagged++;
+    });
+  }
+  return c;
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const ctx = loadContext();
   const args = process.argv.slice(2);
@@ -353,5 +386,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     errors += r.errors.length;
   }
   if (!results.length) console.log('No scripts in kino/data/<category>/.');
+  else if (!args.length) {
+    const c = sceneCounts(ctx);
+    console.log(`${c.films} films and ${c.scenes} scenes. Of the scenes ${c.own} are tagged by what they show (${c.bare} by the links and portraits alone), and ${c.untagged} have no tagged screen.`);
+  }
   process.exit(errors ? 1 : 0);
 }

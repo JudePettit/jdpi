@@ -197,7 +197,9 @@ const calendar = ['1980s', '1990s', '2000s', '2010s', '2020s'].flatMap(d => exis
 // 1945 and 260 from 1949), or the code list's one code where the Retrospective has none.
 const codesOf = (iso3, gw) => { const cs = retroCodes(RETRO_COUNTRIES, iso3); return cs.length ? cs : gw != null ? [gw] : []; };
 const leadership = (iso3, gw, current, term) => leadershipOf(codesOf(iso3, gw).map(g => retro.countries[g]), current, TODAY, term);
-const conflict = (iso3, gw) => conflictOf(codesOf(iso3, gw), wars, realtime.wars.filter(w => w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
+// The Realtime Battlefield's quiet group ("other-recorded": under 25 deaths in a country this year, many countries in
+// one group) is not a war active in any one of them, and its deaths are the whole group's: it is left out here.
+const conflict = (iso3, gw) => conflictOf(codesOf(iso3, gw), wars, realtime.wars.filter(w => w.id !== 'other-recorded' && w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
 function nameOfGw(gw) { return (retro.countries[gw]?.name || '').replace(/ \/.*$/, ''); }
 
 // ---- The guard, against the committed index. An indicator's coverage is the countries with a latest value, which

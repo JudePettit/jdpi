@@ -424,14 +424,17 @@ test('a revision after a final issue: the issue stands, and today\'s mark is lis
   const revised = { ...marks, month: '2026-09', units: marks.units.map(x => (x.id === u.id ? u : x)) };
   const top = [{ unit: u.id }, ...marks.bulletin.top];
   assert.ok(!b.wars.some(l => l.unit === u.id), 'not a line of the issue');
+  // Other marks may differ from the issue too (17 November 2026: Realtime Battlefield's rebuild, AC-14, gave the marks its
+  // country units and the shared counting after September was issued); this test follows the one revised here.
   const since = loadMark().sinceIssue(b, revised);
-  assert.deepEqual(plain(since.map(d => [d.unit, d.issued.direction, d.issued.deaths, d.now.direction, d.now.deaths])), [[u.id, 'same', 769, 'worse', 900]]);
+  assert.deepEqual(plain(since.filter(d => d.unit === u.id).map(d => [d.unit, d.issued.direction, d.issued.deaths, d.now.direction, d.now.deaths])), [[u.id, 'same', 769, 'worse', 900]]);
   for (const t of top) assert.ok(b.wars.some(l => l.unit === t.unit) || since.some(d => d.unit === t.unit), t.unit);
   // Deaths revised without a new direction are listed too (Yemen 3,170 to 3,200), and a mark the same as issued is not.
   const y = structuredClone(revised.units.find(x => x.id === 'focus:yemen'));
   y.fighting.figures.deaths = 3200;
   const both = loadMark().sinceIssue(b, { ...revised, units: revised.units.map(x => (x.id === y.id ? y : x)) });
-  assert.deepEqual(plain(both.map(d => d.unit).sort()), [u.id, 'focus:yemen'].sort());
+  assert.ok(!since.some(d => d.unit === 'focus:yemen'), 'Yemen as issued');
+  assert.deepEqual(plain(both.map(d => d.unit).sort()), [...since.map(d => d.unit), 'focus:yemen'].sort());
   assert.deepEqual(plain(loadMark().sinceIssue(b, { ...marks, month: '2026-10' })), [], 'marks on another month compare with nothing');
 });
 
@@ -585,11 +588,26 @@ test('page: the latest month\'s final bulletin is shown as issued, with a revise
       assert.ok(text.includes(`issued as ${l.words}, ${l.confidence} confidence (${fmtN(l.deaths)} deaths); today ${u.fighting.words}, ${u.fighting.confidence} confidence (${fmtN(l.deaths + 30)} deaths)`), `${at}: today's mark beside the issue`);
       assert.equal(await page.locator('#pick').inputValue(), marks.month, `${at}: the month chosen`);
     }
-    // Without a revision, the issue says none differ.
+    // With today's own marks, the issue says none differ; where they do differ, the page names the true cause. It says
+    // UCDP revised its figures only when today's marks are built from a later UCDP release than the issue's. With the
+    // same release (as after AC-14's rebuild of 17 November 2026, which gave the marks the shared counting and country
+    // units after September was issued), saying so would be false (review AC-14, F1 and D1).
     await page.unroute('**/monthly/data/marks.json');
     await page.goto(`${BASE}/q/monthly.html#tab=changed`, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForFunction(() => /As issued on/.test(document.querySelector('#tab-changed')?.innerText || ''), null, { timeout: 20000 });
-    assert.match(await page.locator('#tab-changed').innerText(), /None differ: today's marks for [A-Z][a-z]+ \d{4} are those of this issue\./);
+    const own = await page.locator('#tab-changed').innerText();
+    const since = loadMark().sinceIssue(b, marks), sameRelease = (b.sources?.realtime ?? null) === (marks.sources?.realtime?.version ?? null);
+    if (!since.length) {
+      assert.match(own, /None differ: today's marks for [A-Z][a-z]+ \d{4} are those of this issue\./);
+    } else {
+      assert.ok(own.includes(l.what), 'the issue\'s own words, kept');
+      assert.doesNotMatch(own, /None differ/);
+      if (sameRelease) {
+        assert.doesNotMatch(own, /UCDP has revised its figures/, `the issue and today's marks are both from UCDP's release ${b.sources?.realtime}: ${since.length} marks differ for another reason`);
+        assert.ok(own.includes(`UCDP's figures are the same release (${b.sources.realtime}); what changed is VM's own count of them, rebuilt since the issue. The issue above is kept as it was.`), 'the same release: the page names VM\'s own count as the cause');
+      }
+      else assert.match(own, /UCDP has revised its figures for [A-Z][a-z]+ \d{4} since this issue, and today's marks differ from it here\. The issue above is kept as it was\./);
+    }
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

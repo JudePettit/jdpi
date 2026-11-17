@@ -7,12 +7,20 @@
 // count each event in the month it starts.
 // Guard: within a year the file only grows (each release adds a month), so a build with fewer months, or with far
 // fewer events or deaths than the committed file, is not written; --allow-drop writes it anyway.
+// AC-14 (17 November 2026; PRP-ALL-COUNTRIES-PLAN.md): every event is in a war or warzone. An "Other armed violence in
+// <country>" group under 25 deaths in the year is no longer dropped: all of them are kept under one quiet group, "Other
+// recorded armed violence (under 25 deaths in a country this year)" (id other-recorded; Month by Month, which leaves
+// every other-… group to its country units, leaves it too). Each country in `countries` also carries its ISO3 (from
+// Gleditsch and Ward's code by Month by Month's table, monthly/scripts/series.mjs gwTable, on National Analysis's
+// codes), its events and deaths, and its events and deaths in each war month by month, each event in the month it
+// starts as the page counts; each circle (`points`) names in a sixth field the country UCDP files its events under.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { parseCsv } from './csv.mjs';
 import { WARS, cleanName } from './wars.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { seriesFromEvents } from '../../monthly/scripts/series.mjs';
+import { gwTable } from '../../monthly/scripts/series.mjs';
 // Each month's note, with the deaths in events UCDP dates only to a month or longer said apart (S0).
 import { monthInsight, country } from './realtime-insight.mjs';
 
@@ -45,6 +53,24 @@ for (const e of events) {
   const c = w.conflicts.get(k); c.deaths += +e.best || 0; c.events++;
 }
 
+// A country's "Other armed violence" with under 25 deaths in the year joins the one quiet group, circles and all.
+const QUIET = 'other-recorded';
+const deathsIn = new Map();
+for (const e of events) deathsIn.set(e.war, (deathsIn.get(e.war) || 0) + (+e.best || 0));
+const small = [...wars.values()].filter(w => w.id.startsWith('other-') && w.conflicts.size && (deathsIn.get(w.id) || 0) < 25);
+if (small.length) {
+  const q = { id: QUIET, name: 'Other recorded armed violence (under 25 deaths in a country this year)', zone: [...new Set(small.map(w => w.zone))].sort().join(', '), ids: [], wiki: null, background: null, conflicts: new Map() };
+  for (const w of small) {
+    for (const [k, c] of w.conflicts) { const x = q.conflicts.get(k); if (x) { x.deaths += c.deaths; x.events += c.events; } else q.conflicts.set(k, { ...c }); }
+    wars.delete(w.id);
+  }
+  const moved = new Set(small.map(w => w.id));
+  for (const e of events) if (moved.has(e.war)) e.war = QUIET;
+  wars.set(QUIET, q);
+}
+// UCDP's own country field: its Gleditsch and Ward code (the first, where a row names more than one).
+const gwOf = e => { const g = String(e.country_id || '').split(/[;,\s]/)[0]; return /^\d+$/.test(g) ? g : null; };
+
 const months = [...new Set(events.map(e => e.date_start.slice(0, 7)))].sort();
 // An event for the shared rule: its first and last day, deaths, place and first source.
 const asSpan = e => ({ d: e.date_start.slice(0, 10), de: (e.date_end || e.date_start).slice(0, 10), best: +e.best || 0, place: e.where_description || e.adm_1, headline: (e.source_headline || '').split(';')[0].replace(/^"|"$/g, ''), office: (e.source_office || '').split(';')[0] });
@@ -54,15 +80,16 @@ const out = [];
 for (const w of wars.values()) {
   const evs = events.filter(e => e.war === w.id);
   const deaths = evs.reduce((s, e) => s + (+e.best || 0), 0);
-  if (!evs.length || (w.id.startsWith('other-') && deaths < 25)) continue;
+  if (!evs.length) continue; // a named war with no events this year
   const monthly = [];
   for (const m of months) monthly.push(monthInsight(w, evs.filter(e => e.date_start.startsWith(m)), m, monthly.at(-1)));
   const lastActive = evs.reduce((a, e) => (e.date_start > a ? e.date_start : a), '').slice(0, 10);
   const countries = [...new Set(evs.map(e => country(e.country)))];
   const cells = new Map();
+  // One circle per place (0.1°), month and country as UCDP files it: [lat, lon, month index, deaths, events, code].
   for (const e of evs) {
-    const k = `${(+e.latitude).toFixed(1)},${(+e.longitude).toFixed(1)},${e.date_start.slice(0, 7)}`;
-    const c = cells.get(k) || cells.set(k, [+(+e.latitude).toFixed(1), +(+e.longitude).toFixed(1), months.indexOf(e.date_start.slice(0, 7)), 0, 0]).get(k);
+    const k = `${(+e.latitude).toFixed(1)},${(+e.longitude).toFixed(1)},${e.date_start.slice(0, 7)},${gwOf(e)}`;
+    const c = cells.get(k) || cells.set(k, [+(+e.latitude).toFixed(1), +(+e.longitude).toFixed(1), months.indexOf(e.date_start.slice(0, 7)), 0, 0, gwOf(e) == null ? null : +gwOf(e)]).get(k);
     c[3] += +e.best || 0; c[4]++;
   }
   const recent = monthly.slice(-3).reduce((s, x) => s + x.deaths, 0);
@@ -77,16 +104,37 @@ for (const w of wars.values()) {
 }
 out.sort((a, b) => b.deaths - a.deaths);
 
-// Each country where UCDP recorded events this year, by its country_id (all three kinds of violence), for Month by Month.
+// Each country where UCDP recorded events this year, by its country_id (all three kinds of violence), for Month by Month
+// and for the page's country layer: its ISO3, events and deaths, and each war's events and deaths in it month by month.
+const { gw: isoOfGw } = gwTable(JSON.parse(readFileSync(new URL('../../national/data/index.json', import.meta.url), 'utf8')));
+// One of VM's 197 that National Analysis does not hold, so its table has no code for it: Taiwan, Gleditsch and Ward's
+// 713 (as design/scripts/focus-countries.mjs and integration/scripts/coverage.mjs file it). No event of this release is
+// filed under it; without it, a later one would leave Taiwan's shape saying no events were recorded.
+const GW_NOT_IN_NATIONAL = Object.freeze({ 713: 'TWN' });
 const countries = {};
 let countryDeaths = 0;
 for (const e of events) {
-  const gw = String(e.country_id || '').split(/[;,\s]/)[0];
-  if (!/^\d+$/.test(gw)) continue;
+  const gw = gwOf(e);
+  if (!gw) continue;
   const c = countries[gw] || (countries[gw] = { name: country(e.country), events: [], conflicts: new Set() });
   c.events.push(e); c.conflicts.add(+e.conflict_new_id); countryDeaths += +e.best || 0;
 }
-for (const [gw, c] of Object.entries(countries)) countries[gw] = { name: c.name, conflicts: [...c.conflicts].filter(Number.isFinite).sort((a, b) => a - b), series: seriesFromEvents(c.events.map(asSpan), months[0], latest) };
+const unnamed = [];
+for (const [gw, c] of Object.entries(countries)) {
+  const byWar = new Map();
+  for (const e of c.events) {
+    const x = byWar.get(e.war) || byWar.set(e.war, { events: months.map(() => 0), deaths: months.map(() => 0), total: 0 }).get(e.war);
+    const i = months.indexOf(e.date_start.slice(0, 7));
+    x.events[i]++; x.deaths[i] += +e.best || 0; x.total += +e.best || 0;
+  }
+  const iso3 = isoOfGw.get(+gw) || GW_NOT_IN_NATIONAL[gw] || null;
+  if (!iso3) unnamed.push(`${gw} ${c.name}`);
+  countries[gw] = { name: c.name, iso3, events: c.events.length, deaths: c.events.reduce((s, e) => s + (+e.best || 0), 0),
+    conflicts: [...c.conflicts].filter(Number.isFinite).sort((a, b) => a - b),
+    wars: Object.fromEntries([...byWar].sort((a, b) => b[1].total - a[1].total).map(([id, x]) => [id, { events: x.events, deaths: x.deaths }])),
+    series: seriesFromEvents(c.events.map(asSpan), months[0], latest) };
+}
+if (unnamed.length) console.warn(`No ISO3 for UCDP's country code ${unnamed.join(', ')}: add it to National Analysis's codes or monthly/scripts/series.mjs GW_EXTRA`);
 
 const data = {
   generated: new Date().toISOString(), source: 'UCDP Candidate Events Dataset', version, licence: 'CC BY 4.0',

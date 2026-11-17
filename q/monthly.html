@@ -167,6 +167,9 @@ async function renderKept(month) {
   const stState = { in: 'In', awaited: 'Awaited', 'not-yet': 'Not yet possible' };
   // Today's marks for this month, where they differ from the issue (the latest month only: marks.json holds no other).
   const since = latest ? K.sinceIssue(b, M) : [];
+  // UCDP revised its figures only if today's marks come from a later release than the issue's; on the same release a
+  // difference is VM's own count (as after the rebuild of 17 November 2026), and the page says so.
+  const sameRelease = !!(b.sources && b.sources.realtime) && b.sources.realtime === ((M.sources || {}).realtime || {}).version;
   const sinceLine = d => `<div class="line">${K.name(d, { strong: true })}: ${d.issued ? `issued as ${esc(d.issued.words)}${conf(d.issued.confidence)} (${fmt(d.issued.deaths)} deaths)` : 'not in this issue'}; today ${esc(d.now.words)}${conf(d.now.confidence)} (${fmt(d.now.deaths)} deaths).</div>`;
   const revised = (M.revisions || []).filter(r => (latest ? r.month < month : r.month === month));
   $('#tab-changed').innerHTML = `<div class="prp-panel"><div class="prp-panel-body">
@@ -177,7 +180,7 @@ async function renderKept(month) {
     <h3 class="sub">Wars</h3>${kpis(b.counts.wars, 'wars')}${b.wars.map(line).join('') || '<p class="empty">No war was marked more or fewer.</p>'}
     <h3 class="sub">Countries</h3>${b.countries.length ? b.countries.map(line).join('') : '<p class="empty">None marked more or fewer, or not yet possible that month.</p>'}
     ${(b.newlyRecorded || []).length ? `<h3 class="sub">Newly recorded</h3>${b.newlyRecorded.map(u => `<div class="line">${K.name(u, { strong: true })}: ${fmt(u.events)} events and ${fmt(u.deaths)} deaths recorded in ${esc(monthName(month))}, none in the three months before.</div>`).join('')}` : ''}
-    ${latest ? `<h3 class="sub">Today's marks against this issue</h3>${since.length ? `<p class="empty">UCDP has revised its figures for ${esc(monthName(month))} since this issue, and today's marks differ from it here. The issue above is kept as it was.</p>${since.map(sinceLine).join('')}` : `<p class="empty">None differ: today's marks for ${esc(monthName(month))} are those of this issue.</p>`}` : ''}
+    ${latest ? `<h3 class="sub">Today's marks against this issue</h3>${since.length ? `<p class="empty">${sameRelease ? `Today's marks for ${esc(monthName(month))} differ from this issue here. UCDP's figures are the same release (${esc(b.sources.realtime)}); what changed is VM's own count of them, rebuilt since the issue. The issue above is kept as it was.` : `UCDP has revised its figures for ${esc(monthName(month))} since this issue, and today's marks differ from it here. The issue above is kept as it was.`}</p>${since.map(sinceLine).join('')}` : `<p class="empty">None differ: today's marks for ${esc(monthName(month))} are those of this issue.</p>`}` : ''}
     <h3 class="sub">${latest ? 'Earlier months: marks revised since issue' : 'Marks revised since this issue'}</h3>
     ${revised.length ? revised.map(r => `<div class="line">${K.name(r, { strong: true })}${latest ? `, ${esc(monthName(r.month))}` : ''}: issued as ${esc(r.issued.words)} (${fmt(r.issued.deaths)} deaths), now ${esc(r.now.words)} (${fmt(r.now.deaths)} deaths) after UCDP's release ${esc(r.release)}.</div>`).join('') : `<p class="empty">None: no later UCDP release has moved a mark ${latest ? 'of an earlier issue' : `of ${esc(monthName(month))}`}.</p>`}
     <p class="empty">${latest ? 'Each war\'s whole explanation, with today\'s figures, is under All marks.' : 'Later UCDP releases can revise these figures; the current marks are under All marks.'}</p>

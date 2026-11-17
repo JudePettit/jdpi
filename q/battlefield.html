@@ -40,6 +40,13 @@ button,select{font:inherit}button{cursor:pointer}
 .leaflet-container .leaflet-control-attribution a{color:var(--prp-link)}
 .leaflet-tooltip{padding:6px 9px;background:var(--prp-surface);border:1px solid var(--prp-line);border-radius:var(--prp-radius-sm);box-shadow:var(--prp-shadow-2);color:var(--prp-text);font:12px/1.45 var(--prp-font-ui)}
 .leaflet-tooltip-top:before{border-top-color:var(--prp-line)}.leaflet-tooltip-bottom:before{border-bottom-color:var(--prp-line)}.leaflet-tooltip-left:before{border-left-color:var(--prp-line)}.leaflet-tooltip-right:before{border-right-color:var(--prp-line)}
+/* The countries (AC-14) lie in their own pane under the circles; the circles' layer lets the pointer through where it
+   has no circle, so a country under it can still be pointed at, and a circle always comes first. */
+.leaflet-overlay-pane>svg,.leaflet-rtcountries-pane>svg{pointer-events:none}
+path.rt-country.leaflet-interactive:hover{stroke-width:1.4px}
+.leaflet-tooltip.rt-country-tip{width:max-content;max-width:min(320px,40vw);white-space:normal}
+/* A country tapped or clicked: its sentence again under the map, whole on a phone where a tooltip may be cut off. */
+.rt-said{margin:0;padding:0 14px 10px;color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
 /* wars and briefing */
 .warlist{max-height:760px;overflow:auto}
 .warrow{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:11px;align-items:center;width:100%;padding:10px 16px;border:0;border-top:1px solid var(--prp-line-soft);background:none;color:inherit;text-align:left}
@@ -103,6 +110,7 @@ button,select{font:inherit}button{cursor:pointer}
         <div class="prp-panel-head"><b id="maptitle">Conflict map</b><div class="monthctl" id="monthctl" role="group" aria-label="Months shown" hidden></div></div>
         <div class="mapwrap"><div id="map" role="region" aria-label="Map of armed-conflict events"></div></div>
         <div class="legend" id="legend"></div>
+        <p class="rt-said" id="country-said" aria-live="polite" hidden></p>
       </div>
       <figcaption><b>Figure 1.</b> <span id="mapcap">Armed-conflict events this year, sized by deaths.</span></figcaption>
     </figure>
@@ -113,12 +121,13 @@ button,select{font:inherit}button{cursor:pointer}
     </section>
   </div>
   <footer class="prp-sources">
-    <p><b>Sources.</b> Events: <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a><span id="ver"></span> (Hegre et al. 2020), CC BY 4.0, released monthly by the Uppsala Conflict Data Program. News: front pages of the outlets tracked by the Global Headline Tracker over the last 30 days. Basemap: Esri Light Gray and Dark Gray Canvas (Esri, HERE, Garmin, © OpenStreetMap contributors).</p>
-    <p><b>Method.</b> Events are grouped into wars and warzones, and each month is summarised in plain English; deaths are UCDP's best estimates. Candidate events are preliminary and can change when UCDP publishes its final annual data. VM checks for a new UCDP release weekly, and an open page reloads its data every six hours.</p>
+    <p><b>Sources.</b> Events: <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">UCDP Candidate Events Dataset</a><span id="ver"></span> (Hegre et al. 2020), CC BY 4.0, released monthly by the Uppsala Conflict Data Program. News: front pages of the outlets tracked by the Global Headline Tracker over the last 30 days. Basemap: Esri Light Gray and Dark Gray Canvas (Esri, HERE, Garmin, © OpenStreetMap contributors).<span id="countries-credit" hidden> Countries: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a> 1:50m (public domain), through <a href="https://github.com/topojson/world-atlas" target="_blank" rel="noreferrer">world-atlas</a> 2.0.2 (ISC); Tuvalu, which it does not draw, is a dot.</span></p>
+    <p><b>Method.</b> Events are grouped into wars and warzones, and each month is summarised in plain English; deaths are UCDP's best estimates. Armed violence outside the named wars is grouped by country; where a country’s comes to under 25 deaths in the year, it is kept in one group, “Other recorded armed violence (under 25 deaths in a country this year)”. A country’s figures count the events UCDP files under that country. A country’s and a war’s figures here count each event in the month it starts; Month by Month shares out an event UCDP dates only to a span of days over those days, so its figures for a month can differ. Candidate events are preliminary and can change when UCDP publishes its final annual data. VM checks for a new UCDP release weekly, and an open page reloads its data every six hours.</p>
   </footer>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="../design/prp-focus.js"></script>
+<script src="../design/prp-mapkit.js"></script>
 <script src="../design/prp-period.js"></script>
 <script src="../design/prp-access.js"></script>
 <script src="../design/prp-mark.js" data-shell="../"></script>
@@ -174,6 +183,11 @@ const token = n => getComputedStyle(document.documentElement).getPropertyValue(n
 const theme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 const map = L.map('map', { scrollWheelZoom: false, minZoom: 1, maxZoom: 7, worldCopyJump: true }).setView([22, 20], 2);
 const layer = L.layerGroup().addTo(map);
+// The country layer's pane, over the basemap and under the circles (the overlay pane, 400); the basemap's place names
+// above the countries, still under the circles, and taking no pointer.
+map.createPane('rtcountries').style.zIndex = 350;
+const labelsPane = map.createPane('rtlabels');
+labelsPane.style.zIndex = 380; labelsPane.style.pointerEvents = 'none';
 
 // Documentary focus (design/prp-focus.js): the map flies to fit what is being discussed and the events inside it stand
 // out; "Reset view" or the end of the reading brings back the page's own view (the selected war, or the world).
@@ -222,15 +236,16 @@ function setBasemap() {
   BASEMAP[t].forEach((name, i) => {
     const url = `${ESRI}${name}/MapServer/tile/{z}/{y}/{x}`;
     if (basemap[i]) basemap[i].setUrl(url);
-    else basemap[i] = L.tileLayer(url, { attribution: i ? '' : 'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16 }).addTo(map);
+    else basemap[i] = L.tileLayer(url, { attribution: i ? '' : 'Tiles © Esri — Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16, pane: i ? 'rtlabels' : 'tilePane' }).addTo(map);
   });
 }
 domReady.then(setBasemap);
 
 // The three deadliest wars of the year keep their own categorical colours; every other war folds into a quiet "Other".
-const OTHER = '--prp-faint';
+// The group of small groups (build-realtime.mjs, AC-14) is never one of the three.
+const OTHER = '--prp-faint', QUIET = 'other-recorded';
 function paint() {
-  const top = [...data.wars].sort((a, b) => (b.deaths ?? 0) - (a.deaths ?? 0)).slice(0, 3).map(w => w.id);
+  const top = data.wars.filter(w => w.id !== QUIET).sort((a, b) => (b.deaths ?? 0) - (a.deaths ?? 0)).slice(0, 3).map(w => w.id);
   data.wars.forEach(w => { w.rank = top.indexOf(w.id); w.cvar = w.rank >= 0 ? `var(--prp-cat-${w.rank + 1})` : `var(${OTHER})`; w.colour = token(w.rank >= 0 ? `--prp-cat-${w.rank + 1}` : OTHER); });
 }
 const colour = w => w.colour;
@@ -250,18 +265,22 @@ function drawMap() {
   // a place, the events inside it are drawn as if selected and the rest fade, as they do for a selected war.
   const order = [...data.wars].sort((a, b) => (a.id === selectedWar) - (b.id === selectedWar) || (a.rank >= 0) - (b.rank >= 0) || b.rank - a.rank);
   for (const w of order) {
-    // One circle per place and month; over a period of months, one per place, its deaths and events summed (mi -1).
+    // One circle per place, month and country as UCDP files it (gw, its code; none in a file built before 17 Nov 2026);
+    // over a period of months, one per place and country, its deaths and events summed (mi -1).
     let pts = w.points.filter(p => idx.has(p[2]));
     if (grouped) {
       const by = new Map();
-      for (const [lat, lon, , deaths, events] of pts) { const k = `${lat},${lon}`, p = by.get(k) || by.set(k, [lat, lon, -1, 0, 0]).get(k); p[3] += deaths; p[4] += events; }
+      for (const [lat, lon, , deaths, events, gw] of pts) { const k = `${lat},${lon},${gw}`, p = by.get(k) || by.set(k, [lat, lon, -1, 0, 0, gw]).get(k); p[3] += deaths; p[4] += events; }
       pts = [...by.values()];
     }
-    for (const [lat, lon, mi, deaths, events] of pts) {
+    for (const [lat, lon, mi, deaths, events, gw] of pts) {
+      // The tooltip names the country UCDP files the events under, not the shape the circle falls on (a circle is
+      // placed to 0.1°, about 11 km, so Rafah's can fall over Egypt).
+      const filed = gw != null ? data.countries?.[gw]?.name : null;
       const inFocus = focusBox && PRPFocus.contains(focusBox, [lon, lat]);
       const sel = selectedWar === w.id || inFocus, faded = (selectedWar || focusBox) && !sel, quiet = w.rank < 0 && !sel, col = selectedWar === w.id && w.rank < 0 ? ink : colour(w);
       L.circleMarker([lat, lon], { radius: Math.min(26, 2.5 + Math.sqrt(deaths) * 0.8), color: col, weight: sel ? 1.5 : .6, fillColor: col, fillOpacity: faded ? .08 : quiet ? .3 : .55, opacity: faded ? .2 : quiet ? .6 : .95 })
-        .bindTooltip(`<b>${esc(w.name)}</b><br>${mi < 0 ? periodName('short') : monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
+        .bindTooltip(`<b>${esc(w.name)}</b><br>${filed ? `${esc(filed)} · ` : ''}${mi < 0 ? periodName('short') : monthName(data.months[mi], { month: 'short' })}: ${fmt(deaths)} deaths, ${fmt(events)} events`, { sticky: true })
         .on('click', () => selectWar(w.id))
         .addTo(layer);
     }
@@ -271,12 +290,14 @@ function renderLegend() {
   const named = data.wars.filter(w => w.rank >= 0).sort((a, b) => a.rank - b.rank);
   const box = document.getElementById('legend');
   box.innerHTML = named.map(w => `<button type="button" class="lg" data-war="${w.id}"><i class="swatch" style="background:${w.cvar}"></i>${esc(w.name)}</button>`).join('')
-    + `<span class="lg"><i class="swatch" style="background:var(${OTHER})"></i>Other wars and warzones</span><span class="lg size">Circle size grows with deaths</span>`;
+    + `<span class="lg"><i class="swatch" style="background:var(${OTHER})"></i>Other wars and warzones</span><span class="lg size">Circle size grows with deaths</span>`
+    + (countryLayer ? '<span class="lg size rt-hint">Point at or tap a country for its events</span>' : '');
   box.querySelectorAll('[data-war]').forEach(b => b.onclick = () => selectWar(b.dataset.war));
 }
 function renderCaption() {
   const when = view === 'archive' ? periodName() : `${monthName(data.months.at(-3) || data.latest, { month: 'long' })} to ${monthName(data.latest)}`;
   document.getElementById('mapcap').textContent = `Armed-conflict events, ${when}: ${view === 'archive' && from ? 'one circle per place, its deaths and events over the period summed' : 'one circle per place and month'}, sized by deaths. The three deadliest wars of ${data.year} have their own colours; click a circle to open its war's briefing. Source: UCDP Candidate Events Dataset${data.version ? ', version ' + data.version : ''}.`;
+  renderSaid();
 }
 
 // A war in the list: its deaths in the months given (the archive's month or period), or in the last three months (Live).
@@ -413,8 +434,102 @@ const period = PRPPeriod.mount(document.getElementById('monthctl'), {
   onChange: p => { month = p.to; from = p.atRest ? null : p.from; setUrl(); renderSide(); renderArchive(); drawMap(); renderCaption(); },
 });
 
+/* ---------- every country under the circles (AC-14; the rule in design/PRP-STYLE.md §6) ----------
+   Natural Earth 1:50m through world-atlas 2.0.2, decoded by topojson-client 3.1.0, both pinned and checked by their
+   hashes, fetched only once the circles are drawn; without them the page is as it was. Which country a shape is comes
+   from the map kit (design/prp-mapkit.js: by the ISO numeric id in analytics/lib/countries.js, Kosovo by name, Northern
+   Cyprus and Somaliland named and given to no country); Tuvalu, which 1:50m does not draw, is the kit's dot. A
+   country's figures come from UCDP's own country field (realtime.json's countries table, built by build-realtime.mjs),
+   never from where a circle falls. A shape that is not one of VM's 197 (Greenland, Western Sahara) is drawn and says
+   nothing. */
+const ATLAS = { src: 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json', integrity: 'sha384-Aw4s9pX1PTPntIYkZ/qV9IYiF5Gv8eTl6Dd/TT56zfO1Wwd+owFwYUuuXNUMrWkc' };
+const TOPOJSON = { src: 'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js', integrity: 'sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67' };
+// VM's 197 (the UN members, the Holy See, Palestine, Taiwan and Kosovo), as integration/scripts/coverage.mjs builds them;
+// tests/battlefield.test.mjs keeps this list in step with it.
+const VM197 = 'AFG AGO ALB AND ARE ARG ARM ATG AUS AUT AZE BDI BEL BEN BFA BGD BGR BHR BHS BIH BLR BLZ BOL BRA BRB BRN BTN BWA CAF CAN CHE CHL CHN CIV CMR COD COG COL COM CPV CRI CUB CYP CZE DEU DJI DMA DNK DOM DZA ECU EGY ERI ESP EST ETH FIN FJI FRA FSM GAB GBR GEO GHA GIN GMB GNB GNQ GRC GRD GTM GUY HND HRV HTI HUN IDN IND IRL IRN IRQ ISL ISR ITA JAM JOR JPN KAZ KEN KGZ KHM KIR KNA KOR KWT LAO LBN LBR LBY LCA LIE LKA LSO LTU LUX LVA MAR MCO MDA MDG MDV MEX MHL MKD MLI MLT MMR MNE MNG MOZ MRT MUS MWI MYS NAM NER NGA NIC NLD NOR NPL NRU NZL OMN PAK PAN PER PHL PLW PNG POL PRK PRT PRY PSE QAT ROU RUS RWA SAU SDN SEN SGP SLB SLE SLV SMR SOM SRB SSD STP SUR SVK SVN SWE SWZ SYC SYR TCD TGO THA TJK TKM TLS TON TTO TUN TUR TUV TWN TZA UGA UKR URY USA UZB VAT VCT VEN VNM VUT WSM XKX YEM ZAF ZMB ZWE';
+const IN_VM = new Set(VM197.split(' '));
+// Palestine waits for Jude's choice 4 (PRP-ALL-COUNTRIES-PLAN.md): UCDP files events in the West Bank and Gaza under
+// Israel, so Palestine has no figures of its own here, and says why (Month by Month's note, monthly/scripts/series.mjs).
+const PSE_NOTE = 'UCDP records events in the West Bank and Gaza under Israel (its country code 666), so their figures are in Israel’s';
+const NODATA_CLASS = (window.PRPMapkit ? PRPMapkit.install() : null)?.className || 'prp-nodata';
+let countryLayer = null, countriesLoading = null;
+// The period the map shows: the archive's month or period, or the Live view's three months.
+const shownPeriod = () => (view === 'archive' ? periodName() : spanName(data.months.at(-3) || data.latest, data.latest));
+const plural = (n, one) => `${fmt(n)} ${one}${n === 1 ? '' : 's'}`;
+let byIso = new Map();
+function countryText(f) {
+  const { iso, kind, name } = f.properties.rt, when = shownPeriod();
+  if (kind === 'unclaimed') return PRPMapkit.sentenceParts({ name, reason: 'not-covered', unclaimed: true, what: 'armed-conflict figures', source: 'UCDP', also: 'It is not one of the 197 countries VM follows' });
+  if (iso === 'PSE') return PRPMapkit.sentenceParts({ name, reason: 'not-covered', what: 'armed-conflict figures', when, also: PSE_NOTE });
+  const c = byIso.get(iso), idx = [...shownMonths()];
+  const ws = Object.entries(c?.wars || {}).map(([id, x]) => ({ w: data.wars.find(y => y.id === id), events: idx.reduce((s, i) => s + (x.events[i] || 0), 0), deaths: idx.reduce((s, i) => s + (x.deaths[i] || 0), 0) }))
+    .filter(x => x.w && x.events).sort((a, b) => b.deaths - a.deaths || b.events - a.events);
+  const events = ws.reduce((s, x) => s + x.events, 0), deaths = ws.reduce((s, x) => s + x.deaths, 0);
+  if (!events) return PRPMapkit.sentenceParts({ name, reason: 'nothing-recorded', what: 'armed-conflict events', source: 'UCDP', when });
+  const head = `${name}: ${plural(events, 'armed-conflict event')} recorded by UCDP, ${when}, with ${plural(deaths, 'death')}.`;
+  return { head, why: `Wars and warzones: ${ws.map(x => x.w.name).join('; ')}.` };
+}
+const countryTip = l => { const t = countryText(l.feature); return `<b>${esc(t.head)}</b>${t.why ? ` ${esc(t.why)}` : ''}`; };
+function countryStyle(f) {
+  const { iso, kind } = f.properties.rt, dot = f.geometry?.type === 'Point', nodata = kind === 'unclaimed' || iso === 'PSE';
+  return { pane: 'rtcountries', interactive: kind !== 'land', className: kind === 'land' ? 'rt-land' : `rt-country${dot ? ' rt-dot' : ''}${iso ? ` rt-c-${iso}` : ''}${nodata ? ` ${NODATA_CLASS}` : ''}`,
+    color: token('--prp-map-border'), weight: dot ? 1 : .5, opacity: .8, fillColor: token(nodata ? '--prp-map-nodata' : '--prp-map-land'), fillOpacity: nodata ? .6 : .35 };
+}
+function script({ src, integrity }) {
+  return new Promise((resolve, reject) => {
+    const s = Object.assign(document.createElement('script'), { src, integrity, crossOrigin: 'anonymous', async: true });
+    s.onload = resolve; s.onerror = () => { s.remove(); reject(new Error(`Could not load ${src}`)); };
+    document.head.appendChild(s);
+  });
+}
+function loadCountries() {
+  countriesLoading ||= (async () => {
+    const [world, { COUNTRIES }] = await Promise.all([
+      fetch(ATLAS.src, { integrity: ATLAS.integrity, mode: 'cors' }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      import('../analytics/lib/countries.js'),
+      window.topojson ? null : script(TOPOJSON),
+    ]);
+    const codes = PRPMapkit.codeTable(COUNTRIES);
+    const shapes = topojson.feature(world, world.objects.countries).features.map(f => {
+      const iso = PRPMapkit.countryOf(f, codes), un = PRPMapkit.unclaimed(f, codes);
+      const kind = iso && IN_VM.has(iso) ? 'country' : un ? 'unclaimed' : 'land';
+      return { ...f, properties: { ...f.properties, rt: { iso: kind === 'country' ? iso : null, kind, name: kind === 'country' ? (PRPFocus.countryName(iso) || f.properties.name) : un || f.properties.name } } };
+    });
+    const dots = PRPMapkit.dotFeatures('50m').features.filter(d => IN_VM.has(d.properties.iso3))
+      .map(d => ({ ...d, properties: { ...d.properties, rt: { iso: d.properties.iso3, kind: 'country', name: PRPFocus.countryName(d.properties.iso3) || d.properties.name } } }));
+    countryLayer = L.geoJSON({ type: 'FeatureCollection', features: [...shapes, ...dots] }, {
+      style: countryStyle,
+      pointToLayer: (f, latlng) => L.circleMarker(latlng, { radius: 3.5 }),
+      onEachFeature: (f, l) => {
+        if (f.properties.rt.kind === 'land') return;
+        l.bindTooltip(countryTip, { sticky: true, className: 'rt-country-tip' });
+        // A tap on a phone opens it too, and the sentence is said again, whole, under the map.
+        l.on('click', e => { l.openTooltip(e.latlng); saidLayer = l; renderSaid(); });
+      },
+    }).addTo(map);
+    // Tuvalu's dot is a few pixels across: a clear ring a finger wide (24 px) round it takes the same pointer and tap,
+    // in the countries' pane, so it never takes a click from a circle.
+    countryLayer.eachLayer(l => {
+      if (l.feature?.geometry?.type !== 'Point') return;
+      const hit = L.circleMarker(l.getLatLng(), { pane: 'rtcountries', radius: 12, stroke: false, fill: true, fillOpacity: 0, className: 'rt-dot-hit' })
+        .bindTooltip(() => countryTip(l), { sticky: true, className: 'rt-country-tip' })
+        .on('click', e => { hit.openTooltip(e.latlng); saidLayer = l; renderSaid(); })
+        .addTo(map);
+      l.bringToFront();
+    });
+    // The credit for the shapes is shown once they are drawn (without the file, the map has none).
+    document.getElementById('countries-credit').hidden = false;
+    renderLegend();
+  })().catch(() => { /* no country file (the CDN down): the circles and the lists are as they were */ });
+}
+function restyleCountries() { countryLayer?.eachLayer(l => l.setStyle(countryStyle(l.feature))); }
+// The country last tapped or clicked, said again under the map for the period shown (renderCaption keeps it in step).
+let saidLayer = null;
+function renderSaid() { const said = document.getElementById('country-said'); if (!saidLayer) return; said.innerHTML = countryTip(saidLayer); said.hidden = false; }
+
 function render() {
   paint();
+  byIso = new Map(Object.values(data.countries || {}).map(c => [c.iso3, c]));
   document.getElementById('through').textContent = monthName(data.latest);
   renderFiguresDated();
   document.getElementById('totals').innerHTML = `<b>${fmt(data.totals.deaths)}</b>&nbsp;deaths · <b>${fmt(data.totals.events)}</b>&nbsp;events in ${data.year}`;
@@ -434,7 +549,7 @@ function render() {
 }
 
 // Theme switch: new basemap, and the circles redrawn in the new palette (swatches use CSS variables).
-window.addEventListener('prp:themechange', () => { setBasemap(); if (data) { paint(); drawMap(); } });
+window.addEventListener('prp:themechange', () => { setBasemap(); restyleCountries(); if (data) { paint(); drawMap(); } });
 
 async function load() {
   try {
@@ -444,6 +559,8 @@ async function load() {
     if (data && next.generated === data.generated) return;
     await domReady; // the connector has applied the saved theme by now
     data = next; render();
+    // The countries come after the circles are drawn, so the 1:50m file (about 750 KB) never holds up the first paint.
+    requestAnimationFrame(() => setTimeout(loadCountries, 0));
   } catch (e) {
     if (!data) document.getElementById('side').innerHTML = `<div class="prp-empty">Conflict data could not load.<br><span class="small">${esc(e.message)}</span></div>`;
   }

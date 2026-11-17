@@ -40,7 +40,7 @@ Geopolitical Volatility: global mean. The world mean of the Geopolitical Volatil
 
 Realtime Battlefield: wars this year. Every armed conflict recorded so far in 2026, grouped into wars, with deaths, events, status and a plain-English background. UCDP candidate events through 2026-09.
 
-- Rows: 59 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
+- Rows: 60 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/realtime-wars.json (records at `records`)
 - Fields: `id` (string), `name` (string), `zone` (string), `status` (string), `countries` (array), `deaths` (number), `events` (number), `deaths_last_3_months` (number), `last_active` (date), `summary` (string), `background` (string), `conflicts` (array), `wikipedia` (string)
 
@@ -48,7 +48,7 @@ Realtime Battlefield: wars this year. Every armed conflict recorded so far in 20
 
 Realtime Battlefield: war by month. Each war's deaths, events and civilian deaths month by month in 2026, with Vitruvian Manager's monthly note (change on the previous month, deadliest areas).
 
-- Rows: 531 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
+- Rows: 540 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
 - File: https://jdpi.pages.dev/integration/data/realtime-war-months.json (records at `records`)
 - Fields: `war_id` (string), `war` (string), `zone` (string), `month` (date), `deaths` (number), `events` (number), `civilians` (number), `deadliest_place` (string), `note` (string)
 
@@ -56,7 +56,7 @@ Realtime Battlefield: war by month. Each war's deaths, events and civilian death
 
 Realtime Battlefield: events on a 0.1° grid. Conflict events this year summed by war, month and 0.1° grid cell (about 11 km): the points on the Realtime Battlefield map.
 
-- Rows: 9,783 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
+- Rows: 9,921 · refresh: weekly · licence: UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.
 - Files: https://jdpi.pages.dev/integration/data/realtime-conflict-cells/0.json, https://jdpi.pages.dev/integration/data/realtime-conflict-cells/1.json, https://jdpi.pages.dev/integration/data/realtime-conflict-cells/2.json (+6 more) (records at `records`)
 - Fields: `war_id` (string), `war` (string), `month` (date), `lat` (number), `lon` (number), `deaths` (number), `events` (number)
 
@@ -106,7 +106,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 
 Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 6,649 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,605 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -122,7 +122,7 @@ Political Briefing: publishers. The Political Briefing's publishers with their p
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 519 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 524 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -138,7 +138,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,281 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,315 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -154,7 +154,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,240 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,236 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `accessMark` (string), `alt` (array)
 

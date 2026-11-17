@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-17T17:17:16.415Z",
+  "generated": "2026-11-17T22:17:22.001Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -379,18 +379,18 @@
           "description": "Wikipedia article, if any"
         }
       ],
-      "rows": 59,
+      "rows": 60,
       "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-17",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 43758
+      "bytes": 47064
     },
     {
       "id": "realtime-war-months",
@@ -448,18 +448,18 @@
           "description": "Monthly note (Vitruvian Manager, from the events)"
         }
       ],
-      "rows": 531,
+      "rows": 540,
       "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-17",
       "refresh": "weekly",
       "page": "q/battlefield.html?view=archive",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 213863
+      "bytes": 240894
     },
     {
       "id": "realtime-conflict-cells",
@@ -517,18 +517,18 @@
           "description": "Recorded events in the cell that month"
         }
       ],
-      "rows": 9783,
+      "rows": 9921,
       "licence": "UCDP data CC BY 4.0 (cite Hegre et al. 2020); war groupings, background and monthly text © JDP-Iq.",
       "sources": [
         "UCDP Candidate Events Dataset v26.01.26.09 (Hegre, H. et al. (2020). Introducing the UCDP Candidate Events Dataset. Research & Politics 7(3). Data: Uppsala Conflict Data Program, ucdp.uu.se.)"
       ],
-      "updated": "2026-10-26",
+      "updated": "2026-11-17",
       "refresh": "weekly",
       "page": "q/battlefield.html",
       "derivedFrom": [
         "battlefield/data/realtime.json"
       ],
-      "bytes": 1200191
+      "bytes": 1223238
     },
     {
       "id": "national-countries",
@@ -1114,7 +1114,7 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6649,
+      "rows": 6605,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
@@ -1123,7 +1123,7 @@
       "updated": "2026-11-17",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2916444
+      "bytes": 2896714
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1191,7 +1191,7 @@
       "updated": "2026-11-17",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2916444
+      "bytes": 2896714
     },
     {
       "id": "econ-briefing-stories",
@@ -1289,7 +1289,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 519,
+      "rows": 524,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1297,7 +1297,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 303014
+      "bytes": 306706
     },
     {
       "id": "econ-briefing-sources",
@@ -1428,7 +1428,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 303014
+      "bytes": 306706
     },
     {
       "id": "science-briefing-stories",
@@ -1521,7 +1521,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1281,
+      "rows": 1315,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1529,7 +1529,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 745225
+      "bytes": 763255
     },
     {
       "id": "science-briefing-sources",
@@ -1655,7 +1655,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 745225
+      "bytes": 763255
     },
     {
       "id": "digital-briefing-stories",
@@ -1758,7 +1758,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1240,
+      "rows": 1236,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1766,7 +1766,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 732076
+      "bytes": 728604
     },
     {
       "id": "digital-briefing-sources",
@@ -1912,7 +1912,7 @@
       "updated": "2026-11-17",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 732076
+      "bytes": 728604
     },
     {
       "id": "political-calendar",

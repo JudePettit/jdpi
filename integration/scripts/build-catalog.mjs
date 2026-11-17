@@ -734,7 +734,9 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
 /* ------------------------------------------------------------------ country profiles */
 {
   const bfByIso = new Map();
-  for (const w of BF.wars) for (const c of w.countries || []) { const i = iso3Of(c); if (i) (bfByIso.get(i) || bfByIso.set(i, []).get(i)).push(w); }
+  // The quiet group ("other-recorded": under 25 deaths in a country this year, many countries in one group) is not a war
+  // of any one country, and its deaths are the whole group's: no country's profile lists it (as in national/scripts).
+  for (const w of BF.wars) if (w.id !== 'other-recorded') for (const c of w.countries || []) { const i = iso3Of(c); if (i) (bfByIso.get(i) || bfByIso.set(i, []).get(i)).push(w); }
   const calByIso = new Map();
   for (const e of CAL_EVENTS) { const i = iso3Of(e.country); if (i) (calByIso.get(i) || calByIso.set(i, []).get(i)).push(e); }
   const index = [];

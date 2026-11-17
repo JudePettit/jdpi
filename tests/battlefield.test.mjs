@@ -338,6 +338,76 @@ test('Realtime data: the year so far month by month, with enough wars and confli
   }
 });
 
+/* ---- AC-14 (ledger AT-19 with AT-10; Jude's request of 16 November 2026 that every map show all countries where the
+   sources allow; PRP-ALL-COUNTRIES-PLAN.md, AC-14 and section 3). Every event UCDP records is in a war or warzone: an
+   "Other armed violence in <country>" group under 25 deaths is no longer dropped but kept under one quiet group. Every
+   country UCDP's own country field names is in the "countries" table, with its ISO3 and its events, deaths and wars
+   month by month; every circle names its country as UCDP files it. The relations are asserted, never the counts. */
+const QUIET = 'other-recorded';
+const sumOf = a => a.reduce((t, x) => t + x, 0);
+const VM197 = async () => {
+  const { makeResolvers } = await import('../integration/scripts/coverage.mjs');
+  return [...makeResolvers({ national: JSON.parse(readFileSync(new URL('../national/data/index.json', import.meta.url), 'utf8')).countries }).target].sort();
+};
+test('Realtime data: every event UCDP records is in a war or warzone; a group under 25 deaths is kept in one quiet group', () => {
+  const r = REALTIME;
+  assert.equal(sumOf(r.wars.map(w => w.events)), r.totals.events, 'the wars’ events add up to the year’s');
+  assert.equal(sumOf(r.wars.map(w => w.deaths)), r.totals.deaths, 'and their deaths');
+  for (const w of r.wars.filter(x => x.id.startsWith('other-') && x.id !== QUIET)) assert.ok(w.deaths >= 25, `${w.id}: ${w.deaths} deaths belong in the quiet group`);
+  const q = r.wars.find(w => w.id === QUIET);
+  assert.ok(q, 'the quiet group is in the file');
+  assert.equal(q.name, 'Other recorded armed violence (under 25 deaths in a country this year)');
+  assert.deepEqual(q.keywords, [], 'no news search for a group of many countries');
+  assert.ok(q.points.length && q.countries.length > 1, 'its circles, and the countries it holds');
+  assert.doesNotMatch(readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8'), /deaths < 25\) continue/, 'no group is dropped for its size');
+});
+
+test('Realtime data: every country UCDP records is in the countries table, by its code and ISO3, and in some war', async () => {
+  const r = REALTIME, n = r.months.length, wars = new Map(r.wars.map(w => [w.id, w])), vm = new Set(await VM197());
+  assert.ok(r.countries && Object.keys(r.countries).length, 'the file has the countries table the present builder writes');
+  const iso = new Set();
+  for (const [gw, c] of Object.entries(r.countries)) {
+    assert.match(c.iso3 || '', /^[A-Z]{3}$/, `${gw} ${c.name}: its ISO3`);
+    assert.ok(vm.has(c.iso3), `${gw} ${c.iso3}: one of VM’s 197`);
+    assert.ok(!iso.has(c.iso3), `${c.iso3} once`); iso.add(c.iso3);
+    const ws = Object.entries(c.wars || {});
+    assert.ok(ws.length, `${gw} ${c.name} appears in some war`);
+    for (const [id, x] of ws) {
+      assert.ok(wars.has(id), `${gw}: ${id} is a war in the file`);
+      assert.ok(wars.get(id).countries.includes(c.name), `${id} names ${c.name}`);
+      assert.equal(x.events.length, n, `${gw} ${id}`); assert.equal(x.deaths.length, n, `${gw} ${id}`);
+    }
+    assert.equal(sumOf(ws.flatMap(([, x]) => x.events)), c.events, `${gw}: its events`);
+    assert.equal(sumOf(ws.flatMap(([, x]) => x.deaths)), c.deaths, `${gw}: its deaths`);
+    if (c.wars[QUIET]) assert.ok(sumOf(c.wars[QUIET].deaths) < 25, `${c.name}: under 25 deaths in the quiet group`);
+  }
+  assert.equal(sumOf(Object.values(r.countries).map(c => c.events)), r.totals.events, 'the countries’ events add up to the year’s');
+  assert.equal(sumOf(Object.values(r.countries).map(c => c.deaths)), r.totals.deaths, 'and their deaths');
+  for (const w of r.wars) {
+    assert.equal(sumOf(Object.values(r.countries).map(c => sumOf(c.wars[w.id]?.events || []))), w.events, `${w.id}: its events by country`);
+    assert.deepEqual(r.months.map((m, i) => sumOf(Object.values(r.countries).map(c => c.wars[w.id]?.events[i] || 0))), w.monthly.map(x => x.events), `${w.id}: month by month, as the page counts`);
+    // A circle names its country as UCDP files it (the sixth field, a code in the table).
+    for (const p of w.points) assert.ok(Object.hasOwn(r.countries, String(p[5])), `${w.id}: point ${p.join(',')}`);
+  }
+});
+
+test('page file: the country layer is Natural Earth 1:50m, pinned and checked, loaded after the circles, with the map kit', async () => {
+  const html = readFileSync(new URL('../q/battlefield.html', import.meta.url), 'utf8');
+  assert.ok(html.includes("'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json'"), 'the 1:50m file');
+  assert.ok(html.includes("'sha384-Aw4s9pX1PTPntIYkZ/qV9IYiF5Gv8eTl6Dd/TT56zfO1Wwd+owFwYUuuXNUMrWkc'"), 'checked by its hash');
+  assert.ok(html.includes("'https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js'"), 'topojson-client');
+  assert.ok(html.includes("'sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67'"), 'checked by its hash');
+  for (const m of html.matchAll(/(https:\/\/(?:unpkg\.com|cdn\.jsdelivr\.net)[^"'\s]+)/g)) assert.match(m[1], /@\d+\.\d+\.\d+\//, `pinned: ${m[1]}`);
+  assert.match(html, /<script src="\.\.\/design\/prp-mapkit\.js"><\/script>/);
+  assert.match(html, /PRPMapkit\.(dots|dotFeatures)\('50m'\)/, 'the kit’s dot for Tuvalu');
+  assert.doesNotMatch(html, /<script[^>]+(world-atlas|topojson-client)/, 'neither blocks the first paint');
+  // Review D5: the Method says how this page counts a month, so its figures and Month by Month's can be told apart.
+  assert.match(html, /count each event in the month it starts; Month by Month shares out/);
+  // The page's list of VM's 197 is the coverage script's.
+  const listed = html.match(/const VM197 = '([A-Z ]+)'/)?.[1].split(' ').sort();
+  assert.deepEqual(listed, await VM197());
+});
+
 async function open(path) {
   const browser = await launch();
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
@@ -351,7 +421,7 @@ test('Realtime: live view lists extant wars and plots events; a war opens its br
   const { browser, page, errors } = await open('q/battlefield?view=live');
   await page.waitForSelector('.warrow', { timeout: 20000 });
   const wars = await page.locator('.warrow').count();
-  const markers = await page.locator('path.leaflet-interactive').count();
+  const markers = await page.locator('.leaflet-overlay-pane path.leaflet-interactive').count(); // the circles, not the countries
   await page.locator('.warrow').first().click();
   await page.waitForSelector('.detail h2');
   const briefing = await page.locator('.detail').innerText();
@@ -843,5 +913,173 @@ test('page file: the Method names the weekly check for UCDP data and the six-hou
   const html = readFileSync(new URL('../q/battlefield.html', import.meta.url), 'utf8');
   assert.match(html, /VM checks for a new UCDP release weekly, and an open page reloads its data every six hours\./);
   assert.doesNotMatch(html, /The page checks for new data every six hours/);
+  // R2-4: no sentence in the Method runs into the next without a space.
+  const method = html.match(/<p><b>Method\.<\/b>([\s\S]*?)<\/p>/)[1];
+  assert.doesNotMatch(method, /[a-z)”’]\.[A-Z]/, 'a space after each full stop in the Method');
   assert.match(readFileSync(new URL('../.github/workflows/battlefield-refresh.yml', import.meta.url), 'utf8'), /cron: '\d+ \d+ \* \* \d'/, 'the refresh runs once a week');
+});
+
+/* ---- AC-14 on the page: the country layer (Natural Earth 1:50m, the kit's dot for Tuvalu) under the circles. Each
+   country is pointed at by a mouseover on its own shape, so a circle over it cannot get in the way; the figures and the
+   period come from the data the page loads. */
+const monthLong = m => new Date(`${m}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' });
+const periodOf = (a, b) => (a === b ? `${monthLong(b)} ${b.slice(0, 4)}` : `${monthLong(a)}–${monthLong(b)} ${b.slice(0, 4)}`);
+const pointAt = isos => {
+  const out = {};
+  for (const iso of isos) {
+    const el = document.querySelector(`.rt-c-${iso}`);
+    if (!el) { out[iso] = null; continue; }
+    const b = el.getBoundingClientRect(), o = { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 };
+    el.dispatchEvent(new MouseEvent('mouseover', o));
+    out[iso] = [...document.querySelectorAll('.leaflet-tooltip.rt-country-tip')].at(-1)?.textContent ?? ''; // the last one fades out for 0.2 s
+    el.dispatchEvent(new MouseEvent('mouseout', o));
+  }
+  return out;
+};
+test('Realtime: every one of the 197 is on the map under the circles, and pointing at one gives its figures or one sentence', pageTest, async t => {
+  const data = await (await fetch(`${BASE}/battlefield/data/realtime.json`)).json();
+  const vm = await VM197(), [first, last] = [data.months[0], data.months.at(-1)], period = periodOf(first, last);
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/q/battlefield.html?view=archive&month=${last}&from=${first}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('path.rt-country', { timeout: 30000 });
+  const tips = await page.evaluate(pointAt, vm);
+  assert.deepEqual(vm.filter(i => !tips[i]), [], 'every one of the 197 is drawn and says something');
+  const byIso = new Map(Object.values(data.countries).map(c => [c.iso3, c]));
+  for (const iso of vm) {
+    const c = byIso.get(iso);
+    if (c) assert.ok(tips[iso].includes(`: ${c.events.toLocaleString('en-GB')} armed-conflict event${c.events === 1 ? '' : 's'} recorded by UCDP, ${period}, with ${c.deaths.toLocaleString('en-GB')} death`), `${iso}: ${tips[iso]}`);
+    else assert.match(tips[iso], /^[^:]+: no armed-conflict (events recorded by UCDP|figures), /, `${iso}: ${tips[iso]}`);
+  }
+  assert.equal(tips.PRT, `Portugal: no armed-conflict events recorded by UCDP, ${period}.`);
+  const swe = byIso.get('SWE');
+  if (swe) assert.match(tips.SWE, new RegExp(`^Sweden: ${swe.events} armed-conflict events? recorded by UCDP`));
+  // A country with events names its wars and warzones, from the data.
+  const ukr = byIso.get('UKR');
+  if (ukr) for (const id of Object.keys(ukr.wars)) assert.ok(tips.UKR.includes(data.wars.find(w => w.id === id).name), `Ukraine names ${id}`);
+  // Tuvalu, which 1:50m does not draw, is the kit's dot; the layer is under the circles; a shape that is not one of the
+  // 197 (Greenland) is drawn and takes no pointer.
+  assert.equal(await page.locator('path.rt-dot.rt-c-TUV').count(), 1);
+  assert.equal(await page.locator('#countries-credit').isVisible(), true, 'the shapes are credited once drawn');
+  // The dot is a few pixels across; pointing or tapping 8 px off its centre (a finger) still finds Tuvalu.
+  await page.evaluate(() => { const el = document.querySelector('.rt-c-TUV'); countryLayer.eachLayer(l => { if (l.getElement?.() === el) map.setView(l.getLatLng(), map.getZoom(), { animate: false }); }); });
+  // R2-3: a tooltip that pointAt opened is still fading (0.2 s) and could stand in for the real hover, and the page can
+  // still shift as its last parts load (the map moved some 36 px down after the box was read): move away, wait until no
+  // country tooltip is left and the dot has stood still for 0.3 s, and only then read where it is, point and tap.
+  await page.mouse.move(5, 5);
+  await page.waitForFunction(() => !document.querySelector('.leaflet-tooltip.rt-country-tip'), null, { timeout: 5000 });
+  let tuv = null;
+  for (let i = 0; i < 40; i++) {
+    const b = await page.locator('path.rt-dot.rt-c-TUV').boundingBox();
+    if (tuv && b && b.x === tuv.x && b.y === tuv.y) break;
+    tuv = b;
+    await page.waitForTimeout(300);
+  }
+  assert.ok(tuv && tuv.width < 16, `the dot itself is small (${tuv?.width} px)`);
+  const off = { x: tuv.x + tuv.width / 2 + 8, y: tuv.y + tuv.height / 2 };
+  await page.mouse.move(off.x, off.y, { steps: 4 });
+  await page.waitForFunction(() => [...document.querySelectorAll('.leaflet-tooltip.rt-country-tip')].some(t => /^Tuvalu: /.test(t.textContent) && +getComputedStyle(t).opacity > 0.5), null, { timeout: 5000 });
+  await page.mouse.click(off.x, off.y);
+  await page.waitForFunction(() => /^Tuvalu: /.test(document.getElementById('country-said')?.textContent || ''), null, { timeout: 5000 });
+  assert.equal(await page.locator('#country-said').textContent(), tips.TUV, 'a tap beside the dot says Tuvalu’s sentence');
+  await page.mouse.move(5, 5);
+  const z =await page.evaluate(() => ['.leaflet-rtcountries-pane', '.leaflet-overlay-pane'].map(s => +getComputedStyle(document.querySelector(s)).zIndex));
+  assert.ok(z[0] < z[1], `countries ${z[0]} under circles ${z[1]}`);
+  assert.ok(await page.locator('path.rt-land').count() > 0, 'the shapes outside the 197 are drawn');
+  assert.equal(await page.locator('path.rt-land.leaflet-interactive').count(), 0, 'and say nothing');
+  // A tap (a click) says it again under the map, whole; it follows the period shown. The Live view's is its three months.
+  await page.evaluate(() => { const el = document.querySelector('.rt-c-PRT'), b = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 })); });
+  assert.equal(await page.locator('#country-said').textContent(), tips.PRT);
+  await page.locator('#tab-live').click();
+  const livePeriod = periodOf(data.months.at(-3) || last, last), live = await page.evaluate(pointAt, ['PRT']);
+  assert.equal(live.PRT, `Portugal: no armed-conflict events recorded by UCDP, ${livePeriod}.`);
+  assert.equal(await page.locator('#country-said').textContent(), live.PRT);
+  assert.deepEqual(errors, []);
+});
+
+test('Realtime: a circle keeps its pointer and its click over a country and names UCDP’s country; dark at 390 px; no country file, no harm', pageTest, async t => {
+  const data = await (await fetch(`${BASE}/battlefield/data/realtime.json`)).json();
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, colorScheme: 'dark' });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/q/battlefield.html?view=live`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('path.rt-country', { timeout: 30000 });
+  await page.locator('#map').scrollIntoViewIfNeeded();
+  // A circle that is itself what the pointer finds at its centre, over a country shape.
+  const at = await page.evaluate(() => {
+    for (const el of document.querySelectorAll('.leaflet-overlay-pane path.leaflet-interactive')) {
+      const b = el.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+      if (b.width < 6 || x < 5 || y < 5 || x > innerWidth - 5 || y > innerHeight - 5 || document.elementFromPoint(x, y) !== el) continue;
+      el.style.pointerEvents = 'none'; const under = document.elementFromPoint(x, y); el.style.pointerEvents = '';
+      if (under?.classList.contains('rt-country')) return { x, y };
+    }
+    return null;
+  });
+  assert.ok(at, 'a circle over a country');
+  await page.mouse.move(at.x, at.y);
+  const tip = await page.locator('.leaflet-tooltip:not(.rt-country-tip)').first().textContent({ timeout: 5000 });
+  assert.ok(data.wars.some(w => tip.startsWith(w.name)), `the circle’s own tooltip: ${tip}`);
+  assert.ok(Object.values(data.countries).some(c => tip.includes(`${c.name} · `)), `it names UCDP’s country: ${tip}`);
+  assert.equal(await page.locator('.leaflet-tooltip.rt-country-tip').count(), 0, 'not the country’s');
+  // R2-5: a tap on a country across the map opens its tooltip inside the map, whole (checked here, before a circle's
+  // tap moves the map).
+  await page.mouse.move(2, 2);
+  await page.waitForFunction(() => !document.querySelector('.leaflet-tooltip'), null, { timeout: 5000 });
+  // The page can still shift as its last parts load: wait until the map has stood still for 0.3 s.
+  for (let i = 0, was = ''; i < 40; i++) {
+    const now = JSON.stringify(await page.locator('#map').boundingBox());
+    if (now === was) break;
+    was = now;
+    await page.waitForTimeout(300);
+  }
+  const spots = await page.evaluate(() => {
+    const m = document.getElementById('map').getBoundingClientRect(), out = [];
+    for (const fx of [0.15, 0.3, 0.5, 0.7, 0.85]) {
+      for (let y = m.top + 40; y < Math.min(m.bottom, innerHeight) - 40; y += 8) {
+        const x = m.left + m.width * fx, el = document.elementFromPoint(x, y);
+        if (el?.matches?.('path.rt-country:not(.rt-dot)')) { out.push({ x, y }); break; }
+      }
+    }
+    return out;
+  });
+  assert.ok(spots.length >= 2, `countries to tap across the map (${spots.length})`);
+  for (const s of spots) {
+    await page.mouse.click(s.x, s.y);
+    const r = await (await page.waitForFunction(() => {
+      const t = [...document.querySelectorAll('.leaflet-tooltip.rt-country-tip')].find(x => +getComputedStyle(x).opacity > 0.5);
+      if (!t) return null;
+      const m = document.getElementById('map').getBoundingClientRect(), b = t.getBoundingClientRect();
+      return { left: b.left, right: b.right, mapLeft: m.left, mapRight: m.right };
+    }, null, { timeout: 5000 })).jsonValue();
+    assert.ok(r.left >= r.mapLeft - 1 && r.right <= r.mapRight + 1, `a tap at x ${Math.round(s.x)}: the tooltip ${Math.round(r.left)}–${Math.round(r.right)} is inside the map ${Math.round(r.mapLeft)}–${Math.round(r.mapRight)}`);
+    await page.mouse.move(2, 2);
+    await page.waitForFunction(() => !document.querySelector('.leaflet-tooltip.rt-country-tip'), null, { timeout: 5000 });
+  }
+  await page.mouse.move(at.x, at.y);
+  await page.mouse.click(at.x, at.y);
+  await page.waitForSelector('.detail h2', { timeout: 5000 });
+  // The countries follow the theme.
+  const [fill, land] = await page.evaluate(() => [document.querySelector('path.rt-country:not(.rt-dot):not(.prp-nodata)').getAttribute('fill'), getComputedStyle(document.documentElement).getPropertyValue('--prp-map-land').trim()]);
+  assert.equal(fill, land);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth) <= 0, 'no sideways scroll at 390 px');
+  assert.deepEqual(errors, []);
+  // Without the 1:50m file (the CDN down), the circles and the list are as before and nothing fails.
+  const bare = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const bareErrors = [];
+  bare.on('pageerror', e => bareErrors.push(e.message));
+  await bare.route('**/countries-50m.json', r => r.abort());
+  await bare.goto(`${BASE}/q/battlefield.html?view=live`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await bare.waitForSelector('.warrow', { timeout: 20000 });
+  await bare.waitForTimeout(2000);
+  assert.ok(await bare.locator('.leaflet-overlay-pane path.leaflet-interactive').count() >= 100, 'the circles');
+  assert.equal(await bare.locator('path.rt-country').count(), 0);
+  assert.equal(await bare.locator('#legend .rt-hint').count(), 0, 'no hint about countries that are not there');
+  assert.equal(await bare.locator('#countries-credit').isVisible(), false, 'and no credit for shapes that are not drawn');
+  assert.doesNotMatch(await bare.locator('.prp-sources').innerText(), /Natural Earth|Tuvalu/);
+  assert.deepEqual(bareErrors, []);
 });

@@ -22,7 +22,7 @@ import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { readHash, writeHash, readMap, PANES } from '../bibliotheca/neo/lib/hash.js';
 import { readRecipe, writeRecipe } from '../design/vm-recipe.js';
-import { readZip, COLUMNS } from '../design/vm-bundle.js';
+import { readZip, zipStored, COLUMNS } from '../design/vm-bundle.js';
 import { freshnessLine } from '../design/prp-freshness.js';
 import { pageTest, launch, launchOptions } from './tools/pages.mjs';
 import '../design/prp-focus.js';
@@ -303,7 +303,8 @@ test('page: Save this view (bundle) — rows equal the drawn ids, the pin verifi
     // "Open a saved view" reads the bundle back from this computer, checks its pin and draws its frozen features.
     await page.setInputFiles('#open-file', { name: b.name, mimeType: 'application/zip', buffer: b.bytes });
     await page.waitForFunction(p => window.omniState?.mode === 'saved' && window.omniState.pin === p, pin, { timeout: 15000 });
-    assert.match(await page.textContent('#saved-note'), new RegExp(`Saved view, pin ${pin}, made `));
+    assert.match(await page.textContent('#saved-note'), new RegExp(`Saved view, pin ${pin}: its recipe, rows and features match the pin`));
+    assert.match(await page.textContent('#saved-note'), new RegExp(`not covered by the pin, so the time it gives \\(made ${meta.made}\\)`));
     assert.deepEqual([...(await page.evaluate(() => window.omniState.features))].sort(), [...ids].sort());
     // A changed byte is refused, and says so.
     const bad = Buffer.from(b.bytes); bad[200] ^= 1;
@@ -619,5 +620,134 @@ test('page: in Neo Book a click on a tagged name opens the map; a second click n
     assert.ok(top < 70, `the map starts ${top} px down its frame`);
     assert.match(await pf.textContent('.om-time'), /1494/, 'the year beside the slider');
     await phone.close();
+  } finally { await browser.close(); }
+});
+
+/* ================================================================ the second review (17 November 2026), in a browser */
+test('page: the second review: names escaped (X1), what a saved view\'s pin covers (X2), up-to periods (X3), layers (X4), the open control\'s focus (X8)', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    // X1: a composite polity's name reaches the page as text, never as markup.
+    const p1 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const forged = '(<img src=x id=om-forged onerror="window.omForged=1">)';
+    await p1.route(/\/omni\/data\/borders\/1400-1499\.topo\.json$/, async r => {
+      const res = await r.fetch(); const j = await res.json();
+      for (const g of j.objects.borders.geometries) if (g.properties.n === '(Kingdom of France)') g.properties.n = forged;
+      await r.fulfill({ response: res, body: JSON.stringify(j) });
+    });
+    await p1.goto(`${BASE}/omni/index.html#${RECIPE}`, { waitUntil: 'domcontentloaded' });
+    await ready(p1, 1494);
+    assert.equal(await p1.locator('#shows-list img').count(), 0, 'no element made from the name');
+    const shown = await p1.$$eval('#shows-list li', ls => ls.map(l => l.textContent));
+    assert.ok(shown.some(t => t.includes('composite: <img src=x id=om-forged') && t.includes('with its dependencies')), 'the name is shown as written');
+    assert.equal(await p1.evaluate(() => window.omForged), undefined);
+    await p1.close();
+
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+    const errors = watch(page);
+    // X3: an up-to view draws every battle from the window's first year to the frame (design 2.1 rule 4: rest 'first').
+    const upto = 'vr=1&t=1494..1509&at=1509&show=upto&step=y&base=plain&fill=borders&l=battles';
+    await page.goto(`${BASE}/omni/index.html#${upto}`, { waitUntil: 'domcontentloaded' });
+    await ready(page, 1509);
+    let st = await page.evaluate(() => window.omniState);
+    assert.ok(st.features.includes('Q764793') && st.features.includes('Q1754732'), `Fornovo (1495) and Agnadello (1509) at 1509 (${st.battles.drawn})`);
+    assert.equal(st.recipe, upto, 'a start at its rest writes no since=');
+    // A start chosen by hand is kept in the recipe (since=) and drawn again from it after a reload.
+    await page.focus('#from');
+    for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight');
+    await page.waitForFunction(() => /&since=1500&/.test(window.omniState.recipe), null, { timeout: 15000 });
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.battles.drawn, ['Q1754732'], 'from 1500: Agnadello alone');
+    await page.waitForFunction(() => /&since=1500&/.test(location.hash));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1509);
+    st = await page.evaluate(() => window.omniState);
+    assert.match(st.recipe, /&at=1509&since=1500&show=upto&/);
+    assert.deepEqual(st.battles.drawn, ['Q1754732']);
+    assert.equal(await page.getAttribute('#from', 'data-value'), '1500', 'the start handle where it was left');
+    // The bundle carries it too, and its choices name the period drawn.
+    const ub = await downloadOf(page, () => page.click('#save'));
+    const uz = files(ub.bytes);
+    assert.match(uz['recipe.txt'], /&since=1500&/);
+    assert.deepEqual(JSON.parse(uz['choices.json']).period, [1500, 1509]);
+
+    // X4: a recipe naming no battles layer draws, exports and reports none, and says so.
+    const none = 'vr=1&t=1494..1509&at=1495&show=frame&step=y&base=plain&fill=borders';
+    await page.goto(`${BASE}/omni/index.html#${none}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1495);
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.layers, ['borders']);
+    assert.ok(!st.features.includes('Q764793'), 'Fornovo is not drawn');
+    assert.deepEqual(st.battles.drawn, []);
+    assert.ok(!st.legend.some(l => l.layer === 'battles'), 'the legend names the layers drawn');
+    assert.match(await page.textContent('#battles-held'), /VM holds 2 battles for these years; this view draws none, as its recipe names no battles layer/);
+    const nb = await downloadOf(page, () => page.click('#save'));
+    const nrows = csvRows(files(nb.bytes)['rows.csv']), nhead = nrows[0];
+    assert.ok(!nrows.slice(1).some(r => r[nhead.indexOf('layer')] === 'battles'), 'the bundle holds no battle');
+    // And with l=battles, the same frame draws Fornovo.
+    await page.goto(`${BASE}/omni/index.html#${none}&l=battles`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1495);
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.layers, ['borders', 'battles']);
+    assert.ok(st.features.includes('Q764793'));
+
+    // X2: a bundle whose unpinned files were changed still opens under its pin, but the page states nothing from them
+    // as fact: the heading is made from the recipe, and the time it gives is said to be unchecked.
+    const other = 'vr=1&t=1500..1600&at=1550&show=frame&step=y&base=plain&fill=borders&l=battles';
+    await page.goto(`${BASE}/omni/index.html#${other}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1550);
+    const b = await downloadOf(page, () => page.click('#save'));
+    const z = files(b.bytes), csl = JSON.parse(z['citation.csl.json']), meta = JSON.parse(z['metadata.json']);
+    const forgedMeta = { ...meta, made: '1900-01-01T00:00:00Z', datasets: meta.datasets.map(d => ({ ...d, licence: 'Forged licence' })) };
+    const changed = { ...z, 'metadata.json': JSON.stringify(forgedMeta, null, 2) + '\n', 'citation.csl.json': JSON.stringify([{ ...csl[0], title: 'Forged title' }], null, 2) + '\n' };
+    const repacked = Buffer.from(zipStored(Object.keys(z).map(name => ({ name, text: changed[name] }))));
+    await page.setInputFiles('#open-file', { name: 'changed-metadata.zip', mimeType: 'application/zip', buffer: repacked });
+    await page.waitForFunction(p => window.omniState?.mode === 'saved' && window.omniState.pin === p, meta.pin, { timeout: 15000 });
+    const subject = await page.textContent('#view-subject');
+    assert.notEqual(subject, 'Forged title', 'the heading is not taken from a file the pin does not cover');
+    assert.equal(subject, csl[0].title, 'it is made from the recipe, as the genuine citation was');
+    const note = await page.textContent('#saved-note');
+    assert.match(note, /not covered by the pin, so the time it gives \(made 1900-01-01T00:00:00Z\), its citations and its licence text are as the file gives them, unchecked/);
+    assert.doesNotMatch(await page.textContent('body'), /Forged (title|licence)/);
+    assert.deepEqual(errors, []);
+    await page.close();
+
+    // X8: "Open a saved view" shows the keyboard's focus, in light and dark, at 1440 by 900 and 390 wide.
+    for (const [width, height] of [[1440, 900], [390, 844]]) {
+      const p = await browser.newPage({ viewport: { width, height } });
+      await p.goto(`${BASE}/omni/index.html#${RECIPE}`, { waitUntil: 'domcontentloaded' });
+      await ready(p, 1494);
+      for (const theme of ['light', 'dark']) {
+        await p.evaluate(t => { document.documentElement.dataset.theme = t; window.dispatchEvent(new CustomEvent('prp:themechange')); }, theme);
+        await p.focus('#download');
+        await p.keyboard.press('Tab');
+        assert.equal(await p.evaluate(() => document.activeElement?.id), 'open-file', `${width} ${theme}: Tab reaches the file input`);
+        const ring = await p.evaluate(() => { const s = getComputedStyle(document.querySelector('label.om-open')); return { style: s.outlineStyle, width: s.outlineWidth, color: s.outlineColor }; });
+        assert.equal(ring.style, 'solid', `${width} ${theme}: its label shows the focus (${JSON.stringify(ring)})`);
+        assert.equal(ring.width, '2px');
+        const focusColour = await p.evaluate(() => { const e = document.createElement('i'); e.style.color = 'var(--prp-focus)'; document.body.append(e); const c = getComputedStyle(e).color; e.remove(); return c; });
+        assert.equal(ring.color, focusColour, `${width} ${theme}: in the theme's focus colour`);
+      }
+      await p.close();
+    }
+  } finally { await browser.close(); }
+});
+
+test('page: Neo Book opens a map= view whole, with no reader term (t=) in its address (X6)', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=3&pane=map&map=${encodeURIComponent(RECIPE)}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.omniState?.frame === 1494, null, { timeout: 60000 });
+    assert.equal(await page.isVisible('#map-frame'), true, 'the frame is shown');
+    const frame = await frameOf(page, '#map-frame');
+    await ready(frame, 1494);
+    assert.equal(readRecipe(await frame.evaluate(() => window.omniState.recipe)).q, 'Q236853', 'the address\'s own view');
+    assert.doesNotMatch(await page.textContent('#panel-map'), /No term chosen/);
+    assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

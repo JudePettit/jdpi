@@ -69,6 +69,18 @@ test('VR/1: equal recipes give equal strings whatever order their parts were giv
   assert.deepEqual(readRecipe('vr=1&t=-0431-05..-404').t, { from: '-0431-05', to: -404 }, 'a BC month');
 });
 
+test('VR/1: since, the start of a period the reader chose, follows at and round-trips (review X3)', () => {
+  assert.equal(KEYS[KEYS.indexOf('at') + 1], 'since', 'written straight after the frame');
+  const s = 'vr=1&t=1446..1514&at=1509&since=1495&show=upto&step=y&base=plain&fill=borders&l=battles';
+  assert.equal(readRecipe(s).since, 1495);
+  assert.equal(writeRecipe(readRecipe(s)), s);
+  assert.equal(writeRecipe({ vr: 1, since: 1495, at: 1509, t: { from: 1446, to: 1514 }, show: 'upto' }), 'vr=1&t=1446..1514&at=1509&since=1495&show=upto');
+  assert.equal(readRecipe('vr=1&at=1509&since=0').since, undefined, 'no year 0');
+  assert.equal(readRecipe('vr=1&at=1509&since=x').since, undefined, 'a malformed start reads as absent');
+  assert.equal(readRecipe('vr=1&at=-426&since=-431').since, -431, 'a BC start');
+  assert.equal(writeRecipe({ vr: 1, at: 1509, since: null }), 'vr=1&at=1509', 'no start: the period at its rest');
+});
+
 test('VR/1: a malformed key reads as absent and never throws; a recipe that is not VR/1 reads as null', () => {
   const base = 'vr=1&t=1446..1514&at=1494&step=y';
   assert.equal(readRecipe(base.replace('1446..1514', '1446..x')).t, undefined);
@@ -266,6 +278,12 @@ test('resolve: the window, frame and step rules on their own', () => {
   assert.equal(windowFor({ facts: {} }, {}), null);
   const w = windowFor({ facts: { founded: '1395-05-11', dissolved: '1797-10-17' } }, {});
   assert.deepEqual([w.from, w.to, w.step], [1350, 1840, '10y'], 'four centuries step by decades, rounded outward');
+  // Astronomical year 0 is 1 BC (historical -1), never AD 1 (review X5): an eight-year life ending in 2 BC is widened
+  // by one year each way, to 11 BC–1 BC; and a decade rounded up onto astronomical 0 ends in 1 BC too.
+  const bc = windowFor({ facts: { born: '-0010', died: '-0002' } }, { kind: 'person' });
+  assert.deepEqual([bc.from, bc.to], [-11, -1], '11 BC to 1 BC');
+  const bcDecades = windowFor({ facts: { founded: '-0400', dissolved: '-0046' } }, { kind: 'place' });
+  assert.deepEqual([bcDecades.from, bcDecades.to, bcDecades.step], [-441, -1, '10y'], 'rounded up by decades to astronomical 0: 1 BC');
   assert.equal(frameFor({ from: 1446, to: 1514 }, { era: [1494, 1527] }), 1494);
   assert.equal(frameFor({ from: 1446, to: 1514 }, { era: [1600, 1650] }), 1446, 'an era outside the window: the window\'s start');
   assert.equal(frameFor({ from: 1446, to: 1514 }, { passageYear: 1499, era: [1494, 1527] }), 1499);
@@ -521,6 +539,9 @@ test('bundle: the nine files; rows equal features; the pin verifies from the fil
   assert.equal(meta.pin, p); assert.equal(meta.vmCommit, null); assert.equal(meta.recipe, `${VIEW.recipe}&pin=${p}`);
   assert.equal(readRecipe(meta.recipe).pin, p, 'the recipe with its pin is still VR/1');
   assert.match(text('README.txt'), /Zenodo or OSF/); assert.match(text('README.txt'), new RegExp(p));
+  // Review X2: the README says what the pin does not cover (the time, the licences, the citations).
+  assert.match(text('README.txt'), /The pin covers those three files only\. choices\.json, metadata\.json \(the time, the deployment, the licences\)/);
+  assert.match(text('README.txt'), /citation files are not covered by it/);
   const csl = JSON.parse(text('citation.csl.json'));
   assert.equal(csl[0].type, 'dataset'); assert.equal(csl[0].version, p);
   assert.deepEqual(csl[0].author, [{ literal: 'JDP-Iq' }]); assert.equal(csl[0].publisher, 'Vitruvian Manager');

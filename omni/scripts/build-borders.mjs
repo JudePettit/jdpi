@@ -28,7 +28,9 @@
 //    (lake/data/e, read from disk) whose label is a POLITY row's Name, and whose founding or dissolution date in the
 //    lake overlaps the row's years: basis "name" (so Q70972, the Kingdom of France, reaches its rows).
 // 5. Writes omni/data/borders/<from>-<to>.topo.json, index.json and qids.json, and the borders layer's `built` and
-//    years in omni/data/layers.json. Prints rows, bytes and gzipped bytes per file. Nothing else is written.
+//    years in omni/data/layers.json. index.json and qids.json each keep the `built` they have when nothing else in them
+//    changes (builtFor), so a run on unchanged inputs writes the same bytes and the views' pins stay. Prints rows,
+//    bytes and gzipped bytes per file. Nothing else is written.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { gzipSync, inflateRawSync, crc32 } from 'node:zlib';
@@ -212,6 +214,16 @@ async function wikidataItems(ids, cacheDir) {
   return { items, read };
 }
 
+/** The `built` stamp a file is written with: the one it already has when nothing else in it would change (the same
+ *  archive, Wikidata reading and lake give the same bytes, so the pins borders@ and qids@ stay as they were); else
+ *  `now`. prev is the file as it stands (parsed, or null); next is what would be written, its own `built` ignored. */
+export function builtFor(prev, next, now) {
+  if (!prev || typeof prev.built !== 'string') return now;
+  const rest = o => JSON.stringify({ ...o, built: null });
+  return rest(prev) === rest(next) ? prev.built : now;
+}
+const readJson = file => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return null; } };
+
 /** The borders layer's entry in the catalogue: its build and years (the text is written by hand). */
 export function updateLayer(file, id, fields) {
   const cat = JSON.parse(readFileSync(file, 'utf8'));
@@ -231,7 +243,7 @@ async function main() {
   const { topology } = await import('topojson-server');
   const geo = JSON.parse(unzipEntry(buf, RELEASE.entry).toString('utf8'));
   console.log(`Cliopatria ${RELEASE.version}: ${geo.features.length} rows`);
-  const built = stamp(), files = [], all = [];
+  const now = stamp(), files = [], all = [];
   for (const [from, to] of SPANS) {
     const rows = rowsFor(geo.features, from, to);
     const ids = new Set(rows.map(r => r.properties.id));
@@ -248,12 +260,17 @@ async function main() {
   const { entries, rejected } = crosswalk(all, items, lakePlaces());
   mkdirSync(OUT, { recursive: true });
   for (const f of files) { writeFileSync(join(OUT, f.file), f.text); delete f.text; console.log(`${f.file}: ${f.rows} rows, ${f.bytes} bytes, ${f.gzip} gzipped`); }
-  writeFileSync(join(OUT, 'index.json'), JSON.stringify({ format: 'vm-borders-index/1', source: 'cliopatria', version: RELEASE.version, built, from: SPANS[0][0], to: SPANS.at(-1)[1],
-    archive: { url: RELEASE.url, sha256: RELEASE.sha256 }, quantisation: QUANTISATION, files }, null, 2) + '\n');
-  writeFileSync(join(OUT, 'qids.json'), JSON.stringify({ format: 'vm-qids/1', version: `cliopatria@${RELEASE.version}`, built, wikidata: { read, ids: qs.length },
-    entries, rejected }, null, 1) + '\n');
+  // Each file keeps its `built` where its content is unchanged (builtFor), so a second run on the same inputs writes
+  // the same bytes; the layer's `built` is the later of the two.
+  const index = { format: 'vm-borders-index/1', source: 'cliopatria', version: RELEASE.version, built: null, from: SPANS[0][0], to: SPANS.at(-1)[1],
+    archive: { url: RELEASE.url, sha256: RELEASE.sha256 }, quantisation: QUANTISATION, files };
+  index.built = builtFor(readJson(join(OUT, 'index.json')), index, now);
+  const qids = { format: 'vm-qids/1', version: `cliopatria@${RELEASE.version}`, built: null, wikidata: { read, ids: qs.length }, entries, rejected };
+  qids.built = builtFor(readJson(join(OUT, 'qids.json')), qids, now);
+  writeFileSync(join(OUT, 'index.json'), JSON.stringify(index, null, 2) + '\n');
+  writeFileSync(join(OUT, 'qids.json'), JSON.stringify(qids, null, 1) + '\n');
   console.log(`qids.json: ${Object.keys(entries).length} Q-ids, ${rejected.length} of Cliopatria's ids rejected`);
-  updateLayer(LAYERS, 'borders', { built, time: { from: SPANS[0][0], to: SPANS.at(-1)[1] } });
+  updateLayer(LAYERS, 'borders', { built: [index.built, qids.built].sort().at(-1), time: { from: SPANS[0][0], to: SPANS.at(-1)[1] } });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

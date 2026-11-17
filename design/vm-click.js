@@ -26,7 +26,7 @@
      wars           War Focus's wars ({ id, qid, name }); layers { borders: { step } }, the fill's own step
    S1 builds the person, the place and the battle; any other kind gets the generic rules and says so. */
 import { writeRecipe, readRecipe } from './vm-recipe.js';
-import { yearOf, addYears, yearsBetween, precisionOf, formatSpan, formatYear } from './vm-dates.js';
+import { yearOf, addYears, yearsBetween, precisionOf, formatSpan, formatYear, toAstro, fromAstro } from './vm-dates.js';
 
 export const GESTURES = ['term', 'selection', 'scene', 'news', 'badge', 'name'];
 export const KINDS = ['person', 'place', 'battle'];
@@ -113,11 +113,10 @@ export function readPeriods(json) {
 
 /* ---------- 2.1's rules ---------- */
 const lenStep = n => (n < 1 ? 'd' : n < 5 ? 'm' : n < 300 ? 'y' : n < 1500 ? '10y' : 'c');
-// Rounded outward to whole steps of `size` years (a decade, a century), never onto the year 0 that does not exist.
-const floorTo = (y, size) => { if (size <= 1) return y; const a = Math.floor(yearToAstro(y) / size) * size; return fromAstroSafe(a, -1); };
-const ceilTo = (y, size) => { if (size <= 1) return y; const a = Math.ceil(yearToAstro(y) / size) * size; return fromAstroSafe(a, 1); };
-const yearToAstro = y => (y < 0 ? y + 1 : y);
-const fromAstroSafe = (a, dir) => (a > 0 ? a : a < 0 ? a - 1 : dir < 0 ? -1 : 1);
+// Rounded outward to whole steps of `size` years (a decade, a century), counted astronomically and turned back into
+// historical years by vm-dates.js's one converter, so astronomical 0 is 1 BC (-1), never AD 1 and never a year 0.
+const floorTo = (y, size) => { if (size <= 1) return y; return fromAstro(Math.floor(toAstro(y) / size) * size); };
+const ceilTo = (y, size) => { if (size <= 1) return y; return fromAstro(Math.ceil(toAstro(y) / size) * size); };
 
 function spanOf(entry, kind, today) {
   const f = entry?.facts || {}, fp = entry?.fp || {};
@@ -156,8 +155,8 @@ export function windowFor(entry, { kind = kindOf(entry), today } = {}) {
   const size = STEP_YEARS[lenStep(span)];
   const pad = Math.max(size, span * 0.1);
   const now = s.open ? s.to : null;
-  let from = floorTo(fromAstroSafe(Math.floor(yearToAstro(s.from) - pad), -1), size);
-  let to = s.open ? now : ceilTo(fromAstroSafe(Math.ceil(yearToAstro(s.to) + pad), 1), size);
+  let from = floorTo(fromAstro(Math.floor(toAstro(s.from) - pad)), size);
+  let to = s.open ? now : ceilTo(fromAstro(Math.ceil(toAstro(s.to) + pad)), size);
   if (s.open && now != null && to > now) to = now;
   return { from, to, step: lenStep(yearsBetween(from, to)), p };
 }

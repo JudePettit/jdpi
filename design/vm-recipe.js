@@ -6,6 +6,8 @@
      vr     1, the version (a recipe without it, or with another, is not VR/1 and reads as null)
      t      the window, from..to                    1446..1514, -431..-404, 1756-05..1763-02
      at     the frame                               1494, -426, 1756-08-29
+     since  the start of the period shown, where the reader moved it off its rest; absent, it rests (show=upto: the
+            window's first year, so the period is t's from up to at; show=frame: the frame itself)   1495
      show   upto | frame
      step   d | m | y | 10y | c
      base   plain | terrain | satellite | night
@@ -22,13 +24,15 @@
      pin    a bundle's hash, 12 hex digits (5.7)
    The order is the one 3.3's three worked examples are written in (the table of 3.2 lists `an` after `ds`, and `film`
    after `ds`, but examples 2 and 3 write them earlier, and each must read back to its own string); `pin` is last, so
-   a bundle's recipe is its pinned recipe with &pin=<pin> appended.
+   a bundle's recipe is its pinned recipe with &pin=<pin> appended. `since` is not in the design's table of 3.2: it was
+   added (review X3, 17 November 2026) so that a period the reader chose with the slider's start handle is kept in the
+   recipe and drawn again from it; a recipe without it reads and writes exactly as before.
    Atoms are percent-encoded by analytics/lib/spec.js's rule (encodeURIComponent and ! ' ( ) * ~); the structure
    characters .. , : / @ = stay bare. Years are signed historical years with no year 0 (vm-dates.js).
    A malformed key reads as absent and never throws. `host=neo|kino` is a frame-only key outside VR/1 (readHost,
    withHost), ignored by readRecipe and by every comparison. */
 
-export const KEYS = ['vr', 't', 'at', 'show', 'step', 'base', 'fill', 'l', 'an', 'focus', 'q', 'rec', 'agg', 'film', 'pace', 'narr', 'ds', 'from', 'pin'];
+export const KEYS = ['vr', 't', 'at', 'since', 'show', 'step', 'base', 'fill', 'l', 'an', 'focus', 'q', 'rec', 'agg', 'film', 'pace', 'narr', 'ds', 'from', 'pin'];
 export const SHOWS = ['upto', 'frame'];
 export const STEPS = ['d', 'm', 'y', '10y', 'c'];
 export const BASES = ['plain', 'terrain', 'satellite', 'night'];
@@ -66,6 +70,7 @@ const CODEC = {
     write: v => (v && timeOk(v.from) && timeOk(v.to) && before(v.from, v.to) ? `${v.from}..${v.to}` : undefined),
   },
   at: { read: r => readTime(r) ?? undefined, write: v => (timeOk(v) ? String(v) : undefined) },
+  since: { read: r => readTime(r) ?? undefined, write: v => (timeOk(v) ? String(v) : undefined) },
   show: one(SHOWS), step: one(STEPS), base: one(BASES),
   fill: { read: r => (FILL.test(r) ? r : undefined), write: v => (FILL.test(String(v ?? '')) ? String(v) : undefined) },
   l: {

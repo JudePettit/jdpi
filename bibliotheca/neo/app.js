@@ -97,7 +97,7 @@ const S = {
   // The Map tab (PRP-SCHOLAR-USP-DESIGN.md S1, contract 4): the Omni-Map's recipe as the frame last posted it (map=
   // in the address), the selection (sel=), which term and paragraph the view was made for (mapKey), the paragraph a
   // click came from (mapPid), and the click's offers and related items for the card under the frame (mapRes).
-  map: null, sel: null, mapKey: null, mapPid: null, mapRes: null, mapSeq: 0,
+  map: null, sel: null, mapKey: null, mapPid: null, mapRes: null, mapSeq: 0, mapOwn: false,
 };
 const inSide = inSidePane();
 let narr = null; // the narrator, made when the mode is first turned on
@@ -754,10 +754,20 @@ async function clickView(qid, pid) {
   const from = { module: 'neo-classic', at: `bibliotheca/neo/index.html${hashFor(c.n, { p: pid, t: qid })}`, ...(pid ? { passage: { book: S.book.slug, ch: c.n, p: pid } } : {}) };
   return { entry: ent, res: resolve(ent, from, ctx) };
 }
-// The tab: the view for the term in use, made once per term and paragraph; the address's own view (map=) when it names one.
+// The tab: the view for the term in use, made once per term and paragraph; the address's own view (map=) when it names
+// one, with or without a term (t=): a map= recipe is a whole view, its clicked object (its own q=) standing for the term.
 async function renderMap() {
-  const q = S.term, pid = S.mapPid || S.current || S.p || null, key = `${q}|${pid}`;
+  const own = !S.term && (S.mapFromAddress || S.mapOwn) ? readRecipe(S.map || '') : null;
+  S.mapOwn = !!own;
+  const q = S.term || own?.q || null, pid = S.mapPid || S.current || S.p || null, key = `${q}|${pid}`;
   const f = $('#map-frame');
+  if (!q && own) {
+    // A view with no clicked object (a bare period): the frame draws it, with no card of offers.
+    S.mapFromAddress = false; S.mapRes = null; S.mapKey = null;
+    $('#map-empty').hidden = true; f.hidden = false; $('#map-card').hidden = true;
+    showMapRecipe(S.map);
+    return;
+  }
   if (!q) {
     $('#map-empty').hidden = false; f.hidden = true; $('#map-card').hidden = true;
     setPaneHead('Omni-Map', 'No term chosen', null);
@@ -770,6 +780,7 @@ async function renderMap() {
     const v = await clickView(q, pid);
     if (seq !== S.mapSeq) return;
     S.mapRes = v; S.mapKey = key;
+    if (!v && own) { S.mapFromAddress = false; $('#map-empty').hidden = true; f.hidden = false; $('#map-card').hidden = true; showMapRecipe(S.map); return; }
     if (!v) { $('#map-empty').hidden = false; $('#map-empty').textContent = `The Master Index holds no record of ${label} yet, so VM cannot map it.`; f.hidden = true; $('#map-card').hidden = true; S.map = null; writeState(); return; }
     if (!S.mapFromAddress) S.map = v.res.recipe;
   }
@@ -782,14 +793,14 @@ async function renderMap() {
 function showMapRecipe(recipe) {
   S.map = recipe;
   const r = readRecipe(recipe), win = r?.t ? formatSpan(r.t.from, r.t.to) : '';
-  const label = S.mapRes?.entry?.label || S.labels.get(S.term) || S.term;
+  const label = S.mapRes?.entry?.label || S.labels.get(S.term) || S.term || 'The view in this address';
   setPaneHead('Omni-Map', win ? `${label} · ${win}` : label, placeLink('ds', 'omni-map', `omni/index.html#${recipe}`));
   $('#map-frame').title = `Omni-Map: ${label}`;
   frames.map.go(omniAt(recipe));
   writeState();
 }
-// Two recipes are the same view whatever year the slider shows (an offer stays marked as the reader moves it).
-const sameView = (a, b) => { const x = readRecipe(a || ''), y = readRecipe(b || ''); if (!x || !y) return false; delete x.at; delete y.at; return writeRecipe(x) === writeRecipe(y); };
+// Two recipes are the same view whatever year or period the slider shows (an offer stays marked as the reader moves it).
+const sameView = (a, b) => { const x = readRecipe(a || ''), y = readRecipe(b || ''); if (!x || !y) return false; for (const r of [x, y]) { delete r.at; delete r.since; } return writeRecipe(x) === writeRecipe(y); };
 // Under the frame: the click's offers (2.2), what is related, and 2.5's words when VM holds little.
 function drawMapCard() {
   const v = S.mapRes, card = $('#map-card');

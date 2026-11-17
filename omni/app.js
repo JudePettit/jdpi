@@ -124,12 +124,16 @@ function windowOf(R) {
 function layerNotes(R) {
   const notes = [];
   if (R.fill && R.fill !== 'borders') notes.push(`VM builds the borders fill first; it holds no "${R.fill}" fill yet, so this view draws borders.`);
-  for (const l of R.l || []) if (l.id !== 'battles') notes.push(`VM holds no "${l.id}" layer yet; this view draws the battles it holds.`);
+  for (const l of R.l || []) if (l.id !== 'battles') notes.push(`VM holds no "${l.id}" layer yet, so it is not drawn${battleFilter(R) ? '; this view draws the battles VM holds' : ''}.`);
   if (R.base && R.base !== 'plain') notes.push(`VM holds the plain base only in this first version (asked: ${R.base}).`);
   if (R.step === 'd' || R.step === 'm') notes.push('Borders change by the year here, so the slider steps by year.');
   return notes;
 }
-const battleFilter = R => (R.l || []).find(l => l.id === 'battles') || null;
+// The layers a view draws are the ones its recipe names (l=, design 3.2): a recipe without l=battles draws, exports and
+// reports no battles; the battles VM holds for its years are still counted beside the map, said not to be drawn.
+const battleFilter = R => (R?.l || []).find(l => l.id === 'battles') || null;
+const battlesOn = () => !!battleFilter(S.R);
+// The battles VM holds in the window (those matching the layer's filter, where the recipe gives one).
 function battlesInWindow(win) {
   const f = battleFilter(S.R);
   return (S.battles?.rows || []).filter(r => r.sortYear >= win.from && r.sortYear <= win.to && (!f?.field || String(r[f.field] ?? '') === f.value));
@@ -190,17 +194,24 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   if (seq !== S.seq) return;
   S.fc = fc;
   S.drawn = fc ? M.sliceAt(fc, year).filter(f => f.geometry) : [];
-  const lo = start ?? year, win = windowOf(S.R);
-  const inWin = battlesInWindow(win);
-  S.drawnBattles = inWin.filter(r => r.sortYear >= Math.min(lo, year) && r.sortYear <= year && Array.isArray(r.pt));
+  // The period whose events are drawn (design 2.1 rule 4): the start the reader chose (since=), else its rest: on an
+  // up-to view (show=upto) the window's first year, so the view shows everything up to the frame; on a frame view the
+  // frame alone.
+  const win = windowOf(S.R);
+  const lo = start ?? (S.R.show === 'upto' ? win.from : year);
+  S.lo = Math.min(lo, year);
+  const inWin = battlesInWindow(win), on = battlesOn();
+  S.drawnBattles = on ? inWin.filter(r => r.sortYear >= S.lo && r.sortYear <= year && Array.isArray(r.pt)) : [];
   // The extent (2.1 rule 5) at the opening frame, and again on "Fit to the view". A place VM cannot outline is placed
   // at its Master Index point (drawn as a point at every frame) or, for a battle, at the battle's point (drawn only in
   // the battle's own year, as the battles layer draws it). Outside the years VM holds, every place asked for is named
   // with that reason (the core gives "outside-slice" for a year beyond the span held).
-  const pointOf = q => lakePoint(q) || battleRow(q)?.pt || null;
+  // A battle's own point counts only where the view draws the battles layer.
+  const asBattle = q => (on ? battleRow(q) : null);
+  const pointOf = q => lakePoint(q) || asBattle(q)?.pt || null;
   const ext = M.extent({ focus: S.R.focus || [], year, fc: fc || { type: 'FeatureCollection', features: [], vm: null }, qids: S.qids, held, pointOf });
   S.focusHits = fc ? ext.hits.flatMap(q => M.featuresFor(fc, S.qids, q, year, held).features.map(f => f.id)) : [];
-  S.focusPoints = ext.misses.filter(m => m.point && lakePoint(m.qid) && !battleRow(m.qid)).map(m => ({ q: m.qid, pt: lakePoint(m.qid) }));
+  S.focusPoints = ext.misses.filter(m => m.point && lakePoint(m.qid) && !asBattle(m.qid)).map(m => ({ q: m.qid, pt: lakePoint(m.qid) }));
   S.ext = ext;
   if (fit || !S.boxSet) { S.box = ext.box; S.boxSet = true; S.map?.fit(S.box, { padding: ext.padding, animate: source !== 'set' }); }
   if (S.map) {
@@ -260,9 +271,10 @@ function render(inWin, ext, file, held) {
   const noteText = !file ? M.reasonText('outside-slice', { held }) : ext.box || !asked ? '' : ext.text;
   note.textContent = noteText; note.hidden = !noteText;
 
-  // The legend: each layer's source, version, licence, precision and status, its credit, and its method under ⓘ.
-  const items = [];
-  for (const id of ['borders', 'battles']) {
+  // The legend: each layer's source, version, licence, precision and status, its credit, and its method under ⓘ: the
+  // layers this view draws.
+  const items = [], on = battlesOn();
+  for (const id of ['borders', ...(on ? ['battles'] : [])]) {
     const entry = layerOf(id);
     if (!entry) continue;
     const lg = M.legend(entry, { sources: S.sources, year });
@@ -282,7 +294,7 @@ function render(inWin, ext, file, held) {
   // The folded legend's one line (4.2's phone legend): the borders' source, version, licence and precision.
   const bl = layerOf('borders'), bsrc = sourceOf(bl?.source);
   const bp = bl ? M.borderPrecisionAt(bl, year) : null, bpRule = (bl?.borderPrecision || []).find(r => r.p === 'c');
-  $('#legend-summary').textContent = bl ? `Borders: ${bsrc?.short || bl.source} ${bsrc?.version || ''}, ${bsrc?.licence || ''}, ${bp === 'c' ? `century precision before ${(bpRule?.to ?? 1499) + 1}` : 'at the years Cliopatria records'}; battles: Wikidata.` : '';
+  $('#legend-summary').textContent = bl ? `Borders: ${bsrc?.short || bl.source} ${bsrc?.version || ''}, ${bsrc?.licence || ''}, ${bp === 'c' ? `century precision before ${(bpRule?.to ?? 1499) + 1}` : 'at the years Cliopatria records'}${on ? '; battles: Wikidata' : ''}.` : '';
 
   // In focus: what the recipe asked to see, and what VM can and cannot outline at this frame.
   const f = [];
@@ -291,7 +303,7 @@ function render(inWin, ext, file, held) {
   for (const q of ext.hits) rows.push(`<li><b><bdi>${esc(nameOf(q, year) || q)}</bdi></b> <span class="om-q">${esc(q)}</span><span>Outlined at ${esc(formatYear(year))}, as Cliopatria names it, ${esc(basisOf(q, year))}</span></li>`);
   const drawnB = new Set(S.drawnBattles.map(r => r.q)), drawnP = new Set(S.focusPoints.map(p => p.q));
   for (const m of ext.misses) {
-    const b = battleRow(m.qid);
+    const b = on ? battleRow(m.qid) : null;
     // A point is said to be shown only when it is on the map at this frame (S3): a battle's, in its own year.
     const text = !m.point || m.reason === 'outside-slice' ? m.text
       : drawnP.has(m.qid) || drawnB.has(m.qid) ? `${m.text}: shown as a point`
@@ -307,9 +319,10 @@ function render(inWin, ext, file, held) {
   $('#focus-body').innerHTML = f.join('');
 
   // The battles VM holds for these years, each with its date as its source records it and its source line.
-  $('#battles-held').textContent = M.heldMessage('battle', inWin.length);
+  $('#battles-held').textContent = on ? M.heldMessage('battle', inWin.length)
+    : `${M.heldMessage('battle', inWin.length)}; this view draws none, as its recipe names no battles layer (l=battles).`;
   const drawnIds = new Set(S.drawnBattles.map(r => r.q));
-  $('#battles-list').innerHTML = inWin.map(r => {
+  $('#battles-list').innerHTML = !on ? '' : inWin.map(r => {
     const on = drawnIds.has(r.q);
     const when = formatValueDate(r.date, { source: 'Wikidata' });
     const pt = Array.isArray(r.pt) ? ptText(r.pt, r.ptPrec) : 'no point';
@@ -327,7 +340,7 @@ function render(inWin, ext, file, held) {
   const tag = S.map ? 'button' : 'span';
   $('#shows-list').innerHTML = byName.map(x => {
     const p = x.properties, comp = p.k === 'POLITY' && /^\(.+\)$/.test(p.n);
-    const rel = p.k === 'RELATION' ? ' · a union, alliance or overlordship, outlined' : comp ? ` · composite: ${p.n.slice(1, -1)} with its dependencies, outlined` : '';
+    const rel = p.k === 'RELATION' ? ' · a union, alliance or overlordship, outlined' : comp ? ` · composite: ${esc(p.n.slice(1, -1))} with its dependencies, outlined` : '';
     return `<li><${tag}${tag === 'button' ? ` type="button" data-fit="${esc(p.id)}"` : ''} class="om-row"><bdi>${esc(p.n)}</bdi><span>${esc(formatSpan(p.f, p.t))}${rel}</span></${tag}></li>`;
   }).join('');
 
@@ -342,9 +355,11 @@ let sayTimer = 0;
 function say(text) { clearTimeout(sayTimer); sayTimer = setTimeout(() => { $('#say').textContent = text; }, 200); }
 
 /* ---------- the address and the reader ---------- */
-const currentRecipe = () => (S.mode === 'saved' ? S.saved.recipe : writeRecipe({ ...S.R, at: S.frame }));
+// The view as it stands: the recipe at the frame shown, with the period's start where the reader moved it (since=).
+const nowRecipe = extra => ({ ...S.R, at: S.frame, since: S.start ?? undefined, ...extra });
+const currentRecipe = () => (S.mode === 'saved' ? S.saved.recipe : writeRecipe(nowRecipe()));
 function liveUrl() {
-  const r = { ...S.R, at: S.frame }; delete r.ds; delete r.pin;
+  const r = nowRecipe(); delete r.ds; delete r.pin;
   return new URL(`omni/index.html#${writeRecipe(r)}`, SITE).href;
 }
 function publish() {
@@ -380,7 +395,7 @@ async function view() {
   const ne = sourceOf('natural-earth'), clio = sourceOf('cliopatria'), wd = sourceOf('wikidata');
   const pins = nowPins();
   const ds = ['cliopatria', 'borders', 'qids', 'natural-earth', 'battles'].map(id => ({ id, version: pins[id] || (id === 'natural-earth' ? '5.1.1' : '') }));
-  const recipe = writeRecipe({ ...S.R, at: year, ds });
+  const recipe = writeRecipe(nowRecipe({ at: year, ds }));
   const p = M.borderPrecisionAt(entry, year);
   const rows = [
     ...S.drawn.map(f => M.borderRow(f, { qids: S.qids, year, precision: p })),
@@ -410,7 +425,7 @@ async function view() {
   return {
     recipe, rows, features, made: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), vmCommit: null, deployment: location.origin, code: await code(), datasets: data, qids,
     from: S.R.from || null, subject: S.subject || 'Omni-Map view', window: [win.from, win.to], liveUrl: liveUrl(), providers: PROVIDERS, sources: S.sources,
-    choices: { frame: year, period: S.start != null ? [S.start, year] : [year, year], fill: 'borders', layers: (S.R.l || []).map(l => l.id), base: S.R.base || 'plain',
+    choices: { frame: year, period: [S.lo ?? year, year], fill: 'borders', layers: (S.R.l || []).map(l => l.id), base: S.R.base || 'plain',
       drawn: { borders: S.drawn.length, battles: S.drawnBattles.length, points: S.focusPoints.length }, battlesHeld: battlesInWindow(win).length,
       borderPrecision: p === 'c' ? 'VM counts the borders of this frame as known only to their century (rows.csv: status); their date and precision columns give the years as Cliopatria records them' : 'the years as Cliopatria records them',
       deployment: 'the site\'s address, not a per-deployment address (VM does not yet keep each day\'s page)',
@@ -461,20 +476,22 @@ async function openSaved(file) {
     const R = readRecipe(got['recipe.txt']);
     if (!R) throw new Error('its recipe is not VR/1');
     const fc = JSON.parse(got['features.geojson']);
-    let title = null;
-    try { title = JSON.parse(got['citation.csl.json'] || 'null')?.[0]?.title || null; } catch { title = null; }
-    // The saved view whole (E5): its recipe, its years and its slider, its title, and its address; never a mix of the
-    // live view's window and the saved frame.
+    // The saved view whole (E5): its recipe, its years and its slider, its heading, and its address; never a mix of
+    // the live view's window and the saved frame. The pin covers recipe.txt, rows.csv and features.geojson only, so what
+    // the page states as the view comes from those: the heading is made again from the recipe (the clicked object's
+    // name as VM holds it, and the recipe's years), never taken from the citation files, which the pin does not cover.
     S.mode = 'saved';
-    S.saved = { pin: p, made: meta.made, ids: fc.features.map(f => f.id).sort(), recipe: got['recipe.txt'], title: title || 'A saved Omni-Map view' };
+    S.saved = { pin: p, made: typeof meta.made === 'string' ? meta.made : null, ids: fc.features.map(f => f.id).sort(), recipe: got['recipe.txt'], title: '' };
     S.R = R;
     if (!S.R.show) S.R.show = 'frame';
     if (!S.R.step) S.R.step = 'y';
     S.boxSet = false;
-    const at = mountPeriod();
+    const { at, start } = mountPeriod();
     await loadSubject(R.q || null);
     await readRecords(unoutlined(R));
-    await setFrame(at, { fit: true, source: 'saved' });
+    const win = windowOf(R);
+    S.saved.title = `${S.subject || 'Omni-Map view'}, ${formatSpan(win.from, win.to)}`;
+    await setFrame(at, { start, fit: true, source: 'saved' });
     if (S.mode !== 'saved') return;
     if (S.map) {
       S.map.setBorders(fc.features.filter(f => f.geometry?.type !== 'Point').map(f => ({ ...f, properties: { ...f.properties, k: f.properties?.k || 'POLITY' } })), { focus: [] });
@@ -482,7 +499,10 @@ async function openSaved(file) {
       S.map.setPoints([]);
       S.map.labels([]);
     }
-    note.innerHTML = `Saved view, pin ${esc(p)}, made ${esc(meta.made)}: its frozen features are drawn (${S.saved.ids.length}); the lists beside it show today's data for its recipe. Moving the slider goes back to the live view.`;
+    // What the pin does not cover is said to be the file's own word, unchecked (review X2).
+    const made = S.saved.made ? `the time it gives (made ${esc(S.saved.made)}), ` : '';
+    note.innerHTML = `Saved view, pin ${esc(p)}: its recipe, rows and features match the pin, and its frozen features are drawn (${S.saved.ids.length}); the lists beside it show today's data for its recipe. `
+      + `Its other files are not covered by the pin, so ${made}its citations and its licence text are as the file gives them, unchecked; the heading is made from its recipe. Moving the slider goes back to the live view.`;
     publish();
   } catch (e) {
     note.textContent = `This file could not be opened as a saved view: ${e.message}.`;
@@ -499,21 +519,31 @@ function mountPeriod() {
   // The recipe's own year is a stop even when the step's stops pass it by (a decade step and at=1494), so the slider
   // always says the year the map shows, and the reader can come back to it (S4).
   if (!S.stops.includes(at)) S.stops = [...S.stops, at].sort((a, b) => a - b);
+  // The period's start the recipe names (since=), a stop too, so the view is drawn again from where the reader left it.
+  let since = yearOf(S.R.since);
+  if (since == null || since < win.from || since > at) since = null;
+  if (since != null && !S.stops.includes(since)) S.stops = [...S.stops, since].sort((a, b) => a - b);
   const size = step === 'c' ? 100 : step === '10y' ? 10 : 1;
   // Minor tick labels only where they fit (R10): a long track of yearly stops shows its key years alone.
   const minorText = S.stops.length <= 120;
   const ticks = S.stops.filter((y, i) => i === 0 || i === S.stops.length - 1 || y % (size * 10) === 0 || y % (size * 50) === 0)
     .map(y => ({ at: y, text: y % (size * 50) === 0 || minorText || y === S.stops[0] || y === S.stops.at(-1) ? formatYear(y) : '', kind: y % (size * 50) === 0 ? 'key' : 'minor' }));
-  if (!S.period) {
+  // Where the start rests follows the recipe's show (2.1 rule 4): a new recipe that changes it mounts the slider again.
+  const rest = S.R.show === 'upto' ? 'first' : 'end';
+  if (!S.period || S.periodRest !== rest) {
+    S.period?.stop();
+    S.periodRest = rest;
     S.period = P.mount($('#timeline'), {
-      stops: S.stops, from: null, to: at, rest: S.R.show === 'upto' ? 'first' : 'end', labels: y => formatYear(y), ticks,
+      stops: S.stops, from: since, to: at, rest, labels: y => formatYear(y), ticks,
       ids: { from: 'from', to: 'year', prev: 'prev', play: 'play', next: 'next' },
       names: { group: 'Year shown', from: 'First year of the period', to: 'Year shown', prev: 'Previous year', next: 'Next year' },
       play: { interval: 1200, label: 'Play through the years' },
       onChange: p => setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }),
     });
-  } else S.period.update({ stops: S.stops, ticks, from: null, to: at });
-  return at;
+  } else S.period.update({ stops: S.stops, ticks, from: since, to: at });
+  // A start on its rest (the first stop of an up-to view, the frame of a frame view) is no start: since= is not written.
+  const p = S.period.get();
+  return { at, start: p.atRest ? null : p.from };
 }
 
 /* ---------- start ---------- */
@@ -527,11 +557,11 @@ async function applyRecipe({ first = false } = {}) {
   if (!S.R.step) S.R.step = 'y';
   S.boxSet = false;
   if (S.mode === 'saved') leaveSaved();
-  const at = mountPeriod();
+  const { at, start } = mountPeriod();
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
   // the records of the places VM cannot outline give their names and points.
   await Promise.all([loadSubject(S.R.q || null), readRecords(unoutlined(S.R)), loadShelf(S.R)]);
-  await setFrame(at, { fit: true, source: first ? 'set' : 'hash' });
+  await setFrame(at, { start, fit: true, source: first ? 'set' : 'hash' });
 }
 async function init() {
   wire();

@@ -327,6 +327,31 @@ test('build-borders: its steps, on small fixtures (the archive check, the id, th
   assert.equal(B.itemYears(items.get('Q9')), null);
 });
 
+test('build-borders: a second run on unchanged inputs writes the same bytes; its `built` moves only with its content (review X7)', async () => {
+  const B = await import('../omni/scripts/build-borders.mjs');
+  assert.equal(typeof B.builtFor, 'function');
+  // Two runs, at 10:00 and at 10:05, of the same content: the second keeps the first's stamp, byte for byte.
+  const content = { format: 'vm-borders-index/1', version: 'v0.2.1', built: null, files: [{ file: '1400-1499.topo.json', sha256: 'ab'.repeat(32) }] };
+  const first = { ...content, built: B.builtFor(null, content, '2026-11-17T10:00:00Z') };
+  assert.equal(first.built, '2026-11-17T10:00:00Z', 'no file yet: the run\'s own time');
+  const again = { ...content, built: B.builtFor(JSON.parse(JSON.stringify(first)), content, '2026-11-17T10:05:00Z') };
+  assert.equal(JSON.stringify(again, null, 2), JSON.stringify(first, null, 2), 'the same bytes');
+  // A change of content (a file's sha256, a Wikidata reading) takes the new time.
+  const changed = { ...content, files: [{ file: '1400-1499.topo.json', sha256: 'cd'.repeat(32) }] };
+  assert.equal(B.builtFor(first, changed, '2026-11-17T10:05:00Z'), '2026-11-17T10:05:00Z');
+  assert.equal(B.builtFor({ ...first, built: 7 }, content, 'now'), 'now', 'a stamp that is not text is not kept');
+  // The committed files, rebuilt from the same inputs, keep their stamps: their recorded hashes and the views' pins stay.
+  for (const p of ['omni/data/borders/index.json', 'omni/data/borders/qids.json']) {
+    const committed = JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
+    assert.equal(B.builtFor(committed, { ...committed, built: null }, '2027-01-01T00:00:00Z'), committed.built, p);
+  }
+  // The builder writes each file through it, and the layer's stamp is the later of the two.
+  const src = readFileSync(join(ROOT, 'omni/scripts/build-borders.mjs'), 'utf8');
+  assert.match(src, /index\.built = builtFor\(readJson\(join\(OUT, 'index\.json'\)\), index, now\)/);
+  assert.match(src, /qids\.built = builtFor\(readJson\(join\(OUT, 'qids\.json'\)\), qids, now\)/);
+  assert.doesNotMatch(src, /const built = stamp\(\)/);
+});
+
 test('build-battles: dates keep their calendar and precision; a value\'s source line follows 5.1', async () => {
   const T = await import('../omni/scripts/build-battles.mjs');
   const cal = q => `http://www.wikidata.org/entity/${q}`;

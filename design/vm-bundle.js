@@ -134,6 +134,8 @@ export function readme(v) {
     '',
     'To verify the pin: join the three files recipe.txt, rows.csv and features.geojson, exactly as they are, with one',
     'newline (\\n) between each, and take the sha256 of the UTF-8 text. Its first 12 hex digits are the pin.',
+    'The pin covers those three files only. choices.json, metadata.json (the time, the deployment, the licences), this',
+    'README and the citation files are not covered by it: a change to them leaves the pin as it is.',
     '',
     'A live address draws today\'s data; only this bundle is exact. For a DOI, deposit this zip in Zenodo or OSF under',
     'your own account and cite that deposit. "Open a saved view" on the Omni-Map reads it from your computer (nothing',

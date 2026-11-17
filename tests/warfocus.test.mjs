@@ -1417,3 +1417,330 @@ test('page: a battle\'s window keeps its place while its detail loads, and a cou
     await page.close();
   }
 });
+
+// AC-5 (PRP-ALL-COUNTRIES-PLAN.md, section 3 and AC-5; Jude's request of 16 November 2026, AT-19 with AT-10): the map
+// says so. A drawn state on neither side of the war shown reads "<Country>: not on either side of this war."; a country
+// in none of War Focus's wars "<Country>: in none of War Focus’s <N> major wars. Its armed conflicts since 1946, if any,
+// are in the Retrospective Battlefield.", the panel repeating it with a link; the 22 states CShapes 2.0 has no border
+// for are the map kit's dots (design/prp-mapkit.js), each from its first day as a state, the day the Retrospective
+// Battlefield publishes for it (battlefield/history/data/wars.json `dots`, from battlefield/scripts/build-history.mjs).
+// Before it only the name showed, and the 22 were not drawn at all.
+const inAnyWar = async () => {
+  const index = await dataFile('battlefield/focus/data/index.json'), any = new Set();
+  for (const x of index.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    for (const gw of [...w.sides.a.states, ...w.sides.b.states, ...(w.control || [])].map(s => s.gw).concat(w.theatre || [])) any.add(gw);
+  }
+  return { index, any };
+};
+const inNone = (name, n, since) => `${name}: in none of War Focus’s ${n} major wars. Its armed conflicts since ${since}, if any, are in the Retrospective Battlefield.`;
+// The dots a month draws: those whose first day is on or before the day the page reads for it (its 15th). A first day
+// known only to its year (Tonga's 1970) counts from the next year, so a dot is never drawn before its state was one.
+const dotsBy = (rb, date) => Object.entries(rb.dots).filter(([, d]) => d.from == null || (d.from.length === 4 ? String(+d.from + 1) : d.from) <= date).map(([iso3]) => iso3).sort();
+// Before a test reads points on the map to move a real pointer to: prp-bar.js adds the VM bar after load (800 ms and an
+// idle moment later), moving the whole page down 36 px, so a point read before it lands on another state. Wait for the
+// bar, the fonts, and the map's top to stay put for half a second.
+const settled = async page => {
+  await page.waitForSelector('.jdpi-returnbar', { timeout: 15000 });
+  await page.evaluate(() => document.fonts.ready);
+  let last = null, same = 0;
+  for (let k = 0; k < 100 && same < 5; k++) {
+    const top = await page.evaluate(() => Math.round(document.querySelector('#map').getBoundingClientRect().top + scrollY));
+    same = top === last ? same + 1 : 0; last = top;
+    await page.waitForTimeout(100);
+  }
+};
+
+test('AC-5: War Focus takes its dots and their first days from the kit and the Retrospective Battlefield, and its sentences from the kit', async () => {
+  const src = readFileSync(new URL('../battlefield/focus/app.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../battlefield/focus/index.html', import.meta.url), 'utf8');
+  assert.ok(html.indexOf('../../design/prp-mapkit.js') > 0 && html.indexOf('../../design/prp-mapkit.js') < html.indexOf('src="app.js"'), 'the page loads the map kit before its own code');
+  assert.match(src, /PRPMapkit\.dots\('cshapes'\)/, 'the kit\'s dots for CShapes');
+  assert.match(src, /\.\.\/history\/data\/wars\.json/, 'the first days from the file the Retrospective Battlefield publishes');
+  assert.match(src, /PRPMapkit\.sentenceParts\(/, 'the sentence from the kit\'s builder');
+  const rb = await dataFile('battlefield/history/data/wars.json');
+  assert.equal(Object.keys(rb.dots).length, 22, 'the 22 states CShapes cannot draw');
+  // No second copy of the first days, and no count of the wars typed into the page.
+  for (const [iso3, d] of Object.entries(rb.dots)) if (d.from && d.from.length > 4) assert.ok(!src.includes(d.from), `${iso3}'s first day (${d.from}) is not typed into War Focus`);
+  assert.doesNotMatch(src, /\b\d+ major wars/, 'N is counted from the data');
+  // The kit gives section 3's two sentences exactly, with N from the index and the year from the Retrospective's file.
+  await import('../design/prp-mapkit.js');
+  const K = globalThis.PRPMapkit, index = await dataFile('battlefield/focus/data/index.json');
+  assert.equal(K.sentence({ name: 'Switzerland', reason: K.REASONS.NEITHER_SIDE }), 'Switzerland: not on either side of this war.');
+  assert.equal(K.sentence({ name: 'Switzerland', reason: K.REASONS.NEITHER_SIDE, wars: `War Focus’s ${index.wars.length} major wars`, also: `Its armed conflicts since ${rb.ucdpFrom}, if any, are in the Retrospective Battlefield` }),
+    inNone('Switzerland', index.wars.length, rb.ucdpFrom));
+});
+
+test('page (AC-5): a state in none of the wars, a dot, and a state on neither side of the war shown each say so; the panel repeats it with a link', pageTest, async t => {
+  const { index, any } = await inAnyWar(), rb = await dataFile('battlefield/history/data/wars.json'), N = index.wars.length;
+  assert.ok(!any.has(225) && !any.has(rb.dots.SMR.gw) && any.has(255), 'Switzerland and San Marino are in none of the wars; Germany is in one');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1939-09`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelectorAll('path.state').length > 10 && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
+  // The dots of September 1939: the states whose first day is by then (Andorra, Liechtenstein, Monaco, San Marino, the
+  // Holy See), from the Retrospective's table; the islands that became states later are not drawn.
+  assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort()), dotsBy(rb, '1939-09-15'));
+  const hover = sel => page.evaluate(s => {
+    const el = typeof s === 'number' ? d3.selectAll('path.state').filter(f => f.properties.gw === s).node() : document.querySelector(s), b = el.getBoundingClientRect();
+    el.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 }));
+  }, sel);
+  const tipIs = text => page.waitForFunction(x => !document.querySelector('#tooltip').hidden && document.querySelector('#tooltip').innerText.replace(/\s+/g, ' ').trim() === x, text, { timeout: 20000 })
+    .catch(async () => assert.fail(`the tooltip reads "${await page.locator('#tooltip').innerText()}", not "${text}"`));
+  await hover(225);
+  await tipIs(inNone('Switzerland', N, rb.ucdpFrom));
+  await hover('#map g.dot[data-iso3="SMR"]');
+  await tipIs(inNone('San Marino', N, rb.ucdpFrom));
+  // Selected, the panel repeats it, with the link to the Retrospective Battlefield's years since 1946 for that state.
+  await page.evaluate(() => d3.selectAll('path.state').filter(f => f.properties.gw === 225).dispatch('click'));
+  await page.waitForSelector('#panel .nodata-note', { timeout: 10000 });
+  assert.equal((await page.locator('#panel .nodata-note p').innerText()).replace(/\s+/g, ' ').trim(), inNone('Switzerland', N, rb.ucdpFrom));
+  const href = await page.locator('#panel .nodata-note a').getAttribute('href');
+  assert.match(href, new RegExp(`battlefield/history/index\\.html#y=${rb.lastYear}&f=${rb.ucdpFrom}&c=225$`), href);
+  assert.equal(await page.locator('#panel .nodata-note a').innerText(), 'Retrospective Battlefield');
+  // A state on a side clears it; the war's panel is as before.
+  await page.evaluate(() => d3.selectAll('path.state').filter(f => f.properties.gw === 200).dispatch('click'));
+  assert.equal(await page.locator('#panel .nodata-note').count(), 0);
+  assert.match(await page.locator('#panel h2').innerText(), /World War II/);
+  // A state in another war but on neither side of this one: the Winter War's Germany.
+  await page.evaluate(() => { location.hash = '#war=winter-war&m=1940-01'; });
+  await page.waitForFunction(() => /Winter War/.test(document.querySelector('#panel h2')?.textContent || '') && document.querySelector('#date')?.textContent === 'January 1940', null, { timeout: 20000 });
+  await hover(255);
+  await tipIs('Germany: not on either side of this war.');
+  // A state on a side keeps its side, as before.
+  await hover(375);
+  const fin = await page.locator('#tooltip').innerText();
+  assert.match(fin, /^Finland/);
+  assert.doesNotMatch(fin, /either side|none of/);
+  assert.deepEqual(errors, []);
+});
+
+test('page (AC-5): a dot appears from its state\'s first day; at 390 wide a finger taps one; it never takes a battle\'s click; the dark theme holds', pageTest, async t => {
+  const rb = await dataFile('battlefield/history/data/wars.json');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  // The Gulf War (1990–91): the Federated States of Micronesia and the Marshall Islands (1986) are drawn, Palau (1994) is not.
+  const desk = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  desk.on('pageerror', e => errors.push(e.message));
+  await desk.goto(`${BASE}/battlefield/focus/#war=gulf-war&m=1990-12`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await desk.waitForFunction(() => document.querySelector('#date')?.textContent === 'December 1990' && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
+  const gulf = await desk.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
+  assert.deepEqual(gulf, dotsBy(rb, '1990-12-15'));
+  assert.ok(gulf.includes('FSM') && gulf.includes('MHL') && !gulf.includes('PLW'), gulf.join(' '));
+  // Italy, September 1944: wherever a battle's mark is, the mark is what a click there finds, never a dot.
+  await desk.goto(`${BASE}/battlefield/focus/#war=ww2&m=1944-09`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await desk.waitForFunction(() => document.querySelector('#date')?.textContent === 'September 1944' && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
+  const taken = await desk.evaluate(() => {
+    const out = [];
+    let checked = 0;
+    const dots = [...document.querySelectorAll('#map g.dot .dot-hit, #map .dot-sea')].map(d => d.getBoundingClientRect());
+    for (const c of document.querySelectorAll('#map circle.battle')) {
+      const b = c.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+      if (!dots.some(r => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom)) continue;
+      checked++;
+      const hit = document.elementFromPoint(x, y);
+      if (hit?.closest('g.dot') || hit?.classList.contains('dot-sea')) out.push(d3.select(c).datum().n);
+    }
+    return { checked, out };
+  });
+  assert.ok(taken.checked > 0, 'some battle marks lie on a dot (Italy, 1944)');
+  assert.deepEqual(taken.out, [], 'a dot over a battle\'s mark');
+  await desk.close();
+  // A phone, in the dark theme: San Marino's dot, tapped, gives its sentence, and the panel repeats it.
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, colorScheme: 'dark' });
+  phone.on('pageerror', e => errors.push(e.message));
+  await phone.goto(`${BASE}/battlefield/focus/#war=ww2&m=1939-09`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await phone.waitForFunction(() => document.querySelectorAll('path.state').length > 10 && document.querySelector('#map g.dot[data-iso3="SMR"]'), null, { timeout: 20000 });
+  await settled(phone);
+  await phone.locator('#map').scrollIntoViewIfNeeded();
+  const centre = () => phone.evaluate(() => { const el = document.querySelector('#map g.dot[data-iso3="SMR"] .dot-hit'), b = el.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+    return { x, y, w: b.width, top: document.elementFromPoint(x, y)?.closest('g.dot')?.dataset.iso3 || null }; });
+  // On the whole world San Marino's dot and the Holy See's overlap, as their states nearly touch, and over Italy's land a
+  // dot's target is only the dot (and 2 px), so it does not take Italy: the map is zoomed on San Marino (the wheel, as
+  // on a desktop, for a pinch) until its dot is the one under the finger and Italy is large enough to spare it a
+  // finger's width.
+  let at = await centre();
+  for (let k = 0; k < 12 && (at.top !== 'SMR' || at.w < 24); k++) { await phone.mouse.move(at.x, at.y); await phone.mouse.wheel(0, -400); await phone.waitForTimeout(150); at = await centre(); }
+  assert.equal(at.top, 'SMR', 'San Marino\'s dot under the finger');
+  assert.ok(at.w >= 24, `the dot's target is a finger's width (${at.w} px)`);
+  await phone.touchscreen.tap(at.x, at.y);
+  await phone.waitForSelector('#panel .nodata-note', { timeout: 20000 });
+  await phone.waitForFunction(() => /^San Marino: in none of War Focus’s \d+ major wars\./.test(document.querySelector('#panel .nodata-note p')?.textContent || ''), null, { timeout: 20000 });
+  // The dot is drawn in the theme's own land colour and outline, like a state on neither side.
+  const look = await phone.evaluate(() => {
+    const mark = getComputedStyle(document.querySelector('#map g.dot[data-iso3="SMR"] .dot-mark')), che = getComputedStyle(d3.selectAll('path.state').filter(f => f.properties.gw === 225).node());
+    return { dark: matchMedia('(prefers-color-scheme: dark)').matches, fill: mark.fill, land: che.fill, stroke: mark.stroke, sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+  });
+  assert.ok(look.dark, 'the dark theme');
+  assert.equal(look.fill, look.land, 'the dot is filled with the dark theme\'s land');
+  assert.notEqual(look.stroke, 'none');
+  assert.equal(look.sideways, 0, 'nothing scrolls sideways');
+  assert.deepEqual(errors, []);
+});
+
+// AC-5 review (H1, M2): a real pointer, as a reader moves it. Over the land a dot takes the pointer only on the dot and
+// 2 px round it, so it never takes the states round it beyond what it covers; before, a clear target 26 px across round
+// each dot took most of Italy and Switzerland at the opening view of World War II (the Holy See answered for Italy,
+// Monaco for Switzerland).
+test('page (AC-5): a real pointer on Italy and Switzerland finds them, not a dot\'s target; on a dot, the dot', pageTest, async t => {
+  const { index } = await inAnyWar(), rb = await dataFile('battlefield/history/data/wars.json'), N = index.wars.length;
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1940-07`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'July 1940' && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
+  await settled(page);
+  await page.locator('#map').scrollIntoViewIfNeeded();
+  // Each pixel of a state's land where a dot is on top lies within the dot and 2 px of its centre (DOT_R + 2, and 1.5
+  // more for the pixel grid); the point returned is one of the state's own, clear of every dot, nearest its middle.
+  const survey = gw => page.evaluate(gw => {
+    const el = d3.selectAll('path.state').filter(f => f.properties.gw === gw).node(), b = el.getBoundingClientRect(), inv = el.getScreenCTM().inverse();
+    const map = document.querySelector('#map').getBoundingClientRect();
+    const dots = [...document.querySelectorAll('#map g.dot .dot-mark')].map(m => { const r = m.getBoundingClientRect(); return { iso3: m.parentNode.dataset.iso3, x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+    const reach = 3.2 + 2 + 1.5, far = [], mid = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    let own = null, land = 0;
+    for (let x = Math.ceil(Math.max(b.left, map.left)); x < Math.min(b.right, map.right); x++) for (let y = Math.ceil(Math.max(b.top, map.top)); y < Math.min(b.bottom, map.bottom); y++) {
+      if (!el.isPointInFill(new DOMPoint(x, y).matrixTransform(inv))) continue;
+      land++;
+      const top = document.elementFromPoint(x, y), dot = top?.closest('g.dot')?.dataset.iso3 || (top?.classList.contains('dot-sea') ? top.dataset.iso3 : null);
+      if (dot) { const d = dots.find(z => z.iso3 === dot); if (Math.hypot(x - d.x, y - d.y) > reach) far.push(`${dot} at ${x},${y}`); continue; }
+      if (top === el && dots.every(d => Math.hypot(x - d.x, y - d.y) > 9) && (!own || Math.hypot(x - mid.x, y - mid.y) < Math.hypot(own.x - mid.x, own.y - mid.y))) own = { x, y };
+    }
+    return { land, far: far.slice(0, 5), own, dots };
+  }, gw);
+  const tipText = () => page.evaluate(() => (document.querySelector('#tooltip').hidden ? '' : document.querySelector('#tooltip').innerText.replace(/\s+/g, ' ').trim()));
+  // The tooltip starts with `start` and has each of `has` (the page's CSP allows no eval, so no function is passed in).
+  const tipIs = (start, has = []) => page.waitForFunction(([start, has]) => { const t = document.querySelector('#tooltip'), s = t.innerText.replace(/\s+/g, ' ').trim(); return !t.hidden && s.startsWith(start) && has.every(h => s.includes(h)); }, [start, has], { timeout: 20000 })
+    .catch(async () => assert.fail(`the tooltip reads "${await tipText()}", not "${start}…"`));
+  // Italy, at the war's opening view: its own land answers with its side, and a click there puts no note in the panel.
+  const italy = await survey(325);
+  assert.ok(italy.land > 100, `Italy is drawn (${italy.land} px)`);
+  assert.deepEqual(italy.far, [], 'no dot takes Italy\'s land beyond the dot itself');
+  assert.ok(italy.own, 'a point of Italy clear of the dots');
+  await page.mouse.move(italy.own.x, italy.own.y);
+  await tipIs('Italy', ['Axis']);
+  assert.doesNotMatch(await tipText(), /either side|none of/);
+  await page.mouse.click(italy.own.x, italy.own.y);
+  assert.equal(await page.locator('#panel .nodata-note').count(), 0, 'Italy is on a side: no note');
+  // The Holy See's dot, pointed at, is the Holy See.
+  // Each dot's point is read again just before the pointer moves to it.
+  const dotAt = iso3 => page.evaluate(i => { const r = document.querySelector(`#map g.dot[data-iso3="${i}"] .dot-mark`).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, iso3);
+  const vat = await dotAt('VAT');
+  await page.mouse.move(vat.x, vat.y);
+  await tipIs('Vatican City: ');
+  // Switzerland is 12 px wide at that view, so the map is zoomed on it (the wheel) until it has land clear of
+  // Liechtenstein's dot; its own land then gives its own sentence, and Liechtenstein's dot its.
+  let swiss = await survey(225);
+  for (let k = 0; k < 6 && !swiss.own; k++) {
+    const b = await page.evaluate(() => { const r = d3.selectAll('path.state').filter(f => f.properties.gw === 225).node().getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+    await page.mouse.move(b.x, b.y); await page.mouse.wheel(0, -400); await page.waitForTimeout(300);
+    swiss = await survey(225);
+  }
+  assert.deepEqual(swiss.far, [], 'no dot takes Switzerland\'s land beyond the dot itself');
+  assert.ok(swiss.own, 'a point of Switzerland clear of the dots');
+  await page.mouse.move(swiss.own.x, swiss.own.y);
+  const want = inNone('Switzerland', N, rb.ucdpFrom);
+  await page.waitForFunction(x => !document.querySelector('#tooltip').hidden && document.querySelector('#tooltip').innerText.replace(/\s+/g, ' ').trim() === x, want, { timeout: 20000 })
+    .catch(async () => assert.fail(`the tooltip reads "${await tipText()}", not "${want}"`));
+  await page.mouse.click(swiss.own.x, swiss.own.y);
+  await page.waitForFunction(() => /^Switzerland: /.test(document.querySelector('#panel .nodata-note p')?.textContent || ''), null, { timeout: 10000 });
+  const lie = await dotAt('LIE');
+  await page.mouse.move(lie.x, lie.y);
+  await tipIs('Liechtenstein: in none of War Focus');
+  assert.deepEqual(errors, []);
+});
+
+// AC-5 review 2 (F2): a state in the war shown at another time, but on no side in the months shown, says so with the
+// month; before, it showed only its name and a click put nothing in the panel. The United States joined World War II
+// on 8 December 1941 and Turkey on 23 February 1945 (data/wars/ww2.json, side a).
+test('page (AC-5): a state in the war at another time but on no side in the months shown says so, with the months', pageTest, async t => {
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  const joined = gw => ww2.sides.a.states.find(s => s.gw === gw)?.from;
+  assert.ok(joined(2) > '1939-09-30' && joined(2) < '1942-06-01', `the United States joined between (${joined(2)})`);
+  assert.ok(joined(640) > '1943-11-30', `Turkey joined after November 1943 (${joined(640)})`);
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1939-09`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'September 1939' && document.querySelectorAll('path.state').length > 10, null, { timeout: 20000 });
+  const hover = gw => page.evaluate(gw => {
+    const el = d3.selectAll('path.state').filter(f => f.properties.gw === gw).node(), b = el.getBoundingClientRect();
+    el.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 }));
+  }, gw);
+  const tipText = () => page.evaluate(() => (document.querySelector('#tooltip').hidden ? '' : document.querySelector('#tooltip').innerText.replace(/\s+/g, ' ').trim()));
+  const tipIs = text => page.waitForFunction(x => !document.querySelector('#tooltip').hidden && document.querySelector('#tooltip').innerText.replace(/\s+/g, ' ').trim() === x, text, { timeout: 20000 })
+    .catch(async () => assert.fail(`the tooltip reads "${await tipText()}", not "${text}"`));
+  await hover(2);
+  await tipIs('United States: not on either side of this war in September 1939.');
+  // Selected, the panel repeats it (no link: the state is in this war).
+  await page.evaluate(() => d3.selectAll('path.state').filter(f => f.properties.gw === 2).dispatch('click'));
+  await page.waitForSelector('#panel .nodata-note', { timeout: 10000 });
+  assert.equal((await page.locator('#panel .nodata-note p').innerText()).replace(/\s+/g, ' ').trim(), 'United States: not on either side of this war in September 1939.');
+  assert.equal(await page.locator('#panel .nodata-note a').count(), 0);
+  // In a month it is on a side, the note goes and the tooltip gives its side, as before.
+  await page.evaluate(() => { location.hash = '#war=ww2&m=1942-06'; });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'June 1942', null, { timeout: 20000 });
+  await page.waitForFunction(() => !document.querySelector('#panel .nodata-note'), null, { timeout: 10000 });
+  await hover(2);
+  await page.waitForFunction(() => /^United States/.test(document.querySelector('#tooltip').innerText) && !/either side/.test(document.querySelector('#tooltip').innerText), null, { timeout: 10000 })
+    .catch(async () => assert.fail(`the tooltip reads "${await tipText()}"`));
+  // Over a period in which it held no side: the period's first and last months.
+  await page.evaluate(() => { location.hash = '#war=ww2&f=1943-06&m=1943-11'; });
+  await page.waitForFunction(() => /Jun – Nov 1943/.test(document.querySelector('#date')?.textContent || ''), null, { timeout: 20000 });
+  await hover(640);
+  await tipIs('Turkey: not on either side of this war between June 1943 and November 1943.');
+  assert.deepEqual(errors, []);
+});
+
+// AC-5 review (M2, L1, L3): the plan's dots with battles. Kiribati and the Marshall Islands became states in 1979 and
+// 1986, so in World War II their dots are not drawn, and the battles of Tarawa and Kwajalein are marked and take a click.
+// A dot's sea target is a finger's width on screen at 1024 wide too. Tonga, whose first day is known only to its year
+// (1970), is not drawn in 1970.
+test('page (AC-5): the Pacific war draws no dot for a later state and its battles take their clicks; a year-only first day counts from the next year', pageTest, async t => {
+  const rb = await dataFile('battlefield/history/data/wars.json');
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1024, height: 768 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1944-02`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'February 1944' && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
+  await settled(page);
+  await page.locator('#map').scrollIntoViewIfNeeded();
+  const drawn = await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
+  assert.deepEqual(drawn, dotsBy(rb, '1944-02-15'));
+  for (const iso3 of ['KIR', 'MHL', 'FSM', 'PLW', 'NRU']) assert.ok(!drawn.includes(iso3), `${iso3} is not yet a state in February 1944`);
+  const sea = await page.evaluate(() => document.querySelector('#map .dot-sea').getBoundingClientRect().width);
+  assert.ok(sea >= 24, `a dot's target over the sea is a finger's width at 1024 wide (${sea} px)`);
+  // At its mark's centre the pointer finds a battle (Tarawa's lies under Makin's, two days and a few miles apart), never a
+  // dot, and a click opens that battle's record.
+  for (const name of ['Battle of Tarawa', 'Battle of Kwajalein']) {
+    const at = await page.evaluate(n => {
+      const c = d3.selectAll('#map circle.battle').filter(b => b.n === n).node(); if (!c) return null;
+      const r = c.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, top = document.elementFromPoint(x, y);
+      return { x, y, battle: top?.matches('circle.battle') ? d3.select(top).datum().n : null, dot: !!(top?.closest('g.dot') || top?.classList.contains('dot-sea')) };
+    }, name);
+    assert.ok(at, `${name} is marked`);
+    assert.ok(at.battle && !at.dot, `a battle's mark is what the pointer finds at ${name}'s`);
+    await page.mouse.click(at.x, at.y);
+    await page.waitForFunction(n => !document.querySelector('#modal').hidden && document.querySelector('#modal-title').textContent === n, at.battle, { timeout: 10000 });
+    await page.click('#modal-close');
+    await page.waitForFunction(() => document.querySelector('#modal').hidden, null, { timeout: 10000 });
+  }
+  // Tonga: its first day is "1970" in the Retrospective's table, so it is drawn from January 1971, never in 1970.
+  assert.equal(rb.dots.TON.from, '1970');
+  await page.evaluate(() => { location.hash = '#war=cambodian-civil-war&m=1970-04'; });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'April 1970', null, { timeout: 20000 });
+  const cambodia = await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
+  assert.deepEqual(cambodia, dotsBy(rb, '1970-04-15'));
+  assert.ok(!cambodia.includes('TON') && cambodia.includes('WSM') && cambodia.includes('NRU'), cambodia.join(' '));
+  assert.deepEqual(errors, []);
+});

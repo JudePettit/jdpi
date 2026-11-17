@@ -74,8 +74,18 @@
 .legend .changed { background: transparent; box-shadow: none; border: 1.5px dashed var(--prp-text); }
 .legend .earlier { background: color-mix(in srgb, var(--side-b) 42%, var(--prp-map-land)); box-shadow: none; border: 1px dashed var(--prp-text-2); }
 .legend .clash { background: color-mix(in srgb, var(--clash) 55%, var(--prp-surface)); box-shadow: inset 0 0 0 1px var(--clash); }
+/* The states CShapes has no border for, as the map kit's dots (AC-5): filled like any state (by side, or the land), ringed
+   so a dot on neither side shows on the land around it. Its target over the land is the dot and a little round it
+   (.dot-hit); its finger-wide target lies under the states, so it takes only the sea (.dot-sea; app.js sizeMarks). */
+.dot-hit, .dot-sea { fill: transparent; stroke: none; pointer-events: all; cursor: pointer; }
+.state.dot-mark { stroke: var(--prp-text-2); stroke-width: .8; pointer-events: none; }
+.legend .no-border { background: var(--prp-map-land); box-shadow: inset 0 0 0 1px var(--prp-text-2); }
 
 /* Panel */
+/* A selected state in no part of the war: its sentence, repeated from the map, over the war's panel (AC-5). */
+.panel .nodata-note { margin: 0 0 14px; padding: 9px 10px 9px 12px; background: var(--prp-surface-2); border: 1px solid var(--prp-line-soft); border-radius: var(--prp-radius-sm); }
+.panel .nodata-note p { margin: 0; color: var(--prp-text-2); font-size: 13px; line-height: 1.5; }
+.panel .nodata-note p b { color: var(--prp-text); font-weight: 600; }
 .side-chip { display: inline-flex; align-items: center; gap: 7px; margin: 6px 0 1px; color: var(--prp-text); font-size: 13px; }
 .side-chip i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px var(--prp-map-border); }
 .side-list { color: var(--prp-text-2); font-size: 12.5px; line-height: 1.55; }

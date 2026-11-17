@@ -27,7 +27,7 @@ import { monthInsight, country } from './realtime-insight.mjs';
 const [csvPath, version = ''] = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const rows = parseCsv(readFileSync(csvPath, 'utf8'));
 // An empty download, an error page or a re-shaped file would otherwise build quietly into zeros or "other" wars.
-const COLUMNS = ['date_start', 'date_end', 'date_prec', 'best', 'deaths_civilians', 'conflict_new_id', 'conflict_name', 'dyad_name', 'type_of_violence', 'country', 'region', 'adm_1', 'latitude', 'longitude'];
+const COLUMNS = ['date_start', 'date_end', 'date_prec', 'best', 'deaths_civilians', 'conflict_new_id', 'conflict_name', 'dyad_name', 'type_of_violence', 'country', 'country_id', 'region', 'adm_1', 'latitude', 'longitude'];
 if (!rows.length) throw new Error(`${csvPath} has no events`);
 const missing = COLUMNS.filter(k => !(k in rows[0]));
 if (missing.length) throw new Error(`${csvPath} is not a UCDP candidate events file this build can read: no ${missing.join(', ')}`);
@@ -112,10 +112,10 @@ const { gw: isoOfGw } = gwTable(JSON.parse(readFileSync(new URL('../../national/
 // filed under it; without it, a later one would leave Taiwan's shape saying no events were recorded.
 const GW_NOT_IN_NATIONAL = Object.freeze({ 713: 'TWN' });
 const countries = {};
-let countryDeaths = 0;
+let countryDeaths = 0, uncoded = 0;
 for (const e of events) {
   const gw = gwOf(e);
-  if (!gw) continue;
+  if (!gw) { uncoded++; continue; }
   const c = countries[gw] || (countries[gw] = { name: country(e.country), events: [], conflicts: new Set() });
   c.events.push(e); c.conflicts.add(+e.conflict_new_id); countryDeaths += +e.best || 0;
 }
@@ -159,6 +159,9 @@ const sum = a => a.reduce((s, x) => s + x, 0);
 refuseIfLost([
   ...out.filter(w => sum(w.series.deaths) !== w.deaths).map(w => `${w.id}: series deaths ${sum(w.series.deaths)} ≠ ${w.deaths}`),
   ...(sum(Object.values(countries).map(c => sum(c.series.deaths))) !== countryDeaths ? [`countries' series deaths ≠ ${countryDeaths}`] : []),
+  // An event with no readable country code is in the wars' totals and in no country: the country layer would then say
+  // "no events recorded" over recorded violence. The comparison above cannot see it (both sides leave the event out).
+  ...(uncoded ? [`${uncoded} of ${events.length} events have no country code (country_id), so the countries would not add up to the total`] : []),
 ]);
 mkdirSync(new URL('../data/', import.meta.url), { recursive: true });
 writeFileSync(OUT, JSON.stringify(data));

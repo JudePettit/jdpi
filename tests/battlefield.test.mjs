@@ -362,6 +362,17 @@ test('Realtime data: every event UCDP records is in a war or warzone; a group un
   assert.doesNotMatch(readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8'), /deaths < 25\) continue/, 'no group is dropped for its size');
 });
 
+test('the builder refuses a file whose events cannot all be filed under a country', () => {
+  const src = readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8');
+  assert.match(src.match(/const COLUMNS = \[[^\]]+\]/)[0], /'country_id'/, 'country_id is a column the build requires');
+  assert.match(src, /if \(!gw\) \{ uncoded\+\+; continue; \}/, 'an event with no readable code is counted, not passed over');
+  assert.match(src, /\.\.\.\(uncoded \? \[`\$\{uncoded\} of \$\{events\.length\} events have no country code/, 'and the count stops the write');
+  const r = JSON.parse(readFileSync(new URL('../battlefield/data/realtime.json', import.meta.url), 'utf8'));
+  const all = Object.values(r.countries);
+  assert.equal(all.reduce((s, c) => s + c.events, 0), r.totals.events, 'every event of the year is in a country');
+  assert.equal(all.reduce((s, c) => s + c.deaths, 0), r.totals.deaths, 'and every death');
+});
+
 test('Realtime data: every country UCDP records is in the countries table, by its code and ISO3, and in some war', async () => {
   const r = REALTIME, n = r.months.length, wars = new Map(r.wars.map(w => [w.id, w])), vm = new Set(await VM197());
   assert.ok(r.countries && Object.keys(r.countries).length, 'the file has the countries table the present builder writes');

@@ -141,7 +141,7 @@
       "id": "the-end",
       "title": "The end, December 1991",
       "narration": "On 8 December the leaders of Russia, Ukraine and Belarus met at a hunting lodge in the Belovezha forest and declared that the Soviet Union had ceased to exist, creating in its place a Commonwealth of Independent States. On 21 December eleven republics confirmed the decision at Alma-Ata. Gorbachev resigned on 25 December, and the next day the upper house of the Soviet parliament voted the Union out of existence.",
-      "visual": { "kind": "quote", "text": "With the formation of the Commonwealth of Independent States the USSR ceases to exist.", "who": "Alma-Ata Declaration, signed by eleven former Soviet republics", "when": "21 December 1991", "cite": "almaata-1991" },
+      "visual": { "kind": "summary", "text": "The eleven republics declared that, with their new Commonwealth of Independent States formed, the Soviet Union no longer existed. The Commonwealth was not to be a state or a super-state, and its members undertook to honour the old Union's treaties.", "of": "Alma-Ata Declaration, signed by eleven former Soviet republics", "when": "21 December 1991", "cite": "almaata-1991" },
       "link": { "label": "Master Index · Belovezh Accords", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q76986" },
       "cites": ["almaata-1991", "plokhy-2014"]
     },

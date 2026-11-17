@@ -35,7 +35,7 @@ Adam Smith (1723–1790) was a Scottish moral philosopher. His _Theory of Moral 
 - **Division of labour.** In Smith's pin factory, ten workers who each specialise in one step make thousands of times more pins than if each made whole pins alone. Specialisation, limited by the size of the market, is the main source of rising productivity.
 - **Self-interest and exchange.** People trade because both sides gain.
 
-> "It is not from the benevolence of the butcher, the brewer, or the baker, that we expect our dinner, but from their regard to their own interest." — Adam Smith, The Wealth of Nations (1776)
+> "It is not from the benevolence of the butcher, the brewer, or the baker that we expect our dinner, but from their regard to their own interest." — Adam Smith, The Wealth of Nations (1776)
 
 - **The invisible hand.** Individuals seeking their own gain in competitive markets are "led by an invisible hand" to promote the public good, which was no part of their intention. Prices coordinate millions of decisions without central direction.
 - **Against mercantilism.** National wealth is not a stock of gold and silver but the goods and services people can consume. Tariffs and monopolies protect merchants at the public's expense, so Smith favoured free trade.
@@ -82,7 +82,7 @@ Smith's successors built the **classical school**:
 ## Marx's critique of capitalism
 Karl Marx (1818–1883), a German philosopher, economist and revolutionary, wrote _The Communist Manifesto_ (1848, with Friedrich Engels) and _Capital_ (volume 1, 1867). He lived much of his life in London.
 
-> "The history of all hitherto existing society is the history of class struggles." — Marx and Engels, The Communist Manifesto (1848)
+> "The history of all hitherto existing society is the history of class struggles." — Marx and Engels, The Communist Manifesto (1848), translated by Samuel Moore (1888)
 
 ### The main ideas
 - **Historical materialism.** The way a society produces its material needs (its "mode of production") shapes its politics, law and ideas. Societies move through stages (feudalism, capitalism, then, Marx predicted, socialism) driven by conflict between classes.
@@ -90,9 +90,7 @@ Karl Marx (1818–1883), a German philosopher, economist and revolutionary, wrot
 - **Labour theory of value and surplus value.** Building on Smith and Ricardo, Marx argued that labour creates value. Workers produce more value in a day than they are paid in wages; the difference, **surplus value**, is taken as profit. That is what Marx meant by **exploitation**: not necessarily low pay, but the structural capture of surplus value.
 - **Accumulation and crisis.** Competition forces capitalists to keep investing and replacing workers with machines. Marx argued this tends to lower the rate of profit, keeps a "reserve army" of unemployed workers, and produces recurring crises of overproduction.
 - **Alienation.** Workers are cut off from the products of their work, from the work itself and from each other.
-- **The future.** Marx expected workers to overthrow capitalism and, after a transitional stage, create a classless society organised on the principle:
-
-> "From each according to his ability, to each according to his needs." — Marx, Critique of the Gotha Programme (1875)
+- **The future.** Marx expected workers to overthrow capitalism and, after a transitional stage, create a classless society. In the _Critique of the Gotha Programme_ (1875) he wrote that only in its higher phase, once work had become a need of life and wealth flowed more abundantly, could society take from each person what they were able to give and give to each what they needed.
 
 ? In Marx's theory, what is "surplus value"?
 * The profit a shop makes from raising prices
@@ -136,7 +134,7 @@ John Maynard Keynes (1883–1946) was a British economist, civil servant and inv
 ### Policy
 In a slump the government should **borrow and spend** (or cut taxes) to replace missing private demand, and run surpluses in booms. Keynes also helped design the post-war **Bretton Woods** system of fixed exchange rates, the IMF and the World Bank (1944).
 
-> "In the long run we are all dead." — Keynes, A Tract on Monetary Reform (1923), criticising economists who promise that markets will eventually correct themselves
+Keynes wrote in _A Tract on Monetary Reform_ (1923) that the long run is a poor guide to the present, since in the long run everyone is dead: economists who can only say that the sea will be calm once the storm is over, he argued, give themselves too easy and too useless a task.
 
 ? According to the paradox of thrift, what can happen if everyone tries to save more during a recession?
 * Interest rates must rise
@@ -194,7 +192,7 @@ Mises, and later **Friedrich Hayek** (Nobel Prize, 1974), developed the **Austri
 4. When credit tightens or prices rise, the projects are revealed as unprofitable and the **bust** begins.
 5. The recession is the necessary **liquidation** of malinvestment. Bailouts and stimulus only delay it and set up the next bubble.
 
-> "There is no means of avoiding the final collapse of a boom brought about by credit expansion." — Mises, Human Action (1949)
+Mises argued in _Human Action_ (1949) that a boom built on credit expansion must end in collapse: the only choice is whether the crisis comes sooner, because the expansion is given up, or later, as a total catastrophe for the currency.
 
 Hayek also argued (_The Use of Knowledge in Society_, 1945) that the knowledge needed to run an economy is dispersed, local and often unspoken; market prices summarise it in a way no planner can. In _The Road to Serfdom_ (1944) he warned that central planning leads to political tyranny. Murray Rothbard later pushed the school towards anarcho-capitalism.
 
@@ -222,7 +220,7 @@ $ M × V = P × Y      (money × velocity = price level × real output)
 
 If velocity is fairly stable and output grows at its own pace, faster money growth mostly produces higher prices.
 
-> "Inflation is always and everywhere a monetary phenomenon." — Milton Friedman
+Friedman held (_The Counter-Revolution in Monetary Theory_, 1970) that inflation is in every case a monetary matter: it arises only when the quantity of money grows faster than output.
 
 - **The Great Depression was a monetary failure.** In _A Monetary History of the United States, 1867–1960_ (1963, with Anna Schwartz), Friedman showed the US money stock fell by about a third between 1929 and 1933 as banks failed, and argued the Federal Reserve turned a recession into a depression by not stopping it.
 - **The natural rate of unemployment.** In 1967–68 Friedman (and Edmund Phelps) argued there is no lasting trade-off between inflation and unemployment: once people expect higher inflation, unemployment returns to its natural rate and only inflation remains higher. Stagflation in the 1970s seemed to confirm this.

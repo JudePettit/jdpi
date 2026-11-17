@@ -4,7 +4,7 @@ intro: A practical, university-style course in geospatial and imagery intelligen
 # Unit 1 · Foundations
 
 ## What GEOINT and IMINT are, and their limits
-**Geospatial intelligence (GEOINT)** is intelligence about places: what is where, how large it is, what lies around it and how it changes. **Imagery intelligence (IMINT)** is the part of it that comes from pictures of the Earth, taken from satellites, aircraft and drones or on the ground. The term GEOINT spread after 2003, when the US National Imagery and Mapping Agency was renamed the National Geospatial-Intelligence Agency, and US law defines it as "the exploitation and analysis of imagery and geospatial information" to describe, assess and depict physical features and activities on the Earth.
+**Geospatial intelligence (GEOINT)** is intelligence about places: what is where, how large it is, what lies around it and how it changes. **Imagery intelligence (IMINT)** is the part of it that comes from pictures of the Earth, taken from satellites, aircraft and drones or on the ground. The term GEOINT spread after 2003, when the US National Imagery and Mapping Agency was renamed the National Geospatial-Intelligence Agency, and US law defines it as making use of imagery and geographic information, and analysing them, to describe, assess and depict physical features and activities on the Earth.
 
 For an open-source analyst the work comes down to three questions: **where** is this, **when** was it taken, and **what has changed**? Answering them draws on three kinds of material:
 - **Imagery**: satellite scenes, aerial and drone photographs, and photos and video taken on the ground.

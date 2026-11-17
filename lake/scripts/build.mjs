@@ -22,6 +22,7 @@ import { wikidataDate, datedFacts, bestClaim, centuryTag } from './dates.mjs';
 import { shortCounts, recount } from './counts.mjs';
 import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
+import { typeOf } from './types.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpiDir = resolve(here, '../..');
@@ -155,25 +156,7 @@ const REL = { P27: 'Citizenship', P17: 'Country', P102: 'Party', P1142: 'Ideolog
 // Facets for the Explorer's tag filters: Wikidata relations shown as tags.
 const TAG_FACETS = { P106: 'Occupation', P101: 'Field', P135: 'Movement', P1142: 'Ideology', P102: 'Party', P39: 'Position held', P607: 'Conflict', P463: 'Member of' };
 const PAGE_RELATIONS = ['P102', 'P1142', 'P135', 'P17', 'P27', 'P607', 'P737']; // related entities that get their own pages
-const PERSON = new Set(['Q5']), CONFLICT = new Set(['Q198', 'Q180684', 'Q350604', 'Q178561', 'Q8465', 'Q103495', 'Q645883', 'Q1261499', 'Q124734', 'Q831663', 'Q2001676', 'Q1006311', 'Q3119160', 'Q188055']);
-const PLACE = new Set(['Q6256', 'Q3624078', 'Q3024240', 'Q7275', 'Q48349', 'Q417175', 'Q1250464', 'Q133442', 'Q1763527', 'Q107390', 'Q35657', 'Q34876', 'Q515', 'Q5119', 'Q15634554', 'Q28171280', 'Q112099', 'Q161243', 'Q131569']);
-const PARTY = new Set(['Q7278', 'Q233591', 'Q1393724', 'Q6440541', 'Q2510446']);
-const IDEA = new Set(['Q12909644', 'Q179805', 'Q7257', 'Q1387659', 'Q2198855', 'Q12345877', 'Q11660', 'Q5891', 'Q4692']);
-const ORG = new Set(['Q4830453', 'Q6881511', 'Q891723', 'Q43229', 'Q783794', 'Q484652', 'Q163740', 'Q245065']);
-function typeOf(e) {
-  const p31 = (e.claims?.P31 || []).map(c => c.mainsnak.datavalue?.value?.id).filter(Boolean);
-  const label = e.labels?.en?.value || '';
-  const has = s => p31.some(x => s.has(x));
-  if (has(PERSON) || e.claims?.P569) return 'person';
-  if (/election|referendum/i.test(label)) return 'election';
-  if (has(CONFLICT) || /\b(war|battle|siege|invasion|insurgency|conflict|revolt|rebellion|uprising|massacre|genocide|coup)\b/i.test(label)) return 'conflict';
-  if (has(PARTY)) return 'party';
-  if (has(IDEA) || /ism$/i.test(label)) return 'idea';
-  if (has(PLACE) || e.claims?.P36) return 'place';
-  if (has(ORG)) return 'organisation';
-  if (e.claims?.P585 || e.claims?.P580) return 'event';
-  return 'topic';
-}
+// The entity types (person, place, war…) from Wikidata's P31: lake/scripts/types.mjs.
 // A date at its precision, the year first and signed: "-0356-07-20" is 20 July 356 BC (dates.mjs). Cut to ten
 // characters, as it was until November 2026, a date BC lost its last digit ("-0356-07-2"), which the page read as 1929.
 const time = c => wikidataDate(c)?.v ?? null;
@@ -287,7 +270,7 @@ function record(q) {
   const e = raw.get(q), title = e.sitelinks?.enwiki?.title || null;
   // Each date at its precision; `fp` keeps the precisions coarser than a year (a decade, a century) and `fc` the dates
   // the source marks circa, so the page shows "15th century" or "c. 1500", not a year Wikidata does not give (dates.mjs).
-  const { facts, fp, fc } = datedFacts(e.claims, PROPS);
+  const { facts, fp, fc, fcal = [], fd = {} } = datedFacts(e.claims, PROPS);
   const rel = {};
   for (const [p, name] of Object.entries(REL)) { const ids = [...new Set(refIds(e, p))].slice(0, 12); if (ids.length) rel[name] = ids.map(x => [x, nameOf(x, { fetched: labels, committed: committedLabel })]); }
   const img = e.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
@@ -321,7 +304,7 @@ function record(q) {
   return {
     q, label, ...(name !== label ? { name } : {}), desc: e.descriptions?.en?.value || '', type,
     aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), { label, name, title, type }), wiki: title, img: img || null,
-    summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
+    summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(fc.length ? { fc } : {}), ...(fcal.length ? { fcal } : {}), ...(Object.keys(fd).length ? { fd } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
     tags: tagsFor(e, type, ms),
   };
 }

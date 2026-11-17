@@ -4,7 +4,7 @@
   "category": "political-events",
   "subjects": [{ "qid": "Q129053", "label": "partition of India" }],
   "era": [1940, 1948],
-  "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with the founders' own words and the range of estimates of the dead and the displaced.",
+  "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with VM's summaries of what the founders told their assemblies and the range of estimates of the dead and the displaced.",
   "minutes": 7,
   "preview": { "scene": "radcliffe" },
   "sources": [
@@ -89,15 +89,15 @@
       "id": "midnight",
       "title": "Freedom at midnight",
       "narration": "Pakistan marked its independence on 14 August, with Jinnah as its Governor-General, and India at midnight, with Nehru as its first Prime Minister. In Delhi, Nehru told the Constituent Assembly that India would awake to life and freedom, while parts of the Punjab were already burning. Gandhi took no part in the celebrations: he spent the day in Calcutta, fasting and praying for peace between Hindus and Muslims.",
-      "visual": { "kind": "quote", "text": "At the stroke of the midnight hour, when the world sleeps, India will awake to life and freedom.", "who": "Jawaharlal Nehru, Constituent Assembly of India", "when": "14 August 1947", "cite": "nehru-1947" },
+      "visual": { "kind": "summary", "text": "Nehru told the Assembly that at midnight, as the world slept, India would wake to life and freedom: one of history's rare moments, when an age ends and a long-suppressed nation finds its voice.", "of": "Jawaharlal Nehru, Constituent Assembly of India", "when": "14 August 1947", "cite": "nehru-1947" },
       "link": { "label": "Master Index · India", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q668" },
       "cites": ["nehru-1947", "khan-2007"]
     },
     {
       "id": "promise",
       "title": "A promise to minorities",
-      "narration": "Three days before independence, Jinnah told Pakistan's Constituent Assembly that its citizens were free to worship as they chose, and that religion had nothing to do with the business of the state. Both new governments promised to protect their minorities, but neither could stop the killing as Hindus and Sikhs fled western Punjab and Muslims fled the east. What the speech means for Pakistan, as a secular or an Islamic state, is still debated there.",
-      "visual": { "kind": "quote", "text": "You may belong to any religion or caste or creed — that has nothing to do with the business of the State.", "who": "Muhammad Ali Jinnah, Constituent Assembly of Pakistan", "when": "11 August 1947", "cite": "jinnah-1947" },
+      "narration": "Three days before independence, Jinnah told Pakistan's Constituent Assembly that its citizens were free to worship as they chose, and that their religion was no concern of the state. Both new governments promised to protect their minorities, but neither could stop the killing as Hindus and Sikhs fled western Punjab and Muslims fled the east. What the speech means for Pakistan, as a secular or an Islamic state, is still debated there.",
+      "visual": { "kind": "summary", "text": "Jinnah told the Assembly that the citizens of Pakistan were free to go to their temples, their mosques or any other place of worship, and that a person's religion, caste or creed was no concern of the state.", "of": "Muhammad Ali Jinnah, Constituent Assembly of Pakistan", "when": "11 August 1947", "cite": "jinnah-1947" },
       "link": { "label": "Political Retrospective · Pakistan, 1947", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1947&c=770" },
       "cites": ["jinnah-1947", "jalal-1985"]
     },

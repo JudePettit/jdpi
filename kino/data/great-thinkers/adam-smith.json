@@ -16,6 +16,7 @@
     { "id": "rasmussen-2017", "kind": "book", "author": "Dennis C. Rasmussen", "title": "The Infidel and the Professor: David Hume, Adam Smith, and the Friendship That Shaped Modern Thought", "year": 2017, "publisher": "Princeton University Press" },
     { "id": "sen-2011", "kind": "article", "author": "Amartya Sen", "title": "Uses and Abuses of Adam Smith", "year": 2011, "journal": "History of Political Economy 43 (2): 257–271", "url": "https://doi.org/10.1215/00182702-1257388" },
     { "id": "smith-1759", "kind": "web", "author": "Adam Smith", "title": "The Theory of Moral Sentiments (1759), Project Gutenberg edition of the Dublin printing of 1777", "year": 1759, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/67363" },
+    { "id": "smith-1759-ws", "kind": "web", "author": "Adam Smith", "title": "The Theory of Moral Sentiments, Part I (the copy read on 16 November 2026, when Project Gutenberg was down for maintenance)", "year": 1759, "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/The_Theory_of_Moral_Sentiments/Part_I" },
     { "id": "smith-1776", "kind": "web", "author": "Adam Smith", "title": "An Inquiry into the Nature and Causes of the Wealth of Nations (1776), Project Gutenberg edition", "year": 1776, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/3300" }
   ],
   "parts": [
@@ -48,8 +49,8 @@
           "id": "moral-sentiments",
           "title": "The Theory of Moral Sentiments, 1759",
           "narration": "Smith's first book, The Theory of Moral Sentiments, appeared in 1759 and made his name. It argues that moral judgement grows out of sympathy, our ability to imagine ourselves in another's place, and out of the verdict of an imagined impartial spectator. It begins by observing that even a selfish person takes an interest in the happiness of others.",
-          "visual": { "kind": "quote", "text": "How selfish soever man may be supposed, there are evidently some principles in his nature, which interest him in the fortune of others, and render their happiness necessary to him, though he derives nothing from it, except the pleasure of seeing it.", "who": "Adam Smith, The Theory of Moral Sentiments", "when": "1759", "cite": "smith-1759" },
-          "cites": ["smith-1759", "phillipson-2010"]
+          "visual": { "kind": "summary", "text": "Smith opens the book by observing that however selfish a person may be, something in human nature makes him care how others fare and need their happiness, though it brings him nothing beyond the pleasure of watching it.", "of": "Adam Smith, The Theory of Moral Sentiments", "when": "1759", "cite": "smith-1759-ws" },
+          "cites": ["smith-1759", "smith-1759-ws", "phillipson-2010"]
         },
         {
           "id": "grand-tour",

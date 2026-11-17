@@ -186,17 +186,17 @@ Master Index: entities. Every person, place, party, election, war, event, idea a
 
 ### retrospective-wars
 
-Retrospective Battlefield: wars and armed conflicts 1926–2025. Every war and armed conflict from 1926 to 2025: UCDP/PRIO from 1946 (25+ battle deaths a year; intensity 2 means 1,000+), Correlates of War before (wars of 1,000+ battle deaths), with type, aim, sides, where it was fought and its active years.
+Retrospective Battlefield: armed conflicts 1946–2025. Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from the Correlates of War, whose terms do not let Vitruvian Manager pass its data on, so they are on the page only.
 
-- Rows: 343 · refresh: static · licence: UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); Correlates of War data free to use with citation (Sarkees & Wayman 2010); state names from CShapes 2.0 (CC BY-NC-SA 4.0).
+- Rows: 303 · refresh: static · licence: UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); state names from CShapes 2.0 (CC BY-NC-SA 4.0).
 - File: https://jdpi.pages.dev/integration/data/retrospective-wars.json (records at `records`)
-- Fields: `id` (string), `dataset` (string), `name` (string), `type` (string), `aim` (string), `start` (date), `first_year` (number), `last_year` (number), `active_years` (number), `peak_intensity` (number), `war_years` (number), `fought_in` (array), `states_involved` (array), `side_a` (array), `side_b` (array), `battle_deaths` (number), `wikipedia` (string)
+- Fields: `id` (string), `dataset` (string), `name` (string), `type` (string), `aim` (string), `start` (date), `first_year` (number), `last_year` (number), `active_years` (number), `peak_intensity` (number), `war_years` (number), `fought_in` (array), `states_involved` (array), `side_a` (array), `side_b` (array), `wikipedia` (string)
 
 ### war-focus-wars
 
 War Focus: major wars. The major wars of the last hundred years that War Focus follows month by month: dates, sides, total deaths and where the figure comes from, and how many battles are recorded and mapped.
 
-- Rows: 39 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
+- Rows: 39 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
 - File: https://jdpi.pages.dev/battlefield/focus/data/index.json (records at `wars`)
 - Fields: `id` (string), `name` (string), `qid` (string), `wiki` (string), `bf` (string), `start` (date), `end` (date), `ongoing` (boolean), `totalDeaths` (number), `deathsSource` (string), `battles` (number), `mappedBattles` (number), `events` (number), `sides` (array), `bbox` (array)
 
@@ -212,7 +212,7 @@ War Focus: battles, sieges and operations. Every battle, siege and operation tha
 
 War Focus: deaths by month. Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.
 
-- Rows: 3,494 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
+- Rows: 3,494 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, and VM's estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision), as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
 - Files: https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/0.json, https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/1.json (records at `records`)
 - Fields: `war_id` (string), `war` (string), `month` (date), `deaths` (number), `estimated` (boolean), `source` (string)
 

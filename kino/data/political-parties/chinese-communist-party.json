@@ -92,7 +92,7 @@
       "id": "victory",
       "title": "Victory, 1949",
       "narration": "Civil war resumed in 1946. Better organised, promising land to the peasants and helped by the Nationalists' inflation and corruption, the communists won decisive campaigns in Manchuria and around the Huai River between September 1948 and January 1949, and entered Beijing at the end of January. Days before Mao proclaimed the People's Republic from the Tiananmen gate on 1 October, he told a conference of the new regime's allies that the Chinese people had stood up, and by December Chiang Kai-shek's government had withdrawn to Taiwan.",
-      "visual": { "kind": "quote", "text": "Ours will no longer be a nation subject to insult and humiliation. We have stood up.", "who": "Mao Zedong, Chinese People's Political Consultative Conference", "when": "21 September 1949", "cite": "mao-1949" },
+      "visual": { "kind": "summary", "text": "Opening the conference, Mao said the Chinese people, a quarter of humanity, had now stood up: their nation would no longer suffer insult and humiliation, and would take its place among the world's peaceful and free nations.", "of": "Mao Zedong, Chinese People's Political Consultative Conference", "when": "21 September 1949", "cite": "mao-1949" },
       "link": { "label": "Political Retrospective · China, 1949", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1949&c=710" },
       "cites": ["mao-1949", "saich-2021"]
     },

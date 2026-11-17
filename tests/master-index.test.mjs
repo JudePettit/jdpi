@@ -452,6 +452,106 @@ test('dates: the preferred statement, else the first normal one, never a depreca
   // The Century tag reads the same statement (build.mjs tagsFor, dates.mjs centuryTag).
   assert.match(text('lake/scripts/build.mjs'), /centuryTag\(\[e\.claims\?\.P569, e\.claims\?\.P585, e\.claims\?\.P580, e\.claims\?\.P571\]\.map\(bestClaim\)\.find\(c => wikidataDate\(c\)\)\)/);
 });
+
+// S0 (16 November 2026), "dates.mjs keeps disputes and calendars": a date Wikidata gives in the Julian calendar was
+// kept and shown as if Gregorian (Alexander the Great's birth, -0356-07-20, is Julian there), and where Wikidata gives
+// two best-rank values for a date (all preferred, or all normal with none preferred) only the first was kept, so a
+// disputed date read as settled. The lake keeps `fcal` (the facts in the Julian calendar) and `fd` (each disputed
+// fact's other values with their precisions); the page says both.
+test('dates: a Julian date says so, and a date with two best-rank values in Wikidata keeps both', async () => {
+  const { factText } = await import('../lake/scripts/dates.mjs');
+  const JUL = 'http://www.wikidata.org/entity/Q1985786', GRE = 'http://www.wikidata.org/entity/Q1985727';
+  const c = (time, precision, calendarmodel = GRE, rank = 'normal') => ({ rank, mainsnak: { datavalue: { value: { time, precision, calendarmodel } } } });
+  assert.deepEqual(wikidataDate(c('-0356-07-20T00:00:00Z', 11, JUL)), { v: '-0356-07-20', p: 11, c: false, cal: 'julian' });
+  assert.deepEqual(wikidataDate(c('+1952-02-06T00:00:00Z', 11)), { v: '1952-02-06', p: 11, c: false }, 'Gregorian is the default, unmarked');
+  const facts = claims => datedFacts(claims, { P569: 'born', P570: 'died' });
+  assert.deepEqual(facts({ P569: [c('+1452-04-15T00:00:00Z', 11, JUL), c('+1452-04-14T00:00:00Z', 11, JUL)] }),
+    { facts: { born: '1452-04-15' }, fp: {}, fc: [], fcal: ['born'], fd: { born: [['1452-04-14', 11]] } }, 'two normal values, none preferred: disputed');
+  assert.equal(facts({ P569: [c('+1452-04-15T00:00:00Z', 11, GRE, 'preferred'), c('+1452-04-14T00:00:00Z', 11)] }).fd, undefined, 'a preferred value settles it');
+  assert.equal(facts({ P569: [c('+1452-04-15T00:00:00Z', 11), c('+1452-00-00T00:00:00Z', 9)] }).fd, undefined, 'the same year, less precise: no dispute');
+  assert.equal(facts({ P569: [c('+1500-00-00T00:00:00Z', 7), c('+1452-04-15T00:00:00Z', 11)] }).fd, undefined, 'a year within the century given: no dispute');
+  assert.equal(facts({ P569: [c('+1452-04-15T00:00:00Z', 11), { ...c('+1460-00-00T00:00:00Z', 9), rank: 'deprecated' }] }).fd, undefined, 'a deprecated value is never a dispute');
+  assert.deepEqual(facts({ P570: [c('+1519-05-02T00:00:00Z', 11, JUL, 'preferred'), c('+1519-05-03T00:00:00Z', 11, JUL, 'preferred'), c('+1520-00-00T00:00:00Z', 9)] }).fd, { died: [['1519-05-03', 11]] }, 'among the preferred only');
+  // Shown: the calendar beside the date, and every value of a disputed one (dates.mjs and the page, the same answers).
+  const page = pageFmtDate(), src = text('encyclopedia/index.html'), at = src.indexOf('const factText = ');
+  assert.ok(at >= 0, 'encyclopedia/index.html defines factText');
+  const pageFact = vm.runInNewContext(`(${src.slice(at + 'const factText = '.length, at + src.slice(at).search(/\r?\n\};/)).trim()}\n})`, { fmtDate: page });
+  for (const [args, want] of [[['-0356-07-20', undefined, false, 'julian'], '20 July 356 BC (Julian calendar)'], [['1500', 7, false, 'julian'], '15th century (Julian calendar)'], [['1952-02-06', undefined, false, undefined], '6 February 1952']]) {
+    assert.equal(formatDate(...args), want); assert.equal(page(...args), want);
+  }
+  const rec = { facts: { born: '1452-04-15' }, fcal: ['born'], fd: { born: [['1452-04-14', 11]] } };
+  assert.equal(factText(rec, 'born'), '15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)');
+  assert.equal(pageFact(rec, 'born'), factText(rec, 'born'));
+  assert.equal(factText({ facts: { died: '1945' }, fp: {} }, 'died'), '1945');
+  assert.match(src, /esc\(factText\(e, f\)\)/, 'the entry\'s facts are written by factText');
+  // The builder keeps them on the record.
+  assert.match(text('lake/scripts/build.mjs'), /const \{ facts, fp, fc, fcal = \[\], fd = \{\} \} = datedFacts\(e\.claims, PROPS\);/);
+  assert.match(text('lake/scripts/build.mjs'), /\.\.\.\(fcal\.length \? \{ fcal \} : \{\}\), \.\.\.\(Object\.keys\(fd\)\.length \? \{ fd \} : \{\}\)/);
+});
+test('committed lake, after the full build: Alexander the Great\'s birth is in the Julian calendar, and every disputed date differs', t => {
+  if (!afterFullBuild(t)) return;
+  assert.ok((lakeRecords().get('Q8409')?.fcal || []).includes('born'), 'Alexander the Great: born in the Julian calendar (Wikidata, read 16 November 2026)');
+  for (const r of lakeRecords().values()) {
+    for (const f of r.fcal || []) assert.ok(r.facts[f], `${r.q}: fcal ${f} is a fact`);
+    for (const [f, alts] of Object.entries(r.fd || {})) { assert.ok(r.facts[f] && alts.length, `${r.q}: fd ${f}`); for (const [v] of alts) assert.notEqual(v, r.facts[f], `${r.q} ${f}`); }
+  }
+});
+
+// S0 (16 November 2026): Sparta (Q5690) was typed a topic: Wikidata makes it a polis (Q148837) and an ancient city
+// (Q15661340), neither among the place types, and it has no capital (P36). The type rules live in lake/scripts/types.mjs.
+test('types: a polis or an ancient city is a place (Sparta)', async () => {
+  const { typeOf, PLACE } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = {}) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...more } });
+  assert.equal(typeOf(e('Sparta', ['Q15661340', 'Q148837', 'Q93342462'])), 'place');
+  assert.equal(typeOf(e('Athens', ['Q148837'])), 'place');
+  assert.ok(PLACE.has('Q6256') && PLACE.has('Q148837') && PLACE.has('Q15661340'));
+  // The rest as before: a person, an election, a war by its label, a party, an idea, a country, an event, a topic.
+  assert.equal(typeOf(e('Niccolò Machiavelli', ['Q5'])), 'person');
+  assert.equal(typeOf(e('2026 South Sudanese general election', ['Q40231'])), 'election');
+  assert.equal(typeOf(e('Peloponnesian War', ['Q180684'])), 'conflict');
+  assert.equal(typeOf(e('Italy', ['Q6256'])), 'place');
+  assert.equal(typeOf(e('Something', [], { P585: [{}] })), 'event');
+  assert.equal(typeOf(e('Something', [])), 'topic');
+  assert.match(text('lake/scripts/build.mjs'), /import \{ typeOf \} from '\.\/types\.mjs';/);
+});
+test('committed lake, after the full build: Sparta is a place', t => {
+  if (!afterFullBuild(t)) return;
+  assert.equal(lakeRecords().get('Q5690')?.type, 'place');
+});
+
+// S0 (16 November 2026): no death precedes a birth. Each date is read at its precision (fp; Wikidata's own reading: a
+// century 1500 is 1401–1500, a millennium 2000 is 1001–2000), so a born "1400" at century precision (Giorgio Scali, died
+// 1382) is no fault. Binds on the data as committed; a fault the full build brings is fixed at its builder.
+test('committed lake: no death precedes a birth, each date read at its precision', () => {
+  // The years a value can mean at its precision (fp: 8 a decade, 7 a century, 6 a millennium; coarser: any year).
+  const yearSpan = (v, p) => {
+    const y = parseInt(String(v), 10);
+    if (!Number.isFinite(y)) return null;
+    if (p == null || p >= 9) return [y, y];
+    if (p === 8) return [Math.floor(y / 10) * 10, Math.floor(y / 10) * 10 + 9];
+    const size = p === 7 ? 100 : p === 6 ? 1000 : null;
+    if (!size) return [-Infinity, Infinity];
+    const n = Math.floor((Math.abs(y) - 1) / size) + 1;
+    return y > 0 ? [(n - 1) * size + 1, n * size] : [-(n * size), -((n - 1) * size + 1)];
+  };
+  assert.deepEqual(yearSpan('1400', 7), [1301, 1400]);
+  assert.deepEqual(yearSpan('-0500', 7), [-500, -401]);
+  assert.deepEqual(yearSpan('1560', 8), [1560, 1569]);
+  const bad = [], day = /^-?\d+-\d\d-\d\d$/;
+  let both = 0;
+  for (const r of lakeRecords().values()) {
+    if (!r.facts.born || !r.facts.died) continue;
+    both++;
+    const b = yearSpan(r.facts.born, r.fp?.born), d = yearSpan(r.facts.died, r.fp?.died);
+    if (!b || !d) continue;
+    const said = `${r.q} ${r.label}: born ${r.facts.born}${r.fp?.born ? ` (p${r.fp.born})` : ''}, died ${r.facts.died}${r.fp?.died ? ` (p${r.fp.died})` : ''}`;
+    if (b[0] > d[1]) bad.push(said);
+    // In one year, two full dates in order (a year BC runs January to December too).
+    else if (b[1] === b[0] && d[1] === d[0] && b[0] === d[0] && day.test(r.facts.born) && day.test(r.facts.died) && r.facts.born.slice(-5) > r.facts.died.slice(-5)) bad.push(said);
+  }
+  assert.ok(both > 1000, `records with both dates: ${both}`);
+  assert.deepEqual(bad, []);
+});
 // The second reader (F2, 16 November 2026): Moses's preferred birth date is -2000 at millennium precision (6), and the
 // tag read its year as "20th century BC", a century Wikidata does not give; 13 records had tags such as "660000th
 // century BC" (the Chicxulub crater, Lucy). A date coarser than a century gives no Century tag.
@@ -739,6 +839,38 @@ test('committed lake: War Focus’s atomic bombings read as War Focus counts the
     assert.equal(at('Q709352', 'ww2'), `Part of World War II; ${figureLine(japan)}`);
     assert.match(at('Q709352', 'ww2'), /; [\d,]+ of them counted in \d{4} \(a late count/);
   }
+});
+
+// S0, the second reader (16 November 2026): War Focus's wars whose deaths are a Correlates of War total read in the
+// Master Index as "… 16,634,907 battle deaths" with no word whose figure it is, where COW's terms keep only a cited
+// total (integration/scripts/cite-only.mjs). The line names the Correlates of War and the citation its terms ask for;
+// the line opens War Focus, whose panel and Sources give the citation with the link. The adapter writes it, and the
+// committed lake carries it (warfocus-refresh's --only battlefield and the monthly full build write the same).
+test('Master Index: a War Focus war whose deaths are a Correlates of War total names the source and its citation', async () => {
+  const { CITE_ONLY, HOSTED } = await import('../integration/scripts/cite-only.mjs');
+  const cow = CITE_ONLY.cow, focus = read('battlefield/focus/data/index.json');
+  assert.ok(cow.short && cow.citation.includes('Sarkees') && cow.short.includes('Resort to War'), 'a short form of the citation');
+  const cowWars = focus.wars.filter(w => cow.match.test(w.deathsSource || ''));
+  assert.ok(cowWars.length >= 9 && cowWars.some(w => w.id === 'ww2'), 'the COW wars are found by their deathsSource');
+  const { battlefield } = await import('../lake/scripts/adapters.mjs');
+  // The war's own line (an undated battle's line opens the same address, so a war is found by its own Wikidata ID).
+  const warQ = new Map(focus.wars.map(w => [w.id, w.qid]));
+  const lines = new Map(battlefield({ jdpiDir: ROOT }).filter(m => m.module === 'war-focus' && !/&m=/.test(m.url) && m.key.qid === warQ.get(m.url.split('#war=')[1])).map(m => [m.url.split('#war=')[1], m.context]));
+  for (const w of focus.wars) {
+    const c = lines.get(w.id);
+    assert.ok(c, `${w.id}: its line`);
+    if (cowWars.includes(w)) assert.ok(c.includes(`${w.totalDeaths.toLocaleString('en-GB')} battle deaths`) && c.includes('Correlates of War') && c.includes(cow.short), `${w.id}: ${c}`);
+    else assert.doesNotMatch(c, /Correlates of War/, `${w.id}: only a COW total names COW`);
+  }
+  // The committed lake: every War Focus war line with a COW total.
+  const all = lakeRecords();
+  let seen = 0;
+  for (const w of cowWars) {
+    const ms = all.get(w.qid)?.mentions.filter(m => m.m === 'war-focus' && m.u.endsWith(`#war=${w.id}`) && /battles and operations/.test(m.c)) || [];
+    for (const m of ms) { seen++; assert.equal(m.c, lines.get(w.id), `lake ${w.qid} (${w.id}): ${m.c}`); }
+  }
+  assert.ok(seen >= 9, `the lake's COW war lines (${seen})`);
+  assert.ok(HOSTED.some(h => h.source === 'cow' && h.dir === 'lake/data/e' && h.kind === 'total'), 'the lake is listed among what VM hosts from COW');
 });
 
 /* ---------------------------------------------------------------- the page */

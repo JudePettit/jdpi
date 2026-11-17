@@ -4,7 +4,9 @@
      smallest frame that borders every highlighted country and point.
    - timeline: a sweep along an axis that lights labelled events as it passes.
    - portrait: a Commons image (Wikidata P18 or a named file) with a slow Ken Burns drift, credited with its licence.
-   - quote: large serif text with its attribution.   - chart: bars or ranges, or a line, drawn in.
+   - quote: large serif text with its attribution (only words a Bibliotheca book holds: the quotation rule).
+   - summary: VM's summary of what someone said or a document says, in the sans, under "VM's summary".
+   - chart: bars or ranges, or a line, drawn in.
    - module: a card that opens the linked Vitruvian Manager submodule.   - title: the documentary's title card.
    Colours are the design tokens set in kino.css, so light and dark need no redraw. Text sizes follow the frame's width with
    legible minimums (u = viewBox units per screen pixel). */
@@ -251,10 +253,10 @@ export class Stage {
     this.mapSvg.classList.add('off');
     await swap; if (this.scene !== scene) return;
     this.layer.className = 'kn-layer fade';
-    const draw ={ title: () => this.titleHtml(v, doc), portrait: () => this.portraitHtml(v), quote: () => this.quoteHtml(v), module: () => this.moduleHtml(scene), timeline: null, chart: null }[v.kind];
+    const draw ={ title: () => this.titleHtml(v, doc), portrait: () => this.portraitHtml(v), quote: () => this.quoteHtml(v), summary: () => this.summaryHtml(v), module: () => this.moduleHtml(scene), timeline: null, chart: null }[v.kind];
     if (draw) {
       this.layer.innerHTML = draw();
-      this.layer.classList.add({ title: 'kn-v-title', portrait: 'kn-v-portrait', quote: 'kn-v-quote', module: 'kn-v-module' }[v.kind]);
+      this.layer.classList.add({ title: 'kn-v-title', portrait: 'kn-v-portrait', quote: 'kn-v-quote', summary: 'kn-v-summary', module: 'kn-v-module' }[v.kind]);
       if (v.kind === 'module') this.layer.querySelector('.go')?.addEventListener('click', () => this.opts.onLink?.(scene.link));
     } else if (v.kind === 'timeline') { this.layer.classList.add('kn-v-svg'); this.redraw = () => { this.stopLoops(); this.timeline(v); }; this.redraw(); }
     else if (v.kind === 'chart') { this.layer.classList.add('kn-v-svg'); this.redraw = () => { this.stopLoops(); this.chart(v, doc); }; this.redraw(); }
@@ -295,6 +297,10 @@ export class Stage {
       <div class="frame">${img?.src ? `<img src="${esc(img.src)}" alt="${esc(img.title || v.heading || '')}" style="object-position:${pos}">` : ''}</div>`;
   }
   quoteHtml(v) { return `<blockquote>${esc(v.text)}</blockquote><div class="who">${esc(v.who)}, ${esc(v.when)}</div>`; }
+  // VM's summary of what someone said or a document says (the quotation rule, S0): VM's words in the page's sans, under
+  // a kicker that says so, with what it summarises; no quotation mark and not the quote card's serif, so the two never
+  // look alike.
+  summaryHtml(v) { return `<div class="kicker">VM’s summary</div><p class="said">${esc(v.text)}</p><div class="of">Summarising: ${esc(v.of)}, ${esc(v.when)}</div>`; }
   moduleHtml(scene) {
     const l = scene.link, info = this.opts.moduleInfo?.(l) || {}, [name, place] = l.label.split(' · ');
     const inShell = this.opts.embedded;

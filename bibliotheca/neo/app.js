@@ -181,6 +181,30 @@ const pd = v => /^(pd|public domain)$/i.test(String(v || ''));
 // The people whose death dates were not found after a reasonable search (shelf.mjs, rights.unknown: a translator of the
 // 1890s), named in the rights line and the badge, so the record says plainly what the finding rests on.
 const unknownDeaths = r => (r?.unknown || []).map(u => u.name).filter(Boolean).join(' and ');
+/* The EU finding (shelf.mjs, rights.eu and rights.euBasis, 16 November 2026): "pd" only when everyone whose words the
+   text carries died more than 70 years ago, each death year read from a named source; else "unconfirmed", which the
+   page says as it is, and such a book is not quoted anywhere in VM (bibliotheca/scripts/quotes.mjs). The page claims no
+   more than the record. */
+const euPd = r => r?.eu === 'pd';
+const euUnconfirmed = r => r?.eu === 'unconfirmed';
+// whose death year is missing: each line of euBasis.missing opens with the name, then the part in brackets
+const euMissing = r => (r?.euBasis?.missing || []).map(m => m.split(' (')[0]).filter(Boolean).join(' and ');
+function euSentence(r) {
+  if (!euPd(r) && !euUnconfirmed(r)) return '';
+  const b = r.euBasis || {};
+  const day = s => (s ? new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '');
+  const source = s => {
+    const q = /Wikidata (Q\d+)/.exec(s || '');
+    const label = /^Wikisource/.test(s || '') ? 'Wikisource and Wikidata' : 'Wikidata';
+    return q ? `<a href="https://www.wikidata.org/wiki/${esc(q[1])}" target="_blank" rel="noreferrer" title="${esc(s)}">${label}</a>` : esc(s || '');
+  };
+  const deaths = (b.deaths || []).map(d => `${esc(d.name)}, ${esc(year(d.died))} (${source(d.source)})`).join('; ');
+  const read = b.checked ? ` Death years as read on ${esc(day(b.checked))}: ${deaths}.` : '';
+  if (euPd(r)) return ` In the European Union (Ireland among its members) the text is in the public domain: everyone whose words it carries died more than 70 years ago. The EU term: ${esc(b.rule || 'life plus 70 years')}.${read}`;
+  const decided = (r.unknown || [])[0]?.checked;
+  return ` EU rights unconfirmed: the death year of ${esc(euMissing(r))} was not found, so the EU term (life plus 70 years) cannot be confirmed, and ${PRODUCT} quotes nothing from this book.${read}`
+    + (decided ? ` On a reasonable search ${PRODUCT}’s editor decided on ${esc(day(decided))} to treat the translation as free in Ireland and the United Kingdom; that is a judgement of risk, not a finding.` : '');
+}
 /* The book's chapters as it numbers them ("Chapter XII", "Book II, Chapter III"), and what else it has: the one other
    piece by its title ("26 chapters and the dedication", "15 chapters and the prefaces"), or how many there are (Smith's
    introductions and appendix, the five pieces before On War's Book I). A book divided into sections counts sections
@@ -216,7 +240,9 @@ function renderBookFront() {
   $('#book-meta').innerHTML = [`<span>${contentsLine(S.chapters)}</span>`,
     `<span><b>${fmt(words)}</b> words</span>`, `<span><b>${fmt(terms.n)}</b> terms · <b>${terms.distinct}</b> entries</span>`,
     b.work?.written != null ? `<span>Written <b>${esc(year(b.work.written))}</b>${b.work.published != null ? `, published <b>${esc(year(b.work.published))}</b>` : ''}</span>` : '',
-    pd(b.rights?.us) && pd(b.rights?.uk) ? (unknownDeaths(b.rights) ? '<span>Public domain <b>US</b> · <b>UK</b> on a reasonable search</span>' : '<span>Public domain <b>US · UK</b></span>') : ''].join('');
+    pd(b.rights?.us) && pd(b.rights?.uk) ? (unknownDeaths(b.rights)
+      ? `<span>Public domain <b>US</b> · <b>UK</b> on a reasonable search${euPd(b.rights) ? ' · <b>EU</b>' : euUnconfirmed(b.rights) ? ' · <b>EU rights unconfirmed</b>' : ''}</span>`
+      : `<span>Public domain <b>US · UK${euPd(b.rights) ? ' · EU' : ''}</b>${euUnconfirmed(b.rights) ? ' · <b>EU rights unconfirmed</b>' : ''}</span>`) : ''].join('');
 }
 function renderToc() {
   $('#toc-list').innerHTML = S.chapters.map((c, i) => {
@@ -230,7 +256,7 @@ function renderSources() {
   const terms = termCount(S.chapters.flatMap(c => c.paragraphs));
   $('#sources').innerHTML = `
     <p><b>Text.</b> ${esc(b.title)} by ${esc(a.name || '')}${coauthors(b).map(n => ` and ${esc(n)}`).join('')}${t ? `, translated by ${esc(t.name)}` : ''}${e.published ? ` (${esc(e.published)})` : ''}: ${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noreferrer">${esc(e.source || 'source')}${e.id ? ` ${esc(e.id)}` : ''}</a>` : esc(e.source || '')}. ${esc(e.licence || '')}</p>
-    <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? (unknownDeaths(r) ? `treated as public domain in Ireland and the United Kingdom, the death date of ${esc(unknownDeaths(r))} not having been found after a reasonable search` : 'public domain in the United Kingdom') : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}</p>
+    <p><b>Rights.</b> ${pd(r.us) ? 'Public domain in the United States' : `United States: ${esc(r.us)}`}; ${pd(r.uk) ? (unknownDeaths(r) ? `treated as public domain in Ireland and the United Kingdom, the death date of ${esc(unknownDeaths(r))} not having been found after a reasonable search` : 'public domain in the United Kingdom') : `United Kingdom: ${esc(r.uk)}`}. ${esc(r.basis || '')}${checked ? ` Checked ${esc(checked)}.` : ''}${euSentence(r)}</p>
     <p><b>Terms.</b> Every highlighted term is an entry of the Master Index, matched at build time to its Wikidata labels and aliases (bibliotheca/scripts/tag-terms.mjs, with this book's own decisions): ${fmt(terms.n)} in this book, ${terms.distinct} entries. AR Mode's "On screen" tab lists those in the text on screen.</p>
     <p><b>In ${PRODUCT}.</b> AR Mode (the pane beside the text) offers the screens that take a year or a period in their address: the Invention Timeline a period from 3000 BC, the Kardashev Tracker its century steps, the Political Retrospective, Retrospective Battlefield and War Focus from 1926, the Historical Calendar from 1980. National Analysis has no year in its address, so it shows a country as it is today: the term’s, when the term is one of today’s countries or a place in one, or else those the book names most; with none, it is not offered.</p>
     <p><b>AR Reader.</b> The book read aloud, the sentence being read marked and kept in view, with the Master Index entry of the nearest term beside it; Hold keeps the pane still, and Screens only lets the pane fill the page with the words under it as subtitles, the screens for the book's era (the Invention Timeline, the Kardashev Tracker and, from 1926, the screens of those years) taking their turn with the entries.</p>

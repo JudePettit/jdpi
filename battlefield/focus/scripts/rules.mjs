@@ -184,6 +184,19 @@ export function eventMonths(dStart, dEnd, deaths, from, to) {
 }
 
 /**
+ * How much each month weighs when a yearly or whole-war total is spread by recorded battles (no UCDP events): 1, plus
+ * one for each battle under way in it. Only a battle whose start and end are known at least to the month weighs: one
+ * Wikidata dates only to its year (p 'y', or an end pe 'y') could fall in any month of it, so it weighs none, where it
+ * used to weigh all twelve (S0, the spread fix, 16 November 2026: "Battle of Łódź", 1939, weighed January to August,
+ * before the war began). `months` are yyyy-mm; a battle { s, e, p, pe } as scripts/rules.mjs battleDates gives it.
+ */
+export function monthWeights(months, battles) {
+  const endPrec = b => (b.pe === 'd' ? null : b.pe || b.p);
+  const known = (battles || []).filter(b => b.s && b.p !== 'y' && endPrec(b) !== 'y');
+  return months.map(m => 1 + known.filter(b => b.s.slice(0, 7) <= m && (b.e || b.s).slice(0, 7) >= m).length);
+}
+
+/**
  * Which of a war's months a Correlates of War total covers: the months in COW's own years for the war (`years`, as
  * Retrospective Battlefield's wars.json gives them). COW ends the Second Sino-Japanese War (its war 130, 1937–41) on
  * 6 December 1941 and counts the fighting after within World War II, so 1942–45 get no share of its total.

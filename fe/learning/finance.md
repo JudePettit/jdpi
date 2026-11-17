@@ -411,7 +411,7 @@ Behavioural finance studies how real investors depart from rational models:
 - **Overconfidence**: investors overrate their own skill and trade too much.
 - **Loss aversion** (Kahneman and Tversky): losses hurt about twice as much as equal gains please, so investors hold losers too long and sell winners too early.
 - **Herding and momentum**: people follow the crowd, so trends can persist.
-- **Limits to arbitrage**: even when prices are wrong, betting against them can be risky and costly ("markets can remain irrational longer than you can remain solvent").
+- **Limits to arbitrage**: even when prices are wrong, betting against them can be risky and costly (prices can stay wrong for longer than someone betting against them can afford to keep the bet open).
 
 These effects help explain **bubbles**, such as the dot-com boom of the late 1990s and the US housing bubble before 2008, when prices rose far above values justified by cash flows before collapsing.
 

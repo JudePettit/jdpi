@@ -18,7 +18,8 @@
     { "id": "shepard-2006", "kind": "book", "author": "Todd Shepard", "title": "The Invention of Decolonization: The Algerian War and the Remaking of France", "year": 2006, "publisher": "Cornell University Press" },
     { "id": "anderson-2005", "kind": "book", "author": "David Anderson", "title": "Histories of the Hanged: Britain's Dirty War in Kenya and the End of Empire", "year": 2005, "publisher": "Weidenfeld & Nicolson" },
     { "id": "lacina-gleditsch-2005", "kind": "article", "author": "Bethany Lacina and Nils Petter Gleditsch", "title": "Monitoring Trends in Global Combat: A New Dataset of Battle Deaths", "year": 2005, "journal": "European Journal of Population 21 (2–3): 145–166 (PRIO Battle Deaths Dataset, version 3.1)", "url": "https://doi.org/10.1007/s10680-005-6851-6" },
-    { "id": "un-1514", "kind": "web", "title": "Declaration on the Granting of Independence to Colonial Countries and Peoples, General Assembly resolution 1514 (XV), 14 December 1960", "publisher": "United Nations", "url": "https://www.un.org/dppa/decolonization/en/history/declaration" }
+    { "id": "un-1514", "kind": "web", "title": "Declaration on the Granting of Independence to Colonial Countries and Peoples, General Assembly resolution 1514 (XV), 14 December 1960", "publisher": "United Nations", "url": "https://www.un.org/dppa/decolonization/en/history/declaration" },
+    { "id": "un-1514-ws", "kind": "web", "title": "United Nations General Assembly Resolution 1514 (XV), the text of the resolution (the copy read on 16 November 2026, when the United Nations page did not load)", "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/United_Nations_General_Assembly_Resolution_1514" }
   ],
   "scenes": [
     {
@@ -92,9 +93,9 @@
       "id": "united-nations",
       "title": "The United Nations takes a side, December 1960",
       "narration": "As newly independent states joined the United Nations, the balance in the General Assembly shifted. On 14 December 1960 it declared that colonial rule denied fundamental human rights and should be ended without conditions, with no country voting against, although the main colonial powers abstained. The declaration gave anti-colonial movements an international standard to appeal to, and a committee was soon set up to watch over the territories still ruled from abroad.",
-      "visual": { "kind": "quote", "text": "The subjection of peoples to alien subjugation, domination and exploitation constitutes a denial of fundamental human rights, is contrary to the Charter of the United Nations and is an impediment to the promotion of world peace and co-operation.", "who": "United Nations General Assembly, resolution 1514 (XV)", "when": "14 December 1960", "cite": "un-1514" },
+      "visual": { "kind": "summary", "text": "The General Assembly declared that holding peoples under foreign rule, domination and exploitation denies their basic human rights, breaks the UN Charter and hinders world peace, and that every people has the right to self-determination.", "of": "United Nations General Assembly, resolution 1514 (XV)", "when": "14 December 1960", "cite": "un-1514-ws" },
       "link": { "label": "Political Retrospective · 1960", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1960" },
-      "cites": ["un-1514", "jansen-osterhammel-2017"]
+      "cites": ["un-1514", "un-1514-ws", "jansen-osterhammel-2017"]
     },
     {
       "id": "algeria",

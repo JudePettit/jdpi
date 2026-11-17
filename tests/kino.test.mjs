@@ -15,7 +15,9 @@ import { pageTest, launch } from './tools/pages.mjs';
 import { readKinoView, kinoViewHash, linkPlace, SHELL_URL } from '../kino/lib/links.js';
 import { relatedPlaces, sceneEntities, tagTables, shardOf, CHIPS, PER_THING, MAP_COUNTRIES } from '../kino/lib/related.js';
 import { sentenceRuns } from '../kino/lib/text.js';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
+import { shelfParagraphs, findQuote, quotedRuns } from '../bibliotheca/scripts/quotes.mjs';
+import { wordCount } from '../kino/lib/text.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const read = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -185,6 +187,104 @@ test('speech: a full stop with no space after it is "point" between digits and "
   for (const d of docs) for (const s of flatScenes(d)) assert.deepEqual(speechWarnings(s.narration), [], `${d.id}/${s.id}`);
 });
 
+// ---- The quotation rule (S0 of the scholar design, 16 November 2026; Jude's rule): a person's words appear in VM as a
+// quotation only when they match a paragraph of a Bibliotheca book whose rights.eu is "pd" (bibliotheca/scripts/
+// quotes.mjs). A scene whose source the shelf does not hold is VM's summary (kind "summary"): VM's words, shown under
+// "VM's summary" and naming whose words or which document it summarises, never as the person's words.
+test('quotations: every quote scene matches a paragraph of a book on the shelf that is public domain in the EU, from the edition it cites', () => {
+  const paras = shelfParagraphs();
+  assert.ok(paras.length > 10000, 'the shelf is read');
+  const quotes = docs.flatMap(d => flatScenes(d).filter(s => s.visual.kind === 'quote').map(s => [d, s]));
+  assert.ok(quotes.length >= 1);
+  for (const [d, s] of quotes) {
+    const hits = findQuote(s.visual.text, paras), src = d.sources.find(x => x.id === s.visual.cite);
+    assert.ok(hits.length, `${d.id}/${s.id}: "${s.visual.text}" matches no paragraph of a book whose rights.eu is "pd": make it VM's summary (kind "summary")`);
+    assert.ok(hits.some(h => h.url === src?.url), `${d.id}/${s.id}: the quotation's cite (${src?.url}) is not the edition it matches (${[...new Set(hits.map(h => h.url))].join(', ')})`);
+  }
+  // the rule itself: typography and note marks aside, the words and their order must be the book's
+  assert.equal(findQuote('“Therefore, it is necessary to be a fox to discover the snares and a lion to terrify the wolves.”', paras)[0]?.slug, 'the-prince');
+  assert.deepEqual(findQuote('It is necessary to be a fox to discover the snares and a lion to terrify the wolves.', paras), [], 'a capital the book does not have');
+  assert.equal(findQuote('… it is necessary to be a fox … a lion to terrify the wolves.', paras)[0]?.slug, 'the-prince', 'an ellipsis leaves words out');
+  assert.deepEqual(findQuote('… a lion to terrify the wolves … it is necessary to be a fox', paras), [], 'but keeps the order');
+  assert.equal(findQuote('The history of all hitherto existing society is the history of class struggles.', paras)[0]?.slug, 'communist-manifesto', 'a note mark in the book is no difference');
+  // a book whose EU rights are unconfirmed is not quoted, however exact the words
+  const nv = JSON.parse(readFileSync(join(ROOT, 'bibliotheca/data/books/natural-value.json'), 'utf8'));
+  assert.equal(nv.rights.eu, 'unconfirmed');
+  const nvText = nv.chapters[2].paragraphs[0].text;
+  assert.deepEqual(findQuote(nvText, paras), [], 'Natural Value (EU rights unconfirmed) is not a source of quotations');
+  // the validator refuses a quotation the shelf does not hold, so kino-check refuses it at once
+  const doc = clone(ctx.docs.get('adam-smith')), sc = doc.parts.flatMap(p => p.scenes).find(s => s.visual.kind === 'quote');
+  sc.visual.text = 'Every individual necessarily labours to render the annual revenue of the society as great as he can, and so on.';
+  assert.ok(validateScript(doc, ctx).errors.some(e => /the words match no paragraph of a Bibliotheca book that is public domain in the EU/.test(e)), 'the validator refuses it');
+});
+
+test('quotations: a summary is VM\'s words, naming whose words or which document it summarises, when, and its source; no narration quotes a person', () => {
+  const summaries = docs.flatMap(d => flatScenes(d).filter(s => s.visual.kind === 'summary').map(s => [d, s]));
+  assert.ok(summaries.length >= 24, `the scenes whose sources the shelf does not hold (${summaries.length})`);
+  for (const [d, s] of summaries) {
+    const v = s.visual, at = `${d.id}/${s.id}`;
+    assert.ok(v.text && v.of && v.when && v.cite, `${at}: text, of, when, cite`);
+    assert.ok(d.sources.some(x => x.id === v.cite && x.url), `${at}: the source summarised, with its address`);
+    assert.ok(s.cites.includes(v.cite), `${at}: and cited by the scene`);
+    assert.doesNotMatch(v.text, /["“”]/, `${at}: no quotation marks in VM's own words`);
+    assert.ok(wordCount(v.text) <= 45, `${at}: short`);
+  }
+  // no narration, of any scene, puts a person's words in quotation marks unless the shelf holds them
+  for (const d of docs) for (const s of flatScenes(d)) {
+    for (const q of quotedRuns(s.narration, 6)) assert.ok(findQuote(q).length, `${d.id}/${s.id}: the narration quotes "${q}"`);
+  }
+  // The second reader (16 November 2026): a film whose quotations became VM's summaries must not promise the people's own
+  // words in its description (the catalogue and "About this documentary"), and a summary scene's narration must not
+  // lead into a sentence of the person's that the card no longer shows.
+  const PROMISE = /\bown words\b|\bwords of\b|\bin (?:his|her|their) (?:own )?words\b/i;
+  const LEAD_IN = /(?:in a single sentence|in these words|in his words|in her words|wrote|said|declared|put it):?\s*$/i;
+  const built = new Map(read('kino/data/index.json').docs.map(e => [e.id, e]));
+  for (const d of docs) {
+    const scenes = flatScenes(d);
+    if (!scenes.some(s => s.visual.kind === 'summary') || scenes.some(s => s.visual.kind === 'quote')) continue;
+    assert.doesNotMatch(d.summary, PROMISE, `${d.id}: its description promises the people's own words, which the film shows as VM's summaries`);
+    if (built.has(d.id)) assert.doesNotMatch(built.get(d.id).summary, PROMISE, `${d.id}: the built catalogue (index.json) promises the people's own words`);
+  }
+  for (const [d, s] of summaries) {
+    const last = sentences(s.narration).at(-1) || '';
+    assert.doesNotMatch(last.replace(/[.]$/, ''), LEAD_IN, `${d.id}/${s.id}: the narration ("${last}") leads into the person's words, but the card is VM's summary`);
+  }
+  // the old quotations are gone: none of the scenes the shelf cannot back is a quotation any more
+  for (const [film, scene] of [['cuban-missile-crisis', 'quarantine'], ['winston-churchill', 'may-1940'], ['partition-of-india', 'promise'], ['adam-smith', 'moral-sentiments'], ['karl-marx', 'materialism'], ['niccolo-machiavelli', 'readings']]) {
+    assert.equal(flatScenes(ctx.docs.get(film)).find(s => s.id === scene)?.visual.kind, 'summary', `${film}/${scene}`);
+  }
+});
+
+test('quotations: no quotation field anywhere in the site\'s data holds words the shelf does not', () => {
+  // Every committed JSON file but the books themselves: any key named quote, quotes, quotation(s) or epigraph, and
+  // the text of every Kino quote scene (above). Today there are none outside Kino; this keeps it so.
+  const KEY = /"(?:quote|quotes|quotation|quotations|epigraph)"\s*:/;
+  const skip = /^(?:node_modules|\.git|\.wrangler|bibliotheca[\\/]data[\\/]books|bibliotheca[\\/]scripts[\\/]cache|tests[\\/]tools)(?:[\\/]|$)/;
+  const found = [];
+  const walk = dir => {
+    for (const e of readdirSync(join(ROOT, dir), { withFileTypes: true })) {
+      const rel = dir ? join(dir, e.name) : e.name;
+      if (skip.test(rel)) continue;
+      if (e.isDirectory()) walk(rel);
+      else if (e.name.endsWith('.json')) {
+        const raw = readFileSync(join(ROOT, rel), 'utf8');
+        if (!KEY.test(raw)) continue;
+        const visit = (o, path) => {
+          if (Array.isArray(o)) return o.forEach((x, i) => visit(x, `${path}[${i}]`));
+          if (!o || typeof o !== 'object') return;
+          for (const [k, v] of Object.entries(o)) {
+            if (/^(quote|quotes|quotation|quotations|epigraph)$/.test(k)) for (const t of [v].flat()) found.push([`${rel} ${path}.${k}`, typeof t === 'string' ? t : t?.text]);
+            visit(v, `${path}.${k}`);
+          }
+        };
+        try { visit(JSON.parse(raw), ''); } catch { /* not JSON data */ }
+      }
+    }
+  };
+  walk('');
+  for (const [where, text] of found) assert.ok(text && findQuote(text).length, `${where}: "${text}" is not a paragraph of a book on the shelf that is public domain in the EU`);
+});
+
 test('validator: refuses broken scripts and accepts a course with parts and a quiz', () => {
   const doc = clone(ctx.docs.get('ww2-europe'));
   const s = doc.scenes[2];
@@ -251,6 +351,41 @@ test('page: catalogue, deep link, map, captions-only playback with highlighted w
     await page.keyboard.press('Space');
     assert.equal(await page.locator('#play').getAttribute('aria-label'), 'Play');
     assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// The quotation rule on the stage: VM's summary never looks like a quotation (no blockquote, no opening mark, the sans),
+// says it is VM's summary and what it summarises, and fits the stage at 1440 px and on a phone; a quotation the shelf
+// holds is still drawn as one.
+test('page: a summary scene is shown as VM\'s summary, not as the person\'s words, at 1440 px and at 390 px', PAGE, async () => {
+  const browser = await launch();
+  try {
+    for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+      const page = await browser.newPage({ viewport });
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      await page.goto(`${BASE}/kino/index.html?cat=political-figures#doc=winston-churchill&s=may-1940`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kn-layer.kn-v-summary .said', { timeout: 30000 });
+      const card = page.locator('.kn-layer.kn-v-summary');
+      assert.match(await card.locator('.kicker').innerText(), /^VM.S SUMMARY$/i);
+      assert.equal(await card.locator('.said').innerText(), flatScenes(ctx.docs.get('winston-churchill')).find(s => s.id === 'may-1940').visual.text);
+      assert.match(await card.locator('.of').innerText(), /^Summarising: Winston Churchill, House of Commons, 13 May 1940$/);
+      assert.equal(await card.locator('blockquote').count(), 0, 'no blockquote');
+      const look = await card.locator('.said').evaluate(el => ({ font: getComputedStyle(el).fontFamily, before: getComputedStyle(el, '::before').content }));
+      assert.doesNotMatch(look.font, /Source Serif|Georgia|Times/i, 'the sans, not the quotation serif');
+      assert.match(look.font, /Plex Sans/i);
+      assert.ok(['none', 'normal'].includes(look.before), 'no opening quotation mark');
+      // the card's text fits inside the stage
+      const fit = await card.evaluate(el => { const r = el.getBoundingClientRect(), last = el.querySelector('.of').getBoundingClientRect(); return last.bottom <= r.bottom + 1 && el.scrollWidth <= el.clientWidth + 1; });
+      assert.ok(fit, `the summary fits the stage at ${viewport.width} px`);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'no sideways scroll');
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${BASE}/kino/index.html?cat=great-thinkers#doc=niccolo-machiavelli&s=fox-and-lion`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.kn-layer.kn-v-quote blockquote', { timeout: 30000 });
+    assert.match(await page.locator('.kn-layer.kn-v-quote blockquote').innerText(), /^… it is necessary to be a fox/);
   } finally { await browser.close(); }
 });
 

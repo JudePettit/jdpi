@@ -38,7 +38,7 @@
       "id": "occupation",
       "title": "Defeat, occupation and a new constitution",
       "narration": "Japan surrendered in August 1945, and under the American occupation a new constitution came into force in May 1947, making the Emperor a symbol of the state and renouncing war. Shigeru Yoshida, a conservative former diplomat, was Prime Minister for most of the years from 1946 to 1954, and his strategy was to rely on the United States for security and concentrate on economic recovery. The occupation ended in 1952 under the San Francisco peace treaty, signed together with a security treaty that kept American bases in Japan.",
-      "visual": { "kind": "quote", "text": "… the Japanese people forever renounce war as a sovereign right of the nation and the threat or use of force as means of settling international disputes.", "who": "The Constitution of Japan, Article 9", "when": "In force from 3 May 1947", "cite": "constitution" },
+      "visual": { "kind": "summary", "text": "In Article 9 the Japanese people, seeking a peace founded on justice and order, give up for ever war as a national right and threatening or using force to settle disputes; no land, sea or air forces are to be kept.", "of": "The Constitution of Japan, Article 9", "when": "In force from 3 May 1947", "cite": "constitution" },
       "link": { "label": "Master Index · Shigeru Yoshida", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q301804" },
       "cites": ["constitution", "curtis-1999"]
     },

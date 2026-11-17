@@ -1474,6 +1474,79 @@ export const SHELF = [
   },
 ];
 
+/* The EU term (S0 of the scholar design, 16 November 2026). Copyright in the European Union lasts for the life of the
+   author and 70 years after the death, counted from 1 January of the year after it (Directive 2006/116/EC, articles 1
+   and 8), and the same holds for a translator's or an editor's own words; Ireland's Copyright and Related Rights Act
+   2000, s.24, gives the same term. So an edition is "pd" in the EU only when the author and everyone else whose words
+   the hosted text carries (`translator`, `editors`) died in or before this year − 71, each death year read from a
+   source named below; a death year not found makes it "unconfirmed", with what is missing. The Irish and UK "treated
+   as free" of `rights.unknown` is a decision on risk, not a death year, so it does not make a book "pd" here.
+   `rights.eu` is a plain string ("pd" or "unconfirmed") that the quotation test reads (quotes.mjs); `rights.euBasis`
+   holds the rule, every death with its source, what is missing, and the day. A careful record, not legal advice.
+   Every death year below was read on 16 November 2026, from the Wikidata item named (date of death, P570), or as said. */
+const EU_CHECKED = '2026-11-16';
+export const EU_RULE = 'life plus 70 years, from 1 January of the year after the death (Directive 2006/116/EC, articles 1 and 8; '
+  + 'Ireland, Copyright and Related Rights Act 2000, s.24)';
+const wd = (qid, died) => `Wikidata ${qid}, date of death (P570) ${died < 0 ? `${-died} BC` : died}, read 16 November 2026`;
+const DEATH_SOURCES = {
+  'Niccolò Machiavelli': wd('Q1399', 1527),
+  // The second reader (16 November 2026): the two are no independent record of each other, and no other was found.
+  'W. K. Marriott': 'Wikisource, Author:William Kenaz Marriott, which lists his translation of The Prince (1908) and gives 1927 as '
+    + 'his death year, and Wikidata Q15983758, the item that page belongs to, date of death (P570) 1927; both read 16 November 2026. '
+    + 'They are no independent record of each other: the page shows the item\'s dates, and the item\'s statement cites English '
+    + 'Wikisource and Project Gutenberg (author 564, as Wikidata retrieved it on 9 October 2017; Project Gutenberg\'s site was down for '
+    + 'maintenance when tried on 16 and 17 November 2026). The Library of Congress (no93033524) and the GND (13366712X) give no dates. '
+    + 'The finding stands: born 1847 by the same item, he would have had to live to 1956, aged 109, for his words to be protected in 2026',
+  'Edward Gibbon': wd('Q161841', 1794),
+  'H. H. Milman': wd('Q4269655', 1868),
+  'François Guizot': wd('Q157324', 1874),
+  'F. A. W. Wenck': wd('Q1458262', 1810),
+  'L. A. Warnkönig': wd('Q85842', 1866),
+  'Gustav Hugo': wd('Q67446', 1844),
+  'Adam Smith': wd('Q9381', 1790),
+  'Eugen von Böhm-Bawerk': wd('Q311535', 1914),
+  'William Smart': wd('Q8018517', 1915),
+  'Thucydides': wd('Q41683', -395),
+  'Richard Crawley': wd('Q7324958', 1893),
+  'Charles Darwin': wd('Q1035', 1882),
+  'Carl von Clausewitz': wd('Q76430', 1831),
+  'J. J. Graham': `${wd('Q29584485', 1883)}. The statement has no reference, and no independent record was found: Wikisource's `
+    + '1808–1883 shows the same item\'s dates, and the Library of Congress (no91024077) gives none. The finding stands: born 1808 by the '
+    + 'same item, he would have had to live to 1956, aged 148, for his words to be protected in 2026',
+  'Marie von Clausewitz': 'Wikidata Q71317 (Marie von Brühl, her name before her marriage; "Marie von Clausewitz" is one of its '
+    + 'names), date of death (P570) 1836, read 16 November 2026',
+  'F. N. Maude': wd('Q16872712', 1933),
+  'Karl Marx': wd('Q9061', 1883),
+  'Frederick Engels': wd('Q34787', 1895),
+  'Samuel Moore': wd('Q19551496', 1911),
+  'Carl Menger': wd('Q84177', 1921),
+  'Caroline A. Foley': 'Wikidata Q622047 (Caroline Rhys Davids, her married name), date of death (P570) 1942, read 16 November 2026',
+  'James Bonar': wd('Q5581489', 1941),
+  'Friedrich von Wieser': wd('Q84482', 1926),
+};
+// What is missing for an "unconfirmed" book, beyond the bare fact that a death year was not found.
+const EU_MISSING = {
+  'Alice M. Macdonald': 'Alice M. Macdonald (translator): death year not found; the search of 7 November 2026 is recorded in '
+    + 'rights.unknown. (Miss Louise Markup, thanked in the preface for help in translation but not credited, has no death year '
+    + 'found either.)',
+  'Christian A. Malloch': 'Christian A. Malloch (translator): death year not found; the search of 7 November 2026 is recorded in '
+    + 'rights.unknown.',
+};
+const people = entry => [
+  entry.author && { ...entry.author, role: 'author' },
+  entry.translator && { ...entry.translator, role: 'translator' },
+  ...(entry.editors || []).map(e => ({ ...e, role: e.role || 'editor' })),
+].filter(Boolean);
+/** The EU finding for a shelf entry, as of `year`: { eu, euBasis }. */
+export function euFinding(entry, year = Number(EU_CHECKED.slice(0, 4))) {
+  const all = people(entry);
+  const deaths = all.filter(p => Number.isFinite(p.died)).map(p => ({ name: p.name, role: p.role, died: p.died, source: DEATH_SOURCES[p.name] || '' }));
+  const missing = all.filter(p => !Number.isFinite(p.died)).map(p => EU_MISSING[p.name] || `${p.name} (${p.role}): death year not found.`);
+  const clear = !missing.length && deaths.every(d => d.died + 70 < year && d.source);
+  return { eu: clear ? 'pd' : 'unconfirmed', euBasis: { rule: EU_RULE, deaths, ...(missing.length ? { missing } : {}), checked: EU_CHECKED } };
+}
+for (const e of SHELF) Object.assign(e.rights, euFinding(e));
+
 export const shelfEntry = slug => {
   const e = SHELF.find(b => b.slug === slug);
   if (!e) throw new Error(`"${slug}" is not on the shelf (bibliotheca/scripts/shelf.mjs has ${SHELF.map(b => b.slug).join(', ')})`);
@@ -1511,7 +1584,37 @@ export function checkRights(entry, year = new Date().getUTCFullYear()) {
   if (!Number.isFinite(entry.published)) throw new Error(`${entry.slug}: no publication year, so the US term cannot be checked`);
   if (entry.published + 95 >= year) throw new Error(`${entry.slug}: published ${entry.published} is not before ${year - 95}, so the date alone cannot confirm "us: pd"`);
   reasons.push(`published ${entry.published}, before ${year - 95}: public domain in the US`);
+  checkEuRights(entry, year);
   return reasons;
+}
+
+/** Refuses an EU finding the record does not bear out (the EU term above): `eu` must be "pd" or "unconfirmed"; every
+    person whose words the edition carries has a death with its source in `euBasis.deaths`, or a line in
+    `euBasis.missing`; "pd" only when nothing is missing and every death is 70 years past by this year; "unconfirmed"
+    only when something is missing or a term still runs. A book "unconfirmed" in the EU is still written: it shows "EU
+    rights unconfirmed" and is not quoted (quotes.mjs). */
+export function checkEuRights(entry, year = new Date().getUTCFullYear()) {
+  const r = entry.rights || {}, b = r.euBasis || {};
+  if (!['pd', 'unconfirmed'].includes(r.eu)) throw new Error(`${entry.slug}: rights.eu must be "pd" or "unconfirmed" (it is ${r.eu})`);
+  if (!b.rule || !/^\d{4}-\d{2}-\d{2}$/.test(b.checked || '') || !Array.isArray(b.deaths)) throw new Error(`${entry.slug}: the EU finding needs its rule, its deaths and the day it was checked (rights.euBasis)`);
+  const y = n => (n < 0 ? `${-n} BC` : String(n));
+  let open = false;
+  for (const who of people(entry)) {
+    if (!Number.isFinite(who.died)) {
+      if (!(b.missing || []).some(m => m.includes(who.name))) throw new Error(`${entry.slug}: ${who.name} has no death year, so the EU finding must name it in euBasis.missing`);
+      if (r.eu === 'pd') throw new Error(`${entry.slug}: the EU finding "pd" is wrong: ${who.name}'s death year was not found`);
+      open = true;
+      continue;
+    }
+    const d = b.deaths.find(x => x.name === who.name);
+    if (!d || d.died !== who.died) throw new Error(`${entry.slug}: the EU finding does not record ${who.name}'s death (${y(who.died)})`);
+    if (!d.source) throw new Error(`${entry.slug}: ${who.name}'s death year needs the source it was read from`);
+    if (who.died + 70 >= year) {
+      if (r.eu === 'pd') throw new Error(`${entry.slug}: ${who.name} died in ${y(who.died)}, so the EU term runs to 31 December ${y(who.died + 70)}; the finding "eu: pd" is wrong`);
+      open = true;
+    }
+  }
+  if (r.eu === 'unconfirmed' && !open) throw new Error(`${entry.slug}: every death is sourced and past its EU term, so the finding should be "pd"`);
 }
 
 export const bookPath = slug => join(BOOKS, `${slug}.json`);

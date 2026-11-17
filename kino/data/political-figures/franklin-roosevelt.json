@@ -72,7 +72,7 @@
       "id": "hundred-days",
       "title": "The Hundred Days, 1933",
       "narration": "In his inaugural address on 4 March 1933, Roosevelt declared that the only thing Americans had to fear was fear itself. He proclaimed a national bank holiday, Congress passed an emergency banking law within days, and on 12 March he explained it to the nation in the first of his radio fireside chats. In the hundred days that followed, Congress passed laws on banking, farming, industry, relief and public works, and in April the country left the gold standard.",
-      "visual": { "kind": "quote", "text": "So, first of all, let me assert my firm belief that the only thing we have to fear is fear itself—nameless, unreasoning, unjustified terror which paralyzes needed efforts to convert retreat into advance.", "who": "Franklin D. Roosevelt, first inaugural address", "when": "4 March 1933", "cite": "inaugural-1933" },
+      "visual": { "kind": "summary", "text": "Roosevelt told Americans that their nation would endure and recover, and that the one thing to fear was fear itself: a vague, unreasoning terror that blocks the effort recovery needs.", "of": "Franklin D. Roosevelt, first inaugural address", "when": "4 March 1933", "cite": "inaugural-1933" },
       "link": { "label": "Political Retrospective · the United States, 1933", "suite": "rs", "module": "retrospective", "at": "https://hp-retrospective.pages.dev/#y=1933&c=2" },
       "cites": ["inaugural-1933", "kennedy-1999"]
     },
@@ -134,7 +134,7 @@
       "id": "pearl-harbor",
       "title": "Pearl Harbor, December 1941",
       "narration": "On the morning of 7 December 1941, Japanese aircraft attacked the American Pacific Fleet at Pearl Harbor in Hawaii. The next day Roosevelt asked Congress to declare war on Japan, and on 11 December Germany and Italy declared war on the United States. Roosevelt and Churchill agreed to defeat Germany first, while American forces also fought their way across the Pacific.",
-      "visual": { "kind": "quote", "text": "Yesterday, December 7, 1941—a date which will live in infamy—the United States of America was suddenly and deliberately attacked by naval and air forces of the Empire of Japan.", "who": "Franklin D. Roosevelt, address to Congress", "when": "8 December 1941", "cite": "infamy-1941" },
+      "visual": { "kind": "summary", "text": "Roosevelt told Congress that the day before, a date he said would be remembered for its infamy, Japan's navy and air force had attacked the United States suddenly and deliberately, while the two countries were at peace and still negotiating.", "of": "Franklin D. Roosevelt, address to Congress", "when": "8 December 1941", "cite": "infamy-1941" },
       "link": { "label": "War Focus · December 1941", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1941-12" },
       "cites": ["infamy-1941", "kennedy-1999"]
     },

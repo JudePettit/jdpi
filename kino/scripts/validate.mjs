@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { CATEGORY_IDS, VISUAL_KINDS, SOURCE_KINDS, flatScenes, cutoffYear, narratedYears } from '../lib/format.js';
 import { countSentences, speechWarnings, wordCount, estimateSeconds } from '../lib/text.js';
 import { TARGETS, onOwnPage, readAt } from '../lib/links.js';
+import { findQuote } from '../../bibliotheca/scripts/quotes.mjs';
 
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export const DATA = join(ROOT, 'kino', 'data');
@@ -281,11 +282,28 @@ export function validateScript(doc, ctx, file) {
       case 'portrait':
         if (!/^Q\d+$/.test(v.qid || '') && !/^File:/.test(v.file || '')) err(at, 'portrait needs a qid (its Wikidata image, P18) or a Commons file ("File:…")');
         break;
-      case 'quote':
+      case 'quote': {
         if (!v.text) err(at, 'quote text'); else if (wordCount(v.text) > 45) err(at, 'keep quotations short (45 words at most)');
         if (!v.who) err(at, 'quote: who said or wrote it');
         if (!v.when) err(at, 'quote: when');
         if (!v.cite) err(at, 'quote: cite the source it is taken from'); else cites(at, v.cite);
+        // The quotation rule (S0, 16 November 2026): a person's words are quoted only from a Bibliotheca book that is
+        // public domain in the EU, and the scene cites that edition; anything else is VM's summary (kind "summary").
+        if (v.text) {
+          const hits = findQuote(v.text), url = (doc.sources || []).find(s => s.id === v.cite)?.url;
+          if (!hits.length) err(at, 'quote: the words match no paragraph of a Bibliotheca book that is public domain in the EU (rights.eu "pd"); make the scene VM\'s summary (kind "summary")');
+          else if (!hits.some(h => h.url === url)) err(at, `quote: cite the edition the words are from (${[...new Set(hits.map(h => h.url))].join(' or ')})`);
+        }
+        break;
+      }
+      case 'summary':
+        // VM's summary of what someone said or a document says, in VM's words: shown under "VM's summary", never as
+        // the person's words, so it carries no quotation marks.
+        if (!v.text) err(at, 'summary text'); else if (wordCount(v.text) > 45) err(at, 'keep summaries short (45 words at most)');
+        if (/["“”]/.test(v.text || '')) err(at, 'summary: VM\'s own words, with no quotation marks');
+        if (!v.of) err(at, 'summary: whose words or which document it summarises');
+        if (!v.when) err(at, 'summary: when');
+        if (!v.cite) err(at, 'summary: cite the source it summarises'); else cites(at, v.cite);
         break;
       case 'chart': {
         if (!['bar', 'line'].includes(v.type)) err(at, 'chart type is bar or line');

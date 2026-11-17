@@ -6,7 +6,7 @@
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
 import { displayName } from '../history/names.mjs';
-import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched } from './figures.mjs';
+import { deaths as shown, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, COW_CITE, beforeWarNote, wikipediaIntro } from './figures.mjs';
 import { sideOf as sideAt, periodSides, inRange, runText } from './sides.mjs';
 
 const $ = s => document.querySelector(s);
@@ -24,7 +24,9 @@ const fmtDate = d => { if (!d) return ''; const t = new Date(d + 'T00:00:00Z'); 
 const END_NOTE = { end: 'end not recorded', order: 'dates uncertain: Wikidata ends it before its start', after: 'Wikidata ends it after the war' };
 // A battle Wikidata dates only to its decade (s null) has no date to show; one whose Wikidata end is over a month after
 // its Wikipedia article's (u 'conflict', scripts/rules.mjs endAgainstArticle) is drawn to the article's, and says so.
-const bDates = b => {
+// A battle whose start falls before the war's says so after its dates (figures.mjs beforeWarNote, S0).
+const bDates = b => { const d = bDatesOnly(b), early = beforeWarNote(b, state.war?.start); return early ? `${d} · ${early}` : d; };
+const bDatesOnly = b => {
   const f = (d, p) => (p === 'y' ? d.slice(0, 4) : p === 'm' ? monthLabel(d.slice(0, 7)) : fmtDate(d));
   if (!b.s) return `date not recorded${b.dec != null ? ` (Wikidata gives only the decade, the ${b.dec}s)` : ''}`;
   const a = f(b.s, b.p);
@@ -396,7 +398,7 @@ function renderPanel() {
     <h3>Deadliest battles of the war</h3>${deadliest.length ? seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null) : '<p class="empty">No battle of this war has a deaths figure.</p>'}
     <p class="fig-note" id="deadliest-note">${esc(deadliestNote(dlShown))}</p>
     <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3><p class="fig-note" id="fig-complete">${esc(completenessText(w.fig))}</p>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(b => battleItem(b)), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
-    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
+    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${/^Correlates of War/.test(w.deathsSource) ? ` Cited as the Correlates of War asks: ${esc(COW_CITE.text)} (<a href="${COW_CITE.url}" target="_blank" rel="noopener">${COW_CITE.url}</a>).` : ''}${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
       <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
       <b>Battle figures:</b> ${esc(FIGURE_METHOD)}
       <b>Wholes and their parts:</b> where Wikidata records an operation and its own parts and both are listed here (one part of the other, or the other among its parts), each death is counted once: the whole is shown as a heading over its parts, never ranked beside them, ranked by the figure recorded for the whole where there is one, else by the sum of its parts' recorded figures, and says which it is (where its parts' figures add up to more than the whole's own, that is said beside it); a figure Wikidata gives the whole that is one of its parts' own is left to that part, and a part of two wholes is counted under one of them, which its window names. A figure counted long after the event (the atomic bombings' registers of the dead, counted to 2013) gives the year it was counted, beside the share counted then: such a count can include people who died of their injuries in later years. On the map a whole is drawn only by what its figure has beyond its parts' marks. The count of battles and operations counts the whole and each part, as Wikidata lists them.
@@ -747,7 +749,8 @@ window.jdpiDocumentary = {
       const s = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(w.wiki.replace(/ /g, '_'))}`).then(r => r.json());
       // The first sentences: a full stop inside a number ("3.5 million") or after "U.S." does not end one.
       const said = window.jdpiNarrator?.sentences?.(s.extract || '') || (s.extract || '').match(/(?:[^.!?]|[.!?](?=\S))+[.!?]*/g) || [];
-      if (said.length) intro += ' ' + said.slice(0, 3).join(' ').trim();
+      // Wikipedia's words, said to be its (CC BY-SA 4.0; S0, 16 November 2026), in the voice and the captions alike.
+      if (said.length) intro += ' ' + wikipediaIntro(said.slice(0, 3), w.wiki);
     } catch {}
     intro += ` In all, about ${spokenNumber(w.totalDeaths)} died in battle${w.ongoing ? ' so far' : ''}.`;
     yield { text: intro, el: document.querySelector('#panel h2'), focus: { reset: true } };

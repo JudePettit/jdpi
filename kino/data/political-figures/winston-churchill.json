@@ -93,16 +93,16 @@
     {
       "id": "munich",
       "title": "Munich, 1938",
-      "narration": "When Neville Chamberlain returned from Munich in September 1938 with an agreement that handed the Sudetenland to Germany, much of Britain greeted him with relief. Churchill told the House of Commons that the country had suffered a total and unmitigated defeat, and he was heckled for it. Six months later Germany occupied the rest of Bohemia and Moravia, and opinion began to turn his way.",
-      "visual": { "kind": "quote", "text": "We have sustained a total and unmitigated defeat.", "who": "Winston Churchill, House of Commons", "when": "5 October 1938", "cite": "hansard-1938" },
+      "narration": "When Neville Chamberlain returned from Munich in September 1938 with an agreement that handed the Sudetenland to Germany, much of Britain greeted him with relief. Churchill told the House of Commons that Britain had been utterly defeated, and he was heckled for it. Six months later Germany occupied the rest of Bohemia and Moravia, and opinion began to turn his way.",
+      "visual": { "kind": "summary", "text": "Churchill began with what he called the most unwelcome thing to say: that in the Munich agreement Britain had suffered a complete defeat, and France an even worse one.", "of": "Winston Churchill, House of Commons", "when": "5 October 1938", "cite": "hansard-1938" },
       "link": { "label": "Master Index · Neville Chamberlain", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q10664" },
       "cites": ["hansard-1938", "gilbert-1991"]
     },
     {
       "id": "may-1940",
       "title": "Prime Minister, May 1940",
-      "narration": "On 10 May 1940, the day Germany attacked in the west, Chamberlain resigned and Churchill became Prime Minister at the head of a coalition with Labour and the Liberals. Three days later he told the Commons he had nothing to offer but blood, toil, tears and sweat. In the War Cabinet's debates of late May, as the army fell back on Dunkirk, he argued against asking Mussolini to broker terms, and Britain fought on.",
-      "visual": { "kind": "quote", "text": "I have nothing to offer but blood, toil, tears and sweat.", "who": "Winston Churchill, House of Commons", "when": "13 May 1940", "cite": "hansard-1940-may" },
+      "narration": "On 10 May 1940, the day Germany attacked in the west, Chamberlain resigned and Churchill became Prime Minister at the head of a coalition with Labour and the Liberals. Three days later he told the Commons that he could promise only hardship and sacrifice, and that his aim was victory. In the War Cabinet's debates of late May, as the army fell back on Dunkirk, he argued against asking Mussolini to broker terms, and Britain fought on.",
+      "visual": { "kind": "summary", "text": "Churchill told the House he could promise only hardship and sacrifice. His policy was to fight a monstrous tyranny with all the country's strength, at sea, on land and in the air; his aim was victory, without which nothing would survive.", "of": "Winston Churchill, House of Commons", "when": "13 May 1940", "cite": "hansard-1940-may" },
       "link": { "label": "War Focus · May 1940", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=ww2&m=1940-05" },
       "cites": ["kershaw-2007", "hansard-1940-may", "roberts-2018"]
     },

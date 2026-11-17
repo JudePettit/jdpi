@@ -28,6 +28,28 @@ export function estimateOf(source) {
   return '';
 }
 
+// The citation the Correlates of War's war data page asks for (read 16 November 2026; its terms bar passing the data on
+// without written permission, so War Focus shows one cited total per war: integration/scripts/cite-only.mjs, S0).
+export const COW_CITE = {
+  text: 'Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press',
+  url: 'https://correlatesofwar.org/data-sets/cow-war/',
+};
+
+/** A battle whose start, read at its precision, falls before its war's start: the note beside its dates (S0). A start
+ *  dated only to a month (p 'm') or a year (p 'y') counts only when the whole month or year is before the war. */
+export function beforeWarNote(b, warStart) {
+  if (!b?.s || !warStart) return '';
+  const latest = b.p === 'y' ? `${b.s.slice(0, 4)}-12-31` : b.p === 'm' ? `${b.s.slice(0, 7)}-31` : b.s;
+  return latest < warStart ? 'begins before the war’s start' : '';
+}
+
+/** The documentary's opening sentences from a war's English Wikipedia article, read aloud and captioned as
+ *  Wikipedia's words (CC BY-SA 4.0), never as VM's (S0). '' when there are none. */
+export function wikipediaIntro(sentences, title) {
+  const text = (sentences || []).join(' ').trim();
+  return text ? `Wikipedia’s article “${title}” says: ${text}` : '';
+}
+
 // ---- A whole and its parts (RV-05 A1, 16 November 2026). One rule for every war, never a list of cases: when an
 // event and one or more of its own parts are both in a war's list (Wikidata's "part of", P361, from the part, or "has
 // part(s)", P527, from the whole), the data records the link both ways (`up` on the part, `parts` on the whole) and

@@ -124,7 +124,7 @@ writeFileSync(new URL('wars.json', out), JSON.stringify({
   generated: new Date().toISOString(), firstYear: FIRST, ucdpFrom: UCDP_FROM, lastYear: LAST,
   sources: {
     ucdp: 'UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0',
-    cow: 'Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees & Wayman 2010)',
+    cow: 'Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)',
   },
   wars,
 }));

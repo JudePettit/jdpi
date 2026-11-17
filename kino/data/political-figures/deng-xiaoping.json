@@ -68,7 +68,7 @@
       "id": "under-mao",
       "title": "Under Mao, 1949–1966",
       "narration": "In the 1950s Deng became a vice-premier and the party's general secretary, and he helped direct the Anti-Rightist Campaign of 1957, which branded more than half a million people as rightists. After the Great Leap Forward ended in a famine in which tens of millions died, he supported letting farm households take on more of the work themselves. Defending that view in July 1962, he cited a Sichuan proverb that his wartime commander Liu Bocheng used about fighting battles.",
-      "visual": { "kind": "quote", "text": "It does not matter if it is a yellow cat or a black cat, as long as it catches mice.", "who": "Deng Xiaoping, citing a Sichuan proverb used by Liu Bocheng", "when": "7 July 1962", "cite": "deng-1962" },
+      "visual": { "kind": "summary", "text": "Arguing that farming should be organised in whatever way revived output fastest, Deng recalled a Sichuan proverb his wartime commander Liu Bocheng used about battles: a cat's colour does not matter, provided it catches mice.", "of": "Deng Xiaoping, citing a Sichuan proverb used by Liu Bocheng", "when": "7 July 1962", "cite": "deng-1962" },
       "link": { "label": "Learning · Politics: the far left in power and its critics", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=the-far-left-in-power-and-its-critics" },
       "cites": ["vogel-2011", "pantsov-levine-2015", "deng-1962"]
     },

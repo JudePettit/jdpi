@@ -131,6 +131,75 @@ describe('catalogue (integration/catalog.json)', () => {
     for (const f of files) if (/method/.test(f.licence)) assert.match(f.licence, new RegExp(`\\(method ${method.replace(/\./g, '\\.')}\\)`), `${f.dataset || f.id}: ${f.licence}`);
     assert.doesNotMatch(readFileSync(join(ROOT, 'integration/scripts/build-catalog.mjs'), 'utf8'), /method gvi-\d/, 'the method is read from the index');
   });
+  // S0, 16 November 2026: the Correlates of War's terms (read that day, integration/scripts/cite-only.mjs) bar
+  // redistributing its data without written permission, where the catalogue called it "free to use with citation" and
+  // offered its 40 wars of 1926–1945 row by row. No download carries a cite-only source's rows; what still names one is
+  // a cited total with the citation and link, or held for Jude's choice with the reason; no licence calls it free.
+  test('no hosted value from a cite-only source: no download carries its rows, and no licence calls it free', async () => {
+    const { CITE_ONLY, HOSTED, namesSource, claimsFree } = await imp('integration/scripts/cite-only.mjs');
+    for (const [id, src] of Object.entries(CITE_ONLY)) {
+      for (const k of ['name', 'citation', 'url', 'terms', 'read', 'words', 'allows']) assert.ok(src[k], `${id}.${k}`);
+      assert.match(src.read, /^\d{4}-\d{2}-\d{2}$/);
+      for (const d of CAT.datasets) {
+        const carries = (d.sources || []).some(s => src.match.test(s)) || recordsOf(d.id).some(r => namesSource(r, src));
+        const held = HOSTED.find(h => h.source === id && h.dataset === d.id);
+        assert.ok(!claimsFree(d.licence, src), `${d.id}: the licence calls ${src.name} free to use: ${d.licence}`);
+        if (!carries) continue;
+        assert.ok(held, `${d.id} carries ${src.name} values and is not listed in cite-only.mjs HOSTED`);
+        assert.ok(['total', 'pending'].includes(held.kind) && held.what, `${d.id}: a kind and what it holds`);
+        if (held.kind === 'total') assert.ok(d.sources.some(s => s.includes(src.citation) && s.includes(src.url)), `${d.id}: cites ${src.name} as its terms ask, with the link`);
+      }
+    }
+    // The second reader (16 November 2026): VM's own data names COW by its id ("src": "cow" on the Retrospective
+    // Battlefield's rows), and a value can come from COW under a key that says so (the count of COW wars 1926–1945 in
+    // the country profiles) with no provenance field at all. Both are seen, in every file the Hub serves under
+    // integration/data, not only in the catalogue's datasets; each is listed in HOSTED.
+    const wwii = JSON.parse(readFileSync(join(ROOT, 'battlefield/history/data/wars.json'), 'utf8')).wars.find(w => w.src === 'cow' && /World War II/.test(w.name));
+    assert.ok(wwii && namesSource(wwii, CITE_ONLY.cow), 'a row VM labels src: "cow" names the Correlates of War');
+    assert.ok(namesSource({ conflict_history: { wars_1926_1945: 2 } }, CITE_ONLY.cow), 'a field that carries a COW count names it');
+    assert.ok(!namesSource({ id: 'u1', src: 'ucdp', name: 'cow war' }, CITE_ONLY.cow));
+    const datasetOf = new Map(CAT.datasets.flatMap(d => (d.urls || [d.url]).map(u => [u, d.id])));
+    const heldFile = (id, f) => HOSTED.some(h => h.source === id && ((h.dataset && h.dataset === datasetOf.get(f)) || (h.dir && f.startsWith(`${h.dir}/`)) || h.file === f));
+    const files = [];
+    const walkDir = d => { for (const e of readdirSync(join(ROOT, d), { withFileTypes: true })) { const p = `${d}/${e.name}`; if (e.isDirectory()) walkDir(p); else if (p.endsWith('.json')) files.push(p); } };
+    walkDir('integration/data');
+    assert.ok(files.length > 300, 'every file under integration/data');
+    for (const [id, src] of Object.entries(CITE_ONLY)) {
+      for (const f of files) {
+        const data = JSON.parse(readFileSync(join(ROOT, f), 'utf8'));
+        // The query index holds a few sample rows of each dataset: a sample is held as its dataset is.
+        if (f === 'integration/data/query-index.json') {
+          for (const [ds, q] of Object.entries(data.datasets)) if (namesSource(q.sample || [], src)) assert.ok(HOSTED.some(h => h.source === id && h.dataset === ds), `query-index: the sample of ${ds} carries ${src.name} values and ${ds} is not listed in HOSTED`);
+          continue;
+        }
+        if (namesSource(data, src)) assert.ok(heldFile(id, f), `${f} carries ${src.name} values and is not listed in cite-only.mjs HOSTED`);
+      }
+    }
+    // A value held for Jude's choice says since when, and what it waits on, so it cannot stand unseen.
+    for (const h of HOSTED.filter(x => x.kind === 'pending')) {
+      assert.match(h.since || '', /^\d{4}-\d{2}-\d{2}$/, `${h.dataset || h.file || h.dir}: pending since when`);
+      assert.ok(h.awaits, `${h.dataset || h.file || h.dir}: what it waits on`);
+    }
+    // A download held for that choice says so in its licence, and what it holds (the second reader, F6): the monthly
+    // deaths are VM's spread of COW totals, not the totals alone.
+    for (const h of HOSTED.filter(x => x.kind === 'pending' && x.dataset)) {
+      const d = CAT.datasets.find(x => x.id === h.dataset);
+      if (!d || !(d.sources || []).concat(recordsOf(d.id).slice(0, 50).map(r => r.source || '')).some(s => CITE_ONLY[h.source].match.test(s))) continue;
+      assert.match(d.licence, /awaits a decision/, `${d.id}: its licence says the ${CITE_ONLY[h.source].name} values in it await a decision`);
+      for (const u of d.urls || [d.url]) if (u.startsWith('integration/data/')) assert.equal(J(u).licence, d.licence, `${u}: the file's licence is the catalogue's`);
+    }
+    assert.match(CAT.datasets.find(d => d.id === 'war-focus-monthly-deaths').licence, /estimated spread of those totals over months/);
+    // The 1926–1945 wars are out of the Retrospective Battlefield's download; its UCDP/PRIO conflicts stay.
+    const rw = recordsOf('retrospective-wars');
+    assert.ok(rw.length > 250 && rw.every(r => r.dataset === 'UCDP/PRIO' && /^u/.test(r.id)), 'retrospective-wars holds UCDP/PRIO rows only');
+    assert.ok(Math.min(...rw.map(r => r.first_year)) >= 1946);
+    // The Hub's table of sources says what the terms say.
+    const row = readFileSync(join(ROOT, 'integration/index.html'), 'utf8').split('\n').find(l => /<td>Correlates of War<\/td>/.test(l));
+    assert.ok(row, 'the Hub lists the Correlates of War');
+    assert.doesNotMatch(row, /free to use/i);
+    assert.match(row, /written permission/);
+    assert.ok(row.includes(CITE_ONLY.cow.url));
+  });
 });
 
 /* ================================================================ the Dashboard "Today" panel's files */

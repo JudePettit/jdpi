@@ -1712,12 +1712,25 @@ test('page: the scan-read books name their scans, their witnesses and, where a t
       assert.doesNotMatch(sources, /Econlib’s transcription/, `${slug}: no transcription`);
       assert.match(sources, rights, `${slug}: the rights`);
       assert.match(await page.locator('#byline').innerText(), byline, `${slug}: byline`);
+      // The EU finding (S0, 16 November 2026): a book whose translator's death year was not found is "EU rights
+      // unconfirmed", said beside the Irish and UK decision so the two do not read as a contradiction; a "pd" book says
+      // who died when, and that it is in the public domain in the EU.
+      if (slug === 'origin-of-money') {
+        assert.match(sources, /In the European Union \(Ireland among its members\) the text is in the public domain: everyone whose words it carries died more than 70 years ago[\s\S]*Caroline A\. Foley, 1942/, `${slug}: EU pd`);
+        assert.doesNotMatch(sources, /EU rights unconfirmed/, `${slug}: not unconfirmed`);
+      } else {
+        const who = slug === 'natural-value' ? 'Christian A\\. Malloch' : 'Alice M\\. Macdonald';
+        assert.match(sources, new RegExp(`EU rights unconfirmed: the death year of ${who} was not found, so the EU term \\(life plus 70 years\\) cannot be confirmed, and Vitruvian Manager quotes nothing from this book[\\s\\S]*a judgement of risk, not a finding`), `${slug}: EU unconfirmed`);
+      }
     }
     assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK on a reasonable search/, 'the badge says what the finding rests on');
+    assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK on a reasonable search · EU rights unconfirmed/, 'and that the EU term is not confirmed');
     await page.goto(`${BASE}/bibliotheca/neo/#book=origin-of-money&ch=1`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelector('#shelf')?.value === 'origin-of-money' && document.querySelector('#text p.para'), null, { timeout: 20000 });
     assert.match(await page.locator('#book-meta').innerText(), /9 sections/);
     assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK(?! on)/);
+    assert.match(await page.locator('#book-meta').innerText(), /Public domain US · UK · EU/);
+    assert.doesNotMatch(await page.locator('#book-meta').innerText(), /unconfirmed/);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

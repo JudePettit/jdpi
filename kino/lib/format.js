@@ -39,7 +39,7 @@ export function courseWords(docs) {
 }
 export const categoryOf = id => CATEGORIES.find(c => c.id === id) || null;
 
-export const VISUAL_KINDS = ['title', 'map', 'timeline', 'portrait', 'quote', 'chart', 'module'];
+export const VISUAL_KINDS = ['title', 'map', 'timeline', 'portrait', 'quote', 'summary', 'chart', 'module'];
 export const SOURCE_KINDS = ['wikidata', 'book', 'article', 'web'];
 
 /** Map tones: groups of countries are coloured by tone (the categorical palette in its fixed order). */

@@ -364,7 +364,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 // the year first and signed ("-0356-07-20"), with the precision when it is coarser than a year (a record's fp) and the
 // source's circa (fc). Written out by hand, not through Date: a year BC or before AD 100 is not a JS Date's year (read
 // as one, "-0356-07-2" was 7 August 1929). The same rules as lake/scripts/dates.mjs formatDate (tests/master-index.test.mjs).
-const fmtDate = (d, p, c) => {
+const fmtDate = (d, p, c, cal) => {
+  const jul = cal === 'julian' ? ' (Julian calendar)' : '';
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const ordinal = n => `${n}${[, 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] || 'th'}`;
   const m = String(d ?? '').match(/^(-?)(\d+)(?:-(\d\d))?(?:-(\d\d))?$/);
@@ -375,13 +376,22 @@ const fmtDate = (d, p, c) => {
     if (p === 8) s = `${Math.floor(y / 10) * 10}s${era}`;
     else if (p === 7) s = `${ordinal(Math.floor((y - 1) / 100) + 1)} century${era}`;
     else if (p === 6) s = `${ordinal(Math.floor((y - 1) / 1000) + 1)} millennium${era}`;
-    else return `c. ${y.toLocaleString('en-GB')}${era}`;
+    else return `c. ${y.toLocaleString('en-GB')}${era}${jul}`;
   } else {
     s = `${y}${era}`;
     if (m[3] && +m[3] >= 1 && +m[3] <= 12) s = `${MONTHS[+m[3] - 1]} ${s}`;
     if (m[3] && m[4] && +m[4] >= 1) s = `${+m[4]} ${s}`;
   }
-  return c ? `c. ${s}` : s;
+  return `${c ? `c. ${s}` : s}${jul}`;
+};
+// A fact as shown: its date, then any other value Wikidata gives it at the same rank (the record's fd), and the calendar
+// once for them all (fcal): "15 April 1452 or 14 April 1452 (Julian calendar; Wikidata gives both)". The same answers
+// as lake/scripts/dates.mjs factText (S0, 16 November 2026).
+const factText = (e, f) => {
+  const julian = (e.fcal || []).includes(f), alts = (e.fd && e.fd[f]) || [];
+  const main = fmtDate(e.facts[f], e.fp?.[f], (e.fc || []).includes(f));
+  const notes = [julian ? 'Julian calendar' : '', alts.length ? `Wikidata gives ${alts.length === 1 ? 'both' : 'all of them'}` : ''].filter(Boolean);
+  return `${[main, ...alts.map(([v, p]) => fmtDate(v, p < 9 ? p : undefined, false))].join(' or ')}${notes.length ? ` (${notes.join('; ')})` : ''}`;
 };
 
 async function renderEntity(q) {
@@ -395,7 +405,7 @@ async function renderEntity(q) {
   setEntryTab(q, name);
   const tagIdOf = new Map(idx.tags.map((t, i) => [t, i]));
   const factRows = [['Born', 'born'], ['Died', 'died'], ['Founded', 'founded'], ['Dissolved', 'dissolved'], ['Began', 'start'], ['Ended', 'end'], ['Date', 'date']].filter(([, f]) => e.facts[f])
-    .map(([k, f]) => `<dt>${k}</dt><dd>${esc(fmtDate(e.facts[f], e.fp?.[f], e.fc?.includes(f)))}</dd>`);
+    .map(([k, f]) => `<dt>${k}</dt><dd>${esc(factText(e, f))}</dd>`);
   const relRows = Object.entries(e.rel).map(([k, list]) => `<dt>${esc(k)}</dt><dd>${list.map(([rq, l]) => byQid.has(rq) ? `<a href="#${rq}">${esc(l)}</a>` : esc(l)).join(', ')}</dd>`);
   // Appearances by module, then submodule (registry.json's names), then each place the submodule gives: the book, the
   // war, the country, the film, the lesson. Long lists open in a pop-out.

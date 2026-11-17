@@ -268,7 +268,8 @@ function renderPanel() {
   // Before 1946 the Correlates of War records wars only; a period that spans 1946 draws on both datasets.
   const { cow, ucdp } = state.data.sources, from = state.data.ucdpFrom;
   const src = y < from ? `${cow}. Before ${from} only wars with 1,000+ battle deaths are recorded.` : a < from ? `${cow}, to ${from - 1}; ${ucdp}, from ${from}. Before ${from} only wars with 1,000+ battle deaths are recorded.` : `${ucdp}.`;
-  panel.innerHTML = html + `<p class="src-note"><b>Source:</b> ${esc(src)} Borders: CShapes 2.0.</p>`;
+  // The citation's link is live (the Correlates of War asks for its citation, S0 16 November 2026).
+  panel.innerHTML = html + `<p class="src-note"><b>Source:</b> ${esc(src).replace(/https:\/\/[^\s()<]+[^\s()<.]/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`)} Borders: CShapes 2.0.</p>`;
   wireCards(panel, selectWar);
   panel.querySelectorAll('[data-more]').forEach(b => b.onclick = () => openPopout(b.dataset.more));
   $('#close')?.addEventListener('click', () => select(null));

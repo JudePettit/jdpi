@@ -16,7 +16,8 @@
     { "id": "berlin-1979", "kind": "book", "author": "Isaiah Berlin", "title": "The Originality of Machiavelli, in Against the Current: Essays in the History of Ideas (edited by Henry Hardy)", "year": 1979, "publisher": "Hogarth Press" },
     { "id": "doyle-1997", "kind": "book", "author": "Michael W. Doyle", "title": "Ways of War and Peace: Realism, Liberalism, and Socialism", "year": 1997, "publisher": "W. W. Norton" },
     { "id": "machiavelli-1513", "kind": "web", "author": "Niccolò Machiavelli", "title": "The Prince (written 1513), translated by W. K. Marriott, Project Gutenberg", "year": 1513, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/1232" },
-    { "id": "rousseau-1762", "kind": "web", "author": "Jean-Jacques Rousseau", "title": "The Social Contract (1762), book 3, chapter 6, translated by G. D. H. Cole (1913), Project Gutenberg", "year": 1762, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46333" }
+    { "id": "rousseau-1762", "kind": "web", "author": "Jean-Jacques Rousseau", "title": "The Social Contract (1762), book 3, chapter 6, translated by G. D. H. Cole (1913), Project Gutenberg", "year": 1762, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46333" },
+    { "id": "rousseau-1762-ws", "kind": "web", "author": "Jean-Jacques Rousseau", "title": "The Social Contract, book 3, translated by G. D. H. Cole (the copy read on 16 November 2026, when Project Gutenberg was down for maintenance)", "year": 1762, "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/The_Social_Contract_(tr._Cole)/Book_3" }
   ],
   "parts": [
     {
@@ -113,7 +114,7 @@
           "id": "fox-and-lion",
           "title": "The fox and the lion",
           "narration": "A prince, Machiavelli wrote, must know how to act like a beast as well as a man, joining the cunning of the fox to the strength of the lion. He should seem merciful, faithful, humane and religious, but be ready to act otherwise when the state is at stake, because people judge by appearances and by results. These chapters, more than any others, earned the book its reputation.",
-          "visual": { "kind": "quote", "text": "It is necessary to be a fox to discover the snares and a lion to terrify the wolves.", "who": "Niccolò Machiavelli, The Prince, translated by W. K. Marriott", "when": "written in 1513", "cite": "machiavelli-1513" },
+          "visual": { "kind": "quote", "text": "… it is necessary to be a fox to discover the snares and a lion to terrify the wolves.", "who": "Niccolò Machiavelli, The Prince, translated by W. K. Marriott", "when": "written in 1513", "cite": "machiavelli-1513" },
           "cites": ["machiavelli-1513", "benner-2013"]
         },
         {
@@ -154,9 +155,9 @@
           "id": "readings",
           "title": "Teacher of evil, or of liberty?",
           "narration": "The Prince was placed on the Catholic Church's index of banned books in 1559, and English playwrights made the murderous Machiavel a stock stage villain. Jean-Jacques Rousseau read the book as a warning to the people disguised as advice to kings, Leo Strauss professed himself inclined to see its author as a teacher of evil, and Isaiah Berlin argued that Machiavelli had shown that political and Christian values cannot always be reconciled. More recently Erica Benner has read The Prince as an ironic book whose real lessons are republican.",
-          "visual": { "kind": "quote", "text": "He professed to teach kings; but it was the people he really taught. His Prince is the book of Republicans.", "who": "Jean-Jacques Rousseau, The Social Contract, translated by G. D. H. Cole", "when": "1762", "cite": "rousseau-1762" },
+          "visual": { "kind": "summary", "text": "Rousseau held that Machiavelli, who had to hide his love of liberty while serving the Medici, only seemed to advise kings: he was really teaching the people, and The Prince is a book for republicans.", "of": "Jean-Jacques Rousseau, The Social Contract, book 3, chapter 6, translated by G. D. H. Cole", "when": "1762", "cite": "rousseau-1762-ws" },
           "link": { "label": "Master Index · Machiavellianism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q472246" },
-          "cites": ["rousseau-1762", "strauss-1958", "berlin-1979", "benner-2013", "najemy-2010"]
+          "cites": ["rousseau-1762", "rousseau-1762-ws", "strauss-1958", "berlin-1979", "benner-2013", "najemy-2010"]
         },
         {
           "id": "realism",
@@ -173,6 +174,6 @@
     { "q": "What post did Machiavelli hold from 1498 to 1512?", "options": ["Head of Florence's Second Chancery", "Duke of Urbino", "Archbishop of Florence"], "answer": 0, "explain": "He ran the Second Chancery, served the republic's council of war and went on diplomatic missions until the Medici returned in 1512." },
     { "q": "To whom was The Prince finally dedicated?", "options": ["Cesare Borgia", "Lorenzo de' Medici", "Pope Julius the Second"], "answer": 1, "explain": "He dedicated it to Lorenzo de' Medici, nephew of Pope Leo the Tenth, hoping to win back employment." },
     { "q": "Which of Machiavelli's books argues that free republics, like ancient Rome, grow greater than principalities?", "options": ["The Art of War", "The Discourses on Livy", "The Mandrake"], "answer": 1, "explain": "The Discourses praise the Roman republic and argue that free states, in which citizens share in power, grow greater than principalities." },
-    { "q": "Which writer read The Prince as a book for republicans?", "options": ["Jean-Jacques Rousseau", "Thomas Hobbes", "Leo Strauss"], "answer": 0, "explain": "In The Social Contract (1762) Rousseau wrote that Machiavelli professed to teach kings but really taught the people, and called The Prince the book of republicans." }
+    { "q": "Which writer read The Prince as a book for republicans?", "options": ["Jean-Jacques Rousseau", "Thomas Hobbes", "Leo Strauss"], "answer": 0, "explain": "In The Social Contract (1762) Rousseau wrote that Machiavelli, while seeming to advise kings, was really teaching the people, and that The Prince is a book for republicans." }
   ]
 }

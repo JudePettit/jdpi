@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-16T06:53:34.852Z",
+  "generated": "2026-11-16T20:01:43.872Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -727,7 +727,7 @@
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)",
         "Wikidata (CC0): government, heads of state, capitals",
         "Political Retrospective (Archigos and Wikidata): leaders and elections since 1926",
-        "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and Correlates of War: conflict history",
+        "UCDP/PRIO Armed Conflict Dataset (CC BY 4.0): conflict history since 1946",
         "Kardashev Tracker: energy share"
       ],
       "updated": "2026-11-15",
@@ -2061,10 +2061,10 @@
     },
     {
       "id": "retrospective-wars",
-      "title": "Retrospective Battlefield: wars and armed conflicts 1926–2025",
+      "title": "Retrospective Battlefield: armed conflicts 1946–2025",
       "module": "rs",
       "submodule": "battlefield-history",
-      "description": "Every war and armed conflict from 1926 to 2025: UCDP/PRIO from 1946 (25+ battle deaths a year; intensity 2 means 1,000+), Correlates of War before (wars of 1,000+ battle deaths), with type, aim, sides, where it was fought and its active years.",
+      "description": "Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from the Correlates of War, whose terms do not let Vitruvian Manager pass its data on, so they are on the page only.",
       "url": "integration/data/retrospective-wars.json",
       "format": "json",
       "records": "records",
@@ -2072,12 +2072,12 @@
         {
           "name": "id",
           "type": "string",
-          "description": "Conflict id (u… UCDP, c… Correlates of War)"
+          "description": "Conflict id (u…, from UCDP's conflict id)"
         },
         {
           "name": "dataset",
           "type": "string",
-          "description": "UCDP/PRIO or Correlates of War"
+          "description": "UCDP/PRIO"
         },
         {
           "name": "name",
@@ -2145,21 +2145,15 @@
           "description": "Side B"
         },
         {
-          "name": "battle_deaths",
-          "type": "number",
-          "description": "Battle deaths (Correlates of War only)"
-        },
-        {
           "name": "wikipedia",
           "type": "string",
           "description": "Wikipedia article, where known"
         }
       ],
-      "rows": 343,
-      "licence": "UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); Correlates of War data free to use with citation (Sarkees & Wayman 2010); state names from CShapes 2.0 (CC BY-NC-SA 4.0).",
+      "rows": 303,
+      "licence": "UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); state names from CShapes 2.0 (CC BY-NC-SA 4.0).",
       "sources": [
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
-        "Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data (Sarkees & Wayman 2010)",
         "CShapes 2.0 (Schvitz et al. 2022) for state names"
       ],
       "updated": "2026-11-15",
@@ -2169,7 +2163,7 @@
         "battlefield/history/data/wars.json",
         "battlefield/history/data/borders.topo.json"
       ],
-      "bytes": 170329
+      "bytes": 146332
     },
     {
       "id": "war-focus-wars",
@@ -2204,7 +2198,7 @@
         {
           "name": "bf",
           "type": "string",
-          "description": "Matching conflict id in retrospective-wars"
+          "description": "Matching conflict id on the Retrospective Battlefield (a u… id is in retrospective-wars; a c… id is a Correlates of War war, shown on the page only)"
         },
         {
           "name": "start",
@@ -2258,18 +2252,19 @@
         }
       ],
       "rows": 39,
-      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
-        "Correlates of War Project war data (Sarkees & Wayman 2010)",
+        "Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
-        "CShapes 2.0 (Schvitz et al. 2022)"
+        "CShapes 2.0 (Schvitz et al. 2022)",
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
-      "bytes": 17605
+      "bytes": 17915
     },
     {
       "id": "war-focus-battles",
@@ -2411,19 +2406,19 @@
         }
       ],
       "rows": 3494,
-      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, and VM's estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision), as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
-        "Correlates of War Project war data (Sarkees & Wayman 2010)"
+        "Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)"
       ],
-      "updated": "2026-11-15",
+      "updated": "2026-11-16",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 869882
+      "bytes": 870142
     },
     {
       "id": "kardashev-polities",

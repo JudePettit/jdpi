@@ -124,6 +124,67 @@ test('Retrospective data: a state on both sides of a war is dated on each, and V
   }
 });
 
+// S0, 16 November 2026: the Correlates of War's terms ask for its citation (Sarkees and Wayman 2010, Resort to War) and
+// bar redistribution without written permission. Every page file and page that shows a COW value cites it as the terms
+// ask, with the link, and the terms read are recorded where a maintainer looks (battlefield/README.md).
+test('Correlates of War: every page and page file showing its values cites it as its terms ask, with the link', async () => {
+  const { CITE_ONLY, HOSTED } = await import('../integration/scripts/cite-only.mjs');
+  const cow = CITE_ONLY.cow, read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+  const cites = s => s.includes(cow.citation) && s.includes(cow.url);
+  for (const h of HOSTED.filter(x => x.file)) {
+    const f = JSON.parse(read(h.file));
+    assert.ok(Object.values(f.sources || {}).some(s => typeof s === 'string' && cites(s)), `${h.file}: sources cite ${cow.name} with the link`);
+  }
+  // The builders write the same, so a rebuild keeps it.
+  for (const p of ['battlefield/scripts/build-history.mjs', 'battlefield/focus/scripts/build.mjs']) assert.ok(read(p).includes(cow.citation) && read(p).includes(cow.url), `${p} writes the citation`);
+  // The pages' Sources paragraphs (HTML: the en dash and the ampersand as written there).
+  const html = s => s.replace(/&amp;/g, '&');
+  for (const p of ['battlefield/history/index.html', 'battlefield/focus/index.html']) {
+    const src = html(read(p).split('\n').find(l => /<b>Sources\.<\/b>/.test(l)) || '');
+    assert.ok(cites(src), `${p}: its Sources paragraph cites ${cow.name} with the link`);
+  }
+  // A War Focus war whose deaths are COW's total says so in its panel, with the citation and link (figures.mjs).
+  const { COW_CITE } = await import('../battlefield/focus/figures.mjs');
+  assert.deepEqual(COW_CITE, { text: cow.citation, url: cow.url });
+  assert.match(read('battlefield/focus/app.js'), /COW_CITE/);
+  // The Retrospective Battlefield's panel names COW for its battle deaths; its Sources paragraph says what the terms allow.
+  assert.match(read('battlefield/history/index.html'), /written permission/);
+  const readme = read('battlefield/README.md').replace(/\s*\n>?\s*/g, ' '); // the quotation's lines joined
+  for (const s of [cow.terms, cow.url, 'Users agree not to distribute the dataset to any third party without written permission', '16 November 2026']) assert.ok(readme.includes(s), `README records: ${s}`);
+});
+
+// S0 (16 November 2026): UCDP aggregate events labelled. Russia–Ukraine, January 2026 read "about 13,394 deaths …
+// Deadliest areas: Ukraine (12,952)" with nothing to say that 8,002 of them were UCDP's event for the whole of January
+// and 4,909 one for January to June 2026, put whole in January, both placed only in the country. The four rows below are
+// UCDP's own (candidate events v26.01.26.09, Russia – Ukraine, January 2026; the columns the note reads).
+test('Realtime notes: deaths in events UCDP dates only to a month or longer, or places only in the country, are said', async () => {
+  const { monthInsight } = await import('../battlefield/scripts/realtime-insight.mjs');
+  const row = (date_start, date_end, date_prec, best, adm_1, headline) => ({ date_start: `${date_start} 00:00:00.000`, date_end: `${date_end} 00:00:00.000`, date_prec, best, deaths_civilians: '0',
+    conflict_new_id: '13243', conflict_name: 'Russia - Ukraine', dyad_name: 'Government of Russia (Soviet Union) - Government of Ukraine', type_of_violence: '1', country: 'Ukraine', region: 'Europe', adm_1, where_description: '', source_headline: headline, source_office: '' });
+  const list = [row('2026-01-01', '2026-01-31', '4', '8002', '', 'Russia\'s losses in the war 01.01.2026 - 31.01.2026'), row('2026-01-01', '2026-06-30', '5', '4909', '', 'Ukraine\'s losses in the war 01.01.2026 - 30.06.2026'),
+    row('2026-01-10', '2026-01-10', '1', '14', 'Donetsk oblast', '10 January 2026'), row('2026-01-23', '2026-01-23', '1', '10', 'Dnipropetrovsk oblast', '23 January 2026')];
+  const x = monthInsight({ conflicts: new Map([['13243', {}]]) }, list, '2026-01', null);
+  assert.equal(x.deaths, 12935);
+  assert.deepEqual([x.periodDeaths, x.periodBeyond, x.unplacedDeaths], [12911, 4909, 12911]);
+  assert.match(x.text, /Deadliest areas: Ukraine \(12,911\); Donetsk, Ukraine \(14\); Dnipropetrovsk, Ukraine \(10\)\./);
+  assert.match(x.text, /Of these deaths, 12,911 are in events UCDP dates only to a month or a longer period, not to a day, each counted here in the month it starts \(4,909 in a period running beyond January\)\./);
+  assert.match(x.text, /12,911 have no area recorded below the country\./);
+  // A month of clashes dated to the day says nothing of the kind.
+  const plain = monthInsight({ conflicts: new Map([['13243', {}]]) }, list.slice(2), '2026-01', null);
+  assert.deepEqual([plain.periodDeaths, plain.periodBeyond, plain.unplacedDeaths], [0, 0, 0]);
+  assert.doesNotMatch(plain.text, /UCDP dates only|no area recorded/);
+  // The builder writes its notes by this rule, and the page's bars say it in their tooltip.
+  assert.match(readFileSync(new URL('../battlefield/scripts/build-realtime.mjs', import.meta.url), 'utf8'), /import \{ monthInsight, country \} from '\.\/realtime-insight\.mjs';/);
+  assert.match(readFileSync(new URL('../q/battlefield.html', import.meta.url), 'utf8'), /x\.periodDeaths \?/);
+  // The committed data, once built by this rule (a file built before has no periodDeaths: the next UCDP release's
+  // build, battlefield-refresh, writes them): every month's figures add up and its note says them.
+  if (!REALTIME.wars.some(w => w.monthly.some(m => 'periodDeaths' in m))) return;
+  for (const w of REALTIME.wars) for (const m of w.monthly.filter(x => x.events)) {
+    assert.ok(m.periodDeaths <= m.deaths && m.periodBeyond <= m.periodDeaths && m.unplacedDeaths <= m.deaths, `${w.id} ${m.month}`);
+    if (m.periodDeaths) assert.match(m.text, /UCDP dates only to a month or a longer period/, `${w.id} ${m.month}`);
+  }
+});
+
 test('Realtime data: the year so far month by month, with enough wars and conflict cells to map', () => {
   const r = REALTIME, sum = f => r.wars.reduce((s, w) => s + (f(w) || 0), 0);
   assert.equal(r.generated, new Date(Date.parse(r.generated)).toISOString());

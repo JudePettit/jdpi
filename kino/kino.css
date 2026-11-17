@@ -115,6 +115,7 @@
 .kn-theatre:fullscreen .kn-v-portrait .text h3 { font-size: max(20px, 4.4cqw); }
 .kn-theatre:fullscreen .kn-v-portrait .text .sub { font-size: max(13px, 2cqw); }
 .kn-theatre:fullscreen .kn-v-quote blockquote { font-size: max(20px, 4.1cqw); }
+.kn-theatre:fullscreen .kn-v-summary .said { font-size: max(14px, 3cqw); }
 .kn-theatre:fullscreen .kn-v-module .card { width: 76cqw; }
 .kn-theatre:fullscreen .kn-v-module h3 { font-size: max(18px, 3.4cqw); }
 .kn-theatre:fullscreen .kn-v-module .at { font-size: max(13px, 1.8cqw); }
@@ -255,6 +256,13 @@
 .kn-v-quote .who { display: flex; align-items: center; gap: 1.2cqw; color: var(--prp-text-2); font: 500 max(11px, 1.45cqw)/1.4 var(--prp-font-mono); letter-spacing: .02em; animation: kn-rise 1.2s .3s ease-out both; }
 .kn-v-quote .who::before { content: ""; width: 5cqw; height: 2px; background: var(--prp-accent); }
 
+/* VM's summary (the quotation rule, S0): what someone said or a document says, in VM's words. The page's sans, not the
+   quote card's serif, no opening mark, a kicker that says whose words they are, and what they summarise beneath. */
+.kn-v-summary { display: grid; align-content: center; gap: 1.6cqw; padding: 5cqw 8cqw; background: var(--prp-surface); }
+.kn-v-summary .kicker { color: var(--prp-muted); font: 500 max(11px, 1.25cqw) var(--prp-font-mono); letter-spacing: .12em; text-transform: uppercase; animation: kn-rise 1.2s ease-out both; }
+.kn-v-summary .said { margin: 0; padding-left: 2cqw; border-left: 3px solid var(--prp-line-strong); font: 400 clamp(14px, 3cqw, 40px)/1.35 var(--prp-font-ui); color: var(--prp-text); animation: kn-rise 1.2s .1s ease-out both; }
+.kn-v-summary .of { color: var(--prp-text-2); font: 500 max(11px, 1.35cqw)/1.4 var(--prp-font-mono); letter-spacing: .02em; animation: kn-rise 1.2s .3s ease-out both; }
+
 /* Module card */
 .kn-v-module { display: grid; place-content: center; padding: 4cqw; background: var(--prp-surface-2); }
 .kn-v-module .card { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 1.4cqw 2.4cqw; align-items: center; width: min(76cqw, 900px); padding: 3cqw 3.4cqw;
@@ -394,6 +402,9 @@
   .kn-legend, .kn-badge { display: none; }
   .kn-cap-foot .legend-key:not(:empty) { display: flex; }
   .kn-bigplay { left: auto; right: 10px; bottom: 10px; transform: none; height: 34px; padding: 0 14px; font-size: 13px; }
+  /* the summary's last line, what it summarises, stops short of the Play button in the corner */
+  .kn-v-summary { padding: 4cqw 5cqw; }
+  .kn-v-summary .of { padding-right: 86px; }
 }
 .kn-cap-foot .legend-key { display: none; flex-basis: 100%; flex-wrap: wrap; gap: 4px 12px; color: var(--prp-text-2); }
 .kn-cap-foot .legend-key i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; vertical-align: -1px; }
@@ -414,7 +425,7 @@
   .kn-map .head { animation: none; opacity: 1; }
   .kn-map .front, .kn-map .ring, .kn-card .thumb img, .kn-v-portrait .frame img, .kn-v-module .icon::after { animation: none; }
   .kn-map .ring { opacity: 0; }
-  .kn-v-title h3, .kn-v-title .sub, .kn-v-title .rule, .kn-v-portrait .text h3, .kn-v-portrait .text .sub, .kn-v-quote blockquote, .kn-v-quote .who, .kn-v-module .card { animation: none; }
+  .kn-v-title h3, .kn-v-title .sub, .kn-v-title .rule, .kn-v-portrait .text h3, .kn-v-portrait .text .sub, .kn-v-quote blockquote, .kn-v-quote .who, .kn-v-summary .kicker, .kn-v-summary .said, .kn-v-summary .of, .kn-v-module .card { animation: none; }
   .kn-map .c, .kn-layer, .kn-stage > svg.kn-map { transition: none; }
 }
 @media print { .kn-controls, .kn-bigplay, .kn-chapters, .kn-related, .kn-more, .kn-side { display: none !important; } }

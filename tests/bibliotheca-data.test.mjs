@@ -11,7 +11,7 @@ import { readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { stripBoilerplate, normalise, roman, sentenceCase, splitChapters } from '../bibliotheca/scripts/text.mjs';
 import { buildAliasIndex, tagText, tagBook, newStats, report, firstYear, fold, loadLake } from '../bibliotheca/scripts/tag-terms.mjs';
-import { SHELF, shelfEntry, checkRights, indexEntry, bookJson, BOOKS, INDEX, ROOT, MAX_BYTES, CACHE } from '../bibliotheca/scripts/shelf.mjs';
+import { SHELF, shelfEntry, checkRights, checkEuRights, indexEntry, bookJson, BOOKS, INDEX, ROOT, MAX_BYTES, CACHE } from '../bibliotheca/scripts/shelf.mjs';
 import { bookRecord, splitWork, splitBook, titleCase, caseCounts, sourceFile, bookText } from '../bibliotheca/scripts/build-book.mjs';
 import { readEconlib, merge as mergeReadings, sourceOf, textWords, table as tableText, renumber, straightQuotes, scribble, checkAgainst, witnessWords, shelfWords, joinBroken } from '../bibliotheca/scripts/scan-text.mjs';
 import { tidyAlias } from '../lake/scripts/aliases.mjs';
@@ -353,6 +353,63 @@ test('shelf: every book is public domain in the US and the UK by its dates, and 
   assert.match(record.edition.licence, /header, footer and licence have been removed/);
   assert.deepEqual(record.rights, prince.rights);
   assert.equal(record.edition.url, 'https://www.gutenberg.org/ebooks/1232');
+});
+
+// ---- The EU term (S0, 16 November 2026): every book carries rights.eu with its basis. "pd" only when everyone whose
+// words the hosted text carries died more than 70 years before 1 January of this year (Directive 2006/116/EC; Ireland's
+// Act of 2000 the same), each death with the source it was read from; otherwise "unconfirmed", with what is missing.
+// Quotation (kino, learning) accepts only "pd" books (bibliotheca/scripts/quotes.mjs).
+test('shelf: every book has an EU finding, "pd" only when every death is 70 years past and sourced, else "unconfirmed" with what is missing', () => {
+  const UNCONFIRMED = { 'karl-marx-and-the-close-of-his-system': 'Alice M. Macdonald', 'natural-value': 'Christian A. Malloch' };
+  const year = new Date().getUTCFullYear();
+  for (const [e, book] of shelfBooks) {
+    const r = e.rights, b = r.euBasis || {}, at = what => `${e.slug}: ${what}`;
+    assert.ok(['pd', 'unconfirmed'].includes(r.eu), at(`rights.eu is "pd" or "unconfirmed" (it is ${r.eu})`));
+    assert.equal(book.rights.eu, r.eu, at('the book file carries the shelf’s EU finding'));
+    assert.deepEqual(book.rights.euBasis, b, at('and its basis'));
+    assert.match(b.rule || '', /life plus 70 years[\s\S]*Directive 2006\/116\/EC[\s\S]*Copyright and Related Rights Act 2000, s\.24/, at('the rule named'));
+    assert.match(b.checked || '', /^\d{4}-\d{2}-\d{2}$/, at('the day of the finding'));
+    for (const who of [e.author, e.translator, ...(e.editors || [])].filter(Boolean)) {
+      if (who.died === null) {
+        assert.ok((b.missing || []).some(m => m.includes(who.name)), at(`${who.name}'s missing death year is named`));
+        continue;
+      }
+      const d = (b.deaths || []).find(x => x.name === who.name);
+      assert.ok(d, at(`${who.name}'s death is recorded`));
+      assert.equal(d.died, who.died, at(`${who.name}'s death year`));
+      assert.ok(d.role, at(`${who.name}'s part`));
+      assert.match(d.source, /(Wikidata Q\d+|Wikisource)[\s\S]*read \d{1,2} [A-Z][a-z]+ \d{4}/, at(`${who.name}: where the year was read, and the day`));
+    }
+    if (UNCONFIRMED[e.slug]) {
+      assert.equal(r.eu, 'unconfirmed', at('EU rights unconfirmed'));
+      assert.ok(b.missing.some(m => m.includes(UNCONFIRMED[e.slug])), at(`the missing death year of ${UNCONFIRMED[e.slug]}`));
+    } else {
+      assert.equal(r.eu, 'pd', at('public domain in the EU'));
+      assert.equal(b.missing, undefined, at('nothing missing'));
+      assert.ok(b.deaths.every(d => d.died + 70 < year), at('every death more than 70 years before this year'));
+    }
+  }
+  // The second reader (16 November 2026): two death years rest on one Wikidata item with no independent record found
+  // (W. K. Marriott's Wikisource page and Wikidata item are one source; J. J. Graham's item cites nothing). The record says
+  // how far each is supported, and why "pd" stands: to be protected when the finding was made, each would have had to
+  // live to the year 70 before it (1956 for the finding of 2026).
+  const deathOf = (slug, name) => shelfEntry(slug).rights.euBasis.deaths.find(d => d.name === name);
+  for (const [slug, name, born] of [['the-prince', 'W. K. Marriott', 1847], ['on-war', 'J. J. Graham', 1808]]) {
+    const d = deathOf(slug, name), until = Number(shelfEntry(slug).rights.euBasis.checked.slice(0, 4)) - 70;
+    assert.match(d.source, /no independent record/, `${name}: the record says no independent source was found`);
+    assert.ok(d.source.includes(`born ${born}`) && d.source.includes(`live to ${until}, aged ${until - born}`), `${name}: the reasoning, born ${born}, alive in ${until} at ${until - born}: ${d.source}`);
+  }
+  assert.match(deathOf('the-prince', 'W. K. Marriott').source, /Project Gutenberg/, 'Marriott: what the Wikidata statement cites');
+  assert.match(deathOf('on-war', 'J. J. Graham').source, /no reference/, 'Graham: the Wikidata statement cites nothing');
+  // A wrong finding is refused, as the US and UK ones are.
+  const km = shelfEntry('karl-marx-and-the-close-of-his-system'), prince = shelfEntry('the-prince'), pb = prince.rights.euBasis;
+  assert.throws(() => checkRights({ ...km, rights: { ...km.rights, eu: 'pd' } }), /EU[\s\S]*Alice M\. Macdonald/);
+  assert.throws(() => checkRights({ ...prince, rights: { ...prince.rights, eu: undefined } }), /rights\.eu/);
+  assert.throws(() => checkRights({ ...prince, rights: { ...prince.rights, eu: 'unconfirmed' } }), /should be "pd"/);
+  assert.throws(() => checkRights({ ...prince, rights: { ...prince.rights, euBasis: { ...pb, deaths: pb.deaths.filter(d => d.name !== 'W. K. Marriott') } } }), /W\. K\. Marriott/);
+  assert.throws(() => checkRights({ ...prince, rights: { ...prince.rights, euBasis: { ...pb, deaths: pb.deaths.map(d => ({ ...d, source: '' })) } } }), /source/);
+  assert.throws(() => checkEuRights({ ...prince, translator: { name: 'W. K. Marriott', died: 1960 }, rights: { ...prince.rights, euBasis: { ...pb, deaths: pb.deaths.map(d => ({ ...d, died: d.name === 'W. K. Marriott' ? 1960 : d.died })) } } }, 2026), /1960[\s\S]*EU term runs to 31 December 2030/);
+  assert.doesNotThrow(() => checkEuRights(prince, 2026));
 });
 
 // ---- The built files.

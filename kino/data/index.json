@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14",
+ "generated": "2026-11-16",
  "categories": [
   {
    "id": "political-events",
@@ -70,7 +70,7 @@
    "scenes": 11,
    "parts": 3,
    "quiz": 4,
-   "sources": 10,
+   "sources": 11,
    "scholarly": 7,
    "links": [
     "rs/encyclopedia",
@@ -113,7 +113,7 @@
    "scenes": 11,
    "parts": 3,
    "quiz": 4,
-   "sources": 10,
+   "sources": 11,
    "scholarly": 7,
    "links": [
     "rs/encyclopedia",
@@ -153,7 +153,7 @@
    "scenes": 12,
    "parts": 3,
    "quiz": 4,
-   "sources": 11,
+   "sources": 12,
    "scholarly": 8,
    "links": [
     "rs/encyclopedia",
@@ -291,7 +291,7 @@
     1924
    ],
    "minutes": 7,
-   "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and the words of Lenin and one of his sharpest critics on the left.",
+   "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and VM's summaries of what Lenin and one of his sharpest critics on the left wrote.",
    "subjects": [
     {
      "qid": "Q8729",
@@ -648,7 +648,7 @@
     1948
    ],
    "minutes": 7,
-   "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with the founders' own words and the range of estimates of the dead and the displaced.",
+   "summary": "How British India was divided into India and Pakistan in August 1947, why it happened, and what it cost the millions who crossed the new borders. Twelve scenes, with VM's summaries of what the founders told their assemblies and the range of estimates of the dead and the displaced.",
    "subjects": [
     {
      "qid": "Q129053",
@@ -716,7 +716,7 @@
    "scenes": 12,
    "parts": 0,
    "quiz": 0,
-   "sources": 9,
+   "sources": 10,
    "scholarly": 6,
    "links": [
     "rs/battlefield-history",
@@ -815,7 +815,7 @@
    "scenes": 12,
    "parts": 0,
    "quiz": 0,
-   "sources": 8,
+   "sources": 9,
    "scholarly": 6,
    "links": [
     "rs/encyclopedia",
@@ -1043,7 +1043,7 @@
     1962
    ],
    "minutes": 6,
-   "summary": "Why Khrushchev sent nuclear missiles to Cuba, how Kennedy found and answered them, the secret bargain that ended the thirteen days, and what both sides kept quiet for decades. Eleven scenes, with the words of Kennedy and Khrushchev themselves.",
+   "summary": "Why Khrushchev sent nuclear missiles to Cuba, how Kennedy found and answered them, the secret bargain that ended the thirteen days, and what both sides kept quiet for decades. Eleven scenes, with VM's summaries of what Kennedy said and Khrushchev wrote.",
    "subjects": [
     {
      "qid": "Q128160",
@@ -1065,7 +1065,7 @@
    "scenes": 11,
    "parts": 0,
    "quiz": 0,
-   "sources": 9,
+   "sources": 10,
    "scholarly": 5,
    "links": [
     "rs/encyclopedia",

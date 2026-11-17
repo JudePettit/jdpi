@@ -8,7 +8,7 @@
     { "qid": "Q42976", "label": "October Revolution" }
   ],
   "era": [1905, 1924],
-  "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and the words of Lenin and one of his sharpest critics on the left.",
+  "summary": "How the Russian Empire fell in February 1917, how Lenin's Bolsheviks took power in October, and how civil war and one-party rule followed. Twelve scenes, with the election the Bolsheviks lost and VM's summaries of what Lenin and one of his sharpest critics on the left wrote.",
   "minutes": 7,
   "preview": { "scene": "civil-war" },
   "sources": [
@@ -92,7 +92,7 @@
       "id": "lenin-returns",
       "title": "Dual power, and Lenin's return",
       "narration": "The Provisional Government promised elections to a Constituent Assembly, but it kept Russia in the war and put off the land reform the peasants demanded. On 16 April Lenin arrived at Petrograd's Finland Station from exile in Switzerland, having crossed Germany with the help of a German government that hoped he would take Russia out of the war. His April Theses rejected any support for the new government and called for power to pass to the soviets, a stance that at first isolated him even among Bolsheviks.",
-      "visual": { "kind": "quote", "text": "No support for the Provisional Government", "who": "Vladimir Lenin, the April Theses", "when": "Pravda, 7 April 1917 (Russian calendar)", "cite": "lenin-1917" },
+      "visual": { "kind": "summary", "text": "The third of Lenin's theses: the Bolsheviks should give the Provisional Government no support, and show that its promises, above all its promise to renounce annexations, were false.", "of": "Vladimir Lenin, the April Theses", "when": "Pravda, 7 April 1917 (Russian calendar)", "cite": "lenin-1917" },
       "link": { "label": "Master Index · Vladimir Lenin", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q1394" },
       "cites": ["lenin-1917", "pipes-1990", "fitzpatrick-2017"]
     },
@@ -147,7 +147,7 @@
       "id": "dictatorship",
       "title": "A critic on the left",
       "narration": "The Bolsheviks argued that the soviets were a higher form of democracy than a parliament elected from out-of-date party lists, but other socialists disagreed. A new security police, the Cheka, set up in December 1917, was soon arresting opponents, and in June 1918 the Mensheviks and the right-wing Socialist Revolutionaries were expelled from the soviets' central executive. Writing in a German prison that autumn, the Polish-born revolutionary Rosa Luxemburg welcomed the revolution but warned that without free elections, a free press and the right of opponents to organise, public life would wither and only a small group of leaders would rule.",
-      "visual": { "kind": "quote", "text": "Freedom is always and exclusively freedom for the one who thinks differently.", "who": "Rosa Luxemburg, The Russian Revolution", "when": "1918", "cite": "luxemburg-1918" },
+      "visual": { "kind": "summary", "text": "Luxemburg argued that freedom granted only to a government's supporters, or to the members of a single party, however large, is not freedom: real freedom always includes those who think otherwise.", "of": "Rosa Luxemburg, The Russian Revolution, translated by Bertram Wolfe", "when": "1918", "cite": "luxemburg-1918" },
       "link": { "label": "Learning · Politics: Thinkers of the far left", "suite": "rs", "module": "learning-politics", "at": "fe/learning.html?course=politics&lesson=thinkers-of-the-far-left" },
       "cites": ["luxemburg-1918", "figes-1996", "pipes-1990"]
     },

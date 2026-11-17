@@ -17,7 +17,8 @@
     { "id": "hobsbawm-2011", "kind": "book", "author": "Eric Hobsbawm", "title": "How to Change the World: Tales of Marx and Marxism", "year": 2011, "publisher": "Little, Brown" },
     { "id": "brown-2009", "kind": "book", "author": "Archie Brown", "title": "The Rise and Fall of Communism", "year": 2009, "publisher": "Bodley Head" },
     { "id": "marx-engels-1848", "kind": "web", "author": "Karl Marx and Friedrich Engels", "title": "Manifesto of the Communist Party (1848), English edition of 1888, Project Gutenberg", "year": 1848, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/61" },
-    { "id": "marx-1859", "kind": "web", "author": "Karl Marx", "title": "A Contribution to the Critique of Political Economy (1859), translated by N. I. Stone (1904), Project Gutenberg", "year": 1859, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46423" }
+    { "id": "marx-1859", "kind": "web", "author": "Karl Marx", "title": "A Contribution to the Critique of Political Economy (1859), translated by N. I. Stone (1904), Project Gutenberg", "year": 1859, "publisher": "Project Gutenberg", "url": "https://www.gutenberg.org/ebooks/46423" },
+    { "id": "marx-1859-ws", "kind": "web", "author": "Karl Marx", "title": "A Contribution to the Critique of Political Economy, Author’s Preface, translated by N. I. Stone (the copy read on 16 November 2026, when Project Gutenberg was down for maintenance)", "year": 1859, "publisher": "Wikisource", "url": "https://en.wikisource.org/wiki/A_Contribution_to_the_Critique_of_Political_Economy/Author%27s_Preface" }
   ],
   "parts": [
     {
@@ -84,10 +85,10 @@
         {
           "id": "materialism",
           "title": "History and class struggle",
-          "narration": "At the centre of Marx's thought is the claim that the way a society produces its material needs shapes its laws, politics and ideas, an approach later called historical materialism. The Manifesto declared that the history of all society so far is the history of class struggles, and that capitalism, by creating an industrial working class, was producing its own gravediggers. In a preface of 1859 Marx put the principle in a single sentence.",
-          "visual": { "kind": "quote", "text": "It is not the consciousness of men that determines their existence, but, on the contrary, their social existence determines their consciousness.", "who": "Karl Marx, preface to A Contribution to the Critique of Political Economy, translated by N. I. Stone", "when": "1859", "cite": "marx-1859" },
+          "narration": "At the centre of Marx's thought is the claim that the way a society produces its material needs shapes its laws, politics and ideas, an approach later called historical materialism. The Manifesto declared that the history of all society so far is the history of class struggles, and that capitalism, by creating an industrial working class, was producing its own gravediggers. In a preface of 1859 Marx summed up the principle.",
+          "visual": { "kind": "summary", "text": "Marx summed up the idea behind his studies: how a society produces its material life shapes its laws, its politics and its ideas, so it is people's social existence that decides their thinking, not the other way round.", "of": "Karl Marx, preface to A Contribution to the Critique of Political Economy, translated by N. I. Stone", "when": "1859", "cite": "marx-1859-ws" },
           "link": { "label": "Master Index · Marxism", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q7264" },
-          "cites": ["marx-1859", "marx-engels-1848", "stedman-jones-2016"]
+          "cites": ["marx-1859", "marx-1859-ws", "marx-engels-1848", "stedman-jones-2016"]
         },
         {
           "id": "capital",

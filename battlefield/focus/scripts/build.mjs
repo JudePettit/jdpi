@@ -18,7 +18,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { WARS } from './wars.mjs';
-import { battleDates, partsWithin, apportion, eventMonths, cowMonths, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
+import { battleDates, partsWithin, apportion, eventMonths, cowMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
@@ -392,7 +392,8 @@ for (const w of wars) {
   const deaths = months.map(() => 0), estimated = months.map(() => false);
   const gedDeaths = months.map(() => 0), shared = months.map(() => 0);
   for (const e of ev) for (const [m, n] of e.m) { const i = mi.get(m); gedDeaths[i] += n; if (e.m.length > 1) shared[i] += n; }
-  const weight = months.map(m => 1 + dated.filter(b => ym(b.s) <= m && ym(b.e || b.s) >= m).length);
+  // A battle dated only to its year weighs no month (rules.mjs monthWeights, S0).
+  const weight = monthWeights(months, dated);
   // A total shared out in whole deaths that add up to it (apportion): COW's 1,000,000 stays 1,000,000, not 999,999.
   const spread = (total, idxs) => {
     const useGed = idxs.some(i => gedDeaths[i] > 0), wt = i => (useGed ? gedDeaths[i] + 1 : weight[i]);
@@ -518,7 +519,7 @@ const all = [...others, ...index].sort((a, b) => (a.start < b.start ? -1 : 1));
 const gedThrough = ONLY && old.gedThrough > maxGed ? old.gedThrough : maxGed;
 writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThrough,
   sources: { ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0',
-    prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)', cow: 'Correlates of War Project war data (Sarkees & Wayman 2010)',
+    prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)', cow: 'Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)',
     wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)',
     wikipedia: FIG_SOURCES.wikipedia },
   wars: all }));

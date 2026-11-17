@@ -4,7 +4,7 @@ intro: A practical, university-style course in open-source intelligence (OSINT) 
 # Unit 1 · Foundations
 
 ## What OSINT is, and what it is not
-Open-source intelligence (OSINT) is intelligence produced from **publicly available information**: material that any member of the public can lawfully see, request, buy or observe. US law (2006) defines it as intelligence "produced from publicly available information" and disseminated "for the purpose of addressing a specific intelligence requirement". Two ideas follow.
+Open-source intelligence (OSINT) is intelligence produced from **publicly available information**: material that any member of the public can lawfully see, request, buy or observe. US law (2006) defines it as intelligence made from publicly available information, then collected, exploited and passed on promptly to the people who need it, to answer a specific intelligence requirement. Two ideas follow.
 - **Information is not intelligence.** A video, a company filing or a satellite image is raw material. It becomes intelligence only when it has been evaluated, combined with other material and analysed to answer a question that someone needs answered.
 - **Open means lawfully available, not merely findable.** News, statistics, company and court records, published imagery, public social-media posts, papers and open datasets are open. Hacked databases, private data dumped online, other people's accounts, anything behind a login you are not entitled to and anything obtained by deceiving someone are not, however easy they are to reach.
 

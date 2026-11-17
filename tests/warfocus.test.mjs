@@ -529,6 +529,76 @@ test('rules: a UCDP period estimate is shared out over its days; a spread total 
   assert.deepEqual(cowMonths(months, [[1937, 2], [1938, 2], [1939, 2], [1940, 2], [1941, 2]]), [0, 1, 2]);
 });
 
+// S0, the spread fix (16 November 2026): a total spread by recorded battles let a battle Wikidata dates only to its
+// year weigh every month of that year ("Battle of Łódź", 1939, weighed January to August 1939, before the war began,
+// and so pulled WWII's spread towards 1939's later months). Only a battle whose start and end are known to the month
+// weighs; the committed spreads are those the rule gives.
+test('rules: a battle dated only to its year weighs no month of a spread total', async () => {
+  const { monthWeights } = await import('../battlefield/focus/scripts/rules.mjs');
+  const months = ['1939-09', '1939-10', '1939-11', '1939-12'];
+  assert.deepEqual(monthWeights(months, [{ s: '1939-01-01', e: '1939-12-31', p: 'y' }]), [1, 1, 1, 1], 'a year-dated battle weighs none');
+  assert.deepEqual(monthWeights(months, [{ s: '1939-09-01', e: '1939-12-31', p: null, pe: 'y' }]), [1, 1, 1, 1], 'nor one whose end is known only to the year');
+  assert.deepEqual(monthWeights(months, [{ s: '1939-09-01', e: '1939-10-06', p: null }]), [2, 2, 1, 1], 'a day-dated battle weighs each month it spans');
+  assert.deepEqual(monthWeights(months, [{ s: '1939-11-01', e: '1939-11-30', p: 'm' }, { s: '1939-10-05', p: null, pe: 'd', e: '1939-12-02' }]), [1, 2, 3, 2]);
+  assert.deepEqual(monthWeights(months, [{ s: '1939-09-17', p: 'y', pe: 'd', e: '1939-10-06' }]), [1, 1, 1, 1], 'a start known only to the year');
+});
+
+test('data: every spread by recorded battles is the rule\'s (a year-dated battle weighs no month)', async () => {
+  const { monthWeights, apportion } = await import('../battlefield/focus/scripts/rules.mjs');
+  const d = await dataFile('battlefield/focus/data/index.json');
+  let checked = 0;
+  for (const x of d.wars) {
+    const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
+    const weights = monthWeights(w.months, w.battles.filter(b => b.s));
+    const est = w.months.map((m, i) => i).filter(i => w.estimated[i]);
+    // A Correlates of War total is one spread over its months; PRIO's, one a year. A spread whose months hold UCDP
+    // events is weighted by them, not by battles (scripts/build.mjs spread).
+    const groups = /^Correlates of War/.test(w.deathsSource) ? [est] : [...new Set(est.map(i => w.months[i].slice(0, 4)))].map(y => est.filter(i => w.months[i].startsWith(y)));
+    for (const g of groups.filter(g => g.length && !g.some(i => w.cells[i].length))) {
+      const total = g.reduce((s, i) => s + w.deaths[i], 0);
+      assert.deepEqual(g.map(i => w.deaths[i]), apportion(total, g.map(i => weights[i])), `${x.id}: the spread over ${w.months[g[0]]}–${w.months[g.at(-1)]}`);
+      checked++;
+    }
+  }
+  assert.ok(checked > 50, `spreads checked: ${checked}`);
+  // Second World War: no year-dated battle of 1939 draws deaths to its first months.
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  assert.ok(ww2.battles.some(b => b.p === 'y' && b.s.startsWith('1939')), 'the 1939 year-dated battles are still listed');
+});
+
+// S0 (16 November 2026): a battle whose start falls before its war's says so beside its dates (WWII: the Adriatic
+// Campaign, April 1939; the air raids on Japan, 15 August 1939). A start dated only to a month or a year counts only
+// when the whole month or year is before the war: "1939" alone does not say whether it was before September.
+test('figures: a battle that begins before its war\'s start says so', async () => {
+  const { beforeWarNote } = await import('../battlefield/focus/figures.mjs');
+  assert.equal(beforeWarNote({ s: '1939-08-15', p: null }, '1939-09-01'), 'begins before the war’s start');
+  assert.equal(beforeWarNote({ s: '1939-04-01', p: 'm' }, '1939-09-01'), 'begins before the war’s start');
+  assert.equal(beforeWarNote({ s: '1939-09-01', p: 'm' }, '1939-09-01'), '', 'its month is the war\'s first');
+  assert.equal(beforeWarNote({ s: '1939-01-01', p: 'y' }, '1939-09-01'), '', 'a year that holds the start');
+  assert.equal(beforeWarNote({ s: '1938-01-01', p: 'y' }, '1939-09-01'), 'begins before the war’s start');
+  assert.equal(beforeWarNote({ s: '1939-09-02' }, '1939-09-01'), '');
+  assert.equal(beforeWarNote({ s: null, u: 'undated' }, '1939-09-01'), '');
+  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json');
+  const before = ww2.battles.filter(b => beforeWarNote(b, ww2.start)).map(b => b.n).sort();
+  assert.deepEqual(before, ['Adriatic Campaign of World War II', 'air raids on Japan']);
+  const app = readFileSync(new URL('../battlefield/focus/app.js', import.meta.url), 'utf8');
+  assert.match(app, /beforeWarNote\(b, state\.war\?\.start\)/, 'the page writes it beside the battle\'s dates');
+});
+
+// S0 (16 November 2026): the documentary's opening reads the first sentences of the war's English Wikipedia summary
+// aloud; they are Wikipedia's words (CC BY-SA 4.0), so the narration says whose they are, and the captions with it.
+test('figures: the documentary credits Wikipedia for the sentences it reads from its article', async () => {
+  const { wikipediaIntro } = await import('../battlefield/focus/figures.mjs');
+  assert.equal(wikipediaIntro(['World War II was a global conflict.', 'It lasted six years.'], 'World War II'),
+    'Wikipedia’s article “World War II” says: World War II was a global conflict. It lasted six years.');
+  assert.equal(wikipediaIntro([], 'World War II'), '');
+  const app = readFileSync(new URL('../battlefield/focus/app.js', import.meta.url), 'utf8');
+  assert.match(app, /intro \+= ' ' \+ wikipediaIntro\(said\.slice\(0, 3\), w\.wiki\)/);
+  assert.doesNotMatch(app, /said\.slice\(0, 3\)\.join/, 'no sentence of the article is read without its credit');
+  const html = readFileSync(new URL('../battlefield/focus/index.html', import.meta.url), 'utf8');
+  assert.match(html, /opening sentences the documentary reads[^<]*Wikipedia, CC BY-SA 4\.0/);
+});
+
 // RV-05, part A, error 1 (the outside review; Jude approved its "parent/child events with explicit aggregation rules",
 // 15 November 2026). The Second World War's "Deadliest battles" ranked the atomic bombings of Hiroshima and Nagasaki
 // (Q488, 286,818) beside its two parts, Hiroshima (Q703203, 286,818) and Nagasaki (Q4382340, 162,083): the same deaths

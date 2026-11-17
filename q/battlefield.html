@@ -301,7 +301,7 @@ function warRow(w, months) {
 // Deaths month by month, the month shown (or every month of the archive's period) highlighted.
 function bars(w) {
   const max = Math.max(...w.monthly.map(x => x.deaths), 1), cur = new Set(view === 'archive' ? archiveMonths() : [data.latest]);
-  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${cur.has(x.month) ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${cur.size > 1 ? periodName() : monthName([...cur][0])}</div>`;
+  return `<div class="bars" style="--n:${w.monthly.length}" role="img" aria-label="Deaths per month in ${data.year}">${w.monthly.map(x => `<div class="${cur.has(x.month) ? 'cur' : ''}" style="height:${Math.max(3, x.deaths / max * 100)}%" title="${monthName(x.month)}: ${fmt(x.deaths)} deaths${x.periodDeaths ? `, ${fmt(x.periodDeaths)} of them in events UCDP dates only to a month or longer` : ''}"></div>`).join('')}</div><div class="barlabels" style="--n:${w.monthly.length}">${w.monthly.map(x => `<span>${monthName(x.month, { month: 'narrow' })}</span>`).join('')}</div><div class="barcap">Deaths per month, ${data.year} · highlighted: ${cur.size > 1 ? periodName() : monthName([...cur][0])}</div>`;
 }
 
 function warDetail(w) {

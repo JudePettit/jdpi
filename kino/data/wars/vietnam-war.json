@@ -37,7 +37,7 @@
       "id": "independence",
       "title": "Independence and the French war, 1945–1954",
       "narration": "On 2 September 1945, as Japan's surrender left a vacuum, Ho Chi Minh declared Vietnam's independence in Hanoi, opening with words borrowed from the American Declaration of Independence. France returned to reclaim its colony, and from December 1946 the Communist-led Viet Minh fought a long war against French forces. As the Cold War hardened, China armed the Viet Minh, and the United States came to pay for much of France's war.",
-      "visual": { "kind": "quote", "text": "Vietnam has the right to be a free and independent country and in fact it is so already.", "who": "Ho Chi Minh, Declaration of Independence of the Democratic Republic of Vietnam", "when": "Hanoi, 2 September 1945", "cite": "ho-1945" },
+      "visual": { "kind": "summary", "text": "Ho Chi Minh declared that Vietnam had won its independence from Japan, not France, and broke off all colonial ties with France: a people who had resisted French rule for more than eighty years and fought beside the Allies must be free.", "of": "Ho Chi Minh, Declaration of Independence of the Democratic Republic of Vietnam", "when": "Hanoi, 2 September 1945", "cite": "ho-1945" },
       "link": { "label": "War Focus · First Indochina War, December 1946", "suite": "rs", "module": "war-focus", "at": "battlefield/focus/index.html#war=first-indochina&m=1946-12" },
       "cites": ["ho-1945", "logevall-2012", "goscha-2016"]
     },
@@ -66,7 +66,7 @@
       "id": "tonkin",
       "title": "The Gulf of Tonkin, August 1964",
       "narration": "On 2 August 1964 North Vietnamese torpedo boats attacked the American destroyer Maddox in the Gulf of Tonkin. A second attack reported two days later almost certainly never happened, but President Lyndon Johnson ordered air strikes on the North, and on 7 August Congress passed a resolution giving him broad authority, with only two senators voting against. It became the legal basis for the American war that followed.",
-      "visual": { "kind": "quote", "text": "That the Congress approves and supports the determination of the President, as Commander in Chief, to take all necessary measures to repel any armed attack against the forces of the United States and to prevent further aggression.", "who": "The Gulf of Tonkin Resolution", "when": "7 August 1964", "cite": "tonkin-1964" },
+      "visual": { "kind": "summary", "text": "Congress backed the President's resolve, as commander in chief, to do whatever was needed to repel armed attacks on American forces and stop further aggression, and said the United States was ready to use force to help its Southeast Asian treaty allies.", "of": "The Gulf of Tonkin Resolution", "when": "7 August 1964", "cite": "tonkin-1964" },
       "link": { "label": "Master Index · Gulf of Tonkin incident", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q482402" },
       "cites": ["tonkin-1964", "logevall-1999"]
     },

@@ -34,7 +34,7 @@ A single line hides a lot. Political scientists often add a second axis, from **
 The far left seeks to **abolish capitalism and class society**, usually through revolution rather than elections. It builds on Karl Marx (see the Economics course), but split into rival traditions.
 
 - **Vladimir Lenin** (1870–1924). In _What Is to Be Done?_ (1902) he argued workers left alone would settle for reforms, so a disciplined **vanguard party** of professional revolutionaries must lead them. In _The State and Revolution_ (1917) he called for smashing the existing state and creating a "dictatorship of the proletariat".
-- **Rosa Luxemburg** (1871–1919) shared the revolutionary goal but warned that Bolshevik methods would crush democracy: "Freedom is always the freedom of the one who thinks differently." She was murdered during the failed 1919 Spartacist uprising in Berlin.
+- **Rosa Luxemburg** (1871–1919) shared the revolutionary goal but warned that Bolshevik methods would crush democracy: freedom only for a government's supporters, she wrote in 1918, is no freedom, since freedom always includes those who think otherwise. She was murdered during the failed 1919 Spartacist uprising in Berlin.
 - **Leon Trotsky** (1879–1940) argued for **permanent revolution**, spreading worldwide rather than "socialism in one country". He was expelled by Stalin and assassinated in Mexico in 1940.
 - **Mao Zedong** (1893–1976) adapted Marxism to a peasant society, built a revolution through rural guerrilla war and stressed continuous struggle against "class enemies".
 - **Antonio Gramsci** (1891–1937) explained why revolution had not come in the West: the ruling class rules through **cultural hegemony**, shaping common sense through schools, churches and media, not only through force.
@@ -80,7 +80,7 @@ The mainstream left accepts **democracy and a market economy**, but wants to mak
 - **The Beveridge Report** (1942), by William Beveridge, proposed attacking the "five giants" of Want, Disease, Ignorance, Squalor and Idleness through social insurance and public services.
 - **Anthony Crosland**, in _The Future of Socialism_ (1956), argued the goal was equality and social justice, not nationalising industry for its own sake.
 - **John Rawls**, in _A Theory of Justice_ (1971), asked what rules people would choose behind a **"veil of ignorance"**, not knowing their own place in society. He argued they would choose equal basic liberties and allow inequalities only if they benefit the least advantaged (the **difference principle**).
-- In 1959 Germany's Social Democrats (SPD) formally dropped Marxism at Bad Godesberg, accepting the market economy: "as much competition as possible, as much planning as necessary".
+- In 1959 Germany's Social Democrats (SPD) formally dropped Marxism at Bad Godesberg, accepting the market economy: competition wherever it could work, and planning only where it was needed.
 
 ? What is Rawls's "veil of ignorance"?
 * A rule that governments should keep policy secret
@@ -126,7 +126,7 @@ Centrists favour **pragmatism over ideology**: market economies with a social sa
 = Mill argued that over things that concern only themselves, individuals should be sovereign.
 
 ## The centre in power and its critics
-- **Bill Clinton** (US president 1993–2001) balanced the budget, signed welfare reform and free-trade agreements, and declared in 1996 that "the era of big government is over".
+- **Bill Clinton** (US president 1993–2001) balanced the budget, signed welfare reform and free-trade agreements, and declared in his State of the Union address of 1996 that the time of big government had ended.
 - **Tony Blair** (UK prime minister 1997–2007) rebranded Labour as "New Labour", rewrote Clause IV (dropping the commitment to public ownership) in 1995, gave the Bank of England independence, introduced a minimum wage and invested heavily in health and education. The 2003 Iraq war damaged his reputation.
 - **Gerhard Schröder** (German chancellor 1998–2005) introduced the _Agenda 2010_ labour-market reforms.
 - **Emmanuel Macron** founded _En Marche!_ in 2016 as "neither left nor right" and was elected French president in 2017 and re-elected in 2022.
@@ -150,8 +150,8 @@ Centrists favour **pragmatism over ideology**: market economies with a social sa
 ## Thinkers of the right
 The mainstream right accepts **democracy and the market economy**. It joins **conservatism**, which values inherited institutions and gradual change, with **classical liberalism** (or market liberalism), which defends free markets and limited government.
 
-- **Edmund Burke** (1729–1797), often called the founder of modern conservatism, attacked the French revolutionaries in _Reflections on the Revolution in France_ (1790) for tearing down institutions in the name of abstract rights. Society, he wrote, is a partnership "between those who are living, those who are dead, and those who are to be born".
-- **Michael Oakeshott** (1901–1990) criticised **rationalism in politics**, governing by blueprints instead of experience. To be conservative, he wrote, is "to prefer the familiar to the unknown".
+- **Edmund Burke** (1729–1797), often called the founder of modern conservatism, attacked the French revolutionaries in _Reflections on the Revolution in France_ (1790) for tearing down institutions in the name of abstract rights. Society, he wrote, is a partnership not only among the living but with the dead and with those not yet born.
+- **Michael Oakeshott** (1901–1990) criticised **rationalism in politics**, governing by blueprints instead of experience. To be conservative, he wrote in _On Being Conservative_ (1956), is to choose the familiar over the unknown and the tried over the untried.
 - **Friedrich Hayek** (1899–1992), in _The Road to Serfdom_ (1944), and **Milton Friedman** (1912–2006), in _Capitalism and Freedom_ (1962), argued that central planning threatens liberty and that economic freedom underpins political freedom (see the Economics course).
 - **Robert Nozick** (1938–2002), replying to Rawls in _Anarchy, State, and Utopia_ (1974), defended a **minimal state**: holdings are just if justly acquired or transferred, or if past injustice has been rectified.
 - In the United States **Russell Kirk** (_The Conservative Mind_, 1953) traced a conservative tradition from Burke, and **William F. Buckley Jr.**, founder of _National Review_ (1955), promoted **fusionism**: an alliance of traditionalists, free-market libertarians and anti-communists.
@@ -171,7 +171,7 @@ The mainstream right accepts **democracy and the market economy**. It joins **co
 ## The right in power and its critics
 - **Britain after 1945**: **One Nation** Conservatives, named after Benjamin Disraeli's warning in _Sybil_ (1845) of "two nations", rich and poor, accepted the welfare state and the NHS.
 - **Margaret Thatcher** (UK prime minister 1979–90) used monetarism against inflation, curbed trade-union power and privatised state industries, from British Aerospace (1981) to British Telecom (1984) and British Gas (1986). She won three elections; the poll tax helped bring her down in 1990.
-- **Ronald Reagan** (US president 1981–89) said in his first inaugural address: "In this present crisis, government is not the solution to our problem; government is the problem." He cut taxes, deregulated and built up the military, then negotiated arms cuts with Mikhail Gorbachev.
+- **Ronald Reagan** (US president 1981–89) said in his first inaugural address that, in the crisis of the day, government was the cause of the country's trouble, not its cure. He cut taxes, deregulated and built up the military, then negotiated arms cuts with Mikhail Gorbachev.
 - In continental Europe the main centre-right parties are often **Christian democrats** (see the Centre unit).
 
 **Neoliberalism.** Liberal thinkers meeting in Paris in 1938 chose the word for a renewed liberalism of competition under a strong state. Today it is used mostly by critics, for the privatisation, deregulation and free trade that spread from the 1980s.
@@ -198,7 +198,7 @@ The mainstream right accepts **democracy and the market economy**. It joins **co
 **Realism** is the school of international relations that sees world politics as a struggle for **power and security** among states, with a scepticism of idealism, a focus on national interest and, in its classical form, a view of human nature as self-interested. It is sui generis (of its own kind): a theory of how states behave towards one another, not a position on the line from left to right. People of the left, the centre and the right have held it, and realists often criticise left-wing and right-wing governments alike.
 
 ### Classical roots
-- **Thucydides**, in his history of the Peloponnesian War (5th century BC), recorded the Athenian envoys telling the people of Melos that "the strong do what they can and the weak suffer what they must."
+- **Thucydides**, in his history of the Peloponnesian War (5th century BC), recorded the Athenian envoys telling the people of Melos (in Richard Crawley's translation) that "the strong do what they can and the weak suffer what they must."
 - **Niccolò Machiavelli**, in _The Prince_ (written 1513), argued rulers must be guided by what works, not by what ought to be.
 - **Thomas Hobbes**, in _Leviathan_ (1651), described life without a sovereign as a "war of all against all". Between states there is no sovereign, so that condition persists internationally.
 
@@ -235,14 +235,14 @@ From these assumptions Mearsheimer concludes that great powers seek to **maximis
 
 ### What critics say
 - **Liberal institutionalists** (Robert Keohane, Joseph Nye) argue trade, institutions and democracy make cooperation possible and lasting; Europe's peace since 1945 is their evidence.
-- **Constructivists** (Alexander Wendt: "anarchy is what states make of it", 1992) argue that ideas and identities, not structure alone, shape whether states see each other as enemies.
+- **Constructivists** (Alexander Wendt, _Anarchy Is What States Make of It_, 1992) argue that ideas and identities, not structure alone, shape whether states see each other as enemies.
 - On Ukraine, critics say Mearsheimer's view denies smaller states the right to choose their alliances, and underplays Russian imperial ambition as a cause of the war.
 - Moral critics say realism treats ethics as irrelevant to foreign policy.
 
 ### What defenders say
 - Realists warned early and accurately against the Iraq war, and argue their predictions about rising great-power rivalry with China and Russia have proved more accurate than liberal hopes after 1991.
 
-> "The strong do what they can and the weak suffer what they must." — Thucydides, History of the Peloponnesian War (Melian Dialogue)
+> "… the strong do what they can and the weak suffer what they must." — Thucydides, History of the Peloponnesian War (Melian Dialogue), translated by Richard Crawley
 
 ? What does Mearsheimer mean by the "tragedy" of great power politics?
 * That great powers always lose wars
@@ -262,7 +262,7 @@ From these assumptions Mearsheimer concludes that great powers seek to **maximis
 The far right rejects the equality of all people and liberal democracy in favour of a **nation defined by ethnicity, culture or race**, led by a strong, often authoritarian state. This unit explains the ideas as historians and political scientists describe them, alongside their consequences.
 
 ### Fascism and Nazism
-- **Benito Mussolini** came to power in Italy after the 1922 March on Rome. Italian fascism glorified the nation and the state above the individual, rejected both liberalism and socialism, used violence against opponents and created a one-party state. Mussolini's slogan was "Everything within the state, nothing outside the state, nothing against the state."
+- **Benito Mussolini** came to power in Italy after the 1922 March on Rome. Italian fascism glorified the nation and the state above the individual, rejected both liberalism and socialism, used violence against opponents and created a one-party state. Mussolini's slogan made the state everything: nothing was to stand outside it or against it.
 - **Adolf Hitler**'s **National Socialism** (Nazism) added a racial ideology: a belief in a superior "Aryan" race, virulent antisemitism and a demand for "living space" in the east. After 1933 the Nazi regime abolished democracy, persecuted Jews, political opponents, Roma, disabled people and others, and launched the Second World War. In the **Holocaust** it murdered about six million Jews.
 - Other inter-war and wartime movements included Franco's nationalist dictatorship in Spain (1939–75) and collaborationist regimes in occupied Europe.
 

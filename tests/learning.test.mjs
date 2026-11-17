@@ -8,6 +8,7 @@ import { pageTest } from './tools/pages.mjs';
 import { fileURLToPath } from 'node:url';
 import { THINKERS, SPECTRUM_SCHOOL, spectrumTag } from '../lake/scripts/thinkers.mjs';
 import { learning } from '../lake/scripts/adapters.mjs';
+import { findQuote, quotedRuns } from '../bibliotheca/scripts/quotes.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
 
@@ -145,6 +146,34 @@ test('finance and economics: the courses are called introductory, on the page, i
   const desc = reg.suites.flatMap(s => s.modules).find(m => m.id === 'learning').description;
   assert.match(desc, /^Two introductory courses: /);
   assert.doesNotMatch(desc, /university/);
+});
+
+// The quotation rule (S0 of the scholar design, 16 November 2026; Jude's rule): a person's words, or a document's, appear
+// in quotation marks in a course only when they match a paragraph of a Bibliotheca book whose rights.eu is "pd"
+// (bibliotheca/scripts/quotes.mjs). Anything else is said in VM's words, as reported speech with the source and year.
+test('quotations: every quotation in the courses matches a book on the shelf; anything else is said in VM\'s words', () => {
+  // Quoted strings that are not a person's words: VM's own example sentences, and an article's title.
+  const NOT_WORDS = new Map([
+    ['The minimum wage should be raised because inequality is unjust.', 'VM’s example of a normative statement'],
+    ['raising the minimum wage by 10% reduces teenage employment by X%', 'VM’s example of a positive statement'],
+    ['Why the Ukraine Crisis Is the West\'s Fault', 'the title of Mearsheimer’s article (Foreign Affairs, 2014)'],
+  ]);
+  // The intelligence courses' quoted strings are VM's example report wording and headlines and the credit lines that
+  // imagery licences ask for, so they are left out as a whole (their definitions from US law are in VM's words).
+  const COURSES = ['economics', 'politics', 'finance'];
+  const md = f => readFileSync(new URL(`../fe/learning/${f}.md`, import.meta.url), 'utf8').replace(/\r/g, '').split('\n');
+  let blocks = 0;
+  for (const f of COURSES) md(f).forEach((line, i) => {
+    const at = `${f}.md:${i + 1}`;
+    const block = /^> "(.+?)"\s+—\s+(.+)$/.exec(line);
+    if (block) { blocks++; assert.ok(findQuote(block[1]).length, `${at}: the quotation "${block[1]}" matches no paragraph of a book on the shelf that is public domain in the EU`); }
+    for (const q of quotedRuns(line, 6)) if (!NOT_WORDS.has(q)) assert.ok(findQuote(q).length, `${at}: "${q}" is quoted but matches no paragraph of a book on the shelf; say it in VM's words`);
+  });
+  assert.ok(blocks >= 4, 'the quotations the shelf holds stay quotations');
+  for (const f of ['osint', 'geoint']) assert.ok(!quotedRuns(md(f)[6], 6).length, `${f}.md: the definition from US law is in VM's words`);
+  // the shelf's quotations name their translator
+  assert.match(md('economics').find(l => l.startsWith('> "The history of all')), /translated by Samuel Moore/);
+  assert.match(md('politics').find(l => l.startsWith('> "… the strong do')), /translated by Richard Crawley/);
 });
 
 test('page: Finance and Economics open with their introductory intros', pageTest, async () => {

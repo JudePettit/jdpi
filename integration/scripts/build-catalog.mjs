@@ -223,7 +223,9 @@ spec({
 const IND = new Map(NAT.indicators.map(i => [i.code, i]));
 const DIMS = ['political', 'economic', 'social', 'technological', 'legal', 'environmental'];
 const natLicence = 'World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.';
-const natSources = ['World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)', 'Wikidata (CC0): government, heads of state, capitals', 'Political Retrospective (Archigos and Wikidata): leaders and elections since 1926', 'UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and Correlates of War: conflict history', 'Kardashev Tracker: energy share'];
+const natSources = ['World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)', 'Wikidata (CC0): government, heads of state, capitals', 'Political Retrospective (Archigos and Wikidata): leaders and elections since 1926', 'UCDP/PRIO Armed Conflict Dataset (CC BY 4.0): conflict history since 1946', 'Kardashev Tracker: energy share'];
+// (No field of national-countries carries a Correlates of War value: the count of its wars 1926–1945 is in the country
+// profiles only, held for Jude's choice in integration/scripts/cite-only.mjs, so the source line names UCDP alone.)
 const latestVal = (c, code) => c.latest?.[code]?.[1] ?? null;
 spec({
   id: 'national-countries', title: 'National Analysis: countries', module: 'rt', submodule: 'pestle',
@@ -335,30 +337,40 @@ for (const g of Object.values(borders.objects)[0].geometries) { const p = g.prop
 const { displayName } = await import('../../battlefield/history/names.mjs');
 const gwName = (gw, date) => { const list = GW_NAME.get(gw) || []; const hit = list.find(([s, e]) => date >= s && date <= e) || list[list.length - 1]; return displayName(gw, hit ? hit[2] : `State ${gw}`, date || '0000'); };
 const HIST = J('battlefield/history/data/wars.json');
+// UCDP/PRIO's conflicts only. The page's wars of 1926–1945 are the Correlates of War's, whose terms (read 16 November
+// 2026, integration/scripts/cite-only.mjs) bar passing its data on without written permission: they stay on the page
+// and are not in the download (S0).
 spec({
-  id: 'retrospective-wars', title: 'Retrospective Battlefield: wars and armed conflicts 1926–2025', module: 'rs', submodule: 'battlefield-history',
-  description: `Every war and armed conflict from ${HIST.firstYear} to ${HIST.lastYear}: UCDP/PRIO from ${HIST.ucdpFrom} (25+ battle deaths a year; intensity 2 means 1,000+), Correlates of War before (wars of 1,000+ battle deaths), with type, aim, sides, where it was fought and its active years.`,
-  derive: () => HIST.wars.map(w => { const ys = (w.years || []).map(y => y[0]); const first = ys.length ? Math.min(...ys) : null, last = ys.length ? Math.max(...ys) : null; const d = w.start || (first ? `${first}-01-01` : '0000');
-    return { id: w.id, dataset: w.src === 'ucdp' ? 'UCDP/PRIO' : 'Correlates of War', name: w.name, type: w.type, aim: w.aim || null, start: w.start || null, first_year: first, last_year: last, active_years: ys.length,
+  id: 'retrospective-wars', title: `Retrospective Battlefield: armed conflicts ${HIST.ucdpFrom}–${HIST.lastYear}`, module: 'rs', submodule: 'battlefield-history',
+  description: `Every armed conflict from ${HIST.ucdpFrom} to ${HIST.lastYear} in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of ${HIST.firstYear}–${HIST.ucdpFrom - 1} come from the Correlates of War, whose terms do not let Vitruvian Manager pass its data on, so they are on the page only.`,
+  derive: () => HIST.wars.filter(w => w.src === 'ucdp').map(w => { const ys = (w.years || []).map(y => y[0]); const first = ys.length ? Math.min(...ys) : null, last = ys.length ? Math.max(...ys) : null; const d = w.start || (first ? `${first}-01-01` : '0000');
+    return { id: w.id, dataset: 'UCDP/PRIO', name: w.name, type: w.type, aim: w.aim || null, start: w.start || null, first_year: first, last_year: last, active_years: ys.length,
       peak_intensity: (w.years || []).reduce((m, y) => Math.max(m, y[1] || 0), 0) || null, war_years: (w.years || []).filter(y => y[1] === 2).length, fought_in: [...new Set((w.loc || []).map(g => gwName(g, d)))],
-      states_involved: [...new Set((w.states || []).map(g => gwName(g, d)))], side_a: w.sideA || [], side_b: w.sideB || [], battle_deaths: w.deaths ?? null, wikipedia: wiki(w.wiki) }; }),
+      states_involved: [...new Set((w.states || []).map(g => gwName(g, d)))], side_a: w.sideA || [], side_b: w.sideB || [], wikipedia: wiki(w.wiki) }; }),
   from: ['battlefield/history/data/wars.json', 'battlefield/history/data/borders.topo.json'], refresh: 'static', updatedFrom: 'battlefield/history/data/wars.json', page: 'battlefield/history/index.html',
-  licence: 'UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); Correlates of War data free to use with citation (Sarkees & Wayman 2010); state names from CShapes 2.0 (CC BY-NC-SA 4.0).',
-  sources: [HIST.sources.ucdp, HIST.sources.cow, 'CShapes 2.0 (Schvitz et al. 2022) for state names'],
-  fields: [['id', 'Conflict id (u… UCDP, c… Correlates of War)'], ['dataset', 'UCDP/PRIO or Correlates of War'], ['name', 'Conflict'], ['type', 'Conflict type (civil, internationalised civil, interstate, colonial…)'], ['aim', 'Incompatibility: government or territory (UCDP)'],
+  licence: `UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (${HIST.ucdpFrom}–${HIST.lastYear}); state names from CShapes 2.0 (CC BY-NC-SA 4.0).`,
+  sources: [HIST.sources.ucdp, 'CShapes 2.0 (Schvitz et al. 2022) for state names'],
+  fields: [['id', 'Conflict id (u…, from UCDP\'s conflict id)'], ['dataset', 'UCDP/PRIO'], ['name', 'Conflict'], ['type', 'Conflict type (civil, internationalised civil, interstate, colonial…)'], ['aim', 'Incompatibility: government or territory (UCDP)'],
     ['start', 'Start date, where recorded'], ['first_year', 'First active year'], ['last_year', 'Last active year'], ['active_years', 'Number of active years'], ['peak_intensity', 'Highest yearly intensity: 1 = 25–999 battle deaths, 2 = 1,000 or more'],
-    ['war_years', 'Years at intensity 2'], ['fought_in', 'States where it was fought'], ['states_involved', 'States taking part'], ['side_a', 'Side A'], ['side_b', 'Side B'], ['battle_deaths', 'Battle deaths (Correlates of War only)'], ['wikipedia', 'Wikipedia article, where known']]
+    ['war_years', 'Years at intensity 2'], ['fought_in', 'States where it was fought'], ['states_involved', 'States taking part'], ['side_a', 'Side A'], ['side_b', 'Side B'], ['wikipedia', 'Wikipedia article, where known']]
 });
 
 const FOCUS = J('battlefield/focus/data/index.json');
-const focusLicence = 'UCDP GED CC BY 4.0; PRIO Battle Deaths and Correlates of War free to use with citation; battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).';
+// The Correlates of War is cite-only (its terms, read 16 November 2026: integration/scripts/cite-only.mjs): War Focus shows
+// one cited total per war, and these files carry that total and VM's spread of it, never COW's rows.
+const focusLicence = 'UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).';
+// The monthly deaths hold more than the totals: VM's spread of each COW total over the war's months (the second reader,
+// F6, 16 November 2026), which waits on Jude's choice (cite-only.mjs HOSTED), and the licence says so.
+const focusMonthlyLicence = focusLicence.replace('Correlates of War war totals shown with its citation only,',
+  'Correlates of War war totals shown with its citation only, and VM\'s estimated spread of those totals over months (Correlates of War data: whether the spread stays in this download awaits a decision),');
+if (focusMonthlyLicence === focusLicence) throw new Error('war-focus-monthly-deaths: the Correlates of War clause of its licence was not found');
 const focusSources = Object.values(FOCUS.sources);
 spec({
   id: 'war-focus-wars', title: 'War Focus: major wars', module: 'rs', submodule: 'war-focus',
   description: 'The major wars of the last hundred years that War Focus follows month by month: dates, sides, total deaths and where the figure comes from, and how many battles are recorded and mapped.',
   source: { urls: ['battlefield/focus/data/index.json'], records: 'wars' }, refresh: 'monthly', page: 'battlefield/focus/index.html',
   licence: focusLicence, sources: focusSources,
-  fields: [['id', 'War id (also the file battlefield/focus/data/wars/<id>.json)'], ['name', 'War'], ['qid', 'Wikidata id'], ['wiki', 'Wikipedia title'], ['bf', 'Matching conflict id in retrospective-wars'], ['start', 'Start date'], ['end', 'End date (null if ongoing)'],
+  fields: [['id', 'War id (also the file battlefield/focus/data/wars/<id>.json)'], ['name', 'War'], ['qid', 'Wikidata id'], ['wiki', 'Wikipedia title'], ['bf', 'Matching conflict id on the Retrospective Battlefield (a u… id is in retrospective-wars; a c… id is a Correlates of War war, shown on the page only)'], ['start', 'Start date'], ['end', 'End date (null if ongoing)'],
     ['ongoing', 'True if still being fought'], ['totalDeaths', 'Total deaths'], ['deathsSource', 'Where the death figure comes from'], ['battles', 'Battles, sieges and operations recorded (Wikidata)'], ['mappedBattles', 'Of those, how many have coordinates'],
     ['events', 'UCDP georeferenced events'], ['sides', 'The two sides'], ['bbox', 'Map extent [west, south, east, north]']]
 });
@@ -390,7 +402,7 @@ spec({
   description: 'Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates.',
   derive: () => focusWars().flatMap(w => (w.months || []).map((m, i) => ({ war_id: w.id, war: w.name, month: m, deaths: w.deaths?.[i] ?? null, estimated: !!w.estimated?.[i], source: w.deathsSource || null }))),
   from: ['battlefield/focus/data/wars/*.json'], refresh: 'monthly', updatedFrom: 'battlefield/focus/data/index.json', page: 'battlefield/focus/index.html', indexFields: ['war_id', 'war'],
-  licence: focusLicence, sources: focusSources.slice(0, 3),
+  licence: focusMonthlyLicence, sources: focusSources.slice(0, 3),
   fields: [['war_id', 'War id (war-focus-wars)'], ['war', 'War'], ['month', 'Month (YYYY-MM)'], ['deaths', 'Deaths that month'], ['estimated', 'True when spread from an annual or war total'], ['source', 'Where the war\'s death figures come from']]
 });
 

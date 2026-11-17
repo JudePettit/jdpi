@@ -50,7 +50,7 @@
       "id": "gorbachev",
       "title": "Gorbachev changes the rules",
       "narration": "Mikhail Gorbachev became the Soviet leader in March 1985 and set out to revive the Soviet system through perestroika, or restructuring, and glasnost, or openness. At the United Nations in December 1988 he announced deep unilateral cuts in Soviet forces and declared that every people had the right to choose its own path. In effect it signalled that Soviet tanks would no longer keep unpopular governments in power, though few in the region yet believed it.",
-      "visual": { "kind": "quote", "text": "Freedom of choice is a universal principle and there should be no exceptions.", "who": "Mikhail Gorbachev, United Nations General Assembly", "when": "7 December 1988", "cite": "gorbachev-1988" },
+      "visual": { "kind": "summary", "text": "Gorbachev told the Assembly that every people must be free to choose its own path, a principle he called universal and allowing no exceptions; denying it, whatever the pretext, would upset the fragile balance on which world peace rested.", "of": "Mikhail Gorbachev, United Nations General Assembly", "when": "7 December 1988", "cite": "gorbachev-1988" },
       "link": { "label": "Master Index · Mikhail Gorbachev", "suite": "rs", "module": "encyclopedia", "at": "encyclopedia/index.html#Q30487" },
       "cites": ["brown-1996", "gorbachev-1988"]
     },

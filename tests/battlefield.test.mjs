@@ -166,6 +166,8 @@ test('Retrospective data: each UCDP conflict keeps its state parties year by yea
     assert.deepEqual(Object.keys(w.statesYears).map(Number).sort(byNum), w.years.map(([y]) => y), `${w.id}: one entry per active year`);
     assert.deepEqual([...new Set(Object.values(w.statesYears).flat())].sort(byNum), [...w.states].sort(byNum), `${w.id}: its years make up its states`);
     for (const [y, gws] of Object.entries(w.statesYears)) assert.ok(gws.length && gws.every(Number.isInteger), `${w.id} ${y}`);
+    // In ascending order, so a rebuild from the same rows writes the same file (the second review of AC-13).
+    for (const [y, gws] of Object.entries(w.statesYears)) assert.deepEqual(gws, [...gws].sort(byNum), `${w.id} ${y}: sorted`);
   }
   // UCDP/PRIO ACD v26.1's rows: Tonga (972) is among side A's secondary parties of "Iraq: government" (u259) in 2004,
   // 2007 and 2008, and of "Afghanistan: government" (u333) in 2011–14; Iraq fought alone in 1982; Sweden (380) took
@@ -594,6 +596,17 @@ test('Retrospective: outlines, "Fighting abroad" and focus follow the year and r
     assert.match(await cls('TON'), /\binvolved\b/, 'Tonga outlined in u259 in 2004');
     await go('#y=2006&w=u259', () => document.querySelector('#year-big').textContent === '2006');
     assert.doesNotMatch(await cls('TON'), /\binvolved\b/, 'Tonga not outlined in u259 in 2006');
+    // The second review of AC-13: in a year when the selected war was not active only its places are outlined, not
+    // the parties of its other years (the page fell back to every party of the whole war, Tonga among them).
+    await go('#y=2003&w=u259', () => document.querySelector('#year-big').textContent === '2003');
+    assert.doesNotMatch(await cls('TON'), /\binvolved\b/, 'Tonga not outlined in u259 in 2003, when the conflict was not active');
+    assert.ok(await page.locator('#map .involved').count() >= 1, 'the war\'s own place is still outlined');
+    // And a period's table names a place as it was called in the years of the fighting, not in the period's last
+    // year: u210 was fought in 1946–48 in the Soviet Union, which a table of 1946–2025 called Russia.
+    await go('#y=2025&f=1946&v=table', () => /1946/.test(document.querySelector('#table-title').textContent) && !!document.querySelector('#table-rows tr[data-id="u210"]'));
+    const fought = await page.locator('#table-rows tr[data-id="u210"] td.wrap').textContent();
+    assert.match(fought, /Soviet Union/);
+    assert.doesNotMatch(fought, /Russia/);
     // A ringed dot is drawn larger than a plain one, so its fill still shows.
     await go('#y=2004&w=u259', () => document.querySelector('#year-big').textContent === '2004');
     const r = await page.evaluate(() => ['TON', 'LIE'].map(i => +document.querySelector(`#map circle.dot[data-iso3="${i}"]`).getAttribute('r')));

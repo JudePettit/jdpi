@@ -74,7 +74,7 @@ for (const [id, { rows }] of byId) {
     sideA: sides('side_a'), sideB: sides('side_b'),
     states: [...new Set(rows.flatMap(partiesOf))],
     // A state is a party in the years UCDP's rows name it, not in every year of the conflict (Tonga in Iraq).
-    statesYears: Object.fromEntries(rows.map(r => [+r.year, [...new Set(partiesOf(r))]])),
+    statesYears: Object.fromEntries(rows.map(r => [+r.year, [...new Set(partiesOf(r))].sort((x, y) => x - y)])),
     start: first.start_date, wiki: UCDP_WIKI[id] || null,
   });
 }

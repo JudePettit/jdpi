@@ -111,7 +111,7 @@ test('the narrow and island states the tracker does not cover keep their land', 
 });
 
 async function openTracker(query, { width = 1280 } = {}) {
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
   const page = await browser.newPage({ viewport: { width, height: 900 } });
   const errors = [], requests = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -284,6 +284,33 @@ test('a link to a country with no outlets opens its sentence, and a tap on one w
     assert.deepEqual(await page.evaluate(() => [document.querySelector('.viewbar').hidden, document.getElementById('refresh').hidden]), [false, false], 'the caption and Refresh are back');
     const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: innerWidth }));
     assert.ok(scroll <= width + 1, `page is ${scroll}px wide on ${width}px`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// 17 November 2026, the second review of AC-2: the two older loaders (the GDELT fallback, used when the archive client
+// is absent, and the archive path before top stories) did not drop a late answer, so France's headlines, arriving
+// after Nauru was chosen, replaced Nauru's sentence under the heading "Nauru".
+test('a late answer for the country chosen before does not replace a no-front-page sentence', pageTest, async () => {
+  const { browser, page, errors } = await openTracker('?view=current');
+  try {
+    let asked, release;
+    const wasAsked = new Promise(r => { asked = r; }), released = new Promise(r => { release = r; });
+    await page.route(/api\.gdeltproject\.org/, async route => {
+      asked(); await released;
+      await route.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ articles: [{ url: 'https://example.org/late', title: 'A late story from France', domain: 'example.org', seendate: '20261117T120000Z', sourcecountry: 'France', language: 'English' }] }) });
+    });
+    // Without the archive client the page falls back to GDELT, asked for France and held back.
+    await page.evaluate(() => { globalThis.GTTSDB = undefined; loadNews('FR', 'France'); });
+    await wasAsked;
+    await page.evaluate(() => loadNews('NR', 'Nauru'));
+    assert.equal((await page.textContent('#articles')).trim(), noFrontPage('Nauru'));
+    release();
+    await page.waitForTimeout(1500); // France's answer arrives, and is dropped
+    assert.equal(await page.textContent('#countryname'), 'Nauru');
+    assert.equal((await page.textContent('#articles')).trim(), noFrontPage('Nauru'), 'the sentence stays');
+    assert.doesNotMatch(await page.textContent('#newsstate'), /stor/i, 'no count of stories for a country with none');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

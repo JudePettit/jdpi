@@ -69,10 +69,12 @@ const nameOf = (gw, y) => {
   return f ? displayName(gw, f.properties.name, dateFor(y)) : dotOf(gw)?.name || `State ${gw}`;
 };
 // What a war's place is called in year y: the war's own name for a shape that held another place that year
-// ("Georgia (then in the Soviet Union)"), else the shape's name as of `at`.
-const placeName = (w, gw, y, at = y) => w.placeNames?.[y]?.[gw] ?? nameOf(gw, at);
-// The places a war was fought in during the period, by name (`where` names places the map has no shape for).
-const placesIn = (w, a, b) => w.where || [...new Set(yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(gw => placeName(w, gw, y, b))))];
+// ("Georgia (then in the Soviet Union)"), else the name the shape had that year.
+const placeName = (w, gw, y) => w.placeNames?.[y]?.[gw] ?? nameOf(gw, y);
+// The places a war was fought in during the period, each by its name in the year it was fought there, not by the
+// period's last year (the Soviet Union for 1946–48, not Russia, in a table of 1946–2025); `where` names places the map
+// has no shape for.
+const placesIn = (w, a, b) => w.where || [...new Set(yearsIn(w, a, b).flatMap(([y]) => locIn(w, y).map(gw => placeName(w, gw, y))))];
 // "Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990." (design/prp-mapkit.js):
 // from 1946 UCDP/PRIO's record, before it the Correlates of War's, and a period across 1946 names both.
 const NO_CONFLICT = { what: 'armed conflict of 25 or more battle deaths', source: 'UCDP/PRIO' };
@@ -178,10 +180,10 @@ window.PRPFocus?.listen({
 
 function renderMap() {
   const a = state.from, b = state.year, date = dateFor(b), status = statusMap(a, b), tip = $('#tooltip'), live = activeOn(date);
-  // The selected war's places in the period's years (or as of the end year when it was not active then).
-  // The selected war's places and parties in the period's years (or, when it was not active then, in all its years).
+  // The selected war's places and parties in the period's years. When it was not active in the period only its places
+  // (as of the end year) are outlined: a party of other years is not a party of the years shown (Tonga in Iraq, 2003).
   const wys = state.war ? yearsIn(state.war, a, b).map(([y]) => y) : [];
-  const involved = new Set(state.war ? (wys.length ? wys.flatMap(y => [...locIn(state.war, y), ...statesIn(state.war, y)]) : [...locIn(state.war, b), ...state.war.states]) : []);
+  const involved = new Set(state.war ? (wys.length ? wys.flatMap(y => [...locIn(state.war, y), ...statesIn(state.war, y)]) : locIn(state.war, b)) : []);
   // Pointing at a state: the conflicts on its territory or with it as a party in the year or period, or one sentence.
   const hover = (ev, key, name) => {
     const box = $('.map-wrap').getBoundingClientRect();

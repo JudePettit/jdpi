@@ -162,3 +162,26 @@ export const positionTag = (unit, own) => {
   const p = UNIT_POSITION[String(unit).split(' · ')[0]];
   return p && p === own ? p : null;
 };
+
+// A school's entry carries its own School value also when no lesson names the school: it may be in the lake only
+// because a thinker's record relates to it (new classical macroeconomics, through Robert Lucas's "Movement"), and a
+// filter on the school must still find the school with its thinkers (the second review of 18 November 2026, X2). So,
+// once every record is made: an idea whose label is a School value, and which a record carrying that value relates
+// to, takes the value too. The relation keeps another idea of the same name out (the painters' realism is not the
+// Realists'). Returns the entries it gave a value to.
+export function schoolSelfTags(records) {
+  const fold = s => String(s).trim().toLowerCase();
+  const related = new Map();   // folded School value → { tag, the entities its carriers relate to }
+  for (const r of records.values()) for (const t of r.tags || []) {
+    if (!t.startsWith('School:')) continue;
+    const k = fold(t.slice(7)), x = related.get(k) || related.set(k, { tag: t, to: new Set() }).get(k);
+    for (const list of Object.values(r.rel || {})) for (const [q] of list) x.to.add(q);
+  }
+  const given = [];
+  for (const r of records.values()) {
+    const x = r.type === 'idea' ? related.get(fold(r.label)) : null;
+    if (!x || !x.to.has(r.q) || r.tags.includes(x.tag)) continue;
+    r.tags.push(x.tag); given.push(`${r.q} ${r.label}`);
+  }
+  return given;
+}

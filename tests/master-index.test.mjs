@@ -1193,3 +1193,29 @@ test('page: each Month by Month mention opens its mark at the top of the Marks t
   assert.deepEqual(bad, [], 'not opened at its mark');
   assert.deepEqual(errors, []);
 });
+
+// The second review of 18 November 2026 (X2): the school's own entry carries its School value, also when it is in the
+// lake only because a thinker's record relates to it.
+test('schools: a school related to its thinker carries its own School value, and a namesake that is not related does not', async () => {
+  const { schoolSelfTags } = await import('../lake/scripts/thinkers.mjs');
+  const recs = new Map([
+    ['Q1', { q: 'Q1', label: 'Robert Lucas', type: 'person', rel: { Movement: [['Q2', 'new classical macroeconomics']] }, tags: ['Type:Person', 'School:New classical macroeconomics'] }],
+    ['Q2', { q: 'Q2', label: 'new classical macroeconomics', type: 'idea', rel: {}, tags: ['Type:Idea or school of thought'] }],
+    ['Q3', { q: 'Q3', label: 'Hans Morgenthau', type: 'person', rel: { Movement: [['Q4', 'Realism']] }, tags: ['School:Realism'] }],
+    ['Q4', { q: 'Q4', label: 'Realism', type: 'idea', rel: {}, tags: ['Type:Idea or school of thought', 'School:Realism'] }],
+    ['Q5', { q: 'Q5', label: 'realism', type: 'idea', rel: {}, tags: ['Type:Idea or school of thought'] }],
+    ['Q6', { q: 'Q6', label: 'New classical macroeconomics', type: 'topic', rel: {}, tags: [] }],
+  ]);
+  assert.deepEqual(schoolSelfTags(recs), ['Q2 new classical macroeconomics']);
+  assert.deepEqual(recs.get('Q2').tags, ['Type:Idea or school of thought', 'School:New classical macroeconomics']);
+  assert.deepEqual(recs.get('Q4').tags, ['Type:Idea or school of thought', 'School:Realism'], 'a value is given once');
+  assert.deepEqual(recs.get('Q5').tags, ['Type:Idea or school of thought'], 'the painters\' realism is not the Realists\'');
+  assert.deepEqual(recs.get('Q6').tags, [], 'ideas only');
+  assert.deepEqual(schoolSelfTags(recs), [], 'a second pass gives nothing');
+  assert.match(text('lake/scripts/build.mjs'), /schoolSelfTags\(records\)/);
+  // The committed lake: every School value's related entry of the same name carries it.
+  const all = new Map();
+  for (let i = 0; i < lakeManifest.shards.entities; i++) for (const [q, r] of Object.entries(read(`lake/data/e/${i}.json`))) all.set(q, r);
+  assert.ok(all.get('Q60238').tags.includes('School:New classical macroeconomics'), 'new classical macroeconomics');
+  assert.deepEqual(schoolSelfTags(all), [], 'no school in the lake is left without its own value');
+});

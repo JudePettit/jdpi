@@ -24,6 +24,7 @@ import { shortCounts, recount } from './counts.mjs';
 import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { typeOf } from './types.mjs';
+import { schoolSelfTags } from './thinkers.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpiDir = resolve(here, '../..');
@@ -298,7 +299,7 @@ function record(q) {
   const img = e.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
   // Its point, from the best P625 statement (coords.mjs): [lon, lat] as Wikidata gives it, with its precision in degrees
   // as `ptp`, so the Omni-Map can place it (PRP-SCHOLAR-USP-DESIGN.md 2.1 rule 5, stage S1; first written by the full
-  // build of 3 December 2026). A record with no coordinates on the Earth has neither.
+  // build of 18 November 2026). A record with no coordinates on the Earth has neither.
   const point = wikidataPoint(bestClaim(e.claims?.P625));
   const ms = (byQid.get(q) || []).sort((a, b) => MODULE_ORDER.indexOf(a.module) - MODULE_ORDER.indexOf(b.module) || String(a.date || '').localeCompare(String(b.date || '')));
   // Keep each place once (some modules mention the same entity many times on one page). A book's mention keeps where in
@@ -399,6 +400,10 @@ const records = only ? only.out : new Map([...raw.keys()].map(q => [q, record(q)
 // "Albert II"): a short name another entry also shows, or has as its label, is taken back, on every record written.
 const namesBack = uniqueNames(records);
 if (namesBack.length) console.log(`${namesBack.length} short names kept as labels, another entry being shown by them (${namesBack.slice(0, 8).join(', ')}${namesBack.length > 8 ? ', …' : ''})`);
+// A school's entry carries its own School value, also when it is in the lake only as a thinker's related entry
+// (thinkers.mjs schoolSelfTags), in a full build and in --only alike.
+const ownSchools = schoolSelfTags(records);
+if (ownSchools.length) console.log(`${ownSchools.length} schools given their own School value (${ownSchools.join(', ')})`);
 const readOut = f => JSON.parse(readFileSync(join(OUT, f), 'utf8'));
 // Everything is written into lake/data.new; only when all of it is there does it replace lake/data.
 rmSync(NEW, { recursive: true, force: true });

@@ -999,10 +999,11 @@ test('page: the National Analysis row opens the term\'s country, or the book\'s 
     const vm = await frameOf(page, '#vm-frame');
     await vm.waitForFunction(() => location.hash === '#country=CHE' && /Switzerland/.test(document.body.innerText), null, { timeout: 20000 });
     await page.waitForFunction(() => /&t=Q39&pane=vm&show=pestle:che$/.test(location.hash), null, { timeout: 5000 });
-    // On War, no term: Spain, named most often, then Poland and Switzerland.
+    // On War, no term: Spain, named most often, then Sweden and Portugal (Clausewitz's Poland is the Commonwealth, not
+    // today's country, and his Switzerland of before 1848 has no entry and is left unmarked: the tagging of 18 November 2026).
     await page.goto(`${BASE}/bibliotheca/neo/#book=on-war&pane=vm`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelectorAll('#era-rows li[data-key^="pestle"]').length === 3, null, { timeout: 20000 });
-    assert.deepEqual(await row.evaluateAll(ls => ls.map(l => l.dataset.key)), ['pestle:esp', 'pestle:pol', 'pestle:che']);
+    assert.deepEqual(await row.evaluateAll(ls => ls.map(l => l.dataset.key)), ['pestle:esp', 'pestle:swe', 'pestle:prt']);
     assert.match(await row.first().innerText(), /Spain today, named \d+ times in this book/);
     assert.deepEqual(errors, []);
     await ctx.close();

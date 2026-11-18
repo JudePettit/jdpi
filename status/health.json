@@ -1,18 +1,38 @@
 {
-  "generated": "2026-11-17T10:29:29.321Z",
+  "generated": "2026-11-18T10:27:27.570Z",
   "ok": false,
-  "problems": 2,
+  "problems": 6,
   "failing": [
     {
       "name": "Scientific, Economics and Digital Briefings refresh",
       "what": "briefings-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-17 08:42 UTC: https://github.com/JudePettit/jdpi/actions/runs/44048979284"
+      "detail": "last scheduled run failure on 2026-11-18 08:43 UTC: https://github.com/JudePettit/jdpi/actions/runs/44269401782"
     },
     {
-      "name": "Calendars and Integration Hub refresh",
-      "what": "calendar-refresh.yml",
-      "detail": "last scheduled run failure on 2026-11-17 06:18 UTC: https://github.com/JudePettit/jdpi/actions/runs/44030293566"
+      "name": "Political Briefing refresh",
+      "what": "briefing-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-18 07:15 UTC: https://github.com/JudePettit/jdpi/actions/runs/44257468692"
+    },
+    {
+      "name": "Geopolitical Volatility refresh",
+      "what": "volatility-refresh.yml",
+      "detail": "last scheduled run failure on 2026-11-18 02:25 UTC: https://github.com/JudePettit/jdpi/actions/runs/44223120931"
+    },
+    {
+      "name": "Scientific Briefing on the site",
+      "what": "live science/briefing/data/stories.json",
+      "detail": "the site serves a copy 6 h older than the repository"
+    },
+    {
+      "name": "Economics Briefing on the site",
+      "what": "live econ/briefing/data/stories.json",
+      "detail": "the site serves a copy 6 h older than the repository"
+    },
+    {
+      "name": "Digital Briefing on the site",
+      "what": "live digital/briefing/data/stories.json",
+      "detail": "the site serves a copy 6 h older than the repository"
     }
   ],
-  "run": "https://github.com/JudePettit/jdpi/actions/runs/44065263589"
+  "run": "https://github.com/JudePettit/jdpi/actions/runs/44285542821"
 }

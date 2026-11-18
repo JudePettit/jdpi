@@ -27,8 +27,11 @@ export const CITE_ONLY = {
     terms: 'https://correlatesofwar.org/data-sets/',
     read: '2026-11-16',
     // The words that matter, from the "Terms and Conditions" at the head of the Data Sets page (they cover every COW
-    // data set and version; the war data page adds no licence of its own).
-    words: 'Users agree to cite each of the datasets they use in the manner described on each specific dataset web page. ' +
+    // data set and version; the war data page adds no licence of its own). All four of its sentences, in the page's
+    // order: the first, on commercial use, was read on 16 November 2026 with the rest (battlefield/README.md said so
+    // that day) but was left out of this quotation until 18 November 2026, when the wording was read again at the page.
+    words: 'Data are not to be used for any commercial activity; users of COW data agree not to sell or use the data as part of any financial profit-making activity. ' +
+      'Users agree to cite each of the datasets they use in the manner described on each specific dataset web page. ' +
       'Users agree not to distribute the dataset to any third party without written permission of the COW director and data host. ' +
       'Users agree to ask permission for any dissemination, posting, or other use of the data that is not covered by the above restrictions.',
     // What VM keeps under Jude's rule of 16 November 2026 (S0): a cited total with a link to the source.

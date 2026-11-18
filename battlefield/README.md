@@ -20,14 +20,16 @@
 VM uses the COW War Data: Inter-State v4.0, Intra-State v4.1 and Extra-State v4.0 (the Retrospective Battlefield's wars of
 1926–1945, and the war totals of the nine War Focus wars before 1946). The "Terms and Conditions" at the head of
 https://correlatesofwar.org/data-sets/ (read 16 November 2026; they cover every COW data set and version, and the war data
-page adds no licence of its own) say, among other things:
+page adds no licence of its own; the wording read again on 18 November 2026) say:
 
-> "Users agree to cite each of the datasets they use in the manner described on each specific dataset web page. Users
-> agree not to distribute the dataset to any third party without written permission of the COW director and data host.
-> Users agree to ask permission for any dissemination, posting, or other use of the data that is not covered by the above
-> restrictions."
+> "Data are not to be used for any commercial activity; users of COW data agree not to sell or use the data as part of
+> any financial profit-making activity. Users agree to cite each of the datasets they use in the manner described on each
+> specific dataset web page. Users agree not to distribute the dataset to any third party without written permission of
+> the COW director and data host. Users agree to ask permission for any dissemination, posting, or other use of the data
+> that is not covered by the above restrictions."
 
-They also bar any commercial use (VM is free). The war data page, https://correlatesofwar.org/data-sets/cow-war/ (read
+So they bar any commercial use (VM is free, and Jude's rule of 18 November 2026 is free data only where it exists: the
+replacement of the 1926–1945 wars from free sources is queued). The war data page, https://correlatesofwar.org/data-sets/cow-war/ (read
 the same day), asks for this citation: Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007.
 Washington DC: CQ Press. Since July 2026 the war data sets are hosted at the University of Chicago (contact on that page).
 

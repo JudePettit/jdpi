@@ -14,6 +14,7 @@ import { eraRows, eraFromFacts, bookEra, kardashevStep, kardashevPolity, yearOf,
 import { frameMove } from '../bibliotheca/neo/lib/frame.js';
 import { shellHash } from '../kino/lib/links.js';
 import { pageTest, launch } from './tools/pages.mjs';
+import { yearsText } from '../design/vm-click.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const file = p => readFileSync(join(ROOT, p), 'utf8');
@@ -2087,6 +2088,93 @@ test('page: at 360 wide the Reader sits in the AR Reader\'s row, to its left, bo
       assert.deepEqual(w.errors, []);
       await w.ctx.close();
     }
+  } finally { await browser.close(); }
+});
+
+// MP-10 (Jude, 17 November 2026): "when I clicked Classical Athens in The Prince on Bibliotheca it hovered over Italy.
+// It also notes classical Athens as lasting to 2026." The click itself: The Prince, chapter 5, the name "Athens".
+test('page: in The Prince V a click on "Athens" opens the map on Classical Athens\'s own years, never as lasting to this year, and says what the map holds of it', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=5&p=c05-p02`, { waitUntil: 'domcontentloaded' });
+    const term = page.locator('#c05-p02 a.term[data-qid="Q844930"]').first();
+    await term.waitFor({ timeout: 30000 });
+    assert.equal((await term.textContent()).trim(), 'Athens', 'the name as the text writes it');
+    await term.click();
+    await page.waitForFunction(() => window.omniState?.ready && window.omniState.frame === -508, null, { timeout: 60000 });
+    assert.equal(await page.getAttribute('#tab-map', 'aria-selected'), 'true');
+    const st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.window, [-513, -503], 'its first recorded year, 508 BC, five years either side');
+    // The heading gives the start only and says the end is not recorded; nothing says it lasts to this year.
+    const title = await page.locator('#pane-title').innerText();
+    assert.equal(title, 'Classical Athens · from 508 BC, end not recorded');
+    const card = await page.textContent('#map-card');
+    assert.doesNotMatch(title + card, /2026|801 BC/);
+    assert.match(card, /the map opens on 508 BC, its own first recorded year/);
+    // Not the book's frame (1494) and not Italy: the map opens on Classical Athens's own years, and where VM can
+    // neither outline it nor place its point, it says so and shows the world.
+    const frame = await frameOf(page, '#map-frame');
+    const rec = read(`lake/data/e/${844930 % 512}.json`).Q844930;
+    assert.ok(rec && !rec.facts?.dissolved && !rec.facts?.end, 'the Master Index still records no end for it');
+    // With the point the Master Index stores (pt, from its full build) the map opens on it; without one it says so.
+    if (Array.isArray(rec.pt)) await frame.waitForFunction(() => window.omniState?.frame === -508 && window.omniState.points?.includes('Q844930'), null, { timeout: 30000 });
+    else await frame.waitForFunction(() => window.omniState?.frame === -508 && /Classical Athens/.test(document.querySelector('#map-note').textContent), null, { timeout: 30000 });
+    const note = await frame.textContent('#map-note');
+    if (Array.isArray(rec.pt)) {
+      const box = (await frame.evaluate(() => window.omniState)).box;
+      assert.ok(box && box[0] <= rec.pt[0] && rec.pt[0] <= box[2] && box[1] <= rec.pt[1] && rec.pt[1] <= box[3], `centred on its point ${rec.pt} (${box})`);
+    } else {
+      assert.equal(st.box, null, 'no other place\'s box: the world');
+      assert.match(note, /^VM holds no outline of Classical Athens for 508 BC/);
+      assert.match(note, /the Master Index holds no point for it, so the map shows the whole world/);
+    }
+    const fin = (await frame.evaluate(() => window.omniState)).box;
+    assert.ok(!(fin && fin[0] >= 6 && fin[2] <= 19 && fin[1] >= 36 && fin[3] <= 48), `not Italy (${fin})`);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review R1 and R2 (18 November 2026): the Map tab's heading gave the map's window (the entry's years with a margin) as
+// if it were the entry's own dates ("Alexander the Great · 360–319 BC"), and read the Roman Empire's start and end as an
+// end alone ("to 395, start not recorded").
+test('page: the Map tab\'s heading gives the clicked entry\'s own years as the Master Index records them, never the map\'s window', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    // Alexander's 356–323 BC; the Roman Empire's start, 27 BC, to its recorded end (AD 395 in the Master Index of
+    // 18 November 2026, which the lake job is rebuilding): its start is recorded and is said.
+    for (const [ch, p, q, words] of [[4, 'c04-p01', 'Q8409', /^356–323 BC$/], [13, 'c13-p14', 'Q2277', /^27 BC–AD \d+$/]]) {
+      await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=${ch}&p=${p}`, { waitUntil: 'domcontentloaded' });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      const term = page.locator(`#${p} a.term[data-qid="${q}"]`).first();
+      await term.waitFor({ timeout: 30000 });
+      await term.click();
+      await page.waitForFunction(() => window.omniState?.ready && Array.isArray(window.omniState.window), null, { timeout: 60000 });
+      const rec = read(`lake/data/e/${+q.slice(1) % 512}.json`)[q];
+      const st = await page.evaluate(() => window.omniState);
+      const title = await page.locator('#pane-title').innerText();
+      const own = yearsText(rec, { today: new Date().toISOString().slice(0, 10) });
+      assert.match(own, words, `${q}: ${JSON.stringify(rec.facts)}`);
+      assert.equal(title, `${rec.label} · ${own}`);
+      assert.doesNotMatch(title, /not recorded/);
+      assert.ok(st.window[0] < (q === 'Q8409' ? -356 : -27), `the map's window is wider than the entry's own years (${st.window})`);
+    }
+    // Review R5: Ancient Egypt (4000–30 BC) opens on the first year VM holds borders for, where its years reach them.
+    const held = read('omni/data/borders/index.json'), egypt = read(`lake/data/e/${11768 % 512}.json`).Q11768;
+    const [ef, et] = [Number(egypt.facts.founded), Number(egypt.facts.dissolved)];
+    await page.goto(`${BASE}/bibliotheca/neo/index.html#book=the-prince&ch=6&p=c06-p04`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    const eterm = page.locator('#c06-p04 a.term[data-qid="Q11768"]').first();
+    await eterm.waitFor({ timeout: 30000 });
+    await eterm.click();
+    const want = ef < held.from && et >= held.from ? held.from : ef;
+    await page.waitForFunction(w => window.omniState?.ready && window.omniState.frame === w, want, { timeout: 60000 });
+    if (want === held.from) assert.ok((await page.textContent('#map-card')).includes(`the first of its own years that VM holds borders for (its first recorded year, ${-ef} BC, is before them)`));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
 

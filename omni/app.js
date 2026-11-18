@@ -27,13 +27,24 @@ import { readRecipe, writeRecipe, readHost } from '../design/vm-recipe.js';
 import { formatYear, formatSpan, formatValueDate, valueDateToEdtf, yearOf, addYears, precisionWord } from '../design/vm-dates.js';
 import { bundleFiles, dataFiles, zipStored, readZip, pin as pinOf, apa } from '../design/vm-bundle.js';
 import { makeMap, webglOk } from './lib/maplibre.js';
+import { yearsText, ownYears } from '../design/vm-click.js';
+import { yearText, readYear, ticksFor, playSteps, playStep, nextStop, keepFiles } from './lib/time.js';
 
 const M = window.PRPMap, P = window.PRPPeriod;
 const $ = s => document.querySelector(s);
 const esc = M.esc;
 const DATA = new URL('data/', import.meta.url).href;
 const SITE = new URL('../', import.meta.url).href;
-const DEFAULT = 'vr=1&t=1400..1600&at=1400&show=frame&step=y&base=plain&fill=borders&l=battles';
+// With no recipe the page opens on every year VM holds (Jude, 15 and 17 November 2026: "I can only see 1400 to 1600"),
+// on 1400 where VM holds it, as the page always has; until 18 November 2026 the default was 1400..1600, and an address
+// that names those years still opens on them.
+const defaultRecipe = () => {
+  const h = M.held(S.index) || { from: 1400, to: 1600 };
+  const at = h.from <= 1400 && 1400 <= h.to ? 1400 : h.from;
+  return `vr=1&t=${h.from}..${h.to}&at=${at}&show=frame&step=y&base=plain&fill=borders&l=battles`;
+};
+// A year as the track and the headings write it: '508 BC', and 'AD 33' wherever the view holds years before AD 1.
+const yt = y => yearText(y, { bc: !!S.bc }) || formatYear(y);
 const MAPLIBRE = 'MapLibre GL JS 5.24.0';
 const MAPLIBRE_SRI = 'sha384-5+cfbwT0iiub6VsQAdn6yz16nr6sDiQoHx6tm4O8OVYXHYOxcffFmCJBL0dgdvGp';
 const MSG = {
@@ -42,7 +53,7 @@ const MSG = {
 };
 // The VM scripts this page runs, whose sha256 a bundle records (vmCommit is null: a static site cannot know its commit).
 const CODE = ['design/prp-bar.js', 'design/prp-focus.js', 'design/prp-period.js', 'design/prp-map.js', 'design/vm-recipe.js', 'design/vm-dates.js',
-  'design/vm-bundle.js', 'lake/scripts/dates.mjs', 'omni/app.js', 'omni/lib/maplibre.js'];
+  'design/vm-bundle.js', 'design/vm-click.js', 'lake/scripts/dates.mjs', 'omni/app.js', 'omni/lib/maplibre.js', 'omni/lib/time.js'];
 const PROVIDERS = ['Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager', 'Natural Earth 5.1.1 (public domain)', 'Wikidata (CC0)'];
 const host = readHost(location.hash);
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
@@ -52,7 +63,7 @@ const S = {
   R: null, layers: null, index: null, qids: null, base: null, battles: null, sources: null, subject: null, subjectQ: null,
   files: new Map(), bufs: new Map(), frame: null, start: null, stops: [], period: null, map: null, mapState: 'drawn',
   drawn: [], drawnBattles: [], focusPoints: [], box: null, seq: 0, notes: [], mode: 'live', saved: null, labelCache: new Map(),
-  shards: new Map(), shelf: null,
+  shards: new Map(), shelf: null, loaded: new Set(), loading: null, bare: false,
 };
 window.omniState = { ready: false };
 
@@ -67,9 +78,20 @@ const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')
 const sha256 = async bytes => hex(await crypto.subtle.digest('SHA-256', bytes));
 const digest = bytes => crypto.subtle.digest('SHA-256', bytes);
 const stamp = iso => String(iso || '').replace(/[-:]/g, '').replace(/^(\d{8}T\d{4})\d*(?:\.\d+)?Z$/, '$1Z');
+// A borders file, decoded once and kept while it is among the last few used (S.used, most recent last): over thousands
+// of years Play passes through many files, and only the frame's and the next ones Play needs are always kept.
 async function bordersFor(file) {
-  if (!S.files.has(file.file)) S.files.set(file.file, getFile(`${DATA}borders/${file.file}`).then(({ json, buf }) => { S.bufs.set(file.file, buf); return M.decode(json); }));
+  if (!S.files.has(file.file)) {
+    const p = getFile(`${DATA}borders/${file.file}`).then(({ json, buf }) => { S.bufs.set(file.file, buf); return M.decode(json); });
+    p.then(() => { if (S.files.get(file.file) === p) S.loaded.add(file.file); }, () => { if (S.files.get(file.file) === p) S.files.delete(file.file); });
+    S.files.set(file.file, p);
+  }
+  S.used = [...(S.used || []).filter(f => f !== file.file), file.file];
   return S.files.get(file.file);
+}
+function letGo(keep) {
+  for (const f of keepFiles(S.used || [], keep, 4)) { S.files.delete(f); S.bufs.delete(f); S.loaded.delete(f); S.labelCache.clear(); }
+  S.used = (S.used || []).filter(f => S.files.has(f));
 }
 const sourceOf = id => S.sources?.find(s => s.id === id) || null;
 const layerOf = id => S.layers?.layers.find(l => l.id === id) || null;
@@ -108,10 +130,12 @@ async function loadSubject(q) {
 }
 
 /* ---------- the recipe ---------- */
+// Every stop of the window: each year (or decade, or century) from its first to its last, however many thousands of
+// years VM holds; never a year 0 (addYears steps from 1 BC to AD 1).
 function stopsFor(from, to, step) {
   const size = step === 'c' ? 100 : step === '10y' ? 10 : 1;
   const out = [];
-  for (let y = from; y <= to && out.length < 5000; y = addYears(y, size)) out.push(y);
+  for (let y = from; y <= to; y = addYears(y, size)) out.push(y);
   if (out.at(-1) !== to) out.push(to);
   return out;
 }
@@ -190,8 +214,12 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   const held = M.held(S.index);
   const file = M.fileFor(S.index, year);
   let fc = null;
+  // While a borders file loads, the slider already stands on the new year and the map on the old: said, so neither the
+  // thumb nor a screen reader passes the new year off as drawn (the year beside the slider moves only once it is).
+  loadingNote(file && !S.loaded.has(file.file) ? `Loading the borders for ${yt(year)}…` : null);
   if (file) { try { fc = await bordersFor(file); } catch (e) { S.notes.push(`The borders file could not load: ${e.message}`); } }
   if (seq !== S.seq) return;
+  loadingNote(null);
   S.fc = fc;
   S.drawn = fc ? M.sliceAt(fc, year).filter(f => f.geometry) : [];
   // The period whose events are drawn (design 2.1 rule 4): the start the reader chose (since=), else its rest: on an
@@ -209,11 +237,18 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   // A battle's own point counts only where the view draws the battles layer.
   const asBattle = q => (on ? battleRow(q) : null);
   const pointOf = q => lakePoint(q) || asBattle(q)?.pt || null;
-  const ext = M.extent({ focus: S.R.focus || [], year, fc: fc || { type: 'FeatureCollection', features: [], vm: null }, qids: S.qids, held, pointOf });
+  const fcNow = fc || { type: 'FeatureCollection', features: [], vm: null };
+  const ext = M.extent({ focus: S.R.focus || [], year, fc: fcNow, qids: S.qids, held, pointOf });
   S.focusHits = fc ? ext.hits.flatMap(q => M.featuresFor(fc, S.qids, q, year, held).features.map(f => f.id)) : [];
   S.focusPoints = ext.misses.filter(m => m.point && lakePoint(m.qid) && !asBattle(m.qid)).map(m => ({ q: m.qid, pt: lakePoint(m.qid) }));
   S.ext = ext;
-  if (fit || !S.boxSet) { S.box = ext.box; S.boxSet = true; S.map?.fit(S.box, { padding: ext.padding, animate: source !== 'set' }); }
+  // The box (MP-10, Jude, 17 November 2026: "when I clicked Classical Athens … it hovered over Italy"): a click on a
+  // place in focus opens on that place alone, its outline or its recorded point; where VM holds neither for the
+  // frame's year the map shows the whole world and says why (render), never the box of the other places named.
+  const own = S.R.q && (S.R.focus || []).includes(S.R.q) ? M.extent({ focus: [S.R.q], year, fc: fcNow, qids: S.qids, held, pointOf }) : null;
+  S.ownExt = own;
+  const box = own ? own.box : ext.box, padding = own ? own.padding : ext.padding;
+  if (fit || !S.boxSet) { S.box = box; S.boxSet = true; S.map?.fit(S.box, { padding, animate: source !== 'set' }); }
   if (S.map) {
     S.map.setBorders(S.drawn, { focus: S.focusHits });
     S.map.setBattles(S.drawnBattles.map(r => ({ id: r.q, geometry: { type: 'Point', coordinates: r.pt } })));
@@ -242,17 +277,50 @@ function frameWhy(year, win) {
   if (S.mode === 'saved' || at == null || at !== year) return '';
   // A battle's own view opens on the year it was fought (decision D4 of 17 November 2026).
   const b = battlesOn() ? battleRow(S.R.q) : null;
-  if (NEO.test(S.R.from || '') && b && b.sortYear === at) return `Opens on ${formatYear(at)}, the year it was fought, as VM's click chose it: a battle's view opens on its own year. The rules are under "Method" below.`;
-  if (NEO.test(S.R.from || '')) return `Opens on ${formatYear(at)}, as VM's click chose it: the passage's own year where VM has dated the passage, until then the start of the book's era. The rules are under "Method" below.`;
-  return at === win.from ? `Opens on ${formatYear(at)}, the first of these years.` : `Opens on ${formatYear(at)}, the year this view's recipe names.`;
+  if (NEO.test(S.R.from || '') && b && b.sortYear === at) return `Opens on ${yt(at)}, the year it was fought, as VM's click chose it: a battle's view opens on its own year. The rules are under "Method" below.`;
+  // A click's view: the one reason that applies, as far as this page can tell it from the clicked entry's own record and
+  // the crosswalk (vm-click.js chose it by the same rules); the passage's year and the book's era are the reader's.
+  if (NEO.test(S.R.from || '')) {
+    const rec = S.R.q ? records.get(S.R.q) : null, name = S.subject || 'the clicked entry';
+    const own = rec ? ownYears(rec, { today: new Date().toISOString().slice(0, 10) }) : null;
+    const held = M.held(S.index);
+    const firstOut = own?.from != null ? (S.qids?.entries?.[S.R.q] || []).filter(r => Number.isInteger(r.from) && Number.isInteger(r.to) && r.to >= own.from && (own.to == null || r.from <= own.to))
+      .map(r => Math.max(r.from, own.from)).sort((x, y) => x - y)[0] : undefined;
+    const why = firstOut === at ? `the first year of ${name}'s own that VM can outline`
+      : own?.from === at ? `${name}'s own first recorded year`
+      : own?.from != null && held && own.from < held.from && at === held.from ? `the first of ${name}'s own years that VM holds borders for (its first recorded year, ${yt(own.from)}, is before them)`
+      : 'the passage\'s own year, or the start of the book\'s era, as the reader\'s card beside the map says';
+    return `Opens on ${yt(at)}, as VM's click chose it: ${why}. The rules are under "Method" below.`;
+  }
+  // The page's own view, with no address: every year VM holds.
+  if (S.bare) { const held = M.held(S.index); return held ? `Opens on ${yt(at)}; the slider holds every year VM holds, ${formatSpan(held.from, held.to)}.` : ''; }
+  return at === win.from ? `Opens on ${yt(at)}, the first of these years.` : `Opens on ${yt(at)}, the year this view's address names.`;
 }
 // How a place in focus was matched to Cliopatria's rows at a year (S14): by Cliopatria's own Wikidata id, or by name.
 function basisOf(q, year) {
   const r = M.qidRows(S.qids, q, year)[0];
   if (!r) return '';
   if (r.basis === 'cliopatria-wikidata') return 'by Cliopatria\'s own Wikidata id';
-  const no = (S.qids?.rejected || []).find(x => x.name === r.name);
+  // A rejection naming years holds only those years' rows (qids.json, design/prp-map.js).
+  const holds = x => !x.years || [...x.years, ...(x.kept?.years || [])].some(([a, b]) => a <= year && year <= b);
+  const no = (S.qids?.rejected || []).find(x => x.name === r.name && holds(x));
   return `matched by name${no ? `; Cliopatria's own Wikidata id for it, ${no.q}, was rejected (${no.why})` : ''}`;
+}
+// The years VM's crosswalk outlines a Q-id (qids.json's rows, merged where they touch): '1260–1571', or null.
+function outlinedYears(q) {
+  const rows = [...(S.qids?.entries?.[q] || [])].filter(r => Number.isInteger(r.from) && Number.isInteger(r.to)).sort((a, b) => a.from - b.from);
+  const spans = [];
+  for (const r of rows) { const last = spans.at(-1); if (last && r.from <= addYears(last[1], 1)) last[1] = Math.max(last[1], r.to); else spans.push([r.from, r.to]); }
+  return spans.length ? spans.map(([a, b]) => formatSpan(a, b)).join(', ') : null;
+}
+// A clicked place VM can neither outline nor place at the frame's year, in a sentence: why, and that the map shows the
+// whole world (a point would be drawn and the box set to it, so it is not said here).
+function unplacedText(q, year, held, miss) {
+  const name = S.subject || labelOf(q) || q;
+  const why = miss?.reason === 'outside-slice' ? M.reasonText('outside-slice', { held })
+    : miss?.reason === 'not-this-year' ? `Cliopatria has no outline for it in ${yt(year)}${outlinedYears(q) ? `; VM outlines it for ${outlinedYears(q)}` : ''}`
+    : 'VM\'s crosswalk matches it to none of Cliopatria\'s rows';
+  return `VM holds no outline of ${name} for ${yt(year)} (${why}), and the Master Index holds no point for it, so the map shows the whole world.`;
 }
 const ptText = (pt, prec) => {
   const d = prec > 0 ? Math.max(0, Math.min(6, Math.round(-Math.log10(prec)))) : 2;
@@ -263,15 +331,22 @@ const lower = s => String(s || '').replace(/^./, c => c.toLowerCase());
 const srcLink = s => (s?.line ? (s.loc ? `<a href="https://www.wikidata.org/wiki/${esc(s.loc)}" target="_blank" rel="noreferrer">${esc(s.line)}</a>` : esc(s.line)) : '');
 function render(inWin, ext, file, held) {
   const year = S.frame, win = windowOf(S.R);
-  $('#frame-year').textContent = `· ${formatYear(year)}`;
-  $('#time-year').textContent = formatYear(year);
-  $('#view-subject').textContent = S.mode === 'saved' ? S.saved.title : `${S.subject || 'The Omni-Map'}, ${formatSpan(win.from, win.to)}`;
+  $('#frame-year').textContent = `· ${yt(year)}`;
+  $('#time-year').textContent = yt(year);
+  // The subject's own years as the Master Index records them ("Alexander the Great (356–323 BC)"), never the window, which
+  // is its years with a margin and is named as the map's: "…: map of 360–319 BC".
+  const today = new Date().toISOString().slice(0, 10);
+  const subjYears = S.subject && S.R.q && records.get(S.R.q) ? yearsText(records.get(S.R.q), { today }) : null;
+  $('#view-subject').textContent = S.mode === 'saved' ? S.saved.title
+    : S.subject ? `${S.subject}${subjYears ? ` (${subjYears})` : ''}: map of ${formatSpan(win.from, win.to)}` : `The Omni-Map, ${formatSpan(win.from, win.to)}`;
   const why = frameWhy(year, win);
   $('#frame-why').textContent = why; $('#frame-why').hidden = !why;
   // Outside the borders VM holds: a gap, said, never empty land. "VM cannot place this" only when places were asked for.
+  // A clicked place VM cannot place at this year: said in a sentence, with the years VM does outline it (MP-10).
   const note = $('#map-note');
   const asked = (S.R.focus || []).length > 0;
-  const noteText = !file ? M.reasonText('outside-slice', { held }) : ext.box || !asked ? '' : ext.text;
+  const unplaced = S.ownExt && !S.ownExt.box ? unplacedText(S.R.q, year, held, S.ownExt.misses[0]) : '';
+  const noteText = unplaced || (!file ? M.reasonText('outside-slice', { held }) : ext.box || !asked ? '' : ext.text);
   note.textContent = noteText; note.hidden = !noteText;
 
   // The legend: each layer's source, version, licence, precision and status, its credit, and its method under ⓘ: the
@@ -301,15 +376,18 @@ function render(inWin, ext, file, held) {
 
   // In focus: what the recipe asked to see, and what VM can and cannot outline at this frame.
   const f = [];
-  if (S.R.q) f.push(`<p>Clicked: <a href="${esc(entryUrl(S.R.q))}" target="_top"><bdi>${esc(S.subject || S.R.q)}</bdi></a> (${esc(S.R.q)})${S.R.from ? `, from ${fromLink(S.R.from)}` : ''}</p>`);
+  // Its own dates as the Master Index records them: an end it does not record is said not to be (MP-10).
+  const ownText = S.R.q && records.get(S.R.q) ? yearsText(records.get(S.R.q), { today }) : null;
+  if (S.R.q) f.push(`<p>Clicked: <a href="${esc(entryUrl(S.R.q))}" target="_top"><bdi>${esc(S.subject || S.R.q)}</bdi></a> (${esc(S.R.q)})${S.R.from ? `, from ${fromLink(S.R.from)}` : ''}${ownText ? `; its own dates in the Master Index: ${esc(ownText)}` : ''}</p>`);
   const rows = [];
   for (const q of ext.hits) rows.push(`<li><b><bdi>${esc(nameOf(q, year) || q)}</bdi></b> <span class="om-q">${esc(q)}</span><span>Outlined at ${esc(formatYear(year))}, as Cliopatria names it, ${esc(basisOf(q, year))}</span></li>`);
   const drawnB = new Set(S.drawnBattles.map(r => r.q)), drawnP = new Set(S.focusPoints.map(p => p.q));
   for (const m of ext.misses) {
     const b = on ? battleRow(m.qid) : null;
     // A point is said to be shown only when it is on the map at this frame (S3): a battle's, in its own year.
-    const text = !m.point || m.reason === 'outside-slice' ? m.text
+    const text = !m.point ? m.text
       : drawnP.has(m.qid) || drawnB.has(m.qid) ? `${m.text}: shown as a point`
+      : m.reason === 'outside-slice' ? m.text
       : b ? `${m.text}; it is drawn as a point at ${formatYear(b.sortYear)}, the year it was fought` : m.text;
     const name = labelOf(m.qid);
     rows.push(`<li><b><bdi>${esc(name || m.qid)}</bdi></b>${name ? ` <span class="om-q">${esc(m.qid)}</span>` : ''}<span>${esc(text)}</span></li>`);
@@ -353,7 +431,10 @@ function render(inWin, ext, file, held) {
   $('#live-view').innerHTML = `<b>Live view:</b> <a href="${esc(live)}" target="_blank" rel="noopener">${esc(live)}</a>. This address draws today's data; only a saved bundle is exact.`;
   const pins = pinNotes(S.R);
   $('#pins-note').textContent = pins.join(' '); $('#pins-note').hidden = !pins.length;
-  say(`${formatYear(year)}: ${k} outline${k === 1 ? '' : 's'}, ${S.drawnBattles.length} battle${S.drawnBattles.length === 1 ? '' : 's'} drawn`);
+  // Play says nothing each step (the year beside the slider moves); it says where it stopped.
+  if (!PL.on) say(`${yt(year)}: ${k} outline${k === 1 ? '' : 's'}, ${S.drawnBattles.length} battle${S.drawnBattles.length === 1 ? '' : 's'} drawn`);
+  $('#whole-span').hidden = S.mode === 'saved' || !held || (win.from <= held.from && win.to >= held.to);
+  if (held) $('#whole-span').title = `Show ${formatSpan(held.from, held.to)} on the slider, keeping ${yt(year)}`;
 }
 let sayTimer = 0;
 function say(text) { clearTimeout(sayTimer); sayTimer = setTimeout(() => { $('#say').textContent = text; }, 200); }
@@ -376,7 +457,7 @@ function publish() {
     battles: { held: battlesInWindow(win).map(r => r.q), drawn: S.drawnBattles.map(r => r.q) },
     focus: S.ext?.hits || [], misses: (S.ext?.misses || []).map(m => ({ qid: m.qid, reason: m.reason, point: m.point, text: m.text })),
     points: S.focusPoints.map(p => p.q),
-    held: M.held(S.index), map: S.mapState, webgl: webglOk(), theme: theme(), ...(S.mode === 'saved' ? { pin: S.saved.pin } : {}),
+    held: M.held(S.index), map: S.mapState, webgl: webglOk(), theme: theme(), play: playState(), ...(S.mode === 'saved' ? { pin: S.saved.pin } : {}),
   };
   const hash = `#${currentRecipe()}${host ? `&host=${host}` : ''}`;
   if (hash !== location.hash) { try { history.replaceState(history.state, '', hash); } catch { /* rate-limited: the next move writes it */ } }
@@ -490,6 +571,7 @@ async function openSaved(file) {
     if (!S.R.show) S.R.show = 'frame';
     if (!S.R.step) S.R.step = 'y';
     S.boxSet = false;
+    stopPlay(); playNote(''); S.goto = null;
     const { at, start } = mountPeriod();
     await loadSubject(R.q || null);
     await readRecords(unoutlined(R));
@@ -518,8 +600,10 @@ function leaveSaved() { S.mode = 'live'; S.saved = null; $('#saved-note').textCo
 function mountPeriod() {
   const win = windowOf(S.R), step = S.R.step === 'c' || S.R.step === '10y' ? S.R.step : 'y';
   S.stops = stopsFor(win.from, win.to, step);
+  // A year after the window's last opens on its last, one before its first (or none) on its first (applyRecipe says so).
   let at = yearOf(S.R.at);
-  if (at == null || at < win.from || at > win.to) at = win.from;
+  if (at != null && at > win.to) at = win.to;
+  if (at == null || at < win.from) at = win.from;
   // The recipe's own year is a stop even when the step's stops pass it by (a decade step and at=1494), so the slider
   // always says the year the map shows, and the reader can come back to it (S4).
   if (!S.stops.includes(at)) S.stops = [...S.stops, at].sort((a, b) => a - b);
@@ -527,27 +611,164 @@ function mountPeriod() {
   let since = yearOf(S.R.since);
   if (since == null || since < win.from || since > at) since = null;
   if (since != null && !S.stops.includes(since)) S.stops = [...S.stops, since].sort((a, b) => a - b);
+  // A year the reader went to ("Go to year") is a stop too, where the step's stops pass it by.
+  if (S.goto != null && S.goto >= win.from && S.goto <= win.to && !S.stops.includes(S.goto)) S.stops = [...S.stops, S.goto].sort((a, b) => a - b);
   const size = step === 'c' ? 100 : step === '10y' ? 10 : 1;
-  // Minor tick labels only where they fit (R10): a long track of yearly stops shows its key years alone.
-  const minorText = S.stops.length <= 120;
-  const ticks = S.stops.filter((y, i) => i === 0 || i === S.stops.length - 1 || y % (size * 10) === 0 || y % (size * 50) === 0)
-    .map(y => ({ at: y, text: y % (size * 50) === 0 || minorText || y === S.stops[0] || y === S.stops.at(-1) ? formatYear(y) : '', kind: y % (size * 50) === 0 ? 'key' : 'minor' }));
+  // Years before AD 1 on the track: every year is written with its era ('508 BC', 'AD 33'); else as before ('1494').
+  S.bc = win.from < 0;
+  // The track's labels: its two ends and round years between, as many as its width holds (about one per 90 px), never
+  // a year 0; minor ticks between them where they fit (R10).
+  const ticks = trackTicks(win);
   // Where the start rests follows the recipe's show (2.1 rule 4): a new recipe that changes it mounts the slider again.
+  // The control draws ‹ › and the track; Play is the page's own (below), so it can wait for each borders file and
+  // step by more than one stop.
   const rest = S.R.show === 'upto' ? 'first' : 'end';
   if (!S.period || S.periodRest !== rest) {
     S.period?.stop();
     S.periodRest = rest;
     S.period = P.mount($('#timeline'), {
-      stops: S.stops, from: since, to: at, rest, labels: y => formatYear(y), ticks,
-      ids: { from: 'from', to: 'year', prev: 'prev', play: 'play', next: 'next' },
+      stops: S.stops, from: since, to: at, rest, labels: y => yt(y), ticks,
+      ids: { from: 'from', to: 'year', prev: 'prev', play: 'play-track', next: 'next' },
       names: { group: 'Year shown', from: 'First year of the period', to: 'Year shown', prev: 'Previous year', next: 'Next year' },
-      play: { interval: 1200, label: 'Play through the years' },
-      onChange: p => setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }),
+      play: false, steps: true,
+      onChange: p => { stopPlay(); setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }); },
     });
   } else S.period.update({ stops: S.stops, ticks, from: since, to: at });
+  fillSteps(win, size);
   // A start on its rest (the first stop of an up-to view, the frame of a frame view) is no start: since= is not written.
   const p = S.period.get();
   return { at, start: p.atRest ? null : p.from };
+}
+function trackTicks(win) {
+  // The track's own width: the control's, less its ‹ › buttons.
+  const w = ($('#timeline')?.clientWidth || 800) - 90;
+  return ticksFor(win.from, win.to, { maxLabels: Math.max(3, Math.min(10, Math.round(w / 90))), bc: S.bc });
+}
+
+/* ---------- Play (Jude, 15 November 2026: "a long playable slider … stepping through spans like 2,000 years") ---------- */
+// The reader chooses the step (years a move) and the pace (time a move); each move waits for its borders file, and the
+// files of the next few moves are asked for ahead, so a frame is never drawn before its borders. Play stops at the
+// view's last year, at a move by the reader, and at a new recipe (Kino's, the reader's, the address).
+const PL = { on: false, timer: 0, run: 0, step: null, pace: 1000 };
+const PACES = [[250, 'a quarter of a second'], [500, 'half a second'], [1000, 'a second'], [2000, 'two seconds'], [4000, 'four seconds']];
+const playState = () => ({ on: PL.on, step: PL.step, pace: PL.pace });
+function fillSteps(win, size) {
+  const sel = $('#play-step');
+  const span = Math.max(1, Math.abs(win.to - win.from));
+  const list = playSteps(span, size);
+  const keep = list.includes(PL.step) ? PL.step : playStep(span, size);
+  sel.replaceChildren(...list.map(k => { const o = document.createElement('option'); o.value = String(k); o.textContent = k === 1 ? '1 year' : `${k.toLocaleString('en-GB')} years`; return o; }));
+  sel.value = String(keep); PL.step = keep;
+}
+function playButton() {
+  // Its label says what a press does ("Play", "Pause"); it is not also a pressed toggle, which a screen reader would
+  // announce as "Pause, pressed".
+  const b = $('#play');
+  b.textContent = PL.on ? 'Pause' : 'Play';
+}
+function playNote(text) { S.loading = null; $('#play-note').textContent = text || ''; }
+// "Loading the borders for …" while a frame waits for its file; cleared when the frame is drawn, unless the note has
+// since been given to something else (Play's stop, a typed year's answer).
+function loadingNote(text) {
+  const el = $('#play-note');
+  if (text) { S.loading = text; el.textContent = text; return; }
+  if (S.loading && el.textContent === S.loading) el.textContent = '';
+  S.loading = null;
+}
+function stopPlay(text = null) {
+  if (PL.on) { PL.on = false; PL.run++; clearTimeout(PL.timer); playButton(); if (window.omniState.ready) window.omniState = { ...window.omniState, play: playState() }; }
+  if (text != null) playNote(text);
+}
+// The stops of the next n moves from `at`, and their borders files.
+function aheadOf(at, n) {
+  const out = [];
+  let y = at;
+  for (let k = 0; k < n; k++) { y = nextStop(S.stops, y, PL.step); if (y == null) break; out.push(y); if (y === S.stops.at(-1)) break; }
+  return out;
+}
+const filesOf = years => [...new Set(years.map(y => M.fileFor(S.index, y)?.file).filter(Boolean))];
+function askAhead(at) {
+  const ahead = aheadOf(at, 3), keep = filesOf([at, ...ahead]);
+  for (const y of ahead) { const f = M.fileFor(S.index, y); if (f) bordersFor(f).catch(() => {}); }
+  letGo(keep);
+}
+function startPlay() {
+  if (PL.on || S.stops.length < 2 || S.frame == null) return;
+  PL.on = true; const run = ++PL.run;
+  playButton(); playNote('');
+  if (S.mode === 'saved') leaveSaved();
+  window.omniState = { ...window.omniState, play: playState() };
+  // From the last year it begins again at the first.
+  const again = S.frame >= S.stops.at(-1);
+  const first = again ? S.stops[0] : S.frame;
+  askAhead(first);
+  if (again) move(run, first); else PL.timer = setTimeout(() => tick(run), PL.pace);
+}
+// One move: its file first, then the frame; the next move a pace after this one began.
+async function move(run, y) {
+  const t0 = performance.now();
+  const f = M.fileFor(S.index, y);
+  if (f) { try { await bordersFor(f); } catch { /* setFrame says the file could not load */ } }
+  if (run !== PL.run) return;
+  const cur = S.period.get();
+  S.period.set(cur.atRest ? null : cur.from, y, { silent: true });
+  askAhead(y);
+  await setFrame(y, { start: S.start, source: 'play' });
+  if (run !== PL.run) return;
+  if (y >= S.stops.at(-1)) { stopPlay(`Stopped at ${yt(y)}, the last year of this view.`); publish(); return; }
+  PL.timer = setTimeout(() => tick(run), Math.max(0, PL.pace - (performance.now() - t0)));
+}
+function tick(run) {
+  if (run !== PL.run || !PL.on) return;
+  const y = nextStop(S.stops, S.frame, PL.step);
+  if (y == null) { stopPlay(`Stopped at ${yt(S.frame)}, the last year of this view.`); publish(); return; }
+  move(run, y);
+}
+
+/* ---------- "Go to year" and every year VM holds ---------- */
+// A year typed exactly ('500 BC', 'AD 33', '1494'), whatever the track's width: inside the view's years the map moves
+// there; outside them, and inside the years VM holds, the slider shows every year VM holds; outside those, it is said.
+async function goTo(text) {
+  stopPlay();
+  const r = readYear(text), held = M.held(S.index);
+  if (r.error === 'zero') return playNote('There is no year 0: 1 BC is followed by AD 1.');
+  if (r.error) return playNote('Write a year as 1494, 500 BC or AD 33.');
+  const y = r.year, win = windowOf(S.R);
+  if (held && (y < held.from || y > held.to)) return playNote(`${M.reasonText('outside-slice', { held })}, so the map stays on ${yt(S.frame)}.`);
+  playNote('');
+  if (S.mode === 'saved') leaveSaved();
+  S.goto = y;
+  if (held && (y < win.from || y > win.to)) S.R = { ...S.R, t: { from: held.from, to: held.to } };
+  const { start } = mountPeriod();
+  S.period.set(S.period.get().atRest ? null : S.period.get().from, y, { silent: true });
+  await setFrame(y, { start: start != null && start <= y ? start : null, source: 'goto' });
+}
+// "Every year VM holds": the same view, its slider over every year VM holds, at the year shown.
+async function wholeSpan() {
+  stopPlay();
+  const held = M.held(S.index);
+  if (!held || S.frame == null) return;
+  if (S.mode === 'saved') leaveSaved();
+  const at = S.frame;
+  S.goto = at;
+  S.R = { ...S.R, t: { from: held.from, to: held.to } };
+  const { start } = mountPeriod();
+  S.period.set(S.period.get().atRest ? null : S.period.get().from, at, { silent: true });
+  await setFrame(at, { start, source: 'set' });
+}
+
+// What an address asked for that the view could not do as written, said, never changed in silence: a year 0 (there is
+// none), years that could not be read, and a year outside the address's own years.
+function addressNotes(raw, R, at) {
+  const part = k => { const m = new RegExp(`(?:^|&)${k}=([^&]*)`).exec(raw); if (!m) return null; try { return decodeURIComponent(m[1]); } catch { return m[1]; } };
+  const zero = v => /(?:^|\.\.)-?0+(?:-|\.\.|$)/.test(v);
+  const notes = [], t = part('t'), a = part('at'), win = windowOf(S.R);
+  if (t != null && !R.t) notes.push(zero(t) ? `This address's years (${t}) include a year 0, which does not exist (1 BC is followed by AD 1), so the slider shows every year VM holds, ${formatSpan(win.from, win.to)}.`
+    : `This address's years (${t}) could not be read, so the slider shows every year VM holds, ${formatSpan(win.from, win.to)}.`);
+  if (a != null && R.at == null) notes.push(zero(a) ? `This address names year 0, which does not exist (1 BC is followed by AD 1); it opens on ${yt(at)}.` : `This address's year (${a}) could not be read; it opens on ${yt(at)}.`);
+  const y = yearOf(R.at);
+  if (y != null && y !== at && (y < win.from || y > win.to)) notes.push(`This address's year, ${yt(y)}, is outside its own years (${formatSpan(win.from, win.to)}), so it opens on ${yt(at)}, the ${y > win.to ? 'last' : 'first'} of them.`);
+  return notes;
 }
 
 /* ---------- start ---------- */
@@ -555,13 +776,17 @@ async function applyRecipe({ first = false } = {}) {
   const raw = location.hash.replace(/^#/, '');
   const R = readRecipe(raw);
   S.notes = [];
+  // A new recipe (the address, Kino's next move, the reader's next click) stops Play and is drawn as it says.
+  stopPlay(); playNote(''); S.goto = null;
   if (raw && !R) S.notes.push('This address is not a view VM can read (VR/1); it shows the borders VM holds instead.');
-  S.R = R || readRecipe(DEFAULT);
+  S.bare = !raw;
+  S.R = R || readRecipe(defaultRecipe());
   if (!S.R.show) S.R.show = 'frame';
   if (!S.R.step) S.R.step = 'y';
   S.boxSet = false;
   if (S.mode === 'saved') leaveSaved();
   const { at, start } = mountPeriod();
+  if (R) S.notes.push(...addressNotes(raw, R, at));
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
   // the records of the places VM cannot outline give their names and points.
   await Promise.all([loadSubject(S.R.q || null), readRecords(unoutlined(S.R)), loadShelf(S.R)]);
@@ -608,6 +833,7 @@ function wire() {
     const b = e.target.closest('button[data-year]');
     if (!b) return;
     const y = +b.dataset.year;
+    stopPlay();
     S.period.set(null, y, { silent: true });
     setFrame(y, { source: 'step' });
     $('#year').focus({ preventScroll: true });
@@ -617,6 +843,17 @@ function wire() {
     const f = b && S.drawn.find(x => x.id === b.dataset.fit);
     if (f && S.map) S.map.fit(f.properties.b, { padding: 30 });
   });
+  // Play, its step and pace, "Go to year" and every year VM holds.
+  const pace = $('#play-pace');
+  pace.replaceChildren(...PACES.map(([ms, words]) => { const o = document.createElement('option'); o.value = String(ms); o.textContent = words; return o; }));
+  pace.value = String(PL.pace);
+  pace.addEventListener('change', () => { PL.pace = +pace.value || 1000; if (window.omniState.ready) window.omniState = { ...window.omniState, play: playState() }; });
+  $('#play-step').addEventListener('change', e => { PL.step = +e.target.value || PL.step; if (window.omniState.ready) window.omniState = { ...window.omniState, play: playState() }; });
+  $('#play').addEventListener('click', () => (PL.on ? stopPlay(`Paused at ${yt(S.frame)}.`) : startPlay()));
+  $('#goto').addEventListener('submit', e => { e.preventDefault(); goTo($('#goto-year').value); });
+  $('#whole-span').addEventListener('click', () => wholeSpan());
+  let resizeT = 0;
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (S.period && S.R) S.period.update({ ticks: trackTicks(windowOf(S.R)) }); }, 200); });
   $('#save').addEventListener('click', () => act('#save', saveBundle));
   $('#cite').addEventListener('click', () => act('#cite', cite));
   $('#download').addEventListener('click', () => act('#download', download));

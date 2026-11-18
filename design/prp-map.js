@@ -3,7 +3,8 @@
    a page before its module script. No DOM, no fetch: the page loads the files and hands them in. Boxes go through
    PRPFocus.resolve (load prp-focus.js first), so a map fits a place the way every VM map does.
 
-   The dated-borders format, version 1 (omni/data/borders/<from>-<to>.topo.json, written by omni/scripts/build-borders.mjs):
+   The dated-borders format, version 1 (omni/data/borders/<from>-<to>.topo.json, a year below zero written m and its
+   digits, as in m3400-m301.topo.json; written by omni/scripts/build-borders.mjs):
      A TopoJSON Topology (spec 1.0, quantised: "transform" with delta-encoded arcs) whose object "borders" is a
      GeometryCollection of Polygon / MultiPolygon (or null) geometries, each with
        properties { id: 'cl-<10 hex>', n: <the source's name>, f: <from year>, t: <to year>, k: 'POLITY' | 'RELATION',
@@ -15,7 +16,9 @@
    The index (omni/data/borders/index.json): { format: 'vm-borders-index/1', source, version, built, from, to,
      files: [{ from, to, file, rows, bytes, gzip, sha256 }] }.
    The crosswalk (omni/data/borders/qids.json): { format: 'vm-qids/1', version, built,
-     entries: { <Q-id>: [{ name, from, to, basis: 'cliopatria-wikidata' | 'name' }] }, rejected: [...] }.
+     entries: { <Q-id>: [{ name, from, to, basis: 'cliopatria-wikidata' | 'name' }] },
+     rejected: [{ q, name, wikidataLabel, why, wikidataYears?, years?: [[from, to]], kept?: { years, why } }] }: a
+     rejection with `years` holds the rows of those years (and of kept.years) only; one without holds every row.
      A Q-id is drawn only through this crosswalk, never through a row's own `q` (the source's ids are checked first).
    A layer's catalogue entry (4.2), checked by readLayer: { id, module, title, geometry, time: { field, from, to, step,
      precision }, data, measure, status, borderPrecision?, style, legend, source, method, open, pinnable }. */
@@ -261,7 +264,10 @@
   function bundleProps(feature, qids, year) {
     const { q = null, ...rest } = feature?.properties || {};
     const out = { ...rest, cliopatria_q: q ?? null, vm_q: qidFor(qids, rest.n, year) };
-    const no = q ? (qids?.rejected || []).find(r => r.q === q && r.name === rest.n) : null;
+    // A rejection that names years (the rows Wikidata's years do not meet, and those kept rejected by decision) holds
+    // only the rows of those years; one that names none holds every row of that id and name.
+    const holds = r => !r.years || [...r.years, ...(r.kept?.years || [])].some(([a, b]) => a <= rest.t && rest.f <= b);
+    const no = q ? (qids?.rejected || []).find(r => r.q === q && r.name === rest.n && holds(r)) : null;
     if (no) { out.cliopatria_q_rejected = true; out.cliopatria_q_why = no.why || 'rejected by VM\'s crosswalk'; }
     return out;
   }

@@ -52,7 +52,7 @@
    the narrator off. S.ar and S.reader are never both true. */
 import { readHash, writeHash, readMap } from './lib/hash.js';
 import { readRecipe, writeRecipe } from '../../design/vm-recipe.js';
-import { clickDetail, kindOf, readPeriods, resolve } from '../../design/vm-click.js';
+import { clickDetail, kindOf, readPeriods, resolve, yearsText } from '../../design/vm-click.js';
 import { formatSpan } from '../../design/vm-dates.js';
 import { readMode, writeMode } from './lib/mode.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
@@ -741,6 +741,14 @@ function notice(html) {
    resolves the term (t=) in its paragraph (p=). */
 const loadOmniLayers = once(() => getJson(new URL('omni/data/layers.json', SHELL)));
 const loadBattles = once(() => getJson(new URL('omni/data/layers/battles.json', SHELL)).then(d => d.rows || []));
+// The crosswalk's years for each Q-id (omni/data/borders/qids.json, which the map's frame reads too, so the browser
+// holds it once): a click opens on the first year of the entry's own that VM can outline (MP-10).
+const loadOutlined = once(() => getJson(new URL('omni/data/borders/qids.json', SHELL))
+  .then(d => q => (Array.isArray(d?.entries?.[q]) ? d.entries[q].filter(r => Number.isInteger(r.from) && Number.isInteger(r.to)).map(r => [r.from, r.to]) : [])));
+// The years VM holds borders for (omni/data/borders/index.json, a small file): an entry whose own first year is before
+// them opens on their first year, not on a year with no borders.
+const loadHeld = once(() => getJson(new URL('omni/data/borders/index.json', SHELL))
+  .then(d => (Number.isInteger(d?.from) && Number.isInteger(d?.to) ? [d.from, d.to] : null)));
 const periodsOf = new Map();
 // The books with a periods file (periods/index.json): only those are asked for, so a book without one costs no 404.
 const loadPeriodsIndex = once(() => getJson(`${DATA}periods/index.json`).then(d => new Set(Array.isArray(d?.books) ? d.books : [])).catch(() => new Set()));
@@ -760,10 +768,11 @@ async function clickView(qid, pid) {
   const relQs = ['Country', 'Participants', 'Member of'].flatMap(k => (ent.rel?.[k] || []).map(x => x[0]));
   const recs = new Map();
   await Promise.all([...new Set([...passageQs, ...relQs])].map(async q => { recs.set(q, await entity(q)); }));
-  const [periods, battles, layers, wars] = await Promise.all([loadPeriods(S.book.slug), loadBattles().catch(() => []), loadOmniLayers().catch(() => null), loadWars().catch(() => [])]);
+  const [periods, battles, layers, wars, outlined, held] = await Promise.all([loadPeriods(S.book.slug), loadBattles().catch(() => []), loadOmniLayers().catch(() => null), loadWars().catch(() => []),
+    loadOutlined().catch(() => null), loadHeld().catch(() => null)]);
   const ctx = {
     today: new Date().toISOString().slice(0, 10), era: bookEra(S.book, S.row, c)?.years, record: pid ? periods(pid) : null,
-    lookup: q => recs.get(q) || null, passagePlaces: passageQs.filter(q => recs.get(q)?.type === 'place'), battles, wars,
+    lookup: q => recs.get(q) || null, passagePlaces: passageQs.filter(q => recs.get(q)?.type === 'place'), battles, wars, outlined, held,
     layers: { borders: { step: layers?.layers?.find(l => l.id === 'borders')?.time?.step || 'y' } },
   };
   const from = { module: 'neo-classic', at: `bibliotheca/neo/index.html${hashFor(c.n, { p: pid, t: qid })}`, ...(pid ? { passage: { book: S.book.slug, ch: c.n, p: pid } } : {}) };
@@ -809,7 +818,14 @@ function showMapRecipe(recipe) {
   S.map = recipe;
   const r = readRecipe(recipe), win = r?.t ? formatSpan(r.t.from, r.t.to) : '';
   const label = S.mapRes?.entry?.label || S.labels.get(S.term) || S.term || 'The view in this address';
-  setPaneHead('Omni-Map', win ? `${label} · ${win}` : label, placeLink('ds', 'omni-map', `omni/index.html#${recipe}`));
+  // The heading gives the entry's own years as the Master Index records them, never the map's window (its years with a
+  // margin either side), and a start (or an end) alone is said to be one, never a span to this year (MP-10, Jude,
+  // 17 November 2026: "It also notes classical Athens as lasting to 2026"): "Alexander the Great · 356–323 BC",
+  // "Classical Athens · from 508 BC, end not recorded". Where it has none, the window is named as the map's.
+  const ent = S.mapRes?.entry;
+  const own = ent && (!r?.q || r.q === ent.q) ? yearsText(ent, { today: new Date().toISOString().slice(0, 10) }) : null;
+  const sub = own || (win ? `map of ${win}` : '');
+  setPaneHead('Omni-Map', sub ? `${label} · ${sub}` : label, placeLink('ds', 'omni-map', `omni/index.html#${recipe}`));
   $('#map-frame').title = `Omni-Map: ${label}`;
   frames.map.go(omniAt(recipe));
   writeState();

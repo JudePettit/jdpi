@@ -24,6 +24,8 @@
      passagePlaces  the paragraph's tagged places, in order of first appearance (Q-ids or lake records)
      battles        the rows of omni/data/layers/battles.json ({ q, label, date, sortYear, pt, partOf })
      wars           War Focus's wars ({ id, qid, name }); layers { borders: { step } }, the fill's own step
+     outlined(q)    the years VM's crosswalk outlines a Q-id ([[from, to]], omni/data/borders/qids.json)
+     held           [from, to], the years VM holds borders for (omni/data/borders/index.json)
    S1 builds the person, the place and the battle; any other kind gets the generic rules and says so. */
 import { writeRecipe, readRecipe } from './vm-recipe.js';
 import { yearOf, addYears, yearsBetween, precisionOf, formatSpan, formatYear, toAstro, fromAstro } from './vm-dates.js';
@@ -120,24 +122,57 @@ const ceilTo = (y, size) => { if (size <= 1) return y; return fromAstro(Math.cei
 
 function spanOf(entry, kind, today) {
   const f = entry?.facts || {}, fp = entry?.fp || {};
-  const pair = (a, b) => (f[a] || f[b] ? [a, b] : null);
-  const [ka, kb] = pair('born', 'died') || pair('founded', 'dissolved') || pair('start', 'end') || [null, null];
+  // Each end from the first key that records it: a person's birth and death; otherwise founded, else start, and
+  // dissolved, else end. (The Roman Empire's record, Q2277, holds start -0027-01 and dissolved 0395-01-17: taken as one
+  // pair, founded/dissolved, it read as an end alone, "start not recorded", which the record does not say.)
+  const life = f.born || f.died;
+  const ka = life ? 'born' : f.founded ? 'founded' : f.start ? 'start' : null;
+  const kb = life ? 'died' : f.dissolved ? 'dissolved' : f.end ? 'end' : null;
   const y = k => (k && f[k] ? yearOf(f[k]) : null);
   const pr = k => precisionOf(f[k], fp[k]);
-  if (ka) {
+  if (ka || kb) {
     let a = y(ka), b = y(kb);
-    const ps = [ka, kb].filter(k => f[k]).map(pr);
+    const ps = [ka, kb].filter(k => k && f[k]).map(pr);
     const now = yearOf(String(today || '').slice(0, 4));
     if (a != null && b == null) {
-      // No end: a living person, or a place still standing, runs to today; a birth long ago with no death is a lone date.
-      if (now != null && (kind !== 'person' || yearsBetween(a, now) <= LIFESPAN)) return { from: a, to: now, ps, open: true };
-      return { lone: a, ps };
+      // No end recorded (MP-10, Jude, 17 November 2026: Classical Athens, founded 508 BC with no end, was shown as
+      // "801 BC–AD 2026"). Only what the record says still exists runs to today: a person born within a lifetime of
+      // today, and a place that is a member of the United Nations with no end (presentDay). Anything else is its start
+      // alone, a lone date, and its end is said not to be recorded (yearsNote), never taken to be this year.
+      if (now != null && (kind === 'person' ? yearsBetween(a, now) <= LIFESPAN : presentDay(entry))) return { from: a, to: now, ps, open: true };
+      return { lone: a, ps, only: 'start', person: kind === 'person' };
     }
-    if (a == null && b != null) return { lone: b, ps };
+    if (a == null && b != null) return { lone: b, ps, only: 'end', person: kind === 'person' };
     if (a != null && b != null) return a <= b ? { from: a, to: b, ps } : null;
   }
   if (f.date) return { lone: yearOf(f.date), ps: [precisionOf(f.date, fp.date)] };
   return null;
+}
+/** The entry's own years as its record gives them, for a heading: null when both ends are recorded (or none), else
+    'from 508 BC, end not recorded', 'born 1452, death not recorded', 'to 1406, start not recorded'. A record that says
+    the thing still exists (a person born within a lifetime of today, a member of the United Nations) has no note. */
+export function yearsNote(entry, { kind = kindOf(entry), today } = {}) {
+  const s = spanOf(entry, kind, today);
+  if (!s?.only) return null;
+  if (s.only === 'start') return s.person ? `born ${formatYear(s.lone)}, death not recorded` : `from ${formatYear(s.lone)}, end not recorded`;
+  return s.person ? `died ${formatYear(s.lone)}, birth not recorded` : `to ${formatYear(s.lone)}, start not recorded`;
+}
+/** The entry's own dates in words: '509–27 BC', '1495', or yearsNote's words where an end is not recorded; null when
+    the record gives no dates. */
+export function yearsText(entry, { kind = kindOf(entry), today } = {}) {
+  const s = spanOf(entry, kind, today);
+  if (!s) return null;
+  if (s.only) return yearsNote(entry, { kind, today });
+  if (s.lone != null) return formatYear(s.lone);
+  return s.open ? `${formatYear(s.from)} to today` : formatSpan(s.from, s.to);
+}
+/** The entry's own first and last recorded years, { from, to }: from is null where only an end is recorded, to is null
+    where only a start is, or where the thing still exists; null when the record gives no dates. */
+export function ownYears(entry, { kind = kindOf(entry), today } = {}) {
+  const s = spanOf(entry, kind, today);
+  if (!s) return null;
+  if (s.lone != null) return { from: s.only === 'end' ? null : s.lone, to: s.only === 'start' ? null : s.lone };
+  return { from: s.from, to: s.open ? null : s.to };
 }
 /** The window of 2.1 rule 1 from the entry's own dates: { from, to, step, p } (step the window length's own, p the
     coarsest end precision), or null when the entry has no dates. Each end is widened by 10% of the span (at least one
@@ -160,12 +195,26 @@ export function windowFor(entry, { kind = kindOf(entry), today } = {}) {
   if (s.open && now != null && to > now) to = now;
   return { from, to, step: lenStep(yearsBetween(from, to)), p };
 }
-/** 2.1 rule 2: the passage's year; else the era's start if it falls in the window; else the window's start. */
-export function frameFor(win, { passageYear, era } = {}) {
+/** 2.1 rule 2: the passage's year; else the era's start if it falls in the window; else the entry's own years
+    (MP-10): the first year of its own (own..ownTo, clipped to the window) that VM can outline, from the crosswalk's
+    years `outlined` ([[from, to]]); else its own first year; else the window's start. */
+export function frameFor(win, { passageYear, era, own, ownTo, outlined } = {}) {
   if (!win) return null;
   if (passageYear != null) return passageYear;
   const e = Array.isArray(era) ? yearOf(era[0]) : null;
-  return e != null && win.from <= e && e <= win.to ? e : win.from;
+  if (e != null && win.from <= e && e <= win.to) return e;
+  const inWin = y => y != null && win.from <= y && y <= win.to;
+  const lo = inWin(own) ? own : win.from, hi = ownTo != null && inWin(ownTo) ? ownTo : win.to;
+  const first = outlinedFrom(outlined, lo, hi);
+  if (first != null) return first;
+  return inWin(own) ? own : win.from;
+}
+// The first year from lo to hi that one of the crosswalk's spans holds, or null.
+function outlinedFrom(spans, lo, hi) {
+  if (!Array.isArray(spans)) return null;
+  const ys = spans.filter(s => Array.isArray(s) && Number.isInteger(s[0]) && Number.isInteger(s[1]))
+    .map(([a, b]) => ({ y: Math.max(a, lo), b })).filter(({ y, b }) => y <= Math.min(b, hi)).map(({ y }) => y);
+  return ys.length ? Math.min(...ys) : null;
 }
 /** 2.1 rule 3: the coarsest of the ends' precision (Wikidata's code), the fill's own step and the window length's
     step (day under a year, month under 5 years, year under 300, decade under 1,500, century beyond). */
@@ -213,8 +262,21 @@ export function resolve(entry, from = {}, ctx = {}) {
   const era = Array.isArray(ctx.era) && yearOf(ctx.era[0]) != null && yearOf(ctx.era[1]) != null ? { from: yearOf(ctx.era[0]), to: yearOf(ctx.era[1]) } : null;
   const lifeWin = own || (era ? { from: era.from, to: era.to, p: 9 } : null);
 
-  const build = (win, passageYear, places) => {
-    const at = frameFor(win, { passageYear, era: ctx.era });
+  // The entry's own first and last years, and the years VM's crosswalk can outline it (ctx.outlined, from
+  // omni/data/borders/qids.json), so a click opens on its own years and place, not on the book's frame (MP-10).
+  const ownSpan = spanOf(entry, kind, ctx.today);
+  const { from: ownFrom = null, to: ownTo = null } = ownYears(entry, { kind, today: ctx.today }) || {};
+  const outlined = QID.test(entry.q || '') && typeof ctx.outlined === 'function' ? ctx.outlined(entry.q) : null;
+  // The years VM holds borders for (ctx.held, omni/data/borders/index.json's from and to): an entry whose own first year
+  // is before them opens on their first year where its own years reach it (Ancient Egypt, 4000–30 BC, on 3400 BC), so
+  // the map opens on borders, never on an empty year.
+  const held = Array.isArray(ctx.held) ? ctx.held : ctx.held ? [ctx.held.from, ctx.held.to] : null;
+  const heldFrom = held && Number.isInteger(held[0]) ? held[0] : null;
+  const ownLast = ownTo ?? (ownSpan?.open ? ownSpan.to : ownFrom);
+  const ownStart = ownFrom != null && heldFrom != null && ownFrom < heldFrom && ownLast >= heldFrom ? heldFrom : ownFrom;
+  const ownOpts = own => (own ? { own: ownStart, ownTo, outlined } : {});
+  const build = (win, passageYear, places, own = false) => {
+    const at = frameFor(win, { passageYear, era: ctx.era, ...ownOpts(own) });
     const step = win ? stepFor({ ends: win.p, fill: fillStep, from: win.from, to: win.to }) : fillStep;
     const focus = win ? focusFor(entry, at, places, pt, ctx) : focusFor(entry, null, places, pt, ctx);
     return writeRecipe({ vr: 1, t: win ? { from: win.from, to: win.to } : undefined, at: at ?? undefined, show: 'frame', step, base: 'plain',
@@ -224,7 +286,7 @@ export function resolve(entry, from = {}, ctx = {}) {
   // A battle's own view opens on the year it was fought (decision D4 of 17 November 2026), so it is drawn when the map
   // opens: Fornovo on 1495, not the start of the book's era, 1494. A checked periods record still sets the passage's view.
   const foughtIn = own && kind === 'battle' ? yearOf(entry.facts?.date) : null;
-  const lifeRecipe = build(lifeWin, foughtIn, ctx.passagePlaces || []);
+  const lifeRecipe = build(lifeWin, foughtIn, ctx.passagePlaces || [], !!own);
   const passageRecipe = pspan ? build({ from: pspan.from, to: pspan.to, p: pspan.p }, pspan.year, rec.places?.length ? rec.places : ctx.passagePlaces || []) : null;
   const recipe = checked ? passageRecipe : lifeRecipe;
   const win = checked ? pspan : lifeWin;
@@ -234,21 +296,30 @@ export function resolve(entry, from = {}, ctx = {}) {
   const lifeName = kind === 'person' ? 'Its whole life' : 'Its years';
   // Why each view opens on its frame (2.1 rule 2), said beside it, so a reader never takes the frame for the passage's
   // year when VM has not dated the passage.
-  const frameWhy = (r, passageYear, fought = null) => {
+  const frameWhy = (r, passageYear, fought = null, mine = false) => {
     const at = readRecipe(r)?.at;
     if (at == null) return '';
+    const y = yearOf(at);
     const e = Array.isArray(ctx.era) ? [yearOf(ctx.era[0]), yearOf(ctx.era[1])] : null;
-    const why = fought != null && yearOf(at) === fought ? 'the year it was fought' : passageYear != null ? 'the paragraph\'s first year' : e && e[0] === yearOf(at) ? `the start of the book's era (${formatSpan(e[0], e[1])})` : 'the first of these years';
-    return `the map opens on ${formatYear(yearOf(at))}, ${why}`;
+    const firstOutlined = mine ? outlinedFrom(outlined, ownStart ?? -Infinity, ownTo ?? Infinity) : null;
+    const why = fought != null && y === fought ? 'the year it was fought' : passageYear != null ? 'the paragraph\'s first year'
+      : e && e[0] === y ? `the start of the book's era (${formatSpan(e[0], e[1])})`
+      : mine && firstOutlined === y ? 'the first year of its own that VM can outline'
+      : mine && ownStart !== ownFrom && ownStart === y ? `the first of its own years that VM holds borders for (its first recorded year, ${formatYear(ownFrom)}, is before them)`
+      : mine && ownFrom === y ? 'its own first recorded year' : 'the first of these years';
+    return `the map opens on ${formatYear(y)}, ${why}`;
   };
   const undated = !from.passage ? '' : !pspan ? ': this paragraph has no periods record yet, so VM has not dated it' : !checked ? ': this paragraph\'s periods record is not yet checked by a second reader' : '';
   const passageOffer = from.passage ? (pspan
     ? { id: 'passage', name: 'This passage', at: omniAt(passageRecipe), recipe: passageRecipe, available: true,
         why: checked ? `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}; ${frameWhy(passageRecipe, pspan.year)}` : `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}, as its periods record gives them; not yet checked by a second reader; ${frameWhy(passageRecipe, pspan.year)}` }
     : { id: 'passage', name: 'This passage', at: '', available: false, why: 'The years this paragraph concerns', reason: 'This paragraph has no periods record yet' }) : null;
-  const lifeWhy = frameWhy(lifeRecipe, null, foughtIn);
+  const lifeWhy = frameWhy(lifeRecipe, null, foughtIn, !!own);
+  // A start or an end alone is said to be one (MP-10): never written as a life that runs to this year.
+  const loneWords = ownSpan?.only === 'start' ? `${label}'s first recorded year, ${formatYear(ownSpan.lone)}, five years either side (its ${ownSpan.person ? 'death' : 'end'} is not recorded)`
+    : ownSpan?.only === 'end' ? `${label}'s last recorded year, ${formatYear(ownSpan.lone)}, five years either side (its ${ownSpan.person ? 'birth' : 'start'} is not recorded)` : null;
   const lifeOffer = lifeWin ? { id: 'life', name: lifeName, at: omniAt(lifeRecipe), recipe: lifeRecipe, available: true,
-    why: (own ? `${label}'s own dates with a margin either side, ${formatSpan(own.from, own.to)}` : `${label} has no dates of its own in VM; the period of the book`)
+    why: (own ? loneWords || `${label}'s own dates with a margin either side, ${formatSpan(own.from, own.to)}` : `${label} has no dates of its own in VM; the period of the book`)
       + (lifeWhy ? `; ${lifeWhy}${foughtIn != null ? '' : undated}` : '') }
     : { id: 'life', name: lifeName, at: '', available: false, why: `${label}'s own dates`, reason: `VM holds no dates for ${label}` };
   if (checked) offers.push(passageOffer, lifeOffer);

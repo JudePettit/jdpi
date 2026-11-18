@@ -33,7 +33,7 @@ export function llmsTxt(catalogue, { site = 'https://jdpi.pages.dev/' } = {}) {
   L.push(`- [Briefing feeds](${site}api/v1/briefings): RSS and JSON Feed for the intelligence, scientific, economics and digital briefings`);
   L.push(`- [Realtime Calendar as iCalendar](${site}integration/feeds/realtime-calendar.ics); filtered calendars at ${site}api/v1/calendar.ics?country=…&type=…`);
   L.push(`- [Bibliotheca · Neo Book](${site}bibliotheca/neo/index.html): a reading room of public-domain books with the Master Index's terms marked through the text. It has no dataset of its own; in encyclopaedia-entities its submodule id in appears_in is neo-classic`);
-  L.push(`- [Digital Science · Omni-Map](${site}omni/index.html): dated borders (Cliopatria v0.2.1, 1400–1600 in this first version) and the battles VM holds on one map, opened from a tagged name in Neo Book; a view is a recipe in its address (VR/1) and saves as a citable bundle. It has no dataset of its own yet`);
+  L.push(`- [Digital Science · Omni-Map](${site}omni/index.html): dated borders (Cliopatria v0.2.1, every year it covers, 3400 BC to AD 2024) and the battles VM holds on one map, opened from a tagged name in Neo Book; a view is a recipe in its address (VR/1) and saves as a citable bundle. It has no dataset of its own yet`);
   L.push(`- [Vitruvian Manager submodules](${site}registry.json): every page of Vitruvian Manager with what it does`);
   return L.join('\n') + '\n';
 }

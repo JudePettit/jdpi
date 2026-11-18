@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-18T03:47:08.997Z",
+  "generated": "2026-11-18T04:16:50.565Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -3482,7 +3482,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 22044
+      "bytes": 22046
     },
     {
       "id": "kino-documentaries",

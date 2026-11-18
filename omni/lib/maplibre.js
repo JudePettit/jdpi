@@ -24,12 +24,19 @@
    map.labels([{ id, text, at: [lon, lat] }])   map.zoomBy(±1)   map.setColors(colors)   map.bounds() → [w, s, e, n]
    webglOk() → whether this browser gives a canvas WebGL at all (checked before the library is asked). */
 
-/** True when this browser gives a canvas a WebGL context (WebGL 2, else 1). */
+/** True when this browser gives a canvas a WebGL context (WebGL 2, else 1). Asked once a page and the probe's context
+    let go: a browser holds only so many contexts, and the oldest, the map's own, is the one it would take back (Play
+    publishes the page's state many times a minute). */
+let webgl = null;
 export function webglOk() {
+  if (webgl != null) return webgl;
   try {
     const c = document.createElement('canvas');
-    return !!(c.getContext('webgl2') || c.getContext('webgl'));
-  } catch { return false; }
+    const gl = c.getContext('webgl2') || c.getContext('webgl');
+    webgl = !!gl;
+    gl?.getExtension?.('WEBGL_lose_context')?.loseContext();
+  } catch { webgl = false; }
+  return webgl;
 }
 
 const EMPTY = { type: 'FeatureCollection', features: [] };

@@ -15,7 +15,7 @@
 // PRP_PAGES=0 (npm run test:unit) leaves the browser tests out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -24,6 +24,9 @@ import { readHash, writeHash, readMap, PANES } from '../bibliotheca/neo/lib/hash
 import { readRecipe, writeRecipe } from '../design/vm-recipe.js';
 import { readZip, zipStored, COLUMNS } from '../design/vm-bundle.js';
 import { freshnessLine } from '../design/prp-freshness.js';
+import { resolve, windowFor, frameFor, yearsNote, yearsText, ownYears } from '../design/vm-click.js';
+import { formatSpan } from '../design/vm-dates.js';
+import { yearText, readYear, ticksFor, playSteps, playStep, nextStop, keepFiles } from '../omni/lib/time.js';
 import { pageTest, launch, launchOptions } from './tools/pages.mjs';
 import '../design/prp-focus.js';
 import '../design/prp-map.js';
@@ -59,6 +62,110 @@ function milanBox() {
     for (const [x, y] of poly[0]) { w = Math.min(w, x); e = Math.max(e, x); s = Math.min(s, y); n = Math.max(n, y); }
   return [w, s, e, n];
 }
+
+/* ================================================================ the whole span of borders (18 November 2026) */
+// Jude, 17 November 2026: "I can only see 1400 to 1600 on the Omni Map on my browser, is the rest being built?" The
+// borders now cover every year Cliopatria v0.2.1 holds. Its first and last years, as its archive's rows give them
+// (read from cliopatria_polities_only_v021.geojson on 18 November 2026; build-borders.mjs reads them again on every
+// run and stops if its files do not cover them exactly).
+const CLIO_FIRST = -3400, CLIO_LAST = 2024;
+const LIMIT_GZ = 1.5 * 1024 * 1024; // the design's limit per borders file (7.3), gzipped
+const bordersIndex = () => read('omni/data/borders/index.json');
+const decoded = new Map();
+const fcOf = f => { if (!decoded.has(f.file)) decoded.set(f.file, M.decode(read(`omni/data/borders/${f.file}`))); return decoded.get(f.file); };
+
+test('whole span: the index covers every year from Cliopatria\'s first to its last, with no gap and no year in no file', () => {
+  const index = bordersIndex(), files = [...index.files].sort((a, b) => a.from - b.from);
+  assert.deepEqual([index.from, index.to], [CLIO_FIRST, CLIO_LAST]);
+  assert.deepEqual(M.held(index), { from: CLIO_FIRST, to: CLIO_LAST });
+  assert.equal(files[0].from, CLIO_FIRST); assert.equal(files.at(-1).to, CLIO_LAST);
+  for (let i = 1; i < files.length; i++) assert.equal(files[i].from, files[i - 1].to + 1, `no gap or overlap before ${files[i].file}`);
+  // Every year a reader can ask for is in exactly one file (VM's years have no year 0: PRPMap reads 0 as no year).
+  for (let y = CLIO_FIRST; y <= CLIO_LAST; y++) {
+    if (y === 0) { assert.equal(M.fileFor(index, y), null); continue; }
+    const holding = index.files.filter(f => f.from <= y && y <= f.to);
+    assert.equal(holding.length, 1, `${y} is in one file`);
+    assert.equal(M.fileFor(index, y), holding[0]);
+  }
+  assert.equal(M.fileFor(index, CLIO_FIRST - 1), null); assert.equal(M.fileFor(index, CLIO_LAST + 1), null);
+  // The span is the rows' own: the first file holds a row from the first year, the last a row to the last.
+  assert.ok(fcOf(files[0]).features.some(x => x.properties.f === CLIO_FIRST), 'a row starts in the first year');
+  assert.ok(fcOf(files.at(-1)).features.some(x => x.properties.t === CLIO_LAST), 'a row ends in the last year');
+  // The flagship's file is the one it has opened since 17 November 2026.
+  assert.equal(M.fileFor(index, 1494).file, '1400-1499.topo.json');
+  // The borders layer says the same years.
+  const layer = read('omni/data/layers.json').layers.find(l => l.id === 'borders');
+  assert.deepEqual([layer.time.from, layer.time.to], [CLIO_FIRST, CLIO_LAST]);
+});
+
+test('whole span: every file is within 1.5 MB gzipped, matches its index entry, and every row has its id, years and area', () => {
+  const index = bordersIndex();
+  let bytes = 0, gzip = 0;
+  for (const f of index.files) {
+    const p = `omni/data/borders/${f.file}`, buf = readFileSync(join(ROOT, p));
+    const name = n => (n < 0 ? `m${-n}` : String(n));
+    assert.equal(f.file, `${name(f.from)}-${name(f.to)}.topo.json`, 'the file is named by its years');
+    assert.equal(createHash('sha256').update(buf).digest('hex'), f.sha256, `${f.file}: sha256`);
+    const gz = gzipSync(buf, { level: 9 }).length;
+    assert.ok(gz <= LIMIT_GZ, `${f.file}: ${gz} bytes gzipped (limit ${LIMIT_GZ})`);
+    bytes += buf.length; gzip += gz;
+    const fc = fcOf(f);
+    assert.deepEqual(fc.vm, { format: 'vm-borders/1', source: 'cliopatria', version: 'v0.2.1', from: f.from, to: f.to });
+    assert.equal(fc.features.length, f.rows, `${f.file}: rows`);
+    const ids = new Set();
+    for (const x of fc.features) {
+      const r = x.properties;
+      assert.ok(M.validId(r.id) && !ids.has(r.id), `${f.file}: ${r.id} an id, once`); ids.add(r.id);
+      assert.ok(Number.isInteger(r.f) && Number.isInteger(r.t) && r.f <= r.t && r.f <= f.to && r.t >= f.from, `${r.n}: years ${r.f}..${r.t} in ${f.file}`);
+      assert.ok(Number.isInteger(r.a) && r.a >= 0, `${r.n}: an area`);
+      assert.ok(x.geometry && /Polygon$/.test(x.geometry.type), `${r.n}: a shape`);
+    }
+  }
+  assert.ok(index.files.length >= 10, `${index.files.length} files`);
+  assert.ok(bytes > 0 && gzip > 0);
+});
+
+test('whole span: no file names CShapes (its licence bars commercial use; VM\'s borders are Cliopatria\'s alone)', () => {
+  const dir = join(ROOT, 'omni/data');
+  const files = [];
+  const walk = d => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (e.isDirectory()) walk(p); else files.push(p); } };
+  walk(dir);
+  for (const p of files) assert.doesNotMatch(readFileSync(p, 'utf8'), /cshapes/i, p);
+  assert.doesNotMatch(file('omni/index.html') + file('omni/app.js') + file('omni/scripts/build-borders.mjs').replace(/^\/\/.*$/gm, ''), /cshapes/i);
+});
+
+test('whole span: the crosswalk uses no rejected id, and the 24 pairs rejected on 17 November 2026 stay rejected', () => {
+  const qids = read('omni/data/borders/qids.json');
+  const overlaps = (r, a, b) => r.from <= b && a <= r.to;
+  for (const no of qids.rejected) {
+    const years = no.years ? [...no.years, ...(no.kept?.years || [])] : null;
+    for (const r of qids.entries[no.q] || []) {
+      if (r.name !== no.name) continue;
+      assert.ok(years && !years.some(([a, b]) => overlaps(r, a, b)), `${no.q} "${no.name}" is rejected${years ? ` for ${JSON.stringify(years)}` : ''}, and never used (${r.from}..${r.to})`);
+    }
+  }
+  const B = { stay: ['Q1074947|Kingdom of Pajana', 'Q10921634|Khoshut Khanate', 'Q112039853|Byzantine Empire', 'Q1406298|Serbian Empire',
+    'Q202266|Old Kingdom of Norway', 'Q205662|Tokugawa Shogunate', 'Q207162|(Kingdom of France)', 'Q207162|Kingdom of France', 'Q213763|County of Béarn',
+    'Q269109|Ryazan', 'Q28405|Joseon', 'Q29|Kingdom of Spain', 'Q373981|Tahirid Sultanate', 'Q39|Swiss Confederation', 'Q5582862|Cuzco',
+    'Q577867|(Kingdom of Poland)', 'Q577867|Kingdom of Poland', 'Q605051|County of Touraine', 'Q703919|Ngô Dynasty', 'Q751868|County of Brabant',
+    'Q79861|Michoacán', 'Q83546|Principality of Vladimir-Suzdal', 'Q918153|Ceylon', 'Q9676|Isle of Man'] };
+  assert.equal(B.stay.length, 24);
+  for (const pair of B.stay) {
+    const [q, name] = pair.split('|');
+    assert.ok(qids.rejected.some(r => r.q === q && r.name === name), `${pair} is listed as rejected`);
+    assert.ok(!(qids.entries[q] || []).some(r => r.name === name), `${pair} is never used, in any year`);
+  }
+  // Every name the crosswalk gives is a row's name in the files of its years.
+  const index = bordersIndex();
+  for (const [q, rows] of Object.entries(qids.entries)) for (const r of rows) {
+    const f = M.fileFor(index, r.from === 0 ? 1 : r.from);
+    assert.ok(f && fcOf(f).features.some(x => x.properties.n === r.name), `${q}: "${r.name}" is in ${f?.file}`);
+  }
+  // What the crosswalk rests on: when Wikidata was read, and the Master Index's build it took its names from.
+  assert.match(qids.wikidata.read, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
+  assert.equal(qids.wikidata.readings.reduce((a, r) => a + r.ids, 0), qids.wikidata.ids, 'each id under the reading that gave it');
+  assert.match(qids.lake.generated, /^\d{4}-\d\d-\d\dT/);
+});
 
 /* ================================================================ the files */
 test('the reader\'s address: pane=map, &map=<recipe> and &sel=<pid>:<s>-<e> round-trip; readHash keeps its seven keys', () => {
@@ -180,6 +287,139 @@ test('Neo Book: a Map tab and its frame (contract 4); the click dispatches vm:cl
   assert.match(app, /new CustomEvent\('vm:click', \{ detail \}\)/);
   assert.match(app, /e\.origin === location\.origin/, 'frame messages are checked against the origin');
   assert.match(app, /omni\/index\.html#\$\{recipe\}&host=neo/);
+});
+
+/* ================================================================ the slider, Play and the click's own years (18 November 2026) */
+// Jude, 15 November 2026: a slider back at least to cuneiform, with a Play button; 17 November (MP-08, MP-11): "I can
+// only see 1400 to 1600 on the Omni Map"; and MP-10: "when I clicked Classical Athens in The Prince on Bibliotheca it
+// hovered over Italy. It also notes classical Athens as lasting to 2026."
+const heldNow = () => M.held(read('omni/data/borders/index.json'));
+
+test('time: years before AD 1 are BC, and AD is written where a track holds both; a typed year is read, never year 0', () => {
+  assert.equal(yearText(-508), '508 BC'); assert.equal(yearText(-1), '1 BC');
+  assert.equal(yearText(1, { bc: true }), 'AD 1'); assert.equal(yearText(1494), '1494'); assert.equal(yearText(0), '');
+  for (const [t, y] of [['500 BC', -500], ['500 bce', -500], ['AD 33', 33], ['33 AD', 33], ['33 CE', 33], ['-500', -500], ['−500', -500], ['1494', 1494], [' 1,494 ', 1494], ['3400 B.C.', -3400]]) assert.deepEqual(readYear(t), { year: y }, t);
+  assert.deepEqual(readYear('0'), { error: 'zero' }); assert.deepEqual(readYear('0 BC'), { error: 'zero' });
+  for (const t of ['', 'year', '15th century', '12-34']) assert.deepEqual(readYear(t), { error: 'unreadable' }, t);
+});
+
+test('time: the track\'s labels are its two ends and round years, few enough to read, never a year 0', () => {
+  const held = heldNow();
+  const all = ticksFor(-3400, 2024, { maxLabels: 8 });
+  const keys = all.filter(t => t.text);
+  assert.equal(keys[0].text, '3400 BC'); assert.equal(keys.at(-1).text, 'AD 2024');
+  assert.ok(keys.length <= 9, `${keys.length} labels`);
+  assert.ok(all.every(t => t.at !== 0), 'no tick on a year 0');
+  assert.ok(keys.some(t => t.text === 'AD 1000') && keys.some(t => t.text === '1000 BC'), keys.map(t => t.text).join(', '));
+  // A short window keeps plain years, as the flagship's slider always has.
+  const f = ticksFor(1446, 1514, { maxLabels: 8 }).filter(t => t.text).map(t => t.text);
+  assert.deepEqual([f[0], f.at(-1)], ['1446', '1514']); assert.ok(f.includes('1480'), f.join(', '));
+  assert.ok(ticksFor(held.from, held.to).length > 2, 'the held span has labels between its ends');
+  // Over 1 BC to AD 1 the years run on with no year 0.
+  assert.deepEqual(ticksFor(-3, 3, { maxLabels: 10 }).filter(t => t.text).map(t => t.text), ['3 BC', '2 BC', '1 BC', 'AD 1', 'AD 2', 'AD 3']);
+});
+
+test('time: Play\'s steps, its next year (no year 0, the last stop, then stop) and the files it lets go of', () => {
+  assert.deepEqual(playSteps(68, 1), [1, 5, 10, 25, 50]);
+  assert.equal(playStep(68, 1), 1, 'the flagship plays year by year');
+  assert.equal(playStep(5424, 1), 50, 'every year VM holds: in about 110 steps');
+  assert.equal(playStep(1000, 1), 10);
+  assert.deepEqual(playSteps(1300, 10), [10, 50, 100, 250, 500, 1000], 'a decade slider plays in decades or more');
+  const stops = []; for (let y = -500; y <= 500; y++) if (y) stops.push(y);
+  assert.equal(nextStop(stops, -1, 1), 1, '1 BC is followed by AD 1');
+  assert.equal(nextStop(stops, -100, 100), 1, 'a hundred years after 100 BC is AD 1');
+  assert.equal(nextStop(stops, 450, 100), 500, 'the last stop, when a step passes it');
+  assert.equal(nextStop(stops, 500, 100), null, 'at the last stop Play stops');
+  assert.deepEqual(keepFiles(['a', 'b', 'c', 'd', 'e', 'f'], ['a'], 4), ['b', 'c'], 'the oldest go, never one kept');
+  assert.deepEqual(keepFiles(['a', 'b'], [], 4), []);
+});
+
+// Classical Athens as the Master Index holds it (lake/data/e/130.json, read 18 November 2026): founded -0508, no end.
+const ATHENS = { q: 'Q844930', label: 'Classical Athens', type: 'place', facts: { founded: '-0508' },
+  rel: { Country: [['Q844930', 'Classical Athens'], ['Q41', 'Greece']], 'Member of': [['Q193235', 'Delian League'], ['Q332337', 'League of Corinth']] } };
+const GREECE = { q: 'Q41', label: 'Greece', type: 'place', facts: { founded: '1821-03-25' }, rel: { 'Member of': [['Q1065', 'United Nations']] } };
+const ROME = { q: 'Q1747689', label: 'Ancient Rome', type: 'place', facts: { founded: '-0753', dissolved: '0476' } };
+const ATHENS_FROM = { module: 'neo-classic', at: 'bibliotheca/neo/index.html#book=the-prince&ch=5&p=c05-p02&t=Q844930', passage: { book: 'the-prince', ch: 5, p: 'c05-p02' } };
+const princeCtx = extra => ({ today: '2026-11-18', era: [1494, 1527], lookup: q => ({ Q41: GREECE, Q1747689: ROME })[q] || null, passagePlaces: ['Q1747689', 'Q844930'], ...extra });
+
+test('MP-10: an entry with a start and no end is never shown as lasting to this year; the heading says the end is not recorded', () => {
+  const w = windowFor(ATHENS, { kind: 'place', today: '2026-11-18' });
+  assert.deepEqual([w.from, w.to], [-513, -503], 'its first recorded year, five years either side (a lone date\'s rule), never AD 2026');
+  assert.equal(yearsNote(ATHENS, { today: '2026-11-18' }), 'from 508 BC, end not recorded');
+  assert.equal(yearsNote(ROME, { today: '2026-11-18' }), null, 'both ends recorded: the window says it');
+  // What the data says still exists runs to today: a member of the United Nations with no end, and a person born within
+  // a lifetime of today (vm-core's rule, unchanged).
+  const g = windowFor(GREECE, { kind: 'place', today: '2026-11-18' });
+  assert.equal(g.to, 2026, 'Greece, a member of the United Nations with no end, still stands');
+  assert.equal(windowFor({ facts: { born: '1950-01-01' } }, { kind: 'person', today: '2026-11-18' }).to, 2026);
+  // A war with a start and no end, and a place with no end, are their start alone.
+  assert.notEqual(windowFor({ type: 'conflict', facts: { start: '1618' } }, { kind: 'war', today: '2026-11-18' }).to, 2026);
+  assert.equal(yearsNote({ type: 'person', facts: { born: '1452' } }, { today: '2026-11-18' }), 'born 1452, death not recorded');
+  assert.equal(yearsNote({ type: 'place', facts: { dissolved: '1406' } }, {}), 'to 1406, start not recorded');
+});
+
+test('MP-10: a click opens on the entry\'s own years: its first year VM can outline, else its own first year; the book\'s era only inside them', () => {
+  // Classical Athens from The Prince V: the book's era (1494–1527) is not in its years, so the map opens on 508 BC.
+  const r = resolve(ATHENS, ATHENS_FROM, princeCtx());
+  const v = readRecipe(r.recipe);
+  assert.deepEqual([v.t, v.at], [{ from: -513, to: -503 }, -508], r.recipe);
+  assert.doesNotMatch(r.recipe, /2026/);
+  assert.ok(v.focus.includes('Q844930'), 'itself in focus');
+  assert.ok(!v.focus.includes('Q41'), 'never today\'s Greece');
+  const life = r.offers.find(o => o.id === 'life');
+  assert.match(life.why, /^Classical Athens's first recorded year, 508 BC, five years either side \(its end is not recorded\); the map opens on 508 BC, its own first recorded year/);
+  assert.doesNotMatch(life.why, /2026|book's era/);
+  // A place whose rows begin after its own first year opens on the first year VM can outline it.
+  const republic = { q: 'Q17167', label: 'Roman Republic', type: 'place', facts: { founded: '-0509', dissolved: '-0027-01-16' } };
+  const rr = readRecipe(resolve(republic, ATHENS_FROM, princeCtx({ outlined: q => (q === 'Q17167' ? [[-500, -32]] : null) })).recipe);
+  assert.equal(rr.at, -500, 'Cliopatria outlines the Roman Republic from 500 BC');
+  assert.equal(readRecipe(resolve(republic, ATHENS_FROM, princeCtx()).recipe).at, -509, 'without the crosswalk: its own first year');
+  assert.match(resolve(republic, ATHENS_FROM, princeCtx({ outlined: () => [[-500, -32]] })).offers.find(o => o.id === 'life').why, /the map opens on 500 BC, the first year of its own that VM can outline/);
+  // The rule on its own: the era's start where it falls in the window, as before (Ludovico Sforza's 1494).
+  assert.equal(frameFor({ from: 1446, to: 1514 }, { era: [1494, 1527], own: 1452, outlined: [[1300, 1600]] }), 1494);
+  assert.equal(frameFor({ from: -513, to: -503 }, { era: [1494, 1527], own: -508 }), -508);
+  assert.equal(frameFor({ from: -561, to: 30 }, { era: [1494, 1527], own: -509, ownTo: -27, outlined: [[-750, -501], [-500, -32]] }), -509, 'the first outlined year inside its own');
+  assert.equal(frameFor({ from: 1060, to: 1620 }, { own: 1115, ownTo: 1569, outlined: [[1260, 1571]] }), 1260);
+  assert.equal(frameFor({ from: 1060, to: 1620 }, { own: 1115, ownTo: 1569, outlined: [[1600, 1700]] }), 1115, 'outlined only after its own end: its own first year');
+});
+
+// Review R2 (18 November 2026): the Roman Empire's record (lake/data/e/229.json, read 18 November 2026) holds its start
+// under `start` and its end under both `dissolved` and `end`; it was read as an end alone, "start not recorded".
+test('R2: each end is taken from the first key that records it, so the Roman Empire runs 27 BC to AD 395', () => {
+  const EMPIRE = { q: 'Q2277', label: 'Roman Empire', type: 'place', facts: { dissolved: '0395-01-17', start: '-0027-01', end: '0395' } };
+  assert.equal(yearsText(EMPIRE, { today: '2026-11-18' }), '27 BC–AD 395');
+  assert.equal(yearsNote(EMPIRE, { today: '2026-11-18' }), null, 'both ends recorded: nothing is said to be missing');
+  assert.deepEqual(ownYears(EMPIRE, { today: '2026-11-18' }), { from: -27, to: 395 });
+  const w = windowFor(EMPIRE, { kind: 'place', today: '2026-11-18' });
+  assert.ok(w.from < -27 && w.to > 395, `its whole span, with a margin (${w.from}..${w.to})`);
+  const life = resolve(EMPIRE, ATHENS_FROM, princeCtx()).offers.find(o => o.id === 'life');
+  assert.doesNotMatch(life.why, /not recorded/);
+  // Founded beats start, dissolved beats end, as before; a person's birth and death are never mixed with them.
+  assert.deepEqual(ownYears({ type: 'place', facts: { founded: '1100', start: '1200', end: '1300' } }), { from: 1100, to: 1300 });
+  assert.deepEqual(ownYears({ type: 'person', facts: { born: '1452', end: '1500' } }, { today: '2026-11-18' }), { from: 1452, to: null });
+  assert.equal(ownYears({ type: 'place', facts: {} }), null);
+});
+
+// Review R5: Ancient Egypt (founded -4000, dissolved -0030 in the Master Index) began before the borders VM holds.
+test('R5: an entry whose own first year is before the borders VM holds opens on their first year, and says why', () => {
+  const EGYPT = { q: 'Q11768', label: 'Ancient Egypt', type: 'place', facts: { founded: '-4000', dissolved: '-0030' } };
+  const r = resolve(EGYPT, ATHENS_FROM, princeCtx({ held: [-3400, 2024] }));
+  assert.equal(readRecipe(r.recipe).at, -3400);
+  assert.match(r.offers.find(o => o.id === 'life').why, /the map opens on 3400 BC, the first of its own years that VM holds borders for \(its first recorded year, 4000 BC, is before them\)/);
+  assert.equal(readRecipe(resolve(EGYPT, ATHENS_FROM, princeCtx()).recipe).at, -4000, 'without the years VM holds: its own first year, as before');
+  // A lone start before them is not moved to a year it never reached (Classical Athens, with only 1400–1600 held).
+  assert.equal(readRecipe(resolve(ATHENS, ATHENS_FROM, princeCtx({ held: [1400, 1600] })).recipe).at, -508);
+});
+
+test('the page: Play, its step and pace, "Go to year" and every year VM holds are the page\'s own; design/prp-period.js draws the track', () => {
+  const html = file('omni/index.html'), app = file('omni/app.js');
+  for (const id of ['play', 'play-step', 'play-pace', 'goto', 'goto-year', 'whole-span', 'play-note']) assert.match(html, new RegExp(`id="${id}"`), id);
+  assert.match(html, /<label for="goto-year">Go to year<\/label>/);
+  assert.match(app, /from '\.\/lib\/time\.js'/);
+  assert.match(app, /play: false, steps: true/, 'the period control draws ‹ ›; Play is the page\'s, so it can wait for a file');
+  assert.doesNotMatch(html.match(/<button[^>]*id="play"[^>]*>/)[0], /aria-pressed/, 'R9: its label says what a press does; it is not also a pressed toggle');
+  assert.match(app, /'omni\/lib\/time\.js'/, 'a bundle records the sha256 of the time script too');
+  assert.doesNotMatch(app, /out\.length < 5000/, 'the stops are not cut short of every year VM holds');
 });
 
 /* ================================================================ the pages, in a browser */
@@ -326,7 +566,7 @@ test('page: the default view weighs under 1.5 MB compressed, MapLibre included (
     const total = got.reduce((a, x) => a + x.gz, 0);
     assert.ok(got.some(x => x.url === ML.js), 'MapLibre is counted');
     assert.ok(got.some(x => /\/omni\/data\/borders\/1400-1499\.topo\.json$/.test(x.url)), 'the frame\'s borders file');
-    assert.ok(!got.some(x => /1500-1600\.topo\.json$/.test(x.url)), 'and only that one');
+    assert.equal(got.filter(x => /\/omni\/data\/borders\/[^/]+\.topo\.json$/.test(x.url)).length, 1, 'and only that one');
     assert.ok(total < 1.5e6, `${(total / 1e6).toFixed(2)} MB`);
   } finally { await browser.close(); }
 });
@@ -414,13 +654,20 @@ test('page: the shell\'s route; keyboard, live region, light and dark, 1440×900
     assert.ok((await p.$$eval('#shows-list bdi', b => b.map(x => x.textContent))).includes('Đại Việt'));
     assert.match(await p.textContent('#battles'), /VM holds 1 battle for these years/);
     await p.close();
-    // Outside the slice: a gap, said, never empty land.
+    // 1700, outside the first version's 1400–1600, is drawn since 18 November 2026, from its own file.
     const q = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await q.goto(`${BASE}/omni/index.html#vr=1&t=1700..1750&at=1700&show=frame&step=y&base=plain&fill=borders&l=battles`, { waitUntil: 'domcontentloaded' });
     await ready(q, 1700);
-    assert.match(await q.textContent('#map-note'), /VM holds borders for 1400–1600 only/);
-    assert.deepEqual(await q.evaluate(() => window.omniState.features), []);
+    assert.ok((await q.evaluate(() => window.omniState.features)).length >= 100, 'the borders of 1700 are drawn');
+    assert.deepEqual(await q.evaluate(() => window.omniState.held), { from: -3400, to: 2024 });
     await q.close();
+    // Past the last year Cliopatria holds: a gap, said, never empty land.
+    const q2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await q2.goto(`${BASE}/omni/index.html#vr=1&t=2025..2030&at=2026&show=frame&step=y&base=plain&fill=borders&l=battles`, { waitUntil: 'domcontentloaded' });
+    await ready(q2, 2026);
+    assert.match(await q2.textContent('#map-note'), /VM holds borders for 3400 BC–AD 2024 only/);
+    assert.deepEqual(await q2.evaluate(() => window.omniState.features), []);
+    await q2.close();
   } finally { await browser.close(); }
 });
 
@@ -503,7 +750,9 @@ test('page: the review\'s findings on the Omni-Map itself (S1, S3, S4, S5, S6, S
     await ready(page, 1494);
     await page.waitForFunction(() => /Capua/.test(document.querySelector('#focus-body').textContent), null, { timeout: 15000 });
     let f = await page.textContent('#focus-body');
-    assert.doesNotMatch(f, /shown as a point/);
+    // Fornovo is not drawn at 1494 (Capua may be: the Master Index stores its point from its full build).
+    const fornovoRow = await page.$$eval('#focus-body li', ls => ls.map(l => l.textContent).find(t => /Battle of Fornovo/.test(t)) || '');
+    assert.doesNotMatch(fornovoRow, /shown as a point/);
     assert.match(f, /Battle of Fornovo/); assert.match(f, /drawn as a point at 1495/);
     await page.click('#next');
     await ready(page, 1495);
@@ -537,14 +786,15 @@ test('page: the review\'s findings on the Omni-Map itself (S1, S3, S4, S5, S6, S
     await ready(page, 1494);
     assert.equal(await yearShown(page), '1494', 'and it can be returned to');
 
-    // R6: outside the years VM holds, the places asked for are named with that reason.
-    await page.goto(`${BASE}/omni/index.html#vr=1&t=1300..1450&at=1350&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q153529&q=Q236853`, { waitUntil: 'domcontentloaded' });
+    // R6: outside the years VM holds (since 18 November 2026, after Cliopatria's last year), the places asked for are
+    // named with that reason.
+    await page.goto(`${BASE}/omni/index.html#vr=1&t=2025..2030&at=2026&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q153529&q=Q236853`, { waitUntil: 'domcontentloaded' });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await ready(page, 1350);
+    await ready(page, 2026);
     await page.waitForFunction(() => /Duchy of Milan/.test(document.querySelector('#focus-body').textContent), null, { timeout: 15000 });
     f = await page.textContent('#focus-body');
     assert.doesNotMatch(f, /names no places/);
-    assert.match(f, /Duchy of Milan[\s\S]*VM holds borders for 1400–1600 only/);
+    assert.match(f, /Duchy of Milan[\s\S]*VM holds borders for 3400 BC–AD 2024 only/);
     assert.deepEqual(errors, []);
     await page.close();
 
@@ -767,6 +1017,259 @@ test('page: Neo Book opens a map= view whole, with no reader term (t=) in its ad
     await ready(frame, 1494);
     assert.equal(readRecipe(await frame.evaluate(() => window.omniState.recipe)).q, 'Q236853', 'the address\'s own view');
     assert.doesNotMatch(await page.textContent('#panel-map'), /No term chosen/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+/* ================================================================ the slider and Play, in a browser (18 November 2026) */
+const BC_AD = 'vr=1&t=-3..3&at=-1&show=frame&step=y&base=plain&fill=borders';
+const PLAY_VIEW = 'vr=1&t=-500..500&at=-500&show=frame&step=y&base=plain&fill=borders';
+
+test('page: the slider covers every year VM holds: its two ends, 1 BC to AD 1, a typed year, and every year from a click\'s view', PAGE, async () => {
+  const held = heldNow(), bc = held.from < 0;
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    // With no recipe: every year VM holds, opening on 1400 as it always has.
+    await page.goto(`${BASE}/omni/index.html`, { waitUntil: 'domcontentloaded' });
+    await ready(page, 1400);
+    let st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.window, [held.from, held.to]);
+    assert.deepEqual(readRecipe(st.recipe).t, { from: held.from, to: held.to });
+    assert.equal(await page.isHidden('#whole-span'), true, 'every year is shown already');
+    const ticks = await page.$$eval('#timeline .prp-period-ticks span', s => s.map(x => x.textContent).filter(Boolean));
+    assert.deepEqual([ticks[0], ticks.at(-1)], [yearText(held.from, { bc }), yearText(held.to, { bc })], 'the track\'s two ends');
+    // Its two ends, by key.
+    await page.focus('#year');
+    await page.keyboard.press('Home');
+    await ready(page, held.from);
+    assert.equal(await yearShown(page), yearText(held.from, { bc }));
+    assert.equal(await page.textContent('#time-year'), yearText(held.from, { bc }));
+    await page.keyboard.press('End');
+    await ready(page, held.to);
+    assert.equal(await yearShown(page), yearText(held.to, { bc }));
+    // 1 BC is followed by AD 1: there is no year 0.
+    await page.goto(`${BASE}/omni/index.html#${BC_AD}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, -1);
+    assert.equal(await yearShown(page), '1 BC');
+    await page.focus('#year');
+    await page.keyboard.press('ArrowRight');
+    await ready(page, 1);
+    assert.equal(await yearShown(page), 'AD 1');
+    assert.equal(await page.textContent('#time-year'), 'AD 1');
+    assert.match(await page.evaluate(() => location.hash), /&at=1&/);
+    await page.keyboard.press('ArrowLeft');
+    await ready(page, -1);
+    // A year typed: exact, whatever the track's width; outside the view's years it shows every year VM holds.
+    const target = held.from <= -500 ? -500 : held.from + 50;
+    await page.fill('#goto-year', yearText(target, { bc: true }));
+    await page.press('#goto-year', 'Enter');
+    await ready(page, target);
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.window, [held.from, held.to], 'widened to every year VM holds');
+    assert.equal(await yearShown(page), yearText(target, { bc }));
+    await page.fill('#goto-year', '0');
+    await page.press('#goto-year', 'Enter');
+    await page.waitForFunction(() => /There is no year 0/.test(document.querySelector('#play-note').textContent));
+    await page.fill('#goto-year', 'AD 3000');
+    await page.press('#goto-year', 'Enter');
+    await page.waitForFunction(() => /VM holds borders for .* only/.test(document.querySelector('#play-note').textContent));
+    assert.equal(await page.evaluate(() => window.omniState.frame), target, 'a year VM does not hold leaves the map where it was');
+    // From a click's view, "Every year VM holds" widens its slider and keeps its year.
+    await page.goto(`${BASE}/omni/index.html#${RECIPE}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1494);
+    assert.equal(await page.isVisible('#whole-span'), true);
+    await page.click('#whole-span');
+    await page.waitForFunction(w => window.omniState.window[0] === w, held.from);
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual([st.frame, st.window], [1494, [held.from, held.to]]);
+    assert.equal(readRecipe(st.recipe).q, 'Q236853', 'the same view, over every year');
+    assert.deepEqual(errors, []);
+    // At 390 wide the controls fit without a sideways scroll.
+    const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await phone.goto(`${BASE}/omni/index.html`, { waitUntil: 'domcontentloaded' });
+    await ready(phone, 1400);
+    const { scroll, inner } = await phone.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: innerWidth }));
+    assert.ok(scroll <= inner + 1, `no sideways scroll (${scroll} on ${inner})`);
+    await phone.close();
+  } finally { await browser.close(); }
+});
+
+test('page: Play steps through 500 BC to AD 500 at the step and pace chosen, loads each file before it is drawn, pauses, and stops at the end', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    const asked = new Map();
+    page.on('request', r => { const m = /\/omni\/data\/borders\/([^/?#]+\.topo\.json)$/.exec(r.url()); if (m && !asked.has(m[1])) asked.set(m[1], Date.now()); });
+    await page.goto(`${BASE}/omni/index.html#${PLAY_VIEW}`, { waitUntil: 'domcontentloaded' });
+    await ready(page, -500);
+    assert.equal((await page.textContent('#play')).trim(), 'Play');
+    assert.equal(await page.getAttribute('#play', 'aria-pressed'), null, 'R9: not a pressed toggle as well as a label that changes');
+    await page.selectOption('#play-step', '100');
+    await page.selectOption('#play-pace', '250');
+    // Each frame as the page publishes it, with when it was drawn.
+    await page.evaluate(() => { window.__frames = []; let last = null; setInterval(() => { const s = window.omniState; if (s.frame !== last) { last = s.frame; window.__frames.push([s.frame, Date.now()]); } }, 5); });
+    await page.click('#play');
+    assert.equal((await page.textContent('#play')).trim(), 'Pause');
+    await page.waitForFunction(() => window.omniState.frame === 500 && window.omniState.play && !window.omniState.play.on, null, { timeout: 60000 });
+    const frames = await page.evaluate(() => window.__frames);
+    assert.deepEqual(frames.map(f => f[0]), [-500, -400, -300, -200, -100, 1, 101, 201, 301, 401, 500], 'a hundred years a step, AD 1 after 100 BC, and the last year');
+    assert.equal((await page.textContent('#play')).trim(), 'Play', 'stopped at the end');
+    assert.match(await page.textContent('#play-note'), /Stopped at AD 500, the last year of this view/);
+    // Each borders file Play needed was asked for before it was needed: at least one step (250 ms) before the first
+    // frame it holds was drawn. (With the first version's data these years hold no file, and none is asked for.)
+    const index = read('omni/data/borders/index.json');
+    for (const [y, when] of frames.slice(1)) {
+      const f = M.fileFor(index, y);
+      const first = frames.find(([z]) => M.fileFor(index, z)?.file === f?.file);
+      if (!f || first[0] !== y || f.file === M.fileFor(index, -500)?.file) continue;
+      assert.ok(asked.has(f.file), `${f.file} was asked for`);
+      assert.ok(asked.get(f.file) <= when - 150, `${f.file} asked for ${when - asked.get(f.file)} ms before ${y} was drawn`);
+    }
+    // Played again from the end, it starts at the view's first year; paused, it stays.
+    await page.click('#play');
+    await page.waitForFunction(() => window.omniState.frame >= -300 && window.omniState.play.on, null, { timeout: 20000 });
+    await page.click('#play');
+    const at = await page.evaluate(() => window.omniState.frame);
+    await page.waitForTimeout(900);
+    assert.equal(await page.evaluate(() => window.omniState.frame), at, 'paused');
+    assert.equal(await page.evaluate(() => window.omniState.play.on), false);
+    // A move by the reader stops it too.
+    await page.click('#play');
+    await page.waitForFunction(a => window.omniState.frame > a, at, { timeout: 20000 });
+    await page.focus('#year');
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForFunction(() => !window.omniState.play.on, null, { timeout: 5000 });
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: addresses from before the whole span open what they opened: a saved view\'s, the old default\'s, and Kino\'s moves', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    // A saved view's address as a bundle of 17 November 2026 wrote it (its pins name that day's files).
+    const OLD = `${RECIPE}&ds=cliopatria@v0.2.1,borders@20261117T0524Z,qids@20261117T0524Z,natural-earth@5.1.1,battles@20261117T0522Z&pin=5f0e1c2d3b4a`;
+    await page.goto(`${BASE}/omni/index.html#${OLD}`, { waitUntil: 'domcontentloaded' });
+    await ready(page, 1494);
+    let st = await page.evaluate(() => window.omniState);
+    assert.deepEqual([st.frame, st.window, st.step], [1494, [1446, 1514], 'y']);
+    const got = readRecipe(st.recipe);
+    assert.deepEqual([got.t, got.at, got.q, got.pin], [{ from: 1446, to: 1514 }, 1494, 'Q236853', '5f0e1c2d3b4a']);
+    assert.match(await page.textContent('#pins-note'), /saved view \(pin 5f0e1c2d3b4a\)/);
+    assert.ok(st.focus.includes('Q153529'), 'Milan outlined, as it was');
+    // The page's default until 18 November 2026, opened by its address.
+    await page.goto(`${BASE}/omni/index.html#vr=1&t=1400..1600&at=1400&show=frame&step=y&base=plain&fill=borders&l=battles`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1400);
+    st = await page.evaluate(() => window.omniState);
+    assert.deepEqual(st.window, [1400, 1600]);
+    // Kino drives the map by its address (host=kino): each new recipe redraws it, and stops Play.
+    await page.goto(`${BASE}/omni/index.html#${PLAY_VIEW}&host=kino`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, -500);
+    assert.equal(await page.evaluate(() => document.documentElement.classList.contains('om-host-kino')), true);
+    await page.click('#play');
+    await page.waitForFunction(() => window.omniState.play.on);
+    await page.evaluate(r => { location.hash = `#${r}&host=kino`; }, RECIPE);
+    await ready(page, 1494);
+    assert.equal(await page.evaluate(() => window.omniState.play.on), false, 'a recipe from Kino stops Play');
+    assert.match(await page.evaluate(() => location.hash), /&host=kino$/);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review R1, R3, R6, R8 (18 November 2026).
+test('page: the heading gives the clicked entry\'s own years, a slow borders file is said to be loading, the frame says its one reason, and an address it cannot follow is said', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    // R1: Ludovico Sforza's own years (the Master Index's), with the window named as the map's, never as his dates.
+    await page.goto(`${BASE}/omni/index.html#${RECIPE}`, { waitUntil: 'domcontentloaded' });
+    await ready(page, 1494);
+    const rec = read(`lake/data/e/${236853 % 512}.json`).Q236853;
+    const own = yearsText(rec, { today: new Date().toISOString().slice(0, 10) });
+    assert.equal(await page.textContent('#view-subject'), `${rec.label} (${own}): map of 1446–1514`);
+    // R6: the one reason that applies (the start of the book's era is the reader's to say).
+    assert.match(await page.textContent('#frame-why'), /^Opens on 1494, as VM's click chose it: the passage's own year, or the start of the book's era, as the reader's card beside the map says\./);
+    // R3: while the file for the slider's new year loads, the note says so and the map's year stays where it is drawn.
+    const slow = /\/omni\/data\/borders\/(?!1400-1499)[^/]+\.topo\.json$/;
+    await page.route(slow, async route => { await new Promise(r => setTimeout(r, 2500)); await route.continue(); });
+    await page.focus('#year');
+    await page.keyboard.press('End');
+    await page.waitForFunction(() => /^Loading the borders for 1514…$/.test(document.querySelector('#play-note').textContent), null, { timeout: 5000 });
+    assert.equal(await page.textContent('#time-year'), '1494', 'the year shown is the one drawn');
+    assert.equal(await page.evaluate(() => window.omniState.frame), 1494);
+    await ready(page, 1514);
+    assert.equal(await page.textContent('#time-year'), '1514');
+    assert.equal(await page.textContent('#play-note'), '', 'said no more once drawn');
+    await page.unroute(slow);
+    // R6: the page's own view, with no address.
+    await page.goto(`${BASE}/omni/index.html`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    const held = heldNow(), bc = held.from < 0;
+    await ready(page, held.from <= 1400 && 1400 <= held.to ? 1400 : held.from);
+    assert.match(await page.textContent('#frame-why'), new RegExp(`^Opens on ${yearText(held.from <= 1400 && 1400 <= held.to ? 1400 : held.from, { bc })}; the slider holds every year VM holds, ${formatSpan(held.from, held.to)}\\.$`));
+    assert.doesNotMatch(await page.textContent('#frame-why'), /recipe/);
+    // R8: a year 0, years that hold a year 0, and a year after the address's own years are said, not changed in silence.
+    for (const [hash, at, says] of [
+      ['vr=1&t=-5..5&at=0&show=frame&step=y&base=plain&fill=borders', -5, /This address names year 0, which does not exist \(1 BC is followed by AD 1\); it opens on 5 BC\./],
+      ['vr=1&t=0..10&at=5&show=frame&step=y&base=plain&fill=borders', held.from <= 5 ? 5 : held.from, /This address's years \(0\.\.10\) include a year 0, which does not exist \(1 BC is followed by AD 1\), so the slider shows every year VM holds/],
+      [`vr=1&t=${held.from}..${held.to}&at=${held.to + 2}&show=frame&step=y&base=plain&fill=borders`, held.to, /is outside its own years .*, so it opens on .*, the last of them\./],
+    ]) {
+      await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await ready(page, at);
+      assert.match(await page.textContent('#focus-body'), says, hash);
+    }
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: a click\'s view opens on the clicked place\'s own outline; where VM holds none, it says so and shows the world (MP-10)', PAGE, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const errors = watch(page);
+    const boxOf = q => { const fc = M.decode(read('omni/data/borders/1400-1499.topo.json')), qids = read('omni/data/borders/qids.json');
+      const { features } = M.featuresFor(fc, qids, q, 1494); let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
+      for (const f of features) for (const poly of f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates) for (const [x, y] of poly[0]) { w = Math.min(w, x); e = Math.max(e, x); s = Math.min(s, y); n = Math.max(n, y); }
+      return [w, s, e, n]; };
+    // The Republic of Florence clicked, with the Kingdom of France in the same passage: the map opens on Florence.
+    await page.goto(`${BASE}/omni/index.html#vr=1&t=1060..1620&at=1494&show=frame&step=10y&base=plain&fill=borders&l=battles&focus=Q148540,Q70972&q=Q148540`, { waitUntil: 'domcontentloaded' });
+    await ready(page, 1494);
+    let st = await page.evaluate(() => window.omniState);
+    const fl = boxOf('Q148540'), fr = boxOf('Q70972');
+    assert.ok(st.focus.includes('Q148540') && st.focus.includes('Q70972'), 'both outlined and in focus');
+    assert.ok(st.box[0] <= fl[0] && st.box[1] <= fl[1] && st.box[2] >= fl[2] && st.box[3] >= fl[3], `the box ${st.box} holds Florence ${fl}`);
+    assert.ok(st.box[2] - st.box[0] < fr[2] - fr[0], 'and is Florence\'s, not France\'s too');
+    // Classical Athens, which Cliopatria does not outline under its name and the Master Index gives no point: said, and the world.
+    await page.goto(`${BASE}/omni/index.html#vr=1&t=-513..-503&at=-508&show=frame&step=y&base=plain&fill=borders&l=battles&focus=Q844930,Q148540&q=Q844930`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, -508);
+    // The Master Index stores each entry's point (pt) from its full build: with one, the map opens on it; without, it
+    // says so and shows the world.
+    const rec = read(`lake/data/e/${844930 % 512}.json`).Q844930;
+    if (Array.isArray(rec?.pt)) await page.waitForFunction(() => window.omniState.points?.includes('Q844930'), null, { timeout: 15000 });
+    else await page.waitForFunction(() => /Classical Athens/.test(document.querySelector('#map-note').textContent), null, { timeout: 15000 });
+    st = await page.evaluate(() => window.omniState);
+    const note = await page.textContent('#map-note');
+    if (Array.isArray(rec?.pt)) {
+      assert.ok(st.box && st.box[0] <= rec.pt[0] && rec.pt[0] <= st.box[2] && st.box[1] <= rec.pt[1] && rec.pt[1] <= st.box[3], `centred on its recorded point ${rec.pt} (${st.box})`);
+      assert.ok(st.box[2] - st.box[0] < 20, 'Classical Athens\'s point, not a box over Florence as well');
+      assert.match(await page.textContent('#focus-body'), /Classical Athens Q844930[^]*?: shown as a point/);
+    } else {
+      assert.equal(st.box, null, 'the world, not another place\'s box');
+      assert.match(note, /^VM holds no outline of Classical Athens for 508 BC/);
+      assert.match(note, /the Master Index holds no point for it, so the map shows the whole world/);
+    }
+    assert.match(await page.textContent('#focus-body'), /Classical Athens[\s\S]*its own dates in the Master Index: from 508 BC, end not recorded/);
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

@@ -17,7 +17,7 @@
       "termsQuote": "This data is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and indicate if changes were made.",
       "termsRead": "2026-11-17",
       "credit": "Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager",
-      "changes": "The rows of 1400–1600 only, converted to TopoJSON quantised to 1/100,000 of each file's extent (points that then coincide are merged; no simplification), with a row id added (omni/scripts/build-borders.mjs)."
+      "changes": "Every row, 3400 BC to AD 2024, in 17 files by years (a row spanning two files is in both), converted to TopoJSON quantised to 1/100,000 of each file’s extent (points that then coincide are merged; no simplification), with a row id added (omni/scripts/build-borders.mjs)."
     },
     {
       "id": "natural-earth",

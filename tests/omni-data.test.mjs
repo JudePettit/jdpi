@@ -1,5 +1,6 @@
 // The Omni-Map's data, stage S1 (PRP-SCHOLAR-USP-DESIGN.md 4.2, 5.1, 5.2, 7.3; the reader-pane contract, item 5):
-//   omni/data/borders/        Cliopatria v0.2.1's rows of 1400–1600 as dated TopoJSON (omni/scripts/build-borders.mjs),
+//   omni/data/borders/        Cliopatria v0.2.1's rows, every year it holds (3400 BC to AD 2024; 1400–1600 until 18
+//                             November 2026), as dated TopoJSON (omni/scripts/build-borders.mjs),
 //                             with qids.json, the crosswalk from Q-ids to Cliopatria's names by year
 //   omni/data/base/           Natural Earth 5.1.1's land, the plain base (omni/scripts/build-base.mjs)
 //   omni/data/layers/battles.json  the battles VM holds for these years, read from Wikidata (omni/scripts/build-battles.mjs)
@@ -38,26 +39,29 @@ const sources = json('integration/sources.json');
 const layers = json('omni/data/layers.json');
 const battles = json('omni/data/layers/battles.json');
 
-test('borders: the index covers 1400–1600 with no gap, from Cliopatria v0.2.1', () => {
+test('borders: the index covers 3400 BC to AD 2024, every year Cliopatria v0.2.1 holds, with no gap', () => {
   assert.equal(index.format, 'vm-borders-index/1');
   assert.equal(index.source, 'cliopatria');
   assert.equal(index.version, 'v0.2.1', 'the version is the release tag (7.3)');
-  assert.equal(index.from, 1400); assert.equal(index.to, 1600);
+  assert.equal(index.from, -3400); assert.equal(index.to, 2024);
   assert.match(index.built, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
   const files = [...index.files].sort((a, b) => a.from - b.from);
   assert.ok(files.length >= 2);
-  assert.equal(files[0].from, 1400); assert.equal(files.at(-1).to, 1600);
+  assert.equal(files[0].from, -3400); assert.equal(files.at(-1).to, 2024);
   for (let i = 1; i < files.length; i++) assert.equal(files[i].from, files[i - 1].to + 1, `no gap or overlap before ${files[i].file}`);
-  assert.deepEqual(M.held(index), { from: 1400, to: 1600 });
-  assert.equal(M.fileFor(index, 1399), null); assert.equal(M.fileFor(index, 1601), null);
+  assert.deepEqual(M.held(index), { from: -3400, to: 2024 });
+  assert.equal(M.fileFor(index, -3401), null); assert.equal(M.fileFor(index, 2025), null);
   assert.equal(M.fileFor(index, 1494).file, '1400-1499.topo.json');
-  assert.equal(M.fileFor(index, 1600).file, '1500-1600.topo.json', 'the slice\'s last year is held');
+  assert.equal(M.fileFor(index, 1600).file, '1600-1699.topo.json');
+  assert.equal(M.fileFor(index, 2024).file, '2000-2024.topo.json', 'the last year is held');
+  assert.equal(M.fileFor(index, -3400).file, 'm3400-m301.topo.json', 'and the first');
 });
 
 test('borders: each file decodes, matches its index entry and stays within 1.5 MB compressed', () => {
   for (const f of index.files) {
     const p = `omni/data/borders/${f.file}`, bytes = raw(p), topo = JSON.parse(bytes.toString('utf8'));
-    assert.equal(f.file, `${f.from}-${f.to}.topo.json`);
+    const y = n => (n < 0 ? `m${-n}` : String(n)); // a year below zero as m and its digits
+    assert.equal(f.file, `${y(f.from)}-${y(f.to)}.topo.json`);
     assert.equal(sha256(bytes), f.sha256, `${f.file}: sha256 as the index records`);
     assert.equal(bytes.length, f.bytes, `${f.file}: bytes`);
     const gz = gzipSync(bytes, { level: 9 }).length;
@@ -67,7 +71,9 @@ test('borders: each file decodes, matches its index entry and stays within 1.5 M
     assert.ok(topo.transform, 'quantised');
     const fc = M.decode(topo);
     assert.equal(fc.features.length, f.rows, `${f.file}: rows`);
-    assert.ok(fc.features.length >= 900, `${f.file}: at least 900 rows (a floor)`);
+    // A floor: Cliopatria holds few rows before 800 BC (538 in the first file, for 3,100 years), and hundreds a
+    // century after.
+    assert.ok(fc.features.length >= (f.from < -300 ? 100 : 400), `${f.file}: rows (a floor)`);
     const ids = new Set();
     for (const x of fc.features) {
       const r = x.properties;
@@ -82,8 +88,10 @@ test('borders: each file decodes, matches its index entry and stays within 1.5 M
       assert.ok(Array.isArray(r.b) && r.b.length === 4 && r.b[0] <= r.b[2] && r.b[1] <= r.b[3], `${r.n}: box`);
       assert.ok(x.geometry && /Polygon$/.test(x.geometry.type), `${r.n}: a polygon`);
     }
-    assert.ok(fc.features.some(x => x.properties.k === 'RELATION'), `${f.file} keeps the RELATION rows (drawn as outlines)`);
   }
+  const all = [...fcs.values()].flatMap(fc => fc.features);
+  assert.ok(all.some(x => x.properties.k === 'RELATION'), 'the RELATION rows are kept (drawn as outlines)');
+  assert.ok(fcAt(1494).features.some(x => x.properties.k === 'RELATION'), 'the flagship\'s file keeps them');
 });
 
 test('borders: an id is the first ten hex of sha256 of Name|FromYear|ToYear|Type, so a name in any script never changes it', () => {
@@ -143,10 +151,10 @@ test('qids: Cliopatria\'s ids are used only where Wikidata agrees; France reache
     }
   }
   const rejected = qids.rejected.find(r => r.q === 'Q207162' && r.name === 'Kingdom of France');
-  assert.ok(rejected, 'Q207162 (the Bourbon Restoration) is not the Kingdom of France of 1400–1600');
+  assert.ok(rejected, 'Q207162 (the Bourbon Restoration) is not the Kingdom of France of Cliopatria\'s rows of that name');
   assert.match(rejected.wikidataLabel, /Bourbon Restoration/);
   assert.match(rejected.why, /other years/, 'its alias is "Kingdom of France", but Wikidata dates it 1814–1830');
-  assert.equal(qids.entries.Q207162, undefined);
+  assert.ok(!(qids.entries.Q207162 || []).some(r => r.name === 'Kingdom of France'), 'never for the name Kingdom of France');
   const france = qids.entries.Q70972;
   assert.ok(france?.length && france.every(r => r.name === 'Kingdom of France' && r.basis === 'name'));
   assert.equal(M.featuresFor(fcAt(1494), qids, 'Q70972', 1494).reason, null, 'France is drawn in 1494');
@@ -174,7 +182,7 @@ test('layers: the catalogue holds borders and battles in 4.2\'s shape, each laye
   const lg = M.legend(b, { sources: sources.sources, year: 1494 });
   const text = [...lg.lines, lg.credit].join('\n');
   for (const w of ['Cliopatria v0.2.1', 'CC BY 4.0', 'century precision', 'one version of each border']) assert.ok(text.includes(w), `the 1494 legend says "${w}"`);
-  for (const w of ['5,000 km²', '50 years', 'written', 'which atlas', '1400–1600', 'no simplification', 'composite polity', 'parentheses']) assert.ok(b.method.includes(w), `the method note says "${w}" (5.6)`);
+  for (const w of ['5,000 km²', '50 years', 'written', 'which atlas', '3400 BC', 'no simplification', 'coarser than a survey', 'no year 0', 'composite polity', 'parentheses']) assert.ok(b.method.includes(w), `the method note says "${w}" (5.6)`);
   const t = byId.battles;
   assert.equal(t.geometry, 'point'); assert.equal(t.source, 'wikidata');
   assert.equal(t.data, 'omni/data/layers/battles.json');

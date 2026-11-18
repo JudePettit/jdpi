@@ -4,14 +4,14 @@ The Omni-Map is Digital Science's map of dated borders and the events VM holds, 
 from a tagged name (PRP-SCHOLAR-USP-DESIGN.md, stage S1). This file describes its data: what each file is, where it
 comes from, under what terms, how it was changed and how to rebuild it. The page itself is `omni/index.html`.
 
-In this first version VM holds borders for **1400–1600 only**, and **2 battles** for those years. The page says so
-wherever a view reaches past what VM holds.
+VM holds Cliopatria's borders for **every year it covers, 3400 BC to AD 2024** (1400–1600 only until 18 November
+2026), and **2 battles**, both of 1400–1600. The page says so wherever a view reaches past what VM holds.
 
 ## The files
 
 | File | What it is | Built by |
 |---|---|---|
-| `data/borders/1400-1499.topo.json`, `data/borders/1500-1600.topo.json` | Cliopatria v0.2.1's rows overlapping each span, as TopoJSON (format `vm-borders/1`, described in `design/prp-map.js`) | `scripts/build-borders.mjs` |
+| `data/borders/<from>-<to>.topo.json`, 17 files from `m3400-m301.topo.json` to `2000-2024.topo.json` (a year below zero written m and its digits) | Cliopatria v0.2.1's rows overlapping each file's years, as TopoJSON (format `vm-borders/1`, described in `design/prp-map.js`); the page loads a file only when the frame reaches its years | `scripts/build-borders.mjs` |
 | `data/borders/index.json` | The files, their years, rows, sizes and sha256, and the archive they were built from | `scripts/build-borders.mjs` |
 | `data/borders/qids.json` | The crosswalk from Wikidata Q-ids to Cliopatria's names by year, and the ids rejected, with why | `scripts/build-borders.mjs` |
 | `data/base/ne_110m_land.geojson` | Natural Earth 5.1.1's land at 1:110 million, unchanged: the plain base (see `data/base/README.md`) | `scripts/build-base.mjs` |
@@ -20,9 +20,14 @@ wherever a view reaches past what VM holds.
 
 VM's sources, with their terms as read, are in `integration/sources.json` (design 5.1).
 
-Sizes, 17 November 2026 (gzip level 9): 1400–1499 758,803 bytes (179,888 gzipped), 1500–1600 893,937 bytes (212,613
-gzipped), the base 138,160 (50,328), qids.json 42,025 (5,846), the battles 2,387 (761). The design's limit is 1.5 MB
-compressed per borders file (7.3), and 1.5 MB for the whole default view, MapLibre included; only the frame's file loads.
+Sizes, 18 November 2026 (gzip level 9): the 17 borders files come to 12,987,328 bytes (3,040,791 gzipped), from
+`m3400-m301` (538 rows, 386,180 bytes, 87,896 gzipped) to the largest, `1800-1899` (1,745 rows, 1,857,657 bytes, 449,310
+gzipped); `1400-1499` is 758,803 bytes (179,888 gzipped), byte for byte the file of 17 November. `index.json` lists each
+file's rows, bytes and gzipped bytes. The design's limit is 1.5 MB compressed per borders file (7.3), and 1.5 MB for the
+whole default view, MapLibre included; only the frame's file loads. How the years were split: each century built alone
+was measured first (from 572 bytes gzipped for 3400–3301 BC, one row, to 449,310 for the 1800s), and centuries were
+joined, from the first, while their sizes alone added up to no more than 200,000 bytes gzipped (`JOIN_GZ` in the
+builder), so the early millennia are a few small files; no century needed splitting, and nothing is simplified.
 
 ## Sources and terms
 
@@ -45,8 +50,12 @@ The credit VM gives, as CC BY 4.0 asks (credit, a link to the licence, and the c
   Zenodo, https://doi.org/10.5281/zenodo.23128623, described in J. S. Bennett et al., 'Cliopatria - A geospatial database
   of world-wide political entities from 3400BCE to 2024CE', Scientific Data 12, 247 (2025),
   https://doi.org/10.1038/s41597-025-04516-9. Licence: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
-- Changes by Vitruvian Manager: the rows of 1400–1600 only, converted to TopoJSON quantised to 1/100,000 of each file's
-  extent (points that then coincide are merged; no simplification), with a row id added.
+- Changes by Vitruvian Manager: every row, 3400 BC to AD 2024, in 17 files by years (a row spanning two files is in
+  both), converted to TopoJSON quantised to 1/100,000 of each file's extent (points that then coincide are merged; no
+  simplification), with a row id added.
+
+What CC BY 4.0 asks, as Cliopatria's LICENSE.md puts it: appropriate credit to the original authors and the source, a
+link to the licence, and a statement of any changes. The three lines above are VM's answer to each.
 
 **Natural Earth**, release v5.1.1 (13 May 2022), `geojson/ne_110m_land.geojson`. Public domain: "All versions of
 Natural Earth raster + vector map data found on this website are in the public domain. You may use the maps in any
@@ -84,12 +93,19 @@ No value from a source whose terms bar passing its data on ("cite-only": the Cor
 ## Method
 
 **Borders.** Cliopatria draws a polity where one or more written sources attest to it and indicate its location and
-extent in particular years, so societies without written records are not drawn; with rare exceptions a polity occupies
+extent in particular years, so a polity that no written source attests, such as the Xia Dynasty before 1600 BC in the
+paper's example, is not drawn; with rare exceptions a polity occupies
 at least 5,000 km² and lasts at least 50 years (its paper). Its README warns that the maps "reflect only one version of
 the territory held by past polities", and the paper that the dataset does not encode border uncertainty or territorial
 disputes. Its rows carry no field naming which atlas or regional source each outline came from (the paper lists its
-sources by region). Each row holds from its FromYear to its ToYear, both included; a row spanning 1499 and 1500 is in
-both files. RELATION rows (vassalages, alliances, unions) are kept, and drawn as outlines over the polities they join;
+sources by region). Its README calls it a dataset of worldwide polities from 3400 BCE to 2024 CE, with over 1,600
+political entities sampled at varying timesteps and spatial scales; release v0.2.1 holds 13,797 rows, and fewer than
+20 in any century before 800 BC, so the map shows few polities in those years. These are a research dataset's
+borders, made to compare polities across the world and five thousand years: coarser than a survey's, and no line on
+the map is a surveyed boundary. Each row holds from its FromYear to its ToYear, both included; a row spanning two files'
+years is in both. Cliopatria writes years before AD 1 as negative numbers (its README: "negative for BCE"); VM reads −1
+as 1 BC, with no year 0, so the six rows that end at year 0 (the Roman Empire, Judea, the Parthian Empire, the
+Indo-Greeks, the Indo-Scythians and the Yuezhi) are drawn to 1 BC, and their next rows start at AD 1. RELATION rows (vassalages, alliances, unions) are kept, and drawn as outlines over the polities they join;
 POLITY rows are filled. A name in parentheses, such as "(Kingdom of France)", is a composite polity, an entity with its
 dependencies (the paper: composite polities "are denoted in the database by enclosing their name in parentheses"); VM
 draws it as a dashed outline, like a RELATION row, so its core is not filled twice, and a download keeps each row's own
@@ -98,18 +114,22 @@ so it is the same on every run of one release, whatever script the name is writt
 
 Borders are quantised to 1/100,000 of each file's extent by topojson-server, which also makes each border two rows share
 into one arc, so neighbours never gap or overlap. Quantising merges the points of a line that then fall on the same
-spot; nothing else is taken out, and no simplifier is used, since the files come to about a tenth of the size limit (a
-departure from design 7.3, which names a topology-preserving simplifier, recorded for Jude). Precision: VM counts a border
-before 1500 as known only to its century (see "How a click sets the view"); from 1500 to 1600 the years are
-Cliopatria's, which VM has not checked.
+spot; nothing else is taken out, and no simplifier is used (Jude's decision of 17 November 2026; the largest file, the
+1800s, is under a third of the size limit; a departure from design 7.3, which names a topology-preserving simplifier).
+The builder stops, writing nothing, if a file would pass the limit. Precision: VM counts a border before 1500 as known
+only to its century (see "How a click sets the view"); from 1500 the years are Cliopatria's, which VM has not checked.
 
 **The crosswalk (qids.json).** A Q-id is drawn only through it, never through a row's own Wikidata id. Cliopatria's ids
 are checked first: each POLITY row's id is read from Wikidata (labels and aliases in English and multilingual, the
 English Wikipedia title, inception and dissolution), and used only where one of those names matches the row's name or
-Wikipedia phrase and, where Wikidata dates the item, its years meet the row's. Of 267 ids, 24 name-and-id pairs were
-rejected; each is listed with Wikidata's label and why. The Kingdom of France's rows carry Q207162, which Wikidata labels
-"Bourbon Restoration in France" and dates 1815–1830 (though "Kingdom of France" is among its aliases); Joseon's carry
-Gojoseon's id; the Swiss Confederation's, today's Switzerland's. Then a Master Index place whose label is a row's name,
+Wikipedia phrase and, where Wikidata dates the item, its years meet the row's own (each row is checked alone; where
+some of a name's rows meet Wikidata's years and others do not, those others are listed as rejected with their years).
+On 17 November 2026, for 1400–1600, 24 of 267 ids' name-and-id pairs were rejected; they stay rejected in every year
+(Jude's decision of 18 November 2026), even where Wikidata's years now meet some of their rows. For the whole span,
+built 18 November 2026: 1,410 ids read from Wikidata (267 on 17 November, 1,143 on 18 November), 1,381 Q-ids used,
+344 rejections, each listed with Wikidata's label and why. The Kingdom of France's rows carry Q207162, which Wikidata
+labels "Bourbon Restoration in France" and dates 1815–1830 (though "Kingdom of France" is among its aliases); Joseon's
+carry Gojoseon's id; the Swiss Confederation's, today's Switzerland's. Then a Master Index place whose label is a row's name,
 and whose founding or dissolution in the lake meets the row's years, is matched by name: so Q70972, the Kingdom of
 France, reaches its rows. RELATION rows carry one of their parts' ids and are not crosswalked. An entity with no
 crosswalk row is "VM cannot outline this" (the Republic of Genoa is outlined; Genoa the city, Q1449, is not).
@@ -129,14 +149,29 @@ A click on a tagged name in Neo Book (design/vm-click.js) turns the name's Maste
 rules:
 
 - **The years shown (the window).** Where the paragraph has a periods record checked by a second reader, its period,
-  unwidened. Otherwise the name's own span (born to died, founded to dissolved, start to end), each end widened by 10% of
-  the span (at least one step) and rounded outward to whole steps; a lone date five years either way, a battle one; a
-  living person ends today. Until a paragraph has a checked periods record, the years are therefore those of what was
-  named, not the passage's own, and the reader's card says so ("This paragraph has no periods record yet").
+  unwidened. Otherwise the name's own span (born to died; else founded, or failing that start, to dissolved, or failing
+  that end: each end from the first key that records it, so the Roman Empire's start and dissolved read 27 BC–AD 395),
+  each end widened by 10% of the span (at least one step) and rounded outward to whole steps; a lone date five years
+  either way, a battle one. An
+  end runs to today only where the record says the thing still exists: a person born within 120 years of today with no
+  death recorded, or a place with no end that is a member of the United Nations. Anything else with a start and no end
+  is its start alone, five years either way. The reader's heading and the map's give the name's own years as the
+  Master Index records them, never the window: "Alexander the Great · 356–323 BC" (the map's own heading adds "map of
+  360–319 BC"), and "Classical Athens · from 508 BC, end not recorded", never "801 BC–AD 2026" (MP-10, 18 November
+  2026). Until a paragraph has a checked periods record, the years
+  are therefore those of what was named, not the passage's own, and the reader's card says so ("This paragraph has no
+  periods record yet").
 - **The year it opens on (the frame).** The passage's first year, where its record gives one; else, for a battle, the
   year it was fought (Fornovo opens on 1495, so it is drawn when the map opens); else
-  the start of the book's era (for The Prince, 1494–1527), if that falls inside the window; else the window's first year. The card beside
-  the map says which of these it is.
+  the start of the book's era (for The Prince, 1494–1527), if that falls inside the window; else the first year of the
+  name's own years that the crosswalk can outline (qids.json); else its own first recorded year, or, where that is
+  before the borders VM holds and its years reach them, their first year (Ancient Egypt, 4000–30 BC, opens on 3400 BC);
+  else the window's first year. The card beside the map says which of these it is, and the map says the one reason it
+  can tell from the entry's record.
+- **Where it opens (the box).** A clicked place opens on its own outline at the frame, or on its Master Index point
+  where VM cannot outline it; where VM holds neither for that year, the map shows the whole world and says so in a
+  sentence ("VM holds no outline of Classical Athens for 508 BC (…), and the Master Index holds no point for it, so the
+  map shows the whole world."), never the box of the other places the passage names.
 - **The step.** The coarsest of: the precision of the span's ends, the fill's own step (borders change by the year), and
   the step the window's length calls for (a day or month under 5 years, a year under 300, a decade under 1,500, a
   century beyond).
@@ -147,6 +182,27 @@ rules:
 - **Borders before 1500.** VM counts a border of those years as known only to its century: Cliopatria dates its rows by
   the year, but VM has not checked the years of its medieval outlines, so the legend and a download say "century" for
   them; from 1500 the years are Cliopatria's.
+
+## The slider and Play
+
+With no recipe in its address the page shows every year VM holds, on 1400 where VM holds it; an address that names
+its years (`t=`) opens on those, so an address from before 18 November 2026 opens what it opened. The slider has a stop
+for every year (or decade, or century, as the step says) of its window, however many thousands of years that is, with
+its two ends and round years labelled; years before AD 1 are written "508 BC" and the years after them "AD 1", and
+1 BC is followed by AD 1 (there is no year 0). An exact year is reached by the keys on the slider (arrows, Page Up and
+Down, Home, End) or by "Go to year", which reads "1494", "500 BC", "500 BCE", "AD 33", "33 CE" or "-500"; a year
+outside the window but inside what VM holds widens the slider to every year VM holds, and "Every year VM holds" does
+the same for the view shown. Play steps through the window by the step and at the pace chosen (a step is a number of
+years: 1, 5, 10, 25, 50, 100, 250, 500 or 1,000, whichever the window holds; it starts on the smallest that crosses
+the window in about 120 steps), asks for the borders files of the next three steps ahead, draws a year only once its
+file has loaded, and keeps the four most recently used files. Its steps count whole years with no year 0, so a hundred
+years after 100 BC is AD 1, and Play then lands on AD 101, 201 and so on, not on round hundreds. Wherever a borders file
+has still to load, the note under the slider says "Loading the borders for …" until it is drawn, and the year shown
+beside the slider stays on the year the map draws. An address that names a year 0, years that could not be read, or a
+year outside its own years opens on the window's first year (its last, for a year after it) and says so under "In
+focus". Play stops at the window's last year and says so, at any
+move of the slider, and at a new recipe (the address, Kino's next move, the reader's next click); from the last year it
+starts again at the first. The pure parts are in `omni/lib/time.js`.
 
 ## Rebuilding
 

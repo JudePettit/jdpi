@@ -2,15 +2,105 @@
   "format": "vm-borders-index/1",
   "source": "cliopatria",
   "version": "v0.2.1",
-  "built": "2026-11-17T05:24:13Z",
-  "from": 1400,
-  "to": 1600,
+  "built": "2026-11-18T00:29:46Z",
+  "from": -3400,
+  "to": 2024,
   "archive": {
     "url": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.1/cliopatria.geojson.zip",
     "sha256": "e10a4e429fca708788ff9e7572a95fce801fae55852d217cffabc1c59cd4eed4"
   },
   "quantisation": 100000,
   "files": [
+    {
+      "from": -3400,
+      "to": -301,
+      "file": "m3400-m301.topo.json",
+      "rows": 538,
+      "bytes": 386180,
+      "gzip": 87896,
+      "sha256": "29596d258eba8242fc5ad382e346bc3fbd7b6b9ca90c8e1809f4bdf7ea54a61e"
+    },
+    {
+      "from": -300,
+      "to": 199,
+      "file": "m300-199.topo.json",
+      "rows": 806,
+      "bytes": 713949,
+      "gzip": 138729,
+      "sha256": "af2f3cecccae71fe9956091f4c1bbb8ad7e0e69550f8033a1347a95f07e98394"
+    },
+    {
+      "from": 200,
+      "to": 499,
+      "file": "200-499.topo.json",
+      "rows": 661,
+      "bytes": 526443,
+      "gzip": 105518,
+      "sha256": "fefabfd8846ef7d745f4e2df5c6d5e965204d4dfc559558f0d072a05a33c057a"
+    },
+    {
+      "from": 500,
+      "to": 699,
+      "file": "500-699.topo.json",
+      "rows": 758,
+      "bytes": 609953,
+      "gzip": 126704,
+      "sha256": "b05b50cb8226fc219f927e2ca8d108c586aac7206414834c18412cfd9f714cf0"
+    },
+    {
+      "from": 700,
+      "to": 899,
+      "file": "700-899.topo.json",
+      "rows": 1003,
+      "bytes": 774963,
+      "gzip": 158994,
+      "sha256": "89671fb4db95bddd062c7cb8b7a6419ace2b18fc724cf7e9e0a20c438b968ecd"
+    },
+    {
+      "from": 900,
+      "to": 999,
+      "file": "900-999.topo.json",
+      "rows": 597,
+      "bytes": 379274,
+      "gzip": 99883,
+      "sha256": "91c9d766bb198440d1686171d901291de4d55a016e1c473493828637f060eb6d"
+    },
+    {
+      "from": 1000,
+      "to": 1099,
+      "file": "1000-1099.topo.json",
+      "rows": 789,
+      "bytes": 467513,
+      "gzip": 123659,
+      "sha256": "0ce75edcf1209349b9fa43328ebc42d7123f1196a097edf8b6ea08145cefb731"
+    },
+    {
+      "from": 1100,
+      "to": 1199,
+      "file": "1100-1199.topo.json",
+      "rows": 590,
+      "bytes": 344672,
+      "gzip": 93940,
+      "sha256": "f31f89e098dd890758d32ba87ae0431c824ce5d4afb498265c84d484af48d118"
+    },
+    {
+      "from": 1200,
+      "to": 1299,
+      "file": "1200-1299.topo.json",
+      "rows": 994,
+      "bytes": 636053,
+      "gzip": 164650,
+      "sha256": "0505ba16f61cd379d123d3ab52b96ba7031db64e41f95e98c79ef61420beb9ac"
+    },
+    {
+      "from": 1300,
+      "to": 1399,
+      "file": "1300-1399.topo.json",
+      "rows": 906,
+      "bytes": 600995,
+      "gzip": 155867,
+      "sha256": "e9888fb08892497716cf4454f5a2aad7fe4393413d3889a4bd0117fee9bcfb93"
+    },
     {
       "from": 1400,
       "to": 1499,
@@ -22,12 +112,57 @@
     },
     {
       "from": 1500,
-      "to": 1600,
-      "file": "1500-1600.topo.json",
-      "rows": 1005,
-      "bytes": 893937,
-      "gzip": 212613,
-      "sha256": "a5c40b6d05531c974b40fd7200a6f93c22ba19f93516b55512cdf777adc4fcff"
+      "to": 1599,
+      "file": "1500-1599.topo.json",
+      "rows": 964,
+      "bytes": 850804,
+      "gzip": 203468,
+      "sha256": "be2ab9ec05160e9e33d24fe35ec5b9827e8473b062bf3173aa597a31b88247c1"
+    },
+    {
+      "from": 1600,
+      "to": 1699,
+      "file": "1600-1699.topo.json",
+      "rows": 937,
+      "bytes": 917472,
+      "gzip": 202372,
+      "sha256": "a4c76bd2eb1082591d9df29c3f2563c2ca57acbb838d1fcebf8e76798fe9d0d3"
+    },
+    {
+      "from": 1700,
+      "to": 1799,
+      "file": "1700-1799.topo.json",
+      "rows": 1223,
+      "bytes": 1231494,
+      "gzip": 280797,
+      "sha256": "30c0cc635c2e24d81bcae63df84b5685dc7f4d3d1f200823df806f54cd0dd1c1"
+    },
+    {
+      "from": 1800,
+      "to": 1899,
+      "file": "1800-1899.topo.json",
+      "rows": 1745,
+      "bytes": 1857657,
+      "gzip": 449310,
+      "sha256": "603befc860ff80b34ac9d899a7a21a787a76d1ac4af24b7b9d7839755fdc8ad3"
+    },
+    {
+      "from": 1900,
+      "to": 1999,
+      "file": "1900-1999.topo.json",
+      "rows": 1422,
+      "bytes": 1573567,
+      "gzip": 365749,
+      "sha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+    },
+    {
+      "from": 2000,
+      "to": 2024,
+      "file": "2000-2024.topo.json",
+      "rows": 422,
+      "bytes": 357536,
+      "gzip": 103367,
+      "sha256": "c439affd55124c94762b56c985a3139e5c11039533e73cdf5809c32c20dfbae7"
     }
   ]
 }

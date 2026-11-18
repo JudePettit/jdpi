@@ -23,6 +23,17 @@
   color: var(--prp-text); font: 500 14px/1.5 var(--prp-font-ui); }
 .om-note { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--prp-warn); background: var(--prp-surface); color: var(--prp-text); font: 13px/1.5 var(--prp-font-ui); }
 .om-time { margin-top: 10px; }
+/* Play, its step and pace, "Go to year" and every year VM holds: one wrapping row under the track. */
+.om-play { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 8px; font: 13px/1.4 var(--prp-font-ui); color: var(--prp-text-2); }
+.om-play #play { min-width: 5.5em; }
+.om-pick, .om-goto { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.om-play select, .om-goto input { font: 13px/1.3 var(--prp-font-ui); color: var(--prp-text); background: var(--prp-surface); border: 1px solid var(--prp-line-strong);
+  border-radius: var(--prp-radius-sm); padding: 3px 6px; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.om-goto input { width: 7.5em; }
+.om-play select:focus-visible, .om-goto input:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 1px; }
+.om-play [hidden] { display: none; }
+.om-play-note { margin: 6px 0 0; font: 12.5px/1.45 var(--prp-font-ui); color: var(--prp-text-2); }
+.om-play-note:empty { display: none; }
 
 .om-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .om-side .prp-panel-body { padding: 10px 14px; font: 13px/1.5 var(--prp-font-ui); color: var(--prp-text); }

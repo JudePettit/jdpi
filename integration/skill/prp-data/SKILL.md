@@ -28,7 +28,7 @@ small JSON API. Everything is public; no keys, no sign-in. Nothing here can chan
 | New papers or news in science, economics or technology | `latest_briefing` with `scientific`, `economics` or `digital`, and a `topic` | `GET /api/v1/briefings/scientific?topic=physics` |
 | Who or what is X? Where does Vitruvian Manager mention it? | `search_encyclopaedia`, then `get_entity` | `GET /api/v1/search?q=…`, `GET /api/v1/entities/{qid}` |
 | Any table: wars, volatility, indicators, trades, holdings, breakthroughs… | `query_dataset` | `GET /api/v1/datasets/{id}/rows?f.<field>=<value>&sort=-date` |
-| Where and when, on a map (dated borders, battles) | none (a page) | `omni/index.html#vr=1&t=1446..1514&at=1494&fill=borders&l=battles&focus=Q153529` (VR/1; borders 1400–1600 only so far) |
+| Where and when, on a map (dated borders, battles) | none (a page) | `omni/index.html#vr=1&t=1446..1514&at=1494&fill=borders&l=battles&focus=Q153529` (VR/1; borders 3400 BC to AD 2024) |
 | Which Vitruvian Manager page shows this? | `list_submodules` | `GET /api/v1/submodules` |
 
 ## 3. Querying well

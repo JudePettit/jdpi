@@ -56,6 +56,9 @@ export function ticksFor(from, to, { maxLabels = 8, minor = true, bc = from < 0 
 }
 
 const PLAY = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+// The years a view spans, as Play counts them: the moves of one year from its first year to its last. There is no year
+// 0, so 60 BC to AD 61 is 120 years, not 121 (the second review of 18 November 2026).
+export const playSpan = (from, to) => Math.max(1, Math.abs(yearsBetween(from, to)));
 export function playSteps(span, size = 1) {
   const s = Math.max(1, size);
   const out = PLAY.filter(k => k % s === 0 && (k <= Math.max(s, span) || k === s));

@@ -28,7 +28,7 @@ import { formatYear, formatSpan, formatValueDate, valueDateToEdtf, yearOf, addYe
 import { bundleFiles, dataFiles, zipStored, readZip, pin as pinOf, apa } from '../design/vm-bundle.js';
 import { makeMap, webglOk } from './lib/maplibre.js';
 import { yearsText, ownYears } from '../design/vm-click.js';
-import { yearText, readYear, ticksFor, playSteps, playStep, nextStop, keepFiles } from './lib/time.js';
+import { yearText, readYear, ticksFor, playSteps, playStep, playSpan, nextStop, keepFiles } from './lib/time.js';
 
 const M = window.PRPMap, P = window.PRPPeriod;
 const $ = s => document.querySelector(s);
@@ -218,6 +218,8 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   // thumb nor a screen reader passes the new year off as drawn (the year beside the slider moves only once it is).
   loadingNote(file && !S.loaded.has(file.file) ? `Loading the borders for ${yt(year)}…` : null);
   if (file) { try { fc = await bordersFor(file); } catch (e) { S.notes.push(`The borders file could not load: ${e.message}`); } }
+  // Whatever moved the frame (Play, the slider, a typed year, an address), only the last few files used stay decoded.
+  letGo(file ? [file.file] : []);
   if (seq !== S.seq) return;
   loadingNote(null);
   S.fc = fc;
@@ -654,7 +656,7 @@ const PACES = [[250, 'a quarter of a second'], [500, 'half a second'], [1000, 'a
 const playState = () => ({ on: PL.on, step: PL.step, pace: PL.pace });
 function fillSteps(win, size) {
   const sel = $('#play-step');
-  const span = Math.max(1, Math.abs(win.to - win.from));
+  const span = playSpan(win.from, win.to);
   const list = playSteps(span, size);
   const keep = list.includes(PL.step) ? PL.step : playStep(span, size);
   sel.replaceChildren(...list.map(k => { const o = document.createElement('option'); o.value = String(k); o.textContent = k === 1 ? '1 year' : `${k.toLocaleString('en-GB')} years`; return o; }));
@@ -708,6 +710,8 @@ function startPlay() {
 async function move(run, y) {
   const t0 = performance.now();
   const f = M.fileFor(S.index, y);
+  // A move that has to wait for its file says so, as a move by hand does (setFrame finds the file loaded and clears it).
+  if (f && !S.loaded.has(f.file)) loadingNote(`Loading the borders for ${yt(y)}…`);
   if (f) { try { await bordersFor(f); } catch { /* setFrame says the file could not load */ } }
   if (run !== PL.run) return;
   const cur = S.period.get();

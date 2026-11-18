@@ -26,7 +26,7 @@ import { readZip, zipStored, COLUMNS } from '../design/vm-bundle.js';
 import { freshnessLine } from '../design/prp-freshness.js';
 import { resolve, windowFor, frameFor, yearsNote, yearsText, ownYears } from '../design/vm-click.js';
 import { formatSpan } from '../design/vm-dates.js';
-import { yearText, readYear, ticksFor, playSteps, playStep, nextStop, keepFiles } from '../omni/lib/time.js';
+import { yearText, readYear, ticksFor, playSteps, playStep, playSpan, nextStop, keepFiles } from '../omni/lib/time.js';
 import { pageTest, launch, launchOptions } from './tools/pages.mjs';
 import '../design/prp-focus.js';
 import '../design/prp-map.js';
@@ -332,6 +332,16 @@ test('time: Play\'s steps, its next year (no year 0, the last stop, then stop) a
   assert.equal(nextStop(stops, 500, 100), null, 'at the last stop Play stops');
   assert.deepEqual(keepFiles(['a', 'b', 'c', 'd', 'e', 'f'], ['a'], 4), ['b', 'c'], 'the oldest go, never one kept');
   assert.deepEqual(keepFiles(['a', 'b'], [], 4), []);
+  // The second review of 18 November 2026. A view's span has no year 0 in it: 60 BC to AD 61 is 120 years and plays
+  // year by year (121 would default to five), and 1 BC to AD 4 offers no five-year step across four years.
+  assert.equal(playSpan(-60, 61), 120); assert.equal(playStep(playSpan(-60, 61), 1), 1); assert.equal(playStep(121, 1), 5);
+  assert.equal(playSpan(-1, 4), 4); assert.deepEqual(playSteps(playSpan(-1, 4), 1), [1]);
+  assert.equal(playSpan(1446, 1514), 68); assert.equal(playSpan(7, 7), 1);
+  const app = readFileSync(new URL('../omni/app.js', import.meta.url), 'utf8');
+  assert.match(app, /const span = playSpan\(win\.from, win\.to\);/, 'Play counts its span with no year 0');
+  // A move by hand lets go of old files too, not only Play; and a Play move that waits for its file says so.
+  assert.match(app, /letGo\(file \? \[file\.file\] : \[\]\);\s+if \(seq !== S\.seq\) return;/, 'setFrame bounds the decoded files');
+  assert.match(app, /if \(f && !S\.loaded\.has\(f\.file\)\) loadingNote\(`Loading the borders for \$\{yt\(y\)\}…`\);\s+if \(f\) \{ try \{ await bordersFor\(f\)/, 'Play says when it waits for a file');
 });
 
 // Classical Athens as the Master Index holds it (lake/data/e/130.json, read 18 November 2026): founded -0508, no end.

@@ -1048,29 +1048,40 @@ test('Realtime: a circle keeps its pointer and its click over a country and name
     was = now;
     await page.waitForTimeout(300);
   }
-  const spots = await page.evaluate(() => {
-    const m = document.getElementById('map').getBoundingClientRect(), out = [];
-    for (const fx of [0.15, 0.3, 0.5, 0.7, 0.85]) {
-      for (let y = m.top + 40; y < Math.min(m.bottom, innerHeight) - 40; y += 8) {
-        const x = m.left + m.width * fx, el = document.elementFromPoint(x, y);
-        if (el?.matches?.('path.rt-country:not(.rt-dot)')) { out.push({ x, y }); break; }
-      }
+  // A spot is looked for just before its tap, and a tap that opens nothing is made again on a spot found afresh: on a
+  // slow machine the page's last parts can still move the map between the two (a refresh run of 18 November 2026
+  // waited five seconds for a tooltip that a tap on the sea could not open).
+  const spotAt = fx => page.evaluate(fx => {
+    const m = document.getElementById('map').getBoundingClientRect();
+    for (let y = m.top + 40; y < Math.min(m.bottom, innerHeight) - 40; y += 8) {
+      const x = m.left + m.width * fx, el = document.elementFromPoint(x, y);
+      if (el?.matches?.('path.rt-country:not(.rt-dot)')) return { x, y };
     }
-    return out;
-  });
-  assert.ok(spots.length >= 2, `countries to tap across the map (${spots.length})`);
-  for (const s of spots) {
-    await page.mouse.click(s.x, s.y);
-    const r = await (await page.waitForFunction(() => {
-      const t = [...document.querySelectorAll('.leaflet-tooltip.rt-country-tip')].find(x => +getComputedStyle(x).opacity > 0.5);
-      if (!t) return null;
-      const m = document.getElementById('map').getBoundingClientRect(), b = t.getBoundingClientRect();
-      return { left: b.left, right: b.right, mapLeft: m.left, mapRight: m.right };
-    }, null, { timeout: 5000 })).jsonValue();
+    return null;
+  }, fx);
+  let tapped = 0;
+  for (const fx of [0.15, 0.3, 0.5, 0.7, 0.85]) {
+    let r = null, s = null;
+    for (let go = 0; go < 3 && !r; go++) {
+      s = await spotAt(fx);
+      if (!s) break;
+      await page.mouse.click(s.x, s.y);
+      r = await page.waitForFunction(() => {
+        const t = [...document.querySelectorAll('.leaflet-tooltip.rt-country-tip')].find(x => +getComputedStyle(x).opacity > 0.5);
+        if (!t) return null;
+        const m = document.getElementById('map').getBoundingClientRect(), b = t.getBoundingClientRect();
+        return { left: b.left, right: b.right, mapLeft: m.left, mapRight: m.right };
+      }, null, { timeout: 4000 }).then(h => h.jsonValue(), () => null);
+      if (!r) { await page.mouse.move(2, 2); await page.waitForTimeout(400); }
+    }
+    if (!s) continue;
+    assert.ok(r, `a tap on a country at x ${Math.round(s.x)} opens its tooltip`);
     assert.ok(r.left >= r.mapLeft - 1 && r.right <= r.mapRight + 1, `a tap at x ${Math.round(s.x)}: the tooltip ${Math.round(r.left)}–${Math.round(r.right)} is inside the map ${Math.round(r.mapLeft)}–${Math.round(r.mapRight)}`);
+    tapped++;
     await page.mouse.move(2, 2);
     await page.waitForFunction(() => !document.querySelector('.leaflet-tooltip.rt-country-tip'), null, { timeout: 5000 });
   }
+  assert.ok(tapped >= 2, `countries to tap across the map (${tapped})`);
   await page.mouse.move(at.x, at.y);
   await page.mouse.click(at.x, at.y);
   await page.waitForSelector('.detail h2', { timeout: 5000 });

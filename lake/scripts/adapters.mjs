@@ -11,7 +11,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { THINKERS, spectrumTag } from './thinkers.mjs';
+import { THINKERS, positionTag, POSITION_NOTE } from './thinkers.mjs';
 import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
 import { groupBattles, figureLine } from '../../battlefield/focus/figures.mjs';
@@ -144,6 +144,7 @@ export function traders({ jdpiDir }) {
 }
 
 /** Learning: thinkers and schools of thought taught in the Finance, Economics and Politics courses. */
+const HELD = ['Occupation', 'Role'];
 export function learning({ jdpiDir }) {
   const out = [];
   const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
@@ -152,11 +153,14 @@ export function learning({ jdpiDir }) {
     let unit = '', lesson = null, body = '';
     const flush = () => {
       if (!lesson) return;
-      for (const [title, re, tags] of THINKERS) {
+      for (const [title, re, tags, own] of THINKERS) {
         if (!re.test(body) && !re.test(lesson)) continue;
-        const spectrum = course === 'politics' ? spectrumTag(unit, tags) : null;
+        // The Politics course's unit gives its position to those it teaches as their own, as VM's placement, with its
+        // note (thinkers.mjs positionTag, POSITION_NOTE); an occupation or office only where the entry lacks it (mentionTags).
+        const position = course === 'politics' ? positionTag(unit, own) : null;
         out.push({ key: { title }, label: title, module, url: `${JDPI}fe/learning.html?course=${course}&lesson=${slug(lesson)}`,
-          context: `Taught in ${label}: ${lesson}`, tags: [...tags.map(x => ['School or tag', x]), ...(spectrum ? [['Political spectrum', spectrum]] : [])] });
+          context: `Taught in ${label}: ${lesson}`, tags: [...tags.map(t => { const at = t.indexOf(':'), f = t.slice(0, at), v = t.slice(at + 1); return HELD.includes(f) ? [f, v, { held: HELD }] : [f, v]; }),
+            ...(position ? [['Political position', position, { note: POSITION_NOTE }]] : [])] });
       }
     };
     for (const line of text.split('\n')) {
@@ -388,6 +392,35 @@ export const ADAPTER_MODULES = {
   kino: CATEGORY_IDS.map(c => `kino-${c}`), pestle: ['pestle'], volatility: ['volatility'], monthly: ['monthly'],
 };
 // The tag groups only one adapter gives. A --only run of that adapter makes these groups again on every entity it
-// mentions, so a curated tag it no longer gives (a thinker's school, a spectrum position) goes at once, not at the
-// next full build, also on an entity other modules mention too.
-export const ADAPTER_TAG_GROUPS = { learning: ['School or tag', 'Political spectrum'] };
+// mentions, so a curated tag it no longer gives (a thinker's school, a position) goes at once, not at the next full
+// build, also on an entity other modules mention too. Learning's groups before 18 November 2026 ("School or tag",
+// "Political spectrum") are listed too, so a --only run takes them away. The groups it shares with Wikidata and the
+// Retrospective (Ideology, Field, Occupation, Role) are not its alone: a value it no longer gives there goes at the
+// next full build.
+export const ADAPTER_TAG_GROUPS = { learning: ['School', 'Political position', 'Theory', 'School or tag', 'Political spectrum'] };
+
+// A mention's tags as "Group:Value" (Appears in aside, which build.mjs adds). A tag may carry a third element:
+// `{ note }`, a note shown beside it (the Learning adapter's positions: VM's own placement), written into `notes`
+// under the tag; or `{ held: [groups] }`, a tag given only where the entry carries the value under none of those groups,
+// in `have` or in these mentions' other tags (Learning's occupations and offices: "Head of state" is not given under
+// Role to Deng Xiaoping, whom Wikidata gives it as an occupation, nor twice to anyone).
+// A value is shown once: a hand-made School, Ideology, Field or Theory value that is the same word (any case, a hyphen
+// or a space alike) as one of `have`'s Field, Movement or Ideology values in another group or spelling puts that one in
+// `drop`, for the caller to take away, so the discipline's group is the one shown (Mearsheimer's "School:Offensive realism", not also
+// Wikidata's "Field:Offensive realism"; Hitler's "Ideology:Nazism", not also "Field:Nazism").
+export const HAND_GROUPS = ['School', 'Ideology', 'Field', 'Theory'], REPEAT_GROUPS = ['Field', 'Movement', 'Ideology'];
+export function mentionTags(ms, have, notes, drop = new Set()) {
+  const out = [], later = [];
+  for (const m of ms) for (const [f, v, o] of m.tags || []) {
+    if (!v) continue;
+    if (o?.held) { later.push([f, v, o.held]); continue; }
+    out.push(`${f}:${v}`);
+    if (o?.note) notes[`${f}:${v}`] = o.note;
+  }
+  const word = t => t.slice(t.indexOf(':') + 1).toLowerCase().replace(/[\s\-–]+/g, ' ').trim();
+  const hand = new Map(out.filter(t => HAND_GROUPS.includes(t.slice(0, t.indexOf(':')))).map(t => [word(t), t]));
+  for (const t of have) { const at = t.indexOf(':'), mine = hand.get(word(t)); if (mine && mine !== t && REPEAT_GROUPS.includes(t.slice(0, at))) drop.add(t); }
+  const all = new Set([...[...have].filter(t => !drop.has(t)), ...out]);
+  for (const [f, v, held] of later) if (!held.some(g => all.has(`${g}:${v}`))) { out.push(`${f}:${v}`); all.add(`${f}:${v}`); }
+  return [...new Set(out)];
+}

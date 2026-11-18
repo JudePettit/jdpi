@@ -5,28 +5,9 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:Vitruvian Manager Realtime Calendar
 X-WR-CALDESC:Political events from six months ago to eighteen months ahead 
- (2026-05-17 to 2028-05-17)\, from Vitruvian Manager's Realtime Calendar.
+ (2026-05-18 to 2028-05-18)\, from Vitruvian Manager's Realtime Calendar.
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-BEGIN:VEVENT
-UID:aec674ad42d3c485@jdpi.pages.dev
-DTSTAMP:20261117T062043Z
-DTSTART;VALUE=DATE:20260517
-DTEND;VALUE=DATE:20260518
-SUMMARY:2026 Cape Verdean parliamentary election
-DESCRIPTION:Parliamentary elections were held in Cape Verde on 17 May 2026 
- to elect all 72 members of the National Assembly. The African Party for th
- e Independence of Cape Verde (PAICV) won a majority of seats\, unseating t
- he Movement for Democracy (MpD). PAICV leader Francisco Carvalho has been 
- named prime minister–designate of Cape Verde.\n\nElection: Cape Verde\nS
- ource: https://en.wikipedia.org/wiki/2026_Cape_Verdean_parliamentary_elect
- ion\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian Manager (jdpi.pages.de
- v).
-CATEGORIES:Election
-URL:https://en.wikipedia.org/wiki/2026_Cape_Verdean_parliamentary_election
-STATUS:CONFIRMED
-TRANSP:TRANSPARENT
-END:VEVENT
 BEGIN:VEVENT
 UID:2e99f83809831618@jdpi.pages.dev
 DTSTAMP:20261117T062043Z

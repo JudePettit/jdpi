@@ -53,7 +53,7 @@ const EXEMPT = {
   'data-analytics': 'a tool over the other submodules’ datasets, with no entities of its own',
   'integration-hub': 'a catalogue and API of the other submodules’ datasets (the Master Index’s among them), with no entities of its own',
   // Month by Month was exempt here from 15 November 2026 until its adapter (lake/scripts/adapters.mjs, monthly) came on
-  // 17 November; its mentions reach the lake with the next full build (AWAITING_BUILD below).
+  // 17 November; its mentions reached the lake with the full build of 18 November 2026 (MI-12).
   'iot-connect': 'Controls the user’s own devices through the local bridge; names no people, places or events',
   // The Omni-Map (S1, 17 November 2026): its outlines are Cliopatria's rows, named as the source names them, not Master Index
   // entities; its battles are the Master Index's own (read from the lake), and its click comes from Neo Book, which reports.
@@ -84,7 +84,8 @@ const declared = new Map(Object.entries(ADAPTER_MODULES).flatMap(([adapter, mods
 // A submodule whose adapter is new and whose mentions wait for the lake's next full build (one with the network:
 // lake-refresh.yml, on the 3rd of each month), with the date that build is due (a note: the test does not read the
 // clock). Once the committed lake holds the submodule, the test below fails until its line here is taken out.
-const AWAITING_BUILD = { monthly: '2026-12-03' };
+// Month by Month waited here from 17 November until the full build of 18 November 2026 put it in the lake.
+const AWAITING_BUILD = {};
 
 test('registry: every live submodule reports to the Master Index through an adapter, or is exempt with its reason', () => {
   const missing = LIVE.filter(m => !declared.has(m.id) && !(m.id in EXEMPT)).map(m => `${m.suite}/${m.id} (${m.name})`);
@@ -593,6 +594,89 @@ test('committed lake, after the full build: Sparta is a place', t => {
   assert.equal(lakeRecords().get('Q5690')?.type, 'place');
 });
 
+// MI-12, step F3 of VM-MASTER-INDEX-CANON-REVIEW.md (fault 7), and row 10 of VM-ATLAS-TOPICS-SUGGESTIONS.md part D
+// (18 November 2026). Each entity below is given the P31 classes, the dates and the capital Wikidata gave it that day
+// (wbgetentities, read-only), so each line fails on the rule that typed it wrong.
+test('types: the review’s corrections: schools of economics, the Nazi Party, the EU, treaties, just war theory, the non-ideas', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  // Schools of economic thought (Q3048444) were topics.
+  for (const l of ['Keynesian economics', 'Austrian school', 'Chicago school of economics', 'post-Keynesian economics', 'New Keynesian economics', 'Neo-Keynesian economics']) assert.equal(typeOf(e(l, ['Q3048444'])), 'idea', l);
+  assert.equal(typeOf(e('classical economics', ['Q3048444', 'Q137189000'])), 'idea');
+  // The Nazi Party: a political party in Germany, a defunct party, a state party; none was a party class.
+  assert.equal(typeOf(e('Nazi Party', ['Q15811108', 'Q2023214', 'Q40482169', 'Q1469680'], ['P571'])), 'party');
+  // The European Union: an international organisation before a place, though it has a capital (P36).
+  assert.equal(typeOf(e('European Union', ['Q4120211', 'Q120121699', 'Q1335818', 'Q170156'], ['P36', 'P571'])), 'organisation');
+  // A treaty (Q131569) was a place; it is an event, with or without its date.
+  assert.equal(typeOf(e('Paris Agreement', ['Q131569', 'Q5381350', 'Q5133412'], ['P585'])), 'event');
+  assert.equal(typeOf(e('Schengen Agreement', ['Q131569'], ['P585'])), 'event');
+  assert.equal(typeOf(e('START II', ['Q131569'], ['P585'])), 'event');
+  assert.equal(typeOf(e('A treaty with no date', ['Q131569'])), 'event');
+  // "war" in a doctrine's label does not make it a conflict.
+  assert.equal(typeOf(e('just war theory', ['Q117850'])), 'idea');
+  // Not ideas: a label ending in "mechanism" or "magnetism", software, a group of philosophers.
+  assert.equal(typeOf(e('Antikythera mechanism', ['Q220659', 'Q211586', 'Q5275'], ['P580'])), 'topic');
+  assert.equal(typeOf(e('Higgs mechanism', ['Q517596'])), 'topic');
+  assert.equal(typeOf(e('electromagnetism', ['Q4162444'])), 'topic');
+  assert.equal(typeOf(e('AlphaFold', ['Q7397', 'Q117349473', 'Q11660'], ['P571'])), 'topic');
+  assert.equal(typeOf({ id: 'Q208238', ...e('Vienna Circle', ['Q1387659'], ['P571']) }), 'organisation');
+  // The atlas's row 10: the Zhou dynasty is a state as the Shang is; the partition of India an event, not a war.
+  assert.equal(typeOf(e('Zhou dynasty', ['Q12857432', 'Q836688', 'Q11514315'], ['P571'])), 'place');
+  assert.equal(typeOf(e('Shang dynasty', ['Q836688', 'Q12857432', 'Q11042', 'Q1292119', 'Q11514315'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('partition of India', ['Q8465', 'Q518554', 'Q198'], ['P585'])), 'event');
+  // Unchanged: the party named Renaissance, a war, a school of thought, an -ism, a country, a person.
+  assert.equal(typeOf(e('Renaissance', ['Q7278'], ['P571'])), 'party');
+  assert.equal(typeOf(e('Peloponnesian War', ['Q180684'])), 'conflict');
+  assert.equal(typeOf(e('Frankfurt School', ['Q1387659'], ['P571'])), 'idea');
+  assert.equal(typeOf(e('liberalism', [])), 'idea');
+  assert.equal(typeOf(e('Italy', ['Q6256'], ['P36'])), 'place');
+  // A country that Wikidata also makes a supranational union stays a place.
+  assert.equal(typeOf(e('Soviet Union', ['Q512187', 'Q842112', 'Q3024240', 'Q3624078', 'Q1335818', 'Q7275', 'Q6256'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('John Mearsheimer', ['Q5'], ['P569'])), 'person');
+});
+// The fixer's pass (18 November 2026): the parties whose only class is a kind of party below political party (each a
+// subclass of Q7278 in Wikidata that day), the Virginia school (no class at all), and entries a war word in the label
+// made conflicts though their class is no war. Each is given the classes and dates Wikidata gave it that day.
+test('types: every kind of party is a party; a war word does not make a protest, a sanction or a ceasefire a war', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const parties = [['Norwegian Labour Party', ['Q108564724']], ['Progressive Party', ['Q3282509']], ['Democratic Party', ['Q23702035']],
+    ['Union of the Democratic Centre', ['Q6065085', 'Q388602']], ['Communist Party of Ukraine', ['Q115326462']], ['We Continue the Change', ['Q43791339', 'Q388602']],
+    ['Croatian Independent Democrats', ['Q43639983']], ['European People\'s Party', ['Q24649']], ['Green Party of Canada', ['Q3778417']]];
+  for (const [l, p31] of parties) assert.equal(typeOf(e(l, p31, ['P571'])), 'party', l);
+  assert.equal(typeOf(e('Ottoman Liberal People\'s Party', ['Q136193351'])), 'party');
+  assert.equal(typeOf({ id: 'Q3482308', ...e('Virginia school of political economy', []) }), 'idea');
+  // No war: a protest and an international reaction with dates are events; a sanction, an arrest warrant, aid and a list
+  // are topics; a ceasefire with its date is an event.
+  assert.equal(typeOf(e('protests against the 2026 Iran war', ['Q273120'], ['P580'])), 'event');
+  assert.equal(typeOf(e('Gaza war protests', ['Q175331', 'Q273120'], ['P585', 'P580'])), 'event');
+  assert.equal(typeOf(e('international reactions to the Gaza war', ['Q100886746'], ['P585', 'P580'])), 'event');
+  assert.equal(typeOf(e('Twelve-Day War ceasefire', ['Q208383'], ['P585'])), 'event');
+  assert.equal(typeOf(e('international sanctions during the Russo-Ukrainian war', ['Q2061202'])), 'topic');
+  assert.equal(typeOf(e('International Criminal Court arrest warrants for Israel–Hamas war figures', ['Q584041'])), 'topic');
+  assert.equal(typeOf(e('Humanitarian aid during the Gaza war', ['Q826745'])), 'topic');
+  assert.equal(typeOf(e('list of attacks in Iraq during Iraq War and after', ['Q13406463'])), 'topic');
+  // Unchanged: a massacre, a coup and an invasion are still conflicts by the word in their label.
+  assert.equal(typeOf(e('Srebrenica massacre', ['Q135010', 'Q173462', 'Q41397', 'Q3199915'], ['P580'])), 'conflict');
+  assert.equal(typeOf(e('2023 Gabon coup d\'état', ['Q3449092'], ['P585'])), 'conflict');
+  assert.equal(typeOf(e('2003 invasion of Iraq', ['Q467011'], ['P580'])), 'conflict');
+  // A parliamentary group and a political movement are not parties.
+  assert.equal(typeOf(e('A parliamentary group', ['Q36378425'])), 'topic');
+});
+test('committed lake, after the full build: the review’s type corrections hold', t => {
+  if (!afterFullBuild(t)) return;
+  const recs = lakeRecords();
+  const want = { Q83937: 'idea', Q203411: 'idea', Q847001: 'idea', Q271857: 'idea', Q60224: 'idea', Q936174: 'idea', Q7320: 'party', Q458: 'organisation',
+    Q21707860: 'event', Q2822795: 'event', Q1187969: 'event', Q847198: 'idea', Q182324: 'topic', Q747702: 'topic', Q11406: 'topic', Q60827595: 'topic',
+    Q208238: 'organisation', Q35216: 'place', Q129053: 'event', Q23731823: 'party',
+    // The fixer's pass: kinds of party, the Virginia school, a protest, a ceasefire and a sanction.
+    Q190219: 'party', Q208242: 'party', Q691730: 'party', Q2263934: 'party', Q3482308: 'idea', Q138511807: 'event', Q135068588: 'event', Q17373979: 'topic' };
+  // Each must be in the lake: an entry a later build drops is named here, not passed over.
+  for (const [q, type] of Object.entries(want)) { assert.ok(recs.has(q), `${q} is in the lake`); assert.equal(recs.get(q).type, type, `${q} ${recs.get(q).label}`); }
+  // No treaty is a place.
+  assert.deepEqual([...recs.values()].filter(r => r.type === 'place' && /\b(treaty|agreement|accords?|convention|protocol)\b/i.test(r.desc || '')).map(r => r.label), []);
+});
+
 // S0 (16 November 2026): no death precedes a birth. Each date is read at its precision (fp; Wikidata's own reading: a
 // century 1500 is 1401–1500, a millennium 2000 is 1001–2000), so a born "1400" at century precision (Giorgio Scali, died
 // 1382) is no fault. Binds on the data as committed; a fault the full build brings is fixed at its builder.
@@ -1040,8 +1124,10 @@ test('page: Alexander the Great’s facts read 356 BC and 323 BC, and the Duchy 
     return page.$$eval('#entity .facts dt', dts => Object.fromEntries(dts.map(dt => [dt.textContent, dt.nextElementSibling.textContent])));
   };
   const alexander = await facts('Q8409');
-  assert.equal(alexander.Born, '20 July 356 BC');
-  assert.equal(alexander.Died, '10 June 323 BC');
+  // Wikidata gives both dates in the Julian calendar, and since the full build of 18 November 2026 the record says so
+  // (fcal; lake/scripts/dates.mjs, S0 of 16 November 2026, which names this birth).
+  assert.equal(alexander.Born, '20 July 356 BC (Julian calendar)');
+  assert.equal(alexander.Died, '10 June 323 BC (Julian calendar)');
   await facts('Q153529');
   const card = await page.$eval('#entity .card:has(.group, .note) h3', h => h.closest('.card').innerText);
   assert.doesNotMatch(card, /· 0\b|Not mentioned directly/, card);

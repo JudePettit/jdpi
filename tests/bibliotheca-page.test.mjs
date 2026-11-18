@@ -177,8 +177,12 @@ test('era: the National Analysis row opens the country it is about, or is left o
   // A place in one: Ferrara is in Italy (and the Papal States, which is no country today).
   assert.deepEqual(todayCountries({ qid: 'Q13362', entity: lake('Q13362'), terms: prince, byQid }).map(c => c.iso3), ['ITA']);
   // No term, or one in no country of today (the Kingdom of France is its own Country): the book's, most named first.
+  // On War names Spain 19 times, Sweden 6 and Portugal 2 (of 1810) as the countries of today. Its Russia is the
+  // Russian Empire and its Poland the partitioned Commonwealth, neither a country of today, and its Switzerland of
+  // 1799–1830 is left untagged (shelf.mjs, 18 November 2026: the lake has only the Old Confederacy to 1798 and the
+  // federal state of 1848), so Poland and Switzerland are no longer among them.
   const war = todayCountries({ terms: onWar, byQid });
-  assert.deepEqual(war.map(c => [c.iso3, c.from]), [['ESP', 'book'], ['POL', 'book'], ['CHE', 'book']]);
+  assert.deepEqual(war.map(c => [c.iso3, c.from]), [['ESP', 'book'], ['SWE', 'book'], ['PRT', 'book']]);
   assert.match(pestle(war)[0][3], /^Spain today, named \d+ times in this book$/);
   assert.deepEqual(todayCountries({ qid: 'Q70972', entity: lake('Q70972'), terms: manifesto, byQid }).map(c => c.iso3), ['CHE', 'BEL', 'ESP']);
   // None at all: The Prince names none of today's countries, so with the Kingdom of France there is no row.

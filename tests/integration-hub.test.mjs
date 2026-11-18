@@ -455,6 +455,11 @@ describe('tools', () => {
     assert.equal(e.label, 'Korean War'); assert.ok(e.mentions.length <= 3); assert.match(e.summary_licence, /CC BY-SA/);
     const byTitle = (await call('get_entity', { title: 'John Mearsheimer' })).structuredContent;
     assert.equal(byTitle.qid, 'Q461830');
+    // A tag that is VM's own placement says so to a reader of the data as it does on the page (the entry's `tn`).
+    const hayek = (await call('get_entity', { qid: 'Q1325' })).structuredContent;
+    assert.ok(hayek.tags.includes('Political position:Right'));
+    assert.match(hayek.tag_notes['Political position:Right'], /VM’s own placement/);
+    assert.deepEqual(byTitle.tag_notes, {});
     assert.equal((await call('get_entity', { qid: 'Q0' })).isError, true);
     assert.equal((await call('get_entity', { qid: 'Q1/../../x' })).isError, true);
   });

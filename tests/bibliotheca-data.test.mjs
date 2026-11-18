@@ -675,8 +675,12 @@ test('built: every term is of its text’s time: first dated by the time the tex
   // later of the end of the book's period and the year the work was published (a text may speak of its own day:
   // Gibbon's of the Europe of 1788, Smith's of 1776), and the edition's year for a note (Marriott, 1908, may name the
   // British Empire; Milman, 1845, the Austrian). An entity a book keeps although it is dated later goes in ALLOWED,
-  // with the shelf decision that explains it; none does yet.
-  const ALLOWED = new Set();
+  // with the shelf decision that explains it.
+  // - Q209842, the University of Paris of Milman's note to Gibbon's chapter LVIII (its students before A.D. 1200): the
+  //   Master Index's entry is the university of 1150 to 1970 (its summary, and the Invention Timeline's Roger Bacon of
+  //   1267 and Oresme of 1350), but Wikidata now prefers the refoundation of 1896 for its date (volume V's decision
+  //   'University of Paris': 'Q209842' in shelf.mjs).
+  const ALLOWED = new Set(['Q209842']);
   const lake = loadLake(), late = [];
   for (const row of shelfIndex.books) {
     const book = read(join(BOOKS, `${row.slug}.json`));

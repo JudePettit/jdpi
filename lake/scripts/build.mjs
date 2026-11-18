@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, renameSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS } from './adapters.mjs';
+import { ADAPTERS, ADAPTER_MODULES, ADAPTER_TAG_GROUPS, mentionTags } from './adapters.mjs';
 import { recordAliases } from './aliases.mjs';
 import { wikidataDate, datedFacts, bestClaim, centuryTag } from './dates.mjs';
 import { wikidataPoint } from './coords.mjs';
@@ -161,7 +161,16 @@ const PAGE_RELATIONS = ['P102', 'P1142', 'P135', 'P17', 'P27', 'P607', 'P737']; 
 // A date at its precision, the year first and signed: "-0356-07-20" is 20 July 356 BC (dates.mjs). Cut to ten
 // characters, as it was until November 2026, a date BC lost its last digit ("-0356-07-2"), which the page read as 1929.
 const time = c => wikidataDate(c)?.v ?? null;
-const refIds = (e, p) => (e.claims?.[p] || []).filter(c => c.rank !== 'deprecated').map(c => c.mainsnak.datavalue?.value?.id).filter(Boolean);
+// Wikidata statements not shown: each rests on no real source, as read on Wikidata on the day given (the canon review
+// of 17 November 2026, fault 9). Nothing is added here without its reason and the day it was read; a statement that
+// gains a real source on Wikidata is taken off the list. Not shown means neither a tag, nor a fact, nor a related entry.
+const HIDDEN_STATEMENTS = [
+  { q: 'Q461830', p: 'P1142', v: 'Q189280', what: 'John Mearsheimer, political ideology: democratic socialism', why: 'its one reference is "stated in: YouTube" with a video id', read: '2026-11-18' },
+  { q: 'Q7747', p: 'P1142', v: 'Q472246', what: 'Vladimir Putin, political ideology: Machiavellianism', why: 'its references are Machiavelli’s The Prince, given as its "main regulatory text", and a page on a site of student essays', read: '2026-11-18' },
+  { q: 'Q6527', p: 'P135', v: 'Q8361', what: 'Jean-Jacques Rousseau, movement: Baroque music', why: 'it has no reference', read: '2026-11-18' },
+];
+const hidden = new Set(HIDDEN_STATEMENTS.map(h => `${h.q} ${h.p} ${h.v}`));
+const refIds = (e, p) => (e.claims?.[p] || []).filter(c => c.rank !== 'deprecated').map(c => c.mainsnak.datavalue?.value?.id).filter(v => v && !hidden.has(`${e.id} ${p} ${v}`));
 
 // Every wbgetentities of IDs goes through getBatched (resolve.mjs): a batch Wikidata answers with an error (one ID it
 // refuses fails all fifty) is split and asked again, so one bad ID no longer leaves fifty names unread.
@@ -201,6 +210,12 @@ const unnamed = [...[...raw].filter(([, e]) => !e.labels?.en && !e.labels?.mul).
 for (const [q, e] of Object.entries(await wbgetIds(unnamed, { props: 'labels' }, 150))) { const l = otherLabel(e.labels); if (l) foreign.set(q, l); }
 const labels = new Map([...raw].map(([q, e]) => [q, entityLabel(e, { title: e.sitelinks?.enwiki?.title, committed: committedLabel.get(q), other: foreign.get(q), q })]));
 for (const q of labelOnly) { const n = nameOf(q, { fetched: fetchedLabel, committed: committedLabel }); labels.set(q, n !== q ? n : foreign.get(q) || q); }
+// Names Wikidata gives today that are not what its statements meant, each with its reason and the day it was read. An
+// item leaves the list once Wikidata names it rightly again.
+const LABEL_OVERRIDES = [
+  { q: 'Q1227195', label: 'political economist', why: 'its English label "political economist" was removed on 10 November 2026 and a multilingual label "Master’s Degree in Economics" added on 13 November, so seventeen economists, Adam Smith and Ricardo among them, read as holding a degree as their occupation (the item’s history)', read: '2026-11-18' },
+];
+for (const { q, label } of LABEL_OVERRIDES) if (labels.has(q)) labels.set(q, label);
 // Nationality tags read better as demonyms ("American" rather than "United States of America").
 const demonym = new Map();
 const citizenships = [...new Set([...raw.values()].flatMap(e => refIds(e, 'P27')))];
@@ -256,7 +271,9 @@ if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries cou
 const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', monthly: 'Month by Month', kardashev: 'Kardashev Tracker', traders: 'Investor Impersonator', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', 'neo-classic': 'Bibliotheca',
   'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers' };
 const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
-function tagsFor(e, type, ms) {
+// `notes` gathers the notes a module gives a tag (adapters.mjs mentionTags: Learning's positions, VM's own placement),
+// which the record keeps as `tn` and the page shows beside the tag.
+function tagsFor(e, type, ms, notes = {}) {
   const tags = new Set([`Type:${TYPE_NAMES[type]}`]);
   for (const q of refIds(e, 'P27')) tags.add(`Nationality:${demonym.get(q) || labels.get(q) || q}`);
   for (const [p, facet] of Object.entries(TAG_FACETS)) for (const q of refIds(e, p).slice(0, 15)) { const l = labels.get(q); if (l && !/^Q\d+$/.test(l)) tags.add(`${facet}:${l.replace(/^./, c => c.toUpperCase())}`); }
@@ -264,7 +281,11 @@ function tagsFor(e, type, ms) {
   // than a century (dates.mjs centuryTag: Moses's 2nd millennium BC is no "20th century BC").
   const century = centuryTag([e.claims?.P569, e.claims?.P585, e.claims?.P580, e.claims?.P571].map(bestClaim).find(c => wikidataDate(c)));
   if (century) tags.add(century);
-  for (const m of ms) { tags.add(`Appears in:${MODULE_NAMES[m.module] || m.module}`); for (const [f, v] of m.tags || []) if (v) tags.add(`${f}:${v}`); }
+  for (const m of ms) tags.add(`Appears in:${MODULE_NAMES[m.module] || m.module}`);
+  // A Wikidata value a hand-made one repeats goes (mentionTags `drop`): a value is shown once.
+  const drop = new Set();
+  for (const t of mentionTags(ms, tags, notes, drop)) tags.add(t);
+  for (const t of drop) tags.delete(t);
   return [...tags];
 }
 function record(q) {
@@ -306,11 +327,12 @@ function record(q) {
   const { summary, ns } = summaryFor(e.sitelinks?.enwiki, title ? cache[normTitle(title)] : undefined);
   // `n`: the modules the kept list shows short (a place named twice, or past the 300th), so --only can recount (counts.mjs).
   const n = shortCounts(ms, mentionsOut);
+  const tn = {}, tags = tagsFor(e, type, ms, tn);
   return {
     q, label, ...(name !== label ? { name } : {}), desc: e.descriptions?.en?.value || '', type,
     aliases: titleAlias(recordAliases((e.aliases?.en || []).map(a => a.value), label, ms.flatMap(m => m.aliases || [])), { label, name, title, type }), wiki: title, img: img || null,
     summary, ...(ns ? { ns } : {}), facts, ...(Object.keys(fp).length ? { fp } : {}), ...(point ? { pt: point.pt, ...(point.p ? { ptp: point.p } : {}) } : {}), ...(fc.length ? { fc } : {}), ...(fcal.length ? { fcal } : {}), ...(Object.keys(fd).length ? { fd } : {}), rel, mentions: mentionsOut, total: ms.length, ...(places !== mentionsOut.length ? { places } : {}), ...(Object.keys(n).length ? { n } : {}),
-    tags: tagsFor(e, type, ms),
+    tags, ...(Object.keys(tn).length ? { tn } : {}),
   };
 }
 // --only: the committed records with these modules' entities made again (ONLY, at the top). An entity only they
@@ -337,19 +359,23 @@ function onlyMerge() {
     const fresh = record(q);
     const ms = [...others, ...fresh.mentions].sort((a, b) => MODULE_ORDER.indexOf(a.m) - MODULE_ORDER.indexOf(b.m) || String(a.d || '').localeCompare(String(b.d || ''))).slice(0, 300);
     const appears = new Set([...MODS].map(m => `Appears in:${MODULE_NAMES[m] || m}`));
-    const add = mine(q).flatMap(m => [`Appears in:${MODULE_NAMES[m.module] || m.module}`, ...(m.tags || []).filter(([, v]) => v).map(([f, v]) => `${f}:${v}`)]);
-    const next = new Set([...old.tags.filter(t => !appears.has(t) && !ownGroups.has(t.split(':')[0])), ...add]);
+    const drop = new Set(), notes = {}, kept0 = old.tags.filter(t => !appears.has(t) && !ownGroups.has(t.split(':')[0]));
+    const made = mentionTags(mine(q), kept0, notes, drop), base = kept0.filter(t => !drop.has(t));
+    const add = [...mine(q).map(m => `Appears in:${MODULE_NAMES[m.module] || m.module}`), ...made];
+    const next = new Set([...base, ...add]);
+    // The tags' notes: the committed ones on the tags kept from other groups, and these modules' own anew.
+    const tn = Object.fromEntries([...Object.entries(old.tn || {}).filter(([t]) => base.includes(t)), ...Object.entries(notes)].filter(([t]) => next.has(t)));
     // The total less these modules' old share, counted from `n` where the list showed it short, plus their new one; a
     // record whose list cannot show that share (counts.mjs canRecount) is refused, and stays as committed.
     let counted;
     try { counted = recount(old, MODS, mine(q), ms, { adapters: ONLY }); } catch (e) { if (!e.record) throw e; refused.push(e.message); continue; }
-    const { total, n } = counted, { n: _, name: __, places: ___, ...kept } = old;
+    const { total, n } = counted, { n: _, name: __, places: ___, tn: ____, ...kept } = old;
     // The places: those of the other modules (all of them when the list was not cut at 300) and these modules' anew.
     const placesNow = (old.places ?? old.mentions.length) - old.mentions.filter(own).length + (fresh.places ?? fresh.mentions.length);
     const shown = shownName(kept.label, kept.type, { title: kept.wiki });
     out.set(q, { q: kept.q, label: kept.label, ...(shown !== kept.label ? { name: shown } : {}), ...kept, aliases: NAMED ? fresh.aliases : old.aliases, mentions: ms, total,
       ...(placesNow !== ms.length ? { places: placesNow } : {}), ...(Object.keys(n).length ? { n } : {}),
-      tags: [...old.tags.filter(t => next.has(t)), ...[...next].filter(t => !old.tags.includes(t))] });
+      tags: [...old.tags.filter(t => next.has(t)), ...[...next].filter(t => !old.tags.includes(t))], ...(Object.keys(tn).length ? { tn } : {}) });
   }
   const pageRel = new Set(PAGE_RELATIONS.map(p => REL[p]));
   const relOf = r => Object.entries(r?.rel || {}).filter(([k]) => pageRel.has(k)).flatMap(([, list]) => list.map(([x]) => x));
@@ -385,6 +411,15 @@ const index = [], typeCounts = {};
 // order Wikidata answered in or --only met them (numbered as they came, an identical rerun renumbered them all).
 const tagList = [...new Set([...records.values()].flatMap(r => r.tags))].sort();
 const tagIds = new Map(tagList.map((t, i) => [t, i]));
+// The notes records give their tags (`tn`: Learning's positions, VM's own placement), so the Explorer can say so beside
+// the tag in its rows and in the filter's heading: index.json `notes`, { texts: [note], at: { qid: { tagId: note's place } } }.
+const noteTexts = [], notesAt = {};
+for (const [q, r] of records) for (const [t, text] of Object.entries(r.tn || {})) {
+  if (!tagIds.has(t)) continue;
+  let i = noteTexts.indexOf(text);
+  if (i < 0) i = noteTexts.push(text) - 1;
+  (notesAt[q] ||= {})[tagIds.get(t)] = i;
+}
 for (const [q, r] of records) {
   eShards[entityShard(q)][q] = r;
   if (r.wiki) tShards[titleShard(r.wiki)][normTitle(r.wiki)] = q;
@@ -401,10 +436,10 @@ for (const [t, q] of titleToQid) if (records.has(q)) tShards[titleShard(t)][t] =
 eShards.forEach((s, i) => writeFileSync(join(NEW, `e/${i}.json`), JSON.stringify(s)));
 tShards.forEach((s, i) => writeFileSync(join(NEW, `t/${i}.json`), JSON.stringify(s)));
 index.sort((a, b) => b[4] - a[4] || a[1].localeCompare(b[1]));
-// index.json: { tags: ["Facet:Value", …], modules: {id: name}, rows: [[qid, label, type, desc, mentions, aliases, tagIds, [[module, url, count]]]] }
+// index.json: { tags: ["Facet:Value", …], modules: {id: name}, rows: [[qid, label, type, desc, mentions, aliases, tagIds, [[module, url, count]]]], notes: { texts, at } }
 // --only keeps the committed module names (and adds its own), and the committed keys of the entities that stay.
 const modulesOut = only ? { ...readOut('index.json').modules, ...Object.fromEntries([...MODS].map(m => [m, MODULE_NAMES[m] || m])) } : MODULE_NAMES;
-writeFileSync(join(NEW, 'index.json'), JSON.stringify({ tags: tagList, modules: modulesOut, rows: index }));
+writeFileSync(join(NEW, 'index.json'), JSON.stringify({ tags: tagList, modules: modulesOut, rows: index, notes: { texts: noteTexts, at: notesAt } }));
 writeFileSync(join(NEW, 'keys.json'), JSON.stringify(only ? { ...Object.fromEntries(Object.entries(readOut('keys.json')).filter(([, q]) => !only.gone.has(q))), ...keys } : keys));
 // --only counts the mentions as committed less these modules' then, plus theirs now (their keys are Wikidata IDs, all
 // resolved), and the entities with mentions anew.

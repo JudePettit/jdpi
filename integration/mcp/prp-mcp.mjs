@@ -528,7 +528,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       qid = (await getJson(`lake/data/t/${n}.json`, { optional: true }) || {})[norm] || null;
       if (!qid) throw new ToolError(`No Master Index entry has the Wikipedia title "${decoded}". Try search_encyclopaedia.`, 404);
     }
-    if (!qid || !/^Q\d{1,10}$/.test(qid)) throw new ToolError('Give a Wikidata id such as "Q725556", or a Wikipedia title.');
+    if (!qid || !/^Q\d{1,10}$/.test(qid)) throw new ToolError('Give a Wikidata id such as "Q461830", or a Wikipedia title.');
     const e = (await getJson(`lake/data/e/${+qid.slice(1) % 512}.json`, { optional: true }) || {})[qid];
     if (!e) throw new ToolError(`${qid} is not in the Vitruvian Manager Master Index. Try search_encyclopaedia.`, 404);
     const reg = await getJson('registry.json', { optional: true });
@@ -538,7 +538,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
     return {
       qid: e.q, label: e.label, type: e.type, description: e.desc || null, aliases: e.aliases || [], wikipedia: e.wiki ? wikiUrl(e.wiki) : null, image: e.img || null,
       summary: e.summary || null, summary_licence: e.summary ? 'Wikipedia, CC BY-SA 4.0: credit Wikipedia and keep the licence if you reuse it.' : undefined,
-      facts: e.facts || {}, related: Object.fromEntries(Object.entries(e.rel || {}).map(([k, v]) => [k, v.map(([q, label]) => ({ qid: q, label }))])), tags: e.tags || [],
+      facts: e.facts || {}, related: Object.fromEntries(Object.entries(e.rel || {}).map(([k, v]) => [k, v.map(([q, label]) => ({ qid: q, label }))])), tags: e.tags || [], tag_notes: e.tn || {},
       mentions: mentions.slice(0, maxM).map(m => ({ submodule: m.m, submodule_name: names[m.m] || m.m, context: m.c || null, date: m.d || null, url: m.u })),
       total_mentions: e.total ?? mentions.length, ...(mentions.length > maxM ? { more_mentions: mentions.length - maxM } : {}),
       encyclopaedia: `${site}encyclopedia/index.html#${e.q}`, licence: 'Facts: Wikidata (CC0). Summary: Wikipedia (CC BY-SA 4.0).', notice: NOTICE
@@ -725,7 +725,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
     { name: 'get_entity', title: 'Get a Master Index entry', fn: getEntity,
       description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
-      inputSchema: S({ qid: { type: 'string', description: 'Wikidata id, e.g. "Q725556".' }, title: { type: 'string', description: 'English Wikipedia title instead of a qid, e.g. "John Mearsheimer".' }, mentions: { type: 'integer', minimum: 1, maximum: 50, description: 'How many mentions to list (default 15).' } }) },
+      inputSchema: S({ qid: { type: 'string', description: 'Wikidata id, e.g. "Q461830".' }, title: { type: 'string', description: 'English Wikipedia title instead of a qid, e.g. "John Mearsheimer".' }, mentions: { type: 'integer', minimum: 1, maximum: 50, description: 'How many mentions to list (default 15).' } }) },
     { name: 'upcoming_events', title: 'Political calendar', fn: upcomingEvents,
       description: `Political events from Vitruvian Manager's Realtime and Historical Calendars in a date range (default: today to 18 months ahead): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more. Filter by country and type. Types: ${Object.keys(EVENT_TYPES).join(', ')}; families: ${Object.keys(EVENT_FAMILIES).join(', ')}.`,
       inputSchema: S({ country: { type: 'string', description: 'Country name or ISO code.' }, type: { description: 'Event type(s) or a family, e.g. "election" or ["election","referendum"].', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },

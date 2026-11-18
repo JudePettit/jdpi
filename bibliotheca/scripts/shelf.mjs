@@ -121,6 +121,32 @@ const GIBBON = {
     ...untag('Antiochus', 'Alexander III', 'Two Sicilies'),
     // "Oxon." in a reference is Oxford as a place of printing, and the lake's alias would end a term on its full stop.
     ...untag('Oxon.'),
+    // Gibbon's Bulgaria is the Bulgarians' kingdoms of the seventh to fourteenth centuries and the Roman Mæsia ("the
+    // kingdom of Bulgaria was destroyed", "the second kingdom of Bulgaria"), his Georgia the Caucasian Iberia ("Iberia,
+    // or Georgia") and twice Virgil's Georgics ("the 1st Georgia"): the lake has only the states of 1878 and 1991 under
+    // the bare words, and no older Bulgaria or Georgia, so both are left untagged (Wikidata dated them so in 2026).
+    ...untag('Bulgaria', 'Georgia'),
+    // Russia, where Gibbon speaks of his own day and Milman of 1845 ("Russia now assumes the form of a powerful and
+    // civilized empire", "the empire of Russia", "Dorpat in Russia"), is the Russian Empire (1721–1917), not the
+    // federation the lake now has under the bare word; the medieval Russia of volumes V and VI is left untagged there,
+    // and so is the "Polish Russia" (Red Ruthenia) of chapter XLVIII.
+    Russia: 'Q34266',
+    ...untag('Polish Russia'),
+    // Namesakes of thinkers the lake has gained: Malchus is the Byzantine historian ("the historian Malchus") or Jerome's
+    // monk, never Porphyry, whose birth name the lake has as an alias; Gregorius is Gregory of Tours ("Gregorius
+    // Florentius Georgius"), Bar-Hebraeus and the popes Gregory II and III, never Gregory of Nyssa; "Scotus" is the
+    // chronicler Marianus Scotus, not Eriugena; Porphyry of Gaza is the bishop, and "the Porphyry of Egypt" the stone.
+    // Attalus is Priscus Attalus, the emperor Alaric made (chapter XXXI), and the hostage whose escape Gregory of Tours
+    // tells (chapter XXXVIII), never the Stoic philosopher who is the lake's only Attalus.
+    ...untag('Malchus', 'Gregorius', 'Scotus', 'Porphyry of Gaza', 'Porphyry of Egypt', 'Attalus'),
+    // "St. Paul" is the apostle, except in these: St. Paul's Cathedral (Milman's measure), the geographer Charles de
+    // St. Paul, Paul of Constantinople, the church and the gate of St. Paul at Rome and the altar of his basilica, and
+    // the crusader count of St. Paul (Saint-Pol); the church of St. John the Baptist at Constantinople is the church,
+    // not the saint; the Société de Jesus is the Jesuits' order, not Jesus.
+    ...untag('St. Paul’s Cathedral', 'Charles de St. Paul', 'St. Paul of Constantinople', 'church of St. Paul', 'gate of St. Paul',
+      'altar of St. Paul', 'count of St. Paul', 'church of St. John the Baptist', 'Société de Jesus'),
+    // The Sea of Japan is the sea (chapter XXVI), not the Tokugawa shogunate that is Gibbon's Japan elsewhere.
+    ...untag('Sea of Japan'),
   },
 };
 const VOLUME = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -222,6 +248,10 @@ function smith(volume, { start, end, parts, chapters, sections }) {
       // Smith's Naples is the Kingdom ("the expedition of Charles VIII. to Naples", "the kingdom of Naples"), which the
       // Prince's cast feeds the lake; the lake's bare word was the city.
       Naples: 'Q173065',
+      // Smith's Russia is the empire of his day ("the empire of Russia", "the peace between Russia and Turkey"), not the
+      // federation the lake now has under the bare word; the Russia company is the Muscovy Company of merchants.
+      Russia: 'Q34266',
+      ...untag('Russia company'),
     },
   };
 }
@@ -475,6 +505,10 @@ export const SHELF = [
       // says.) The village of Polis is the lake's idea "polis" (an idea's name matches in any case, so the decision is
       // the lower-case word) and Neapolis in Thrace is not Naples.
       ...untag('Hippocrates', 'Hipparchus', 'Lycophron', 'Alcmaeon', 'Aristotle', 'Epicurus', 'Socrates', 'Xenophon'),
+      // And two fathers: "Xenophon, son of Euripides" is not the playwright, "Lamachus, son of Xenophanes" not the
+      // philosopher of Colophon. The "country once called Aeolis, and now Calydon and Pleuron" is in Aetolia, not the
+      // Aeolis of Asia whose town is Cyme.
+      ...untag('Euripides', 'Xenophanes', 'Aeolis'),
     },
   },
   {
@@ -536,6 +570,9 @@ export const SHELF = [
       ...untag('Man', 'Mann', 'Caledonia', 'States', 'Mexican', 'prion', 'Unity', 'Natural History'),
       // Namesakes: Elias Fries the botanist, Colonel Hamilton Smith.
       ...untag('Fries', 'Hamilton'),
+      // Darwin's Russia ("In Russia the small Asiatic cockroach", Murchison's "great work on Russia") is the empire of
+      // his day, not the federation the lake now has under the bare word.
+      Russia: 'Q34266',
     },
   },
   smith(1, {
@@ -561,7 +598,12 @@ export const SHELF = [
     // Severus" in full is still a term. Cyrus is the founder of Persia every time in this volume ("the empire of
     // Cyrus", Xerxes "the descendant of Cyrus"), a name the Prince's cast feeds the lake without (the later volumes'
     // Cyrus are others).
-    decisions: { Rome: 'Q1747689', Germany: null, Moses: null, 'Marcus Aurelius Antoninus': null, Severus: null, Cyrus: 'Q8423' },
+    // Milman's population table of 1845 (note to chapter II, from the Almanach de Gotha) counts the Poland of the
+    // partitions, "Prussian and Austrian Poland" and Russia's Congress Poland ("Russia, including Poland"), not the
+    // Commonwealth of 1569–1795 that is Gibbon's Poland beside them ("six in Poland"), so those two phrases are left
+    // untagged whole.
+    decisions: { Rome: 'Q1747689', Germany: null, Moses: null, 'Marcus Aurelius Antoninus': null, Severus: null, Cyrus: 'Q8423',
+      ...untag('Prussian and Austrian Poland', 'including Poland') },
     // After the contents: the editor's preface and Gibbon's three share chapter 0 (the Gutenberg heads them all
     // "Introduction", a label of its own that goes). Chapter I's long title is the file's "Introduction." block and
     // the title after it, joined as Milman prints them. Three words of the long titles are broken in the file, in its
@@ -595,7 +637,14 @@ export const SHELF = [
     // Severus, Alexander Severus, Severus of Antioch; Cyrus a river, a bishop and a prefect; David of Armenia and the
     // Comneni; Moses still of Chorene. Socrates is the church historian more than the philosopher, Mahomet "Mahomet
     // the Second", Bentivoglio the cardinal and historian.
-    decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Mahomet: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Bentivoglio') },
+    // Lucian here is as often the eunuch of Diocletian's household, the martyr Lucian of Antioch and the confessor
+    // Lucianus of Cyprian's letters as Lucian of Samosata; Boethius is Hector Boece, the historian of Scotland ("the
+    // fancy of Boethius, and the classic elegance of Buchanan"); Syrianus is the duke of Egypt who invested Athanasius's
+    // church, not the philosopher; the "acts of St. Paul" are those of Paul of Constantinople. "The three Basilicæ of
+    // Rome, St. Peter, St. Paul, and St. John Lateran" of chapter XX are three churches and their estates, not the
+    // apostles.
+    decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Mahomet: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Bentivoglio'),
+      ...untag('Lucian', 'Lucianus', 'Boethius', 'Syrianus', 'acts of St. Paul', 'St. Peter, St. Paul, and St. John Lateran') },
   }),
   gibbon(3, {
     gutenberg: 733, first: 27, count: 12, written: 1781, published: 1781, appeared: '1781',
@@ -608,7 +657,11 @@ export const SHELF = [
     fix: [['Origin Progress,', 'Origin, Progress,', 2]],
     // Anthemius is the western emperor of 467, not the architect of St. Sophia (volume IV's).
     // Romulus is Romulus Augustulus, the last emperor of the West, as often as the founder (and see volume II's).
-    decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Anthemius: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Romulus') },
+    // Lucian is the presbyter of Caphargamala and the son of the præfect Florentius six times in seven, not Lucian of
+    // Samosata; Boethius the Prætorian præfect killed with Aëtius in 454, not the philosopher; "Plutarch in Pyrrho" is
+    // his Life of Pyrrhus, not Pyrrho the sceptic.
+    decisions: { Rome: 'Q1747689', Germany: null, Socrates: null, Anthemius: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Romulus'),
+      ...untag('Lucian', 'Boethius', 'Pyrrho') },
   }),
   gibbon(4, {
     gutenberg: 734, first: 39, count: 10, written: 1787, published: 1788, appeared: '1788',
@@ -636,7 +689,14 @@ export const SHELF = [
     // four men in this volume (the Neoplatonist, Justin's quaestor, the engineer said to have burned the Gothic fleet,
     // and a bishop of Constantinople), and the lake has only the philosopher (one of Hegel's "Influenced by"), so the
     // name is left untagged like Severus and Cyrus: tagged, nine of its fourteen would be him and wrong.
-    decisions: { Rome: null, Germany: null, Socrates: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Proclus') },
+    // Porphyry is the philosopher ("the logic of Aristotle, with the commentary of Porphyry"); the stone, which the
+    // volume writes in lower case, is left out by the shared "Porphyry of Egypt".
+    // Seneca in a note to chapter XLIV, "Seneca (Excerpt. Controvers. v 4)", is Seneca the Elder of the Controversiae,
+    // whom the lake lacks, not the philosopher who is its Seneca; and the "Rome and Russia" that Manuel Comnenus's
+    // embassies reached (chapter XLVIII) is the twelfth century's Rus', not the Russian Empire the volume's other
+    // Russias are, so both are left untagged.
+    decisions: { Rome: null, Germany: null, Socrates: null, ...untag('Severus', 'Cyrus', 'David', 'Moses', 'Proclus'), Porphyry: 'Q203445',
+      ...untag('Seneca (Excerpt', 'Rome and Russia') },
   }),
   gibbon(5, {
     gutenberg: 735, first: 49, count: 10, written: 1787, published: 1788, appeared: '1788',
@@ -644,8 +704,14 @@ export const SHELF = [
     era: [570, 1099],
     start: /^ {6}Chapter XLIX:/,
     // Germany is the Empire's ("the constitution of the Germanic body"); Russia the Russians of the ninth to the
-    // eleventh century, not the empire of 1721.
-    decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Russia: null, ...untag('Severus', 'Cyrus', 'David', 'Pope Alexander') },
+    // eleventh century, not the empire of 1721. Poland is the dukes' and kings' of the tenth and eleventh centuries
+    // ("the dukes of Poland and Bohemia", "the duke of Poland" of 1000), which the lake's Polish–Lithuanian
+    // Commonwealth (1569) is not and its Kingdom of Poland (1025–1385) only in part, so it is left untagged. The
+    // University of Paris of Milman's note to chapter LVIII (its students' joke "not later than A.D. 1200") is the
+    // Master Index's University of Paris, whose entry is the university of 1150 to 1970 although Wikidata now prefers
+    // its refoundation of 1896 for the date (the data test allows it, with this decision).
+    decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Russia: null, ...untag('Severus', 'Cyrus', 'David', 'Pope Alexander'),
+      Poland: null, 'University of Paris': 'Q209842' },
   }),
   gibbon(6, {
     gutenberg: 736, first: 59, count: 13, written: 1787, published: 1788, appeared: '1788',
@@ -657,7 +723,14 @@ export const SHELF = [
     // Mahomet is the prophet and the sultans Mahomet I and II; Athens the Latin duchy, not Classical Athens. The Song
     // of Chapter LXIV ("the dynasty of the Song", in italics in the file) are the Song dynasty, a word the text also
     // has in lower case.
-    decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Mahomet: null, Athens: null, Song: 'Q7462', ...untag('Severus', 'Cyrus', 'David') },
+    // Russia is the great dukes' and the khans' of the twelfth to fifteenth centuries ("the great dukes of Russia",
+    // "the conquest of Russia" by the Moguls), not the empire of 1721; Poland the medieval kingdom ("the kings of
+    // Poland and Bohemia" of 1147, "Ladislaus of Poland"), split in the lake between its kingdoms of 1025–1385 and
+    // 1386–1569 and not the Commonwealth of 1569; Japan is Cublai's target of the 1270s and the Buddhists' Japan, not
+    // the Tokugawa shogunate. All three are left untagged. The Jubilee's "apostolic churches of St. Peter and St. Paul"
+    // (chapter LXIX) are the two basilicas of Rome, not the apostles.
+    decisions: { Rome: null, Germany: 'Q12548', Socrates: null, Mahomet: null, Athens: null, Song: 'Q7462', ...untag('Severus', 'Cyrus', 'David'),
+      Russia: null, Poland: null, Japan: null, ...untag('churches of St. Peter and St. Paul') },
   }),
   {
     slug: 'on-war',
@@ -748,6 +821,17 @@ export const SHELF = [
       // Graham's "States" are states, not the United States; "King’s" is no college; Marshal Luxembourg is not the
       // grand duchy; a Bologna phial is not the city; the North German Confederation of a plan of 1830 is not 1867's.
       ...untag('States', 'King\'s', 'Unity', 'Republic', 'Luxembourg', 'Bologna', 'North German Confederation'),
+      // Russia, of 1812 and of the Emperor Alexander (and Maude's of 1887), is the Russian Empire, not the federation
+      // the lake now has under the bare word. Switzerland is the country of 1799, 1814 and the plan of 1830, after the
+      // Old Confederacy (to 1798) and before the federal state of 1848, neither of which it is: the lake has nothing
+      // between, so the word is left untagged. (Clausewitz's Poland, partitioned "for a hundred years" talked of, is
+      // the Commonwealth the lake gives it.)
+      Russia: 'Q34266',
+      Switzerland: null,
+      // The "German Confederation" that Austria tows "like a small vessel behind her" after Charles V's abdication
+      // (Book VIII, chapter III, from Louis XI to Louis XIV) is Graham's word for the Empire of the sixteenth and
+      // seventeenth centuries, the Holy Roman Empire, not the Confederation of 1815.
+      'German Confederation': 'Q12548',
     },
   },
   {
@@ -815,6 +899,11 @@ export const SHELF = [
       Darwin: 'Q1035', Herzen: 'Q201221', Bakounine: 'Q27645',
       Rome: 'Q1747689',
       ...untag('Owen', 'England', 'nucleus'),
+      // Engels's Russia, where "Haxthausen discovered common ownership of land", is the Russian Empire, not the federation
+      // the lake now has under the bare word; Poland, whose party "fomented the insurrection of Cracow in 1846", is the
+      // partitioned nation, neither the Commonwealth of 1569–1795 nor the state of 1918, so it is left untagged.
+      Russia: 'Q34266',
+      Poland: null,
     },
   },
   bohmBawerk({

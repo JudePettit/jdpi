@@ -71,7 +71,7 @@ The far left has held power in many states:
 * Vladimir Lenin
 = Luxemburg supported revolution but criticised Bolshevik suppression of free elections and a free press.
 
-# Left wing · Social democracy and progressive liberalism
+# Left · Social democracy and progressive liberalism
 
 ## Thinkers of the democratic left
 The mainstream left accepts **democracy and a market economy**, but wants to make them fairer through the state: redistribution, public services, workers' rights and regulation.
@@ -145,7 +145,7 @@ Centrists favour **pragmatism over ideology**: market economies with a social sa
 * The Maastricht Treaty
 = Clause IV committed Labour to common ownership of the means of production; Blair replaced it with a statement of democratic socialist values.
 
-# Right wing · Conservatism and market liberalism
+# Right · Conservatism and market liberalism
 
 ## Thinkers of the right
 The mainstream right accepts **democracy and the market economy**. It joins **conservatism**, which values inherited institutions and gradual change, with **classical liberalism** (or market liberalism), which defends free markets and limited government.
@@ -192,10 +192,10 @@ The mainstream right accepts **democracy and the market economy**. It joins **co
 * Founding the National Health Service
 = Thatcher's governments sold most large state utilities; the nationalisations and the NHS were the work of Attlee's Labour government.
 
-# Outside the spectrum · John Mearsheimer and the Realists
+# Realism · John Mearsheimer and the Realists
 
 ## The realist tradition
-**Realism** is the school of international relations that sees world politics as a struggle for **power and security** among states, with a scepticism of idealism, a focus on national interest and, in its classical form, a view of human nature as self-interested. It is sui generis (of its own kind): a theory of how states behave towards one another, not a position on the line from left to right. People of the left, the centre and the right have held it, and realists often criticise left-wing and right-wing governments alike.
+**Realism** is the school of international relations that sees world politics as a struggle for **power and security** among states, with a scepticism of idealism, a focus on national interest and, in its classical form, a view of human nature as self-interested. It is a theory of how states behave towards one another, not a position on the line from left to right. People of the left, the centre and the right have held it, and realists often criticise left-wing and right-wing governments alike.
 
 ### Classical roots
 - **Thucydides**, in his history of the Peloponnesian War (5th century BC), recorded the Athenian envoys telling the people of Melos (in Richard Crawley's translation) that "the strong do what they can and the weak suffer what they must."

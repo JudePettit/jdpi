@@ -1097,7 +1097,8 @@ test('page: each Month by Month mention opens its mark at the top of the Marks t
         const id = 'u-' + decodeURIComponent(m.url.split('unit=')[1]).replace(/[^a-z0-9-]/gi, '-');
         await page.goto('about:blank');
         await page.goto(m.url.replace(JDPI, `${BASE}/`), { waitUntil: 'domcontentloaded', timeout: 30000 });
-        const top = await page.waitForSelector(`#${id}`, { timeout: 15000 }).then(() => page.waitForFunction(i => { const r = document.getElementById(i).getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight / 2 ? r.top : false; }, id, { timeout: 5000 })).then(h => h.jsonValue()).catch(() => null);
+        const top = await page.waitForSelector(`#${id}`, { timeout: 15000 }).then(() => page.waitForFunction(i => { const r = document.getElementById(i).getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight / 2 ? [r.top] : false; }, id, { timeout: 5000 })).then(h => h.jsonValue()).catch(() => null);
+        // (The top comes back in a list: a mark that lands at exactly 0 pixels is at the top, and a bare 0 would read as "not yet".)
         if (top == null) bad.push(`${width}: ${m.label} (${id})`);
       }
       await page.close();

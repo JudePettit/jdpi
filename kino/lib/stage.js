@@ -131,10 +131,13 @@ class MapView {
     this.overlay.innerHTML = '';
     const target = (this.target = viewFor(scene, this.g)), token = (this.token = (this.token || 0) + 1);
     place?.();
-    if (!animate || reduced()) { this.apply(target); this.drawOverlay(); return; }
+    if (!animate || reduced()) { delete this.svg.dataset.glide; this.apply(target); this.drawOverlay(); return; }
     const interp = this.g.d3.interpolateZoom(this.view, target);
     const ms = Math.max(900, Math.min(2600, interp.duration * 0.9));
     const t0 = performance.now(), ease = this.g.d3.easeCubicInOut;
+    // While the view glides the map says so (data-glide, set in the task that lights the scene's countries), so
+    // whatever waits for the scene's frame waits for the glide's end and not for a pause between two of its frames.
+    this.svg.dataset.glide = String(token);
     await new Promise(resolve => {
       const frame = now => {
         if (token !== this.token) return resolve();
@@ -144,7 +147,7 @@ class MapView {
       };
       requestAnimationFrame(frame);
     });
-    if (token === this.token) this.drawOverlay();
+    if (token === this.token) { delete this.svg.dataset.glide; this.drawOverlay(); }
   }
 
   /** Arrows, fronts, points and labels, in screen-sized units at the current view. */

@@ -2077,7 +2077,11 @@ const keyAt = page => page.evaluate(() => {
 // Opened by its address, a film shows its scene once its captions do; then the view glides to the scene's frame. With
 // watch, the film is first opened on the scene before, left to settle, and then moved on to this one (as when it plays),
 // and where the key is seen while the view glides is returned.
-const sceneSettled = page => page.waitForFunction(() => new Promise(r => { const w = () => document.querySelector('.kn-stage svg.kn-map g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w()), 600); }), null, { timeout: 20000, polling: 700 });
+// Settled: the glide to the scene's frame has ended (the map carries data-glide while it glides) and the view has not
+// moved for 600 ms. The stillness alone was not enough: on a loaded machine two frames of a glide can lie more than
+// 600 ms apart, and the key was then measured against the frame before (run 44170426552, 17 November 2026: France
+// under the Mediterranean scene's key at 1920 px).
+const sceneSettled = page => page.waitForFunction(() => new Promise(r => { const svg = document.querySelector('.kn-stage svg.kn-map'), w = () => svg?.querySelector('g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w() && !svg.dataset.glide), 600); }), null, { timeout: 20000, polling: 700 });
 async function openScene(page, cat, doc, s, watch) {
   const scenes = flatScenes(ctx.docs.get(doc)), i = scenes.findIndex(x => x.id === s), title = scenes[i].title;
   const at = id => `${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${id}`;

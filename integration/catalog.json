@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-18T04:16:50.565Z",
+  "generated": "2026-11-18T06:25:01.034Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1051,7 +1051,7 @@
           "description": "For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court"
         }
       ],
-      "rows": 311,
+      "rows": 320,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1061,7 +1061,7 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-18",
       "refresh": "daily",
       "page": "q/calendar.html?period=contemporary",
       "derivedFrom": [
@@ -1071,7 +1071,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 153565
+      "bytes": 159921
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1979,9 +1979,14 @@
           "name": "refName",
           "type": "string",
           "description": "Name of that news outlet"
+        },
+        {
+          "name": "level",
+          "type": "string",
+          "description": "For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court"
         }
       ],
-      "rows": 5986,
+      "rows": 5999,
       "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
@@ -1991,10 +1996,10 @@
         "Wikidata (CC0)",
         "Wikipedia Current events portal (CC BY-SA), from January 2026"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-18",
       "refresh": "daily",
       "page": "q/calendar.html?period=history",
-      "bytes": 2735235
+      "bytes": 2745744
     },
     {
       "id": "encyclopaedia-entities",

@@ -459,10 +459,12 @@ export const urlKey = u => String(u).replace(/^https?:\/\/(www\.)?/i, '').replac
 const byNewest = (a, b) => b.at - a.at || a.n - b.n;
 // How typical each of a group's headlines is of the story as a whole: for each of its terms, the term's share of the
 // group's headlines times its rarity, summed, over the square root of its number of terms. The most typical first, a tie
-// to the older headline (then the first read).
+// to the older headline (then the first read). The score is kept to nine decimal places: two headlines with the same
+// terms in another order add up to sums that differ in the last binary digit, and by which way depends on the engine, so
+// unrounded the browser and Node could each name a different lead (refresh run 44326050282, 18 November 2026).
 function typicality(model, g) {
   const size = g.items.length;
-  const score = new Map(g.items.map((i, m) => { const ts = g.toks[m]; return [i, ts.reduce((a, k) => a + ((g.tf.get(k) || 0) / size) * model.idf(k), 0) / Math.sqrt(ts.length || 1)]; }));
+  const score = new Map(g.items.map((i, m) => { const ts = g.toks[m]; return [i, Math.round(ts.reduce((a, k) => a + ((g.tf.get(k) || 0) / size) * model.idf(k), 0) / Math.sqrt(ts.length || 1) * 1e9) / 1e9]; }));
   return { score, order: (a, b) => score.get(b) - score.get(a) || a.at - b.at || a.n - b.n };
 }
 

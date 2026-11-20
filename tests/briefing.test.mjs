@@ -219,8 +219,9 @@ function topsWeek(now = TNOW) {
     pol('r1', 'Massie files Brennick impeachment articles', 2), pol('r2', 'Brennick impeachment articles filed by Massie', 10), pol('fr1', 'Massie Brennick impeachment articles', 11), pol('fr2', 'Brennick impeachment articles: Massie acts', 12),
     // Zorvex: four publishers, far left and left only, the newest 5 hours ago
     pol('fl1', 'Mamdani freezes Zorvex transit fares', 5), pol('fl2', 'Zorvex transit fares frozen by Mamdani', 13), pol('l1', 'Mamdani Zorvex transit fares freeze', 14), pol('l2', 'Zorvex transit fares: Mamdani freeze', 15),
-    // Vantor: two publishers, neither free (c1 paid, l2 metered), 16 and 17 hours ago
-    pol('c1', 'Vantor pension fund sues Brexley bank', 16), pol('l2', 'Brexley bank sued by Vantor pension fund', 17),
+    // Vantor: two publishers, neither free (c1 paid, l2 metered), 17 and 16 hours ago. The two headlines carry the same
+    // terms, so they are as typical as each other and the older, c1's, leads.
+    pol('c1', 'Vantor pension fund sues Brexley bank', 17), pol('l2', 'Brexley bank sued by Vantor pension fund', 16),
     // Quillon: two centre publishers, 30 and 31 hours ago; c1 is paid
     pol('c1', 'Quillon refinery fire forces evacuation', 30), pol('c2', 'Quillon refinery fire evacuation ordered', 31),
     pol('fr2', 'Local fair opens with pumpkin contest', 1),
@@ -240,6 +241,33 @@ test('top stories: ranked by the publishers that ran them, a tie to the newer he
   assert.equal(top[0].headlines, 7, 'the sport headline is left out, as Hard news only does');
   assert.ok(top[0].entries.every(e => !/football/.test(e.item.t)));
   assert.deepEqual(HB_POSITIONS.map(p => top[0].positions[p]), [1, 1, 2, 2, 1]);
+});
+
+// Two headlines made of the same terms in another order are as typical as each other, whatever the order their terms
+// are added up in: the sums differ in the last binary digit, and the browser and Node need not agree which is the larger
+// (refresh run 44326050282, 18 November 2026: the page led with one Hill headline, this file's model with the other).
+test('top stories: headlines of the same terms in another order tie, and the older is the more typical', () => {
+  const W = ['bral', 'drim', 'fost', 'gulp', 'hask', 'jolm', 'kerv', 'lund', 'mirb', 'nopt'];
+  const items = [];
+  for (let k = 0; k < 26; k++) {
+    const [a, b, c, d, e, f, g, h, i, j] = W.map(w => `${w}${String.fromCharCode(97 + k)}ux`);
+    const at = n => tAgo(2 + k + n), it = (s, t, p) => items.push({ s, t, u: `https://${s}.example/${t.replace(/ /g, '-')}`, p, d: '' });
+    // the two under test, the older now in one order of words, now in the other; three more of the story, so that its
+    // four terms differ in how many headlines carry them
+    it('l1', k % 2 ? `${a} ${b} ${c} ${d}` : `${d} ${c} ${b} ${a}`, at(0.5)); it('r1', k % 2 ? `${d} ${c} ${b} ${a}` : `${a} ${b} ${c} ${d}`, at(0));
+    it('c2', `${a} ${b} ${c} ${e}`, at(0.1)); it('fr1', `${a} ${b} ${f} ${g}`, at(0.2)); it('fl1', `${a} ${h} ${i} ${j}`, at(0.3));
+  }
+  const store = { generated: tAgo(1), keepDays: 7, perPosition: 10, positions: HB_POSITIONS.map(key => ({ key, label: HB_LABELS[key] })), sources: TSRC, items };
+  const M = buildModel([store, null, null, null], { now: TNOW, access: globalThis.PRPAccess.table({ sources: [] }) });
+  const tops = politicalTops(M, '3d');
+  let pairs = 0;
+  for (const s of tops) {
+    const older = s.entries.find(x => x.item.sid === 'l1'), newer = s.entries.find(x => x.item.sid === 'r1');
+    if (!older || !newer) continue;
+    pairs++;
+    assert.ok(older.rank < newer.rank, `${older.item.t}: the older of two headlines with the same terms comes first (ranks ${older.rank} and ${newer.rank})`);
+  }
+  assert.equal(pairs, 26, 'every pair is in one story');
 });
 
 test('top stories: each position\'s list counts only its own publishers, needs two of them, and leads with its own headline', () => {

@@ -2081,7 +2081,12 @@ const keyAt = page => page.evaluate(() => {
 // moved for 600 ms. The stillness alone was not enough: on a loaded machine two frames of a glide can lie more than
 // 600 ms apart, and the key was then measured against the frame before (run 44170426552, 17 November 2026: France
 // under the Mediterranean scene's key at 1920 px).
-const sceneSettled = page => page.waitForFunction(() => new Promise(r => { const svg = document.querySelector('.kn-stage svg.kn-map'), w = () => svg?.querySelector('g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w() && !svg.dataset.glide), 600); }), null, { timeout: 20000, polling: 700 });
+// And the web fonts have loaded (the key is placed again when one arrives: run 44257468692, 18 November 2026, one
+// sample of France under the same key at 1440 px after the glide was already waited for), with two frames for that.
+const sceneSettled = async page => {
+  await page.evaluate(() => document.fonts.ready.then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))));
+  return page.waitForFunction(() => new Promise(r => { const svg = document.querySelector('.kn-stage svg.kn-map'), w = () => svg?.querySelector('g.world')?.getAttribute('transform'); const a = w(); setTimeout(() => r(a && a === w() && !svg.dataset.glide && document.fonts.status === 'loaded'), 600); }), null, { timeout: 20000, polling: 700 });
+};
 async function openScene(page, cat, doc, s, watch) {
   const scenes = flatScenes(ctx.docs.get(doc)), i = scenes.findIndex(x => x.id === s), title = scenes[i].title;
   const at = id => `${BASE}/kino/index.html?cat=${cat}#doc=${doc}&s=${id}`;

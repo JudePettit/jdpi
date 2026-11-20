@@ -147,7 +147,8 @@ class MapView {
       };
       requestAnimationFrame(frame);
     });
-    if (token === this.token) { delete this.svg.dataset.glide; this.drawOverlay(); }
+    // The glide ends on the target itself, the frame the key was measured against, not on the last step's rounding.
+    if (token === this.token) { this.apply(target); delete this.svg.dataset.glide; this.drawOverlay(); }
   }
 
   /** Arrows, fronts, points and labels, in screen-sized units at the current view. */
@@ -233,6 +234,12 @@ export class Stage {
     this.layer = root.querySelector('.kn-layer'); this.legend = root.querySelector('.kn-legend'); this.credit = root.querySelector('.kn-credit');
     this.ro = new ResizeObserver(() => { clearTimeout(this.rt); this.rt = setTimeout(() => this.resize(), 120); });
     this.ro.observe(root);
+    // A web font that arrives after the key was measured changes the key's size, so the key is placed again. The
+    // fonts' "ready" promise alone does not cover it: their status can read "loaded" before the key's own face has
+    // been asked for. While a scene's key still waits to be placed, its own placing will measure the new font.
+    document.fonts?.addEventListener?.('loadingdone', () => {
+      if (this.map && !this.mapSvg.classList.contains('off') && !root.classList.contains('kn-key-wait')) this.placeLegend();
+    });
   }
   resize() {
     if (this.map && !this.mapSvg.classList.contains('off')) { this.map.drawOverlay(); this.placeLegend(); }

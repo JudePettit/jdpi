@@ -642,7 +642,12 @@ function mountPeriod() {
       play: false, steps: true,
       onChange: p => { stopPlay(); S.move = p.movement; setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }); },
     });
-  } else S.period.update({ stops: S.stops, ticks, from: since, to: at });
+  } else {
+    // The address's movement first: a slider still in Single Year would put the new period's start on its end, and the
+    // start would be lost (second review X2, 20 November 2026).
+    S.period.setMovement(S.move, { silent: true });
+    S.period.update({ stops: S.stops, ticks, from: since, to: at });
+  }
   // The movement the address chose (a slider mounted again starts at the default): Single Year puts the start on the
   // year shown.
   S.period.setMovement(S.move, { silent: true });

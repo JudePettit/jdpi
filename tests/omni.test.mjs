@@ -1314,5 +1314,16 @@ test('page: the movement buttons: Move Together moves both years with the span k
   await page.locator('#play').click();
   const span = await page.evaluate(() => +document.querySelector('#year').dataset.value - +document.querySelector('#from').dataset.value);
   assert.equal(span, 10, 'Play in Move Together keeps the span');
+  // A new address that arrives while Single Year is chosen is drawn in its own movement, its period whole (second
+  // review X2, 20 November 2026: the slider took the new period while still in Single Year, and its start was lost).
+  await page.goto('about:blank');
+  await page.goto(`${BASE}/omni/index.html#${recipe}&move=single`, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  assert.deepEqual(await page.evaluate(() => [document.querySelector('#from').dataset.value, document.querySelector('#year').dataset.value]), ['1950', '1950']);
+  await page.evaluate(r => { location.hash = r; }, recipe.replace('at=1950', 'at=1960'));
+  await page.waitForFunction(() => document.querySelector('#year').dataset.value === '1960' && /at=1960/.test(window.omniState.recipe), null, { timeout: 30000 });
+  assert.deepEqual(await page.evaluate(() => [document.querySelector('#from').dataset.value, document.querySelector('#year').dataset.value, document.querySelector('.prp-period-move[aria-pressed="true"]').dataset.move]),
+    ['1940', '1960', 'independent'], 'the period the new address names, in Independent');
+  assert.match(await page.evaluate(() => window.omniState.recipe), /since=1940/);
   assert.deepEqual(errors, []);
 });

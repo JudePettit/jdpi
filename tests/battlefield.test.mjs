@@ -1131,12 +1131,41 @@ test('Realtime archive: the movement buttons (Single Month) move both months tog
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   // The archive opens on its last two months; its caption says whether the circles sum a period or show one month.
-  const { s0 } = await movementCheck(page, {
-    url: '/q/battlefield.html?view=archive', from: '#month-from', to: '#month', single: 'Single Month',
+  // It starts again each January (build-realtime.mjs), so early in a year it holds too few months for every move:
+  // `short` leaves those out (second review X1, 20 November 2026; the test below serves three months to prove it).
+  const { s0, n } = await movementCheck(page, {
+    url: '/q/battlefield.html?view=archive', from: '#month-from', to: '#month', single: 'Single Month', short: true,
     ready: p => p.waitForFunction(() => document.querySelector('#month')?.dataset.value && /Armed-conflict events/.test(document.querySelector('#mapcap')?.textContent || ''), null, { timeout: 30000 }),
     readout: p => p.locator('#mapcap').innerText(),
     together: text => /over the period summed/.test(text), one: text => /one circle per place and month/.test(text),
   });
-  assert.equal(s0.j - s0.i, 1, 'the archive opens on its last two months, as before');
+  if (n >= 2) assert.equal(s0.j - s0.i, 1, 'the archive opens on its last two months, as before');
+  assert.deepEqual(errors, []);
+});
+
+// The archive in the first months of a year: with three months the pair has no room to go three stops back, and the
+// buttons, the address and the caption are still checked (second review X1: the check above would have failed every
+// January to April, and stopped every deploy).
+test('realtime archive early in a year (three months served): the movement buttons work without the room for the longer moves', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.route('**/battlefield/data/realtime.json*', async route => {
+    const r = await route.fetch(), d = await r.json();
+    const keep = new Set(d.months.slice(0, 3));
+    const trim = x => (Array.isArray(x) ? x.filter(y => !(y && typeof y === 'object' && typeof y.month === 'string' && !keep.has(y.month))).map(trim) : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, trim(v)])) : x);
+    const out = trim(d); out.months = d.months.slice(0, 3); if (typeof out.latest === 'string') out.latest = out.months.at(-1);
+    await route.fulfill({ response: r, json: out });
+  });
+  const { s0, n } = await movementCheck(page, {
+    url: '/q/battlefield.html?view=archive', from: '#month-from', to: '#month', single: 'Single Month', short: true,
+    ready: p => p.waitForFunction(() => document.querySelector('#month')?.dataset.value && /Armed-conflict events/.test(document.querySelector('#mapcap')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#mapcap').innerText(),
+    together: text => /over the period summed/.test(text), one: text => /one circle per place and month/.test(text),
+  });
+  assert.equal(n, 3, 'three months on the track');
+  assert.deepEqual([s0.i, s0.j], [1, 2], 'it opens on its last two months');
   assert.deepEqual(errors, []);
 });

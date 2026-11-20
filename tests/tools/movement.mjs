@@ -8,6 +8,9 @@
 // readout    page => the text that names what the map shows (#year-big, #date, …)
 // together, one   (text, s) => true when the readout shows the period s (s.from, s.to: the stops' values), and the
 //                 one time s.to; by default a period has an en dash in its text and one time has none
+// short  true on a page whose data can hold too few stops for the moves below (the Realtime archive starts again each
+//        January, and until its fifth month there is no room to move a pair three stops back): the moves that need
+//        the room are then left out and the rest is still checked; with one stop the control shows no buttons
 // It checks: the three buttons and their names (tooltip and accessible name), Independent chosen; Move Together, then
 // the end handle dragged by the pointer and the start handle moved by its keys, moves both, the span kept, and the
 // readout follows; Single brings the handles onto one stop and the readout shows that one time; the address carries
@@ -28,18 +31,26 @@ export async function movementCheck(page, o) {
 
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await o.ready(page);
+  const n = await page.evaluate(t => { const e = document.querySelector(t); return e ? +e.max - +e.min + 1 : 0; }, o.to);
+  if (o.short && n < 2) {
+    assert.equal(await page.locator('.prp-period-move:visible').count(), 0, 'one stop: the control shows no movement buttons');
+    return { n };
+  }
   // The three buttons, their names as tooltip and as accessible name, Independent chosen.
   const buttons = await page.locator('.prp-period-move').evaluateAll(bs => bs.map(b => [b.dataset.move, b.getAttribute('aria-label'), b.title, b.getAttribute('aria-pressed')]));
   assert.deepEqual(buttons, [['independent', 'Independent Movement', 'Independent Movement', 'true'], ['together', 'Move Together', 'Move Together', 'false'], ['single', o.single, o.single, 'false']]);
   assert.equal(await page.locator('.prp-period-moves[role="group"]').getAttribute('aria-label'), 'Movement');
   const s0 = await state();
-  assert.ok(s0.j - s0.i >= 1 && s0.i >= 3, `the address opens a period away from the first stop: ${where(s0)}`);
+  const room = s0.i >= 3; // the moves below take the pair three stops back
+  assert.ok(s0.j - s0.i >= 1 && (room || o.short), `the address opens a period away from the first stop: ${where(s0)}`);
   assert.doesNotMatch(s0.address, /move=/);
 
   // Move Together: the end handle dragged two stops back by the pointer takes the start along, the span kept.
   await page.locator('[data-move="together"]').click();
   await page.waitForFunction(() => /move=together/.test(location.search + location.hash), null, { timeout: 10000 });
   assert.deepEqual((await state()).pressed, ['together']);
+  let s2;
+  if (room) {
   await page.locator(o.to).scrollIntoViewIfNeeded();
   await page.waitForTimeout(1000); // the page settles (a late banner or map can move the control) before the thumb is found
   const drag = await page.evaluate(t => {
@@ -57,8 +68,12 @@ export async function movementCheck(page, o) {
   // The start handle's own keys move both too.
   await page.locator(o.from).focus();
   await page.keyboard.press('ArrowLeft');
-  const s2 = await state();
+  s2 = await state();
   assert.deepEqual([s2.i, s2.j], [s1.i - 1, s1.j - 1], `the start's key moves both: ${where(s1)} to ${where(s2)}`);
+  } else {
+    s2 = await state();
+    assert.deepEqual([s2.i, s2.j], [s0.i, s0.j], `choosing Move Together moves nothing: ${where(s0)} to ${where(s2)}`);
+  }
   await page.waitForTimeout(300);
   const t2 = await o.readout(page);
   assert.ok(together(t2, s2), `the map shows ${where(s2)}: "${t2}"`);
@@ -79,7 +94,7 @@ export async function movementCheck(page, o) {
   await page.locator(o.to).focus();
   await page.keyboard.press('ArrowLeft');
   const s4 = await state();
-  assert.deepEqual([s4.i, s4.j], [s3.j - 1, s3.j - 1], `Single moves as one: ${where(s4)}`);
+  assert.deepEqual([s4.i, s4.j], [Math.max(0, s3.j - 1), Math.max(0, s3.j - 1)], `Single moves as one: ${where(s4)}`);
 
   // A reload keeps Single and its time.
   await page.reload({ waitUntil: 'domcontentloaded' });
@@ -97,5 +112,5 @@ export async function movementCheck(page, o) {
   assert.deepEqual(s6.pressed, ['independent']);
   assert.deepEqual([s6.from, s6.to, s6.i, s6.j], [s0.from, s0.to, s0.i, s0.j]);
   assert.doesNotMatch(s6.address, /move=/);
-  return { s0, s2, s3, s5 };
+  return { s0, s2, s3, s5, n };
 }

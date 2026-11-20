@@ -1,0 +1,52 @@
+{
+ "format": "vm-calendar-index/1",
+ "layer": "calendar-events",
+ "built": "2026-11-20T14:28:18Z",
+ "files": [
+  {
+   "from": 1980,
+   "to": 1989,
+   "file": "1980s.json",
+   "rows": 475,
+   "bytes": 265908,
+   "gzip": 25734,
+   "sha256": "92a688ef674ed7b3960c3141419d82b24fc97aaf230498bc50b2aea5072276f8"
+  },
+  {
+   "from": 1990,
+   "to": 1999,
+   "file": "1990s.json",
+   "rows": 791,
+   "bytes": 442776,
+   "gzip": 40718,
+   "sha256": "bec180ec4bcf8ad1a537d66b4c7f74aeda6996e8c7b9702430a223f3586ebc08"
+  },
+  {
+   "from": 2000,
+   "to": 2009,
+   "file": "2000s.json",
+   "rows": 860,
+   "bytes": 491289,
+   "gzip": 44537,
+   "sha256": "a2c7cd3e12933799271789733dff05a7eeb87c5d648d06d8fc51b1ac6996cb1e"
+  },
+  {
+   "from": 2010,
+   "to": 2019,
+   "file": "2010s.json",
+   "rows": 1253,
+   "bytes": 707713,
+   "gzip": 68016,
+   "sha256": "afddf4a8a0ebabdad4b67c14150a6d1c15bae91ac6b75dafb1bc8d790ed9ae38"
+  },
+  {
+   "from": 2020,
+   "to": 2029,
+   "file": "2020s.json",
+   "rows": 1457,
+   "bytes": 844968,
+   "gzip": 86281,
+   "sha256": "c687b90e5b79926b8cc24659de9b28947bc237bfd07a03a834fcba43a0fe300f"
+  }
+ ]
+}

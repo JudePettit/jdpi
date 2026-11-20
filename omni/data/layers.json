@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-18T04:13:41Z",
+  "generated": "2026-11-20T14:28:18Z",
   "layers": [
     {
       "id": "borders",
@@ -45,8 +45,8 @@
       "geometry": "point",
       "time": {
         "field": "date",
-        "from": 1495,
-        "to": 1509,
+        "from": 1258,
+        "to": 2025,
         "step": "d",
         "precision": "day"
       },
@@ -56,10 +56,2919 @@
       "style": null,
       "legend": "Battles: Wikidata (CC0), each date and point with its Wikidata item and property",
       "source": "wikidata",
-      "method": "The battles the Master Index holds with a date in 1400–1600 (two in this first version), each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM's rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads 'Wikipedia-sourced, unverified'; anything less reads 'no reference'. Wikidata's data is CC0. VM holds few battles for these years; each view says how many.",
+      "method": "VM’s own text. The 1,967 battles VM holds with a date and a point, 1258 to 2025: every conflict of the Master Index that Wikidata types a battle (P31 Q178561), and every located battle of War Focus, each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM’s rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads ‘Wikipedia-sourced, unverified’; anything less reads ‘no reference’. A battle with no date or no point in Wikidata is left out, and so is one whose year no battle can have (before 3000 BC). 1,912 are tied to a war of VM’s war registry (omni/data/layers/wars/registry.json), 1,912 of them to a war War Focus covers, which a click opens. Above 2,000 drawn at once, the points cluster. Wikidata’s data is CC0. Each view says how many battles VM holds for its years.",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-17T05:22:14Z"
+      "built": "2026-11-20T11:37:57Z"
+    },
+    {
+      "id": "countries",
+      "module": "omni-map",
+      "title": "Countries today",
+      "role": "base",
+      "geometry": "polygon",
+      "time": {
+        "field": "today",
+        "from": 1886,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/base/countries.topo.json",
+      "points": "omni/data/base/small-states.json",
+      "space": "today’s borders, drawn from 1886",
+      "measure": null,
+      "status": "today’s borders (Natural Earth v5.1.1, 2022)",
+      "style": {
+        "kind": "outline"
+      },
+      "legend": "Countries: Natural Earth v5.1.1 (public domain). Made with Natural Earth.",
+      "source": "natural-earth-admin0",
+      "method": "VM’s own text. Today’s countries, from Natural Earth’s Admin 0 – Countries at 1:110 million, release v5.1.1 (13 May 2022), with a point for each of the 64 small states and territories that file leaves out (the Siachen Glacier, which Natural Earth calls indeterminate, is not one), at the label point Natural Earth’s 1:50 million file gives it. Natural Earth is in the public domain. Its borders are de facto ones, as Natural Earth draws them, and they are today’s: the design keeps today’s map off every year before 1886, so VM draws this base only from 1886, and a by-country value of a year before 2022 is drawn on today’s borders, which the legend says. Each country is joined to by-country data by its ISO 3166 alpha-3 code: Natural Earth’s ISO_A3, else its ISO_A3_EH, else XKX for Kosovo, the code the World Bank uses; N. Cyprus and Somaliland have no code and take no value. Each country also keeps the Wikidata id Natural Earth gives it (WIKIDATAID), for joins by Q-id. Converted to TopoJSON by topojson-server 3.0.1, quantised to 1/100,000 of the world’s extent, with no simplification (omni/scripts/build-countries.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T10:16:51Z",
+      "files": [
+        {
+          "file": "omni/data/base/countries.topo.json",
+          "bytes": 110819,
+          "gzip": 39418,
+          "sha256": "4bd5d72500f5b91eca938a6ffc04d8bf5ed1d14a1ae546186daf56d53461e0ef"
+        },
+        {
+          "file": "omni/data/base/small-states.json",
+          "bytes": 10294,
+          "gzip": 2398,
+          "sha256": "c93898341b66931042cd17abccbd1ec358e7f1934125dd7f8257dd64fc507a15"
+        }
+      ]
+    },
+    {
+      "id": "density-country",
+      "module": "omni-map",
+      "title": "Population density (by country)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "EN.POP.DNST",
+      "time": {
+        "field": "year",
+        "from": 1961,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/EN.POP.DNST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "people per km² of land area",
+      "status": "as the World Bank estimates it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          10,
+          25,
+          50,
+          100,
+          200,
+          500
+        ],
+        "unit": "people per km² of land area",
+        "scheme": "sequential"
+      },
+      "legend": "Population density: World Bank, World Development Indicators, EN.POP.DNST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Population density (people per sq. km of land area) (EN.POP.DNST), from its World Development Indicators, every economy and year it gives (1961–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Population density is midyear population divided by land area in square kilometers. Population is based on the de facto definition of population, which counts all residents regardless of legal status or citizenship--except for refugees not permanently settled in the country of asylum, who are generally considered part of the population of their country of origin. Land area is a country's total area, excluding area under inland water bodies, national claims to continental shelf, and exclusive economic zones. In most cases the definition of inland water bodies includes major rivers and lakes.” Its sources, as it names them: FAO population estimates, Food and Agriculture Organization of the United Nations (FAO), publisher: Food and Agriculture Organization of the United Nations (FAO); World Bank population estimates, World Bank (WB), publisher: World Bank (WB). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. One of its inputs is FAO’s land area (the series’ own sources name FAO). FAO’s terms for its statistical databases (https://www.fao.org/contact-us/terms/db-terms-of-use/en/, read 20 November 2026) license its datasets under CC BY 4.0 “unless specified otherwise in their metadata or webpage”, allow them to be adapted and re-disseminated, and add that they are not to be used to promote a commercial enterprise or to suggest that FAO endorses one; VM uses them for neither. The land-use domain’s own metadata could not be read: FAOSTAT’s interface asks for authorisation, which VM does not have. VM treats every series resting on FAO’s land area alike, on FAO’s own terms. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s choice (10, 25, 50, 100, 200 and 500 people per km²), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T10:16:51Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/EN.POP.DNST.json",
+          "bytes": 220162,
+          "gzip": 99507,
+          "sha256": "cde19d6f8448959f8c77d6ac874d9738c8dfed6af683d65564673a41839c3a29"
+        }
+      ]
+    },
+    {
+      "id": "density-grid",
+      "module": "omni-map",
+      "title": "Population density (grid)",
+      "role": "fill",
+      "geometry": "grid",
+      "time": {
+        "field": "epoch",
+        "from": 1975,
+        "to": 2030,
+        "step": "5y",
+        "precision": "year",
+        "values": [
+          1975,
+          1980,
+          1985,
+          1990,
+          1995,
+          2000,
+          2005,
+          2010,
+          2015,
+          2020,
+          2025,
+          2030
+        ],
+        "shows": "the epoch at or before the frame"
+      },
+      "data": "omni/data/layers/density/index.json",
+      "split": "year",
+      "space": "cells of 0.25°, about 28 km across at the equator",
+      "measure": "people per km² (0.25° cells)",
+      "status": "modelled",
+      "statusBy": [
+        {
+          "from": 2025,
+          "status": "projection"
+        }
+      ],
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.02,
+          0.12,
+          0.48,
+          1.5,
+          4,
+          9.9,
+          23,
+          54,
+          150
+        ],
+        "unit": "people per km²",
+        "scheme": "sequential"
+      },
+      "legend": "Population: GHSL GHS-POP R2023A (European Commission, JRC, Schiavina et al. 2023), CC BY 4.0 – summed into 0.25° cells by Vitruvian Manager",
+      "source": "ghsl-pop",
+      "method": "VM’s own text. People per km², from GHSL’s GHS-POP R2023A (Schiavina, Freire, Carioli and MacManus 2023, European Commission, Joint Research Centre, doi:10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE), described in the GHSL Data Package 2023 (doi:10.2760/098587). Licence: CC BY 4.0, which the data’s copyright notice says covers any copyright and sui generis (database) right. What GHSL says of the grids, from its Data Package: the people of each census unit (CIESIN’s GPWv4.11) are spread over the 30 arc-second cells by built-up volume, and the totals are those of the UN’s World Population Prospects 2022 and World Urbanization Prospects 2018; 1975–2020 are modelled from censuses and the built-up surface seen from space, and 2025 and 2030 are projections (“Future grids projections”), which the legend says. How VM made this layer (omni/scripts/build-density.mjs): it added the people of every 30 arc-second cell into cells of 0.25° (about 28 km at the equator) by the cell’s centre, checked each year’s world total against the Data Package’s table 20 (within one part in a million), rounded each 0.25° cell to whole people and left out a cell of fewer than half a person, so the empty sea and ice are blank. Density is the cell’s people over its area on a sphere of radius 6,371.0088 km. The classes are VM’s: the nine deciles of density among the populated cells of 2020, rounded to two significant figures (0.02, 0.12, 0.48, 1.5, 4, 9.9, 23, 54, 150 people per km²), kept the same for every year so a colour means the same density in each. A frame between two epochs shows the epoch before it, and says so; a frame before 1975 shows nothing, and says that GHSL holds 1975 to 2030 (the layer “Population density before 1975 (HYDE)” holds the years before, from HYDE 3.2.1, on the same cells and classes). A cell is a modelled spread of a census, not a count of the people in it: GHSL’s own accuracy notes are in its Data Package.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-18T06:03:15Z"
+    },
+    {
+      "id": "density-hyde",
+      "module": "omni-map",
+      "title": "Population density before 1975 (HYDE)",
+      "role": "fill",
+      "geometry": "grid",
+      "time": {
+        "field": "epoch",
+        "from": -4000,
+        "to": 1970,
+        "until": 1974,
+        "step": "listed",
+        "stepWords": "a thousand years apart before AD 1, a century apart to 1700, ten years apart after",
+        "precision": "year",
+        "values": [
+          -4000,
+          -3000,
+          -2000,
+          -1000,
+          100,
+          200,
+          300,
+          400,
+          500,
+          600,
+          700,
+          800,
+          900,
+          1000,
+          1100,
+          1200,
+          1300,
+          1400,
+          1500,
+          1600,
+          1700,
+          1710,
+          1720,
+          1730,
+          1740,
+          1750,
+          1760,
+          1770,
+          1780,
+          1790,
+          1800,
+          1810,
+          1820,
+          1830,
+          1840,
+          1850,
+          1860,
+          1870,
+          1880,
+          1890,
+          1900,
+          1910,
+          1920,
+          1930,
+          1940,
+          1950,
+          1960,
+          1970
+        ],
+        "shows": "the epoch at or before the frame"
+      },
+      "data": "omni/data/layers/density-hyde/index.json",
+      "split": "year",
+      "space": "cells of 0.25°, about 28 km across at the equator",
+      "measure": "people per km² (0.25° cells)",
+      "status": "modelled",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.02,
+          0.12,
+          0.48,
+          1.5,
+          4,
+          9.9,
+          23,
+          54,
+          150
+        ],
+        "unit": "people per km²",
+        "scheme": "sequential"
+      },
+      "legend": "Population: HYDE 3.2.1 baseline (Klein Goldewijk et al. 2017, Utrecht University and PBL), CC0 1.0 (its readme: CC BY 3.0) – a modelled reconstruction, summed into 0.25° cells by Vitruvian Manager",
+      "source": "hyde-3.2.1",
+      "method": "VM’s own text. People per km², from HYDE 3.2.1, the History Database of the Global Environment (Klein Goldewijk, Beusen, Doelman and Stehfest 2017, Utrecht University and PBL Netherlands Environmental Assessment Agency), baseline estimate, as the DANS Data Station publishes it (doi:10.17026/DANS-25G-GEZ3). Licence: the repository’s record gives CC0 1.0 (read 20 November 2026), which also waives the EU database right; HYDE’s own readme gives CC BY 3.0, which allows commercial use but says nothing of that right; VM credits HYDE as the readme asks. HYDE’s readme describes it as historical population estimates combined with land use, from 10,000 BCE to 2015 CE, on cells of 5 arc minutes. VM’s note: a cell is a modelled reconstruction, not a count, and the further back the epoch the less it rests on records. How VM made this layer (omni/scripts/build-density-hyde.mjs): it took HYDE’s population counts (popc) for 48 epochs from 4000 BC (the last before the map’s first year, 3400 BC) to AD 1970 (the last before the GHSL grid begins in 1975), added the people of every 5 arc-minute cell into cells of 0.25° (about 28 km at the equator) by the cell’s centre, checked each epoch’s world total against HYDE’s own world total (its table popc_c.txt, within one part in a thousand), rounded each cell to whole people and left out a cell of fewer than half a person. Density is the cell’s people over its area on a sphere of radius 6,371.0088 km. HYDE’s epochs are a thousand years apart before AD 1, a century apart to 1700 and ten years apart after; a frame between two epochs shows the epoch before it, and the legend says which. HYDE’s epoch “0 AD” is left out, since VM counts no year 0 and HYDE does not say whether it means 1 BC or AD 1. The classes are the GHSL grid’s (the nine deciles of density among the populated cells of 2020: 0.02, 0.12, 0.48, 1.5, 4, 9.9, 23, 54, 150 people per km²), so a colour means the same density on both layers. The grid is drawn only as cells, never on today’s countries.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T10:21:14Z"
+    },
+    {
+      "id": "conflict-territory",
+      "module": "battlefield-history",
+      "title": "Conflict on territory",
+      "role": "fill",
+      "geometry": "polygon",
+      "time": {
+        "field": "year",
+        "from": 1946,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/conflict-territory/conflicts.json",
+      "on": "states",
+      "space": "each state on Cliopatria’s border for the year, else on Natural Earth’s border of today from the state’s inception; a state neither holds is listed",
+      "measure": "armed conflicts on a state’s territory in the year, by intensity (UCDP: at least 25 battle-related deaths a year)",
+      "status": "recorded",
+      "style": {
+        "kind": "states",
+        "classes": [
+          {
+            "v": 1,
+            "label": "Minor conflict: 25 to 999 battle-related deaths in the year"
+          },
+          {
+            "v": 2,
+            "label": "War: 1,000 or more battle-related deaths in the year"
+          }
+        ],
+        "abroad": "Fighting outside its own territory (outlined)"
+      },
+      "gap": {
+        "before": 1946,
+        "text": "Before 1946 VM holds no free conflict data: the Correlates of War, which covers 1926–1945, says “Data are not to be used for any commercial activity” (https://correlatesofwar.org/data-sets/, read 18 November 2026)"
+      },
+      "legend": "Conflict on territory: UCDP/PRIO Armed Conflict Dataset 26.1 and UCDP Battle-Related Deaths Dataset 26.1 (CC BY 4.0), on Cliopatria v0.2.1 (CC BY 4.0) or Natural Earth (public domain) – processed by Vitruvian Manager",
+      "source": "ucdp-acd",
+      "method": "VM’s own text. A state is filled in a year when UCDP/PRIO’s Armed Conflict Dataset 26.1 records an armed conflict on its territory that year: a contested incompatibility over government or territory, between two parties of which at least one is a state’s government, with at least 25 battle-related deaths in the year (UCDP’s threshold). The stronger colour is a war, 1,000 or more deaths in the year. From 1989 each conflict’s battle-related deaths are UCDP’s Battle-Related Deaths Dataset 26.1 (conflict level), its best estimate with its low and high; before 1989 VM gives none, because the only series, PRIO’s Battle Deaths Dataset, states no licence. A state that fought outside its own territory that year (a government on either side, primary or secondary, that is not a location of the conflict) is outlined. UCDP names each state by today’s name with the older one in brackets (“Vietnam (North Vietnam)”); VM joins the names to Wikidata Q-ids and ISO3 codes through its own crosswalk, checked on Wikidata at each build, never by a Gleditsch and Ward number. Each state is drawn on Cliopatria’s border for the year, where VM’s crosswalk of Cliopatria holds it, else on Natural Earth’s border of today from the year Wikidata gives as the state’s inception; a state neither holds is listed beside the map, never drawn on a guessed shape. Before 1946 the layer is empty: the Correlates of War, which covers 1926–1945, bars commercial use. 2026 is not in this layer: UCDP’s Candidate Events, which cover it, give counts of events by country and month, not the conflicts and their intensity this layer draws; the layer “Organised violence, UCDP events” shows 2026 from them, marked candidate.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T11:16:25Z",
+      "files": [
+        {
+          "file": "omni/data/layers/conflict-territory/conflicts.json",
+          "bytes": 227617,
+          "gzip": 41331,
+          "sha256": "594a246272bf29188d599147f3dacaf99897c7d724f0d850bd6238a3683f5699"
+        }
+      ],
+      "gw": "link only: the Retrospective Battlefield’s address names a country by UCDP’s Gleditsch and Ward number (c=), so each state keeps the number UCDP gives it, for that link alone"
+    },
+    {
+      "id": "elections",
+      "module": "retrospective",
+      "title": "Elections and referendums",
+      "role": "point",
+      "geometry": "point",
+      "time": {
+        "field": "date",
+        "from": 1926,
+        "to": 2030,
+        "step": "d",
+        "precision": "day"
+      },
+      "data": "omni/data/layers/elections/elections.json",
+      "at": "country",
+      "space": "each at its country’s point: Cliopatria’s polity for the year, where VM’s crosswalk holds the country, else Natural Earth’s country of today from 1886; one neither holds is listed",
+      "measure": null,
+      "status": "recorded",
+      "statusBy": [
+        {
+          "from": 2027,
+          "status": "expected"
+        }
+      ],
+      "style": {
+        "kind": "points",
+        "token": "--prp-accent",
+        "hollow": "still to come on 2026-11-20, the day VM built the layer: the date set for it, not a record"
+      },
+      "legend": "Elections and referendums: Wikidata (CC0), through the Master Index – placed by Vitruvian Manager",
+      "source": "wikidata",
+      "method": "VM’s own text. Every election and referendum the Master Index holds with a date and a country (3026 of them), each the Wikidata item’s point in time (P585) at the precision Wikidata records: a date known only to its year is shown as the year, never as 1 January, and one known to its month as the month. Those still to come on 2026-11-20, the day VM built the layer (28 of them), are drawn hollow and marked expected: their date is the one set, not a record. 4 records are left out as doubtful, because the date Wikidata gives (as the Master Index holds it) is more than a year from the year the item’s own name begins with, and VM does not choose between them: 1911 Croatian parliamentary election (Q15984054), dated 2015-12-17; October 2013 Australian Labor Party leadership election (Q16949505), dated 2010-10-13; 1935 Salvadoran presidential election (Q17087354), dated 1939-01-15; 2026 Slovak referendum (Q139761779), dated 0202-07-04. Each is placed at its country (Wikidata’s country, P17, or the Master Index’s), at the label point of Cliopatria’s polity for the year where VM’s crosswalk of Cliopatria holds the country, else of Natural Earth’s country of today, from 1886 only; one neither holds is listed beside the map, never placed at a guess. The Political Atlas’s election dates are not used: they are written by a language model, not taken from a source a page can name. The Political Retrospective’s are not used either; they are Wikidata’s too, through it.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T14:28:03Z",
+      "files": [
+        {
+          "file": "omni/data/layers/elections/elections.json",
+          "bytes": 990638,
+          "gzip": 108248,
+          "sha256": "3f98ac6e49d227279b298be982cf014bf34bb1db590c3fd08149c88ee65e45ef"
+        },
+        {
+          "file": "omni/data/layers/retro-keys.json",
+          "role": "addresses",
+          "bytes": 3141,
+          "gzip": 1323,
+          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+        }
+      ]
+    },
+    {
+      "id": "coups",
+      "module": "retrospective",
+      "title": "Coups",
+      "role": "point",
+      "geometry": "point",
+      "time": {
+        "field": "date",
+        "from": -2334,
+        "to": 2026,
+        "step": "d",
+        "precision": "day"
+      },
+      "data": "omni/data/layers/coups/coups.json",
+      "at": "country",
+      "space": "each at its country’s point: Cliopatria’s polity for the year, where VM’s crosswalk holds the country, else Natural Earth’s country of today from 1886; one neither holds is listed",
+      "measure": null,
+      "status": "as Wikidata records them",
+      "style": {
+        "kind": "points",
+        "token": "--prp-bad"
+      },
+      "legend": "Coups: Wikidata (CC0), its items of coup d’état and its subclasses – placed by Vitruvian Manager",
+      "source": "wikidata",
+      "method": "VM’s own text. Every Wikidata item that is an instance of coup d’état (Q45382) or of one of its subclasses, with a country (P17) and a date: its point in time (P585), else its start (P580), at Wikidata’s precision and in its calendar, with what supports the date (a reference, “Wikipedia-sourced, unverified”, or none). 891 of them, from 2334 BC on (635 from 1926); an attempt is marked where Wikidata’s class says so, and an item Wikidata gives no English name (63 of them) is named so, with its Q-id. This counts the coups Wikidata records, which is not the same as the Political Retrospective’s coups: those are Archigos’s “irregular” entries of leaders, and Archigos states no licence, so VM cannot use them. Each is placed at its country (Wikidata’s country, P17, or the Master Index’s), at the label point of Cliopatria’s polity for the year where VM’s crosswalk of Cliopatria holds the country, else of Natural Earth’s country of today, from 1886 only; one neither holds is listed beside the map, never placed at a guess.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T14:28:03Z",
+      "files": [
+        {
+          "file": "omni/data/layers/coups/coups.json",
+          "bytes": 339647,
+          "gzip": 38812,
+          "sha256": "5b5f8bd9be2e43031b1a75e27114cf392c00cca971bf0f08f69e9e829ab379ab"
+        },
+        {
+          "file": "omni/data/layers/retro-keys.json",
+          "role": "addresses",
+          "bytes": 3141,
+          "gzip": 1323,
+          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+        }
+      ]
+    },
+    {
+      "id": "political-change",
+      "module": "retrospective",
+      "title": "Political change: a new head of state or government",
+      "role": "fill",
+      "geometry": "polygon",
+      "time": {
+        "field": "year",
+        "from": 1926,
+        "to": 2026,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/political-change/terms.json",
+      "on": "states",
+      "space": "each state on Cliopatria’s border for the year, else on Natural Earth’s border of today from the state’s inception; a state neither holds is listed",
+      "measure": "a state whose head of state or head of government changed in the year",
+      "status": "as Wikidata records them",
+      "style": {
+        "kind": "states",
+        "classes": [
+          {
+            "v": 1,
+            "label": "A new head of government"
+          },
+          {
+            "v": 2,
+            "label": "A new head of state"
+          },
+          {
+            "v": 3,
+            "label": "Both"
+          }
+        ]
+      },
+      "legend": "Political change: Wikidata (CC0), each term of the offices of head of state and of government – processed by Vitruvian Manager",
+      "source": "wikidata",
+      "method": "VM’s own text. For each of today’s sovereign states (Wikidata’s Q3624078), the office it names as its head of state’s (P1906) and its head of government’s (P1313), and every term of those offices Wikidata records (position held, P39, with its start, P580, at Wikidata’s precision; its end, P582, and end cause, P1534, where given). A state is filled in a year when a term begins that year whose holder is not the one before; 6283 terms from 1900, the changes counted from 1926. Wikidata gives an end cause for few terms, so how a leader came and went (by election, coup or death) is shown only where it does, and otherwise said not to be recorded. What this layer cannot give: Archigos’s coding of how each leader entered and left office (regular, irregular, imposed from abroad) and its choice of the effective leader, since Archigos states no licence; the states of the past that are not states today (the Soviet Union, Yugoslavia) are not in this first build. The leaders named are public office-holders only. VM has not checked the terms one by one: Wikidata’s records hold mistakes (a term given to the wrong office, a holder of an office abroad), and each term carries its Wikidata statement so a reader can check it there.",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T11:33:49Z",
+      "files": [
+        {
+          "file": "omni/data/layers/political-change/terms.json",
+          "bytes": 1378431,
+          "gzip": 334311,
+          "sha256": "9f8449356ff95249ca003806ade6219bd8d6934077ea0b88537b5925273fb986"
+        },
+        {
+          "file": "omni/data/layers/retro-keys.json",
+          "role": "addresses",
+          "bytes": 3141,
+          "gzip": 1323,
+          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+        }
+      ]
+    },
+    {
+      "id": "breakthroughs",
+      "module": "progress",
+      "title": "Breakthroughs in science and technology",
+      "role": "point",
+      "geometry": "point",
+      "time": {
+        "field": "year",
+        "from": -3000,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/breakthroughs/events.json",
+      "measure": null,
+      "status": "VM’s selection",
+      "style": {
+        "kind": "points",
+        "token": "--prp-good"
+      },
+      "filter": {
+        "field": "d",
+        "label": "Discipline",
+        "values": [
+          {
+            "id": "astro",
+            "name": "Astronomy & Space"
+          },
+          {
+            "id": "phys",
+            "name": "Physics"
+          },
+          {
+            "id": "chem",
+            "name": "Chemistry"
+          },
+          {
+            "id": "bio",
+            "name": "Biology"
+          },
+          {
+            "id": "med",
+            "name": "Medicine & Health"
+          },
+          {
+            "id": "earth",
+            "name": "Earth & Environment"
+          },
+          {
+            "id": "math",
+            "name": "Mathematics"
+          },
+          {
+            "id": "tech",
+            "name": "Technology & Engineering"
+          }
+        ]
+      },
+      "legend": "Breakthroughs: the Invention Timeline (Wikidata, CC0; selection, titles and notes by Vitruvian Manager)",
+      "source": "vm-invention",
+      "method": "VM’s own text. The 570 breakthroughs of VM’s Invention Timeline (science/progress), 3000 BC to 2025: which events are in it is VM’s choice, and every title and note is VM’s own text; the facts behind each (its Wikidata item) are Wikidata’s (CC0). A year the timeline marks as approximate is written “c.”. Each point is placed by the Invention Timeline’s rule for it, which the point’s card names (the place of discovery, the site, or the discoverer’s institution, work place, school or birthplace, each from Wikidata); 165 are placed by hand by VM, where Wikidata gives no place or would mislead, and say so. A discipline can be chosen alone (the filter in the layer’s address: l=breakthroughs:d=astro).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T11:38:45Z",
+      "files": [
+        {
+          "file": "omni/data/layers/breakthroughs/events.json",
+          "bytes": 326683,
+          "gzip": 67437,
+          "sha256": "adbdaa42062e3be22a3f4d2c57745b44e3deb6777e697e9301a00103c0bc0f14"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-cc-est",
+      "module": "omni-map",
+      "title": "Control of Corruption - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_CC.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_CC.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Control of Corruption - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.1,
+          -0.71,
+          -0.38,
+          -0.032,
+          0.51,
+          1.2
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Control of Corruption - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_CC.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Control of Corruption - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_CC.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Control of Corruption (CC) captures perceptions of the extent to which public power is used for private gain, including both petty and grand corruption, as well as capture of the state by elites and private interests. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.1, -0.71, -0.38, -0.032, 0.51, 1.2), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:49:06Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_CC.EST.json",
+          "bytes": 66792,
+          "gzip": 28386,
+          "sha256": "c93b8d6507eeb00202e6e117487e4fabbe21edaab32a37f619871fc555e4b401"
+        }
+      ]
+    },
+    {
+      "id": "wb-ag-lnd-frst-zs",
+      "module": "omni-map",
+      "title": "Forest area (% of land area)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "AG.LND.FRST.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1990,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/AG.LND.FRST.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Forest area (% of land area)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          4,
+          13,
+          25,
+          36,
+          50,
+          62
+        ],
+        "unit": "% of land area",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Forest area (% of land area): World Bank, World Development Indicators, AG.LND.FRST.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Forest area (% of land area) (AG.LND.FRST.ZS), from its World Development Indicators, every economy and year it gives (1990–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Forest area (% of land area) is the share of total land area that is under natural or planted stands of trees of at least 5 meters in situ, whether productive or not, and excludes tree stands in agricultural production systems (for example, in fruit plantations and agroforestry systems) and trees in urban parks and gardens.” Its sources, as it names them: FAOSTAT, Food and Agriculture Organization of the United Nations (FAO), uri: https://www.fao.org/faostat/en/#data/RL, publisher: Food and Agriculture Organization of the United Nations (FAO). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (4, 13, 25, 36, 50, 62), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:49:23Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/AG.LND.FRST.ZS.json",
+          "bytes": 127700,
+          "gzip": 50283,
+          "sha256": "1224644a0f58d4c4853f625c04dde9f714a607486447478209886b1aee1c9ffd"
+        }
+      ]
+    },
+    {
+      "id": "wb-bn-cab-xoka-gd-zs",
+      "module": "omni-map",
+      "title": "Current account balance (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "BN.CAB.XOKA.GD.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/BN.CAB.XOKA.GD.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Current account balance (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -10,
+          -6.2,
+          -3.7,
+          -1.8,
+          0.34,
+          4.3
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Current account balance (% of GDP): World Bank, World Development Indicators, BN.CAB.XOKA.GD.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Current account balance (% of GDP) (BN.CAB.XOKA.GD.ZS), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Balance of current transactions (transactions in goods and services, earned income and transfer income) between residents and non-residents. The term current account balance is used in the external accounts and is expressed from the perspective of resident units. The term current external balance is used in the national accounts and is expressed from the perspective of the non-resident units, and therefore with the opposite sign. This indicator is expressed as a percentage of Gross Domestic Product (GDP) which is the total income earned through the production of goods and services in an economic territory during an accounting period.” Its sources, as it names them: Balance of Payments Statistics Yearbook and data files, International Monetary Fund (IMF); World Development Indicators Database, World Bank (WB); National Accounts data files, Organisation for Economic Co-operation and Development (OECD). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-10, -6.2, -3.7, -1.8, 0.34, 4.3), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:49:38Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/BN.CAB.XOKA.GD.ZS.json",
+          "bytes": 172420,
+          "gzip": 71899,
+          "sha256": "c6ceaf47d09b966c9305f0d56668cc89d1ca3223d4ae7c0b1d50b77a93409eeb"
+        }
+      ]
+    },
+    {
+      "id": "wb-bx-klt-dinv-wd-gd-zs",
+      "module": "omni-map",
+      "title": "Foreign direct investment, net inflows (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "BX.KLT.DINV.WD.GD.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1970,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/BX.KLT.DINV.WD.GD.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Foreign direct investment, net inflows (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.05,
+          0.49,
+          1.1,
+          2.1,
+          3.6,
+          6.5
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Foreign direct investment, net inflows (% of GDP): World Bank, World Development Indicators, BX.KLT.DINV.WD.GD.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Foreign direct investment, net inflows (% of GDP) (BX.KLT.DINV.WD.GD.ZS), from its World Development Indicators, every economy and year it gives (1970–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Foreign direct investment is the net inflows of investment to acquire a lasting management interest (10 percent or more of voting stock) in an enterprise operating in an economy other than that of the investor. It is the sum of equity capital, reinvestment of earnings, other long-term capital, and short-term capital as shown in the balance of payments. This series shows net inflows (new investment inflows less disinvestment) in the reporting economy from foreign investors, and is divided by GDP.” Its sources, as it names them: International Financial Statistics and Balance of Payments databases, International Monetary Fund (IMF); International Debt Statistics, World Bank (WB); World Bank GDP estimates, World Bank (WB); OECD GDP estimates, Organisation for Economic Co-operation and Development (OECD). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.05, 0.49, 1.1, 2.1, 3.6, 6.5), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:49:47Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/BX.KLT.DINV.WD.GD.ZS.json",
+          "bytes": 180199,
+          "gzip": 82893,
+          "sha256": "0cd1717032965e4dea7d0376524f298ab6b030659f63a1d892c299e79410aef3"
+        }
+      ]
+    },
+    {
+      "id": "wb-eg-elc-accs-zs",
+      "module": "omni-map",
+      "title": "Access to electricity (% of population)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "EG.ELC.ACCS.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1990,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/EG.ELC.ACCS.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Access to electricity (% of population)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          42,
+          82,
+          98,
+          100
+        ],
+        "unit": "% of population",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Access to electricity (% of population): World Bank, World Development Indicators, EG.ELC.ACCS.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Access to electricity (% of population) (EG.ELC.ACCS.ZS), from its World Development Indicators, every economy and year it gives (1990–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Access to electricity is the percentage of population with access to electricity. Electrification data are collected from industry, national surveys and international sources.” Its sources, as it names them: SDG 7.1.1 Electrification Dataset, World Bank (WB), uri: https://trackingsdg7.esmap.org/downloads, note: Data is downloaded from ESMAP website. Data is released when a new Tracking SDG7 report is released., publisher: World Bank (WB), date accessed: 2024-05-16, date published: 2023. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (42, 82, 98, 100), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:49:47Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/EG.ELC.ACCS.ZS.json",
+          "bytes": 47610,
+          "gzip": 14885,
+          "sha256": "65184a71ebba7789f37016b1d8d8de68d8e3ee06670107948f9cdb44d08d2813"
+        }
+      ]
+    },
+    {
+      "id": "wb-en-atm-pm25-mc-m3",
+      "module": "omni-map",
+      "title": "PM2.5 air pollution, mean annual exposure (micrograms per cubic meter)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "EN.ATM.PM25.MC.M3",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1990,
+        "to": 2023,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/EN.ATM.PM25.MC.M3.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "PM2.5 air pollution, mean annual exposure (micrograms per cubic meter)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          9.4,
+          15,
+          19,
+          23,
+          29,
+          39
+        ],
+        "unit": "micrograms per cubic meter",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "PM2.5 air pollution, mean annual exposure (micrograms per cubic meter): World Bank, World Development Indicators, EN.ATM.PM25.MC.M3 (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s PM2.5 air pollution, mean annual exposure (micrograms per cubic meter) (EN.ATM.PM25.MC.M3), from its World Development Indicators, every economy and year it gives (1990–2023), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Population-weighted exposure to ambient PM2.5 pollution is defined as the average level of exposure of a nation's population to concentrations of suspended particles measuring less than 2.5 microns in aerodynamic diameter, which are capable of penetrating deep into the respiratory tract and causing severe health damage. Exposure is calculated by weighting mean annual concentrations of PM2.5 by population in both urban and rural areas.” Its sources, as it names them: Global Burden of Disease Study 2023 (GBD 2023) Air Pollution Exposure Estimates and Risk Curves 1990-2023, GBD Collaborator Network, uri: https://ghdx.healthdata.org/record/ihme-data/gbd-2023-air-pollution-exposure-estimates-1990-2023, note: Need to create account to retrieve data., publisher: Institute for Health Metrics and Evaluation (IHME), date accessed: 2026-04-03, date published: 2026-01-23. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (9.4, 15, 19, 23, 29, 39), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:50:35Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/EN.ATM.PM25.MC.M3.json",
+          "bytes": 122463,
+          "gzip": 59620,
+          "sha256": "ddd734a571794961e80749559c17794f6974d7a3ff6d6f917d029f423c92c8cd"
+        }
+      ]
+    },
+    {
+      "id": "wb-er-h2o-fwst-zs",
+      "module": "omni-map",
+      "title": "Level of water stress: freshwater withdrawal as a proportion of available freshwater resources",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "ER.H2O.FWST.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1962,
+        "to": 2022,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/ER.H2O.FWST.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Level of water stress: freshwater withdrawal as a proportion of available freshwater resources (% of the freshwater available)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          1.8,
+          4.4,
+          8.6,
+          18,
+          37,
+          76
+        ],
+        "unit": "% of the freshwater available",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Level of water stress: freshwater withdrawal as a proportion of available freshwater resources: World Bank, World Development Indicators, ER.H2O.FWST.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Level of water stress: freshwater withdrawal as a proportion of available freshwater resources (ER.H2O.FWST.ZS), from its World Development Indicators, every economy and year it gives (1962–2022), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “The level of water stress: freshwater withdrawal as a proportion of available freshwater resources is the ratio between total freshwater withdrawn by all major sectors and total renewable freshwater resources, after taking into account environmental water requirements. Main sectors, as defined by ISIC standards, include agriculture; forestry and fishing; manufacturing; electricity industry; and services. This indicator is also known as water withdrawal intensity.” Its sources, as it names them: AQUASTAT - FAO's Global Information System on Water and Agriculture, Food and Agriculture Organization of the United Nations (FAO), uri: https://data.apps.fao.org/aquastat/, publisher: Food and Agriculture Organization of the United Nations (FAO), date accessed: 20240529. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (1.8, 4.4, 8.6, 18, 37, 76), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:50:45Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/ER.H2O.FWST.ZS.json",
+          "bytes": 103093,
+          "gzip": 32343,
+          "sha256": "b2f799fb1e355709a9ff7ab6f16942fe2bae6c7cb99bb5fce3daa53b217bc566"
+        }
+      ]
+    },
+    {
+      "id": "wb-fp-cpi-totl-zg",
+      "module": "omni-map",
+      "title": "Inflation, consumer prices (annual % growth)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "FP.CPI.TOTL.ZG",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/FP.CPI.TOTL.ZG.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Inflation, consumer prices (annual % growth)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          1.1,
+          2.4,
+          3.8,
+          5.9,
+          9,
+          15
+        ],
+        "unit": "annual % growth",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Inflation, consumer prices (annual % growth): World Bank, World Development Indicators, FP.CPI.TOTL.ZG (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Inflation, consumer prices (annual % growth) (FP.CPI.TOTL.ZG), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Inflation as measured by the consumer price index reflects the annual percentage change in the cost to the average consumer of acquiring a basket of goods and services that may be fixed or changed at specified intervals, such as yearly.” Its sources, as it names them: International Financial Statistics database, International Monetary Fund (IMF). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (1.1, 2.4, 3.8, 5.9, 9, 15), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:50:56Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/FP.CPI.TOTL.ZG.json",
+          "bytes": 181432,
+          "gzip": 80589,
+          "sha256": "9549373596bbcd91dfa7e003876ade05b5b3a46f56d7045f963f42c139da700d"
+        }
+      ]
+    },
+    {
+      "id": "wb-gb-xpd-rsdv-gd-zs",
+      "module": "omni-map",
+      "title": "Research and development expenditure (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GB.XPD.RSDV.GD.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GB.XPD.RSDV.GD.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Research and development expenditure (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.14,
+          0.26,
+          0.45,
+          0.72,
+          1.2,
+          2.1
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Research and development expenditure (% of GDP): World Bank, World Development Indicators, GB.XPD.RSDV.GD.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Research and development expenditure (% of GDP) (GB.XPD.RSDV.GD.ZS), from its World Development Indicators, every economy and year it gives (1996–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross domestic expenditures on research and development (R&D), expressed as a percent of GDP. They include both capital and current expenditures in the four main sectors: Business enterprise, Government, Higher education and Private non-profit. R&D covers basic research, applied research, and experimental development.” Its sources, as it names them: Stat Bulk Data Download Service, UN Educational, Scientific and Cultural Organization (UNESCO), uri: https://databrowser.uis.unesco.org/resources/bulk, publisher: UNESCO Institute for Statistics (UIS), date accessed: 2025-03-26, date published: 2025-02. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.14, 0.26, 0.45, 0.72, 1.2, 2.1), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:02Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GB.XPD.RSDV.GD.ZS.json",
+          "bytes": 36055,
+          "gzip": 12733,
+          "sha256": "f26dc10d8861090f3f266eddf9fc17429a3c0e8c1aa99e05b65e0ea60fe1ef0c"
+        }
+      ]
+    },
+    {
+      "id": "wb-gc-dod-totl-gd-zs",
+      "module": "omni-map",
+      "title": "Central government debt, total (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GC.DOD.TOTL.GD.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1970,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GC.DOD.TOTL.GD.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Central government debt, total (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          21,
+          32,
+          44,
+          53,
+          65,
+          87
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Central government debt, total (% of GDP): World Bank, World Development Indicators, GC.DOD.TOTL.GD.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Central government debt, total (% of GDP) (GC.DOD.TOTL.GD.ZS), from its World Development Indicators, every economy and year it gives (1970–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Debt is the entire stock of direct government fixed-term contractual obligations to others outstanding on a particular date. It includes domestic and foreign liabilities such as currency and money deposits, securities other than shares, and loans. It is the gross amount of government liabilities reduced by the amount of equity and financial derivatives held by the government. Because debt is a stock rather than a flow, it is measured as of a given date, usually the last day of the fiscal year. Central government is the part of general government that includes all administrative departments of the national executive, legislative, and judicial functions, other central agencies and those non-market producers controlled by the central government, whose competence extends normally over the whole economic territory. This indicator is expressed as a percentage of Gross Domestic Product (GDP) which is the total income earned through the production of goods and services in an economic territory during an accounting period.” Its sources, as it names them: Government Finance Statistics Yearbook and data files, International Monetary Fund (IMF). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (21, 32, 44, 53, 65, 87), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:04Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GC.DOD.TOTL.GD.ZS.json",
+          "bytes": 54829,
+          "gzip": 18039,
+          "sha256": "8252595d5857aa75c5cb5727bfa491c42d71eee9b3bf7acab1ba4d8bffa67416"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-ge-est",
+      "module": "omni-map",
+      "title": "Government Effectiveness - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_GE.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_GE.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Government Effectiveness - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.1,
+          -0.67,
+          -0.32,
+          0.063,
+          0.52,
+          1.2
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Government Effectiveness - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_GE.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Government Effectiveness - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_GE.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Government Effectiveness (GE) captures perceptions of the quality of public services, the civil service, policy formulation and implementation, and the credibility of a government’s decisions. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.1, -0.67, -0.32, 0.063, 0.52, 1.2), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:07Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_GE.EST.json",
+          "bytes": 66029,
+          "gzip": 27639,
+          "sha256": "c79aa1fbf6ade1835699cb5844e40faa842377efe806c209009bcef93305d340"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-pv-est",
+      "module": "omni-map",
+      "title": "Political Stability - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_PV.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_PV.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Political Stability - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.1,
+          -0.56,
+          -0.16,
+          0.26,
+          0.75,
+          1.1
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Political Stability - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_PV.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Political Stability - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_PV.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Political Stability (PV) captures perceptions of the extent to which political power and governance are secure from destabilization, and of the likelihood that authority will be challenged or altered through violent, coercive, or unconstitutional means. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.1, -0.56, -0.16, 0.26, 0.75, 1.1), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:08Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_PV.EST.json",
+          "bytes": 66538,
+          "gzip": 28706,
+          "sha256": "067384dc525f03199b204c16d83f8f3265d4552154fe015e2dd0627d8267e904"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-rl-est",
+      "module": "omni-map",
+      "title": "Rule of Law - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_RL.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_RL.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Rule of Law - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.1,
+          -0.72,
+          -0.35,
+          0.1,
+          0.67,
+          1.2
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Rule of Law - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_RL.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Rule of Law - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_RL.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Rule of Law (RL) captures perceptions of the extent to which agents respect and follow the rules of society, including contract enforcement, property rights, the police, courts, and the likelihood of crime and violence. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.1, -0.72, -0.35, 0.1, 0.67, 1.2), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:13Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_RL.EST.json",
+          "bytes": 67155,
+          "gzip": 28971,
+          "sha256": "ce6270cdb2bc698cd104786936bd074a7bce71581526bc35ff6e1d4a7dbadb69"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-rq-est",
+      "module": "omni-map",
+      "title": "Regulatory Quality - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_RQ.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_RQ.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Regulatory Quality - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.1,
+          -0.65,
+          -0.33,
+          0.08,
+          0.56,
+          1.2
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Regulatory Quality - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_RQ.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Regulatory Quality - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_RQ.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Regulatory Quality (RQ) captures perceptions of the government’s ability to design and implement policies and regulations that promote private sector development. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.1, -0.65, -0.33, 0.08, 0.56, 1.2), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:15Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_RQ.EST.json",
+          "bytes": 66034,
+          "gzip": 28536,
+          "sha256": "80d999be8cbdd8ab1e4eaace474d19bb8c4f11e6e23722cf036a82ecfd8ddda7"
+        }
+      ]
+    },
+    {
+      "id": "wb-gov-wgi-va-est",
+      "module": "omni-map",
+      "title": "Voice and Accountability - Governance estimate (approx. -2.5 to +2.5)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "GOV_WGI_VA.EST",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1996,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/GOV_WGI_VA.EST.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Voice and Accountability - Governance estimate (approx. -2.5 to +2.5)",
+      "status": "estimated: a model’s estimate, with a margin of error the World Bank publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -1.2,
+          -0.72,
+          -0.16,
+          0.24,
+          0.71,
+          1.1
+        ],
+        "unit": "approx. -2.5 to +2.5",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Voice and Accountability - Governance estimate (approx. -2.5 to +2.5): World Bank, Worldwide Governance Indicators, GOV_WGI_VA.EST (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wgi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Voice and Accountability - Governance estimate (approx. -2.5 to +2.5) (GOV_WGI_VA.EST), from its Worldwide Governance Indicators, every economy and year it gives (1996–2025), as last updated by the World Bank on 2026-09-25; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Voice and Accountability (VA) captures perceptions of the extent to which citizens can participate in selecting their government including electoral integrity, and of accountability mechanisms for citizens—reflected in the ability to access information, governmental oversight bodies, and a robust traditional/digital media landscape. Governance estimate from the aggregation model, in units of a standard normal distribution, i.e. ranging from approximately -2.5 to 2.5. Larger values correspond to better governance.” Its sources, as it names them: Detailed documentation of the WGI, interactive tools for exploring the data, and full access to the underlying source data available at www.govindicators.org. Worldwide Governance Indicators, 2025 Revision, World Bank (www.govindicators.org), Accessed on 12/15/2025. And: World Bank (2025). “The Worldwide Governance Indicators: Revised Methodology for Measuring Governance Using Perception Data.” Washington, DC: World Bank Group. The 2025 revision builds upon the original WGI methodology which was introduced in 1999 and summarized by the following paper: Kaufmann, Daniel & Aart C. Kraay. (2024). “The Worldwide Governance Indicators: Methodology and 2024 Update.” Policy Research Working Paper. Washington, DC: World Bank Group. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 0 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-1.2, -0.72, -0.16, 0.24, 0.71, 1.1), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:22Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/GOV_WGI_VA.EST.json",
+          "bytes": 66658,
+          "gzip": 29124,
+          "sha256": "2e4dc5d30411192219cf1cfac847aa20341b25833c135d72b5f9f31894089212"
+        }
+      ]
+    },
+    {
+      "id": "wb-ip-pat-resd",
+      "module": "omni-map",
+      "title": "Patent applications, residents",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "IP.PAT.RESD",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1980,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/IP.PAT.RESD.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Patent applications, residents (applications)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          10,
+          35,
+          110,
+          340,
+          1100,
+          2900
+        ],
+        "unit": "applications",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Patent applications, residents: World Bank, World Development Indicators, IP.PAT.RESD (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Patent applications, residents (IP.PAT.RESD), from its World Development Indicators, every economy and year it gives (1980–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Patent applications are worldwide patent applications filed through the Patent Cooperation Treaty procedure or with a national patent office for exclusive rights for an invention--a product or process that provides a new way of doing something or offers a new technical solution to a problem. A patent provides protection for the invention to the owner of the patent for a limited period, generally 20 years.” Its sources, as it names them: WIPO Patent Report: Statistics on Worldwide Patent Activity, World Intellectual Property Organization (WIPO), note: The International Bureau of WIPO assumes no responsibility with respect to the transformation of these data. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (10, 35, 110, 340, 1,100, 2,900), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:23Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/IP.PAT.RESD.json",
+          "bytes": 37611,
+          "gzip": 12087,
+          "sha256": "20f63fd0feb920f1120d0d62953fd560e70a79d9eff9041d33e09fcfe2551fc1"
+        }
+      ]
+    },
+    {
+      "id": "wb-it-cel-sets-p2",
+      "module": "omni-map",
+      "title": "Mobile cellular subscriptions (per 100 people)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "IT.CEL.SETS.P2",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/IT.CEL.SETS.P2.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Mobile cellular subscriptions (per 100 people)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0,
+          0.11,
+          12,
+          69,
+          110
+        ],
+        "unit": "per 100 people",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Mobile cellular subscriptions (per 100 people): World Bank, World Development Indicators, IT.CEL.SETS.P2 (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Mobile cellular subscriptions (per 100 people) (IT.CEL.SETS.P2), from its World Development Indicators, every economy and year it gives (1960–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Mobile cellular telephone subscriptions are subscriptions to a public mobile telephone service that provide access to the PSTN using cellular technology. The indicator includes (and is split into) the number of postpaid subscriptions, and the number of active prepaid accounts (i.e. that have been used during the last three months). The indicator applies to all mobile cellular subscriptions that offer voice communications. It excludes subscriptions via data cards or USB modems, subscriptions to public mobile data services, private trunked mobile radio, telepoint, radio paging and telemetry services.” Its sources, as it names them: World Telecommunication/ICT Indicators Database, International Telecommunication Union (ITU). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Gibraltar has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0, 0.11, 12, 69, 110), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:30Z",
+      "unplaced": {
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/IT.CEL.SETS.P2.json",
+          "bytes": 135771,
+          "gzip": 55905,
+          "sha256": "3e04276c5001ba49b63b1988dc56b7ba86f0eab2fcf33e76b97f659ac33ee0f5"
+        }
+      ]
+    },
+    {
+      "id": "wb-it-net-user-zs",
+      "module": "omni-map",
+      "title": "Individuals using the Internet (% of population)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "IT.NET.USER.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1990,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/IT.NET.USER.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Individuals using the Internet (% of population)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.25,
+          2.8,
+          11,
+          29,
+          55,
+          78
+        ],
+        "unit": "% of population",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Individuals using the Internet (% of population): World Bank, World Development Indicators, IT.NET.USER.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Individuals using the Internet (% of population) (IT.NET.USER.ZS), from its World Development Indicators, every economy and year it gives (1990–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Internet users are individuals who have used the Internet (from any location) in the last 3 months. The Internet can be used via a computer, mobile phone, personal digital assistant, games machine, digital TV etc.” Its sources, as it names them: World Telecommunication/ICT Indicators Database, International Telecommunication Union (ITU), uri: https://datahub.itu.int/. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Gibraltar has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.25, 2.8, 11, 29, 55, 78), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:42Z",
+      "unplaced": {
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/IT.NET.USER.ZS.json",
+          "bytes": 78792,
+          "gzip": 34861,
+          "sha256": "6ea954a87931b0984213e431add525656f6ff486e3d19ef1cb604b5a14c6b8ed"
+        }
+      ]
+    },
+    {
+      "id": "wb-ne-trd-gnfs-zs",
+      "module": "omni-map",
+      "title": "Trade (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "NE.TRD.GNFS.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/NE.TRD.GNFS.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Trade (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          35,
+          47,
+          60,
+          75,
+          93,
+          120
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Trade (% of GDP): World Bank, World Development Indicators, NE.TRD.GNFS.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Trade (% of GDP) (NE.TRD.GNFS.ZS), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Trade is the sum of exports and imports of goods and services. This indicator is expressed as a percentage of Gross Domestic Product (GDP) which is the total income earned through the production of goods and services in an economic territory during an accounting period.” Its sources, as it names them: Country official statistics, National Statistical Organizations and/or Central Banks; National Accounts data files, Organisation for Economic Co-operation and Development (OECD); Staff estimates, World Bank (WB). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (35, 47, 60, 75, 93, 120), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:58Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/NE.TRD.GNFS.ZS.json",
+          "bytes": 178359,
+          "gzip": 79145,
+          "sha256": "fa26f308356ae0d6ca2ea80dc420b1f8041a305b94c2bb26d2dd43e44a7ddc60"
+        }
+      ]
+    },
+    {
+      "id": "wb-ny-gdp-mktp-cd",
+      "module": "omni-map",
+      "title": "GDP (current US$)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "NY.GDP.MKTP.CD",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/NY.GDP.MKTP.CD.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "GDP (current US$)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          570000000,
+          2000000000,
+          5300000000,
+          13000000000,
+          40000000000,
+          170000000000
+        ],
+        "unit": "current US$",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "GDP (current US$): World Bank, World Development Indicators, NY.GDP.MKTP.CD (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s GDP (current US$) (NY.GDP.MKTP.CD), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross domestic product is the total income earned through the production of goods and services in an economic territory during an accounting period. It can be measured in three different ways: using either the expenditure approach, the income approach, or the production approach. This indicator is expressed in current prices, meaning no adjustment has been made to account for price changes over time. This indicator is expressed in United States dollars.” Its sources, as it names them: Country official statistics, National Statistical Organizations and/or Central Banks; National Accounts data files, Organisation for Economic Co-operation and Development (OECD); Staff estimates, World Bank (WB). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Channel Islands has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (570,000,000, 2,000,000,000, 5,300,000,000, 13,000,000,000, 40,000,000,000, 170,000,000,000), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:51:59Z",
+      "unplaced": {
+        "CHI": "Channel Islands"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/NY.GDP.MKTP.CD.json",
+          "bytes": 211532,
+          "gzip": 98932,
+          "sha256": "b92bb44e1ccfb5ba27f124ffcdc8013b1fd5b437b166a9a666ea5c7ee9ee4816"
+        }
+      ]
+    },
+    {
+      "id": "wb-ny-gdp-mktp-kd-zg",
+      "module": "omni-map",
+      "title": "GDP (annual % growth)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "NY.GDP.MKTP.KD.ZG",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1961,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/NY.GDP.MKTP.KD.ZG.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "GDP (annual % growth)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          -0.75,
+          1.6,
+          3.1,
+          4.3,
+          5.8,
+          8
+        ],
+        "unit": "annual % growth",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "GDP (annual % growth): World Bank, World Development Indicators, NY.GDP.MKTP.KD.ZG (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s GDP (annual % growth) (NY.GDP.MKTP.KD.ZG), from its World Development Indicators, every economy and year it gives (1961–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross domestic product is the total income earned through the production of goods and services in an economic territory during an accounting period. It can be measured in three different ways: using either the expenditure approach, the income approach, or the production approach. This indicator denotes the percentage change over each previous year of the constant price (base year 2015) series in United States dollars.” Its sources, as it names them: Country official statistics, National Statistical Organizations and/or Central Banks; National Accounts data files, Organisation for Economic Co-operation and Development (OECD); Staff estimates, World Bank (WB). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Channel Islands has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (-0.75, 1.6, 3.1, 4.3, 5.8, 8), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:09Z",
+      "unplaced": {
+        "CHI": "Channel Islands"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/NY.GDP.MKTP.KD.ZG.json",
+          "bytes": 216227,
+          "gzip": 98945,
+          "sha256": "be1c1eed6931b19bd00faaec3fee783d29366c05daf3658728af0957235f3fc1"
+        }
+      ]
+    },
+    {
+      "id": "wb-ny-gdp-pcap-kd",
+      "module": "omni-map",
+      "title": "GDP per capita (constant 2015 US$)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "NY.GDP.PCAP.KD",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/NY.GDP.PCAP.KD.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "GDP per capita (constant 2015 US$)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          790,
+          1600,
+          3100,
+          5500,
+          13000,
+          29000
+        ],
+        "unit": "constant 2015 US$",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "GDP per capita (constant 2015 US$): World Bank, World Development Indicators, NY.GDP.PCAP.KD (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s GDP per capita (constant 2015 US$) (NY.GDP.PCAP.KD), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross domestic product is the total income earned through the production of goods and services in an economic territory during an accounting period. It can be measured in three different ways: using either the expenditure approach, the income approach, or the production approach. The core indicator has been divided by the general population to achieve a per capita estimate.This indicator is expressed in constant prices, meaning the series has been adjusted to account for price changes over time. The reference year for this adjustment is 2015. This indicator is expressed in United States dollars.” Its sources, as it names them: Country official statistics, National Statistical Organizations and/or Central Banks; National Accounts data files, Organisation for Economic Co-operation and Development (OECD); Staff estimates, World Bank (WB). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Channel Islands has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (790, 1,600, 3,100, 5,500, 13,000, 29,000), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:10Z",
+      "unplaced": {
+        "CHI": "Channel Islands"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/NY.GDP.PCAP.KD.json",
+          "bytes": 215319,
+          "gzip": 101616,
+          "sha256": "4e4893553d87fdb343a43b5fd206dfa518ac495a71ab8640aacd9a257fc6ef2c"
+        }
+      ]
+    },
+    {
+      "id": "wb-se-sec-enrr",
+      "module": "omni-map",
+      "title": "School enrollment, secondary (% gross)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SE.SEC.ENRR",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1970,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SE.SEC.ENRR.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "School enrollment, secondary (% gross)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          20,
+          40,
+          62,
+          81,
+          92,
+          100
+        ],
+        "unit": "% gross",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "School enrollment, secondary (% gross): World Bank, World Development Indicators, SE.SEC.ENRR (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s School enrollment, secondary (% gross) (SE.SEC.ENRR), from its World Development Indicators, every economy and year it gives (1970–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross enrollment ratio is the ratio of total enrollment, regardless of age, to the population of the age group that officially corresponds to the level of education shown. Secondary education completes the provision of basic education that began at the primary level, and aims at laying the foundations for lifelong learning and human development, by offering more subject- or skill-oriented instruction using more specialized teachers.” Its sources, as it names them: Data API, UN Educational, Scientific and Cultural Organization (UNESCO), uri: https://databrowser.uis.unesco.org/resources, note: The data are obtained through the UIS API. Detailed documentation is available at: https://api.uis.unesco.org/api/public/documentation/, publisher: UNESCO Institute for Statistics (UIS), type: Bulk file (csv), date accessed: 2026-03-19, date published: 2026-02. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Gibraltar has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (20, 40, 62, 81, 92, 100), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:18Z",
+      "unplaced": {
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SE.SEC.ENRR.json",
+          "bytes": 140840,
+          "gzip": 54745,
+          "sha256": "d924066f2edffb74b02610636b635c76383c29c35fed1e1d55339e3762ebacc7"
+        }
+      ]
+    },
+    {
+      "id": "wb-se-ter-enrr",
+      "module": "omni-map",
+      "title": "School enrollment, tertiary (% gross)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SE.TER.ENRR",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1970,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SE.TER.ENRR.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "School enrollment, tertiary (% gross)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          1.9,
+          5.6,
+          13,
+          23,
+          43,
+          64
+        ],
+        "unit": "% gross",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "School enrollment, tertiary (% gross): World Bank, World Development Indicators, SE.TER.ENRR (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s School enrollment, tertiary (% gross) (SE.TER.ENRR), from its World Development Indicators, every economy and year it gives (1970–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gross enrollment ratio is the ratio of total enrollment, regardless of age, to the population of the age group that officially corresponds to the level of education shown. Tertiary education, whether or not to an advanced research qualification, normally requires, as a minimum condition of admission, the successful completion of education at the secondary level.” Its sources, as it names them: Data API, UN Educational, Scientific and Cultural Organization (UNESCO), uri: https://databrowser.uis.unesco.org/resources, note: The data are obtained through the UIS API. Detailed documentation is available at: https://api.uis.unesco.org/api/public/documentation/, publisher: UNESCO Institute for Statistics (UIS), type: Bulk file (csv), date accessed: 2026-03-19, date published: 2026-02. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (1.9, 5.6, 13, 23, 43, 64), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:24Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SE.TER.ENRR.json",
+          "bytes": 128580,
+          "gzip": 50105,
+          "sha256": "9d4519aa80bebb8b3680a5103f68ddb64bd493a88c6793d9ce7cd79bd9746dce"
+        }
+      ]
+    },
+    {
+      "id": "wb-sh-xpd-chex-gd-zs",
+      "module": "omni-map",
+      "title": "Current health expenditure (% of GDP)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SH.XPD.CHEX.GD.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 2000,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SH.XPD.CHEX.GD.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Current health expenditure (% of GDP)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          3.5,
+          4.3,
+          5.2,
+          6.2,
+          7.6,
+          9.2
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Current health expenditure (% of GDP): World Bank, World Development Indicators, SH.XPD.CHEX.GD.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Current health expenditure (% of GDP) (SH.XPD.CHEX.GD.ZS), from its World Development Indicators, every economy and year it gives (2000–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Level of current health expenditure expressed as a percentage of GDP. Estimates of current health expenditures include healthcare goods and services consumed during each year. This indicator does not include capital health expenditures such as buildings, machinery, IT and stocks of vaccines for emergency or outbreaks.” Its sources, as it names them: Global Health Expenditure Database, updated December 12th, 2025, World Health Organization (WHO), uri: https://apps.who.int/nha/database. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (3.5, 4.3, 5.2, 6.2, 7.6, 9.2), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:30Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SH.XPD.CHEX.GD.ZS.json",
+          "bytes": 58695,
+          "gzip": 28100,
+          "sha256": "b9b6629b564a036d6bf50ac7b76b97a06d55cb88d73ad6d5e1e17bbf239f2c77"
+        }
+      ]
+    },
+    {
+      "id": "wb-si-pov-dday",
+      "module": "omni-map",
+      "title": "Poverty headcount ratio at $3.00 a day (2021 PPP) (% of population)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SI.POV.DDAY",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1963,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SI.POV.DDAY.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Poverty headcount ratio at $3.00 a day (2021 PPP) (% of population)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.1,
+          0.4,
+          1,
+          3.1,
+          10,
+          27
+        ],
+        "unit": "% of population",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Poverty headcount ratio at $3.00 a day (2021 PPP) (% of population): World Bank, World Development Indicators, SI.POV.DDAY (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Poverty headcount ratio at $3.00 a day (2021 PPP) (% of population) (SI.POV.DDAY), from its World Development Indicators, every economy and year it gives (1963–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Poverty headcount ratio at $3.00 a day is the percentage of the population living on less than $3.00 a day at 2021 purchasing power adjusted prices. As a result of revisions in PPP exchange rates, poverty rates for individual countries cannot be compared with poverty rates reported in earlier editions.” Its sources, as it names them: World Bank, Poverty and Inequality Platform. Data are based on primary household survey data obtained from government statistical agencies and World Bank country departments. Data for high-income economies are mostly from the Luxembourg Income Study database. For more information and methodology, please see http://pip.worldbank.org., World Bank (WB), uri: http://pip.worldbank.org, note: Data are based on primary household survey data obtained from government statistical agencies and World Bank country departments. Data for high-income economies are mostly from the Luxembourg Income Study database. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.1, 0.4, 1, 3.1, 10, 27), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:36Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SI.POV.DDAY.json",
+          "bytes": 58287,
+          "gzip": 8610,
+          "sha256": "700509d434c48e3db232a2f2639d894188b13c18bccbb8c3ef4b4908feb703bf"
+        }
+      ]
+    },
+    {
+      "id": "wb-si-pov-gini",
+      "module": "omni-map",
+      "title": "Gini index",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SI.POV.GINI",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1963,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SI.POV.GINI.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Gini index (index, 0 to 100)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          28,
+          32,
+          34,
+          37,
+          41,
+          48
+        ],
+        "unit": "index, 0 to 100",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Gini index: World Bank, World Development Indicators, SI.POV.GINI (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Gini index (SI.POV.GINI), from its World Development Indicators, every economy and year it gives (1963–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Gini index measures the extent to which the distribution of income (or, in some cases, consumption expenditure) among individuals or households within an economy deviates from a perfectly equal distribution. A Lorenz curve plots the cumulative percentages of total income received against the cumulative number of recipients, starting with the poorest individual or household. The Gini index measures the area between the Lorenz curve and a hypothetical line of absolute equality, expressed as a percentage of the maximum area under the line. Thus a Gini index of 0 represents perfect equality, while an index of 100 implies perfect inequality.” Its sources, as it names them: World Bank, Poverty and Inequality Platform. Data are based on primary household survey data obtained from government statistical agencies and World Bank country departments. Data for high-income economies are mostly from the Luxembourg Income Study database. For more information and methodology, please see http://pip.worldbank.org., World Bank (WB), uri: http://pip.worldbank.org, note: Data are based on primary household survey data obtained from government statistical agencies and World Bank country departments. Data for high-income economies are mostly from the Luxembourg Income Study database. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (28, 32, 34, 37, 41, 48), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:52:48Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SI.POV.GINI.json",
+          "bytes": 60171,
+          "gzip": 9389,
+          "sha256": "0e71ce889b48c2c626175aa457ba7d0bdbe7cfbc7bd75676ee5725e717cbb5ce"
+        }
+      ]
+    },
+    {
+      "id": "wb-sl-uem-totl-zs",
+      "module": "omni-map",
+      "title": "Unemployment, total (% of total labor force) (modeled ILO estimate)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SL.UEM.TOTL.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1991,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SL.UEM.TOTL.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Unemployment, total (% of total labor force) (modeled ILO estimate)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          2.7,
+          4,
+          5.4,
+          7.4,
+          10,
+          14
+        ],
+        "unit": "% of total labor force",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Unemployment, total (% of total labor force) (modeled ILO estimate): World Bank, World Development Indicators, SL.UEM.TOTL.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Unemployment, total (% of total labor force) (modeled ILO estimate) (SL.UEM.TOTL.ZS), from its World Development Indicators, every economy and year it gives (1991–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Unemployment refers to the share of the labor force that is without work but available for and seeking employment.” Its sources, as it names them: ILO Modelled Estimates database (ILOEST), International Labour Organization (ILO), uri: https://ilostat.ilo.org/data/bulk/, publisher: ILOSTAT, type: external database, date accessed: January 17, 2026. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economy Channel Islands has a value but no shape or point on Natural Earth’s countries, so VM cannot place it on a free border; the key lists it. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (2.7, 4, 5.4, 7.4, 10, 14), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:00Z",
+      "unplaced": {
+        "CHI": "Channel Islands"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SL.UEM.TOTL.ZS.json",
+          "bytes": 46333,
+          "gzip": 20377,
+          "sha256": "842490d98dd9bb3ed46d39a0cc90c0f3d10ae311cd71201c6aa22fa2eb4cfbbb"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-dyn-imrt-in",
+      "module": "omni-map",
+      "title": "Mortality rate, infant (per 1,000 live births)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.DYN.IMRT.IN",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.DYN.IMRT.IN.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Mortality rate, infant (per 1,000 live births)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          7.9,
+          15,
+          25,
+          42,
+          64,
+          100
+        ],
+        "unit": "per 1,000 live births",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Mortality rate, infant (per 1,000 live births): World Bank, World Development Indicators, SP.DYN.IMRT.IN (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Mortality rate, infant (per 1,000 live births) (SP.DYN.IMRT.IN), from its World Development Indicators, every economy and year it gives (1960–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Infant mortality rate is the number of infants dying before reaching one year of age, per 1,000 live births in a given year.” Its sources, as it names them: UN Inter-agency Group for Child Mortality Estimation, UN Children's Fund (UNICEF), uri: www.childmortality.org; World Health Organization (WHO), uri: www.childmortality.org, note: UN Inter-agency Group for Child Mortality Estimation; World Bank (WB), uri: www.childmortality.org, note: UN Inter-agency Group for Child Mortality Estimation; United Nations (UN), uri: www.childmortality.org, note: UN Inter-agency Group for Child Mortality Estimation, publisher: UN Population Division. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (7.9, 15, 25, 42, 64, 100), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:01Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.DYN.IMRT.IN.json",
+          "bytes": 68489,
+          "gzip": 22413,
+          "sha256": "39da4e78babeea68b2e6ba9a8ce65680722344bf43f97dfa736d59aabe704b45"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-dyn-le00-in",
+      "module": "omni-map",
+      "title": "Life expectancy at birth, total (years)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.DYN.LE00.IN",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.DYN.LE00.IN.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Life expectancy at birth, total (years)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          52,
+          60,
+          66,
+          70,
+          73,
+          76
+        ],
+        "unit": "years",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Life expectancy at birth, total (years): World Bank, World Development Indicators, SP.DYN.LE00.IN (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Life expectancy at birth, total (years) (SP.DYN.LE00.IN), from its World Development Indicators, every economy and year it gives (1960–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Life expectancy at birth indicates the number of years a newborn infant would live if prevailing patterns of mortality at the time of its birth were to stay the same throughout its life.” Its sources, as it names them: World Population Prospects, United Nations (UN), uri: UN Population Division; Statistical databases and publications from national statistical offices, National Statistical Offices (NSOs), note: Derived from male and female life expectancy at birth from sources such as statistical databases and publications from national statistical offices.; Demographic Statistics, Eurostat (ESTAT), note: Derived from male and female life expectancy at birth from sources such as Eurostat: Demographic Statistics. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (52, 60, 66, 70, 73, 76), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:02Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.DYN.LE00.IN.json",
+          "bytes": 139895,
+          "gzip": 49063,
+          "sha256": "cc8d06cb113e8e7a2af6ae6124ae33c7220717ada35b3c3c1d6243896dbc8da0"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-dyn-tfrt-in",
+      "module": "omni-map",
+      "title": "Fertility rate, total (births per woman)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.DYN.TFRT.IN",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.DYN.TFRT.IN.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Fertility rate, total (births per woman)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          1.7,
+          2.1,
+          2.8,
+          3.8,
+          5.3,
+          6.4
+        ],
+        "unit": "births per woman",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Fertility rate, total (births per woman): World Bank, World Development Indicators, SP.DYN.TFRT.IN (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Fertility rate, total (births per woman) (SP.DYN.TFRT.IN), from its World Development Indicators, every economy and year it gives (1960–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Total fertility rate represents the number of children that would be born to a woman if she were to live to the end of her childbearing years and bear children in accordance with age-specific fertility rates of the specified year.” Its sources, as it names them: World Population Prospects, United Nations (UN), publisher: UN Population Division; Statistical databases and publications from national statistical offices, National Statistical Offices (NSOs); Demographic Statistics, Eurostat (ESTAT). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (1.7, 2.1, 2.8, 3.8, 5.3, 6.4), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:03Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.DYN.TFRT.IN.json",
+          "bytes": 88692,
+          "gzip": 33538,
+          "sha256": "60caa697e8268a4800e466d004863747043c31e51fe9e7ed003660ba9cef1c63"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-pop-grow",
+      "module": "omni-map",
+      "title": "Population growth (annual %)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.POP.GROW",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1961,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.POP.GROW.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Population growth (annual %)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.21,
+          0.78,
+          1.3,
+          2,
+          2.5,
+          3.1
+        ],
+        "unit": "annual %",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Population growth (annual %): World Bank, World Development Indicators, SP.POP.GROW (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Population growth (annual %) (SP.POP.GROW), from its World Development Indicators, every economy and year it gives (1961–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Annual population growth rate for year t is the exponential rate of growth of midyear population from year t-1 to t, expressed as a percentage. Population is based on the de facto definition of population, which counts all residents regardless of legal status or citizenship.” Its sources, as it names them: World Population Prospects, United Nations (UN), note: Derived from total population, publisher: UN Population Division; Statistical databases and publications from national statistical offices, National Statistical Offices (NSOs), note: Derived from total population; Demographic Statistics, Eurostat (ESTAT), note: Derived from total population; Population and Vital Statistics Report (various years), United Nations (UN), note: Derived from total population, publisher: UN Statistical Division. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.21, 0.78, 1.3, 2, 2.5, 3.1), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:03Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.POP.GROW.json",
+          "bytes": 252457,
+          "gzip": 119315,
+          "sha256": "90734003b62caf8e3d3279eecb9db423baeb0a33c0e0d8e0a5497e6bec434271"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-pop-totl",
+      "module": "omni-map",
+      "title": "Population, total",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.POP.TOTL",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.POP.TOTL.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Population, total (people)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          110000,
+          760000,
+          3000000,
+          5800000,
+          11000000,
+          33000000
+        ],
+        "unit": "people",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Population, total: World Bank, World Development Indicators, SP.POP.TOTL (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Population, total (SP.POP.TOTL), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Total population is based on the de facto definition of population, which counts all residents regardless of legal status or citizenship. The values shown are midyear estimates.” Its sources, as it names them: World Population Prospects, United Nations (UN), uri: https://population.un.org/wpp/, publisher: UN Population Division; Statistical databases and publications from national statistical offices, National Statistical Offices (NSOs), uri: https://unstats.un.org/home/nso_sites/, publisher: National Statistical Offices; Eurostat: Demographic Statistics, Eurostat (ESTAT), uri: https://ec.europa.eu/eurostat/data/database?node_code=earn_ses_monthly, publisher: Eurostat; Population and Vital Statistics Report (various years), United Nations (UN), uri: https://unstats.un.org, publisher: UN Statistics Division. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (110,000, 760,000, 3,000,000, 5,800,000, 11,000,000, 33,000,000), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:04Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.POP.TOTL.json",
+          "bytes": 121569,
+          "gzip": 58767,
+          "sha256": "6acff5b926e25cc39e0cdc2cdd9064de3661d9e7fe3472315af412d467e763b6"
+        }
+      ]
+    },
+    {
+      "id": "wb-sp-urb-totl-in-zs",
+      "module": "omni-map",
+      "title": "Urban population (% of total population)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "SP.URB.TOTL.IN.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1960,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/SP.URB.TOTL.IN.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Urban population (% of total population)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          22,
+          34,
+          45,
+          57,
+          69,
+          83
+        ],
+        "unit": "% of total population",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Urban population (% of total population): World Bank, World Development Indicators, SP.URB.TOTL.IN.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Urban population (% of total population) (SP.URB.TOTL.IN.ZS), from its World Development Indicators, every economy and year it gives (1960–2025), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “Urban population refers to people living in urban areas as defined by national statistical offices. The data are collected and smoothed by United Nations Population Division.” Its sources, as it names them: World Urbanization Prospects, United Nations (UN), uri: https://population.un.org/wup/, note: United Nations Population Division's World Urbanization Prospects, National definitions, publisher: UN Population Division. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (22, 34, 45, 57, 69, 83), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:05Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/SP.URB.TOTL.IN.ZS.json",
+          "bytes": 241859,
+          "gzip": 115042,
+          "sha256": "ed87341b9e992bf9ea13f67b33b8dc6500da80ad109abf2fc0c3f9c636fd63f7"
+        }
+      ]
+    },
+    {
+      "id": "wb-tx-val-tech-mf-zs",
+      "module": "omni-map",
+      "title": "High-technology exports (% of manufactured exports)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "TX.VAL.TECH.MF.ZS",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 2007,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/TX.VAL.TECH.MF.ZS.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "High-technology exports (% of manufactured exports)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.8,
+          2.4,
+          5.1,
+          8.1,
+          13,
+          22
+        ],
+        "unit": "% of manufactured exports",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "High-technology exports (% of manufactured exports): World Bank, World Development Indicators, TX.VAL.TECH.MF.ZS (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s High-technology exports (% of manufactured exports) (TX.VAL.TECH.MF.ZS), from its World Development Indicators, every economy and year it gives (2007–2024), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “High-technology exports are products with high R&D intensity, such as in aerospace, computers, pharmaceuticals, scientific instruments, and electrical machinery.” Its sources, as it names them: Comtrade database, United Nations (UN), uri: comtrade.un.org, publisher: UN Statistics Division; World Integrated Trade Solution system (WITS), World Bank (WB), uri: https://wits.worldbank.org/. VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.8, 2.4, 5.1, 8.1, 13, 22), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:21Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/wb/TX.VAL.TECH.MF.ZS.json",
+          "bytes": 55271,
+          "gzip": 26489,
+          "sha256": "21268d21337fa7b2e7a0006bb701ffb726bc0077a27e61057d4d88b98e65af72"
+        }
+      ]
+    },
+    {
+      "id": "wb-vc-ihr-psrc-p5",
+      "module": "omni-map",
+      "title": "Intentional homicides (per 100,000 people)",
+      "role": "fill",
+      "geometry": "polygon",
+      "wb": "VC.IHR.PSRC.P5",
+      "group": "wb",
+      "time": {
+        "field": "year",
+        "from": 1990,
+        "to": 2023,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/wb/VC.IHR.PSRC.P5.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Intentional homicides (per 100,000 people)",
+      "status": "as the World Bank and the sources it names estimate it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.92,
+          1.5,
+          2.5,
+          4.8,
+          8.3,
+          17
+        ],
+        "unit": "per 100,000 people",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Intentional homicides (per 100,000 people): World Bank, World Development Indicators, VC.IHR.PSRC.P5 (CC BY 4.0), on Natural Earth’s countries of today",
+      "source": "world-bank-wdi",
+      "method": "VM’s own text, quoting the World Bank. The World Bank’s Intentional homicides (per 100,000 people) (VC.IHR.PSRC.P5), from its World Development Indicators, every economy and year it gives (1990–2023), as last updated by the World Bank on 2026-11-11; licence, as the series’ own metadata gives it at each build: CC BY-4.0. Its definition, in the World Bank’s words: “An intentional homicide is defined as an unlawful death inflicted upon a person with the intent to cause death or serious injury.” Its sources, as it names them: UNODC Research - Data Portal – Intentional Homicide, UN Office on Drugs and Crime (UNODC). VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. The 44 aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. The economies Channel Islands and Gibraltar have a value but no shape or point on Natural Earth’s countries, so VM cannot place them on a free border; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every economy and year together), each rounded to two significant figures (0.92, 1.5, 2.5, 4.8, 8.3, 17), the same for every year. A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:53:21Z",
+      "unplaced": {
+        "CHI": "Channel Islands",
+        "GIB": "Gibraltar"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/wb/VC.IHR.PSRC.P5.json",
+          "bytes": 89800,
+          "gzip": 39501,
+          "sha256": "ab84addf3d6d13fa92310e0a329033edae6d42c8b28e2b8a48123ffeb11293d9"
+        }
+      ]
+    },
+    {
+      "id": "gvi",
+      "module": "volatility",
+      "title": "Volatility score (by country, by day)",
+      "role": "fill",
+      "geometry": "polygon",
+      "time": {
+        "field": "day",
+        "from": 2026,
+        "to": 2026,
+        "step": "d",
+        "precision": "day",
+        "first": "2026-09-26",
+        "last": "2026-11-19",
+        "shows": "the last day held of the frame’s year"
+      },
+      "data": "omni/data/layers/gvi/index.json",
+      "split": "year",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Geopolitical Volatility Index, 0 to 100",
+      "status": "VM’s own score",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          30,
+          40,
+          50,
+          60,
+          70
+        ],
+        "unit": "GVI",
+        "scheme": "sequential",
+        "cut": "VM’s classes at Volatility’s own bands (40 elevated, 70 high), with steps of ten between"
+      },
+      "legend": "Volatility score: VM’s own Geopolitical Volatility Index, from GDELT 2.0’s events (free for any use, with citation), on Natural Earth’s countries of today",
+      "source": "vm-volatility",
+      "method": "VM’s own text. VM’s Geopolitical Volatility Index (Volatility, q/volatility.html; method gvi-1.2-q96), one score from 0 to 100 for each country and day, from 2026-09-26 to 2026-11-19: five components scored from GDELT 2.0’s events that day (conflict and security, political escalation, civil unrest, economic disruption, cross-border spread), each ranked against the trailing 90 days and shrunk towards the middle where there are few reports (volatility/scripts/gvi.mjs). It is VM’s own score, not a measurement: a day with too few events or sources is not scored and the country is left blank. The days are kept by volatility/scripts/ingest.mjs in volatility/data/kept/ before Volatility’s index drops days older than a year, so every day since 2026-09-26 stays. The map shows one day, the last VM holds of the frame’s year; each country’s coverage that day (high, medium, low) is in the bundle. Drawn on Natural Earth’s countries of today, joined by ISO 3166 alpha-3 code. The classes are VM’s, at Volatility’s own bands (40 and over elevated, 70 and over high) with steps of ten between (omni/scripts/build-gvi.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:55:06Z",
+      "files": [
+        {
+          "file": "omni/data/layers/gvi/index.json",
+          "bytes": 399,
+          "gzip": 249,
+          "sha256": "1db54241f5355bf9d864afd4ffa500a848e8bf0097adcbfcaea5f7e8334efa4b"
+        },
+        {
+          "file": "omni/data/layers/gvi/2026.json",
+          "bytes": 58942,
+          "gzip": 13196,
+          "sha256": "f1d9d8b333388aa684499e864ecbb3eaf89d7c646779b4f0f38211c495a89e80"
+        }
+      ]
+    },
+    {
+      "id": "ucdp-events",
+      "module": "battlefield",
+      "title": "Organised violence, UCDP events (0.5° cells by month)",
+      "role": "point",
+      "geometry": "point",
+      "time": {
+        "field": "month",
+        "from": 1989,
+        "to": 2026,
+        "step": "m",
+        "precision": "month",
+        "first": "1989-01",
+        "last": "2026-09",
+        "recordedLast": "2025-12",
+        "shows": "the frame’s year, every month of it"
+      },
+      "data": "omni/data/layers/ucdp-events/index.json",
+      "split": "year",
+      "space": "0.5° cells (about 55 km at the equator), by month and type of violence",
+      "measure": "events, and best, low and high deaths, a cell and month",
+      "status": "recorded",
+      "statusBy": [
+        {
+          "from": 2026,
+          "status": "candidate"
+        }
+      ],
+      "style": {
+        "kind": "cells",
+        "token": "--prp-bad"
+      },
+      "filter": {
+        "field": "t",
+        "label": "Type of violence",
+        "values": [
+          {
+            "id": "1",
+            "name": "state-based"
+          },
+          {
+            "id": "2",
+            "name": "non-state"
+          },
+          {
+            "id": "3",
+            "name": "one-sided"
+          }
+        ]
+      },
+      "legend": "Organised violence: UCDP Georeferenced Event Dataset 26.1 (CC BY 4.0), 0.5° cells by month; 2026: UCDP Candidate Events, by country and month",
+      "source": "ucdp-ged",
+      "method": "VM’s own text. UCDP’s Georeferenced Event Dataset (GED) 26.1, every event from 1989-01 to 2025-12: an event is a day of organised violence with at least one death, state-based (a government against another or against a rebel group), non-state (groups with no government) or one-sided (against civilians). VM counts the events and sums UCDP’s best, low and high deaths in 0.5° cells by month and type, from the month each event began; no actor, side or person is named. UCDP says how exactly it knows each place (where_prec): VM puts the events known to the place, within 25 km, or to a district into cells (1 to 3); those known only to a province or a wider area (4 and 5) are counted by country and month and drawn at the country, not in a cell; those known only to the country, or at sea or in the air (6 and 7), are listed beside the map and never drawn. Countries are joined by ISO3 through VM’s crosswalk of UCDP’s names, never by a Gleditsch and Ward number. A state-based event’s conflict is joined to VM’s war registry, so the map can show one war (l=ucdp-events:w=<id>). 2026 is UCDP’s Candidate Events (26.01.26.09), as the Realtime Battlefield holds them: by country and month only, and candidate, not yet checked by UCDP. The map shows the frame’s year, every month of it, one file loaded at a time (omni/scripts/build-ucdp-events.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T12:59:42Z",
+      "files": [
+        {
+          "file": "omni/data/layers/ucdp-events/index.json",
+          "bytes": 9466,
+          "gzip": 2345,
+          "sha256": "a81f70777374d854a9700802791ec926c5ee05eba66a7a32b6c1d6402a2c7def"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1989.json",
+          "bytes": 40306,
+          "gzip": 9700,
+          "sha256": "f00ade4c5a5098eb1b21840de963e5ee8b4da49f051f0825a85fbc410484a877"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1990.json",
+          "bytes": 49771,
+          "gzip": 11503,
+          "sha256": "399e370cf3e0b07715736047755816e19b76778c70effb546a2f2e4ccea4ac1f"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1991.json",
+          "bytes": 45540,
+          "gzip": 10494,
+          "sha256": "e257df0e639783e57b052e6c7a359553a32cb146a1b8952e135c43aa5ddbb507"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1992.json",
+          "bytes": 56163,
+          "gzip": 12968,
+          "sha256": "4d2d99997394c141980db0018b26e39945c86149d9c2b9def79b600c0398a647"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1993.json",
+          "bytes": 58498,
+          "gzip": 13331,
+          "sha256": "b6a61f327f3bc8499007e95038ec9543c86969bad64107185a976e15ad5a1d3e"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1994.json",
+          "bytes": 55592,
+          "gzip": 13210,
+          "sha256": "3985374144f46a3f8d997046861b42d96ce7e8b4a47ab5a3c196492d9942e3ff"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1995.json",
+          "bytes": 55047,
+          "gzip": 12596,
+          "sha256": "b3fc14dfa06d6487df7c932da87c0f72f3393696c2009138525cb2e56fa8a931"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1996.json",
+          "bytes": 47024,
+          "gzip": 10901,
+          "sha256": "485e253bd87600b4062001c1346cb780744ed130d49bf8f28d625bd5c15abe7d"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1997.json",
+          "bytes": 47604,
+          "gzip": 10996,
+          "sha256": "0ef18912c23f9cc5115e909a63203f2355b1533b2ff74b54390be162b2709ecb"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1998.json",
+          "bytes": 55897,
+          "gzip": 12868,
+          "sha256": "c56bbf14fc9c42997520d3953338b069b2bb25e007f0397f6098a73cca56ccca"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/1999.json",
+          "bytes": 73675,
+          "gzip": 15978,
+          "sha256": "379e7ed63a3534a899dec77887579f4e9431ab3148f2f6b3c6fdb7ad8ff4e6fa"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2000.json",
+          "bytes": 81263,
+          "gzip": 17161,
+          "sha256": "51edb770842b4fec9112a4b53e4be6d9eafcc7b6ee0a06d768e176b891558eed"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2001.json",
+          "bytes": 70993,
+          "gzip": 15172,
+          "sha256": "1db3a0716280014a2531fa36abfc5b6b138d7ed3b2f75bcb73b552c25a6c1f9b"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2002.json",
+          "bytes": 98896,
+          "gzip": 20167,
+          "sha256": "a35ab1fcd728b3ceea65ac6b566d39ede47a6597989a2a31d14966d6f4c81299"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2003.json",
+          "bytes": 89525,
+          "gzip": 17933,
+          "sha256": "fe16f0f3c4af08bba2284733ff23106aa2b42c6d5b0db96b7226a9c32e8c97d5"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2004.json",
+          "bytes": 100311,
+          "gzip": 19734,
+          "sha256": "ebef38752f7649fb7c3be3c523a0211ce36f42842ccab50736d26bb29d1d4490"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2005.json",
+          "bytes": 84790,
+          "gzip": 16745,
+          "sha256": "b3e467a24d6ee3122882b3f2cc8a6e72e81a4dc61bd2fae90fb126cd4edb9a8e"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2006.json",
+          "bytes": 76036,
+          "gzip": 15716,
+          "sha256": "9cf573af94aa02452413117066740eab200b317ad8e81f2d9f9982708e8bf3fa"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2007.json",
+          "bytes": 89784,
+          "gzip": 18356,
+          "sha256": "dfea409287501a2c84e683c864854ce05dd4e7fa29018f21323252c56264790a"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2008.json",
+          "bytes": 79215,
+          "gzip": 17153,
+          "sha256": "54b9f6072d063f96d4c3dc7c2db12a3b065ade34a311e792f98b6e24c2b070c3"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2009.json",
+          "bytes": 86557,
+          "gzip": 18527,
+          "sha256": "233a84133502b3ff91e4fd8fbf87142efbacaaa405f17eaf64d72dfc8e26a900"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2010.json",
+          "bytes": 87761,
+          "gzip": 18328,
+          "sha256": "587e796a2acbb50c7493829617cd4585d07ca2bd787e028ae8164d3cbbc290ea"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2011.json",
+          "bytes": 87785,
+          "gzip": 18747,
+          "sha256": "0610e59d2a3af81a03e724f697ebe337ea5fed0d4293404d70b160a323a36e54"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2012.json",
+          "bytes": 99854,
+          "gzip": 21325,
+          "sha256": "2106e0a2fc246e7c076e31fdaa571afd89c453e1095d85d0e93a40091be36faa"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2013.json",
+          "bytes": 100142,
+          "gzip": 22437,
+          "sha256": "e1b00cb86e2d50063716b25db80a201dfd6c41a6c3aaf5988986c316b78575cf"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2014.json",
+          "bytes": 121781,
+          "gzip": 27419,
+          "sha256": "a6c6d5e22ea6d2bff6cb2c2b28c22abb5cff1f400c6978d695f2118e7aed5c82"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2015.json",
+          "bytes": 128109,
+          "gzip": 28467,
+          "sha256": "b9c32ba929dd98691e418ddda6db96f6b8a656614b2265e6d11f2326ff769a68"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2016.json",
+          "bytes": 123308,
+          "gzip": 27412,
+          "sha256": "dc71b19b326e7041af56783dcd97dd2a6559464a7fb4b0d97536fbf3fb40d7f5"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2017.json",
+          "bytes": 130736,
+          "gzip": 28674,
+          "sha256": "a1a65a7c67e07f385c84ce68f76f1a56672176f9a98533f8a3a759f758b2d07d"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2018.json",
+          "bytes": 132312,
+          "gzip": 28650,
+          "sha256": "7f816c7aacddbcfda6fc82a8b1a7b4b43fa329acbcec03877dd14e03c90a767b"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2019.json",
+          "bytes": 143932,
+          "gzip": 31132,
+          "sha256": "7f3e79fb9b526932186ad16f8863812fdebfe59adf479009f83e9f0996e66920"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2020.json",
+          "bytes": 152258,
+          "gzip": 32262,
+          "sha256": "7147ba29b29b7882e1b446800d1e15c38c36f3f4922c93d67d7f4b7b4685535d"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2021.json",
+          "bytes": 158492,
+          "gzip": 33994,
+          "sha256": "9a55d28778e413b14716826d5e809dc5fae892408b176167e4565fbdb21d1801"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2022.json",
+          "bytes": 171189,
+          "gzip": 35408,
+          "sha256": "0e7cb6fc50344a1f7b058a137b6f56703b75c46bc210741bcf86760019a6e553"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2023.json",
+          "bytes": 178105,
+          "gzip": 36735,
+          "sha256": "c249f3eb35647ed7a73883c33db24b79f4cd054f88a7fb81c08ef14161d7a3cf"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2024.json",
+          "bytes": 186082,
+          "gzip": 39238,
+          "sha256": "5f6998821fac8e1033a13037a01509f8c6302c479317d11b08064ab44d9e8b10"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2025.json",
+          "bytes": 187356,
+          "gzip": 40058,
+          "sha256": "cc262923aac54fe728700f9f9a79647b56e92a2b03d14db70470246c89f26174"
+        },
+        {
+          "file": "omni/data/layers/ucdp-events/2026.json",
+          "bytes": 14363,
+          "gzip": 3071,
+          "sha256": "1b0af2c095ab324bbbcbd605678c8865f420186d30d2e545d825e22d6f8d1906"
+        }
+      ]
+    },
+    {
+      "id": "calendar-events",
+      "module": "calendar",
+      "title": "Political events (VM’s Calendars)",
+      "role": "point",
+      "geometry": "point",
+      "time": {
+        "field": "date",
+        "from": 1980,
+        "to": 2029,
+        "step": "d",
+        "precision": "day",
+        "shows": "the frame’s year"
+      },
+      "data": "omni/data/layers/calendar/index.json",
+      "split": "year",
+      "at": "country",
+      "space": "at its country’s point, by ISO3 (Natural Earth’s countries of today)",
+      "measure": null,
+      "status": "recorded",
+      "statusBy": [],
+      "style": {
+        "kind": "events",
+        "token": "--prp-ds",
+        "hollow": "expected: its day not yet come, or its date not yet confirmed"
+      },
+      "filter": {
+        "field": "type",
+        "label": "Kind of event",
+        "values": [
+          {
+            "id": "assassination",
+            "name": "assassination"
+          },
+          {
+            "id": "ceasefire",
+            "name": "ceasefire"
+          },
+          {
+            "id": "conflict",
+            "name": "conflict"
+          },
+          {
+            "id": "court",
+            "name": "court"
+          },
+          {
+            "id": "crisis",
+            "name": "crisis"
+          },
+          {
+            "id": "election",
+            "name": "election"
+          },
+          {
+            "id": "inauguration",
+            "name": "inauguration"
+          },
+          {
+            "id": "party",
+            "name": "party"
+          },
+          {
+            "id": "protest",
+            "name": "protest"
+          },
+          {
+            "id": "referendum",
+            "name": "referendum"
+          },
+          {
+            "id": "resignation",
+            "name": "resignation"
+          },
+          {
+            "id": "sanctions",
+            "name": "sanctions"
+          },
+          {
+            "id": "summit",
+            "name": "summit"
+          },
+          {
+            "id": "treaty",
+            "name": "treaty"
+          },
+          {
+            "id": "vote",
+            "name": "vote"
+          }
+        ]
+      },
+      "legend": "Political events: VM’s Realtime and Historical Calendars (facts: Wikidata, Wikipedia, UCDP/PRIO ACD), each at its country",
+      "source": "vm-calendar",
+      "leftOut": {
+        "archigos": 1028,
+        "atlas": 139
+      },
+      "method": "VM’s own text. The dated events of VM’s Realtime and Historical Calendars (q/calendar.html), 1980 to 2029: elections, referendums, summits, treaties, outbreaks of armed conflict, ceasefires, court rulings, protests and the like, each from its own source (Wikidata, Wikipedia’s lists and its Current events portal, the UCDP/PRIO Armed Conflict Dataset), each with its source’s class. VM leaves out the 1028 events that are, or may be, Archigos’s (a new leader or a seizure of power from the Political Retrospective: Archigos’s terms do not plainly allow commercial use), and the 139 only in the Political Atlas. Each event is drawn at its country’s point, by its ISO3 (VM’s crosswalk of the calendars’ names to Natural Earth’s countries of today); an event of the European Union, of several countries, or of a state that is not one of today’s is listed, not drawn. A date known only to its month is kept to the month. For 4197 events the calendars have not yet recorded what kind of source each comes from (their next refresh does, with its date’s precision): each names its own source’s address, and its date is shown to the day as the calendars hold it, though a date on the 1st of a month may stand for the month alone. An event still to come, or whose date is not yet confirmed, is drawn hollow. The map shows the frame’s year, one decade’s file loaded at a time (omni/scripts/build-calendar-layer.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-20T14:28:18Z",
+      "files": [
+        {
+          "file": "omni/data/layers/calendar/index.json",
+          "bytes": 1117,
+          "gzip": 490,
+          "sha256": "8e5139a624c177f9ac0eb7faf3427da6e752b4bf9f28c9b5f6dde8ee0385b20f"
+        },
+        {
+          "file": "omni/data/layers/calendar/1980s.json",
+          "bytes": 265908,
+          "gzip": 25734,
+          "sha256": "92a688ef674ed7b3960c3141419d82b24fc97aaf230498bc50b2aea5072276f8"
+        },
+        {
+          "file": "omni/data/layers/calendar/1990s.json",
+          "bytes": 442776,
+          "gzip": 40718,
+          "sha256": "bec180ec4bcf8ad1a537d66b4c7f74aeda6996e8c7b9702430a223f3586ebc08"
+        },
+        {
+          "file": "omni/data/layers/calendar/2000s.json",
+          "bytes": 491289,
+          "gzip": 44537,
+          "sha256": "a2c7cd3e12933799271789733dff05a7eeb87c5d648d06d8fc51b1ac6996cb1e"
+        },
+        {
+          "file": "omni/data/layers/calendar/2010s.json",
+          "bytes": 707713,
+          "gzip": 68016,
+          "sha256": "afddf4a8a0ebabdad4b67c14150a6d1c15bae91ac6b75dafb1bc8d790ed9ae38"
+        },
+        {
+          "file": "omni/data/layers/calendar/2020s.json",
+          "bytes": 844968,
+          "gzip": 86281,
+          "sha256": "c687b90e5b79926b8cc24659de9b28947bc237bfd07a03a834fcba43a0fe300f"
+        }
+      ]
+    }
+  ],
+  "absent": [
+    {
+      "id": "wb-ms-mil-xpnd-gd-zs",
+      "title": "Military expenditure (% of GDP), by country",
+      "geometry": "polygon",
+      "group": "wb",
+      "wb": "MS.MIL.XPND.GD.ZS",
+      "why": "the World Bank takes this series from the Stockholm International Peace Research Institute (SIPRI), whose terms bar commercial use without its authorisation and a royalty, so it is not free data; military spending as a share of GDP cannot be drawn until a series under an open licence (CC BY or similar) exists",
+      "seen": "“Use of SIPRI copyrighted material for commercial purposes must be authorized and will normally require the payment of a reasonable royalty.” (SIPRI’s terms and conditions); the World Bank’s metadata for the series gives its licence as “SIPRI terms and conditions”",
+      "url": "https://api.worldbank.org/v2/sources/2/series/MS.MIL.XPND.GD.ZS/metadata?format=json",
+      "termsUrl": "https://www.sipri.org/about/terms-and-conditions",
+      "read": "2026-11-18",
+      "licence": "SIPRI terms and conditions",
+      "source": "world-bank-wdi"
+    },
+    {
+      "id": "wb-eg-fec-rnew-zs",
+      "title": "Renewable energy consumption (% of total final energy consumption), by country",
+      "geometry": "polygon",
+      "group": "wb",
+      "wb": "EG.FEC.RNEW.ZS",
+      "why": "the World Bank takes this series in part from the International Energy Agency, whose own terms keep its datasets outside CC BY 4.0, bar offering more than five of its data points for download and limit their use to non-commercial ends, so it is not free data; the renewable share of final energy cannot be drawn until a series under an open licence exists (for energy, an energy balance published under CC BY or similar)",
+      "seen": "the World Bank’s metadata for the series gives “CC BY-4.0” and names the International Energy Agency (IEA) among its sources; the IEA’s terms (https://www.iea.org/terms, read 20 November 2026) list “Standalone datasets, data explorers and databases” as content not made available under CC BY 4.0, and its terms for that material (https://www.iea.org/terms/terms-of-use-for-non-cc-material) bar “making more than 5 (five) raw data points from the Non-CC Material, whether or not aggregated, accessible for download” and allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”",
+      "url": "https://api.worldbank.org/v2/sources/2/series/EG.FEC.RNEW.ZS/metadata?format=json",
+      "termsUrl": "https://www.iea.org/terms",
+      "read": "2026-11-20",
+      "licence": "CC BY-4.0",
+      "source": "world-bank-wdi"
+    },
+    {
+      "id": "wb-eg-use-pcap-kg-oe",
+      "title": "Energy use (kg of oil equivalent per capita), by country",
+      "geometry": "polygon",
+      "group": "wb",
+      "wb": "EG.USE.PCAP.KG.OE",
+      "why": "the World Bank takes this series in part from the International Energy Agency, whose own terms keep its datasets outside CC BY 4.0, bar offering more than five of its data points for download and limit their use to non-commercial ends, so it is not free data; energy use per person cannot be drawn until a series under an open licence exists (for energy, an energy balance published under CC BY or similar)",
+      "seen": "the World Bank’s metadata for the series gives “CC BY-4.0” and names the International Energy Agency (IEA) among its sources; the IEA’s terms (https://www.iea.org/terms, read 20 November 2026) list “Standalone datasets, data explorers and databases” as content not made available under CC BY 4.0, and its terms for that material (https://www.iea.org/terms/terms-of-use-for-non-cc-material) bar “making more than 5 (five) raw data points from the Non-CC Material, whether or not aggregated, accessible for download” and allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”",
+      "url": "https://api.worldbank.org/v2/sources/2/series/EG.USE.PCAP.KG.OE/metadata?format=json",
+      "termsUrl": "https://www.iea.org/terms",
+      "read": "2026-11-20",
+      "licence": "CC BY-4.0",
+      "source": "world-bank-wdi"
+    },
+    {
+      "id": "wb-en-ghg-co2-pc-ce-ar5",
+      "title": "Carbon dioxide (CO2) emissions excluding LULUCF per capita, by country",
+      "geometry": "polygon",
+      "group": "wb",
+      "wb": "EN.GHG.CO2.PC.CE.AR5",
+      "why": "the World Bank takes this series in part from the International Energy Agency, whose own terms keep its datasets outside CC BY 4.0, bar offering more than five of its data points for download and limit their use to non-commercial ends, so it is not free data; carbon dioxide emissions per person cannot be drawn until a series under an open licence exists (for energy, an energy balance published under CC BY or similar; for carbon dioxide, EDGAR’s own CC BY 4.0 release read and joined by VM without the IEA’s part)",
+      "seen": "the World Bank’s metadata for the series gives “CC BY-4.0” and names the International Energy Agency (IEA) among its sources (beside the European Commission’s EDGAR); the IEA’s terms (https://www.iea.org/terms, read 20 November 2026) list “Standalone datasets, data explorers and databases” as content not made available under CC BY 4.0, and its terms for that material (https://www.iea.org/terms/terms-of-use-for-non-cc-material) bar “making more than 5 (five) raw data points from the Non-CC Material, whether or not aggregated, accessible for download” and allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”",
+      "url": "https://api.worldbank.org/v2/sources/2/series/EN.GHG.CO2.PC.CE.AR5/metadata?format=json",
+      "termsUrl": "https://www.iea.org/terms",
+      "read": "2026-11-20",
+      "licence": "CC BY-4.0",
+      "source": "world-bank-wdi"
     }
   ]
 }

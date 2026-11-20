@@ -1,0 +1,714 @@
+{
+ "format": "vm-small-states/1",
+ "source": "natural-earth",
+ "version": "v5.1.1",
+ "file": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.1/geojson/ne_50m_admin_0_countries.geojson",
+ "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+ "built": "2026-11-20T10:16:51Z",
+ "points": [
+  {
+   "id": "ne-ABW",
+   "iso3": "ABW",
+   "q": "Q21203",
+   "n": "Aruba",
+   "type": "Country",
+   "at": [
+    -69.9728,
+    12.5174
+   ]
+  },
+  {
+   "id": "ne-AIA",
+   "iso3": "AIA",
+   "q": "Q25228",
+   "n": "Anguilla",
+   "type": "Dependency",
+   "at": [
+    -63.0264,
+    18.243
+   ]
+  },
+  {
+   "id": "ne-ALD",
+   "iso3": "ALA",
+   "q": "Q5689",
+   "n": "Åland",
+   "type": "Country",
+   "at": [
+    19.8697,
+    60.1565
+   ]
+  },
+  {
+   "id": "ne-AND",
+   "iso3": "AND",
+   "q": "Q228",
+   "n": "Andorra",
+   "type": "Sovereign country",
+   "at": [
+    1.5394,
+    42.5476
+   ]
+  },
+  {
+   "id": "ne-ASM",
+   "iso3": "ASM",
+   "q": "Q16641",
+   "n": "American Samoa",
+   "type": "Dependency",
+   "at": [
+    -170.7472,
+    -14.3267
+   ]
+  },
+  {
+   "id": "ne-ATC",
+   "iso3": "AUS",
+   "q": "Q133888",
+   "n": "Ashmore and Cartier Is.",
+   "type": "Dependency",
+   "at": [
+    123.5864,
+    -12.4326
+   ]
+  },
+  {
+   "id": "ne-ATG",
+   "iso3": "ATG",
+   "q": "Q781",
+   "n": "Antigua and Barb.",
+   "type": "Sovereign country",
+   "at": [
+    -61.7906,
+    17.3522
+   ]
+  },
+  {
+   "id": "ne-BHR",
+   "iso3": "BHR",
+   "q": "Q398",
+   "n": "Bahrain",
+   "type": "Sovereign country",
+   "at": [
+    50.5548,
+    26.056
+   ]
+  },
+  {
+   "id": "ne-BLM",
+   "iso3": "BLM",
+   "q": "Q25362",
+   "n": "St-Barthélemy",
+   "type": "Dependency",
+   "at": [
+    -62.8332,
+    17.902
+   ]
+  },
+  {
+   "id": "ne-BMU",
+   "iso3": "BMU",
+   "q": "Q23635",
+   "n": "Bermuda",
+   "type": "Dependency",
+   "at": [
+    -64.7636,
+    32.2966
+   ]
+  },
+  {
+   "id": "ne-BRB",
+   "iso3": "BRB",
+   "q": "Q244",
+   "n": "Barbados",
+   "type": "Sovereign country",
+   "at": [
+    -59.569,
+    13.1637
+   ]
+  },
+  {
+   "id": "ne-COK",
+   "iso3": "COK",
+   "q": "Q26988",
+   "n": "Cook Is.",
+   "type": "Dependency",
+   "at": [
+    -159.7857,
+    -21.216
+   ]
+  },
+  {
+   "id": "ne-COM",
+   "iso3": "COM",
+   "q": "Q970",
+   "n": "Comoros",
+   "type": "Sovereign country",
+   "at": [
+    43.3181,
+    -11.7277
+   ]
+  },
+  {
+   "id": "ne-CPV",
+   "iso3": "CPV",
+   "q": "Q1011",
+   "n": "Cabo Verde",
+   "type": "Sovereign country",
+   "at": [
+    -23.6394,
+    15.0748
+   ]
+  },
+  {
+   "id": "ne-CUW",
+   "iso3": "CUW",
+   "q": "Q25279",
+   "n": "Curaçao",
+   "type": "Country",
+   "at": [
+    -68.9206,
+    12.145
+   ]
+  },
+  {
+   "id": "ne-CYM",
+   "iso3": "CYM",
+   "q": "Q5785",
+   "n": "Cayman Is.",
+   "type": "Dependency",
+   "at": [
+    -81.2405,
+    19.3199
+   ]
+  },
+  {
+   "id": "ne-DMA",
+   "iso3": "DMA",
+   "q": "Q784",
+   "n": "Dominica",
+   "type": "Sovereign country",
+   "at": [
+    -61.345,
+    15.4588
+   ]
+  },
+  {
+   "id": "ne-FRO",
+   "iso3": "FRO",
+   "q": "Q4628",
+   "n": "Faeroe Is.",
+   "type": "Dependency",
+   "at": [
+    -7.0584,
+    62.1856
+   ]
+  },
+  {
+   "id": "ne-FSM",
+   "iso3": "FSM",
+   "q": "Q702",
+   "n": "Micronesia",
+   "type": "Sovereign country",
+   "at": [
+    158.234,
+    6.8876
+   ]
+  },
+  {
+   "id": "ne-GGY",
+   "iso3": "GGY",
+   "q": "Q25230",
+   "n": "Guernsey",
+   "type": "Country",
+   "at": [
+    -2.5617,
+    49.4635
+   ]
+  },
+  {
+   "id": "ne-GRD",
+   "iso3": "GRD",
+   "q": "Q769",
+   "n": "Grenada",
+   "type": "Sovereign country",
+   "at": [
+    -61.6805,
+    12.1132
+   ]
+  },
+  {
+   "id": "ne-GUM",
+   "iso3": "GUM",
+   "q": "Q16635",
+   "n": "Guam",
+   "type": "Dependency",
+   "at": [
+    144.7036,
+    13.3542
+   ]
+  },
+  {
+   "id": "ne-HKG",
+   "iso3": "HKG",
+   "q": "Q8646",
+   "n": "Hong Kong",
+   "type": "Country",
+   "at": [
+    114.0978,
+    22.4488
+   ]
+  },
+  {
+   "id": "ne-HMD",
+   "iso3": "HMD",
+   "q": "Q131198",
+   "n": "Heard I. and McDonald Is.",
+   "type": "Dependency",
+   "at": [
+    73.5052,
+    -53.1035
+   ]
+  },
+  {
+   "id": "ne-IMN",
+   "iso3": "IMN",
+   "q": "Q9676",
+   "n": "Isle of Man",
+   "type": "Country",
+   "at": [
+    -4.5301,
+    54.2208
+   ]
+  },
+  {
+   "id": "ne-IOA",
+   "iso3": "AUS",
+   "q": "Q4824275",
+   "n": "Indian Ocean Ter.",
+   "type": "Dependency",
+   "at": [
+    105.6726,
+    -10.4908
+   ]
+  },
+  {
+   "id": "ne-IOT",
+   "iso3": "IOT",
+   "q": "Q43448",
+   "n": "Br. Indian Ocean Ter.",
+   "type": "Disputed",
+   "at": [
+    71.3483,
+    -6.1908
+   ]
+  },
+  {
+   "id": "ne-JEY",
+   "iso3": "JEY",
+   "q": "Q785",
+   "n": "Jersey",
+   "type": "Country",
+   "at": [
+    -2.0901,
+    49.2208
+   ]
+  },
+  {
+   "id": "ne-KIR",
+   "iso3": "KIR",
+   "q": "Q710",
+   "n": "Kiribati",
+   "type": "Sovereign country",
+   "at": [
+    -157.3846,
+    1.8204
+   ]
+  },
+  {
+   "id": "ne-KNA",
+   "iso3": "KNA",
+   "q": "Q763",
+   "n": "St. Kitts and Nevis",
+   "type": "Sovereign country",
+   "at": [
+    -62.758,
+    17.3366
+   ]
+  },
+  {
+   "id": "ne-LCA",
+   "iso3": "LCA",
+   "q": "Q760",
+   "n": "Saint Lucia",
+   "type": "Sovereign country",
+   "at": [
+    -60.9801,
+    13.8924
+   ]
+  },
+  {
+   "id": "ne-LIE",
+   "iso3": "LIE",
+   "q": "Q347",
+   "n": "Liechtenstein",
+   "type": "Sovereign country",
+   "at": [
+    9.5594,
+    47.1114
+   ]
+  },
+  {
+   "id": "ne-MAC",
+   "iso3": "MAC",
+   "q": "Q14773",
+   "n": "Macao",
+   "type": "Country",
+   "at": [
+    113.556,
+    22.1297
+   ]
+  },
+  {
+   "id": "ne-MAF",
+   "iso3": "MAF",
+   "q": "Q126125",
+   "n": "St-Martin",
+   "type": "Dependency",
+   "at": [
+    -63.0494,
+    18.0813
+   ]
+  },
+  {
+   "id": "ne-MCO",
+   "iso3": "MCO",
+   "q": "Q235",
+   "n": "Monaco",
+   "type": "Sovereign country",
+   "at": [
+    7.3983,
+    43.7397
+   ]
+  },
+  {
+   "id": "ne-MDV",
+   "iso3": "MDV",
+   "q": "Q826",
+   "n": "Maldives",
+   "type": "Sovereign country",
+   "at": [
+    73.5076,
+    4.1744
+   ]
+  },
+  {
+   "id": "ne-MHL",
+   "iso3": "MHL",
+   "q": "Q709",
+   "n": "Marshall Is.",
+   "type": "Sovereign country",
+   "at": [
+    171.1936,
+    7.0826
+   ]
+  },
+  {
+   "id": "ne-MLT",
+   "iso3": "MLT",
+   "q": "Q233",
+   "n": "Malta",
+   "type": "Sovereign country",
+   "at": [
+    14.433,
+    35.8929
+   ]
+  },
+  {
+   "id": "ne-MNP",
+   "iso3": "MNP",
+   "q": "Q16644",
+   "n": "N. Mariana Is.",
+   "type": "Dependency",
+   "at": [
+    145.7344,
+    15.1882
+   ]
+  },
+  {
+   "id": "ne-MSR",
+   "iso3": "MSR",
+   "q": "Q13353",
+   "n": "Montserrat",
+   "type": "Dependency",
+   "at": [
+    -62.1883,
+    16.7372
+   ]
+  },
+  {
+   "id": "ne-MUS",
+   "iso3": "MUS",
+   "q": "Q1027",
+   "n": "Mauritius",
+   "type": "Sovereign country",
+   "at": [
+    57.5658,
+    -20.2995
+   ]
+  },
+  {
+   "id": "ne-NFK",
+   "iso3": "NFK",
+   "q": "Q31057",
+   "n": "Norfolk Island",
+   "type": "Dependency",
+   "at": [
+    167.9545,
+    -29.033
+   ]
+  },
+  {
+   "id": "ne-NIU",
+   "iso3": "NIU",
+   "q": "Q34020",
+   "n": "Niue",
+   "type": "Dependency",
+   "at": [
+    -169.8626,
+    -19.046
+   ]
+  },
+  {
+   "id": "ne-NRU",
+   "iso3": "NRU",
+   "q": "Q697",
+   "n": "Nauru",
+   "type": "Sovereign country",
+   "at": [
+    166.9326,
+    -0.5203
+   ]
+  },
+  {
+   "id": "ne-PCN",
+   "iso3": "PCN",
+   "q": "Q35672",
+   "n": "Pitcairn Is.",
+   "type": "Dependency",
+   "at": [
+    -128.3175,
+    -24.3646
+   ]
+  },
+  {
+   "id": "ne-PLW",
+   "iso3": "PLW",
+   "q": "Q695",
+   "n": "Palau",
+   "type": "Sovereign country",
+   "at": [
+    134.5802,
+    7.5183
+   ]
+  },
+  {
+   "id": "ne-PYF",
+   "iso3": "PYF",
+   "q": "Q30971",
+   "n": "Fr. Polynesia",
+   "type": "Dependency",
+   "at": [
+    -149.4616,
+    -17.6281
+   ]
+  },
+  {
+   "id": "ne-SGP",
+   "iso3": "SGP",
+   "q": "Q334",
+   "n": "Singapore",
+   "type": "Sovereign country",
+   "at": [
+    103.8169,
+    1.3666
+   ]
+  },
+  {
+   "id": "ne-SGS",
+   "iso3": "SGS",
+   "q": "Q35086",
+   "n": "S. Geo. and the Is.",
+   "type": "Dependency",
+   "at": [
+    -31.0632,
+    -55.6834
+   ]
+  },
+  {
+   "id": "ne-SHN",
+   "iso3": "SHN",
+   "q": "Q34497",
+   "n": "Saint Helena",
+   "type": "Dependency",
+   "at": [
+    -5.7126,
+    -15.9505
+   ]
+  },
+  {
+   "id": "ne-SMR",
+   "iso3": "SMR",
+   "q": "Q238",
+   "n": "San Marino",
+   "type": "Sovereign country",
+   "at": [
+    12.4412,
+    43.9339
+   ]
+  },
+  {
+   "id": "ne-SPM",
+   "iso3": "SPM",
+   "q": "Q34617",
+   "n": "St. Pierre and Miquelon",
+   "type": "Dependency",
+   "at": [
+    -56.3324,
+    47.0403
+   ]
+  },
+  {
+   "id": "ne-STP",
+   "iso3": "STP",
+   "q": "Q1039",
+   "n": "São Tomé and Principe",
+   "type": "Sovereign country",
+   "at": [
+    7.021,
+    0.9709
+   ]
+  },
+  {
+   "id": "ne-SXM",
+   "iso3": "SXM",
+   "q": "Q26273",
+   "n": "Sint Maarten",
+   "type": "Country",
+   "at": [
+    -63.0701,
+    18.0409
+   ]
+  },
+  {
+   "id": "ne-SYC",
+   "iso3": "SYC",
+   "q": "Q1042",
+   "n": "Seychelles",
+   "type": "Sovereign country",
+   "at": [
+    55.4802,
+    -4.6767
+   ]
+  },
+  {
+   "id": "ne-TCA",
+   "iso3": "TCA",
+   "q": "Q18221",
+   "n": "Turks and Caicos Is.",
+   "type": "Dependency",
+   "at": [
+    -71.7527,
+    21.8166
+   ]
+  },
+  {
+   "id": "ne-TON",
+   "iso3": "TON",
+   "q": "Q678",
+   "n": "Tonga",
+   "type": "Sovereign country",
+   "at": [
+    -175.163,
+    -21.21
+   ]
+  },
+  {
+   "id": "ne-TUV",
+   "iso3": "TUV",
+   "q": "Q672",
+   "n": "Tuvalu",
+   "type": "Sovereign country",
+   "at": [
+    179.2096,
+    -8.5137
+   ]
+  },
+  {
+   "id": "ne-VAT",
+   "iso3": "VAT",
+   "q": "Q237",
+   "n": "Vatican",
+   "type": "Sovereign country",
+   "at": [
+    12.4534,
+    41.9033
+   ]
+  },
+  {
+   "id": "ne-VCT",
+   "iso3": "VCT",
+   "q": "Q757",
+   "n": "St. Vin. and Gren.",
+   "type": "Sovereign country",
+   "at": [
+    -61.3359,
+    13.0879
+   ]
+  },
+  {
+   "id": "ne-VGB",
+   "iso3": "VGB",
+   "q": "Q25305",
+   "n": "British Virgin Is.",
+   "type": "Dependency",
+   "at": [
+    -64.6366,
+    18.4266
+   ]
+  },
+  {
+   "id": "ne-VIR",
+   "iso3": "VIR",
+   "q": "Q11703",
+   "n": "U.S. Virgin Is.",
+   "type": "Dependency",
+   "at": [
+    -64.7792,
+    17.7467
+   ]
+  },
+  {
+   "id": "ne-WLF",
+   "iso3": "WLF",
+   "q": "Q35555",
+   "n": "Wallis and Futuna Is.",
+   "type": "Dependency",
+   "at": [
+    -178.1374,
+    -14.2864
+   ]
+  },
+  {
+   "id": "ne-WSM",
+   "iso3": "WSM",
+   "q": "Q683",
+   "n": "Samoa",
+   "type": "Sovereign country",
+   "at": [
+    -172.4382,
+    -13.6391
+   ]
+  }
+ ]
+}

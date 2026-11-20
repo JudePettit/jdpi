@@ -164,11 +164,18 @@ test('qids: Cliopatria\'s ids are used only where Wikidata agrees; France reache
 test('layers: the catalogue holds borders and battles in 4.2\'s shape, each layer\'s from its first value', () => {
   assert.equal(layers.format, 'vm-layers/1');
   const byId = Object.fromEntries(layers.layers.map(l => [l.id, l]));
-  assert.deepEqual(Object.keys(byId).sort(), ['battles', 'borders'], 'S1 holds these two layers and no other');
+  // S1 held borders and battles; S5a adds the countries base and population density by country, as a grid from 1975
+  // (GHSL) and before 1975 (HYDE 3.2.1) (their own checks are in tests/omni-layers.test.mjs); S5b the layers of history,
+  // each named by the module whose page it opens (their own checks are in tests/omni-history.test.mjs).
+  // S5c adds the World Bank's indicators (wb-<code>, their own checks in tests/omni-now.test.mjs), the Volatility score,
+  // UCDP's events and the calendars' events, each named by its module.
+  const S5B = { 'conflict-territory': 'battlefield-history', elections: 'retrospective', coups: 'retrospective', 'political-change': 'retrospective', breakthroughs: 'progress', gvi: 'volatility', 'ucdp-events': 'battlefield', 'calendar-events': 'calendar' };
+  assert.deepEqual(Object.keys(byId).filter(id => !/^wb-/.test(id)).sort(), ['battles', 'borders', 'breakthroughs', 'calendar-events', 'conflict-territory', 'countries', 'coups', 'density-country', 'density-grid', 'density-hyde', 'elections', 'gvi', 'political-change', 'ucdp-events'], 'the layers S1, S5a, S5b and S5c hold, and no other');
+  assert.ok(Object.keys(byId).filter(id => /^wb-/.test(id)).length >= 30, 'and the World Bank\'s indicators');
   for (const l of layers.layers) {
     const r = M.readLayer(l);
     assert.ok(r.ok, `${l.id}: ${r.errors.join('; ')}`);
-    assert.equal(l.module, 'omni-map');
+    assert.equal(l.module, S5B[l.id] || 'omni-map');
     assert.ok(sources.sources.some(s => s.id === l.source), `${l.id}: its source ${l.source} is in sources.json`);
     assert.ok(existsSync(join(ROOT, l.data)), `${l.id}: ${l.data} exists`);
     assert.match(l.built, /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
@@ -198,7 +205,8 @@ test('battles: Fornovo and Agnadello at their recorded dates, calendars and poin
   const ids = new Set(sources.sources.map(s => s.id));
   for (const r of battles.rows) {
     assert.match(r.q, /^Q[1-9]\d*$/); assert.equal(r.id, r.q);
-    assert.ok(r.sortYear >= 1400 && r.sortYear <= 1600, `${r.label}: in the slice's years`);
+    // S5b widened the layer from 1400–1600 to every year: a year no battle can have (before 3000 BC) is left out.
+    assert.ok(Number.isInteger(r.sortYear) && r.sortYear >= -3000 && r.sortYear >= battles.from && r.sortYear <= battles.to, `${r.label}: in the layer's years`);
     assert.ok(Array.isArray(r.pt) && Math.abs(r.pt[0]) <= 180 && Math.abs(r.pt[1]) <= 90, `${r.label}: a point`);
     for (const k of ['date', 'pt']) {
       assert.ok(ids.has(r.src?.[k]?.id), `${r.label}: the ${k} has a source in sources.json`);
@@ -216,7 +224,9 @@ test('battles: Fornovo and Agnadello at their recorded dates, calendars and poin
   assert.equal(agnadello.label, 'Battle of Agnadello');
   assert.deepEqual(agnadello.date, { from: '1509-05-14', p: 11, cal: 'julian' });
   assert.equal(agnadello.src.date.support, 'none', 'Agnadello\'s date carries no reference in Wikidata');
-  assert.equal(battles.from, 1495); assert.equal(battles.to, 1509);
+  // S1's pair is still the whole of 1400–1600; the file spans every battle since S5b.
+  assert.deepEqual(battles.rows.filter(r => r.sortYear >= 1400 && r.sortYear <= 1600).map(r => r.q).sort(), ['Q1754732', 'Q764793']);
+  assert.equal(battles.from, Math.min(...battles.rows.map(r => r.sortYear))); assert.equal(battles.to, Math.max(...battles.rows.map(r => r.sortYear)));
 });
 
 test('sources.json v1: 5.1\'s fields; cite-only entries agree with cite-only.mjs both ways', () => {
@@ -376,8 +386,11 @@ test('build-battles: dates keep their calendar and precision; a value\'s source 
   assert.equal(T.battleRow(e, q => q), null, 'no point: it cannot be drawn, so it is left out');
   // Every battle of the layer is a Master Index conflict of 1400–1600 (a subset: the lake's monthly refresh may add
   // conflicts, wars among them, which build-battles.mjs leaves out, before the layer is rebuilt by hand).
-  const conflicts = new Set(T.lakeConflicts());
-  for (const r of battles.rows) assert.ok(conflicts.has(r.q), `${r.label} (${r.q}) is a Master Index conflict of 1400–1600`);
+  // S5b widened it to every year and to War Focus's located battles: each battle is a Master Index conflict or one of
+  // War Focus's, and those of 1400–1600 are still the Master Index's.
+  const conflicts = new Set(T.lakeConflicts()), focus = T.focusBattles();
+  for (const r of battles.rows) assert.ok(conflicts.has(r.q) || focus.has(r.q), `${r.label} (${r.q}) is a Master Index conflict or a War Focus battle`);
+  for (const r of battles.rows.filter(x => x.sortYear >= 1400 && x.sortYear <= 1600)) assert.ok(conflicts.has(r.q), `${r.label} (${r.q}) is a Master Index conflict of 1400–1600`);
 });
 
 // The decisions of 17 November 2026 (O2): build-battles.mjs stamped a new time on every run, so a rerun on the same

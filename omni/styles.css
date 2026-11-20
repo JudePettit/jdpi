@@ -49,7 +49,7 @@
 .om-notes { margin: 8px 0 0; padding-left: 18px; color: var(--prp-text-2); }
 .om-b-name a { font-weight: 600; }
 .om-b-date { color: var(--prp-text); }
-.om-src { color: var(--prp-text-2); font-size: 12px; }
+.om-src { color: var(--prp-text-2); font-size: 12px; overflow-wrap: anywhere; } /* a reference may be one long address */
 .om-b-state { color: var(--prp-text-2); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .om-details summary { cursor: pointer; font-weight: 600; padding: 2px 0; }
 .om-outlines { max-height: 340px; overflow: auto; margin-top: 6px; }
@@ -117,3 +117,74 @@ button.om-row:hover { background: var(--prp-surface-2); }
   .om-host-neo .om-view { font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .om-host-neo .om-map { height: 58vh; min-height: 240px; }
 }
+
+/* The layers (stage S5a): one list, a switch for each layer, its words, and the lines for the layers VM leaves out.
+   The sequential ramp of the fills (--om-seq-1, low, to --om-seq-10, high) is the design system's sequential blues
+   (--prp-seq-100 … 700, CVD-checked in both themes), stretched to ten steps with color-mix(): light to dark on a light
+   page and dark to light on a dark one, as the blues themselves turn, so a high value always stands out. */
+:root {
+  --om-seq-1: color-mix(in oklab, var(--prp-seq-100) 45%, var(--prp-canvas));
+  --om-seq-2: var(--prp-seq-100);
+  --om-seq-3: color-mix(in oklab, var(--prp-seq-100) 50%, var(--prp-seq-200));
+  --om-seq-4: var(--prp-seq-200);
+  --om-seq-5: var(--prp-seq-300);
+  --om-seq-6: var(--prp-seq-400);
+  --om-seq-7: var(--prp-seq-500);
+  --om-seq-8: var(--prp-seq-600);
+  --om-seq-9: var(--prp-seq-700);
+  --om-seq-10: color-mix(in oklab, var(--prp-seq-700) 65%, var(--prp-text));
+}
+.om-layers > li { padding: 8px 0; }
+.om-ly-row { display: flex; align-items: center; gap: 8px; }
+.om-ly-row label, .om-ly-row b { flex: 1 1 auto; font-weight: 600; cursor: pointer; }
+.om-ly.absent .om-ly-row b { cursor: default; color: var(--prp-text-2); }
+.om-ly-role { color: var(--prp-muted); font-size: 12px; }
+.om-ly-off { width: 18px; text-align: center; color: var(--prp-muted); }
+.om-ly-what { margin: 2px 0 0 26px; color: var(--prp-text-2); font-size: 12.5px; overflow-wrap: anywhere; }
+.om-ly .om-method { margin: 4px 0 0 26px; }
+.om-ly .om-method .om-lg-lines { margin-top: 4px; }
+.om-ly-any { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-weight: 600; }
+.om-ly-any + .om-ly-what { margin-left: 26px; }
+.om-ly-note { margin: 6px 0 0; color: var(--prp-text); font-size: 12.5px; }
+.om-ly-note:empty { display: none; }
+/* S5c: a group of layers (the World Bank's indicators) under one disclosure; a hollow point (still expected, or known
+   only to a province or wider). */
+.om-ly-group > details > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.om-ly-group > details > summary:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.om-ly-group > details > .om-layers { margin: 4px 0 0 12px; padding: 0; }
+.om-swatch.hollow { width: 10px; border-radius: 50%; background: none; border: 1.5px solid var(--prp-ds); vertical-align: middle; }
+/* The switches: the browser's own checkbox, large enough to hit, its focus shown. */
+.om-layers input[type="checkbox"], #ly-anyway { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--prp-ds); cursor: pointer; }
+.om-layers input[type="checkbox"]:disabled { cursor: default; }
+.om-layers input[type="checkbox"]:focus-visible, #ly-anyway:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.om-ramp { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 10px; font-size: 12px; color: var(--prp-text); }
+.om-ramp li { display: flex; align-items: center; gap: 6px; }
+.om-swatch.fill { background: linear-gradient(90deg, var(--om-seq-2), var(--om-seq-9)); }
+.om-swatch.base { background: var(--prp-map-land); }
+.om-swatch.point, .om-swatch.line { width: 10px; border-radius: 50%; background: var(--prp-ds); }
+.om-seq-1 { background: var(--om-seq-1); } .om-seq-2 { background: var(--om-seq-2); } .om-seq-3 { background: var(--om-seq-3); }
+.om-seq-4 { background: var(--om-seq-4); } .om-seq-5 { background: var(--om-seq-5); } .om-seq-6 { background: var(--om-seq-6); }
+.om-seq-7 { background: var(--om-seq-7); } .om-seq-8 { background: var(--om-seq-8); } .om-seq-9 { background: var(--om-seq-9); }
+.om-seq-10 { background: var(--om-seq-10); }
+/* The classes start at --om-seq-2 (omni/lib/layers.js tokenOf): --om-seq-1 is too near the sea's colour. A country with
+   no value is drawn in the map's no-data colour; an empty grid cell is left blank, shown by a dashed swatch. */
+.om-swatch.om-nodata { background: var(--prp-map-nodata); }
+.om-swatch.om-nodata.blank { background: none; border-style: dashed; }
+/* Stage S5b: a state fighting abroad is outlined in a dashed red; each point layer's swatch takes its own token. */
+.om-swatch.abroad { background: none; border: 2px dashed var(--prp-bad); }
+.om-lg[data-layer="elections"] .om-swatch.point { background: var(--prp-accent); }
+.om-lg[data-layer="coups"] .om-swatch.point { background: var(--prp-bad); }
+.om-lg[data-layer="breakthroughs"] .om-swatch.point { background: var(--prp-good); }
+.om-strip { margin: 6px 0 0; }
+.om-strip svg { display: block; width: 100%; height: 36px; }
+.om-strip rect { fill: var(--prp-muted); }
+.om-strip rect.now { fill: var(--prp-bad); }
+.om-strip figcaption { font-size: 12px; color: var(--prp-text-2); margin-top: 2px; }
+.om-ly-items > li { display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; overflow-wrap: anywhere; }
+.om-ly-items .om-src { color: var(--prp-text-2); font-size: 12px; overflow-wrap: anywhere; } /* a reference may be one long address */
+.om-ly-filter { margin: 4px 0 0 26px; font-size: 12.5px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.om-ly-filter select { font: inherit; min-height: 32px; max-width: 100%; color: var(--prp-text); background: var(--prp-surface, transparent); border: 1px solid var(--prp-line); border-radius: 4px; }
+.om-ly-filter select:focus-visible { outline: 2px solid var(--prp-focus); outline-offset: 2px; }
+.om-pick:empty { display: none; }
+.om-pick { display: block; border-left: 3px solid var(--prp-ds); padding-left: 8px; overflow-wrap: anywhere; }
+.om-pick p { margin: 0 0 3px; }

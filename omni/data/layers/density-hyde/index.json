@@ -1,0 +1,895 @@
+{
+  "format": "vm-grid-index/1",
+  "layer": "density-hyde",
+  "source": "hyde-3.2.1",
+  "version": "HYDE 3.2.1 baseline",
+  "built": "2026-11-20T10:21:14Z",
+  "deg": 0.25,
+  "cols": 1440,
+  "rows": 720,
+  "west": -180,
+  "north": 90,
+  "radiusKm": 6371.0088,
+  "unit": "people",
+  "measure": "people per km²",
+  "breaks": [
+    0.02,
+    0.12,
+    0.48,
+    1.5,
+    4,
+    9.9,
+    23,
+    54,
+    150
+  ],
+  "breaksFrom": "the GHSL grid (omni/data/layers/density/index.json, 2020)",
+  "years": [
+    -4000,
+    -3000,
+    -2000,
+    -1000,
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700,
+    800,
+    900,
+    1000,
+    1100,
+    1200,
+    1300,
+    1400,
+    1500,
+    1600,
+    1700,
+    1710,
+    1720,
+    1730,
+    1740,
+    1750,
+    1760,
+    1770,
+    1780,
+    1790,
+    1800,
+    1810,
+    1820,
+    1830,
+    1840,
+    1850,
+    1860,
+    1870,
+    1880,
+    1890,
+    1900,
+    1910,
+    1920,
+    1930,
+    1940,
+    1950,
+    1960,
+    1970
+  ],
+  "files": [
+    {
+      "year": -4000,
+      "label": "4000BC",
+      "file": "m4000.json",
+      "status": "modelled",
+      "total": 28773588,
+      "populated": 158193,
+      "bytes": 807662,
+      "gzip": 211378,
+      "sha256": "6231a466656686a777530c0cb40264a89ad58001b3061c93ece545ec329f578c",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/4000BC_pop/popc_4000BC.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": -3000,
+      "label": "3000BC",
+      "file": "m3000.json",
+      "status": "modelled",
+      "total": 44486161,
+      "populated": 160526,
+      "bytes": 836098,
+      "gzip": 225099,
+      "sha256": "e3e391bce02e71b104b09ee12355a20946437f2408b597eead87bc3d375a5d4f",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/3000BC_pop/popc_3000BC.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": -2000,
+      "label": "2000BC",
+      "file": "m2000.json",
+      "status": "modelled",
+      "total": 72584882,
+      "populated": 162469,
+      "bytes": 865345,
+      "gzip": 240510,
+      "sha256": "76feefe8b7353ccf7f6904bc1f651301b3d39a3dc02a25118718a654542c49c9",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/2000BC_pop/popc_2000BC.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": -1000,
+      "label": "1000BC",
+      "file": "m1000.json",
+      "status": "modelled",
+      "total": 110418692,
+      "populated": 164105,
+      "bytes": 890038,
+      "gzip": 253408,
+      "sha256": "47a02c345736bfc86996b32010d622ee73c14cdaacc61863dcae994ea1eada31",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1000BC_pop/popc_1000BC.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 100,
+      "label": "100AD",
+      "file": "100.json",
+      "status": "modelled",
+      "total": 236903382,
+      "populated": 166455,
+      "bytes": 935675,
+      "gzip": 277198,
+      "sha256": "ae9f3ee6a9d4095cfcebf07fcaa631be5d14bb19279087931ebdcc9a3df3a383",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/100AD_pop/popc_100AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 200,
+      "label": "200AD",
+      "file": "200.json",
+      "status": "modelled",
+      "total": 240610596,
+      "populated": 167667,
+      "bytes": 945200,
+      "gzip": 280802,
+      "sha256": "893df688f68893f269f7457772b39d3f066c0353e295a2fcb9e393465b1d45c4",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/200AD_pop/popc_200AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 300,
+      "label": "300AD",
+      "file": "300.json",
+      "status": "modelled",
+      "total": 227548126,
+      "populated": 168924,
+      "bytes": 951543,
+      "gzip": 281774,
+      "sha256": "a99b67a0ffb40b14e05d225ca93e1bcedec46a219a1fa69e50612203640ea5cd",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/300AD_pop/popc_300AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 400,
+      "label": "400AD",
+      "file": "400.json",
+      "status": "modelled",
+      "total": 241538819,
+      "populated": 170342,
+      "bytes": 964054,
+      "gzip": 286771,
+      "sha256": "0a74351151b46691d0c06a4e334167def92e963524c6f127369dcd21c1502c80",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/400AD_pop/popc_400AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 500,
+      "label": "500AD",
+      "file": "500.json",
+      "status": "modelled",
+      "total": 253236171,
+      "populated": 171659,
+      "bytes": 974945,
+      "gzip": 291188,
+      "sha256": "0b1e5e3a8ae412c3b2facb43c6bf998ca3045065a62d22d42a47bf78e374f4b4",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/500AD_pop/popc_500AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 600,
+      "label": "600AD",
+      "file": "600.json",
+      "status": "modelled",
+      "total": 271477939,
+      "populated": 172864,
+      "bytes": 986434,
+      "gzip": 295473,
+      "sha256": "8781d45800f3c95305867a73945da657c2bcb9c49590572adf0d10ec76e3d507",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/600AD_pop/popc_600AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 700,
+      "label": "700AD",
+      "file": "700.json",
+      "status": "modelled",
+      "total": 278184516,
+      "populated": 174002,
+      "bytes": 995562,
+      "gzip": 299690,
+      "sha256": "9d52395593d4d4f1a18006b118e6d65e019cdce6f4919bd84527372e8449ee7c",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/700AD_pop/popc_700AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 800,
+      "label": "800AD",
+      "file": "800.json",
+      "status": "modelled",
+      "total": 285712531,
+      "populated": 175337,
+      "bytes": 1006156,
+      "gzip": 303842,
+      "sha256": "70b4b1f8be13a20aaf2c5a78542bf4ea883a4079e71dad8b71f7ccad16474557",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/800AD_pop/popc_800AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 900,
+      "label": "900AD",
+      "file": "900.json",
+      "status": "modelled",
+      "total": 310967537,
+      "populated": 175644,
+      "bytes": 1014084,
+      "gzip": 307810,
+      "sha256": "cd5b2912d914cc0e370b07d9b44433c49906965091cba159680554efcfac8616",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/900AD_pop/popc_900AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1000,
+      "label": "1000AD",
+      "file": "1000.json",
+      "status": "modelled",
+      "total": 323407039,
+      "populated": 175979,
+      "bytes": 1019574,
+      "gzip": 310672,
+      "sha256": "66ce6e2c0e68bfdfbe3e6bedb542ba24fb7b9ca96cf18301e44a9669fe70d905",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1000AD_pop/popc_1000AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1100,
+      "label": "1100AD",
+      "file": "1100.json",
+      "status": "modelled",
+      "total": 397923052,
+      "populated": 177457,
+      "bytes": 1041519,
+      "gzip": 320791,
+      "sha256": "4f592d113f8f917faa99ace11023f6f0c9f33470d5fc739cda4416889217c262",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1100AD_pop/popc_1100AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1200,
+      "label": "1200AD",
+      "file": "1200.json",
+      "status": "modelled",
+      "total": 444751028,
+      "populated": 179343,
+      "bytes": 1060745,
+      "gzip": 328736,
+      "sha256": "800992b0769060de972985789153e705af5cb32224bc1b1eb13f6e4416ec857b",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1200AD_pop/popc_1200AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1300,
+      "label": "1300AD",
+      "file": "1300.json",
+      "status": "modelled",
+      "total": 456389677,
+      "populated": 179542,
+      "bytes": 1066052,
+      "gzip": 331453,
+      "sha256": "28c4f40475ec932d954ddd06787b94dbfe9244d207e3a3d3a02863de14bf437d",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1300AD_pop/popc_1300AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1400,
+      "label": "1400AD",
+      "file": "1400.json",
+      "status": "modelled",
+      "total": 442480737,
+      "populated": 179707,
+      "bytes": 1067071,
+      "gzip": 331868,
+      "sha256": "50f0d4f109d5fc490f34ae85c986d023db44934688619776a95fa115b745b641",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1400AD_pop/popc_1400AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1500,
+      "label": "1500AD",
+      "file": "1500.json",
+      "status": "modelled",
+      "total": 503241223,
+      "populated": 180358,
+      "bytes": 1080394,
+      "gzip": 338519,
+      "sha256": "a9c2e625c8062bc69db63886534d16fbaa15ad87cb5ed10aab29c361db60e2d0",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1500AD_pop/popc_1500AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1600,
+      "label": "1600AD",
+      "file": "1600.json",
+      "status": "modelled",
+      "total": 515752049,
+      "populated": 180766,
+      "bytes": 1064064,
+      "gzip": 330476,
+      "sha256": "73776a399dfd683988f2771ab78001f9a551ba5c68c794833340ddcfb597a32a",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1600AD_pop/popc_1600AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1700,
+      "label": "1700AD",
+      "file": "1700.json",
+      "status": "modelled",
+      "total": 591722621,
+      "populated": 179924,
+      "bytes": 1064386,
+      "gzip": 332488,
+      "sha256": "a156aa4f21179f8d2651c5903dda83f339843c9ecca4d95bfb8e4d93b9e469eb",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1700AD_pop/popc_1700AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1710,
+      "label": "1710AD",
+      "file": "1710.json",
+      "status": "modelled",
+      "total": 613191490,
+      "populated": 180077,
+      "bytes": 1069095,
+      "gzip": 335368,
+      "sha256": "69f31508bba46bb71971a5f5c926f4066a7cd85f7f6ae08b22feb1e37d3d60cd",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1710AD_pop/popc_1710AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1720,
+      "label": "1720AD",
+      "file": "1720.json",
+      "status": "modelled",
+      "total": 642719878,
+      "populated": 180457,
+      "bytes": 1074612,
+      "gzip": 338237,
+      "sha256": "5f337f22d7295f64aaa90d2eb53798c836f8f6292795c614179936db2e6a5038",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1720AD_pop/popc_1720AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1730,
+      "label": "1730AD",
+      "file": "1730.json",
+      "status": "modelled",
+      "total": 664735724,
+      "populated": 180765,
+      "bytes": 1079034,
+      "gzip": 340568,
+      "sha256": "37f50df072e1f0e89f5c0fe054fd85b1cd5e907fd3ff9152d0b7676af9d16e2d",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1730AD_pop/popc_1730AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1740,
+      "label": "1740AD",
+      "file": "1740.json",
+      "status": "modelled",
+      "total": 695347335,
+      "populated": 181033,
+      "bytes": 1083006,
+      "gzip": 342938,
+      "sha256": "5f77a24b356abe116c292954cfa25d0f99c11451095914230f65b37dcb6288ab",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1740AD_pop/popc_1740AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1750,
+      "label": "1750AD",
+      "file": "1750.json",
+      "status": "modelled",
+      "total": 745666538,
+      "populated": 181234,
+      "bytes": 1086975,
+      "gzip": 345339,
+      "sha256": "5cded5427e08cbfe9a71aea07e016d763186a60498a4919e3f0b0ff6981a1d36",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1750AD_pop/popc_1750AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1760,
+      "label": "1760AD",
+      "file": "1760.json",
+      "status": "modelled",
+      "total": 779895385,
+      "populated": 181389,
+      "bytes": 1089975,
+      "gzip": 347158,
+      "sha256": "0ddbe4affb25036ed14a4277e9cdadd4782372d2d887b193c47c77f2da821f1e",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1760AD_pop/popc_1760AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1770,
+      "label": "1770AD",
+      "file": "1770.json",
+      "status": "modelled",
+      "total": 818831044,
+      "populated": 181573,
+      "bytes": 1092943,
+      "gzip": 349148,
+      "sha256": "0d8ba8cb64c023767c33db319365b390ab8fb28eeda97439b8d7be9dad9fce91",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1770AD_pop/popc_1770AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1780,
+      "label": "1780AD",
+      "file": "1780.json",
+      "status": "modelled",
+      "total": 891050436,
+      "populated": 181652,
+      "bytes": 1095834,
+      "gzip": 350976,
+      "sha256": "80aa5725fd8061f376abc1d6d4f8163c0ac8ce2d68c82ac8f93e7048131623d8",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1780AD_pop/popc_1780AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1790,
+      "label": "1790AD",
+      "file": "1790.json",
+      "status": "modelled",
+      "total": 931579939,
+      "populated": 181702,
+      "bytes": 1097681,
+      "gzip": 352388,
+      "sha256": "75fdb8a5b0873cc24f8a722cf0d8607c698097ee8401af33bdbc877e1d31dccf",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1790AD_pop/popc_1790AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1800,
+      "label": "1800AD",
+      "file": "1800.json",
+      "status": "modelled",
+      "total": 943430896,
+      "populated": 181715,
+      "bytes": 1098878,
+      "gzip": 353205,
+      "sha256": "539a905adddb9970010b2715365fa871816afc1b467cdd678b897c3d5f3307ac",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1800AD_pop/popc_1800AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1810,
+      "label": "1810AD",
+      "file": "1810.json",
+      "status": "modelled",
+      "total": 1016655565,
+      "populated": 181846,
+      "bytes": 1102329,
+      "gzip": 354921,
+      "sha256": "243e4a2f8f044bceb65130d73c99c6408bc4b7fa369c498682ef53978f33e367",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1810AD_pop/popc_1810AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1820,
+      "label": "1820AD",
+      "file": "1820.json",
+      "status": "modelled",
+      "total": 1052788145,
+      "populated": 182417,
+      "bytes": 1108962,
+      "gzip": 358190,
+      "sha256": "1eab5764416bf405fba94b1eccfc33689414b41b0ec2324a7f6079a2bf3b1dee",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1820AD_pop/popc_1820AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1830,
+      "label": "1830AD",
+      "file": "1830.json",
+      "status": "modelled",
+      "total": 1134774235,
+      "populated": 182622,
+      "bytes": 1114948,
+      "gzip": 361165,
+      "sha256": "4f198a76f7c95098bf134e5d3c25cd333a83ead04a6ec6f3cd8d29cf7f5d9ef7",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1830AD_pop/popc_1830AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1840,
+      "label": "1840AD",
+      "file": "1840.json",
+      "status": "modelled",
+      "total": 1194345105,
+      "populated": 182607,
+      "bytes": 1119787,
+      "gzip": 364369,
+      "sha256": "adcad887b96c0ea1f68e7355dc907a9f1e10c0981952c36831dac692f57c190f",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1840AD_pop/popc_1840AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1850,
+      "label": "1850AD",
+      "file": "1850.json",
+      "status": "modelled",
+      "total": 1270604025,
+      "populated": 182656,
+      "bytes": 1124715,
+      "gzip": 367179,
+      "sha256": "bd05b6a2d66ccccb28e551ad23a7d6b29ed6bad64d47dd94f81061baf40acc32",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1850AD_pop/popc_1850AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1860,
+      "label": "1860AD",
+      "file": "1860.json",
+      "status": "modelled",
+      "total": 1327627013,
+      "populated": 182940,
+      "bytes": 1132657,
+      "gzip": 371233,
+      "sha256": "a5a100253f0e575c8f8b939e3defe45fac75ff252059606c2e912f0198f03479",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1860AD_pop/popc_1860AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1870,
+      "label": "1870AD",
+      "file": "1870.json",
+      "status": "modelled",
+      "total": 1326920246,
+      "populated": 183067,
+      "bytes": 1136346,
+      "gzip": 373400,
+      "sha256": "03b4b4b4c4eb4c4972683676c95fc85ad58be56fec0f724cea17cfe73efa16eb",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1870AD_pop/popc_1870AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1880,
+      "label": "1880AD",
+      "file": "1880.json",
+      "status": "modelled",
+      "total": 1405165645,
+      "populated": 183305,
+      "bytes": 1144499,
+      "gzip": 377303,
+      "sha256": "109a824c66076996a2b0694f0edf0c7abbf1f9b82166d108c264556a808729c3",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1880AD_pop/popc_1880AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1890,
+      "label": "1890AD",
+      "file": "1890.json",
+      "status": "modelled",
+      "total": 1522755184,
+      "populated": 183361,
+      "bytes": 1152659,
+      "gzip": 381785,
+      "sha256": "cb095d2befdfd316c88a2fd4aacfc789770e531db2695c42dfc3a9f5d01d2083",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1890AD_pop/popc_1890AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1900,
+      "label": "1900AD",
+      "file": "1900.json",
+      "status": "modelled",
+      "total": 1642027868,
+      "populated": 183544,
+      "bytes": 1159883,
+      "gzip": 385628,
+      "sha256": "481584ab35f193fcfef00bcf72a4c93d6123ecde068a954c7d1f78955e7b3e25",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1900AD_pop/popc_1900AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1910,
+      "label": "1910AD",
+      "file": "1910.json",
+      "status": "modelled",
+      "total": 1764997468,
+      "populated": 183684,
+      "bytes": 1169114,
+      "gzip": 390055,
+      "sha256": "6b892feab705ce195f099e0d151e8a6a4583a298a123c239c6e50ee6bb5aae4c",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1910AD_pop/popc_1910AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1920,
+      "label": "1920AD",
+      "file": "1920.json",
+      "status": "modelled",
+      "total": 1895515609,
+      "populated": 183649,
+      "bytes": 1171842,
+      "gzip": 391790,
+      "sha256": "6f4fe61aeb112bf94aefc9473869f672d6540b8414ba284a1af700d47f34c797",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1920AD_pop/popc_1920AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1930,
+      "label": "1930AD",
+      "file": "1930.json",
+      "status": "modelled",
+      "total": 2073194024,
+      "populated": 183636,
+      "bytes": 1176087,
+      "gzip": 394128,
+      "sha256": "675eab2744b139a4c3e50910fcb3bde08cf6a622864d7d860b35bb37f573ea06",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1930AD_pop/popc_1930AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1940,
+      "label": "1940AD",
+      "file": "1940.json",
+      "status": "modelled",
+      "total": 2289230789,
+      "populated": 183682,
+      "bytes": 1181139,
+      "gzip": 397086,
+      "sha256": "3a622ba2161fbb7e73514e16368e1707b38050c748d09b788d8b7580c6514e30",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1940AD_pop/popc_1940AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1950,
+      "label": "1950AD",
+      "file": "1950.json",
+      "status": "modelled",
+      "total": 2529780655,
+      "populated": 183795,
+      "bytes": 1185652,
+      "gzip": 399592,
+      "sha256": "fac2cbc93203ffaa4150f26752a9d3b1837eb9eba97628fb82e8792c008fe3fa",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1950AD_pop/popc_1950AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1960,
+      "label": "1960AD",
+      "file": "1960.json",
+      "status": "modelled",
+      "total": 3022818298,
+      "populated": 183917,
+      "bytes": 1198020,
+      "gzip": 406244,
+      "sha256": "a1c4cc314aa6a6c6273dc6e06dfb4d061e8d228c78fb9ebadefafb6d21c517e6",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1960AD_pop/popc_1960AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    },
+    {
+      "year": 1970,
+      "label": "1970AD",
+      "file": "1970.json",
+      "status": "modelled",
+      "total": 3694116712,
+      "populated": 183993,
+      "bytes": 1209054,
+      "gzip": 411972,
+      "sha256": "408235c2f999b33920fb13f5c3b32fe7f659ea549601e79480b216a581df4edd",
+      "from": {
+        "file": "HYDE3_2_1-baseline.zip",
+        "entry": "baseline/asc/1970AD_pop/popc_1970AD.asc",
+        "url": "https://archaeology.datastations.nl/api/access/datafile/5490328",
+        "sha256": "5a847086cb199c75b739a7b099a8c48840e52fe5a4937882bd8fb26f86288714"
+      }
+    }
+  ]
+}

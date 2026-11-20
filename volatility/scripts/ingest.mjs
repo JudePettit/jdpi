@@ -21,14 +21,42 @@
 // method's code is in gvi.mjs. With --rescore, every stored day file is scored again, oldest first, from what it keeps of
 // each country (no download), and the index rebuilt: for a change of method. Each day's row in the index records the
 // method that scored it and its baseline's days, as the day file says (buildIndex), so a change of method shows by day.
+// The kept days (stage S5c of the Omni-Map, 20 November 2026): each time index.json is written, every country's day rows
+// are also written to volatility/data/kept/<year>.json as [day, score, coverage initial, method] (keepDays), before the
+// index's 365-day cut can drop them: a day once kept is never removed there, and a day scored again (--rescore) keeps
+// its newer row. The Omni-Map's Volatility layer is built from these files (omni/scripts/build-gvi.mjs). With
+// --keep-only, nothing is downloaded or scored: the kept files are brought up to date from index.json as it stands.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLOTS, MIN_SLOTS, BASELINE_DAYS, MIN_BASELINE, ymd, addDays, unzipFirst, slotUrl, fetchDay, mergeDay, thinDay, dayProblem, daysToIngest, scoreDay, rescoreDay, buildIndex, pruneBefore } from './gvi.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 
 const ROOT = fileURLToPath(new URL('../data/', import.meta.url));
-const DAYS_DIR = join(ROOT, 'days'), INDEX = join(ROOT, 'index.json');
+const DAYS_DIR = join(ROOT, 'days'), INDEX = join(ROOT, 'index.json'), KEPT_DIR = join(ROOT, 'kept');
+
+/** The kept days of one year after an index (pure): prev, the year's kept file or null; index, index.json as written.
+    Every day of prev stays; each of the index's rows of that year is put in (a day scored again replaces its row).
+    Rows are [day, score, coverage initial, method]; the method is the day's own (the index's global row), else null. */
+export function keepDays(prev, index, year) {
+  const method = new Map((index.global || []).map(g => [g[0], g[4] ?? null]));
+  const out = { format: 'vm-gvi-kept/1', of: 'volatility/data/index.json', year, about: 'Each country’s Volatility score by day, kept by volatility/scripts/ingest.mjs before index.json’s 365-day cut: [day, score (null: too little coverage to score), coverage (h high, m medium, l low, i insufficient), method]. A day once kept is never removed.', countries: {} };
+  const put = (iso, name, row) => { const c = (out.countries[iso] ||= { name, days: new Map() }); c.name = name || c.name; c.days.set(row[0], row); };
+  for (const [iso, c] of Object.entries(prev?.countries || {})) for (const r of c.days) put(iso, c.name, r);
+  for (const [iso, c] of Object.entries(index.countries || {})) for (const r of c.days || []) if (String(r[0]).startsWith(`${year}-`)) put(iso, c.name, [r[0], r[1] ?? null, r[5] ?? null, method.get(r[0]) ?? null]);
+  for (const iso of Object.keys(out.countries).sort()) { const c = out.countries[iso]; delete out.countries[iso]; out.countries[iso] = { name: c.name, days: [...c.days.values()].sort((a, b) => (a[0] < b[0] ? -1 : 1)) }; }
+  return out;
+}
+/** Writes the kept file of every year the index holds a day of; a file whose rows did not change is left as it is. */
+function writeKept(index) {
+  mkdirSync(KEPT_DIR, { recursive: true });
+  const years = [...new Set((index.global || []).map(g => String(g[0]).slice(0, 4)))].sort();
+  for (const y of years) {
+    const file = join(KEPT_DIR, `${y}.json`), prev = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+    const next = JSON.stringify(keepDays(prev, index, +y)) + '\n';
+    if (!prev || next !== readFileSync(file, 'utf8')) writeFileSync(file, next);
+  }
+}
 const UA = { 'User-Agent': 'JDP-I Geopolitical Volatility (https://jdpi.pages.dev)' };
 const argDays = process.argv.indexOf('--days');
 const LOOKBACK = argDays > 0 ? +process.argv[argDays + 1] : 14;
@@ -92,6 +120,12 @@ function rescoreAll() {
 
 async function main() {
   if (!(Number.isInteger(LOOKBACK) && LOOKBACK >= 1)) throw stop(`--days must be a positive integer (got ${process.argv[argDays + 1]})`);
+  if (process.argv.includes('--keep-only')) {
+    if (!existsSync(INDEX)) throw stop('--keep-only: there is no index.json to keep the days of');
+    writeKept(JSON.parse(readFileSync(INDEX, 'utf8')));
+    console.log(`kept: ${readdirSync(KEPT_DIR).join(', ')}`);
+    return;
+  }
   mkdirSync(DAYS_DIR, { recursive: true });
   if (RESCORE) rescoreAll();
   // ---- Days of the look-back window without a complete stored file, oldest first (the baseline must be built in order).
@@ -118,13 +152,15 @@ async function main() {
   }
   const index = buildIndex(prev, stored, loadDay, new Date().toISOString());
   writeFileSync(INDEX, JSON.stringify(index));
+  writeKept(index); // every day row of the index kept, before a later index's 365-day cut drops it (the Omni-Map's layer 9)
   writeHeads(INDEX); // index.head.json (the Dashboard's movers) in step with it (integration/scripts/heads.mjs)
   for (const d of stored) if (d < pruneBefore(index.latest)) unlinkSync(join(DAYS_DIR, d + '.json'));
   console.log(`index: ${index.days} days, ${Object.keys(index.countries).length} countries, latest ${index.latest}`);
   thinStop();
 }
 
-await main().catch(e => {
+// Run as a script (the refresh, the tests' copy); imported, it only lends keepDays.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main().catch(e => {
   console.log(`::error title=Volatility::${e.message}`);
   if (!e.stop) console.error(e.stack);
   process.exitCode = 1;

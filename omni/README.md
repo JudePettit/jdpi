@@ -15,8 +15,18 @@ VM holds Cliopatria's borders for **every year it covers, 3400 BC to AD 2024** (
 | `data/borders/index.json` | The files, their years, rows, sizes and sha256, and the archive they were built from | `scripts/build-borders.mjs` |
 | `data/borders/qids.json` | The crosswalk from Wikidata Q-ids to Cliopatria's names by year, and the ids rejected, with why | `scripts/build-borders.mjs` |
 | `data/base/ne_110m_land.geojson` | Natural Earth 5.1.1's land at 1:110 million, unchanged: the plain base (see `data/base/README.md`) | `scripts/build-base.mjs` |
-| `data/layers/battles.json` | The battles the Master Index holds with a date in 1400–1600, each value with its source | `scripts/build-battles.mjs` |
-| `data/layers.json` | The layer catalogue (design 4.2): each layer's years, step, status, legend, source and method | by hand; the builders set each layer's `built` and years |
+| `data/layers/battles.json` | The battles the Master Index and War Focus hold with a date and a point (1,967, 1258–2025), each value with its source | `scripts/build-battles.mjs` |
+| `data/layers/wars/registry.json` | The one war registry (S5b): each war of the lake and of UCDP/PRIO ACD 26.1 once, with its ids in each, its years and its War Focus id where there is one; no COW record | `scripts/build-wars.mjs` |
+| `data/layers/conflict-territory/conflicts.json` | Layer 2: UCDP/PRIO ACD 26.1 and UCDP BRD 26.1 by country and year, 1946–2025 (intensity, battle deaths from 1989, the sides fighting abroad), each joined to a country by its name and ISO 3166 code, never by a GW code alone | `scripts/build-conflict-territory.mjs` (places from `scripts/ucdp-places.mjs`) |
+| `data/layers/political-change/terms.json`, `elections/elections.json`, `coups/coups.json` | Layer 3: heads of state and government from Wikidata (P39), elections and referendums from the Master Index, coups from Wikidata (Q45382), each value with its source | `scripts/build-political.mjs` |
+| `data/layers/retro-keys.json` | The Retrospective’s own country keys by ISO 3166 code (format `vm-addresses/1`), read from its `data/countries.json`, so a click on a country opens the Retrospective at that country | `scripts/build-political.mjs --only retro` |
+| `data/layers/breakthroughs/events.json` | Layer 5: the Invention Timeline’s breakthroughs, with their disciplines as a filter | `scripts/build-breakthroughs.mjs` |
+| `data/layers.json` | The layer catalogue (design 4.2): each layer's years, step, status, legend, source and method, and the `absent` lines for layers VM leaves out for want of free data | by hand for borders and battles; the S5a builders put their whole entries (`scripts/layer-catalogue.mjs`) |
+| `data/layers.head.json` | The catalogue's `generated` alone: the small file every page's sidebar reads for the Omni-Map's line (`registry.json`), so the catalogue can grow without weighing on every page | written beside `layers.json` by every writer (`writeCatalogue` in `scripts/layer-catalogue.mjs`, used by `updateLayer` in `scripts/build-borders.mjs`), never by hand |
+| `data/base/countries.topo.json`, `data/base/small-states.json` | Natural Earth 5.1.1's Admin 0 countries at 1:110 million as TopoJSON (177 countries, id `ne-<ADM0_A3>`, ISO 3166 alpha-3 code), and a point for each of the 64 small states only the 1:50 million map holds: the countries base (see `data/base/README.md`) | `scripts/build-countries.mjs` |
+| `data/layers/wb/EN.POP.DNST.json` | The World Bank's population density (people per km² of land area), every economy and year it gives, 1961–2024 (format `vm-series/1`) | `scripts/build-wb.mjs` |
+| `data/layers/density/<year>.json`, `index.json` | GHSL GHS-POP R2023A summed into 0.25° cells, one file per epoch, 1975–2030 (2025 and 2030 are projections), as `[step, people]` pairs (format `vm-grid/1`); the index lists each file's sha256 and the GHSL zip it came from | `scripts/build-density.mjs` |
+| `data/layers/density-hyde/<year>.json`, `index.json` | HYDE 3.2.1's population counts (baseline) summed into the same 0.25° cells, 48 epochs from 4000 BC to 1970 (a year BC is named m and its digits: `m4000.json`), on the GHSL grid's classes; the index names each file's archive entry and the archive's sha256 | `scripts/build-density-hyde.mjs` |
 
 VM's sources, with their terms as read, are in `integration/sources.json` (design 5.1).
 
@@ -204,6 +214,94 @@ focus". Play stops at the window's last year and says so, at any
 move of the slider, and at a new recipe (the address, Kino's next move, the reader's next click); from the last year it
 starts again at the first. The pure parts are in `omni/lib/time.js`.
 
+## Layers (stage S5a)
+
+The panel "Layers" lists every layer in `data/layers.json`, each with a switch (a checkbox with the role switch: Space
+or a click), what it is doing at the frame, and its legend, source, licence and method; a layer VM leaves out for want
+of free data stays in the list as a line saying why. A layer's data loads only when it is switched on, and for a layer
+split by years (the grid) only the file of the frame's epoch. A layer whose years miss the frame says so, as
+"Population density (by country) holds 1961 to 2024; the map is at 1494", and draws nothing.
+
+The clutter rule (`omni/lib/layers.js`, pure): one fill, one base and at most three point or line layers. A second
+fill or base replaces the first; a fourth point or line layer switches off the oldest, with a note, unless "Show
+anyway" is ticked; the layer of the view's subject (a clicked battle's) is never dropped. Above 2,000 visible points a
+point layer clusters. The borders are always drawn; under a fill they are outlines.
+
+In the address (design 3.2's keys): `fill=wb:EN.POP.DNST` or `fill=density-grid`, `base=countries`, `l=` the point and
+line layers in the order switched on, `all=1` for Show anyway (which lets `l=` hold up to twelve). A fill's or base's id
+given in `l=` is read into its own key. An address from before S5a opens as it did; an id VM does not hold is named
+on the page and not drawn. The bundle and "Download data" carry each drawn layer's rows (each value with its
+source and its place in it) and its dataset entry with sha256 and licence, and `ds=` pins each drawn layer's version.
+
+| Layer | Role | Years | From |
+|---|---|---|---|
+| Countries today | base | 1886–2024, today's borders | Natural Earth 5.1.1 Admin 0 (public domain) |
+| Population density (by country) | fill | 1961–2024 | World Bank WDI EN.POP.DNST (CC BY 4.0), drawn on today's countries |
+| Population density (grid) | fill | 1975–2030 in five-year epochs; the frame shows the epoch at or before it | GHSL GHS-POP R2023A (CC BY 4.0), summed into 0.25° cells |
+| Population density before 1975 (HYDE) | fill | 4000 BC to 1970 in HYDE's 48 epochs (a thousand years apart before AD 1, a century apart to 1700, ten years apart after); its 1970 stands to 1974; HYDE's "0 AD" is left out | HYDE 3.2.1 baseline from the DANS Data Station (CC0 1.0 by the repository's record, CC BY 3.0 by its readme), summed into 0.25° cells on the grid's classes. HYDE 3.3 sits behind a bot check VM does not get round, so VM holds the earlier release |
+
+`omni/lib/layer-view.js` loads, draws and lists the layers; S5b and S5c add catalogue entries, builders, data and draw
+rules only. The fills' colours are the design system's sequential blues stretched to ten steps (`--om-seq-1` …
+`--om-seq-10` in `styles.css`); the classes take `--om-seq-2` upward (`tokenOf` in `lib/layers.js`), since the first step
+is close to the sea's colour. A country with no value for the year is drawn in the map's no-data colour, the countries
+are outlined under a fill, and an economy with a value but no free shape (the Channel Islands and Gibraltar, for the
+World Bank) is named under the key, never dropped silently. Each line of the list gives the years the layer holds and
+the year the map actually draws. A layer left out has a line starting "VM’s own text", with links to what VM read.
+
+`design/prp-map-d3.js` draws the same dated borders as SVG with d3, from the same core (`design/prp-map.js`, which
+stays pure); a page that uses it loads d3 itself at an exact version with its SRI hash. `omni/d3.html#at=1494` is its
+test page (d3 7.9.0 from jsDelivr); `tests/omni-layers-page.test.mjs` checks it slices the rows the MapLibre page draws
+at 1494 and 1900.
+
+## Layers of history (stage S5b)
+
+Four layers draw on what VM already holds or on free data, read with its terms:
+
+- **Conflict on territory** (fill, 1946–2025): each country coloured by the highest UCDP intensity on its territory in
+  the year; a country whose forces fight only abroad is outlined in a dashed line instead. A strip above the key counts
+  the armed conflicts of each year, as UCDP counts them. Before 1946 the layer says it has no free data: VM’s free-data rule
+  (MP-11) leaves out COW and PRIO’s battle deaths, so there are no deaths before UCDP’s from 1989.
+- **Political change** (fill), **Elections and referendums** and **Coups** (points): who held office at the frame,
+  and the elections and coups of the period from the slider’s start to the frame.
+- **Battles** (points): now every dated battle with a point, from the Master Index and War Focus.
+- **Breakthroughs** (points): the Invention Timeline’s events, with a Discipline filter (`l=breakthroughs:d=astro`).
+
+A state is placed by Cliopatria’s shape for the year where the crosswalk has one, by Natural Earth’s from 1886, and as
+a point for a small state; one with none is listed under the key with why. A click on a country or a point opens a
+panel with its values and the module that holds it at that year: the Battlefield history
+(`battlefield/history/index.html#y=<year>&c=<GW or ISO3>`), the Retrospective (`#y=<year>&c=<its key>`), War Focus
+(`battlefield/focus/index.html#war=<id>`) or the Invention Timeline (`science/progress/index.html#y=<year>&e=<id>`). A
+point list shows at most 40 items, the rest counted.
+
+## Layers of now (stage S5c)
+
+VM’s own text. Four more layers, each loaded only when it is switched on:
+
+- **World Bank indicators** (fills, one at a time, `fill=wb:<code>`): one layer per World Development Indicators series
+  whose own metadata reads CC BY 4.0, listed together under one disclosure in the layer list. A series whose metadata
+  gives other terms is not built and is listed with them: military expenditure (MS.MIL.XPND.GD.ZS) is SIPRI’s, under
+  SIPRI’s terms, so it is absent.
+- **UCDP’s events** (points, 1989–2026, `l=ucdp-events`, `l=ucdp-events:t=1|2|3`, `l=ucdp-events:w=<war id>`): UCDP
+  GED 26.1 summed into 0.5° cells by month, one file a year (`data/layers/ucdp-events/<year>.json`); only the frame’s
+  year is fetched. An event UCDP knows only to its province or country is drawn hollow at its country; one known only to
+  the country at large, or at sea or in the air, is counted under the key and not drawn. 2026 is UCDP Candidate’s
+  monthly counts by country, from VM’s Realtime file, and is labelled candidate. The war filter goes through the war
+  registry; a cell names no actor and no person.
+- **The calendars’ events** (points, 1980–2029, `l=calendar-events`): VM Calendars’ events, one file a decade, each
+  event with its date’s precision (day or month), its ISO3 where it has a country of today, and its source class. An
+  event to come is drawn hollow. Leader and coup events that may be Archigos’s, and the Atlas’s, are left out and counted.
+- **Volatility score** (fill, `fill=gvi`): VM’s own Geopolitical Volatility Index by country, the last day VM holds of
+  the frame’s year (`data/layers/gvi/<year>.json`). The days are kept in `volatility/data/kept/` by
+  `volatility/scripts/ingest.mjs`, so none is lost when Volatility’s index drops days older than a year.
+
+The map draws at most three point or line layers; a fourth switches off the oldest and says so. A page or the narrator
+can send `prp:focus` with ISO3 codes (`{ countries: ['FRA'] }`) and the map fits them; `{ reset: true }` fits the
+view’s own box. Across VM, a tagged name (a Wikipedia link, or an element with `data-qid`) opens VM’s card
+(`design/jdpi-entities.js`, offers from `design/vm-click.js`): the person’s life on the Omni-Map, their encyclopedia
+entry, and Wikipedia. A Ctrl-, Shift-, Alt- or middle-click still goes to Wikipedia.
+
+Power Patterns (layer 16) is not built: the module does not exist yet.
+
 ## Rebuilding
 
 None of these files has a schedule; each is rebuilt by hand. Every builder writes nothing until its steps have worked,
@@ -217,7 +315,32 @@ node --max-old-space-size=6000 omni/scripts/build-borders.mjs --zip <folder>/cli
 node omni/scripts/build-base.mjs
 # The battles: reads the lake from disk, then asks Wikidata for those items only
 node omni/scripts/build-battles.mjs [--cache <folder>]
+# The countries base: Natural Earth 5.1.1's Admin 0 at 1:110m and 1:50m, each checked against its pinned sha256
+node omni/scripts/build-countries.mjs [--file110 <file>] [--file50 <file>]
+# Population density by country: the World Bank's API (stops unless the series' own licence reads CC BY 4.0)
+node omni/scripts/build-wb.mjs --code EN.POP.DNST [--data <file>] [--meta <file>] [--countries <file>]
+# Population density as a grid: the twelve GHS-POP 30 arc-second WGS84 zips, downloaded first (about 5.6 GB)
+node --max-old-space-size=6000 omni/scripts/build-density.mjs --zips <12 zips> --work <folder outside the repository>
+# Population density before 1975: HYDE3_2_1-baseline.zip (about 5.3 GB) from the DANS Data Station
+# (https://archaeology.datastations.nl/api/access/datafile/5490328), downloaded first; the archive packs with Deflate64,
+# which the script reads itself, checking each entry's CRC-32
+node --max-old-space-size=6000 omni/scripts/build-density-hyde.mjs --zip <file> --work <folder outside the repository>
+# S5b, in this order: UCDP's ACD 26.1 and BRD 26.1 CSVs downloaded first (CC BY 4.0), then
+node omni/scripts/build-wars.mjs --acd <UcdpPrioConflict_v26_1.csv> [--cache <folder>]
+node omni/scripts/build-conflict-territory.mjs --acd <UcdpPrioConflict_v26_1.csv> --brd <BattleDeaths_v26_1_conf.csv> [--cache <folder>]
+node omni/scripts/build-political.mjs [--cache <folder>] [--only elections|coups|political-change|retro] [--retro <countries.json>]
+node omni/scripts/build-breakthroughs.mjs
+# S5c: every World Bank series in build-wb.mjs's list, each licence read from its own metadata
+node omni/scripts/build-wb.mjs --all [--meta-dir <folder>]
+# UCDP GED 26.1 (ged261-csv.zip, CC BY 4.0), downloaded first into a scratch folder of its own; checked against its sha256
+node --max-old-space-size=6000 omni/scripts/build-ucdp-events.mjs --file <ged261-csv.zip>
+# The Volatility score: the kept days first, then the layer
+node volatility/scripts/ingest.mjs --keep-only
+node omni/scripts/build-gvi.mjs
+# The calendars' events, from calendar/data/<decade>.json (rebuilt each morning by calendar-refresh.yml)
+node omni/scripts/build-calendar-layer.mjs
 npm run test:unit
+# then, from the main session only: node integration/scripts/build-catalog.mjs --quiet
 ```
 
 A new Cliopatria release is a change made by hand: read its licence again, record its sha256 in `RELEASE`

@@ -1,0 +1,20 @@
+{
+ "format": "vm-gvi-index/1",
+ "layer": "gvi",
+ "built": "2026-11-20T12:55:06Z",
+ "first": "2026-09-26",
+ "last": "2026-11-19",
+ "files": [
+  {
+   "year": 2026,
+   "file": "2026.json",
+   "first": "2026-09-26",
+   "last": "2026-11-19",
+   "days": 55,
+   "countries": 160,
+   "bytes": 58942,
+   "gzip": 13196,
+   "sha256": "f1d9d8b333388aa684499e864ecbb3eaf89d7c646779b4f0f38211c495a89e80"
+  }
+ ]
+}

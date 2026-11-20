@@ -21,13 +21,20 @@
      rejection with `years` holds the rows of those years (and of kept.years) only; one without holds every row.
      A Q-id is drawn only through this crosswalk, never through a row's own `q` (the source's ids are checked first).
    A layer's catalogue entry (4.2), checked by readLayer: { id, module, title, geometry, time: { field, from, to, step,
-     precision }, data, measure, status, borderPrecision?, style, legend, source, method, open, pinnable }. */
+     precision, values? }, data, measure, status, borderPrecision?, style, legend, source, method, open, pinnable }, and
+     from stage S5a role? (borders | fill | base | point | line), statusBy? ([{ from?, to?, status }], GHSL's 2025 and
+     2030 'projection'), space? (where a value stands, said in the legend) and geometry 'grid'. A layer VM leaves out for
+     want of free data is a line of the catalogue's `absent` list, checked by readAbsent: { id, title, why, url, read }. */
 (function () {
   const root = typeof window !== 'undefined' ? window : globalThis;
   const ID = /^cl-[0-9a-f]{10}$/;
   const QID = /^Q[1-9]\d*$/;
-  const STEPS = ['d', 'm', 'y', '10y', 'c'];
-  const GEOMETRIES = ['polygon', 'point', 'line'];
+  // 'listed': the years are those of time.values, at uneven steps (HYDE's epochs), said in words by time.stepWords.
+  const STEPS = ['d', 'm', 'y', '5y', '10y', 'c', 'listed'];
+  const GEOMETRIES = ['polygon', 'point', 'line', 'grid'];
+  // A layer's part in the clutter rule (stage S5a; omni/lib/layers.js): the borders, one fill, one base, and point and
+  // line layers. An entry without a role takes it from its geometry.
+  const ROLES = ['borders', 'fill', 'base', 'point', 'line'];
   const yearOf = v => { const y = typeof v === 'number' ? v : parseInt(String(v ?? ''), 10); return Number.isInteger(y) && y !== 0 ? y : null; };
   const fmtYear = y => (y < 0 ? `${-y} BC` : String(y));
   const fmtSpan = (a, b) => (a < 0 && b < 0 ? `${-a}–${-b} BC` : a < 0 ? `${-a} BC–AD ${b}` : `${a}–${b}`);
@@ -197,7 +204,7 @@
     need('title', str, 'a title');
     need('geometry', v => GEOMETRIES.includes(v), `one of ${GEOMETRIES.join(', ')}`);
     need('time', v => v && typeof v === 'object' && str(v.field) && Number.isInteger(v.from) && Number.isInteger(v.to) && v.from <= v.to
-      && STEPS.includes(v.step) && str(v.precision), 'a time { field, from, to, step, precision } with from <= to');
+      && STEPS.includes(v.step) && (v.step !== 'listed' || Array.isArray(v.values)) && str(v.precision), 'a time { field, from, to, step, precision } with from <= to');
     need('data', str, 'the address of its data');
     need('measure', v => v === null || str(v), 'a measure id or null');
     need('status', str, 'a status');
@@ -209,7 +216,65 @@
     need('method', str, 'a method note');
     need('open', v => typeof v === 'boolean', 'true or false');
     need('pinnable', v => typeof v === 'boolean', 'true or false');
+    if ('role' in entry && !ROLES.includes(entry.role)) errors.push(`role is not one of ${ROLES.join(', ')}`);
+    if (entry.time && 'values' in entry.time) {
+      const v = entry.time.values;
+      if (!(Array.isArray(v) && v.length && v.every(Number.isInteger) && v.every((x, i) => !i || x > v[i - 1]))) errors.push('time.values is not a rising list of years');
+      else if (v[0] !== entry.time.from || v.at(-1) !== entry.time.to) errors.push('time.from and time.to are not the first and last of time.values');
+      if ('until' in entry.time && !(Number.isInteger(entry.time.until) && entry.time.until >= entry.time.to)) errors.push('time.until is not a year at or after time.to');
+    }
+    if ('statusBy' in entry && !(Array.isArray(entry.statusBy) && entry.statusBy.every(r => r && str(r.status) && (r.from == null || Number.isInteger(r.from)) && (r.to == null || Number.isInteger(r.to)))))
+      errors.push('statusBy is not a list of { from?, to?, status }');
     return { ok: !errors.length, entry, errors };
+  }
+  /** Checks a line for a layer VM leaves out for want of free data (the catalogue's `absent` list): { ok, errors }. */
+  function readAbsent(line) {
+    const errors = [];
+    if (!line || typeof line !== 'object') return { ok: false, errors: ['the line is not an object'] };
+    const str = v => typeof v === 'string' && v.trim() !== '';
+    for (const k of ['id', 'title', 'why', 'url', 'read']) if (!str(line[k])) errors.push(`${k} is missing`);
+    if (str(line.id) && !/^[a-z][a-z0-9-]*$/.test(line.id)) errors.push('id is not a layer id');
+    if (str(line.url) && !/^https:\/\//.test(line.url)) errors.push('url is not an https address');
+    if (str(line.read) && !/^\d{4}-\d\d-\d\d$/.test(line.read)) errors.push('read is not a date');
+    return { ok: !errors.length, errors };
+  }
+  /** A layer's role in the clutter rule: its own, else by its geometry (the borders are 'borders'). */
+  function roleOf(entry) {
+    if (ROLES.includes(entry?.role)) return entry.role;
+    if (entry?.id === 'borders') return 'borders';
+    return entry?.geometry === 'point' ? 'point' : entry?.geometry === 'line' ? 'line' : 'fill';
+  }
+  /** A layer's status at a year: the statusBy rule holding the year (2025 and 2030: 'projection'), else its status. */
+  function statusAt(entry, year) {
+    const y = yearOf(year);
+    const r = y == null ? null : (entry?.statusBy || []).find(x => (x.from == null || x.from <= y) && (x.to == null || y <= x.to));
+    return r ? r.status : entry?.status || '';
+  }
+  /** The layer's value-year shown at a frame: for a layer of separate years (time.values, GHSL's epochs), the last at or
+      before the frame, up to time.until when it has one (HYDE's 1970 stands for the frames to 1974, before GHSL's 1975);
+      else the frame itself. null outside its years. */
+  function layerYear(entry, year) {
+    const y = yearOf(year), t = entry?.time;
+    if (y == null || !t || y < t.from) return null;
+    if (Array.isArray(t.values)) return y > (t.until ?? Infinity) ? null : t.values.filter(v => v <= y).at(-1) ?? null;
+    return y <= t.to ? y : null;
+  }
+  /** Whether a layer holds the frame's year, and if not, the design's words: "Population density (by country) holds
+      1961 to 2024; the map is at 1494". null when it holds it. A layer of separate years holds every year from its
+      first to its last value. */
+  function heldText(entry, year) {
+    const y = yearOf(year), t = entry?.time;
+    if (y == null || !t) return null;
+    if (y >= t.from && y <= (t.until ?? t.to)) return null;
+    return `${entry.title} holds ${spanWords(entry)}; the map is at ${fmtYear(y)}`;
+  }
+  const dayWords = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d); return m ? [`${+m[3]} ${MONTHS[+m[2] - 1]}`, m[1]] : null; };
+  /** The years a layer holds in words: "1961 to 2024"; a layer of days within a year (time.first and time.last days,
+      the Volatility score) gives its days, "26 September to 19 November 2026" (V12 of the S5b/S5c review). */
+  function spanWords(entry) {
+    const t = entry?.time || {}, a = dayWords(String(t.first || '')), b = dayWords(String(t.last || ''));
+    if (a && b && t.from === t.to) return a[1] === b[1] ? `${a[0]} to ${b[0]} ${b[1]}` : `${a.join(' ')} to ${b.join(' ')}`;
+    return `${fmtYear(t.from)} to ${fmtYear(t.to)}`;
   }
   /** The precision VM gives a layer's borders at a year ('c' century, 'y' year), from its borderPrecision rules
       ([{ to: 1499, p: 'c' }, { from: 1500, p: 'y' }]); null when no rule holds the year. */
@@ -239,9 +304,14 @@
       const p = borderPrecisionAt(entry, year), rule = (entry.borderPrecision || []).find(r => r.p === p);
       if (p === 'c') lines.push(`Borders at century precision${rule?.to != null ? ` before ${fmtYear(rule.to + 1)}` : ''}: VM counts a border of these years as known only to its century`);
       else if (p) lines.push(`Borders at ${PRECISION[p] || p} precision, as ${src?.short || 'the source'} dates its rows; VM has not checked them`);
-    } else if (entry?.time?.precision) lines.push(`Dates at the precision ${src?.short || 'the source'} records, at best to the ${entry.time.precision}`);
-    if (entry?.status === 'reconstruction') lines.push('A reconstruction: one version of each border, with no measure of its uncertainty');
-    else if (entry?.status) lines.push(`Status: ${entry.status}`);
+    } else if (Array.isArray(entry?.time?.values)) {
+      const v = layerYear(entry, year);
+      const vs = entry.time.values, list = vs.length > 14 ? `${vs.length} years from ${fmtYear(vs[0])} to ${fmtYear(vs.at(-1))}${entry.time.stepWords ? ` (${entry.time.stepWords})` : ''}` : vs.map(fmtYear).join(', ');
+      lines.push(`Precision: ${src?.short || 'the source'}’s years ${list}${v != null && v !== yearOf(year) ? `; at ${fmtYear(yearOf(year))} the map shows ${fmtYear(v)}, the last of them before it` : ''}${entry.space ? `; ${entry.space}` : ''}`);
+    } else if (entry?.time?.precision) lines.push(`Dates at the precision ${src?.short || 'the source'} records, at best to the ${entry.time.precision}${entry.space ? `; ${entry.space}` : ''}`);
+    const status = statusAt(entry, layerYear(entry, year) ?? year);
+    if (status === 'reconstruction') lines.push('A reconstruction: one version of each border, with no measure of its uncertainty');
+    else if (status) lines.push(`Status: ${status}`);
     if (entry?.measure) lines.push(`Measure: ${entry.measure}`);
     return { title: entry?.title || '', lines, credit: entry?.legend || '', method: entry?.method || '' };
   }
@@ -282,5 +352,5 @@
   }
 
   root.PRPMap = { decode, validId, fileFor, held, sliceAt, qidRows, featuresFor, reasonText, extent, polityAt, labelPoint, esc,
-    readLayer, borderPrecisionAt, legend, heldMessage, qidFor, bundleProps, borderRow };
+    readLayer, readAbsent, roleOf, statusAt, layerYear, heldText, spanWords, borderPrecisionAt, legend, heldMessage, qidFor, bundleProps, borderRow };
 })();

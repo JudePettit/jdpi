@@ -39,7 +39,8 @@
 //    POLITY row's Name, and whose founding or dissolution date in the lake overlaps the row's years: basis "name" (so
 //    Q70972, the Kingdom of France, reaches its rows).
 // 5. Writes omni/data/borders/<from>-<to>.topo.json (a year below zero written m and its digits: m3400-m301.topo.json),
-//    index.json and qids.json, and the borders layer's `built` and years in omni/data/layers.json. index.json and
+//    index.json and qids.json, and the borders layer's `built` and years in omni/data/layers.json (and its
+//    `generated` in omni/data/layers.head.json, which every page's sidebar reads). index.json and
 //    qids.json each keep the `built` they have when nothing else in them changes (builtFor), so a run on unchanged
 //    inputs writes the same bytes and the views' pins stay. Prints rows, bytes and gzipped bytes per file, and names any
 //    .topo.json file in the folder that the index no longer lists (it deletes nothing). Nothing else is written.
@@ -49,6 +50,7 @@ import { gzipSync, inflateRawSync, crc32 } from 'node:zlib';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { wikidataDate, bestClaim, yearSpan } from '../../lake/scripts/dates.mjs';
+import { writeCatalogue } from './layer-catalogue.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 // The release: https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.1 (tag of 3 October 2026; its
@@ -305,8 +307,10 @@ export function updateLayer(file, id, fields) {
   const l = cat.layers.find(x => x.id === id);
   if (!l) throw new Error(`${file} has no layer ${id}`);
   Object.assign(l, { built: fields.built }); Object.assign(l.time, fields.time);
+  if (typeof fields.method === 'string') l.method = fields.method; // a builder whose rows say what its method is (S5b's battles)
   cat.generated = cat.layers.map(x => x.built).filter(Boolean).sort().at(-1);
-  writeFileSync(file, JSON.stringify(cat, null, 2) + '\n');
+  // With its head beside it (omni/data/layers.head.json: only `generated`, which every page's sidebar reads).
+  writeCatalogue(file, cat);
 }
 
 async function main() {

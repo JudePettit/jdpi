@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-suite="ds" class="prp">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omni-Map borders in d3 · VM</title>
+<meta name="description" content="The Omni-Map's dated borders for one year, drawn by d3 from the same core as the MapLibre page: a test page for the d3 adapter (design/prp-map-d3.js).">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../design/brand-vm-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../design/prp.css">
+<link rel="stylesheet" href="styles.css">
+<!-- d3 7.9.0 (ISC licence, © Mike Bostock), loaded only by this test page: pinned to its exact version with the
+     Subresource Integrity hash of the file as published (jsDelivr and unpkg agree byte for byte), so a changed file is
+     refused. The Omni-Map itself does not load it. -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="../design/prp-map.js"></script>
+<script src="../design/prp-map-d3.js"></script>
+<script type="module" src="d3-page.js"></script>
+</head>
+<body>
+<main class="om">
+  <h1 class="prp-title">The Omni-Map's borders in d3</h1>
+  <p class="prp-dek">A test page for the d3 adapter (design/prp-map-d3.js): the rows Cliopatria v0.2.1 holds for one year, drawn by d3 7.9.0 from the core the MapLibre page uses. Put the year in the address, as #at=1494.</p>
+  <p class="prp-meta" id="d3-meta" role="status">Loading…</p>
+  <svg id="d3-map" class="om-d3" aria-labelledby="d3-meta"></svg>
+  <p class="om-lg-credit">Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager. Made with Natural Earth. Drawn with d3 7.9.0 (ISC licence).</p>
+</main>
+</body>
+</html>

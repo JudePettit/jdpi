@@ -1021,7 +1021,7 @@
             "class": "reference",
             "parts": [
               {
-                "read": "omni/data/layers.json"
+                "read": "omni/data/layers.head.json"
               }
             ]
           },

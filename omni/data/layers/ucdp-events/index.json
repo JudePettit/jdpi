@@ -1,0 +1,503 @@
+{
+ "format": "vm-ged-index/1",
+ "layer": "ucdp-events",
+ "built": "2026-11-20T12:59:42Z",
+ "first": "1989-01",
+ "last": "2025-12",
+ "files": [
+  {
+   "year": 1989,
+   "file": "1989.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1190,
+   "bytes": 40306,
+   "gzip": 9700,
+   "sha256": "f00ade4c5a5098eb1b21840de963e5ee8b4da49f051f0825a85fbc410484a877"
+  },
+  {
+   "year": 1990,
+   "file": "1990.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1535,
+   "bytes": 49771,
+   "gzip": 11503,
+   "sha256": "399e370cf3e0b07715736047755816e19b76778c70effb546a2f2e4ccea4ac1f"
+  },
+  {
+   "year": 1991,
+   "file": "1991.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1394,
+   "bytes": 45540,
+   "gzip": 10494,
+   "sha256": "e257df0e639783e57b052e6c7a359553a32cb146a1b8952e135c43aa5ddbb507"
+  },
+  {
+   "year": 1992,
+   "file": "1992.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1788,
+   "bytes": 56163,
+   "gzip": 12968,
+   "sha256": "4d2d99997394c141980db0018b26e39945c86149d9c2b9def79b600c0398a647"
+  },
+  {
+   "year": 1993,
+   "file": "1993.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1869,
+   "bytes": 58498,
+   "gzip": 13331,
+   "sha256": "b6a61f327f3bc8499007e95038ec9543c86969bad64107185a976e15ad5a1d3e"
+  },
+  {
+   "year": 1994,
+   "file": "1994.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1749,
+   "bytes": 55592,
+   "gzip": 13210,
+   "sha256": "3985374144f46a3f8d997046861b42d96ce7e8b4a47ab5a3c196492d9942e3ff"
+  },
+  {
+   "year": 1995,
+   "file": "1995.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1707,
+   "bytes": 55047,
+   "gzip": 12596,
+   "sha256": "b3fc14dfa06d6487df7c932da87c0f72f3393696c2009138525cb2e56fa8a931"
+  },
+  {
+   "year": 1996,
+   "file": "1996.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1449,
+   "bytes": 47024,
+   "gzip": 10901,
+   "sha256": "485e253bd87600b4062001c1346cb780744ed130d49bf8f28d625bd5c15abe7d"
+  },
+  {
+   "year": 1997,
+   "file": "1997.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1486,
+   "bytes": 47604,
+   "gzip": 10996,
+   "sha256": "0ef18912c23f9cc5115e909a63203f2355b1533b2ff74b54390be162b2709ecb"
+  },
+  {
+   "year": 1998,
+   "file": "1998.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 1757,
+   "bytes": 55897,
+   "gzip": 12868,
+   "sha256": "c56bbf14fc9c42997520d3953338b069b2bb25e007f0397f6098a73cca56ccca"
+  },
+  {
+   "year": 1999,
+   "file": "1999.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2493,
+   "bytes": 73675,
+   "gzip": 15978,
+   "sha256": "379e7ed63a3534a899dec77887579f4e9431ab3148f2f6b3c6fdb7ad8ff4e6fa"
+  },
+  {
+   "year": 2000,
+   "file": "2000.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2763,
+   "bytes": 81263,
+   "gzip": 17161,
+   "sha256": "51edb770842b4fec9112a4b53e4be6d9eafcc7b6ee0a06d768e176b891558eed"
+  },
+  {
+   "year": 2001,
+   "file": "2001.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2417,
+   "bytes": 70993,
+   "gzip": 15172,
+   "sha256": "1db3a0716280014a2531fa36abfc5b6b138d7ed3b2f75bcb73b552c25a6c1f9b"
+  },
+  {
+   "year": 2002,
+   "file": "2002.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3512,
+   "bytes": 98896,
+   "gzip": 20167,
+   "sha256": "a35ab1fcd728b3ceea65ac6b566d39ede47a6597989a2a31d14966d6f4c81299"
+  },
+  {
+   "year": 2003,
+   "file": "2003.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3173,
+   "bytes": 89525,
+   "gzip": 17933,
+   "sha256": "fe16f0f3c4af08bba2284733ff23106aa2b42c6d5b0db96b7226a9c32e8c97d5"
+  },
+  {
+   "year": 2004,
+   "file": "2004.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3596,
+   "bytes": 100311,
+   "gzip": 19734,
+   "sha256": "ebef38752f7649fb7c3be3c523a0211ce36f42842ccab50736d26bb29d1d4490"
+  },
+  {
+   "year": 2005,
+   "file": "2005.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2990,
+   "bytes": 84790,
+   "gzip": 16745,
+   "sha256": "b3e467a24d6ee3122882b3f2cc8a6e72e81a4dc61bd2fae90fb126cd4edb9a8e"
+  },
+  {
+   "year": 2006,
+   "file": "2006.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2618,
+   "bytes": 76036,
+   "gzip": 15716,
+   "sha256": "9cf573af94aa02452413117066740eab200b317ad8e81f2d9f9982708e8bf3fa"
+  },
+  {
+   "year": 2007,
+   "file": "2007.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3171,
+   "bytes": 89784,
+   "gzip": 18356,
+   "sha256": "dfea409287501a2c84e683c864854ce05dd4e7fa29018f21323252c56264790a"
+  },
+  {
+   "year": 2008,
+   "file": "2008.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 2736,
+   "bytes": 79215,
+   "gzip": 17153,
+   "sha256": "54b9f6072d063f96d4c3dc7c2db12a3b065ade34a311e792f98b6e24c2b070c3"
+  },
+  {
+   "year": 2009,
+   "file": "2009.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3045,
+   "bytes": 86557,
+   "gzip": 18527,
+   "sha256": "233a84133502b3ff91e4fd8fbf87142efbacaaa405f17eaf64d72dfc8e26a900"
+  },
+  {
+   "year": 2010,
+   "file": "2010.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3167,
+   "bytes": 87761,
+   "gzip": 18328,
+   "sha256": "587e796a2acbb50c7493829617cd4585d07ca2bd787e028ae8164d3cbbc290ea"
+  },
+  {
+   "year": 2011,
+   "file": "2011.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3067,
+   "bytes": 87785,
+   "gzip": 18747,
+   "sha256": "0610e59d2a3af81a03e724f697ebe337ea5fed0d4293404d70b160a323a36e54"
+  },
+  {
+   "year": 2012,
+   "file": "2012.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3495,
+   "bytes": 99854,
+   "gzip": 21325,
+   "sha256": "2106e0a2fc246e7c076e31fdaa571afd89c453e1095d85d0e93a40091be36faa"
+  },
+  {
+   "year": 2013,
+   "file": "2013.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 3507,
+   "bytes": 100142,
+   "gzip": 22437,
+   "sha256": "e1b00cb86e2d50063716b25db80a201dfd6c41a6c3aaf5988986c316b78575cf"
+  },
+  {
+   "year": 2014,
+   "file": "2014.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 4264,
+   "bytes": 121781,
+   "gzip": 27419,
+   "sha256": "a6c6d5e22ea6d2bff6cb2c2b28c22abb5cff1f400c6978d695f2118e7aed5c82"
+  },
+  {
+   "year": 2015,
+   "file": "2015.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 4467,
+   "bytes": 128109,
+   "gzip": 28467,
+   "sha256": "b9c32ba929dd98691e418ddda6db96f6b8a656614b2265e6d11f2326ff769a68"
+  },
+  {
+   "year": 2016,
+   "file": "2016.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 4341,
+   "bytes": 123308,
+   "gzip": 27412,
+   "sha256": "dc71b19b326e7041af56783dcd97dd2a6559464a7fb4b0d97536fbf3fb40d7f5"
+  },
+  {
+   "year": 2017,
+   "file": "2017.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 4600,
+   "bytes": 130736,
+   "gzip": 28674,
+   "sha256": "a1a65a7c67e07f385c84ce68f76f1a56672176f9a98533f8a3a759f758b2d07d"
+  },
+  {
+   "year": 2018,
+   "file": "2018.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 4731,
+   "bytes": 132312,
+   "gzip": 28650,
+   "sha256": "7f816c7aacddbcfda6fc82a8b1a7b4b43fa329acbcec03877dd14e03c90a767b"
+  },
+  {
+   "year": 2019,
+   "file": "2019.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 5198,
+   "bytes": 143932,
+   "gzip": 31132,
+   "sha256": "7f3e79fb9b526932186ad16f8863812fdebfe59adf479009f83e9f0996e66920"
+  },
+  {
+   "year": 2020,
+   "file": "2020.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 5515,
+   "bytes": 152258,
+   "gzip": 32262,
+   "sha256": "7147ba29b29b7882e1b446800d1e15c38c36f3f4922c93d67d7f4b7b4685535d"
+  },
+  {
+   "year": 2021,
+   "file": "2021.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 5756,
+   "bytes": 158492,
+   "gzip": 33994,
+   "sha256": "9a55d28778e413b14716826d5e809dc5fae892408b176167e4565fbdb21d1801"
+  },
+  {
+   "year": 2022,
+   "file": "2022.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 6265,
+   "bytes": 171189,
+   "gzip": 35408,
+   "sha256": "0e7cb6fc50344a1f7b058a137b6f56703b75c46bc210741bcf86760019a6e553"
+  },
+  {
+   "year": 2023,
+   "file": "2023.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 6529,
+   "bytes": 178105,
+   "gzip": 36735,
+   "sha256": "c249f3eb35647ed7a73883c33db24b79f4cd054f88a7fb81c08ef14161d7a3cf"
+  },
+  {
+   "year": 2024,
+   "file": "2024.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 6783,
+   "bytes": 186082,
+   "gzip": 39238,
+   "sha256": "5f6998821fac8e1033a13037a01509f8c6302c479317d11b08064ab44d9e8b10"
+  },
+  {
+   "year": 2025,
+   "file": "2025.json",
+   "status": "recorded",
+   "months": [
+    1,
+    12
+   ],
+   "cells": 6798,
+   "bytes": 187356,
+   "gzip": 40058,
+   "sha256": "cc262923aac54fe728700f9f9a79647b56e92a2b03d14db70470246c89f26174"
+  },
+  {
+   "year": 2026,
+   "file": "2026.json",
+   "status": "candidate",
+   "months": [
+    1,
+    9
+   ],
+   "cells": 0,
+   "bytes": 14363,
+   "gzip": 3071,
+   "sha256": "1b0af2c095ab324bbbcbd605678c8865f420186d30d2e545d825e22d6f8d1906"
+  }
+ ]
+}

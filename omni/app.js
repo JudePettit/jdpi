@@ -27,6 +27,8 @@ import { readRecipe, writeRecipe, readHost } from '../design/vm-recipe.js';
 import { formatYear, formatSpan, formatValueDate, valueDateToEdtf, yearOf, addYears, precisionWord } from '../design/vm-dates.js';
 import { bundleFiles, dataFiles, zipStored, readZip, pin as pinOf, apa } from '../design/vm-bundle.js';
 import { makeMap, webglOk } from './lib/maplibre.js';
+import { layerView } from './lib/layer-view.js'; // the layer list and the layers of stage S5a
+import { listenFocus } from './lib/focus.js'; // prp:focus by ISO3 fits the map (stage S5c)
 import { yearsText, ownYears } from '../design/vm-click.js';
 import { yearText, readYear, ticksFor, playSteps, playStep, playSpan, nextStop, keepFiles } from './lib/time.js';
 
@@ -53,7 +55,8 @@ const MSG = {
 };
 // The VM scripts this page runs, whose sha256 a bundle records (vmCommit is null: a static site cannot know its commit).
 const CODE = ['design/prp-bar.js', 'design/prp-focus.js', 'design/prp-period.js', 'design/prp-map.js', 'design/vm-recipe.js', 'design/vm-dates.js',
-  'design/vm-bundle.js', 'design/vm-click.js', 'lake/scripts/dates.mjs', 'omni/app.js', 'omni/lib/maplibre.js', 'omni/lib/time.js'];
+  'design/vm-bundle.js', 'design/vm-click.js', 'lake/scripts/dates.mjs', 'omni/app.js', 'omni/lib/maplibre.js', 'omni/lib/time.js',
+  'omni/lib/layers.js', 'omni/lib/layer-view.js', 'omni/lib/layers-now.js', 'omni/lib/focus.js'];
 const PROVIDERS = ['Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager', 'Natural Earth 5.1.1 (public domain)', 'Wikidata (CC0)'];
 const host = readHost(location.hash);
 const embedded = (() => { try { return window.self !== window.top; } catch { return true; } })();
@@ -152,9 +155,11 @@ function windowOf(R) {
 // The layers the recipe asks for that VM holds; any other is named, never drawn as if it were there.
 function layerNotes(R) {
   const notes = [];
-  if (R.fill && R.fill !== 'borders') notes.push(`VM builds the borders fill first; it holds no "${R.fill}" fill yet, so this view draws borders.`);
-  for (const l of R.l || []) if (l.id !== 'battles') notes.push(`VM holds no "${l.id}" layer yet, so it is not drawn${battleFilter(R) ? '; this view draws the battles VM holds' : ''}.`);
-  if (R.base && R.base !== 'plain') notes.push(`VM holds the plain base only in this first version (asked: ${R.base}).`);
+  // The catalogue's layers (stage S5a) are drawn through omni/lib/layer-view.js; an id it does not hold is named.
+  const cat = S.lv?.catalogue();
+  if (R.fill && R.fill !== 'borders' && !cat?.byFill.has(R.fill)) notes.push(`VM holds no "${R.fill}" fill, so this view draws borders.`);
+  for (const l of R.l || []) if (l.id !== 'battles' && l.id !== 'borders' && !cat?.byId.has(l.id)) notes.push(`VM holds no "${l.id}" layer, so it is not drawn${battleFilter(R) ? '; this view draws the battles VM holds' : ''}.`);
+  if (R.base && R.base !== 'plain' && !(R.base === 'countries' && cat?.byId.has('countries'))) notes.push(`VM holds the plain base and today's countries only (asked: ${R.base}).`);
   if (R.step === 'd' || R.step === 'm') notes.push('Borders change by the year here, so the slider steps by year.');
   return notes;
 }
@@ -167,11 +172,21 @@ function battlesInWindow(win) {
   const f = battleFilter(S.R);
   return (S.battles?.rows || []).filter(r => r.sortYear >= win.from && r.sortYear <= win.to && (!f?.field || String(r[f.field] ?? '') === f.value));
 }
+// V4 (S5b/S5c review): the battles' file (about 140 KB gzipped since S5b) loads only when the view draws the battles,
+// or when a bundle is made (its datasets carry the file's sha256), as every other layer's data does.
+let battlesLoad = null;
+async function ensureBattles(always = false) {
+  if (S.battles || !(always || battlesOn())) return;
+  battlesLoad ||= getFile(`${DATA}layers/battles.json`).then(b => { S.battles = b.json; S.bufs.set('battles', b.buf); }).finally(() => { battlesLoad = null; });
+  await battlesLoad;
+}
 // The pins of a saved view's address that VM no longer holds (5.7: never drawn silently).
 // The data versions a view draws: the release (cliopatria), VM's own files made from it (borders, the crosswalk qids),
 // the base and the battles. A saved view pins all five (ds=), so a rebuild of VM's files from the same release is seen.
 const nowPins = () => ({ cliopatria: S.index?.version, borders: stamp(S.index?.built), qids: stamp(S.qids?.built),
-  'natural-earth': sourceOf('natural-earth')?.version, battles: stamp(S.battles?.built) });
+  'natural-earth': sourceOf('natural-earth')?.version, battles: stamp(S.battles?.built ?? layerOf('battles')?.built), // the catalogue's stamp is the file's (updateLayer)
+  // the layers of stage S5a the frame draws (only those: a view of borders and battles pins what it pinned before)
+  ...Object.fromEntries((S.lv?.pinList() || []).map(p => [p.id, p.version])) });
 function pinNotes(R) {
   const now = nowPins();
   const notes = (R.ds || []).map(d => (now[d.id] == null ? `This view was saved with ${d.id}@${d.version}, which VM does not hold; it draws what VM holds.`
@@ -256,6 +271,10 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   S.ownExt = own;
   const box = own ? own.box : ext.box, padding = own ? own.padding : ext.padding;
   if (fit || !S.boxSet) { S.box = box; S.boxSet = true; S.map?.fit(S.box, { padding, animate: source !== 'set' }); }
+  // The layers switched on (stage S5a): each loads only now, and only the frame's file of a layer split by years.
+  const lvErrors = S.lv ? await S.lv.frame(year, { lo: S.lo }) : [];
+  if (seq !== S.seq) return;
+  for (const e of lvErrors) S.notes.push(`A layer's data could not load: ${e}`);
   if (S.map) {
     S.map.setBorders(S.drawn, { focus: S.focusHits });
     S.map.setBattles(S.drawnBattles.map(r => ({ id: r.q, geometry: { type: 'Point', coordinates: r.pt } })));
@@ -363,19 +382,35 @@ function render(inWin, ext, file, held) {
     const entry = layerOf(id);
     if (!entry) continue;
     const lg = M.legend(entry, { sources: S.sources, year });
+    // V5 (S5b/S5c review): a frame past the borders VM holds (a card's view of 2026) says that none are drawn.
+    const hb = id === 'borders' ? M.held(S.index) : null;
+    const none = hb && (year < hb.from || year > hb.to) ? [`No borders are drawn at ${formatYear(year)}: VM holds Cliopatria’s borders from ${formatYear(hb.from)} to ${formatYear(hb.to)}.`] : [];
     items.push(`<div class="om-lg" data-layer="${esc(id)}"><p class="om-lg-title"><span class="om-swatch ${esc(id)}" aria-hidden="true"></span>${esc(lg.title)}</p>`
-      + `<ul class="om-lg-lines">${lg.lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="om-lg-credit">${esc(lg.credit)}</p>`
+      + `<ul class="om-lg-lines">${[...none, ...lg.lines].map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="om-lg-credit">${esc(lg.credit)}</p>`
       + `<details class="om-method"><summary><span aria-hidden="true">ⓘ</span> How this layer was made</summary><p>${esc(lg.method)}</p></details></div>`);
   }
+  // The layers of stage S5a switched on: each its legend (measure, precision, status, source and licence) and method.
+  if (S.lv && S.mode !== 'saved') items.push(S.lv.legend(year));
   // What the map's own marks mean (R7): the stronger fill of the places in focus, and the dashed outlines.
   items.push('<div class="om-lg" data-layer="key"><p class="om-lg-title">On the map</p><ul class="om-key">'
     + '<li><span class="om-swatch focus" aria-hidden="true"></span>In focus: the places of this view, filled more strongly</li>'
     + '<li><span class="om-swatch relation" aria-hidden="true"></span>A union, alliance or overlordship (a Cliopatria RELATION row), or a composite polity, written "(…)" (an entity with its dependencies): outlined, not filled</li>'
     + '<li><span class="om-swatch point" aria-hidden="true"></span>A place VM cannot outline, at its recorded point</li></ul></div>');
   const ne = sourceOf('natural-earth');
-  items.push(`<div class="om-lg" data-layer="base"><p class="om-lg-title"><span class="om-swatch base" aria-hidden="true"></span>Base</p><ul class="om-lg-lines"><li>Source: ${esc(ne?.short || 'Natural Earth')} ${esc(ne?.version || '')}, ${esc(lower(ne?.licence || 'public domain'))}: land only, never today's states</li></ul><p class="om-lg-credit">Made with Natural Earth.</p></div>`);
+  // R2 (S5a review): with the countries base on, today's states are drawn from 1886, so the Base block says so.
+  const baseNote = S.mode !== 'saved' && S.lv?.recipe().base === 'countries'
+    ? (S.lv.drawnNow().includes('countries') ? ': land, with today’s countries (Natural Earth Admin 0) drawn over it, as they are from 1886' : ': land only at this year; today’s countries are drawn only from 1886')
+    // V10 (S5b/S5c review): the Base line is the base's alone; a fill drawn on today's countries is said to be.
+    : baseFillNote();
+  items.push(`<div class="om-lg" data-layer="base"><p class="om-lg-title"><span class="om-swatch base" aria-hidden="true"></span>Base</p><ul class="om-lg-lines"><li>Source: ${esc(ne?.short || 'Natural Earth')} ${esc(ne?.version || '')}, ${esc(lower(ne?.licence || 'public domain'))}${esc(baseNote)}</li></ul><p class="om-lg-credit">Made with Natural Earth.</p></div>`);
   items.push(`<p class="om-lg-map">Map drawn with ${MAPLIBRE} (BSD 3-Clause).</p>`);
   $('#legend-body').innerHTML = items.join('');
+  // The layer list, drawn again for the frame (what each holds at this year); a switch the reader is on keeps its focus.
+  if (S.lv) {
+    const was = document.activeElement?.id;
+    S.lv.list($('#layers-body'), year);
+    if (was && was.startsWith('ly-')) document.getElementById(was)?.focus({ preventScroll: true });
+  }
   // The folded legend's one line (4.2's phone legend): the borders' source, version, licence and precision.
   const bl = layerOf('borders'), bsrc = sourceOf(bl?.source);
   const bp = bl ? M.borderPrecisionAt(bl, year) : null, bpRule = (bl?.borderPrecision || []).find(r => r.p === 'c');
@@ -408,13 +443,18 @@ function render(inWin, ext, file, held) {
 
   // The battles VM holds for these years, each with its date as its source records it and its source line.
   $('#battles-held').textContent = on ? M.heldMessage('battle', inWin.length)
-    : `${M.heldMessage('battle', inWin.length)}; this view draws none, as its recipe names no battles layer (l=battles).`;
+    : 'This view draws no battles, as its recipe names no battles layer (l=battles); the battles VM holds load when that layer is switched on.';
   const drawnIds = new Set(S.drawnBattles.map(r => r.q));
-  $('#battles-list').innerHTML = !on ? '' : inWin.map(r => {
+  // Stage S5b widened the battles to every located battle VM holds (about 2,000): a long window lists at most 300, those
+  // drawn first, and says so; each battle of a war War Focus covers links to it.
+  const LISTED = 300;
+  const listed = inWin.length > LISTED ? [...inWin.filter(r => drawnIds.has(r.q)), ...inWin.filter(r => !drawnIds.has(r.q))].slice(0, LISTED) : inWin;
+  if (on && inWin.length > LISTED) $('#battles-held').textContent += `; the first ${LISTED} are listed here, those drawn at this frame first`;
+  $('#battles-list').innerHTML = !on ? '' : listed.map(r => {
     const on = drawnIds.has(r.q);
     const when = formatValueDate(r.date, { source: 'Wikidata' });
     const pt = Array.isArray(r.pt) ? ptText(r.pt, r.ptPrec) : 'no point';
-    return `<li data-q="${esc(r.q)}"><p class="om-b-name"><a href="${esc(entryUrl(r.q))}" target="_top"><bdi>${esc(r.label)}</bdi></a>${r.partOfLabel ? ` <span class="om-q">part of ${esc(r.partOfLabel)}</span>` : ''}</p>`
+    return `<li data-q="${esc(r.q)}"><p class="om-b-name"><a href="${esc(entryUrl(r.q))}" target="_top"><bdi>${esc(r.label)}</bdi></a>${r.partOfLabel ? ` <span class="om-q">part of ${esc(r.partOfLabel)}</span>` : ''}${/^wf-/.test(r.war || '') ? ` <a class="om-q" href="${esc(new URL(`battlefield/focus/index.html#war=${encodeURIComponent(r.war.slice(3))}`, SITE).href)}" target="_top">War Focus</a>` : ''}</p>`
       + `<p class="om-b-date">${esc(when)}</p><p class="om-src">${srcLink(r.src?.date)}</p>`
       + `<p class="om-b-pt">Point: ${esc(pt)}</p><p class="om-src">${srcLink(r.src?.pt)}</p>`
       // Drawn, with when it was fought: an up-to view draws at its frame the battles of every year before it.
@@ -443,6 +483,14 @@ function render(inWin, ext, file, held) {
   $('#whole-span').hidden = S.mode === 'saved' || !held || (win.from <= held.from && win.to >= held.to);
   if (held) $('#whole-span').title = `Show ${formatSpan(held.from, held.to)} on the slider, keeping ${yt(year)}`;
 }
+// The plain base's words beside what a fill draws: a fill on Natural Earth's countries of today (a World Bank series,
+// the Volatility score) or one placing states on them where Cliopatria holds no border.
+function baseFillNote() {
+  const f = S.mode !== 'saved' && S.lv ? S.lv.drawnNow().map(id => S.lv.catalogue().byId.get(id)).find(e => e && e.role === 'fill') : null;
+  if (f?.on === 'countries') return ': land only; the fill above is drawn on today’s countries (Natural Earth Admin 0), not on the borders of the year';
+  if (f?.on === 'states') return ': land only; the fill above draws a state on today’s countries (Natural Earth Admin 0) where Cliopatria holds no border for it';
+  return ': land only, never today\'s states';
+}
 let sayTimer = 0;
 function say(text) { clearTimeout(sayTimer); sayTimer = setTimeout(() => { $('#say').textContent = text; }, 200); }
 
@@ -459,7 +507,8 @@ function publish() {
   const ids = S.mode === 'saved' ? S.saved.ids : [...S.drawn.map(f => f.id), ...S.drawnBattles.map(r => r.q), ...S.focusPoints.map(p => p.q)].sort();
   window.omniState = {
     ready: true, mode: S.mode, recipe: currentRecipe(), frame: S.frame, window: [win.from, win.to], step: S.R.step || 'y', show: S.R.show || 'frame',
-    box: S.box, features: ids, layers: ['borders', ...(battleFilter(S.R) ? ['battles'] : [])],
+    box: S.box, features: ids, layers: ['borders', ...(battleFilter(S.R) ? ['battles'] : []), ...(S.mode === 'saved' ? [] : S.lv?.drawnNow() || [])],
+    lv: S.lv?.state() || null,
     legend: [...document.querySelectorAll('#legend .om-lg')].map(el => ({ layer: el.dataset.layer, text: el.textContent.replace(/\s+/g, ' ').trim() })),
     battles: { held: battlesInWindow(win).map(r => r.q), drawn: S.drawnBattles.map(r => r.q) },
     focus: S.ext?.hits || [], misses: (S.ext?.misses || []).map(m => ({ qid: m.qid, reason: m.reason, point: m.point, text: m.text })),
@@ -484,10 +533,12 @@ async function code() {
 }
 async function view() {
   if (S.mode === 'saved') throw new Error('This is a saved view: its bundle is the file you opened');
+  await ensureBattles(true); // the bundle's datasets carry the battles' file and its sha256, drawn or not
   const year = S.frame, entry = layerOf('borders'), win = windowOf(S.R);
   const ne = sourceOf('natural-earth'), clio = sourceOf('cliopatria'), wd = sourceOf('wikidata');
   const pins = nowPins();
-  const ds = ['cliopatria', 'borders', 'qids', 'natural-earth', 'battles'].map(id => ({ id, version: pins[id] || (id === 'natural-earth' ? '5.1.1' : '') }));
+  const ds = ['cliopatria', 'borders', 'qids', 'natural-earth', 'battles'].map(id => ({ id, version: pins[id] || (id === 'natural-earth' ? '5.1.1' : '') }))
+    .concat(S.lv?.pinList() || []); // each S5a layer drawn, at the version drawn (only when drawn)
   const recipe = writeRecipe(nowRecipe({ at: year, ds }));
   const p = M.borderPrecisionAt(entry, year);
   const rows = [
@@ -496,11 +547,13 @@ async function view() {
       origin: 'source', source_id: 'wikidata', source_loc: r.src?.date?.loc || `${r.q}#P585`, layer: 'battles', feature_id: r.q })),
     ...S.focusPoints.map(pt => ({ Entity: labelOf(pt.q) || pt.q, Code: pt.q, date: '', precision: '', value: '', low: '', high: '', measure: '', status: 'VM cannot outline this: its point', by: '',
       origin: 'source', source_id: 'wikidata', source_loc: `${pt.q}#P625`, layer: 'focus', feature_id: pt.q })),
+    ...(S.lv?.rows() || []), // the S5a layers drawn: each value with its source and where in it
   ];
   // The source's own Wikidata id travels as cliopatria_q, never as a bare q, beside VM's crosswalk id (S7).
   const features = [...S.drawn.map(f => ({ type: 'Feature', id: f.id, properties: M.bundleProps(f, S.qids, year), geometry: f.geometry })),
     ...S.drawnBattles.map(r => ({ type: 'Feature', id: r.q, properties: { label: r.label, date: r.date, ptPrec: r.ptPrec ?? null, src: r.src }, geometry: { type: 'Point', coordinates: r.pt } })),
-    ...S.focusPoints.map(pt => ({ type: 'Feature', id: pt.q, properties: { label: labelOf(pt.q) || pt.q, ptPrec: records.get(pt.q)?.ptp ?? null, src: { id: 'wikidata', loc: `${pt.q}#P625` } }, geometry: { type: 'Point', coordinates: pt.pt } }))];
+    ...S.focusPoints.map(pt => ({ type: 'Feature', id: pt.q, properties: { label: labelOf(pt.q) || pt.q, ptPrec: records.get(pt.q)?.ptp ?? null, src: { id: 'wikidata', loc: `${pt.q}#P625` } }, geometry: { type: 'Point', coordinates: pt.pt } })),
+    ...(S.lv?.features() || [])];
   const file = M.fileFor(S.index, year);
   const hashOf = async key => (S.bufs.get(key) ? sha256(S.bufs.get(key)) : null);
   const clioLicence = { licence: clio?.licence, licenceUrl: clio?.licenceUrl, citation: clio?.citation, credit: clio?.credit, changes: clio?.changes };
@@ -513,16 +566,19 @@ async function view() {
       citation: 'VM\'s crosswalk from Wikidata ids to Cliopatria\'s names by year (omni/data/borders/qids.json)' },
     { id: 'natural-earth', version: ne?.version, file: 'omni/data/base/ne_110m_land.geojson', sha256: await hashOf('base'), licence: ne?.licence, citation: ne?.citation, credit: ne?.credit },
     { id: 'battles', version: pins.battles, file: 'omni/data/layers/battles.json', sha256: await hashOf('battles'), licence: wd?.licence, licenceUrl: wd?.licenceUrl, citation: wd?.citation, credit: wd?.credit },
+    ...(S.lv ? await S.lv.datasets() : []),
   ];
   const qids = [...new Set([S.R.q, ...(S.R.focus || []).filter(x => /^Q\d+$/.test(x)), ...S.drawnBattles.map(r => r.q)].filter(Boolean))];
   return {
     recipe, rows, features, made: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), vmCommit: null, deployment: location.origin, code: await code(), datasets: data, qids,
     from: S.R.from || null, subject: S.subject || 'Omni-Map view', window: [win.from, win.to], liveUrl: liveUrl(), providers: PROVIDERS, sources: S.sources,
-    choices: { frame: year, period: [S.lo ?? year, year], fill: 'borders', layers: (S.R.l || []).map(l => l.id), base: S.R.base || 'plain',
+    choices: { frame: year, period: [S.lo ?? year, year], fill: S.lv?.recipe().fill || 'borders', layers: (S.R.l || []).map(l => l.id), base: S.R.base || 'plain',
       drawn: { borders: S.drawn.length, battles: S.drawnBattles.length, points: S.focusPoints.length }, battlesHeld: battlesInWindow(win).length,
       borderPrecision: p === 'c' ? 'VM counts the borders of this frame as known only to their century (rows.csv: status); their date and precision columns give the years as Cliopatria records them' : 'the years as Cliopatria records them',
       deployment: 'the site\'s address, not a per-deployment address (VM does not yet keep each day\'s page)',
-      events: 'every battle VM holds whose year falls in the period shown', clutter: 'one fill, one point layer, one base: nothing left out',
+      events: 'every battle VM holds whose year falls in the period shown', clutter: S.lv?.state().anyway ? 'Show anyway: every point or line layer switched on is drawn'
+        : 'one fill, one base and at most three point or line layers (a fourth replaces the oldest; the layer of the clicked object is never dropped)',
+      layersDrawn: ['borders', ...(battlesOn() ? ['battles'] : []), ...(S.lv?.drawnNow() || [])],
       features: 'every row drawn at the frame, whole, not cut at the edge of the screen, so the same recipe gives the same features on any screen',
       renderer: `${MAPLIBRE} (${MAPLIBRE_SRI}), from cdn.jsdelivr.net`, notes: layerNotes(S.R) },
   };
@@ -818,6 +874,9 @@ async function applyRecipe({ first = false } = {}) {
   S.move = moveOf(raw); // the address's movement (MP-12; none, as in every recipe Kino writes: Independent)
   const { at, start } = mountPeriod();
   if (R) S.notes.push(...addressNotes(raw, R, at));
+  // The recipe's layers under the clutter rule (stage S5a); the clicked battle's layer is the subject's, never dropped.
+  await ensureBattles().catch(e => S.notes.push(`The battles could not load: ${e.message}`));
+  if (S.lv) S.notes.push(...S.lv.read(S.R, { subject: battleRow(S.R.q) ? 'battles' : null }).notes);
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
   // the records of the places VM cannot outline give their names and points.
   await Promise.all([loadSubject(S.R.q || null), readRecords(unoutlined(S.R)), loadShelf(S.R)]);
@@ -826,13 +885,23 @@ async function applyRecipe({ first = false } = {}) {
 async function init() {
   wire();
   try {
-    const [layers, index, qids, base, battles, sources] = await Promise.all([
+    // The battles' file is not among these: it loads only when the view draws the battles (ensureBattles, V4).
+    const [layers, index, qids, base, sources] = await Promise.all([
       getFile(`${DATA}layers.json`), getFile(`${DATA}borders/index.json`), getFile(`${DATA}borders/qids.json`), getFile(`${DATA}base/ne_110m_land.geojson`),
-      getFile(`${DATA}layers/battles.json`), getFile(new URL('integration/sources.json', SITE).href)]);
-    S.layers = layers.json; S.index = index.json; S.qids = qids.json; S.base = base.json; S.battles = battles.json; S.sources = sources.json.sources;
-    S.bufs.set('base', base.buf); S.bufs.set('battles', battles.buf); S.bufs.set('qids', qids.buf);
+      getFile(new URL('integration/sources.json', SITE).href)]);
+    S.layers = layers.json; S.index = index.json; S.qids = qids.json; S.base = base.json; S.sources = sources.json.sources;
+    S.bufs.set('base', base.buf); S.bufs.set('qids', qids.buf);
     const bad = S.layers.layers.map(l => M.readLayer(l)).filter(r => !r.ok);
     for (const b of bad) S.notes.push(`The layer "${b.entry?.id}" is not well formed: ${b.errors.join('; ')}`);
+    for (const a of S.layers.absent || []) { const r = M.readAbsent(a); if (!r.ok) S.notes.push(`The line for "${a?.id}" is not well formed: ${r.errors.join('; ')}`); }
+    // The layer list (stage S5a): a switch moved writes the recipe's layer keys and draws the frame again.
+    // borders: the frame's Cliopatria borders and VM's crosswalk, on which a layer of stage S5b draws each state of its year.
+    S.lv = layerView({ data: DATA, getFile, map: () => S.map, sources: () => S.sources, borders: () => ({ fc: S.fc, qids: S.qids, held: M.held(S.index) }), onChange: ({ focus } = {}) => {
+      S.R = { ...S.R, ...S.lv.recipe() };
+      if (S.frame != null) ensureBattles().then(() => setFrame(S.frame, { start: S.start, source: 'layer' })).then(() => { if (focus) document.getElementById(focus)?.focus({ preventScroll: true }); });
+    } });
+    S.lv.init(S.layers);
+    S.lv.wire($('#layers-body'));
   } catch (e) {
     $('#meta').innerHTML = `<span>The Omni-Map's data could not load: ${esc(e.message)}</span>`;
     window.omniState = { ready: true, error: e.message };
@@ -841,7 +910,7 @@ async function init() {
   const built = new Date(S.layers.generated);
   const held = M.held(S.index);
   $('#meta').innerHTML = [`<span>Borders <b>${esc(formatSpan(held.from, held.to))}</b> (Cliopatria ${esc(S.index.version)})</span>`,
-    `<span>Battles <b>${(S.battles.rows || []).length}</b> (Wikidata)</span>`,
+    ...(layerOf('battles') ? [`<span>Battles <b>${esc(formatSpan(layerOf('battles').time.from, layerOf('battles').time.to))}</b> (Wikidata)</span>`] : []),
     `<span>Built <b>${esc(built.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }))}</b></span>`].join('');
   const borders = layerOf('borders');
   if (borders) $('#method-text').textContent = borders.method;
@@ -904,5 +973,10 @@ function wire() {
   });
   window.addEventListener('prp:themechange', () => { S.map?.setColors(colors()); if (window.omniState.ready) publish(); });
   window.addEventListener('resize', () => S.map?.resize());
+  // Stage S5c: prp:focus fits the map to countries by ISO3, or a Q-id's border of the frame's year (else its lake
+  // point); { reset: true } fits the view's own box again (omni/lib/focus.js).
+  S.focus = listenFocus({ getFile, data: DATA, map: () => S.map, home: () => S.box,
+    qid: q => { const fs = S.fc && S.index ? M.featuresFor(S.fc, S.qids, q, S.frame, M.held(S.index)).features : []; return fs.length ? { type: 'FeatureCollection', features: fs } : lakePoint(q); } });
+  window.omniFocus = () => S.focus.state();
 }
 init();

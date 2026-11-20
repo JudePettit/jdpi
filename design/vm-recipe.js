@@ -10,9 +10,10 @@
             window's first year, so the period is t's from up to at; show=frame: the frame itself)   1495
      show   upto | frame
      step   d | m | y | 10y | c
-     base   plain | terrain | satellite | night
+     base   plain | terrain | satellite | night | countries (Natural Earth's countries of today, stage S5a)
      fill   one fill                                borders, wb:<code>, an:<n>, membership:<Q>
      l      up to three layers, layer[:field=value]  battles, battles:partOf=Q33143
+     all    1: the reader's "Show anyway" (stage S5a), which lifts the Omni-Map's clutter rule; l may then hold up to 12
      an     a Data Analytics spec, encoded           d%3Dnational-key-series%26…
      focus  up to 20: ISO3, gw:N, Q-ids, bbox:w,s,e,n
      q      the clicked object                      Q236853
@@ -32,12 +33,12 @@
    A malformed key reads as absent and never throws. `host=neo|kino` is a frame-only key outside VR/1 (readHost,
    withHost), ignored by readRecipe and by every comparison. */
 
-export const KEYS = ['vr', 't', 'at', 'since', 'show', 'step', 'base', 'fill', 'l', 'an', 'focus', 'q', 'rec', 'agg', 'film', 'pace', 'narr', 'ds', 'from', 'pin'];
+export const KEYS = ['vr', 't', 'at', 'since', 'show', 'step', 'base', 'fill', 'l', 'all', 'an', 'focus', 'q', 'rec', 'agg', 'film', 'pace', 'narr', 'ds', 'from', 'pin'];
 export const SHOWS = ['upto', 'frame'];
 export const STEPS = ['d', 'm', 'y', '10y', 'c'];
-export const BASES = ['plain', 'terrain', 'satellite', 'night'];
+export const BASES = ['plain', 'terrain', 'satellite', 'night', 'countries'];
 export const HOSTS = ['neo', 'kino'];
-export const MAX_LAYERS = 3, MAX_FOCUS = 20;
+export const MAX_LAYERS = 3, MAX_FOCUS = 20, MAX_ANYWAY = 12;
 
 const enc = s => encodeURIComponent(String(s ?? '')).replace(/[!'()*~]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
 const dec = s => decodeURIComponent(String(s ?? ''));
@@ -74,9 +75,9 @@ const CODEC = {
   show: one(SHOWS), step: one(STEPS), base: one(BASES),
   fill: { read: r => (FILL.test(r) ? r : undefined), write: v => (FILL.test(String(v ?? '')) ? String(v) : undefined) },
   l: {
-    read: r => {
+    read: (r, max = MAX_LAYERS) => {
       const parts = r.split(',');
-      if (!parts.length || parts.length > MAX_LAYERS) return;
+      if (!parts.length || parts.length > max) return;
       const out = [];
       for (const p of parts) {
         const m = /^([^:=]+)(?::([^:=]+)=(.+))?$/.exec(p);
@@ -90,8 +91,8 @@ const CODEC = {
       }
       return out;
     },
-    write: v => {
-      if (!Array.isArray(v) || !v.length || v.length > MAX_LAYERS) return;
+    write: (v, max = MAX_LAYERS) => {
+      if (!Array.isArray(v) || !v.length || v.length > max) return;
       const out = [];
       for (const x of v) {
         if (!x || !ID.test(String(x.id ?? ''))) return;
@@ -102,6 +103,7 @@ const CODEC = {
       return out.join(',');
     },
   },
+  all: { read: r => (r === '1' ? 1 : undefined), write: v => (v === 1 || v === true ? '1' : undefined) },
   an: { read: r => { const s = dec(r); return s ? s : undefined; }, write: v => (typeof v === 'string' && v ? enc(v) : undefined) },
   focus: {
     read: r => {
@@ -180,7 +182,8 @@ export function readRecipe(str) {
   for (const k of KEYS) {
     if (!(k in raw)) continue;
     let v;
-    try { v = CODEC[k].read(raw[k]); } catch { v = undefined; }
+    // l holds up to three layers, or up to MAX_ANYWAY where the recipe says all=1 (Show anyway).
+    try { v = k === 'l' ? CODEC.l.read(raw.l, raw.all === '1' ? MAX_ANYWAY : MAX_LAYERS) : CODEC[k].read(raw[k]); } catch { v = undefined; }
     if (v !== undefined) out[k] = v;
   }
   return out;
@@ -193,7 +196,7 @@ export function writeRecipe(obj) {
   for (const k of KEYS.slice(1)) {
     if (obj[k] === undefined || obj[k] === null) continue;
     let w;
-    try { w = CODEC[k].write(obj[k]); } catch { w = undefined; }
+    try { w = k === 'l' ? CODEC.l.write(obj.l, obj.all === 1 || obj.all === true ? MAX_ANYWAY : MAX_LAYERS) : CODEC[k].write(obj[k]); } catch { w = undefined; }
     if (w !== undefined) parts.push(`${k}=${w}`);
   }
   return parts.join('&');

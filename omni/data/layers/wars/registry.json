@@ -1,0 +1,4747 @@
+{
+ "format": "vm-wars/1",
+ "built": "2026-11-20T11:12:39Z",
+ "about": "VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. No Correlates of War record or number: its terms bar commercial use.",
+ "sources": {
+  "ucdp-acd": {
+   "file": "UcdpPrioConflict_v26_1.csv",
+   "sha256": "2aea044f1bcae7b050bb6c79fb796743e787edeed3b90e74e146cfc4e5b05447"
+  },
+  "wikidata": {
+   "read": "wbgetentities"
+  }
+ },
+ "wars": [
+  {
+   "id": "wf-northern-expedition",
+   "name": "Northern Expedition",
+   "q": "Q1073476",
+   "wf": "northern-expedition",
+   "ucdp": [],
+   "from": 1926,
+   "to": 1928,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q1073476#P580",
+    "label": "Northern Expedition"
+   }
+  },
+  {
+   "id": "wf-chinese-civil-war-1",
+   "name": "Chinese Civil War (1927–1936)",
+   "q": "Q179975",
+   "wf": "chinese-civil-war-1",
+   "ucdp": [],
+   "from": 1927,
+   "to": 1950,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q179975#P580",
+    "label": "Chinese Civil War"
+   }
+  },
+  {
+   "id": "wf-manchuria",
+   "name": "Japanese invasion of Manchuria",
+   "q": "Q1551794",
+   "wf": "manchuria",
+   "ucdp": [],
+   "from": 1931,
+   "to": 1932,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q1551794#P580",
+    "label": "Japanese invasion of Manchuria"
+   }
+  },
+  {
+   "id": "wf-chaco",
+   "name": "Chaco War",
+   "q": "Q223126",
+   "wf": "chaco",
+   "ucdp": [],
+   "from": 1932,
+   "to": 1935,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q223126#P580",
+    "label": "Chaco War"
+   }
+  },
+  {
+   "id": "wf-spanish-civil-war",
+   "name": "Spanish Civil War",
+   "q": "Q10859",
+   "wf": "spanish-civil-war",
+   "ucdp": [],
+   "from": 1936,
+   "to": 1939,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q10859#P580",
+    "label": "Spanish Civil War"
+   }
+  },
+  {
+   "id": "wf-second-sino-japanese",
+   "name": "Second Sino-Japanese War",
+   "q": "Q170314",
+   "wf": "second-sino-japanese",
+   "ucdp": [],
+   "from": 1937,
+   "to": 1945,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q170314#P580",
+    "label": "Second Sino-Japanese War"
+   }
+  },
+  {
+   "id": "wf-khalkhin-gol",
+   "name": "Battles of Khalkhin Gol",
+   "q": "Q188925",
+   "wf": "khalkhin-gol",
+   "ucdp": [],
+   "from": 1939,
+   "to": 1939,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q188925#P580",
+    "label": "Battles of Khalkhin Gol"
+   }
+  },
+  {
+   "id": "wf-ww2",
+   "name": "World War II",
+   "q": "Q362",
+   "wf": "ww2",
+   "ucdp": [],
+   "from": 1939,
+   "to": 1945,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q362#P580",
+    "label": "World War II"
+   }
+  },
+  {
+   "id": "wf-winter-war",
+   "name": "Winter War",
+   "q": "Q134949",
+   "wf": "winter-war",
+   "ucdp": [],
+   "from": 1939,
+   "to": 1940,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q134949#P580",
+    "label": "Winter War"
+   }
+  },
+  {
+   "id": "wf-greek-civil-war",
+   "name": "Greek Civil War",
+   "q": "Q188972",
+   "wf": "greek-civil-war",
+   "ucdp": [
+    203
+   ],
+   "from": 1946,
+   "to": 1949,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q188972#P580",
+    "label": "Greek Civil War"
+   }
+  },
+  {
+   "id": "wf-chinese-civil-war-2",
+   "name": "Chinese Civil War (1946–1949)",
+   "q": "Q179975",
+   "wf": "chinese-civil-war-2",
+   "ucdp": [
+    202
+   ],
+   "from": 1927,
+   "to": 1950,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q179975#P580",
+    "label": "Chinese Civil War"
+   }
+  },
+  {
+   "id": "wf-first-indochina",
+   "name": "First Indochina War",
+   "q": "Q748780",
+   "wf": "first-indochina",
+   "ucdp": [
+    216
+   ],
+   "from": 1946,
+   "to": 1954,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q748780#P580",
+    "label": "First Indochina War"
+   }
+  },
+  {
+   "id": "wf-korean-war",
+   "name": "Korean War",
+   "q": "Q8663",
+   "wf": "korean-war",
+   "ucdp": [
+    235
+   ],
+   "from": 1950,
+   "to": 1953,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q8663#P580",
+    "label": "Korean War"
+   }
+  },
+  {
+   "id": "wf-algerian-war",
+   "name": "Algerian War",
+   "q": "Q200790",
+   "wf": "algerian-war",
+   "ucdp": [
+    246
+   ],
+   "from": 1954,
+   "to": 1962,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q200790#P580",
+    "label": "Algerian War"
+   }
+  },
+  {
+   "id": "wf-vietnam-war",
+   "name": "Vietnam War",
+   "q": "Q8740",
+   "wf": "vietnam-war",
+   "ucdp": [
+    293
+   ],
+   "from": 1955,
+   "to": 1975,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q8740#P580",
+    "label": "Vietnam War"
+   }
+  },
+  {
+   "id": "wf-nigerian-civil-war",
+   "name": "Nigerian Civil War",
+   "q": "Q829875",
+   "wf": "nigerian-civil-war",
+   "ucdp": [
+    303
+   ],
+   "from": 1967,
+   "to": 1970,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q829875#P580",
+    "label": "Nigerian Civil War"
+   }
+  },
+  {
+   "id": "wf-cambodian-civil-war",
+   "name": "Cambodian Civil War",
+   "q": "Q817206",
+   "wf": "cambodian-civil-war",
+   "ucdp": [
+    300
+   ],
+   "from": 1967,
+   "to": 1975,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q817206#P580",
+    "label": "Cambodian Civil War"
+   }
+  },
+  {
+   "id": "wf-bangladesh-liberation",
+   "name": "Bangladesh Liberation War",
+   "q": "Q371394",
+   "wf": "bangladesh-liberation",
+   "ucdp": [
+    312
+   ],
+   "from": 1971,
+   "to": 1971,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q371394#P580",
+    "label": "Bangladesh Liberation War"
+   }
+  },
+  {
+   "id": "wf-lebanese-civil-war",
+   "name": "Lebanese Civil War",
+   "q": "Q208484",
+   "wf": "lebanese-civil-war",
+   "ucdp": [
+    260
+   ],
+   "from": 1975,
+   "to": 1990,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q208484#P580",
+    "label": "Lebanese Civil War"
+   }
+  },
+  {
+   "id": "wf-angolan-civil-war",
+   "name": "Angolan Civil War",
+   "q": "Q12055176",
+   "wf": "angolan-civil-war",
+   "ucdp": [
+    327
+   ],
+   "from": 1975,
+   "to": 2002,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q12055176#P580",
+    "label": "Angolan Civil War"
+   }
+  },
+  {
+   "id": "wf-mozambican-civil-war",
+   "name": "Mozambican Civil War",
+   "q": "Q657661",
+   "wf": "mozambican-civil-war",
+   "ucdp": [
+    332
+   ],
+   "from": 1977,
+   "to": 1992,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q657661#P580",
+    "label": "Mozambican Civil War"
+   }
+  },
+  {
+   "id": "wf-salvadoran-civil-war",
+   "name": "Salvadoran Civil War",
+   "q": "Q1783607",
+   "wf": "salvadoran-civil-war",
+   "ucdp": [
+    316
+   ],
+   "from": 1979,
+   "to": 1992,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q1783607#P580",
+    "label": "Salvadoran Civil War"
+   }
+  },
+  {
+   "id": "wf-soviet-afghan",
+   "name": "Soviet–Afghan War",
+   "q": "Q83085",
+   "wf": "soviet-afghan",
+   "ucdp": [
+    333
+   ],
+   "from": 1979,
+   "to": 1989,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q83085#P580",
+    "label": "Soviet-Afghan War"
+   }
+  },
+  {
+   "id": "wf-iran-iraq",
+   "name": "Iran–Iraq War",
+   "q": "Q82664",
+   "wf": "iran-iraq",
+   "ucdp": [
+    324
+   ],
+   "from": 1980,
+   "to": 1988,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q82664#P580",
+    "label": "Iran–Iraq War"
+   }
+  },
+  {
+   "id": "wf-sri-lankan-civil-war",
+   "name": "Sri Lankan Civil War",
+   "q": "Q213394",
+   "wf": "sri-lankan-civil-war",
+   "ucdp": [
+    352
+   ],
+   "from": 1983,
+   "to": 2009,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q213394#P580",
+    "label": "Sri Lankan Civil War"
+   }
+  },
+  {
+   "id": "wf-gulf-war",
+   "name": "Gulf War",
+   "q": "Q37643",
+   "wf": "gulf-war",
+   "ucdp": [
+    371
+   ],
+   "from": 1990,
+   "to": 1991,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q37643#P580",
+    "label": "Gulf War"
+   }
+  },
+  {
+   "id": "wf-bosnian-war",
+   "name": "Bosnian War",
+   "q": "Q181533",
+   "wf": "bosnian-war",
+   "ucdp": [
+    389
+   ],
+   "from": 1992,
+   "to": 1995,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q181533#P580",
+    "label": "War in Bosnia and Herzegovina"
+   }
+  },
+  {
+   "id": "wf-first-chechen",
+   "name": "First Chechen War",
+   "q": "Q29269",
+   "wf": "first-chechen",
+   "ucdp": [
+    401
+   ],
+   "from": 1994,
+   "to": 1996,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q29269#P580",
+    "label": "First Chechen War"
+   }
+  },
+  {
+   "id": "wf-eritrean-ethiopian",
+   "name": "Eritrean–Ethiopian War",
+   "q": "Q832273",
+   "wf": "eritrean-ethiopian",
+   "ucdp": [
+    409
+   ],
+   "from": 1998,
+   "to": 2000,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q832273#P580",
+    "label": "Eritrean–Ethiopian War"
+   }
+  },
+  {
+   "id": "wf-second-congo",
+   "name": "Second Congo War",
+   "q": "Q75756",
+   "wf": "second-congo",
+   "ucdp": [
+    283
+   ],
+   "from": 1998,
+   "to": 2003,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q75756#P580",
+    "label": "Second Congo War"
+   }
+  },
+  {
+   "id": "wf-second-chechen",
+   "name": "Second Chechen War",
+   "q": "Q120843",
+   "wf": "second-chechen",
+   "ucdp": [
+    401
+   ],
+   "from": 1999,
+   "to": 2009,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q120843#P580",
+    "label": "Second Chechen War"
+   }
+  },
+  {
+   "id": "wf-afghanistan-2001",
+   "name": "War in Afghanistan (2001–2021)",
+   "q": "Q182865",
+   "wf": "afghanistan-2001",
+   "ucdp": [
+    333
+   ],
+   "from": 2001,
+   "to": 2021,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q182865#P580",
+    "label": "War in Afghanistan (2001–2021)"
+   }
+  },
+  {
+   "id": "wf-iraq-war",
+   "name": "Iraq War",
+   "q": "Q545449",
+   "wf": "iraq-war",
+   "ucdp": [
+    420
+   ],
+   "from": 2003,
+   "to": 2011,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q545449#P580",
+    "label": "Iraq War"
+   }
+  },
+  {
+   "id": "wf-syrian-civil-war",
+   "name": "Syrian civil war",
+   "q": "Q178810",
+   "wf": "syrian-civil-war",
+   "ucdp": [
+    299
+   ],
+   "from": 2011,
+   "to": 2024,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q178810#P580",
+    "label": "Syrian Civil War"
+   }
+  },
+  {
+   "id": "wf-yemen",
+   "name": "Yemeni civil war",
+   "q": "Q19686631",
+   "wf": "yemen",
+   "ucdp": [
+    230
+   ],
+   "from": 2014,
+   "to": null,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q19686631#P580",
+    "label": "Yemeni Civil War"
+   }
+  },
+  {
+   "id": "wf-tigray",
+   "name": "Tigray War",
+   "q": "Q101231200",
+   "wf": "tigray",
+   "ucdp": [
+    267
+   ],
+   "from": 2020,
+   "to": 2022,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q101231200#P580",
+    "label": "Tigray war"
+   }
+  },
+  {
+   "id": "wf-russia-ukraine",
+   "name": "Russian invasion of Ukraine",
+   "q": "Q110999040",
+   "wf": "russia-ukraine",
+   "ucdp": [
+    13243
+   ],
+   "from": 2022,
+   "to": null,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q110999040#P580",
+    "label": "full-scale Russo-Ukrainian war"
+   }
+  },
+  {
+   "id": "wf-sudan-2023",
+   "name": "Sudanese civil war (2023–present)",
+   "q": "Q117716414",
+   "wf": "sudan-2023",
+   "ucdp": [
+    309
+   ],
+   "from": 2023,
+   "to": null,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q117716414#P580",
+    "label": "Sudanese civil war"
+   }
+  },
+  {
+   "id": "wf-gaza-war",
+   "name": "Gaza war",
+   "q": "Q122962941",
+   "wf": "gaza-war",
+   "ucdp": [
+    234
+   ],
+   "from": 2023,
+   "to": null,
+   "src": {
+    "id": "wikidata",
+    "loc": "Q122962941#P580",
+    "label": "Gaza War"
+   }
+  },
+  {
+   "id": "ucdp-200",
+   "name": "Bolivia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    200
+   ],
+   "from": 1946,
+   "to": 1967,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=200"
+   }
+  },
+  {
+   "id": "ucdp-201",
+   "name": "Cambodia (Kampuchea): Cambodia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    201
+   ],
+   "from": 1946,
+   "to": 1953,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=201"
+   }
+  },
+  {
+   "id": "ucdp-204",
+   "name": "Indonesia: Indonesia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    204
+   ],
+   "from": 1946,
+   "to": 1949,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=204"
+   }
+  },
+  {
+   "id": "ucdp-205",
+   "name": "Iran: Kurdistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    205
+   ],
+   "from": 1946,
+   "to": 2018,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=205"
+   }
+  },
+  {
+   "id": "ucdp-206",
+   "name": "Iran: Azerbaijan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    206
+   ],
+   "from": 1946,
+   "to": 1946,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=206"
+   }
+  },
+  {
+   "id": "ucdp-207",
+   "name": "Israel: Israel",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    207
+   ],
+   "from": 1946,
+   "to": 1946,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=207"
+   }
+  },
+  {
+   "id": "ucdp-208",
+   "name": "Laos: Laos",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    208
+   ],
+   "from": 1946,
+   "to": 1953,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=208"
+   }
+  },
+  {
+   "id": "ucdp-209",
+   "name": "Philippines: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    209
+   ],
+   "from": 1946,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=209"
+   }
+  },
+  {
+   "id": "ucdp-210",
+   "name": "Russia (Soviet Union): Estonia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    210
+   ],
+   "from": 1946,
+   "to": 1948,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=210"
+   }
+  },
+  {
+   "id": "ucdp-211",
+   "name": "Russia (Soviet Union): Latvia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    211
+   ],
+   "from": 1946,
+   "to": 1946,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=211"
+   }
+  },
+  {
+   "id": "ucdp-212",
+   "name": "Russia (Soviet Union): Lithuania",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    212
+   ],
+   "from": 1946,
+   "to": 1948,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=212"
+   }
+  },
+  {
+   "id": "ucdp-213",
+   "name": "Russia (Soviet Union): Ukraine",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    213
+   ],
+   "from": 1946,
+   "to": 1950,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=213"
+   }
+  },
+  {
+   "id": "ucdp-214",
+   "name": "France – Thailand",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    214
+   ],
+   "from": 1946,
+   "to": 1946,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=214"
+   }
+  },
+  {
+   "id": "ucdp-215",
+   "name": "Albania – United Kingdom",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    215
+   ],
+   "from": 1946,
+   "to": 1946,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=215"
+   }
+  },
+  {
+   "id": "ucdp-217",
+   "name": "China: Taiwan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    217
+   ],
+   "from": 1947,
+   "to": 1947,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=217"
+   }
+  },
+  {
+   "id": "ucdp-218",
+   "name": "India – Pakistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    218
+   ],
+   "from": 1948,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=218"
+   }
+  },
+  {
+   "id": "ucdp-219",
+   "name": "Madagascar (Malagasy): Malagasy",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    219
+   ],
+   "from": 1947,
+   "to": 1947,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=219"
+   }
+  },
+  {
+   "id": "ucdp-220",
+   "name": "Paraguay: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    220
+   ],
+   "from": 1947,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=220"
+   }
+  },
+  {
+   "id": "ucdp-221",
+   "name": "Myanmar (Burma): Karen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    221
+   ],
+   "from": 1949,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=221"
+   }
+  },
+  {
+   "id": "ucdp-222",
+   "name": "Myanmar (Burma): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    222
+   ],
+   "from": 1948,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=222"
+   }
+  },
+  {
+   "id": "ucdp-223",
+   "name": "Myanmar (Burma): Arakan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    223
+   ],
+   "from": 1948,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=223"
+   }
+  },
+  {
+   "id": "ucdp-224",
+   "name": "Myanmar (Burma): Mon",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    224
+   ],
+   "from": 1949,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=224"
+   }
+  },
+  {
+   "id": "ucdp-225",
+   "name": "Costa Rica: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    225
+   ],
+   "from": 1948,
+   "to": 1948,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=225"
+   }
+  },
+  {
+   "id": "ucdp-226",
+   "name": "Hyderabad – India",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    226
+   ],
+   "from": 1948,
+   "to": 1948,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=226"
+   }
+  },
+  {
+   "id": "ucdp-227",
+   "name": "India: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    227
+   ],
+   "from": 1948,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=227"
+   }
+  },
+  {
+   "id": "ucdp-228",
+   "name": "Egypt, Iraq, Jordan, Lebanon, Syria – Israel",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    228
+   ],
+   "from": 1948,
+   "to": 1949,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=228"
+   }
+  },
+  {
+   "id": "ucdp-229",
+   "name": "Malaysia: Malaya",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    229
+   ],
+   "from": 1948,
+   "to": 1957,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=229"
+   }
+  },
+  {
+   "id": "ucdp-231",
+   "name": "Myanmar (Burma): Kachin",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    231
+   ],
+   "from": 1949,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=231"
+   }
+  },
+  {
+   "id": "ucdp-232",
+   "name": "China – Taiwan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    232
+   ],
+   "from": 1949,
+   "to": 1958,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=232"
+   }
+  },
+  {
+   "id": "ucdp-233",
+   "name": "Guatemala: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    233
+   ],
+   "from": 1949,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=233"
+   }
+  },
+  {
+   "id": "ucdp-236",
+   "name": "China: Tibet",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    236
+   ],
+   "from": 1950,
+   "to": 1959,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=236"
+   }
+  },
+  {
+   "id": "ucdp-237",
+   "name": "Indonesia: South Moluccas",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    237
+   ],
+   "from": 1950,
+   "to": 1950,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=237"
+   }
+  },
+  {
+   "id": "ucdp-238",
+   "name": "United States of America: Puerto Rico",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    238
+   ],
+   "from": 1950,
+   "to": 1950,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=238"
+   }
+  },
+  {
+   "id": "ucdp-239",
+   "name": "Egypt – United Kingdom",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    239
+   ],
+   "from": 1951,
+   "to": 1952,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=239"
+   }
+  },
+  {
+   "id": "ucdp-240",
+   "name": "Thailand: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    240
+   ],
+   "from": 1951,
+   "to": 1982,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=240"
+   }
+  },
+  {
+   "id": "ucdp-241",
+   "name": "Kenya: Kenya",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    241
+   ],
+   "from": 1952,
+   "to": 1956,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=241"
+   }
+  },
+  {
+   "id": "ucdp-242",
+   "name": "Cuba: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    242
+   ],
+   "from": 1953,
+   "to": 1961,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=242"
+   }
+  },
+  {
+   "id": "ucdp-243",
+   "name": "Indonesia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    243
+   ],
+   "from": 1953,
+   "to": 1961,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=243"
+   }
+  },
+  {
+   "id": "ucdp-244",
+   "name": "Morocco: Morocco",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    244
+   ],
+   "from": 1953,
+   "to": 1956,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=244"
+   }
+  },
+  {
+   "id": "ucdp-245",
+   "name": "Tunisia: Tunisia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    245
+   ],
+   "from": 1953,
+   "to": 1956,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=245"
+   }
+  },
+  {
+   "id": "ucdp-247",
+   "name": "Argentina: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    247
+   ],
+   "from": 1955,
+   "to": 1977,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=247"
+   }
+  },
+  {
+   "id": "ucdp-248",
+   "name": "Cyprus: Cyprus",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    248
+   ],
+   "from": 1955,
+   "to": 1959,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=248"
+   }
+  },
+  {
+   "id": "ucdp-249",
+   "name": "South Vietnam: South Vietnam",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    249
+   ],
+   "from": 1955,
+   "to": 1964,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=249"
+   }
+  },
+  {
+   "id": "ucdp-250",
+   "name": "Hungary – Soviet Union",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    250
+   ],
+   "from": 1956,
+   "to": 1956,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=250"
+   }
+  },
+  {
+   "id": "ucdp-251",
+   "name": "India: Nagaland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    251
+   ],
+   "from": 1956,
+   "to": 2000,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=251"
+   }
+  },
+  {
+   "id": "ucdp-252",
+   "name": "Egypt – France, Israel, United Kingdom",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    252
+   ],
+   "from": 1956,
+   "to": 1956,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=252"
+   }
+  },
+  {
+   "id": "ucdp-253",
+   "name": "Myanmar (Burma): Karenni",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    253
+   ],
+   "from": 1957,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=253"
+   }
+  },
+  {
+   "id": "ucdp-254",
+   "name": "Cameroon: Cameroon",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    254
+   ],
+   "from": 1957,
+   "to": 1959,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=254"
+   }
+  },
+  {
+   "id": "ucdp-255",
+   "name": "Honduras – Nicaragua",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    255
+   ],
+   "from": 1957,
+   "to": 1957,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=255"
+   }
+  },
+  {
+   "id": "ucdp-256",
+   "name": "Mauritania, Morocco: Morocco/Mauritania",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    256
+   ],
+   "from": 1957,
+   "to": 1958,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=256"
+   }
+  },
+  {
+   "id": "ucdp-257",
+   "name": "Mauritania, Morocco: Morocco/Spanish territories",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    257
+   ],
+   "from": 1957,
+   "to": 1958,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=257"
+   }
+  },
+  {
+   "id": "ucdp-258",
+   "name": "Oman: Oman",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    258
+   ],
+   "from": 1957,
+   "to": 1957,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=258"
+   }
+  },
+  {
+   "id": "ucdp-259",
+   "name": "Iraq: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    259
+   ],
+   "from": 1958,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=259"
+   }
+  },
+  {
+   "id": "ucdp-261",
+   "name": "Malaysia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    261
+   ],
+   "from": 1958,
+   "to": 1981,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=261"
+   }
+  },
+  {
+   "id": "ucdp-262",
+   "name": "Laos: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    262
+   ],
+   "from": 1959,
+   "to": 1990,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=262"
+   }
+  },
+  {
+   "id": "ucdp-263",
+   "name": "Angola: Angola",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    263
+   ],
+   "from": 1961,
+   "to": 1974,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=263"
+   }
+  },
+  {
+   "id": "ucdp-264",
+   "name": "Myanmar (Burma): Shan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    264
+   ],
+   "from": 1959,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=264"
+   }
+  },
+  {
+   "id": "ucdp-265",
+   "name": "DR Congo (Zaire): Katanga",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    265
+   ],
+   "from": 1961,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=265"
+   }
+  },
+  {
+   "id": "ucdp-266",
+   "name": "DR Congo (Zaire): South Kasai",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    266
+   ],
+   "from": 1960,
+   "to": 1962,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=266"
+   }
+  },
+  {
+   "id": "ucdp-268",
+   "name": "Ethiopia – Somalia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    268
+   ],
+   "from": 1964,
+   "to": 1980,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=268"
+   }
+  },
+  {
+   "id": "ucdp-269",
+   "name": "Nepal: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    269
+   ],
+   "from": 1960,
+   "to": 2006,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=269"
+   }
+  },
+  {
+   "id": "ucdp-270",
+   "name": "France: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    270
+   ],
+   "from": 1961,
+   "to": 1962,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=270"
+   }
+  },
+  {
+   "id": "ucdp-271",
+   "name": "Iraq: Kurdistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    271
+   ],
+   "from": 1961,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=271"
+   }
+  },
+  {
+   "id": "ucdp-272",
+   "name": "France – Tunisia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    272
+   ],
+   "from": 1961,
+   "to": 1961,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=272"
+   }
+  },
+  {
+   "id": "ucdp-273",
+   "name": "Brunei: North Borneo",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    273
+   ],
+   "from": 1962,
+   "to": 1962,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=273"
+   }
+  },
+  {
+   "id": "ucdp-274",
+   "name": "China – India",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    274
+   ],
+   "from": 1962,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=274"
+   }
+  },
+  {
+   "id": "ucdp-275",
+   "name": "Ethiopia: Eritrea",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    275
+   ],
+   "from": 1964,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=275"
+   }
+  },
+  {
+   "id": "ucdp-276",
+   "name": "Indonesia – Netherlands",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    276
+   ],
+   "from": 1962,
+   "to": 1962,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=276"
+   }
+  },
+  {
+   "id": "ucdp-277",
+   "name": "Venezuela: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    277
+   ],
+   "from": 1962,
+   "to": 1992,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=277"
+   }
+  },
+  {
+   "id": "ucdp-278",
+   "name": "Algeria – Morocco",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    278
+   ],
+   "from": 1963,
+   "to": 1963,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=278"
+   }
+  },
+  {
+   "id": "ucdp-279",
+   "name": "Guinea-Bissau: Guinea-Bissau",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    279
+   ],
+   "from": 1963,
+   "to": 1973,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=279"
+   }
+  },
+  {
+   "id": "ucdp-280",
+   "name": "Malaysia: North Borneo",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    280
+   ],
+   "from": 1963,
+   "to": 1966,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=280"
+   }
+  },
+  {
+   "id": "ucdp-281",
+   "name": "Indonesia – Malaysia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    281
+   ],
+   "from": 1963,
+   "to": 1966,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=281"
+   }
+  },
+  {
+   "id": "ucdp-282",
+   "name": "Sudan: Southern Sudan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    282
+   ],
+   "from": 1963,
+   "to": 1972,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=282"
+   }
+  },
+  {
+   "id": "ucdp-284",
+   "name": "Gabon: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    284
+   ],
+   "from": 1964,
+   "to": 1964,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=284"
+   }
+  },
+  {
+   "id": "ucdp-285",
+   "name": "Mozambique: Mozambique",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    285
+   ],
+   "from": 1964,
+   "to": 1974,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=285"
+   }
+  },
+  {
+   "id": "ucdp-286",
+   "name": "South Yemen: Aden/South Yemen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    286
+   ],
+   "from": 1964,
+   "to": 1967,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=286"
+   }
+  },
+  {
+   "id": "ucdp-287",
+   "name": "Burundi: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    287
+   ],
+   "from": 1965,
+   "to": 2024,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=287"
+   }
+  },
+  {
+   "id": "ucdp-288",
+   "name": "Chad: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    288
+   ],
+   "from": 1966,
+   "to": 2023,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=288"
+   }
+  },
+  {
+   "id": "ucdp-289",
+   "name": "Colombia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    289
+   ],
+   "from": 1964,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=289"
+   }
+  },
+  {
+   "id": "ucdp-290",
+   "name": "Dominican Republic: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    290
+   ],
+   "from": 1965,
+   "to": 1965,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=290"
+   }
+  },
+  {
+   "id": "ucdp-291",
+   "name": "Indonesia: West Papua",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    291
+   ],
+   "from": 1965,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=291"
+   }
+  },
+  {
+   "id": "ucdp-292",
+   "name": "Peru: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    292
+   ],
+   "from": 1965,
+   "to": 2010,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=292"
+   }
+  },
+  {
+   "id": "ucdp-294",
+   "name": "Cambodia – Thailand",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    294
+   ],
+   "from": 1977,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=294"
+   }
+  },
+  {
+   "id": "ucdp-295",
+   "name": "Ghana: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    295
+   ],
+   "from": 1966,
+   "to": 1983,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=295"
+   }
+  },
+  {
+   "id": "ucdp-296",
+   "name": "India: Mizoram",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    296
+   ],
+   "from": 1966,
+   "to": 1968,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=296"
+   }
+  },
+  {
+   "id": "ucdp-297",
+   "name": "Nigeria: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    297
+   ],
+   "from": 1966,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=297"
+   }
+  },
+  {
+   "id": "ucdp-298",
+   "name": "South Africa: Namibia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    298
+   ],
+   "from": 1966,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=298"
+   }
+  },
+  {
+   "id": "ucdp-301",
+   "name": "Israel – Jordan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    301
+   ],
+   "from": 1967,
+   "to": 1967,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=301"
+   }
+  },
+  {
+   "id": "ucdp-302",
+   "name": "Israel – Syria",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    302
+   ],
+   "from": 1967,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=302"
+   }
+  },
+  {
+   "id": "ucdp-304",
+   "name": "China – Burma",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    304
+   ],
+   "from": 1969,
+   "to": 1969,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=304"
+   }
+  },
+  {
+   "id": "ucdp-305",
+   "name": "China – Soviet Union",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    305
+   ],
+   "from": 1969,
+   "to": 1969,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=305"
+   }
+  },
+  {
+   "id": "ucdp-306",
+   "name": "El Salvador – Honduras",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    306
+   ],
+   "from": 1969,
+   "to": 1969,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=306"
+   }
+  },
+  {
+   "id": "ucdp-307",
+   "name": "Guinea: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    307
+   ],
+   "from": 2000,
+   "to": 2001,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=307"
+   }
+  },
+  {
+   "id": "ucdp-308",
+   "name": "Philippines: Mindanao",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    308
+   ],
+   "from": 1970,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=308"
+   }
+  },
+  {
+   "id": "ucdp-310",
+   "name": "Madagascar (Malagasy): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    310
+   ],
+   "from": 1971,
+   "to": 1971,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=310"
+   }
+  },
+  {
+   "id": "ucdp-311",
+   "name": "Morocco: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    311
+   ],
+   "from": 1971,
+   "to": 1971,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=311"
+   }
+  },
+  {
+   "id": "ucdp-313",
+   "name": "Sri Lanka: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    313
+   ],
+   "from": 1971,
+   "to": 1990,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=313"
+   }
+  },
+  {
+   "id": "ucdp-314",
+   "name": "Uganda: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    314
+   ],
+   "from": 1971,
+   "to": 2017,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=314"
+   }
+  },
+  {
+   "id": "ucdp-315",
+   "name": "United Kingdom: Northern Ireland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    315
+   ],
+   "from": 1971,
+   "to": 1998,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=315"
+   }
+  },
+  {
+   "id": "ucdp-317",
+   "name": "Oman: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    317
+   ],
+   "from": 1969,
+   "to": 1975,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=317"
+   }
+  },
+  {
+   "id": "ucdp-318",
+   "name": "Zimbabwe (Rhodesia): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    318
+   ],
+   "from": 1967,
+   "to": 1979,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=318"
+   }
+  },
+  {
+   "id": "ucdp-319",
+   "name": "Uruguay: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    319
+   ],
+   "from": 1972,
+   "to": 1972,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=319"
+   }
+  },
+  {
+   "id": "ucdp-320",
+   "name": "South Yemen – North Yemen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    320
+   ],
+   "from": 1972,
+   "to": 1979,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=320"
+   }
+  },
+  {
+   "id": "ucdp-321",
+   "name": "Chile: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    321
+   ],
+   "from": 1973,
+   "to": 1973,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=321"
+   }
+  },
+  {
+   "id": "ucdp-322",
+   "name": "Bangladesh: Chittagong Hill Tracts",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    322
+   ],
+   "from": 1975,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=322"
+   }
+  },
+  {
+   "id": "ucdp-323",
+   "name": "Cyprus – Turkey",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    323
+   ],
+   "from": 1974,
+   "to": 1974,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=323"
+   }
+  },
+  {
+   "id": "ucdp-325",
+   "name": "Pakistan: Balochistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    325
+   ],
+   "from": 1974,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=325"
+   }
+  },
+  {
+   "id": "ucdp-326",
+   "name": "Eritrea: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    326
+   ],
+   "from": 1997,
+   "to": 2003,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=326"
+   }
+  },
+  {
+   "id": "ucdp-328",
+   "name": "Cambodia – Vietnam",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    328
+   ],
+   "from": 1975,
+   "to": 1977,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=328"
+   }
+  },
+  {
+   "id": "ucdp-329",
+   "name": "Ethiopia: Ogaden",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    329
+   ],
+   "from": 1964,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=329"
+   }
+  },
+  {
+   "id": "ucdp-330",
+   "name": "Indonesia: East Timor",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    330
+   ],
+   "from": 1975,
+   "to": 1999,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=330"
+   }
+  },
+  {
+   "id": "ucdp-331",
+   "name": "Morocco: Sahrawi Arab Democratic Republic (Western Sahara)",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    331
+   ],
+   "from": 1975,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=331"
+   }
+  },
+  {
+   "id": "ucdp-334",
+   "name": "China – Vietnam",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    334
+   ],
+   "from": 1974,
+   "to": 1988,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=334"
+   }
+  },
+  {
+   "id": "ucdp-335",
+   "name": "India: Tripura",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    335
+   ],
+   "from": 1979,
+   "to": 2004,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=335"
+   }
+  },
+  {
+   "id": "ucdp-336",
+   "name": "Nicaragua: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    336
+   ],
+   "from": 1977,
+   "to": 1990,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=336"
+   }
+  },
+  {
+   "id": "ucdp-337",
+   "name": "Somalia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    337
+   ],
+   "from": 1982,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=337"
+   }
+  },
+  {
+   "id": "ucdp-338",
+   "name": "Iran: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    338
+   ],
+   "from": 1979,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=338"
+   }
+  },
+  {
+   "id": "ucdp-339",
+   "name": "Iran: Arabistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    339
+   ],
+   "from": 1979,
+   "to": 1980,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=339"
+   }
+  },
+  {
+   "id": "ucdp-340",
+   "name": "Saudi Arabia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    340
+   ],
+   "from": 1979,
+   "to": 1979,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=340"
+   }
+  },
+  {
+   "id": "ucdp-341",
+   "name": "Liberia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    341
+   ],
+   "from": 1980,
+   "to": 2003,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=341"
+   }
+  },
+  {
+   "id": "ucdp-342",
+   "name": "Spain: Basque",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    342
+   ],
+   "from": 1978,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=342"
+   }
+  },
+  {
+   "id": "ucdp-343",
+   "name": "Tunisia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    343
+   ],
+   "from": 1980,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=343"
+   }
+  },
+  {
+   "id": "ucdp-344",
+   "name": "Gambia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    344
+   ],
+   "from": 1981,
+   "to": 1981,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=344"
+   }
+  },
+  {
+   "id": "ucdp-345",
+   "name": "South Africa: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    345
+   ],
+   "from": 1981,
+   "to": 1988,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=345"
+   }
+  },
+  {
+   "id": "ucdp-346",
+   "name": "Argentina – United Kingdom",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    346
+   ],
+   "from": 1982,
+   "to": 1982,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=346"
+   }
+  },
+  {
+   "id": "ucdp-347",
+   "name": "India: Manipur",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    347
+   ],
+   "from": 1982,
+   "to": 2009,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=347"
+   }
+  },
+  {
+   "id": "ucdp-348",
+   "name": "Kenya: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    348
+   ],
+   "from": 1982,
+   "to": 1982,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=348"
+   }
+  },
+  {
+   "id": "ucdp-349",
+   "name": "Chad – Nigeria",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    349
+   ],
+   "from": 1983,
+   "to": 1983,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=349"
+   }
+  },
+  {
+   "id": "ucdp-350",
+   "name": "Grenada – United States of America",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    350
+   ],
+   "from": 1983,
+   "to": 1983,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=350"
+   }
+  },
+  {
+   "id": "ucdp-351",
+   "name": "India: Punjab/Khalistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    351
+   ],
+   "from": 1983,
+   "to": 1993,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=351"
+   }
+  },
+  {
+   "id": "ucdp-353",
+   "name": "Cameroon: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    353
+   ],
+   "from": 1960,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=353"
+   }
+  },
+  {
+   "id": "ucdp-354",
+   "name": "Turkey: Kurdistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    354
+   ],
+   "from": 1984,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=354"
+   }
+  },
+  {
+   "id": "ucdp-355",
+   "name": "Burkina Faso – Mali",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    355
+   ],
+   "from": 1985,
+   "to": 1985,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=355"
+   }
+  },
+  {
+   "id": "ucdp-356",
+   "name": "Laos – Thailand",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    356
+   ],
+   "from": 1986,
+   "to": 1988,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=356"
+   }
+  },
+  {
+   "id": "ucdp-357",
+   "name": "Suriname: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    357
+   ],
+   "from": 1987,
+   "to": 1987,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=357"
+   }
+  },
+  {
+   "id": "ucdp-358",
+   "name": "Togo: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    358
+   ],
+   "from": 1986,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=358"
+   }
+  },
+  {
+   "id": "ucdp-359",
+   "name": "South Yemen: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    359
+   ],
+   "from": 1986,
+   "to": 1986,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=359"
+   }
+  },
+  {
+   "id": "ucdp-360",
+   "name": "Burkina Faso: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    360
+   ],
+   "from": 1987,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=360"
+   }
+  },
+  {
+   "id": "ucdp-361",
+   "name": "Chad – Libya",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    361
+   ],
+   "from": 1987,
+   "to": 1987,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=361"
+   }
+  },
+  {
+   "id": "ucdp-362",
+   "name": "Comoros: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    362
+   ],
+   "from": 1989,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=362"
+   }
+  },
+  {
+   "id": "ucdp-363",
+   "name": "Ethiopia: Afar",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    363
+   ],
+   "from": 1975,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=363"
+   }
+  },
+  {
+   "id": "ucdp-364",
+   "name": "India: Kashmir",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    364
+   ],
+   "from": 1990,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=364"
+   }
+  },
+  {
+   "id": "ucdp-365",
+   "name": "India: Assam",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    365
+   ],
+   "from": 1990,
+   "to": 2010,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=365"
+   }
+  },
+  {
+   "id": "ucdp-366",
+   "name": "Indonesia: Aceh",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    366
+   ],
+   "from": 1990,
+   "to": 2005,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=366"
+   }
+  },
+  {
+   "id": "ucdp-367",
+   "name": "Panama: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    367
+   ],
+   "from": 1989,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=367"
+   }
+  },
+  {
+   "id": "ucdp-368",
+   "name": "Panama – United States of America",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    368
+   ],
+   "from": 1989,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=368"
+   }
+  },
+  {
+   "id": "ucdp-369",
+   "name": "Papua New Guinea: Bougainville",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    369
+   ],
+   "from": 1990,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=369"
+   }
+  },
+  {
+   "id": "ucdp-370",
+   "name": "Romania: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    370
+   ],
+   "from": 1989,
+   "to": 1989,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=370"
+   }
+  },
+  {
+   "id": "ucdp-372",
+   "name": "Mali: Azawad",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    372
+   ],
+   "from": 1990,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=372"
+   }
+  },
+  {
+   "id": "ucdp-373",
+   "name": "Niger: Air and Azawad",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    373
+   ],
+   "from": 1994,
+   "to": 1994,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=373"
+   }
+  },
+  {
+   "id": "ucdp-374",
+   "name": "Rwanda: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    374
+   ],
+   "from": 1990,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=374"
+   }
+  },
+  {
+   "id": "ucdp-375",
+   "name": "Senegal: Casamance",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    375
+   ],
+   "from": 1990,
+   "to": 2011,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=375"
+   }
+  },
+  {
+   "id": "ucdp-376",
+   "name": "Russia (Soviet Union): Nagorno-Karabakh",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    376
+   ],
+   "from": 1990,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=376"
+   }
+  },
+  {
+   "id": "ucdp-377",
+   "name": "Russia (Soviet Union): Azerbaijan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    377
+   ],
+   "from": 1990,
+   "to": 1990,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=377"
+   }
+  },
+  {
+   "id": "ucdp-378",
+   "name": "Trinidad and Tobago: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    378
+   ],
+   "from": 1990,
+   "to": 1990,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=378"
+   }
+  },
+  {
+   "id": "ucdp-379",
+   "name": "Djibouti: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    379
+   ],
+   "from": 1991,
+   "to": 1999,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=379"
+   }
+  },
+  {
+   "id": "ucdp-380",
+   "name": "Georgia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    380
+   ],
+   "from": 1991,
+   "to": 1993,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=380"
+   }
+  },
+  {
+   "id": "ucdp-381",
+   "name": "Haiti: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    381
+   ],
+   "from": 1989,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=381"
+   }
+  },
+  {
+   "id": "ucdp-382",
+   "name": "Sierra Leone: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    382
+   ],
+   "from": 1991,
+   "to": 2001,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=382"
+   }
+  },
+  {
+   "id": "ucdp-383",
+   "name": "Turkey: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    383
+   ],
+   "from": 1991,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=383"
+   }
+  },
+  {
+   "id": "ucdp-384",
+   "name": "Serbia (Yugoslavia): Slovenia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    384
+   ],
+   "from": 1991,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=384"
+   }
+  },
+  {
+   "id": "ucdp-385",
+   "name": "Serbia (Yugoslavia): Croatia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    385
+   ],
+   "from": 1991,
+   "to": 1992,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=385"
+   }
+  },
+  {
+   "id": "ucdp-386",
+   "name": "Algeria: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    386
+   ],
+   "from": 1991,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=386"
+   }
+  },
+  {
+   "id": "ucdp-387",
+   "name": "Angola: Cabinda",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    387
+   ],
+   "from": 1991,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=387"
+   }
+  },
+  {
+   "id": "ucdp-388",
+   "name": "Azerbaijan: Artsakh (Nagorno-Karabakh)",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    388
+   ],
+   "from": 1991,
+   "to": 2023,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=388"
+   }
+  },
+  {
+   "id": "ucdp-390",
+   "name": "Croatia: Serb",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    390
+   ],
+   "from": 1992,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=390"
+   }
+  },
+  {
+   "id": "ucdp-391",
+   "name": "Egypt: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    391
+   ],
+   "from": 1993,
+   "to": 2019,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=391"
+   }
+  },
+  {
+   "id": "ucdp-392",
+   "name": "Georgia: Abkhazia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    392
+   ],
+   "from": 1992,
+   "to": 1993,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=392"
+   }
+  },
+  {
+   "id": "ucdp-393",
+   "name": "Georgia: South Ossetia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    393
+   ],
+   "from": 1992,
+   "to": 2008,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=393"
+   }
+  },
+  {
+   "id": "ucdp-394",
+   "name": "Moldova: Dniestr",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    394
+   ],
+   "from": 1992,
+   "to": 1992,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=394"
+   }
+  },
+  {
+   "id": "ucdp-395",
+   "name": "Tajikistan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    395
+   ],
+   "from": 1992,
+   "to": 2011,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=395"
+   }
+  },
+  {
+   "id": "ucdp-396",
+   "name": "Azerbaijan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    396
+   ],
+   "from": 1993,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=396"
+   }
+  },
+  {
+   "id": "ucdp-397",
+   "name": "Bosnia-Herzegovina: Bihaca Krajina",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    397
+   ],
+   "from": 1993,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=397"
+   }
+  },
+  {
+   "id": "ucdp-398",
+   "name": "Bosnia-Herzegovina: Croat",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    398
+   ],
+   "from": 1992,
+   "to": 1994,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=398"
+   }
+  },
+  {
+   "id": "ucdp-399",
+   "name": "Russia (Soviet Union): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    399
+   ],
+   "from": 1993,
+   "to": 2024,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=399"
+   }
+  },
+  {
+   "id": "ucdp-400",
+   "name": "Mexico: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    400
+   ],
+   "from": 1994,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=400"
+   }
+  },
+  {
+   "id": "ucdp-402",
+   "name": "Yemen (North Yemen): South Yemen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    402
+   ],
+   "from": 1994,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=402"
+   }
+  },
+  {
+   "id": "ucdp-403",
+   "name": "Ecuador – Peru",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    403
+   ],
+   "from": 1995,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=403"
+   }
+  },
+  {
+   "id": "ucdp-404",
+   "name": "Pakistan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    404
+   ],
+   "from": 1990,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=404"
+   }
+  },
+  {
+   "id": "ucdp-405",
+   "name": "Cameroon – Nigeria",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    405
+   ],
+   "from": 1996,
+   "to": 1996,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=405"
+   }
+  },
+  {
+   "id": "ucdp-406",
+   "name": "Niger: Eastern Niger",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    406
+   ],
+   "from": 1995,
+   "to": 1995,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=406"
+   }
+  },
+  {
+   "id": "ucdp-407",
+   "name": "Comoros: Anjouan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    407
+   ],
+   "from": 1997,
+   "to": 1997,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=407"
+   }
+  },
+  {
+   "id": "ucdp-408",
+   "name": "Congo: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    408
+   ],
+   "from": 1993,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=408"
+   }
+  },
+  {
+   "id": "ucdp-410",
+   "name": "Guinea-Bissau: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    410
+   ],
+   "from": 1998,
+   "to": 1999,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=410"
+   }
+  },
+  {
+   "id": "ucdp-411",
+   "name": "Lesotho: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    411
+   ],
+   "from": 1998,
+   "to": 1998,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=411"
+   }
+  },
+  {
+   "id": "ucdp-412",
+   "name": "Serbia (Yugoslavia): Kosovo",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    412
+   ],
+   "from": 1998,
+   "to": 1999,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=412"
+   }
+  },
+  {
+   "id": "ucdp-413",
+   "name": "Ethiopia: Oromiya",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    413
+   ],
+   "from": 1977,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=413"
+   }
+  },
+  {
+   "id": "ucdp-414",
+   "name": "Russia (Soviet Union): Dagestan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    414
+   ],
+   "from": 1999,
+   "to": 1999,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=414"
+   }
+  },
+  {
+   "id": "ucdp-415",
+   "name": "Uzbekistan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    415
+   ],
+   "from": 1999,
+   "to": 2004,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=415"
+   }
+  },
+  {
+   "id": "ucdp-416",
+   "name": "Central African Republic: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    416
+   ],
+   "from": 2001,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=416"
+   }
+  },
+  {
+   "id": "ucdp-417",
+   "name": "North Macedonia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    417
+   ],
+   "from": 2001,
+   "to": 2001,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=417"
+   }
+  },
+  {
+   "id": "ucdp-418",
+   "name": "United States of America: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    418
+   ],
+   "from": 2001,
+   "to": 2019,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=418"
+   }
+  },
+  {
+   "id": "ucdp-419",
+   "name": "Ivory Coast: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    419
+   ],
+   "from": 2002,
+   "to": 2011,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=419"
+   }
+  },
+  {
+   "id": "ucdp-421",
+   "name": "India: Bodoland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    421
+   ],
+   "from": 1989,
+   "to": 2014,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=421"
+   }
+  },
+  {
+   "id": "ucdp-422",
+   "name": "Myanmar (Burma): Wa",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    422
+   ],
+   "from": 1997,
+   "to": 1997,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=422"
+   }
+  },
+  {
+   "id": "ucdp-423",
+   "name": "Thailand: Patani",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    423
+   ],
+   "from": 2003,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=423"
+   }
+  },
+  {
+   "id": "ucdp-424",
+   "name": "Nigeria: Northern Nigeria",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    424
+   ],
+   "from": 2004,
+   "to": 2004,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=424"
+   }
+  },
+  {
+   "id": "ucdp-425",
+   "name": "Nigeria: Niger Delta",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    425
+   ],
+   "from": 2004,
+   "to": 2004,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=425"
+   }
+  },
+  {
+   "id": "ucdp-426",
+   "name": "Israel: Southern Lebanon",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    426
+   ],
+   "from": 1990,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=426"
+   }
+  },
+  {
+   "id": "ucdp-427",
+   "name": "Tanzania – Uganda",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    427
+   ],
+   "from": 1978,
+   "to": 1978,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=427"
+   }
+  },
+  {
+   "id": "ucdp-428",
+   "name": "Mauritania: Sahrawi Arab Democratic Republic (Western Sahara)",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    428
+   ],
+   "from": 1975,
+   "to": 1978,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=428"
+   }
+  },
+  {
+   "id": "ucdp-429",
+   "name": "DR Congo (Zaire): Kongo Kingdom",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    429
+   ],
+   "from": 2007,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=429"
+   }
+  },
+  {
+   "id": "ucdp-430",
+   "name": "Niger: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    430
+   ],
+   "from": 1991,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=430"
+   }
+  },
+  {
+   "id": "ucdp-431",
+   "name": "Afghanistan – Soviet Union",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    431
+   ],
+   "from": 1979,
+   "to": 1979,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=431"
+   }
+  },
+  {
+   "id": "ucdp-432",
+   "name": "Russia (Soviet Union): Caucasus Emirate",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    432
+   ],
+   "from": 2007,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=432"
+   }
+  },
+  {
+   "id": "ucdp-434",
+   "name": "India: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    434
+   ],
+   "from": 2008,
+   "to": 2008,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=434"
+   }
+  },
+  {
+   "id": "ucdp-435",
+   "name": "Djibouti – Eritrea",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    435
+   ],
+   "from": 2008,
+   "to": 2008,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=435"
+   }
+  },
+  {
+   "id": "ucdp-436",
+   "name": "Ethiopia: Arssi, Bale & Sidamo",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    436
+   ],
+   "from": 1977,
+   "to": 1980,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=436"
+   }
+  },
+  {
+   "id": "ucdp-437",
+   "name": "Ethiopia: Sidamaland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    437
+   ],
+   "from": 1981,
+   "to": 1983,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=437"
+   }
+  },
+  {
+   "id": "ucdp-439",
+   "name": "Myanmar (Burma): Kokang",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    439
+   ],
+   "from": 2009,
+   "to": 2024,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=439"
+   }
+  },
+  {
+   "id": "ucdp-440",
+   "name": "Myanmar (Burma): Lahu",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    440
+   ],
+   "from": 1973,
+   "to": 1982,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=440"
+   }
+  },
+  {
+   "id": "ucdp-442",
+   "name": "Mauritania: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    442
+   ],
+   "from": 2010,
+   "to": 2010,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=442"
+   }
+  },
+  {
+   "id": "ucdp-11342",
+   "name": "India: Garoland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11342
+   ],
+   "from": 2012,
+   "to": 2014,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11342"
+   }
+  },
+  {
+   "id": "ucdp-11343",
+   "name": "Egypt – Israel",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11343
+   ],
+   "from": 1967,
+   "to": 1973,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11343"
+   }
+  },
+  {
+   "id": "ucdp-11344",
+   "name": "Sudan: Abyei",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11344
+   ],
+   "from": 2011,
+   "to": 2011,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11344"
+   }
+  },
+  {
+   "id": "ucdp-11345",
+   "name": "South Sudan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11345
+   ],
+   "from": 2011,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11345"
+   }
+  },
+  {
+   "id": "ucdp-11346",
+   "name": "Libya: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11346
+   ],
+   "from": 2011,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11346"
+   }
+  },
+  {
+   "id": "ucdp-11347",
+   "name": "Mali: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11347
+   ],
+   "from": 2009,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11347"
+   }
+  },
+  {
+   "id": "ucdp-11348",
+   "name": "South Sudan – Sudan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11348
+   ],
+   "from": 2012,
+   "to": 2012,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11348"
+   }
+  },
+  {
+   "id": "ucdp-11349",
+   "name": "China: East Turkestan\n",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11349
+   ],
+   "from": 2008,
+   "to": 2008,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11349"
+   }
+  },
+  {
+   "id": "ucdp-11350",
+   "name": "Bangladesh: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11350
+   ],
+   "from": 2005,
+   "to": 2006,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11350"
+   }
+  },
+  {
+   "id": "ucdp-11447",
+   "name": "Ethiopia: Hararghe",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11447
+   ],
+   "from": 1991,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11447"
+   }
+  },
+  {
+   "id": "ucdp-11475",
+   "name": "Myanmar (Burma): Nagaland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11475
+   ],
+   "from": 1991,
+   "to": 2007,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11475"
+   }
+  },
+  {
+   "id": "ucdp-11487",
+   "name": "Malaysia: Sabah",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11487
+   ],
+   "from": 2013,
+   "to": 2013,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11487"
+   }
+  },
+  {
+   "id": "ucdp-11639",
+   "name": "Afghanistan – Pakistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11639
+   ],
+   "from": 2024,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11639"
+   }
+  },
+  {
+   "id": "ucdp-11884",
+   "name": "Hyderabad: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    11884
+   ],
+   "from": 1947,
+   "to": 1948,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=11884"
+   }
+  },
+  {
+   "id": "ucdp-13042",
+   "name": "Syria: Rojava Kurdistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13042
+   ],
+   "from": 2012,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13042"
+   }
+  },
+  {
+   "id": "ucdp-13219",
+   "name": "Ukraine: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13219
+   ],
+   "from": 2014,
+   "to": 2014,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13219"
+   }
+  },
+  {
+   "id": "ucdp-13246",
+   "name": "Ukraine: Donetsk",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13246
+   ],
+   "from": 2014,
+   "to": 2014,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13246"
+   }
+  },
+  {
+   "id": "ucdp-13247",
+   "name": "Ukraine: Lugansk",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13247
+   ],
+   "from": 2014,
+   "to": 2014,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13247"
+   }
+  },
+  {
+   "id": "ucdp-13306",
+   "name": "Ukraine: Novorossiya",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13306
+   ],
+   "from": 2014,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13306"
+   }
+  },
+  {
+   "id": "ucdp-13324",
+   "name": "Kyrgyzstan – Tajikistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13324
+   ],
+   "from": 2021,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13324"
+   }
+  },
+  {
+   "id": "ucdp-13588",
+   "name": "Russia (Soviet Union): Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13588
+   ],
+   "from": 2015,
+   "to": 2024,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13588"
+   }
+  },
+  {
+   "id": "ucdp-13604",
+   "name": "Syria: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13604
+   ],
+   "from": 2013,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13604"
+   }
+  },
+  {
+   "id": "ucdp-13611",
+   "name": "Mali: Macina Empire",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13611
+   ],
+   "from": 2015,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13611"
+   }
+  },
+  {
+   "id": "ucdp-13637",
+   "name": "Afghanistan: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13637
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13637"
+   }
+  },
+  {
+   "id": "ucdp-13638",
+   "name": "Cameroon: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13638
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13638"
+   }
+  },
+  {
+   "id": "ucdp-13639",
+   "name": "Niger: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13639
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13639"
+   }
+  },
+  {
+   "id": "ucdp-13640",
+   "name": "Chad: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13640
+   ],
+   "from": 2015,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13640"
+   }
+  },
+  {
+   "id": "ucdp-13641",
+   "name": "Nigeria: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13641
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13641"
+   }
+  },
+  {
+   "id": "ucdp-13645",
+   "name": "Yemen (North Yemen): Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13645
+   ],
+   "from": 2015,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13645"
+   }
+  },
+  {
+   "id": "ucdp-13646",
+   "name": "Kenya: Northeastern Province and Coast",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13646
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13646"
+   }
+  },
+  {
+   "id": "ucdp-13648",
+   "name": "Egypt: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13648
+   ],
+   "from": 2015,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13648"
+   }
+  },
+  {
+   "id": "ucdp-13653",
+   "name": "India: Western South East Asia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13653
+   ],
+   "from": 2015,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13653"
+   }
+  },
+  {
+   "id": "ucdp-13674",
+   "name": "Bangladesh: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13674
+   ],
+   "from": 2016,
+   "to": 2017,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13674"
+   }
+  },
+  {
+   "id": "ucdp-13675",
+   "name": "Lebanon: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13675
+   ],
+   "from": 2014,
+   "to": 2017,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13675"
+   }
+  },
+  {
+   "id": "ucdp-13692",
+   "name": "Afghanistan – United Kingdom, United States of America",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13692
+   ],
+   "from": 2001,
+   "to": 2001,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13692"
+   }
+  },
+  {
+   "id": "ucdp-13694",
+   "name": "Libya: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13694
+   ],
+   "from": 2015,
+   "to": 2019,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13694"
+   }
+  },
+  {
+   "id": "ucdp-13721",
+   "name": "Algeria: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13721
+   ],
+   "from": 2015,
+   "to": 2015,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13721"
+   }
+  },
+  {
+   "id": "ucdp-13809",
+   "name": "Syria: Rojava Kurdistan",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13809
+   ],
+   "from": 2016,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13809"
+   }
+  },
+  {
+   "id": "ucdp-13840",
+   "name": "Burkina Faso: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13840
+   ],
+   "from": 2019,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13840"
+   }
+  },
+  {
+   "id": "ucdp-13886",
+   "name": "Jordan: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13886
+   ],
+   "from": 2016,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13886"
+   }
+  },
+  {
+   "id": "ucdp-13902",
+   "name": "Turkey: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13902
+   ],
+   "from": 2015,
+   "to": 2017,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13902"
+   }
+  },
+  {
+   "id": "ucdp-13936",
+   "name": "Pakistan: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    13936
+   ],
+   "from": 2016,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=13936"
+   }
+  },
+  {
+   "id": "ucdp-14074",
+   "name": "Somalia: Somaliland",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14074
+   ],
+   "from": 2018,
+   "to": 2018,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14074"
+   }
+  },
+  {
+   "id": "ucdp-14113",
+   "name": "Mali: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14113
+   ],
+   "from": 2017,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14113"
+   }
+  },
+  {
+   "id": "ucdp-14129",
+   "name": "Cameroon: Ambazonia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14129
+   ],
+   "from": 2017,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14129"
+   }
+  },
+  {
+   "id": "ucdp-14197",
+   "name": "Somalia: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14197
+   ],
+   "from": 2019,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14197"
+   }
+  },
+  {
+   "id": "ucdp-14268",
+   "name": "Iran: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14268
+   ],
+   "from": 2017,
+   "to": 2017,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14268"
+   }
+  },
+  {
+   "id": "ucdp-14275",
+   "name": "Philippines: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14275
+   ],
+   "from": 2016,
+   "to": 2024,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14275"
+   }
+  },
+  {
+   "id": "ucdp-14333",
+   "name": "Tunisia: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14333
+   ],
+   "from": 2016,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14333"
+   }
+  },
+  {
+   "id": "ucdp-14609",
+   "name": "Iran – Israel",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14609
+   ],
+   "from": 2018,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14609"
+   }
+  },
+  {
+   "id": "ucdp-14692",
+   "name": "DR Congo (Zaire): Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14692
+   ],
+   "from": 2017,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14692"
+   }
+  },
+  {
+   "id": "ucdp-14845",
+   "name": "Mozambique: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14845
+   ],
+   "from": 2019,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14845"
+   }
+  },
+  {
+   "id": "ucdp-14935",
+   "name": "Ethiopia: Amhara",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    14935
+   ],
+   "from": 2019,
+   "to": 2019,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=14935"
+   }
+  },
+  {
+   "id": "ucdp-15183",
+   "name": "Tanzania: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    15183
+   ],
+   "from": 2020,
+   "to": 2020,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=15183"
+   }
+  },
+  {
+   "id": "ucdp-15256",
+   "name": "Benin: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    15256
+   ],
+   "from": 2022,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=15256"
+   }
+  },
+  {
+   "id": "ucdp-15283",
+   "name": "Central African Republic: Logone",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    15283
+   ],
+   "from": 2015,
+   "to": 2023,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=15283"
+   }
+  },
+  {
+   "id": "ucdp-15438",
+   "name": "Uganda: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    15438
+   ],
+   "from": 2022,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=15438"
+   }
+  },
+  {
+   "id": "ucdp-16038",
+   "name": "Mali: Azawad",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    16038
+   ],
+   "from": 2023,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=16038"
+   }
+  },
+  {
+   "id": "ucdp-16069",
+   "name": "Ethiopia: Amhara",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    16069
+   ],
+   "from": 2023,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=16069"
+   }
+  },
+  {
+   "id": "ucdp-16099",
+   "name": "United Kingdom, United States of America – Yemen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    16099
+   ],
+   "from": 2024,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=16099"
+   }
+  },
+  {
+   "id": "ucdp-16292",
+   "name": "Tajikistan: Islamic State",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    16292
+   ],
+   "from": 2018,
+   "to": 2019,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=16292"
+   }
+  },
+  {
+   "id": "ucdp-16470",
+   "name": "Israel – Yemen",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    16470
+   ],
+   "from": 2025,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=16470"
+   }
+  }
+ ]
+}

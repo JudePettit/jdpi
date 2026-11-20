@@ -215,14 +215,17 @@ test('registration: omni-map in Digital Science, its freshness line, llms.txt, t
   const icons = reg.suites.flatMap(s => s.modules.map(x => x.icon));
   assert.equal(icons.filter(i => i === m.icon).length, 1, 'its icon is its own');
   assert.doesNotMatch(m.description, /\b(unique|the only|the first)\b|unlike any/i, 'no claim the survey does not support');
-  // A page with no single data file: the layer catalogue is the one file read, and its `generated` the newest layer.
-  assert.deepEqual(m.data, { class: 'reference', parts: [{ read: 'omni/data/layers.json' }] });
-  const layers = read('omni/data/layers.json');
+  // A page with no single data file: the layer catalogue's head is the one file read (only `generated`, the newest
+  // layer's build, which the builders write beside omni/data/layers.json), so every page's sidebar reads a few bytes
+  // however large the catalogue grows (S5a fixer, R1).
+  assert.deepEqual(m.data, { class: 'reference', parts: [{ read: 'omni/data/layers.head.json' }] });
+  const layers = read('omni/data/layers.json'), head = read('omni/data/layers.head.json');
   assert.equal(layers.generated, layers.layers.map(l => l.built).sort().at(-1));
+  assert.deepEqual(head, { format: 'vm-layers-head/1', of: 'omni/data/layers.json', generated: layers.generated }, 'the head follows the catalogue');
   // The day after the newest layer was built, whenever that is (a hand rebuild moves it).
   const now = Date.parse(layers.generated) + 86400e3;
   const day = new Date(layers.generated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-  assert.equal(freshnessLine(m, { 'omni/data/layers.json': { generated: layers.generated } }, { now }).text, `Reference · built ${day} · no schedule`);
+  assert.equal(freshnessLine(m, { 'omni/data/layers.head.json': head }, { now }).text, `Reference · built ${day} · no schedule`);
   assert.equal(freshnessLine(m, {}, { now }).text, 'Reference · no schedule');
   // llms.txt and its builder: one line, under Optional, after Bibliotheca's.
   const llms = file('llms.txt');
@@ -635,7 +638,7 @@ test('page: the shell\'s route; keyboard, live region, light and dark, 1440×900
       assert.ok(scroll <= inner + 1, `${width}: no sideways scroll (${scroll} on ${inner})`);
       // The keyboard alone: Tab reaches the year handle, the outlines, the battles and the three actions, in order.
       const order = [];
-      for (let i = 0; i < 60 && order.length < 200; i++) {
+      for (let i = 0; i < 90 && order.length < 200; i++) { // S5c's layers add tab stops before the actions
         await page.keyboard.press('Tab');
         order.push(await page.evaluate(() => document.activeElement?.id || document.activeElement?.className || ''));
       }
@@ -711,7 +714,9 @@ test('page: the review\'s findings on the Omni-Map itself (S1, S3, S4, S5, S6, S
     const legend = await page.textContent('#legend');
     for (const w of ['In focus: the places of this view', 'outlined, not filled', 'composite polity']) assert.ok(legend.includes(w), `the legend: ${w}`);
     assert.match(legend, /Natural Earth 5\.1\.1, public domain/, 'R11c');
-    assert.match(legend, /Wikidata, read 17 November 2026/);
+    // The date of VM's read of Wikidata, as sources.json gives it (S5b's widened battles read it again on 20 November 2026).
+    const wdRead = new Date(read('integration/sources.json').sources.find(s => s.id === 'wikidata').version).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    assert.ok(legend.includes(`Wikidata, read ${wdRead}`), `the legend names Wikidata's read of ${wdRead}`);
     const shows = await page.$$eval('#shows-list li', ls => ls.map(l => l.textContent));
     assert.ok(shows.some(t => t.startsWith('(Kingdom of France)') && /composite: Kingdom of France with its dependencies/.test(t)), 'S8');
     const focus = await page.textContent('#focus-body');
@@ -960,7 +965,8 @@ test('page: the second review: names escaped (X1), what a saved view\'s pin cove
     assert.ok(!st.features.includes('Q764793'), 'Fornovo is not drawn');
     assert.deepEqual(st.battles.drawn, []);
     assert.ok(!st.legend.some(l => l.layer === 'battles'), 'the legend names the layers drawn');
-    assert.match(await page.textContent('#battles-held'), /VM holds 2 battles for these years; this view draws none, as its recipe names no battles layer/);
+    // V4 (S5b/S5c review): the battles' file is not read for a view that does not draw them, so they are not counted.
+    assert.match(await page.textContent('#battles-held'), /^This view draws no battles, as its recipe names no battles layer \(l=battles\)/);
     const nb = await downloadOf(page, () => page.click('#save'));
     const nrows = csvRows(files(nb.bytes)['rows.csv']), nhead = nrows[0];
     assert.ok(!nrows.slice(1).some(r => r[nhead.indexOf('layer')] === 'battles'), 'the bundle holds no battle');

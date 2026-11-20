@@ -35,6 +35,7 @@ import { listEvents } from './wiki-lists.mjs';
 import { atlasElections, mergeBallots, resolveExpected } from './outlook.mjs';
 import { lostEvents, refuseIfLost } from './guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
+import { isoResolver, neCountries } from '../../omni/scripts/country-names.mjs';
 
 const args = process.argv.slice(2);
 const option = name => args.find(a => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -50,7 +51,8 @@ const DATA = new URL('../data/', import.meta.url);
 const previous = (existsSync(DATA) ? readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f)) : []).flatMap(f => JSON.parse(readFileSync(new URL(f, DATA), 'utf8')).events);
 const events = [];
 // `via` (dropped on write) says where an event came from, so that duplicates keep the structured record; so does
-// `precision` ("month" for a date known only to the month, on the 1st).
+// `precision` ("month" for a date known only to the month, on the 1st). Both are written as the event's `class` and
+// `precision` (only "month") once the duplicates are gone.
 const add = (e, via) => { if (e.date >= FROM && e.date < '2030' && /^\d{4}-\d{2}-\d{2}$/.test(e.date)) events.push({ ...e, country: normaliseCountry(e.country), via }); };
 const wiki = t => `https://en.wikipedia.org/wiki/${encodeURIComponent(t.replace(/ /g, '_'))}`;
 const articleTitle = url => decodeURIComponent(String(url).split('/wiki/')[1] || '').replace(/_/g, ' ');
@@ -357,8 +359,19 @@ for (const e of news) {
   if (isArticle(e.source)) { note(`${e.type}|${e.source}`, e); note(`${e.type}|title|${articleKey(e.source)}`, e); }
   if (e.type === 'summit') note(`summit|${e.country}`, e);
 }
+// Each event keeps (for the Omni-Map's calendar layer, omni/scripts/build-calendar-layer.mjs) its date's precision when
+// it is known only to the month, its country's ISO3 where it is one of today's (VM's crosswalk, omni/scripts/
+// country-names.mjs), and its source's class (SOURCE_CLASS): a new leader or a seizure of power from the Retrospective
+// is Archigos's, its elections and referendums Wikidata's.
+const SOURCE_CLASS = { ucdp: 'ucdp', wikidata: 'wikidata', landmark: 'vm', list: 'wikipedia-list', atlas: 'atlas', news: 'wikipedia-news' };
+const classOf = e => (e.via === 'retro' ? (e.type === 'leader' || e.type === 'coup' ? 'archigos' : 'retrospective') : SOURCE_CLASS[e.via] || e.via);
+const isoOf = isoResolver(neCountries());
 const unique = new Map();
-for (const { via, precision, ...e } of kept) if (!unique.has(`${e.date}|${e.title}`)) unique.set(`${e.date}|${e.title}`, e);
+for (const { via, precision, ...e } of kept) {
+  if (unique.has(`${e.date}|${e.title}`)) continue;
+  const iso3 = isoOf(e.country);
+  unique.set(`${e.date}|${e.title}`, { ...e, ...(precision === 'month' ? { precision } : {}), ...(iso3 ? { iso3 } : {}), class: classOf({ via, type: e.type }) });
+}
 
 const all = [...unique.values()].sort((a, b) => a.date.localeCompare(b.date) || a.country.localeCompare(b.country));
 

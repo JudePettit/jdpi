@@ -397,3 +397,39 @@ export function followMessage({ from, at, recipe, label } = {}) {
   if (recipe != null && !/^vr=1(&|$)/.test(String(recipe))) return null;
   return { type: 'follow', from, at, ...(recipe != null ? { recipe } : {}), label };
 }
+
+/* ---------- stage S5c: VM's card, which a tagged name opens anywhere (design/jdpi-entities.js) ---------- */
+/** The card of a tagged name: { title, q, desc, years, offers: [{ id, name, at, why }], thin }. Its offers are the
+    resolver's that VM can open (the Omni-Map at the entry's own years, the Master Index entry, the Wikipedia article),
+    and last the name's own link as the page gives it (href), one tap away; a modifier-click on the name still follows
+    that link. entry: the lake record, or null (the card then holds the Master Index entry and the link alone). */
+// V5 (S5b/S5c review): the card's Omni-Map view switches on the layer that holds what was clicked: an election or a
+// referendum the elections layer, a coup the coups layer, a war or armed conflict the conflict on territory (UCDP,
+// 1946 on) beside the battles. Anything else keeps the resolver's view (borders and battles).
+export function cardLayer(entry) {
+  const kind = kindOf(entry), words = `${entry?.label || ''} ${entry?.desc || ''}`;
+  if (kind === 'election' || /\b(election|referendum|plebiscite)\b/i.test(words) && kind === 'event') return { l: 'elections' };
+  if (/\bcoup\b|putsch/i.test(words) && kind !== 'person') return { l: 'coups' };
+  if (kind === 'war' || kind === 'conflict') return { fill: 'conflict-territory' };
+  return null;
+}
+function cardLayers(entry, at) {
+  const want = cardLayer(entry), m = /^(.*?#)(.*)$/.exec(at || '');
+  const R = want && m ? readRecipe(m[2]) : null;
+  if (!R) return at;
+  const next = want.l ? { ...R, l: [{ id: want.l }] } : { ...R, fill: want.fill };
+  return `${m[1]}${writeRecipe(next)}`;
+}
+export function cardOf(entry, { q = null, label = '', href = null, today } = {}) {
+  const e = entry && typeof entry === 'object' && QID.test(entry.q || '') ? entry : QID.test(q || '') ? { q, label } : null;
+  const title = e?.label || label || e?.q || '';
+  const offers = [];
+  let thin = false;
+  if (e) {
+    const r = resolve(e, { module: 'card', at: '' }, { today });
+    thin = entry ? r.thin : { missing: ['dates', 'place', 'related'], text: `VM’s lake holds no record of ${title} yet.` };
+    for (const o of r.offers) if (o.available && o.at) offers.push({ id: o.id, name: o.id === 'life' ? `Open on the Omni-Map (${o.name.toLowerCase()})` : o.name, at: o.id === 'life' ? cardLayers(e, o.at) : o.at, why: o.why });
+  }
+  if (str(href) && /^https?:\/\//.test(href) && !offers.some(o => o.at === href || (o.id === 'wiki' && /\/\/en\.wikipedia\.org\//.test(href)))) offers.push({ id: 'link', name: /\.wikipedia\.org\//.test(href) ? 'Wikipedia article' : 'The page’s own link', at: href, why: 'Where the name links on this page' });
+  return { title, q: e?.q || null, desc: entry?.desc || '', years: (entry && yearsText(entry, { today })) || '', offers, thin };
+}

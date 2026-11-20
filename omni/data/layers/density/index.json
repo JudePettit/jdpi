@@ -1,0 +1,223 @@
+{
+  "format": "vm-grid-index/1",
+  "layer": "density-grid",
+  "source": "ghsl-pop",
+  "version": "R2023A V1-0",
+  "built": "2026-11-18T06:03:15Z",
+  "deg": 0.25,
+  "cols": 1440,
+  "rows": 720,
+  "west": -180,
+  "north": 90,
+  "radiusKm": 6371.0088,
+  "unit": "people",
+  "measure": "people per km²",
+  "breaks": [
+    0.02,
+    0.12,
+    0.48,
+    1.5,
+    4,
+    9.9,
+    23,
+    54,
+    150
+  ],
+  "breaksFrom": 2020,
+  "years": [
+    1975,
+    1980,
+    1985,
+    1990,
+    1995,
+    2000,
+    2005,
+    2010,
+    2015,
+    2020,
+    2025,
+    2030
+  ],
+  "files": [
+    {
+      "year": 1975,
+      "file": "1975.json",
+      "status": "modelled",
+      "total": 4069436570,
+      "populated": 163779,
+      "bytes": 1071814,
+      "gzip": 371976,
+      "sha256": "a80b450617fe8f52bbd2005706a7a807794e70a5bdabfd9a7e036aefe2f786d3",
+      "from": {
+        "file": "GHS_POP_E1975_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1975_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E1975_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "9f4184b8723b9bd7aee7497307bb92674bc6961aa99efbddbebe7cfd12a58c02"
+      }
+    },
+    {
+      "year": 1980,
+      "file": "1980.json",
+      "status": "modelled",
+      "total": 4444007089,
+      "populated": 164119,
+      "bytes": 1079937,
+      "gzip": 375903,
+      "sha256": "06d2a146a453cdfd946d232179c35e7a88fcfe01020713348e1cd44d745a35da",
+      "from": {
+        "file": "GHS_POP_E1980_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1980_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E1980_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "59f073cced5b37853b6ca28d35f13a1b7722ab2e18c1bdd1cac844d760b601a5"
+      }
+    },
+    {
+      "year": 1985,
+      "file": "1985.json",
+      "status": "modelled",
+      "total": 4861729980,
+      "populated": 164501,
+      "bytes": 1088299,
+      "gzip": 379933,
+      "sha256": "40623e1c5fb676bc95045f2ab1d9834dbf09107c67897bd19867ff769e6936dd",
+      "from": {
+        "file": "GHS_POP_E1985_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1985_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E1985_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "f93a5d2d46d03dc78cd9a2b44076956c28b38ff6b33605e98f88ca05246ca2ad"
+      }
+    },
+    {
+      "year": 1990,
+      "file": "1990.json",
+      "status": "modelled",
+      "total": 5316175183,
+      "populated": 164793,
+      "bytes": 1095707,
+      "gzip": 383444,
+      "sha256": "70b3687c893df0d94a64308019441bb3b625388a292007a1699534432c390924",
+      "from": {
+        "file": "GHS_POP_E1990_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1990_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E1990_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "c1b51512356fad3865376fae36e8e4908846866a966f2a267b1d51f2138db040"
+      }
+    },
+    {
+      "year": 1995,
+      "file": "1995.json",
+      "status": "modelled",
+      "total": 5743218968,
+      "populated": 164877,
+      "bytes": 1100353,
+      "gzip": 385874,
+      "sha256": "dec41754c22c88c5975eaf3c03059a75f1b551f64a4ccb9a03c7584acc868b67",
+      "from": {
+        "file": "GHS_POP_E1995_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E1995_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E1995_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "a38e22a0a3f1bfcce727430ed555d40ffbe18f2b19070d6bb1471660700cd965"
+      }
+    },
+    {
+      "year": 2000,
+      "file": "2000.json",
+      "status": "modelled",
+      "total": 6148898594,
+      "populated": 164941,
+      "bytes": 1103506,
+      "gzip": 387341,
+      "sha256": "7346d2e474c49e42943392aeb6ed863625506ae14b1c403e12b71fb6ed4cda24",
+      "from": {
+        "file": "GHS_POP_E2000_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2000_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2000_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "67304fd1e6bf71619739bbbc560e8a0863da33f4192a42219578a824bd6f0813"
+      }
+    },
+    {
+      "year": 2005,
+      "file": "2005.json",
+      "status": "modelled",
+      "total": 6558175532,
+      "populated": 164978,
+      "bytes": 1107169,
+      "gzip": 389177,
+      "sha256": "169ad3065b52a3178222e0f8f9c656fa10a524e462077f2b1487207a37f767f5",
+      "from": {
+        "file": "GHS_POP_E2005_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2005_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2005_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "791b674f9b88717257dbc90a2b750dd6f01beeb449570424abdeac1eaca7f604"
+      }
+    },
+    {
+      "year": 2010,
+      "file": "2010.json",
+      "status": "modelled",
+      "total": 6985602551,
+      "populated": 165013,
+      "bytes": 1110539,
+      "gzip": 390971,
+      "sha256": "bbcc4a33fe821d3de2de05325ccf8c1b9359f695f032bd015ea4b54fcaad23eb",
+      "from": {
+        "file": "GHS_POP_E2010_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2010_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2010_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "3999a1d42d071db95f8cfb891442212d4ed4c46adecd6f0feed58ac43e26b736"
+      }
+    },
+    {
+      "year": 2015,
+      "file": "2015.json",
+      "status": "modelled",
+      "total": 7426597466,
+      "populated": 164992,
+      "bytes": 1113444,
+      "gzip": 392747,
+      "sha256": "41431f02b18813e511f95253d517432ad1219c90c65e4a646264822aab6ecddb",
+      "from": {
+        "file": "GHS_POP_E2015_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2015_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2015_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "c154871ecd7fc0e4f529eade128c3cedcaa229286d9e4f72dc98d57b93dc9f13"
+      }
+    },
+    {
+      "year": 2020,
+      "file": "2020.json",
+      "status": "modelled",
+      "total": 7840952201,
+      "populated": 164963,
+      "bytes": 1116242,
+      "gzip": 394256,
+      "sha256": "252213b3ff043dc0eeda3e590ddfbf3fd0db6882613c636318acfd5d8d8d8a57",
+      "from": {
+        "file": "GHS_POP_E2020_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2020_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2020_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "8de311f475322cebb920edd870dda0f50fb1750a2a2c0f533c9ecf2f41589c45"
+      }
+    },
+    {
+      "year": 2025,
+      "file": "2025.json",
+      "status": "projection",
+      "total": 8191988078,
+      "populated": 164990,
+      "bytes": 1118660,
+      "gzip": 395420,
+      "sha256": "13c0beee90703b1291f78a911a03d6ae885da6a77163f66b04bdd1d08e21376c",
+      "from": {
+        "file": "GHS_POP_E2025_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2025_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "cec59a706722493bc670bb53503ce4a2f9b9850aab76dbf9f21fb94746d01195"
+      }
+    },
+    {
+      "year": 2030,
+      "file": "2030.json",
+      "status": "projection",
+      "total": 8546140949,
+      "populated": 164979,
+      "bytes": 1120879,
+      "gzip": 396508,
+      "sha256": "9e0d07b24dfec98e5163a0ac2cb89053469afb9222711d18b736c9cf811eaf61",
+      "from": {
+        "file": "GHS_POP_E2030_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "url": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2030_GLOBE_R2023A_4326_30ss/V1-0/GHS_POP_E2030_GLOBE_R2023A_4326_30ss_V1_0.zip",
+        "sha256": "f7e9c5784a1d33d0cce4ee33e2b36791282a4bfbfaddb76063ecf135676f0d43"
+      }
+    }
+  ]
+}

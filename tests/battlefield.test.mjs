@@ -1145,18 +1145,21 @@ test('Realtime archive: the movement buttons (Single Month) move both months tog
 
 // The archive in the first months of a year: with three months the pair has no room to go three stops back, and the
 // buttons, the address and the caption are still checked (second review X1: the check above would have failed every
-// January to April, and stopped every deploy).
-test('realtime archive early in a year (three months served): the movement buttons work without the room for the longer moves', pageTest, async t => {
+// January to April, and stopped every deploy). The months served are the archive's own first three, or all it has when
+// it holds fewer (a second review, X1 again: a fixed three could not be served from an archive of one or two months).
+test('realtime archive early in a year (three months served at most): the movement buttons work without the room for the longer moves', pageTest, async t => {
   const browser = await launch({ args: ['--mute-audio'] });
   t.after(() => browser.close());
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  let served = 0;
   await page.route('**/battlefield/data/realtime.json*', async route => {
     const r = await route.fetch(), d = await r.json();
     const keep = new Set(d.months.slice(0, 3));
     const trim = x => (Array.isArray(x) ? x.filter(y => !(y && typeof y === 'object' && typeof y.month === 'string' && !keep.has(y.month))).map(trim) : x && typeof x === 'object' ? Object.fromEntries(Object.entries(x).map(([k, v]) => [k, trim(v)])) : x);
     const out = trim(d); out.months = d.months.slice(0, 3); if (typeof out.latest === 'string') out.latest = out.months.at(-1);
+    served = out.months.length;
     await route.fulfill({ response: r, json: out });
   });
   const { s0, n } = await movementCheck(page, {
@@ -1165,7 +1168,7 @@ test('realtime archive early in a year (three months served): the movement butto
     readout: p => p.locator('#mapcap').innerText(),
     together: text => /over the period summed/.test(text), one: text => /one circle per place and month/.test(text),
   });
-  assert.equal(n, 3, 'three months on the track');
-  assert.deepEqual([s0.i, s0.j], [1, 2], 'it opens on its last two months');
+  assert.ok(served >= 1 && served <= 3 && n === served, `the months served are the months on the track: ${served} and ${n}`);
+  if (n >= 2) assert.deepEqual([s0.i, s0.j], [n - 2, n - 1], 'it opens on its last two months');
   assert.deepEqual(errors, []);
 });

@@ -755,3 +755,30 @@ test('page: beside the 90-day baseline, how many days of history the day shown h
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons (a slider of days: "Single Day"), on the label's line.
+import { movementCheck } from './tools/movement.mjs';
+test('page: the movement buttons: Move Together moves both days with the span kept, Single Day shows one day, the address keeps it', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  // With no day the page opens on its last two days, as before.
+  const { s0 } = await movementCheck(page, {
+    url: '/q/volatility.html', from: '#day-from', to: '#day', single: 'Single Day',
+    ready: p => p.waitForFunction(() => document.querySelector('#day')?.dataset.value && /\d/.test(document.querySelector('#daylabel')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#daylabel').innerText(),
+    one: (text, s) => text === s.to,
+  });
+  assert.equal(s0.j - s0.i, 1, 'opens on its last two days, as before');
+  const box = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); return { moves: r('.prp-period-moves'), track: r('#days .prp-period-track') }; });
+  assert.ok(box.moves.bottom <= box.track.top, 'the buttons sit on the label\'s line, above the track\'s own row');
+  // They stay put while the label's text changes width (a period, then one day).
+  const left = () => page.evaluate(() => document.querySelector('.prp-period-moves').getBoundingClientRect().left);
+  const before = await left();
+  await page.locator('[data-move="single"]').click();
+  await page.waitForFunction(() => /move=single/.test(location.hash), null, { timeout: 10000 });
+  assert.equal(await left(), before, 'the movement buttons do not move when the label changes');
+  assert.deepEqual(errors, []);
+});

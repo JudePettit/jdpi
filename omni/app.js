@@ -64,7 +64,12 @@ const S = {
   files: new Map(), bufs: new Map(), frame: null, start: null, stops: [], period: null, map: null, mapState: 'drawn',
   drawn: [], drawnBattles: [], focusPoints: [], box: null, seq: 0, notes: [], mode: 'live', saved: null, labelCache: new Map(),
   shards: new Map(), shelf: null, loaded: new Set(), loading: null, bare: false,
+  // The slider's movement (MP-12): 'independent' (the default), 'together' or 'single'. It is a frame-only key outside
+  // VR/1, as host= is (&move=… after the recipe, only away from the default): no recipe, saved view or bundle carries
+  // it, so Kino's recipes and saved views open at the default, as before.
+  move: 'independent',
 };
+const moveOf = raw => P.rules.readMovement(new URLSearchParams(String(raw || '').replace(/^#/, '')).get(P.MOVE_PARAM));
 window.omniState = { ready: false };
 
 /* ---------- loading ---------- */
@@ -461,7 +466,8 @@ function publish() {
     points: S.focusPoints.map(p => p.q),
     held: M.held(S.index), map: S.mapState, webgl: webglOk(), theme: theme(), play: playState(), ...(S.mode === 'saved' ? { pin: S.saved.pin } : {}),
   };
-  const hash = `#${currentRecipe()}${host ? `&host=${host}` : ''}`;
+  const mv = P.rules.movementParam(S.move);
+  const hash = `#${currentRecipe()}${mv ? `&${P.MOVE_PARAM}=${mv}` : ''}${host ? `&host=${host}` : ''}`;
   if (hash !== location.hash) { try { history.replaceState(history.state, '', hash); } catch { /* rate-limited: the next move writes it */ } }
   if (host === 'neo' && embedded) {
     try { window.parent.postMessage({ type: 'vm:view', recipe: window.omniState.recipe, state: window.omniState }, location.origin); } catch { /* another origin: nothing to tell */ }
@@ -574,6 +580,7 @@ async function openSaved(file) {
     if (!S.R.step) S.R.step = 'y';
     S.boxSet = false;
     stopPlay(); playNote(''); S.goto = null;
+    S.move = 'independent'; // a saved view carries no movement: its period is drawn as it was saved (MP-12)
     const { at, start } = mountPeriod();
     await loadSubject(R.q || null);
     await readRecords(unoutlined(R));
@@ -633,17 +640,29 @@ function mountPeriod() {
       ids: { from: 'from', to: 'year', prev: 'prev', play: 'play-track', next: 'next' },
       names: { group: 'Year shown', from: 'First year of the period', to: 'Year shown', prev: 'Previous year', next: 'Next year' },
       play: false, steps: true,
-      onChange: p => { stopPlay(); setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }); },
+      onChange: p => { stopPlay(); S.move = p.movement; setFrame(p.to, { start: p.atRest ? null : p.from, source: p.source }); },
     });
   } else S.period.update({ stops: S.stops, ticks, from: since, to: at });
+  // The movement the address chose (a slider mounted again starts at the default): Single Year puts the start on the
+  // year shown.
+  S.period.setMovement(S.move, { silent: true });
   fillSteps(win, size);
   // A start on its rest (the first stop of an up-to view, the frame of a frame view) is no start: since= is not written.
   const p = S.period.get();
-  return { at, start: p.atRest ? null : p.from };
+  return { at: p.to ?? at, start: p.atRest ? null : p.from };
+}
+// The period the slider's movement gives with the year shown moved to y, for the page's own moves (Play): Move Together
+// takes the start along, the span kept and the pair stopping at the track's ends; Single Year moves the one year (set()
+// puts the start on it); Independent keeps the start, as before.
+function periodAt(y) {
+  const cur = S.period.get();
+  if (cur.movement !== 'together') return { from: cur.atRest ? null : cur.from, to: y };
+  const r = P.rules, nx = r.endTo({ i: cur.fromIndex, j: cur.toIndex, n: cur.stops.length, rest: S.periodRest, m: 'together' }, r.indexOf(cur.stops, y));
+  return { from: cur.stops[nx.i], to: cur.stops[nx.j] };
 }
 function trackTicks(win) {
-  // The track's own width: the control's, less its ‹ › buttons.
-  const w = ($('#timeline')?.clientWidth || 800) - 90;
+  // The track's own width: the drawn track's once it is there, else the control's less its ‹ › and movement buttons.
+  const w = $('#timeline .prp-period-track')?.clientWidth || ($('#timeline')?.clientWidth || 800) - 170;
   return ticksFor(win.from, win.to, { maxLabels: Math.max(3, Math.min(10, Math.round(w / 90))), bc: S.bc });
 }
 
@@ -700,24 +719,25 @@ function startPlay() {
   playButton(); playNote('');
   if (S.mode === 'saved') leaveSaved();
   window.omniState = { ...window.omniState, play: playState() };
-  // From the last year it begins again at the first.
-  const again = S.frame >= S.stops.at(-1);
-  const first = again ? S.stops[0] : S.frame;
+  // From the last year it begins again at the first (in Move Together, with the start on the first, the span kept).
+  const again = S.frame >= S.stops.at(-1), cur = S.period.get();
+  const first = again ? S.stops[cur.movement === 'together' ? Math.min(S.stops.length - 1, cur.toIndex - cur.fromIndex) : 0] : S.frame;
   askAhead(first);
   if (again) move(run, first); else PL.timer = setTimeout(() => tick(run), PL.pace);
 }
 // One move: its file first, then the frame; the next move a pace after this one began.
 async function move(run, y) {
   const t0 = performance.now();
+  const to = periodAt(y); // by the slider's movement (MP-12): the year shown, and the start
+  y = to.to;
   const f = M.fileFor(S.index, y);
   // A move that has to wait for its file says so, as a move by hand does (setFrame finds the file loaded and clears it).
   if (f && !S.loaded.has(f.file)) loadingNote(`Loading the borders for ${yt(y)}…`);
   if (f) { try { await bordersFor(f); } catch { /* setFrame says the file could not load */ } }
   if (run !== PL.run) return;
-  const cur = S.period.get();
-  S.period.set(cur.atRest ? null : cur.from, y, { silent: true });
+  const p = S.period.set(to.from, y, { silent: true });
   askAhead(y);
-  await setFrame(y, { start: S.start, source: 'play' });
+  await setFrame(y, { start: p.atRest ? null : p.from, source: 'play' });
   if (run !== PL.run) return;
   if (y >= S.stops.at(-1)) { stopPlay(`Stopped at ${yt(y)}, the last year of this view.`); publish(); return; }
   PL.timer = setTimeout(() => tick(run), Math.max(0, PL.pace - (performance.now() - t0)));
@@ -744,8 +764,9 @@ async function goTo(text) {
   S.goto = y;
   if (held && (y < win.from || y > win.to)) S.R = { ...S.R, t: { from: held.from, to: held.to } };
   const { start } = mountPeriod();
-  S.period.set(S.period.get().atRest ? null : S.period.get().from, y, { silent: true });
-  await setFrame(y, { start: start != null && start <= y ? start : null, source: 'goto' });
+  const p = S.period.set(S.period.get().atRest ? null : S.period.get().from, y, { silent: true });
+  // In Single Year the slider has put its start on y: the map draws what the slider says.
+  await setFrame(y, { start: p.movement === 'single' ? (p.atRest ? null : p.from) : start != null && start <= y ? start : null, source: 'goto' });
 }
 // "Every year VM holds": the same view, its slider over every year VM holds, at the year shown.
 async function wholeSpan() {
@@ -789,6 +810,7 @@ async function applyRecipe({ first = false } = {}) {
   if (!S.R.step) S.R.step = 'y';
   S.boxSet = false;
   if (S.mode === 'saved') leaveSaved();
+  S.move = moveOf(raw); // the address's movement (MP-12; none, as in every recipe Kino writes: Independent)
   const { at, start } = mountPeriod();
   if (R) S.notes.push(...addressNotes(raw, R, at));
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
@@ -838,8 +860,8 @@ function wire() {
     if (!b) return;
     const y = +b.dataset.year;
     stopPlay();
-    S.period.set(null, y, { silent: true });
-    setFrame(y, { source: 'step' });
+    const p = S.period.set(null, y, { silent: true });
+    setFrame(y, { start: p.atRest ? null : p.from, source: 'step' }); // the start as the slider has it (Single Year on an up-to view: y)
     $('#year').focus({ preventScroll: true });
   });
   $('#shows-list').addEventListener('click', e => {
@@ -864,7 +886,15 @@ function wire() {
   $('#open-file').addEventListener('change', e => { const f = e.target.files?.[0]; if (f) openSaved(f); e.target.value = ''; });
   window.addEventListener('hashchange', () => {
     const R = readRecipe(location.hash.replace(/^#/, ''));
-    if (R && writeRecipe(R) === currentRecipe()) return; // our own write, read back
+    if (R && writeRecipe(R) === currentRecipe()) {
+      // our own write, read back; or the same view with another movement (move=, MP-12), which the slider takes up
+      const m = moveOf(location.hash);
+      if (m === S.move || !S.period) return;
+      stopPlay(); S.move = m;
+      const p = S.period.setMovement(m, { silent: true });
+      setFrame(p.to, { start: p.atRest ? null : p.from, source: 'hash' });
+      return;
+    }
     applyRecipe();
   });
   window.addEventListener('prp:themechange', () => { S.map?.setColors(colors()); if (window.omniState.ready) publish(); });

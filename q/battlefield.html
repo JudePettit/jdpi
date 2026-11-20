@@ -25,7 +25,7 @@ button,select{font:inherit}button{cursor:pointer}
 .mapwrap{position:relative;height:440px;background:var(--prp-map-water)}
 #map{width:100%;height:100%}
 /* The archive's months: design/prp-period.js (‹ › and two handles on one track, one month or a period), styled by prp.css. */
-.monthctl{flex:0 1 380px}
+.monthctl{flex:0 1 460px} /* 460: room for the three movement buttons (MP-12) beside a track of twelve months */
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 14px;border-top:1px solid var(--prp-line-soft);color:var(--prp-text-2);font-size:var(--prp-fs-sm)}
 .legend .lg{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left}
 .legend button.lg:hover{color:var(--prp-link);text-decoration:underline}
@@ -254,6 +254,8 @@ function setUrl() {
   if (view === 'archive' && month) p.set('month', month);
   if (view === 'archive' && from) p.set('from', from);
   if (selectedWar) p.set('war', selectedWar);
+  const mv = PRPPeriod.rules.movementParam(period.movement()); // MP-12: the archive's movement, only away from Independent
+  if (view === 'archive' && mv) p.set(PRPPeriod.MOVE_PARAM, mv);
   history.replaceState(null, '', '?' + p);
 }
 
@@ -433,6 +435,8 @@ const period = PRPPeriod.mount(document.getElementById('monthctl'), {
   names: { from: 'First month of the period', to: 'Month shown, or the last of the period', prev: 'Previous month', next: 'Next month' },
   onChange: p => { month = p.to; from = p.atRest ? null : p.from; setUrl(); renderSide(); renderArchive(); drawMap(); renderCaption(); },
 });
+// The address's movement (?move=, MP-12; none: Independent), before the months load and are placed by its rule.
+period.setMovement(PRPPeriod.rules.readMovement(params.get(PRPPeriod.MOVE_PARAM)), { silent: true });
 
 /* ---------- every country under the circles (AC-14; the rule in design/PRP-STYLE.md §6) ----------
    Natural Earth 1:50m through world-atlas 2.0.2, decoded by topojson-client 3.1.0, both pinned and checked by their

@@ -211,3 +211,40 @@ import { checkHeads as checkSummaries } from '../integration/scripts/heads.mjs';
 test('events.head.json is in step with its store (integration/scripts/heads.mjs)', () => {
   assert.deepEqual(checkSummaries('science/progress/data/events.json'), [], 'run node integration/scripts/heads.mjs science/progress/data/events.json');
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons; End, the page's own key, keeps the span in Move Together.
+import { movementCheck } from './tools/movement.mjs';
+test('page: the movement buttons: Move Together moves both years with the span kept (End too), Single Year shows one year, the address keeps it', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const { s0 } = await movementCheck(page, {
+    url: `${BASE}/science/progress/#y=1900&f=1800`, from: '#from', to: '#year', single: 'Single Year',
+    ready: p => p.waitForFunction(() => document.querySelector('#year')?.dataset.value && /\d/.test(document.querySelector('#year-big')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#year-big').innerText(),
+  });
+  assert.deepEqual([s0.from, s0.to], ['1800', '1900'], 'an address with no move= opens its period as before');
+  // End (the page's own key) in Move Together: the end on the last stop, the start the same number of stops before it.
+  await page.locator('[data-move="together"]').click();
+  await page.keyboard.press('End');
+  const end = await page.evaluate(() => [+document.querySelector('#from').value, +document.querySelector('#year').value, +document.querySelector('#year').max]);
+  assert.equal(end[1], end[2], 'End: the end on the last stop');
+  assert.equal(end[1] - end[0], s0.j - s0.i, 'End: the span kept');
+  // Shift+→ in Move Together walks on from breakthrough to breakthrough, even where the next one sits on the same stop
+  // (from 1600 to 1796 the stops are four years apart: 1609 and 1610 sit on 1608's).
+  const ys = [...new Set(data.events.map(e => e.y))].sort((a, b) => a - b), after = y => ys.find(v => v > y);
+  await page.goto('about:blank');
+  await page.goto(`${BASE}/science/progress/#y=1608&f=1600&move=together`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#year')?.dataset.value === '1608', null, { timeout: 30000 });
+  let y = 1608;
+  for (let k = 0; k < 3; k++) {
+    await page.keyboard.press('Shift+ArrowRight');
+    y = after(y);
+    await page.waitForFunction(v => document.querySelector('#year').dataset.value === String(v), y, { timeout: 5000 });
+  }
+  assert.ok(y > 1610, `three steps past 1608 reach ${y}`);
+  assert.match(page.url(), new RegExp(`y=${y}(&|$)`));
+  assert.deepEqual(errors, []);
+});

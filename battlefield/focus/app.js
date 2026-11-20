@@ -893,11 +893,11 @@ window.jdpiDocumentary = {
 };
 
 // The address: exactly #war=…&m=…[&v=…] while the start rests (the shell's deep links and Kino rely on it), with
-// &f=<first month> after m for a period.
+// &f=<first month> after m for a period, and &move=… last for a movement other than Independent (MP-12).
 function writeHash() {
   if (!state.war) return;
-  const f = PRPPeriod.rules.startParam(period.get());
-  history.replaceState(null, '', `#war=${state.war.id}&m=${state.war.months[state.m]}${f != null ? `&f=${f}` : ''}${state.view !== 'map' ? `&v=${state.view}` : ''}`);
+  const f = PRPPeriod.rules.startParam(period.get()), mv = PRPPeriod.rules.movementParam(period.movement());
+  history.replaceState(null, '', `#war=${state.war.id}&m=${state.war.months[state.m]}${f != null ? `&f=${f}` : ''}${state.view !== 'map' ? `&v=${state.view}` : ''}${mv ? `&${PRPPeriod.MOVE_PARAM}=${mv}` : ''}`);
 }
 async function loadWar(id, month, from = null) {
   period.stop();
@@ -926,15 +926,18 @@ async function loadWar(id, month, from = null) {
   hits.gws.clear(); hits.qids.clear(); focusFit = null;
   fitProjection(); writeHash();
 }
-function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m'), f: p.get('f'), v: VIEWS.includes(p.get('v')) ? p.get('v') : 'map' }; }
-// Another war loads; another month or period of the same war moves the timeline (no f: the start back at rest).
+function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m'), f: p.get('f'), v: VIEWS.includes(p.get('v')) ? p.get('v') : 'map', move: PRPPeriod.rules.readMovement(p.get(PRPPeriod.MOVE_PARAM)) }; }
+// Another war loads; another month or period of the same war moves the timeline (no f: the start back at rest). The
+// movement is read first (no move: Independent), so the period is placed by its rule.
 window.addEventListener('hashchange', () => {
   const h = readHash();
   if (h.v !== state.view) setView(h.v, { push: false });
+  const moved = h.move !== period.movement();
+  if (moved) period.setMovement(h.move, { silent: true });
   if (h.war && h.war !== state.war?.id) return loadWar(h.war, h.m, h.f);
-  if (!state.war || !(h.m || h.f)) return;
+  if (!state.war || !(h.m || h.f || moved)) return;
   const w = state.war, to = w.months.includes(h.m) ? h.m : w.months[state.m], from = PRPPeriod.rules.readStart(w.months, h.f, to, 'first'), p = period.get();
-  if (to !== p.to || from !== PRPPeriod.rules.startParam(p)) setPeriod(from, to, { push: false });
+  if (moved || to !== p.to || from !== PRPPeriod.rules.startParam(p)) setPeriod(from, to, { push: false });
 });
 
 { const a = $('#sibling'); a.href = go('battlefield-history', 'battlefield/history/index.html'); a.target = embedded ? '_top' : '_self'; }
@@ -950,5 +953,6 @@ Promise.all([fetch('data/index.json').then(r => r.json()), fetch('../history/dat
   initMap();
   const h = readHash();
   setView(h.v, { push: false });
+  period.setMovement(h.move, { silent: true }); // the address's movement (MP-12), before the war's months are placed
   loadWar(idx.wars.some(w => w.id === h.war) ? h.war : 'ww2', h.m, h.f);
 }).catch(e => { $('#status').textContent = 'War data could not load: ' + e.message; });

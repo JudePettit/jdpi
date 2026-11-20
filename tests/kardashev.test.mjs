@@ -515,3 +515,20 @@ test('a power listed at no step opens with its panel and the page whole, and a y
   }
   assert.deepEqual(errors, []);
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons.
+import { movementCheck } from './tools/movement.mjs';
+test('the movement buttons: Move Together moves both steps with the span kept, Single Year shows one step, the address keeps it', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const { s0 } = await movementCheck(page, {
+    url: '/kardashev/#y=1900&f=1500', from: '#step-from', to: '#step', single: 'Single Year',
+    ready: p => p.waitForSelector('.rank[data-id]', { timeout: 30000 }),
+    readout: p => p.locator('#year-big').innerText(),
+  });
+  assert.deepEqual([s0.from, s0.to], ['1500', '1900'], 'an address with no move= opens its period as before');
+  assert.deepEqual(errors, []);
+});

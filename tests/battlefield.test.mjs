@@ -1105,3 +1105,38 @@ test('Realtime: a circle keeps its pointer and its click over a country and name
   assert.doesNotMatch(await bare.locator('.prp-sources').innerText(), /Natural Earth|Tuvalu/);
   assert.deepEqual(bareErrors, []);
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons, on the Retrospective Battlefield and on the Realtime
+// archive of months (its third button reads "Single Month": "Single Year" would be plainly false on a slider of months).
+import { movementCheck } from './tools/movement.mjs';
+test('Retrospective: the movement buttons: Move Together moves both handles with the span kept, Single Year shows one year, the address keeps it', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const { s0 } = await movementCheck(page, {
+    url: '/battlefield/history/#y=1945&f=1939', from: '#from', to: '#year', single: 'Single Year',
+    ready: p => p.waitForFunction(() => document.querySelector('#year')?.dataset.value && /\d/.test(document.querySelector('#year-big')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#year-big').innerText(),
+    together: (text, s) => text === `${s.from}–${s.to}`, one: (text, s) => text === s.to,
+  });
+  assert.deepEqual([s0.from, s0.to], ['1939', '1945'], 'an address with no move= opens its period as before');
+  assert.deepEqual(errors, []);
+});
+test('Realtime archive: the movement buttons (Single Month) move both months together, show one month, and the address keeps it', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  // The archive opens on its last two months; its caption says whether the circles sum a period or show one month.
+  const { s0 } = await movementCheck(page, {
+    url: '/q/battlefield.html?view=archive', from: '#month-from', to: '#month', single: 'Single Month',
+    ready: p => p.waitForFunction(() => document.querySelector('#month')?.dataset.value && /Armed-conflict events/.test(document.querySelector('#mapcap')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#mapcap').innerText(),
+    together: text => /over the period summed/.test(text), one: text => /one circle per place and month/.test(text),
+  });
+  assert.equal(s0.j - s0.i, 1, 'the archive opens on its last two months, as before');
+  assert.deepEqual(errors, []);
+});

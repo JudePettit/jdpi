@@ -1492,3 +1492,31 @@ test('leaders: a name is shown without its realm ("Mohammed VI of Morocco" is "M
     assert.equal(plainName(n), n, `${c.iso3}: "${n}" still carries its realm`);
   }
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons, on the label's line beside ‹ ▶ › Latest.
+import { movementCheck } from './tools/movement.mjs';
+test('page: the movement buttons: Move Together moves both years with the span kept, Single Year shows one year, the address keeps it; the track keeps its row', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const { s0 } = await movementCheck(page, {
+    url: '/q/national.html#map&year=2015&from=2008', from: '#yr-from', to: '#yr', single: 'Single Year',
+    ready: p => p.waitForFunction(() => document.querySelector('#yr')?.dataset.value && /\d{4}/.test(document.querySelector('#yrlabel')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#yrlabel').innerText(),
+  });
+  assert.deepEqual([s0.from, s0.to], ['2008', '2015'], 'an address with no move= opens its period as before');
+  // The buttons share the label's line with ‹ ▶ › Latest, above the track's own full-width row, at 1400 and 390 px.
+  for (const width of [1400, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const box = await page.evaluate(() => {
+      const r = s => document.querySelector(s).getBoundingClientRect();
+      return { moves: r('.prp-period-moves'), track: r('#years .prp-period-track'), scroll: document.documentElement.scrollWidth };
+    });
+    assert.ok(box.moves.bottom <= box.track.top, `${width}: the buttons above the track`);
+    assert.ok(box.track.width > width - 80, `${width}: the track keeps its row (${box.track.width}px)`);
+    assert.ok(box.moves.right <= width - 16 + 0.5 && box.scroll <= width, `${width}: no sideways scroll`);
+  }
+  assert.deepEqual(errors, []);
+});

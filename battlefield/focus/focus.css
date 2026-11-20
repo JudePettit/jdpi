@@ -29,6 +29,8 @@
 #timeline { --prp-period-strip: 38px; flex: 1 1 auto; align-items: flex-end; }
 #timeline .prp-period-btn { margin-bottom: 10px; }
 #timeline .prp-period-btn.play { margin-bottom: 8px; }
+#timeline .prp-period-moves { margin-bottom: 14px; } /* the movement buttons (24px; 26px to touch) level with them too */
+@media (pointer: coarse) { #timeline .prp-period-moves { margin-bottom: 13px; } }
 #speed { flex: none; height: 30px; margin-bottom: 11px; font-size: 12px; }
 #timeline .prp-period-strip .area { fill: var(--clash); fill-opacity: .28; }
 #timeline .prp-period-strip .area.est { fill-opacity: .15; }

@@ -1744,3 +1744,21 @@ test('page (AC-5): the Pacific war draws no dot for a later state and its battle
   assert.ok(!cambodia.includes('TON') && cambodia.includes('WSM') && cambodia.includes('NRU'), cambodia.join(' '));
   assert.deepEqual(errors, []);
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons on War Focus (a slider of months: "Single Month").
+import { movementCheck } from './tools/movement.mjs';
+test('page: the movement buttons: Move Together moves both months with the span kept, Single Month shows one month, the address keeps it', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const { s0 } = await movementCheck(page, {
+    url: '/battlefield/focus/#war=ww2&m=1943-11&f=1943-06', from: '#month-from', to: '#month', single: 'Single Month',
+    ready: p => p.waitForFunction(() => document.querySelector('#month')?.dataset.value && /\d{4}/.test(document.querySelector('#date')?.textContent || ''), null, { timeout: 30000 }),
+    readout: p => p.locator('#date').innerText(),
+  });
+  assert.deepEqual([s0.from, s0.to], ['1943-06', '1943-11'], 'an address with no move= opens its period as before');
+  assert.equal(await page.locator('#date').innerText(), 'Jun – Nov 1943');
+  assert.deepEqual(errors, []);
+});

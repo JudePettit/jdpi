@@ -1283,3 +1283,36 @@ test('page: a click\'s view opens on the clicked place\'s own outline; where VM 
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
+
+// MP-12 (Jude, 17 November 2026): the three movement buttons. move= is a frame-only key after the recipe (as host=),
+// outside VR/1: the recipe the page publishes (omniState.recipe) never carries it, so Kino and saved views are unchanged.
+import { movementCheck } from './tools/movement.mjs';
+test('page: the movement buttons: Move Together moves both years with the span kept, Single Year draws one year, the address keeps move= outside the recipe', BASE ? pageTest : { skip: 'set JDPI_URL to test the page' }, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const recipe = 'vr=1&t=1900..2000&at=1950&since=1940&show=frame&step=y&base=plain&fill=borders';
+  const ready = p => p.waitForFunction(() => window.omniState?.ready && window.omniState.frame != null && document.querySelector('#year')?.dataset.value, null, { timeout: 60000 });
+  const { s0, s5 } = await movementCheck(page, {
+    url: `${BASE}/omni/index.html#${recipe}`, from: '#from', to: '#year', single: 'Single Year', ready,
+    // What the map draws: the published recipe's year shown (at=) and the period's start (since=, absent for one year).
+    readout: p => p.evaluate(() => window.omniState.recipe),
+    together: (r, s) => r.includes(`at=${s.to}`) && r.includes(`since=${s.from}`), one: (r, s) => r.includes(`at=${s.to}`) && !/since=/.test(r),
+  });
+  assert.deepEqual([s0.from, s0.to], ['1940', '1950'], 'an address with no move= opens its period as before');
+  assert.match(s5.address, /&move=single/);
+  // The recipe never carries the movement; the page's own Play in Move Together moves both, the span kept.
+  await page.goto(`${BASE}/omni/index.html#${recipe}&move=together`, { waitUntil: 'domcontentloaded' });
+  await ready(page);
+  assert.doesNotMatch(await page.evaluate(() => window.omniState.recipe), /move/);
+  assert.equal(await page.locator('[data-move="together"]').getAttribute('aria-pressed'), 'true');
+  await page.locator('#play-pace').selectOption('250');
+  await page.locator('#play').click();
+  await page.waitForFunction(() => +document.querySelector('#year').dataset.value >= 1953, null, { timeout: 30000 });
+  await page.locator('#play').click();
+  const span = await page.evaluate(() => +document.querySelector('#year').dataset.value - +document.querySelector('#from').dataset.value);
+  assert.equal(span, 10, 'Play in Move Together keeps the span');
+  assert.deepEqual(errors, []);
+});

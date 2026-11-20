@@ -453,14 +453,17 @@ function selectWar(id) {
 }
 function writeHash() {
   const f = PRPPeriod.rules.startParam(period.get());
-  const h = `#y=${state.year}${f != null ? `&f=${f}` : ''}${state.selected ? `&c=${state.selected}` : ''}${state.war ? `&w=${state.war.id}` : ''}${state.view === 'table' ? '&v=table' : ''}`;
+  const m = PRPPeriod.rules.movementParam(period.movement()); // MP-12: the movement, written only away from Independent
+  const h = `#y=${state.year}${f != null ? `&f=${f}` : ''}${state.selected ? `&c=${state.selected}` : ''}${state.war ? `&w=${state.war.id}` : ''}${state.view === 'table' ? '&v=table' : ''}${m ? `&${PRPPeriod.MOVE_PARAM}=${m}` : ''}`;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 // MP-03 (15 Nov 2026): on a phone the opening's two handles sit at least about 24 px apart at the track's drawn
 // width, the latest year still at the right handle; on wider screens they open one year apart, as before.
 function openSteps() {
   if (!matchMedia('(max-width: 767px)').matches) return 1;
-  const w = document.getElementById('year')?.getBoundingClientRect().width || $('#timeline').getBoundingClientRect().width;
+  // The track, not #year: the input's box takes in the thumb, while the track (inset half a thumb at each end) is
+  // exactly the distance the handles travel, whatever sits beside it (the movement buttons, MP-12).
+  const w = document.querySelector('#timeline .prp-period-track')?.getBoundingClientRect().width || $('#timeline').getBoundingClientRect().width;
   return PRPPeriod.rules.openSteps(period.get().stops.length, w);
 }
 function readHash() {
@@ -469,7 +472,8 @@ function readHash() {
   // An f at or after the year, or unreadable, is a single year; an address with no year at all opens on the last two.
   // c: a Gleditsch–Ward number, or the ISO3 of a dot that has none (the Holy See).
   const c = p.get('c') || '', key = /^\d+$/.test(c) ? +c || null : /^[A-Z]{3}$/.test(c) && dotOf(c) ? c : null;
-  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f'), openSteps()), c: key, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map' };
+  return { y, f: PRPPeriod.rules.readStart(years, p.get('f'), y, 'end', !p.get('y') && !p.get('f'), openSteps()), c: key, w: p.get('w'), v: p.get('v') === 'table' ? 'table' : 'map',
+    m: PRPPeriod.rules.readMovement(p.get(PRPPeriod.MOVE_PARAM)) };
 }
 
 function setupSearch() {
@@ -557,15 +561,18 @@ const fmtDay = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric'
     $('.map-wrap').classList.add('has-dots'); // styles.css: the key under the map, clear of the dots
     $('#status').innerHTML = `<span><b>${data.wars.length}</b> wars and armed conflicts</span><span>Coverage <b>${data.firstYear}–${data.lastYear}</b></span><span>Sources <b>UCDP/PRIO · Correlates of War · CShapes 2.0</b></span>${data.generated ? `<span>Built <b>${esc(fmtDay(data.generated))}</b></span>` : ''}`;
     drawMap(); setupTimeline(); setupSearch();
-    const { y, f, c, w, v } = readHash();
+    const { y, f, c, w, v, m } = readHash();
     state.selected = c;
     setView(v, { push: false });
+    period.setMovement(m, { silent: true }); // the address's movement first, so its period is placed by that rule
     setPeriod(f, y, { push: false });
     if (w) selectWar(w);
     window.addEventListener('hashchange', () => {
       const h = readHash();
       if (h.v !== state.view) setView(h.v, { push: false });
-      if (h.y !== state.year || (h.f ?? h.y) !== state.from) setPeriod(h.f, h.y, { push: false });
+      const moved = h.m !== period.movement();
+      if (moved) period.setMovement(h.m, { silent: true });
+      if (moved || h.y !== state.year || (h.f ?? h.y) !== state.from) setPeriod(h.f, h.y, { push: false });
       if (h.c !== state.selected) select(h.c);
       if ((h.w || null) !== (state.war?.id || null)) selectWar(h.w);
     });

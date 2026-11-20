@@ -1010,6 +1010,8 @@ function timeKeys() {
   if (per()) q.push(`from=${view.from}`);
   const w = measureId(metricNow());
   if (w) q.push(`measure=${encodeURIComponent(w)}`);
+  const mv = PRPPeriod.rules.movementParam(period.movement()); // MP-12: the slider's movement, only away from Independent
+  if (mv) q.push(`${PRPPeriod.MOVE_PARAM}=${mv}`);
   return q;
 }
 function writeHash() {
@@ -1037,6 +1039,10 @@ function readHash(moved = false) {
   $('#ccount').hidden = !compare.length; $('#ccount').textContent = compare.length;
   const keep = moved && !['year', 'from', 'period', 'measure'].some(k => p.has(k));
   let t = { old: false }, switched = null;
+  // The movement (move=, MP-12): read on a first load (none: Independent) and from a moved hash that names one; a moved
+  // hash without it keeps the reader's, as it keeps the years.
+  const mv = PRPPeriod.rules.readMovement(p.get(PRPPeriod.MOVE_PARAM));
+  if ((!keep || p.has(PRPPeriod.MOVE_PARAM)) && mv !== period.movement()) setView(period.setMovement(mv, { silent: true }));
   if (!keep) {
     $('#metric').value = (metricOf(p.get('measure')) || METRICS[0]).id; // no measure= is overall pressure
     t = readTime(p);
@@ -1176,6 +1182,8 @@ const period = PRPPeriod.mount($('#years'), {
 $('#yrbtns').append(...['#yr-prev', '#yr-play', '#yr-next'].map(s => $(s)).filter(Boolean));
 $('#yrbtns').insertAdjacentHTML('beforeend', '<button type="button" class="prp-btn sm" id="yr-latest" title="Back to Latest: each country’s newest values" disabled>Latest</button>');
 $('#yr-latest').onclick = () => { period.stop(); period.set(null, LATEST); };
+// The three movement buttons (MP-12) share that line too, after Latest, so the track keeps its full-width row.
+$('#yrbtns').after(...[$('#years .prp-period-moves')].filter(Boolean));
 for (const inp of Object.values(period.inputs)) inp.setAttribute('aria-describedby', 'yrhint');
 // Above the track: how many countries have a full six-dimension score (or, for an indicator, a value) in each year.
 let stripKey = '';

@@ -478,7 +478,7 @@
     svgC.on('click', ev => {
       if (ev.target.tagName === 'path') return;
       const k = Math.max(0, Math.min(data.steps.length - 1, Math.round(x.invert(d3.pointer(ev)[0])))), p = period.get();
-      const t = PRPPeriod.rules.trackTo({ i: p.fromIndex, j: p.toIndex, n: data.steps.length, rest: 'end' }, k);
+      const t = PRPPeriod.rules.trackTo({ i: p.fromIndex, j: p.toIndex, n: data.steps.length, rest: 'end', m: p.movement }, k); // by the chosen movement (MP-12)
       period.stop();
       setPeriod(t.i === t.j ? null : data.steps[t.i].year, data.steps[t.j].year);
     });
@@ -503,8 +503,8 @@
   }
 
   function writeHash() {
-    const f = PRPPeriod.rules.startParam(period.get());
-    history.replaceState(null, '', `#y=${data.steps[idx].year}${f != null ? `&f=${f}` : ''}${selected ? `&p=${selected}` : ''}${view === 'table' ? '&v=table' : ''}`);
+    const f = PRPPeriod.rules.startParam(period.get()), m = PRPPeriod.rules.movementParam(period.movement()); // m: MP-12, only away from Independent
+    history.replaceState(null, '', `#y=${data.steps[idx].year}${f != null ? `&f=${f}` : ''}${selected ? `&p=${selected}` : ''}${view === 'table' ? '&v=table' : ''}${m ? `&${PRPPeriod.MOVE_PARAM}=${m}` : ''}`);
   }
   function render() { renderKpis(); placeLines(); renderMap(); renderPanel(); renderTable(); renderCaption(); }
   // The steps shown (design/prp-period.js): the start rests on the end, so one step is shown and ‹ ›, play, a click on
@@ -590,7 +590,8 @@
     const h = new URLSearchParams(location.hash.slice(1)), y = h.get('y') ? +h.get('y') : NaN;
     const k = Number.isFinite(y) ? data.steps.reduce((b, s, i) => (Math.abs(s.year - y) < Math.abs(data.steps[b].year - y) ? i : b), 0) : -1;
     const to = data.steps[k >= 0 ? k : idx].year;
-    return { to, from: PRPPeriod.rules.readStart(period.get().stops, h.get('f'), to, 'end', !h.get('y') && !h.get('f')), p: byId[h.get('p')] ? h.get('p') : null, v: h.get('v') === 'table' ? 'table' : 'map' };
+    return { to, from: PRPPeriod.rules.readStart(period.get().stops, h.get('f'), to, 'end', !h.get('y') && !h.get('f')), p: byId[h.get('p')] ? h.get('p') : null, v: h.get('v') === 'table' ? 'table' : 'map',
+      m: PRPPeriod.rules.readMovement(h.get(PRPPeriod.MOVE_PARAM)) };
   }
   Promise.all([
     fetch('data/energy.json').then(r => r.json()),
@@ -608,6 +609,7 @@
     setView(h.v, false);
     drawChart();
     selected = h.p;
+    period.setMovement(h.m, { silent: true }); // the address's movement first, so its period is placed by that rule
     setPeriod(h.from, h.to);
     // The names on the map are placed by their measured widths, so they are placed again once the web font is in
     // (review of 16 November 2026: placed with the fallback font, a name could sit on another until a redraw).
@@ -619,6 +621,7 @@
       const q = readHash();
       if (q.v !== view) setView(q.v, false);
       if (q.p !== selected) selected = q.p;
+      period.setMovement(q.m, { silent: true });
       setPeriod(q.from, q.to);
     });
   }).catch(err => { console.error(err); $('#status').textContent = 'Could not load the energy data.'; });

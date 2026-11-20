@@ -340,6 +340,8 @@ function writeHash() {
   if (state.sel) parts.push(`e=${state.sel}`);
   if (state.view !== 'map') parts.push(`v=${state.view}`);
   if (state.off.size) parts.push(`d=${DISC.filter(d => !state.off.has(d.id)).map(d => d.id).join(',')}`);
+  const mv = PRPPeriod.rules.movementParam(period.movement()); // MP-12: the movement, only away from Independent
+  if (mv) parts.push(`${PRPPeriod.MOVE_PARAM}=${mv}`);
   const h = `#${parts.join('&')}`;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
@@ -352,13 +354,15 @@ function readHash() {
   if (f > y) f = y;
   if (e && e.y < f) f = e.y;
   const shown = (p.get('d') || '').split(',').filter(d => d in DIDX);
-  return { y, f, e: e?.id || null, v: p.get('v') || 'map', off: new Set(shown.length ? DISC.map(d => d.id).filter(d => !shown.includes(d)) : []) };
+  return { y, f, e: e?.id || null, v: p.get('v') || 'map', off: new Set(shown.length ? DISC.map(d => d.id).filter(d => !shown.includes(d)) : []),
+    move: PRPPeriod.rules.readMovement(p.get(PRPPeriod.MOVE_PARAM)) };
 }
 function applyHash() {
   const h = readHash();
   state.off = h.off;
   if (h.v !== state.view) setView(h.v, { push: false });
   state.sel = h.e;
+  period.setMovement(h.move, { silent: true }); // the address's movement first (none: Independent), so the period is placed by its rule
   setPeriod(h.f, h.y, { push: false }); // readHash has put an f at or before the first year at rest and capped it at y
 }
 
@@ -368,7 +372,18 @@ function applyHash() {
 function jump(dir) {
   const ys = [...new Set(EVENTS.filter(isShown).map(e => e.y))].sort((a, b) => a - b);
   const y = dir > 0 ? ys.find(v => v > state.year) : ys.filter(v => v < state.year).at(-1);
-  if (y != null) setPeriod(state.from > y ? STOPS[stopFor(y)] : state.from, y);
+  if (y != null) setPeriod(...endPeriod(y, state.from > y ? STOPS[stopFor(y)] : state.from));
+}
+// The end moved to year y by the page's own keys (Shift+arrows, Home, End), as [from, to] for setPeriod: in Move
+// Together the start goes along, the span kept and the pair stopping at the track's ends (on stops); in Single Year
+// set() puts the start on the one year; in Independent it is as before.
+function endPeriod(y, from) {
+  const p = period.get();
+  if (p.movement !== 'together') return [from, y];
+  const r = PRPPeriod.rules, k = stopFor(y), nx = r.endTo({ i: p.fromIndex, j: p.toIndex, n: STOPS.length, rest: 'first', m: 'together' }, k);
+  // The end keeps y itself when it lands on y's stop (1687 sits on 1684), so the next Shift+→ finds the next year
+  // rather than the same one again; a start that did not move keeps its own value.
+  return [nx.i === p.fromIndex ? from : STOPS[nx.i], nx.j === k ? y : STOPS[nx.j]];
 }
 function setupTimeline() {
   // minor ticks drop out below 900px; on phones only the key ones (and the ends) stay.
@@ -392,8 +407,8 @@ function setupTimeline() {
       const dir = e.key === 'ArrowRight' ? 1 : -1;
       if (e.shiftKey) jump(dir); else period.step(dir);
     }
-    else if (e.key === 'Home') { period.stop(); setPeriod(state.from, STOPS[0]); }
-    else if (e.key === 'End') { period.stop(); setPeriod(state.from, STOPS.at(-1)); }
+    else if (e.key === 'Home') { period.stop(); setPeriod(...endPeriod(STOPS[0], state.from)); }
+    else if (e.key === 'End') { period.stop(); setPeriod(...endPeriod(STOPS.at(-1), state.from)); }
   });
 }
 

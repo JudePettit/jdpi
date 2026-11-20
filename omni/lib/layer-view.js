@@ -68,6 +68,8 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
     }
     return files.get(url);
   };
+  // A layer's own files as loaded (its catalogue file, and the year's file of a split layer), taken out of the cache.
+  const forget = (id, d) => { for (const p of [entry(id)?.data, d?.path]) if (p) files.delete(rel(p)); };
   const entry = id => cat.byId.get(id) || null;
   const src = id => (sources() || []).find(s => s.id === id) || null;
   // The files under omni/data are named from the site's root in the catalogue (omni/data/...): data is omni/data/.
@@ -471,7 +473,8 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
     async frame(year, { lo = year } = {}) {
       const gen = ++frameGen;
       const mine = set, next = { fill: null, base: null, points: {} }, bad = new Map(), errs = [];
-      const job = (id, put) => need(id, year).then(d => { const why = misshapen(id, d); if (why) throw new Error(why); put(d); })
+      // A file of the wrong shape is forgotten, so switching the layer off and on reads it again (third reading, 20 November 2026).
+      const job = (id, put) => need(id, year).then(d => { const why = misshapen(id, d); if (why) { forget(id, d); throw new Error(why); } put(d); })
         .catch(e => { errs.push(e.message); bad.set(id, e.message); });
       const jobs = [];
       if (set.base) jobs.push(job(set.base, d => { next.base = d; }));

@@ -22,7 +22,8 @@
 // 4. Reads omni/data/layers/retro-keys.json's source: the Political Retrospective's own key of each country by ISO3,
 //    from its data/countries.json (the sibling folder hp-retrospective, or --retro), only so a click can open its page
 //    there.
-// 5. Only once every step above has worked (X6): writes omni/data/layers/elections/elections.json,
+// 5. Only once every step above has worked (X6), and omni/data/layers.json has been read and holds its list of layers
+//    (third reading, 20 November 2026): writes omni/data/layers/elections/elections.json,
 //    omni/data/layers/coups/coups.json, omni/data/layers/political-change/terms.json and retro-keys.json, then their
 //    catalogue entries in omni/data/layers.json (each `built` moving only when its rows change), then the bytes and
 //    sha256 of retro-keys.json in every entry that lists it, whichever this run rebuilt. A run that fails writes
@@ -280,10 +281,17 @@ async function main() {
     outs.push(o); entries.push(() => changeEntry(o.file, o.m));
     said.push(`terms.json: ${terms.length} terms (${terms.filter(t => t.role === 'hos').length} of heads of state, ${terms.filter(t => t.role === 'hog').length} of government), ${Object.keys(places).length} states, changes ${ys[0]}–${ys.at(-1)}; ${o.m.bytes} bytes, ${o.m.gzip} gzipped; built ${o.file.built}`);
   }
-  // Every step has worked: the files, then the catalogue entries (measured from the files as written), then the
-  // hashes of retro-keys.json in every entry that lists it, so a run of --only retro leaves none stale.
+  // The catalogue is read and checked, and every entry made, before the first write: a catalogue that cannot be read
+  // stops the run with nothing written (third reading, 20 November 2026). An entry's retro-keys.json hashes, measured
+  // here from the file before it is written, are set right by syncRetro below.
+  let catalogue = null;
+  try { catalogue = JSON.parse(readFileSync(LAYERS, 'utf8')); } catch (e) { throw new Error(`omni/data/layers.json could not be read (${e.message}), so nothing is written`); }
+  if (!Array.isArray(catalogue?.layers)) throw new Error('omni/data/layers.json holds no list of layers, so nothing is written');
+  const made = entries.map(e => e());
+  // Every step has worked: the files, then the catalogue entries, then the hashes of retro-keys.json in every entry
+  // that lists it, so a run of --only retro leaves none stale.
   writeAll(outs);
-  for (const e of entries) putLayer(LAYERS, e());
+  for (const e of made) putLayer(LAYERS, e);
   if (existsSync(join(ROOT, RETRO))) {
     const cat = JSON.parse(readFileSync(LAYERS, 'utf8')), before = JSON.stringify(cat);
     syncRetro(cat, measure(readFileSync(join(ROOT, RETRO), 'utf8')));

@@ -16,7 +16,7 @@ VM holds Cliopatria's borders for **every year it covers, 3400 BC to AD 2024** (
 | `data/borders/qids.json` | The crosswalk from Wikidata Q-ids to Cliopatria's names by year, and the ids rejected, with why | `scripts/build-borders.mjs` |
 | `data/base/ne_110m_land.geojson` | Natural Earth 5.1.1's land at 1:110 million, unchanged: the plain base (see `data/base/README.md`) | `scripts/build-base.mjs` |
 | `data/layers/battles.json` | The battles the Master Index and War Focus hold with a date and a point (1,967, 1258–2025), each value with its source | `scripts/build-battles.mjs` |
-| `data/layers/wars/registry.json` | The one war registry (S5b): each war of the lake and of UCDP/PRIO ACD 26.1 once, with its ids in each, its years and its War Focus id where there is one; a UCDP conflict's years outside every War Focus war that holds it are the conflict's own war (`ucdp-<id>`); no COW record | `scripts/build-wars.mjs` |
+| `data/layers/wars/registry.json` | The one war registry (S5b): each war of the lake and of UCDP/PRIO ACD 26.1 once, with its ids in each, its years and its War Focus id where there is one; a UCDP conflict's years outside every War Focus war that holds it are the conflict's own war (`ucdp-<id>`), whose from and to are the years ACD records it as active (25 or more battle-related deaths); an event UCDP files under the conflict belongs to its own war in any year, so an event can fall outside those years (conflict 364 in 1989); no COW record | `scripts/build-wars.mjs` |
 | `data/layers/conflict-territory/conflicts.json` | Layer 2: UCDP/PRIO ACD 26.1 and UCDP BRD 26.1 by country and year, 1946–2025 (intensity, battle deaths from 1989, the sides fighting abroad), each joined to a country by its name and ISO 3166 code, never by a GW code alone | `scripts/build-conflict-territory.mjs` (places from `scripts/ucdp-places.mjs`) |
 | `data/layers/political-change/terms.json`, `elections/elections.json`, `coups/coups.json` | Layer 3: heads of state and government from Wikidata (P39), elections and referendums from the Master Index, coups from Wikidata (Q45382), each value with its source | `scripts/build-political.mjs` |
 | `data/layers/retro-keys.json` | The Retrospective’s own country keys by ISO 3166 code (format `vm-addresses/1`), read from its `data/countries.json`, so a click on a country opens the Retrospective at that country | `scripts/build-political.mjs --only retro` |
@@ -289,7 +289,9 @@ VM’s own text. Four more layers, each loaded only when it is switched on:
   the IEA (EG.USE.PCAP.KG.OE, EG.FEC.RNEW.ZS, EN.GHG.CO2.PC.CE.AR5), IHME (EN.ATM.PM25.MC.M3) and ITU (IT.CEL.SETS.P2,
   IT.NET.USER.ZS) are absent too, each with the words of its terms. Each series’ entry names its originators
   (`originators`) and what VM read of their terms; where an originator’s terms were not read (the UN Population
-  Division’s page holds none in its text), its method says “originator’s terms not read”.
+  Division’s page holds none in its text), its method says “originator’s terms not read”. The builder finds a barred
+  originator in a series’ sources by its full name in any case or by its abbreviation as a word (IEA, IHME, ITU, SIPRI),
+  and stops if one comes back unlisted.
 - **UCDP’s events** (points, 1989–2026, `l=ucdp-events`, `l=ucdp-events:t=1|2|3`, `l=ucdp-events:w=<war id>`): UCDP
   GED 26.1 summed into 0.5° cells by month, one file a year (`data/layers/ucdp-events/<year>.json`); only the frame’s
   year is fetched. An event UCDP knows only to its province or country is drawn hollow at its country; one known only to
@@ -309,8 +311,11 @@ VM’s own text. Four more layers, each loaded only when it is switched on:
 The map draws at most three point or line layers; a fourth switches off the oldest and says so. A page or the narrator
 can send `prp:focus` with ISO3 codes (`{ countries: ['FRA'] }`) and the map fits them; a Q-id (`{ qids: ['Q1449'] }`)
 is fitted to its border of the frame's year, else to its point in the Master Index, read from its shard if the view
-has not read it; `{ reset: true }` fits the view’s own box. If the battles' file cannot load, their switch goes back
-off and the list says why. Across VM, a tagged name (a Wikipedia link, or an element with `data-qid`) opens VM’s card
+has not read it; `{ reset: true }` fits the view’s own box, and a focus whose reads finish after a newer focus or a
+reset changes nothing. If the battles' file cannot load, whether switched on or named in the address, their switch goes
+back off and the list says why. Only the latest address is drawn: an older one whose reads finish late stops there. A
+layer’s loading errors are those of the latest frame; a file of the wrong shape is read again when the layer is next
+switched on. A `fill=` or `base=` the recipe cannot read is named under “In focus”, never dropped in silence. Across VM, a tagged name (a Wikipedia link, or an element with `data-qid`) opens VM’s card
 (`design/jdpi-entities.js`, offers from `design/vm-click.js`): the person’s life on the Omni-Map, their encyclopedia
 entry, and Wikipedia. A Ctrl-, Shift-, Alt- or middle-click still goes to Wikipedia.
 

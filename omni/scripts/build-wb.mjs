@@ -85,38 +85,40 @@ export const BARRED = {
 // use, redistribution and adaptation) or 'not read' (VM has not read them, or could not: the series rests on the World
 // Bank's CC BY 4.0 label, and its method says "originator’s terms not read"). A series that names a barred originator
 // and has no line in BARRED stops the build (checkOriginators), so it cannot come back unseen; one that names no
-// originator listed here stops it too.
+// originator listed here stops it too. Every match reads in any case, and a barred originator is found by its full name
+// or by its abbreviation as a word of its own (IEA, IHME, ITU, SIPRI: "IEA; World Bank (WB)" names the IEA), so another
+// spelling of the same producer cannot slip past the check (third reading, 20 November 2026).
 export const ORIGINATORS = [
-  { id: 'ihme', name: 'Institute for Health Metrics and Evaluation (IHME)', match: /Institute for Health Metrics|\(IHME\)/, terms: 'barred',
+  { id: 'ihme', name: 'Institute for Health Metrics and Evaluation (IHME)', match: /Institute for Health Metrics|\bIHME\b/i, terms: 'barred',
     termsUrl: 'https://www.healthdata.org/about/terms-and-conditions', read: '2026-11-20',
     also: ['https://ghdx.healthdata.org/record/ihme-data/gbd-2023-air-pollution-exposure-estimates-1990-2023', 'https://www.healthdata.org/about/ihme-free-charge-non-commercial-user-agreement'],
     seen: 'data on IHME’s websites “can be used, shared, modified or built upon by non-commercial users in accordance with the IHME FREE-OF-CHARGE NON-COMMERCIAL USER AGREEMENT”; “Commercial organizations wishing to acquire a license to access and download IHME data should contact” IHME' },
-  { id: 'itu', name: 'International Telecommunication Union (ITU)', match: /International Telecommunication Union|\(ITU\)/, terms: 'barred',
+  { id: 'itu', name: 'International Telecommunication Union (ITU)', match: /International Telecommunication Union|\bITU\b/i, terms: 'barred',
     termsUrl: 'https://www.itu.int/en/about/Pages/terms-of-use.aspx', read: '2026-11-20', refused: { url: 'https://datahub.itu.int/', answer: 'HTTP 403, “Request blocked”', read: '2026-11-20' },
     seen: '“ITU grants you permission to download, copy and use content for personal, educational, or non-commercial purposes”; “You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU”' },
-  { id: 'iea', name: 'International Energy Agency (IEA)', match: /International Energy Agency|\(IEA\)/, terms: 'barred',
+  { id: 'iea', name: 'International Energy Agency (IEA)', match: /International Energy Agency|\bIEA\b/i, terms: 'barred',
     termsUrl: 'https://www.iea.org/terms', read: '2026-11-20', seen: '“Standalone datasets, data explorers and databases” are not made available under CC BY 4.0, and its terms for them allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”' },
-  { id: 'sipri', name: 'Stockholm International Peace Research Institute (SIPRI)', match: /Stockholm International Peace Research Institute|\(SIPRI\)/, terms: 'barred',
+  { id: 'sipri', name: 'Stockholm International Peace Research Institute (SIPRI)', match: /Stockholm International Peace Research Institute|\bSIPRI\b/i, terms: 'barred',
     termsUrl: 'https://www.sipri.org/about/terms-and-conditions', read: '2026-11-18', seen: '“Use of SIPRI copyrighted material for commercial purposes must be authorized and will normally require the payment of a reasonable royalty.”' },
-  { id: 'world-bank', name: 'World Bank', match: /World Bank \(WB\)|World Bank, Poverty and Inequality|World Bank \(www\.govindicators\.org\)/, terms: 'free',
+  { id: 'world-bank', name: 'World Bank', match: /World Bank \(WB\)|World Bank, Poverty and Inequality|World Bank \(www\.govindicators\.org\)/i, terms: 'free',
     termsUrl: 'https://datacatalog.worldbank.org/public-licenses', read: '2026-11-18', seen: 'CC BY 4.0: “allows users to copy, modify and distribute data in any format for any purpose, including commercial use”' },
-  { id: 'fao', name: 'Food and Agriculture Organization of the United Nations (FAO)', match: /Food and Agriculture Organization|\(FAO\)/, terms: 'free',
+  { id: 'fao', name: 'Food and Agriculture Organization of the United Nations (FAO)', match: /Food and Agriculture Organization|\(FAO\)/i, terms: 'free',
     termsUrl: 'https://www.fao.org/contact-us/terms/db-terms-of-use/en/', read: '2026-11-20', seen: 'its statistical databases’ datasets are under CC BY 4.0 “unless specified otherwise in their metadata or webpage”, may be adapted and re-disseminated, and are not to be used to promote a commercial enterprise or suggest FAO’s endorsement' },
-  { id: 'un-pop', name: 'UN Population Division', match: /UN Population Division|World Population Prospects|World Urbanization Prospects/, terms: 'not read',
+  { id: 'un-pop', name: 'UN Population Division', match: /UN Population Division|World Population Prospects|World Urbanization Prospects/i, terms: 'not read',
     tried: { url: 'https://population.un.org/wpp/', read: '2026-11-20', answer: 'the page’s text holds no terms: it is a script application, and VM runs no script it downloads' } },
-  { id: 'imf', name: 'International Monetary Fund (IMF)', match: /International Monetary Fund/, terms: 'not read' },
-  { id: 'oecd', name: 'Organisation for Economic Co-operation and Development (OECD)', match: /Organisation for Economic Co-operation and Development/, terms: 'not read' },
-  { id: 'unesco', name: 'UNESCO Institute for Statistics', match: /UNESCO/, terms: 'not read' },
-  { id: 'who', name: 'World Health Organization (WHO)', match: /World Health Organization/, terms: 'not read' },
-  { id: 'unicef', name: 'UN Children’s Fund (UNICEF)', match: /UNICEF/, terms: 'not read' },
-  { id: 'ilo', name: 'International Labour Organization (ILO)', match: /International Labour Organization|ILOSTAT/, terms: 'not read' },
-  { id: 'wipo', name: 'World Intellectual Property Organization (WIPO)', match: /World Intellectual Property Organization/, terms: 'not read' },
-  { id: 'unodc', name: 'UN Office on Drugs and Crime (UNODC)', match: /Office on Drugs and Crime|UNODC/, terms: 'not read' },
-  { id: 'un-stats', name: 'UN Statistics Division (Comtrade; Population and Vital Statistics Report)', match: /UN Statistic(?:s|al) Division|Comtrade/, terms: 'not read' },
-  { id: 'eurostat', name: 'Eurostat', match: /Eurostat|\(ESTAT\)/, terms: 'not read' },
+  { id: 'imf', name: 'International Monetary Fund (IMF)', match: /International Monetary Fund/i, terms: 'not read' },
+  { id: 'oecd', name: 'Organisation for Economic Co-operation and Development (OECD)', match: /Organisation for Economic Co-operation and Development/i, terms: 'not read' },
+  { id: 'unesco', name: 'UNESCO Institute for Statistics', match: /UNESCO/i, terms: 'not read' },
+  { id: 'who', name: 'World Health Organization (WHO)', match: /World Health Organization/i, terms: 'not read' },
+  { id: 'unicef', name: 'UN Children’s Fund (UNICEF)', match: /UNICEF/i, terms: 'not read' },
+  { id: 'ilo', name: 'International Labour Organization (ILO)', match: /International Labour Organization|ILOSTAT/i, terms: 'not read' },
+  { id: 'wipo', name: 'World Intellectual Property Organization (WIPO)', match: /World Intellectual Property Organization/i, terms: 'not read' },
+  { id: 'unodc', name: 'UN Office on Drugs and Crime (UNODC)', match: /Office on Drugs and Crime|UNODC/i, terms: 'not read' },
+  { id: 'un-stats', name: 'UN Statistics Division (Comtrade; Population and Vital Statistics Report)', match: /UN Statistic(?:s|al) Division|Comtrade/i, terms: 'not read' },
+  { id: 'eurostat', name: 'Eurostat', match: /Eurostat|\(ESTAT\)/i, terms: 'not read' },
   { id: 'nso', name: 'national statistical offices and central banks', match: /National Statistical (?:Organizations|Offices)|government statistical agencies/i, terms: 'not read' },
-  { id: 'lis', name: 'Luxembourg Income Study (LIS)', match: /Luxembourg Income Study/, terms: 'not read' },
-  { id: 'jrc', name: 'Joint Research Centre of the European Commission (EDGAR)', match: /Joint Research Centre|EDGAR/, terms: 'not read' },
+  { id: 'lis', name: 'Luxembourg Income Study (LIS)', match: /Luxembourg Income Study/i, terms: 'not read' },
+  { id: 'jrc', name: 'Joint Research Centre of the European Commission (EDGAR)', match: /Joint Research Centre|\bEDGAR\b/i, terms: 'not read' },
 ];
 /** The originators a series' Source names, in ORIGINATORS's order. */
 export const originatorsOf = source => ORIGINATORS.filter(o => o.match.test(String(source || '')));

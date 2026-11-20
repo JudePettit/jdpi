@@ -10,6 +10,9 @@
 export function listenFocus({ getFile, data, map, home, qid = () => null, prepare = async () => {} }) {
   const F = window.PRPFocus, M = window.PRPMap;
   let fc = null, focused = null, countries = [], at = null;
+  // Each focus and each reset takes the next number; a focus whose reads (the shapes, a Q-id's record) finish after a
+  // newer focus or a reset changes nothing (third reading, 20 November 2026).
+  let ask = 0;
   if (!F) return { state: () => ({ focused: null, countries: [], at: null }) };
   const shapes = async () => {
     if (fc) return fc;
@@ -23,16 +26,19 @@ export function listenFocus({ getFile, data, map, home, qid = () => null, prepar
   };
   F.listen({
     async focus(t) {
+      const mine = ++ask;
       if (t.countries.length) await shapes().catch(() => null);
       // A Q-id whose record the view has not read is placed from its lake shard, as the view's own places are (second
       // review X7, 20 November 2026).
       if (t.qids?.length) await Promise.resolve(prepare(t.qids)).catch(() => null);
+      if (mine !== ask) return;
       const r = F.resolve(t, { country, qid });
       if (!r.box || !map()) return;
       focused = r.box; countries = t.countries; at = new Date().toISOString();
       map().fit(r.box, { padding: r.padding });
     },
     reset() {
+      ask++;
       focused = null; countries = []; at = new Date().toISOString();
       map()?.fit(home(), { padding: 40 });
     },

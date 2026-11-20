@@ -171,3 +171,109 @@ test('X8: after the year rolls over, a Candidate year still awaiting UCDP’s ye
   assert.deepEqual(U.keptCandidates(index, 2026, 2027), [], 'a year GED now records is GED’s');
   assert.throws(() => U.candidateGap([2024, 2025], [], 2027), /2026/, 'a missing year between GED and the Realtime file stops the build');
 });
+
+/* ================================================================ The third reading (Codex on f9e1004, 20 November 2026) */
+// Each test below failed on f9e1004 and passes once mended; the page's findings are in omni-review2-page.test.mjs.
+
+/* ---------------------------------------------------------------- 3rd X2: a barred originator by any spelling */
+test('3rd X2: a barred originator is found however its name is spelt: bare abbreviation, lower case, beside another', () => {
+  for (const [source, id] of [['IEA; World Bank (WB)', 'iea'], ['institute for health metrics and evaluation; World Bank (WB)', 'ihme'], ['IHME; World Bank (WB)', 'ihme'],
+    ['ITU, World Bank (WB)', 'itu'], ['international telecommunication union; World Bank (WB)', 'itu'], ['SIPRI; World Bank (WB)', 'sipri'],
+    ['stockholm international peace research institute, World Bank (WB)', 'sipri'], ['INTERNATIONAL ENERGY AGENCY and World Bank (WB)', 'iea']]) {
+    assert.ok(WB.originatorsOf(source).some(o => o.id === id), `${source}: names ${id}`);
+    assert.throws(() => WB.checkOriginators('SP.POP.TOTL', source), /bar commercial use/, source);
+  }
+  // An abbreviation is a whole word only: ITUC or PIEAS is not ITU or IEA.
+  assert.deepEqual(WB.originatorsOf('ITUC survey; PIEAS; World Bank (WB)').map(o => o.id), ['world-bank']);
+  // The other originators read in any case too.
+  assert.deepEqual(WB.originatorsOf('world bank (wb); food and agriculture organization').map(o => o.id), ['world-bank', 'fao']);
+});
+test('3rd X2: every World Bank series VM draws still passes and names the originators its catalogue entry records', () => {
+  const built = DOC.layers.filter(l => l.wb);
+  assert.equal(built.length, 34, 'population density and the 33 series of National Analysis VM hosts');
+  for (const e of built) {
+    // The method quotes the series' Source as the World Bank's metadata gave it at the build (its line breaks joined).
+    const m = /Its sources, as it names them: (.*?)\. Its originators, as/.exec(e.method);
+    assert.ok(m, `${e.wb}: its method quotes its sources`);
+    assert.deepEqual(WB.checkOriginators(e.wb, m[1]).map(o => o.name), e.originators.map(o => o.name), e.wb);
+  }
+});
+
+/* ---------------------------------------------------------------- 3rd X4: a late focus never undoes a newer one */
+// focus.js answers prp:focus through window.PRPFocus; here a stand-in hands its listener to the test.
+function focusRig() {
+  const fits = [], gates = [];
+  let h = null;
+  globalThis.window = { ...(globalThis.window || {}), PRPFocus: { listen: x => { h = x; }, resolve: t => ({ box: t.box || null, padding: 0 }) }, PRPMap: { ...(globalThis.window?.PRPMap || {}) } };
+  return { fits, gates, h: () => h, map: { fit: (box) => fits.push(box) }, prepare: () => new Promise(r => gates.push(r)) };
+}
+test('3rd X4: a focus whose record arrives after a reset, or after a newer focus, changes nothing', async () => {
+  const { listenFocus } = await import('../omni/lib/focus.js');
+  // A reset while the first focus waits for its Q-id's record: the map stays home.
+  let r = focusRig();
+  let f = listenFocus({ getFile: null, data: 'http://x/omni/data/', map: () => r.map, home: () => 'HOME', qid: () => null, prepare: r.prepare });
+  const late = r.h().focus({ countries: [], qids: ['Q1449'], box: 'GENOA' });
+  r.h().reset();
+  r.gates[0](); await late;
+  assert.deepEqual(r.fits, ['HOME'], 'the reset stands');
+  assert.equal(f.state().focused, null);
+  // A newer focus while the first waits: the newer one stands.
+  r = focusRig();
+  f = listenFocus({ getFile: null, data: 'http://x/omni/data/', map: () => r.map, home: () => 'HOME', qid: () => null, prepare: r.prepare });
+  const first = r.h().focus({ countries: [], qids: ['Q1449'], box: 'GENOA' });
+  await r.h().focus({ countries: [], qids: [], box: 'ROME' });
+  r.gates[0](); await first;
+  assert.deepEqual(r.fits, ['ROME']);
+  assert.equal(f.state().focused, 'ROME');
+});
+
+/* ---------------------------------------------------------------- 3rd X5: an event outside its conflict's listed years */
+test('3rd X5: an event UCDP files under a conflict belongs to that conflict’s own war in any year; a War Focus war never outside its own', () => {
+  const reg = read('omni/data/layers/wars/registry.json');
+  // India: Kashmir (UCDP conflict 364): the Armed Conflict Dataset lists it from 1990; UCDP's event data has events of it in 1989.
+  const own = reg.wars.find(w => w.id === 'ucdp-364');
+  assert.equal(own.from, 1990);
+  assert.equal(W.warOf(reg, 364, 1989), 'ucdp-364');
+  const ev = read('omni/data/layers/ucdp-events/1989.json');
+  assert.ok(ev.cells.some(r => r[7].includes(ev.wars.indexOf('ucdp-364'))), '1989’s events include conflict 364’s');
+  // No War Focus war is returned outside its own dates, for any conflict and year.
+  const ids = [...new Set(reg.wars.flatMap(w => w.ucdp))], byId = new Map(reg.wars.map(w => [w.id, w])), bad = [];
+  for (const c of ids) for (let y = 1946; y <= 2026; y++) { const w = byId.get(W.warOf(reg, c, y)); if (w?.wf && !holds(w, y)) bad.push(`${c} ${y}: ${w.id}`); }
+  assert.deepEqual(bad, []);
+  // The registry says so in words: its own war's years are those the yearly list records; an event may fall outside them.
+  assert.match(reg.about, /an event UCDP files under a conflict belongs to that conflict’s own war in any year, so an event can fall in a year outside the years listed for it/);
+  assert.match(reg.about, /25 or more battle-related deaths/);
+});
+
+/* ---------------------------------------------------------------- 3rd X6: a misshapen file is read again */
+test('3rd X6: a layer file of the wrong shape is forgotten, so the next frame reads it again and draws the repaired file', async () => {
+  globalThis.window = { ...(globalThis.window || {}), PRPMap: { layerYear: (e, y) => y, heldText: () => null, esc: s => String(s) } };
+  const { layerView } = await import('../omni/lib/layer-view.js');
+  const good = raw('omni/data/layers/breakthroughs/events.json');
+  const asked = [];
+  const getFile = async url => { asked.push(url); const buf = asked.length === 1 ? Buffer.from('{}') : good; return { json: JSON.parse(buf.toString('utf8')), buf }; };
+  const lv = layerView({ data: 'http://x/omni/data/', getFile, map: () => null, sources: () => [], onChange: () => {} });
+  lv.init(DOC);
+  lv.read({ vr: 1, l: [{ id: 'breakthroughs' }] });
+  const bad = await lv.frame(1609);
+  assert.equal(bad.length, 1); assert.match(bad[0], /is not of the shape this page reads/);
+  const ok = await lv.frame(1609);
+  assert.deepEqual([...ok], [], 'the repaired file loads');
+  assert.equal(asked.length, 2, 'the file is fetched again, not taken from the cache');
+});
+
+/* ---------------------------------------------------------------- 3rd X8: the catalogue is read before any write */
+test('3rd X8: a catalogue that cannot be read stops the political build before it writes anything', () => {
+  for (const body of ['{"layers": [', '{}']) {
+    const s = sandbox();
+    try {
+      writeFileSync(join(s.dir, 'omni/data/layers.json'), body);
+      const before = readFileSync(join(s.dir, 'omni/data/layers/retro-keys.json'));
+      const r = s.run(['--only', 'retro', '--retro', s.retro]);
+      assert.notEqual(r.status, 0, `${body}: the build stops`);
+      assert.match(r.stderr, /layers\.json/, `${body}: and names the catalogue`);
+      assert.ok(readFileSync(join(s.dir, 'omni/data/layers/retro-keys.json')).equals(before), `${body}: retro-keys.json is not written`);
+      assert.equal(readFileSync(join(s.dir, 'omni/data/layers.json'), 'utf8'), body, `${body}: the catalogue is left as it was`);
+    } finally { rmSync(s.dir, { recursive: true, force: true }); }
+  }
+});

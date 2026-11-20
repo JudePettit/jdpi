@@ -200,3 +200,78 @@ test('page X7: prp:focus with a Q-id the view has not read loads its point from 
   assert.ok(w <= 8.94 && e >= 8.93 && s <= 44.41 && n >= 44.40, `the box holds Genoa's point: ${[w, s, e, n]}`);
   assert.deepEqual(errors, []);
 });
+
+/* ================================================================ The third reading (Codex on f9e1004, 20 November 2026) */
+// Each test below failed on f9e1004 and passes once mended; the Node-level findings are in omni-review2-data.test.mjs.
+
+test('page 3rd X1: an older recipe whose subject is read late never replaces the newer view', PAGE, async t => {
+  const page = await open(t);
+  const errors = watch(page);
+  // Q1449, Genoa: its Master Index record is in lake/data/e/425.json, held until the newer recipe has drawn.
+  const late = await hold(page, '**/lake/data/e/425.json');
+  await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1980..2010&at=1990&fill=borders&q=Q1449`, { waitUntil: 'domcontentloaded' });
+  await late.asked;
+  await page.evaluate(h => { location.hash = h; }, `${HEAD}&t=1980..2010&at=2000&fill=borders`);
+  await ready(page, 2000);
+  const done = page.waitForResponse(r => /\/lake\/data\/e\/425\.json$/.test(r.url()), { timeout: 30000 });
+  late.release();
+  await done;
+  await page.waitForTimeout(2000);
+  const s = await fresh(page);
+  assert.equal(s.frame, 2000, 'the newer recipe’s year stands');
+  assert.match(s.recipe, /at=2000/);
+  assert.doesNotMatch(s.recipe, /q=Q1449/);
+  assert.deepEqual(errors, []);
+});
+
+test('page 3rd X3: an address with l=battles whose file fails to load opens with the switch off, and says why', PAGE, async t => {
+  const page = await open(t);
+  const errors = watch(page, /\/omni\/data\/layers\/battles\.json/);
+  await page.route('**/omni/data/layers/battles.json', route => route.fulfill({ status: 404, contentType: 'text/plain', body: 'not here' }));
+  await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1490..1500&at=1495&fill=borders&l=battles`, { waitUntil: 'domcontentloaded' });
+  await ready(page, 1495);
+  assert.equal(await page.isChecked('#ly-battles'), false);
+  assert.match(await page.textContent('#ly-note'), /The battles could not load \(HTTP 404 for \/omni\/data\/layers\/battles\.json\), so their switch is off\./);
+  const s = await page.evaluate(() => window.omniState);
+  assert.doesNotMatch(s.recipe, /l=battles/);
+  assert.deepEqual(s.layers, ['borders']);
+  assert.deepEqual(errors, []);
+});
+
+test('page 3rd X7: a layer that failed to load and then loads leaves no "could not load" line behind', PAGE, async t => {
+  const page = await open(t);
+  const errors = watch(page, /\/omni\/data\/layers\/breakthroughs\/events\.json/);
+  let first = true;
+  await page.route('**/omni/data/layers/breakthroughs/events.json', route => {
+    if (!first) return route.continue();
+    first = false;
+    return route.fulfill({ status: 503, contentType: 'text/plain', body: 'busy' });
+  });
+  await page.goto(`${BASE}/omni/index.html#${HEAD}&t=1600..1620&at=1609&fill=borders&l=breakthroughs`, { waitUntil: 'domcontentloaded' });
+  await ready(page, 1609);
+  assert.match(await page.textContent('#focus-body'), /A layer's data could not load: HTTP 503/);
+  await page.click('#ly-breakthroughs'); // off
+  await page.waitForFunction(() => window.omniState?.ready && !window.omniState.lv.on.includes('breakthroughs'), null, { timeout: 60000 });
+  await page.click('#ly-breakthroughs'); // on again: the file loads this time
+  await page.waitForFunction(() => window.omniState?.ready && window.omniState.lv.drawn.includes('breakthroughs'), null, { timeout: 60000 });
+  assert.doesNotMatch(await page.textContent('#focus-body'), /could not load/);
+  assert.deepEqual(errors, []);
+});
+
+test('page 3rd X9: a fill= or base= the recipe cannot read is named, escaped, not dropped in silence', PAGE, async t => {
+  const page = await open(t);
+  const errors = watch(page);
+  const tail = 't=1600..1620&at=1609';
+  for (const [hash, said] of [
+    [`vr=1&show=frame&step=y&base=plain&fill=invalid!&${tail}`, 'fill=invalid! is not a layer VM holds, so it is not drawn.'],
+    [`vr=1&show=frame&step=y&base=unknown&fill=borders&${tail}`, 'base=unknown is not a base VM holds, so the plain base is drawn.'],
+    [`vr=1&show=frame&step=y&base=plain&fill=%3Cimg%20src%3Dx%3E&${tail}`, 'fill=<img src=x> is not a layer VM holds, so it is not drawn.']]) {
+    await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1609);
+    const notes = await page.$$eval('#focus-body .om-notes li', ls => ls.map(l => l.textContent));
+    assert.ok(notes.includes(said), `${hash}: ${JSON.stringify(notes)}`);
+    assert.equal(await page.locator('#focus-body img').count(), 0, 'written as text, never as markup');
+  }
+  assert.deepEqual(errors, []);
+});

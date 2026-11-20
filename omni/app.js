@@ -67,6 +67,9 @@ const S = {
   files: new Map(), bufs: new Map(), frame: null, start: null, stops: [], period: null, map: null, mapState: 'drawn',
   drawn: [], drawnBattles: [], focusPoints: [], box: null, seq: 0, notes: [], mode: 'live', saved: null, labelCache: new Map(),
   shards: new Map(), shelf: null, loaded: new Set(), loading: null, bare: false,
+  // Third reading, 20 November 2026: recipeSeq numbers the calls of applyRecipe, so only the latest recipe goes on to
+  // draw (X1); lvNotes are the layer view's loading errors of the latest frame drawn, replaced at each frame (X7).
+  recipeSeq: 0, lvNotes: [],
   // The slider's movement (MP-12): 'independent' (the default), 'together' or 'single'. It is a frame-only key outside
   // VR/1, as host= is (&move=… after the recipe, only away from the default): no recipe, saved view or bundle carries
   // it, so Kino's recipes and saved views open at the default, as before.
@@ -275,7 +278,9 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   const lvErrors = S.lv ? await S.lv.frame(year, { lo: S.lo }) : [];
   // stale: a later frame, or a change of the layers on, has since asked for its own; it draws (second review X1).
   if (seq !== S.seq || lvErrors.stale) return;
-  for (const e of lvErrors) S.notes.push(`A layer's data could not load: ${e}`);
+  // The errors of this frame replace those of the frame before: a layer that failed and has since loaded is not still
+  // said to have failed (third reading, 20 November 2026).
+  S.lvNotes = lvErrors.map(e => `A layer's data could not load: ${e}`);
   if (S.map) {
     S.map.setBorders(S.drawn, { focus: S.focusHits });
     S.map.setBattles(S.drawnBattles.map(r => ({ id: r.q, geometry: { type: 'Point', coordinates: r.pt } })));
@@ -438,7 +443,7 @@ function render(inWin, ext, file, held) {
   for (const c of (S.R.focus || []).filter(x => !/^Q/.test(x))) rows.push(`<li><b>${esc(c)}</b><span>${ext.box ? 'In the box the view opens on' : 'VM cannot place this'}</span></li>`);
   f.push(rows.length ? `<ul class="om-list om-focus">${rows.join('')}</ul>` : '<p class="prp-empty">This view names no places; it opens on the borders VM holds.</p>');
   if (!ext.box && (S.R.focus || []).length) f.push(`<p class="om-held">${esc(M.reasonText('nothing-placeable'))}: the map shows the world.</p>`);
-  const notes = [...layerNotes(S.R), ...S.notes];
+  const notes = [...layerNotes(S.R), ...S.notes, ...S.lvNotes];
   if (notes.length) f.push(`<ul class="om-notes">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`);
   $('#focus-body').innerHTML = f.join('');
 
@@ -857,11 +862,19 @@ function addressNotes(raw, R, at) {
   if (a != null && R.at == null) notes.push(zero(a) ? `This address names year 0, which does not exist (1 BC is followed by AD 1); it opens on ${yt(at)}.` : `This address's year (${a}) could not be read; it opens on ${yt(at)}.`);
   const y = yearOf(R.at);
   if (y != null && y !== at && (y < win.from || y > win.to)) notes.push(`This address's year, ${yt(y)}, is outside its own years (${formatSpan(win.from, win.to)}), so it opens on ${yt(at)}, the ${y > win.to ? 'last' : 'first'} of them.`);
+  // A fill= or base= that design/vm-recipe.js cannot read is left out of the recipe; it is named here, never dropped in
+  // silence (third reading, 20 November 2026). The words are escaped where the notes are written (render).
+  const fill = part('fill'), base = part('base');
+  if (fill != null && R.fill === undefined) notes.push(`fill=${fill} is not a layer VM holds, so it is not drawn.`);
+  if (base != null && R.base === undefined) notes.push(`base=${base} is not a base VM holds, so the plain base is drawn.`);
   return notes;
 }
 
 /* ---------- start ---------- */
 async function applyRecipe({ first = false } = {}) {
+  // Only the latest recipe goes on past each wait: an older one whose reads finish late (its subject's record, the
+  // battles) stops there and never draws over the newer view (third reading, 20 November 2026).
+  const gen = ++S.recipeSeq;
   const raw = location.hash.replace(/^#/, '');
   const R = readRecipe(raw);
   S.notes = [];
@@ -878,12 +891,18 @@ async function applyRecipe({ first = false } = {}) {
   const { at, start } = mountPeriod();
   if (R) S.notes.push(...addressNotes(raw, R, at));
   // The recipe's layers under the clutter rule (stage S5a); the clicked battle's layer is the subject's, never dropped.
-  await ensureBattles().catch(e => S.notes.push(`The battles could not load: ${e.message}`));
+  let battlesFailed = null;
+  await ensureBattles().catch(e => { battlesFailed = e; S.notes.push(`The battles could not load: ${e.message}`); });
+  if (gen !== S.recipeSeq) return;
   // Any other layer's subject (an election's, a coup's) is found by the layer view in its data, by q= (second review X5).
   if (S.lv) S.notes.push(...S.lv.read(S.R, { subject: battleRow(S.R.q) ? 'battles' : null, q: S.R.q }).notes);
+  // The battles' file failing on opening an address turns their switch off and says so, as a switch moved by hand does
+  // (third reading, 20 November 2026): the recipe and the list no longer give them as drawn.
+  if (battlesFailed && S.lv) { S.lv.off('battles', `The battles could not load (${battlesFailed.message}), so their switch is off.`); S.R = { ...S.R, ...S.lv.recipe() }; }
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
   // the records of the places VM cannot outline give their names and points.
   await Promise.all([loadSubject(S.R.q || null), readRecords(unoutlined(S.R)), loadShelf(S.R)]);
+  if (gen !== S.recipeSeq) return;
   await setFrame(at, { start, fit: true, source: first ? 'set' : 'hash' });
 }
 async function init() {

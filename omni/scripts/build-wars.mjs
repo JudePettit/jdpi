@@ -17,6 +17,11 @@
 //    own, and so is a War Focus war's conflict for its years outside every War Focus war's own (X3 of the second review,
 //    20 November 2026: Yemen's conflict 230 in 1948 is not War Focus's Yemen war, which Wikidata starts in 2014). A
 //    conflict-year belongs to the War Focus war whose years hold it, else to the conflict's own war, else to none (warOf).
+//    A conflict's own war gives as from and to the first and last of the years UCDP/PRIO's yearly conflict list records
+//    it as active (25 or more battle-related deaths in the year) that no War Focus war holds. An event UCDP files under
+//    the conflict belongs to that conflict's own war in any year, so an event can fall in a year outside those listed
+//    (India: Kashmir, conflict 364, is listed from 1990 and has events in UCDP's event data in 1989): warOf gives the
+//    conflict's own war for such a year, and never a War Focus war outside its own years (third reading, 20 November 2026).
 // 5. Writes omni/data/layers/wars/registry.json, keeping its `built` when nothing else changed. Nothing else is written.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -62,8 +67,9 @@ export function joinWars(conflicts, names, wf, wfYears) {
 export const holdsYear = (w, year) => w.from != null && w.from <= year && year <= (w.to ?? Infinity);
 
 /** The war a UCDP conflict-year belongs to: the War Focus war holding that conflict whose years hold the year; else
-    the conflict's own war (ucdp-<id>), which holds its years outside every War Focus war; else none. A War Focus war is
-    never given a year outside its own (X3). */
+    the conflict's own war (ucdp-<id>), in any year, even one outside the years its entry lists (an event UCDP files
+    under the conflict in a year its yearly list does not record it as active); else none. A War Focus war is never
+    given a year outside its own (X3; third reading, 20 November 2026). */
 export function warOf(registry, conflictId, year) {
   const ws = registry.wars.filter(w => w.ucdp.includes(conflictId));
   const focus = ws.find(w => w.wf && holdsYear(w, year));
@@ -93,7 +99,7 @@ async function main() {
   const wars = joinWars(conflicts, names, wf, wfYears);
   const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : null;
   const body = { format: 'vm-wars/1', built: null,
-    about: 'VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. No Correlates of War record or number: its terms bar commercial use.',
+    about: 'VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. A conflict’s own war gives as its from and to the first and last of the years that dataset records the conflict as active (25 or more battle-related deaths in the year) and no War Focus war holds; an event UCDP files under a conflict belongs to that conflict’s own war in any year, so an event can fall in a year outside the years listed for it. A War Focus war holds only its own years. No Correlates of War record or number: its terms bar commercial use.',
     sources: { 'ucdp-acd': { file: 'UcdpPrioConflict_v26_1.csv', sha256: sha256(acdBuf) }, wikidata: { read: 'wbgetentities' } },
     wars };
   const file = { ...body, built: keepStamp(prev, body, stamp()) };

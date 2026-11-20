@@ -1,7 +1,7 @@
 {
  "format": "vm-wars/1",
- "built": "2026-11-20T15:54:11Z",
- "about": "VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. No Correlates of War record or number: its terms bar commercial use.",
+ "built": "2026-11-20T16:33:13Z",
+ "about": "VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. A conflict’s own war gives as its from and to the first and last of the years that dataset records the conflict as active (25 or more battle-related deaths in the year) and no War Focus war holds; an event UCDP files under a conflict belongs to that conflict’s own war in any year, so an event can fall in a year outside the years listed for it. A War Focus war holds only its own years. No Correlates of War record or number: its terms bar commercial use.",
  "sources": {
   "ucdp-acd": {
    "file": "UcdpPrioConflict_v26_1.csv",

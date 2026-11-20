@@ -283,9 +283,15 @@ test('page live check: an l= the recipe cannot read is named, escaped, not dropp
   const errors = watch(page);
   const head = 'vr=1&t=1960..1980&at=1968&show=frame&step=y&base=plain&fill=borders';
   for (const [hash, said, on] of [
-    [`${head}&l=elections,coups,breakthroughs,calendar-events`, 'l= names 4 layers and an address holds at most 3 (12 with all=1, “Show anyway”), so none of them is drawn.', []],
-    [`${head}&l=elections,coups,breakthroughs,calendar-events,a,b,c,d,e,f,g,h,i&all=1`, 'l= names 13 layers and an address holds at most 12, so none of them is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events`, 'l= has 4 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events,a,b,c,d,e,f,g,h,i&all=1`, 'l= has 13 entries and an address holds at most 12 layers, so none of them is drawn.', []],
     [`${head}&l=%3Cimg%20src%3Dx%3E`, 'l=<img src=x> could not be read, so no layer it names is drawn.', []],
+    // Counted as the reader counts (the second reader's two points on the first mend): an encoded comma inside a
+    // filter's value is no entry; an empty part is one; the first all= stands, and only the literal 1 lifts the limit.
+    [`${head}&l=elections:kind=a%2Cb%2Cc%2Cd,invalid!`, 'l=elections:kind=a,b,c,d,invalid! could not be read, so no layer it names is drawn.', []],
+    [`${head}&l=elections,,coups,breakthroughs`, 'l= has 4 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events,a,b,c,d,e,f,g,h,i&all=%31&all=1`, 'l= has 13 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events&all&all=1`, 'l= has 4 entries and an address holds at most 3 layers (12 with all=1, “Show anyway”), so none of them is drawn.', []],
     [`${head}&l=elections,coups,breakthroughs,calendar-events&all=1`, null, ['elections', 'coups', 'breakthroughs', 'calendar-events']]]) {
     await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
     await page.reload({ waitUntil: 'domcontentloaded' });

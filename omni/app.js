@@ -869,11 +869,15 @@ function addressNotes(raw, R, at) {
   if (base != null && R.base === undefined) notes.push(`base=${base} is not a base VM holds, so the plain base is drawn.`);
   // The same for l=: more layers than an address holds (3, or 12 with all=1), or a list that cannot be read (found by
   // the live check of 20 November 2026: four layers without all=1 drew none and said nothing).
-  const l = part('l');
+  // Counted as the reader counts: the first l= and the first all= of the address stand, a key with no "=" among them,
+  // and the list is split on its commas before anything is decoded (so a comma inside a filter's value is no entry).
+  const first = k => { for (const p of raw.split('&')) { const i = p.indexOf('='); if (p && (i < 0 ? p : p.slice(0, i)) === k) return i < 0 ? '' : p.slice(i + 1); } return null; };
+  const l = first('l');
   if (l && R.l === undefined) {
-    const n = l.split(',').length, all = part('all') === '1', most = all ? MAX_ANYWAY : MAX_LAYERS;
-    notes.push(n > most ? `l= names ${n} layers and an address holds at most ${most}${all ? '' : ` (${MAX_ANYWAY} with all=1, “Show anyway”)`}, so none of them is drawn.`
-      : `l=${l} could not be read, so no layer it names is drawn.`);
+    const n = l.split(',').length, all = first('all') === '1', most = all ? MAX_ANYWAY : MAX_LAYERS;
+    let shown = l; try { shown = decodeURIComponent(l); } catch { /* shown as written */ }
+    notes.push(n > most ? `l= has ${n} entries and an address holds at most ${most} layers${all ? '' : ` (${MAX_ANYWAY} with all=1, “Show anyway”)`}, so none of them is drawn.`
+      : `l=${shown} could not be read, so no layer it names is drawn.`);
   }
   return notes;
 }

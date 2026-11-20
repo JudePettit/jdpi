@@ -275,3 +275,26 @@ test('page 3rd X9: a fill= or base= the recipe cannot read is named, escaped, no
   }
   assert.deepEqual(errors, []);
 });
+
+// Found by the live check of 20 November 2026: an address whose l= named four layers without all=1 drew none of them
+// and said nothing (design/vm-recipe.js leaves such an l= out of the recipe).
+test('page live check: an l= the recipe cannot read is named, escaped, not dropped in silence', PAGE, async t => {
+  const page = await open(t);
+  const errors = watch(page);
+  const head = 'vr=1&t=1960..1980&at=1968&show=frame&step=y&base=plain&fill=borders';
+  for (const [hash, said, on] of [
+    [`${head}&l=elections,coups,breakthroughs,calendar-events`, 'l= names 4 layers and an address holds at most 3 (12 with all=1, “Show anyway”), so none of them is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events,a,b,c,d,e,f,g,h,i&all=1`, 'l= names 13 layers and an address holds at most 12, so none of them is drawn.', []],
+    [`${head}&l=%3Cimg%20src%3Dx%3E`, 'l=<img src=x> could not be read, so no layer it names is drawn.', []],
+    [`${head}&l=elections,coups,breakthroughs,calendar-events&all=1`, null, ['elections', 'coups', 'breakthroughs', 'calendar-events']]]) {
+    await page.goto(`${BASE}/omni/index.html#${hash}`, { waitUntil: 'domcontentloaded' });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await ready(page, 1968);
+    const notes = await page.$$eval('#focus-body .om-notes li', ls => ls.map(l => l.textContent));
+    if (said) assert.ok(notes.includes(said), `${hash}: ${JSON.stringify(notes)}`);
+    else assert.ok(!notes.some(n => /^l=/.test(n)), `a readable l= draws and no note names it: ${JSON.stringify(notes)}`);
+    assert.deepEqual(await page.evaluate(() => window.omniState.lv.on), on, hash);
+    assert.equal(await page.locator('#focus-body img').count(), 0, 'written as text, never as markup');
+  }
+  assert.deepEqual(errors, []);
+});

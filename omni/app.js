@@ -23,7 +23,7 @@
        held: { from, to }, map: 'drawn' | 'no-webgl' | 'no-library', webgl, theme, pin? }
    features are every row the frame draws, whole: the same recipe and data give the same features whatever the
    screen, so a saved bundle's pin can be checked by anyone (the bundle's README says so). */
-import { readRecipe, writeRecipe, readHost } from '../design/vm-recipe.js';
+import { readRecipe, writeRecipe, readHost, MAX_LAYERS, MAX_ANYWAY } from '../design/vm-recipe.js';
 import { formatYear, formatSpan, formatValueDate, valueDateToEdtf, yearOf, addYears, precisionWord } from '../design/vm-dates.js';
 import { bundleFiles, dataFiles, zipStored, readZip, pin as pinOf, apa } from '../design/vm-bundle.js';
 import { makeMap, webglOk } from './lib/maplibre.js';
@@ -867,6 +867,14 @@ function addressNotes(raw, R, at) {
   const fill = part('fill'), base = part('base');
   if (fill != null && R.fill === undefined) notes.push(`fill=${fill} is not a layer VM holds, so it is not drawn.`);
   if (base != null && R.base === undefined) notes.push(`base=${base} is not a base VM holds, so the plain base is drawn.`);
+  // The same for l=: more layers than an address holds (3, or 12 with all=1), or a list that cannot be read (found by
+  // the live check of 20 November 2026: four layers without all=1 drew none and said nothing).
+  const l = part('l');
+  if (l && R.l === undefined) {
+    const n = l.split(',').length, all = part('all') === '1', most = all ? MAX_ANYWAY : MAX_LAYERS;
+    notes.push(n > most ? `l= names ${n} layers and an address holds at most ${most}${all ? '' : ` (${MAX_ANYWAY} with all=1, “Show anyway”)`}, so none of them is drawn.`
+      : `l=${l} could not be read, so no layer it names is drawn.`);
+  }
   return notes;
 }
 

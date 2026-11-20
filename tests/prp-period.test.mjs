@@ -606,11 +606,18 @@ test('movement on months and days: Single Month, Single Day; a control of one st
   assert.deepEqual([days.period.get().from, days.period.get().to], ['2026-10-01', '2026-10-01']);
   // A page's own name wins.
   assert.equal(mountFake({ stops: ['2023-01', '2023-02'], names: { single: 'Single Year' } }).q('.prp-period-moves').children[2].getAttribute('aria-label'), 'Single Year');
-  // One stop: nothing to move; the buttons come back when more stops arrive. No stops yet: drawn, and a press reports nothing.
+  // One stop: nothing to move; the buttons come back when more stops arrive. No stops yet (a page waiting for its
+  // data): their place is kept and they cannot be seen or pressed, since the third name is not yet known; a press from
+  // code reports nothing.
   const one = mountFake({ stops: [2026] });
   assert.equal(one.q('.prp-period-moves').hidden, true);
   one.period.update({ stops: [2025, 2026] });
   assert.equal(one.q('.prp-period-moves').hidden, false);
+  assert.equal(one.q('.prp-period-moves').style.visibility, '');
+  const waiting = mountFake({ stops: [] });
+  assert.deepEqual([waiting.q('.prp-period-moves').hidden, waiting.q('.prp-period-moves').style.visibility], [false, 'hidden']);
+  waiting.period.update({ stops: ['2026-09-29', '2026-09-30'] });
+  assert.deepEqual([waiting.q('.prp-period-moves').style.visibility, waiting.q('.prp-period-moves').children[2].getAttribute('aria-label')], ['', 'Single Day']);
   const empty = mountFake({ stops: [] });
   assert.equal(empty.q('.prp-period-moves').hidden, false);
   empty.q('.prp-period-moves').children[1].click();

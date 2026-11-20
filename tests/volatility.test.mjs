@@ -782,3 +782,31 @@ test('page: the movement buttons: Move Together moves both days with the span ke
   assert.equal(await left(), before, 'the movement buttons do not move when the label changes');
   assert.deepEqual(errors, []);
 });
+
+// Before the page's data arrives the control has no days, so the third button's name is not yet known ("Single Year"
+// would be false here) and a movement chosen then was lost when the page read its address. The buttons keep their
+// place and cannot be seen or pressed until the days are there (20 November 2026).
+test('page: while the data is on its way the movement buttons keep their place unseen; with the days they read Single Day', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  let release; const held = new Promise(r => { release = r; });
+  await page.route('**/volatility/data/index.json*', async route => { await held; await route.continue(); });
+  await page.goto(`${BASE}/q/volatility.html`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('.prp-period-moves', { state: 'attached', timeout: 20000 });
+  const box = () => page.evaluate(() => { const b = document.querySelector('.prp-period-moves'), r = b.getBoundingClientRect(); return { seen: getComputedStyle(b).visibility, w: Math.round(r.width), h: Math.round(r.height) }; });
+  const waiting = await box();
+  assert.equal(waiting.seen, 'hidden', 'not seen while the page has no days');
+  assert.ok(waiting.w > 40 && waiting.h > 10, `their place is kept (${waiting.w} × ${waiting.h})`);
+  assert.equal(await page.locator('[data-move="single"]').isVisible(), false);
+  release();
+  await page.waitForSelector('#rows tr', { timeout: 30000 });
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('.prp-period-moves')).visibility === 'visible', null, { timeout: 10000 });
+  const shown = await box();
+  assert.deepEqual([shown.w, shown.h], [waiting.w, waiting.h], 'the same place as while waiting');
+  assert.equal(await page.locator('[data-move="single"]').getAttribute('aria-label'), 'Single Day');
+  assert.equal(await page.locator('[data-move="independent"]').getAttribute('aria-pressed'), 'true');
+  assert.deepEqual(errors, []);
+});

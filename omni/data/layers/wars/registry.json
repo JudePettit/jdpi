@@ -1,6 +1,6 @@
 {
  "format": "vm-wars/1",
- "built": "2026-11-20T11:12:39Z",
+ "built": "2026-11-20T15:54:11Z",
  "about": "VM’s own text. One id per war for the Omni-Map’s layers: each War Focus war (its Q-id and years from Wikidata, CC0), holding its UCDP conflict for those years, and every other conflict of UCDP/PRIO’s Armed Conflict Dataset 26.1 (CC BY 4.0) as a war of its own. No Correlates of War record or number: its terms bar commercial use.",
  "sources": {
   "ucdp-acd": {
@@ -1024,6 +1024,21 @@
    }
   },
   {
+   "id": "ucdp-230",
+   "name": "Yemen (North Yemen): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    230
+   ],
+   "from": 1948,
+   "to": 2013,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=230"
+   }
+  },
+  {
    "id": "ucdp-231",
    "name": "Myanmar (Burma): Kachin",
    "q": null,
@@ -1066,6 +1081,36 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=233"
+   }
+  },
+  {
+   "id": "ucdp-234",
+   "name": "Israel: Palestine",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    234
+   ],
+   "from": 1949,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=234"
+   }
+  },
+  {
+   "id": "ucdp-235",
+   "name": "North Korea – South Korea",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    235
+   ],
+   "from": 1949,
+   "to": 1949,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=235"
    }
   },
   {
@@ -1414,6 +1459,21 @@
    }
   },
   {
+   "id": "ucdp-260",
+   "name": "Lebanon: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    260
+   ],
+   "from": 1958,
+   "to": 1958,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=260"
+   }
+  },
+  {
    "id": "ucdp-261",
    "name": "Malaysia: government",
    "q": null,
@@ -1501,6 +1561,21 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=266"
+   }
+  },
+  {
+   "id": "ucdp-267",
+   "name": "Ethiopia: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    267
+   ],
+   "from": 1960,
+   "to": 1991,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=267"
    }
   },
   {
@@ -1729,6 +1804,21 @@
    }
   },
   {
+   "id": "ucdp-283",
+   "name": "DR Congo (Zaire): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    283
+   ],
+   "from": 1964,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=283"
+   }
+  },
+  {
    "id": "ucdp-284",
    "name": "Gabon: government",
    "q": null,
@@ -1939,6 +2029,36 @@
    }
   },
   {
+   "id": "ucdp-299",
+   "name": "Syria: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    299
+   ],
+   "from": 1966,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=299"
+   }
+  },
+  {
+   "id": "ucdp-300",
+   "name": "Cambodia (Kampuchea): government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    300
+   ],
+   "from": 1978,
+   "to": 1998,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=300"
+   }
+  },
+  {
    "id": "ucdp-301",
    "name": "Israel – Jordan",
    "q": null,
@@ -1966,6 +2086,21 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=302"
+   }
+  },
+  {
+   "id": "ucdp-303",
+   "name": "Nigeria: Biafra",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    303
+   ],
+   "from": 2021,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=303"
    }
   },
   {
@@ -2044,6 +2179,21 @@
    }
   },
   {
+   "id": "ucdp-309",
+   "name": "Sudan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    309
+   ],
+   "from": 1971,
+   "to": 2022,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=309"
+   }
+  },
+  {
    "id": "ucdp-310",
    "name": "Madagascar (Malagasy): government",
    "q": null,
@@ -2116,6 +2266,21 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=315"
+   }
+  },
+  {
+   "id": "ucdp-316",
+   "name": "El Salvador: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    316
+   ],
+   "from": 1972,
+   "to": 1972,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=316"
    }
   },
   {
@@ -2224,6 +2389,21 @@
    }
   },
   {
+   "id": "ucdp-324",
+   "name": "Iran – Iraq",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    324
+   ],
+   "from": 1974,
+   "to": 1974,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=324"
+   }
+  },
+  {
    "id": "ucdp-325",
    "name": "Pakistan: Balochistan",
    "q": null,
@@ -2311,6 +2491,36 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=331"
+   }
+  },
+  {
+   "id": "ucdp-332",
+   "name": "Mozambique: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    332
+   ],
+   "from": 2013,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=332"
+   }
+  },
+  {
+   "id": "ucdp-333",
+   "name": "Afghanistan: government",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    333
+   ],
+   "from": 1978,
+   "to": 2025,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=333"
    }
   },
   {
@@ -3376,6 +3586,21 @@
    "src": {
     "id": "ucdp-acd",
     "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=408"
+   }
+  },
+  {
+   "id": "ucdp-409",
+   "name": "Eritrea – Ethiopia",
+   "q": null,
+   "wf": null,
+   "ucdp": [
+    409
+   ],
+   "from": 2016,
+   "to": 2016,
+   "src": {
+    "id": "ucdp-acd",
+    "loc": "UcdpPrioConflict_v26_1.csv;conflict_id=409"
    }
   },
   {

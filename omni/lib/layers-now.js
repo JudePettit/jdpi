@@ -4,8 +4,9 @@
      splitFile(index, year)       the file of a split layer's index that holds the year, or null
      gviSeries(doc)               a year of the Volatility score (vm-gvi/1) as a by-country series of one value, the last
                                   day held of the year
-     cellRows(doc, { wars })      a year of UCDP's events (vm-ged-cells/1) as point rows: a cell, or a country, by type
-                                  of violence and war, its months summed; each with its events and best, low and high deaths
+     cellRows(doc)                a year of UCDP's events (vm-ged-cells/1) as point rows: a cell, or a country, by type
+                                  of violence and war (one war a row, or none), its months summed; each with its events and
+                                  best, low and high deaths, and `w`, the list of its one war's id (empty: no registry war)
      calendarRows(doc)            a decade of the calendars' events (vm-layer/1) as point rows, the expected ones hollow
      cellOf / cellCentre          a 0.5° cell's index and centre (row 0 at 90° N, column 0 at 180° W)
    A cell, a country row and a calendar event name no actor, side or person beyond what its own source titles it. */
@@ -43,7 +44,10 @@ export function cellRows(doc) {
     m.n += r[3]; m.best += r[4]; m.low += r[5] ?? 0; m.high += r[6] ?? 0;
     out.set(key, x);
   };
-  const ws = r => (r[7] || []).map(i => wars[i]).filter(Boolean);
+  // A row of the file: [cell or ISO3/Q-id, month, type, events, best, low, high, war], `war` a list of at most one index
+  // into the file's `wars` (X2 of the second review: each row counts one war's events, so a war's filtered total is its
+  // own). A bare index is read as a list of one.
+  const ws = r => (Number.isInteger(r[7]) ? [r[7]] : r[7] || []).map(i => wars[i]).filter(Boolean);
   for (const r of doc?.cells || []) {
     const w = ws(r), key = `c${r[0]}-t${r[2]}${w.length ? `-${w.join('+')}` : ''}`, pt = cellCentre(r[0], doc.deg || GED_DEG, doc.cols || GED_COLS);
     add(key, { id: key, kind: 'cell', cell: r[0], pt, t: String(r[2]), w, sortYear: year, hollow: false }, r);

@@ -15,8 +15,13 @@
 //    (omni/scripts/ucdp-places.mjs), never by its Gleditsch and Ward number.
 // 4. Joins each state-based event's conflict to the war registry (omni/data/layers/wars/registry.json, build-wars.mjs), so
 //    the layer's war filter (l=ucdp-events:w=<registry id>) works; non-state and one-sided events have no registry war.
-// 5. Reads 2026 from battlefield/data/realtime.json (UCDP Candidate Events, by country and month, already joined to ISO3
-//    by the Realtime Battlefield): counts only, status "candidate", no cells (it holds no points).
+//    Each row counts one war's events (X2 of the second review, 20 November 2026): a row is a cell (or country), month,
+//    type and war, its last column a list of at most one index into the file's `wars` (empty: no registry war).
+// 5. Reads the Realtime year from battlefield/data/realtime.json (UCDP Candidate Events, by country and month): counts
+//    only, status "candidate", no cells (it holds no points). Each country is joined by its name through VM's crosswalk
+//    (ucdp-places.mjs; X7), never by the Gleditsch and Ward code the Realtime file is keyed by nor the ISO3 it derives
+//    from that code; a name the crosswalk cannot read is counted and listed in the file's `unjoined`, not drawn.
+//    Every earlier candidate year the layer holds past GED's last year is kept as written (X8), until GED records it.
 // 6. Writes omni/data/layers/ucdp-events/<year>.json (vm-ged-cells/1), one file a year, and index.json listing each with
 //    its first and last month, bytes, gzipped bytes and sha256, then the layer's entry in omni/data/layers.json. Nothing is
 //    written until every step has worked; a file keeps its `built` when nothing in it changes.
@@ -25,7 +30,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import { placeResolver } from './ucdp-places.mjs';
+import { placeResolver, SPECIAL } from './ucdp-places.mjs';
 import { warOf } from './build-wars.mjs';
 import { arg, stamp, measure, putLayer, keepBuilt, readJson, LIMIT_GZ } from './layer-catalogue.mjs';
 
@@ -76,9 +81,11 @@ export const cellCentre = cell => [-180 + (cell % COLS) * DEG + DEG / 2, 90 - Ma
 export function cellYears(events, { resolveName, registry }) {
   const years = new Map(), unread = new Set();
   const Y = y => { if (!years.has(y)) years.set(y, { cells: new Map(), country: new Map(), listed: new Map(), wars: new Map(), months: new Set() }); return years.get(y); };
-  const add = (m, k, e, war) => {
-    const r = m.get(k) || { n: 0, best: 0, low: 0, high: 0, w: new Set() };
-    r.n++; r.best += e.best; r.low += e.low; r.high += e.high; if (war) r.w.add(war);
+  // X2 (second review, 20 November 2026): a row is one war's events (or those of no registry war) in a cell, month and
+  // type, so a war's filtered total is its own and the rows of a cell add up to its events.
+  const add = (m, k, e) => {
+    const r = m.get(k) || { n: 0, best: 0, low: 0, high: 0 };
+    r.n++; r.best += e.best; r.low += e.low; r.high += e.high;
     m.set(k, r);
   };
   for (const e of events) {
@@ -86,34 +93,65 @@ export function cellYears(events, { resolveName, registry }) {
     y.months.add(e.month);
     const war = e.type === 1 ? warOf(registry, e.conflict, e.year) : null;
     if (war && !y.wars.has(war)) y.wars.set(war, y.wars.size);
-    if (e.prec >= 1 && e.prec <= 3 && Number.isFinite(e.lon) && Number.isFinite(e.lat)) { add(y.cells, `${cellOf(e.lon, e.lat)}|${e.month}|${e.type}`, e, war); continue; }
+    if (e.prec >= 1 && e.prec <= 3 && Number.isFinite(e.lon) && Number.isFinite(e.lat)) { add(y.cells, `${cellOf(e.lon, e.lat)}|${e.month}|${e.type}|${war ?? ''}`, e); continue; }
     const p = resolveName(e.country, e.year);
     if (!p) unread.add(e.country);
     // A state that is not one of today's (the Soviet Union, Yugoslavia) is keyed by its Q-id.
-    const key = `${p?.iso3 || p?.q || e.country}|${e.month}|${e.type}`;
-    add(e.prec === 4 || e.prec === 5 ? y.country : y.listed, key, e, war);
+    const key = `${p?.iso3 || p?.q || e.country}|${e.month}|${e.type}|${war ?? ''}`;
+    add(e.prec === 4 || e.prec === 5 ? y.country : y.listed, key, e);
   }
   const out = {};
   for (const [year, y] of [...years].sort((a, b) => a[0] - b[0])) {
-    const wi = w => [...w].map(x => y.wars.get(x)).sort((a, b) => a - b);
-    const rows = (m, num) => [...m].map(([k, r]) => { const [a, mo, t] = k.split('|'); return [num ? +a : a, +mo, +t, r.n, r.best, r.low, r.high, wi(r.w)]; })
-      .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1] || a[2] - b[2]));
+    const wi = w => (w ? [y.wars.get(w)] : []);
+    const rows = (m, num) => [...m].map(([k, r]) => { const [a, mo, t, w] = k.split('|'); return [num ? +a : a, +mo, +t, r.n, r.best, r.low, r.high, wi(w)]; })
+      .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1] || a[2] - b[2] || (a[7][0] ?? -1) - (b[7][0] ?? -1)));
     out[year] = { months: [...y.months].sort((a, b) => a - b), wars: [...y.wars.keys()], cells: rows(y.cells, true), country: rows(y.country, false), listed: rows(y.listed, false) };
   }
   return { years: out, unread: [...unread].sort() };
 }
 
-/** Step 5: 2026 from the Realtime Battlefield's candidate events: by country and month, counts only. */
-export function candidateYear(rt) {
+/** X7 (second review, 20 November 2026): the crosswalk for UCDP Candidate's country names as the Realtime Battlefield
+    holds them. That file writes UCDP's name without its bracket ("DR Congo" for UCDP's "DR Congo (Zaire)",
+    battlefield/scripts/realtime-insight.mjs `country`), so a name the crosswalk does not read as it stands is read as
+    the one name of ucdp-places.mjs's SPECIAL that it is before its bracket. Nothing here reads a Gleditsch and Ward code
+    or the ISO3 the Realtime file derives from one. */
+export function candidateResolver(resolveName, year) {
+  const short = new Map();
+  for (const n of Object.keys(SPECIAL)) { const s = n.replace(/ \(.*\)$/, ''); if (s !== n) short.set(s, short.has(s) ? null : n); }
+  const special = placeResolver([]);
+  return name => {
+    const n = String(name || '').trim();
+    return resolveName(n, year) || (short.get(n) ? special(short.get(n), year) : null);
+  };
+}
+
+/** Step 5: the Realtime year from the Realtime Battlefield's candidate events: by country and month, counts only. Each
+    country is joined to ISO3 (or a Q-id, for a state not of today) by its name through VM's crosswalk (X7); one whose
+    name the crosswalk cannot read is not drawn, and is counted and listed in `unjoined` with its events and deaths. */
+export function candidateYear(rt, { resolveName }) {
   const months = (rt.months || []).map(m => +String(m).slice(5, 7)).filter(Boolean);
-  const country = [];
+  const country = [], unjoined = [], resolve = candidateResolver(resolveName, rt.year);
   for (const c of Object.values(rt.countries || {})) {
-    if (!/^[A-Z]{3}$/.test(c.iso3 || '')) continue;
     const s = c.series || {}, from = +String(s.from || rt.months?.[0] || '').slice(5, 7) || 1;
-    (s.events || []).forEach((n, i) => { if (n) country.push([c.iso3, from + i, 0, n, s.deaths?.[i] ?? 0, null, null, []]); });
+    const p = resolve(c.name), key = p?.iso3 || p?.q || null;
+    if (!key) { unjoined.push({ name: String(c.name || ''), events: (s.events || []).reduce((a, n) => a + (n || 0), 0), deaths: (s.deaths || []).reduce((a, n) => a + (n || 0), 0) }); continue; }
+    (s.events || []).forEach((n, i) => { if (n) country.push([key, from + i, 0, n, s.deaths?.[i] ?? 0, null, null, []]); });
   }
   country.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]));
-  return { months, wars: [], cells: [], country, listed: [] };
+  unjoined.sort((a, b) => a.name.localeCompare(b.name));
+  return { months, wars: [], cells: [], country, listed: [], unjoined };
+}
+
+/** X8 (second review): the candidate years the layer already holds (its index) that GED does not yet record and the
+    Realtime file no longer holds: they are kept as they were written, until GED's yearly release records them. */
+export function keptCandidates(index, gedLast, rtYear) {
+  return (index?.files || []).filter(f => f.status === 'candidate' && f.year > gedLast && f.year !== rtYear).map(f => f.year).sort((a, b) => a - b);
+}
+/** Stops when a year between GED's last and the Realtime year is held by neither (the layer's years run unbroken). */
+export function candidateGap(gedYears, kept, rtYear) {
+  if (!gedYears.length) throw new Error('ucdp-events: GED gave no year');
+  const have = new Set([...gedYears, ...kept, rtYear]);
+  for (let y = Math.max(...gedYears) + 1; y < rtYear; y++) if (!have.has(y)) throw new Error(`ucdp-events: ${y} is held neither by GED nor as a kept candidate year; the layer's years would break`);
 }
 
 function main() {
@@ -139,19 +177,28 @@ function main() {
   const { years, unread } = cellYears(events, { resolveName, registry });
   const ys = Object.keys(years).map(Number);
   const rt = JSON.parse(readFileSync(join(ROOT, 'battlefield/data/realtime.json'), 'utf8'));
-  if (rt.year > ys.at(-1)) years[rt.year] = candidateYear(rt);
+  // X8: every candidate year the layer already holds past GED's last is kept as it was written (its own version and
+  // `built`); the Realtime year is rebuilt from the Realtime file; a year held by neither stops the build.
+  const kept = keptCandidates(readJson(join(OUT, 'index.json')), ys.at(-1), rt.year);
+  if (rt.year > ys.at(-1)) { candidateGap(ys, kept, rt.year); years[rt.year] = candidateYear(rt, { resolveName }); }
   const now = stamp(), outs = [];
+  for (const y of kept) {
+    const f = join(OUT, `${y}.json`), t = readFileSync(f, 'utf8'), doc = JSON.parse(t);
+    if (doc.status !== 'candidate' || doc.year !== y) throw new Error(`ucdp-events/${y}.json is not the candidate year its index lists`);
+    outs.push({ y, f, t, m: measure(t), doc, cand: true });
+  }
   for (const [y, body] of Object.entries(years)) {
     const cand = +y > ys.at(-1);
     const doc = { format: 'vm-ged-cells/1', layer: 'ucdp-events', source: cand ? 'ucdp-candidate' : 'ucdp-ged', version: cand ? rt.version : '26.1', status: cand ? 'candidate' : 'recorded', year: +y, built: null,
       from: cand ? 'battlefield/data/realtime.json' : `${FILE_URL} (${name}, sha256 ${SHA256})`, deg: DEG, cols: COLS,
-      columns: ['cell or iso3', 'month', 'type (1 state-based, 2 non-state, 3 one-sided; 0 every type)', 'events', 'best', 'low', 'high', 'wars (indexes into wars)'], ...body };
+      columns: ['cell or iso3', 'month', 'type (1 state-based, 2 non-state, 3 one-sided; 0 every type)', 'events', 'best', 'low', 'high', 'war: a list of at most one index into wars, the war whose events the row counts (empty: no war of the registry)'], ...body };
     const f = join(OUT, `${y}.json`);
     doc.built = keepBuilt(readJson(f), doc, now);
     const t = JSON.stringify(doc) + '\n', m = measure(t);
     if (m.gzip > LIMIT_GZ) throw new Error(`ucdp-events/${y}.json is over the limit`);
     outs.push({ y: +y, f, t, m, doc, cand });
   }
+  outs.sort((a, b) => a.y - b.y);
   const last = outs.filter(o => !o.cand).at(-1);
   const index = { format: 'vm-ged-index/1', layer: 'ucdp-events', built: null, first: `${outs[0].y}-${String(outs[0].doc.months[0]).padStart(2, '0')}`, last: `${last.y}-${String(last.doc.months.at(-1)).padStart(2, '0')}`,
     files: outs.map(o => ({ year: o.y, file: `${o.y}.json`, status: o.doc.status, months: [o.doc.months[0], o.doc.months.at(-1)], cells: o.doc.cells.length, ...o.m })) };
@@ -164,7 +211,10 @@ function main() {
   const sum = k => outs.filter(o => !o.cand).reduce((s, o) => s + o.doc[k].reduce((a, r) => a + r[3], 0), 0);
   console.log(`${events.length} events: ${sum('cells')} in cells, ${sum('country')} by country and month, ${sum('listed')} listed; names VM's crosswalk cannot read: ${unread.join('; ') || 'none'}`);
   for (const o of outs) console.log(`ucdp-events/${o.y}.json: ${o.doc.cells.length} cell rows, ${o.doc.country.length} country rows; ${o.m.bytes} bytes, ${o.m.gzip} gzipped`);
-  const yrs = outs.map(o => o.y);
+  const yrs = outs.map(o => o.y), cands = outs.filter(o => o.cand);
+  const candYears = cands.map(o => o.y).join(' and ');
+  const unjoinedText = cands.map(o => (o.doc.unjoined || []).length ? `in ${o.y}, ${o.doc.unjoined.map(u => `${u.name} (${u.events} ${u.events === 1 ? 'event' : 'events'})`).join(', ')}` : null).filter(Boolean).join('; ');
+  for (const o of cands) console.log(`ucdp-events/${o.y}.json: candidate (${o.doc.version}); names the crosswalk cannot read, counted and not drawn: ${(o.doc.unjoined || []).map(u => `${u.name} ${u.events}`).join('; ') || 'none'}`);
   putLayer(LAYERS, {
     id: 'ucdp-events', module: 'battlefield', title: 'Organised violence, UCDP events (0.5° cells by month)', role: 'point', geometry: 'point',
     // D5 (S5b/S5c review): time.last is the last month the layer holds, the candidate months among them; recordedLast is
@@ -174,9 +224,9 @@ function main() {
     measure: 'events, and best, low and high deaths, a cell and month', status: 'recorded', statusBy: [{ from: last.y + 1, status: 'candidate' }],
     style: { kind: 'cells', token: '--prp-bad' },
     filter: { field: 't', label: 'Type of violence', values: Object.entries(TYPES).map(([id, n]) => ({ id, name: n })) },
-    legend: 'Organised violence: UCDP Georeferenced Event Dataset 26.1 (CC BY 4.0), 0.5° cells by month; 2026: UCDP Candidate Events, by country and month',
+    legend: `Organised violence: UCDP Georeferenced Event Dataset 26.1 (CC BY 4.0), 0.5° cells by month${cands.length ? `; ${candYears}: UCDP Candidate Events, by country and month` : ''}`,
     source: 'ucdp-ged',
-    method: `VM’s own text. UCDP’s Georeferenced Event Dataset (GED) 26.1, every event from ${index.first} to ${index.last}: an event is a day of organised violence with at least one death, state-based (a government against another or against a rebel group), non-state (groups with no government) or one-sided (against civilians). VM counts the events and sums UCDP’s best, low and high deaths in 0.5° cells by month and type, from the month each event began; no actor, side or person is named. UCDP says how exactly it knows each place (where_prec): VM puts the events known to the place, within 25 km, or to a district into cells (1 to 3); those known only to a province or a wider area (4 and 5) are counted by country and month and drawn at the country, not in a cell; those known only to the country, or at sea or in the air (6 and 7), are listed beside the map and never drawn. Countries are joined by ISO3 through VM’s crosswalk of UCDP’s names, never by a Gleditsch and Ward number. A state-based event’s conflict is joined to VM’s war registry, so the map can show one war (l=ucdp-events:w=<id>). ${rt.year > ys.at(-1) ? `${rt.year} is UCDP’s Candidate Events (${rt.version}), as the Realtime Battlefield holds them: by country and month only, and candidate, not yet checked by UCDP. ` : ''}The map shows the frame’s year, every month of it, one file loaded at a time (omni/scripts/build-ucdp-events.mjs).`,
+    method: `VM’s own text. UCDP’s Georeferenced Event Dataset (GED) 26.1, every event from ${index.first} to ${index.last}: an event is a day of organised violence with at least one death, state-based (a government against another or against a rebel group), non-state (groups with no government) or one-sided (against civilians). VM counts the events and sums UCDP’s best, low and high deaths in 0.5° cells by month and type, from the month each event began; no actor, side or person is named. UCDP says how exactly it knows each place (where_prec): VM puts the events known to the place, within 25 km, or to a district into cells (1 to 3); those known only to a province or a wider area (4 and 5) are counted by country and month and drawn at the country, not in a cell; those known only to the country, or at sea or in the air (6 and 7), are listed beside the map and never drawn. Countries are joined by ISO3 through VM’s crosswalk of UCDP’s names, never by a Gleditsch and Ward number. A state-based event’s conflict is joined to VM’s war registry, so the map can show one war (l=ucdp-events:w=<id>): each row counts one war’s events, so a war’s total is its own, and a War Focus war holds only its own years. ${cands.length ? `${candYears} ${cands.length === 1 ? 'is' : 'are'} UCDP’s Candidate Events (${[...new Set(cands.map(o => o.doc.version))].join(', ')}), as the Realtime Battlefield holds them: by country and month only, and candidate, not yet checked by UCDP; each country is joined by its name through VM’s crosswalk, never by the Realtime file’s Gleditsch and Ward code${unjoinedText ? `, and the names the crosswalk cannot read are counted and not drawn (${unjoinedText})` : ''}. A candidate year stays until UCDP’s yearly release records it. ` : ''}The map shows the frame’s year, every month of it, one file loaded at a time (omni/scripts/build-ucdp-events.mjs).`,
     open: true, pinnable: true, built: index.built,
     files: [{ file: 'omni/data/layers/ucdp-events/index.json', ...measure(ixText) }, ...outs.map(o => ({ file: `omni/data/layers/ucdp-events/${o.y}.json`, ...o.m }))],
   });

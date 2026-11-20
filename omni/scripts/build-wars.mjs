@@ -14,7 +14,9 @@
 //    label checks the Q-id, and its start and end (P580, P582) give the war's years, at the precision Wikidata records.
 // 4. Joins: each War Focus war is a war of its own, holding its UCDP conflict for the years of the war (two War Focus
 //    wars may share one UCDP conflict: the Chechen wars, and Afghanistan's); every other UCDP conflict is a war of its
-//    own. A conflict-year belongs to the War Focus war whose years hold it, else to the conflict's own war (warOf).
+//    own, and so is a War Focus war's conflict for its years outside every War Focus war's own (X3 of the second review,
+//    20 November 2026: Yemen's conflict 230 in 1948 is not War Focus's Yemen war, which Wikidata starts in 2014). A
+//    conflict-year belongs to the War Focus war whose years hold it, else to the conflict's own war, else to none (warOf).
 // 5. Writes omni/data/layers/wars/registry.json, keeping its `built` when nothing else changed. Nothing else is written.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -46,23 +48,28 @@ export function joinWars(conflicts, names, wf, wfYears) {
     const y = wfYears[w.id] || {};
     wars.push({ id: `wf-${w.id}`, name: w.name, q: w.qid || null, wf: w.id, ucdp: u && conflicts[+u[1]] ? [+u[1]] : [], from: y.from ?? null, to: y.to ?? null, ...(y.src ? { src: y.src } : {}) });
   }
-  const held = new Set(wars.flatMap(w => w.ucdp));
+  const focus = wars.slice();
   for (const c of Object.values(conflicts).sort((a, b) => a.id - b.id)) {
-    if (held.has(c.id)) continue;
-    wars.push({ id: `ucdp-${c.id}`, name: names[c.id] || c.location, q: null, wf: null, ucdp: [c.id], from: c.years[0], to: c.years.at(-1), src: { id: 'ucdp-acd', loc: `UcdpPrioConflict_v26_1.csv;conflict_id=${c.id}` } });
+    // The conflict's years that no War Focus war holding it covers: all of them for a conflict War Focus does not hold.
+    const outside = c.years.filter(y => !focus.some(w => w.ucdp.includes(c.id) && holdsYear(w, y)));
+    if (!outside.length) continue;
+    wars.push({ id: `ucdp-${c.id}`, name: names[c.id] || c.location, q: null, wf: null, ucdp: [c.id], from: outside[0], to: outside.at(-1), src: { id: 'ucdp-acd', loc: `UcdpPrioConflict_v26_1.csv;conflict_id=${c.id}` } });
   }
   return wars;
 }
 
-/** The war a UCDP conflict-year belongs to: the War Focus war holding that conflict whose years hold the year (the
-    nearest by its start when none does), else the conflict's own. */
+/** Whether a war's own years (from, to; no end: still going) hold a year. A war with no start holds none. */
+export const holdsYear = (w, year) => w.from != null && w.from <= year && year <= (w.to ?? Infinity);
+
+/** The war a UCDP conflict-year belongs to: the War Focus war holding that conflict whose years hold the year; else
+    the conflict's own war (ucdp-<id>), which holds its years outside every War Focus war; else none. A War Focus war is
+    never given a year outside its own (X3). */
 export function warOf(registry, conflictId, year) {
   const ws = registry.wars.filter(w => w.ucdp.includes(conflictId));
-  if (!ws.length) return null;
-  if (ws.length === 1) return ws[0].id;
-  const holds = ws.filter(w => w.from != null && w.from <= year && year <= (w.to ?? Infinity));
-  if (holds.length) return holds[0].id;
-  return ws.slice().sort((a, b) => Math.abs((a.from ?? 0) - year) - Math.abs((b.from ?? 0) - year))[0].id;
+  const focus = ws.find(w => w.wf && holdsYear(w, year));
+  if (focus) return focus.id;
+  const own = ws.find(w => !w.wf);
+  return own ? own.id : null;
 }
 
 async function main() {

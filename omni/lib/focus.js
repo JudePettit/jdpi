@@ -4,9 +4,10 @@
    focus asks for it), its main parts only; a Q-id to its border of the frame's year (VM's crosswalk of Cliopatria),
    else to its point in the lake. The page has no Documentary button of its own; it only answers.
 
-   const f = listenFocus({ getFile, data, map: () => S.map, home: () => S.box, qid: q => <GeoJSON | [lon, lat] | null> })
+   const f = listenFocus({ getFile, data, map: () => S.map, home: () => S.box, qid: q => <GeoJSON | [lon, lat] | null>,
+     prepare: async qids => {} })   prepare reads what qid() needs first (a Q-id's lake record not yet loaded)
    f.state()   { focused: box | null, countries, at }  for window.omniState */
-export function listenFocus({ getFile, data, map, home, qid = () => null }) {
+export function listenFocus({ getFile, data, map, home, qid = () => null, prepare = async () => {} }) {
   const F = window.PRPFocus, M = window.PRPMap;
   let fc = null, focused = null, countries = [], at = null;
   if (!F) return { state: () => ({ focused: null, countries: [], at: null }) };
@@ -23,6 +24,9 @@ export function listenFocus({ getFile, data, map, home, qid = () => null }) {
   F.listen({
     async focus(t) {
       if (t.countries.length) await shapes().catch(() => null);
+      // A Q-id whose record the view has not read is placed from its lake shard, as the view's own places are (second
+      // review X7, 20 November 2026).
+      if (t.qids?.length) await Promise.resolve(prepare(t.qids)).catch(() => null);
       const r = F.resolve(t, { country, qid });
       if (!r.box || !map()) return;
       focused = r.box; countries = t.countries; at = new Date().toISOString();

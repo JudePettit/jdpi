@@ -25,8 +25,35 @@ const sha = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256'
 const BEFORE = 'borders-fill'; // fills and bases are drawn under the borders
 const GROUPS = { wb: 'World Bank indicators, by country' };
 
-export function layerView({ data, getFile, map, sources, onChange, borders = () => null }) {
+// A layer's filter in words: its own (the discipline, the type of violence) or a war of the registry (l=ucdp-events:w=…).
+// A war of the registry is named by its words (wf-russia-ukraine: "the war Russia–Ukraine"), its id beside (V8). An
+// address may carry a war id with an empty part (w=wf-, w=wf--ukraine): such an id names no war, and the words say so
+// rather than throw, so the page still draws (second review, 20 November 2026).
+const WAR_ID = /^wf-[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+export const warName = id => (!/^wf-/.test(id) ? id : WAR_ID.test(id) ? `${id.slice(3).split('-').map(w => w[0].toUpperCase() + w.slice(1)).join('–')} (${id})` : null);
+export const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.filter.label.toLowerCase()} ${e.filter.values.find(v => v.id === f.value)?.name || f.value}`
+  : f.field === 'w' ? (warName(f.value) ? `the war ${warName(f.value)}` : `the war “${f.value}” (an id that names no war, so none of it is drawn)`) : `${f.field} ${f.value}`);
+
+export function layerView({ data, getFile, map, sources, onChange, borders = () => null, battles = () => [] }) {
   let cat = L.catalogue(null), set = L.emptySet(), subject = null, note = '';
+  // Second review, 20 November 2026: frameGen numbers the calls of frame(), so only the last draws; subjectQ is the
+  // view's clicked object (q=), whose layer is found in the data once loaded; failed holds the layers of the frame
+  // that could not load or draw, so the list does not say they are drawn.
+  let frameGen = 0, subjectQ = null, failed = new Map();
+  const holdsSubject = d => !!(subjectQ && d?.held && Array.isArray(d.rows) && d.rows.some(r => r?.q === subjectQ || r?.id === subjectQ));
+  // A layer's file of another shape than the one this page reads (an empty object, rows that are not a list): its words,
+  // so the page's loading note says it and nothing is drawn as if the layer were empty (second review, 20 November 2026).
+  function misshapen(id, d) {
+    if (!d?.held) return null;
+    const e = entry(id), isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+    const ok = (d.fc ? Array.isArray(d.fc.features) && Array.isArray(d.small) : true)
+      && (e.geometry === 'grid' ? Array.isArray(d.index?.breaks) && Array.isArray(d.grid?.cells) && d.grid.cols > 0 && d.grid.rows > 0
+        : e.on === 'states' ? isObj(d.doc) && isObj(d.doc.years) && Array.isArray(e.style?.classes)
+          : e.on === 'countries' ? Array.isArray(d.series?.years) && isObj(d.series?.values) && (!d.split || d.series.day != null)
+            : id === 'countries' ? true
+              : Array.isArray(d.rows) && (d.doc?.format === 'vm-ged-cells/1' || Array.isArray(d.doc?.rows)));
+    return ok ? null : `${e?.title || id}: VM’s file ${d.path || ''} is not of the shape this page reads, so it is not drawn`.replace('  ', ' ');
+  }
   const files = new Map(), fetched = [];
   const drawn = { fill: null, base: null, points: {} };
   const site = new URL('../../', data).href; // the site's root (data is omni/data/)
@@ -277,12 +304,14 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
     if (m._vmPick) return; // once for each map (the page may make its map again)
     m._vmPick = true;
     m.on('click', ev => {
-      const ids = ['lv-st', 'lv-st-pts', ...Object.keys(drawn.points).map(id => `lv-pt-${id}`)].filter(id => m.getLayer(id));
+      // The battles are omni/app.js's own layer ('battles'), drawn with their Q-id: a click on one opens the panel too
+      // (second review, 20 November 2026).
+      const ids = ['lv-st', 'lv-st-pts', ...Object.keys(drawn.points).map(id => `lv-pt-${id}`), 'battles'].filter(id => m.getLayer(id));
       const f = ids.length ? m.queryRenderedFeatures(ev.point, { layers: ids })[0] : null;
       if (!f) return;
-      api.pick(f.layer.id.startsWith('lv-st') ? { layer: f.properties.lv, q: f.properties.q } : f.properties.point_count ? { layer: f.layer.id.slice(6), cluster: f.properties.point_count } : { layer: f.layer.id.slice(6), id: f.properties.id });
+      api.pick(f.layer.id === 'battles' ? { layer: 'battles', id: f.properties.id } : f.layer.id.startsWith('lv-st') ? { layer: f.properties.lv, q: f.properties.q } : f.properties.point_count ? { layer: f.layer.id.slice(6), cluster: f.properties.point_count } : { layer: f.layer.id.slice(6), id: f.properties.id });
     });
-    for (const id of ['lv-st', 'lv-st-pts']) {
+    for (const id of ['lv-st', 'lv-st-pts', 'battles']) {
       m.on('mouseenter', id, () => { m.getCanvas().style.cursor = 'pointer'; });
       m.on('mouseleave', id, () => { m.getCanvas().style.cursor = ''; });
     }
@@ -321,10 +350,6 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
     }
     return out;
   }
-  // A layer's filter in words: its own (the discipline, the type of violence) or a war of the registry (l=ucdp-events:w=…).
-  // A war of the registry is named by its words (wf-russia-ukraine: "the war Russia–Ukraine"), its id beside (V8).
-const warName = id => (/^wf-/.test(id) ? `${id.slice(3).split('-').map(w => w[0].toUpperCase() + w.slice(1)).join('–')} (${id})` : id);
-const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.filter.label.toLowerCase()} ${e.filter.values.find(v => v.id === f.value)?.name || f.value}` : f.field === 'w' ? `the war ${warName(f.value)}` : `${f.field} ${f.value}`);
   const linksHtml = ls => ls.map(l => `<a href="${esc(l.href)}" target="_top"${/^https?:/.test(l.href) && !l.href.startsWith(site) ? ' rel="noreferrer"' : ''}>${esc(l.text)}</a>`).join(' · ');
   const when = r => (r.date?.from ? formatValueDate(r.date, { source: 'Wikidata' }) : r.whenText || `${r.circa ? 'c. ' : ''}${yr(r.sortYear)}`);
   // A row's name for a reader: an item Wikidata gives no English name is "an unnamed Wikidata item (Q…)" (V12).
@@ -373,6 +398,13 @@ const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.fi
   // source, and the module that holds it at that place and year.
   function pickHtml() {
     if (!picked) return '';
+    if (picked.layer === 'battles') {
+      // A battle drawn at the frame (omni/app.js's rows): its name, date and source, its encyclopaedia entry and War Focus.
+      const r = (battles() || []).find(x => x.q === picked.id);
+      if (!r) return '';
+      return `<p class="om-lg-title">${esc(entry('battles')?.title || 'Battles')}: what you clicked</p><p><b><bdi>${esc(nameOf(r))}</bdi></b> <span class="om-q">${esc(r.q)}</span>${r.partOfLabel ? ` <span class="om-q">part of ${esc(r.partOfLabel)}</span>` : ''}</p>`
+        + `<p>${esc(when(r))}</p><p class="om-src">${esc(r.src?.date?.line || '')}</p><p>${linksHtml(rowLinks('battles', r))}</p>`;
+    }
     const d = picked.layer === drawn.fill?.id ? drawn.fill : drawn.points[picked.layer];
     if (!d?.held) return '';
     const e = entry(d.id);
@@ -400,6 +432,8 @@ const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.fi
     if (!on) return 'Off: its data loads when you switch it on.';
     if (e.id === 'countries') return 'On: today’s borders, whatever the year.';
     if (e.id === 'battles') return 'On.';
+    // Its data could not load or be drawn at the frame: said, never "the map shows" (second review, 20 November 2026).
+    if (failed.has(e.id) && frameYear === year) return 'On, but its data could not load, so nothing of it is drawn (the note under “In focus” says why).';
     const y = M().layerYear(e, year), s = src(e.source)?.short || e.source;
     if (y == null) return 'On: nothing of it falls at this year.';
     if (L.roleOf(e) === 'point') {
@@ -415,37 +449,58 @@ const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.fi
   const api = {
     init(doc) { cat = L.catalogue(doc); },
     catalogue: () => cat,
+    // opts.subject: the subject's layer where the page knows it (a clicked battle's); opts.q: the clicked object, whose
+    // layer (an election's, a coup's, any point layer's) is found once its data loads.
     read(R, opts = {}) {
-      subject = opts.subject || null;
+      // A recipe holds at most three point layers without all=1 (design/vm-recipe.js), so reading one drops none; the
+      // subject's layer matters when a fourth is switched on or "Show anyway" is unticked (second review X5).
+      subject = opts.subject || null; subjectQ = /^Q\d+$/.test(opts.q || '') ? opts.q : null;
       const r = L.fromRecipe(R, cat, { subject });
       set = r.set; note = r.notes.join(' ');
       return { unknown: r.unknown, notes: r.notes };
     },
     recipe: () => L.toRecipe(set, cat),
+    // A layer switched off by the page itself, with the note the list shows (the battles' file failing to load).
+    off(id, text = '') { set = L.switchOff(set, id); note = text; },
     on: () => L.layersOn(set),
     isOn: id => id === 'borders' || L.layersOn(set).includes(id),
     // opts.lo: the first year of the period shown (design 2.1 rule 4); a point layer draws its rows of [lo, year].
+    // Each call loads into its own result and draws only if it is still the last call and the layers on are still the
+    // ones it loaded: a late answer for an older frame, or for a layer since switched off, changes nothing on the map or
+    // in what is drawn (second review, 20 November 2026). The errors it returns then carry stale: true.
     async frame(year, { lo = year } = {}) {
-      drawn.fill = drawn.base = null; drawn.points = {};
-      if (frameYear !== year || frameLo !== lo) picked = null;
-      frameYear = year; frameLo = Math.min(lo ?? year, year);
+      const gen = ++frameGen;
+      const mine = set, next = { fill: null, base: null, points: {} }, bad = new Map(), errs = [];
+      const job = (id, put) => need(id, year).then(d => { const why = misshapen(id, d); if (why) throw new Error(why); put(d); })
+        .catch(e => { errs.push(e.message); bad.set(id, e.message); });
       const jobs = [];
-      if (set.base) jobs.push(need(set.base, year).then(d => { drawn.base = d; }));
-      if (set.fill) jobs.push(need(set.fill, year).then(d => { drawn.fill = d; }));
-      for (const id of set.points) if (id !== 'battles') jobs.push(need(id, year).then(d => { drawn.points[id] = d; }));
-      const errs = [];
-      await Promise.all(jobs.map(j => j.catch(e => errs.push(e.message))));
+      if (set.base) jobs.push(job(set.base, d => { next.base = d; }));
+      if (set.fill) jobs.push(job(set.fill, d => { next.fill = d; }));
+      for (const id of set.points) if (id !== 'battles') jobs.push(job(id, d => { next.points[id] = d; }));
+      await Promise.all(jobs);
+      if (gen !== frameGen || set !== mine) return Object.assign([], { stale: true });
+      const lo2 = Math.min(lo ?? year, year);
+      if (frameYear !== year || frameLo !== lo2) picked = null;
+      frameYear = year; frameLo = lo2;
+      drawn.fill = next.fill; drawn.base = next.base; drawn.points = next.points; failed = bad;
+      // The layer holding the subject (q=), whatever its kind, is the one the clutter rule never drops.
+      if (subjectQ && !subject) subject = Object.keys(next.points).find(id => holdsSubject(next.points[id])) || null;
       ready(m => {
+        if (gen !== frameGen) return;
+        clickable(m); // a battle's point opens the pick panel too, with no other layer drawn
+        // A layer whose drawing fails is said in the page's loading note and the others are still drawn.
+        const guard = (id, f) => { try { f(); } catch (e) { const t = `${entry(id)?.title || id}: it could not be drawn (${e.message})`; errs.push(t); bad.set(id, t); console.warn('Omni-Map:', t);
+          if (drawn.fill?.id === id) drawn.fill = null; delete drawn.points[id]; } };
         drawCountriesBase(m, drawn.base?.held ? drawn.base : null);
         const f = drawn.fill?.held ? drawn.fill : null;
-        if (f && entry(f.id).geometry === 'grid') { clear(m, ['lv-fill-line', 'lv-fill', 'lv-fill-pts', ...ST]); drawGrid(m, f); }
-        else if (f && entry(f.id).on === 'states') { clear(m, ['lv-fill-line', 'lv-fill', 'lv-fill-pts', 'lv-grid']); drawStates(m, f); }
-        else if (f) { clear(m, ['lv-grid', ...ST]); drawCountryFill(m, f); }
+        if (f && entry(f.id).geometry === 'grid') { clear(m, ['lv-fill-line', 'lv-fill', 'lv-fill-pts', ...ST]); guard(f.id, () => drawGrid(m, f)); }
+        else if (f && entry(f.id).on === 'states') { clear(m, ['lv-fill-line', 'lv-fill', 'lv-fill-pts', 'lv-grid']); guard(f.id, () => drawStates(m, f)); }
+        else if (f) { clear(m, ['lv-grid', ...ST]); guard(f.id, () => drawCountryFill(m, f)); }
         else clear(m, ['lv-fill-line', 'lv-fill', 'lv-fill-pts', 'lv-grid', ...ST]);
         bordersAsOutlines(m, !!f);
         for (const id of cat.list.filter(e => L.roleOf(e) === 'point' && e.id !== 'battles').map(e => e.id)) {
           const d = drawn.points[id];
-          if (d?.held) drawPoints(m, id, pointsView(d, year, frameLo).shown.map(x => ({ ...x.r, pt: x.pt })));
+          if (d?.held) guard(id, () => drawPoints(m, id, pointsView(d, year, frameLo).shown.map(x => ({ ...x.r, pt: x.pt }))));
           else clear(m, [`lv-pt-${id}`]);
         }
       });
@@ -533,7 +588,7 @@ const filterWords = (e, f) => (!f ? null : f.field === e.filter?.field ? `${e.fi
           + `<ul class="om-lg-lines">${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>${key}${shown}<p class="om-lg-credit">${esc(lg.credit)}</p>`
           + `<details class="om-method"><summary><span aria-hidden="true">ⓘ</span> How this layer was made</summary><p>${esc(lg.method)}</p></details></div>`);
       }
-      if (out.length && (drawn.fill?.doc || Object.values(drawn.points).some(d => d.held))) out.unshift(`<div class="om-lg om-pick" id="ly-pick" role="status" aria-live="polite">${pickHtml()}</div>`);
+      if ((out.length && (drawn.fill?.doc || Object.values(drawn.points).some(d => d.held))) || (battles() || []).length) out.unshift(`<div class="om-lg om-pick" id="ly-pick" role="status" aria-live="polite">${pickHtml()}</div>`);
       return out.join('');
     },
     // A click on a state or a point a layer draws: { layer, q } or { layer, id } or { layer, cluster }.

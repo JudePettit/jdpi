@@ -141,8 +141,10 @@ test('layer 8: the builder\'s steps: the zip and its sha256, the CSV, cells, pre
   assert.deepEqual(y.country.map(r => r[0]).sort(), ['Q15180', 'UKR'], 'precision 4 and 5 by country, a state not of today by its Q-id');
   assert.equal(y.listed.length, 2, 'precision 6 and 7 listed'); assert.deepEqual(unread, ['Atlantis']);
   assert.equal(warOf(registry, 7, 2005), 'wf-test');
-  const c = candidateYear({ months: ['2026-01', '2026-02'], countries: { 369: { iso3: 'UKR', series: { from: '2026-01', events: [3, 0], deaths: [10, 0] } }, 999: { iso3: '', series: { events: [1] } } } });
+  // X7 (second review): a candidate country is joined by its name through VM's crosswalk, never by its GW-derived iso3.
+  const c = candidateYear({ year: 2026, months: ['2026-01', '2026-02'], countries: { 369: { name: 'Ukraine', iso3: 'UKR', series: { from: '2026-01', events: [3, 0], deaths: [10, 0] } }, 999: { name: '', iso3: '', series: { events: [1] } } } }, { resolveName });
   assert.deepEqual(c.months, [1, 2]); assert.deepEqual(c.country, [['UKR', 1, 0, 3, 10, null, null, []]]);
+  assert.deepEqual(c.unjoined, [{ name: '', events: 1, deaths: 0 }], 'a country the crosswalk cannot read is counted, not drawn');
   assert.throws(() => unzipFirst(Buffer.from('not a zip')), /not a zip/);
 });
 

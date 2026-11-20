@@ -39,8 +39,10 @@ test('catalogue: readLayer accepts every entry; each absent line passes readAbse
   assert.ok(DOC.layers.slice(11).every(e => /^wb-/.test(e.id) || ['gvi', 'ucdp-events', 'calendar-events'].includes(e.id)));
   // F1 (S5a review): HYDE 3.2.1 is built, so nothing is left out for want of free data in S5a; S5c leaves out SIPRI's
   // military expenditure, whose terms bar commercial use; D1 (S5b/S5c review) the three series the IEA's terms keep
-  // outside CC BY 4.0.
-  assert.deepEqual(DOC.absent.map(a => a.id).sort(), ['wb-eg-fec-rnew-zs', 'wb-eg-use-pcap-kg-oe', 'wb-en-ghg-co2-pc-ce-ar5', 'wb-ms-mil-xpnd-gd-zs']);
+  // outside CC BY 4.0; X1 (second review) IHME's PM2.5 exposure and ITU's two series, whose originators' terms bar
+  // commercial use.
+  assert.deepEqual(DOC.absent.map(a => a.id).sort(), ['wb-eg-fec-rnew-zs', 'wb-eg-use-pcap-kg-oe', 'wb-en-atm-pm25-mc-m3', 'wb-en-ghg-co2-pc-ce-ar5',
+    'wb-it-cel-sets-p2', 'wb-it-net-user-zs', 'wb-ms-mil-xpnd-gd-zs']);
 });
 
 test('catalogue: readLayer refuses a bad role, time.values that do not match from and to, and a bad statusBy', () => {

@@ -8,7 +8,8 @@
 // 1. Elections: reads the Master Index's shards (lake/data/e, committed; no fetch): every record of type "election"
 //    (referendums among them) with a date and a country. Its date is Wikidata's point in time (P585), as the Master
 //    Index stores it at Wikidata's precision ("1928" for a year, "1963-04" for a month), so a date known to the year is
-//    never written as 1 January.
+//    never written as 1 January; where the Master Index stores the precision itself (fp.date: 8 a decade), that number
+//    is the row's, never one read from the date's spelling (X4 of the second review).
 // 2. Coups: asks Wikidata's query service for the items that are instances of coup d'état (Q45382) or of a subclass of
 //    it, then reads those items (wbgetentities): country (P17), point in time (P585) or start (P580), at Wikidata's
 //    precision, with what supports the date (lake/scripts/refs.mjs), and their classes' names (an attempt is its own
@@ -16,18 +17,21 @@
 // 3. Political change: asks the query service for every term (position held, P39, with a start, P580) of the office
 //    each sovereign state (Q3624078) names as its head of state's (P1906) or its head of government's (P1313), its
 //    end (P582) and end cause (P1534) where Wikidata gives them; a state changes in a year when a term begins that year
-//    whose holder is not the one before (a holder named again is no change).
-// 4. Writes omni/data/layers/elections/elections.json, omni/data/layers/coups/coups.json and
-//    omni/data/layers/political-change/terms.json, their catalogue entries in omni/data/layers.json, each `built`
-//    moving only when its rows change.
-// 5. Writes omni/data/layers/retro-keys.json: the Political Retrospective's own key of each country by ISO3, from its
-//    data/countries.json (the sibling folder hp-retrospective, or --retro), only so a click can open its page there.
-//    Nothing else is written.
+//    whose holder is not the one before (a holder named again is no change). An office that is the state's head of
+//    state's and head of government's both gives one term in each role (X5), so its new holder counts as both.
+// 4. Reads omni/data/layers/retro-keys.json's source: the Political Retrospective's own key of each country by ISO3,
+//    from its data/countries.json (the sibling folder hp-retrospective, or --retro), only so a click can open its page
+//    there.
+// 5. Only once every step above has worked (X6): writes omni/data/layers/elections/elections.json,
+//    omni/data/layers/coups/coups.json, omni/data/layers/political-change/terms.json and retro-keys.json, then their
+//    catalogue entries in omni/data/layers.json (each `built` moving only when its rows change), then the bytes and
+//    sha256 of retro-keys.json in every entry that lists it, whichever this run rebuilt. A run that fails writes
+//    nothing. Nothing else is written.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { entities, sparql, keepStamp, claimIds } from './history-common.mjs';
-import { arg, stamp, measure, putLayer } from './layer-catalogue.mjs';
+import { arg, stamp, measure, putLayer, writeCatalogue } from './layer-catalogue.mjs';
 import { wikidataDate, bestClaim } from '../../lake/scripts/dates.mjs';
 import { support, supportText } from '../../lake/scripts/refs.mjs';
 
@@ -55,7 +59,10 @@ export function electionRows(records, { today = new Date().toISOString().slice(0
   const out = [], doubtful = [];
   for (const r of records) {
     if (r?.type !== 'election') continue;
-    const v = r.facts?.date ?? null, p = precisionOf(v), y = yearOf(v);
+    // X4 (second review, 20 November 2026): the Master Index's own precision of the date (fp.date, Wikidata's number:
+    // 8 a decade, 7 a century) decides where it gives one; the spelling only where it gives none, and never finer.
+    const v = r.facts?.date ?? null, spelt = precisionOf(v), stored = Number.isInteger(r.fp?.date) ? r.fp.date : null;
+    const p = spelt == null ? null : stored != null ? Math.min(stored, spelt) : spelt, y = yearOf(v);
     const country = (r.rel?.Country || []).map(c => c[0]).filter(q => /^Q\d+$/.test(q));
     if (!v || p == null || y == null || !country.length) continue;
     const row = { id: r.q, q: r.q, label: r.label, kind: /referend|plebiscite/i.test(`${r.label} ${r.desc || ''}`) ? 'referendum' : 'election',
@@ -125,7 +132,10 @@ export function timeAt(v, p) {
 export function changeRows(bindings, { from = 1926 } = {}) {
   const seen = new Set(), terms = [], places = {};
   for (const b of bindings) {
-    if (seen.has(b.st)) continue; seen.add(b.st);
+    // X5 (second review): one statement of an office that is its state's head of state's and head of government's both
+    // (the President of the United States) is a term in each role, so a new holder counts as both.
+    const k = `${b.st}|${b.role}`;
+    if (seen.has(k)) continue; seen.add(k);
     const c = q(b.country);
     places[c] ||= { q: c, n: b.countryLabel, iso3: b.iso || null };
     terms.push({ c, role: b.role, office: q(b.office), q: q(b.person), n: b.personLabel, start: { from: timeAt(b.start, b.sp), p: +b.sp },
@@ -146,13 +156,16 @@ export function changeRows(bindings, { from = 1926 } = {}) {
 }
 
 /* ---------- step 4 ---------- */
-function write(path, body) {
+// X6 (second review, 20 November 2026): a file is prepared in memory and written only once every step of the run has
+// worked (writeAll), so a run that fails part-way leaves every file and the catalogue as they were.
+function prepare(path, body) {
   const full = join(ROOT, path), prev = existsSync(full) ? JSON.parse(readFileSync(full, 'utf8')) : null;
   const file = { ...body, built: keepStamp(prev, body, stamp()) };
   const text = JSON.stringify(file) + '\n';
-  mkdirSync(join(full, '..'), { recursive: true });
-  writeFileSync(full, text);
-  return { file, m: measure(text) };
+  return { path, full, file, text, m: measure(text) };
+}
+function writeAll(outs) {
+  for (const o of outs) { mkdirSync(join(o.full, '..'), { recursive: true }); writeFileSync(o.full, o.text); }
 }
 const span = rows => [Math.min(...rows.map(r => r.sortYear)), Math.max(...rows.map(r => r.sortYear))];
 const PLACE = 'each at its country’s point: Cliopatria’s polity for the year, where VM’s crosswalk holds the country, else Natural Earth’s country of today from 1886; one neither holds is listed';
@@ -164,7 +177,7 @@ export function electionsEntry(file, m) {
     measure: null, status: 'recorded', statusBy: [{ from: +String(file.asOf).slice(0, 4) + 1, status: 'expected' }],
     style: { kind: 'points', token: '--prp-accent', hollow: `still to come on ${file.asOf}, the day VM built the layer: the date set for it, not a record` },
     legend: 'Elections and referendums: Wikidata (CC0), through the Master Index – placed by Vitruvian Manager', source: 'wikidata',
-    method: `VM’s own text. Every election and referendum the Master Index holds with a date and a country (${file.rows.length} of them), each the Wikidata item’s point in time (P585) at the precision Wikidata records: a date known only to its year is shown as the year, never as 1 January, and one known to its month as the month. Those still to come on ${file.asOf}, the day VM built the layer (${file.rows.filter(r => r.expected).length} of them), are drawn hollow and marked expected: their date is the one set, not a record. ${file.doubtful.length ? `${file.doubtful.length === 1 ? 'One record is' : `${file.doubtful.length} records are`} left out as doubtful, because the date Wikidata gives (as the Master Index holds it) is more than a year from the year the item’s own name begins with, and VM does not choose between them: ${file.doubtful.map(d => `${d.label} (${d.q}), dated ${d.date.from}`).join('; ')}. ` : ''}${placeMethod} The Political Atlas’s election dates are not used: they are written by a language model, not taken from a source a page can name. The Political Retrospective’s are not used either; they are Wikidata’s too, through it.`,
+    method: `VM’s own text. Every election and referendum the Master Index holds with a date and a country (${file.rows.length} of them), each the Wikidata item’s point in time (P585) at the precision Wikidata records: a date known only to its year is shown as the year, never as 1 January, and one known to its month as the month; where the Master Index stores the precision itself, that is the one kept (${file.rows.filter(r => r.date.p < 9).length === 1 ? 'one record is' : `${file.rows.filter(r => r.date.p < 9).length} records are`} known only to the decade or coarser, and placed at its first year). Those still to come on ${file.asOf}, the day VM built the layer (${file.rows.filter(r => r.expected).length} of them), are drawn hollow and marked expected: their date is the one set, not a record. ${file.doubtful.length ? `${file.doubtful.length === 1 ? 'One record is' : `${file.doubtful.length} records are`} left out as doubtful, because the date Wikidata gives (as the Master Index holds it) is more than a year from the year the item’s own name begins with, and VM does not choose between them: ${file.doubtful.map(d => `${d.label} (${d.q}), dated ${d.date.from}`).join('; ')}. ` : ''}${placeMethod} The Political Atlas’s election dates are not used: they are written by a language model, not taken from a source a page can name. The Political Retrospective’s are not used either; they are Wikidata’s too, through it.`,
     open: true, pinnable: true, built: file.built, files: [{ file: 'omni/data/layers/elections/elections.json', ...m }, ...retroFile()] };
 }
 export function coupsEntry(file, m) {
@@ -199,28 +212,39 @@ export function retroKeys(doc) {
   return out;
 }
 const RETRO = 'omni/data/layers/retro-keys.json';
-// The address table as a file of the layers that open the Political Retrospective (the page loads it with them).
+// The address table as a file of the layers that open the Political Retrospective (the page loads it with them),
+// measured from the file on disk: the catalogue entries are put only after every file of the run is written.
 const retroFile = () => (existsSync(join(ROOT, RETRO)) ? [{ file: RETRO, role: 'addresses', ...measure(readFileSync(join(ROOT, RETRO), 'utf8')) }] : []);
-function writeRetro(path) {
-  if (!existsSync(path)) { console.log(`retro-keys.json: kept (no ${path})`); return; }
+function prepareRetro(path) {
+  if (!existsSync(path)) { console.log(`retro-keys.json: kept (no ${path})`); return null; }
   const doc = JSON.parse(readFileSync(path, 'utf8'));
-  const { file, m } = write(RETRO, { format: 'vm-addresses/1', module: 'https://hp-retrospective.pages.dev/', built: null, of: doc.built || null,
+  return prepare(RETRO, { format: 'vm-addresses/1', module: 'https://hp-retrospective.pages.dev/', built: null, of: doc.built || null,
     about: 'VM’s own text. The Political Retrospective’s own key for each country it covers, by ISO3, read from its data/countries.json: only the key and the name, to open its page at that country (#y=<year>&c=<key>). None of its data is read.',
     keys: retroKeys(doc) });
-  console.log(`retro-keys.json: ${Object.keys(file.keys).length} ISO3 codes; ${m.bytes} bytes; built ${file.built}`);
+}
+/** X6: every catalogue entry that lists retro-keys.json (elections, coups, political change) carries the file's bytes,
+    gzipped bytes and sha256 as it now is, whichever of them this run rebuilt; an entry's `built` stays its data's. */
+export function syncRetro(cat, measured) {
+  for (const l of cat.layers) for (const f of l.files || []) if (f.file === RETRO) Object.assign(f, measured);
+  return cat;
 }
 
 async function main() {
   const cache = arg('--cache'), only = arg('--only');
   const doing = k => !only || only === k;
-  if (doing('retro')) writeRetro(arg('--retro') || join(ROOT, '../hp-retrospective/data/countries.json'));
+  const outs = [], entries = [], said = [];
+  // Every step first, in memory; nothing is written until all have worked.
+  if (doing('retro')) {
+    const o = prepareRetro(arg('--retro') || join(ROOT, '../hp-retrospective/data/countries.json'));
+    if (o) { outs.push(o); said.push(`retro-keys.json: ${Object.keys(o.file.keys).length} ISO3 codes; ${o.m.bytes} bytes; built ${o.file.built}`); }
+  }
   if (doing('elections')) {
     const today = stamp().slice(0, 10), { rows, doubtful } = electionRows(lakeRecords(), { today }), [from, to] = span(rows);
-    const { file, m } = write('omni/data/layers/elections/elections.json', { layer: 'elections', format: 'vm-layer/1', source: 'wikidata', built: null, from, to,
-      about: 'VM’s own text. The elections and referendums the Master Index holds with a date and a country, each date Wikidata’s point in time (P585) at Wikidata’s precision. Those still to come on the day VM built the file are marked expected; those whose date contradicts the year their own name begins with are listed as doubtful, not drawn.',
+    const o = prepare('omni/data/layers/elections/elections.json', { layer: 'elections', format: 'vm-layer/1', source: 'wikidata', built: null, from, to,
+      about: 'VM’s own text. The elections and referendums the Master Index holds with a date and a country, each date Wikidata’s point in time (P585) at the precision the Master Index stores for it (Wikidata’s). Those still to come on the day VM built the file are marked expected; those whose date contradicts the year their own name begins with are listed as doubtful, not drawn.',
       asOf: today, rows, doubtful });
-    putLayer(LAYERS, electionsEntry(file, m));
-    console.log(`elections.json: ${rows.length} rows (${rows.filter(r => r.expected).length} expected), ${from}–${to}; ${doubtful.length} doubtful left out; ${m.bytes} bytes, ${m.gzip} gzipped; built ${file.built}`);
+    outs.push(o); entries.push(() => electionsEntry(o.file, o.m));
+    said.push(`elections.json: ${rows.length} rows (${rows.filter(r => r.expected).length} expected, ${rows.filter(r => r.date.p < 9).length} known only to a decade or coarser), ${from}–${to}; ${doubtful.length} doubtful left out; ${o.m.bytes} bytes, ${o.m.gzip} gzipped; built ${o.file.built}`);
   }
   if (doing('coups')) {
     const list = await sparql('SELECT DISTINCT ?item WHERE { ?item wdt:P31/wdt:P279* wd:Q45382 . }', { cache, key: 'coups-list.json' });
@@ -234,10 +258,10 @@ async function main() {
       .sort((a, b) => a.sortYear - b.sortYear || String(a.date.from).localeCompare(String(b.date.from)) || +a.q.slice(1) - +b.q.slice(1));
     console.log(`Coups: ${qs.length} items; ${rows.length} with a country and a date (${rows.filter(r => r.sortYear >= 1926).length} from 1926)`);
     const [from, to] = span(rows);
-    const { file, m } = write('omni/data/layers/coups/coups.json', { layer: 'coups', format: 'vm-layer/1', source: 'wikidata', built: null, from, to,
+    const o = prepare('omni/data/layers/coups/coups.json', { layer: 'coups', format: 'vm-layer/1', source: 'wikidata', built: null, from, to,
       about: 'VM’s own text. The Wikidata items of coup d’état (Q45382) and its subclasses with a country and a date, at Wikidata’s precision.', rows });
-    putLayer(LAYERS, coupsEntry(file, m));
-    console.log(`coups.json: ${m.bytes} bytes, ${m.gzip} gzipped; built ${file.built}`);
+    outs.push(o); entries.push(() => coupsEntry(o.file, o.m));
+    said.push(`coups.json: ${o.m.bytes} bytes, ${o.m.gzip} gzipped; built ${o.file.built}`);
   }
   if (doing('political-change')) {
     const offices = (await sparql(OFFICES_QUERY, { cache, key: 'offices.json' })).map(o => ({ country: q(o.country), office: q(o.office), role: o.role }))
@@ -250,12 +274,22 @@ async function main() {
     // Each state's inception (P571), the first year VM may draw it on Natural Earth's border of today.
     const got = await entities(Object.keys(places), { props: 'claims', cache, tag: 'pc' });
     for (const [c, p] of Object.entries(places)) { const d = wikidataDate(bestClaim(got[c]?.claims?.P571)); p.since = yearOf(d?.v); p.src = { id: 'wikidata', loc: `${c}#P571` }; }
-    const { file, m } = write('omni/data/layers/political-change/terms.json', { layer: 'political-change', format: 'vm-terms/1', source: 'wikidata', built: null, from: ys[0], to: ys.at(-1),
+    const o = prepare('omni/data/layers/political-change/terms.json', { layer: 'political-change', format: 'vm-terms/1', source: 'wikidata', built: null, from: ys[0], to: ys.at(-1),
       about: 'VM’s own text. Each term of the offices of head of state (P1906) and head of government (P1313) of today’s sovereign states, as Wikidata records them, and the years a new holder began.',
       places: Object.fromEntries(Object.entries(places).sort(([a], [b2]) => +a.slice(1) - +b2.slice(1))), terms, years: Object.fromEntries(ys.map(y => [y, years[y]])) });
-    putLayer(LAYERS, changeEntry(file, m));
-    console.log(`terms.json: ${terms.length} terms, ${Object.keys(places).length} states, changes ${ys[0]}–${ys.at(-1)}; ${m.bytes} bytes, ${m.gzip} gzipped; built ${file.built}`);
+    outs.push(o); entries.push(() => changeEntry(o.file, o.m));
+    said.push(`terms.json: ${terms.length} terms (${terms.filter(t => t.role === 'hos').length} of heads of state, ${terms.filter(t => t.role === 'hog').length} of government), ${Object.keys(places).length} states, changes ${ys[0]}–${ys.at(-1)}; ${o.m.bytes} bytes, ${o.m.gzip} gzipped; built ${o.file.built}`);
   }
+  // Every step has worked: the files, then the catalogue entries (measured from the files as written), then the
+  // hashes of retro-keys.json in every entry that lists it, so a run of --only retro leaves none stale.
+  writeAll(outs);
+  for (const e of entries) putLayer(LAYERS, e());
+  if (existsSync(join(ROOT, RETRO))) {
+    const cat = JSON.parse(readFileSync(LAYERS, 'utf8')), before = JSON.stringify(cat);
+    syncRetro(cat, measure(readFileSync(join(ROOT, RETRO), 'utf8')));
+    if (JSON.stringify(cat) !== before) writeCatalogue(LAYERS, cat);
+  }
+  for (const s of said) console.log(s);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

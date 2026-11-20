@@ -4,13 +4,17 @@
 // each, from the World Development Indicators (the API's source 2) and the Worldwide Governance Indicators (source 3).
 //   node omni/scripts/build-wb.mjs --code EN.POP.DNST [--data <copy>] [--meta <copy>] [--countries <copy>]
 //   node omni/scripts/build-wb.mjs --all [--meta-dir <folder of <code>.json copies>]   every series, one after another
+//   --keep-values   reuse the values the last build fetched (omni/data/layers/wb/<code>.json) instead of asking the API
 // A series whose licence does not read CC BY 4.0 (MS.MIL.XPND.GD.ZS: "SIPRI terms and conditions") is not hosted: with
 // --all it is written as a line of the catalogue's `absent` list, with the licence its metadata gives and SIPRI's terms.
+// So is one whose originator's own terms bar commercial use, whatever its licence reads (BARRED, ORIGINATORS: the IEA's
+// three, IHME's PM2.5 exposure and ITU's two, X1 of the second review, 20 November 2026).
 // The order of steps:
 // 1. Reads the series' metadata from the World Bank's API (META_URL, User-Agent "VM build check
 //    (https://jdpi.pages.dev)"), or --meta, and stops unless its License_Type is CC BY 4.0: the series' own licence,
 //    read at each build, decides, and the licence the World Bank's data catalogue gives CC BY 4.0 is in
-//    integration/sources.json ("world-bank-wdi").
+//    integration/sources.json ("world-bank-wdi"). Then names its originators from its Source (ORIGINATORS) and stops
+//    if one of them bars commercial use and BARRED has no line for the series; one BARRED lists is written as absent.
 // 2. Reads the values for every economy and aggregate, 1960–2025, from DATA_URL, or --data; and the World Bank's list of
 //    economies (COUNTRIES_URL), or --countries, which marks each aggregate (region "Aggregates").
 // 3. Keeps each economy's value of each year as the World Bank gives it, and null where it gives none; the aggregates
@@ -60,7 +64,75 @@ export const BARRED = {
   ].map(([code, title, what]) => [code, { title, originator: true, termsUrl: 'https://www.iea.org/terms', read: '2026-11-20',
     seen: `the World Bank’s metadata for the series gives “CC BY-4.0” and names the International Energy Agency (IEA) among its sources${code === 'EN.GHG.CO2.PC.CE.AR5' ? ' (beside the European Commission’s EDGAR)' : ''}; the IEA’s terms (https://www.iea.org/terms, read 20 November 2026) list “Standalone datasets, data explorers and databases” as content not made available under CC BY 4.0, and its terms for that material (https://www.iea.org/terms/terms-of-use-for-non-cc-material) bar “making more than 5 (five) raw data points from the Non-CC Material, whether or not aggregated, accessible for download” and allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”`,
     why: `the World Bank takes this series in part from the International Energy Agency, whose own terms keep its datasets outside CC BY 4.0, bar offering more than five of its data points for download and limit their use to non-commercial ends, so it is not free data; ${what} cannot be drawn until a series under an open licence exists (for energy, an energy balance published under CC BY or similar${code === 'EN.GHG.CO2.PC.CE.AR5' ? '; for carbon dioxide, EDGAR’s own CC BY 4.0 release read and joined by VM without the IEA’s part' : ''})` }])),
+  // X1 (second review, 20 November 2026): the World Bank's metadata reads CC BY-4.0, but its originator, IHME, licenses
+  // its data to non-commercial users only (ORIGINATORS below gives the words read and where).
+  'EN.ATM.PM25.MC.M3': { title: 'PM2.5 air pollution, mean annual exposure (micrograms per cubic meter), by country', originator: true,
+    termsUrl: 'https://www.healthdata.org/about/terms-and-conditions', read: '2026-11-20',
+    seen: 'the World Bank’s metadata for the series gives “CC BY-4.0” and names as its source the Global Burden of Disease Study 2023 air pollution exposure estimates, published by the Institute for Health Metrics and Evaluation (IHME) at https://ghdx.healthdata.org/record/ihme-data/gbd-2023-air-pollution-exposure-estimates-1990-2023; that record’s terms (read 20 November 2026) say its data “can be used, shared, modified or built upon by non-commercial users in accordance with the IHME FREE-OF-CHARGE NON-COMMERCIAL USER AGREEMENT”, and IHME’s terms and conditions (https://www.healthdata.org/about/terms-and-conditions, read the same day) say “Commercial organizations wishing to acquire a license to access and download IHME data should contact” IHME',
+    why: 'the World Bank takes this series from the Institute for Health Metrics and Evaluation (IHME), whose own terms let only non-commercial users use, share or adapt its data, so it is not free data; exposure to fine particulate matter by country cannot be drawn until an estimate under an open licence (CC BY or similar) is found and read' },
+  // X1: the World Bank's metadata reads CC BY-4.0, but its originator, ITU, gives its content for non-commercial use only.
+  ...Object.fromEntries([
+    ['IT.CEL.SETS.P2', 'Mobile cellular subscriptions (per 100 people), by country', 'mobile subscriptions per hundred people'],
+    ['IT.NET.USER.ZS', 'Individuals using the Internet (% of population), by country', 'the share of people using the Internet'],
+  ].map(([code, title, what]) => [code, { title, originator: true, termsUrl: 'https://www.itu.int/en/about/Pages/terms-of-use.aspx', read: '2026-11-20',
+    seen: 'the World Bank’s metadata for the series gives “CC BY-4.0” and names as its source the World Telecommunication/ICT Indicators Database of the International Telecommunication Union (ITU); ITU’s terms of use (https://www.itu.int/en/about/Pages/terms-of-use.aspx, read 20 November 2026) say “ITU grants you permission to download, copy and use content for personal, educational, or non-commercial purposes” and “You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU”; ITU’s DataHub (https://datahub.itu.int/), where the World Bank names the data, refused VM’s reader the same day (HTTP 403, “Request blocked”), so no other terms for the data could be read',
+    why: `the World Bank takes this series from the International Telecommunication Union (ITU), whose own terms of use allow its content to be used only for personal, educational or non-commercial purposes and bar adapting or redistributing it commercially without its written permission, so it is not free data; ${what} cannot be drawn until ITU’s own terms for the data are read and allow it, or a series under an open licence exists` }])),
 };
+
+// X1 (second review, 20 November 2026): each series' originators, as the World Bank's metadata names them in its
+// Source, and what VM read of each one's own terms at its own address. `terms`: 'barred' (its terms bar commercial use:
+// every series naming it is left out, whatever the World Bank's label says), 'free' (its terms, read, allow commercial
+// use, redistribution and adaptation) or 'not read' (VM has not read them, or could not: the series rests on the World
+// Bank's CC BY 4.0 label, and its method says "originator’s terms not read"). A series that names a barred originator
+// and has no line in BARRED stops the build (checkOriginators), so it cannot come back unseen; one that names no
+// originator listed here stops it too.
+export const ORIGINATORS = [
+  { id: 'ihme', name: 'Institute for Health Metrics and Evaluation (IHME)', match: /Institute for Health Metrics|\(IHME\)/, terms: 'barred',
+    termsUrl: 'https://www.healthdata.org/about/terms-and-conditions', read: '2026-11-20',
+    also: ['https://ghdx.healthdata.org/record/ihme-data/gbd-2023-air-pollution-exposure-estimates-1990-2023', 'https://www.healthdata.org/about/ihme-free-charge-non-commercial-user-agreement'],
+    seen: 'data on IHME’s websites “can be used, shared, modified or built upon by non-commercial users in accordance with the IHME FREE-OF-CHARGE NON-COMMERCIAL USER AGREEMENT”; “Commercial organizations wishing to acquire a license to access and download IHME data should contact” IHME' },
+  { id: 'itu', name: 'International Telecommunication Union (ITU)', match: /International Telecommunication Union|\(ITU\)/, terms: 'barred',
+    termsUrl: 'https://www.itu.int/en/about/Pages/terms-of-use.aspx', read: '2026-11-20', refused: { url: 'https://datahub.itu.int/', answer: 'HTTP 403, “Request blocked”', read: '2026-11-20' },
+    seen: '“ITU grants you permission to download, copy and use content for personal, educational, or non-commercial purposes”; “You may not modify, reproduce, distribute, sell, transmit, create derivative works or use the content for any commercial purpose without obtaining prior written permission from ITU”' },
+  { id: 'iea', name: 'International Energy Agency (IEA)', match: /International Energy Agency|\(IEA\)/, terms: 'barred',
+    termsUrl: 'https://www.iea.org/terms', read: '2026-11-20', seen: '“Standalone datasets, data explorers and databases” are not made available under CC BY 4.0, and its terms for them allow public use only when it is “neither primarily intended for, or directed towards, commercial advantage or revenue generation”' },
+  { id: 'sipri', name: 'Stockholm International Peace Research Institute (SIPRI)', match: /Stockholm International Peace Research Institute|\(SIPRI\)/, terms: 'barred',
+    termsUrl: 'https://www.sipri.org/about/terms-and-conditions', read: '2026-11-18', seen: '“Use of SIPRI copyrighted material for commercial purposes must be authorized and will normally require the payment of a reasonable royalty.”' },
+  { id: 'world-bank', name: 'World Bank', match: /World Bank \(WB\)|World Bank, Poverty and Inequality|World Bank \(www\.govindicators\.org\)/, terms: 'free',
+    termsUrl: 'https://datacatalog.worldbank.org/public-licenses', read: '2026-11-18', seen: 'CC BY 4.0: “allows users to copy, modify and distribute data in any format for any purpose, including commercial use”' },
+  { id: 'fao', name: 'Food and Agriculture Organization of the United Nations (FAO)', match: /Food and Agriculture Organization|\(FAO\)/, terms: 'free',
+    termsUrl: 'https://www.fao.org/contact-us/terms/db-terms-of-use/en/', read: '2026-11-20', seen: 'its statistical databases’ datasets are under CC BY 4.0 “unless specified otherwise in their metadata or webpage”, may be adapted and re-disseminated, and are not to be used to promote a commercial enterprise or suggest FAO’s endorsement' },
+  { id: 'un-pop', name: 'UN Population Division', match: /UN Population Division|World Population Prospects|World Urbanization Prospects/, terms: 'not read',
+    tried: { url: 'https://population.un.org/wpp/', read: '2026-11-20', answer: 'the page’s text holds no terms: it is a script application, and VM runs no script it downloads' } },
+  { id: 'imf', name: 'International Monetary Fund (IMF)', match: /International Monetary Fund/, terms: 'not read' },
+  { id: 'oecd', name: 'Organisation for Economic Co-operation and Development (OECD)', match: /Organisation for Economic Co-operation and Development/, terms: 'not read' },
+  { id: 'unesco', name: 'UNESCO Institute for Statistics', match: /UNESCO/, terms: 'not read' },
+  { id: 'who', name: 'World Health Organization (WHO)', match: /World Health Organization/, terms: 'not read' },
+  { id: 'unicef', name: 'UN Children’s Fund (UNICEF)', match: /UNICEF/, terms: 'not read' },
+  { id: 'ilo', name: 'International Labour Organization (ILO)', match: /International Labour Organization|ILOSTAT/, terms: 'not read' },
+  { id: 'wipo', name: 'World Intellectual Property Organization (WIPO)', match: /World Intellectual Property Organization/, terms: 'not read' },
+  { id: 'unodc', name: 'UN Office on Drugs and Crime (UNODC)', match: /Office on Drugs and Crime|UNODC/, terms: 'not read' },
+  { id: 'un-stats', name: 'UN Statistics Division (Comtrade; Population and Vital Statistics Report)', match: /UN Statistic(?:s|al) Division|Comtrade/, terms: 'not read' },
+  { id: 'eurostat', name: 'Eurostat', match: /Eurostat|\(ESTAT\)/, terms: 'not read' },
+  { id: 'nso', name: 'national statistical offices and central banks', match: /National Statistical (?:Organizations|Offices)|government statistical agencies/i, terms: 'not read' },
+  { id: 'lis', name: 'Luxembourg Income Study (LIS)', match: /Luxembourg Income Study/, terms: 'not read' },
+  { id: 'jrc', name: 'Joint Research Centre of the European Commission (EDGAR)', match: /Joint Research Centre|EDGAR/, terms: 'not read' },
+];
+/** The originators a series' Source names, in ORIGINATORS's order. */
+export const originatorsOf = source => ORIGINATORS.filter(o => o.match.test(String(source || '')));
+/** Stops unless every barred originator a series names has its line in BARRED, and unless it names one VM lists. */
+export function checkOriginators(code, source) {
+  const all = originatorsOf(source), barred = all.filter(o => o.terms === 'barred');
+  if (barred.length && !BARRED[code]) throw new Error(`${code}: its metadata names ${barred.map(o => o.name).join(' and ')}, whose own terms bar commercial use (${barred.map(o => `${o.termsUrl}, read ${o.read}`).join('; ')}); BARRED gives no line for it, so VM does not build it`);
+  if (!all.length) throw new Error(`${code}: its metadata names no originator ORIGINATORS lists ("${String(source || '').slice(0, 160)}"): add it, with its terms, first`);
+  return all;
+}
+/** The originators as a layer entry lists them, and the sentence its method says of their terms. */
+const entryOriginators = all => all.map(o => ({ name: o.name, terms: o.terms, ...(o.termsUrl ? { termsUrl: o.termsUrl, read: o.read } : {}), ...(o.tried ? { tried: o.tried.url, triedOn: o.tried.read } : {}) }));
+const fmtDay = d => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const originatorWords = all => `Its originators, as the World Bank’s metadata names them, and their own terms: ${all.map(o => (o.terms === 'free'
+  ? `${o.name}, whose terms (${o.termsUrl}, read ${fmtDay(o.read)}) allow it`
+  : `${o.name}: originator’s terms not read${o.tried ? ` (VM tried ${o.tried.url} on ${fmtDay(o.tried.read)}; ${o.tried.answer})` : ''}`)).join('; ')}.${all.some(o => o.terms === 'not read') ? ' Where an originator’s terms were not read, VM relies on the World Bank’s own CC BY 4.0 label for the series.' : ''}`;
 export const COUNTRIES_URL = 'https://api.worldbank.org/v2/country?format=json&per_page=400';
 // The series VM draws, each with its layer's own words (the method and legend are VM's; the definition is the World Bank's).
 export const SERIES = {
@@ -160,8 +232,9 @@ function specOf(code, meta, s) {
   };
 }
 
-async function buildOne(code, { metaFile = null, dataFile = null, countriesFile = null } = {}) {
+async function buildOne(code, { metaFile = null, dataFile = null, countriesFile = null, keepValues = false } = {}) {
   const meta = seriesMeta(await json(META_URL(code), metaFile));
+  const origin = checkOriginators(code, meta.source);
   if (!isCcBy(meta.licence) || BARRED[code]?.originator) {
     const b = BARRED[code];
     if (!b) throw new Error(`${code}: its licence reads "${meta.licence}", not CC BY 4.0; VM does not host it, and BARRED gives no words for its line`);
@@ -174,9 +247,13 @@ async function buildOne(code, { metaFile = null, dataFile = null, countriesFile 
     return;
   }
   dropAbsent(LAYERS, idOf(code));
-  const data = await json(DATA_URL(code), dataFile);
-  const economies = (await json(COUNTRIES_URL, countriesFile))[1];
-  const s = series(data[1], economies), now = stamp();
+  // --keep-values: the values the last build fetched (this layer's own file), so a change of words alone asks the
+  // World Bank for nothing and leaves the values, and the file, as they were.
+  const file = join(OUT, `${code}.json`), last = keepValues ? readJson(file) : null;
+  if (keepValues && !last) throw new Error(`${code}: --keep-values, but there is no ${file} to keep`);
+  const data = last ? [{ lastupdated: last.lastupdated }, null] : await json(DATA_URL(code), dataFile);
+  const s = last ? { years: last.years, values: last.values, names: last.names, aggregates: last.aggregates } : series(data[1], (await json(COUNTRIES_URL, countriesFile))[1]);
+  const now = stamp();
   const spec = specOf(code, meta, s);
   const base = joinPath(ROOT, 'omni/data/base');
   const away = unplaced(s, JSON.parse(readFileSync(joinPath(base, 'countries.topo.json'), 'utf8')), JSON.parse(readFileSync(joinPath(base, 'small-states.json'), 'utf8')));
@@ -184,7 +261,6 @@ async function buildOne(code, { metaFile = null, dataFile = null, countriesFile 
     licenceUrl: meta.licenceUrl, lastupdated: data[0].lastupdated, url: DATA_URL(code), built: null, years: s.years, join: 'iso3', values: s.values, names: s.names,
     aggregates: s.aggregates, unplaced: away };
   mkdirSync(OUT, { recursive: true });
-  const file = join(OUT, `${code}.json`);
   doc.built = keepBuilt(readJson(file), doc, now);
   const text = JSON.stringify(doc) + '\n', m = measure(text);
   if (m.gzip > LIMIT_GZ) throw new Error(`${code}.json is over the limit`);
@@ -198,24 +274,28 @@ async function buildOne(code, { metaFile = null, dataFile = null, countriesFile 
     data: `omni/data/layers/wb/${code}.json`, on: 'countries', space: 'by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)', measure: spec.measure, status: spec.status || 'as the World Bank estimates it',
     style: { kind: 'classes', breaks, unit: spec.unit || spec.measure, scheme: 'sequential', ...(spec.group ? { cut: `sevenths of every value, rounded to two significant figures` } : {}) },
     legend: spec.legend, source: spec.source || 'world-bank-wdi',
-    method: `VM’s own text, quoting the World Bank. The World Bank’s ${meta.name} (${code}), from its ${spec.set || 'World Development Indicators'}, every economy and year it gives (${s.years[0]}–${s.years.at(-1)}), as last updated by the World Bank on ${doc.lastupdated}; licence, as the series’ own metadata gives it at each build: ${meta.licence}. ${meta.definition ? `Its definition, in the World Bank’s words: “${meta.definition}”${' '}` : ''}${meta.source ? `Its sources, as it names them: ${meta.source.replace(/\s*\n\s*/g, ' ')}.` : 'The World Bank names no sources for it in its metadata.'} VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. ${spec.inputs ? spec.inputs + ' ' : ''}The ${Object.keys(s.aggregates).length} aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. ${Object.keys(away).length ? `The ${Object.keys(away).length === 1 ? 'economy' : 'economies'} ${Object.values(away).join(' and ')} ${Object.keys(away).length === 1 ? 'has' : 'have'} a value but no shape or point on Natural Earth’s countries, so VM cannot place ${Object.keys(away).length === 1 ? 'it' : 'them'} on a free border; the key lists ${Object.keys(away).length === 1 ? 'it' : 'them'}.` : ''} ${classWords} A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).`.replace(/\.\.(?=\s|$)/g, '.').replace(/ {2,}/g, ' '),
-    open: true, pinnable: true, built: doc.built, unplaced: away,
+    method: `VM’s own text, quoting the World Bank. The World Bank’s ${meta.name} (${code}), from its ${spec.set || 'World Development Indicators'}, every economy and year it gives (${s.years[0]}–${s.years.at(-1)}), as last updated by the World Bank on ${doc.lastupdated}; licence, as the series’ own metadata gives it at each build: ${meta.licence}. ${meta.definition ? `Its definition, in the World Bank’s words: “${meta.definition}”${' '}` : ''}${meta.source ? `Its sources, as it names them: ${meta.source.replace(/\s*\n\s*/g, ' ')}.` : 'The World Bank names no sources for it in its metadata.'} ${originatorWords(origin)} VM draws each economy’s value on Natural Earth’s countries of today (v5.1.1, 2022), joined by ISO 3166 alpha-3 code, so a value of 1961 is drawn on today’s borders, not on those of 1961; a small state the 1:110 million map leaves out is a point. ${spec.inputs ? spec.inputs + ' ' : ''}The ${Object.keys(s.aggregates).length} aggregates the World Bank also gives (regions, income groups, the world) are not drawn, and are listed under the map’s key. ${Object.keys(away).length ? `The ${Object.keys(away).length === 1 ? 'economy' : 'economies'} ${Object.values(away).join(' and ')} ${Object.keys(away).length === 1 ? 'has' : 'have'} a value but no shape or point on Natural Earth’s countries, so VM cannot place ${Object.keys(away).length === 1 ? 'it' : 'them'} on a free border; the key lists ${Object.keys(away).length === 1 ? 'it' : 'them'}.` : ''} ${classWords} A year with no value for an economy leaves it blank (omni/scripts/build-wb.mjs).`.replace(/\.\.(?=\s|$)/g, '.').replace(/ {2,}/g, ' '),
+    open: true, pinnable: true, built: doc.built, unplaced: away, originators: entryOriginators(origin),
     files: [{ file: `omni/data/layers/wb/${code}.json`, ...m }],
   });
 }
 
 async function main() {
+  const keepValues = process.argv.includes('--keep-values');
   if (process.argv.includes('--all')) {
     const dir = arg('--meta-dir');
-    for (const code of ['EN.POP.DNST', ...NATIONAL]) {
-      await buildOne(code, { metaFile: dir ? joinPath(dir, `${code}.json`) : null });
-      await new Promise(r => setTimeout(r, 500)); // politely, one series after another
+    // Every series' metadata and originators are read and checked before any file is written.
+    const codes = ['EN.POP.DNST', ...NATIONAL];
+    for (const code of codes) if (dir) checkOriginators(code, seriesMeta(JSON.parse(readFileSync(joinPath(dir, `${code}.json`), 'utf8'))).source);
+    for (const code of codes) {
+      await buildOne(code, { metaFile: dir ? joinPath(dir, `${code}.json`) : null, keepValues: keepValues && !BARRED[code] });
+      if (!dir || !keepValues) await new Promise(r => setTimeout(r, 500)); // politely, one series after another
     }
     return;
   }
   const code = arg('--code');
   if (!code || !(SERIES[code] || NATIONAL.includes(code))) throw new Error(`--code must be one of ${[...Object.keys(SERIES), ...NATIONAL].join(', ')}, or use --all`);
-  await buildOne(code, { metaFile: arg('--meta'), dataFile: arg('--data'), countriesFile: arg('--countries') });
+  await buildOne(code, { metaFile: arg('--meta'), dataFile: arg('--data'), countriesFile: arg('--countries'), keepValues });
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

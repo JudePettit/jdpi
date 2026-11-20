@@ -73,8 +73,10 @@ test('page: a layer switched on by keyboard is fetched only then; its legend nam
     ['ly-conflict-territory', false, false], ['ly-elections', false, false], ['ly-coups', false, false], ['ly-political-change', false, false], ['ly-breakthroughs', false, false]]);
   for (const [id, on, off] of switches.slice(11)) { assert.match(id, /^ly-(wb-[a-z0-9-]+|gvi|ucdp-events|calendar-events)$/); assert.equal(on || off, false, id); }
   // The lines left out: the World Bank's military expenditure, which is SIPRI's, under SIPRI's terms (S5c), and the
-  // three series the World Bank takes from the IEA, under the IEA's own terms (D1 of the S5b/S5c review).
-  assert.deepEqual((await page.$$eval('#layers-body [data-absent="true"]', els => els.map(e => e.dataset.layer || e.id))).sort(),['wb-eg-fec-rnew-zs', 'wb-eg-use-pcap-kg-oe', 'wb-en-ghg-co2-pc-ce-ar5', 'wb-ms-mil-xpnd-gd-zs']);
+  // three series the World Bank takes from the IEA, under the IEA's own terms (D1 of the S5b/S5c review); and, since
+  // the second review of 20 November 2026 (X1), IHME's PM2.5 exposure and ITU's two series, whose originators' own
+  // terms bar commercial use whatever the World Bank's label reads.
+  assert.deepEqual((await page.$$eval('#layers-body [data-absent="true"]', els => els.map(e => e.dataset.layer || e.id))).sort(),['wb-eg-fec-rnew-zs', 'wb-eg-use-pcap-kg-oe', 'wb-en-atm-pm25-mc-m3', 'wb-en-ghg-co2-pc-ce-ar5', 'wb-it-cel-sets-p2', 'wb-it-net-user-zs', 'wb-ms-mil-xpnd-gd-zs']);
   // R4: each line says the years the layer holds, on or off; outside them, in the design's words.
   assert.equal(await page.textContent('#ly-density-country-what'), 'Holds 1961 to 2024. Off: its data loads when you switch it on.');
   assert.equal(await page.textContent('#ly-countries-what'), 'Holds 1886 to 2024. Off: its data loads when you switch it on.');
@@ -195,8 +197,10 @@ test('page: addresses from before S5a open as before; an unknown layer is named 
   assert.ok(ireland, 'Ireland has a row');
   const series = JSON.parse(readFileSync(new URL('../omni/data/layers/wb/EN.POP.DNST.json', import.meta.url), 'utf8'));
   assert.equal(+ireland.value, series.values.IRL[series.years.indexOf(1990)], 'the value is the World Bank\'s, unchanged');
-  // ds= pins each drawn layer's version, after the five pins of a view from before S5a.
-  assert.match(b['recipe.txt'], /&ds=cliopatria@[^&]*,battles@\d{8}T\d{4}Z,countries@\d{8}T\d{4}Z,density-country@\d{8}T\d{4}Z$/);
+  // ds= pins each drawn layer's version, after the borders' four pins; the battles, not drawn here, are not pinned
+  // (second review X8, 20 November 2026: a battles refresh must not mark this view as changed).
+  assert.match(b['recipe.txt'], /&ds=cliopatria@[^&]*,natural-earth@[^,&]+,countries@\d{8}T\d{4}Z,density-country@\d{8}T\d{4}Z$/);
+  assert.doesNotMatch(b['recipe.txt'], /battles@/);
   const list = JSON.parse(b['metadata.json']).datasets;
   const wbd = list.find(d => d.id === 'density-country'), nd = list.find(d => d.id === 'countries');
   assert.ok(wbd && /^[0-9a-f]{64}$/.test(wbd.sha256) && wbd.licence === 'CC BY 4.0', JSON.stringify(wbd));

@@ -16,7 +16,7 @@ VM holds Cliopatria's borders for **every year it covers, 3400 BC to AD 2024** (
 | `data/borders/qids.json` | The crosswalk from Wikidata Q-ids to Cliopatria's names by year, and the ids rejected, with why | `scripts/build-borders.mjs` |
 | `data/base/ne_110m_land.geojson` | Natural Earth 5.1.1's land at 1:110 million, unchanged: the plain base (see `data/base/README.md`) | `scripts/build-base.mjs` |
 | `data/layers/battles.json` | The battles the Master Index and War Focus hold with a date and a point (1,967, 1258–2025), each value with its source | `scripts/build-battles.mjs` |
-| `data/layers/wars/registry.json` | The one war registry (S5b): each war of the lake and of UCDP/PRIO ACD 26.1 once, with its ids in each, its years and its War Focus id where there is one; no COW record | `scripts/build-wars.mjs` |
+| `data/layers/wars/registry.json` | The one war registry (S5b): each war of the lake and of UCDP/PRIO ACD 26.1 once, with its ids in each, its years and its War Focus id where there is one; a UCDP conflict's years outside every War Focus war that holds it are the conflict's own war (`ucdp-<id>`); no COW record | `scripts/build-wars.mjs` |
 | `data/layers/conflict-territory/conflicts.json` | Layer 2: UCDP/PRIO ACD 26.1 and UCDP BRD 26.1 by country and year, 1946–2025 (intensity, battle deaths from 1989, the sides fighting abroad), each joined to a country by its name and ISO 3166 code, never by a GW code alone | `scripts/build-conflict-territory.mjs` (places from `scripts/ucdp-places.mjs`) |
 | `data/layers/political-change/terms.json`, `elections/elections.json`, `coups/coups.json` | Layer 3: heads of state and government from Wikidata (P39), elections and referendums from the Master Index, coups from Wikidata (Q45382), each value with its source | `scripts/build-political.mjs` |
 | `data/layers/retro-keys.json` | The Retrospective’s own country keys by ISO 3166 code (format `vm-addresses/1`), read from its `data/countries.json`, so a click on a country opens the Retrospective at that country | `scripts/build-political.mjs --only retro` |
@@ -224,14 +224,18 @@ split by years (the grid) only the file of the frame's epoch. A layer whose year
 
 The clutter rule (`omni/lib/layers.js`, pure): one fill, one base and at most three point or line layers. A second
 fill or base replaces the first; a fourth point or line layer switches off the oldest, with a note, unless "Show
-anyway" is ticked; the layer of the view's subject (a clicked battle's) is never dropped. Above 2,000 visible points a
+anyway" is ticked; the layer holding the view's subject (`q=`: a clicked battle's, election's, coup's or any point
+layer's, found in its data once loaded) is never dropped. Above 2,000 visible points a
 point layer clusters. The borders are always drawn; under a fill they are outlines.
 
 In the address (design 3.2's keys): `fill=wb:EN.POP.DNST` or `fill=density-grid`, `base=countries`, `l=` the point and
 line layers in the order switched on, `all=1` for Show anyway (which lets `l=` hold up to twelve). A fill's or base's id
 given in `l=` is read into its own key. An address from before S5a opens as it did; an id VM does not hold is named
 on the page and not drawn. The bundle and "Download data" carry each drawn layer's rows (each value with its
-source and its place in it) and its dataset entry with sha256 and licence, and `ds=` pins each drawn layer's version.
+source and its place in it) and its dataset entry with sha256 and licence, and `ds=` pins each drawn layer's version
+(the battles only when they are switched on). A layer's answer that comes after the reader has moved on (another
+frame, or the layer switched off) changes nothing drawn, and a layer file of another shape than the page reads is
+named in the page's loading note and not drawn.
 
 | Layer | Role | Years | From |
 |---|---|---|---|
@@ -267,7 +271,8 @@ Four layers draw on what VM already holds or on free data, read with its terms:
 - **Breakthroughs** (points): the Invention Timeline’s events, with a Discipline filter (`l=breakthroughs:d=astro`).
 
 A state is placed by Cliopatria’s shape for the year where the crosswalk has one, by Natural Earth’s from 1886, and as
-a point for a small state; one with none is listed under the key with why. A click on a country or a point opens a
+a point for a small state; one with none is listed under the key with why. A click on a country or a point (a battle's
+too) opens a
 panel with its values and the module that holds it at that year: the Battlefield history
 (`battlefield/history/index.html#y=<year>&c=<GW or ISO3>`), the Retrospective (`#y=<year>&c=<its key>`), War Focus
 (`battlefield/focus/index.html#war=<id>`) or the Invention Timeline (`science/progress/index.html#y=<year>&e=<id>`). A
@@ -280,13 +285,20 @@ VM’s own text. Four more layers, each loaded only when it is switched on:
 - **World Bank indicators** (fills, one at a time, `fill=wb:<code>`): one layer per World Development Indicators series
   whose own metadata reads CC BY 4.0, listed together under one disclosure in the layer list. A series whose metadata
   gives other terms is not built and is listed with them: military expenditure (MS.MIL.XPND.GD.ZS) is SIPRI’s, under
-  SIPRI’s terms, so it is absent.
+  SIPRI’s terms, so it is absent. An originator’s own terms decide over the World Bank’s label: the series taken from
+  the IEA (EG.USE.PCAP.KG.OE, EG.FEC.RNEW.ZS, EN.GHG.CO2.PC.CE.AR5), IHME (EN.ATM.PM25.MC.M3) and ITU (IT.CEL.SETS.P2,
+  IT.NET.USER.ZS) are absent too, each with the words of its terms. Each series’ entry names its originators
+  (`originators`) and what VM read of their terms; where an originator’s terms were not read (the UN Population
+  Division’s page holds none in its text), its method says “originator’s terms not read”.
 - **UCDP’s events** (points, 1989–2026, `l=ucdp-events`, `l=ucdp-events:t=1|2|3`, `l=ucdp-events:w=<war id>`): UCDP
   GED 26.1 summed into 0.5° cells by month, one file a year (`data/layers/ucdp-events/<year>.json`); only the frame’s
   year is fetched. An event UCDP knows only to its province or country is drawn hollow at its country; one known only to
   the country at large, or at sea or in the air, is counted under the key and not drawn. 2026 is UCDP Candidate’s
-  monthly counts by country, from VM’s Realtime file, and is labelled candidate. The war filter goes through the war
-  registry; a cell names no actor and no person.
+  monthly counts by country, from VM’s Realtime file, and is labelled candidate; each country is joined by its UCDP
+  name through VM’s crosswalk, and a name the crosswalk cannot read is counted in the file’s `unjoined`, not drawn. A
+  candidate year GED has not yet recorded is kept, as written, until GED’s yearly release records it. Each row counts
+  one war’s events (its `war` a list of at most one index into the file’s `wars`), so the war filter’s totals are the
+  war’s own; the filter goes through the war registry; a cell names no actor and no person.
 - **The calendars’ events** (points, 1980–2029, `l=calendar-events`): VM Calendars’ events, one file a decade, each
   event with its date’s precision (day or month), its ISO3 where it has a country of today, and its source class. An
   event to come is drawn hollow. Leader and coup events that may be Archigos’s, and the Atlas’s, are left out and counted.
@@ -295,8 +307,10 @@ VM’s own text. Four more layers, each loaded only when it is switched on:
   `volatility/scripts/ingest.mjs`, so none is lost when Volatility’s index drops days older than a year.
 
 The map draws at most three point or line layers; a fourth switches off the oldest and says so. A page or the narrator
-can send `prp:focus` with ISO3 codes (`{ countries: ['FRA'] }`) and the map fits them; `{ reset: true }` fits the
-view’s own box. Across VM, a tagged name (a Wikipedia link, or an element with `data-qid`) opens VM’s card
+can send `prp:focus` with ISO3 codes (`{ countries: ['FRA'] }`) and the map fits them; a Q-id (`{ qids: ['Q1449'] }`)
+is fitted to its border of the frame's year, else to its point in the Master Index, read from its shard if the view
+has not read it; `{ reset: true }` fits the view’s own box. If the battles' file cannot load, their switch goes back
+off and the list says why. Across VM, a tagged name (a Wikipedia link, or an element with `data-qid`) opens VM’s card
 (`design/jdpi-entities.js`, offers from `design/vm-click.js`): the person’s life on the Omni-Map, their encyclopedia
 entry, and Wikipedia. A Ctrl-, Shift-, Alt- or middle-click still goes to Wikipedia.
 
@@ -330,8 +344,10 @@ node omni/scripts/build-wars.mjs --acd <UcdpPrioConflict_v26_1.csv> [--cache <fo
 node omni/scripts/build-conflict-territory.mjs --acd <UcdpPrioConflict_v26_1.csv> --brd <BattleDeaths_v26_1_conf.csv> [--cache <folder>]
 node omni/scripts/build-political.mjs [--cache <folder>] [--only elections|coups|political-change|retro] [--retro <countries.json>]
 node omni/scripts/build-breakthroughs.mjs
-# S5c: every World Bank series in build-wb.mjs's list, each licence read from its own metadata
-node omni/scripts/build-wb.mjs --all [--meta-dir <folder>]
+# S5c: every World Bank series in build-wb.mjs's list, each licence and originator read from its own metadata
+# (every series' originators are checked before anything is written); --keep-values reuses each file's values and
+# fetches nothing but the metadata, for a change of method or terms alone
+node omni/scripts/build-wb.mjs --all [--meta-dir <folder>] [--keep-values]
 # UCDP GED 26.1 (ged261-csv.zip, CC BY 4.0), downloaded first into a scratch folder of its own; checked against its sha256
 node --max-old-space-size=6000 omni/scripts/build-ucdp-events.mjs --file <ged261-csv.zip>
 # The Volatility score: the kept days first, then the layer

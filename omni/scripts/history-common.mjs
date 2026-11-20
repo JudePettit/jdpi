@@ -1,5 +1,5 @@
 // Shared steps of the Omni-Map's history layers (stage S5b of PRP-SCHOLAR-USP-DESIGN.md): reading a CSV, asking
-// Wikidata politely (wbgetentities and the query service, one request at a time, with VM's client name and no personal
+// Wikidata politely (wbgetentities and the query service, one request at a time and at most one every four seconds, with VM's client name and no personal
 // detail, each answer kept in a cache folder of the caller's own, never the repository), and the file stamp rule.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -35,7 +35,7 @@ async function polite(url, { cache, key, accept = 'application/json' } = {}) {
     const j = await res.json();
     if (j.error) throw new Error(`Wikidata: ${j.error.info}`);
     if (cache && key) { mkdirSync(cache, { recursive: true }); writeFileSync(join(cache, key), JSON.stringify(j)); }
-    await sleep(1000);
+    await sleep(4000); // at most one request to Wikimedia every four seconds
     return j;
   }
   throw new Error('Wikidata kept refusing: try later');

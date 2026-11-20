@@ -273,7 +273,8 @@ async function setFrame(year, { start = null, fit = false, source = 'set' } = {}
   if (fit || !S.boxSet) { S.box = box; S.boxSet = true; S.map?.fit(S.box, { padding, animate: source !== 'set' }); }
   // The layers switched on (stage S5a): each loads only now, and only the frame's file of a layer split by years.
   const lvErrors = S.lv ? await S.lv.frame(year, { lo: S.lo }) : [];
-  if (seq !== S.seq) return;
+  // stale: a later frame, or a change of the layers on, has since asked for its own; it draws (second review X1).
+  if (seq !== S.seq || lvErrors.stale) return;
   for (const e of lvErrors) S.notes.push(`A layer's data could not load: ${e}`);
   if (S.map) {
     S.map.setBorders(S.drawn, { focus: S.focusHits });
@@ -537,7 +538,9 @@ async function view() {
   const year = S.frame, entry = layerOf('borders'), win = windowOf(S.R);
   const ne = sourceOf('natural-earth'), clio = sourceOf('cliopatria'), wd = sourceOf('wikidata');
   const pins = nowPins();
-  const ds = ['cliopatria', 'borders', 'qids', 'natural-earth', 'battles'].map(id => ({ id, version: pins[id] || (id === 'natural-earth' ? '5.1.1' : '') }))
+  // ds= pins what the view draws: the battles only when they are switched on (second review X8, 20 November 2026), so a
+  // later battles refresh does not mark a view without them as changed. Their file still goes in the datasets (V4).
+  const ds = ['cliopatria', 'borders', 'qids', 'natural-earth', ...(battlesOn() ? ['battles'] : [])].map(id => ({ id, version: pins[id] || (id === 'natural-earth' ? '5.1.1' : '') }))
     .concat(S.lv?.pinList() || []); // each S5a layer drawn, at the version drawn (only when drawn)
   const recipe = writeRecipe(nowRecipe({ at: year, ds }));
   const p = M.borderPrecisionAt(entry, year);
@@ -876,7 +879,8 @@ async function applyRecipe({ first = false } = {}) {
   if (R) S.notes.push(...addressNotes(raw, R, at));
   // The recipe's layers under the clutter rule (stage S5a); the clicked battle's layer is the subject's, never dropped.
   await ensureBattles().catch(e => S.notes.push(`The battles could not load: ${e.message}`));
-  if (S.lv) S.notes.push(...S.lv.read(S.R, { subject: battleRow(S.R.q) ? 'battles' : null }).notes);
+  // Any other layer's subject (an election's, a coup's) is found by the layer view in its data, by q= (second review X5).
+  if (S.lv) S.notes.push(...S.lv.read(S.R, { subject: battleRow(S.R.q) ? 'battles' : null, q: S.R.q }).notes);
   // The subject's name follows the recipe (R2: the reader moves this frame by its hash, one click after another), and
   // the records of the places VM cannot outline give their names and points.
   await Promise.all([loadSubject(S.R.q || null), readRecords(unoutlined(S.R)), loadShelf(S.R)]);
@@ -896,9 +900,13 @@ async function init() {
     for (const a of S.layers.absent || []) { const r = M.readAbsent(a); if (!r.ok) S.notes.push(`The line for "${a?.id}" is not well formed: ${r.errors.join('; ')}`); }
     // The layer list (stage S5a): a switch moved writes the recipe's layer keys and draws the frame again.
     // borders: the frame's Cliopatria borders and VM's crosswalk, on which a layer of stage S5b draws each state of its year.
-    S.lv = layerView({ data: DATA, getFile, map: () => S.map, sources: () => S.sources, borders: () => ({ fc: S.fc, qids: S.qids, held: M.held(S.index) }), onChange: ({ focus } = {}) => {
+    // battles: the battles drawn at the frame, so a click on one opens the layer view's pick panel (second review X6).
+    S.lv = layerView({ data: DATA, getFile, map: () => S.map, sources: () => S.sources, borders: () => ({ fc: S.fc, qids: S.qids, held: M.held(S.index) }), battles: () => S.drawnBattles, onChange: ({ focus } = {}) => {
       S.R = { ...S.R, ...S.lv.recipe() };
-      if (S.frame != null) ensureBattles().then(() => setFrame(S.frame, { start: S.start, source: 'layer' })).then(() => { if (focus) document.getElementById(focus)?.focus({ preventScroll: true }); });
+      // The battles' file failing to load turns their switch off again and says so in the list's note; the frame is
+      // drawn either way (second review X4, 20 November 2026).
+      if (S.frame != null) ensureBattles().catch(e => { S.lv.off('battles', `The battles could not load (${e.message}), so their switch is off again.`); S.R = { ...S.R, ...S.lv.recipe() }; })
+        .then(() => setFrame(S.frame, { start: S.start, source: 'layer' })).then(() => { if (focus) document.getElementById(focus)?.focus({ preventScroll: true }); });
     } });
     S.lv.init(S.layers);
     S.lv.wire($('#layers-body'));
@@ -975,7 +983,8 @@ function wire() {
   window.addEventListener('resize', () => S.map?.resize());
   // Stage S5c: prp:focus fits the map to countries by ISO3, or a Q-id's border of the frame's year (else its lake
   // point); { reset: true } fits the view's own box again (omni/lib/focus.js).
-  S.focus = listenFocus({ getFile, data: DATA, map: () => S.map, home: () => S.box,
+  // prepare: a Q-id's Master Index record is read first, so its lake point is there for one not yet loaded (second review X7).
+  S.focus = listenFocus({ getFile, data: DATA, map: () => S.map, home: () => S.box, prepare: qs => readRecords(qs),
     qid: q => { const fs = S.fc && S.index ? M.featuresFor(S.fc, S.qids, q, S.frame, M.held(S.index)).features : []; return fs.length ? { type: 'FeatureCollection', features: fs } : lakePoint(q); } });
   window.omniFocus = () => S.focus.state();
 }

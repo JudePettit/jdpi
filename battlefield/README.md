@@ -19,7 +19,12 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   no longer read by the page and stay only until War Focus and the Integration Hub's catalogue stop reading them.
 - **Old addresses:** a link written before the change still opens the same view: `w=c<number>` opens the same war, or
   the whole war it was part of (`oldIds`, `oldWithin` in `history/data/wars.json`); a war no longer listed says so in
-  plain words (`oldGone`); `c=<number>` opens the country it stood for (`oldCountries` in `history/data/places.json`).
+  plain words (`oldGone`); `c=<number>` opens the country it stood for (`oldCountries` in `history/data/places.json`),
+  and a number UCDP gave two states opens the one of the year shown (`history/old-countries.js`, which the coverage
+  report reads too).
+- **Unplaced:** a state with no Cliopatria row of its own in a year is named under the map, above the table and in a
+  war's panel ("VM cannot place this on a free border for …"), never drawn on another state's row or on a part's
+  (occupied Yugoslavia, 1941–44; Palestine, whose only row from 2014 is Gaza's).
 - **Rebuild:**
   ```
   node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>]

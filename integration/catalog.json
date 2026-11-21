@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-21T00:36:14.201Z",
+  "generated": "2026-11-21T01:42:42.875Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1050,6 +1050,21 @@
           "name": "level",
           "type": "string",
           "description": "For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court"
+        },
+        {
+          "name": "iso3",
+          "type": "string",
+          "description": "The country’s ISO 3166-1 alpha-3 code, where it is one of today’s countries"
+        },
+        {
+          "name": "class",
+          "type": "string",
+          "description": "Where the record comes from: ucdp, wikidata, vm, wikipedia-list, atlas, wikipedia-news, archigos or retrospective"
+        },
+        {
+          "name": "precision",
+          "type": "string",
+          "description": "month, when the date is known only to the month; absent when the day is known"
         }
       ],
       "rows": 320,
@@ -2188,7 +2203,7 @@
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
         "Wikidata (CC0): the name of each place and state, by its Q-id (battlefield/history/data/places.json)"
       ],
-      "updated": "2026-11-20",
+      "updated": "2026-11-21",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [

@@ -212,6 +212,32 @@ test('Retrospective data: no place is drawn on a border of today; small states a
   assert.ok(PLACES.places.Q801.since >= 1948);
 });
 
+// Review X1 (21 November 2026): a state with no Cliopatria row of its own in a year is listed as one VM cannot place,
+// never drawn on another state's row or on a part's. Occupied Yugoslavia was drawn as the Independent State of Croatia
+// in 1941–43 (history-places.mjs AS) and as the Yugoslav Partisans' territory in 1944 (CANONICAL); Palestine as
+// Cliopatria's "Gaza/Hamas" from 2014 (ROWS). Each of those rows now stands for no place but its own.
+test('Retrospective data: a state with no row of its own is listed as unplaced, never drawn on another state’s row or a part’s', async () => {
+  const { placeAt } = await import('../battlefield/scripts/history-places.mjs');
+  await import('../design/prp-map.js');
+  const M = globalThis.PRPMap;
+  const fcs = PLACES.borders.map(f => M.decode(JSON.parse(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'))));
+  const rowQ = (id, y) => { const r = PLACES.rows[id]; return typeof r === 'string' ? r : (r || []).find(([f, t]) => f <= y && y <= t)?.[2] || null; };
+  // The rows of year y drawn as place q (a row's place is kept for the years Cliopatria holds the row).
+  const rowsFor = (q, y) => M.sliceAt(fcs[y < 2000 ? 0 : 1], y).map(f => f.id).filter(id => rowQ(id, y) === q);
+  const ww2 = war('Q362');
+  for (let y = 1941; y <= 1944; y++) {
+    assert.equal(placeAt('Q83286', y), 'Q83286', `${y}: Yugoslavia is not drawn under another place`);
+    assert.ok(locIn(ww2, y).includes('Q83286'), `${y}: World War II in Yugoslavia, as Wikidata gives it`);
+    assert.ok(PLACES.unplaced[y].includes('Q83286'), `${y}: Yugoslavia listed as unplaced`);
+  }
+  // No row of 1941–1944 is Yugoslavia's: Croatia's rows are Croatia's, the Partisans' row is its own.
+  const yugoslavRows = [1941, 1942, 1943, 1944].flatMap(y => rowsFor('Q83286', y).map(id => `${y} ${id}`));
+  assert.deepEqual(yugoslavRows, []);
+  assert.ok(rowsFor('Q153128', 1942).length, 'the Independent State of Croatia keeps its own rows');
+  // Palestine: Cliopatria's "Gaza/Hamas" (2014–2024) is a part of it, so no row is Palestine's.
+  for (let y = 1926; y <= PLACES.bordersTo; y++) assert.deepEqual(rowsFor('Q23792', y), [], `${y}: a row drawn as Palestine`);
+});
+
 // AC-13 (Jude, 16 November 2026): a UCDP conflict's states were stored once for all its years, so Tonga stood in "Iraq:
 // government" for all 35 of its active years. Each conflict keeps its state parties year by year, from UCDP's
 // "Government of …" sides, each name read as a Q-id (omni/scripts/ucdp-places.mjs).
@@ -705,6 +731,59 @@ test('Retrospective: places off Cliopatria’s rows are named, never drawn on to
     await page.goto(`${BASE}/battlefield/history/#y=1929&w=c118`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => /Sino-Soviet conflict \(1929\).*does not hold it/.test(document.querySelector('#panel .old-address')?.textContent || ''), null, { timeout: 20000 });
     assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review X2 (21 November 2026): an old country number UCDP gave two states (places.json oldCountries, dated runs) in a
+// year between its runs opened the last run: c=678 in 1988 opened today's Yemen, which places.json dates from 1990. In
+// a gap the later state is opened from its inception (Wikidata's, `since`), the earlier one before it.
+test('Retrospective: an old country number in a year between its two states opens the state of that year', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = []; page.on('pageerror', e => errors.push(e.message));
+    const h2 = async hash => {
+      await page.goto(`${BASE}/battlefield/history/${hash}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForFunction(() => document.querySelector('#panel h2') && document.querySelector('#panel .sub'), null, { timeout: 20000 });
+      return page.locator('#panel h2').innerText();
+    };
+    const { places } = PLACES;
+    assert.equal(await h2('#y=1988&c=678'), places.Q267584.n, '678 in 1988: North Yemen, before the united Yemen of 1990');
+    assert.equal(await h2('#y=1991&c=678'), places.Q805.n, '678 in 1991: Yemen');
+    assert.equal(await h2('#y=1982&c=552'), places.Q954.n, '552 in 1982: Zimbabwe, a state from 1980');
+    assert.equal(await h2('#y=1992&c=365'), places.Q159.n, '365 in 1992: Russia');
+    await page.close();
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+// Review X3 (21 November 2026): the line naming what VM cannot place on a free border stood only under the map. The
+// table view carries the same line, and a war's panel names its own places VM cannot place in the years shown.
+test('Retrospective: the table view and a war’s panel say what VM cannot place, as the map does, without sideways scroll at 360 px', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    for (const width of [1400, 360]) {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      const errors = []; page.on('pageerror', e => errors.push(e.message));
+      await page.goto(`${BASE}/battlefield/history/#y=1938&w=Q46057&v=table`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForFunction(() => document.querySelector('#panel h2') && document.querySelector('#table-rows tr[data-id="Q46057"]'), null, { timeout: 20000 });
+      await page.waitForFunction(() => !document.querySelector('#table-unplaced')?.hidden, null, { timeout: 10000 });
+      const table = await page.locator('#table-unplaced').innerText();
+      const panel = await page.locator('#panel .unplaced-note').innerText();
+      // The map's own line, for the same year, word for word.
+      await page.locator('#tab-map').click();
+      await page.waitForFunction(() => !document.querySelector('#unplaced').hidden);
+      const map = await page.locator('#unplaced').innerText();
+      const scroll = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      assert.match(table, /^VM cannot place this on a free border for 1938: .*Mandatory Palestine/, `${width}: table`);
+      assert.equal(table, map, `${width}: one line for the table and the map`);
+      assert.equal(panel, 'VM cannot place this on a free border for 1938: Mandatory Palestine.', `${width}: the war’s panel`);
+      assert.doesNotMatch(table + panel, /'/, 'the typographic apostrophe only');
+      assert.ok(scroll <= 1, `${width}: no sideways scroll (${scroll} px)`);
+      assert.equal(await page.locator('#table-unplaced button, #panel .unplaced-note button').count(), 0, 'a line of text, no button');
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
   } finally { await browser.close(); }
 });
 

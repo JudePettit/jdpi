@@ -20,8 +20,7 @@ export const CANONICAL = {
   Q207521: 'Q115',                                  // Ethiopian Empire → Ethiopia
   Q1155700: 'Q869',                                 // Rattanakosin Kingdom → Thailand
   Q62567: 'Q189',                                   // Kingdom of Iceland → Iceland
-  Q36704: 'Q83286',                                 // Kingdom of Yugoslavia → Yugoslavia
-  Q155198: 'Q83286',                                // the Yugoslav Partisans' territory, 1944 → Yugoslavia
+  Q36704: 'Q83286',                                 // Kingdom of Yugoslavia → Yugoslavia (the Yugoslav Partisans' row of 1944 is not: ROWS)
   Q31747: 'Q27', Q5306909: 'Q27',                   // Irish Free State, Éire → Ireland
   Q13426199: 'Q148', Q31113: 'Q148', Q17427: 'Q148', // Republic of China to 1949, the Kuomintang, the Communists' areas → China
   Q188712: 'Q17',                                   // Empire of Japan → Japan
@@ -57,7 +56,10 @@ export const CANONICAL = {
   Q5187: 'Q159',                                   // the Chechen Republic of Ichkeria's area → Russia, where UCDP places the Chechen wars
 };
 
-/** Rows Cliopatria names that the crosswalk leaves without a Q-id, or gives the wrong one: [name, from, to, Q]. */
+/** Rows Cliopatria names that the crosswalk leaves without a Q-id, or gives the wrong one: [name, from, to, Q]. A Q of
+    null: the row is a part or a puppet of a state that has no row of its own in those years, so it stands for no
+    place VM lists (the page draws it under Cliopatria's name) and the state is listed as one VM cannot place; a part
+    never stands in for the whole (review X1, 21 November 2026). */
 export const ROWS = [
   ['Argentine Confederation', 1926, 1929, 'Q414'],
   ['Denmark-Norway', 1926, 1940, 'Q35'],            // Cliopatria's name for Denmark's row to 1940 (Norway has its own)
@@ -85,15 +87,17 @@ export const ROWS = [
   ['People\'s Republic of Kampuchea', 1992, 1995, 'Q424'],
   ['Serbia-Montenegro', 1992, 1999, 'Q838261'],
   ['Kosovo', 2000, 2005, 'Q1246'],
-  ['Gaza/Hamas', 2014, 2024, 'Q23792'],             // Natural Earth's Palestine
-  ['Hungarian Nationalists', 1956, 1957, 'Q28'],
+  ['Gaza/Hamas', 2014, 2024, null],                 // the Gaza Strip alone: Palestine has no row of its own (the West Bank lies in Israel's)
+  ['Yugoslav Partisans', 1944, 1944, null],         // the Partisans' territory, a part of Yugoslavia, which has no row in 1941–44
+  ['Hungarian Nationalists', 1956, 1957, 'Q28'],    // Hungary's whole land, as the Hungarian People's Republic's rows draw it
   ['Cuban Communists', 1958, 1959, 'Q241'],
 ];
 
-/** A war's place in a year Cliopatria draws it under another Q-id: [Q, from, to, Q drawn, why] (VM's own, by hand). */
-export const AS = [
-  ['Q83286', 1941, 1943, 'Q153128', 'occupied Yugoslavia, 1941–43: Cliopatria draws the Independent State of Croatia; the rest lies in the occupiers’ rows'],
-];
+/** A war's place in a year Cliopatria draws it under another Q-id: [Q, from, to, Q drawn, why] (VM's own, by hand).
+    Only for one state under two Q-ids, never for another state, a puppet, an occupier or a part standing in for a state
+    with no row of its own: that state is listed as one VM cannot place. Occupied Yugoslavia, 1941–43, was drawn as the
+    Independent State of Croatia until review X1 (21 November 2026); it is now listed. */
+export const AS = [];
 /** The Q-id a war's place `q` is drawn under in `year`. */
 export const placeAt = (q, year) => AS.find(([a, f, t]) => a === q && f <= year && year <= t)?.[3] || q;
 

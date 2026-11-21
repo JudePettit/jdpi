@@ -15,6 +15,7 @@
    before 20 November 2026 still open: c=<number> (a Gleditsch–Ward number UCDP's rows give a country) through
    places.json's oldCountries, c=<ISO3> through the places' ISO3, and w=c<number> (a Correlates of War war) through
    wars.json's oldIds; one VM can no longer show says so. */
+import { oldCountry } from './old-countries.js';
 
 const W = 1000, H = 600, DOT_R = 3.2;
 const state = { year: 2025, from: 2025, selected: null, war: null, data: null, places: null, focus: {}, view: 'map', note: null,
@@ -177,13 +178,9 @@ function clearFocus() { focusHits.clear(); paintFocus(); }
 // A Q-id, an ISO3 or an old gw:N (Kino's scenes, PRPFocus's table) as a place on this year's map.
 function keyFor(id, y = state.year) {
   if (/^Q\d+$/.test(id)) return id;
-  if (/^gw:\d+$/.test(id)) {
-    // UCDP's number for a country, kept from before 20 November 2026; one it gave two places (365: the Soviet Union
-    // to 1991, then Russia) opens the place of the year shown.
-    const v = state.places.oldCountries?.[id.slice(3)];
-    if (!Array.isArray(v)) return v || null;
-    return (v.find(([a, b]) => a <= y && y <= b) || (y < v[0][0] ? v[0] : v.at(-1)))[2];
-  }
+  // UCDP's number for a country, kept from before 20 November 2026; one it gave two places (365: the Soviet Union to
+  // 1991, then Russia) opens the place of the year shown, a year between them too (old-countries.js).
+  if (/^gw:\d+$/.test(id)) return oldCountry(state.places.oldCountries, state.places.places, id.slice(3), y);
   if (/^[A-Z]{3}$/.test(id)) return Object.entries(state.places.places).find(([, p]) => p.iso3 === id)?.[0] || null;
   return null;
 }
@@ -265,17 +262,21 @@ async function renderMap() {
   if (a === b) { $('#caption').textContent = `Polities on Cliopatria’s borders for ${b}, shaded by the most intense armed conflict ${state.war ? 'on their territory' : 'fought on their territory'}${outlined}.${yearly}${late}`; return; }
   $('#caption').textContent = `Polities on Cliopatria’s borders for ${b}, shaded by the most intense armed conflict on their territory in any year from ${a} to ${b}${outlined}. A place of the period that had gone by ${b} is counted in the lists but not drawn.${yearly}${late}`;
 }
-// The war places of the year or period that no Cliopatria row (nor, from 1946, a small state's point) holds, by name,
-// under the map; never drawn on a border of today.
-function renderUnplaced(a, b) {
-  const el = $('#unplaced'); if (!el) return;
+// The war places of the year or period that no Cliopatria row (nor, from 1946, a small state's point) holds, by name;
+// never drawn on a border of today. One sentence, said under the map, above the table and, for a war's own places, in
+// its panel (review X3, 21 November 2026); a country's panel says it of that country.
+const cannotPlace = (what, when) => `VM cannot place ${what} on a free border for ${when}`;
+function unplacedLine(a, b, keep = () => true) {
   const rows = [];
   for (let y = a; y <= b; y++) {
-    const qs = state.places.unplaced[y] || [];
+    const qs = (state.places.unplaced[y] || []).filter(q => keep(q, y));
     if (qs.length) rows.push(`${y}: ${qs.map(q => unplacedName(q, y)).sort((p, r) => p.localeCompare(r)).join(', ')}`);
   }
-  el.hidden = !rows.length;
-  el.innerHTML = rows.length ? `<b>VM cannot place this on a free border for ${a === b ? b : `${a}–${b}`}:</b> ${esc(rows.length === 1 && a === b ? rows[0].replace(/^\d+: /, '') : rows.join('; '))}.` : '';
+  return rows.length ? `<b>${cannotPlace('this', a === b ? b : `${a}–${b}`)}:</b> ${esc(rows.length === 1 && a === b ? rows[0].replace(/^\d+: /, '') : rows.join('; '))}.` : '';
+}
+function renderUnplaced(a, b) {
+  const html = unplacedLine(a, b);
+  for (const el of [$('#unplaced'), $('#table-unplaced')]) if (el) { el.hidden = !html; el.innerHTML = html; }
 }
 
 /* ---------------------------------------------------------------- see more */
@@ -363,6 +364,9 @@ function warDetail(w) {
     ? (l ? `<p><span class="tag ${TAG[l]}">${y}</span>${levelLabel(l)}</p>` : `<p class="empty">Not active in ${y}.</p>`)
     : (l ? `<p><span class="tag ${TAG[l]}">${a}–${y}</span>Active in ${ys.length} of the ${years} years ${a}–${y}${w.src === 'wikidata' ? '' : atWar ? `, ${atWar} at war level (1,000+ battle deaths)` : ', none at war level'}.</p>` : `<p class="empty">Not active in ${a}–${y}.</p>`);
   const inP = yy => yy >= a && yy <= y;
+  // Its own places in the years shown that VM cannot place on a free border, in the map's words.
+  const activeYs = new Set(ys.map(([yy]) => yy));
+  const unplaced = unplacedLine(a, y, (q, yy) => activeYs.has(yy) && (locIn(w, yy).includes(q) || statesIn(w, yy).includes(q)));
   const sides = w.src === 'wikidata'
     ? `<div class="sides"><b>States taking part (Wikidata’s participants)</b>${seeMoreText(parties.length ? parties : places, 10, `${w.name} · states taking part`)}</div>`
     : `<div class="sides"><b>Side A</b>${seeMoreText(w.sideA, 8, `${w.name} · side A`)}<b>Side B</b>${seeMoreText(w.sideB, 8, `${w.name} · side B`)}</div>`;
@@ -370,6 +374,7 @@ function warDetail(w) {
     <h2>${esc(w.name)}</h2><p class="sub">${esc(w.type)} · ${span(w)}</p>
     <p>${intro}</p>
     ${shown}
+    ${unplaced ? `<p class="note unplaced-note">${unplaced}</p>` : ''}
     ${sides}
     <a class="btn" href="${wikiUrl(w)}" target="_blank" rel="noreferrer">${w.wiki ? 'Wikipedia article ↗' : 'Search Wikipedia ↗'}</a>
     ${w.q ? `<a class="btn" href="https://www.wikidata.org/wiki/${esc(w.q)}" target="_blank" rel="noreferrer">Wikidata item ↗</a>` : ''}
@@ -401,7 +406,7 @@ function renderPanel() {
     // Where its shape comes from this year, in a line.
     const row = rowNameOf(q), pt = state.points.some(p => p.key === q);
     const border = row ? `Border: Cliopatria’s “${row}” for ${bordersYear(y)}.` : pt ? 'Drawn as a point (Natural Earth), since no free border holds it.'
-      : (state.places.unplaced[y] || []).includes(q) ? `VM cannot place ${unplacedName(q, y)} on a free border for ${y}, so it is not drawn.` : '';
+      : (state.places.unplaced[y] || []).includes(q) ? `${cannotPlace(unplacedName(q, y), y)}, so it is not drawn.` : '';
     const rowNote = rowOnly ? '<p class="note">VM holds no state for this Cliopatria polity, so no war is listed under it here.</p>' : '';
     html = `<button class="close" id="close" aria-label="Close">×</button><h2>${esc(cname)}</h2>
       <p class="sub">${esc(sub)}</p>${border ? `<p class="note border-note">${esc(border)}</p>` : ''}${rowNote}
@@ -441,6 +446,7 @@ function renderKpis() {
 function renderTable() {
   if (state.view !== 'table' || !state.data) return;
   const a = state.from, y = state.year, list = warsInPeriod(a, y);
+  renderUnplaced(a, y);
   $('#table-title').textContent = `Armed conflicts ${a === y ? `in ${y}` : `${a}–${y}`} · ${list.length}`;
   $('#th-year').textContent = a === y ? `In ${y}` : `${a}–${y}`;
   $('#table-rows').innerHTML = list.map(w => {

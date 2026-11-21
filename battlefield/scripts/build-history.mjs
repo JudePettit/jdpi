@@ -20,7 +20,8 @@
 //    through VM's crosswalk (omni/scripts/ucdp-places.mjs); a name the crosswalk cannot read stops the build.
 // 3. Wikidata: the wars of 1926–1945 (wars-1926.mjs), at level 3 for every active year ("a war Wikidata lists").
 // 4. history-fought.mjs's places where the sources' are too wide or missing; then, year by year, a place Cliopatria
-//    draws under another Q-id (history-places.mjs AS: "Vietnam (North Vietnam)" after 1976 is Vietnam).
+//    draws under another Q-id (history-places.mjs AS: one state under two Q-ids only, never another state or a part
+//    standing in; empty since review X1, 21 November 2026).
 // 5. Every place's Q-id asked of Wikidata (wbgetentities): its English label is the page's name for it, its ISO3
 //    (P298) must agree with Natural Earth's, and its inception (P571, the earliest) is kept as `since` when it falls
 //    after 1926, so the page can call a place named for a year before it "today’s …".
@@ -145,8 +146,8 @@ for (const l of left) console.log(`  left out: ${l.q} ${l.n}: ${l.why}`);
 const unusedFought = Object.keys(FOUGHT_IN).filter(id => !wars.some(w => w.id === id));
 if (unusedFought.length) console.warn(`history-fought.mjs entries for wars not on the list: ${unusedFought.join(', ')}`);
 
-// ---- 4b. A place Cliopatria draws under another Q-id in a year (history-places.mjs AS: UCDP's old names for a
-// successor state; occupied Yugoslavia): the war's places by year are rewritten, so the map and the counts agree.
+// ---- 4b. A place Cliopatria draws under another Q-id in a year (history-places.mjs AS: one state under two Q-ids;
+// none at present): the war's places by year are rewritten, so the map and the counts agree.
 const yearsOf = w => w.years.map(([y]) => y);
 for (const w of wars) {
   const ys = yearsOf(w);
@@ -239,7 +240,7 @@ for (const r of acd) {
 }
 // A number UCDP gave two places over time (365: the Soviet Union to 1991, then Russia) is kept with each one's years
 // in UCDP's rows, [[first, last, Q], …]; the page opens the one of the year shown (before the first, the first;
-// after the last, the last).
+// after the last, the last; between two, the later from its inception, the earlier before it: history/old-countries.js).
 const oldC = Object.fromEntries(Object.entries(oldCountries).map(([gw, m]) => {
   const runs = [...m].map(([q, [f, t]]) => [f, t, q]).sort((a, b) => a[0] - b[0]);
   return [gw, runs.length === 1 ? runs[0][2] : runs];

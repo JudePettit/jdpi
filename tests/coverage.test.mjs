@@ -287,6 +287,27 @@ test('Kino: an old Retrospective Battlefield link is the war and the place it be
   assert.deepEqual(k.films[0].links[0].at, { w: 'c139', y: 1941, c: 365 }, 'the link as written is kept for the dead-link rule');
 });
 
+// Review X4 (21 November 2026): a number UCDP gave two states over time is stored as dated runs (places.json
+// oldCountries, [[first, last, Q], …]; 365 and 678 as the committed file holds them), and battlefieldIso read every
+// entry as one Q-id and was given no year, so a link to #y=1988&c=365 counted no country. It reads the link's year
+// through the page's own function (battlefield/history/old-countries.js), a year between two runs too.
+test('Kino: an old Battlefield number UCDP gave two states counts the state of the link’s year', () => {
+  const places = { ...PLACES, Q159: { n: 'Russia', iso3: 'RUS' }, Q267584: { n: 'Yemen Arab Republic', since: 1962 }, Q805: { n: 'Yemen', iso3: 'YEM', since: 1990 } };
+  const oldCountries = { 220: 'Q142', 365: [[1946, 1991, 'Q15180'], [1993, 2025, 'Q159']], 552: [[1967, 1979, 'Q217169'], [1985, 2011, 'Q954']] };
+  const T = makeResolvers({ national: NATIONAL, historical: HISTORICAL, places, oldCountries });
+  assert.deepEqual(T.battlefieldIso(365, 1988), ['SUN'], '365 in 1988: the Soviet Union');
+  assert.deepEqual(T.battlefieldIso(365, 1992), ['RUS'], '365 in 1992, between its runs: Russia');
+  assert.deepEqual(T.battlefieldIso(365, 2000), ['RUS']);
+  assert.deepEqual(T.battlefieldIso(552, 1975), ['ZWE'], 'Rhodesia, VM’s table');
+  assert.deepEqual(T.battlefieldIso(220, 1950), ['FRA'], 'a plain entry, any year');
+  assert.deepEqual(T.battlefieldIso('Q79'), ['EGY']);
+  const docs = [{ meta: { id: 'old', category: 'wars', title: 'Old' }, doc: { title: 'Old', subjects: [], scenes: [
+    sceneOf('one', { link: { module: 'battlefield-history', at: { y: 1988, c: 365 } } })] } }];
+  assert.deepEqual([...kinoFilms(docs, T, KINO).pieces[0].tiers.linked.keys()], ['RUS', 'UKR'], 'the link counts the Soviet Union, as its successors');
+  const later = [{ ...docs[0], doc: { ...docs[0].doc, scenes: [sceneOf('one', { link: { module: 'battlefield-history', at: { y: 2000, c: 365 } } })] } }];
+  assert.deepEqual([...kinoFilms(later, T, KINO).pieces[0].tiers.linked.keys()], ['RUS'], 'in 2000, Russia');
+});
+
 test('Kino arrows count where they bend (via), and "New Guinea" is not Guinea', () => {
   const s = kinoScene({ id: 'a', visual: { kind: 'map', arrows: [{ from: [25, 5], via: [5, 5], to: [55, 5] }] } }, R);
   assert.deepEqual([...s.point].sort(), ['EGY', 'FRA', 'RUS'], 'the arrow is drawn across France');

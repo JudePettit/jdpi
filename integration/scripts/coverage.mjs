@@ -49,6 +49,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve, relative, extname, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { oldCountry } from '../../battlefield/history/old-countries.js';
 
 export const TIERS = ['map', 'point', 'belligerent', 'tagged', 'linked', 'named', 'row'];
 // Tiers that show a country is part of a piece's content (not just mentioned, not just a table row).
@@ -155,7 +156,7 @@ const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  *   small      omni/data/base/small-states.json points ({ iso3, q, at: [lon, lat] }), optional
  *   recognised the recognised-border corrections: [{ iso, over, feats }] (recognisedShapes below), optional
  *   places     battlefield/history/data/places.json places ({ Q: { n, iso3 } }), optional
- *   oldCountries  places.json oldCountries (an old Battlefield address's number → Q), optional
+ *   oldCountries  places.json oldCountries (an old Battlefield address's number → Q, or dated runs), optional
  *   retro      the Political Retrospective: { countries (data/countries.json), oldKeys (scripts/countries.mjs OLD_KEYS) }, optional
  * CShapes is no longer read (20 November 2026: its terms bar commercial use).
  */
@@ -229,7 +230,8 @@ export function makeResolvers({ national = [], names = [], focus = null, normali
     return { key: `${q}:${list.join(',')}`, q, name: PLACE_NAME[q] || rbPlaces[q]?.n || q, successors: list };
   }
   // An old Battlefield address's c=<number> (places.json oldCountries), or a Wikidata item, → the place's countries.
-  const battlefieldIso = c => { const q = /^Q\d+$/.test(String(c)) ? String(c) : oldCountries[c]; return q ? placeIso(q) : null; };
+  // A number UCDP gave two states (365) is the state of the link's year y, read as the page reads it (review X4).
+  const battlefieldIso = (c, y) => { const q = /^Q\d+$/.test(String(c)) ? String(c) : oldCountry(oldCountries, rbPlaces, c, y); return q ? placeIso(q) : null; };
   // A Political Retrospective country, by its key: a Wikidata item ('retro-countries/2', 20 November 2026) or an old
   // number (its OLD_KEYS, or the Gleditsch–Ward table where the Retrospective is not read). A historical state's item
   // (the Soviet Union, Yugoslavia, Czechoslovakia) counts as its successors before its end, as the record's country after.
@@ -367,7 +369,7 @@ export function kinoFilms(docs, R, ctx) {
       links.push({ scene: s.id, module: m, at });
       if ((m === 'atlas' || m === 'pestle') && at.country) add(p, 'linked', String(at.country).toUpperCase());
       if (m === 'retrospective' && at.c) add(p, 'linked', R.retroIso(at.c, `${at.y || 9999}-07-01`), 1, R);
-      if (m === 'battlefield-history' && at.c) add(p, 'linked', R.battlefieldIso(at.c), 1, R);
+      if (m === 'battlefield-history' && at.c) add(p, 'linked', R.battlefieldIso(at.c, at.y), 1, R);
       // An old war id (c139) is the war it became (wars.json oldIds, or oldWithin for one listed as part of a whole).
       if (m === 'battlefield-history' && at.w && ctx.rbOld?.[at.w]) at = s.at = { ...at, w: ctx.rbOld[at.w] };
       if (m === 'encyclopedia' && at.qid) add(p, 'linked', R.qidIso(at.qid));

@@ -30,7 +30,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import '../../design/prp-access.js'; // globalThis.PRPAccess
-import { selectStories, makeInput, rulesDay, withDraft, indexOf, utcDay, CORRECTIONS_FORMAT } from '../lib/day.mjs';
+import { selectStories, makeInput, rulesDay, withDraft, indexOf, utcDay, publicReasons, CORRECTIONS_FORMAT } from '../lib/day.mjs';
 import { checkDraft, MESSAGES } from '../lib/check.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -79,10 +79,14 @@ export async function build({ now = Date.now(), today = utcDay(Date.now()), draf
       const result = checkDraft(input, text);
       const draft = result.ok ? JSON.parse(text) : null;
       dayDoc = withDraft(dayDoc, input, draft, result, { checked: stamp });
+      // Every value in these lines is the input's (a story id), a fixed message or a place of fixed words and indexes
+      // (publicReasons), never the draft's words: GitHub Actions reads a line of a step's output that begins with :: as
+      // a command.
+      const said = reasons => publicReasons(reasons).map(r => `${MESSAGES[r.code]} (${r.where || 'the draft'})`).join('; ');
       if (result.ok) {
-        const refused = Object.entries(result.five).filter(([, f]) => f && !f.ok);
-        log(`${day}: the draft passed the check and is published.${refused.length ? ` Written analyses refused: ${refused.map(([id, f]) => `${id} (${f.reasons.map(r => `${MESSAGES[r.code]} ${r.where}`).join('; ')})`).join(', ')}.` : ''}`);
-      } else log(`${day}: the draft was refused: ${result.reasons.map(r => `${MESSAGES[r.code] || r.code} (${r.where || 'the draft'})`).join('; ')}`);
+        const refused = input.stories.map(s => [s.id, result.five[s.id]]).filter(([, f]) => f && !f.ok);
+        log(`${day}: the draft passed the check and is published.${refused.length ? ` Written analyses refused: ${refused.map(([id, f]) => `${id} (${said(f.reasons)})`).join(', ')}.` : ''}`);
+      } else log(`${day}: the draft was refused: ${said(result.reasons)}`);
     }
   } else if (draftFile) log(`${day}: no draft at ${draftFile}.`);
   const dayText = JSON.stringify(dayDoc, null, 1) + '\n';

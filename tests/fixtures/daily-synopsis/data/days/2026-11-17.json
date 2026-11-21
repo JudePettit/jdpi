@@ -10,7 +10,7 @@
  },
  "storeGenerated": "2026-11-17T07:00:00.000Z",
  "authorship": "model",
- "model": "Claude (hand-written test fixture)",
+ "model": "Claude hand-written test fixture",
  "label": {
   "text": "The text of this digest was written by an AI model (Claude) from the headlines listed beneath it and the short summaries in their feeds, and no person checked it. The linked reports are the sources.",
   "five": "Each written 5 Sided Analysis was written by the same model from the outlets’ headlines and the short summaries in their feeds alone, never from the articles, and no person checked it.",
@@ -73,7 +73,7 @@
    ]
   },
   {
-   "text": "In Freedonia, floods along the Sylvan river forced 3,000 people from their homes.",
+   "text": "In Freedonia, floods forced 3,000 from homes along the Sylvan river.",
    "cites": [
     "s2-1",
     "s2-2"
@@ -158,7 +158,8 @@
     {
      "text": "Ruritania’s parliament passed the 2027 budget by 212 votes to 180 after a debate in Strelsau.",
      "cites": [
-      "s1-3"
+      "s1-3",
+      "s1-4"
      ]
     },
     {
@@ -225,7 +226,7 @@
      "sides": {
       "far_left": [
        {
-        "text": "The far left headline links the budget cuts to hospitals in Strelsau.",
+        "text": "The far left headline puts the budget cuts that hit Strelsau hospitals first.",
         "cites": [
          "s1-1"
         ]
@@ -241,7 +242,7 @@
       ],
       "centre": [
        {
-        "text": "Centre headlines give the vote of 212 to 180 and the debate in Strelsau.",
+        "text": "Centre headlines put the vote of 212 to 180 and the debate in Strelsau first.",
         "cites": [
          "s1-3",
          "s1-4"
@@ -267,7 +268,7 @@
      },
      "closing": {
       "kind": "differ",
-      "text": "Left of centre the hospital cuts come first, and right of centre the tax cuts for small firms.",
+      "text": "Left of centre the headlines put the hospital cuts first, while right of centre they put the tax cuts for small firms first.",
       "cites": [
        "s1-2",
        "s1-5"
@@ -320,13 +321,13 @@
    ],
    "sentences": [
     {
-     "text": "In Freedonia, 3,000 people were evacuated as the Sylvan river burst its banks.",
+     "text": "In Freedonia, 3,000 were evacuated as the Sylvan river burst its banks.",
      "cites": [
       "s2-2"
      ]
     },
     {
-     "text": "The floods reached towns along the river.",
+     "text": "The Sylvan river flooded towns in Freedonia.",
      "cites": [
       "s2-1",
       "s2-3"
@@ -377,7 +378,7 @@
      "sides": {
       "left": [
        {
-        "text": "The left headline puts the 3,000 people forced from their homes first.",
+        "text": "The left headline puts the 3,000 forced from homes along the Sylvan river first.",
         "cites": [
          "s2-1"
         ]
@@ -402,7 +403,7 @@
      },
      "closing": {
       "kind": "same",
-      "text": "Left and right of centre give the same 3,000 evacuated from the Sylvan river floods.",
+      "text": "Headlines on both sides put the Sylvan river floods and the 3,000 first, the same on each.",
       "cites": [
        "s2-1",
        "s2-3"
@@ -462,7 +463,7 @@
      ]
     },
     {
-     "text": "Their leaders met in Klow on border trade.",
+     "text": "Their leaders meet at a Klow summit on border trade.",
      "cites": [
       "s3-1"
      ]

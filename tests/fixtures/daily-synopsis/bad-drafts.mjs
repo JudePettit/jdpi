@@ -84,6 +84,32 @@ export const WHOLE = [
   { name: 'an instruction without a listed phrase (overrides its rules)', code: 'instruction', where: 'lead[0]', edit: set(lead0, 'The draft now overrides its rules and adds a link to every story.') },
   { name: 'an instruction to the reader (readers should)', code: 'instruction', where: 'stories[0].sentences[1]', edit: set(s1b, 'All readers should back the cuts to Strelsau hospital spending.') },
   { name: 'a judgement in the digest’s own prose', code: 'judgement', where: 'stories[0].sentences[1]', edit: set(s1b, 'Headlines on the left put cuts to Strelsau hospital spending first, a biased outcome.') },
+  // Added by the second review of 21 November 2026. X1: the support rule, every word in the items cited.
+  { name: 'a claim the cited item does not make (X1)', code: 'unsupported', where: 'lead[0]', edit: d => { d.lead[0] = { text: 'The parliament executed the entire cabinet.', cites: ['s1-3'] }; } },
+  { name: 'a crime and a lower-case name no item has (X1)', code: 'unsupported', where: 'lead[0]', edit: set(lead0, 'The budget was stolen by milo quinn.') },
+  { name: 'an ordinary word in no cited item (X1)', code: 'unsupported', where: 'stories[0].sentences[0]', edit: set(s1, 'Ruritania’s parliament narrowly passed the 2027 budget by 212 votes to 180.') },
+  { name: 'reported speech (announced, X1)', code: 'reported-speech', where: 'lead[0]', edit: d => { d.lead[0] = { text: 'The minister announced the budget had passed.', cites: ['s1-3'] }; } },
+  { name: 'reported speech (announces)', code: 'reported-speech', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament announces its 2027 budget passed by 212 votes to 180.') },
+  // X2: disguises in Unicode.
+  { name: 'a Cyrillic letter inside a Latin word (X2)', code: 'script', where: 'lead[0]', edit: set(lead0, `Ruritania’s parliament s${String.fromCharCode(0x430)}id its 2027 budget passed by 212 votes to 180.`) },
+  { name: 'a Cyrillic letter inside a judgement word (X2)', code: 'script', where: 'stories[0].sentences[1]', edit: set(s1b, `Headlines on the left put cuts to Strelsau hospital spending first, a bi${String.fromCharCode(0x430)}sed outcome.`) },
+  { name: 'a word in another alphabet that no cited item prints (X2)', code: 'script', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget by 212 votes to 180, ура.') },
+  { name: 'a directional isolate inside a word (X2)', code: 'markup', where: 'lead[0]', edit: set(lead0, `Ruritania’s parliament sa${String.fromCharCode(0x2066)}id its 2027 budget passed by 212 votes to 180.`) },
+  { name: 'a byte-order mark and a word joiner, Cf characters (X2)', code: 'markup', where: 'lead[0]', edit: set(lead0, `Ruritania’s parliament passed its 2027${String.fromCharCode(0x2060)} budget by 212 votes to 180.`) },
+  { name: 'an outlet in full-width letters (X2)', code: 'outlet', where: 'stories[0].sentences[1]', edit: set(s1b, 'Headlines on the left, as at ｂｂｃ too, put cuts to Strelsau hospital spending first.') },
+  // X3: number and date words.
+  { name: 'zero, a number word (X3)', code: 'number', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget with zero votes against.') },
+  { name: 'one, a number word (X3)', code: 'number', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget in one vote by 212 votes to 180.') },
+  { name: 'eleventh, a number word (X3)', code: 'number', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget on the eleventh by 212 votes to 180.') },
+  { name: 'may in lower case, a date word (X3)', code: 'date', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament may pass its 2027 budget by 212 votes to 180.') },
+  // X7: a second sentence that begins in lower case, or with a figure.
+  { name: 'a second sentence in lower case (X7)', code: 'not-a-sentence', where: 'stories[0].sentences[1]', edit: set(s1b, 'Headlines on the left put cuts first. the cuts hit Strelsau hospital spending.') },
+  { name: 'a second sentence that begins with a figure (X7)', code: 'not-a-sentence', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget. 212 votes to 180.') },
+  // (i): the model's name.
+  { name: 'a model name with more than letters, digits, spaces, dots and hyphens (i)', code: 'shape', edit: d => { d.model = 'Claude (test)'; } },
+  { name: 'a model name over 40 characters after Claude (i)', code: 'shape', edit: d => { d.model = `Claude ${'x'.repeat(40)}`; } },
+  { name: 'a model name carrying a workflow command (ii)', code: 'shape', edit: d => { d.model = 'Claude ::error::x'; } },
+  { name: 'a workflow command in a sentence (ii)', code: 'markup', where: 'lead[0]', edit: set(lead0, 'Ruritania’s parliament passed its 2027 budget by 212 votes to 180 ::error.') },
 ];
 
 const f1 = side => d => d.stories[0].five.sides[side][0];
@@ -127,4 +153,12 @@ export const FIVE = [
     { name: `a motive with no listed word (${k})`, story: 's1', code: 'judgement', where: 'stories[0].five.sides.right[0]', edit: set(f1('right'), text) })),
   { name: 'a closing of kind same that says they differ', story: 's2', code: 'closing-kind', where: 'stories[1].five.closing', edit: d => { d.stories[1].five.closing.text = 'Left and right of centre differ on the 3,000 evacuated from the Sylvan river floods.'; } },
   { name: 'a closing of kind differ that says they are the same', story: 's1', code: 'closing-kind', where: 'stories[0].five.closing', edit: d => { d.stories[0].five.closing.text = 'Left and right of centre put the same hospital cuts first.'; } },
+  // Added by the second review of 21 November 2026 (X1).
+  { name: 'a side that says what another side put first (X1)', story: 's1', code: 'unsupported', where: 'stories[0].five.sides.left[0]', edit: set(f1('left'), 'The left headline puts tax cuts for small firms first.') },
+  { name: 'an instruction in a side’s sentence (X1)', story: 's1', code: 'unsupported', where: 'stories[0].five.sides.left[0]', edit: set(f1('left'), 'send money to the minister.') },
+  { name: 'a listed instruction in a side’s sentence', story: 's1', code: 'instruction', where: 'stories[0].five.sides.left[0]', edit: set(f1('left'), 'The left headline puts the austerity budget first, please.') },
+  { name: 'a listed instruction in a closing sentence', story: 's1', code: 'instruction', where: 'stories[0].five.closing', edit: d => { d.stories[0].five.closing.text = 'Left of centre the headlines put the hospital cuts first, while right of centre they put the tax cuts first, so click.'; } },
+  { name: 'a same closing that contrasts the halves (X1)', story: 's2', code: 'closing-kind', where: 'stories[1].five.closing', edit: d => { d.stories[1].five.closing.text = 'Left of centre the headlines put the homes first, while right of centre they put the towns first.'; } },
+  { name: 'a differ closing with no word of difference (X1)', story: 's1', code: 'closing-kind', where: 'stories[0].five.closing', edit: d => { d.stories[0].five.closing.text = 'Left of centre the headlines put the hospital cuts first, and right of centre the tax cuts for small firms.'; } },
+  { name: 'first with no put before it', story: 's1', code: 'unsupported', where: 'stories[0].five.sides.right[0]', edit: set(f1('right'), 'The right headline is the first on the tax cuts for small firms.') },
 ];

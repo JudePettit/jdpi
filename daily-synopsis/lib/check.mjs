@@ -27,6 +27,19 @@
 // "president trump" in one cited headline or summary, "Trump" alone is not enough. And it must be in the items of at
 // least two different outlets of the story (of the stories cited, for the lead), so a name only one outlet printed, as
 // a private person's would be, is never carried.
+//
+// The support rule (the second review of 21 November 2026): every word of every sentence (lead, story, side and closing),
+// folded and compared as a whole word, must be in the headline or summary of an item the sentence cites, exactly or as
+// another form of it (stems: plural -s, -es, -ies, and -ed, -ied, -d, -ing), or be in the closed list supportWords
+// (articles, the plainer prepositions and conjunctions, pronouns, be, have and do, and a few neutral words for coverage:
+// headline, side, put, first after put …). A sentence with any other word is refused ('unsupported'). The refusal's
+// `detail` lists the words, for a local caller only (scripts/check-draft.mjs): the day's file and the workflow's log keep
+// codes and places alone (day.mjs publicReasons, build.mjs). THE LIMIT THAT REMAINS: the check tests the text's form and
+// that its words, names and figures come from the reports it cites; it cannot test that a sentence is true to them
+// (the words of two items can be put together into a claim neither makes).
+// Characters: every control and format character (Unicode Cc and Cf) is refused; a word that mixes alphabets (a Cyrillic
+// а in said) is refused, and so is a word in another alphabet than the Latin unless a cited item prints it; the outlet,
+// reported-speech, judgement and instruction checks read the text after NFKC (full-width ｂｂｃ is bbc).
 import { readFileSync } from 'node:fs';
 import { SOURCES } from '../../briefing/scripts/sources.mjs';
 
@@ -71,8 +84,12 @@ export const MESSAGES = {
   judgement: 'A sentence states a motive, an intent or a judgement.',
   'closing-one-half': 'The closing sentence compares left and right, but only one of the two carried the story.',
   'closing-cites': 'The closing sentence cites an item that is not left or right of centre, or not one from each.',
-  'closing-kind': 'The closing sentence says the opposite of its kind: that the two halves differ when it is of kind same, or are alike when it is of kind differ.',
+  'closing-kind': 'The closing sentence does not say what its kind says: a closing of kind same must hold a word of sameness (same, alike, similar) and none of difference; one of kind differ a word of difference (while, whereas, differ, but) and none of sameness.',
+  unsupported: 'A sentence holds a word that is in none of the items it cites, and is not one of the common words every sentence may use (supportWords).',
+  script: 'A sentence holds a word that mixes alphabets, or a word in another alphabet than the Latin that the items it cites do not print.',
 };
+/** Model names the day's file may carry: Claude, then a space and at most 39 more letters, digits, spaces, dots or hyphens. */
+export const MODEL_RE = /^Claude(?: [A-Za-z0-9 .-]{0,39})?$/;
 
 /* ------------------------------------------------------------------------------------------------ text */
 export const fold = s => String(s ?? '').normalize('NFKD').replace(/\p{M}+/gu, '').replace(/[‘’ʼ′`´]/g, "'").toLowerCase();
@@ -92,15 +109,18 @@ const JUDGEMENT = listRe(WORDS.judgement.words);
 const EVERYWHERE = listRe(WORDS.judgementEverywhere.words, 'gu');
 const JOURNALIST = listRe(WORDS.journalist.words);
 const INSTRUCTION = listRe(WORDS.instructionLike.words);
-const CLOSING_SAME = listRe(WORDS.closingSame.words);
-const CLOSING_DIFFER = listRe(WORDS.closingDiffer.words);
+// closingSame holds the words of difference (refused in a same closing), closingDiffer the words of sameness.
+const DIFFER_WORDS = listRe(WORDS.closingSame.words);
+const SAME_WORDS = listRe(WORDS.closingDiffer.words), SAME_ALL = listRe(WORDS.closingDiffer.words, 'gu');
 const OPENERS = new Set(WORDS.openers.words);
 const COMMON_NAMES = new Set(WORDS.commonWordNames.words.map(fold));
 const NUMBER_WORDS = WORDS.numberWords.words;
 const RELATIVE = WORDS.relativeDates.words;
 const DATE_NAMES = new Set(WORDS.dateNames.words.map(fold));
-// Full month and weekday names are dates in lower case too ("on monday", "in march"); May is left out, being also a verb.
-const DATE_WORDS = new Set(WORDS.dateNames.words.filter(w => w.length > 3 && w !== 'May' && w !== 'Sept').map(fold));
+// Full month and weekday names are dates in lower case too ("on monday", "in march"), and so is may: as a verb it is in
+// no list of words a sentence may use freely, so it must be in the items cited all the same.
+const DATE_WORDS = new Set(WORDS.dateNames.words.filter(w => (w.length > 3 && w !== 'Sept') || w === 'May').map(fold));
+export const SUPPORT_WORDS = new Set(WORDS.supportWords.words.map(fold));
 // A purpose after "first" in a side's sentence: to and a verb ("first to stir fear", "first, to court small firms"),
 // never to and a noun ("first, next to the river").
 const PURPOSE = /(?<![\p{L}\p{N}])first(?![\p{L}\p{N}])[^.]*?(?<![\p{L}\p{N}])to\s+(?!(?:the|a|an|his|her|its|their|this|that|these|those|our|my|some|any|each|every|all|both|one|which|what|whom|where|who|more|most|less)(?![\p{L}\p{N}]))\p{Ll}/u;
@@ -116,15 +136,26 @@ const outletRes = names => names.filter(n => n && n.length >= 2).map(n => {
 });
 const OUTLET_RES = outletRes(OUTLET_NAMES);
 
-export const hasReported = t => REPORTED.test(fold(t));
-export const hasJudgement = t => JUDGEMENT.test(fold(t)) || everywhereWords(t).length > 0 || PURPOSE.test(String(t));
-export const hasJournalist = t => JOURNALIST.test(fold(t));
-export const hasInstruction = t => INSTRUCTION.test(fold(t));
-export const hasOutlet = (t, extra = []) => { const s = String(t).replace(/[‘’]/g, "'"); return OUTLET_RES.some(re => re.test(s)) || extra.some(re => re.test(s)); };
+// Each reads the text after NFKC (full-width letters, ligatures and the like made plain); fold also lowers the case and
+// takes accents off.
+const nfkc = t => String(t ?? '').normalize('NFKC');
+export const hasReported = t => REPORTED.test(fold(nfkc(t)));
+export const hasJudgement = t => JUDGEMENT.test(fold(nfkc(t))) || everywhereWords(t).length > 0 || PURPOSE.test(nfkc(t));
+export const hasJournalist = t => JOURNALIST.test(fold(nfkc(t)));
+export const hasInstruction = t => INSTRUCTION.test(fold(nfkc(t)));
+export const hasOutlet = (t, extra = []) => { const s = nfkc(t).replace(/[‘’]/g, "'"); return OUTLET_RES.some(re => re.test(s)) || extra.some(re => re.test(s)); };
 /** The words of judgementEverywhere in a text (folded): refused in every sentence, unless the digest cites them. */
-export const everywhereWords = t => [...fold(t).matchAll(EVERYWHERE)].map(m => m[0]);
-/** The closing sentence's words against its kind: a same closing may not say they differ, nor a differ one that they are alike. */
-export const kindFault = (kind, t) => (kind === 'same' ? CLOSING_SAME : CLOSING_DIFFER).test(fold(t));
+export const everywhereWords = t => [...fold(nfkc(t)).matchAll(EVERYWHERE)].map(m => m[0]);
+/**
+ * The closing sentence's words against its kind, checked both ways: a same closing must hold a word of sameness
+ * (closingDiffer: same, alike, similar …) and, once those are set aside (no difference, not differ), none of difference
+ * (closingSame: differ, while, whereas, but …); a differ closing must hold a word of difference and none of sameness.
+ */
+export function kindFault(kind, t) {
+  const f = fold(nfkc(t));
+  if (kind === 'same') return !SAME_WORDS.test(f) || DIFFER_WORDS.test(f.replace(SAME_ALL, ' '));
+  return SAME_WORDS.test(f) || !DIFFER_WORDS.test(f);
+}
 
 // Any quotation mark: every double quote, prime, ornament, guillemet and corner bracket anywhere; a single quote or
 // apostrophe only inside a word, between two letters (Trump’s, don’t), never at a word's edge, where it quotes.
@@ -138,22 +169,25 @@ export function hasQuote(t) {
   }
   return false;
 }
-const CONTROL_SET = '[' + [[0x0, 0x1f], [0x7f, 0x9f], [0xad, 0xad], [0x200b, 0x200f], [0x2028, 0x202e], [0x2060, 0x2064], [0xfeff, 0xfeff]].map(([a, b]) => String.fromCharCode(a) + '-' + String.fromCharCode(b)).join('') + ']';
-const CONTROL = new RegExp(CONTROL_SET, 'u'); // controls, soft hyphen, zero-width and direction marks
+// Every control and format character (Unicode Cc and Cf: soft hyphen, zero-width and direction marks and isolates, the
+// byte-order mark, tags …) and the line and paragraph separators.
+const CONTROL_SET = '[\\p{Cc}\\p{Cf}\\p{Zl}\\p{Zp}]';
+const CONTROL = new RegExp(CONTROL_SET, 'u');
 const CONTROL_ALL = new RegExp(CONTROL_SET, 'gu');
 /** Publisher text as the input file holds it: every run of white space (line breaks and tabs too) one space, and the
  *  characters CONTROL holds taken out, so nothing in a headline or summary is hidden from a person reading the file. */
 export const plainText = t => String(t ?? '').replace(/\s+/gu, ' ').replace(CONTROL_ALL, '').replace(/ {2,}/g, ' ').trim();
-const MARKUP = /[<>[\]{}*_#|\\~^=]|&[#a-z0-9]+;/iu;
+// Markup, and :: (a workflow command's mark) as well.
+const MARKUP = /[<>[\]{}*_#|\\~^=]|&[#a-z0-9]+;|::/iu;
 // A link or an address: a scheme, www., //, @, or any word.ending of two letters or more (example.org, example.ie);
 // U.S. and St. are not addresses (one letter, or a space, after the full stop).
 const LINK = /https?:|www\.|:\/\/|@|(?<![\p{L}\p{N}])[\p{L}\p{N}-]+\.\p{L}{2,}(?![\p{L}\p{N}])/iu;
 export const hasMarkup = t => CONTROL.test(t) || MARKUP.test(t);
 export const hasLink = t => LINK.test(String(t));
-// A full stop followed by a capital inside a text starts a second sentence, unless it ends an abbreviation (U.S., a
-// single letter, or one of these).
+// A full stop followed by a space and a letter or a digit, in either case, inside a text starts a second sentence
+// ("The budget passed. the cabinet resigned."), unless it ends an abbreviation (U.S., a single letter, or one of these).
 const ABBREVIATIONS = new Set(['Mr', 'Mrs', 'Ms', 'Dr', 'St', 'Sr', 'Jr', 'Gen', 'Lt', 'Col', 'Sgt', 'Capt', 'Rep', 'Sen', 'Gov', 'Rev', 'Prof', 'No', 'Inc', 'Ltd', 'Co', 'Corp', 'Mt', 'Ft', 'vs']);
-const twoSentences = t => [...String(t).matchAll(/([\p{L}\p{N}.'’-]*)\.\s+(?=\p{Lu})/gu)].some(m => !(m[1].includes('.') || /^\p{L}$/u.test(m[1]) || ABBREVIATIONS.has(m[1])));
+const twoSentences = t => [...nfkc(t).matchAll(/([\p{L}\p{N}.'’-]*)\.\s+(?=[\p{L}\p{N}])/gu)].some(m => !(m[1].includes('.') || /^\p{L}$/u.test(m[1]) || ABBREVIATIONS.has(m[1])));
 
 /** The words of a text, each { w, i, e }: letters and digits, with ' ’ . & - inside a word. */
 export function words(text) {
@@ -283,40 +317,111 @@ function outletsPrinting(name, pool, vocab) {
   return out;
 }
 
+/* ------------------------------------------------------------------------------------------ the support rule */
+/** A text's words as the support rule compares them: folded (NFKD, accents off, lower case), a possessive 's and the
+ *  full stops inside a word taken out (U.S. is us), split at every mark but an apostrophe inside a word. */
+export const supportTokens = t => fold(t).replace(/(\p{L})'s(?!\p{L})/gu, '$1').replace(/(\p{L})\.(?=\p{L})/gu, '$1')
+  .split(/[^\p{L}\p{N}']+/u).map(w => w.replace(/^'+|'+$/g, '')).filter(Boolean);
+const undouble = s => (/([b-df-hj-km-np-tv-xz])\1$/.test(s) && !/(?:ll|ss|zz|ff)$/.test(s) ? s.slice(0, -1) : null);
+/**
+ * The forms a word may stand for, itself included: a conservative stemmer for English endings, no dictionary. Plural -s
+ * and -es, -ies for -y; -ed (and a doubled consonant before it), -ied for -y, -d; -ing (with e added back, and a doubled
+ * consonant undone). No form shorter than three letters is made. Two words match when their forms meet: passed and
+ * passes (pass), evacuated and evacuates (evacuate), cutting and cuts (cut).
+ */
+export function stems(w) {
+  const out = new Set([w]);
+  const add = s => { if (s && s.length >= 3) out.add(s); };
+  if (w.endsWith('ies') || w.endsWith('ied')) add(w.slice(0, -3) + 'y');
+  if (w.endsWith('es')) add(w.slice(0, -2));
+  if (w.endsWith('s') && !w.endsWith('ss')) add(w.slice(0, -1));
+  if (w.endsWith('ed')) { const b = w.slice(0, -2); add(b); add(undouble(b)); }
+  if (w.endsWith('d')) add(w.slice(0, -1));
+  if (w.endsWith('ing')) { const b = w.slice(0, -3); add(b); if (b.length >= 3) add(b + 'e'); add(undouble(b)); }
+  return [...out];
+}
+const PUT = new Set(['put', 'puts', 'putting']);
+/** The words of a sentence that the items it cites do not support (folded, each once), or []. */
+export function unsupportedWords(text, cited) {
+  const have = new Set(), fromItems = new Set();
+  for (const i of cited) for (const w of supportTokens(`${i.headline} ${i.summary || ''}`)) { fromItems.add(w); for (const s of stems(w)) have.add(s); }
+  const out = new Set();
+  // The one word allowed by its place: first, once for each put, puts or putting before it in the sentence (what a
+  // headline puts first). A second first after one put ("puts the floods first, after the first vote") needs an item.
+  let puts = 0;
+  for (const w of supportTokens(nfkc(text))) {
+    if (PUT.has(w)) puts++;
+    if (SUPPORT_WORDS.has(w) || fromItems.has(w)) continue;
+    if (w === 'first' && puts > 0) { puts--; continue; }
+    if (/^\p{N}+$/u.test(w) || Object.hasOwn(NUMBER_WORDS, w)) continue; // figures and number words: the number check has held them to the items cited
+    if (stems(w).some(s => have.has(s))) continue;
+    out.add(w);
+  }
+  return [...out];
+}
+
+/* ------------------------------------------------------------------------------------------------ alphabets */
+const SCRIPTS = ['Latin', 'Greek', 'Cyrillic', 'Armenian', 'Hebrew', 'Arabic', 'Syriac', 'Thaana', 'Devanagari', 'Bengali', 'Gurmukhi', 'Gujarati', 'Oriya',
+  'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhala', 'Thai', 'Lao', 'Tibetan', 'Myanmar', 'Georgian', 'Hangul', 'Ethiopic', 'Cherokee', 'Khmer',
+  'Mongolian', 'Hiragana', 'Katakana', 'Bopomofo', 'Han'].map(n => [n, new RegExp(`\\p{Script=${n}}`, 'u')]);
+const scriptOf = ch => (SCRIPTS.find(([, re]) => re.test(ch)) || ['Other'])[0];
+/** A word that mixes alphabets (Cyrillic а in said), or a word in another alphabet than the Latin that no cited item prints. */
+export function scriptFault(text, cited) {
+  let citedWords = null;
+  for (const { w } of words(text)) {
+    const scripts = new Set([...w].filter(c => /\p{L}/u.test(c)).map(scriptOf));
+    if (scripts.size > 1) return true;
+    if (scripts.size === 1 && !scripts.has('Latin')) {
+      citedWords ??= new Set(cited.flatMap(i => supportTokens(`${i.headline} ${i.summary || ''}`)));
+      if (!supportTokens(w).every(x => citedWords.has(x))) return true;
+    }
+  }
+  return false;
+}
+
 /* --------------------------------------------------------------------------------------- the one sentence */
 /**
  * The checks every sentence gets: the first that fails gives its code, or null. `cited` are the input items the sentence
  * cites, `pool` the items a name must be found among in two outlets' text.
  */
-export function sentenceFault(text, cited, pool, { max = LIMITS.sentenceChars, five = false, outlets = outletRes([...new Set(pool.map(i => i.outlet))]), vocab = lowerVocab(pool) } = {}) {
-  if (typeof text !== 'string' || !text.trim() || text !== text.trim()) return 'shape';
-  if (text.length > max) return 'length';
-  if (CONTROL.test(text)) return 'markup';
-  if (hasLink(text)) return 'link';
-  if (MARKUP.test(text)) return 'markup';
-  if (!/\.$/.test(text) || /[?!]/.test(text) || twoSentences(text)) return 'not-a-sentence';
-  if (hasQuote(text)) return 'quote';
-  if (hasReported(text)) return 'reported-speech';
-  if (hasInstruction(text)) return 'instruction';
-  if (hasOutlet(text, outlets)) return 'outlet';
-  if (five && hasJournalist(text)) return 'journalist';
+export function sentenceFault(text, cited, pool, opts = {}) {
+  return sentenceCheck(text, cited, pool, opts)?.code ?? null;
+}
+/** As sentenceFault, with the words for the support rule: { code, detail } or null. `detail` is the draft's own words,
+ *  for a local caller only; nothing that writes a file or a log line may use it. */
+export function sentenceCheck(text, cited, pool, { max = LIMITS.sentenceChars, five = false, outlets = outletRes([...new Set(pool.map(i => i.outlet))]), vocab = lowerVocab(pool) } = {}) {
+  const no = code => ({ code });
+  if (typeof text !== 'string' || !text.trim() || text !== text.trim()) return no('shape');
+  if (text.length > max) return no('length');
+  if (CONTROL.test(text)) return no('markup');
+  if (hasLink(text)) return no('link');
+  if (MARKUP.test(text)) return no('markup');
+  if (scriptFault(text, cited)) return no('script');
+  if (!/\.$/.test(text) || /[?!]/.test(text) || twoSentences(text)) return no('not-a-sentence');
+  if (hasQuote(text)) return no('quote');
+  if (hasReported(text)) return no('reported-speech');
+  if (hasInstruction(text)) return no('instruction');
+  if (hasOutlet(text, outlets)) return no('outlet');
+  if (five && hasJournalist(text)) return no('journalist');
   const citedText = cited.map(i => `${i.headline} ${i.summary || ''}`).join(' \n ');
-  if (five ? hasJudgement(text) : everywhereWords(text).some(w => !phraseRe(w).test(fold(citedText)))) return 'judgement';
-  if (/(?![0-9])\p{N}/u.test(text)) return 'number'; // a figure in any digits but 0 to 9 (full-width, Arabic-Indic, ², ½)
+  if (five ? hasJudgement(text) : everywhereWords(text).some(w => !phraseRe(w).test(fold(citedText)))) return no('judgement');
+  if (/(?![0-9])\p{N}/u.test(text)) return no('number'); // a figure in any digits but 0 to 9 (full-width, Arabic-Indic, ², ½)
   const figs = new Set(figures(citedText)), have = wordSet(citedText);
-  for (const n of figures(text)) if (!figs.has(n)) return 'number';
+  for (const n of figures(text)) if (!figs.has(n)) return no('number');
   for (const w of wordSet(text)) {
-    if (Object.hasOwn(NUMBER_WORDS, w) && !have.has(w) && !(NUMBER_WORDS[w] != null && figs.has(String(NUMBER_WORDS[w])))) return 'number';
+    if (Object.hasOwn(NUMBER_WORDS, w) && !have.has(w) && !(NUMBER_WORDS[w] != null && figs.has(String(NUMBER_WORDS[w])))) return no('number');
     const base = w.replace(/s$/, '');
-    if ((RELATIVE.includes(w) || RELATIVE.includes(base)) && !have.has(base) && !have.has(base + 's')) return 'date';
-    if (DATE_WORDS.has(w) && !have.has(w)) return 'date';
+    if ((RELATIVE.includes(w) || RELATIVE.includes(base)) && !have.has(base) && !have.has(base + 's')) return no('date');
+    if (DATE_WORDS.has(w) && !have.has(w)) return no('date');
   }
   const citedNorm = cited.map(i => normText(`${i.headline} ${i.summary || ''}`));
   const names = [...namesIn(text, { vocab }), ...lowerNames(text, properWords(pool, vocab))];
   for (const name of names) {
-    if (!citedNorm.some(t => t.includes(` ${name} `))) return name.split(' ').some(w => DATE_NAMES.has(w)) ? 'date' : 'name';
-    if (outletsPrinting(name, pool, vocab).size < 2) return 'private-name';
+    if (!citedNorm.some(t => t.includes(` ${name} `))) return no(name.split(' ').some(w => DATE_NAMES.has(w)) ? 'date' : 'name');
+    if (outletsPrinting(name, pool, vocab).size < 2) return no('private-name');
   }
+  const missing = unsupportedWords(text, cited);
+  if (missing.length) return { code: 'unsupported', detail: missing };
   return null;
 }
 
@@ -327,9 +432,12 @@ const isSentence = s => onlyKeys(s, ['text', 'cites']) && typeof s.text === 'str
 
 /**
  * Checks a draft (its text, as read from the file) against the day's input. Returns
- *   { ok, reasons: [{ code, where }], five: { <story id>: { ok, reasons } } }
+ *   { ok, reasons: [{ code, where, detail? }], five: { <story id>: { ok, reasons } } }
  * ok false: the whole draft is refused, and `five` is empty. ok true: the digest is published, and each story's written
- * analysis where its own `five` entry is ok.
+ * analysis where its own `five` entry is ok. `code` is a fixed code, `where` a place made of fixed words, indexes and the
+ * input's side keys, and the story ids of `five` are the input's own (a draft's ids must be exactly the input's). Only
+ * `detail` (the unsupported words, for 'unsupported') holds the draft's own words: it is for a local caller
+ * (scripts/check-draft.mjs), and day.mjs publicReasons drops it before anything is written or logged.
  */
 export function checkDraft(input, draftText) {
   const fail = (code, where = '') => ({ ok: false, reasons: [{ code, where }], five: {} });
@@ -337,7 +445,7 @@ export function checkDraft(input, draftText) {
   if (Buffer.byteLength(draftText) > LIMITS.draftBytes) return fail('too-large');
   let d;
   try { d = JSON.parse(draftText); } catch { return fail('not-json'); }
-  if (!onlyKeys(d, ['format', 'day', 'input', 'model', 'lead', 'stories']) || d.format !== DRAFT_FORMAT || typeof d.model !== 'string' || !/^Claude\b/.test(d.model) || !Array.isArray(d.lead) || !Array.isArray(d.stories)) return fail('shape');
+  if (!onlyKeys(d, ['format', 'day', 'input', 'model', 'lead', 'stories']) || d.format !== DRAFT_FORMAT || typeof d.model !== 'string' || !MODEL_RE.test(d.model) || !Array.isArray(d.lead) || !Array.isArray(d.stories)) return fail('shape');
   if (d.day !== input.day) return fail('day');
   if (d.input !== input.id) return fail('input');
   const items = new Map(input.stories.flatMap(s => s.items.map(i => [i.id, { ...i, story: s.id }])));
@@ -364,8 +472,8 @@ export function checkDraft(input, draftText) {
     if (c) return reasons.push({ code: c, where });
     const cited = s.cites.map(id => items.get(id));
     const pool = [...new Set(cited.map(i => i.story))].flatMap(id => storyOf.get(id).items);
-    const f = sentenceFault(s.text, cited, pool, { outlets, vocab });
-    if (f) reasons.push({ code: f, where });
+    const f = sentenceCheck(s.text, cited, pool, { outlets, vocab });
+    if (f) reasons.push({ ...f, where });
   });
   // Each story: two to four sentences citing its own items.
   for (const [n, s] of d.stories.entries()) {
@@ -376,8 +484,8 @@ export function checkDraft(input, draftText) {
     s.sentences.forEach((x, k) => {
       const w = `${where}.sentences[${k}]`, c = cite(x, w, s.id);
       if (c) return reasons.push({ code: c, where: w });
-      const f = sentenceFault(x.text, x.cites.map(id => items.get(id)), story.items, { outlets, vocab });
-      if (f) reasons.push({ code: f, where: w });
+      const f = sentenceCheck(x.text, x.cites.map(id => items.get(id)), story.items, { outlets, vocab });
+      if (f) reasons.push({ ...f, where: w });
     });
   }
   if (reasons.length) return { ok: false, reasons, five: {} };
@@ -406,8 +514,8 @@ export function checkFive(story, five, where = 'five', outlets = outletRes([...n
       const ww = `${w}[${j}]`;
       if (!x.cites.length) return reasons.push({ code: 'cites-none', where: ww });
       if (!x.cites.every(id => own.has(id))) return reasons.push({ code: story.items.some(i => x.cites.includes(i.id)) ? 'side-cites-other-side' : 'cites-unknown', where: ww });
-      const f = sentenceFault(x.text, x.cites.map(id => own.get(id)), story.items, { five: true, outlets, vocab });
-      if (f) reasons.push({ code: f, where: ww });
+      const f = sentenceCheck(x.text, x.cites.map(id => own.get(id)), story.items, { five: true, outlets, vocab });
+      if (f) reasons.push({ ...f, where: ww });
     });
   }
   // The closing sentence: far left and left together against right and far right together, only when both carried it.
@@ -421,8 +529,8 @@ export function checkFive(story, five, where = 'five', outlets = outletRes([...n
     const halves = new Map([...L, ...R].map(i => [i.id, i]));
     if (!c.cites.length || !c.cites.every(id => halves.has(id)) || !c.cites.some(id => LEFT_HALF.includes(halves.get(id).side)) || !c.cites.some(id => RIGHT_HALF.includes(halves.get(id).side))) reasons.push({ code: 'closing-cites', where: w });
     else {
-      const f = sentenceFault(c.text, c.cites.map(id => halves.get(id)), story.items, { max: LIMITS.closingChars, five: true, outlets, vocab });
-      if (f) reasons.push({ code: f, where: w });
+      const f = sentenceCheck(c.text, c.cites.map(id => halves.get(id)), story.items, { max: LIMITS.closingChars, five: true, outlets, vocab });
+      if (f) reasons.push({ ...f, where: w });
       else if (kindFault(c.kind, c.text)) reasons.push({ code: 'closing-kind', where: w });
     }
   }

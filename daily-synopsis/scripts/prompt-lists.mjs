@@ -15,11 +15,12 @@ import { WORDS } from '../lib/check.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PROMPT = join(HERE, '../PROMPT.md');
 /** The lists PROMPT.md carries, by their name in check-words.json. */
-export const LISTS = ['openers', 'commonWordNames', 'reportedSpeech', 'judgement', 'judgementEverywhere', 'journalist', 'instructionLike', 'closingSame', 'closingDiffer'];
+export const LISTS = ['openers', 'commonWordNames', 'reportedSpeech', 'judgement', 'judgementEverywhere', 'journalist', 'instructionLike', 'closingSame', 'closingDiffer',
+  'supportWords', 'numberWords', 'dateNames', 'relativeDates', 'outletCommonWords'];
 const MARK = /<!-- list:([A-Za-z]+) -->[^]*?<!-- \/list -->/g;
 
-/** A list as PROMPT.md shows it: its words, comma separated. */
-export const listText = name => WORDS[name].words.join(', ');
+/** A list as PROMPT.md shows it: its words, comma separated (for numberWords, the words without their figures). */
+export const listText = name => (Array.isArray(WORDS[name].words) ? WORDS[name].words : Object.keys(WORDS[name].words)).join(', ');
 /** The words between a list's markers in a text, or null. */
 export function listBlock(text, name) {
   const m = text.match(new RegExp(`<!-- list:${name} -->([^]*?)<!-- /list -->`));

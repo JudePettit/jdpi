@@ -25,7 +25,7 @@
 // analysis (the model's, checked) only when at least FIVE_MIN_SIDES (3) of the five sides carried it, at least one left
 // of centre (far left or left) and one right of centre (right or far right): 7 to 10 of each day's ten on the same days.
 import { buildModel, politicalTops, isFree, POSITIONS } from '../../highbrowse/analysis.js';
-import { plainText } from './check.mjs';
+import { plainText, MESSAGES, MODEL_RE, SIDE_KEYS } from './check.mjs';
 
 export const MIN_OUTLETS = 3, MIN_SIDES = 2, CAP = 10, FIVE_MIN_SIDES = 3, MAX_ITEMS = 30;
 export const INPUT_FORMAT = 'vm-daily-synopsis-input/1', DAY_FORMAT = 'vm-daily-synopsis-day/1', INDEX_FORMAT = 'vm-daily-synopsis-index/1';
@@ -44,6 +44,7 @@ export const LABEL = {
   fiveNotEligible: 'No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre.',
   fiveOneHalf: 'Only one of the two halves, left or right of centre, carried this story, so they are not compared.',
   noSide: 'None of Vitruvian Manager’s outlets on this side was found reporting it in the 24 hours.',
+  noStories: 'No story met the threshold on this day: none was run by at least three of the Political Briefing’s publishers from at least two of the five sides.',
 };
 export const meta = authorship => (authorship === 'model'
   ? 'Written by an AI model (Claude) from the listed headlines; no person checked it'
@@ -82,17 +83,45 @@ async function digestOf(text) {
 }
 
 /**
+ * A story's headlines cut to MAX_ITEMS, so that every side with headlines keeps some (the review of 21 November 2026:
+ * a cut by side order alone dropped the far right). First an even share for each side that has headlines (MAX_ITEMS
+ * divided by their number), then the slots left over by the existing rank (the most typical first). Within each, a
+ * publisher not yet kept comes before a second headline of one kept, so that as many publishers as can be are kept.
+ * Returned in side order, far left to far right, and within a side by rank.
+ */
+export function cutEntries(entries, max = MAX_ITEMS) {
+  const byRank = [...entries].sort((a, b) => a.rank - b.rank);
+  if (byRank.length <= max) return byRank.sort((a, b) => POSITIONS.indexOf(a.item.pos) - POSITIONS.indexOf(b.item.pos) || a.rank - b.rank);
+  const kept = new Set(), outlets = new Set();
+  const take = (list, n) => {
+    const left = list.filter(e => !kept.has(e));
+    const first = left.filter((e, k) => !outlets.has(e.item.sid) && left.findIndex(x => x.item.sid === e.item.sid) === k);
+    const order = [...first, ...left.filter(e => !first.includes(e))];
+    for (const e of order.slice(0, n)) { kept.add(e); outlets.add(e.item.sid); }
+  };
+  const sides = POSITIONS.filter(p => byRank.some(e => e.item.pos === p));
+  const share = Math.floor(max / sides.length);
+  for (const p of sides) take(byRank.filter(e => e.item.pos === p), share);
+  take(byRank, max - kept.size);
+  return [...kept].sort((a, b) => POSITIONS.indexOf(a.item.pos) - POSITIONS.indexOf(b.item.pos) || a.rank - b.rank);
+}
+
+/**
  * The day's input file. Each story: its rank, its outlets per side, whether it gets a written analysis, the id of its
  * first headline (the most typical one anyone can read) and its items, by side from far left to far right and, within
  * a side, the most typical first. Each item: id, side, outlet, outletId, caution, access, headline, url, published and
  * the feed's short summary (used by the model and the check, never shown). The headline and the summary are the
- * publishers' text made plain (check.mjs plainText): line breaks and tabs become spaces, and control, zero-width and
- * direction characters are taken out, so no text in them is hidden from a person reading the input file.
+ * publishers' text made plain (check.mjs plainText): line breaks and tabs become spaces, and control and format
+ * characters (zero-width, direction marks and the like) are taken out, so no text in them is hidden from a person
+ * reading the input file. A story of more than MAX_ITEMS headlines is cut by cutEntries, and its counts of outlets per
+ * side, and whether it gets a written analysis, are those of the headlines kept.
  */
 export async function makeInput(stories, { day, ref, storeGenerated, generated }) {
   const list = stories.map((s, n) => {
     const id = `s${n + 1}`;
-    const ordered = [...s.entries].sort((a, b) => POSITIONS.indexOf(a.item.pos) - POSITIONS.indexOf(b.item.pos) || a.rank - b.rank).slice(0, MAX_ITEMS);
+    const ordered = cutEntries(s.entries);
+    const per = Object.fromEntries(POSITIONS.map(p => [p, new Set(ordered.filter(e => e.item.pos === p).map(e => e.item.sid)).size]));
+    const sides = POSITIONS.filter(p => per[p] > 0);
     const items = ordered.map((e, k) => ({
       id: `${id}-${k + 1}`, side: e.item.pos, outlet: e.item.src, outletId: e.item.sid, caution: !!e.item.caution, access: e.item.acc || 'free',
       headline: plainText(e.item.t), url: e.item.u, published: new Date(e.item.at).toISOString(), summary: plainText(e.item.d).slice(0, 240).trim(),
@@ -100,7 +129,7 @@ export async function makeInput(stories, { day, ref, storeGenerated, generated }
     const byRank = [...ordered].sort((a, b) => a.rank - b.rank);
     const lead = byRank.find(e => isFree(e.item)) || byRank[0];
     return {
-      id, rank: n + 1, outlets: s.outlets, sides: Object.fromEntries(POSITIONS.map(p => [p, s.per[p]])), written5: fiveEligible(s.sides),
+      id, rank: n + 1, outlets: POSITIONS.reduce((a, p) => a + per[p], 0), sides: per, written5: fiveEligible(sides),
       lead: items[ordered.indexOf(lead)].id, items,
     };
   });
@@ -135,6 +164,15 @@ export function rulesDay(input, { generated }) {
   };
 }
 
+// A place in a draft as the check names it: fixed words, indexes and side keys only ("stories[2].five.sides.far_left[0]").
+const PLACE = new RegExp(`^(?:|stories|lead|lead\\[\\d{1,3}\\]|stories\\[\\d{1,3}\\](?:\\.sentences\\[\\d{1,3}\\]|\\.five(?:\\.closing|\\.sides\\.(?:${SIDE_KEYS.join('|')})(?:\\[\\d{1,3}\\])?)?)?)$`);
+/** A refusal's reasons as they may be written to a day's file or a log line: each a fixed code and a place of fixed
+ *  words and indexes, never the draft's own words (a reason's `detail` is dropped; anything else is made 'shape'). */
+export const publicReasons = reasons => (reasons || []).map(r => ({
+  code: Object.hasOwn(MESSAGES, r?.code) ? r.code : 'shape',
+  where: typeof r?.where === 'string' && PLACE.test(r.where) ? r.where : '',
+}));
+
 /**
  * The day with a checked draft. `result` is checkDraft's. A refused draft adds an attempt (its codes and places, never
  * its words) and leaves the day as rules made it; a passing one publishes its text, once: a day whose written digest is
@@ -142,14 +180,15 @@ export function rulesDay(input, { generated }) {
  */
 export function withDraft(day, input, draft, result, { checked }) {
   if (day.written.status === 'published') return day;
-  const attempt = { checked, ok: result.ok, reasons: result.reasons };
+  if (result.ok && !MODEL_RE.test(draft?.model)) throw new Error('A draft that passed the check has a model name the check refuses.');
+  const attempt = { checked, ok: result.ok, reasons: publicReasons(result.reasons) };
   if (!result.ok) return { ...day, updated: checked, written: { ...day.written, status: 'refused', note: LABEL.unavailable, attempts: [...day.written.attempts, attempt] } };
   const byId = new Map(draft.stories.map(s => [s.id, s]));
   const anyFive = Object.values(result.five).some(f => f && f.ok);
   return {
     ...day, updated: checked, authorship: 'model', model: draft.model,
     label: { ...day.label, text: LABEL.model, five: anyFive ? LABEL.fiveModel : LABEL.fiveRules, meta: meta('model') },
-    written: { status: 'published', note: null, attempts: [...day.written.attempts, { ...attempt, five: Object.fromEntries(Object.entries(result.five).filter(([, f]) => f).map(([k, f]) => [k, f.ok ? { ok: true } : f])) }] },
+    written: { status: 'published', note: null, attempts: [...day.written.attempts, { ...attempt, five: Object.fromEntries(Object.entries(result.five).filter(([k, f]) => f && byId.has(k) && input.stories.some(s => s.id === k)).map(([k, f]) => [k, f.ok ? { ok: true } : { ok: false, reasons: publicReasons(f.reasons) }])) }] },
     lead: draft.lead.map(s => ({ text: s.text, cites: [...s.cites] })),
     stories: day.stories.map(s => {
       const d = byId.get(s.id), f = result.five[s.id];

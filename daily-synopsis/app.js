@@ -15,6 +15,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const NO_SIDE = 'None of Vitruvian Manager’s outlets on this side was found reporting it in the 24 hours.';
+const NO_STORIES = 'No story met the threshold on this day: none was run by at least three of the Political Briefing’s publishers from at least two of the five sides.';
 
 /** An element with attributes and children; strings become text nodes, never markup. */
 function el(tag, attrs = {}, ...kids) {
@@ -44,7 +45,8 @@ async function getJSON(url) {
   return r.json();
 }
 
-let INDEX = null, CORR = [], RSP = PRPRsp.table(null), RSP_SETTLED = false, CURRENT = null, USED = null;
+// CURRENT: the day being loaded or shown; SHOWN: the day whose stories are on the page.
+let INDEX = null, CORR = [], RSP = PRPRsp.table(null), RSP_SETTLED = false, CURRENT = null, SHOWN = null, USED = null;
 const cache = new Map();
 const dayFile = d => { if (!cache.has(d)) cache.set(d, getJSON(`${BASE}days/${d}.json`)); return cache.get(d); };
 
@@ -150,6 +152,40 @@ function leadView(day) {
   box.hidden = false;
 }
 
+/* --------------------------------------------------------------------------------- a day file's shape */
+// A day file that reads as JSON is still checked for the shape the page draws from before anything on the page changes
+// (the second review, X5): a file of the wrong shape leaves the day shown as it was, with a plain line saying so.
+const isStr = x => typeof x === 'string';
+const isArr = Array.isArray;
+const isObj = x => !!x && typeof x === 'object' && !isArr(x);
+const isNum = x => typeof x === 'number' && Number.isFinite(x);
+const isSentence = s => isObj(s) && isStr(s.text) && isArr(s.cites) && s.cites.every(isStr);
+const isHeadline = h => isObj(h) && isStr(h.id) && isStr(h.headline) && isStr(h.outlet) && (h.url == null || isStr(h.url));
+function isStory(s) {
+  if (!isObj(s) || !isStr(s.id) || !isNum(s.rank) || !isNum(s.outlets) || !isArr(s.headlines) || !s.headlines.length || !s.headlines.every(isHeadline)) return false;
+  if (!(s.sentences === null || (isArr(s.sentences) && s.sentences.every(isSentence)))) return false;
+  const f = s.five;
+  if (!isObj(f) || !isArr(f.sides) || f.sides.length !== SIDES.length) return false;
+  if (!f.sides.every((x, k) => isObj(x) && x.key === SIDES[k] && isStr(x.label) && isNum(x.outlets) && isArr(x.headlines) && x.headlines.every(isStr))) return false;
+  if (!isStr(f.status) || !(f.note === null || isStr(f.note))) return false;
+  if (f.status === 'published') {
+    const w = f.written;
+    if (!isObj(w) || !isObj(w.sides) || !Object.entries(w.sides).every(([k, l]) => SIDES.includes(k) && isArr(l) && l.every(isSentence))) return false;
+    if (!(w.closing === null || (isObj(w.closing) && ['same', 'differ'].includes(w.closing.kind) && isSentence(w.closing)))) return false;
+  }
+  return true;
+}
+/** Whether a day file has the shape the page draws: the day asked for, its label, its window, its stories. */
+function isDayFile(x, d) {
+  if (!isObj(x) || x.day !== d || !['model', 'rules'].includes(x.authorship)) return false;
+  const l = x.label;
+  if (!isObj(l) || ![l.text, l.five, l.notProof, l.meta].every(isStr)) return false;
+  if (!isObj(x.written) || !isStr(x.written.status) || !(x.written.note === null || isStr(x.written.note))) return false;
+  if (!isObj(x.window) || !isStr(x.window.to) || !(x.storeGenerated == null || isStr(x.storeGenerated))) return false;
+  if (!(x.lead === null || (isArr(x.lead) && x.lead.every(isSentence)))) return false;
+  return isArr(x.stories) && x.stories.every(isStory);
+}
+
 /** A real calendar day in the form 2026-11-21, or false (2026-02-30 and nonsense are not days). */
 const isDay = d => DAY_RE.test(d || '') && !Number.isNaN(Date.parse(`${d}T00:00:00Z`)) && new Date(`${d}T00:00:00Z`).toISOString().slice(0, 10) === d;
 
@@ -164,9 +200,20 @@ async function show(d, { focus = false, note = '' } = {}) {
   }
   CURRENT = d;
   $('#status').textContent = `Loading ${dateOf(d)}…`;
-  let day;
-  try { day = await dayFile(d); } catch (e) { $('#status').textContent = `${dateOf(d)} could not be read just now.`; return; }
+  let day = null;
+  try { day = await dayFile(d); } catch { day = null; }
   if (CURRENT !== d) return;
+  if (!isDayFile(day, d)) {
+    // Nothing on the page changes: the day shown stays (its heading, the chooser, its stories), and CURRENT names it
+    // again, so Earlier and Later step from it. The file is read afresh next time.
+    cache.delete(d);
+    CURRENT = SHOWN;
+    $('#status').textContent = `${dateOf(d)} could not be read just now.${SHOWN ? ` ${dateOf(SHOWN)} is still shown.` : ''}`;
+    if (SHOWN) $('#day').value = SHOWN;
+    USED = null;
+    return;
+  }
+  SHOWN = d;
   document.title = `Daily Synopsis · ${dateOf(d)} · VM`;
   $('#title').textContent = `Daily Synopsis: ${dateOf(d)}`;
   $('#day').value = d;
@@ -177,7 +224,8 @@ async function show(d, { focus = false, note = '' } = {}) {
   USED = null;
   labelView(day);
   leadView(day);
-  $('#stories').replaceChildren(...day.stories.map(s => storyView(s, day)));
+  // A day with no story that met the threshold is a day too: one plain line says so.
+  $('#stories').replaceChildren(...(day.stories.length ? day.stories.map(s => storyView(s, day)) : [el('li', { class: 'no-stories prp-empty', id: 'no-stories' }, NO_STORIES)]));
   const corr = CORR.filter(c => c.day === d && !c.story);
   $('#corrections').hidden = !corr.length;
   $('#corr-list').replaceChildren(...corr.map(c => el('li', {}, el('b', {}, `${dateOf(c.date)}:`), ' ', c.text)));

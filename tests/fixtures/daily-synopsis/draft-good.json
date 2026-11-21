@@ -2,50 +2,50 @@
  "format": "vm-daily-synopsis-draft/1",
  "day": "2026-11-17",
  "input": "2026-11-17-0549fd87456e",
- "model": "Claude (hand-written test fixture)",
+ "model": "Claude hand-written test fixture",
  "lead": [
   { "text": "Ruritania’s parliament passed its 2027 budget by 212 votes to 180.", "cites": ["s1-3"] },
-  { "text": "In Freedonia, floods along the Sylvan river forced 3,000 people from their homes.", "cites": ["s2-1", "s2-2"] }
+  { "text": "In Freedonia, floods forced 3,000 from homes along the Sylvan river.", "cites": ["s2-1", "s2-2"] }
  ],
  "stories": [
   {
    "id": "s1",
    "sentences": [
-    { "text": "Ruritania’s parliament passed the 2027 budget by 212 votes to 180 after a debate in Strelsau.", "cites": ["s1-3"] },
+    { "text": "Ruritania’s parliament passed the 2027 budget by 212 votes to 180 after a debate in Strelsau.", "cites": ["s1-3", "s1-4"] },
     { "text": "Headlines on the left put cuts to Strelsau hospital spending first.", "cites": ["s1-1", "s1-2"] },
     { "text": "Headlines on the right put tax cuts for small firms first.", "cites": ["s1-5", "s1-6"] }
    ],
    "five": {
     "sides": {
-     "far_left": [{ "text": "The far left headline links the budget cuts to hospitals in Strelsau.", "cites": ["s1-1"] }],
+     "far_left": [{ "text": "The far left headline puts the budget cuts that hit Strelsau hospitals first.", "cites": ["s1-1"] }],
      "left": [{ "text": "The left headline puts the austerity budget and its cut to Strelsau hospital spending first.", "cites": ["s1-2"] }],
-     "centre": [{ "text": "Centre headlines give the vote of 212 to 180 and the debate in Strelsau.", "cites": ["s1-3", "s1-4"] }],
+     "centre": [{ "text": "Centre headlines put the vote of 212 to 180 and the debate in Strelsau first.", "cites": ["s1-3", "s1-4"] }],
      "right": [{ "text": "The right headline puts the tax cuts for small firms first.", "cites": ["s1-5"] }],
      "far_right": [{ "text": "The far right headline puts the tax cuts for small firms first, as a win.", "cites": ["s1-6"] }]
     },
-    "closing": { "kind": "differ", "text": "Left of centre the hospital cuts come first, and right of centre the tax cuts for small firms.", "cites": ["s1-2", "s1-5"] }
+    "closing": { "kind": "differ", "text": "Left of centre the headlines put the hospital cuts first, while right of centre they put the tax cuts for small firms first.", "cites": ["s1-2", "s1-5"] }
    }
   },
   {
    "id": "s2",
    "sentences": [
-    { "text": "In Freedonia, 3,000 people were evacuated as the Sylvan river burst its banks.", "cites": ["s2-2"] },
-    { "text": "The floods reached towns along the river.", "cites": ["s2-1", "s2-3"] }
+    { "text": "In Freedonia, 3,000 were evacuated as the Sylvan river burst its banks.", "cites": ["s2-2"] },
+    { "text": "The Sylvan river flooded towns in Freedonia.", "cites": ["s2-1", "s2-3"] }
    ],
    "five": {
     "sides": {
-     "left": [{ "text": "The left headline puts the 3,000 people forced from their homes first.", "cites": ["s2-1"] }],
+     "left": [{ "text": "The left headline puts the 3,000 forced from homes along the Sylvan river first.", "cites": ["s2-1"] }],
      "centre": [{ "text": "The centre headline puts the 3,000 evacuated and the Sylvan river bursting its banks first.", "cites": ["s2-2"] }],
      "right": [{ "text": "The right headline puts the river first, flooding towns in Freedonia.", "cites": ["s2-3"] }]
     },
-    "closing": { "kind": "same", "text": "Left and right of centre give the same 3,000 evacuated from the Sylvan river floods.", "cites": ["s2-1", "s2-3"] }
+    "closing": { "kind": "same", "text": "Headlines on both sides put the Sylvan river floods and the 3,000 first, the same on each.", "cites": ["s2-1", "s2-3"] }
    }
   },
   {
    "id": "s3",
    "sentences": [
     { "text": "Syldavia and Borduria signed a border trade deal at a summit in Klow.", "cites": ["s3-2", "s3-3"] },
-    { "text": "Their leaders met in Klow on border trade.", "cites": ["s3-1"] }
+    { "text": "Their leaders meet at a Klow summit on border trade.", "cites": ["s3-1"] }
    ]
   }
  ]

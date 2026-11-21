@@ -7,7 +7,7 @@
       "in his words", "in her words", "in their words", "in the words of", "in the view of", "quoted", "quoting", "quote", "quotes", "vowed", "vows", "vowing",
       "pledged", "promised", "warned", "warns", "warning that", "called it", "described … as", "called … a", "called … an", "branded … as", "labelled … as",
       "labeled … as", "hailed … as", "dismissed … as", "painted … as", "characterised … as", "characterized … as", "dubbed", "branded", "accused", "accuses", "denied", "denies",
-      "confirmed that", "added that", "noted that", "suggested that", "announced that", "stressed that", "explained", "acknowledged", "conceded",
+      "confirmed that", "added that", "noted that", "suggested that", "announce", "announces", "announced", "announcing", "announcement", "announcements", "stressed that", "explained", "acknowledged", "conceded",
       "alleged that", "believes that", "thinks that", "hinted", "boasted", "boasts", "reported", "reportedly", "spokesperson", "spokesman",
       "spokeswoman", "statement"]
   },
@@ -59,15 +59,15 @@
       "instruction", "instructions", "prompt", "click", "subscribe", "sign up", "follow us", "download", "read more", "share this", "please", "note to"]
   },
   "closingSame": {
-    "about": "Words a closing sentence of kind same may not hold: the page shows it as Left and right of centre alike, so it may not say that they differ.",
+    "about": "The words of difference. A closing sentence of kind same may not hold one: the page shows it after Left and right of centre alike, so it may not say that they differ. A closing sentence of kind differ must hold one.",
     "words": ["differ*", "while", "whereas", "but", "unlike", "instead", "contrast*", "rather than", "however", "versus", "on the other hand", "opposite"]
   },
   "closingDiffer": {
-    "about": "Words a closing sentence of kind differ may not hold: the page shows it as Left and right of centre, a difference, so it may not say that they are alike.",
+    "about": "The words of sameness. A closing sentence of kind differ may not hold one: the page shows it after Left and right of centre, as a difference, so it may not say that they are alike. A closing sentence of kind same must hold one (no difference and not differ count as sameness, not as difference).",
     "words": ["same", "alike", "identical", "similar*", "no difference", "not differ"]
   },
   "dateNames": {
-    "about": "Months and weekdays. Written with a capital, they are names, and like any name must be in the text of the items the sentence cites; one that is not is refused as a date. The full names (but May) are dates in lower case too.",
+    "about": "Months and weekdays. Written with a capital, they are names, and like any name must be in the text of the items the sentence cites, and printed by two outlets; one that is not is refused as a date. The full names, and may, are dates in lower case too: may, the verb, must be in the items the sentence cites like any other word.",
     "words": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
       "Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Sept", "Oct", "Nov", "Dec",
       "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -77,12 +77,28 @@
     "words": ["today", "yesterday", "tomorrow", "tonight", "overnight", "weekend", "week", "month", "year", "decade", "century", "morning", "afternoon", "evening"]
   },
   "numberWords": {
-    "about": "Numbers written as words. Each must be in the text of the items the sentence cites, as the word or as its figure. (Not first or half, which headlines and the 5 Sided Analysis use in other senses: what a headline puts first.)",
-    "words": {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+    "about": "Numbers written as words. Each must be in the text of the items the sentence cites, as the word or as its figure. (Not first or half, which headlines and the 5 Sided Analysis use in other senses: what a headline puts first. Like every other word, first and half must still be in the items cited, but for first after put or puts: see supportWords.)",
+    "words": {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
       "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20, "thirty": 30,
       "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100, "hundreds": null, "thousand": 1000,
       "thousands": null, "million": null, "millions": null, "billion": null, "billions": null, "trillion": null, "dozen": 12, "dozens": null,
-      "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10}
+      "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10,
+      "eleventh": 11, "twelfth": 12, "thirteenth": 13, "fourteenth": 14, "fifteenth": 15, "sixteenth": 16, "seventeenth": 17, "eighteenth": 18,
+      "nineteenth": 19, "twentieth": 20, "thirtieth": 30, "hundredth": 100, "thousandth": 1000}
+  },
+  "supportWords": {
+    "about": "The support rule: every word of every sentence must be in the headline or summary of an item the sentence cites (exactly, or as another form of it: plural -s or -es, -ies for -y, -ed, -ied, -d or -ing), or be one of these. A closed list of words that carry no fact of their own: articles, the plainer prepositions and conjunctions, pronouns, the forms of be, have and do, and the few neutral words a 5 Sided Analysis needs to describe coverage. It holds no number word, no month or weekday, no verb of saying, no word of judgement or motive and no word that gives an order; and on purpose not not, no, never, against, without, up, down, off, out, nor any modal verb (will, may, could, should). Besides these, first counts as supported in the same clause after put, puts or putting (what a headline puts first).",
+    "words": ["a", "an", "the",
+      "of", "in", "on", "at", "by", "for", "from", "with", "to", "into", "onto", "over", "under", "after", "before", "during", "until", "about",
+      "between", "among", "amid", "across", "through", "around", "near", "within", "along", "toward", "towards", "upon", "via", "per", "beside", "behind", "beyond",
+      "and", "or", "but", "as", "than", "while", "whereas", "whether", "although", "though", "also",
+      "that", "this", "these", "those", "which", "who", "whom", "whose", "what", "where", "when",
+      "it", "its", "they", "their", "them", "he", "she", "his", "her", "him", "there",
+      "each", "both", "other", "another", "such", "own",
+      "is", "are", "was", "were", "be", "been", "being", "am", "has", "have", "had", "having", "do", "does", "did",
+      "become", "becomes", "became", "remain", "remains", "remained",
+      "headline", "headlines", "side", "sides", "outlet", "outlets", "coverage", "story", "stories", "lead", "leads", "focus", "focuses",
+      "put", "puts", "putting", "far", "left", "right", "centre", "more", "less", "same", "similar", "alike", "differ", "differs", "different", "emphasis"]
   },
   "openers": {
     "about": "Words a sentence may begin with although they are not in its items: the first word of a sentence is capitalised, and when it is one of these it is not taken for a name. A first word that the day's headlines and summaries also print in lower case (Federal, Floods) is not taken for a name either, unless it is in commonWordNames. Every other capitalised word is a name.",

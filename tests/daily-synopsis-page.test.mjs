@@ -110,7 +110,7 @@ test('page: the 5 Sided Analysis: its heading, five sides in order by name, a si
   // The budget story: a written sentence on each side, and the comparison.
   const budget = stories.nth(0);
   assert.equal(await budget.locator('.side .written').count(), 5);
-  assert.match(await budget.locator('.closing').textContent(), /right of centre the tax cuts/);
+  assert.match(await budget.locator('.closing').textContent(), /^Left and right of centre: Left of centre the headlines put the hospital cuts first, while right of centre they put the tax cuts/);
   // The summit story: not one to compare, and it says why.
   assert.equal(await stories.nth(2).locator('.five-note').textContent(), LABEL.fiveNotEligible);
   assert.equal(await stories.nth(2).locator('.written').count(), 0);
@@ -150,6 +150,49 @@ test('page: a day that is not kept, or an address that names no day, shows the n
   await page.click('#earlier');
   await shown(page, '2026-11-17');
   assert.doesNotMatch(await page.textContent('#status'), /not kept|names no day/);
+  assert.deepEqual(errors, []);
+});
+
+// The second review of 21 November 2026, X5: a day file that reads as JSON but has the wrong shape changes nothing on the
+// page; the status line says so, and the day shown, its heading and the chooser stay in step. X6: a day with no story
+// that met the threshold says so in one plain line.
+test('page: a day file of the wrong shape leaves the page as it was; a day with no story says so', PAGE, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = watch(page);
+  for (const body of ['{}', '{"day":"2026-11-16","stories":[{}]}']) {
+    await page.unrouteAll();
+    await page.route('**/tests/fixtures/daily-synopsis/data/days/2026-11-16.json', route => route.fulfill({ contentType: 'application/json', body }));
+    await page.goto(`${FIX}#day=2026-11-17`, { waitUntil: 'domcontentloaded' });
+    await shown(page, '2026-11-17');
+    const before = await page.textContent('#stories');
+    await page.click('#earlier');
+    await page.waitForFunction(() => /could not be read just now/.test(document.querySelector('#status')?.textContent || ''), null, { timeout: 15000 });
+    assert.equal(await page.textContent('#status'), 'Monday 16 Nov 2026 could not be read just now. Tuesday 17 Nov 2026 is still shown.', body);
+    assert.equal(await page.textContent('#title'), 'Daily Synopsis: Tuesday 17 Nov 2026', 'the heading names the day shown');
+    assert.equal(await page.inputValue('#day'), '2026-11-17', 'the chooser names the day shown');
+    assert.equal(await page.textContent('#stories'), before, 'the day\'s stories as they were');
+    assert.equal(await page.isDisabled('#earlier'), false);
+    // Later steps from the day shown, 17 November, to 18 November.
+    await page.click('#later');
+    await shown(page, '2026-11-18');
+  }
+  // Straight from the address: nothing was shown, and nothing is drawn.
+  await page.goto(`${FIX}#day=2026-11-16`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => /could not be read just now/.test(document.querySelector('#status')?.textContent || ''), null, { timeout: 15000 });
+  assert.equal(await page.textContent('#status'), 'Monday 16 Nov 2026 could not be read just now.');
+  assert.equal(await page.locator('#stories > li').count(), 0);
+  // A day with no story that met the threshold.
+  await page.unrouteAll();
+  const empty = JSON.parse(await (await fetch(`${BASE}/tests/fixtures/daily-synopsis/data/days/2026-11-16.json`)).text());
+  empty.stories = [];
+  await page.route('**/tests/fixtures/daily-synopsis/data/days/2026-11-16.json', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(empty) }));
+  await page.goto(`${FIX}#day=2026-11-16`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !!document.querySelector('#no-stories'), null, { timeout: 15000 });
+  assert.equal(await page.textContent('#no-stories'), LABEL.noStories);
+  assert.equal(await page.locator('#stories > li').count(), 1);
+  assert.equal(await page.textContent('#title'), 'Daily Synopsis: Monday 16 Nov 2026');
   assert.deepEqual(errors, []);
 });
 
@@ -206,6 +249,7 @@ test('page: the label links to where the five positions come from, and the day s
   const a = page.locator('#label a[href="#positions"]');
   assert.equal(await a.textContent(), 'Where the five positions come from');
   assert.match(await page.textContent('#positions'), /AllSides Media Bias Ratings.*Media Bias\/Fact Check.*editorial slant, not its accuracy/s);
+  assert.match(await page.textContent('#positions'), /The check tests the text’s form and that its words, names and figures come from the reports it cites; it cannot test that a sentence is true to them\./, 'the limit of the check, where a reader sees it');
   await a.focus();
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => document.activeElement?.id === 'positions', null, { timeout: 10000 });

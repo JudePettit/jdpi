@@ -2,7 +2,7 @@
  "format": "vm-daily-synopsis-draft/1",
  "day": "2026-11-18",
  "input": "2026-11-18-ede7fa2c6459",
- "model": "Claude (hand-written test fixture)",
+ "model": "Claude hand-written test fixture",
  "lead": [
   { "text": "Genovia’s port reopened after repairs to Pyrus harbour, officials said.", "cites": ["s1-3"] }
  ],
@@ -10,7 +10,7 @@
   {
    "id": "s1",
    "sentences": [
-    { "text": "Genovia’s port reopened after repairs to Pyrus harbour.", "cites": ["s1-3"] },
+    { "text": "Genovia’s port reopened after repairs to Pyrus harbour.", "cites": ["s1-1"] },
     { "text": "The repairs are finished.", "cites": ["s1-2", "s1-3"] }
    ],
    "five": {
@@ -26,7 +26,7 @@
   {
    "id": "s2",
    "sentences": [
-    { "text": "Latveria launched a weather satellite from Doomstadt.", "cites": ["s2-3"] },
+    { "text": "Latveria launched a weather satellite from Doomstadt.", "cites": ["s2-1"] },
     { "text": "The satellite is for weather.", "cites": ["s2-1", "s2-2"] }
    ]
   }

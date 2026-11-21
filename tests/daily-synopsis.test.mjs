@@ -12,10 +12,12 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { parseYaml } from './tools/yaml.mjs';
 import {
-  WORDS, LIMITS, MESSAGES, SIDE_KEYS, DRAFT_FORMAT, OUTLET_NAMES, checkDraft, checkFive, sentenceFault, namesIn, hasQuote, hasOutlet, fold,
+  WORDS, LIMITS, MESSAGES, SIDE_KEYS, DRAFT_FORMAT, OUTLET_NAMES, SUPPORT_WORDS, checkDraft, checkFive, sentenceFault, namesIn, hasQuote, hasOutlet, fold,
+  stems, unsupportedWords, hasReported, hasJudgement, hasInstruction, hasJournalist, plainText,
 } from '../daily-synopsis/lib/check.mjs';
 import { withLists, listBlock } from '../daily-synopsis/scripts/prompt-lists.mjs';
-import { selectStories, makeInput, rulesDay, withDraft, LABEL, meta, MIN_OUTLETS, MIN_SIDES, CAP, MAX_ITEMS, INPUT_FORMAT, DAY_FORMAT } from '../daily-synopsis/lib/day.mjs';
+import { selectStories, makeInput, rulesDay, withDraft, cutEntries, publicReasons, LABEL, meta, MIN_OUTLETS, MIN_SIDES, CAP, MAX_ITEMS, INPUT_FORMAT, DAY_FORMAT } from '../daily-synopsis/lib/day.mjs';
+import { report } from '../daily-synopsis/scripts/check-draft.mjs';
 import { build } from '../daily-synopsis/scripts/build.mjs';
 import { correct } from '../daily-synopsis/scripts/correct.mjs';
 import { DAYS, fixtureStore, OUTLETS } from './fixtures/daily-synopsis/fixture.mjs';
@@ -127,7 +129,7 @@ describe('part 4: the check refuses a draft whole', () => {
     assert.deepEqual(namesIn('Ruritania’s parliament passed it.'), ['ruritania']);
     const cited = I17.stories[0].items.filter(i => i.id === 's1-3');
     assert.equal(sentenceFault('Rudolf Rassendyll opened the debate in Strelsau.', cited, I17.stories[0].items), 'private-name');
-    assert.equal(sentenceFault('Ruritania passed the budget after the debate in Strelsau.', cited, I17.stories[0].items), null);
+    assert.equal(sentenceFault('Ruritania passed the budget by 212 votes to 180 in Strelsau.', cited, I17.stories[0].items), null);
   });
   // The review of 21 November 2026 (findings F2 and F3): a name is corroborated only where a second outlet prints it with
   // its capitals, in a place where a capital means a name; a name written in lower case is still a name.
@@ -150,7 +152,7 @@ describe('part 4: the check refuses a draft whole', () => {
   test('a sentence may begin with an ordinary word the day prints in lower case, or with He, She, His or Her', () => {
     const items = made(['alpha', 'Federal lawyers ask court to drop the floods case'], ['beta', 'Court asked by federal lawyers to drop floods case'], ['gamma', 'He spoke on the floods case, and she spoke after']);
     assert.equal(sentenceFault('Federal lawyers asked a court to drop the case.', [items[0]], items), null);
-    assert.equal(sentenceFault('Floods led to the case.', [items[0]], items), null);
+    assert.equal(sentenceFault('Floods case lawyers ask a court to drop the case.', [items[0]], items), null);
     for (const w of ['He', 'She', 'His', 'Her']) assert.ok(WORDS.openers.words.includes(w), w);
     assert.equal(sentenceFault('He spoke on the floods case.', [items[2]], items), null);
   });
@@ -388,7 +390,9 @@ describe('the fixed lists: every entry is tested', () => {
   for (const w of WORDS.judgement.words) test(`judgement, in the 5 Sided Analysis: ${w}`, () => {
     for (const f of forms(w)) {
       assert.equal(fault(`The left headline puts the budget first, ${f} the vote.`, true), 'judgement', f);
-      if (!everywhere(f)) assert.equal(fault(`The budget passes, ${f} the vote.`), null, `${f}: the digest's own sentences are held only to the shorter list`);
+      // The digest's own sentences are held only to the shorter list, when a cited item has the words (the support rule).
+      const withIt = [{ ...cited[0], summary: `The budget passes, ${f} the vote.` }, cited[1]];
+      if (!everywhere(f)) assert.equal(sentenceFault(`The budget passes, ${f} the vote.`, withIt, withIt), null, `${f}: the digest's own sentences are held only to the shorter list`);
     }
   });
   for (const w of WORDS.judgementEverywhere.words) test(`judgement, in every sentence: ${w}`, () => {
@@ -400,29 +404,39 @@ describe('the fixed lists: every entry is tested', () => {
     }
   });
   test('a motive after first: to and a verb, never to and a noun', () => {
+    const items = [{ ...cited[0], summary: 'The vote of the budget, next to the vote.' }, cited[1]];
     assert.equal(fault('The left headline puts the budget first to court the vote.', true), 'judgement');
-    assert.equal(fault('The left headline puts the budget first, next to the vote.', true), null);
-    assert.equal(fault('The left headline puts the vote of the budget first.', true), null);
+    assert.equal(sentenceFault('The left headline puts the budget first, next to the vote.', items, items, { five: true }), null);
+    assert.equal(sentenceFault('The left headline puts the vote of the budget first.', items, items, { five: true }), null);
   });
-  for (const w of WORDS.closingSame.words) test(`a closing of kind same may not say: ${w}`, () => {
-    const story = { id: 'sx', written5: true, items: [
-      { id: 'sx-1', side: 'left', outlet: 'A', outletId: 'a', headline: 'Ruritania budget passes the vote', summary: '' },
-      { id: 'sx-2', side: 'centre', outlet: 'B', outletId: 'b', headline: 'Ruritania budget passes the vote', summary: '' },
-      { id: 'sx-3', side: 'right', outlet: 'C', outletId: 'c', headline: 'Ruritania budget passes the vote', summary: '' }] };
-    const sides = { left: [{ text: 'The left headline puts the budget first.', cites: ['sx-1'] }], centre: [{ text: 'The centre headline puts the budget first.', cites: ['sx-2'] }], right: [{ text: 'The right headline puts the budget first.', cites: ['sx-3'] }] };
-    const closing = text => checkFive(story, { sides, closing: { kind: 'same', text, cites: ['sx-1', 'sx-3'] } }, 'f');
-    assert.deepEqual(closing('Left and right of centre put the budget first.'), { ok: true, reasons: [] });
-    for (const f of forms(w)) assert.deepEqual(closing(`Left and right of centre put the budget first, ${f} the vote.`), { ok: false, reasons: [{ code: 'closing-kind', where: 'f.closing' }] }, f);
+  // The closing sentence's kind is checked both ways (the second review, X1): a same closing must say they are alike,
+  // and must not say they differ; a differ closing the reverse. Each word is put in the cited items too, so that the
+  // support rule passes and the kind alone is tested.
+  const closingStory = extra => ({ id: 'sx', written5: true, items: [
+    { id: 'sx-1', side: 'left', outlet: 'A', outletId: 'a', headline: 'Ruritania budget passes the vote', summary: extra },
+    { id: 'sx-2', side: 'centre', outlet: 'B', outletId: 'b', headline: 'Ruritania budget passes the vote', summary: extra },
+    { id: 'sx-3', side: 'right', outlet: 'C', outletId: 'c', headline: 'Ruritania budget passes the vote', summary: extra }] });
+  const closingSides = { left: [{ text: 'The left headline puts the budget first.', cites: ['sx-1'] }], centre: [{ text: 'The centre headline puts the budget first.', cites: ['sx-2'] }], right: [{ text: 'The right headline puts the vote first.', cites: ['sx-3'] }] };
+  const closingOf = (kind, extra = '') => text => checkFive(closingStory(extra), { sides: closingSides, closing: { kind, text, cites: ['sx-1', 'sx-3'] } }, 'f');
+  const KIND = { ok: false, reasons: [{ code: 'closing-kind', where: 'f.closing' }] };
+  for (const w of WORDS.closingSame.words) test(`a closing of kind same may not say, and one of kind differ may say: ${w}`, () => {
+    assert.deepEqual(closingOf('same')('Left and right of centre alike put the budget first.'), { ok: true, reasons: [] });
+    for (const f of forms(w)) {
+      assert.deepEqual(closingOf('same', f)(`Left and right of centre alike put the budget first, ${f} the vote.`), KIND, f);
+      assert.deepEqual(closingOf('differ', f)(`Left of centre the headlines put the budget first, ${f} right of centre the vote.`), { ok: true, reasons: [] }, `${f}: a word of difference makes a differ closing`);
+    }
   });
-  for (const w of WORDS.closingDiffer.words) test(`a closing of kind differ may not say: ${w}`, () => {
-    const story = { id: 'sx', written5: true, items: [
-      { id: 'sx-1', side: 'left', outlet: 'A', outletId: 'a', headline: 'Ruritania budget passes the vote', summary: '' },
-      { id: 'sx-2', side: 'centre', outlet: 'B', outletId: 'b', headline: 'Ruritania budget passes the vote', summary: '' },
-      { id: 'sx-3', side: 'right', outlet: 'C', outletId: 'c', headline: 'Ruritania budget passes the vote', summary: '' }] };
-    const sides = { left: [{ text: 'The left headline puts the budget first.', cites: ['sx-1'] }], centre: [{ text: 'The centre headline puts the budget first.', cites: ['sx-2'] }], right: [{ text: 'The right headline puts the vote first.', cites: ['sx-3'] }] };
-    const closing = text => checkFive(story, { sides, closing: { kind: 'differ', text, cites: ['sx-1', 'sx-3'] } }, 'f');
-    assert.deepEqual(closing('Left of centre the budget comes first, and right of centre the vote.'), { ok: true, reasons: [] });
-    for (const f of forms(w)) assert.deepEqual(closing(`Left of centre the budget comes first, and right of centre the vote, ${f} the budget.`), { ok: false, reasons: [{ code: 'closing-kind', where: 'f.closing' }] }, f);
+  for (const w of WORDS.closingDiffer.words) test(`a closing of kind differ may not say, and one of kind same may say: ${w}`, () => {
+    assert.deepEqual(closingOf('differ')('Left of centre the headlines put the budget first, while right of centre they put the vote first.'), { ok: true, reasons: [] });
+    for (const f of forms(w)) {
+      assert.deepEqual(closingOf('differ', f)(`Left of centre the headlines put the budget first, while right of centre they put the vote first, ${f} the budget.`), KIND, f);
+      assert.deepEqual(closingOf('same', f)(`Left and right of centre put the budget first, ${f} on each side.`), { ok: true, reasons: [] }, `${f}: a word of sameness makes a same closing`);
+    }
+  });
+  test('a closing must say what its kind says: no word of sameness in a same closing, none of difference in a differ one', () => {
+    assert.deepEqual(closingOf('same')('Left and right of centre put the budget first.'), KIND, 'same, with no word of sameness');
+    assert.deepEqual(closingOf('differ')('Left of centre the headlines put the budget first, and right of centre the vote.'), KIND, 'differ, with no word of difference');
+    assert.deepEqual(closingOf('same')('Left of centre the headlines put the budget first, while right of centre they put the vote first.'), KIND, 'the review: a same closing that contrasts the two halves');
   });
   for (const w of WORDS.commonWordNames.words) test(`a name that is also a common word, carried by one outlet: ${w}`, () => {
     const items = [
@@ -470,6 +484,159 @@ describe('the fixed lists: every entry is tested', () => {
   });
 });
 
+// The second review of 21 November 2026: X1 to X7, and the model's name and the workflow's log lines.
+describe('the second review: the support rule and the other mends', () => {
+  const items = [
+    { id: 'x-1', side: 'left', outletId: 'a', outlet: 'Example A', headline: 'Ruritania parliament passes 2027 budget by 212 votes to 180', summary: 'The vote followed a two-day debate in Strelsau.' },
+    { id: 'x-2', side: 'right', outletId: 'b', outlet: 'Example B', headline: 'Ruritania budget cuts hospital spending, evacuated towns flooding', summary: '' }];
+  test('the stemmer: plural, -ed, -d, -ing and -ies, and nothing shorter than three letters', () => {
+    assert.ok(stems('passes').includes('pass') && stems('passed').includes('pass'));
+    assert.ok(stems('evacuated').includes('evacuate') && stems('evacuates').includes('evacuate'));
+    assert.ok(stems('cutting').includes('cut') && stems('cuts').includes('cut'));
+    assert.ok(stems('making').includes('make'));
+    assert.ok(stems('parties').includes('party') && stems('carried').includes('carry'));
+    assert.ok(stems('hospitals').includes('hospital'));
+    assert.ok(!stems('passes').includes('pa') && !stems('being').includes('be') && !stems('used').includes('us'), 'no form shorter than three letters');
+    assert.ok(!stems('class').includes('clas'), 'a double s is not a plural');
+    assert.deepEqual(stems('budget'), ['budget']);
+  });
+  test('the support rule: every word is in an item cited (or another form of it), or one of the closed list', () => {
+    assert.deepEqual(unsupportedWords('Ruritania’s parliament passed its 2027 budget by 212 votes to 180.', [items[0]]), []);
+    assert.deepEqual(unsupportedWords('The budget cut hospital spending as towns flooded.', [items[1]]), []);
+    assert.deepEqual(unsupportedWords('The parliament executed the entire cabinet.', [items[0]]), ['executed', 'entire', 'cabinet']);
+    assert.deepEqual(unsupportedWords('The budget was stolen by milo quinn.', [items[0]]), ['stolen', 'milo', 'quinn']);
+    assert.deepEqual(unsupportedWords('The budget cut hospital spending.', [items[0]]), ['cut', 'hospital', 'spending'], 'only the items cited count');
+    assert.deepEqual(unsupportedWords('The left headline puts the budget first.', [items[0]]), [], 'first after puts');
+    assert.deepEqual(unsupportedWords('The left headline puts Ruritania, the budget and the 212 votes first.', [items[0]]), [], 'a list with commas between');
+    assert.deepEqual(unsupportedWords('The first budget passes.', [items[0]]), ['first'], 'first before any put needs an item');
+    assert.deepEqual(unsupportedWords('The left headline puts the budget first, after the first vote.', [items[0]]), ['first'], 'one first for each put');
+    assert.deepEqual(unsupportedWords('The budget did not pass.', [items[0]]), ['not'], 'not is never free');
+    assert.deepEqual(unsupportedWords('The budget passes with two votes against.', [items[0]]), ['against'], 'figures and number words are held by the number check, against is never free');
+  });
+  test('the closed list: no number word, no month or weekday, no verb of saying, no word of judgement or motive, no order', () => {
+    const list = WORDS.supportWords.words;
+    assert.equal(new Set(list).size, list.length);
+    const dates = new Set([...WORDS.dateNames.words, ...WORDS.relativeDates.words].map(fold));
+    const imperative = ['please', 'click', 'subscribe', 'donate', 'send', 'visit', 'share', 'follow', 'download', 'sign', 'call', 'contact', 'read', 'watch', 'buy', 'join', 'support', 'vote', 'go', 'look', 'see', 'note', 'remember', 'stop', 'act'];
+    const never = ['not', 'no', 'never', 'against', 'without', 'up', 'down', 'off', 'out', 'will', 'would', 'may', 'might', 'must', 'should', 'shall', 'can', 'could', 'first', 'half', 'you', 'your', 'we', 'our', 'us', 'all', 'every', 'none', 'some', 'many', 'most', 'few', 'report', 'reports', 'say', 'says'];
+    for (const w of list) {
+      assert.equal(w, fold(w), `${w}: folded`);
+      assert.ok(!Object.hasOwn(WORDS.numberWords.words, w), `${w}: a number word`);
+      assert.ok(!dates.has(w), `${w}: a date`);
+      assert.ok(!hasReported(`the ${w} x`), `${w}: a verb of saying`);
+      assert.ok(!hasJudgement(`the ${w} x`), `${w}: a judgement or motive`);
+      assert.ok(!hasInstruction(`the ${w} x`), `${w}: an instruction`);
+      assert.ok(!hasJournalist(`the ${w} x`), `${w}: a journalist`);
+      assert.ok(!imperative.includes(w), `${w}: an order`);
+      assert.ok(!never.includes(w), `${w}: kept out on purpose`);
+      assert.ok(SUPPORT_WORDS.has(w));
+    }
+  });
+  test('X1: the reviewer\'s sentences are refused, and the refusal names the words for a local caller only', () => {
+    const d = JSON.parse(GOOD);
+    d.lead[0] = { text: 'The parliament executed the entire cabinet.', cites: ['s1-3'] };
+    const r = checkDraft(I17, JSON.stringify(d));
+    assert.deepEqual(r.reasons, [{ code: 'unsupported', where: 'lead[0]', detail: ['executed', 'entire', 'cabinet'] }]);
+    assert.match(report(r).join('\n'), /lead\[0\]: .*Not in the items cited: executed, entire, cabinet\./, 'check-draft.mjs shows the writer the words');
+    const day = withDraft(rulesDay(I17, { generated: 'a' }), I17, null, r, { checked: 'b' });
+    assert.deepEqual(day.written.attempts[0].reasons, [{ code: 'unsupported', where: 'lead[0]' }], 'the day\'s file: the code and the place alone');
+    assert.doesNotMatch(JSON.stringify(day), /executed|cabinet|detail/);
+  });
+  test('publicReasons: only fixed codes and places of fixed words and indexes reach a file or a log', () => {
+    assert.deepEqual(publicReasons([{ code: 'unsupported', where: 'stories[2].five.sides.far_left[0]', detail: ['x'] }, { code: '::error::x', where: 'lead[0]' }, { code: 'name', where: '::warning::x' }, { code: 'quote', where: 'stories[1].five.closing' }]),
+      [{ code: 'unsupported', where: 'stories[2].five.sides.far_left[0]' }, { code: 'shape', where: 'lead[0]' }, { code: 'name', where: '' }, { code: 'quote', where: 'stories[1].five.closing' }]);
+  });
+  test('X2: format characters are taken out of the input; outlets, speech, judgement and instructions are read after NFKC', () => {
+    const iso = String.fromCharCode(0x2066), pdi = String.fromCharCode(0x2069), tag = String.fromCodePoint(0xe0041);
+    assert.equal(plainText(`The ${iso}budget${pdi} passed${tag}.`), 'The budget passed.');
+    assert.equal(hasOutlet('The budget passed at ｂｂｃ too.'), true);
+    assert.equal(hasReported('The budget ｓａｉｄ passed.'), true);
+    const cited = [{ id: 'x-1', outletId: 'a', outlet: 'Example A', headline: 'Ruritania budget passes in Москва', summary: '' }, { id: 'x-2', outletId: 'b', outlet: 'Example B', headline: 'Ruritania budget passes in Москва', summary: '' }];
+    assert.equal(sentenceFault('The budget passes in Москва.', cited, cited), null, 'a word in another alphabet that a cited item prints');
+    assert.equal(sentenceFault('The budget passes in Москва too.', cited, cited), 'unsupported');
+    assert.equal(sentenceFault('The budget passes in Mосква.', cited, cited), 'script', 'a Latin M in a Cyrillic word');
+  });
+  test('X4: a story of 40 headlines, 8 from 2 publishers on each side, keeps headlines on every side, and its counts are those kept', async () => {
+    const entries = [];
+    SIDE_KEYS.forEach((pos, p) => { for (let k = 0; k < 8; k++) entries.push({ rank: entries.length, item: { pos, src: `Example ${pos} ${k % 2}`, sid: `fx-${pos}-${k % 2}`, caution: false, acc: 'free', t: `Ruritania budget headline ${p} ${k}`, u: `https://example.org/${pos}/${k}`, at: Date.parse('2026-11-17T05:00:00Z'), d: '' } }); });
+    const old = [...entries].sort((a, b) => SIDE_KEYS.indexOf(a.item.pos) - SIDE_KEYS.indexOf(b.item.pos) || a.rank - b.rank).slice(0, MAX_ITEMS);
+    assert.equal(old.filter(e => e.item.pos === 'far_right').length, 0, 'the old cut: no far right headline');
+    const input = await makeInput([{ entries, outlets: 10, per: Object.fromEntries(SIDE_KEYS.map(k => [k, 2])), sides: SIDE_KEYS }], { day: '2026-11-17', ref: Date.parse('2026-11-17T07:00:00Z'), storeGenerated: 'x', generated: 'x' });
+    const s = input.stories[0];
+    assert.equal(s.items.length, MAX_ITEMS);
+    for (const k of SIDE_KEYS) {
+      assert.equal(s.items.filter(i => i.side === k).length, 6, `${k}: an even share`);
+      assert.equal(s.sides[k], new Set(s.items.filter(i => i.side === k).map(i => i.outletId)).size, `${k}: the count is of what is kept`);
+      assert.equal(s.sides[k], 2);
+    }
+    assert.equal(s.outlets, new Set(s.items.map(i => i.outletId)).size);
+    assert.equal(s.written5, true);
+    const order = s.items.map(i => SIDE_KEYS.indexOf(i.side));
+    assert.deepEqual(order, [...order].sort((a, b) => a - b), 'far left to far right');
+  });
+  test('X4: a side with few headlines keeps them all, the rest go by rank, and a publisher is kept before a second headline of another', () => {
+    const e = (rank, pos, sid) => ({ rank, item: { pos, sid } });
+    const list = [e(0, 'centre', 'c1'), ...Array.from({ length: 30 }, (_, k) => e(k + 1, 'centre', 'c1')), e(31, 'centre', 'c2'), e(32, 'far_right', 'fr1'), ...Array.from({ length: 10 }, (_, k) => e(33 + k, 'left', `l${k % 2}`))];
+    const kept = cutEntries(list);
+    assert.equal(kept.length, MAX_ITEMS);
+    assert.equal(kept.filter(x => x.item.pos === 'far_right').length, 1);
+    assert.equal(kept.filter(x => x.item.pos === 'left').length, 10, 'a share of 10 a side');
+    assert.ok(kept.some(x => x.item.sid === 'c2'), 'the second centre publisher is kept');
+  });
+  test('X6: a day with no story that meets the threshold is built, kept and passes the day\'s tests', async () => {
+    const dir = temp(), stores = join(dir, 'stores'), data = join(dir, 'data');
+    try {
+      const store = fixtureStore('2026-11-16');
+      store.items = store.items.filter(i => /^Zeta/.test(i.t));
+      mkdirSync(join(stores, 'briefing/data'), { recursive: true });
+      writeFileSync(join(stores, 'briefing/data/latest.json'), JSON.stringify(store));
+      const r = await build({ now: Date.parse('2026-11-16T08:20:00Z'), today: '2026-11-16', dataDir: data, storesDir: stores, log: quiet });
+      assert.equal(r.dayDoc.stories.length, 0);
+      assert.ok(existsSync(join(data, 'days/2026-11-16.json')), 'the day is written');
+      assert.deepEqual(keptDayFaults(data), []);
+      assert.match(LABEL.noStories, /^No story met the threshold on this day/);
+      assert.ok(read('daily-synopsis/app.js').includes(LABEL.noStories), 'the page says so in the same words');
+      assert.ok(!LABEL.noStories.includes("'"));
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  test('(i) and (ii): the model\'s name, and no word of a draft in a log line or the day\'s file', async () => {
+    const dir = temp(), stores = join(dir, 'stores');
+    try {
+      storesAt(stores, '2026-11-17');
+      const lines = [], log = l => lines.push(String(l));
+      const run = async (name, edit) => {
+        const data = join(dir, name), d = JSON.parse(GOOD);
+        edit(d);
+        writeFileSync(join(dir, `${name}.json`), JSON.stringify(d));
+        await build({ now: Date.parse('2026-11-17T08:20:00Z'), today: '2026-11-17', dataDir: data, storesDir: stores, log });
+        return build({ now: Date.parse('2026-11-17T12:20:00Z'), today: '2026-11-17', draftFile: join(dir, `${name}.json`), dataDir: data, storesDir: stores, log });
+      };
+      const a = await run('model', d => { d.model = 'Claude ::error::PLANTEDA'; });
+      assert.equal(a.dayDoc.written.status, 'refused');
+      const b = await run('lead', d => { d.lead[0].text = 'Ruritania’s parliament passed its 2027 budget by 212 votes to 180 plantedb.'; });
+      assert.equal(b.dayDoc.written.status, 'refused');
+      const c = await run('side', d => { d.stories[0].five.sides.left[0].text = 'The left headline puts the austerity budget plantedc first.'; });
+      assert.equal(c.dayDoc.written.status, 'published');
+      assert.equal(c.dayDoc.stories[0].five.status, 'refused');
+      assert.equal(c.dayDoc.model, 'Claude hand-written test fixture');
+      assert.ok(lines.some(l => /Written analyses refused: s1 /.test(l)), lines.join('\n'));
+      for (const l of lines) {
+        assert.doesNotMatch(l, /planted|::/i, l);
+      }
+      for (const x of [a, b, c]) assert.doesNotMatch(JSON.stringify(x.dayDoc), /planted|::|detail/i);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+  test('the outlet names and the word lists match whole words, never inside a longer word', () => {
+    for (const w of ['blaze', 'slated', 'reason', 'national', 'National', 'Nationals', 'hill', 'times', 'news', 'mail', 'independent', 'review', 'earlier', 'affairs', 'Blazers', 'Slated', 'Hillary', 'Timeshare', 'Mailing', 'unfair', 'belied', 'spinach', 'framework', 'angler', 'saying']) {
+      assert.equal(hasOutlet(`The budget ${w} passed.`), false, `outlet: ${w}`);
+      if (w !== 'saying' && w !== 'unfair') assert.equal(hasJudgement(`The headline puts ${w} first.`), false, `judgement: ${w}`);
+    }
+    assert.equal(hasReported('The headline puts saying first.'), true, 'saying is itself on the list');
+    assert.equal(hasJudgement('The headline puts the unfair tax first.'), true, 'unfair is itself on the list');
+    assert.equal(hasOutlet('The budget passed, Reason says.'), true, 'Reason with its capital is the outlet');
+  });
+});
+
 describe('the page, the prompt and the workflow', () => {
   test('the page renders text only: no HTML from data, links only when https', () => {
     const src = read('daily-synopsis/app.js');
@@ -509,36 +676,46 @@ describe('the page, the prompt and the workflow', () => {
   });
 });
 
-describe('the committed days (daily-synopsis/data)', () => {
-  const base = 'daily-synopsis/data';
-  const index = existsSync(new URL(`${base}/index.json`, ROOT)) ? J(`${base}/index.json`) : null;
-  test('the index lists every day kept, newest first, with its authorship', () => {
-    assert.ok(index, 'the index is committed');
-    const kept = readdirSync(new URL(`${base}/days`, ROOT)).map(f => f.slice(0, 10)).sort().reverse();
-    assert.deepEqual(index.days.map(d => d.day), kept);
-    assert.equal(index.latest, kept[0]);
-    assert.equal(typeof index.generated, 'string');
-  });
-  test('each day keeps the rules, its label, its input; a published text passes the check again', () => {
-    for (const { day } of index.days) {
-      const d = J(`${base}/days/${day}.json`), input = J(`${base}/input/${day}.json`);
-      assert.equal(d.format, DAY_FORMAT, day);
-      assert.equal(d.input, input.id, day);
-      assert.ok(d.stories.length <= CAP && d.stories.length > 0, day);
-      for (const s of input.stories) {
-        assert.ok(new Set(s.items.map(i => i.outletId)).size >= MIN_OUTLETS, `${day} ${s.id}`);
-        assert.ok(new Set(s.items.map(i => i.side)).size >= MIN_SIDES, `${day} ${s.id}`);
-      }
-      assert.equal(d.label.text, d.authorship === 'model' ? LABEL.model : LABEL.rules, day);
-      assert.equal(d.label.meta, meta(d.authorship), day);
-      for (const s of d.stories) assert.deepEqual(s.five.sides.map(x => x.key), SIDE_KEYS, `${day} ${s.id}`);
-      if (d.written.status === 'published') {
-        const draft = { format: DRAFT_FORMAT, day, input: input.id, model: d.model, lead: d.lead,
-          stories: d.stories.map(s => ({ id: s.id, sentences: s.sentences, ...(s.five.status === 'published' ? { five: s.five.written } : {}) })) };
-        const r = checkDraft(input, JSON.stringify(draft));
-        assert.equal(r.ok, true, `${day}: ${JSON.stringify(r.reasons)}`);
-      } else assert.ok(d.stories.every(s => s.sentences === null) && d.lead === null, day);
+/**
+ * The faults of the days kept in a data folder (an absolute path), as plain lines of input ids, indexes and fixed codes
+ * (the workflow prints them, so never a word of a draft): each day keeps the rules, its label and its input, and a
+ * published text passes the check again. A day with no story that met the threshold is a day (the second review, X6).
+ */
+function keptDayFaults(base) {
+  const faults = [], P = p => JSON.parse(readFileSync(join(base, p), 'utf8'));
+  const index = P('index.json');
+  const kept = readdirSync(join(base, 'days')).map(f => f.slice(0, 10)).sort().reverse();
+  if (JSON.stringify(index.days.map(d => d.day)) !== JSON.stringify(kept)) faults.push('the index does not list every day kept, newest first');
+  if (index.latest !== kept[0] || typeof index.generated !== 'string') faults.push('the index names another latest day or no time');
+  for (const { day } of index.days) {
+    const d = P(`days/${day}.json`), input = P(`input/${day}.json`);
+    const no = (ok, what) => { if (!ok) faults.push(`${day}: ${what}`); };
+    no(d.format === DAY_FORMAT, 'format');
+    no(d.input === input.id, 'made from another input');
+    no(d.stories.length <= CAP && d.stories.length === input.stories.length, 'stories');
+    for (const s of input.stories) {
+      no(new Set(s.items.map(i => i.outletId)).size >= MIN_OUTLETS, `${s.id}: too few outlets`);
+      no(new Set(s.items.map(i => i.side)).size >= MIN_SIDES, `${s.id}: too few sides`);
+      no(s.items.length <= MAX_ITEMS, `${s.id}: too many items`);
     }
+    no(d.label.text === (d.authorship === 'model' ? LABEL.model : LABEL.rules), 'label');
+    no(d.label.meta === meta(d.authorship), 'label meta');
+    for (const s of d.stories) no(JSON.stringify(s.five.sides.map(x => x.key)) === JSON.stringify(SIDE_KEYS), `${s.id}: sides`);
+    if (d.written.status === 'published') {
+      const draft = { format: DRAFT_FORMAT, day, input: input.id, model: d.model, lead: d.lead,
+        stories: d.stories.map(s => ({ id: s.id, sentences: s.sentences, ...(s.five.status === 'published' ? { five: s.five.written } : {}) })) };
+      const r = checkDraft(input, JSON.stringify(draft));
+      no(r.ok, `the published text fails the check again: ${publicReasons(r.reasons).map(x => `${x.code} ${x.where}`).join('; ')}`);
+    } else no(d.stories.every(s => s.sentences === null) && d.lead === null, 'text without a published draft');
+    for (const a of d.written.attempts) no(JSON.stringify(a.reasons) === JSON.stringify(publicReasons(a.reasons)), 'a refusal holds more than codes and places');
+  }
+  return faults;
+}
+
+describe('the committed days (daily-synopsis/data)', () => {
+  test('the index lists every day kept; each day keeps the rules, its label, its input; a published text passes the check again', () => {
+    assert.ok(existsSync(new URL('daily-synopsis/data/index.json', ROOT)), 'the index is committed');
+    assert.deepEqual(keptDayFaults(fileURLToPath(new URL('daily-synopsis/data', ROOT))), []);
   });
 });
 

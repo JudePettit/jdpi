@@ -435,6 +435,10 @@ const resolveFns = resolveRules;
 const lakeManifest = read('lake/data/manifest.json');
 const FULL = Boolean(lakeManifest.fullBuild) || process.env.LAKE_RULES === 'all';
 const afterFullBuild = t => { if (!FULL) t.diagnostic('the data check binds from the first full build by the corrected builder (lake-refresh, 3 December 2026; manifest.fullBuild)'); return FULL; };
+// The types Polity, Period, Site and Series came on 21 November 2026 (types.mjs): their data checks bind from the first
+// full build made after that day, which types every record again from Wikidata's classes.
+const TYPES_BUILD = (FULL && String(lakeManifest.fullBuild || '') >= '2026-11-21') || process.env.LAKE_RULES === 'all';
+const afterTypesBuild = t => { if (!TYPES_BUILD) t.diagnostic('the data check binds from the first full build after the four types came (21 November 2026; manifest.fullBuild)'); return TYPES_BUILD; };
 let allRecords = null;
 const lakeRecords = () => {
   if (!allRecords) { allRecords = new Map(); for (let i = 0; i < 512; i++) for (const [q, r] of Object.entries(read(`lake/data/e/${i}.json`))) allRecords.set(q, r); }
@@ -574,11 +578,14 @@ test('committed lake, after the full build: Alexander the Great\'s birth is in t
 
 // S0 (16 November 2026): Sparta (Q5690) was typed a topic: Wikidata makes it a polis (Q148837) and an ancient city
 // (Q15661340), neither among the place types, and it has no capital (P36). The type rules live in lake/scripts/types.mjs.
-test('types: a polis or an ancient city is a place (Sparta)', async () => {
+// Since 21 November 2026 a polis is a polity, a state that no longer exists (the four new types, below); an ancient city
+// that is neither a polis nor a city-state, nor an archaeological site, stays a place.
+test('types: a polis is a polity, and an ancient city a place (Sparta)', async () => {
   const { typeOf, PLACE } = await import('../lake/scripts/types.mjs');
   const e = (label, p31, more = {}) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...more } });
-  assert.equal(typeOf(e('Sparta', ['Q15661340', 'Q148837', 'Q93342462'])), 'place');
-  assert.equal(typeOf(e('Athens', ['Q148837'])), 'place');
+  assert.equal(typeOf(e('Sparta', ['Q15661340', 'Q148837', 'Q93342462'])), 'polity');
+  assert.equal(typeOf(e('Athens', ['Q148837'])), 'polity');
+  assert.equal(typeOf(e('An ancient city', ['Q15661340'])), 'place');
   assert.ok(PLACE.has('Q6256') && PLACE.has('Q148837') && PLACE.has('Q15661340'));
   // The rest as before: a person, an election, a war by its label, a party, an idea, a country, an event, a topic.
   assert.equal(typeOf(e('Niccolò Machiavelli', ['Q5'])), 'person');
@@ -587,11 +594,11 @@ test('types: a polis or an ancient city is a place (Sparta)', async () => {
   assert.equal(typeOf(e('Italy', ['Q6256'])), 'place');
   assert.equal(typeOf(e('Something', [], { P585: [{}] })), 'event');
   assert.equal(typeOf(e('Something', [])), 'topic');
-  assert.match(text('lake/scripts/build.mjs'), /import \{ typeOf \} from '\.\/types\.mjs';/);
+  assert.match(text('lake/scripts/build.mjs'), /import \{ typeOf\b[^}]*\} from '\.\/types\.mjs';/);
 });
-test('committed lake, after the full build: Sparta is a place', t => {
-  if (!afterFullBuild(t)) return;
-  assert.equal(lakeRecords().get('Q5690')?.type, 'place');
+test('committed lake, after the full build: Sparta is a polity', t => {
+  if (!afterTypesBuild(t)) return;
+  assert.equal(lakeRecords().get('Q5690')?.type, 'polity');
 });
 
 // MI-12, step F3 of VM-MASTER-INDEX-CANON-REVIEW.md (fault 7), and row 10 of VM-ATLAS-TOPICS-SUGGESTIONS.md part D
@@ -620,9 +627,10 @@ test('types: the review’s corrections: schools of economics, the Nazi Party, t
   assert.equal(typeOf(e('electromagnetism', ['Q4162444'])), 'topic');
   assert.equal(typeOf(e('AlphaFold', ['Q7397', 'Q117349473', 'Q11660'], ['P571'])), 'topic');
   assert.equal(typeOf({ id: 'Q208238', ...e('Vienna Circle', ['Q1387659'], ['P571']) }), 'organisation');
-  // The atlas's row 10: the Zhou dynasty is a state as the Shang is; the partition of India an event, not a war.
-  assert.equal(typeOf(e('Zhou dynasty', ['Q12857432', 'Q836688', 'Q11514315'], ['P571'])), 'place');
-  assert.equal(typeOf(e('Shang dynasty', ['Q836688', 'Q12857432', 'Q11042', 'Q1292119', 'Q11514315'], ['P36', 'P571'])), 'place');
+  // The atlas's row 10: the Zhou dynasty is a state as the Shang is (a polity since 21 November 2026); the partition of
+  // India an event, not a war.
+  assert.equal(typeOf(e('Zhou dynasty', ['Q12857432', 'Q836688', 'Q11514315'], ['P571'])), 'polity');
+  assert.equal(typeOf(e('Shang dynasty', ['Q836688', 'Q12857432', 'Q11042', 'Q1292119', 'Q11514315'], ['P36', 'P571'])), 'polity');
   assert.equal(typeOf(e('partition of India', ['Q8465', 'Q518554', 'Q198'], ['P585'])), 'event');
   // Unchanged: the party named Renaissance, a war, a school of thought, an -ism, a country, a person.
   assert.equal(typeOf(e('Renaissance', ['Q7278'], ['P571'])), 'party');
@@ -630,8 +638,9 @@ test('types: the review’s corrections: schools of economics, the Nazi Party, t
   assert.equal(typeOf(e('Frankfurt School', ['Q1387659'], ['P571'])), 'idea');
   assert.equal(typeOf(e('liberalism', [])), 'idea');
   assert.equal(typeOf(e('Italy', ['Q6256'], ['P36'])), 'place');
-  // A country that Wikidata also makes a supranational union stays a place.
-  assert.equal(typeOf(e('Soviet Union', ['Q512187', 'Q842112', 'Q3024240', 'Q3624078', 'Q1335818', 'Q7275', 'Q6256'], ['P36', 'P571'])), 'place');
+  // A country that Wikidata also makes a supranational union is no organisation: a place, and since 21 November 2026,
+  // as a historical country dissolved in 1991 (P576, read 21 November 2026), a polity.
+  assert.equal(typeOf(e('Soviet Union', ['Q512187', 'Q842112', 'Q3024240', 'Q3624078', 'Q1335818', 'Q7275', 'Q6256'], ['P36', 'P571', 'P576'])), 'polity');
   assert.equal(typeOf(e('John Mearsheimer', ['Q5'], ['P569'])), 'person');
 });
 // The fixer's pass (18 November 2026): the parties whose only class is a kind of party below political party (each a
@@ -663,12 +672,177 @@ test('types: every kind of party is a party; a war word does not make a protest,
   // A parliamentary group and a political movement are not parties.
   assert.equal(typeOf(e('A parliamentary group', ['Q36378425'])), 'topic');
 });
+
+// MI-12, MI-13 and MI-07 (21 November 2026): the types Polity, Period, Site and Series (VM-ATLAS-TOPICS-SUGGESTIONS.md
+// part D and question 3 of part E; PRP-SCHOLAR-USP-DESIGN.md 7.1). Each entity is given the P31 classes and the signs
+// Wikidata gave it on 21 November 2026 (wbgetentities, read-only), so each line fails on the rule that types it.
+test('types: a state that no longer exists is a polity; a country, a city lived in today and a region stay places', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  // The owner's examples of a polity: dynasties, empires, ancient Egypt, a city republic.
+  assert.equal(typeOf(e('Zhou dynasty', ['Q12857432', 'Q836688', 'Q11514315'], ['P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Shang dynasty', ['Q836688', 'Q12857432', 'Q11042', 'Q1292119', 'Q11514315'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Achaemenid Empire', ['Q3024240', 'Q11514315'], ['P36', 'P580', 'P582', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('ancient Egypt', ['Q28171280', 'Q3502482', 'Q3024240', 'Q1620908'], ['P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Neo-Assyrian Empire', ['Q3024240', 'Q11514315', 'Q1292119', 'Q48349'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Republic of Florence', ['Q3624078', 'Q3024240'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Inca Empire', ['Q3024240'], ['P36', 'P580', 'P582', 'P571', 'P576'])), 'polity');
+  // A dynasty that is also a historical period is a polity (a state before a period); so is a sovereign state that is
+  // also a historical country (Ming, the Soviet Union), and a city-state that is also an archaeological site.
+  assert.equal(typeOf(e('Ming dynasty', ['Q50068795', 'Q3624078', 'Q11042', 'Q11514315', 'Q1292119'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Classical Athens', ['Q148837', 'Q839954', 'Q133442', 'Q102202066'], ['P36', 'P571'])), 'polity');
+  assert.equal(typeOf(e('Kingdom of Pergamon', ['Q3932025'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Latvian Soviet Socialist Republic', ['Q236036'], ['P36', 'P571', 'P576'])), 'polity');
+  // A colony, a confederation, an empire or a republic with a date it was dissolved (P576): a polity.
+  assert.equal(typeOf(e('Italian Libya', ['Q133156'], ['P36', 'P571', 'P576', 'P582'])), 'polity');
+  assert.equal(typeOf(e('Crown Colony of Malta', ['Q1351282'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Confederation of the Rhine', ['Q170156'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('British Empire', ['Q1790360', 'Q1620908'], ['P36', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Independent Albania', ['Q7270'], ['P36', 'P571', 'P576'])), 'polity');
+  // Review D4: Wikidata records the end of a military occupation as its end time (P582), not a date of dissolution; the
+  // Ukrainian occupation of Kursk Oblast (Q129167851, read 21 November 2026) has P582 May 2025 and no P576.
+  assert.equal(typeOf(e('Ukrainian occupation of Kursk Oblast', ['Q188686'], ['P36', 'P580', 'P582', 'P571'])), 'polity');
+  // An end time makes no state that exists today a polity, and no territory without one.
+  assert.equal(typeOf(e('India', ['Q6256', 'Q3624078', 'Q223832'], ['P36', 'P571', 'P582'])), 'place');
+  // A period's end time is not a dissolution: Ottoman Palestine (Q2909425, read 21 November 2026) stays a period.
+  assert.equal(typeOf(e('Ottoman Palestine', ['Q11514315', 'Q1620908', 'Q161243'], ['P580', 'P582', 'P625'])), 'period');
+  // States that exist today stay places, a former dominion (India) and a colonial power (France) among them; so do a
+  // territory with no date it was dissolved, a region, and a city lived in today, whatever its old classes: Rome, Venice
+  // (an Italian city-state), Hong Kong (a city-state), the island of Samos (a polis), Byblos (an archaeological site).
+  assert.equal(typeOf(e('France', ['Q3624078', 'Q20181813', 'Q51576574', 'Q7270', 'Q6256'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('India', ['Q6256', 'Q3624078', 'Q223832'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Greenland', ['Q66724388', 'Q192611', 'Q112099', 'Q161243', 'Q788176'], ['P36'])), 'place');
+  assert.equal(typeOf(e('Tuscany', ['Q16110'], ['P36'])), 'place');
+  assert.equal(typeOf(e('Rome', ['Q902814', 'Q3685476', 'Q1200957', 'Q200250', 'Q51929311', 'Q1187811', 'Q1549591', 'Q747074', 'Q108178728', 'Q5119'], ['P571'])), 'place');
+  assert.equal(typeOf(e('Venice', ['Q747074', 'Q581830', 'Q2264924', 'Q515', 'Q1549591', 'Q4115680'], ['P571'])), 'place');
+  assert.equal(typeOf(e('Hong Kong', ['Q779415', 'Q515', 'Q1549591', 'Q200250', 'Q208511', 'Q161243', 'Q133442'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Samos', ['Q23442', 'Q148837'], ['P36'])), 'place');
+  assert.equal(typeOf(e('Byblos', ['Q486972', 'Q839954', 'Q515', 'Q133442'], ['P571'])), 'place');
+  // A sovereign state or a country with no date of dissolution exists today, whatever older class Wikidata also gives it.
+  assert.equal(typeOf(e('United States', ['Q3624078', 'Q1489259', 'Q6256', 'Q99541706', 'Q1520223', 'Q5035794'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Indonesia', ['Q3624078', 'Q11815167', 'Q1520223', 'Q112099', 'Q6256', 'Q99541706', 'Q179164'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Georgia', ['Q6256', 'Q3624078', 'Q179164', 'Q7270', 'Q4209223', 'Q236036', 'Q140892892'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Liechtenstein', ['Q3624078', 'Q208500', 'Q179164', 'Q136361597', 'Q26879769', 'Q244381', 'Q6256'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Monaco', ['Q3624078', 'Q179164', 'Q208500', 'Q133442', 'Q902814', 'Q6256'], ['P36', 'P571'])), 'place');
+  assert.equal(typeOf(e('Vatican City', ['Q133442', 'Q171441', 'Q123480', 'Q6256', 'Q3624078'], ['P36', 'P571'])), 'place');
+  // A family dynasty is no state (the Ptolemaic dynasty; its kingdom is the polity).
+  assert.notEqual(typeOf(e('Ptolemaic dynasty', ['Q164950'], ['P580', 'P582', 'P571', 'P576'])), 'polity');
+  assert.equal(typeOf(e('Ptolemaic Kingdom', ['Q3932025'], ['P36', 'P571', 'P576'])), 'polity');
+});
+test('types: a named span of history is a period; a movement, a war, a revolution and a party stay what they are', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  assert.equal(typeOf(e('Migration Period', ['Q11514315', 'Q177626'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Iron Age', ['Q15401633'], ['P580'])), 'period');
+  assert.equal(typeOf(e('Bronze Age', ['Q15401699'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Middle Ages', ['Q17522177', 'Q11514315'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Industrial Revolution', ['Q11514315'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Late Period of ancient Egypt', ['Q816829'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Islamic Golden Age', ['Q186081', 'Q238526'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Middle kingdoms of India', ['Q11514315'])), 'period');
+  // A movement that Wikidata also classes as a period is a period; one it does not stays an idea (the Renaissance and
+  // the Age of Enlightenment are a cultural movement in Wikidata, not a period).
+  assert.equal(typeOf(e('High Renaissance', ['Q968159', 'Q32880', 'Q11514315', 'Q1292119'], ['P580', 'P582'])), 'period');
+  assert.equal(typeOf(e('Renaissance', ['Q968159', 'Q2198855'], ['P580', 'P582'])), 'idea');
+  assert.equal(typeOf(e('Age of Enlightenment', ['Q2198855'], ['P580', 'P582'])), 'idea');
+  assert.equal(typeOf(e('Renaissance', ['Q7278'], ['P571'])), 'party');
+  // A war Wikidata also calls a period stays a war, by its class or, as VM holds the Cold War, by its label.
+  assert.equal(typeOf(e('World War II', ['Q103495', 'Q11514315'], ['P580', 'P582'])), 'conflict');
+  assert.equal(typeOf(e('Cold War', ['Q4176199', 'Q1469686', 'Q864113', 'Q11514315'], ['P585', 'P580', 'P582'])), 'conflict');
+  assert.equal(typeOf(e('Colombian conflict', ['Q124734', 'Q11514315'], ['P580'])), 'conflict');
+  // A revolution or a historical event Wikidata also calls a period stays an event; an age of the Earth is no period.
+  assert.equal(typeOf(e('French Revolution', ['Q13418847', 'Q10931', 'Q11514315'], ['P580', 'P582'])), 'event');
+  assert.equal(typeOf(e('age of the Earth', ['Q186081', 'Q100343219'], ['P580'])), 'event');
+  // A year's events in a country are a series, not a period.
+  assert.equal(typeOf(e('2006 in Iceland', ['Q18340514'], ['P585'])), 'series');
+});
+test('types: an archaeological site, a monument or a historic building is a site; an institution in a building is not', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  assert.equal(typeOf(e('Great Pyramid of Giza', ['Q4363262', 'Q839954', 'Q66108498', 'Q175582', 'Q381885'], ['P625', 'P571'])), 'site');
+  assert.equal(typeOf(e('Pyramid of Djoser', ['Q1456099', 'Q839954', 'Q175582'], ['P625', 'P571'])), 'site');
+  assert.equal(typeOf(e('Pantheon', ['Q867143', 'Q21752084', 'Q120560', 'Q96376684', 'Q14752696', 'Q92755865', 'Q3867560', 'Q112132548', 'Q112132522'], ['P625', 'P571'])), 'site');
+  assert.equal(typeOf(e('Hagia Sophia', ['Q32815', 'Q33506', 'Q96371632', 'Q96440023', 'Q811979', 'Q35112127', 'Q16970', 'Q97588309'], ['P576', 'P625', 'P571'])), 'site');
+  assert.equal(typeOf(e('Uraniborg', ['Q1254933', 'Q16560', 'Q3395377', 'Q1497375', 'Q19860854'], ['P625', 'P571'])), 'site');
+  assert.equal(typeOf(e('Stonehenge', ['Q935773', 'Q4989906', 'Q839954', 'Q16735822', 'Q1035294'], ['P571', 'P576', 'P625'])), 'site');
+  // An ancient city that is an archaeological site and no polis or city-state is a site (a site that is also a city).
+  assert.equal(typeOf(e('Pompeii', ['Q839954', 'Q15661340'], ['P571', 'P625'])), 'site');
+  assert.equal(typeOf(e('Ur', ['Q15661340', 'Q839954'], ['P571', 'P576', 'P625'])), 'site');
+  // A city lived in today stays a place, though Wikidata also makes it a tell (Jericho) or an archaeological site.
+  assert.equal(typeOf(e('Jericho', ['Q515', 'Q755017'], ['P571', 'P625'])), 'place');
+  // A museum, a university, a college building and an artefact are not sites.
+  assert.equal(typeOf(e('British Museum', ['Q17431399', 'Q3343298', 'Q207694', 'Q33506', 'Q708676'], ['P625', 'P571'])), 'topic');
+  assert.equal(typeOf(e('Sorbonne', ['Q1244442', 'Q38723'], ['P625', 'P571'])), 'topic');
+  assert.equal(typeOf(e('Trinity College', ['Q1055028', 'Q1244442', 'Q19844914', 'Q2385804', 'Q2467461', 'Q3918', 'Q708676'], ['P625', 'P571'])), 'topic');
+  assert.equal(typeOf(e('Antikythera mechanism', ['Q220659', 'Q211586', 'Q5275'], ['P580'])), 'topic');
+  // A battle at a historic site stays a war.
+  assert.equal(typeOf(e('Battle of Batina', ['Q178561', 'Q1081138'], ['P580', 'P582', 'P625'])), 'conflict');
+});
+test('types: an entry that is only a grouping of others is a series; a war that has battles stays a war', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  assert.equal(typeOf(e('Balkan Wars', ['Q104212151'], ['P580', 'P582', 'P527'])), 'series');
+  assert.equal(typeOf(e('Italian Wars of 1499–1504', ['Q104212151'], ['P580', 'P582'])), 'series');
+  assert.equal(typeOf(e('Wars of Alexander the Great', ['Q130525743', 'Q104212151'], ['P580', 'P582', 'P527'])), 'series');
+  assert.equal(typeOf(e('2006 in Iceland', ['Q18340514'], ['P585'])), 'series');
+  // A war Wikidata also classes as a war or a civil war, or that VM holds as a war by its label, stays a war.
+  assert.equal(typeOf(e('Napoleonic Wars', ['Q104212151', 'Q198'], ['P580', 'P582', 'P527'])), 'conflict');
+  assert.equal(typeOf(e('Punic Wars', ['Q104212151', 'Q198'], ['P580', 'P582', 'P527'])), 'conflict');
+  assert.equal(typeOf(e('Myanmar conflict', ['Q8465', 'Q104212151'], ['P580'])), 'conflict');
+  assert.equal(typeOf(e('War in the Sahel', ['Q104212151'], ['P580', 'P527'])), 'conflict');
+  // An entry with a class of its own besides the grouping is not only a grouping: a protest, an ethnic conflict, a written
+  // work.
+  assert.equal(typeOf(e('2011–2012 Iranian protests', ['Q18340514', 'Q273120'], ['P580', 'P582', 'P585'])), 'event');
+  assert.equal(typeOf(e('Yugoslav Wars', ['Q104212151', 'Q766875'], ['P580', 'P582', 'P527'])), 'event');
+  assert.equal(typeOf(e('Hippocratic Corpus', ['Q47461344', 'Q17518870'])), 'topic');
+});
+test('types: every type typeOf gives has a name a reader sees, and the build takes the names from the rules', async () => {
+  const { TYPES, TYPE_NAMES } = await import('../lake/scripts/types.mjs');
+  assert.deepEqual([...TYPES].sort(), ['conflict', 'election', 'event', 'idea', 'organisation', 'party', 'period', 'person', 'place', 'polity', 'series', 'site', 'topic']);
+  for (const t of TYPES) assert.ok(TYPE_NAMES[t], t);
+  assert.deepEqual(Object.keys(TYPE_NAMES).sort(), [...TYPES].sort());
+  assert.equal(TYPE_NAMES.polity, 'Polity'); assert.equal(TYPE_NAMES.period, 'Period'); assert.equal(TYPE_NAMES.site, 'Site'); assert.equal(TYPE_NAMES.series, 'Series');
+  // No other type is renamed.
+  assert.equal(TYPE_NAMES.place, 'Place or state'); assert.equal(TYPE_NAMES.idea, 'Idea or school of thought'); assert.equal(TYPE_NAMES.conflict, 'War or conflict');
+  const build = text('lake/scripts/build.mjs');
+  assert.match(build, /import \{ typeOf, TYPE_NAMES \} from '\.\/types\.mjs';/);
+  assert.doesNotMatch(build, /const TYPE_NAMES =/);
+});
+// Review R3 (21 November 2026): the title says what the body checks. That no person, party or election can move is held
+// at its cause, typeOf's order (the next test); here the data is checked for a person's or an election's signs.
+test('committed lake, after the first full build with the four types: the owner’s polities, each new type held, and no entry of the four with a person’s or an election’s signs', t => {
+  if (!afterTypesBuild(t)) return;
+  const recs = lakeRecords();
+  // The Zhou and Shang dynasties, the Achaemenid Empire, ancient Egypt, the Neo-Assyrian Empire, the Republic of Florence
+  // and the Inca Empire are polities; France and India places; the Renaissance party a party.
+  const want = { Q35216: 'polity', Q128938: 'polity', Q389688: 'polity', Q11768: 'polity', Q10914393: 'polity', Q148540: 'polity', Q28573: 'polity',
+    Q142: 'place', Q668: 'place', Q23731823: 'party', Q8683: 'conflict', Q37200: 'site', Q165725: 'series', Q1474884: 'period' };
+  for (const [q, type] of Object.entries(want)) { assert.ok(recs.has(q), `${q} is in the lake`); assert.equal(recs.get(q).type, type, `${q} ${recs.get(q).label}`); }
+  const types = new Set([...recs.values()].map(r => r.type));
+  for (const ty of ['polity', 'period', 'site', 'series']) assert.ok(types.has(ty), `some entry is a ${ty}`);
+  // A person is typed by a birth (P569) or the class human, an election by its label: none of the four may carry either.
+  const four = new Set(['polity', 'period', 'site', 'series']);
+  assert.deepEqual([...recs.values()].filter(r => four.has(r.type) && (r.facts?.born || /election|referendum/i.test(r.label || ''))).map(r => `${r.q} ${r.label}`), []);
+});
+test('types: no rule of the four types reaches a person, an election, a party or a war, whatever other classes they carry', async () => {
+  const { typeOf } = await import('../lake/scripts/types.mjs');
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  // A human with a historical country's, a period's, a site's and a series' classes is still a person.
+  assert.equal(typeOf(e('Someone', ['Q5', 'Q3024240', 'Q11514315', 'Q839954', 'Q20937557'], ['P569', 'P576'])), 'person');
+  // An election's label wins over a polity's, a period's or a series' class.
+  assert.equal(typeOf(e('1920 election', ['Q3024240', 'Q11514315', 'Q18340514'], ['P576'])), 'election');
+  // A party (a defunct political party) with a state's class and a date of dissolution stays a party.
+  assert.equal(typeOf(e('Some Party', ['Q7278', 'Q7275'], ['P36', 'P576'])), 'party');
+  // A war (Wikidata's class) that is also a series of wars or a historical period stays a war.
+  assert.equal(typeOf(e('Punic Wars', ['Q198', 'Q104212151'], ['P580', 'P582'])), 'conflict');
+  assert.equal(typeOf(e('Some War', ['Q198', 'Q11514315'], ['P580', 'P582'])), 'conflict');
+});
 test('committed lake, after the full build: the review’s type corrections hold', t => {
   if (!afterFullBuild(t)) return;
   const recs = lakeRecords();
   const want = { Q83937: 'idea', Q203411: 'idea', Q847001: 'idea', Q271857: 'idea', Q60224: 'idea', Q936174: 'idea', Q7320: 'party', Q458: 'organisation',
     Q21707860: 'event', Q2822795: 'event', Q1187969: 'event', Q847198: 'idea', Q182324: 'topic', Q747702: 'topic', Q11406: 'topic', Q60827595: 'topic',
-    Q208238: 'organisation', Q35216: 'place', Q129053: 'event', Q23731823: 'party',
+    Q208238: 'organisation', Q129053: 'event', Q23731823: 'party',
     // The fixer's pass: kinds of party, the Virginia school, a protest, a ceasefire and a sanction.
     Q190219: 'party', Q208242: 'party', Q691730: 'party', Q2263934: 'party', Q3482308: 'idea', Q138511807: 'event', Q135068588: 'event', Q17373979: 'topic' };
   // Each must be in the lake: an entry a later build drops is named here, not passed over.

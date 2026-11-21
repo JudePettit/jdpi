@@ -31,7 +31,13 @@ import { writeRecipe, readRecipe } from './vm-recipe.js';
 import { yearOf, addYears, yearsBetween, precisionOf, formatSpan, formatYear, toAstro, fromAstro } from './vm-dates.js';
 
 export const GESTURES = ['term', 'selection', 'scene', 'news', 'badge', 'name'];
-export const KINDS = ['person', 'place', 'battle'];
+// The kinds the map view is built for. A polity (a state that no longer exists) is clicked as a state was, a site as a
+// place is, and a period that carries years opens on them (the four types of 21 November 2026, lake/scripts/types.mjs).
+export const KINDS = ['person', 'place', 'battle', 'polity', 'site', 'period'];
+// The Master Index's types that are a place to the click: in focus themselves, a passage's places, a dated Country.
+const PLACE_KINDS = new Set(['place', 'polity', 'site']);
+/** Whether a Master Index type is a place to the click: a place, a polity or a site. */
+export const isPlaceKind = type => PLACE_KINDS.has(type);
 const QID = /^Q[1-9]\d*$/;
 const PLACE = /^(?:Q[1-9]\d*|[A-Z]{3}|gw:\d{1,4})$/;
 const SLUG = /^[a-z0-9][a-z0-9-]{0,80}$/;
@@ -91,6 +97,16 @@ export function kindOf(entry) {
   const f = entry.facts || {};
   if (entry.type === 'conflict') return f.date && !f.start && !f.end ? 'battle' : f.start || f.end ? 'war' : 'conflict';
   return entry.type || null;
+}
+/** What a click on the entry opens: 'entry' (its Master Index entry: a series, which only groups other entries),
+    'card' (its card alone: a period with no years of its own, or no record), else 'map' (the Omni-Map at its own years,
+    or the generic view a kind the rule does not know gets, which says so). */
+export function opensOn(entry) {
+  if (!entry || typeof entry !== 'object') return 'card';
+  const kind = kindOf(entry);
+  if (kind === 'series') return 'entry';
+  if (kind === 'period' && !windowFor(entry, { kind })) return 'card';
+  return 'map';
 }
 
 /* ---------- contract 5: the periods file ---------- */
@@ -241,7 +257,7 @@ const entryAt = q => `encyclopedia/index.html#${q}`;
 const omniAt = recipe => `omni/index.html#${recipe}`;
 const wikiAt = title => `https://en.wikipedia.org/wiki/${encodeURIComponent(String(title).replace(/ /g, '_')).replace(/%2F/g, '/')}`;
 const article = w => (/^[aeiou]/i.test(w) ? `an ${w}` : `a ${w}`);
-const KIND_WORDS = { war: 'war', conflict: 'conflict', event: 'event', election: 'election', idea: 'idea', topic: 'topic', party: 'party', organisation: 'organisation' };
+const KIND_WORDS = { war: 'war', conflict: 'conflict', event: 'event', election: 'election', idea: 'idea', topic: 'topic', party: 'party', organisation: 'organisation', series: 'series' };
 
 /** The click's view, offers, related items and thin note (contract 2), by 2.1's rules. */
 export function resolve(entry, from = {}, ctx = {}) {
@@ -260,7 +276,9 @@ export function resolve(entry, from = {}, ctx = {}) {
   // Rule 1: the life (or the era, for an entry with no dates of its own).
   const own = windowFor(entry, { kind, today: ctx.today });
   const era = Array.isArray(ctx.era) && yearOf(ctx.era[0]) != null && yearOf(ctx.era[1]) != null ? { from: yearOf(ctx.era[0]), to: yearOf(ctx.era[1]) } : null;
-  const lifeWin = own || (era ? { from: era.from, to: era.to, p: 9 } : null);
+  // A series groups other entries and opens its Master Index entry, never a map; a period is a span of years, so one
+  // with none of its own is given no other years (the book's era is not the period's) and opens its card.
+  const lifeWin = kind === 'series' ? null : own || (era && kind !== 'period' ? { from: era.from, to: era.to, p: 9 } : null);
 
   // The entry's own first and last years, and the years VM's crosswalk can outline it (ctx.outlined, from
   // omni/data/borders/qids.json), so a click opens on its own years and place, not on the book's frame (MP-10).
@@ -321,7 +339,7 @@ export function resolve(entry, from = {}, ctx = {}) {
   const lifeOffer = lifeWin ? { id: 'life', name: lifeName, at: omniAt(lifeRecipe), recipe: lifeRecipe, available: true,
     why: (own ? loneWords || `${label}'s own dates with a margin either side, ${formatSpan(own.from, own.to)}` : `${label} has no dates of its own in VM; the period of the book`)
       + (lifeWhy ? `; ${lifeWhy}${foughtIn != null ? '' : undated}` : '') }
-    : { id: 'life', name: lifeName, at: '', available: false, why: `${label}'s own dates`, reason: `VM holds no dates for ${label}` };
+    : { id: 'life', name: lifeName, at: '', available: false, why: `${label}'s own dates`, reason: kind === 'series' ? 'A series groups other entries; its Master Index entry is where they are' : `VM holds no dates for ${label}` };
   if (checked) offers.push(passageOffer, lifeOffer);
   else { if (passageOffer) offers.push(passageOffer); offers.push(lifeOffer); }
   if (QID.test(entry.q || '')) offers.push({ id: 'entry', name: 'Master Index entry', at: entryAt(entry.q), available: true, why: `What the Master Index holds on ${label}` });
@@ -339,7 +357,7 @@ export function resolve(entry, from = {}, ctx = {}) {
   const relItems = (key, why) => (entry.rel?.[key] || []).filter(([q]) => QID.test(q)).map(([qid, l]) => ({ qid, label: l || qid, why, at: entryAt(qid) }));
   const offices = relItems('Positions held', 'Position held');
   if (offices.length) related.push({ group: 'Offices', items: offices });
-  const pl = (passagePlaces || []).map(x => recordOf(ctx, x)).filter(r => r && QID.test(r.q || '') && (!r.type || r.type === 'place'));
+  const pl = (passagePlaces || []).map(x => recordOf(ctx, x)).filter(r => r && QID.test(r.q || '') && (!r.type || isPlaceKind(r.type)));
   if (from.passage && pl.length) related.push({ group: 'Places in this passage', items: pl.map(r => ({ qid: r.q, label: r.label || r.q, why: 'Named in this paragraph', at: entryAt(r.q) })) });
   const inWin = win ? (ctx.battles || []).filter(b => { const y = b.sortYear ?? yearOf(b.date?.from); return y != null && win.from <= y && y <= win.to && QID.test(b.q || b.id || ''); }) : [];
   if (inWin.length) related.push({ group: 'Battles VM holds for these years', items: inWin.map(b => ({ qid: b.q || b.id, label: b.label, why: `A battle of ${b.sortYear ?? yearOf(b.date?.from)}`, at: entryAt(b.q || b.id) })) });
@@ -349,11 +367,19 @@ export function resolve(entry, from = {}, ctx = {}) {
   const firstFocus = readFocus(recipe);
   const hasPlace = !!pt || firstFocus.length > 0;
   const hasRelated = related.some(g => g.items.length);
-  const missing = [!hasDates && 'dates', !hasPlace && 'place', !hasRelated && 'related'].filter(Boolean);
+  // A series is never mapped (it groups other entries), so the lack of a place is not counted against it.
+  const missing = [!hasDates && 'dates', kind !== 'series' && !hasPlace && 'place', !hasRelated && 'related'].filter(Boolean);
   const WORDS = { dates: 'no dates', place: 'no place it can map', related: 'nothing related' };
   const little = missing.length >= 2 ? `VM holds little on ${label} yet: ${missing.map(m => WORDS[m]).join(', ')}. What VM has is shown below.` : '';
   let thin = little ? { missing, text: little } : false;
-  if (kind && !KINDS.includes(kind)) {
+  if (kind === 'series') {
+    // True on every page: Neo Book opens the entry, and elsewhere the card leads with it.
+    const note = `${label} is a series, a grouping of other entries: its Master Index entry lists them.`;
+    thin = { missing, text: little ? `${note} ${little}` : note };
+  } else if (kind === 'period' && !own) {
+    const note = `VM holds no years for ${label}, so its card opens, not the Omni-Map.`;
+    thin = { missing, text: little ? `${note} ${little}` : note };
+  } else if (kind && !KINDS.includes(kind)) {
     const note = `VM builds its map view for people, places and battles first; ${label} is ${article(KIND_WORDS[kind] || kind)}.`;
     thin = { missing, text: little ? `${note} ${little}` : note };
   }
@@ -369,13 +395,13 @@ function focusFor(entry, at, passagePlaces, pt, ctx) {
   const out = [];
   const add = q => { if (QID.test(q || '') && !out.includes(q)) out.push(q); };
   const kind = kindOf(entry);
-  if (kind === 'place' && (at == null || datesHold(entry, at))) add(entry.q);
-  if (pt && kind !== 'place') add(entry.q);
+  if (isPlaceKind(kind) && (at == null || datesHold(entry, at))) add(entry.q);
+  if (pt && !isPlaceKind(kind)) add(entry.q);
   for (const key of ['Country', 'Participants', 'Member of']) {
     for (const [q] of entry.rel?.[key] || []) {
       if (q === entry.q) continue;
       const r = ctx.lookup?.(q);
-      if (!r || r.type !== 'place') continue;
+      if (!r || !isPlaceKind(r.type)) continue;
       if (at == null || !r.facts || (!r.facts.founded && !r.facts.dissolved) || !datesHold(r, at)) continue; // undated or not standing then: left out
       if (presentDay(r)) continue; // today's state (San Marino's traditional 301 holds 1494, but the republic of today is not the polity then)
       add(q);
@@ -383,7 +409,7 @@ function focusFor(entry, at, passagePlaces, pt, ctx) {
   }
   for (const x of passagePlaces || []) {
     const r = recordOf(ctx, x);
-    if (!r || (r.type && r.type !== 'place')) continue;
+    if (!r || (r.type && !isPlaceKind(r.type))) continue;
     if (at != null && (!datesHold(r, at) || presentDay(r))) continue;
     add(r.q);
   }

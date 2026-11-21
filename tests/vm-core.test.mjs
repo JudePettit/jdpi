@@ -15,7 +15,7 @@ import '../design/prp-focus.js';
 import '../design/prp-map.js';
 import { KEYS, readRecipe, writeRecipe, sameRecipe, readHost, withHost } from '../design/vm-recipe.js';
 import { toEdtf, fromEdtf, intervalToEdtf, valueDateToEdtf, yearOf, sortYear, addYears, formatYear, formatSpan, formatValueDate, precisionOf, precisionWord } from '../design/vm-dates.js';
-import { clickDetail, kindOf, readPeriods, resolve, windowFor, frameFor, stepFor, followMessage, GESTURES } from '../design/vm-click.js';
+import { clickDetail, kindOf, readPeriods, resolve, windowFor, frameFor, stepFor, followMessage, GESTURES, isPlaceKind, opensOn, cardOf } from '../design/vm-click.js';
 import { COLUMNS, rowsCsv, featuresGeojson, pin, metadata, cslJson, ris, bibtex, apa, crc32, zipStored, readZip, bundleFiles, dataFiles } from '../design/vm-bundle.js';
 
 const M = globalThis.PRPMap;
@@ -311,6 +311,75 @@ test('resolve: an entry with no dates, no place and nothing related is thin, in 
   const idea = resolve({ q: 'Q7272', label: 'socialism', type: 'idea', facts: {}, rel: {} }, { module: 'neo-classic', at: 'x' }, { today: '2026-11-17', era: [1847, 1888] });
   assert.match(idea.thin.text, /^VM builds its map view for people, places and battles first; socialism is an idea\./);
   assert.deepEqual(readRecipe(idea.recipe).t, { from: 1847, to: 1888 }, 'no dates of its own: the book\'s era');
+});
+
+// The four types of 21 November 2026 (MI-12, MI-13, MI-07; choice 7 of the job): a polity is clicked as a state was, a
+// site as a place is, a period with years opens on them and one without opens its card, a series its Master Index
+// entry; a type the rule does not know is named, never thrown on. The records are the frozen fixture's, retyped, and the
+// Master Index's as it stood on 21 November 2026 (lake/data/e: High Renaissance, Middle kingdoms of India, Balkan Wars).
+test('the four types: a polity and a site are clicked as a place; a period by its years; a series opens its entry; an unknown type is named', () => {
+  assert.ok(isPlaceKind('place') && isPlaceKind('polity') && isPlaceKind('site'), 'a place, a polity and a site are places to the click');
+  for (const t of ['period', 'series', 'person', 'conflict', 'event', undefined, null, 'widget']) assert.equal(isPlaceKind(t), false, String(t));
+  // A polity: the Duchy of Milan, a place in the frozen fixture, retyped, opens exactly as it did.
+  const milan = lookup('Q153529');
+  assert.equal(milan.type, 'place');
+  const from = fromNeo('c03-p03', 3, 'Q153529'), ctx = ctxFor(para(3, 'c03-p03'));
+  const asPlace = resolve(milan, from, ctx);
+  for (const type of ['polity', 'site']) {
+    const r = resolve({ ...milan, type }, from, ctx);
+    assert.equal(r.recipe, asPlace.recipe, `${type}: the same view`);
+    assert.deepEqual(r.offers, asPlace.offers, `${type}: the same offers`);
+    assert.deepEqual(r.related, asPlace.related); assert.deepEqual(r.thin, asPlace.thin, `${type}: no "is a ${type}" note`);
+    assert.ok(readRecipe(r.recipe).focus.includes('Q153529'), `${type}: itself in focus`);
+    assert.equal(opensOn({ ...milan, type }), 'map');
+  }
+  // A paragraph's places that are now polities are still its places: Ludovico Sforza's view is the same when every
+  // place of c03-p03 is typed polity, and they are still listed as "Places in this passage".
+  const retyped = q => { const r = lookup(q); return r?.type === 'place' ? { ...r, type: 'polity' } : r; };
+  const p3 = para(3, 'c03-p03');
+  const before = resolve(ludovico, fromNeo('c03-p03', 3, 'Q236853'), ctxFor(p3));
+  const after = resolve(ludovico, fromNeo('c03-p03', 3, 'Q236853'), { ...ctxFor(p3), lookup: retyped, passagePlaces: placesOf(p3).map(retyped) });
+  assert.ok(before.related.some(g => g.group === 'Places in this passage'), 'the fixture has places in this passage');
+  assert.equal(after.recipe, before.recipe); assert.deepEqual(after.related, before.related);
+  // A period that carries years opens the Omni-Map on them, with no "is a period" note.
+  const high = { q: 'Q1474884', label: 'High Renaissance', type: 'period', facts: { start: '1494', end: '1527' }, rel: {}, wiki: 'High Renaissance' };
+  const hr = resolve(high, { module: 'card', at: '' }, { today: '2026-11-21' });
+  const hv = readRecipe(hr.recipe);
+  assert.ok(hv.t && hv.t.from <= 1494 && hv.t.to >= 1527, `its own years: ${hr.recipe}`);
+  assert.equal(hr.offers.find(o => o.id === 'life').available, true);
+  assert.equal(opensOn(high), 'map');
+  assert.ok(!hr.thin || !/map view for people/.test(hr.thin.text), 'no note that VM builds its map for other kinds first');
+  // A period without years opens its card: no map of the book's era is drawn for it, and the card holds its entry.
+  const middle = { q: 'Q1189518', label: 'Middle kingdoms of India', type: 'period', facts: {}, rel: {}, wiki: 'Middle kingdoms of India' };
+  const mr = resolve(middle, { module: 'neo-classic', at: 'x' }, { today: '2026-11-21', era: [1494, 1527] });
+  assert.equal(readRecipe(mr.recipe).t, undefined, 'no window: the book\'s era is not the period\'s');
+  assert.equal(mr.offers.find(o => o.id === 'life').available, false);
+  assert.equal(opensOn(middle), 'card');
+  assert.deepEqual(cardOf(middle, { today: '2026-11-21' }).offers.map(o => o.id), ['entry', 'wiki']);
+  assert.match(mr.thin.text, /VM holds no years for Middle kingdoms of India/);
+  // A series opens its Master Index entry: no map is offered for a grouping, and the card says why.
+  const balkan = { q: 'Q165725', label: 'Balkan Wars', type: 'series', facts: { start: '1912-10-08', end: '1913-07-18' }, rel: {}, wiki: 'Balkan Wars' };
+  assert.equal(opensOn(balkan), 'entry');
+  const card = cardOf(balkan, { today: '2026-11-21' });
+  assert.deepEqual(card.offers.map(o => o.id), ['entry', 'wiki'], 'the Master Index entry first, no Omni-Map view');
+  assert.equal(card.offers[0].at, 'encyclopedia/index.html#Q165725');
+  // The note holds on every page (review R2, 21 November 2026): Neo Book opens the entry, other pages open this card
+  // with the entry first, so it says what the entry holds, not that VM opened it; and no map is offered for a series, so
+  // the lack of a place it can map is not listed against it.
+  assert.equal(card.thin.text, 'Balkan Wars is a series, a grouping of other entries: its Master Index entry lists them.');
+  assert.doesNotMatch(card.thin.text, /VM opens|no place it can map/);
+  const bare = cardOf({ ...balkan, facts: {} }, { today: '2026-11-21' });
+  assert.match(bare.thin.text, /: no dates, nothing related\./, 'a series with no dates and nothing related is still called thin, without the place');
+  const br = resolve(balkan, { module: 'neo-classic', at: 'x' }, { today: '2026-11-21' });
+  assert.equal(br.offers.find(o => o.id === 'life').available, false);
+  assert.equal(br.offers.find(o => o.id === 'life').reason, 'A series groups other entries; its Master Index entry is where they are');
+  // A type the rule does not know is named, and the card still holds the entry: it never throws or says nothing.
+  const odd = { q: 'Q42', label: 'Something', type: 'widget', facts: {}, rel: {} };
+  assert.doesNotThrow(() => resolve(odd, { module: 'card', at: '' }, {}));
+  assert.equal(opensOn(odd), 'map');
+  assert.match(resolve(odd, { module: 'card', at: '' }, {}).thin.text, /^VM builds its map view for people, places and battles first; Something is a widget\./);
+  assert.deepEqual(cardOf(odd).offers.map(o => o.id), ['entry']);
+  assert.equal(opensOn(null), 'card'); assert.equal(opensOn({}), 'map');
 });
 
 test('vm:click: the detail is exactly the contract\'s shape, or null when malformed', () => {

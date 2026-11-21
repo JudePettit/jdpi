@@ -119,6 +119,23 @@ test('data: the economists\' occupation reads "Political economist", not a degre
   assert.ok((ricardo.rel.Occupation || []).some(([q, l]) => q === 'Q1227195' && l === 'political economist'), 'Ricardo: the related occupation by its name');
 });
 
+// Review D1 (21 November 2026): two English labels on Wikidata that their own items contradict, read that day. Q3366745,
+// the PSOE's federation in the Community of Madrid, is labelled "Vox" in English (its Spanish label and English
+// description still say PSOE), which tagged Pedro Sánchez "Member of:Vox"; Lázaro Cárdenas (Q296718) is labelled
+// "Lázaro Cárdenas segundo" in English, though his Spanish and multilingual labels are "Lázaro Cárdenas". LABEL_OVERRIDES
+// in build.mjs keeps the names the items mean, for an entry's own label as for a related one's.
+test('data: the PSOE’s Madrid federation is not "Vox", and Lázaro Cárdenas is not "segundo"', () => {
+  const all = lakeAll(), byQ = new Map(all.map(r => [r.q, r]));
+  const sanchez = byQ.get('Q6070218');
+  assert.ok(sanchez, 'Pedro Sánchez is in the lake');
+  assert.ok(!sanchez.tags.includes('Member of:Vox'), 'Pedro Sánchez is no member of Vox');
+  for (const [, l] of Object.values(sanchez.rel || {}).flat().filter(([q]) => q === 'Q3366745')) assert.equal(l, 'Spanish Socialist Workers\' Party of the Community of Madrid');
+  const cardenas = byQ.get('Q296718');
+  assert.ok(cardenas, 'Lázaro Cárdenas is in the lake');
+  assert.equal(cardenas.label, 'Lázaro Cárdenas');
+  assert.deepEqual(all.filter(r => /Cárdenas segundo/.test(r.label + JSON.stringify(r.rel || {}) + r.tags.join('|'))).map(r => r.q), []);
+});
+
 test('data: the mainstream right is on the line; its thinkers and schools carry "Right", and no realist or other position does', () => {
   const all = lakeAll(), byLabel = new Map(all.map(r => [r.label, r]));
   for (const name of ['Edmund Burke', 'Michael Oakeshott', 'Friedrich Hayek', 'Milton Friedman', 'Robert Nozick', 'Russell Kirk', 'William F. Buckley Jr.',
@@ -176,6 +193,44 @@ test('page: the facets name the groups in the discipline\'s words, and the searc
   // Each of its terms is a tag the data holds.
   const values = new Set(read('lake/data/index.json').tags.map(t => t.slice(t.indexOf(':') + 1).toLowerCase()));
   for (const term of ['Realism', 'Offensive realism', 'American']) assert.ok(values.has(term.toLowerCase()), term);
+});
+
+// The four types of 21 November 2026 (choice 6 of the job): a reader sees them as "Polity", "Period", "Site" and
+// "Series", and where the page explains its types each has one plain sentence saying what it holds.
+const TYPE_SENTENCES = { Polity: 'A state that no longer exists.', Period: 'A named span of history.', Site: 'An archaeological site, a monument or a building of historical note.',
+  Series: 'A grouping of other entries, such as a series of wars or the events of one year.' };
+test('page: the four new types each have one plain sentence, in the method and as the entry\'s note; no other type is renamed', async () => {
+  const src = readFileSync(new URL('../encyclopedia/index.html', import.meta.url), 'utf8');
+  const notes = JSON.parse(src.match(/const TYPE_NOTE = (\{[^}]+\});/)[1].replace(/'/g, '"').replace(/(\w+):/g, '"$1":'));
+  assert.deepEqual(notes, TYPE_SENTENCES);
+  const method = src.match(/<p><b>Method\.<\/b>[\s\S]*?<\/p>/)[0];
+  assert.match(method, /a polity is a state that no longer exists; a period, a named span of history; a site, an archaeological site, a monument or a building of historical note; a series, a grouping of other entries/);
+  const { TYPE_NAMES } = await import('../lake/scripts/types.mjs');
+  assert.deepEqual(['polity', 'period', 'site', 'series'].map(t => TYPE_NAMES[t]), Object.keys(TYPE_SENTENCES), 'the names the page explains are the tags\' names');
+});
+
+test('a polity\'s entry says what a polity is, and the Type filter lists only the types the data holds, each new one explained', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/encyclopedia/index.html#Q12560`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#entity .ehead h2', { timeout: 30000 });
+    assert.equal(await page.textContent('#entity .ehead .prp-label'), 'Polity');
+    assert.equal(await page.textContent('#entity .ehead .tdef'), TYPE_SENTENCES.Polity);
+    await page.goto(`${BASE}/encyclopedia/index.html#explore`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#facets .facet button[data-toggle="Type"]', { timeout: 30000 });
+    const facet = page.locator('.facet', { has: page.locator('button[data-toggle="Type"]') });
+    const shown = await facet.locator('.opt span').allInnerTexts();
+    const counts = read('lake/data/manifest.json').types;
+    const { TYPE_NAMES } = await import('../lake/scripts/types.mjs');
+    assert.deepEqual([...shown].sort(), Object.entries(counts).filter(([, n]) => n > 0).map(([t]) => TYPE_NAMES[t]).sort(), 'every type with entries, and no empty one');
+    const note = await facet.locator('.fnote').innerText();
+    for (const [name, sentence] of Object.entries(TYPE_SENTENCES)) if (shown.includes(name)) assert.ok(note.includes(`${name}: ${sentence.replace(/^./, c => c.toLowerCase())}`), `${name} is explained: ${note}`);
+    assert.equal(await facet.locator('.opt span', { hasText: /^Polity$/ }).getAttribute('title'), TYPE_SENTENCES.Polity);
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
 });
 
 test('a position shows that it is VM\'s own placement, on the entry and in the filter\'s heading', pageTest, async () => {

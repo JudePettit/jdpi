@@ -450,13 +450,26 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
   }
 
   async function nameIndex() { return getJson('integration/data/names/index.json'); }
-  const TYPE_LIST = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation'];
+  // The Master Index's types (lake/scripts/types.mjs; this file imports nothing, so they are listed here and a test holds
+  // the two lists equal). The nine before 21 November 2026 keep their places, which the name index's codes give in one
+  // digit; the four of that day follow, digit 9 in a code, their place in the index's `later`.
+  const TYPE_LIST = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation', 'polity', 'period', 'site', 'series'];
+  const TYPE_ALIAS = { people: 'person', persons: 'person', war: 'conflict', wars: 'conflict', organization: 'organisation', organizations: 'organisation',
+    polities: 'polity', periods: 'period', sites: 'site', series: 'series' };
+  /** A type as asked ("polities", "Series", "wars", "people") as the Master Index names it, or null. */
+  function masterIndexType(v) {
+    const t = foldText(String(v ?? '')).trim();
+    if (TYPE_LIST.includes(t)) return t;
+    if (TYPE_ALIAS[t]) return TYPE_ALIAS[t];
+    const s = t.replace(/s$/, '');
+    return TYPE_LIST.includes(s) ? s : TYPE_ALIAS[s] || null;
+  }
   async function searchMasterIndex(a = {}) {
     const q = String(a.query ?? a.q ?? '').trim();
     if (!q) throw new ToolError('Give a name to search for, e.g. "Mearsheimer" or "Korean War".');
     if (q.length > 200) throw new ToolError('Search for a name of at most 200 characters.');
-    const type = a.type ? foldText(a.type).trim().replace(/s$/, '').replace(/^people$/, 'person').replace(/^organization$/, 'organisation').replace(/^war$/, 'conflict') : null;
-    if (type && !TYPE_LIST.includes(type)) throw new ToolError(`Unknown type "${a.type}". Use ${TYPE_LIST.join(', ')}.`);
+    const type = a.type ? masterIndexType(a.type) : null;
+    if (a.type && !type) throw new ToolError(`Unknown type "${a.type}". Use ${TYPE_LIST.join(', ')}.`);
     const limit = Math.max(1, Math.min(25, Math.floor(+a.limit || 10)));
     const ni = await nameIndex();
     const qtoks = [...new Set(tokenize(q).filter(t => [...t].length >= 2 || /\d/.test(t)))].slice(0, 5);
@@ -488,7 +501,10 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       if (keys.length > 8) notes.push(`"${t}" is short: only some names starting with it were searched.`);
       for (const [c, sc] of seen) { const r = scores.get(c) || { s: 0, hits: 0 }; r.s += sc; r.hits++; scores.set(c, r); }
     }
-    let cands = [...scores.entries()].map(([code, r]) => ({ qn: Math.floor(code / 1000), mentions: Math.floor(code / 10) % 100, type: TYPE_LIST[code % 10], ...r }));
+    // A code's last digit is its type's place in the index's types (0–8); 9 is a later type, whose place is later[qid number].
+    const types = Array.isArray(ni.types) ? ni.types : TYPE_LIST;
+    const typeOf = (code, qn) => (code % 10 === 9 ? types[ni.later?.[qn]] ?? null : types[code % 10]);
+    let cands = [...scores.entries()].map(([code, r]) => { const qn = Math.floor(code / 1000); return { qn, mentions: Math.floor(code / 10) % 100, type: typeOf(code, qn), ...r }; });
     if (type) cands = cands.filter(c => c.type === type);
     const all = cands.filter(c => c.hits === qtoks.length);
     if (all.length) cands = all; else if (cands.length) notes.push('No entry matches every word; showing the closest.');
@@ -721,7 +737,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
         offset: { type: 'integer', minimum: 0, maximum: L.maxOffset, description: 'Rows to skip, for paging.' },
         cursor: { type: 'string', description: 'next_cursor from a partial result, to read the next shards.' } }, ['id']) },
     { name: 'search_encyclopaedia', title: 'Search the Master Index', fn: searchMasterIndex,
-      description: 'Find people, places, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
+      description: 'Find people, places, polities (states that no longer exist), periods, sites, series, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
     { name: 'get_entity', title: 'Get a Master Index entry', fn: getEntity,
       description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',
@@ -761,7 +777,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       if (p.type === 'string' && typeof v !== 'string') throw new ToolError(`"${k}" must be a string.`);
       if (p.type === 'integer' && !(Number.isInteger(v) || (typeof v === 'string' && /^\d+$/.test(v)))) throw new ToolError(`"${k}" must be a whole number.`);
       if (p.type === 'boolean' && typeof v !== 'boolean') throw new ToolError(`"${k}" must be true or false.`);
-      if (p.enum && typeof v === 'string' && !p.enum.includes(v) && !(k === 'briefing' && BRIEFING_ALIAS[foldText(v)])) throw new ToolError(`"${k}" must be one of ${p.enum.join(', ')}.`);
+      if (p.enum && typeof v === 'string' && !p.enum.includes(v) && !(k === 'briefing' && BRIEFING_ALIAS[foldText(v)]) && !(k === 'type' && tool.name === 'search_encyclopaedia' && masterIndexType(v))) throw new ToolError(`"${k}" must be one of ${p.enum.join(', ')}.`);
       if (typeof v === 'string' && v.length > 2000) throw new ToolError(`"${k}" is too long.`);
     }
   }

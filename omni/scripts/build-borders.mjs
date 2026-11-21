@@ -230,12 +230,15 @@ export function crosswalk(rows, items, places, { stay = [] } = {}) {
 }
 
 const yearOf = v => { const y = parseInt(String(v ?? ''), 10); return Number.isFinite(y) && y !== 0 ? y : null; };
-/** The lake's places with their labels and years (founded, dissolved), read from the committed shards. */
+const BORDER_TYPES = new Set(['place', 'polity']);
+/** The lake's places and polities (states that no longer exist, typed apart from places on 21 November 2026, so the
+ *  crosswalk still matches them by name) with their labels and years (founded, dissolved), read from the committed
+ *  shards. A site, a period or any other type is not a border. */
 export function lakePlaces(dir = join(ROOT, 'lake/data/e')) {
   const out = [];
   for (const f of readdirSync(dir).filter(f => f.endsWith('.json'))) {
     for (const r of Object.values(JSON.parse(readFileSync(join(dir, f), 'utf8')))) {
-      if (r?.type !== 'place' || !r.label) continue;
+      if (!BORDER_TYPES.has(r?.type) || !r.label) continue;
       out.push({ q: r.q, label: r.label, from: yearOf(r.facts?.founded), to: yearOf(r.facts?.dissolved) });
     }
   }

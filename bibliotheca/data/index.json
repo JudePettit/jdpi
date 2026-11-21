@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-18T03:39:11.101Z",
+ "generated": "2026-11-21T06:20:20.944Z",
  "books": [
   {
    "slug": "the-prince",
@@ -15,7 +15,7 @@
    "chapters": 27,
    "paragraphs": 254,
    "terms": 570,
-   "generated": "2026-11-18T03:20:50.262Z"
+   "generated": "2026-11-21T06:19:39.660Z"
   },
   {
    "slug": "peloponnesian-war",
@@ -31,7 +31,7 @@
    "chapters": 26,
    "paragraphs": 998,
    "terms": 1121,
-   "generated": "2026-11-18T03:20:42.455Z"
+   "generated": "2026-11-21T06:19:41.977Z"
   },
   {
    "slug": "origin-of-species",
@@ -46,8 +46,8 @@
    "words": 196098,
    "chapters": 16,
    "paragraphs": 972,
-   "terms": 274,
-   "generated": "2026-11-18T03:20:38.269Z"
+   "terms": 278,
+   "generated": "2026-11-21T06:19:44.235Z"
   },
   {
    "slug": "wealth-of-nations-1",
@@ -62,8 +62,8 @@
    "words": 162323,
    "chapters": 22,
    "paragraphs": 950,
-   "terms": 711,
-   "generated": "2026-11-18T03:20:53.720Z",
+   "terms": 712,
+   "generated": "2026-11-21T06:19:46.349Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -85,7 +85,7 @@
    "chapters": 14,
    "paragraphs": 1194,
    "terms": 1203,
-   "generated": "2026-11-18T03:20:57.831Z",
+   "generated": "2026-11-21T06:19:48.524Z",
    "set": {
     "slug": "wealth-of-nations",
     "title": "The Wealth of Nations",
@@ -107,7 +107,7 @@
    "chapters": 16,
    "paragraphs": 2415,
    "terms": 1526,
-   "generated": "2026-11-18T03:39:04.821Z",
+   "generated": "2026-11-21T06:19:51.680Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -129,7 +129,7 @@
    "chapters": 11,
    "paragraphs": 2082,
    "terms": 834,
-   "generated": "2026-11-18T03:39:07.076Z",
+   "generated": "2026-11-21T06:19:54.418Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -151,7 +151,7 @@
    "chapters": 12,
    "paragraphs": 1718,
    "terms": 891,
-   "generated": "2026-11-18T03:20:04.411Z",
+   "generated": "2026-11-21T06:19:56.800Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -173,7 +173,7 @@
    "chapters": 10,
    "paragraphs": 1642,
    "terms": 1055,
-   "generated": "2026-11-18T03:39:08.914Z",
+   "generated": "2026-11-21T06:19:59.221Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -195,7 +195,7 @@
    "chapters": 10,
    "paragraphs": 1698,
    "terms": 982,
-   "generated": "2026-11-18T03:20:14.151Z",
+   "generated": "2026-11-21T06:20:01.659Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -217,7 +217,7 @@
    "chapters": 13,
    "paragraphs": 1520,
    "terms": 945,
-   "generated": "2026-11-18T03:39:10.755Z",
+   "generated": "2026-11-21T06:20:04.397Z",
    "set": {
     "slug": "decline-and-fall",
     "title": "The History of the Decline and Fall of the Roman Empire",
@@ -239,7 +239,7 @@
    "chapters": 130,
    "paragraphs": 3210,
    "terms": 281,
-   "generated": "2026-11-18T03:39:02.819Z"
+   "generated": "2026-11-21T06:20:06.956Z"
   },
   {
    "slug": "communist-manifesto",
@@ -255,7 +255,7 @@
    "chapters": 5,
    "paragraphs": 243,
    "terms": 90,
-   "generated": "2026-11-18T03:19:51.447Z"
+   "generated": "2026-11-21T06:20:08.842Z"
   },
   {
    "slug": "capital-and-interest",
@@ -271,7 +271,7 @@
    "chapters": 31,
    "paragraphs": 1736,
    "terms": 452,
-   "generated": "2026-11-18T03:19:47.952Z"
+   "generated": "2026-11-21T06:20:10.961Z"
   },
   {
    "slug": "positive-theory-of-capital",
@@ -287,7 +287,7 @@
    "chapters": 53,
    "paragraphs": 1146,
    "terms": 112,
-   "generated": "2026-11-18T03:20:46.632Z"
+   "generated": "2026-11-21T06:20:13.548Z"
   },
   {
    "slug": "origin-of-money",
@@ -303,7 +303,7 @@
    "chapters": 9,
    "paragraphs": 67,
    "terms": 7,
-   "generated": "2026-11-18T03:20:34.008Z"
+   "generated": "2026-11-21T06:20:15.347Z"
   },
   {
    "slug": "karl-marx-and-the-close-of-his-system",
@@ -319,7 +319,7 @@
    "chapters": 6,
    "paragraphs": 325,
    "terms": 369,
-   "generated": "2026-11-18T03:20:23.664Z"
+   "generated": "2026-11-21T06:20:18.362Z"
   },
   {
    "slug": "natural-value",
@@ -335,7 +335,7 @@
    "chapters": 68,
    "paragraphs": 670,
    "terms": 157,
-   "generated": "2026-11-18T03:20:26.939Z"
+   "generated": "2026-11-21T06:20:20.614Z"
   }
  ]
 }

@@ -377,6 +377,26 @@ test('lake: wikidataPoint and support read P625 and references by 5.1\'s rules; 
   assert.match(build, /\.\.\.\(point \? \{ pt: point\.pt/, 'and stores pt');
 });
 
+// 21 November 2026: the Master Index's states that no longer exist are typed polity, not place. The crosswalk by name
+// matches Cliopatria's polities to the lake's places and polities (the Kingdom of France, now a polity, by its name), so
+// the next border build does not lose them; a site, a period or a person is never matched by name.
+test('build-borders: the lake\'s places and polities are matched by name; a site, a period or a person is not', async () => {
+  const B = await import('../omni/scripts/build-borders.mjs');
+  const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const dir = mkdtempSync(join(tmpdir(), 'vm-lake-'));
+  try {
+    writeFileSync(join(dir, '0.json'), JSON.stringify({
+      Q70972: { q: 'Q70972', label: 'Kingdom of France', type: 'polity', facts: { founded: '0987', dissolved: '1791-09-04' } },
+      Q142: { q: 'Q142', label: 'France', type: 'place', facts: { founded: '1792' } },
+      Q99309: { q: 'Q99309', label: 'Pantheon', type: 'site', facts: { founded: '0128' } },
+      Q1474884: { q: 'Q1474884', label: 'High Renaissance', type: 'period', facts: { start: '1494', end: '1527' } },
+      Q1399: { q: 'Q1399', label: 'Niccolò Machiavelli', type: 'person', facts: {} } }));
+    assert.deepEqual(B.lakePlaces(dir).map(p => p.q).sort(), ['Q142', 'Q70972']);
+    assert.deepEqual(B.lakePlaces(dir).find(p => p.q === 'Q70972'), { q: 'Q70972', label: 'Kingdom of France', from: 987, to: 1791 });
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('build-borders: its steps, on small fixtures (the archive check, the id, the crosswalk\'s name and date rules)', async () => {
   const B = await import('../omni/scripts/build-borders.mjs');
   const { zipStored } = await import('../design/vm-bundle.js');

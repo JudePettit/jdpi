@@ -37,6 +37,11 @@ export const LAKE = join(ROOT, 'lake', 'data');
 const MIN_COMMON = 4;
 // Which of two entities sharing a string a text of a given era is likelier to mean, all else equal.
 export const TYPE_RANK = ['place', 'person', 'conflict', 'event', 'organisation', 'party', 'idea', 'topic', 'election'];
+// The four types of 21 November 2026 (lake/scripts/types.mjs) rank as the type their entries were read as before: a
+// polity was a place and a site is clicked as one; a period and a series were events. A type not listed ranks last
+// (indexOf's -1 would have put it before every other).
+const RANK_AS = { polity: 'place', site: 'place', period: 'event', series: 'event' };
+export const typeRank = t => { const i = TYPE_RANK.indexOf(RANK_AS[t] || t); return i < 0 ? TYPE_RANK.length : i; };
 // Only these types' lowercase strings are terms a text uses as common nouns; a place's or party's lowercase alias
 // ("res publica", "labour") is left alone.
 const COMMON_TYPES = new Set(['idea', 'topic']);
@@ -180,7 +185,7 @@ export function choose(ends, year, stats) {
   if (!pool.length) return null;
   // Alive in the era first; then the entity whose own name the string is, before one that has it as an alias (the
   // Roman Empire before the Byzantine Empire for "Roman Empire"); then by type; then by the Master Index's mentions.
-  if (pool.length > 1) pool.sort((a, b) => (after(a) - after(b)) || (b.exact - a.exact) || (TYPE_RANK.indexOf(a.type) - TYPE_RANK.indexOf(b.type)) || (b.total - a.total) || a.q.localeCompare(b.q));
+  if (pool.length > 1) pool.sort((a, b) => (after(a) - after(b)) || (b.exact - a.exact) || (typeRank(a.type) - typeRank(b.type)) || (b.total - a.total) || a.q.localeCompare(b.q));
   return pool[0];
 }
 

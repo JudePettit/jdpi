@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { stripBoilerplate, normalise, roman, sentenceCase, splitChapters } from '../bibliotheca/scripts/text.mjs';
-import { buildAliasIndex, tagText, tagBook, newStats, report, firstYear, fold, loadLake } from '../bibliotheca/scripts/tag-terms.mjs';
+import { buildAliasIndex, tagText, tagBook, newStats, report, firstYear, fold, loadLake, TYPE_RANK, typeRank, choose } from '../bibliotheca/scripts/tag-terms.mjs';
 import { SHELF, shelfEntry, checkRights, checkEuRights, indexEntry, bookJson, BOOKS, INDEX, ROOT, MAX_BYTES, CACHE } from '../bibliotheca/scripts/shelf.mjs';
 import { bookRecord, splitWork, splitBook, titleCase, caseCounts, sourceFile, bookText } from '../bibliotheca/scripts/build-book.mjs';
 import { readEconlib, merge as mergeReadings, sourceOf, textWords, table as tableText, renumber, straightQuotes, scribble, checkAgainst, witnessWords, shelfWords, joinBroken } from '../bibliotheca/scripts/scan-text.mjs';
@@ -137,6 +137,22 @@ test('tagger: the era rule skips an entity first dated after the book unless the
   assert.equal(firstYear({ born: '1469-05-03', died: '1527-06-21' }), 1469);
   assert.equal(firstYear({ died: '1527' }), null, 'a death alone does not date an entity');
   assert.equal(firstYear({}), null);
+});
+
+// The four types of 21 November 2026: a type missing from TYPE_RANK was ranked before every other (indexOf -1), so a
+// polity would have beaten a person of the same name where a place does not. Each of the four ranks as the type its
+// entries were read as before (a polity was a place; a site is clicked as a place; a period and a series were events),
+// and a type the tagger does not know ranks last.
+test('tagger: a polity, a site, a period and a series rank as a place or an event; a type it does not know ranks last', async () => {
+  const { TYPES } = await import('../lake/scripts/types.mjs');
+  for (const t of TYPES) assert.ok(typeRank(t) >= 0 && typeRank(t) < TYPE_RANK.length, `${t} is ranked`);
+  assert.equal(typeRank('polity'), typeRank('place')); assert.equal(typeRank('site'), typeRank('place'));
+  assert.equal(typeRank('period'), typeRank('event')); assert.equal(typeRank('series'), typeRank('event'));
+  assert.equal(typeRank('widget'), TYPE_RANK.length);
+  const c = (q, type, total) => ({ q, label: q, alias: 'Name', exact: true, proper: true, type, first: null, total, decided: false });
+  assert.equal(choose([c('Q2', 'polity', 1), c('Q1', 'person', 9)]).q, 'Q2', 'a polity before a person, as a place');
+  assert.equal(choose([c('Q2', 'polity', 1), c('Q1', 'place', 9)]).q, 'Q1', 'a polity and a place tie on type: the mentions decide');
+  assert.equal(choose([c('Q2', 'widget', 99), c('Q1', 'election', 1)]).q, 'Q1', 'an unknown type last');
 });
 
 test('tagger: the shelf’s decisions win: retarget, leave out, add a word; a wrong decision is refused', () => {
@@ -667,6 +683,12 @@ test('built: every term has valid offsets, a whole word, a known string of its e
   assert.ok(qids('wealth-of-nations-1').has('Q12548'), 'Smith’s Germany');
   assert.ok(qids('peloponnesian-war').has('Q5690'), 'Lacedaemon');
   for (const [e] of shelfBooks) for (const q of ['Q38', 'Q41', 'Q79', 'Q142', 'Q183', 'Q668']) assert.ok(!qids(e.slug).has(q), `${e.slug}: no present-day state ${q}`);
+  // Review D2 (21 November 2026): Gibbon's Abyssinia is mostly the Aksumite kingdom of the 4th to 6th centuries
+  // (Frumentius, Justinian's Negus, Abrahah), not the Ethiopian Empire of 1270 to 1975, now a polity whose click opens
+  // the Omni-Map on those years; the shelf leaves the word untagged in Decline and Fall. Darwin's and Smith's Abyssinia
+  // is the state of their own day and keeps its tag.
+  for (let v = 1; v <= 6; v++) assert.ok(!qids(`decline-and-fall-${v}`).has('Q207521'), `decline-and-fall-${v}: no Ethiopian Empire for Gibbon's Abyssinia`);
+  assert.ok(qids('origin-of-species').has('Q207521') && qids('wealth-of-nations-1').has('Q207521'), 'Darwin’s and Smith’s Abyssinia is the Ethiopian Empire');
 });
 
 test('built: every term is of its text’s time: first dated by the time the text was written, or by the edition in a note', () => {

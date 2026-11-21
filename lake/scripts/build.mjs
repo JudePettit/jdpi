@@ -23,7 +23,7 @@ import { wikidataPoint } from './coords.mjs';
 import { shortCounts, recount } from './counts.mjs';
 import { isDisambiguation, getBatched, entityLabel, nameOf, otherLabel, shownName, uniqueNames, titleAlias, summaryFor, restSummary, isQid, REDIRECT_BADGES } from './resolve.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
-import { typeOf } from './types.mjs';
+import { typeOf, TYPE_NAMES } from './types.mjs';
 import { schoolSelfTags } from './thinkers.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -215,8 +215,11 @@ for (const q of labelOnly) { const n = nameOf(q, { fetched: fetchedLabel, commit
 // item leaves the list once Wikidata names it rightly again.
 const LABEL_OVERRIDES = [
   { q: 'Q1227195', label: 'political economist', why: 'its English label "political economist" was removed on 10 November 2026 and a multilingual label "Master’s Degree in Economics" added on 13 November, so seventeen economists, Adam Smith and Ricardo among them, read as holding a degree as their occupation (the item’s history)', read: '2026-11-18' },
+  { q: 'Q3366745', label: 'Spanish Socialist Workers\' Party of the Community of Madrid', why: 'its English label is "Vox", another party, while its Spanish label (Partido Socialista Obrero Español de la Comunidad de Madrid), its alias PSM and its English description ("territorial organization of the PSOE in the Community of Madrid") say PSOE, so Pedro Sánchez was tagged "Member of:Vox"; the name is the one the last full build had (review D1)', read: '2026-11-21' },
+  { q: 'Q296718', label: 'Lázaro Cárdenas', why: 'its English label is "Lázaro Cárdenas segundo", while its Spanish and multilingual labels and its English Wikipedia article are "Lázaro Cárdenas", the 51st President of Mexico (review D1)', read: '2026-11-21' },
 ];
-for (const { q, label } of LABEL_OVERRIDES) if (labels.has(q)) labels.set(q, label);
+const LABEL_HOLD = new Map(LABEL_OVERRIDES.map(({ q, label }) => [q, label]));
+for (const [q, label] of LABEL_HOLD) if (labels.has(q)) labels.set(q, label);
 // Nationality tags read better as demonyms ("American" rather than "United States of America").
 const demonym = new Map();
 const citizenships = [...new Set([...raw.values()].flatMap(e => refIds(e, 'P27')))];
@@ -271,7 +274,7 @@ if (unfetched) console.warn(`${unfetched} of ${needSummary.length} summaries cou
 // The names "Appears in" shows; a Kino category's carries the suite's name, since "Wars" alone would be anyone's.
 const MODULE_NAMES = { retrospective: 'Political Retrospective', pestle: 'National Analysis', volatility: 'Geopolitical Volatility', 'historical-calendar': 'Historical Calendar', calendar: 'Realtime Calendar', 'battlefield-history': 'Retrospective Battlefield', 'war-focus': 'War Focus', battlefield: 'Realtime Battlefield', monthly: 'Month by Month', kardashev: 'Kardashev Tracker', traders: 'Investor Impersonator', learning: 'Learning · Finance & Economics', 'learning-politics': 'Learning · Politics', progress: 'Invention Timeline', 'science-briefing': 'Scientific Briefing', 'osint-training': 'Intel Training', 'neo-classic': 'Bibliotheca',
   'kino-political-events': 'Kino · Political Events', 'kino-political-figures': 'Kino · Political Figures', 'kino-political-parties': 'Kino · Political Parties', 'kino-wars': 'Kino · Wars', 'kino-geopolitical-events': 'Kino · Geopolitical Events', 'kino-great-thinkers': 'Kino · Great Thinkers' };
-const TYPE_NAMES = { person: 'Person', place: 'Place or state', conflict: 'War or conflict', election: 'Election', party: 'Political party', idea: 'Idea or school of thought', organisation: 'Organisation', event: 'Event', topic: 'Topic' };
+// The type's name in the "Type:" tag: TYPE_NAMES in types.mjs, beside the rules, so a new type is never "Type:undefined".
 // `notes` gathers the notes a module gives a tag (adapters.mjs mentionTags: Learning's positions, VM's own placement),
 // which the record keeps as `tn` and the page shows beside the tag.
 function tagsFor(e, type, ms, notes = {}) {
@@ -320,7 +323,8 @@ function record(q) {
   // another language's; a bare QID only with none of them (resolve.mjs entityLabel; eight entries were "Q4887122" and
   // the like until November 2026). `name`, only where it differs, is what the page shows: a person's label without the
   // realm after a regnal number or a comma title ("Frederik X", label "Frederik X of Denmark", resolve.mjs shownName).
-  const label = entityLabel(e, { title, names: ms.map(m => m.label), committed: committedLabel.get(q), other: foreign.get(q), q });
+  // A held name (LABEL_OVERRIDES) is the entry's own label too, not only a related entry's.
+  const label = LABEL_HOLD.get(q) || entityLabel(e, { title, names: ms.map(m => m.label), committed: committedLabel.get(q), other: foreign.get(q), q });
   // Short only where Wikipedia's title is the short name, or with no article (the second reader's F1; uniqueNames below
   // takes back one that another entry would show too); Wikipedia's title kept among a person's aliases (titleAlias).
   const type = typeOf(e), name = shownName(label, type, { title });

@@ -102,6 +102,11 @@ const GIBBON = {
     // United States, nor Valencia the modern region, nor Tonquin (Tonkin) the French protectorate; Neapolis is Sichem
     // (Nablus) or the Neapolis of Cyprus, not Naples, which Gibbon calls Naples.
     ...untag('Byzantium', 'Caledonia', 'Alba', 'Scot', 'Saxony', 'Man', 'States', 'Valencia', 'Tonquin', 'Tonkin', 'Neapolis'),
+    // Abyssinia is most often the Aksumite kingdom of the fourth to sixth centuries (Frumentius, Justinian's Negus and
+    // the silk trade, Abrahah), which the lake has no entry for, not the Ethiopian Empire of 1270 to 1975 (Q207521), a
+    // polity whose click opens the Omni-Map on those years; so the word is left untagged, as it was until that entry
+    // came into the lake on 21 November 2026 (review D2). To be looked at again once a Kingdom of Aksum entry exists.
+    Abyssinia: null,
     // "The kingdom of Naples" is the Kingdom (Gibbon's own day's, or the Normans' and Angevins'), the entity the
     // Prince's cast feeds the lake; the bare "Naples" is the city as often, and is left to the lake.
     'kingdom of Naples': 'Q173065',

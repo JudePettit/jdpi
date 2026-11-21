@@ -27,6 +27,7 @@ import { llmsTxt } from './llms.mjs';
 import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
 import { groupBattles, ownFigure, stateOf } from '../../battlefield/focus/figures.mjs';
+import { TYPES as MASTER_INDEX_TYPES } from '../../lake/scripts/types.mjs';
 // No download carries a value from a cite-only source (integration/scripts/cite-only.mjs, the Correlates of War): since
 // MP-11 (Jude, 17 November 2026: free data only; built 20 November) none is read here, so none is imported.
 // Each licence line says what the source's own terms say, as read on the date integration/sources.json gives.
@@ -325,7 +326,13 @@ spec({
 });
 
 // Master Index: every entity (the lake), flattened with its main dates and country.
-const LAKE_TYPES = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation'];
+// The nine types before 21 November 2026 keep their places (the name index's codes hold a type's place in one digit), and
+// the four of that day follow: a polity (a state that no longer exists), a period, a site and a series.
+const LAKE_TYPES = ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation', 'polity', 'period', 'site', 'series'];
+{
+  const missing = MASTER_INDEX_TYPES.filter(t => !LAKE_TYPES.includes(t)), extra = LAKE_TYPES.filter(t => !MASTER_INDEX_TYPES.includes(t));
+  if (missing.length || extra.length) throw new Error(`build-catalog: LAKE_TYPES differs from lake/scripts/types.mjs (missing ${missing.join(', ') || 'none'}; not a type ${extra.join(', ') || 'none'})`);
+}
 let LAKE_ENTITIES = null;
 const lakeEntities = () => {
   if (LAKE_ENTITIES) return LAKE_ENTITIES;
@@ -338,10 +345,10 @@ const lakeEntities = () => {
   }
   return (LAKE_ENTITIES = all);
 };
-const ENC_TYPE_ORDER = ['person', 'conflict', 'election', 'event', 'topic', 'party', 'place', 'idea', 'organisation'];
+const ENC_TYPE_ORDER = ['person', 'conflict', 'election', 'event', 'period', 'series', 'topic', 'party', 'place', 'polity', 'site', 'idea', 'organisation'];
 spec({
   id: 'encyclopaedia-entities', title: 'Master Index: entities', module: 'rs', submodule: 'encyclopedia',
-  description: 'Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
+  description: 'Every person, place, polity (a state that no longer exists), party, election, war, event, period, site, series, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.',
   derive: () => lakeEntities().map(({ e, appears }) => {
     const f = e.facts || {}, rel = e.rel || {};
     const country = (rel.Country || rel.Citizenship || rel.Jurisdiction || [])[0];
@@ -688,14 +695,20 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
 
 /* ------------------------------------------------------------------ Master Index name index */
 // Tokens of every label and alias → entity codes (qid number × 1000 + min(mentions, 99) × 10 + type), sorted by mentions.
+// The type is its place in LAKE_TYPES when that is 0–8 (the nine types an old copy of the local MCP server reads); a
+// later type (from 21 November 2026: polity, period, site, series) is digit 9, its place in `later` by qid number.
 // Shards are keyed by token prefix (two characters, extended where a shard grows past ~24 KB) and packed into ~40 files.
 {
   const ents = lakeEntities().map(({ e }) => ({ qn: +String(e.q).slice(1), label: e.label || '', aliases: e.aliases || [], type: e.type, total: e.total || 0 }))
     .filter(e => Number.isFinite(e.qn)).sort((a, b) => b.total - a.total || a.qn - b.qn);
   const tok = new Map();
   const ok = t => [...t].length >= 2;
+  const later = {};
   for (const e of ents) {
-    const code = e.qn * 1000 + Math.min(e.total, 99) * 10 + Math.max(0, LAKE_TYPES.indexOf(e.type));
+    const ti = LAKE_TYPES.indexOf(e.type);
+    if (ti < 0) throw new Error(`build-catalog: Q${e.qn} has a type the name index does not know: ${e.type}`);
+    if (ti > 8) later[e.qn] = ti;
+    const code = e.qn * 1000 + Math.min(e.total, 99) * 10 + Math.min(ti, 9);
     const lt = new Set(tokenize(e.label).filter(ok));
     const at = new Set(); for (const a of e.aliases) for (const t of tokenize(a)) if (ok(t) && !lt.has(t)) at.add(t);
     // x: the whole label or alias is this one word (acronyms such as UN, NATO, USSR; one-word names), for an exact-name boost
@@ -732,7 +745,7 @@ put('llms.txt', llmsTxt(CATALOGUE, { site: BASE_URL }));
   }
   if (Object.keys(cur).length) files.push(cur);
   files.forEach((f, i) => { const p = `integration/data/names/${i}.json`; put(p, JSON.stringify(f) + '\n'); derivedFiles.add(p); });
-  putJson('integration/data/names/index.json', { generated: STAMP, about: 'Master Index name index: token prefix → file. Codes are qid number × 1000 + min(mentions, 99) × 10 + type index.', types: LAKE_TYPES, entities: ents.length, split: [...split].sort(), keys: keyFile });
+  putJson('integration/data/names/index.json', { generated: STAMP, about: 'Master Index name index: token prefix → file. Codes are qid number × 1000 + min(mentions, 99) × 10 + type index (0–8, a place in types); digit 9 is a later type, whose place in types is later[qid number].', types: LAKE_TYPES, later, entities: ents.length, split: [...split].sort(), keys: keyFile });
   log(`names: ${tok.size} tokens, ${keys.length} keys, ${files.length} files, ${(files.reduce((a, f) => a + JSON.stringify(f).length, 0) / 1024).toFixed(0)} KB`);
 }
 

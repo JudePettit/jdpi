@@ -439,19 +439,23 @@
             "name": "type",
             "in": "query",
             "required": false,
-            "description": "Only this type.",
+            "description": "Only this type (a polity is a state that no longer exists).",
             "schema": {
               "type": "string",
               "enum": [
                 "person",
                 "place",
-                "party",
-                "election",
-                "event",
-                "topic",
-                "idea",
+                "polity",
+                "period",
+                "site",
+                "series",
                 "conflict",
-                "organisation"
+                "election",
+                "party",
+                "idea",
+                "organisation",
+                "event",
+                "topic"
               ]
             }
           },

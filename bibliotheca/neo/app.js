@@ -52,7 +52,7 @@
    the narrator off. S.ar and S.reader are never both true. */
 import { readHash, writeHash, readMap } from './lib/hash.js';
 import { readRecipe, writeRecipe } from '../../design/vm-recipe.js';
-import { clickDetail, kindOf, readPeriods, resolve, yearsText } from '../../design/vm-click.js';
+import { clickDetail, isPlaceKind, kindOf, opensOn, readPeriods, resolve, yearsText } from '../../design/vm-click.js';
 import { formatSpan } from '../../design/vm-dates.js';
 import { readMode, writeMode } from './lib/mode.js';
 import { esc, paragraphHtml, distinctTerms, termCount, chapterLabel, validTerms } from './lib/text.js';
@@ -441,7 +441,13 @@ function useTerm(qid, from = null) {
   // the Map tab, with the Master Index entry one tab away (10.2's default). A chip in the "On screen" bar, and any click
   // while the AR Reader is on (its pane follows the narrator on the Master Index), open the entry as before; while
   // the Map tab is open, every click redraws the map.
+  // S.mapByClick: the term this click opened (or redrew) the Map tab for, so a series opens its Master Index entry
+  // instead. It holds until a renderMap for that term has decided (review R1, 21 November 2026): the vm:click listener's
+  // renderMap supersedes the one openPane starts, and must still know the click. A reader who picks the Map tab later
+  // still gets the series' card.
+  S.mapByClick = qid;
   openPane(S.pane === 'map' || (inText && !S.ar) ? 'map' : 'ency');
+  if (S.pane !== 'map') S.mapByClick = null;
   reveal(from);
   dispatchClick(qid, S.mapPid);
 }
@@ -772,7 +778,7 @@ async function clickView(qid, pid) {
     loadOutlined().catch(() => null), loadHeld().catch(() => null)]);
   const ctx = {
     today: new Date().toISOString().slice(0, 10), era: bookEra(S.book, S.row, c)?.years, record: pid ? periods(pid) : null,
-    lookup: q => recs.get(q) || null, passagePlaces: passageQs.filter(q => recs.get(q)?.type === 'place'), battles, wars, outlined, held,
+    lookup: q => recs.get(q) || null, passagePlaces: passageQs.filter(q => isPlaceKind(recs.get(q)?.type)), battles, wars, outlined, held,
     layers: { borders: { step: layers?.layers?.find(l => l.id === 'borders')?.time?.step || 'y' } },
   };
   const from = { module: 'neo-classic', at: `bibliotheca/neo/index.html${hashFor(c.n, { p: pid, t: qid })}`, ...(pid ? { passage: { book: S.book.slug, ch: c.n, p: pid } } : {}) };
@@ -784,6 +790,7 @@ async function renderMap() {
   const own = !S.term && (S.mapFromAddress || S.mapOwn) ? readRecipe(S.map || '') : null;
   S.mapOwn = !!own;
   const q = S.term || own?.q || null, pid = S.mapPid || S.current || S.p || null, key = `${q}|${pid}`;
+  const byClick = !!q && S.mapByClick === q && !S.mapFromAddress;
   const f = $('#map-frame');
   if (!q && own) {
     // A view with no clicked object (a bare period): the frame draws it, with no card of offers.
@@ -808,8 +815,20 @@ async function renderMap() {
     if (!v) { $('#map-empty').hidden = false; $('#map-empty').textContent = `The Master Index holds no record of ${label} yet, so VM cannot map it.`; f.hidden = true; $('#map-card').hidden = true; S.map = null; writeState(); return; }
     if (!S.mapFromAddress) S.map = v.res.recipe;
   }
+  // The click rule of 21 November 2026 (design/vm-click.js opensOn): a series, a grouping of other entries, opens its
+  // Master Index entry; a period with no years of its own opens its card alone, with no map of other years.
+  const opens = S.mapFromAddress ? 'map' : opensOn(S.mapRes.entry);
+  if (S.mapByClick === q) S.mapByClick = null; // the click is decided here, by the last renderMap it started
+  if (opens === 'entry' && byClick) { S.mapFromAddress = false; openPane('ency'); return; }
   S.mapFromAddress = false;
   $('#map-empty').hidden = true;
+  if (opens !== 'map') {
+    f.hidden = true; S.map = null;
+    drawMapCard();
+    setPaneHead('Omni-Map', S.mapRes.entry?.label || label, null);
+    writeState();
+    return;
+  }
   f.hidden = false;
   drawMapCard();
   showMapRecipe(S.map || S.mapRes.res.recipe);

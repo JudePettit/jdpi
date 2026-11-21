@@ -463,6 +463,41 @@ describe('tools', () => {
     assert.equal((await call('get_entity', { qid: 'Q0' })).isError, true);
     assert.equal((await call('get_entity', { qid: 'Q1/../../x' })).isError, true);
   });
+  // The four types of 21 November 2026 (polity, period, site, series): the MCP server names them, filters by them and
+  // describes them, the catalogue's entity shards and the OpenAPI enum hold them, and the name index's codes keep the
+  // nine types they had (an old copy of the local server still reads them) with a later type's index beside them.
+  test('the Master Index\'s thirteen types: search_encyclopaedia names, filters by and describes the four of 21 November 2026', async () => {
+    const { TYPES } = await imp('lake/scripts/types.mjs');
+    const search = (await rpc({ jsonrpc: '2.0', id: 3, method: 'tools/list' })).json.result.tools.find(t => t.name === 'search_encyclopaedia');
+    assert.deepEqual([...search.inputSchema.properties.type.enum].sort(), [...TYPES].sort(), 'the tool names every type the Master Index gives');
+    assert.match(search.description, /polities \(states that no longer exist\), periods, sites, series/);
+    const ottoman = (await call('search_encyclopaedia', { query: 'Ottoman Empire', type: 'polity' })).structuredContent;
+    assert.equal(ottoman.results[0].qid, 'Q12560'); assert.equal(ottoman.results[0].type, 'polity'); assert.equal(ottoman.type, 'polity');
+    assert.ok(!(await call('search_encyclopaedia', { query: 'Ottoman Empire', type: 'place' })).structuredContent.results.some(r => r.qid === 'Q12560'), 'a polity is not a place');
+    assert.equal((await call('search_encyclopaedia', { query: 'Ottoman Empire', type: 'polities' })).structuredContent.type, 'polity');
+    for (const [asked, type] of [['series', 'series'], ['Series', 'series'], ['periods', 'period'], ['sites', 'site'], ['wars', 'conflict'], ['people', 'person']]) {
+      const r = await call('search_encyclopaedia', { query: 'Rome', type: asked });
+      assert.ok(!r.isError, `${asked}: ${r.content?.[0]?.text}`); assert.equal(r.structuredContent.type, type, asked);
+    }
+    const pyramid = (await call('search_encyclopaedia', { query: 'Great Pyramid of Giza', type: 'site' })).structuredContent;
+    assert.equal(pyramid.results[0]?.qid, 'Q37200');
+    const unknown = await call('search_encyclopaedia', { query: 'Rome', type: 'widget' });
+    assert.equal(unknown.isError, true); assert.match(unknown.content[0].text, /polity, period, site, series/);
+    // The name index: the nine old types keep their digits; a later type's entities carry digit 9 and their index beside.
+    const ni = J('integration/data/names/index.json');
+    assert.deepEqual(ni.types.slice(0, 9), ['person', 'place', 'party', 'election', 'event', 'topic', 'idea', 'conflict', 'organisation']);
+    assert.deepEqual([...ni.types].sort(), [...TYPES].sort());
+    assert.equal(ni.types[ni.later['12560']], 'polity', 'the Ottoman Empire is listed under its later type');
+    assert.match(ni.about, /digit 9/);
+    // The catalogue: the type field names all thirteen, and the entities are sharded by type, polities among them.
+    const ents = CAT.datasets.find(d => d.id === 'encyclopaedia-entities');
+    const typeField = ents.fields.find(f => f.name === 'type');
+    for (const t of TYPES) assert.match(typeField.description, new RegExp(`\\b${t}\\b`), `the type field names ${t}`);
+    assert.ok(Object.values(QI.datasets['encyclopaedia-entities'].parts).some(p => p.values?.type?.includes?.('polity') || p.values?.type === 'polity'), 'a shard of polities');
+    const openapi = J('integration/openapi.json');
+    const typeParam = openapi.paths['/search'].get.parameters.find(p => p.name === 'type');
+    assert.deepEqual([...typeParam.schema.enum].sort(), [...TYPES].sort());
+  });
   test('upcoming_events, country_profile, latest_briefing, list_submodules', async () => {
     const ev = (await call('upcoming_events', { type: 'ballots', limit: 5 })).structuredContent;
     assert.ok(ev.events.every(e => ['election', 'referendum', 'party'].includes(e.type) && e.date >= ev.from));

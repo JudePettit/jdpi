@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-21T07:59:12.980Z",
+  "generated": "2026-11-21T17:32:37.700Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1130,16 +1130,16 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6844,
+      "rows": 6918,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
         "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
       ],
-      "updated": "2026-11-20",
+      "updated": "2026-11-21",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2992370
+      "bytes": 3027824
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1204,10 +1204,111 @@
         "Media Bias/Fact Check",
         "The publishers' own feeds"
       ],
-      "updated": "2026-11-20",
+      "updated": "2026-11-21",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2992370
+      "bytes": 3027824
+    },
+    {
+      "id": "daily-synopsis-stories",
+      "title": "Daily Synopsis: the day's major stories",
+      "module": "hb",
+      "submodule": "daily-synopsis",
+      "description": "Each day's major political stories, picked by stated rules with no AI model: those that at least three of the Political Briefing's publishers, from at least two of its five positions, ran in the 24 hours to its morning refresh, at most ten a day, with the number of outlets on each side and the first headline. `authorship` says whether that day's short digest was written by an AI model (Claude) and passed VM's checks (model) or the day holds the outlets' headlines alone (rules); no person checked either.",
+      "url": "integration/data/daily-synopsis-stories.json",
+      "format": "json",
+      "records": "records",
+      "fields": [
+        {
+          "name": "day",
+          "type": "date",
+          "description": "Day (UTC)"
+        },
+        {
+          "name": "rank",
+          "type": "number",
+          "description": "Rank that day, 1 to 10"
+        },
+        {
+          "name": "story",
+          "type": "string",
+          "description": "Story id in the day's file (s1, s2, …)"
+        },
+        {
+          "name": "outlets",
+          "type": "number",
+          "description": "Political Briefing publishers that ran a headline in it"
+        },
+        {
+          "name": "far_left",
+          "type": "number",
+          "description": "Far-left publishers"
+        },
+        {
+          "name": "left",
+          "type": "number",
+          "description": "Left publishers"
+        },
+        {
+          "name": "centre",
+          "type": "number",
+          "description": "Centre publishers"
+        },
+        {
+          "name": "right",
+          "type": "number",
+          "description": "Right publishers"
+        },
+        {
+          "name": "far_right",
+          "type": "number",
+          "description": "Far-right publishers"
+        },
+        {
+          "name": "lead_headline",
+          "type": "string",
+          "description": "The first headline: the most typical one anyone can read"
+        },
+        {
+          "name": "lead_outlet",
+          "type": "string",
+          "description": "Its publisher"
+        },
+        {
+          "name": "lead_url",
+          "type": "string",
+          "description": "Its link"
+        },
+        {
+          "name": "authorship",
+          "type": "string",
+          "description": "model: the day's digest was written by an AI model (Claude) and passed the checks; rules: the outlets' headlines alone"
+        },
+        {
+          "name": "written",
+          "type": "string",
+          "description": "The written digest: published, refused or missing"
+        },
+        {
+          "name": "five",
+          "type": "string",
+          "description": "The story's written 5 Sided Analysis: published, refused, missing or not-eligible"
+        }
+      ],
+      "rows": 10,
+      "licence": "Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.",
+      "sources": [
+        "The Political Briefing's publishers' RSS and Atom feeds (intelligence-briefing-stories)",
+        "Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps"
+      ],
+      "updated": "2026-11-21",
+      "refresh": "daily",
+      "page": "daily-synopsis/index.html",
+      "derivedFrom": [
+        "daily-synopsis/data/index.json",
+        "daily-synopsis/data/days/2026-11-21.json"
+      ],
+      "bytes": 4251
     },
     {
       "id": "econ-briefing-stories",
@@ -1305,7 +1406,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 547,
+      "rows": 565,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1313,7 +1414,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 316932
+      "bytes": 327439
     },
     {
       "id": "econ-briefing-sources",
@@ -1416,11 +1517,6 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
-          "name": "error",
-          "type": "string",
-          "description": "Last error, if any"
-        },
-        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -1449,7 +1545,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 316932
+      "bytes": 327439
     },
     {
       "id": "science-briefing-stories",
@@ -1542,7 +1638,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1393,
+      "rows": 1398,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1550,7 +1646,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 805204
+      "bytes": 809808
     },
     {
       "id": "science-briefing-sources",
@@ -1676,7 +1772,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 805204
+      "bytes": 809808
     },
     {
       "id": "digital-briefing-stories",
@@ -1779,7 +1875,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1350,
+      "rows": 1361,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1787,7 +1883,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 795146
+      "bytes": 800618
     },
     {
       "id": "digital-briefing-sources",
@@ -1933,7 +2029,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 795146
+      "bytes": 800618
     },
     {
       "id": "political-calendar",
@@ -3508,7 +3604,7 @@
           "description": "Tabs inside the page"
         }
       ],
-      "rows": 39,
+      "rows": 40,
       "licence": "© JDP-Iq.",
       "sources": [
         "registry.json"
@@ -3519,7 +3615,7 @@
       "derivedFrom": [
         "registry.json"
       ],
-      "bytes": 22046
+      "bytes": 22749
     },
     {
       "id": "kino-documentaries",

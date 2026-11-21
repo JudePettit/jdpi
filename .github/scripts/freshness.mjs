@@ -60,6 +60,8 @@ const STORES = [
   { file: 'osint/data/sanctions-index.json', name: 'OSINT sanctions index', workflow: 'sanctions-refresh.yml', every: 24,
     when: j => { const reads = Object.values(j.lists || {}).map(l => l?.read); return reads.length && reads.every(Boolean) ? reads.sort()[0] : undefined; } },
   { file: 'national/data/standins.json', name: 'Stand-in series', workflow: 'standins-refresh.yml', every: 31 * 24 },
+  // A day a day: its newest day (`latest`), not `generated`, which moves when a draft is checked later the same day.
+  { file: 'daily-synopsis/data/index.json', name: 'Daily Synopsis', workflow: 'daily-synopsis.yml', every: 24, when: j => j.latest },
 ];
 // Each refresh workflow by its plain name.
 const WORKFLOWS = {
@@ -69,6 +71,7 @@ const WORKFLOWS = {
   'progress-refresh.yml': 'Invention Timeline refresh', 'lake-refresh.yml': 'Master Index refresh', 'national-refresh.yml': 'National Analysis refresh',
   'kino-refresh.yml': 'Kino refresh', 'rsp-refresh.yml': 'Wikipedia reliability flags refresh',
   'sanctions-refresh.yml': 'OSINT sanctions index refresh', 'standins-refresh.yml': 'Stand-in series refresh',
+  'daily-synopsis.yml': 'Daily Synopsis build',
 };
 
 const age = ms => ms < 48 * HOUR ? `${Math.round(ms / HOUR)} h` : `${Math.round(ms / (24 * HOUR))} days`;

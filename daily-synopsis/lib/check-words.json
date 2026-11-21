@@ -1,0 +1,101 @@
+{
+  "about": "Daily Synopsis: the fixed lists the check (daily-synopsis/lib/check.mjs) refuses a model's draft by. Each entry is matched as a whole word or phrase, ignoring case and accents, after curly apostrophes are made straight. An entry ending in * stands for the word and every longer word that begins so (ignor* is ignore, ignored, ignoring and ignorant). An entry with … between its words allows up to six words in the gap (described … as is also described the summit as), the first of them not for, on, off, up, in, out or back. tests/daily-synopsis.test.mjs tests every entry, and daily-synopsis/scripts/prompt-lists.mjs writes them into PROMPT.md. Edit only with a test, and run prompt-lists.mjs after.",
+  "reportedSpeech": {
+    "about": "Words that mark a sentence as someone's words (reported speech). Refused in every sentence of the digest and of the 5 Sided Analysis.",
+    "words": ["said", "says", "say", "saying", "told", "tells", "tell", "stated", "declared", "declares", "claimed", "claims", "claim", "claiming",
+      "insist*", "argued", "argues", "asserted", "asserts", "remarked", "wrote", "writes", "tweet*", "posted on", "according to",
+      "in his words", "in her words", "in their words", "in the words of", "in the view of", "quoted", "quoting", "quote", "quotes", "vowed", "vows", "vowing",
+      "pledged", "promised", "warned", "warns", "warning that", "called it", "described … as", "called … a", "called … an", "branded … as", "labelled … as",
+      "labeled … as", "hailed … as", "dismissed … as", "painted … as", "characterised … as", "characterized … as", "dubbed", "branded", "accused", "accuses", "denied", "denies",
+      "confirmed that", "added that", "noted that", "suggested that", "announced that", "stressed that", "explained", "acknowledged", "conceded",
+      "alleged that", "believes that", "thinks that", "hinted", "boasted", "boasts", "reported", "reportedly", "spokesperson", "spokesman",
+      "spokeswoman", "statement"]
+  },
+  "judgement": {
+    "about": "Words and phrases that state a motive, an intent or a judgement of a side or an outlet. Refused in the written 5 Sided Analysis: it says what the headlines put first, never why. Besides this list, a side's sentence may not go on after the word first with to and a verb (first to stir fear): that too gives a purpose.",
+    "words": ["bias*", "propagand*", "lie", "lies", "lied", "lying", "liar", "liars", "mislead*", "misled", "spin", "spins", "spun", "spinn*",
+      "agenda*", "admits", "admitted", "admit", "refuses to", "refused to", "fails to", "failed to", "failing to", "ignor*", "downplay*",
+      "plays down", "played down", "exaggerat*", "hypes", "hyped", "sensational", "sensationali*", "slant*", "partisan", "hysteri*", "smear*",
+      "distort*", "whitewash*", "cover up", "covers up", "covered up", "hides", "conceal*", "omits", "omitted", "buries", "buried", "cherry-pick*",
+      "misrepresent*", "demoni*", "vilif*", "glorif*", "deliberately", "intentionally", "purposely", "wants to", "tries to", "tried to", "seeks to",
+      "aims to", "in order to", "so as to", "because", "motive", "motives", "motivated", "intent", "intention", "intends", "intended", "narrativ*",
+      "framing", "frames", "framed", "angle", "loaded", "inflammatory", "fake", "false", "falsely", "untrue", "accurate", "accurately", "inaccurate",
+      "truth", "truthful", "honest", "dishonest", "fair", "unfair", "balanced", "objective", "credible", "reliable", "unreliable", "correctly",
+      "wrongly", "rightly", "obviously", "clearly", "of course", "conveniently", "predictably", "unsurprisingly", "silent on", "glosses over",
+      "gloss over", "conspiracy", "fearmonger*", "fear-mongering", "scaremonger*", "alarmist", "apologist", "mouthpiece", "shill", "extremist",
+      "radical", "hoping", "hopes to", "in a bid", "so that", "so readers", "aimed at", "designed to", "meant to", "one-sided", "lurid*",
+      "to stir", "to stoke", "to push", "to anger", "to shock", "to frighten", "to scare", "to inflame", "to rally", "to provoke", "to whip up",
+      "reader", "readers", "audience", "audiences"]
+  },
+  "judgementEverywhere": {
+    "about": "The part of the judgement list refused in every sentence, the digest's own included: words that call something biased or a lie. In the digest a word is allowed when a headline or summary the sentence cites has the same word (a law on propaganda, a study of bias); in the 5 Sided Analysis never.",
+    "words": ["bias*", "propagand*", "lied", "liar", "liars", "mislead*", "misled", "smear*", "one-sided", "fake news", "disinformation"]
+  },
+  "journalist": {
+    "about": "Words that name a journalist's or a publisher's role. Refused in the written 5 Sided Analysis, where outlets appear only as linked headlines, never in VM's prose.",
+    "words": ["journalist", "journalists", "reporter", "reporters", "columnist", "columnists", "correspondent", "correspondents", "editor", "editors",
+      "commentator", "commentators", "pundit", "pundits", "anchor", "anchors", "writer", "writers", "byline", "op-ed", "editorial board"]
+  },
+  "outlets": {
+    "about": "Publishers' names besides the Political Briefing's own catalogue (whose names the check reads from briefing/scripts/sources.mjs). Refused in every sentence of the digest and of the 5 Sided Analysis, in any case, except the names in outletCommonWords, which are refused only with their capitals.",
+    "words": ["Reuters", "Associated Press", "AP", "AFP", "CNN", "MSNBC", "ABC News", "CBS", "NBC", "NPR", "PBS", "Politico", "Washington Post",
+      "Wall Street Journal", "Financial Times", "The Economist", "Al Jazeera", "Fox", "Breitbart", "Newsmax", "Guardian", "Telegraph", "Daily Mail",
+      "New York Times", "BBC", "Sky News", "Bloomberg", "Axios", "The Times", "The Sun", "Daily Express", "Mirror", "HuffPost", "Vox", "Slate", "Salon",
+      "Jacobin", "ZeroHedge", "Blaze", "Daily Caller", "Daily Wire", "Federalist", "Gateway Pundit", "National Review", "New York Post", "Washington Examiner",
+      "Washington Times", "Free Beacon", "GB News", "Euronews", "France 24", "Deutsche Welle", "DW", "UPI", "RealClearPolitics", "CNBC", "The Hill",
+      "The Nation", "The Atlantic", "The Independent", "The Intercept", "Mother Jones", "Democracy Now", "Common Dreams", "Truthout", "Truthdig",
+      "Novara", "Morning Star", "Mondoweiss", "Left Voice", "Counterfire", "The Canary", "Black Agenda Report", "World Socialist Web Site", "WSWS",
+      "The Real News", "One America News", "OAN", "OANN", "WND", "American Greatness", "National Pulse", "Remix News", "PJ Media", "Reason",
+      "The American Conservative", "Daily Signal", "Christian Science Monitor", "New Republic", "Google News"]
+  },
+  "outletCommonWords": {
+    "about": "Outlets' names that are also ordinary English words (a fox, a slate of candidates, a blaze, the nation). Each is refused as an outlet only when written with its capital, as a name; every other outlet's name is refused in any case (bbc, the guardian).",
+    "words": ["Fox", "Mirror", "Slate", "Salon", "Blaze", "Reason", "Vox", "Federalist", "Nation", "Hill", "Independent", "Times", "Sun", "Atlantic", "Canary", "Intercept", "Telegraph"]
+  },
+  "instructionLike": {
+    "about": "Phrases that read as an instruction to a reader or a model rather than a description of the news. Refused in every sentence.",
+    "words": ["ignore previous", "ignore all", "ignore the above", "disregard", "forget previous", "system prompt", "you", "your", "you are", "you must",
+      "you should", "readers should", "should donate", "overrides its", "override its", "adds a link", "add a link", "as an ai", "language model",
+      "instruction", "instructions", "prompt", "click", "subscribe", "sign up", "follow us", "download", "read more", "share this", "please", "note to"]
+  },
+  "closingSame": {
+    "about": "Words a closing sentence of kind same may not hold: the page shows it as Left and right of centre alike, so it may not say that they differ.",
+    "words": ["differ*", "while", "whereas", "but", "unlike", "instead", "contrast*", "rather than", "however", "versus", "on the other hand", "opposite"]
+  },
+  "closingDiffer": {
+    "about": "Words a closing sentence of kind differ may not hold: the page shows it as Left and right of centre, a difference, so it may not say that they are alike.",
+    "words": ["same", "alike", "identical", "similar*", "no difference", "not differ"]
+  },
+  "dateNames": {
+    "about": "Months and weekdays. Written with a capital, they are names, and like any name must be in the text of the items the sentence cites; one that is not is refused as a date. The full names (but May) are dates in lower case too.",
+    "words": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+      "Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Sept", "Oct", "Nov", "Dec",
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  },
+  "relativeDates": {
+    "about": "Date words written in lower case. Like a month, a weekday or a year, each must be in the text of the items the sentence cites (a plural counts as its singular).",
+    "words": ["today", "yesterday", "tomorrow", "tonight", "overnight", "weekend", "week", "month", "year", "decade", "century", "morning", "afternoon", "evening"]
+  },
+  "numberWords": {
+    "about": "Numbers written as words. Each must be in the text of the items the sentence cites, as the word or as its figure. (Not first or half, which headlines and the 5 Sided Analysis use in other senses: what a headline puts first.)",
+    "words": {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+      "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20, "thirty": 30,
+      "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100, "hundreds": null, "thousand": 1000,
+      "thousands": null, "million": null, "millions": null, "billion": null, "billions": null, "trillion": null, "dozen": 12, "dozens": null,
+      "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10}
+  },
+  "openers": {
+    "about": "Words a sentence may begin with although they are not in its items: the first word of a sentence is capitalised, and when it is one of these it is not taken for a name. A first word that the day's headlines and summaries also print in lower case (Federal, Floods) is not taken for a name either, unless it is in commonWordNames. Every other capitalised word is a name.",
+    "words": ["The", "A", "An", "In", "On", "At", "By", "For", "From", "With", "After", "Before", "During", "While", "Across", "Among", "Both", "Each",
+      "Every", "Several", "Some", "Many", "Most", "Few", "All", "No", "None", "Only", "Other", "Others", "This", "These", "That", "Those", "It", "Its",
+      "They", "Their", "There", "Here", "He", "She", "His", "Her", "Headlines", "Coverage", "Reports", "Stories", "Meanwhile", "Elsewhere", "Separately", "Also", "Far", "Left",
+      "Right", "Centre", "Neither", "Either", "Over", "Under", "Against", "Without", "Within", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+  },
+  "commonWordNames": {
+    "about": "Names that are also ordinary English words. A capital at the start of a headline or a summary's sentence, or in a headline written in title case, says nothing about whether such a word is a name there, so it is not taken as a second outlet printing the name: a private person called Hope is not carried because another outlet's headline begins Hope fades.",
+    "words": ["Hope", "Rose", "Price", "Young", "White", "Black", "Brown", "Green", "Gray", "Grey", "King", "Rich", "Bush", "Rice", "Hill", "Long",
+      "Wood", "Woods", "Bell", "Cook", "Baker", "Bond", "Lane", "Love", "Joy", "Faith", "Grace", "Will", "Mark", "Bill", "Frank", "Grant", "Hunt",
+      "May", "June", "April", "Summer", "Winter", "Page", "Ward", "Hall", "Wolf", "Little", "Major", "Day", "Golden", "Sterling", "Field", "Banks",
+      "Glass", "Stone", "Fisher", "Hunter", "Mason", "Porter", "Carter", "Turner", "Walker", "Parker", "Miller", "Smith", "Hart", "Lord", "Noble", "Moody"]
+  }
+}

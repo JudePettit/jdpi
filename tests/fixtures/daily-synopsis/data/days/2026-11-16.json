@@ -1,0 +1,255 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-16",
+ "input": "2026-11-16-f659d9f74478",
+ "generated": "2026-11-16T08:20:00.000Z",
+ "updated": "2026-11-16T08:20:00.000Z",
+ "window": {
+  "from": "2026-11-15T07:00:00.000Z",
+  "to": "2026-11-16T07:00:00.000Z"
+ },
+ "storeGenerated": "2026-11-16T07:00:00.000Z",
+ "authorship": "rules",
+ "model": null,
+ "label": {
+  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
+  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Assembled by rules, with no AI model; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "missing",
+  "note": "The written digest is not available for this day.",
+  "attempts": []
+ },
+ "lead": null,
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 5,
+   "lead": "s1-4",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Example Far Left One",
+     "outletId": "fx-fl1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election: Mountjoy coalition loses its majority",
+     "url": "https://example.org/fx-fl1/grand-fenwick-election-mountjoy-coalition-loses-its-majority",
+     "published": "2026-11-16T04:00:00.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "Example Left One",
+     "outletId": "fx-l1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election ends Mountjoy coalition majority",
+     "url": "https://example.org/fx-l1/grand-fenwick-election-ends-mountjoy-coalition-majority",
+     "published": "2026-11-16T03:00:00.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election: Mountjoy coalition short of majority after count",
+     "url": "https://example.org/fx-c1/grand-fenwick-election-mountjoy-coalition-short-of-majority-after-count",
+     "published": "2026-11-16T02:00:00.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "right",
+     "outlet": "Example Right One",
+     "outletId": "fx-r1",
+     "caution": false,
+     "access": "free",
+     "headline": "Mountjoy coalition loses Grand Fenwick election majority",
+     "url": "https://example.org/fx-r1/mountjoy-coalition-loses-grand-fenwick-election-majority",
+     "published": "2026-11-16T01:00:00.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "far_right",
+     "outlet": "Example Far Right One",
+     "outletId": "fx-fr1",
+     "caution": true,
+     "access": "free",
+     "headline": "Grand Fenwick voters end Mountjoy coalition majority",
+     "url": "https://example.org/fx-fr1/grand-fenwick-voters-end-mountjoy-coalition-majority",
+     "published": "2026-11-16T00:00:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s1-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s1-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s1-3"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s1-4"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s1-5"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 3,
+   "lead": "s2-3",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "Example Left Two",
+     "outletId": "fx-l2",
+     "caution": false,
+     "access": "free",
+     "headline": "Elbonia rail strike halts trains for a second day",
+     "url": "https://example.org/fx-l2/elbonia-rail-strike-halts-trains-for-a-second-day",
+     "published": "2026-11-15T23:00:00.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "Example Centre Two",
+     "outletId": "fx-c2",
+     "caution": false,
+     "access": "free",
+     "headline": "Elbonia rail strike: trains halted for second day",
+     "url": "https://example.org/fx-c2/elbonia-rail-strike-trains-halted-for-second-day",
+     "published": "2026-11-15T22:00:00.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "right",
+     "outlet": "Example Right Two",
+     "outletId": "fx-r2",
+     "caution": true,
+     "access": "free",
+     "headline": "Second day of Elbonia rail strike halts trains",
+     "url": "https://example.org/fx-r2/second-day-of-elbonia-rail-strike-halts-trains",
+     "published": "2026-11-15T21:00:00.000Z"
+    }
+   ],
+   "sentences": null,
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s2-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s2-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s2-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": null,
+    "status": "missing",
+    "note": "The written comparison is not available for this story."
+   }
+  }
+ ]
+}

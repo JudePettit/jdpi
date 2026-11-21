@@ -1,0 +1,1090 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-21",
+ "id": "2026-11-21-972446f54579",
+ "generated": "2026-11-21T16:14:37.510Z",
+ "window": {
+  "from": "2026-11-20T07:08:10.795Z",
+  "to": "2026-11-21T07:08:10.795Z"
+ },
+ "storeGenerated": "2026-11-21T07:08:10.795Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 9,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 3,
+    "right": 3,
+    "far_right": 2
+   },
+   "written5": true,
+   "lead": "s1-2",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Man accused of sparking deadly Los Angeles wildfire found guilty",
+     "url": "https://www.theguardian.com/us-news/2026/nov/20/los-angeles-palisades-wildfire-trial-verdict",
+     "published": "2026-11-21T01:43:15.000Z",
+     "summary": "Verdict in case against former Uber driver Jonathan Rinderknecht comes after first trial ended with hung jury The 30-year-old accused of sparking the deadly Palisades fire in Los Angeles was found guilty of two federal arson charges in a Fr"
+    },
+    {
+     "id": "s1-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "California man found guilty of sparking blaze that became deadly Palisades Fire",
+     "url": "https://thehill.com/homenews/state-watch/6234829-uber-driver-palisades-fire-conviction/",
+     "published": "2026-11-21T01:30:51.000Z",
+     "summary": "The Palisades Fire killed 12 people as it incinerated entire neighborhoods in Los Angeles and Malibu."
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "California man guilty in Palisades Fire arson retrial",
+     "url": "https://www.upi.com/Top_News/US/2026/11/20/palisades-fire-trial/3571795218859/",
+     "published": "2026-11-21T00:53:05.000Z",
+     "summary": "A jury found Jonathan Rinderknecht guilty of starting the Palisades Fire, which killed a dozen people and burned more than 23,000 acres in California."
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Man convicted of starting Palisades fire in Los Angeles",
+     "url": "https://www.bbc.co.uk/news/articles/c64gn0gy8rj3o",
+     "published": "2026-11-21T04:34:00.000Z",
+     "summary": "The 30-year-old LA resident was convicted of arson leading to wildfires that killed 12 people and destroyed more than 6,800 buildings."
+    },
+    {
+     "id": "s1-5",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Federal jury convicts man of starting the deadly 2025 Palisades Fire in Los Angeles",
+     "url": "https://www.washingtontimes.com/news/2026/nov/20/federal-jury-convicts-jonathan-rinderknecht-starting-deadly-2025/",
+     "published": "2026-11-20T23:23:04.000Z",
+     "summary": "The man accused of sparking last year's deadly Palisades Fire was found guilty of arson charges Friday after his first federal case earlier this year ended in a mistrial."
+    },
+    {
+     "id": "s1-6",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Palisades Fire arsonist found guilty on all counts in deadly blaze that killed 12",
+     "url": "https://www.washingtonexaminer.com/news/crime/4810846/palisades-fire-arsonist-guilty-all-counts-california/",
+     "published": "2026-11-21T01:20:40.000Z",
+     "summary": "The California man accused of starting the Palisades Fire in January 2025 was found guilty on all counts by a federal jury on Friday after his mistrial in June. Jonathan Rinderknecht, 30, faced two federal charges for destruction of propert"
+    },
+    {
+     "id": "s1-7",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Palisades firestarter found guilty of the most destructive inferno in LA history that killed 12 people, destroyed more than 6,800 structures, and displaced 105,000 residents",
+     "url": "https://www.dailymail.com/news/article-16310487/palisades-fire-jonathan-rinderknecht-guilty-la-inferno.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-21T04:12:01.000Z",
+     "summary": "The catastrophic wildfires ripped through the City of Angels and completely turned the idyllic Palisades from a beloved celebrity paradise into a smoldering apocalyptic hellscape."
+    },
+    {
+     "id": "s1-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "Man Accused of Starting Deadly Pacific Palisades Fire Found Guilty",
+     "url": "https://www.thegatewaypundit.com/2026/11/man-accused-starting-deadly-pacific-palisades-fire-found/",
+     "published": "2026-11-21T01:20:58.000Z",
+     "summary": "In June, a mistrial was declared in the Pacific Palisades arson case after a jury deadlocked. The post Man Accused of Starting Deadly Pacific Palisades Fire Found Guilty appeared first on The Gateway Pundit ."
+    },
+    {
+     "id": "s1-9",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Federal jury convicts Jonathan Rinderknecht of arson in deadly 2025 Palisades fire retrial",
+     "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNQmVoeWtXdjVPXzlUckpjSjFFUF9tWEgzRzFEenl2dWo5ZFpnakQ4bC01NllSS1pidjlhYTBfTllJMk1aOVhzcnZfSzloR1BFY2ZIdHNXWkZJcXFNUzAtcXNranQ5MzVSRmp5Tl9kT3FPdzZzT0hCc05qSGNvVTZTaWV0OHBsYjNxdUJwVlVtbEZOTjVhZk5ITmpmRnM0WEpWMnZNV2VxSVFmM2NqYy1YOWNtWDkwdHQ5OFQzRkRB?oc=5",
+     "published": "2026-11-21T01:45:11.000Z",
+     "summary": "Federal jury convicts Jonathan Rinderknecht of arson in deadly 2025 Palisades fire retrial One America News Network"
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 9,
+   "sides": {
+    "far_left": 0,
+    "left": 2,
+    "centre": 3,
+    "right": 0,
+    "far_right": 4
+   },
+   "written5": true,
+   "lead": "s2-3",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "New York City’s notorious jail Rikers Island set to ‘finally’ close, Mayor Mamdani unveils",
+     "url": "https://www.independent.co.uk/news/world/americas/mamdani-rikers-island-jail-closing-b3088549.html",
+     "published": "2026-11-20T16:39:01.000Z",
+     "summary": "The jail has been plagued by violence and overcrowding for years"
+    },
+    {
+     "id": "s2-2",
+     "side": "left",
+     "outlet": "The New Republic",
+     "outletId": "newrepublic",
+     "caution": false,
+     "access": "paid",
+     "headline": "How Mamdani Plans to Finally Close New York’s Most Notorious Prison",
+     "url": "https://newrepublic.com/article/218247/zohran-mamdani-close-rikers-island",
+     "published": "2026-11-20T16:28:40.000Z",
+     "summary": "New York City Mayor Zohran Mamdani’s first year in office has been defined by solving small problems . By focusing on the local issues his city’s residents, in some cases, literally trip over every day, Mamdani is trying to show his adminis"
+    },
+    {
+     "id": "s2-3",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Mamdani announces plan to close New York's Rikers Island jail by 2032",
+     "url": "https://www.bbc.co.uk/news/articles/cmjeqv89egylo",
+     "published": "2026-11-21T00:01:39.000Z",
+     "summary": "Plans to shutter the troubled facility date back to 2019, when the city council first voted to close it but delays arose over where to place inmates."
+    },
+    {
+     "id": "s2-4",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "Mamdani releases plan to close Rikers Island, build new jails",
+     "url": "https://www.upi.com/Top_News/US/2026/11/20/mamdani-rikers-island-new-jails/5221795183990/",
+     "published": "2026-11-20T14:28:27.000Z",
+     "summary": "New York Mayor Zohran Mamdani released a plan to close the notorious Rikers Island Correctional Facility and open four new borough-based jails."
+    },
+    {
+     "id": "s2-5",
+     "side": "centre",
+     "outlet": "Euronews",
+     "outletId": "euronews",
+     "caution": false,
+     "access": "free",
+     "headline": "NYC mayor unveils plan to close notorious Rikers Island jail by 2032",
+     "url": "https://www.euronews.com/2026/11/20/nyc-mayor-unveils-plan-to-close-notorious-rikers-island-jail-by-2032",
+     "published": "2026-11-20T15:03:20.000Z",
+     "summary": "Rikers had been slated to close by August 2027 following legislation passed by the City Council in 2019. Moving the deadline will require a change to this law."
+    },
+    {
+     "id": "s2-6",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Mamdani: Rikers Island to close ‘once and for all’ by 2032",
+     "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQMXVia0Z5clItN1BIbUJxMy1KdlczUGt0SnVIVzBQUEJqczBMbFFxWWh6NXY3aXN0NTJ3d2stOEVIQWMwanNmTDY4Mm40MVFleHNTYldJNVRGaTFDVVpMQjhvaEF2NzlMaFZJRElHcDVXU0V3Y1VNSXA3aFYyWmVUdUx1ZVBmd0pxMVlKRFVkQQ?oc=5",
+     "published": "2026-11-20T20:33:00.000Z",
+     "summary": "Mamdani: Rikers Island to close ‘once and for all’ by 2032 One America News Network"
+    },
+    {
+     "id": "s2-7",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Mamdani Launches Plan to Empty and Close Rikers Island Jail",
+     "url": "https://www.breitbart.com/politics/2026/11/20/mamdani-launches-plan-to-empty-and-close-rikers-island-jail/",
+     "published": "2026-11-20T12:14:29.000Z",
+     "summary": "New York's Rikers Island jail will close by 2032 under a scheme announced Friday by Democratic Socialist Mayor Zohran Mamdani who has never resiled from his long-held ambition to empty the infamous complex of inmates and shut it forever. Th"
+    },
+    {
+     "id": "s2-8",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "New York’s Mamdani Unveils Plan to Shut Down Rikers Island Jail",
+     "url": "https://www.thegatewaypundit.com/2026/11/new-yorks-mamdani-unveils-plan-shut-rikers-island/",
+     "published": "2026-11-21T02:20:06.000Z",
+     "summary": "New York City's Democratic Socialist Mayor Zorhan Mamdani announced plans on Friday to shut down Rikers Island jail and house the inmates in four alternative facilities. The post New York’s Mamdani Unveils Plan to Shut Down Rikers Island Ja"
+    },
+    {
+     "id": "s2-9",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "'We're closing Rikers once and for all': Mamdani plan will end NYC's largest jail — but there's a catch",
+     "url": "https://www.theblaze.com/news/mamdani-rikers-jail-closing-nyc",
+     "published": "2026-11-20T20:00:00.000Z",
+     "summary": "The socialist mayor of New York City has announced a plan to shut down the jail on Rikers Island \"once and for all\" — but the truth behind his proposal is far more complex. Mayor Zohran Mamdani (D) revealed the plan Friday in a video on soc"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 8,
+   "sides": {
+    "far_left": 1,
+    "left": 1,
+    "centre": 2,
+    "right": 0,
+    "far_right": 4
+   },
+   "written5": true,
+   "lead": "s3-7",
+   "items": [
+    {
+     "id": "s3-1",
+     "side": "far_left",
+     "outlet": "The Nation",
+     "outletId": "thenation",
+     "caution": false,
+     "access": "metered",
+     "headline": "The Ridiculous Spectacle of Trump’s Meeting With Xi and Putin",
+     "url": "https://www.thenation.com/article/politics/trumps-xi-and-putin-shenzhen-summit/",
+     "published": "2026-11-20T16:21:35.000Z",
+     "summary": "Sasha Abramsky The Shenzhen “summit” was a charade intended to generate handshake-and-hug memes rather than binding international agreements. The post The Ridiculous Spectacle of Trump’s Meeting With Xi and Putin appeared first on The Natio"
+    },
+    {
+     "id": "s3-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump, Putin and Xi target UN and ICC in four-point ‘peace declaration’ – but offer no plans to end wars",
+     "url": "https://www.independent.co.uk/news/world/donald-trump-vladimir-putin-xi-jinping-un-icc-b3088430.html",
+     "published": "2026-11-20T08:46:54.000Z",
+     "summary": "Trump joined in criticism of the international order but presented no solutions at his summit in China"
+    },
+    {
+     "id": "s3-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Xi hails ‘complete turnaround’ in ties with Australia as Apec summit wraps up in Shenzhen",
+     "url": "https://www.independent.co.uk/news/world/australasia/china-australia-apec-xi-jinping-anthony-albanese-b3088419.html",
+     "published": "2026-11-20T09:22:44.000Z",
+     "summary": "Australian prime minister says relationship with China relationship ‘delivers prosperity for both of our countries’"
+    },
+    {
+     "id": "s3-4",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Watch live: Trump briefs on Asia trip after Xi, Putin summit",
+     "url": "https://thehill.com/video-clips/6233321-watch-live-donald-trump-press-briefing-asia-trip-putin-xi-meeting/",
+     "published": "2026-11-20T16:44:13.000Z",
+     "summary": "President Trump will brief reporters Friday from the White House on his high-profile trip to Asia, which included an unprecedented trilateral meeting with Chinese President Xi Jinping and Russian President Vladimir Putin. Trump is expected "
+    },
+    {
+     "id": "s3-5",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Bolton: ‘No substance’ to Trump meeting with Putin, Xi",
+     "url": "https://thehill.com/policy/international/6232720-john-bolton-trump-putin-xi-trilateral-meeting/",
+     "published": "2026-11-20T14:47:58.000Z",
+     "summary": "Former White House national security adviser John Bolton said the trilateral meeting this week between President Trump, Russian President Vladimir Putin and Chinese President Xi Jinping has “no substance.” “I think from what we can tell of "
+    },
+    {
+     "id": "s3-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "🔴Watch live: Trump holds press conference after meeting with Xi, Putin",
+     "url": "https://www.france24.com/en/americas/20261120-watch-live-trump-holds-press-conference-meeting-xi-putin",
+     "published": "2026-11-20T17:26:57.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s3-7",
+     "side": "far_right",
+     "outlet": "TheBlaze",
+     "outletId": "blaze",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Here's what Trump, Xi, and Putin agreed to in China",
+     "url": "https://www.theblaze.com/news/trump-patin-xi-nukes-oil",
+     "published": "2026-11-20T16:45:00.000Z",
+     "summary": "China, Russia, and the U.S. agreed on Thursday: more oil, less United Nations and International Criminal Court. After the first ever trilateral summit between China, Russia, and the U.S., President Donald Trump, President Xi Jinping, and Pr"
+    },
+    {
+     "id": "s3-8",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch Live: Trump Holds White House Press Conference After Historic Summit With Xi And Putin",
+     "url": "https://www.zerohedge.com/political/watch-live-trump-holds-white-house-press-conference-after-historic-summit-xi-and-putin",
+     "published": "2026-11-20T17:00:00.000Z",
+     "summary": "Watch Live: Trump Holds White House Press Conference After Historic Summit With Xi And Putin APEC's Shenzhen summit on Thursday brought together Chinese President Xi Jinping, US President Donald Trump, and Russian President Vladimir Putin f"
+    },
+    {
+     "id": "s3-9",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump holds WH press briefing celebrating trilateral sit-down with Xi and Putin",
+     "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQWVhIdmdiNGJRQ05rMXlqLURlYS1pZVVFZGN5bnNENGdFQ3VtVkhTMU8ycXpCN0ZiR0pXbjU1Z0t5VEg0ay1NdFF1bFdwRWxxT25NOHZmVzZoVnp5M3NHdzlqOVJCSFVIVUdJZWd0cktOQ3BrdW1Pb0R3aWRFN3Y0S0tOSUxHNUxzQWdXSDFia2p6VGt4TjBOd1VrampYMGtkbTRpbUVDZjFKajgwcVVR?oc=5",
+     "published": "2026-11-20T21:58:39.000Z",
+     "summary": "Trump holds WH press briefing celebrating trilateral sit-down with Xi and Putin One America News Network"
+    },
+    {
+     "id": "s3-10",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Watch Live: Donald Trump Holds White House Press Conference",
+     "url": "https://www.breitbart.com/politics/2026/11/20/watch-live-donald-trump-holds-white-house-press-conference/",
+     "published": "2026-11-20T17:28:37.000Z",
+     "summary": "President Donald Trump addresses members of the media at the White House on Friday, November 20. The post Watch Live: Donald Trump Holds White House Press Conference appeared first on Breitbart ."
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "rank": 4,
+   "outlets": 7,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 4,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s4-3",
+   "items": [
+    {
+     "id": "s4-1",
+     "side": "left",
+     "outlet": "Slate",
+     "outletId": "slate",
+     "caution": false,
+     "access": "metered",
+     "headline": "Grand Theft Auto Needed to Grow Up. It Used a Major Twist to Do So.",
+     "url": "https://slate.com/culture/2026/11/gta-6-vi-lucia-jason-tomas-twist-grand-theft-auto.html?via=rss",
+     "published": "2026-11-20T20:54:08.000Z",
+     "summary": "GTA 6’s twist is game-changing in every sense."
+    },
+    {
+     "id": "s4-2",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Burchett says you’re a ‘bad parent’ if you let your child play ‘Grand Theft Auto VI’",
+     "url": "https://thehill.com/homenews/house/6232789-gop-rep-warns-parents-gta-6/",
+     "published": "2026-11-20T14:48:28.000Z",
+     "summary": "Rep. Tim Burchett (R-Tenn.) warned parents against allowing their children to play the new “Grand Theft Auto VI” video game amid its rollout this week. “These kids’ parents, are they wolves or something, raising their kids? I think it’s rea"
+    },
+    {
+     "id": "s4-3",
+     "side": "right",
+     "outlet": "National Review",
+     "outletId": "nationalreview",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Grand Theft Auto VI and How We Spend Our Time",
+     "url": "https://www.nationalreview.com/article/grand-theft-auto-vi-and-how-we-spend-our-time",
+     "published": "2026-11-20T15:59:43.000Z",
+     "summary": "Your time on earth, no matter how long, is shorter than you think. Do you want to spend it doing chores in a simulated environment?"
+    },
+    {
+     "id": "s4-4",
+     "side": "right",
+     "outlet": "Reason",
+     "outletId": "reason",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Theft Auto VI: The Right's Newest Culture War Is Over a Video Game",
+     "url": "https://reason.com/podcast/2026/11/20/grand-theft-auto-vi-the-rights-newest-culture-war-is-over-a-video-game/",
+     "published": "2026-11-20T22:05:30.000Z",
+     "summary": "Robby Soave and Christian Britschgi discuss the monumental release of Grand Theft Auto VI."
+    },
+    {
+     "id": "s4-5",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Crime DOES pay! Grand Theft Auto VI makes £2.89 billion after just ONE day of being on sale - making it the biggest entertainment launch of all time",
+     "url": "https://www.dailymail.com/news/article-16310059/Grand-Theft-Auto-VI-worlds-fastest-selling-game.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-21T01:19:59.000Z",
+     "summary": "The hotly-anticipated game has now broken records by becoming both the best-reviewed game ever and the most successful entertainment property in history."
+    },
+    {
+     "id": "s4-6",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "'Grand Theft Auto VI' sets record with $3.79B in first-day retail sales, Rockstar Games reports",
+     "url": "https://www.washingtontimes.com/news/2026/nov/20/grand-theft-auto-vi-sets-record-379-billion-1st-day-retail-sales/",
+     "published": "2026-11-20T21:05:11.000Z",
+     "summary": "Sales of \"Grand Theft Auto VI\" generated a record with $3.79 billion in first-day retail sales, maker Rockstar Games said Friday, underscoring the enormous demand for the first new installment in the blockbuster series in 13 years."
+    },
+    {
+     "id": "s4-7",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Italy: Two Minors Allegedly Vandalize Depot, Steal Bus to 'Imitate' Grand Theft Auto VI",
+     "url": "https://www.breitbart.com/europe/2026/11/20/italy-two-minors-vandalize-depot-steal-bus-to-imitate-grand-theft-auto-vi/",
+     "published": "2026-11-20T10:49:59.000Z",
+     "summary": "Two Italian minor boys allegedly stole a bus and damaged several others at a depot in what Italian outlets report was an attempt to \"imitate\" the video game Grand Theft Auto VI. The post Italy: Two Minors Allegedly Vandalize Depot, Steal Bu"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "rank": 5,
+   "outlets": 7,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 2,
+    "right": 4,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s5-1",
+   "items": [
+    {
+     "id": "s5-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Fiona the hippo dies 11 days after swallowing visitor’s hat, Cincinnati Zoo says",
+     "url": "https://www.independent.co.uk/news/world/americas/fiona-hippo-cincinnati-zoo-dead-hat-b3088445.html",
+     "published": "2026-11-20T07:45:45.000Z",
+     "summary": "The zoo’s animal care team had been caring for Fiona around the clock, attempting to help her digest and pass the hat"
+    },
+    {
+     "id": "s5-2",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Hundreds flock to Cincinnati Zoo to mourn Fiona the hippo after her death from eating a hat",
+     "url": "https://www.independent.co.uk/news/world/americas/fiona-hippo-cincinnati-zoo-death-memorial-b3088722.html",
+     "published": "2026-11-20T14:19:49.000Z",
+     "summary": "Located in Ohio, Fiona became an international online sensation and symbol of survival, inspiring merch, including everything from clothes to holiday ornaments and children’s books"
+    },
+    {
+     "id": "s5-3",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Harambe was killed a decade ago at the same zoo as Fiona the hippo",
+     "url": "https://www.independent.co.uk/news/world/americas/fiona-hippo-harambe-death-cincinnati-zoo-b3088746.html",
+     "published": "2026-11-20T14:39:39.000Z",
+     "summary": "Ten years on, the Cincinnati Zoo has found itself in a similarly tragic situation"
+    },
+    {
+     "id": "s5-4",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Hat swallowed by Fiona the hippo was deep in her small intestine, exam reveals",
+     "url": "https://www.independent.co.uk/news/world/americas/fiona-the-hippo-hat-small-intestine-post-mortem-exam-b3089008.html",
+     "published": "2026-11-20T22:14:10.000Z",
+     "summary": "Fiona the hippo swallowed the hat 11 days before her death"
+    },
+    {
+     "id": "s5-5",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "Cincinnati Zoo's famed Fiona the hippo dies days after eating a visitor’s hat",
+     "url": "https://www.france24.com/en/video/20261120-cincinnati-zoo-s-famed-fiona-the-hippo-dies-days-after-eating-a-visitor-s-hat",
+     "published": "2026-11-20T14:48:52.000Z",
+     "summary": "Fiona, the hippo whose premature birth and fight for survival at the Cincinnati Zoo turned her into a global sensation nearly a decade ago, died Thursday from complications after swallowing a knit hat that was accidentally flung into her en"
+    },
+    {
+     "id": "s5-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "🦛 USA: Fiona, Cincinnati Zoo’s famous hippo, has died",
+     "url": "https://www.france24.com/en/video/20261120-%F0%9F%A6%9B-usa-fiona-cincinnati-zoo-s-famous-hippo-has-died",
+     "published": "2026-11-20T17:35:32.000Z",
+     "summary": "🦛Fiona, Cincinnati Zoo’s beloved hippo, has died aged just 9, after swallowing a knitted hat that fell into her enclosure. Born prematurely and weighing only 13kg, she captured millions of hearts around the world and became an internet sen"
+    },
+    {
+     "id": "s5-7",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Senate adopts resolution honoring Fiona the hippo",
+     "url": "https://thehill.com/homenews/senate/6234147-senate-honors-fiona-hippo/",
+     "published": "2026-11-20T20:08:14.000Z",
+     "summary": "The U.S. Senate adopted a resolution Friday to honor Fiona the hippo, a beloved inhabitant of the Cincinnati Zoo who died Thursday. Fiona the hippo died days after she ingested a zoo-goer’s hat that accidentally ended up in her enclosure. S"
+    },
+    {
+     "id": "s5-8",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Fiona the hippo honored by US Senate in unanimous resolution praising Cincinnati Zoo staff",
+     "url": "https://www.foxnews.com/politics/fiona-hippo-honored-us-senate-unanimous-resolution-praising-cincinnati-zoo-staff",
+     "published": "2026-11-20T23:16:06.000Z",
+     "summary": "Fiona the hippo received a formal Senate tribute from Sen. Bernie Moreno one day after the Cincinnati Zoo Nile hippopotamus died after a medical emergency."
+    },
+    {
+     "id": "s5-9",
+     "side": "right",
+     "outlet": "Daily Mail",
+     "outletId": "dailymail",
+     "caution": false,
+     "access": "free",
+     "headline": "Fiona the hippo died in agony because knitted hat thrown into her enclosure was too deep in her body to save her, zoo says",
+     "url": "https://www.dailymail.com/news/article-16310091/fiona-hippo-cincinnati-zoo-death-swallowed-knitted-hat.html?ns_mchannel=rss&ns_campaign=1490",
+     "published": "2026-11-21T06:13:43.000Z",
+     "summary": "The nine-year-old hippo who captivated the world when she was born six weeks premature in January 2017 died on Thursday after specialists spent days trying to get the hat out of her."
+    },
+    {
+     "id": "s5-10",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Exam shows that hat Fiona the hippo ate was deep into her small intestine",
+     "url": "https://www.washingtontimes.com/news/2026/nov/20/examination-shows-hat-fiona-hippo-ate-deep-small-intestine/",
+     "published": "2026-11-20T20:54:01.000Z",
+     "summary": "A necropsy on Fiona the hippo showed that the hat she swallowed nearly two weeks ago was caught in the middle of her small intestine, causing her death this week, the Cincinnati Zoo said Friday."
+    },
+    {
+     "id": "s5-11",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "A decade after shooting Harambe, the Cincinnati Zoo is reeling from Fiona's untimely death",
+     "url": "https://www.washingtontimes.com/news/2026/nov/20/decade-shooting-harambe-cincinnati-zoo-reels-fionas-untimely-death/",
+     "published": "2026-11-20T20:17:40.000Z",
+     "summary": "Months of international backlash cast a shadow over the Cincinnati Zoo after workers decided to fatally shoot a beloved endangered gorilla named Harambe in response to a little boy falling into his exhibit in 2016."
+    },
+    {
+     "id": "s5-12",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Senate unanimously passes Moreno resolution in honor of Fiona the hippo",
+     "url": "https://www.washingtonexaminer.com/news/senate/4810819/senate-passes-bernie-moreno-resolution-honoring-fiona-the-hippo/",
+     "published": "2026-11-21T00:28:23.000Z",
+     "summary": "The Senate unanimously passed a resolution in honor of Fiona, the beloved hippopotamus who died at the Cincinnati Zoo on Thursday after swallowing a visitor’s hat. Sen. Bernie Moreno (R-OH) introduced the resolution on the Senate floor to h"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "rank": 6,
+   "outlets": 6,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 4,
+    "right": 0,
+    "far_right": 2
+   },
+   "written5": false,
+   "lead": "s6-1",
+   "items": [
+    {
+     "id": "s6-1",
+     "side": "centre",
+     "outlet": "CNBC",
+     "outletId": "cnbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump vows to stop U.S. companies from building data centers abroad, threatens 'tremendous tax'",
+     "url": "https://www.cnbc.com/2026/11/20/trump-data-centers-ai-companies-tax.html",
+     "published": "2026-11-20T18:35:16.000Z",
+     "summary": "Trump spoke at the White House after meeting with Chinese President Xi Jinping and Russian President Vladimir Putin for a historic trilateral summit in China."
+    },
+    {
+     "id": "s6-2",
+     "side": "centre",
+     "outlet": "Axios",
+     "outletId": "axios",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Trump floats major tax on U.S. companies constructing data centers overseas",
+     "url": "https://www.axios.com/2026/11/20/us-ai-trump-data-centers-overseas",
+     "published": "2026-11-20T18:38:17.000Z",
+     "summary": "President Trump on Friday said he would block U.S. companies from building data centers overseas or impose a \"tremendous tax\" on them if they do. Why it matters: Trump's push to keep AI infrastructure in the country comes just weeks after d"
+    },
+    {
+     "id": "s6-3",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump seeks curbs on US companies building data centers overseas",
+     "url": "https://thehill.com/homenews/administration/6233765-trump-threatens-data-center-tax-overseas/",
+     "published": "2026-11-20T18:16:33.000Z",
+     "summary": "President Trump said Friday he will not allow U.S. companies to build data centers outside of the country, threatening a “tremendous tax” on firms that don’t comply. “We’re not going to allow our companies to build data centers outside of o"
+    },
+    {
+     "id": "s6-4",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Trump threatens ban on US firms building AI data centres overseas",
+     "url": "https://www.bbc.co.uk/news/articles/cmde1lw9y54ko",
+     "published": "2026-11-20T20:54:12.000Z",
+     "summary": "The US president provided little detail on the potential policy, saying others in his team were hearing about it for the first time."
+    },
+    {
+     "id": "s6-5",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "In Massive Blow To Google, Trump Threatens \"Tremendous Tax\" On Companies That Build Data Centers Abroad",
+     "url": "https://www.zerohedge.com/ai/massive-blow-google-trump-threatens-tremendous-tax-companies-build-data-centers-abroad",
+     "published": "2026-11-20T18:00:00.000Z",
+     "summary": "In Massive Blow To Google, Trump Threatens \"Tremendous Tax\" On Companies That Build Data Centers Abroad President Trump on Friday took aim at companies pouring billions into data centers overseas, telling reporters at a White House news con"
+    },
+    {
+     "id": "s6-6",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump to Tax Companies That Build Data Centers Overseas",
+     "url": "https://www.breitbart.com/politics/2026/11/20/trump-tax-companies-build-data-centers-overseas/",
+     "published": "2026-11-21T03:15:17.000Z",
+     "summary": "President Donald Trump unveiled plans Friday to impose a lofty tax on companies that build data centers overseas. The post Trump to Tax Companies That Build Data Centers Overseas appeared first on Breitbart ."
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "rank": 7,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 2,
+    "centre": 1,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s7-1",
+   "items": [
+    {
+     "id": "s7-1",
+     "side": "left",
+     "outlet": "The Independent",
+     "outletId": "independent",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump team drops Alaska senate lawsuit after Democrat easily won the race",
+     "url": "https://www.independent.co.uk/news/world/americas/us-politics/trump-peltola-alaska-senate-lawsuit-b3088684.html",
+     "published": "2026-11-20T12:48:49.000Z",
+     "summary": "The Trump administration on Thursday moved to effectively drop its lawsuit that sought to block the certification of Democrat Mary Peltola's victory in Alaska"
+    },
+    {
+     "id": "s7-2",
+     "side": "left",
+     "outlet": "The New Republic",
+     "outletId": "newrepublic",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump DOJ Forced to Stop Trying to Steal Alaska Senate Race",
+     "url": "https://newrepublic.com/post/218232/donald-trump-department-justice-drops-lawsuit-alaska-senate-race",
+     "published": "2026-11-20T14:58:48.000Z",
+     "summary": "The Trump administration’s Alaska election challenge is dead and gone. The Justice Department dropped its lawsuit against the Last Frontier State Thursday night, ending its quest to potentially block the certification of votes in Alaska’s S"
+    },
+    {
+     "id": "s7-3",
+     "side": "centre",
+     "outlet": "UPI",
+     "outletId": "upi",
+     "caution": false,
+     "access": "free",
+     "headline": "DOJ seeks to dismiss Alaska election certification lawsuit",
+     "url": "https://www.upi.com/Top_News/US/2026/11/20/DOJ-dismiss-Alaska-election-lawsuit/5131795163561/",
+     "published": "2026-11-20T09:22:11.000Z",
+     "summary": "Federal lawyers asked an appeals court to drop its lawsuit asking to block the certification of Alaska' s Senate election."
+    },
+    {
+     "id": "s7-4",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Dozens of FBI and DOJ personnel are investigating Peltola's Alaska victory",
+     "url": "https://www.foxnews.com/politics/dozens-fbi-doj-personnel-investigating-peltolas-alaska-victory",
+     "published": "2026-11-20T18:42:29.000Z",
+     "summary": "At least 50 FBI agents and over a dozen DOJ lawyers are probing Sen.-elect Mary Peltola over the alleged \"Decoy Dan\" scheme, with 200 subpoenas sent."
+    },
+    {
+     "id": "s7-5",
+     "side": "far_right",
+     "outlet": "The Gateway Pundit",
+     "outletId": "gatewaypundit",
+     "caution": true,
+     "access": "free",
+     "headline": "FBI Floods Alaska as DOJ Escalates ‘Decoy Dan’ Criminal Investigation Into Dem Senate Victory",
+     "url": "https://www.thegatewaypundit.com/2026/11/fbi-floods-alaska-as-doj-escalates-decoy-dan/",
+     "published": "2026-11-21T01:00:46.000Z",
+     "summary": "At least 50 FBI agents and more than a dozen Justice Department lawyers are reportedly investigating allegations surrounding Democrat Mary Peltola’s victory in Alaska’s U.S. The post FBI Floods Alaska as DOJ Escalates ‘Decoy Dan’ Criminal I"
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "rank": 8,
+   "outlets": 5,
+   "sides": {
+    "far_left": 1,
+    "left": 1,
+    "centre": 3,
+    "right": 0,
+    "far_right": 0
+   },
+   "written5": false,
+   "lead": "s8-4",
+   "items": [
+    {
+     "id": "s8-1",
+     "side": "far_left",
+     "outlet": "Mondoweiss",
+     "outletId": "mondoweiss",
+     "caution": true,
+     "access": "free",
+     "headline": "What does the ICJ ruling on Myanmar mean for Gaza?",
+     "url": "https://mondoweiss.net/2026/11/what-does-the-icj-ruling-on-myanmar-mean-for-gaza/",
+     "published": "2026-11-20T19:39:31.000Z",
+     "summary": "For the first time in history, the ICJ has found a state directly guilty of genocide. It remains to be seen if Israel's genocide in Gaza will follow."
+    },
+    {
+     "id": "s8-2",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "Rohingya who escaped Myanmar’s genocide tell their stories",
+     "url": "https://www.theguardian.com/world/2026/nov/21/rohingya-who-escaped-myanmars-genocide-tell-their-stories",
+     "published": "2026-11-21T04:00:47.000Z",
+     "summary": "Survivors recount rivers red with blood and burning nearby villages serving as an urgent warning to flee their homes Smoke was often the signal to run – seen from a distance, it was the indication for Rohingya that a neighbouring village wa"
+    },
+    {
+     "id": "s8-3",
+     "side": "left",
+     "outlet": "The Guardian",
+     "outletId": "guardian",
+     "caution": false,
+     "access": "free",
+     "headline": "US reacts cautiously to Myanmar genocide ruling as EU praises ‘critical’ role of UN’s top court",
+     "url": "https://www.theguardian.com/law/2026/nov/20/us-eu-reaction-myanmar-rohingya-genocide-icj-ruling-trump-international-law",
+     "published": "2026-11-20T11:57:43.000Z",
+     "summary": "Reactions to ICJ ruling underline global divisions over court with China raising concerns about judicial overreach The US has greeted with caution the world’s highest court’s ruling that Myanmar committed genocide against its Rohingya minor"
+    },
+    {
+     "id": "s8-4",
+     "side": "centre",
+     "outlet": "Deutsche Welle",
+     "outletId": "dw",
+     "caution": false,
+     "access": "free",
+     "headline": "Myanmar genocide ruling: Rohingya say struggle for justice not over",
+     "url": "https://www.dw.com/en/myanmar-genocide-ruling-rohingya-say-struggle-for-justice-not-over/a-80003365?maca=en-rss-en-all-1573-rdf",
+     "published": "2026-11-20T13:38:00.000Z",
+     "summary": "The ICJ has held Myanmar responsible for genocide against the Rohingya and ordered restitution and reparations. Community members have hailed the ruling, but caution that achieving real change will be long and hard."
+    },
+    {
+     "id": "s8-5",
+     "side": "centre",
+     "outlet": "Sky News",
+     "outletId": "skynews",
+     "caution": false,
+     "access": "unknown",
+     "headline": "Myanmar rejects UN court's genocide ruling as 'unfair'",
+     "url": "https://news.sky.com/story/myanmar-rejects-un-courts-rohingya-genocide-guilty-verdict-as-unfair-13614272",
+     "published": "2026-11-20T09:15:00.000Z",
+     "summary": "Myanmar branded a ruling by the UN's highest court that its security forces conducted state-sponsored genocide against Rohingya Muslims as \"unfair\"."
+    },
+    {
+     "id": "s8-6",
+     "side": "centre",
+     "outlet": "France 24",
+     "outletId": "france24",
+     "caution": false,
+     "access": "free",
+     "headline": "'Friends' But Who Benefits? Notes from an Historic Summit, Myanmar's Genocide Ruling, Time to 'Bre-join' the EU?",
+     "url": "https://www.france24.com/en/tv-shows/the-world-this-week/20261120-friends-but-who-benefits-notes-from-an-historic-summit-myanmar-s-genocide-ruling-time-to-bre-join-the-eu",
+     "published": "2026-11-20T19:42:58.000Z",
+     "summary": "Welcome to the World This Week with Gavin Lee. You give us 45 minutes, we'll give you 7 days worth of crystal clear analysis. As ever, alongside a handpicked panel of four distinguished foreign correspondents."
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "rank": 9,
+   "outlets": 5,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 3,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s9-2",
+   "items": [
+    {
+     "id": "s9-1",
+     "side": "centre",
+     "outlet": "The Hill",
+     "outletId": "thehill",
+     "caution": false,
+     "access": "free",
+     "headline": "Watch live: Trump, Dana White host helipad reception honoring Marine Band",
+     "url": "https://thehill.com/homenews/administration/6233969-live-dana-white-trump-helipad-reception/",
+     "published": "2026-11-20T19:34:54.000Z",
+     "summary": "President Trump and UFC CEO Dana White will host a reception Friday honoring the United States Marine Band on the White House’s newly renovated helipad. The president and White are expected to announce a combined $200,000 personal donation "
+    },
+    {
+     "id": "s9-2",
+     "side": "right",
+     "outlet": "Fox News",
+     "outletId": "foxnews",
+     "caution": true,
+     "access": "free",
+     "headline": "Trump and Dana White honor Marine Corps band with six-figure checks in first event on new helipad",
+     "url": "https://www.foxnews.com/politics/trump-dana-white-honor-marine-corps-band-six-figure-checks-first-event-new-helipad",
+     "published": "2026-11-20T15:33:54.000Z",
+     "summary": "President Donald Trump and Dana White will each donate $100,000 to the Marine Band, America's oldest continuously active professional musical organization."
+    },
+    {
+     "id": "s9-3",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "Trump and Dana White gift Marine Band with $500,000 ‘bonus’",
+     "url": "https://www.washingtonexaminer.com/news/white-house/4810707/trump-dana-white-marine-band-bonus/",
+     "published": "2026-11-20T22:23:36.000Z",
+     "summary": "President Donald Trump and UFC CEO Dana White presented the U.S. Marine Band with a $500,000 check Friday, rewarding the military musicians for their performances at major White House events, including this summer’s UFC Freedom 250 celebrat"
+    },
+    {
+     "id": "s9-4",
+     "side": "right",
+     "outlet": "The Washington Times",
+     "outletId": "washingtontimes",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump, Dana White honor the U.S. Marine Band with bonus checks, White House reception",
+     "url": "https://www.washingtontimes.com/news/2026/nov/20/trump-dana-white-honor-us-marine-band-bonus-checks-white-house/",
+     "published": "2026-11-20T21:17:56.000Z",
+     "summary": "President Trump is handing out checks to the United States Marine Band for their \"exceptional service and talent.\""
+    },
+    {
+     "id": "s9-5",
+     "side": "far_right",
+     "outlet": "One America News",
+     "outletId": "oann",
+     "caution": true,
+     "access": "unknown",
+     "headline": "Trump and Dana White surprise U.S. Marine Band with massive $500K personal gift — zero taxpayer dollars used: 'A true honor'",
+     "url": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxQODhVQUZOaVRJWHBhbkJkb0ZKcVBjc3hRNWtHeFJUbUZDYWl3MnJzbU40bl9XSUdBMXJvRHVieENlbFk4bkNXUlVNVGNsR2lWNHoyX1NsalRSU2laQ1hweC1yUEVpSDd0eFgxWThtcTVXcUwxM1p5cV9rS2RnVzF6cHVjUVJ1OFNtR3dCaU51RDF4cXVOWXNDbEFXQmZfQVhzUGtqa2RVZ2xZaTlqTnlEaGlwM1hfbnNQdnFsNzIta05vT2ZaYkxzRFZlNUpXRF8yV2dGRFBmQlRaZ29jRE03NWN3?oc=5",
+     "published": "2026-11-20T23:19:27.000Z",
+     "summary": "Trump and Dana White surprise U.S. Marine Band with massive $500K personal gift — zero taxpayer dollars used: 'A true honor' One America News Network"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "rank": 10,
+   "outlets": 4,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 1,
+    "right": 1,
+    "far_right": 2
+   },
+   "written5": false,
+   "lead": "s10-3",
+   "items": [
+    {
+     "id": "s10-1",
+     "side": "centre",
+     "outlet": "BBC News",
+     "outletId": "bbc",
+     "caution": false,
+     "access": "free",
+     "headline": "Russia targets Kyiv crossings days after Ukraine hits Crimean Bridge",
+     "url": "https://www.bbc.co.uk/news/articles/c6x29gn4pdn9o",
+     "published": "2026-11-20T13:01:16.000Z",
+     "summary": "Russia launched one of its biggest air attacks yet as it rejected the prospect of security guarantees for Ukraine."
+    },
+    {
+     "id": "s10-2",
+     "side": "right",
+     "outlet": "Washington Examiner",
+     "outletId": "washingtonexaminer",
+     "caution": false,
+     "access": "paid",
+     "headline": "A Crimean bridge Ukraine had to break",
+     "url": "https://www.washingtonexaminer.com/opinion/beltway-confidential/4807820/a-crimean-bridge-kerch-ukraine-had-to-break-morale-boost-for-ukraine-efforts/",
+     "published": "2026-11-20T18:24:03.000Z",
+     "summary": "The destruction of a key road portion of Russia’s Kerch Bridge is a major strategic victory for Ukraine. While the bridge’s railway link remains operational, the heavy destruction caused by two days of Ukrainian attacks will add to Russian "
+    },
+    {
+     "id": "s10-3",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Russia Vows Crimean Bridge To Soon Be Restored, Will Become Even Better",
+     "url": "https://www.zerohedge.com/geopolitical/russia-vows-crimean-bridge-will-soon-be-restored-will-become-even-better",
+     "published": "2026-11-20T14:20:00.000Z",
+     "summary": "Russia Vows Crimean Bridge To Soon Be Restored, Will Become Even Better Russia is vowing to rapidly rebuild the damaged Crimean bridge , after a series of devastating drone and missile attacks took it out of service this week. The single mo"
+    },
+    {
+     "id": "s10-4",
+     "side": "far_right",
+     "outlet": "Breitbart",
+     "outletId": "breitbart",
+     "caution": true,
+     "access": "free",
+     "headline": "Putin Vows 'Painful' Revenge For Ukraine Destroying Crimean Bridge",
+     "url": "https://www.breitbart.com/europe/2026/11/20/putin-vows-painful-revenge-for-ukraine-destroying-crimean-bridge/",
+     "published": "2026-11-20T10:59:32.000Z",
+     "summary": "Russia will exact revenge for Ukraine destroying the road bridge over the Kerch Strait, President Vladimir Putin said. The post Putin Vows ‘Painful’ Revenge For Ukraine Destroying Crimean Bridge appeared first on Breitbart ."
+    },
+    {
+     "id": "s10-5",
+     "side": "far_right",
+     "outlet": "ZeroHedge",
+     "outletId": "zerohedge",
+     "caution": true,
+     "access": "free",
+     "headline": "Pepe Escobar Predicts Putin Vows 'Massive' Retaliation Over Crimean Bridge Attack, China Quietly Shipping Weapons Material To Iran Via Pakistan",
+     "url": "https://www.zerohedge.com/geopolitical/pepe-escobar-says-putin-vows-massive-retaliation-over-crimean-bridge-attack-china",
+     "published": "2026-11-21T04:00:00.000Z",
+     "summary": "Pepe Escobar Predicts Putin Vows 'Massive' Retaliation Over Crimean Bridge Attack, China Quietly Shipping Weapons Material To Iran Via Pakistan Hours after Trump, Xi and Putin sat down together in Shenzhen, Pepe Escobar claimed from the sum"
+    }
+   ]
+  }
+ ]
+}

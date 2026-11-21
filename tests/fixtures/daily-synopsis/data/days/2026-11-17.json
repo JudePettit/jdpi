@@ -1,0 +1,517 @@
+{
+ "format": "vm-daily-synopsis-day/1",
+ "day": "2026-11-17",
+ "input": "2026-11-17-0549fd87456e",
+ "generated": "2026-11-17T08:20:00.000Z",
+ "updated": "2026-11-17T12:20:00.000Z",
+ "window": {
+  "from": "2026-11-16T07:00:00.000Z",
+  "to": "2026-11-17T07:00:00.000Z"
+ },
+ "storeGenerated": "2026-11-17T07:00:00.000Z",
+ "authorship": "model",
+ "model": "Claude (hand-written test fixture)",
+ "label": {
+  "text": "The text of this digest was written by an AI model (Claude) from the headlines listed beneath it and the short summaries in their feeds, and no person checked it. The linked reports are the sources.",
+  "five": "Each written 5 Sided Analysis was written by the same model from the outlets’ headlines and the short summaries in their feeds alone, never from the articles, and no person checked it.",
+  "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
+  "meta": "Written by an AI model (Claude) from the listed headlines; no person checked it"
+ },
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "written": {
+  "status": "published",
+  "note": null,
+  "attempts": [
+   {
+    "checked": "2026-11-17T12:20:00.000Z",
+    "ok": true,
+    "reasons": [],
+    "five": {
+     "s1": {
+      "ok": true
+     },
+     "s2": {
+      "ok": true
+     }
+    }
+   }
+  ]
+ },
+ "lead": [
+  {
+   "text": "Ruritania’s parliament passed its 2027 budget by 212 votes to 180.",
+   "cites": [
+    "s1-3"
+   ]
+  },
+  {
+   "text": "In Freedonia, floods along the Sylvan river forced 3,000 people from their homes.",
+   "cites": [
+    "s2-1",
+    "s2-2"
+   ]
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 6,
+   "lead": "s1-6",
+   "headlines": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Example Far Left One",
+     "outletId": "fx-fl1",
+     "caution": false,
+     "access": "free",
+     "headline": "Ruritania budget cuts hit Strelsau hospitals as parliament votes",
+     "url": "https://example.org/fx-fl1/ruritania-budget-cuts-hit-strelsau-hospitals-as-parliament-votes",
+     "published": "2026-11-17T04:00:00.000Z"
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "Example Left One",
+     "outletId": "fx-l1",
+     "caution": false,
+     "access": "free",
+     "headline": "Ruritania parliament passes austerity budget, cutting Strelsau hospital spending",
+     "url": "https://example.org/fx-l1/ruritania-parliament-passes-austerity-budget-cutting-strelsau-hospital-spending",
+     "published": "2026-11-17T03:00:00.000Z"
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Ruritania parliament passes 2027 budget by 212 votes to 180",
+     "url": "https://example.org/fx-c1/ruritania-parliament-passes-2027-budget-by-212-votes-to-180",
+     "published": "2026-11-17T02:00:00.000Z"
+    },
+    {
+     "id": "s1-4",
+     "side": "centre",
+     "outlet": "Example Centre Two",
+     "outletId": "fx-c2",
+     "caution": false,
+     "access": "free",
+     "headline": "Ruritania parliament approves 2027 budget after Strelsau debate",
+     "url": "https://example.org/fx-c2/ruritania-parliament-approves-2027-budget-after-strelsau-debate",
+     "published": "2026-11-17T01:00:00.000Z"
+    },
+    {
+     "id": "s1-5",
+     "side": "right",
+     "outlet": "Example Right One",
+     "outletId": "fx-r1",
+     "caution": false,
+     "access": "free",
+     "headline": "Ruritania parliament passes budget with tax cuts for small firms",
+     "url": "https://example.org/fx-r1/ruritania-parliament-passes-budget-with-tax-cuts-for-small-firms",
+     "published": "2026-11-17T00:00:00.000Z"
+    },
+    {
+     "id": "s1-6",
+     "side": "far_right",
+     "outlet": "Example Far Right One",
+     "outletId": "fx-fr1",
+     "caution": true,
+     "access": "free",
+     "headline": "Ruritania budget passes parliament: tax cuts for small firms win",
+     "url": "https://example.org/fx-fr1/ruritania-budget-passes-parliament-tax-cuts-for-small-firms-win",
+     "published": "2026-11-16T23:00:00.000Z"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Ruritania’s parliament passed the 2027 budget by 212 votes to 180 after a debate in Strelsau.",
+     "cites": [
+      "s1-3"
+     ]
+    },
+    {
+     "text": "Headlines on the left put cuts to Strelsau hospital spending first.",
+     "cites": [
+      "s1-1",
+      "s1-2"
+     ]
+    },
+    {
+     "text": "Headlines on the right put tax cuts for small firms first.",
+     "cites": [
+      "s1-5",
+      "s1-6"
+     ]
+    }
+   ],
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 1,
+      "headlines": [
+       "s1-1"
+      ]
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s1-2"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 2,
+      "headlines": [
+       "s1-3",
+       "s1-4"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s1-5"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s1-6"
+      ]
+     }
+    ],
+    "eligible": true,
+    "written": {
+     "sides": {
+      "far_left": [
+       {
+        "text": "The far left headline links the budget cuts to hospitals in Strelsau.",
+        "cites": [
+         "s1-1"
+        ]
+       }
+      ],
+      "left": [
+       {
+        "text": "The left headline puts the austerity budget and its cut to Strelsau hospital spending first.",
+        "cites": [
+         "s1-2"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "Centre headlines give the vote of 212 to 180 and the debate in Strelsau.",
+        "cites": [
+         "s1-3",
+         "s1-4"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "The right headline puts the tax cuts for small firms first.",
+        "cites": [
+         "s1-5"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "The far right headline puts the tax cuts for small firms first, as a win.",
+        "cites": [
+         "s1-6"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "differ",
+      "text": "Left of centre the hospital cuts come first, and right of centre the tax cuts for small firms.",
+      "cites": [
+       "s1-2",
+       "s1-5"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
+   }
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 3,
+   "lead": "s2-2",
+   "headlines": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "Example Left Two",
+     "outletId": "fx-l2",
+     "caution": false,
+     "access": "free",
+     "headline": "Freedonia floods force 3,000 from homes along the Sylvan river",
+     "url": "https://example.org/fx-l2/freedonia-floods-force-3-000-from-homes-along-the-sylvan-river",
+     "published": "2026-11-16T22:00:00.000Z"
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Freedonia floods: 3,000 evacuated as Sylvan river bursts banks",
+     "url": "https://example.org/fx-c1/freedonia-floods-3-000-evacuated-as-sylvan-river-bursts-banks",
+     "published": "2026-11-16T21:00:00.000Z"
+    },
+    {
+     "id": "s2-3",
+     "side": "right",
+     "outlet": "Example Right Two",
+     "outletId": "fx-r2",
+     "caution": true,
+     "access": "free",
+     "headline": "Sylvan river floods Freedonia towns, 3,000 evacuated",
+     "url": "https://example.org/fx-r2/sylvan-river-floods-freedonia-towns-3-000-evacuated",
+     "published": "2026-11-16T20:00:00.000Z"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "In Freedonia, 3,000 people were evacuated as the Sylvan river burst its banks.",
+     "cites": [
+      "s2-2"
+     ]
+    },
+    {
+     "text": "The floods reached towns along the river.",
+     "cites": [
+      "s2-1",
+      "s2-3"
+     ]
+    }
+   ],
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 1,
+      "headlines": [
+       "s2-1"
+      ]
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s2-2"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s2-3"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 0,
+      "headlines": []
+     }
+    ],
+    "eligible": true,
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "The left headline puts the 3,000 people forced from their homes first.",
+        "cites": [
+         "s2-1"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "The centre headline puts the 3,000 evacuated and the Sylvan river bursting its banks first.",
+        "cites": [
+         "s2-2"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "The right headline puts the river first, flooding towns in Freedonia.",
+        "cites": [
+         "s2-3"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "same",
+      "text": "Left and right of centre give the same 3,000 evacuated from the Sylvan river floods.",
+      "cites": [
+       "s2-1",
+       "s2-3"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
+   }
+  },
+  {
+   "id": "s3",
+   "rank": 3,
+   "outlets": 3,
+   "lead": "s3-3",
+   "headlines": [
+    {
+     "id": "s3-1",
+     "side": "centre",
+     "outlet": "Example Centre Two",
+     "outletId": "fx-c2",
+     "caution": false,
+     "access": "free",
+     "headline": "Syldavia and Borduria leaders meet at Klow summit on border trade",
+     "url": "https://example.org/fx-c2/syldavia-and-borduria-leaders-meet-at-klow-summit-on-border-trade",
+     "published": "2026-11-16T19:00:00.000Z"
+    },
+    {
+     "id": "s3-2",
+     "side": "right",
+     "outlet": "Example Right One",
+     "outletId": "fx-r1",
+     "caution": false,
+     "access": "free",
+     "headline": "Syldavia Borduria summit in Klow ends with border trade deal",
+     "url": "https://example.org/fx-r1/syldavia-borduria-summit-in-klow-ends-with-border-trade-deal",
+     "published": "2026-11-16T18:00:00.000Z"
+    },
+    {
+     "id": "s3-3",
+     "side": "far_right",
+     "outlet": "Example Far Right Two",
+     "outletId": "fx-fr2",
+     "caution": false,
+     "access": "free",
+     "headline": "Klow summit: Syldavia and Borduria sign border trade deal",
+     "url": "https://example.org/fx-fr2/klow-summit-syldavia-and-borduria-sign-border-trade-deal",
+     "published": "2026-11-16T17:00:00.000Z"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Syldavia and Borduria signed a border trade deal at a summit in Klow.",
+     "cites": [
+      "s3-2",
+      "s3-3"
+     ]
+    },
+    {
+     "text": "Their leaders met in Klow on border trade.",
+     "cites": [
+      "s3-1"
+     ]
+    }
+   ],
+   "five": {
+    "sides": [
+     {
+      "key": "far_left",
+      "label": "Far left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "left",
+      "label": "Left",
+      "outlets": 0,
+      "headlines": []
+     },
+     {
+      "key": "centre",
+      "label": "Centre",
+      "outlets": 1,
+      "headlines": [
+       "s3-1"
+      ]
+     },
+     {
+      "key": "right",
+      "label": "Right",
+      "outlets": 1,
+      "headlines": [
+       "s3-2"
+      ]
+     },
+     {
+      "key": "far_right",
+      "label": "Far right",
+      "outlets": 1,
+      "headlines": [
+       "s3-3"
+      ]
+     }
+    ],
+    "eligible": false,
+    "written": null,
+    "status": "not-eligible",
+    "note": "No written comparison for this story: one is written only when at least three of the five sides carried it, one left of centre and one right of centre."
+   }
+  }
+ ]
+}

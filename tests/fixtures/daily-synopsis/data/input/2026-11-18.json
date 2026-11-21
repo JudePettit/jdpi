@@ -1,0 +1,158 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-18",
+ "id": "2026-11-18-ede7fa2c6459",
+ "generated": "2026-11-18T08:20:00.000Z",
+ "window": {
+  "from": "2026-11-17T07:00:00.000Z",
+  "to": "2026-11-18T07:00:00.000Z"
+ },
+ "storeGenerated": "2026-11-18T07:00:00.000Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 4,
+   "sides": {
+    "far_left": 1,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s1-4",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Example Far Left Two",
+     "outletId": "fx-fl2",
+     "caution": false,
+     "access": "free",
+     "headline": "Genovia port reopens after Pyrus harbour repairs",
+     "url": "https://example.org/fx-fl2/genovia-port-reopens-after-pyrus-harbour-repairs",
+     "published": "2026-11-18T04:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "Example Left One",
+     "outletId": "fx-l1",
+     "caution": false,
+     "access": "free",
+     "headline": "Pyrus harbour repairs done as Genovia port reopens",
+     "url": "https://example.org/fx-l1/pyrus-harbour-repairs-done-as-genovia-port-reopens",
+     "published": "2026-11-18T03:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Genovia port reopens: Pyrus harbour repairs finished",
+     "url": "https://example.org/fx-c1/genovia-port-reopens-pyrus-harbour-repairs-finished",
+     "published": "2026-11-18T02:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-4",
+     "side": "right",
+     "outlet": "Example Right One",
+     "outletId": "fx-r1",
+     "caution": false,
+     "access": "free",
+     "headline": "Genovia reopens Pyrus harbour port after repairs",
+     "url": "https://example.org/fx-r1/genovia-reopens-pyrus-harbour-port-after-repairs",
+     "published": "2026-11-18T01:00:00.000Z",
+     "summary": ""
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 0,
+    "centre": 2,
+    "right": 0,
+    "far_right": 1
+   },
+   "written5": false,
+   "lead": "s2-3",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "centre",
+     "outlet": "Example Centre Two",
+     "outletId": "fx-c2",
+     "caution": false,
+     "access": "free",
+     "headline": "Doomstadt weather satellite launched by Latveria",
+     "url": "https://example.org/fx-c2/doomstadt-weather-satellite-launched-by-latveria",
+     "published": "2026-11-17T23:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Latveria launches Doomstadt weather satellite",
+     "url": "https://example.org/fx-c1/latveria-launches-doomstadt-weather-satellite",
+     "published": "2026-11-18T00:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s2-3",
+     "side": "far_right",
+     "outlet": "Example Far Right One",
+     "outletId": "fx-fr1",
+     "caution": true,
+     "access": "free",
+     "headline": "Latveria weather satellite lifts off from Doomstadt",
+     "url": "https://example.org/fx-fr1/latveria-weather-satellite-lifts-off-from-doomstadt",
+     "published": "2026-11-17T22:00:00.000Z",
+     "summary": ""
+    }
+   ]
+  }
+ ]
+}

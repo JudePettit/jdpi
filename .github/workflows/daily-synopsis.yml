@@ -1,0 +1,50 @@
+name: Daily Synopsis build
+# Omni News · Daily Synopsis (daily-synopsis/README.md). Four times a day, 08:20, 12:20, 16:20 and 20:20 UTC:
+#   08:20  the day's stories, by rules, from the Political Briefing's morning refresh (its run starts at 06:05 UTC; on
+#          21 November 2026 its store was written at 07:08): the day's input file and its rules-only digest. If the refresh has not landed, the run writes nothing, and a
+#          later run builds the day (at 20:20 from whatever store there is).
+#   12:20  the scheduled Claude run's draft for the day, if it has written one by then (it reads only the day's input
+#          file and pushes daily-synopsis/drafts/<day>.json to the branch claude/daily-synopsis-drafts), is checked by
+#          daily-synopsis/lib/check.mjs and published in the day's file if it passes; refused, the day keeps its
+#          rules-only digest. 16:20 and 20:20 try again for a draft that came late. A published day is never changed.
+# No secret: the job reads the repository and pushes its own commit with the token GitHub gives every run. The draft is
+# fetched to the runner's temporary folder and never committed to main; nothing in it is run. The days go live with the
+# site's next tested deploy (every data refresh ends with one).
+on:
+  schedule:
+    - cron: '20 8-20/4 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: daily-synopsis
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Fetch the day's draft, if the scheduled Claude run has written one
+        run: |
+          day="$(date -u +%F)"
+          if git fetch --quiet --depth=1 origin claude/daily-synopsis-drafts 2>/dev/null \
+             && git cat-file -e "FETCH_HEAD:daily-synopsis/drafts/${day}.json" 2>/dev/null; then
+            git show "FETCH_HEAD:daily-synopsis/drafts/${day}.json" > "$RUNNER_TEMP/draft.json"
+            echo "A draft for ${day}: $(wc -c < "$RUNNER_TEMP/draft.json") bytes."
+          else
+            echo "No draft for ${day} yet."
+          fi
+      - name: Build the day and check the draft
+        run: node daily-synopsis/scripts/build.mjs --draft "$RUNNER_TEMP/draft.json"
+      - name: Test the days before they are committed
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/daily-synopsis.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: daily-synopsis/data
+          message: 'Daily Synopsis: the day by rules, and the checked draft when there is one'

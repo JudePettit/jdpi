@@ -392,9 +392,10 @@ test('address: views and searches round-trip through the hash, unknown values fa
 /* ---------------------------------------------------------------- the module and its figure */
 test('module: Highbrowse holds its landing page and the four briefings; the page is hooked up to it', () => {
   const reg = json('registry.json'), hb = reg.suites.find(s => s.id === 'hb');
-  assert.deepEqual(hb.modules.map(m => m.id), ['highbrowse', 'briefing', 'science-briefing', 'econ-briefing', 'digital-briefing']);
-  assert.deepEqual(hb.modules.slice(1).map(m => m.url), BRIEFINGS.map(b => b.page), 'the briefings keep their pages, in analysis.js\'s order');
-  assert.deepEqual(BRIEFINGS.map(b => b.id), hb.modules.slice(1).map(m => m.id));
+  // Daily Synopsis (21 November 2026) comes after the four briefings: it reads them, it is not one of them.
+  assert.deepEqual(hb.modules.map(m => m.id), ['highbrowse', 'briefing', 'science-briefing', 'econ-briefing', 'digital-briefing', 'daily-synopsis']);
+  assert.deepEqual(hb.modules.slice(1, 5).map(m => m.url), BRIEFINGS.map(b => b.page), 'the briefings keep their pages, in analysis.js\'s order');
+  assert.deepEqual(BRIEFINGS.map(b => b.id), hb.modules.slice(1, 5).map(m => m.id));
   assert.deepEqual([hb.mark, hb.figure], ['design/brand-hb-icon.svg', 'design/brand-hb.svg']);
   const html = read('highbrowse/index.html');
   assert.match(html, /<html lang="en" data-suite="hb" class="prp">/);

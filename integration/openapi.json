@@ -191,6 +191,7 @@
               "enum": [
                 "congress-members",
                 "congress-trades",
+                "daily-synopsis-stories",
                 "digital-briefing-sources",
                 "digital-briefing-stories",
                 "econ-briefing-sources",
@@ -273,6 +274,7 @@
               "enum": [
                 "congress-members",
                 "congress-trades",
+                "daily-synopsis-stories",
                 "digital-briefing-sources",
                 "digital-briefing-stories",
                 "econ-briefing-sources",

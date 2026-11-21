@@ -337,10 +337,19 @@ describe('the workflows: only a tested commit is deployed', () => {
     assert.deepEqual(w.on.push, { branches: ['main'] });
   });
 
+  // The one exception: the Daily Synopsis build holds no secret at all, not even one passed on to the deploy (its brief,
+  // 21 November 2026), so it does not deploy; its days go out with the next refresh's tested deploy, and never untested.
+  const NO_SECRET = ['daily-synopsis.yml'];
+  test('the Daily Synopsis build holds no secret and deploys nothing of its own', () => {
+    for (const f of NO_SECRET) {
+      assert.doesNotMatch(read(WF + f), /secrets|wrangler|pages deploy/, f);
+      assert.equal(callers().filter(c => c.f === f).length, 0, f);
+    }
+  });
   test('every refresh that commits data deploys through the pipeline after its commit, even when it ended red', () => {
     for (const [f, w] of Object.entries(workflows)) {
       const committers = Object.entries(w.jobs).filter(([, j]) => steps(j).some(s => s.uses === './.github/actions/commit-data'));
-      if (!committers.length) continue;
+      if (!committers.length || NO_SECRET.includes(f)) continue;
       const deploy = callers().filter(c => c.f === f);
       assert.equal(deploy.length, 1, `${f}: one deploy job`);
       const needs = [deploy[0].j.needs].flat();

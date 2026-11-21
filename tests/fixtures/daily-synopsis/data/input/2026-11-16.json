@@ -1,0 +1,170 @@
+{
+ "format": "vm-daily-synopsis-input/1",
+ "day": "2026-11-16",
+ "id": "2026-11-16-f659d9f74478",
+ "generated": "2026-11-16T08:20:00.000Z",
+ "window": {
+  "from": "2026-11-15T07:00:00.000Z",
+  "to": "2026-11-16T07:00:00.000Z"
+ },
+ "storeGenerated": "2026-11-16T07:00:00.000Z",
+ "rule": {
+  "minOutlets": 3,
+  "minSides": 2,
+  "cap": 10,
+  "fiveMinSides": 3,
+  "fiveNeedsLeftAndRight": true
+ },
+ "sides": [
+  {
+   "key": "far_left",
+   "label": "Far left"
+  },
+  {
+   "key": "left",
+   "label": "Left"
+  },
+  {
+   "key": "centre",
+   "label": "Centre"
+  },
+  {
+   "key": "right",
+   "label": "Right"
+  },
+  {
+   "key": "far_right",
+   "label": "Far right"
+  }
+ ],
+ "stories": [
+  {
+   "id": "s1",
+   "rank": 1,
+   "outlets": 5,
+   "sides": {
+    "far_left": 1,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 1
+   },
+   "written5": true,
+   "lead": "s1-4",
+   "items": [
+    {
+     "id": "s1-1",
+     "side": "far_left",
+     "outlet": "Example Far Left One",
+     "outletId": "fx-fl1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election: Mountjoy coalition loses its majority",
+     "url": "https://example.org/fx-fl1/grand-fenwick-election-mountjoy-coalition-loses-its-majority",
+     "published": "2026-11-16T04:00:00.000Z",
+     "summary": "Turnout was 71 per cent."
+    },
+    {
+     "id": "s1-2",
+     "side": "left",
+     "outlet": "Example Left One",
+     "outletId": "fx-l1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election ends Mountjoy coalition majority",
+     "url": "https://example.org/fx-l1/grand-fenwick-election-ends-mountjoy-coalition-majority",
+     "published": "2026-11-16T03:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-3",
+     "side": "centre",
+     "outlet": "Example Centre One",
+     "outletId": "fx-c1",
+     "caution": false,
+     "access": "free",
+     "headline": "Grand Fenwick election: Mountjoy coalition short of majority after count",
+     "url": "https://example.org/fx-c1/grand-fenwick-election-mountjoy-coalition-short-of-majority-after-count",
+     "published": "2026-11-16T02:00:00.000Z",
+     "summary": "The coalition won 9 of 20 seats."
+    },
+    {
+     "id": "s1-4",
+     "side": "right",
+     "outlet": "Example Right One",
+     "outletId": "fx-r1",
+     "caution": false,
+     "access": "free",
+     "headline": "Mountjoy coalition loses Grand Fenwick election majority",
+     "url": "https://example.org/fx-r1/mountjoy-coalition-loses-grand-fenwick-election-majority",
+     "published": "2026-11-16T01:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s1-5",
+     "side": "far_right",
+     "outlet": "Example Far Right One",
+     "outletId": "fx-fr1",
+     "caution": true,
+     "access": "free",
+     "headline": "Grand Fenwick voters end Mountjoy coalition majority",
+     "url": "https://example.org/fx-fr1/grand-fenwick-voters-end-mountjoy-coalition-majority",
+     "published": "2026-11-16T00:00:00.000Z",
+     "summary": ""
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "rank": 2,
+   "outlets": 3,
+   "sides": {
+    "far_left": 0,
+    "left": 1,
+    "centre": 1,
+    "right": 1,
+    "far_right": 0
+   },
+   "written5": true,
+   "lead": "s2-3",
+   "items": [
+    {
+     "id": "s2-1",
+     "side": "left",
+     "outlet": "Example Left Two",
+     "outletId": "fx-l2",
+     "caution": false,
+     "access": "free",
+     "headline": "Elbonia rail strike halts trains for a second day",
+     "url": "https://example.org/fx-l2/elbonia-rail-strike-halts-trains-for-a-second-day",
+     "published": "2026-11-15T23:00:00.000Z",
+     "summary": ""
+    },
+    {
+     "id": "s2-2",
+     "side": "centre",
+     "outlet": "Example Centre Two",
+     "outletId": "fx-c2",
+     "caution": false,
+     "access": "free",
+     "headline": "Elbonia rail strike: trains halted for second day",
+     "url": "https://example.org/fx-c2/elbonia-rail-strike-trains-halted-for-second-day",
+     "published": "2026-11-15T22:00:00.000Z",
+     "summary": "Unions want a 6 per cent rise."
+    },
+    {
+     "id": "s2-3",
+     "side": "right",
+     "outlet": "Example Right Two",
+     "outletId": "fx-r2",
+     "caution": true,
+     "access": "free",
+     "headline": "Second day of Elbonia rail strike halts trains",
+     "url": "https://example.org/fx-r2/second-day-of-elbonia-rail-strike-halts-trains",
+     "published": "2026-11-15T21:00:00.000Z",
+     "summary": ""
+    }
+   ]
+  }
+ ]
+}

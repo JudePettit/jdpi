@@ -152,6 +152,25 @@ if (BRIEF) {
       ['reserve', 'True for a reserve outlet that stands in when an active one fails'], ['status', 'Feed status at the last refresh (ok or an error)'], ['count', 'Items in the publisher\'s feed at the last refresh']]
   });
 }
+// Omni News · Daily Synopsis: one row per story per day kept (daily-synopsis/data/days/*.json, never rewritten after
+// their day). The written text is not copied here: each row says whether the day's digest was written by the model and
+// published, and the page and the day's file hold it, under their label.
+const DS_DAYS = has('daily-synopsis/data/index.json') ? J('daily-synopsis/data/index.json').days.map(d => `daily-synopsis/data/days/${d.day}.json`).filter(has) : [];
+if (DS_DAYS.length) {
+  spec({
+    id: 'daily-synopsis-stories', title: 'Daily Synopsis: the day\'s major stories', module: 'hb', submodule: 'daily-synopsis',
+    description: 'Each day\'s major political stories, picked by stated rules with no AI model: those that at least three of the Political Briefing\'s publishers, from at least two of its five positions, ran in the 24 hours to its morning refresh, at most ten a day, with the number of outlets on each side and the first headline. `authorship` says whether that day\'s short digest was written by an AI model (Claude) and passed VM\'s checks (model) or the day holds the outlets\' headlines alone (rules); no person checked either.',
+    derive: () => DS_DAYS.flatMap(p => { const d = J(p); return d.stories.map(s => { const lead = s.headlines.find(h => h.id === s.lead) || s.headlines[0]; return { day: d.day, rank: s.rank, story: s.id, outlets: s.outlets, ...Object.fromEntries(s.five.sides.map(x => [x.key, x.outlets])), lead_headline: lead.headline, lead_outlet: lead.outlet, lead_url: lead.url, authorship: d.authorship, written: d.written.status, five: s.five.status }; }); }),
+    from: ['daily-synopsis/data/index.json', ...DS_DAYS], refresh: 'daily', updatedFrom: 'daily-synopsis/data/index.json', page: 'daily-synopsis/index.html', rangeFields: ['day'],
+    licence: 'Headlines and links © their publishers, quoted for reference; selection and counts © JDP-Iq.',
+    sources: ['The Political Briefing\'s publishers\' RSS and Atom feeds (intelligence-briefing-stories)', 'Political positions: AllSides Media Bias Ratings, otherwise Media Bias/Fact Check, adjusted to five steps'],
+    fields: [['day', 'Day (UTC)'], ['rank', 'Rank that day, 1 to 10'], ['story', 'Story id in the day\'s file (s1, s2, …)'], ['outlets', 'Political Briefing publishers that ran a headline in it'],
+      ['far_left', 'Far-left publishers'], ['left', 'Left publishers'], ['centre', 'Centre publishers'], ['right', 'Right publishers'], ['far_right', 'Far-right publishers'],
+      ['lead_headline', 'The first headline: the most typical one anyone can read'], ['lead_outlet', 'Its publisher'], ['lead_url', 'Its link'],
+      ['authorship', 'model: the day\'s digest was written by an AI model (Claude) and passed the checks; rules: the outlets\' headlines alone'], ['written', 'The written digest: published, refused or missing'],
+      ['five', 'The story\'s written 5 Sided Analysis: published, refused, missing or not-eligible']]
+  });
+}
 
 spec({
   id: 'headline-outlets', title: 'Global Headline Tracker: outlets', module: 'rt', submodule: 'headlines',

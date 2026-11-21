@@ -84,7 +84,8 @@ test('registry is well formed', () => {
   // Science (they were asserted there before); each keeps its id and its page. The Global Headline Tracker stays.
   const hb = registry.suites.find(s => s.id === 'hb');
   assert.deepEqual(hb.modules.map(m => [m.id, m.name, m.url]), [['highbrowse', 'Highbrowse', 'highbrowse/index.html'], ['briefing', 'Political Briefing', 'q/briefing.html'],
-    ['science-briefing', 'Scientific Briefing', 'science/briefing/index.html'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/index.html'], ['digital-briefing', 'Digital Briefing', 'digital/briefing/index.html']]);
+    ['science-briefing', 'Scientific Briefing', 'science/briefing/index.html'], ['econ-briefing', 'Economics Briefing', 'econ/briefing/index.html'], ['digital-briefing', 'Digital Briefing', 'digital/briefing/index.html'],
+    ['daily-synopsis', 'Daily Synopsis', 'daily-synopsis/index.html']]);
   assert.equal(where('headlines'), 'rt');
   assert.deepEqual(modules.find(x => x.m.id === 'highbrowse').m.views.map(v => [v.id, v.url]), [['today', 'highbrowse/index.html'], ['week', 'highbrowse/index.html#tab=week'], ['search', 'highbrowse/index.html#tab=search'], ['trends', 'highbrowse/index.html#tab=trends']]);
 });
@@ -910,7 +911,7 @@ test('freshness lines: the top bar and the sidebar give each submodule\'s line, 
     assert.doesNotMatch(await p.textContent('#nav'), /\bLive\b/);
     assert.equal(await p.locator('#nav .flag.late').count(), modules.filter(x => lightLine(x.m.id).late).length, 'a Late flag on each late one, and only those');
     // The one count, Home counted.
-    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 39 submodules');
+    assert.equal(await p.textContent('#legal #count'), '10 modules, Home included · 40 submodules');
     // The other site's line: the Political Atlas's own manifest (faked here as it serves it).
     await p.goto(`${BASE}/#/rt/atlas`, { waitUntil: 'domcontentloaded' });
     const atlasText = line('atlas').text;

@@ -571,7 +571,7 @@
       "termsUrl": "https://www.cnbc.com/rss-feeds/",
       "termsNotRead": "Each outlet has its own terms; of two tried on 18 November 2026, theguardian.com refused the reader and cnbc.com's feeds page held none.",
       "termsRead": "2026-11-18",
-      "where": "The Headline Tracker, Omni News and the four briefings (integration/data/headline-outlets.json, briefing/, science/, econ/, digital/, headlines/).",
+      "where": "The Headline Tracker, Omni News and the four briefings, and Omni News's Daily Synopsis, which shows the Political Briefing's headlines and reads its feeds' short summaries without showing them (integration/data/headline-outlets.json, briefing/, science/, econ/, digital/, headlines/, daily-synopsis/).",
       "decision": "On VM’s owner’s list for later (17 November 2026)."
     },
     {

@@ -424,6 +424,29 @@
           "host": "Vitruvian Manager",
           "url": "digital/briefing/index.html",
           "description": "New papers and news on AI, computing, cybersecurity, chips, networks, quantum computing, data and digital policy, from the major journals, preprint servers, labs and technology desks, with a toggle by field."
+        },
+        {
+          "id": "daily-synopsis",
+          "name": "Daily Synopsis",
+          "kind": "realtime",
+          "icon": "§",
+          "status": "live",
+          "data": {
+            "class": "data-to",
+            "workflow": "daily-synopsis.yml",
+            "expected": "daily",
+            "parts": [
+              {
+                "read": "daily-synopsis/data/index.json",
+                "store": "daily-synopsis/data/index.json",
+                "time": "latest",
+                "label": "Digest for"
+              }
+            ]
+          },
+          "host": "Vitruvian Manager",
+          "url": "daily-synopsis/index.html",
+          "description": "Each day's major political stories, those at least three of the Political Briefing's publishers from more than one side ran, with their 5 Sided Analysis: the outlets' own headlines laid out from far left to far right. A short digest and comparison written by an AI model (Claude) are added only when they pass VM's rules, and are labelled as such; no person checks them. A day is never rewritten once it has passed."
         }
       ]
     },

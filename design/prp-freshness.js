@@ -50,6 +50,7 @@ export const SCHEDULES = {
   'rsp-refresh.yml': '41 5 * * 1',
   'sanctions-refresh.yml': '17 7 * * *',
   'standins-refresh.yml': '29 4 6 * *',
+  'daily-synopsis.yml': '20 8-20/4 * * *',
   'political-atlas/monthly-update.yml': '0 6 1 * *',
 };
 

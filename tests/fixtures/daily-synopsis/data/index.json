@@ -1,0 +1,31 @@
+{
+ "format": "vm-daily-synopsis-index/1",
+ "generated": "2026-11-18T12:20:00.000Z",
+ "latest": "2026-11-18",
+ "days": [
+  {
+   "day": "2026-11-18",
+   "authorship": "rules",
+   "written": "refused",
+   "stories": 2,
+   "fiveWritten": 0,
+   "corrections": 0
+  },
+  {
+   "day": "2026-11-17",
+   "authorship": "model",
+   "written": "published",
+   "stories": 3,
+   "fiveWritten": 2,
+   "corrections": 0
+  },
+  {
+   "day": "2026-11-16",
+   "authorship": "rules",
+   "written": "missing",
+   "stories": 2,
+   "fiveWritten": 0,
+   "corrections": 0
+  }
+ ]
+}

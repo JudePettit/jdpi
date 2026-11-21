@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-21T00:36:13Z",
+  "generated": "2026-11-21T07:59:12Z",
   "layers": [
     {
       "id": "borders",
@@ -2664,7 +2664,7 @@
         "step": "d",
         "precision": "day",
         "first": "2026-09-26",
-        "last": "2026-11-19",
+        "last": "2026-11-20",
         "shows": "the last day held of the frame’s year"
       },
       "data": "omni/data/layers/gvi/index.json",
@@ -2688,22 +2688,22 @@
       },
       "legend": "Volatility score: VM’s own Geopolitical Volatility Index, from GDELT 2.0’s events (free for any use, with citation), on Natural Earth’s countries of today",
       "source": "vm-volatility",
-      "method": "VM’s own text. VM’s Geopolitical Volatility Index (Volatility, q/volatility.html; method gvi-1.2-q96), one score from 0 to 100 for each country and day, from 2026-09-26 to 2026-11-19: five components scored from GDELT 2.0’s events that day (conflict and security, political escalation, civil unrest, economic disruption, cross-border spread), each ranked against the trailing 90 days and shrunk towards the middle where there are few reports (volatility/scripts/gvi.mjs). It is VM’s own score, not a measurement: a day with too few events or sources is not scored and the country is left blank. The days are kept by volatility/scripts/ingest.mjs in volatility/data/kept/ before Volatility’s index drops days older than a year, so every day since 2026-09-26 stays. The map shows one day, the last VM holds of the frame’s year; each country’s coverage that day (high, medium, low) is in the bundle. Drawn on Natural Earth’s countries of today, joined by ISO 3166 alpha-3 code. The classes are VM’s, at Volatility’s own bands (40 and over elevated, 70 and over high) with steps of ten between (omni/scripts/build-gvi.mjs).",
+      "method": "VM’s own text. VM’s Geopolitical Volatility Index (Volatility, q/volatility.html; method gvi-1.2-q96), one score from 0 to 100 for each country and day, from 2026-09-26 to 2026-11-20: five components scored from GDELT 2.0’s events that day (conflict and security, political escalation, civil unrest, economic disruption, cross-border spread), each ranked against the trailing 90 days and shrunk towards the middle where there are few reports (volatility/scripts/gvi.mjs). It is VM’s own score, not a measurement: a day with too few events or sources is not scored and the country is left blank. The days are kept by volatility/scripts/ingest.mjs in volatility/data/kept/ before Volatility’s index drops days older than a year, so every day since 2026-09-26 stays. The map shows one day, the last VM holds of the frame’s year; each country’s coverage that day (high, medium, low) is in the bundle. Drawn on Natural Earth’s countries of today, joined by ISO 3166 alpha-3 code. The classes are VM’s, at Volatility’s own bands (40 and over elevated, 70 and over high) with steps of ten between (omni/scripts/build-gvi.mjs).",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-20T12:55:06Z",
+      "built": "2026-11-21T07:59:12Z",
       "files": [
         {
           "file": "omni/data/layers/gvi/index.json",
           "bytes": 399,
-          "gzip": 249,
-          "sha256": "1db54241f5355bf9d864afd4ffa500a848e8bf0097adcbfcaea5f7e8334efa4b"
+          "gzip": 246,
+          "sha256": "ed5db39412e67e4fbd4a8adb6484ef1fd0d8b7652f68528fdf6bbfd2ab0de290"
         },
         {
           "file": "omni/data/layers/gvi/2026.json",
-          "bytes": 58942,
-          "gzip": 13196,
-          "sha256": "f1d9d8b333388aa684499e864ecbb3eaf89d7c646779b4f0f38211c495a89e80"
+          "bytes": 59911,
+          "gzip": 13399,
+          "sha256": "f5e2e9c16cc7a0afa1232ed7b6d3af5421aa8a262ed3215199b5f5200065c77c"
         }
       ]
     },
@@ -3043,6 +3043,10 @@
             "name": "conflict"
           },
           {
+            "id": "coup",
+            "name": "coup"
+          },
+          {
             "id": "court",
             "name": "court"
           },
@@ -3095,49 +3099,49 @@
       "legend": "Political events: VM’s Realtime and Historical Calendars (facts: Wikidata, Wikipedia, UCDP/PRIO ACD), each at its country",
       "source": "vm-calendar",
       "leftOut": {
-        "archigos": 1028,
+        "archigos": 914,
         "atlas": 139
       },
-      "method": "VM’s own text. The dated events of VM’s Realtime and Historical Calendars (q/calendar.html), 1980 to 2029: elections, referendums, summits, treaties, outbreaks of armed conflict, ceasefires, court rulings, protests and the like, each from its own source (Wikidata, Wikipedia’s lists and its Current events portal, the UCDP/PRIO Armed Conflict Dataset), each with its source’s class. VM leaves out the 1028 events that are, or may be, Archigos’s (a new leader or a seizure of power from the Political Retrospective: Archigos’s terms do not plainly allow commercial use), and the 139 only in the Political Atlas. Each event is drawn at its country’s point, by its ISO3 (VM’s crosswalk of the calendars’ names to Natural Earth’s countries of today); an event of the European Union, of several countries, or of a state that is not one of today’s is listed, not drawn. A date known only to its month is kept to the month. For 4197 events the calendars have not yet recorded what kind of source each comes from (their next refresh does, with its date’s precision): each names its own source’s address, and its date is shown to the day as the calendars hold it, though a date on the 1st of a month may stand for the month alone. An event still to come, or whose date is not yet confirmed, is drawn hollow. The map shows the frame’s year, one decade’s file loaded at a time (omni/scripts/build-calendar-layer.mjs).",
+      "method": "VM’s own text. The dated events of VM’s Realtime and Historical Calendars (q/calendar.html), 1980 to 2029: elections, referendums, summits, treaties, outbreaks of armed conflict, ceasefires, court rulings, protests and the like, each from its own source (Wikidata, Wikipedia’s lists and its Current events portal, the UCDP/PRIO Armed Conflict Dataset), each with its source’s class. VM leaves out the 914 events that are, or may be, Archigos’s (a new leader or a seizure of power from the Political Retrospective: Archigos’s terms do not plainly allow commercial use), and the 139 only in the Political Atlas. Each event is drawn at its country’s point, by its ISO3 (VM’s crosswalk of the calendars’ names to Natural Earth’s countries of today); an event of the European Union, of several countries, or of a state that is not one of today’s is listed, not drawn. A date known only to its month is kept to the month. An event still to come, or whose date is not yet confirmed, is drawn hollow. The map shows the frame’s year, one decade’s file loaded at a time (omni/scripts/build-calendar-layer.mjs).",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-20T14:28:18Z",
+      "built": "2026-11-21T07:59:12Z",
       "files": [
         {
           "file": "omni/data/layers/calendar/index.json",
           "bytes": 1117,
-          "gzip": 490,
-          "sha256": "8e5139a624c177f9ac0eb7faf3427da6e752b4bf9f28c9b5f6dde8ee0385b20f"
+          "gzip": 494,
+          "sha256": "6bd35476f6fb11a225fc7d936c385792448b4514d7213b0d5963f4c641ce416f"
         },
         {
           "file": "omni/data/layers/calendar/1980s.json",
-          "bytes": 265908,
-          "gzip": 25734,
-          "sha256": "92a688ef674ed7b3960c3141419d82b24fc97aaf230498bc50b2aea5072276f8"
+          "bytes": 242613,
+          "gzip": 26840,
+          "sha256": "d135d97b204b7be0bcc6dd3584f793f55fdde02a6fc29d01da79ba21c5fbbb7b"
         },
         {
           "file": "omni/data/layers/calendar/1990s.json",
-          "bytes": 442776,
-          "gzip": 40718,
-          "sha256": "bec180ec4bcf8ad1a537d66b4c7f74aeda6996e8c7b9702430a223f3586ebc08"
+          "bytes": 397953,
+          "gzip": 41454,
+          "sha256": "e0bfd1212a76af2c416416b4bc2d832564efdc907a73be8f71040e1261381073"
         },
         {
           "file": "omni/data/layers/calendar/2000s.json",
-          "bytes": 491289,
-          "gzip": 44537,
-          "sha256": "a2c7cd3e12933799271789733dff05a7eeb87c5d648d06d8fc51b1ac6996cb1e"
+          "bytes": 432992,
+          "gzip": 45188,
+          "sha256": "4b71b676e3fcb731453d437cc160821d09de37268db43780c16443ae4145df61"
         },
         {
           "file": "omni/data/layers/calendar/2010s.json",
-          "bytes": 707713,
-          "gzip": 68016,
-          "sha256": "afddf4a8a0ebabdad4b67c14150a6d1c15bae91ac6b75dafb1bc8d790ed9ae38"
+          "bytes": 622576,
+          "gzip": 68099,
+          "sha256": "b4f6806cff9dd6b704936167a1968f7e3fa4ae6166aabf4e2dd451d3a20256cd"
         },
         {
           "file": "omni/data/layers/calendar/2020s.json",
-          "bytes": 844968,
-          "gzip": 86281,
-          "sha256": "c687b90e5b79926b8cc24659de9b28947bc237bfd07a03a834fcba43a0fe300f"
+          "bytes": 742928,
+          "gzip": 86982,
+          "sha256": "1ea56d81e2364d4ccf890cc66f2183701d8afb1789b71d2f0f79a7c808c60998"
         }
       ]
     }

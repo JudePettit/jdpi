@@ -96,7 +96,7 @@ National Analysis: key indicator time series. Yearly values since 1980 for every
 
 Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-21 to 2028-05-21 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 320 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 321 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
@@ -172,9 +172,9 @@ Digital Briefing: sources. The journals, preprint servers, institutions and news
 
 Historical Calendar: political events since 1980. Political history from 1980 to today and scheduled events ahead, one file per decade: elections and referendums, new leaders, inaugurations and resignations, coups, wars and ceasefires, assassinations, summits, treaties, sanctions, protests, parliamentary votes and court rulings, each with a plain-English account. The Realtime Calendar shows the same records for the current window.
 
-- Rows: 6,003 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
+- Rows: 6,004 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - Files: https://jdpi.pages.dev/calendar/data/1980s.json, https://jdpi.pages.dev/calendar/data/1990s.json, https://jdpi.pages.dev/calendar/data/2000s.json (+2 more) (records at `events`)
-- Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string)
+- Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string), `iso3` (string), `class` (string), `precision` (string)
 
 ### encyclopaedia-entities
 

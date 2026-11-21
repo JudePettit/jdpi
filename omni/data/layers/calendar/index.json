@@ -1,52 +1,52 @@
 {
  "format": "vm-calendar-index/1",
  "layer": "calendar-events",
- "built": "2026-11-20T14:28:18Z",
+ "built": "2026-11-21T07:59:12Z",
  "files": [
   {
    "from": 1980,
    "to": 1989,
    "file": "1980s.json",
-   "rows": 475,
-   "bytes": 265908,
-   "gzip": 25734,
-   "sha256": "92a688ef674ed7b3960c3141419d82b24fc97aaf230498bc50b2aea5072276f8"
+   "rows": 499,
+   "bytes": 242613,
+   "gzip": 26840,
+   "sha256": "d135d97b204b7be0bcc6dd3584f793f55fdde02a6fc29d01da79ba21c5fbbb7b"
   },
   {
    "from": 1990,
    "to": 1999,
    "file": "1990s.json",
-   "rows": 791,
-   "bytes": 442776,
-   "gzip": 40718,
-   "sha256": "bec180ec4bcf8ad1a537d66b4c7f74aeda6996e8c7b9702430a223f3586ebc08"
+   "rows": 812,
+   "bytes": 397953,
+   "gzip": 41454,
+   "sha256": "e0bfd1212a76af2c416416b4bc2d832564efdc907a73be8f71040e1261381073"
   },
   {
    "from": 2000,
    "to": 2009,
    "file": "2000s.json",
-   "rows": 860,
-   "bytes": 491289,
-   "gzip": 44537,
-   "sha256": "a2c7cd3e12933799271789733dff05a7eeb87c5d648d06d8fc51b1ac6996cb1e"
+   "rows": 876,
+   "bytes": 432992,
+   "gzip": 45188,
+   "sha256": "4b71b676e3fcb731453d437cc160821d09de37268db43780c16443ae4145df61"
   },
   {
    "from": 2010,
    "to": 2019,
    "file": "2010s.json",
-   "rows": 1253,
-   "bytes": 707713,
-   "gzip": 68016,
-   "sha256": "afddf4a8a0ebabdad4b67c14150a6d1c15bae91ac6b75dafb1bc8d790ed9ae38"
+   "rows": 1274,
+   "bytes": 622576,
+   "gzip": 68099,
+   "sha256": "b4f6806cff9dd6b704936167a1968f7e3fa4ae6166aabf4e2dd451d3a20256cd"
   },
   {
    "from": 2020,
    "to": 2029,
    "file": "2020s.json",
-   "rows": 1457,
-   "bytes": 844968,
-   "gzip": 86281,
-   "sha256": "c687b90e5b79926b8cc24659de9b28947bc237bfd07a03a834fcba43a0fe300f"
+   "rows": 1490,
+   "bytes": 742928,
+   "gzip": 86982,
+   "sha256": "1ea56d81e2364d4ccf890cc66f2183701d8afb1789b71d2f0f79a7c808c60998"
   }
  ]
 }

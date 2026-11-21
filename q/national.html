@@ -79,6 +79,12 @@ small.yr,.stat b small.yr{display:inline;margin:0 0 0 5px;color:var(--prp-muted)
 .ind{display:grid;grid-template-columns:minmax(0,1fr) 70px 92px 80px;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--prp-line-soft);font-size:12.5px}
 .ind .l{min-width:0}.ind .l small{display:block;color:var(--prp-muted);font-size:11px}.ind .l small a{white-space:nowrap}
 .ind .v{text-align:right;font-variant-numeric:tabular-nums}
+/* A stand-in: a different producer's series under the World Bank row it stands beside, set in from the left with a
+   rule of its own so it never reads as one of the 41 indicators (it is not scored). */
+.sti{display:grid;grid-template-columns:minmax(0,1fr) 92px 80px;gap:8px;align-items:center;margin-left:10px;padding:5px 0 6px 10px;border-left:2px solid var(--prp-line);font-size:12.5px}
+.sti .l{min-width:0}.sti .l small{display:block;color:var(--prp-muted);font-size:11px}.sti .l small a{white-space:nowrap}
+.sti .v{text-align:right;font-variant-numeric:tabular-nums}
+.sti .tag{margin-right:5px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase}
 .mv{text-align:right;color:var(--prp-muted);font:var(--prp-fs-xs) var(--prp-font-mono)}.mv.improving{color:var(--prp-good)}.mv.worsening{color:var(--prp-bad)}
 .spark{display:block;width:70px;height:22px}
 .added{margin-left:5px;padding:0 4px;border:1px solid var(--prp-line);border-radius:3px;color:var(--prp-muted);font:500 9.5px var(--prp-font-mono);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px}
@@ -146,7 +152,7 @@ td .nv{color:var(--prp-muted);font-size:12px}
 .spark .yrrule{stroke:var(--prp-accent);stroke-width:1}.spark .yrband{fill:var(--prp-accent-soft)}
 @media(max-width:1180px){.rankwrap.per{grid-template-columns:minmax(0,1fr)}.rankwrap .movers{order:-1}.mvcols{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.fld.years .prp-period{--prp-period-thumb:22px}.yrlabel{min-width:0}#yr-lbl{min-width:0}}
-@media(max-width:700px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px}.stat b{font-size:15px}.ind{grid-template-columns:minmax(0,1fr) 64px 76px}.ind .spark{display:none}.links{justify-content:flex-start}.pact{justify-items:start}.prp-panel-head .filters,.prp-panel-head .filters .prp-input{width:100%}.prp-panel-head .filters .prp-input{flex:1 1 140px}}
+@media(max-width:700px){.page{padding:16px 16px 32px}.prp-title{font-size:26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px}.stat b{font-size:15px}.ind{grid-template-columns:minmax(0,1fr) 64px 76px}.ind .spark{display:none}.sti{grid-template-columns:minmax(0,1fr) 76px;margin-left:4px;padding-left:8px}.sti .mv{display:none}.links{justify-content:flex-start}.pact{justify-items:start}.prp-panel-head .filters,.prp-panel-head .filters .prp-input{width:100%}.prp-panel-head .filters .prp-input{flex:1 1 140px}}
 </style>
 </head>
 <body>
@@ -202,6 +208,7 @@ td .nv{color:var(--prp-muted);font-size:12px}
     <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926 (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides), and for the leaders of <span id="liststates">the states Archigos does not cover</span>, its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) for conflict history since 1946 and, for 1926–1945, VM’s list of wars from Wikidata (CC0); Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
     <p id="method"><b>How this is worked out.</b> PESTLE pressure is VM's own composite, after Country PESTLE. It is not a forecast, and not a ranking of how well a country is run. For each of the 22 core World Bank indicators, a value is compared with the country's previous value no more than five years before it; a change past the indicator's threshold is improving or worsening. A dimension's pressure is the share of its scored indicators worsening; overall pressure is the mean of the dimensions scored; coverage is the share of the 22 with a value. <b>Latest</b> uses each indicator's newest value, its year beside it. <b>A year</b> uses that year's value, or one from up to two years earlier, marked with its year; anything older counts as no value, and nothing is carried forward. <b>A period</b> compares the first and last values inside it (1990–1999 is the old “1990s”), beside its first year's and its last year's own scores. A score with fewer than six dimensions is marked partial (dotted on the map). A score from fewer than three dimensions is too few values to colour or rank: there is no other minimum, so a score of three dimensions may still rest on a handful of indicators (its coverage is beside it). A period's change, and Rose most and Fell most, compare its first and last years only where both scores rest on the same dimensions, three or more, and, for a period to Latest, where Latest's score uses no value from before the period began; the other changes are shown, marked, but not ranked. Every score before 1998 is partial, because the governance indicators begin in 1996 (every two years until 2002) and a change needs two values; 1980, the first year held, has a coverage but no score. The years offered, <span id="yrspan">1980 to the newest</span>, are VM's request window: its build asks the World Bank for 1980 (where Country PESTLE began) to last year, though most series go back to 1960, so for a value from before 1985 the five-year look-back stops at 1980 and the early 1980s are scored more thinly than the full series would allow. The World Bank's values are for present-day countries: a year before a state existed, or before its borders took today's shape (South Sudan, Russia, Ukraine and Germany in the 1980s), is its reconstruction for the present territory, not a figure of the time. Indicators marked "added" are shown and compared but not scored. Recompute any figure from <code>national/data/years/</code> with <code>national/lib/pestle.js</code>.</p>
     <p><b>The yearly layer.</b> <code>national/data/years/manifest.json</code> lists one layer for each indicator (<code>wb:&lt;code&gt;</code>: every country by ISO3, every year, its unit, source, licence and method; no value is <code>null</code>) and the PESTLE pressure of each year (<code>national-pestle</code>, which stays on this page as VM's composite: each field's unit and scale, and the floor of three dimensions, are in the manifest). Its country key is the World Bank's three-letter code, ISO 3166-1 alpha-3 save Kosovo (XKX) and the Channel Islands (CHI); the values are for present-day countries. The Omni-Map reads the same files; the Integration Hub's <code>national-indicators</code> dataset names each indicator's layer.</p>
+    <p id="standins-note"><b>Stand-ins.</b> VM’s own text. A country’s profile shows, beside four of the seven World Bank series above whose originators’ terms bar commercial use, a different producer’s own series on free terms, each with a plain line on how it differs in method, units and years: fossil CO₂ per person from the Global Carbon Project (CC BY 4.0), PM2.5 exposure from SatPM at Washington University in St. Louis (CC BY 4.0), energy consumption per person from the US Energy Information Administration (public domain) and military spending as a share of GDP from the Global Military Spending Dataset (CC0), which ends in 2019. Each is that producer’s figure, not the World Bank’s; it is shown with its own latest year and is not scored. The renewable share of final energy, Internet users and mobile subscriptions have no stand-in yet: the free series VM found cover Europe only. Written monthly to <code>national/data/standins.json</code> by <code>omni/scripts/build-standins.mjs</code>; the Omni-Map draws the same four as layers of their own.</p>
     <p><b>Headlines.</b> The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
     <p><b>Dates.</b> Rebuilt <span id="rhythm">on its schedule</span> from the sources above. Each figure carries its own date beside it: a World Bank value its year (a country's latest value is of the latest year it reported), Wikidata the day it was read, Political Atlas the day its records were last reviewed, the Political Retrospective the day its data was built, and the conflict and energy figures the years they run to.</p>
   </footer>
@@ -243,6 +250,10 @@ let pressureP = null;
 // "no value" (rerender() keeps the view that was showing and says so).
 const getJson = url => fetch(url).then(r => { if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); });
 const loadPressure = () => (pressureP ||= getJson(YEARS + 'pressure.json').then(p => { PR = p; got(); return p; }, e => { pressureP = null; throw e; }));
+// The stand-ins (omni/scripts/build-standins.mjs, monthly): four series from other producers, each country's latest
+// value and year, shown under the World Bank row each stands beside. A failure is forgotten and simply leaves them out.
+let standinsP = null;
+const standins = () => (standinsP ||= getJson('../national/data/standins.json').catch(e => { standinsP = null; throw e; }));
 // An indicator the World Bank serves no values for (none at Latest either: the manifest lists it with data null) has
 // no file, so none is asked for: an empty layer.
 const noValues = code => !D.countries.some(c => c.latest[code]);
@@ -353,6 +364,13 @@ const ORIGINATOR = {
 const originatorLine = code => { const o = ORIGINATOR[code]; return o ? ` · <span class="orig">the World Bank takes it from ${esc(o[0])} (<a href="${esc(o[1])}" target="_blank" rel="noreferrer">its terms ↗</a>)</span>` : ''; };
 // The same line as a sentence, for the map's and the comparison's captions (HTML; nothing where the series is free).
 const originatorNote = code => { const o = ORIGINATOR[code]; return o ? ` <span class="orig">The World Bank takes it from ${esc(o[0])} (<a href="${esc(o[1])}" target="_blank" rel="noreferrer">its terms ↗</a>).</span>` : ''; };
+// A different producer's series standing beside a World Bank row (national/data/standins.json): its own label, unit,
+// latest year and value, a link to its producer and the plain line on how it differs. Never scored, never in its place;
+// whatever the years chosen, it shows its own latest value with that value's year. Nothing when the file did not load.
+const standinRows = (SI, code, iso) => (SI?.series || []).filter(x => x.standsFor === code).map(x => {
+  const v = x.latest?.[iso];
+  return `<div class="sti" data-standin="${esc(x.id)}"><div class="l"><span class="tag">Stand-in</span>${esc(x.label)}<small>${esc(x.unit)} · ${v ? `latest ${v[0]}` : 'no value for this country'} · <a href="${esc(x.url)}" target="_blank" rel="noreferrer">${esc(x.producer)} ↗</a> (${esc(x.licence)}) · VM’s own text: ${esc(x.line)}</small></div><div class="v">${v ? fmtVal(v[1], x.unit) : '–'}</div><div class="mv"></div></div>`;
+}).join('');
 const SRC = {
   worldBank: 'World Bank (WDI and WGI)',
   wikidata: () => (S().wikidataRead ? `Wikidata, read ${dateOf(S().wikidataRead)}` : 'Wikidata'),
@@ -744,7 +762,7 @@ async function renderProfile() {
   if (!c) return;
   $('#pname').textContent = ' · ' + c.name;
   const tok = ++profileTok;
-  const s = await series(c.iso3).catch(() => null);
+  const [s, SI] = await Promise.all([series(c.iso3).catch(() => null), standins().catch(() => null)]);
   try { await ensureData(); } catch { return; } // (rerender() says the figures could not load, and goes back)
   if (tok !== profileTok || selected !== c.iso3) return;
   // The country's series could not load: the note says so, and the profile that was showing stays (only its button
@@ -782,7 +800,7 @@ async function renderProfile() {
           : md === 'period' ? ` · ${first ? `${first[0]}: ${fmtVal(first[1], i.unit)} → ` : ''}${last[0]}` : ` · ${last[0]}${md === 'year' && last[0] < Y ? ' (earlier value)' : ''}`;
         const mark = md === 'latest' ? null : md === 'year' ? [Y] : [view.from, isLatest(Y) ? LAST : Y];
         return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a>${originatorLine(i.code)}</small></div>
-          ${spark(md === 'latest' ? all.slice(-25) : all, i.better, mark)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
+          ${spark(md === 'latest' ? all.slice(-25) : all, i.better, mark)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>${standinRows(SI, i.code, c.iso3)}`;
       }).join('')}</div>`;
   }).join('');
   // The years of the core values a year's or a period's score used ("values of 2009–2010").

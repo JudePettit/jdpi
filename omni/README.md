@@ -308,6 +308,29 @@ VM’s own text. Four more layers, each loaded only when it is switched on:
   the frame’s year (`data/layers/gvi/<year>.json`). The days are kept in `volatility/data/kept/` by
   `volatility/scripts/ingest.mjs`, so none is lost when Volatility’s index drops days older than a year.
 
+## Stand-ins from other producers (21 November 2026)
+
+VM’s own text. Four of the seven World Bank series VM leaves out have a different producer’s series beside them, as
+new layers of their own under “Stand-ins from other producers, by country” (fills, one at a time, `fill=<id>`). The
+absent line of each left-out series stays and names the stand-in beside it; each stand-in has no `wb` field, so
+`fill=wb:<code>` of a left-out series still opens nothing, as before. Each legend says it is that producer’s series, not
+the World Bank’s, and the key gives a plain line on how it differs in method, units and years.
+
+| Layer | Producer and licence | Years | Stands beside |
+|---|---|---|---|
+| `standin-co2-gcp` | Global Carbon Project, fossil CO₂ dataset (Zenodo), CC BY 4.0 | 1820–2025 | EN.GHG.CO2.PC.CE.AR5 |
+| `standin-pm25-satpm` | SatPM2.5 V5.GL.06, Washington University in St. Louis, CC BY 4.0 | 1998–2024 | EN.ATM.PM25.MC.M3 |
+| `standin-energy-eia` | US Energy Information Administration, International Energy Data, public domain | 1980–2024 | EG.USE.PCAP.KG.OE |
+| `standin-milex-gmsd` | Global Military Spending Dataset 9.0 (Harvard Dataverse), CC0 1.0; it ends in 2019 | 1993–2019 | MS.MIL.XPND.GD.ZS |
+
+`scripts/build-standins.mjs` reads each producer’s own file (its header gives the steps, inputs and terms), joins
+countries to ISO3 through `scripts/country-names.mjs` (with the short lists of spellings and codes in the script, and no
+guessed name), writes `data/layers/standin/<id>.json`, their catalogue entries and `national/data/standins.json` (each
+country’s latest value, for National Analysis), and writes nothing unless every step works. GMSD starts at 1993 so
+that no state of before is drawn on today’s borders. `.github/workflows/standins-refresh.yml` reruns it monthly with no
+key. The renewable share of final energy, Internet users and mobile subscriptions have no stand-in yet: the free series
+VM found cover Europe only, and their absent lines say so.
+
 The map draws at most three point or line layers; a fourth switches off the oldest and says so. A page or the narrator
 can send `prp:focus` with ISO3 codes (`{ countries: ['FRA'] }`) and the map fits them; a Q-id (`{ qids: ['Q1449'] }`)
 is fitted to its border of the frame's year, else to its point in the Master Index, read from its shard if the view

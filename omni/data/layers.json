@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-21T07:59:12Z",
+  "generated": "2026-11-21T12:54:55Z",
   "layers": [
     {
       "id": "borders",
@@ -3142,6 +3142,221 @@
           "bytes": 742928,
           "gzip": 86982,
           "sha256": "1ea56d81e2364d4ccf890cc66f2183701d8afb1789b71d2f0f79a7c808c60998"
+        }
+      ]
+    },
+    {
+      "id": "standin-co2-gcp",
+      "module": "omni-map",
+      "title": "Fossil CO₂ per person (Global Carbon Project), by country",
+      "role": "fill",
+      "geometry": "polygon",
+      "group": "standin",
+      "standsFor": "EN.GHG.CO2.PC.CE.AR5",
+      "time": {
+        "field": "year",
+        "from": 1820,
+        "to": 2025,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/standin/standin-co2-gcp.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Fossil CO₂ emissions per person (tonnes of CO₂)",
+      "status": "as the Global Carbon Project estimates it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.15,
+          0.49,
+          1.2,
+          2.5,
+          4.9,
+          8.8
+        ],
+        "unit": "t CO₂ per person",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Fossil CO₂ emissions per person (tonnes of CO₂): Global Carbon Project, 2026v11, 2026-10-26 (CC BY 4.0), on Natural Earth’s countries of today; a stand-in, not the World Bank’s series",
+      "line": "The Global Carbon Project’s figure, not the World Bank’s: fossil CO₂ alone (coal, oil, gas, cement, flaring and other carbonates), in tonnes of CO₂ per person, 1820–2025. The World Bank’s series is CO₂ excluding land use, in tonnes of CO₂ equivalent, from EDGAR and the IEA, so the two differ.",
+      "source": "gcp-fossil-co2",
+      "method": "VM’s own text. A stand-in for the World Bank’s EN.GHG.CO2.PC.CE.AR5, which VM leaves out (its line under the map says why): The Global Carbon Project’s figure, not the World Bank’s: fossil CO₂ alone (coal, oil, gas, cement, flaring and other carbonates), in tonnes of CO₂ per person, 1820–2025. The World Bank’s series is CO₂ excluding land use, in tonnes of CO₂ equivalent, from EDGAR and the IEA, so the two differ. Read from https://zenodo.org/api/records/23667912/files/GCB2026v11_percapita_flat.csv/content (GCB2026v11_percapita_flat.csv, 2,807,027 bytes, sha256 41d317713aca…, read 2026-11-21). Joined by the Global Carbon Project’s own ISO 3166-1 alpha-3 codes (its KSV is Kosovo, XKX). VM draws each value on Natural Earth’s countries of today (v5.1.1, 2022), so a value of an early year is drawn on today’s borders, not on those of its time; a small state the 1:110 million map leaves out is a point. Not drawn, and listed under the map’s key: the Global Carbon Project’s 4 rows that are not a country of today. Bonaire, Saint Eustatius and Saba, Guadeloupe, French Guiana, Martinique, Mayotte, Réunion have a value but no shape or point on Natural Earth’s countries, so VM cannot place them; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every country and year together), each rounded to two significant figures (0.15, 0.49, 1.2, 2.5, 4.9, 8.8), the same for every year. A year with no value for a country leaves it blank (omni/scripts/build-standins.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-21T12:54:55Z",
+      "unplaced": {
+        "BES": "Bonaire, Saint Eustatius and Saba",
+        "GLP": "Guadeloupe",
+        "GUF": "French Guiana",
+        "MTQ": "Martinique",
+        "MYT": "Mayotte",
+        "REU": "Réunion"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/standin/standin-co2-gcp.json",
+          "bytes": 305205,
+          "gzip": 80580,
+          "sha256": "457e40f46a5cb169cbcf236da05bc428db01372b86cee9b11d535298f30d3e25"
+        }
+      ]
+    },
+    {
+      "id": "standin-pm25-satpm",
+      "module": "omni-map",
+      "title": "PM2.5 exposure, population-weighted (SatPM), by country",
+      "role": "fill",
+      "geometry": "polygon",
+      "group": "standin",
+      "standsFor": "EN.ATM.PM25.MC.M3",
+      "time": {
+        "field": "year",
+        "from": 1998,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/standin/standin-pm25-satpm.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Population-weighted mean PM2.5 (micrograms per cubic metre)",
+      "status": "estimated: a model’s estimate from satellites, a chemical transport model and ground monitors",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          6.5,
+          11,
+          15,
+          18,
+          23,
+          32
+        ],
+        "unit": "µg/m³",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Population-weighted mean PM2.5 (micrograms per cubic metre): SatPM, Washington University in St. Louis, V5.GL.06 (CC BY 4.0), on Natural Earth’s countries of today; a stand-in, not the World Bank’s series",
+      "line": "SatPM’s figure, not the World Bank’s: fine particulate matter estimated from satellite readings, the GEOS-Chem model and ground monitors, averaged over each country’s people, in µg/m³, 1998–2024. The World Bank’s series is IHME’s Global Burden of Disease estimate, another model, so the two differ.",
+      "source": "satpm-v5gl06",
+      "method": "VM’s own text. A stand-in for the World Bank’s EN.ATM.PM25.MC.M3, which VM leaves out (its line under the map says why): SatPM’s figure, not the World Bank’s: fine particulate matter estimated from satellite readings, the GEOS-Chem model and ground monitors, averaged over each country’s people, in µg/m³, 1998–2024. The World Bank’s series is IHME’s Global Burden of Disease estimate, another model, so the two differ. Read from https://satpmdata.s3.amazonaws.com/V5GL06/RegionSummaries/GlobalPM25-V5GL06-Annual-1998-2024-wThresFrac.csv (GlobalPM25-V5GL06-Annual-1998-2024-wThresFrac.csv, 606,886 bytes, sha256 b9ec0b055af5…, read 2026-11-21). SatPM’s file names each country and gives no code: VM joins each name to Natural Earth’s name and ISO3, or, for SatPM’s own spellings, through VM’s table in omni/scripts/build-standins.mjs (SATPM_NAMES); a name it cannot join is listed, never guessed. VM draws each value on Natural Earth’s countries of today (v5.1.1, 2022), so a value of an early year is drawn on today’s borders, not on those of its time; a small state the 1:110 million map leaves out is a point. Not drawn, and listed under the map’s key: SatPM’s 14 regions that VM cannot join to a country of Natural Earth’s. The classes are VM’s: cut at the sevenths of every value the series holds (every country and year together), each rounded to two significant figures (6.5, 11, 15, 18, 23, 32), the same for every year. A year with no value for a country leaves it blank (omni/scripts/build-standins.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-21T11:51:40Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/standin/standin-pm25-satpm.json",
+          "bytes": 40246,
+          "gzip": 15337,
+          "sha256": "eb151b3c87440fb99cc54acf85f9d1e45134683387c1a0738a0a43c3a1de8da8"
+        }
+      ]
+    },
+    {
+      "id": "standin-energy-eia",
+      "module": "omni-map",
+      "title": "Energy consumption per person (US EIA), by country",
+      "role": "fill",
+      "geometry": "polygon",
+      "group": "standin",
+      "standsFor": "EG.USE.PCAP.KG.OE",
+      "time": {
+        "field": "year",
+        "from": 1980,
+        "to": 2024,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/standin/standin-energy-eia.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Total energy consumption per person (million Btu)",
+      "status": "as the US Energy Information Administration estimates it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          3.2,
+          9.9,
+          25,
+          47,
+          91,
+          150
+        ],
+        "unit": "million Btu per person",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Total energy consumption per person (million Btu): US Energy Information Administration, International Energy Data (bulk file INTL), 2026-08-21 (Public domain (US government work)), on Natural Earth’s countries of today; a stand-in, not the World Bank’s series",
+      "line": "The US Energy Information Administration’s figure, not the World Bank’s: total energy consumption per person in million Btu, not kilograms of oil equivalent, 1980–2024. The EIA’s file gives 0 for some places and years; VM reads the EIA’s 0 as no value and leaves it blank. The World Bank’s series comes in part from the IEA, another agency counting in another unit, so the two cannot be read one for one.",
+      "source": "eia-intl",
+      "method": "VM’s own text. A stand-in for the World Bank’s EG.USE.PCAP.KG.OE, which VM leaves out (its line under the map says why): The US Energy Information Administration’s figure, not the World Bank’s: total energy consumption per person in million Btu, not kilograms of oil equivalent, 1980–2024. The EIA’s file gives 0 for some places and years; VM reads the EIA’s 0 as no value and leaves it blank. The World Bank’s series comes in part from the IEA, another agency counting in another unit, so the two cannot be read one for one. Read from https://www.eia.gov/opendata/bulk/INTL.zip (INTL.zip, its INTL.txt, 24,714,575 bytes, sha256 2a79be689b8d…, read 2026-11-21). Joined by the EIA’s own three-letter codes (its XKS is Kosovo, XKX); its regions and groups of countries are not drawn, and a code with a value but no shape on today’s map is listed under the key. VM reads the EIA’s 0 as no value, so a year the file gives as 0 is blank, and 24 codes whose every value is 0 are not drawn: French Polynesia (PYF), Gibraltar (GIB), Niue (NIU), Turks and Caicos Islands (TCA), Former Yugoslavia (YUG), Nauru (NRU), Antarctica (ATA), Germany, East (DDR), Northern Mariana Islands (MNP), Former U.S.S.R. (SUN), Former Serbia and Montenegro (SCG), Saint Helena (SHN), Saint Pierre and Miquelon (SPM), Wake Island (WAK), Cook Islands (COK), Former Czechoslovakia (CSK), Faroe Islands (FRO), Micronesia (FSM), French Guiana (GUF), Montserrat (MSR), New Caledonia (NCL), Falkland Islands (FLK), Tuvalu (TUV), Western Sahara (ESH). VM draws each value on Natural Earth’s countries of today (v5.1.1, 2022), so a value of an early year is drawn on today’s borders, not on those of its time; a small state the 1:110 million map leaves out is a point. Not drawn, and listed under the map’s key: the EIA’s 40 regions, groups and areas under codes of its own. Guadeloupe, Martinique, Reunion have a value but no shape or point on Natural Earth’s countries, so VM cannot place them; the key lists them. The classes are VM’s: cut at the sevenths of every value the series holds (every country and year together), each rounded to two significant figures (3.2, 9.9, 25, 47, 91, 150), the same for every year. A year with no value for a country leaves it blank (omni/scripts/build-standins.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-21T12:54:55Z",
+      "unplaced": {
+        "GLP": "Guadeloupe",
+        "MTQ": "Martinique",
+        "REU": "Reunion"
+      },
+      "files": [
+        {
+          "file": "omni/data/layers/standin/standin-energy-eia.json",
+          "bytes": 163779,
+          "gzip": 79606,
+          "sha256": "b36924bf8eec65278eba12ff16a09d79dbd59ab43cb176178f9e324d097d5e2b"
+        }
+      ]
+    },
+    {
+      "id": "standin-milex-gmsd",
+      "module": "omni-map",
+      "title": "Military spending, % of GDP (GMSD, to 2019), by country",
+      "role": "fill",
+      "geometry": "polygon",
+      "group": "standin",
+      "standsFor": "MS.MIL.XPND.GD.ZS",
+      "time": {
+        "field": "year",
+        "from": 1993,
+        "to": 2019,
+        "step": "y",
+        "precision": "year"
+      },
+      "data": "omni/data/layers/standin/standin-milex-gmsd.json",
+      "on": "countries",
+      "space": "by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)",
+      "measure": "Military spending as a share of GDP (%)",
+      "status": "estimated: GMSD’s estimate, with the standard deviation and range it publishes beside it",
+      "style": {
+        "kind": "classes",
+        "breaks": [
+          0.54,
+          0.83,
+          1.1,
+          1.4,
+          1.8,
+          2.8
+        ],
+        "unit": "% of GDP",
+        "scheme": "sequential",
+        "cut": "sevenths of every value, rounded to two significant figures"
+      },
+      "legend": "Military spending as a share of GDP (%): Global Military Spending Dataset (GMSD), 9.0, 2025-04-29 (CC0 1.0), on Natural Earth’s countries of today; a stand-in, not the World Bank’s series",
+      "line": "The Global Military Spending Dataset’s figure, not the World Bank’s: its authors’ estimate of military spending as a share of GDP, 1993–2019; it ends in 2019. GMSD gives a fraction, which VM multiplies by 100. The World Bank’s series is SIPRI’s.",
+      "source": "gmsd-v9",
+      "method": "VM’s own text. A stand-in for the World Bank’s MS.MIL.XPND.GD.ZS, which VM leaves out (its line under the map says why): The Global Military Spending Dataset’s figure, not the World Bank’s: its authors’ estimate of military spending as a share of GDP, 1993–2019; it ends in 2019. GMSD gives a fraction, which VM multiplies by 100. The World Bank’s series is SIPRI’s. Read from https://dataverse.harvard.edu/api/access/datafile/11122138?format=original (estimates_milburden_20250429.csv, 4,837,790 bytes, sha256 5e94fbde6111…, read 2026-11-21). GMSD keys each state by its Gleditsch and Ward number: VM joins each number to an ISO3 through National Analysis’s numbers (national/data/index.json), save 340 (SRB), 713 (TWN), 816 (VNM), from VM’s table (GW_JOIN). VM shows the years from 1993, the first in which every number stands for a state of today. GMSD gives each value as a fraction of GDP; VM multiplies it by 100 and keeps six significant figures. VM draws each value on Natural Earth’s countries of today (v5.1.1, 2022), so a value of an early year is drawn on today’s borders, not on those of its time; a small state the 1:110 million map leaves out is a point. Not drawn, and listed under the map’s key: GMSD’s state number that VM does not draw. The classes are VM’s: cut at the sevenths of every value the series holds (every country and year together), each rounded to two significant figures (0.54, 0.83, 1.1, 1.4, 1.8, 2.8), the same for every year. A year with no value for a country leaves it blank (omni/scripts/build-standins.mjs).",
+      "open": true,
+      "pinnable": true,
+      "built": "2026-11-21T11:51:40Z",
+      "unplaced": {},
+      "files": [
+        {
+          "file": "omni/data/layers/standin/standin-milex-gmsd.json",
+          "bytes": 43952,
+          "gzip": 20217,
+          "sha256": "6136ac0ea98d3221c59eba059cc695537b948c4b49f1f0910a197394818f135f"
         }
       ]
     }

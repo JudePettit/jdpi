@@ -348,6 +348,188 @@ test('free data: the OpenSanctions panel states its terms in VM’s own words (M
   }
 });
 
+/* ---------------------------------------------------------------- VM's own sanctions index (MP-14 build B) */
+// The index (osint/data/sanctions-index.json) is written by osint/scripts/build-sanctions.mjs from the EU's and the UK's
+// official lists. A person is never indexed. These fixtures hold organisations and ships only: the one record typed as
+// an individual in each is a placeholder with no person's details, there to prove that the type alone drops it.
+const EU_HEAD = 'Date_file;Entity_logical_id;Subject_type;Leba_numtitle;Leba_publication_date;Leba_url;Programme;Entity_remark;Naal_logical_id;Entity_logical_id;Naal_leba_numtitle;Naal_leba_publication_date;Naal_leba_url;Naal_programme;Naal_lastname;Naal_firstname;Naal_middlename;Naal_wholename;Naal_gender;Naal_title;Naal_function;Naal_language;Addr_logical_id;Entity_logical_id;Addr_leba_numtitle;Addr_leba_publication_date;Addr_leba_url;Addr_programme;Addr_number;Addr_street;Addr_zipcode;Addr_city;Addr_country;Addr_other;Birt_logical_id;Entity_logical_id;Birt_leba_numtitle;Birt_leba_publication_date;Birt_leba_url;Birt_programme;Birt_date;Birt_place;Birt_country;Iden_logical_id;Entity_logical_id;Iden_leba_numtitle;Iden_leba_publication_date;Iden_leba_url;Iden_programme;Iden_number;Iden_country;Citi_logical_id;Entity_logical_id;Citi_leba_numtitle;Citi_leba_publication_date;Citi_leba_url;Citi_programme;Citi_country;EU_ref_num'.split(';');
+const euRow = (id, type, ref, cells) => {
+  const r = EU_HEAD.map(() => '');
+  Object.assign(r, { 0: '20/11/2026', 1: id, 2: type, 3: '9999/1 (OJ L1)', 4: '2026-01-02', 5: 'http://eur-lex.europa.eu/fixture', 6: 'TST', 7: 'FIXTURE REMARK TEXT', 58: ref });
+  for (const [k, v] of Object.entries(cells)) r[EU_HEAD.indexOf(k)] = v;
+  return r.map(v => (/[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)).join(';');
+};
+const EU_FIXTURE = [EU_HEAD.join(';'),
+  euRow('1', 'E', 'EU.1.1', { Naal_wholename: 'Fixture Shipping Company', Naal_language: 'EN', Naal_function: 'FIXTURE FUNCTION TEXT', Naal_title: 'FIXTURE TITLE TEXT' }),
+  euRow('1', 'E', 'EU.1.1', { Naal_wholename: 'Фикстура', Naal_language: 'RU' }),
+  euRow('1', 'E', 'EU.1.1', { Naal_wholename: 'Fixture Name Parts', Naal_firstname: 'Fixturefirst', Naal_lastname: 'Fixturelast' }),
+  euRow('1', 'E', 'EU.1.1', { Addr_street: '1 Fixture Street', Addr_city: 'Fixture City', Addr_country: 'PRK' }),
+  euRow('1', 'E', 'EU.1.1', { Iden_number: '1234567 (imo-IMO (vessel identification)) ' }),
+  euRow('1', 'E', 'EU.1.1', { Iden_number: 'R-999 (regnumber-Registration Number); with a semicolon', Iden_country: 'PRK' }),
+  euRow('1', 'E', 'EU.1.1', { Citi_country: 'PRK' }),
+  euRow('2', 'P', 'EU.2.2', { Naal_wholename: 'FIXTURE-TYPE-P-PLACEHOLDER', Birt_date: '1900-01-01', Birt_place: 'FIXTURE-PLACE' }),
+].join('\r\n');
+const UK_FIXTURE = `<?xml version="1.0" encoding="utf-8"?>
+<Designations><DateGenerated>20/11/2026</DateGenerated>
+<Designation><DateDesignated>01/02/2016</DateDesignated><UniqueID>TST0001</UniqueID>
+  <Names><Name><Name6>FIXTURE TRADING &amp; CO</Name6><NameType>Primary Name</NameType></Name><Name><Name6>Fixture Alias</Name6><NameType>Alias</NameType></Name><Name><Name1>Fixturefirst</Name1><Name6>Fixture Person Parts</Name6><NameType>Alias</NameType></Name></Names>
+  <RegimeName>The Fixture (Sanctions) Regulations 2019</RegimeName><IndividualEntityShip>Entity</IndividualEntityShip>
+  <OtherInformation>FIXTURE OTHER INFORMATION</OtherInformation><UKStatementofReasons>FIXTURE REASONS</UKStatementofReasons>
+  <Addresses><Address><AddressLine1>1 Fixture Street</AddressLine1><AddressPostalCode>FX1</AddressPostalCode><AddressCountry>Testland</AddressCountry></Address></Addresses>
+  <PhoneNumbers><PhoneNumber>+00 0000 0000</PhoneNumber></PhoneNumbers><EmailAddresses><EmailAddress>fixture@example.invalid</EmailAddress></EmailAddresses><Websites><Website>https://fixture.example.invalid</Website></Websites>
+  <EntityDetails><Entity><BusinessRegistrationNumbers><BusinessRegistrationNumber>FX-REG-1</BusinessRegistrationNumber></BusinessRegistrationNumbers><ParentCompanies><ParentCompany>FIXTURE PARENT LTD</ParentCompany></ParentCompanies><Subsidiaries><Subsidiary>FIXTURE SUBSIDIARY LTD</Subsidiary></Subsidiaries></Entity></EntityDetails>
+</Designation>
+<Designation><DateDesignated>03/10/2017</DateDesignated><UniqueID>TST0002</UniqueID>
+  <Names><Name><Name6>Fixture Vessel</Name6><NameType>Primary name</NameType></Name></Names>
+  <RegimeName>The Fixture (Sanctions) Regulations 2019</RegimeName><IndividualEntityShip>Ship</IndividualEntityShip>
+  <ShipDetails><Ship><IMONumbers><IMONumber>IMO7654321</IMONumber></IMONumbers><CurrentOwnerOperators><CurrentOwnerOperator>FIXTURE OWNER LTD</CurrentOwnerOperator></CurrentOwnerOperators><CurrentBelievedFlagOfShips><CurrentBelievedFlagOfShip>Testland</CurrentBelievedFlagOfShip></CurrentBelievedFlagOfShips><PreviousOwnerOperators><PreviousOwnerOperator>FIXTURE PREVIOUS OWNER</PreviousOwnerOperator></PreviousOwnerOperators></Ship></ShipDetails>
+</Designation>
+<Designation><DateDesignated>01/01/2020</DateDesignated><UniqueID>TST0003</UniqueID>
+  <Names><Name><Name6>FIXTURE-TYPE-INDIVIDUAL-PLACEHOLDER</Name6><NameType>Primary Name</NameType></Name></Names>
+  <RegimeName>The Fixture (Sanctions) Regulations 2019</RegimeName><IndividualEntityShip>Individual</IndividualEntityShip>
+</Designation>
+</Designations>`;
+const DROPPED_WORDS = ['FIXTURE REMARK', 'FIXTURE FUNCTION', 'FIXTURE TITLE', 'Fixture Street', 'Fixture City', 'FX1', 'Fixturefirst', 'Fixturelast', 'Fixture Name Parts', 'Fixture Person Parts', 'R-999', 'FIXTURE-TYPE', '1900-01-01', 'FIXTURE-PLACE',
+  'FIXTURE OTHER', 'FIXTURE REASONS', '+00 0000', 'fixture@', 'fixture.example', 'FX-REG', 'FIXTURE PARENT', 'FIXTURE SUBSIDIARY', 'FIXTURE OWNER', 'FIXTURE PREVIOUS'];
+
+test('sanctions build: a record typed as an individual is dropped, and only the kept fields survive', async () => {
+  const B = await import('../osint/scripts/build-sanctions.mjs');
+  const eu = B.parseEuCsv(EU_FIXTURE);
+  assert.equal(eu.generated, '2026-11-20');
+  assert.equal(eu.dropped.individuals, 1, 'the P record is counted as dropped');
+  assert.deepEqual(eu.records, [{ list: 'eu', type: 'enterprise', name: 'Fixture Shipping Company', aliases: ['Фикстура'], regime: 'TST', ref: 'EU.1.1', country: ['PRK'], imo: '1234567', act: '9999/1 (OJ L1)', actDate: '2026-01-02', actUrl: 'https://eur-lex.europa.eu/fixture' }]);
+  const uk = B.parseUkXml(UK_FIXTURE);
+  assert.equal(uk.generated, '2026-11-20');
+  assert.equal(uk.dropped.individuals, 1);
+  assert.deepEqual(uk.records, [
+    { list: 'uk', type: 'Entity', name: 'FIXTURE TRADING & CO', aliases: ['Fixture Alias'], regime: 'The Fixture (Sanctions) Regulations 2019', listed: '2016-02-01', ref: 'TST0001', country: ['Testland'] },
+    { list: 'uk', type: 'Ship', name: 'Fixture Vessel', regime: 'The Fixture (Sanctions) Regulations 2019', listed: '2017-10-03', ref: 'TST0002', imo: '7654321', flag: 'Testland' },
+  ]);
+  const text = JSON.stringify([eu, uk]);
+  for (const w of DROPPED_WORDS) assert.ok(!text.includes(w), `“${w}” is dropped`);
+  assert.equal(B.dmyToIso('29/06/2012'), '2012-06-29'); assert.equal(B.dmyToIso('31/02/2012'), '', 'no such day'); assert.equal(B.dmyToIso('2012'), '');
+  assert.throws(() => B.checkRecords('uk', [{ list: 'uk', type: 'Individual', name: 'x', ref: 'y' }]), /type Individual/);
+  assert.throws(() => B.checkRecords('eu', [{ list: 'eu', type: 'enterprise', name: 'x', ref: 'y', remark: 'z' }]), /field remark/);
+});
+
+test('sanctions build: a list that fails keeps its last copy, marked, and the page says so plainly', async () => {
+  const B = await import('../osint/scripts/build-sanctions.mjs');
+  const many = (list, type, n) => Array.from({ length: n }, (_, i) => ({ list, type, name: `Fixture ${list} ${i}`, ref: `${list.toUpperCase()}${i}` }));
+  const ok = (list, type, n) => ({ ok: true, parsed: { generated: '2026-11-20', records: many(list, type, n), dropped: { individuals: 1 } }, meta: { read: '2026-11-21T07:17:00Z', bytes: 1, sha256: 'a' } });
+  const NOW2 = new Date('2026-11-22T07:17:00Z');
+  const first = B.buildIndex({ eu: ok('eu', 'enterprise', 600), uk: ok('uk', 'Entity', 700) }, null, NOW2);
+  assert.equal(first.records.length, 1300); assert.equal(first.lists.eu.status, 'ok');
+  const next = B.buildIndex({ eu: { ok: false, error: 'HTTP 503' }, uk: ok('uk', 'Ship', 10) }, first, NOW2);
+  assert.equal(next.lists.eu.status, 'stale'); assert.equal(next.lists.eu.read, '2026-11-21T07:17:00Z', 'the last read date is kept');
+  assert.equal(next.lists.uk.status, 'stale', 'a list that shrinks to a handful is not believed'); assert.match(next.lists.uk.error, /only 10 records/);
+  assert.equal(next.records.length, 1300, 'the last records are kept');
+  const none = B.buildIndex({ eu: { ok: false, error: 'HTTP 403' }, uk: ok('uk', 'Entity', 700) }, null, NOW2);
+  assert.equal(none.lists.eu.status, 'failed'); assert.equal(none.lists.eu.records, 0);
+  const lines = L.sanctionsListLines(next);
+  assert.match(lines.find(l => l.id === 'eu').text, /could not be loaded on 22 Nov 2026, 07:17 UTC\. This index still holds the copy read 21 Nov 2026, 07:17 UTC/);
+  assert.match(L.sanctionsListLines(none).find(l => l.id === 'eu').text, /could not be loaded on 22 Nov 2026, 07:17 UTC, and this index holds nothing from it/);
+  assert.match(L.sanctionsListLines(first).find(l => l.id === 'uk').text, /^UK Sanctions List: read 21 Nov 2026, 07:17 UTC \(the list’s own date: 20 Nov 2026\), 700 records kept\.$/);
+  for (const id of ['us', 'un']) assert.match(L.sanctionsListLines(first).find(l => l.id === id).text, /not in this index\. Left out: /, id);
+  assert.throws(() => B.checkIndex({ records: [{ list: 'eu', type: 'P', name: 'x', ref: 'y' }] }), /type P/);
+});
+
+test('sanctions search: names, aliases, references, IMO numbers and registrations', () => {
+  const idx = { records: [
+    { list: 'eu', type: 'enterprise', name: 'Fixture Shipping Company', aliases: ['Фикстура', 'FSC Ltd.'], ref: 'EU.1.1', imo: '1234567' },
+    { list: 'uk', type: 'Ship', name: 'Fixture Vessel', ref: 'TST0002', imo: '7654321', flag: 'Testland', listed: '2017-10-03' },
+    { list: 'uk', type: 'Entity', name: 'Société Fixture Générale', ref: 'TST0009', listed: '2016-02-01' },
+    { list: 'us', type: 'Aircraft', name: 'Fixture Aircraft', ref: 'TST-A1', reg: 'FX-ABC' },
+  ] };
+  const names = q => L.sanctionsSearch(idx, q).results.map(r => r.rec.ref);
+  assert.deepEqual(names('fixture ship'), ['EU.1.1']);
+  assert.deepEqual(names('fsc'), ['EU.1.1']); assert.equal(L.sanctionsSearch(idx, 'fsc').results[0].via, 'FSC Ltd.');
+  assert.deepEqual(names('фикс'), ['EU.1.1'], 'non-Latin aliases');
+  assert.deepEqual(names('societe generale'), ['TST0009'], 'accents do not matter');
+  assert.deepEqual(names('eu.1.1'), ['EU.1.1']); assert.deepEqual(names('tst 0002'), ['TST0002']);
+  assert.deepEqual(names('IMO 7654321'), ['TST0002']); assert.deepEqual(names('1234567'), ['EU.1.1']);
+  assert.deepEqual(names('fx-abc'), ['TST-A1'], 'an aircraft by its registration');
+  assert.equal(names('Fixture Vessel')[0], 'TST0002', 'the exact name first');
+  assert.equal(names('fixture')[0], 'TST-A1', 'ties in name order');
+  assert.deepEqual(names(''), []); assert.deepEqual(names('nothing like it'), []);
+  assert.deepEqual(L.sanctionsSearch(idx, 'fixture', { lists: ['uk'] }).results.map(r => r.rec.list), ['uk', 'uk']);
+  const row = L.sanctionsRow(idx.records[0], { eu: { name: 'EU consolidated list of financial sanctions', search: 'https://www.sanctionsmap.eu/' } });
+  assert.equal(row.list, 'EU consolidated list of financial sanctions'); assert.equal(row.type, 'Enterprise (EU)'); assert.equal(row.listed, ''); assert.equal(row.listedNote, 'Not given in this file');
+  assert.deepEqual(row.links.map(l => l.href), ['https://www.sanctionsmap.eu/']);
+  assert.equal(L.sanctionsRow(idx.records[1], {}).listed, '3 Oct 2017');
+  assert.equal(L.sanctionsRow({ list: 'eu', type: 'enterprise', name: 'x', ref: 'y', act: '9999/1', actDate: '2026-01-02', actUrl: 'javascript:alert(1)' }).links.length, 0, 'only http(s) links');
+  assert.deepEqual(L.PERSON_SEARCHES.map(p => p.id), ['eu', 'uk', 'us', 'un']);
+  for (const p of L.PERSON_SEARCHES) assert.match(p.href, /^https:\/\//);
+  // Fixer, 21 Nov 2026: the EU's file gives a programme code, not a regime's name; it is labelled as the list's own code.
+  assert.equal(L.sanctionsRow({ list: 'eu', type: 'enterprise', name: 'x', ref: 'y', regime: 'UKR' }).regime, 'EU programme code UKR');
+  assert.equal(L.sanctionsRow({ list: 'uk', type: 'Entity', name: 'x', ref: 'y', regime: 'The Fixture (Sanctions) Regulations 2019' }).regime, 'The Fixture (Sanctions) Regulations 2019');
+  assert.equal(L.sanctionsRow({ list: 'eu', type: 'enterprise', name: 'x', ref: 'y' }).regime, '');
+  // A match through an alias alone carries the line that the row is an organisation's and the index holds no people.
+  assert.match(readFileSync(new URL('../osint/index.html', import.meta.url), 'utf8'), /id="sx-person">[^]*?the index keeps them as the lists type them, as organisations, and a search that finds one says so\./, 'the page says how organisations named after a person are kept');
+  assert.match(L.SX_VIA_NOTE, /^This is an organisation on the list; the index holds no people: for a person, use the official searches below\.$/);
+  const orgs = readFileSync(new URL('../osint/tab-orgs.js', import.meta.url), 'utf8');
+  assert.match(orgs, /h\.via \? `<span class="sub">Matched the alias “\$\{esc\(h\.via\)\}”<\/span><span class="sub sx-via">\$\{esc\(SX_VIA_NOTE\)\}<\/span>`/);
+  // At phone width the results become one card per record, as the module's other wide tables do.
+  const css = readFileSync(new URL('../osint/osint.css', import.meta.url), 'utf8');
+  const phone = css.slice(css.indexOf('@media (max-width: 640px)'));
+  assert.match(phone, /\.sx-table, \.sx-table tbody, \.sx-table tr, \.sx-table td \{ display: block;/);
+  assert.match(phone, /\.sx-table td\[data-label\]::before \{ content: attr\(data-label\) ": "/);
+});
+
+test('sanctions index: the built file holds no individual and none of the dropped fields; known records are found', async () => {
+  const B = await import('../osint/scripts/build-sanctions.mjs');
+  const raw = read('osint/data/sanctions-index.json');
+  const idx = JSON.parse(raw);
+  const { gzipSync } = await import('node:zlib');
+  assert.ok(gzipSync(raw).length < 1.5 * 1024 * 1024, 'under 1.5 MB gzipped');
+  assert.deepEqual(Object.keys(idx.lists).sort(), ['eu', 'uk']); assert.deepEqual(Object.keys(idx.leftOut).sort(), ['un', 'us']);
+  assert.deepEqual(idx.kept, B.KEPT);
+  for (const r of idx.records) {
+    assert.ok(B.KEPT_TYPES[r.list]?.includes(r.type), `${r.ref}: type ${r.type} of list ${r.list}`);
+    for (const k of Object.keys(r)) assert.ok(B.KEPT.includes(k), `${r.ref}: field ${k}`);
+    if (r.actUrl) assert.match(r.actUrl, /^https:\/\/eur-lex\.europa\.eu\//);
+  }
+  assert.ok(!idx.records.some(r => /^(P|person|Individual)$/i.test(r.type)), 'no record of an individual type');
+  for (const [id, l] of Object.entries(idx.lists)) {
+    assert.ok(l.dropped?.individuals > 1000, `${id}: the list's individuals were dropped (${l.dropped?.individuals})`);
+    assert.match(l.read || '', /^\d{4}-\d{2}-\d{2}T/, `${id}: the date read`); assert.ok(l.licence && l.licenceUrl && l.credit && l.termsQuote, `${id}: terms and credit`);
+  }
+  // Dropped fields: none of the lists' own names for them, and nothing shaped like an email address or a phone number.
+  const keys = new Set(); const walk = v => { if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) { if (!Array.isArray(v)) keys.add(k); walk(x); } }; walk(idx);
+  for (const k of keys) assert.ok(!/remark|reason|statement|address|street|city|postal|zip|phone|email|website|registration|regnumber|tax|parent|subsidiar|owner|operator|citizen|national|birth|dob|passport|gender|function|title|iden_|naal_|addr_|birt_|citi_/i.test(k), `no field “${k}”`);
+  for (const k of ['Entity_remark', 'Naal_function', 'Addr_street', 'Birt_date', 'Citi_country', 'Iden_number', 'OtherInformation', 'UKStatementofReasons', 'AddressLine', 'PhoneNumber', 'EmailAddress', 'BusinessRegistrationNumber', 'CurrentOwnerOperator']) assert.ok(!raw.includes(k), k);
+  assert.ok(!/[\w.+-]+@[\w-]+\.[\w.]+/.test(JSON.stringify(idx.records)), 'no email address');
+  const find = (q, ref) => { const r = L.sanctionsSearch(idx, q).results.find(x => x.rec.ref === ref); assert.ok(r, `${q} → ${ref}`); return r.rec; };
+  // A known company on both lists, a known ship (by name and by IMO number), and the EU's own IMO-bearing enterprise.
+  assert.equal(find('Korea Mining Development Trading Corporation', 'EU.4187.20').list, 'eu');
+  assert.equal(find('Korea Mining Development Trading Corporation', 'DPR0157').listed, '2009-04-24');
+  const ship = find('Petrel 8', 'DPR0075');
+  assert.deepEqual([ship.type, ship.imo, ship.flag, ship.listed], ['Ship', '9562233', 'Comoros', '2017-10-03']);
+  assert.equal(find('IMO 9562233', 'DPR0075').name, 'Petrel 8');
+  assert.equal(find('EU.4198.83', 'EU.4198.83').imo, '5342883');
+  // No aircraft: neither the EU's file nor the UK's types one (only the US list does, and it is left out).
+  assert.ok(!idx.records.some(r => r.reg || r.type === 'Aircraft'));
+});
+
+test('sanctions page: the index panel, its read dates and plain lines, the route for persons, OpenSanctions kept', () => {
+  const html = read('osint/index.html');
+  const at = id => html.indexOf(`id="${id}"`);
+  for (const id of ['sx-panel', 'sx-form', 'sx-dates', 'sx-warn', 'sx-out', 'sx-person', 'sx-terms']) assert.ok(at(id) > 0, id);
+  assert.ok(at('sx-panel') > at('panel-orgs') && at('sx-panel') < at('panel-events'), 'in the Organisations & sanctions tab');
+  assert.ok(at('sx-dates') > at('sx-form') && at('sx-dates') < at('sx-out'), 'the read dates sit beside the search box');
+  const warn = html.match(/<p[^>]*id="sx-warn"[^>]*>([\s\S]*?)<\/p>/)[1];
+  assert.match(warn, /change daily/); assert.match(warn, /for learning/); assert.match(warn, /not a compliance check/); assert.match(warn, /the official list decides/i);
+  const person = html.match(/<div[^>]*id="sx-person"[^>]*>([\s\S]*?)<\/div>/)[1];
+  assert.match(person, /does not build tools that identify private people/);
+  for (const p of L.PERSON_SEARCHES) assert.ok(person.includes(`href="${p.href}"`), p.id);
+  const terms = html.match(/<p[^>]*id="sx-terms"[^>]*>([\s\S]*?)<\/p>/)[1].replace(/<span class="sr-only">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, '');
+  assert.match(terms, /CC BY 4\.0/); assert.match(terms, /Open Government Licence v3\.0/); assert.match(terms, /Contains public sector information licensed under the Open Government Licence v3\.0/);
+  assert.match(terms, /US Treasury/); assert.match(terms, /UN Security Council/);
+  // The OpenSanctions search stays as it was, after the index.
+  assert.ok(at('os-panel') > at('sx-panel')); assert.ok(at('os-key') > 0 && at('os-search') > 0 && at('os-terms') > 0);
+  const tab = read('osint/tab-orgs.js');
+  assert.match(tab, /SANCTIONS_INDEX_URL/); assert.match(tab, /osSearchUrl\(name, \{ schema, key: osKey, limit: 15 \}\)/, 'the OpenSanctions request is unchanged');
+});
+
 /* ---------------------------------------------------------------- events (GDELT) */
 test('events: GDELT queries, addresses and replies', () => {
   const b = L.buildGdeltQuery({ all: 'cable', phrase: 'Red Sea', any: 'attack strike', none: 'film', country: 'ireland', lang: 'english', domain: 'https://www.rte.ie/news' });
@@ -701,6 +883,67 @@ test('page: every tab opens without errors, and the notebook and media check wor
     await page.waitForSelector('#cb-exiftool');
     assert.equal(await page.$eval('.md .callout.tip', el => getComputedStyle(el).position), 'static', 'tip callouts flow with the text');
     assert.deepEqual(errors, []);
+  } finally { await browser.close(); }
+});
+
+test('page: the sanctions index finds a ship and a company, dates each list, and says plainly when a list or the index failed', { skip: !PAGE && 'set OSINT_URL (e.g. http://localhost:8787) to run' }, async () => {
+  const { chromium } = await import('playwright-core');
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route(/api\.gleif\.org/, r => r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '{"meta":{"pagination":{"total":0}},"data":[]}' }));
+    const base = PAGE.replace(/\/$/, '') + '/osint/index.html';
+    await page.goto(base + '#tab=orgs', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /UK Sanctions List: read \d/.test(document.getElementById('sx-dates')?.textContent || ''));
+    assert.match(await page.textContent('#sx-dates'), /EU consolidated list of financial sanctions: read \d/);
+    assert.match(await page.textContent('#sx-dates'), /US Treasury \(OFAC\) sanctions lists: not in this index/);
+    await page.fill('#sx-form [name=q]', 'IMO 9562233');
+    await page.click('#sx-form [type=submit]');
+    await page.waitForSelector('#sx-out .sx-table');
+    const ship = await page.textContent('#sx-out tbody tr');
+    for (const w of ['Petrel 8', 'UK Sanctions List', 'Ship (UK)', 'DPR0075', '3 Oct 2017', 'IMO 9562233']) assert.ok(ship.includes(w), w);
+    assert.ok(await page.$('#sx-out a[href="https://search-uk-sanctions-list.service.gov.uk/"]'), 'the official search for the record');
+    await page.fill('#sx-form [name=q]', 'Korea Mining Development Trading');
+    await page.click('#sx-form [type=submit]');
+    await page.waitForFunction(() => /EU\.4187\.20/.test(document.getElementById('sx-out').textContent) && /DPR0157/.test(document.getElementById('sx-out').textContent));
+    assert.ok(await page.$('#sx-out a[href^="https://eur-lex.europa.eu/"]'), 'the EU record links the legal act it cites');
+    assert.match(await page.textContent('#sx-person'), /does not build tools that identify private people/);
+    assert.ok(await page.$('#os-key') && await page.$('#os-terms'), 'the OpenSanctions search is still there');
+    // EU rows give the list's own programme code, labelled as such (fixer, 21 Nov 2026).
+    assert.match(await page.textContent('#sx-out'), /EU programme code PRK/);
+    // At phone width each result is a card: no sideways scroll, and the date, reference and official link are in view
+    // beside the name (fixer, 21 Nov 2026).
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.waitForFunction(() => document.documentElement.scrollWidth <= 360, null, { timeout: 5000 }).catch(() => {});
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 360, 'no sideways page scroll at 360 px with results shown');
+    const inView = await page.evaluate(() => [...document.querySelectorAll('#sx-out tbody tr')].every(tr => ['Reference', 'Date listed', 'Official record'].every(l => {
+      const td = tr.querySelector(`td[data-label="${l}"]`), b = td.getBoundingClientRect(), box = document.getElementById('sx-out').getBoundingClientRect();
+      return b.width > 0 && b.left >= box.left - 1 && b.right <= box.right + 1;
+    })));
+    assert.ok(inView, 'every card shows its reference, date and official record inside the panel at 360 px');
+    assert.equal(await page.evaluate(() => { const s = document.querySelector('#sx-out .scroll'); return s.scrollWidth - s.clientWidth; }), 0, 'nothing scrolls sideways inside the panel');
+    await page.setViewportSize({ width: 1280, height: 900 });
+    // A search that matches an organisation only through an alias says the row is the organisation's.
+    await page.fill('#sx-form [name=q]', 'Islamic Salvation Foundation');
+    await page.click('#sx-form [type=submit]');
+    await page.waitForFunction(() => /Matched the alias/.test(document.getElementById('sx-out').textContent));
+    assert.match(await page.textContent('#sx-out .sx-via'), /the index holds no people: for a person, use the official searches below/);
+    assert.match(await page.textContent('#sx-out > p'), /Every row is a company, organisation or ship, never a person/);
+    // One list failed at the last read: the dates say so, in words.
+    const real = JSON.parse(read('osint/data/sanctions-index.json'));
+    const stale = { ...real, lists: { ...real.lists, uk: { ...real.lists.uk, status: 'stale', failedAt: '2026-11-22T07:17:00Z', error: 'HTTP 503' } } };
+    await page.route(/osint\/data\/sanctions-index\.json/, r => r.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify(stale) }));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /UK Sanctions List: could not be loaded on 22 Nov 2026, 07:17 UTC\. This index still holds the copy read/.test(document.getElementById('sx-dates')?.textContent || ''));
+    // The index itself cannot be read: the panel says so.
+    await page.unroute(/osint\/data\/sanctions-index\.json/);
+    await page.route(/osint\/data\/sanctions-index\.json/, r => r.fulfill({ status: 404, body: 'not found' }));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /sanctions index could not be loaded/.test(document.getElementById('sx-dates')?.textContent || ''));
+    assert.deepEqual(errors, []);
+    await page.close();
   } finally { await browser.close(); }
 });
 

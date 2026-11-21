@@ -41,7 +41,7 @@ Article 85 requires each country to balance data protection with freedom of expr
 | Security | Encrypted disks and backups, strong unique passwords, two-factor authentication |
 | Accountability | Keep the notebook and your lawful-basis note: they show how you decided |
 
-This dashboard helps: it stores the notebook only in your browser, filters sole traders out of company results, does not offer people-search tools, and flags identifying fields in image metadata.
+This dashboard helps: it stores the notebook only in your browser, filters sole traders out of company results, does not offer people-search tools, and flags identifying fields in image metadata. Its own sanctions index holds companies, organisations and ships only: every record the EU or UK list types as a person is dropped before the file is written, and for a person the page links to each list’s official search instead. A sanctions list is evidence of a legal measure, not of guilt, and a name that matches is only a lead until the list’s own reference and identifiers agree.
 
 ## The Berkeley Protocol
 The [Berkeley Protocol on Digital Open Source Investigations](https://humanrights.berkeley.edu/publications/berkeley-protocol-on-digital-open-source-investigations/), from the UC Berkeley Human Rights Center and the UN Human Rights Office (launched in December 2020; the [UN edition](https://digitallibrary.un.org/record/3973652), HR/PUB/20/2, followed in 2022), is the professional standard for open-source work that may become evidence of crimes or human-rights violations.

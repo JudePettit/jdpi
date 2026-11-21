@@ -13,6 +13,7 @@
 <script src="../design/prp-bar.js" data-suite="hb" data-module="briefing" data-shell="../" defer></script>
 <script src="../design/prp-access.js"></script>
 <script src="../design/prp-tex.js"></script>
+<script src="../design/prp-rsp.js"></script>
 <style>
 /* Political positions: the page's own diverging scale (red · grey · blue). The far positions carry the most contrast
    against the page in both themes; every mark sits next to its label, so colour is never the only cue. */
@@ -95,6 +96,13 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
 .tcard summary{cursor:pointer;padding:6px 0 0;color:var(--prp-link);font-size:12.5px}
 .cmp{display:inline-block;margin-top:8px;color:var(--prp-link);font:500 12.5px var(--prp-font-ui)}
 .caution{margin-left:4px;color:var(--prp-warn)}
+/* Wikipedia's list of perennial sources, beside ⚠ (design/prp-rsp.js): its words, small and muted, a link to the row */
+.rsp{margin-left:6px;color:var(--prp-text-2);font:var(--prp-fs-xs)/1.4 var(--prp-font-mono);text-decoration:none}
+.rsp:hover{color:var(--prp-link);text-decoration:underline;text-underline-offset:2px}
+.rsp-k{margin-right:2px;padding:0 4px;border:1px solid var(--prp-line);border-radius:var(--prp-radius-sm);color:var(--prp-muted);font-size:10.5px;white-space:nowrap}
+.rsp.none,.rsp-no{color:var(--prp-muted)}
+.rsp-rows{display:flex;flex-direction:column;gap:2px}.rsp-rows .rsp,#srcrows .rsp{margin-left:0}
+.rsp-no{font:var(--prp-fs-xs)/1.4 var(--prp-font-ui)}
 .tmore{padding:12px 14px}
 .posswitch{display:none;margin:0;padding:10px 14px 4px;border:0;border-bottom:1px solid var(--prp-line-soft)}
 .posswitch legend{float:left;margin:0 10px 6px 0;padding:5px 0 0}
@@ -241,8 +249,8 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
     <div class="prp-panel">
       <div class="prp-panel-head"><b>Publisher catalogue</b><span class="srcmeta" id="srcmeta"></span></div>
       <p class="prp-note pub-note" id="balance"></p>
-      <div class="tablewrap"><table class="prp-table"><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
-      <p class="prp-note pub-note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. <span class="caution" aria-hidden="true">⚠</span> marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage.</p>
+      <div class="tablewrap"><table class="prp-table"><thead><tr><th>Publisher</th><th>Position</th><th>Country</th><th id="rsphead">Wikipedia’s list</th><th>Status</th><th class="num">Stories (7 days)</th></tr></thead><tbody id="srcrows"></tbody></table></div>
+      <p class="prp-note pub-note">Each position has ten active publishers. Each refresh uses the first ten in each position whose feeds return fresh stories, and reserves step in if one fails, so the positions stay equal. Positions follow AllSides Media Bias Ratings where available and Media Bias/Fact Check otherwise, adjusted to five steps. They describe editorial slant, not accuracy. <span class="caution" aria-hidden="true">⚠</span> marks outlets those raters score as having mixed or low factual reliability: read them alongside other coverage. Beside it, <b>Wikipedia’s list</b> gives each publisher’s row on English Wikipedia’s list of perennial sources, in its own words: the standing consensus of Wikipedia’s editors on using that outlet as a source in Wikipedia. It is not Vitruvian Manager’s judgement, not Media Bias/Fact Check’s, and not a rating of any single article. A publisher the list splits by subject or by period shows each of its rows; one not on the list says so; where Vitruvian Manager cannot be sure which row is the publisher’s, it shows no flag and says why.</p>
     </div>
   </section>
 
@@ -251,6 +259,7 @@ textarea.prp-input{height:auto;min-height:64px;padding:7px 10px;resize:vertical;
     <p><b>Top stories.</b> Headlines grouped as one story by Highbrowse’s own code, in your browser, from the four Omni News briefings’ stores, and counted by the Political Briefing’s publishers that ran them. A count of publishers, not a judgement of importance: the rule is under “How this is worked out”.</p>
     <p><b>Free sources lead.</b> In Top stories, a story’s first headline is from a publisher anyone can read wherever one ran it, a story only publishers behind a paywall or a sign-up ran never comes first, and a labelled headline has the same story’s free headline beside it (“Free at …”) where the grouping found one. In Latest, stories are newest first, except that the first story in the stream and in each position’s column is from a free publisher wherever the list has one; a story only publishers behind a paywall or a sign-up carry never comes first, and keeps its place lower down. Links to those publishers are labelled “Paywall” or “Sign-up”. Each publisher’s class, with the evidence and the day it was checked, is in <code>design/prp-access.json</code>; one that could not be checked counts as free.</p>
     <p><b>Positions.</b> AllSides Media Bias Ratings where available, otherwise Media Bias/Fact Check, adjusted to five steps. They describe editorial slant, not accuracy; ⚠ marks outlets that Media Bias/Fact Check rates mixed or low for factual reliability.</p>
+    <p><b>Wikipedia’s list.</b> Beside ⚠, “Wikipedia” and a status give the publisher’s row on English Wikipedia’s list of perennial sources, as Vitruvian Manager read it, and link to that row: the standing consensus of Wikipedia’s editors on using that outlet as a source in Wikipedia. It is not Vitruvian Manager’s judgement, not Media Bias/Fact Check’s, and not a rating of any single article. Where the list gives an outlet different statuses by subject or by period, the flag says “varies by subject: see the list” (or “by period”), and the Publishers tab shows each row; an outlet not on the list says “Not on Wikipedia’s list”; an outlet Vitruvian Manager cannot surely match to one row shows no flag. <span id="rspcredit">Statuses and row names from “Wikipedia:Reliable sources/Perennial sources” by Wikipedia contributors, under CC BY-SA 4.0, kept in <code>briefing/data/rsp.json</code> under the same licence.</span></p>
     <p><b>Refresh.</b> Twice a day; stories are kept for seven days. <b>Hard news only</b> hides sport results, celebrity and entertainment coverage and lifestyle sections, but keeps stories about politics, law, courts, business or money in those fields.</p>
     <p><b>Privacy.</b> Your topics, your filter choice and the position you last picked are stored in this browser only.</p>
   </footer>
@@ -350,6 +359,13 @@ const ago = iso => { const m = (Date.now() - Date.parse(iso)) / 6e4; return m < 
 const posLabel = k => D.positions.find(p => p.key === k)?.label || k;
 const posTag = k => `<span class="ptag" style="${posVar(k)}"><i aria-hidden="true"></i>${esc(posLabel(k))}</span>`;
 const caution = '<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>';
+// Beside ⚠, the publisher's status on Wikipedia's list of perennial sources (design/prp-rsp.js, from ../briefing/data/rsp.json):
+// its words, "varies by subject: see the list", "Not on Wikipedia's list", or nothing where VM cannot be sure which row is
+// the publisher's. The stories never wait on the table: until it is read, each flag is an empty slot, filled when it
+// arrives (PRPRsp.fill); if it cannot be read, no publisher shows one.
+let RSP = PRPRsp.table(null), RSP_SETTLED = false;
+const rsp = id => (RSP_SETTLED ? PRPRsp.html(RSP.flag(id)) : PRPRsp.slot(id));
+const rspCell = id => PRPRsp.html(RSP.flag(id), { full: true }) || (RSP.ok ? `<span class="rsp-no">No flag: ${esc(RSP.why(id) || 'not a certain match.')}</span>` : '');
 // Free sources lead (design/prp-access.js): each publisher's access class from design/prp-access.json; a link to one
 // that is not free to read carries a label, and the top of the stream and of each position's column is a story anyone
 // can read wherever the list has one (the rest keep their order, newest first). Latest's stories stand alone (it does not
@@ -362,7 +378,7 @@ function storyHtml(i, showTag) {
   // A headline's or summary's TeX notation, should a feed send any, in plain characters (design/prp-tex.js).
   const t = PRPTex.plain(i.t), d = PRPTex.plain(i.d || '');
   return `<div class="story">${showTag ? `<div>${posTag(s.position)}</div>` : ''}<div><a class="t" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(t)}${PRPAccess.label(accOf(i))}</a>
-    <small>${esc(s.name)}${s.caution ? caution : ''} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(d.slice(0, 180))}${d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
+    <small>${esc(s.name)}${s.caution ? caution : ''}${rsp(s.id)} · ${ago(i.p)}</small>${i.d && i.d !== i.t ? `<p>${esc(d.slice(0, 180))}${d.length > 180 ? '…' : ''}</p>` : ''}</div></div>`;
 }
 // The toolbar's publisher and search and the topic picked: whether one headline passes them (Latest shows those that
 // do; Top stories keeps the stories with one that does).
@@ -438,7 +454,7 @@ const agoMs = ms => ago(new Date(ms).toISOString());
 // with it, the same story's free headline ("Free at …").
 const headLink = (i, cls = '') => `<a${cls ? ` class="${cls}"` : ''} ${http(i.u) ? `href="${esc(i.u)}" target="_blank" rel="noopener"` : ''}>${esc(i.t)}${PRPAccess.label(i.acc)}</a>`;
 const altLink = a => (a ? ' ' + PRPAccess.altLink({ url: a.u, outlet: a.src, title: a.t }) : '');
-const srcLine = i => `<p class="tc-src">${esc(i.src)}${i.caution ? caution : ''} · ${esc(agoMs(i.at))}</p>`;
+const srcLine = i => `<p class="tc-src">${esc(i.src)}${i.caution ? caution : ''}${rsp(i.sid)} · ${esc(agoMs(i.at))}</p>`;
 // Each position's publishers that ran it, every position named beside its mark (none left out but `skip`).
 const posKey = (s, skip, what = 'Publishers by position:') => `<p class="tc-pos"><span class="what">${esc(what)}</span>${D.positions.filter(p => p.key !== skip).map(p => { const n = s.positions[p.key] || 0; return `<span class="${n ? '' : 'z'}" style="${posVar(p.key)}" data-pos="${esc(p.key)}"><i aria-hidden="true"></i>${esc(p.label)} <b>${num(n)}</b></span>`; }).join('')}</p>`;
 // "Compare the positions ›": Latest's balanced columns on the story (Highbrowse's link, #w=…&q=…). A hash link, so the
@@ -449,7 +465,7 @@ const compareHref = s => '#' + new URLSearchParams({ w: wKey(), q: String(s.quer
 const utc = ms => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
 let focusCmp = null; // the story whose "Compare" link takes the focus again on the way back
 const compare = s => `<a class="cmp" href="${esc(compareHref(s))}">Compare the positions<span class="prp-vh"> on this story</span> ›</a>`;
-const entryLi = e => `<li><span class="o">${esc(e.item.src)}</span>${e.item.caution ? caution : ''}<span class="pl" style="${posVar(e.item.pos)}"><i aria-hidden="true"></i>${esc(posLabel(e.item.pos))}</span>${headLink(e.item, 'h')}${altLink(e.alt)}</li>`;
+const entryLi = e => `<li><span class="o">${esc(e.item.src)}</span>${e.item.caution ? caution : ''}${rsp(e.item.sid)}<span class="pl" style="${posVar(e.item.pos)}"><i aria-hidden="true"></i>${esc(posLabel(e.item.pos))}</span>${headLink(e.item, 'h')}${altLink(e.alt)}</li>`;
 
 function topCard(s, k) {
   // Every headline the card counts can be reached: the first few, then all the rest under "N more headlines".
@@ -610,10 +626,11 @@ function renderSources() {
   const counts = new Map(); for (const i of D.items) counts.set(i.s, (counts.get(i.s) || 0) + 1);
   const order = Object.fromEntries(D.positions.map((p, k) => [p.key, k]));
   $('#srcrows').innerHTML = [...D.sources].sort((a, b) => order[a.position] - order[b.position] || (b.active - a.active)).map(s => `<tr><td>${esc(s.name)}${s.caution ? ' ' + caution : ''}</td>
-    <td>${posTag(s.position)}</td><td>${esc(s.country)}</td>
+    <td>${posTag(s.position)}</td><td>${esc(s.country)}</td><td>${rspCell(s.id)}</td>
     <td>${s.active ? '<span class="prp-status good">Active</span>' : s.reserve ? '<span class="prp-status">Reserve</span>' : `<span class="prp-status bad">Unavailable (${esc(s.status)})</span>`}</td><td class="num">${num(counts.get(s.id) || 0)}</td></tr>`).join('');
   $('#srcmeta').textContent = 'Active · ' + D.positions.map(p => `${p.label} ${D.sources.filter(s => s.position === p.key && s.active).length}`).join(' · ');
   $('#balance').textContent = balanceNote(D);
+  $('#rsphead').textContent = RSP.read ? `Wikipedia’s list (read ${PRPRsp.day(RSP.read)})` : 'Wikipedia’s list';
 }
 // Beside the publisher counts: equal numbers of publishers are neither equal numbers of stories (the store's own
 // counts by position, over the days it keeps) nor a balance of facts.
@@ -699,6 +716,15 @@ setTab(new URLSearchParams(location.search).get('tab') || storyView, false);
 function update() { render(); renderTop(); }
 
 /* ---------- boot ---------- */
+// Wikipedia's table is read beside the stories, not before them: when it settles, its flags go into their slots, the
+// Publishers tab is drawn again with its column, and the credit line is written.
+fetch('../briefing/data/rsp.json').then(r => (r.ok ? r.json() : null)).catch(() => null).then(rspJson => {
+  RSP = PRPRsp.table(rspJson); RSP_SETTLED = true;
+  $('#rspcredit').innerHTML = PRPRsp.credit(RSP);
+  PRPRsp.fill(RSP, document);
+  if (D) renderSources();
+  document.documentElement.dataset.rsp = RSP.ok ? 'ok' : 'failed'; // for the tests: the flags are in place
+});
 const accessDoc = fetch('../design/prp-access.json').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }).catch(() => ({ sources: [], failed: true }));
 Promise.all([fetch('../briefing/data/latest.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }), accessDoc]).then(([text, doc]) => {
   const d = JSON.parse(text), acc = PRPAccess.table(doc);

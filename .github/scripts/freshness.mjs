@@ -53,6 +53,10 @@ const STORES = [
   // The cache's own stamp once the Kino build writes one; until then its newest fetch.
   { file: 'kino/scripts/cache.json', name: 'Kino', workflow: 'kino-refresh.yml', every: 31 * 24,
     when: j => j.generated ?? [...Object.values(j.entities || {}), ...Object.values(j.files || {})].map(e => e?.at).filter(Boolean).sort().at(-1) },
+  // Wikipedia's reliability flags are stamped when the list was read (`read`), the sanctions index when it was built.
+  { file: 'briefing/data/rsp.json', name: 'Wikipedia reliability flags', workflow: 'rsp-refresh.yml', every: 7 * 24, when: j => j.read },
+  { file: 'osint/data/sanctions-index.json', name: 'OSINT sanctions index', workflow: 'sanctions-refresh.yml', every: 24, when: j => j.built },
+  { file: 'national/data/standins.json', name: 'Stand-in series', workflow: 'standins-refresh.yml', every: 31 * 24 },
 ];
 // Each refresh workflow by its plain name.
 const WORKFLOWS = {
@@ -60,7 +64,8 @@ const WORKFLOWS = {
   'calendar-refresh.yml': 'Calendars and Integration Hub refresh', 'volatility-refresh.yml': 'Geopolitical Volatility refresh',
   'traders-refresh.yml': 'Investor Impersonator refresh', 'battlefield-refresh.yml': 'Realtime Battlefield refresh', 'warfocus-refresh.yml': 'War Focus refresh',
   'progress-refresh.yml': 'Invention Timeline refresh', 'lake-refresh.yml': 'Master Index refresh', 'national-refresh.yml': 'National Analysis refresh',
-  'kino-refresh.yml': 'Kino refresh',
+  'kino-refresh.yml': 'Kino refresh', 'rsp-refresh.yml': 'Wikipedia reliability flags refresh',
+  'sanctions-refresh.yml': 'OSINT sanctions index refresh', 'standins-refresh.yml': 'Stand-in series refresh',
 };
 
 const age = ms => ms < 48 * HOUR ? `${Math.round(ms / HOUR)} h` : `${Math.round(ms / (24 * HOUR))} days`;

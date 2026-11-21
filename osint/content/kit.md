@@ -154,7 +154,7 @@ A virtual private network sends your traffic through an encrypted tunnel to the 
 ### Being seen
 - Every site you visit logs your address unless a VPN or Tor hides it. Some platforms show account owners who viewed their profile; check your research account's privacy settings.
 - Links and documents can carry trackers that report when and where they were opened. Open unknown links in the research profile, and documents in the VM or Dangerzone.
-- This dashboard's own lookups go straight from your browser to the service named on each tab (the Wayback Machine, IANA and the domain registries' RDAP servers, Google or Cloudflare DNS, crt.sh, GLEIF, GDELT, OpenSanctions). Those services see your address and what you looked up; Vitruvian Manager sees nothing.
+- This dashboard's own lookups go straight from your browser to the service named on each tab (the Wayback Machine, IANA and the domain registries' RDAP servers, Google or Cloudflare DNS, crt.sh, GLEIF, GDELT, OpenSanctions). Those services see your address and what you looked up; Vitruvian Manager sees nothing. Vitruvian Manager’s sanctions index is different: your browser fetches one file from this site and searches it on your device, so the words you search for are not sent anywhere.
 
 ## Screen capture and recording
 Capture so that a reader can see what you saw, where and when: include the address bar and the system clock where you can, and note the time in UTC.
@@ -246,6 +246,7 @@ caption: How data moves from public APIs to your write-up. Nothing passes throug
 - **Markdown** reads well in Obsidian, Joplin or any editor, includes the sources table and imports back into the notebook.
 - **Keys** you add (an OpenSanctions key, for example) stay in this browser and go only to their own service.
 - **OpenSanctions’s terms.** Its data is under CC BY-NC 4.0, for non-commercial use with credit; commercial use needs a licence from OpenSanctions ([its licensing page](https://www.opensanctions.org/licensing/), read 20 November 2026). Your key, and the searches you make with it, fall under your own agreement with OpenSanctions. Vitruvian Manager stores none of its data: the results go from OpenSanctions to your browser and are not kept.
+- **The EU’s and UK’s terms.** Vitruvian Manager’s own sanctions index reuses the European Commission’s Consolidated Financial Sanctions File 1.0, which the official catalogue labels CC BY 4.0 (© European Union), and the UK Sanctions List, under the Open Government Licence v3.0. Both were read on 21 November 2026. The index keeps companies, organisations and ships only: every record a list types as a person is dropped before the file is written.
 - Clearing your browser's site data deletes the notebook. Export after every working session.
 
 ## Reference

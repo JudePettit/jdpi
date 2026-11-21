@@ -1,0 +1,39 @@
+name: Refresh Wikipedia's reliability flags
+# English Wikipedia's "Reliable sources/Perennial sources" list (CC BY-SA 4.0) beside the Political Briefing's
+# publishers (briefing/scripts/build-rsp.mjs): two requests to MediaWiki's public interface, no key, read once a week.
+# Nothing is written if a step fails, so the last good file stays.
+on:
+  schedule:
+    - cron: '41 5 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: rsp-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node briefing/scripts/build-rsp.mjs
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/briefing.test.mjs tests/highbrowse.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: briefing/data/rsp.json
+          message: 'Wikipedia reliability flags: weekly refresh'
+  # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
+    secrets: inherit

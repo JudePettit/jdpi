@@ -71,7 +71,7 @@ test('page: a layer switched on by keyboard is fetched only then; its legend nam
   assert.deepEqual(switches.slice(0, 11), [
     ['ly-borders', true, true], ['ly-battles', false, false], ['ly-countries', false, false], ['ly-density-country', false, false], ['ly-density-grid', false, false], ['ly-density-hyde', false, false],
     ['ly-conflict-territory', false, false], ['ly-elections', false, false], ['ly-coups', false, false], ['ly-political-change', false, false], ['ly-breakthroughs', false, false]]);
-  for (const [id, on, off] of switches.slice(11)) { assert.match(id, /^ly-(wb-[a-z0-9-]+|gvi|ucdp-events|calendar-events)$/); assert.equal(on || off, false, id); }
+  for (const [id, on, off] of switches.slice(11)) { assert.match(id, /^ly-((?:wb|standin)-[a-z0-9-]+|gvi|ucdp-events|calendar-events)$/); assert.equal(on || off, false, id); } // then the stand-ins (tests/standins.test.mjs)
   // The lines left out: the World Bank's military expenditure, which is SIPRI's, under SIPRI's terms (S5c), and the
   // three series the World Bank takes from the IEA, under the IEA's own terms (D1 of the S5b/S5c review); and, since
   // the second review of 20 November 2026 (X1), IHME's PM2.5 exposure and ITU's two series, whose originators' own

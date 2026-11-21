@@ -59,6 +59,29 @@ integration/scripts/heads.mjs --all` mends it. The headline-trend rule is `desig
 its stories a day by topic in `data/history.json` (rebuilt once, on 13 November 2026, from the committed stores by
 `integration/scripts/backfill-history.mjs`).
 
+**Two reliability flags.** Beside a Political Briefing publisher, in the briefing and in Highbrowse, ⚠ marks a mixed or
+low factual-reliability rating from Media Bias/Fact Check, and beside it a second flag gives the publisher’s row on
+English Wikipedia’s list of perennial sources ("Wikipedia:Reliable sources/Perennial sources"), in the list’s own words:
+Generally reliable, No consensus, Generally unreliable, Deprecated, and Blacklisted where the list says so. It is the
+standing consensus of Wikipedia’s editors on using that outlet as a source in Wikipedia: not VM’s judgement, not Media
+Bias/Fact Check’s, and not a rating of any single article. A publisher the list splits shows "varies by subject: see
+the list" (or "by period"), and each row on the Publishers tab; one not on the list says "Not on Wikipedia’s list"; one
+VM cannot surely match to a row shows no flag. `briefing/scripts/build-rsp.mjs` reads the list through MediaWiki’s
+public interface and writes `briefing/data/rsp.json` (each row’s name, status and anchor, and the join to the
+publishers, whose own sites are in `briefing/scripts/sources.mjs`); `design/prp-rsp.js` draws the flag; the join is
+checked row by row in `tests/briefing.test.mjs`. It keeps none of the list’s summaries. On 21 November 2026 the list
+had 497 rows, and 37 more on its Overflow page.
+
+**Stand-ins from other producers.** Seven World Bank series rest on originators whose terms bar commercial use; the
+Omni-Map leaves them out and National Analysis still shows them with a line naming the originator. Beside four of them
+VM now shows a different producer’s free series, never in their place: fossil CO₂ per person from the Global Carbon
+Project (CC BY 4.0), PM2.5 exposure from SatPM (CC BY 4.0), energy consumption per person from the US Energy Information
+Administration (public domain) and military spending from the Global Military Spending Dataset (CC0), which ends in
+2019. Each is a layer of its own on the Omni-Map and a row under the World Bank row on a National Analysis profile, with
+a plain line on how it differs. The renewable share of final energy, Internet users and mobile subscriptions have none
+yet: the free series found cover Europe only. `omni/scripts/build-standins.mjs` rebuilds them monthly
+(`standins-refresh.yml`); the details are in [omni/README.md](omni/README.md).
+
 ## Architecture
 
 ```
@@ -132,7 +155,10 @@ that way before they commit it.
 
 ## Licences
 
-Code © JDP-Iq. Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0 and are credited where shown. Each data source
+Code © JDP-Iq. Wikidata facts are CC0. Wikipedia summaries are CC BY-SA 4.0 and are credited where shown.
+`briefing/data/rsp.json`, the row names and statuses of Wikipedia’s list of perennial sources with VM’s join to its
+publishers, is CC BY-SA 4.0 too: it credits Wikipedia contributors, links the page, names every revision read and says
+what VM changed, and the Political Briefing and Highbrowse show that credit. Each data source
 is credited on the page that uses it. `volatility/scripts/fips-iso3.json` is a table of country codes and names extracted
 from the countrycode project (Arel-Bundock, Enevoldsen and Yetman, GPL-3.0), recorded with its source commit and checksum;
 the codes themselves are facts, and the file is not part of Vitruvian Manager's code.

@@ -168,9 +168,10 @@ test('layers: the catalogue holds borders and battles in 4.2\'s shape, each laye
   // (GHSL) and before 1975 (HYDE 3.2.1) (their own checks are in tests/omni-layers.test.mjs); S5b the layers of history,
   // each named by the module whose page it opens (their own checks are in tests/omni-history.test.mjs).
   // S5c adds the World Bank's indicators (wb-<code>, their own checks in tests/omni-now.test.mjs), the Volatility score,
-  // UCDP's events and the calendars' events, each named by its module.
+  // UCDP's events and the calendars' events, each named by its module. The four stand-ins (21 November 2026; their own
+  // checks are in tests/standins.test.mjs) are other producers' series beside the World Bank's left out.
   const S5B = { 'conflict-territory': 'battlefield-history', elections: 'retrospective', coups: 'retrospective', 'political-change': 'retrospective', breakthroughs: 'progress', gvi: 'volatility', 'ucdp-events': 'battlefield', 'calendar-events': 'calendar' };
-  assert.deepEqual(Object.keys(byId).filter(id => !/^wb-/.test(id)).sort(), ['battles', 'borders', 'breakthroughs', 'calendar-events', 'conflict-territory', 'countries', 'coups', 'density-country', 'density-grid', 'density-hyde', 'elections', 'gvi', 'political-change', 'ucdp-events'], 'the layers S1, S5a, S5b and S5c hold, and no other');
+  assert.deepEqual(Object.keys(byId).filter(id => !/^wb-/.test(id)).sort(), ['battles', 'borders', 'breakthroughs', 'calendar-events', 'conflict-territory', 'countries', 'coups', 'density-country', 'density-grid', 'density-hyde', 'elections', 'gvi', 'political-change', 'standin-co2-gcp', 'standin-energy-eia', 'standin-milex-gmsd', 'standin-pm25-satpm', 'ucdp-events'], 'the layers S1, S5a, S5b, S5c and the stand-ins hold, and no other');
   assert.ok(Object.keys(byId).filter(id => /^wb-/.test(id)).length >= 30, 'and the World Bank\'s indicators');
   for (const l of layers.layers) {
     const r = M.readLayer(l);

@@ -8,8 +8,9 @@ import {
 } from './analysis.js';
 import { METHOD, sinceLastWeek } from '../design/prp-trends.js';
 import { SCHEDULES, rhythmFromCron, lateAfterHours, dayTime } from '../design/prp-freshness.js';
+import '../design/prp-rsp.js'; // globalThis.PRPRsp: Wikipedia's list of perennial sources, the flag beside ⚠
 
-const { PRPAccess } = globalThis; // design/prp-access.js, loaded by analysis.js: free sources lead
+const { PRPAccess, PRPRsp } = globalThis; // design/prp-access.js, loaded by analysis.js: free sources lead
 
 const $ = s => document.querySelector(s);
 const SHELL = new URL('../', location.href).href;
@@ -64,12 +65,18 @@ const alt = (i, s) => { const a = freeAlt(M, i, s); return a ? PRPAccess.altLink
 /* ---------- small marks ---------- */
 const bchip = k => `<span class="bchip" data-b="${k}">${esc(BRIEFING[k].short)}</span>`;
 const caution = '<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>';
+// Beside ⚠, a Political Briefing publisher's status on Wikipedia's list of perennial sources (design/prp-rsp.js, from
+// briefing/data/rsp.json): its words, "varies by subject: see the list", "Not on Wikipedia's list", or nothing where
+// VM cannot be sure which row is the publisher's. The other three briefings' outlets carry neither flag.
+// The stories never wait on the table: until it is read, each flag is an empty slot, filled when it arrives (PRPRsp.fill).
+let RSP = PRPRsp.table(null), RSP_SETTLED = false;
+const rsp = i => (i.b === 'political' ? (RSP_SETTLED ? PRPRsp.html(RSP.flag(i.sid)) : PRPRsp.slot(i.sid)) : '');
 const pkey = (s, w) => `<div class="pkey"><span class="prp-label">Political Briefing publishers</span>${POSITIONS.map(p => `<span class="${s.positions[p] ? '' : 'z'}" style="--c:var(--pos-${p})"><i aria-hidden="true"></i>${esc(posLabel(p))} ${num(s.positions[p])}</span>`).join('')}` +
   `<a class="bp" ${goAttrs('political', briefingPage('political', { q: s.query, w: w === '24h' ? '24h' : '7d' }))}>Compare the positions ›</a></div>`;
 // One headline of a story: its outlet, the headline at its publisher, and a link into each briefing that carries it.
 const entryLi = s => e => {
   const i = e.item;
-  return `<li><span><span class="o">${esc(i.src)}</span>${i.caution ? caution : ''} <a class="h" ${art(i.u)}>${esc(i.t)}${acc(i)}</a>${alt(i, s)}</span><span>${[i, ...e.also].map(x => toItem(x)).join(' ')}</span></li>`;
+  return `<li><span><span class="o">${esc(i.src)}</span>${i.caution ? caution : ''}${rsp(i)} <a class="h" ${art(i.u)}>${esc(i.t)}${acc(i)}</a>${alt(i, s)}</span><span>${[i, ...e.also].map(x => toItem(x)).join(' ')}</span></li>`;
 };
 // "Political", "Political and Digital", "Political, Economics and Digital".
 const andList = xs => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}` : xs.join(''));
@@ -113,7 +120,7 @@ function storyCard(s, k, w) {
   return `<article class="story prp-panel${lead ? ' lead' : ''}" data-story="${esc(s.id)}">
     <div class="st-meta"><span class="rank">${k + 1}</span>${s.briefings.map(bchip).join('')}<span>${plural(s.outlets, 'outlet')} · ${plural(s.headlines, 'headline')}</span><span>${esc(span(s))}</span></div>
     <h3><a ${art(s.lead.u)}>${esc(s.lead.t)}${acc(s.lead)}</a></h3>
-    <p class="st-src">${esc(s.lead.src)}${s.lead.caution ? caution : ''} · ${esc(timeOf(s.lead))} · ${[s.lead, ...s.entries[0].also].map(x => toItem(x, `In the ${BRIEFING[x.b].name} ›`)).join(' · ')}</p>
+    <p class="st-src">${esc(s.lead.src)}${s.lead.caution ? caution : ''}${rsp(s.lead)} · ${esc(timeOf(s.lead))} · ${[s.lead, ...s.entries[0].also].map(x => toItem(x, `In the ${BRIEFING[x.b].name} ›`)).join(' · ')}</p>
     ${s.key.length ? `<p class="st-terms" aria-label="Its main terms">${s.key.map(esc).join(' · ')}</p>` : ''}
     ${s.publishers ? pkey(s, w) : ''}
     ${shown.length ? `<ul class="st-list">${shown.map(entryLi(s)).join('')}</ul>` : ''}
@@ -338,7 +345,7 @@ function resultLi(r, words) {
   const badge = i.type ? `<span class="badge">${i.type === 'paper' ? 'Paper' : 'News'}</span>` : '';
   const tags = i.tp.map(id => topicLabel.get(`${i.b}.${id}`)).filter(Boolean).map(l => `<span class="tag">${esc(l)}</span>`).join('');
   const links = [i, ...r.also].map(x => toItem(x, `In the ${BRIEFING[x.b].name} ›`)).join('');
-  return `<li class="res" data-b="${i.b}"><div class="r1">${chips}<span class="src">${esc(i.src)}</span>${i.caution ? caution : ''}${pos}<time datetime="${esc(new Date(i.at).toISOString())}">${esc(timeOf(i))}</time>${badge}</div>
+  return `<li class="res" data-b="${i.b}"><div class="r1">${chips}<span class="src">${esc(i.src)}</span>${i.caution ? caution : ''}${rsp(i)}${pos}<time datetime="${esc(new Date(i.at).toISOString())}">${esc(timeOf(i))}</time>${badge}</div>
     <h3 class="r-title"><a ${art(i.u)}>${mark(i.t, words)}${acc(i)}</a>${alt(i)}</h3>${i.d ? `<p class="r-sum">${mark(clip(i.d, 320), words)}</p>` : ''}<div class="r3">${tags}${links}</div></li>`;
 }
 
@@ -433,6 +440,8 @@ function wire() {
 
 /* ---------- boot ---------- */
 const ACCESS = PRPAccess.load(new URL('design/prp-access.json', SHELL)); // the sources' access classes (free when it cannot be read)
+// Wikipedia's list of perennial sources, joined to the Political Briefing's publishers (no flags when it cannot be read).
+const RSPDOC = fetch(new URL('briefing/data/rsp.json', SHELL), { cache: 'no-cache' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
 // The return check: the shell keeps this page in its frame, so a page read hours ago can be shown again. Every 15 minutes
 // while it is open (and when its tab comes back into view), it reads the four heads and, when a store is newer than the
 // one this page read, says so in its meta line with a Reload button; the trends are read again then too.
@@ -465,6 +474,13 @@ async function boot() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(TOPICS_KEY) || 'null'); } catch { /* storage blocked or not JSON: the defaults */ }
   M = buildModel(stores, { savedTopics: saved, access: await ACCESS });
+  // Wikipedia's table, when it settles: its flags go into their slots and the credit is written; the stories do not wait.
+  RSPDOC.then(j => {
+    RSP = PRPRsp.table(j); RSP_SETTLED = true;
+    const credit = $('#rsp-credit'); if (credit) credit.innerHTML = PRPRsp.credit(RSP);
+    PRPRsp.fill(RSP, document);
+    document.documentElement.dataset.rsp = RSP.ok ? 'ok' : 'failed'; // for the tests: the flags are in place
+  });
   topicLabel = new Map(M.briefings.flatMap(x => x.topics.map(t => [`${x.key}.${t.id}`, t.short || t.label])));
   if (state.tab !== 'trends' && !topicLabel.has(state.t)) state.t = '';
   lastCheck = Date.now();

@@ -1,0 +1,41 @@
+name: Refresh the stand-in series
+# Four series from producers other than the World Bank, beside the World Bank series VM leaves out (omni/scripts/
+# build-standins.mjs): the Global Carbon Project's fossil CO2 (Zenodo, CC BY 4.0), SatPM's PM2.5 (CC BY 4.0), the US
+# EIA's energy consumption (public domain) and the Global Military Spending Dataset (Harvard Dataverse, CC0, to 2019).
+# Each is read from its producer's own public file with no key; a new release is taken in the month it appears. The
+# build writes nothing unless every step works, so a failed read leaves the last good files.
+on:
+  schedule:
+    - cron: '29 4 6 * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: standins-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node omni/scripts/build-standins.mjs
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/standins.test.mjs tests/omni-data.test.mjs tests/omni-layers.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: omni/data/layers/standin omni/data/layers.json omni/data/layers.head.json national/data/standins.json
+          message: 'Stand-in series: monthly data refresh'
+  # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
+    secrets: inherit

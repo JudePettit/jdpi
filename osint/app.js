@@ -87,7 +87,7 @@ function renderMeta() {
   $('#nb-count').setAttribute('aria-label', s.items ? `${s.items} items` : '');
   $('#meta').innerHTML = [
     '<span>Tools and links checked <b>28 Oct 2026</b></span>',
-    '<span>Live lookups: <b>8 keyless services</b>, OpenSanctions with your key</span>',
+    '<span>Live lookups: <b>8 keyless services</b>, OpenSanctions with your key; the EU and UK sanctions lists in VM’s own index (no people)</span>',
     `<span>Case <b>${esc(c.title)}</b>: ${num(s.items)} item${s.items === 1 ? '' : 's'}, ${num(s.graded)} graded${store.persistent ? '' : ' · <b>not saved: storage is blocked</b>'}</span>`,
     '<span>Notebook stored in this browser only</span>',
   ].join('');

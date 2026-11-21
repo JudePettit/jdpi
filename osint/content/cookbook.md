@@ -568,7 +568,7 @@ caption: From a company name to its corporate parents and sanctions exposure. Re
 - Pin down the entity | exact name, number, jurisdiction
 - LEI and parents | Organisations tab (GLEIF)
 - Read the filings | Companies House, CRO, OpenCorporates
-- Screen sanctions | OpenSanctions, OFAC, EU, UK, UN
+- Screen sanctions | VM’s index, OpenSanctions, OFAC, EU, UK, UN
 - Search leaks and courts | OCCRP Aleph, court records
 - Clean and connect | OpenRefine, Maltego CE (with care)
 - [accent] Log and report | Case notebook, sources table
@@ -576,7 +576,7 @@ caption: From a company name to its corporate parents and sanctions exposure. Re
 1. **Pin down the exact legal entity.** Search the name on the [Organisations & sanctions](#tab=orgs) tab and in the national registry (UK Companies House, Ireland's CRO, OpenCorporates for others). Record the registration number and jurisdiction: names are shared, numbers are not.
 2. **Find its LEI and corporate parents.** The GLEIF lookup on the Organisations tab shows the direct and ultimate accounting parents, or the reason none is reported (for example, control by individuals whom GLEIF does not name).
 3. **Read the filings.** Officers, persons with significant control (UK), annual returns and accounts. Note shell-company indicators: a formation agent's address shared by hundreds of companies, nominee directors, no staff.
-4. **Screen sanctions lists.** OpenSanctions combines many lists; confirm any hit on the official list (OFAC, the EU, the UK Sanctions List, the UN). A name match is not a match until identifiers agree. Remember OFAC's 50 percent rule: a company owned half or more by sanctioned parties is blocked even if unlisted.
+4. **Screen sanctions lists.** Vitruvian Manager’s own index on the Organisations tab searches the companies, organisations and ships on the EU and UK lists, with no key; it holds no people, so a person is checked on each list’s own official search. OpenSanctions combines many lists; confirm any hit on the official list (OFAC, the EU, the UK Sanctions List, the UN). A name match is not a match until identifiers agree. Remember OFAC's 50 percent rule: a company owned half or more by sanctioned parties is blocked even if unlisted.
 5. **Search leaks and court records** in OCCRP Aleph and the court databases on the [Search tab](#tab=search). Treat leaked material as a lead to verify, never as proof on its own.
 6. **Clean and connect.** Use OpenRefine to merge spelling variants in lists of companies; draw the structure in Maltego CE only with sourced, dated links.
 7. **Log and report** each fact with its registry link and archive copy. Directors and owners are people: keep the focus on the organisation and never publish home addresses.

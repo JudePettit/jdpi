@@ -70,6 +70,11 @@ button, input, select { font: inherit; }
 .story h3 a:hover, .r-title a:hover { color: var(--prp-link); text-decoration: underline; text-underline-offset: 2px; }
 .st-src { margin: 5px 0 0; color: var(--prp-muted); font-size: 12.5px; }
 .st-src .caution, .r1 .caution, .st-list .caution { margin-left: 3px; color: var(--prp-warn); }
+/* Wikipedia's list of perennial sources, beside ⚠ (design/prp-rsp.js): its words, small and muted, a link to the row */
+.rsp { margin: 0 4px 0 6px; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.4 var(--prp-font-mono); text-decoration: none; }
+.rsp:hover { color: var(--prp-link); text-decoration: underline; text-underline-offset: 2px; }
+.rsp-k { margin-right: 2px; padding: 0 4px; border: 1px solid var(--prp-line); border-radius: var(--prp-radius-sm); color: var(--prp-muted); font-size: 10.5px; white-space: nowrap; }
+.rsp.none { color: var(--prp-muted); }
 .bp { color: var(--prp-link); text-decoration: none; white-space: nowrap; }
 .bp:hover { text-decoration: underline; }
 .st-terms { margin: 7px 0 0; color: var(--prp-text-2); font: var(--prp-fs-xs)/1.5 var(--prp-font-mono); }

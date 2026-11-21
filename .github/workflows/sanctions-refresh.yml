@@ -1,0 +1,39 @@
+name: Refresh the OSINT sanctions index
+# The EU consolidated list of financial sanctions (CC BY 4.0) and the UK Sanctions List (Open Government Licence v3.0),
+# companies, organisations and ships only (osint/scripts/build-sanctions.mjs): each list's own public file, no key.
+# Either list can change on any day, so the index is rebuilt daily. Nothing is written if a step fails.
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sanctions-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node osint/scripts/build-sanctions.mjs
+      - name: Test the new data
+        env:
+          PRP_PAGES: '0'
+        run: node --test tests/osint.test.mjs
+      - uses: ./.github/actions/commit-data
+        with:
+          paths: osint/data/sanctions-index.json
+          message: 'OSINT sanctions index: daily refresh'
+  # Tests the whole suite on main as this refresh left it, and deploys that commit only if it passed (pages-deploy.yml).
+  deploy:
+    needs: refresh
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/pages-deploy.yml
+    with:
+      deploy: ${{ github.ref == 'refs/heads/main' }}
+    secrets: inherit

@@ -708,3 +708,95 @@ test('notation: the briefings\' headlines and summaries reach Highbrowse in plai
   const pol = normalise('political', { generated: at, sources: [{ id: 's', name: 'S', position: 'centre' }], items: [{ s: 's', t: 'Fund raises $667m and $40bn more', d: 'A $^{14}\\mathrm{C}$ date', u: 'https://example.org/c', p: at }] }).items[0];
   assert.deepEqual([pol.t, pol.d], ['Fund raises $667m and $40bn more', 'A ¹⁴C date']);
 });
+
+/* ---- Wikipedia's list of perennial sources, beside ⚠ on the Political Briefing's publishers (design/prp-rsp.js, from
+   briefing/data/rsp.json; tests/briefing.test.mjs holds the file and the join). Here: every ⚠ in Highbrowse has the flag
+   beside it, the ⚠ is unchanged, the Method note says what the flag is, and the footer credits Wikipedia contributors
+   under CC BY-SA 4.0; on the page, each political headline's flag is the table's, and a table that cannot be read leaves
+   no flag and says so. */
+import '../design/prp-rsp.js'; // globalThis.PRPRsp
+import { SOURCES as POLITICAL_SOURCES } from '../briefing/scripts/sources.mjs';
+
+test('Wikipedia flag: beside every ⚠ in Highbrowse\'s code, the ⚠ unchanged, and the page says what it is and credits it', () => {
+  const app = read('highbrowse/app.js').replace(/\r\n/g, '\n'), html = read('highbrowse/index.html').replace(/\r\n/g, '\n');
+  assert.ok(app.includes('const caution = \'<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>\';'), 'the Media Bias/Fact Check flag is as it was');
+  const uses = [...app.matchAll(/[\w.]+\.caution \? caution : ''\}/g)];
+  assert.ok(uses.length >= 3, `${uses.length} uses of ⚠`);
+  for (const m of uses) assert.match(app.slice(m.index + m[0].length, m.index + m[0].length + 30), /^\$\{rsp\([\w.]+\)\}/, `no Wikipedia flag beside ${m[0]}`);
+  assert.match(app, /const rsp = i => \(i\.b === 'political' \? \(RSP_SETTLED \? PRPRsp\.html\(RSP\.flag\(i\.sid\)\) : PRPRsp\.slot\(i\.sid\)\) : ''\);/, 'only the Political Briefing\'s publishers are on the table');
+  assert.doesNotMatch(app, /RSP = PRPRsp\.table\(await RSPDOC\)/, 'the stories do not wait on the table');
+  assert.match(html, /“Wikipedia” and a status give the publisher’s row on English Wikipedia’s list of perennial sources: the standing consensus of Wikipedia’s editors on using that outlet as a source in Wikipedia, not Vitruvian Manager’s judgement, not Media Bias\/Fact Check’s, and not a rating of any single article\./);
+  assert.ok(html.includes('“Not on Wikipedia’s list”') && html.includes('shows nothing'));
+  assert.match(html, /<p><b>Wikipedia’s list\.<\/b> <span id="rsp-credit">[^<]*by Wikipedia contributors, under CC BY-SA 4\.0/);
+  // The credit the page writes there, from the committed table.
+  const c = globalThis.PRPRsp.credit(globalThis.PRPRsp.table(json('briefing/data/rsp.json')));
+  for (const want of ['by Wikipedia contributors', 'Perennial_sources"', 'oldid=', '>CC BY-SA 4.0</a>', 'none of the list’s summaries']) assert.ok(c.includes(want), want);
+});
+
+async function hbFlags(page) {
+  return page.evaluate(() => [...document.querySelectorAll('#panel-today .caution, #panel-week .caution')].map(c => ({
+    src: c.previousElementSibling?.textContent || c.parentElement.firstChild?.textContent || '', next: c.nextElementSibling?.classList.contains('rsp') ? c.nextElementSibling.textContent : null,
+  })));
+}
+
+test('page: Highbrowse shows the Wikipedia flag beside ⚠ as the table gives it, and the credit; without the table, no flag and a plain line', pageTest, async t => {
+  const res = await fetch(`${BASE}/highbrowse/`).catch(() => null);
+  if (!res?.ok) { t.skip(`Highbrowse is not deployed at ${BASE} (set JDPI_URL to test a local copy)`); return; }
+  const T = globalThis.PRPRsp.table(await fetch(`${BASE}/briefing/data/rsp.json`).then(r => r.json()));
+  const byName = new Map(POLITICAL_SOURCES.map(s => [s.name, s.id]));
+  const want = id => { const f = T.flag(id); return f ? (f.kind === 'none' ? 'Not on Wikipedia’s list' : f.kind === 'listed' ? `Wikipedia ${f.words}` : `Wikipedia varies by ${f.by}: see the list`) : null; };
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const errors = [];
+  const watch = p => { p.on('pageerror', e => errors.push(e.message)); p.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); }); return p; };
+  const page = watch(await browser.newPage({ viewport: { width: 1360, height: 900 } }));
+  await page.goto(`${BASE}/highbrowse/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('html[data-ready="1"][data-rsp="ok"]', { timeout: 30000 });
+  await page.click('#tab-week');
+  await page.waitForSelector('#panel-week .story', { timeout: 20000 });
+  const flags = await hbFlags(page);
+  for (const f of flags) {
+    const id = byName.get(f.src.trim());
+    if (id) assert.equal(f.next, want(id), `${f.src}: the flag beside ⚠`);
+  }
+  // Every flag on the page is one the table gives, in the list's words, with its link.
+  const shown = await page.$$eval('a.rsp', as => as.map(a => ({ text: a.textContent, href: a.getAttribute('href'), title: a.title, label: a.getAttribute('aria-label') })));
+  for (const a of shown) {
+    assert.match(a.text, /^(Wikipedia (Generally reliable|No consensus|Generally unreliable|Deprecated)( · Blacklisted)?|Wikipedia varies by (subject|period): see the list|Not on Wikipedia’s list)$/);
+    assert.ok(a.href.startsWith(globalThis.PRPRsp.LIST_URL), a.href);
+    // Fixer, 21 Nov 2026: the accessible name starts with the words shown (WCAG 2.5.3) and says the link opens a new tab;
+    // a "Not on Wikipedia's list" flag says the list has no row for it, not that the list rates it.
+    assert.ok(a.title.includes(a.text === 'Not on Wikipedia’s list' ? 'has no row for this outlet. That is not a rating' : 'not a rating of any single article'), a.title);
+    assert.ok(a.label.startsWith(a.text), `${a.text}: ${a.label}`);
+    assert.ok(a.label.endsWith('(opens in a new tab)'), a.label);
+  }
+  assert.equal(await page.locator('.rsp-slot').count(), 0, 'no slot is left waiting');
+  assert.match(await page.innerHTML('#rsp-credit'), /by Wikipedia contributors.*>CC BY-SA 4\.0<\/a>/);
+  assert.deepEqual(errors, []);
+  await page.close();
+
+  // Without the table: no flag anywhere, the stories still there, and the credit says why.
+  const bare = watch(await browser.newPage({ viewport: { width: 1360, height: 900 } }));
+  await bare.route('**/briefing/data/rsp.json', r => r.fulfill({ status: 404, body: 'gone' }));
+  await bare.goto(`${BASE}/highbrowse/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await bare.waitForSelector('html[data-ready="1"][data-rsp="failed"]', { timeout: 30000 });
+  assert.equal(await bare.locator('a.rsp').count(), 0);
+  assert.equal(await bare.locator('.rsp-slot').count(), 0);
+  assert.match(await bare.textContent('#rsp-credit'), /could not be read just now/);
+  assert.deepEqual(errors.filter(e => !/404|Failed to load resource/.test(e)), []);
+  await bare.close();
+
+  // Fixer, 21 Nov 2026: a slow table holds nothing back; the analysis is drawn first and the flags fill in after.
+  const slow = watch(await browser.newPage({ viewport: { width: 1360, height: 900 } }));
+  let release;
+  const held = new Promise(r => { release = r; });
+  await slow.route('**/briefing/data/rsp.json', async r => { await held; await r.continue(); });
+  await slow.goto(`${BASE}/highbrowse/`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await slow.waitForSelector('html[data-ready="1"]', { timeout: 30000 });
+  assert.equal(await slow.evaluate(() => document.documentElement.dataset.rsp), undefined, 'drawn while the table is held back');
+  release();
+  await slow.waitForSelector('html[data-rsp="ok"]', { timeout: 20000 });
+  assert.equal(await slow.locator('.rsp-slot').count(), 0);
+  assert.ok(await slow.locator('a.rsp').count() > 0, 'the flags filled in');
+  await slow.close();
+});

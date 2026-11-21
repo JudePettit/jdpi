@@ -23,7 +23,12 @@ const fmt = n => (Math.abs(n) >= 100 ? Math.round(n).toLocaleString('en-GB') : N
 const stamp = iso => String(iso || '').replace(/[-:]/g, '').replace(/^(\d{8}T\d{4})\d*(?:\.\d+)?Z$/, '$1Z');
 const sha = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(x => x.toString(16).padStart(2, '0')).join('');
 const BEFORE = 'borders-fill'; // fills and bases are drawn under the borders
-const GROUPS = { wb: 'World Bank indicators, by country' };
+const GROUPS = { wb: 'World Bank indicators, by country', standin: 'Stand-ins from other producers, by country' };
+// Build C (21 November 2026): the World Bank series VM leaves out that no free series stands in for yet. VM's own text,
+// as omni/scripts/build-standins.mjs (STILL_LEFT_OUT) and National Analysis give it. A series with a stand-in has a
+// layer whose standsFor is its code, and its line names that layer.
+const NO_STANDIN = { 'EG.FEC.RNEW.ZS': 1, 'IT.NET.USER.ZS': 1, 'IT.CEL.SETS.P2': 1 };
+const NO_STANDIN_WHY = 'No free series stands in for it yet: the free series VM found cover Europe only.';
 
 // A layer's filter in words: its own (the discipline, the type of violence) or a war of the registry (l=ucdp-events:w=…).
 // A war of the registry is named by its words (wf-russia-ukraine: "the war Russia–Ukraine"), its id beside (V8). An
@@ -538,9 +543,13 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
         rows[k] = `<li class="om-ly om-ly-group" data-group="${esc(g)}"><details${open ? ' open' : ''}><summary>${esc(GROUPS[g] || g)}: ${ix.length} layers, one fill at a time</summary><ul class="om-list om-layers">${ix.map(i => html[i]).join('')}</ul></details></li>`;
       }
       for (const a of cat.absent) {
+        // Build C: a different producer's series stands beside it (its own layer, never in its place), or none yet.
+        const st = a.wb ? cat.list.find(e => e.standsFor === a.wb) : null;
+        const beside = st ? `<p class="om-ly-what" data-standin="${esc(st.id)}">VM’s own text: A different producer’s figure stands beside it: ${esc(st.title)}, under “${esc(GROUPS.standin)}” above. It is that producer’s series, not this one.</p>`
+          : a.wb && NO_STANDIN[a.wb] ? `<p class="om-ly-what" data-standin="">VM’s own text: ${esc(NO_STANDIN_WHY)}</p>` : '';
         rows.push(`<li class="om-ly absent" data-layer="${esc(a.id)}" data-absent="true"><div class="om-ly-row"><span class="om-ly-off" aria-hidden="true">—</span><b>${esc(a.title)}</b><span class="om-ly-role">left out</span></div>`
           + `<p class="om-ly-what">VM’s own text: not built, because ${esc(a.why)}. ${a.seen ? `What VM read: ${esc(a.seen)}. ` : ''}`
-          + `${a.termsUrl ? `<a href="${esc(a.termsUrl)}" target="_blank" rel="noreferrer">Its terms</a>, read ${esc(a.read)}; ` : ''}<a href="${esc(a.url)}" target="_blank" rel="noreferrer">${a.termsUrl ? 'where its files are' : 'Where it is'}</a>${a.termsUrl ? '' : `, read ${esc(a.read)}`}.</p></li>`);
+          + `${a.termsUrl ? `<a href="${esc(a.termsUrl)}" target="_blank" rel="noreferrer">Its terms</a>, read ${esc(a.read)}; ` : ''}<a href="${esc(a.url)}" target="_blank" rel="noreferrer">${a.termsUrl ? 'where its files are' : 'Where it is'}</a>${a.termsUrl ? '' : `, read ${esc(a.read)}`}.</p>${beside}</li>`);
       }
       el.innerHTML = `<ul class="om-list om-layers">${rows.join('')}</ul>`
         + `<p class="om-ly-any"><input type="checkbox" id="ly-anyway"${set.anyway ? ' checked' : ''} aria-describedby="ly-anyway-what"> <label for="ly-anyway">Show anyway</label></p>`
@@ -579,7 +588,10 @@ export function layerView({ data, getFile, map, sources, onChange, borders = () 
           if (e.on === 'countries') {
             const { s, unplaced } = countryValues(d), agg = Object.values(s.aggregates || {});
             if (unplaced.length) key += `<p class="om-lg-credit" data-unplaced="${esc(unplaced.map(u => u.iso3).join(' '))}">VM cannot place ${unplaced.length === 1 ? 'this' : 'these'} on a free border for ${esc(String(d.year))}, so ${unplaced.length === 1 ? 'it is' : 'they are'} not drawn: ${esc(unplaced.map(u => `${u.n} (${u.iso3}), ${fmt(u.v)}`).join('; '))}.</p>`;
-            if (agg.length) key += `<details class="om-method"><summary>Not drawn: the World Bank’s ${agg.length} aggregates</summary><p>${esc(agg.join('; '))}.</p></details>`;
+            // A stand-in's file names whose rows they are (s.notDrawn: "the EIA’s 40 regions, …"); the World Bank's are its aggregates.
+            if (agg.length) key += `<details class="om-method"><summary>Not drawn: ${esc(s.notDrawn || `the World Bank’s ${agg.length} aggregates`)}</summary><p>${esc(agg.join('; '))}.</p></details>`;
+            // A stand-in (build C): how it differs from the World Bank's series it stands beside, under its key.
+            if (e.line) key += `<p class="om-lg-credit" data-standin="${esc(e.standsFor || '')}">VM’s own text: ${esc(e.line)}</p>`;
             // S5c: a by-day score shows one day, the last VM holds of the frame's year.
             if (s.day) key += `<p class="om-lg-credit" data-day="${esc(s.day)}">Drawn: the score of ${esc(formatValueDate({ from: s.day, p: 11 }))}, the last day VM holds of ${esc(String(d.year))}${s.method ? ` (method ${esc(s.method)})` : ''}.</p>`;
           }

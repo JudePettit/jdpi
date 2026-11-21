@@ -35,8 +35,8 @@ test('catalogue: readLayer accepts every entry; each absent line passes readAbse
   assert.equal(new Set(ids).size, ids.length);
   assert.deepEqual(DOC.layers.slice(0, 11).map(e => e.id), ['borders', 'battles', 'countries', 'density-country', 'density-grid', 'density-hyde',
     'conflict-territory', 'elections', 'coups', 'political-change', 'breakthroughs']); // S5b's layers of history follow S5a's
-  // S5c's follow (their own checks are in tests/omni-now.test.mjs).
-  assert.ok(DOC.layers.slice(11).every(e => /^wb-/.test(e.id) || ['gvi', 'ucdp-events', 'calendar-events'].includes(e.id)));
+  // S5c's follow (their own checks are in tests/omni-now.test.mjs), then the stand-ins (tests/standins.test.mjs).
+  assert.ok(DOC.layers.slice(11).every(e => /^(wb|standin)-/.test(e.id) || ['gvi', 'ucdp-events', 'calendar-events'].includes(e.id)));
   // F1 (S5a review): HYDE 3.2.1 is built, so nothing is left out for want of free data in S5a; S5c leaves out SIPRI's
   // military expenditure, whose terms bar commercial use; D1 (S5b/S5c review) the three series the IEA's terms keep
   // outside CC BY 4.0; X1 (second review) IHME's PM2.5 exposure and ITU's two series, whose originators' terms bar
@@ -82,8 +82,9 @@ test('data: every layer file is within 1.5 MB gzipped and listed with its sha256
   const gi = read('omni/data/layers/density/index.json'), hi = read('omni/data/layers/density-hyde/index.json');
   for (const f of gi.files) listed.push({ ...f, file: `omni/data/layers/density/${f.file}` });
   for (const f of hi.files) listed.push({ ...f, file: `omni/data/layers/density-hyde/${f.file}` });
-  // S5c's files are listed by their own layers (tests/omni-now.test.mjs checks which); every one is measured below.
-  const S5C = /^omni\/data\/layers\/(?:wb\/(?!EN\.POP\.DNST\.json)|gvi\/|ucdp-events\/|calendar\/)/;
+  // S5c's files are listed by their own layers (tests/omni-now.test.mjs checks which), and the stand-ins' by theirs
+  // (tests/standins.test.mjs); every one is measured below.
+  const S5C = /^omni\/data\/layers\/(?:wb\/(?!EN\.POP\.DNST\.json)|gvi\/|ucdp-events\/|calendar\/|standin\/)/;
   assert.deepEqual(listed.map(f => f.file).filter(p => !S5C.test(p)).sort(), [
     'omni/data/base/countries.topo.json', 'omni/data/base/small-states.json', 'omni/data/layers/wb/EN.POP.DNST.json',
     ...gi.years.map(y => `omni/data/layers/density/${y}.json`), ...hi.years.map(y => `omni/data/layers/density-hyde/${y < 0 ? `m${-y}` : y}.json`),

@@ -47,6 +47,9 @@ export const SCHEDULES = {
   'lake-refresh.yml': '31 3 3 * *',
   'national-refresh.yml': '47 3 5 * *',
   'kino-refresh.yml': '13 4 4 * *',
+  'rsp-refresh.yml': '41 5 * * 1',
+  'sanctions-refresh.yml': '17 7 * * *',
+  'standins-refresh.yml': '29 4 6 * *',
   'political-atlas/monthly-update.yml': '0 6 1 * *',
 };
 

@@ -854,6 +854,104 @@ export function orgLinks(q) {
 }
 
 /* ---------------------------------------------------------------------------------------------------------------
+   VM's sanctions index (osint/data/sanctions-index.json, written by osint/scripts/build-sanctions.mjs): companies,
+   organisations and ships on the EU and UK lists. No person is in it, and the page offers no search for people.
+   --------------------------------------------------------------------------------------------------------------- */
+export const SANCTIONS_INDEX_URL = 'data/sanctions-index.json';
+/** Each list's own type word, in plain English for the results table. */
+export const SANCTIONS_TYPES = { enterprise: 'Enterprise (EU)', Entity: 'Entity (UK)', Ship: 'Ship (UK)', Vessel: 'Vessel', Aircraft: 'Aircraft' };
+/** For a person, the official searches: VM does not build tools that identify private people. */
+export const PERSON_SEARCHES = [
+  { id: 'eu', name: 'EU Sanctions Map', href: 'https://www.sanctionsmap.eu/', publisher: 'European Union' },
+  { id: 'uk', name: 'UK Sanctions List search', href: 'https://search-uk-sanctions-list.service.gov.uk/', publisher: 'Foreign, Commonwealth & Development Office' },
+  { id: 'us', name: 'OFAC Sanctions List Search', href: 'https://sanctionssearch.ofac.treas.gov/', publisher: 'US Treasury' },
+  { id: 'un', name: 'UN Security Council Consolidated List', href: 'https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list', publisher: 'United Nations' },
+];
+
+/** Lower case, accents and punctuation gone, one space between words: how names are compared. */
+export const normName = s => String(s ?? '').normalize('NFKD').replace(/\p{M}+/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+const normRef = s => String(s ?? '').toUpperCase().replace(/\s+/g, '');
+const prepared = new WeakMap();
+function prepare(index) {
+  let p = prepared.get(index);
+  if (!p) {
+    p = (Array.isArray(index?.records) ? index.records : []).map(rec => {
+      const names = [rec.name, ...(rec.aliases || [])].filter(Boolean).map((n, i) => ({ n, i, norm: normName(n) }));
+      return { rec, names, words: names.map(x => x.norm.split(' ')), ref: normRef(rec.ref), imo: String(rec.imo || '').split(/,\s*/).filter(Boolean), reg: normRef(rec.reg) };
+    });
+    prepared.set(index, p);
+  }
+  return p;
+}
+
+/**
+ * Search the index by name or alias (every word of the query begins a word of the name), by the list's reference
+ * (EU.4187.20, DPR0157), by IMO number (seven digits, with or without "IMO") or by an aircraft's registration.
+ * Returns { total, results: [{ rec, via, score }] }, best first; `via` is the alias that matched, if not the name.
+ */
+export function sanctionsSearch(index, query, { limit = 50, lists = null } = {}) {
+  const q = String(query ?? '').trim();
+  if (!q) return { total: 0, results: [] };
+  const qn = normName(q), qw = qn.split(' ').filter(Boolean), qr = normRef(q);
+  const imo = (q.match(/^(?:imo\s*)?(\d{7})$/i) || [])[1] || '';
+  const hits = [];
+  for (const p of prepare(index)) {
+    if (lists && !lists.includes(p.rec.list)) continue;
+    let score = 0, via = '';
+    if (qr && (qr === p.ref || (p.reg && qr === p.reg))) score = 1000;
+    else if (imo && p.imo.includes(imo)) score = 900;
+    else if (qw.length) {
+      for (let k = 0; k < p.names.length; k++) {
+        const { norm, i, n } = p.names[k], words = p.words[k];
+        let s = 0;
+        if (norm === qn) s = 100;
+        else if (norm.startsWith(qn + ' ') || norm.startsWith(qn)) s = 80;
+        else if (qw.every(w => words.some(x => x.startsWith(w)))) s = 50;
+        if (s && i === 0) s += 10;
+        if (s > score) { score = s; via = i === 0 ? '' : n; }
+      }
+    }
+    if (score) hits.push({ rec: p.rec, via, score });
+  }
+  hits.sort((a, b) => b.score - a.score || a.rec.name.localeCompare(b.rec.name) || a.rec.list.localeCompare(b.rec.list));
+  return { total: hits.length, results: hits.slice(0, limit) };
+}
+
+/** One result, ready to show: which list, the type, regime, date listed (or why there is none), reference and links. */
+/** Under a result found through an alias alone: the row is an organisation's, and the index holds no people. */
+export const SX_VIA_NOTE = 'This is an organisation on the list; the index holds no people: for a person, use the official searches below.';
+
+/** The regime as the list gives it. The EU's file gives a programme code (UKR, PRK, TAQA…), not a regime's name, so it
+    is labelled as the list's own code; the cited act, linked beside it, names the regime. */
+export const regimeLabel = rec => (!rec.regime ? '' : rec.list === 'eu' ? `EU programme code ${rec.regime}` : rec.regime);
+
+export function sanctionsRow(rec, lists = {}) {
+  const l = lists[rec.list] || {};
+  const links = [];
+  if (rec.actUrl && safeHttpUrl(rec.actUrl)) links.push({ href: safeHttpUrl(rec.actUrl), label: `Legal act ${rec.act || ''}`.trim() + ' (EUR-Lex)' });
+  if (l.search && safeHttpUrl(l.search)) links.push({ href: safeHttpUrl(l.search), label: rec.list === 'uk' ? 'Search the UK list for the reference' : rec.list === 'eu' ? 'EU Sanctions Map' : 'The official search' });
+  return {
+    list: l.name || rec.list, type: SANCTIONS_TYPES[rec.type] || rec.type, name: rec.name, aliases: rec.aliases || [], regime: regimeLabel(rec),
+    listed: rec.listed ? dayLabel(rec.listed) : '', listedNote: rec.listed ? '' : rec.act ? `Not given in this file. Cited act ${rec.act}${rec.actDate ? `, published ${dayLabel(rec.actDate)}` : ''}` : 'Not given in this file',
+    ref: rec.ref, country: (rec.country || []).join(', '), imo: rec.imo || '', flag: rec.flag || '', reg: rec.reg || '', links,
+  };
+}
+
+/** One plain line per list: read when, and whether today's read worked. A list that failed says so in words. */
+export function sanctionsListLines(index) {
+  const out = [];
+  for (const [id, l] of Object.entries(index?.lists || {})) {
+    const read = l.read ? utcLabel(l.read) : '';
+    const n = Number(l.records || 0).toLocaleString('en-GB');
+    if (l.status === 'ok') out.push({ id, tone: 'ok', text: `${l.name}: read ${read}${l.generated ? ` (the list’s own date: ${dayLabel(l.generated)})` : ''}, ${n} records kept.` });
+    else if (l.status === 'stale') out.push({ id, tone: 'warn', text: `${l.name}: could not be loaded on ${utcLabel(l.failedAt)}. This index still holds the copy read ${read}, which may be out of date: check the official list.` });
+    else out.push({ id, tone: 'bad', text: `${l.name}: could not be loaded${l.failedAt ? ` on ${utcLabel(l.failedAt)}` : ''}, and this index holds nothing from it. Search the official list.` });
+  }
+  for (const [id, l] of Object.entries(index?.leftOut || {})) out.push({ id, tone: 'info', text: `${l.name}: not in this index. ${l.why}` });
+  return out;
+}
+
+/* ---------------------------------------------------------------------------------------------------------------
    Events: GDELT DOC 2.0 (keyless; one request every five seconds; the last three months only)
    --------------------------------------------------------------------------------------------------------------- */
 export const GDELT_SPANS = { '24h': '24 hours', '3d': '3 days', '1w': '1 week', '2w': '2 weeks', '1m': '1 month', '3m': '3 months' };

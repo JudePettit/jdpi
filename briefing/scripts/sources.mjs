@@ -21,6 +21,30 @@ export const PER_POSITION = 10;
 // run has 58–62 (four feeds are dead on most days). The far right has had no spare feed on some runs, so one more
 // failure there must not stop the refresh, but losing three of its ten would.
 export const MIN_WORKING_SHARE = 0.75, MIN_ACTIVE = PER_POSITION - 2;
+// Each publisher's own web address, for joining it to Wikipedia's list of perennial sources (build-rsp.mjs), where a
+// feed's host would mislead (feeds.bbci.co.uk, feeds.feedburner.com, news.google.com). Read on 21 November 2026 from the
+// <link> each feed gives for its channel; for the FeedBurner copies, from their articles' links; for the Google News
+// searches, from the site they search. The Daily Mail's feed is on dailymail.co.uk and names dailymail.com: both.
+export const SITES = {
+  jacobin: 'jacobin.com', thenation: 'thenation.com', commondreams: 'commondreams.org', truthout: 'truthout.org', wsws: 'wsws.org',
+  novara: 'novaramedia.com', morningstar: 'morningstaronline.co.uk', mondoweiss: 'mondoweiss.net', leftvoice: 'leftvoice.org',
+  counterfire: 'counterfire.org', therealnews: 'therealnews.com', truthdig: 'truthdig.com', canary: 'thecanary.co',
+  blackagendareport: 'blackagendareport.com',
+  guardian: 'theguardian.com', nyt: 'nytimes.com', motherjones: 'motherjones.com', intercept: 'theintercept.com', vox: 'vox.com',
+  democracynow: 'democracynow.org', slate: 'slate.com', newrepublic: 'newrepublic.com', independent: 'independent.co.uk',
+  atlantic: 'theatlantic.com', salon: 'salon.com', huffpost: 'huffpost.com',
+  bbc: 'bbc.co.uk', axios: 'axios.com', thehill: 'thehill.com', dw: 'dw.com', france24: 'france24.com', euronews: 'euronews.com',
+  csmonitor: 'csmonitor.com', cnbc: 'cnbc.com', skynews: 'news.sky.com', upi: 'upi.com', realclear: 'realclearpolitics.com',
+  bloomberg: 'bloomberg.com',
+  foxnews: 'foxnews.com', nationalreview: 'nationalreview.com', washingtonexaminer: 'washingtonexaminer.com', nypost: 'nypost.com',
+  washingtontimes: 'washingtontimes.com', telegraph: 'telegraph.co.uk', reason: 'reason.com', amconmag: 'theamericanconservative.com',
+  freebeacon: 'freebeacon.com', dailymail: ['dailymail.co.uk', 'dailymail.com'], dailycaller: 'dailycaller.com', dailywire: 'dailywire.com',
+  dailysignal: 'dailysignal.com', gbnews: 'gbnews.com',
+  breitbart: 'breitbart.com', federalist: 'thefederalist.com', wnd: 'wnd.com', gatewaypundit: 'thegatewaypundit.com', oann: 'oann.com',
+  amgreatness: 'amgreatness.com', nationalpulse: 'thenationalpulse.com', zerohedge: 'zerohedge.com', remix: 'rmx.news', blaze: 'theblaze.com',
+  pjmedia: 'pjmedia.com', newsmax: 'newsmax.com',
+};
+
 // [id, name, position, country, feed, caution?]
 // WND, One America News and Newsmax refuse automated readers of their own feeds (TLS failure, HTTP 403, timeouts from
 // every runner), so their stories come through Google News's search for the site, as the Headline Tracker's outlets
@@ -97,4 +121,5 @@ export const SOURCES = [
   ['blaze', 'TheBlaze', 'far_right', 'US', 'https://www.theblaze.com/feeds/feed.rss', true],
   ['pjmedia', 'PJ Media', 'far_right', 'US', 'https://pjmedia.com/feed', true],
   ['newsmax', 'Newsmax', 'far_right', 'US', GNEWS('newsmax.com'), true],
-].map(([id, name, position, country, feed, caution]) => ({ id, name, position, country, feed, caution: !!caution }));
+].map(([id, name, position, country, feed, caution]) => ({ id, name, position, country, feed, caution: !!caution, site: SITES[id] }));
+

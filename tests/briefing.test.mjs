@@ -818,3 +818,302 @@ test('page: a failed load says so plainly, the cards are not read out on every k
     await browser.close();
   }
 });
+
+/* ---- Wikipedia's list of perennial sources, beside ⚠ (Jude, 17 and 20 November 2026: free data, and the Media Bias/
+   Fact Check flag stays). briefing/scripts/build-rsp.mjs reads the list and writes briefing/data/rsp.json, a file of its
+   own under CC BY-SA 4.0; design/prp-rsp.js draws the flag. These hold the file to its credit and licence, the parser to
+   rows with no summaries in them, the join to the table below row by row, and the flag to the list's own words: a split
+   shows its split, an outlet not on the list says so, and an uncertain match shows nothing. */
+import { parseRows, statusWords, subPages, joinOutlet, buildDoc, problems as rspProblems, serialise as rspSerialise, LIST_URL as RSP_URL, CHANGES as RSP_CHANGES } from '../briefing/scripts/build-rsp.mjs';
+import { SITES } from '../briefing/scripts/sources.mjs';
+import { gzipSync } from 'node:zlib';
+import '../design/prp-rsp.js'; // globalThis.PRPRsp
+
+const RSP_TEXT = readFileSync(new URL('../briefing/data/rsp.json', import.meta.url), 'utf8');
+const RSPD = JSON.parse(RSP_TEXT);
+
+// The join as the script wrote it on 21 November 2026, publisher by publisher: the kind of match, how a split is split,
+// and the anchors of the rows it joins. A weekly refresh that changes a row's status passes; one that changes which row
+// is a publisher's, or whether it is sure, fails here until someone has looked (and changed this table).
+const RSP_EXPECTED = {
+  jacobin: ['uncertain'], thenation: ['listed', ['The Nation']], commondreams: ['none'], truthout: ['none'],
+  wsws: ['listed', ['World Socialist Web Site']], novara: ['none'], morningstar: ['listed', ['Morning Star']], mondoweiss: ['listed', ['Mondoweiss']],
+  leftvoice: ['none'], counterfire: ['none'], therealnews: ['none'], truthdig: ['none'], canary: ['listed', ['The Canary']], blackagendareport: ['none'],
+  guardian: ['split', 'subject', ['The Guardian', 'The Guardian blogs']], nyt: ['listed', ['The New York Times']], motherjones: ['listed', ['Mother Jones']],
+  intercept: ['listed', ['The Intercept']], vox: ['listed', ['Vox']], democracynow: ['listed', ['Democracy Now!']], slate: ['none'],
+  newrepublic: ['listed', ['The New Republic']], independent: ['listed', ['The Independent']], atlantic: ['listed', ['The Atlantic']], salon: ['listed', ['Salon']],
+  huffpost: ['split', 'subject', ['HuffPost', 'HuffPost (politics)', 'HuffPost contributors']], bbc: ['listed', ['BBC']], axios: ['listed', ['Axios']],
+  thehill: ['listed', ['The Hill']], dw: ['listed', ['Deutsche Welle']], france24: ['none'], euronews: ['none'], csmonitor: ['listed', ['The Christian Science Monitor']],
+  cnbc: ['none'], skynews: ['listed', ['Sky News UK']], upi: ['none'], realclear: ['listed', ['RealClearPolitics']],
+  bloomberg: ['split', 'subject', ['Bloomberg', 'Bloomberg profiles']], foxnews: ['split', 'subject', ['Fox News', 'Fox News (politics and science)', 'Fox News (talk shows)']],
+  nationalreview: ['listed', ['National Review']], washingtonexaminer: ['listed', ['Washington Examiner']], nypost: ['split', 'subject', ['New York Post', 'New York Post Entertainment']],
+  washingtontimes: ['listed', ['The Washington Times']], telegraph: ['split', 'subject', ['The Daily Telegraph', 'The Daily Telegraph (trans issues)']],
+  reason: ['listed', ['Reason']], amconmag: ['listed', ['The American Conservative']],
+  freebeacon: ['split', 'period', ['The Washington Free Beacon 2012-2018', 'The Washington Free Beacon 2019-present']],
+  dailymail: ['listed', ['Daily Mail']], dailycaller: ['listed', ['The Daily Caller']], dailywire: ['listed', ['The Daily Wire']], dailysignal: ['uncertain'],
+  gbnews: ['listed', ['GB News']], breitbart: ['listed', ['Breitbart News']], federalist: ['listed', ['The Federalist']], wnd: ['listed', ['WorldNetDaily']],
+  gatewaypundit: ['listed', ['The Gateway Pundit']], oann: ['listed', ['One America News Network']], amgreatness: ['none'], nationalpulse: ['none'],
+  zerohedge: ['listed', ['Zero Hedge']], remix: ['none'], blaze: ['listed', ['Blaze Media']], pjmedia: ['none'], newsmax: ['listed', ['Newsmax']],
+};
+
+// A made-up sub-page in the list's own shapes: id before class, a sort key before the name, other names in <small>, a
+// note, a shortcut, and summary prose that must never reach the file.
+const RSP_PROSE = 'There is consensus that this made-up sentence is a summary, which Vitruvian Manager never copies.';
+const RSP_STATUS = '{{#switch:{{{1|}}}|gr=Generally reliable|m|nc=No consensus|gu=Generally unreliable|Deprecated}}{{#if:{{{b|}}}|&nbsp;[[File:X-circle.svg|20px|Blacklisted|link=WP:RSPBLACKLIST#Blacklisted]]}}';
+const RSP_HEADER = '[[Wikipedia:Reliable sources/Perennial sources/1|A–Z]] · [[Wikipedia:Reliable sources/Perennial sources/X|Overflow]]';
+const row = (head, name, status, uses, prose = RSP_PROSE) => `${head}\n| ${name}\n| {{WP:RSPSTATUS|${status}}}\n| {{rsnl|123|Example discussion|2024}}\n| {{WP:RSPLAST|2024}}\n| ${prose}\n| {{WP:RSPUSES|${uses}}}`;
+const RSP_PAGE = ['{| class="wikitable sortable perennial-sources"', '|-', '! Source !! Status !! Discussions !! Last !! Summary !! Uses',
+  row('|- class="s-gr" id="Example Gazette"', "''[[Example Gazette]]'' <small>(The Gazette)</small>{{efn|An editor's note that is not kept.}}{{WP:RSPSHORTCUT|RSPEG}}", 'gr', 'examplegazette.test'),
+  row('|- id="Example Gazette (opinion)" class="s-gu"', "data-sort-value=\"Example Gazette opinion\" | ''[[Example Gazette]]'' (opinion)", 'gu', 'examplegazette.test/opinion'),
+  row('|- class="s-d" id="Example Herald 2010–2015"', 'Example Herald 2010–2015', 'd|b=y', 'exampleherald.test'),
+  row('|- class="s-gr" id="Example Herald 2016–present"', 'Example Herald 2016–present', 'gr', 'exampleherald.test'),
+  row('|- class="s-nc" id="Example Institute"', 'Example Institute <small>(Example Signal)</small>', 'nc', 'exampleinstitute.test'),
+  row('|- class="s-gu" id="Example Ledger"', '[[Example Ledger|The Example Ledger]]', 'gu', 'exampleledger.test'),
+  row('|- class="s-gr" id="Example Post (US)"', 'Example Post (US)', 'gr', 'examplepost.test'),
+  row('|- class="s-gu" id="Example Post (UK)"', 'Example Post (UK)', 'gu', 'examplepost.example'),
+  '|}'].join('\n');
+const RSP_OVERFLOW = ['{| class="wikitable"', row('|- class="s-nc" id="Example Weekly"', 'Example Weekly', 'm', 'exampleweekly.test'), '|}'].join('\n');
+const RSP_OUTLETS = [
+  { id: 'gazette', name: 'Example Gazette', site: 'examplegazette.test' },            // two rows, two statuses: by subject
+  { id: 'herald', name: 'The Example Herald', site: 'www.exampleherald.test' },       // two rows with years: by period
+  { id: 'ledger', name: 'Example Ledger', site: 'exampleledger.test' },               // one row
+  { id: 'weekly', name: 'Example Weekly', site: 'exampleweekly.test' },               // one row, on the overflow page
+  { id: 'nowhere', name: 'Nowhere Times', site: 'nowhere.test' },                     // not on the list
+  { id: 'signal', name: 'Example Signal', site: 'examplesignal.test' },               // named only inside another's row
+  { id: 'ledger2', name: 'Example Ledger', site: 'ledger.test' },                     // the name, at another address
+  { id: 'weeklygazette', name: 'Weekly Courier', site: 'examplegazette.test' },       // the address, under another name
+  { id: 'post', name: 'Example Post', site: 'examplepost.test' },                     // two rows of one name, two addresses
+];
+const rev = (title, revid) => ({ title, revid, timestamp: '2026-11-21T10:00:00Z' });
+function rspFixture() {
+  const pages = subPages(RSP_HEADER).map((p, k) => ({ ...p, rev: rev(`Wikipedia:Reliable sources/Perennial sources/${p.page}`, 900 + k) }));
+  const rows = [...parseRows('1', RSP_PAGE), ...parseRows('X', RSP_OVERFLOW)];
+  return { rows, doc: buildDoc({ read: '2026-11-21T10:00:00.000Z', main: rev('Wikipedia:Reliable sources/Perennial sources', 777), header: rev('Wikipedia:Reliable sources/Perennial sources/Header', 778),
+    status: rev('Wikipedia:Reliable sources/Perennial sources/Status', 779), pages, words: statusWords(RSP_STATUS), rows, outlets: RSP_OUTLETS }) };
+}
+
+test('rsp: the Status template\'s own words, and the Header\'s sub-pages with the overflow page marked', () => {
+  assert.deepEqual(statusWords(RSP_STATUS), { gr: 'Generally reliable', m: 'No consensus', nc: 'No consensus', gu: 'Generally unreliable', d: 'Deprecated', b: 'Blacklisted' });
+  assert.deepEqual(subPages(RSP_HEADER), [{ page: '1', label: 'A–Z', overflow: false }, { page: 'X', label: 'Overflow', overflow: true }]);
+  assert.throws(() => statusWords('{{#switch:{{{1|}}}|gr=Reliable}}'), /no longer has the switch/);
+  assert.throws(() => parseRows('1', '|- class="s-gr" id="Two"\n| Two\n| {{WP:RSPSTATUS|gr}} {{WP:RSPSTATUS|gu}}'), /2 status marks/);
+});
+
+test('rsp: rows keep their name, status and anchor, and no summary prose, discussion, note or web address reaches the file', () => {
+  const { rows, doc } = rspFixture();
+  assert.deepEqual(rows.map(r => [r.id, r.name, r.st, r.b]), [
+    ['Example Gazette', 'Example Gazette', 'gr', false], ['Example Gazette (opinion)', 'Example Gazette (opinion)', 'gu', false],
+    ['Example Herald 2010–2015', 'Example Herald 2010–2015', 'd', true], ['Example Herald 2016–present', 'Example Herald 2016–present', 'gr', false],
+    ['Example Institute', 'Example Institute', 'nc', false], ['Example Ledger', 'The Example Ledger', 'gu', false],
+    ['Example Post (US)', 'Example Post (US)', 'gr', false], ['Example Post (UK)', 'Example Post (UK)', 'gu', false], ['Example Weekly', 'Example Weekly', 'm', false]]);
+  const text = rspSerialise(doc);
+  for (const gone of [RSP_PROSE, 'There is consensus', 'made-up sentence', "An editor's note", 'Example discussion', 'RSPEG', 'examplegazette.test', 'The Gazette', 'rsnl', 'RSPLAST', '{{'])
+    assert.ok(!text.includes(gone), `the file keeps "${gone}"`);
+  for (const r of doc.rows) assert.deepEqual(Object.keys(r).filter(k => !['k', 'page', 'id', 'name', 'st', 'b'].includes(k)), [], `row ${r.k} keeps only its name, status and anchor`);
+  // The build's own check refuses a row that keeps more, and a join to a row that is not there.
+  const bad = { ...doc, rows: [...doc.rows, { k: '1:99', page: '1', id: 'x', name: 'X', st: 'gr', summary: RSP_PROSE }], outlets: { ...doc.outlets, y: { match: 'listed', rows: ['1:100'] } } };
+  const p = rspProblems(bad);
+  assert.ok(p.some(m => /keeps summary/.test(m)) && p.some(m => /not there/.test(m)), p.join('; '));
+});
+
+test('rsp: the join: a split by subject or period, one row, the overflow page, not on the list, and three uncertain matches with no flag', () => {
+  const { rows, doc } = rspFixture();
+  const ids = j => (j.rows || []).map(k => doc.rows.find(r => r.k === k).id);
+  const got = Object.fromEntries(Object.entries(doc.outlets).map(([id, j]) => [id, [j.match, j.by || null, ids(j)]]));
+  assert.deepEqual(got, {
+    gazette: ['split', 'subject', ['Example Gazette', 'Example Gazette (opinion)']],
+    herald: ['split', 'period', ['Example Herald 2010–2015', 'Example Herald 2016–present']],
+    ledger: ['listed', null, ['Example Ledger']], weekly: ['listed', null, ['Example Weekly']], nowhere: ['none', null, []],
+    signal: ['uncertain', null, []], ledger2: ['uncertain', null, []], weeklygazette: ['uncertain', null, []], post: ['uncertain', null, []],
+  });
+  for (const id of ['signal', 'ledger2', 'weeklygazette', 'post']) assert.ok(doc.outlets[id].why.length > 10, `${id} says why it has no flag`);
+  assert.equal(joinOutlet({ id: 'z', name: 'Example Ledger', site: ['elsewhere.test', 'exampleledger.test'] }, rows).match, 'listed', 'any of an outlet\'s own sites');
+});
+
+test('rsp: the flag carries the list\'s words, its row and what it is; a split says so; "Not on Wikipedia\'s list"; an uncertain match shows nothing', () => {
+  const { doc } = rspFixture();
+  const T = globalThis.PRPRsp.table(doc), H = (id, o) => globalThis.PRPRsp.html(T.flag(id), o);
+  assert.match(H('ledger'), /^<a class="rsp" href="https:\/\/en\.wikipedia\.org\/wiki\/Wikipedia:Reliable_sources\/Perennial_sources#Example_Ledger" target="_blank" rel="noopener" title="[^"]+" aria-label="[^"]+"><span class="rsp-k">Wikipedia<\/span> Generally unreliable<\/a>$/);
+  const title = H('ledger').match(/title="([^"]+)"/)[1];
+  assert.ok(title.includes('the standing consensus of Wikipedia’s editors on using this outlet as a source in Wikipedia') && title.includes('It is not Vitruvian Manager’s judgement, not Media Bias/Fact Check’s, and not a rating of any single article.') && title.includes('read by Vitruvian Manager on 21 Nov 2026'), title);
+  assert.match(H('ledger', { full: true }), /^<span class="rsp-rows"><a class="rsp" [^>]+>The Example Ledger: Generally unreliable<\/a><\/span>$/, 'in full, the row by its own name');
+  assert.match(H('weekly'), /Perennial_sources\/X#Example_Weekly".*No consensus<\/a>$/, 'a row on the overflow page links to that page');
+  assert.match(H('gazette'), /class="rsp split".*>.*varies by subject: see the list<\/a>$/);
+  assert.match(H('gazette').match(/title="([^"]+)"/)[1], /Example Gazette: Generally reliable; Example Gazette \(opinion\): Generally unreliable\./);
+  assert.match(H('herald'), /varies by period: see the list<\/a>$/);
+  const full = H('herald', { full: true });
+  assert.ok(full.includes('>Example Herald 2010–2015: Deprecated · Blacklisted</a>') && full.includes('>Example Herald 2016–present: Generally reliable</a>') && full.includes('#Example_Herald_2010%E2%80%932015"'), full);
+  assert.match(H('nowhere'), /^<a class="rsp none" href="https:\/\/en\.wikipedia\.org\/wiki\/Wikipedia:Reliable_sources\/Perennial_sources" [^>]+>Not on Wikipedia’s list<\/a>$/);
+  for (const id of ['signal', 'ledger2', 'weeklygazette', 'post', 'not-a-publisher']) {
+    assert.equal(T.flag(id), null); assert.equal(H(id), ''); assert.equal(H(id, { full: true }), '');
+  }
+  assert.ok(T.why('post').length > 10); assert.equal(T.why('ledger'), null);
+  // No table (the file could not be read): no publisher shows a flag, and the credit line says why.
+  const none = globalThis.PRPRsp.table(null);
+  assert.equal(none.flag('ledger'), null);
+  assert.match(globalThis.PRPRsp.credit(none), /could not be read just now, so no publisher shows its flag/);
+});
+
+// Fixer, 21 Nov 2026: each flag's accessible name begins with the words it shows (WCAG 2.5.3) and says it opens a new
+// tab; "Not on Wikipedia's list" says the list has no row for the outlet, not what the list's consensus is; and a slot
+// written while the table loads is filled, or removed, when it arrives.
+test('rsp: each flag\'s name starts with its visible words; "Not on" says no row; slots fill when the table arrives', () => {
+  const { doc } = rspFixture();
+  const T = globalThis.PRPRsp.table(doc), H = (id, o) => globalThis.PRPRsp.html(T.flag(id), o);
+  const parts = h => { const m = h.match(/<a [^>]*title="([^"]+)" aria-label="([^"]+)">(.*?)<\/a>/); return { title: m[1].replace(/&#39;/g, "'"), label: m[2].replace(/&#39;/g, "'"), text: m[3].replace(/<[^>]+>/g, '') }; };
+  for (const [id, o] of [['ledger'], ['gazette'], ['herald'], ['nowhere'], ['ledger', { full: true }]]) {
+    const p = parts(H(id, o));
+    assert.ok(p.label.startsWith(p.text), `${id}: "${p.label}" starts with "${p.text}"`);
+    assert.ok(p.label.endsWith('(opens in a new tab)'), p.label);
+    assert.equal(p.title, p.label);
+  }
+  const none = parts(H('nowhere')).label;
+  assert.ok(none.includes('has no row for this outlet') && none.includes('not a rating') && !none.includes('standing consensus'), none);
+  assert.ok(parts(H('ledger')).label.includes('read by Vitruvian Manager on'), 'the day read');
+  // Slots: written while the table loads, filled (or removed for an uncertain match) when it settles.
+  assert.equal(globalThis.PRPRsp.slot('ledger'), '<span class="rsp-slot" data-rsp="ledger" hidden></span>');
+  const slots = [{ dataset: { rsp: 'ledger' } }, { dataset: { rsp: 'post' } }];
+  const n = globalThis.PRPRsp.fill(T, { querySelectorAll: () => slots });
+  assert.equal(n, 2);
+  assert.equal(slots[0].outerHTML, H('ledger')); assert.equal(slots[1].outerHTML, '', 'an uncertain match: the slot goes');
+  const failed = [{ dataset: { rsp: 'ledger' } }];
+  globalThis.PRPRsp.fill(globalThis.PRPRsp.table(null), { querySelectorAll: () => failed });
+  assert.equal(failed[0].outerHTML, '', 'no table: no flag');
+  const html = readFileSync(new URL('../q/briefing.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /Promise\.all\(\[[^\]]*rspDoc\]/, 'the stories do not wait on the table');
+});
+
+test('data: rsp.json credits Wikipedia contributors under CC BY-SA 4.0, names the revisions read and what VM changed, and joins every publisher as the table says', () => {
+  assert.deepEqual([RSPD.source, RSPD.sourceUrl, RSPD.credit, RSPD.licence, RSPD.licenceUrl, RSPD.changes],
+    ['Wikipedia:Reliable sources/Perennial sources', RSP_URL, 'Wikipedia contributors', 'CC BY-SA 4.0', 'https://creativecommons.org/licenses/by-sa/4.0/', RSP_CHANGES]);
+  assert.match(RSPD.changes, /copied none of the list’s summaries/);
+  assert.match(RSPD.about, /standing consensus of Wikipedia’s editors .* not Vitruvian Manager’s judgement, not Media Bias\/Fact Check’s, and not a rating of any single article/);
+  assert.ok(Number.isFinite(Date.parse(RSPD.read)), RSPD.read);
+  // The main page, its Header and Status template, and every sub-page the Header names, each by its revision id.
+  assert.deepEqual(RSPD.revisions.map(r => r.page), ['', '/Header', '/Status', ...RSPD.pages.map(p => '/' + p.page)].map(s => 'Wikipedia:Reliable sources/Perennial sources' + s));
+  for (const r of RSPD.revisions) { assert.ok(Number.isInteger(r.revid) && r.revid > 0, r.page); assert.equal(r.url, `https://en.wikipedia.org/w/index.php?oldid=${r.revid}`); }
+  assert.deepEqual(RSPD.words, { gr: 'Generally reliable', m: 'No consensus', nc: 'No consensus', gu: 'Generally unreliable', d: 'Deprecated', b: 'Blacklisted' });
+  assert.deepEqual(rspProblems(RSPD), []);
+  // The counts are the rows' own.
+  const over = new Set(RSPD.pages.filter(p => p.overflow).map(p => p.page)), live = RSPD.rows.filter(r => !over.has(r.page));
+  assert.equal(RSPD.counts.live.rows, live.length);
+  assert.equal(RSPD.counts.live.gr + RSPD.counts.live.nc + RSPD.counts.live.gu + RSPD.counts.live.d, live.length);
+  assert.ok(live.length > 400, `${live.length} rows`);
+  // No summary prose, discussion, markup or web address: each row is its name, status and anchor, and no more.
+  assert.doesNotMatch(RSP_TEXT, /There is (no )?consensus|\b[Ee]ditors (consider|agree|have|generally)|RSPUSES|RSPSTATUS|\{\{|<ref|<small>/);
+  for (const r of RSPD.rows) assert.ok(r.name.length <= 160, r.k);
+  assert.ok(gzipSync(RSP_TEXT).length < 1.5e6);
+  // Every publisher, joined as RSP_EXPECTED says, row by row.
+  assert.deepEqual(Object.keys(RSPD.outlets).sort(), SOURCES.map(s => s.id).sort());
+  assert.deepEqual(Object.keys(RSP_EXPECTED).sort(), SOURCES.map(s => s.id).sort());
+  const byK = new Map(RSPD.rows.map(r => [r.k, r]));
+  for (const [id, want] of Object.entries(RSP_EXPECTED)) {
+    const j = RSPD.outlets[id], got = [j.match, ...(j.by ? [j.by] : []), ...(j.rows ? [j.rows.map(k => byK.get(k).id)] : [])];
+    assert.deepEqual(got, want, id);
+    if (j.match === 'uncertain') assert.ok(j.why, `${id} says why`);
+  }
+  // Each publisher's own site, as the join read it.
+  for (const s of SOURCES) assert.ok([].concat(SITES[s.id]).every(h => /^[a-z0-9.-]+\.[a-z]+$/.test(h)), s.id);
+});
+
+test('rsp: the credit names the page, Wikipedia contributors, the revision, the day read, CC BY-SA 4.0 and what VM changed', () => {
+  const c = globalThis.PRPRsp.credit(globalThis.PRPRsp.table(RSPD));
+  const main = RSPD.revisions[0];
+  for (const want of [`href="${RSP_URL}"`, '>Wikipedia:Reliable sources/Perennial sources</a>', 'by Wikipedia contributors', `href="${main.url}"`, `>${main.revid}</a>`,
+    `read on ${globalThis.PRPRsp.day(RSPD.read)}`, 'href="https://creativecommons.org/licenses/by-sa/4.0/"', '>CC BY-SA 4.0</a>', 'It copied none of the list’s summaries', '<code>briefing/data/rsp.json</code>, under the same licence'])
+    assert.ok(c.includes(want), `the credit lacks ${want}`);
+});
+
+test('page source: the Wikipedia flag sits beside every ⚠, the ⚠ itself is unchanged, and the page says what the flag is', () => {
+  const html = readFileSync(new URL('../q/briefing.html', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  assert.ok(html.includes('const caution = \'<span class="caution" title="Mixed or low factual reliability rating" aria-label="Mixed or low factual reliability rating">⚠</span>\';'), 'the Media Bias/Fact Check flag is as it was');
+  const uses = [...html.matchAll(/caution \? (?:' ' \+ )?caution : ''\}/g)];
+  assert.ok(uses.length >= 4, `${uses.length} uses of ⚠`);
+  for (const m of uses) assert.match(html.slice(m.index, m.index + 140), /\$\{rsp(Cell)?\([^)]*\)\}/, `no Wikipedia flag beside ⚠ at ${html.slice(m.index - 60, m.index)}`);
+  assert.ok(html.includes('<script src="../design/prp-rsp.js"></script>'));
+  assert.match(html, /<p><b>Wikipedia’s list\.<\/b> [^<]*the standing consensus of Wikipedia’s editors on using that outlet as a source in Wikipedia\. It is not Vitruvian Manager’s judgement, not Media Bias\/Fact Check’s, and not a rating of any single article\./);
+  assert.ok(html.includes('“varies by subject: see the list”') && html.includes('“Not on Wikipedia’s list”') && html.includes('shows no flag'));
+  assert.match(html, /<span id="rspcredit">[^<]*by Wikipedia contributors, under CC BY-SA 4\.0/);
+  assert.doesNotMatch(html, /Documentary/);
+});
+
+test('page: the Publishers tab gives each publisher\'s row on Wikipedia\'s list beside ⚠, stories carry the flag, and the credit is shown', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/briefing?tab=publishers`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelector('#rsphead')?.textContent.includes('read') && document.querySelectorAll('#srcrows tr').length > 0, null, { timeout: 20000 });
+    assert.equal(await page.textContent('#rsphead'), `Wikipedia’s list (read ${globalThis.PRPRsp.day(RSPD.read)})`);
+    const cell = n => page.evaluate(n => {
+      const tr = [...document.querySelectorAll('#srcrows tr')].find(r => r.cells[0].textContent.replace('⚠', '').trim() === n);
+      return tr ? { text: tr.cells[3].textContent, links: [...tr.cells[3].querySelectorAll('a')].map(x => x.getAttribute('href')), caution: !!tr.cells[0].querySelector('.caution') } : null;
+    }, n);
+    const name = id => SOURCES.find(s => s.id === id).name;
+    const guardian = await cell(name('guardian'));
+    assert.equal(guardian.links.length, 2, 'a split shows each of its rows');
+    assert.match(guardian.text, /^The Guardian: Generally reliable.*The Guardian blogs: /);
+    assert.equal((await cell(name('commondreams'))).text, 'Not on Wikipedia’s list');
+    assert.match((await cell(name('jacobin'))).text, /^No flag: /);
+    const breitbart = await cell(name('breitbart'));
+    assert.ok(breitbart.caution, 'the ⚠ stays');
+    assert.equal(breitbart.text, 'Breitbart News: Deprecated · Blacklisted');
+    assert.equal(breitbart.links[0], `${RSP_URL}#Breitbart_News`);
+    // A story's line: ⚠, then the Wikipedia flag, short.
+    const story = await page.evaluate(() => storyHtml({ ...D.items[0], s: 'breitbart' }, false));
+    assert.match(story, /⚠<\/span><a class="rsp" [^>]+><span class="rsp-k">Wikipedia<\/span> Deprecated · Blacklisted<\/a> · /);
+    assert.match(await page.evaluate(() => storyHtml({ ...D.items[0], s: 'guardian' }, false)), /varies by subject: see the list<\/a> · /);
+    const credit = await page.innerHTML('#rspcredit');
+    assert.ok(credit.includes('by Wikipedia contributors') && credit.includes('>CC BY-SA 4.0</a>') && credit.includes(`oldid=${RSPD.revisions[0].revid}`), credit);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('page: when Wikipedia\'s table cannot be read, the stories still show, no publisher shows its flag, and the credit says why', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/briefing/data/rsp.json', r => r.fulfill({ status: 404, body: 'gone' }));
+    await page.goto(`${BASE}/q/briefing?tab=publishers`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelectorAll('#srcrows tr').length > 0 && document.documentElement.dataset.rsp === 'failed', null, { timeout: 20000 });
+    assert.equal(await page.textContent('#rsphead'), 'Wikipedia’s list');
+    assert.equal(await page.locator('.rsp-slot').count(), 0, 'no slot is left waiting');
+    assert.equal(await page.locator('#srcrows .rsp, #srcrows .rsp-no').count(), 0);
+    assert.match(await page.textContent('#rspcredit'), /could not be read just now/);
+    assert.equal(await page.evaluate(() => storyHtml({ ...D.items[0], s: 'breitbart' }, false).includes('rsp')), false);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+// Fixer, 21 Nov 2026: the stories are drawn before Wikipedia's table arrives, and its flags are filled in when it does.
+test('page: the stories never wait on Wikipedia\'s table; its flags fill in when it arrives', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  try {
+    const page = await browser.newPage({ viewport: { width: 1300, height: 900 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    let release;
+    const held = new Promise(r => { release = r; });
+    await page.route('**/briefing/data/rsp.json', async r => { await held; await r.continue(); });
+    await page.goto(`${BASE}/q/briefing`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelectorAll('#out .story').length > 0, null, { timeout: 20000 });
+    assert.equal(await page.evaluate(() => document.documentElement.dataset.rsp), undefined, 'the table is still held back, yet the stories are drawn');
+    assert.ok(await page.locator('.rsp-slot').count() > 0, 'each flag waits in its slot');
+    assert.equal(await page.locator('a.rsp').count(), 0);
+    release();
+    await page.waitForFunction(() => document.documentElement.dataset.rsp === 'ok', null, { timeout: 20000 });
+    assert.equal(await page.locator('.rsp-slot').count(), 0, 'every slot filled or removed');
+    assert.ok(await page.locator('#out a.rsp').count() > 0, 'the flags are in the stories');
+    assert.match(await page.textContent('#rspcredit'), /by Wikipedia contributors/);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});

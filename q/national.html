@@ -429,7 +429,7 @@ function metrics() {
     { id: 'leaders100', label: 'Leaders in the last 100 years', at: (F, c) => c.leadership?.leaders100, fmt: v => v ?? '–', better: null, group: 'Leadership' },
     { id: 'avgTenure', label: 'Average leader tenure (years)', at: (F, c) => c.leadership?.avgTenure, fmt: v => v ?? '–', better: null, group: 'Leadership' },
     { id: 'irregular', label: 'Irregular seizures of power since 1926', at: (F, c) => c.leadership?.irregular, fmt: v => v ?? '–', better: 'down', group: 'Leadership' },
-    { id: 'elections', label: 'Elections and referendums since 1926', at: (F, c) => c.leadership?.elections, fmt: v => v ?? '–', better: null, group: 'Leadership' },
+    { id: 'elections', label: 'Elections and referendums since 1926 (or since independence)', at: (F, c) => c.leadership?.elections, fmt: v => v ?? '–', better: null, group: 'Leadership' },
     { id: 'avgConflicts', label: 'Armed conflicts per year on its territory (1946–2025)', at: (F, c) => c.conflict?.avgConflictsPerYear, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
     { id: 'yearsAtWar', label: 'Years with a war on its territory (1946–2025)', at: (F, c) => c.conflict?.yearsAtWar, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
     { id: 'onsets', label: 'New armed conflicts per decade', at: (F, c) => c.conflict?.onsetsPerDecade, fmt: v => v ?? '–', better: 'down', group: 'Conflict' },
@@ -828,7 +828,7 @@ async function renderProfile() {
       ${L ? stat('Average time in office', L.avgTenure == null ? '–' : count(L.avgTenure, 'yr'), 'median ' + (L.medianTenure == null ? '–' : count(L.medianTenure, 'yr')), SRC.leaders(c)) : ''}
       ${L?.longest ? longestStat(c, L, stat) : ''}
       ${L ? stat('Irregular seizures of power', L.irregular, 'coups and foreign impositions since 1926', SRC.leaders(c)) : ''}
-      ${L ? stat('Elections and referendums', L.elections, 'since 1926', SRC.retro()) : ''}
+      ${L ? stat('Elections and referendums', L.elections, 'since 1926, or since independence where that came later', SRC.retro()) : ''}
       ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${count(K.conflictYears, 'conflict-year')})`, SRC.ucdp()) : ''}
       ${K ? stat('Years at war', K.yearsAtWar, `of ${count(K.yearsWithConflict, 'year')} with any armed conflict`, SRC.ucdp()) : ''}
       ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`, SRC.ucdp()) : ''}

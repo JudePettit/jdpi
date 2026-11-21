@@ -15,7 +15,7 @@ export const TARGETS = {
   encyclopedia: { suite: 'rs', path: 'encyclopedia/index.html', example: 'encyclopedia/index.html#Q8016', params: ['qid'] },
   kardashev: { suite: 'rs', path: 'kardashev/index.html', example: 'kardashev/index.html#y=1900&p=britain', params: ['y', 'p'] },
   'historical-calendar': { suite: 'rs', path: 'q/calendar.html', example: 'q/calendar.html?period=history&month=1989-11', params: ['month'] },
-  retrospective: { suite: 'rs', path: 'https://hp-retrospective.pages.dev/', example: 'https://hp-retrospective.pages.dev/#y=1946&c=200', params: ['y', 'c'] },
+  retrospective: { suite: 'rs', path: 'https://hp-retrospective.pages.dev/', example: 'https://hp-retrospective.pages.dev/#y=1946&c=Q145', params: ['y', 'c'] },
   'learning-politics': { suite: 'rs', path: 'fe/learning.html', example: 'fe/learning.html?course=politics&lesson=…', params: ['course', 'lesson'] },
   learning: { suite: 'mm', path: 'fe/learning.html', example: 'fe/learning.html?course=economics&lesson=…', params: ['course', 'lesson'] },
   pestle: { suite: 'rt', path: 'q/national.html', example: 'q/national.html#country=GBR', params: ['country'] },

@@ -737,7 +737,7 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
         offset: { type: 'integer', minimum: 0, maximum: L.maxOffset, description: 'Rows to skip, for paging.' },
         cursor: { type: 'string', description: 'next_cursor from a partial result, to read the next shards.' } }, ['id']) },
     { name: 'search_encyclopaedia', title: 'Search the Master Index', fn: searchMasterIndex,
-      description: 'Find people, places, polities (states that no longer exist), periods, sites, series, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (12,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
+      description: 'Find people, places, polities (states that no longer exist), periods, sites, series, parties, elections, wars, events, ideas and organisations in the Vitruvian Manager Master Index (more than 14,000 entries keyed by Wikidata id) by name or alias. Returns ids, descriptions and how often Vitruvian Manager mentions each.',
       inputSchema: S({ query: { type: 'string', description: 'Name or part of one, e.g. "Mearsheimer", "Korean War", "1997 UK general election".' }, type: { type: 'string', enum: TYPE_LIST, description: 'Only this type.' }, limit: { type: 'integer', minimum: 1, maximum: 25, description: 'Results (default 10).' } }, ['query']) },
     { name: 'get_entity', title: 'Get a Master Index entry', fn: getEntity,
       description: 'The full Master Index record for a Wikidata id (or an English Wikipedia title): description, Wikipedia summary, facts, related entities, tags and every place Vitruvian Manager mentions it, with links.',

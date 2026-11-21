@@ -73,7 +73,8 @@ export function gwCodes(COUNTRIES, codelist, warn = () => {}, oldKeys = null) {
 
 /**
  * Leaders in the last 100 years, their average and median time in office, the longest-serving, the irregular
- * seizures of power and the elections and referendums since 1926, over every one of the country's records (`records`:
+ * seizures of power and the elections and referendums since 1926 (the Retrospective holds a state's votes only from its
+ * independence, so for a younger state the count runs from then), over every one of the country's records (`records`:
  * the Retrospective's countries[code] for each of its codes). `current` is the country's leader, repeated for the
  * Integration Hub's catalog. `term` is the fixed term of the office the current leader holds, from Wikidata (the
  * office's "term length", P2097: { years, office }, officeTerm below), or null; it is kept only where the office is

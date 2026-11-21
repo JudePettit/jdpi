@@ -869,7 +869,7 @@ test('page: hookup, tabs, tokens only, pinned libraries, no old brand names', ()
 const PAGE = process.env.OSINT_URL;
 test('page: every tab opens without errors, and the notebook and media check work', { skip: !PAGE && 'set OSINT_URL (e.g. http://localhost:8787) to run' }, async () => {
   const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const errors = [];
@@ -962,7 +962,7 @@ test('page: the sanctions index finds a ship and a company, dates each list, and
 
 test('page: Events shows the copy saved in this browser while GDELT is turning requests away', { skip: !PAGE && 'set OSINT_URL (e.g. http://localhost:8787) to run' }, async () => {
   const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({ channel: 'msedge' });
+  const browser = await chromium.launch({ channel: 'msedge', args: ['--mute-audio'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     const ok = r => r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: /timelinevol/i.test(r.request().url())

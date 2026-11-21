@@ -87,9 +87,12 @@
     const d = T?.doc;
     if (!d) return 'Wikipedia’s list of perennial sources could not be read just now, so no publisher shows its flag.';
     const main = (d.revisions || [])[0];
-    return `Statuses and row names from “<a href="${esc(d.sourceUrl)}" target="_blank" rel="noopener">${esc(d.source)}</a>” by ${esc(d.credit)}`
-      + (main ? ` (revision <a href="${esc(main.url)}" target="_blank" rel="noopener">${esc(main.revid)}</a> and the sub-pages read with it)` : '')
-      + `, read on ${esc(day(d.read))}, under <a href="${esc(d.licenceUrl)}" target="_blank" rel="noopener">${esc(d.licence)}</a>. ${esc(d.changes)} The table is <code>briefing/data/rsp.json</code>, under the same licence.`;
+    // An address from the table is written only when it is a web address; else the list's own page, or the licence's
+    // (the second review of 21 November 2026).
+    const web = (u, or) => esc(/^https?:\/\//i.test(String(u ?? '')) ? u : or);
+    return `Statuses and row names from “<a href="${web(d.sourceUrl, LIST_URL)}" target="_blank" rel="noopener">${esc(d.source)}</a>” by ${esc(d.credit)}`
+      + (main ? ` (revision <a href="${web(main.url, LIST_URL)}" target="_blank" rel="noopener">${esc(main.revid)}</a> and the sub-pages read with it)` : '')
+      + `, read on ${esc(day(d.read))}, under <a href="${web(d.licenceUrl, 'https://creativecommons.org/licenses/by-sa/4.0/')}" target="_blank" rel="noopener">${esc(d.licence)}</a>. ${esc(d.changes)} The table is <code>briefing/data/rsp.json</code>, under the same licence.`;
   }
   root.PRPRsp = { table, html, title, credit, day, slot, fill, LIST_URL, WHAT };
 })();

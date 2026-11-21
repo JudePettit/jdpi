@@ -46,7 +46,10 @@
 //      in SATPM_LEFT or GMSD_LEFT with its reason, or the build stops: nothing is dropped unseen and no name is guessed.
 //      The EIA's 0 is read as no value (VM's own step; its file gives 0 where it has no figure), and a code whose every
 //      value is 0 is listed in the file's zeroOnly, not drawn.
-//   3. Check each: enough countries, every key an ISO3, units and columns as expected, values in range.
+//   3. Check each: enough countries, every key an ISO3, units and columns as expected, values in range, and nothing
+//      lost since the last file: a country that had values then and has none now, or a last year that went back, is
+//      a file cut short until someone has looked, so the build stops and names it (--allow-lost CODE,CODE accepts a
+//      real change).
 //   4. Build every file in memory and measure it (each under 1.5 MB gzipped).
 //   5. Only then write omni/data/layers/standin/<id>.json, each layer's entry in omni/data/layers.json (and its head),
 //      and national/data/standins.json (each series' latest value for each of National Analysis's countries). If any
@@ -342,7 +345,15 @@ async function readGmsd() {
 const fmtCut = n => (Math.abs(n) >= 1000 ? n.toLocaleString('en-GB') : String(n));
 const SPACE = 'by country, drawn on today’s borders (Natural Earth v5.1.1, 2022)';
 
-export function buildAll(parsed, metas, { topo, small, national, now = stamp(), prevOf = () => null }) {
+/** What a new series lacks that the last file had: codes with values then and none now, and a last year that went back. */
+export function lostSince(before, s, allow = new Set()) {
+  if (!before?.values) return [];
+  const out = Object.keys(before.values).filter(k => !(k in s.values) && !allow.has(k));
+  if (Array.isArray(before.years) && before.years.at(-1) > s.years.at(-1)) out.push(`the years after ${s.years.at(-1)}`);
+  return out;
+}
+
+export function buildAll(parsed, metas, { topo, small, national, now = stamp(), prevOf = () => null, allowLost = new Set() }) {
   const files = [], entries = [], nat = [];
   for (const spec of STANDINS) {
     const s = parsed[spec.id], m = metas[spec.id];
@@ -354,6 +365,8 @@ export function buildAll(parsed, metas, { topo, small, national, now = stamp(), 
     const from = s.years[0], to = s.years.at(-1), line = spec.line(from, to), breaks = breaksOf(s);
     const away = unplaced(s, topo, small);
     const file = `${OUT}/${spec.id}.json`;
+    const lost = lostSince(prevOf(file), s, allowLost);
+    if (lost.length) throw new Error(`${spec.id}: lost since the last file: ${lost.join(', ')}. A file cut short, or a real change (then run again with --allow-lost and the codes)`);
     const notDrawn = Object.keys(s.aggregates).length
       ? spec.id === 'standin-pm25-satpm' ? `SatPM’s ${Object.keys(s.aggregates).length} regions that VM cannot join to a country of Natural Earth’s`
         : spec.id === 'standin-milex-gmsd' ? `GMSD’s ${Object.keys(s.aggregates).length === 1 ? 'state number' : 'state numbers'} that VM does not draw`
@@ -440,7 +453,7 @@ async function main() {
     'standin-milex-gmsd': { ...gmsd.meta, date: gmsd.meta.released ? gmsd.meta.released.slice(0, 10) : null },
   };
   // Step 4.
-  const out = buildAll(parsed, metas, { topo, small, national: index.countries, prevOf: f => readJson(join(ROOT, f)) });
+  const out = buildAll(parsed, metas, { topo, small, national: index.countries, prevOf: f => readJson(join(ROOT, f)), allowLost: new Set(String(arg('--allow-lost') || '').split(',').filter(Boolean)) });
   for (const f of out.files) console.log(`${f.file}: ${Object.keys(f.doc.values).length} countries, ${f.doc.years[0]}–${f.doc.years.at(-1)}, not drawn: ${Object.values(f.doc.aggregates).join('; ') || 'none'}, unplaced: ${Object.keys(f.doc.unplaced).join(' ') || 'none'}; ${f.size.bytes} bytes, ${f.size.gzip} gzipped`);
   for (const [id, m] of Object.entries(metas)) console.log(`${id}: ${m.url} ${m.bytes} bytes sha256 ${m.sha256}`);
   if (dry) { console.log('--dry: nothing written'); return; }

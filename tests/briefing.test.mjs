@@ -1022,6 +1022,10 @@ test('rsp: the credit names the page, Wikipedia contributors, the revision, the 
   for (const want of [`href="${RSP_URL}"`, '>Wikipedia:Reliable sources/Perennial sources</a>', 'by Wikipedia contributors', `href="${main.url}"`, `>${main.revid}</a>`,
     `read on ${globalThis.PRPRsp.day(RSPD.read)}`, 'href="https://creativecommons.org/licenses/by-sa/4.0/"', '>CC BY-SA 4.0</a>', 'It copied none of the list’s summaries', '<code>briefing/data/rsp.json</code>, under the same licence'])
     assert.ok(c.includes(want), `the credit lacks ${want}`);
+  // An address in the table that is not a web address is never written as a link (the second review of 21 November 2026).
+  const odd = globalThis.PRPRsp.credit(globalThis.PRPRsp.table({ ...RSPD, sourceUrl: 'javascript:alert(1)', licenceUrl: 'data:text/html,x', revisions: [{ ...main, url: 'javascript:alert(2)' }] }));
+  assert.ok(!/javascript:|data:text/.test(odd), odd);
+  assert.ok(odd.includes(`href="${RSP_URL}"`) && odd.includes('href="https://creativecommons.org/licenses/by-sa/4.0/"'), 'the list’s own page and the licence’s stand in');
 });
 
 test('page source: the Wikipedia flag sits beside every ⚠, the ⚠ itself is unchanged, and the page says what the flag is', () => {

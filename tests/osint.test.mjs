@@ -373,6 +373,7 @@ const UK_FIXTURE = `<?xml version="1.0" encoding="utf-8"?>
 <Designations><DateGenerated>20/11/2026</DateGenerated>
 <Designation><DateDesignated>01/02/2016</DateDesignated><UniqueID>TST0001</UniqueID>
   <Names><Name><Name6>FIXTURE TRADING &amp; CO</Name6><NameType>Primary Name</NameType></Name><Name><Name6>Fixture Alias</Name6><NameType>Alias</NameType></Name><Name><Name1>Fixturefirst</Name1><Name6>Fixture Person Parts</Name6><NameType>Alias</NameType></Name></Names>
+  <NonLatinNames><NonLatinName><NameNonLatinScript>ФИКСТУРА ЛИЦО</NameNonLatinScript></NonLatinName></NonLatinNames>
   <RegimeName>The Fixture (Sanctions) Regulations 2019</RegimeName><IndividualEntityShip>Entity</IndividualEntityShip>
   <OtherInformation>FIXTURE OTHER INFORMATION</OtherInformation><UKStatementofReasons>FIXTURE REASONS</UKStatementofReasons>
   <Addresses><Address><AddressLine1>1 Fixture Street</AddressLine1><AddressPostalCode>FX1</AddressPostalCode><AddressCountry>Testland</AddressCountry></Address></Addresses>
@@ -381,6 +382,7 @@ const UK_FIXTURE = `<?xml version="1.0" encoding="utf-8"?>
 </Designation>
 <Designation><DateDesignated>03/10/2017</DateDesignated><UniqueID>TST0002</UniqueID>
   <Names><Name><Name6>Fixture Vessel</Name6><NameType>Primary name</NameType></Name></Names>
+  <NonLatinNames><NonLatinName><NameNonLatinScript>Фикстура судно</NameNonLatinScript></NonLatinName></NonLatinNames>
   <RegimeName>The Fixture (Sanctions) Regulations 2019</RegimeName><IndividualEntityShip>Ship</IndividualEntityShip>
   <ShipDetails><Ship><IMONumbers><IMONumber>IMO7654321</IMONumber></IMONumbers><CurrentOwnerOperators><CurrentOwnerOperator>FIXTURE OWNER LTD</CurrentOwnerOperator></CurrentOwnerOperators><CurrentBelievedFlagOfShips><CurrentBelievedFlagOfShip>Testland</CurrentBelievedFlagOfShip></CurrentBelievedFlagOfShips><PreviousOwnerOperators><PreviousOwnerOperator>FIXTURE PREVIOUS OWNER</PreviousOwnerOperator></PreviousOwnerOperators></Ship></ShipDetails>
 </Designation>
@@ -403,8 +405,15 @@ test('sanctions build: a record typed as an individual is dropped, and only the 
   assert.equal(uk.dropped.individuals, 1);
   assert.deepEqual(uk.records, [
     { list: 'uk', type: 'Entity', name: 'FIXTURE TRADING & CO', aliases: ['Fixture Alias'], regime: 'The Fixture (Sanctions) Regulations 2019', listed: '2016-02-01', ref: 'TST0001', country: ['Testland'] },
-    { list: 'uk', type: 'Ship', name: 'Fixture Vessel', regime: 'The Fixture (Sanctions) Regulations 2019', listed: '2017-10-03', ref: 'TST0002', imo: '7654321', flag: 'Testland' },
+    { list: 'uk', type: 'Ship', name: 'Fixture Vessel', aliases: ['Фикстура судно'], regime: 'The Fixture (Sanctions) Regulations 2019', listed: '2017-10-03', ref: 'TST0002', imo: '7654321', flag: 'Testland' },
   ]);
+  // A record with a name in a person's parts keeps no name in another script: the list does not say whose each is
+  // (the second review of 21 November 2026). The ship, which has no such name, keeps its own.
+  assert.ok(!JSON.stringify(uk).includes('ФИКСТУРА ЛИЦО'), 'no name in another script survives beside a person’s name parts');
+  // A file cut short is not parsed (the same review): no closed root, a record left open, a last row cut.
+  assert.throws(() => B.parseUkXml(UK_FIXTURE.replace('</Designations>', '')), /root is not closed/);
+  assert.throws(() => B.parseUkXml(UK_FIXTURE.replace(/<\/Designation>\s*<\/Designations>/, '</Designations>')), /record is not closed/);
+  assert.throws(() => B.parseEuCsv(EU_FIXTURE.slice(0, EU_FIXTURE.lastIndexOf(';FIXTURE-PLACE'))), /last row is cut short/);
   const text = JSON.stringify([eu, uk]);
   for (const w of DROPPED_WORDS) assert.ok(!text.includes(w), `“${w}” is dropped`);
   assert.equal(B.dmyToIso('29/06/2012'), '2012-06-29'); assert.equal(B.dmyToIso('31/02/2012'), '', 'no such day'); assert.equal(B.dmyToIso('2012'), '');
@@ -423,6 +432,10 @@ test('sanctions build: a list that fails keeps its last copy, marked, and the pa
   assert.equal(next.lists.eu.status, 'stale'); assert.equal(next.lists.eu.read, '2026-11-21T07:17:00Z', 'the last read date is kept');
   assert.equal(next.lists.uk.status, 'stale', 'a list that shrinks to a handful is not believed'); assert.match(next.lists.uk.error, /only 10 records/);
   assert.equal(next.records.length, 1300, 'the last records are kept');
+  // A list that comes back a quarter shorter is a cut file until someone has looked (four fifths is the least believed).
+  const cut = B.buildIndex({ eu: ok('eu', 'enterprise', 600), uk: ok('uk', 'Entity', 525) }, first, NOW2);
+  assert.equal(cut.lists.uk.status, 'stale'); assert.match(cut.lists.uk.error, /only 525 records, against 700/);
+  assert.equal(B.buildIndex({ eu: ok('eu', 'enterprise', 600), uk: ok('uk', 'Entity', 560) }, first, NOW2).lists.uk.status, 'ok', 'four fifths is believed');
   const none = B.buildIndex({ eu: { ok: false, error: 'HTTP 403' }, uk: ok('uk', 'Entity', 700) }, null, NOW2);
   assert.equal(none.lists.eu.status, 'failed'); assert.equal(none.lists.eu.records, 0);
   const lines = L.sanctionsListLines(next);

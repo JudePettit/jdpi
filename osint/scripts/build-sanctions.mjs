@@ -3,8 +3,9 @@
 // lists, written to osint/data/sanctions-index.json. Run: node osint/scripts/build-sanctions.mjs
 //
 // A PERSON IS NEVER INDEXED. Each list types its records; every record the list types as an individual (EU subject
-// type "P", UK "Individual") is dropped as it is read, before any of its fields is looked at, and nothing is written
-// inside the repository until every step below has worked.
+// type "P", UK "Individual") is dropped as it is read: of such a record only the list's own type is looked at (and,
+// in the EU file, the list's own record number, to count the entries dropped), never a name or any other field. Nothing
+// is written inside the repository until every step below has worked.
 //
 // Inputs (no key, no sign-in; each address is a plain public link on the list's own official page, read 21 Nov 2026):
 //   EU  Consolidated list of persons, groups and entities subject to EU financial sanctions, the Consolidated Financial
@@ -28,9 +29,12 @@
 //      for the EU, the legal act the list cites with its address on EUR-Lex. Everything else is dropped: remarks,
 //      statements of reasons, street addresses, phones, emails, websites, registration and tax numbers, parent and
 //      subsidiary companies, owners and operators, citizenship, functions, titles, and any name written as a person's
-//      name parts (EU: a first, middle or last name, or a gender; UK: Name1 to Name5).
-//   4. Check each list: enough records (at least 500, and at least half of the last index's count), every record of a
-//      kept type, no field outside the kept set. A list that fails steps 2 to 4 keeps its last records and its last
+//      name parts (EU: a first, middle or last name, or a gender; UK: Name1 to Name5). A UK record that has such a
+//      name keeps none of its names in another script either, since the list does not say which name each belongs to.
+//      A file cut short is not parsed: the UK file must close its root and every record, the EU file's last row must
+//      be whole.
+//   4. Check each list: enough records (at least 500, and at least four fifths of the last index's count), every
+//      record of a kept type, no field outside the kept set. A list that fails steps 2 to 4 keeps its last records and its last
 //      read date, marked "stale" with the reason; a list with no earlier copy is marked "failed" with no records.
 //   5. Check the whole index again (no individual type, no field outside the kept set, under 1.5 MB gzipped), then
 //      write it to a temporary file beside the target and rename it into place. If every list failed and there was no
@@ -51,6 +55,8 @@ export const KEPT = ['list', 'type', 'name', 'aliases', 'regime', 'listed', 'ref
 /** The list's own types VM keeps. Individuals ("P", "Individual") are never among them. */
 export const KEPT_TYPES = { eu: ['enterprise'], uk: ['Entity', 'Ship'] };
 export const MIN_RECORDS = 500;
+/** A list that comes back with fewer than this share of the last index's records is not believed (a cut file). */
+export const MIN_SHARE = 0.8;
 export const MAX_GZIP = 1.5 * 1024 * 1024;
 
 export const SOURCES = {
@@ -161,7 +167,8 @@ export function parseSemicolonCsv(text) {
 
 /**
  * The EU CSV 1.0, enterprises only. Each row joins an entry to one of its names, addresses, births, identifications or
- * citizenships; a row whose Subject_type is not "E" is skipped before any other column of it is read.
+ * citizenships; of a row whose Subject_type is not "E" only the list's own record number is read (to count the entries
+ * dropped), never a name or any other column. A last row that is cut short means a file cut short: nothing is parsed.
  * Returns { generated, records, dropped: { individuals, rows, otherTypes, malformed, personNames } }.
  */
 export function parseEuCsv(text) {
@@ -176,6 +183,7 @@ export function parseEuCsv(text) {
   };
   if (head[C.id] !== 'Entity_logical_id') throw new Error('EU file: the second column is not Entity_logical_id');
   const width = head.length;
+  if (rows.length > 1 && rows.at(-1).length !== width) throw new Error('EU file: the last row is cut short');
   const people = new Set(), others = new Set(), by = new Map();
   let generated = '', malformed = 0, personNames = 0, skippedRows = 0;
   for (const r of rows.slice(1)) {
@@ -220,13 +228,19 @@ const first = (block, name) => tag(block, name)[0] || '';
 
 /**
  * The UK Sanctions List XML, entities and ships only. Each <Designation> is typed by <IndividualEntityShip>; a record
- * typed anything but Entity or Ship is skipped before any other field of it is read.
+ * typed anything but Entity or Ship is skipped before any other field of it is read. A file that does not close its
+ * root, or a record that is not closed, means a file cut short: nothing is parsed.
  */
 export function parseUkXml(text) {
   const s = String(text);
   if (!/<Designations[\s>]/.test(s)) throw new Error('UK file: no <Designations> root');
+  if (!/<\/Designations>\s*$/.test(s)) throw new Error('UK file: the root is not closed, so the file is cut short');
   const generated = dmyToIso(first(s.slice(0, 2000), 'DateGenerated'));
-  const blocks = s.split('<Designation>').slice(1).map(b => b.slice(0, b.indexOf('</Designation>')));
+  const blocks = s.split('<Designation>').slice(1).map(b => {
+    const end = b.indexOf('</Designation>');
+    if (end < 0) throw new Error('UK file: a record is not closed, so the file is cut short');
+    return b.slice(0, end);
+  });
   let individuals = 0, otherTypes = 0, personNames = 0;
   const records = [];
   for (const b of blocks) {
@@ -234,15 +248,19 @@ export function parseUkXml(text) {
     if (type === 'Individual') { individuals++; continue; }
     if (!KEPT_TYPES.uk.includes(type)) { otherTypes++; continue; }
     const names = [];
+    let parts = 0;
     for (const m of b.matchAll(/<Name>([\s\S]*?)<\/Name>/g)) {
       const nb = m[1];
-      if (/<Name[1-5]>/.test(nb)) { personNames++; continue; } // name parts (forename, surname…) are a person's: dropped
+      if (/<Name[1-5]>/.test(nb)) { parts++; continue; } // name parts (forename, surname…) are a person's: dropped
       const whole = first(nb, 'Name6');
       if (!whole) continue;
       const kind = first(nb, 'NameType').toLowerCase();
       names.push({ whole, primary: kind === 'primary name' });
     }
-    const nonLatin = tag(b, 'NameNonLatinScript');
+    personNames += parts;
+    // The list keeps names in another script in a block of their own and does not say which name each belongs to. So a
+    // record with a name in a person's parts keeps none of them: one could be that person's name in another script.
+    const nonLatin = parts ? [] : tag(b, 'NameNonLatinScript');
     const primary = names.find(n => n.primary)?.whole || names[0]?.whole || '';
     if (!primary) continue;
     const ship = type === 'Ship' ? (b.match(/<ShipDetails>([\s\S]*?)<\/ShipDetails>/) || [])[1] || '' : '';
@@ -285,7 +303,7 @@ export function buildIndex(reads, prev, now = new Date()) {
       try {
         const n = rd.parsed.records.length;
         if (n < MIN_RECORDS) throw new Error(`only ${n} records`);
-        if (oldRecords.length && n < oldRecords.length / 2) throw new Error(`only ${n} records, against ${oldRecords.length} in the last index`);
+        if (oldRecords.length && n < oldRecords.length * MIN_SHARE) throw new Error(`only ${n} records, against ${oldRecords.length} in the last index`);
         checkRecords(id, rd.parsed.records);
       } catch (e) { err = e.message; }
     }

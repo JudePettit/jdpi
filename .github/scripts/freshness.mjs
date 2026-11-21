@@ -53,9 +53,12 @@ const STORES = [
   // The cache's own stamp once the Kino build writes one; until then its newest fetch.
   { file: 'kino/scripts/cache.json', name: 'Kino', workflow: 'kino-refresh.yml', every: 31 * 24,
     when: j => j.generated ?? [...Object.values(j.entities || {}), ...Object.values(j.files || {})].map(e => e?.at).filter(Boolean).sort().at(-1) },
-  // Wikipedia's reliability flags are stamped when the list was read (`read`), the sanctions index when it was built.
+  // Wikipedia's reliability flags are stamped when the list was read (`read`). The sanctions index is as old as the
+  // older of its two lists' reads: its `built` moves on even on a day when a list could not be read and its last copy
+  // is kept, so `built` would pass a stale list as fresh. A list with no read at all gives no usable time, which fails.
   { file: 'briefing/data/rsp.json', name: 'Wikipedia reliability flags', workflow: 'rsp-refresh.yml', every: 7 * 24, when: j => j.read },
-  { file: 'osint/data/sanctions-index.json', name: 'OSINT sanctions index', workflow: 'sanctions-refresh.yml', every: 24, when: j => j.built },
+  { file: 'osint/data/sanctions-index.json', name: 'OSINT sanctions index', workflow: 'sanctions-refresh.yml', every: 24,
+    when: j => { const reads = Object.values(j.lists || {}).map(l => l?.read); return reads.length && reads.every(Boolean) ? reads.sort()[0] : undefined; } },
   { file: 'national/data/standins.json', name: 'Stand-in series', workflow: 'standins-refresh.yml', every: 31 * 24 },
 ];
 // Each refresh workflow by its plain name.

@@ -368,8 +368,11 @@ const originatorNote = code => { const o = ORIGINATOR[code]; return o ? ` <span 
 // latest year and value, a link to its producer and the plain line on how it differs. Never scored, never in its place;
 // whatever the years chosen, it shows its own latest value with that value's year. Nothing when the file did not load.
 const standinRows = (SI, code, iso) => (SI?.series || []).filter(x => x.standsFor === code).map(x => {
-  const v = x.latest?.[iso];
-  return `<div class="sti" data-standin="${esc(x.id)}"><div class="l"><span class="tag">Stand-in</span>${esc(x.label)}<small>${esc(x.unit)} · ${v ? `latest ${v[0]}` : 'no value for this country'} · <a href="${esc(x.url)}" target="_blank" rel="noreferrer">${esc(x.producer)} ↗</a> (${esc(x.licence)}) · VM’s own text: ${esc(x.line)}</small></div><div class="v">${v ? fmtVal(v[1], x.unit) : '–'}</div><div class="mv"></div></div>`;
+  // The file is VM's own, but the page still takes nothing on trust from it (the second review of 21 November 2026):
+  // a latest value is a whole year and a number or it is not shown, and the producer's address is a web address or no link.
+  const raw = x.latest?.[iso], v = Array.isArray(raw) && Number.isInteger(raw[0]) && Number.isFinite(raw[1]) ? raw : null;
+  const who = /^https?:\/\//i.test(String(x.url ?? '')) ? `<a href="${esc(x.url)}" target="_blank" rel="noreferrer">${esc(x.producer)} ↗</a>` : esc(x.producer);
+  return `<div class="sti" data-standin="${esc(x.id)}"><div class="l"><span class="tag">Stand-in</span>${esc(x.label)}<small>${esc(x.unit)} · ${v ? `latest ${v[0]}` : 'no value for this country'} · ${who} (${esc(x.licence)}) · VM’s own text: ${esc(x.line)}</small></div><div class="v">${v ? fmtVal(v[1], x.unit) : '–'}</div><div class="mv"></div></div>`;
 }).join('');
 const SRC = {
   worldBank: 'World Bank (WDI and WGI)',

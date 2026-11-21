@@ -14,7 +14,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { pageTest, launch } from './tools/pages.mjs';
-import { STANDINS, STILL_LEFT_OUT, SATPM_NAMES, SATPM_LEFT, GW_JOIN, GMSD_LEFT, GMSD_FROM, OUT, NATIONAL_FILE, parseGcp, parseSatpm, parseEia, parseGmsd, unzipOne, csvLine } from '../omni/scripts/build-standins.mjs';
+import { STANDINS, STILL_LEFT_OUT, SATPM_NAMES, SATPM_LEFT, GW_JOIN, GMSD_LEFT, GMSD_FROM, OUT, NATIONAL_FILE, parseGcp, parseSatpm, parseEia, parseGmsd, unzipOne, csvLine, lostSince } from '../omni/scripts/build-standins.mjs';
 import { BARRED } from '../omni/scripts/build-wb.mjs';
 import { isoResolver, neCountries } from '../omni/scripts/country-names.mjs';
 import { catalogue } from '../omni/lib/layers.js';
@@ -166,6 +166,27 @@ test('the EIA’s 0 is no value: never drawn or shown as a figure, and a place w
   assert.equal(nat.line, eia.line);
   const e = DOC.layers.find(x => x.id === 'standin-energy-eia');
   assert.ok(!/Wake Island|Gibraltar \(GIB\)/.test(Object.values(e.unplaced).join(' ')), 'the key no longer lists them as values VM cannot place');
+});
+
+// The second review of 21 November 2026: a download cut short could pass the build's checks (one country fewer is still
+// "enough countries"), and National Analysis wrote a stand-in's year and its producer's address as the file gave them.
+test('a file cut short stops the stand-in build, and National Analysis takes no year or address on trust', () => {
+  const before = { years: [2000, 2001], values: { IRL: [1, 2], ZWE: [3, 4] } };
+  assert.deepEqual(lostSince(before, { years: [2000, 2001], values: { IRL: [1, 2] } }), ['ZWE']);
+  assert.deepEqual(lostSince(before, { years: [2000, 2001], values: { IRL: [1, 2] } }, new Set(['ZWE'])), [], 'a real change is accepted by its code');
+  assert.deepEqual(lostSince(before, { years: [2000], values: { IRL: [1], ZWE: [3] } }), ['the years after 2000']);
+  assert.deepEqual(lostSince(null, { years: [2000], values: {} }), [], 'a first build has nothing to lose');
+  assert.match(text('omni/scripts/build-standins.mjs'), /const lost = lostSince\(prevOf\(file\), s, allowLost\);\s+if \(lost\.length\) throw/);
+  const body = text('q/national.html').replace(/\r\n/g, '\n').match(/const standinRows = ([\s\S]*?\n\}\)\.join\(''\));/)?.[1];
+  assert.ok(body, 'the row builder is found in the page');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const rows = new Function('esc', 'fmtVal', `return ${body}`)(esc, v => String(v));
+  const one = (latest, url) => rows({ series: [{ id: 's', standsFor: 'X', label: 'L', unit: 'u', producer: 'P', licence: 'CC0', line: 'l', url, latest: { IRL: latest } }] }, 'X', 'IRL');
+  const good = one([2019, 0.5], 'https://example.org/data');
+  assert.ok(good.includes('latest 2019') && good.includes('<a href="https://example.org/data"') && good.includes('<div class="v">0.5</div>'), good);
+  const bad = one(['<img src=x onerror=alert(1)>', 0.5], 'javascript:alert(1)');
+  assert.ok(!bad.includes('<img') && !bad.includes('javascript:') && bad.includes('no value for this country') && !bad.includes('<a '), bad);
+  assert.ok(one([2019, 'x'], 'https://example.org/').includes('no value for this country'), 'a value that is not a number is not shown');
 });
 
 // Fixer, 21 Nov 2026: the Global Carbon Project's metadata names its last component "Other carbonates", not "other industry".

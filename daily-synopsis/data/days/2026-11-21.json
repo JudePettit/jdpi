@@ -3,19 +3,19 @@
  "day": "2026-11-21",
  "input": "2026-11-21-972446f54579",
  "generated": "2026-11-21T16:14:37.510Z",
- "updated": "2026-11-21T16:14:37.510Z",
+ "updated": "2026-11-21T20:59:42.223Z",
  "window": {
   "from": "2026-11-20T07:08:10.795Z",
   "to": "2026-11-21T07:08:10.795Z"
  },
  "storeGenerated": "2026-11-21T07:08:10.795Z",
- "authorship": "rules",
- "model": null,
+ "authorship": "model",
+ "model": "Claude Fable 5.2",
  "label": {
-  "text": "This digest was assembled by rules, with no AI model: Vitruvian Manager’s code picked the stories and grouped the outlets’ own headlines beneath them, and no person checked it. The linked reports are the sources.",
-  "five": "The 5 Sided Analysis under each story lays out the outlets’ own headlines by side, far left to far right, by rules alone.",
+  "text": "The text of this digest was written by an AI model (Claude) from the headlines listed beneath it and the short summaries in their feeds, and no person checked it. The linked reports are the sources.",
+  "five": "Each written 5 Sided Analysis was written by the same model from the outlets’ headlines and the short summaries in their feeds alone, never from the articles, and no person checked it.",
   "notProof": "A side with no headline here was not found among Vitruvian Manager’s outlets, which is not proof that the side did not report it.",
-  "meta": "Assembled by rules, with no AI model; no person checked it"
+  "meta": "Written by an AI model (Claude) from the listed headlines; no person checked it"
  },
  "rule": {
   "minOutlets": 3,
@@ -47,11 +47,59 @@
   }
  ],
  "written": {
-  "status": "missing",
-  "note": "The written digest is not available for this day.",
-  "attempts": []
+  "status": "published",
+  "note": null,
+  "attempts": [
+   {
+    "checked": "2026-11-21T20:59:42.223Z",
+    "ok": true,
+    "reasons": [],
+    "five": {
+     "s1": {
+      "ok": true
+     },
+     "s2": {
+      "ok": true
+     },
+     "s3": {
+      "ok": true
+     },
+     "s4": {
+      "ok": true
+     },
+     "s5": {
+      "ok": true
+     },
+     "s7": {
+      "ok": true
+     }
+    }
+   }
+  ]
  },
- "lead": null,
+ "lead": [
+  {
+   "text": "A federal jury found a man guilty of starting the deadly Palisades Fire in Los Angeles.",
+   "cites": [
+    "s1-5"
+   ]
+  },
+  {
+   "text": "Mamdani released a plan to close the Rikers Island jail in New York.",
+   "cites": [
+    "s2-4"
+   ]
+  },
+  {
+   "text": "After a summit with Xi and Putin, Trump threatens a tax on US companies building data centers overseas.",
+   "cites": [
+    "s6-1",
+    "s6-3",
+    "s6-4",
+    "s3-4"
+   ]
+  }
+ ],
  "stories": [
   {
    "id": "s1",
@@ -159,7 +207,28 @@
      "published": "2026-11-21T01:45:11.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "A federal jury found Jonathan Rinderknecht guilty of arson in the retrial over the deadly Palisades fire in Los Angeles.",
+     "cites": [
+      "s1-1",
+      "s1-3",
+      "s1-9"
+     ]
+    },
+    {
+     "text": "The fire killed 12 people and destroyed more than 6,800 buildings.",
+     "cites": [
+      "s1-4"
+     ]
+    },
+    {
+     "text": "His first federal case ended in a mistrial earlier this year.",
+     "cites": [
+      "s1-5"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -207,9 +276,55 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "The left headline puts the man found guilty of sparking the deadly Los Angeles wildfire first.",
+        "cites": [
+         "s1-1"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "Centre headlines put the California man found guilty in the Palisades Fire arson retrial first.",
+        "cites": [
+         "s1-2",
+         "s1-3"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "Right headlines put the federal jury, the deadly 2025 Palisades Fire and the blaze that killed 12 first.",
+        "cites": [
+         "s1-5",
+         "s1-6"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "Far right headlines put the man found guilty of starting the deadly fire and the federal jury first.",
+        "cites": [
+         "s1-8",
+         "s1-9"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "same",
+      "text": "Headlines on both sides put the man found guilty over the deadly fire in Los Angeles first, the same on each.",
+      "cites": [
+       "s1-1",
+       "s1-5"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -318,7 +433,27 @@
      "published": "2026-11-20T20:00:00.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "New York mayor Zohran Mamdani released a plan to close the notorious Rikers Island jail by 2032 and open four new borough-based jails.",
+     "cites": [
+      "s2-4",
+      "s2-5"
+     ]
+    },
+    {
+     "text": "The city council first voted to close it in 2019, but delays arose over where to place inmates.",
+     "cites": [
+      "s2-3"
+     ]
+    },
+    {
+     "text": "The jail has been plagued by violence and overcrowding for years.",
+     "cites": [
+      "s2-1"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -365,9 +500,47 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "Left headlines put the notorious Rikers Island jail and how Mamdani plans to finally close it first.",
+        "cites": [
+         "s2-1",
+         "s2-2"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "Centre headlines put the plan of Mamdani to close the Rikers Island jail by 2032 and build new jails first.",
+        "cites": [
+         "s2-3",
+         "s2-4"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "Far right headlines put the plan of Mamdani to empty and close the Rikers Island jail by 2032 first.",
+        "cites": [
+         "s2-6",
+         "s2-7"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "same",
+      "text": "Headlines on both sides put the plan of Mamdani to close Rikers Island first, the same on each.",
+      "cites": [
+       "s2-2",
+       "s2-7"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -487,7 +660,27 @@
      "published": "2026-11-20T17:28:37.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "The Shenzhen summit on Thursday brought together Donald Trump with Chinese President Xi Jinping and Russian President Vladimir Putin.",
+     "cites": [
+      "s3-8"
+     ]
+    },
+    {
+     "text": "The four-point peace declaration from the summit offered no plans to end wars.",
+     "cites": [
+      "s3-2"
+     ]
+    },
+    {
+     "text": "Trump addressed members of the media at the White House on Friday after the summit with Xi and Putin.",
+     "cites": [
+      "s3-10",
+      "s3-8"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -536,9 +729,54 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "far_left": [
+       {
+        "text": "The far left headline puts the meeting of Trump with Xi and Putin first.",
+        "cites": [
+         "s3-1"
+        ]
+       }
+      ],
+      "left": [
+       {
+        "text": "Left headlines put the four-point peace declaration and its offer of no plans to end wars first.",
+        "cites": [
+         "s3-2"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "Centre headlines put the trip of Trump and his press conference after the summit with Xi and Putin first.",
+        "cites": [
+         "s3-4",
+         "s3-6"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "Far right headlines put what Trump agreed to with Xi and Putin in China and the White House press conference after the historic summit first.",
+        "cites": [
+         "s3-7",
+         "s3-8"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "differ",
+      "text": "Left of centre the headlines put a declaration with no plans to end wars first, while right of centre they put what Trump agreed with Xi and Putin in China first.",
+      "cites": [
+       "s3-2",
+       "s3-7"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -625,7 +863,33 @@
      "published": "2026-11-20T10:49:59.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "Sales of Grand Theft Auto VI generated a record with $3.79 billion in first-day retail sales.",
+     "cites": [
+      "s4-6"
+     ]
+    },
+    {
+     "text": "The game is the first new installment in the blockbuster series in 13 years.",
+     "cites": [
+      "s4-5",
+      "s4-6"
+     ]
+    },
+    {
+     "text": "The game has broken records, becoming the best-reviewed game ever.",
+     "cites": [
+      "s4-5"
+     ]
+    },
+    {
+     "text": "Two minor boys allegedly stole a bus in an attempt to imitate the video game.",
+     "cites": [
+      "s4-7"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -671,9 +935,55 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "The left headline puts the major twist that Grand Theft Auto used to grow up first.",
+        "cites": [
+         "s4-1"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "The centre headline puts parents who let a child play Grand Theft Auto VI first.",
+        "cites": [
+         "s4-2"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "Right headlines put time, a culture war over a video game and the record retail sales of Grand Theft Auto VI first.",
+        "cites": [
+         "s4-3",
+         "s4-4",
+         "s4-6"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "The far right headline puts two minor boys who allegedly stole a bus to imitate Grand Theft Auto VI first.",
+        "cites": [
+         "s4-7"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "differ",
+      "text": "Left of centre the headline puts a major twist first, while right of centre the headlines put record retail sales and a culture war over a video game first.",
+      "cites": [
+       "s4-1",
+       "s4-4",
+       "s4-6"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -815,7 +1125,33 @@
      "published": "2026-11-21T00:28:23.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "Fiona the hippo died at the Cincinnati Zoo on Thursday after swallowing a visitor’s hat.",
+     "cites": [
+      "s5-12"
+     ]
+    },
+    {
+     "text": "An exam showed that the hat, swallowed 11 days before her death, was deep in her small intestine.",
+     "cites": [
+      "s5-4",
+      "s5-10"
+     ]
+    },
+    {
+     "text": "The Senate unanimously passed a resolution in honor of Fiona.",
+     "cites": [
+      "s5-12"
+     ]
+    },
+    {
+     "text": "After her death, hundreds flocked to the Cincinnati Zoo to mourn her.",
+     "cites": [
+      "s5-2"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -865,9 +1201,47 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "Left headlines put the death of Fiona the hippo 11 days after swallowing a visitor’s hat first.",
+        "cites": [
+         "s5-1",
+         "s5-2"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "Centre headlines put the famed Fiona the hippo, who dies days after eating a visitor’s hat, and a Senate resolution honoring her first.",
+        "cites": [
+         "s5-5",
+         "s5-7"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "Right headlines put Fiona the hippo honored in a unanimous Senate resolution and the hat deep in her small intestine first.",
+        "cites": [
+         "s5-8",
+         "s5-10"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "differ",
+      "text": "Left of centre the headlines put Fiona the hippo swallowing a hat first, while right of centre they put the Senate resolution honoring her first.",
+      "cites": [
+       "s5-1",
+       "s5-8"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -943,7 +1317,28 @@
      "published": "2026-11-21T03:15:17.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "Trump threatens a tremendous tax on US companies that build data centers overseas.",
+     "cites": [
+      "s6-3",
+      "s6-4",
+      "s6-5"
+     ]
+    },
+    {
+     "text": "The US president provided little detail on the potential policy.",
+     "cites": [
+      "s6-4"
+     ]
+    },
+    {
+     "text": "Trump took aim on Friday at companies pouring billions into data centers overseas.",
+     "cites": [
+      "s6-5"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -1053,7 +1448,27 @@
      "published": "2026-11-21T01:00:46.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "The Trump administration on Thursday moved to drop its lawsuit that sought to block the certification of the victory of Democrat Mary Peltola in Alaska.",
+     "cites": [
+      "s7-1"
+     ]
+    },
+    {
+     "text": "Federal lawyers asked an appeals court to drop the lawsuit.",
+     "cites": [
+      "s7-3"
+     ]
+    },
+    {
+     "text": "At least 50 FBI agents and more than a dozen Justice Department lawyers are investigating the victory of Peltola in Alaska.",
+     "cites": [
+      "s7-5",
+      "s7-4"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -1097,9 +1512,53 @@
      }
     ],
     "eligible": true,
-    "written": null,
-    "status": "missing",
-    "note": "The written comparison is not available for this story."
+    "written": {
+     "sides": {
+      "left": [
+       {
+        "text": "Left headlines put the Alaska senate lawsuit that the Trump team drops after the Democrat easily won the race first.",
+        "cites": [
+         "s7-1"
+        ]
+       }
+      ],
+      "centre": [
+       {
+        "text": "The centre headline puts the DOJ and the Alaska election certification lawsuit first.",
+        "cites": [
+         "s7-3"
+        ]
+       }
+      ],
+      "right": [
+       {
+        "text": "The right headline puts dozens of FBI and DOJ personnel investigating the Alaska victory of Peltola first.",
+        "cites": [
+         "s7-4"
+        ]
+       }
+      ],
+      "far_right": [
+       {
+        "text": "The far right headline puts the FBI in Alaska and the DOJ investigating the victory first.",
+        "cites": [
+         "s7-5"
+        ]
+       }
+      ]
+     },
+     "closing": {
+      "kind": "differ",
+      "text": "Left of centre the headlines put the dropped lawsuit first, while right of centre they put the FBI and DOJ personnel investigating the Alaska victory of Peltola first.",
+      "cites": [
+       "s7-1",
+       "s7-2",
+       "s7-4"
+      ]
+     }
+    },
+    "status": "published",
+    "note": null
    }
   },
   {
@@ -1175,7 +1634,32 @@
      "published": "2026-11-20T19:42:58.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "The ICJ held Myanmar responsible for genocide against the Rohingya and ordered restitution and reparations.",
+     "cites": [
+      "s8-4"
+     ]
+    },
+    {
+     "text": "For the first time in history, the ICJ has found a state directly guilty of genocide.",
+     "cites": [
+      "s8-1"
+     ]
+    },
+    {
+     "text": "Myanmar rejects the genocide ruling of the UN court.",
+     "cites": [
+      "s8-5"
+     ]
+    },
+    {
+     "text": "Rohingya community members caution that achieving real change will be long and hard.",
+     "cites": [
+      "s8-4"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -1286,7 +1770,21 @@
      "published": "2026-11-20T23:19:27.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "Trump and Dana White presented the Marine Band with a $500,000 check on Friday, rewarding the military musicians for their performances at major White House events.",
+     "cites": [
+      "s9-3"
+     ]
+    },
+    {
+     "text": "The reception at the White House honoring the band was the first event on the new helipad.",
+     "cites": [
+      "s9-1",
+      "s9-2"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {
@@ -1396,7 +1894,26 @@
      "published": "2026-11-21T04:00:00.000Z"
     }
    ],
-   "sentences": null,
+   "sentences": [
+    {
+     "text": "Russia launched one of its biggest air attacks yet, days after Ukraine hit the Crimean bridge.",
+     "cites": [
+      "s10-1"
+     ]
+    },
+    {
+     "text": "A series of devastating drone and missile attacks took the bridge out of service this week.",
+     "cites": [
+      "s10-3"
+     ]
+    },
+    {
+     "text": "The railway link of the bridge remains operational.",
+     "cites": [
+      "s10-2"
+     ]
+    }
+   ],
    "five": {
     "sides": [
      {

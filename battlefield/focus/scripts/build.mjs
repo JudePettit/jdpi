@@ -1,6 +1,7 @@
 // War Focus data build: one file per war in battlefield/focus/data/wars/<id>.json plus an index.
 //   node battlefield/focus/scripts/build.mjs [--cache dir] [--only id,id] [--allow-drop]
 //   node battlefield/focus/scripts/build.mjs --deaths-only [--cache dir] [--only id,id]
+//   node battlefield/focus/scripts/build.mjs --sides-only [--cache dir] [--only id,id]
 // Guard: nothing is written when a war lost its Wikidata item (its Wikipedia title no longer resolves), all or half
 // of its battles, or a tenth of its UCDP events, or when the UCDP data ends earlier than before; --allow-drop writes.
 // Sources (downloaded into the cache directory once):
@@ -14,9 +15,24 @@
 // Months with UCDP events use their recorded deaths. Other months spread each year's total (PRIO's or UCDP's) across
 // its months in proportion to the UCDP events or the battles recorded in each month; these are flagged as estimates.
 // A war no free source gives battle deaths for (deaths: {}, the nine before 1946) has no figure: totalDeaths null.
-// Order of steps: load PRIO and UCDP BRD; then (a full build) GED, each war's battles from Wikidata and Wikipedia, its
-// deaths, the guard, then every file; or (--deaths-only) each committed war file's months, UCDP cells and battles, its
-// deaths again from the yearly totals, then the war files and the index. Nothing is written until every step has worked.
+//   · States (sides, the contested state, occupation) are Wikidata Q-ids (scripts/wars.mjs), each named as the
+//     Retrospective Battlefield names its places (battlefield/history/data/places.json), else by its Wikidata label and
+//     inception (wbgetentities, cached in <cache>/state-names.json). No Gleditsch–Ward number is read or written (21
+//     November 2026).
+//   · Borders: Cliopatria v0.2.1 (CC BY 4.0), the Omni-Map's (omni/data/borders/1900-1999 and 2000-2024), for each
+//     war's theatre: the boxes of its states' rows (stateBoxes, scripts/rules.mjs) through the Battlefield's crosswalk
+//     (places.json `rows`), a state no row holds then taking its reference land's boxes (scripts/lands.mjs), else the
+//     war's committed bbox. The page draws the spans scripts/build-borders.mjs cuts from the same files.
+//   · Lands (scripts/lands.mjs, 21 November 2026), from the same rows and crosswalk: for each year of a war, the states
+//     drawn only as a fragment (listed in `unplaced` with the states no row holds), the polygons drawn uncoloured as
+//     another war state's land, and the war's states whose land lies joined inside another row (`lands`).
+//   · A war's nameAs (scripts/wars.mjs): the earlier state's Wikidata label and dissolution year (P576), the same call.
+// Order of steps: (--sides-only) each committed war file's states again from scripts/wars.mjs, their lands, the states
+// VM cannot place, and their names, then the war files and the index's sources; else load PRIO and UCDP BRD; then (a
+// full build) GED, each war's battles
+// from Wikidata and Wikipedia, its deaths, the guard, then every file; or (--deaths-only) each committed war file's
+// months, UCDP cells and battles, its deaths again from the yearly totals, then the war files and the index. Nothing is
+// written until every step has worked.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, createReadStream } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -30,6 +46,9 @@ import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
 import { refuseIfLost } from '../../../calendar/scripts/guard.mjs';
+import { rowPlace, warStates, warStatesIn, drawnRow, unplacedIn } from '../places.mjs';
+import { decodeRows, makeLands } from './lands.mjs';
+import { DOTS, dotOn } from '../dots.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
@@ -40,6 +59,7 @@ const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.arg
 const CACHE = arg('--cache') || join(tmpdir(), 'warfocus-src');
 const ONLY = arg('--only')?.split(',');
 const DEATHS_ONLY = process.argv.includes('--deaths-only');
+const SIDES_ONLY = process.argv.includes('--sides-only');
 const PRIO_TO = 1988, BRD_FROM = 1989, BRD_TO = 2008;
 mkdirSync(CACHE, { recursive: true });
 const UA = { 'User-Agent': process.env.VM_UA || 'JDP-I War Focus (https://jdpi.pages.dev; research use)' };
@@ -417,6 +437,135 @@ function deathsOnly() {
   console.log(`deaths again for ${out.length} wars`);
 }
 
+// ---- States and borders (21 November 2026). A war's states as the files hold them: sides { label, states [{ q, from,
+// to }] }, theatre [Q], control [{ q, side, from, to }], and names { Q: { n, since? } }.
+const SITE = join(ROOT, '../../');
+const PLACES = JSON.parse(readFileSync(join(SITE, 'battlefield/history/data/places.json'), 'utf8'));
+const BORDERS_SOURCE = 'Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year';
+const FIRST_YEAR = 1926;
+const norm = side => (side.q || []).map(x => (Array.isArray(x) ? { q: x[0], from: x[1] || null, to: x[2] || null } : { q: x, from: null, to: null }));
+const statesOf = w => ({ sides: { a: { label: w.sides.a.label, states: norm(w.sides.a) }, b: { label: w.sides.b.label, states: norm(w.sides.b) } },
+  theatre: w.theatre || [], control: (w.control || []).map(([q, side, from, to]) => ({ q, side, from, to })) });
+// Each state's name: the Battlefield's (places.json, Wikidata's English label and its inception where after 1926), else
+// Wikidata's, read the same way (build-history.mjs step 5): its English label and its earliest inception (P571).
+// A war's nameAs { Q: Q2 } names Q by Q2's label to the year of Q2's dissolution (P576): `then` { n, to }.
+async function namesOf(qs, nameAs = {}) {
+  const file = join(CACHE, 'state-names.json');
+  const cache = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+  const earlier = Object.values(nameAs);
+  const need = [...new Set([...qs.filter(q => !PLACES.places[q]), ...earlier])].filter(q => !cache[q] || (earlier.includes(q) && cache[q].to == null));
+  for (let i = 0; i < need.length; i += 50) {
+    const ids = need.slice(i, i + 50);
+    await pause(1000);
+    const res = await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&props=labels|claims&languages=en&maxlag=5&ids=${ids.join('|')}`, { headers: UA, signal: AbortSignal.timeout(TIMEOUT) });
+    if (res.status === 403) throw new Error('Wikidata refused the request (403): stopping, not working round it');
+    if (!res.ok) throw new Error(`Wikidata: ${res.status} for the states' names`);
+    const body = await res.json();
+    for (const q of ids) {
+      const e = body.entities?.[q];
+      if (!e || e.missing != null || !e.labels?.en?.value) throw new Error(`Wikidata holds no English label for ${q}`);
+      const years = p => (e.claims?.[p] || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
+      const since = years('P571'), to = years('P576');
+      cache[q] = { n: e.labels.en.value, ...(since.length && Math.min(...since) > FIRST_YEAR ? { since: Math.min(...since) } : {}), ...(to.length ? { to: Math.max(...to) } : {}) };
+      if (earlier.includes(q) && cache[q].to == null) throw new Error(`Wikidata gives ${q} no dissolution (P576), so its name has no last year`);
+    }
+  }
+  if (need.length) writeFileSync(file, JSON.stringify(cache));
+  return Object.fromEntries([...qs].sort((a, b) => +a.slice(1) - +b.slice(1)).map(q => {
+    const p = PLACES.places[q] || cache[q], was = nameAs[q] ? cache[nameAs[q]] : null;
+    return [q, { n: p.n, ...(p.since ? { since: p.since } : {}), ...(was ? { then: { n: was.n, to: was.to } } : {}) }];
+  }));
+}
+// Cliopatria's rows (the Omni-Map's files of War Focus's years), for each war's theatre boxes.
+const CLIO = ['1900-1999', '2000-2024'].map(f => JSON.parse(readFileSync(join(SITE, `omni/data/borders/${f}.topo.json`), 'utf8')));
+const placeOf = (id, y) => rowPlace(PLACES.rows, id, y);
+// The places drawn in a year (Cliopatria's last, 2024, for a later year): each drawn row's place, and the small states'
+// dots (dots.mjs) drawn on some day of it. A war's state none of them is goes in its file's `unplaced` { year: [Q] }:
+// the page lists it, never drawing it on another shape.
+const SMALL = new Set(JSON.parse(readFileSync(join(SITE, 'omni/data/base/small-states.json'), 'utf8')).points.map(p => p.q));
+const DOT_LIST = Object.values(DOTS).filter(d => SMALL.has(d.q));
+const placedCache = new Map();
+function placedIn(y) {
+  y = Math.min(y, PLACES.bordersTo);
+  if (!placedCache.has(y)) {
+    const t = CLIO[y < 2000 ? 0 : 1], rowQs = new Set();
+    for (const g of t.objects.borders.geometries) {
+      const p = g.properties;
+      if (p.f <= y && y <= p.t && drawnRow({ properties: p, geometry: g.type ? {} : null })) { const q = placeOf(p.id, y); if (q) rowQs.add(q); }
+    }
+    const all = new Set(rowQs);
+    for (const d of DOT_LIST) if (dotOn(d, `${y}-12-31`, rowQs)) all.add(d.q);
+    placedCache.set(y, all);
+  }
+  return placedCache.get(y);
+}
+// Whose land each row draws (scripts/lands.mjs, 21 November 2026): for each year of a war, the states drawn only as a
+// fragment (`parts`, listed as ones VM cannot place), the polygons drawn uncoloured because they lie on another war
+// state's land (`left`), and the war's states whose land lies joined inside another place's coloured row (`inside`).
+// The war file's `lands` { year: { parts?, left?, inside? } } holds only the years with any.
+const LANDS = makeLands(CLIO.map(decodeRows), placeOf, (p, has) => drawnRow({ properties: p, geometry: has ? {} : null }), { from: 1900, to: PLACES.bordersTo });
+function landsOf(w, s, end) {
+  const out = {}, war = { ...s, start: w.start, end: w.end };
+  for (let y = +w.start.slice(0, 4); y <= +end.slice(0, 4); y++) {
+    const a = `${y}-01-01` < w.start ? w.start : `${y}-01-01`, b = `${y}-12-31` > end ? end : `${y}-12-31`;
+    if (a > b) continue;
+    const r = LANDS.year(y, warStatesIn(war, a, b), s.theatre), e = {};
+    for (const k of ['parts', 'left', 'inside']) if (r[k].length) e[k] = r[k];
+    if (Object.keys(e).length) out[y] = e;
+  }
+  return out;
+}
+// A state drawn only as a fragment is listed with those no row holds.
+function unplacedOf(w, s, end, lands) {
+  const out = {}, war = { ...s, start: w.start, end: w.end };
+  for (let y = +w.start.slice(0, 4); y <= +end.slice(0, 4); y++) {
+    const parts = lands[y]?.parts || [], placed = new Set([...placedIn(y)].filter(q => !parts.includes(q)));
+    const qs = unplacedIn(war, y, placed); if (qs.length) out[y] = qs;
+  }
+  return out;
+}
+// The Retrospective Battlefield's years (its data/wars.json), for the page's links to a state there: UCDP/PRIO's first
+// year and its last.
+const RETRO = (() => { const r = JSON.parse(readFileSync(join(SITE, 'battlefield/history/data/wars.json'), 'utf8')); return { ucdpFrom: r.ucdpFrom, lastYear: r.lastYear }; })();
+// The boxes of the war's states' rows in its years (stateBoxes). A state no row holds then (Vietnam, Cambodia and Laos
+// in 1946–54, Algeria to 1962) takes its reference land's (lands.mjs ref: its own rows in the nearest year within twelve
+// of the war's, that it is whole), else the war's committed bbox, so partsWithin keeps a theatre for every state
+// (21 November 2026).
+function theatreBoxes(w, end, bbox = null) {
+  const a = Math.min(+w.start.slice(0, 4), PLACES.bordersTo), b = Math.min(+end.slice(0, 4), PLACES.bordersTo), out = new Map();
+  for (const t of CLIO) for (const [q, bs] of stateBoxes(t, a, b, placeOf)) (out.get(q) || out.set(q, []).get(q)).push(...bs);
+  const s = statesOf(w);
+  for (const q of warStates(s)) {
+    if (out.get(q)?.length) continue;
+    let rf = null;
+    for (let y = a; y <= b && !rf; y++) rf = LANDS.ref(q, y, s.theatre.includes(q));
+    if (rf) out.set(q, rf.boxes.slice());
+    else if (bbox) out.set(q, [bbox]);
+  }
+  return out;
+}
+
+// --sides-only: each committed war file's states again from scripts/wars.mjs, with their names; then the war files and
+// the index's sources (the months, deaths, battles and events are kept as built).
+async function sidesOnly(list) {
+  const IDXF = join(OUT, 'index.json'), idx = JSON.parse(readFileSync(IDXF, 'utf8')), out = [];
+  for (const w of list) {
+    const file = join(WAR_DIR, w.id + '.json'), d = JSON.parse(readFileSync(file, 'utf8'));
+    const s = statesOf(w), end = w.end || d.dataThrough || new Date().toISOString().slice(0, 10), lands = landsOf(w, s, end);
+    delete d.lands;
+    Object.assign(d, s, { names: await namesOf([...warStates(s)], w.nameAs), unplaced: unplacedOf(w, s, end, lands), lands });
+    out.push([file, JSON.stringify(d)]);
+    const n = k => Object.values(lands).reduce((t, e) => t + (e[k]?.length || 0), 0);
+    console.log(`${w.id}: ${Object.keys(d.names).length} states, ${Object.values(d.unplaced).flat().length} state-years VM cannot place (${n('parts')} only a fragment), ${n('left')} rows partly uncoloured, ${n('inside')} lands inside another row`);
+  }
+  idx.sources.borders = BORDERS_SOURCE;
+  idx.battlefield = RETRO;
+  for (const [file, text] of out) writeFileSync(file, text);
+  writeFileSync(IDXF, JSON.stringify(idx));
+  console.log(`states again for ${out.length} wars`);
+}
+if (SIDES_ONLY) { await sidesOnly(WARS.filter(w => !ONLY || ONLY.includes(w.id))); process.exit(0); }
+
 // ---- Load sources
 const X = require('xlsx');
 const prioRows = X.utils.sheet_to_json(X.readFile(await download('https://cdn.cloud.prio.org/files/d21ef702-a546-45a8-b3c9-5b520dcc1239/PRIO%20Battle%20Deaths%20Dataset%2031.xls?inline=true', 'prio_bd31.xls')).Sheets.bdonly);
@@ -435,8 +584,6 @@ const brd = new Map(); // UCDP conflict id -> year -> bd_best
 const wars = WARS.filter(w => !ONLY || ONLY.includes(w.id));
 const today = new Date().toISOString().slice(0, 10);
 if (DEATHS_ONLY) { deathsOnly(); process.exit(0); }
-// CShapes 2.0 borders (Retrospective Battlefield's), for each war's theatre (stateBoxes, scripts/rules.mjs).
-const BORDERS = JSON.parse(readFileSync(join(ROOT, '../history/data/borders.topo.json'), 'utf8'));
 const gedDir = unzip(await download('https://ucdp.uu.se/downloads/ged/ged261-csv.zip', 'ged261.zip'), 'ged');
 // The candidate files for every year GED v26.1 does not cover yet: 2026's latest now, and 2026's last plus 2027's
 // latest once UCDP's first 2027 file is out (until a GED release covering 2026 replaces ged261 above and GED_THROUGH).
@@ -474,9 +621,11 @@ for (const w of wars) {
   const mi = new Map(months.map((m, i) => [m, i]));
   const ev = events.get(w.id) || [];
   // The war's theatre for partsWithin: its UCDP events, and the territory of its sides' and contested states then.
-  const boxes = stateBoxes(BORDERS, w.start, w.end || today);
-  const gws = [...new Set([...w.sides.a.gw || [], ...w.sides.b.gw || [], ...w.theatre || []].map(x => (Array.isArray(x) ? x[0] : x)))];
-  const theatre = { points: ev.filter(e => isFinite(e.lat) && isFinite(e.lon)).map(e => [e.lon, e.lat]), states: gws.flatMap(gw => boxes.get(gw) || []) };
+  // A state no Cliopatria row holds in the war's years has no box (it is listed on the page, never drawn).
+  const prevBbox = (() => { try { return JSON.parse(readFileSync(join(WAR_DIR, w.id + '.json'), 'utf8')).bbox || null; } catch { return null; } })();
+  const boxes = theatreBoxes(w, w.end || today, prevBbox);
+  const qs = [...new Set([...w.sides.a.q || [], ...w.sides.b.q || [], ...w.theatre || []].map(x => (Array.isArray(x) ? x[0] : x)))];
+  const theatre = { points: ev.filter(e => isFinite(e.lat) && isFinite(e.lon)).map(e => [e.lon, e.lat]), states: qs.flatMap(q => boxes.get(q) || []) };
   // A battle dated only to its decade (u 'undated') is kept when the decade overlaps the war's years, and listed last.
   const found = qid ? await battlesOf(qid, { start: w.start, end: w.end || today, warEnd: w.end }, theatre, w.id) : { battles: [], edges: [] };
   const battles = found.battles.filter(b => (b.u === 'undated' ? decadeFits(b.dec, w.start, end) : b.s >= w.start.slice(0, 4) && b.s <= end));
@@ -511,8 +660,7 @@ for (const w of wars) {
     const lo = pts.length > 200 ? 0.01 : 0, hi = 1 - lo;
     bbox = [q(pts.map(p => p[0]), lo), q(pts.map(p => p[1]), lo), q(pts.map(p => p[0]), hi), q(pts.map(p => p[1]), hi)];
   }
-  const norm = side => (side.gw || []).map(x => (Array.isArray(x) ? { gw: x[0], from: x[1] || null, to: x[2] || null } : { gw: x, from: null, to: null }));
-  const bf = bfOf(w);
+  const bf = bfOf(w), states = statesOf(w), names = await namesOf([...warStates(states)], w.nameAs), lands = landsOf(w, states, end), unplaced = unplacedOf(w, states, end, lands);
   // ---- Each battle's figures from every source (BF-08, scripts/infobox.mjs battleFigures): Wikidata's statements read
   // in full, the article's infobox at the revision read, and since 1989 UCDP's clashes nearby where nothing else gives
   // one. The detail for the battle's window goes to data/figures/<id>.json, loaded on demand. A battle whose source
@@ -546,9 +694,7 @@ for (const w of wars) {
   const data = {
     id: w.id, name: w.name, qid, wiki: w.wiki, bf, start: w.start, end: w.end, ongoing: !w.end, dataThrough: w.end ? null : maxGed,
     months, deaths, estimated, deathsSource: source, totalDeaths: total, covered, shared: shared.some(Boolean) ? shared : null,
-    sides: { a: { label: w.sides.a.label, states: norm(w.sides.a) }, b: { label: w.sides.b.label, states: norm(w.sides.b) } },
-    theatre: w.theatre || [], control: (w.control || []).map(([gw, side, from, to]) => ({ gw, side, from, to })),
-    bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts, fd, fc, fs, fw, fwp, fu }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
+    ...states, names, unplaced, lands, bbox, battles: battles.map(({ q, n, desc, lat, lon, s, e, p, pe, u, eW, eA, dec, deaths, cas, dv, dAt, w: art, up, upAlso, parts, fd, fc, fs, fw, fwp, fu }) => ({ q, n, desc, lat, lon, s: s || null, e: e || null, p: p || null, ...(pe ? { pe } : {}), ...(u ? { u } : {}), ...(eW ? { eW } : {}), ...(eA ? { eA } : {}), ...(dec != null ? { dec } : {}), deaths: deaths || null, cas: cas || null,
       ...(dv ? { dv } : {}), ...(dAt ? { dAt } : {}), w: art || null, ...(up ? { up } : {}), ...(upAlso?.length ? { upAlso } : {}), ...(parts?.length ? { parts } : {}),
       ...(fd ? { fd } : {}), ...(fc ? { fc } : {}), ...(fs ? { fs } : {}), ...(fw ? { fw } : {}), ...(fwp ? { fwp } : {}), ...(fu ? { fu } : {}) })),
     cells: cellsOut, top: topOut, events: ev.length,
@@ -585,7 +731,7 @@ writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThro
   sources: { ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0',
     prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides',
     brd: 'UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008',
-    wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)',
+    wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: BORDERS_SOURCE,
     wikipedia: FIG_SOURCES.wikipedia },
-  wars: all }));
+  battlefield: RETRO, wars: all }));
 console.log(`index: ${all.length} wars`);

@@ -408,9 +408,9 @@ spec({
 const FOCUS = J('battlefield/focus/data/index.json');
 // Each source on its own terms, as read (integration/sources.json): UCDP's CC BY 4.0; PRIO's Battle Deaths page states
 // no licence, so its years 1946–1988 are kept with that said until VM's owner decides; Wikidata CC0; the borders are
-// still CShapes 2.0 (CC BY-NC-SA 4.0, not free) until War Focus moves to Cliopatria. No Correlates of War value is held
+// Cliopatria's (CC BY 4.0) since 21 November 2026, one a year (CShapes 2.0 before). No Correlates of War value is held
 // since 20 November 2026 (MP-11), so no month needs a pointer in place of a number.
-const focusLicence = 'UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.';
+const focusLicence = 'UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles and states from Wikidata (CC0); borders from Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0, one border a year.';
 const focusSources = Object.values(FOCUS.sources);
 spec({
   id: 'war-focus-wars', title: 'War Focus: major wars', module: 'rs', submodule: 'war-focus',

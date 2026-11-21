@@ -138,7 +138,7 @@ test('text names count once each, longest first, and a second "South Sudan" is n
 /* ------------------------------------------------------------------ extraction */
 const WAR = {
   id: 'w1', name: 'Test war', qid: 'Q1', bf: 'c1', start: '1940-01-01', months: ['1940-05', '1940-06'],
-  sides: { a: { states: [{ gw: 220, from: '1940-01-01', to: null }] }, b: { states: [{ gw: 255, from: '1940-01-01', to: null }] } },
+  sides: { a: { states: [{ q: 'Q142', from: '1940-01-01', to: null }] }, b: { states: [{ q: 'Q183', from: '1940-01-01', to: null }] } },
   theatre: [], control: [],
   battles: [
     { q: 'Q10', n: 'Battle A', lat: 5, lon: 25, s: '1940-05-01', e: '1940-05-20' },
@@ -151,7 +151,11 @@ const WAR = {
 
 test('War Focus: belligerents from sides at their dates, places from battles', () => {
   const w = warFocusWar(WAR, R);
-  assert.deepEqual([...w.belligerent.keys()].sort(), ['DEU', 'FRA']);
+  assert.deepEqual([...w.belligerent.keys()].sort(), ['DEU', 'FRA'], 'its states are Wikidata items (21 November 2026), no Gleditsch–Ward code');
+  const gw = warFocusWar({ ...WAR, sides: { a: { states: [{ gw: 220, from: '1940-01-01', to: null }] }, b: { states: [] } } }, R);
+  assert.equal(gw.belligerent.size, 0, 'an old number is not read');
+  const unk = warFocusWar({ ...WAR, theatre: ['Q99999999'] }, R);
+  assert.deepEqual(unk.unknown, ['Q99999999'], 'a state with no present-day country is listed');
   assert.deepEqual(Object.fromEntries(w.point), { EGY: 2, FRA: 1 });
   assert.equal(w.unplaced, 1, 'the battle at sea');
   const m = warFocusMoment(w, '1940-05');

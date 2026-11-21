@@ -124,11 +124,18 @@ export function partsWithin(edges, dates, root, span, { places = null, points = 
 }
 
 /**
- * The bounding boxes [w, s, e, n] of each part (polygon) of each state's territory in a CShapes TopoJSON (Retrospective
- * Battlefield's borders.topo.json, quantized), for the borders in force at some time from `from` to `to`.
- * Returns Map gw → [[w, s, e, n], ...].
+ * The bounding boxes [w, s, e, n] of each part (polygon) of each state's territory on Cliopatria's borders (a quantized
+ * TopoJSON of the Omni-Map's, omni/data/borders, or one of War Focus's spans of it), for the rows of some year from
+ * `from` to `to` (years, inclusive). A row is a state's where `placeOf(row id, year)` gives the state's Q-id (the
+ * Retrospective Battlefield's crosswalk, places.json `rows`); a composite, a row with no shape and a row with no place
+ * give none (21 November 2026: until then CShapes 2.0's borders, by Gleditsch–Ward number).
+ * Cliopatria's rows can draw the same land twice: its Kingdom of Great Britain of 1969–2023 carries a part over Oman,
+ * Qatar and Bahrain, each also a row of its own. A part whose box is mostly another place's part in the same years
+ * (overlap at least half of the two boxes together) is left to the place for which it is the larger share of its
+ * territory (Oman's, not Britain's), so a state's area never reaches lands another row holds.
+ * Returns Map Q → [[w, s, e, n], ...].
  */
-export function stateBoxes(topo, from, to) {
+export function stateBoxes(topo, from, to, placeOf) {
   const [sx, sy] = topo.transform?.scale || [1, 1], [tx, ty] = topo.transform?.translate || [0, 0];
   const arcBox = topo.arcs.map(arc => {
     let x = 0, y = 0, b = [Infinity, Infinity, -Infinity, -Infinity];
@@ -139,17 +146,38 @@ export function stateBoxes(topo, from, to) {
     }
     return b;
   });
-  const out = new Map();
+  const area = b => Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]);
+  const parts = [], total = new Map(); // { qs, a, z, box }, and each place's summed part areas
   for (const g of Object.values(topo.objects)[0].geometries) {
     const p = g.properties || {};
-    if (!(p.s <= to && p.e >= from)) continue;
+    if (!(p.f <= to && p.t >= from) || p.k !== 'POLITY' || /^\(.+\)$/.test(p.n || '')) continue;
+    const qs = new Set(), a = Math.max(from, p.f), z = Math.min(to, p.t);
+    for (let y = a; y <= z; y++) { const q = placeOf(p.id, y); if (q) qs.add(q); }
+    if (!qs.size) continue;
     const polys = g.type === 'Polygon' ? [g.arcs] : g.type === 'MultiPolygon' ? g.arcs : [];
     for (const poly of polys) {
       let b = [Infinity, Infinity, -Infinity, -Infinity];
-      for (const ring of poly) for (const i of ring) { const a = arcBox[i < 0 ? ~i : i]; b = [Math.min(b[0], a[0]), Math.min(b[1], a[1]), Math.max(b[2], a[2]), Math.max(b[3], a[3])]; }
-      if (isFinite(b[0])) (out.get(p.gw) || out.set(p.gw, []).get(p.gw)).push(b);
+      for (const ring of poly) for (const i of ring) { const x = arcBox[i < 0 ? ~i : i]; b = [Math.min(b[0], x[0]), Math.min(b[1], x[1]), Math.max(b[2], x[2]), Math.max(b[3], x[3])]; }
+      if (!isFinite(b[0])) continue;
+      parts.push({ qs, a, z, box: b });
+      for (const q of qs) total.set(q, (total.get(q) || 0) + area(b));
     }
   }
+  // Parts bucketed by the 10° cells their boxes touch, so each is checked only against its neighbours.
+  const cells = new Map(), cellsOf = b => { const out = []; for (let i = Math.floor(b[0] / 10); i <= Math.floor(b[2] / 10); i++) for (let j = Math.floor(b[1] / 10); j <= Math.floor(b[3] / 10); j++) out.push(i + ',' + j); return out; };
+  parts.forEach((x, k) => { for (const c of cellsOf(x.box)) (cells.get(c) || cells.set(c, []).get(c)).push(k); });
+  const share = x => Math.max(...[...x.qs].map(q => area(x.box) / (total.get(q) || 1)));
+  const out = new Map();
+  parts.forEach((x, k) => {
+    const near = new Set(cellsOf(x.box).flatMap(c => cells.get(c)));
+    for (const m of near) {
+      const o = parts[m];
+      if (m === k || o.a > x.z || o.z < x.a || [...o.qs].some(q => x.qs.has(q))) continue;
+      const i = [Math.max(x.box[0], o.box[0]), Math.max(x.box[1], o.box[1]), Math.min(x.box[2], o.box[2]), Math.min(x.box[3], o.box[3])], ia = area(i);
+      if (ia > 0 && ia >= 0.5 * (area(x.box) + area(o.box) - ia) && share(o) > share(x)) return;
+    }
+    for (const q of x.qs) (out.get(q) || out.set(q, []).get(q)).push(x.box);
+  });
   return out;
 }
 

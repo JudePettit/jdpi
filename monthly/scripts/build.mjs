@@ -2,7 +2,8 @@
 // list and the year strips, built only from VM's own public JSON.
 //   node monthly/scripts/build.mjs [--ged <dir>] [--today yyyy-mm-dd] [--allow-drop]
 // Reads: battlefield/data/realtime.json, battlefield/focus/data (index and wars), volatility/data/index.json, the
-// calendars (calendar/data/<decade>s.json, upcoming.json), national/data/index.json, monthly/data/ged-countries.json
+// calendars (calendar/data/<decade>s.json, upcoming.json), national/data/index.json, the Retrospective Battlefield's
+// places (battlefield/history/data/places.json, for War Focus's states, which are Wikidata Q-ids), monthly/data/ged-countries.json
 // and its own last output (monthly/data/series.json carries the year's candidate months past January, when
 // realtime.json starts again). Writes monthly/data: marks.json (and its head), series.json, bulletins/<yyyy-mm>.json
 // and bulletins/index.json, watch.json and watch/<yyyy-mm>.json, strips/<ISO3>.json and strips/focus-<id>.json.
@@ -90,6 +91,7 @@ const vol = readIf('volatility/data/index.json');
 const volFacts = volatilityDays(vol); // each day's method and baseline, as the store records them (null: not recorded)
 const volRecordsMethods = !!vol?.global?.length && vol.global.every(g => volFacts.methodOf(g[0]));
 const nat = read('national/data/index.json');
+const bfPlaces = read('battlefield/history/data/places.json');
 const ged = readIf('monthly/data/ged-countries.json');
 const stored = readIf('monthly/data/series.json');
 const prevMarks = readIf('monthly/data/marks.json');
@@ -104,6 +106,12 @@ const CANDIDATE = rt.version; // the candidate release realtime.json is built fr
 /* ---------------------------------------------------------------- countries: names, codes, Master Index ids */
 const { iso: gwOfIso, gw: isoOfGw } = gwTable(nat);
 const natBy = new Map(nat.countries.map(c => [c.iso3, c]));
+// War Focus's states are Wikidata Q-ids (since 21 November 2026): a state is the country National Analysis gives that
+// Q-id, else the one the Retrospective Battlefield's places give it an ISO3 code for. A state of then with no country
+// of today (the Soviet Union, Yugoslavia) has none, so no country of today is credited with its war.
+const isoOfQ = new Map();
+for (const c of nat.countries) if (c.qid && !isoOfQ.has(c.qid)) isoOfQ.set(c.qid, c.iso3);
+for (const [q, p] of Object.entries(bfPlaces.places || {})) if (p.iso3 && natBy.has(p.iso3) && !isoOfQ.has(q)) isoOfQ.set(q, p.iso3);
 const DISPLAY = { COD: 'DR Congo', COG: 'Congo', MMR: 'Myanmar', CIV: 'Ivory Coast', PSE: 'Palestine', KOR: 'South Korea', PRK: 'North Korea', LAO: 'Laos', TUR: 'Turkey' };
 const nameOf = iso => DISPLAY[iso] || vol?.countries?.[iso]?.name || natBy.get(iso)?.name || iso;
 const ALIASES = { 'dr congo': 'COD', congo: 'COG', 'ivory coast': 'CIV', 'the gambia': 'GMB', 'saint kitts and nevis': 'KNA', 'saint lucia': 'LCA', 'saint vincent and the grenadines': 'VCT', 'são tomé and príncipe': 'STP', micronesia: 'FSM', 'greenland (denmark)': 'GRL', palestine: 'PSE', 'bosnia-herzegovina': 'BIH', 'russia (soviet union)': 'RUS', 'yemen (north yemen)': 'YEM', 'cambodia (kampuchea)': 'KHM', 'myanmar (burma)': 'MMR', 'zimbabwe (rhodesia)': 'ZWE', 'madagascar (malagasy)': 'MDG', 'serbia (yugoslavia)': 'SRB', 'turkey': 'TUR', 'iran': 'IRN', 'syria': 'SYR', 'russia': 'RUS', 'laos': 'LAO', 'kyrgyzstan': 'KGZ', 'egypt': 'EGY', 'venezuela': 'VEN', 'south korea': 'KOR', 'north korea': 'PRK' };
@@ -167,8 +175,8 @@ const rtHeadlinesOf = focusId => {
 for (const w of wfWars) {
   const id = `focus:${w.id}`, rows = focusRows(w, { gedThrough: GED_THROUGH, headlines: rtHeadlinesOf(w.id) });
   // Its countries: the theatre, or where War Focus names none, the states on each side, with the days they fought.
-  const theatre = (w.theatre || []).map(g => isoOfGw.get(Array.isArray(g) ? g[0] : g)).filter(Boolean).map(iso => ({ iso, from: null, to: null }));
-  const sides = theatre.length ? [] : ['a', 'b'].flatMap(k => w.sides?.[k]?.states || []).map(s => ({ iso: isoOfGw.get(s.gw), from: s.from || null, to: s.to || null })).filter(x => x.iso);
+  const theatre = (w.theatre || []).map(q => isoOfQ.get(q)).filter(Boolean).map(iso => ({ iso, from: null, to: null }));
+  const sides = theatre.length ? [] : ['a', 'b'].flatMap(k => w.sides?.[k]?.states || []).map(s => ({ iso: isoOfQ.get(s.q), from: s.from || null, to: s.to || null })).filter(x => x.iso);
   const ranges = [...theatre, ...sides];
   const isos = [...new Set(ranges.map(x => x.iso))];
   const last = rows.at(-1)?.m || M;

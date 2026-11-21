@@ -1,15 +1,26 @@
 // War Focus (PRP · Retrospective Geopolitics): one war, month by month. Data: data/index.json and data/wars/<id>.json
-// (scripts/build.mjs); borders from Retrospective Battlefield's CShapes file. Wars and battles carry their Wikidata IDs
-// (data-qid), so the PRP entity linker adds Master Index links, and lake/scripts/adapters.mjs links the Master Index back here.
+// (scripts/build.mjs); borders Cliopatria v0.2.1 (CC BY 4.0), one border a year, in the spans scripts/build-borders.mjs
+// cuts from the Omni-Map's files (data/borders), each row placed through the Retrospective Battlefield's crosswalk
+// (../history/data/places.json `rows`; places.mjs). A month shows its year's border (2025 and 2026, 2024's, the last
+// Cliopatria holds). States, sides, occupation and the picked state are Wikidata Q-ids (21 November 2026; CShapes 2.0
+// and Gleditsch–Ward numbers until then). A state no row of the year holds is listed, never drawn on another shape:
+// "VM cannot place … on a free border for <year>" under the map, above each table and in the war's panel. Wars and
+// battles carry their Wikidata IDs (data-qid), so the PRP entity linker adds Master Index links, and
+// lake/scripts/adapters.mjs links the Master Index back here.
 // Views (tabs): the map, a table of the war's battles and a table of deaths by month. All follow the timeline
 // (design/prp-period.js): its start rests on the war's first month, so the map shows the war up to the month shown, as
 // before; moved, it sets a period of months, whose deaths, battles and clashes the page shows instead.
 // URL: #war=<id>&m=<yyyy-mm, the month shown or the period's last>[&f=<yyyy-mm, the period's first>]&v=battles|months
-// Every state is drawn (AC-5, 17 November 2026; design/PRP-STYLE.md §6): the 22 CShapes has no border for as the map
-// kit's dots (design/prp-mapkit.js) from their first day as states, and a state in no part of the war shown says so in
-// one sentence from the kit, which its panel repeats ("Switzerland: not on either side of this war.").
-import { displayName } from '../history/names.mjs';
-import { DOTS as DOT_TABLE } from './dots.mjs';
+// An old address with a Gleditsch–Ward number (Documentary mode's and Kino's focus, gw:<number>) is read as its Q-id
+// for the year shown, through places.json's oldCountries (../history/old-countries.js), else through the number's
+// ISO3 (design/prp-focus.js) and the places' ISO3.
+// Every polity of the year is drawn (AC-5, 17 November 2026; design/PRP-STYLE.md §6), 22 small states as dots at
+// Natural Earth's points (dots.mjs) from their first day as states where no row holds them, and a state in no part of
+// the war shown says so in one sentence from the kit, which its panel repeats ("Switzerland: not on either side of
+// this war.").
+import { DOTS as DOT_TABLE, dotOn } from './dots.mjs';
+import { borderYear, drawnRow, rowPlace, spanOf, warStates, warStatesIn, unplacedShown, stateName, cannotPlace } from './places.mjs';
+import { oldCountry } from '../history/old-countries.js';
 import { deaths as shown, noun, count, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, beforeWarNote, wikipediaIntro } from './figures.mjs';
 import { sideOf as sideAt, periodSides, inRange, runText } from './sides.mjs';
 
@@ -54,15 +65,72 @@ const go = (module, url) => embedded ? `${SHELL}#/rs/${module}?at=${encodeURICom
 const motion = () => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
 
 // m: the month shown (the end of the period), f: the period's first month (0, the war's first, while the start rests).
-// picked: the state selected on the map whose sentence the panel repeats ({ gw, iso3 }: a dot's ISO3, as the Holy See has
-// no number); retro: the Retrospective Battlefield's data file, for the dots' first days and its years.
-const state = { index: null, borders: null, war: null, m: 0, f: 0, atRest: true, zoomK: 1, view: 'map', picked: null, retro: null, dotsShown: 0 };
+// picked: the state selected on the map whose sentence the panel repeats ({ q }, a Q-id, a dot's too).
+// bindex: the borders' spans (data/borders/index.json); places: the Battlefield's places.json; small: Natural Earth's
+// points by Q-id; year: the year whose borders `features` holds.
+const state = { index: null, bindex: null, places: null, small: new Map(), war: null, m: 0, f: 0, atRest: true, zoomK: 1, view: 'map', picked: null, dotsShown: 0, year: null };
 let svg, g, gDotSea, gStates, gDots, gLabels, gCells, gBattles, path, projection, zoom, features = [], focusView = null, focusFit = null;
-const hits = { gws: new Set(), qids: new Set() }; // what Documentary mode is discussing: states (GW codes) and battles (QIDs)
+// What Documentary mode is discussing: states and battles (Q-ids); listed: states it names the map cannot place.
+const hits = { qs: new Set(), qids: new Set(), listed: new Set() };
+
+/* ---------------------------------------------------------------- borders */
+// A span's file, decoded and wound for d3 once (design/prp-map.js, prp-map-d3.js), and a year's shapes from it: each
+// drawn row under its place's Q-id, or `row:<id>` where the crosswalk holds no place for it.
+const spans = new Map(), years = new Map();
+const bordersTo = () => state.bindex.to;
+const yearOfMonth = m => borderYear(m, bordersTo());
+function spanFile(file) {
+  if (!spans.has(file)) spans.set(file, fetch(`data/borders/${file}`).then(r => { if (!r.ok) throw new Error(`${file}: ${r.status}`); return r.json(); }).then(t => PRPMapD3.rewind(PRPMap.decode(t), d3)));
+  return spans.get(file);
+}
+function loadYear(y) {
+  if (!years.has(y)) {
+    const s = spanOf(state.bindex, y);
+    years.set(y, s ? spanFile(s.file).then(fc => PRPMap.sliceAt(fc, y).filter(drawnRow).map(f => ({ type: 'Feature', geometry: f.geometry,
+      properties: { key: rowPlace(state.places.rows, f.id, y) || `row:${f.id}`, row: f.properties.n, id: f.id } }))) : Promise.resolve([]));
+  }
+  return years.get(y);
+}
+// The year's shapes for the war: polygons its file leaves uncoloured (lands[year].left, scripts/lands.mjs) become a
+// shape keyed left:<row id>, drawn first, in no side's colour, never picked.
+function warFeatures(fs, ly) {
+  const left = new Map((state.war?.lands?.[ly]?.left || []).map(([id, idx, q, ry]) => [id, { idx: new Set(idx), q, ry }]));
+  if (!left.size) return fs;
+  const own = [], cut = [];
+  for (const f of fs) {
+    const e = left.get(f.properties.id);
+    if (!e) { own.push(f); continue; }
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    const keep = polys.filter((_, i) => !e.idx.has(i)), out = polys.filter((_, i) => e.idx.has(i));
+    if (keep.length) own.push({ ...f, geometry: { type: 'MultiPolygon', coordinates: keep } });
+    if (out.length) cut.push({ type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: out },
+      properties: { key: `left:${f.properties.id}`, row: f.properties.row, id: `${f.properties.id}~left`, of: e.q, ry: e.ry, holder: f.properties.key } });
+  }
+  return [...cut, ...own];
+}
+const isLeft = key => key.startsWith('left:');
+function leftText(p, y = state.landsYear) {
+  const of = stateName(state.war.names, p.of, y);
+  return p.of === p.holder ? `Only a fragment of ${of} this year: left uncoloured` : `On ${of}’s land (its border of ${p.ry}): left uncoloured`;
+}
+// The places drawn in the year shown: its rows' (and, with the dots, placed()).
+const rowKeys = () => new Set(features.filter(f => !isLeft(f.properties.key)).map(f => f.properties.key));
+// A state's name in a year: Wikidata's (the war file's names, as the Battlefield names its places); one Wikidata dates
+// after that year is its Cliopatria row's name where a row holds it (the Republic of China in 1941, not today's
+// People's Republic), else "today's …" (places.mjs stateName).
+function nameIn(key, y = state.year) {
+  if (key.startsWith('row:')) return features.find(f => f.properties.key === key)?.properties.row || 'This polity';
+  const n = state.war?.names?.[key] || (state.places.places[key] ? { n: state.places.places[key].n, since: state.places.places[key].since } : null);
+  if (n && !(n.since > y)) return n.n;
+  const row = y === state.year ? featuresOf(key)[0]?.properties.row : null;
+  return row || (n ? stateName({ [key]: n }, key, y) : DOTS.find(d => d.q === key)?.name || key);
+}
+const featuresOf = key => features.filter(f => f.properties.key === key).sort((a, b) => d3.geoArea(b) - d3.geoArea(a));
+const areaOf = key => featuresOf(key).reduce((s, f) => s + d3.geoArea(f), 0);
 
 /* ---------------------------------------------------------------- side logic */
 // sides.mjs: a state's side at a date, and over a period every month between the handles (16 November 2026).
-const sideOf = (gw, date) => sideAt(state.war, gw, date);
+const sideOf = (q, date) => sideAt(state.war, q, date);
 // The months of the period shown, each with the date read for it (dateOf).
 const periodDates = () => { const out = []; for (let k = state.f; k <= state.m; k++) out.push({ m: state.war.months[k], d: dateOf(k) }); return out; };
 const dateOf = i => { const w = state.war, d = w.months[i] + '-15'; return d < w.start ? w.start : w.end && d > w.end ? w.end : d; };
@@ -81,7 +149,6 @@ function initMap() {
   $('#zoom-out').onclick = () => svg.transition().duration(motion()).call(zoom.scaleBy, 1 / 1.6);
   $('#zoom-reset').onclick = () => { clearFocus(); svg.transition().duration(motion()).call(zoom.transform, d3.zoomIdentity); };
   focusView = window.PRPFocus?.d3View({ svg, zoom, project: () => projection, maxScale: 8 });
-  features = topojson.feature(state.borders, state.borders.objects.borders).features;
   new ResizeObserver(() => state.war && fitProjection()).observe($('.map-wrap'));
 }
 function fitProjection() {
@@ -95,8 +162,10 @@ function fitProjection() {
     const xs = d3.range(9).map(k => x0 - px + (x1 - x0 + 2 * px) * k / 8);
     target = { type: 'MultiPoint', coordinates: [...xs.map(x => [x, Math.max(-85, y0 - py)]), ...xs.map(x => [x, Math.min(85, y1 + py)])] };
   } else {
-    const gws = new Set([...w.theatre, ...w.sides.a.states.map(s => s.gw), ...w.sides.b.states.map(s => s.gw)]), d = dateOf(0);
-    target = { type: 'FeatureCollection', features: features.filter(f => gws.has(f.properties.gw) && f.properties.s <= d && f.properties.e >= d) };
+    // The war's states on the borders of its first month (loadWar loads that year first); none drawn, the world.
+    const qs = new Set([...w.theatre, ...w.sides.a.states.map(s => s.q), ...w.sides.b.states.map(s => s.q)]);
+    const fs = (w.firstShapes || []).filter(f => qs.has(f.properties.key));
+    target = fs.length ? { type: 'FeatureCollection', features: fs } : { type: 'Sphere' };
   }
   projection = d3.geoNaturalEarth1().fitExtent([[16, 16], [W - 16, H - 16]], target);
   path = d3.geoPath(projection);
@@ -128,15 +197,11 @@ function sizeMarks() {
 const DOT_R = 3.2, DOT_EDGE = 2, DOT_HIT = 13;
 
 /* ---------------------------------------------------------------- every state drawn (AC-5) */
-// The states CShapes 2.0 has no border for, as the map kit's dots, each with the Gleditsch–Ward number and first day in
-// War Focus's own table (dots.mjs, with their sources; until 20 November 2026 the Retrospective Battlefield's wars.json): a dot is drawn from that day (null: a state before 1926), so a war before it does not draw it.
-// A first day Wikidata gives only to its year (Tonga's 1970) is not known within that year, so the dot is drawn from the
-// next year's first month, never before the state was one (the Retrospective, which works by year, draws it that year).
+// 22 small states as dots at Natural Earth's points, each with its Q-id and first day in War Focus's own table
+// (dots.mjs, with their sources): a dot is drawn from that day (null: a state before 1926), so a war before it does not
+// draw it, and only in a year no Cliopatria row holds it (Andorra has a row to 1937). Vanuatu has no point, so no dot.
 let DOTS = [];
-const dotFrom = d => (d.from.length === 4 ? String(+d.from + 1) : d.from);
-const dotsOn = date => DOTS.filter(d => d.from == null || dotFrom(d) <= date);
-// The states in a war at some time: on a side, wholly occupied or contested.
-const warStates = w => [...w.sides.a.states, ...w.sides.b.states, ...(w.control || [])].map(s => s.gw).concat(w.theatre || []);
+const dotsOn = date => DOTS.filter(d => dotOn(d, date, rowKeys()));
 // Which states are in any of War Focus's wars. data/index.json does not list a war's states, so each war's file is read,
 // once, the first time a state in no part of the war shown is pointed at or selected; until then, or if a file cannot
 // be read (it is not asked again), such a state reads "not on either side of this war", which is true either way.
@@ -149,12 +214,12 @@ async function loadInAny() {
   const next = async () => {
     for (let id; (id = queue.shift());) {
       const w = id === state.war?.id ? state.war : await fetch(`data/wars/${id}.json`).then(r => { if (!r.ok) throw new Error(`${id}: ${r.status}`); return r.json(); });
-      for (const gw of warStates(w)) set.add(gw);
+      for (const q of warStates(w)) set.add(q);
     }
   };
   try { await Promise.all([next(), next(), next(), next()]); } catch { return; }
   inAny.set = set;
-  if (lastNote && !$('#tooltip').hidden) { const n = stateNote(lastNote.gw, lastNote.name); if (n) tip(lastNote.at, `<strong>${esc(n.text)}</strong>`, true); }
+  if (lastNote && !$('#tooltip').hidden) { const n = stateNote(lastNote.q, lastNote.name); if (n) tip(lastNote.at, `<strong>${esc(n.text)}</strong>`, true); }
   if (state.picked && state.war) renderPanel();
 }
 // A state in no part of the war shown (never on a side, occupied or contested in it): the kit's sentence, as
@@ -163,38 +228,81 @@ async function loadInAny() {
 // state in the war at another time but on no side in the months shown (the United States in September 1939): "not on
 // either side of this war in September 1939" (over a period, "between <first month> and <last month>"). null for a
 // state on a side in the months shown (its side, or the months it held one, are shown as before) or with no kit.
-function stateNote(gw, name) {
+function stateNote(q, name) {
   const w = state.war;
   if (!w || !window.PRPMapkit) return null;
-  const reason = PRPMapkit.REASONS.NEITHER_SIDE, r = state.retro;
-  if (gw != null && w.gws.has(gw)) {
+  const reason = PRPMapkit.REASONS.NEITHER_SIDE, r = state.index?.battlefield;
+  if (w.qs.has(q)) {
     const p = isPeriod(), a = w.months[state.f], z = w.months[state.m];
-    if (p ? periodSides(w, [gw], periodDates()).get(gw).runs.length : sideOf(gw, dateOf(state.m))) return null;
+    if (p ? periodSides(w, [q], periodDates()).get(q).runs.length : sideOf(q, dateOf(state.m))) return null;
     return PRPMapkit.sentenceParts({ name, reason, war: `this war ${p && a !== z ? `between ${monthLabel(a)} and ${monthLabel(z)}` : `in ${monthLabel(z)}`}` });
   }
   if (!inAny.set) loadInAny();
-  if (!inAny.set || (gw != null && inAny.set.has(gw))) return PRPMapkit.sentenceParts({ name, reason });
+  // A polity the crosswalk holds no place for (row:<id>) is in none of the wars' lists of states either.
+  if (!inAny.set || inAny.set.has(q)) return PRPMapkit.sentenceParts({ name, reason });
   return PRPMapkit.sentenceParts({ name, reason, wars: `War Focus’s ${state.index.wars.length} major wars`,
-    also: r?.ucdpFrom ? `Its armed conflicts since ${r.ucdpFrom}, if any, are in the Retrospective Battlefield` : '' });
+    also: r?.ucdpFrom && /^Q\d+$/.test(q) ? `Its armed conflicts since ${r.ucdpFrom}, if any, are in the Retrospective Battlefield` : '' });
 }
 // The panel's copy of the selected state's sentence, while it is drawn on the date shown and still on no side in the
-// months shown; "Retrospective Battlefield" links to that state there over the years since 1946.
+// months shown; "Retrospective Battlefield" links to that state there (c=<Q-id>) over the years since 1946.
 function pickedNote(date) {
   const k = state.picked; if (!k) return '';
-  const d = k.iso3 ? dotsOn(date).find(x => x.iso3 === k.iso3) : null, f = k.iso3 ? null : featureAt(k.gw, date);
+  const d = dotsOn(date).find(x => x.q === k.q), f = featuresOf(k.q)[0];
   if (!d && !f) return '';
-  const n = stateNote(k.gw, d ? d.name : displayName(k.gw, f.properties.name, date)); if (!n) return '';
-  const r = state.retro, why = esc(n.why);
-  const link = r?.ucdpFrom && r.lastYear && /Retrospective Battlefield/.test(n.why)
-    ? `<a href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${r.lastYear}&f=${r.ucdpFrom}&c=${k.gw ?? k.iso3}`))}" target="${embedded ? '_top' : '_self'}">Retrospective Battlefield</a>` : '';
+  const n = stateNote(k.q, nameIn(k.q)); if (!n) return '';
+  const r = state.index?.battlefield, why = esc(n.why);
+  const link = r?.ucdpFrom && r.lastYear && /^Q\d+$/.test(k.q) && /Retrospective Battlefield/.test(n.why)
+    ? `<a href="${esc(go('battlefield-history', `battlefield/history/index.html#y=${r.lastYear}&f=${r.ucdpFrom}&c=${k.q}`))}" target="${embedded ? '_top' : '_self'}">Retrospective Battlefield</a>` : '';
   return `<div class="nodata-note" role="note"><button type="button" class="close" aria-label="Close">×</button><p><b>${esc(n.head)}</b>${why ? ` ${link ? why.replace('Retrospective Battlefield', link) : why}` : ''}</p></div>`;
 }
-// Selecting a state or a dot: its sentence in the panel, or none for a state on a side in the months shown.
-function pick(gw, iso3 = null) {
-  const date = dateOf(state.m), d = iso3 ? dotsOn(date).find(x => x.iso3 === iso3) : null, f = iso3 ? null : featureAt(gw, date);
-  const name = d ? d.name : f ? displayName(gw, f.properties.name, date) : '';
-  state.picked = name && stateNote(gw, name) ? { gw, iso3 } : null;
+// Selecting a state or a dot (its Q-id, or row:<id> for a polity VM holds no place for): its sentence in the panel, or
+// none for a state on a side in the months shown.
+function pick(q) {
+  const date = dateOf(state.m), drawn = dotsOn(date).some(x => x.q === q) || featuresOf(q).length;
+  state.picked = drawn && stateNote(q, nameIn(q)) ? { q } : null;
   renderPanel();
+}
+// The war's states VM cannot place in the months shown (places.mjs unplacedShown, from the war file's `unplaced`): one
+// sentence, each state in its side's colour where it has one, said under the map, above each table and in the panel.
+// Grouped in words by what each state is that month; "counted" only of those in a side's list (statesOn).
+function unplacedHtml() {
+  const w = state.war; if (!w) return '';
+  const a = dateOf(isPeriod() ? state.f : state.m), z = dateOf(state.m), rows = unplacedShown(w, isPeriod() ? a : z, z);
+  if (!rows.length) return '';
+  // Its side in the month shown, else the side it last held in the period (sides.mjs), else none.
+  const look = q => sideOf(q, z) || (isPeriod() ? periodSides(w, [q], periodDates()).get(q)?.held : '') || '';
+  const ORDER = ['side-a', 'side-b', 'occ-a', 'occ-b', 'theatre', ''];
+  const group = s => ({ 'side-a': w.sides.a.label, 'side-b': w.sides.b.label, 'occ-a': `held by ${w.sides.a.label}`, 'occ-b': `held by ${w.sides.b.label}`, theatre: 'contested' }[s]
+    || `on no side in ${monthLabel(w.months[state.m])}`);
+  const item = (q, y) => { const s = look(q); return `<span class="up-state${s ? ` ${s}` : ''}" data-q="${esc(q)}">${esc(stateName(w.names, q, y))}</span>`; };
+  const groups = (qs, y) => ORDER.map(s => [s, qs.filter(q => look(q) === s)]).filter(([, g]) => g.length).map(([s, g]) => `${esc(group(s))} (${g.map(q => item(q, y)).join(', ')})`);
+  const when = rows.length === 1 ? String(rows[0][0]) : `${rows[0][0]}–${rows.at(-1)[0]}`;
+  const list = rows.length === 1 ? groups(rows[0][1], rows[0][0]).join('; ') : rows.map(([y, qs]) => `<span class="up-year">${y}:</span> ${groups(qs, y).join(', ')}`).join('; ');
+  const all = [...new Set(rows.flatMap(([, qs]) => qs))];
+  const counted = all.filter(q => ['a', 'b'].some(s => w.sides[s].states.some(x => x.q === q && inRange(z, x.from, x.to))));
+  const close = !counted.length ? '' : counted.length < all.length ? ' Those in a side’s list are still counted with it.' : all.length === 1 ? ' It is still counted with its side.' : ' Each is still counted with its side.';
+  return `<b>${esc(cannotPlace(all.length === 1 ? 'this state' : 'these states', when))}:</b> ${list}.${close}`;
+}
+// The war's states a quarter or more joined into another state's shape that year (lands[year].inside).
+function insideHtml() {
+  const w = state.war, y = state.landsYear; if (!w || y == null) return '';
+  const on = warStatesIn(w, `${y}-01-01`, `${y}-12-31`), list = (w.lands?.[y]?.inside || []).filter(([q]) => on.has(q));
+  if (!list.length) return '';
+  const holder = (key, id) => features.find(f => f.properties.id === id)?.properties.row || nameIn(key);
+  const items = list.map(([q, key, id]) => `<span class="up-state" data-q="${esc(q)}">${esc(stateName(w.names, q, y))}</span> (inside ${esc(holder(key, id))})`);
+  const one = new Set(list.map(([q]) => q)).size === 1;
+  return `<b>${one ? 'Part of this state lies' : 'Part of each of these states lies'} inside another state’s shape on Cliopatria’s border for ${y}:</b> ${items.join(', ')}. VM cannot draw ${one ? 'it' : 'them'} apart.`;
+}
+function renderUnplaced() {
+  const w = state.war, html = [unplacedHtml(), insideHtml()].filter(Boolean).join(' ');
+  // The map's note keeps its height while any year of the war has a line, so the map does not jump.
+  const reserve = !!w && (Object.keys(w.unplaced || {}).length > 0 || Object.values(w.lands || {}).some(e => e.inside?.length));
+  for (const el of document.querySelectorAll('.unplaced')) {
+    const map = el.classList.contains('map-unplaced');
+    el.hidden = !html && !(map && reserve); el.classList.toggle('reserve', map && reserve);
+    el.innerHTML = html || (map && reserve ? 'All of this month’s states are on the map.' : '');
+  }
+  markListed(false);
 }
 // A clash circle's radius from its deaths (over a period, its deaths a month, so a long period stays legible).
 const cellR = deaths => Math.min(22, 2 + Math.sqrt(deaths) * 0.9);
@@ -221,56 +329,67 @@ function periodDeaths() {
   return { deaths, est };
 }
 
+// The year whose borders the month shown is drawn on; its shapes load first (one span file for several years), and
+// a later month asked for meanwhile wins.
+let drawSeq = 0;
 function draw(full) {
-  const w = state.war, i = state.m, m = w.months[i], date = dateOf(i), p = isPeriod(), a = w.months[state.f], startDate = dateOf(state.f);
-  // States as they stood that month, coloured by side or occupation; over a period, outlined where that changed since
-  // its first month.
-  const live = features.filter(f => f.properties.s <= date && f.properties.e >= date);
+  const mo = state.war.months[state.m], y = yearOfMonth(mo), ly = +mo.slice(0, 4), seq = ++drawSeq;
+  if (state.year === y && state.landsYear === ly) return drawNow(full);
+  loadYear(y).then(fs => { if (seq !== drawSeq || !state.war) return; features = warFeatures(fs, ly); state.year = y; state.landsYear = ly; drawNow(full); })
+    .catch(e => { $('#status').textContent = 'The borders could not load: ' + e.message; });
+}
+function drawNow(full) {
+  const w = state.war, i = state.m, m = w.months[i], date = dateOf(i), p = isPeriod(), a = w.months[state.f];
+  // Every polity of the year (Cliopatria's rows), coloured by side or occupation; over a period, outlined where that
+  // changed since its first month.
+  const live = features;
   const prevDate = i ? dateOf(i - 1) : null;
   // Over a period, every month between the handles (sides.mjs periodSides): a state is coloured by its side in the last
   // month; one on a side only earlier in the period is drawn faded with a broken outline in the side it last held; a
-  // change of side or occupation at any month is outlined. Borders are the last month's.
+  // change of side or occupation at any month is outlined. Borders are the last month's year's.
   const dotsNow = dotsOn(date);
-  const ps = p ? periodSides(w, [...new Set([...live.map(f => f.properties.gw), ...dotsNow.map(d => d.gw).filter(x => x != null)])], periodDates()) : null;
-  const look = gw => { const s = sideOf(gw, date), x = ps?.get(gw); return { s, cls: s || (x?.earlier ? `${x.held} earlier` : ''), changed: !!x?.changed, runs: x?.runs || [] }; };
-  state.changed = p ? live.filter(f => look(f.properties.gw).changed).length : 0; // for the legend
-  state.earlier = p ? live.filter(f => ps.get(f.properties.gw)?.earlier).length : 0;
-  gStates.selectAll('path').data(live, f => f.properties.gw + f.properties.s).join('path')
+  const ps = p ? periodSides(w, [...new Set([...live.map(f => f.properties.key), ...dotsNow.map(d => d.q)])], periodDates()) : null;
+  const look = q => { const s = sideOf(q, date), x = ps?.get(q); return { s, cls: s || (x?.earlier ? `${x.held} earlier` : ''), changed: !!x?.changed, runs: x?.runs || [] }; };
+  state.changed = p ? live.filter(f => look(f.properties.key).changed).length : 0; // for the legend
+  state.earlier = p ? live.filter(f => ps.get(f.properties.key)?.earlier).length : 0;
+  gStates.selectAll('path').data(live, f => f.properties.id).join('path')
     .attr('d', path)
-    .attr('class', f => { const gw = f.properties.gw, l = look(gw); const was = prevDate ? sideOf(gw, prevDate) : l.s; return `state ${l.cls}${!full && l.s !== was ? ' joined' : ''}${l.changed ? ' changed' : ''}${hits.gws.has(gw) ? ' prp-focus-hit' : ''}`; })
-    .on('mousemove', (e, f) => point(e, f.properties.gw, displayName(f.properties.gw, f.properties.name, date)))
+    .attr('data-key', f => f.properties.key)
+    .attr('class', f => { const q = f.properties.key; if (isLeft(q)) return 'state left'; const l = look(q); const was = prevDate ? sideOf(q, prevDate) : l.s; return `state ${l.cls}${!full && l.s !== was ? ' joined' : ''}${l.changed ? ' changed' : ''}${hits.qs.has(q) ? ' prp-focus-hit' : ''}`; })
+    .on('mousemove', (e, f) => (isLeft(f.properties.key) ? tip(e, `<strong>${esc(f.properties.row)}</strong><br>${esc(leftText(f.properties))}`) : point(e, f.properties.key, nameIn(f.properties.key))))
     .on('mouseleave', hideTip)
-    .on('click', (e, f) => pick(f.properties.gw));
+    .on('click', (e, f) => { if (!isLeft(f.properties.key)) pick(f.properties.key); });
   // Pointing at a state or a dot: its side; a state on no side in the months shown, its sentence (stateNote).
-  function point(e, gw, name) {
-    const l = look(gw), note = l.s || l.runs.length ? null : stateNote(gw, name);
-    if (note) { tip(e, `<strong>${esc(note.text)}</strong>`, true); lastNote = { at: { clientX: e.clientX, clientY: e.clientY }, gw, name }; return; }
+  function point(e, q, name) {
+    const l = look(q), note = l.s || l.runs.length ? null : stateNote(q, name);
+    if (note) { tip(e, `<strong>${esc(note.text)}</strong>`, true); lastNote = { at: { clientX: e.clientX, clientY: e.clientY }, q, name }; return; }
     // Over a period, each side it held and when, month by month (a state on none of them in the last month says so).
     const when = p && (l.changed || !l.s) && l.runs.length ? `<span class="tip-when">${l.runs.map(r => `${esc(cap(sideWord(r.side)))}: ${esc(runText(r))}`).join('<br>')}</span>` : '';
     tip(e, `<strong>${esc(name)}</strong>${l.s ? sideText(l.s) : l.runs.length ? `<br>Not at war in ${esc(monthLabel(m))}` : ''}${when}`);
   }
-  // The states CShapes has no border for, as dots from their first day: coloured by side like any state, with a clear
-  // target round each (focus.css).
+  // The small states no row holds, as dots from their first day: coloured by side like any state, with a clear target
+  // round each (focus.css).
   state.dotsShown = dotsNow.length;
   const dots = gDots.selectAll('g.dot').data(dotsNow, d => d.iso3).join(enter => {
-    const one = enter.append('g').attr('class', 'dot').attr('data-iso3', d => d.iso3);
+    const one = enter.append('g').attr('class', 'dot').attr('data-iso3', d => d.iso3).attr('data-key', d => d.q);
     one.append('circle').attr('class', 'dot-hit');
     one.append('circle').attr('class', 'dot-mark');
     return one;
   }).attr('transform', d => `translate(${projection(d.lonlat)})`)
-    .on('mousemove', (e, d) => point(e, d.gw, d.name))
+    .on('mousemove', (e, d) => point(e, d.q, d.name))
     .on('mouseleave', hideTip)
-    .on('click', (e, d) => pick(d.gw, d.iso3));
-  dots.select('.dot-mark').attr('class', d => { const l = look(d.gw); return `state dot-mark ${l.cls}${l.changed ? ' changed' : ''}`; });
+    .on('click', (e, d) => pick(d.q));
+  dots.select('.dot-mark').attr('class', d => { const l = look(d.q); return `state dot-mark ${l.cls}${l.changed ? ' changed' : ''}`; });
   gDotSea.selectAll('circle.dot-sea').data(dotsNow, d => d.iso3).join('circle').attr('class', 'dot-sea').attr('data-iso3', d => d.iso3)
     .attr('cx', d => projection(d.lonlat)[0]).attr('cy', d => projection(d.lonlat)[1])
-    .on('mousemove', (e, d) => point(e, d.gw, d.name))
+    .on('mousemove', (e, d) => point(e, d.q, d.name))
     .on('mouseleave', hideTip)
-    .on('click', (e, d) => pick(d.gw, d.iso3));
-  // Labels for the states taking part.
-  const named = live.filter(f => sideOf(f.properties.gw, date) && path.area(f) > 900);
-  gLabels.selectAll('text').data(named, f => f.properties.gw).join('text').attr('class', 'state-label')
-    .attr('transform', f => `translate(${path.centroid(f)})`).text(f => displayName(f.properties.gw, f.properties.name, date));
+    .on('click', (e, d) => pick(d.q));
+  // Labels for the states taking part: one for each state, on its largest row.
+  const seen = new Set(), named = [];
+  for (const f of [...live].filter(f => sideOf(f.properties.key, date) && path.area(f) > 900).sort((x, z) => path.area(z) - path.area(x))) if (!seen.has(f.properties.key)) { seen.add(f.properties.key); named.push(f); }
+  gLabels.selectAll('text').data(named, f => f.properties.id).join('text').attr('class', 'state-label')
+    .attr('transform', f => `translate(${path.centroid(f)})`).text(f => nameIn(f.properties.key));
   // UCDP events: this month, plus the two before it faded; over a period, grouped by place across its months (deaths
   // and clashes summed), the places active in its last month bright and drawn last. [lat, lon, deaths, clashes, now, r]
   let cells = [];
@@ -301,7 +420,7 @@ function draw(full) {
   gBattles.selectAll('circle.battle').filter(isNow).raise();
   raiseHits();
   sizeMarks();
-  renderCounters(); renderPanel(); renderLegend(); renderCaption(); renderTables();
+  renderCounters(); renderPanel(); renderLegend(); renderCaption(); renderTables(); renderUnplaced();
 }
 function sideText(s) {
   const w = state.war;
@@ -329,26 +448,49 @@ function hideTip() { $('#tooltip').hidden = true; lastNote = null; }
 /* ---------------------------------------------------------------- documentary focus (design/prp-focus.js) */
 // When the reader talks about states or battles, they are outlined in the module accent (drawn over their neighbours)
 // and the map eases to fit them all; ⟲ or the end of the reading brings back the whole theatre.
-const featureAt = (gw, date) => features.find(f => f.properties.gw === gw && f.properties.s <= date && f.properties.e >= date);
+// A country named by Documentary mode or Kino (design/prp-focus.js): a Q-id; an old gw:<number> (written before 21
+// November 2026), read as its place in the year shown through places.json's oldCountries (the Soviet Union to 1991,
+// then Russia), else through its ISO3; or an ISO3, through the places' ISO3. The state's shapes that year, or its dot.
+function keyFor(id) {
+  if (/^Q\d+$/.test(id)) return id;
+  const byIso = iso3 => (iso3 ? Object.entries(state.places.places).find(([, p]) => p.iso3 === iso3)?.[0] || DOTS.find(d => d.iso3 === iso3)?.q || null : null);
+  if (/^gw:\d+$/.test(id)) return oldCountry(state.places.oldCountries, state.places.places, id.slice(3), state.year) || byIso(PRPFocus.iso3OfGw?.(+id.slice(3)));
+  if (/^[A-Z]{3}$/.test(id)) return byIso(id);
+  return null;
+}
+function shapesFor(q) {
+  const fs = featuresOf(q); if (fs.length) return fs;
+  const d = dotsOn(dateOf(state.m)).find(x => x.q === q);
+  return d ? [...d.lonlat] : null;
+}
 function raiseHits() { gStates.selectAll('path.prp-focus-hit').raise(); gBattles.selectAll('circle.prp-focus-hit').raise(); }
 function paintHits() {
   if (!gStates) return;
-  gStates.selectAll('path.state').classed('prp-focus-hit', f => hits.gws.has(f.properties.gw));
+  gStates.selectAll('path.state').classed('prp-focus-hit', f => hits.qs.has(f.properties.key));
   gBattles.selectAll('circle.battle').classed('prp-focus-hit', b => hits.qids.has(b.q));
   raiseHits();
 }
-function clearFocus() { hits.gws.clear(); hits.qids.clear(); focusFit = null; paintHits(); }
+function clearFocus() { hits.qs.clear(); hits.qids.clear(); hits.listed.clear(); focusFit = null; paintHits(); markListed(false); }
+// A state named that the map cannot place: marked in the lines listing it, the map's note scrolled to it.
+function markListed(scroll = true) {
+  for (const el of document.querySelectorAll('.unplaced .up-state')) el.classList.toggle('prp-focus-hit', hits.listed.has(el.dataset.q));
+  const el = scroll && document.querySelector('.map-unplaced .up-state.prp-focus-hit'), box = el && el.closest('.map-unplaced');
+  if (el && box) box.scrollTop = Math.max(0, el.offsetTop - box.offsetTop - 4);
+}
 window.PRPFocus?.listen({
   focus(t) {
     const w = state.war; if (!w || !projection || !focusView) return;
-    const date = dateOf(state.m), gws = new Set(), qids = new Set();
+    const qs = new Set(), qids = new Set(), listed = new Set();
+    const state_ = id => { const q = keyFor(id), s = q ? shapesFor(q) : null; if (s) qs.add(q); else if (q && w.qs.has(q)) listed.add(q); return s; };
     const r = PRPFocus.resolve(t, {
-      country: id => { const gw = /^gw:\d+$/.test(id) ? +id.slice(3) : PRPFocus.gwOf(id), f = gw == null ? null : featureAt(gw, date); if (f) gws.add(gw); return f; },
-      qid: q => { const b = w.battles.find(x => x.q === q && x.lat != null); if (b) { qids.add(q); return [b.lon, b.lat]; } return q === w.qid ? w.bbox : null; },
+      country: state_,
+      // A Q-id is a battle of the war, a state on the map, or the war itself.
+      qid: q => { const b = w.battles.find(x => x.q === q && x.lat != null); if (b) { qids.add(q); return [b.lon, b.lat]; } const s = state_(q); if (s) return s; return q === w.qid ? w.bbox : null; },
       minSpan: 5,
     });
+    hits.listed = listed; markListed();
     if (!r.box) return;
-    hits.gws = gws; hits.qids = qids; paintHits();
+    hits.qs = qs; hits.qids = qids; paintHits();
     focusFit = [r.box, r.padding];
     focusView.fit(...focusFit);
   },
@@ -397,19 +539,26 @@ function renderLegend() {
   if (w.sides.b.states.length) items.push(`<li><span class="swatch" style="background:var(--side-b)"></span>${esc(w.sides.b.label)}</li>`);
   if (w.control.length) items.push('<li><span class="swatch hatch"></span>Occupied (whole country)</li>');
   if (w.theatre.length) items.push('<li><span class="swatch" style="background:var(--contested)"></span>Contested (civil war)</li>');
+  if (features.some(f => isLeft(f.properties.key))) items.push('<li><span class="swatch left"></span>Left uncoloured (another’s land, or a fragment)</li>');
   if (p && state.earlier) items.push('<li><span class="swatch earlier"></span>On a side earlier in the period, not in its last month</li>');
   if (p && state.changed) items.push('<li><span class="swatch changed"></span>Side or occupation changed during the period</li>');
   if (w.battles.some(b => b.lat != null)) items.push(p
     ? `<li><span class="swatch dot b-now"></span>Battle under way in ${esc(m)}</li><li><span class="swatch dot b-in"></span>Battle in the period</li><li><span class="swatch dot b-past"></span>Earlier battle</li>`
     : '<li><span class="swatch dot b-now"></span>Battle this month</li><li><span class="swatch dot b-past"></span>Earlier battle</li>');
   if (w.events) items.push(`<li><span class="swatch dot clash"></span>Recorded clashes (UCDP)${p ? ', by place' : ''}</li>`);
-  if (state.dotsShown) items.push('<li><span class="swatch dot no-border"></span>A state with no border in CShapes 2.0, as a dot</li>');
+  if (state.dotsShown) items.push('<li><span class="swatch dot no-border"></span>A small state no border holds, as a dot (Natural Earth)</li>');
   $('#legend').innerHTML = `<h4>${esc(periodLabel())}</h4><ul>${items.join('')}</ul>`;
+}
+// Beside the map, what its borders can and cannot show (as the Retrospective Battlefield says it): one border a year,
+// so no change within a year, and after 2024 the last year Cliopatria holds.
+function bordersLine() {
+  const y = +state.war.months[state.m].slice(0, 4), b = yearOfMonth(state.war.months[state.m]);
+  return ` Borders: Cliopatria’s for ${b}, one border a year: the map cannot show a border that changed within a year.${y > b ? ` Cliopatria’s borders end in ${b}, so ${y} is drawn on ${b}’s.` : ''}`;
 }
 function renderCaption() {
   const w = state.war, m = monthLabel(w.months[state.m]);
-  if (!isPeriod()) { $('#caption').textContent = `${w.name}, ${m}: the states at war coloured by side (${w.sides.a.label} blue, ${w.sides.b.label} red) on the borders of the day${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}; battles under way are ringed${w.events ? ', UCDP clashes in red' : ''}.`; return; }
-  $('#caption').textContent = `${w.name}, ${periodLabel()}: the states at war coloured by their side in ${m} (${w.sides.a.label} blue, ${w.sides.b.label} red) on its borders${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}${state.earlier ? ', those on a side only earlier in the period faded with a broken outline in the side they last held' : ''}${state.changed ? ', and outlined where their side or occupation changed in any month of the period' : ''}; battles under way in the period are drawn full and those under way in ${m} ringed${w.events ? '; UCDP clashes of the period are grouped by place, in red, sized by deaths a month and faded where none fell in its last month' : ''}.`;
+  if (!isPeriod()) { $('#caption').textContent = `${w.name}, ${m}: the states at war coloured by side (${w.sides.a.label} blue, ${w.sides.b.label} red)${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}; battles under way are ringed${w.events ? ', UCDP clashes in red' : ''}.${bordersLine()}`; return; }
+  $('#caption').textContent = `${w.name}, ${periodLabel()}: the states at war coloured by their side in ${m} (${w.sides.a.label} blue, ${w.sides.b.label} red)${w.control.length ? ', hatched while wholly occupied' : ''}${w.theatre.length ? ', the contested state in amber' : ''}${state.earlier ? ', those on a side only earlier in the period faded with a broken outline in the side they last held' : ''}${state.changed ? ', and outlined where their side or occupation changed in any month of the period' : ''}; battles under way in the period are drawn full and those under way in ${m} ringed${w.events ? '; UCDP clashes of the period are grouped by place, in red, sized by deaths a month and faded where none fell in its last month' : ''}.${bordersLine()}`;
 }
 
 /* ---------------------------------------------------------------- panel */
@@ -447,12 +596,12 @@ function rankedItem(n, { under = false, few = 0 } = {}) {
   const inner = n.shown.length ? `<ul class="blist parts">${parts.map(p => rankedItem(p, { under: true, few })).join('')}${more ? `<li class="more-parts">and ${more} more ${noun(more, 'part')} with figures (See all)</li>` : ''}</ul>` : '';
   return battleItem(n.b, { under, inner });
 }
-// The states on a side that month, largest first, so the major powers lead the list.
+// The states on a side that month: those drawn, largest first, so the major powers lead the list; then those VM cannot
+// place that year (no row holds them), which keep their side and count.
 function statesOn(side, date) {
-  const found = state.war.sides[side].states.filter(s => inRange(date, s.from, s.to))
-    .map(s => features.find(f => f.properties.gw === s.gw && f.properties.s <= date && f.properties.e >= date)).filter(Boolean)
-    .sort((a, b) => d3.geoArea(b) - d3.geoArea(a));
-  return [...new Set(found.map(f => displayName(f.properties.gw, f.properties.name, date)))];
+  const qs = [...new Set(state.war.sides[side].states.filter(s => inRange(date, s.from, s.to)).map(s => s.q))];
+  const drawn = qs.filter(q => featuresOf(q).length).sort((a, b) => areaOf(b) - areaOf(a)), rest = qs.filter(q => !featuresOf(q).length);
+  return [...new Set([...drawn, ...rest].map(q => nameIn(q)))];
 }
 // Month by Month (monthly/data, design/prp-mark.js): the latest month's mark for an ongoing war, with its explanation,
 // in the panel when that month is shown; and every war's year strip above the Deaths by month table. VM's own
@@ -508,6 +657,7 @@ function renderPanel() {
     <h2><span data-qid="${esc(w.qid || '')}">${esc(w.name)}</span></h2>
     <p class="sub">${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'} · ${years ? `${years} yr${years > 1 ? 's' : ''} ` : ''}${months % 12 ? `${months % 12} mo` : ''}</p>
     <div class="sides" style="margin-top:10px">${sides}</div>
+    <p class="unplaced panel-unplaced" role="note"${unplacedHtml() ? '' : ' hidden'}>${unplacedHtml()}</p>
     <div class="stat-row">
       <div class="stat"><span>Deaths, whole war</span><b>${noFigure(w) ? '–' : shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>${noFigure(w) ? 'no free source gives a figure' : 'battle-related'}${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}${w.covered ? `, ${esc(monthLabel(w.covered[0]))} – ${esc(monthLabel(w.covered[1]))} only` : ''}</small></div>
       <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length + w.undated.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped${w.undated.length ? ` · ${num(w.undated.length)} undated` : ''} · <button type="button" class="fig-jump">figures for ${num(w.fig.figure)}</button></small></div>
@@ -529,7 +679,7 @@ function renderPanel() {
       ${(w.leftOut || []).map(x => `<b>Left out of this war:</b> ${esc(x.why)} (${esc(x.source)}: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a>).`).join(' ')}
       <b>Battle figures:</b> ${esc(FIGURE_METHOD)}
       <b>Wholes and their parts:</b> where Wikidata records an operation and its own parts and both are listed here (one part of the other, or the other among its parts), each death is counted once: the whole is shown as a heading over its parts, never ranked beside them, ranked by the figure recorded for the whole where there is one, else by the sum of its parts' recorded figures, and says which it is (where its parts' figures add up to more than the whole's own, that is said beside it); a figure Wikidata gives the whole that is one of its parts' own is left to that part, and a part of two wholes is counted under one of them, which its window names. A figure counted long after the event (the atomic bombings' registers of the dead, counted to 2013) gives the year it was counted, beside the share counted then: such a count can include people who died of their injuries in later years. On the map a whole is drawn only by what its figure has beyond its parts' marks. The count of battles and operations counts the whole and each part, as Wikidata lists them.
-      <b>Territory:</b> CShapes borders as they stood that month${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded as a whole' : ''}. Front lines are not drawn: no open data records them month by month.</p>`;
+      <b>Territory:</b> Cliopatria’s borders for the month’s year (v0.2.1, CC BY 4.0; one border a year, so a border that changed within a year cannot be shown; 2025 and 2026 on 2024’s), each state on the row Cliopatria draws it as${w.control.length ? ', with whole countries hatched while occupied' : ''}${w.theatre.length ? '; the contested state is shaded on its own row' : ''}. A state no row holds that year, or whose rows hold less than a tenth of its land in the nearest other years (a far-off fragment), is listed, never drawn on another shape. A polygon of another state’s row that lies half or more on a war state’s own land (its own border in the nearest year within twelve) is left uncoloured; where a quarter or more of a war state’s land is joined into another state’s shape, the line under the map names it. Front lines are not drawn: no open data records them month by month.</p>`;
   $('#panel').querySelectorAll('[data-b]').forEach(b => b.onclick = () => openBattle(battleOf(b.dataset.b)));
   $('#panel').querySelectorAll('[data-pop]').forEach(b => b.onclick = () => openPop(popouts.get(b.dataset.pop)));
   const shut = $('#panel .nodata-note .close'); if (shut) shut.onclick = () => { state.picked = null; renderPanel(); };
@@ -813,21 +963,22 @@ function battleLine(b) {
 function changes(i) {
   const w = state.war, d = dateOf(i), p = i ? dateOf(i - 1) : null;
   if (!p) return [];
-  const gws = new Set([...w.sides.a.states, ...w.sides.b.states].map(s => s.gw).concat(w.control.map(c => c.gw)));
-  const featAt = (gw, date) => features.find(f => f.properties.gw === gw && f.properties.s <= date && f.properties.e >= date);
+  // Every state that changes, drawn or not: one VM cannot place still joins, leaves or is occupied (named as the lists
+  // name it), and is told after the drawn ones, as it has no area on the map.
+  const qs = new Set([...w.sides.a.states, ...w.sides.b.states].map(s => s.q).concat(w.control.map(c => c.q)));
   const label = s => sideName(s === 'a' ? w.sides.a.label : w.sides.b.label);
   const events = [];
-  for (const gw of gws) {
-    const now = sideOf(gw, d), before = sideOf(gw, p), f = featAt(gw, d) || featAt(gw, p);
-    if (!f || now === before) continue;
-    const raw = plainName(displayName(gw, f.properties.name, d)), name = cap(the(raw));
+  for (const q of qs) {
+    const now = sideOf(q, d), before = sideOf(q, p);
+    if (now === before) continue;
+    const raw = plainName(nameIn(q, +d.slice(0, 4))), name = cap(the(raw));
     let kind, text;
     if (now.startsWith('occ-')) { kind = 'occ'; text = `${name} is occupied by ${label(now.slice(4))}.`; }
     else if (before.startsWith('occ-')) { kind = 'free'; text = now ? `${name} is liberated.` : `The occupation of ${the(raw)} ends.`; }
     else if (now.startsWith('side-') && before.startsWith('side-')) { kind = 'switch'; text = `${name} changes sides, joining ${label(now.slice(5))}.`; }
     else if (now.startsWith('side-')) { kind = 'join' + now.slice(5); text = `${name} enters the war on the side of ${label(now.slice(5))}`; }
     else if (before.startsWith('side-')) { kind = 'leave'; text = `${name} leaves the war.`; }
-    if (kind) events.push({ kind, text, gw, area: d3.geoArea(f) });
+    if (kind) events.push({ kind, text, q, area: areaOf(q) });
   }
   // Largest countries first; when several join one side at once, name the two largest and count the rest. Each line
   // keeps the states it is about (all the joiners, counted or named), for the map.
@@ -835,20 +986,20 @@ function changes(i) {
   const out = [];
   for (const k of ['joina', 'joinb']) {
     const js = events.filter(e => e.kind === k);
-    if (js.length) out.push({ text: js[0].text + (js.length > 1 ? `, ${js.length > 2 ? `with ${js.length - 1} other states and territories` : `as does ${js[1].text.split(' enters')[0].replace(/^The /, 'the ')}`}.` : '.'), gws: js.map(e => e.gw) });
+    if (js.length) out.push({ text: js[0].text + (js.length > 1 ? `, ${js.length > 2 ? `with ${js.length - 1} other states and territories` : `as does ${js[1].text.split(' enters')[0].replace(/^The /, 'the ')}`}.` : '.'), qs: js.map(e => e.q) });
   }
-  out.push(...events.filter(e => !e.kind.startsWith('join')).slice(0, 4).map(e => ({ text: e.text, gws: [e.gw] })));
+  out.push(...events.filter(e => !e.kind.startsWith('join')).slice(0, 4).map(e => ({ text: e.text, qs: [e.q] })));
   return out;
 }
 // A month as told, and where it happens: the states that join, leave or change hands, the battles that begin or end,
 // and the deadliest clash (the month's deadliest UCDP cell). A month with none of these shows the whole theatre.
 function monthStory(i) {
-  const w = state.war, m = w.months[i], parts = [monthLabel(m) + '.'], gws = [], qids = [], points = [];
+  const w = state.war, m = w.months[i], parts = [monthLabel(m) + '.'], told = [], qids = [], points = [];
   if (i === 0) {
     const a = statesOn('a', dateOf(0)), b = statesOn('b', dateOf(0));
     if (a.length || b.length) parts.push(`On one side, ${a.length ? listNames(a.slice(0, 5)) : w.sides.a.label}; on the other, ${b.length ? listNames(b.slice(0, 5)) : w.sides.b.label}.`);
   }
-  for (const c of changes(i).slice(0, 4)) { parts.push(c.text); gws.push(...c.gws); }
+  for (const c of changes(i).slice(0, 4)) { parts.push(c.text); told.push(...c.qs); }
   // A whole and its parts that begin (or end) in the same month are told once, as the whole; a toll is the whole's,
   // each death counted once (figures.mjs).
   const once = list => { const q = new Set(list.map(b => b.q)); return list.filter(b => { for (let u = nodeOf(b)?.up, k = 0; u && k < 40; u = u.up, k++) if (q.has(u.b.q)) return false; return true; }); };
@@ -867,7 +1018,8 @@ function monthStory(i) {
     if (cell) points.push([cell[1], cell[0]]);
   }
   if (parts.length === 1) parts.push('The fighting continues.');
-  const focus = gws.length || qids.length || points.length ? { countries: [...new Set(gws)].map(gw => `gw:${gw}`), qids, points, padding: 48 } : { reset: true };
+  // The states told of go as Q-ids, with the battles' (the page's focus reads a Q-id as a battle or a state).
+  const focus = told.length || qids.length || points.length ? { qids: [...new Set(told), ...qids], points, padding: 48 } : { reset: true };
   return { text: parts.join(' '), focus };
 }
 window.jdpiDocumentary = {
@@ -917,8 +1069,8 @@ async function loadWar(id, month, from = null) {
   w.fig = completeness([...w.battles, ...w.undated], w.groups); // how complete its battle figures are (BF-08)
   const onMap = (n, d = 0) => (d > 40 ? 0 : n.b.lat != null && n.b.s ? n.fig : n.parts.reduce((s, p) => s + onMap(p, d + 1), 0));
   for (const n of w.groups.byQ.values()) n.drawn = Math.max(0, n.fig - n.parts.reduce((s, p) => s + onMap(p, 1), 0));
-  w.gws = new Set(warStates(w)); // the states in this war at some time (stateNote)
-  state.war = w; state.picked = null; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
+  w.qs = warStates(w); // the states in this war at some time (stateNote)
+  state.war = w; state.picked = null; state.year = null; state.landsYear = null; cumulative = []; w.deaths.reduce((s, v, k) => (cumulative[k] = s + v), 0);
   estimatedTo = []; w.estimated.reduce((e, v, k) => (estimatedTo[k] = e || !!v), false);
   $('#war').value = id;
   // Ticks every few months or years, by the war's length; a month the war does not have opens at its second (below).
@@ -928,9 +1080,14 @@ async function loadWar(id, month, from = null) {
   // month apart, and the map shows the first two months; a war of one month opens on it.
   const to = w.months.includes(month) ? month : w.months[Math.min(1, w.months.length - 1)];
   fromPeriod(period.update({ stops: w.months, ticks, from: PRPPeriod.rules.readStart(w.months, from, to, 'first'), to }));
+  writeHash(); // the address names the month at once, not only once its year's borders have loaded
   $('#status').innerHTML = `<span><b>${esc(w.sides.a.label)}</b> v <b>${esc(w.sides.b.label)}</b></span><span>${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'}</span>${w.ongoing && w.dataThrough ? `<span>Data through <b>${esc(fmtDate(w.dataThrough))}</b></span>` : ''}<span><b>${state.index.wars.length}</b> major wars since 1926</span>`;
-  hits.gws.clear(); hits.qids.clear(); focusFit = null;
-  fitProjection(); writeHash();
+  hits.qs.clear(); hits.qids.clear(); hits.listed.clear(); focusFit = null;
+  // The borders of the war's first month frame a war with no bbox (fitProjection); any other loads one span.
+  const shown = loadYear(yearOfMonth(w.months[state.m]));
+  try { w.firstShapes = w.bbox ? [] : await loadYear(yearOfMonth(w.months[0])); await shown; } catch (e) { w.firstShapes = []; $('#status').textContent = 'The borders could not load: ' + e.message; }
+  if (state.war !== w) return; // another war was asked for meanwhile
+  fitProjection();
 }
 function readHash() { const p = new URLSearchParams(location.hash.slice(1)); return { war: p.get('war'), m: p.get('m'), f: p.get('f'), v: VIEWS.includes(p.get('v')) ? p.get('v') : 'map', move: PRPPeriod.rules.readMovement(p.get(PRPPeriod.MOVE_PARAM)) }; }
 // Another war loads; another month or period of the same war moves the timeline (no f: the start back at rest). The
@@ -947,12 +1104,15 @@ window.addEventListener('hashchange', () => {
 });
 
 { const a = $('#sibling'); a.href = go('battlefield-history', 'battlefield/history/index.html'); a.target = embedded ? '_top' : '_self'; }
-// The Retrospective Battlefield's data file gives its years, for the link; the dots' numbers and first days are
-// War Focus's own (dots.mjs).
-Promise.all([fetch('data/index.json').then(r => r.json()), fetch('../history/data/borders.topo.json').then(r => r.json()),
-  fetch('../history/data/wars.json').then(r => (r.ok ? r.json() : null)).catch(() => null)]).then(([idx, borders, retro]) => {
-  state.index = idx; state.borders = borders; state.retro = retro;
-  if (window.PRPMapkit) DOTS = PRPMapkit.dots('cshapes').filter(d => DOT_TABLE[d.iso3]).map(d => ({ iso3: d.iso3, name: d.name, lonlat: [...d.lonlat], gw: DOT_TABLE[d.iso3].gw, from: DOT_TABLE[d.iso3].from }));
+// War Focus's index (it carries the Retrospective Battlefield's years, for the link), the borders' spans, the
+// Battlefield's crosswalk and Natural Earth's points; the dots' Q-ids and first days are War Focus's own (dots.mjs),
+// each at Natural Earth's point for it, and one with no point is not drawn.
+const json = (url, what) => fetch(url).then(r => { if (!r.ok) throw new Error(`${what}: ${r.status}`); return r.json(); });
+Promise.all([json('data/index.json', 'the wars'), json('data/borders/index.json', 'the borders'), json('../history/data/places.json', 'the places'),
+  json('../../omni/data/base/small-states.json', 'the small states')]).then(([idx, bindex, places, small]) => {
+  state.index = idx; state.bindex = bindex; state.places = places;
+  for (const p of small.points || []) if (p.q && Array.isArray(p.at)) state.small.set(p.q, p);
+  DOTS = Object.entries(DOT_TABLE).flatMap(([iso3, d]) => { const p = state.small.get(d.q); return p ? [{ iso3, q: d.q, name: p.n, lonlat: [...p.at], from: d.from }] : []; });
   const eras = [['1926–1945', w => w.start < '1946'], ['1946–1988', w => w.start >= '1946' && w.start < '1989'], ['1989 to today', w => w.start >= '1989']];
   $('#war').innerHTML = eras.map(([l, f]) => `<optgroup label="${l}">${idx.wars.filter(f).map(w => `<option value="${w.id}">${esc(w.name)} (${w.start.slice(0, 4)}–${w.end ? w.end.slice(0, 4) : 'now'})</option>`).join('')}</optgroup>`).join('');
   $('#war').onchange = e => loadWar(e.target.value);

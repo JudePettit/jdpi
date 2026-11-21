@@ -106,15 +106,21 @@ const SMALL_STATE_RADIUS = 0.25;
 // states' own Wikipedia and Wikidata entries). A place in neither this table nor QID_EXTRA (the Italian Empire, French
 // Colonial Africa, British Overseas Territories, Jammu and Kashmir) has no country and is listed as unknown; the
 // British Empire is the United Kingdom, as QID_EXTRA files it for the Master Index. Federal Yugoslavia
-// (1992–2006) is the three countries Gleditsch–Ward code 345 stood for in those years.
+// (1992–2006) is the three countries Gleditsch–Ward code 345 stood for in those years. The colonial units War Focus names by
+// their own items since 21 November 2026 (battlefield/focus/scripts/wars.mjs) are the countries GW_EXTRA gave the codes
+// they replace: Korea under Japanese rule, Ruanda-Urundi, the Straits Settlements, the Malay States, British North
+// Borneo, Papua and New Guinea, the Somalilands, Aden, Spanish Morocco, Newfoundland and Karafuto; and Taiwan under
+// Japanese rule (Q137816), Taiwan's as Q865 was before.
 const PLACE_EXTRA = { Q838261: ['SRB', 'MNE', 'XKX'], Q23681: 'CYP', Q34754: 'SOM', Q37102: 'MAR', Q69808: 'FRA', Q152582: 'FRA',
   Q139708: ['SYR', 'LBN'], Q146713: ['IRQ', 'JOR'], Q157904: 'TZA', Q172640: 'VNM', Q180573: 'VNM', Q185682: ['VNM', 'LAO', 'KHM'], Q201190: 'PSE',
   Q216173: 'POL', Q216632: ['MLI', 'SEN'], Q217169: 'ZWE', Q267584: 'YEM', Q521263: 'CHN', Q840601: 'CHN', Q717809: 'CHN', Q1240096: 'IND',
-  Q1658411: 'MYS', Q3497642: 'MAR', Q106809413: 'UKR' };
+  Q1658411: 'MYS', Q3497642: 'MAR', Q106809413: 'UKR',
+  Q503585: ['KOR', 'PRK'], Q590743: ['RWA', 'BDI'], Q376178: ['MYS', 'SGP'], Q1400154: 'MYS', Q1973084: 'MYS', Q1147441: 'MYS', Q530560: 'PNG',
+  Q1443945: 'PNG', Q319984: 'SOM', Q662653: 'SOM', Q49910: 'YEM', Q457242: 'MAR', Q38610: 'CAN', Q696736: 'RUS', Q137816: 'TWN' };
 // places.json's codes for states that are one country today.
 const ISO_HIST = { DDR: 'DEU', YMD: 'YEM' };
 // The name a historical state takes in the gap rules, where it is not places.json's own.
-const PLACE_NAME = { Q15180: 'the Soviet Union', Q838261: 'Serbia and Montenegro' };
+const PLACE_NAME = { Q15180: 'the Soviet Union', Q838261: 'Serbia and Montenegro', Q503585: 'Korea before its division', Q590743: 'Ruanda-Urundi', Q376178: 'the Straits Settlements' };
 
 /** TopoJSON → features with decoded rings and a bounding box ([w, s, e, n]) for a quick first test. */
 export function decodeTopo(topo, object) {
@@ -402,16 +408,21 @@ export function warFocusWar(w, R) {
   // bel: every present-day country (a historical state as its successors), for coverage and war-sides; belDirect and
   // belGroups keep the two apart for the war-film rule, which counts a historical state once.
   const bel = new Map(), belDirect = new Map(), belGroups = new Map(), pt = new Map(), battlesIn = new Map(), battleIso = new Map();
-  const unknownGw = new Set();
-  const addGw = (gw, date) => {
-    const d = date || w.start, r = R.gwIso(gw, d); if (!r) { unknownGw.add(gw); return; }
+  // Since 21 November 2026 every state is a Wikidata item, its dated memberships its own (the Soviet Union's item, then
+  // Russia's), read through places.json as the Retrospective Battlefield's are (R.placeIso, R.placeGroup); no
+  // Gleditsch–Ward code is read. Yugoslavia's item at a date after Slovenia and Croatia left (25 June 1991) counts as
+  // Federal Yugoslavia's three countries, as gwIso counts code 345 then (the Bosnian War's first three weeks).
+  const unknown = new Set();
+  const addState = (q, date) => {
+    if (q === 'Q83286' && (date || w.start) >= '1991-06-25') q = 'Q838261';
+    const r = R.placeIso(q); if (!r) { unknown.add(q); return; }
     for (const c of R.expand(r)) bel.set(c, (bel.get(c) || 0) + 1);
-    const g = R.gwGroup?.(gw, d);
+    const g = R.placeGroup?.(q);
     if (g) belGroups.set(g.key, g); else for (const c of R.expand(r)) belDirect.set(c, (belDirect.get(c) || 0) + 1);
   };
-  for (const k of ['a', 'b']) for (const s of w.sides?.[k]?.states || []) addGw(s.gw, s.from);
-  for (const g of w.theatre || []) addGw(g, w.start);
-  for (const c of w.control || []) addGw(c.gw, c.from);
+  for (const k of ['a', 'b']) for (const s of w.sides?.[k]?.states || []) addState(s.q, s.from);
+  for (const q of w.theatre || []) addState(q, w.start);
+  for (const c of w.control || []) addState(c.q, c.from);
   let points = 0, unplaced = 0, near = 0;
   const hit = (lon, lat, battle) => {
     points++;
@@ -424,7 +435,7 @@ export function warFocusWar(w, R) {
   for (const b of w.battles || []) if (b.lat != null && b.lon != null) hit(b.lon, b.lat, b);
   const cells = Array.isArray(w.cells) ? w.cells : Object.values(w.cells || {});
   for (const m of cells) for (const c of m || []) hit(c[1], c[0], null);
-  return { id: w.id, name: w.name, qid: w.qid, bf: w.bf || null, start: w.start, end: w.end, belligerent: bel, belDirect, belGroups, point: pt, battlesIn, battleIso, points, unplaced, near, unknownGw: [...unknownGw], raw: w };
+  return { id: w.id, name: w.name, qid: w.qid, bf: w.bf || null, start: w.start, end: w.end, belligerent: bel, belDirect, belGroups, point: pt, battlesIn, battleIso, points, unplaced, near, unknown: [...unknown], raw: w };
 }
 
 /** War Focus at one month: where the battles under way that month, and that month's UCDP cells, fall. */
@@ -704,7 +715,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
     wfPiece.parts.push({ id: `war-focus:${w.id}`, label: w.name, belligerent: [...w.belligerent.keys()].sort(), point: [...w.point.keys()].sort(), places: w.points, unplaced: w.unplaced, near: w.near });
   }
   wfPiece.notes.push(`${wfList.length} wars; ${wfList.reduce((a, w) => a + w.points, 0)} battle and event places, ${wfList.reduce((a, w) => a + w.unplaced, 0)} at sea or unplaced, ${wfList.reduce((a, w) => a + w.near, 0)} placed by the nearest coast.`);
-  const unknownWf = uniq(wfList.flatMap(w => w.unknownGw)); if (unknownWf.length) wfPiece.notes.push(`Unknown Gleditsch–Ward codes: ${unknownWf.join(' ')}`);
+  const unknownWf = uniq(wfList.flatMap(w => w.unknown)); if (unknownWf.length) wfPiece.notes.push(`States with no present-day country: ${unknownWf.map(q => `${rbPlaces.places[q]?.n || q} (${q})`).join(', ')}`);
   pieces.push(wfPiece);
   log(`War Focus ${Date.now() - t0} ms`);
 

@@ -1,0 +1,152 @@
+{
+ "format": "vm-warfocus-borders/1",
+ "source": "cliopatria",
+ "version": "v0.2.1",
+ "licence": "CC BY 4.0",
+ "credit": "Cliopatria v0.2.1, Seshat Global History Databank (CC BY 4.0)",
+ "from": 1926,
+ "to": 2024,
+ "about": "Cliopatria’s polities with a shape for each span of years, cut byte for byte from the Omni-Map’s borders (omni/data/borders). A month shows its year’s rows; a year after the last shows the last year’s.",
+ "spans": [
+  {
+   "from": 1926,
+   "to": 1931,
+   "file": "1926-1931.topo.json",
+   "rows": 127,
+   "bytes": 330647,
+   "gzip": 100361,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1932,
+   "to": 1935,
+   "file": "1932-1935.topo.json",
+   "rows": 87,
+   "bytes": 299944,
+   "gzip": 96886,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1936,
+   "to": 1938,
+   "file": "1936-1938.topo.json",
+   "rows": 107,
+   "bytes": 340684,
+   "gzip": 107252,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1939,
+   "to": 1940,
+   "file": "1939-1940.topo.json",
+   "rows": 108,
+   "bytes": 346245,
+   "gzip": 108069,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1941,
+   "to": 1942,
+   "file": "1941-1942.topo.json",
+   "rows": 91,
+   "bytes": 338787,
+   "gzip": 106235,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1943,
+   "to": 1944,
+   "file": "1943-1944.topo.json",
+   "rows": 92,
+   "bytes": 342292,
+   "gzip": 107145,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1945,
+   "to": 1946,
+   "file": "1945-1946.topo.json",
+   "rows": 109,
+   "bytes": 333631,
+   "gzip": 104961,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1947,
+   "to": 1952,
+   "file": "1947-1952.topo.json",
+   "rows": 155,
+   "bytes": 353673,
+   "gzip": 107196,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1953,
+   "to": 1960,
+   "file": "1953-1960.topo.json",
+   "rows": 162,
+   "bytes": 346022,
+   "gzip": 106562,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1961,
+   "to": 1972,
+   "file": "1961-1972.topo.json",
+   "rows": 188,
+   "bytes": 347323,
+   "gzip": 107756,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1973,
+   "to": 1982,
+   "file": "1973-1982.topo.json",
+   "rows": 207,
+   "bytes": 352044,
+   "gzip": 108297,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1983,
+   "to": 1991,
+   "file": "1983-1991.topo.json",
+   "rows": 214,
+   "bytes": 359104,
+   "gzip": 109903,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 1992,
+   "to": 1999,
+   "file": "1992-1999.topo.json",
+   "rows": 204,
+   "bytes": 350423,
+   "gzip": 109538,
+   "cutFrom": "omni/data/borders/1900-1999.topo.json",
+   "cutFromSha256": "b697b4a3da9e4fa0f2c340d4bebedecd0d717b34a6f10f0b13b5ae9e8170bdc4"
+  },
+  {
+   "from": 2000,
+   "to": 2024,
+   "file": "2000-2024.topo.json",
+   "rows": 414,
+   "bytes": 352520,
+   "gzip": 102523,
+   "cutFrom": "omni/data/borders/2000-2024.topo.json",
+   "cutFromSha256": "c439affd55124c94762b56c985a3139e5c11039533e73cdf5809c32c20dfbae7"
+  }
+ ]
+}

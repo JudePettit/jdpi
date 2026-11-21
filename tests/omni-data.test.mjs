@@ -316,6 +316,15 @@ test('the Hub\'s licence lines and table say what each source\'s terms say', () 
     ['SIPRI, IEA, IHME and ITU (seven World Bank series)', /commercial/], ['Cliopatria', /CC BY 4\.0/], ['Natural Earth', /public domain/i]])
     assert.match(row(name), words, `the Hub’s row for ${name}`);
   assert.match(row('CShapes 2.0'), /no longer/);
+  // 21 November 2026: War Focus draws Cliopatria's borders, so no page draws CShapes 2.0 now.
+  assert.match(focus, /Cliopatria v0\.2\.1[^;]*CC BY 4\.0/, 'War Focus’s downloads name Cliopatria’s borders');
+  assert.doesNotMatch(focus, /CShapes/, 'and no longer CShapes');
+  assert.match(row('CShapes 2.0'), /War Focus on 21 November 2026/);
+  assert.doesNotMatch(row('CShapes 2.0'), /still draws/);
+  assert.match(row('Cliopatria'), /War Focus/);
+  const cshapes = JSON.parse(raw('integration/sources.json').toString('utf8')).sources.find(s => s.id === 'cshapes');
+  assert.match(cshapes.where, /No longer read or drawn by any page/);
+  assert.doesNotMatch(cshapes.where, /still draws/);
   assert.match(hub, /integration\/sources\.json/, 'the table points to the full record');
 });
 

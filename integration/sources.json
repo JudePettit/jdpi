@@ -19,7 +19,7 @@
       "termsQuote": "This data is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptation, distribution and reproduction in any medium or format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and indicate if changes were made.",
       "termsRead": "2026-11-20",
       "credit": "Borders: Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager",
-      "changes": "Every row, 3400 BC to AD 2024, in 17 files by years (a row spanning two files is in both), converted to TopoJSON quantised to 1/100,000 of each file’s extent (points that then coincide are merged; no simplification), with a row id added (omni/scripts/build-borders.mjs).",
+      "changes": "Every row, 3400 BC to AD 2024, in 17 files by years (a row spanning two files is in both), converted to TopoJSON quantised to 1/100,000 of each file’s extent (points that then coincide are merged; no simplification), with a row id added (omni/scripts/build-borders.mjs). War Focus (since 21 November 2026) draws the rows of 1926–2024 from those files, cut into spans of years with no point moved or removed (battlefield/focus/scripts/build-borders.mjs), one border a year, and draws 2025 and 2026 on 2024’s; it leaves uncoloured a row’s polygons that lie on another of the war’s states’ own land, and lists, uncoloured, a state whose rows are only a far-off fragment of it that year (battlefield/focus/scripts/lands.mjs).",
       "databaseRight": "CC BY 4.0 licenses the sui generis database right as well as copyright."
     },
     {
@@ -389,8 +389,8 @@
       "termsQuote": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.",
       "termsRead": "2026-11-18",
       "held": true,
-      "where": "No longer read by the Retrospective Battlefield or the Integration Hub: since 20 November 2026 their borders come from Cliopatria and Natural Earth and their place names from Wikidata (battlefield/history/data/places.json); there it is kept for comparison only. War Focus still draws its borders from battlefield/history/data/borders.topo.json, made from CShapes 2.0, until it moves to a free source.",
-      "decision": "Whether War Focus moves to Cliopatria (yearly borders in place of monthly ones) or keeps CShapes under a licence from its makers: waits on VM’s owner.",
+      "where": "No longer read or drawn by any page: the Retrospective Battlefield and the Integration Hub left it on 20 November 2026, and War Focus on 21 November 2026; their borders now come from Cliopatria and Natural Earth and their place names from Wikidata (battlefield/history/data/places.json). Its two files, battlefield/history/data/borders.topo.json and battlefield/history/names.mjs, are still in the repository, read by nothing.",
+      "decision": "Removing the two files that no page reads (battlefield/history/data/borders.topo.json, battlefield/history/names.mjs): waits on VM’s owner.",
       "credit": "Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA 4.0",
       "databaseRight": "CC BY-NC-SA 4.0 licenses the sui generis database right for non-commercial use only."
     },

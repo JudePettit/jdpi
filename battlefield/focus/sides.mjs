@@ -5,34 +5,34 @@
 
 export const inRange = (d, from, to) => (!from || d >= from) && (!to || d <= to);
 
-/** A state's place in a war at a date: 'occ-a'/'occ-b' (wholly occupied, held by that side), 'side-a'/'side-b',
+/** A state's place in a war at a date (q, its Wikidata Q-id; Gleditsch–Ward numbers until 21 November 2026): 'occ-a'/'occ-b' (wholly occupied, held by that side), 'side-a'/'side-b',
  *  'theatre' (the contested state of a civil war), or '' (not at war). Occupation comes first. */
-export function sideOf(war, gw, date) {
-  for (const c of war.control || []) if (c.gw === gw && inRange(date, c.from, c.to)) return 'occ-' + c.side;
-  for (const s of ['a', 'b']) if ((war.sides?.[s]?.states || []).some(x => x.gw === gw && inRange(date, x.from, x.to))) return 'side-' + s;
-  if ((war.theatre || []).includes(gw)) return 'theatre';
+export function sideOf(war, q, date) {
+  for (const c of war.control || []) if (c.q === q && inRange(date, c.from, c.to)) return 'occ-' + c.side;
+  for (const s of ['a', 'b']) if ((war.sides?.[s]?.states || []).some(x => x.q === q && inRange(date, x.from, x.to))) return 'side-' + s;
+  if ((war.theatre || []).includes(q)) return 'theatre';
   return '';
 }
 
 /**
- * Each state's sides over a period's months (`dates`: [{ m: 'YYYY-MM', d: the date read for it }], in order): Map gw →
+ * Each state's sides over a period's months (`dates`: [{ m: 'YYYY-MM', d: the date read for it }], in order): Map Q →
  * { last (its side in the last month), runs: [{ side, from, to }] (months in a row on one side, not-at-war left out),
  * changed (its side or occupation differs between any two months), held (the last side it held in the period),
  * earlier (on a side in the period but not in its last month: drawn faded, in the side it last held) }.
  */
-export function periodSides(war, gws, dates) {
+export function periodSides(war, qs, dates) {
   const out = new Map();
-  for (const gw of gws) {
+  for (const q of qs) {
     const runs = [];
     let prev = null, changed = false, held = '';
     for (const { m, d } of dates) {
-      const s = sideOf(war, gw, d);
+      const s = sideOf(war, q, d);
       if (prev !== null && s !== prev) changed = true;
       if (s) { const r = runs.at(-1); if (r && r.side === s && prev === s) r.to = m; else runs.push({ side: s, from: m, to: m }); held = s; }
       prev = s;
     }
     const last = prev ?? '';
-    out.set(gw, { last, runs, changed, held, earlier: !last && !!held });
+    out.set(q, { last, runs, changed, held, earlier: !last && !!held });
   }
   return out;
 }

@@ -53,6 +53,9 @@
 .state.occ-a { fill: url(#hatch-a); }
 .state.occ-b { fill: url(#hatch-b); }
 .state.theatre { fill: var(--contested); }
+/* A row's polygons on another war state's land, or a state's far-off fragment (lands.mjs): in no side's colour, paler
+   than the land, with a dotted edge, and drawn first, so the states round it keep their own edges. */
+.state.left { fill: var(--prp-map-land); fill-opacity: .5; stroke: var(--prp-text-2); stroke-width: .5; stroke-dasharray: 1 2; }
 .state.joined { animation: flash 1.2s ease-out; }
 .state.changed { stroke: var(--prp-text); stroke-width: 1.3; stroke-dasharray: 4 3; } /* a period: side or occupation changed in it */
 /* A period: on a side in an earlier month of it but not in its last, in the side it last held, faded with a broken outline. */
@@ -76,12 +79,38 @@
 .legend .changed { background: transparent; box-shadow: none; border: 1.5px dashed var(--prp-text); }
 .legend .earlier { background: color-mix(in srgb, var(--side-b) 42%, var(--prp-map-land)); box-shadow: none; border: 1px dashed var(--prp-text-2); }
 .legend .clash { background: color-mix(in srgb, var(--clash) 55%, var(--prp-surface)); box-shadow: inset 0 0 0 1px var(--clash); }
-/* The states CShapes has no border for, as the map kit's dots (AC-5): filled like any state (by side, or the land), ringed
+.legend .left { background: color-mix(in srgb, var(--prp-map-land) 50%, var(--prp-surface)); box-shadow: none; border: 1px dotted var(--prp-text-2); }
+/* The small states no Cliopatria row holds, as the map kit's dots (AC-5): filled like any state (by side, or the land), ringed
    so a dot on neither side shows on the land around it. Its target over the land is the dot and a little round it
    (.dot-hit); its finger-wide target lies under the states, so it takes only the sea (.dot-sea; app.js sizeMarks). */
 .dot-hit, .dot-sea { fill: transparent; stroke: none; pointer-events: all; cursor: pointer; }
 .state.dot-mark { stroke: var(--prp-text-2); stroke-width: .8; pointer-events: none; }
 .legend .no-border { background: var(--prp-map-land); box-shadow: inset 0 0 0 1px var(--prp-text-2); }
+
+/* The states VM cannot place on a free border in the months shown: one line under the map, over each table and in the
+ panel, each state named in its side's colour (a mark beside the name, so the text keeps its contrast); it wraps, so a
+ phone never scrolls sideways. */
+.unplaced { margin: 8px 0 0; padding: 8px 10px; background: var(--prp-surface-2); border: 1px solid var(--prp-line-soft); border-radius: var(--prp-radius-sm); color: var(--prp-text-2); font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
+.unplaced[hidden] { display: none; }
+.unplaced b { color: var(--prp-text); font-weight: 600; }
+/* Under the map the line takes at most three lines and scrolls inside, so a long list (World War II's) never shrinks
+   the map; the panel and the tables show it whole. */
+.map-unplaced { flex: none; max-height: calc(4.65em + 16px); overflow-y: auto; }
+/* While any year of the war has a line, the box keeps that height in every month, so the map never jumps as it plays. */
+.map-unplaced.reserve { height: calc(4.65em + 16px); }
+/* A state Documentary mode names while the map cannot place it. */
+.up-state.prp-focus-hit { outline: 2px solid var(--prp-text); outline-offset: 1px; border-radius: 2px; }
+.tablepanel .unplaced { margin: 0 0 8px; }
+.panel .unplaced { margin: 0 0 14px; }
+.up-state { white-space: normal; color: var(--prp-text); }
+.up-state::before { content: ""; display: inline-block; width: 9px; height: 9px; margin: 0 4px 0 1px; border-radius: 2px; vertical-align: 0; background: var(--prp-map-land); box-shadow: inset 0 0 0 1px var(--prp-map-border); }
+.up-state.side-a::before { background: var(--side-a); }
+.up-state.side-b::before { background: var(--side-b); }
+.up-state.occ-a::before { background: repeating-linear-gradient(45deg, var(--side-a) 0 2px, var(--prp-map-land) 2px 4px); }
+.up-state.occ-b::before { background: repeating-linear-gradient(45deg, var(--side-b) 0 2px, var(--prp-map-land) 2px 4px); }
+.up-state.theatre::before { background: var(--contested); }
+.up-state.earlier::before { opacity: .5; }
+.up-year { color: var(--prp-text); font-weight: 600; }
 
 /* Panel */
 /* A selected state in no part of the war: its sentence, repeated from the map, over the war's panel (AC-5). */

@@ -15,8 +15,8 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   Wikidata lists", and smaller ones may be missing. Until 20 November they came from the Correlates of War.
 - **Borders:** Cliopatria v0.2.1 (CC BY 4.0), as VM holds it in `omni/data/borders/`; where no Cliopatria row holds a
   place that year, Natural Earth's border of today or its point (public domain, `omni/data/base/`). Until 20 November
-  they were CShapes 2.0 (CC BY-NC-SA, non-commercial); `history/data/borders.topo.json` and `history/names.mjs` are
-  no longer read by the page and stay only until War Focus and the Integration Hub's catalogue stop reading them.
+  they were CShapes 2.0 (CC BY-NC-SA, non-commercial). `history/data/borders.topo.json` and `history/names.mjs` are
+  read by no page or script since 21 November 2026, when War Focus left them too; removing them waits on VM's owner.
 - **Old addresses:** a link written before the change still opens the same view: `w=c<number>` opens the same war, or
   the whole war it was part of (`oldIds`, `oldWithin` in `history/data/wars.json`); a war no longer listed says so in
   plain words (`oldGone`); `c=<number>` opens the country it stood for (`oldCountries` in `history/data/places.json`),
@@ -38,6 +38,73 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
 - **The nine wars before 1946** (the Northern Expedition to the Second World War) have no figure: no free source gives
   their battle deaths by month or year, and the Correlates of War totals they showed until 20 November 2026 are gone.
   Each battle's own figures, from Wikidata, are still listed.
+- **Borders (since 21 November 2026):** Cliopatria v0.2.1 (Bennett et al. 2025, CC BY 4.0), the Omni-Map's files in
+  `omni/data/borders/`, cut into spans of years by `scripts/build-borders.mjs` (`data/borders/<from>-<to>.topo.json`
+  and `index.json`, each under 110 KB gzipped, no point moved or removed), drawn as the Retrospective Battlefield draws
+  them: its rule for which rows are drawn (`scripts/history-places.mjs`) and its crosswalk from Cliopatria's rows to
+  Wikidata items (`history/data/places.json`). One border a year: a month shows its year's border, so a border that
+  changed within a year cannot be shown (the page says so under the map). Cliopatria ends in 2024: 2025 and 2026 are
+  drawn on 2024's borders, and the caption and Sources line say so. Small states Cliopatria has no row for are dots at
+  Natural Earth's points (`omni/data/base/small-states.json`, public domain); Vanuatu has no such point, so a war that names it lists it.
+  Until 21 November the borders were CShapes 2.0 (CC BY-NC-SA 4.0, non-commercial), month by month.
+- **States are Wikidata items:** every side, theatre and control entry (`scripts/wars.mjs`), the built files
+  (`data/wars/<id>.json`: `sides`, `theatre`, `control`, `names`, `unplaced`) and the picked state (`#c=<Q-id>`) are
+  Q-ids. A dated membership keeps its dates at their precision; the Bosnian War's Yugoslavia is the SFRY (Q83286) to 26
+  April 1992 and the FRY (Q838261) from 27 April. No Gleditsch–Ward number is read, joined or shown. An old address or
+  focus with a number (`c=<number>`, Kino's and Documentary mode's `gw:<number>`) opens the same state: the number is
+  read as its Q-id for the year shown (`oldCountries` in `history/data/places.json`, through `history/old-countries.js`).
+- **States with no free border:** a state taking part with no Cliopatria row of its own that year (and no dot) is listed
+  under the map, above the battles and months tables and in the war's panel, "VM cannot place … on a free border for
+  <year>", in its side's colour, and still counted on its side. It is never drawn on a guessed shape, on today's border
+  or through another state's row. The list for each year is in each war file's `unplaced`. Under the map the line groups
+  the states by what they are that month, in words (each side by its label, "held by" a side, "contested", "on no side"),
+  and says that a state in a side's list is still counted with it only where that is so.
+- **Whose land a row draws** (`scripts/lands.mjs`, 21 November 2026; each war file's `lands`, by year): Cliopatria
+  places occupied, annexed or administered land inside the holder's row, and a row can be only a far-off fragment of its
+  state. So that no part, puppet or occupier stands in for a whole state:
+  - a state whose rows hold less than a tenth of their area in the nearest other years is only a fragment (Denmark of
+    1940, the Faroes; Norway of 1941–44, Jan Mayen; Italy of 1944, its Tianjin concession): it is listed with the states
+    VM cannot place, and the fragment is drawn uncoloured (`parts`);
+  - a polygon of another row that lies half or more inside a war state's own land (its rows in the nearest year, within
+    twelve, that it is whole) is drawn uncoloured, with a dotted edge, when that land is the larger share of the war
+    state's territory than of the row's own (`left`): the United States' part over South Vietnam (1967–75) and over Iraq
+    (2006–11), Norway and Libya inside Nazi Germany's row of 1942, Greenland in the United States' row of 1943–44;
+  - Cliopatria's rows are dissolved shapes, so land joined to its holder (France and Poland inside Germany in 1942,
+    Serb-held Bosnia inside Serbia-Montenegro in 1992–95, Burma inside the British Raj) is in the same polygon and cannot
+    be cut out without drawing another year's border; where a quarter or more of a war state's land lies in another
+    place's coloured polygon, the line under the map names it ("Part of this state lies inside another state's shape on
+    Cliopatria's border for 1994: Bosnia and Herzegovina (inside Serbia-Montenegro)") (`inside`).
+- **Names of a year:** the Second World War's Yugoslavia is drawn on the rows the Battlefield files under the Socialist
+  Federal Republic (Q83286) and named the Kingdom of Yugoslavia (Wikidata Q191077, its label, dissolved 1945) to 1945
+  (`nameAs` in `scripts/wars.mjs`); the Battlefield's own crosswalk still keys Cliopatria's Yugoslavia rows of 1920–45 to
+  Q83286. Japan's Taiwan in the wars with Japan is Q137816, Taiwan under Japanese rule, not Q865 (which Wikidata dates
+  from 1912 as the Republic of China).
+- **What was lost in the move** (`warfocus-borders-compare.tsv`, each war at its first, middle and last month, 117
+  checks): 475 states drawn on CShapes, 273 on Cliopatria; 197 moved to "cannot place", 1 drawn only now. The largest
+  are colonies and occupied states Cliopatria holds within their rulers' rows: Sudan and Libya in the Second World War,
+  Algeria in the Algerian War, Indonesia in 1945, Angola in 1975, Korea and Taiwan in the wars with Japan, Kuwait in the
+  Gulf War. Cliopatria's own rows place some land with another state: its "Kingdom of Great Britain" row (1969–2023)
+  holds Oman, Qatar and Bahrain, so War Focus's theatre boxes leave those parts out (`stateBoxes`, `scripts/rules.mjs`);
+  its United States row of 2006–2023 covers Iraq, its United States row of 1967–2005 covers South Vietnam, and its
+  Honduras row of 1979–1991 covers El Salvador, so Iraq (2006–11), South Vietnam (1967–72) and El Salvador are listed,
+  not drawn, and the United States' parts over them are left uncoloured; Bosnia and Herzegovina in 1992–95 is drawn only
+  as the small row Cliopatria gives it, the rest named inside Serbia-Montenegro. The months of a year now share its border, so a change within a year
+  (an annexation or an armistice line) shows only in the years Cliopatria gives it. Natural Earth names the Holy See's
+  point "Vatican". The coverage report counts the Second World War's Puerto Rico within the United States now (one
+  Wikidata item). Month by Month no longer reads the Soviet Union as Russia (Khalkhin Gol, the Winter War, the Second
+  World War) or Yugoslavia as Serbia (the Second World War), since neither is a National Analysis country, and now
+  reads Germany in the Second World War.
+- **Rebuild the states only** (names, lands and the states VM cannot place, from `scripts/wars.mjs`; reads Wikidata's
+  labels for states the Battlefield's places do not name, and a `nameAs` item's dissolution, cached in
+  `<folder>/state-names.json`):
+  ```
+  node battlefield/focus/scripts/build.mjs --sides-only --cache <folder>
+  ```
+- **Rebuild the borders** (only when the Omni-Map's Cliopatria files change; a test checks each span against their
+  sha256):
+  ```
+  node battlefield/focus/scripts/build-borders.mjs
+  ```
 - **Rebuild the deaths only** (from the committed files, with PRIO's and UCDP's files in the cache):
   ```
   node battlefield/focus/scripts/build.mjs --deaths-only --cache <folder>

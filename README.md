@@ -162,3 +162,7 @@ what VM changed, and the Political Briefing and Highbrowse show that credit. Eac
 is credited on the page that uses it. `volatility/scripts/fips-iso3.json` is a table of country codes and names extracted
 from the countrycode project (Arel-Bundock, Enevoldsen and Yetman, GPL-3.0), recorded with its source commit and checksum;
 the codes themselves are facts, and the file is not part of Vitruvian Manager's code.
+Historical borders are Cliopatria v0.2.1's (Bennett et al. 2025, CC BY 4.0) on the Omni-Map, the Retrospective
+Battlefield and, since 21 November 2026, War Focus, which draws one border a year in place of CShapes 2.0's monthly
+borders (CC BY-NC-SA 4.0, non-commercial; no page reads it now). What that move changed and lost is in
+[battlefield/README.md](battlefield/README.md).

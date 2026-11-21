@@ -1129,8 +1129,12 @@ test('names: a Retrospective event that opens with a QID names the leader, in th
   if (!existsSync(join(retroDir, 'data/countries.json'))) return;
   return retrospective({ retroDir }).then(ms => {
     assert.deepEqual(ms.filter(m => /(^|: )Q[1-9]\d* /.test(m.context)).map(m => m.context), [], 'no context names a QID');
-    // A party the Retrospective links to Wikidata (no English article) is keyed by that ID, so it has its mention.
-    assert.ok(ms.some(m => m.key.qid === 'Q12876078' && /^Party of /.test(m.context)), 'the Greek party named Q12876078 there');
+    // Until its full rebuild of 21 November 2026 the Retrospective's data held one party under a bare Wikidata ID
+    // (Q12876078, a Greek party with neither an English name nor an English article, on Emmanouil Tsouderos), and
+    // this test held its mention. The Retrospective's own rule since 17 November leaves such a party out
+    // (hp-retrospective scripts/build-parties.mjs), and the rebuild applied it: no party link names a bare ID.
+    assert.ok(ms.some(m => /^Party of /.test(m.context)), 'leaders’ parties have their mentions');
+    assert.deepEqual(ms.filter(m => /^Party of /.test(m.context) && /^Q[1-9]\d*$/.test(m.label || '')).map(m => m.label), [], 'no party is named by a bare ID');
   });
 });
 test('committed lake: no label or shown name is a bare QID, and no shown person name ends in its realm', t => {

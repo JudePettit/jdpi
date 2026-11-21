@@ -302,7 +302,10 @@ spec({
 const calLicence = 'Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.' + ARCHIGOS_NOTE;
 const calSources = ['Wikipedia national electoral calendars and lists of summits', 'Political Atlas (Europe, North America and the major powers)', 'Political Retrospective (Archigos and Wikidata)', 'UCDP/PRIO Armed Conflict Dataset (CC BY 4.0)', 'Wikidata (CC0)', 'Wikipedia Current events portal (CC BY-SA), from January 2026'];
 const calFields = [['date', 'Date (YYYY-MM-DD)'], ['country', 'Country, or International'], ['title', 'Event'], ['type', 'election, referendum, party, leader, inauguration, resignation, coup, conflict, ceasefire, assassination, crisis, protest, treaty, summit, sanctions, vote or court'],
-  ['status', 'declared, or tentative when the date is not yet fixed'], ['source', 'Wikipedia (or other) page for the event'], ['summary', 'Plain-English account (Wikipedia, CC BY-SA)'], ['ref', 'News report cited for events since 2026, if any'], ['refName', 'Name of that news outlet'], ['level', 'For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court']];
+  ['status', 'declared, or tentative when the date is not yet fixed'], ['source', 'Wikipedia (or other) page for the event'], ['summary', 'Plain-English account (Wikipedia, CC BY-SA)'], ['ref', 'News report cited for events since 2026, if any'], ['refName', 'Name of that news outlet'], ['level', 'For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court'],
+  // Written by calendar/scripts/build-events.mjs for the Omni-Map's calendar layer since 20 November 2026.
+  ['iso3', 'The country’s ISO 3166-1 alpha-3 code, where it is one of today’s countries'], ['class', 'Where the record comes from: ucdp, wikidata, vm, wikipedia-list, atlas, wikipedia-news, archigos or retrospective'],
+  ['precision', 'month, when the date is known only to the month; absent when the day is known']];
 const addMonths = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); };
 const RT_FROM = addMonths(TODAY, -6), RT_TO = addMonths(TODAY, 18);
 spec({

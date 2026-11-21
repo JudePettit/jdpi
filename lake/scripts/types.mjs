@@ -141,9 +141,15 @@ export const TYPE_OVERRIDES = {
 export const NOT_CONFLICT = new Set(['Q273120', 'Q2061202', 'Q208383', 'Q584041', 'Q13406463', 'Q826745', 'Q100886746']);
 // A label's "-ism" makes an idea, but not a mechanism or a magnetism (the Higgs mechanism, electromagnetism).
 const ISM = /ism$/i, NOT_ISM = /(mechanism|magnetism)$/i;
+import { wikidataDate, bestClaim } from './dates.mjs';
 const WAR_WORD = /\b(war|battle|siege|invasion|insurgency|conflict|revolt|rebellion|uprising|massacre|genocide|coup)\b/i;
 export function typeOf(e) {
   if (e.id && TYPE_OVERRIDES[e.id]) return TYPE_OVERRIDES[e.id];
+  // A date counts as a sign only when it is the date the record will show (dates.mjs datedFacts reads it the same way):
+  // Wikidata's best statement, never a deprecated one, and one that states a time. A "no value" or "unknown value"
+  // statement, or only a deprecated date, ends nothing (second review X1, 21 November 2026: a state of today whose
+  // dissolution is stated as "no value" was a polity, with no date to show for it).
+  const dated = p => Boolean(wikidataDate(bestClaim(e.claims?.[p])));
   const p31 = (e.claims?.P31 || []).map(c => c.mainsnak.datavalue?.value?.id).filter(Boolean);
   const label = e.labels?.en?.value || '';
   const has = s => p31.some(x => s.has(x));
@@ -154,13 +160,13 @@ export function typeOf(e) {
   if (has(PARTY)) return 'party';
   // A polity before a period (a Chinese dynasty is also a historical period) and before an idea, among what would
   // otherwise be a place: a place's class, a polity's, or a capital with no international organisation's class.
-  const living = has(LIVING), dissolved = Boolean(e.claims?.P576);
+  const living = has(LIVING), dissolved = dated('P576');
   // Among a state's or a ruled territory's classes, an end time (P582) stands for a date of dissolution: Wikidata records
   // the end of a military occupation so (the Ukrainian occupation of Kursk Oblast, Q129167851, has P582 May 2025 and no
   // P576, read 21 November 2026). A sovereign state or a country still needs its P576 to be a polity (CURRENT), and a
   // period's end time ends a span, not a state: Ottoman Palestine (Q2909425, a historical period and a dependent
   // territory with an end time) stays a period.
-  const ended = dissolved || (Boolean(e.claims?.P582) && !has(PERIOD));
+  const ended = dissolved || (dated('P582') && !has(PERIOD));
   const placeLike = has(PLACE) || has(POLITY) || (Boolean(e.claims?.P36) && !has(INTERNATIONAL_ORG));
   if (!(has(CURRENT) && !dissolved) && (has(POLITY) || (!living && has(CITY_STATE)) || (placeLike && !living && has(STATE) && ended))) return 'polity';
   const warByLabel = WAR_WORD.test(label) && !has(NOT_CONFLICT);

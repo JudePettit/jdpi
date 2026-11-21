@@ -306,8 +306,12 @@ export function resolve(entry, from = {}, ctx = {}) {
   const foughtIn = own && kind === 'battle' ? yearOf(entry.facts?.date) : null;
   const lifeRecipe = build(lifeWin, foughtIn, ctx.passagePlaces || [], !!own);
   const passageRecipe = pspan ? build({ from: pspan.from, to: pspan.to, p: pspan.p }, pspan.year, rec.places?.length ? rec.places : ctx.passagePlaces || []) : null;
-  const recipe = checked ? passageRecipe : lifeRecipe;
-  const win = checked ? pspan : lifeWin;
+  // A series is never mapped, in a checked passage either (second review X2, 21 November 2026): the passage's years are
+  // the passage's, and any other term in it opens them; the series still opens its Master Index entry. Every other
+  // kind keeps the older rule: a checked periods record is the default view, and the entry's own years are an offer.
+  const noMap = kind === 'series';
+  const recipe = checked && !noMap ? passageRecipe : lifeRecipe;
+  const win = checked && !noMap ? pspan : lifeWin;
 
   // Offers.
   const offers = [];
@@ -328,7 +332,9 @@ export function resolve(entry, from = {}, ctx = {}) {
     return `the map opens on ${formatYear(y)}, ${why}`;
   };
   const undated = !from.passage ? '' : !pspan ? ': this paragraph has no periods record yet, so VM has not dated it' : !checked ? ': this paragraph\'s periods record is not yet checked by a second reader' : '';
-  const passageOffer = from.passage ? (pspan
+  const passageOffer = from.passage ? (noMap
+    ? { id: 'passage', name: 'This passage', at: '', available: false, why: 'The years this paragraph concerns', reason: 'A series groups other entries; its Master Index entry is where they are' }
+    : pspan
     ? { id: 'passage', name: 'This passage', at: omniAt(passageRecipe), recipe: passageRecipe, available: true,
         why: checked ? `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}; ${frameWhy(passageRecipe, pspan.year)}` : `The years this paragraph concerns, ${formatSpan(pspan.from, pspan.to)}, as its periods record gives them; not yet checked by a second reader; ${frameWhy(passageRecipe, pspan.year)}` }
     : { id: 'passage', name: 'This passage', at: '', available: false, why: 'The years this paragraph concerns', reason: 'This paragraph has no periods record yet' }) : null;

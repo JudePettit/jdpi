@@ -373,6 +373,21 @@ test('the four types: a polity and a site are clicked as a place; a period by it
   const br = resolve(balkan, { module: 'neo-classic', at: 'x' }, { today: '2026-11-21' });
   assert.equal(br.offers.find(o => o.id === 'life').available, false);
   assert.equal(br.offers.find(o => o.id === 'life').reason, 'A series groups other entries; its Master Index entry is where they are');
+  // Second review X2 (21 November 2026): in a passage whose periods record a second reader has checked, a series is
+  // still offered no map: neither the default view nor the "This passage" offer is the passage's map.
+  const checkedRec = readPeriods(read('./fixtures/omni/periods.json'))('c03-p03');
+  assert.ok(checkedRec && checkedRec.checkedBy);
+  const inPassage = { ...fromNeo('c03-p03', 3, 'Q165725'), periods: checkedRec.periods, places: checkedRec.places };
+  const sr = resolve(balkan, inPassage, ctxFor(para(3, 'c03-p03'), { record: checkedRec }));
+  assert.equal(readRecipe(sr.recipe).t, undefined, 'the default view of a series carries no years, checked passage or not');
+  assert.deepEqual(sr.offers.filter(o => o.available && /^omni\//.test(o.at)).map(o => o.id), [], 'no map is offered for a series');
+  assert.equal(sr.offers.find(o => o.id === 'passage').reason, 'A series groups other entries; its Master Index entry is where they are');
+  // A period in the same checked passage keeps the older rule every kind follows: the passage's years are the default
+  // view, and the period's own years are the "Its years" offer.
+  const hrIn = { q: 'Q1474884', label: 'High Renaissance', type: 'period', facts: { start: '1494', end: '1527' }, rel: {} };
+  const pr = resolve(hrIn, { ...inPassage, at: 'x' }, ctxFor(para(3, 'c03-p03'), { record: checkedRec }));
+  assert.deepEqual(readRecipe(pr.recipe).t, { from: 1499, to: 1500 });
+  assert.deepEqual(readRecipe(pr.offers.find(o => o.id === 'life').recipe).t, { from: 1490, to: 1531 });
   // A type the rule does not know is named, and the card still holds the entry: it never throws or says nothing.
   const odd = { q: 'Q42', label: 'Something', type: 'widget', facts: {}, rel: {} };
   assert.doesNotThrow(() => resolve(odd, { module: 'card', at: '' }, {}));

@@ -580,6 +580,8 @@ test('committed lake, after the full build: Alexander the Great\'s birth is in t
 // (Q15661340), neither among the place types, and it has no capital (P36). The type rules live in lake/scripts/types.mjs.
 // Since 21 November 2026 a polis is a polity, a state that no longer exists (the four new types, below); an ancient city
 // that is neither a polis nor a city-state, nor an archaeological site, stays a place.
+// A dated statement as Wikidata gives one (a year, normal rank): what a date sign needs to count (typeOf's dated).
+const STATED = { rank: 'normal', mainsnak: { snaktype: 'value', datavalue: { value: { time: '+1900-00-00T00:00:00Z', precision: 9 } } } };
 test('types: a polis is a polity, and an ancient city a place (Sparta)', async () => {
   const { typeOf, PLACE } = await import('../lake/scripts/types.mjs');
   const e = (label, p31, more = {}) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...more } });
@@ -606,7 +608,7 @@ test('committed lake, after the full build: Sparta is a polity', t => {
 // (wbgetentities, read-only), so each line fails on the rule that typed it wrong.
 test('types: the review’s corrections: schools of economics, the Nazi Party, the EU, treaties, just war theory, the non-ideas', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   // Schools of economic thought (Q3048444) were topics.
   for (const l of ['Keynesian economics', 'Austrian school', 'Chicago school of economics', 'post-Keynesian economics', 'New Keynesian economics', 'Neo-Keynesian economics']) assert.equal(typeOf(e(l, ['Q3048444'])), 'idea', l);
   assert.equal(typeOf(e('classical economics', ['Q3048444', 'Q137189000'])), 'idea');
@@ -648,7 +650,7 @@ test('types: the review’s corrections: schools of economics, the Nazi Party, t
 // made conflicts though their class is no war. Each is given the classes and dates Wikidata gave it that day.
 test('types: every kind of party is a party; a war word does not make a protest, a sanction or a ceasefire a war', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   const parties = [['Norwegian Labour Party', ['Q108564724']], ['Progressive Party', ['Q3282509']], ['Democratic Party', ['Q23702035']],
     ['Union of the Democratic Centre', ['Q6065085', 'Q388602']], ['Communist Party of Ukraine', ['Q115326462']], ['We Continue the Change', ['Q43791339', 'Q388602']],
     ['Croatian Independent Democrats', ['Q43639983']], ['European People\'s Party', ['Q24649']], ['Green Party of Canada', ['Q3778417']]];
@@ -678,7 +680,7 @@ test('types: every kind of party is a party; a war word does not make a protest,
 // Wikidata gave it on 21 November 2026 (wbgetentities, read-only), so each line fails on the rule that types it.
 test('types: a state that no longer exists is a polity; a country, a city lived in today and a region stay places', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   // The owner's examples of a polity: dynasties, empires, ancient Egypt, a city republic.
   assert.equal(typeOf(e('Zhou dynasty', ['Q12857432', 'Q836688', 'Q11514315'], ['P571', 'P576'])), 'polity');
   assert.equal(typeOf(e('Shang dynasty', ['Q836688', 'Q12857432', 'Q11042', 'Q1292119', 'Q11514315'], ['P36', 'P571', 'P576'])), 'polity');
@@ -702,6 +704,19 @@ test('types: a state that no longer exists is a polity; a country, a city lived 
   // Review D4: Wikidata records the end of a military occupation as its end time (P582), not a date of dissolution; the
   // Ukrainian occupation of Kursk Oblast (Q129167851, read 21 November 2026) has P582 May 2025 and no P576.
   assert.equal(typeOf(e('Ukrainian occupation of Kursk Oblast', ['Q188686'], ['P36', 'P580', 'P582', 'P571'])), 'polity');
+  // Second review X1 (21 November 2026): a date is a sign only when Wikidata's best statement states one. A dissolution
+  // stated as 'no value' or 'unknown value', or only a deprecated date, ends nothing: the record would show no date.
+  const noValue = { rank: 'normal', mainsnak: { snaktype: 'novalue' } }, unknown = { rank: 'normal', mainsnak: { snaktype: 'somevalue' } };
+  const deprecated = { ...STATED, rank: 'deprecated' };
+  const withP = (ent, p, claims) => ({ ...ent, claims: { ...ent.claims, [p]: claims } });
+  const libya = e('Italian Libya', ['Q133156'], ['P36', 'P571']), sovereign = e('A state of today', ['Q6256', 'Q3624078', 'Q3024240'], ['P36', 'P571']);
+  for (const claims of [[noValue], [unknown], [deprecated], []]) {
+    assert.equal(typeOf(withP(libya, 'P576', claims)), 'place', 'a colony with no stated date of dissolution stays a place');
+    assert.equal(typeOf(withP(sovereign, 'P576', claims)), 'place', 'a state of today with no stated date of dissolution stays a place');
+    assert.equal(typeOf(withP(e('An occupation', ['Q188686'], ['P36', 'P580', 'P571']), 'P582', claims)), 'place', 'an occupation with no stated end stays a place');
+  }
+  assert.equal(typeOf(withP(libya, 'P576', [deprecated, STATED])), 'polity', 'a stated date beside a deprecated one counts');
+  assert.equal(typeOf(withP(sovereign, 'P576', [STATED])), 'polity', 'a historical country with a stated dissolution is a polity');
   // An end time makes no state that exists today a polity, and no territory without one.
   assert.equal(typeOf(e('India', ['Q6256', 'Q3624078', 'Q223832'], ['P36', 'P571', 'P582'])), 'place');
   // A period's end time is not a dissolution: Ottoman Palestine (Q2909425, read 21 November 2026) stays a period.
@@ -731,7 +746,7 @@ test('types: a state that no longer exists is a polity; a country, a city lived 
 });
 test('types: a named span of history is a period; a movement, a war, a revolution and a party stay what they are', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   assert.equal(typeOf(e('Migration Period', ['Q11514315', 'Q177626'], ['P580', 'P582'])), 'period');
   assert.equal(typeOf(e('Iron Age', ['Q15401633'], ['P580'])), 'period');
   assert.equal(typeOf(e('Bronze Age', ['Q15401699'], ['P580', 'P582'])), 'period');
@@ -758,7 +773,7 @@ test('types: a named span of history is a period; a movement, a war, a revolutio
 });
 test('types: an archaeological site, a monument or a historic building is a site; an institution in a building is not', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   assert.equal(typeOf(e('Great Pyramid of Giza', ['Q4363262', 'Q839954', 'Q66108498', 'Q175582', 'Q381885'], ['P625', 'P571'])), 'site');
   assert.equal(typeOf(e('Pyramid of Djoser', ['Q1456099', 'Q839954', 'Q175582'], ['P625', 'P571'])), 'site');
   assert.equal(typeOf(e('Pantheon', ['Q867143', 'Q21752084', 'Q120560', 'Q96376684', 'Q14752696', 'Q92755865', 'Q3867560', 'Q112132548', 'Q112132522'], ['P625', 'P571'])), 'site');
@@ -780,7 +795,7 @@ test('types: an archaeological site, a monument or a historic building is a site
 });
 test('types: an entry that is only a grouping of others is a series; a war that has battles stays a war', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   assert.equal(typeOf(e('Balkan Wars', ['Q104212151'], ['P580', 'P582', 'P527'])), 'series');
   assert.equal(typeOf(e('Italian Wars of 1499–1504', ['Q104212151'], ['P580', 'P582'])), 'series');
   assert.equal(typeOf(e('Wars of Alexander the Great', ['Q130525743', 'Q104212151'], ['P580', 'P582', 'P527'])), 'series');
@@ -826,7 +841,7 @@ test('committed lake, after the first full build with the four types: the owner�
 });
 test('types: no rule of the four types reaches a person, an election, a party or a war, whatever other classes they carry', async () => {
   const { typeOf } = await import('../lake/scripts/types.mjs');
-  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [{}]])) } });
+  const e = (label, p31, more = []) => ({ labels: { en: { value: label } }, claims: { P31: p31.map(id => ({ mainsnak: { datavalue: { value: { id } } } })), ...Object.fromEntries(more.map(p => [p, [STATED]])) } });
   // A human with a historical country's, a period's, a site's and a series' classes is still a person.
   assert.equal(typeOf(e('Someone', ['Q5', 'Q3024240', 'Q11514315', 'Q839954', 'Q20937557'], ['P569', 'P576'])), 'person');
   // An election's label wins over a polity's, a period's or a series' class.

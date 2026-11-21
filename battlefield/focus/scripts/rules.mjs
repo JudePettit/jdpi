@@ -196,16 +196,6 @@ export function monthWeights(months, battles) {
   return months.map(m => 1 + known.filter(b => b.s.slice(0, 7) <= m && (b.e || b.s).slice(0, 7) >= m).length);
 }
 
-/**
- * Which of a war's months a Correlates of War total covers: the months in COW's own years for the war (`years`, as
- * Retrospective Battlefield's wars.json gives them). COW ends the Second Sino-Japanese War (its war 130, 1937–41) on
- * 6 December 1941 and counts the fighting after within World War II, so 1942–45 get no share of its total.
- */
-export function cowMonths(months, years) {
-  const ys = new Set((years || []).map(y => String(Array.isArray(y) ? y[0] : y)));
-  return months.map((m, i) => [m, i]).filter(([m]) => ys.has(m.slice(0, 4))).map(([, i]) => i);
-}
-
 const MONTH_NO = Object.fromEntries(['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'].map((m, i) => [m, i + 1]));
 const lastDay = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
 /**

@@ -1,15 +1,22 @@
 // War Focus data build: one file per war in battlefield/focus/data/wars/<id>.json plus an index.
 //   node battlefield/focus/scripts/build.mjs [--cache dir] [--only id,id] [--allow-drop]
+//   node battlefield/focus/scripts/build.mjs --deaths-only [--cache dir] [--only id,id]
 // Guard: nothing is written when a war lost its Wikidata item (its Wikipedia title no longer resolves), all or half
 // of its battles, or a tenth of its UCDP events, or when the UCDP data ends earlier than before; --allow-drop writes.
 // Sources (downloaded into the cache directory once):
 //   · UCDP Georeferenced Event Dataset v26.1 (1989–2025) and the candidate events of every later year: geolocated clashes with deaths.
-//   · PRIO Battle Deaths Dataset v3.1 (annual battle deaths, 1946–2008).
-//   · Correlates of War totals (already in Retrospective Battlefield's wars.json).
+//   · PRIO Battle Deaths Dataset v3.1: annual battle deaths, its years 1946–1988 only. Its page states no licence; VM
+//     keeps these years until its owner decides (20 November 2026).
+//   · UCDP Battle-Related Deaths Dataset v26.1, conflict level (CC BY 4.0): annual battle deaths from 1989, in place of
+//     PRIO's years 1989–2008 (by the war's `ged` conflicts, else the UCDP conflict of its bf u<id>).
 //   · Wikidata: the war's item and every battle, siege or military operation that is part of it, with coordinates,
 //     dates and recorded deaths.
-// Months with UCDP events use their recorded deaths. Earlier months spread each year's (PRIO) or the war's (COW) total
-// across its months in proportion to the battles recorded in each month; these are flagged as estimates.
+// Months with UCDP events use their recorded deaths. Other months spread each year's total (PRIO's or UCDP's) across
+// its months in proportion to the UCDP events or the battles recorded in each month; these are flagged as estimates.
+// A war no free source gives battle deaths for (deaths: {}, the nine before 1946) has no figure: totalDeaths null.
+// Order of steps: load PRIO and UCDP BRD; then (a full build) GED, each war's battles from Wikidata and Wikipedia, its
+// deaths, the guard, then every file; or (--deaths-only) each committed war file's months, UCDP cells and battles, its
+// deaths again from the yearly totals, then the war files and the index. Nothing is written until every step has worked.
 import { readFileSync, writeFileSync, mkdirSync, existsSync, createReadStream } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -18,7 +25,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { WARS, leftOutOf } from './wars.mjs';
-import { battleDates, partsWithin, apportion, eventMonths, cowMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
+import { battleDates, partsWithin, apportion, eventMonths, monthWeights, wdDate, decadeFits, stateBoxes, infoboxEnd, endAgainstArticle, casualtiesOf, byStart, pickCoord } from './rules.mjs';
 import { linkParts, ownDeaths, groupBattles, ownFigure } from '../figures.mjs';
 import { readArticle, battleFigures, wdStatements, keptFigures } from './infobox.mjs';
 import { candidateFiles } from '../../scripts/ucdp.mjs';
@@ -32,6 +39,8 @@ mkdirSync(FIG_DIR, { recursive: true });
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 const CACHE = arg('--cache') || join(tmpdir(), 'warfocus-src');
 const ONLY = arg('--only')?.split(',');
+const DEATHS_ONLY = process.argv.includes('--deaths-only');
+const PRIO_TO = 1988, BRD_FROM = 1989, BRD_TO = 2008;
 mkdirSync(CACHE, { recursive: true });
 const UA = { 'User-Agent': process.env.VM_UA || 'JDP-I War Focus (https://jdpi.pages.dev; research use)' };
 const pause = ms => new Promise(res => setTimeout(res, ms));
@@ -338,12 +347,94 @@ function wholesAndParts(battles, edges, warId = '') {
 }
 const dayNo = d => Date.parse(d + 'T00:00:00Z') / 864e5;
 
+// The war's id in the Retrospective Battlefield (its wars.json): bf as written, else u<first GED conflict id>.
+const bfOf = w => w.bf || (w.ged ? 'u' + w.ged[0] : null);
+
+// Monthly deaths. Per year: an annual total where one source has it (PRIO's to 1988, UCDP Battle-Related Deaths' for
+// 1989–2008), scaled to the war's share of the year when the conflict also runs outside the war, spread over the
+// months by UCDP event deaths, or by battle counts when there are no events; otherwise UCDP event deaths as recorded.
+// A war with no free source for its deaths (deaths: {}) has none: every month 0, not an estimate, and total null.
+function deathsFor(w, months, end, gedDeaths, shared, dated, events) {
+  const deaths = months.map(() => 0), estimated = months.map(() => false);
+  if (!w.deaths.prio && !w.deaths.ucdp) {
+    return { deaths, estimated, covered: null, total: null,
+      source: 'No free source gives this war’s battle deaths by month or year, so none is shown; each battle’s own figures are listed below' };
+  }
+  // A battle dated only to its year weighs no month (rules.mjs monthWeights, S0).
+  const weight = monthWeights(months, dated);
+  // A total shared out in whole deaths that add up to it (apportion).
+  const spread = (total, idxs) => {
+    const useGed = idxs.some(i => gedDeaths[i] > 0), wt = i => (useGed ? gedDeaths[i] + 1 : weight[i]);
+    apportion(total, idxs.map(wt)).forEach((n, k) => { deaths[idxs[k]] += n; estimated[idxs[k]] = true; });
+  };
+  const allIdx = months.map((_, i) => i), parts = [];
+  const byYear = new Map(), from = new Map();
+  const add = (y, v, src) => { byYear.set(y, (byYear.get(y) || 0) + v); from.set(y, src); };
+  for (const id of w.deaths.prio || []) for (const [y, v] of prio.get(id) || []) if (v > 0) add(y, v, 'prio');
+  // UCDP's years only for a war PRIO counted (the years PRIO's v3.1 gave to 2008).
+  if (w.deaths.prio) {
+    const ids = w.ged || (/^u\d+$/.test(bfOf(w) || '') ? [bfOf(w).slice(1)] : []);
+    for (const id of ids) for (const [y, v] of brd.get(String(id)) || []) add(y, v, 'brd');
+  }
+  // A first or last year is scaled to the war's share of it only when the conflict was also fighting in the year
+  // beside it (Afghanistan 2000–01), not when the year's deaths all fell inside the war (Korea 1950).
+  const y0 = +w.start.slice(0, 4), y1 = +end.slice(0, 4), busy = y => (byYear.get(y) || 0) >= 1000;
+  const used = new Set();
+  let usedGed = false;
+  for (let y = y0; y <= y1; y++) {
+    const idxs = allIdx.filter(i => months[i].startsWith(y + '-'));
+    const share = (y === y0 && busy(y - 1)) || (y === y1 && busy(y + 1)) ? idxs.length / 12 : 1;
+    if (byYear.has(y)) { spread(byYear.get(y) * share, idxs); used.add(from.get(y)); }
+    else for (const i of idxs) if (gedDeaths[i]) { deaths[i] = gedDeaths[i]; usedGed = true; }
+  }
+  const by = events ? 'UCDP events' : 'recorded battles';
+  if (used.has('prio')) parts.push(`PRIO Battle Deaths annual totals to 1988, spread across months by ${by}`);
+  if (used.has('brd')) parts.push(`UCDP Battle-Related Deaths annual totals for 1989–2008, spread across months by ${by}`);
+  if (usedGed) parts.push('UCDP GED recorded deaths (state-based violence)' + (shared.some(Boolean) ? ', an event UCDP dates only to a period shared out over the days of that period' : ''));
+  return { deaths, estimated, covered: null, total: deaths.reduce((s, v) => s + v, 0), source: parts.join('; ') };
+}
+
+// --deaths-only: each committed war file's deaths again from the yearly totals, with its months, UCDP cells (their
+// deaths add up to the month's UCDP deaths) and battles as built; then the war files and the index's entries.
+function deathsOnly() {
+  const IDXF = join(OUT, 'index.json'), idx = JSON.parse(readFileSync(IDXF, 'utf8')), out = [];
+  for (const w of wars) {
+    const file = join(WAR_DIR, w.id + '.json'), d = JSON.parse(readFileSync(file, 'utf8'));
+    const gedDeaths = d.months.map((_, i) => (d.cells[i] || []).reduce((s, c) => s + (c[2] || 0), 0));
+    const shared = d.shared || d.months.map(() => 0);
+    const r = deathsFor(w, d.months, w.end || d.dataThrough || today, gedDeaths, shared, (d.battles || []).filter(b => b.s), d.events);
+    Object.assign(d, { bf: bfOf(w), deaths: r.deaths, estimated: r.estimated, deathsSource: r.source, totalDeaths: r.total, covered: r.covered });
+    const e = idx.wars.find(x => x.id === w.id); if (!e) throw new Error(`${w.id}: not in the index`);
+    Object.assign(e, { bf: bfOf(w), totalDeaths: r.total, deathsSource: r.source });
+    out.push([file, JSON.stringify(d)]);
+    console.log(`${w.id}: ${r.total == null ? 'no figure' : r.total.toLocaleString('en-GB')} · ${r.source.slice(0, 90)}`);
+  }
+  delete idx.sources.cow;
+  idx.sources.prio = 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides';
+  idx.sources.brd = 'UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008';
+  for (const [file, text] of out) writeFileSync(file, text);
+  writeFileSync(IDXF, JSON.stringify(idx));
+  console.log(`deaths again for ${out.length} wars`);
+}
+
 // ---- Load sources
 const X = require('xlsx');
 const prioRows = X.utils.sheet_to_json(X.readFile(await download('https://cdn.cloud.prio.org/files/d21ef702-a546-45a8-b3c9-5b520dcc1239/PRIO%20Battle%20Deaths%20Dataset%2031.xls?inline=true', 'prio_bd31.xls')).Sheets.bdonly);
 const prio = new Map(); // id -> year -> best
-for (const r of prioRows) { const v = r.bdeadbes > 0 ? r.bdeadbes : r.bdeadlow > 0 ? r.bdeadlow : 0; const m = prio.get(r.id) || new Map(); m.set(r.year, (m.get(r.year) || 0) + v); prio.set(r.id, m); }
-const cow = new Map(JSON.parse(readFileSync(join(ROOT, '../history/data/wars.json'), 'utf8')).wars.filter(w => w.src === 'cow').map(w => [+w.id.slice(1), w]));
+for (const r of prioRows) { if (r.year > PRIO_TO) continue; const v = r.bdeadbes > 0 ? r.bdeadbes : r.bdeadlow > 0 ? r.bdeadlow : 0; const m = prio.get(r.id) || new Map(); m.set(r.year, (m.get(r.year) || 0) + v); prio.set(r.id, m); }
+// UCDP Battle-Related Deaths v26.1, conflict-year (bd_best), for PRIO's years 1989–2008.
+const brd = new Map(); // UCDP conflict id -> year -> bd_best
+{
+  const dir = unzip(await download('https://ucdp.uu.se/downloads/brd/ucdp-brd-conf-261-csv.zip', 'ucdp-brd-conf-261-csv.zip'), 'brd261');
+  for await (const r of csvRows(join(dir, 'BattleDeaths_v26_1_conf.csv'))) {
+    const y = +r.year, v = +r.bd_best; if (!(y >= BRD_FROM && y <= BRD_TO) || !(v > 0)) continue;
+    const m = brd.get(r.conflict_id) || brd.set(r.conflict_id, new Map()).get(r.conflict_id); m.set(y, (m.get(y) || 0) + v);
+  }
+  if (!brd.size) throw new Error('UCDP Battle-Related Deaths: no conflict-years read');
+}
+const wars = WARS.filter(w => !ONLY || ONLY.includes(w.id));
+const today = new Date().toISOString().slice(0, 10);
+if (DEATHS_ONLY) { deathsOnly(); process.exit(0); }
 // CShapes 2.0 borders (Retrospective Battlefield's), for each war's theatre (stateBoxes, scripts/rules.mjs).
 const BORDERS = JSON.parse(readFileSync(join(ROOT, '../history/data/borders.topo.json'), 'utf8'));
 const gedDir = unzip(await download('https://ucdp.uu.se/downloads/ged/ged261-csv.zip', 'ged261.zip'), 'ged');
@@ -355,8 +446,6 @@ const candNames = candidateFiles(page, GED_THROUGH);
 if (!candNames.length) throw new Error(`No UCDP candidate events file after ${GED_THROUGH} on https://ucdp.uu.se/downloads/`);
 const gedCands = [];
 for (const name of candNames) gedCands.push(await download(`https://ucdp.uu.se/downloads/candidateged/${name}`, name));
-const wars = WARS.filter(w => !ONLY || ONLY.includes(w.id));
-const today = new Date().toISOString().slice(0, 10);
 
 // GED events for every war at once (one pass over the file).
 const gedIds = new Map(); for (const w of wars) for (const id of w.ged || []) (gedIds.get(String(id)) || gedIds.set(String(id), []).get(String(id))).push(w);
@@ -397,47 +486,11 @@ for (const w of wars) {
   // Each event's deaths by month: an event UCDP dates only to a period (date_prec above 1, a week, a month, a year) is
   // shared out over the days of its period that fall in the war (eventMonths, scripts/rules.mjs), not put on its first day.
   for (const e of ev) e.m = eventMonths(e.d, e.de, e.best, w.start, end).filter(([m]) => mi.has(m));
-  // Monthly deaths. Per year: PRIO's annual total where it has one (scaled to the war's share of the year when the
-  // PRIO conflict also runs outside the war), spread over the months by UCDP event deaths, or by battle counts when
-  // there are no events; otherwise UCDP event deaths as recorded; COW wars spread their single total the same way.
-  const deaths = months.map(() => 0), estimated = months.map(() => false);
+  // Monthly deaths (deathsFor, below the loop's helpers).
   const gedDeaths = months.map(() => 0), shared = months.map(() => 0);
   for (const e of ev) for (const [m, n] of e.m) { const i = mi.get(m); gedDeaths[i] += n; if (e.m.length > 1) shared[i] += n; }
-  // A battle dated only to its year weighs no month (rules.mjs monthWeights, S0).
-  const weight = monthWeights(months, dated);
-  // A total shared out in whole deaths that add up to it (apportion): COW's 1,000,000 stays 1,000,000, not 999,999.
-  const spread = (total, idxs) => {
-    const useGed = idxs.some(i => gedDeaths[i] > 0), wt = i => (useGed ? gedDeaths[i] + 1 : weight[i]);
-    apportion(total, idxs.map(wt)).forEach((n, k) => { deaths[idxs[k]] += n; estimated[idxs[k]] = true; });
-  };
-  const allIdx = months.map((_, i) => i);
-  const parts = [];
-  let covered = null;
-  if (w.deaths.cow) {
-    // Only over the months in COW's own years for the war (cowMonths): a month outside them has no figure.
-    const c = cow.get(w.deaths.cow), idxs = cowMonths(months, c.years);
-    spread(c.deaths, idxs);
-    if (idxs.length < months.length) covered = [months[idxs[0]], months[idxs.at(-1)]];
-    parts.push(covered ? `Correlates of War war total for ${c.span}, spread across those years' months by recorded battles` : 'Correlates of War war total, spread across months by recorded battles');
-    if (w.deathsNote) parts.push(w.deathsNote);
-  }
-  else {
-    const byYear = new Map();
-    for (const id of w.deaths.prio || []) for (const [y, v] of prio.get(id) || []) if (v > 0) byYear.set(y, (byYear.get(y) || 0) + v);
-    // A first or last year is scaled to the war's share of it only when the PRIO conflict was also fighting in the
-    // year beside it (Afghanistan 2000–01), not when the year's deaths all fell inside the war (Korea 1950).
-    const y0 = +w.start.slice(0, 4), y1 = +end.slice(0, 4), busy = y => (byYear.get(y) || 0) >= 1000;
-    let usedPrio = false, usedGed = false;
-    for (let y = y0; y <= y1; y++) {
-      const idxs = allIdx.filter(i => months[i].startsWith(y + '-'));
-      const share = (y === y0 && busy(y - 1)) || (y === y1 && busy(y + 1)) ? idxs.length / 12 : 1;
-      if (byYear.has(y)) { spread(byYear.get(y) * share, idxs); usedPrio = true; }
-      else for (const i of idxs) if (gedDeaths[i]) { deaths[i] = gedDeaths[i]; usedGed = true; }
-    }
-    if (usedPrio) parts.push('PRIO Battle Deaths annual totals, spread across months by ' + (ev.length ? 'UCDP events' : 'recorded battles'));
-    if (usedGed) parts.push('UCDP GED recorded deaths (state-based violence)' + (shared.some(Boolean) ? ', an event UCDP dates only to a period shared out over the days of that period' : ''));
-  }
-  const source = parts.join('; ');
+  const { deaths, estimated, source, covered, total } = deathsFor(w, months, end, gedDeaths, shared, dated, ev.length);
+
   // Events: per month, 0.2° cells with deaths and counts, and the five deadliest events.
   const cells = months.map(() => new Map()), top = months.map(() => []);
   // An event over a period counts in each of its months with that month's share of its deaths.
@@ -458,9 +511,8 @@ for (const w of wars) {
     const lo = pts.length > 200 ? 0.01 : 0, hi = 1 - lo;
     bbox = [q(pts.map(p => p[0]), lo), q(pts.map(p => p[1]), lo), q(pts.map(p => p[0]), hi), q(pts.map(p => p[1]), hi)];
   }
-  const total = deaths.reduce((s, v) => s + v, 0);
   const norm = side => (side.gw || []).map(x => (Array.isArray(x) ? { gw: x[0], from: x[1] || null, to: x[2] || null } : { gw: x, from: null, to: null }));
-  const bf = w.bf || (w.deaths.cow ? 'c' + w.deaths.cow : w.ged ? 'u' + w.ged[0] : null);
+  const bf = bfOf(w);
   // ---- Each battle's figures from every source (BF-08, scripts/infobox.mjs battleFigures): Wikidata's statements read
   // in full, the article's infobox at the revision read, and since 1989 UCDP's clashes nearby where nothing else gives
   // one. The detail for the battle's window goes to data/figures/<id>.json, loaded on demand. A battle whose source
@@ -531,7 +583,8 @@ const all = [...others, ...index].sort((a, b) => (a.start < b.start ? -1 : 1));
 const gedThrough = ONLY && old.gedThrough > maxGed ? old.gedThrough : maxGed;
 writeFileSync(IDX, JSON.stringify({ generated: new Date().toISOString(), gedThrough,
   sources: { ucdp: 'UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0',
-    prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)', cow: 'Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)',
+    prio: 'PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides',
+    brd: 'UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008',
     wikidata: 'Wikidata (CC0): battles, sieges and operations that are part of each war', borders: 'CShapes 2.0 (Schvitz et al. 2022)',
     wikipedia: FIG_SOURCES.wikipedia },
   wars: all }));

@@ -5,30 +5,9 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:Vitruvian Manager Realtime Calendar
 X-WR-CALDESC:Political events from six months ago to eighteen months ahead 
- (2026-05-20 to 2028-05-20)\, from Vitruvian Manager's Realtime Calendar.
+ (2026-05-21 to 2028-05-21)\, from Vitruvian Manager's Realtime Calendar.
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-BEGIN:VEVENT
-UID:8cd7a506e35e706e@jdpi.pages.dev
-DTSTAMP:20261120T062338Z
-DTSTART;VALUE=DATE:20260520
-DTEND;VALUE=DATE:20260521
-SUMMARY:The U.S. Office of Foreign Assets Control removes sanctions on Fran
- cesca Albanese (Palestine)
-DESCRIPTION:The U.S. Office of Foreign Assets Control removes sanctions on 
- Francesca Albanese\, the UN Special Rapporteur on occupied Palestinian ter
- ritories\, after district judge Richard J. Leon of the District of Columbi
- a blocked measures imposed over Albanese's criticism of Israel and its act
- ions in Gaza.\n\nSanctions: Palestine\nReported by AFP via ABS-CBN News: h
- ttps://www.abs-cbn.com/news/world/2026/5/21/us-lifts-sanctions-on-un-exper
- t-on-palestinians-1006\nSource: https://en.wikipedia.org/wiki/United_State
- s_and_the_United_Nations\nText: Wikipedia (CC BY-SA 4.0)\, via Vitruvian M
- anager (jdpi.pages.dev).
-CATEGORIES:Sanctions
-URL:https://en.wikipedia.org/wiki/United_States_and_the_United_Nations
-STATUS:CONFIRMED
-TRANSP:TRANSPARENT
-END:VEVENT
 BEGIN:VEVENT
 UID:03925860ffed4d3c@jdpi.pages.dev
 DTSTAMP:20261120T062338Z

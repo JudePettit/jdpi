@@ -10,14 +10,32 @@
 // wars of 1926–45 were none: Retrospective Battlefield's Correlates of War wars file Germany's Second World War and
 // Spanish Civil War under 255. The GDR (265) is a state of its own, not counted in Germany's figures, as the
 // Retrospective keeps it (no ISO3). Yemen, which had no code at all, is GW_PREDECESSOR's (below).
+// Since 20 November 2026 the conflict figures read the Retrospective Battlefield's places by Wikidata item (placeKeys,
+// below), not by code, and its wars of 1926–45 are VM's list from Wikidata, not the Correlates of War's. The codes are
+// kept only for the leaders (the Retrospective's records, under either of its shapes) and for links.
 
 export const SINCE = '1926-10-26'; // "the last 100 years", as the overview has counted them
 
 const years = (a, b, today) => Math.max(0, (Date.parse(b || today) - Date.parse(a)) / (365.25 * 864e5));
 const round = (x, d = 3) => (x == null ? null : Math.round(x * 10 ** d) / 10 ** d);
 
-/** The Retrospective's codes for a country (ISO3), from its scripts/countries.mjs COUNTRIES: e.g. DEU → [255, 260]. */
-export const retroCodes = (COUNTRIES, iso3) => Object.entries(COUNTRIES).filter(([, c]) => c.iso3 === iso3).map(([gw]) => +gw).sort((a, b) => a - b);
+/**
+ * The Retrospective's keys for a country (ISO3), from its scripts/countries.mjs COUNTRIES, in either of its shapes: until
+ * 20 November 2026 keyed by Gleditsch–Ward number (DEU → [255, 260]); from then ('retro-countries/2') by each state's
+ * first Wikidata item (DEU → ['Q41304', 'Q713750']). Each key opens the country's record in its data/countries.json.
+ */
+export const retroCodes = (COUNTRIES, iso3) => Object.entries(COUNTRIES).filter(([, c]) => c.iso3 === iso3).map(([k]) => (/^\d+$/.test(k) ? +k : k))
+  .sort((a, b) => (typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b))));
+
+// The states a present-day country's war counts take in (VM's own table, 20 November 2026), besides its own Wikidata
+// item and those its Retrospective records name (qids): the ones a single Gleditsch–Ward number used to cover with it, so
+// that the counts, which read the Retrospective Battlefield's places by Wikidata item since that day, take in what they
+// took in before. Russia, the Soviet Union (365); Serbia, socialist and federal Yugoslavia (345); Vietnam, North Vietnam
+// (816); Yemen, the Yemen Arab Republic (678, GW_PREDECESSOR below); Zimbabwe, Rhodesia (552). A state each successor shares (the Soviet Union for
+// Ukraine) is not added: those states were counted under their own numbers before, and still are.
+export const SUCCESSION = { RUS: ['Q15180'], SRB: ['Q83286', 'Q838261'], VNM: ['Q172640'], YEM: ['Q267584'], ZWE: ['Q217169'] };
+/** The Wikidata items a country's war counts read: its own, SUCCESSION's and its Retrospective records' (qids). */
+export const placeKeys = (iso3, qid, records = []) => [...new Set([qid, ...(SUCCESSION[iso3] || []), ...records.filter(Boolean).flatMap(r => r.qids || [])].filter(Boolean))];
 
 // A present-day state whose Gleditsch and Ward code the code list (countrycode) files under a predecessor's row, which
 // has no ISO3, so the state itself had none: Yemen (until 17 November 2026 National Analysis had no code for it, and so
@@ -37,8 +55,12 @@ export const GW_PREDECESSOR = { YEM: { gw: 678, row: 'Yemen Arab Republic' } };
  * the parsed code list (rows with iso3c, gwn and country.name.en). Returns Map(ISO3 → code); `warn` hears of a
  * predecessor row that no longer gives its code.
  */
-export function gwCodes(COUNTRIES, codelist, warn = () => {}) {
-  const out = new Map(Object.entries(COUNTRIES).map(([gw, c]) => [c.iso3, +gw]));
+export function gwCodes(COUNTRIES, codelist, warn = () => {}, oldKeys = null) {
+  // The Retrospective keyed by Wikidata item ('retro-countries/2', 20 November 2026) gives its old numbers in OLD_KEYS
+  // (number → key), for the codes other modules still read (the Realtime Battlefield, War Focus); the conflict figures
+  // here no longer use them.
+  const out = oldKeys ? new Map(Object.entries(oldKeys).filter(([, k]) => COUNTRIES[k]?.iso3).map(([gw, k]) => [COUNTRIES[k].iso3, +gw]))
+    : new Map(Object.entries(COUNTRIES).filter(([gw]) => /^\d+$/.test(gw)).map(([gw, c]) => [c.iso3, +gw]));
   for (const r of codelist) if (r.iso3c && r.gwn && !out.has(r.iso3c)) out.set(r.iso3c, +r.gwn);
   for (const [iso3, p] of Object.entries(GW_PREDECESSOR)) {
     if (out.has(iso3)) continue;
@@ -122,14 +144,19 @@ export function officeTerm(offices) {
 }
 
 /**
- * Armed conflict under any of the country's codes: UCDP/PRIO's conflicts since 1946 on its soil (by year, onsets, new
- * wars) and abroad, the Correlates of War's wars of 1926–45 it fought in or on its soil, and `active` (Realtime
- * Battlefield's wars this year, chosen by the caller).
+ * Armed conflict under any of the country's Wikidata items (`keys`, placeKeys above), as the Retrospective Battlefield
+ * places its wars (battlefield/history/data/wars.json, 'vm-battlefield-wars/2'): UCDP/PRIO's conflicts since 1946 on its
+ * soil (by year, onsets, new wars) and abroad; the wars of 1926–45 on VM's list from Wikidata (CC0) that it fought in or
+ * on its soil (wars1926_45: since 20 November 2026 in place of the Correlates of War's, which may not be passed on);
+ * and `active` (Realtime Battlefield's wars this year, chosen by the caller). A war's places and states are those of all
+ * its years (loc, states, and each year's locYears and statesYears).
  */
-export function conflict(codes, wars, active = []) {
-  const has = list => codes.some(g => list.includes(g));
-  const ucdp = wars.filter(w => w.src === 'ucdp' && (has(w.loc) || has(w.states)));
-  const onSoil = ucdp.filter(w => has(w.loc));
+export function conflict(keys, wars, active = []) {
+  const has = list => (list || []).some(k => keys.includes(k));
+  const all = (w, k, ky) => [...(w[k] || []), ...Object.values(w[ky] || {}).flat()];
+  const soil = w => has(all(w, 'loc', 'locYears')), fought = w => soil(w) || has(all(w, 'states', 'statesYears'));
+  const ucdp = wars.filter(w => w.src === 'ucdp' && fought(w));
+  const onSoil = ucdp.filter(soil);
   const byYear = new Map();
   for (const w of onSoil) for (const [y, lvl] of w.years) { const x = byYear.get(y) || { n: 0, war: false }; x.n++; if (lvl === 2) x.war = true; byYear.set(y, x); }
   let onsets = 0, newWars = 0;
@@ -138,13 +165,13 @@ export function conflict(codes, wars, active = []) {
     for (const [y, lvl] of w.years) { if (!ys.has(y - 1)) onsets++; if (lvl === 2 && ys.get(y - 1) !== 2) newWars++; }
   }
   const span = 2025 - 1946 + 1;
-  const cow = wars.filter(w => w.src === 'cow' && (has(w.loc) || has(w.states)));
+  const listed = wars.filter(w => w.src === 'wikidata' && fought(w));
   return {
     conflictYears: [...byYear.values()].reduce((s, x) => s + x.n, 0),
     avgConflictsPerYear: round([...byYear.values()].reduce((s, x) => s + x.n, 0) / span, 2),
     yearsWithConflict: byYear.size, yearsAtWar: [...byYear.values()].filter(x => x.war).length,
     onsetsPerDecade: round(onsets / (span / 10), 2), newWarsPerDecade: round(newWars / (span / 10), 2), newWarsPerYear: round(newWars / span, 3),
-    conflictsAbroad: ucdp.filter(w => !has(w.loc)).length, cowWars1926_45: cow.length,
+    conflictsAbroad: ucdp.filter(w => !soil(w)).length, wars1926_45: listed.length,
     active2026: active.map(w => ({ name: w.name, deaths: w.deaths, id: w.id })),
   };
 }

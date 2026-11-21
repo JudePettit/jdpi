@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {
   makeResolvers, newPiece, add, covered, coverageClass, countryCoverage, kinoFilms, warFocusWar, warSideGaps, warFilmGaps, retroWar,
   sceneGap, retroMoment, warFocusMoment, scopeGap, calendarGap, thinIndexGap, scopeTextGaps, boxShare, isAfrica, TERRITORIES, kinoScene, rankGaps,
+  recognisedShapes,
 } from '../integration/scripts/coverage.mjs';
 
 /* ------------------------------------------------------------------ fixtures */
@@ -25,20 +26,37 @@ const NAMES = [['FRA', 'FR', '250', 'France'], ['DEU', 'DE', '276', 'Germany', '
   ['UKR', 'UA', '804', 'Ukraine'], ['EGY', 'EG', '818', 'Egypt'], ['SEN', 'SN', '686', 'Senegal'], ['SSD', 'SS', '728', 'South Sudan'], ['SDN', 'SD', '729', 'Sudan'],
   ['VNM', 'VN', '704', 'Vietnam', 'Viet Nam'], ['GRL', 'GL', '304', 'Greenland'], ['TWN', 'TW', '158', 'Taiwan']];
 const HISTORICAL = { SUN: ['RUS', 'UKR'], YUG: ['SRB', 'HRV'] };
-// CShapes-like TopoJSON with absolute coordinates: France a square at 0–10°, Egypt at 20–30°, Russia at 40–60° (2019),
-// and Ukraine's 1991 shape at 40–50°, which Russia's 2019 shape covers (the recognised-border correction).
+// Natural Earth-like TopoJSON with absolute coordinates (since 20 November 2026; CShapes before): France a square at
+// 0–10°, Egypt at 20–30°, Russia at 40–60°, Morocco at 70–80° with Western Sahara's box at 70–75° by 0–8° drawn after it
+// (Natural Earth draws Western Sahara's coast inside Morocco). Cliopatria-like borders: Ukraine of 1992 at 40–50°, which
+// Russia's shape covers (the recognised-border correction), and a later Ukraine row that must not be the one read.
 const square = (w, s, e, n) => [[w, s], [e, s], [e, n], [w, n], [w, s]];
-const CSHAPES = {
+const COUNTRIES = {
   type: 'Topology',
-  arcs: [square(0, 0, 10, 10), square(20, 0, 30, 10), square(40, 0, 60, 10), square(40, 0, 50, 10)],
-  objects: { borders: { type: 'GeometryCollection', geometries: [
-    { type: 'Polygon', arcs: [[0]], properties: { gw: 220, s: '1900-01-01', e: '2100-01-01' } },
-    { type: 'Polygon', arcs: [[1]], properties: { gw: 651, s: '1900-01-01', e: '2100-01-01' } },
-    { type: 'Polygon', arcs: [[2]], properties: { gw: 365, s: '2014-03-18', e: '2100-01-01' } },
-    { type: 'Polygon', arcs: [[3]], properties: { gw: 369, s: '1991-12-26', e: '2014-03-18' } },
+  arcs: [square(0, 0, 10, 10), square(20, 0, 30, 10), square(40, 0, 60, 10), square(70, 0, 80, 20), square(70, 0, 75, 8)],
+  objects: { countries: { type: 'GeometryCollection', geometries: [
+    { type: 'Polygon', arcs: [[0]], properties: { iso3: 'FRA', q: 'Q142' } },
+    { type: 'Polygon', arcs: [[1]], properties: { iso3: 'EGY', q: 'Q79' } },
+    { type: 'Polygon', arcs: [[2]], properties: { iso3: 'RUS', q: 'Q159' } },
+    { type: 'Polygon', arcs: [[3]], properties: { iso3: 'MAR', q: 'Q1028' } },
+    { type: 'Polygon', arcs: [[4]], properties: { iso3: 'ESH', q: 'Q6250' } },
   ] } },
 };
-const R = makeResolvers({ national: NATIONAL, names: NAMES, historical: HISTORICAL, cshapes: CSHAPES, normaliseCountry: n => (n === 'Ivory Coast' ? "Côte d'Ivoire" : n) });
+const CLIOPATRIA = {
+  type: 'Topology',
+  arcs: [square(40, 0, 50, 10), square(40, 0, 55, 10)],
+  objects: { borders: { type: 'GeometryCollection', geometries: [
+    { type: 'Polygon', arcs: [[0]], properties: { q: 'Q598570', k: 'POLITY', f: 1992, t: 2023, n: 'Ukraine' } },
+    { type: 'Polygon', arcs: [[1]], properties: { q: 'Q598570', k: 'POLITY', f: 2024, t: 2024, n: 'Ukraine' } },
+  ] } },
+};
+// The Retrospective Battlefield's places by Wikidata item (battlefield/history/data/places.json), and its old c= numbers.
+const PLACES = { Q142: { n: 'France', iso3: 'FRA' }, Q79: { n: 'Egypt', iso3: 'EGY' }, Q183: { n: 'Germany', iso3: 'DEU' }, Q1041: { n: 'Senegal', iso3: 'SEN' },
+  Q15180: { n: 'Soviet Union', iso3: 'SUN' }, Q838261: { n: 'Federal Republic of Yugoslavia', iso3: 'YUG' }, Q16957: { n: 'East Germany', iso3: 'DDR' },
+  Q172640: { n: 'North Vietnam' }, Q8680: { n: 'British Empire' }, Q19951607: { n: 'French Colonial Africa' } };
+const OLD_COUNTRIES = { 220: 'Q142', 365: 'Q15180' };
+const R = makeResolvers({ national: NATIONAL, names: NAMES, historical: HISTORICAL, countries: COUNTRIES, small: [{ iso3: 'SGP', q: 'Q334', at: [103.82, 1.35] }],
+  recognised: recognisedShapes([CLIOPATRIA]), places: PLACES, oldCountries: OLD_COUNTRIES, normaliseCountry: n => (n === 'Ivory Coast' ? "Côte d'Ivoire" : n) });
 
 /* ------------------------------------------------------------------ resolvers */
 test('the target list is National Analysis without its territories, plus Taiwan and the Holy See', () => {
@@ -72,13 +90,40 @@ test('Gleditsch–Ward codes resolve by date for the Soviet Union and Yugoslavia
   assert.equal(R.gwIso(99999), null);
 });
 
+// Since 20 November 2026 the Retrospective Battlefield keys its places by Wikidata item (places.json); its old c=<number>
+// addresses still open the same place (oldCountries), and the Political Retrospective is read under either shape.
+test('the Retrospective Battlefield\'s places and the Retrospective\'s keys resolve without a Gleditsch–Ward code', () => {
+  assert.deepEqual(R.placeIso('Q142'), ['FRA']);
+  assert.deepEqual(R.expand(R.placeIso('Q15180')), ['RUS', 'UKR'], 'the Soviet Union as its successors');
+  assert.deepEqual(R.placeIso('Q16957'), ['DEU'], 'East Germany is Germany today');
+  assert.deepEqual(R.placeIso('Q172640'), ['VNM'], 'North Vietnam, a place with no code of its own: VM\'s table');
+  assert.deepEqual(R.placeIso('Q838261'), ['SRB', 'MNE', 'XKX'], 'federal Yugoslavia, as code 345 stood for it from 1992 to 2006');
+  assert.equal(R.placeIso('Q19951607'), null, 'French Colonial Africa is no one country today');
+  assert.deepEqual(R.placeIso('Q8680'), ['GBR'], 'the British Empire is the United Kingdom, as the Master Index files it');
+  assert.deepEqual(R.placeIso('Q183'), ['DEU']);
+  assert.deepEqual(R.battlefieldIso(220), ['FRA'], 'an old address, c=220');
+  assert.deepEqual(R.battlefieldIso('Q79'), ['EGY']);
+  assert.equal(R.battlefieldIso(999), null);
+  const T = makeResolvers({ national: NATIONAL, historical: HISTORICAL, retro: { countries: { Q15180: { iso3: 'RUS' }, Q142: { iso3: 'FRA' } }, oldKeys: { 365: 'Q15180', 220: 'Q142' } } });
+  assert.deepEqual(T.retroIso('Q15180', '1950-07-01'), ['SUN'], 'the Soviet Union before its end');
+  assert.deepEqual(T.retroIso('Q15180', '1995-07-01'), ['RUS'], 'the record\'s country after');
+  assert.deepEqual(T.retroIso(365, '1950-07-01'), ['SUN'], 'an old number through OLD_KEYS');
+  assert.deepEqual(T.retroIso(220), ['FRA']);
+  assert.deepEqual(R.retroIso(365, '1950-07-01'), ['RUS', 'UKR'], 'without the Retrospective, an old number still opens its place');
+});
+
 test('points fall in a shape, near a coast, under the recognised border, or nowhere', () => {
   assert.deepEqual(R.pointIso(5, 5), { iso: 'FRA', how: 'in' });
   assert.deepEqual(R.pointIso(10.1, 5), { iso: 'FRA', how: 'near' });
   assert.equal(R.pointIso(15, 5), null, 'at sea');
   assert.deepEqual(R.pointIso(15, 5, { near: 5.5 }), { iso: 'FRA', how: 'near' }, 'a wider coast for capitals');
-  assert.equal(R.pointIso(45, 5).iso, 'UKR', "inside Ukraine's 1991 shape, though CShapes 2019 draws Russia there");
+  assert.equal(R.pointIso(45, 5).iso, 'UKR', "inside Cliopatria's Ukraine of 1992, though Natural Earth draws Russia there");
+  assert.equal(R.pointIso(52, 5).iso, 'RUS', "only Cliopatria's first Ukraine row is read");
   assert.equal(R.pointIso(55, 5).iso, 'RUS');
+  assert.equal(R.pointIso(72, 5).iso, 'ESH', "Natural Earth's Morocco inside Western Sahara's box is Western Sahara");
+  assert.equal(R.pointIso(72, 15).iso, 'MAR');
+  assert.deepEqual(R.pointIso(103.9, 1.3), { iso: 'SGP', how: 'dot' }, "a small state Natural Earth's 1:110m file leaves out, by its point");
+  assert.deepEqual(recognisedShapes([CLIOPATRIA]).map(r => [r.iso, r.over, r.feats.length]), [['UKR', 'RUS', 1]], 'no Syria row in the fixture: none');
   assert.deepEqual(R.pointIso(12.4534, 41.9029), { iso: 'VAT', how: 'dot' });
   assert.equal(R.pointIso(null, 5), null);
 });
@@ -123,9 +168,12 @@ test('war-sides: battles in a country on neither side, and a war with no country
 });
 
 test('Retrospective Battlefield: each year uses locYears where it exists, loc otherwise', () => {
-  const w = retroWar({ id: 'c1', name: 'Test war', years: [[1940, 1], [1941, 1]], loc: [220], locYears: { 1941: [651] }, states: [220, 255] }, R);
+  const w = retroWar({ id: 'c1', name: 'Test war', years: [[1940, 1], [1941, 1]], loc: ['Q142'], locYears: { 1941: ['Q79'] }, states: ['Q142', 'Q183'] }, R);
   assert.deepEqual([...w.fought.keys()].sort(), ['EGY', 'FRA']);
   assert.deepEqual([...w.part.keys()].sort(), ['DEU', 'FRA']);
+  const y = retroWar({ id: 'Q2', name: 'Year by year', years: [[1940, 3], [1941, 3]], loc: ['Q142'], states: ['Q142', 'Q183', 'Q1041'], statesYears: { 1940: ['Q142'], 1941: ['Q142', 'Q183'] } }, R);
+  assert.deepEqual(Object.fromEntries(y.part), { FRA: 2, DEU: 1 }, 'each year\'s parties where statesYears gives them');
+  assert.deepEqual(retroWar({ id: 'Q3', name: 'Empire', years: [[1930, 3]], loc: ['Q19951607'], states: [] }, R).unknown, ['Q19951607']);
   assert.deepEqual([...retroMoment(w, '1941', R).fought], ['EGY']);
   assert.deepEqual([...retroMoment(w, '1940', R).fought], ['FRA']);
 });
@@ -161,7 +209,7 @@ test('Kino: map, point, linked and named tiers per film, and the wars each film 
 
 test('war-film and war-scene: the war countries a film never shows, and the scene that leaves one grey', () => {
   const wf = new Map([['w1', warFocusWar(WAR, R)]]);
-  const rb = new Map([['c1', retroWar({ id: 'c1', name: 'Test war', years: [[1940, 1]], loc: [220, 433], states: [220] }, R)]]);
+  const rb = new Map([['c1', retroWar({ id: 'c1', name: 'Test war', years: [[1940, 1]], loc: ['Q142', 'Q1041'], states: ['Q142'] }, R)]]);
   const { films, pieces } = kinoFilms(FILMS, R, { ...KINO, wfWars: new Map([['w1', { qid: 'Q1', bf: 'c1' }]]) });
   const gaps = warFilmGaps(films, new Map(pieces.map(p => [p.id, p])), { wf, rb }, R);
   const film = gaps.find(g => g.piece === 'kino:wars/the-war');
@@ -191,12 +239,14 @@ test('a scene with no view box has no scene rule; box shares count fought-over c
 });
 
 test('a historical state is one entry in the gap rules: the Soviet Union taking part is not fifteen countries', () => {
+  assert.deepEqual(R.placeGroup('Q15180'), { key: 'Q15180:RUS,UKR', q: 'Q15180', name: 'the Soviet Union', successors: ['RUS', 'UKR'] });
+  assert.equal(R.placeGroup('Q142'), null);
+  assert.equal(R.placeGroup('Q838261').name, 'Serbia and Montenegro');
+  // War Focus still reads Gleditsch–Ward codes (until it moves to Cliopatria): its groups are unchanged.
   assert.deepEqual(R.gwGroup(365, '1950-07-01'), { key: 'gw365:RUS,UKR', gw: 365, name: 'the Soviet Union', successors: ['RUS', 'UKR'] });
   assert.equal(R.gwGroup(365, '1995-07-01'), null, 'Russia after 1991 is one country');
-  assert.equal(R.gwGroup(220, '1950-07-01'), null);
-  assert.equal(R.gwGroup(345, '1999-07-01').name, 'Serbia and Montenegro');
   // A Korean War: France fought in, the Soviet Union took part; the film draws France.
-  const rbw = retroWar({ id: 'k1', name: 'Korea-like', years: [[1950, 1]], loc: [220], states: [220, 365] }, R);
+  const rbw = retroWar({ id: 'k1', name: 'Korea-like', years: [[1950, 1]], loc: ['Q142'], states: ['Q142', 'Q15180'] }, R);
   assert.deepEqual([...rbw.part.keys()].sort(), ['FRA', 'RUS', 'UKR'], 'coverage still counts every successor');
   assert.deepEqual([...rbw.partDirect.keys()], ['FRA']);
   const docs = [{ meta: { id: 'korea', category: 'wars', title: 'Korea' }, doc: { title: 'Korea', subjects: [], scenes: [
@@ -213,7 +263,7 @@ test('a historical state is one entry in the gap rules: the Soviet Union taking 
 
 test('war-scene: a historical state fought over is kept whole, in view only if a fifth of all its successors is', () => {
   const fake = { ...R, box: c => ({ RUS: [40, 0, 60, 10], UKR: [30, 0, 40, 10], FRA: [0, 0, 10, 10] })[c] };
-  const war = { raw: { years: [[1990, 1]], loc: [365] } };
+  const war = { raw: { years: [[1990, 1]], loc: ['Q15180'] } };
   const m = retroMoment(war, '1990', fake);
   assert.deepEqual([...m.fought], [], 'no country on its own');
   assert.deepEqual(m.states.map(s => s.name), ['the Soviet Union']);
@@ -224,6 +274,17 @@ test('war-scene: a historical state fought over is kept whole, in view only if a
   const whole = sceneGap(scene([28, 0, 70, 10]), m, fake);
   assert.deepEqual(whole.states.map(s => [s.name, s.why]), [['the Soviet Union', ['fought over that year']]]);
   assert.deepEqual(whole.missing, [], 'listed once, not as each successor');
+});
+
+// A Kino link to the Retrospective Battlefield written before 20 November 2026 (w=c139, c=365) is read as the page reads
+// it: the war it became (wars.json oldIds) and the place the number stood for (places.json oldCountries).
+test('Kino: an old Retrospective Battlefield link is the war and the place it became', () => {
+  const docs = [{ meta: { id: 'old', category: 'wars', title: 'Old' }, doc: { title: 'Old', subjects: [], scenes: [
+    sceneOf('one', { focus: { countries: ['FRA'] }, link: { module: 'battlefield-history', at: { w: 'c139', y: 1941, c: 365 } } })] } }];
+  const k = kinoFilms(docs, R, { ...KINO, rbOld: { c139: 'Q362' } });
+  assert.deepEqual(k.films[0].wars.rb, ['Q362']);
+  assert.deepEqual([...k.pieces[0].tiers.linked.keys()], ['RUS', 'UKR']);
+  assert.deepEqual(k.films[0].links[0].at, { w: 'c139', y: 1941, c: 365 }, 'the link as written is kept for the dead-link rule');
 });
 
 test('Kino arrows count where they bend (via), and "New Guinea" is not Guinea', () => {

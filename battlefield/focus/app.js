@@ -9,12 +9,19 @@
 // kit's dots (design/prp-mapkit.js) from their first day as states, and a state in no part of the war shown says so in
 // one sentence from the kit, which its panel repeats ("Switzerland: not on either side of this war.").
 import { displayName } from '../history/names.mjs';
-import { deaths as shown, noun, count, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, COW_CITE, beforeWarNote, wikipediaIntro } from './figures.mjs';
+import { DOTS as DOT_TABLE } from './dots.mjs';
+import { deaths as shown, noun, count, estimateOf, groupBattles, figureText, plural, endLine, leftToParts, markValue, LATE, figureLine, kindWords, rangeText, ownFigure, shownFigure, sourceNote, deadliest as rankDeadliest, deadliestNote, completeness, completenessText, stateOf, searched, beforeWarNote, wikipediaIntro } from './figures.mjs';
 import { sideOf as sideAt, periodSides, inRange, runText } from './sides.mjs';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = n => Math.round(n).toLocaleString('en-GB');
+// A war no free source gives battle deaths for (the nine before 1946: VM uses only free data, and the Correlates of
+// War's totals are not, so since 20 November 2026 they are gone): every death figure shows as '–', never as nought.
+const noFigure = w => w.totalDeaths == null;
+// PRIO's terms as read on 20 November 2026 (integration/sources.json, prio-battle-deaths), beside every war whose
+// deaths it gives (MP-11 fixer).
+const PRIO_TERMS = 'PRIO Battle Deaths Dataset v3.1, whose page states no licence; kept until VM’s owner decides';
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthLabel = m => `${MONTHS[+m.slice(5, 7) - 1]} ${m.slice(0, 4)}`;
 // One formatter for every date: toLocaleDateString with options builds a new one on each call, and a long war's battle
@@ -121,9 +128,8 @@ function sizeMarks() {
 const DOT_R = 3.2, DOT_EDGE = 2, DOT_HIT = 13;
 
 /* ---------------------------------------------------------------- every state drawn (AC-5) */
-// The states CShapes 2.0 has no border for, as the map kit's dots, each with the Gleditsch–Ward number and first day the
-// Retrospective Battlefield publishes for it (../history/data/wars.json `dots`, from battlefield/scripts/build-history.mjs,
-// with their sources): a dot is drawn from that day (null: a state before 1926), so a war before it does not draw it.
+// The states CShapes 2.0 has no border for, as the map kit's dots, each with the Gleditsch–Ward number and first day in
+// War Focus's own table (dots.mjs, with their sources; until 20 November 2026 the Retrospective Battlefield's wars.json): a dot is drawn from that day (null: a state before 1926), so a war before it does not draw it.
 // A first day Wikidata gives only to its year (Tonga's 1970) is not known within that year, so the dot is drawn from the
 // next year's first month, never before the state was one (the Retrospective, which works by year, draws it that year).
 let DOTS = [];
@@ -358,15 +364,15 @@ function renderCounters() {
   $('#date-label').textContent = p ? 'Period' : 'Month';
   $('.counters').classList.toggle('is-period', p);
   $('#date').textContent = periodLabel();
-  $('#c-total').textContent = shown(cumulative[i], estimatedTo[i], { total: i > 0 });
+  $('#c-total').textContent = noFigure(w) ? '–' : shown(cumulative[i], estimatedTo[i], { total: i > 0 });
   const pd = periodDeaths(), est = p ? pd.est : !!w.estimated[i], n = p ? pd.deaths : w.deaths[i];
   $('#c-month-label').textContent = p ? 'In the period' : 'This month';
   // Beside the figure, whose it is: an estimate and its source, or UCDP's own count (with the share of events UCDP
   // dates only to a longer period, scripts/rules.mjs eventMonths); a month outside its source's years has no figure.
   const shared = w.shared ? w.shared.slice(p ? state.f : i, i + 1).reduce((s, v) => s + v, 0) : 0;
-  const covered = !w.covered || (m >= w.covered[0] && (p ? a : m) <= w.covered[1]);
+  const covered = !noFigure(w) && (!w.covered || (m >= w.covered[0] && (p ? a : m) <= w.covered[1]));
   $('#c-month').textContent = covered ? shown(n, est) : '–';
-  $('#c-month-note').textContent = est ? `Estimate from ${estimateOf(w.deathsSource)}` : !covered ? 'No figure in the source' : n ? (shared ? `UCDP, ${num(shared)} spread from periods` : 'As recorded by UCDP') : 'None recorded';
+  $('#c-month-note').textContent = noFigure(w) ? 'No free source gives a figure' : est ? `Estimate from ${estimateOf(w.deathsSource)}` : !covered ? 'No figure in the source' : n ? (shared ? `UCDP, ${num(shared)} spread from periods` : 'As recorded by UCDP') : 'None recorded';
   // Over a period, the battles under way in it: the panel's count, so the two figures on screen agree.
   $('#c-battles-label').textContent = p ? 'Battles in the period' : 'Battles so far';
   $('#c-battles').textContent = num(p ? w.battles.filter(b => underWay(b, a, m)).length : w.battles.filter(b => b.s.slice(0, 7) <= m).length);
@@ -503,9 +509,9 @@ function renderPanel() {
     <p class="sub">${esc(fmtDate(w.start))} – ${w.end ? esc(fmtDate(w.end)) : 'ongoing'} · ${years ? `${years} yr${years > 1 ? 's' : ''} ` : ''}${months % 12 ? `${months % 12} mo` : ''}</p>
     <div class="sides" style="margin-top:10px">${sides}</div>
     <div class="stat-row">
-      <div class="stat"><span>Deaths, whole war</span><b>${shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>battle-related${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}${w.covered ? `, ${esc(monthLabel(w.covered[0]))} – ${esc(monthLabel(w.covered[1]))} only` : ''}</small></div>
+      <div class="stat"><span>Deaths, whole war</span><b>${noFigure(w) ? '–' : shown(w.totalDeaths, estimatedTo.at(-1), { total: w.months.length > 1 })}</b><small>${noFigure(w) ? 'no free source gives a figure' : 'battle-related'}${w.ongoing ? `, to ${esc(fmtDate(w.dataThrough))}` : ''}${w.covered ? `, ${esc(monthLabel(w.covered[0]))} – ${esc(monthLabel(w.covered[1]))} only` : ''}</small></div>
       <div class="stat"><span>Battles &amp; operations</span><b>${num(w.battles.length + w.undated.length)}</b><small>${num(w.battles.filter(b => b.lat != null).length)} mapped${w.undated.length ? ` · ${num(w.undated.length)} undated` : ''} · <button type="button" class="fig-jump">figures for ${num(w.fig.figure)}</button></small></div>
-      ${p ? `<div class="stat"><span>Deaths in the period</span><b>${shown(pd.deaths, pd.est)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${shown(cumulative[i], estimatedTo[i], { total: i > 0 })} by ${esc(monthLabel(m))}</small></div>`
+      ${noFigure(w) ? '' : p ? `<div class="stat"><span>Deaths in the period</span><b>${shown(pd.deaths, pd.est)}</b><small>${Math.round(pd.deaths / Math.max(1, w.totalDeaths) * 100)}% of the war's total · ${shown(cumulative[i], estimatedTo[i], { total: i > 0 })} by ${esc(monthLabel(m))}</small></div>`
         : `<div class="stat"><span>Deaths so far</span><b>${shown(cumulative[i], estimatedTo[i], { total: i > 0 })}</b><small>${soFarNote(w, m, cumulative[i])}</small></div>`}
       <div class="stat"><span>Clashes recorded</span><b>${w.events ? num(w.events) : '–'}</b><small>${w.events ? 'UCDP geolocated events' : 'no event data before 1989'}</small></div>
     </div>
@@ -518,7 +524,7 @@ function renderPanel() {
     <h3>Deadliest battles of the war</h3>${deadliest.length ? seeMoreList(deadliest.map(n => rankedItem(n, { few: 3 })), 6, `${w.name} · battles by deaths`, 'deadliest', deadliest.some(n => n.shown.length) ? deadliest.map(n => rankedItem(n)) : null) : '<p class="empty">No battle of this war has a deaths figure.</p>'}
     <p class="fig-note" id="deadliest-note">${esc(deadliestNote(dlShown))}</p>
     <h3>All battles &amp; operations <span class="count">${w.battles.length + w.undated.length}</span></h3><p class="fig-note" id="fig-complete">${esc(completenessText(w.fig))}</p>${w.battles.length + w.undated.length ? seeMoreList([...w.battles, ...w.undated].map(b => battleItem(b)), 5, `${w.name} · all battles`) : '<p class="empty">None recorded in Wikidata.</p>'}
-    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${/^Correlates of War/.test(w.deathsSource) ? ` Cited as the Correlates of War asks: ${esc(COW_CITE.text)} (<a href="${COW_CITE.url}" target="_blank" rel="noopener">${COW_CITE.url}</a>).` : ''}${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
+    <p class="src-note"><b>Deaths:</b> ${esc(w.deathsSource)}.${/PRIO/.test(w.deathsSource || '') ? ` ${esc(PRIO_TERMS)}.` : ''}${w.estimated.some(Boolean) ? ` Figures marked ~ are estimates from ${esc(estimateOf(w.deathsSource))}, shared out over the months, not counts: a month or a period is rounded to two significant figures, a total that includes such months to three.` : ''}
       <b>Battles &amp; operations:</b> Wikidata battles, sieges and military operations recorded as part of this war; dates as recorded there, an end more than a month after the battle's Wikipedia article's drawn to the article's and marked uncertain${w.undated.length ? '; a battle Wikidata dates only to the decade is listed as undated, in no month' : ''}.
       ${(w.leftOut || []).map(x => `<b>Left out of this war:</b> ${esc(x.why)} (${esc(x.source)}: <a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.url)}</a>).`).join(' ')}
       <b>Battle figures:</b> ${esc(FIGURE_METHOD)}
@@ -713,12 +719,12 @@ function renderTables() {
     const begun = new Map();
     for (const b of w.battles) if (b.p !== 'y') begun.set(b.s.slice(0, 7), (begun.get(b.s.slice(0, 7)) || 0) + 1);
     $('#months-title').textContent = `${w.name} · battle deaths by month${p ? ` · ${periodLabel()} highlighted` : ''}`;
-    $('#months-note').textContent = `Select a month to go to it · ${w.estimated.some(Boolean) ? `~ estimated from ${estimateOf(w.deathsSource)}, rounded` : 'as recorded by UCDP'}`;
+    $('#months-note').textContent = `Select a month to go to it · ${noFigure(w) ? 'no free source gives deaths for this war' : w.estimated.some(Boolean) ? `~ estimated from ${estimateOf(w.deathsSource)}, rounded` : 'as recorded by UCDP'}`;
     // The month shown is highlighted, or every month of the period; the list keeps the month shown in view.
     $('#months-rows').innerHTML = w.months.map((mm, k) => {
       const clashes = (w.cells[k] || []).reduce((s, c) => s + (c[3] || 0), 0), cls = k === i ? 'sel end' : p && k >= state.f && k < i ? 'sel' : '';
-      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${w.covered && (mm < w.covered[0] || mm > w.covered[1]) ? '–' : shown(w.deaths[k], w.estimated[k])}</td>
-        <td class="num">${shown(cumulative[k], estimatedTo[k], { total: k > 0 })}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
+      return `<tr data-k="${k}"${cls ? ` class="${cls}"` : ''}><td><button type="button" class="rowbtn">${esc(monthLabel(mm))}</button></td><td class="num">${noFigure(w) || (w.covered && (mm < w.covered[0] || mm > w.covered[1])) ? '–' : shown(w.deaths[k], w.estimated[k])}</td>
+        <td class="num">${noFigure(w) ? '–' : shown(cumulative[k], estimatedTo[k], { total: k > 0 })}</td><td class="num">${begun.get(mm) || '–'}</td><td class="num">${w.events ? num(clashes) : '–'}</td></tr>`;
     }).join('');
     // A month goes to it, keeping the period's start; one before the start widens the period to begin there, as a
     // battle's "Go to" does (moving the end there would pull the start along, to a one-month period).
@@ -877,7 +883,7 @@ window.jdpiDocumentary = {
       // Wikipedia's words, said to be its (CC BY-SA 4.0; S0, 16 November 2026), in the voice and the captions alike.
       if (said.length) intro += ' ' + wikipediaIntro(said.slice(0, 3), w.wiki);
     } catch {}
-    intro += ` In all, about ${spokenNumber(w.totalDeaths)} died in battle${w.ongoing ? ' so far' : ''}.`;
+    if (!noFigure(w)) intro += ` In all, about ${spokenNumber(w.totalDeaths)} died in battle${w.ongoing ? ' so far' : ''}.`;
     yield { text: intro, el: document.querySelector('#panel h2'), focus: { reset: true } };
     // Month by month, the war so far to each (whatever period was set), as the narration counts it.
     for (let i = state.m; i < w.months.length; i++) {
@@ -888,7 +894,7 @@ window.jdpiDocumentary = {
       const next = w.months[i + 1];
       if (next && next.slice(0, 4) !== w.months[i].slice(0, 4)) yield { chapterEnd: true, label: `Continue to ${next.slice(0, 4)}` };
     }
-    yield { text: w.end ? `The war ended on ${fmtDate(w.end)}. About ${spokenNumber(w.totalDeaths)} had died in battle.` : `The war goes on. The record here runs to ${fmtDate(w.dataThrough)}, with about ${spokenNumber(w.totalDeaths)} battle deaths so far.`, el: document.querySelector('#panel h2'), focus: { reset: true } };
+    yield { text: noFigure(w) ? `The war ended on ${fmtDate(w.end)}.` : w.end ? `The war ended on ${fmtDate(w.end)}. About ${spokenNumber(w.totalDeaths)} had died in battle.` : `The war goes on. The record here runs to ${fmtDate(w.dataThrough)}, with about ${spokenNumber(w.totalDeaths)} battle deaths so far.`, el: document.querySelector('#panel h2'), focus: { reset: true } };
   },
 };
 
@@ -941,12 +947,12 @@ window.addEventListener('hashchange', () => {
 });
 
 { const a = $('#sibling'); a.href = go('battlefield-history', 'battlefield/history/index.html'); a.target = embedded ? '_top' : '_self'; }
-// The Retrospective Battlefield's data file gives the dots their numbers and first days (and its years, for the link);
-// without it the page draws no dots, as before.
+// The Retrospective Battlefield's data file gives its years, for the link; the dots' numbers and first days are
+// War Focus's own (dots.mjs).
 Promise.all([fetch('data/index.json').then(r => r.json()), fetch('../history/data/borders.topo.json').then(r => r.json()),
   fetch('../history/data/wars.json').then(r => (r.ok ? r.json() : null)).catch(() => null)]).then(([idx, borders, retro]) => {
   state.index = idx; state.borders = borders; state.retro = retro;
-  if (window.PRPMapkit && retro?.dots) DOTS = PRPMapkit.dots('cshapes').filter(d => retro.dots[d.iso3]).map(d => ({ iso3: d.iso3, name: d.name, lonlat: [...d.lonlat], gw: retro.dots[d.iso3].gw, from: retro.dots[d.iso3].from }));
+  if (window.PRPMapkit) DOTS = PRPMapkit.dots('cshapes').filter(d => DOT_TABLE[d.iso3]).map(d => ({ iso3: d.iso3, name: d.name, lonlat: [...d.lonlat], gw: DOT_TABLE[d.iso3].gw, from: DOT_TABLE[d.iso3].from }));
   const eras = [['1926–1945', w => w.start < '1946'], ['1946–1988', w => w.start >= '1946' && w.start < '1989'], ['1989 to today', w => w.start >= '1989']];
   $('#war').innerHTML = eras.map(([l, f]) => `<optgroup label="${l}">${idx.wars.filter(f).map(w => `<option value="${w.id}">${esc(w.name)} (${w.start.slice(0, 4)}–${w.end ? w.end.slice(0, 4) : 'now'})</option>`).join('')}</optgroup>`).join('');
   $('#war').onchange = e => loadWar(e.target.value);

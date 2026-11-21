@@ -1,127 +1,105 @@
-// Where wars were fought, for the wars whose sources would put them on the territory of every state that took part.
-// UCDP's location for an interstate conflict lists every primary party's government, so Iraq 2003 would shade the
-// United States, Britain and Australia as war zones. Correlates of War gives no location at all (build-history.mjs
-// infers one from the regions a war was fought in), and its colonial wars name only the colonial power.
-// Keys are war ids in wars.json. `loc`: the CShapes 2.0 (Gleditsch–Ward) codes of the states and colonies where the
-// fighting was; `where`: what the war's places are called when the map has no shape for them; `years`: places by
-// year, for a war that moved (World War II, a government fighting abroad); the years not listed keep the sources';
-// `names`: { year: { code: name } }, what a place is called in a year when the shape that held it on 1 July was
-// another state's (Georgia in the Soviet Union's shape in 1991); such a shape is drawn that year but is not one of the
-// war's own places (`loc`).
+// Where wars were fought, for the wars whose sources would put them on the territory of every state that took part,
+// or give no place the map can draw. UCDP's location for an interstate conflict lists every primary party's
+// government, so Iraq 2003 would shade the United States, Britain and Australia as war zones; Wikidata's countries
+// and locations for a war of 1926–1945 are often missing or name a region.
+// Keys are war ids in wars.json (u<UCDP id>, or a Wikidata Q-id for 1926–1945). Places are VM's place keys, Wikidata
+// Q-ids (battlefield/scripts/history-places.mjs; never a Gleditsch–Ward number). `loc`: where the fighting was;
+// `where`: what the war's places are called when the map has no shape for them; `years`: places by year, for a war
+// that moved (World War II, a government fighting abroad); the years not listed keep the sources'.
 // From 1989 the UCDP entries follow the countries that the UCDP Georeferenced Event Dataset (GED v26.1) places each
 // conflict's events in; check-fought.mjs repeats that check and prints the entries.
+// VM's own work. Re-keyed from Gleditsch–Ward numbers to Q-ids on 20 November 2026 (stage J1) by hand, place by place;
+// the entries that only answered CShapes's dates of a border change are gone with CShapes.
 
 // Every UCDP interstate conflict that started up to this year has been checked; build-history.mjs names newer ones.
 export const CHECKED_THROUGH = 2025;
 
 // World War II: where it was fought on land, or bombed heavily, each year. The war at sea, and places the map has no
-// shape for (Hong Kong, Guam, the central Pacific islands), are not shown.
+// shape for (Hong Kong, Guam, the central Pacific islands), are not shown; Pearl Harbor and the Aleutians are named.
 const WW2 = [
-  [1939, 1944, [255]], [1945, 1945, [260, 265]], // Germany; on 1 July 1945 CShapes draws it as two shapes (from 8 May 1945)
-  [1939, 1939, [290]], [1941, 1945, [290]], // Poland: the invasion; Barbarossa, the Warsaw uprisings, the Vistula–Oder offensive
-  [1940, 1945, [200, 210, 211, 220, 325]], // Britain (the Blitz, then V-weapons), the Netherlands, Belgium, France, Italy
-  [1940, 1940, [212, 385, 390]], [1944, 1945, [212]], [1944, 1944, [385]], // Luxembourg, Norway, Denmark; the Ardennes; Finnmark
-  [1940, 1942, [338]], [1940, 1943, [620]], [1940, 1942, [651]], // the siege of Malta; the Western Desert
-  [1940, 1941, [521, 625]], [1941, 1941, [530, 531, 5200]], [1940, 1940, [433, 481]], // East Africa; Dakar, Gabon
-  [1940, 1944, [339, 350]], [1941, 1945, [345]], // Albania and Greece (the Italian and German invasions, the resistance), Yugoslavia
-  [1941, 1945, [365, 375]], [1941, 1941, [360, 630, 645, 652, 660]], [1943, 1944, [355, 360]], [1944, 1945, [305, 310, 315]],
-  [1942, 1942, [580, 600, 615]], [1942, 1943, [616]], // Madagascar, Operation Torch, Tunisia
-  [1941, 1945, [710, 800, 840]], [1941, 1941, [4]], [1942, 1943, [3]], // China, Thailand, the Philippines; Pearl Harbor; the Aleutians
-  [1941, 1942, [821, 822, 827, 823, 824, 835]], [1945, 1945, [823, 824, 835]], // Malaya and Singapore; Borneo
-  [1942, 1945, [775, 850, 911, 912, 940]], [1942, 1943, [860, 900]], // Burma, the Dutch East Indies, New Guinea, the Solomons; Timor, northern Australia
-  [1942, 1944, [750]], [1942, 1942, [780]], // India (air raids, Imphal and Kohima), Ceylon
-  [1944, 1945, [713, 740]], [1945, 1945, [730, 815, 7351]], // Taiwan and Japan; Korea, Vietnam and southern Sakhalin
+  [1939, 1945, ['Q183']], [1939, 1939, ['Q36']], [1941, 1945, ['Q36']], // Germany; Poland: the invasion, Barbarossa, the Warsaw uprisings, the Vistula–Oder offensive
+  [1940, 1945, ['Q145', 'Q55', 'Q31', 'Q142', 'Q38']], // Britain (the Blitz, then V-weapons), the Netherlands, Belgium, France, Italy
+  [1940, 1940, ['Q32', 'Q20', 'Q35']], [1944, 1945, ['Q32']], [1944, 1944, ['Q20']], // Luxembourg, Norway, Denmark; the Ardennes; Finnmark
+  [1940, 1942, ['Q233']], [1940, 1943, ['Q1016']], [1940, 1942, ['Q79']], // the siege of Malta; the Western Desert
+  [1940, 1941, ['Q34754', 'Q1049']], [1941, 1941, ['Q115', 'Q986', 'Q1045']], [1940, 1940, ['Q1041', 'Q1000']], // East Africa; Dakar, Gabon
+  [1940, 1944, ['Q222', 'Q41']], [1941, 1945, ['Q83286']], // Albania and Greece (the Italian and German invasions, the resistance), Yugoslavia
+  [1941, 1945, ['Q15180', 'Q33']], [1941, 1941, ['Q218', 'Q794', 'Q796', 'Q858', 'Q822']], [1943, 1944, ['Q219', 'Q218']], [1944, 1945, ['Q40', 'Q28', 'Q33946']],
+  [1942, 1942, ['Q1019', 'Q1028', 'Q262']], [1942, 1943, ['Q948']], // Madagascar, Operation Torch, Tunisia
+  [1941, 1945, ['Q148', 'Q869', 'Q928']], // China, Thailand, the Philippines
+  [1941, 1942, ['Q833', 'Q334', 'Q921']], [1945, 1945, ['Q833', 'Q921']], // Malaya, Singapore and Borneo
+  [1942, 1945, ['Q836', 'Q252', 'Q691', 'Q685']], [1942, 1943, ['Q574', 'Q408']], // Burma, the Dutch East Indies, New Guinea, the Solomons; Timor, northern Australia
+  [1942, 1944, ['Q668']], [1942, 1942, ['Q854']], // India (air raids, Imphal and Kohima), Ceylon
+  [1944, 1945, ['Q865', 'Q17']], [1945, 1945, ['Q423', 'Q185682']], // Taiwan and Japan; Korea, Vietnam
 ];
 const byYear = spans => {
   const out = {};
-  for (const [from, to, gws] of spans) for (let y = from; y <= to; y++) out[y] = [...new Set([...(out[y] || []), ...gws])];
+  for (const [from, to, qs] of spans) for (let y = from; y <= to; y++) out[y] = [...new Set([...(out[y] || []), ...qs])];
   return out;
 };
 
 export const FOUGHT_IN = {
   // ---- UCDP/PRIO interstate conflicts, 1946–2025
-  u214: { loc: [800, 811] },               // France – Thailand 1946: northern Cambodia, held by Thailand since 1941
-  u215: { loc: [339] },                    // Albania – United Kingdom 1946: the Corfu Channel, in Albanian waters
-  u228: { loc: [651, 652, 660, 663, 666, 6511, 6631] }, // Arab–Israeli war 1948–49: Palestine and its neighbours, not Iraq
-  u239: { loc: [651] },                    // Egypt – United Kingdom 1951–52: the Suez Canal zone
-  u250: { loc: [310] },                    // Hungary – Soviet Union 1956
-  u252: { loc: [651, 6511] },              // Suez 1956: Sinai, Gaza and Port Said
-  u272: { loc: [616] },                    // France – Tunisia 1961: Bizerte
-  u276: { loc: [851] },                    // Indonesia – Netherlands 1962: West New Guinea
-  u323: { loc: [352] },                    // Cyprus – Turkey 1974
-  u346: { loc: [], where: ['the Falkland Islands'] }, // Falklands 1982: islands the map has no shape for
-  u350: { loc: [55], where: ['Grenada'] }, // Grenada 1983 (CShapes has no border for it: the page draws it as a dot)
-  u368: { loc: [95] },                     // Panama 1989
-  u405: { loc: [471] },                    // Cameroon – Nigeria 1996: the Bakassi peninsula
-  u420: { loc: [645] },                    // Iraq 2003
-  u431: { loc: [700] },                    // Afghanistan – Soviet Union 1979
-  u435: { loc: [522] },                    // Djibouti – Eritrea 2008: Ras Doumeira
-  u13692: { loc: [700] },                  // Afghanistan 2001
-  u16099: { loc: [678] },                  // Red Sea 2024–25: US and British strikes on Yemen
+  u214: { loc: ['Q869', 'Q424'] },          // France – Thailand 1946: northern Cambodia, held by Thailand since 1941
+  u215: { loc: ['Q222'] },                  // Albania – United Kingdom 1946: the Corfu Channel, in Albanian waters
+  u228: { loc: ['Q79', 'Q858', 'Q822', 'Q810', 'Q801', 'Q23792'] }, // Arab–Israeli war 1948–49: Palestine and its neighbours, not Iraq
+  u239: { loc: ['Q79'] },                   // Egypt – United Kingdom 1951–52: the Suez Canal zone
+  u250: { loc: ['Q28'] },                   // Hungary – Soviet Union 1956
+  u252: { loc: ['Q79', 'Q23792'] },         // Suez 1956: Sinai, Gaza and Port Said
+  u272: { loc: ['Q948'] },                  // France – Tunisia 1961: Bizerte
+  u276: { loc: ['Q252'], where: ['West New Guinea'] }, // Indonesia – Netherlands 1962: West New Guinea, drawn within Indonesia
+  u323: { loc: ['Q229'] },                  // Cyprus – Turkey 1974
+  u346: { loc: ['Q9648'] },                 // Falklands 1982: the islands
+  u350: { loc: ['Q769'] },                  // Grenada 1983
+  u368: { loc: ['Q804'] },                  // Panama 1989
+  u405: { loc: ['Q1009'] },                 // Cameroon – Nigeria 1996: the Bakassi peninsula
+  u420: { loc: ['Q796'] },                  // Iraq 2003
+  u431: { loc: ['Q889'] },                  // Afghanistan – Soviet Union 1979
+  u435: { loc: ['Q977'] },                  // Djibouti – Eritrea 2008: Ras Doumeira
+  u13692: { loc: ['Q889'] },                // Afghanistan 2001
+  u16099: { loc: ['Q805'] },                // Red Sea 2024–25: US and British strikes on Yemen
   // Checked and kept as UCDP has them, though GED places no events in one of the two:
-  u274: { loc: [710, 750] },               // China – India: 1962 and 1967 were fought on both sides of the line (GED sees only 2020)
-  u16470: { loc: [666, 678] },             // Israel – Yemen 2025: Houthi missiles and drones struck Israel, without deaths
+  u274: { loc: ['Q148', 'Q668'] },          // China – India: 1962 and 1967 were fought on both sides of the line (GED sees only 2020)
+  u16470: { loc: ['Q801', 'Q805'] },        // Israel – Yemen 2025: Houthi missiles and drones struck Israel, without deaths
 
   // ---- UCDP/PRIO conflicts that a government also fought abroad: their places by year, from GED (the countries with
   // 25 or more of the year's battle deaths, or a tenth of them), where that differs from UCDP's location.
-  u418: { years: { 2001: [2, 700], 2002: [700], 2003: [640, 700, 770], 2004: [670, 770], 2005: [670, 770], 2006: [770], 2007: [520, 700, 770], 2008: [520, 700, 770], 2009: [770], 2010: [770], 2011: [700, 770], 2012: [770], 2013: [700, 770], 2014: [652, 770], 2015: [652, 700, 770], 2016: [700, 770], 2017: [652, 700], 2019: [700] } }, // United States: al-Qaida
-  u426: { years: { 1990: [660], 1991: [660], 1992: [660], 1993: [660], 1994: [660], 1995: [660], 1996: [660], 1997: [660], 1998: [660], 1999: [660], 2000: [660], 2006: [660, 666], 2023: [660, 666], 2024: [660, 666], 2025: [660] } }, // Israel: Hezbollah, in Lebanon
-  u374: { years: { 1997: [490, 517], 1999: [490], 2000: [490], 2002: [490, 516], 2009: [490], 2010: [490], 2011: [490], 2012: [490, 517], 2016: [490], 2019: [490], 2020: [490], 2022: [490, 516], 2023: [490], 2024: [490], 2025: [490] } }, // Rwanda: the FDLR, in DR Congo
-  u314: { years: { 1995: [500, 625], 1996: [490, 500], 1997: [500, 625], 1998: [490, 500], 2001: [490, 500, 625], 2002: [490, 500, 625], 2004: [500, 625], 2005: [500, 625], 2006: [500, 625], 2008: [490, 625], 2009: [482, 490, 625], 2010: [482, 490], 2011: [490], 2013: [482, 490], 2014: [490], 2015: [490], 2016: [490], 2017: [490] } }, // Uganda: the LRA and the ADF
-  u287: { years: { 2014: [490, 516], 2019: [490, 516], 2020: [490, 516], 2021: [490, 516], 2022: [490], 2024: [490, 516] } }, // Burundi: RED-Tabara, from DR Congo
-  u288: { years: { 1989: [483, 625], 1990: [483, 625], 2010: [625] } }, // Chad: rebels based in Sudan
-  u354: { years: { 1992: [640, 645], 1994: [640, 645], 1995: [640, 645], 1996: [640, 645], 1997: [640, 645], 1998: [640, 645], 1999: [640, 645], 2000: [640, 645], 2001: [640, 645], 2002: [640, 645], 2004: [640, 645], 2006: [640, 645], 2007: [640, 645], 2008: [640, 645], 2009: [640, 645], 2010: [640, 645], 2011: [640, 645], 2012: [640, 645], 2013: [640, 645], 2016: [640, 645], 2017: [640, 645], 2018: [640, 645], 2019: [640, 645], 2020: [640, 645], 2021: [640, 645], 2022: [640, 645], 2023: [640, 645], 2024: [640, 645], 2025: [645] } }, // Turkey: the PKK, also in northern Iraq
-  u390: { years: { 1992: [344, 346], 1993: [344, 346], 1994: [346], 1995: [344, 346] } }, // Croatia: the Krajina Serbs, also in Bosnia
-  u442: { years: { 2010: [432] } },        // Mauritania: AQIM, in Mali
-  u13902: { years: { 2015: [640, 652], 2016: [640, 645, 652], 2017: [652] } }, // Turkey: Islamic State, also in Syria and Iraq
+  u418: { years: { 2001: ['Q30', 'Q889'], 2002: ['Q889'], 2003: ['Q43', 'Q889', 'Q843'], 2004: ['Q851', 'Q843'], 2005: ['Q851', 'Q843'], 2006: ['Q843'], 2007: ['Q1045', 'Q889', 'Q843'], 2008: ['Q1045', 'Q889', 'Q843'], 2009: ['Q843'], 2010: ['Q843'], 2011: ['Q889', 'Q843'], 2012: ['Q843'], 2013: ['Q889', 'Q843'], 2014: ['Q858', 'Q843'], 2015: ['Q858', 'Q889', 'Q843'], 2016: ['Q889', 'Q843'], 2017: ['Q858', 'Q889'], 2019: ['Q889'] } }, // United States: al-Qaida
+  u426: { years: Object.fromEntries([1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2006, 2023, 2024, 2025].map(y => [y, [2006, 2023, 2024].includes(y) ? ['Q822', 'Q801'] : ['Q822']])) }, // Israel: Hezbollah, in Lebanon
+  u374: { years: { 1997: ['Q974', 'Q1037'], 1999: ['Q974'], 2000: ['Q974'], 2002: ['Q974', 'Q967'], 2009: ['Q974'], 2010: ['Q974'], 2011: ['Q974'], 2012: ['Q974', 'Q1037'], 2016: ['Q974'], 2019: ['Q974'], 2020: ['Q974'], 2022: ['Q974', 'Q967'], 2023: ['Q974'], 2024: ['Q974'], 2025: ['Q974'] } }, // Rwanda: the FDLR, in DR Congo
+  u314: { years: { 1995: ['Q1036', 'Q1049'], 1996: ['Q974', 'Q1036'], 1997: ['Q1036', 'Q1049'], 1998: ['Q974', 'Q1036'], 2001: ['Q974', 'Q1036', 'Q1049'], 2002: ['Q974', 'Q1036', 'Q1049'], 2004: ['Q1036', 'Q1049'], 2005: ['Q1036', 'Q1049'], 2006: ['Q1036', 'Q1049'], 2008: ['Q974', 'Q1049'], 2009: ['Q929', 'Q974', 'Q1049'], 2010: ['Q929', 'Q974'], 2011: ['Q974'], 2013: ['Q929', 'Q974'], 2014: ['Q974'], 2015: ['Q974'], 2016: ['Q974'], 2017: ['Q974'] } }, // Uganda: the LRA and the ADF
+  u287: { years: { 2014: ['Q974', 'Q967'], 2019: ['Q974', 'Q967'], 2020: ['Q974', 'Q967'], 2021: ['Q974', 'Q967'], 2022: ['Q974'], 2024: ['Q974', 'Q967'] } }, // Burundi: RED-Tabara, from DR Congo
+  u288: { years: { 1989: ['Q657', 'Q1049'], 1990: ['Q657', 'Q1049'], 2010: ['Q1049'] } }, // Chad: rebels based in Sudan
+  u354: { years: Object.fromEntries([1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025].map(y => [y, y === 2025 ? ['Q796'] : ['Q43', 'Q796']])) }, // Turkey: the PKK, also in northern Iraq
+  u390: { years: { 1992: ['Q224', 'Q225'], 1993: ['Q224', 'Q225'], 1994: ['Q225'], 1995: ['Q224', 'Q225'] } }, // Croatia: the Krajina Serbs, also in Bosnia
+  u442: { years: { 2010: ['Q912'] } },      // Mauritania: AQIM, in Mali
+  u13902: { years: { 2015: ['Q43', 'Q858'], 2016: ['Q43', 'Q796', 'Q858'], 2017: ['Q858'] } }, // Turkey: Islamic State, also in Syria and Iraq
 
   // ---- UCDP/PRIO places the map has no shape for in those years
-  u207: { loc: [665] },                    // Israel 1946: Mandatory Palestine
-  u226: { loc: [750], where: ['Hyderabad'] }, // Hyderabad – India 1948: Hyderabad lies within India on this map
-  u11884: { loc: [750], where: ['Hyderabad'] },
-  u286: { loc: [6801] },                   // Aden 1964–67: the Federation of South Arabia
+  u207: { loc: ['Q193714'] },              // Israel 1946: Mandatory Palestine (no free border holds it, so it is named under the map)
+  u226: { loc: ['Q668'], where: ['Hyderabad'] }, // Hyderabad – India 1948: Hyderabad lies within India on this map
+  u11884: { loc: ['Q668'], where: ['Hyderabad'] },
+  u216: { years: { 1946: ['Q185682'], 1947: ['Q185682'], 1948: ['Q185682'], 1949: ['Q185682'], 1950: ['Q185682'], 1951: ['Q185682'], 1952: ['Q185682'], 1953: ['Q185682'], 1954: ['Q185682'] }, where: ['Vietnam'] }, // First Indochina War: Cliopatria's French Indochina
 
-  // ---- Places by year where CShapes 2.0 changed a shape in the middle of a war (AC-13, 17 November 2026): the map
-  // draws the borders of 1 July, so a war-year place is the shape that held it on that day. The dates are CShapes's
-  // (battlefield/history/data/borders.topo.json): Vietnam (815, Annam, Cochin China and Tonkin) to 30 April 1954 and the
-  // Democratic Republic (816) from 1 May 1954, which takes in the Republic of Vietnam (817) from 1 May 1975; Taiwan (713)
-  // within China (710) from 15 August 1945 to 7 December 1949; Georgia (372) from 6 September 1991 and Azerbaijan (373)
-  // from 26 December 1991, within the Soviet Union (365) before; South Sudan (626) from 9 July 2011, within Sudan (625)
-  // before.
-  u216: { years: { 1946: [815], 1947: [815], 1948: [815], 1949: [815], 1950: [815], 1951: [815], 1952: [815], 1953: [815] }, where: ['Vietnam'] }, // First Indochina War
-  u232: { years: { 1949: [710] } },        // China – Taiwan 1949: Taiwan still within China's shape on 1 July
-  // The fall of Saigon, 30 April 1975: UCDP places 1975 in 816 and 817; on 1 July CShapes's 816 holds both, so the
-  // year is on that shape under its own name.
-  u293: { years: { 1975: [816] } },
-  u380: { years: { 1991: [365] }, names: { 1991: { 365: 'Georgia (then in the Soviet Union)' } } },
-  u388: { years: { 1991: [365] }, names: { 1991: { 365: 'Azerbaijan (then in the Soviet Union)' } } },
-  u11345: { years: { 2011: [625] }, names: { 2011: { 625: 'South Sudan (then in Sudan)' } } },
-
-  // ---- Correlates of War, 1926–1945. While the S0 hold stands (integration/scripts/cite-only.mjs: 'pending'),
-  // build-history.mjs writes the 40 rows back exactly as they are and applies none of these; they apply when the hold
-  // lifts and the COW files are read again. Three were added on 17 November 2026 (AC-13) and wait for that: c139's
-  // 1945 on the two shapes of occupied Germany (the held row has 255, which CShapes ends on 7 May 1945), c708 in Nejd
-  // (the held row has loc [670], Saudi Arabia, which CShapes starts on 23 September 1932) and c698 in China (the held
-  // row has no place).
-  c121: { loc: [710] },                  // Japan's invasion of Manchuria, 1931–33
-  c130: { loc: [710] },                    // Second Sino-Japanese War, 1937–41
-  c133: { loc: [365] },                    // Lake Khasan 1938: hills held by the Soviet Union
-  c136: { loc: [712] },                    // Khalkhin Gol 1939: Mongolia
-  c139: { years: byYear(WW2), names: { 1945: { 260: 'Germany', 265: 'Germany' } } }, // World War II
-  c142: { loc: [375] },                    // Winter War 1939–40: Finland
-  c145: { loc: [800, 811, 812] },          // Franco-Thai War 1940–41: Thailand, Cambodia and Laos
-  c708: { loc: [], where: ['Nejd'] },      // Ikhwan Revolt 1929–30: Nejd, which CShapes does not draw (Saudi Arabia from 23 September 1932)
-  c698: { loc: [710] },                    // Third Chinese Warlord War, 1926: fought in China
-  c700: { loc: [710] },                    // Northern Expedition: Japan's troops fought at Jinan, in China
-  c711: { loc: [710] },                    // Kumul Rebellion: the Soviet intervention in Xinjiang
-  c718: { loc: [230] },                    // Spanish Civil War: Germany, Italy and Portugal fought in Spain
-  c720: { loc: [350] },                    // Greek Civil War: Britain fought in Greece
-  c447: { loc: [620] },                    // Libya (Italy and the Senussi)
-  c449: { loc: [602, 600] },               // the Rif War: Spanish and French Morocco
-  c451: { loc: [652, 660] },               // the Great Syrian Revolt: Syria and Lebanon
-  c452: { loc: [815] },                    // the Yên Bái mutiny: Vietnam
-  c453: { loc: [750], where: ['Burma'] },  // the Saya San rebellion: Burma, part of British India until 1937
-  c454: { loc: [665] },                    // the Arab revolt in Palestine
-  c455: { loc: [750] },                    // Waziristan, in British India
-  c456: { loc: [850] },                    // the Indonesian National Revolution
+  // ---- Wikidata's wars of 1926–1945, by their Q-ids: where Wikidata gives no place the map can draw, or one too wide.
+  Q1551794: { loc: ['Q148'] },              // Japan's invasion of Manchuria, 1931–33
+  Q170314: { loc: ['Q148'] },               // Second Sino-Japanese War
+  Q188925: { loc: ['Q711'] },               // Khalkhin Gol 1939: Mongolia
+  Q362: { years: byYear(WW2), where: ['Pearl Harbor (1941)', 'the Aleutian Islands (1942–43)'] }, // World War II
+  Q134949: { loc: ['Q33'] },                // Winter War 1939–40: Finland
+  Q3938020: { loc: ['Q851'] },              // Ikhwan Revolt 1927–30: Nejd (Cliopatria's Kingdom of Hejaz and Nejd)
+  Q1073476: { loc: ['Q148'] },              // Northern Expedition: China
+  Q179975: { loc: ['Q148'] },               // Chinese Civil War: China
+  Q4247016: { loc: ['Q148'] },              // Kumul Rebellion: Xinjiang
+  Q10859: { loc: ['Q29'] },                 // Spanish Civil War: Germany, Italy and Portugal fought in Spain
+  Q766437: { loc: ['Q1028'] },              // the Rif War: Spanish and French Morocco
+  Q1968718: { loc: ['Q858', 'Q822'] },      // the Great Syrian Revolt: Syria and Lebanon
+  Q46057: { loc: ['Q193714'] },            // the Arab revolt in Palestine: Mandatory Palestine, not today's Israel or Palestine
+  Q1332160: { loc: ['Q252'] },              // the Indonesian National Revolution
+  // Fixer, 20 November 2026: Wikidata places these two only in a region spanning several states, which is no longer
+  // spread to them (wars-1926.mjs). The Ahmed Barzani revolt (Wikidata: Kurdistan) was "in modern Iraq" (English
+  // Wikipedia's article, read that day); the Soviet–Japanese border conflicts (Wikidata's country: Japan; location:
+  // Northeast Asia) were fought on the borders of Wikidata's other participants: the Soviet Union, the Mongolian
+  // People's Republic and Manchukuo, drawn within China as Japan's invasion of Manchuria is.
+  Q4695762: { loc: ['Q796'] },              // Ahmed Barzani revolt, 1931–32
+  Q696389: { loc: ['Q15180', 'Q711', 'Q148'] }, // Soviet–Japanese border conflicts, 1932–39
 };

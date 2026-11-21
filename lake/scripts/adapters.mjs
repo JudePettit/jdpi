@@ -15,7 +15,6 @@ import { THINKERS, positionTag, POSITION_NOTE } from './thinkers.mjs';
 import { CATEGORY_IDS, flatScenes } from '../../kino/lib/format.js';
 import { readAt, kinoHash } from '../../kino/lib/links.js';
 import { groupBattles, figureLine } from '../../battlefield/focus/figures.mjs';
-import { CITE_ONLY } from '../../integration/scripts/cite-only.mjs';
 import { leaderText } from './resolve.mjs';
 
 export const JDPI = 'https://jdpi.pages.dev/';
@@ -89,14 +88,12 @@ export function battlefield({ jdpiDir }) {
   }
   // War Focus: each major war and every battle or operation recorded as part of it, keyed by Wikidata ID.
   const focus = json(join(jdpiDir, 'battlefield/focus/data/index.json'));
-  // A war whose deaths are a Correlates of War total names it and the citation its terms ask for (S0, the second
-  // reader, 16 November 2026: COW is cite-only, integration/scripts/cite-only.mjs); the line opens War Focus, whose panel
-  // and Sources give the citation in full with the link.
-  const cow = CITE_ONLY.cow;
-  const whose = f => (cow.match.test(f.deathsSource || '') ? `, the Correlates of War total (${cow.short})` : '');
+  // A war no free source gives deaths for (totalDeaths null: the nine before 1946, since 20 November 2026, when VM
+  // stopped using the Correlates of War's totals) gives its battles alone, never a nought.
+  const deathsOf = f => (f.totalDeaths == null ? '' : `, ${f.totalDeaths.toLocaleString('en-GB')} battle deaths`);
   for (const f of focus.wars) {
     if (f.qid) out.push({ key: { qid: f.qid }, label: f.name, module: 'war-focus', url: `${JDPI}battlefield/focus/index.html#war=${f.id}`,
-      date: f.start, context: `Month by month, ${f.start.slice(0, 4)}–${f.end ? f.end.slice(0, 4) : 'now'}: ${f.battles} battles and operations, ${f.totalDeaths.toLocaleString('en-GB')} battle deaths${whose(f)}` });
+      date: f.start, context: `Month by month, ${f.start.slice(0, 4)}–${f.end ? f.end.slice(0, 4) : 'now'}: ${f.battles} battles and operations${deathsOf(f)}` });
     const d = json(join(jdpiDir, `battlefield/focus/data/wars/${f.id}.json`));
     // Each death once, as War Focus counts it (figures.mjs, RV-05 A1): an event listed with its own parts (the atomic
     // bombings of Hiroshima and Nagasaki) gives the figure War Focus shows over its parts ("448,901 deaths, the sum of

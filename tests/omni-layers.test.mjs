@@ -330,6 +330,27 @@ test('d3 adapter: slices exactly the rows the core slices; loads no code; the te
   assert.doesNotMatch(raw('omni/index.html').toString('utf8'), /d3@|d3\.min/);
 });
 
+// Fixer, 20 November 2026 (review finding P1): d3 reads a ring wound counter-clockwise on the map as the whole globe
+// less the shape, so rewind() winds every outer ring clockwise and every hole counter-clockwise; Cliopatria's rows
+// in the omni files are wound both ways (at 1938, 25 of 90 polity rows the way d3 would fill inside out).
+test('d3 adapter: rewind() winds outer rings clockwise and holes counter-clockwise, in place', async () => {
+  await import('../design/prp-map-d3.js');
+  const D = globalThis.PRPMapD3;
+  const signed = r => { let a = 0; for (let i = 0; i < r.length - 1; i++) a += r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1]; return a; };
+  const ccw = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], cwHole = [[2, 2], [2, 4], [4, 4], [4, 2], [2, 2]];
+  const fc = { features: [{ geometry: { type: 'Polygon', coordinates: [ccw, cwHole] } }, { geometry: { type: 'MultiPolygon', coordinates: [[ccw.slice().reverse()], [ccw]] } }, { geometry: null }] };
+  assert.equal(D.rewind(fc, null), fc);
+  const [outer, hole] = fc.features[0].geometry.coordinates;
+  assert.ok(signed(outer) < 0 && signed(hole) > 0);
+  assert.ok(fc.features[1].geometry.coordinates.every(([r]) => signed(r) < 0));
+  // Every polity row of 1938 in the omni file, rewound, has its outer rings clockwise.
+  const topo = read('omni/data/borders/1900-1999.topo.json');
+  const rows = D.rewind({ features: M.sliceAt(M.decode(topo), 1938).filter(f => f.properties.k === 'POLITY' && f.geometry) }, null).features;
+  const polys = f => (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates);
+  assert.deepEqual(rows.filter(f => polys(f).some(p => signed(p[0]) > 0)).map(f => f.properties.n), []);
+  assert.match(raw('design/prp-map-d3.js').toString('utf8'), /rewind\(fc, d3\);/, 'draw() rewinds');
+});
+
 test('engine: omni/lib/layers.js is pure (no DOM, no fetch) and names no layer of its own', () => {
   const src = raw('omni/lib/layers.js').toString('utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
   assert.doesNotMatch(src, /document|window|fetch\(|import\s/);

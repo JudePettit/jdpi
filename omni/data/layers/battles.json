@@ -2,10 +2,10 @@
   "layer": "battles",
   "format": "vm-layer/1",
   "source": "wikidata",
-  "built": "2026-11-20T11:37:57Z",
+  "built": "2026-11-21T00:36:13Z",
   "from": 1258,
   "to": 2025,
-  "about": "The battles the Master Index holds with a date, and War Focus’s located battles, read from Wikidata on 2026-11-20 by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.",
+  "about": "The battles the Master Index holds with a date, and War Focus’s located battles, read from Wikidata on 2026-11-21 by omni/scripts/build-battles.mjs. Dates at the precision and in the calendar Wikidata records; points as Wikidata gives them; each value with what supports it.",
   "rows": [
     {
       "id": "Q369560",
@@ -4006,40 +4006,6 @@
           "via": "French Wikipedia",
           "viaQ": "Q8447",
           "line": "Wikidata Q626796, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
-        }
-      }
-    },
-    {
-      "id": "Q697579",
-      "q": "Q697579",
-      "label": "Battle of Lake Khasan",
-      "date": {
-        "from": "1938",
-        "p": 9,
-        "cal": "gregorian"
-      },
-      "sortYear": 1938,
-      "pt": [
-        130.61100556,
-        42.43590556
-      ],
-      "ptPrec": 0.00000277777777778,
-      "partOf": "Q696389",
-      "partOfLabel": "Soviet–Japanese border conflicts",
-      "src": {
-        "date": {
-          "id": "wikidata",
-          "loc": "Q697579#P585",
-          "support": "none",
-          "line": "Wikidata Q697579, point in time (P585): no reference"
-        },
-        "pt": {
-          "id": "wikidata",
-          "loc": "Q697579#P625",
-          "support": "wikipedia",
-          "via": "French Wikipedia",
-          "viaQ": "Q8447",
-          "line": "Wikidata Q697579, coordinate location (P625): Wikipedia-sourced, unverified (imported from French Wikipedia)"
         }
       }
     },
@@ -65623,7 +65589,7 @@
     {
       "id": "Q120703876",
       "q": "Q120703876",
-      "label": "July 2023 Crimean Bridge explosion",
+      "label": "2023 Crimean Bridge explosion",
       "date": {
         "from": "2023-07-17",
         "p": 11,

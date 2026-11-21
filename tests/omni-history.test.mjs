@@ -206,10 +206,12 @@ test('S5b: a click opens the module that holds the place and year', () => {
   assert.equal(L.moduleLink('progress', { year: 1609, event: 'telescope' }), 'science/progress/index.html#y=1609&e=telescope');
   const keys = read('omni/data/layers/retro-keys.json').keys;
   const usa = L.retroKey(keys, 'USA');
-  assert.match(usa, /^\d+$/);
+  assert.match(usa, /^Q\d+$/, 'the Retrospective’s keys are Wikidata items since retro-countries/2 (20 November 2026)');
   assert.equal(L.moduleLink('retrospective', { year: 1968, key: usa }), `https://hp-retrospective.pages.dev/#y=1968&c=${usa}`);
   assert.equal(L.retroKey(retroKeys({ countries: { 255: { iso3: 'DEU', name: 'Germany' }, 260: { iso3: 'DEU', name: 'West Germany / Germany' }, 265: { name: 'East Germany' } } }), 'DEU', 'West Germany / Germany'), '260');
   assert.deepEqual(Object.keys(retroKeys({ countries: { 265: { name: 'East Germany' } } })), [], 'no ISO3, no key: never joined by the key alone');
+  // The Retrospective keyed by Wikidata item (retro-countries/2, 20 November 2026): its keys in order of their digits.
+  assert.deepEqual(retroKeys({ countries: { Q713750: { iso3: 'DEU', name: 'Germany' }, Q41304: { iso3: 'DEU', name: 'Germany' } } }).DEU.map(x => x.k), ['Q41304', 'Q713750']);
   // The address table holds only keys and names, by ISO3.
   for (const [iso, ks] of Object.entries(keys)) { assert.match(iso, /^[A-Z]{3}$/); for (const k of ks) assert.deepEqual(Object.keys(k).sort(), ['k', 'n']); }
   // The state colours: few classes, from a darker step than a ramp of values.

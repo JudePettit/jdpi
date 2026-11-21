@@ -245,6 +245,7 @@ caption: How data moves from public APIs to your write-up. Nothing passes throug
 - **JSON** keeps every field and loads into OpenRefine, Python or another copy of this notebook (use it as your backup).
 - **Markdown** reads well in Obsidian, Joplin or any editor, includes the sources table and imports back into the notebook.
 - **Keys** you add (an OpenSanctions key, for example) stay in this browser and go only to their own service.
+- **OpenSanctions’s terms.** Its data is under CC BY-NC 4.0, for non-commercial use with credit; commercial use needs a licence from OpenSanctions ([its licensing page](https://www.opensanctions.org/licensing/), read 20 November 2026). Your key, and the searches you make with it, fall under your own agreement with OpenSanctions. Vitruvian Manager stores none of its data: the results go from OpenSanctions to your browser and are not kept.
 - Clearing your browser's site data deletes the notebook. Export after every working session.
 
 ## Reference

@@ -27,7 +27,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { parseCsv } from '../../battlefield/scripts/csv.mjs';
 import { FOUGHT_IN } from '../../battlefield/scripts/history-fought.mjs';
-import { interstateName, parties, stateName } from '../../battlefield/scripts/ucdp.mjs';
+import { interstateName, stateName } from '../../battlefield/scripts/ucdp.mjs';
 import { leaderText } from '../../lake/scripts/resolve.mjs';
 import { countryInText, countryOfLink, isKnownCountry, normaliseCountry } from './countries.mjs';
 import { currentEvents } from './current-events.mjs';
@@ -47,6 +47,8 @@ const shiftMonths = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCMo
 const NEWS_FROM = option('news-from') || [shiftMonths(TODAY, -6), '2026-01-01'].sort()[0];
 const RECENT = shiftMonths(TODAY, -24);
 const DATA = new URL('../data/', import.meta.url);
+// The Retrospective Battlefield's places (Wikidata item → name), to name where an interstate conflict was fought.
+const RB_PLACES = JSON.parse(readFileSync(new URL('../../battlefield/history/data/places.json', import.meta.url), 'utf8')).places;
 // The last build, for the UCDP events when no CSV is given and for the guard before writing.
 const previous = (existsSync(DATA) ? readdirSync(DATA).filter(f => /^\d{4}s\.json$/.test(f)) : []).flatMap(f => JSON.parse(readFileSync(new URL(f, DATA), 'utf8')).events);
 const events = [];
@@ -93,8 +95,12 @@ if (acdPath) {
       const name = r.type_of_conflict === '2' ? interstateName(episode) : `${stateName(r.side_a, r.start_date2)} vs ${r.side_b}`;
       // Where: UCDP's location, except that an interstate conflict's lists every party's government ("Australia,
       // Iraq, United Kingdom, …"), so the first state it was fought in comes first (history-fought.mjs).
-      const fought = FOUGHT_IN['u' + r.conflict_id]?.loc, partyName = parties(r, r.start_date2);
-      const country = fought?.map(gw => partyName.get(gw)).find(Boolean) || r.location.split(',')[0].replace(/ \(.*\)$/, '');
+      // Since 20 November 2026 FOUGHT_IN's places are Wikidata items (never a Gleditsch–Ward number): each is named as
+      // UCDP's location names it, where it does, else by the Retrospective Battlefield's places.json where that is a
+      // country the calendar knows (the Falklands are not: the Falklands War stays under Argentina, as before).
+      const fought = FOUGHT_IN['u' + r.conflict_id]?.loc, locs = r.location.split(',').map(x => x.trim().replace(/ \(.*\)$/, ''));
+      const placeNames = (fought || []).map(q => RB_PLACES[q]?.n).filter(Boolean);
+      const country = placeNames.map(n => locs.find(l => normaliseCountry(l) === normaliseCountry(n))).find(Boolean) || placeNames.find(n => isKnownCountry(n)) || locs[0];
       // Plain-text account from the UCDP record, since these events have no Wikipedia article of their own.
       const last = episode.at(-1), warYears = episode.filter(x => x.intensity_level === '2').length;
       const KIND = { 1: 'a colonial conflict', 2: 'an interstate conflict', 3: 'a civil conflict', 4: 'an internationalised civil conflict' };

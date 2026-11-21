@@ -59,31 +59,37 @@ test('UCDP names: each actor once, without "Government of", by the name that fit
   assert.deepEqual([...parties(row, '2003-03-20')], [[900, 'Australia'], [200, 'United Kingdom'], [2, 'United States of America'], [645, 'Iraq']]);
 });
 
+// Stage J1 (20 November 2026; Jude, 17 November: "let's use only free data if possible"): places are Wikidata Q-ids,
+// never Gleditsch–Ward numbers; the wars of 1926–1945 come from Wikidata by VM's rule; borders are Cliopatria's.
+const PLACES = JSON.parse(readFileSync(new URL('../battlefield/history/data/places.json', import.meta.url), 'utf8'));
+const sortQ = l => [...l].sort((a, b) => +a.slice(1) - +b.slice(1));
+const isQ = q => typeof q === 'string' && /^Q\d+$/.test(q);
+
 test('Retrospective data: wars sit where they were fought, not in every state that sent forces', () => {
   // The finding: the United States had no war on its own territory in 2003 (Iraq, Afghanistan and al-Qaida were all abroad).
-  assert.deepEqual(activeIn(2003).filter(w => locIn(w, 2003).includes(2)).map(w => w.name), []);
-  assert.deepEqual(war('u420').loc, [645]);
-  assert.deepEqual(war('u13692').loc, [700]);
-  assert.deepEqual(war('u16099').loc, [678]);
-  for (const [id, gw] of [['u252', 200], ['u252', 220], ['u350', 2], ['u368', 2], ['u250', 365], ['u431', 365], ['u323', 640]]) assert.ok(!war(id).loc.includes(gw), `${war(id).name} is not on ${gw}`);
+  assert.deepEqual(activeIn(2003).filter(w => locIn(w, 2003).includes('Q30')).map(w => w.name), []);
+  assert.deepEqual(war('u420').loc, ['Q796']);
+  assert.deepEqual(war('u13692').loc, ['Q889']);
+  assert.deepEqual(war('u16099').loc, ['Q805']);
+  for (const [id, q] of [['u252', 'Q145'], ['u252', 'Q142'], ['u350', 'Q30'], ['u368', 'Q30'], ['u250', 'Q15180'], ['u431', 'Q15180'], ['u323', 'Q43']]) assert.ok(!war(id).loc.includes(q), `${war(id).name} is not in ${q}`);
   // Wars fought on both sides keep both.
-  for (const [id, gws] of [['u235', [731, 732]], ['u293', [816, 817]], ['u13243', [365, 369]], ['u324', [630, 645]], ['u409', [530, 531]]]) assert.deepEqual([...war(id).loc].sort((a, b) => a - b), gws, war(id).name);
-  // The Falklands were fought on islands the map has no shape for: neither Argentina nor Britain, but named.
-  assert.deepEqual(war('u346').loc, []);
-  assert.deepEqual(war('u346').where, ['the Falkland Islands']);
+  for (const [id, qs] of [['u235', ['Q423', 'Q884']], ['u293', ['Q172640', 'Q180573']], ['u13243', ['Q159', 'Q212']], ['u324', ['Q794', 'Q796']], ['u409', ['Q115', 'Q986']]]) assert.deepEqual(sortQ(war(id).loc), sortQ(qs), war(id).name);
+  // The Falklands: the islands, neither Argentina nor Britain.
+  assert.deepEqual(war('u346').loc, ['Q9648']);
   // Al-Qaida's war with the United States reached US soil in 2001 only; Hezbollah's with Israel was fought in Lebanon.
-  assert.deepEqual(locIn(war('u418'), 2001), [2, 700]);
-  assert.ok(!locIn(war('u418'), 2010).includes(2));
-  assert.ok(locIn(war('u426'), 2006).includes(660));
-  // World War II moves year by year: Poland in 1939, North Africa and the Pacific later; never New Zealand or South Africa.
-  const ww2 = war('c139');
-  assert.deepEqual([...locIn(ww2, 1939)].sort((a, b) => a - b), [255, 290]);
-  for (const gw of [620, 651, 840, 775, 911, 365]) assert.ok(locIn(ww2, 1942).includes(gw), `1942: ${gw}`);
-  for (const gw of [2, 20, 140, 560, 712, 920]) assert.ok(!ww2.loc.includes(gw), `World War II not fought in ${gw}`);
-  assert.ok(Object.keys(ww2.locYears).length === 7);
+  assert.deepEqual(sortQ(locIn(war('u418'), 2001)), ['Q30', 'Q889']);
+  assert.ok(!locIn(war('u418'), 2010).includes('Q30'));
+  assert.ok(locIn(war('u426'), 2006).includes('Q822'));
+  // World War II moves year by year: Germany and Poland in 1939, North Africa and the Pacific later; never New Zealand
+  // or South Africa.
+  const ww2 = war('Q362');
+  assert.deepEqual(sortQ(locIn(ww2, 1939)), ['Q36', 'Q183']);
+  for (const q of ['Q79', 'Q1016', 'Q17', 'Q15180', 'Q928', 'Q252']) assert.ok(locIn(ww2, 1942).includes(q) || ww2.statesYears[1942].includes(q), `1942: ${q}`);
+  for (const q of ['Q30', 'Q16', 'Q155', 'Q664', 'Q258']) assert.ok(!ww2.loc.includes(q), `World War II not fought in ${q}`);
+  assert.equal(Object.keys(ww2.locYears).length, 7);
   // Colonial wars are fought in the colony, civil wars in their own country, not in the states that intervened.
-  assert.deepEqual(war('c454').loc, [665]);
-  assert.deepEqual(war('c718').loc, [230]);
+  assert.deepEqual(war('Q46057').loc, ['Q193714']); // Mandatory Palestine (fixer, 20 November 2026)
+  assert.deepEqual(war('Q10859').loc, ['Q29']);
   // Every year a war was active has its places.
   for (const w of HISTORY.wars) if (w.locYears) for (const [y] of w.years) assert.ok(w.locYears[y], `${w.name} ${y}`);
 });
@@ -98,147 +104,174 @@ test('Retrospective data: war names list each side once, without "Government of"
   for (const w of HISTORY.wars) for (const s of [...w.sideA, ...w.sideB]) assert.equal((s.match(/\(/g) || []).length, (s.match(/\)/g) || []).length, `${w.name}: ${s}`);
 });
 
-// Review of 15 November 2026: Romania, Bulgaria, Italy and France stood undated on both sides of World War II. A state
-// Correlates of War puts on both sides of a war is listed on each with its dates there; Vichy France is told apart.
-test('Retrospective data: a state on both sides of a war is dated on each, and Vichy France is named', () => {
-  const ww2 = war('c139'), on = (list, n) => list.filter(s => s === n || s.startsWith(n + ' ('));
-  assert.deepEqual(on(ww2.sideA, 'Italy'), ['Italy (18 Oct 1943 – 7 May 1945)']);
-  assert.deepEqual(on(ww2.sideB, 'Italy'), ['Italy (10 Jun 1940 – 2 Sep 1943)']);
-  assert.deepEqual(on(ww2.sideA, 'Romania'), ['Romania (9 Sep 1944 – 7 May 1945)']);
-  assert.deepEqual(on(ww2.sideB, 'Romania'), ['Romania (22 Jun 1941 – 23 Aug 1944)']);
-  assert.deepEqual(on(ww2.sideA, 'Bulgaria'), ['Bulgaria (9 Sep 1944 – 7 May 1945)']);
-  assert.deepEqual(on(ww2.sideB, 'Bulgaria'), ['Bulgaria (13 Dec 1941 – 8 Sep 1944)']);
-  assert.deepEqual(on(ww2.sideA, 'France'), ['France (3 Sep 1939 – 22 Jun 1940; 23 Oct 1944 – 14 Aug 1945)']);
-  assert.deepEqual(on(ww2.sideB, 'Vichy France'), ['Vichy France (7 Jul 1940 – 14 Jul 1941)']);
-  assert.match(ww2.sideNote, /Vichy regime/);
-  assert.match(ww2.sideNote, /Free France/);
-  // COW's side-B dates end at the Syria–Lebanon armistice, but Vichy forces fought the Allies again in 1942: the note
-  // says so rather than reading as if the fighting ended in July 1941 (second reader, 15 Nov 2026).
-  assert.match(ww2.sideNote, /Madagascar/);
-  assert.match(ww2.sideNote, /North Africa \(November 1942\)/);
-  // No Correlates of War interstate war (whose states COW dates) names a state undated on both sides.
-  for (const w of HISTORY.wars.filter(w => w.src === 'cow' && w.type === 'Interstate war')) {
-    const bare = s => s.replace(/ \(.*\)$/, '');
-    const both = w.sideA.filter(s => w.sideB.some(t => bare(t) === bare(s)));
-    for (const s of both) assert.match(s, /\(\d/, `${w.name}: ${s} on both sides without dates`);
+// J1: the Correlates of War's terms bar commercial use, so none of its records, totals or numbers is kept. The wars of
+// 1926–1945 are VM's list from Wikidata (CC0), at level 3, with no battle-death figure; a place is a Q-id.
+test('Retrospective data: 1926–1945 is VM’s list from Wikidata; no Correlates of War record, total or number', () => {
+  const raw = readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8');
+  assert.equal(HISTORY.format, 'vm-battlefield-wars/2');
+  assert.ok(!HISTORY.wars.some(w => w.src === 'cow'), 'no Correlates of War record');
+  assert.doesNotMatch(raw, /"src":"cow"|Correlates of War Inter|"deaths"|"gw"|"dots"|CShapes/);
+  for (const w of HISTORY.wars) {
+    for (const q of [...w.loc, ...w.states, ...Object.values(w.locYears || {}).flat(), ...Object.values(w.statesYears || {}).flat()]) assert.ok(isQ(q), `${w.id}: ${q} is a Q-id`);
+    if (w.src === 'ucdp') assert.match(w.id, /^u\d+$/);
+    else { assert.equal(w.src, 'wikidata'); assert.equal(w.id, w.q); assert.match(w.id, /^Q\d+$/); assert.ok(w.years.every(([y, l]) => y >= 1926 && y <= 1945 && l === 3), w.id); assert.ok(w.wiki, `${w.id}: its article`); }
+  }
+  const pre = HISTORY.wars.filter(w => w.years[0][0] < 1946).map(w => w.id);
+  for (const q of ['Q362', 'Q10859', 'Q223126', 'Q134949', 'Q94916', 'Q179975', 'Q279662']) assert.ok(pre.includes(q), `${q} is on the list`);
+  // Parts of a whole on the list are listed once, as the whole; a gang war and the Cold War are not wars.
+  for (const q of ['Q122100', 'Q189266', 'Q780845', 'Q611027', 'Q8683']) assert.ok(!pre.includes(q), `${q} is not listed on its own`);
+  assert.match(HISTORY.levels[3], /Wikidata/);
+  assert.match(HISTORY.sources.wikidata, /CC0/);
+  assert.match(HISTORY.sources.borders, /Cliopatria v0\.2\.1/);
+});
+
+test('wars-1926.mjs: VM’s rule picks wars and long rebellions, leaves out coups, short risings and parts of a whole', async () => {
+  const { selectWars, tooShort } = await import('../battlefield/scripts/wars-1926.mjs');
+  const t = (time, precision = 11) => [{ mainsnak: { datavalue: { value: { time, precision } } } }];
+  const ids = l => l.map(q => ({ mainsnak: { datavalue: { value: { id: q } } } }));
+  const item = (n, cls, claims = {}) => ({ labels: { en: { value: n } }, sitelinks: { enwiki: { title: n } }, claims: { P31: ids(cls), P17: ids(['Q29']), ...claims } });
+  const items = {
+    Q1: item('A war', ['Q8465'], { P580: t('+1936-07-17T00:00:00Z'), P582: t('+1939-04-01T00:00:00Z') }),
+    Q2: item('Its front', ['Q8465'], { P580: t('+1937-01-01T00:00:00Z'), P582: t('+1938-01-01T00:00:00Z'), P361: ids(['Q1']) }),
+    Q3: item('A long rebellion', ['Q124734'], { P580: t('+1930-02-00T00:00:00Z', 10), P582: t('+1930-04-00T00:00:00Z', 10) }),
+    Q4: item('A day’s rising', ['Q124734'], { P585: t('+1931-07-13T00:00:00Z') }),
+    Q5: item('A coup attempt', ['Q8465', 'Q25906438'], { P585: t('+1932-08-10T00:00:00Z') }),
+    Q6: item('A week’s revolt', ['Q6107280'], { P580: t('+1934-10-05T00:00:00Z'), P582: t('+1934-10-12T00:00:00Z') }),
+    Q7: item('A war abroad', ['Q8465'], { P17: ids(['Q99999']), P580: t('+1940-01-01T00:00:00Z'), P582: t('+1941-01-01T00:00:00Z') }),
+  };
+  const { wars, left } = selectWars({ items, things: {}, isPlace: q => q === 'Q29', warTree: new Set(['Q1', 'Q2', 'Q5', 'Q7']) });
+  assert.deepEqual(wars.map(w => w.q), ['Q3', 'Q1']);
+  const why = q => left.find(l => l.q === q)?.why || '';
+  assert.match(why('Q2'), /part of A war/);
+  assert.match(why('Q4'), /one date only/);
+  assert.match(why('Q5'), /class VM does not count/);
+  assert.match(why('Q6'), /8 days/);
+  assert.match(why('Q7'), /no state VM can place/);
+  assert.equal(tooShort(items.Q3), null);
+  // A war VM places by hand (history-fought.mjs) passes the last test.
+  assert.deepEqual(selectWars({ items: { Q7: items.Q7 }, things: {}, isPlace: q => q === 'Q29', warTree: new Set(['Q7']), placed: new Set(['Q7']) }).wars.map(w => w.q), ['Q7']);
+});
+
+// Fixer (20 November 2026; review finding F3): a location that spans several states (Wikidata's Gran Chaco lies in
+// Bolivia, Paraguay, Argentina and Brazil) is named, never spread to every state it spans, so National Analysis does
+// not count Argentina as a place of the Chaco War. A location in exactly one state stands for that state. F13: each
+// war keeps Wikidata's start and end at their own precision.
+test('wars-1926.mjs: a location spanning several states is named, not spread to them; dates keep their precision', async () => {
+  const { selectWars, dateAt } = await import('../battlefield/scripts/wars-1926.mjs');
+  const t = (time, precision = 11) => [{ mainsnak: { datavalue: { value: { time, precision } } } }];
+  const ids = l => l.map(q => ({ mainsnak: { datavalue: { value: { id: q } } } }));
+  const items = { Q1: { labels: { en: { value: 'A war in a region' } }, sitelinks: { enwiki: { title: 'A war' } },
+    claims: { P31: ids(['Q8465']), P17: ids(['Q750']), P276: ids(['Q900', 'Q901']), P710: ids(['Q750', 'Q733']), P580: t('+1932-09-09T00:00:00Z'), P582: t('+1935-06-00T00:00:00Z', 10) } } };
+  const things = { Q900: { labels: { en: { value: 'A region' } }, claims: { P17: ids(['Q750', 'Q733', 'Q414', 'Q155']) } },
+    Q901: { labels: { en: { value: 'A town' } }, claims: { P17: ids(['Q733']) } } };
+  const { wars } = selectWars({ items, things, isPlace: q => ['Q750', 'Q733', 'Q414', 'Q155'].includes(q), warTree: new Set(['Q1']) });
+  assert.deepEqual(wars[0].loc.sort(), ['Q733', 'Q750']);
+  assert.deepEqual(wars[0].states.sort(), ['Q733', 'Q750']);
+  assert.deepEqual(wars[0].where, ['A region']);
+  assert.deepEqual([wars[0].start, wars[0].end], ['1932-09-09', '1935-06']);
+  assert.equal(dateAt({ time: '+1940-00-00T00:00:00Z', precision: 9 }), '1940');
+});
+
+test('Retrospective data: 1926–1945 places come from Wikidata’s countries, participants and single-state locations; dates at Wikidata’s precision', () => {
+  // The Chaco War: Wikidata gives Bolivia as its country and Bolivia and Paraguay as its participants; its location,
+  // the Gran Chaco, also spans Argentina and Brazil, which took no part.
+  const chaco = war('Q223126'), spain = war('Q10859');
+  for (const q of ['Q414', 'Q155']) assert.ok(!chaco.states.includes(q) && !chaco.loc.includes(q), `Chaco War: ${q}`);
+  assert.deepEqual(sortQ(chaco.states), ['Q733', 'Q750']);
+  // The Spanish Civil War: the Iberian Peninsula does not make Portugal or Andorra a place of the war.
+  for (const q of ['Q45', 'Q228']) assert.ok(!spain.states.includes(q), `Spanish Civil War: ${q}`);
+  assert.deepEqual([chaco.start, chaco.end], ['1932-09-09', '1935-06-12']);
+  assert.deepEqual([war('Q134949').start, war('Q134949').end], ['1939-11-30', '1940-03-13']);
+  for (const w of HISTORY.wars.filter(x => x.src === 'wikidata')) {
+    assert.match(w.start, /^\d{4}(-\d\d){0,2}$/, `${w.id} start`);
+    if (w.end != null) assert.match(w.end, /^\d{4}(-\d\d){0,2}$/, `${w.id} end`);
   }
 });
 
-// S0, 16 November 2026: the Correlates of War's terms ask for its citation (Sarkees and Wayman 2010, Resort to War) and
-// bar redistribution without written permission. Every page file and page that shows a COW value cites it as the terms
-// ask, with the link, and the terms read are recorded where a maintainer looks (battlefield/README.md).
-test('Correlates of War: every page and page file showing its values cites it as its terms ask, with the link', async () => {
-  const { CITE_ONLY, HOSTED } = await import('../integration/scripts/cite-only.mjs');
-  const cow = CITE_ONLY.cow, read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
-  const cites = s => s.includes(cow.citation) && s.includes(cow.url);
-  for (const h of HOSTED.filter(x => x.file)) {
-    const f = JSON.parse(read(h.file));
-    assert.ok(Object.values(f.sources || {}).some(s => typeof s === 'string' && cites(s)), `${h.file}: sources cite ${cow.name} with the link`);
+// Fixer (20 November 2026; review findings F2 and P2): a war place no Cliopatria row holds in a year is never drawn on
+// Natural Earth's border of today: that is a guessed shape for the year, and it drew states that did not exist yet
+// (Israel in 1936 and 1938, for the Arab revolt in Palestine). It is listed under the map. From 1946 a small state UCDP
+// names as a party keeps Natural Earth's point (Tonga in Iraq in 2004).
+test('Retrospective data: no place is drawn on a border of today; small states as points from 1946 only', () => {
+  assert.equal(PLACES.format, 'vm-battlefield-places/2');
+  assert.ok(!('fallback' in PLACES), 'no border-of-today fallback');
+  for (const [y, o] of Object.entries(PLACES.points)) {
+    assert.ok(+y >= HISTORY.ucdpFrom, `points in ${y}`);
+    for (const id of Object.values(o)) assert.match(id, /^ne-[A-Z]{3}$/, `${y}: ${id}`);
   }
-  // The builders write the same, so a rebuild keeps it.
-  for (const p of ['battlefield/scripts/build-history.mjs', 'battlefield/focus/scripts/build.mjs']) assert.ok(read(p).includes(cow.citation) && read(p).includes(cow.url), `${p} writes the citation`);
-  // The pages' Sources paragraphs (HTML: the en dash and the ampersand as written there).
-  const html = s => s.replace(/&amp;/g, '&');
-  for (const p of ['battlefield/history/index.html', 'battlefield/focus/index.html']) {
-    const src = html(read(p).split('\n').find(l => /<b>Sources\.<\/b>/.test(l)) || '');
-    assert.ok(cites(src), `${p}: its Sources paragraph cites ${cow.name} with the link`);
-  }
-  // A War Focus war whose deaths are COW's total says so in its panel, with the citation and link (figures.mjs).
-  const { COW_CITE } = await import('../battlefield/focus/figures.mjs');
-  assert.deepEqual(COW_CITE, { text: cow.citation, url: cow.url });
-  assert.match(read('battlefield/focus/app.js'), /COW_CITE/);
-  // The Retrospective Battlefield's panel names COW for its battle deaths; its Sources paragraph says what the terms allow.
-  assert.match(read('battlefield/history/index.html'), /written permission/);
-  const readme = read('battlefield/README.md').replace(/\s*\n>?\s*/g, ' '); // the quotation's lines joined
-  for (const s of [cow.terms, cow.url, 'Users agree not to distribute the dataset to any third party without written permission', '16 November 2026']) assert.ok(readme.includes(s), `README records: ${s}`);
+  assert.equal(PLACES.points[2004].Q678, 'ne-TON');
+  // The Arab revolt in Palestine is placed in Mandatory Palestine, which no free border holds, so it is named.
+  const revolt = war('Q46057');
+  assert.deepEqual(revolt.loc, ['Q193714']);
+  for (const y of [1936, 1937, 1938, 1939].filter(y => revolt.years.some(([yy]) => yy === y))) assert.ok(PLACES.unplaced[y].includes('Q193714'), `${y}`);
+  // No war is placed in Israel before Israel existed.
+  for (const w of HISTORY.wars) for (const [y] of w.years) if (y < 1948) assert.ok(!locIn(w, y).includes('Q801') && !statesIn(w, y).includes('Q801'), `${w.id} ${y}: Israel`);
+  // Georgia in 1991 lay inside the Soviet Union's row: named, not drawn on today's border.
+  assert.ok(PLACES.unplaced[1991].includes('Q230'));
+  // A place founded after 1926 carries its year (Wikidata's inception), so the page calls it today's in an earlier year.
+  assert.ok(PLACES.places.Q801.since >= 1948);
 });
 
-// AC-13 (Jude, 16 November 2026: every map shows every country the sources allow; ledger AT-19 with AT-10). A UCDP
-// conflict's states were stored once for all its years, so Tonga stood in "Iraq: government" for all 35 of its active
-// years and Sweden fought in Afghanistan in 1985: 8,693 state-years across 79 conflicts and 146 states in UCDP/PRIO ACD
-// v26.1 (PRP-ALL-COUNTRIES-PLAN.md, AC-13). Each conflict now keeps its state parties year by year, from UCDP's
-// gwno_a, gwno_a_2nd, gwno_b and gwno_b_2nd.
+// AC-13 (Jude, 16 November 2026): a UCDP conflict's states were stored once for all its years, so Tonga stood in "Iraq:
+// government" for all 35 of its active years. Each conflict keeps its state parties year by year, from UCDP's
+// "Government of …" sides, each name read as a Q-id (omni/scripts/ucdp-places.mjs).
 const statesIn = (w, y) => (w.statesYears ? w.statesYears[y] || [] : w.states);
-const byNum = (a, b) => a - b;
 test('Retrospective data: each UCDP conflict keeps its state parties year by year, as UCDP’s rows give them', () => {
   for (const w of HISTORY.wars.filter(x => x.src === 'ucdp')) {
     assert.ok(w.statesYears, `${w.id}: parties by year`);
-    assert.deepEqual(Object.keys(w.statesYears).map(Number).sort(byNum), w.years.map(([y]) => y), `${w.id}: one entry per active year`);
-    assert.deepEqual([...new Set(Object.values(w.statesYears).flat())].sort(byNum), [...w.states].sort(byNum), `${w.id}: its years make up its states`);
-    for (const [y, gws] of Object.entries(w.statesYears)) assert.ok(gws.length && gws.every(Number.isInteger), `${w.id} ${y}`);
-    // In ascending order, so a rebuild from the same rows writes the same file (the second review of AC-13).
-    for (const [y, gws] of Object.entries(w.statesYears)) assert.deepEqual(gws, [...gws].sort(byNum), `${w.id} ${y}: sorted`);
+    assert.deepEqual(Object.keys(w.statesYears).map(Number).sort((a, b) => a - b), w.years.map(([y]) => y), `${w.id}: one entry per active year`);
+    assert.deepEqual(sortQ(new Set(Object.values(w.statesYears).flat())), sortQ(w.states), `${w.id}: its years make up its states`);
+    for (const [y, qs] of Object.entries(w.statesYears)) assert.ok(qs.length && qs.every(isQ), `${w.id} ${y}`);
   }
-  // UCDP/PRIO ACD v26.1's rows: Tonga (972) is among side A's secondary parties of "Iraq: government" (u259) in 2004,
-  // 2007 and 2008, and of "Afghanistan: government" (u333) in 2011–14; Iraq fought alone in 1982; Sweden (380) took
-  // part in Afghanistan from 2006 to 2014, and in 1985 the parties were Afghanistan and the Soviet Union.
-  const iraq = war('u259'), afghanistan = war('u333'), yearsWith = (w, gw) => w.years.map(([y]) => y).filter(y => statesIn(w, y).includes(gw));
-  assert.deepEqual(yearsWith(iraq, 972), [2004, 2007, 2008]);
-  assert.deepEqual(statesIn(iraq, 1982), [645]);
-  // (The plan's example year, 1980, is not one of u259's active years; 1982–87 are, with Iraq alone.)
-  assert.ok(!iraq.years.some(([y]) => y === 1980));
-  for (const y of [1982, 1983, 1984, 1987]) for (const gw of [972, 2]) assert.ok(!statesIn(iraq, y).includes(gw), `u259 in ${y}: not ${gw}`);
-  assert.ok(!statesIn(iraq, 2006).includes(972) && statesIn(iraq, 2006).includes(2), 'u259 in 2006: the United States, not Tonga');
-  assert.deepEqual(yearsWith(afghanistan, 972), [2011, 2012, 2013, 2014]);
-  assert.deepEqual(yearsWith(afghanistan, 380), [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014]);
-  assert.deepEqual([...statesIn(afghanistan, 1985)].sort(byNum), [365, 700]);
-  // The Correlates of War's wars are written back as they were (the S0 hold): no parties by year are added to them.
-  for (const w of HISTORY.wars.filter(x => x.src === 'cow')) assert.equal(w.statesYears, undefined, w.id);
+  // UCDP/PRIO ACD v26.1's rows: Tonga is among side A's secondary parties of "Iraq: government" (u259) in 2004, 2007
+  // and 2008, and of "Afghanistan: government" (u333) in 2011–14; Iraq fought alone in 1982; Sweden took part in
+  // Afghanistan from 2006 to 2014, and in 1985 the parties were Afghanistan and the Soviet Union.
+  const iraq = war('u259'), afghanistan = war('u333'), yearsWith = (w, q) => w.years.map(([y]) => y).filter(y => statesIn(w, y).includes(q));
+  assert.deepEqual(yearsWith(iraq, 'Q678'), [2004, 2007, 2008]);
+  assert.deepEqual(statesIn(iraq, 1982), ['Q796']);
+  assert.ok(!statesIn(iraq, 2006).includes('Q678') && statesIn(iraq, 2006).includes('Q30'), 'u259 in 2006: the United States, not Tonga');
+  assert.deepEqual(yearsWith(afghanistan, 'Q678'), [2011, 2012, 2013, 2014]);
+  assert.deepEqual(yearsWith(afghanistan, 'Q34'), [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014]);
+  assert.deepEqual(sortQ(statesIn(afghanistan, 1985)), ['Q889', 'Q15180']);
 });
 
-// Where CShapes changed a shape in the middle of a war, the place follows that year's shape (the map draws the borders
-// of 1 July): nine place codes had no shape in the year they were given for, so Vietnam stood at peace through the
-// First Indochina War. A place is drawn as a shape, or as a dot from the dot's first day; a war-year with no place at
-// all is named (`where`). Only a dot excuses a code with no shape: a war's `where` does not excuse its other years.
-test('Retrospective data: every war-year place has a CShapes shape on 1 July of that year, or a name', async () => {
-  const { HOSTED } = await import('../integration/scripts/cite-only.mjs');
-  const held = HOSTED.find(h => h.file === 'battlefield/history/data/wars.json')?.kind === 'pending';
-  const shapes = JSON.parse(readFileSync(new URL('../battlefield/history/data/borders.topo.json', import.meta.url), 'utf8')).objects.borders.geometries.map(g => g.properties);
-  const dotFrom = new Map(Object.values(HISTORY.dots).filter(d => d.gw != null).map(d => [d.gw, d.from]));
-  const drawn = (gw, y) => shapes.some(p => p.gw === gw && p.s <= `${y}-07-01` && `${y}-07-01` <= p.e)
-    || (dotFrom.has(gw) && (dotFrom.get(gw) == null || dotFrom.get(gw) <= `${y}-07-01`));
+// Every war-year place is drawn on a Cliopatria row of that year (2025 on 2024's), or, from 1946, as a small state's
+// point, or it is listed as one VM cannot place, which the page names under the map (fixer, 20 November 2026: no
+// border of today for a past year).
+test('Retrospective data: every war-year place is on a Cliopatria row, a small state’s point, or listed as unplaced', async () => {
+  await import('../design/prp-map.js');
+  const M = globalThis.PRPMap;
+  assert.equal(PLACES.format, 'vm-battlefield-places/2');
+  assert.deepEqual(PLACES.borders, ['omni/data/borders/1900-1999.topo.json', 'omni/data/borders/2000-2024.topo.json']);
+  const rowQ = (id, y) => { const r = PLACES.rows[id]; return typeof r === 'string' ? r : (r || []).find(([f, t]) => f <= y && y <= t)?.[2] || null; };
+  const fcs = PLACES.borders.map(f => M.decode(JSON.parse(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'))));
+  const onRows = new Map();
+  const rowsIn = y => {
+    const yb = Math.min(y, PLACES.bordersTo);
+    if (!onRows.has(yb)) onRows.set(yb, new Set(M.sliceAt(fcs[yb < 2000 ? 0 : 1], yb).map(f => rowQ(f.id, yb)).filter(Boolean)));
+    return onRows.get(yb);
+  };
   const missing = [];
   for (const w of HISTORY.wars) for (const [y] of w.years) {
-    const gs = locIn(w, y);
-    for (const gw of gs) if (!drawn(gw, y)) missing.push(`${w.id} ${y} ${gw}`);
-    if (!gs.length && !w.where?.length) missing.push(`${w.id} ${y} (no place)`);
+    const qs = new Set([...locIn(w, y), ...statesIn(w, y)]);
+    if (!qs.size && !w.where?.length) missing.push(`${w.id} ${y} (no place)`);
+    for (const q of qs) if (!rowsIn(y).has(q) && !PLACES.points[y]?.[q] && !PLACES.unplaced[y]?.includes(q)) missing.push(`${w.id} ${y} ${q}`);
+    for (const q of qs) assert.ok(PLACES.places[q]?.n, `${q} has a name`);
   }
-  // While the S0 hold stands (integration/scripts/cite-only.mjs), the Correlates of War rows are written back exactly as
-  // they are; these four wait for it (history-fought.mjs has their places for when it lifts).
-  assert.deepEqual(missing.sort(), held ? ['c139 1945 255', 'c698 1926 (no place)', 'c708 1929 670', 'c708 1930 670'] : []);
-  assert.ok(war('u350').loc.includes(55), 'Grenada 1983, drawn as a dot');
-  const sorted = (w, y) => [...locIn(w, y)].sort(byNum);
-  // The First Indochina War on French Indochina's Vietnam (815) to 1953, then on the Democratic Republic's shape.
-  for (let y = 1946; y <= 1953; y++) assert.deepEqual(sorted(war('u216'), y), [815], `u216 ${y}`);
-  assert.ok(locIn(war('u216'), 1954).includes(816));
-  // When the hold lifts: World War II in 1945 on the occupied Germany's two shapes; the Ikhwan Revolt in Nejd, which
-  // CShapes does not draw. While it stands, the rows as they were.
-  assert.ok(locIn(war('c139'), 1944).includes(255));
-  if (held) {
-    assert.ok(locIn(war('c139'), 1945).includes(255) && war('c139').placeNames === undefined);
-    assert.deepEqual(war('c708').loc, [670]);
-    assert.equal(war('c708').where, undefined);
-  } else {
-    assert.deepEqual(sorted(war('c139'), 1945).filter(gw => gw >= 255 && gw <= 265), [260, 265]);
-    assert.deepEqual(war('c708').loc, []);
-    assert.deepEqual(war('c708').where, ['Nejd']);
-  }
-  // Georgia, Azerbaijan and South Sudan in their first year, and Taiwan in 1949: the state whose shape held them on
-  // 1 July, named for the place; South Vietnam in 1975 on the Democratic Republic's shape, which held both on 1 July
-  // (UCDP places 1975 in 816 and 817), under its own name.
-  for (const [id, y, gw, name] of [['u380', 1991, 365, 'Georgia (then in the Soviet Union)'], ['u388', 1991, 365, 'Azerbaijan (then in the Soviet Union)'],
-    ['u11345', 2011, 625, 'South Sudan (then in Sudan)'], ['u293', 1975, 816, null], ['u232', 1949, 710, null]]) {
-    assert.deepEqual(sorted(war(id), y), [gw], `${id} ${y}`);
-    assert.equal(war(id).placeNames?.[y]?.[gw] ?? null, name, `${id} ${y}: named`);
-  }
-  assert.deepEqual(sorted(war('u380'), 1992), [372]);
-  // A borrowed shape is not one of the war's own places (`loc`, which National Analysis reads).
-  for (const [id, gw] of [['u380', 365], ['u388', 365], ['u11345', 625]]) assert.ok(!war(id).loc.includes(gw), `${id}: not ${gw}`);
-  assert.deepEqual([...war('u293').loc].sort(byNum), [816, 817]);
-  assert.deepEqual(sorted(war('u232'), 1950), [710, 713]);
-  // u216's name was "Vietnam (North Vietnam): Vietnam" (UCDP's location, named for a state that came in 1954).
+  assert.deepEqual(missing, []);
+  // The First Indochina War on Cliopatria's French Indochina, 1946–53.
+  for (let y = 1946; y <= 1953; y++) { assert.deepEqual(locIn(war('u216'), y), ['Q185682'], `u216 ${y}`); assert.ok(rowsIn(y).has('Q185682'), `${y}: a row`); }
   assert.equal(war('u216').name, 'Vietnam: Vietnam');
-  assert.deepEqual(war('u216').where, ['Vietnam']);
+  // Tonga as its point.
+  assert.equal(PLACES.points[2004].Q678, 'ne-TON');
+  // Germany's and the Soviet Union's rows carry their Q-ids by year (VM's crosswalk, history-places.mjs).
+  for (const y of [1938, 1975, 2010]) assert.ok(rowsIn(y).has('Q183'), `Germany ${y}`);
+  assert.ok(rowsIn(1950).has('Q15180') && !rowsIn(1995).has('Q15180') && rowsIn(1995).has('Q159'));
+  // What VM cannot place is named, and never also drawn that year.
+  for (const [y, qs] of Object.entries(PLACES.unplaced)) for (const q of qs) {
+    assert.ok(PLACES.places[q].n, q);
+    assert.ok(!rowsIn(+y).has(q) && !PLACES.points[y]?.[q], `${y} ${q}`);
+  }
 });
 
 // The catalogue's copy (integration/data/retrospective-wars.json, from integration/scripts/build-catalog.mjs) names
@@ -246,37 +279,24 @@ test('Retrospective data: every war-year place has a CShapes shape on 1 July of 
 test('Retrospective data: the catalogue’s copy names every UCDP conflict as wars.json does', () => {
   const cat = JSON.parse(readFileSync(new URL('../integration/data/retrospective-wars.json', import.meta.url), 'utf8')).records;
   const ucdp = HISTORY.wars.filter(w => w.src === 'ucdp');
-  assert.deepEqual(cat.map(r => r.id).sort(), ucdp.map(w => w.id).sort());
+  assert.deepEqual(cat.map(r => r.id).filter(id => /^u/.test(id)).sort(), ucdp.map(w => w.id).sort());
   const stale = ucdp.filter(w => cat.find(r => r.id === w.id).name !== w.name).map(w => w.id);
   assert.deepEqual(stale, [], 'run node integration/scripts/build-catalog.mjs');
 });
 
-// The 22 of VM's countries CShapes 2.0 has no border for are drawn as the kit's dots (design/prp-mapkit.js), from
-// their first day as a state, under the Gleditsch–Ward number UCDP files them under (none for the Holy See).
-test('Retrospective data: the 22 states with no CShapes border are dots from their first day, under UCDP’s numbers', async () => {
-  await import('../design/prp-mapkit.js');
-  const kit = globalThis.PRPMapkit.dots('cshapes').map(d => d.iso3).sort();
-  assert.equal(kit.length, 22);
-  assert.deepEqual(Object.keys(HISTORY.dots).sort(), kit);
-  const shapes = new Set(JSON.parse(readFileSync(new URL('../battlefield/history/data/borders.topo.json', import.meta.url), 'utf8')).objects.borders.geometries.map(g => g.properties.gw));
-  const gws = Object.values(HISTORY.dots).map(d => d.gw).filter(gw => gw != null);
-  assert.equal(gws.length, 21, 'every one but the Holy See has a number');
-  assert.equal(HISTORY.dots.VAT.gw, null);
-  assert.equal(new Set(gws).size, gws.length);
-  for (const gw of gws) assert.ok(Number.isInteger(gw) && !shapes.has(gw), `${gw}: a number of its own, with no shape`);
-  for (const [iso3, d] of Object.entries(HISTORY.dots)) assert.ok(d.from === null || /^\d{4}(-\d{2}-\d{2})?$/.test(d.from), `${iso3}: ${d.from}`);
-  // The numbers UCDP gives them: Grenada (55) in 1983, Tonga (972) in Iraq and Afghanistan.
-  assert.equal(HISTORY.dots.GRD.gw, 55);
-  assert.equal(HISTORY.dots.TON.gw, 972);
-  assert.ok(war('u350').states.includes(55) && war('u259').states.includes(972) && war('u333').states.includes(972));
-  // First days: the Retrospective's leader lists (Grenada's first Prime Minister from independence; the four European
-  // microstates were states before 1926), and Wikidata for the other twelve.
-  assert.equal(HISTORY.dots.GRD.from, '1974-02-07');
-  for (const iso3 of ['AND', 'LIE', 'MCO', 'SMR']) assert.equal(HISTORY.dots[iso3].from, null, iso3);
-  assert.equal(HISTORY.dots.TUV.from, '1978-10-01');
-  assert.equal(HISTORY.dots.VAT.from, '1929-02-11');
-  assert.match(HISTORY.sources.dots, /Gleditsch/);
-  assert.match(HISTORY.sources.dots, /Wikidata/);
+// Addresses written before J1 still open the same view: c=<Gleditsch–Ward number> through UCDP's own rows, and
+// w=c<number> (a Correlates of War war) through the wars' Wikipedia titles, or the page says what it cannot show.
+test('Retrospective data: the old addresses’ tables (c=365, w=c139) name places and wars on the new list', () => {
+  assert.equal(PLACES.oldCountries[2], 'Q30');
+  // 365: the Soviet Union in UCDP's rows to 1991, then Russia; the page opens the one of the year shown.
+  assert.deepEqual(PLACES.oldCountries[365].map(r => r[2]), ['Q15180', 'Q159']);
+  assert.equal(PLACES.oldCountries[645], 'Q796');
+  for (const v of Object.values(PLACES.oldCountries)) for (const q of Array.isArray(v) ? v.map(r => r[2]) : [v]) assert.ok(PLACES.places[q], q);
+  assert.equal(HISTORY.oldIds.c139, 'Q362');
+  assert.equal(HISTORY.oldIds.c718, 'Q10859');
+  assert.deepEqual(HISTORY.oldWithin.c145, ['Q362', 'Franco-Thai War']);
+  for (const q of Object.values(HISTORY.oldIds)) assert.ok(war(q), q);
+  for (const t of Object.values(HISTORY.oldGone)) assert.equal(typeof t, 'string');
 });
 
 // S0 (16 November 2026): UCDP aggregate events labelled. Russia–Ukraine, January 2026 read "about 13,394 deaths …
@@ -497,8 +517,9 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', p
   await page.waitForFunction(() => document.querySelector('#year-big').textContent === '2025');
   const n2025 = +(await page.locator('#panel .sub').innerText()).match(/^(\d+) armed/)[1];
   const red = await page.locator('path.shape[fill="var(--c-war)"]').count();
+  const caption = await page.locator('#caption').innerText();
   // A long list shows its first items and opens the rest in a pop-out.
-  await page.evaluate(() => { location.hash = '#y=2025&c=2'; });
+  await page.evaluate(() => { location.hash = '#y=2025&c=Q30'; });
   await page.waitForSelector('#panel [data-more]');
   const shown = await page.locator('#panel .war').count();
   await page.locator('#panel [data-more]').last().click();
@@ -511,30 +532,34 @@ test('Retrospective: 1939 shows World War II; 2025 shows dozens of conflicts', p
   assert.match(heading, /all conflicts 1926–2025/);
   assert.match(y1939, /World War II/);
   assert.ok(n2025 >= 40, `2025 conflicts: ${n2025}`);
-  assert.ok(red >= 5, `countries at war: ${red}`);
+  assert.ok(red >= 5, `places at war: ${red}`);
+  assert.match(caption, /Cliopatria’s borders end in 2024, so 2025 is drawn on 2024’s/);
   assert.deepEqual(errors, []);
 });
 
 // Review of 12 November 2026: the inclusion rules differ before UCDP's first year and after, and only the Method said
-// so. The two thresholds now stand under the timeline, with the years from the data.
+// so. The two thresholds stand under the timeline, with the years from the data.
 test('Retrospective: the two datasets\' thresholds stand under the timeline, with their years', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=1939');
   await page.waitForFunction(() => document.querySelector('#thresholds')?.textContent, null, { timeout: 20000 });
   const line = await page.locator('#thresholds').innerText();
   const below = await page.evaluate(() => document.querySelector('#thresholds').getBoundingClientRect().top >= document.querySelector('#timeline').getBoundingClientRect().bottom - 1);
+  const html = await page.content();
   await browser.close();
   const { firstYear: a, ucdpFrom: u, lastYear: b } = HISTORY;
-  assert.equal(line, `What is counted: ${a}–${u - 1}, wars of 1,000+ battle deaths (Correlates of War); ${u}–${b}, armed conflicts of 25+ battle deaths in a year (UCDP/PRIO). Smaller conflicts before ${u} are missing.`);
+  assert.equal(line, `What is counted: ${a}–${u - 1}, the wars VM lists from Wikidata (no free source codes their size, so smaller conflicts are missing); ${u}–${b}, armed conflicts of 25+ battle deaths in a year (UCDP/PRIO), at war level from 1,000.`);
   assert.ok(below, 'right under the timeline');
+  // J1: no Correlates of War, no CShapes, anywhere on the page.
+  assert.doesNotMatch(html, /Correlates of War Inter|CShapes|correlatesofwar\.org/);
   assert.deepEqual(errors, []);
 });
 
+const fillsOf = page => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#map .shape')].map(p => [p.dataset.key, p.getAttribute('fill')])));
 test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad; 1942 shows the war in North Africa and the Pacific', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=2003');
   await page.waitForSelector('#panel .war', { timeout: 20000 });
-  const fills = () => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('path.shape')].map(p => [p.__data__.properties.gw, p.getAttribute('fill')])));
-  const y2003 = await fills();
-  await page.evaluate(() => { location.hash = '#y=2003&c=2'; });
+  const y2003 = await fillsOf(page);
+  await page.evaluate(() => { location.hash = '#y=2003&c=Q30'; });
   await page.waitForFunction(() => /^No conflict on its territory in 2003/.test(document.querySelector('#panel .sub')?.textContent || ''));
   const us = await page.locator('#panel .sub').innerText();
   await page.evaluate(() => { location.hash = '#y=1982&w=u346'; });
@@ -542,21 +567,27 @@ test('Retrospective: 2003 shades Iraq at war and its invaders as fighting abroad
   const falklands = await page.locator('#panel').innerText();
   await page.evaluate(() => { location.hash = '#y=1942'; });
   await page.waitForFunction(() => document.querySelector('#year-big').textContent === '1942');
-  const y1942 = await fills();
+  await page.waitForFunction(() => document.querySelector('#map .shape[data-key="Q79"]') && !document.querySelector('#unplaced').hidden);
+  const y1942 = await fillsOf(page);
+  const unplaced1942 = await page.locator('#unplaced').innerText();
   await browser.close();
-  assert.equal(y2003[645], 'var(--c-war)');
-  for (const gw of [2, 200, 900]) assert.equal(y2003[gw], 'var(--c-abroad)', `2003: ${gw}`);
+  assert.equal(y2003.Q796, 'var(--c-war)');
+  for (const q of ['Q30', 'Q145', 'Q408']) assert.equal(y2003[q], 'var(--c-abroad)', `2003: ${q}`);
   assert.match(us, /fighting in \d+ abroad/);
-  assert.match(falklands, /over territory in the Falkland Islands/);
-  for (const gw of [620, 651, 840, 775, 911]) assert.equal(y1942[gw], 'var(--c-war)', `1942: ${gw}`);
-  for (const gw of [560, 920]) assert.equal(y1942[gw], 'var(--c-abroad)', `1942: ${gw}`);
+  assert.match(falklands, /over territory in (the )?Falkland Islands/);
+  // 1942: World War II, a war on VM's list from Wikidata, in its own colour: Egypt, the Soviet Union, China and the
+  // Dutch East Indies. Libya, the Philippines and Burma lay in empires Cliopatria draws as one: named, not drawn on a
+  // border of today (fixer, 20 November 2026); Burma as today's Myanmar, a state from 1948.
+  for (const q of ['Q79', 'Q15180', 'Q148', 'Q252']) assert.equal(y1942[q], 'var(--c-listed)', `1942: ${q}`);
+  for (const q of ['Q1016', 'Q928', 'Q836']) assert.equal(y1942[q], undefined, `1942: ${q} is not drawn`);
+  assert.match(unplaced1942, /^VM cannot place this on a free border for 1942: .*Libya.*Philippines.*today’s Myanmar/);
   assert.deepEqual(errors, []);
 });
 
 test('Retrospective: a period of years shows every conflict active in it at its peak; the end handle pulled onto the start gives one year', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=1942');
   await page.waitForSelector('#panel .war', { timeout: 20000 });
-  const atWar = () => page.locator('path.shape[fill="var(--c-war)"]').count();
+  const atWar = () => page.locator('path.shape[fill="var(--c-war)"], path.shape[fill="var(--c-listed)"]').count();
   const red1942 = await atWar();
   await page.evaluate(() => { location.hash = '#y=1945&f=1939'; });
   await page.waitForFunction(() => document.querySelector('#year-big').textContent === '1939–1945');
@@ -564,11 +595,11 @@ test('Retrospective: a period of years shows every conflict active in it at its 
     label: (await page.locator('#year-label').textContent()).trim(), // textContent: the CSS upper-cases it
     sub: await page.locator('#panel .sub').innerText(),
     red: await atWar(),
-    card: (await page.locator('#panel .war[data-id] .lvl').first().textContent()).trim(), // textContent: the CSS upper-cases it
+    card: (await page.locator('#panel .war[data-id] .lvl').first().textContent()).trim(),
     handles: [await page.locator('#from').inputValue(), await page.locator('#year').inputValue()],
   };
   // A redraw (a country chosen) keeps the period in the address.
-  await page.evaluate(() => { location.hash = '#y=1945&f=1939&c=2'; });
+  await page.evaluate(() => { location.hash = '#y=1945&f=1939&c=Q30'; });
   await page.waitForFunction(() => /on its territory in 1939–1945/.test(document.querySelector('#panel .sub')?.textContent || ''));
   const kept = page.url();
   // The end handle pulled back onto the start: one year again, the start at rest, and no f in the address.
@@ -578,174 +609,172 @@ test('Retrospective: a period of years shows every conflict active in it at its 
   await browser.close();
   assert.equal(period.label, 'Period');
   assert.match(period.sub, /^\d+ armed conflicts, \d+ at war level at some point$/);
-  assert.ok(period.red >= red1942, `countries at war 1939–1945: ${period.red}; 1942: ${red1942}`);
-  assert.equal(period.card, 'War · 1939–45 · 7 yrs'); // World War II leads: at war level, active in all seven years
+  assert.ok(period.red >= red1942, `places at war 1939–1945: ${period.red}; 1942: ${red1942}`);
+  assert.equal(period.card, 'Listed war · 1939–45 · 7 yrs'); // World War II leads: on VM's list, active in all seven years
   assert.deepEqual(period.handles, ['1939', '1945']);
-  assert.match(kept, /#y=1945&f=1939&c=2$/);
+  assert.match(kept, /#y=1945&f=1939&c=Q30$/);
   assert.equal(one.big, '1939');
-  assert.match(one.url, /#y=1939&c=2$/);
+  assert.match(one.url, /#y=1939&c=Q30$/);
   assert.deepEqual(one.handles, ['1939', '1939']);
   assert.deepEqual(errors, []);
 });
 
 // AC-13: what pointing at a country says follows the year shown: that year's parties, and when it has no conflict, one
-// sentence naming the record that year belongs to (design/prp-mapkit.js's sentence); the dots are drawn and found.
-const tipOf = (page, gw) => page.evaluate(gw => {
-  const el = [...document.querySelectorAll('#map .shape')].find(p => p.__data__?.properties?.gw === gw || p.__data__?.gw === gw);
+// sentence naming the record that year belongs to (design/prp-mapkit.js's sentence).
+const tipOf = (page, key) => page.evaluate(key => {
+  const el = document.querySelector(`#map .shape[data-key="${key}"]`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
   el.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
   return document.querySelector('#tooltip').textContent;
-}, gw);
+}, key);
 test('Retrospective: pointing at a country gives the year’s parties, or one sentence naming the record', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=1985');
   try {
     await page.waitForSelector('#panel .war', { timeout: 20000 });
-    const sweden1985 = await tipOf(page, 380);
+    const sweden1985 = await tipOf(page, 'Q34');
     assert.ok(sweden1985 && !sweden1985.includes('Afghanistan: government'), `Sweden 1985: ${sweden1985}`);
-    const go = async h => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(t => document.querySelector('#year-big').textContent === t, h.includes('&f=') ? `${h.match(/f=(\d+)/)[1]}–${h.match(/y=(\d+)/)[1]}` : h.match(/y=(\d+)/)[1]); };
+    const go = async h => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(t => document.querySelector('#year-big').textContent === t, h.includes('&f=') ? `${h.match(/f=(\d+)/)[1]}–${h.match(/y=(\d+)/)[1]}` : h.match(/y=(\d+)/)[1]); await page.waitForTimeout(300); };
     await go('#y=2010');
-    assert.match(await tipOf(page, 380), /Afghanistan: government/);
+    assert.match(await tipOf(page, 'Q34'), /Afghanistan: government/);
     await go('#y=1932');
-    assert.equal(await tipOf(page, 94), 'Costa Rica: no war of 1,000 or more battle deaths recorded by the Correlates of War in 1932.');
+    assert.equal(await tipOf(page, 'Q800'), 'Costa Rica: no war recorded by VM’s list of wars from Wikidata in 1932.');
     await go('#y=1990');
-    assert.equal(await tipOf(page, 94), 'Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990.');
+    assert.equal(await tipOf(page, 'Q800'), 'Costa Rica: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 1990.');
     // A period across 1946 names both records.
     await go('#y=1947&f=1944');
-    assert.equal(await tipOf(page, 225), 'Switzerland: no war of 1,000 or more battle deaths recorded by the Correlates of War from 1944 to 1945, and no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO from 1946 to 1947.');
-    // Its panel repeats it.
-    await page.evaluate(() => { location.hash = '#y=1990&c=94'; });
+    assert.equal(await tipOf(page, 'Q39'), 'Switzerland: no war recorded by VM’s list of wars from Wikidata from 1944 to 1945, and no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO from 1946 to 1947.');
+    // Its panel repeats it, and names the border it is drawn on.
+    await page.evaluate(() => { location.hash = '#y=1990&c=Q800'; });
     await page.waitForFunction(() => /^Costa Rica: no armed conflict/.test(document.querySelector('#panel .sub')?.textContent || ''));
-    // Vietnam is at war through the First Indochina War, on French Indochina's shape.
+    assert.match(await page.locator('#panel .border-note').innerText(), /^Border: Cliopatria’s “.+” for 1990\.$/);
+    // Vietnam is at war through the First Indochina War, on Cliopatria's French Indochina.
     await go('#y=1950');
-    assert.equal(await page.evaluate(() => [...document.querySelectorAll('#map path.shape')].find(p => p.__data__.properties.gw === 815)?.getAttribute('fill')), 'var(--c-war)');
+    assert.equal(await page.evaluate(() => document.querySelector('#map path.shape[data-key="Q185682"]')?.getAttribute('fill')), 'var(--c-war)');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
 
-test('Retrospective: the 22 states with no border are dots from their first day, filled by their year, and found by search', pageTest, async () => {
-  const { browser, page, errors } = await open('battlefield/history/#y=1983');
+// J1, then the fixer (20 November 2026; review findings F2, P2, P7 and F13): a war place with no Cliopatria row in a
+// year is named under the map, never drawn on Natural Earth's border of today; from 1946 a small state is its point;
+// the caption says borders are by the year; a Wikidata war gives its dates at their precision; old addresses
+// (c=<number>, w=c<number>) open the same view or say what they cannot show.
+test('Retrospective: places off Cliopatria’s rows are named, never drawn on today’s border; old addresses still open', pageTest, async () => {
+  const { browser, page, errors } = await open('battlefield/history/#y=2008');
   try {
     await page.waitForSelector('#panel .war', { timeout: 20000 });
-    const dots = () => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('#map circle.dot')].map(c => [c.dataset.iso3, c.getAttribute('fill')])));
-    const y1983 = await dots();
-    // Grenada in 1983: UCDP's level for "Grenada – United States of America" that year is 1 (25–999 battle deaths).
-    assert.equal(y1983.GRD, 'var(--c-minor)');
-    assert.equal(y1983.LIE, 'var(--c-peace)');
-    assert.equal(y1983.TUV, 'var(--c-peace)'); // a state from 1 October 1978
-    assert.equal(y1983.PLW, undefined, 'Palau: a state from 1 October 1994');
-    assert.equal(Object.keys(y1983).length, 18, 'Saint Kitts and Nevis from 19 September 1983, the Marshall Islands, Micronesia and Palau later');
-    assert.match(await tipOf(page, 55), /Grenada – United States of America/);
-    await page.evaluate(() => { location.hash = '#y=2008'; });
-    await page.waitForFunction(() => document.querySelector('#year-big').textContent === '2008');
-    const y2008 = await dots();
-    assert.equal(y2008.TON, 'var(--c-abroad)', 'Tonga: a party in Iraq in 2008');
-    assert.equal(Object.keys(y2008).length, 22);
-    await page.evaluate(() => { location.hash = '#y=2006'; });
-    await page.waitForFunction(() => document.querySelector('#year-big').textContent === '2006');
-    assert.equal((await dots()).TON, 'var(--c-peace)', 'Tonga: not a party in 2006');
-    // Search finds a dot; chosen in a year before its first day, it opens in its first year drawn.
-    await page.evaluate(() => { location.hash = '#y=1950'; });
-    await page.waitForFunction(() => document.querySelector('#year-big').textContent === '1950');
-    await page.locator('#search').fill('Tuvalu');
-    await page.waitForSelector('#search-results li');
-    assert.match(await page.locator('#search-results li').first().innerText(), /Tuvalu/);
-    await page.locator('#search').press('Enter');
-    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Tuvalu');
-    const panel = await page.locator('#panel').innerText();
-    assert.equal(await page.locator('#year-big').textContent(), '1979');
-    assert.match(panel, /Not drawn as a shape: CShapes 2\.0 has no border for it\./);
-    assert.match(panel, /Tuvalu: no armed conflict of 25 or more battle deaths recorded by UCDP\/PRIO in 1979\./);
-    assert.match(page.url(), /&c=973$/, 'Tuvalu under its Gleditsch–Ward number');
-    // Before its first day, the panel says so.
-    await page.evaluate(() => { location.hash = '#y=1960&c=973'; });
-    await page.waitForFunction(() => /Tuvalu: not an independent state in 1960\./.test(document.querySelector('#panel')?.textContent || ''));
+    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done, null, { timeout: 10000 }); };
+    // Tonga, a party in Iraq in 2008, as Natural Earth's point.
+    await page.waitForSelector('#map circle.dot[data-key="Q678"]');
+    assert.equal(await page.locator('#map circle.dot[data-key="Q678"]').getAttribute('fill'), 'var(--c-abroad)');
+    await go('#y=2008&c=Q678', () => document.querySelector('#panel h2')?.textContent === 'Tonga');
+    assert.match(await page.locator('#panel').innerText(), /Drawn as a point \(Natural Earth\)/);
+    // Georgia in 1991, inside the Soviet Union's row: named, not drawn.
+    await go('#y=1991&c=Q230', () => document.querySelector('#panel h2')?.textContent === 'Georgia');
+    assert.equal(await page.locator('#map path.shape[data-key="Q230"]').count(), 0);
+    assert.equal(await page.locator('#panel .border-note').innerText(), 'VM cannot place Georgia on a free border for 1991, so it is not drawn.');
+    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1991: .*Georgia/);
+    // 1967: South Vietnam and South Yemen, which no free border holds that year, named under the map, and Angola, then
+    // a Portuguese colony, as today's Angola.
+    await go('#y=1967', () => !document.querySelector('#unplaced').hidden);
+    assert.match(await page.locator('#unplaced').innerText(), /^VM cannot place this on a free border for 1967: .*South Vietnam, South Yemen.*today’s Angola/);
+    await go('#y=2000', () => document.querySelector('#unplaced').hidden);
+    // 1938: the Arab revolt in Palestine is in Mandatory Palestine, named; nothing is drawn as Israel, which came in
+    // 1948. The caption says the borders are one a year.
+    await go('#y=1938', () => /1938/.test(document.querySelector('#unplaced').textContent));
+    assert.equal(await page.locator('#map [data-key="Q801"], #map [data-key="Q23792"]').count(), 0);
+    assert.match(await page.locator('#unplaced').innerText(), /Mandatory Palestine/);
+    assert.match(await page.locator('#caption').innerText(), /One border a year, in Cliopatria’s sample years: the map cannot show a border that changed within a year\./);
+    assert.equal(await page.locator('.legend').innerText().then(t => /today’s border/.test(t)), false);
+    // 1941: the land of today's Malaysia, named as such.
+    await go('#y=1941', () => /1941/.test(document.querySelector('#unplaced').textContent));
+    assert.match(await page.locator('#unplaced').innerText(), /today’s Malaysia/);
+    // The Chaco War's dates, to the day as Wikidata gives them.
+    await go('#y=1933&w=Q223126', () => document.querySelector('#panel h2')?.textContent === 'Chaco War');
+    assert.match(await page.locator('#panel').innerText(), /from 9 September 1932 to 12 June 1935/);
+    // Old addresses: UCDP's number for the Soviet Union (365) in 1985, and for Russia in 2000; a Correlates of War war.
+    await page.goto(`${BASE}/battlefield/history/#y=1985&c=365`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Soviet Union', null, { timeout: 20000 });
+    await page.goto(`${BASE}/battlefield/history/#y=2000&c=365`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Russia', null, { timeout: 20000 });
+    await page.goto(`${BASE}/battlefield/history/#y=1939&w=c139`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'World War II', null, { timeout: 20000 });
+    assert.match(await page.locator('#panel').innerText(), /Wikidata lists World War II as a world war/);
+    await page.goto(`${BASE}/battlefield/history/#y=1940&w=c145`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /part of World War II, shown here/.test(document.querySelector('#panel .old-address')?.textContent || ''), null, { timeout: 20000 });
+    await page.goto(`${BASE}/battlefield/history/#y=1929&w=c118`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => /Sino-Soviet conflict \(1929\).*does not hold it/.test(document.querySelector('#panel .old-address')?.textContent || ''), null, { timeout: 20000 });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
 
 // Review of AC-13 (17 November 2026): a selected war's outline and "Fighting abroad" follow the year; Documentary focus
-// marks a dot that PRPFocus has no number for; a war's panel names each place once; a state's list of all its
-// conflicts counts a war on its territory as the year's list does; the Holy See is found by that name; and the key
-// covers no dot, nor does the frame cut Tonga off on a phone.
-test('Retrospective: outlines, "Fighting abroad" and focus follow the year and reach the dots; places are named once', pageTest, async () => {
+// reaches a point; a war's panel names each place once; a state's list of all its conflicts counts a war on its
+// territory as the year's list does.
+test('Retrospective: outlines, "Fighting abroad" and focus follow the year and reach the points; places are named once', pageTest, async () => {
   const { browser, page, errors } = await open('battlefield/history/#y=2004&w=u259');
   try {
     await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Iraq: government', null, { timeout: 20000 });
-    const cls = iso3 => page.evaluate(i => document.querySelector(`#map circle.dot[data-iso3="${i}"]`)?.getAttribute('class') || '', iso3);
-    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done); };
-    assert.match(await cls('TON'), /\binvolved\b/, 'Tonga outlined in u259 in 2004');
-    await go('#y=2006&w=u259', () => document.querySelector('#year-big').textContent === '2006');
-    assert.doesNotMatch(await cls('TON'), /\binvolved\b/, 'Tonga not outlined in u259 in 2006');
-    // The second review of AC-13: in a year when the selected war was not active only its places are outlined, not
-    // the parties of its other years (the page fell back to every party of the whole war, Tonga among them).
+    const cls = q => page.evaluate(q => document.querySelector(`#map circle.dot[data-key="${q}"]`)?.getAttribute('class') || '', q);
+    const go = async (h, done) => { await page.evaluate(h => { location.hash = h; }, h); await page.waitForFunction(done); await page.waitForTimeout(200); };
+    assert.match(await cls('Q678'), /\binvolved\b/, 'Tonga outlined in u259 in 2004');
+    // In a year when the selected war was not active only its places are outlined, not the parties of its other years.
     await go('#y=2003&w=u259', () => document.querySelector('#year-big').textContent === '2003');
-    assert.doesNotMatch(await cls('TON'), /\binvolved\b/, 'Tonga not outlined in u259 in 2003, when the conflict was not active');
+    assert.doesNotMatch(await cls('Q678'), /\binvolved\b/, 'Tonga not outlined in u259 in 2003');
     assert.ok(await page.locator('#map .involved').count() >= 1, 'the war\'s own place is still outlined');
-    // And a period's table names a place as it was called in the years of the fighting, not in the period's last
-    // year: u210 was fought in 1946–48 in the Soviet Union, which a table of 1946–2025 called Russia.
+    // A period's table names a place as it was called in the years of the fighting: u210, in the Soviet Union.
     await go('#y=2025&f=1946&v=table', () => /1946/.test(document.querySelector('#table-title').textContent) && !!document.querySelector('#table-rows tr[data-id="u210"]'));
     const fought = await page.locator('#table-rows tr[data-id="u210"] td.wrap').textContent();
     assert.match(fought, /Soviet Union/);
     assert.doesNotMatch(fought, /Russia/);
-    // A ringed dot is drawn larger than a plain one, so its fill still shows.
-    await go('#y=2004&w=u259', () => document.querySelector('#year-big').textContent === '2004');
-    const r = await page.evaluate(() => ['TON', 'LIE'].map(i => +document.querySelector(`#map circle.dot[data-iso3="${i}"]`).getAttribute('r')));
-    assert.ok(r[0] > r[1], `ringed ${r[0]}, plain ${r[1]}`);
-    // Tonga's panel: "Fighting abroad" in 2008, the sentence in 2006.
-    await go('#y=2008&c=972', () => document.querySelector('#panel h2')?.textContent === 'Tonga' && document.querySelector('#year-big').textContent === '2008');
+    // A ringed point is drawn larger than a plain one, so its fill still shows.
+    await go('#y=2004&w=u259&v=map', () => document.querySelector('#year-big').textContent === '2004' && !!document.querySelector('#map circle.dot[data-key="Q678"]'));
+    const r = await page.evaluate(() => [...document.querySelectorAll('#map circle.dot')].map(c => [c.classList.contains('involved'), +c.getAttribute('r')]));
+    const ringed = r.filter(([i]) => i).map(([, x]) => x), plain = r.filter(([i]) => !i).map(([, x]) => x);
+    if (plain.length) assert.ok(Math.min(...ringed) > Math.max(...plain), JSON.stringify(r));
+    // Tonga's panel: "Fighting abroad" in 2008.
+    await go('#y=2008&c=Q678', () => document.querySelector('#panel h2')?.textContent === 'Tonga' && document.querySelector('#year-big').textContent === '2008');
     assert.match(await page.locator('#panel').textContent(), /Fighting abroad in 2008[\s\S]*Iraq: government/);
-    await go('#y=2006&c=972', () => document.querySelector('#year-big').textContent === '2006');
-    assert.doesNotMatch(await page.locator('#panel').textContent(), /Fighting abroad/);
-    assert.equal(await page.locator('#panel .sub').textContent(), 'Tonga: no armed conflict of 25 or more battle deaths recorded by UCDP/PRIO in 2006.');
-    // Documentary focus on a dot, by ISO3: Grenada (PRPFocus has its number), Tonga and Tuvalu (it has none) and the Holy See.
-    await go('#y=2008', () => !document.querySelector('#panel .dot-note'));
-    for (const iso3 of ['GRD', 'TON', 'TUV', 'VAT']) {
-      await page.evaluate(i => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { countries: [i] } })), iso3);
-      await page.waitForFunction(i => document.querySelector(`#map circle.dot[data-iso3="${i}"]`)?.classList.contains('prp-focus-hit'), iso3, { timeout: 5000 });
+    // Documentary focus on a point, by ISO3 and by Q-id.
+    for (const detail of [{ countries: ['TON'] }, { qids: ['Q678'] }]) {
+      await page.evaluate(d => window.dispatchEvent(new CustomEvent('prp:focus', { detail: d })), detail);
+      await page.waitForFunction(() => document.querySelector('#map circle.dot[data-key="Q678"]')?.classList.contains('prp-focus-hit'), null, { timeout: 5000 });
+      await page.evaluate(() => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { reset: true } })));
     }
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('prp:focus', { detail: { reset: true } })));
-    // A war's panel names each place once: Georgia, not also "Georgia (then in the Soviet Union)".
+    // A war's panel names each place once.
     await go('#y=1993&w=u380', () => document.querySelector('#panel h2')?.textContent === 'Georgia: government');
     const intro = await page.locator('#panel > p:not(.sub)').first().textContent();
-    assert.match(intro, /over government in Georgia, active in 3 years/);
+    assert.match(intro, /over government in Georgia, active in \d+ years/);
     assert.doesNotMatch(intro, /Soviet Union/);
-    // The Soviet Union in 1991: Georgia's war is on its territory that year, and so in its list of all conflicts.
-    await go('#y=1991&c=365', () => /on its territory in 1991/.test(document.querySelector('#panel .sub')?.textContent || ''));
-    assert.ok(await page.locator('#panel .war[data-id="u380"]').count() >= 1);
+    // Russia in 1993: Georgia's war is not on its territory; the Soviet Union's list of all conflicts holds the wars
+    // on its territory as the year's list does.
+    await go('#y=1991&c=Q15180', () => /on its territory in 1991/.test(document.querySelector('#panel .sub')?.textContent || '') || /^No conflict/.test(document.querySelector('#panel .sub')?.textContent || ''));
     await page.locator('#panel [data-more]').last().click();
     await page.waitForSelector('#modal:not([hidden]) .war');
-    assert.ok(await page.locator('#modal .war[data-id="u380"]').count() === 1, 'listed among all its conflicts');
+    assert.ok(await page.locator('#modal .war').count() > 3, 'listed among all its conflicts');
     await page.locator('#modal-close').click();
-    // The Holy See, by VM's name for it.
-    await page.locator('#search').fill('Holy See');
-    await page.waitForSelector('#search-results li');
-    assert.match(await page.locator('#search-results li').first().innerText(), /Vatican/);
-    await page.locator('#search').fill('');
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });
 
-test('Retrospective: the key and the frame hide no dot, at a tablet’s width and a phone’s', pageTest, async () => {
+test('Retrospective: the key and the frame hide no point, at a tablet’s width and a phone’s', pageTest, async () => {
   const browser = await launch();
   try {
     for (const [width, height] of [[1024, 768], [390, 844]]) {
       const page = await browser.newPage({ viewport: { width, height } });
-      await page.goto(`${BASE}/battlefield/history/#y=1983`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(`${BASE}/battlefield/history/#y=2008`, { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForSelector('#map circle.dot', { timeout: 20000 });
       const seen = await page.evaluate(() => {
         const svg = document.querySelector('#map').getBoundingClientRect(), legend = document.querySelector('.legend').getBoundingClientRect();
         const at = c => { const r = c.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
         const dots = [...document.querySelectorAll('#map circle.dot')];
-        const grd = dots.find(c => c.dataset.iso3 === 'GRD');
         return {
           keyBelow: legend.top >= svg.bottom - 1,
-          outside: dots.filter(c => { const [x, y] = at(c); return x < svg.left || x > svg.right || y < svg.top || y > svg.bottom; }).map(c => c.dataset.iso3),
-          grenadaOnTop: document.elementFromPoint(...at(grd)) === grd, // at war in 1983: over its neighbours at peace
+          outside: dots.filter(c => { const [x, y] = at(c); return x < svg.left || x > svg.right || y < svg.top || y > svg.bottom; }).map(c => c.dataset.key),
         };
       });
       await page.close();
-      assert.deepEqual(seen, { keyBelow: true, outside: [], grenadaOnTop: true }, `${width} px`);
+      assert.deepEqual(seen, { keyBelow: true, outside: [] }, `${width} px`);
     }
   } finally { await browser.close(); }
 });

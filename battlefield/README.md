@@ -7,39 +7,45 @@
 - **Text:** monthly insights are generated from the events: deaths, change on the previous month, deadliest areas, main fighting and source headlines. "In the news" searches the Global Headline Tracker's `country_top_stories` table in Supabase using the war's keywords.
 
 ## Retrospective Battlefield (`battlefield/history/`)
+Free data only since 20 November 2026 (Jude's rule MP-11 of 17 November: "use only free data if possible"). Places
+are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Ward number is joined.
 - **1946–2025:** UCDP/PRIO Armed Conflict Dataset v26.1 (CC BY 4.0). Intensity 1 means 25–999 battle deaths in the year; intensity 2 means 1,000 or more.
-- **1926–1945:** Correlates of War Inter-State, Intra-State and Extra-State War Data v4. These lists contain only wars with at least 1,000 battle deaths.
-- **Borders:** CShapes 2.0 (CC BY-NC-SA, non-commercial), shared with H&P Retrospective.
+- **1926–1945:** the wars Wikidata lists (CC0), with English Wikipedia's article titles (CC BY-SA 4.0), by VM's rule
+  (`scripts/wars-1926.mjs`). No free source measures these wars' size, so the page shows them at one level, "a war
+  Wikidata lists", and smaller ones may be missing. Until 20 November they came from the Correlates of War.
+- **Borders:** Cliopatria v0.2.1 (CC BY 4.0), as VM holds it in `omni/data/borders/`; where no Cliopatria row holds a
+  place that year, Natural Earth's border of today or its point (public domain, `omni/data/base/`). Until 20 November
+  they were CShapes 2.0 (CC BY-NC-SA, non-commercial); `history/data/borders.topo.json` and `history/names.mjs` are
+  no longer read by the page and stay only until War Focus and the Integration Hub's catalogue stop reading them.
+- **Old addresses:** a link written before the change still opens the same view: `w=c<number>` opens the same war, or
+  the whole war it was part of (`oldIds`, `oldWithin` in `history/data/wars.json`); a war no longer listed says so in
+  plain words (`oldGone`); `c=<number>` opens the country it stood for (`oldCountries` in `history/data/places.json`).
 - **Rebuild:**
   ```
-  node battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> <folder with the COW CSVs>
+  node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>]
   ```
 - **Wikipedia links:** titles live in `scripts/history-wiki.mjs`. Wars without a title link to a Wikipedia search.
 
+## War Focus (`battlefield/focus/`)
+- **Battle deaths by month:** UCDP's Georeferenced Event Dataset (GED v26.1, CC BY 4.0) from 1989; PRIO's Battle
+  Deaths Dataset v3.1 yearly totals for 1946–1988, whose page states no licence (kept until VM's owner decides); UCDP's
+  Battle-Related Deaths Dataset v26.1 (CC BY 4.0) yearly totals for the years GED does not cover from 1989.
+- **The nine wars before 1946** (the Northern Expedition to the Second World War) have no figure: no free source gives
+  their battle deaths by month or year, and the Correlates of War totals they showed until 20 November 2026 are gone.
+  Each battle's own figures, from Wikidata, are still listed.
+- **Rebuild the deaths only** (from the committed files, with PRIO's and UCDP's files in the cache):
+  ```
+  node battlefield/focus/scripts/build.mjs --deaths-only --cache <folder>
+  ```
+
 ## Correlates of War: terms (read 16 November 2026)
-VM uses the COW War Data: Inter-State v4.0, Intra-State v4.1 and Extra-State v4.0 (the Retrospective Battlefield's wars of
-1926–1945, and the war totals of the nine War Focus wars before 1946). The "Terms and Conditions" at the head of
-https://correlatesofwar.org/data-sets/ (read 16 November 2026; they cover every COW data set and version, and the war data
-page adds no licence of its own; the wording read again on 18 November 2026) say:
+The "Terms and Conditions" at the head of https://correlatesofwar.org/data-sets/ (read 16 and 18 November 2026) say:
 
 > "Data are not to be used for any commercial activity; users of COW data agree not to sell or use the data as part of
-> any financial profit-making activity. Users agree to cite each of the datasets they use in the manner described on each
-> specific dataset web page. Users agree not to distribute the dataset to any third party without written permission of
-> the COW director and data host. Users agree to ask permission for any dissemination, posting, or other use of the data
-> that is not covered by the above restrictions."
+> any financial profit-making activity. […] Users agree not to distribute the dataset to any third party without written
+> permission of the COW director and data host."
 
-So they bar any commercial use (VM is free, and Jude's rule of 18 November 2026 is free data only where it exists: the
-replacement of the 1926–1945 wars from free sources is queued). The war data page, https://correlatesofwar.org/data-sets/cow-war/ (read
-the same day), asks for this citation: Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007.
-Washington DC: CQ Press. Since July 2026 the war data sets are hosted at the University of Chicago (contact on that page).
-
-So the data may not be passed on, and posting it needs permission. What VM does (S0, 16 November 2026):
-- A cited total with a link stays: War Focus's nine totals and the Retrospective Battlefield's battle deaths, each cited
-  as above with the link (`sources.cow` in `history/data/wars.json` and `focus/data/index.json`, written by
-  `scripts/build-history.mjs` and `focus/scripts/build.mjs`; both pages' Sources paragraphs; War Focus's panel).
-- No COW row is in a download: the Integration Hub's `retrospective-wars` holds the UCDP/PRIO conflicts only.
-- Held for Jude's choice, unchanged: the Retrospective Battlefield's 40 wars of 1926–1945 on the page (no allowed source
-  replaces them: UCDP starts in 1946), War Focus's monthly spread of the COW totals in `war-focus-monthly-deaths`, and
-  National Analysis's count of COW wars per country.
-- The record, as data the tests read: `integration/scripts/cite-only.mjs` (to become `integration/sources.json` at S1).
-  A careful record of the terms as read, not legal advice.
+So since 20 November 2026 no VM data file holds a Correlates of War value: the Retrospective Battlefield's wars of
+1926–1945 are Wikidata's, War Focus's nine totals are gone, and National Analysis counts the wars of 1926–45 on VM's
+Wikidata list. `integration/scripts/cite-only.mjs` keeps the record of the terms and lists nothing as hosted
+(`HOSTED` is empty). A careful record of the terms as read, not legal advice.

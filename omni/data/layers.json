@@ -1,6 +1,6 @@
 {
   "format": "vm-layers/1",
-  "generated": "2026-11-20T15:56:09Z",
+  "generated": "2026-11-21T00:36:13Z",
   "layers": [
     {
       "id": "borders",
@@ -56,10 +56,10 @@
       "style": null,
       "legend": "Battles: Wikidata (CC0), each date and point with its Wikidata item and property",
       "source": "wikidata",
-      "method": "VM’s own text. The 1,967 battles VM holds with a date and a point, 1258 to 2025: every conflict of the Master Index that Wikidata types a battle (P31 Q178561), and every located battle of War Focus, each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM’s rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads ‘Wikipedia-sourced, unverified’; anything less reads ‘no reference’. A battle with no date or no point in Wikidata is left out, and so is one whose year no battle can have (before 3000 BC). 1,912 are tied to a war of VM’s war registry (omni/data/layers/wars/registry.json), 1,912 of them to a war War Focus covers, which a click opens. Above 2,000 drawn at once, the points cluster. Wikidata’s data is CC0. Each view says how many battles VM holds for its years.",
+      "method": "VM’s own text. The 1,966 battles VM holds with a date and a point, 1258 to 2025: every conflict of the Master Index that Wikidata types a battle (P31 Q178561), and every located battle of War Focus, each read from Wikidata by omni/scripts/build-battles.mjs: its point in time (P585), or its start and end (P580, P582), at the precision and in the calendar Wikidata records, never converted; its coordinate location (P625) as Wikidata gives it, with its precision; and what supports each value, by VM’s rule: a reference naming a work (P248), a reference URL or a database record counts as a reference; a value only imported from a Wikipedia (P143, P4656) reads ‘Wikipedia-sourced, unverified’; anything less reads ‘no reference’. A battle with no date or no point in Wikidata is left out, and so is one whose year no battle can have (before 3000 BC). 1,912 are tied to a war of VM’s war registry (omni/data/layers/wars/registry.json), 1,912 of them to a war War Focus covers, which a click opens. Above 2,000 drawn at once, the points cluster. Wikidata’s data is CC0. Each view says how many battles VM holds for its years.",
       "open": true,
       "pinnable": true,
-      "built": "2026-11-20T11:37:57Z"
+      "built": "2026-11-21T00:36:13Z"
     },
     {
       "id": "countries",
@@ -421,9 +421,9 @@
         {
           "file": "omni/data/layers/retro-keys.json",
           "role": "addresses",
-          "bytes": 3141,
-          "gzip": 1323,
-          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+          "bytes": 3236,
+          "gzip": 1353,
+          "sha256": "7122a028dea84351de9aac2e6be66f3bc7620d76d283f1115ae46cfab2cf697c"
         }
       ]
     },
@@ -465,9 +465,9 @@
         {
           "file": "omni/data/layers/retro-keys.json",
           "role": "addresses",
-          "bytes": 3141,
-          "gzip": 1323,
-          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+          "bytes": 3236,
+          "gzip": 1353,
+          "sha256": "7122a028dea84351de9aac2e6be66f3bc7620d76d283f1115ae46cfab2cf697c"
         }
       ]
     },
@@ -522,9 +522,9 @@
         {
           "file": "omni/data/layers/retro-keys.json",
           "role": "addresses",
-          "bytes": 3141,
-          "gzip": 1323,
-          "sha256": "6d79d89623add0aa070a78c64f3f4f3acae9d000b911d9a7d3bf4ba962c8efb4"
+          "bytes": 3236,
+          "gzip": 1353,
+          "sha256": "7122a028dea84351de9aac2e6be66f3bc7620d76d283f1115ae46cfab2cf697c"
         }
       ]
     },

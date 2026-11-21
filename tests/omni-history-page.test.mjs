@@ -116,7 +116,7 @@ test('page: political change at 1968 links each state to the Political Retrospec
   const lg = legendOf(s, 'political-change');
   for (const w of ['A new head of government', 'A new head of state', 'Both', 'Wikidata']) assert.ok(lg.includes(w), `the legend says "${w}"`);
   const hrefs = await page.$$eval('[data-list="political-change"] a', as => as.map(a => a.getAttribute('href')));
-  assert.ok(hrefs.some(h => /^https:\/\/hp-retrospective\.pages\.dev\/#y=1968&c=\d+$/.test(h)), hrefs.slice(0, 5).join(' '));
+  assert.ok(hrefs.some(h => /^https:\/\/hp-retrospective\.pages\.dev\/#y=1968&c=Q\d+$/.test(h)), hrefs.slice(0, 5).join(' '));
   // The period of an up-to view: elections and coups from 1960 to 1968, at their countries.
   assert.deepEqual(s.lv.period, [1960, 1968]);
   assert.ok(s.lv.counts.elections.drawn > 0 && s.lv.counts.coups.drawn > 0);

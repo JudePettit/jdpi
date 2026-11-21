@@ -330,6 +330,24 @@ test('organisations: OpenSanctions requests and replies; registry links', () => 
   assert.match(links.find(l => l.id === 'companies-house').href, /search\/companies\?q=Ryanair%20DAC$/);
 });
 
+test('free data: the OpenSanctions panel states its terms in VM’s own words (MP-11)', () => {
+  // https://www.opensanctions.org/licensing/, read 20 Nov 2026: "The data is licensed under the terms of Creative Commons 4.0 Attribution NonCommercial".
+  const html = read('osint/index.html');
+  const terms = html.match(/<p[^>]*id="os-terms"[^>]*>([\s\S]*?)<\/p>/);
+  assert.ok(terms, 'the panel has a terms paragraph');
+  const t = terms[1];
+  assert.ok(html.indexOf('id="os-terms"') > html.indexOf('id="os-panel"') && html.indexOf('id="os-terms"') < html.indexOf('id="os-out"'), 'the terms sit inside the panel, before the results');
+  assert.match(t, /CC BY-NC 4\.0/); assert.match(t, /commercial use needs (a|its own) licence from OpenSanctions/i);
+  assert.match(t, /your own (agreement|terms) with OpenSanctions/i); assert.match(t, /stores none of (its|OpenSanctions’s) data/i);
+  assert.match(t, /https:\/\/www\.opensanctions\.org\/licensing\//);
+  for (const p of ['osint/content/kit.md', 'fe/learning/osint.md']) {
+    const md = read(p);
+    assert.match(md, /CC BY-NC 4\.0/, `${p} names the licence`);
+    assert.match(md, /commercial use needs (a|its own) licence from OpenSanctions/i, `${p} says commercial use needs a licence`);
+    assert.match(md, /stores none of (its|OpenSanctions’s) data/i, `${p} says VM keeps none of it`);
+  }
+});
+
 /* ---------------------------------------------------------------- events (GDELT) */
 test('events: GDELT queries, addresses and replies', () => {
   const b = L.buildGdeltQuery({ all: 'cable', phrase: 'Red Sea', any: 'attack strike', none: 'film', country: 'ireland', lang: 'english', domain: 'https://www.rte.ie/news' });

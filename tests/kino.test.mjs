@@ -1622,13 +1622,21 @@ function warGaps() {
     await import('../design/prp-focus.js');
     const cal = await import('../calendar/scripts/countries.mjs');
     const { readAt } = await import('../kino/lib/links.js');
+    // Since 20 November 2026 on free data, as the coverage script reads it: Natural Earth's countries and small states,
+    // Cliopatria's recognised borders, and the Retrospective Battlefield's places by Wikidata item.
+    const { recognisedShapes } = await import('../integration/scripts/coverage.mjs');
+    const places = read('battlefield/history/data/places.json'), history = read('battlefield/history/data/wars.json');
     const R = makeResolvers({ national: read('national/data/index.json').countries, names, focus: globalThis.PRPFocus, normaliseCountry: cal.normaliseCountry,
-      historical: read('kino/data/iso.json').historical, boundaries: read('headlines/boundaries.json'), cshapes: read('battlefield/history/data/borders.topo.json') });
+      historical: read('kino/data/iso.json').historical, boundaries: read('headlines/boundaries.json'),
+      countries: read('omni/data/base/countries.topo.json'), small: read('omni/data/base/small-states.json').points,
+      recognised: recognisedShapes([read('omni/data/borders/1900-1999.topo.json'), read('omni/data/borders/2000-2024.topo.json')]),
+      places: places.places, oldCountries: places.oldCountries });
     const wfList = read('battlefield/focus/data/index.json').wars.map(m => warFocusWar(read(`battlefield/focus/data/wars/${m.id}.json`), R));
     const wf = new Map(wfList.map(w => [w.id, w]));
-    const rb = new Map(read('battlefield/history/data/wars.json').wars.map(w => retroWar(w, R)).map(w => [w.id, w]));
+    const rb = new Map(history.wars.map(w => retroWar(w, R)).map(w => [w.id, w]));
+    const rbOld = { ...history.oldIds, ...Object.fromEntries(Object.entries(history.oldWithin || {}).map(([o, [q]]) => [o, q])) };
     const films = ['korean-war', 'vietnam-war', 'winston-churchill', 'ww2-europe'].map(id => ctx.docs.get(id)).map(doc => ({ meta: { id: doc.id, category: doc.category, title: doc.title }, doc }));
-    const k = kinoFilms(films, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: w.bf }])), rbWars: rb });
+    const k = kinoFilms(films, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: rbOld[w.bf] || w.bf }])), rbWars: rb, rbOld });
     const gaps = warFilmGaps(k.films, new Map(k.pieces.map(p => [p.id, p])), { wf, rb }, R);
     const find = id => gaps.find(g => g.piece === id) || { countries: [], states: [], scenes: [] };
     // What a scene shows, as the coverage script reads it: the countries it draws and the places it marks.

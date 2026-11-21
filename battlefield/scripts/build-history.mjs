@@ -1,217 +1,267 @@
-// Builds battlefield/history/data/wars.json: every war and armed conflict, 1926–2025.
-//   node battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [<cow-dir>]
-// 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (CC BY 4.0), conflict-years with ≥25 battle deaths, from
-// https://ucdp.uu.se/downloads/ (ucdpprio/ucdp-prio-acd-261-csv.zip). Each conflict keeps its state parties year by
-// year (`statesYears`, from that year's row); `states` is all of them.
-// 1926–1945: Correlates of War inter-, intra- and extra-state war lists v4 (wars with ≥1,000 battle deaths). While
-// integration/scripts/cite-only.mjs records them as 'pending' (the S0 hold of 16 November 2026, Jude's choice on the
-// Correlates of War), the rows already in wars.json are written back exactly as they are, places included, and
-// <cow-dir> is not read: no row and no value is added from it.
-// Where each war was fought: the sources' location, unless history-fought.mjs records otherwise (check-fought.mjs
-// tests UCDP's interstate conflicts against GED after each release). The build then checks every war-year place
-// against the CShapes 2.0 borders the page draws (history/data/borders.topo.json, on 1 July of the year).
-// The 22 of VM's countries CShapes has no border for are written as `dots` (below), for the page to draw with the
-// kit's dots (design/prp-mapkit.js).
+// Builds the Retrospective Battlefield's data: battlefield/history/data/wars.json (every war and armed conflict,
+// 1926–2025) and battlefield/history/data/places.json (where the page draws each place, year by year).
+//   node --max-old-space-size=6000 battlefield/scripts/build-history.mjs <UcdpPrioConflict_v26_1.csv> [--cache <folder>]
+// Sources, all free (stage J1, 20 November 2026):
+//   · 1946–2025: UCDP/PRIO Armed Conflict Dataset v26.1 (CC BY 4.0), conflict-years with at least 25 battle deaths,
+//     downloaded by hand from https://ucdp.uu.se/downloads/ (ucdpprio/ucdp-prio-acd-261-csv.zip).
+//   · 1926–1945: Wikidata (CC0) and English Wikipedia's article titles (CC BY-SA 4.0), by VM's rule (wars-1926.mjs).
+//   · Borders: Cliopatria v0.2.1 (CC BY 4.0) as VM holds it (omni/data/borders/1900-1999 and 2000-2024.topo.json,
+//     with VM's crosswalk qids.json). Natural Earth (public domain: omni/data/base/countries.topo.json and
+//     small-states.json) gives each place's ISO3 and, from 1946, the point of a small state UCDP names as a party that
+//     year; its borders of today are never drawn for a past year (fixer, 20 November 2026: a border of today is a
+//     guessed shape for 1941, and named states that did not exist yet, Israel in 1938).
+// No Correlates of War file, no CShapes border and no Gleditsch–Ward number is read as a join: places are Wikidata
+// Q-ids. UCDP's own Gleditsch–Ward numbers are kept only in the table of old addresses (`oldCountries`, below), so a
+// link written before this change (c=365) still opens the same country; nothing is joined by them.
+// The order of steps (nothing is written until every step has worked):
+// 1. Reads the ACD file (version 26.1), Cliopatria's two files of the years, qids.json and Natural Earth's countries.
+// 2. UCDP: one war per conflict_id with an intensity per active year (1 minor, 2 war); its places (`loc`, the location)
+//    and its state parties by year (`statesYears`, the governments on either side), each UCDP name read as a Q-id
+//    through VM's crosswalk (omni/scripts/ucdp-places.mjs); a name the crosswalk cannot read stops the build.
+// 3. Wikidata: the wars of 1926–1945 (wars-1926.mjs), at level 3 for every active year ("a war Wikidata lists").
+// 4. history-fought.mjs's places where the sources' are too wide or missing; then, year by year, a place Cliopatria
+//    draws under another Q-id (history-places.mjs AS: "Vietnam (North Vietnam)" after 1976 is Vietnam).
+// 5. Every place's Q-id asked of Wikidata (wbgetentities): its English label is the page's name for it, its ISO3
+//    (P298) must agree with Natural Earth's, and its inception (P571, the earliest) is kept as `since` when it falls
+//    after 1926, so the page can call a place named for a year before it "today’s …".
+// 6. Where the page draws each place each year (places.json): Cliopatria's rows of the year (2025 on 2024's rows, the
+//    last Cliopatria holds), each row's place by history-places.mjs; from 1946, a small state no row holds as Natural
+//    Earth's point (`points`); any other war place no row holds that year is listed as one VM cannot place
+//    (`unplaced`), which the page names under the map. No place is drawn on a border of today.
+// 7. Old addresses: w=c<number> (a Correlates of War war) opens the same war where the new list holds it (by its
+//    Wikipedia title, history-wiki.mjs), or the whole war it is part of (oldWithin); c=<number> opens the country UCDP's own rows give that number.
+// 8. Writes both files.
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseCsv } from './csv.mjs';
 import { COW_WIKI, UCDP_WIKI } from './history-wiki.mjs';
 import { FOUGHT_IN, CHECKED_THROUGH } from './history-fought.mjs';
 import { actors, interstateName } from './ucdp.mjs';
-import { HOSTED } from '../../integration/scripts/cite-only.mjs';
-import '../../design/prp-mapkit.js';
+import { rowQid, drawnRow, canonical, placeAt, CANONICAL } from './history-places.mjs';
+import { fetchWars, selectWars, THEN, FIRST as WD_FIRST, LAST as WD_LAST } from './wars-1926.mjs';
+import { placeResolver, governments, SPECIAL } from '../../omni/scripts/ucdp-places.mjs';
+import { entities, byTitles, sha256 } from '../../omni/scripts/history-common.mjs';
+import '../../design/prp-map.js';
 
-const [acdPath, cowDir] = process.argv.slice(2);
-const FIRST = 1926, UCDP_FROM = 1946, LAST = 2025;
+const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
+const acdPath = process.argv[2];
+const CACHE = arg('--cache') || join(tmpdir(), 'battlefield-history-src');
+mkdirSync(CACHE, { recursive: true });
+const FIRST = 1926, UCDP_FROM = 1946, LAST = 2025, BORDERS_TO = 2024;
 const UCDP_VERSION = '26.1';
-const gws = s => String(s || '').split(',').map(x => parseInt(x, 10)).filter(n => n > 0);
-const wars = [];
+const ROOT = new URL('../../', import.meta.url);
 const OUT = new URL('../history/data/', import.meta.url);
-const committed = existsSync(new URL('wars.json', OUT)) ? JSON.parse(readFileSync(new URL('wars.json', OUT), 'utf8')) : null;
-// A war's places: the sources' `loc` (codes), unless history-fought.mjs has its own: `loc`, `where` (names for places
-// the map has no shape for), places by year (`locYears`; a year it doesn't list keeps the sources', own(year)) and
-// what a place is called in a year (`placeNames`, for the years the war was active). `loc` is every year's places,
-// but for a shape named for another place that year: the Soviet Union's shape drawn for Georgia's war in 1991 is not
-// the Soviet Union's own (National Analysis reads `loc`; the page lists a war under the shape it is drawn on each year).
-function place(id, loc, years, own) {
-  const f = FOUGHT_IN[id];
-  if (!f) return { loc };
-  const where = f.where ? { where: f.where } : {};
-  const named = f.names ? Object.fromEntries(Object.entries(f.names).filter(([y]) => years.includes(+y))) : {};
-  const placeNames = Object.keys(named).length ? { placeNames: named } : {};
-  if (!f.years) return { loc: f.loc, ...where, ...placeNames };
-  const locYears = Object.fromEntries(years.map(y => [y, f.years[y] || own(y)]));
-  const ownPlaces = Object.entries(locYears).flatMap(([y, gs]) => gs.filter(gw => named[y]?.[gw] == null));
-  return { loc: [...new Set(ownPlaces)], locYears, ...where, ...placeNames };
-}
+const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
+const M = globalThis.PRPMap;
+if (!acdPath || !existsSync(acdPath)) { console.error('Give the UCDP/PRIO ACD v26.1 CSV, downloaded from https://ucdp.uu.se/downloads/'); process.exit(1); }
 
-// ---- UCDP/PRIO: one entry per conflict_id, with an intensity per active year (1 = minor, 2 = war).
+// ---- 1. Inputs
+const acdBuf = readFileSync(acdPath);
+const acd = parseCsv(acdBuf.toString('utf8'));
+const versions = [...new Set(acd.map(r => r.version))];
+if (versions.join() !== UCDP_VERSION) throw new Error(`UCDP/PRIO ACD version ${versions.join(', ')}, not ${UCDP_VERSION}: update UCDP_VERSION, the sources line below and the page's Sources`);
+const BORDER_FILES = ['omni/data/borders/1900-1999.topo.json', 'omni/data/borders/2000-2024.topo.json'];
+const fcs = BORDER_FILES.map(f => M.decode(J(f)));
+const fcAt = y => fcs[Math.min(y, BORDERS_TO) < 2000 ? 0 : 1];
+const qids = J('omni/data/borders/qids.json');
+const ne = J('omni/data/base/countries.topo.json').objects.countries.geometries.map(g => g.properties);
+const small = J('omni/data/base/small-states.json').points;
+const resolveName = placeResolver([...ne, ...small]);
+
+// ---- 2. UCDP
 const UCDP_TYPE = { 1: 'Colonial war', 2: 'Interstate war', 3: 'Civil conflict', 4: 'Internationalised civil conflict' };
 // u216, the First Indochina War (1946–54): UCDP's location, "Vietnam (North Vietnam)", names it for a state that came
 // in 1954; its name drops the bracket, as UCDP's other colonial wars read ("Laos: Laos", "Kenya: Kenya").
 const LOCATION_AS = { 216: 'Vietnam' };
-const byId = new Map(), unchecked = [];
-const acd = parseCsv(readFileSync(acdPath, 'utf8'));
-const versions = [...new Set(acd.map(r => r.version))];
-if (versions.join() !== UCDP_VERSION) throw new Error(`UCDP/PRIO ACD version ${versions.join(', ')}, not ${UCDP_VERSION}: update UCDP_VERSION, the sources line below and the page's Sources`);
-const partiesOf = r => [...gws(r.gwno_a), ...gws(r.gwno_a_2nd), ...gws(r.gwno_b), ...gws(r.gwno_b_2nd)];
-for (const r of acd) {
-  const c = byId.get(r.conflict_id) || byId.set(r.conflict_id, { rows: [] }).get(r.conflict_id);
-  c.rows.push(r);
+const unread = new Set(), unchecked = [];
+const qOf = (name, y) => { const p = resolveName(name, y); if (!p) unread.add(name); return p?.q || null; };
+const locQs = r => r.location.split(/,\s*/).map(n => qOf(n, +r.year)).filter(Boolean);
+const partyQs = r => [...new Set([r.side_a, r.side_a_2nd, r.side_b, r.side_b_2nd].flatMap(governments).map(n => qOf(n, +r.year)).filter(Boolean))];
+const byId = new Map();
+for (const r of acd) (byId.get(r.conflict_id) || byId.set(r.conflict_id, []).get(r.conflict_id)).push(r);
+const wars = [];
+// A war's places: the sources' (`loc`), unless history-fought.mjs has its own: `loc`, `where` (names for places the
+// map has no shape for) and places by year (`locYears`; a year it does not list keeps the sources', own(year)).
+function place(id, loc, years, own) {
+  const f = FOUGHT_IN[id];
+  if (!f) {
+    // A place whose name UCDP reads as another state in some years (the Soviet Union, then Russia) is kept by year.
+    const by = Object.fromEntries(years.map(y => [y, own(y)]));
+    return new Set(Object.values(by).map(l => l.join())).size > 1 ? { loc, locYears: by } : { loc };
+  }
+  const where = f.where ? { where: f.where } : {};
+  if (!f.years) return { loc: f.loc, ...where };
+  const locYears = Object.fromEntries(years.map(y => [y, f.years[y] || own(y)]));
+  return { loc: [...new Set(Object.values(locYears).flat())], locYears, ...where };
 }
-for (const [id, { rows }] of byId) {
+for (const [id, rows] of byId) {
   rows.sort((a, b) => a.year - b.year);
   const last = rows.at(-1), first = rows[0];
   const territory = [...new Set(rows.map(r => r.territory_name).filter(Boolean))].join(', ');
   const name = last.type_of_conflict === '2' ? interstateName(rows) : `${LOCATION_AS[id] || last.location}: ${territory || 'government'}`;
   const sides = k => [...new Set(rows.flatMap(r => [...actors(r[k], r[`${k}_id`]), ...actors(r[`${k}_2nd`])]))];
   if (rows.some(r => r.type_of_conflict === '2') && +first.year > CHECKED_THROUGH && !FOUGHT_IN['u' + id]) unchecked.push('u' + id);
+  const own = y => locQs(rows.find(r => +r.year === y));
   wars.push({
     id: 'u' + id, src: 'ucdp', name, type: UCDP_TYPE[last.type_of_conflict],
     aim: last.incompatibility === '1' ? 'territory' : last.incompatibility === '2' ? 'government' : 'territory and government',
     years: rows.map(r => [+r.year, +r.intensity_level]),
-    ...place('u' + id, [...new Set(rows.flatMap(r => gws(r.gwno_loc)))], rows.map(r => +r.year), y => gws(rows.find(r => +r.year === y).gwno_loc)),
+    ...place('u' + id, [...new Set(rows.flatMap(locQs))], rows.map(r => +r.year), own),
     sideA: sides('side_a'), sideB: sides('side_b'),
-    states: [...new Set(rows.flatMap(partiesOf))],
+    states: [...new Set(rows.flatMap(partyQs))],
     // A state is a party in the years UCDP's rows name it, not in every year of the conflict (Tonga in Iraq).
-    statesYears: Object.fromEntries(rows.map(r => [+r.year, [...new Set(partiesOf(r))].sort((x, y) => x - y)])),
+    statesYears: Object.fromEntries(rows.map(r => [+r.year, partyQs(r)])),
     start: first.start_date, wiki: UCDP_WIKI[id] || null,
   });
 }
+if (unread.size) throw new Error(`VM's crosswalk cannot read these UCDP names: ${[...unread].join('; ')}. Add them to omni/scripts/ucdp-places.mjs.`);
 
-// ---- Correlates of War, wars active 1926–1945.
-const held = HOSTED.find(h => h.file === 'battlefield/history/data/wars.json')?.kind === 'pending';
-const yearsOf = r => {
-  const ys = [];
-  for (const [s, e] of [[r.StartYear1, r.EndYear1], [r.StartYear2, r.EndYear2]]) {
-    if (+s < 0) continue;
-    for (let y = +s; y <= (+e > 0 ? +e : +s); y++) ys.push(y);
-  }
-  return ys;
-};
-const cow = f => parseCsv(readFileSync(join(cowDir, f), 'latin1').replace(/^﻿/, '').replace(/EndDay2 ,/, 'EndDay2,'));
-const cowWars = new Map();
-function addCow(num, name, type, years, part) {
-  const w = cowWars.get(num) || cowWars.set(num, { id: 'c' + num, src: 'cow', name, type, years: new Set(), sideA: new Set(), sideB: new Set(), states: new Set(), loc: new Set(), deaths: 0, periods: [] }).get(num);
-  years.forEach(y => w.years.add(y));
-  part(w);
-}
-// COW WhereFought codes → regions (1 Americas, 2 Europe, 4 Africa, 6 Middle East, 7 Asia, 9 Oceania).
-// A participant counts as fighting on its own territory only if its region is one the war was fought in.
-const FOUGHT = { 1: [1], 2: [2], 4: [4], 6: [6], 7: [7], 9: [9], 11: [2, 6], 12: [2, 7], 13: [1, 7], 14: [2, 4, 6], 15: [2, 4, 6, 7], 16: [4, 6, 7, 9], 17: [7, 9], 18: [4, 6], 19: [2, 4, 6, 7, 9] };
-const regionOf = c => c < 200 ? 1 : c < 400 ? 2 : c < 630 ? 4 : c < 700 ? 6 : c < 900 ? 7 : 9;
-// A participant's dates in a COW inter-state war, as written: its one or two periods ("22 Jun 1941 – 23 Aug 1944").
-const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const cowDay = (m, d, y) => (+y > 0 ? [+d > 0 && +m > 0 ? +d : null, +m > 0 ? MON[+m - 1] : null, +y].filter(Boolean).join(' ') : null);
-const periodsOf = r => [[r.StartMonth1, r.StartDay1, r.StartYear1, r.EndMonth1, r.EndDay1, r.EndYear1], [r.StartMonth2, r.StartDay2, r.StartYear2, r.EndMonth2, r.EndDay2, r.EndYear2]]
-  .map(([m, d, y, m2, d2, y2]) => [cowDay(m, d, y), cowDay(m2, d2, y2)]).filter(([a]) => a).map(([a, z]) => (z && z !== a ? `${a} – ${z}` : a));
-function readCow() {
-  for (const r of cow('Inter-StateWarData_v4.0.csv')) addCow(r.WarNum, r.WarName, 'Interstate war', yearsOf(r), w => {
-    (r.Side === '1' ? w.sideA : w.sideB).add(r.StateName); w.states.add(+r.ccode);
-    w.periods.push({ side: r.Side === '1' ? 'A' : 'B', name: r.StateName, when: periodsOf(r) });
-    if ((FOUGHT[+r.WhereFought] || []).includes(regionOf(+r.ccode))) w.loc.add(+r.ccode);
-    if (+r.BatDeath > 0) w.deaths += +r.BatDeath;
-  });
-  for (const r of cow('Intra-StateWarData_v4.1.csv')) addCow(r.WarNum, r.WarName, 'Civil war', yearsOf(r), w => {
-    w.sideA.add(r.SideA); w.sideB.add(r.SideB);
-    for (const c of [+r.CcodeA, +r.CcodeB]) if (c > 0) { w.states.add(c); w.loc.add(c); }
-    w.deaths += Math.max(0, +r.SideADeaths) + Math.max(0, +r.SideBDeaths);
-  });
-  for (const r of cow('Extra-StateWarData_v4.0.csv')) addCow(r.WarNum, r.WarName, 'Colonial or imperial war', yearsOf(r), w => {
-    w.sideA.add(r.SideA); w.sideB.add(r.SideB);
-    if (+r.ccode1 > 0) { w.states.add(+r.ccode1); w.loc.add(+r.ccode1); }
-    w.deaths += Math.max(0, +r.BatDeath) + Math.max(0, +r.NonStateDeaths);
-  });
-}
-// A state COW puts on both sides of a war (it changed sides: Italy in 1943, Romania and Bulgaria in 1944) is named on
-// each with its dates there, so neither list reads as if it fought on that side throughout.
-const dated = (w, side, names) => names.map(n => {
-  if (!(w.sideA.has(n) && w.sideB.has(n))) return n;
-  const when = w.periods.filter(p => p.side === side && p.name === n).flatMap(p => p.when), label = SIDE_NAMES[w.id.slice(1)]?.[side]?.[n] || n;
-  return when.length ? `${label} (${when.join('; ')})` : label;
-});
-// A state COW names once that was two regimes on the two sides (see SIDE_NOTES).
-const SIDE_NAMES = { 139: { B: { France: 'Vichy France' } } };
-// Beside the sides where COW's states do not say enough. France: COW has one France, on side A to the fall of France
-// and again from the Allies' recognition of the Provisional Government, and on side B in between.
-const SIDE_NOTES = {
-  139: 'France: COW\'s France on side B (7 Jul 1940 – 14 Jul 1941) is the Vichy regime: COW dates its side-B participation to the armistice in Syria and Lebanon (14 July 1941), though Vichy forces fought the Allies again in Madagascar (May–November 1942) and French North Africa (November 1942), which COW does not count; on side A it is the Third Republic to 22 June 1940 and the Provisional Government from 23 October 1944, when the Allies recognised it. Free France fought with the Allies from June 1940 but was not a state and is not a COW participant (Wikipedia: Vichy France; Free France; Madagascar campaign; Operation Torch).',
-};
-// Under the hold: the committed rows exactly as they are, places included ("the page stays as it is until Jude
-// chooses"). history-fought.mjs's entries for them apply only when the COW files are read again, so a rebuild never
-// feeds its own output back through them.
-if (held) {
-  const rows = (committed?.wars || []).filter(w => w.src === 'cow');
-  if (!rows.length) throw new Error('The Correlates of War rows are held (cite-only.mjs: pending), but wars.json holds none to write back');
-  if (cowDir) console.warn(`The Correlates of War rows are held (S0): ${cowDir} is not read; the ${rows.length} rows in wars.json are written back.`);
-  wars.push(...rows);
-} else {
-  if (!cowDir) throw new Error('Give the folder with the Correlates of War CSVs');
-  readCow();
-}
-for (const w of cowWars.values()) {
-  const years = [...w.years].filter(y => y >= FIRST && y < UCDP_FROM).sort((a, b) => a - b);
-  if (!years.length) continue;
-  const all = [...w.years].sort((a, b) => a - b);
-  const sideA = dated(w, 'A', [...w.sideA].filter(s => s !== '-8')), sideB = dated(w, 'B', [...w.sideB].filter(s => s !== '-8'));
+// ---- 3. Wikidata, 1926–1945
+const focusIndex = J('battlefield/focus/data/index.json');
+const keep = focusIndex.wars.filter(w => w.start < `${UCDP_FROM}` && w.qid).map(w => w.qid);
+const PLACEABLE = new Set([...ne.map(p => p.q), ...small.map(p => p.q), ...Object.keys(qids.entries).map(canonical), ...Object.values(CANONICAL), ...Object.values(SPECIAL).flat().map(x => x.q), ...Object.values(THEN)].filter(Boolean));
+const fetched = await fetchWars({ cache: CACHE, keep });
+const placedByHand = new Set(Object.keys(FOUGHT_IN).filter(id => /^Q\d+$/.test(id) && FOUGHT_IN[id].loc?.length));
+const { wars: listed, left } = selectWars({ ...fetched, isPlace: q => PLACEABLE.has(q), keep: new Set(keep), placed: placedByHand });
+const classes = await entities([...new Set(listed.map(w => w.cls[0]).filter(Boolean))], { props: 'labels', cache: CACHE, tag: 'bf26c' });
+const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
+for (const w of listed) {
+  const years = []; for (let y = Math.max(w.from, WD_FIRST); y <= Math.min(w.to, WD_LAST); y++) years.push([y, 3]);
+  const own = () => w.loc;
+  const p = place(w.q, w.loc, years.map(([y]) => y), own);
+  const where = [...new Set([...(p.where || []), ...(p.loc.length || p.locYears ? [] : w.where)])];
   wars.push({
-    id: w.id, src: 'cow', name: w.name, type: w.type, years: years.map(y => [y, 2]),
-    span: `${all[0]}–${all.at(-1)}`, ...place(w.id, [...w.loc], years, () => [...w.loc]), states: [...w.states], sideA, sideB,
-    ...(SIDE_NOTES[w.id.slice(1)] ? { sideNote: SIDE_NOTES[w.id.slice(1)] } : {}),
-    deaths: w.deaths || null, wiki: COW_WIKI[w.id.slice(1)] || null,
+    id: w.q, src: 'wikidata', q: w.q, name: w.n, type: cap(classes[w.cls[0]]?.labels?.en?.value) || 'War', years,
+    span: w.from === w.to ? `${w.from}` : `${w.from}–${w.to}`,
+    loc: p.loc, ...(p.locYears ? { locYears: p.locYears } : {}), ...(where.length ? { where } : {}),
+    sideA: [], sideB: [], states: [...new Set([...w.states, ...p.loc])],
+    statesYears: Object.fromEntries(years.map(([y]) => [y, [...new Set([...w.states, ...(p.locYears?.[y] || p.loc)])]])),
+    start: w.start, end: w.end, wiki: w.wiki,
   });
 }
+console.log(`Wikidata, ${WD_FIRST}–${WD_LAST}: ${fetched.candidates} candidates, ${listed.length} wars listed, ${left.length} left out`);
+for (const l of left) console.log(`  left out: ${l.q} ${l.n}: ${l.why}`);
+const unusedFought = Object.keys(FOUGHT_IN).filter(id => !wars.some(w => w.id === id));
+if (unusedFought.length) console.warn(`history-fought.mjs entries for wars not on the list: ${unusedFought.join(', ')}`);
 
-// ---- The 22 of VM's countries with no CShapes 2.0 border (design/prp-mapkit.js, PRPMapkit.dots('cshapes')): the
-// page draws each as the kit's dot from its first day as a state, under the Gleditsch–Ward number UCDP's rows use.
-// [gw, from]. gw: for its ten, the Political Retrospective's own codes (hp-retrospective, data/countries.json at commit
-// 930b968, keyed by Gleditsch–Ward code); for the other eleven, Kristian Gleditsch and Michael Ward's list of
-// microstates (http://ksgleditsch.com/data/microstatessystem.dat, read 17 November 2026), whose codes UCDP's follow:
-// UCDP/PRIO ACD v26.1 files Grenada as 55 and Tonga as 972. The Holy See is on neither list, so it has none.
-// from: the first day as a state. For the Retrospective's ten, the first day of its leader lists (scripts/leader-lists.mjs
-// at 930b968, which start each list on the state's first day); null for the four European microstates that were
-// states before 1926, drawn from the page's first year. For the other twelve, Wikidata's inception (P571; where it has
-// several, the preferred statement), read 17 November 2026 from https://query.wikidata.org/ (CC0); Wikidata gives
-// Tonga's and Samoa's to the year only.
-const DOTS = {
-  AND: [232, null], ATG: [58, '1981-11-01'], DMA: [54, '1978-11-03'], GRD: [55, '1974-02-07'], KNA: [60, '1983-09-19'],
-  LCA: [56, '1979-02-22'], LIE: [223, null], MCO: [221, null], SMR: [331, null], VCT: [57, '1979-10-27'],
-  FSM: [987, '1986-11-03'], KIR: [970, '1979-07-12'], MHL: [983, '1986-10-21'], NRU: [971, '1968-01-31'], PLW: [986, '1994-10-01'],
-  STP: [403, '1975-07-12'], SYC: [591, '1976-06-29'], TON: [972, '1970'], TUV: [973, '1978-10-01'], VAT: [null, '1929-02-11'],
-  VUT: [935, '1980-07-30'], WSM: [990, '1962'],
+// ---- 4b. A place Cliopatria draws under another Q-id in a year (history-places.mjs AS: UCDP's old names for a
+// successor state; occupied Yugoslavia): the war's places by year are rewritten, so the map and the counts agree.
+const yearsOf = w => w.years.map(([y]) => y);
+for (const w of wars) {
+  const ys = yearsOf(w);
+  const locBy = Object.fromEntries(ys.map(y => [y, [...new Set((w.locYears?.[y] || w.loc).map(q => placeAt(q, y)))]]));
+  const stBy = Object.fromEntries(ys.map(y => [y, [...new Set((w.statesYears?.[y] || []).map(q => placeAt(q, y)))]]));
+  if (w.locYears || ys.some(y => locBy[y].join() !== w.loc.join())) { w.locYears = locBy; w.loc = [...new Set(Object.values(locBy).flat())]; }
+  if (w.statesYears) { w.statesYears = stBy; w.states = [...new Set([...Object.values(stBy).flat()])]; }
+}
+
+// ---- 5. Every place checked on Wikidata
+const placesIn = (w, y) => [...new Set([...(w.locYears?.[y] || w.loc), ...(w.statesYears?.[y] || [])])];
+const allPlaces = new Set(wars.flatMap(w => yearsOf(w).flatMap(y => placesIn(w, y))));
+const rowQs = new Map(); // row id → [[from, to, Q]]
+const rowsOfYear = new Map();
+for (let y = FIRST; y <= LAST; y++) {
+  const yb = Math.min(y, BORDERS_TO), list = [];
+  for (const f of M.sliceAt(fcAt(y), yb)) {
+    if (!drawnRow(f)) continue;
+    const q = rowQid(qids, f.properties.n, yb, M.qidFor);
+    list.push([f.id, q]);
+    if (y > BORDERS_TO) continue;
+    const runs = rowQs.get(f.id) || rowQs.set(f.id, []).get(f.id), lastRun = runs.at(-1);
+    if (lastRun && lastRun[2] === q && lastRun[1] === yb - 1) lastRun[1] = yb; else runs.push([yb, yb, q]);
+    if (q) allPlaces.add(q);
+  }
+  rowsOfYear.set(y, list);
+}
+const got = await entities([...allPlaces], { props: 'claims|labels', cache: CACHE, tag: 'bfpl' });
+const neBy = new Map(ne.filter(p => p.q).map(p => [p.q, p])), smallBy = new Map(small.filter(p => p.q).map(p => [p.q, p]));
+const places = {};
+for (const q of [...allPlaces].sort((a, b) => +a.slice(1) - +b.slice(1))) {
+  const e = got[q];
+  if (!e || e.missing != null) throw new Error(`Wikidata holds no ${q}`);
+  const iso = (e.claims?.P298 || []).filter(c => c.rank !== 'deprecated').map(c => c.mainsnak?.datavalue?.value);
+  const nat = neBy.get(q) || smallBy.get(q);
+  // Kosovo has no ISO 3166 code: Natural Earth and Wikidata each use a user-assigned X code, so X codes are not compared.
+  if (nat?.iso3 && iso.length && !iso.includes(nat.iso3) && !/^X/.test(nat.iso3)) throw new Error(`${q}: Wikidata's ISO3 ${iso.join(', ')} is not Natural Earth's ${nat.iso3}`);
+  const since = (e.claims?.P571 || []).filter(c => c.rank !== 'deprecated').map(c => /^\+?(-?\d+)-/.exec(c.mainsnak?.datavalue?.value?.time || '')?.[1]).filter(Boolean).map(Number);
+  places[q] = { n: e.labels?.en?.value || nat?.n || q, ...(nat?.iso3 || iso[0] ? { iso3: nat?.iso3 || iso[0] } : {}),
+    ...(since.length && Math.min(...since) > FIRST ? { since: Math.min(...since) } : {}) };
+}
+
+// ---- 6. Where each war place is drawn each year: a Cliopatria row; from 1946 a small state's point; else unplaced
+const points = {}, unplaced = {};
+for (let y = FIRST; y <= LAST; y++) {
+  const onRows = new Set(rowsOfYear.get(y).map(([, q]) => q).filter(Boolean));
+  const need = new Set(wars.filter(w => yearsOf(w).includes(y)).flatMap(w => placesIn(w, y)));
+  for (const q of [...need].sort()) {
+    if (onRows.has(q)) continue;
+    const s = smallBy.get(q);
+    if (s && y >= UCDP_FROM) (points[y] ||= {})[q] = s.id;
+    else (unplaced[y] ||= []).push(q);
+  }
+}
+const unplacedCount = Object.values(unplaced).reduce((s, l) => s + l.length, 0);
+console.log(`Places: ${Object.keys(places).length}; war-year places as Natural Earth's point: ${Object.values(points).reduce((s, o) => s + Object.keys(o).length, 0)}; that VM cannot place: ${unplacedCount}`);
+for (const [y, qs] of Object.entries(unplaced)) console.log(`  ${y}: VM cannot place ${qs.map(q => `${q} ${places[q]?.n}`).join(', ')}`);
+
+// ---- 7. Old addresses
+const titles = await byTitles(Object.values(COW_WIKI), { cache: CACHE });
+const onList = new Set(wars.map(w => w.id));
+// A war the new list holds as part of a whole one (the Franco-Thai War, within World War II) opens the whole, and
+// the page says so (oldWithin); one it does not hold at all is named (oldGone).
+const oldIds = {}, oldWithin = {}, oldGone = {};
+const byWiki = new Map(wars.filter(w => w.src === 'ucdp' && w.wiki).map(w => [w.wiki, w.id]));
+const wholeOf = new Map(left.filter(l => l.whole).map(l => [l.q, l.whole]));
+for (const [num, title] of Object.entries(COW_WIKI)) {
+  const q = titles[title];
+  if (q && onList.has(q)) oldIds['c' + num] = q;
+  else if (byWiki.has(title)) oldIds['c' + num] = byWiki.get(title); // a UCDP conflict by its Wikipedia title (1946–)
+  else if (q && onList.has(wholeOf.get(q))) oldWithin['c' + num] = [wholeOf.get(q), title];
+  else oldGone['c' + num] = title;
+}
+// War Focus's old links to the Battlefield (bf c700 …) name the same Correlates of War numbers, through COW_WIKI.
+const oldCountries = {};
+const gwList = s => String(s || '').split(',').map(x => parseInt(x, 10)).filter(n => n > 0);
+for (const r of acd) {
+  const locs = r.location.split(/,\s*/), gl = gwList(r.gwno_loc);
+  const note = (gw, name) => {
+    const q = qOf(name, +r.year); if (!q) return;
+    const m = (oldCountries[gw] ||= new Map()), s = m.get(q) || [+r.year, +r.year];
+    m.set(q, [Math.min(s[0], +r.year), Math.max(s[1], +r.year)]);
+  };
+  if (locs.length === 1 && gl.length === 1) note(gl[0], locs[0]);
+  // A side of one state and one number (UCDP's lists of several are not in the same order as their names).
+  for (const [k, g] of [['side_a', 'gwno_a'], ['side_b', 'gwno_b'], ['side_a_2nd', 'gwno_a_2nd'], ['side_b_2nd', 'gwno_b_2nd']]) {
+    const gs = governments(r[k]), gn = gwList(r[g]);
+    if (gs.length === 1 && gn.length === 1) note(gn[0], gs[0]);
+  }
+}
+// A number UCDP gave two places over time (365: the Soviet Union to 1991, then Russia) is kept with each one's years
+// in UCDP's rows, [[first, last, Q], …]; the page opens the one of the year shown (before the first, the first;
+// after the last, the last).
+const oldC = Object.fromEntries(Object.entries(oldCountries).map(([gw, m]) => {
+  const runs = [...m].map(([q, [f, t]]) => [f, t, q]).sort((a, b) => a[0] - b[0]);
+  return [gw, runs.length === 1 ? runs[0][2] : runs];
+}).sort((a, b) => +a[0] - +b[0]));
+
+// ---- 8. Write
+wars.sort((a, b) => (a.years[0][0] - b.years[0][0]) || (a.id < b.id ? -1 : 1));
+const sources = {
+  ucdp: 'UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0',
+  wikidata: 'Wikidata (CC0): the wars of 1926–1945 by VM’s rule (battlefield/scripts/wars-1926.mjs), with their dates, countries, locations and participants; English Wikipedia (CC BY-SA 4.0) for their titles',
+  borders: 'Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0 – processed by Vitruvian Manager; Natural Earth (public domain) for the points of small states from 1946',
 };
-const RETROSPECTIVE_TEN = new Set(['AND', 'ATG', 'DMA', 'GRD', 'KNA', 'LCA', 'LIE', 'MCO', 'SMR', 'VCT']);
-const kitDots = globalThis.PRPMapkit.dots('cshapes').map(d => d.iso3).sort();
-if (kitDots.join() !== Object.keys(DOTS).sort().join()) throw new Error(`The kit's CShapes dots (${kitDots.join(' ')}) and DOTS differ`);
-const borders = JSON.parse(readFileSync(new URL('borders.topo.json', OUT), 'utf8')).objects.borders.geometries.map(g => g.properties);
-for (const [iso3, [gw]] of Object.entries(DOTS)) if (gw != null && borders.some(p => p.gw === gw)) throw new Error(`${iso3}: ${gw} has a CShapes shape`);
-// Every war-year place is drawn on 1 July of the year: as a CShapes shape, or as a dot (a state CShapes has no border
-// for, from its first day); a war-year with no place at all names it (`where`). The held Correlates of War rows are
-// written back as they are, so theirs are listed apart (history-fought.mjs records what waits for the hold).
-const drawn = (gw, y) => borders.some(p => p.gw === gw && p.s <= `${y}-07-01` && `${y}-07-01` <= p.e)
-  || Object.values(DOTS).some(([g, from]) => g === gw && (from == null || from <= `${y}-07-01`));
-const unplacedIn = w => w.years.flatMap(([y]) => {
-  const gs = w.locYears?.[y] || w.loc;
-  return [...gs.filter(gw => !drawn(gw, y)).map(gw => `${w.id} ${y} ${gw}`), ...(gs.length || w.where?.length ? [] : [`${w.id} ${y} (no place)`])];
-});
-const unplaced = wars.filter(w => !(held && w.src === 'cow')).flatMap(unplacedIn);
-if (unplaced.length) console.warn(`War-year places not drawn on 1 July (add them to history-fought.mjs): ${unplaced.join(', ')}`);
-const heldUnplaced = held ? wars.filter(w => w.src === 'cow').flatMap(unplacedIn) : [];
-if (heldUnplaced.length) console.log(`Held Correlates of War rows (S0) with places not drawn on 1 July, as they stand: ${heldUnplaced.join(', ')}`);
-
+const warsDoc = { generated: new Date().toISOString(), format: 'vm-battlefield-wars/2', firstYear: FIRST, ucdpFrom: UCDP_FROM, lastYear: LAST,
+  files: { 'ucdp-acd': { file: acdPath.split(/[\\/]/).pop(), sha256: sha256(acdBuf), url: 'https://ucdp.uu.se/downloads/ucdpprio/ucdp-prio-acd-261-csv.zip' } },
+  levels: { 1: 'Minor conflict: 25 to 999 battle-related deaths in the year (UCDP)', 2: 'War: 1,000 or more battle-related deaths in the year (UCDP)', 3: 'A war Wikidata lists, 1926–1945; its intensity is not coded' },
+  sources, oldIds, oldWithin, oldGone, wars };
+const placesDoc = { generated: warsDoc.generated, format: 'vm-battlefield-places/2', borders: BORDER_FILES, bordersTo: BORDERS_TO,
+  about: 'VM’s own work. Each Cliopatria row’s place by year (battlefield/scripts/history-places.mjs); from 1946, each small state that no row holds in a year, as Natural Earth’s point (points: year → Q-id → point id); and, each year, the war places VM cannot place on a free border (unplaced). No place is drawn on a border of today. A place’s `since` is its inception on Wikidata, where after 1926.',
+  places, rows: Object.fromEntries([...rowQs].map(([id, runs]) => [id, runs.length === 1 && runs[0][2] ? runs[0][2] : runs])), points, unplaced, oldCountries: oldC };
 mkdirSync(OUT, { recursive: true });
-writeFileSync(new URL('wars.json', OUT), JSON.stringify({
-  generated: new Date().toISOString(), firstYear: FIRST, ucdpFrom: UCDP_FROM, lastYear: LAST,
-  sources: {
-    ucdp: 'UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0',
-    cow: 'Correlates of War Project, Inter-State (v4.0), Intra-State (v4.1) and Extra-State (v4.0) War Data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)',
-    dots: 'States with no CShapes 2.0 border: Gleditsch–Ward numbers from the Political Retrospective and from Gleditsch and Ward’s list of microstates (http://ksgleditsch.com/data/microstatessystem.dat); first days from the Retrospective’s leader lists and from Wikidata (inception, CC0)',
-  },
-  // src: where its first day comes from, for the page to name.
-  dots: Object.fromEntries(Object.entries(DOTS).map(([iso3, [gw, from]]) => [iso3, { gw, from, src: RETROSPECTIVE_TEN.has(iso3) ? 'retrospective' : 'wikidata' }])),
-  wars,
-}));
+writeFileSync(new URL('wars.json', OUT), JSON.stringify(warsDoc));
+writeFileSync(new URL('places.json', OUT), JSON.stringify(placesDoc));
 const n = y => wars.filter(w => w.years.some(([yy]) => yy === y)).length;
-console.log(`${wars.length} wars/conflicts; 1926: ${n(1926)}, 1939: ${n(1939)}, 1946: ${n(1946)}, 2025: ${n(2025)}`);
+console.log(`${wars.length} wars/conflicts; 1926: ${n(1926)}, 1939: ${n(1939)}, 1946: ${n(1946)}, 2025: ${n(2025)}; old war ids kept ${Object.keys(oldIds).length}, within a whole ${Object.keys(oldWithin).length}, gone ${Object.keys(oldGone).length}; old country numbers ${Object.keys(oldC).length}`);
 if (unchecked.length) console.warn(`Interstate conflicts newer than ${CHECKED_THROUGH} not yet in history-fought.mjs: ${unchecked.join(', ')}. Run check-fought.mjs with the GED CSV.`);
-if (process.argv.includes('--list-cow')) for (const w of wars.filter(w => w.src === 'cow')) console.log(w.id.slice(1), '|', w.name, '|', w.span);

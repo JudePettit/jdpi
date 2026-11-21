@@ -76,8 +76,27 @@ export const CANVAS_CREDIT = 'Tiles © Esri — Esri, HERE, Garmin, © OpenStree
 export const ESRI_IMAGERY = `${ESRI}World_Imagery/MapServer/tile/{z}/{y}/{x}`;
 export const ESRI_IMAGERY_CREDIT = 'Imagery © Esri — Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community';
 export const ESRI_LABELS = `${ESRI}Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`;
-export const EOX_S2 = 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg';
-export const EOX_S2_CREDIT = 'EOxCloudless 2025 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2025), CC BY-NC-SA 4.0';
+// The free satellite base (MP-11, Jude, 17 November 2026: free data only). NASA's Global Web-Enabled Landsat Data
+// (GWELD) v3.1, a 30 m yearly composite, through GIBS; its 2000 epoch, the latest it holds (time values 1983-12-01 to
+// 2000-12-01 in GIBS's capabilities, read 20 November 2026), served to level 12. NASA's terms (data use guidance, read
+// that day): "data provided from a NASA-led mission are licensed as Creative Commons Zero (CC0)".
+// It replaced EOX's cloud-free Sentinel-2 mosaic, whose maker allows commercial use only under its paid licence.
+export const LANDSAT_LAYER = 'Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual';
+export const LANDSAT_DAY = '2000-12-01';
+export const LANDSAT_BASE = `${GIBS_WMTS}/${LANDSAT_LAYER}/default/${LANDSAT_DAY}/GoogleMapsCompatible_Level12/{z}/{y}/{x}.jpeg`;
+export const LANDSAT_CREDIT = 'Imagery: NASA Global Web-Enabled Landsat Data (GWELD) v3.1, 2000 epoch, through NASA EOSDIS GIBS (CC0)';
+/** The base maps an address may ask for (mb). */
+export const BASES = ['map', 'imagery', 'landsat'];
+/** A base this page no longer offers, with the plain words it shows when an old address asks for it. */
+export const RETIRED_BASES = {
+  s2: 'The Sentinel-2 cloud-free mosaic this address asked for is no longer offered: EOX, which makes it, allows commercial use only under its paid licence, and Vitruvian Manager uses free data only. This view opens on NASA’s Landsat composite instead (30 m, the 2000 epoch), so recent change will not show on it.',
+};
+/** The base to open for an address's mb value, and the note to show when it asked for a retired one. */
+export function baseFromState(mb) {
+  if (BASES.includes(mb)) return { base: mb, note: null };
+  if (Object.hasOwn(RETIRED_BASES, mb)) return { base: 'landsat', note: RETIRED_BASES[mb] };
+  return { base: 'imagery', note: null };
+}
 export const TERRARIUM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
 export const TERRAIN_CREDIT = 'Elevation: Terrain Tiles (Mapzen/Tilezen on AWS Open Data; SRTM, GMTED, ETOPO1, 3DEP, EU-DEM and others)';
 export const terrariumUrl = ({ z, x, y }) => TERRARIUM.replace('{z}', z).replace('{x}', x).replace('{y}', y);

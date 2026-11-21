@@ -667,3 +667,9 @@ test('Historical Calendar: an event names its own date and, apart, when its reco
     assert.match(await page.locator('#hero-meta').innerText(), /Records rebuilt/i);
   });
 });
+
+// MP-11 fixer (20 November 2026): Archigos's terms line stands where the calendars name it as a source of past events.
+test('page file: the Sources give Archigos’s terms line beside the Political Retrospective', () => {
+  const html = readFileSync(new URL('../q/calendar.html', import.meta.url), 'utf8');
+  assert.ok(html.includes('Political Retrospective (Archigos and Wikidata) for new leaders, coups, elections and referendums (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides);'));
+});

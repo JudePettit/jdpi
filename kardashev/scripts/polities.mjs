@@ -10,8 +10,14 @@
 //    Cores sit near Morris's figures; less developed regions of large empires are blended lower.
 //  - Populations follow McEvedy & Jones (Atlas of World Population History, 1978), Maddison and standard
 //    estimates for individual empires; combined entries ("North Indian kingdoms") group several states.
-//  - From 1900, per-person values follow primary-energy statistics (Energy Institute / Our World in Data)
-//    plus food and traditional biomass, converted at 1 GJ/year ≈ 655 kcal/day.
+//  - From 1900, per-person values follow primary-energy statistics (the Energy Institute's Statistical Review, as
+//    Our World in Data presents it) plus food and traditional biomass, converted at 1 GJ/year ≈ 655 kcal/day.
+//
+// Terms (MP-11, 20 November 2026): every value here is Vitruvian Manager's own estimate (© JDP-Iq), shaped after
+// books that carry no open licence (Morris; McEvedy & Jones); Maddison's populations are CC BY 4.0. The Energy
+// Institute's terms could not be read (https://www.energyinst.org/statistical-review answered HTTP 403 on 18 and 20
+// November 2026), and Our World in Data passes such data on under its makers' terms. Kept until VM's owner decides
+// (integration/sources.json: vm-kardashev, energy-institute).
 export const POLITIES = [
   // ---- Bronze Age
   { id: 'egypt-mk', name: 'Egypt (Middle & New Kingdoms)', lat: 25.7, lon: 32.6, region: 'Near East', wiki: 'New_Kingdom_of_Egypt', k: [[-2000, 2, 12], [-1500, 2.5, 13], [-1200, 3, 13.5], [-1070, 3, 13]] },

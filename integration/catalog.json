@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20T15:16:14.287Z",
+  "generated": "2026-11-21T00:36:14.201Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -56,7 +56,7 @@
       "sources": [
         "The outlets' own RSS feeds, or Google News restricted to the outlet's site"
       ],
-      "updated": "2026-11-20",
+      "updated": "2026-11-21",
       "refresh": "static",
       "page": "q/headlines.html?view=current",
       "derivedFrom": [
@@ -723,7 +723,7 @@
         }
       ],
       "rows": 217,
-      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.",
+      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)",
         "Wikidata (CC0): government, heads of state, capitals",
@@ -738,7 +738,7 @@
         "national/data/index.json",
         "volatility/data/index.json"
       ],
-      "bytes": 184938
+      "bytes": 185090
     },
     {
       "id": "national-indicators",
@@ -898,7 +898,7 @@
         }
       ],
       "rows": 7884,
-      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.",
+      "licence": "World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq. Not free at their source, whatever the World Bank’s label: MS.MIL.XPND.GD.ZS rests on SIPRI, whose terms ask its permission, and normally a royalty, for commercial use; EG.FEC.RNEW.ZS, EG.USE.PCAP.KG.OE and EN.GHG.CO2.PC.CE.AR5 rest on the IEA, whose terms keep its datasets outside CC BY 4.0; EN.ATM.PM25.MC.M3 rests on IHME, whose terms are for non-commercial users only; IT.CEL.SETS.P2 and IT.NET.USER.ZS rest on the ITU, whose terms allow personal, educational or non-commercial use only. Kept until VM’s owner decides.",
       "sources": [
         "World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0)"
       ],
@@ -908,7 +908,7 @@
       "derivedFrom": [
         "national/data/index.json"
       ],
-      "bytes": 1763655
+      "bytes": 1768935
     },
     {
       "id": "national-key-series",
@@ -978,7 +978,7 @@
         }
       ],
       "rows": 67168,
-      "licence": "World Bank WDI, CC BY 4.0.",
+      "licence": "World Bank WDI, CC BY 4.0. Not free at their source, whatever the World Bank’s label: MS.MIL.XPND.GD.ZS rests on SIPRI, whose terms ask its permission, and normally a royalty, for commercial use; EN.GHG.CO2.PC.CE.AR5 rests on the IEA, whose terms keep its datasets outside CC BY 4.0. Kept until VM’s owner decides.",
       "sources": [
         "World Bank World Development Indicators (CC BY 4.0)"
       ],
@@ -989,14 +989,14 @@
         "national/data/series/*.json",
         "national/data/index.json"
       ],
-      "bytes": 6340770
+      "bytes": 6349530
     },
     {
       "id": "upcoming-political-events",
       "title": "Realtime Calendar: recent and upcoming events",
       "module": "rt",
       "submodule": "calendar",
-      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-20 to 2028-05-20 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
+      "description": "The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-21 to 2028-05-21 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.",
       "url": "integration/data/upcoming-political-events.json",
       "format": "json",
       "records": "records",
@@ -1052,8 +1052,8 @@
           "description": "For a court ruling below a supreme, constitutional or international court: appeal court, trial court or lower court"
         }
       ],
-      "rows": 321,
-      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
+      "rows": 320,
+      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
         "Political Atlas (Europe, North America and the major powers)",
@@ -1072,7 +1072,7 @@
         "calendar/data/2010s.json",
         "calendar/data/2020s.json"
       ],
-      "bytes": 160702
+      "bytes": 160151
     },
     {
       "id": "intelligence-briefing-stories",
@@ -1115,7 +1115,7 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6842,
+      "rows": 6844,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
@@ -1124,7 +1124,7 @@
       "updated": "2026-11-20",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2993854
+      "bytes": 2992370
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1192,7 +1192,7 @@
       "updated": "2026-11-20",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 2993854
+      "bytes": 2992370
     },
     {
       "id": "econ-briefing-stories",
@@ -1290,7 +1290,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 545,
+      "rows": 551,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1298,7 +1298,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 315668
+      "bytes": 318874
     },
     {
       "id": "econ-briefing-sources",
@@ -1429,7 +1429,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 315668
+      "bytes": 318874
     },
     {
       "id": "science-briefing-stories",
@@ -1522,7 +1522,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1331,
+      "rows": 1396,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1530,7 +1530,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 780853
+      "bytes": 808131
     },
     {
       "id": "science-briefing-sources",
@@ -1656,7 +1656,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 780853
+      "bytes": 808131
     },
     {
       "id": "digital-briefing-stories",
@@ -1759,7 +1759,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1366,
+      "rows": 1351,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1767,7 +1767,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 801265
+      "bytes": 794564
     },
     {
       "id": "digital-briefing-sources",
@@ -1913,7 +1913,7 @@
       "updated": "2026-11-20",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 801265
+      "bytes": 794564
     },
     {
       "id": "political-calendar",
@@ -1983,7 +1983,7 @@
         }
       ],
       "rows": 6003,
-      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.",
+      "licence": "Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.",
       "sources": [
         "Wikipedia national electoral calendars and lists of summits",
         "Political Atlas (Europe, North America and the major powers)",
@@ -2076,27 +2076,27 @@
           "description": "English Wikipedia article"
         }
       ],
-      "rows": 14306,
+      "rows": 14330,
       "licence": "Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)",
       "sources": [
         "Wikidata (CC0)",
         "Every Vitruvian Manager submodule that mentions the entity"
       ],
-      "updated": "2026-11-18",
+      "updated": "2026-11-21",
       "refresh": "monthly",
       "page": "encyclopedia/index.html",
       "derivedFrom": [
         "lake/data/index.json",
         "lake/data/e/*.json"
       ],
-      "bytes": 4250659
+      "bytes": 4258544
     },
     {
       "id": "retrospective-wars",
       "title": "Retrospective Battlefield: armed conflicts 1946–2025",
       "module": "rs",
       "submodule": "battlefield-history",
-      "description": "Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from the Correlates of War, whose terms do not let Vitruvian Manager pass its data on, so they are on the page only.",
+      "description": "Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from Wikidata (CC0) by Vitruvian Manager's own rule and are on the page only, for now.",
       "url": "integration/data/retrospective-wars.json",
       "format": "json",
       "records": "records",
@@ -2183,19 +2183,19 @@
         }
       ],
       "rows": 303,
-      "licence": "UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); state names from CShapes 2.0 (CC BY-NC-SA 4.0).",
+      "licence": "UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); place names from Wikidata (CC0).",
       "sources": [
         "UCDP/PRIO Armed Conflict Dataset v26.1 (Davies, Pettersson & Öberg 2026; Gleditsch et al. 2002), CC BY 4.0",
-        "CShapes 2.0 (Schvitz et al. 2022) for state names"
+        "Wikidata (CC0): the name of each place and state, by its Q-id (battlefield/history/data/places.json)"
       ],
-      "updated": "2026-11-17",
+      "updated": "2026-11-20",
       "refresh": "static",
       "page": "battlefield/history/index.html",
       "derivedFrom": [
         "battlefield/history/data/wars.json",
-        "battlefield/history/data/borders.topo.json"
+        "battlefield/history/data/places.json"
       ],
-      "bytes": 146354
+      "bytes": 145409
     },
     {
       "id": "war-focus-wars",
@@ -2230,7 +2230,7 @@
         {
           "name": "bf",
           "type": "string",
-          "description": "Matching conflict id on the Retrospective Battlefield (a u… id is in retrospective-wars; a c… id is a Correlates of War war, shown on the page only)"
+          "description": "Matching conflict id on the Retrospective Battlefield (a u… id is in retrospective-wars; a Q… id is one of its wars of 1926–1945 from Wikidata, shown on the page only)"
         },
         {
           "name": "start",
@@ -2284,19 +2284,19 @@
         }
       ],
       "rows": 39,
-      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
+      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
-        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
-        "Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)",
+        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
         "CShapes 2.0 (Schvitz et al. 2022)",
-        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own"
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
+        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
       ],
       "updated": "2026-11-17",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
-      "bytes": 17915
+      "bytes": 19048
     },
     {
       "id": "war-focus-battles",
@@ -2480,7 +2480,7 @@
       "title": "War Focus: deaths by month",
       "module": "rs",
       "submodule": "war-focus",
-      "description": "Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For the wars whose deaths come from the Correlates of War, every month says “see the Correlates of War” in place of a number: its terms do not let Vitruvian Manager pass on figures made from its totals (the notes give its citation and address).",
+      "description": "Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For a war no free source gives deaths for (its totalDeaths is empty in war-focus-wars: the nine wars before 1946), deaths and estimated are empty in every month, never 0.",
       "urls": [
         "integration/data/war-focus-monthly-deaths/0.json",
         "integration/data/war-focus-monthly-deaths/1.json"
@@ -2505,31 +2505,28 @@
         },
         {
           "name": "deaths",
-          "type": "string",
-          "description": "Deaths that month; “see the Correlates of War” for the wars whose figures come from it (see the notes)"
+          "type": "number",
+          "description": "Deaths that month; empty for a war no free source gives deaths for"
         },
         {
           "name": "estimated",
           "type": "boolean",
-          "description": "True when spread from an annual or war total; empty for the wars whose deaths come from the Correlates of War (no figure is given)"
+          "description": "True when spread from an annual or war total; empty where deaths is"
         },
         {
           "name": "source",
           "type": "string",
-          "description": "Where the war's death figures come from (for the Correlates of War's wars, which total, not given here)"
+          "description": "Where the war's death figures come from"
         }
       ],
       "rows": 3494,
-      "licence": "UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; no Correlates of War figures, as its terms bar passing its data on without written permission: the months of the wars whose deaths come from its totals say “see the Correlates of War” (its citation and address are in the notes); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).",
-      "notes": [
-        "The Correlates of War’s terms (https://correlatesofwar.org/data-sets/, read 2026-11-16) let Vitruvian Manager show a war’s total with its citation but not pass on its data, and spreading a total over months makes new figures from it. So in every month of the wars whose deaths War Focus takes from a Correlates of War total, deaths says “see the Correlates of War” in place of a number, estimated is empty (no figure is given to be an estimate), and the source column says which of its totals War Focus’s page cites and the years it covers, without the figure.",
-        "Correlates of War: Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press. COW War Data: Inter-State v4.0, Intra-State v4.1 and Extra-State v4.0: https://correlatesofwar.org/data-sets/cow-war/",
-        "War Focus’s page shows each of those wars’ totals with this citation."
-      ],
+      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
-        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005)",
-        "Correlates of War Project war data, cited as Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press (https://correlatesofwar.org/data-sets/cow-war/)"
+        "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
+        "Wikidata (CC0): battles, sieges and operations that are part of each war",
+        "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
+        "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
       ],
       "updated": "2026-11-17",
       "refresh": "monthly",
@@ -2537,7 +2534,7 @@
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 863859
+      "bytes": 1014712
     },
     {
       "id": "kardashev-polities",
@@ -2591,11 +2588,11 @@
         }
       ],
       "rows": 82,
-      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "licence": "Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.",
       "sources": [
         "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
         "McEvedy & Jones, Maddison: populations",
-        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+        "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
       "updated": "2026-10-26",
       "refresh": "static",
@@ -2654,11 +2651,11 @@
         }
       ],
       "rows": 349,
-      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "licence": "Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.",
       "sources": [
         "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
         "McEvedy & Jones, Maddison: populations",
-        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+        "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
       "updated": "2026-10-26",
       "refresh": "static",
@@ -2666,7 +2663,7 @@
       "derivedFrom": [
         "kardashev/data/energy.json"
       ],
-      "bytes": 61764
+      "bytes": 62052
     },
     {
       "id": "kardashev-world",
@@ -2700,11 +2697,11 @@
         }
       ],
       "rows": 44,
-      "licence": "Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).",
+      "licence": "Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.",
       "sources": [
         "Ian Morris, Why the West Rules — For Now (2010) and The Measure of Civilization (2013)",
         "McEvedy & Jones, Maddison: populations",
-        "Energy Institute Statistical Review / Our World in Data (from 1900)"
+        "Energy Institute Statistical Review, as Our World in Data presents it (from 1900)"
       ],
       "updated": "2026-10-26",
       "refresh": "static",
@@ -2712,7 +2709,7 @@
       "derivedFrom": [
         "kardashev/data/energy.json"
       ],
-      "bytes": 4157
+      "bytes": 4445
     },
     {
       "id": "congress-members",
@@ -3477,7 +3474,7 @@
       "sources": [
         "registry.json"
       ],
-      "updated": "2026-11-20",
+      "updated": "2026-11-21",
       "refresh": "on change",
       "page": "index.html",
       "derivedFrom": [

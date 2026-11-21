@@ -270,7 +270,7 @@ Keep a consistent ladder of confidence for identifications:
 Use these words for what something is, and estimative language for judgements about what will happen or why (the OSINT course's lesson on [biases and estimative language](#/oi/osint-training/course-osint?at=fe%2Flearning.html%3Fcourse%3Dosint%26lesson%3Dbiases-and-estimative-language)). Write the observation and the inference separately: "Observed: six objects about 7 m long, in two rows behind earth banks. Assessed: probably self-propelled guns, from their size, the gun-like shadows and the tracks leading to them." Annotate a copy and keep the clean original beside it.
 
 ### In Vitruvian Manager: practising interpretation
-1. In [Measure & geolocate](#/oi/geoint/measure), set the **Base** to **Imagery** (Esri World Imagery: sub-metre in many places, but stitched from captures of different dates, none shown on the map) or **Sentinel-2** (a cloud-free 10 m mosaic made in 2025), and zoom into a port, an airport and a power station you know. Name each element you use.
+1. In [Measure & geolocate](#/oi/geoint/measure), set the **Base** to **Imagery** (Esri World Imagery: sub-metre in many places, but stitched from captures of different dates, none shown on the map) or **Landsat 2000** (NASA’s free 30 m cloud-free composite of the year 2000, so recent building will not show on it), and zoom into a port, an airport and a power station you know. Name each element you use.
 2. Check sizes with the **Distance** and **Area** tools against the [known sizes](#/oi/geoint?at=geoint%2Findex.html%23tab%3Dhardware%26s%3Dhardware-known-sizes-for-measuring-in-imagery) in the Hardware Guide.
 3. Use [Features](#/oi/geoint/features) as an answer key, since OpenStreetMap often names what you are looking at, and for dated, sharper captures open the place in Esri Wayback or Google Earth from the [Imagery](#/oi/geoint/imagery) tab's links.
 
@@ -549,7 +549,7 @@ Uses: can a camera on this ridge see the valley floor? Which hilltops overlook a
 1. In [Measure & geolocate](#/oi/geoint/measure), **Inspect** a point to read its decimal degrees, DMS, MGRS and terrain height (±10–30 m), or go to coordinates you paste in.
 2. **Distance** (click points, then double-click, press Enter or choose Finish) gives the ellipsoidal length in kilometres, miles and nautical miles, with a table of each segment's length and bearing when there are several. **Area** gives the area and perimeter, and **Bearing** the true bearing, back bearing and distance.
 3. With a distance line drawn, open **Elevation profile and line of sight**, enter the observer's and the target's heights above the ground, and read whether the line is clear and, if not, where it is blocked. The profile allows for curvature and refraction, and a table view lists the numbers.
-4. Tick **Hillshade** to see the relief, and switch the base between Map, Imagery and Sentinel-2 to measure what you can see.
+4. Tick **Hillshade** to see the relief, and switch the base between Map, Imagery and Landsat 2000 to measure what you can see.
 5. Keep the captions' limits in mind: the elevation data have cells of 30–90 m in most places, and buildings and trees are missing.
 
 ? The line-of-sight tool shows a clear view between a hilltop and a village 8 km away. What can you conclude?

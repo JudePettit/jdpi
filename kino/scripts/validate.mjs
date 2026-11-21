@@ -66,6 +66,7 @@ export function loadContext() {
     focusWars: new Map(focus.wars.map(w => [w.id, w])),
     warMonths: id => { if (!warMonths.has(id)) { try { warMonths.set(id, new Set(read(`battlefield/focus/data/wars/${id}.json`).months)); } catch { warMonths.set(id, new Set()); } } return warMonths.get(id); },
     historyWars: new Map(history.wars.map(w => [w.id, w])), historyYears: [history.firstYear, history.lastYear],
+    historyOld: { ...history.oldIds, ...Object.fromEntries(Object.entries(history.oldWithin || {}).map(([k, [q]]) => [k, q])) },
     lakeQids: new Set(lake.rows.map(r => r[0])), lakeLabel: new Map(lake.rows.map(r => [r[0], r[1]])),
     progressEvents: new Map(progress.events.map(e => [e.id, e])),
     kardashevYears: new Set(energy.steps.map(s => s.year)), kardashevPolities: new Set(energy.polities.map(p => p.id)),
@@ -131,7 +132,9 @@ export function checkLink(link, ctx) {
     case 'battlefield-history': {
       const y = +at.y;
       if (!Number.isInteger(y) || y < ctx.historyYears[0] || y > ctx.historyYears[1]) bad(`year "${at.y}" is outside ${ctx.historyYears.join('–')}`);
-      if (at.w) { const w = ctx.historyWars.get(at.w); if (!w) bad(`no war "${at.w}"`); else if (y && !w.years.some(([yy]) => yy === y)) bad(`${w.name} was not fought in ${y}`); }
+      // An id written before 20 November 2026 (w=c139, a Correlates of War war) opens the war the page's table of old
+      // ids gives (wars.json oldIds, or oldWithin for one listed as part of a whole), as the page itself reads it.
+      if (at.w) { const id = ctx.historyOld[at.w] || at.w, w = ctx.historyWars.get(id); if (!w) bad(`no war "${at.w}"`); else if (y && !w.years.some(([yy]) => yy === y)) bad(`${w.name} was not fought in ${y}`); }
       break;
     }
     case 'encyclopedia': if (!ctx.lakeQids.has(at.qid)) bad(`no entry ${at.qid} in lake/data/index.json`); break;

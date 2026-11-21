@@ -257,6 +257,9 @@ for (const u of units) {
 // Focus wars from their first month not estimated. Each square is the mark the rule gives that month.
 const shortWhat = mk => (mk.figures?.median != null ? `${fmt(mk.figures.deaths)} deaths against a median of ${fmt(mk.figures.median)} (${mk.figures.pct == null ? 'none before' : `${mk.figures.pct >= 0 ? '+' : '−'}${fmt(Math.abs(mk.figures.pct))}%`})` : mk.what);
 function stripOf(u) {
+  // A War Focus war no free source gives deaths for (totalDeaths null: the nine before 1946, since 20 November 2026)
+  // has no months to mark: its zeros are "no figure", not "no deaths".
+  if (u.kind === 'focus' && u.war?.totalDeaths == null) return { id: u.id, name: u.name, from: null, to: M, why: 'No free source gives this war’s battle deaths by month or year, so no month can be marked.', months: [] };
   const ok = u.rows.filter(r => !r.est);
   if (!ok.length) return { id: u.id, name: u.name, from: null, to: M, why: u.kind === 'focus' ? 'War Focus\'s monthly deaths for this war are estimates spread from yearly or whole-war totals, not recorded events, so no month can be marked.' : 'No months held.', months: [] };
   // A country's first square is April 1989 (GED begins in January; April is the first month with three before it), or

@@ -1,14 +1,14 @@
 // GEOINT & IMINT Dashboard · Measure & geolocate: distance, area, bearing and bearing-line tools on the WGS84 ellipsoid,
 // elevation and hillshade from Terrain Tiles (Terrarium PNGs), elevation profile and line of sight, coordinates (DD, DMS,
 // MGRS), a sun-and-shadow calculator (SunCalc 2.1.1) and chronolocation, plus street-level and 3D link-outs.
-// URL keys: mb (base: map, imagery, s2), mh=1 (hillshade), mp (selected point "lat,lon").
+// URL keys: mb (base: map, imagery, landsat; an old mb=s2 opens on landsat and says why), mh=1 (hillshade), mp (selected point "lat,lon").
 import { esc, fmtNum, fmtDistance, fmtMiles, fmtNautical, fmtArea, fmtDay, isISODate, clamp, parseLatLon, fmtLatLon, addDays } from './util.js';
 import {
   inverse, pathLength, polygonArea, destination, greatCircle, intersection, compass, normDeg, toDMS, toMGRS, parseCoordinates, tileOf,
   metersPerPixel, decodeTerrarium, hillshade, samplePath, lineOfSight, shadowLength, altitudeFromShadow, shadowBearing, sunAzimuthFromShadow,
   chronolocate, zonedToUtc, utcToZoned, fmtOffset, etcZoneForLon,
 } from './geo.js';
-import { terrariumUrl, mapillaryUrl, kartaviewUrl, streetViewUrl, peakvisorUrl, googleEarthUrl, osmUrl } from './sources.js';
+import { terrariumUrl, mapillaryUrl, kartaviewUrl, streetViewUrl, peakvisorUrl, googleEarthUrl, osmUrl, baseFromState } from './sources.js';
 import { createMap, syncToView, baseLayers, flyTo, cased } from './maps.js';
 
 const TZ_URL = 'https://cdn.jsdelivr.net/npm/@photostructure/tz-lookup@11.7.0/tz.js';
@@ -38,8 +38,9 @@ const HINTS = {
 export async function init(panel, ctx) {
   const $ = s => panel.querySelector(s);
   const s0 = ctx.state;
+  const opening = baseFromState(s0.mb);
   const st = {
-    tool: 'inspect', base: ['map', 'imagery', 's2'].includes(s0.mb) ? s0.mb : 'imagery', hill: s0.mh === '1',
+    tool: 'inspect', base: opening.base, hill: s0.mh === '1',
     point: parseLatLon(s0.mp), pts: [], shape: null, lines: [], pendingOrigin: null, profile: null, elev: null,
     sun: { day: null, time: null, tz: null, tzManual: false, height: 10 },
     chrono: { dir: '', h: '', L: '', alt: '', tolAz: 4, tolAlt: 2, scope: 'day', results: null },
@@ -50,6 +51,10 @@ export async function init(panel, ctx) {
   const map = createMap($('#ms-map'), ctx, 'measure', { minZoom: 2, maxZoom: 19 });
   map.doubleClickZoom.disable();
   const base = baseLayers(map, { kind: st.base, labels: true });
+  // An old address that asked for a base no longer offered (mb=s2) opens on its free stand-in and says so in plain words;
+  // the address is left as it was, so it says so again when opened again, until a base is chosen.
+  const baseNote = $('#ms-base-note');
+  if (baseNote && opening.note) { baseNote.textContent = opening.note; baseNote.hidden = false; }
   map.attributionControl.addAttribution('Elevation: <a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">Terrain Tiles</a>');
   const draft = L.layerGroup().addTo(map), shapes = L.layerGroup().addTo(map), linesLayer = L.layerGroup().addTo(map), sunLayer = L.layerGroup().addTo(map), pointLayer = L.layerGroup().addTo(map);
   let hillLayer = null;
@@ -522,6 +527,7 @@ export async function init(panel, ctx) {
   panel.querySelectorAll('#ms-tool [data-v]').forEach(b => b.addEventListener('click', () => setTool(b.dataset.v)));
   panel.querySelectorAll('#ms-base [data-v]').forEach(b => b.addEventListener('click', () => {
     st.base = b.dataset.v; base.set(st.base);
+    if (baseNote) baseNote.hidden = true;
     panel.querySelectorAll('#ms-base [data-v]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === st.base)));
     ctx.set({ mb: st.base === 'imagery' ? null : st.base });
   }));

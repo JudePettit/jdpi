@@ -1,6 +1,6 @@
 # Vitruvian Manager datasets
 
-Generated 2026-11-20 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
+Generated 2026-11-21 from https://jdpi.pages.dev/integration/catalog.json. Read the live catalogue for current row counts.
 
 ## Realtime Geopolitics
 
@@ -64,7 +64,7 @@ Realtime Battlefield: events on a 0.1° grid. Conflict events this year summed b
 
 National Analysis: countries. One row per country: region, income group, government, heads of state and government, PESTLE pressure (the share of each dimension's indicators that are worsening), leadership turnover, conflict history and a few headline indicators.
 
-- Rows: 217 · refresh: monthly · licence: World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.
+- Rows: 217 · refresh: monthly · licence: World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/national-countries.json (records at `records`)
 - Fields: `iso3` (string), `iso2` (string), `name` (string), `official_name` (string), `region` (string), `income` (string), `capital` (string), `government` (array), `head_of_state` (string), `head_of_government` (string), `qid` (string), `pestle_overall` (number), `pestle_political` (number), `pestle_economic` (number), `pestle_social` (number), `pestle_technological` (number), `pestle_legal` (number), `pestle_environmental` (number), `pestle_coverage` (number), `population` (number), `gdp_usd` (number), `gdp_growth` (number), `gdp_per_capita` (number), `inflation` (number), `life_expectancy` (number), `current_leader` (string), `leader_since` (date), `leader_party` (string), `leaders_since_1926` (number), `average_tenure_years` (number), `irregular_exits` (number), `elections_since_1926` (number), `conflict_years` (number), `years_at_war` (number), `wars_active_this_year` (number), `energy_share` (number)
 
@@ -80,7 +80,7 @@ National Analysis: indicator definitions. The 41 indicators behind National Anal
 
 National Analysis: latest indicator values. For each country and indicator, the latest value, its year, the change on the previous value and whether that counts as improving, stable or worsening.
 
-- Rows: 7,884 · refresh: monthly · licence: World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq.
+- Rows: 7,884 · refresh: monthly · licence: World Bank WDI and WGI CC BY 4.0; Wikidata CC0; UCDP CC BY 4.0; PESTLE scores © JDP-Iq. Not free at their source, whatever the World Bank’s label: MS.MIL.XPND.GD.ZS rests on SIPRI, whose terms ask its permission, and normally a royalty, for commercial use; EG.FEC.RNEW.ZS, EG.USE.PCAP.KG.OE and EN.GHG.CO2.PC.CE.AR5 rest on the IEA, whose terms keep its datasets outside CC BY 4.0; EN.ATM.PM25.MC.M3 rests on IHME, whose terms are for non-commercial users only; IT.CEL.SETS.P2 and IT.NET.USER.ZS rest on the ITU, whose terms allow personal, educational or non-commercial use only. Kept until VM’s owner decides.
 - Files: https://jdpi.pages.dev/integration/data/national-indicator-latest/0.json, https://jdpi.pages.dev/integration/data/national-indicator-latest/1.json, https://jdpi.pages.dev/integration/data/national-indicator-latest/2.json (+7 more) (records at `records`)
 - Fields: `iso3` (string), `country` (string), `dimension` (string), `code` (string), `indicator` (string), `unit` (string), `year` (number), `value` (number), `previous_year` (number), `change` (number), `trend` (string)
 
@@ -88,15 +88,15 @@ National Analysis: latest indicator values. For each country and indicator, the 
 
 National Analysis: key indicator time series. Yearly values since 1980 for every country of eight headline indicators (NY.GDP.MKTP.KD.ZG: GDP growth, % a year; FP.CPI.TOTL.ZG: Inflation (consumer prices), % a year; NY.GDP.PCAP.KD: GDP per person (constant 2015 US$), US$; SP.POP.TOTL: Population, people; SP.DYN.LE00.IN: Life expectancy at birth, years; SL.UEM.TOTL.ZS: Unemployment, % of labour force; MS.MIL.XPND.GD.ZS: Military spending, % of GDP; EN.GHG.CO2.PC.CE.AR5: CO₂ emissions per person, t CO₂e). Sharded by indicator, then by country; filter on indicator (and iso3) to read one shard. Labels and units are in national-indicators; all 41 indicators for one country are at national/data/series/<ISO3>.json.
 
-- Rows: 67,168 · refresh: monthly · licence: World Bank WDI, CC BY 4.0.
+- Rows: 67,168 · refresh: monthly · licence: World Bank WDI, CC BY 4.0. Not free at their source, whatever the World Bank’s label: MS.MIL.XPND.GD.ZS rests on SIPRI, whose terms ask its permission, and normally a royalty, for commercial use; EN.GHG.CO2.PC.CE.AR5 rests on the IEA, whose terms keep its datasets outside CC BY 4.0. Kept until VM’s owner decides.
 - Files: https://jdpi.pages.dev/integration/data/national-key-series/0.json, https://jdpi.pages.dev/integration/data/national-key-series/1.json, https://jdpi.pages.dev/integration/data/national-key-series/2.json (+27 more) (records at `records`)
 - Fields: `indicator` (string), `iso3` (string), `country` (string), `year` (number), `value` (number)
 
 ### upcoming-political-events
 
-Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-20 to 2028-05-20 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
+Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: political events from six months ago to eighteen months ahead (2026-05-21 to 2028-05-21 at the last build): elections, referendums, summits, new leaders, coups, ceasefires, protests, court rulings and more.
 
-- Rows: 321 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.
+- Rows: 320 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/upcoming-political-events.json (records at `records`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string)
 
@@ -106,7 +106,7 @@ Realtime Calendar: recent and upcoming events. The Realtime Calendar's window: p
 
 Political Briefing: stories. Every story from the Political Briefing's publishers over the last seven days, ten active publishers for each of five political positions (far left to far right). Join `s` to intelligence-briefing-sources for the outlet's name and position.
 
-- Rows: 6,842 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
+- Rows: 6,844 · refresh: twice daily · licence: Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/briefing/data/latest.json (records at `items`)
 - Fields: `s` (string), `t` (string), `u` (string), `p` (date), `d` (string), `c` (string)
 
@@ -122,7 +122,7 @@ Political Briefing: publishers. The Political Briefing's publishers with their p
 
 Economics Briefing: stories and papers. Every paper and story in the Economics Briefing over the last 7 days, classed by fields (macro, monetary, trade, labour, development, finance, public, energy) and by type (papers or news). Join `source` to econ-briefing-sources.
 
-- Rows: 545 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 551 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/econ/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -138,7 +138,7 @@ Economics Briefing: sources. The journals, preprint servers, institutions and ne
 
 Scientific Briefing: stories and papers. Every paper and story in the Scientific Briefing over the last 7 days, classed by disciplines (physics, chemistry, biology, earth, space) and by type (papers or news). Join `source` to science-briefing-sources.
 
-- Rows: 1,331 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,396 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/science/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `disciplines` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `also` (array), `undated` (boolean), `access` (string), `alt` (array)
 
@@ -154,7 +154,7 @@ Scientific Briefing: sources. The journals, preprint servers, institutions and n
 
 Digital Briefing: stories and papers. Every paper and story in the Digital Briefing over the last 7 days, classed by fields (ai, software, security, hardware, networks, quantum, privacy, policy) and by type (papers or news). Join `source` to digital-briefing-sources.
 
-- Rows: 1,366 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
+- Rows: 1,351 · refresh: 6-hourly · licence: Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.
 - File: https://jdpi.pages.dev/digital/briefing/data/stories.json (records at `items`)
 - Fields: `id` (string), `title` (string), `url` (string), `source` (string), `kind` (string), `tier` (number), `fields` (array), `type` (string), `published` (date), `summary` (string), `section` (string), `doi` (string), `authors` (string), `also` (array), `undated` (boolean), `access` (string), `accessMark` (string), `alt` (array)
 
@@ -172,7 +172,7 @@ Digital Briefing: sources. The journals, preprint servers, institutions and news
 
 Historical Calendar: political events since 1980. Political history from 1980 to today and scheduled events ahead, one file per decade: elections and referendums, new leaders, inaugurations and resignations, coups, wars and ceasefires, assassinations, summits, treaties, sanctions, protests, parliamentary votes and court rulings, each with a plain-English account. The Realtime Calendar shows the same records for the current window.
 
-- Rows: 6,003 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq.
+- Rows: 6,003 · refresh: daily · licence: Summaries from Wikipedia, CC BY-SA 4.0 (credit Wikipedia); facts from Wikidata (CC0) and UCDP/PRIO (CC BY 4.0); compilation © JDP-Iq. Leaders to 2015 after Archigos 4.1 (Goemans, Gleditsch and Chiozza), whose page states no licence: kept with its citation until VM’s owner decides.
 - Files: https://jdpi.pages.dev/calendar/data/1980s.json, https://jdpi.pages.dev/calendar/data/1990s.json, https://jdpi.pages.dev/calendar/data/2000s.json (+2 more) (records at `events`)
 - Fields: `date` (date), `country` (string), `title` (string), `type` (string), `status` (string), `source` (string), `summary` (string), `ref` (string), `refName` (string), `level` (string)
 
@@ -180,15 +180,15 @@ Historical Calendar: political events since 1980. Political history from 1980 to
 
 Master Index: entities. Every person, place, party, election, war, event, idea and organisation in the Vitruvian Manager Master Index, keyed by Wikidata id, with its main dates, country, how often Vitruvian Manager mentions it and which submodules it appears in. One shard per type. Full records (facts, relations, tags, every mention, Wikipedia summary) are one get_entity call away, or at lake/data/e/<qid number % 512>.json.
 
-- Rows: 14,306 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
+- Rows: 14,330 · refresh: monthly · licence: Wikidata facts, labels and descriptions CC0; tags and links © JDP-Iq. (Wikipedia summaries, CC BY-SA 4.0, are only in the full entity records.)
 - Files: https://jdpi.pages.dev/integration/data/encyclopaedia-entities/0.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/1.json, https://jdpi.pages.dev/integration/data/encyclopaedia-entities/2.json (+14 more) (records at `records`)
 - Fields: `qid` (string), `label` (string), `type` (string), `description` (string), `start` (string), `end` (string), `country` (string), `mentions` (number), `appears_in` (array), `wikipedia` (string)
 
 ### retrospective-wars
 
-Retrospective Battlefield: armed conflicts 1946–2025. Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from the Correlates of War, whose terms do not let Vitruvian Manager pass its data on, so they are on the page only.
+Retrospective Battlefield: armed conflicts 1946–2025. Every armed conflict from 1946 to 2025 in the UCDP/PRIO Armed Conflict Dataset (25+ battle deaths a year; intensity 2 means 1,000+), with type, aim, sides, where it was fought and its active years. The page's wars of 1926–1945 come from Wikidata (CC0) by Vitruvian Manager's own rule and are on the page only, for now.
 
-- Rows: 303 · refresh: static · licence: UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); state names from CShapes 2.0 (CC BY-NC-SA 4.0).
+- Rows: 303 · refresh: static · licence: UCDP/PRIO Armed Conflict Dataset CC BY 4.0 (1946–2025); place names from Wikidata (CC0).
 - File: https://jdpi.pages.dev/integration/data/retrospective-wars.json (records at `records`)
 - Fields: `id` (string), `dataset` (string), `name` (string), `type` (string), `aim` (string), `start` (date), `first_year` (number), `last_year` (number), `active_years` (number), `peak_intensity` (number), `war_years` (number), `fought_in` (array), `states_involved` (array), `side_a` (array), `side_b` (array), `wikipedia` (string)
 
@@ -196,7 +196,7 @@ Retrospective Battlefield: armed conflicts 1946–2025. Every armed conflict fro
 
 War Focus: major wars. The major wars of the last hundred years that War Focus follows month by month: dates, sides, total deaths and where the figure comes from, and how many battles are recorded and mapped.
 
-- Rows: 39 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; Correlates of War war totals shown with its citation only, as its terms bar passing its data on without written permission (ask the project before reuse); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
+- Rows: 39 · refresh: monthly · licence: UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.
 - File: https://jdpi.pages.dev/battlefield/focus/data/index.json (records at `wars`)
 - Fields: `id` (string), `name` (string), `qid` (string), `wiki` (string), `bf` (string), `start` (date), `end` (date), `ongoing` (boolean), `totalDeaths` (number), `deathsSource` (string), `battles` (number), `mappedBattles` (number), `events` (number), `sides` (array), `bbox` (array)
 
@@ -210,17 +210,17 @@ War Focus: battles, sieges and operations. Every battle, siege and operation tha
 
 ### war-focus-monthly-deaths
 
-War Focus: deaths by month. Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For the wars whose deaths come from the Correlates of War, every month says “see the Correlates of War” in place of a number: its terms do not let Vitruvian Manager pass on figures made from its totals (the notes give its citation and address).
+War Focus: deaths by month. Deaths in each War Focus war month by month. Where no monthly record exists, annual or war totals are spread across months by recorded events or battles; those months are marked as estimates. For a war no free source gives deaths for (its totalDeaths is empty in war-focus-wars: the nine wars before 1946), deaths and estimated are empty in every month, never 0.
 
-- Rows: 3,494 · refresh: monthly · licence: UCDP GED CC BY 4.0; PRIO Battle Deaths free to use with citation; no Correlates of War figures, as its terms bar passing its data on without written permission: the months of the wars whose deaths come from its totals say “see the Correlates of War” (its citation and address are in the notes); battles from Wikidata (CC0); borders CShapes 2.0 CC BY-NC-SA 4.0 (non-commercial).
+- Rows: 3,494 · refresh: monthly · licence: UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.
 - Files: https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/0.json, https://jdpi.pages.dev/integration/data/war-focus-monthly-deaths/1.json (records at `records`)
-- Fields: `war_id` (string), `war` (string), `month` (date), `deaths` (string), `estimated` (boolean), `source` (string)
+- Fields: `war_id` (string), `war` (string), `month` (date), `deaths` (number), `estimated` (boolean), `source` (string)
 
 ### kardashev-polities
 
 Kardashev Tracker: powers. The empires and countries the Kardashev Tracker follows from 2000 BC to today, with their capital's position and years.
 
-- Rows: 82 · refresh: static · licence: Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).
+- Rows: 82 · refresh: static · licence: Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.
 - File: https://jdpi.pages.dev/kardashev/data/energy.json (records at `polities`)
 - Fields: `id` (string), `name` (string), `lat` (number), `lon` (number), `region` (string), `wiki` (string), `from` (number), `to` (number)
 
@@ -228,7 +228,7 @@ Kardashev Tracker: powers. The empires and countries the Kardashev Tracker follo
 
 Kardashev Tracker: shares of world energy. Each power's population, energy capture per person and share of humanity's energy capture, century by century from 2000 BC (then 1850, 1900, 1950, 2000 and 2025), with its own Kardashev rating. "Rest of world" rows complete each year.
 
-- Rows: 349 · refresh: static · licence: Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).
+- Rows: 349 · refresh: static · licence: Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/kardashev-shares.json (records at `records`)
 - Fields: `year` (number), `polity_id` (string), `polity` (string), `population` (number), `kcal_per_person_day` (number), `watts` (number), `share` (number), `kardashev` (number)
 
@@ -236,7 +236,7 @@ Kardashev Tracker: shares of world energy. Each power's population, energy captu
 
 Kardashev Tracker: humanity. World population, total energy capture and humanity's Kardashev rating (Sagan: K = (log10 P − 6) / 10, P in watts) for each step from 2000 BC to 2025.
 
-- Rows: 44 · refresh: static · licence: Estimates © JDP-Iq after Ian Morris (2010, 2013), McEvedy & Jones and Maddison; from 1900, Energy Institute / Our World in Data (CC BY 4.0).
+- Rows: 44 · refresh: static · licence: Vitruvian Manager’s own estimates (© JDP-Iq), shaped after books with no open licence (Ian Morris 2010 and 2013; McEvedy & Jones) and Maddison’s populations (CC BY 4.0); from 1900, primary energy from the Energy Institute’s Statistical Review through Our World in Data, under the Energy Institute’s own terms, which could not be read (its page refused VM’s reader on 20 November 2026). Kept until VM’s owner decides.
 - File: https://jdpi.pages.dev/integration/data/kardashev-world.json (records at `records`)
 - Fields: `year` (number), `world_population` (number), `world_watts` (number), `kardashev` (number)
 

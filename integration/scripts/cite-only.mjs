@@ -48,17 +48,16 @@ export const CITE_ONLY = {
 //              download's notes give the source's citation and address.
 // Row-level data is never listed here: it is taken out of every download. `dataset` is a catalogue id; `file`, page data
 // that cites the source in its own `sources`; `dir`, every file in a folder (the Hub's country profiles, the lake's shards).
-const CHOICE = 'Jude\'s choice on the Correlates of War (the S0 report of 16 November 2026): ask the project for written permission, '
-  + 're-source 1926–1945 from Wikidata, start the Retrospective Battlefield in 1946, or take COW totals out of War Focus as well';
-export const HOSTED = [
-  { source: 'cow', dataset: 'war-focus-wars', kind: 'total', what: 'one cited Correlates of War total for each of the 9 War Focus wars it covers (totalDeaths, deathsSource)' },
-  { source: 'cow', file: 'battlefield/focus/data/index.json', kind: 'total', what: 'the same totals: War Focus\'s own index, which the war-focus-wars download serves' },
-  { source: 'cow', dir: 'lake/data/e', kind: 'total', what: 'the same totals in the Master Index\'s lines for those 9 wars ("… battle deaths, the Correlates of War total (Sarkees and Wayman 2010, …)"), each opening War Focus (lake/scripts/adapters.mjs)' },
-  // Jude's decision F1 of 17 November 2026 (VM-DECISIONS-17NOV.md): what VM offers as a download carries no COW value.
-  { source: 'cow', dataset: 'war-focus-monthly-deaths', kind: 'pointer', since: '2026-11-17', fields: ['deaths'], says: 'see the Correlates of War', what: 'no Correlates of War value: in every month of the 9 War Focus wars whose deaths come from a COW total, deaths says "see the Correlates of War" in place of VM\'s spread of that total, and the file\'s notes give COW\'s citation and address (War Focus\'s page keeps the cited totals on screen)' },
-  { source: 'cow', dir: 'integration/data/countries', kind: 'pending', since: '2026-11-16', awaits: CHOICE, what: 'a count per country of Correlates of War wars 1926–1945 (conflict_history.wars_1926_1945) in the API\'s and MCP\'s country profiles, from National Analysis\'s cowWars1926_45 (national/data/index.json, shown on q/national.html as "N wars 1926–45"), derived from the Retrospective Battlefield\'s wars; follows Jude\'s choice for that page. The national-countries download does not carry it' },
-  { source: 'cow', file: 'battlefield/history/data/wars.json', kind: 'pending', since: '2026-11-16', awaits: CHOICE, what: 'the Retrospective Battlefield\'s 40 wars of 1926–1945 (type, years, places, dated sides, battle deaths), page data and no longer a download: no allowed source replaces them (UCDP starts in 1946), so the page stays as it is until Jude chooses' },
-];
+// Nothing, since 20 November 2026. Jude chose free data only (MP-11, 17 November 2026: "Let's use only free data if
+// possible"), so VM hosts no Correlates of War value at all: the Retrospective Battlefield's wars of 1926–1945 come from
+// Wikidata (CC0) and Wikipedia (CC BY-SA 4.0); War Focus's nine wars before 1946 have no deaths figure (no free source
+// gives one), so the war-focus-wars and war-focus-monthly-deaths downloads, War Focus's index and the Master Index's lines
+// carry none; National Analysis counts its wars of 1926–45 from the Wikidata list (wars1926_45). The entries it held
+// were: 'total' for the war-focus-wars download, battlefield/focus/data/index.json and lake/data/e; 'pointer' for the
+// war-focus-monthly-deaths download (Jude's decision F1 of 17 November 2026); 'pending' for integration/data/countries
+// (conflict_history.wars_1926_1945) and battlefield/history/data/wars.json. CITE_ONLY.cow above stays, with its ids,
+// fields and words, so that the tests still find any value from the source that came back.
+export const HOSTED = [];
 
 // The keys of a record that say where its value comes from.
 export const PROVENANCE = /^(dataset|src|source|sources)$|Source$/;

@@ -8,6 +8,8 @@
   --c-minor: color-mix(in srgb, var(--prp-status-warning) 80%, var(--prp-map-land));
   --c-abroad: color-mix(in srgb, var(--prp-cat-7) 48%, var(--prp-map-land));
   --c-peace: var(--prp-map-land);
+  /* Retrospective Battlefield, 1926–1945: a war on Wikidata's list, whose intensity no free source codes */
+  --c-listed: color-mix(in srgb, var(--prp-status-critical) 50%, var(--prp-map-land));
 }
 
 * { box-sizing: border-box; }
@@ -125,6 +127,9 @@ button, input, select { font: inherit; }
   border: 1px solid var(--prp-line); border-left: 3px solid var(--prp-line-strong); border-radius: var(--prp-radius-sm); }
 .war[data-level="1"] { border-left-color: var(--c-minor); }
 .war[data-level="2"] { border-left-color: var(--c-war); }
+.war[data-level="3"] { border-left-color: var(--c-listed); }
+.lvl.l3 { color: var(--prp-bad); }
+.tag.listed-level { background: var(--prp-bad-soft); color: var(--prp-text-2); }
 .war:hover { background: var(--prp-surface-2); }
 .war.sel { border-top-color: var(--prp-primary); border-right-color: var(--prp-primary); border-bottom-color: var(--prp-primary); background: var(--prp-primary-soft); }
 .war .who { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; color: var(--prp-text); font-weight: 600; }

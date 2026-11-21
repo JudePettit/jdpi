@@ -10,7 +10,16 @@
    const fc = PRPMapD3.slice(topology, year)                      the rows drawn at the year, with their geometry
    PRPMapD3.draw(svg, fc, { d3, width, height, colors, focus })   one <path> per row, POLITY filled, RELATION and
                                                                   composite rows outlined, as the MapLibre page draws them
-   PRPMapD3.ids(fc)                                               the drawn rows' ids, sorted */
+   PRPMapD3.ids(fc)                                               the drawn rows' ids, sorted
+   PRPMapD3.rewind(fc, d3?)                                       the rings wound as d3 reads them (in place; returns fc)
+
+   Winding (fixer, 20 November 2026; review finding P1): d3's spherical paths take a polygon's inside to lie on the
+   right of its outer ring, clockwise on the map. Many Cliopatria rows are wound the other way, as GeoJSON's RFC 7946
+   winds them, and d3 then fills the whole globe less the country, hiding every row drawn under it (the Retrospective
+   Battlefield at 1938 and 1945). rewind() turns each such polygon round: with d3 given, a polygon whose d3.geoArea is
+   over half the sphere has all its rings reversed; without it, by the plane (an outer ring clockwise, its holes
+   counter-clockwise), which agrees for every ring that neither crosses the 180th meridian nor holds a pole. draw()
+   rewinds before it draws. */
 (function () {
   const root = typeof window !== 'undefined' ? window : globalThis;
   const core = () => { if (!root.PRPMap) throw new Error('PRPMap is not loaded (design/prp-map.js)'); return root.PRPMap; };
@@ -24,9 +33,27 @@
   }
   const ids = fc => fc.features.map(f => f.id).sort();
 
+  // Twice the signed area of a ring in the plane (longitude, latitude): below zero when it runs clockwise.
+  const signed = r => { let a = 0; for (let i = 0; i < r.length - 1; i++) a += r[i][0] * r[i + 1][1] - r[i + 1][0] * r[i][1]; return a; };
+  function rewindPolygon(rings, d3) {
+    if (!rings?.length) return rings;
+    if (d3?.geoArea) return d3.geoArea({ type: 'Polygon', coordinates: rings }) > 2 * Math.PI ? rings.map(r => r.slice().reverse()) : rings;
+    return rings.map((r, i) => ((i === 0) === (signed(r) > 0) ? r.slice().reverse() : r));
+  }
+  /** Each Polygon and MultiPolygon in fc wound as d3 reads it (see Winding above); fc is changed in place and returned. */
+  function rewind(fc, d3 = root.d3) {
+    for (const f of fc?.features || []) {
+      const g = f.geometry;
+      if (g?.type === 'Polygon') g.coordinates = rewindPolygon(g.coordinates, d3);
+      else if (g?.type === 'MultiPolygon') g.coordinates = g.coordinates.map(p => rewindPolygon(p, d3));
+    }
+    return fc;
+  }
+
   /** Draws the rows into an <svg> with d3 (given, never loaded here): Natural Earth's projection fitted to the box. */
   function draw(svg, fc, { d3, width = 960, height = 500, colors = {}, focus = [], land = null } = {}) {
     if (!d3?.geoPath) throw new Error('d3 is not loaded');
+    rewind(fc, d3);
     const on = new Set(focus);
     const projection = d3.geoNaturalEarth1().fitExtent([[4, 4], [width - 4, height - 4]], { type: 'Sphere' });
     const path = d3.geoPath(projection);
@@ -47,5 +74,5 @@
     return { drawn: fc.features.length };
   }
 
-  root.PRPMapD3 = { slice, draw, ids, d3Version: '7.9.0' };
+  root.PRPMapD3 = { slice, draw, ids, rewind, d3Version: '7.9.0' };
 })();

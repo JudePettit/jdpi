@@ -30,17 +30,12 @@ export function deaths(n, est, { total = false } = {}) {
 /** Whose estimate a war's ~ figures are, from its deathsSource (scripts/build.mjs writes it), in a few words. */
 export function estimateOf(source) {
   const s = String(source || '');
-  if (/^Correlates of War/.test(s)) return 'Correlates of War’s war total';
-  if (/PRIO/.test(s)) return 'PRIO’s yearly totals';
+  const prio = /PRIO/.test(s), brd = /Battle-Related Deaths/.test(s);
+  if (prio && brd) return 'PRIO’s and UCDP’s yearly totals';
+  if (prio) return 'PRIO’s yearly totals';
+  if (brd) return 'UCDP’s yearly totals';
   return '';
 }
-
-// The citation the Correlates of War's war data page asks for (read 16 November 2026; its terms bar passing the data on
-// without written permission, so War Focus shows one cited total per war: integration/scripts/cite-only.mjs, S0).
-export const COW_CITE = {
-  text: 'Sarkees, Meredith Reid and Frank Wayman (2010). Resort to War: 1816–2007. Washington DC: CQ Press',
-  url: 'https://correlatesofwar.org/data-sets/cow-war/',
-};
 
 /** A battle whose start, read at its precision, falls before its war's start: the note beside its dates (S0). A start
  *  dated only to a month (p 'm') or a year (p 'y') counts only when the whole month or year is before the war. */

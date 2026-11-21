@@ -96,6 +96,24 @@ const QID_EXTRA = { Q55: 'NLD', Q756617: 'DNK', Q1246: 'XKX', Q865: 'TWN', Q237:
 const TEXT_RESERVED = [['New Guinea', null], ['Gulf of Guinea', null], ['New Mexico', null], ['Portuguese Guinea', 'GNB'], ['Spanish Guinea', 'GNQ'], ['French Guinea', 'GIN']];
 // Microstates too small for the shipped boundaries: a dot of this radius (degrees) round the centre.
 const DOTS = { VAT: [12.4534, 41.9029, 0.006], MCO: [7.4246, 43.7384, 0.015] };
+// The other states and territories Natural Earth's 1:110m file leaves out are points (omni/data/base/small-states.json):
+// a place within this many degrees of one, and in no headline shape, counts as that state (VM's own rule, 20 November
+// 2026; CShapes drew them as shapes before).
+const SMALL_STATE_RADIUS = 0.25;
+// The Retrospective Battlefield's places (battlefield/history/data/places.json, keyed by Wikidata item since 20
+// November 2026) that carry no present-day ISO3: the countries their land lies in today (VM's own table, from the
+// states' own Wikipedia and Wikidata entries). A place in neither this table nor QID_EXTRA (the Italian Empire, French
+// Colonial Africa, British Overseas Territories, Jammu and Kashmir) has no country and is listed as unknown; the
+// British Empire is the United Kingdom, as QID_EXTRA files it for the Master Index. Federal Yugoslavia
+// (1992–2006) is the three countries Gleditsch–Ward code 345 stood for in those years.
+const PLACE_EXTRA = { Q838261: ['SRB', 'MNE', 'XKX'], Q23681: 'CYP', Q34754: 'SOM', Q37102: 'MAR', Q69808: 'FRA', Q152582: 'FRA',
+  Q139708: ['SYR', 'LBN'], Q146713: ['IRQ', 'JOR'], Q157904: 'TZA', Q172640: 'VNM', Q180573: 'VNM', Q185682: ['VNM', 'LAO', 'KHM'], Q201190: 'PSE',
+  Q216173: 'POL', Q216632: ['MLI', 'SEN'], Q217169: 'ZWE', Q267584: 'YEM', Q521263: 'CHN', Q840601: 'CHN', Q717809: 'CHN', Q1240096: 'IND',
+  Q1658411: 'MYS', Q3497642: 'MAR', Q106809413: 'UKR' };
+// places.json's codes for states that are one country today.
+const ISO_HIST = { DDR: 'DEU', YMD: 'YEM' };
+// The name a historical state takes in the gap rules, where it is not places.json's own.
+const PLACE_NAME = { Q15180: 'the Soviet Union', Q838261: 'Serbia and Montenegro' };
 
 /** TopoJSON → features with decoded rings and a bounding box ([w, s, e, n]) for a quick first test. */
 export function decodeTopo(topo, object) {
@@ -133,9 +151,15 @@ const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  *   normaliseCountry  calendar/scripts/countries.mjs normaliseCountry, optional
  *   historical kino/data/iso.json historical {SUN: [...], YUG: [...], CSK: [...]}
  *   boundaries headlines/boundaries.json (TopoJSON, object "countries"), optional
- *   cshapes    battlefield/history/data/borders.topo.json (CShapes 2.0, object "borders"), optional
+ *   countries  omni/data/base/countries.topo.json (Natural Earth 1:110m, object "countries", iso3 and q), optional
+ *   small      omni/data/base/small-states.json points ({ iso3, q, at: [lon, lat] }), optional
+ *   recognised the recognised-border corrections: [{ iso, over, feats }] (recognisedShapes below), optional
+ *   places     battlefield/history/data/places.json places ({ Q: { n, iso3 } }), optional
+ *   oldCountries  places.json oldCountries (an old Battlefield address's number → Q), optional
+ *   retro      the Political Retrospective: { countries (data/countries.json), oldKeys (scripts/countries.mjs OLD_KEYS) }, optional
+ * CShapes is no longer read (20 November 2026: its terms bar commercial use).
  */
-export function makeResolvers({ national = [], names = [], focus = null, normaliseCountry = n => n, historical = {}, boundaries = null, cshapes = null } = {}) {
+export function makeResolvers({ national = [], names = [], focus = null, normaliseCountry = n => n, historical = {}, boundaries = null, countries = null, small = [], recognised = [], places: rbPlaces = {}, oldCountries = {}, retro = null } = {}) {
   const target = new Set([...national.map(c => c.iso3).filter(i => !TERRITORIES.has(i)), ...EXTRA_TARGET]);
   const nat = new Map(national.map(c => [c.iso3, c]));
   const nameRow = new Map(names.map(r => [r[0], r]));
@@ -188,29 +212,62 @@ export function makeResolvers({ national = [], names = [], focus = null, normali
   for (const [k, v] of Object.entries(QID_EXTRA)) if (!QID.has(k)) QID.set(k, [].concat(v));
   const qidIso = q => (QID.has(q) ? expand(QID.get(q)) : null);
 
-  // Point → ISO3: the microstate dots, the headline shapes (Natural Earth 1:10m, 78 countries), then CShapes as at the
-  // end of 2019 (every state); then the recognised-border corrections; then the nearest coast within `near` degrees
-  // ("near"); then prp-focus's box for a country neither shape set has ("box"). Otherwise null.
+  // The Retrospective Battlefield's places (Wikidata items) → ISO3, unexpanded (a historical code stays SUN, YUG or CSK,
+  // as gwIso gives it): VM's table of places with no present-day code, then places.json's own code, then the items the
+  // other modules use (QID above). Null for a place VM cannot put in any country today.
+  function placeIso(q) {
+    if (Object.hasOwn(PLACE_EXTRA, q)) return [].concat(PLACE_EXTRA[q]);
+    const i = rbPlaces[q]?.iso3;
+    if (i) return [ISO_HIST[i] || i];
+    return QID.has(q) ? [...QID.get(q)] : null;
+  }
+  // A place that is several countries today (the Soviet Union, Yugoslavia, Czechoslovakia, French Indochina, ...): one
+  // entry in the gap rules, as gwGroup.
+  function placeGroup(q) {
+    const list = uniq(expand(placeIso(q) || []));
+    if (list.length < 2) return null;
+    return { key: `${q}:${list.join(',')}`, q, name: PLACE_NAME[q] || rbPlaces[q]?.n || q, successors: list };
+  }
+  // An old Battlefield address's c=<number> (places.json oldCountries), or a Wikidata item, → the place's countries.
+  const battlefieldIso = c => { const q = /^Q\d+$/.test(String(c)) ? String(c) : oldCountries[c]; return q ? placeIso(q) : null; };
+  // A Political Retrospective country, by its key: a Wikidata item ('retro-countries/2', 20 November 2026) or an old
+  // number (its OLD_KEYS, or the Gleditsch–Ward table where the Retrospective is not read). A historical state's item
+  // (the Soviet Union, Yugoslavia, Czechoslovakia) counts as its successors before its end, as the record's country after.
+  const HIST_END = { SUN: '1991-12-26', YUG: '1991-06-25', CSK: '1993-01-01' };
+  function retroIso(c, date = '9999') {
+    const key = /^Q\d+$/.test(String(c)) ? String(c) : retro?.oldKeys?.[c];
+    if (!key) return gwIso(c, date);
+    const rec = retro?.countries?.[key], hist = QID.get(key)?.length === 1 && HIST_END[QID.get(key)[0]] ? QID.get(key)[0] : null;
+    if (hist && String(date) < HIST_END[hist]) return [hist];
+    if (rec?.iso3) return [rec.iso3];
+    return qidIso(key);
+  }
+
+  // Point → ISO3: the microstate dots, the headline shapes (Natural Earth 1:10m, 78 countries), then the other small
+  // states' points (Natural Earth, within SMALL_STATE_RADIUS), then Natural Earth's 1:110m countries (every other state);
+  // then the recognised-border corrections; then the nearest coast within `near` degrees ("near"); then prp-focus's box
+  // for a country no shape set has ("box"). Otherwise null. (Until 20 November 2026 CShapes 2.0 as at the end of 2019
+  // took Natural Earth's place: 1:110m is coarser, so a place near a border or a coast can fall on the other side.)
   const HL = boundaries ? decodeTopo(boundaries, 'countries').map(f => ({ ...f, iso: f.props.iso3 || (f.props.code === 'XK' ? 'XKX' : null) })) : [];
-  const CS_ALL = cshapes ? decodeTopo(cshapes, 'borders') : [];
-  const CS = CS_ALL.filter(f => f.props.s <= '2019-12-31' && f.props.e > '2019-12-31').map(f => ({ ...f, iso: (gwIso(f.props.gw) || [null])[0] }));
-  const earliest = gw => CS_ALL.filter(f => f.props.gw === gw).sort((a, b) => (a.props.s < b.props.s ? -1 : 1))[0] || null;
-  const UKR91 = earliest(369), SYR_EARLY = earliest(652);
-  const PAL = CS_ALL.filter(f => f.props.gw === 6511 || f.props.gw === 6631), ESHF = CS_ALL.filter(f => f.props.gw === 609);
-  const shaped = new Set([...HL, ...CS].map(f => f.iso));
+  const NE = countries ? decodeTopo(countries, 'countries').map(f => ({ ...f, iso: f.props.iso3 || (f.props.q ? (placeIso(f.props.q) || [null])[0] : null) })) : [];
+  const SMALL = (small || []).filter(p => p.iso3 && Array.isArray(p.at));
+  // Natural Earth draws Western Sahara's coast inside Morocco: a point it puts in Morocco inside Western Sahara's own box
+  // (south of the 27°40′ line, Morocco's recognised border) is Western Sahara.
+  const ESH_BOX = NE.find(f => f.iso === 'ESH')?.box || null;
+  const shaped = new Set([...HL, ...NE].map(f => f.iso).concat(SMALL.map(p => p.iso3)));
   const boxOnly = focus ? [...target].filter(c => !shaped.has(c)).map(c => [c, focus.countryBox(c)]).filter(([, b]) => b) : [];
   function pointIso(lon, lat, { near = 0.15 } = {}) {
     if (lon == null || lat == null || !Number.isFinite(+lon) || !Number.isFinite(+lat)) return null;
     lon = +lon; lat = +lat;
     for (const [iso, [x, y, r]] of Object.entries(DOTS)) if (Math.hypot(lon - x, lat - y) <= r) return { iso, how: 'dot' };
-    const f = HL.find(f => inFeature(lon, lat, f)) || CS.find(f => inFeature(lon, lat, f));
+    let f = HL.find(f => inFeature(lon, lat, f));
+    if (!f) { const s = SMALL.find(p => Math.hypot(lon - p.at[0], lat - p.at[1]) <= SMALL_STATE_RADIUS); if (s) return { iso: s.iso3, how: 'dot' }; }
+    f ||= NE.find(f => inFeature(lon, lat, f));
     let iso = f?.iso;
-    if (iso === 'RUS' && UKR91 && inFeature(lon, lat, UKR91)) iso = 'UKR';
-    if (iso === 'ISR' && PAL.some(p => inFeature(lon, lat, p) || nearest(lon, lat, [p], 0.03))) iso = 'PSE';
-    if (iso === 'ISR' && SYR_EARLY && inFeature(lon, lat, SYR_EARLY)) iso = 'SYR';
-    if (iso === 'MAR' && ESHF.some(p => inFeature(lon, lat, p))) iso = 'ESH';
+    for (const r of recognised) if (iso === r.over && r.feats.some(p => inFeature(lon, lat, p))) { iso = r.iso; break; }
+    if (iso === 'MAR' && ESH_BOX && lon >= ESH_BOX[0] && lon <= ESH_BOX[2] && lat >= ESH_BOX[1] && lat <= ESH_BOX[3]) iso = 'ESH';
     if (iso) return { iso, how: 'in' };
-    const n = nearest(lon, lat, HL, near) || nearest(lon, lat, CS, near);
+    const n = nearest(lon, lat, HL, near) || nearest(lon, lat, NE, near);
     if (n?.iso) return { iso: n.iso, how: 'near' };
     for (const [c, [w, s, e, nn]] of boxOnly) if (lon >= w && lon <= e && lat >= s && lat <= nn) return { iso: c, how: 'box' };
     return null;
@@ -245,7 +302,24 @@ export function makeResolvers({ national = [], names = [], focus = null, normali
   const iso2 = new Map(national.filter(c => c.iso2).map(c => [c.iso2, c.iso3]));
   for (const [iso, i2] of names) if (i2 && !iso2.has(i2)) iso2.set(i2, iso);
   const iso2Iso = c => iso2.get(String(c).toUpperCase()) || null;
-  return { target, name, region, expand, nameIso, gwIso, gwGroup, qidIso, pointIso, textIso, box, iso2Iso, shapeless: () => boxOnly.map(([c]) => c) };
+  return { target, name, region, expand, nameIso, gwIso, gwGroup, qidIso, placeIso, placeGroup, battlefieldIso, retroIso, pointIso, textIso, box, iso2Iso, shapeless: () => boxOnly.map(([c]) => c) };
+}
+
+/**
+ * The recognised-border corrections, from Cliopatria's dated borders (omni/data/borders/<from>-<to>.topo.json, object
+ * "borders", CC BY 4.0), where Natural Earth draws the ground as held today: Crimea is Ukraine (Cliopatria's Ukraine of
+ * 1992, Q598570, drawn over Russia) and the Golan Syria (its Republic of Syria of 1961–62, Q858, drawn over Israel).
+ * topos: the border files to look in. Each entry is { iso, over, feats }: a point in `over`'s shape inside one of
+ * `feats` is `iso`.
+ */
+export const RECOGNISED = [{ iso: 'UKR', over: 'RUS', q: 'Q598570' }, { iso: 'SYR', over: 'ISR', q: 'Q858' }];
+export function recognisedShapes(topos) {
+  const feats = topos.flatMap(t => decodeTopo(t, 'borders'));
+  return RECOGNISED.map(({ iso, over, q }) => {
+    const rows = feats.filter(f => f.props.q === q && f.props.k === 'POLITY');
+    const first = Math.min(...rows.map(f => f.props.f));
+    return { iso, over, q, feats: rows.filter(f => f.props.f === first) };
+  }).filter(r => r.feats.length);
 }
 
 /* ------------------------------------------------------------------ pieces */
@@ -292,7 +366,10 @@ export function kinoFilms(docs, R, ctx) {
       const m = s.link.module; s.at = at;
       links.push({ scene: s.id, module: m, at });
       if ((m === 'atlas' || m === 'pestle') && at.country) add(p, 'linked', String(at.country).toUpperCase());
-      if ((m === 'retrospective' || m === 'battlefield-history') && at.c) add(p, 'linked', R.gwIso(at.c, `${at.y || 9999}-07-01`), 1, R);
+      if (m === 'retrospective' && at.c) add(p, 'linked', R.retroIso(at.c, `${at.y || 9999}-07-01`), 1, R);
+      if (m === 'battlefield-history' && at.c) add(p, 'linked', R.battlefieldIso(at.c), 1, R);
+      // An old war id (c139) is the war it became (wars.json oldIds, or oldWithin for one listed as part of a whole).
+      if (m === 'battlefield-history' && at.w && ctx.rbOld?.[at.w]) at = s.at = { ...at, w: ctx.rbOld[at.w] };
       if (m === 'encyclopedia' && at.qid) add(p, 'linked', R.qidIso(at.qid));
       if (m === 'kardashev' && at.p && ctx.polities?.get(at.p)) add(p, 'linked', ctx.polities.get(at.p));
       if (m === 'progress' && at.e && ctx.inventions?.get(at.e)) add(p, 'linked', ctx.inventions.get(at.e));
@@ -360,30 +437,34 @@ export function warFocusMoment(war, m) {
   return { places, fought: new Set() };
 }
 
-/** Retrospective Battlefield: where each war was fought, year by year (locYears[y] or loc), and who took part (states). */
+/**
+ * Retrospective Battlefield: where each war was fought, year by year (locYears[y] or loc), and who took part
+ * (statesYears[y] or states). Since 20 November 2026 (vm-battlefield-wars/2) every place is a Wikidata item, read
+ * through places.json (R.placeIso); no Gleditsch–Ward code is read.
+ */
 // fought and part hold every present-day country (coverage); foughtDirect, partDirect and groups keep a historical
-// state apart (the gap rules count it once: see gwGroup).
+// state apart (the gap rules count it once: see placeGroup).
 export function retroWar(w, R) {
-  const fought = new Map(), part = new Map(), foughtDirect = new Map(), partDirect = new Map(), groups = new Map(), unknownGw = new Set();
-  const take = (g, y, all, direct, kind) => {
-    const d = `${y}-07-01`, r = R.gwIso(g, d); if (!r) { unknownGw.add(g); return; }
+  const fought = new Map(), part = new Map(), foughtDirect = new Map(), partDirect = new Map(), groups = new Map(), unknown = new Set();
+  const take = (q, all, direct, kind) => {
+    const r = R.placeIso(q); if (!r) { unknown.add(q); return; }
     for (const c of R.expand(r)) all.set(c, (all.get(c) || 0) + 1);
-    const gr = R.gwGroup?.(g, d);
+    const gr = R.placeGroup?.(q);
     if (gr) { const x = groups.get(gr.key) || groups.set(gr.key, { ...gr, fought: 0, part: 0 }).get(gr.key); x[kind]++; }
     else for (const c of R.expand(r)) direct.set(c, (direct.get(c) || 0) + 1);
   };
   for (const [y] of w.years || []) {
-    for (const g of w.locYears?.[y] || w.loc || []) take(g, y, fought, foughtDirect, 'fought');
-    for (const g of w.states || []) take(g, y, part, partDirect, 'part');
+    for (const q of w.locYears?.[y] || w.loc || []) take(q, fought, foughtDirect, 'fought');
+    for (const q of w.statesYears?.[y] || w.states || []) take(q, part, partDirect, 'part');
   }
-  return { id: w.id, name: w.name, fought, part, foughtDirect, partDirect, groups, unknownGw: [...unknownGw], raw: w };
+  return { id: w.id, name: w.name, fought, part, foughtDirect, partDirect, groups, unknown: [...unknown], raw: w };
 }
 /** Retrospective Battlefield in one year: the countries fought over, and the historical states fought over (kept whole). */
 export function retroMoment(war, y, R) {
-  const w = war.raw, d = `${y}-07-01`, fought = new Set(), states = [];
-  for (const g of w.locYears?.[y] || w.loc || []) {
-    const gr = R.gwGroup?.(g, d);
-    if (gr) states.push(gr); else for (const c of R.expand(R.gwIso(g, d) || [])) fought.add(c);
+  const w = war.raw, fought = new Set(), states = [];
+  for (const q of w.locYears?.[y] || w.loc || []) {
+    const gr = R.placeGroup?.(q);
+    if (gr) states.push(gr); else for (const c of R.expand(R.placeIso(q) || [])) fought.add(c);
   }
   return { fighting: new Set(), places: [], fought, states };
 }
@@ -589,7 +670,18 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   const focus = globalThis.PRPFocus;
   const cal = await imp('calendar/scripts/countries.mjs');
   const historical = J('kino/data/iso.json').historical;
-  const R = makeResolvers({ national, names, focus, normaliseCountry: cal.normaliseCountry, historical, boundaries: J('headlines/boundaries.json'), cshapes: J('battlefield/history/data/borders.topo.json') });
+  // The Political Retrospective under either of its shapes: keyed by number (to 20 November 2026) or by Wikidata item,
+  // with OLD_KEYS (number → item) from its scripts/countries.mjs.
+  const retroDoc = retroDir ? JSON.parse(readText(join(retroDir, 'data/countries.json'))) : null, retroCountries = retroDoc?.countries || null;
+  const retroMod = retroDir && existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : {};
+  const retro = retroCountries ? { countries: retroCountries, oldKeys: retroMod.OLD_KEYS || retroDoc.oldKeys || null } : null;
+  const rbPlaces = J('battlefield/history/data/places.json');
+  const R = makeResolvers({
+    national, names, focus, normaliseCountry: cal.normaliseCountry, historical, boundaries: J('headlines/boundaries.json'),
+    countries: J('omni/data/base/countries.topo.json'), small: J('omni/data/base/small-states.json').points,
+    recognised: recognisedShapes([J('omni/data/borders/1900-1999.topo.json'), J('omni/data/borders/2000-2024.topo.json')]),
+    places: rbPlaces.places, oldCountries: rbPlaces.oldCountries, retro,
+  });
   const rel = d => (d ? relative(root, d).split(sep).join('/') || '.' : null);
   const sources = { root: '.', atlas: rel(atlasDir), retrospective: rel(retroDir), today };
   const pieces = [];
@@ -615,7 +707,9 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   log(`War Focus ${Date.now() - t0} ms`);
 
   // Retrospective Battlefield
-  const rbList = J('battlefield/history/data/wars.json').wars.map(w => retroWar(w, R));
+  const rbData = J('battlefield/history/data/wars.json');
+  const rbList = rbData.wars.map(w => retroWar(w, R));
+  const rbOld = { ...(rbData.oldIds || {}), ...Object.fromEntries(Object.entries(rbData.oldWithin || {}).map(([k, [q]]) => [k, q])) };
   const rb = new Map(rbList.map(w => [w.id, w]));
   const rbPiece = newPiece('retrospective-battlefield', 'battlefield-history', 'Retrospective Battlefield');
   for (const w of rbList) {
@@ -624,7 +718,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
     rbPiece.parts.push({ id: `retrospective-battlefield:${w.id}`, label: w.name, foughtIn: [...w.fought.keys()].sort(), participants: [...w.part.keys()].sort() });
   }
   rbPiece.notes.push(`${rbList.length} wars; "belligerent" here joins where each war was fought (locYears or loc) and the states that took part; the parts keep them apart.`);
-  const unknownRb = uniq(rbList.flatMap(w => w.unknownGw)); if (unknownRb.length) rbPiece.notes.push(`Unknown Gleditsch–Ward codes: ${unknownRb.join(' ')}`);
+  const unknownRb = uniq(rbList.flatMap(w => w.unknown)); if (unknownRb.length) rbPiece.notes.push(`Places with no present-day country: ${unknownRb.map(q => `${rbPlaces.places[q]?.n || q} (${q})`).join(', ')}`);
   pieces.push(rbPiece);
 
   // Realtime Battlefield
@@ -687,7 +781,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   const { readAt } = await imp('kino/lib/links.js');
   const kIndex = J('kino/data/index.json');
   const docs = kIndex.docs.map(meta => ({ meta, doc: J('kino/data/' + String(meta.path).replace(/^(kino\/)?(data\/)?/, '')) }));
-  const kino = kinoFilms(docs, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: w.bf }])), rbWars: rb, polities, inventions });
+  const kino = kinoFilms(docs, R, { flatScenes, readAt, wfWars: new Map(wfList.map(w => [w.id, { qid: w.qid, bf: rbOld[w.bf] || w.bf }])), rbWars: rb, rbOld, polities, inventions });
   pieces.push(...kino.pieces);
   log(`Kino ${Date.now() - t0} ms`);
 
@@ -703,7 +797,7 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
     const self = R.qidIso(q);
     if (self) { steps.self++; add(miPiece, 'row', self); continue; }
     let iso = ['Country', 'Citizenship', 'Jurisdiction'].flatMap(k => relQ(e.rel?.[k] || [])).flatMap(x => R.qidIso(x) || []), how = 'rel';
-    if (!iso.length) { iso = (e.mentions || []).flatMap(m => { const mm = /[#&?]y=(-?\d+)&c=(\d+)/.exec(m.u || ''); return mm ? R.gwIso(mm[2], `${mm[1]}-07-01`) || [] : []; }); how = 'retrospective'; }
+    if (!iso.length) { iso = (e.mentions || []).flatMap(m => { const mm = /[#&?]y=(-?\d+)&c=(Q\d+|\d+)/.exec(m.u || ''); return mm ? R.retroIso(mm[2], `${mm[1]}-07-01`) || [] : []; }); how = 'retrospective'; }
     if (!iso.length && battleQ.has(q)) { const r = R.pointIso(...battleQ.get(q), { near: 0.5 }); iso = r ? [r.iso] : []; how = 'battle'; }
     if (!iso.length) { steps.none++; noneByType[e.type] = (noneByType[e.type] || 0) + 1; continue; }
     steps[how]++;
@@ -762,12 +856,13 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   } else atlasPiece.notes.push('Not read: no Political Atlas folder found (pass --atlas=<dir>).');
   pieces.push(atlasPiece);
   const retroPiece = newPiece('political-retrospective', 'retrospective', 'Political Retrospective', 'reference');
-  let retroGw = new Set();
+  // A Retrospective address's c= opens a record when it is a key (an item, or an old number) or an old number OLD_KEYS
+  // maps to one.
+  const retroHas = c => !!(retroCountries && (Object.hasOwn(retroCountries, String(c)) || (retro.oldKeys && Object.hasOwn(retroCountries, String(retro.oldKeys[c])))));
   if (retroDir) {
-    const rc = JSON.parse(readText(join(retroDir, 'data/countries.json'))).countries;
-    retroGw = new Set(Object.keys(rc).map(Number));
-    for (const [gw, r] of Object.entries(rc)) { const iso = r.iso3 ? [r.iso3] : R.gwIso(gw) || []; add(retroPiece, 'row', iso, 1, R); add(retroPiece, 'map', iso, 1, R); }
-    retroPiece.notes.push(`${Object.keys(rc).length} Gleditsch–Ward records (predecessor states included).`);
+    const rc = retroCountries;
+    for (const [key, r] of Object.entries(rc)) { const iso = r.iso3 ? [r.iso3] : R.retroIso(key) || []; add(retroPiece, 'row', iso, 1, R); add(retroPiece, 'map', iso, 1, R); }
+    retroPiece.notes.push(`${Object.keys(rc).length} records (predecessor states included).`);
   } else retroPiece.notes.push('Not read: no Political Retrospective folder found (pass --retro=<dir>).');
   pieces.push(retroPiece);
 
@@ -793,8 +888,8 @@ export async function buildModel({ root, atlasDir, retroDir, today = new Date().
   const noBriefTarget = [...R.target].filter(c => !relPiece.tiers.row.has(c));
   gaps.push({ rule: 'dead-link', piece: 'kino-related', title: `Kino Related screens cannot tag ${noBriefTarget.join(' and ')}: national/data/brief.json has no row for them`, countries: noBriefTarget, onKinoMapsToday: noBrief, evidence: {}, weight: noBriefTarget.length });
   if (retroDir) {
-    const bad = kino.films.flatMap(f => f.links.filter(l => l.module === 'retrospective' && l.at.c && !retroGw.has(+l.at.c)).map(l => ({ film: f.id, scene: l.scene, c: l.at.c })));
-    if (bad.length) gaps.push({ rule: 'dead-link', piece: 'kino', title: `Kino links to Political Retrospective countries it has no record for`, countries: uniq(bad.flatMap(b => R.gwIso(b.c) || [])), links: bad, evidence: {}, weight: bad.length });
+    const bad = kino.films.flatMap(f => f.links.filter(l => l.module === 'retrospective' && l.at.c && !retroHas(l.at.c)).map(l => ({ film: f.id, scene: l.scene, c: l.at.c })));
+    if (bad.length) gaps.push({ rule: 'dead-link', piece: 'kino', title: `Kino links to Political Retrospective countries it has no record for`, countries: uniq(bad.flatMap(b => R.retroIso(b.c) || [])), links: bad, evidence: {}, weight: bad.length });
   }
   const noHub = [...R.target].filter(c => !hubPiece.tiers.row.has(c));
   if (noHub.length) gaps.push({ rule: 'dead-link', piece: 'hub-profiles', title: `The Integration Hub (and so the MCP server's country lookup) has no profile for ${noHub.join(', ')}`, countries: noHub, evidence: Object.fromEntries(noHub.map(c => [c, pieces.filter(p => p.kind === 'content' && substantive(p).has(c)).map(p => p.id)])), weight: noHub.length });

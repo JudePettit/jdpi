@@ -387,21 +387,34 @@ test('overview: a country under two state codes is read under both, each for its
   assert.equal(both.longest.name, 'Konrad Adenauer');
   assert.equal(leadership([federal], null, '2026-11-17').leaders100, 2, 'the Federal Republic alone, as the build read it');
   assert.equal(leadership([undefined], null), null, 'no record: no figures');
+  // Since 20 November 2026 by Wikidata item, as the Retrospective Battlefield places its wars; the wars of 1926–45 are
+  // VM's list from Wikidata (src 'wikidata'), not the Correlates of War's.
   const wars = [
-    { src: 'cow', name: 'World War II', loc: [255, 290], states: [2, 255, 365], years: [[1939, 2]] },
-    { src: 'cow', name: 'Spanish Civil War', loc: [230], states: [230, 255, 325], years: [[1936, 2]] },
-    { src: 'ucdp', name: 'Afghanistan: government', loc: [700], states: [700, 260], years: [[2002, 1]] },
+    { src: 'wikidata', name: 'World War II', loc: ['Q183', 'Q36'], states: ['Q30', 'Q183', 'Q15180'], years: [[1939, 3]] },
+    { src: 'wikidata', name: 'Spanish Civil War', loc: ['Q29'], states: ['Q29'], statesYears: { 1937: ['Q29', 'Q183'] }, years: [[1936, 3], [1937, 3]] },
+    { src: 'ucdp', name: 'Afghanistan: government', loc: ['Q889'], states: ['Q889', 'Q183'], years: [[2002, 1]] },
   ];
-  assert.deepEqual([conflict([255, 260], wars).cowWars1926_45, conflict([255, 260], wars).conflictsAbroad], [2, 1]);
-  assert.deepEqual([conflict([260], wars).cowWars1926_45, conflict([260], wars).conflictsAbroad], [0, 1], 'under 260 alone: no war of 1926–45');
-  assert.equal(conflict([255, 260], wars).conflictYears, 0, 'World War II is on its soil but before 1946, which the UCDP figures start from');
+  assert.deepEqual([conflict(['Q183'], wars).wars1926_45, conflict(['Q183'], wars).conflictsAbroad], [2, 1], 'a party in one year of a war counts (statesYears)');
+  assert.deepEqual([conflict(['Q159'], wars).wars1926_45, conflict(['Q159', 'Q15180'], wars).wars1926_45], [0, 1], 'Russia takes in the Soviet Union only through SUCCESSION');
+  assert.equal(conflict(['Q183'], wars).conflictYears, 0, 'World War II is on its soil but before 1946, which the UCDP figures start from');
+  assert.equal(conflict(['Q183'], wars).cowWars1926_45, undefined, 'no Correlates of War count');
+  const { placeKeys, SUCCESSION } = await import('../national/scripts/overview.mjs');
+  assert.deepEqual(placeKeys('RUS', 'Q159', [{ qids: ['Q15180', 'Q159'] }]), ['Q159', 'Q15180']);
+  assert.deepEqual(placeKeys('DEU', 'Q183', [{ qids: ['Q41304', 'Q7318', 'Q183'] }, { qids: ['Q713750', 'Q183'] }, undefined]), ['Q183', 'Q41304', 'Q7318', 'Q713750'], 'both of the Retrospective\'s shapes: a record without qids adds none');
+  assert.deepEqual(SUCCESSION.YEM, ['Q267584']);
+  assert.deepEqual(retroCodes({ Q41304: { iso3: 'DEU' }, Q713750: { iso3: 'DEU' }, Q16957: { iso3: null } }, 'DEU'), ['Q41304', 'Q713750'], 'the Retrospective keyed by Wikidata item (retro-countries/2)');
   // On the committed data.
   const de = read('national/data/index.json').countries.find(c => c.iso3 === 'DEU');
-  assert.equal(de.gw, 260, 'its code on the page stays the Retrospective\'s for Germany today');
+  assert.equal(de.gw, 260, 'its code (for the modules that still read one) stays the Retrospective\'s for Germany today');
   assert.ok(de.leadership.leaders100 >= 17, `DEU: ${de.leadership.leaders100} leaders since 1926 (Marx to Dönitz, then Adenauer on)`);
-  assert.ok(de.conflict.cowWars1926_45 >= 2, `DEU: ${de.conflict.cowWars1926_45} Correlates of War wars 1926–45 (the Second World War and the Spanish Civil War)`);
-  const wars1926 = read('battlefield/history/data/wars.json').wars.filter(w => w.src === 'cow' && (w.states.includes(255) || w.loc.includes(255)));
-  assert.equal(de.conflict.cowWars1926_45, wars1926.length, 'every war Retrospective Battlefield files under 255');
+  const rb = read('battlefield/history/data/wars.json');
+  const keys = placeKeys('DEU', de.qid, []);
+  const fought = w => [...w.loc, ...w.states, ...Object.values(w.locYears || {}).flat(), ...Object.values(w.statesYears || {}).flat()].some(k => keys.includes(k));
+  const listed = rb.wars.filter(w => w.src === 'wikidata' && fought(w));
+  assert.ok(listed.some(w => w.name === 'World War II') && listed.some(w => w.name === 'Spanish Civil War'), listed.map(w => w.name).join(', '));
+  assert.equal(de.conflict.wars1926_45, listed.length, 'every war of 1926–45 on VM\'s list that names Germany');
+  assert.equal(de.conflict.cowWars1926_45, undefined);
+  assert.ok(!rb.wars.some(w => w.src === 'cow'), 'no Correlates of War record left to count');
 });
 
 // Yemen had no Gleditsch and Ward code (N3, 17 November 2026): the code list (countrycode) files GW 678 under "Yemen
@@ -420,6 +433,9 @@ test('overview: Yemen has its Gleditsch and Ward code (678), from the code list\
   assert.equal(gw.get('YEM'), 678, 'Yemen: 678');
   assert.equal(gw.get('OMN'), 698, 'the code list\'s own code where it has one');
   assert.equal(gw.get('DEU'), 260, 'the Retrospective\'s code first (its later one, Germany today), as the build read it');
+  // The Retrospective keyed by Wikidata item (retro-countries/2): its old numbers come from OLD_KEYS, to the same result.
+  const byQ = gwCodes({ Q41304: { iso3: 'DEU' }, Q713750: { iso3: 'DEU' }, Q16957: { iso3: null } }, list, m => warned.push(m), { 255: 'Q41304', 260: 'Q713750', 265: 'Q16957' });
+  assert.deepEqual([byQ.get('DEU'), byQ.get('YEM'), byQ.get('OMN')], [260, 678, 698], 'the same codes from either shape');
   assert.ok(![...gw.values()].includes(680), 'South Yemen\'s 680 is no present state\'s code');
   assert.deepEqual(warned, []);
   // The code list's row stops giving 678 (or gives Yemen an ISO3): the build says so and takes no code from the table.
@@ -431,7 +447,8 @@ test('overview: Yemen has its Gleditsch and Ward code (678), from the code list\
   const ye = read('national/data/index.json').countries.find(c => c.iso3 === 'YEM');
   assert.equal(ye.gw, 678);
   assert.ok(ye.conflict, 'YEM: conflict figures');
-  const onSoil = read('battlefield/history/data/wars.json').wars.filter(w => w.src === 'ucdp' && w.loc.includes(678));
+  // Yemen's places since 20 November 2026: Yemen (Q805) and the Yemen Arab Republic (Q267584), which its old code 678 covered.
+  const onSoil = read('battlefield/history/data/wars.json').wars.filter(w => w.src === 'ucdp' && [...w.loc, ...Object.values(w.locYears || {}).flat()].some(k => k === 'Q805' || k === 'Q267584'));
   assert.equal(ye.conflict.conflictYears, onSoil.reduce((s, w) => s + w.years.length, 0), 'every UCDP conflict-year on its soil');
   assert.ok(ye.conflict.active2026.some(w => w.id === 'yemen'), JSON.stringify(ye.conflict.active2026));
   assert.equal(ye.leadership, null, 'the Retrospective does not cover Yemen: no leadership figures are made up');
@@ -472,7 +489,23 @@ test('page: the leaders\' source names the hand-built lists, San Marino\'s count
       const de = await stat('Leaders in the last 100 years');
       assert.deepEqual([de.value, de.notes.length], [String(by.DEU.leadership.leaders100), 1], `${width}: Germany's count, with its source only`);
       assert.match(de.notes[0], /^Political Retrospective \(Archigos and Wikidata\)/);
-      assert.match((await stat('Conflicts fought abroad')).notes[0], new RegExp(`· ${by.DEU.conflict.cowWars1926_45} wars 1926–45$`));
+      // Since 20 November 2026 the wars of 1926–45 are their own stat, counted on VM's list from Wikidata (MP-11: free data
+      // only), and the conflicts abroad are UCDP's alone.
+      assert.equal((await stat('Conflicts fought abroad')).notes[0], 'since 1946', `${width}: UCDP's count only`);
+      const w26 = await stat('Wars of 1926–45');
+      assert.equal(w26.value, String(by.DEU.conflict.wars1926_45));
+      assert.match(w26.notes[0], /^on VM’s list from Wikidata, where Wikidata names this country as the war’s country, a participant, or a location that lies within it \(a region spanning several states counts for none of them\) · no free source measures these wars’ size, so smaller ones are missing$/);
+      assert.equal(w26.notes.at(-1), 'Wikidata (CC0), as the Retrospective Battlefield lists them');
+      assert.ok(!/Correlates of War/.test(await page.textContent('#profile')), `${width}: no Correlates of War figure`);
+      // The seven World Bank series whose originators' terms bar commercial use: each says whose data it is and links its
+      // terms; no other series carries the line.
+      const orig = await page.$$eval('#profile .ind', is => is.map(i => [i.dataset.code, i.querySelector('.orig')?.textContent || null, i.querySelector('.orig a')?.href || null]));
+      const BARRED = { 'MS.MIL.XPND.GD.ZS': ['SIPRI', 'https://www.sipri.org/about/terms-and-conditions'], 'EG.FEC.RNEW.ZS': ['IEA', 'https://www.iea.org/terms/terms-of-use-for-non-cc-material'], 'EG.USE.PCAP.KG.OE': ['IEA', 'https://www.iea.org/terms/terms-of-use-for-non-cc-material'], 'EN.GHG.CO2.PC.CE.AR5': ['IEA', 'https://www.iea.org/terms/terms-of-use-for-non-cc-material'], 'EN.ATM.PM25.MC.M3': ['IHME', 'https://www.healthdata.org/about/terms-and-conditions'], 'IT.CEL.SETS.P2': ['ITU', 'https://www.itu.int/en/about/Pages/terms-of-use.aspx'], 'IT.NET.USER.ZS': ['ITU', 'https://www.itu.int/en/about/Pages/terms-of-use.aspx'] };
+      assert.deepEqual(orig.filter(o => o[1]).map(o => o[0]).sort(), Object.keys(BARRED).sort(), `${width}: the seven lines`);
+      for (const [code, text, href] of orig.filter(o => o[1])) {
+        assert.ok(text.startsWith('the World Bank takes it from ') && text.includes(`(${BARRED[code][0]})`) && text.endsWith('(its terms ↗)'), `${width}: ${code}: ${text}`);
+        assert.equal(href, BARRED[code][1], code);
+      }
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}: no sideways scroll`);
       await page.close();
     }
@@ -523,10 +556,11 @@ test('page: San Marino\'s term in words and the marked ranking, one plural for e
       stat = await open('YEM');
       const ye = by.YEM.conflict;
       assert.equal((await stat('Armed conflicts per year')).notes[0], `on its territory, 1946–2025 (${ye.conflictYears} conflict-years)`);
-      assert.equal((await stat('Conflicts fought abroad')).notes[0], `since 1946 · ${ye.cowWars1926_45 === 1 ? '1 war' : `${ye.cowWars1926_45} wars`} 1926–45`, `${width}: Yemen's one war of 1926–45 (Saudi-Yemeni, 1934)`);
+      assert.equal((await stat('Conflicts fought abroad')).notes[0], 'since 1946');
+      assert.equal((await stat('Wars of 1926–45')).value, String(ye.wars1926_45), `${width}: Yemen's war of 1926–45 on VM's list`);
       const wars = await page.$$eval('#profile .wars a', as => as.map(a => a.textContent.trim()));
       assert.ok(wars.some(w => w.startsWith('Yemen') && w.endsWith(`${ye.active2026.find(w => w.id === 'yemen').deaths.toLocaleString('en-GB')} deaths`)), `${width}: ${wars.join(' | ')}`);
-      assert.ok(await page.$('#profile a[href*="battlefield/history/index.html#y=2025&c=678"]'), `${width}: the Retrospective Battlefield link`);
+      assert.ok(await page.$('#profile a[href*="battlefield/history/index.html#y=2025&c=Q805"]'), `${width}: the Retrospective Battlefield link, by Wikidata item since 20 November 2026`);
       // The ranking: San Marino's count of leaders, and its average tenure, are marked; no other country's are.
       for (const measure of ['leaders100', 'avgTenure']) {
         await page.goto(`${BASE}/q/national#map&measure=${measure}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -624,6 +658,61 @@ test('map, profile and comparison work', pageTest, async () => {
   assert.match(profile, /armed conflicts per year/i);
   assert.match(profile, /rule of law/i);
   assert.equal(cmpCols, 4);
+  assert.deepEqual(errors, []);
+});
+
+// MP-11 fixer (20 November 2026): the page joins to the Retrospective and the Battlefield by Wikidata item, not by a
+// Gleditsch and Ward number; each country the Retrospective covers carries its key there.
+test('data: each country the Retrospective covers carries its key there (a Wikidata item), and the page builds no link from a code', () => {
+  const n = read('national/data/index.json');
+  const keyed = n.countries.filter(c => c.retro);
+  assert.ok(keyed.length >= 70, `${keyed.length} countries with a Retrospective key`);
+  for (const c of n.countries) assert.ok(c.retro === null || /^Q[1-9]\d*$/.test(c.retro), `${c.iso3}: ${c.retro}`);
+  assert.equal(n.countries.find(c => c.iso3 === 'DEU').retro, 'Q713750', 'Germany today: West Germany / Germany’s record');
+  const html = readFileSync(new URL('../q/national.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /c\.gw\b/, 'the page reads no c.gw');
+  assert.doesNotMatch(html, /Correlates of War/, 'the page credits no Correlates of War');
+});
+
+// MP-11 fixer (20 November 2026): the sources say what the terms say. The footer credits VM's list of wars from Wikidata
+// (CC0) for 1926–1945, not the Correlates of War; the IEA line gives its terms for non-CC material; the map's and the
+// comparison's captions name a barred series' originator and link its terms; Archigos's terms line stands beside its
+// figures and in the Sources.
+test('page: the footer, the IEA line, the captions of a barred series and the Archigos line say what the terms say', pageTest, async () => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  const errors = [];
+  try {
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto(`${BASE}/q/national#measure=wb%3AMS.MIL.XPND.GD.ZS`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => /Military spending/.test(document.querySelector('#mapcap')?.textContent || ''), null, { timeout: 20000 });
+    const cap = await page.$eval('#mapcap', el => ({ text: el.textContent, href: el.querySelector('.orig a')?.href || null }));
+    assert.match(cap.text, /The World Bank takes it from the Stockholm International Peace Research Institute \(SIPRI\)/, cap.text);
+    assert.equal(cap.href, 'https://www.sipri.org/about/terms-and-conditions');
+    const sources = await page.textContent('.prp-sources');
+    assert.doesNotMatch(sources, /Correlates of War/);
+    assert.ok(sources.includes('the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) for conflict history since 1946 and, for 1926–1945, VM’s list of wars from Wikidata (CC0);'), sources);
+    assert.ok(sources.includes('(leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides)'), 'the Archigos line in the Sources');
+    await page.goto(`${BASE}/q/national#country=FRA`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForFunction(() => document.querySelector('#profile h2')?.textContent === 'France' && document.querySelector('#profile .stat'), null, { timeout: 20000 });
+    const iea = await page.$eval('#profile .ind[data-code="EG.USE.PCAP.KG.OE"] .orig', el => ({ text: el.textContent, href: el.querySelector('a').href }));
+    assert.match(iea.text, /whose terms allow public use of only small extracts \(no more than five data points, not as a download\)/, iea.text);
+    assert.equal(iea.href, 'https://www.iea.org/terms/terms-of-use-for-non-cc-material');
+    const irregular = await page.$$eval('#profile .stat', ss => [...ss.find(s => s.querySelector('span')?.textContent === 'Irregular seizures of power').querySelectorAll('small')].map(x => x.textContent));
+    assert.match(irregular.at(-1), /Leaders to 2015 and how they took and left office: Archigos 4\.1, which states no licence; kept until VM’s owner decides$/, irregular.join(' | '));
+    const links = await page.$$eval('#profile a', as => as.map(a => a.getAttribute('href') || ''));
+    const fra = read('national/data/index.json').countries.find(c => c.iso3 === 'FRA');
+    assert.ok(links.includes(`https://hp-retrospective.pages.dev/#y=2025&c=${fra.retro}`), 'the Retrospective by its key');
+    assert.ok(links.includes(`${BASE}/battlefield/history/index.html#y=2025&c=${fra.qid}`), `the Battlefield by Wikidata item: ${links.join(' ')}`);
+    await page.goto(`${BASE}/q/national#compare=FRA,DEU`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForSelector('#cmpind', { timeout: 20000 });
+    await page.selectOption('#cmpind', 'MS.MIL.XPND.GD.ZS');
+    await page.waitForFunction(() => /Military spending/.test(document.querySelector('#cmpcap')?.textContent || ''), null, { timeout: 20000 });
+    const cmp = await page.$eval('#cmpcap', el => ({ text: el.textContent, href: el.querySelector('.orig a')?.href || null }));
+    assert.match(cmp.text, /\(SIPRI\)/, cmp.text);
+    assert.equal(cmp.href, 'https://www.sipri.org/about/terms-and-conditions');
+    await page.close();
+  } finally { await browser.close(); }
   assert.deepEqual(errors, []);
 });
 
@@ -830,7 +919,8 @@ test('page: each figure carries its own year or date and its source, in the prof
     assert.equal((await stat('Head of state')).src, wikidata);
     assert.equal((await stat('System of government')).src, wikidata);
     assert.equal((await stat('Current leader')).src, irl.leader.rule === 'atlas' ? `Office named by Political Atlas, reviewed ${date(s.atlasReviewed)}; holder from ${wikidata}` : wikidata);
-    assert.equal((await stat('Leaders in the last 100 years')).src, `Political Retrospective (Archigos and Wikidata), built ${date(s.retrospectiveBuilt)}`);
+    // Archigos's terms line beside its figures (MP-11 fixer, 20 November 2026).
+    assert.equal((await stat('Leaders in the last 100 years')).src, `Political Retrospective (Archigos and Wikidata), built ${date(s.retrospectiveBuilt)} · Leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides`);
     assert.equal((await stat('Armed conflicts per year')).src, 'UCDP/PRIO Armed Conflict Dataset, 1946–2025');
     assert.equal((await stat('Calendar events since 1980')).src, `Historical and Realtime Calendars, as built ${date(s.calendarBuilt)}`);
     const pop = await stat('Population');

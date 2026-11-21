@@ -206,7 +206,9 @@ export function changeEntry(file, m) {
     used only as that page's address, and is reached only through the ISO3 (never joined by the key alone). */
 export function retroKeys(doc) {
   const out = {};
-  for (const [k, v] of Object.entries(doc?.countries || {}).sort(([a], [b]) => +a - +b)) {
+  // Its keys are numbers to 20 November 2026 and Wikidata items after ('retro-countries/2'): either sorts by its digits.
+  const order = k => +String(k).replace(/^Q/, '');
+  for (const [k, v] of Object.entries(doc?.countries || {}).sort(([a], [b]) => order(a) - order(b))) {
     if (!/^[A-Z]{3}$/.test(v?.iso3 || '')) continue;
     (out[v.iso3] ||= []).push({ k, n: v.name });
   }

@@ -27,12 +27,12 @@ const SERVICES = [
   { id: 'crtsh', name: 'crt.sh', org: 'Sectigo', tab: 'domains', access: 'Keyless', browser: 'Yes, when it is not overloaded (often slow)', limits: 'Full certificate history' },
   { id: 'certspotter', name: 'Cert Spotter API', org: 'SSLMate', tab: 'domains', access: 'Keyless, limited', browser: 'Yes', limits: 'Current certificates only; a few lookups an hour' },
   { id: 'gleif', name: 'GLEIF API', org: 'Global Legal Entity Identifier Foundation', tab: 'orgs', access: 'Keyless', browser: 'Yes', limits: 'LEI data under CC0', check: { url: 'https://api.gleif.org/api/v1/lei-records?page%5Bsize%5D=1' } },
-  { id: 'opensanctions', name: 'OpenSanctions API', org: 'OpenSanctions', tab: 'orgs', access: 'Your key (free for public-interest work)', browser: 'Yes, with the key in the request address', limits: 'Free keys for journalists, non-profits and academics; others get 2,000 trial credits, then pay per query. Data CC BY-NC 4.0' },
+  { id: 'opensanctions', name: 'OpenSanctions API', org: 'OpenSanctions', tab: 'orgs', access: 'Your key (free for public-interest work)', browser: 'Yes, with the key in the request address', limits: 'Free keys for journalists, non-profits and academics; others get 2,000 trial credits, then pay per query. Data CC BY-NC 4.0: commercial use needs OpenSanctions’s licence; VM stores none of it' },
   { id: 'registries', name: 'Registries and sanctions lists', org: 'Companies House, CRO, OpenCorporates, Aleph, EU, OFAC, UK, UN', tab: 'orgs', access: 'Links out', browser: 'You open them', limits: 'Each site’s own terms' },
   { id: 'gdelt', name: 'GDELT DOC 2.0 API', org: 'The GDELT Project', tab: 'events', access: 'Keyless', browser: 'Yes; a busy server is reported as unreachable', limits: 'One request every five seconds; last three months' },
   { id: 'reverse', name: 'Reverse image search', org: 'Google Lens, Bing, Yandex, TinEye', tab: 'media', access: 'Links out', browser: 'You upload or paste', limits: 'Their terms; not for identifying people' },
   { id: 'local', name: 'Metadata reader and hashing', org: 'This page', tab: 'media', access: 'None needed', browser: 'On your device; nothing uploaded', limits: '' },
-  { id: 'tiles', name: 'Map tiles', org: 'Esri', tab: 'media', access: 'Keyless', browser: 'Yes', limits: 'Esri terms; attribution on the map' },
+  { id: 'tiles', name: 'Map tiles', org: 'Esri', tab: 'media', access: 'Keyless', browser: 'Yes', limits: 'Esri Master License Agreement (not a free licence; kept until VM’s owner decides); attribution on the map' },
 ];
 
 const FIGURE = [

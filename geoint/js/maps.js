@@ -1,7 +1,7 @@
 // GEOINT & IMINT Dashboard: Leaflet helpers shared by the map tabs (global L from the pinned Leaflet 1.9.4 script).
 // Base maps follow the PRP theme (Esri Canvas light/dark, swapped on 'prp:themechange'); vector marks get CSS classes
 // written against the PRP tokens, so they change with the theme without redrawing.
-import { BASEMAPS, CANVAS_CREDIT, ESRI_IMAGERY, ESRI_IMAGERY_CREDIT, ESRI_LABELS, EOX_S2, EOX_S2_CREDIT } from './sources.js';
+import { BASEMAPS, CANVAS_CREDIT, ESRI_IMAGERY, ESRI_IMAGERY_CREDIT, ESRI_LABELS, LANDSAT_BASE, LANDSAT_CREDIT } from './sources.js';
 import { clamp } from './util.js';
 
 export const tok = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -27,7 +27,7 @@ export function syncToView(map, ctx) {
   if (Math.abs(c.lat - v.lat) > 1e-4 || Math.abs(c.lng - v.lon) > 1e-4 || map.getZoom() !== z) map.setView([v.lat, v.lon], z, { animate: false });
 }
 
-/** Base layer switcher: 'map' (Esri Canvas, follows the theme), 'imagery' (Esri World Imagery), 's2' (EOxCloudless Sentinel-2), 'none'. */
+/** Base layer switcher: 'map' (Esri Canvas, follows the theme), 'imagery' (Esri World Imagery), 'landsat' (NASA GWELD through GIBS, free), 'none'. */
 export function baseLayers(map, { kind = 'map', labels = true } = {}) {
   let current = null, layers = [], built = null;
   const opts = (extra) => ({ maxZoom: map.getMaxZoom(), ...extra });
@@ -42,8 +42,8 @@ export function baseLayers(map, { kind = 'map', labels = true } = {}) {
     } else if (current === 'imagery') {
       layers.push(L.tileLayer(ESRI_IMAGERY, opts({ attribution: ESRI_IMAGERY_CREDIT, maxNativeZoom: 18 })));
       if (labels) layers.push(L.tileLayer(ESRI_LABELS, opts({ pane: 'labels', maxNativeZoom: 18 })));
-    } else if (current === 's2') {
-      layers.push(L.tileLayer(EOX_S2, opts({ attribution: EOX_S2_CREDIT, maxNativeZoom: 15 })));
+    } else if (current === 'landsat') {
+      layers.push(L.tileLayer(LANDSAT_BASE, opts({ attribution: LANDSAT_CREDIT, maxNativeZoom: 12 })));
       if (labels) layers.push(L.tileLayer(ESRI_LABELS, opts({ pane: 'labels', maxNativeZoom: 18 })));
     }
     layers.forEach(l => l.addTo(map));

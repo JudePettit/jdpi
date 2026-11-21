@@ -220,6 +220,36 @@ test('GIBS layers, tile URLs and DescribeDomains parsing', () => {
   assert.equal(S.fireLayerNames(['n20', 'modis']), 'VIIRS_NOAA20_Thermal_Anomalies_375m_All,MODIS_Combined_Thermal_Anomalies_All');
 });
 
+test('free data: the Sentinel-2 base is retired for NASA Landsat, and old addresses say so', () => {
+  // MP-11 (17 Nov 2026): free data only. EOxCloudless is CC BY-NC-SA 4.0 and needs EOX's paid licence for commercial use.
+  assert.equal(S.EOX_S2, undefined); assert.equal(S.EOX_S2_CREDIT, undefined);
+  for (const [name, text] of [['sources.js', read('js/sources.js')], ['maps.js', read('js/maps.js')], ['index.html', read('index.html')]])
+    assert.doesNotMatch(text, /eox\.at|s2cloudless|EOX_S2|CC BY-NC-SA/i, `${name} no longer loads or credits EOxCloudless`);
+  assert.match(read('content/law.md'), /\| EOxCloudless[^|\n]*no longer on this dashboard/, 'the guide says the mosaic is no longer here');
+  assert.ok(S.LANDSAT_BASE.startsWith('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual/default/2000-12-01/GoogleMapsCompatible_Level12/'));
+  assert.ok(S.LANDSAT_BASE.endsWith('/{z}/{y}/{x}.jpeg'));
+  assert.match(S.LANDSAT_CREDIT, /NASA/); assert.match(S.LANDSAT_CREDIT, /GIBS/);
+  assert.deepEqual(S.BASES, ['map', 'imagery', 'landsat']);
+  for (const b of S.BASES) assert.deepEqual(S.baseFromState(b), { base: b, note: null });
+  assert.deepEqual(S.baseFromState(undefined), { base: 'imagery', note: null });
+  assert.deepEqual(S.baseFromState('nonsense'), { base: 'imagery', note: null });
+  const old = S.baseFromState('s2');
+  assert.equal(old.base, 'landsat'); assert.match(old.note, /no longer offered/); assert.match(old.note, /’/);
+  const html = read('index.html');
+  assert.match(html, /data-v="landsat"/); assert.doesNotMatch(html, /data-v="s2"/);
+  assert.match(html, /id="ms-base-note"/);
+  assert.match(read('js/measure.js'), /baseFromState/);
+  assert.match(read('js/maps.js'), /LANDSAT_BASE/);
+});
+
+test('free data: every Esri base names its terms (Esri Master License Agreement)', () => {
+  const law = read('content/law.md'), html = read('index.html');
+  assert.match(html, /Esri Master License Agreement/); assert.match(law, /Esri Master License Agreement/);
+  assert.match(law, /NASA[^\n|]*\|[^\n]*CC0/, 'law.md lists the Landsat base as CC0');
+  for (const p of ['../q/battlefield.html', '../q/headlines.html', '../sigint/index.html', '../osint/index.html'])
+    assert.match(read(p), /Esri Master License Agreement/, `${p} names Esri’s terms`);
+});
+
 test('Overpass presets and queries stay small and polite', () => {
   const ids = new Set();
   for (const p of S.OSM_PRESETS) {
@@ -498,10 +528,12 @@ test('live: USGS and GDACS feeds parse (CORS open)', live, async () => {
 test('live: terrain tiles and base maps (CORS open for the elevation reader)', live, async () => {
   const t = await get(S.terrariumUrl(G.tileOf(46.55, 7.98, 12)));
   assert.equal(t.status, 200); assert.equal(t.headers.get('access-control-allow-origin'), '*');
-  for (const u of [S.EOX_S2, S.ESRI_IMAGERY, S.BASEMAPS.light[0], S.BASEMAPS.dark[0]]) {
+  for (const u of [S.ESRI_IMAGERY, S.BASEMAPS.light[0], S.BASEMAPS.dark[0]]) {
     const r = await get(u.replace('{z}', '5').replace('{y}', '11').replace('{x}', '15'));
     assert.equal(r.status, 200, u);
   }
+  const l = await get(S.LANDSAT_BASE.replace('{z}', '12').replace('{y}', '1327').replace('{x}', '1976')); // Dublin at the top native level
+  assert.equal(l.status, 200); assert.match(l.headers.get('content-type'), /image\/jpeg/);
 });
 
 test('live: pinned CDN files match their integrity hashes', live, async () => {

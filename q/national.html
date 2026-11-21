@@ -199,7 +199,7 @@ td .nv{color:var(--prp-muted);font-size:12px}
   <section id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare" hidden><div id="compare"></div></section>
 
   <footer class="prp-sources">
-    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926, and for the leaders of <span id="liststates">the states Archigos does not cover</span>, its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) and the Correlates of War project for conflict history; Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
+    <p><b>Sources.</b> World Bank World Development Indicators and Worldwide Governance Indicators (CC BY 4.0) for the 41 indicators and the PESTLE scores; Wikidata (CC0) for systems of government, heads of state and government and capitals; Political Atlas for which office holds the most power (the current leader is its holder; elsewhere the head of state in presidential systems and ruling monarchies, the head of government in parliamentary ones); Political Retrospective (Archigos and Wikidata) for leaders and elections since 1926 (leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides), and for the leaders of <span id="liststates">the states Archigos does not cover</span>, its own lists, built by hand from at least two of Wikidata, Wikipedia's lists of office holders and rulers.org; the UCDP/PRIO Armed Conflict Dataset (CC BY 4.0) for conflict history since 1946 and, for 1926–1945, VM’s list of wars from Wikidata (CC0); Realtime Battlefield (UCDP Candidate Events) for wars active this year; Kardashev Tracker for energy share; Historical Calendar for events since 1980; Global Headline Tracker for headlines. Country shapes: Natural Earth via world-atlas (public domain).</p>
     <p id="method"><b>How this is worked out.</b> PESTLE pressure is VM's own composite, after Country PESTLE. It is not a forecast, and not a ranking of how well a country is run. For each of the 22 core World Bank indicators, a value is compared with the country's previous value no more than five years before it; a change past the indicator's threshold is improving or worsening. A dimension's pressure is the share of its scored indicators worsening; overall pressure is the mean of the dimensions scored; coverage is the share of the 22 with a value. <b>Latest</b> uses each indicator's newest value, its year beside it. <b>A year</b> uses that year's value, or one from up to two years earlier, marked with its year; anything older counts as no value, and nothing is carried forward. <b>A period</b> compares the first and last values inside it (1990–1999 is the old “1990s”), beside its first year's and its last year's own scores. A score with fewer than six dimensions is marked partial (dotted on the map). A score from fewer than three dimensions is too few values to colour or rank: there is no other minimum, so a score of three dimensions may still rest on a handful of indicators (its coverage is beside it). A period's change, and Rose most and Fell most, compare its first and last years only where both scores rest on the same dimensions, three or more, and, for a period to Latest, where Latest's score uses no value from before the period began; the other changes are shown, marked, but not ranked. Every score before 1998 is partial, because the governance indicators begin in 1996 (every two years until 2002) and a change needs two values; 1980, the first year held, has a coverage but no score. The years offered, <span id="yrspan">1980 to the newest</span>, are VM's request window: its build asks the World Bank for 1980 (where Country PESTLE began) to last year, though most series go back to 1960, so for a value from before 1985 the five-year look-back stops at 1980 and the early 1980s are scored more thinly than the full series would allow. The World Bank's values are for present-day countries: a year before a state existed, or before its borders took today's shape (South Sudan, Russia, Ukraine and Germany in the 1980s), is its reconstruction for the present territory, not a figure of the time. Indicators marked "added" are shown and compared but not scored. Recompute any figure from <code>national/data/years/</code> with <code>national/lib/pestle.js</code>.</p>
     <p><b>The yearly layer.</b> <code>national/data/years/manifest.json</code> lists one layer for each indicator (<code>wb:&lt;code&gt;</code>: every country by ISO3, every year, its unit, source, licence and method; no value is <code>null</code>) and the PESTLE pressure of each year (<code>national-pestle</code>, which stays on this page as VM's composite: each field's unit and scale, and the floor of three dimensions, are in the manifest). Its country key is the World Bank's three-letter code, ISO 3166-1 alpha-3 save Kosovo (XKX) and the Channel Islands (CHI); the values are for present-day countries. The Omni-Map reads the same files; the Integration Hub's <code>national-indicators</code> dataset names each indicator's layer.</p>
     <p><b>Headlines.</b> The latest headlines are the Global Headline Tracker's, in its order, except that free sources lead: the first is from an outlet anyone can read wherever the country has one, and links to outlets behind a paywall or a sign-up are labelled (<code>design/prp-access.json</code> holds each outlet's class and the evidence for it).</p>
@@ -336,15 +336,35 @@ const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct
 const dateOf = v => { const t = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? v + 'T12:00:00Z' : v); if (!Number.isFinite(t)) return null; const d = new Date(t); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
 const monthOf = v => (/^\d{4}-\d{2}$/.test(String(v || '')) ? `${MON[+v.slice(5, 7) - 1]} ${v.slice(0, 4)}` : null);
 const S = () => D?.sources || {};
+// The seven World Bank series whose originator's own terms bar commercial use (omni/scripts/build-wb.mjs BARRED, read at
+// each address on 18 and 20 November 2026; MP-11): still shown here until VM's owner decides, each with a plain line
+// saying whose data it is and what its terms say. The Omni-Map leaves them out.
+// The IEA's terms for the data outside its CC BY 4.0 (read 20 November 2026 at the address below): "You are permitted
+// to reproduce Insubstantial Amounts only of the Non-CC Material in your own work", not for commercial ends, and more
+// than five data points never as a download.
+const IEA = ['the International Energy Agency (IEA), in part, whose terms allow public use of only small extracts (no more than five data points, not as a download)', 'https://www.iea.org/terms/terms-of-use-for-non-cc-material'];
+const ITU = ['the International Telecommunication Union (ITU), whose terms allow only personal, educational or non-commercial use', 'https://www.itu.int/en/about/Pages/terms-of-use.aspx'];
+const ORIGINATOR = {
+  'MS.MIL.XPND.GD.ZS': ['the Stockholm International Peace Research Institute (SIPRI), whose terms ask its permission, and normally a royalty, for commercial use', 'https://www.sipri.org/about/terms-and-conditions'],
+  'EG.FEC.RNEW.ZS': IEA, 'EG.USE.PCAP.KG.OE': IEA, 'EN.GHG.CO2.PC.CE.AR5': IEA,
+  'EN.ATM.PM25.MC.M3': ['the Institute for Health Metrics and Evaluation (IHME), whose terms let only non-commercial users use, share or adapt its data', 'https://www.healthdata.org/about/terms-and-conditions'],
+  'IT.CEL.SETS.P2': ITU, 'IT.NET.USER.ZS': ITU,
+};
+const originatorLine = code => { const o = ORIGINATOR[code]; return o ? ` · <span class="orig">the World Bank takes it from ${esc(o[0])} (<a href="${esc(o[1])}" target="_blank" rel="noreferrer">its terms ↗</a>)</span>` : ''; };
+// The same line as a sentence, for the map's and the comparison's captions (HTML; nothing where the series is free).
+const originatorNote = code => { const o = ORIGINATOR[code]; return o ? ` <span class="orig">The World Bank takes it from ${esc(o[0])} (<a href="${esc(o[1])}" target="_blank" rel="noreferrer">its terms ↗</a>).</span>` : ''; };
 const SRC = {
   worldBank: 'World Bank (WDI and WGI)',
   wikidata: () => (S().wikidataRead ? `Wikidata, read ${dateOf(S().wikidataRead)}` : 'Wikidata'),
   atlas: () => (S().atlasReviewed ? `Political Atlas, reviewed ${dateOf(S().atlasReviewed)}` : 'Political Atlas'),
-  retro: () => (S().retrospectiveBuilt ? `Political Retrospective (Archigos and Wikidata), built ${dateOf(S().retrospectiveBuilt)}` : 'Political Retrospective (Archigos and Wikidata)'),
+  retro: () => `${S().retrospectiveBuilt ? `Political Retrospective (Archigos and Wikidata), built ${dateOf(S().retrospectiveBuilt)}` : 'Political Retrospective (Archigos and Wikidata)'} · ${SRC.archigos}`,
+  // Archigos's terms as read on 20 November 2026 (MP-11): its page states no licence (integration/sources.json, archigos).
+  archigos: 'Leaders to 2015 and how they took and left office: Archigos 4.1, which states no licence; kept until VM’s owner decides',
   // A state Archigos does not cover (Montenegro and ten microstates, 16 November 2026): its leaders are from the
   // Retrospective's own list, built by hand (its scripts/leader-lists.mjs); its elections are still Wikidata's.
   leaders: c => (c?.leadership?.leaderLists ? 'Political Retrospective: its own list of this state’s leaders, built by hand from at least two of Wikidata, Wikipedia’s lists of office holders and rulers.org' : SRC.retro()),
   ucdp: () => `UCDP/PRIO Armed Conflict Dataset, ${(S().conflictYears || [1946, 2025]).join('–')}`,
+  wars1926: () => 'Wikidata (CC0), as the Retrospective Battlefield lists them',
   battlefield: () => (monthOf(S().battlefieldThrough) ? `Realtime Battlefield, figures to ${monthOf(S().battlefieldThrough)}` : 'Realtime Battlefield'),
   calendar: () => (S().calendarBuilt ? `Historical and Realtime Calendars, as built ${dateOf(S().calendarBuilt)}` : 'Historical and Realtime Calendars'),
   energy: () => `Kardashev Tracker, ${S().energyYear ?? 2025}`,
@@ -537,7 +557,7 @@ window.PRPFocus?.listen({
     if (!mapG || !focusView) return;
     const isos = new Set(), feats = mapG.selectAll('path.land').data();
     const r = PRPFocus.resolve(t, { country: id => {
-      const iso = /^gw:\d+$/.test(id) ? (D?.countries.find(c => c.gw === +id.slice(3))?.iso3 || PRPFocus.iso3OfGw(id.slice(3))) : id, fs = feats.filter(f => numToIso.get(f.id) === iso);
+      const iso = /^gw:\d+$/.test(id) ? PRPFocus.iso3OfGw(id.slice(3)) : id, fs = feats.filter(f => numToIso.get(f.id) === iso);
       if (fs.length) isos.add(iso);
       return fs.length ? fs : null;
     } });
@@ -592,7 +612,7 @@ function colourMap() {
     : `${strong} blue means a higher value${m.better ? ` (${m.better === 'down' ? 'lower' : 'higher'} is better)` : ''}`;
   const honest = m.group === 'PESTLE' ? ' PESTLE pressure is VM’s own composite, not a forecast or a ranking of worth.' : '';
   const hatched = hatchKey ? (m.code ? ' Dotted: the value is of an earlier year, at most two years before (its year is in the tooltip).' : ' Dotted: a partial score, from fewer than six dimensions.') : '';
-  $('#mapcap').textContent = `${m.label}${when}, by country. ${what}. ${noWord}: hatched grey; plain grey, not covered by the World Bank.${hatched}${honest} Source: ${sourceOf(m)}.`;
+  $('#mapcap').innerHTML = esc(`${m.label}${when}, by country. ${what}. ${noWord}: hatched grey; plain grey, not covered by the World Bank.${hatched}${honest} Source: ${sourceOf(m)}.`) + originatorNote(m.code);
 }
 function recolour() { document.querySelectorAll('[data-p]').forEach(el => { el.style.background = pressColour(el.dataset.p); }); }
 
@@ -740,8 +760,10 @@ async function renderProfile() {
   const pop = c.latest['SP.POP.TOTL'], gdp = c.latest['NY.GDP.MKTP.CD'];
   const links = [
     c.encyclopedia && link('rs', 'encyclopedia', `encyclopedia/index.html#${c.encyclopedia}`, '◈ Master Index'),
-    c.gw != null && link('rs', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.gw}`, 'Political Retrospective'),
-    c.gw != null && link('rs', 'battlefield-history', `battlefield/history/index.html#y=2025&c=${c.gw}`, 'Retrospective Battlefield'),
+    // By Wikidata item, not by a source's own code (MP-11): the Retrospective's key for the state (retro, a Wikidata item)
+    // opens its record. A country it does not cover has no link: the old one, by code, opened no record of it.
+    c.retro && link('rs', 'retrospective', `https://hp-retrospective.pages.dev/#y=2025&c=${c.retro}`, 'Political Retrospective'),
+    c.qid && link('rs', 'battlefield-history', `battlefield/history/index.html#y=2025&c=${c.qid}`, 'Retrospective Battlefield'),
     link('rs', 'historical-calendar', `q/calendar.html?period=history&countries=${encodeURIComponent(c.name)}&view=year`, 'Historical Calendar'),
     `<a class="prp-chip" href="https://political-atlas.pages.dev/#${c.iso3}" target="_blank" rel="noopener">Political Atlas ↗</a>`,
   ].filter(Boolean).join('');
@@ -759,7 +781,7 @@ async function renderProfile() {
         const when = it === undefined ? ' · could not load' : !it ? (md === 'latest' ? '' : md === 'year' ? ` · No value for ${Y}${(e => (e ? ` (latest earlier ${e})` : ''))(PL.earlierYear(all, Y - PL.MAX_AGE))}` : ` · No value in ${whenText()}`)
           : md === 'period' ? ` · ${first ? `${first[0]}: ${fmtVal(first[1], i.unit)} → ` : ''}${last[0]}` : ` · ${last[0]}${md === 'year' && last[0] < Y ? ' (earlier value)' : ''}`;
         const mark = md === 'latest' ? null : md === 'year' ? [Y] : [view.from, isLatest(Y) ? LAST : Y];
-        return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a></small></div>
+        return `<div class="ind" data-code="${esc(i.code)}"><div class="l">${esc(i.label)}${i.core ? '' : '<span class="added">added</span>'}<small>${esc(i.unit)}${esc(when)} · <a href="https://data.worldbank.org/indicator/${esc(i.code.replace(/^GOV_WGI_/, ''))}?locations=${esc(c.iso2)}" target="_blank" rel="noreferrer">World Bank ↗</a>${originatorLine(i.code)}</small></div>
           ${spark(md === 'latest' ? all.slice(-25) : all, i.better, mark)}<div class="v">${last ? fmtVal(last[1], i.unit) : '–'}</div><div class="mv ${mv || ''}">${mv ? mv : ch != null ? (ch > 0 ? '+' : '') + fmtVal(ch, i.unit) : ''}</div></div>`;
       }).join('')}</div>`;
   }).join('');
@@ -789,7 +811,8 @@ async function renderProfile() {
       ${K ? stat('Armed conflicts per year', K.avgConflictsPerYear, `on its territory, 1946–2025 (${count(K.conflictYears, 'conflict-year')})`, SRC.ucdp()) : ''}
       ${K ? stat('Years at war', K.yearsAtWar, `of ${count(K.yearsWithConflict, 'year')} with any armed conflict`, SRC.ucdp()) : ''}
       ${K ? stat('New armed conflicts', K.onsetsPerDecade + ' a decade', `new wars: ${K.newWarsPerDecade} a decade (${K.newWarsPerYear} a year)`, SRC.ucdp()) : ''}
-      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, `since 1946 · ${count(K.cowWars1926_45, 'war')} 1926–45`, `${SRC.ucdp()}; Correlates of War`) : ''}
+      ${K ? stat('Conflicts fought abroad', K.conflictsAbroad, 'since 1946', SRC.ucdp()) : ''}
+      ${K?.wars1926_45 != null ? stat('Wars of 1926–45', K.wars1926_45, 'on VM’s list from Wikidata, where Wikidata names this country as the war’s country, a participant, or a location that lies within it (a region spanning several states counts for none of them) · no free source measures these wars’ size, so smaller ones are missing', SRC.wars1926()) : ''}
       ${c.energyShare != null ? stat('Share of world energy', pct(c.energyShare), '', SRC.energy()) : ''}
       ${c.calendar ? stat('Calendar events since 1980', Object.values(c.calendar).reduce((a, b) => a + b, 0), Object.entries(c.calendar).filter(([, n]) => n).map(([t, n]) => calCount(t, n)).join(' · '), SRC.calendar()) : ''}
       ${stat('PESTLE pressure', P.overall == null && md !== 'latest' ? 'No value' : pct(P.overall), esc(pestleNote), pestleSrc)}
@@ -943,7 +966,7 @@ async function drawCmpChart() {
   const all = data.flatMap(d => d.pts), lost = data.filter(d => d.lost).map(d => d.c.name);
   cmpData = { ind, data, years: [...new Set(all.map(p => p[0]))].sort((a, b) => a - b) };
   const marked = mode() === 'year' ? ` The rule marks ${view.to}.` : mode() === 'period' ? ` The band marks ${whenText()}.` : '';
-  $('#cmpcap').textContent = `${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : lost.length ? 'not loaded' : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked}${lost.length ? ` The figures for ${lost.join(', ')} could not load.` : ''} Source: World Bank.`;
+  $('#cmpcap').innerHTML = esc(`${ind.label} (${ind.unit}), ${cmpData.years.length ? `${cmpData.years[0]}–${cmpData.years.at(-1)}` : lost.length ? 'not loaded' : 'no data'}, for ${data.map(d => d.c.name).join(', ')}. ${ind.better ? (ind.better === 'up' ? 'Higher is better. ' : 'Lower is better. ') : ''}The line joins the years that have a value.${marked}${lost.length ? ` The figures for ${lost.join(', ')} could not load.` : ''} Source: World Bank.`) + originatorNote(code);
   drawCmpTable();
   // Drawn at the figure's real width, so text stays at its set size; redrawn when the window resizes.
   const W = Math.max(300, Math.round(svg.node().getBoundingClientRect().width || 900)), H = W < 560 ? 240 : 300;

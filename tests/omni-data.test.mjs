@@ -229,16 +229,55 @@ test('battles: Fornovo and Agnadello at their recorded dates, calendars and poin
   assert.equal(battles.from, Math.min(...battles.rows.map(r => r.sortYear))); assert.equal(battles.to, Math.max(...battles.rows.map(r => r.sortYear)));
 });
 
-test('sources.json v1: 5.1\'s fields; cite-only entries agree with cite-only.mjs both ways', () => {
+// The 42 sources of the licence inventory (VM-DATA-LICENCES-18NOV.md, 18 November 2026), each named in sources.json by
+// its `inventory` field (MP-11, built 20 November 2026). A source may have more than one entry (UCDP's four datasets).
+const INVENTORY = [
+  'CShapes 2.0', 'Correlates of War', 'EOxCloudless', 'OpenSanctions',
+  'Archigos', 'Gleditsch and Ward', 'PRIO Battle Deaths', 'Media Bias/Fact Check', 'AllSides', 'Yahoo Finance', 'ApeWisdom', 'CoinGecko',
+  'Publishers’ headlines and feeds', 'Esri tiles', 'Kardashev estimates', 'Energy Institute', 'flagcdn', 'OpenFIGI', 'adsb.lol',
+  'US House transaction reports', 'countrycode',
+  'UCDP', 'Natural Earth', 'Wikidata', 'Wikipedia', 'World Bank WDI and WGI', 'Cliopatria', 'MapLibre GL JS', 'Leaflet', 'D3', 'GDELT',
+  'OpenStreetMap and Nominatim', 'Econlib Böhm-Bawerk', 'Maddison Project', 'Our World in Data', 'arXiv metadata', 'SEC EDGAR', 'USGS',
+  'NASA GIBS and FIRMS', 'congress-legislators', 'Wikimedia Commons', 'Bibliotheca texts',
+];
+const LATER = ['Media Bias/Fact Check', 'AllSides', 'Yahoo Finance', 'ApeWisdom', 'CoinGecko', 'Publishers’ headlines and feeds', 'US House transaction reports'];
+
+test('sources.json v1: 5.1\'s fields, each source\'s standing and terms class; cite-only entries agree with cite-only.mjs both ways', () => {
   assert.equal(sources.format, 'vm-sources/1');
   const list = sources.sources, byId = Object.fromEntries(list.map(s => [s.id, s]));
   assert.equal(new Set(list.map(s => s.id)).size, list.length, 'ids unique');
   for (const s of list) {
-    for (const k of ['id', 'citation', 'short', 'version', 'licence', 'url', 'accessed', 'terms', 'termsUrl', 'termsQuote', 'termsRead']) assert.ok(typeof s[k] === 'string' && s[k].trim(), `${s.id}: ${k}`);
-    assert.ok(['host', 'cite-only'].includes(s.terms), `${s.id}: terms`);
-    assert.match(s.accessed, /^\d{4}-\d\d-\d\d$/); assert.match(s.termsRead, /^\d{4}-\d\d-\d\d$/);
+    for (const k of ['id', 'citation', 'short', 'licence', 'url', 'terms', 'standing', 'termsUrl', 'termsRead']) assert.ok(typeof s[k] === 'string' && s[k].trim(), `${s.id}: ${k}`);
+    // host: VM may host its values; cite-only: VM may cite and link, hosting none of its rows; not-held: VM holds and
+    // shows none of it (retired, or read live by the visitor on the visitor's own terms); pending: held, with a plain
+    // line on the page, until VM's owner decides; later: the owner's standing choice to deal with it later.
+    assert.ok(['host', 'cite-only', 'not-held', 'pending', 'later'].includes(s.terms), `${s.id}: terms`);
+    assert.ok(['free', 'not-free', 'unclear'].includes(s.standing), `${s.id}: standing`);
+    if (s.standing === 'free') assert.equal(s.terms, 'host', `${s.id}: a free source may be hosted`);
+    if (s.terms === 'host') assert.notEqual(s.standing, 'not-free', `${s.id}: a source that is not free is not hosted`);
+    assert.ok(typeof s.termsQuote === 'string' && s.termsQuote.trim() || typeof s.termsNotRead === 'string' && s.termsNotRead.trim(), `${s.id}: the deciding words, or why they could not be read`);
+    if (['host', 'cite-only'].includes(s.terms)) for (const k of ['version', 'accessed']) assert.ok(typeof s[k] === 'string' && s[k].trim(), `${s.id}: ${k}`);
+    if (s.accessed) assert.match(s.accessed, /^\d{4}-\d\d-\d\d$/);
+    assert.match(s.termsRead, /^\d{4}-\d\d-\d\d$/);
     assert.match(s.url, /^https:\/\//); assert.match(s.termsUrl, /^https?:\/\//);
+    if (['pending', 'later', 'not-held'].includes(s.terms)) assert.ok(typeof s.where === 'string' && s.where.trim(), `${s.id}: where VM uses it, or used it`);
+    if (s.terms === 'pending') assert.ok(typeof s.decision === 'string' && /VM’s owner/.test(s.decision), `${s.id}: what waits on VM’s owner`);
+    if (s.terms === 'not-held') assert.equal(s.held, false, `${s.id}: not held`);
   }
+  // Every source of the inventory is here, on its terms as read; the "later" list is Jude's and stays as it is.
+  const named = new Map();
+  for (const s of list) for (const n of [].concat(s.inventory || [])) (named.get(n) || named.set(n, []).get(n)).push(s);
+  assert.deepEqual(INVENTORY.filter(n => !named.has(n)), [], 'every inventory source has an entry');
+  assert.deepEqual([...named.keys()].filter(n => !INVENTORY.includes(n)), [], 'no entry names a source the inventory lacks');
+  assert.equal(INVENTORY.length, 42);
+  for (const n of LATER) assert.ok(named.get(n).every(s => s.terms === 'later'), `${n}: later`);
+  for (const n of ['CShapes 2.0', 'Correlates of War', 'EOxCloudless', 'OpenSanctions']) assert.ok(named.get(n).every(s => s.standing === 'not-free' && s.terms !== 'host'), `${n} bars commercial use`);
+  assert.equal(byId.eoxcloudless.terms, 'not-held'); assert.equal(byId.opensanctions.terms, 'not-held');
+  assert.equal(byId.cow.held, false); assert.match(byId.cow.where, /no longer used/i);
+  assert.match(byId.cshapes.where, /no longer read/i);
+  assert.match(byId['world-bank-wdi'].originators, /IEA|International Energy Agency/);
+  assert.equal(byId['nasa-gibs'].standing, 'free'); assert.match(byId['nasa-gibs'].termsQuote, /Creative Commons Zero/);
+  for (const id of ['sipri', 'iea', 'ihme', 'itu']) assert.equal(byId[id]?.terms, 'pending', `${id}: the World Bank series resting on it wait on VM’s owner`);
   for (const id of ['cliopatria', 'natural-earth', 'wikidata']) assert.equal(byId[id]?.terms, 'host', `${id} may be hosted`);
   assert.equal(byId.cliopatria.version, 'v0.2.1'); assert.equal(byId.cliopatria.licence, 'CC BY 4.0');
   assert.match(byId.cliopatria.termsQuote, /permits use, sharing, adaptation, distribution and reproduction in any medium or format/);
@@ -251,6 +290,32 @@ test('sources.json v1: 5.1\'s fields; cite-only entries agree with cite-only.mjs
     assert.equal(s.termsUrl, src.terms); assert.equal(s.termsQuote, src.words); assert.equal(s.termsRead, src.read);
   }
   for (const s of list.filter(x => x.terms === 'cite-only')) assert.ok(CITE_ONLY[s.id], `${s.id}: a cite-only source is listed in cite-only.mjs`);
+});
+
+// MP-11, built 20 November 2026: the Hub's licence lines say what each source's own terms say (read that day). The
+// catalogue is rebuilt from build-catalog.mjs, so its words are checked at their source; the Hub's table likewise.
+test('the Hub\'s licence lines and table say what each source\'s terms say', () => {
+  const cat = raw('integration/scripts/build-catalog.mjs').toString('utf8');
+  assert.doesNotMatch(cat, /PRIO Battle Deaths free to use/, 'PRIO’s page states no licence');
+  assert.doesNotMatch(cat, /Energy Institute \/ Our World in Data \(CC BY 4\.0\)/);
+  assert.doesNotMatch(cat, /state names from CShapes/i, 'the Retrospective Battlefield’s names come from Wikidata now');
+  assert.doesNotMatch(cat, /borders\.topo\.json|history\/names\.mjs/, 'the catalogue reads places.json, not the CShapes borders');
+  assert.doesNotMatch(cat, /HOSTED|COW_SEE|cowWars1926_45/, 'no Correlates of War pointer is needed');
+  assert.match(cat, /listed_wars_1926_1945: c\.conflict\.wars1926_45/);
+  assert.match(cat, /battlefield\/history\/data\/places\.json/);
+  const focus = cat.match(/const focusLicence = '([^']+)'/)[1];
+  assert.match(focus, /PRIO Battle Deaths[^;]*states no licence/); assert.match(focus, /VM’s owner decides/);
+  assert.doesNotMatch(focus, /Correlates of War/);
+  assert.match(cat, /MS\.MIL\.XPND\.GD\.ZS[^\n]*SIPRI/, 'the key series name the SIPRI terms');
+  const hub = raw('integration/index.html').toString('utf8');
+  const row = name => hub.split('\n').find(l => l.includes(`<td>${name}</td>`)) || '';
+  assert.doesNotMatch(row('UCDP (Uppsala Conflict Data Program), PRIO'), /./, 'UCDP and PRIO have rows of their own');
+  for (const [name, words] of [['UCDP (Uppsala Conflict Data Program)', /CC BY 4\.0/], ['PRIO Battle Deaths Dataset', /states no licence/], ['Esri map tiles', /Esri Master License Agreement/],
+    ['NASA GIBS and FIRMS', /CC0/], ['OpenSanctions', /CC BY-NC 4\.0/], ['Archigos', /states no licence/], ['Energy Institute Statistical Review', /could not be read/],
+    ['SIPRI, IEA, IHME and ITU (seven World Bank series)', /commercial/], ['Cliopatria', /CC BY 4\.0/], ['Natural Earth', /public domain/i]])
+    assert.match(row(name), words, `the Hub’s row for ${name}`);
+  assert.match(row('CShapes 2.0'), /no longer/);
+  assert.match(hub, /integration\/sources\.json/, 'the table points to the full record');
 });
 
 test('no value from a cite-only source anywhere under omni/data', () => {

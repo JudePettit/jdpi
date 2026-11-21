@@ -84,8 +84,9 @@ In wartime, publishing **where defence forces are** can kill. Ukraine, for examp
 | Planet | Commercial licence; publication depends on your plan | As your licence specifies |
 | Umbra, Capella and Satellogic open data | CC BY 4.0 | The provider and the licence |
 | Google Earth and Maps | Allowed for many editorial and non-commercial uses with the attribution visible | Keep Google's and the provider's credit; see the Geo guidelines |
-| Esri World Imagery and Wayback | Esri's terms of use | "Esri, Vantor, Earthstar Geographics" as shown on the map |
-| EOxCloudless Sentinel-2 mosaic | CC BY-NC-SA 4.0 for non-commercial use | "EOxCloudless [year] by EOX IT Services GmbH (contains modified Copernicus Sentinel data)" |
+| NASA Global Web-Enabled Landsat Data (GWELD) v3.1, this dashboard’s free satellite base | CC0: NASA’s data use guidance says data "from a NASA-led mission are licensed as Creative Commons Zero (CC0)" | "NASA GWELD v3.1 (Roy and Zhang, LP DAAC), through NASA EOSDIS GIBS" |
+| Esri World Imagery, Canvas, labels and Wayback | The Esri Master License Agreement, Esri’s own terms, which are not a free licence; this dashboard keeps its Esri base maps until VM’s owner decides | "Esri, Vantor, Earthstar Geographics, and the GIS User Community" as shown on the map |
+| EOxCloudless Sentinel-2 mosaic (no longer on this dashboard) | Free for non-commercial use only; commercial use needs a paid licence from EOX | "EOxCloudless [year] by EOX IT Services GmbH (contains modified Copernicus Sentinel data)" |
 | OpenStreetMap | Open Database Licence (ODbL) | "© OpenStreetMap contributors", and share-alike for databases you derive |
 | Mapillary and KartaView photos | CC BY-SA 4.0 | The contributor, the platform and the licence |
 | Your own drone or ground photos | Yours | But the privacy rules above still apply to people in them |

@@ -30,7 +30,7 @@ import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { writeHeads } from '../../integration/scripts/heads.mjs';
 import { scorePeriod as scoreWith, latestPick, decadePick } from '../lib/pestle.js';
 import { yearsFiles, writeYears } from './years.mjs';
-import { leadership as leadershipOf, conflict as conflictOf, retroCodes, gwCodes, officeTerm } from './overview.mjs';
+import { leadership as leadershipOf, conflict as conflictOf, retroCodes, gwCodes, officeTerm, placeKeys } from './overview.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const jdpi = resolve(here, '../..');
@@ -51,6 +51,37 @@ async function getJson(url, init = {}) {
   throw new Error('Failed: ' + url.slice(0, 120));
 }
 const round = (x, d = 3) => (x == null ? null : Math.round(x * 10 ** d) / 10 ** d);
+
+// ---- The Retrospective (hp-retrospective), in either of its shapes (overview.mjs retroCodes): its records for a country.
+const RETRO_MOD = existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : {};
+const RETRO_COUNTRIES = RETRO_MOD.COUNTRIES || {}, RETRO_OLD_KEYS = RETRO_MOD.OLD_KEYS || null;
+const retro = existsSync(join(retroDir, 'data/countries.json')) ? json(join(retroDir, 'data/countries.json')) : { countries: {} };
+const retroRecords = iso3 => retroCodes(RETRO_COUNTRIES, iso3).map(k => retro.countries[k]).filter(Boolean);
+// The record that holds the country now: the one whose cover runs to today (spans, from 20 November 2026), else the last.
+const retroNow = iso3 => { const rs = retroRecords(iso3); return rs.find(r => (r.spans || []).some(([, e]) => !e)) || rs.at(-1) || null; };
+// That record's key in the Retrospective (its first Wikidata item, under 'retro-countries/2'), which the page's link to
+// the Retrospective opens (#c=<key>; 20 November 2026, MP-11: in place of a Gleditsch and Ward number). Null where the
+// Retrospective does not cover the country, or still keys it by number.
+const retroKey = iso3 => { const now = retroNow(iso3); const k = now && retroCodes(RETRO_COUNTRIES, iso3).find(x => retro.countries[x] === now); return typeof k === 'string' ? k : null; };
+const wars = json(join(jdpi, 'battlefield/history/data/wars.json')).wars;
+
+// --overview-only (20 November 2026): each committed country's conflict figures again from the Retrospective
+// Battlefield's wars.json, by Wikidata item (overview.mjs placeKeys and conflict), its wars this year kept as built, and
+// each country's key in the Retrospective (retro, retroKey above); nothing else is read or fetched. Order of steps: read the committed index, the Retrospective and wars.json; count;
+// write index.json once every country is done, then index.head.json from it.
+if (process.argv.includes('--overview-only')) {
+  const idx = json(join(OUT, 'index.json'));
+  for (const c of idx.countries) {
+    c.retro = retroKey(c.iso3);
+    if (!c.conflict) continue;
+    const { active2026 } = c.conflict;
+    c.conflict = { ...conflictOf(placeKeys(c.iso3, c.qid, retroRecords(c.iso3)), wars), active2026 };
+  }
+  writeFileSync(join(OUT, 'index.json'), JSON.stringify(idx));
+  writeHeads(join(OUT, 'index.json'), { root: jdpi }); // index.head.json in step with it; brief.json reads only active2026, kept
+  console.log(`conflict figures again for ${idx.countries.filter(c => c.conflict).length} countries; Germany's wars of 1926–45: ${idx.countries.find(c => c.iso3 === 'DEU')?.conflict?.wars1926_45}`);
+  process.exit(0);
+}
 
 // ---- Countries: World Bank list (non-aggregates) + Wikidata codes and government
 const wbCountries = (await getJson('https://api.worldbank.org/v2/country?format=json&per_page=400'))[1].filter(c => c.region.id !== 'NA');
@@ -167,8 +198,6 @@ for (const ind of INDICATORS) {
 const scorePeriod = (s, pick) => scoreWith(s, pick, INDICATORS, DIMENSIONS);
 
 // ---- JDP-I data for the overview
-const { COUNTRIES: RETRO_COUNTRIES } = existsSync(join(retroDir, 'scripts/countries.mjs')) ? await import(pathToFileURL(join(retroDir, 'scripts/countries.mjs')).href) : { COUNTRIES: {} };
-const retro = existsSync(join(retroDir, 'data/countries.json')) ? json(join(retroDir, 'data/countries.json')) : { countries: {} };
 // Gleditsch–Ward codes for every state (the codes UCDP uses), from the countrycode project's code list. An error page
 // would parse to no rows and cost about a hundred countries their codes, conflict history and wars this year.
 // Read at a fixed commit, not the moving main branch, so an upstream change cannot alter the codes unseen. To update,
@@ -181,26 +210,24 @@ const codelist = parseCsv(await codes.text());
 const nameKey = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\(.*?\)/g, '').replace(/[^a-z]/g, '');
 // The Retrospective's codes first, then the code list's, then a predecessor's row where the code list files a present
 // state's code there (Yemen, 678: overview.mjs GW_PREDECESSOR).
-const gwByIso3 = gwCodes(RETRO_COUNTRIES, codelist, msg => console.warn(msg));
+const gwByIso3 = gwCodes(RETRO_COUNTRIES, codelist, msg => console.warn(msg), RETRO_OLD_KEYS);
 const aliasToIso3 = new Map();
 for (const r of codelist) if (r.iso3c) aliasToIso3.set(nameKey(r['country.name.en']), r.iso3c);
 // UCDP's own country names that differ from the code list's.
 for (const [n, iso] of Object.entries({ 'DR Congo': 'COD', Congo: 'COG', Russia: 'RUS', 'Ivory Coast': 'CIV', Myanmar: 'MMR', Yemen: 'YEM', Iran: 'IRN', Syria: 'SYR', Laos: 'LAO', 'South Korea': 'KOR', 'North Korea': 'PRK', 'United States of America': 'USA', 'Bosnia-Herzegovina': 'BIH', 'Kingdom of eSwatini': 'SWZ', Cambodia: 'KHM', Madagascar: 'MDG', Zimbabwe: 'ZWE', Serbia: 'SRB', Vietnam: 'VNM', Turkey: 'TUR', Egypt: 'EGY', Venezuela: 'VEN', Gambia: 'GMB', 'South Sudan': 'SSD', 'Central African Republic': 'CAF' })) aliasToIso3.set(nameKey(n), iso);
-const wars = json(join(jdpi, 'battlefield/history/data/wars.json')).wars;
 const realtime = json(join(jdpi, 'battlefield/data/realtime.json'));
 const energy = json(join(jdpi, 'kardashev/data/energy.json'));
 const KARDASHEV = { USA: 'usa', CHN: 'prc', IND: 'india', RUS: 'russia', JPN: 'japan', GBR: 'uk' };
 const lakeIdx = existsSync(join(jdpi, 'lake/data/index.json')) ? new Set(json(join(jdpi, 'lake/data/index.json')).rows.map(r => r[0])) : new Set();
 const calendar = ['1980s', '1990s', '2000s', '2010s', '2020s'].flatMap(d => existsSync(join(jdpi, `calendar/data/${d}.json`)) ? json(join(jdpi, `calendar/data/${d}.json`)).events : []);
 
-// Leadership and conflict (overview.mjs), under every code the Retrospective files the country under (Germany: 255 to
-// 1945 and 260 from 1949), or the code list's one code where the Retrospective has none.
-const codesOf = (iso3, gw) => { const cs = retroCodes(RETRO_COUNTRIES, iso3); return cs.length ? cs : gw != null ? [gw] : []; };
-const leadership = (iso3, gw, current, term) => leadershipOf(codesOf(iso3, gw).map(g => retro.countries[g]), current, TODAY, term);
+// Leadership (overview.mjs), over every record the Retrospective files the country under (Germany: two, to 1945 and
+// from 1949), under either of its shapes; conflict by Wikidata item (placeKeys), not by code.
+const leadership = (iso3, current, term) => leadershipOf(retroRecords(iso3), current, TODAY, term);
 // The Realtime Battlefield's quiet group ("other-recorded": under 25 deaths in a country this year, many countries in
 // one group) is not a war active in any one of them, and its deaths are the whole group's: it is left out here.
-const conflict = (iso3, gw) => conflictOf(codesOf(iso3, gw), wars, realtime.wars.filter(w => w.id !== 'other-recorded' && w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
-function nameOfGw(gw) { return (retro.countries[gw]?.name || '').replace(/ \/.*$/, ''); }
+const conflict = (iso3, qid) => conflictOf(placeKeys(iso3, qid, retroRecords(iso3)), wars, realtime.wars.filter(w => w.id !== 'other-recorded' && w.countries.some(n => aliasToIso3.get(nameKey(n)) === iso3)));
+const retroName = iso3 => (retroNow(iso3)?.name || '').replace(/ \/.*$/, '');
 
 // ---- The guard, against the committed index. An indicator's coverage is the countries with a latest value, which
 // they have exactly when their series has a point. World Bank revisions move a few countries, a failed or deprecated
@@ -213,7 +240,7 @@ const tally = (list, qid, gw, lead) => ({ countries: list.length, 'with Wikidata
 refuseIfLost([
   ...lostCounts(coverage, covered).map(x => `${x} countries`),
   ...lostCounts(tally(OLD.countries, c => c.qid, c => c.gw != null, c => c.leadership),
-    tally(wbCountries, c => wdBy.has(c.id), c => gwByIso3.has(c.id), c => retro.countries[gwByIso3.get(c.id)]), { keep: 0.9 }),
+    tally(wbCountries, c => wdBy.has(c.id), c => gwByIso3.has(c.id), c => retroRecords(c.id).length), { keep: 0.9 }),
   // The heads query is a second request: a failed or changed one would leave every country without heads.
   ...lostCounts({ 'with a head of state': OLD.countries.filter(c => c.headOfState).length, 'with a head of government': OLD.countries.filter(c => c.headOfGovernment).length },
     { 'with a head of state': wbCountries.filter(c => heads.get(c.id)?.headOfState).length, 'with a head of government': wbCountries.filter(c => heads.get(c.id)?.headOfGovernment).length }, { keep: 0.9 }),
@@ -223,7 +250,7 @@ refuseIfLost([
 const countries = [], seriesFiles = [];
 for (const c of wbCountries) {
   const s = series.get(c.id), w = wdBy.get(c.id) || {}, gw = gwByIso3.get(c.id);
-  const h = heads.get(c.id) || {}, rc = gw != null ? retro.countries[gw] : null;
+  const h = heads.get(c.id) || {}, rc = retroNow(c.id);
   const ar = atlas?.get(c.id) || null, sameOffice = [...(w.hosOffices || [])].some(o => w.hogOffices.has(o));
   const vacant = [...(h.vacant || [])];
   // The Atlas's "Vacant" counts where National Analysis has no holder either (Haiti's head of state).
@@ -237,12 +264,16 @@ for (const c of wbCountries) {
   leaderLog.push({ iso3: c.id, country: c.name, office: choice.office, rule: choice.rule, leader: leader?.name || null });
   const latest = scorePeriod(s, latestPick);
   const decades = Object.fromEntries([1980, 1990, 2000, 2010, 2020].map(d => { const x = scorePeriod(s, decadePick(d)); return [d, { pressure: x.pressure, overall: x.overall, coverage: x.coverage }]; }));
-  const calEvents = calendar.filter(e => e.country === c.name || e.country === nameOfGw(gw) || aliasToIso3.get(nameKey(e.country)) === c.id);
+  const calEvents = calendar.filter(e => e.country === c.name || (retroName(c.id) && e.country === retroName(c.id)) || aliasToIso3.get(nameKey(e.country)) === c.id);
   const ks = KARDASHEV[c.id] ? energy.steps.at(-1).polities.find(p => p.id === KARDASHEV[c.id]) : null;
   const people = peopleInIndex({ headOfStateQid: h.headOfState?.qid, headOfGovernmentQid: h.headOfGovernment?.qid, leader }, q => lakeIdx.has(q));
   countries.push({
     iso3: c.id, iso2: c.iso2Code, num: w.num || null, name: c.name, region: c.region.value, income: c.incomeLevel.value, capital: w.capital || c.capitalCity || null,
-    qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, gw: gw ?? null,
+    qid: w.qid || null, encyclopedia: w.qid && lakeIdx.has(w.qid) ? w.qid : null, retro: retroKey(c.id),
+    // The Gleditsch and Ward number stays for the builders that still read one (battlefield/scripts/build-realtime.mjs,
+    // monthly/scripts/build.mjs and integration/scripts/coverage.mjs, through UCDP's own country codes); the page reads
+    // none (MP-11, 20 November 2026).
+    gw: gw ?? null,
     government: [...(w.gov || [])].slice(0, 4), headOfState: plainName(h.headOfState?.name) || null, headOfGovernment: plainName(h.headOfGovernment?.name) || null, // NA-03: shown without the realm
     headOfStateQid: h.headOfState?.qid || null, headOfGovernmentQid: h.headOfGovernment?.qid || null,
     ...(h.regent?.name ? { regent: plainName(h.regent.name), regentQid: h.regent.qid || null } : {}), // who exercises the head of state's powers for him (a 'regent' correction)
@@ -250,8 +281,8 @@ for (const c of wbCountries) {
     ...(vacant.length ? { vacant } : {}), // offices with no holder now: the page shows "Vacant"
     leader: shown, // the current leader, { name, qid, office, rule, since, party, url, source }, or null (leaders.mjs)
     latest: latest.items, pressure: latest.pressure, overall: latest.overall, coverage: latest.coverage, decades,
-    leadership: rc ? leadership(c.id, gw, shown, officeTerm(w.terms?.[shown?.office])) : null,
-    conflict: gw != null ? conflict(c.id, gw) : null,
+    leadership: rc ? leadership(c.id, shown, officeTerm(w.terms?.[shown?.office])) : null,
+    conflict: gw != null ? conflict(c.id, w.qid || null) : null,
     calendar: calEvents.length ? Object.fromEntries(['election', 'referendum', 'party', 'leader', 'inauguration', 'resignation', 'coup', 'conflict', 'ceasefire', 'assassination', 'crisis', 'protest', 'treaty', 'summit', 'sanctions', 'vote', 'court'].map(t => [t, calEvents.filter(e => e.type === t).length])) : null,
     energyShare: ks ? round(ks.share, 4) : null,
   });

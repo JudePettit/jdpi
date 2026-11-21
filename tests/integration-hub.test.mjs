@@ -133,8 +133,9 @@ describe('catalogue (integration/catalog.json)', () => {
   });
   // S0, 16 November 2026: the Correlates of War's terms (read that day, integration/scripts/cite-only.mjs) bar
   // redistributing its data without written permission, where the catalogue called it "free to use with citation" and
-  // offered its 40 wars of 1926–1945 row by row. No download carries a cite-only source's rows; what still names one is
-  // a cited total with the citation and link, or held for Jude's choice with the reason; no licence calls it free.
+  // offered its 40 wars of 1926–1945 row by row. No download carries a cite-only source's rows, and no licence calls it
+  // free. Since MP-11 (Jude, 17 November 2026: free data only; built 20 November) HOSTED is empty: no cited total, no
+  // pointer and nothing held for a choice, so any file that still names a cite-only source fails here.
   test('no hosted value from a cite-only source: no download carries its rows, and no licence calls it free', async () => {
     const { CITE_ONLY, HOSTED, namesSource, claimsFree, pointerProblems } = await imp('integration/scripts/cite-only.mjs');
     for (const [id, src] of Object.entries(CITE_ONLY)) {
@@ -159,11 +160,14 @@ describe('catalogue (integration/catalog.json)', () => {
       }
     }
     // The second reader (16 November 2026): VM's own data names COW by its id ("src": "cow" on the Retrospective
-    // Battlefield's rows), and a value can come from COW under a key that says so (the count of COW wars 1926–1945 in
-    // the country profiles) with no provenance field at all. Both are seen, in every file the Hub serves under
-    // integration/data, not only in the catalogue's datasets; each is listed in HOSTED.
-    const wwii = JSON.parse(readFileSync(join(ROOT, 'battlefield/history/data/wars.json'), 'utf8')).wars.find(w => w.src === 'cow' && /World War II/.test(w.name));
-    assert.ok(wwii && namesSource(wwii, CITE_ONLY.cow), 'a row VM labels src: "cow" names the Correlates of War');
+    // Battlefield's rows, to 20 November 2026), and a value can come from COW under a key that says so (the count of COW
+    // wars 1926–1945 in the country profiles) with no provenance field at all. Both are seen, in every file the Hub
+    // serves under integration/data, not only in the catalogue's datasets.
+    assert.deepEqual(HOSTED, [], 'MP-11: no hosted value from a cite-only source');
+    const history = JSON.parse(readFileSync(join(ROOT, 'battlefield/history/data/wars.json'), 'utf8'));
+    assert.ok(!history.wars.some(w => w.src === 'cow') && !namesSource(history, CITE_ONLY.cow), 'the Retrospective Battlefield names no Correlates of War row');
+    assert.ok(history.wars.some(w => w.src === 'wikidata' && /World War II/.test(w.name)), 'its Second World War is from Wikidata');
+    assert.ok(namesSource({ src: 'cow', name: 'World War II' }, CITE_ONLY.cow), 'a row VM labels src: "cow" names the Correlates of War');
     assert.ok(namesSource({ conflict_history: { wars_1926_1945: 2 } }, CITE_ONLY.cow), 'a field that carries a COW count names it');
     assert.ok(!namesSource({ id: 'u1', src: 'ucdp', name: 'cow war' }, CITE_ONLY.cow));
     // The second reviewer (17 November 2026, X4): a value inside a provenance key is provenance however deep it sits, so
@@ -202,24 +206,20 @@ describe('catalogue (integration/catalog.json)', () => {
       assert.match(d.licence, /awaits a decision/, `${d.id}: its licence says the ${CITE_ONLY[h.source].name} values in it await a decision`);
       for (const u of d.urls || [d.url]) if (u.startsWith('integration/data/')) assert.equal(J(u).licence, d.licence, `${u}: the file's licence is the catalogue's`);
     }
-    // The monthly deaths: since Jude's decision F1 (17 November 2026), the nine COW wars' months say where to read the
-    // figures, not VM's spread of COW's totals. The check fails on a month that still holds a number (a fixture).
-    const monthly = HOSTED.find(h => h.dataset === 'war-focus-monthly-deaths');
-    assert.equal(monthly?.kind, 'pointer');
+    // The monthly deaths: from Jude's decision F1 (17 November 2026) to MP-11, the nine COW wars' months said where to
+    // read the figures; since 20 November they carry no figure and name no source but the free ones. The pointer check
+    // itself still finds a month that holds a number (a fixture).
+    const monthly = { dataset: 'war-focus-monthly-deaths', kind: 'pointer', fields: ['deaths'], says: 'not given here: see the notes' };
     const cowRow = { war_id: 'chaco', war: 'Chaco War', month: '1932-09', deaths: 4119, estimated: true, source: 'Correlates of War war total, spread across months by recorded battles' };
     assert.equal(pointerProblems([cowRow], monthly, CITE_ONLY.cow).length, 1, 'a COW month with a number is found');
     assert.equal(pointerProblems([{ ...cowRow, deaths: monthly.says, source: 'Correlates of War war total; China 1,350,000 battle deaths' }], monthly, CITE_ONLY.cow).length, 1, 'and a COW figure written into its words');
     assert.deepEqual(pointerProblems([{ ...cowRow, deaths: monthly.says }, { ...cowRow, war_id: 'iraq-war', deaths: 900, estimated: false, source: 'UCDP Georeferenced Event Dataset' }], monthly, CITE_ONLY.cow), [], 'its words, or another source\'s number, pass');
     assert.doesNotMatch(CAT.datasets.find(d => d.id === 'war-focus-monthly-deaths').licence, /estimated spread of those totals over months/);
-    // Those months describe no spread the file does not carry (the second reader's F5, 17 November 2026): no estimate
-    // flag, and source words that say the total is not given here, not "spread across months by recorded battles".
-    const cowMonths = recordsOf('war-focus-monthly-deaths').filter(r => r.deaths === monthly.says);
-    assert.ok(cowMonths.length > 400, `${cowMonths.length} COW months`);
-    for (const r of cowMonths) {
-      assert.equal(r.estimated, null, `${r.war_id} ${r.month}: estimated`);
-      assert.ok(/not given here: see the notes/.test(r.source) && !/spread across/.test(r.source), `${r.war_id} ${r.month}: ${r.source}`);
+    // No month of War Focus's own files names the Correlates of War (its nine wars before 1946 have no figure).
+    for (const m of JSON.parse(readFileSync(join(ROOT, 'battlefield/focus/data/index.json'), 'utf8')).wars) {
+      const w = JSON.parse(readFileSync(join(ROOT, `battlefield/focus/data/wars/${m.id}.json`), 'utf8'));
+      assert.ok(!namesSource(w, CITE_ONLY.cow) && !/Correlates of War/.test(w.deathsSource || ''), `${m.id}: names the Correlates of War`);
     }
-    assert.ok(!/source column names the total/.test(J('integration/data/war-focus-monthly-deaths/0.json').notes?.join(' ') ?? ''), 'the notes describe the source column as it is');
     // The 1926–1945 wars are out of the Retrospective Battlefield's download; its UCDP/PRIO conflicts stay.
     const rw = recordsOf('retrospective-wars');
     assert.ok(rw.length > 250 && rw.every(r => r.dataset === 'UCDP/PRIO' && /^u/.test(r.id)), 'retrospective-wars holds UCDP/PRIO rows only');

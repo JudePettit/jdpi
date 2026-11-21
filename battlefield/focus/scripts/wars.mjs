@@ -1,37 +1,36 @@
-// War Focus: the major wars since 1926 (25,000+ battle deaths), curated from Correlates of War (before 1946), the PRIO
-// Battle Deaths Dataset (1946–2008) and UCDP (1989 on). Each entry says where its deaths come from and which UCDP
-// conflicts' geolocated events (GED, 1989 on) belong to it; battles come from Wikidata ("part of" the war).
-//   deaths: { cow: id } | { prio: [ids] } | { ucdp: true, prio?: [ids] }  (PRIO's annual totals where it has the year,
-//           otherwise UCDP GED events within the dates)
+// War Focus: the major wars since 1926 (25,000+ battle deaths), curated from the PRIO Battle Deaths Dataset (1946–88),
+// UCDP (1989 on) and, before 1946, the wars Wikipedia and Wikidata describe. Each entry says where its deaths come from
+// and which UCDP conflicts' geolocated events (GED, 1989 on) belong to it; battles come from Wikidata ("part of" the war).
+//   deaths: {} | { prio: [ids] } | { ucdp: true, prio?: [ids] }  ({} : no free source gives the war's battle deaths, so
+//           none is shown (the nine wars before 1946; VM uses only free data since 20 November 2026). Otherwise annual
+//           totals where a source has the year: PRIO's to 1988, UCDP's Battle-Related Deaths v26.1 from 1989 (by the
+//           war's `ged` conflicts, else its bf u<id>); otherwise UCDP GED events within the dates)
 //   ged: UCDP conflict ids whose state-based events within [start, end] are mapped
 //   sides: a and b, each a label and the CShapes (Gleditsch–Ward) states fighting on that side, optionally with dates
 //          ([gw, from, to]); civil wars list the contested state under `theatre` instead.
 //   control: country-level occupation by date (WWII only), as [gw, side, from, to].
-//   bf: the war's id in Retrospective Battlefield when it isn't c<COW id> or u<first GED conflict id>.
+//   bf: the war's id in Retrospective Battlefield when it isn't u<first GED conflict id> (before 1946, its Wikidata id).
 //   deathsNote: what the deaths source says about the war that its figures alone do not (shown with the source).
 // Dates are ISO; `end: null` means ongoing.
 const ALLIES = 'Allies', AXIS = 'Axis';
 export const WARS = [
-  { id: 'northern-expedition', name: 'Northern Expedition', wiki: 'Northern Expedition', start: '1926-07-09', end: '1928-12-29', deaths: { cow: 700 },
+  { id: 'northern-expedition', name: 'Northern Expedition', wiki: 'Northern Expedition', start: '1926-07-09', end: '1928-12-29', deaths: {}, bf: 'Q1073476',
     sides: { a: { label: 'National Revolutionary Army (KMT)', gw: [] }, b: { label: 'Beiyang warlords', gw: [] } }, theatre: [710] },
-  { id: 'chinese-civil-war-1', name: 'Chinese Civil War (1927–1936)', wiki: 'Chinese Civil War', start: '1927-08-01', end: '1936-12-12', deaths: { cow: 710 },
+  { id: 'chinese-civil-war-1', name: 'Chinese Civil War (1927–1936)', wiki: 'Chinese Civil War', start: '1927-08-01', end: '1936-12-12', deaths: {}, bf: 'Q179975',
     sides: { a: { label: 'Nationalists (KMT)', gw: [] }, b: { label: 'Communists (CCP)', gw: [] } }, theatre: [710] },
-  { id: 'manchuria', name: 'Japanese invasion of Manchuria', wiki: 'Japanese invasion of Manchuria', start: '1931-09-18', end: '1933-05-31', deaths: { cow: 121 },
+  { id: 'manchuria', name: 'Japanese invasion of Manchuria', wiki: 'Japanese invasion of Manchuria', start: '1931-09-18', end: '1933-05-31', deaths: {}, bf: 'Q1551794',
     sides: { a: { label: 'Japan', gw: [740, 730, 713] }, b: { label: 'China', gw: [710] } } },
-  { id: 'chaco', name: 'Chaco War', wiki: 'Chaco War', start: '1932-09-09', end: '1935-06-12', deaths: { cow: 124 },
+  { id: 'chaco', name: 'Chaco War', wiki: 'Chaco War', start: '1932-09-09', end: '1935-06-12', deaths: {}, bf: 'Q223126',
     sides: { a: { label: 'Bolivia', gw: [145] }, b: { label: 'Paraguay', gw: [150] } } },
-  { id: 'spanish-civil-war', name: 'Spanish Civil War', wiki: 'Spanish Civil War', start: '1936-07-17', end: '1939-04-01', deaths: { cow: 718 },
+  { id: 'spanish-civil-war', name: 'Spanish Civil War', wiki: 'Spanish Civil War', start: '1936-07-17', end: '1939-04-01', deaths: {}, bf: 'Q10859',
     sides: { a: { label: 'Republicans', gw: [] }, b: { label: 'Nationalists', gw: [] } }, theatre: [230, 602] },
-  // COW's war 130 ("Third Sino-Japanese") runs 7 July 1937 – 6 December 1941: China 750,000 and Japan 250,000 battle
-  // deaths. From 7 December 1941 COW counts the war in China within World War II (war 139), not separately.
-  { id: 'second-sino-japanese', name: 'Second Sino-Japanese War', wiki: 'Second Sino-Japanese War', start: '1937-07-07', end: '1945-09-02', deaths: { cow: 130 },
-    deathsNote: 'COW ends its war 130 on 6 December 1941 and counts the fighting after it within World War II (war 139: China 1,350,000 battle deaths, 7 December 1941 – 14 August 1945; Japan\'s are not split by front), so the months from 1942 have no separate figure',
+  { id: 'second-sino-japanese', name: 'Second Sino-Japanese War', wiki: 'Second Sino-Japanese War', start: '1937-07-07', end: '1945-09-02', deaths: {}, bf: 'Q170314',
     sides: { a: { label: 'China', gw: [710] }, b: { label: 'Japan', gw: [740, 730, 713] } } },
-  { id: 'khalkhin-gol', name: 'Battles of Khalkhin Gol', wiki: 'Battles of Khalkhin Gol', start: '1939-05-11', end: '1939-09-16', deaths: { cow: 136 },
+  { id: 'khalkhin-gol', name: 'Battles of Khalkhin Gol', wiki: 'Battles of Khalkhin Gol', start: '1939-05-11', end: '1939-09-16', deaths: {}, bf: 'Q188925',
     sides: { a: { label: 'Soviet Union & Mongolia', gw: [365, 712] }, b: { label: 'Japan & Manchukuo', gw: [740] } } },
-  { id: 'winter-war', name: 'Winter War', wiki: 'Winter War', start: '1939-11-30', end: '1940-03-13', deaths: { cow: 142 },
+  { id: 'winter-war', name: 'Winter War', wiki: 'Winter War', start: '1939-11-30', end: '1940-03-13', deaths: {}, bf: 'Q134949',
     sides: { a: { label: 'Finland', gw: [375] }, b: { label: 'Soviet Union', gw: [365] } } },
-  { id: 'ww2', name: 'World War II', wiki: 'World War II', start: '1939-09-01', end: '1945-09-02', deaths: { cow: 139 },
+  { id: 'ww2', name: 'World War II', wiki: 'World War II', start: '1939-09-01', end: '1945-09-02', deaths: {}, bf: 'Q362',
     sides: {
       a: { label: ALLIES, gw: [[290, '1939-09-01'], [200, '1939-09-03'], [220, '1939-09-03', '1940-06-22'], [220, '1944-08-25'], [900, '1939-09-03'], [920, '1939-09-03'],
         [750, '1939-09-03'], [775, '1939-09-03'], [780, '1939-09-03'], [651, '1939-09-03'], [625, '1939-09-03'], [501, '1939-09-03'], [500, '1939-09-03'], [510, '1939-09-03'],

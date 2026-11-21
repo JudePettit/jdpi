@@ -1010,17 +1010,19 @@ test('committed lake: War Focus’s atomic bombings read as War Focus counts the
   }
 });
 
-// S0, the second reader (16 November 2026): War Focus's wars whose deaths are a Correlates of War total read in the
-// Master Index as "… 16,634,907 battle deaths" with no word whose figure it is, where COW's terms keep only a cited
-// total (integration/scripts/cite-only.mjs). The line names the Correlates of War and the citation its terms ask for;
-// the line opens War Focus, whose panel and Sources give the citation with the link. The adapter writes it, and the
-// committed lake carries it (warfocus-refresh's --only battlefield and the monthly full build write the same).
-test('Master Index: a War Focus war whose deaths are a Correlates of War total names the source and its citation', async () => {
-  const { CITE_ONLY, HOSTED } = await import('../integration/scripts/cite-only.mjs');
-  const cow = CITE_ONLY.cow, focus = read('battlefield/focus/data/index.json');
-  assert.ok(cow.short && cow.citation.includes('Sarkees') && cow.short.includes('Resort to War'), 'a short form of the citation');
-  const cowWars = focus.wars.filter(w => cow.match.test(w.deathsSource || ''));
-  assert.ok(cowWars.length >= 9 && cowWars.some(w => w.id === 'ww2'), 'the COW wars are found by their deathsSource');
+// The free-data rule (Jude, MP-11, 17 November 2026; built 20 November): the Correlates of War's terms bar commercial use
+// and redistribution, so War Focus's nine wars before 1946 lost the COW totals they showed. Their Master Index line gives
+// the battles alone, with no figure and no word of COW (the adapter's deathsOf gives '' for a war with no total), and
+// cite-only.mjs lists nothing VM hosts from COW. Before 20 November the nine lines read "… battle deaths (the
+// Correlates of War …)".
+test('Master Index: War Focus’s wars before 1946 carry no battle-death figure and no war line names the Correlates of War', async () => {
+  const { HOSTED } = await import('../integration/scripts/cite-only.mjs');
+  assert.deepEqual(HOSTED, [], 'VM hosts nothing from a cite-only source');
+  const focus = read('battlefield/focus/data/index.json');
+  const early = focus.wars.filter(w => w.start < '1946');
+  assert.ok(early.length >= 9 && early.some(w => w.id === 'ww2'), 'the wars before 1946');
+  for (const w of focus.wars) assert.doesNotMatch(w.deathsSource || '', /Correlates of War|COW/, `${w.id}: ${w.deathsSource}`);
+  for (const w of early) assert.equal(w.totalDeaths, null, `${w.id}: no total`);
   const { battlefield } = await import('../lake/scripts/adapters.mjs');
   // The war's own line (an undated battle's line opens the same address, so a war is found by its own Wikidata ID).
   const warQ = new Map(focus.wars.map(w => [w.id, w.qid]));
@@ -1028,18 +1030,23 @@ test('Master Index: a War Focus war whose deaths are a Correlates of War total n
   for (const w of focus.wars) {
     const c = lines.get(w.id);
     assert.ok(c, `${w.id}: its line`);
-    if (cowWars.includes(w)) assert.ok(c.includes(`${w.totalDeaths.toLocaleString('en-GB')} battle deaths`) && c.includes('Correlates of War') && c.includes(cow.short), `${w.id}: ${c}`);
-    else assert.doesNotMatch(c, /Correlates of War/, `${w.id}: only a COW total names COW`);
+    assert.doesNotMatch(c, /Correlates of War/, `${w.id}: ${c}`);
+    if (w.totalDeaths == null) assert.match(c, /battles and operations$/, `${w.id}: the battles alone: ${c}`);
+    else assert.ok(c.endsWith(`, ${w.totalDeaths.toLocaleString('en-GB')} battle deaths`), `${w.id}: ${c}`);
   }
-  // The committed lake: every War Focus war line with a COW total.
-  const all = lakeRecords();
-  let seen = 0;
-  for (const w of cowWars) {
-    const ms = all.get(w.qid)?.mentions.filter(m => m.m === 'war-focus' && m.u.endsWith(`#war=${w.id}`) && /battles and operations/.test(m.c)) || [];
-    for (const m of ms) { seen++; assert.equal(m.c, lines.get(w.id), `lake ${w.qid} (${w.id}): ${m.c}`); }
+});
+
+// The committed lake carries the same lines once it is rebuilt (lake-refresh.yml, or
+// VM_UA="VM build check (https://jdpi.pages.dev)" node lake/scripts/build.mjs --only battlefield).
+test('Master Index: the committed lake names no Correlates of War total on a War Focus war line', () => {
+  const all = lakeRecords(), focus = read('battlefield/focus/data/index.json');
+  const bad = [];
+  for (const w of focus.wars) {
+    for (const m of all.get(w.qid)?.mentions.filter(m => m.m === 'war-focus' && m.u.endsWith(`#war=${w.id}`)) || []) {
+      if (/Correlates of War/.test(m.c)) bad.push(`${w.id}: ${m.c}`);
+    }
   }
-  assert.ok(seen >= 9, `the lake's COW war lines (${seen})`);
-  assert.ok(HOSTED.some(h => h.source === 'cow' && h.dir === 'lake/data/e' && h.kind === 'total'), 'the lake is listed among what VM hosts from COW');
+  assert.deepEqual(bad, [], 'rebuild the lake: node lake/scripts/build.mjs --only battlefield');
 });
 
 /* ---------------------------------------------------------------- the page */

@@ -1,9 +1,30 @@
 // Kardashev Tracker: century slider, map bubbles, ranking and chart (runs against JDPI_URL).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
+
+// MP-11 (Jude, 17 November 2026: free data only, and say where a source is not free). The figures are VM's own
+// estimates shaped after books with no open licence; the energy from 1900 follows the Energy Institute's terms, which
+// VM could not read (https://www.energyinst.org/statistical-review answered HTTP 403 on 18 and 20 November 2026).
+test('the page and its script say plainly whose the figures are and on whose terms (no page needed)', () => {
+  const html = readFileSync(new URL('../kardashev/index.html', import.meta.url), 'utf8');
+  const terms = html.match(/<p[^>]*id="k-terms"[^>]*>([\s\S]*?)<\/p>/);
+  assert.ok(terms, 'the sources footer has a terms line');
+  const t = terms[1];
+  assert.match(t, /Vitruvian Manager’s own estimates/); assert.match(t, /no open licence/);
+  assert.match(t, /Energy Institute’s own terms/); assert.match(t, /could not read/); assert.match(t, /20 November 2026/);
+  assert.match(t, /https:\/\/www\.energyinst\.org\/statistical-review/);
+  assert.doesNotMatch(html, /Energy Institute \/ Our World in Data \(CC BY/);
+  const script = readFileSync(new URL('../kardashev/scripts/polities.mjs', import.meta.url), 'utf8').split('export const POLITIES')[0];
+  assert.match(script, /no open licence/); assert.match(script, /could not be read/);
+  const cat = readFileSync(new URL('../integration/scripts/build-catalog.mjs', import.meta.url), 'utf8');
+  const kar = cat.match(/const karLicence = '([^']+)'/)[1];
+  assert.doesNotMatch(kar, /Our World in Data \(CC BY 4\.0\)/, 'the Energy Institute’s figures are not CC BY 4.0');
+  assert.match(kar, /Energy Institute’s own terms/); assert.match(kar, /no open licence/);
+});
 
 // A page test (the review of 17 November 2026, F6): until then it had no pageTest guard and ran in "npm run test:unit"
 // against the live site, unmuted, and an unreachable site left its browser open; now muted and closed whatever happens.

@@ -15,7 +15,9 @@ test('index lists the major wars with Wikidata IDs and deaths', async () => {
   const ids = d.wars.map(w => w.id);
   for (const id of ['ww2', 'korean-war', 'vietnam-war', 'iran-iraq', 'russia-ukraine']) assert.ok(ids.includes(id), id);
   assert.ok(d.wars.length >= 35, `wars: ${d.wars.length}`);
-  assert.ok(d.wars.every(w => /^Q\d+$/.test(w.qid) && w.totalDeaths > 0), 'every war has a QID and deaths');
+  assert.ok(d.wars.every(w => /^Q\d+$/.test(w.qid)), 'every war has a QID');
+  // Deaths for every war a free source counts (from 1946); the nine before have none (see "free sources only").
+  assert.ok(d.wars.every(w => (w.start < '1946' ? w.totalDeaths === null : w.totalDeaths > 0)), 'deaths for every war from 1946');
   const ww2 = d.wars.find(w => w.id === 'ww2');
   assert.ok(ww2.mappedBattles > 500, `WWII mapped battles: ${ww2.mappedBattles}`);
 });
@@ -41,8 +43,9 @@ test('figures: an estimate is rounded and marked, a recorded count is not', asyn
   assert.equal(deaths(16634910, true, { total: true }), '~16,600,000');
   assert.equal(deaths(999999, true, { total: true }), '~1,000,000', 'a spread total back to the round figure it was spread from');
   assert.equal(deaths(4321, false), '4,321', 'a recorded count is exact');
-  assert.equal(estimateOf('Correlates of War war total, spread across months by recorded battles'), 'Correlates of War’s war total');
-  assert.equal(estimateOf('PRIO Battle Deaths annual totals, spread across months by UCDP events; UCDP GED recorded deaths (state-based violence)'), 'PRIO’s yearly totals');
+  assert.equal(estimateOf('PRIO Battle Deaths annual totals to 1988, spread across months by UCDP events; UCDP GED recorded deaths (state-based violence)'), 'PRIO’s yearly totals');
+  assert.equal(estimateOf('PRIO Battle Deaths annual totals to 1988, spread across months by UCDP events; UCDP Battle-Related Deaths annual totals for 1989–2008, spread across months by UCDP events'), 'PRIO’s and UCDP’s yearly totals');
+  assert.equal(estimateOf('UCDP Battle-Related Deaths annual totals for 1989–2008, spread across months by UCDP events'), 'UCDP’s yearly totals');
   assert.equal(estimateOf('UCDP GED recorded deaths (state-based violence)'), '');
 });
 
@@ -564,8 +567,8 @@ test('rules: Wikidata dates at their precision; a decade is no date; no end, an 
   assert.ok(decadeFits(2020, '2020-11-03', '2022-11-02') && decadeFits(1930, '1939-09-01', '1945-09-02') && !decadeFits(1950, '1939-09-01', '1945-09-02'));
 });
 
-test('rules: a UCDP period estimate is shared out over its days; a spread total adds up to its source; COW only over its own years', async () => {
-  const { eventMonths, apportion, cowMonths } = await import('../battlefield/focus/scripts/rules.mjs');
+test('rules: a UCDP period estimate is shared out over its days; a spread total adds up to its source', async () => {
+  const { eventMonths, apportion } = await import('../battlefield/focus/scripts/rules.mjs');
   // UCDP 13243, 7,986 deaths near Pokrovsk dated 21 Aug – 20 Oct 2025 (date_prec 5): 11, 30 and 20 of its 61 days.
   assert.deepEqual(eventMonths('2025-08-21', '2025-10-20', 7986, '2022-02-24', '2026-09-30'), [['2025-08', 1440], ['2025-09', 3928], ['2025-10', 2618]]);
   assert.deepEqual(eventMonths('2025-08-03', '2025-08-09', 40, '2022-02-24', '2026-09-30'), [['2025-08', 40]], 'a week in one month stays in it');
@@ -574,8 +577,6 @@ test('rules: a UCDP period estimate is shared out over its days; a spread total 
   assert.equal(eventMonths('1991-01-17', '1991-03-01', 9505, '1990-08-02', '1991-02-28').reduce((s, [, n]) => s + n, 0), 9505);
   assert.deepEqual(apportion(1000000, [3, 3, 3]), [333334, 333333, 333333]);
   assert.equal(apportion(999999.6, [1, 2, 3, 4, 5, 6, 7]).reduce((s, v) => s + v, 0), 1000000);
-  const months = ['1937-07', '1937-12', '1941-12', '1942-01', '1945-09'];
-  assert.deepEqual(cowMonths(months, [[1937, 2], [1938, 2], [1939, 2], [1940, 2], [1941, 2]]), [0, 1, 2]);
 });
 
 // S0, the spread fix (16 November 2026): a total spread by recorded battles let a battle Wikidata dates only to its
@@ -600,9 +601,9 @@ test('data: every spread by recorded battles is the rule\'s (a year-dated battle
     const w = await dataFile(`battlefield/focus/data/wars/${x.id}.json`);
     const weights = monthWeights(w.months, w.battles.filter(b => b.s));
     const est = w.months.map((m, i) => i).filter(i => w.estimated[i]);
-    // A Correlates of War total is one spread over its months; PRIO's, one a year. A spread whose months hold UCDP
-    // events is weighted by them, not by battles (scripts/build.mjs spread).
-    const groups = /^Correlates of War/.test(w.deathsSource) ? [est] : [...new Set(est.map(i => w.months[i].slice(0, 4)))].map(y => est.filter(i => w.months[i].startsWith(y)));
+    // A yearly total (PRIO's or UCDP's) is spread over its year. A spread whose months hold UCDP events is weighted by
+    // them, not by battles (scripts/build.mjs spread).
+    const groups = [...new Set(est.map(i => w.months[i].slice(0, 4)))].map(y => est.filter(i => w.months[i].startsWith(y)));
     for (const g of groups.filter(g => g.length && !g.some(i => w.cells[i].length))) {
       const total = g.reduce((s, i) => s + w.deaths[i], 0);
       assert.deepEqual(g.map(i => w.deaths[i]), apportion(total, g.map(i => weights[i])), `${x.id}: the spread over ${w.months[g[0]]}–${w.months[g.at(-1)]}`);
@@ -974,7 +975,7 @@ test('data: each battle under its own war, with no impossible dates', async () =
   assert.ok(k('Battle of Kharkiv').e !== k('Battle of Kharkiv').s, 'a start with no end is not one day');
 });
 
-test('data: UCDP period estimates are spread over their months; COW totals stay whole and within COW\'s years', async () => {
+test('data: UCDP period estimates are spread over their months', async () => {
   const ru = await dataFile('battlefield/focus/data/wars/russia-ukraine.json'), at = (w, m) => w.deaths[w.months.indexOf(m)];
   // Before: August 2025 20,891 then September 1,693, from period estimates put on 1 and 21 August.
   assert.ok(at(ru, '2025-08') < 2 * at(ru, '2025-09') && at(ru, '2025-09') < 2 * at(ru, '2025-08'), `Aug ${at(ru, '2025-08')}, Sep ${at(ru, '2025-09')}`);
@@ -983,16 +984,36 @@ test('data: UCDP period estimates are spread over their months; COW totals stay 
   // Gulf War: before, January 1991 25,969 and February 2,276 (the air campaign's period estimates on 17 January).
   const g = await dataFile('battlefield/focus/data/wars/gulf-war.json');
   assert.ok(at(g, '1991-02') > at(g, '1991-01') / 2, `Jan ${at(g, '1991-01')}, Feb ${at(g, '1991-02')}`);
-  // Second Sino-Japanese War: COW's war 130 is 1,000,000 battle deaths, 1937–41 (no missing-value code), not 999,999
-  // spread over 1937–45.
-  const sj = await dataFile('battlefield/focus/data/wars/second-sino-japanese.json');
-  assert.equal(sj.totalDeaths, 1000000);
-  assert.deepEqual(sj.covered, ['1937-07', '1941-12']);
-  assert.ok(sj.months.every((m, i) => m <= '1941-12' || (sj.deaths[i] === 0 && !sj.estimated[i])), 'no share after 1941');
-  assert.match(sj.deathsSource, /World War II/);
+});
+
+// Free data only (Jude, 17 November 2026; J1, 20 November): the Correlates of War's totals may not be passed on, so the
+// nine wars before 1946 have no deaths figure (none is shown, not a nought), and no War Focus file holds a COW record;
+// PRIO v3.1's years 1989–2008 give way to UCDP's Battle-Related Deaths v26.1 (CC BY 4.0), PRIO's 1946–88 kept for now.
+test('data: free sources only: no COW total; the wars before 1946 have no figure; UCDP\'s yearly totals from 1989', async () => {
   const d = await dataFile('battlefield/focus/data/index.json');
-  const cow = new Map(JSON.parse(readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8')).wars.map(w => [w.id, w.deaths]));
-  for (const x of d.wars.filter(x => /^Correlates of War/.test(x.deathsSource))) assert.equal(x.totalDeaths, cow.get(x.bf), `${x.id}: the spread total adds up to COW's`);
+  assert.equal(d.sources.cow, undefined);
+  assert.match(d.sources.brd, /Battle-Related Deaths Dataset v26\.1.*CC BY 4\.0/);
+  assert.match(d.sources.prio, /1946–1988 only; its page states no licence/);
+  const retro = JSON.parse(readFileSync(new URL('../battlefield/history/data/wars.json', import.meta.url), 'utf8'));
+  const retroIds = new Set(retro.wars.map(w => w.id));
+  const before = d.wars.filter(x => x.start < '1946');
+  assert.equal(before.length, 9);
+  for (const x of d.wars) {
+    const text = readFileSync(new URL(`../battlefield/focus/data/wars/${x.id}.json`, import.meta.url), 'utf8'), w = JSON.parse(text);
+    assert.doesNotMatch(text, /Correlates of War|"src":"cow"|"cow":/, `${x.id}: no COW record`);
+    assert.ok(!x.bf || retroIds.has(x.bf), `${x.id}: its Retrospective Battlefield war ${x.bf} is in wars.json`);
+    if (x.start < '1946') {
+      assert.equal(w.totalDeaths, null, `${x.id}: no figure`);
+      assert.equal(x.totalDeaths, null);
+      assert.ok(w.deaths.every(v => v === 0) && !w.estimated.some(Boolean), `${x.id}: no month carries a figure`);
+      assert.match(w.deathsSource, /^No free source gives this war’s battle deaths/);
+      assert.match(x.bf, /^Q\d+$/, `${x.id}: its Retrospective Battlefield war by its Wikidata id`);
+    }
+    // A war PRIO counted that runs into 1989–2008 takes those years' totals from UCDP's Battle-Related Deaths.
+    if (/PRIO/.test(w.deathsSource)) assert.match(w.deathsSource, /PRIO Battle Deaths annual totals to 1988/);
+    if (/PRIO|Battle-Related/.test(w.deathsSource) && (w.end || '9999') >= '1989' && w.start <= '2008-12-31' && w.months.some(m => m >= '1989' && m < '2009' && w.estimated[w.months.indexOf(m)]))
+      assert.match(w.deathsSource, /UCDP Battle-Related Deaths annual totals for 1989–2008/, `${x.id}: 1989–2008 from UCDP`);
+  }
 });
 
 test('the page claims only what it draws: sides and whole-country occupation, not who held what', () => {
@@ -1005,17 +1026,17 @@ test('the page claims only what it draws: sides and whole-country occupation, no
 });
 
 test('the page says whose its estimated deaths are, rounded; UCDP\'s counts stay exact', pageTest, async t => {
-  const ww2 = await dataFile('battlefield/focus/data/wars/ww2.json'), k = ww2.months.indexOf('1942-01');
+  const kw = await dataFile('battlefield/focus/data/wars/korean-war.json'), k = kw.months.indexOf('1951-01');
   const browser = await launch();
   t.after(() => browser.close());
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-  await page.goto(`${BASE}/battlefield/focus/#war=ww2&m=1942-01`, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'January 1942', null, { timeout: 20000 });
+  await page.goto(`${BASE}/battlefield/focus/#war=korean-war&m=1951-01`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'January 1951', null, { timeout: 20000 });
   const month = await page.locator('#c-month').innerText(), note = await page.locator('#c-month-note').innerText();
   const digits = month.replace(/[~,]/g, '').replace(/0+$/, '').length;
   assert.match(month, /^~[\d,]+$/);
-  assert.ok(digits <= 2, `an estimated month to two significant figures: ${month} (the data says ${ww2.deaths[k]})`);
-  assert.match(note, /^Estimate from Correlates of War/);
+  assert.ok(digits <= 2, `an estimated month to two significant figures: ${month} (the data says ${kw.deaths[k]})`);
+  assert.match(note, /^Estimate from PRIO/);
   assert.match(await page.locator('#c-total').innerText(), /^~/);
   await page.goto(`${BASE}/battlefield/focus/#war=russia-ukraine&m=2023-03`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'March 2023', null, { timeout: 20000 });
@@ -1023,14 +1044,42 @@ test('the page says whose its estimated deaths are, rounded; UCDP\'s counts stay
   assert.equal((await page.locator('#c-month').innerText()).replace(/,/g, ''), String(ru.deaths[ru.months.indexOf('2023-03')]), 'UCDP\'s count, exactly');
   // March 2023 carries a share of events UCDP dates only to a longer period (review of 15 November 2026), and says so.
   assert.equal(await page.locator('#c-month-note').innerText(), `UCDP, ${ru.shared[ru.months.indexOf('2023-03')].toLocaleString('en-GB')} spread from periods`);
-  // A COW war's month outside COW's own years has no figure, not "none recorded".
+  // A war no free source gives deaths for (before 1946) shows no figure anywhere, never a nought or "none recorded".
   await page.goto(`${BASE}/battlefield/focus/#war=second-sino-japanese&m=1943-05`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'May 1943', null, { timeout: 20000 });
-  assert.equal(await page.locator('#c-month-note').innerText(), 'No figure in the source');
+  assert.equal(await page.locator('#c-month-note').innerText(), 'No free source gives a figure');
   assert.equal(await page.locator('#c-month').innerText(), '–');
-  // Nor does the running total read as all of the war's deaths, as if no one died after 1941 (second reader, 15 Nov).
-  const soFar = await page.locator('#panel .stat', { hasText: 'Deaths so far' }).locator('small').innerText();
-  assert.equal(soFar, 'to December 1941; no figure after');
+  assert.equal(await page.locator('#c-total').innerText(), '–');
+  assert.equal(await page.locator('#panel .stat', { hasText: 'Deaths so far' }).count(), 0);
+  const whole = page.locator('#panel .stat', { hasText: 'Deaths, whole war' });
+  assert.equal(await whole.locator('b').innerText(), '–');
+  assert.equal(await whole.locator('small').innerText(), 'no free source gives a figure');
+  assert.doesNotMatch(await page.locator('#panel').innerText(), /Correlates of War/);
+});
+
+// MP-11 fixer (20 November 2026): the Sources name each deaths source on its own terms (UCDP GED and BRD, CC BY 4.0,
+// with BRD's citation; PRIO v3.1 with its terms line; no figure before 1946) and no Correlates of War; a war whose
+// deaths PRIO gives says PRIO's terms in its panel, and one whose deaths it does not give does not.
+test('page: the Sources and the panel say each deaths source\'s terms: UCDP BRD cited, PRIO\'s terms line, no Correlates of War', pageTest, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const PRIO = 'PRIO Battle Deaths Dataset v3.1, whose page states no licence; kept until VM’s owner decides';
+  await page.goto(`${BASE}/battlefield/focus/#war=korean-war&m=1951-01`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'January 1951' && document.querySelector('#panel .src-note'), null, { timeout: 20000 });
+  const sources = await page.locator('#sources').innerText();
+  assert.doesNotMatch(sources, /Correlates of War|correlatesofwar/i, 'no Correlates of War in the Sources or the Method');
+  assert.match(sources, /UCDP Battle-Related Deaths Dataset v26\.1 annual totals \(Davies, Pettersson & Öberg 2026\), CC BY 4\.0/);
+  assert.ok(sources.includes(`for 1946–1988, annual totals from the ${PRIO} (Lacina & Gleditsch 2005).`), sources);
+  assert.match(sources, /Before 1946 no free source gives a war’s battle deaths, so none is shown\./);
+  const korea = await page.locator('#panel .src-note').innerText();
+  assert.ok(korea.includes(PRIO), `Korea, whose deaths PRIO gives: ${korea.slice(0, 300)}`);
+  await page.goto(`${BASE}/battlefield/focus/#war=russia-ukraine&m=2023-03`, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'March 2023' && document.querySelector('#panel .src-note'), null, { timeout: 20000 });
+  assert.ok(!(await page.locator('#panel .src-note').innerText()).includes('PRIO'), 'a war of UCDP\'s alone carries no PRIO line');
+  assert.deepEqual(errors, []);
 });
 
 test('WWII plays month by month with sides, occupation and battles', pageTest, async () => {
@@ -1434,9 +1483,11 @@ const inAnyWar = async () => {
   return { index, any };
 };
 const inNone = (name, n, since) => `${name}: in none of War Focus’s ${n} major wars. Its armed conflicts since ${since}, if any, are in the Retrospective Battlefield.`;
+// War Focus's own table of the dots (dots.mjs; the Retrospective Battlefield's wars.json carried it until 20 November 2026).
+const { DOTS: FOCUS_DOTS } = await import('../battlefield/focus/dots.mjs');
 // The dots a month draws: those whose first day is on or before the day the page reads for it (its 15th). A first day
 // known only to its year (Tonga's 1970) counts from the next year, so a dot is never drawn before its state was one.
-const dotsBy = (rb, date) => Object.entries(rb.dots).filter(([, d]) => d.from == null || (d.from.length === 4 ? String(+d.from + 1) : d.from) <= date).map(([iso3]) => iso3).sort();
+const dotsBy = date => Object.entries(FOCUS_DOTS).filter(([, d]) => d.from == null || (d.from.length === 4 ? String(+d.from + 1) : d.from) <= date).map(([iso3]) => iso3).sort();
 // Before a test reads points on the map to move a real pointer to: prp-bar.js adds the VM bar after load (800 ms and an
 // idle moment later), moving the whole page down 36 px, so a point read before it lands on another state. Wait for the
 // bar, the fonts, and the map's top to stay put for half a second.
@@ -1459,9 +1510,9 @@ test('AC-5: War Focus takes its dots and their first days from the kit and the R
   assert.match(src, /\.\.\/history\/data\/wars\.json/, 'the first days from the file the Retrospective Battlefield publishes');
   assert.match(src, /PRPMapkit\.sentenceParts\(/, 'the sentence from the kit\'s builder');
   const rb = await dataFile('battlefield/history/data/wars.json');
-  assert.equal(Object.keys(rb.dots).length, 22, 'the 22 states CShapes cannot draw');
+  assert.equal(Object.keys(FOCUS_DOTS).length, 22, 'the 22 states CShapes cannot draw');
   // No second copy of the first days, and no count of the wars typed into the page.
-  for (const [iso3, d] of Object.entries(rb.dots)) if (d.from && d.from.length > 4) assert.ok(!src.includes(d.from), `${iso3}'s first day (${d.from}) is not typed into War Focus`);
+  for (const [iso3, d] of Object.entries(FOCUS_DOTS)) if (d.from && d.from.length > 4) assert.ok(!src.includes(d.from), `${iso3}'s first day (${d.from}) is not typed into War Focus`);
   assert.doesNotMatch(src, /\b\d+ major wars/, 'N is counted from the data');
   // The kit gives section 3's two sentences exactly, with N from the index and the year from the Retrospective's file.
   await import('../design/prp-mapkit.js');
@@ -1473,7 +1524,7 @@ test('AC-5: War Focus takes its dots and their first days from the kit and the R
 
 test('page (AC-5): a state in none of the wars, a dot, and a state on neither side of the war shown each say so; the panel repeats it with a link', pageTest, async t => {
   const { index, any } = await inAnyWar(), rb = await dataFile('battlefield/history/data/wars.json'), N = index.wars.length;
-  assert.ok(!any.has(225) && !any.has(rb.dots.SMR.gw) && any.has(255), 'Switzerland and San Marino are in none of the wars; Germany is in one');
+  assert.ok(!any.has(225) && !any.has(FOCUS_DOTS.SMR.gw) && any.has(255), 'Switzerland and San Marino are in none of the wars; Germany is in one');
   const browser = await launch({ args: ['--mute-audio'] });
   t.after(() => browser.close());
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -1483,7 +1534,7 @@ test('page (AC-5): a state in none of the wars, a dot, and a state on neither si
   await page.waitForFunction(() => document.querySelectorAll('path.state').length > 10 && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
   // The dots of September 1939: the states whose first day is by then (Andorra, Liechtenstein, Monaco, San Marino, the
   // Holy See), from the Retrospective's table; the islands that became states later are not drawn.
-  assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort()), dotsBy(rb, '1939-09-15'));
+  assert.deepEqual(await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort()), dotsBy('1939-09-15'));
   const hover = sel => page.evaluate(s => {
     const el = typeof s === 'number' ? d3.selectAll('path.state').filter(f => f.properties.gw === s).node() : document.querySelector(s), b = el.getBoundingClientRect();
     el.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: b.x + b.width / 2, clientY: b.y + b.height / 2 }));
@@ -1529,7 +1580,7 @@ test('page (AC-5): a dot appears from its state\'s first day; at 390 wide a fing
   await desk.goto(`${BASE}/battlefield/focus/#war=gulf-war&m=1990-12`, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await desk.waitForFunction(() => document.querySelector('#date')?.textContent === 'December 1990' && document.querySelectorAll('#map g.dot').length, null, { timeout: 20000 });
   const gulf = await desk.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
-  assert.deepEqual(gulf, dotsBy(rb, '1990-12-15'));
+  assert.deepEqual(gulf, dotsBy('1990-12-15'));
   assert.ok(gulf.includes('FSM') && gulf.includes('MHL') && !gulf.includes('PLW'), gulf.join(' '));
   // Italy, September 1944: wherever a battle's mark is, the mark is what a click there finds, never a dot.
   await desk.goto(`${BASE}/battlefield/focus/#war=ww2&m=1944-09`, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -1716,7 +1767,7 @@ test('page (AC-5): the Pacific war draws no dot for a later state and its battle
   await settled(page);
   await page.locator('#map').scrollIntoViewIfNeeded();
   const drawn = await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
-  assert.deepEqual(drawn, dotsBy(rb, '1944-02-15'));
+  assert.deepEqual(drawn, dotsBy('1944-02-15'));
   for (const iso3 of ['KIR', 'MHL', 'FSM', 'PLW', 'NRU']) assert.ok(!drawn.includes(iso3), `${iso3} is not yet a state in February 1944`);
   const sea = await page.evaluate(() => document.querySelector('#map .dot-sea').getBoundingClientRect().width);
   assert.ok(sea >= 24, `a dot's target over the sea is a finger's width at 1024 wide (${sea} px)`);
@@ -1736,11 +1787,11 @@ test('page (AC-5): the Pacific war draws no dot for a later state and its battle
     await page.waitForFunction(() => document.querySelector('#modal').hidden, null, { timeout: 10000 });
   }
   // Tonga: its first day is "1970" in the Retrospective's table, so it is drawn from January 1971, never in 1970.
-  assert.equal(rb.dots.TON.from, '1970');
+  assert.equal(FOCUS_DOTS.TON.from, '1970');
   await page.evaluate(() => { location.hash = '#war=cambodian-civil-war&m=1970-04'; });
   await page.waitForFunction(() => document.querySelector('#date')?.textContent === 'April 1970', null, { timeout: 20000 });
   const cambodia = await page.evaluate(() => [...document.querySelectorAll('#map g.dot')].map(d => d.dataset.iso3).sort());
-  assert.deepEqual(cambodia, dotsBy(rb, '1970-04-15'));
+  assert.deepEqual(cambodia, dotsBy('1970-04-15'));
   assert.ok(!cambodia.includes('TON') && cambodia.includes('WSM') && cambodia.includes('NRU'), cambodia.join(' '));
   assert.deepEqual(errors, []);
 });

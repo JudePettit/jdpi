@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-21T17:32:37.700Z",
+  "generated": "2026-11-21T23:10:13.416Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -1130,7 +1130,7 @@
           "description": "Soft-news class when the story is not hard news: s sport, e entertainment, l lifestyle; absent for news"
         }
       ],
-      "rows": 6918,
+      "rows": 6947,
       "licence": "Headlines, standfirsts and links © their publishers, quoted for reference; selection and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the publishers listed in intelligence-briefing-sources",
@@ -1139,7 +1139,7 @@
       "updated": "2026-11-21",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 3027824
+      "bytes": 3038120
     },
     {
       "id": "intelligence-briefing-sources",
@@ -1207,7 +1207,7 @@
       "updated": "2026-11-21",
       "refresh": "twice daily",
       "page": "q/briefing.html",
-      "bytes": 3027824
+      "bytes": 3038120
     },
     {
       "id": "daily-synopsis-stories",
@@ -1308,7 +1308,7 @@
         "daily-synopsis/data/index.json",
         "daily-synopsis/data/days/2026-11-21.json"
       ],
-      "bytes": 4251
+      "bytes": 4283
     },
     {
       "id": "econ-briefing-stories",
@@ -1406,7 +1406,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 565,
+      "rows": 564,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, working-paper series, central banks, think tanks and economics desks listed in econ-briefing-sources"
@@ -1414,7 +1414,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 327439
+      "bytes": 326572
     },
     {
       "id": "econ-briefing-sources",
@@ -1517,6 +1517,11 @@
           "description": "HTTP Last-Modified of the feed"
         },
         {
+          "name": "error",
+          "type": "string",
+          "description": "Last error, if any"
+        },
+        {
           "name": "notModified",
           "type": "boolean",
           "description": "True when the feed answered \"not modified\" at the last check (its earlier items are kept)"
@@ -1545,7 +1550,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "econ/briefing/index.html",
-      "bytes": 327439
+      "bytes": 326572
     },
     {
       "id": "science-briefing-stories",
@@ -1638,7 +1643,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1398,
+      "rows": 1405,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals and science desks listed in science-briefing-sources (Springer Nature, AAAS, Cell Press, PNAS, APS, Wiley, IOP, AAS, PLOS, NASA, ESA and others)"
@@ -1646,7 +1651,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 809808
+      "bytes": 813559
     },
     {
       "id": "science-briefing-sources",
@@ -1772,7 +1777,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "science/briefing/index.html",
-      "bytes": 809808
+      "bytes": 813559
     },
     {
       "id": "digital-briefing-stories",
@@ -1875,7 +1880,7 @@
           "description": "The same item at the other outlets that carried it, each { source, url, title, access }"
         }
       ],
-      "rows": 1361,
+      "rows": 1368,
       "licence": "Titles, links and short summaries © their publishers, quoted for reference; classification and metadata © JDP-Iq.",
       "sources": [
         "RSS and Atom feeds of the journals, preprint servers, labs and technology desks listed in digital-briefing-sources"
@@ -1883,7 +1888,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 800618
+      "bytes": 804460
     },
     {
       "id": "digital-briefing-sources",
@@ -2029,7 +2034,7 @@
       "updated": "2026-11-21",
       "refresh": "6-hourly",
       "page": "digital/briefing/index.html",
-      "bytes": 800618
+      "bytes": 804460
     },
     {
       "id": "political-calendar",
@@ -2419,19 +2424,19 @@
         }
       ],
       "rows": 39,
-      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.",
+      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles and states from Wikidata (CC0); borders from Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0, one border a year.",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
-        "CShapes 2.0 (Schvitz et al. 2022)",
+        "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
         "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
       ],
       "updated": "2026-11-17",
       "refresh": "monthly",
       "page": "battlefield/focus/index.html",
-      "bytes": 19048
+      "bytes": 19132
     },
     {
       "id": "war-focus-battles",
@@ -2655,11 +2660,12 @@
         }
       ],
       "rows": 3494,
-      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles from Wikidata (CC0); borders still CShapes 2.0, CC BY-NC-SA 4.0 (non-commercial), until War Focus moves to a free source.",
+      "licence": "UCDP GED and Battle-Related Deaths CC BY 4.0; PRIO Battle Deaths Dataset v3.1 (1946–1988), whose page states no licence, kept with its citation until VM’s owner decides; battles and states from Wikidata (CC0); borders from Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0, one border a year.",
       "sources": [
         "UCDP Georeferenced Event Dataset v26.1 and candidate events (Sundberg & Melander 2013; Davies et al. 2026), CC BY 4.0",
         "PRIO Battle Deaths Dataset v3.1 (Lacina & Gleditsch 2005), its years 1946–1988 only; its page states no licence, and VM keeps these years until its owner decides",
         "Wikidata (CC0): battles, sieges and operations that are part of each war",
+        "Cliopatria v0.2.1 (Bennett et al. 2025), CC BY 4.0: one border a year",
         "English Wikipedia (CC BY-SA 4.0): the casualty fields of each battle’s infobox, at the revision named; figures taken as facts, with at most a few words of its own",
         "UCDP Battle-Related Deaths Dataset v26.1, conflict level (Davies et al. 2026), CC BY 4.0: 1989–2008"
       ],
@@ -2669,7 +2675,7 @@
       "derivedFrom": [
         "battlefield/focus/data/wars/*.json"
       ],
-      "bytes": 1014712
+      "bytes": 1014700
     },
     {
       "id": "kardashev-polities",

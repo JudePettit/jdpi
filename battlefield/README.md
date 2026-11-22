@@ -27,7 +27,8 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   earlier states' names, each to the year Wikidata ends that state (`NAMED_AS` in `scripts/history-places.mjs`; `was` in
   `history/data/places.json`, written by `scripts/build-history.mjs`). Yugoslavia is the Kingdom of Serbs, Croats and
   Slovenes to 1929 and the Kingdom of Yugoslavia to 1945, the name War Focus gives it for the Second World War; the
-  page names a place by the year shown, and the search finds it by each name.
+  page names a place by the year shown, and the search finds it by each name, opening the first war year in which the
+  place is drawn under that name (1945 for the Kingdom of Yugoslavia, which is on no border from 1941 to 1944).
 - **Unplaced:** a state with no Cliopatria row of its own in a year is named under the map, above the table and in a
   war's panel ("VM cannot place this on a free border for …"), never drawn on another state's row or on a part's
   (occupied Yugoslavia, 1941–44; Palestine, whose only row from 2014 is Gaza's).

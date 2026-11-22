@@ -579,8 +579,12 @@ function setupSearch() {
   const firstYear = new Map();
   for (const w of state.data.wars) for (const [y] of w.years) for (const q of [...locIn(w, y), ...statesIn(w, y)]) if (!firstYear.has(q) || firstYear.get(q) > y) firstYear.set(q, y);
   // A place with earlier names (`was`) is found by each: an earlier name opens in the first year a war touched the place
-  // under it, the later name in the first such year after the earlier names' last.
-  const firstFrom = (q, from, to) => { const ys = state.data.wars.flatMap(w => w.years.map(([y]) => y).filter(y => y >= from && y <= to && [...locIn(w, y), ...statesIn(w, y)].includes(q))); return ys.length ? Math.min(...ys) : null; };
+  // under it, the later name in the first such year after the earlier names' last. A year in which the place is drawn
+  // comes before one in which it cannot be placed (Yugoslavia under occupation, 1941 to 1944, opens in 1945).
+  const firstFrom = (q, from, to) => {
+    const ys = [...new Set(state.data.wars.flatMap(w => w.years.map(([y]) => y).filter(y => y >= from && y <= to && [...locIn(w, y), ...statesIn(w, y)].includes(q))))].sort((a, b) => a - b);
+    return ys.find(y => !(state.places.unplaced[y] || []).includes(q)) ?? ys[0] ?? null;
+  };
   for (const [q, p] of Object.entries(state.places.places)) {
     const was = p.was || [], after = was.length ? was.at(-1).to + 1 : null;
     index.push({ label: p.n, sub: `Country${p.iso3 ? ` · ${p.iso3}` : ''}`, key: `${p.n} ${p.iso3 || ''}`.toLowerCase(), q, year: (after ? firstFrom(q, after, state.data.lastYear) || after : firstYear.get(q)) || null, from: after });

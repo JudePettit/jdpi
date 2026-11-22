@@ -821,11 +821,15 @@ test('Retrospective: Yugoslavia has its name of the year: two kingdoms to 1929 a
     await go('#y=2025', () => document.querySelector('#year-big').textContent === '2025');
     assert.match(await pick('kingdom of yugo'), /^Kingdom of Yugoslavia\s*Country · to 1945$/);
     await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Kingdom of Yugoslavia', null, { timeout: 10000 });
-    assert.ok(+(await page.locator('#year-big').innerText()) <= 1945);
+    // It opens in a year the Kingdom is drawn: 1945, not 1941 (the first war year, when it is on no row and not drawn).
+    assert.equal(await page.locator('#year-big').innerText(), '1945');
+    await page.waitForSelector('#map path.shape[data-key="Q83286"]', { timeout: 10000 });
+    assert.match(await page.locator('#panel .border-note').innerText(), /^Border: Cliopatria’s “.+” for 1945\.$/, 'drawn on a border in the year the search opens, with no “cannot place” note');
     await go('#y=2025', () => document.querySelector('#year-big').textContent === '2025');
     assert.match(await pick('socialist federal'), /^Socialist Federal Republic of Yugoslavia\s*Country · YUG$/);
     await page.waitForFunction(() => document.querySelector('#panel h2')?.textContent === 'Socialist Federal Republic of Yugoslavia', null, { timeout: 10000 });
     assert.ok(+(await page.locator('#year-big').innerText()) > 1945);
+    await page.waitForSelector('#map path.shape[data-key="Q83286"]', { timeout: 10000 });
     assert.deepEqual(errors, []);
   } finally { await browser.close(); }
 });

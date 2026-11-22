@@ -338,8 +338,9 @@ export function check(l, ctx = {}) {
     if (f.id === 'FORERUNNER') {
       const before = typeof y('written') === 'number' ? 'written' : 'died';
       if (typeof y('named') !== 'number' || !QID.test(who('named') || '') || typeof y(before) !== 'number') out.push('FORERUNNER needs a source that dates the idea’s name (dates.named, from Wikidata) and the work’s writing or the author’s death');
-      // whose date it is: the idea's own item, or a person a statement on the idea's item names (the one who named it)
-      else if (who('named') !== s.q && !(l.source || []).some(x => x.wd === s.q && x.v === who('named'))) out.push(`FORERUNNER: dates.named is read from ${who('named')}, which is neither the idea’s own item nor a person a cited statement on it names`);
+      // whose date it is: the idea's own inception (P571), or the birth (P569) of the person a cited "named by" statement
+      // (P3938) on the idea's item names. Any other relation, or another date of that person, dates no name.
+      else if (!(who('named') === s.q ? d.named[2] === 'P571' : d.named[2] === 'P569' && (l.source || []).some(x => x.wd === s.q && x.p === 'P3938' && x.v === who('named')))) out.push(`FORERUNNER: dates.named is read from ${who('named')} (${d.named[2]}), which is neither the idea’s own inception (P571) nor the birth (P569) of a person a cited “named by” statement (P3938) on it names`);
       else if (!(y('named') > y(before))) out.push(`FORERUNNER: the name dates from ${y('named')} at the earliest, not after the ${before === 'written' ? 'writing' : 'author’s death'} in ${y(before)}`);
     }
   }

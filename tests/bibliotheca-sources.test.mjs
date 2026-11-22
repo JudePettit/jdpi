@@ -457,6 +457,12 @@ test('X1: FORERUNNER’s naming date is the idea’s own, or that of a person a 
   assert.deepEqual(check(fore()), []);
   assert.deepEqual(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1800, 'Q3', 'P571'] } })), []);
   assert.match(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1818, 'Q8', 'P569'] } })).join(), /FORERUNNER: dates\.named is read from Q8/, 'an unrelated person’s birth');
+  // Only a "named by" statement names the namer, and only a birth or the idea's own inception dates the name: another
+  // idea's inception reached through another relation, the namer's death, or another date of the idea's item do not.
+  assert.match(check(fore({ source: [{ wd: 'Q3', p: 'P279', v: 'Q7' }], dates: { died: [1790, 'Q9', 'P570'], named: [1900, 'Q7', 'P571'] } })).join(), /FORERUNNER: dates\.named is read from Q7 \(P571\)/, 'another idea’s inception');
+  assert.match(check(fore({ source: [{ wd: 'Q3', p: 'P279', v: 'Q7' }] })).join(), /FORERUNNER: dates\.named is read from Q7 \(P569\)/, 'a birth, but of no one a “named by” statement names');
+  assert.match(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1883, 'Q7', 'P570'] } })).join(), /FORERUNNER: dates\.named is read from Q7 \(P570\)/, 'the namer’s death');
+  assert.match(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1800, 'Q3', 'P580'] } })).join(), /FORERUNNER: dates\.named is read from Q3 \(P580\)/, 'the idea’s item, but not its inception');
 });
 
 test('X1: RETROSPECTIVE gives a range only where the book dates the start of its writing', () => {

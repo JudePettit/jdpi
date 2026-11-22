@@ -28,7 +28,7 @@ import { lostCounts, refuseIfLost } from '../../calendar/scripts/guard.mjs';
 import { volatilityMovers, briefingFacts, writeHeads } from './heads.mjs';
 import { groupBattles, ownFigure, stateOf } from '../../battlefield/focus/figures.mjs';
 import { TYPES as MASTER_INDEX_TYPES } from '../../lake/scripts/types.mjs';
-import { LINKS_PATH as SOURCE_LINKS_PATH, BASES, FLAGS, plain, isShown, cite, nameMap, workTitle } from '../../bibliotheca/lib/sources.js';
+import { LINKS_PATH as SOURCE_LINKS_PATH, BASES, FLAGS, WORDING, plain, isShown, cite, nameMap, workTitle } from '../../bibliotheca/lib/sources.js';
 import { readSourceLinks } from '../../lake/scripts/source-links.mjs';
 // No download carries a value from a cite-only source (integration/scripts/cite-only.mjs, the Correlates of War): since
 // MP-11 (Jude, 17 November 2026: free data only; built 20 November) none is read here, so none is imported.
@@ -636,6 +636,8 @@ if (has(SOURCE_LINKS_PATH)) {
         confidence: l.confidence, shown: isShown(l), held: l.held || null, why: l.why || null, note: l.note || null, judged: l.judged, entry: lakeNames.has(l.subject.q) };
     }),
     from: [SOURCE_LINKS_PATH, 'bibliotheca/data/index.json', 'lake/data/index.json'], refresh: 'on change', updated: file.judged || TODAY, page: 'bibliotheca/neo/index.html',
+    // Said in the file itself and in every answer from it, not only in the catalogue's description (review X6).
+    notes: [WORDING.made, 'The evidence sentences are Vitruvian Manager’s own text, written by the same AI model; they describe the sources and quote none. Rows with shown: false are held back from the pages as weak evidence.'],
     licence: 'Judgements, evidence sentences and wording © JDP-Iq; the Wikidata statements they cite are CC0.', sources: ['The books on Bibliotheca’s shelf, read by chapter', 'Wikidata (CC0), read on the day judged', 'Vitruvian Manager’s rule for primary and secondary sources (bibliotheca/lib/sources.js)'],
     fields: [['work', 'The work’s shelf slug: a book’s, or a set’s for every volume of it'], ['work_qid', 'The work’s Wikidata id, where the shelf gives one'], ['work_title', 'The work’s title'],
       ['part', 'For a part by another hand (a translator’s preface, an editor’s introduction): its heading; null for the main text'], ['part_by', 'The part’s writer'],

@@ -10,7 +10,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, normalize, resolve, dirname, extname } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { WORDING, plain, isShown, cite, nameMap, readerTexts } from '../bibliotheca/lib/sources.js';
+import { WORDING, plain, isShown, cite, nameMap, readerTexts, linksFrom } from '../bibliotheca/lib/sources.js';
 import { applySourceLinks, readSourceLinks, SOURCE_GROUPS } from '../lake/scripts/source-links.mjs';
 import { pageTest, launch } from './tools/pages.mjs';
 
@@ -108,6 +108,9 @@ test('the build: a work’s own entry lists its subjects and carries their group
   // The groups come from the main text's tags only (a part by another hand is not the work), named as the entry is.
   assert.deepEqual(work.tags, ['Type:Topic', 'Primary source on:A war', 'Primary source on:An Author', 'Primary source on:A battle with no entry']);
   assert.ok(!records.get('Q9').tags.some(t => SOURCE_GROUPS.some(g => t.startsWith(g + ':'))), 'no tag on the author’s entry');
+  // Each group tag carries its note, who made the judgement (X6); no other tag does.
+  assert.deepEqual(work.tn, Object.fromEntries(work.tags.slice(1).map(t => [t, WORDING.tagNote])));
+  assert.equal(records.get('Q9').tn, undefined);
   assert.equal(records.get('Q9').srcFrom, undefined);
 });
 
@@ -120,6 +123,13 @@ test('the build: applying again replaces what the last file gave, and a file wit
   applySourceLinks(records, { ...CTX, file: { ...FILE, links: FILE.links.slice(2, 6) } });
   assert.equal(records.get('Q1').src, undefined);
   assert.deepEqual(records.get('Q100').tags, ['Type:Topic']);
+  assert.equal(records.get('Q100').tn, undefined, 'the notes go with the tags');
+  // A note another module gave another tag is kept.
+  const kept = LAKE();
+  kept.get('Q100').tn = { 'Type:Topic': 'a note of another module' };
+  applySourceLinks(kept, CTX);
+  applySourceLinks(kept, { ...CTX, file: { ...FILE, links: [] } });
+  assert.deepEqual(kept.get('Q100').tn, { 'Type:Topic': 'a note of another module' });
   assert.deepEqual(records.get('Q9').src.map(x => x.tag), ['secondary']);
 });
 
@@ -162,13 +172,17 @@ test('catalogue: every link is a row of its own dataset, with the words, the evi
   const want = ['work', 'work_qid', 'work_title', 'part', 'part_by', 'subject_qid', 'subject_label', 'subject_kind', 'tag', 'tag_words', 'basis', 'basis_words', 'flags', 'flag_words', 'evidence', 'sources', 'source_words', 'confidence', 'shown', 'held', 'why', 'note', 'judged', 'entry'];
   assert.deepEqual(d.fields.map(f => f.name), want);
   for (const f of d.fields) assert.doesNotMatch(f.description, /Not yet described/, f.name);
-  const committed = lake();
+  // `entry` is read from the lake when the catalogue is built. The monthly lake refresh rebuilds the lake alone, so a
+  // subject may gain its entry there before the next catalogue build (the calendar refresh's, each day): the two are
+  // held equal while the catalogue is the newer of the two, and the field is a plain true or false until then (X5).
+  const committed = lake(), abreast = read('integration/catalog.json').generated >= read('lake/data/manifest.json').generated;
   file.links.forEach((l, i) => {
     const r = rows[i], p = plain(l);
     assert.equal(r.subject_qid, l.subject.q); assert.equal(r.tag, l.tag); assert.equal(r.tag_words, p.tag); assert.equal(r.basis_words, p.basis);
     assert.deepEqual(r.flag_words, p.flags); assert.equal(r.shown, isShown(l)); assert.equal(r.confidence, l.confidence); assert.equal(r.judged, l.judged);
     assert.deepEqual(r.sources, l.source); assert.equal(r.source_words.length, l.source.length);
-    assert.equal(r.entry, committed.has(l.subject.q), `${l.subject.label}: entry is read from the lake, not the file`);
+    if (abreast) assert.equal(r.entry, committed.has(l.subject.q), `${l.subject.label}: entry is read from the lake, not the file`);
+    else assert.equal(typeof r.entry, 'boolean', l.subject.label);
   });
 });
 
@@ -322,9 +336,83 @@ test('page: Neo Book’s book side lists what the book is a source on, its parts
     assert.deepEqual(errors, []);
     await context.close();
   }
-  // A book with no shown link shows nothing: every book on the shelf today has one, so the fixture stands in.
+  // Every book on the shelf today has a shown link; a book with none is the next test's last case.
   const shelf = read('bibliotheca/data/index.json');
   assert.ok(shelf.books.every(b => read('bibliotheca/data/source-links.json').links.some(l => isShown(l) && (l.work === b.slug || l.work === b.set?.slug))), 'every book on the shelf has a shown link');
+});
+
+// ---- The second reader's points of 22 November 2026 (Codex on the first commit), where a reader meets them.
+// X6: the statement that an AI model made the judgements and no person checked them stood in the catalogue's
+// description and on the entry page, but not in the dataset's own file, in a query's answer, or beside the Explorer's
+// two filters. It is one sentence of the table (WORDING.made), said in each.
+test('X6: wherever a judgement is served or filtered, it is said that an AI model made it and no person checked it', async () => {
+  assert.match(WORDING.made, /made for Vitruvian Manager by an AI model \(Claude\).*no person checked it\.$/);
+  assert.ok(WORDING.about.includes(WORDING.made), 'the rule’s paragraph says it in the same words');
+  assert.match(WORDING.tagNote, /by an AI model \(Claude\).*no person checked it$/);
+  const d = read('integration/catalog.json').datasets.find(x => x.id === DS);
+  assert.equal(d.notes[0], WORDING.made);
+  assert.deepEqual(read(d.url).notes, d.notes, 'the downloaded file says it too');
+  const answer = await call('query_dataset', { id: DS, limit: 2 });
+  assert.equal(answer.rows.length, 2);
+  assert.deepEqual(answer.dataset_notes, d.notes, 'and so does every answer from it');
+  // The Explorer: each tag of the two groups carries its note in index.json, which the filter's heading and the tag show.
+  const idx = read('lake/data/index.json');
+  const groupTags = idx.tags.map((t, i) => [t, i]).filter(([t]) => SOURCE_GROUPS.some(g => t.startsWith(g + ':')));
+  assert.ok(groupTags.length);
+  const noted = new Set(Object.values(idx.notes.at).flatMap(m => Object.entries(m).filter(([, n]) => idx.notes.texts[n] === WORDING.tagNote).map(([t]) => +t)));
+  for (const [t, i] of groupTags) assert.ok(noted.has(i), `${t} carries its note`);
+  assert.equal(noted.size, groupTags.length, 'and no other tag carries it');
+  const ency = text('encyclopedia/index.html');
+  assert.match(ency, /facetNotes\.get\(f\)/, 'the filter’s heading shows a facet’s notes');
+  // An outside reader of one work's entry is told beside the tags too.
+  const origin = await call('get_entity', { qid: 'Q20124' });
+  const tagged = origin.tags.filter(t => SOURCE_GROUPS.some(g => t.startsWith(g + ':')));
+  assert.ok(tagged.length);
+  for (const t of tagged) assert.equal(origin.tag_notes[t], WORDING.tagNote, t);
+});
+
+// X7: Neo Book read a subject's entry through a loader that kept a failed read as "no entry", so one failed request
+// labelled an existing entry as absent until the page was loaded again. A failure now settles nothing and is asked
+// again the next time the list is opened. And a book with no shown link shows no list (the file served emptied).
+test('page: Neo Book says a subject has no entry only when the lake says so; a failed lookup is asked again', PAGE, async t => {
+  const browser = await launch({ args: ['--mute-audio'] });
+  t.after(() => browser.close());
+  const { page, context } = await open(browser, { width: 1440, height: 900, theme: 'light' }, 'bibliotheca/neo/index.html#book=on-war');
+  await page.waitForSelector('#book-srcs:not([hidden])', { timeout: 30000 });
+  let failing = true, asked = 0;
+  await page.route('**/lake/data/e/*.json', r => { asked++; return failing ? r.abort() : r.continue(); });
+  const box = page.locator('#book-srcs'), summary = page.locator('#book-srcs > summary');
+  const settle = async () => {
+    for (let i = 0; i < 100 && !asked; i++) await page.waitForTimeout(50);
+    await page.waitForFunction(() => !document.querySelector('#book-srcs').dataset.asking, null, { timeout: 15000 });
+  };
+  await summary.click();
+  await settle();
+  assert.ok(asked > 0, 'the entries were asked for');
+  assert.equal(await box.locator('.nc-src-wait').count(), 0, 'a failed lookup is not “no entry”');
+  assert.equal(await box.locator('a.srcsubj').count(), 0);
+  // Closed and opened again with the lake answering: the entries are found, and only the subjects the lake does not
+  // hold are said to have none.
+  failing = false; asked = 0;
+  await summary.click(); await summary.click();
+  await page.waitForSelector('#book-srcs [data-q="Q78994"] a.srcsubj', { timeout: 15000 });
+  const all = lake(), shown = linksFrom(read('bibliotheca/data/source-links.json'), 'on-war', read('bibliotheca/data/index.json')).filter(isShown);
+  assert.equal(await box.locator('.nc-src-wait').count(), shown.filter(l => !all.has(l.subject.q)).length);
+  assert.equal(await box.locator('a.srcsubj').count(), shown.filter(l => all.has(l.subject.q)).length);
+  // What is settled is not asked for a third time.
+  const before = asked;
+  await summary.click(); await summary.click();
+  await page.waitForTimeout(400);
+  assert.equal(asked, before);
+  // A book with no shown link shows no list.
+  const bare = await context.newPage();
+  await bare.route('**/bibliotheca/data/source-links.json', r => r.fulfill({ json: { judged: '2026-11-22', links: [] } }));
+  await Promise.all([bare.waitForResponse(r => /source-links\.json/.test(r.url())), bare.goto(`${BASE}/bibliotheca/neo/index.html#book=on-war`, { waitUntil: 'domcontentloaded', timeout: 30000 })]);
+  await bare.waitForSelector('#toc-list a', { state: 'attached', timeout: 30000 });
+  await bare.waitForTimeout(300);
+  assert.equal(await bare.locator('#book-srcs').isHidden(), true);
+  assert.equal((await bare.locator('#book-srcs-body').innerHTML()).trim(), '');
+  await context.close();
 });
 
 test('page files: the entry page and Neo Book read the links through the one rule module, and type no wording of their own', () => {

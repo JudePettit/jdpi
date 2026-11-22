@@ -454,32 +454,6 @@
    "wq": "Q20124",
    "part": null,
    "subject": {
-    "q": "Q202261",
-    "label": "social Darwinism",
-    "kind": "idea"
-   },
-   "tag": null,
-   "basis": null,
-   "flags": [],
-   "evidence": "The book never uses the name, and Wikidata gives natural selection, not social Darwinism, as its main subject.",
-   "source": [
-    {
-     "wd": "Q20124",
-     "p": "P921",
-     "v": "Q43478"
-    }
-   ],
-   "confidence": "low",
-   "held": "The study listed this subject and left it blank, since the author is not an exponent; the book is not about it, so no tag and no note is given, and the judgement is kept here so that it can be seen.",
-   "why": "The study named it as a subject later readers drew from the book.",
-   "judged": "2026-11-22",
-   "entry": false
-  },
-  {
-   "work": "origin-of-species",
-   "wq": "Q20124",
-   "part": null,
-   "subject": {
     "q": "Q1564366",
     "label": "Second voyage of HMS Beagle",
     "kind": "happening"
@@ -492,7 +466,7 @@
      "years": 23
     }
    ],
-   "evidence": "The introduction opens with the author on board the Beagle as its naturalist, struck by what he saw in South America; Wikidata lists him among the voyage’s participants. The book appeared twenty-three years after the voyage ended.",
+   "evidence": "The introduction opens with the author on board the Beagle as its naturalist, struck by what he saw in South America; Wikidata lists him among the voyage’s participants. The introduction dates his first notes on the question to five years after 1837 and a sketch to 1844, but not the start of this book, which it calls an abstract; the book appeared in 1859, twenty-three years after the voyage ended.",
    "source": [
     {
      "book": "origin-of-species",
@@ -834,32 +808,6 @@
    "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
    "judged": "2026-11-22",
    "entry": false
-  },
-  {
-   "work": "decline-and-fall",
-   "wq": "Q313030",
-   "part": null,
-   "subject": {
-    "q": "Q12539",
-    "label": "Age of Enlightenment",
-    "kind": "idea"
-   },
-   "tag": null,
-   "basis": null,
-   "flags": [],
-   "evidence": "Wikidata gives neither the Enlightenment among the book’s main subjects nor any movement for the author, and the book is a history of Rome and its successors, not of the author’s own age.",
-   "source": [
-    {
-     "wd": "Q313030",
-     "p": "P921"
-    }
-   ],
-   "confidence": "low",
-   "held": "The study suggested the book as a primary source on the history writing of its own age and asked for a person to confirm it; that is not a subject the book is about, so no tag and no note is given, and the judgement is kept here so that it can be seen.",
-   "why": "The study named the book as a work of the Enlightenment.",
-   "note": "The first volume’s prefaces include the editor Milman’s preface of 1845 in the same chapter as Gibbon’s own, and the notes of Gibbon and his editors are not marked by hand on the shelf; only Gibbon’s text is tagged.",
-   "judged": "2026-11-22",
-   "entry": true
   },
   {
    "work": "decline-and-fall",
@@ -1767,7 +1715,7 @@
    "tag": "primary",
    "basis": "OWN",
    "flags": [],
-   "evidence": "Wikidata gives Marxism as Marx’s ideology and names Marx and Engels as its founders; Section I states in their own voice that history is the history of class struggles, the core of the doctrine.",
+   "evidence": "Wikidata gives Marxism as Marx’s ideology and names Marx and Engels as those who devised it; Section I states in their own voice that history is the history of class struggles, the core of the doctrine.",
    "source": [
     {
      "wd": "Q9061",
@@ -1778,6 +1726,11 @@
      "wd": "Q7264",
      "p": "P61",
      "v": "Q9061"
+    },
+    {
+     "wd": "Q7264",
+     "p": "P61",
+     "v": "Q34787"
     },
     {
      "book": "communist-manifesto",
@@ -1858,6 +1811,28 @@
      "v": "Q34787"
     }
    ],
+   "dates": {
+    "born": [
+     1818,
+     "Q9061",
+     "P569"
+    ],
+    "died": [
+     1883,
+     "Q9061",
+     "P570"
+    ],
+    "start": [
+     1847,
+     "Q642562",
+     "P571"
+    ],
+    "end": [
+     1852,
+     "Q642562",
+     "P576"
+    ]
+   },
    "confidence": "high",
    "why": "The Manifesto is the League’s own programme.",
    "note": "Engels’s preface of 1888 and the preamble are held in one chapter, and his notes are not marked by hand on the shelf; only the Manifesto’s own text is tagged.",
@@ -2521,6 +2496,20 @@
    "note": "The editor says in his preface that he is connected with the Austrian school himself, so his account is not wholly from outside it; it is tagged as an account of another writer’s work.",
    "judged": "2026-11-22",
    "entry": false
+  }
+ ],
+ "setAside": [
+  {
+   "work": "origin-of-species",
+   "q": "Q202261",
+   "label": "social Darwinism",
+   "why": "The study of primary sources named social Darwinism as a subject later readers drew from the book. The book never uses the name, and Wikidata gives natural selection as its main subject: it is not a subject the book is about, so no link is stored."
+  },
+  {
+   "work": "decline-and-fall",
+   "q": "Q12539",
+   "label": "Age of Enlightenment",
+   "why": "The study of primary sources suggested the book as a primary source on the history writing of its own age, the Enlightenment. The book is a history of Rome and its successors, and Wikidata gives neither the Enlightenment among its main subjects nor any movement for its author: it is not a subject the book is about, so no link is stored."
   }
  ]
 }

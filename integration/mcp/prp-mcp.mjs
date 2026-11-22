@@ -420,6 +420,8 @@ export function createPRP({ read, limits = {}, origin = BASE_URL } = {}) {
       complete, ...(cursor ? { next_cursor: cursor } : {}),
       scanned: { shards: scannedParts, of: meta.parts.length, records: scannedRows },
       rows, ...(notes.length ? { notes } : {}),
+      // What the dataset says of itself (its catalogue notes): who made generated text, where it holds any.
+      ...(d.notes ? { dataset_notes: d.notes } : {}),
       licence: d.licence, source: `${site}${d.url || d.urls[0]}`, updated: d.updated, notice: NOTICE
     };
   }

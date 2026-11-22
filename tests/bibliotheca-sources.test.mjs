@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   TAGS, KINDS, CONFIDENCE, BASES, FLAGS, RETROSPECTIVE_YEARS, WORDING, LINKS_PATH,
-  check, checkFile, derive, scriptBasis, plain, isShown, basisText, flagText, readerTexts, linksOn, linksFrom, kindOfType,
+  check, checkFile, derive, scriptBasis, plain, isShown, basisText, flagText, readerTexts, linksOn, linksFrom, kindOfType, yearsFrom,
 } from '../bibliotheca/lib/sources.js';
 
 const read = p => JSON.parse(readFileSync(new URL('../' + p, import.meta.url), 'utf8'));
@@ -101,9 +101,18 @@ test('BORNAFTER needs both dates from Wikidata, in the right order', () => {
 test('a primary tag on a happening needs an author whose life overlaps it', () => {
   assert.match(check(base({ dates: undefined })).join(), /overlap|dates/);
   assert.match(check(base({ dates: { ...base().dates, born: [-380, 'Q9', 'P569'], died: [-320, 'Q9', 'P570'] } })).join(), /overlap/);
-  assert.match(check(base({ basis: 'WIT', subject: { q: 'Q5', label: 'A duke', kind: 'person' }, dates: { born: [1469, 'Q9', 'P569'], died: [1527, 'Q9', 'P570'], start: [1530, 'Q5', 'P569'], end: [1580, 'Q5', 'P570'] } })).join(), /overlap/);
+  const duke = over => base({ basis: 'WIT', subject: { q: 'Q5', label: 'A duke', kind: 'person' }, evidence: 'The author says in chapter II that he spoke with the duke at his court.', ...over });
+  assert.match(check(duke({ dates: { born: [1469, 'Q9', 'P569'], died: [1527, 'Q9', 'P570'], start: [1530, 'Q5', 'P569'], end: [1580, 'Q5', 'P570'] } })).join(), /overlap/);
+  // X9: on a person the rule asks for the author's own word that he knew him, not for dates; dates held must overlap
+  assert.deepEqual(check(duke({ dates: undefined })), []);
+  assert.deepEqual(check(duke({ dates: { born: [1469, 'Q9', 'P569'], died: [1527, 'Q9', 'P570'], start: [1475, 'Q5', 'P569'], end: [1507, 'Q5', 'P570'] } })), []);
+  assert.match(check(duke({ dates: { born: [1469, 'Q9', 'P569'], died: [1527, 'Q9', 'P570'] } })).join(), /overlap/, 'half the dates show nothing');
   // an act needs no dates: a treaty's text has no author whose life could overlap
-  assert.deepEqual(check(base({ basis: 'ACT', dates: undefined, source: [{ collection: 'A treaty series' }] })), []);
+  const act = over => base({ basis: 'ACT', dates: undefined, source: [{ collection: 'A treaty series' }], ...over });
+  assert.deepEqual(check(act()), []);
+  // X2: but an act with an author is that author's: born in 1900, he wrote no programme of a league that ended in 1852
+  assert.match(check(act({ dates: { born: [1900, 'Q9', 'P569'], died: [1970, 'Q9', 'P570'], start: [1847, 'Q1', 'P571'], end: [1852, 'Q1', 'P576'] } })).join(), /ACT.*overlap/);
+  assert.deepEqual(check(act({ dates: { born: [1818, 'Q9', 'P569'], died: [1883, 'Q9', 'P570'], start: [1847, 'Q1', 'P571'], end: [1852, 'Q1', 'P576'] } })), []);
 });
 
 test('flags come from the list and stand where the rule puts them', () => {
@@ -289,7 +298,7 @@ const authorsOf = l => (l.part ? [l.part.byq].filter(Boolean)
   : [book(volumes(l.work)[0]).author.qid, ...FILE.links.filter(x => x.work === l.work).flatMap(x => x.source.filter(s => s.p === 'P50' && s.wd === (x.wq || l.wq)).map(s => s.v))]);
 
 test('the file passes the rule, each link reading its own author’s life', () => {
-  assert.deepEqual(checkFile(FILE, { authorsOf }), []);
+  assert.deepEqual(checkFile(FILE, { authorsOf, volumesOf: l => volumes(l.work) }), []);
   assert.ok(FILE.links.length >= 40, `${FILE.links.length} links`);
 });
 
@@ -317,9 +326,15 @@ test('the review’s findings stay fixed in the file (R1 to R4, R6, R7)', () => 
   assert.equal(ce.tag, null);
   assert.deepEqual(ce.flags.map(f => f.id), ['FORERUNNER']);
   assert.ok(ce.source.some(s => s.wd === 'Q271857' && s.p === 'P3938' && s.v === 'Q9061'));
-  // R6: the subjects the books are plainly about, and the study's rows that were dropped, are each in the file
-  for (const [w, q] of [['karl-marx-and-the-close-of-his-system', 'Q9061'], ['wealth-of-nations', 'Q207449'], ['origin-of-species', 'Q1063'], ['on-war', 'Q198'],
-    ['decline-and-fall', 'Q12539'], ['origin-of-species', 'Q202261']]) assert.ok(one(w, q), `${w} → ${q}`);
+  // R6: the subjects the books are plainly about are each in the file; the study's two rows that were dropped, which
+  // the file itself says the books are not about, are kept apart from the links (X11: step 0 stores a link only for a
+  // subject the book is plainly about), each with its reason
+  for (const [w, q] of [['karl-marx-and-the-close-of-his-system', 'Q9061'], ['wealth-of-nations', 'Q207449'], ['origin-of-species', 'Q1063'], ['on-war', 'Q198']]) assert.ok(one(w, q), `${w} → ${q}`);
+  for (const [w, q] of [['decline-and-fall', 'Q12539'], ['origin-of-species', 'Q202261']]) {
+    assert.equal(one(w, q), undefined, `${w} → ${q} is not a link`);
+    assert.match(FILE.setAside.find(a => a.work === w && a.q === q)?.why || '', /not a subject the book is about/, `${w} → ${q} is set aside with its reason`);
+  }
+  assert.equal(FILE.setAside.length, 2);
   assert.equal(one('karl-marx-and-the-close-of-his-system', 'Q9061').basis, 'OUTSIDE');
   // R7: Böhm-Bawerk's authorship of Capital and Interest is cited from the work's author statement
   assert.ok(one('capital-and-interest', 'Q311535').source.some(s => s.wd === 'Q4212911' && s.p === 'P50' && s.v === 'Q311535'));
@@ -409,4 +424,98 @@ test('every reader sentence in the file is plain: no id, no quotation, the typog
       assert.doesNotMatch(s, /'|"|“|”/, `${l.work} → ${l.subject.label}: ${s}`);
     }
   }
+});
+
+// ---- The second reader's points of 22 November 2026 (Codex on the first commit): what the checker let through.
+test('X1: a shown link rests on evidence of its own; another book’s chapter or a Master Index tag alone is weak', () => {
+  const weak = idea({ source: [{ book: 'another-book', ch: 1, other: true }, { lake: 'Q9', tag: 'School:A school' }], evidence: 'Other books on the shelf name the author as the source of the school’s theory.' });
+  assert.match(check(weak).join(), /shown link rests on/);
+  assert.match(check({ ...weak, confidence: 'high' }).join(), /shown link rests on/);
+  assert.deepEqual(check({ ...weak, confidence: 'low', held: 'The evidence lies only in other books.' }), []);
+  // the committed record that prompted it, raised from low to high, no longer passes
+  const money = FILE.links.find(l => l.work === 'origin-of-money' && l.subject.q === 'Q203411');
+  assert.equal(money.confidence, 'low');
+  assert.equal(isShown(money), false);
+  assert.match(check({ ...money, confidence: 'high', held: undefined }).join(), /shown link rests on/);
+  // a chapter of another book is marked as such, where the work's own volumes are known
+  assert.match(check(base({ source: [{ book: 'another-book', ch: 2 }] }), { volumes: ['a-book'] }).join(), /another book \(another-book\) is marked other/);
+  assert.deepEqual(check(base(), { volumes: ['a-book'] }), []);
+});
+
+test('X1: OWN on an idea cites the author’s movement or ideology naming it, or the work’s own text', () => {
+  assert.deepEqual(check(idea()), []);
+  assert.match(check(idea({ source: [{ wd: 'Q9', p: 'P135', v: 'Q4' }] })).join(), /OWN on an idea cites/, 'the movement named is another');
+  assert.match(check(idea({ source: [{ wd: 'Q3', p: 'P921' }] })).join(), /OWN on an idea cites/, 'a statement, but not the author’s movement');
+  assert.match(check(idea(), { authors: ['Q8'] }).join(), /OWN on an idea cites/, 'the statement is on someone else’s item');
+  assert.deepEqual(check(idea(), { authors: ['Q9'] }), []);
+  assert.deepEqual(check(idea({ source: [{ book: 'a-book', ch: 1 }], evidence: 'Chapter I states the doctrine in the author’s own voice.' })), []);
+});
+
+test('X1: FORERUNNER’s naming date is the idea’s own, or that of a person a cited statement on the idea names', () => {
+  const fore = over => idea({ tag: null, basis: null, flags: [{ id: 'FORERUNNER' }], source: [{ wd: 'Q3', p: 'P3938', v: 'Q7' }],
+    evidence: 'Wikidata says the school was named by a writer born after the author died.', dates: { died: [1790, 'Q9', 'P570'], named: [1818, 'Q7', 'P569'] }, ...over });
+  assert.deepEqual(check(fore()), []);
+  assert.deepEqual(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1800, 'Q3', 'P571'] } })), []);
+  assert.match(check(fore({ dates: { died: [1790, 'Q9', 'P570'], named: [1818, 'Q8', 'P569'] } })).join(), /FORERUNNER: dates\.named is read from Q8/, 'an unrelated person’s birth');
+});
+
+test('X1: RETROSPECTIVE gives a range only where the book dates the start of its writing', () => {
+  const late = flag => base({ dates: { ...base().dates, written: [-391, 'shelf'] }, flags: [flag] });
+  assert.deepEqual(check(late({ id: 'RETROSPECTIVE', years: 13 })), []);
+  assert.match(check(late({ id: 'RETROSPECTIVE', years: 13, to: 99 })).join(), /to is given only where/);
+});
+
+test('X8: years across 1 BC and AD 1 are counted with no year zero', () => {
+  assert.equal(yearsFrom(-10, 1), 10);
+  assert.equal(yearsFrom(-431, -404), 27);
+  assert.equal(yearsFrom(1836, 1859), 23);
+  const d = { born: [-40, 'Q9', 'P569'], died: [30, 'Q9', 'P570'], start: [-20, 'Q1', 'P580'], end: [-10, 'Q1', 'P582'], written: [5, 'shelf'] };
+  assert.deepEqual(check(base({ dates: d, flags: [{ id: 'RETROSPECTIVE', years: 14 }] })), []);
+  assert.match(check(base({ dates: d, flags: [{ id: 'RETROSPECTIVE', years: 15 }] })).join(), /the dates give 14 years/);
+  // ten years exactly is not long after: no flag is asked for where the old sum made eleven
+  assert.deepEqual(check(base({ dates: { ...d, written: [1, 'shelf'] } })), []);
+});
+
+test('X4: a part by another hand that one volume holds is listed on that volume only', () => {
+  const shelf = { books: [{ slug: 'v1', set: { slug: 's' } }, { slug: 'v2', set: { slug: 's' } }] };
+  const file = { links: [{ work: 's', part: null, subject: { q: 'Q1' } }, { work: 's', part: { ch: 0, heading: 'Preface', by: 'An Editor', book: 'v2' }, subject: { q: 'Q2' } },
+    { work: 's', part: { ch: 3, heading: 'Note', by: 'An Editor' }, subject: { q: 'Q3' } }] };
+  assert.deepEqual(linksFrom(file, 'v1', shelf).map(l => l.subject.q), ['Q1', 'Q3']);
+  assert.deepEqual(linksFrom(file, 'v2', shelf).map(l => l.subject.q), ['Q1', 'Q2', 'Q3']);
+  // on the shelf: every part that names its volume is listed on that volume and on no other of its set
+  const held = FILE.links.filter(l => l.part?.book);
+  for (const l of held) for (const v of volumes(l.work)) assert.equal(linksFrom(FILE, v, SHELF).includes(l), v === l.part.book, `${l.work}, ${l.part.heading}, on ${v}`);
+});
+
+test('X11: a subject set aside is not a link, and says why', () => {
+  const ok = { judged: '2026-11-22', links: [base()], setAside: [{ work: 'a-book', q: 'Q5', label: 'A later doctrine', why: 'Later readers drew it from the book; the book is not about it.' }] };
+  assert.deepEqual(checkFile(ok), []);
+  assert.match(checkFile({ ...ok, setAside: [{ work: 'a-book', q: 'Q1', label: 'A war', why: 'It is stored above as a link as well.' }] }).join(), /also stored as a link/);
+  assert.match(checkFile({ ...ok, setAside: [{ work: 'a-book', q: 'Q5', label: 'A later doctrine' }] }).join(), /why it is not a subject/);
+  assert.match(checkFile({ ...ok, setAside: {} }).join(), /setAside is a list/);
+  // no link of the committed file says of itself that the book is not about its subject (step 0)
+  for (const l of FILE.links) assert.doesNotMatch(`${l.held || ''} ${l.why}`, /not a subject the book is about|the book is not about it/, `${l.work} → ${l.subject.label}`);
+  for (const a of FILE.setAside) assert.doesNotMatch(a.why, ID, `${a.work} → ${a.label}`);
+});
+
+test('the file’s mends of 22 November: the League’s years, who devised Marxism, what the Origin’s introduction dates', () => {
+  const one = (work, q) => FILE.links.find(l => l.work === work && l.subject.q === q && !l.part);
+  // X2: the Manifesto is the League's own act, and its authors' lives are shown to overlap the League's years
+  const league = one('communist-manifesto', 'Q642562');
+  assert.equal(league.basis, 'ACT');
+  assert.deepEqual(league.dates, { born: [1818, 'Q9061', 'P569'], died: [1883, 'Q9061', 'P570'], start: [1847, 'Q642562', 'P571'], end: [1852, 'Q642562', 'P576'] });
+  // X10: the sentence says what its cited statements carry: both men, by the property it cites
+  const marxism = one('communist-manifesto', 'Q7264');
+  for (const v of ['Q9061', 'Q34787']) assert.ok(marxism.source.some(s => s.wd === 'Q7264' && s.p === 'P61' && s.v === v), v);
+  assert.match(marxism.evidence, /Marx and Engels as those who devised it/);
+  assert.doesNotMatch(marxism.evidence, /founders/);
+  // X3: the gap is from the book's own date; the sentence says the introduction dates earlier notes, not this book's start
+  const beagle = one('origin-of-species', 'Q1564366');
+  assert.deepEqual(beagle.flags, [{ id: 'RETROSPECTIVE', years: 23 }]);
+  assert.equal(beagle.dates.begun, undefined);
+  assert.match(beagle.evidence, /first notes .* a sketch to 1844, but not the start of this book/);
+  const intro = book('origin-of-species').chapters.find(c => c.n === 0).paragraphs.map(p => (typeof p === 'string' ? p : p.text || '')).join(' ');
+  assert.match(intro, /After five years’ work I allowed myself to speculate/);
+  assert.match(intro, /these I enlarged in 1844 into a sketch/);
+  assert.match(intro, /I have been urged to publish this abstract/);
 });

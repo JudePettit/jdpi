@@ -102,6 +102,9 @@ const FLAG_WORDS = Object.freeze({
   'AS-TOLD-TO': 'written with another person',
   DISPUTED: 'the sources disagree',
 });
+// Who made the judgements, said wherever one is shown or served: the rule's paragraph, the dataset's notes, the
+// Explorer's two filters (review X6).
+const MADE = 'Each judgement was made for Vitruvian Manager by an AI model (Claude), reading the evidence named beside it (the book’s own words, by chapter, or a statement on Wikidata, read on the day it was judged), and checked by Vitruvian Manager’s rules; no person checked it.';
 const inQuotes = list => list.map(w => `“${w}”`);
 const orList = list => (list.length > 1 ? `${list.slice(0, -1).join(', ')} or ${list[list.length - 1]}` : list.join(''));
 export const WORDING = Object.freeze({
@@ -144,7 +147,10 @@ export const WORDING = Object.freeze({
   },
   about: 'A primary source on a subject is evidence made by the subject itself, or by someone who took part in it or saw it: a party’s own programme, a soldier’s own account of a war, an adherent’s own statement of a school of thought, a person’s own book. A secondary source is an account from a distance: by someone born after the events, written from others’ accounts, a study of a person by someone not shown to have known the person, or an analysis of an idea from outside it. The tag belongs to the link between one book and one subject, not to the book: the same book can be a primary source on one subject and a secondary source on another, and many links carry no tag at all, because the evidence shows neither, and then nothing is said rather than a guess. '
     + `A short note may stand beside a tag or in its place: ${orList(inQuotes(Object.values(FLAG_WORDS)))}. “${FLAG_WORDS.RETROSPECTIVE}” means more than ten years after the events, counted from when the writing began where the book says so. `
-    + 'A preface or introduction by another hand, such as a translator’s, is tagged apart from the text it introduces. A date alone never gives a tag, except that an author born after a subject ended is a secondary source on it. Each judgement was made for Vitruvian Manager by an AI model (Claude), reading the evidence named beside it (the book’s own words, by chapter, or a statement on Wikidata, read on the day it was judged), and checked by Vitruvian Manager’s rules; no person checked it. Only judgements resting on strong or fair evidence are shown.',
+    + 'A preface or introduction by another hand, such as a translator’s, is tagged apart from the text it introduces. A date alone never gives a tag, except that an author born after a subject ended is a secondary source on it. ' + MADE + ' Only judgements resting on strong or fair evidence are shown.',
+  made: MADE,
+  // Beside a work's "Primary source on" and "Secondary source on" tags in the Explorer (the lake's note on a tag).
+  tagNote: 'judged for Vitruvian Manager by an AI model (Claude) from the evidence on the work’s entry; no person checked it',
 });
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -170,7 +176,7 @@ export function readerTexts() {
   for (const byKind of Object.values(WORDING.basis)) out.push(...Object.values(byKind));
   for (const id of Object.keys(FLAGS)) out.push(flagText({ id, years: 15, with: 'A. N. Other' }), flagText({ id, years: 16, to: 28 }));
   out.push(...Object.values(WORDING.group), WORDING.noted, WORDING.notNamed, WORDING.notNamedNote, WORDING.what, WORDING.partsApart, WORDING.read('2026-11-22'),
-    WORDING.collection, WORDING.lakeTag('A doctrine', 'An Author'), WORDING.lakeTag('A doctrine'), ...Object.values(WORDING.property));
+    WORDING.made, WORDING.tagNote, WORDING.collection, WORDING.lakeTag('A doctrine', 'An Author'), WORDING.lakeTag('A doctrine'), ...Object.values(WORDING.property));
   return out;
 }
 
@@ -215,6 +221,10 @@ export function scriptBasis(l, author) {
   });
 }
 
+// The years from one year to a later one, where years before 1 CE are negative and there is no year zero (10 BC to
+// AD 1 is ten years, not eleven), as the site counts them elsewhere.
+export const yearsFrom = (from, to) => to - from - (from < 0 && to > 0 ? 1 : 0);
+
 // ---- The checks. check(link) returns the problems with one link, as sentences; [] when it passes.
 const QID = /^Q\d+$/, PID = /^P\d+$/, DAY = /^\d{4}-\d{2}-\d{2}$/;
 const DATE_PROPS = { born: ['P569'], died: ['P570'], start: ['P580', 'P571', 'P569', 'P585'], end: ['P582', 'P576', 'P570', 'P585'], named: ['P571', 'P569', 'P580', 'P585'] };
@@ -244,6 +254,8 @@ function checkProse(name, s, out) {
 
 // ctx.authors, where given: the Wikidata ids of the people whose lives the link may read (the work's authors, or the
 // part's writer); the file's test gives them from the shelf, so a date read from anyone else's item fails (review R5).
+// ctx.volumes, where given: the shelf slugs that are the work itself (a book's own, or a set's volumes), so a chapter
+// of any other book must be marked other: true and cannot carry a shown link alone.
 export function check(l, ctx = {}) {
   const out = [];
   if (!l || typeof l !== 'object') return ['a link must be an object'];
@@ -292,7 +304,13 @@ export function check(l, ctx = {}) {
     if (typeof y('born') !== 'number' || typeof y('end') !== 'number') out.push('BORNAFTER needs both dates: dates.born and dates.end');
     else if (!(y('born') > y('end'))) out.push(`BORNAFTER: the author was born in ${y('born')}, not after ${y('end')}`);
   }
-  if (b?.dates === 'overlap' && l.tag && !overlaps()) out.push(`${l.basis}: the author’s life must overlap the subject’s (dates.born, died, start and end), and the dates must show it`);
+  // Step 2: a primary tag on a happening by one who took part or saw it needs the author's life to overlap it, and the
+  // dates must show it. An act of the subject itself may have no author (a treaty's text), and on a person the rule asks
+  // for the author's own word that he knew him: there no dates are needed, but where any is held the four must be, and
+  // must overlap (review X2, X9).
+  const dated = ['born', 'died', 'start', 'end'].some(k => d[k] !== undefined);
+  if (b?.dates === 'overlap' && l.tag && s.kind === 'happening' && !overlaps()) out.push(`${l.basis}: the author’s life must overlap the subject’s (dates.born, died, start and end), and the dates must show it`);
+  else if (l.tag === 'primary' && (l.basis === 'ACT' || (b?.dates === 'overlap' && s.kind === 'person')) && dated && !overlaps()) out.push(`${l.basis}: where the lives are dated they must overlap (dates.born, died, start and end)`);
 
   // flags
   const flags = Array.isArray(l.flags) ? l.flags : (out.push('flags is a list'), []);
@@ -311,21 +329,40 @@ export function check(l, ctx = {}) {
     if (f.id === 'RETROSPECTIVE') {
       const end = y('end');
       if (!Number.isInteger(f.years) || f.years <= RETROSPECTIVE_YEARS) out.push('RETROSPECTIVE: written more than ten years after the subject ended (years)');
-      else if (typeof y(from) === 'number' && typeof end === 'number' && f.years !== y(from) - end) out.push(`RETROSPECTIVE: the dates give ${y(from) - end} years${from === 'begun' ? ' from the start of the writing' : ''}, not ${f.years}`);
-      if (from === 'begun' && typeof y('written') === 'number' && typeof end === 'number' && f.to !== y('written') - end) out.push(`RETROSPECTIVE: the last revision came ${y('written') - end} years after the subject ended (to), not ${f.to ?? 'unsaid'}`);
+      else if (typeof y(from) === 'number' && typeof end === 'number' && f.years !== yearsFrom(end, y(from))) out.push(`RETROSPECTIVE: the dates give ${yearsFrom(end, y(from))} years${from === 'begun' ? ' from the start of the writing' : ''}, not ${f.years}`);
+      const ranged = from === 'begun' && typeof y('written') === 'number' && typeof end === 'number';
+      if (ranged && f.to !== yearsFrom(end, y('written'))) out.push(`RETROSPECTIVE: the last revision came ${yearsFrom(end, y('written'))} years after the subject ended (to), not ${f.to ?? 'unsaid'}`);
+      if (!ranged && f.to !== undefined) out.push('RETROSPECTIVE: to is given only where the book dates the start of its writing (dates.begun) and the dates hold its last revision and the subject’s end');
       if (f.to !== undefined && (!Number.isInteger(f.to) || f.to < f.years)) out.push('RETROSPECTIVE: to is the gap to the last revision, no shorter than years');
     }
     if (f.id === 'FORERUNNER') {
       const before = typeof y('written') === 'number' ? 'written' : 'died';
       if (typeof y('named') !== 'number' || !QID.test(who('named') || '') || typeof y(before) !== 'number') out.push('FORERUNNER needs a source that dates the idea’s name (dates.named, from Wikidata) and the work’s writing or the author’s death');
+      // whose date it is: the idea's own item, or a person a statement on the idea's item names (the one who named it)
+      else if (who('named') !== s.q && !(l.source || []).some(x => x.wd === s.q && x.v === who('named'))) out.push(`FORERUNNER: dates.named is read from ${who('named')}, which is neither the idea’s own item nor a person a cited statement on it names`);
       else if (!(y('named') > y(before))) out.push(`FORERUNNER: the name dates from ${y('named')} at the earliest, not after the ${before === 'written' ? 'writing' : 'author’s death'} in ${y(before)}`);
     }
   }
   // a primary tag on a happening written more than ten years after it ended must carry RETROSPECTIVE (counted from the
   // start of the writing where the book says when that was)
   if (l.tag === 'primary' && s.kind === 'happening' && typeof y(from) === 'number' && typeof y('end') === 'number') {
-    const gap = y(from) - y('end');
+    const gap = yearsFrom(y('end'), y(from));
     if (gap > RETROSPECTIVE_YEARS && !seen.has('RETROSPECTIVE')) out.push(`RETROSPECTIVE: written ${gap} years after the subject ended, and the link must say so`);
+  }
+  // What a shown link rests on (review X1). A chapter of another book is marked other: true; a shown link needs evidence
+  // of its own: a statement on Wikidata, a collection's heading or a chapter of the work itself. Other books and the
+  // Master Index's own tags alone are weak evidence, which is low and not shown.
+  const sources = Array.isArray(l.source) ? l.source : [];
+  if (Array.isArray(ctx.volumes)) for (const x of sources) if (x?.book && !x.other && !ctx.volumes.includes(x.book)) out.push(`a chapter of another book (${x.book}) is marked other: true`);
+  const own = x => !!x && (QID.test(x.wd || '') || (typeof x.collection === 'string' && !!x.collection.trim()) || (typeof x.book === 'string' && !x.other));
+  const shows = SHOWN.includes(l.confidence) && (l.tag != null || flags.length > 0);
+  if (shows && !sources.some(own)) out.push('a shown link rests on the work’s own text, a collection’s heading or a statement on Wikidata; other books and Master Index tags alone are weak evidence (low)');
+  // Step 3: an idea is the author's own where Wikidata's movement (P135) or ideology (P1142) of the author names it, or
+  // the work's own text states it; a shown OWN on an idea cites one of the two.
+  if (shows && l.basis === 'OWN' && s.kind === 'idea') {
+    const stated = sources.some(x => x?.book && !x.other);
+    const named = sources.some(x => (x?.p === 'P135' || x?.p === 'P1142') && x.v === s.q && (!Array.isArray(ctx.authors) || ctx.authors.includes(x.wd)));
+    if (!stated && !named) out.push('OWN on an idea cites the author’s movement or ideology on Wikidata (P135 or P1142) naming the idea, or a chapter of the work’s own text');
   }
   // step 4: a person's own book is primary on that person at high confidence
   if (l.basis === 'OWN' && s.kind === 'person' && l.confidence !== 'high') out.push('a person’s own book is primary on him at high confidence');
@@ -335,17 +372,26 @@ export function check(l, ctx = {}) {
 const linkKey = l => [l.work, l.part ? `${l.part.book || ''}#${l.part.ch}` : '', l.subject?.q].join('|');
 
 // checkFile(file, ctx) checks every link, the file's own fields, and that no link is stored twice. ctx.authorsOf(link),
-// where given, names the people whose lives each link may read (see check).
+// where given, names the people whose lives each link may read, and ctx.volumesOf(link) the shelf slugs that are the
+// work itself (see check). A subject judged not to be one the book is about is not a link (step 0): it is kept apart in
+// setAside, [{ work, q, label, why }], which no page, lake record or dataset reads (review X11).
 export function checkFile(file, ctx = {}) {
   const out = [];
   if (!file || !Array.isArray(file.links)) return ['the file holds links: [...]'];
   if (!DAY.test(file.judged || '')) out.push('the file says the day it was judged (judged)');
   const keys = new Set();
   file.links.forEach((l, i) => {
-    for (const p of check(l, ctx.authorsOf ? { authors: ctx.authorsOf(l) } : {})) out.push(`link ${i} (${l?.work} → ${l?.subject?.label}): ${p}`);
+    for (const p of check(l, { ...(ctx.authorsOf ? { authors: ctx.authorsOf(l) } : {}), ...(ctx.volumesOf ? { volumes: ctx.volumesOf(l) } : {}) })) out.push(`link ${i} (${l?.work} → ${l?.subject?.label}): ${p}`);
     const k = linkKey(l);
     if (keys.has(k)) out.push(`link ${i} (${l?.work} → ${l?.subject?.label}) is stored twice`);
     keys.add(k);
+  });
+  if (file.setAside !== undefined && !Array.isArray(file.setAside)) out.push('setAside is a list');
+  (Array.isArray(file.setAside) ? file.setAside : []).forEach((a, i) => {
+    const at = `set aside ${i} (${a?.work} → ${a?.label})`;
+    if (!a || typeof a.work !== 'string' || !a.work || !QID.test(a.q || '') || typeof a.label !== 'string' || !a.label || typeof a.why !== 'string' || a.why.trim().length < 12) return out.push(`${at}: names its work, the subject’s Wikidata id and label, and why it is not a subject of the book`);
+    checkProse('why', a.why, out);
+    if (file.links.some(l => l.work === a.work && l.subject?.q === a.q)) out.push(`${at} is also stored as a link`);
   });
   return out;
 }
@@ -364,7 +410,8 @@ export const linksOn = (file, q) => (file?.links || []).filter(l => l.subject?.q
 // The links from one book of the shelf: its own and its set's. shelf is bibliotheca/data/index.json.
 export function linksFrom(file, slug, shelf) {
   const set = shelf?.books?.find(b => b.slug === slug)?.set?.slug;
-  return (file?.links || []).filter(l => l.work === slug || (set && l.work === set));
+  // A part by another hand that one volume of a set holds is that volume's alone (review X4), as the lake marks it.
+  return (file?.links || []).filter(l => (l.work === slug || (set && l.work === set)) && (!l.part?.book || l.part.book === slug));
 }
 
 // ---- Naming a link's sources in words (the pages, the lake's build, the catalogue).

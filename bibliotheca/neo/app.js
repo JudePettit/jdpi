@@ -271,7 +271,9 @@ function renderBookFront() {
    one file of judgements (bibliotheca/data/source-links.json), in the one table's words (../lib/sources.js): the main
    text's by tag, then those with a note in place of a tag, then the parts by other hands (a translator's preface), each
    with its basis, its notes and its evidence. A subject is linked to its Master Index entry once the entry is found (when
-   the list is first opened); one with no entry is named, and said to have none. A set's links are shown on each volume. */
+   the list is first opened); one with no entry is named, and said to have none; one whose lookup failed is left as it
+   was and asked for again the next time the list is opened, never said to have no entry (review X7). A set's links are
+   shown on each volume, a part by another hand on the volume that holds it. */
 const loadLinks = once(() => getJson(`${DATA}source-links.json`));
 function renderBookSources(file) {
   const b = S.book, box = $('#book-srcs');
@@ -303,20 +305,26 @@ function renderBookSources(file) {
   $('#book-srcs-body').innerHTML = sect(WORDING.on.primary, main.filter(l => l.tag === 'primary')) + sect(WORDING.on.secondary, main.filter(l => l.tag === 'secondary'))
     + sect(WORDING.noted, main.filter(l => !l.tag)) + sect(WORDING.partsApart, parts, true) + `<p class="nc-src-about">${esc(WORDING.about)}</p>`;
   box.hidden = false;
-  // The entries, asked for once the list is open: a subject with one is linked to it, one with none says so.
+  // The entries, asked for once the list is open: a subject with one is linked to it, one with none says so. The lake's
+  // shard is read here and not through entity(), which keeps a failed read as "no entry": a failure settles nothing,
+  // and that subject is asked for again the next time the list is opened.
+  const settled = new Set();
   box.ontoggle = () => {
-    if (!box.open || box.dataset.asked === b.slug) return;
-    box.dataset.asked = b.slug;
-    const qs = [...new Set(links.map(l => l.subject.q))];
-    Promise.all(qs.map(q => entity(q).then(e => [q, e]))).then(found => {
+    const qs = [...new Set(links.map(l => l.subject.q))].filter(q => !settled.has(q));
+    if (!box.open || !qs.length || box.dataset.asking === b.slug) return;
+    box.dataset.asking = b.slug;
+    const shards = new Map(), shard = q => { const n = +q.slice(1) % 512; if (!shards.has(n)) shards.set(n, getJson(`${LAKE}e/${n}.json`)); return shards.get(n); };
+    Promise.all(qs.map(q => shard(q).then(s => [q, s[q] || null], () => [q, undefined]))).then(found => {
       if (S.book !== b) return;
-      for (const [q, e] of found) for (const el of box.querySelectorAll(`.nc-src[data-q="${q}"] > .nc-src-subj`)) {
+      delete box.dataset.asking;
+      for (const [q, e] of found) if (e !== undefined) settled.add(q);
+      for (const [q, e] of found) if (e !== undefined) for (const el of box.querySelectorAll(`.nc-src[data-q="${q}"] > .nc-src-subj`)) {
         el.outerHTML = e ? `<a class="term srcsubj nc-src-subj" data-qid="${esc(q)}" data-jdpi-ency="${esc(q)}" ${entryAttrs(q)} title="${esc(e.name || e.label)} · Master Index">${el.innerHTML}</a>`
           : `${el.outerHTML}<span class="nc-src-wait">${esc(WORDING.waiting)}</span>`;
       }
     });
   };
-  delete box.dataset.asked;
+  delete box.dataset.asking;
 }
 function renderToc() {
   $('#toc-list').innerHTML = S.chapters.map((c, i) => {

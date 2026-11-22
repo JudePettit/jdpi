@@ -5,7 +5,8 @@
 //   srcFrom  on a work's own entry, where the Master Index holds the work: one item per shown link from it
 //   tags     on a work's own entry: "Primary source on:<subject>" and "Secondary source on:<subject>", from the main
 //            text's tagged links only (a part by another hand is not the work). No tag goes on a subject's entry, and
-//            none on an author's: an author is a subject of his book, never its work.
+//            none on an author's: an author is a subject of his book, never its work. Each such tag carries a note
+//            (tn) saying who made the judgement, which the Explorer shows beside it.
 // Only shown links are carried (high or medium confidence, with a tag or a flag); a low one stays in the file. No entry
 // is made: a subject with no entry has its link on the book side only (Neo Book), and gains it here the day the lake
 // holds it, with no change to the file. Every run takes away what the last file gave before giving what this one does,
@@ -41,6 +42,7 @@ export function applySourceLinks(records, { file, shelf, chapter = () => null })
   for (const r of records.values()) {
     delete r.src; delete r.srcFrom;
     if (r.tags?.some(isGroupTag)) r.tags = r.tags.filter(t => !isGroupTag(t));
+    if (r.tn) { for (const t of Object.keys(r.tn)) if (isGroupTag(t)) delete r.tn[t]; if (!Object.keys(r.tn).length) delete r.tn; }
   }
   const names = nameMap(file, shelf);
   const shownName = q => { const r = records.get(q); return r ? (r.name || r.label) : null; };
@@ -66,6 +68,9 @@ export function applySourceLinks(records, { file, shelf, chapter = () => null })
       if (l.tag && !l.part) {
         const t = `${WORDING.group[l.tag]}:${capital(shownName(l.subject.q) || l.subject.label)}`;
         if (!work.tags.includes(t)) work.tags.push(t);
+        // The tag's note (build.mjs gathers `tn` into index.json's notes): the Explorer says beside the tag and in the
+        // filter's heading who made the judgement (review X6).
+        (work.tn ||= {})[t] = WORDING.tagNote;
       }
     }
   }

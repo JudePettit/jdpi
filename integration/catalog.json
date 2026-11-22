@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-22T07:44:56.766Z",
+  "generated": "2026-11-22T08:43:43.585Z",
   "name": "Vitruvian Manager data catalogue",
   "publisher": "JDP-Iq",
   "description": "Every public dataset in Vitruvian Manager (VM, by JDP-Iq), with its fields, size, licence and sources. Read-only; no keys. Files are static JSON on this site; the MCP server (/mcp) and the JSON API (/api/v1/) query them with row and size caps.",
@@ -3865,8 +3865,12 @@
           "description": "True when the subject has a Master Index entry today (read from the lake, not from the file)"
         }
       ],
-      "rows": 65,
+      "rows": 63,
       "licence": "Judgements, evidence sentences and wording © JDP-Iq; the Wikidata statements they cite are CC0.",
+      "notes": [
+        "Each judgement was made for Vitruvian Manager by an AI model (Claude), reading the evidence named beside it (the book’s own words, by chapter, or a statement on Wikidata, read on the day it was judged), and checked by Vitruvian Manager’s rules; no person checked it.",
+        "The evidence sentences are Vitruvian Manager’s own text, written by the same AI model; they describe the sources and quote none. Rows with shown: false are held back from the pages as weak evidence."
+      ],
       "sources": [
         "The books on Bibliotheca’s shelf, read by chapter",
         "Wikidata (CC0), read on the day judged",
@@ -3880,7 +3884,7 @@
         "bibliotheca/data/index.json",
         "lake/data/index.json"
       ],
-      "bytes": 87122
+      "bytes": 85624
     }
   ]
 }

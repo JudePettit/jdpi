@@ -134,7 +134,7 @@
      17 Nov 2026 from https://query.wikidata.org/ (P36 capital, P625 coordinates): the capital's item and position are
      the last fields. Which border files lack each country: the plan (PRP-ALL-COUNTRIES-PLAN.md, AC-1, AC-5, AC-13),
      checked against world-atlas 2.0.2 countries-110m (tests/fixtures/world-atlas-110m-ids.json) and CShapes 2.0
-     (battlefield/history/data/borders.topo.json). Names as design/prp-focus.js gives them. Capitals' names are
+     (its border file, which VM held until 22 November 2026). Names as design/prp-focus.js gives them. Capitals' names are
      Wikidata's English labels, but for Saint John's (Q36262, which has none): its name is National Analysis's.
      iso3, name, country item, dot [lon, lat], from, lacks, capital item, capital, capital [lon, lat] */
   const ROWS = [

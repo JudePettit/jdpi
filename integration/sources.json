@@ -388,9 +388,9 @@
       "termsUrl": "https://icr.ethz.ch/data/cshapes/",
       "termsQuote": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.",
       "termsRead": "2026-11-18",
-      "held": true,
-      "where": "No longer read or drawn by any page: the Retrospective Battlefield and the Integration Hub left it on 20 November 2026, and War Focus on 21 November 2026; their borders now come from Cliopatria and Natural Earth and their place names from Wikidata (battlefield/history/data/places.json). Its two files, battlefield/history/data/borders.topo.json and battlefield/history/names.mjs, are still in the repository, read by nothing.",
-      "decision": "Removing the two files that no page reads (battlefield/history/data/borders.topo.json, battlefield/history/names.mjs): waits on VM’s owner.",
+      "held": false,
+      "where": "No longer read or drawn by any page: the Retrospective Battlefield and the Integration Hub left it on 20 November 2026, and War Focus on 21 November 2026; their borders now come from Cliopatria and Natural Earth and their place names from Wikidata (battlefield/history/data/places.json). Its two files, battlefield/history/data/borders.topo.json and battlefield/history/names.mjs, were removed from the repository on 22 November 2026; VM holds no CShapes data.",
+      "decision": "VM’s owner agreed on 22 November 2026 to remove the two files that no page read (battlefield/history/data/borders.topo.json, battlefield/history/names.mjs); they are removed.",
       "credit": "Borders: CShapes 2.0 (Schvitz et al. 2022), CC BY-NC-SA 4.0",
       "databaseRight": "CC BY-NC-SA 4.0 licenses the sui generis database right for non-commercial use only."
     },

@@ -3,7 +3,7 @@
 // site's when JDPI_URL is set; the page tests run against JDPI_URL (default live) and PRP_PAGES=0 leaves them out.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { pageTest, launch } from './tools/pages.mjs';
 
 const BASE = (process.env.JDPI_URL || 'https://jdpi.pages.dev').replace(/\/$/, '');
@@ -2246,9 +2246,11 @@ test('focus (second review X4): every Gleditsch–Ward number the wars used open
   assert.equal(field(255, last), 'Q183');
   assert.match(readFileSync(new URL('../battlefield/history/app.js', import.meta.url), 'utf8'), /oldCountry\(OLD_NUMBERS, state\.places\.places, id\.slice\(3\), y\)/);
 });
-// Third review R5: every Gleditsch–Ward number of War Focus's previous border file (CShapes 2.0,
-// battlefield/history/data/borders.topo.json), at the first year from 1926 that it resolves under a name the file
-// gave it, with the state War Focus opens. A pair whose names differ only in form is listed in OLD_LOOSE; a number
+// Third review R5: every Gleditsch–Ward number of War Focus's previous border file (CShapes 2.0), at the first year
+// from 1926 that it resolves under a name the file gave it, with the state War Focus opens. The file itself (434
+// rows, 222 numbers) left the repository on 22 November 2026 with the owner's agreement, and its names table is not
+// copied here (it is CShapes' own, CC BY-NC-SA): each pair's name was compared with the file for the last time at
+// commit b745a99, and what stays is VM's own list of the numbers and the states they open. A pair whose names differ only in form is listed in OLD_LOOSE; a number
 // with no state of its own among the Battlefield's places and the war files' names is left out (OLD_LEFT_OUT: the
 // United States' territories 3, 4 and 6, which name no state of their own and open the United States in the years
 // the file drew them (asserted at the test's end); French and Spanish
@@ -2319,17 +2321,17 @@ test('focus (third review R5): every number of the previous border file opens a 
   for (const x of (await dataFile('battlefield/focus/data/index.json')).wars) for (const [q, v] of Object.entries((await dataFile(`battlefield/focus/data/wars/${x.id}.json`)).names || {})) {
     const s = names.get(q) || names.set(q, new Set()).get(q); s.add(v.n); if (v.then) s.add(v.then.n);
   }
-  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
-  const drawn = localJson('../battlefield/history/data/borders.topo.json').objects.borders.geometries.map(g => g.properties);
   const listed = new Set(OLD_BORDER.map(([n]) => n));
-  for (const n of new Set(drawn.map(p => p.gw))) assert.ok(listed.has(n) !== OLD_LEFT_OUT.has(n), `gw:${n} listed or left out, not both`);
+  assert.equal(listed.size + OLD_LEFT_OUT.size, 222, 'every number the old file drew is listed or left out');
+  for (const n of OLD_LEFT_OUT) assert.ok(!listed.has(n), `gw:${n} listed or left out, not both`);
   for (const [n, y, q] of OLD_BORDER) {
-    const as = drawn.filter(p => p.gw === n && +p.s.slice(0, 4) <= y && y <= +p.e.slice(0, 4)).map(p => p.name);
-    assert.ok(as.length, `gw:${n} drawn in ${y}`);
+    assert.ok(y >= 1926 && y <= 2026, `gw:${n}: ${y} is a year the old file drew`);
     assert.equal(focus(n, y), q, `gw:${n} in ${y}`);
     assert.ok(names.has(q), `gw:${n}: ${q} is a place or a war's state`);
-    assert.ok(OLD_LOOSE.has(`${n} ${q}`) || as.some(a => [...names.get(q)].some(b => norm(a) === norm(b))), `gw:${n} ${as} is ${[...names.get(q)]}`);
   }
+  for (const pair of OLD_LOOSE) assert.ok(OLD_BORDER.some(([n, , q]) => `${n} ${q}` === pair), `${pair}: a loose pair is a listed pair`);
+  // The two CShapes files are gone from the repository.
+  for (const f of ['battlefield/history/data/borders.topo.json', 'battlefield/history/names.mjs']) assert.equal(existsSync(new URL(`../${f}`, import.meta.url)), false, `${f} is removed`);
   assert.equal(focus(265, 1985), 'Q16957', 'East Germany in 1985');
   assert.equal(focus(552, 1970), 'Q217169', 'Rhodesia in 1970');
   assert.equal(focus(713, 1930), 'Q137816', 'Taiwan under Japanese rule in 1930');

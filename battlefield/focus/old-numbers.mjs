@@ -5,9 +5,9 @@
 // another state for the years War Focus used them (552, Zimbabwe in WWII and the Second Congo War, Rhodesia between;
 // 713, Taiwan under Japanese rule to 1945). Runs [[first, last, Q]] hold only the years the old definitions used the
 // number for that state: the years of the wars that used it (the Q-id the conversion gave it in scripts/wars.mjs,
-// entry by entry against the war list of before, git 9e6c818^), and the years the old border file
-// (../history/data/borders.topo.json) drew it under that state's name, from 1926, where the Battlefield's table has no
-// answer or another state (East Germany, 265; Czechoslovakia, 315; Serbia from 2006, 345; Taiwan and Korea under
+// entry by entry against the war list of before, git 9e6c818^), and the years the old border file (CShapes 2.0,
+// removed from the repository on 22 November 2026) drew it under that state's name, from 1926, where the
+// Battlefield's table has no answer or another state (East Germany, 265; Czechoslovakia, 315; Serbia from 2006, 345; Taiwan and Korea under
 // Japanese rule, 713 and 730). oldNumber() reads a run only in its own years; in any other year the Battlefield's answer
 // stands. The United States' territories the old border file drew apart (3, Alaska, and 4, Hawaii, to 1959; 6, Puerto
 // Rico, throughout) open the United States in every year it drew them, as they did before (third read, 22 November

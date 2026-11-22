@@ -15,8 +15,9 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   Wikidata lists", and smaller ones may be missing. Until 20 November they came from the Correlates of War.
 - **Borders:** Cliopatria v0.2.1 (CC BY 4.0), as VM holds it in `omni/data/borders/`; where no Cliopatria row holds a
   place that year, Natural Earth's border of today or its point (public domain, `omni/data/base/`). Until 20 November
-  they were CShapes 2.0 (CC BY-NC-SA, non-commercial). `history/data/borders.topo.json` and `history/names.mjs` are
-  read by no page or script since 21 November 2026, when War Focus left them too; removing them waits on VM's owner.
+  they were CShapes 2.0 (CC BY-NC-SA, non-commercial). Its two files (`history/data/borders.topo.json` and `history/names.mjs`),
+  read by no page or script since 21 November 2026, when War Focus left them too, were removed on 22 November 2026
+  with the owner's agreement.
 - **Old addresses:** a link written before the change still opens the same view: `w=c<number>` opens the same war, or
   the whole war it was part of (`oldIds`, `oldWithin` in `history/data/wars.json`); a war no longer listed says so in
   plain words (`oldGone`); `c=<number>` opens the country it stood for (`oldCountries` in `history/data/places.json`),
@@ -56,7 +57,7 @@ are Wikidata items; no Correlates of War value, CShapes border or Gleditsch–Wa
   A number War Focus itself used before 21 November 2026 that the Battlefield's table lacks, or gives another state for
   War Focus's years (255 Germany, 552 Zimbabwe in 1939–45 and 1998–2003, 713 Taiwan under Japanese rule to 1945, and
   48 more), is in `focus/old-numbers.mjs`, each the Q-id the conversion gave it in `scripts/wars.mjs` for the years of
-  the wars that used it; so is a number of War Focus's previous border file (`history/data/borders.topo.json`) for the
+  the wars that used it; so is a number of War Focus's previous border file (CShapes 2.0, removed on 22 November 2026) for the
   years it drew it under that state's name where the Battlefield's table has none (265 East Germany, 315
   Czechoslovakia; third review R5). War Focus reads a run only in its own years, then the Battlefield's table (loaded
   only when a number is asked for; R4), the Battlefield after its own (second review X4).
